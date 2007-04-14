@@ -1,0 +1,1983 @@
+                 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                 ³  ÜÜÜÜ ÜÜÜÜ   ÜÜÜ  ÜÜÜÜÜ Ü   Ü     ÜÜÜÜ  ³
+                 ³ Û     Û   Û Û   Û Û     ßÜ Üß         Û ³
+                 ³ Û  ÜÜ ÛÜÜÜß ÛÜÜÜÛ ÛÜÜ    ßÜß       Üßß  ³
+                 ³ Û   Û Û ßÜ  Û   Û Û      Û Û      Û .00 ³
+                 ³ ßÜÜÜÛ Û   Û Û   Û Û     Û   Û     ÛÜÜÜÜ ³
+                 ³                                         ³
+                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+                              GRAFX 2.00 á96.5%
+
+                              - USER'S MANUAL -
+
+
+                 ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                 ³                CONTENTS                 ³
+                 ³                ÍÍÍÍÍÍÍÍ                 ³
+                 ³                                         ³
+                 ³ - Presentation                          ³
+                 ³ - Required equipment                    ³
+                 ³ - Configuration files                   ³
+                 ³ - Available options                     ³
+                 ³ - Let's talk about $$$, baby            ³
+                 ³ - Drawing tips                          ³
+                 ³ - Trouble-shooting/General hints/FAQ    ³
+                 ³                                         ³
+                 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+
+Presentation:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+    This program is designed for drawing 256-color pictures in a huge range of
+  resolutions (actually, there are 60 with some coming from the Amiga world).
+    No one can contest that most of the beautiful GFX of the Scene were drawn
+  on Amiga. But these GFX are in video resolutions that aren't the common PC
+  modes. So we wanted to make the first paint program on PC that could
+  visualize those pictures, and that could allow you, of course, to draw yours
+  in the video mode that you want.
+
+    This program was first shown at the Wired'96 where it met a big success
+  (bigger than all our expects) so we hope you'll like it too.
+
+    It's made up of many drawing tools, effects and menus. All the effects
+  will work with any drawing tool.
+
+    This software has been created for YOU, PC users who envy Amiga owners
+  for their fantastic paint programs. This software doesn't pretend to replace
+  the best programs on Amiga, but it modestly tries to fill the gap between PC
+  and Amiga in the field of bitmap drawing.
+    If you dream about a very useful option we haven't thought of yet, do not
+  hesitate to tell us. If we also think it can be useful, and above all if it
+  is possible to include it in the program :), then we'll implement it as soon
+  as possible.
+
+
+
+
+Required equipment:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+  To run GrafX2, you'll need:
+
+  - a PC (386DX or higher),
+  - DOS 5 or higher (maybe it works with DOS 3.1 but we don't remember which
+    functions of the INT 21h we use),
+  - a VGA compatible video card (a VLB or PCI card is strongly recommended)
+  - a mouse (and its driver),
+  - 3 Megabytes of RAM (can work with less if you use the DOS4GW or Windows
+  disk-cache).
+
+  But if you want to use it more efficiently, you'll need:
+
+  - at least a 486DXı66 (to improve global speed),
+  - at least 8 Mb of RAM for grabbing very big brushes and to use multi-undo,
+  - a VESA 1.2 (or later) compatible video card (to access more video modes).
+
+
+
+
+Configuration files:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+    GrafX2 needs two files to store its configuration: 'GFX2.INI' and
+  'GFX2.CFG'.
+
+  GFX2.INI:
+  ÄÄÄÄÄÄÄÄÄ
+
+      This file contains the parameters defined in the settings menu and some
+    others. You may edit this file with any standard ASCII editor.
+      When you click on Reload in the settings menu, all the data contained in
+    this file are restored. When you click on Save or when you quit the
+    program with the Auto-save option on, all the current parameters are
+    written into (updated in) this file.
+
+      If you corrupted this file and don't manage to fix the problem, then
+    delete it and run GFXCFG.EXE. It will automatically create a default
+    initialization file when it is absent.
+
+
+  GFX2.CFG:
+  ÄÄÄÄÄÄÄÄÄ
+
+      This file contains the keyboard configuration plus the state of the
+    following variables in the program:
+      ş video modes
+      ş shade tables
+      ş stencil
+      ş mask
+      ş gradients
+
+      All these variables are saved when clicking on the Save button in the
+    settings menu or when exiting the program with the Auto-save option on.
+      However, when you click on Reload in the settings menu, only the state
+    of each video mode is restored.
+
+    Note: the GFX2_FRA.CFG file is a default configuration file for AZERTY
+    keyboards. If you have got an AZERTY keyboard, you may replace the
+    GFX2.CFG file by GFX2_FRA.CFG.
+
+    Important: from version 2.00 á95.5%, .CFG files will have ascending
+    compatibility. This means that you'll be able to retrieve most of their
+    contents from a release to another by copying your old .CFG file into
+    your new GrafX2 directory and running GFXCFG.EXE. Indeed, this program
+    will convert your old file for it is usable by the new version of GrafX2.
+    But copying a .CFG file from an earlier version than version 95.5% won't
+    work. Moreover, (I don't see why you would do that, but...) copying a
+    recent .CFG file to an older version shouldn't work neither.
+
+
+  Note: We highly recommand not to modify the keys related to the mouse
+  emulation in the GFXCFG program because the values you could use may inter-
+  fere with the keyboard shortcuts used in the menus.
+
+
+
+
+Available options:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+    The different options available in GrafX2 will be listed and detailed
+  below. They will be described as follows:
+
+            ÉÍÍÍÍËÍÍÍÍËÍúúúÍ»                                ÉÍÍÍÍ»
+            º  1 º  3 º     º        triangular buttons will º1 / º
+            º    º    º     º        be detailed like this:  º / 2º
+            ÌÍÍÍÍÎÍÍÍÍÎÍúúúÍ¹                                ÈÍÍÍÍ¼
+            º  2 º  4 º     º
+            º    º    º     º
+            ÈÍÍÍÍÊÍÍÍÍÊÍúúúÍ¼
+
+
+     1 - Paintbrushes
+     2 - Adjust picture / Effects on the picture
+     3 - Hand-drawing
+     4 - Splines
+     5 - Lines
+     6 - Spray
+     7 - Floodfill
+     8 - Polygons / Polyforms
+     9 - Polyfills / Filled polyforms
+    10 - Empty rectangles
+    11 - Filled rectangles
+    12 - Empty circles/ellipses
+    13 - Filled circles/ellipses
+    14 - Rectangles with gradation
+    15 - Gradation menu
+    16 - Spheres / Ellipses with gradation
+    17 - Brush grabbing / restore
+    18 - Polyformed brush grabbing (lasso) / restore
+    19 - Brush effects
+    20 - Drawing modes
+    21 - Text
+    22 - Magnifier mode / Menu
+    23 - Pipette / Invert colors
+    24 - Screen size / Safety resolution
+    25 - Spare page / Copy current to spare
+    26 - Save picture / Autosave
+    27 - Load picture / Reload
+    28 - Settings
+    29 - Clear picture
+    30 - Help / Statistics
+    31 - Oops (Undo/Redo)
+    32 - Kill current page
+    33 - Quit program
+    34 - Palette menu
+    35 - Scroll palette left / right
+    36 - Palette window
+    37 - Hide menu
+
+
+
+    When you will use any drawing tool, left-clicking will draw with the Fore
+  color while right-clicking will draw with the Back-color.
+
+    When dialog boxes or windows will come on the screen, Cancel (or No) will
+  always be emulated by the <Escape> key, and OK (or Yes) by the <Return> key.
+
+    In the different menus, the titles of the buttons that contain an under-
+  lined letter can be emulated by pressing this letter on the keyboard.
+
+    In some menus, you can select a color range in the palette. This means
+  that you can click on a color and move the mouse to another by maintaining
+  the button pressed to select a color range.
+
+
+
+  1 - Paintbrushes:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Displays a menu where you can choose the shape of your paintbrush.
+
+        Paintbrushes are sorted by family. You can see some paintbrushes of
+      the same family but with different sizes. There is at least one paint-
+      brush from each family displayed in this menu.
+        Here is the list of all the different paintbrush families:
+
+        ÛÛÛÛÛÛÛ      ÛÛÛ      Û Û Û Û      Û Û         Û           Û
+        ÛÛÛÛÛÛÛ     ÛÛÛÛÛ      Û Û Û      Û Û Û       ÛÛÛ       Û    Û
+        ÛÛÛÛÛÛÛ    ÛÛÛÛÛÛÛ    Û Û Û Û    Û Û Û Û     ÛÛÛÛÛ        Û
+        ÛÛÛÛÛÛÛ    ÛÛÛÛÛÛÛ     Û Û Û      Û Û Û     ÛÛÛÛÛÛÛ
+        ÛÛÛÛÛÛÛ    ÛÛÛÛÛÛÛ    Û Û Û Û    Û Û Û Û     ÛÛÛÛÛ     Û  Û  Û
+        ÛÛÛÛÛÛÛ     ÛÛÛÛÛ      Û Û Û      Û Û Û       ÛÛÛ
+        ÛÛÛÛÛÛÛ      ÛÛÛ      Û Û Û Û      Û Û         Û         Û  Û
+
+        Square      Disc       Sieve      Sieve     Diamond    Random
+                              square      disc      shaped
+        ______________________________________________________________
+
+                      Û             Û    Û          Û     Û       Û
+                      Û            Û      Û          Û   Û        Û
+                      Û           Û        Û          Û Û         Û
+        ÛÛÛÛÛÛÛ       Û          Û          Û          Û       ÛÛÛÛÛÛÛ
+                      Û         Û            Û        Û Û         Û
+                      Û        Û              Û      Û   Û        Û
+                      Û       Û                Û    Û     Û       Û
+
+         Horiz.    Vertical    Slash      Back-     Cross X    Cross +
+          bar        bar                  slash
+
+        The 3 last paintbrushes in the menu belong to the "miscellaneous"
+      family and their size cannot be modified.
+
+
+    Right click:
+    ============>
+
+        Transforms your current user-defined brush into a paintbrush. This is
+      actually a "monochromisation" of your user-defined brush. This means
+      that every color of the brush that aren't the Back-color will be set to
+      the Fore-color. But this option doesn't alter the brush: you'll just
+      have to right-click on the "Get brush" buttons to get your brush back.
+
+
+    Note: When you press (not in the menu) the <Delete> key (default value),
+    the current paintbrush becomes the smallest member of the "Disc" family:
+    i.e one pixel.
+
+
+
+  2 - Adjust picture / Effects on the picture:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Allows you to scroll the picture to re-center your graph for example.
+
+        Any part of the picture that goes out of the image by a side comes
+      back by the opposite one.
+
+        It is assimilated to the drawing tools family.
+
+
+    Right click:
+    ============>
+
+        *** Not implemented yet ***
+
+
+
+  3 - Hand-drawing:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the current hand-drawing mode as the active drawing tool.
+      There are 3 hand-drawing modes:
+
+        - Continuous hand-drawing: as you move the mouse, the paintbrush is
+          regularily pasted on the picture. This drawing tool allows to change
+          the fore and back colors when being in use.
+
+        - Discontinuous hand-drawing: as you move the mouse, the paintbrush is
+          pasted on the picture every time a delay is passed (actually, the
+          delay is 1 VBL (vertical blanking)). This drawing tool allows to
+          change the fore and back colors when being in use.
+
+        - Dot by dot hand-drawing: the paintbrush is only pasted at the
+          position where you first clicked.
+
+
+    Right click:
+    ============>
+
+        Toggles the different hand-drawing modes and activates, at the same
+      time, the hand-drawing tool.
+
+
+
+  4 - Splines:
+  ÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the current curve-drawing mode as the active drawing tool.
+      There are 2 different curve-drawing modes:
+
+        - 4 control points curves: define the basic line like a classical
+          line, then move, with the left mouse button, the inner control
+          points to choose the shape of your curve. When the curve has the
+          shape you want, click with the right mouse button to draw it
+          definitively.
+
+        - 3 control points curves: the same as above, but you'll have only one
+          inner control point to place. Moreover, the spline will be traced
+          just after placing this point.
+
+
+    Right click:
+    ============>
+
+        Toggles the different curve-drawing modes and activates, at the same
+      time, the curve-drawing tool.
+
+
+
+  5 - Lines:
+  ÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the current line-drawing mode as the active drawing tool.
+      There are 3 line-drawing modes:
+
+        - Classical lines: when first clicking on the picture, you'll define
+          the start of the line. Maintain your click to choose the end of the
+          line and release the mouse button to set it.
+
+        - Knotted lines: works like classical lines, but the end of your line
+          will automatically become the start of the next one. When you want
+          to stop chaining lines, use the opposite mouse button. "The opposite
+          button" means that if you started to draw lignes with the left
+          button (Fore-color), you'll have to stop the procedure with the
+          right button; and conversely.
+
+        - Concentric lines: when first clicking on the picture, you'll define
+          the center of the lines. In fact, the center is defined by the
+          position of the mouse when you release the mouse button. Then you
+          can draw lines from the center to the current mouse position by
+          clicking. To stop drawing concentric lines, use the opposite mouse
+          button. This drawing tool allows to change the fore and back colors
+          when being in use.
+
+
+    Right click:
+    ============>
+
+        Toggles the different line-drawing modes and activates, at the same
+      time, the line-drawing tool.
+
+
+
+  6 - Spray:
+  ÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the spray as the active drawing tool. This drawing tool allows
+      to change the fore and back colors when being in use.
+
+
+    Right click:
+    ============>
+
+        Displays a menu where you can configure the spray:
+
+        - Size: Defines the diameter of the circle in which will effectively
+          fit the spray.
+
+        - Delay: Defines the number of VBLs that will be waited for between
+          two flows of spray.
+
+        - Mode: Defines whether you want to use a monochrome spray or a multi-
+          colored one.
+
+        - Mono-flow: Defines the number of paintbrushes that will be pasted in
+          the circle of the spray at each cycle.
+
+        - Palette: Left-click on a color of the palette to see how much it
+          will be used in the multicolored flow, and modify it by using the
+          gauge on the right. If the flow of this color was equal to 0, then
+          the "Init" value will be applied. Or set the flow of a color to 0 by
+          clicking on it with the right mouse button.
+
+        - Clear: Removes all the colors from the multicolored flow.
+          Actually, this puts a 0 value in the use of each color.
+
+        - Init: Allows you to define a value that will be set to the color you
+          click on in the palette if its value is equal to 0. This permits to
+          tag a set of colors more quickly.
+
+        - +1,-1,x2,ö2: Modify the values of all the tagged colors (and only
+          them).
+
+
+        Tip: If you often use the Shade mode, and are bored to click many
+             times on a color to reach the color you want, you can define a
+             spray with "Size"=1, "Mono-flow"=1, and "Delay"=2 (or more,
+             according to your reflexes). And then, you'll just have to click
+             a few hundredths of second to modify a color.
+
+
+
+  7 - Floodfill:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the filler as the active drawing tool. The filler, as any
+      drawing tool, will be affected by all the effects!
+
+        Note that only the visible part of the picture will be filled (as
+      every other drawing tools, the floodfill only alters the visible part of
+      the picture; this avoids unwanted effects that wouldn't be controlled by
+      the user).
+
+
+    Right click:
+    ============>
+
+        Selects the color replacement as the active drawing tool.
+
+        Any rule has its exceptions and this one doesn't depart from that.
+      Indeed, this tool is the only one to be affected by no effect (except
+      Stencil) and to be able to modify non visible parts of the picture.
+        The function of this tool being replacing all the occurences of a
+      color in the picture by another, if would have been a shame to limit
+      modifications only to the visible part of the picture.
+
+
+
+  8 - Polygons / Polyforms:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the polygons as the active drawing tool.
+
+        This works just like knotted-lines but loops the extremities when
+      you're finished.
+
+
+    Right click:
+    ============>
+
+        Selects the polyforms as the active drawing tool.
+
+        This works like a combination of free-hand drawing and knotted-lines.
+      If you keep the mouse button pressed, you'll draw as if you were in
+      free-hand drawing mode. And, if you release the mouse button, it will
+      work like knotted lines.
+
+        Click on the opposite mouse button (i.e.: click right if you started
+      to draw with the left mouse button, and vice versa) to terminate the
+      operation. The two extremities will be linked automatically.
+
+
+
+  9 - Polyfills / Filled polyforms:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+      Work exactly the same way as the polygons et polyforms above, but fill
+    in the interior of the drawn shapes.
+
+
+
+  10 - Empty rectangles:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Selects the empty rectangles as the active drawing tool.
+
+        Set a corner of a rectangle. Maintain the click to move the opposite
+      corner and release the mouse button to set it definitively.
+
+
+
+  11 - Filled rectangles:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Selects the filled rectangles as the active drawing tool.
+
+        Works like an empty rectangle.
+
+
+
+  12 - Empty circles/ellipses:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the empty circles as the active drawing tool.
+
+        Position the center of the cercle and maintain the mouse button to
+      select its radius.
+
+
+    Right click:
+    ============>
+
+        Selects the empty ellipses as the active drawing tool.
+
+        Position the center of the cercle and maintain the mouse button to
+      select its dimensions.
+
+
+
+  13 - Filled circles/ellipses:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Work like empty circles and ellipses.
+
+
+
+  14 - Rectangles with gradation:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    *** Not implemented yet ***
+
+
+
+  15 - Gradation menu:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Opens a window where you can define the way gradations are processed.
+      The different sections of this menu are:
+
+        - Direction (arrow): Switches the direction of the gradation.
+
+        - Dithering method: Toggles the 3 following methods:
+            - No dithering
+            - Basical dithering
+            - Enhanced dithering
+
+        - Mix: Mixes the gradation with a more or less random factor.
+
+        - Palette: Select a color range to build a gradation.
+
+        - Index scroller: Defines the current gradation among a set of 16 that
+          will be memorised.
+
+
+
+  16 - Spheres / Ellipses with gradation:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Selects the spheres as the active drawing tool.
+
+        Position the center of the sphere and maintain the mouse button to
+      select its radius. Then place the spot-light.
+
+
+    Right click:
+    ============>
+
+        Selects the ellipses with gradation as the active drawing tool.
+
+        *** The current version of this tool isn't the right one; ***
+        ***  so we'll explain how to use it when it will be done  ***
+
+
+      If you trace a sphere or an ellipse with gradation with the right mouse
+    button, the result will be the same figure filled with the Back-color.
+
+
+
+  17 - Brush grabbing / restore:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Engages a brush grabbing.
+
+        Click on a corner of the rectangle containing the brush then maintain
+      the click to define the opposite corner of the rectangle. Release the
+      mouse button to grab the brush. Performing this operation with the right
+      mouse button will erase the area where the brush was grabbed with the
+      Back-color.
+
+
+    Right click:
+    ============>
+
+        Restores the old brush.
+
+
+
+  18 - Polyformed brush grabbing (Lasso) / restore:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Grabs a brush of any shape by defining a polyform (please refer to
+      section 8 for more explanations).
+
+
+    Right click:
+    ============>
+
+        Restores the old brush (same as above).
+
+
+
+  19 - Brush effects:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Displays a menu where the following options are available:
+
+        - X: Flip-X.
+
+        - Y: Flip-Y.
+
+        - Rotate by 90ø: Rotates the brush by an angle of 90 degrees.
+
+        - Rotate by 180ø: Rotates the brush by an angle of 180 degrees.
+
+        - Rotate by any angle: Triggers an interactive operation that allows
+          you to rotate the brush. For this, start by placing the center or
+          rotation with the left mouse button (if, at this moment, you press
+          the right button, the operation with be cancelled). After that, you
+          can define the angle of rotation as many times as you want by moving
+          the mouse and left-clicking. Then validate with the right button
+          when you are satisfied.
+          Meanwhile, you can press on the 8 outer digits of the numeric pad
+          for defining angles multiple of 45ø:
+                         135ø    90ø     45ø
+                            \     |     /
+                             '7' '8' '9'
+                       180ø -'4'     '6'- 0ø
+                             '1' '2' '3'
+                            /     |     \
+                         225ø    270ø   315ø
+
+
+        - Stretch: Triggers an interactive operation that enables you to stretch
+          the brush. For this, start by placing the upper-left cornerof the
+          brush with the left mouse button (if, at this moment, you press the
+          right button, the operation will be cancelled). after that, you can
+          place the opposite corner as many times as you need, then validate
+          with the right mouse button when you are satisfied. If you place
+          this point at coordinates inferior to the ones of the first point,
+          the brush will be inverted.
+          Meanwhile, you can press the following keys whose effects are:
+            'D'      : double the brush in X and Y
+            'H'      : reduce the brush by half in X and Y
+            'X'      : double the brush in X
+            'Shift+X': reduce the brush by half in X
+            'Y'      : double the brush in Y
+            'Shift+Y': reduce the brush by half in Y
+            'N'      : restore the normal size of the brush (can be useful
+                       because it's the only way for cancelling)
+
+        - Distort: *** Not implemented yet ***
+
+        - Outline:
+          This option permits to draw the outlines of the brush with the Fore-
+          color.
+
+        - Nibble:
+          This option "nibbles" the outlines of the brush. It's in some way
+          the opposite effect of the Outline option.
+
+        - Recolorize: Remaps the brush so that it looks like it would in the
+          spare page, using the current palette.
+
+        - Get brush colors: Transfers the spare page's colors used by the
+          brush to the current palette.
+
+        - Brush handle: Allows you to choose where to place the handle of the
+          brush.
+
+        - Load / Save: load or save a brush from disk.
+
+
+
+  20 - Drawing modes:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+      This button opens a menu where you can switch on or off the different
+    drawing modes. ([F1]-[F9] keys correspond to the 9 buttons)
+
+      In this menu, the "All off" button switches all the drawing modes off.
+    The [Del] key is the keyboard shortcut for this button.
+
+      The "Feedback" button is only used in "Shade", "Quick-shade, "Transpa-
+    rency" and "Smooth" modes. When it is set, it means that the _current_
+    state of the picture has to be taken into account for the effect instead
+    of the state in which the image was when you started to click for drawing.
+    The best, as often, is that you try by yourself with and without Feedback
+    to see the difference.
+
+    The other buttons are the following:
+
+
+  * Shade mode / Menu:
+  --------------------
+
+      It consists in increasing or decreasing the color number within a user-
+    defined range. This shows its real dimension when used with a range of
+    colors that shade off. Then, you can work on a part of your picture where
+    colors belong to the same range without having to change your brush color
+    all the time.
+      You can choose the incrementation or decrementation of the color by
+    pressing the left or right mouse button while drawing. If you click on a
+    color that does not belong to the range, it will remain unchanged.
+
+    Left click:
+    ============>
+
+        Switches the Shade mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define one table of shades within a range
+      of 8 memorised by the program.
+      The different sections of this menu are:
+
+        - Palette: You can define in it the color blocks that will be inserted
+        into the table of shades.
+
+        - Scroller: Used to change flick through the tables of shades.
+
+        - table of shades definition area: The 512 squares should be widely
+        sufficient to define the different shades since every 256 colors of
+        the palette cannot be present more than once in each table.
+
+        - A window (on the top-right side) permits to visualize the different
+        shades defined in he current table.
+
+        - Copy: Copy the contents of the table in a buffer.
+        (Each time you open this menu, the current table is automatically
+        transfered into this buffer).
+
+        - Paste: Copy the contents of the buffer above in the current table.
+
+        - Clear: Reset the "shades" table.
+
+        - Insert: Used to insert the block selected in the palette at the
+        cursor's position in the table of shades.
+        IF you click with the left mouse button on this button THEN
+          IF a block of more than one color is selected in the table THEN
+            It is deleted and the block defined in the palette is inserted.
+          ELSE
+            The block defined in the palette is inserted at the postion just
+            before the selected square.
+          END IF
+        ELSE
+          The block defined in the palette is inserted by erasing the colors
+          following the beginning of the bloc selected in the table.
+        END IF
+
+        - Delete: Delete the block selected in the table.
+
+        - Blank: Follows this algorithm:
+        IF you click with the left mouse button on this button THEN
+          Replace the block selected in the table by blank squares.
+        ELSE
+          IF a block of more than one color is selected in the table THEN
+            Insert blank squares to the left and to the right of the block.
+            (this is useful for isolating a shade quickly)
+          ELSE
+            Insert blank squares to the left of the selected square.
+          END IF
+        END IF
+
+        - Invert: Invert the order of the block selected in the table.
+
+        - Swap: Allows you you move a block (this exchanges it with what is
+        where you want to move it).
+
+        - Undo: Cancel the last modification of the table.
+
+        - The 2 numbers displayed on the right of these buttons are:
+          (above) - the number of the color selected in the palette if only
+                    one color is selected.
+          (below) - the number of the color contained in a square in the
+                    shades table if this square is the only one selected.
+
+        - The "mode" button displays 3 different modes:
+        "Normal":
+          Shades in the range and saturates to its boundaries.
+        "Loop":
+          Shades in the range and loops if boundaries are passed.
+        "No saturation":
+          Shades in the range and doesn't saturate if boundaries are passed.
+          If the Step (see below) is set to 1, this option does exactly the
+          same as the Normal mode.
+
+        - Set/Disable: If you want to define several shades in the same table
+        but you'd like these shades not to be effective at the same time, you
+        can mask (disable) some parts of the table so that they will be
+        interpreted a blank squares.
+        To do that, select a block in the table of shades and click on "Set".
+        The block will be underlined with a white line; this means that it is
+        disabled.
+
+        - Clear/Enable: This does exactly the opposite as the button above.
+
+        - Step: Defines the step of incrementation of the shade. The bigger,
+        the faster you run through the colors of the shade.
+        For example: if the step is 2 and that you have defined a shade with
+        the colors 0,1,4,5,9 and that you click on a pixel of color 1, it will
+        take the value 5 which is 2 positions next in the la table.
+
+        (We are sorry for these technical considerations quite far from a
+      purely artistic point of view; but know that this effect is really very
+      useful and it is preferable that you understand its whole functionment
+      if you want to fully take advantage of it).
+
+
+
+  * Quick-shade mode / Menu:
+  --------------------------
+
+      This drawing mode has about the same effect as Shade mode's except that
+    it is faster to configurate but a little bit less powerful.
+      When you draw on a color of the image which is between the fore- and the
+    back-color in the palette, the color tends towards the fore-color
+    (according to the step defined) if you draw with the left mouse button, or
+    it tends towards the back-color if you are using the right mouse button.
+
+    Left click:
+    ============>
+
+        Switches the Quick-shade mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu with a few parameters that mean exactly the same as in
+      the menu of Shade mode. These parameters are the step and the loop/satu-
+      ration mode (normal, loop, no saturation).
+
+
+
+  * Stencil mode / Menu:
+  ----------------------
+
+      It is used to prevent some colors from being modified if you draw on
+    them. The main application of the stencil is when you want to change one
+    color or more into another.
+
+    Left click:
+    ============>
+
+        Switches the Stencil mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define a stencil.
+      The different sections of this menu are:
+
+        - Clear: No color is protected.
+
+        - Invert: Colors that were protected are unprotected and vice versa.
+
+        - Palette: Select colors that should be protected with the left mouse
+          button or unprotect colors with the right mouse button.
+
+
+
+  * Mask mode / Menu:
+  ----------------------
+
+      This effect could have been called "True stencil" because it protects
+    some parts of the picture instead of some colors. The colors you tag
+    represent the pixels in the spare page, corresponding to the pixels in the
+    current page, that you don't want to alter.
+      For example, draw a simple white figure on a black background in the
+    spare page. Then, tag the black color in the menu of the Mask mode. When
+    you'll draw in the current page, only the pixels corresponding to the
+    white (non-black) ones in the spare page will be modified.
+
+    Left click:
+    ============>
+
+        Switches the Mask mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can set the colors of the Mask.
+        This menu works the same way as the one of the Stencil, so please
+      refer to the Stencil paragraph to know how to use it.
+
+
+
+  * Grid mode / Menu:
+  -------------------
+
+      This is useful to snap the cursor to the cross-points of a grid. It's
+    generally used to draw a grid before drawing sprites of the same size such
+    as a font or tiles, or for drawing figures or grabbing brushes with their
+    dimensions multiple of the step of the grid.');
+
+    Left click:
+    ============>
+
+        Switches the Grid mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define the grid parameters.
+      These parameters are:
+
+        - X,Y: Steps of the grid.
+
+        - dX,dY: Offsets of the grid.
+
+
+
+  * Sieve mode / Menu:
+  --------------------
+
+      This effect allows you, by defining a pattern, to draw only on
+    particular points of the picture.
+      If you are a Manga drawer, you might find this useful to make patterned
+    shades or color transitions.
+
+    Left click:
+    ============>
+
+        Switches the Sieve mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define the Sieve parameters.
+      This menu consists in:
+
+        - 16x16 drawing area: You can define a pattern in it (left click =>
+          white pixel / right click => black pixel).
+          All the white pixels indicate that, when you'll draw, pixels will be
+          applied on the picture at the corresponding positions whereas black
+          pixels won't modify the picture: whites pixels are the "holes of the
+          sieve".
+
+        - 12 default patterns: They can be copied to the drawing area.
+
+        - "Transfer to brush": Copies the pattern to the brush (white pixels
+          => Fore-color / black pixels => Back-color).
+
+        - "Get from brush": Puts the brush into the drawing area (back-color
+          => black pixels / others => white pixels).
+
+        - Scrolling 4-arrows pad: Scrolls the pattern in the drawing area.
+
+        - Resizing 4-arrows pad: Defines the dimensions of the pattern.
+
+        - Default-value (black or white square): Indicates which value must be
+          inserted when you increase the dimensions of the pattern.
+
+        - "Clear": Sets the whole pattern with the default value (see above).
+
+        - "Invert": It... inverts :) ... black and white pixels.
+
+
+
+  * Transparency mode (Colorize) / Menu:
+  --------------------------------------
+
+      This allows to mix the color(s) of the paintbrush with the colors of the
+    picture. It's used to make transparency effects like with watercolors.
+
+    Left click:
+    ============>
+
+        Switches the Transparency mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define the Transparency parameters.
+      These parameters are:
+
+        - Interpolation rate: Indicates the percentage of the applied color
+          that will be considered upon the replaced color.
+
+        - Interpolation method: Uses an interpolation algorithm to compute the
+          color, according to the interpolation rate.
+
+        - Additive method: Uses the lightest colors to choose the color to
+          apply.
+          For example: if you want to apply a color RGB:30,20,40 on a color
+          RGB:10,50,20, the color applied will be the one, in the palette,
+          that is the closest to the theoretic color RGB:30,50,40.
+
+        - Subtractive method: uses the darkest colors to choose the color to
+          apply.
+          For example: if you want to apply a color RGB:30,20,40 on a color
+          RGB:10,50,20, the color applied will be the one, in the palette,
+          that is the closest to the theoretic color RGB:10,20,20.
+
+
+
+  * Smooth mode / Menu:
+  ---------------------
+
+      It provides an easy but not as efficient anti-aliasing as any artist's
+    touch. Anyway this effect finds a better use in making a blurry aspect.
+
+    Left click:
+    ============>
+
+        Switches the Smooth mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define the Smooth matrix or choose one
+      among the 4 ones predefined.
+        The middle square represents the pixel on which you draw and the 8
+      others represent the neighbour pixels. Then, the point on which one draw
+      will be replaced by the weighted average (according to values of each
+      squares) of the 9 defined points.
+
+
+
+  * Smear mode / Menu:
+  ---------------------
+
+      It smears pixels in the direction you are moving your paintbrush, just
+    as if you wanted to spread fresh paint with your fingers. You can combine
+    this effect with the transparency effect.
+
+    Any click:
+    ==========>
+
+        Switches the Smear mode.
+
+
+
+  * Tiling mode / Menu:
+  ---------------------
+
+      It consists in displaying parts of the brush that are adjusted on a
+    tiling when you are drawing. It's mainly used for quickly drawing a
+    background with a pattern, but there is a great number of other
+    possibilities.
+
+    Left click:
+    ============>
+
+        Switches the Tiling mode.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can define the Tiling parameters.
+      These parameters are the offsets of the tiling.
+
+
+
+  21 - Text:
+  ÄÄÄÄÄÄÄÄÄÄ
+
+    *** Not implemented yet ***
+
+
+
+  22 - Magnifier mode / Menu:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Engages/Disengages the choice of the zoomed window. If you're already
+      in magnifier mode, you'll return to normal mode.
+
+
+    Right click:
+    ============>
+
+        Displays a menu where you can choose the magnifying factor.
+
+
+      Note: When you are in Zoom mode, you can move the "split" bar by
+    clicking on it and moving your mouse left or right while holding the mouse
+    button down.
+
+
+
+  23 - Pipette / Invert colors:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Engages a color grabbing.
+
+        Click on the picture to get the color of the pixel you're on. You can
+      either get a new Fore-color or Back-color with respectively left or
+      right mouse button.
+
+
+    Right click:
+    ============>
+
+        Swap Fore-color and Back-color.
+
+
+      The color currently pointed will be displayed in the tool-bar right
+    after the coordinates.
+      If you click outside the picture, the color 0 will be returned.
+
+
+
+  24 - Screen size / Safety resolution:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Displays a menu where you can define the size of your picture (up to
+      1024x768) by clicking in the boxes named "Width" and "Height"; and the
+      resolution in which you want to draw (in the list).
+
+        Clicking on a resolution button with the right mouse button will not
+      only set the resolution of the screen, but also set the picture
+      dimensions to the screen ones.
+
+        Resolutions written in dark gray are VESA modes that aren't supported
+      by your video card. If you have some modes like that, you should try to
+      run a VESA driver such as Univesa or Univbe before running the program.
+      If these modes still aren't available, then this means that your video
+      card really doesn't support them.
+
+        The small buttons on the left-hand side of the lines in the list of
+      modes have been designed to allow you to disable some modes that are not
+      supported by your card. So, the modes that you will disable won't be
+      used when loading pictures with "Auto-set resolution" ON.
+
+        When you click on one of these buttons, its color changes to one of
+      the 4 following. The signification for each color of these buttons is:
+
+        - Light gray: The video mode is OK. It can be used by the auto-set
+          resolution option when you load picture, and you can select it in
+          the menu of resolutions.
+
+        - White: It works exactly the same as above. Moreover, it allows you
+          to tag your favourite modes. Indeed, the huge number of video modes
+          makes it more difficult to find the mode your want in the list; so
+          you can tag your favoutite ones in white, so that it will be easier
+          to locate them. (Note: you cannot disable the standard 320x200 mode)
+
+        - Dark gray: It allows you to indicate which modes are not really
+          perfect (flickering, not centered, etc...) but which can be used
+          even so. The difference with the light grey button is that these
+          modes won't be used by the auto-set resolution option.
+
+        - Black: Use it for totally unsupported modes. Thus, these modes won't
+          be selected the "auto-set res." and the program will prevent you
+          from selecting them from the menu of resolutions.
+
+
+    Right click:
+    ============>
+
+      Automaticaly switches to the 320x200 MCGA mode.
+
+
+
+  25 - Spare page / Copy current to spare:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Jumps to spare page. The current page is then considered as the new
+      spare page, and the spare page considered as the new current page.
+
+
+    Right click:
+    ============>
+
+        Opens a menu where you can choose whether you want to copy the whole
+      picture (keyboard short-cut in this menu is [Return]), only the pixels,
+      only the palette, or only some colors.
+        In this last case, a second menu (stencil-like) will propose you to
+      tag the colors you want to copy (they are all selected by default).
+        Please refer to section "18 - Stencil" to know how to use this last
+      menu.
+        The last option the menu ("Copy palette and remap"), remaps the spare
+      page with the current palette and replicates this palette to the spare
+      page. This option is useful to quickly remap a picture with the palette
+      of another.
+
+
+
+  26 - Save picture / Autosave:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Displays a fileselector where the following options are available:
+
+        - Drives: Allow you to change the current drive. You can use <Alt>+
+          <Letter> to change drives too.
+
+        - Format: Allows you to choose the file format you want. (PAL and KCF
+          file formats are "palette" files).
+
+        - Filename: Allows you to give a new name to the picture. If no
+          extension is given, the default (according to the format) will be
+          used.
+
+        - File-list: Allows you to flick through the disk tree or to overwrite
+          an existing file.
+
+        - Delete: Allows you to delete the item under the selection bar.
+          If the item is a directory, it must be empty to be removed.
+
+        - Save: Saves the picture with the current filename, with the chosen
+          format and with the current comment (for PKM files). If the current
+          filename represents a directory, you'll enter it.
+
+        - Comment (Txt): If you're using the PKM format, you can type in a
+          comment on your picture.
+
+        Note: The Backspace key brings you directly to the parent directory.
+              Type in the 1st lettets of a filename you are looking for to
+              access it faster.
+
+
+    Right click:
+    ============>
+
+        Save the current picture with its current filename, format and
+      comment.
+
+        If the file already exists, a confirmation box will appear.
+
+
+
+  27 - Load picture / Reload:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        This works the same way as Save.
+
+        You'll have access in the format selector to a "*.*" filter. And of
+      course, you won't be able to type in any comment.
+
+
+    Right click:
+    ============>
+
+        Reloads the picture.
+
+        If you want to load a picture and that you haven't saved the last
+      modifications of the current picture, a confirmation box will appear.
+
+
+
+  28 - Settings:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Displays a menu where you can configure some miscellaneous elements of
+      the program:
+
+        - Number of UNDO pages: indicates the total number of pages that
+          GrafX2 will memorize. Each time you modify the picture, its current
+          state is memorized in one of these pages. To flick through these
+          pages, use the "Oops" button (Undo/Redo).
+
+        - Font: determines whether you want to use GrafX2 with a classical
+          font, or another one a bit funnier.
+
+        - Mouse sensibility: Modifies the speed of the mouse.
+
+        - Show/Hide in file list: Defines whether some particular files or
+          directories must be displayed by the fileselectors or not.
+
+        - Show/Hide picture limits: Indicates if the picture boundaries must
+          be displayed when you are in a resolution bigger than the picture.
+
+        - Clear palette: Indicates if loading a file with a palette of less
+          than 256 colors must erase the rest of the current palette (replace
+          by the black color).
+
+        - Maximize preview: maximizes the preview of the pictures so that it
+          is as big as possible. If you're not in the same resolution as the
+          picture's one, it can try to correct the aspect ratio, but if the
+          picture does not fill the whole screen, it can be worse.
+
+        - Backup: when you'll save a picture over an existing file, the
+          program will rename this file to "*.BAK" where * is the name of the
+          picture without its extension. If the backup file already exists in
+          the directory, it will be replaced. If you save a picture with the
+          name of the backup file, no backup file will be created (of course!)
+          ;).
+
+        - Cursor: allows you to choose whether you prefer a solid cursor or a
+          transparent cursor.
+
+        - Safety colors: Brings back the 4 default colors of the menus if you
+          run an operation that passes the image in less than four colors in
+          the palette editor.
+
+        - Adjust brush pick: This option is used when you grab a brush in Grid
+          (Snap) mode. Then, the right-most and down-most pixels won't be
+          picked up with the rest of the brush. This option has been made
+          because, if people grab brushes in Grid mode, that's mostly when
+          they want to grab sprites.
+          For example: if you have 16x16 sprites on your page, you'll set the
+          grid mode to 16x16. But the cursor will snap at points like (0,0),
+          (16,0), (16,16) and so on... And the problem is that, from (0,0) to
+          (16,16), there are 17 pixels! But if you keep the adjust-brush-pick
+          option on, the unwanted pixels will be ignored.
+          Moreover, this option adjusts the brush handle so that the brush
+          still fits in the grid, instead of placing the handle in the center
+          of the brush.
+
+        - Separate colors: Draws a squaring around the colors of the tool-bar.
+
+        - Auto-set resolution: sets the best resolution for the loaded image.
+
+        - Coordinates: Choose if you want to display relative or absolute
+          coordinates when using tools such as circles, rectangles, etc...
+          for example, if you draw a circle: if coords are relative, the
+          radius of the circle will be displayed, while in absolute coords,
+          the coordinates of the cursor will be displayed.
+
+        - Reload: loads the previously saved configuration.
+
+        - Auto-save: means that the configuration will be automatically saved
+          when you'll quit the program.
+
+        - Save: saves the configuration at once.
+
+      All modifications will be effective just after closing the menu.
+
+
+
+  29 - Clear picture:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Clears the picture with the color number 0.
+
+
+    Right click:
+    ============>
+
+        Clears the picture with the Back-color.
+
+
+
+  30 - Help / Statistics:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Displays an info window where you'll find some credits, help about the
+      credits, different effects, greetings, registering...
+
+
+    Right click:
+    ============>
+
+        Displays a window where you'll find miscellaneous informations about
+      the system.
+
+      Note: you should take care to keep more than 128 Kb in order to let the
+            program run in a proper way.
+
+
+
+  31 - Oops (Undo/Redo):
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============> Allows you to undo the last modification on the picture.
+
+    Right click:
+    ============> Allows you to redo the last modification undone on the
+                  picture.
+
+    The maximum number of UNDO that you can perform can be defined in the
+    settings menu.
+
+    Undo/Redo aren't effective after page switching, picture loading and
+    picture size modifications.
+
+
+
+  32 - Kill currenty page:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Removes the current page from the list of "Undo" pages. This allows
+      you to free some memory if you need it. For instance, this will allow
+      you to delete the start-up page after having loaded an image. A message
+      will appear if you've already erased all the pages except the last one.
+
+      Note: Another way to free some memory is to decrease the number of
+            "Undo" pages. Or else, if you have recentlt grabbed a very big
+            brush that you don't use any more, you can grab a new smaller one.
+            The memory allocated by the big brush will be thus freed.
+
+
+
+  33 - Quit program:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Allows you to leave GrafX2. If there are unsaved modifications in the
+      current or spare page, a confirmation box will ask you if you really
+      want to quit GrafX2, if you want to save (Auto-save, no fileselector) or
+      if you want to stay in GrafX2.
+
+
+
+  34 - Palette menu:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Displays a menu where the following options are available:
+
+        - Palette: Allows you to choose a color-block to edit. If you click
+          with the right mouse button, you'll choose a new Back-color.
+
+        - RGB gauges: Allow you to modify the current selection.
+
+        - "+" and "-": Allow you to lighten or darken the current selection.
+
+        - Default: Restores the predifined GrafX2 palette.
+
+        - Gray: Transforms the current selection into its gray-scaled
+          equivalent.
+
+        - Negative: Transforms the current selection into its reverse video
+          equivalent.
+
+        - Invert: Swaps the colors of the current selection so that the first
+          colors become the last ones.
+
+        - X-Invert: Works as above but modifies the picture so that it looks
+          the same.
+
+        - Swap: Swaps the current selection with another color-block. Click on
+          the beginning of the new color-block.
+
+        - X-Swap: Works as above but modifies the picture so that it looks the
+          same. This may be useful if you want to sort your palette.
+
+        - Copy: Copies the current selection to another color-block. Click on
+          the beginning of the new color-block.
+
+        - Spread: Computes a gradation between two colors. If your selection
+          is only made up of one color, select the second color in the
+          palette. Otherwise, the two colors used will be its extremities.
+
+        - Used: Indicates the number of colors used in the picture.
+
+        - Zap unused: Erases the unused colors with copies of the current
+          selection. (The keyboard shortcut for this button is <Del>).
+
+        - Reduce: Allows you to reduce the palette to the number of colors you
+          want (and modifies the picture).
+
+        - Undo: Allows you to recover the last modifications made on the
+          palette. If the last operation modified the picture, it won't
+          recover them: you'll have to click on Cancel to do so.
+
+
+        If you press <Backspace>, the program will replace, as well as
+      possible, some unused colors by the four default colors of the menu.
+      The image won't look altered because the modified colors (in the case
+      they were used on a few points) will be replaced by the closest colors
+      in the rest of the palette.
+      This option is really useful when you modify the palette so that there
+      are no colors that fit for the menu (eg: "Zap unused" while very little
+      colors are used in the picture; or "Reduce" with a very small number of
+      colors).
+
+        If you press the key below <Escape> or <,> (QWERTY), the menu will
+      disappear and you will be able to pick up a color from the picture
+      easily. Press <Escape> to cancel.
+
+        If only one color is selected (not a block), the <[> and <]> keys can
+      be used to select the previous or next Forecolor (Backcolor if you press
+      <Shift> at the same time).
+
+        Warning! If you press Undo after an action that modifies the picture
+      (X-Swap, X-Invert and Reduce colors), the picture won't be remapped as
+      it was just before this action. Only Cancel will.
+
+
+    Right click:
+    ============>
+
+        Opens a menu from where you can access the following menus:
+
+        - A menu in which you can select the colors that have not to be used
+        for smoothing, for the transparency mode and for remapping.
+
+        - A menu in which you can define color series.
+        *** Not implemented yet ***
+
+
+
+  35 - Scroll palette left / right:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Scrolls the palette window in the right of the menu.
+
+
+    Right click:
+    ============>
+
+        Same as above, but faster.
+
+
+
+  36 - Palette window:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Left click:
+    ============>
+
+        Defines the Fore-color.
+
+
+    Right click:
+    ============>
+
+        Defines the Back-color.
+
+
+
+  37 - Hide menu:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    Any click:
+    ==========>
+
+        Allows you to hide the menu. If you do this, take care to watch before
+      the key to press to show the menu back (the default key is <F10>).
+
+
+
+
+Let's talk about $$$, baby:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+    Please refer to the "Register?" section in the internal help of GrafX2.
+
+    To sum up this section, let's just say that GrafX2 is freeware. But you
+  can anyway send us money, graphics, or just a postcard to show us that we
+  made a useful program.
+
+    You must note that the version you have is already the "complete" version
+  (the same as the registered version) so we won't send you any other copy of
+  GrafX2. But if you register for one version, we'll consider that you won't
+  have to register for the next ones.
+
+
+
+
+Drawing tips:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+    This section deals with tips that can help you to draw some cool effects,
+  or just to draw faster.
+    Note that, in most cases, these tips only make a big part of the work and
+  that you'll have to touch up in zoom mode if you want to draw a picture
+  worthy of the name! ;)
+    Moreover, if you've found out nice tips by yourself, and if you want to
+  share them with the others, don't hesitate to tell us.
+
+  Anti-aliasing:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+      This is not an effect proposed by GrafX2 but a drawing method. It
+    consists in placing medium colored pixels in the angles formed by
+    contrasted pixels for artistically smoothing their aspect.
+      From our point of view, this is essential for drawing really nice
+    pictures.
+      An easy but tiresome way (the best way!) is to start by adding 1 middle
+    color, then antialias the new colors "recursively" while you have
+    intermediate colors in your palette.
+
+                           ÛÛÛÛÛÛÛÛÛÛÛÛ
+                                       ÛÛÛÛÛÛÛÛÛÛÛÛ
+
+                           ÛÛÛÛÛÛÛÛ±±±±±±±±
+                                   ±±±±±±±±ÛÛÛÛÛÛÛÛ
+
+                           ÛÛÛÛ²²²²²±±±±°°°°
+                                  °°°°±±±±²²²²²ÛÛÛÛ
+
+
+  Smear mode combined with concentric lines:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+      By combining this effect and this drawing tool, you can spread an area
+    from a central point.
+      If you aren't in high resolution, it can be useful to switch on the
+    transparency mode too (see next section).
+
+    ş A possible application is to draw fluffy hair. For that, you can choose
+    one of the pre-defined paintbrushes loking like random points. According
+    to the hair density you wish to obtain, you can choose a paintbrush with
+    more or less points. Then, place the center of the concentric lines in the
+    middle of the plush, and rotate the mouse around it keeping the mouse
+    button pressed.
+      With the same method, by turning around more, you can manage to give
+    an explosion effect to an object.
+
+    ş You can also create easily and quickly sun rays with this method. For
+    that, after having drawn the primary shape of the sun in the sky, choose
+    a paintbrush according to the size of the rays you want (but a small one
+    will often be prefered), and place the center of the lines in the center
+    of the sun. Then trace the ray at the length you want. If you didn't take
+    a big paintbrush, you'll be able first to draw an aura around the sun by
+    rotating quickly, and then to add more important rays with precision.
+
+
+  Smear mode combined with Transparency mode:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+      This two drawing modes, once combined, permit to spread parts of the
+    picture as fresh paint.
+      It is recommanded to use the transparency method which consists in
+    interpolating with an opacity of about 60% and the effects "Feedback" on.
+
+    ş As in the prvious section, it can be useful for drawing hair and
+    especially eyelashes if you have got a good palette (i.e. a palette that
+    contains color gradations between every colors you'll draw on during the
+    operation.
+      For drawing eyelashes for example, after having drawn the eye and the
+    eyelid, trace a quite thick black line representing the base of the eye-
+    lashes (this is that black line you'll spread out on the eyelid). Then, in
+    smear+transparency mode, draw with the freehand continuous tool (with a
+    small paintbrush: 1, 2 or 3 pixels wide according to what you draw: a face
+    or a close-up on an eye) starting from the base of the eyelashes in giving
+    their shape. You'll see your black bar looking more and more like eye-
+    lashes.
+
+    ş One can also use these effects for mixing colors on the screen like
+    paint. For example, if one want to draw a background made of abstract
+    shapes composed of color mixings, one can proceed like what follows:
+    - Define a palette containing a gradation between the different colors you
+    wish to use .
+    - Draw very vaguely the different colored areas with a big paintbrush (in
+    normal mode).
+    - With a smaller paintbrush, and with the spray, apply these same colors
+    but lighter or darker on the previously defined areas.
+    - Always with the same paintbrush in spray, but this time in smear mode
+    (not necessarily with transparency... but why not?), mix all these colors
+    on the screen to obtain a "multicolored pulp" vaguely conserving the
+    different color areas.
+    - At last, in Smear+Transparency mode, with a medium rounded paintbrush,
+    hand-draw by whirling or making waves, etc... conserving the same movement
+    to avoid breaks. This aims at eliminating the pixellisation made by the
+    spray and giving the final mixed paint aspect.
+    - Now, if it's ugly, it's either because my explanations are incomprehen-
+    sible, or because you have no talent! :p
+
+
+  Spray combined with shade mode:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    ş If you often use Shade mode, and you are tired of clicking plenty of
+    times on a pixel for reaching the color you want, you can define a spray
+    with "Size"=1, "Mono-flow"=1, and "Delay"=2 (or more, according to your
+    reflexes). Then you'll just have to click a few hundredth of second for
+    modifying a color.
+
+    ş With a wider diameter, it permits to add granularity to a texture,
+    because placing lighter or darker pixels creates some ruggedness.
+    Different textures appropriated to this effect are: sand, rock, etc...
+    Of course, you'll need a color gradation corresponding to color of the
+    texture.
+
+    ş You can also draw more elaborated textures           -        \
+    using a paintbrush of the shape of a small curve        \        \
+    or line as these figures "try" to show. ;)               `        \
+    Thus, you can create textures of straw, hair,            |         \
+    rock, marble (although hand-drawing would be
+    more recommanded than spray for this last one).
+
+
+  Shade mode used for replacing a color gradation by another one:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    ş If you drew something with colors belonging to a gradation and you'd
+    like to  replace all these colors by the ones of another gradation (with
+    the same number of colors), proceed as follows:
+    - Define these 2 gradations in the same shade table in the shade menu
+    without separating them by a blank square.
+    - Set the "no saturation" shade mode.
+    - Define the step of the shade with the size of the two gradations (e.g.:
+    enter 16 if each gradation contains 16 colors).
+    - Now, you just have to draw on the area you want the colors to change
+    (with the left mouse button if you placed the gradation to replace first
+    in the shade table, or inversely).
+
+
+  Spheres combined with additive transparency mode:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    ş Starting from a dark background (if possible all of the same color),
+    trace overlapping spheres with their lighting point at their center.
+    You'll quickly obtain a "blob" effect.
+
+
+  How to draw drops:
+  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    ş Here is a fast and efficient method to draw drops.
+    Just draw very bright pixels on the side of the drop where the main light
+    is, and less bright ones on the opposite side. Then draw shadows according
+    to the position of the light.
+
+    Here are examples with a light             ±±±±±±±±±±±±  ±±±±±±±±
+    coming from the top-left corner.           ±±±±±±±±±±±±  ±±±±±±±±
+    (they are best viewed in 80x50             ±±±±²±°±±±±±  ±±Û°±±±±
+    text mode)                                 ±±±²Û°°±±±±±  ±±±°²°±±
+                                               ±±±Û²°±²°±±±  ±±±±°±±±
+    You may think that the smallest            ±±±²±°²²°±±±  ±±±±±±±±
+    drop doesn't really look like a            ±±±±±²Û±°±±±  ±±±±±±±±
+    drop, but draw it in graph mode            ±±±±±°°°±±±±
+    and you'll see it DOES look                ±±±±±±±±±±±±
+    like a drop.                               ±±±±±±±±±±±±
+
+    If you don't trust me, then know that it's by looking at Lazur's graphs
+    that I found this method. And in a general way, it's always good to study
+    the work of the best artists to learn new techniques.
+
+
+
+
+Trouble-shooting / General hints / FAQ:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+  * Video card problems:
+
+    - VESA modes are disabled by Windows NT. And it is said that it will be
+    the same under Windows 2000 (we haven't tried it yet, and we aren't in a
+    hurry!).
+
+    - If your video card is not VESA compatible in hardware, you should try to
+      run a VESA driver such as Univesa or Univbe.
+
+    - If your card is VESA compatible but doesn't display the screen correctly
+    in VESA resolutions, that's probably because they don't fulfil all the
+    criteria that we expect. The explanation is that, for a better efficiency,
+    we have had to neglect some specificities on some video cards. However,
+    we always try to improve the compatibility with any kind of the VESA
+    standard in each new version.
+
+    - If you have an ATI Mach 64 video card (e.g. ATI Xpert), you should use
+    the m64vbe TSR supplied with the card to fully support our fancy XVESA
+    modes by typing "m64vbe vga".
+
+
+  * Memory problems:
+
+    - Since the 94.666% version, we use the EOS dos-extender Copyright (c)1996
+      Eclipse instead of the usual DOS4GW. The reason is that it is much
+      smaller in disk space (a smaller zip should please your phone bills) and
+      in memory (so you'll be able to run GrafX2 with more device handlers
+      using conventionnal memory). In addition, this dos-extender is inside
+      the main file, which reduces the number of files (your FAT will be happy
+      for that).
+
+      The backdraw is that this dos-extender doesn't manage disk-cache. So, if
+      you haven't at least 4 Megabytes of RAM, you'll have to use the batch
+      file GFX2_MEM.BAT .
+
+      Notice that:
+        - you'll have to configure this file according to the location of some
+          files in the tree of your hard-disk(s).
+        - you'll have to have the file DOS4GW.EXE somewhere in the tree of
+          your hard-disk(s).
+        - you'll need at least 16 Megabytes of free space on your current
+          hard-disk.
+
+      If you ever encounter problems using GrafX2 (with at least 4 Megabytes
+      of RAM) that would vanish using GFX2_MEM, we would thank you to let us
+      know.
+
+      EOS is a shareware dos-extender, with very interesting libraries for
+      music, graphism, ... for Watcom, Tasm or Masm applications. If you want
+      more informations on its features or its libraries, don't hesitate to
+      contact us in order to be put in relationship with its authors.
+
+
+  * Sound card problems:
+
+    Q: No sound comes out from my Ultra-maxi-sound-blaster-galaxy-64-3D-pnp,
+       so what can I do?
+    A: Well... You must understand that this program is not a soundtracker nor
+       a music-player :) ... So if you want some music, you'll have either to
+       play modules with a good player that can run background (with a DOS
+       shell), or to switch your Hi-Fi on.
+
+
+  * Miscellaneous:
+
+    - If you corrupted the GFX2.CFG file and that GrafX2 uses it as is, with
+      an incorrect behavior, don't hesitate to erase GFX2.CFG and to re-run
+      GFXCFG to create a new correct one. Indeed, the only tests of validity
+      we do on the configuration file are checking its size and its version
+      number.
+
+    - It may happen that you get a version already configured by one of your
+      friends who could have used some "Windows 95" keys while you haven't got
+      such keyboard yourself. In this case, you'll have to reconfigure these
+      combinations using GFXCFG.
+
+
+  * Frequently asked questions:
+
+    Q: How can I set the dimensions of the picture?
+    A: We thought it was obvious that you had to click in the areas where the
+       dimensions are written in the resolution menu (Width & Height) but many
+       people asked this question (?!). So, to sum up, everywhere you'll see a
+       value or text written in black in a sort of encrusted area, this means
+       that if you click on it, you'll be able to modify its value.
+       Moreover, if you want the picture dimensions to be the same as the ones
+       of the screen, you just have to right-click on the resolution in the
+       list.
+
+    Q: Where can I get the latest version of GrafX2?
+    A: The only place where you will find the latest version for sure is our
+       web site: http://www-msi.ensil.unilim.fr/~maritaud/sunset
+       Nevertheless, it isn't impossible that GrafX2 may also be found on FTP
+       sites dedicated to the "demo-scene" (e.g. ftp://ftp.scene.org).
+
+    Q: How can I make the brush become monochrome, and how can I get it back
+       to its normal state?
+    A: You can do it (assuming that you haven't modified the default keys)
+       with the keys <Shift>+<F4> to make the brush become monochrome, and
+       <Shift>+<B> to get the multi-coloured brush back.
+
+    Q: Why is the tool bar at the bottom of the screen instead of at the right
+       side like in Deluxe Paint (copyright Electronic Arts)?
+    A: Well... GrafX2 IS NOT Deluxe Paint! We know that you are used to Deluxe
+       Paint but you'll have to get used to GrafX2! ;) If you really can't
+       stand using GrafX2 like this, then you'll have to wait for GrafX3 but
+       we probably won't release it before year 2000! Actually, the main
+       reason why we put the tool bar with such a basical aspect is that it
+       was easier (therefore faster) to redraw the whole screen just by
+       telling the routine where to stop (where starts the tool bar).
+       Moreover, one of the best Amiga paint programs (Brilliance) has got the
+       tool bar at the bottom of the screen too.
+
+    Q: Why aren't the hidden parts of the picture filled when I use the "Flood
+       fill" tool?
+    A: For the simple and "quite" good reason that it is preferable that the
+       user controls perfectly what he is drawing. Thus, he won't see too late
+       that he has fucked up a part of his picture. The other tools work the
+       same way. And for the less good reason that is was more convenient for
+       us. ;)
+
+    Q: Is it possible to launch the program in a different resolution than
+       320x200?
+    A: Yes, you just have to type GFX2 <mode_number> at the DOS prompt. Type
+       GFX2 /? to get the list of all the video modes.
+
+    Q: Is it normal that some buttons don't work (e.g.: the Text button)?
+    A: Yes, this is because we haven't had the time to make them (I remind you
+       that GrafX2 is still at a Beta version state).
+       However, here is the list of the buttons that don't respond in GrafX2:
+        - Grad. rectangles
+        - Text
+        - Effects on the picture
+        - and the following button in the "Brush effects" menu: Distort.
+
+    Q: Will you release a Windows version?
+    A: GrafX2 would lose its soul by being adapted to a windowed system or a
+       system that doesn't support all its video modes. And anyway, it can be
+       run from Windows 9x (we don't know about Windows 2000 but we don't
+       care). So that's OK the way it is. The only interesting thing that
+       Windows could bring is the clipboard.
+
+    Q: Will you release a Linux version?
+    A: Although this is about the same problem as with the Windows version,
+       Linux lacks programs like GrafX2; so, even a limited version would be
+       interesting in this OS. Therefore, we would like to release a Linux
+       version. But we have no experience in Linux programming and our code is
+       completely indecipherable for others. So you'll have to wait...
+
+    Q: How can I contact you?
+    A: Actually, this is not really this question since those people managed
+       to contact us ;) but...
+
+       * Snail mail:
+           GUILLAUME DORME (Robinson)          KARL MARITAUD (X-Man)
+           15, rue de l'observatoire           10, rue de la Brasserie
+           87000 LIMOGES (FRANCE)              87000 LIMOGES (FRANCE)
+
+       * E-mail:
+           dorme@msi.unilim.fr                 maritaud@ensil.unilim.fr
+
+       Do not hesitate to contact us; we love that! :)
+       We'll try to reply to every e-mails (if any answer is needed), and also
+       to certain normal letters (Yes of course, we won't ruin ourselves for
+       stamps just to say "Thanks for writing!" :)).

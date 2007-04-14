@@ -1,0 +1,145 @@
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³!!!!!!! PLEASE READ THIS FILE !!!!!!!³!!!!!! VEUILLEZ LIRE CE FICHIER !!!!!!³
+³!! ENTIRELY BEFORE RUNNING GRAFX2 !!!³! ENTIEREMENT AVANT DE LANCER GRAFX2 !³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                                      ³
+                                      ³
+  If you are reading this file right  ³   Si vous lisez ce fichier maintenant,
+now, I'm sure that it is for one out  ³ Je suis s–r que c'est pour l'une de
+of these four reasons:                ³ ces quatre raisons:
+                                      ³
+  1) You are THE ONE who first reads  ³ 1) Vous ˆtes CELUI qui lit les
+     README.1ST files before running  ³    fichiers README.1ST avant de lancer
+     new programs.                    ³    de nouveaux programmes.
+                                      ³
+  2) Today is a rainy day and you've  ³ 2) Il pleut aujourd'hui et vous avez
+     already finished all the games   ³    d‚j… termin‚ tous les jeux que vous
+     you've... "purchased". So you    ³    avez... "achet‚s". Donc vous n'avez
+     have nothing else to do that     ³    rien d'autre … faire que de lire ce
+     reading this damn file.          ³    fichu fichier.
+                                      ³
+  3) You had the quite good reflex    ³ 3) Vous avez eu l'assez bon r‚flŠxe
+     (for someone who did not read    ³    (pour quelqu'un qui n'a pas lu ce
+     this file) to switch off your PC ³    fichier) d'‚teindre votre PC avant
+     before your monitor burns, and   ³    que votre moniteur grille, et
+     now you wonder why.              ³    maintenant vous cherchez pourquoi.
+                                      ³
+  4) You have burnt your monitor      ³ 4) Vous avez bouzill‚ votre moniteur
+     because you didn't read this     ³    parce que vous n'avez pas lu ce
+     file first. And you now have all ³    fichier en premier. Et maintenant
+     the time to read it on your      ³    vous avez tout le temps de le lire
+     neighbour's computer before you  ³    sur l'ordinateur de votre voisin en
+     can buy another monitor.         ³    attendant de pouvoir vous acheter
+                                      ³    un nouvel ‚cran.
+                                      ³
+                                      ³
+úÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄú
+                                      ³
+                                      ³
+  So here is what you must know about ³   Donc voici ce que vous devez savoir
+GrafX2 before running it:             ³ … propos de GrafX2 avant de le lancer:
+                                      ³
+                                      ³
+  Video problems:                     ³   ProblŠmes vid‚o:
+  ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ                     ³   ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+                                      ³
+  - This program provides a huge      ³   - Ce programme propose un trŠs grand
+  range of video resolutions. All     ³   nombre de modes vid‚o. Toutes ces
+  these resolutions may not work with ³   r‚solutions peuvent ne pas marcher
+  your monitor or video card. This    ³   avec votre moniteur ou carte vid‚o.
+  should result by your monitor to    ³   Ceci peut r‚sulter par un sifflement
+  whistle and stay black or display   ³   de votre moniteur ou bien plus g‚n‚-
+  shit.                               ³   ralement qu'il affiche n'importe
+    So we added a keyboard shortcut   ³   quoi ou qu'il reste tout noir.
+  for you to come back to a normal    ³     Par cons‚quent, nous avons ajout‚
+  resolution (MCGA 320x200). The      ³   un raccourci clavier pour que vous
+  default keys for this shortcut are  ³   puissiez revenir … un r‚solution
+  [Shift]+[Return]. But, since you    ³   normale (MCGA 320x200). La combinai-
+  can configure all the keys with     ³   son de touches par d‚faut est
+  GFXCFG, you should check its actual ³   [Shift]+[Return]. Mais, puisque vous
+  value by running this setup program.³   pouvez configurer toutes les touches
+                                      ³   avec GFXCFG, vous devriez v‚rifier
+    Note that we take no responsa-    ³   la combinaison exacte en lan‡ant ce
+  bility for any problems you could   ³   programme.
+  encounter with GrafX2.              ³
+                                      ³     Notez que ne sommes aucunement
+  Important:                          ³   responsables d'‚ventuels problŠmes
+    If the standard VESA modes (i.e.  ³   que vous pourriez rencontrer avec
+  640x400,640x480,800x600 & 1024x768) ³   GrafX2.
+  don't work, please type this line   ³
+  from the DOS command line:          ³   Important:
+  TESTVESA > VESA.TXT                 ³     Si les modes VESA standards (i.e.
+  and send us the file thus created   ³   640x400,640x480,800x600 & 1024x768)
+  telling us the name of your video   ³   ne fonctionnent pas, veuillez taper
+  card. It would be even better if you³   ceci sur la ligne de commande DOS:
+  sent a version of this file with no ³   TESTVESA > VESA.TXT
+  VESA driver in memory and another   ³   et nous envoyer le fichier ainsi
+  one with a resident driver (such as ³   cr‚‚ en nous donnant le nom de votre
+  UNIVBE (c)Scitech Software).        ³   carte vid‚o. Ce serait encore mieux
+                                      ³   si vous nous envoyiez une version de
+                                      ³   ce fichier avec aucun gestionnaire
+                                      ³   VESA en m‚moire et une autre avec un
+                                      ³   driver r‚sident (tel que UNIVBE
+                                      ³   (c)Scitech Software).
+                                      ³
+                                      ³
+  Problems with the keys?             ³   ProblŠmes avec les touches?
+  ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ             ³   ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+                                      ³
+  - The button in the bottom-left     ³   - Le bouton dans le coin bas-gauche
+  corner of the tool-bar (the one     ³   de la barre d'outils (celui avec une
+  with a cross) was designed to hide  ³   croix) a ‚t‚ con‡u pour cacher la
+  the tool-bar. But, the danger with  ³   barre d'outils. Mais le danger avec
+  this button is that, if you don't   ³   ce bouton est que si vous ne con-
+  know the key to have it back, you   ³   naissez pas la touche qui permet de
+  will be in trouble :).              ³   la rafficher, vous serez embˆt‚ :).
+    The default key is [F10] but      ³     La touche par d‚faut est [F10]
+  check it in the setup program.      ³   mais v‚rifiez-la avec GFXCFG.
+                                      ³
+  - The default key for exiting the   ³   - La touche par d‚faut pour quitter
+  program is [Q] (for QWERTY          ³   le programme est [Q] (pour claviers
+  keyboards). This can be useful if   ³   QWERTY). Cela peut ˆtre utile si
+  you don't remember how to show the  ³   vous ne vous rappelez pas comment
+  tool-bar.                           ³   remontrer la barre d'outils.
+                                      ³
+  - The key-configuration program     ³   - Le programme de configuration des
+  displays the values for QWERTY      ³   touches affiche ces derniŠres pour
+  keyboards. So if you have an AZERTY ³   les claviers QWERTY. Donc, si vous
+  keyboard for example, and want to   ³   avez un clavier AZERTY par exemple
+  use your true Q key for quitting,   ³   et que vous voulez utiliser votre
+  don't worry if the program displays ³   vraie touche Q pour quitter, ne vous
+  'A'.                                ³   ‚tonnez pas si le programme affiche
+                                      ³   'A'.
+  - Though keys are designed for      ³
+  QWERTY keyboards, "typing areas"    ³   - Bien que les touches soient g‚r‚es
+  will read the key-codes of your     ³   pour claviers QWERTY, les zones de
+  country. For example, when you'll   ³   saisie lisent les touches de votre
+  have to enter a file name, you'll   ³   pays. Par exemple, lorsque vous
+  get what you type (cool! :)).       ³   entrerez un nom de fichier, vous
+                                      ³   obtiendrez ce que vous tapez (cool!)
+  - For people who would like to get  ³   :).
+  directly the AZERTY equivalent of   ³
+  the default configuration file, we  ³   - Pour ceux qui voudraient avoir
+  have added the GFX2_FRA.CFG file.   ³   directement l'‚quivalent AZERTY du
+  Then you'll just have to rename it  ³   fichier de configuration par d‚faut,
+  to GFX2.CFG (great!) ;).            ³   nous avons inclus le fichier
+                                      ³   GFX2_FRA.CFG. Vous n'aurez qu'… le
+                                      ³   renommer en GFX2.CFG (g‚nial!) ;).
+                                      ³
+                                      ³
+úÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄú
+                                      ³
+                                      ³
+  OK! Now you can use and abuse of    ³   OK! Maintenant vous pouvez user et
+this program!                         ³ abuser de ce programme!
+                                      ³
+                                      ³
+PS: Pleeeease! If you think something ³ PS: Par piti‚‚‚‚! Si vous pensez que
+    is going wrong, read all the docs ³     quelque chose ne tourne pas rond,
+    before complaining! Maybe that's  ³     lisez toutes les docs avant de
+    merely because you don't know how ³     vous plaindre! Peut-ˆtre que c'est
+    to use it that it doesn't act as  ³     simplement parce que vous ne savez
+    you expect. ;)                    ³     pas comment l'utiliser qu'une
+                                      ³     option n'agit pas comme vous
+                                      |     esp‚rez.
+                                      ú
