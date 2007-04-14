@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="Anciens fichiers/divers.asm" open="1" top="0" tabpos="7">
+		<Cursor position="35193" topLine="1614" />
+	</File>
+	<File name="aide.c" open="1" top="0" tabpos="3">
+		<Cursor position="4763" topLine="127" />
+	</File>
+	<File name="boutons.c" open="1" top="1" tabpos="5">
+		<Cursor position="78223" topLine="2431" />
+	</File>
+	<File name="divers.c" open="1" top="0" tabpos="4">
+		<Cursor position="1961" topLine="47" />
+	</File>
+	<File name="divers.h" open="1" top="0" tabpos="6">
+		<Cursor position="1275" topLine="5" />
+	</File>
+	<File name="global.h" open="1" top="0" tabpos="1">
+		<Cursor position="2951" topLine="101" />
+	</File>
+	<File name="readline.h" open="1" top="0" tabpos="8">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="sdlscreen.h" open="1" top="0" tabpos="2">
+		<Cursor position="2273" topLine="0" />
+	</File>
+	<File name="shade.c" open="1" top="0" tabpos="9">
+		<Cursor position="31123" topLine="924" />
+	</File>
+</CodeBlocks_layout_file>

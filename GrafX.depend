@@ -1,0 +1,333 @@
+# depslib dependency file v1.0
+1176573750 source:/home/pulkomandy/Projects/GFX2_SRC/aide.c
+	<stdio.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	<string.h>
+	<sys/vfs.h>
+
+1176566963 /home/pulkomandy/Projects/GFX2_SRC/const.h
+
+1176561067 /home/pulkomandy/Projects/GFX2_SRC/struct.h
+	"const.h"
+
+1176580114 /home/pulkomandy/Projects/GFX2_SRC/global.h
+	<SDL/SDL.h>
+	"struct.h"
+	"loadsave.h"
+
+940692956 /home/pulkomandy/Projects/GFX2_SRC/loadsave.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/divers.h
+
+1176563251 /home/pulkomandy/Projects/GFX2_SRC/graph.h
+
+1176549546 /home/pulkomandy/Projects/GFX2_SRC/moteur.h
+
+1176573039 source:/home/pulkomandy/Projects/GFX2_SRC/boutons.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	"readline.h"
+	"files.h"
+	"loadsave.h"
+	"init.h"
+	<fcntl.h>
+	<stdio.h>
+	"boutons.h"
+	"operatio.h"
+	<string.h>
+	<stdlib.h>
+	<unistd.h>
+	<ctype.h>
+	"shade.c"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/readline.h
+
+1176552986 /home/pulkomandy/Projects/GFX2_SRC/files.h
+
+1176553118 /home/pulkomandy/Projects/GFX2_SRC/init.h
+	"readini.h"
+	"saveini.h"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/readini.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/saveini.h
+
+1176554162 /home/pulkomandy/Projects/GFX2_SRC/boutons.h
+
+945641428 /home/pulkomandy/Projects/GFX2_SRC/operatio.h
+
+1176579600 /home/pulkomandy/Projects/GFX2_SRC/shade.c
+	"global.h"
+	"graph.h"
+
+1176556780 source:/home/pulkomandy/Projects/GFX2_SRC/files.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	<stdlib.h>
+	<fcntl.h>
+	<string.h>
+	<dirent.h>
+	<errno.h>
+	<unistd.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<unistd.h>
+	"linux.h"
+
+1176552205 /home/pulkomandy/Projects/GFX2_SRC/linux.h
+
+1176571401 source:/home/pulkomandy/Projects/GFX2_SRC/graph.c
+	"sdlscreen.h"
+	"graph.h"
+	"divers.h"
+	<math.h>
+	<malloc.h>
+	<sys/sysinfo.h>
+	<string.h>
+	<stdlib.h>
+	"moteur.h"
+	"boutons.h"
+	"pages.h"
+	"global.h"
+	"pages.c"
+
+1176559031 /home/pulkomandy/Projects/GFX2_SRC/video.h
+	"struct.h"
+
+1176548808 /home/pulkomandy/Projects/GFX2_SRC/vesalfb.h
+	"struct.h"
+	"global.h"
+
+1176561017 /home/pulkomandy/Projects/GFX2_SRC/pages.h
+
+1176561064 /home/pulkomandy/Projects/GFX2_SRC/pages.c
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	"linux.h"
+	"global.h"
+	"pages.h"
+	"graph.h"
+
+1176568608 source:/home/pulkomandy/Projects/GFX2_SRC/init.c
+	<fcntl.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"modesvdo.h"
+	"graph.h"
+	"boutons.h"
+	"palette.h"
+	"aide.h"
+	"operatio.h"
+	<stdio.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<string.h>
+	<unistd.h>
+	<stdlib.h>
+	"divers.h"
+	"readini.c"
+	"saveini.c"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/modesvdo.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/palette.h
+
+941312106 /home/pulkomandy/Projects/GFX2_SRC/aide.h
+
+1176548158 /home/pulkomandy/Projects/GFX2_SRC/readini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176555965 /home/pulkomandy/Projects/GFX2_SRC/saveini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176539011 source:/home/pulkomandy/Projects/GFX2_SRC/linux.c
+	<string.h>
+
+1176562607 source:/home/pulkomandy/Projects/GFX2_SRC/loadsave.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"pages.h"
+	"op_c.h"
+	<fcntl.h>
+	<sys/stat.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"boutons.h"
+
+944346298 /home/pulkomandy/Projects/GFX2_SRC/op_c.h
+	"struct.h"
+
+1176571151 source:/home/pulkomandy/Projects/GFX2_SRC/main.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"init.h"
+	"boutons.h"
+	"moteur.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<signal.h>
+	<time.h>
+	<SDL/SDL.h>
+	<unistd.h>
+	"linux.h"
+	"pages.h"
+	"files.h"
+	"loadsave.h"
+	"sdlscreen.h"
+
+1176562163 /home/pulkomandy/Projects/GFX2_SRC/vesahigh.c
+	<string.h>
+	"vesalfb.h"
+
+1176562627 source:/home/pulkomandy/Projects/GFX2_SRC/moteur.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"special.h"
+	<string.h>
+	<stdlib.h>
+	<stdio.h>
+	"linux.h"
+	"boutons.h"
+	"operatio.h"
+	"shade.h"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/special.h
+
+1176553647 /home/pulkomandy/Projects/GFX2_SRC/shade.h
+
+1176546236 source:/home/pulkomandy/Projects/GFX2_SRC/op_c.c
+	<stdlib.h>
+	<stdio.h>
+	<fcntl.h>
+	<sys/stat.h>
+	"op_c.h"
+	"op_asm.h"
+
+944346460 /home/pulkomandy/Projects/GFX2_SRC/op_asm.h
+	"op_c.h"
+
+976376552 source:/home/pulkomandy/Projects/GFX2_SRC/operatio.c
+	<math.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"moteur.h"
+	"graph.h"
+	"operatio.h"
+
+1176561064 source:/home/pulkomandy/Projects/GFX2_SRC/pages.c
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	"linux.h"
+	"global.h"
+	"pages.h"
+	"graph.h"
+
+940768894 source:/home/pulkomandy/Projects/GFX2_SRC/palette.c
+	<stdio.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	"readline.h"
+
+1176548158 source:/home/pulkomandy/Projects/GFX2_SRC/readini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+898300360 source:/home/pulkomandy/Projects/GFX2_SRC/readline.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+
+1176555965 source:/home/pulkomandy/Projects/GFX2_SRC/saveini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176579600 source:/home/pulkomandy/Projects/GFX2_SRC/shade.c
+	"global.h"
+	"graph.h"
+
+898300360 source:/home/pulkomandy/Projects/GFX2_SRC/special.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"moteur.h"
+	<stdlib.h>
+
+1176552028 source:/home/pulkomandy/Projects/GFX2_SRC/testvesa/testvesa.c
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"vesa.h"
+
+870946826 /home/pulkomandy/Projects/GFX2_SRC/testvesa/vesa.h
+
+1176562163 source:/home/pulkomandy/Projects/GFX2_SRC/vesahigh.c
+	<string.h>
+	"vesalfb.h"
+
+1176564725 source:/home/pulkomandy/Projects/GFX2_SRC/vesalfb.c
+
+1176579529 /home/pulkomandy/Projects/GFX2_SRC/sdlscreen.h
+	<SDL/SDL.h>
+	"struct.h"
+
+1176551535 source:/home/pulkomandy/Projects/GFX2_SRC/oper_bak.c
+	<math.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"moteur.h"
+	"graph.h"
+	"operatio.h"
+	<string.h>
+	<stdlib.h>
+
+1176579531 source:/home/pulkomandy/Projects/GFX2_SRC/divers.c
+	<SDL/SDL.h>
+	"struct.h"
+	"sdlscreen.h"
+	"global.h"
+

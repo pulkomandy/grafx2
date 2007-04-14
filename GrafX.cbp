@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="GrafX" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/GrafX" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/GrafX" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Bazar">
+				<Option output="Bazar" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="Anciens fichiers/divers.asm">
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/oper_bak.c">
+			<Option compilerVar="CC" />
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/vesahigh.c">
+			<Option compilerVar="CC" />
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/vesalfb.asm">
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/vesalfb.h">
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/video.asm">
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="Anciens fichiers/video.h">
+			<Option target="Bazar" />
+		</Unit>
+		<Unit filename="GrafX.cbp">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="GrafX.depend">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="aide.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="aide.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="boutons.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="boutons.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="const.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="divers.asm">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="divers.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="divers.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="doc_eng.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="doc_fra.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="dpmi.asm">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="dpmi.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="file_id.diz">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="files.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="files.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2.cfg">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2.dat">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2.gif">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2.ico">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2.ini">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2_fra.cfg">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="gfx2_mem.bat">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="global.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="graph.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="graph.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="history.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="init.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="init.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="linux.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="linux.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="loadsave.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="loadsave.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="make.inc">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="makefile">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="mcnormal.asm">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="mcpourp2.asm">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="modesvdo.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="moteur.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="moteur.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="op_asm.asm">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="op_asm.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="op_c.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="op_c.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="operatio.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="operatio.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="pages.c">
+			<Option compilerVar="CC" />
+			<Option link="0" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="pages.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="palette.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="palette.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readini.c">
+			<Option compilerVar="CC" />
+			<Option link="0" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readini.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readline.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readline.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readme!.1st">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="readme.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="saveini.c">
+			<Option compilerVar="CC" />
+			<Option link="0" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="saveini.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="sdlscreen.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="shade.c">
+			<Option compilerVar="CC" />
+			<Option link="0" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="shade.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="special.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="special.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="struct.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="tech_eng.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="tech_fra.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Unit filename="todo.txt">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
