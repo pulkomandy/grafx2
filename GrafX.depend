@@ -331,3 +331,299 @@
 	"sdlscreen.h"
 	"global.h"
 
+1176573750 source:/home/pulkomandy/Projects/GFX2_SRC/svn/aide.c
+	<stdio.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	<string.h>
+	<sys/vfs.h>
+
+1176566963 /home/pulkomandy/Projects/GFX2_SRC/svn/const.h
+
+1176561067 /home/pulkomandy/Projects/GFX2_SRC/svn/struct.h
+	"const.h"
+
+1176580114 /home/pulkomandy/Projects/GFX2_SRC/svn/global.h
+	<SDL/SDL.h>
+	"struct.h"
+	"loadsave.h"
+
+940692956 /home/pulkomandy/Projects/GFX2_SRC/svn/loadsave.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/divers.h
+
+1176563251 /home/pulkomandy/Projects/GFX2_SRC/svn/graph.h
+
+1176549546 /home/pulkomandy/Projects/GFX2_SRC/svn/moteur.h
+
+1176580194 source:/home/pulkomandy/Projects/GFX2_SRC/svn/boutons.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	"readline.h"
+	"files.h"
+	"loadsave.h"
+	"init.h"
+	<fcntl.h>
+	<stdio.h>
+	<SDL/SDL.h>
+	<string.h>
+	<stdlib.h>
+	<unistd.h>
+	<ctype.h>
+	"boutons.h"
+	"operatio.h"
+	"shade.c"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/readline.h
+
+1176552986 /home/pulkomandy/Projects/GFX2_SRC/svn/files.h
+
+1176553118 /home/pulkomandy/Projects/GFX2_SRC/svn/init.h
+	"readini.h"
+	"saveini.h"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/readini.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/saveini.h
+
+1176554162 /home/pulkomandy/Projects/GFX2_SRC/svn/boutons.h
+
+945641428 /home/pulkomandy/Projects/GFX2_SRC/svn/operatio.h
+
+1176579600 /home/pulkomandy/Projects/GFX2_SRC/svn/shade.c
+	"global.h"
+	"graph.h"
+
+1176579531 source:/home/pulkomandy/Projects/GFX2_SRC/svn/divers.c
+	<SDL/SDL.h>
+	"struct.h"
+	"sdlscreen.h"
+	"global.h"
+
+1176579529 /home/pulkomandy/Projects/GFX2_SRC/svn/sdlscreen.h
+	<SDL/SDL.h>
+	"struct.h"
+
+1176556780 source:/home/pulkomandy/Projects/GFX2_SRC/svn/files.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	<stdlib.h>
+	<fcntl.h>
+	<string.h>
+	<dirent.h>
+	<errno.h>
+	<unistd.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<unistd.h>
+	"linux.h"
+
+1176552205 /home/pulkomandy/Projects/GFX2_SRC/svn/linux.h
+
+1176571401 source:/home/pulkomandy/Projects/GFX2_SRC/svn/graph.c
+	"sdlscreen.h"
+	"graph.h"
+	"divers.h"
+	<math.h>
+	<malloc.h>
+	<sys/sysinfo.h>
+	<string.h>
+	<stdlib.h>
+	"moteur.h"
+	"boutons.h"
+	"pages.h"
+	"global.h"
+	"pages.c"
+
+1176561017 /home/pulkomandy/Projects/GFX2_SRC/svn/pages.h
+
+1176561064 /home/pulkomandy/Projects/GFX2_SRC/svn/pages.c
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	"linux.h"
+	"global.h"
+	"pages.h"
+	"graph.h"
+
+1176568608 source:/home/pulkomandy/Projects/GFX2_SRC/svn/init.c
+	<fcntl.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"modesvdo.h"
+	"graph.h"
+	"boutons.h"
+	"palette.h"
+	"aide.h"
+	"operatio.h"
+	<stdio.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<string.h>
+	<unistd.h>
+	<stdlib.h>
+	"divers.h"
+	"readini.c"
+	"saveini.c"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/modesvdo.h
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/palette.h
+
+941312106 /home/pulkomandy/Projects/GFX2_SRC/svn/aide.h
+
+1176548158 /home/pulkomandy/Projects/GFX2_SRC/svn/readini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176555965 /home/pulkomandy/Projects/GFX2_SRC/svn/saveini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176539011 source:/home/pulkomandy/Projects/GFX2_SRC/svn/linux.c
+	<string.h>
+
+1176562607 source:/home/pulkomandy/Projects/GFX2_SRC/svn/loadsave.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"pages.h"
+	"op_c.h"
+	<fcntl.h>
+	<sys/stat.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+	"boutons.h"
+
+944346298 /home/pulkomandy/Projects/GFX2_SRC/svn/op_c.h
+	"struct.h"
+
+1176571151 source:/home/pulkomandy/Projects/GFX2_SRC/svn/main.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"init.h"
+	"boutons.h"
+	"moteur.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<signal.h>
+	<time.h>
+	<SDL/SDL.h>
+	<unistd.h>
+	"linux.h"
+	"pages.h"
+	"files.h"
+	"loadsave.h"
+	"sdlscreen.h"
+
+1176562627 source:/home/pulkomandy/Projects/GFX2_SRC/svn/moteur.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+	"special.h"
+	<string.h>
+	<stdlib.h>
+	<stdio.h>
+	"linux.h"
+	"boutons.h"
+	"operatio.h"
+	"shade.h"
+
+898300360 /home/pulkomandy/Projects/GFX2_SRC/svn/special.h
+
+1176553647 /home/pulkomandy/Projects/GFX2_SRC/svn/shade.h
+
+1176546236 source:/home/pulkomandy/Projects/GFX2_SRC/svn/op_c.c
+	<stdlib.h>
+	<stdio.h>
+	<fcntl.h>
+	<sys/stat.h>
+	"op_c.h"
+	"op_asm.h"
+
+944346460 /home/pulkomandy/Projects/GFX2_SRC/svn/op_asm.h
+	"op_c.h"
+
+976376552 source:/home/pulkomandy/Projects/GFX2_SRC/svn/operatio.c
+	<math.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"moteur.h"
+	"graph.h"
+	"operatio.h"
+
+1176561064 source:/home/pulkomandy/Projects/GFX2_SRC/svn/pages.c
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	"linux.h"
+	"global.h"
+	"pages.h"
+	"graph.h"
+
+940768894 source:/home/pulkomandy/Projects/GFX2_SRC/svn/palette.c
+	<stdio.h>
+	"const.h"
+	"struct.h"
+	"global.h"
+	"divers.h"
+	"graph.h"
+	"moteur.h"
+	"readline.h"
+
+1176548158 source:/home/pulkomandy/Projects/GFX2_SRC/svn/readini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+898300360 source:/home/pulkomandy/Projects/GFX2_SRC/svn/readline.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"divers.h"
+
+1176555965 source:/home/pulkomandy/Projects/GFX2_SRC/svn/saveini.c
+	<stdio.h>
+	"const.h"
+	"global.h"
+
+1176579600 source:/home/pulkomandy/Projects/GFX2_SRC/svn/shade.c
+	"global.h"
+	"graph.h"
+
+898300360 source:/home/pulkomandy/Projects/GFX2_SRC/svn/special.c
+	"const.h"
+	"struct.h"
+	"global.h"
+	"graph.h"
+	"moteur.h"
+	<stdlib.h>
+
