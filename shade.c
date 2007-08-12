@@ -40,8 +40,8 @@ void Shade_Blocs_degrades(void)
   word  Curseur=0;
   word  Nb_shades=0;
   short Shade_traite,Ancien_shade_traite;
-  word  Taille_shade;
-  word  Debut_shade;
+  word  Taille_shade=0;
+  word  Debut_shade=0;
   short Pos_X,Pos_Y;
   short Taille_X,Taille_Y;
   short Debut_X,Debut_Y,Fin_X,Fin_Y;

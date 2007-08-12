@@ -200,7 +200,7 @@ void Bouton_Stats(void)
   char  Buffer[37];
   dword Utilisation_couleur[256];
   long  Taille;
-  struct statfs* Informations_Disque;
+  struct statfs* Informations_Disque = NULL;
 
 
   Ouvrir_fenetre(310,174,"Statistics");

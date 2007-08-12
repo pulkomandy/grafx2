@@ -2286,7 +2286,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   short Bouton_clicke;
   struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
   short Temp;
-  unsigned Bidon;       // Sert … appeler _dos_setdrive
+  unsigned Bidon=0;       // Sert … appeler _dos_setdrive
   word  Drives_Debut_Y;
   byte  Charger_ou_sauver_l_image=0;
   char  Nom_drive[3]="  ";
@@ -2947,7 +2947,7 @@ void Load_picture(byte Image)
   byte  Format_fichier_initial;
   byte  Ne_pas_restaurer;
   byte  Utiliser_palette_brosse;
-  struct Composantes * Palette_initiale;
+  struct Composantes * Palette_initiale=NULL;
   byte  Ancienne_forme_curseur;
   short Principal_Largeur_image_initiale=Principal_Largeur_image;
   short Principal_Hauteur_image_initiale=Principal_Hauteur_image;
@@ -4166,7 +4166,7 @@ void Bouton_Colorize_Mode(void)
 
 void Bouton_Colorize_Afficher_la_selection(int Numero)
 {
-  short Pos_Y; // Ligne o— afficher les flŠches de s‚lection
+  short Pos_Y=0; // Ligne o— afficher les flŠches de s‚lection
 
   // On commence par effacer les anciennes s‚lections:
     // Partie gauche
@@ -4830,8 +4830,8 @@ void Bouton_Trame_Menu(void)
   short Indice;
   short Pos_X;
   short Pos_Y;
-  short Old_Pos_X;
-  short Old_Pos_Y;
+  short Old_Pos_X=0;
+  short Old_Pos_Y=0;
   short Orig_X;
   short Orig_Y;
   static byte Octet_insere=0;

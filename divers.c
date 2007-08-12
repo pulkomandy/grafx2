@@ -91,3 +91,25 @@ void Get_input(void)
     SDL_PollEvent(Evenement_SDL);
 }
 
+
+void Initialiser_chrono(dword Delai)
+{// Démarrer le chrono
+
+  push ebp
+  mov  ebp,esp
+
+  arg  Delai:dword
+
+  mov  eax,Delai
+  mov  Chrono_delay,eax
+
+  xor  ah,ah
+  int  1Ah
+  mov  word ptr[Chrono_cmp+0],dx
+  mov  word ptr[Chrono_cmp+2],cx
+
+  mov  esp,ebp
+  pop  ebp
+
+  return;
+}
