@@ -974,8 +974,8 @@ void Initialiser_mode_video(int Numero)
 
   // fonction d'affichage "Pixel" utilisée pour les opérations définitivement
   // Ne doit à aucune condition être appelée en dehors de la partie visible
-  // de l'image dans l'écran (‡a pourrait être grave)
-void Afficher_pixel(short X,short Y,byte Couleur)
+  // de l'image dans l'écran (ça pourrait être grave)
+void Afficher_pixel(word X,word Y,byte Couleur)
   // X & Y    sont la position d'un point dans l'IMAGE
   // Couleur  est la couleur du point
   // Le Stencil est géré.

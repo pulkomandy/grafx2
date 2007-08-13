@@ -127,3 +127,153 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 	puts("Lit_pixel_dans_brosse non implémenté!\n");
 	return 0;
 }
+
+void Clavier_de_depart(void)
+{
+	puts("Clavier_de_depart non implémenté!\n");
+}
+
+byte Recuperer_nb_lignes(void)
+{
+	puts("Recuperer_nb_lignes non implémenté!\n");
+	return 0;
+}
+
+void Clavier_americain(void)
+{
+	puts("Clavier_americain non implémenté!\n");
+}
+
+word Detection_souris(void)
+{
+	puts("Detection_souris non implémenté!\n");
+	return 0;
+}
+
+byte Lit_pixel_dans_ecran_courant  (word X,word Y)
+{
+	puts("Lit_pixel_dans_ecran_courant non implémenté!\n");
+	return 0;
+}
+
+void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
+{
+	puts("Pixel_dans_ecran_courant non implémenté!\n");
+}
+
+void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
+{
+	puts("Remplacer_une_couleur non implémenté!\n");
+}
+
+void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
+{
+	puts("Ellipse_Calculer_limites non implémenté!\n");
+}
+
+byte Pixel_dans_ellipse(void)
+{
+	puts("Pixel_dans_ellipse non implémenté!\n");
+	return 0;
+}
+
+byte Pixel_dans_cercle(void)
+{
+	puts("Pixel_dans_cercle non implémenté!\n");
+	return 0;
+}
+
+void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
+{
+	puts("Copier_une_partie_d_image_dans_une_autre non implémenté!\n");
+}
+
+byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
+{
+	puts("Lit_pixel_dans_ecran_brouillon non implémenté!\n");
+	return 0;
+}
+
+void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
+{
+	puts("Rotate_90_deg_LOWLEVEL non implémenté!\n");
+}
+
+void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
+{
+	puts("Remap_general_LOWLEVEL non implémenté!\n");
+}
+
+void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
+{
+	puts("Copier_image_dans_brosse non implémenté!\n");
+}
+
+byte Lit_pixel_dans_ecran_feedback (word X,word Y)
+{
+	puts("Lit_pixel_dans_ecran_feedback non implémenté!\n");
+	return 0;
+}
+
+dword Round_div(dword Numerateur,dword Diviseur)
+{
+	puts("Round_div non implémenté!\n");
+	return 0;
+}
+
+byte Effet_Trame(word X,word Y)
+{
+	puts("Effet_Trame non implémenté!\n");
+	return 0;
+}
+
+void Set_mouse_position(void)
+{
+	puts("Set_mouse_position non implémenté!\n");
+}
+
+void Clip_mouse(void)
+{
+	puts("Clip_mouse non implémenté!\n");
+}
+
+void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
+{
+	puts("Remplacer_toutes_les_couleurs_dans_limites non implémenté!\n");
+}
+
+byte Lit_pixel_dans_ecran_backup   (word X,word Y)
+{
+	puts("Lit_pixel_dans_ecran_backup non implémenté!\n");
+	return 0;
+}
+
+byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
+{
+	puts("Type_de_lecteur_de_disquette non implémenté!\n");
+	return 0;
+}
+
+byte Disk_map(byte Numero_de_lecteur)
+{
+	puts("Disk_map non implémenté!\n");
+	return 0;
+}
+
+byte Disque_dur_present(byte Numero_de_disque)
+{
+	puts("Disque_dur_present non implémenté!\n");
+	return 0;
+}
+
+byte Lecteur_CDROM_present(byte Numero_de_lecteur)
+{
+	puts("Lecteur_CDROM_present non implémenté!\n");
+	return 0;
+}
+
+long Freespace(byte Numero_de_lecteur)
+{
+	puts("Freespace non implémenté!\n");
+	return 0;
+}

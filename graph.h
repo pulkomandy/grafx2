@@ -154,3 +154,5 @@ void Detruire_la_page_courante(void);
 void Interchanger_image_principale_et_brouillon(void);
 
 void Changer_facteur_loupe(byte Indice_facteur);
+
+void Remap_picture(void);

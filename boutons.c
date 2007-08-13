@@ -370,7 +370,7 @@ void Bouton_Cacher_menu(void)
 byte Bouton_Quitter_Routine_locale(void)
 {
   short Bouton_clicke;
-  byte  Enregistrer;
+  //byte  Enregistrer;
   char  Nom_du_fichier[256];
   byte  Ancienne_forme_curseur;
 
@@ -430,7 +430,7 @@ byte Bouton_Quitter_Routine_locale(void)
 
 void Bouton_Quit(void)
 {
-  short Bouton_clicke;
+  //short Bouton_clicke;
 
   if (Bouton_Quitter_Routine_locale())
   {
@@ -2451,7 +2451,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
           do
           {
-            Etat_Du_Clavier=SDL_GetKeyState(Bidon);
+				 puts("boutons.c 2454\n");
+            //Etat_Du_Clavier=SDL_GetKeyState(Bidon);
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
           // On efface la demande de confirmation
@@ -2951,7 +2952,7 @@ void Load_picture(byte Image)
   byte  Ancienne_forme_curseur;
   short Principal_Largeur_image_initiale=Principal_Largeur_image;
   short Principal_Hauteur_image_initiale=Principal_Hauteur_image;
-  char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
+  //char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
   int   Nouveau_mode;
 
 
@@ -3242,7 +3243,7 @@ void Save_picture(byte Image)
   byte  Ancienne_forme_curseur;
   short Principal_Largeur_image_Backup=Principal_Largeur_image;
   short Principal_Hauteur_image_Backup=Principal_Hauteur_image;
-  char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
+  //char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
 
 
   if (!Image)
@@ -5451,7 +5452,7 @@ void Bouton_Effets(void)
         Afficher_curseur();
         break;
       case 13 : // Feedback (pour Colorize et Shade)
-        if (Config.FX_Feedback=!Config.FX_Feedback)
+        if (Config.FX_Feedback=!Config.FX_Feedback) //???
           FX_Feedback_Ecran=Principal_Ecran;
         else
           FX_Feedback_Ecran=Ecran_backup;

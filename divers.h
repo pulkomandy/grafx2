@@ -68,8 +68,8 @@ byte Disk_map(byte Numero_de_lecteur);
 byte Disque_dur_present(byte Numero_de_disque);
 // Numero_de_disque = 0:C, 1:D, 2:E, ...
 //
-// R‚sultat = 0 : Pas de disque dur pr‚sent
-//            1 : Disque dur pr‚sent
+// Résultat = 0 : Pas de disque dur présent
+//            1 : Disque dur présent
 
 byte Lecteur_CDROM_present(byte Numero_de_lecteur);
 // Numero_de_lecteur = 0 : lecteur A:
@@ -77,12 +77,12 @@ byte Lecteur_CDROM_present(byte Numero_de_lecteur);
 //                     2 : lecteur C:
 //                   ... : ...
 //
-// R‚sultat = 0 : Pas de lecteur CD-ROM pr‚sent
-//            1 : Lecteur CD-ROM pr‚sent
+// Résultat = 0 : Pas de lecteur CD-ROM présent
+//            1 : Lecteur CD-ROM présent
 
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical);
-// Calcule les valeurs suivantes en fonction des deux paramŠtres:
+// Calcule les valeurs suivantes en fonction des deux paramètres:
 //
 // Ellipse_Rayon_vertical_au_carre
 // Ellipse_Rayon_horizontal_au_carre

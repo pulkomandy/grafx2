@@ -1,8 +1,9 @@
 #include <string.h>
+#include <stdio.h>
 
 void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier)
 {
-    int i=0, Position_Du_Dernier_Slash;
+    int i=0, Position_Du_Dernier_Slash=0;
     do
     {
         Chemin[i]=Buffer[i];
@@ -16,7 +17,8 @@ void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier)
     strcpy(Nom_Fichier,Buffer+i);
 }
 
-int filelength(char *)
+int filelength(int fichier)
 {
 	printf("filelenght non implémenté!\n");
+	return 0;
 }

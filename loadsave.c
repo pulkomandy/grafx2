@@ -1177,7 +1177,7 @@ void Load_PKM(void)
   }
 
 
-void save_PKM(void)
+void Save_PKM(void)
 {
   char Nom_du_fichier[256];
   int  Fichier;

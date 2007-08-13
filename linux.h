@@ -6,6 +6,6 @@ struct find_t {
   char name[256];
 };
 
-int filelength(char *);
+int filelength(int);
 
 #define _A_SUBDIR 1
