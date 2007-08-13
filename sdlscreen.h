@@ -3,8 +3,8 @@
 
 #include <SDL/SDL.h>
 #include "struct.h"
-//Set_Mode_SDL();
 
+	void Set_Mode_SDL();
   void Pixel_SDL                (word X,word Y,byte Couleur);
   byte Lit_Pixel_SDL            (word X,word Y);
   void Effacer_Tout_l_Ecran_SDL (byte Couleur);
@@ -26,7 +26,7 @@
   void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer);
 
   SDL_Rect ** Liste_Modes_Videos_SDL;
-  SDL_Surface* Ecran;
+  byte* Ecran;
 
   SDL_Event* Evenement_SDL;
 

@@ -1,7 +1,7 @@
 
-void Pixel_Chargement_dans_ecran_courant(short Pos_X,short Pos_Y,byte Couleur);
-void Pixel_Chargement_dans_preview      (short Pos_X,short Pos_Y,byte Couleur);
-void Pixel_Chargement_dans_brosse       (short Pos_X,short Pos_Y,byte Couleur);
+void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_Chargement_dans_preview      (word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_Chargement_dans_brosse       (word Pos_X,word Pos_Y,byte Couleur);
 
 void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix);
 

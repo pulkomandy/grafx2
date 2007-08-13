@@ -20,11 +20,11 @@
 #include <stdlib.h>
 #include "divers.h"
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
-// Chercher le r‚pertoire contenant GFX2.EXE
+// Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
   int Position;
@@ -81,8 +81,8 @@ void Rechercher_drives(void)
   byte Lecteur;
   byte Nb_lecteurs_disquettes;
   byte Lecteur_de_disquettes;
-  byte Type_de_lecteur;
-  char Bidon[256];
+  byte Type_de_lecteur=42;
+  //char Bidon[256];
 
   Nb_drives=0;
   Nb_lecteurs_disquettes=(Type_de_lecteur_de_disquette(0)>0)+(Type_de_lecteur_de_disquette(1)>0);
@@ -106,7 +106,7 @@ void Rechercher_drives(void)
   {
     if (Disk_map(2)==Disk_map(1))
     {
-      // Il n'y a pas de lecteur ‚mul‚ par un SUBST
+      // Il n'y a pas de lecteur émulé par un SUBST
       Lecteur_de_disquettes=Disk_map(1)-1;
       for (Lecteur=0; Lecteur<=1; Lecteur++)
       {
@@ -125,7 +125,7 @@ void Rechercher_drives(void)
     }
     else
     {
-      // Il y a un lecteur ‚mul‚ par un SUBST
+      // Il y a un lecteur émulé par un SUBST
       Lecteur_de_disquettes=Disk_map(1)-1;
 
       // On cherche d'abord sur quel lecteur le lecteur physique est dispo
@@ -144,24 +144,24 @@ void Rechercher_drives(void)
         }
       }
 
-      // On d‚clare les trucs maintenant
+      // On déclare les trucs maintenant
       if (Lecteur_de_disquettes==0)
       {
-        // Situation : On a un lecteur A: qui est r‚el et un lecteur B: ‚mul‚
+        // Situation : On a un lecteur A: qui est réel et un lecteur B: émulé
         Ajouter_lecteur(0,Type_de_lecteur);
         Ajouter_lecteur(1,DRIVE_NETWORK);
       }
       else
       {
-        // Situation : On a un lecteur A: qui est r‚el et un lecteur B: ‚mul‚
+        // Situation : On a un lecteur A: qui est réel et un lecteur B: émulé
         Ajouter_lecteur(0,DRIVE_NETWORK);
         Ajouter_lecteur(1,Type_de_lecteur);
       }
     }
   }
   else
-    //  Il n'y a pas de lecteur de D7 physique, mais on v‚rifie s'il n'y en a
-    // pas qui seraient ‚mul‚s par SUBST
+    //  Il n'y a pas de lecteur de D7 physique, mais on vérifie s'il n'y en a
+    // pas qui seraient émulés par SUBST
     for (Lecteur=0; Lecteur<=1; Lecteur++)
     {
       switch (Freespace(Lecteur+1))
@@ -173,8 +173,8 @@ void Rechercher_drives(void)
       }
     }
 
-  // Test de la pr‚sence d'autres lecteurs (HDD, CD, R‚seau)
-  // On les met tous en r‚seau avant de tester leur vrai type.
+  // Test de la présence d'autres lecteurs (HDD, CD, Réseau)
+  // On les met tous en réseau avant de tester leur vrai type.
   for (Lecteur=2; Lecteur<=25; Lecteur++)
   {
     if (Disque_dur_present(Lecteur-2))
@@ -190,7 +190,7 @@ void Rechercher_drives(void)
 }
 
 
-// Fonction de d‚cryptage
+// Fonction de décryptage
 
   #define DECRYPT_TAILLE_CLE 14
   byte Decrypt_compteur=0;
@@ -206,7 +206,7 @@ void Rechercher_drives(void)
     return Temp;
   }
 
-// D‚cryptage d'une donn‚e
+// Décryptage d'une donnée
 
 void Decrypte(byte * Donnee,int Taille)
 {
@@ -228,7 +228,7 @@ void Charger_DAT(void)
   byte Pos_Y;
   word Mot_temporaire;
 
-  struct stat* Informations_Fichier;
+  struct stat* Informations_Fichier=NULL;
 
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
@@ -248,7 +248,7 @@ void Charger_DAT(void)
 
   if (read(Handle,BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU)!=LARGEUR_MENU*HAUTEUR_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte(BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
+  Decrypte((byte *)BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
 
   if (read(Handle,SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)!=
       LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)
@@ -311,12 +311,12 @@ void Charger_DAT(void)
 
   Fonte=Fonte_systeme;
 
-  // Lecture de la fonte 6x8: (sp‚ciale aide)
+  // Lecture de la fonte 6x8: (spéciale aide)
   if (read(Handle,Fonte_help,(315*6*8))!=(315*6*8))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte*)Fonte_help,(315*6*8));
 
-  // Lecture des diff‚rentes sections de l'aide:
+  // Lecture des différentes sections de l'aide:
 
   // Pour chaque section "Indice" de l'aide:
   for (Indice=0;Indice<NB_SECTIONS_AIDE;Indice++)
@@ -328,11 +328,11 @@ void Charger_DAT(void)
     // On copie ce nombre de lignes dans la table:
     Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
 
-    // On lit la place que la section prend en m‚moire:
+    // On lit la place que la section prend en mémoire:
     if (read(Handle,&Mot_temporaire,2)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 
-    // On alloue la m‚moire correspondante:
+    // On alloue la mémoire correspondante:
     if (!(Table_d_aide[Indice].Debut_de_la_liste=(byte *)malloc(Mot_temporaire)))
       Erreur(ERREUR_MEMOIRE);
 
@@ -619,7 +619,7 @@ void Initialisation_des_boutons(void)
                        0);
   }
 
-  // Ici viennent les d‚clarations des boutons que l'on sait g‚rer
+  // Ici viennent les déclarations des boutons que l'on sait gérer
 
   Initialiser_bouton(BOUTON_PINCEAUX,
                      0,1,
@@ -958,9 +958,9 @@ void Initialisation_des_boutons(void)
 
 
 
-// Initialisation des op‚rations:
+// Initialisation des opérations:
 
-  // Initialiseur d'une op‚ration:
+  // Initialiseur d'une opération:
 
 void Initialiser_operation(byte Numero_operation,
                            byte Numero_bouton_souris,
@@ -975,15 +975,15 @@ void Initialiser_operation(byte Numero_operation,
 }
 
 
-  // Initiliseur de toutes les op‚rations:
+  // Initiliseur de toutes les opérations:
 
 void Initialisation_des_operations(void)
 {
-  byte Numero; // Num‚ro de l'option en cours d'auto-initialisation
+  byte Numero; // Numéro de l'option en cours d'auto-initialisation
   byte Bouton; // Bouton souris en cours d'auto-initialisation
   byte Taille; // Taille de la pile en cours d'auto-initialisation
 
-  // Auto-initialisation des op‚rations (vers des actions inoffensives)
+  // Auto-initialisation des opérations (vers des actions inoffensives)
 
   for (Numero=0;Numero<NB_OPERATIONS;Numero++)
     for (Bouton=0;Bouton<3;Bouton++)
@@ -991,7 +991,7 @@ void Initialisation_des_operations(void)
         Initialiser_operation(Numero,Bouton,Taille,Print_coordonnees,0);
 
 
-  // Ici viennent les d‚clarations d‚taill‚es des op‚rations
+  // Ici viennent les déclarations détaillées des opérations
   Initialiser_operation(OPERATION_DESSIN_CONTINU,1,0,
                         Freehand_Mode1_1_0,1);
   Initialiser_operation(OPERATION_DESSIN_CONTINU,1,2,
@@ -1350,9 +1350,9 @@ void Initialisation_des_operations(void)
 
 
 
-//-- D‚finition des modes vid‚o: --------------------------------------------
+//-- Définition des modes vidéo: --------------------------------------------
 
-  // D‚finition d'un mode:
+  // Définition d'un mode:
 
 void Definir_mode_video(int    Numero,
                         short  Largeur, short Hauteur,
@@ -1375,7 +1375,7 @@ void Definir_mode_video(int    Numero,
 }
 
 
-  // Initiliseur de toutes les op‚rations:
+  // Initiliseur de toutes les opérations:
 
 void Definition_des_modes_video(void)
 {                   // Numero       LargHaut Mode      FXFY Ratio Ref Vesa  Pointeur
@@ -1485,8 +1485,8 @@ word Ordonnancement[NB_TOUCHES]=
   0x200+BOUTON_SPRAY,               // Spray menu
   0x100+BOUTON_FLOODFILL,           // Floodfill
   0x200+BOUTON_FLOODFILL,           // Replace color
-  0x100+BOUTON_COURBES,             // B‚zier's curves
-  0x200+BOUTON_COURBES,             // B‚zier's curve with 3 or 4 points
+  0x100+BOUTON_COURBES,             // Bézier's curves
+  0x200+BOUTON_COURBES,             // Bézier's curve with 3 or 4 points
   0x100+BOUTON_RECTANGLES,          // Empty rectangle
   0x100+BOUTON_FILLRECT,            // Filled rectangle
   0x100+BOUTON_CERCLES,             // Empty circle
@@ -1585,7 +1585,7 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_PREVIOUS_USER_FORECOLOR,  // Previous user-defined foreground color
   SPECIAL_NEXT_USER_BACKCOLOR,      // Next user-defined background color
   SPECIAL_PREVIOUS_USER_BACKCOLOR,  // Previous user-defined background color
-  SPECIAL_RETRECIR_PINCEAU,         // R‚tr‚cir le pinceau
+  SPECIAL_RETRECIR_PINCEAU,         // Rétrécir le pinceau
   SPECIAL_GROSSIR_PINCEAU           // Grossir le pinceau
 };
 
@@ -1623,8 +1623,8 @@ byte Numero_option[NB_TOUCHES]=
    29, // Spray menu
    30, // Floodfill
   124, // Replace color
-   31, // B‚zier's curves
-   32, // B‚zier's curve with 3 or 4 points
+   31, // Bézier's curves
+   32, // Bézier's curve with 3 or 4 points
    33, // Empty rectangle
    34, // Filled rectangle
    35, // Empty circle
@@ -1723,7 +1723,7 @@ byte Numero_option[NB_TOUCHES]=
   127, // Previous user-defined foreground color
   128, // Next user-defined background color
   129, // Previous user-defined background color
-  121, // R‚tr‚cir le pinceau
+  121, // Rétrécir le pinceau
   122  // Grossir le pinceau
 };
 
@@ -1738,7 +1738,7 @@ int Charger_CFG(int Tout_charger)
   struct Config_Chunk        Chunk;
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
-  struct stat* Informations_Fichier;
+  struct stat* Informations_Fichier=NULL;
 
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
@@ -1802,7 +1802,7 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_MODES_VIDEO: // Modes vid‚o
+      case CHUNK_MODES_VIDEO: // Modes vidéo
         if ((Chunk.Taille/sizeof(CFG_Mode_video))!=NB_MODES_VIDEO)
           goto Erreur_lecture_config;
         for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
@@ -1868,7 +1868,7 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_DEGRADES: // Infos sur les d‚grad‚s
+      case CHUNK_DEGRADES: // Infos sur les dégradés
         if (Tout_charger)
         {
           if (read(Handle,&Degrade_Courant,1)!=1)
@@ -1944,7 +1944,7 @@ int Sauver_CFG(void)
 {
   int  Handle;
   int  Indice;
-  byte Octet;
+  //byte Octet;
   char Nom_du_fichier[256];
   struct Config_Header       CFG_Header;
   struct Config_Chunk        Chunk;
@@ -1986,7 +1986,7 @@ int Sauver_CFG(void)
       goto Erreur_sauvegarde_config;
   }
 
-  // Sauvegarde de l'‚tat de chaque mode vid‚o
+  // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
   Chunk.Taille=NB_MODES_VIDEO*sizeof(CFG_Mode_video);
   if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
@@ -2000,7 +2000,7 @@ int Sauver_CFG(void)
       goto Erreur_sauvegarde_config;
   }
 
-  // Ecriture des donn‚es du Shade (pr‚c‚d‚es du shade en cours)
+  // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Numero=CHUNK_SHADE;
   Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
   if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
@@ -2026,7 +2026,7 @@ int Sauver_CFG(void)
   if (write(Handle,Stencil,sizeof(Stencil))!=sizeof(Stencil))
     goto Erreur_sauvegarde_config;
 
-  // Sauvegarde des informations des d‚grad‚s
+  // Sauvegarde des informations des dégradés
   Chunk.Numero=CHUNK_DEGRADES;
   Chunk.Taille=sizeof(Degrade_Tableau)+1;
   if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
@@ -2104,11 +2104,11 @@ void Initialiser_la_table_precalculee_des_distances_de_couleur(void)
 {
   int Indice;
 
-  // On commence par allouer la m‚moire utilis‚e par la table:
+  // On commence par allouer la mémoire utilisée par la table:
   // 128 valeurs pour chaque teinte, 3 teintes (Rouge, vert et bleu)
   MC_Table_differences=(int *)malloc(sizeof(int)*(3*128));
 
-  // Pour chacune des 128 positions correspondant … une valeur de diff‚rence:
+  // Pour chacune des 128 positions correspondant … une valeur de différence:
   for (Indice=0;Indice<128;Indice++)
   {
     if (Indice<64)

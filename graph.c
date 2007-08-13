@@ -13,18 +13,17 @@
 #include "global.h"
 
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
-/*
 byte Meilleure_couleur(byte R,byte V,byte B)
 {
   short Coul;
   int   Delta_R,Delta_V,Delta_B;
   int   Dist;
   int   Best_dist=0x7FFFFFFF;
-  byte  Best_color;
+  byte  Best_color=0;
 
   for (Coul=0; Coul<256; Coul++)
   {
@@ -47,8 +46,6 @@ byte Meilleure_couleur(byte R,byte V,byte B)
 
   return Best_color;
 }
-*/
-
 
 void Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
      (byte Rouge, byte Vert, byte Bleu, struct Composantes * Palette, byte * Table)
@@ -120,7 +117,7 @@ byte Old_Trans;
 void Remap_pixel(byte * Pix)
 {
   if (*Pix==Old_Clair)         // On commence par tester le Gris clair
-    *Pix=CM_Clair;             // qui est pas mal utilis‚.
+    *Pix=CM_Clair;             // qui est pas mal utilisé.
   else
   {
     if (*Pix==Old_Noir)        // Puis le Noir...
@@ -147,15 +144,15 @@ void Remap_pixel(byte * Pix)
 
 void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
 {
-  // On part du principe qu'il n'y a que le bas d'une fenˆtre qui puisse
-  // empi‚ter sur la palette... Et c'est d‚j… pas mal!
+  // On part du principe qu'il n'y a que le bas d'une fenêtre qui puisse
+  // empiéter sur la palette... Et c'est déjà pas mal!
   byte Couleur,Vraie_couleur;
   word Debut_X,Debut_Y;
   word Fin_X,Fin_Y;
   word Largeur;
   word Hauteur;
   word Coin_X=Fenetre_Pos_X+Fenetre_Largeur; // |_ Coin bas-droit
-  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur; // |  de la fenˆtre +1
+  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur; // |  de la fenêtre +1
 
 
   if (Config.Couleurs_separees)
@@ -178,8 +175,8 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       Fin_X=Debut_X+Largeur;
       Fin_Y=Debut_Y+Hauteur;
 
-      //   On affiche le bloc en entier si on peut, sinon on le d‚coupe autour
-      // de la fenˆtre.
+      //   On affiche le bloc en entier si on peut, sinon on le découpe autour
+      // de la fenêtre.
       if ( (Debut_Y>=Coin_Y) || (Fin_X<=Fenetre_Pos_X) || (Debut_X>=Coin_X) )
         Block(Debut_X,Debut_Y,Largeur,Hauteur,Vraie_couleur);
       else
@@ -240,15 +237,12 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
 {
   short Indice;
   byte  Table_de_conversion[256];
-  short Temp,Temp2;
+  short Temp/*,Temp2*/;
 
-  if ( (CM_Clair!=Old_Clair)
-    || (CM_Fonce!=Old_Fonce)
-    || (CM_Blanc!=Old_Blanc)
-    || (CM_Noir !=Old_Noir )
+  if ( (CM_Clair!=Old_Clair) || (CM_Fonce!=Old_Fonce) || (CM_Blanc!=Old_Blanc) || (CM_Noir !=Old_Noir )
     || (CM_Trans!=Old_Trans) )
   {
-    // Cr‚ation de la table de conversion
+    // Création de la table de conversion
     for (Indice=0; Indice<256; Indice++)
       Table_de_conversion[Indice]=Indice;
 
@@ -257,7 +251,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
     Table_de_conversion[Old_Clair]=CM_Clair;
     Table_de_conversion[Old_Blanc]=CM_Blanc;
 
-    // Remappage de l'‚cran
+    // Remappage de l'écran
 
     Temp=Fenetre_Hauteur*Menu_Facteur_Y;
 
@@ -271,13 +265,13 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
       Remap_screen(0, Menu_Ordonnee_avant_fenetre,
                    Largeur_ecran, Hauteur_ecran-Menu_Ordonnee_avant_fenetre,
                    Table_de_conversion);
-      // On passe la table juste pour ne rafficher que les couleurs modifi‚es
+      // On passe la table juste pour ne rafficher que les couleurs modifiées
       Afficher_palette_du_menu_en_evitant_la_fenetre(Table_de_conversion);
     }
     /*
-       Il faudrait peut-ˆtre remapper les pointill‚s d‚limitant l'image.
-       Mais ‡a va ˆtre chiant parce qu'ils peuvent ˆtre affich‚s en mode Loupe.
-       Mais de toutes fa‡ons, c'est franchement facultatif...
+       Il faudrait peut-ˆtre remapper les pointillés délimitant l'image.
+       Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
+       Mais de toutes façons, c'est franchement facultatif...
     */
   }
 }
@@ -323,7 +317,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
       CM_Clair=Table[2];
   }
 
-  // Recherche du gris fonc‚
+  // Recherche du gris foncé
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
     (Coul_menu_pref[1].R, Coul_menu_pref[1].V, Coul_menu_pref[1].B,Palette,Table);
   if ( (CM_Noir!=Table[0]) && (CM_Blanc!=Table[0]) && (CM_Clair!=Table[0]) )
@@ -341,7 +335,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
     }
   }
 
-  // C'est peu probable mais il est possible que CM_Clair soit plus fonc‚e que
+  // C'est peu probable mais il est possible que CM_Clair soit plus foncée que
   // CM_Fonce. Dans ce cas, on les inverse.
   if ( ((Palette[CM_Clair].R*30)+(Palette[CM_Clair].V*59)+(Palette[CM_Clair].B*11)) <
        ((Palette[CM_Fonce].R*30)+(Palette[CM_Fonce].V*59)+(Palette[CM_Fonce].B*11)) )
@@ -351,7 +345,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
     CM_Fonce=I;
   }
 
-  // On cherche une couleur de transparence diff‚rente des 4 autres.
+  // On cherche une couleur de transparence différente des 4 autres.
   for (CM_Trans=0; ((CM_Trans==CM_Noir) || (CM_Trans==CM_Fonce) ||
                    (CM_Trans==CM_Clair) || (CM_Trans==CM_Blanc)); CM_Trans++);
 
@@ -396,13 +390,13 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
 
 
 
-// Indique quelle est la m‚moire disponible
+// Indique quelle est la mémoire disponible
 dword Memoire_libre(void)
 {
-  // On appelle la fonction qui optimise la m‚moire libre afin d'en regagner
-  // un maximum. Sinon, tous les "free" libŠrent une m‚moire qui n'est pas
+  // On appelle la fonction qui optimise la mémoire libre afin d'en regagner
+  // un maximum. Sinon, tous les "free" libèrent une mémoire qui n'est pas
   // prise en compte par la fonction, et on se retrouve avec un manque
-  // alarmant de m‚moire.
+  // alarmant de mémoire.
   /*
   A revoir, mais est-ce vraiment utile?
   _heapmin();
@@ -424,32 +418,32 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
   int Temp;
 
 
-  // On initialise les deux tables de conversion en Identit‚
+  // On initialise les deux tables de conversion en Identité
   for (Indice=0;Indice<256;Indice++)
   {
     Table_inc[Indice]=Indice;
     Table_dec[Indice]=Indice;
   }
 
-  // On s'apprˆte … examiner l'ensemble de la liste
+  // On s'apprête à examiner l'ensemble de la liste
   for (Indice=0;Indice<512;Indice++)
   {
-    // On recherche la premiŠre case de la liste non vide (et non inhib‚e)
+    // On recherche la première case de la liste non vide (et non inhibée)
     while ((Indice<512) && (Liste[Indice]>255))
       Indice++;
 
-    // On note la position de la premiŠre case de la s‚quence
+    // On note la position de la première case de la séquence
     Premier=Indice;
 
-    // On recherche la position de la derniŠre case de la s‚quence
+    // On recherche la position de la dernière case de la séquence
     for (Dernier=Premier;Liste[Dernier+1]<256;Dernier++);
 
-    // Pour toutes les cases non vides (et non inhib‚es) qui suivent
+    // Pour toutes les cases non vides (et non inhibées) qui suivent
     switch (Mode)
     {
       case MODE_SHADE_NORMAL :
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
-        { // On met … jour les tables de conversion
+        { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
           Table_inc[Couleur]=Liste[(Indice+Pas<=Dernier)?Indice+Pas:Dernier];
           Table_dec[Couleur]=Liste[(Indice-Pas>=Premier)?Indice-Pas:Premier];
@@ -458,7 +452,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
       case MODE_SHADE_BOUCLE :
         Temp=1+Dernier-Premier;
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
-        { // On met … jour les tables de conversion
+        { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
           Table_inc[Couleur]=Liste[Premier+((Pas+Indice-Premier)%Temp)];
           Table_dec[Couleur]=Liste[Premier+(((Temp-Pas)+Indice-Premier)%Temp)];
@@ -466,7 +460,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
         break;
       default : // MODE_SHADE_NOSAT
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
-        { // On met … jour les tables de conversion
+        { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
           if (Indice+Pas<=Dernier)
             Table_inc[Couleur]=Liste[Indice+Pas];
@@ -510,7 +504,7 @@ int Str2num(char * Chaine)
 }
 
 
-// Arrondir un nombre r‚el … la valeur entiŠre la plus proche
+// Arrondir un nombre réel à la valeur entière la plus proche
 short Round(float Valeur)
 {
   short Temp=Valeur;
@@ -523,7 +517,7 @@ short Round(float Valeur)
   return Temp;
 }
 
-// Arrondir le r‚sultat d'une division … la valeur entiŠre sup‚rieure
+// Arrondir le résultat d'une division à la valeur entière supérieure
 short Round_div_max(short Numerateur,short Diviseur)
 {
   if (!(Numerateur % Diviseur))
@@ -556,7 +550,7 @@ void Transformer_point(short X, short Y, float cosA, float sinA,
 
 
 
-// -- Recadrer la partie non-zoom‚e de l'image par rapport … la partie zoom‚e
+// -- Recadrer la partie non-zoomée de l'image par rapport à la partie zoomée
 //    lorsqu'on scrolle en mode Loupe --
 void Recadrer_ecran_par_rapport_au_zoom(void)
 {
@@ -590,22 +584,22 @@ void Recadrer_ecran_par_rapport_au_zoom(void)
 }
 
 
-// - Calcul des donn‚es du split en fonction de la proportion de chaque zone -
+// - Calcul des données du split en fonction de la proportion de chaque zone -
 void Calculer_split(void)
 {
-  short Temp;
+  //short Temp;
   short X_theorique=Round(Principal_Proportion_split*Largeur_ecran);
 
   Principal_X_Zoom=Largeur_ecran-(((Largeur_ecran+(Loupe_Facteur>>1)-X_theorique)/Loupe_Facteur)*Loupe_Facteur);
   Principal_Split=Principal_X_Zoom-(Menu_Facteur_X*LARGEUR_BARRE_SPLIT);
 
-  // Correction en cas de d‚bordement sur la gauche
+  // Correction en cas de débordement sur la gauche
   while (Principal_Split*(Loupe_Facteur+1)<Largeur_ecran-(Menu_Facteur_X*LARGEUR_BARRE_SPLIT))
   {
     Principal_Split+=Loupe_Facteur;
     Principal_X_Zoom+=Loupe_Facteur;
   }
-  // Correction en cas de d‚bordement sur la droite
+  // Correction en cas de débordement sur la droite
   X_theorique=Largeur_ecran-((NB_PIXELS_ZOOMES_MIN-1)*Loupe_Facteur);
   while (Principal_X_Zoom>=X_theorique)
   {
@@ -619,7 +613,7 @@ void Calculer_split(void)
 // -------------------- Calcul des information de la loupe -------------------
 void Calculer_donnees_loupe(void)
 /*
-  AprŠs modification des donn‚es de la loupe, il faut recalculer les limites.
+  Après modification des données de la loupe, il faut recalculer les limites.
 */
 {
   Calculer_split();
@@ -639,15 +633,15 @@ void Calculer_donnees_loupe(void)
 }
 
 
-// -------- Calcul des bornes de la partie d'image visible … l'‚cran ---------
+// -------- Calcul des bornes de la partie d'image visible à l'écran ---------
 void Calculer_limites(void)
 /*
-  Avant l'appel … cette fonction, les donn‚es de la loupe doivent ˆtre … jour.
+  Avant l'appel à cette fonction, les données de la loupe doivent être à jour.
 */
 {
   if (Loupe_Mode)
   {
-    // -- Calcul des limites de la partie non zoom‚e de l'image --
+    // -- Calcul des limites de la partie non zoomée de l'image --
     Limite_Haut  =Principal_Decalage_Y;
     Limite_Gauche=Principal_Decalage_X;
     Limite_visible_Bas   =Limite_Haut+Menu_Ordonnee-1;
@@ -663,7 +657,7 @@ void Calculer_limites(void)
     else
       Limite_Droite=Limite_visible_Droite;
 
-    // -- Calcul des limites de la partie zoom‚e de l'image --
+    // -- Calcul des limites de la partie zoomée de l'image --
     Limite_Haut_Zoom  =Loupe_Decalage_Y;
     Limite_Gauche_Zoom=Loupe_Decalage_X;
     Limite_visible_Bas_Zoom   =Limite_Haut_Zoom+Loupe_Hauteur-1;
@@ -700,7 +694,7 @@ void Calculer_limites(void)
 }
 
 
-// -- Calculer les coordonn‚es du pinceau en fonction du snap et de la loupe -
+// -- Calculer les coordonnées du pinceau en fonction du snap et de la loupe -
 void Calculer_coordonnees_pinceau(void)
 {
   if ((Loupe_Mode) && (Mouse_X>=Principal_X_Zoom))
@@ -722,7 +716,7 @@ void Calculer_coordonnees_pinceau(void)
 }
 
 
-// ------------ Changer le facteur de zoom et tout mettre … jour -------------
+// ------------ Changer le facteur de zoom et tout mettre à jour -------------
 void Changer_facteur_loupe(byte Indice_facteur)
 {
   short Centre_X;
@@ -737,11 +731,11 @@ void Changer_facteur_loupe(byte Indice_facteur)
 
   if (Loupe_Mode)
   {
-    // Recalculer le d‚calage de la loupe
-    // Centrage "brut" de l‚cran par rapport … la loupe
+    // Recalculer le décalage de la loupe
+    // Centrage "brut" de lécran par rapport à la loupe
     Loupe_Decalage_X=Centre_X-(Loupe_Largeur>>1);
     Loupe_Decalage_Y=Centre_Y-(Loupe_Hauteur>>1);
-    // Correction en cas de d‚bordement de l'image
+    // Correction en cas de débordement de l'image
     if (Loupe_Decalage_X+Loupe_Largeur>Principal_Largeur_image)
       Loupe_Decalage_X=Principal_Largeur_image-Loupe_Largeur;
     if (Loupe_Decalage_Y+Loupe_Hauteur>Principal_Hauteur_image)
@@ -777,7 +771,7 @@ void Afficher_limites_de_l_image(void)
   Bas_visible   =Principal_Hauteur_image<Menu_Ordonnee;
 
 
-  // On v‚rifie que la limite … droite est visible:
+  // On vérifie que la limite à droite est visible:
   if (Droite_visible)
   {
     Debut=Limite_Haut;
@@ -787,7 +781,7 @@ void Afficher_limites_de_l_image(void)
     if (Bas_visible)
       Fin++;
 
-    // Juste le temps d'afficher les limites, on ‚tend les limites de la loupe
+    // Juste le temps d'afficher les limites, on étend les limites de la loupe
     // aux limites visibles, car sinon Pixel_Preview ne voudra pas afficher.
     Ancienne_Limite_Zoom=Limite_Droite_Zoom;
     Limite_Droite_Zoom=Limite_visible_Droite_Zoom;
@@ -799,14 +793,14 @@ void Afficher_limites_de_l_image(void)
     Limite_Droite_Zoom=Ancienne_Limite_Zoom;
   }
 
-  // On v‚rifie que la limite en bas est visible:
+  // On vérifie que la limite en bas est visible:
   if (Bas_visible)
   {
     Debut=Limite_Gauche;
     Fin=(Limite_Droite<Principal_Largeur_image)?
         Limite_Droite:Principal_Largeur_image;
 
-    // On ‚tend ‚galement les limites en bas (comme pour la limite droit)
+    // On étend également les limites en bas (comme pour la limite droit)
     Ancienne_Limite_Zoom=Limite_Bas_Zoom;
     Limite_Bas_Zoom=Limite_visible_Bas_Zoom;
 
@@ -820,7 +814,7 @@ void Afficher_limites_de_l_image(void)
 
 
 
-// Fonction retournant le libell‚ d'une mode (ex: " 320x200")
+// Fonction retournant le libellé d'une mode (ex: " 320x200")
 char * Libelle_mode(int Mode)
 {
   static char Chaine[9];
@@ -833,16 +827,16 @@ char * Libelle_mode(int Mode)
 
 
 
-//--------------------- Initialisation d'un mode vid‚o -----------------------
+//--------------------- Initialisation d'un mode vidéo -----------------------
 
-void * Mode_X_Ptr; // Pointeur sur la table … utiliser pour le changement de
-                   // mode vid‚o X
+void * Mode_X_Ptr; // Pointeur sur la table à utiliser pour le changement de
+                   // mode vidéo X
 
 void Initialiser_mode_video(int Numero)
 {
   int Sensibilite_X;
   int Sensibilite_Y;
-  int Indice_VESA;
+  //int Indice_VESA;
 
 
   if (Resolution_actuelle!=Numero)
@@ -856,7 +850,7 @@ void Initialiser_mode_video(int Numero)
         Menu_Facteur_X=Mode_video[Numero].Facteur_X;
         Menu_Facteur_Y=Mode_video[Numero].Facteur_Y;
         break;
-      case 2: // adapter l‚gŠrement
+      case 2: // adapter légèrement
         Menu_Facteur_X=Mode_video[Numero].Facteur_X-1;
         if (Menu_Facteur_X<1) Menu_Facteur_X=1;
         Menu_Facteur_Y=Mode_video[Numero].Facteur_Y-1;
@@ -903,7 +897,7 @@ void Initialiser_mode_video(int Numero)
             Clear_brush_zoom=Clear_brush_zoom_SDL;
             Set_Mode_SDL();
         break;
-
+/*
         switch(Mode_video[Numero].Mode_VESA_de_base)
         {
           case 0x100 : Indice_VESA=0; //  640x400
@@ -928,7 +922,7 @@ void Initialiser_mode_video(int Numero)
         }
         else
         {
-          // Ce n'est pas le cas, on continue comme si de rien n'‚tait
+          // Ce n'est pas le cas, on continue comme si de rien n'était
           Granularite    =VESA_Mode_Infos[Indice_VESA].Granularite;
           VESA_WinFuncPtr=VESA_Mode_Infos[Indice_VESA].WinFuncPtr;
 
@@ -936,6 +930,7 @@ void Initialiser_mode_video(int Numero)
           if (Mode_X_Ptr!=NULL)
             Retoucher_CRTC();
         }
+*/
     }
     Set_palette(Principal_Palette);
 
@@ -959,15 +954,15 @@ void Initialiser_mode_video(int Numero)
     Sensibilite_Y>>=Mouse_Facteur_de_correction_Y;
     Sensibilite_souris(Sensibilite_X?Sensibilite_X:1,Sensibilite_Y?Sensibilite_Y:1);
 
-    Brouillon_Decalage_X=0; // |  Il faut penser … ‚viter les incoh‚rences
-    Brouillon_Decalage_Y=0; // |- de d‚calage du brouillon par rapport …
-    Brouillon_Loupe_Mode=0; // |  la r‚solution.
+    Brouillon_Decalage_X=0; // |  Il faut penser à éviter les incohérences
+    Brouillon_Decalage_Y=0; // |- de décalage du brouillon par rapport à
+    Brouillon_Loupe_Mode=0; // |  la résolution.
   }
 
   Pixel_Preview=Pixel_Preview_Normal;
 
-  Principal_Decalage_X=0; // Il faut quand mˆme modifier ces valeurs … chaque
-  Principal_Decalage_Y=0; // fois car on n'est pas … l'abri d'une modification
+  Principal_Decalage_X=0; // Il faut quand même modifier ces valeurs à chaque
+  Principal_Decalage_Y=0; // fois car on n'est pas à l'abri d'une modification
                           // des dimensions de l'image.
   Calculer_donnees_loupe();
   Calculer_limites();
@@ -975,17 +970,17 @@ void Initialiser_mode_video(int Numero)
 }
 
 
-// -- Interface avec l'image, affect‚e par le facteur de grossissement -------
+// -- Interface avec l'image, affectée par le facteur de grossissement -------
 
-  // fonction d'affichage "Pixel" utilis‚e pour les op‚rations d‚finitivement
-  // Ne doit … aucune condition ˆtre appel‚e en dehors de la partie visible
-  // de l'image dans l'‚cran (‡a pourrait ˆtre grave)
+  // fonction d'affichage "Pixel" utilisée pour les opérations définitivement
+  // Ne doit à aucune condition être appelée en dehors de la partie visible
+  // de l'image dans l'écran (‡a pourrait être grave)
 void Afficher_pixel(short X,short Y,byte Couleur)
   // X & Y    sont la position d'un point dans l'IMAGE
   // Couleur  est la couleur du point
-  // Le Stencil est g‚r‚.
-  // Les effets sont g‚r‚s par appel … Fonction_effet().
-  // La Loupe est g‚r‚e par appel … Pixel_Preview().
+  // Le Stencil est géré.
+  // Les effets sont gérés par appel à Fonction_effet().
+  // La Loupe est gérée par appel à Pixel_Preview().
 {
   if ( ( (!Trame_Mode)   || (Effet_Trame(X,Y)) )
     && (!((Stencil_Mode) && (Stencil[Lit_pixel_dans_ecran_courant(X,Y)])))
@@ -998,16 +993,16 @@ void Afficher_pixel(short X,short Y,byte Couleur)
 }
 
 
-// -- Interface avec le menu et les fenˆtres ---------------------------------
+// -- Interface avec le menu et les fenêtres ---------------------------------
 
-  // Affichage d'un pixel dans le menu (le menu doŒt ˆtre visible)
+  // Affichage d'un pixel dans le menu (le menu doŒt être visible)
 
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
   Block(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
-  // Affichage d'un pixel dans la fenˆtre (la fenˆtre doŒt ˆtre visible)
+  // Affichage d'un pixel dans la fenêtre (la fenêtre doŒt être visible)
 
 void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 {
@@ -1015,35 +1010,35 @@ void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 }
 
 
-// -- Affichages de diff‚rents cƒdres dans une fenˆtre -----------------------
+// -- Affichages de différents cƒdres dans une fenêtre -----------------------
 
-  // -- Cadre g‚n‚ral avec couleurs paramŠtrables --
+  // -- Cadre général avec couleurs paramètrables --
 
 void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD)
-// ParamŠtres de couleurs:
+// Paramètres de couleurs:
 // Couleur_HG =Bords Haut et Gauche
 // Couleur_BD =Bords Bas et Droite
 // Couleur_S  =Coins Haut-Droite et Bas-Gauche
 // Couleur_CHG=Coin Haut-Gauche
 // Couleur_CBD=Coin Bas-Droite
 {
-  // Bord haut (sans les extr‚mit‚s)
+  // Bord haut (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
         Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_HG);
 
-  // Bord bas (sans les extr‚mit‚s)
+  // Bord bas (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+Hauteur-1)*Menu_Facteur_Y),
         (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_BD);
 
-  // Bord gauche (sans les extr‚mit‚s)
+  // Bord gauche (sans les extrémités)
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_HG);
 
-  // Bord droite (sans les extr‚mit‚s)
+  // Bord droite (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+Largeur-1)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_BD);
@@ -1065,21 +1060,21 @@ void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word Largeur,word Hauteur
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,Couleur,Couleur,Couleur,Couleur,Couleur);
 }
 
-  // -- Cadre creux: fonc‚ en haut-gauche et clair en bas-droite --
+  // -- Cadre creux: foncé en haut-gauche et clair en bas-droite --
 
 void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
 }
 
-  // -- Cadre bomb‚: clair en haut-gauche et fonc‚ en bas-droite --
+  // -- Cadre bombé: clair en haut-gauche et foncé en bas-droite --
 
 void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
 }
 
-  // -- Cadre de s‚paration: un cadre bomb‚ dans un cadre creux (3D!!!) --
+  // -- Cadre de séparation: un cadre bombé dans un cadre creux (3D!!!) --
 
 void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
@@ -1088,7 +1083,7 @@ void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 }
 
 
-//-- Affichages relatifs … la palette dans le menu ---------------------------
+//-- Affichages relatifs à la palette dans le menu ---------------------------
 
   // -- Affichage des couleurs courante (fore/back) de pinceau dans le menu --
 
@@ -1214,7 +1209,7 @@ void Recadrer_palette(void)
 }
 
 
-  // -- Afficher la barre de s‚paration entre les parties zoom‚es ou non en
+  // -- Afficher la barre de séparation entre les parties zoomées ou non en
   //    mode Loupe --
 
 void Afficher_barre_de_split(void)
@@ -1238,11 +1233,11 @@ void Afficher_barre_de_split(void)
   Block(Principal_Split+Menu_Facteur_X,Menu_Facteur_Y,
         Menu_Facteur_X,(Menu_Ordonnee-(Menu_Facteur_Y<<1)),CM_Blanc);
 
-  // Bord droite (gris fonc‚)
+  // Bord droite (gris foncé)
   Block(Principal_X_Zoom-(Menu_Facteur_X<<1),Menu_Facteur_Y,
         Menu_Facteur_X,(Menu_Ordonnee-(Menu_Facteur_Y<<1)),CM_Fonce);
 
-  // Bord bas (gris fonc‚)
+  // Bord bas (gris foncé)
   Block(Principal_Split+(Menu_Facteur_X<<1),Menu_Ordonnee-Menu_Facteur_Y,
         (LARGEUR_BARRE_SPLIT-3)*Menu_Facteur_X,Menu_Facteur_Y,CM_Fonce);
 
@@ -1304,7 +1299,7 @@ void Afficher_menu(void)
 
 // -- Affichage de texte -----------------------------------------------------
 
-  // -- Afficher une chaŒne n'importe o— … l'‚cran --
+  // -- Afficher une chaŒne n'importe o— à l'écran --
 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -1335,7 +1330,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
   }
 }
 
-  // -- Afficher un caractŠre dans une fenˆtre --
+  // -- Afficher un caractère dans une fenêtre --
 
 void Print_char_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur_texte,byte Couleur_fond)
 {
@@ -1351,7 +1346,7 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur
             (*(Fonte+(Caractere<<6)+(X<<3)+Y)?Couleur_texte:Couleur_fond));
 }
 
-  // -- Afficher un caractŠre sans fond dans une fenˆtre --
+  // -- Afficher un caractère sans fond dans une fenêtre --
 
 void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur)
 {
@@ -1369,7 +1364,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,
     }
 }
 
-  // -- Afficher une chaŒne dans une fenˆtre --
+  // -- Afficher une chaŒne dans une fenêtre --
 
 void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -1385,7 +1380,7 @@ void Print_dans_menu(char * Chaine, short Position)
   Print_general((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,Chaine,CM_Noir,CM_Clair);
 }
 
-  // -- Afficher les coordonn‚es du pinceau dans le menu --
+  // -- Afficher les coordonnées du pinceau dans le menu --
 
 void Print_coordonnees(void)
 {
@@ -1435,7 +1430,7 @@ void Print_nom_fichier(void)
 }
 
 
-// -- Calcul des diff‚rents effets -------------------------------------------
+// -- Calcul des différents effets -------------------------------------------
 
   // -- Aucun effet en cours --
 
@@ -1595,20 +1590,20 @@ byte Effet_Smooth(word X,word Y,byte Couleur)
     B+=Poids*Principal_Palette[C].B;
   }
 
-  return (Poids_total)? // On regarde s'il faut ‚viter le 0/0.
+  return (Poids_total)? // On regarde s'il faut éviter le 0/0.
     Meilleure_couleur(Round_div(R,Poids_total),
                       Round_div(V,Poids_total),
                       Round_div(B,Poids_total)):
-    Lit_pixel_dans_ecran_courant(X,Y); // C'est bien l'‚cran courant et pas
-                                       // l'‚cran feedback car il s'agit de ne
-}                                      // pas modifier l'‚cran courant.
+    Lit_pixel_dans_ecran_courant(X,Y); // C'est bien l'écran courant et pas
+                                       // l'écran feedback car il s'agit de ne
+}                                      // pas modifier l'écran courant.
 
 
 
 // -- Fonctions de manipulation du pinceau -----------------------------------
 
-  // -- Calcul de redimensionnement du pinceau pour ‚viter les d‚bordements
-  //    de l'‚cran et de l'image --
+  // -- Calcul de redimensionnement du pinceau pour éviter les débordements
+  //    de l'écran et de l'image --
 
 void Calculer_dimensions_clipees(short * X,short * Y,short * Largeur,short * Hauteur)
 {
@@ -1635,8 +1630,8 @@ void Calculer_dimensions_clipees(short * X,short * Y,short * Largeur,short * Hau
   }
 }
 
-  // -- Calcul de redimensionnement du pinceau pour ‚viter les d‚bordements
-  //    de l'‚cran zoom‚ et de l'image --
+  // -- Calcul de redimensionnement du pinceau pour éviter les débordements
+  //    de l'écran zoomé et de l'image --
 
 void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short * Hauteur)
 {
@@ -1664,25 +1659,25 @@ void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short 
 }
 
 
-  // -- Afficher le pinceau (de fa‡on d‚finitive ou non) --
+  // -- Afficher le pinceau (de façon définitive ou non) --
 
 void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   // X,Y: position du centre du pinceau
-  // Couleur: couleur … appliquer au pinceau
-  // Preview: "Il ne faut l'afficher qu'… l'‚cran"
+  // Couleur: couleur à appliquer au pinceau
+  // Preview: "Il ne faut l'afficher qu'… l'écran"
 {
-  short Debut_X; // Position X (dans l'image) … partir de laquelle on affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) … partir de laquelle on affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'‚cran selon laquelle on affiche la brosse/pinceau
-  short Hauteur; // Hauteur dans l'‚cran selon laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) … partir de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) … partir de laquelle on affiche la brosse/pinceau
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on affiche la brosse/pinceau
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la brosse/pinceau
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
   short Pos_X; // Position X (dans l'image) en cours d'affichage
   short Pos_Y; // Position Y (dans l'image) en cours d'affichage
   short Compteur_X; // Position X (dans la brosse/pinceau) en cours d'affichage
   short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrˆte l'affichade de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrˆte l'affichade de la brosse/pinceau
+  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
+  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
   byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
   int Position;
   byte * Temp;
@@ -1989,18 +1984,18 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 void Effacer_pinceau(short X,short Y)
   // X,Y: position du centre du pinceau
 {
-  short Debut_X; // Position X (dans l'image) … partir de laquelle on affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) … partir de laquelle on affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'‚cran selon laquelle on affiche la brosse/pinceau
-  short Hauteur; // Hauteur dans l'‚cran selon laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) … partir de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) … partir de laquelle on affiche la brosse/pinceau
-  short Pos_X; // Position X (dans l'image) en cours d'affichage
-  short Pos_Y; // Position Y (dans l'image) en cours d'affichage
-  short Compteur_X; // Position X (dans la brosse/pinceau) en cours d'affichage
-  short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrˆte l'affichade de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrˆte l'affichade de la brosse/pinceau
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on affiche la brosse/pinceau
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la brosse/pinceau
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
+  //short Pos_X; // Position X (dans l'image) en cours d'affichage
+  //short Pos_Y; // Position Y (dans l'image) en cours d'affichage
+  //short Compteur_X; // Position X (dans la brosse/pinceau) en cours d'affichage
+  //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
+  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
+  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
   byte * Temp;
 
   if (!Mouse_K)
@@ -2110,7 +2105,7 @@ void Effacer_pinceau(short X,short Y)
 // -- Fonctions de manipulation du curseur -----------------------------------
 
 
-  // -- Afficher une barre horizontale XOR zoom‚e
+  // -- Afficher une barre horizontale XOR zoomée
 
 void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 {
@@ -2125,7 +2120,7 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 }
 
 
-  // -- Afficher une barre verticale XOR zoom‚e
+  // -- Afficher une barre verticale XOR zoomée
 
 void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
 {
@@ -2152,8 +2147,8 @@ void Afficher_curseur(void)
   short Pos_Y;
   short Compteur_X;
   short Compteur_Y;
-  short Fin_Compteur_X; // Position X ou s'arrˆte l'affichage de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrˆte l'affichage de la brosse/pinceau
+  //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
+  //short Fin_Compteur_Y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   Temp;
   byte  Couleur;
   float cosA,sinA;
@@ -2237,7 +2232,7 @@ void Afficher_curseur(void)
           if (Fin_Y<3)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,3-Fin_Y);
 
-          // Petites barres aux extr‚mit‚s
+          // Petites barres aux extrémités
 
           Debut_X=(!Mouse_X);
           Debut_Y=(!Mouse_Y);
@@ -2319,7 +2314,7 @@ void Afficher_curseur(void)
       }
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
-      // !!! Cette forme ne peut pas ˆtre utilis‚e en mode Loupe !!!
+      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
       Debut_X=Mouse_X-(Loupe_Largeur>>1);
       Debut_Y=Mouse_Y-(Loupe_Hauteur>>1);
       if (Debut_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
@@ -2430,10 +2425,10 @@ void Effacer_curseur(void)
   short Pos_Y;
   short Compteur_X;
   short Compteur_Y;
-  short Fin_Compteur_X; // Position X ou s'arrˆte l'affichage de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrˆte l'affichage de la brosse/pinceau
+  //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
+  //short Fin_Compteur_Y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   Temp;
-  byte  Couleur;
+  //byte  Couleur;
   float cosA,sinA;
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
 
@@ -2505,7 +2500,7 @@ void Effacer_curseur(void)
           if (Fin_Y<3)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,3-Fin_Y);
 
-          // Petites barres aux extr‚mit‚s
+          // Petites barres aux extrémités
 
           Debut_X=(!Mouse_X);
           Debut_Y=(!Mouse_Y);
@@ -2574,7 +2569,7 @@ void Effacer_curseur(void)
       }
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
-      // !!! Cette forme ne peut pas ˆtre utilis‚e en mode Loupe !!!
+      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
       Debut_X=Mouse_X-(Loupe_Largeur>>1);
       Debut_Y=Mouse_Y-(Loupe_Hauteur>>1);
       if (Debut_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
@@ -2674,7 +2669,7 @@ void Effacer_curseur(void)
 
 
 
-//---- Fenˆtre demandant de confirmer une action et renvoyant la r‚ponse -----
+//---- Fenêtre demandant de confirmer une action et renvoyant la réponse -----
 byte Demande_de_confirmation(char * Message)
 {
   short Bouton_clicke;
@@ -2710,7 +2705,7 @@ byte Demande_de_confirmation(char * Message)
 
 
 
-//---- Fenˆtre avertissant de quelque chose et attendant un click sur OK -----
+//---- Fenêtre avertissant de quelque chose et attendant un click sur OK -----
 void Warning_message(char * Message)
 {
   short Bouton_clicke;
@@ -2745,7 +2740,7 @@ void Afficher_ecran(void)
   word Largeur;
   word Hauteur;
 
-  // ---/\/\/\  Partie non zoom‚e: /\/\/\---
+  // ---/\/\/\  Partie non zoomée: /\/\/\---
   if (Loupe_Mode)
   {
     if (Principal_Largeur_image<Principal_Split)
@@ -2766,7 +2761,7 @@ void Afficher_ecran(void)
     Hauteur=Menu_Ordonnee;
   Display_screen(Largeur,Hauteur,Principal_Largeur_image);
 
-  // Effacement de la partie non-image dans la partie non zoom‚e:
+  // Effacement de la partie non-image dans la partie non zoomée:
   if (Loupe_Mode)
   {
     if (Principal_Largeur_image<Principal_Split)
@@ -2780,7 +2775,7 @@ void Afficher_ecran(void)
   if (Principal_Hauteur_image<Menu_Ordonnee)
     Block(0,Principal_Hauteur_image,Largeur,(Menu_Ordonnee-Hauteur),0);
 
-  // ---/\/\/\  Partie zoom‚e: /\/\/\---
+  // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Loupe_Mode)
   {
     // Affichage de la barre de split
@@ -2792,7 +2787,7 @@ void Afficher_ecran(void)
     else
       Largeur=Loupe_Largeur;
 
-    // Calcul du nombre de lignes visibles de l'image zoom‚e
+    // Calcul du nombre de lignes visibles de l'image zoomée
     if (Principal_Hauteur_image<Loupe_Hauteur)
       Hauteur=Principal_Hauteur_image*Loupe_Facteur;
     else
@@ -2800,7 +2795,7 @@ void Afficher_ecran(void)
 
     Display_zoomed_screen(Largeur,Hauteur,Principal_Largeur_image,Buffer_de_ligne_horizontale);
 
-    // Effacement de la partie non-image dans la partie zoom‚e:
+    // Effacement de la partie non-image dans la partie zoomée:
     if (Principal_Largeur_image<Loupe_Largeur)
       Block(Principal_X_Zoom+(Principal_Largeur_image*Loupe_Facteur),0,
             (Loupe_Largeur-Principal_Largeur_image)*Loupe_Facteur,
@@ -2856,7 +2851,7 @@ void Afficher_pinceau_dans_menu(void)
         }
       break;
     default : // Pinceau
-      // On efface le pinceau pr‚c‚dent
+      // On efface le pinceau précédent
       for (Pos_menu_Y=2,Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,Pos_Y++)
         for (Pos_menu_X=1,Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_menu_X++,Pos_X++)
         {
@@ -2892,10 +2887,10 @@ void Afficher_pinceau_dans_menu(void)
   }
 }
 
-  // -- Dessiner un pinceau pr‚d‚fini dans la fenˆtre --
+  // -- Dessiner un pinceau prédéfini dans la fenêtre --
 
 void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
-  // Pinceau = 0..NB_SPRITES_PINCEAU-1 : Pinceau pr‚d‚fini
+  // Pinceau = 0..NB_SPRITES_PINCEAU-1 : Pinceau prédéfini
 {
   word Pos_X;
   word Pos_Y;
@@ -2922,16 +2917,16 @@ void Dessiner_zigouigoui(word X,word Y, byte Couleur, short Sens)
   Pixel_dans_fenetre(X,Y+5,Couleur);
 }
 
-  // -- Dessiner un bloc de couleurs d‚grad‚ verticalement
+  // -- Dessiner un bloc de couleurs dégradé verticalement
 
 void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_block)
 {
-  word Total_lignes  =Menu_Facteur_Y<<6; // <=> … 64 lignes fct(Menu_Facteur)
+  word Total_lignes  =Menu_Facteur_Y<<6; // <=> à 64 lignes fct(Menu_Facteur)
   word Nb_couleurs   =(Debut_block<=Fin_block)?Fin_block-Debut_block+1:Debut_block-Fin_block+1;
   word Ligne_en_cours=(Debut_block<=Fin_block)?0:Total_lignes-1;
 
   word Debut_X       =Fenetre_Pos_X+(Menu_Facteur_X*Pos_X);
-  word Largeur_ligne =Menu_Facteur_X<<4; // <=> … 16 pixels fct(Menu_Facteur)
+  word Largeur_ligne =Menu_Facteur_X<<4; // <=> à 16 pixels fct(Menu_Facteur)
 
   word Debut_Y       =Fenetre_Pos_Y+(Menu_Facteur_Y*Pos_Y);
   word Fin_Y         =Debut_Y+Total_lignes;
@@ -2950,7 +2945,7 @@ void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_b
 
 
 
-  // -- Redimentionner l'image (nettoie l'‚cran virtuel) --
+  // -- Redimentionner l'image (nettoie l'écran virtuel) --
 
 void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
 {
@@ -2965,7 +2960,7 @@ void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
 
   if (Backup_avec_nouvelles_dimensions(1,Largeur_choisie,Hauteur_choisie))
   {
-    // La nouvelle page a pu ˆtre allou‚e, elle est pour l'instant pleine de
+    // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Principal_Largeur_image de large.
 
     // On copie donc maintenant la partie C dans la nouvelle image.
@@ -2983,7 +2978,7 @@ void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
   }
 }
 
-  // -- Dessiner un petit sprite repr‚sentant le type d'un drive --
+  // -- Dessiner un petit sprite représentant le type d'un drive --
 
 void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
 {
@@ -3023,10 +3018,10 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
 
   if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
   {
-    // On met les d‚calages du tiling … 0 pour eviter toute incoh‚rence.
-    // Si par hasard on voulait les mettre …
+    // On met les décalages du tiling à 0 pour eviter toute incohérence.
+    // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser … les initialiser … 0 dans "MAIN.C".
+    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
     Tiling_Decalage_X=0;
     Tiling_Decalage_Y=0;
 
@@ -3061,7 +3056,7 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mˆme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -3128,11 +3123,11 @@ void Remap_brosse(void)
 {
   short Pos_X; // Variable de balayage de la brosse
   short Pos_Y; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de bool‚ens "La couleur est utilis‚e"
+  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
   int   Couleur;
 
 
-  // On commence par initialiser le tableau de bool‚ens … faux
+  // On commence par initialiser le tableau de booléens à faux
   for (Couleur=0;Couleur<=255;Couleur++)
     Utilisee[Couleur]=0;
 
@@ -3141,33 +3136,33 @@ void Remap_brosse(void)
     for (Pos_X=0;Pos_X<Brosse_Largeur;Pos_X++)
       Utilisee[Lit_pixel_dans_brosse(Pos_X,Pos_Y)]=1;
 
-  //  On n'est pas cens‚ remapper la couleur de transparence, sinon la brosse
-  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilis‚e
-  // ainsi on ne s'embˆtera pas … la recalculer
+  //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
+  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
+  // ainsi on ne s'embêtera pas à la recalculer
   Utilisee[Back_color]=0;
 
   //   On va maintenant se servir de la table "Utilisee" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilis‚es on besoin d'ˆtres recalcul‚es: les
-  //       autres ne seront jamais consult‚es dans la nouvelle table de
+  // Note : Seules les couleurs utilisées on besoin d'ˆtres recalculées: les
+  //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
-  //       ne seront pas utilis‚es par Remap_brush_LOWLEVEL.
+  //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
       Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
       //Utilisee[Couleur]=Meilleure_couleur_sans_exclusion(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
 
-  //   Il reste une couleur non calcul‚e dans la table qu'il faut mettre …
-  // jour: c'est la couleur de fond. On l'avait inhib‚e pour ‚viter son
-  // calcul inutile, mais comme il est possible qu'elle soit quand mˆme dans
-  // la brosse, on va mettre dans la table une relation d'‚quivalence entre
-  // les deux palettes: comme on ne veut pas que la couleur soit remplac‚e,
-  // on va dire qu'on veut qu'elle soit remplac‚e par la couleur en question.
+  //   Il reste une couleur non calculée dans la table qu'il faut mettre à
+  // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
+  // calcul inutile, mais comme il est possible qu'elle soit quand même dans
+  // la brosse, on va mettre dans la table une relation d'équivalence entre
+  // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
+  // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
   Utilisee[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
-  // qui craint un peu, on peut faire l'‚change dans la brosse de toutes les
+  // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   Remap_general_LOWLEVEL(Utilisee,Brosse,Brosse_Largeur,Brosse_Hauteur,Brosse_Largeur);
   //Remap_brush_LOWLEVEL(Utilisee);
@@ -3179,10 +3174,10 @@ void Remap_picture(void)
 {
   short Pos_X; // Variable de balayage de la brosse
   short Pos_Y; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de bool‚ens "La couleur est utilis‚e"
+  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
   int   Couleur;
 
-  // On commence par initialiser le tableau de bool‚ens … faux
+  // On commence par initialiser le tableau de booléens à faux
   for (Couleur=0;Couleur<=255;Couleur++)
     Utilisee[Couleur]=0;
 
@@ -3194,17 +3189,17 @@ void Remap_picture(void)
   //   On va maintenant se servir de la table "Utilisee" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilis‚es on besoin d'ˆtres recalcul‚es: les
-  //       autres ne seront jamais consult‚es dans la nouvelle table de
+  // Note : Seules les couleurs utilisées on besoin d'ˆtres recalculées: les
+  //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans l'image, donc elles
-  //       ne seront pas utilis‚es par Remap_general_LOWLEVEL.
+  //       ne seront pas utilisées par Remap_general_LOWLEVEL.
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
       Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
       //Utilisee[Couleur]=Meilleure_couleur_sans_exclusion(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
-  // qui craint un peu, on peut faire l'‚change dans la brosse de toutes les
+  // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   Remap_general_LOWLEVEL(Utilisee,Brouillon_Ecran,Brouillon_Largeur_image,Brouillon_Hauteur_image,Brouillon_Largeur_image);
 }
@@ -3215,14 +3210,14 @@ void Get_colors_from_brush(void)
 {
   short Pos_X; // Variable de balayage de la brosse
   short Pos_Y; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de bool‚ens "La couleur est utilis‚e"
+  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
   int   Couleur;
 
   if (Demande_de_confirmation("Modify current palette ?"))
   {
     Backup();
 
-    // On commence par initialiser le tableau de bool‚en … faux
+    // On commence par initialiser le tableau de booléen à faux
     for (Couleur=0;Couleur<=255;Couleur++)
       Utilisee[Couleur]=0;
 
@@ -3231,7 +3226,7 @@ void Get_colors_from_brush(void)
       for (Pos_X=0;Pos_X<Brosse_Largeur;Pos_X++)
         Utilisee[Lit_pixel_dans_brosse(Pos_X,Pos_Y)]=1;
 
-    // On recopie dans la palette principale les teintes des couleurs utilis‚es
+    // On recopie dans la palette principale les teintes des couleurs utilisées
     // dans la palette du brouillon
     for (Couleur=0;Couleur<=255;Couleur++)
       if (Utilisee[Couleur])
@@ -3256,7 +3251,7 @@ void Get_colors_from_brush(void)
 
 void Outline_brush(void)
 {
-  long Pos,Pos_X,Pos_Y;
+  long /*Pos,*/Pos_X,Pos_Y;
   byte Etat;
   byte * Nouvelle_brosse;
   byte * Temporaire;
@@ -3270,7 +3265,7 @@ void Outline_brush(void)
 
   if (Nouvelle_brosse)
   {
-    // On remplit la bordure ajout‚e par la Backcolor
+    // On remplit la bordure ajoutée par la Backcolor
     memset(Nouvelle_brosse,Back_color,((long)Largeur)*Hauteur);
 
     // On copie la brosse courante dans la nouvelle
@@ -3291,7 +3286,7 @@ void Outline_brush(void)
     Largeur-=2;
     Hauteur-=2;
 
-    // Si on "outline" avec une couleur diff‚rente de la Back_color on y va!
+    // Si on "outline" avec une couleur différente de la Back_color on y va!
     if (Fore_color!=Back_color)
     {
       // 1er balayage (horizontal)
@@ -3317,12 +3312,12 @@ void Outline_brush(void)
             }
           }
         }
-        // Cas du dernier pixel … droite de la ligne
+        // Cas du dernier pixel à droite de la ligne
         if (Etat)
           Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
       }
 
-      // 2Šme balayage (vertical)
+      // 2ème balayage (vertical)
       for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
       {
         Etat=0;
@@ -3355,22 +3350,22 @@ void Outline_brush(void)
     Brosse_Decalage_X=(Brosse_Largeur>>1);
     Brosse_Decalage_Y=(Brosse_Hauteur>>1);
 
-    free(Temporaire); // Lib‚ration de l'ancienne brosse
+    free(Temporaire); // Libération de l'ancienne brosse
 
-    // R‚allocation d'un buffer de Smear
+    // Réallocation d'un buffer de Smear
     free(Smear_Brosse);
     Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
   }
   else
-    Erreur(0); // Pas assez de m‚moire!
+    Erreur(0); // Pas assez de mémoire!
 }
 
 
 void Nibble_brush(void)
 {
-  long Pos,Pos_X,Pos_Y;
+  long /*Pos,*/Pos_X,Pos_Y;
   byte Etat;
   byte * Nouvelle_brosse;
   byte * Temporaire;
@@ -3429,12 +3424,12 @@ void Nibble_brush(void)
             }
           }
         }
-        // Cas du dernier pixel … droite de la ligne
+        // Cas du dernier pixel à droite de la ligne
         if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
           Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
       }
 
-      // 2Šme balayage (vertical)
+      // 2ème balayage (vertical)
       for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
       {
         Etat=(Temporaire[Largeur+Pos_X+1]!=Back_color);;
@@ -3467,16 +3462,16 @@ void Nibble_brush(void)
       Brosse_Decalage_X=(Brosse_Largeur>>1);
       Brosse_Decalage_Y=(Brosse_Hauteur>>1);
 
-      free(Temporaire); // Lib‚ration de l'ancienne brosse
+      free(Temporaire); // Libération de l'ancienne brosse
 
-      // R‚allocation d'un buffer de Smear
+      // Réallocation d'un buffer de Smear
       free(Smear_Brosse);
       Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
       Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
       Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
     }
     else
-      Erreur(0);  // Pas assez de m‚moire!
+      Erreur(0);  // Pas assez de mémoire!
   }
 }
 
@@ -3492,25 +3487,25 @@ void Nibble_brush(void)
 void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           short * Limite_atteinte_Gauche, short * Limite_atteinte_Droite)
 //
-//   Cette fonction fait un remplissage classique d'une zone d‚limit‚e de
-// l'image. Les limites employ‚es sont Limite_Haut, Limite_Bas, Limite_Gauche
-// et Limite_Droite. Le point de d‚part du remplissage est Pinceau_X,Pinceau_Y
-// et s'effectue en th‚orie sur la couleur 1 et emploie la couleur 2 pour le
-// remplissage. Ces restrictions sont d–es … l'utilisation qu'on en fait dans
+//   Cette fonction fait un remplissage classique d'une zone délimitée de
+// l'image. Les limites employées sont Limite_Haut, Limite_Bas, Limite_Gauche
+// et Limite_Droite. Le point de départ du remplissage est Pinceau_X,Pinceau_Y
+// et s'effectue en théorie sur la couleur 1 et emploie la couleur 2 pour le
+// remplissage. Ces restrictions sont d–es à l'utilisation qu'on en fait dans
 // la fonction principale "Remplir", qui se charge de faire une gestion de
 // tous les effets.
-//   Cette fonction ne doit pas ˆtre directement appel‚e.
+//   Cette fonction ne doit pas être directement appelée.
 //
 {
-  short Pos_X;   // Abscisse de balayage du segment, utilis‚e lors de l'"affichage"
-  short Ligne;   // Ordonn‚e de la ligne en cours de traitement
-  short Debut_X; // Abscisse de d‚part du segment trait‚
-  short Fin_X;   // Abscisse de fin du segment trait‚
-  int   Modifs_effectuees;    // Bool‚en "On a fait une modif dans le dernier passage"
-  int   Propagation_possible; // Bool‚en "On peut propager la couleur dans le segment"
+  short Pos_X;   // Abscisse de balayage du segment, utilisée lors de l'"affichage"
+  short Ligne;   // Ordonnée de la ligne en cours de traitement
+  short Debut_X; // Abscisse de départ du segment traité
+  short Fin_X;   // Abscisse de fin du segment traité
+  int   Modifs_effectuees;    // Booléen "On a fait une modif dans le dernier passage"
+  int   Propagation_possible; // Booléen "On peut propager la couleur dans le segment"
   short Limite_courante_Bas;  // Intervalle vertical restreint
   short Limite_courante_Haut;
-  int   Ligne_modifiee;       // Bool‚en "On a fait une modif dans la ligne"
+  int   Ligne_modifiee;       // Booléen "On a fait une modif dans la ligne"
 
   Modifs_effectuees=1;
   Limite_courante_Haut=Pinceau_Y;
@@ -3528,19 +3523,19 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       Ligne_modifiee=0;
       // On va traiter le cas de la ligne nø Ligne.
 
-      // On commence le traitement … la gauche de l'‚cran
+      // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
       while (Debut_X<=Limite_Droite)
       {
-        // On cherche son d‚but
+        // On cherche son début
         for (;(Debut_X<=Limite_Droite) &&
              (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1);Debut_X++);
 
         if (Debut_X<=Limite_Droite)
         {
-          // Un segment de couleur 1 existe et commence … la position Debut_X.
+          // Un segment de couleur 1 existe et commence à la position Debut_X.
           // On va donc en chercher la fin.
           for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
                (Lit_pixel_dans_ecran_courant(Fin_X,Ligne)==1);Fin_X++);
@@ -3548,19 +3543,19 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // Debut_X et qui se termine en Fin_X-1.
 
-          //   On va maintenant regarder si une couleur sur la p‚riph‚rie
+          //   On va maintenant regarder si une couleur sur la périphérie
           // permet de colorier ce segment avec la couleur 2.
 
           Propagation_possible=(
-            // Test de la pr‚sence d'un point … gauche du segment
+            // Test de la présence d'un point à gauche du segment
             ((Debut_X>Limite_Gauche) &&
              (Lit_pixel_dans_ecran_courant(Debut_X-1,Ligne)==2)) ||
-            // Test de la pr‚sence d'un point … droite du segment
+            // Test de la présence d'un point à droite du segment
             ((Fin_X-1<Limite_Droite) &&
              (Lit_pixel_dans_ecran_courant(Fin_X    ,Ligne)==2))
                                );
 
-          // Test de la pr‚sence d'un point en haut du segment
+          // Test de la présence d'un point en haut du segment
           if (!Propagation_possible && (Ligne>Limite_Haut))
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
               if (Lit_pixel_dans_ecran_courant(Pos_X,Ligne-1)==2)
@@ -3575,7 +3570,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
               *Limite_atteinte_Gauche=Debut_X;
             if (Fin_X>*Limite_atteinte_Droite)
               *Limite_atteinte_Droite=Fin_X;
-            // On remplit le segment de Debut_X … Fin_X-1.
+            // On remplit le segment de Debut_X à Fin_X-1.
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
               Pixel_dans_ecran_courant(Pos_X,Ligne,2);
             // On vient d'effectuer des modifications.
@@ -3596,8 +3591,8 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
 
     // Pour le prochain balayage vers le haut, on va se permettre d'aller
     // voir une ligne plus haut.
-    // Si on ne le fait pas, et que la premiŠre ligne (Limite_courante_Haut)
-    // n'‚tait pas modifi‚e, alors cette limite ne serait pas remont‚e, donc
+    // Si on ne le fait pas, et que la première ligne (Limite_courante_Haut)
+    // n'était pas modifiée, alors cette limite ne serait pas remontée, donc
     // le filler ne progresserait pas vers le haut.
     if (Limite_courante_Haut>Limite_Haut)
       Limite_courante_Haut--;
@@ -3607,19 +3602,19 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       Ligne_modifiee=0;
       // On va traiter le cas de la ligne nø Ligne.
 
-      // On commence le traitement … la gauche de l'‚cran
+      // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
       while (Debut_X<=Limite_Droite)
       {
-        // On cherche son d‚but
+        // On cherche son début
         for (;(Debut_X<=Limite_Droite) &&
              (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1);Debut_X++);
 
         if (Debut_X<=Limite_Droite)
         {
-          // Un segment de couleur 1 existe et commence … la position Debut_X.
+          // Un segment de couleur 1 existe et commence à la position Debut_X.
           // On va donc en chercher la fin.
           for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
                (Lit_pixel_dans_ecran_courant(Fin_X,Ligne)==1);Fin_X++);
@@ -3627,19 +3622,19 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // Debut_X et qui se termine en Fin_X-1.
 
-          //   On va maintenant regarder si une couleur sur la p‚riph‚rie
+          //   On va maintenant regarder si une couleur sur la périphérie
           // permet de colorier ce segment avec la couleur 2.
 
           Propagation_possible=(
-            // Test de la pr‚sence d'un point … gauche du segment
+            // Test de la présence d'un point à gauche du segment
             ((Debut_X>Limite_Gauche) &&
              (Lit_pixel_dans_ecran_courant(Debut_X-1,Ligne)==2)) ||
-            // Test de la pr‚sence d'un point … droite du segment
+            // Test de la présence d'un point à droite du segment
             ((Fin_X-1<Limite_Droite) &&
              (Lit_pixel_dans_ecran_courant(Fin_X    ,Ligne)==2))
                                );
 
-          // Test de la pr‚sence d'un point en bas du segment
+          // Test de la présence d'un point en bas du segment
           if (!Propagation_possible && (Ligne<Limite_Bas))
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
               if (Lit_pixel_dans_ecran_courant(Pos_X,Ligne+1)==2)
@@ -3654,7 +3649,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
               *Limite_atteinte_Gauche=Debut_X;
             if (Fin_X>*Limite_atteinte_Droite)
               *Limite_atteinte_Droite=Fin_X;
-            // On remplit le segment de Debut_X … Fin_X-1.
+            // On remplit le segment de Debut_X à Fin_X-1.
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
               Pixel_dans_ecran_courant(Pos_X,Ligne,2);
             // On vient d'effectuer des modifications.
@@ -3682,8 +3677,8 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
 
 void Remplir(byte Couleur_de_remplissage)
 //
-//  Cette fonction fait un remplissage qui gŠre tous les effets. Elle fait
-// appel … "Fill()".
+//  Cette fonction fait un remplissage qui gère tous les effets. Elle fait
+// appel à "Fill()".
 //
 {
   byte   Forme_curseur_avant_remplissage;
@@ -3694,7 +3689,7 @@ void Remplir(byte Couleur_de_remplissage)
   byte   Table_de_remplacement[256];
 
 
-  // Avant toute chose, on v‚rifie que l'on n'est pas en train de remplir
+  // Avant toute chose, on vérifie que l'on n'est pas en train de remplir
   // en dehors de l'image:
 
   if ( (Pinceau_X>=Limite_Gauche) &&
@@ -3702,7 +3697,7 @@ void Remplir(byte Couleur_de_remplissage)
        (Pinceau_Y>=Limite_Haut)   &&
        (Pinceau_Y<=Limite_Bas) )
   {
-    // On suppose que le curseur est d‚j… cach‚.
+    // On suppose que le curseur est déjà caché.
     // Effacer_curseur();
 
     //   On va faire patienter l'utilisateur en lui affichant un joli petit
@@ -3718,7 +3713,7 @@ void Remplir(byte Couleur_de_remplissage)
     FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
     FX_Feedback_Ecran=Ecran_backup;
 
-    // On va maintenant "‚purer" la zone visible de l'image:
+    // On va maintenant "épurer" la zone visible de l'image:
     memset(Table_de_remplacement,0,256);
     Table_de_remplacement[Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y)]=1;
     Remplacer_toutes_les_couleurs_dans_limites(Table_de_remplacement);
@@ -3727,13 +3722,13 @@ void Remplir(byte Couleur_de_remplissage)
     Fill(&Limite_atteinte_Haut  ,&Limite_atteinte_Bas,
          &Limite_atteinte_Gauche,&Limite_atteinte_Droite);
 
-    //  On s'apprˆte … faire des op‚rations qui n‚cessitent un affichage. Il
-    // faut donc retirer de l'‚cran le curseur:
+    //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
+    // faut donc retirer de l'écran le curseur:
     Effacer_curseur();
     Forme_curseur=Forme_curseur_avant_remplissage;
 
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
-    // ressemble un peu plus … ce … quoi l'utilisateur peut s'attendre.
+    // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (Limite_atteinte_Haut>Limite_Haut)
       Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
                                                Limite_Gauche,Limite_Haut,
@@ -3767,12 +3762,12 @@ void Remplir(byte Couleur_de_remplissage)
       for (Pos_X=Limite_atteinte_Gauche;Pos_X<=Limite_atteinte_Droite;Pos_X++)
         if (Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y)==2)
         {
-          //   Si le pixel en cours de traitement a ‚t‚ touch‚ par le Fill()
-          // on se doit d'afficher le pixel modifi‚ par la couleur de
+          //   Si le pixel en cours de traitement a été touché par le Fill()
+          // on se doit d'afficher le pixel modifié par la couleur de
           // remplissage:
 
-          //  Ceci se fait en commen‡ant par restaurer la couleur qu'il y avait
-          // pr‚c‚demment (c'est important pour que les effets ne s'emmŠlent
+          //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
+          // précédemment (c'est important pour que les effets ne s'emmèlent
           // pas le pinceaux)
           Pixel_dans_ecran_courant(Pos_X,Pos_Y,Lit_pixel_dans_ecran_backup(Pos_X,Pos_Y));
 
@@ -3785,25 +3780,25 @@ void Remplir(byte Couleur_de_remplissage)
 
     FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;
 
-    //   A la fin, on n'a pas besoin de r‚afficher le curseur puisque c'est
+    //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
     // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
-    // puisque les seuls points qui ont chang‚ dans l'image ont ‚t‚ raffich‚s
+    // puisque les seuls points qui ont changé dans l'image ont été raffichés
     // par l'utilisation de "Afficher_pixel()", et que les autres... eh bein
-    // on n'y a jamais touch‚ … l'‚cran les autres: ils sont donc corrects.
+    // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
   }
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////
-////////////////// TRACS DE FIGURES GOMTRIQUES STANDARDS //////////////////
+////////////////// TRACéS DE FIGURES GéOMéTRIQUES STANDARDS //////////////////
 ////////////////////////// avec gestion de previews //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-  // D‚finition d'une fonction g‚n‚rique de tra‡age de figures:
+  // Définition d'une fonction générique de traçage de figures:
   fonction_afficheur Pixel_figure;
 
-  // Affichage d'un point de fa‡on d‚finitive (utilisation du pinceau)
+  // Affichage d'un point de façon définitive (utilisation du pinceau)
   void Pixel_figure_Definitif(short Pos_X,short Pos_Y,byte Couleur)
   {
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
@@ -3853,7 +3848,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
 
-  // -- Tracer g‚n‚ral d'un cercle vide -------------------------------------
+  // -- Tracer général d'un cercle vide -------------------------------------
 
 void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
 {
@@ -3866,14 +3861,14 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
   Debut_X=Centre_X-Rayon;
   Debut_Y=Centre_Y-Rayon;
 
-  // Affichage des extremit‚es du cercle sur chaque quart du cercle:
+  // Affichage des extremitées du cercle sur chaque quart du cercle:
   for (Pos_Y=Debut_Y,Cercle_Curseur_Y=-Rayon;Pos_Y<Centre_Y;Pos_Y++,Cercle_Curseur_Y++)
     for (Pos_X=Debut_X,Cercle_Curseur_X=-Rayon;Pos_X<Centre_X;Pos_X++,Cercle_Curseur_X++)
       if (Pixel_dans_cercle())
       {
         // On vient de tomber sur le premier point sur la ligne horizontale
         // qui fait partie du cercle.
-        // Donc on peut l'afficher (lui et ses copains sym‚triques)
+        // Donc on peut l'afficher (lui et ses copains symétriques)
 
          // Quart Haut-gauche
         Pixel_figure(Pos_X,Pos_Y,Couleur);
@@ -3905,14 +3900,14 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
         break;
       }
 
-  // On affiche … la fin les points cardinaux:
+  // On affiche à la fin les points cardinaux:
   Pixel_figure(Centre_X,Centre_Y-Rayon,Couleur); // Haut
   Pixel_figure(Centre_X-Rayon,Centre_Y,Couleur); // Gauche
   Pixel_figure(Centre_X+Rayon,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
 }
 
-  // -- Trac‚ d‚finitif d'un cercle vide --
+  // -- Tracé définitif d'un cercle vide --
 
 void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
 {
@@ -3952,7 +3947,7 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
   Fin_X=Centre_X+Rayon;
   Fin_Y=Centre_Y+Rayon;
 
-  // Correction des bornes d'aprŠs les limites
+  // Correction des bornes d'après les limites
   if (Debut_Y<Limite_Haut)
     Debut_Y=Limite_Haut;
   if (Fin_Y>Limite_Bas)
@@ -3970,7 +3965,7 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
 }
 
 
-  // -- Tracer g‚n‚ral d'une ellipse vide -----------------------------------
+  // -- Tracer général d'une ellipse vide -----------------------------------
 
 void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
 {
@@ -3985,7 +3980,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
   // Calcul des limites de l'ellipse
   Ellipse_Calculer_limites(Rayon_horizontal+1,Rayon_vertical+1);
 
-  // Affichage des extremit‚es de l'ellipse sur chaque quart de l'ellipse:
+  // Affichage des extremitées de l'ellipse sur chaque quart de l'ellipse:
   for (Pos_Y=Debut_Y,Ellipse_Curseur_Y=-Rayon_vertical;Pos_Y<Centre_Y;Pos_Y++,Ellipse_Curseur_Y++)
     for (Pos_X=Debut_X,Ellipse_Curseur_X=-Rayon_horizontal;Pos_X<Centre_X;Pos_X++,Ellipse_Curseur_X++)
       if (Pixel_dans_ellipse())
@@ -3993,7 +3988,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
         // On vient de tomber sur le premier point qui sur la ligne
         // horizontale fait partie de l'ellipse.
 
-        // Donc on peut l'afficher (lui et ses copains sym‚triques)
+        // Donc on peut l'afficher (lui et ses copains symétriques)
 
          // Quart Haut-gauche
         Pixel_figure(Pos_X,Pos_Y,Couleur);
@@ -4005,7 +4000,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
         Pixel_figure((Centre_X<<1)-Pos_X,(Centre_Y<<1)-Pos_Y,Couleur);
 
         // On peut ensuite afficher tous les points qui le suivent dont le
-        // pixel voisin du haut n'appartient pas … l'ellipse:
+        // pixel voisin du haut n'appartient pas à l'ellipse:
         for (Ellipse_Curseur_Y--,Pos_X++,Ellipse_Curseur_X++;Pos_X<Centre_X;Pos_X++,Ellipse_Curseur_X++)
           if (!Pixel_dans_ellipse())
           {
@@ -4025,7 +4020,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
         break;
       }
 
-  // On affiche … la fin les points cardinaux:
+  // On affiche à la fin les points cardinaux:
 
   // Points verticaux:
   Pos_X=Centre_X;
@@ -4047,7 +4042,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
   Pixel_figure(Centre_X,Centre_Y+Rayon_vertical,Couleur);   // Bas
 }
 
-  // -- Trac‚ d‚finitif d'une ellipse vide --
+  // -- Tracé définitif d'une ellipse vide --
 
 void Tracer_ellipse_vide_Definitif(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
 {
@@ -4090,7 +4085,7 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
   // Calcul des limites de l'ellipse
   Ellipse_Calculer_limites(Rayon_horizontal+1,Rayon_vertical+1);
 
-  // Correction des bornes d'aprŠs les limites
+  // Correction des bornes d'après les limites
   if (Debut_Y<Limite_Haut)
     Debut_Y=Limite_Haut;
   if (Fin_Y>Limite_Bas)
@@ -4108,7 +4103,7 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
 }
 
 
-  // -- Tracer g‚n‚ral d'une ligne ------------------------------------------
+  // -- Tracer général d'une ligne ------------------------------------------
 
 void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
 {
@@ -4178,7 +4173,7 @@ void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, b
     Pixel_figure(Fin_X,Fin_Y,Couleur);
 }
 
-  // -- Tracer d‚finitif d'une ligne --
+  // -- Tracer définitif d'une ligne --
 
 void Tracer_ligne_Definitif(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
 {
@@ -4220,7 +4215,7 @@ void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,b
   short Pos_Y;
 
 
-  // On v‚rifie que les bornes soient dans le bon sens:
+  // On vérifie que les bornes soient dans le bon sens:
   if (Debut_X>Fin_X)
   {
     Tempo=Debut_X;
@@ -4258,7 +4253,7 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
   short Pos_Y;
 
 
-  // On v‚rifie que les bornes sont dans le bon sens:
+  // On vérifie que les bornes sont dans le bon sens:
   if (Debut_X>Fin_X)
   {
     Tempo=Debut_X;
@@ -4272,7 +4267,7 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
     Fin_Y=Tempo;
   }
 
-  // Correction en cas de d‚passement des limites de l'image
+  // Correction en cas de dépassement des limites de l'image
   if (Fin_X>Limite_Droite)
     Fin_X=Limite_Droite;
   if (Fin_Y>Limite_Bas)
@@ -4287,7 +4282,7 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
 
 
 
-  // -- Tracer une courbe de B‚zier --
+  // -- Tracer une courbe de Bézier --
 
 void Tracer_courbe_General(short X1, short Y1,
                            short X2, short Y2,
@@ -4311,7 +4306,7 @@ void Tracer_courbe_General(short X1, short Y1,
   CY[2]= - 3*Y1 + 3*Y2;
   CY[3]= +   Y1;
 
-  // Tra‡age de la courbe
+  // Traçage de la courbe
   Old_X=X1;
   Old_Y=Y1;
   Pixel_figure(Old_X,Old_Y,Couleur);
@@ -4328,7 +4323,7 @@ void Tracer_courbe_General(short X1, short Y1,
   }
 }
 
-  // -- Tracer une courbe de B‚zier d‚finitivement --
+  // -- Tracer une courbe de Bézier définitivement --
 
 void Tracer_courbe_Definitif(short X1, short Y1,
                              short X2, short Y2,
@@ -4340,7 +4335,7 @@ void Tracer_courbe_Definitif(short X1, short Y1,
   Tracer_courbe_General(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
 }
 
-  // -- Tracer la preview d'une courbe de B‚zier --
+  // -- Tracer la preview d'une courbe de Bézier --
 
 void Tracer_courbe_Preview(short X1, short Y1,
                            short X2, short Y2,
@@ -4352,7 +4347,7 @@ void Tracer_courbe_Preview(short X1, short Y1,
   Tracer_courbe_General(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
 }
 
-  // -- Effacer la preview d'une courbe de B‚zier --
+  // -- Effacer la preview d'une courbe de Bézier --
 
 void Effacer_courbe_Preview(short X1, short Y1,
                             short X2, short Y2,
@@ -4400,9 +4395,9 @@ void Aerographe(short Bouton_clicke)
   }
   else
   {
-    //   On essaye de se balader dans la table des flux de fa‡on … ce que ce
-    // ne soit pas toujours la derniŠre couleur qui soit affich‚e en dernier
-    // Pour ‡a, on part d'une couleur au pif dans une direction al‚atoire.
+    //   On essaye de se balader dans la table des flux de façon à ce que ce
+    // ne soit pas toujours la dernière couleur qui soit affichée en dernier
+    // Pour ça, on part d'une couleur au pif dans une direction aléatoire.
     Sens=rand()&1;
     for (Indice=0,Indice_couleur=rand()/*%256*/; Indice<256; Indice++)
     {
@@ -4440,7 +4435,7 @@ void Aerographe(short Bouton_clicke)
   //////////////////////////////////////////////////////////////////////////
 
 
-  // -- Gestion d'un d‚grad‚ de base (le plus moche) --
+  // -- Gestion d'un dégradé de base (le plus moche) --
 
 void Degrade_de_base(long Indice,short Pos_X,short Pos_Y)
 {
@@ -4449,21 +4444,21 @@ void Degrade_de_base(long Indice,short Pos_X,short Pos_Y)
   // On fait un premier calcul partiel
   Position=(Indice*Degrade_Intervalle_bornes);
 
-  // On gŠre un d‚placement au hasard
+  // On gère un déplacement au hasard
   Position+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
   Position-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
 
   Position/=Degrade_Intervalle_total;
 
-  //   On va v‚rifier que nos petites idioties n'ont pas ‚ject‚ la valeur hors
-  // des valeurs autoris‚es par le d‚grad‚ d‚fini par l'utilisateur.
+  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
+  // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
   if (Position<0)
     Position=0;
   else if (Position>=Degrade_Intervalle_bornes)
     Position=Degrade_Intervalle_bornes-1;
 
-  // On ramŠne ensuite la position dans le d‚grad‚ vers un num‚ro de couleur
+  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
   if (Degrade_Inverse)
     Traiter_pixel_de_degrade(Pos_X,Pos_Y,Degrade_Borne_Superieure-Position);
   else
@@ -4471,7 +4466,7 @@ void Degrade_de_base(long Indice,short Pos_X,short Pos_Y)
 }
 
 
-  // -- Gestion d'un d‚grad‚ par trames simples --
+  // -- Gestion d'un dégradé par trames simples --
 
 void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
 {
@@ -4479,22 +4474,22 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
   long Position_dans_segment;
 
   //
-  //   But de l'op‚ration: en plus de calculer la position de base (d‚sign‚e
-  // dans cette proc‚dure par "Position_dans_degrade", on calcule la position
-  // de l'indice dans le sch‚ma suivant:
+  //   But de l'opération: en plus de calculer la position de base (désignée
+  // dans cette procédure par "Position_dans_degrade", on calcule la position
+  // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traŒnent de ce c“t‚ du segment se voient subir
-  //         ³ une incr‚mentation conditionnelle … leur position dans l'‚cran.
+  //         Ú Les indices qui traŒnent de ce c“té du segment se voient subir
+  //         ³ une incrémentation conditionnelle à leur position dans l'écran.
   //         v
   //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
   //   ^
-  //   ÀÄ Les indices qui traŒnent de ce c“t‚ du segment se voient subir une
-  //      d‚cr‚mentation conditionnelle … leur position dans l'‚cran.
+  //   ÀÄ Les indices qui traŒnent de ce c“té du segment se voient subir une
+  //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
   Position_dans_degrade=(Indice*Degrade_Intervalle_bornes);
 
-  // On gŠre un d‚placement au hasard...
+  // On gère un déplacement au hasard...
   Position_dans_degrade+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
   Position_dans_degrade-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
 
@@ -4504,11 +4499,11 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
   // ... qui nous permet de calculer la position dans le segment
   Position_dans_segment=((Position_dans_degrade<<2)/Degrade_Intervalle_total)&3;
 
-  // On peut ensuite terminer le calcul de l'indice dans le d‚grad‚
+  // On peut ensuite terminer le calcul de l'indice dans le dégradé
   Position_dans_degrade/=Degrade_Intervalle_total;
 
   // On va pouvoir discuter de la valeur de Position_dans_degrade en fonction
-  // de la position dans l'‚cran et de la Position_dans_segment.
+  // de la position dans l'écran et de la Position_dans_segment.
 
   switch (Position_dans_segment)
   {
@@ -4517,23 +4512,23 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
         Position_dans_degrade--;
       break;
 
-      // On n'a pas … traiter les cas 1 et 2 car ils repr‚sentent des valeurs
-      // suffisament au centre du segment pour ne pas avoir … subir la trame
+      // On n'a pas à traiter les cas 1 et 2 car ils représentent des valeurs
+      // suffisament au centre du segment pour ne pas avoir à subir la trame
 
     case 3 : // On est sur la droite du segment
-      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“t‚s de la trame.
+      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“tés de la trame.
         Position_dans_degrade++;
   }
 
-  //   On va v‚rifier que nos petites idioties n'ont pas ‚ject‚ la valeur hors
-  // des valeurs autoris‚es par le d‚grad‚ d‚fini par l'utilisateur.
+  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
+  // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
   if (Position_dans_degrade<0)
     Position_dans_degrade=0;
   else if (Position_dans_degrade>=Degrade_Intervalle_bornes)
     Position_dans_degrade=Degrade_Intervalle_bornes-1;
 
-  // On ramŠne ensuite la position dans le d‚grad‚ vers un num‚ro de couleur
+  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
   if (Degrade_Inverse)
     Position_dans_degrade=Degrade_Borne_Superieure-Position_dans_degrade;
   else
@@ -4543,7 +4538,7 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
 }
 
 
-  // -- Gestion d'un d‚grad‚ par trames ‚tendues --
+  // -- Gestion d'un dégradé par trames étendues --
 
 void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
 {
@@ -4551,22 +4546,22 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
   long Position_dans_segment;
 
   //
-  //   But de l'op‚ration: en plus de calculer la position de base (d‚sign‚e
-  // dans cette proc‚dure par "Position_dans_degrade", on calcule la position
-  // de l'indice dans le sch‚ma suivant:
+  //   But de l'opération: en plus de calculer la position de base (désignée
+  // dans cette procédure par "Position_dans_degrade", on calcule la position
+  // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traŒnent de ce c“t‚ du segment se voient subir
-  //         ³ une incr‚mentation conditionnelle … leur position dans l'‚cran.
+  //         Ú Les indices qui traŒnent de ce c“té du segment se voient subir
+  //         ³ une incrémentation conditionnelle à leur position dans l'écran.
   //         v
   //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
   //   ^
-  //   ÀÄ Les indices qui traŒnent de ce c“t‚ du segment se voient subir une
-  //      d‚cr‚mentation conditionnelle … leur position dans l'‚cran.
+  //   ÀÄ Les indices qui traŒnent de ce c“té du segment se voient subir une
+  //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
   Position_dans_degrade=(Indice*Degrade_Intervalle_bornes);
 
-  // On gŠre un d‚placement au hasard
+  // On gère un déplacement au hasard
   Position_dans_degrade+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
   Position_dans_degrade-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
 
@@ -4576,15 +4571,15 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
   // Qui nous permet de calculer la position dans le segment
   Position_dans_segment=((Position_dans_degrade<<3)/Degrade_Intervalle_total)&7;
 
-  // On peut ensuite terminer le calcul de l'indice dans le d‚grad‚
+  // On peut ensuite terminer le calcul de l'indice dans le dégradé
   Position_dans_degrade/=Degrade_Intervalle_total;
 
   // On va pouvoir discuter de la valeur de Position_dans_degrade en fonction
-  // de la position dans l'‚cran et de la Position_dans_segment.
+  // de la position dans l'écran et de la Position_dans_segment.
 
   switch (Position_dans_segment)
   {
-    case 0 : // On est sur l'extrˆme gauche du segment
+    case 0 : // On est sur l'extrême gauche du segment
       if (((Pos_X+Pos_Y)&1)==0)
         Position_dans_degrade--;
       break;
@@ -4595,8 +4590,8 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
         Position_dans_degrade--;
       break;
 
-      // On n'a pas … traiter les cas 3 et 4 car ils repr‚sentent des valeurs
-      // suffisament au centre du segment pour ne pas avoir … subir la trame
+      // On n'a pas à traiter les cas 3 et 4 car ils représentent des valeurs
+      // suffisament au centre du segment pour ne pas avoir à subir la trame
 
     case 5 : // On est sur la droite du segment
     case 6 : // On est sur la droite du segment
@@ -4605,19 +4600,19 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
       break;
 
     case 7 : // On est sur l'extreme droite du segment
-      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“t‚s de la trame.
+      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“tés de la trame.
         Position_dans_degrade++;
   }
 
-  //   On va v‚rifier que nos petites idioties n'ont pas ‚ject‚ la valeur hors
-  // des valeurs autoris‚es par le d‚grad‚ d‚fini par l'utilisateur.
+  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
+  // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
   if (Position_dans_degrade<0)
     Position_dans_degrade=0;
   else if (Position_dans_degrade>=Degrade_Intervalle_bornes)
     Position_dans_degrade=Degrade_Intervalle_bornes-1;
 
-  // On ramŠne ensuite la position dans le d‚grad‚ vers un num‚ro de couleur
+  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
   if (Degrade_Inverse)
     Position_dans_degrade=Degrade_Borne_Superieure-Position_dans_degrade;
   else
@@ -4632,7 +4627,7 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
 
 
 
-  // -- Tracer un cercle degrad‚ (une sphŠre) --
+  // -- Tracer un cercle degradé (une sphère) --
 
 void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclairage_X,short Eclairage_Y)
 {
@@ -4642,15 +4637,15 @@ void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclai
   long Pos_Y;
   long Fin_X;
   long Fin_Y;
-  long Distance_X; // Distance (au carr‚) sur les X du point en cours au centre d'‚clairage
-  long Distance_Y; // Distance (au carr‚) sur les Y du point en cours au centre d'‚clairage
+  long Distance_X; // Distance (au carré) sur les X du point en cours au centre d'éclairage
+  long Distance_Y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
 
   Debut_X=Centre_X-Rayon;
   Debut_Y=Centre_Y-Rayon;
   Fin_X=Centre_X+Rayon;
   Fin_Y=Centre_Y+Rayon;
 
-  // Correction des bornes d'aprŠs les limites
+  // Correction des bornes d'après les limites
   if (Debut_Y<Limite_Haut)
     Debut_Y=Limite_Haut;
   if (Fin_Y>Limite_Bas)
@@ -4686,7 +4681,7 @@ void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclai
 }
 
 
-  // -- Tracer une ellipse degrad‚e --
+  // -- Tracer une ellipse degradée --
 
 void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y)
 {
@@ -4696,8 +4691,8 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
   long Pos_Y;
   long Fin_X;
   long Fin_Y;
-  long Distance_X; // Distance (au carr‚) sur les X du point en cours au centre d'‚clairage
-  long Distance_Y; // Distance (au carr‚) sur les Y du point en cours au centre d'‚clairage
+  long Distance_X; // Distance (au carré) sur les X du point en cours au centre d'éclairage
+  long Distance_Y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
 
 
   Debut_X=Centre_X-Rayon_horizontal;
@@ -4724,7 +4719,7 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
   if (Degrade_Intervalle_total==0)
     Degrade_Intervalle_total=1;
 
-  // Correction des bornes d'aprŠs les limites
+  // Correction des bornes d'après les limites
   if (Debut_Y<Limite_Haut)
     Debut_Y=Limite_Haut;
   if (Fin_Y>Limite_Bas)
@@ -5012,7 +5007,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
       Fin_Y=Pos_Y;
   }
 
-  // On clippe ces bornes … l'‚cran:
+  // On clippe ces bornes à l'écran:
   if (Debut_X<Limite_Gauche)
     Debut_X=Limite_Gauche;
   if (Fin_X>Limite_Droite)
@@ -5027,10 +5022,10 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
 
   if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
   {
-    // On met les d‚calages du tiling … 0 pour eviter toute incoh‚rence.
-    // Si par hasard on voulait les mettre …
+    // On met les décalages du tiling à 0 pour eviter toute incohérence.
+    // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser … les initialiser … 0 dans "MAIN.C".
+    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
     Tiling_Decalage_X=0;
     Tiling_Decalage_Y=0;
 
@@ -5060,7 +5055,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mˆme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -5092,7 +5087,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
                          Points[0],Points[1],
                          ~Back_color);
 
-    // On scanne la brosse pour remplacer tous les pixels affect‚s par le
+    // On scanne la brosse pour remplacer tous les pixels affectés par le
     // polyfill par ceux de l'image:
     for (Pos_Y=Debut_Y;Pos_Y<=Fin_Y;Pos_Y++)
       for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
@@ -5112,7 +5107,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
 
 
 
-//------------ Remplacement de la couleur point‚e par une autre --------------
+//------------ Remplacement de la couleur pointée par une autre --------------
 
 void Remplacer(byte Nouvelle_couleur)
 {
@@ -5144,9 +5139,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 
   int    Pos_X_dans_brosse;   // Position courante dans l'ancienne brosse
   int    Pos_Y_dans_brosse;
-  int    Delta_X_dans_brosse; // "Vecteur incr‚mental" du point pr‚c‚dent
+  int    Delta_X_dans_brosse; // "Vecteur incrémental" du point précédent
   int    Delta_Y_dans_brosse;
-  int    Pos_X_initial;       // Position X de d‚but de parcours de ligne
+  int    Pos_X_initial;       // Position X de début de parcours de ligne
   int    Dx,Dy;
 
   Dx=(X1<X2)?1:-1;
@@ -5163,7 +5158,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 
   // Calcul des anciennes dimensions de la brosse:
 
-  // Calcul du "vecteur incr‚mental":
+  // Calcul du "vecteur incrémental":
   Delta_X_dans_brosse=(Brosse_Largeur<<16)/(X2-X1+Dx);
   Delta_Y_dans_brosse=(Brosse_Hauteur<<16)/(Y2-Y1+Dy);
 
@@ -5173,9 +5168,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   else
     Pos_X_initial = (Brosse_Largeur<<16)-1; // Inversion en X de la brosse
 
-  free(Smear_Brosse); // On libŠre un peu de m‚moire
+  free(Smear_Brosse); // On libère un peu de mémoire
 
-  if (New_Brosse=(byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))
+  if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
   {
     Offset=0;
 
@@ -5188,7 +5183,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
     // Pour chaque ligne
     for (Ligne=0;Ligne<New_Brosse_Hauteur;Ligne++)
     {
-      // On repart du d‚but de la ligne:
+      // On repart du début de la ligne:
       Pos_X_dans_brosse=Pos_X_initial;
 
       // Pour chaque colonne:
@@ -5196,13 +5191,13 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
       {
         // On copie le pixel:
         New_Brosse[Offset]=Lit_pixel_dans_brosse(Pos_X_dans_brosse>>16,Pos_Y_dans_brosse>>16);
-        // On passe … la colonne de brosse suivante:
+        // On passe à la colonne de brosse suivante:
         Pos_X_dans_brosse+=Delta_X_dans_brosse;
         // On passe au pixel suivant de la nouvelle brosse:
         Offset++;
       }
 
-      // On passe … la ligne de brosse suivante:
+      // On passe à la ligne de brosse suivante:
       Pos_Y_dans_brosse+=Delta_Y_dans_brosse;
     }
 
@@ -5216,7 +5211,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mˆme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -5235,9 +5230,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   }
   else
   {
-    // Ici la lib‚ration de m‚moire n'a pas suffit donc on remet dans l'‚tat
-    // o— c'etait avant. On a juste … r‚allouer la Smear_Brosse car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu ˆtre allou‚
+    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
+    // o— c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
     Erreur(0);
@@ -5268,7 +5263,7 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
   Largeur_dest=Pos_X_dest_Finale-Pos_X_dest_Initiale+1;
   Hauteur_dest=Pos_Y_dest_Finale-Pos_Y_dest_Initiale+1;
 
-  // Calcul des vecteurs d'incr‚mentation :
+  // Calcul des vecteurs d'incrémentation :
   Delta_X=(Brosse_Largeur<<16)/Largeur_dest;
   Delta_Y=(Brosse_Hauteur<<16)/Hauteur_dest;
 
@@ -5385,7 +5380,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       {
         Xt=(((float)((Pos_X-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
         Yt=(((float)((Pos_X-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non d‚fini
+        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
         {
           ScanY_X[0][Pos_Y]=Pos_X;
           ScanY_Xt[0][Pos_Y]=Xt;
@@ -5395,7 +5390,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         {
           if (Pos_X>=ScanY_X[0][Pos_Y])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non d‚fini
+            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
              || (Pos_X>ScanY_X[1][Pos_Y]))
             {
               ScanY_X[1][Pos_Y]=Pos_X;
@@ -5405,7 +5400,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non d‚fini
+            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
             {
               ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
               ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
@@ -5442,7 +5437,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       {
         Xt=(((float)((Pos_Y-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
         Yt=(((float)((Pos_Y-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non d‚fini
+        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
         {
           ScanY_X[0][Pos_Y]=Pos_X;
           ScanY_Xt[0][Pos_Y]=Xt;
@@ -5452,7 +5447,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         {
           if (Pos_X>=ScanY_X[0][Pos_Y])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non d‚fini
+            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
              || (Pos_X>ScanY_X[1][Pos_Y]))
             {
               ScanY_X[1][Pos_Y]=Pos_X;
@@ -5462,7 +5457,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non d‚fini
+            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
             {
               ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
               ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
@@ -5494,11 +5489,11 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
                            int X4,int Y4,int Xt4,int Yt4,
                            byte * Buffer, int Largeur, int Hauteur)
 {
-  int Xmin,Xmax,Ymin,Ymax;
+  int Xmin,/*Xmax,*/Ymin/*,Ymax*/;
   int X,Y,Xt,Yt;
   int Debut_X,Fin_X,Largeur_ligne;
   float Temp;
-  byte Couleur;
+  //byte Couleur;
 
   Xmin=Min(Min(X1,X2),Min(X3,X4));
   Ymin=Min(Min(Y1,Y2),Min(Y3,Y4));
@@ -5510,7 +5505,7 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
   ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
 
-  // Remplir avec des valeurs ‚gales … INDEFINI.
+  // Remplir avec des valeurs égales à INDEFINI.
   for (Y=0; Y<Hauteur; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
@@ -5565,7 +5560,7 @@ void Tourner_brosse(float Angle)
   float cosA=cos(Angle);
   float sinA=sin(Angle);
 
-  // Calcul des coordonn‚es des 4 coins:
+  // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
@@ -5588,11 +5583,11 @@ void Tourner_brosse(float Angle)
   New_Brosse_Largeur=Xmax+1-Xmin;
   New_Brosse_Hauteur=Ymax+1-Ymin;
 
-  free(Smear_Brosse); // On libŠre un peu de m‚moire
+  free(Smear_Brosse); // On libère un peu de mémoire
 
-  if (New_Brosse=(byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))
+  if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
   {
-    // Et maintenant on calcule la nouvelle brosse tourn‚e.
+    // Et maintenant on calcule la nouvelle brosse tournée.
     Calculer_quad_texture(X1,Y1,               0,               0,
                           X2,Y2,Brosse_Largeur-1,               0,
                           X3,Y3,               0,Brosse_Hauteur-1,
@@ -5609,7 +5604,7 @@ void Tourner_brosse(float Angle)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mˆme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -5628,9 +5623,9 @@ void Tourner_brosse(float Angle)
   }
   else
   {
-    // Ici la lib‚ration de m‚moire n'a pas suffit donc on remet dans l'‚tat
-    // o— c'etait avant. On a juste … r‚allouer la Smear_Brosse car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu ˆtre allou‚
+    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
+    // o— c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
     Erreur(0);
@@ -5664,7 +5659,7 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
   ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
 
-  // Remplir avec des valeurs ‚gales … INDEFINI.
+  // Remplir avec des valeurs égales à INDEFINI.
   for (Y=0; Y<Hauteur; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
@@ -5719,7 +5714,7 @@ void Tourner_brosse_preview(float Angle)
   float cosA=cos(Angle);
   float sinA=sin(Angle);
 
-  // Calcul des coordonn‚es des 4 coins:
+  // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
@@ -5742,7 +5737,7 @@ void Tourner_brosse_preview(float Angle)
   X4+=Brosse_Centre_rotation_X;
   Y4+=Brosse_Centre_rotation_Y;
 
-  // Et maintenant on dessine la brosse tourn‚e.
+  // Et maintenant on dessine la brosse tournée.
   Dessiner_quad_texture_preview(X1,Y1,               0,               0,
                                 X2,Y2,Brosse_Largeur-1,               0,
                                 X3,Y3,               0,Brosse_Hauteur-1,

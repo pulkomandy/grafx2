@@ -11,7 +11,7 @@
 #include "pages.h"
 #include "graph.h"
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
@@ -53,7 +53,7 @@ void Initialiser_S_Page(S_Page * Page)
 
 void Download_infos_page_principal(S_Page * Page)
 {
-  int Indice_facteur;
+  //int Indice_facteur;
   int Dimensions_modifiees;
 
   if (Page!=NULL)
@@ -73,7 +73,7 @@ void Download_infos_page_principal(S_Page * Page)
     Principal_Decalage_X=Page->Decalage_X;
     Principal_Decalage_Y=Page->Decalage_Y;
 
-    // On corrige les d‚calages en fonction de la dimension de l'‚cran
+    // On corrige les décalages en fonction de la dimension de l'‚cran
     if ( (Principal_Decalage_X>0) &&
          (Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image) )
       Principal_Decalage_X=Max(0,Principal_Largeur_image-Largeur_ecran);
@@ -212,38 +212,38 @@ void Download_infos_backup(S_Liste_de_pages * Liste)
 
 int Allouer_une_page(S_Page * Page,int Largeur,int Hauteur)
 {
-  // Important: la S_Page ne doit pas d‚j… d‚signer une page allou‚e auquel
+  // Important: la S_Page ne doit pas déjà désigner une page allouée auquel
   //            cas celle-ci serait perdue.
 
   /* Debug : if (Page->Image!=NULL) exit(666); */
 
-  // On alloue la m‚moire pour le bitmap
+  // On alloue la mémoire pour le bitmap
   Page->Image=(byte *)malloc(Largeur*Hauteur);
 
-  // On v‚rifie que l'allocation se soit bien pass‚e
+  // On vérifie que l'allocation se soit bien passée
   if (Page->Image==NULL)
     return 0; // Echec
   else
   {
     Page->Largeur=Largeur;
     Page->Hauteur=Hauteur;
-    // Important: La mise … jour des autres infos est du ressort de
+    // Important: La mise à jour des autres infos est du ressort de
     //            l'appelant.
 
-    return 1; // SuccŠs
+    return 1; // Succès
   }
 }
 
 void Liberer_une_page(S_Page * Page)
 {
-  // On peut appeler cette fonction sur une page non allou‚e.
+  // On peut appeler cette fonction sur une page non allouée.
 
   if (Page->Image!=NULL)
     free(Page->Image);
   Page->Image=NULL;
   Page->Largeur=0;
   Page->Hauteur=0;
-  // On ne se pr‚occupe pas de ce que deviens le reste des infos de l'image.
+  // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
 }
 
 void Copier_S_page(S_Page * Destination,S_Page * Source)
@@ -255,9 +255,9 @@ int Taille_d_une_page(S_Page * Page)
 {
   return sizeof(S_Page)+(Page->Largeur*Page->Hauteur)+8;
   // 8 = 4 + 4
-  // (Toute zone allou‚e en m‚moire est pr‚c‚d‚e d'un mot double indiquant sa
+  // (Toute zone allouée en mémoire est précédée d'un mot double indiquant sa
   // taille, or la taille d'un mot double est de 4 octets, et on utilise deux
-  // allocations de m‚moires: une pour la S_Page et une pour l'image)
+  // allocations de mémoires: une pour la S_Page et une pour l'image)
 }
 
 
@@ -277,16 +277,16 @@ void Initialiser_S_Liste_de_pages(S_Liste_de_pages * Liste)
 
 int Allouer_une_liste_de_pages(S_Liste_de_pages * Liste,int Taille)
 {
-  // Important: la S_Liste_de_pages ne doit pas d‚j… d‚signer une liste de
-  //            pages allou‚e auquel cas celle-ci serait perdue.
+  // Important: la S_Liste_de_pages ne doit pas déjà désigner une liste de
+  //            pages allouée auquel cas celle-ci serait perdue.
   int Indice;
 
   /* Debug : if (Liste->Pages!=NULL) exit(666); */
 
-  // On alloue la m‚moire pour la liste
+  // On alloue la mémoire pour la liste
   Liste->Pages=(S_Page *)malloc(Taille*sizeof(S_Page));
 
-  // On v‚rifie que l'allocation se soit bien pass‚e
+  // On vérifie que l'allocation se soit bien passée
   if (Liste->Pages==NULL)
     return 0; // Echec
   else
@@ -297,16 +297,16 @@ int Allouer_une_liste_de_pages(S_Liste_de_pages * Liste,int Taille)
     Liste->Taille_liste=Taille;
     Liste->Nb_pages_allouees=0;
 
-    return 1; // SuccŠs
+    return 1; // Succès
   }
 }
 
 void Liberer_une_liste_de_pages(S_Liste_de_pages * Liste)
 {
-  // On peut appeler cette fonction sur une liste de pages non allou‚e.
+  // On peut appeler cette fonction sur une liste de pages non allouée.
 
-  // Important: cette fonction ne libŠre pas les pages de la liste. Il faut
-  //            donc le faire pr‚alablement si n‚cessaire.
+  // Important: cette fonction ne libère pas les pages de la liste. Il faut
+  //            donc le faire préalablement si nécessaire.
 
   if (Liste->Pages!=NULL)
     free(Liste->Pages);
@@ -325,7 +325,7 @@ int Taille_d_une_liste_de_pages(S_Liste_de_pages * Liste)
 
   return Resultat+sizeof(S_Liste_de_pages)+4;
 
-  // C.F. la remarque … propos de Taille_d_une_page pour la valeur 4.
+  // C.F. la remarque à propos de Taille_d_une_page pour la valeur 4.
 }
 
 void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
@@ -336,14 +336,14 @@ void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
   // º0º1³2³3³4³5³6³7³8³9³Aº  |
   // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=Page courante
   //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=Page la plus ancienne
-  //  v v v v v v v v v v v   |  1=DerniŠre page (1er backup)
+  //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // º1º2³3³4³5³6³7³8³9³A³0º  |
   // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |
 
-  // Pour simuler un v‚ritable Undo, l'appelant doit mettre la structure
-  // de page courante … jour avant l'appel, puis en r‚extraire les infos en
-  // sortie, ainsi que celles relatives … la plus r‚cente page d'undo (1Šre
+  // Pour simuler un véritable Undo, l'appelant doit mettre la structure
+  // de page courante à jour avant l'appel, puis en réextraire les infos en
+  // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
 
   int Indice;
@@ -351,22 +351,22 @@ void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
 
   if (Liste->Nb_pages_allouees>1)
   {
-    // On cr‚e la page tempo
+    // On crée la page tempo
     Page_tempo=(S_Page *)malloc(sizeof(S_Page));
     Initialiser_S_Page(Page_tempo);
 
-    // On copie la 1Šre page (Page 0) dans la page temporaire
+    // On copie la 1ère page (Page 0) dans la page temporaire
     Copier_S_page(Page_tempo,Liste->Pages);
 
-    // On copie toutes les pages 1-A … leur gauche
+    // On copie toutes les pages 1-A à leur gauche
     for (Indice=1;Indice<Liste->Nb_pages_allouees;Indice++)
       Copier_S_page(Liste->Pages+Indice-1,Liste->Pages+Indice);
 
-    // On copie la page 0 (dont la sauvegarde a ‚t‚ effectu‚e dans la page
-    // temporaire) en derniŠre position
+    // On copie la page 0 (dont la sauvegarde a été effectuée dans la page
+    // temporaire) en dernière position
     Copier_S_page(Liste->Pages+Liste->Nb_pages_allouees-1,Page_tempo);
 
-    // On d‚truit la page tempo
+    // On détruit la page tempo
     free(Page_tempo);
   }
 }
@@ -379,14 +379,14 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
   // º0º1³2³3³4³5³6³7³8³9³Aº  |
   // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=Page courante
   //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=Page la plus ancienne
-  //  v v v v v v v v v v v   |  1=DerniŠre page (1er backup)
+  //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // ºAº0³1³2³3³4³5³6³7³8³9º  |
   // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |
 
-  // Pour simuler un v‚ritable Redo, l'appelant doit mettre la structure
-  // de page courante … jour avant l'appel, puis en r‚extraire les infos en
-  // sortie, ainsi que celles relatives … la plus r‚cente page d'undo (1Šre
+  // Pour simuler un véritable Redo, l'appelant doit mettre la structure
+  // de page courante à jour avant l'appel, puis en réextraire les infos en
+  // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
 
   int Indice;
@@ -394,22 +394,22 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
 
   if (Liste->Nb_pages_allouees>1)
   {
-    // On cr‚e la page tempo
+    // On crée la page tempo
     Page_tempo=(S_Page *)malloc(sizeof(S_Page));
     Initialiser_S_Page(Page_tempo);
 
-    // On copie la derniŠre page dans la page temporaire
+    // On copie la dernière page dans la page temporaire
     Copier_S_page(Page_tempo,Liste->Pages+Liste->Nb_pages_allouees-1);
 
-    // On copie toutes les pages 0-9 … leur droite
+    // On copie toutes les pages 0-9 à leur droite
     for (Indice=Liste->Nb_pages_allouees-1;Indice>0;Indice--)
       Copier_S_page(Liste->Pages+Indice,Liste->Pages+Indice-1);
 
-    // On copie la page plus ancienne page (la "A", dont la sauvegarde a ‚t‚
-    // effectu‚e dans la page temporaire) en 1Šre position
+    // On copie la page plus ancienne page (la "A", dont la sauvegarde a été
+    // effectuée dans la page temporaire) en 1ère position
     Copier_S_page(Liste->Pages,Page_tempo);
 
-    // On d‚truit la page tempo
+    // On détruit la page tempo
     free(Page_tempo);
   }
 }
@@ -431,14 +431,14 @@ int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_coura
   Taille_nouvelle_page  =Taille_d_une_page(Nouvelle_page);
 
   // Il faut pouvoir loger la nouvelle page et son backup dans la page
-  // courante, en conservant au pire la 1Šre page de brouillon.
+  // courante, en conservant au pire la 1ère page de brouillon.
   if ((Taille_immediatement_disponible+Taille_liste_courante+
        Taille_liste_brouillon-Taille_page_brouillon)<(2*Taille_nouvelle_page))
     return 0;
 
   // Il faut pouvoir loger le brouillon et son backup dans la page de
   // brouillon, en conservant au pire un exemplaire de la nouvelle page dans
-  // la page courante. (pour permettre … l'utilisateur de travailler sur son
+  // la page courante. (pour permettre à l'utilisateur de travailler sur son
   // brouillon)
   if ((Taille_immediatement_disponible+Taille_liste_courante+
        Taille_liste_brouillon-Taille_nouvelle_page)<(2*Taille_page_brouillon))
@@ -462,24 +462,24 @@ void Detruire_derniere_page_allouee_de_la_liste(S_Liste_de_pages * Liste)
 void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire)
 {
 
-//   Cette fonction cr‚e une nouvelle page dont les attributs correspondent …
+//   Cette fonction crée une nouvelle page dont les attributs correspondent à
 // ceux de Nouvelle_page (Largeur,Hauteur,...) (le champ Image est invalide
-// … l'appel, c'est la fonction qui le met … jour), et l'enfile dans
+// à l'appel, c'est la fonction qui le met à jour), et l'enfile dans
 // Liste_courante.
-//   Il est imp‚ratif que la cr‚ation de cette page soit possible,
-// ‚ventuellement au d‚triment des backups de la page de brouillon
-// (Liste_secondaire). Afin de s'en assurer, il faut v‚rifier cette
-// possibilit‚ … l'aide de
+//   Il est impératif que la création de cette page soit possible,
+// éventuellement au détriment des backups de la page de brouillon
+// (Liste_secondaire). Afin de s'en assurer, il faut vérifier cette
+// possibilité à l'aide de
 // Nouvelle_page_possible(Nouvelle_page,Liste_courante,Liste_secondaire) avant
-// l'appel … cette fonction.
+// l'appel à cette fonction.
 //   De plus, il faut qu'il y ait au moins une page dans chacune des listes.
 
   int                Il_faut_liberer;
-  S_Liste_de_pages * Liste_a_raboter;
+  S_Liste_de_pages * Liste_a_raboter=NULL;
   S_Page *           Page_a_supprimer;
   int                Indice;
 
-  // On regarde s'il faut lib‚rer des pages:
+  // On regarde s'il faut libérer des pages:
   Il_faut_liberer=
     // C'est le cas si la Liste_courante est pleine
   (  (Liste_courante->Taille_liste==Liste_courante->Nb_pages_allouees)
@@ -490,29 +490,29 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
   if (!Il_faut_liberer)
   {
     // On a assez de place pour allouer une page, et de plus la Liste_courante
-    // n'est pas pleine. On n'a donc aucune page … supprimer. On peut en
+    // n'est pas pleine. On n'a donc aucune page à supprimer. On peut en
     // allouer une directement.
     Nouvelle_page->Image=(byte *)malloc(Nouvelle_page->Hauteur*Nouvelle_page->Largeur);
   }
   else
   {
-    // On manque de m‚moire ou la Liste_courante est pleine. Dans tous les
-    // cas, il faut lib‚rer une page... qui peut-ˆtre pourra re-servir.
+    // On manque de mémoire ou la Liste_courante est pleine. Dans tous les
+    // cas, il faut libérer une page... qui peut-ˆtre pourra re-servir.
 
-    // Tant qu'il faut lib‚rer
+    // Tant qu'il faut libérer
     while (Il_faut_liberer)
     {
       // On cherche sur quelle liste on va virer une page
 
-      // S'il reste des pages … lib‚rer dans la Liste_courante
+      // S'il reste des pages à libérer dans la Liste_courante
       if (Liste_courante->Nb_pages_allouees>1)
-        // Alors on va d‚truire la derniŠre page allou‚e de la Liste_courante
+        // Alors on va détruire la dernière page allouée de la Liste_courante
         Liste_a_raboter=Liste_courante;
       else
       {
         if (Liste_secondaire->Nb_pages_allouees>1)
         {
-          // Sinon on va d‚truire la derniŠre page allou‚e de la
+          // Sinon on va détruire la dernière page allouée de la
           // Liste_secondaire
           Liste_a_raboter=Liste_secondaire;
         }
@@ -522,7 +522,7 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
         }
       }
 
-      // Puis on d‚termine la page que l'on va supprimer (c'est la derniŠre de
+      // Puis on détermine la page que l'on va supprimer (c'est la dernière de
       // la liste)
       Page_a_supprimer=Liste_a_raboter->Pages+(Liste_a_raboter->Nb_pages_allouees)-1;
 
@@ -532,14 +532,14 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
           (Nouvelle_page->Hauteur*Nouvelle_page->Largeur))
       {
         // Alors
-        // On r‚cupŠre le bitmap de la page … supprimer (‚vite de faire des
-        // allocations/d‚sallocations fastidieuses et inutiles)
+        // On récupère le bitmap de la page à supprimer (‚vite de faire des
+        // allocations/désallocations fastidieuses et inutiles)
         Nouvelle_page->Image=Page_a_supprimer->Image;
 
-        // On fait semblant que la derniŠre page allou‚e ne l'est pas
+        // On fait semblant que la dernière page allouée ne l'est pas
         Liste_a_raboter->Nb_pages_allouees--;
 
-        // On n'a plus besoin de lib‚rer de la m‚moire puisqu'on a refil‚ …
+        // On n'a plus besoin de libérer de la mémoire puisqu'on a refilé à
         // Nouvelle_page un bitmap valide
         Il_faut_liberer=0;
       }
@@ -547,10 +547,10 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
       {
         // Sinon
 
-        // D‚truire la derniŠre page allou‚e dans la Liste_…_raboter
+        // Détruire la dernière page allouée dans la Liste_à_raboter
         Detruire_derniere_page_allouee_de_la_liste(Liste_a_raboter);
 
-        // On regarde s'il faut continuer … lib‚rer de la place
+        // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=(Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)
                        <(Nouvelle_page->Hauteur*Nouvelle_page->Largeur);
 
@@ -562,15 +562,15 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
     }
   }
 
-  // D'aprŠs l'hypothŠse de d‚part, la boucle ci-dessus doit s'arrˆter car
-  // on a assez de m‚moire pour allouer la nouvelle page.
-  // D‚sormais Nouvelle_page contient un pointeur sur une zone bitmap valide.
+  // D'après l'hypothèse de départ, la boucle ci-dessus doit s'arrˆter car
+  // on a assez de mémoire pour allouer la nouvelle page.
+  // Désormais Nouvelle_page contient un pointeur sur une zone bitmap valide.
 
-  // D‚caler la Liste_courante d'un cran vers le pass‚.
+  // Décaler la Liste_courante d'un cran vers le pass‚.
   for (Indice=Liste_courante->Taille_liste-1;Indice>0;Indice--)
     Copier_S_page(Liste_courante->Pages+Indice,Liste_courante->Pages+Indice-1);
 
-  // Recopier la Nouvelle_page en 1Šre position de la Liste_courante
+  // Recopier la Nouvelle_page en 1ère position de la Liste_courante
   Copier_S_page(Liste_courante->Pages,Nouvelle_page);
   Liste_courante->Nb_pages_allouees++;
 }
@@ -580,16 +580,16 @@ void Changer_nombre_de_pages_d_une_liste(S_Liste_de_pages * Liste,int Nb)
   int Indice;
   S_Page * Nouvelles_pages;
 
-  // Si la liste a d‚j… la taille demand‚e
+  // Si la liste a déjà la taille demandée
   if (Liste->Taille_liste==Nb)
-    // Alors il n'y a rien … faire
+    // Alors il n'y a rien à faire
     return;
 
-  // Si la liste contient plus de pages que souhait‚
+  // Si la liste contient plus de pages que souhaité
   if (Liste->Taille_liste>Nb)
-    // Alors pour chaque page en exc‚s
+    // Alors pour chaque page en excés
     for (Indice=Nb;Indice<Liste->Taille_liste;Indice++)
-      // On libŠre la page
+      // On libère la page
       Liberer_une_page(Liste->Pages+Indice);
 
   // On fait une nouvelle liste de pages:
@@ -597,14 +597,14 @@ void Changer_nombre_de_pages_d_une_liste(S_Liste_de_pages * Liste,int Nb)
   for (Indice=0;Indice<Nb;Indice++)
     Initialiser_S_Page(Nouvelles_pages+Indice);
 
-  // On recopie les pages … conserver de l'ancienne liste
+  // On recopie les pages à conserver de l'ancienne liste
   for (Indice=0;Indice<Min(Nb,Liste->Taille_liste);Indice++)
     Copier_S_page(Nouvelles_pages+Indice,Liste->Pages+Indice);
 
-  // On libŠre l'ancienne liste
+  // On libère l'ancienne liste
   free(Liste->Pages);
 
-  // On met … jour les champs de la nouvelle liste
+  // On met à jour les champs de la nouvelle liste
   Liste->Pages=Nouvelles_pages;
   Liste->Taille_liste=Nb;
   if (Liste->Nb_pages_allouees>Nb)
@@ -613,15 +613,15 @@ void Changer_nombre_de_pages_d_une_liste(S_Liste_de_pages * Liste,int Nb)
 
 void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * Liste)
 {
-  // On ne peut pas d‚truire la page courante de la liste si aprŠs
+  // On ne peut pas détruire la page courante de la liste si après
   // destruction il ne reste pas encore au moins une page.
   if (Liste->Nb_pages_allouees>1)
   {
-    // On fait faire un undo … la liste, comme ‡a, la nouvelle page courante
-    // est la page pr‚c‚dente
+    // On fait faire un undo à la liste, comme ‡a, la nouvelle page courante
+    // est la page précédente
     Reculer_dans_une_liste_de_pages(Principal_Backups);
 
-    // Puis on d‚truit la derniŠre page, qui est l'ancienne page courante
+    // Puis on détruit la dernière page, qui est l'ancienne page courante
     Detruire_derniere_page_allouee_de_la_liste(Liste);
   }
 }
@@ -635,7 +635,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
 {
   // Taille correspond au nombre de pages que l'on souhaite dans chaque liste
   // (1 pour la page courante, puis 1 pour chaque backup, soit 2 au minimum).
-  // Largeur et Hauteur correspondent … la dimension des images de d‚part.
+  // Largeur et Hauteur correspondent à la dimension des images de départ.
 
   S_Page * Page;
   int Retour=0;
@@ -643,26 +643,26 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
   if (Allouer_une_liste_de_pages(Principal_Backups,Taille) &&
       Allouer_une_liste_de_pages(Brouillon_Backups,Taille))
   {
-    // On a r‚ussi … allouer deux listes de pages dont la taille correspond …
-    // celle demand‚e par l'utilisateur.
+    // On a réussi à allouer deux listes de pages dont la taille correspond à
+    // celle demandée par l'utilisateur.
 
-    // On cr‚e un descripteur de page correspondant … la page principale
+    // On crée un descripteur de page correspondant à la page principale
     Page=(S_Page *)malloc(sizeof(S_Page));
     Initialiser_S_Page(Page);
     Upload_infos_page_principal(Page);
-    // On y met les infos sur la dimension de d‚marrage
+    // On y met les infos sur la dimension de démarrage
     Page->Largeur=Largeur;
     Page->Hauteur=Hauteur;
 
     // On regarde si on peut ajouter cette page
     if (Nouvelle_page_possible(Page,Principal_Backups,Brouillon_Backups))
     {
-      // On peut, donc on va la cr‚er
+      // On peut, donc on va la créer
       Creer_nouvelle_page(Page,Principal_Backups,Brouillon_Backups);
       Download_infos_page_principal(Page);
       Download_infos_backup(Principal_Backups);
 
-      // Maintenant, on regarde si on a le droit de cr‚er la mˆme page dans
+      // Maintenant, on regarde si on a le droit de créer la mˆme page dans
       // la page de brouillon.
       if (Nouvelle_page_possible(Page,Brouillon_Backups,Principal_Backups))
       {
@@ -678,23 +678,23 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
       }
       else
       {
-        // Il n'est pas possible de d‚marrer le programme avec la page
-        // principale et la page de brouillon aux dimensions demand‚e par
+        // Il n'est pas possible de démarrer le programme avec la page
+        // principale et la page de brouillon aux dimensions demandée par
         // l'utilisateur. ==> On l'envoie ballader
         Retour=0;
       }
     }
     else
     {
-      // On ne peut pas d‚marrer le programme avec ne serait-ce qu'une page
-      // de la dimension souhait‚e, donc on laisse tout tomber et on le
+      // On ne peut pas démarrer le programme avec ne serait-ce qu'une page
+      // de la dimension souhaitée, donc on laisse tout tomber et on le
       // renvoie chier.
       Retour=0;
     }
   }
   else
   {
-    // On n'a mˆme pas r‚ussi … cr‚er les listes. Donc c'est mˆme pas la
+    // On n'a mˆme pas réussi à créer les listes. Donc c'est mˆme pas la
     // peine de continuer : l'utilisateur ne pourra jamais rien faire, autant
     // avorter le chargement du programme.
     Retour=0;
@@ -705,7 +705,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
 
 void Detruire_les_listes_de_backups_en_fin_de_programme(void)
 {
-  // On commence par supprimer les pages une … une dans chacune des listes
+  // On commence par supprimer les pages une à une dans chacune des listes
     // Liste de la page principale
   while (Principal_Backups->Nb_pages_allouees>0)
     Detruire_derniere_page_allouee_de_la_liste(Principal_Backups);
@@ -713,7 +713,7 @@ void Detruire_les_listes_de_backups_en_fin_de_programme(void)
   while (Brouillon_Backups->Nb_pages_allouees>0)
     Detruire_derniere_page_allouee_de_la_liste(Brouillon_Backups);
 
-  // Puis on peut d‚truire les structures de liste elles-mˆmes
+  // Puis on peut détruire les structures de liste elles-mˆmes
   Liberer_une_liste_de_pages(Principal_Backups);
   Liberer_une_liste_de_pages(Brouillon_Backups);
   free(Principal_Backups);
@@ -725,7 +725,7 @@ void Nouveau_nombre_de_backups(int Nouveau)
   Changer_nombre_de_pages_d_une_liste(Principal_Backups,Nouveau+1);
   Changer_nombre_de_pages_d_une_liste(Brouillon_Backups,Nouveau+1);
 
-  // Le +1 vient du fait que dans chaque liste, en 1Šre position on retrouve
+  // Le +1 vient du fait que dans chaque liste, en 1ère position on retrouve
   // les infos de la page courante sur le brouillon et la page principale.
   // (Nouveau = Nombre de backups, sans compter les pages courantes)
 }
@@ -739,11 +739,11 @@ int Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur)
   int Retour=0;
 
   if (Upload)
-    // On remet … jour l'‚tat des infos de la page courante (pour pouvoir les
+    // On remet à jour l'‚tat des infos de la page courante (pour pouvoir les
     // retrouver plus tard)
     Upload_infos_page_principal(Principal_Backups->Pages);
 
-  // On cr‚e un descripteur pour la nouvelle page courante
+  // On crée un descripteur pour la nouvelle page courante
   Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
   Initialiser_S_Page(Nouvelle_page);
 
@@ -760,7 +760,7 @@ int Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur)
     Retour=1;
   }
 
-  // On d‚truit le descripteur de la page courante
+  // On détruit le descripteur de la page courante
   free(Nouvelle_page);
 
   return Retour;
@@ -774,11 +774,11 @@ int Backuper_et_redimensionner_brouillon(int Largeur,int Hauteur)
   S_Page * Nouvelle_page;
   int Retour=0;
 
-  // On remet … jour l'‚tat des infos de la page de brouillon (pour pouvoir
+  // On remet à jour l'‚tat des infos de la page de brouillon (pour pouvoir
   // les retrouver plus tard)
   Upload_infos_page_brouillon(Brouillon_Backups->Pages);
 
-  // On cr‚e un descripteur pour la nouvelle page de brouillon
+  // On crée un descripteur pour la nouvelle page de brouillon
   Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
   Initialiser_S_Page(Nouvelle_page);
 
@@ -792,7 +792,7 @@ int Backuper_et_redimensionner_brouillon(int Largeur,int Hauteur)
     Retour=1;
   }
 
-  // On d‚truit le descripteur de la page courante
+  // On détruit le descripteur de la page courante
   free(Nouvelle_page);
 
   return Retour;
@@ -802,11 +802,11 @@ void Backup(void)
 {
   S_Page * Nouvelle_page;
 
-  // On remet … jour l'‚tat des infos de la page courante (pour pouvoir les
+  // On remet à jour l'‚tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_principal(Principal_Backups->Pages);
 
-  // On cr‚e un descripteur pour la nouvelle page courante
+  // On crée un descripteur pour la nouvelle page courante
   Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
   Initialiser_S_Page(Nouvelle_page);
 
@@ -819,7 +819,7 @@ void Backup(void)
   // On copie l'image du backup vers la page courante:
   memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
 
-  // On d‚truit le descripteur de la page courante
+  // On détruit le descripteur de la page courante
   free(Nouvelle_page);
 
   // On allume l'indicateur de modification de l'image
@@ -828,10 +828,10 @@ void Backup(void)
 
 void Undo(void)
 {
-  // On remet … jour l'‚tat des infos de la page courante (pour pouvoir les
+  // On remet à jour l'‚tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_principal(Principal_Backups->Pages);
-  // On fait faire un undo … la liste des backups de la page principale
+  // On fait faire un undo à la liste des backups de la page principale
   Reculer_dans_une_liste_de_pages(Principal_Backups);
 
   // On extrait ensuite les infos sur la nouvelle page courante
@@ -840,16 +840,16 @@ void Undo(void)
   Download_infos_backup(Principal_Backups);
   // Note: le backup n'a pas obligatoirement les mˆmes dimensions ni la mˆme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilis‚ … la suite d'un Undo. Donc ‡a ne devrait pas
-  //       poser de problŠmes.
+  //       n'est pas utilisé à la suite d'un Undo. Donc ‡a ne devrait pas
+  //       poser de problèmes.
 }
 
 void Redo(void)
 {
-  // On remet … jour l'‚tat des infos de la page courante (pour pouvoir les
+  // On remet à jour l'‚tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_principal(Principal_Backups->Pages);
-  // On fait faire un redo … la liste des backups de la page principale
+  // On fait faire un redo à la liste des backups de la page principale
   Avancer_dans_une_liste_de_pages(Principal_Backups);
 
   // On extrait ensuite les infos sur la nouvelle page courante
@@ -858,13 +858,13 @@ void Redo(void)
   Download_infos_backup(Principal_Backups);
   // Note: le backup n'a pas obligatoirement les mˆmes dimensions ni la mˆme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilis‚ … la suite d'un Redo. Donc ‡a ne devrait pas
-  //       poser de problŠmes.
+  //       n'est pas utilisé à la suite d'un Redo. Donc ‡a ne devrait pas
+  //       poser de problèmes.
 }
 
 void Detruire_la_page_courante(void)
 {
-  // On d‚truit la page courante de la liste principale
+  // On détruit la page courante de la liste principale
   Detruire_la_page_courante_d_une_liste(Principal_Backups);
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_principal(Principal_Backups->Pages);
@@ -872,16 +872,16 @@ void Detruire_la_page_courante(void)
   Download_infos_backup(Principal_Backups);
   // Note: le backup n'a pas obligatoirement les mˆmes dimensions ni la mˆme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilis‚ … la suite d'une destruction de page. Donc ‡a ne
-  //       devrait pas poser de problŠmes.
+  //       n'est pas utilisé à la suite d'une destruction de page. Donc ‡a ne
+  //       devrait pas poser de problèmes.
 }
 
 void Interchanger_image_principale_et_brouillon(void)
 {
   S_Liste_de_pages * Liste_tempo;
 
-  // On commence par mettre … jour dans les descripteurs les infos sur les
-  // pages qu'on s'apprˆte … ‚changer, pour qu'on se retrouve pas avec de
+  // On commence par mettre à jour dans les descripteurs les infos sur les
+  // pages qu'on s'apprˆte à échanger, pour qu'on se retrouve pas avec de
   // vieilles valeurs qui datent de mathuzalem.
   Upload_infos_page_principal(Principal_Backups->Pages);
   Upload_infos_page_brouillon(Brouillon_Backups->Pages);
@@ -895,8 +895,8 @@ void Interchanger_image_principale_et_brouillon(void)
   // et backup.
 
     /* SECTION GROS CACA PROUT PROUT */
-    // Auparavant on ruse en mettant d‚j… … jour les dimensions de la
-    // nouvelle page courante. Si on ne le fait pas, le "Download" va d‚tecter
+    // Auparavant on ruse en mettant déjà à jour les dimensions de la
+    // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
     // un changement de dimensions et va bˆtement sortir du mode loupe, alors
     // que lors d'un changement de page, on veut bien conserver l'‚tat du mode
     // loupe du brouillon.
@@ -923,8 +923,8 @@ int Emprunt_memoire_de_page_possible(int taille)
   Taille_page_courante  =Taille_d_une_page(Principal_Backups->Pages);
   Taille_page_brouillon =Taille_d_une_page(Brouillon_Backups->Pages);
 
-  // Il faut pouvoir loger la zone m‚moire ainsi qu'un exemplaire de la page
-  // courante, en conservant au pire la 1Šre page de brouillon.
+  // Il faut pouvoir loger la zone mémoire ainsi qu'un exemplaire de la page
+  // courante, en conservant au pire la 1ère page de brouillon.
   if ((Taille_immediatement_disponible
       +Taille_liste_courante
       +Taille_liste_brouillon
@@ -940,60 +940,60 @@ void * Emprunter_memoire_de_page(int taille)
   int                Il_faut_liberer;
   S_Liste_de_pages * Liste_a_raboter;
   S_Page *           Page_a_supprimer;
-  int                Indice;
+  //int                Indice;
 
   if (Emprunt_memoire_de_page_possible(taille))
   {
-    // On regarde s'il faut lib‚rer des pages:
+    // On regarde s'il faut libérer des pages:
     Il_faut_liberer=
       (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<taille;
 
     if (!Il_faut_liberer)
     {
       // On a assez de place pour allouer une page. On n'a donc aucune page
-      // … supprimer. On peut allouer de la m‚moire directement.
+      // à supprimer. On peut allouer de la mémoire directement.
       return malloc(taille);
     }
     else
     {
-      // On manque de m‚moire. Il faut lib‚rer une page...
+      // On manque de mémoire. Il faut libérer une page...
 
-      // Tant qu'il faut lib‚rer
+      // Tant qu'il faut libérer
       while (Il_faut_liberer)
       {
         // On cherche sur quelle liste on va virer une page
 
-        // S'il reste des pages … lib‚rer dans la liste des brouillons
+        // S'il reste des pages à libérer dans la liste des brouillons
         if (Brouillon_Backups->Nb_pages_allouees>1)
-          // Alors on va d‚truire la derniŠre page allou‚e de la liste des
+          // Alors on va détruire la dernière page allouée de la liste des
           // brouillons
           Liste_a_raboter=Brouillon_Backups;
         else
         {
           if (Principal_Backups->Nb_pages_allouees>1)
           {
-            // Sinon on va d‚truire la derniŠre page allou‚e de la
+            // Sinon on va détruire la dernière page allouée de la
             // liste principale
             Liste_a_raboter=Principal_Backups;
           }
           else
           {
-            // Dans cette branche, il ‚tait pr‚vu qu'on obtienne la m‚moire
-            // n‚cessaire mais on n'arrive pas … la trouver. On indique donc
+            // Dans cette branche, il était prévu qu'on obtienne la mémoire
+            // nécessaire mais on n'arrive pas à la trouver. On indique donc
             // qu'elle n'est pas disponible, et on aura perdu des backups
             // pour rien
             return 0;
           }
         }
 
-        // Puis on d‚termine la page que l'on va supprimer (c'est la derniŠre
+        // Puis on détermine la page que l'on va supprimer (c'est la dernière
         // de la liste)
         Page_a_supprimer=Liste_a_raboter->Pages+(Liste_a_raboter->Nb_pages_allouees)-1;
 
-        // D‚truire la derniŠre page allou‚e dans la Liste_…_raboter
+        // Détruire la dernière page allouée dans la Liste_à_raboter
         Detruire_derniere_page_allouee_de_la_liste(Liste_a_raboter);
 
-        // On regarde s'il faut continuer … lib‚rer de la place
+        // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=
           (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<taille;
 
@@ -1006,8 +1006,8 @@ void * Emprunter_memoire_de_page(int taille)
   }
   else
   {
-    // Il n'y a pas assez de place pour allouer la m‚moire temporaire dans
-    // la m‚moire r‚serv‚e aux pages.
+    // Il n'y a pas assez de place pour allouer la mémoire temporaire dans
+    // la mémoire réservée aux pages.
     return 0;
   }
 

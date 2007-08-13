@@ -42,12 +42,12 @@ long Freespace(byte Numero_de_lecteur);
 //                     3 : lecteur C:
 //                   ... : ...
 //
-// R‚sultat = -1 si lecteur invalide, taille disponible sinon
+// Résultat = -1 si lecteur invalide, taille disponible sinon
 
 byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur);
 // Numero_de_lecteur compris entre 0 et 3 (4 lecteurs de disquettes)
 //
-// R‚sultat = 0 : Pas de lecteur
+// Résultat = 0 : Pas de lecteur
 //            1 : Lecteur 360 Ko
 //            2 : Lecteur 1.2 Mo
 //            3 : Lecteur 720 Ko
@@ -59,11 +59,11 @@ byte Disk_map(byte Numero_de_lecteur);
 // Renseigne sur la lettre logique d'un lecteur
 // (utile pour tester si un lecteur de disquette est A: ou B: aux yeux du DOS)
 //
-// Entr‚e: Octet = nø du lecteur (1=A, 2=B ...)
+// Entrée: Octet = nø du lecteur (1=A, 2=B ...)
 //
 // Sortie: Octet = 0FFh : Pas de lecteur (???)
-//                 sinon: num‚ro repr‚sentant la lettre logique du lecteur
-//                        (commence … 1)
+//                 sinon: numéro représenatan la lettre logique du lecteur
+//                        (commence à 1)
 
 byte Disque_dur_present(byte Numero_de_disque);
 // Numero_de_disque = 0:C, 1:D, 2:E, ...
@@ -91,21 +91,21 @@ void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical);
 
 
 byte Pixel_dans_ellipse(void);
-//   Indique si le pixel se trouvant … Ellipse_Curseur_X pixels
-// (Ellipse_Curseur_X>0 = … droite, Ellipse_Curseur_X<0 = … gauche) et …
+//   Indique si le pixel se trouvant à Ellipse_Curseur_X pixels
+// (Ellipse_Curseur_X>0 = à droite, Ellipse_Curseur_X<0 = à gauche) et à
 // Ellipse_Curseur_Y pixels (Ellipse_Curseur_Y>0 = en bas,
 // Ellipse_Curseur_Y<0 = en haut) du centre se trouve dans l'ellipse en
 // cours.
 
 byte Pixel_dans_cercle(void);
-//   Indique si le pixel se trouvant … Cercle_Curseur_X pixels
-// (Cercle_Curseur_X>0 = … droite, Cercle_Curseur_X<0 = … gauche) et …
+//   Indique si le pixel se trouvant à Cercle_Curseur_X pixels
+// (Cercle_Curseur_X>0 = à droite, Cercle_Curseur_X<0 = à gauche) et à
 // Cercle_Curseur_Y pixels (Cercle_Curseur_Y>0 = en bas,
 // Cercle_Curseur_Y<0 = en haut) du centre se trouve dans le cercle en
 // cours.
 
 byte Bit(byte Octet, byte Rang);
-// Extrait un bit d'un certain rang … partir d'un octet.
+// Extrait un bit d'un certain rang à partir d'un octet.
 
 byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne);
 // Renvoie la couleur du pixel (ILBM) en Pos_X.

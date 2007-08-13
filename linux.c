@@ -15,3 +15,8 @@ void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier)
     Chemin[i]=0;
     strcpy(Nom_Fichier,Buffer+i);
 }
+
+int filelength(char *)
+{
+	printf("filelenght non implémenté!\n");
+}

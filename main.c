@@ -22,10 +22,10 @@
 #include "loadsave.h"
 #include "sdlscreen.h"
 
-byte Ancien_nb_lignes;                  // Ancien nombre de lignes de l'‚cran
+byte Ancien_nb_lignes;                  // Ancien nombre de lignes de l'écran
 
 
-//--- Affichage de la syntaxe, et de la liste des modes vid‚os disponibles ---
+//--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Afficher_syntaxe(void)
 {
   printf("Syntax: GFX2 [<picture>] [<Video mode number>|<Help>]\n\n");
@@ -188,7 +188,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 
   switch (argc)
   {
-    case 1 : // Mode par d‚faut
+    case 1 : // Mode par défaut
       Resolution_actuelle=Config.Resolution_par_defaut;
       break;
 
@@ -199,9 +199,9 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         Un_fichier_a_ete_passe_en_parametre=1;
         Option2=2;
 
-        // On r‚cupŠre le chemin complet du paramŠtre
+        // On récupŠre le chemin complet du paramŠtre
         Buffer=realpath(argv[1],NULL);
-        // Et on d‚coupe ce chemin en r‚pertoire(path) + fichier(.ext)
+        // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
         // chdir(Principal_Repertoire_fichier);
       }
@@ -223,7 +223,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
           exit(0);
         }
 
-        Resolution_actuelle=Str2num(argv[Option2]); // Mode d‚sir‚ par l'utilisateur
+        Resolution_actuelle=Str2num(argv[Option2]); // Mode désiré par l'utilisateur
         if ( (Resolution_actuelle<MODE_320_200) || (Resolution_actuelle>MODE_1024_768) )
           Erreur(ERREUR_NUMERO_MODE);
         Une_resolution_a_ete_passee_en_parametre=Un_fichier_a_ete_passe_en_parametre;
@@ -248,40 +248,40 @@ void Initialisation_du_programme(int argc,char * argv[])
   int Temp;
   int Mode_dans_lequel_on_demarre;
 
-  // On commence ‚galement par interdire d'appuyer sur Ctrl+Pause et Ctrl+C
+  // On commence également par interdire d'appuyer sur Ctrl+Pause et Ctrl+C
   signal(SIGINT  ,SIG_IGN);
 
   printf("°±²Û GrafX 2.00 %s%s þ Copyright (c)1996-1999 Sunset Design Û²±°\n",ALPHA_BETA,POURCENTAGE_VERSION);
 
-  // On cr‚e dŠs maintenant les descripteurs des listes de pages pour la page
+  // On crée dŠs maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
-  // invalide lors des appels aux multiples fonctions manipul‚es …
+  // invalide lors des appels aux multiples fonctions manipulées …
   // l'initialisation du programme.
   Principal_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
   Brouillon_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
   Initialiser_S_Liste_de_pages(Principal_Backups);
   Initialiser_S_Liste_de_pages(Brouillon_Backups);
 
-  // On calcule tout de suite la table pr‚calcul‚e utilis‚e pour la recherche
+  // On calcule tout de suite la table précalculée utilisée pour la recherche
   // des meilleures couleurs afin de ne pas avoir de valeurs catastrophiques
-  // d‚sign‚es au d‚marrage (couleurs du menu, ...)
+  // désignées au démarrage (couleurs du menu, ...)
   Initialiser_la_table_precalculee_des_distances_de_couleur();
 
-  // On d‚termine dŠs le d‚part o— se trouve le fichier:
+  // On détermine dŠs le départ o— se trouve le fichier:
   Chercher_repertoire_du_programme(argv[0]);
-  // On d‚tecte les lecteurs qui sont accessibles:
+  // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
-  // On d‚termine le r‚pertoire courant:
+  // On détermine le répertoire courant:
   Determiner_repertoire_courant();
 
-  // On en profite pour le m‚moriser dans le r‚pertoire principal:
+  // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Repertoire_initial,Principal_Repertoire_courant);
 
-  // On initialise les donn‚es sur le nom de fichier de l'image principale:
+  // On initialise les données sur le nom de fichier de l'image principale:
   strcpy(Principal_Repertoire_fichier,Principal_Repertoire_courant);
   strcpy(Principal_Nom_fichier,"NO_NAME.PKM");
   Principal_Format_fichier=FORMAT_PAR_DEFAUT;
-  // On initialise les donn‚es sur le nom de fichier de l'image de brouillon:
+  // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Brouillon_Repertoire_courant,Principal_Repertoire_courant);
   strcpy(Brouillon_Repertoire_fichier,Principal_Repertoire_fichier);
   strcpy(Brouillon_Nom_fichier       ,Principal_Nom_fichier);
@@ -292,9 +292,9 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brosse_Format_fichier    =Principal_Format_fichier;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  Liste_du_fileselect=NULL;       // Au d‚but, il n'y a pas de fichiers dans la liste
-  Principal_File_list_Position=0; // Au d‚but, le fileselect est en haut de la liste des fichiers
-  Principal_File_list_Decalage=0; // Au d‚but, le fileselect est en haut de la liste des fichiers
+  Liste_du_fileselect=NULL;       // Au début, il n'y a pas de fichiers dans la liste
+  Principal_File_list_Position=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Principal_File_list_Decalage=0; // Au début, le fileselect est en haut de la liste des fichiers
   Principal_Format=0;
   Brouillon_File_list_Position=0;
   Brouillon_File_list_Decalage=0;
@@ -336,23 +336,23 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Loupe_Decalage_X=0;
   Brouillon_Loupe_Decalage_Y=0;
 
-  // On initialise tous les modes vid‚o
+  // On initialise tous les modes vidéo
   Definition_des_modes_video();
 
-  // On initialise les donn‚es sur l'‚tat du programme:
-    // Donn‚e sur la sortie du programme:
+  // On initialise les données sur l'état du programme:
+    // Donnée sur la sortie du programme:
   Sortir_du_programme=0;
-    // Donn‚es sur l'‚tat du menu:
+    // Données sur l'état du menu:
   Pixel_dans_menu=Pixel_dans_barre_d_outil;
   Menu_visible=1;
-    // Donn‚es sur les couleurs et la palette:
+    // Données sur les couleurs et la palette:
   Fore_color=15;
   Back_color=0;
   Couleur_debut_palette=0;
-    // Donn‚es sur le curseur:
+    // Données sur le curseur:
   Forme_curseur=FORME_CURSEUR_CIBLE;
   Cacher_curseur=0;
-    // Donn‚es sur le pinceau:
+    // Données sur le pinceau:
   Pinceau_X=0;
   Pinceau_Y=0;
   Pinceau_Forme=FORME_PINCEAU_ROND;
@@ -362,10 +362,10 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   Forcer_affichage_curseur=0;
 
-  // On initialise la table des carr‚s:
+  // On initialise la table des carrés:
   Initialiser_la_table_des_carres();
 
-  // On initialise tout ce qui concerne les op‚rations et les effets
+  // On initialise tout ce qui concerne les opérations et les effets
   Operation_Taille_pile=0;
   Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
   Ligne_en_cours         =OPERATION_LIGNE;
@@ -385,10 +385,10 @@ void Initialisation_du_programme(int argc,char * argv[])
     // On initialise les infos du mode smooth:
   Smooth_Mode=0;
     // On initialise les infos du mode shade:
-  Shade_Mode=0;     // Les autres infos du Shade sont charg‚es avec la config
+  Shade_Mode=0;     // Les autres infos du Shade sont chargées avec la config
   Quick_shade_Mode=0; // idem
-    // On initialise les infos sur les d‚grad‚s:
-  Traiter_pixel_de_degrade =Afficher_pixel; // Les autres infos sont charg‚es avec la config
+    // On initialise les infos sur les dégradés:
+  Traiter_pixel_de_degrade =Afficher_pixel; // Les autres infos sont chargées avec la config
     // On initialise les infos de la grille:
   Snap_Mode=0;
   Snap_Largeur=8;
@@ -396,12 +396,12 @@ void Initialisation_du_programme(int argc,char * argv[])
   Snap_Decalage_X=0;
   Snap_Decalage_Y=0;
     // On initialise les infos du mode Colorize:
-  Colorize_Mode=0;          // Mode colorize inactif par d‚faut
-  Colorize_Opacite=50;      // Une interpolation de 50% par d‚faut
-  Colorize_Mode_en_cours=0; // Par d‚faut, la m‚thode par interpolation
+  Colorize_Mode=0;          // Mode colorize inactif par défaut
+  Colorize_Opacite=50;      // Une interpolation de 50% par défaut
+  Colorize_Mode_en_cours=0; // Par défaut, la méthode par interpolation
   Calculer_les_tables_de_Colorize();
     // On initialise les infos du mode Tiling:
-  Tiling_Mode=0;  //   Pas besoin d'initialiser les d‚calages car ‡a se fait
+  Tiling_Mode=0;  //   Pas besoin d'initialiser les décalages car ‡a se fait
                   // en prenant une brosse (toujours mis … 0).
     // On initialise les infos du mode Mask:
   Mask_Mode=0;
@@ -414,17 +414,17 @@ void Initialisation_du_programme(int argc,char * argv[])
   memset(Spray_Multi_flow,0,256);
   srand(time(NULL)); // On randomize un peu tout ‡a...
 
-  // R‚cup‚ration du nombre de lignes de l'ancien mode
+  // Récupération du nombre de lignes de l'ancien mode
   Ancien_nb_lignes=Recuperer_nb_lignes();
-  // Passer en clavier am‚ricain
+  // Passer en clavier américain
   Clavier_americain();
 
-  // Tester la pr‚sence de la souris
+  // Tester la présence de la souris
   if (!Detection_souris()) Erreur(ERREUR_DRIVER_SOURIS);
 
   // Initialisation des boutons
   Initialisation_des_boutons();
-  // Initialisation des op‚rations
+  // Initialisation des opérations
   Initialisation_des_operations();
 
   Une_fenetre_est_ouverte=0;
@@ -459,7 +459,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Trame_Mode=0;
   Copier_trame_predefinie(0);
 
-  // On s‚lectionne toutes les couleurs pour le masque de copie de couleurs vers le brouillon
+  // On sélectionne toutes les couleurs pour le masque de copie de couleurs vers le brouillon
   memset(Masque_copie_couleurs,1,256);
 
   // Prise en compte de la fonte
@@ -468,7 +468,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   else
     Fonte=Fonte_systeme;
 
-  // Allocation de m‚moire pour la brosse
+  // Allocation de mémoire pour la brosse
   if (!(Brosse         =(byte *)malloc(   1*   1))) Erreur(ERREUR_MEMOIRE);
   if (!(Smear_Brosse   =(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU))) Erreur(ERREUR_MEMOIRE);
 
@@ -478,7 +478,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Largeur=1;
   Pinceau_Hauteur=1;
 
-  // D‚tection des modes SDL en ‚tat de fonctionner:
+  // Détection des modes SDL en état de fonctionner:
   Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
 
 //Ici, trier les modes dispos ou pas dans le tableau global ...
@@ -506,7 +506,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   Mode_dans_lequel_on_demarre=Resolution_actuelle;
   Buffer_de_ligne_horizontale=NULL;
-  Resolution_actuelle=-1; // On n'‚tait pas dans un mode graphique
+  Resolution_actuelle=-1; // On n'était pas dans un mode graphique
   Initialiser_mode_video(Mode_dans_lequel_on_demarre);
 
   Principal_Largeur_image=Largeur_ecran;
@@ -514,12 +514,12 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Largeur_image=Largeur_ecran;
   Brouillon_Hauteur_image=Hauteur_ecran;
 
-  // Allocation de m‚moire pour les diff‚rents ‚crans virtuels (et brosse)
+  // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Initialiser_les_listes_de_backups_en_debut_de_programme(Config.Nb_pages_Undo+1,Largeur_ecran,Hauteur_ecran)==0)
     Erreur(ERREUR_MEMOIRE);
 
-  // On remet le nom par d‚faut pour la page de brouillon car il ‚t‚ modifi‚
-  // par le passage d'un fichier en paramŠtre lors du traitement pr‚c‚dent.
+  // On remet le nom par défaut pour la page de brouillon car il été modifié
+  // par le passage d'un fichier en paramŠtre lors du traitement précédent.
   // Note: le fait que l'on ne modifie que les variables globales Brouillon_*
   // et pas les infos contenues dans la page de brouillon elle-mˆme ne m'ins-
   // -pire pas confiance mais ‡a a l'air de marcher sans poser de problŠmes,
@@ -531,7 +531,7 @@ void Initialisation_du_programme(int argc,char * argv[])
     Brouillon_Format_fichier=FORMAT_PAR_DEFAUT;
   }
 
-  // Nettoyage de l'‚cran virtuel (les autres recevront celui-ci par copie)
+  // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
 
   // Initialisation de diverses variables par calcul:
@@ -543,13 +543,13 @@ void Initialisation_du_programme(int argc,char * argv[])
   Afficher_menu();
   Afficher_pinceau_dans_menu();
 
-  // On affiche le curseur pour d‚butter correctement l'‚tat du programme:
+  // On affiche le curseur pour débutter correctement l'état du programme:
   Afficher_curseur();
 
   Brouillon_Image_modifiee=0;
   Principal_Image_modifiee=0;
 
-  // Le programme d‚bute en mode de dessin … la main
+  // Le programme débute en mode de dessin … la main
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
 
   // On initialise la brosse initiale … 1 pixel blanc:
@@ -568,32 +568,32 @@ void Fermeture_du_programme(void)
   // On libŠre le buffer de gestion de lignes
   free(Buffer_de_ligne_horizontale);
 
-  // On libŠre le pinceau sp‚cial
+  // On libŠre le pinceau spécial
   free(Pinceau_Sprite);
 
-  // On libŠre la table pr‚calcul‚e des distances de teintes
+  // On libŠre la table précalculée des distances de teintes
   free(MC_Table_differences);
 
-  // On libŠre les diff‚rents ‚crans virtuels et brosse:
+  // On libŠre les différents écrans virtuels et brosse:
   free(Brosse);
   Nouveau_nombre_de_backups(0);
   free(Brouillon_Ecran);
   free(Principal_Ecran);
 
-  // On libŠre ‚galement les donn‚es de l'aide:
+  // On libŠre également les données de l'aide:
   for (Bidon=0;Bidon<NB_SECTIONS_AIDE;Bidon++)
     free(Table_d_aide[Bidon].Debut_de_la_liste);
 
   Passer_en_mode_texte(Ancien_nb_lignes);
   Clavier_de_depart();
 
-  // On prend bien soin de passer dans le r‚pertoire initial:
+  // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Repertoire_initial)!=-1)
   {
     /* A revoir ...
     _dos_setdrive(Repertoire_initial[0]-64,&Bidon);
     */
-    // On sauvegarde les donn‚es dans le .CFG et dans le .INI
+    // On sauvegarde les données dans le .CFG et dans le .INI
     if (Config.Auto_save)
     {
       Retour=Sauver_CFG();
@@ -609,7 +609,7 @@ void Fermeture_du_programme(void)
 }
 
 
-// -------------------------- Proc‚dure principale ---------------------------
+// -------------------------- Procédure principale ---------------------------
 int main(int argc,char * argv[])
 {
   Initialisation_du_programme(argc,argv);
@@ -620,7 +620,7 @@ int main(int argc,char * argv[])
 
   if (Un_fichier_a_ete_passe_en_parametre)
   {
-    Bouton_reload();
+    Bouton_Reload();
     Une_resolution_a_ete_passee_en_parametre=0;
   }
 

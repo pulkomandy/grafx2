@@ -16,26 +16,28 @@
 #include <unistd.h>
 #include "boutons.h"
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+#include "linux.h"
+
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
 
-// Chargement des pixels dans l'‚cran principal
-void Pixel_Chargement_dans_ecran_courant(short Pos_X,short Pos_Y,byte Couleur)
+// Chargement des pixels dans l'écran principal
+void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
 {
-  if ((Pos_X>=0) && (Pos_Y>=0))
+  //if ((Pos_X>=0) && (Pos_Y>=0)) //Toujours vrai ?
   if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
     Pixel_dans_ecran_courant(Pos_X,Pos_Y,Couleur);
 }
 
 
 // Chargement des pixels dans la brosse
-void Pixel_Chargement_dans_brosse(short Pos_X,short Pos_Y,byte Couleur)
+void Pixel_Chargement_dans_brosse(word Pos_X,word Pos_Y,byte Couleur)
 {
-  if ((Pos_X>=0) && (Pos_Y>=0))
+  //if ((Pos_X>=0) && (Pos_Y>=0))
   if ((Pos_X<Brosse_Largeur) && (Pos_Y<Brosse_Hauteur))
-    Pixel_dans_Brosse(Pos_X,Pos_Y,Couleur);
+    Pixel_dans_brosse(Pos_X,Pos_Y,Couleur);
 }
 
 
@@ -46,7 +48,7 @@ short Preview_Pos_Y;
 
 
 // Chargement des pixels dans la preview
-void Pixel_Chargement_dans_preview(short Pos_X,short Pos_Y,byte Couleur)
+void Pixel_Chargement_dans_preview(word Pos_X,word Pos_Y,byte Couleur)
 {
   if (((Pos_X % Preview_Facteur_X)==0) && ((Pos_Y % Preview_Facteur_Y)==0))
   if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
@@ -67,7 +69,7 @@ void Remapper_fileselect(void)
 
 
 
-// Donn‚es pour la gestion du chargement en 24b
+// Données pour la gestion du chargement en 24b
 #define FORMAT_24B 0x100
 typedef void (* fonction_afficheur_24b) (short,short,byte,byte,byte);
 int                    Image_24b;
@@ -107,12 +109,12 @@ void Pixel_Chargement_dans_preview_24b(short Pos_X,short Pos_Y,byte R,byte V,byt
   }
 }
 
-// Cr‚ation d'une palette fake
+// Création d'une palette fake
 void Palette_fake_24b(T_Palette Palette)
 {
   int Couleur;
 
-  // G‚n‚ration de la palette
+  // Génération de la palette
   for (Couleur=0;Couleur<256;Couleur++)
   {
     Palette[Couleur].R=((Couleur & 0xE0)>>5)<<3;
@@ -121,7 +123,7 @@ void Palette_fake_24b(T_Palette Palette)
   }
 }
 
-// Suppl‚ment … faire lors de l'initialisation d'une preview dans le cas
+// Supplément à faire lors de l'initialisation d'une preview dans le cas
 // d'une image 24b
 void Initialiser_preview_24b(int Largeur,int Hauteur)
 {
@@ -153,10 +155,10 @@ void Initialiser_preview_24b(int Largeur,int Hauteur)
       if (Pixel_de_chargement==Pixel_Chargement_dans_ecran_courant)
         Erreur_fichier=1; // 1 => On n'a pas perdu l'image courante
       else
-        Erreur_fichier=3; // 3 => Chargement de brosse ‚chou‚
+        Erreur_fichier=3; // 3 => Chargement de brosse échoué
     }
     else
-      Image_24b=1;        // On a un buffer … traiter en fin de chargement
+      Image_24b=1;        // On a un buffer à traiter en fin de chargement
   }
 }
 
@@ -165,10 +167,10 @@ void Initialiser_preview_24b(int Largeur,int Hauteur)
 
 void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
 //
-//   Cette proc‚dure doit ˆtre appel‚e par les routines de chargement
+//   Cette procédure doit ˆtre appelée par les routines de chargement
 // d'images.
-//   Elle doit ˆtre appel‚e entre le moment o— l'on connait la dimension de
-// l'image (dimension r‚elle, pas dimension tronqu‚e) et l'affichage du
+//   Elle doit ˆtre appelée entre le moment o— l'on connait la dimension de
+// l'image (dimension réelle, pas dimension tronquée) et l'affichage du
 // premier point.
 //
 {
@@ -180,9 +182,9 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
 
   if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
   {
-    // Pr‚paration du chargement d'une preview:
+    // Préparation du chargement d'une preview:
 
-    // Affichage des donn‚es "Image size:"
+    // Affichage des données "Image size:"
     if ((Largeur<10000) && (Hauteur<10000))
     {
       Num2str(Largeur,Chaine,4);
@@ -223,14 +225,14 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
       Print_dans_fenetre( 83,74,Format_Extension[Format-1],CM_Noir,CM_Clair);
     }
 
-    // On efface le commentaire pr‚c‚dent
+    // On efface le commentaire précédent
     Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+176*Menu_Facteur_Y,
           Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
     // Affichage du commentaire
     if (Format_Commentaire[Format-1])
       Print_dans_fenetre(46,176,Principal_Commentaire,CM_Noir,CM_Clair);
 
-    // Calculs des donn‚es n‚cessaires … l'affichage de la preview:
+    // Calculs des données nécessaires à l'affichage de la preview:
     Preview_Facteur_X=Round_div_max(Largeur,122*Menu_Facteur_X);
     Preview_Facteur_Y=Round_div_max(Hauteur, 82*Menu_Facteur_Y);
 
@@ -257,7 +259,7 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
     {
       if (Backup_avec_nouvelles_dimensions(0,Largeur,Hauteur))
       {
-        // La nouvelle page a pu ˆtre allou‚e, elle est pour l'instant pleine
+        // La nouvelle page a pu ˆtre allouée, elle est pour l'instant pleine
         // de 0s. Elle fait Principal_Largeur_image de large.
         // Normalement tout va bien, tout est sous contr“le...
       }
@@ -354,7 +356,7 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 
 
 /////////////////////////////////////////////////////////////////////////////
-//                    Gestion des lectures et ‚critures                    //
+//                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
 byte * Tampon_lecture;
@@ -430,12 +432,12 @@ void /*__interrupt __near*/ Nouveau_handler_clavier(void)
 }
 
 
-// -------- Modifier la valeur du code d'erreur d'accŠs … un fichier --------
-//   On n'est pas oblig‚ d'utiliser cette fonction … chaque fois mais il est
+// -------- Modifier la valeur du code d'erreur d'accŠs à un fichier --------
+//   On n'est pas obligé d'utiliser cette fonction à chaque fois mais il est
 // important de l'utiliser dans les cas du type:
 //   if (!Erreur_fichier) *** else Erreur_fichier=***;
 // En fait, dans le cas o— l'on modifie Erreur_fichier alors qu'elle contient
-// dŠj… un code d'erreur.
+// dŠjà un code d'erreur.
 void Modif_Erreur_fichier(int Nouvelle_valeur)
 {
   if (Erreur_fichier>=0)
@@ -447,10 +449,10 @@ void Modif_Erreur_fichier(int Nouvelle_valeur)
 void Charger_image(byte Image)
 {
   int  Indice; // Indice de balayage des formats
-  int  Format; // Format du fichier … charger
+  int  Format; // Format du fichier à charger
 
 
-  // On place par d‚faut Erreur_fichier … vrai au cas o— on ne sache pas
+  // On place par défaut Erreur_fichier à vrai au cas o— on ne sache pas
   // charger le format du fichier:
   Erreur_fichier=1;
 
@@ -458,14 +460,14 @@ void Charger_image(byte Image)
   {
     Format_Test[Principal_Format-1]();
     if (!Erreur_fichier)
-      // Si dans le s‚lecteur il y a un format valide on le prend tout de suite
+      // Si dans le sélecteur il y a un format valide on le prend tout de suite
       Format=Principal_Format-1;
   }
 
   if (Erreur_fichier)
   {
-    //  Sinon, on va devoir scanner les diff‚rents formats qu'on connait pour
-    // savoir … quel format est le fichier:
+    //  Sinon, on va devoir scanner les différents formats qu'on connait pour
+    // savoir à quel format est le fichier:
     for (Indice=0;Indice<NB_FORMATS_LOAD;Indice++)
     {
       // On appelle le testeur du format:
@@ -479,7 +481,7 @@ void Charger_image(byte Image)
     }
   }
 
-  // Si on a su d‚terminer avec succŠs le format du fichier:
+  // Si on a su déterminer avec succŠs le format du fichier:
   if (!Erreur_fichier)
   {
     // Installer le handler d'interruption du clavier pour stopper une preview
@@ -495,7 +497,7 @@ void Charger_image(byte Image)
     Image_24b=0;
     Format_Load[Format]();
 
-    // D‚sinstaller le handler d'interruption du clavier
+    // Désinstaller le handler d'interruption du clavier
     if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
     /*A revoir ...
       _dos_setvect(9,Ancien_handler_clavier);
@@ -509,7 +511,7 @@ void Charger_image(byte Image)
       // On vient de charger une image 24b
       if (!Erreur_fichier)
       {
-        // Le chargement a r‚ussi, on peut faire la conversion en 256 couleurs
+        // Le chargement a réussi, on peut faire la conversion en 256 couleurs
         if (Pixel_de_chargement==Pixel_Chargement_dans_ecran_courant)
         {
           // Cas d'un chargement dans l'image
@@ -533,7 +535,7 @@ void Charger_image(byte Image)
     {
       if ( (Erreur_fichier!=1) && (Format_Backup_done[Format]) )
       {
-        // On considŠre que l'image charg‚e n'est plus modifi‚e
+        // On considŠre que l'image chargée n'est plus modifiée
         Principal_Image_modifiee=0;
         // Et on documente la variable Principal_Format_fichier avec la valeur:
         Principal_Format_fichier=Format+1;
@@ -546,22 +548,22 @@ void Charger_image(byte Image)
       }
       else if (Erreur_fichier!=1)
       {
-        // On considŠre que l'image charg‚e est encore modifi‚e
+        // On considŠre que l'image chargée est encore modifiée
         Principal_Image_modifiee=1;
         // Et on documente la variable Principal_Format_fichier avec la valeur:
         Principal_Format_fichier=Format+1;
       }
       else
       {
-        // Dans ce cas, on sait que l'image n'a pas chang‚, mais ses
+        // Dans ce cas, on sait que l'image n'a pas changé, mais ses
         // paramŠtres (dimension, palette, ...) si. Donc on les restaures.
         Download_infos_page_principal(Principal_Backups->Pages);
       }
     }
   }
   else
-    // Sinon, l'appelant sera au courant de l'‚chec grƒce … Erreur_fichier;
-    // et si on s'apprˆtait … faire un chargement d‚finitif de l'image (pas
+    // Sinon, l'appelant sera au courant de l'échec grƒce à Erreur_fichier;
+    // et si on s'apprˆtait à faire un chargement définitif de l'image (pas
     // une preview), alors on flash l'utilisateur.
     if (Pixel_de_chargement!=Pixel_Chargement_dans_preview)
       Erreur(0);
@@ -571,7 +573,7 @@ void Charger_image(byte Image)
 // -- Sauver n'importe quel type connu de fichier d'image (ou palette) ------
 void Sauver_image(byte Image)
 {
-  // On place par d‚faut Erreur_fichier … vrai au cas o— on ne sache pas
+  // On place par défaut Erreur_fichier à vrai au cas o— on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   Erreur_fichier=1;
 
@@ -627,7 +629,7 @@ void Load_PAL(void)
 {
   int   Handle;              // Handle du fichier
   char  Nom_du_fichier[256]; // Nom complet du fichier
-  long  Taille_du_fichier;   // Taille du fichier
+  //long  Taille_du_fichier;   // Taille du fichier
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -655,7 +657,7 @@ void Load_PAL(void)
     close(Handle);
   }
   else
-    // Si on n'a pas r‚ussi … ouvrir le fichier, alors il y a eu une erreur
+    // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
     Erreur_fichier=1;
 }
 
@@ -665,7 +667,7 @@ void Save_PAL(void)
 {
   int  Fichier;             // Handle du fichier
   char Nom_du_fichier[256]; // Nom complet du fichier
-  long Taille_du_fichier;   // Taille du fichier
+  //long Taille_du_fichier;   // Taille du fichier
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -685,15 +687,15 @@ void Save_PAL(void)
     else // Ecriture correcte => Fermeture normale du fichier
       close(Fichier);
   }
-  else // Si on n'a pas r‚ussi … ouvrir le fichier, alors il y a eu une erreur
+  else // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
   {
     Erreur_fichier=1;
     close(Fichier);
     remove(Nom_du_fichier);
-                     //   On se fout du r‚sultat de l'op‚ration car si ‡a
-		     // renvoie 0 c'est que le fichier avait ‚t‚ partiel-
-		     // -lement ‚crit, sinon pas du tout. Or dans tous les
-		     // cas ‡a revient au mˆme pour nous: Sauvegarde rat‚e!
+                     //   On se fout du résultat de l'opération car si ‡a
+		     // renvoie 0 c'est que le fichier avait été partiel-
+		     // -lement écrit, sinon pas du tout. Or dans tous les
+		     // cas ‡a revient au mˆme pour nous: Sauvegarde ratée!
   }
 }
 
@@ -729,7 +731,7 @@ void Test_IMG(void)
   Handle=open(Nom_du_fichier,O_RDONLY);
   if (Handle!=-1)
   {
-    // Lecture et v‚rification de la signature
+    // Lecture et vérification de la signature
     if ((read(Handle,&IMG_Header,sizeof(struct Header)))==sizeof(struct Header))
     {
       if ( (!memcmp(IMG_Header.Filler1,Signature,6))
@@ -779,10 +781,10 @@ void Load_IMG(void)
       if (Erreur_fichier==0)
       {
         //   On commence par passer la palette en 256 comme ‡a, si la nouvelle
-        // palette a moins de 256 coul, la pr‚c‚dente ne souffrira pas d'un
-        // assombrissement pr‚judiciable.
+        // palette a moins de 256 coul, la précédente ne souffrira pas d'un
+        // assombrissement préjudiciable.
         Palette_64_to_256(Principal_Palette);
-        //   On peut maintenant transf‚rer la nouvelle palette
+        //   On peut maintenant transférer la nouvelle palette
         memcpy(Principal_Palette,IMG_Header.Palette,sizeof(T_Palette));
         Palette_256_to_64(Principal_Palette);
         Set_palette(Principal_Palette);
@@ -865,7 +867,7 @@ void Save_IMG(void)
       if (Erreur_fichier)
         remove(Nom_du_fichier);
     }
-    else // Erreur d'‚criture (disque plein ou prot‚g‚)
+    else // Erreur d'écriture (disque plein ou protégé)
     {
       close(Fichier);
       remove(Nom_du_fichier);
@@ -896,7 +898,7 @@ void Test_PKM(void)
   struct Header
   {
     char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // M‚thode de compression:
+    byte Methode;  // Méthode de compression:
 		   //   0 = compression en ligne (c)KM
 		   //   autres = inconnues pour le moment
     byte Recon1;   // Octet de reconnaissance sur 1 octet  }
@@ -920,9 +922,9 @@ void Test_PKM(void)
     // Lecture du header du fichier
     if (read(Fichier,&Head,sizeof(struct Header))==sizeof(struct Header))
     {
-      // On regarde s'il y a la signature PKM suivie de la m‚thode 0.
-      // La constante "PKM" ‚tant un chaŒne, elle se termine toujours par 0.
-      // Donc pas la peine de s'emm...er … regarder si la m‚thode est … 0.
+      // On regarde s'il y a la signature PKM suivie de la méthode 0.
+      // La constante "PKM" étant un chaŒne, elle se termine toujours par 0.
+      // Donc pas la peine de s'emm...er à regarder si la méthode est à 0.
       if ( (!memcmp(&Head,"PKM",4)) && Head.Largeur && Head.Hauteur)
         Erreur_fichier=0;
     }
@@ -939,7 +941,7 @@ void Load_PKM(void)
   struct Header
   {
     char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // M‚thode de compression:
+    byte Methode;  // Méthode de compression:
                    //   0 = compression en ligne (c)KM
                    //   autres = inconnues pour le moment
     byte Recon1;   // Octet de reconnaissance sur 1 octet  }
@@ -1011,7 +1013,7 @@ void Load_PKM(void)
                   Erreur_fichier=2;
                 break;
 
-              case 1 : // Dimensions de l'‚cran d'origine
+              case 1 : // Dimensions de l'écran d'origine
                 if (read(Fichier,&Octet,1)==1)
                 {
                   if (Octet==4)
@@ -1081,7 +1083,7 @@ void Load_PKM(void)
           Compteur_de_pixels=0;
           Taille_pack=(Informations_Fichier->st_size)-sizeof(struct Header)-Head.Jump;
 
-          // Boucle de d‚compression:
+          // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
           {
             Octet=Lire_octet(Fichier);
@@ -1095,7 +1097,7 @@ void Load_PKM(void)
               Compteur_de_donnees_packees++;
               Compteur_de_pixels++;
             }
-            else // Sinon, On regarde si on va d‚compacter un...
+            else // Sinon, On regarde si on va décompacter un...
             { // ... nombre de pixels tenant sur un byte
               if (Octet==Head.Recon1)
               {
@@ -1149,10 +1151,10 @@ void Load_PKM(void)
     // On commence par compter l'utilisation de chaque couleurs
     Palette_Compter_nb_couleurs_utilisees(Find_recon);
 
-    // Ensuite Recon1 devient celle la moins utilis‚e de celles-ci
+    // Ensuite Recon1 devient celle la moins utilisée de celles-ci
     *Recon1=0;
     Best=1;
-    NBest=1000000; // Une mˆme couleur ne pourra jamais ˆtre utilis‚e 1M de fois.
+    NBest=1000000; // Une mˆme couleur ne pourra jamais ˆtre utilisée 1M de fois.
     for (Indice=1;Indice<=255;Indice++)
       if (Find_recon[Indice]<NBest)
       {
@@ -1161,7 +1163,7 @@ void Load_PKM(void)
       }
     *Recon1=Best;
 
-    // Enfin Recon2 devient la 2Šme moins utilis‚e
+    // Enfin Recon2 devient la 2Šme moins utilisée
     *Recon2=0;
     Best=0;
     NBest=1000000;
@@ -1182,7 +1184,7 @@ void save_PKM(void)
   struct Header
   {
     char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // M‚thode de compression:
+    byte Methode;  // Méthode de compression:
 		   //   0 = compression en ligne (c)KM
 		   //   autres = inconnues pour le moment
     byte Recon1;   // Octet de reconnaissance sur 1 octet  }
@@ -1231,7 +1233,7 @@ void save_PKM(void)
       Init_ecriture();
 
       // Ecriture du commentaire
-      // (Compteur_de_pixels est utilis‚ ici comme simple indice de comptage)
+      // (Compteur_de_pixels est utilisé ici comme simple indice de comptage)
       if (Taille_commentaire)
       {
         Ecrire_octet(Fichier,0);
@@ -1239,7 +1241,7 @@ void save_PKM(void)
         for (Compteur_de_pixels=0; Compteur_de_pixels<Taille_commentaire; Compteur_de_pixels++)
           Ecrire_octet(Fichier,Principal_Commentaire[Compteur_de_pixels]);
       }
-      // Ecriture des dimensions de l'‚cran
+      // Ecriture des dimensions de l'écran
       Ecrire_octet(Fichier,1);
       Ecrire_octet(Fichier,4);
       Ecrire_octet(Fichier,Largeur_ecran&0xFF);
@@ -1377,9 +1379,9 @@ void Test_LBM(void)
       Erreur_fichier=1;
     else
     {
-      Lire_long(); //   On aurait pu v‚rifier que ce long est ‚gal … la taille
+      Lire_long(); //   On aurait pu vérifier que ce long est égal à la taille
                    // du fichier - 8, mais ‡a aurait interdit de charger des
-                   // fichiers tronqu‚s (et d‚j… que c'est chiant de perdre
+                   // fichiers tronqués (et déjà que c'est chiant de perdre
                    // une partie du fichier il faut quand mˆme pouvoir en
                    // garder un peu... Sinon, moi je pleure :'( !!! )
       if (read(LBM_Fichier,Format,4)!=4)
@@ -1455,7 +1457,7 @@ void Test_LBM(void)
           }
         }
       }
-      // Ici, il reste les 16 derniŠres couleurs … modifier
+      // Ici, il reste les 16 derniŠres couleurs à modifier
       for (I=240,J=0; J<16; I++,J++)
       {
         Temp=Principal_Palette[J].R+8;
@@ -1493,7 +1495,7 @@ void Test_LBM(void)
         }
       }
     }
-    else // Image 64 couleurs sauv‚e en 32.
+    else // Image 64 couleurs sauvée en 32.
     {
       for (I=0; I<32; I++)
       {
@@ -1508,13 +1510,13 @@ void Test_LBM(void)
   // ------------------------- Attendre une section -------------------------
   byte Wait_for(byte * Section_attendue)
   {
-    // Valeur retourn‚e: 1=Section trouv‚e, 0=Section non trouv‚e (erreur)
+    // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
     dword Taille_section;
     byte Section_lue[4];
 
     if (read(LBM_Fichier,Section_lue,4)!=4)
       return 0;
-    while (memcmp(Section_lue,Section_attendue,4)) // Sect. pas encore trouv‚e
+    while (memcmp(Section_lue,Section_attendue,4)) // Sect. pas encore trouvée
     {
       Taille_section=Lire_long();
       if (Erreur_fichier)
@@ -1607,7 +1609,7 @@ void Test_LBM(void)
 void Load_LBM(void)
 {
   char  Nom_du_fichier[256];
-  int   Fichier;
+  //int   Fichier;
   struct Header_LBM
   {
     word  Width;
@@ -1649,11 +1651,11 @@ void Load_LBM(void)
       stat(Nom_du_fichier,Informations_Fichier);
     Taille_du_fichier=Informations_Fichier->st_size;
 
-    // On avance dans le fichier (pas besoin de tester ce qui l'a d‚j… ‚t‚)
+    // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
     read(LBM_Fichier,Section,4);
     Lire_long();
     read(LBM_Fichier,Format,4);
-    if (!Wait_for("BMHD"))
+    if (!Wait_for((byte *)"BMHD"))
       Erreur_fichier=1;
     Lire_long();
 
@@ -1661,7 +1663,7 @@ void Load_LBM(void)
     if ( (read(LBM_Fichier,&Header,sizeof(struct Header_LBM))==sizeof(struct Header_LBM))
       && Header.Width && Header.Height)
     {
-      if ( (Header.Bit_planes) && (Wait_for("CMAP")) )
+      if ( (Header.Bit_planes) && (Wait_for((byte *)"CMAP")) )
       {
         Nb_couleurs=Lire_long()/3;
 
@@ -1669,15 +1671,15 @@ void Load_LBM(void)
         {
           if ((Nb_couleurs==32) && (Header.Bit_planes==6))
           {              // Ce n'est pas une image HAM mais une image 64 coul.
-            Image_HAM=1; // Sauv‚e en 32 coul. => il faut copier les 32 coul.
+            Image_HAM=1; // Sauvée en 32 coul. => il faut copier les 32 coul.
           }              // sur les 32 suivantes et assombrir ces derniŠres.
           else
           {
             if ((Header.Bit_planes==6) || (Header.Bit_planes==8))
               Image_HAM=Header.Bit_planes;
             else
-              // Erreur_fichier=1; /* C'est cens‚ ˆtre incorrect mais j'ai */
-              Image_HAM=0;         /* trouv‚ un fichier comme ‡a, alors... */
+              // Erreur_fichier=1; /* C'est censé ˆtre incorrect mais j'ai */
+              Image_HAM=0;         /* trouvé un fichier comme ‡a, alors... */
           }
         }
         else
@@ -1693,8 +1695,8 @@ void Load_LBM(void)
           Back_color=Header.Transp_col;
 
           // On commence par passer la palette en 256 comme ‡a, si la nouvelle
-          // palette a moins de 256 coul, la pr‚c‚dente ne souffrira pas d'un
-          // assombrissement pr‚judiciable.
+          // palette a moins de 256 coul, la précédente ne souffrira pas d'un
+          // assombrissement préjudiciable.
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
           else
@@ -1713,7 +1715,7 @@ void Load_LBM(void)
               if (read(LBM_Fichier,&Octet,1)==1)
                 Erreur_fichier=2;
 
-            if ( (Wait_for("BODY")) && (!Erreur_fichier) )
+            if ( (Wait_for((byte *)"BODY")) && (!Erreur_fichier) )
             {
               Taille_image=Lire_long();
               swab((char *)&Header.Width ,(char *)&Principal_Largeur_image,2);
@@ -1740,7 +1742,7 @@ void Load_LBM(void)
                   }
 
                   if (!Header.Compression)
-                  {                                           // non compress‚
+                  {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
@@ -1752,7 +1754,7 @@ void Load_LBM(void)
                     free(LBM_Buffer);
                   }
                   else
-                  {                                               // compress‚
+                  {                                               // compressé
                     Init_lecture();
 
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
@@ -1792,7 +1794,7 @@ void Load_LBM(void)
                   Vraie_taille_ligne=Principal_Largeur_image+(Principal_Largeur_image&1);
 
                   if (!Header.Compression)
-                  {                                           // non compress‚
+                  {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Vraie_taille_ligne);
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
@@ -1805,7 +1807,7 @@ void Load_LBM(void)
                     free(LBM_Buffer);
                   }
                   else
-                  {                                               // compress‚
+                  {                                               // compressé
                     Init_lecture();
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
@@ -1862,7 +1864,7 @@ void Load_LBM(void)
   word LBM_Taille_de_file;
   byte LBM_Mode_repetition;
 
-  // ----------- Traduire et ‚crire une valeur au format Motorola -----------
+  // ----------- Traduire et écrire une valeur au format Motorola -----------
   void Ecrire_long(dword Valeur)
   {
     dword Temp;
@@ -1917,7 +1919,7 @@ void Load_LBM(void)
       default: // Couleurs suivantes
         Derniere_couleur      =LBM_File_de_couleurs[LBM_Taille_de_file-1];
         Avant_derniere_couleur=LBM_File_de_couleurs[LBM_Taille_de_file-2];
-        if (Derniere_couleur==Couleur)  // On a une r‚p‚tition de couleur
+        if (Derniere_couleur==Couleur)  // On a une répétition de couleur
         {
           if ( (LBM_Mode_repetition) || (Avant_derniere_couleur!=Couleur) )
           // On conserve le mode...
@@ -1938,7 +1940,7 @@ void Load_LBM(void)
             LBM_Mode_repetition=1;
           }
         }
-        else // La couleur n'est pas la mˆme que la pr‚c‚dente
+        else // La couleur n'est pas la mˆme que la précédente
         {
           if (!LBM_Mode_repetition)                 // On conserve le mode...
           {
@@ -1991,7 +1993,7 @@ void Save_LBM(void)
   if (LBM_Fichier!=-1)
   {
     write(LBM_Fichier,"FORM",4);
-    Ecrire_long(0); // On mettra la taille … jour … la fin
+    Ecrire_long(0); // On mettra la taille à jour à la fin
 
     write(LBM_Fichier,"PBM BMHD",8);
     Ecrire_long(20);
@@ -2024,7 +2026,7 @@ void Save_LBM(void)
     Palette_256_to_64(Principal_Palette);
 
     write(LBM_Fichier,"BODY",4);
-    Ecrire_long(0); // On mettra la taille … jour … la fin
+    Ecrire_long(0); // On mettra la taille à jour à la fin
 
     Init_ecriture();
 
@@ -2055,7 +2057,7 @@ void Save_LBM(void)
         lseek(LBM_Fichier,4,SEEK_SET);
 
         //   Si la taille de la section de l'image (taille fichier-8) est
-        // impaire, on rajoute un 0 (Padding) … la fin.
+        // impaire, on rajoute un 0 (Padding) à la fin.
         if ((Informations_Fichier->st_size) & 1)
         {
           Ecrire_long((Informations_Fichier->st_size)-7);
@@ -2106,7 +2108,7 @@ void Test_BMP(void)
     long Taille_1;    // =Taille du fichier
     word Reserv_1;    // =0
     word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les donn‚es bitmap
+    long Decalage;    // Nb octets avant les données bitmap
 
     long Taille_2;    // =40
     long Largeur;
@@ -2147,7 +2149,7 @@ void Load_BMP(void)
     long Taille_1;    // =Taille du fichier
     word Reserv_1;    // =0
     word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les donn‚es bitmap
+    long Decalage;    // Nb octets avant les données bitmap
 
     long Taille_2;    // =40
     long Largeur;
@@ -2206,13 +2208,13 @@ void Load_BMP(void)
           if (read(Fichier,Palette_locale,Nb_Couleurs<<2)==(Nb_Couleurs<<2))
           {
             //   On commence par passer la palette en 256 comme ‡a, si la nouvelle
-            // palette a moins de 256 coul, la pr‚c‚dente ne souffrira pas d'un
-            // assombrissement pr‚judiciable.
+            // palette a moins de 256 coul, la précédente ne souffrira pas d'un
+            // assombrissement préjudiciable.
             if (Config.Clear_palette)
               memset(Principal_Palette,0,sizeof(T_Palette));
             else
               Palette_64_to_256(Principal_Palette);
-            //   On peut maintenant transf‚rer la nouvelle palette
+            //   On peut maintenant transférer la nouvelle palette
             for (Indice=0; Indice<Nb_Couleurs; Indice++)
             {
               Principal_Palette[Indice].R=Palette_locale[Indice][2];
@@ -2290,7 +2292,7 @@ void Load_BMP(void)
                         Pos_X+=A;
                         Pos_Y-=B;
                         break;
-                      default: // Nouvelle s‚rie
+                      default: // Nouvelle série
                         while (B)
                         {
                           A=Lire_octet(Fichier);
@@ -2342,7 +2344,7 @@ void Load_BMP(void)
                         Pos_X+=A;
                         Pos_Y-=B;
                         break;
-                      default: // Nouvelle s‚rie (B 1/2 pixels bruts)
+                      default: // Nouvelle série (B 1/2 pixels bruts)
                         for (Indice=1; ((Indice<=B) && (!Erreur_fichier)); Indice++,Pos_X++)
                         {
                           if (Indice&1)
@@ -2354,7 +2356,7 @@ void Load_BMP(void)
                             Pixel_de_chargement(Pos_X,Pos_Y,C&0xF);
                         }
                         //   On lit l'octet rendant le nombre d'octets pair, si
-                        // n‚cessaire. Encore un truc de cr‚tin "made in MS".
+                        // nécessaire. Encore un truc de crétin "made in MS".
                         if ( ((B&3)==1) || ((B&3)==2) )
                           Lire_octet(Fichier);
                     }
@@ -2424,7 +2426,7 @@ void Save_BMP(void)
     long Taille_1;    // =Taille du fichier
     word Reserv_1;    // =0
     word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les donn‚es bitmap
+    long Decalage;    // Nb octets avant les données bitmap
 
     long Taille_2;    // =40
     long Largeur;
@@ -2477,10 +2479,10 @@ void Save_BMP(void)
     if (write(Fichier,&Header,sizeof(struct BMP_Header))!=-1)
     {
       //   Chez Bill, ils ont dit: "On va mettre les couleur dans l'ordre
-      // inverse, et pour faire chier, on va les mettre sur une ‚chelle de
-      // 0 … 255 parce que le standard VGA c'est de 0 … 63 (logique!). Et
-      // puis comme c'est pas assez d‚bile, on va aussi y rajouter un octet
-      // toujours … 0 pour forcer les gens … s'acheter des gros disques
+      // inverse, et pour faire chier, on va les mettre sur une échelle de
+      // 0 à 255 parce que le standard VGA c'est de 0 à 63 (logique!). Et
+      // puis comme c'est pas assez débile, on va aussi y rajouter un octet
+      // toujours à 0 pour forcer les gens à s'acheter des gros disques
       // durs... Comme ‡a, ‡a fera passer la pillule lorsqu'on sortira
       // Windows 95." ...
       Palette_64_to_256(Principal_Palette);
@@ -2567,20 +2569,20 @@ void Test_GIF(void)
 
 // -- Lire un fichier au format GIF -----------------------------------------
 
-  // D‚finition de quelques variables globales au chargement du GIF87a
+  // Définition de quelques variables globales au chargement du GIF87a
   word GIF_Nb_bits;        // Nb de bits composants un code complet
   word GIF_Rest_bits;      // Nb de bits encore dispos dans GIF_Last_byte
   word GIF_Rest_byte;      // Nb d'octets avant le prochain bloc de Raster Data
-  word GIF_Code_actuel;    // Code trait‚ (qui vient d'ˆtre lu en g‚n‚ral)
+  word GIF_Code_actuel;    // Code traité (qui vient d'ˆtre lu en général)
   word GIF_Last_byte;      // Octet de lecture des bits
-  word GIF_Pos_X;          // Coordonn‚es d'affichage de l'image
+  word GIF_Pos_X;          // Coordonnées d'affichage de l'image
   word GIF_Pos_Y;
-  word GIF_Entrelacee;     // L'image est entrelac‚e
-  word GIF_Image_entrelacee_terminee; // L'image entrelac‚e est finie de charger
-  word GIF_Passe;          // Indice de passe de l'image entrelac‚e
+  word GIF_Entrelacee;     // L'image est entrelacée
+  word GIF_Image_entrelacee_terminee; // L'image entrelacée est finie de charger
+  word GIF_Passe;          // Indice de passe de l'image entrelacée
   int  GIF_Fichier;        // L'handle du fichier
 
-  // -- Lit le code … GIF_Nb_bits suivant --
+  // -- Lit le code à GIF_Nb_bits suivant --
 
   word GIF_Get_next_code(void)
   {
@@ -2667,26 +2669,26 @@ void Load_GIF(void)
   char Nom_du_fichier[256];
   char Signature[6];
 
-  word * Alphabet_Pile;     // Pile de d‚codage d'une chaŒne
-  word * Alphabet_Prefixe;  // Table des pr‚fixes des codes
+  word * Alphabet_Pile;     // Pile de décodage d'une chaŒne
+  word * Alphabet_Prefixe;  // Table des préfixes des codes
   word * Alphabet_Suffixe;  // Table des suffixes des codes
   word   Alphabet_Free;     // Position libre dans l'alphabet
-  word   Alphabet_Max;      // Nombre d'entr‚es possibles dans l'alphabet
-  word   Alphabet_Pos_pile; // Position dans la pile de d‚codage d'un chaŒne
+  word   Alphabet_Max;      // Nombre d'entrées possibles dans l'alphabet
+  word   Alphabet_Pos_pile; // Position dans la pile de décodage d'un chaŒne
 
   struct Type_LSDB
   {
-    word Largeur; // Largeur de l'‚cran virtuel
-    word Hauteur; // Hauteur de l'‚cran virtuel
-    byte Resol;   // Informations sur la r‚solution (et autres)
+    word Largeur; // Largeur de l'écran virtuel
+    word Hauteur; // Hauteur de l'écran virtuel
+    byte Resol;   // Informations sur la résolution (et autres)
     byte Backcol; // Couleur de fond
     byte Aspect;  // Informations sur l'aspect ratio (et autres)
   } LSDB; // Logical Screen Descriptor Block
 
   struct Type_IDB
   {
-    word Pos_X;         // Abscisse o— devrait ˆtre affich‚e l'image
-    word Pos_Y;         // Ordonn‚e o— devrait ˆtre affich‚e l'image
+    word Pos_X;         // Abscisse o— devrait ˆtre affichée l'image
+    word Pos_Y;         // Ordonnée o— devrait ˆtre affichée l'image
     word Largeur_image; // Largeur de l'image
     word Hauteur_image; // Hauteur de l'image
     byte Indicateur;    // Informations diverses sur l'image
@@ -2695,12 +2697,12 @@ void Load_GIF(void)
 
   word Nb_couleurs;       // Nombre de couleurs dans l'image
   word Indice_de_couleur; // Indice de traitement d'une couleur
-  word Taille_de_lecture; // Nombre de donn‚es … lire      (divers)
-  word Indice_de_lecture; // Indice de lecture des donn‚es (divers)
+  word Taille_de_lecture; // Nombre de données à lire      (divers)
+  //word Indice_de_lecture; // Indice de lecture des données (divers)
   byte Block_indicateur;  // Code indicateur du type de bloc en cours
-  word Nb_bits_initial;   // Nb de bits au d‚but du traitement LZW
-  word Cas_special=0;       // M‚moire pour le cas sp‚cial
-  word Code_ancien=0;       // Code pr‚c‚dent
+  word Nb_bits_initial;   // Nb de bits au début du traitement LZW
+  word Cas_special=0;       // Mémoire pour le cas spécial
+  word Code_ancien=0;       // Code précédent
   word Read_byte;         // Sauvegarde du code en cours de lecture
   word Valeur_Clr;        // Valeur <=> Clear tables
   word Valeur_Eof;        // Valeur <=> Fin d'image
@@ -2728,14 +2730,14 @@ void Load_GIF(void)
          ( (memcmp(Signature,"GIF87a",6)==0) ||
            (memcmp(Signature,"GIF89a",6)==0) ) )
     {
-      // Allocation de m‚moire pour les tables & piles de traitement:
+      // Allocation de mémoire pour les tables & piles de traitement:
       Alphabet_Pile   =(word *)malloc(4096*sizeof(word));
       Alphabet_Prefixe=(word *)malloc(4096*sizeof(word));
       Alphabet_Suffixe=(word *)malloc(4096*sizeof(word));
 
       if (read(GIF_Fichier,&LSDB,sizeof(struct Type_LSDB))==sizeof(struct Type_LSDB))
       {
-        // Lecture du Logical Screen Descriptor Block r‚ussie:
+        // Lecture du Logical Screen Descriptor Block réussie:
 
         Ecran_original_X=LSDB.Largeur;
         Ecran_original_Y=LSDB.Hauteur;
@@ -2758,8 +2760,8 @@ void Load_GIF(void)
           // Palette globale dispo:
 
           //   On commence par passer la palette en 256 comme ‡a, si la
-          // nouvelle palette a moins de 256 coul, la pr‚c‚dente ne souffrira
-          // pas d'un assombrissement pr‚judiciable.
+          // nouvelle palette a moins de 256 coul, la précédente ne souffrira
+          // pas d'un assombrissement préjudiciable.
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
           else
@@ -2771,7 +2773,7 @@ void Load_GIF(void)
             read(GIF_Fichier,Principal_Palette,Nb_couleurs*3);
           else
           {
-            // Palette tri‚e par composantes:
+            // Palette triée par composantes:
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
               read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
@@ -2784,7 +2786,7 @@ void Load_GIF(void)
           Set_palette(Principal_Palette);
         }
 
-        // On s'apprˆte … sauter tous les blocks d'extension:
+        // On s'apprˆte à sauter tous les blocks d'extension:
 
         // On lit un indicateur de block
         read(GIF_Fichier,&Block_indicateur,1);
@@ -2815,7 +2817,7 @@ void Load_GIF(void)
 
         if (Block_indicateur==0x2C)
         {
-          // Pr‚sence d'un Image Separator Header
+          // Présence d'un Image Separator Header
 
           // lecture de 10 derniers octets
           if ( (read(GIF_Fichier,&IDB,sizeof(struct Type_IDB))==sizeof(struct Type_IDB))
@@ -2827,7 +2829,7 @@ void Load_GIF(void)
             Initialiser_preview(IDB.Largeur_image,IDB.Hauteur_image,Taille_du_fichier,FORMAT_GIF);
 
             // Palette locale dispo = (IDB.Indicateur and $80)
-            // Image entrelac‚e     = (IDB.Indicateur and $40)
+            // Image entrelacée     = (IDB.Indicateur and $40)
             // Ordre de classement  = (IDB.Indicateur and $20)
             // Nombre de bits/pixel = (IDB.Indicateur and $07)+1 (si palette locale dispo)
 
@@ -2839,8 +2841,8 @@ void Load_GIF(void)
               Nb_bits_initial=(IDB.Indicateur & 0x07)+2;
 
               //   On commence par passer la palette en 256 comme ‡a, si la
-              // nouvelle palette a moins de 256 coul, la pr‚c‚dente ne
-              // souffrira pas d'un assombrissement pr‚judiciable.
+              // nouvelle palette a moins de 256 coul, la précédente ne
+              // souffrira pas d'un assombrissement préjudiciable.
               Palette_64_to_256(Principal_Palette);
 
               if (!(IDB.Indicateur & 0x40))
@@ -2848,7 +2850,7 @@ void Load_GIF(void)
                 read(GIF_Fichier,Principal_Palette,Nb_couleurs*3);
               else
               {
-                // Palette tri‚e par composantes:
+                // Palette triée par composantes:
                 for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
                   read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
                 for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
@@ -2912,7 +2914,7 @@ void Load_GIF(void)
                       Alphabet_Max      =((1 << (++GIF_Nb_bits))-1);
                   }
                 }
-                else // Code Clear rencontr‚
+                else // Code Clear rencontré
                 {
                   GIF_Nb_bits       =Nb_bits_initial;
                   Alphabet_Max      =((1 <<  GIF_Nb_bits)-1);
@@ -2924,7 +2926,7 @@ void Load_GIF(void)
               }
               else
                 Erreur_fichier=2;
-            } // Code End-Of-Information ou erreur de fichier rencontr‚
+            } // Code End-Of-Information ou erreur de fichier rencontré
 
             Close_lecture();
 
@@ -2946,7 +2948,7 @@ void Load_GIF(void)
       else
         Erreur_fichier=1;
 
-      // Lib‚ration de la m‚moire utilis‚e par les tables & piles de traitement:
+      // Libération de la mémoire utilisée par les tables & piles de traitement:
       free(Alphabet_Suffixe);
       free(Alphabet_Prefixe);
       free(Alphabet_Pile);
@@ -2956,7 +2958,7 @@ void Load_GIF(void)
 
     close(GIF_Fichier);
 
-  } // Le fichier ‚tait ouvrable
+  } // Le fichier était ouvrable
   else
     Erreur_fichier=1;
 }
@@ -2965,7 +2967,7 @@ void Load_GIF(void)
 // -- Sauver un fichier au format GIF ---------------------------------------
 
   int  GIF_Arret;         // "On peut arrˆter la sauvegarde du fichier"
-  byte GIF_Buffer[256];   // Buffer d'‚criture de bloc de donn‚es compil‚es
+  byte GIF_Buffer[256];   // Buffer d'écriture de bloc de données compilées
 
   // -- Vider le buffer GIF dans le buffer KM --
 
@@ -2984,7 +2986,7 @@ void Load_GIF(void)
     }
   }
 
-  // -- Ecrit un code … GIF_Nb_bits --
+  // -- Ecrit un code à GIF_Nb_bits --
 
   void GIF_Set_code(word Code)
   {
@@ -3002,9 +3004,9 @@ void Load_GIF(void)
       Nb_bits_traites  +=Nb_bits_en_cours;
       Nb_bits_a_traiter-=Nb_bits_en_cours;
 
-      if (GIF_Rest_bits==8) // Il ne reste plus de bits … coder sur l'octet courant
+      if (GIF_Rest_bits==8) // Il ne reste plus de bits à coder sur l'octet courant
       {
-        // Ecrire l'octet … balancer:
+        // Ecrire l'octet à balancer:
         GIF_Buffer[++GIF_Rest_byte]=GIF_Last_byte;
 
         // Si on a atteint la fin du bloc de Raster Data
@@ -3043,28 +3045,28 @@ void Save_GIF(void)
 {
   char Nom_du_fichier[256];
 
-  word * Alphabet_Prefixe;  // Table des pr‚fixes des codes
+  word * Alphabet_Prefixe;  // Table des préfixes des codes
   word * Alphabet_Suffixe;  // Table des suffixes des codes
   word * Alphabet_Fille;    // Table des chaŒnes filles (plus longues)
   word * Alphabet_Soeur;    // Table des chaŒnes soeurs (mˆme longueur)
   word   Alphabet_Free;     // Position libre dans l'alphabet
-  word   Alphabet_Max;      // Nombre d'entr‚es possibles dans l'alphabet
-  word   Depart;            // Code pr‚c‚dent (sert au linkage des chaŒnes)
-  int    Descente;          // Bool‚en "On vient de descendre"
+  word   Alphabet_Max;      // Nombre d'entrées possibles dans l'alphabet
+  word   Depart;            // Code précédent (sert au linkage des chaŒnes)
+  int    Descente;          // Booléen "On vient de descendre"
 
   struct Type_LSDB
   {
-    word Largeur; // Largeur de l'‚cran virtuel |_ Dimensions de l'image si 1
-    word Hauteur; // Hauteur de l'‚cran virtuel |  seule image dans le fichier (ce qui est notre cas)
-    byte Resol;   // Informations sur la r‚solution (et autres)
+    word Largeur; // Largeur de l'écran virtuel |_ Dimensions de l'image si 1
+    word Hauteur; // Hauteur de l'écran virtuel |  seule image dans le fichier (ce qui est notre cas)
+    byte Resol;   // Informations sur la résolution (et autres)
     byte Backcol; // Couleur de fond
     byte Aspect;  // Informations sur l'aspect ratio (et autres)
   } LSDB; // Logical Screen Descriptor Block
 
   struct Type_IDB
   {
-    word Pos_X;         // Abscisse o— devrait ˆtre affich‚e l'image
-    word Pos_Y;         // Ordonn‚e o— devrait ˆtre affich‚e l'image
+    word Pos_X;         // Abscisse o— devrait ˆtre affichée l'image
+    word Pos_Y;         // Ordonnée o— devrait ˆtre affichée l'image
     word Largeur_image; // Largeur de l'image
     word Hauteur_image; // Hauteur de l'image
     byte Indicateur;    // Informations diverses sur l'image
@@ -3073,7 +3075,7 @@ void Save_GIF(void)
 
   byte Block_indicateur;  // Code indicateur du type de bloc en cours
   word Chaine_en_cours;   // Code de la chaŒne en cours de traitement
-  byte Caractere;         // CaractŠre … coder
+  byte Caractere;         // CaractŠre à coder
   word Indice;            // Indice de recherche de chaŒne
 
 
@@ -3091,12 +3093,12 @@ void Save_GIF(void)
   GIF_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
   if (GIF_Fichier!=-1)
   {
-    // On ‚crit la signature du fichier
+    // On écrit la signature du fichier
     if (write(GIF_Fichier,"GIF87a",6)==6)
     {
-      // La signature du fichier a ‚t‚ correctement ‚crite.
+      // La signature du fichier a été correctement écrite.
 
-      // Allocation de m‚moire pour les tables
+      // Allocation de mémoire pour les tables
       Alphabet_Prefixe=(word *)malloc(4096*sizeof(word));
       Alphabet_Suffixe=(word *)malloc(4096*sizeof(word));
       Alphabet_Fille  =(word *)malloc(4096*sizeof(word));
@@ -3121,33 +3123,33 @@ void Save_GIF(void)
 
       if (write(GIF_Fichier,&LSDB,sizeof(struct Type_LSDB))==sizeof(struct Type_LSDB))
       {
-        // Le LSDB a ‚t‚ correctement ‚crit.
+        // Le LSDB a été correctement écrit.
 
         // On sauve la palette
 
         Palette_64_to_256(Principal_Palette);
         if (write(GIF_Fichier,Principal_Palette,768)==768)
         {
-          // La palette a ‚t‚ correctement ‚crite.
+          // La palette a été correctement écrite.
 
           //   Le jour o— on se servira des blocks d'extensions pour placer
           // des commentaires, on le fera ici.
 
-          // On va ‚crire un block indicateur d'IDB et l'IDB du fichier
+          // On va écrire un block indicateur d'IDB et l'IDB du fichier
 
           Block_indicateur=0x2C;
           IDB.Pos_X=0;
           IDB.Pos_Y=0;
           IDB.Largeur_image=Principal_Largeur_image;
           IDB.Hauteur_image=Principal_Hauteur_image;
-          IDB.Indicateur=0x07;    // Image non entrelac‚e, pas de palette locale.
+          IDB.Indicateur=0x07;    // Image non entrelacée, pas de palette locale.
           IDB.Nb_bits_pixel=8; // Image 256 couleurs;
 
           if ( (write(GIF_Fichier,&Block_indicateur,1)==1) &&
                (write(GIF_Fichier,&IDB,sizeof(struct Type_IDB))==sizeof(struct Type_IDB)) )
           {
-            //   Le block indicateur d'IDB et l'IDB ont ‚t‚s correctements
-            // ‚crits.
+            //   Le block indicateur d'IDB et l'IDB ont étés correctements
+            // écrits.
 
             Init_ecriture();
 
@@ -3155,7 +3157,7 @@ void Save_GIF(void)
             Erreur_fichier=0;
             GIF_Arret=0;
 
-            // R‚intialisation de la table:
+            // Réintialisation de la table:
             Alphabet_Free=258;
             GIF_Nb_bits  =9;
             Alphabet_Max =511;
@@ -3176,7 +3178,7 @@ void Save_GIF(void)
               Caractere=GIF_Pixel_suivant();
 
               //   On regarde si dans la table on aurait pas une chaŒne
-              // ‚quivalente … Chaine_en_cours+Caractere
+              // équivalente à Chaine_en_cours+Caractere
 
               while ( (Indice<Alphabet_Free) &&
                       ( (Chaine_en_cours!=Alphabet_Prefixe[Indice]) ||
@@ -3204,16 +3206,16 @@ void Save_GIF(void)
                 else
                   Alphabet_Soeur[Depart]=Alphabet_Free;
 
-                // On rajoute la chaŒne Chaine_en_cours+Caractere … la table
+                // On rajoute la chaŒne Chaine_en_cours+Caractere à la table
                 Alphabet_Prefixe[Alphabet_Free  ]=Chaine_en_cours;
                 Alphabet_Suffixe[Alphabet_Free++]=Caractere;
 
-                // On ‚crit le code dans le fichier
+                // On écrit le code dans le fichier
                 GIF_Set_code(Chaine_en_cours);
 
                 if (Alphabet_Free>0xFFF)
                 {
-                  // R‚intialisation de la table:
+                  // Réintialisation de la table:
                   GIF_Set_code(256);
                   Alphabet_Free=258;
                   GIF_Nb_bits  =9;
@@ -3242,21 +3244,21 @@ void Save_GIF(void)
 
             if (!Erreur_fichier)
             {
-              // On ‚crit le code dans le fichier
+              // On écrit le code dans le fichier
               GIF_Set_code(Chaine_en_cours); // DerniŠre portion d'image
 
               //   Cette derniŠre portion ne devrait pas poser de problŠmes
-              // du c“t‚ GIF_Nb_bits puisque pour que GIF_Nb_bits change de
+              // du c“té GIF_Nb_bits puisque pour que GIF_Nb_bits change de
               // valeur, il faudrait que la table de chaŒne soit remplie or
               // c'est impossible puisqu'on traite une chaŒne qui se trouve
-              // d‚j… dans la table, et qu'elle n'a rien d'in‚dit. Donc on
-              // ne devrait pas avoir … changer de taille, mais je laisse
+              // déjà dans la table, et qu'elle n'a rien d'inédit. Donc on
+              // ne devrait pas avoir à changer de taille, mais je laisse
               // quand mˆme en remarque tout ‡a, au cas o— il subsisterait
               // des problŠmes dans certains cas exceptionnels.
               //
-              // Note: de toutes fa‡ons, ces lignes en commentaires ont ‚t‚s
-              //      ‚crites par copier/coller du temps o— la sauvegarde du
-              //      GIF d‚connait. Il y a donc fort … parier qu'elles ne
+              // Note: de toutes fa‡ons, ces lignes en commentaires ont étés
+              //      écrites par copier/coller du temps o— la sauvegarde du
+              //      GIF déconnait. Il y a donc fort à parier qu'elles ne
               //      sont pas correctes.
 
               /*
@@ -3267,7 +3269,7 @@ void Save_GIF(void)
                   // On balargue un Clear Code
                   GIF_Set_code(256);
 
-                  // On r‚initialise les donn‚es LZW
+                  // On réinitialise les données LZW
                   Alphabet_Free=258;
                   GIF_Nb_bits  =9;
                   Alphabet_Max =511;
@@ -3282,35 +3284,35 @@ void Save_GIF(void)
 
               GIF_Set_code(257);             // Code de Fin d'image
               if (GIF_Rest_bits!=0)
-                GIF_Set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien ‚t‚s inscris dans le buffer GIF
-              GIF_Vider_le_buffer();         // On envoie les derniŠres donn‚es du buffer GIF dans le buffer KM
-              Close_ecriture(GIF_Fichier);   // On envoie les derniŠres donn‚es du buffer KM  dans le fichier
+                GIF_Set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
+              GIF_Vider_le_buffer();         // On envoie les derniŠres données du buffer GIF dans le buffer KM
+              Close_ecriture(GIF_Fichier);   // On envoie les derniŠres données du buffer KM  dans le fichier
 
-              Chaine_en_cours=0x3B00;        // On ‚crit un GIF TERMINATOR, exig‚ par SVGA et SEA.
+              Chaine_en_cours=0x3B00;        // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
               if (write(GIF_Fichier,&Chaine_en_cours,sizeof(Chaine_en_cours))!=sizeof(Chaine_en_cours))
                 Erreur_fichier=1;
             }
 
-          } // On a pu ‚crire l'IDB
+          } // On a pu écrire l'IDB
           else
             Erreur_fichier=1;
 
-        } // On a pu ‚crire la palette
+        } // On a pu écrire la palette
         else
           Erreur_fichier=1;
 
         Palette_256_to_64(Principal_Palette);
-      } // On a pu ‚crire le LSDB
+      } // On a pu écrire le LSDB
       else
         Erreur_fichier=1;
 
-      // Lib‚ration de la m‚moire utilis‚e par les tables
+      // Libération de la mémoire utilisée par les tables
       free(Alphabet_Soeur);
       free(Alphabet_Fille);
       free(Alphabet_Suffixe);
       free(Alphabet_Prefixe);
 
-    } // On a pu ‚crire la signature du fichier
+    } // On a pu écrire la signature du fichier
     else
       Erreur_fichier=1;
 
@@ -3318,7 +3320,7 @@ void Save_GIF(void)
     if (Erreur_fichier)
       remove(Nom_du_fichier);
 
-  } // On a pu ouvrir le fichier en ‚criture
+  } // On a pu ouvrir le fichier en écriture
   else
     Erreur_fichier=1;
 }
@@ -3345,21 +3347,21 @@ void Test_PCX(void)
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
     byte Version;            // |  mettre une vraie signature significative!
-    byte Compression;        // L'image est-elle compress‚e?
+    byte Compression;        // L'image est-elle compressée?
     byte Depth;              // Nombre de bits pour coder un pixel (inutile puisqu'on se sert de Plane)
     word X_min;              // |_ Coin haut-gauche   |
-    word Y_min;              // |  de l'image         |_ (Cr‚tin!)
+    word Y_min;              // |  de l'image         |_ (Crétin!)
     word X_max;              // |_ Coin bas-droit     |
     word Y_max;              // |  de l'image         |
-    word X_dpi;              // |_ Densit‚ de |_ (Presque inutile parce que
+    word X_dpi;              // |_ Densité de |_ (Presque inutile parce que
     word Y_dpi;              // |  l'image    |  aucun moniteur n'est pareil!)
-    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (d‚bile!)
+    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (débile!)
     byte Reserved;           // Ca me plait ‡a aussi!
     byte Plane;              // 4 => 16c , 1 => 256c
     word Bytes_per_plane_line;// Doit toujours ˆtre pair
-    word Palette_info;       // 1 => Couleur , 2 => Gris (ignor‚ … partir de la version 4)
+    word Palette_info;       // 1 => Couleur , 2 => Gris (ignoré à partir de la version 4)
     word Screen_X;           // |_ Dimensions de
-    word Screen_Y;           // |  l'‚cran d'origine
+    word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
   } Header; // Je hais ce header!
 
@@ -3372,7 +3374,7 @@ void Test_PCX(void)
     if (read(Fichier,&Header,sizeof(struct PCX_Header))==sizeof(struct PCX_Header))
     {
       //   Vu que ce header a une signature de merde et peu significative, il
-      // va falloir que je teste diff‚rentes petites valeurs dont je connais
+      // va falloir que je teste différentes petites valeurs dont je connais
       // l'intervalle. Grrr!
       if ( (Header.Manufacturer!=10)
         || (Header.Compression>1)
@@ -3393,7 +3395,7 @@ void Test_PCX(void)
 
 // -- Lire un fichier au format PCX -----------------------------------------
 
-  // -- Afficher une ligne PCX cod‚e sur 1 seul plan avec moins de 256 c. --
+  // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
   void Draw_PCX_line(short Pos_Y, short Vraie_taille_ligne, byte Depth)
   {
     short Pos_X;
@@ -3417,25 +3419,25 @@ void Load_PCX(void)
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
     byte Version;            // |  mettre une vraie signature!
-    byte Compression;        // L'image est-elle compress‚e?
+    byte Compression;        // L'image est-elle compressée?
     byte Depth;              // Nombre de bits pour coder un pixel (inutile puisqu'on se sert de Plane)
     word X_min;              // |_ Coin haut-gauche   |
-    word Y_min;              // |  de l'image         |_ (Cr‚tin!)
+    word Y_min;              // |  de l'image         |_ (Crétin!)
     word X_max;              // |_ Coin bas-droit     |
     word Y_max;              // |  de l'image         |
-    word X_dpi;              // |_ Densit‚ de |_ (Presque inutile parce que
+    word X_dpi;              // |_ Densité de |_ (Presque inutile parce que
     word Y_dpi;              // |  l'image    |  aucun moniteur n'est pareil!)
-    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (d‚bile!)
+    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (débile!)
     byte Reserved;           // Ca me plait ‡a aussi!
     byte Plane;              // 4 => 16c , 1 => 256c , ...
     word Bytes_per_plane_line;// Doit toujours ˆtre pair
-    word Palette_info;       // 1 => Couleur , 2 => Gris (ignor‚ … partir de la version 4)
+    word Palette_info;       // 1 => Couleur , 2 => Gris (ignoré à partir de la version 4)
     word Screen_X;           // |_ Dimensions de
-    word Screen_Y;           // |  l'‚cran d'origine
+    word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
   } Header; // Je hais ce header!
   short Taille_ligne;
-  short Vraie_taille_ligne; // Largeur de l'image corrig‚e
+  short Vraie_taille_ligne; // Largeur de l'image corrigée
   short Largeur_lue;
   short Pos_X;
   short Pos_Y;
@@ -3474,7 +3476,7 @@ void Load_PCX(void)
         Initialiser_preview(Principal_Largeur_image,Principal_Hauteur_image,Taille_du_fichier,FORMAT_PCX);
         if (Erreur_fichier==0)
         {
-          // On pr‚pare la palette … accueillir les valeurs du fichier PCX
+          // On prépare la palette à accueillir les valeurs du fichier PCX
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
           else
@@ -3490,7 +3492,7 @@ void Load_PCX(void)
             Principal_Palette[1].B=0;
             Octet1=Header.Palette_16c[3]>>5;
             if (Nb_couleurs==4)
-            { // Pal. CGA "alakon" (du Turc Allahkoum qui signifie "… la con" :))
+            { // Pal. CGA "alakon" (du Turc Allahkoum qui signifie "à la con" :))
               memcpy(Principal_Palette+1,Palette_CGA,9);
               if (!(Octet1&2))
               {
@@ -3507,16 +3509,16 @@ void Load_PCX(void)
             }
           }
 
-          //   On se positionne … la fin du fichier - 769 octets pour voir s'il y
+          //   On se positionne à la fin du fichier - 769 octets pour voir s'il y
           // a une palette.
           if ( (Header.Depth==8) && (Header.Version>=5) && (Taille_du_fichier>sizeof(T_Palette)) )
           {
             lseek(Fichier,Taille_du_fichier-(sizeof(T_Palette)+1),SEEK_SET);
-            // On regarde s'il y a une palette aprŠs les donn‚es de l'image
+            // On regarde s'il y a une palette aprŠs les données de l'image
             if (read(Fichier,&Octet1,1)==1)
               if (Octet1==12) // Lire la palette si c'est une image en 256 couleurs
               {
-                // On lit la palette 256c que ces cr‚tins ont foutue … la fin du fichier
+                // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
                 if (read(Fichier,Principal_Palette,sizeof(T_Palette))!=sizeof(T_Palette))
                   Erreur_fichier=2;
               }
@@ -3525,22 +3527,22 @@ void Load_PCX(void)
           Set_palette(Principal_Palette);
           Remapper_fileselect();
 
-          //   Maintenant qu'on a lu la palette que ces cr‚tins sont all‚s foutre
-          // … la fin, on retourne juste aprŠs le header pour lire l'image.
+          //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
+          // à la fin, on retourne juste aprŠs le header pour lire l'image.
           lseek(Fichier,sizeof(struct PCX_Header),SEEK_SET);
 
           if (!Erreur_fichier)
           {
             Taille_ligne=Header.Bytes_per_plane_line*Header.Plane;
             Vraie_taille_ligne=(short)Header.Bytes_per_plane_line<<3;
-            //   On se sert de donn‚es LBM car le dessin de ligne en moins de 256
+            //   On se sert de données LBM car le dessin de ligne en moins de 256
             // couleurs se fait comme avec la structure ILBM.
             Image_HAM=0;
             HBPm1=Header.Plane-1;
             LBM_Buffer=(byte *)malloc(Taille_ligne);
 
             // Chargement de l'image
-            if (Header.Compression)  // Image compress‚e
+            if (Header.Compression)  // Image compressée
             {
               Init_lecture();
 
@@ -3550,14 +3552,14 @@ void Load_PCX(void)
               {
                 for (Position=0; ((Position<Taille_image) && (!Erreur_fichier));)
                 {
-                  // Lecture et d‚compression de la ligne
+                  // Lecture et décompression de la ligne
                   Octet1=Lire_octet(Fichier);
                   if (!Erreur_fichier)
                   {
                     if ((Octet1&0xC0)==0xC0)
                     {
-                      Octet1-=0xC0;               // facteur de r‚p‚tition
-                      Octet2=Lire_octet(Fichier); // octet … r‚p‚ter
+                      Octet1-=0xC0;               // facteur de répétition
+                      Octet2=Lire_octet(Fichier); // octet à répéter
                       if (!Erreur_fichier)
                       {
                         for (Indice=0; Indice<Octet1; Indice++,Position++)
@@ -3579,7 +3581,7 @@ void Load_PCX(void)
                   }
                 }
               }
-              else                 // couleurs rang‚es par plans
+              else                 // couleurs rangées par plans
               {
                 for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                 {
@@ -3590,8 +3592,8 @@ void Load_PCX(void)
                     {
                       if ((Octet1&0xC0)==0xC0)
                       {
-                        Octet1-=0xC0;               // facteur de r‚p‚tition
-                        Octet2=Lire_octet(Fichier); // octet … r‚p‚ter
+                        Octet1-=0xC0;               // facteur de répétition
+                        Octet2=Lire_octet(Fichier); // octet à répéter
                         if (!Erreur_fichier)
                         {
                           for (Indice=0; Indice<Octet1; Indice++)
@@ -3617,7 +3619,7 @@ void Load_PCX(void)
 
               Close_lecture();
             }
-            else                     // Image non compress‚e
+            else                     // Image non compressée
             {
               for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
               {
@@ -3673,14 +3675,14 @@ void Load_PCX(void)
 
             for (Pos_Y=0,Position=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);)
             {
-              // Lecture et d‚compression de la ligne
+              // Lecture et décompression de la ligne
               Octet1=Lire_octet(Fichier);
               if (!Erreur_fichier)
               {
                 if ((Octet1 & 0xC0)==0xC0)
                 {
-                  Octet1-=0xC0;               // facteur de r‚p‚tition
-                  Octet2=Lire_octet(Fichier); // octet … r‚p‚ter
+                  Octet1-=0xC0;               // facteur de répétition
+                  Octet2=Lire_octet(Fichier); // octet à répéter
                   if (!Erreur_fichier)
                   {
                     for (Indice=0; (Indice<Octet1) && (!Erreur_fichier); Indice++)
@@ -3770,7 +3772,7 @@ void Save_PCX(void)
 
   if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))!=-1)
   {
-    // On pr‚pare la palette pour ‚crire les 16 premieres valeurs
+    // On prépare la palette pour écrire les 16 premieres valeurs
     Palette_64_to_256(Principal_Palette);
 
     Header.Manufacturer=10;
@@ -3802,7 +3804,7 @@ void Save_PCX(void)
       {
         Pixel_lu=Lit_pixel_de_sauvegarde(0,Pos_Y);
 
-        // Compression et ‚criture de la ligne
+        // Compression et écriture de la ligne
         for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
         {
           Pos_X++;
@@ -3844,7 +3846,7 @@ void Save_PCX(void)
     if (Erreur_fichier)
       remove(Nom_du_fichier);
 
-    // On remet la palette … son ‚tat normal
+    // On remet la palette à son état normal
     Palette_256_to_64(Principal_Palette);
   }
   else
@@ -3892,7 +3894,7 @@ void Test_CEL(void)
     if (read(Fichier,&Header1,sizeof(struct CEL_Header1))==sizeof(struct CEL_Header1))
     {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
-      // coh‚rence de la dimension de l'image avec celle du fichier.
+      // cohérence de la dimension de l'image avec celle du fichier.
       stat(Nom_du_fichier,Informations_Fichier);
       Taille=(Informations_Fichier->st_size)-sizeof(struct CEL_Header1);
       if ( (!Taille) || ( (((Header1.Width+1)>>1)*Header1.Height)!=Taille ) )
@@ -3989,7 +3991,7 @@ void Load_CEL(void)
       }
       else
       {
-        // On r‚essaye avec le nouveau format
+        // On réessaye avec le nouveau format
 
         lseek(Fichier,0,SEEK_SET);
         if (read(Fichier,&Header2,sizeof(struct CEL_Header2))==sizeof(struct CEL_Header2))
@@ -4008,7 +4010,7 @@ void Load_CEL(void)
 
             if (!Erreur_fichier)
             {
-              // Effacement du d‚calage
+              // Effacement du décalage
               for (Pos_Y=0;Pos_Y<Header2.Decalage_Y;Pos_Y++)
                 for (Pos_X=0;Pos_X<Principal_Largeur_image;Pos_X++)
                   Pixel_de_chargement(Pos_X,Pos_Y,0);
@@ -4092,12 +4094,12 @@ void Save_CEL(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))!=-1)
   {
-    // On regarde si des couleurs >16 sont utilis‚es dans l'image
+    // On regarde si des couleurs >16 sont utilisées dans l'image
     for (Pos_X=16;((Pos_X<256) && (!Utilisation[Pos_X]));Pos_X++);
 
     if (Pos_X==256)
     {
-      // Cas d'une image 16 couleurs (‚criture … l'ancien format)
+      // Cas d'une image 16 couleurs (écriture à l'ancien format)
 
       Header1.Width =Principal_Largeur_image;
       Header1.Height=Principal_Hauteur_image;
@@ -4128,9 +4130,9 @@ void Save_CEL(void)
     }
     else
     {
-      // Cas d'une image 256 couleurs (‚criture au nouveau format)
+      // Cas d'une image 256 couleurs (écriture au nouveau format)
 
-      // Recherche du d‚calage
+      // Recherche du décalage
       for (Pos_Y=0;Pos_Y<Principal_Hauteur_image;Pos_Y++)
       {
         for (Pos_X=0;Pos_X<Principal_Largeur_image;Pos_X++)
@@ -4227,7 +4229,7 @@ void Test_KCF(void)
     if (filelength(Fichier)==sizeof(struct KCF_Header))
     {
       read(Fichier,&Buffer,sizeof(struct KCF_Header));
-      // On v‚rifie une propri‚t‚ de la structure de palette:
+      // On vérifie une propriété de la structure de palette:
       for (Indice_palette=0;Indice_palette<10;Indice_palette++)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
           if ((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2>>4)!=0)
@@ -4278,8 +4280,8 @@ void Load_KCF(void)
     byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
     byte Nbbits;             // Nombre de bits
     word Filler1;            // ???
-    word Largeur;            // Largeur de l'image ou nb de couleurs d‚finies
-    word Hauteur;            // Hauteur de l'image ou nb de palettes d‚finies
+    word Largeur;            // Largeur de l'image ou nb de couleurs définies
+    word Hauteur;            // Hauteur de l'image ou nb de palettes définies
     word Decalage_X;         // Decalage en X de l'image
     word Decalage_Y;         // Decalage en Y de l'image
     byte Filler2[16];        // ???
@@ -4298,7 +4300,7 @@ void Load_KCF(void)
     Taille_du_fichier=filelength(Fichier);
     if (Taille_du_fichier==sizeof(struct KCF_Header))
     {
-      // Fichier KCF … l'ancien format
+      // Fichier KCF à l'ancien format
 
       if (read(Fichier,&Buffer,sizeof(struct KCF_Header))==sizeof(struct KCF_Header))
       {
@@ -4413,8 +4415,8 @@ void Save_KCF(void)
     byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
     byte Nbbits;             // Nombre de bits
     word Filler1;            // ???
-    word Largeur;            // Largeur de l'image ou nb de couleurs d‚finies
-    word Hauteur;            // Hauteur de l'image ou nb de palettes d‚finies
+    word Largeur;            // Largeur de l'image ou nb de couleurs définies
+    word Hauteur;            // Hauteur de l'image ou nb de palettes définies
     word Decalage_X;         // Decalage en X de l'image
     word Decalage_Y;         // Decalage en Y de l'image
     byte Filler2[16];        // ???
@@ -4434,12 +4436,12 @@ void Save_KCF(void)
   {
     // Sauvegarde de la palette
 
-    // On regarde si des couleurs >16 sont utilis‚es dans l'image
+    // On regarde si des couleurs >16 sont utilisées dans l'image
     for (Indice=16;((Indice<256) && (!Utilisation[Indice]));Indice++);
 
     if (Indice==256)
     {
-      // Cas d'une image 16 couleurs (‚criture … l'ancien format)
+      // Cas d'une image 16 couleurs (écriture à l'ancien format)
 
       for (Indice_palette=0;Indice_palette<10;Indice_palette++)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
@@ -4454,7 +4456,7 @@ void Save_KCF(void)
     }
     else
     {
-      // Cas d'une image 256 couleurs (‚criture au nouveau format)
+      // Cas d'une image 256 couleurs (écriture au nouveau format)
 
       memcpy(Header2.Signa,"KiSS",4); // Initialisation de la signature
       Header2.Kind=0x10;              // Initialisation du type (PALette)
@@ -4462,8 +4464,8 @@ void Save_KCF(void)
       Header2.Filler1=0;              // Initialisation du filler 1 (???)
       Header2.Largeur=256;            // Initialisation du nombre de couleurs
       Header2.Hauteur=1;              // Initialisation du nombre de palettes
-      Header2.Decalage_X=0;           // Initialisation du d‚calage X
-      Header2.Decalage_Y=0;           // Initialisation du d‚calage Y
+      Header2.Decalage_X=0;           // Initialisation du décalage X
+      Header2.Decalage_Y=0;           // Initialisation du décalage Y
       for (Indice=0;Indice<16;Indice++) // Initialisation du filler 2 (???)
         Header2.Filler2[Indice]=0;
 
@@ -4505,7 +4507,7 @@ void Test_SCx(void)
 {
   int  Handle;              // Handle du fichier
   char Nom_du_fichier[256]; // Nom complet du fichier
-  byte Signature[3];
+  //byte Signature[3];
   struct Header
   {
     byte Filler1[4];
@@ -4524,7 +4526,7 @@ void Test_SCx(void)
   Handle=open(Nom_du_fichier,O_RDONLY);
   if (Handle!=-1)
   {
-    // Lecture et v‚rification de la signature
+    // Lecture et vérification de la signature
     if ((read(Handle,&SCx_Header,sizeof(struct Header)))==sizeof(struct Header))
     {
       if ( (!memcmp(SCx_Header.Filler1,"RIX",3))
@@ -4673,7 +4675,7 @@ void Save_SCx(void)
       if (Erreur_fichier)
         remove(Nom_du_fichier);
     }
-    else // Erreur d'‚criture (disque plein ou prot‚g‚)
+    else // Erreur d'écriture (disque plein ou protégé)
     {
       close(Fichier);
       remove(Nom_du_fichier);
@@ -4703,9 +4705,9 @@ void Save_SCx(void)
 
 void PI1_8b_to_16p(byte * Src,byte * Dst)
 {
-  int  i;           // Indice du pixel … calculer
+  int  i;           // Indice du pixel à calculer
   word masque;      // Masque de decodage
-  word w0,w1,w2,w3; // Les 4 words bien ordonn‚s de la source
+  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la source
 
   masque=0x8000;
   w0=(((word)Src[0])<<8) | Src[1];
@@ -4714,8 +4716,8 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
   w3=(((word)Src[6])<<8) | Src[7];
   for (i=0;i<16;i++)
   {
-    // Pour d‚coder le pixel nøi, il faut traiter les 4 words sur leur bit
-    // correspondant … celui du masque
+    // Pour décoder le pixel nøi, il faut traiter les 4 words sur leur bit
+    // correspondant à celui du masque
 
     Dst[i]=((w0 & masque)?0x01:0x00) |
            ((w1 & masque)?0x02:0x00) |
@@ -4729,16 +4731,16 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
 
 void PI1_16p_to_8b(byte * Src,byte * Dst)
 {
-  int  i;           // Indice du pixel … calculer
+  int  i;           // Indice du pixel à calculer
   word masque;      // Masque de codage
-  word w0,w1,w2,w3; // Les 4 words bien ordonn‚s de la destination
+  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la destination
 
   masque=0x8000;
   w0=w1=w2=w3=0;
   for (i=0;i<16;i++)
   {
     // Pour coder le pixel nøi, il faut modifier les 4 words sur leur bit
-    // correspondant … celui du masque
+    // correspondant à celui du masque
 
     w0|=(Src[i] & 0x01)?masque:0x00;
     w1|=(Src[i] & 0x02)?masque:0x00;
@@ -4760,11 +4762,11 @@ void PI1_16p_to_8b(byte * Src,byte * Dst)
 
 void PI1_Decoder_palette(byte * Src,byte * Pal)
 {
-  int i;  // Num‚ro de la couleur trait‚e
+  int i;  // Numéro de la couleur traitée
   int ip; // Indice dans la palette
   word w; // Word contenant le code
 
-  // Sch‚ma d'un word =
+  // Schéma d'un word =
   //
   //    Low        High
   // VVVV RRRR | 0000 BBBB
@@ -4786,11 +4788,11 @@ void PI1_Decoder_palette(byte * Src,byte * Pal)
 
 void PI1_Coder_palette(byte * Pal,byte * Dst)
 {
-  int i;  // Num‚ro de la couleur trait‚e
+  int i;  // Numéro de la couleur traitée
   int ip; // Indice dans la palette
   word w; // Word contenant le code
 
-  // Sch‚ma d'un word =
+  // Schéma d'un word =
   //
   //    Low        High
   // VVVV RRRR | 0000 BBBB
@@ -4816,7 +4818,7 @@ void Test_PI1(void)
   int  Handle;              // Handle du fichier
   char Nom_du_fichier[256]; // Nom complet du fichier
   int  Taille;              // Taille du fichier
-  word Res;                 // R‚solution de l'image
+  word Res;                 // Résolution de l'image
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -4827,11 +4829,11 @@ void Test_PI1(void)
   Handle=open(Nom_du_fichier,O_RDONLY);
   if (Handle!=-1)
   {
-    // V‚rification de la taille
+    // Vérification de la taille
     Taille=filelength(Handle);
     if ((Taille==32034) || (Taille==32066))
     {
-      // Lecture et v‚rification de la r‚solution
+      // Lecture et vérification de la résolution
       if ((read(Handle,&Res,2))==2)
       {
         if (Res==0x0000)
@@ -4859,7 +4861,7 @@ void Load_PI1(void)
   Erreur_fichier=0;
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-    // allocation d'un buffer m‚moire
+    // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
     if (buffer!=NULL)
     {
@@ -4880,7 +4882,7 @@ void Load_PI1(void)
           Principal_Largeur_image=320;
           Principal_Hauteur_image=200;
 
-          // Chargement/d‚compression de l'image
+          // Chargement/décompression de l'image
           ptr=buffer+34;
           for (Pos_Y=0;Pos_Y<200;Pos_Y++)
           {
@@ -4924,9 +4926,9 @@ void Save_PI1(void)
   Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
   if (Fichier!=-1)
   {
-    // allocation d'un buffer m‚moire
+    // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
-    // Codage de la r‚solution
+    // Codage de la résolution
     buffer[0]=0x00;
     buffer[1]=0x00;
     // Codage de la palette
@@ -4954,13 +4956,13 @@ void Save_PI1(void)
     {
       close(Fichier);
     }
-    else // Erreur d'‚criture (disque plein ou prot‚g‚)
+    else // Erreur d'écriture (disque plein ou protégé)
     {
       close(Fichier);
       remove(Nom_du_fichier);
       Erreur_fichier=1;
     }
-    // Lib‚ration du buffer m‚moire
+    // Libération du buffer mémoire
     free(buffer);
   }
   else
@@ -4982,7 +4984,7 @@ void Save_PI1(void)
 /////////////////////////////////////////////////////////////////////////////
 
 
-//// DECOMPRESSION d'un buffer selon la m‚thode PACKBITS ////
+//// DECOMPRESSION d'un buffer selon la méthode PACKBITS ////
 
 void PC1_Decompresser_PackBits(byte * Src,byte * Dst)
 {
@@ -5003,7 +5005,7 @@ void PC1_Decompresser_PackBits(byte * Src,byte * Dst)
     }
     else
     {
-      // Recopier n+1 octets litt‚ralement
+      // Recopier n+1 octets littéralement
       n=n+1;
       for (;(n>0) && (id<32000);n--)
         Dst[id++]=Src[is++];
@@ -5015,19 +5017,19 @@ void PC1_Decompresser_PackBits(byte * Src,byte * Dst)
   }
 }
 
-//// COMPRESSION d'un buffer selon la m‚thode PACKBITS ////
+//// COMPRESSION d'un buffer selon la méthode PACKBITS ////
 
 void PC1_Compresser_PackBits(byte * Src,byte * Dst,int TailleS,int * TailleD)
 {
   int is; // Indice dans la source
   int id; // Indice dans la destination
-  int ir; // Indice de   la r‚p‚tition
-  int n;  // Taille des s‚quences
-  int repet; // "Il y a r‚p‚tition"
+  int ir; // Indice de   la répétition
+  int n;  // Taille des séquences
+  int repet; // "Il y a répétition"
 
   for (is=id=0;is<TailleS;)
   {
-    // On recherche le 1er endroit o— il y a r‚p‚tition d'au moins 3 valeurs
+    // On recherche le 1er endroit o— il y a répétition d'au moins 3 valeurs
     // identiques
 
     repet=0;
@@ -5042,7 +5044,7 @@ void PC1_Compresser_PackBits(byte * Src,byte * Dst,int TailleS,int * TailleD)
         break;
     }
 
-    // On code la partie sans r‚p‚titions
+    // On code la partie sans répétitions
     if (ir!=is)
     {
       n=(ir-is)+1;
@@ -5051,10 +5053,10 @@ void PC1_Compresser_PackBits(byte * Src,byte * Dst,int TailleS,int * TailleD)
         Dst[id++]=Src[is++];
     }
 
-    // On code la partie sans r‚p‚titions
+    // On code la partie sans répétitions
     if (repet)
     {
-      // On compte la quantit‚ de fois qu'il faut r‚p‚ter la valeur
+      // On compte la quantité de fois qu'il faut répéter la valeur
       for (ir+=3;ir<TailleS;ir++)
       {
         if (Src[ir]!=Src[is])
@@ -5069,7 +5071,7 @@ void PC1_Compresser_PackBits(byte * Src,byte * Dst,int TailleS,int * TailleD)
     }
   }
 
-  // On renseigne la taille du buffer compress‚
+  // On renseigne la taille du buffer compressé
   *TailleD=id;
 }
 
@@ -5080,7 +5082,7 @@ void PC1_Compresser_PackBits(byte * Src,byte * Dst,int TailleS,int * TailleD)
 void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
 {
   int  i,j;         // Compteurs
-  int  ip;          // Indice du pixel … calculer
+  int  ip;          // Indice du pixel à calculer
   byte masque;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
@@ -5112,7 +5114,7 @@ void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
 void PC1_1lp_to_4pb(byte * Src,byte * Dst0,byte * Dst1,byte * Dst2,byte * Dst3)
 {
   int  i,j;         // Compteurs
-  int  ip;          // Indice du pixel … calculer
+  int  ip;          // Indice du pixel à calculer
   byte masque;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
@@ -5146,7 +5148,7 @@ void Test_PC1(void)
   int  Handle;              // Handle du fichier
   char Nom_du_fichier[256]; // Nom complet du fichier
   int  Taille;              // Taille du fichier
-  word Res;                 // R‚solution de l'image
+  word Res;                 // Résolution de l'image
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -5157,11 +5159,11 @@ void Test_PC1(void)
   Handle=open(Nom_du_fichier,O_RDONLY);
   if (Handle!=-1)
   {
-    // V‚rification de la taille
+    // Vérification de la taille
     Taille=filelength(Handle);
     if ((Taille<=32066))
     {
-      // Lecture et v‚rification de la r‚solution
+      // Lecture et vérification de la résolution
       if ((read(Handle,&Res,2))==2)
       {
         if (Res==0x0080)
@@ -5192,7 +5194,7 @@ void Load_PC1(void)
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
     Taille=filelength(Fichier);
-    // allocation des buffers m‚moire
+    // allocation des buffers mémoire
     buffercomp=(byte *)malloc(Taille);
     bufferdecomp=(byte *)malloc(32000);
     if ( (buffercomp!=NULL) && (bufferdecomp!=NULL) )
@@ -5214,14 +5216,14 @@ void Load_PC1(void)
           Principal_Largeur_image=320;
           Principal_Hauteur_image=200;
 
-          // D‚compression du buffer
+          // Décompression du buffer
           PC1_Decompresser_PackBits(buffercomp+34,bufferdecomp);
 
-          // D‚codage de l'image
+          // Décodage de l'image
           ptr=bufferdecomp;
           for (Pos_Y=0;Pos_Y<200;Pos_Y++)
           {
-            // D‚codage de la scanline
+            // Décodage de la scanline
             PC1_4pb_to_1lp(ptr,ptr+40,ptr+80,ptr+120,pixels);
             ptr+=160;
             // Chargement de la ligne
@@ -5267,10 +5269,10 @@ void Save_PC1(void)
   Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
   if (Fichier!=-1)
   {
-    // Allocation des buffers m‚moire
+    // Allocation des buffers mémoire
     bufferdecomp=(byte *)malloc(32000);
     buffercomp  =(byte *)malloc(64066);
-    // Codage de la r‚solution
+    // Codage de la résolution
     buffercomp[0]=0x80;
     buffercomp[1]=0x00;
     // Codage de la palette
@@ -5302,13 +5304,13 @@ void Save_PC1(void)
     {
       close(Fichier);
     }
-    else // Erreur d'‚criture (disque plein ou prot‚g‚)
+    else // Erreur d'écriture (disque plein ou protégé)
     {
       close(Fichier);
       remove(Nom_du_fichier);
       Erreur_fichier=1;
     }
-    // Lib‚ration des buffers m‚moire
+    // Libération des buffers mémoire
     free(bufferdecomp);
     free(buffercomp);
   }

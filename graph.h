@@ -1,3 +1,5 @@
+#include "global.h"
+
 //byte Meilleure_couleur(byte Rouge, byte Vert, byte Bleu);
 
 void Remapper_ecran_apres_changement_couleurs_menu(void);
@@ -52,7 +54,7 @@ byte Effet_Smooth(word X,word Y,byte Couleur);
 void Afficher_foreback(void);
 
 
-void Afficher_pixel(short X,short Y,byte Couleur);
+void Afficher_pixel(word X,word Y,byte Couleur);
 
 void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview);
 void Effacer_pinceau(short X,short Y);
