@@ -237,12 +237,9 @@ void Charger_DAT(void)
 
   struct stat Informations_Fichier;
 
-/*
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.dat");
-*/
-  strcpy(Nom_du_fichier,"gfx2.dat");
-  puts("Charger_DAT incomplet");
+
   if(stat(Nom_du_fichier,&Informations_Fichier))
 	switch errno
 		{
@@ -1761,10 +1758,8 @@ int Charger_CFG(int Tout_charger)
   struct Config_Mode_video   CFG_Mode_video;
   struct stat Informations_Fichier;
 
-
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
-
 
   stat(Nom_du_fichier,&Informations_Fichier);
   Taille_fichier=Informations_Fichier.st_size;
@@ -1782,13 +1777,14 @@ int Charger_CFG(int Tout_charger)
     || (CFG_Header.Beta1!=BETA1)
     || (CFG_Header.Beta2!=BETA2) )
     goto Erreur_config_ancienne;
-
+  
   if (Taille_fichier!=TAILLE_FICHIER_CONFIG)
     goto Erreur_lecture_config;
-
+  
   // - Lecture des infos contenues dans le fichier de config -
   while (read(Handle,&Chunk,sizeof(Chunk))==sizeof(Chunk))
   {
+	  printf("CHUNK: %d %d \n",Chunk.Numero,Chunk.Taille);
     switch (Chunk.Numero)
     {
       case CHUNK_TOUCHES: // Touches
