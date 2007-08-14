@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include "divers.h"
 
+#include "errno.h"
+
 //  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
@@ -27,11 +29,13 @@ void Erreur(int Code);
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
-  int Position;
+  /*int Position;
 
   strcpy(Repertoire_du_programme,Chaine);
-  for (Position=strlen(Repertoire_du_programme);Repertoire_du_programme[Position]!='\\';Position--);
-  Repertoire_du_programme[Position+1]='\0';
+  for (Position=strlen(Repertoire_du_programme);Repertoire_du_programme[Position]!='/';Position--); //sous linux c'est un /, sous windows c'est \\
+  Repertoire_du_programme[Position+1]='\0';*/
+  puts("Chercher_repertoire_du_programme: implémentation incomplète");
+  Repertoire_du_programme[0]=0; //On va travailler dans le dossier courant ...
 }
 
 
@@ -64,7 +68,7 @@ word Drive_Touche[26]=
   0x0415,
   0x042C
 };
-// Ajouter un lecteur … la liste de lecteurs
+// Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(byte Numero, byte Type)
 {
   Drive[Nb_drives].Lettre=Numero+65;
@@ -78,6 +82,7 @@ void Ajouter_lecteur(byte Numero, byte Type)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
+/*
   byte Lecteur;
   byte Nb_lecteurs_disquettes;
   byte Lecteur_de_disquettes;
@@ -186,7 +191,9 @@ void Rechercher_drives(void)
     if (Freespace(Lecteur+1)!=-1)
       Ajouter_lecteur(Lecteur,DRIVE_NETWORK);
   }
-
+*/
+//Sous linux, il n'y a pas de lecteurs, on va juste mettre un disque dur qui pointera vers la racine
+Ajouter_lecteur(0,DRIVE_HDD); //Le lecteur numéro 0 est un disque dur.
 }
 
 
@@ -228,24 +235,38 @@ void Charger_DAT(void)
   byte Pos_Y;
   word Mot_temporaire;
 
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
-
+/*
   strcpy(Nom_du_fichier,Repertoire_du_programme);
-  strcat(Nom_du_fichier,"GFX2.DAT");
-
-  Handle=open(Nom_du_fichier,O_RDONLY);
-  if (Handle==-1)
-    Erreur(ERREUR_DAT_ABSENT);
-  stat(Nom_du_fichier,Informations_Fichier);
-  Taille_fichier=Informations_Fichier->st_size;
+  strcat(Nom_du_fichier,"gfx2.dat");
+*/
+  strcpy(Nom_du_fichier,"gfx2.dat");
+  puts("Charger_DAT incomplet");
+  if(stat(Nom_du_fichier,&Informations_Fichier))
+	switch errno
+		{
+			case EACCES: puts("La permission de parcours est refusée pour un des répertoires contenu dans le chemin path."); break;
+			case EBADF:  puts("filedes est un mauvais descripteur."); break;
+			case EFAULT: puts("Un pointeur se trouve en dehors de l'espace d'adressage."); break;
+			case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
+			case ENAMETOOLONG: puts("Nom de fichier trop long."); break;
+			case ENOENT: puts("Un composant du chemin path n'existe pas, ou il s'agit d'une chaîne vide."); break;
+			case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
+			case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
+		}
+  Taille_fichier=Informations_Fichier.st_size;
   if (Taille_fichier!=TAILLE_FICHIER_DATA)
     Erreur(ERREUR_DAT_CORROMPU);
-
+  
+	Handle=open(Nom_du_fichier,O_RDONLY);
+	if (Handle==-1)
+		Erreur(ERREUR_DAT_ABSENT);
+  
   if (read(Handle,Palette_defaut,sizeof(T_Palette))!=sizeof(T_Palette))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)Palette_defaut,sizeof(T_Palette));
-
+  
   if (read(Handle,BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU)!=LARGEUR_MENU*HAUTEUR_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
@@ -284,7 +305,7 @@ void Charger_DAT(void)
   if (read(Handle,TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES)!=2*16*NB_TRAMES_PREDEFINIES)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES);
-
+  
   // Lecture des fontes 8x8:
   if (!(Fonte_temporaire=(byte *)malloc(2048)))
     Erreur(ERREUR_MEMOIRE);
@@ -342,7 +363,7 @@ void Charger_DAT(void)
   }
 
   close(Handle);
-
+  
   Section_d_aide_en_cours=0;
   Position_d_aide_en_cours=0;
 
@@ -941,7 +962,7 @@ void Initialisation_des_boutons(void)
 
   Initialiser_bouton(BOUTON_CHOIX_COL,
                      LARGEUR_MENU+1,2,
-                     1,32, // La largeur est mise … jour … chq chngmnt de mode
+                     1,32, // La largeur est mise à jour à chq chngmnt de mode
                      FORME_BOUTON_SANS_CADRE,
                      Bouton_Choix_forecolor,Bouton_Choix_backcolor,
                      Rien_du_tout,
@@ -1738,17 +1759,19 @@ int Charger_CFG(int Tout_charger)
   struct Config_Chunk        Chunk;
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
-  strcat(Nom_du_fichier,"GFX2.CFG");
+  strcat(Nom_du_fichier,"gfx2.cfg");
 
+
+  stat(Nom_du_fichier,&Informations_Fichier);
+  Taille_fichier=Informations_Fichier.st_size;
+  
   if ((Handle=open(Nom_du_fichier,O_RDONLY))==-1)
     return ERREUR_CFG_ABSENT;
-  stat(Nom_du_fichier,Informations_Fichier);
-  Taille_fichier=Informations_Fichier->st_size;
-
+  
   if ( (Taille_fichier<sizeof(CFG_Header))
     || (read(Handle,&CFG_Header,sizeof(CFG_Header))!=sizeof(CFG_Header))
     || memcmp(CFG_Header.Signature,"CFG",3) )
@@ -2044,7 +2067,7 @@ int Sauver_CFG(void)
   if (write(Handle,Smooth_Matrice,sizeof(Smooth_Matrice))!=sizeof(Smooth_Matrice))
     goto Erreur_sauvegarde_config;
 
-  // Sauvegarde des couleurs … exclure
+  // Sauvegarde des couleurs à exclure
   Chunk.Numero=CHUNK_EXCLUDE_COLORS;
   Chunk.Taille=sizeof(Exclude_color);
   if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
@@ -2108,7 +2131,7 @@ void Initialiser_la_table_precalculee_des_distances_de_couleur(void)
   // 128 valeurs pour chaque teinte, 3 teintes (Rouge, vert et bleu)
   MC_Table_differences=(int *)malloc(sizeof(int)*(3*128));
 
-  // Pour chacune des 128 positions correspondant … une valeur de différence:
+  // Pour chacune des 128 positions correspondant à une valeur de différence:
   for (Indice=0;Indice<128;Indice++)
   {
     if (Indice<64)

@@ -4,6 +4,22 @@
 #include "sdlscreen.h"
 #include "global.h"
 
+// Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
+byte Recuperer_nb_lignes(void)
+{
+	/*
+  mov  ax,1130h
+  xor  bh,bh
+  push es
+  int  10h
+  pop  es
+  inc  dl
+  mov  [esp+28],dl
+	*/
+	puts("Recuperer_nb_lignes non implémenté!\n");
+	return 0;
+}
+
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {
     int Nombre_De_Pixels=0; //ECX
@@ -75,12 +91,13 @@ void Effacer_image_courante(byte Couleur)
 }
 
 void Sensibilite_souris(word X,word Y)
-{;//TODO Implémenter la sensibilité souris
+{
+	puts("Sensibilite_souris non implémenté!\n");
 }
 
 void Get_input(void)
 {
-    SDL_PollEvent(Evenement_SDL);
+	puts("Get_input non implémenté!\n");
 }
 
 
@@ -131,12 +148,6 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 void Clavier_de_depart(void)
 {
 	puts("Clavier_de_depart non implémenté!\n");
-}
-
-byte Recuperer_nb_lignes(void)
-{
-	puts("Recuperer_nb_lignes non implémenté!\n");
-	return 0;
 }
 
 void Clavier_americain(void)
@@ -249,6 +260,15 @@ byte Lit_pixel_dans_ecran_backup   (word X,word Y)
 }
 
 byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
+// Numero_de_lecteur compris entre 0 et 3 (4 lecteurs de disquettes)
+//
+// Résultat = 0 : Pas de lecteur
+//            1 : Lecteur 360 Ko
+//            2 : Lecteur 1.2 Mo
+//            3 : Lecteur 720 Ko
+//            4 : Lecteur 1.4 Mo
+//            5 : Lecteur 2.8 Mo (??? pas sur ???)
+//            6 : Lecteur 2.8 Mo
 {
 	puts("Type_de_lecteur_de_disquette non implémenté!\n");
 	return 0;

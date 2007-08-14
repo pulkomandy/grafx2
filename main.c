@@ -199,7 +199,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         Un_fichier_a_ete_passe_en_parametre=1;
         Option2=2;
 
-        // On récupŠre le chemin complet du paramŠtre
+        // On récupère le chemin complet du paramètre
         Buffer=realpath(argv[1],NULL);
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
@@ -231,7 +231,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
       break;
 
     default:
-      // Erreur: trop de paramŠtres sur la ligne de commande
+      // Erreur: trop de paramètres sur la ligne de commande
       Erreur(ERREUR_LIGNE_COMMANDE);
   }
 
@@ -253,9 +253,9 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   printf("°±²Û GrafX 2.00 %s%s þ Copyright (c)1996-1999 Sunset Design Û²±°\n",ALPHA_BETA,POURCENTAGE_VERSION);
 
-  // On crée dŠs maintenant les descripteurs des listes de pages pour la page
+  // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
-  // invalide lors des appels aux multiples fonctions manipulées …
+  // invalide lors des appels aux multiples fonctions manipulées à
   // l'initialisation du programme.
   Principal_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
   Brouillon_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
@@ -267,7 +267,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   // désignées au démarrage (couleurs du menu, ...)
   Initialiser_la_table_precalculee_des_distances_de_couleur();
 
-  // On détermine dŠs le départ o— se trouve le fichier:
+  // On détermine dès le départ où se trouve le fichier:
   Chercher_repertoire_du_programme(argv[0]);
   // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
@@ -303,7 +303,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brosse_File_list_Decalage=0;
   Brosse_Format=0;
 
-  // On initialise les commentaires des images … des chaŒnes vides
+  // On initialise les commentaires des images à des chaŒnes vides
   Principal_Commentaire[0]='\0';
   Brouillon_Commentaire[0]='\0';
   Brosse_Commentaire[0]='\0';
@@ -401,8 +401,8 @@ void Initialisation_du_programme(int argc,char * argv[])
   Colorize_Mode_en_cours=0; // Par défaut, la méthode par interpolation
   Calculer_les_tables_de_Colorize();
     // On initialise les infos du mode Tiling:
-  Tiling_Mode=0;  //   Pas besoin d'initialiser les décalages car ‡a se fait
-                  // en prenant une brosse (toujours mis … 0).
+  Tiling_Mode=0;  //   Pas besoin d'initialiser les décalages car ça se fait
+                  // en prenant une brosse (toujours mis à 0).
     // On initialise les infos du mode Mask:
   Mask_Mode=0;
 
@@ -412,15 +412,11 @@ void Initialisation_du_programme(int argc,char * argv[])
   Spray_Delay=1;
   Spray_Mono_flow=10;
   memset(Spray_Multi_flow,0,256);
-  srand(time(NULL)); // On randomize un peu tout ‡a...
-
-  // Récupération du nombre de lignes de l'ancien mode
-  Ancien_nb_lignes=Recuperer_nb_lignes();
+  srand(time(NULL)); // On randomize un peu tout ça...
+	
   // Passer en clavier américain
-  Clavier_americain();
-
-  // Tester la présence de la souris
-  if (!Detection_souris()) Erreur(ERREUR_DRIVER_SOURIS);
+  //Clavier_americain();
+  //TODO: Voir à quoi ça sert vraiement ...
 
   // Initialisation des boutons
   Initialisation_des_boutons();
@@ -519,10 +515,10 @@ void Initialisation_du_programme(int argc,char * argv[])
     Erreur(ERREUR_MEMOIRE);
 
   // On remet le nom par défaut pour la page de brouillon car il été modifié
-  // par le passage d'un fichier en paramŠtre lors du traitement précédent.
+  // par le passage d'un fichier en paramètre lors du traitement précédent.
   // Note: le fait que l'on ne modifie que les variables globales Brouillon_*
-  // et pas les infos contenues dans la page de brouillon elle-mˆme ne m'ins-
-  // -pire pas confiance mais ‡a a l'air de marcher sans poser de problŠmes,
+  // et pas les infos contenues dans la page de brouillon elle-même ne m'ins-
+  // -pire pas confiance mais ça a l'air de marcher sans poser de problèmes,
   // alors...
   if (Un_fichier_a_ete_passe_en_parametre)
   {
@@ -549,10 +545,10 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Image_modifiee=0;
   Principal_Image_modifiee=0;
 
-  // Le programme débute en mode de dessin … la main
+  // Le programme débute en mode de dessin à la main
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
 
-  // On initialise la brosse initiale … 1 pixel blanc:
+  // On initialise la brosse initiale à 1 pixel blanc:
   Brosse_Largeur=1;
   Brosse_Hauteur=1;
   Capturer_brosse(0,0,0,0,0);
@@ -565,22 +561,22 @@ void Fermeture_du_programme(void)
   unsigned Bidon;
   int      Retour;
 
-  // On libŠre le buffer de gestion de lignes
+  // On libère le buffer de gestion de lignes
   free(Buffer_de_ligne_horizontale);
 
-  // On libŠre le pinceau spécial
+  // On libère le pinceau spécial
   free(Pinceau_Sprite);
 
-  // On libŠre la table précalculée des distances de teintes
+  // On libère la table précalculée des distances de teintes
   free(MC_Table_differences);
 
-  // On libŠre les différents écrans virtuels et brosse:
+  // On libère les différents écrans virtuels et brosse:
   free(Brosse);
   Nouveau_nombre_de_backups(0);
   free(Brouillon_Ecran);
   free(Principal_Ecran);
 
-  // On libŠre également les données de l'aide:
+  // On libère également les données de l'aide:
   for (Bidon=0;Bidon<NB_SECTIONS_AIDE;Bidon++)
     free(Table_d_aide[Bidon].Debut_de_la_liste);
 
