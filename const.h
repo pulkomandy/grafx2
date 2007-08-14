@@ -3,27 +3,26 @@
 
 
 
-// D‚claration des constantes ////////////////////////////////////////////////
+// Déclaration des constantes ////////////////////////////////////////////////
 
-#define M_PI  3.14159265358979323846264338328
 #define M_2PI 6.28318530717958647692528676656
 
-// Note: La taille du fichier GFX2.DAT est d‚finie au d‚but de INIT.C !
-#define POURCENTAGE_VERSION     "96.5%" // Libell‚ du pourcentage de la version á
+// Note: La taille du fichier GFX2.DAT est définie au début de INIT.C !
+#define POURCENTAGE_VERSION     "96.5%" // Libellé du pourcentage de la version á
 #define VERSION1                  2     // |
-#define VERSION2                  0     // |_ Num‚ro de version d‚coup‚ en
+#define VERSION2                  0     // |_ Numéro de version découpé en
 #define BETA1                     96    // |  plusieurs parties => 2.0 á95.5%
 #define BETA2                     5     // |
 #define ALPHA_BETA                "á"   // Type de la version "à" ou "á"
 #define TAILLE_FICHIER_CONFIG     10351 // Taille du fichier GFX2.CFG
-#define NB_MODES_VIDEO            60    // Nombre de modes vid‚o
-#define NB_BOUTONS                38    // Nombre de boutons … g‚rer
+#define NB_MODES_VIDEO            60    // Nombre de modes vidéo
+#define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
-#define NB_TOUCHES_SPECIALES      72    // Nombre de touches sp‚ciales
-#define NB_OPERATIONS             32    // Nombre d'op‚rations g‚r‚es par le moteur
+#define NB_TOUCHES_SPECIALES      72    // Nombre de touches spéciales
+#define NB_OPERATIONS             32    // Nombre d'opérations gérées par le moteur
 #define NB_FACTEURS_DE_ZOOM       12    // Nombre de facteurs de zoom
-#define LARGEUR_MENU              254   // Largeur du menu en taille r‚elle
-#define HAUTEUR_MENU              44    // Hauteur du menu en taille r‚elle
+#define LARGEUR_MENU              254   // Largeur du menu en taille réelle
+#define HAUTEUR_MENU              44    // Hauteur du menu en taille réelle
 #define NB_SPRITES_CURSEUR        8     // Nombre de sprites de curseur
 #define LARGEUR_SPRITE_CURSEUR    15    // Largeur d'un sprite de curseur en pixels
 #define HAUTEUR_SPRITE_CURSEUR    15    // Hauteur d'un sprite de curseur en pixels
@@ -31,37 +30,37 @@
 #define NB_SPRITES_MENU           9     // Nombre de sprites de menu
 #define LARGEUR_SPRITE_MENU       14    // Largeur d'un sprite de menu en pixels
 #define HAUTEUR_SPRITE_MENU       14    // Hauteur d'un sprite de menu en pixels
-#define LARGEUR_PINCEAU           16    // Largeur d'un sprite de pinceau pr‚d‚fini
-#define HAUTEUR_PINCEAU           16    // Hauteur d'un sprite de pinceau pr‚d‚fini
+#define LARGEUR_PINCEAU           16    // Largeur d'un sprite de pinceau prédéfini
+#define HAUTEUR_PINCEAU           16    // Hauteur d'un sprite de pinceau prédéfini
 #define TAILLE_MAXI_PINCEAU       127   // Taille maxi des pinceaux
 #define NB_SPRITES_DRIVES         5     // Nombre de sprites de drives
 #define LARGEUR_SPRITE_DRIVE      7     // Largeur d'un sprite de drive en pixels
 #define HAUTEUR_SPRITE_DRIVE      7     // Hauteur d'un sprite de drive en pixels
 #define NB_SPRITES_PINCEAU        48    // Nombre de sprites de pinceau
-#define NB_TRAMES_PREDEFINIES     12    // Nombre de trames pr‚d‚finies
-#define TAILLE_PILE_OPERATIONS    16    // Nombre maximum d'‚l‚ments utilis‚s par les op‚rations
-#define TAILLE_MAXI_PATH          37    // Taille maximum affichable du r‚pertoire courant dans les fenˆtres du fileselect
+#define NB_TRAMES_PREDEFINIES     12    // Nombre de trames prédéfinies
+#define TAILLE_PILE_OPERATIONS    16    // Nombre maximum d'éléments utilisés par les opérations
+#define TAILLE_MAXI_PATH          37    // Taille maximum affichable du répertoire courant dans les fenêtres du fileselect
 #define TAILLE_COMMENTAIRE        32    // Taille maxi des commentaires pour le PKM
-#define TAILLE_NOM_CONSTRUCTEUR   24    // Taille maxi du nom de constructeur VESA dans la fenˆtre de stats.
+#define TAILLE_NOM_CONSTRUCTEUR   24    // Taille maxi du nom de constructeur VESA dans la fenêtre de stats.
 #define NB_PAGES_UNDO_MAX         99    // Nombre maximal de pages d'undo
 #define FACTEUR_DE_ZOOM_PAR_DEFAUT 4    // Facteur de zoom initial
 #define NB_SECTIONS_AIDE          3     // Nombre de sections dans l'aide
 
-// On impose … l'allocation dynamique des pages de backups de conserver un
-// minimum de 256 Ko pour que le reste du programme puisse continuer …
+// On impose à l'allocation dynamique des pages de backups de conserver un
+// minimum de 256 Ko pour que le reste du programme puisse continuer à
 // fonctionner.
 #define QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER (256*1024)
 
-#define A_GAUCHE                  1     // Indique une direction (ou click) … gauche
-#define A_DROITE                  2     // Indique une direction (ou click) … droite
+#define A_GAUCHE                  1     // Indique une direction (ou click) à gauche
+#define A_DROITE                  2     // Indique une direction (ou click) à droite
 
 #define LARGEUR_BARRE_SPLIT       6     // [ Û±±° ]
-#define PROPORTION_SPLIT          0.3   // proportion de la zone non-zoom‚e en largeur par rapport … l'‚cran
-#define NB_PIXELS_ZOOMES_MIN      4     // Nombre minimal de pixels zoom‚s en largeur (Note: En dessous de 4, on ne peut plus scroller!)
+#define PROPORTION_SPLIT          0.3   // proportion de la zone non-zoomée en largeur par rapport à l'écran
+#define NB_PIXELS_ZOOMES_MIN      4     // Nombre minimal de pixels zoomés en largeur (Note: En dessous de 4, on ne peut plus scroller!)
 
-  // Les diff‚rents formats de fichiers:
+  // Les différents formats de fichiers:
 
-#define NB_FORMATS_CONNUS         12    // Nombre de formats connus (devrait ˆtre la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus g‚n‚ralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
+#define NB_FORMATS_CONNUS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
 #define NB_FORMATS_LOAD           12    // Nombre de formats que l'on sait charger
 #define NB_FORMATS_SAVE           12    // Nombre de formats que l'on sait sauver
 
@@ -69,21 +68,21 @@ enum FORMATS_RECONNUS
 {
   FORMAT_PKM=1,      // |
   FORMAT_LBM,        // |
-  FORMAT_GIF,        // |    Il faudra penser … r‚ordonner
-  FORMAT_BMP,        // |  les donn‚es sur les formats dans
+  FORMAT_GIF,        // |    Il faudra penser à réordonner
+  FORMAT_BMP,        // |  les données sur les formats dans
   FORMAT_PCX,        // |  GLOBAL.H si on modifie ces cons-
   FORMAT_IMG,        // |_ tantes.
   FORMAT_SCx,        // |
-  FORMAT_PI1,        // |    Elles repr‚sentent l'indice o—
+  FORMAT_PI1,        // |    Elles représentent l'indice o—
   FORMAT_PC1,        // |  l'on doit aller piocher ces
-  FORMAT_CEL,        // |  donn‚es.
+  FORMAT_CEL,        // |  données.
   FORMAT_KCF,        // |
   FORMAT_PAL         // |
 };
 
-#define FORMAT_PAR_DEFAUT    FORMAT_PKM // Format par d‚faut (ah bon? oh!)
+#define FORMAT_PAR_DEFAUT    FORMAT_PKM // Format par défaut (ah bon? oh!)
 
-  // Les diff‚rentes erreurs:
+  // Les différentes erreurs:
 
 enum CODES_D_ERREURS
 {
@@ -92,32 +91,32 @@ enum CODES_D_ERREURS
   ERREUR_CFG_ABSENT,            // Le fichier GFX2.CFG est absent
   ERREUR_CFG_CORROMPU,          // Mauvais fichier GFX2.CFG
   ERREUR_CFG_ANCIEN,            // Ancienne version du fichier GFX2.CFG
-  ERREUR_MEMOIRE,               // Plus de m‚moire
+  ERREUR_MEMOIRE,               // Plus de mémoire
   ERREUR_LIGNE_COMMANDE,        // Erreur sur la ligne de commande
-  ERREUR_DRIVER_SOURIS,         // Pas de driver souris install‚
-  ERREUR_MODE_VESA_INVALIDE,    // Mode VESA demand‚ sur la ligne de commande invalide
-  ERREUR_MODE_INTERDIT,         // Mode demand‚ sur la ligne de commande interdit (coch‚ en noir)
+  ERREUR_DRIVER_SOURIS,         // Pas de driver souris installé
+  ERREUR_MODE_VESA_INVALIDE,    // Mode VESA demandé sur la ligne de commande invalide
+  ERREUR_MODE_INTERDIT,         // Mode demandé sur la ligne de commande interdit (coché en noir)
   ERREUR_NUMERO_MODE,           // Erreur de choix de mode sur la ligne de commande
-  ERREUR_SAUVEGARDE_CFG,        // Erreur en ‚criture pour GFX2.CFG
-  ERREUR_REPERTOIRE_DISPARU,    // Le r‚pertoire de lancement n'existe plus
+  ERREUR_SAUVEGARDE_CFG,        // Erreur en écriture pour GFX2.CFG
+  ERREUR_REPERTOIRE_DISPARU,    // Le répertoire de lancement n'existe plus
   ERREUR_INI_ABSENT,            // Le fichier GFX2.INI est absent
   ERREUR_INI_CORROMPU,          // Le fichier GFX2.INI est corrompu
   ERREUR_SAUVEGARDE_INI,        // Le fichier GFX2.INI n'est pas inscriptible
   ERREUR_SORRY_SORRY_SORRY      // On le refera plus, promis
 };
 
-  // Les diff‚rents types de modes vid‚os
+  // Les différents types de modes vidéos
 
 enum TYPES_DE_MODES_VIDEO
 {
     MODE_SDL
   /*MODE_MCGA,
   MODE_X,
-  MODE_VESA,       // Attention! Si on change la num‚rotation, il faut
+  MODE_VESA,       // Attention! Si on change la numérotation, il faut
   MODE_XVESA       // que les 2 plus grandes valeurs soient ces 2 modes!*/
 };
 
-  // Les diff‚rents modes vid‚os (avec leur nø d'ordre)
+  // Les différents modes vidéos (avec leur nø d'ordre)
 
 enum MODES_VIDEO
 {
@@ -183,18 +182,18 @@ enum MODES_VIDEO
   MODE_1024_768 // 59
 };
 
-  // Les diff‚rentes cat‚gories de bouton:
+  // Les différentes catégories de bouton:
 
 enum FAMILLES_DE_BOUTONS
 {
   FAMILLE_OUTIL=1,          // Outils de dessin
-  FAMILLE_INTERRUPTION,     // Op‚ration ‚ph‚mŠre
+  FAMILLE_INTERRUPTION,     // Opération éphémŠre
   FAMILLE_INSTANTANE,       // Pif paf
   FAMILLE_TOOLBAR,          // Cache/Montre la barre d'outils
   FAMILLE_EFFETS            // Effets
 };
 
-  // Les diff‚rentes formes de bouton:
+  // Les différentes formes de bouton:
 
 enum FORMES_DE_BOUTONS
 {
@@ -204,7 +203,7 @@ enum FORMES_DE_BOUTONS
   FORME_BOUTON_TRIANGLE_BAS_DROITE    // Ex: Rectangles pleins
 };
 
-  // Les diff‚rentes formes de curseur:
+  // Les différentes formes de curseur:
 
 enum FORMES_DE_CURSEUR
 {
@@ -221,7 +220,7 @@ enum FORMES_DE_CURSEUR
   FORME_CURSEUR_ROTATE_XOR
 };
 
-  // Les diff‚rentes formes de pinceaux (les types de pinceaux doivent ˆtre au d‚but)
+  // Les différentes formes de pinceaux (les types de pinceaux doivent être au début)
 
 enum FORMES_DE_PINCEAUX
 {
@@ -237,18 +236,18 @@ enum FORMES_DE_PINCEAUX
   FORME_PINCEAU_LOSANGE,
   FORME_PINCEAU_ROND_TRAME,
   FORME_PINCEAU_CARRE_TRAME,
-  FORME_PINCEAU_DIVERS,// Ce doit ˆtre le dernier des types de pinceaux, comme ‡a il indique le nombre de types de pinceaux (-1)
-  FORME_PINCEAU_POINT, // Utilis‚ pour r‚duire de pinceau … 1 point dans certaines op‚rations
+  FORME_PINCEAU_DIVERS,// Ce doit être le dernier des types de pinceaux, comme ‡a il indique le nombre de types de pinceaux (-1)
+  FORME_PINCEAU_POINT, // Utilisé pour réduire de pinceau à 1 point dans certaines opérations
   FORME_PINCEAU_BROSSE_COULEUR,
   FORME_PINCEAU_BROSSE_MONOCHROME
 };
 
-  // Les diff‚rents ‚tats de bouton:
+  // Les différents états de bouton:
 
 #define BOUTON_RELACHE 0
 #define BOUTON_ENFONCE 1
 
-  // Les diff‚rents modes de Shade
+  // Les différents modes de Shade
 
 enum MODES_DE_SHADE
 {
@@ -257,7 +256,7 @@ enum MODES_DE_SHADE
   MODE_SHADE_NOSAT
 };
 
-  // Les diff‚rents chunks du fichier .CFG
+  // Les différents chunks du fichier .CFG
 
 enum CHUNKS_CFG
 {
@@ -272,7 +271,7 @@ enum CHUNKS_CFG
   CHUNK_QUICK_SHADE
 };
 
-  // Les diff‚rents types de lecteurs:
+  // Les différents types de lecteurs:
 
 enum TYPES_DE_LECTEURS
 {
@@ -280,10 +279,10 @@ enum TYPES_DE_LECTEURS
   DRIVE_FLOPPY_5_25,  // 1: Diskette 5"¬
   DRIVE_HDD,          // 2: HDD
   DRIVE_CDROM,        // 3: CD-ROM
-  DRIVE_NETWORK       // 4: Logique (r‚seau?)
+  DRIVE_NETWORK       // 4: Logique (réseau?)
 };
 
-  // Les diff‚rents boutons:
+  // Les différents boutons:
 
 enum NUMEROS_DE_BOUTONS
 {
@@ -327,7 +326,7 @@ enum NUMEROS_DE_BOUTONS
   BOUTON_CACHER
 };
 
-  // Les actions des touches sp‚ciales
+  // Les actions des touches spéciales
 
 enum ACTIONS_SPECIALES
 {
@@ -337,9 +336,9 @@ enum ACTIONS_SPECIALES
   SPECIAL_MOUSE_RIGHT,             // |
   SPECIAL_CLICK_LEFT,              // |  Il faut garder
   SPECIAL_CLICK_RIGHT,             // |  ces constantes
-  SPECIAL_NEXT_FORECOLOR,          // |  au d‚but de la
+  SPECIAL_NEXT_FORECOLOR,          // |  au début de la
   SPECIAL_PREVIOUS_FORECOLOR,      // |_ liste car elles
-  SPECIAL_NEXT_BACKCOLOR,          // |  sont r‚utilis‚es
+  SPECIAL_NEXT_BACKCOLOR,          // |  sont réutilisées
   SPECIAL_PREVIOUS_BACKCOLOR,      // |  avec leurs valeurs
   SPECIAL_RETRECIR_PINCEAU,        // |  brutes en ASM dans
   SPECIAL_GROSSIR_PINCEAU,         // |  Get_input !!!
@@ -394,7 +393,7 @@ enum ACTIONS_SPECIALES
   SPECIAL_MASK_MENU,        // |  SPECIAL_SHADE_MODE, et que le
   SPECIAL_GRID_MODE,        // |  dernier soit SPECIAL_TILING_MENU,
   SPECIAL_GRID_MENU,        // |_ et que seuls des effets soient
-  SPECIAL_SIEVE_MODE,       // |  d‚finis entre ces deux l… car
+  SPECIAL_SIEVE_MODE,       // |  définis entre ces deux là car
   SPECIAL_SIEVE_MENU,       // |  des tests sur cet intervalle sont
   SPECIAL_COLORIZE_MODE,    // |  faits dans le moteur.
   SPECIAL_COLORIZE_MENU,    // |
@@ -405,15 +404,15 @@ enum ACTIONS_SPECIALES
   SPECIAL_TILING_MENU       // |
 };
 
-  // D‚finition des op‚rations:
+  // Définition des opérations:
 
 enum OPERATIONS
 {
-  OPERATION_DESSIN_CONTINU,     // Dessin … la main continu
-  OPERATION_DESSIN_DISCONTINU,  // Dessin … la main discontinu
-  OPERATION_DESSIN_POINT,       // Dessin … la main point par point
+  OPERATION_DESSIN_CONTINU,     // Dessin à la main continu
+  OPERATION_DESSIN_DISCONTINU,  // Dessin à la main discontinu
+  OPERATION_DESSIN_POINT,       // Dessin à la main point par point
   OPERATION_LIGNE,              // Lignes
-  OPERATION_K_LIGNE,            // Lignes reli‚es
+  OPERATION_K_LIGNE,            // Lignes reliées
   OPERATION_LIGNES_CENTREES,    // Lignes concentriques
   OPERATION_RECTANGLE_VIDE,     // Rectangle vide
   OPERATION_RECTANGLE_PLEIN,    // Rectangle plein
@@ -425,18 +424,18 @@ enum OPERATIONS
   OPERATION_REMPLACER,          // Remplacer couleur
   OPERATION_PRISE_BROSSE,       // Prise de brosse rectangulaire
   OPERATION_POLYBROSSE,         // Prise d'une brosse multiforme
-  OPERATION_PIPETTE,            // R‚cup‚ration d'une couleur
-  OPERATION_LOUPE,              // Positionnement de la fenˆtre de loupe
-  OPERATION_COURBE_3_POINTS,    // Courbe … 3 points
-  OPERATION_COURBE_4_POINTS,    // Courbe … 4 points
+  OPERATION_PIPETTE,            // Récupération d'une couleur
+  OPERATION_LOUPE,              // Positionnement de la fenêtre de loupe
+  OPERATION_COURBE_3_POINTS,    // Courbe à 3 points
+  OPERATION_COURBE_4_POINTS,    // Courbe à 4 points
   OPERATION_SPRAY,              // Spray
   OPERATION_POLYGONE,           // Polygone
   OPERATION_POLYFORM,           // Polyforme
   OPERATION_POLYFILL,           // Polyfill
   OPERATION_FILLED_POLYFORM,    // Polyforme rempli
   OPERATION_SCROLL,             // Scroll
-  OPERATION_CERCLE_DEGRADE,     // Cercles d‚grad‚s
-  OPERATION_ELLIPSE_DEGRADEE,   // Ellipses d‚grad‚es
+  OPERATION_CERCLE_DEGRADE,     // Cercles dégradés
+  OPERATION_ELLIPSE_DEGRADEE,   // Ellipses dégradées
   OPERATION_TOURNER_BROSSE,     // Faire tourner brosse
   OPERATION_ETIRER_BROSSE,      // Etirer brosse
   OPERATION_DEFORMER_BROSSE,    // Deformer brosse

@@ -277,3 +277,84 @@ long Freespace(byte Numero_de_lecteur)
 	puts("Freespace non implémenté!\n");
 	return 0;
 }
+
+byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
+{
+	puts("Couleur_ILBM_line non implémenté!\n");
+	return 0;
+}
+
+void Palette_256_to_64(T_Palette Palette)
+{
+	puts("Palette_256_to_64 non implémenté!\n");
+}
+
+void Palette_64_to_256(T_Palette Palette)
+{
+	puts("Palette_64_to_256 non implémenté!\n");
+}
+
+byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
+{
+	puts("Effet_Colorize_interpole non implémenté!\n");
+	return 0;
+}
+
+byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
+{
+	puts("Effet_Colorize_additif non implémenté!\n");
+	return 0;
+}
+
+byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
+{
+	puts("Effet_Colorize_soustractif non implémenté!\n");
+	return 0;
+}
+
+void Tester_chrono(void)
+{
+	puts("Tester_chrono non implémenté!\n");
+}
+
+void Flip_Y_LOWLEVEL(void)
+{
+	puts("Flip_Y_LOWLEVEL non implémenté!\n");
+}
+
+void Flip_X_LOWLEVEL(void)
+{
+	puts("Flip_X_LOWLEVEL non implémenté!\n");
+}
+
+void Rotate_180_deg_LOWLEVEL(void)
+{
+	puts("Rotate_180_deg_LOWLEVEL non implémenté!\n");
+}
+
+void Tempo_jauge(byte Vitesse)
+{
+	puts("Tempo_jauge non implémenté!\n");
+}
+
+byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
+{
+	puts("Meilleure_couleur_sans_exclusion non implémenté!\n");
+	return 0;
+}
+
+void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
+{
+	puts("Set_color non implémenté!\n");
+}
+
+void Scroll_picture(short Decalage_X,short Decalage_Y)
+{
+	puts("Scroll_picture non implémenté!\n");
+}
+
+byte Get_key(void)
+{
+	puts("Get_key non implémenté!\n");
+	return 0;
+}

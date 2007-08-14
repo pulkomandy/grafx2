@@ -17,13 +17,13 @@
 #include "operatio.h"
 #include "shade.h"
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
-  // Variables m‚morisants les anciens effets
+  // Variables mémorisants les anciens effets
 
 byte Shade_Mode_avant_annulation;
 byte Quick_shade_Mode_avant_annulation;
@@ -272,22 +272,22 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
 }
 
 
-//---------------------- D‚senclenchement d'un bouton ------------------------
+//---------------------- Désenclenchement d'un bouton ------------------------
 void Desenclencher_bouton(int Numero)
 {
   if (Bouton[Numero].Enfonce)
   {
-    // On affiche le cadre autour du bouton de fa‡on … ce qu'il paraisse relƒch‚
+    // On affiche le cadre autour du bouton de fa‡on à ce qu'il paraisse relƒché
     Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_RELACHE);
-    // On considŠre que le bouton est relƒch‚
+    // On considère que le bouton est relƒché
     Bouton[Numero].Enfonce=BOUTON_RELACHE;
-    // On appelle le d‚senclenchement particulier au bouton:
+    // On appelle le désenclenchement particulier au bouton:
     Bouton[Numero].Desenclencher();
   }
 }
 
 
-//-Enclenchement d'un bouton (et d‚senclenchement de ceux de la mˆme famille)-
+//-Enclenchement d'un bouton (et désenclenchement de ceux de la même famille)-
 void Enclencher_bouton(int Numero,byte Click)
 {
   int Famille;
@@ -295,50 +295,50 @@ void Enclencher_bouton(int Numero,byte Click)
 
   Effacer_curseur();
 
-  // On note d‚j… la famille du bouton (La "Famiglia" c'est sacr‚)
+  // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
   Famille=Bouton[Numero].Famille;
 
   switch (Famille)
   {
-    case FAMILLE_TOOLBAR: // On ne fait rien (on pr‚serve les interruptions)
+    case FAMILLE_TOOLBAR: // On ne fait rien (on préserve les interruptions)
       break;
 
-    case FAMILLE_INTERRUPTION: // Petit cas sp‚cial dans la famille "Interruption":
+    case FAMILLE_INTERRUPTION: // Petit cas spécial dans la famille "Interruption":
       if ((Numero!=BOUTON_LOUPE) || (!Loupe_Mode))
       // Pour chaque bouton:
       for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
-        // S'il est de la mˆme famille
+        // S'il est de la même famille
         if (
              (Curseur!=Numero) &&
              (Bouton[Curseur].Famille==FAMILLE_INTERRUPTION) &&
              (  (Curseur!=BOUTON_LOUPE) ||
                ((Curseur==BOUTON_LOUPE) && (!Loupe_Mode)) )
            )
-          // Alors on d‚senclenche le bouton
+          // Alors on désenclenche le bouton
           Desenclencher_bouton(Curseur);
       break;
 
     default:
-      // On d‚senclenche D'ABORD les interruptions
+      // On désenclenche D'ABORD les interruptions
       // Pour chaque bouton:
       for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
-        // S'il est de la mˆme famille
+        // S'il est de la même famille
         if ( (Curseur!=Numero)
           && (Bouton[Curseur].Famille==FAMILLE_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Loupe_Mode && (Curseur==BOUTON_LOUPE))) )
-          // Alors on d‚senclenche le bouton
+          // Alors on désenclenche le bouton
           Desenclencher_bouton(Curseur);
       // Pour chaque bouton:
       for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
-        // S'il est de la mˆme famille
+        // S'il est de la même famille
         if ( (Curseur!=Numero)
           && (Bouton[Curseur].Famille==Famille) )
-          // Alors on d‚senclenche le bouton
+          // Alors on désenclenche le bouton
           Desenclencher_bouton(Curseur);
   }
 
-  // On affiche le cadre autour du bouton de fa‡on … ce qu'il paraisse enfonc‚
+  // On affiche le cadre autour du bouton de fa‡on à ce qu'il paraisse enfoncé
   Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_ENFONCE);
 
   Afficher_curseur();
@@ -346,7 +346,7 @@ void Enclencher_bouton(int Numero,byte Click)
   // On attend ensuite que l'utilisateur lƒche son bouton:
   Attendre_fin_de_click();
 
-  // On considŠre que le bouton est enfonc‚
+  // On considère que le bouton est enfoncé
   Bouton[Numero].Enfonce=BOUTON_ENFONCE;
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
@@ -358,8 +358,8 @@ void Enclencher_bouton(int Numero,byte Click)
 
 
 
-//--- D‚placer la barre de s‚paration entre la partie zoom‚e et la partie ----
-//------------------ non-zoom‚e lorsqu'on est en mode loupe ------------------
+//--- Déplacer la barre de séparation entre la partie zoomée et la partie ----
+//------------------ non-zoomée lorsqu'on est en mode loupe ------------------
 void Deplacer_Split(void)
 {
   short Ancien_Split=Principal_Split;
@@ -422,17 +422,17 @@ void Gestion_principale(void)
   static byte Temp_color;
   static short Old_MX=0;
   static short Old_MY=0;
-  int  Indice_bouton;           // Num‚ro de bouton de menu en cours
-  int  Indice_bouton_precedent=0; // Num‚ro de bouton de menu sur lequel on ‚tait pr‚c‚demment
-  byte Blink;                   // L'op‚ration demande un effacement du curseur
-  int  Bouton_Touche;           // Bouton … enclencher d'aprŠs la touche de raccourci enfonc‚e
-  byte Bouton_Cote;             // C“t‚ du bouton … enclencher d'aprŠs la touche de raccourci enfonc‚e
-  int  Indice_Touche;           // Indice du tableau de touches sp‚ciales correspondant … la touche enfonc‚e
+  int  Indice_bouton;           // Numéro de bouton de menu en cours
+  int  Indice_bouton_precedent=0; // Numéro de bouton de menu sur lequel on était précédemment
+  byte Blink;                   // L'opération demande un effacement du curseur
+  int  Bouton_Touche;           // Bouton à enclencher d'après la touche de raccourci enfoncée
+  byte Bouton_Cote;             // C“té du bouton à enclencher d'après la touche de raccourci enfoncée
+  int  Indice_Touche;           // Indice du tableau de touches spéciales correspondant à la touche enfoncée
   char Chaine[25];
   byte Temp;
 
 
-  // Au d‚marrage, on sait que le curseur n'est pas dans le menu
+  // Au démarrage, on sait que le curseur n'est pas dans le menu
 
   Curseur_dans_menu_precedent=0;
 
@@ -446,7 +446,7 @@ void Gestion_principale(void)
     {
       for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && (Touche!=Config_Touche[Indice_Touche]);Indice_Touche++);
 
-      // Gestion des touches sp‚ciales:
+      // Gestion des touches spéciales:
       if (Indice_Touche>SPECIAL_CLICK_RIGHT)
       switch(Indice_Touche)
       {
@@ -534,7 +534,7 @@ void Gestion_principale(void)
         case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
           Special_Previous_backcolor();
           break;
-        case SPECIAL_RETRECIR_PINCEAU: // R‚tr‚cir le pinceau
+        case SPECIAL_RETRECIR_PINCEAU: // Rétrécir le pinceau
           Retrecir_pinceau();
           break;
         case SPECIAL_GROSSIR_PINCEAU: // Grossir le pinceau
@@ -756,7 +756,7 @@ void Gestion_principale(void)
               Indice_bouton=NB_BOUTONS;
             }
           }
-          // AprŠs avoir scrut‚ les boutons, si la recherche a ‚t‚ fructueuse,
+          // Après avoir scruté les boutons, si la recherche a été fructueuse,
           // on lance le bouton.
           if (Bouton_Touche!=-1)
           {
@@ -765,8 +765,8 @@ void Gestion_principale(void)
           }
       }
 
-      // Si on a modifi‚ un effet, il faut rafficher le bouton des effets en
-      // cons‚quence.
+      // Si on a modifié un effet, il faut rafficher le bouton des effets en
+      // conséquence.
       if ((Indice_Touche>=SPECIAL_SHADE_MODE)
        && (Indice_Touche<=SPECIAL_TILING_MENU))
       {
@@ -801,7 +801,7 @@ void Gestion_principale(void)
         {
           if (Menu_visible)
           {
-            // On nettoie les coordonn‚es
+            // On nettoie les coordonnées
             Effacer_curseur();
             Block(18*Menu_Facteur_X,Menu_Ordonnee_Texte,192*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
             Afficher_curseur();
@@ -923,16 +923,16 @@ void Gestion_principale(void)
 
 
 //////////////////////////////////////////////////////////////////////////////
-//      Diff‚rentes fonctions d'affichage utilis‚es dans les fenˆtres       //
+//      Différentes fonctions d'affichage utilisées dans les fenêtres       //
 //////////////////////////////////////////////////////////////////////////////
 
-//----------------------- Tracer une fenˆtre d'options -----------------------
+//----------------------- Tracer une fenêtre d'options -----------------------
 
 void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
-// Lors de l'appel … cette proc‚dure, la souris doit ˆtre affich‚e.
-// En sortie de cette procedure, la souris est effac‚e.
+// Lors de l'appel à cette procédure, la souris doit être affichée.
+// En sortie de cette procedure, la souris est effacée.
 {
-  word i,j;
+  //word i,j;
 
   Effacer_curseur();
 
@@ -941,15 +941,15 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Fenetre_Largeur=Largeur;
   Fenetre_Hauteur=Hauteur;
 
-  // Positionnement de la fenˆtre
+  // Positionnement de la fenêtre
   Fenetre_Pos_X=(Largeur_ecran-(Largeur*Menu_Facteur_X))>>1;
 
   Fenetre_Pos_Y=(Hauteur_ecran-(Hauteur*Menu_Facteur_Y))>>1;
 
-  // Fenˆtre grise
+  // Fenêtre grise
   Block(Fenetre_Pos_X+(Menu_Facteur_X<<1),Fenetre_Pos_Y+(Menu_Facteur_Y<<1),(Largeur-4)*Menu_Facteur_X,(Hauteur-4)*Menu_Facteur_Y,CM_Clair);
 
-  // -- Cadre de la fenˆtre ----- --- -- -  -
+  // -- Cadre de la fenêtre ----- --- -- -  -
 
   // Cadre noir puis en relief
   Fenetre_Afficher_cadre_mono(0,0,Largeur,Hauteur,CM_Noir);
@@ -970,22 +970,22 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Cacher_pinceau_avant_fenetre=Cacher_pinceau;
   Cacher_pinceau=1;
 
-  // Initialisation des listes de boutons de la fenˆtre
+  // Initialisation des listes de boutons de la fenêtre
   Fenetre_Liste_boutons_normal  =NULL;
   Fenetre_Liste_boutons_palette =NULL;
   Fenetre_Liste_boutons_scroller=NULL;
   Fenetre_Liste_boutons_special =NULL;
   Nb_boutons_fenetre            =0;
 
-  // On (re)passe dans le clavier de d‚part (fran‡ais pour nous)
+  // On (re)passe dans le clavier de départ (fran‡ais pour nous)
   Clavier_de_depart();
 }
 
-//----------------------- Fermer une fenˆtre d'options -----------------------
+//----------------------- Fermer une fenêtre d'options -----------------------
 
 void Fermer_fenetre(void)
-// Lors de l'appel … cette procedure, la souris doit ˆtre affich‚e.
-// En sortie de cette procedure, la souris est effac‚e.
+// Lors de l'appel à cette procedure, la souris doit être affichée.
+// En sortie de cette procedure, la souris est effacée.
 {
   struct Fenetre_Bouton_normal   * Temp1;
   struct Fenetre_Bouton_palette  * Temp2;
@@ -1022,7 +1022,7 @@ void Fermer_fenetre(void)
   }
 
   Une_fenetre_est_ouverte=0;
-  Curseur_dans_menu_precedent=0; // il faut rafficher le libell‚ dans la barre
+  Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
                                  // d'outils si le curseur est sur une ic“ne.
 
   Calculer_coordonnees_pinceau();
@@ -1037,12 +1037,12 @@ void Fermer_fenetre(void)
   Touche=0;
   Mouse_K=0;
 
-  // On (re)passe dans le clavier am‚ricain
+  // On (re)passe dans le clavier américain
   Clavier_americain();
 }
 
 
-//---------------- Dessiner un bouton normal dans une fenˆtre ----------------
+//---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
 void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
                                     char * Titre,byte Lettre_soulignee,byte Clickable)
@@ -1074,20 +1074,20 @@ void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Haut
 }
 
 
-// -- Bouton normal enfonc‚ dans la fenˆtre --
+// -- Bouton normal enfoncé dans la fenêtre --
 void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Noir,CM_Fonce,CM_Fonce,CM_Noir);
 }
 
-// -- Bouton normal d‚senfonc‚ dans la fenˆtre --
+// -- Bouton normal désenfoncé dans la fenêtre --
 void Fenetre_Desenfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 
-//--------------- Dessiner un bouton palette dans une fenˆtre ----------------
+//--------------- Dessiner un bouton palette dans une fenêtre ----------------
 void Fenetre_Dessiner_bouton_palette(word Pos_X,word Pos_Y)
 {
   word Couleur;
@@ -1107,7 +1107,7 @@ void Fenetre_Effacer_tags(void)
   word Origine_Y;
   word Pos_X;
   word Pos_fenetre_X;
-  word Pos_fenetre_Y;
+  //word Pos_fenetre_Y;
 
   Origine_X=Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3)*Menu_Facteur_X;
   Origine_Y=Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3)*Menu_Facteur_Y;
@@ -1121,9 +1121,9 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 {
   word Origine_X;
   word Origine_Y;
-  word Pos_X;
+  //word Pos_X;
   word Pos_Y;
-  word Pos_fenetre_X;
+  //word Pos_fenetre_X;
   word Pos_fenetre_Y;
   word Indice;
 
@@ -1149,10 +1149,10 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 
   if (Debut!=Fin)
   {
-    // On complŠte le 1er TAG
+    // On complète le 1er TAG
     Pixel_dans_fenetre(Origine_X+1,Origine_Y+4,CM_Noir);
 
-    // On affiche le 2Šme TAG
+    // On affiche le 2ème TAG
     Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(Fin>>4)*10;
     Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(Fin&15)* 5;
     for (Pos_Y=0,Pos_fenetre_Y=Origine_Y; Pos_Y<5; Pos_Y++,Pos_fenetre_Y++)
@@ -1161,13 +1161,13 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
       Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
     Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
-    // On TAG toutes les couleurs interm‚diaires
+    // On TAG toutes les couleurs intermédiaires
     for (Indice=Debut+1;Indice<Fin;Indice++)
     {
       Block(Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3+((Indice>>4)*10))*Menu_Facteur_X,
             Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3+((Indice&15)* 5))*Menu_Facteur_Y,
             Menu_Facteur_X*2,Menu_Facteur_Y*5,CM_Noir);
-      // On efface l'‚ventuelle pointe d'une ancienne extr‚mit‚ de l'intervalle
+      // On efface l'éventuelle pointe d'une ancienne extrémité de l'intervalle
       Pixel_dans_fenetre(Fenetre_Liste_boutons_palette->Pos_X+5+((Indice>>4)*10),
                          Fenetre_Liste_boutons_palette->Pos_Y+5+((Indice&15)* 5),
                          CM_Clair);
@@ -1176,7 +1176,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 }
 
 
-//------------------ Dessiner un scroller dans une fenˆtre -------------------
+//------------------ Dessiner un scroller dans une fenêtre -------------------
 
 void Calculer_hauteur_curseur_jauge(struct Fenetre_Bouton_scroller * Enreg)
 {
@@ -1222,7 +1222,7 @@ void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg)
 }
 
 
-//--------------- Dessiner une zone de saisie dans une fenˆtre ---------------
+//--------------- Dessiner une zone de saisie dans une fenêtre ---------------
 
 void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
 {
@@ -1239,7 +1239,7 @@ void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char *
 
 
 
-//------ Rajout d'un bouton … la liste de ceux pr‚sents dans la fenˆtre ------
+//------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
 void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
@@ -1336,12 +1336,12 @@ void Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracte
 
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
-//       Mini-MOTEUR utilis‚ dans les fenˆtres (menus des boutons...)       //
+//       Mini-MOTEUR utilisé dans les fenêtres (menus des boutons...)       //
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
 
-// -- Indique si on a cliqu‚ dans une zone d‚finie par deux points extremes --
+// -- Indique si on a cliqué dans une zone définie par deux points extremes --
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
 {
   short Pos_X,Pos_Y;
@@ -1357,7 +1357,7 @@ byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y
 
 
 // --- Attend que l'on clique dans la palette pour renvoyer la couleur choisie
-// ou bien renvoie -1 si on a annul‚ l'action pas click-droit ou Escape ------
+// ou bien renvoie -1 si on a annulé l'action pas click-droit ou Escape ------
 short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
 {
   short Debut_X=Enreg->Pos_X+5;
@@ -1420,7 +1420,7 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
 
 
 
-// -------------- R‚cup‚ration d'une couleur derriŠre un menu ----------------
+// -------------- Récupération d'une couleur derrière un menu ----------------
 void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 {
   short Largeur=Fenetre_Largeur*Menu_Facteur_X;
@@ -1434,7 +1434,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
   byte Cacher_curseur_avant_recuperation;
 
 
-  if (Buffer=(byte *) malloc(Largeur*Hauteur))
+  if ((Buffer=(byte *) malloc(Largeur*Hauteur)))
   {
     Effacer_curseur();
 
@@ -1455,7 +1455,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
     Forme_curseur=FORME_CURSEUR_CIBLE_PIPETTE;
     B=Cacher_pinceau;
     Cacher_pinceau=1;
-    C=-1; // Couleur point‚e: au d‚but aucune, comme ‡a on initialise tout
+    C=-1; // Couleur pointée: au début aucune, comme ‡a on initialise tout
     if (Menu_visible_avant_fenetre)
       Print_dans_menu(TITRE_BOUTON[BOUTON_CHOIX_COL],0);
 
@@ -1471,7 +1471,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
         A=Lit_pixel(Mouse_X,Mouse_Y);
         if (A!=C)
         {
-          C=A; // Mise … jour de la couleur point‚e
+          C=A; // Mise à jour de la couleur pointée
           if (Menu_visible_avant_fenetre)
           {
             sprintf(Chaine,"%d",A);
@@ -1531,7 +1531,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
 
 
-// ------------ Op‚ration de d‚placement de la fenˆtre … l'‚cran -------------
+// ------------ Opération de déplacement de la fenêtre à l'écran -------------
 void Deplacer_fenetre(short Dx, short Dy)
 {
   short Nouveau_X=Mouse_X-Dx;
@@ -1546,7 +1546,7 @@ void Deplacer_fenetre(short Dx, short Dy)
   byte * Buffer;
 
 
-  if (Buffer=(byte *) malloc(Largeur*Hauteur))
+  if ((Buffer=(byte *) malloc(Largeur*Hauteur)))
   {
     Effacer_curseur();
     for (Indice=0; Indice<Hauteur; Indice++)
@@ -1631,7 +1631,7 @@ void Deplacer_fenetre(short Dx, short Dy)
 
 
 
-// --- Renvoie le num‚ro du bouton clicke (-1:hors de la fenˆtre, 0:aucun) ---
+// --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
 short Fenetre_Numero_bouton_clicke(void)
 {
   struct Fenetre_Bouton_normal   * Temp1;
@@ -1639,7 +1639,7 @@ short Fenetre_Numero_bouton_clicke(void)
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
 
-  long Hauteur_Curseur_jauge;
+  //long Hauteur_Curseur_jauge;
   long Hauteur_maxi_jauge;
 
 
@@ -1670,12 +1670,12 @@ short Fenetre_Numero_bouton_clicke(void)
     }
   }
 
-  // Test du click sur les barres de d‚filement
+  // Test du click sur les barres de défilement
   for (Temp3=Fenetre_Liste_boutons_scroller; Temp3; Temp3=Temp3->Next)
   {
     if (Fenetre_click_dans_zone(Temp3->Pos_X,Temp3->Pos_Y,Temp3->Pos_X+10,Temp3->Pos_Y+Temp3->Hauteur-1))
     {
-      // Bouton flŠche Haut
+      // Bouton flèche Haut
       if (Fenetre_click_dans_zone(Temp3->Pos_X,Temp3->Pos_Y,Temp3->Pos_X+10,Temp3->Pos_Y+10))
       {
         Effacer_curseur();
@@ -1700,10 +1700,10 @@ short Fenetre_Numero_bouton_clicke(void)
         Afficher_curseur();
       }
       else
-      // Bouton flŠche Bas
+      // Bouton flèche Bas
       if (Fenetre_click_dans_zone(Temp3->Pos_X,Temp3->Pos_Y+Temp3->Hauteur-11,Temp3->Pos_X+10,Temp3->Pos_Y+Temp3->Hauteur-1))
       {
-        Effacer_Curseur();
+        Effacer_curseur();
         Fenetre_Enfoncer_bouton_normal(Temp3->Pos_X,Temp3->Pos_Y+Temp3->Hauteur-11,11,11);
 
         if (Temp3->Position+Temp3->Nb_visibles<Temp3->Nb_elements)
@@ -1716,13 +1716,13 @@ short Fenetre_Numero_bouton_clicke(void)
         else
           Fenetre_Attribut1=0;
 
-        Afficher_Curseur();
+        Afficher_curseur();
 
         Tempo_jauge((Mouse_K==1)? Config.Valeur_tempo_jauge_gauche : Config.Valeur_tempo_jauge_droite);
 
-        Effacer_Curseur();
+        Effacer_curseur();
         Fenetre_Desenfoncer_bouton_normal(Temp3->Pos_X,Temp3->Pos_Y+Temp3->Hauteur-11,11,11);
-        Afficher_Curseur();
+        Afficher_curseur();
       }
       else
       // Jauge
@@ -1754,9 +1754,9 @@ short Fenetre_Numero_bouton_clicke(void)
           {
             Temp3->Position=Fenetre_Attribut2;
             Fenetre_Attribut1=3;
-            Effacer_Curseur();
+            Effacer_curseur();
             Fenetre_Dessiner_jauge(Temp3);
-            Afficher_Curseur();
+            Afficher_curseur();
           }
           else
             // Si le curseur de la jauge ne bouge pas:
@@ -1775,7 +1775,7 @@ short Fenetre_Numero_bouton_clicke(void)
     }
   }
 
-  // Test du click sur une zone sp‚ciale
+  // Test du click sur une zone spéciale
   for (Temp4=Fenetre_Liste_boutons_special; Temp4; Temp4=Temp4->Next)
   {
     if (Fenetre_click_dans_zone(Temp4->Pos_X,Temp4->Pos_Y,Temp4->Pos_X+Temp4->Largeur-1,Temp4->Pos_Y+Temp4->Hauteur-1))
@@ -1795,7 +1795,7 @@ short Fenetre_Numero_bouton_touche(void)
   else
     Fenetre_Attribut1=A_GAUCHE;
 
-  // On fait une premiŠre recherche
+  // On fait une première recherche
   Temp=Fenetre_Liste_boutons_normal;
   while (Temp!=NULL)
   {
@@ -1804,9 +1804,9 @@ short Fenetre_Numero_bouton_touche(void)
     Temp=Temp->Next;
   }
 
-  // Si la recherche n'a pas ‚t‚ fructueuse ET que l'utilisateur appuyait sur
-  // <Shift>, on regarde si un bouton ne pourrait pas r‚agir comme si <Shift>
-  // n'‚tait pas appuy‚.
+  // Si la recherche n'a pas été fructueuse ET que l'utilisateur appuyait sur
+  // <Shift>, on regarde si un bouton ne pourrait pas réagir comme si <Shift>
+  // n'était pas appuyé.
   if (Fenetre_Attribut1==A_DROITE)
   {
     Temp=Fenetre_Liste_boutons_normal;

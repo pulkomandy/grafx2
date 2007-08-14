@@ -22,3 +22,8 @@ int filelength(int fichier)
 	printf("filelenght non implémenté!\n");
 	return 0;
 }
+
+void itoa(int source,char* dest, int longueur)
+{
+	printf("itoa non implémenté!\n");
+}

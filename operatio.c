@@ -6,13 +6,13 @@
 #include "moteur.h"
 #include "graph.h"
 #include "operatio.h"
-
+#include "boutons.h"
 
 void Demarrer_pile_operation(word Operation_demandee)
 {
   Brosse_Centre_rotation_defini=0;
 
-  // On m‚morise l'op‚ration pr‚c‚dente si on d‚marre une interruption
+  // On mémorise l'opération précédente si on démarre une interruption
   switch(Operation_demandee)
   {
     case OPERATION_LOUPE         :
@@ -22,16 +22,16 @@ void Demarrer_pile_operation(word Operation_demandee)
     case OPERATION_ETIRER_BROSSE :
     case OPERATION_TOURNER_BROSSE:
       Operation_avant_interruption=Operation_en_cours;
-      // On passe … l'operation demand‚e
+      // On passe … l'operation demandée
       Operation_en_cours=Operation_demandee;
       break;
     default :
-      // On passe … l'operation demand‚e
+      // On passe … l'operation demandée
       Operation_en_cours=Operation_demandee;
       Operation_avant_interruption=Operation_en_cours;
   }
 
-  // On sp‚cifie si l'op‚ration autorise le changement de couleur au clavier
+  // On spécifie si l'opération autorise le changement de couleur au clavier
   switch(Operation_demandee)
   {
     case OPERATION_DESSIN_CONTINU:
@@ -121,22 +121,22 @@ void Aff_coords_rel_ou_abs(short Debut_X, short Debut_Y)
     }
   }
   else
-    Print_Coordonnees();
+    Print_coordonnees();
 }
 
 //////////////////////////////////////////////////// OPERATION_DESSIN_CONTINU
 
 void Freehand_Mode1_1_0(void)
-//  Op‚ration   : OPERATION_DESSIN_CONTINU
+//  Opération   : OPERATION_DESSIN_CONTINU
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_gauche;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -144,11 +144,11 @@ void Freehand_Mode1_1_0(void)
 
 
 void Freehand_Mode1_1_2(void)
-//  Op‚ration   : OPERATION_DESSIN_CONTINU
+//  Opération   : OPERATION_DESSIN_CONTINU
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -159,7 +159,7 @@ void Freehand_Mode1_1_2(void)
   if ( (Debut_Y!=Pinceau_Y) || (Debut_X!=Pinceau_X) )
   {
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Fore_color);
     Afficher_curseur();
   }
@@ -170,27 +170,27 @@ void Freehand_Mode1_1_2(void)
 
 
 void Freehand_Mode12_0_2(void)
-//  Op‚ration   : OPERATION_DESSIN_[DIS]CONTINU
+//  Opération   : OPERATION_DESSIN_[DIS]CONTINU
 //  Click Souris: 0
 //  Taille_Pile : 2
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   Operation_Taille_pile=0;
 }
 
 
 void Freehand_Mode1_2_0(void)
-//  Op‚ration   : OPERATION_DESSIN_CONTINU
+//  Opération   : OPERATION_DESSIN_CONTINU
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_droite;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -198,11 +198,11 @@ void Freehand_Mode1_2_0(void)
 
 
 void Freehand_Mode1_2_2(void)
-//  Op‚ration   : OPERATION_DESSIN_CONTINU
+//  Opération   : OPERATION_DESSIN_CONTINU
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -212,7 +212,7 @@ void Freehand_Mode1_2_2(void)
 
   if ( (Debut_Y!=Pinceau_Y) || (Debut_X!=Pinceau_X) )
   {
-    Print_Coordonnees();
+    Print_coordonnees();
     Effacer_curseur();
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Back_color);
     Afficher_curseur();
@@ -226,30 +226,30 @@ void Freehand_Mode1_2_2(void)
 ///////////////////////////////////////////////// OPERATION_DESSIN_DISCONTINU
 
 void Freehand_Mode2_1_0(void)
-//  Op‚ration   : OPERATION_DESSIN_DISCONTINU
+//  Opération   : OPERATION_DESSIN_DISCONTINU
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_gauche;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  Print_Coordonnees();
+  Print_coordonnees();
   Wait_VBL();
 }
 
 
 void Freehand_Mode2_1_2(void)
-//  Op‚ration   : OPERATION_DESSIN_DISCONTINU
+//  Opération   : OPERATION_DESSIN_DISCONTINU
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -260,10 +260,10 @@ void Freehand_Mode2_1_2(void)
   if ( (Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y) )
   {
     Effacer_curseur();
-    // On affiche d‚finitivement le pinceau
+    // On affiche définitivement le pinceau
     Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
     Afficher_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
     Wait_VBL();
   }
 
@@ -273,30 +273,30 @@ void Freehand_Mode2_1_2(void)
 
 
 void Freehand_Mode2_2_0(void)
-//  Op‚ration   : OPERATION_DESSIN_DISCONTINU
+//  Opération   : OPERATION_DESSIN_DISCONTINU
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_droite;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  Print_Coordonnees();
+  Print_coordonnees();
   Wait_VBL();
 }
 
 
 void Freehand_Mode2_2_2(void)
-//  Op‚ration   : OPERATION_DESSIN_DISCONTINU
+//  Opération   : OPERATION_DESSIN_DISCONTINU
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -307,10 +307,10 @@ void Freehand_Mode2_2_2(void)
   if ( (Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y) )
   {
     Effacer_curseur();
-    // On affiche d‚finitivement le pinceau
+    // On affiche définitivement le pinceau
     Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
     Afficher_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
     Wait_VBL();
   }
 
@@ -322,43 +322,43 @@ void Freehand_Mode2_2_2(void)
 ////////////////////////////////////////////////////// OPERATION_DESSIN_POINT
 
 void Freehand_Mode3_1_0(void)
-//  Op‚ration   : OPERATION_DESSIN_POINT
+//  Opération   : OPERATION_DESSIN_POINT
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_gauche;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
-  Operation_PUSH(0);  // On change simplement l'‚tat de la pile...
+  Operation_PUSH(0);  // On change simplement l'état de la pile...
 }
 
 
 void Freehand_Mode3_2_0(void)
-//  Op‚ration   : OPERATION_DESSIN_POINT
+//  Opération   : OPERATION_DESSIN_POINT
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_droite;
-  // On affiche d‚finitivement le pinceau
+  // On affiche définitivement le pinceau
   Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
-  Operation_PUSH(0);  // On change simplement l'‚tat de la pile...
+  Operation_PUSH(0);  // On change simplement l'état de la pile...
 }
 
 
 void Freehand_Mode3_0_1(void)
-//  Op‚ration   : OPERATION_DESSIN_POINT
+//  Opération   : OPERATION_DESSIN_POINT
 //  Click Souris: 0
 //  Taille_Pile : 1
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   Operation_Taille_pile--;
 }
@@ -367,11 +367,11 @@ void Freehand_Mode3_0_1(void)
 ///////////////////////////////////////////////////////////// OPERATION_LIGNE
 
 void Ligne_12_0(void)
-// Op‚ration   : OPERATION_LIGNE
+// Opération   : OPERATION_LIGNE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
@@ -402,11 +402,11 @@ void Ligne_12_0(void)
 
 
 void Ligne_12_5(void)
-// Op‚ration   : OPERATION_LIGNE
+// Opération   : OPERATION_LIGNE
 // Click Souris: 1
 // Taille_Pile : 5
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -447,11 +447,11 @@ void Ligne_12_5(void)
 
 
 void Ligne_0_5(void)
-// Op‚ration   : OPERATION_LIGNE
+// Opération   : OPERATION_LIGNE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -484,11 +484,11 @@ void Ligne_0_5(void)
 
 
 void K_Ligne_12_0(void)
-// Op‚ration   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   byte Couleur;
 
@@ -500,7 +500,7 @@ void K_Ligne_12_0(void)
 
   Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
 
-  // On place temporairement le d‚but de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
   if ((Config.Coords_rel) && (Menu_visible))
@@ -517,11 +517,11 @@ void K_Ligne_12_0(void)
 
 
 void K_Ligne_12_6(void)
-// Op‚ration   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 6      | 7
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -557,11 +557,11 @@ void K_Ligne_12_6(void)
 
 
 void K_Ligne_0_6(void)
-// Op‚ration   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LIGNE
 // Click Souris: 0
 // Taille_Pile : 6
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -593,7 +593,7 @@ void K_Ligne_0_6(void)
   Pinceau_Forme=FORME_PINCEAU_POINT;
 
   Operation_PUSH(Direction);
-  Operation_PUSH(Direction); // Valeur bidon servant de nouvel ‚tat de pile
+  Operation_PUSH(Direction); // Valeur bidon servant de nouvel état de pile
   Operation_PUSH(Couleur);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -604,11 +604,11 @@ void K_Ligne_0_6(void)
 
 
 void K_Ligne_12_7(void)
-// Op‚ration   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -637,7 +637,7 @@ void K_Ligne_12_7(void)
   }
   else
   {
-    // La s‚rie de ligne est termin‚e, il faut donc effacer la derniŠre
+    // La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne
     Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
     Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
@@ -661,11 +661,11 @@ void K_Ligne_12_7(void)
 
 void Loupe_12_0(void)
 
-// Op‚ration   : 4      (Choix d'une Loupe)
+// Opération   : 4      (Choix d'une Loupe)
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 
 {
   Attendre_fin_de_click();
@@ -673,21 +673,21 @@ void Loupe_12_0(void)
   // On passe en mode loupe
   Loupe_Mode=1;
 
-  // La fonction d'affichage dans la partie image est d‚sormais un affichage
-  // sp‚cial loupe.
+  // La fonction d'affichage dans la partie image est désormais un affichage
+  // spécial loupe.
   Pixel_Preview=Pixel_Preview_Loupe;
 
   // On calcule l'origine de la loupe
   Loupe_Decalage_X=Mouse_X-(Loupe_Largeur>>1);
   Loupe_Decalage_Y=Mouse_Y-(Loupe_Hauteur>>1);
 
-  // Calcul du coin haut_gauche de la fenˆtre devant ˆtre zoom‚e DANS L'ECRAN
+  // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
   if (Loupe_Decalage_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
     Loupe_Decalage_X=Limite_Droite-Loupe_Largeur-Principal_Decalage_X+1;
   if (Loupe_Decalage_Y+Loupe_Hauteur>=Limite_Bas-Principal_Decalage_Y)
     Loupe_Decalage_Y=Limite_Bas-Loupe_Hauteur-Principal_Decalage_Y+1;
 
-  // Calcul des coordonn‚es absolues de ce coin DANS L'IMAGE
+  // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
   Loupe_Decalage_X+=Principal_Decalage_X;
   Loupe_Decalage_Y+=Principal_Decalage_Y;
 
@@ -696,32 +696,32 @@ void Loupe_12_0(void)
   if (Loupe_Decalage_Y<0)
     Loupe_Decalage_Y=0;
 
-  // On calcule les bornes visibles dans l'‚cran
+  // On calcule les bornes visibles dans l'écran
   Recadrer_ecran_par_rapport_au_zoom();
   Calculer_limites();
   Afficher_ecran();
 
-  // Repositionner le curseur en fonction des coordonn‚es visibles
+  // Repositionner le curseur en fonction des coordonnées visibles
   Calculer_coordonnees_pinceau();
 
-  // On fait de notre mieux pour restaurer l'ancienne op‚ration:
+  // On fait de notre mieux pour restaurer l'ancienne opération:
   Demarrer_pile_operation(Operation_avant_interruption);
 }
 
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????
 
 void Rectangle_12_0(void)
-// Op‚ration   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
+// Opération   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   Initialiser_debut_operation();
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("\035:   1   \022:   1",0);
-  // On laisse une trace du curseur … l'‚cran
+  // On laisse une trace du curseur … l'écran
   Afficher_curseur();
 
   if (Mouse_K==A_GAUCHE)
@@ -743,11 +743,11 @@ void Rectangle_12_0(void)
 
 
 void Rectangle_12_5(void)
-// Op‚ration   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
+// Opération   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -783,17 +783,17 @@ void Rectangle_12_5(void)
 
 
 void Rectangle_vide_0_5(void)
-// Op‚ration   : OPERATION_RECTANGLE_VIDE
+// Opération   : OPERATION_RECTANGLE_VIDE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Ancien_Pinceau_X;
   short Ancien_Pinceau_Y;
   short Couleur;
 
-  // On m‚morise la position courante du pinceau:
+  // On mémorise la position courante du pinceau:
 
   Ancien_Pinceau_X=Pinceau_X;
   Ancien_Pinceau_Y=Pinceau_Y;
@@ -805,7 +805,7 @@ void Rectangle_vide_0_5(void)
   Operation_POP(&Pinceau_Y);
   Operation_POP(&Pinceau_X);
 
-  // On va devoir effacer l'ancien curseur qu'on a laiss‚ trainer:
+  // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
   Effacer_curseur();
 
   // On lit la couleur du rectangle:
@@ -817,7 +817,7 @@ void Rectangle_vide_0_5(void)
   // Et on trace le rectangle:
   Tracer_rectangle_vide(Pinceau_X,Pinceau_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,Couleur);
 
-  // Enfin, on r‚tablit la position du pinceau:
+  // Enfin, on rétablit la position du pinceau:
   Pinceau_X=Ancien_Pinceau_X;
   Pinceau_Y=Ancien_Pinceau_Y;
 
@@ -828,17 +828,17 @@ void Rectangle_vide_0_5(void)
 
 
 void Rectangle_plein_0_5(void)
-// Op‚ration   : OPERATION_RECTANGLE_PLEIN
+// Opération   : OPERATION_RECTANGLE_PLEIN
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Ancien_Pinceau_X;
   short Ancien_Pinceau_Y;
   short Couleur;
 
-  // On m‚morise la position courante du pinceau:
+  // On mémorise la position courante du pinceau:
 
   Ancien_Pinceau_X=Pinceau_X;
   Ancien_Pinceau_Y=Pinceau_Y;
@@ -850,7 +850,7 @@ void Rectangle_plein_0_5(void)
   Operation_POP(&Pinceau_Y);
   Operation_POP(&Pinceau_X);
 
-  // On va devoir effacer l'ancien curseur qu'on a laiss‚ trainer:
+  // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
   Effacer_curseur();
 
   // On lit la couleur du rectangle:
@@ -862,7 +862,7 @@ void Rectangle_plein_0_5(void)
   // Et on trace le rectangle:
   Tracer_rectangle_plein(Pinceau_X,Pinceau_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,Couleur);
 
-  // Enfin, on r‚tablit la position du pinceau:
+  // Enfin, on rétablit la position du pinceau:
   Pinceau_X=Ancien_Pinceau_X;
   Pinceau_Y=Ancien_Pinceau_Y;
 
@@ -879,11 +879,11 @@ void Rectangle_plein_0_5(void)
 
 void Cercle_12_0(void)
 //
-// Op‚ration   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
@@ -914,11 +914,11 @@ void Cercle_12_0(void)
 
 void Cercle_12_5(void)
 //
-// Op‚ration   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
 // Click Souris: 1 ou 2
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   short Tangente_X;
@@ -969,11 +969,11 @@ void Cercle_12_5(void)
 
 void Cercle_vide_0_5(void)
 //
-// Op‚ration   : OPERATION_CERCLE_VIDE
+// Opération   : OPERATION_CERCLE_VIDE
 // Click Souris: 0
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -1008,11 +1008,11 @@ void Cercle_vide_0_5(void)
 
 void Cercle_plein_0_5(void)
 //
-// Op‚ration   : OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_CERCLE_PLEIN
 // Click Souris: 0
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -1050,11 +1050,11 @@ void Cercle_plein_0_5(void)
 
 void Ellipse_12_0(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
@@ -1085,11 +1085,11 @@ void Ellipse_12_0(void)
 
 void Ellipse_12_5(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   short Tangente_X;
@@ -1136,11 +1136,11 @@ void Ellipse_12_5(void)
 
 void Ellipse_vide_0_5(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_VIDE
+// Opération   : OPERATION_ELLIPSE_VIDE
 // Click Souris: 0
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -1177,11 +1177,11 @@ void Ellipse_vide_0_5(void)
 
 void Ellipse_pleine_0_5(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_ELLIPSE_PLEINE
 // Click Souris: 0
 // Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -1221,14 +1221,14 @@ void Ellipse_pleine_0_5(void)
 
 void Fill_1_0(void)
 //
-// Op‚ration   : OPERATION_FILL
+// Opération   : OPERATION_FILL
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
-  // Pas besoin d'initialiser le d‚but d'op‚ration car le Smear n'affecte pas
+  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
@@ -1240,14 +1240,14 @@ void Fill_1_0(void)
 
 void Fill_2_0(void)
 //
-// Op‚ration   : OPERATION_FILL
+// Opération   : OPERATION_FILL
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
-  // Pas besoin d'initialiser le d‚but d'op‚ration car le Smear n'affecte pas
+  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
@@ -1262,14 +1262,14 @@ void Fill_2_0(void)
 
 void Remplacer_1_0(void)
 //
-// Op‚ration   : OPERATION_REMPLACER
+// Opération   : OPERATION_REMPLACER
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
-  // Pas besoin d'initialiser le d‚but d'op‚ration car le Smear n'affecte pas
+  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
@@ -1281,14 +1281,14 @@ void Remplacer_1_0(void)
 
 void Remplacer_2_0(void)
 //
-// Op‚ration   : OPERATION_REMPLACER
+// Opération   : OPERATION_REMPLACER
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
-  // Pas besoin d'initialiser le d‚but d'op‚ration car le Smear n'affecte pas
+  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
@@ -1303,11 +1303,11 @@ void Remplacer_2_0(void)
 
 void Pipette_12_0(void)
 //
-// Op‚ration   : OPERATION_PIPETTE
+// Opération   : OPERATION_PIPETTE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -1331,11 +1331,11 @@ void Pipette_12_0(void)
 
 void Pipette_1_1(void)
 //
-// Op‚ration   : OPERATION_PIPETTE
+// Opération   : OPERATION_PIPETTE
 // Click Souris: 1
 // Taille_Pile : 1
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char Chaine[4];
@@ -1377,11 +1377,11 @@ void Pipette_1_1(void)
 
 void Pipette_2_1(void)
 //
-// Op‚ration   : OPERATION_PIPETTE
+// Opération   : OPERATION_PIPETTE
 // Click Souris: 2
 // Taille_Pile : 1
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char Chaine[4];
@@ -1421,11 +1421,11 @@ void Pipette_2_1(void)
 
 void Pipette_0_1(void)
 //
-// Op‚ration   : OPERATION_PIPETTE
+// Opération   : OPERATION_PIPETTE
 // Click Souris: 0
 // Taille_Pile : 1
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Clic;
@@ -1456,7 +1456,7 @@ void Courbe_Tracer_croix(short Pos_X, short Pos_Y)
   short Debut_X,Fin_X;
   short Debut_Y,Fin_Y;
   short i,Temp;
-  byte  Temp2;
+  //byte  Temp2;
 
   if (Pos_X>=Limite_Gauche+3)
     Debut_X=0;
@@ -1495,11 +1495,11 @@ void Courbe_Tracer_croix(short Pos_X, short Pos_Y)
 
 void Courbe_34_points_1_0(void)
 //
-//  Op‚ration   : OPERATION_COURBE_?_POINTS
+//  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -1522,11 +1522,11 @@ void Courbe_34_points_1_0(void)
 
 void Courbe_34_points_2_0(void)
 //
-//  Op‚ration   : OPERATION_COURBE_?_POINTS
+//  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -1550,11 +1550,11 @@ void Courbe_34_points_2_0(void)
 
 void Courbe_34_points_1_5(void)
 //
-//  Op‚ration   : OPERATION_COURBE_?_POINTS
+//  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
 //  Taille_Pile : 5
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short X1,X2,Y1,Y2;
@@ -1584,11 +1584,11 @@ void Courbe_34_points_1_5(void)
 
 void Courbe_34_points_2_5(void)
 //
-//  Op‚ration   : OPERATION_COURBE_?_POINTS
+//  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
 //  Taille_Pile : 5
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short X1,X2,Y1,Y2;
@@ -1621,11 +1621,11 @@ byte Cacher_curseur_avant_courbe;
 
 void Courbe_4_points_0_5(void)
 //
-//  Op‚ration   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_COURBE_4_POINTS
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1666,7 +1666,7 @@ void Courbe_4_points_0_5(void)
   Effacer_ligne_Preview(X1,Y1,X4,Y4);
   Tracer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
 
-  // On trace les petites croix montrant les 2 points interm‚diares
+  // On trace les petites croix montrant les 2 points intermédiares
   Courbe_Tracer_croix(X2,Y2);
   Courbe_Tracer_croix(X3,Y3);
 
@@ -1693,11 +1693,11 @@ void Courbe_4_points_0_5(void)
 
 void Courbe_4_points_1_9(void)
 //
-//  Op‚ration   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_COURBE_4_POINTS
 //  Click Souris: 1
 //  Taille_Pile : 9
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1760,11 +1760,11 @@ void Courbe_4_points_1_9(void)
 
 void Courbe_4_points_2_9(void)
 //
-//  Op‚ration   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_COURBE_4_POINTS
 //  Click Souris: 2
 //  Taille_Pile : 9
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1802,10 +1802,10 @@ void Calculer_courbe_3_points(short X1, short Y1, short X4, short Y4,
   float CX,CY; // Centre de (X1,Y1) et (X4,Y4)
   float BX,BY; // Intersectø des dtes ((X1,Y1),(X2,Y2)) et ((X3,Y3),(X4,Y4))
 
-  CX=(float)(X1+X4)/2.0;           // P1*--_               L‚gende:
+  CX=(float)(X1+X4)/2.0;           // P1*--_               Légende:
   CY=(float)(Y1+Y4)/2.0;           //   ú   \úú P2         -_\|/ : courbe
                                    //   ú    \ ú*ú         * : point important
-  BX=CX+((8.0/3.0)*(Pinceau_X-CX));//   ú     |   úú       ú : pointill‚
+  BX=CX+((8.0/3.0)*(Pinceau_X-CX));//   ú     |   úú       ú : pointillé
   BY=CY+((8.0/3.0)*(Pinceau_Y-CY));//   ú     |P    úú  B
                                    // C *úúúúú*úúúúúúúúú*  P=Pos. du pinceau
   *X2=Round((BX+X1)/2.0);          //   ú     |     úú     C=milieu de [P1,P4]
@@ -1818,11 +1818,11 @@ void Calculer_courbe_3_points(short X1, short Y1, short X4, short Y4,
 
 void Courbe_3_points_0_5(void)
 //
-//  Op‚ration   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_COURBE_3_POINTS
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1861,11 +1861,11 @@ void Courbe_3_points_0_5(void)
 
 void Courbe_3_points_0_11(void)
 //
-//  Op‚ration   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_COURBE_3_POINTS
 //  Click Souris: 0
 //  Taille_Pile : 11
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1912,11 +1912,11 @@ void Courbe_3_points_0_11(void)
 
 void Courbe_3_points_12_11(void)
 //
-//  Op‚ration   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_COURBE_3_POINTS
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 11
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
@@ -1950,11 +1950,11 @@ void Courbe_3_points_12_11(void)
 
 void Spray_1_0(void)
 //
-//  Op‚ration   : OPERATION_SPRAY
+//  Opération   : OPERATION_SPRAY
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   Initialiser_debut_operation();
@@ -1969,11 +1969,11 @@ void Spray_1_0(void)
 
 void Spray_2_0(void)
 //
-//  Op‚ration   : OPERATION_SPRAY
+//  Opération   : OPERATION_SPRAY
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   Initialiser_debut_operation();
@@ -1988,11 +1988,11 @@ void Spray_2_0(void)
 
 void Spray_12_3(void)
 //
-//  Op‚ration   : OPERATION_SPRAY
+//  Opération   : OPERATION_SPRAY
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 1
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short Bouton_clicke;
@@ -2004,9 +2004,9 @@ void Spray_12_3(void)
 
   if ( (Menu_visible) && ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y)) )
   {
-    Effacer_Curseur();
+    Effacer_curseur();
     Print_coordonnees();
-    Afficher_Curseur();
+    Afficher_curseur();
   }
 
   Aerographe(Bouton_clicke);
@@ -2018,11 +2018,11 @@ void Spray_12_3(void)
 
 void Spray_0_3(void)
 //
-//  Op‚ration   : OPERATION_SPRAY
+//  Opération   : OPERATION_SPRAY
 //  Click Souris: 0
 //  Taille_Pile : 3
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   Operation_Taille_pile-=3;
@@ -2033,11 +2033,11 @@ void Spray_0_3(void)
 
 
 void Polygone_12_0(void)
-// Op‚ration   : OPERATION_POLYGONE
+// Opération   : OPERATION_POLYGONE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   byte Couleur;
 
@@ -2049,7 +2049,7 @@ void Polygone_12_0(void)
 
   Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
 
-  // On place temporairement le d‚but de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
   if ((Config.Coords_rel) && (Menu_visible))
@@ -2069,11 +2069,11 @@ void Polygone_12_0(void)
 
 
 void Polygone_12_9(void)
-// Op‚ration   : OPERATION_POLYGONE
+// Opération   : OPERATION_POLYGONE
 // Click Souris: 1 ou 2
 // Taille_Pile : 9
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -2102,14 +2102,14 @@ void Polygone_12_9(void)
   }
   else
   {
-    //   La s‚rie de ligne est termin‚e, il faut donc effacer la derniŠre
+    //   La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
     Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
     Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
     Operation_POP(&Fin_Y);
     Operation_POP(&Fin_X);
     Pinceau_Forme=Pinceau_Forme_avant_operation;
-    // Le pied aurait ‚t‚ de ne pas repasser sur le 1er point de la 1Šre ligne
+    // Le pied aurait été de ne pas repasser sur le 1er point de la 1ère ligne
     // mais c'est pas possible :(
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
     Pinceau_Forme=FORME_PINCEAU_POINT;
@@ -2135,11 +2135,11 @@ short * Polyfill_Table_de_points;
 int Polyfill_Nombre_de_points;
 
 void Polyfill_12_0(void)
-// Op‚ration   : OPERATION_POLYFILL
+// Opération   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   byte Couleur;
 
@@ -2155,7 +2155,7 @@ void Polyfill_12_0(void)
   Polyfill_Table_de_points[1]=Pinceau_Y;
   Polyfill_Nombre_de_points=1;
 
-  // On place temporairement le d‚but de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
 
   if ((Config.Coords_rel) && (Menu_visible))
@@ -2174,11 +2174,11 @@ void Polyfill_12_0(void)
 
 
 void Polyfill_0_8(void)
-// Op‚ration   : OPERATION_POLYFILL
+// Opération   : OPERATION_POLYFILL
 // Click Souris: 0
 // Taille_Pile : 8
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -2202,11 +2202,11 @@ void Polyfill_0_8(void)
   if (Direction & 0x80)
     Direction=(Direction & 0x7F);
 
-  Operation_PUSH(Direction); // Valeur bidon servant de nouvel ‚tat de pile
+  Operation_PUSH(Direction); // Valeur bidon servant de nouvel état de pile
   Operation_PUSH(Direction);
   Operation_PUSH(Couleur);
 
-  Tracer_ligne_preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+  Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
   if (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon)
   {
@@ -2231,11 +2231,11 @@ void Polyfill_0_8(void)
 
 
 void Polyfill_12_8(void)
-// Op‚ration   : OPERATION_POLYFILL
+// Opération   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 8      | 9
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -2267,11 +2267,11 @@ void Polyfill_12_8(void)
 
 
 void Polyfill_12_9(void)
-// Op‚ration   : OPERATION_POLYFILL
+// Opération   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2
 // Taille_Pile : 9
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -2300,12 +2300,12 @@ void Polyfill_12_9(void)
   }
   else
   {
-    //   La s‚rie de lignes est termin‚e, il faut donc effacer la derniŠre
+    //   La série de lignes est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
     Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
     Operation_POP(&Fin_Y);
     Operation_POP(&Fin_X);
-    Tracer_ligne_preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
 
     Afficher_curseur();
     Attendre_fin_de_click();
@@ -2330,11 +2330,11 @@ void Polyfill_12_9(void)
 
 
 void Polyform_12_0(void)
-//  Op‚ration   : OPERATION_POLYFORM
+//  Opération   : OPERATION_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   short Couleur;
 
@@ -2361,11 +2361,11 @@ void Polyform_12_0(void)
 
 
 void Polyform_12_8(void)
-//  Op‚ration   : OPERATION_POLYFORM
+//  Opération   : OPERATION_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Clic;
   short Fin_Y;
@@ -2388,17 +2388,17 @@ void Polyform_12_8(void)
 
     if ((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y))
     {
-      // Il existe un segment d‚finit par (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
+      // Il existe un segment définit par (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
 
       Effacer_curseur();
-      Print_Coordonnees();
+      Print_coordonnees();
 
       Operation_POP(&Couleur);
 
-      // On efface la preview du segment valid‚:
+      // On efface la preview du segment validé:
       Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
 
-      // On l'affiche de fa‡on d‚finitive:
+      // On l'affiche de fa‡on définitive:
       Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
 
       // Et on affiche un pixel de preview en (Pinceau_X,Pinceau_Y):
@@ -2417,7 +2417,7 @@ void Polyform_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrˆter l'op‚ration et refermer le polygone
+    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
     Operation_POP(&Couleur);
     Operation_POP(&Initial_Y);
@@ -2425,12 +2425,12 @@ void Polyform_12_8(void)
 
     Attendre_fin_de_click();
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
 
-    // On efface la preview du segment annul‚:
+    // On efface la preview du segment annulé:
     Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
 
-    // On affiche de fa‡on d‚finitive le bouclage du polygone:
+    // On affiche de fa‡on définitive le bouclage du polygone:
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Initial_X,Initial_Y,Couleur);
 
     Afficher_curseur();
@@ -2439,11 +2439,11 @@ void Polyform_12_8(void)
 
 
 void Polyform_0_8(void)
-//  Op‚ration   : OPERATION_POLYFORM
+//  Opération   : OPERATION_POLYFORM
 //  Click Souris: 0
 //  Taille_Pile : 8
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Clic;
   short Fin_Y;
@@ -2459,7 +2459,7 @@ void Polyform_0_8(void)
   if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
   {
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
 
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
@@ -2486,17 +2486,17 @@ void Polyform_0_8(void)
 
 
 void Filled_polyform_12_0(void)
-//  Op‚ration   : OPERATION_FILLED_POLYFORM
+//  Opération   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   short Couleur;
 
   Initialiser_debut_operation();
 
-  // Cette op‚ration ‚tant ‚galement utilis‚e pour le lasso, on ne fait pas de
+  // Cette opération étant également utilisée pour le lasso, on ne fait pas de
   // backup si on prend une brosse au lasso avec le bouton gauche.
   if ((Operation_en_cours==OPERATION_FILLED_POLYFORM) || (Mouse_K==A_DROITE))
     Backup();
@@ -2511,7 +2511,7 @@ void Filled_polyform_12_0(void)
   Polyfill_Table_de_points[1]=Pinceau_Y;
   Polyfill_Nombre_de_points=1;
 
-  // On place temporairement le d‚but de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
 
   Operation_PUSH(Pinceau_X); // X Initial
@@ -2526,11 +2526,11 @@ void Filled_polyform_12_0(void)
 
 
 void Filled_polyform_12_8(void)
-//  Op‚ration   : OPERATION_FILLED_POLYFORM
+//  Opération   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Clic;
   short Fin_Y;
@@ -2554,13 +2554,13 @@ void Filled_polyform_12_8(void)
     if (((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y)) &&
         (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon))
     {
-      // Il existe un nouveau segment d‚fini par
+      // Il existe un nouveau segment défini par
       // (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
 
       Effacer_curseur();
-      Print_Coordonnees();
+      Print_coordonnees();
 
-      // On le place … l'‚cran
+      // On le place … l'écran
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
@@ -2587,15 +2587,15 @@ void Filled_polyform_12_8(void)
         if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
         {
           Effacer_curseur();
-          Print_Coordonnees();
+          Print_coordonnees();
 
-          // On le place … l'‚cran
+          // On le place … l'écran
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
           Afficher_curseur();
         }
 
-        // On remet les mˆmes valeurs (comme si on n'avait pas cliqu‚):
+        // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
         Operation_PUSH(Debut_X);
         Operation_PUSH(Debut_Y);
         Operation_PUSH(Pinceau_X);
@@ -2614,7 +2614,7 @@ void Filled_polyform_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrˆter l'op‚ration et refermer le polygone
+    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
     Operation_POP(&Couleur);
     Operation_POP(&Initial_Y);
@@ -2622,7 +2622,7 @@ void Filled_polyform_12_8(void)
 
     Attendre_fin_de_click();
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
 
     // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
     // puisque on les effaces toutes d'un coup.
@@ -2639,11 +2639,11 @@ void Filled_polyform_12_8(void)
 
 
 void Filled_polyform_0_8(void)
-//  Op‚ration   : OPERATION_FILLED_POLYFORM
+//  Opération   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 0
 //  Taille_Pile : 8
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Clic;
   short Fin_Y;
@@ -2658,7 +2658,7 @@ void Filled_polyform_0_8(void)
   if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
   {
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
 
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
@@ -2684,18 +2684,18 @@ void Filled_polyform_0_8(void)
 
 void Brosse_12_0(void)
 //
-// Op‚ration   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_PRISE_BROSSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
-  if (Mouse_K==A_DROITE) // Besoin d'effacer la brosse aprŠs ?
+  if (Mouse_K==A_DROITE) // Besoin d'effacer la brosse après ?
   {
     Operation_PUSH(1);
-    // Puisque la zone o— on prend la brosse sera effac‚e, on fait un backup
+    // Puisque la zone o— on prend la brosse sera effacée, on fait un backup
     Backup();
   }
   else
@@ -2705,10 +2705,10 @@ void Brosse_12_0(void)
   // o— demarre sa brosse:
   Afficher_curseur();
 
-  Operation_PUSH(Pinceau_X); // D‚but X
-  Operation_PUSH(Pinceau_Y); // D‚but Y
-  Operation_PUSH(Pinceau_X); // DerniŠre position X
-  Operation_PUSH(Pinceau_Y); // DerniŠre position Y
+  Operation_PUSH(Pinceau_X); // Début X
+  Operation_PUSH(Pinceau_Y); // Début Y
+  Operation_PUSH(Pinceau_X); // Dernière position X
+  Operation_PUSH(Pinceau_Y); // Dernière position Y
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("\035:   1   \022:   1",0);
@@ -2717,11 +2717,11 @@ void Brosse_12_0(void)
 
 void Brosse_12_5(void)
 //
-// Op‚ration   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_PRISE_BROSSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char  Chaine[5];
@@ -2763,11 +2763,11 @@ void Brosse_12_5(void)
 
 void Brosse_0_5(void)
 //
-// Op‚ration   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_PRISE_BROSSE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Debut_X;
@@ -2776,7 +2776,7 @@ void Brosse_0_5(void)
   short Ancien_Pinceau_Y;
   short Effacement;
 
-  // Comme on a demand‚ l'effacement du curseur, il n'y a plus de croix en
+  // Comme on a demandé l'effacement du curseur, il n'y a plus de croix en
   // (Pinceau_X,Pinceau_Y). C'est une bonne chose.
 
   Operation_Taille_pile-=2;
@@ -2789,7 +2789,7 @@ void Brosse_0_5(void)
   Ancien_Pinceau_Y=Pinceau_Y;
   Pinceau_X=Debut_X;
   Pinceau_Y=Debut_Y;
-  Effacer_curseur(); // Maintenant, il n'y a plus de croix … l'‚cran.
+  Effacer_curseur(); // Maintenant, il n'y a plus de croix … l'écran.
 
   Pinceau_X=Ancien_Pinceau_X;
   Pinceau_Y=Ancien_Pinceau_Y;
@@ -2822,17 +2822,17 @@ void Brosse_0_5(void)
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // pr‚alable:
+  // préalable:
   Afficher_curseur();
   // !!! Efface la croix puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // D‚senclenche au passage le bouton brosse
+  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu … la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
-  // Maintenant, il faut r‚effacer le curseur parce qu'il sera raffich‚ en fin
+  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel … cette action:
   Effacer_curseur();
 
@@ -2849,11 +2849,11 @@ void Brosse_0_5(void)
 
 
 void Polybrosse_12_8(void)
-//  Op‚ration   : OPERATION_POLYBROSSE
+//  Opération   : OPERATION_POLYBROSSE
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 {
   short Clic;
   short Fin_Y;
@@ -2877,13 +2877,13 @@ void Polybrosse_12_8(void)
     if (((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y)) &&
         (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon))
     {
-      // Il existe un nouveau segment d‚fini par
+      // Il existe un nouveau segment défini par
       // (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
 
       Effacer_curseur();
-      Print_Coordonnees();
+      Print_coordonnees();
 
-      // On le place … l'‚cran
+      // On le place … l'écran
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
@@ -2910,15 +2910,15 @@ void Polybrosse_12_8(void)
         if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
         {
           Effacer_curseur();
-          Print_Coordonnees();
+          Print_coordonnees();
 
-          // On le place … l'‚cran
+          // On le place … l'écran
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
           Afficher_curseur();
         }
 
-        // On remet les mˆmes valeurs (comme si on n'avait pas cliqu‚):
+        // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
         Operation_PUSH(Debut_X);
         Operation_PUSH(Debut_Y);
         Operation_PUSH(Pinceau_X);
@@ -2937,7 +2937,7 @@ void Polybrosse_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrˆter l'op‚ration et refermer le polygone
+    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
     Operation_POP(&Couleur);
     Operation_POP(&Initial_Y);
@@ -2945,7 +2945,7 @@ void Polybrosse_12_8(void)
 
     Attendre_fin_de_click();
     Effacer_curseur();
-    Print_Coordonnees();
+    Print_coordonnees();
 
     // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
     // puisqu'on les efface toutes d'un coup.
@@ -2953,8 +2953,8 @@ void Polybrosse_12_8(void)
     Capturer_brosse_au_lasso(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Clic==A_DROITE);
     free(Polyfill_Table_de_points);
 
-    // On raffiche l'‚cran pour effacer les traits en xor et pour raffraichir
-    // l'‚cran si on a d‚coup‚ une partie de l'image en prenant la brosse.
+    // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
+    // l'écran si on a découpé une partie de l'image en prenant la brosse.
     Afficher_ecran();
 
     Cacher_pinceau=0;
@@ -2968,17 +2968,17 @@ void Polybrosse_12_8(void)
     // Simuler l'appui du bouton "Dessin"
 
     // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-    // pr‚alable:
+    // préalable:
     Afficher_curseur();
     // !!! Efface la croix puis affiche le viseur !!!
-    Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // D‚senclenche au passage le bouton brosse
+    Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
     if (Config.Auto_discontinuous)
     {
       // On se place en mode Dessin discontinu … la main
       while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
         Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
     }
-    // Maintenant, il faut r‚effacer le curseur parce qu'il sera raffich‚ en fin
+    // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
     // d'appel … cette action:
     Effacer_curseur();
 
@@ -2995,11 +2995,11 @@ void Polybrosse_12_8(void)
 
 void Etirer_brosse_12_0(void)
 //
-// Op‚ration   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_ETIRER_BROSSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -3011,11 +3011,11 @@ void Etirer_brosse_12_0(void)
 
     Operation_PUSH(Pinceau_X); // Dernier calcul X
     Operation_PUSH(Pinceau_Y); // Dernier calcul Y
-    Operation_PUSH(Pinceau_X); // D‚but X
-    Operation_PUSH(Pinceau_Y); // D‚but Y
-    Operation_PUSH(Pinceau_X); // DerniŠre position X
-    Operation_PUSH(Pinceau_Y); // DerniŠre position Y
-    Operation_PUSH(1); // Etat pr‚c‚dent
+    Operation_PUSH(Pinceau_X); // Début X
+    Operation_PUSH(Pinceau_Y); // Début Y
+    Operation_PUSH(Pinceau_X); // Dernière position X
+    Operation_PUSH(Pinceau_Y); // Dernière position Y
+    Operation_PUSH(1); // Etat précédent
 
     if ((Config.Coords_rel) && (Menu_visible))
       Print_dans_menu("\035:   1   \022:   1",0);
@@ -3031,11 +3031,11 @@ void Etirer_brosse_12_0(void)
 
 void Etirer_brosse_1_7(void)
 //
-// Op‚ration   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_ETIRER_BROSSE
 // Click Souris: 1
 // Taille_Pile : 7
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char  Chaine[5];
@@ -3121,11 +3121,11 @@ void Etirer_brosse_1_7(void)
 
 void Etirer_brosse_0_7(void)
 //
-// Op‚ration   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_ETIRER_BROSSE
 // Click Souris: 0
 // Taille_Pile : 7
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char  Chaine[5];
@@ -3180,15 +3180,15 @@ void Etirer_brosse_0_7(void)
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
-      case 'h': // Moiti‚
+      case 'h': // Moitié
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case 'X': // Moiti‚ X
+      case 'X': // Moitié X
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case 'Y': // Moiti‚ Y
+      case 'Y': // Moitié Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
@@ -3234,11 +3234,11 @@ void Etirer_brosse_0_7(void)
 
 void Etirer_brosse_2_7(void)
 //
-// Op‚ration   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_ETIRER_BROSSE
 // Click Souris: 2
 // Taille_Pile : 7
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Calcul_X;
@@ -3256,23 +3256,23 @@ void Etirer_brosse_2_7(void)
   // On efface la preview de la brosse (et la croix)
   Afficher_ecran();
 
-  // Et enfin on stocke pour de bon la nouvelle brosse ‚tir‚e
-  Etirer_Brosse(Debut_X,Debut_Y,Calcul_X,Calcul_Y);
+  // Et enfin on stocke pour de bon la nouvelle brosse étirée
+  Etirer_brosse(Debut_X,Debut_Y,Calcul_X,Calcul_Y);
 
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // pr‚alable:
+  // préalable:
   Afficher_curseur();
   // !!! Efface la croix puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // D‚senclenche au passage le bouton brosse
+  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu … la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
-  // Maintenant, il faut r‚effacer le curseur parce qu'il sera raffich‚ en fin
+  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel … cette action:
   Effacer_curseur();
 
@@ -3292,11 +3292,11 @@ void Etirer_brosse_2_7(void)
 
 void Tourner_brosse_12_0(void)
 //
-// Op‚ration   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_TOURNER_BROSSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -3305,11 +3305,11 @@ void Tourner_brosse_12_0(void)
     Brosse_Centre_rotation_X=Pinceau_X+(Brosse_Largeur>>1)-Brosse_Largeur;
     Brosse_Centre_rotation_Y=Pinceau_Y;
     Brosse_Centre_rotation_defini=1;
-    Operation_PUSH(Pinceau_X); // DerniŠre position calcul‚e X
-    Operation_PUSH(Pinceau_Y); // DerniŠre position calcul‚e Y
-    Operation_PUSH(Pinceau_X); // DerniŠre position X
-    Operation_PUSH(Pinceau_Y); // DerniŠre position Y
-    Operation_PUSH(1); // Etat pr‚c‚dent
+    Operation_PUSH(Pinceau_X); // Dernière position calculée X
+    Operation_PUSH(Pinceau_Y); // Dernière position calculée Y
+    Operation_PUSH(Pinceau_X); // Dernière position X
+    Operation_PUSH(Pinceau_Y); // Dernière position Y
+    Operation_PUSH(1); // Etat précédent
 
     if ((Config.Coords_rel) && (Menu_visible))
       Print_dans_menu("Angle:   0ø    ",0);
@@ -3325,11 +3325,11 @@ void Tourner_brosse_12_0(void)
 
 void Tourner_brosse_1_5(void)
 //
-// Op‚ration   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_TOURNER_BROSSE
 // Click Souris: 1
 // Taille_Pile : 5
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char  Chaine[4];
@@ -3385,11 +3385,11 @@ void Tourner_brosse_1_5(void)
 
 void Tourner_brosse_0_5(void)
 //
-// Op‚ration   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_TOURNER_BROSSE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   char  Chaine[4];
@@ -3473,11 +3473,11 @@ void Tourner_brosse_0_5(void)
 
 void Tourner_brosse_2_5(void)
 //
-// Op‚ration   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_TOURNER_BROSSE
 // Click Souris: 2
 // Taille_Pile : 5
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Calcul_X;
@@ -3493,7 +3493,7 @@ void Tourner_brosse_2_5(void)
   Operation_POP(&Calcul_Y);
   Operation_POP(&Calcul_X);
 
-  // Calcul de l'angle par rapport … la derniŠre position calcul‚e
+  // Calcul de l'angle par rapport … la dernière position calculée
   if ( (Brosse_Centre_rotation_X==Calcul_X)
     && (Brosse_Centre_rotation_Y==Calcul_Y) )
     Angle=0.0;
@@ -3505,23 +3505,23 @@ void Tourner_brosse_2_5(void)
     if (dY>0) Angle=M_2PI-Angle;
   }
 
-  // Et enfin on stocke pour de bon la nouvelle brosse ‚tir‚e
+  // Et enfin on stocke pour de bon la nouvelle brosse étirée
   Tourner_brosse(Angle);
 
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // pr‚alable:
+  // préalable:
   Afficher_curseur();
-  // !!! Efface le curseur de l'op‚ration puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // D‚senclenche au passage le bouton brosse
+  // !!! Efface le curseur de l'opération puis affiche le viseur !!!
+  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu … la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
-  // Maintenant, il faut r‚effacer le curseur parce qu'il sera raffich‚ en fin
+  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel … cette action:
   Effacer_curseur();
 
@@ -3543,11 +3543,11 @@ byte Cacher_curseur_avant_scroll;
 
 void Scroll_12_0(void)
 //
-//  Op‚ration   : OPERATION_SCROLL
+//  Opération   : OPERATION_SCROLL
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   Initialiser_debut_operation();
@@ -3565,11 +3565,11 @@ void Scroll_12_0(void)
 
 void Scroll_12_4(void)
 //
-//  Op‚ration   : OPERATION_SCROLL
+//  Opération   : OPERATION_SCROLL
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 4
 //
-//  Souris effac‚e: Non
+//  Souris effacée: Non
 //
 {
   short Centre_X;
@@ -3578,7 +3578,7 @@ void Scroll_12_4(void)
   short Pos_Y;
   short Decalage_X;
   short Decalage_Y;
-  char  Chaine[5];
+  //char  Chaine[5];
 
   Operation_POP(&Pos_Y);
   Operation_POP(&Pos_X);
@@ -3587,7 +3587,7 @@ void Scroll_12_4(void)
 
   if ( (Pinceau_X!=Pos_X) || (Pinceau_Y!=Pos_Y) )
   {
-    // L'utilisateur a boug‚, il faut scroller l'image
+    // L'utilisateur a bougé, il faut scroller l'image
 
     if (Pinceau_X>=Centre_X)
       Decalage_X=(Pinceau_X-Centre_X)%Principal_Largeur_image;
@@ -3614,11 +3614,11 @@ void Scroll_12_4(void)
 
 void Scroll_0_4(void)
 //
-//  Op‚ration   : OPERATION_SCROLL
+//  Opération   : OPERATION_SCROLL
 //  Click Souris: 0
 //  Taille_Pile : 4
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 //
 {
   Operation_Taille_pile-=4;
@@ -3636,11 +3636,11 @@ void Scroll_0_4(void)
 
 void Cercle_degrade_12_0(void)
 //
-// Op‚ration   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_CERCLE_DEGRADE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   byte Couleur;
 
@@ -3669,11 +3669,11 @@ void Cercle_degrade_12_0(void)
 
 void Cercle_degrade_12_6(void)
 //
-// Op‚ration   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_CERCLE_DEGRADE
 // Click Souris: 1 ou 2
 // Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   short Tangente_X;
@@ -3724,11 +3724,11 @@ void Cercle_degrade_12_6(void)
 
 void Cercle_degrade_0_6(void)
 //
-// Op‚ration   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_CERCLE_DEGRADE
 // Click Souris: 0
 // Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -3798,11 +3798,11 @@ void Cercle_degrade_0_6(void)
 
 void Cercle_degrade_12_8(void)
 //
-// Op‚ration   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_CERCLE_DEGRADE
 // Click Souris: 0
 // Taille_Pile : 8 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente, Ancien_X, Ancien_Y)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -3814,7 +3814,7 @@ void Cercle_degrade_12_8(void)
 
   short Rayon;
 
-  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers ‚lts de la pile
+  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers élts de la pile
   Operation_POP(&Tangente_Y);
   Operation_POP(&Tangente_X);
   Operation_POP(&Centre_Y);
@@ -3848,11 +3848,11 @@ void Cercle_degrade_12_8(void)
 
 void Cercle_ou_ellipse_degrade_0_8(void)
 //
-// Op‚ration   : OPERATION_{CERCLE|ELLIPSE}_DEGRADE
+// Opération   : OPERATION_{CERCLE|ELLIPSE}_DEGRADE
 // Click Souris: 0
 // Taille_Pile : 8
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   short Debut_X;
@@ -3888,11 +3888,11 @@ void Cercle_ou_ellipse_degrade_0_8(void)
 
 void Ellipse_degradee_12_0(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_ELLIPSE_DEGRADEE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   byte Couleur;
 
@@ -3921,11 +3921,11 @@ void Ellipse_degradee_12_0(void)
 
 void Ellipse_degradee_12_6(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_ELLIPSE_DEGRADEE
 // Click Souris: 1 ou 2
 // Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 //
 {
   short Tangente_X;
@@ -3972,11 +3972,11 @@ void Ellipse_degradee_12_6(void)
 
 void Ellipse_degradee_0_6(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_ELLIPSE_DEGRADEE
 // Click Souris: 0
 // Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -3985,7 +3985,7 @@ void Ellipse_degradee_0_6(void)
   short Centre_Y;
   short Couleur;
   short Click;
-  short Rayon;
+  //short Rayon;
   short Rayon_horizontal;
   short Rayon_vertical;
 
@@ -4049,11 +4049,11 @@ void Ellipse_degradee_0_6(void)
 
 void Ellipse_degradee_12_8(void)
 //
-// Op‚ration   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_ELLIPSE_DEGRADEE
 // Click Souris: 0
 // Taille_Pile : 8 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente, Ancien_X, Ancien_Y)
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 //
 {
   short Tangente_X;
@@ -4065,7 +4065,7 @@ void Ellipse_degradee_12_8(void)
   short Rayon_vertical;
   short Ancien_Mouse_K;
 
-  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers ‚lts de la pile
+  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers élts de la pile
   Operation_POP(&Tangente_Y);
   Operation_POP(&Tangente_X);
   Operation_POP(&Centre_Y);
@@ -4102,11 +4102,11 @@ void Ellipse_degradee_12_8(void)
 
 
 void Lignes_centrees_12_0(void)
-// Op‚ration   : OPERATION_LIGNES_CENTREES
+// Opération   : OPERATION_LIGNES_CENTREES
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effac‚e: Oui
+//  Souris effacée: Oui
 {
   Initialiser_debut_operation();
   Backup();
@@ -4122,11 +4122,11 @@ void Lignes_centrees_12_0(void)
 
 
 void Lignes_centrees_12_3(void)
-// Op‚ration   : OPERATION_LIGNES_CENTREES
+// Opération   : OPERATION_LIGNES_CENTREES
 // Click Souris: 1 ou 2
 // Taille_Pile : 3
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Debut_X;
   short Debut_Y;
@@ -4139,11 +4139,11 @@ void Lignes_centrees_12_3(void)
 
 
 void Lignes_centrees_0_3(void)
-// Op‚ration   : OPERATION_LIGNES_CENTREES
+// Opération   : OPERATION_LIGNES_CENTREES
 // Click Souris: 0
 // Taille_Pile : 3
 //
-// Souris effac‚e: Oui
+// Souris effacée: Oui
 {
   short Debut_X;
   short Debut_Y;
@@ -4161,21 +4161,21 @@ void Lignes_centrees_0_3(void)
   Pinceau_Forme=FORME_PINCEAU_POINT;
 
   Operation_PUSH(Bouton);
-  Operation_PUSH(Pinceau_X); // Nouveau d‚but X
-  Operation_PUSH(Pinceau_Y); // Nouveau d‚but Y
-  Operation_PUSH(Pinceau_X); // Nouvelle derniŠre fin X
-  Operation_PUSH(Pinceau_Y); // Nouvelle derniŠre fin Y
-  Operation_PUSH(Pinceau_X); // Nouvelle derniŠre position X
-  Operation_PUSH(Pinceau_Y); // Nouvelle derniŠre position Y
+  Operation_PUSH(Pinceau_X); // Nouveau début X
+  Operation_PUSH(Pinceau_Y); // Nouveau début Y
+  Operation_PUSH(Pinceau_X); // Nouvelle dernière fin X
+  Operation_PUSH(Pinceau_Y); // Nouvelle dernière fin Y
+  Operation_PUSH(Pinceau_X); // Nouvelle dernière position X
+  Operation_PUSH(Pinceau_Y); // Nouvelle dernière position Y
 }
 
 
 void Lignes_centrees_12_7(void)
-// Op‚ration   : OPERATION_LIGNES_CENTREES
+// Opération   : OPERATION_LIGNES_CENTREES
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Bouton;
   short Debut_X;
@@ -4250,11 +4250,11 @@ void Lignes_centrees_12_7(void)
 
 
 void Lignes_centrees_0_7(void)
-// Op‚ration   : OPERATION_LIGNES_CENTREES
+// Opération   : OPERATION_LIGNES_CENTREES
 // Click Souris: 0
 // Taille_Pile : 7
 //
-// Souris effac‚e: Non
+// Souris effacée: Non
 {
   short Bouton;
   short Debut_X;

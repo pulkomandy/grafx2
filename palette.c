@@ -6,7 +6,7 @@
 #include "graph.h"
 #include "moteur.h"
 #include "readline.h"
-
+#include "boutons.h"
 
 // --------------------------- Menu des palettes -----------------------------
 char * Libelle_reduction_palette[7]=
@@ -15,7 +15,7 @@ char * Libelle_reduction_palette[7]=
 };
 
 
-void Modifier_rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -27,7 +27,7 @@ void Modifier_rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 }
 
 
-void Modifier_vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -39,7 +39,7 @@ void Modifier_vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 }
 
 
-void Modifier_bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -52,8 +52,8 @@ void Modifier_bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 
 
 void Degrader_palette(short Debut,short Fin,T_Palette Palette)
-// Modifie la palette pour obtenir un d‚grad‚ de couleur entre les deux bornes
-// pass‚es en paramŠtre
+// Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
+// passées en paramŠtre
 {
   short Debut_Rouge;
   short Debut_Vert;
@@ -63,8 +63,8 @@ void Degrader_palette(short Debut,short Fin,T_Palette Palette)
   short Fin_Bleu;
   short Indice;
 
-  // On v‚rifie qu'il y ait assez de couleurs entre le d‚but et la fin pour
-  // pouvoir faire un d‚grad‚:
+  // On vérifie qu'il y ait assez de couleurs entre le début et la fin pour
+  // pouvoir faire un dégradé:
   if ( (Debut!=Fin) && (Debut+1!=Fin) )
   {
     Debut_Rouge=Palette[Debut].R;
@@ -124,14 +124,14 @@ void Remap_image_HIGH(byte * Table_de_conversion)
 {
   short Fin_X;
   short Fin_Y;
-  short Fin_X_Loupe;
-  short Fin_Y_Loupe;
+  short Fin_X_Loupe=0;
+  short Fin_Y_Loupe=0;
 
   // On s'occupe de faire la traduction dans l'image
   Remap_general_LOWLEVEL(Table_de_conversion,Principal_Ecran,
                          Principal_Largeur_image,Principal_Hauteur_image,Principal_Largeur_image);
 
-  // On calcule les limites … l'‚cran de l'image
+  // On calcule les limites … l'écran de l'image
   if (Principal_Hauteur_image>=Menu_Ordonnee_avant_fenetre)
     Fin_Y=Menu_Ordonnee_avant_fenetre;
   else
@@ -163,14 +163,14 @@ void Remap_image_HIGH(byte * Table_de_conversion)
       Fin_Y_Loupe=Principal_Hauteur_image*Loupe_Facteur;
   }
 
-  // On doit maintenant faire la traduction … l'‚cran
+  // On doit maintenant faire la traduction … l'écran
   Remap_zone_HIGH(0,0,Fin_X,Fin_Y,Table_de_conversion);
 
   if (Loupe_Mode)
   {
     Remap_zone_HIGH(Principal_Split,0,Fin_X_Loupe,Fin_Y_Loupe,Table_de_conversion);
     // Il peut encore rester le bas de la barre de split … remapper si la
-    // partie zoom‚e ne descend pas jusqu'en bas...
+    // partie zoomée ne descend pas jusqu'en bas...
     Remap_zone_HIGH(Principal_Split,Fin_Y_Loupe,
                     (Principal_Split+(LARGEUR_BARRE_SPLIT*Menu_Facteur_X)),
                     Menu_Ordonnee_avant_fenetre,Table_de_conversion);
@@ -199,7 +199,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   Utilisation_temporaire=(dword *)malloc(sizeof(dword)*256);
   memcpy(Utilisation_temporaire,Utilisation_couleur,sizeof(dword)*256);
 
-  // On commence … initialiser la table de conversion … un ‚tat o— elle ne
+  // On commence … initialiser la table de conversion … un état o— elle ne
   // fera aucune conversion.
   for (Pos_1=0;Pos_1<=255;Pos_1++)
     Table_de_conversion[Pos_1]=Pos_1;
@@ -232,7 +232,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   else
   if ((Debut_Bloc_2<Debut_Bloc_1) && (Fin_2>=Debut_Bloc_1))
   {
-    // Le bloc destination d‚borde dans le bloc source.
+    // Le bloc destination déborde dans le bloc source.
 
     for (Pos_1=Debut_Bloc_2,Pos_2=Debut_Bloc_1;Pos_1<=Fin_1;Pos_1++)
     {
@@ -262,7 +262,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Table_de_conversion[Pos_2]=Pos_1;
 
       //   On intervertit le nombre d'utilisation des couleurs pour garder une
-      // coh‚rence lors d'un ‚ventuel "Zap unused".
+      // cohérence lors d'un éventuel "Zap unused".
       Tempo                     =Utilisation_couleur[Pos_1];
       Utilisation_couleur[Pos_1]=Utilisation_couleur[Pos_2];
       Utilisation_couleur[Pos_2]=Tempo;
@@ -285,8 +285,8 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   free(Utilisation_temporaire);
   free(Palette_temporaire);
 
-  // Maintenant, tous ces calculs doivent ˆtres pris en compte dans la
-  // palette, l'image et … l'‚cran.
+  // Maintenant, tous ces calculs doivent êtres pris en compte dans la
+  // palette, l'image et … l'écran.
   Set_palette(Palette);
 
   if (X_Swap)
@@ -307,7 +307,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
   for (Indice=0; Indice<256; Indice++)
     Table_de_remplacement[Indice]=Indice;
 
-  // On recherche les 4 couleurs les moins utilis‚es dans l'image pour pouvoir
+  // On recherche les 4 couleurs les moins utilisées dans l'image pour pouvoir
   // les remplacer par les nouvelles couleurs.
   for (Indice2=0; Indice2<4; Indice2++)
     for (Indice=255; Indice>=0; Indice--)
@@ -318,11 +318,11 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
         Nouvelles[Indice2]=Indice;
     }
 
-  // On trie maintenant la table dans le sens d‚croissant.
+  // On trie maintenant la table dans le sens décroissant.
   // (Ce n'est pas indispensable, mais ‡a fera plus joli dans la palette).
   do
   {
-    Couleur=0; // Bool‚en qui dit si le tri n'est pas termin‚.
+    Couleur=0; // Booléen qui dit si le tri n'est pas terminé.
     for (Indice=0; Indice<3; Indice++)
     {
       if (Nouvelles[Indice]>Nouvelles[Indice+1])
@@ -336,7 +336,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
   } while (Couleur);
 
   //   On sauvegarde dans RVB les teintes qu'on va remplacer et on met les
-  // couleurs du menu par d‚faut
+  // couleurs du menu par défaut
   for (Indice=0; Indice<4; Indice++)
   {
     Couleur=Nouvelles[Indice];
@@ -348,14 +348,14 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
     Principal_Palette[Couleur].B=Coul_menu_pref[Indice].B;
   }
 
-  //   Maintenant qu'on a plac‚ notre nouvelle palette, on va chercher quelles
+  //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
   // sont les couleurs qui peuvent remplacer les anciennes
   Effacer_curseur();
   for (Indice=0; Indice<4; Indice++)
     Table_de_remplacement[Nouvelles[Indice]]=Meilleure_couleur_sans_exclusion
                                   (RVB[Indice].R,RVB[Indice].V,RVB[Indice].B);
 
-  // On fait un changement des couleurs visibles … l'‚cran et dans l'image
+  // On fait un changement des couleurs visibles … l'écran et dans l'image
   Remap_image_HIGH(Table_de_remplacement);
 
   Afficher_curseur();
@@ -369,26 +369,26 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   byte  Table_de_conversion[256]; // Table de conversion
   int   Couleur_1;                // |_ Variables de balayages
   int   Couleur_2;                // |  de la palette
-  int   Meilleure_couleur_1;
-  int   Meilleure_couleur_2;
+  int   Meilleure_couleur_1=0;
+  int   Meilleure_couleur_2=0;
   int   Difference;
   int   Meilleure_difference;
   dword Utilisation;
   dword Meilleure_utilisation;
 
-  //   On commence par initialiser la table de conversion dans un ‚tat o—
-  // aucune conversion ne sera effectu‚e.
+  //   On commence par initialiser la table de conversion dans un état o—
+  // aucune conversion ne sera effectuée.
   for (Couleur_1=0; Couleur_1<=255; Couleur_1++)
     Table_de_conversion[Couleur_1]=Couleur_1;
 
-  //   Si on ne connait pas encore le nombre de couleurs utilis‚es, on le
-  // calcule! (!!! La fonction appel‚e Efface puis Affiche le curseur !!!)
+  //   Si on ne connait pas encore le nombre de couleurs utilisées, on le
+  // calcule! (!!! La fonction appelée Efface puis Affiche le curseur !!!)
   if ((*Nb_couleurs_utilisees)<0)
     Compter_nb_couleurs_utilisees(Nb_couleurs_utilisees,Utilisation_couleur);
 
   Effacer_curseur();
 
-  //   On tasse la palette vers le d‚but parce qu'elle doit ressembler …
+  //   On tasse la palette vers le début parce qu'elle doit ressembler …
   // du GruyŠre (et comme Papouille il aime pas le fromage...)
 
   // Pour cela, on va scruter la couleur Couleur_1 et se servir de l'indice
@@ -408,13 +408,13 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
       // On va maintenant s'occuper de la table de conversion:
       Table_de_conversion[Couleur_1]=Couleur_2;
 
-      // Maintenant, la place d‚sign‚e par Couleur_2 est occup‚e, alors on
+      // Maintenant, la place désignée par Couleur_2 est occupée, alors on
       // doit passer … un indice de destination suivant.
       Couleur_2++;
     }
   }
 
-  // On met toutes les couleurs inutilis‚es en noir
+  // On met toutes les couleurs inutilisées en noir
   for (;Couleur_2<256;Couleur_2++)
   {
     Palette[Couleur_2].R=0;
@@ -423,13 +423,13 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     Utilisation_couleur[Couleur_2]=0;
   }
 
-  //   Maintenant qu'on a une palette clean, on va boucler en r‚duisant
-  // le nombre de couleurs jusqu'… ce qu'on atteigne le nombre d‚sir‚.
+  //   Maintenant qu'on a une palette clean, on va boucler en réduisant
+  // le nombre de couleurs jusqu'… ce qu'on atteigne le nombre désiré.
   while ((*Nb_couleurs_utilisees)>Nb_couleurs_demandees)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
-    // parmis celles qui sont utilis‚es (bien s–r) et de les remplacer par
-    // une seule couleur qui est la moyenne pond‚r‚e de ces 2 couleurs
+    // parmis celles qui sont utilisées (bien s–r) et de les remplacer par
+    // une seule couleur qui est la moyenne pondérée de ces 2 couleurs
     // en fonction de leur utilisation dans l'image.
 
     Meilleure_difference =0x7FFF;
@@ -456,8 +456,8 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
           }
         }
 
-    //   Maintenant qu'on les a trouv‚es, on va pouvoir mettre … jour nos
-    // donn‚es pour que le remplacement se fasse sans encombres.
+    //   Maintenant qu'on les a trouvées, on va pouvoir mettre … jour nos
+    // données pour que le remplacement se fasse sans encombres.
 
     // En somme, on va remplacer Meilleure_couleur_2 par Meilleure_couleur_1,
     // mais attention, on ne remplace pas Meilleure_couleur_1 par
@@ -483,8 +483,8 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     {
       if (Table_de_conversion[Couleur_1]==Meilleure_couleur_2)
       {
-        //   La Couleur_1 avait d‚j… pr‚vue de se faire remplacer par la
-        // couleur que l'on veut maintenant ‚liminer. On va maintenant
+        //   La Couleur_1 avait déj… prévue de se faire remplacer par la
+        // couleur que l'on veut maintenant éliminer. On va maintenant
         // demander … ce que la Couleur_1 se fasse remplacer par la
         // Meilleure_couleur_1.
         Table_de_conversion[Couleur_1]=Meilleure_couleur_1;
@@ -492,8 +492,8 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     }
 
     //   Bon, maintenant que l'on a fait bouger nos petites choses concernants
-    // la couleur … ‚liminer, on va s'occuper de faire bouger les couleurs
-    // situ‚es aprŠs la couleur … ‚liminer pour qu'elles se d‚pla‡ent d'une
+    // la couleur … éliminer, on va s'occuper de faire bouger les couleurs
+    // situées aprŠs la couleur … éliminer pour qu'elles se dépla‡ent d'une
     // couleur en arriŠre.
     for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
     {
@@ -505,47 +505,47 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
         // La Couleur_1 va scroller en arriŠre.
 
         //   Donc on transfŠre son utilisation dans l'utilisation de la
-        // couleur qui la pr‚cŠde.
+        // couleur qui la précŠde.
         Utilisation_couleur[Couleur_1-1]=Utilisation_couleur[Couleur_1];
 
         //   Et on transfŠre ses teintes dans les teintes de la couleur qui
-        // la pr‚cŠde.
+        // la précŠde.
         Palette[Couleur_1-1].R=Palette[Couleur_1].R;
         Palette[Couleur_1-1].V=Palette[Couleur_1].V;
         Palette[Couleur_1-1].B=Palette[Couleur_1].B;
       }
 
-      //   Une fois la palette et la table d'utilisation g‚r‚es, on peut
+      //   Une fois la palette et la table d'utilisation gérées, on peut
       // s'occuper de notre table de conversion.
       if (Table_de_conversion[Couleur_1]>Meilleure_couleur_2)
         //   La Couleur_1 avait l'intention de se faire remplacer par une
-        // couleur que l'on va (ou que l'on a d‚j…) bouger en arriŠre.
+        // couleur que l'on va (ou que l'on a déj…) bouger en arriŠre.
         Table_de_conversion[Couleur_1]--;
     }
 
-    //   On vient d'‚jecter une couleur, donc on peut mettre … jour le nombre
-    // de couleurs utilis‚es.
+    //   On vient d'éjecter une couleur, donc on peut mettre … jour le nombre
+    // de couleurs utilisées.
     (*Nb_couleurs_utilisees)--;
 
     // A la fin, on doit passer (dans la palette) les teintes du dernier
-    // ‚l‚ment de notre ensemble en noir.
+    // élément de notre ensemble en noir.
     Palette[*Nb_couleurs_utilisees].R=0;
     Palette[*Nb_couleurs_utilisees].V=0;
     Palette[*Nb_couleurs_utilisees].B=0;
 
-    // Au passage, on va s'assurer que l'on a pas oubli‚ de la mettre … une
+    // Au passage, on va s'assurer que l'on a pas oublié de la mettre … une
     // utilisation nulle.
     Utilisation_couleur[*Nb_couleurs_utilisees]=0;
 
-    // AprŠs avoir ‚ject‚ une couleur, on le fait savoir … l'utilisateur par
-    // l'interm‚diaire du compteur de nombre utilis‚es.
+    // AprŠs avoir éjecté une couleur, on le fait savoir … l'utilisateur par
+    // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*Nb_couleurs_utilisees,Chaine,3);
     Print_dans_fenetre(186,23,Chaine,CM_Noir,CM_Clair);
   }
 
-  //   Maintenant, tous ces calculs doivent ˆtres pris en compte dans la
-  // palette, l'image et … l'‚cran.
-  Remap_image_HIGH(Table_de_conversion); // Et voila pour l'image et l'‚cran
+  //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
+  // palette, l'image et … l'écran.
+  Remap_image_HIGH(Table_de_conversion); // Et voila pour l'image et l'écran
   Afficher_curseur();
 }
 
@@ -599,7 +599,7 @@ void Palette_Reafficher_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
   char Chaine[3];
 
   Effacer_curseur();
-  // R‚affichage des jauges:
+  // Réaffichage des jauges:
   if (Debut!=Fin)
   {
     // Dans le cas d'un bloc, tout … 0.
@@ -644,9 +644,9 @@ void Bouton_Palette(void)
 {
   static short Indice_Reduction_palette=0;
   static short Reduce_Nb_couleurs=256;
-  short  Couleur_temporaire; // Variable pouvant reservir pour diff‚rents calculs interm‚diaires
+  short  Couleur_temporaire; // Variable pouvant reservir pour différents calculs intermédiaires
   dword  Temp;
-  byte   Couleur,Click; // Variables pouvant reservir pour diff‚rents calculs interm‚diaires
+  byte   Couleur,Click; // Variables pouvant reservir pour différents calculs intermédiaires
   short  Bouton_clicke;
   word   Ancien_Mouse_X;
   word   Ancien_Mouse_Y;
@@ -657,7 +657,7 @@ void Bouton_Palette(void)
   byte   Derniere_couleur;
   char   Chaine[10];
   word   i;
-  short  Pos_X,Pos_Y;
+  //short  Pos_X,Pos_Y;
   struct Fenetre_Bouton_normal   * Bouton_Used;
   struct Fenetre_Bouton_scroller * Jauge_rouge;
   struct Fenetre_Bouton_scroller * Jauge_verte;
@@ -690,7 +690,7 @@ void Bouton_Palette(void)
   Fenetre_Afficher_cadre      (173, 67,121,116);
   Fenetre_Afficher_cadre      (128, 16, 91, 39);
   Fenetre_Afficher_cadre      (221, 16, 73, 39);
-  // Cadre creux destin‚ … l'affichage de la(les) couleur(s) s‚lectionn‚e(s)
+  // Cadre creux destiné … l'affichage de la(les) couleur(s) sélectionnée(s)
   Fenetre_Afficher_cadre_creux(259, 88, 26, 74);
 
   // Graduation des jauges de couleur
@@ -752,7 +752,7 @@ void Bouton_Palette(void)
   Bouton_Used=Fenetre_Liste_boutons_normal;
   Fenetre_Definir_bouton_normal(132,37,83,14,"Zap unused",0,1,0x0053);//16
 
-  // Jauge de r‚duction de palette
+  // Jauge de réduction de palette
   Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
   Jauge_Reduction=Fenetre_Liste_boutons_scroller;
 
@@ -764,11 +764,11 @@ void Bouton_Palette(void)
   Fenetre_Definir_bouton_normal(66,32,59,14,"X-Inv." ,5,1,0x002F);   // 22
 
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
-  // Affichage du facteur de r‚duction de la palette
+  // Affichage du facteur de réduction de la palette
   Num2str(Reduce_Nb_couleurs,Chaine,3);
   Print_dans_fenetre(265,41,Chaine,CM_Noir,CM_Clair);
 
-  // Dessin des petits effets sp‚ciaux pour les boutons [+] et [-]
+  // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Dessiner_zigouigoui(263, 74,CM_Blanc,-1);
   Dessiner_zigouigoui(280, 74,CM_Blanc,+1);
   Dessiner_zigouigoui(263,165,CM_Fonce,-1);
@@ -776,8 +776,8 @@ void Bouton_Palette(void)
 
   Afficher_curseur();
 
-  Clavier_americain(); // On est oblig‚ de rester en clavier am‚ricain pour
-                       // que l'on puisse d‚caler la couleur s‚lectionn‚e …
+  Clavier_americain(); // On est obligé de rester en clavier américain pour
+                       // que l'on puisse décaler la couleur sélectionnée …
                        // l'aide des touche "^" et "$" ("[" et "]").
 
   if (Config.Auto_nb_used)
@@ -794,7 +794,7 @@ void Bouton_Palette(void)
     {
       case  0 : // Nulle part
         break;
-      case -1 : // Hors de la fenˆtre
+      case -1 : // Hors de la fenêtre
       case  1 : // Palette
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
@@ -820,13 +820,13 @@ void Bouton_Palette(void)
               if ( (Fore_color!=Couleur_temporaire) || (Debut_block!=Fin_block) )
               {
                 // La couleur en question est nouvelle ou elle annule un
-                // ancien bloc. Il faut donc s‚lectionner cette couleur comme
+                // ancien bloc. Il faut donc sélectionner cette couleur comme
                 // unique couleur choisie.
 
                 Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur_temporaire;
                 Tagger_intervalle_palette(Debut_block,Fin_block);
 
-                // Affichage du nø de la couleur s‚lectionn‚e
+                // Affichage du nø de la couleur sélectionnée
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
                 Num2str(Fore_color,Chaine,3);
                 Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
@@ -853,7 +853,7 @@ void Bouton_Palette(void)
                   Debut_block=Premiere_couleur;
                   Fin_block=Couleur_temporaire;
 
-                  // Affichage du nø de la couleur s‚lectionn‚e
+                  // Affichage du nø de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
                   Chaine[3]=26; // FlŠche vers la droite
@@ -862,7 +862,7 @@ void Bouton_Palette(void)
                   // Affichage des jauges
                   Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,1,NULL);
 
-                  // Affichage dans le block de visu du bloc (d‚grad‚) en cours
+                  // Affichage dans le block de visu du bloc (dégradé) en cours
                   Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
                 }
                 else if (Premiere_couleur>Couleur_temporaire)
@@ -870,7 +870,7 @@ void Bouton_Palette(void)
                   Debut_block=Couleur_temporaire;
                   Fin_block=Premiere_couleur;
 
-                  // Affichage du nø de la couleur s‚lectionn‚e
+                  // Affichage du nø de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
                   Chaine[3]=26; // FlŠche vers la droite
@@ -879,7 +879,7 @@ void Bouton_Palette(void)
                   // Affichage des jauges
                   Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,1,NULL);
 
-                  // Affichage dans le block de visu du bloc (d‚grad‚) en cours
+                  // Affichage dans le block de visu du bloc (dégradé) en cours
                   Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
                 }
                 else
@@ -887,7 +887,7 @@ void Bouton_Palette(void)
                   Debut_block=Fin_block=Premiere_couleur;
                   Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
 
-                  // Affichage du nø de la couleur s‚lectionn‚e
+                  // Affichage du nø de la couleur sélectionnée
                   Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
                   Num2str(Fore_color,Chaine,3);
                   Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
@@ -924,7 +924,7 @@ void Bouton_Palette(void)
 
           if (Jauge_rouge->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_rouge->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -961,7 +961,7 @@ void Bouton_Palette(void)
 
           if (Jauge_verte->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_verte->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -998,7 +998,7 @@ void Bouton_Palette(void)
 
           if (Jauge_bleue->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_bleue->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1027,7 +1027,7 @@ void Bouton_Palette(void)
         memcpy(Palette_temporaire,Palette_defaut,sizeof(T_Palette));
         Set_palette(Palette_defaut);
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        // On pr‚pare la "modifiabilit‚" des nouvelles couleurs
+        // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1045,7 +1045,7 @@ void Bouton_Palette(void)
           Modifier_Bleu (i,Couleur_temporaire,Palette_de_travail);
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        // On pr‚pare la "modifiabilit‚" des nouvelles couleurs
+        // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1061,7 +1061,7 @@ void Bouton_Palette(void)
           memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
 
           // On calcule le nombre de couleurs a swapper sans risquer de sortir
-          // de la palette (La var. Premiere_couleur est utilis‚e pour ‚conomiser 1 var; c'est tout)
+          // de la palette (La var. Premiere_couleur est utilisée pour économiser 1 var; c'est tout)
           Premiere_couleur=(Couleur_temporaire+Fin_block-Debut_block<=255)?Fin_block+1-Debut_block:256-Couleur_temporaire;
 
           if (Bouton_clicke==8) // On ne fait de backup de l'image que si on
@@ -1076,7 +1076,7 @@ void Bouton_Palette(void)
 
           memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
-          // On d‚place le bloc vers les modifs:
+          // On déplace le bloc vers les modifs:
           Derniere_couleur=Fin_block=Couleur_temporaire+Premiere_couleur-1;
           Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
           // On raffiche le nø des bornes du bloc:
@@ -1086,7 +1086,7 @@ void Bouton_Palette(void)
             Num2str(Debut_block,Chaine  ,3);
             Num2str(Fin_block  ,Chaine+4,3);
             Chaine[3]=26; // FlŠche vers la droite
-            // Affichage dans le block de visu du bloc (d‚grad‚) en cours
+            // Affichage dans le block de visu du bloc (dégradé) en cours
             Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
           }
           else
@@ -1118,7 +1118,7 @@ void Bouton_Palette(void)
                  ((Couleur_temporaire+Fin_block-Debut_block<=255)?Fin_block+1-Debut_block:256-Couleur_temporaire)*3);
           memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
           Set_palette(Palette_de_travail);
-          // On d‚place le bloc vers les modifs:
+          // On déplace le bloc vers les modifs:
           Derniere_couleur=Fin_block=((Couleur_temporaire+Fin_block-Debut_block<=255)?(Couleur_temporaire+Fin_block-Debut_block):255);
           Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
           // On raffiche le nø des bornes du bloc:
@@ -1128,7 +1128,7 @@ void Bouton_Palette(void)
             Num2str(Debut_block,Chaine  ,3);
             Num2str(Fin_block  ,Chaine+4,3);
             Chaine[3]=26; // FlŠche vers la droite
-            // Affichage dans le block de visu du bloc (d‚grad‚) en cours
+            // Affichage dans le block de visu du bloc (dégradé) en cours
             Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
           }
           else
@@ -1170,7 +1170,7 @@ void Bouton_Palette(void)
         }
 
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        // On pr‚pare la "modifiabilit‚" des nouvelles couleurs
+        // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1194,7 +1194,7 @@ void Bouton_Palette(void)
           memcpy(Principal_Palette,Palette_temporaire,sizeof(T_Palette));
         }
 
-        Set_palette(Palette_de_travail);     // On d‚finit la nouvelle palette
+        Set_palette(Palette_de_travail);     // On définit la nouvelle palette
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1246,11 +1246,11 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
         break;
 
-      case 17 : // Jauge de r‚duction de palette
+      case 17 : // Jauge de réduction de palette
         if (Indice_Reduction_palette!=Jauge_Reduction->Position)
         {
           Indice_Reduction_palette=Jauge_Reduction->Position;
-          // Affichage du facteur de r‚duction de la palette
+          // Affichage du facteur de réduction de la palette
           Effacer_curseur();
           Print_dans_fenetre(265,41,Libelle_reduction_palette[Indice_Reduction_palette],CM_Noir,CM_Clair);
           Afficher_curseur();
@@ -1315,7 +1315,7 @@ void Bouton_Palette(void)
           // -- Rouge --
           if (Jauge_rouge->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_rouge->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1336,7 +1336,7 @@ void Bouton_Palette(void)
           // -- Vert --
           if (Jauge_verte->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_verte->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1357,7 +1357,7 @@ void Bouton_Palette(void)
           // -- Bleu --
           if (Jauge_bleue->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_bleue->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1437,7 +1437,7 @@ void Bouton_Palette(void)
           // -- Rouge --
           if (Jauge_rouge->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_rouge->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1458,7 +1458,7 @@ void Bouton_Palette(void)
           // -- Vert --
           if (Jauge_verte->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_verte->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1479,7 +1479,7 @@ void Bouton_Palette(void)
           // -- Bleu --
           if (Jauge_bleue->Position>63)
           {
-            // Jauge dans les n‚gatifs:
+            // Jauge dans les négatifs:
             Num2str(-(63-Jauge_bleue->Position),Chaine,3);
             Chaine[0]='-';
           }
@@ -1513,7 +1513,7 @@ void Bouton_Palette(void)
           Modifier_Bleu (i,63-Palette_de_travail[i].B,Palette_de_travail);
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        // On pr‚pare la "modifiabilit‚" des nouvelles couleurs
+        // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1556,13 +1556,13 @@ void Bouton_Palette(void)
           Remap_image_HIGH(Table_de_conversion);
           Afficher_curseur();
         }
-        // On pr‚pare la "modifiabilit‚" des nouvelles couleurs
+        // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
         break;
 
-      case 23 : // Saisie du nombre de couleurs pour la r‚duction de palette
+      case 23 : // Saisie du nombre de couleurs pour la réduction de palette
         Num2str(Reduce_Nb_couleurs,Chaine,3);
         Effacer_curseur();
 
@@ -1592,7 +1592,7 @@ void Bouton_Palette(void)
     {
       switch (Touche)
       {
-        case 0x001A : // D‚caler Forecolor vers la gauche
+        case 0x001A : // Décaler Forecolor vers la gauche
           if (Debut_block==Fin_block)
           {
             Fore_color--;
@@ -1603,7 +1603,7 @@ void Bouton_Palette(void)
             Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
             Effacer_curseur();
             Tagger_intervalle_palette(Debut_block,Fin_block);
-            // Affichage du nø de la couleur s‚lectionn‚e
+            // Affichage du nø de la couleur sélectionnée
             Num2str(Fore_color,Chaine,3);
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
@@ -1612,7 +1612,7 @@ void Bouton_Palette(void)
           }
           break;
 
-        case 0x001B : // D‚caler Forecolor vers la droite
+        case 0x001B : // Décaler Forecolor vers la droite
           if (Debut_block==Fin_block)
           {
             Fore_color++;
@@ -1623,7 +1623,7 @@ void Bouton_Palette(void)
             Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
             Effacer_curseur();
             Tagger_intervalle_palette(Debut_block,Fin_block);
-            // Affichage du nø de la couleur s‚lectionn‚e
+            // Affichage du nø de la couleur sélectionnée
             Num2str(Fore_color,Chaine,3);
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
@@ -1645,7 +1645,7 @@ void Bouton_Palette(void)
           Afficher_curseur();
           break;
 
-        case 0x000E : // Remise des couleurs du menu … l'‚tat normal en essayant
+        case 0x000E : // Remise des couleurs du menu … l'état normal en essayant
                       // de ne pas trop modifier l'image.
           if (!Backup_de_l_image_effectue)
           {
@@ -1668,12 +1668,12 @@ void Bouton_Palette(void)
           Il_faut_remapper=1;
           break;
 
-        case 0x0029 : // R‚cup‚ration d'une couleur derriŠre le menu
+        case 0x0029 : // Récupération d'une couleur derriŠre le menu
         case 0x0033 :
           Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
           if (Click)
           {
-            Effacer_Curseur();
+            Effacer_curseur();
             if (Click==A_DROITE)
             {
               if (Back_color!=Couleur)
@@ -1691,7 +1691,7 @@ void Bouton_Palette(void)
               Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur;
               Tagger_intervalle_palette(Debut_block,Fin_block);
 
-              // Affichage du nø de la couleur s‚lectionn‚e
+              // Affichage du nø de la couleur sélectionnée
               Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
               Num2str(Fore_color,Chaine,3);
               Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
@@ -1761,7 +1761,7 @@ void Bouton_Palette(void)
 
   Calculer_couleurs_menu_optimales(Principal_Palette);
 
-  // La variable employ‚e ici n'a pas vraiment de rapport avec son nom...
+  // La variable employée ici n'a pas vraiment de rapport avec son nom...
   Il_faut_remapper=(Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)<Menu_Ordonnee_avant_fenetre);
 
   Fermer_fenetre();
@@ -1769,9 +1769,9 @@ void Bouton_Palette(void)
 
   Recadrer_palette();
 
-  //   On affiche les "ForeBack" car le menu n'est raffich‚ que si la fenˆtre
-  // empi‚tait sur le menu. Mais si les couleurs on ‚t‚ modifi‚es, il faut
-  // rafficher tout le menu remapp‚.
+  //   On affiche les "ForeBack" car le menu n'est raffiché que si la fenêtre
+  // empiétait sur le menu. Mais si les couleurs on été modifiées, il faut
+  // rafficher tout le menu remappé.
   if (Il_faut_remapper)
     Afficher_menu();
 

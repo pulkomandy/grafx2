@@ -8,4 +8,7 @@ struct find_t {
 
 int filelength(int);
 
+void itoa(int source,char* dest, int longueur);
+/* Integer TO Ascii */
+
 #define _A_SUBDIR 1
