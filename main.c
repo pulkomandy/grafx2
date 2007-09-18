@@ -249,7 +249,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   int Mode_dans_lequel_on_demarre;
 
   // On commence également par interdire d'appuyer sur Ctrl+Pause et Ctrl+C
-  signal(SIGINT  ,SIG_IGN);
+  // signal(SIGINT  ,SIG_IGN);
 
   printf("°±²Û GrafX 2.00 %s%s þ Copyright (c)1996-1999 Sunset Design Û²±°\n",ALPHA_BETA,POURCENTAGE_VERSION);
 
@@ -303,7 +303,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brosse_File_list_Decalage=0;
   Brosse_Format=0;
 
-  // On initialise les commentaires des images à des chaŒnes vides
+  // On initialise les commentaires des images à des chaînes vides
   Principal_Commentaire[0]='\0';
   Brouillon_Commentaire[0]='\0';
   Brosse_Commentaire[0]='\0';
@@ -415,8 +415,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   srand(time(NULL)); // On randomize un peu tout ça...
 	
   // Passer en clavier américain
-  //Clavier_americain();
-  //TODO: Voir à quoi ça sert vraiement ...
+  Clavier_americain();
 
   // Initialisation des boutons
   Initialisation_des_boutons();
@@ -475,7 +474,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Hauteur=1;
 
   // Détection des modes SDL en état de fonctionner:
-  Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
+  // Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
 
 //Ici, trier les modes dispos ou pas dans le tableau global ...
 

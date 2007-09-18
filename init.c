@@ -21,6 +21,8 @@
 #include "divers.h"
 
 #include "errno.h"
+#include <endian.h>
+#include <byteswap.h>
 
 //  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
@@ -227,7 +229,7 @@ void Decrypte(byte * Donnee,int Taille)
 void Charger_DAT(void)
 {
   int  Handle;
-  long Taille_fichier;
+  int  Taille_fichier;
   int  Indice;
   char Nom_du_fichier[256];
   byte * Fonte_temporaire;
@@ -259,11 +261,11 @@ void Charger_DAT(void)
 	Handle=open(Nom_du_fichier,O_RDONLY);
 	if (Handle==-1)
 		Erreur(ERREUR_DAT_ABSENT);
-  
+
   if (read(Handle,Palette_defaut,sizeof(T_Palette))!=sizeof(T_Palette))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)Palette_defaut,sizeof(T_Palette));
-  
+
   if (read(Handle,BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU)!=LARGEUR_MENU*HAUTEUR_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
@@ -343,12 +345,20 @@ void Charger_DAT(void)
     if (read(Handle,&Mot_temporaire,2)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 
+#ifdef __BIG_ENDIAN
+	Mot_temporaire=bswap_16(Mot_temporaire);
+#endif
+
     // On copie ce nombre de lignes dans la table:
     Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
 
     // On lit la place que la section prend en mémoire:
     if (read(Handle,&Mot_temporaire,2)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
+
+#ifdef __BIG_ENDIAN
+	Mot_temporaire=bswap_16(Mot_temporaire);
+#endif
 
     // On alloue la mémoire correspondante:
     if (!(Table_d_aide[Indice].Debut_de_la_liste=(byte *)malloc(Mot_temporaire)))
@@ -1782,9 +1792,12 @@ int Charger_CFG(int Tout_charger)
     goto Erreur_lecture_config;
   
   // - Lecture des infos contenues dans le fichier de config -
-  while (read(Handle,&Chunk,sizeof(Chunk))==sizeof(Chunk))
+  while (read(Handle,&(Chunk.Numero),sizeof(byte))==sizeof(byte))
   {
-	  printf("CHUNK: %d %d \n",Chunk.Numero,Chunk.Taille);
+		read(Handle,&(Chunk.Taille),sizeof(word));
+		#ifdef __BIG_ENDIAN
+			Chunk.Taille=bswap_16(Chunk.Taille);
+		#endif
     switch (Chunk.Numero)
     {
       case CHUNK_TOUCHES: // Touches
@@ -1798,6 +1811,11 @@ int Charger_CFG(int Tout_charger)
               goto Erreur_lecture_config;
             else
             {
+							#ifdef __BIG_ENDIAN
+								CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
+								CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
+								CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
+							#endif
               for (Indice2=0;
                    ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
                    Indice2++);
@@ -1822,11 +1840,13 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_MODES_VIDEO: // Modes vidéo
-        if ((Chunk.Taille/sizeof(CFG_Mode_video))!=NB_MODES_VIDEO)
+        if ((Chunk.Taille/5/*sizeof(CFG_Mode_video)*/)!=NB_MODES_VIDEO)
           goto Erreur_lecture_config;
         for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
         {
-          if (read(Handle,&CFG_Mode_video,sizeof(CFG_Mode_video))!=sizeof(CFG_Mode_video))
+					read(Handle,&(CFG_Mode_video.Etat),1);
+					read(Handle,&(CFG_Mode_video.Largeur),2);
+          if (read(Handle,&(CFG_Mode_video.Hauteur),2)!=2)
             goto Erreur_lecture_config;
           else
           {
@@ -1892,8 +1912,15 @@ int Charger_CFG(int Tout_charger)
         {
           if (read(Handle,&Degrade_Courant,1)!=1)
             goto Erreur_lecture_config;
-          if (read(Handle,Degrade_Tableau,sizeof(Degrade_Tableau))!=sizeof(Degrade_Tableau))
-            goto Erreur_lecture_config;
+					for(Indice=0;Indice<16;Indice++)
+					{
+						read(Handle,&(Degrade_Tableau[Indice].Debut),1);
+						read(Handle,&(Degrade_Tableau[Indice].Fin),1);
+						read(Handle,&(Degrade_Tableau[Indice].Inverse),4);
+						read(Handle,&(Degrade_Tableau[Indice].Melange),4);
+          	if (read(Handle,&(Degrade_Tableau[Indice]).Technique,4)!=4)
+            	goto Erreur_lecture_config;
+					}
           Degrade_Charger_infos_du_tableau(Degrade_Courant);
         }
         else

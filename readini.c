@@ -346,7 +346,7 @@ int Charger_INI(struct S_Config * Conf)
 
   // On calcule le nom du fichier qu'on manipule:
   strcpy(Nom_du_fichier,Repertoire_du_programme);
-  strcat(Nom_du_fichier,"GFX2.INI");
+  strcat(Nom_du_fichier,"gfx2.ini");
 
   Fichier=fopen(Nom_du_fichier,"r");
   if (Fichier!=0)

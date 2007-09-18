@@ -114,9 +114,9 @@ struct T_Degrade_Tableau
 {
   byte Debut;     // PremiŠre couleur du dégradé
   byte Fin;       // DerniŠre couleur du dégradé
-  int  Inverse;   // "Le dégradé va de Fin … Debut"
-  long Melange;   // Valeur de mélange du dégradé (0-255)
-  int  Technique; // Technique … utiliser (0-2)
+  dword Inverse;   // "Le dégradé va de Fin … Debut" //INT
+  dword Melange;   // Valeur de mélange du dégradé (0-255) //LONG
+  dword Technique; // Technique … utiliser (0-2) //INT
 };
 
 // Déclaration d'une info de shade

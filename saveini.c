@@ -268,10 +268,10 @@ int Sauver_INI(struct S_Config * Conf)
 
   // On calcule les noms des fichiers qu'on manipule:
   strcpy(Nom_du_fichier,Repertoire_du_programme);
-  strcat(Nom_du_fichier,"GFX2.INI");
+  strcat(Nom_du_fichier,"gfx2.ini");
 
   strcpy(Nom_du_fichier_temporaire,Repertoire_du_programme);
-  strcat(Nom_du_fichier_temporaire,"GFX2.$$$");
+  strcat(Nom_du_fichier_temporaire,"gfx2.$$$");
 
   // On renome l'ancienne version du fichier INI vers un fichier temporaire:
   if (rename(Nom_du_fichier,Nom_du_fichier_temporaire)!=0)
