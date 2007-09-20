@@ -56,7 +56,17 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 
 void Set_palette(T_Palette Palette)
 {
-    puts("Set_Palette non implémenté!\n");
+	SDL_Color PaletteSDL[255];
+	byte i=0;
+	do
+	{
+		PaletteSDL[i].r=Palette[i].R*4; //Les couleurs VGA ne vont que de 0 à 63
+		PaletteSDL[i].g=Palette[i].V*4;
+		PaletteSDL[i].b=Palette[i].B*4;
+		i++;
+	}
+	while(i!=0);
+	SDL_SetPalette(Ecran_SDL,SDL_PHYSPAL|SDL_LOGPAL,PaletteSDL,0,256);
 }
 
 void Attendre_fin_de_click(void)

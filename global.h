@@ -753,4 +753,8 @@ GLOBAL int Ligne_INI;
 GLOBAL fonction_afficheur Pixel_de_chargement;
 GLOBAL fonction_lecteur   Lit_pixel_de_sauvegarde;
 
+/********************
+ * Spécifique à SDL *
+ ********************/
+GLOBAL SDL_Surface * Ecran_SDL;
 #endif
