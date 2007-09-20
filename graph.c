@@ -1328,7 +1328,6 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne(X,Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
   }
-	puts("GENERAL");
 }
 
   // -- Afficher un caractère dans une fenêtre --
@@ -1363,7 +1362,6 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,
         Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
-		puts("FENETRE");
 }
 
   // -- Afficher une chaŒne dans une fenêtre --

@@ -94,7 +94,7 @@ void Afficher_une_ligne_ecran_SDL     (word Pos_X,word Pos_Y,word Largeur,byte *
 	int i;
 	for(i=0;i<Largeur;i++)
 	{
-		Pixel_SDL_Fast(Ecran_SDL,Pos_X+i,Pos_Y);
+		Pixel_SDL_Fast(Pos_X+i,Pos_Y,*(Ligne+i));
 	}
 	SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,1);
 } 
