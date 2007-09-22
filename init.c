@@ -345,10 +345,11 @@ void Charger_DAT(void)
     if (read(Handle,&Mot_temporaire,2)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 
-#ifdef __BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN
 	Mot_temporaire=bswap_16(Mot_temporaire);
 #endif
 
+printf("%d Nb Lignes: %x ",Indice,Mot_temporaire);
     // On copie ce nombre de lignes dans la table:
     Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
 
@@ -356,10 +357,11 @@ void Charger_DAT(void)
     if (read(Handle,&Mot_temporaire,2)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 
-#ifdef __BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN
 	Mot_temporaire=bswap_16(Mot_temporaire);
 #endif
 
+printf("Taille: %x\n",Mot_temporaire);
     // On alloue la mémoire correspondante:
     if (!(Table_d_aide[Indice].Debut_de_la_liste=(byte *)malloc(Mot_temporaire)))
       Erreur(ERREUR_MEMOIRE);
@@ -1795,7 +1797,7 @@ int Charger_CFG(int Tout_charger)
   while (read(Handle,&(Chunk.Numero),sizeof(byte))==sizeof(byte))
   {
 		read(Handle,&(Chunk.Taille),sizeof(word));
-		#ifdef __BIG_ENDIAN
+		#if __BYTE_ORDER == __BIG_ENDIAN
 			Chunk.Taille=bswap_16(Chunk.Taille);
 		#endif
     switch (Chunk.Numero)
@@ -1811,7 +1813,7 @@ int Charger_CFG(int Tout_charger)
               goto Erreur_lecture_config;
             else
             {
-							#ifdef __BIG_ENDIAN
+							#if __BYTE_ORDER == __BIG_ENDIAN
 								CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
 								CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
 								CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
