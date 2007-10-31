@@ -72,7 +72,13 @@ void Set_palette(T_Palette Palette)
 
 void Attendre_fin_de_click(void)
 {
-	puts("Attendre_fin_de_click non implémenté!\n");
+    do
+    {
+	SDL_PumpEvents(); 
+	puts("Attente fin clic...");
+    }
+    while(SDL_GetMouseState(NULL, NULL)&(SDL_BUTTON(1) | SDL_BUTTON(2) | SDL_BUTTON(3))); //On attend tant que l'un des trois boutons est enfoncé
+    Mouse_K=0;
 }
 
 void Effacer_image_courante_Stencil(byte Couleur, byte * Pochoir)

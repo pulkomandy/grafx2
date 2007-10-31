@@ -346,10 +346,10 @@ void Charger_DAT(void)
       Erreur(ERREUR_DAT_CORROMPU);
 
 #if __BYTE_ORDER == __BIG_ENDIAN
+    //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
 	Mot_temporaire=bswap_16(Mot_temporaire);
 #endif
 
-printf("%d Nb Lignes: %x ",Indice,Mot_temporaire);
     // On copie ce nombre de lignes dans la table:
     Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
 
@@ -358,10 +358,10 @@ printf("%d Nb Lignes: %x ",Indice,Mot_temporaire);
       Erreur(ERREUR_DAT_CORROMPU);
 
 #if __BYTE_ORDER == __BIG_ENDIAN
+    //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
 	Mot_temporaire=bswap_16(Mot_temporaire);
 #endif
 
-printf("Taille: %x\n",Mot_temporaire);
     // On alloue la mémoire correspondante:
     if (!(Table_d_aide[Indice].Debut_de_la_liste=(byte *)malloc(Mot_temporaire)))
       Erreur(ERREUR_MEMOIRE);
@@ -2018,7 +2018,11 @@ int Sauver_CFG(void)
   // Enregistrement des touches
   Chunk.Numero=CHUNK_TOUCHES;
   Chunk.Taille=NB_TOUCHES*sizeof(CFG_Infos_touche);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
@@ -2030,28 +2034,41 @@ int Sauver_CFG(void)
       case 2 : CFG_Infos_touche.Touche=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite; break;
     }
     CFG_Infos_touche.Touche2=0x00FF;
+    #if __BYTE_ORDER == __BIG_ENDIAN
+	CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
+	CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
+	CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
+    #endif
     if (write(Handle,&CFG_Infos_touche,sizeof(CFG_Infos_touche))!=sizeof(CFG_Infos_touche))
       goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
-  Chunk.Taille=NB_MODES_VIDEO*sizeof(CFG_Mode_video);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  Chunk.Taille=NB_MODES_VIDEO*5 /*sizeof(CFG_Mode_video)*/;
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_MODES_VIDEO; Indice++)
   {
     CFG_Mode_video.Etat   =(Mode_video[Indice].Mode<<6) | (Mode_video[Indice].Etat&3);
     CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
     CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
-    if (write(Handle,&CFG_Mode_video,sizeof(CFG_Mode_video))!=sizeof(CFG_Mode_video))
+    if (write(Handle,&(CFG_Mode_video.Etat),1)!=1 ||write(Handle,&(CFG_Mode_video.Largeur),2)!=2 ||write(Handle,&(CFG_Mode_video.Hauteur),2)!=2)
       goto Erreur_sauvegarde_config;
   }
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Numero=CHUNK_SHADE;
   Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,&Shade_Actuel,sizeof(Shade_Actuel))!=sizeof(Shade_Actuel))
     goto Erreur_sauvegarde_config;
@@ -2061,7 +2078,11 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Masque
   Chunk.Numero=CHUNK_MASQUE;
   Chunk.Taille=sizeof(Mask);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,Mask,sizeof(Mask))!=sizeof(Mask))
     goto Erreur_sauvegarde_config;
@@ -2069,7 +2090,11 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Stencil
   Chunk.Numero=CHUNK_STENCIL;
   Chunk.Taille=sizeof(Stencil);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,Stencil,sizeof(Stencil))!=sizeof(Stencil))
     goto Erreur_sauvegarde_config;
@@ -2077,17 +2102,32 @@ int Sauver_CFG(void)
   // Sauvegarde des informations des dégradés
   Chunk.Numero=CHUNK_DEGRADES;
   Chunk.Taille=sizeof(Degrade_Tableau)+1;
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,&Degrade_Courant,1)!=1)
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Degrade_Tableau,sizeof(Degrade_Tableau))!=sizeof(Degrade_Tableau))
-    goto Erreur_sauvegarde_config;
+  for(Indice=0;Indice<16;Indice++)
+  {
+    if (write(Handle,&(Degrade_Tableau[Indice].Debut),1)!=1 ||
+	write(Handle,&(Degrade_Tableau[Indice].Fin),1)!=1 ||
+	write(Handle,&(Degrade_Tableau[Indice].Inverse),4)!=4 ||
+	write(Handle,&(Degrade_Tableau[Indice].Melange),4)!=4 ||
+	write(Handle,&(Degrade_Tableau[Indice].Technique),4)!=4 )
+	goto Erreur_sauvegarde_config;
+  }
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Numero=CHUNK_SMOOTH;
   Chunk.Taille=sizeof(Smooth_Matrice);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,Smooth_Matrice,sizeof(Smooth_Matrice))!=sizeof(Smooth_Matrice))
     goto Erreur_sauvegarde_config;
@@ -2095,7 +2135,11 @@ int Sauver_CFG(void)
   // Sauvegarde des couleurs à exclure
   Chunk.Numero=CHUNK_EXCLUDE_COLORS;
   Chunk.Taille=sizeof(Exclude_color);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,Exclude_color,sizeof(Exclude_color))!=sizeof(Exclude_color))
     goto Erreur_sauvegarde_config;
@@ -2103,7 +2147,11 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Quick-shade
   Chunk.Numero=CHUNK_QUICK_SHADE;
   Chunk.Taille=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
-  if (write(Handle,&Chunk,sizeof(Chunk))!=sizeof(Chunk))
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    //On remet les octets dans l'ordre "normal"
+    Chunk.Taille=bswap_16(Chunk.Taille);
+  #endif
+  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
     goto Erreur_sauvegarde_config;
   if (write(Handle,&Quick_shade_Step,sizeof(Quick_shade_Step))!=sizeof(Quick_shade_Step))
     goto Erreur_sauvegarde_config;
