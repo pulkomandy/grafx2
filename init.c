@@ -2001,7 +2001,7 @@ int Sauver_CFG(void)
 
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
-  strcat(Nom_du_fichier,"GFX2.CFG");
+  strcat(Nom_du_fichier,"gfx2.cfg");
 
   if ((Handle=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))<0)
     return ERREUR_SAUVEGARDE_CFG;
