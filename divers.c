@@ -266,6 +266,7 @@ void Get_input(void)
     mov  ax,0004h
     int  33h
 	    break;
+*/
 	}  
     }
 	
