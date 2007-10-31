@@ -1,8 +1,8 @@
 #include <SDL/SDL.h>
-
 #include "struct.h"
 #include "sdlscreen.h"
 #include "global.h"
+#include "graph.h" //Afficher_curseur
 
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
@@ -22,9 +22,9 @@ byte Recuperer_nb_lignes(void)
 
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {
-    int Nombre_De_Pixels=0; //ECX
-    Uint8* Pixel_Courant=Ecran; //ESI
-    Uint8 Couleur; //AL/EAX
+    int Nombre_De_Pixels=0;
+    Uint8* Pixel_Courant=Ecran;
+    Uint8 Couleur;
     word Nombre_Couleurs=0;
     int i;
 
@@ -44,14 +44,15 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 
     //On va maintenant compter dans la table les couleurs utilisées:
     Couleur=0;
-	 do
-    {
-		if (Tableau[Couleur]!=0)
-        Nombre_Couleurs++;
-		Couleur++;
-    }while(Couleur!=0); //On sort quand on a fait le tour (la var est sur 8 bits donc 255+1=0)
+   do
+   {
+      if (Tableau[Couleur]!=0)
+	 Nombre_Couleurs++;
+      Couleur++;
+   }
+   while(Couleur!=0); //On sort quand on a fait le tour (la var est sur 8 bits donc 255+1=0)
 
-    return Nombre_Couleurs;
+   return Nombre_Couleurs;
 }
 
 void Set_palette(T_Palette Palette)
@@ -106,8 +107,288 @@ void Sensibilite_souris(word X,word Y)
 }
 
 void Get_input(void)
+//Gestion des évènements: mouvement de la souris, clic sur les boutons, et utilisation du clavier.
 {
-	puts("Get_input non implémenté!\n");
+    SDL_Event event;
+    
+    Touche=0;
+    Touche_ASCII=0; // Par défaut, il n'y a pas d'action sur le clavier.
+
+    if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
+    {
+	switch( event.type)
+	{
+	    case SDL_MOUSEMOTION:
+		//Mouvement de la souris
+		INPUT_Nouveau_Mouse_X = event.motion.x;
+		INPUT_Nouveau_Mouse_Y = event.motion.y;
+		puts("Get_input: Mouse_Facteur_De_Correction_X et Mouse_Facteur_De_Correction_Y non gérés!");	 
+	    break;
+	    case SDL_MOUSEBUTTONDOWN:
+		//Clic sur un des boutons de la souris
+		INPUT_Nouveau_Mouse_K=event.button.button;
+	    break;
+	    case SDL_KEYDOWN:
+		//Appui sur une touche du clavier
+		puts("Get-Input: clavier pas géré !");
+/*
+    ; Sinon, appel à l'interruption pour connaître son scancode
+
+    mov  ah,10h
+    int  16h
+
+      ; AH = Scancode
+      ; AL = Caractère ASCII
+
+    ; On place le scan code dans la partie basse de [Touche]
+
+    mov  byte ptr[Touche],ah
+    mov  Touche_ASCII,al      ; ... et le code ASCII dans Touche_ASCII
+
+    ; Appel à l'interruption pour connaitre l'état des touches de contrôle
+
+    mov  ah,02h
+    int  16h
+
+      ; AL = Etat des touches de contrôle
+
+
+    ; On oublie les informations sur Insert, CapsLock, NumLock et ScrollLock
+
+    and  al,00001111b
+
+    ; On associe les deux Shifts (2 bits de poids faible)
+
+    mov  ah,al
+    and  ah,00000001b
+    shr  al,1
+    or   al,ah
+
+    ; On met le resultat dans la partie haute de [Touche]
+
+    mov  byte ptr[Touche+1],al
+
+
+    ; On gère le cas où [Touche] est un déplacement du curseur
+
+    mov  ax,Touche
+
+    ; Test [Touche] = Emulation de MOUSE UP
+
+    cmp  ax,word ptr[Config_Touche]
+    jne  Get_input_Pas_emulation_Haut
+
+    cmp  INPUT_Nouveau_Mouse_Y,0
+    je   Get_input_Pas_de_touche
+
+    dec  INPUT_Nouveau_Mouse_Y
+
+    jmp  Get_input_Fin_emulation
+
+    Get_input_Pas_emulation_Haut:
+
+    ; Test [Touche] = Emulation de MOUSE DOWN
+
+    cmp  ax,word ptr[Config_Touche+2]
+    jne  Get_input_Pas_emulation_Bas
+
+    mov  ax,INPUT_Nouveau_Mouse_Y
+    mov  bx,Hauteur_ecran
+    dec  bx
+    cmp  ax,bx
+    jae  Get_input_Pas_de_touche
+
+    inc  ax
+    mov  INPUT_Nouveau_Mouse_Y,ax
+
+    jmp  Get_input_Fin_emulation
+
+    Get_input_Pas_emulation_Bas:
+
+    ; Test [Touche] = Emulation de MOUSE LEFT
+
+    cmp  ax,word ptr[Config_Touche+4]
+    jne  Get_input_Pas_emulation_Gauche
+
+    cmp  INPUT_Nouveau_Mouse_X,0
+    je   Get_input_Pas_de_touche
+
+    dec  INPUT_Nouveau_Mouse_X
+
+    jmp  Get_input_Fin_emulation
+
+    Get_input_Pas_emulation_Gauche:
+
+    ; Test [Touche] = Emulation de MOUSE RIGHT
+
+    cmp  ax,word ptr[Config_Touche+6]
+    jne  Get_input_Pas_emulation_Droite
+
+    mov  ax,INPUT_Nouveau_Mouse_X
+    mov  bx,Largeur_ecran
+    dec  bx
+    cmp  ax,bx
+    jae  Get_input_Pas_de_touche
+
+    inc  ax
+    mov  INPUT_Nouveau_Mouse_X,ax
+    jmp  Get_input_Fin_emulation
+
+    Get_input_Pas_emulation_Droite:
+
+    ; Test [Touche] = Emulation de MOUSE CLICK LEFT
+
+    cmp  ax,word ptr[Config_Touche+8]
+    jne  Get_input_Pas_emulation_Click_gauche
+
+    mov  INPUT_Nouveau_Mouse_K,1
+    jmp  Get_input_Pas_de_touche
+
+    Get_input_Pas_emulation_Click_gauche:
+
+    ; Test [Touche] = Emulation de MOUSE CLICK RIGHT
+
+    cmp  ax,word ptr[Config_Touche+10]
+    jne  Get_input_Pas_de_touche
+
+    mov  INPUT_Nouveau_Mouse_K,2
+    jmp  Get_input_Pas_de_touche
+
+    Get_input_Fin_emulation:
+
+    mov  cl,Mouse_Facteur_de_correction_X
+    mov  ax,INPUT_Nouveau_Mouse_X
+    mov  dx,INPUT_Nouveau_Mouse_Y
+    shl  ax,cl
+    mov  cl,Mouse_Facteur_de_correction_Y
+    shl  dx,cl
+    mov  cx,ax
+    mov  ax,0004h
+    int  33h
+	    break;
+	}  
+    }
+	
+/*
+
+    Get_input_Pas_de_touche:
+
+
+  ; Gestion "avancée" du curseur: interdire la descente du curseur dans le
+  ; menu lorsqu'on est en train de travailler dans l'image
+
+
+    cmp  Operation_Taille_pile,0
+    je   Get_input_Pas_de_correction
+
+      xor  bl,bl  ; BL va indiquer si on doit corriger la position du curseur
+
+      ; Si le curseur ne se trouve plus dans l'image
+      mov  ax,Menu_Ordonnee
+      cmp  INPUT_Nouveau_Mouse_Y,ax
+      jb   Get_input_Fin_correction_Y
+
+        ; On bloque le curseur en fin d'image
+        dec  ax  ; La ligne !!au-dessus!! du menu
+        inc  bl
+        mov  INPUT_Nouveau_Mouse_Y,ax
+
+      Get_input_Fin_correction_Y:
+
+
+      cmp  Loupe_Mode,0
+      jz   Get_input_Fin_correction_X
+
+      mov  ax,INPUT_Nouveau_Mouse_X
+      cmp  Operation_dans_loupe,0
+      jnz  Get_input_X_dans_loupe
+
+        mov dx,Principal_Split
+        cmp ax,dx
+        jb  Get_input_Fin_correction_X
+
+        dec dx
+        inc bl
+        mov INPUT_Nouveau_Mouse_X,dx
+
+      jmp  Get_input_Fin_correction_X
+      Get_input_X_dans_loupe:
+
+        mov dx,Principal_X_Zoom
+        cmp ax,dx
+        jae Get_input_Fin_correction_X
+
+        inc bl
+        mov INPUT_Nouveau_Mouse_X,dx
+
+      Get_input_Fin_correction_X:
+
+
+      or   bl,bl
+      jz   Get_input_Pas_de_correction_du_curseur
+
+        mov  cl,Mouse_Facteur_de_correction_X
+        mov  ax,INPUT_Nouveau_Mouse_X
+        mov  dx,INPUT_Nouveau_Mouse_Y
+        shl  ax,cl
+        mov  cl,Mouse_Facteur_de_correction_Y
+        shl  dx,cl
+        mov  cx,ax
+        mov  ax,0004h
+        int  33h
+
+      Get_input_Pas_de_correction_du_curseur:
+
+
+      mov  ax,Touche
+      or   ax,ax
+      jz   Get_input_Pas_de_correction
+      ; Enfin, on inhibe les touches (sauf si c'est un changement de couleur
+      ; ou de taille de pinceau lors d'une des operations suivantes:
+      ; OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY
+      cmp  Autoriser_changement_de_couleur_pendant_operation,0
+      jz   Get_input_Il_faut_inhiber_les_touches
+
+      ; A ce stade là, on sait qu'on est dans une des 3 opérations supportant
+      ; le changement de couleur ou de taille de pinceau.
+      cmp  ax,word ptr [Config_Touche+12]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+14]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+16]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+18]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+20]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+22]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+24]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+26]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+28]
+      je   Get_input_Pas_de_correction
+      cmp  ax,word ptr [Config_Touche+30]
+      je   Get_input_Pas_de_correction
+
+      Get_input_Il_faut_inhiber_les_touches:
+      mov  word ptr Touche,0
+
+    Get_input_Pas_de_correction:
+
+*/
+
+    if (INPUT_Nouveau_Mouse_X != Mouse_X || INPUT_Nouveau_Mouse_Y != Mouse_Y || INPUT_Nouveau_Mouse_K != Mouse_K )
+    {
+	Forcer_affichage_curseur=0;
+	Mouse_X=INPUT_Nouveau_Mouse_X;
+	Mouse_Y=INPUT_Nouveau_Mouse_Y;
+	Mouse_K=INPUT_Nouveau_Mouse_K;
+	Effacer_curseur();
+	Calculer_coordonnees_pinceau();
+	Afficher_curseur();
+    }
 }
 
 
