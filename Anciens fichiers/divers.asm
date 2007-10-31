@@ -77,19 +77,19 @@ extrn Calculer_coordonnees_pinceau:near
 extrn Principal_Palette           :dataptr
 extrn Exclude_color               :dataptr
 
-; Donn‚es pour le colorize
+; Données pour le colorize
 
 extrn Table_de_multiplication_par_Facteur_A:dataptr
 extrn Table_de_multiplication_par_Facteur_B:dataptr
 extrn FX_Feedback_Ecran:dword
 
-; Donn‚es pour les trames
+; Données pour les trames
 
 extrn Trame:dataptr      ; Sprite de la trame
 extrn Trame_Largeur:word ; Largeur de la trame
 extrn Trame_Hauteur:word ; Hauteur de la trame
 
-; Donn‚es sur l'image
+; Données sur l'image
 
 extrn Principal_Ecran             :dword
 extrn Principal_Image_modifiee    :byte
@@ -105,23 +105,23 @@ extrn Limite_Bas                  :word
 extrn Limite_Gauche               :word
 extrn Limite_Droite               :word
 
-; Donn‚es sur le brouillon
+; Données sur le brouillon
 
 extrn Brouillon_Ecran             :dword
 extrn Brouillon_Largeur_image     :word
 extrn Brouillon_Hauteur_image     :word
 
-; Donn‚es sur la brosse
+; Données sur la brosse
 
 extrn Brosse                      :dword
 extrn Brosse_Largeur              :word
 extrn Brosse_Hauteur              :word
 
-; Donn‚es sur le menu
+; Données sur le menu
 
 extrn Menu_Ordonnee:word
 
-; Donn‚es sur la souris
+; Données sur la souris
 
 extrn Mouse_X:word
 extrn Mouse_Y:word
@@ -136,7 +136,7 @@ extrn Operation_Taille_pile:byte
 extrn Operation_en_cours:word
 extrn Operation_dans_loupe:byte
 
-; Donn‚es sur les touches
+; Données sur les touches
 
 extrn Touche         :word
 extrn Touche_ASCII   :byte
@@ -145,7 +145,7 @@ extrn INPUT_Keyb_mode:byte
 
 extrn Autoriser_changement_de_couleur_pendant_operation:byte
 
-; Donn‚es sur les ellipses et les cercles:
+; Données sur les ellipses et les cercles:
 
 extrn Table_des_carres                 :dataptr
 extrn Ellipse_Curseur_X                :dword
@@ -165,7 +165,7 @@ extrn MODE_X_Valeur_initiale_de_esi:dword  ; Variables de travail (aucun
 extrn MODE_X_Valeur_initiale_de_edi:dword  ; rapport avec leurs noms !!)
 
 extrn MC_Indice:dword             ; pour indexer la table d'exclusion
-extrn MC_Table_differences:dword  ; Table pr‚calcul‚e des diff‚rences
+extrn MC_Table_differences:dword  ; Table précalculée des différences
 extrn MC_DR:dword
 extrn MC_DV:dword
 extrn MC_DB:dword
@@ -180,7 +180,7 @@ extrn Chrono_delay:dword
 
 
 
-; -- N‚ttoyer l'‚cran courant --
+; -- Néttoyer l'écran courant --
 
 Effacer_ecran_courant proc near
 
@@ -229,7 +229,7 @@ Copier_image_dans_brosse proc near
   push edi
 
 
-  ; On place dans ESI l'adresse de d‚part de l'image:
+  ; On place dans ESI l'adresse de départ de l'image:
   xor   eax,eax
   xor   ebx,ebx
   xor   ecx,ecx
@@ -241,22 +241,22 @@ Copier_image_dans_brosse proc near
   add   eax,ecx
   add   esi,eax
 
-  ; On place dans EDI l'adresse de d‚part de la brosse:
+  ; On place dans EDI l'adresse de départ de la brosse:
   mov  edi,Brosse
 
   ; On place dans EAX la distance entre la fin d'une ligne de l'image et le
-  ; d‚but de la suivante:
+  ; début de la suivante:
   xor  eax,eax
   mov   ax,Largeur_image
   sub   ax,Largeur
 
-  ; On place dans DX le nombre de lignes … copier:
+  ; On place dans DX le nombre de lignes à copier:
   mov  dx,Hauteur
 
   xor  ecx,ecx
   Copier_image_dans_brosse_Pour_chaque_ligne:
 
-    ; On met dans CX le nombre de pixels … copier sur la ligne:
+    ; On met dans CX le nombre de pixels à copier sur la ligne:
     mov  cx,Largeur
 
     ; On recopie CX fois les pixels:
@@ -270,10 +270,10 @@ Copier_image_dans_brosse proc near
     Copier_image_dans_brosse_Largeur_multiple_de_4:
     rep  movsd
 
-    ; On rajoute … ESI la distance EAX
+    ; On rajoute à ESI la distance EAX
     add  esi,eax
 
-    ; On passe … la ligne suivante s'il y en a une:
+    ; On passe à la ligne suivante s'il y en a une:
     dec  dx
     jnz  Copier_image_dans_brosse_Pour_chaque_ligne
 
@@ -304,10 +304,10 @@ Permuter_dans_l_image_les_couleurs proc near
   push ebx
 
 
-  ; On place dans EBX l'adresse du d‚but de l'image
+  ; On place dans EBX l'adresse du début de l'image
   mov  ebx,Principal_Ecran
 
-  ; On place dans ECX le nb de pixels … traiter
+  ; On place dans ECX le nb de pixels à traiter
   xor  eax,eax
   xor  ecx,ecx
   mov   ax,Principal_Largeur_image
@@ -315,10 +315,10 @@ Permuter_dans_l_image_les_couleurs proc near
   mul  ecx
   mov  ecx,eax
 
-  ; On place dans DL la 1Šre couleur … ‚changer
+  ; On place dans DL la 1ère couleur à échanger
   mov  dl,Couleur_1
 
-  ; On place dans DH la 2Šme couleur … ‚changer
+  ; On place dans DH la 2ème couleur à échanger
   mov  dh,Couleur_2
 
   Permuter_dans_l_image_les_couleurs_Pour_chaque_pixel:
@@ -377,14 +377,14 @@ Remap_general_LOWLEVEL proc near
   ; On place dans EBX l'adresse de la table de conversion
   mov  ebx,Tab_conv
 
-  ; On place dans EDI l'adresse du d‚but de l'image
+  ; On place dans EDI l'adresse du début de l'image
   mov  edi,Buffer
 
   ; On place dans ESI la distance qu'il y a entre la fin d'une ligne de
-  ; l'image et le d‚but de la suivante:
+  ; l'image et le début de la suivante:
   mov  si,Largeur_buf
-  xor  eax,eax       ; Ces deux initialisations sont faites ici pour ‚viter
-  mov  dx,Hauteur    ; une p‚nalit‚ sur la modificatione de SI
+  xor  eax,eax       ; Ces deux initialisations sont faites ici pour éviter
+  mov  dx,Hauteur    ; une pénalité sur la modificatione de SI
   sub  si,Largeur
 
   Remap_general_Pour_chaque_ligne:
@@ -394,9 +394,9 @@ Remap_general_LOWLEVEL proc near
 
       ; On lit la couleur du pixel en cours:
       mov  al,[edi]
-      ; On fait la conversion de la couleur … l'aide de la table de conversion
+      ; On fait la conversion de la couleur à l'aide de la table de conversion
       mov  al,[ebx+eax]
-      ; On replace la nouvelle couleur … l'emplacement en cours
+      ; On replace la nouvelle couleur à l'emplacement en cours
       mov  [edi],al
 
       ; On passe au pixel suivant:
@@ -404,7 +404,7 @@ Remap_general_LOWLEVEL proc near
       dec  cx
     jnz  Remap_general_Pour_chaque_pixel
 
-    ; On passe … la ligne suivante:
+    ; On passe à la ligne suivante:
     add  edi,esi
     dec  dx
   jnz  Remap_general_Pour_chaque_ligne
@@ -450,19 +450,19 @@ Scroll_picture proc near
   add  edi,eax
   add  edi,ecx
 
-  ;   On place dans AX le nb de pixels … copier … la droite de
+  ;   On place dans AX le nb de pixels à copier à la droite de
   ; (Decalage_X,Decalage_Y)
   mov  ax,bx
   sub  ax,cx
 
-  ; On place dans DX le nb de lignes … copier sous (Decalage_X,Decalage_Y)
+  ; On place dans DX le nb de lignes à copier sous (Decalage_X,Decalage_Y)
   mov  dx,Principal_Hauteur_image
   sub  dx,Decalage_Y
   jz   Scroll_picture_Fin_de_traitement_Bas
 
   Scroll_picture_Pour_chaque_ligne_Bas:
 
-    ; On place dans CX le nb de pixels … copier
+    ; On place dans CX le nb de pixels à copier
     mov  cx,ax
 
     ; On fait une copier 32 bits de CX pixels de ESI vers EDI
@@ -476,10 +476,10 @@ Scroll_picture proc near
     Scroll_picture_Bas_Droite_Multiple_de_4:
     rep  movsd
 
-    ; On replace EDI en tout d‚but de ligne
+    ; On replace EDI en tout début de ligne
     sub  edi,ebx
 
-    ; On place dans CX le nb de pixels … copier
+    ; On place dans CX le nb de pixels à copier
     mov  cx,Decalage_X
 
     ; On fait une copier 32 bits de CX pixels de ESI vers EDI
@@ -493,7 +493,7 @@ Scroll_picture proc near
     Scroll_picture_Bas_Gauche_Multiple_de_4:
     rep  movsd
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
 ;;    add  esi,ebx
     add  edi,ebx
     dec  dx
@@ -501,14 +501,14 @@ Scroll_picture proc near
 
   Scroll_picture_Fin_de_traitement_Bas:
 
-  ;   On vient de faire le traitement pour toutes les lignes plac‚es sous
+  ;   On vient de faire le traitement pour toutes les lignes placées sous
   ; Decalage_Y. On va maintenant s'occuper de la partie au-dessus.
 
   ; On place dans EDI l'adresse de Principal_Ecran[0][Decalage_X]
   movzx edi,Decalage_X
   add  edi,Principal_Ecran
 
-  ;   On place dans DX le nb de lignes … copier au-dessus de
+  ;   On place dans DX le nb de lignes à copier au-dessus de
   ; (Decalage_X,Decalage_Y)
   mov  dx,Decalage_Y
   cmp  dx,0
@@ -516,7 +516,7 @@ Scroll_picture proc near
 
   Scroll_picture_Pour_chaque_ligne_Haut:
 
-    ; On place dans CX le nb de pixels … copier
+    ; On place dans CX le nb de pixels à copier
     mov  cx,ax
 
     ; On fait une copier 32 bits de CX pixels de ESI vers EDI
@@ -530,10 +530,10 @@ Scroll_picture proc near
     Scroll_picture_Haut_Droite_Multiple_de_4:
     rep  movsd
 
-    ; On replace EDI en tout d‚but de ligne
+    ; On replace EDI en tout début de ligne
     sub  edi,ebx
 
-    ; On place dans CX le nb de pixels … copier
+    ; On place dans CX le nb de pixels à copier
     mov  cx,Decalage_X
 
     ; On fait une copier 32 bits de CX pixels de ESI vers EDI
@@ -547,7 +547,7 @@ Scroll_picture proc near
     Scroll_picture_Haut_Gauche_Multiple_de_4:
     rep  movsd
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
 ;;    add  esi,ebx
     add  edi,ebx
     dec  dx
@@ -575,7 +575,7 @@ Scroll_picture endp
 
 ; ---- Gestion du mode texte pour pouvoir repasser dans le mode d'origine ----
 
-; -- R‚cup‚rer les informations du mode texte initial --
+; -- Récupérer les informations du mode texte initial --
 Recuperer_nb_lignes proc near
 
   pushad
@@ -633,7 +633,7 @@ Passer_en_mode_texte endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; ----------------------- Passer en clavier am‚ricain ------------------------
+; ----------------------- Passer en clavier américain ------------------------
 
 Clavier_americain proc near
 
@@ -659,7 +659,7 @@ Clavier_americain endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; -------------------- Repasser dans le clavier de d‚part --------------------
+; -------------------- Repasser dans le clavier de départ --------------------
 
 Clavier_de_depart proc near
 
@@ -682,7 +682,7 @@ Clavier_de_depart endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; ---------------- D‚tection de la pr‚sence d'un driver souris ---------------
+; ---------------- Détection de la présence d'un driver souris ---------------
 
 Detection_souris proc near
 
@@ -702,7 +702,7 @@ Detection_souris endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; ------- R‚cup‚ration des entr‚es de l'utilisateur (souris/clavier) ---------
+; ------- Récupération des entrées de l'utilisateur (souris/clavier) ---------
 
 Get_input proc near
 
@@ -711,7 +711,7 @@ Get_input proc near
 
   ; Gestion de la souris:
 
-    ; Appel … l'interruption pour connaŒtre les nouvelles coordonn‚es:
+    ; Appel à l'interruption pour connaître les nouvelles coordonnées:
 
     mov  ax,0003h
     int  33h
@@ -720,18 +720,18 @@ Get_input proc near
     ; DX = Position Y
     ; BL = Etat des boutons
 
-    ; Dans le cas o— les 2 boutons sont enfonc‚s...
+    ; Dans le cas où les 2 boutons sont enfoncés...
 
     cmp  bl,3
     jb   Get_input_Saut_inhibe_2_boutons
 
-    ; ... on n'en considŠre aucun:
+    ; ... on n'en considère aucun:
 
     xor  bl,bl
 
     Get_input_Saut_inhibe_2_boutons:
 
-    ; On transfŠre dans les variables les nouvelles valeurs:
+    ; On transfère dans les variables les nouvelles valeurs:
 
     mov  ax,cx
     mov  cl,Mouse_Facteur_de_correction_X
@@ -745,41 +745,41 @@ Get_input proc near
 
   ; Gestion des touches:
 
-    ; Par d‚faut -> pas de touches enfonc‚es
+    ; Par défaut -> pas de touches enfoncées
 
     mov  Touche,0
     mov  Touche_ASCII,0
 
-    ; Appel … l'interruption pour savoir si une touche est appuy‚e
+    ; Appel à l'interruption pour savoir si une touche est appuyée
 
     mov  ah,11h
     int  16h
 
       ; ZERO -> Pas de touche
 
-    ; S'il n'y en a pas, on se contente de la valeur par d‚faut et on sort
+    ; S'il n'y en a pas, on se contente de la valeur par défaut et on sort
 
     jz   Get_input_Pas_de_touche
 
-    ; Sinon, appel … l'interruption pour connaŒtre son scancode
+    ; Sinon, appel à l'interruption pour connaître son scancode
 
     mov  ah,10h
     int  16h
 
       ; AH = Scancode
-      ; AL = CaractŠre ASCII
+      ; AL = Caractère ASCII
 
     ; On place le scan code dans la partie basse de [Touche]
 
     mov  byte ptr[Touche],ah
     mov  Touche_ASCII,al      ; ... et le code ASCII dans Touche_ASCII
 
-    ; Appel … l'interruption pour connaitre l'‚tat des touches de contr“le
+    ; Appel à l'interruption pour connaitre l'état des touches de contrôle
 
     mov  ah,02h
     int  16h
 
-      ; AL = Etat des touches de contr“le
+      ; AL = Etat des touches de contrôle
 
 
     ; On oublie les informations sur Insert, CapsLock, NumLock et ScrollLock
@@ -798,7 +798,7 @@ Get_input proc near
     mov  byte ptr[Touche+1],al
 
 
-    ; On gŠre le cas o— [Touche] est un d‚placement du curseur
+    ; On gère le cas où [Touche] est un déplacement du curseur
 
     mov  ax,Touche
 
@@ -898,7 +898,7 @@ Get_input proc near
     Get_input_Pas_de_touche:
 
 
-  ; Gestion "avanc‚e" du curseur: interdire la descente du curseur dans le
+  ; Gestion "avancée" du curseur: interdire la descente du curseur dans le
   ; menu lorsqu'on est en train de travailler dans l'image
 
 
@@ -973,7 +973,7 @@ Get_input proc near
       cmp  Autoriser_changement_de_couleur_pendant_operation,0
       jz   Get_input_Il_faut_inhiber_les_touches
 
-      ; A ce stade l…, on sait qu'on est dans une des 3 op‚rations supportant
+      ; A ce stade là, on sait qu'on est dans une des 3 opérations supportant
       ; le changement de couleur ou de taille de pinceau.
       cmp  ax,word ptr [Config_Touche+12]
       je   Get_input_Pas_de_correction
@@ -1002,7 +1002,7 @@ Get_input proc near
     Get_input_Pas_de_correction:
 
 
-  ; On commence … mettre … jour les variables globales
+  ; On commence à mettre à jour les variables globales
 
   mov  ax,INPUT_Nouveau_Mouse_X
   mov  bx,INPUT_Nouveau_Mouse_Y
@@ -1032,7 +1032,7 @@ Get_input proc near
     mov  Mouse_Y,bx
     mov  Mouse_K,cl
 
-    ; Calcul des coordonn‚es du pinceau:
+    ; Calcul des coordonnées du pinceau:
     call Calculer_coordonnees_pinceau
 
     pushad
@@ -1084,7 +1084,7 @@ Set_mouse_position endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; ---- D‚finir le champ de d‚placement de la souris suivant la r‚solution ----
+; ---- Définir le champ de déplacement de la souris suivant la résolution ----
 
 Clip_mouse proc near
 
@@ -1093,11 +1093,11 @@ Clip_mouse proc near
   push dx
 
 
-  ; RŠgle les dimensions de l'espace virtuel de la souris et corrige le
-  ; programme pour une pr‚cision au pixel prŠs.
+  ; Règle les dimensions de l'espace virtuel de la souris et corrige le
+  ; programme pour une précision au pixel près.
 
 
-  ; On rŠgle le clip en hauteur:
+  ; On règle le clip en hauteur:
 
   mov  cl,Mouse_Facteur_de_correction_Y
   mov  dx,Hauteur_ecran
@@ -1107,7 +1107,7 @@ Clip_mouse proc near
   xor  cx,cx
   int  33h
 
-  ; On rŠgle le clip en largeur:
+  ; On règle le clip en largeur:
 
   mov  cl,Mouse_Facteur_de_correction_X
   mov  dx,Largeur_ecran
@@ -1142,7 +1142,7 @@ Sensibilite_souris proc near
   push dx
 
 
-  ; RŠglage de la sensibilit‚
+  ; Règlage de la sensibilité
 
   mov ax,0Fh
   mov cx,Sensibilite_X
@@ -1191,7 +1191,7 @@ Attendre_fin_de_click endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; --------------------------- D‚finir une couleur ----------------------------
+; --------------------------- Définir une couleur ----------------------------
 
 Set_color proc near
 
@@ -1220,7 +1220,7 @@ Set_color proc near
 
 Set_color endp
 
-; --------------------------- D‚finir une palette ----------------------------
+; --------------------------- Définir une palette ----------------------------
 
 Set_palette proc near
 
@@ -1232,8 +1232,8 @@ Set_palette proc near
   push esi
 
 
-;  xor  al,al            ; M‚thode rapide mais qui ne fonctionne pas avec
-;  mov  dx,3C8h          ; toutes les cartes vid‚o.
+;  xor  al,al            ; Méthode rapide mais qui ne fonctionne pas avec
+;  mov  dx,3C8h          ; toutes les cartes vidéo.
 ;  out  dx,al
 ;
 ;  inc  dx
@@ -1241,8 +1241,8 @@ Set_palette proc near
 ;  mov  ecx,768
 ;  rep  outsb
 
-  mov  esi,Palette       ; M‚thode un peu plus lente mais qui fonctionne avec
-  mov  dx,3C9h           ; toutes les cartes vid‚o compatibles VGA.
+  mov  esi,Palette       ; Méthode un peu plus lente mais qui fonctionne avec
+  mov  dx,3C9h           ; toutes les cartes vidéo compatibles VGA.
   xor  cl,cl
   Set_palette_Loop:
     dec  dx
@@ -1252,8 +1252,8 @@ Set_palette proc near
     outsb
     outsb
     outsb
-    inc  cl              ; On incr‚mente le num‚ro de couleur et
-  jnz  Set_palette_Loop  ; s'il repasse … 0, c'est qu'on a termin‚.
+    inc  cl              ; On incrémente le numéro de couleur et
+  jnz  Set_palette_Loop  ; s'il repasse à 0, c'est qu'on a terminé.
 
 
   pop  esi
@@ -1377,14 +1377,14 @@ Effacer_image_courante proc near
 
   shr  ecx,1
   jnc  Effacer_image_Pair
-  stosb                         ; On commence par se d‚barrasser du 1er byte
-				; en cas d'imparit‚
+  stosb                         ; On commence par se débarrasser du 1er byte
+				; en cas d'imparité
   Effacer_image_Pair:
 
   shr  ecx,1
   jnc  Effacer_image_test_de_superiorite_a_3
-  stosw                         ; On se d‚barrasse des 2Šme et 3Šme bytes en
-				; cas de "non-multiplicit‚-de-4"
+  stosw                         ; On se débarrasse des 2ème et 3ème bytes en
+				; cas de "non-multiplicité-de-4"
   Effacer_image_test_de_superiorite_a_3:
 
   ; copie 32 bits
@@ -1432,7 +1432,7 @@ Effacer_image_courante_Stencil proc near
   ; On met dans AL la couleur d'effacement
   mov  al,Couleur
 
-  ; On met dans EDI l'adresse de l'image … effacer
+  ; On met dans EDI l'adresse de l'image à effacer
   mov  edi,Principal_Ecran
 
   Effacer_image_Stencil_Pour_chaque_pixel:
@@ -1464,7 +1464,7 @@ Effacer_image_courante_Stencil endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; ----------------- Attendre un balayage vertical de l'‚cran -----------------
+; ----------------- Attendre un balayage vertical de l'écran -----------------
 
 Wait_VBL proc near
 
@@ -1561,13 +1561,13 @@ Palette_Compter_nb_couleurs_utilisees proc near
   pushad
 
 
-  ; On commence par mettre toutes les valeurs … 0
+  ; On commence par mettre toutes les valeurs à 0
   mov  ecx,256
   mov  edi,Tableau
   xor  eax,eax
   rep  stosd
 
-  ; On parcourt ensuite l'‚cran courant pour compter les utilisations des
+  ; On parcourt ensuite l'écran courant pour compter les utilisations des
   ; couleurs:
 
   ; Dans ECX on met le nombre de pixels dans l'image
@@ -1578,10 +1578,10 @@ Palette_Compter_nb_couleurs_utilisees proc near
   mul  edx
   mov  ecx,eax
 
-  ; On place dans ESI le d‚but de l'image
+  ; On place dans ESI le début de l'image
   mov  esi,Principal_Ecran
 
-  ; On place dans EBX le d‚but de la table d'utilisation des couleurs:
+  ; On place dans EBX le début de la table d'utilisation des couleurs:
   mov  ebx,Tableau
 
   ; On nettoie la partie haute de EAX
@@ -1592,7 +1592,7 @@ Palette_Compter_nb_couleurs_utilisees proc near
     ; On lit la couleur dans AL (donc aussi dans EAX)
     mov  al,[esi]
 
-    ; On incr‚mente l'utilisation de la couleur AL:
+    ; On incrémente l'utilisation de la couleur AL:
     inc  dword ptr[ebx+4*eax]
 
     ; On passe au pixel suivant
@@ -1600,11 +1600,11 @@ Palette_Compter_nb_couleurs_utilisees proc near
     dec  ecx
     jnz  Compter_Pour_chaque_pixel
 
-  ; On va maintenant compter dans la table les couleurs utilis‚es:
+  ; On va maintenant compter dans la table les couleurs utilisées:
 
-  xor  ax,ax   ; On initialise le compteur … 0
-  mov  cx,256  ; On initialise le compte … rebours … 256
-  xor  edx,edx ; On initialise l'indice … 0
+  xor  ax,ax   ; On initialise le compteur à 0
+  mov  cx,256  ; On initialise le compte à rebours à 256
+  xor  edx,edx ; On initialise l'indice à 0
 
   Compter_Pour_chaque_couleur:
 
@@ -1617,7 +1617,7 @@ Palette_Compter_nb_couleurs_utilisees proc near
     dec  cx
     jnz  Compter_Pour_chaque_couleur
 
-  ; On stock le r‚sultat (AX) dans la pile pour que le POPAD ne le d‚truise
+  ; On stock le résultat (AX) dans la pile pour que le POPAD ne le détruise
   ; pas:
 
 
@@ -1650,7 +1650,7 @@ Get_key endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; -- Afficher un pixel dans l'‚cran virtuel courant --
+; -- Afficher un pixel dans l'écran virtuel courant --
 
 Pixel_dans_ecran_courant proc near
 
@@ -1686,7 +1686,7 @@ Pixel_dans_ecran_courant endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; -- Lire la couleur d'un pixel dans l'‚cran virtuel courant --
+; -- Lire la couleur d'un pixel dans l'écran virtuel courant --
 
 Lit_pixel_dans_ecran_courant proc near
 
@@ -1718,7 +1718,7 @@ Lit_pixel_dans_ecran_courant endp
 
 
 
-; -- Lire la couleur d'un pixel dans l'‚cran virtuel brouillon --
+; -- Lire la couleur d'un pixel dans l'écran virtuel brouillon --
 
 Lit_pixel_dans_ecran_brouillon proc near
 
@@ -1750,7 +1750,7 @@ Lit_pixel_dans_ecran_brouillon endp
 
 
 
-; -- Lire la couleur d'un pixel dans l'‚cran virtuel de sauvegarde --
+; -- Lire la couleur d'un pixel dans l'écran virtuel de sauvegarde --
 
 Lit_pixel_dans_ecran_backup proc near
 
@@ -1782,7 +1782,7 @@ Lit_pixel_dans_ecran_backup endp
 
 
 
-; -- Lire la couleur d'un pixel dans l'‚cran de feedback --
+; -- Lire la couleur d'un pixel dans l'écran de feedback --
 
 Lit_pixel_dans_ecran_feedback proc near
 
@@ -1817,7 +1817,7 @@ Lit_pixel_dans_ecran_feedback endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; -- D‚finir la couleur d'un pixel dans la brosse --
+; -- Définir la couleur d'un pixel dans la brosse --
 
 Pixel_dans_brosse proc near
 
@@ -1888,9 +1888,9 @@ Lit_pixel_dans_brosse endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; Renseigne sur la quantit‚ de place libre sur un lecteur quelconque
+; Renseigne sur la quantité de place libre sur un lecteur quelconque
 ;
-; Entr‚e: Octet = nø de lecteur (0:courant, 1:A, 2:B, 3:C, 4:D, ...)
+; Entrée: Octet = n° de lecteur (0:courant, 1:A, 2:B, 3:C, 4:D, ...)
 ;
 ; Sortie: Long  =   -1  : Lecteur invalide
 ;                 sinon : Place libre sur le lecteur
@@ -1958,7 +1958,7 @@ Freespace endp
 
 ; Renseigne sur un lecteur de disquette:
 ;
-; Entr‚e: Octet = nø du lecteur de disquette (commence … 0)
+; Entrée: Octet = n° du lecteur de disquette (commence à 0)
 ;
 ; Sortie: Octet = 0 : Pas de lecteur
 ;                 1 : Lecteur 360 Ko
@@ -2004,11 +2004,11 @@ Type_de_lecteur_de_disquette endp
 ; Renseigne sur la lettre logique d'un lecteur
 ; (utile pour tester si un lecteur de disquette est A: ou B: aux yeux du DOS)
 ;
-; Entr‚e: Octet = nø du lecteur (1=A, 2=B ...)
+; Entrée: Octet = n° du lecteur (1=A, 2=B ...)
 ;
 ; Sortie: Octet = 0FFh : Pas de lecteur (???)
-;                 sinon: num‚ro repr‚sentant la lettre logique du lecteur
-;                        (commence … 1)
+;                 sinon: numéro représentant la lettre logique du lecteur
+;                        (commence à 1)
 
 Disk_map proc near
 
@@ -2056,10 +2056,10 @@ Disk_map endp
 
 ; Renseigne sur un disque dur:
 ;
-; Entr‚e: Octet = nø du disque dur (0:C, 1:D, 2:E, ...)
+; Entrée: Octet = n° du disque dur (0:C, 1:D, 2:E, ...)
 ;
 ; Sortie: Octet = 0 : Pas de lecteur
-;                 1 : Disque dur pr‚sent
+;                 1 : Disque dur présent
 
 Disque_dur_present proc near
 
@@ -2071,7 +2071,7 @@ Disque_dur_present proc near
   pushad
 
 
-  ; On se renseigne sur le disque … l'aide de la fonction 08h de
+  ; On se renseigne sur le disque à l'aide de la fonction 08h de
   ; l'interruption 13h
 
   mov  ah,08h
@@ -2080,7 +2080,7 @@ Disque_dur_present proc near
   or   dl,80h
   int  13h     ; modifie ES!
 
-  pop es   ; POP du ES memoris‚ juste avant l'INT 13h
+  pop es   ; POP du ES memorisé juste avant l'INT 13h
 
   ; Le disque est absent si CF ou si AH<>0
 
@@ -2089,7 +2089,7 @@ Disque_dur_present proc near
   jnz  Disque_dur_present_Pas_de_disque
 
   ; Il peut arriver que ces tests soient insuffisants, il faut alors comparer
-  ; le nø du drive avec le nb de disques durs install‚s (nb dans DL)
+  ; le n° du drive avec le nb de disques durs installés (nb dans DL)
 
   mov  ah,Numero_de_disque
   inc  ah
@@ -2097,7 +2097,7 @@ Disque_dur_present proc near
   ja   Disque_dur_present_Pas_de_disque
 
   ; On doit maintenant pouvoir supposer que le disque en question est bien
-  ; install‚
+  ; installé
 
   mov  byte ptr[esp+28],1
   jmp  Disque_dur_present_Fin_de_traitement
@@ -2125,7 +2125,7 @@ Disque_dur_present endp
 
 ; Renseigne sur un lecteur CD-ROM:
 ;
-; Entr‚e : Octet = nø du lecteur (0:A, 1:B, 2:C, ...)
+; Entrée : Octet = n° du lecteur (0:A, 1:B, 2:C, ...)
 ;
 ; Sortie : Octet = 0 : Le lecteur n'est pas un CD-ROM
 ;                  1 : Le lecteur est un CD-ROM
@@ -2142,15 +2142,15 @@ Lecteur_CDROM_present proc near
   push dx
 
 
-  ; D‚tection du nø de version de MSCDEX
+  ; Détection du n° de version de MSCDEX
 
   mov  ax,150Ch
   int  2Fh
   cmp  bh,2
   jb   Lecteur_CDROM_present_Mauvaise_version
 
-  ; On est donc avec une version de MSCDEX assez r‚cente (enfin, disons...
-  ; ... pas trop obsolŠte).
+  ; On est donc avec une version de MSCDEX assez récente (enfin, disons...
+  ; ... pas trop obsolète).
 
   ; On demande des informations sur le lecteur de la part de MSCDEX v2.00
 
@@ -2159,8 +2159,8 @@ Lecteur_CDROM_present proc near
   mov  cl,Numero_de_lecteur
   int  2Fh
 
-  ; On d‚termine maintenant si le lecteur est de type CD-ROM grƒce aux
-  ; r‚sultats
+  ; On détermine maintenant si le lecteur est de type CD-ROM grâce aux
+  ; résultats
 
   cmp  bx,0ADADh
   jne  Lecteur_CDROM_present_Pas_CDROM
@@ -2171,28 +2171,28 @@ Lecteur_CDROM_present proc near
 
   Lecteur_CDROM_present_Mauvaise_version:
 
-  ; On va ˆtre oblig‚ de traiter le problŠme avec une vieille version
-  ; merdique de MSCDEX: ‡a me fait chier, plus personne ne devrait poss‚der
-  ; des antiquit‚s pareilles. Moi je dit que ce genre de personne ne m‚rite
+  ; On va être obligé de traiter le problème avec une vieille version
+  ; merdique de MSCDEX: ça me fait chier, plus personne ne devrait posséder
+  ; des antiquités pareilles. Moi je dit que ce genre de personne ne mérite
   ; pas de pouvoir utiliser GRAFX 2 !
 
   ; mais bon... comme je me trouve dans un bon jour, je vais faire un effort
-  ; et je vais demander quelques informations … p‚p‚ MSCDEX. Mais faut pas
-  ; abuser: le gars il a int‚rˆt … avoir ses lecteurs CD-ROM les uns … la
-  ; suite des autres... je ne m'amuserai pas … prendre en compte un cas
+  ; et je vais demander quelques informations à pépé MSCDEX. Mais faut pas
+  ; abuser: le gars il a intérêt à avoir ses lecteurs CD-ROM les uns à la
+  ; suite des autres... je ne m'amuserai pas à prendre en compte un cas
   ; aussi chiant... enfin tu me diras, le type est suffisamment emmerdant pour
-  ; avoir une vieille version de MSCDEX, il serait bien du genre … mettre ses
+  ; avoir une vieille version de MSCDEX, il serait bien du genre à mettre ses
   ; lecteurs CD-ROM dans n'importe quel ordre, le gars.
 
   mov  ax,1500h
   xor  bx,bx
   int  2Fh
 
-  cmp  Numero_de_lecteur,cl              ; Si le lecteur demand‚ se trouve avant le premier lecteur CD,
+  cmp  Numero_de_lecteur,cl              ; Si le lecteur demandé se trouve avant le premier lecteur CD,
   jb   Lecteur_CDROM_present_Pas_CDROM   ; c'est que c'est pas un lecteur CD-ROM
 
   add  cx,bx
-  cmp  Numero_de_lecteur,cl              ; Pareille, si le lecteur est aprŠs le dernier,
+  cmp  Numero_de_lecteur,cl              ; Pareille, si le lecteur est après le dernier,
   jge  Lecteur_CDROM_present_Pas_CDROM   ; c'est que c'est pas un lecteur CD-ROM
 
   Lecteur_CDROM_present_CDROM_OK:
@@ -2223,7 +2223,7 @@ Lecteur_CDROM_present endp
 
 
 
-; -- Calculer les variables globales n‚cessaires au trac‚ d'une ellipse --
+; -- Calculer les variables globales nécessaires au tracé d'une ellipse --
 
 Ellipse_Calculer_limites proc near
 
@@ -2263,7 +2263,7 @@ Ellipse_Calculer_limites endp
 
 
 
-; -- Teste si un point se trouve ou non dans l'ellipse en cours de trac‚ --
+; -- Teste si un point se trouve ou non dans l'ellipse en cours de tracé --
 
 Pixel_dans_ellipse proc near
 
@@ -2288,7 +2288,7 @@ Pixel_dans_ellipse proc near
   ; On met dans EDX:EAX la valeur ( B^2 x X^2 ):
   mul   dword ptr[Ellipse_Rayon_vertical_au_carre]
 
-  ; On stock le r‚sultat ( B^2 x X^2 ) dans EDI:ESI :
+  ; On stock le résultat ( B^2 x X^2 ) dans EDI:ESI :
   mov   edi,edx
   mov   esi,eax
 
@@ -2309,7 +2309,7 @@ Pixel_dans_ellipse proc near
   add   eax,esi
   adc   edx,edi
 
-  ; On regarde si cette valeur est inferieure ou ‚gale … la limite de
+  ; On regarde si cette valeur est inferieure ou égale à la limite de
   ; l'ellipse:
   cmp   edx,Ellipse_Limite_High
   je    Pixel_dans_ellipse_Regarder_la_partie_basse
@@ -2335,7 +2335,7 @@ Pixel_dans_ellipse endp
 
 
 
-; -- Teste si un point se trouve ou non dans le cercle en cours de trac‚ --
+; -- Teste si un point se trouve ou non dans le cercle en cours de tracé --
 
 Pixel_dans_cercle proc near
 
@@ -2408,7 +2408,7 @@ Bit endp
 
 
 
-; -- Trouver la couleur du pixel (ILBM) … afficher en Pos_X --
+; -- Trouver la couleur du pixel (ILBM) à afficher en Pos_X --
 
 Couleur_ILBM_line proc near
 
@@ -2471,7 +2471,7 @@ Couleur_ILBM_line endp
 
 
 
-; -- D‚marrer le chrono --
+; -- Démarrer le chrono --
 
 Initialiser_chrono proc near
 
@@ -2500,14 +2500,14 @@ Initialiser_chrono endp
 
 
 
-; -- Met Etat_chrono … 1 si le compte … rebours est atteint --
+; -- Met Etat_chrono à 1 si le compte à rebours est atteint --
 
 Tester_chrono proc near
 
   xor  ah,ah
   int  1Ah
 
-  ; On transfŠre CX:DX dans EAX
+  ; On transfère CX:DX dans EAX
   mov  ax,cx
   shl  eax,16
   mov  ax,dx
@@ -2553,7 +2553,7 @@ Remplacer_une_couleur proc near
   mov  al,Ancienne_couleur
   mov  ah,Nouvelle_couleur
 
-  ; EDI pointe sur le d‚but de l'image
+  ; EDI pointe sur le début de l'image
   mov  edi,Principal_Ecran
 
   RUC_Pour_chaque_pixel:
@@ -2582,7 +2582,7 @@ Remplacer_une_couleur endp
 
 
 
-; -- Remplacement de toutes les couleurs dans l'image … l'aide d'une table --
+; -- Remplacement de toutes les couleurs dans l'image à l'aide d'une table --
 ; -- et ceci en respectant les limites --
 
 Remplacer_toutes_les_couleurs_dans_limites proc near
@@ -2599,7 +2599,7 @@ Remplacer_toutes_les_couleurs_dans_limites proc near
 
   xor  ebx,ebx
 
-  ; ESI pointe sur le d‚but de la ligne d'‚cran actuelle
+  ; ESI pointe sur le début de la ligne d'écran actuelle
   mov  esi,Principal_Ecran
   mov  bx,Limite_Gauche
   add  esi,ebx
@@ -2608,17 +2608,17 @@ Remplacer_toutes_les_couleurs_dans_limites proc near
   mov   ax,Principal_Largeur_image
   mul  ebx
   add  esi,eax
-  ; EDI pointe sur la position actuelle dans l'‚cran
+  ; EDI pointe sur la position actuelle dans l'écran
   mov  edi,esi
   ; EBX pointe sur la table de remplacement
   mov  ebx,Table_de_remplacement
 
-  ; On place dans CX le nombre de lignes … traiter
+  ; On place dans CX le nombre de lignes à traiter
   mov  cx,Limite_Bas
   sub  cx,Limite_Haut
   RTLCDL_Pour_chaque_ligne:
 
-    ; On met dans DX le nombre de pixels … traiter et on nettoye la partie
+    ; On met dans DX le nombre de pixels à traiter et on nettoye la partie
     ; haute de EAX
     mov  dx,Limite_Droite
     xor  eax,eax
@@ -2672,7 +2672,7 @@ ENDIF
 
 
 
-; -- Gestion de l'effet Colorize … l'aide de la m‚thode d'interpolation
+; -- Gestion de l'effet Colorize à l'aide de la méthode d'interpolation
 
 Effet_Colorize_interpole proc near
 
@@ -2691,7 +2691,7 @@ Effet_Colorize_interpole proc near
   ;
   ; (Couleur_dessous*Facteur_A+Couleur*Facteur_B)/256
 
-  ; On fait tout de suite pointer ESI sur les coordonn‚es (X,Y) dans l'image
+  ; On fait tout de suite pointer ESI sur les coordonnées (X,Y) dans l'image
   xor  eax,eax
   xor  edx,edx
   xor  esi,esi
@@ -2725,7 +2725,7 @@ Effet_Colorize_interpole proc near
   add  esi,offset Principal_Palette
   add  edi,offset Principal_Palette
 
-;  ; On m‚morise dans BL,CL,DL les 3 teintes de Couleur_dessous
+;  ; On mémorise dans BL,CL,DL les 3 teintes de Couleur_dessous
 ;  mov  bl,[esi+0]
 ;  mov  cl,[esi+1]
 ;  mov  dl,[esi+2]
@@ -2733,7 +2733,7 @@ Effet_Colorize_interpole proc near
 ;  ; On fait pointer ESI sur la table de multiplication par le Facteur_A
 ;  mov  esi,offset Table_de_multiplication_par_Facteur_A
 ;
-;  ; On m‚morise dans BH,CH,DH les 3 teintes de Couleur
+;  ; On mémorise dans BH,CH,DH les 3 teintes de Couleur
 ;  mov  bh,[edi+0]
 ;  mov  ch,[edi+1]
 ;  mov  dh,[edi+2]
@@ -2741,7 +2741,7 @@ Effet_Colorize_interpole proc near
 ;  ; On fait pointer EDI sur la table de multiplication par le Facteur_B
 ;  mov  edi,offset Table_de_multiplication_par_Facteur_B
 
-  ; On m‚morise dans BL,CL,DL les 3 teintes de Couleur_dessous
+  ; On mémorise dans BL,CL,DL les 3 teintes de Couleur_dessous
   ;          et dans BH,CH,DH les 3 teintes de Couleur
   mov  bl,[esi]
   mov  bh,[edi]
@@ -2847,7 +2847,7 @@ Effet_Colorize_interpole endp
 
 
 
-; -- Gestion de l'effet Colorize … l'aide de la m‚thode additive
+; -- Gestion de l'effet Colorize à l'aide de la méthode additive
 
 Effet_Colorize_additif proc near
 
@@ -2861,7 +2861,7 @@ Effet_Colorize_additif proc near
   push edi
 
 
-  ; On fait tout de suite pointer ESI sur les coordonn‚es (X,Y) dans l'image
+  ; On fait tout de suite pointer ESI sur les coordonnées (X,Y) dans l'image
   xor  eax,eax
   xor  edx,edx
   xor  esi,esi
@@ -2880,7 +2880,7 @@ Effet_Colorize_additif proc near
   ; On lit dans AL (EAX) la couleur en (X,Y)
   mov  al,[esi]
 
-  ; On met dans CL (ECX) la couleur … rajouter
+  ; On met dans CL (ECX) la couleur à rajouter
   mov  cl,Couleur
 
   ; On multiplie AX (EAX) par 3
@@ -2914,7 +2914,7 @@ Effet_Colorize_additif proc near
     shr  dx,8
   Effet_Colorize_additif_Bleu_Fin_de_traitement:
 
-  push edx ; On passe la composante bleue que l'on d‚sire
+  push edx ; On passe la composante bleue que l'on désire
 
 
   ; On va traiter la composante verte:
@@ -2934,7 +2934,7 @@ Effet_Colorize_additif proc near
     shr  dx,8
   Effet_Colorize_additif_Vert_Fin_de_traitement:
 
-  push edx ; On passe la composante verte que l'on d‚sire
+  push edx ; On passe la composante verte que l'on désire
 
 
   ; On va traiter la composante rouge:
@@ -2954,7 +2954,7 @@ Effet_Colorize_additif proc near
     shr  dx,8
   Effet_Colorize_additif_Rouge_Fin_de_traitement:
 
-  push edx ; On passe la composante rouge que l'on d‚sire
+  push edx ; On passe la composante rouge que l'on désire
   call Meilleure_couleur
   add  esp,12
 
@@ -2976,7 +2976,7 @@ Effet_Colorize_additif endp
 
 
 
-; -- Gestion de l'effet Colorize … l'aide de la m‚thode soustractive
+; -- Gestion de l'effet Colorize à l'aide de la méthode soustractive
 
 Effet_Colorize_soustractif proc near
 
@@ -2990,7 +2990,7 @@ Effet_Colorize_soustractif proc near
   push edi
 
 
-  ; On fait tout de suite pointer ESI sur les coordonn‚es (X,Y) dans l'image
+  ; On fait tout de suite pointer ESI sur les coordonnées (X,Y) dans l'image
   xor  eax,eax
   xor  edx,edx
   xor  esi,esi
@@ -3009,7 +3009,7 @@ Effet_Colorize_soustractif proc near
   ; On lit dans AL (EAX) la couleur en (X,Y)
   mov  al,[esi]
 
-  ; On met dans CL (ECX) la couleur … soustraire
+  ; On met dans CL (ECX) la couleur à soustraire
   mov  cl,Couleur
 
   ; On multiplie AX (EAX) par 3
@@ -3043,7 +3043,7 @@ Effet_Colorize_soustractif proc near
     shr  dx,8
   Effet_Colorize_soustractif_Bleu_Fin_de_traitement:
 
-  push edx ; On passe la composante bleue que l'on d‚sire
+  push edx ; On passe la composante bleue que l'on désire
 
 
   ; On va traiter la composante verte:
@@ -3063,7 +3063,7 @@ Effet_Colorize_soustractif proc near
     shr  dx,8
   Effet_Colorize_soustractif_Vert_Fin_de_traitement:
 
-  push edx ; On passe la composante verte que l'on d‚sire
+  push edx ; On passe la composante verte que l'on désire
 
 
   ; On va traiter la composante rouge:
@@ -3083,7 +3083,7 @@ Effet_Colorize_soustractif proc near
     shr  dx,8
   Effet_Colorize_soustractif_Rouge_Fin_de_traitement:
 
-  push edx ; On passe la composante rouge que l'on d‚sire
+  push edx ; On passe la composante rouge que l'on désire
   call Meilleure_couleur
   add  esp,12
 
@@ -3156,7 +3156,7 @@ Flip_Y_LOWLEVEL proc near
   push esi
   push edi
 
-  ; On va se servir de ESI pour pointer sur la partie sup‚rieure de la brosse
+  ; On va se servir de ESI pour pointer sur la partie supérieure de la brosse
   ; et de EDI pour pointer sur la partie basse.
 
   mov  esi,Brosse
@@ -3177,13 +3177,13 @@ Flip_Y_LOWLEVEL proc near
     cmp  edi,esi
     jbe  Flip_Y_Fin_tant_que
 
-    ; Il faut inverser les lignes de la brosse point‚es par EDI et ESI
+    ; Il faut inverser les lignes de la brosse pointées par EDI et ESI
     ; ("Brosse_Largeur" octets en tout)
 
     mov  cx,Brosse_Largeur
 
-    ; On va se pr‚parer … une inversion 32 bits de lignes. Pour cela, on
-    ; traite tout de suite les exc‚dants
+    ; On va se préparer à une inversion 32 bits de lignes. Pour cela, on
+    ; traite tout de suite les excédants
 
     shr  cx,1
     jnc  Flip_Y_Largeur_multiple_de_2
@@ -3209,8 +3209,8 @@ Flip_Y_LOWLEVEL proc near
 
     Flip_Y_Largeur_multiple_de_4:
 
-    ; Avant de se mettre … faire de l'inversion 32 bits, on v‚rifie qu'il
-    ; reste bien des dwords … traiter (cas d'une brosse trop ‚troite)
+    ; Avant de se mettre à faire de l'inversion 32 bits, on vérifie qu'il
+    ; reste bien des dwords à traiter (cas d'une brosse trop étroite)
 
     or  cx,cx
     jz  Flip_Y_Fin_de_ligne
@@ -3229,13 +3229,13 @@ Flip_Y_LOWLEVEL proc near
 
     Flip_Y_Fin_de_ligne:
 
-    ; On change de ligne, il faut donc mettre … jour ESI et EDI: ESI doit
-    ; pointer sur le d‚but de la ligne suivante (ce qui est d‚ja le cas), et
-    ; EDI sur le d‚but de la ligne pr‚c‚dente
+    ; On change de ligne, il faut donc mettre à jour ESI et EDI: ESI doit
+    ; pointer sur le début de la ligne suivante (ce qui est déja le cas), et
+    ; EDI sur le début de la ligne précédente
 
     movzx ebx,Brosse_Largeur
-    sub  edi,ebx  ; EDI se retrouve en d‚but de la ligne en cours
-    sub  edi,ebx  ; EDI se retrouve en d‚but de ligne pr‚c‚dente
+    sub  edi,ebx  ; EDI se retrouve en début de la ligne en cours
+    sub  edi,ebx  ; EDI se retrouve en début de ligne précédente
 
     jmp  Flip_Y_Tant_que
 
@@ -3289,7 +3289,7 @@ Flip_X_LOWLEVEL proc near
     cmp  edi,esi
     jbe  Flip_X_Fin_tant_que
 
-    ; Il faut inverser les colonnes de la brosse point‚es par EDI et ESI
+    ; Il faut inverser les colonnes de la brosse pointées par EDI et ESI
     ; ("Brosse_Hauteur" octets en tout)
 
     mov  cx,Brosse_Hauteur
@@ -3307,8 +3307,8 @@ Flip_X_LOWLEVEL proc near
       jnz  Flip_X_Pour_chaque_ligne
 
 
-    ; On change de colonne, il faut donc mettre … jour ESI et EDI: ESI doit
-    ; pointer sur la colonne suivante, et EDI sur la colonne pr‚c‚dente
+    ; On change de colonne, il faut donc mettre à jour ESI et EDI: ESI doit
+    ; pointer sur la colonne suivante, et EDI sur la colonne précédente
 
     mov  esi,MODE_X_Valeur_initiale_de_esi
     mov  edi,MODE_X_Valeur_initiale_de_edi
@@ -3334,7 +3334,7 @@ Flip_X_LOWLEVEL endp
 
 
 
-; -- Effectuer une rotation de 90ø sur la brosse --
+; -- Effectuer une rotation de 90° sur la brosse --
 
 Rotate_90_deg_LOWLEVEL proc near
 
@@ -3343,7 +3343,7 @@ Rotate_90_deg_LOWLEVEL proc near
 
   arg  Source:dword,Destination:dword
 
-  ; Brosse_Largeur & Brosse_Hauteur doivent ˆtre les dimensions de la brosse
+  ; Brosse_Largeur & Brosse_Hauteur doivent être les dimensions de la brosse
   ; Source
 
   push ebx
@@ -3357,7 +3357,7 @@ Rotate_90_deg_LOWLEVEL proc near
   add  esi,eax
   dec  esi
 
-  ; Et on m‚morise son emplacement initial:
+  ; Et on mémorise son emplacement initial:
   mov  MODE_X_Valeur_initiale_de_esi,esi
 
   ; On place EDI sur le point haut-gauche de la brosse destination:
@@ -3367,7 +3367,7 @@ Rotate_90_deg_LOWLEVEL proc near
   xor  ebx,ebx
   mov  bx,Brosse_Largeur
 
-  ; On place dans DX le nombre de lignes/destination (colonnes/source) …
+  ; On place dans DX le nombre de lignes/destination (colonnes/source) à
   ; traiter:
   mov  dx,bx
 
@@ -3375,7 +3375,7 @@ Rotate_90_deg_LOWLEVEL proc near
 
     mov  esi,MODE_X_Valeur_initiale_de_esi
 
-    ; On place dans CX le nombre de colonnes/destination (lignes/source) …
+    ; On place dans CX le nombre de colonnes/destination (lignes/source) à
     ; traiter:
     mov  cx,Brosse_Hauteur
 
@@ -3385,13 +3385,13 @@ Rotate_90_deg_LOWLEVEL proc near
       mov  al,[esi]
       mov  [edi],al
 
-      ; Et on passe … la colonne de destination suivante:
+      ; Et on passe à la colonne de destination suivante:
       add  esi,ebx
       inc  edi
       dec  cx
       jnz  Rotate_90_deg_Pour_chaque_colonne
 
-    ; Et on passe … la ligne de destination suivante:
+    ; Et on passe à la ligne de destination suivante:
     dec  MODE_X_Valeur_initiale_de_esi
     dec  dx
     jnz  Rotate_90_deg_Pour_chaque_ligne
@@ -3414,7 +3414,7 @@ Rotate_90_deg_LOWLEVEL endp
 
 
 
-; -- Effectuer une rotation de 180ø sur la brosse (version compatible 386) --
+; -- Effectuer une rotation de 180° sur la brosse (version compatible 386) --
 
 Rotate_180_deg_LOWLEVEL proc near
 
@@ -3422,7 +3422,7 @@ Rotate_180_deg_LOWLEVEL proc near
   push esi
   push edi
 
-  ; On va se servir de ESI pour pointer sur la partie sup‚rieure de la brosse
+  ; On va se servir de ESI pour pointer sur la partie supérieure de la brosse
   ; et de EDI pour pointer sur la partie basse.
 
   mov  esi,Brosse
@@ -3443,18 +3443,18 @@ Rotate_180_deg_LOWLEVEL proc near
     cmp  edi,esi
     jbe  Rotate_180_deg_Fin_tant_que
 
-    ; Il faut inverser les lignes de la brosse point‚es par EDI et ESI
+    ; Il faut inverser les lignes de la brosse pointées par EDI et ESI
     ; (EDX octets en tout)
 
     mov  ecx,edx
 
-    ; Comme on fait pas un Flip_Y mais une rotation de 180ø, on "ejecte" EDI
+    ; Comme on fait pas un Flip_Y mais une rotation de 180°, on "ejecte" EDI
     ; au bout de sa ligne
     add  edi,edx
     dec  edi
 
-    ; On va se pr‚parer … une inversion 16 bits de lignes. Pour cela, on
-    ; traite tout de suite les exc‚dants
+    ; On va se préparer à une inversion 16 bits de lignes. Pour cela, on
+    ; traite tout de suite les excédants
 
     shr  cx,1
     jnc  Rotate_180_deg_Largeur_multiple_de_2
@@ -3468,13 +3468,13 @@ Rotate_180_deg_LOWLEVEL proc near
 
     Rotate_180_deg_Largeur_multiple_de_2:
 
-    ;  On s'apprˆte … faire un traitement sur des words, on doit donc se
-    ; laisser la place d'y acc‚der.
+    ;  On s'apprête à faire un traitement sur des words, on doit donc se
+    ; laisser la place d'y accéder.
 
     dec  edi
 
-    ; Avant de se mettre … faire de l'inversion 16 bits, on v‚rifie qu'il
-    ; reste bien des words … traiter (cas d'une brosse trop ‚troite)
+    ; Avant de se mettre à faire de l'inversion 16 bits, on vérifie qu'il
+    ; reste bien des words à traiter (cas d'une brosse trop étroite)
 
     or  cx,cx
     jz  Rotate_180_deg_Fin_de_ligne
@@ -3495,18 +3495,18 @@ Rotate_180_deg_LOWLEVEL proc near
 
     Rotate_180_deg_Fin_de_ligne:
 
-    ; On change de ligne, il faut donc mettre … jour ESI et EDI: ESI doit
-    ; pointer sur le d‚but de la ligne suivante (ce qui est d‚j… le cas), et
-    ; EDI sur le d‚but de la ligne pr‚c‚dente
+    ; On change de ligne, il faut donc mettre à jour ESI et EDI: ESI doit
+    ; pointer sur le début de la ligne suivante (ce qui est déjà le cas), et
+    ; EDI sur le début de la ligne précédente
 
-    ; Note: EDI se retrouve d‚j… au d‚but de la ligne en cours puisqu'on l'a
-    ;      ‚ject‚ (au d‚but de traitement de la ligne) en fin de ligne, et
+    ; Note: EDI se retrouve déjà au début de la ligne en cours puisqu'on l'a
+    ;      éjecté (au début de traitement de la ligne) en fin de ligne, et
     ;      qu'il a fait le parcours de la ligne en sens inverse. Seulement,
-    ;      il a l‚gŠrement d‚bord‚ sur la gauche, c'est pourquoi on doit le
-    ;      corriger par une incr‚mentation de 2 (car on a trait‚ des words).
+    ;      il a légèrement débordé sur la gauche, c'est pourquoi on doit le
+    ;      corriger par une incrémentation de 2 (car on a traité des words).
 
     add  edi,2   ; EDI se retrouve en debut de la ligne en cours
-    sub  edi,edx ; EDI se retrouve en d‚but de ligne pr‚c‚dente
+    sub  edi,edx ; EDI se retrouve en début de ligne précédente
 
     jmp  Rotate_180_deg_Tant_que
 
@@ -3525,7 +3525,7 @@ Rotate_180_deg_LOWLEVEL endp
 
 
 
-; Etirer une ligne selon un facteur donn‚ vers un buffer
+; Etirer une ligne selon un facteur donné vers un buffer
 
 Zoomer_une_ligne proc near
 
@@ -3537,13 +3537,13 @@ Zoomer_une_ligne proc near
   push esi
   push edi
 
-  ; On place dans ESI l'adresse de la ligne orignale (… zoomer):
+  ; On place dans ESI l'adresse de la ligne orignale (à zoomer):
   mov  esi,Ligne_originale
 
-  ; On place dans EDI l'adresse de la ligne r‚sultat (zoom‚e):
+  ; On place dans EDI l'adresse de la ligne résultat (zoomée):
   mov  edi,Ligne_zoomee
 
-  ; On place dans DX le nombre de pixels … zoomer sur la ligne:
+  ; On place dans DX le nombre de pixels à zoomer sur la ligne:
   mov  dx,Largeur
 
   ; On nettoye la partie haute de ECX:
@@ -3551,7 +3551,7 @@ Zoomer_une_ligne proc near
 
   ZUL_Pour_chaque_pixel:
 
-    ; On lit la couleur … recopier dans AL
+    ; On lit la couleur à recopier dans AL
     mov  cl,[esi]
     mov  ch,cl
     mov  ax,cx
@@ -3629,23 +3629,23 @@ Copier_une_partie_d_image_dans_une_autre proc near
   add  edi,eax
 
   ; On place dans EAX la distance entre la fin d'une ligne de l'image source
-  ; et le d‚but de la suivante … l'abscisse S_Pos_X:
+  ; et le début de la suivante à l'abscisse S_Pos_X:
   xor  eax,eax
   mov   ax,Largeur_source
   sub   ax,Largeur
 
   ; On place dans EBX la distance entre la fin d'une ligne de l'image
-  ; destination et le d‚but de la suivante … l'abscisse D_Pos_X:
+  ; destination et le début de la suivante à l'abscisse D_Pos_X:
   xor  ebx,ebx
   mov   bx,Largeur_destination
   sub   bx,Largeur
 
-  ; On place dans DX le nombre de lignes … traiter
+  ; On place dans DX le nombre de lignes à traiter
   mov  dx,Hauteur
 
   CUPDIDUA_Pour_chaque_ligne:
 
-    ; On place dans CX le nombre de pixels … traiter sur la ligne:
+    ; On place dans CX le nombre de pixels à traiter sur la ligne:
     mov  cx,Largeur
 
     ; On fait une copie au mieux par 8/16/32 bits:
@@ -3659,7 +3659,7 @@ Copier_une_partie_d_image_dans_une_autre proc near
     CUPDIDUA_CX_multiple_de_4:
     repnz movsd
 
-    ; On passe … la ligne suivante:
+    ; On passe à la ligne suivante:
     add  esi,eax
     add  edi,ebx
     dec  dx
@@ -3713,7 +3713,7 @@ Effet_Smooth2 proc near
   push edi
 
 
-  ; On fait tout de suite pointer ESI sur les coordonn‚es (X,Y) dans l'image
+  ; On fait tout de suite pointer ESI sur les coordonnées (X,Y) dans l'image
   xor  eax,eax
   xor  edx,edx
   xor  esi,esi
@@ -3724,7 +3724,7 @@ Effet_Smooth2 proc near
   add  esi,eax
   add  esi,FX_Feedback_Ecran
 
-  ; On v‚rifie d'abord que le point ne soit pas … la p‚riph‚rie de l'image
+  ; On vérifie d'abord que le point ne soit pas à la périphérie de l'image
 
   cmp  X,0
   je   Effet_Smooth_Sur_la_peripherie
@@ -3741,7 +3741,7 @@ Effet_Smooth2 proc near
 
   Effet_Smooth_Sur_la_peripherie:
 
-  ; On est sur la p‚riph‚rie, donc on ne modifie pas la couleur du point de
+  ; On est sur la périphérie, donc on ne modifie pas la couleur du point de
   ; l'image.
 
   mov  al,[esi]
@@ -3835,7 +3835,7 @@ Effet_Smooth2 proc near
 
   mov  di,6
 
-  mov  ax,dx   ; On passe le paramŠtre (Cumul_bleu / 6)
+  mov  ax,dx   ; On passe le paramètre (Cumul_bleu / 6)
   xor  dx,dx
   div  di
   cmp  ah,3
@@ -3844,7 +3844,7 @@ Effet_Smooth2 proc near
   Effet_Smooth_Pas_plus_bleu:
   push eax
 
-  mov  ax,cx   ; On passe le paramŠtre (Cumul_vert / 6)
+  mov  ax,cx   ; On passe le paramètre (Cumul_vert / 6)
   xor  dx,dx
   div  di
   cmp  ah,3
@@ -3853,7 +3853,7 @@ Effet_Smooth2 proc near
   Effet_Smooth_Pas_plus_vert:
   push eax
 
-  mov  ax,bx   ; On passe le paramŠtre (Cumul_rouge / 6)
+  mov  ax,bx   ; On passe le paramètre (Cumul_rouge / 6)
   xor  dx,dx
   div  di
   cmp  ah,3
@@ -3863,7 +3863,7 @@ Effet_Smooth2 proc near
   push eax
 
   call Meilleure_couleur
-  add  esp,12  ; 12 = 3 paramŠtres cod‚s sur 4 octets
+  add  esp,12  ; 12 = 3 paramètres codés sur 4 octets
 
   Effet_Smooth_Fin_de_traitement:
 
@@ -3894,24 +3894,24 @@ Remap_brush_LOWLEVEL proc near
   push edi
 
 
-  ; On place dans EDI l'adresse du d‚but de la brosse
+  ; On place dans EDI l'adresse du début de la brosse
   mov  edi,Brosse
 
-  ; On place dans EAX le nombre total de pixels … convertir
+  ; On place dans EAX le nombre total de pixels à convertir
   xor  eax,eax
   xor  ecx,ecx
   mov  ax,Brosse_Largeur
   mov  cx,Brosse_Hauteur
   mul  ecx
 
-  ; On place dans ECX le nb de pixels … traiter
+  ; On place dans ECX le nb de pixels à traiter
   mov  ecx,eax
 
   ; On place dans EBX l'adresse de la table de conversion
   mov  ebx,Table_de_conversion
 
-  ; On nettoie la partie haute de EAX pour qu'aprŠs chaque lecture de AL,
-  ; EAX puisse servir d'index dans la table de conversion point‚e par EBX
+  ; On nettoie la partie haute de EAX pour qu'après chaque lecture de AL,
+  ; EAX puisse servir d'index dans la table de conversion pointée par EBX
   xor  eax,eax
 
   Remap_brush_Pour_chaque_pixel:
@@ -3919,10 +3919,10 @@ Remap_brush_LOWLEVEL proc near
     ; On lit la couleur du pixel en cours:
     mov  al,[edi]
 
-    ; On fait la conversion de la couleur … l'aide de la table de conversion
+    ; On fait la conversion de la couleur à l'aide de la table de conversion
     mov  al,[ebx+eax]
 
-    ; On replace la nouvelle couleur … l'emplacement en cours
+    ; On replace la nouvelle couleur à l'emplacement en cours
     mov  [edi],al
 
     ; On passe au pixel suivant:
