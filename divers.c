@@ -227,7 +227,15 @@ void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short 
 
 void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
 {
-	puts("Copier_image_dans_brosse non implémenté!\n");
+	int i,j;
+	for(i=0;i<Brosse_Hauteur;i++)
+	{
+		for(j=0;j<Brosse_Largeur;j++)
+		{
+			*(Brosse+i*Largeur_image+j)=*(Principal_Ecran+Debut_X+j+(Debut_Y+i)*Largeur_image);
+		}
+	}
+	puts("Copier_image_dans_brosse à tester!\n");
 }
 
 byte Lit_pixel_dans_ecran_feedback (word X,word Y)

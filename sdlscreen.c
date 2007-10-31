@@ -3,17 +3,20 @@
 #include "sdlscreen.h"
 
 void Pixel_SDL (word X,word Y,byte Couleur)
+/* Affiche un pixel de la Couleur aux coords X;Y à l'écran */
 {
     *(((Uint8 *)Ecran_SDL->pixels) + Y * Ecran_SDL->pitch + X)=Couleur;
 //		SDL_UpdateRect(Ecran_SDL,X,Y,0,0);
 }
 
 static inline void Pixel_SDL_Fast(word X, word Y,byte Couleur)
+/* Idem mais on ne rafraichit pas (plus rapide, mais ça ne s'affiche pas tout de suite) */
 {
 	*(((byte *)Ecran_SDL->pixels) + Y * Ecran_SDL->pitch +X)=Couleur;
 }
 
 byte Lit_Pixel_SDL            (word X,word Y)
+/* On retourne la couleur du pixel aux coords données */
 {
 	Uint8 * p = ((Uint8 *)Ecran_SDL->pixels) + Y * Ecran_SDL -> pitch + X * Ecran_SDL -> format -> BytesPerPixel;
 	return *p;
@@ -30,6 +33,7 @@ void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeu
 }
 
 void Block_SDL                (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
+/* On affiche un rectangle de la couleur donnée */
 {
 	SDL_Rect rectangle;
 	rectangle.x=Debut_X;
@@ -66,6 +70,7 @@ void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decala
 }
 
 void Display_brush_Mono_SDL   (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse)
+/* On affiche la brosse en monochrome */
 {
 	int i,j;
 	for(i=0;i<Hauteur;i++)
@@ -90,6 +95,7 @@ void Remap_screen_SDL         (word Pos_X,word Pos_Y,word Largeur,word Hauteur,b
 }
 
 void Afficher_une_ligne_ecran_SDL     (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
+/* On affiche toute une lignei de pixels. Utilisé pour les textes. */
 {
 	int i;
 	for(i=0;i<Largeur;i++)
@@ -125,6 +131,7 @@ void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Dec
 }
   
 void Set_Mode_SDL()
+/* On règle larésolution de l'écran */
 {
 	Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_SWSURFACE);
 }
