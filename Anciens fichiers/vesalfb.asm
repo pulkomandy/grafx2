@@ -7,7 +7,7 @@ _DATA Segment dword public 'data'
 
 
 
-; ---- Variables export‚es ----
+; ---- Variables exportées ----
 
 public LFB_Selecteur
 public LFB_Adresse
@@ -15,13 +15,13 @@ public LFB_Taille
 
 
 
-; ---- D‚claration des variables ----
+; ---- Déclaration des variables ----
 
-  LFB_Selecteur dw 0     ; S‚lecteur utilis‚ par le mapping du LFB
-  LFB_Adresse   dd 0     ; Adresse o— est mapp‚e le LFB
-  LFB_Taille    dd 0     ; Taille de la m‚moire LFB
+  LFB_Selecteur dw 0     ; Sélecteur utilisé par le mapping du LFB
+  LFB_Adresse   dd 0     ; Adresse où est mappée le LFB
+  LFB_Taille    dd 0     ; Taille de la mémoire LFB
 
-  Handle_temporaire dw 0 ; Handle de bloc m‚moire DOS utilis‚ temporairement
+  Handle_temporaire dw 0 ; Handle de bloc mémoire DOS utilisé temporairement
 
 
 _DATA ENDS
@@ -39,7 +39,7 @@ _TEXT Segment dword public 'code'
 
 
 
-; ---- Fonctions export‚es ----
+; ---- Fonctions exportées ----
 
 ; -- Fonctions VESA --
 public Get_VESA_info
@@ -69,7 +69,7 @@ public Display_brush_Color_Zoom_VESA_LFB
 public Display_brush_Mono_Zoom_VESA_LFB
 public Clear_brush_Zoom_VESA_LFB
 
-; ---- Fonctions import‚es ----
+; ---- Fonctions importées ----
 
 ; -- Fonctions DPMI --
 extrn Physical_address_mapping     :near
@@ -105,7 +105,7 @@ extrn Limite_visible_Droite_Zoom:word
 
 extrn VESA_WinFuncPtr:dword
 
-; -- Proc‚dures externes --
+; -- Procédures externes --
 extrn Zoomer_une_ligne:near
 
 
@@ -115,12 +115,12 @@ extrn Zoomer_une_ligne:near
 
 Convertir_adresse_MR_MP proc near
 
-  ; EDI = Adresse d'une adresse … corriger
+  ; EDI = Adresse d'une adresse à corriger
 
   push eax
   push ecx
 
-  mov  eax,[edi] ; EAX = adresse … corriger
+  mov  eax,[edi] ; EAX = adresse à corriger
   mov  ecx,eax
   shr  eax,16
   shl  eax,4
@@ -149,7 +149,7 @@ Get_VESA_info proc near
   push edi
 
 
-  ; On commence par allouer un buffer en mode r‚el de 1024+64 octets
+  ; On commence par allouer un buffer en mode réel de 1024+64 octets
   mov  ax,0100h    ; "DPMI : Allocate Dos memory blocks"
   mov  bx,68d      ; BX = (1024+64)/16 = 68 paragraphes
   int  31h
@@ -170,24 +170,24 @@ Get_VESA_info proc near
   rep  stosd       ; !!! Maintenant !!!
 
   ; On demande les infos VESA: (AX=4F00, ES:DI=Adresse du buffer)
-  mov  edi,edx     ; Adresse des valeurs des registres … passer … l'interruption
+  mov  edi,edx     ; Adresse des valeurs des registres à passer à l'interruption
   add  edx,40h     ; EDX=segment du buffer d'infos VESA
   shr  edx,4
-  mov  dword ptr[edi+1Ch],00004F00h ; EAX pass‚ … l'interruption
-  mov  dword ptr[edi+00h],00000000h ; EDI pass‚ … l'interruption
-  mov   word ptr[edi+22h],dx        ; ES  pass‚ … l'interruption
+  mov  dword ptr[edi+1Ch],00004F00h ; EAX passé à l'interruption
+  mov  dword ptr[edi+00h],00000000h ; EDI passé à l'interruption
+  mov   word ptr[edi+22h],dx        ; ES  passé à l'interruption
   shl  edx,4
   mov  dword ptr[edx],32454256h     ; valeur hexa de "VBE2"
-  mov  ax,0300h    ; Service DPMI simuler une interruption en mode r‚el
-  mov  bl,10h      ; Interruption … appeler (int vid‚o)
+  mov  ax,0300h    ; Service DPMI simuler une interruption en mode réel
+  mov  bl,10h      ; Interruption à appeler (int vidéo)
   xor  bh,bh       ; Flags de mode d'appel d'interruption
-  xor  cx,cx       ; Nb d'elements de la pile … passer
+  xor  cx,cx       ; Nb d'elements de la pile à passer
   int  31h         ; Appel de l'interruption du DPMI
 
   ; On place dans EBX la valeur EAX de retour de l'interruption
   mov  ebx,dword ptr[edi+1Ch]
 
-  ; On recopie le buffer du mode r‚el vers le mode prot‚g‚
+  ; On recopie le buffer du mode réel vers le mode protégé
   mov  ecx,256    ; (256 dword = 1024 octets)
   mov  esi,edx
   mov  edi,Buffer
@@ -204,9 +204,9 @@ Get_VESA_info proc near
   add  edi,04h
   call Convertir_adresse_MR_MP               ; Produit
   add  edi,04h
-  call Convertir_adresse_MR_MP               ; R‚vision
+  call Convertir_adresse_MR_MP               ; Révision
 
-  ; On libŠre le buffer en mode r‚el de 1024+64 octets
+  ; On libŠre le buffer en mode réel de 1024+64 octets
   mov  ax,0101h    ; "DPMI : Free Dos memory blocks"
   pop  dx          ; DX = handle du buffer
   int  31h
@@ -250,7 +250,7 @@ Get_VESA_mode_info proc near
   push edi
 
 
-  ; On commence par allouer un buffer en mode r‚el de 256+64 octets
+  ; On commence par allouer un buffer en mode réel de 256+64 octets
   mov  ax,0100h    ; "DPMI : Allocate Dos memory blocks"
   mov  bx,20d      ; BX = (256+64)/16 = 20 paragraphes
   int  31h
@@ -271,25 +271,25 @@ Get_VESA_mode_info proc near
   rep  stosd       ; !!! Maintenant !!!
 
   ; On demande les infos VESA: (AX=4F01, CX=Mode, ES:DI=Adresse du buffer)
-  mov  edi,edx     ; Adresse des valeurs des registres … passer … l'interruption
+  mov  edi,edx     ; Adresse des valeurs des registres à passer à l'interruption
   add  edx,40h     ; EDX=segment du buffer d'infos VESA
   shr  edx,4
-  mov  ax,Mode     ; ECX=Mode vid‚o dont ont recherche les informations
-  mov  dword ptr[edi+1Ch],00004F01h ; EAX pass‚ … l'interruption
-  mov   word ptr[edi+18h],ax        ; ECX pass‚ … l'interruption
-  mov  dword ptr[edi+00h],00000000h ; EDI pass‚ … l'interruption
-  mov   word ptr[edi+22h],dx        ; ES  pass‚ … l'interruption
+  mov  ax,Mode     ; ECX=Mode vidéo dont ont recherche les informations
+  mov  dword ptr[edi+1Ch],00004F01h ; EAX passé à l'interruption
+  mov   word ptr[edi+18h],ax        ; ECX passé à l'interruption
+  mov  dword ptr[edi+00h],00000000h ; EDI passé à l'interruption
+  mov   word ptr[edi+22h],dx        ; ES  passé à l'interruption
   shl  edx,4
-  mov  ax,0300h    ; Service DPMI simuler une interruption en mode r‚el
-  mov  bl,10h      ; Interruption … appeler (int vid‚o)
+  mov  ax,0300h    ; Service DPMI simuler une interruption en mode réel
+  mov  bl,10h      ; Interruption à appeler (int vidéo)
   xor  bh,bh       ; Flags de mode d'appel d'interruption
-  xor  cx,cx       ; Nb d'elements de la pile … passer
+  xor  cx,cx       ; Nb d'elements de la pile à passer
   int  31h         ; Appel de l'interruption du DPMI
 
   ; On place dans EBX la valeur EAX de retour de l'interruption
   mov  ebx,dword ptr[edi+1Ch]
 
-  ; On recopie le buffer du mode r‚el vers le mode prot‚g‚
+  ; On recopie le buffer du mode réel vers le mode protégé
   mov  ecx,64      ; (64 dword = 256 octets)
   mov  esi,edx
   mov  edi,Buffer
@@ -298,9 +298,9 @@ Get_VESA_mode_info proc near
   ; Puis on corrige chacune des adresses:
   mov  edi,Buffer
   add  edi,0Ch
-  call Convertir_adresse_MR_MP               ; Adresse WinFuncPtr (Mode r‚el)
+  call Convertir_adresse_MR_MP               ; Adresse WinFuncPtr (Mode réel)
 
-  ; On libŠre le buffer en mode r‚el de 256+64 octets
+  ; On libŠre le buffer en mode réel de 256+64 octets
   mov  ax,0101h    ; "DPMI : Free Dos memory blocks"
   pop  dx          ; DX = handle du buffer
   int  31h
@@ -331,7 +331,7 @@ Get_VESA_mode_info endp
 
 
 
-; Renvoie dans EAX l'adresse de la fonction WinFuncPtr du mode prot‚g‚
+; Renvoie dans EAX l'adresse de la fonction WinFuncPtr du mode protégé
 
 Get_VESA_protected_mode_WinFuncPtr proc near
 
@@ -341,7 +341,7 @@ Get_VESA_protected_mode_WinFuncPtr proc near
 
   mov  VESA_WinFuncPtr,00000000h
 
-  ; On commence par allouer un buffer en mode r‚el de 64 octets
+  ; On commence par allouer un buffer en mode réel de 64 octets
   mov  ax,0100h    ; "DPMI : Allocate Dos memory blocks"
   mov  bx,4d       ; BX = 64/16 = 4 paragraphes
   int  31h
@@ -362,16 +362,16 @@ Get_VESA_protected_mode_WinFuncPtr proc near
   rep  stosd       ; !!! Maintenant !!!
 
   ; On demande les infos VESA PMI: (AX=4F0A, BX=0)
-  mov  ax,0300h    ; Service DPMI simuler une interruption en mode r‚el
-  mov  bl,10h      ; Interruption … appeler (int vid‚o)
+  mov  ax,0300h    ; Service DPMI simuler une interruption en mode réel
+  mov  bl,10h      ; Interruption à appeler (int vidéo)
   xor  bh,bh       ; Flags de mode d'appel d'interruption
-  xor  cx,cx       ; Nb d'elements de la pile … passer
-  mov  edi,edx     ; Adresse des valeurs des registres … passer … l'interruption
-  mov  dword ptr[edi+1Ch],00004F0Ah ; EAX pass‚ … l'interruption
-  mov  dword ptr[edi+10h],00000000h ; EBX pass‚ … l'interruption
+  xor  cx,cx       ; Nb d'elements de la pile à passer
+  mov  edi,edx     ; Adresse des valeurs des registres à passer à l'interruption
+  mov  dword ptr[edi+1Ch],00004F0Ah ; EAX passé à l'interruption
+  mov  dword ptr[edi+10h],00000000h ; EBX passé à l'interruption
   int  31h         ; Appel de l'interruption du DPMI
 
-  ; On v‚rifie que la valeur de AX de retour soit = 004Fh
+  ; On vérifie que la valeur de AX de retour soit = 004Fh
   mov  eax,dword ptr[edi+1Ch]
   cmp  ax,004Fh
   jne  GVPMW_Fonction_VESA_non_supportee
@@ -379,8 +379,8 @@ Get_VESA_protected_mode_WinFuncPtr proc near
   ; On sauve l'adresse dans VESA_WinFuncPtr
   xor  eax,eax
   xor  ecx,ecx
-  mov   ax,word ptr[edi+34]  ; ES retourn‚ par l'interruption
-  mov   cx,word ptr[edi+00]  ; DI retourn‚ par l'interruption
+  mov   ax,word ptr[edi+34]  ; ES retourné par l'interruption
+  mov   cx,word ptr[edi+00]  ; DI retourné par l'interruption
   shl  eax,4
   add  eax,ecx
   mov   cx,[eax]
@@ -389,7 +389,7 @@ Get_VESA_protected_mode_WinFuncPtr proc near
 
   GVPMW_Fonction_VESA_non_supportee:
 
-  ; On libŠre le buffer en mode r‚el de 64 octets
+  ; On libŠre le buffer en mode réel de 64 octets
   mov  ax,0101h               ; "DPMI : Free Dos memory blocks"
   mov  dx,Handle_temporaire   ; DX = handle du buffer
   int  31h
@@ -408,7 +408,7 @@ Get_VESA_protected_mode_WinFuncPtr endp
 
 
 
-; - -- --- ----\/\ Passage dans un mode vid‚o VESA : /\/---- --- -- -
+; - -- --- ----\/\ Passage dans un mode vidéo VESA : /\/---- --- -- -
 
 Set_VESA_mode proc near
 
@@ -451,7 +451,7 @@ Initialiser_le_LFB proc near
   push esi
   push edi
 
-  ; M‚morisation de la taille
+  ; Mémorisation de la taille
   mov  eax,Taille
   mov  LFB_Taille,eax
 
@@ -514,7 +514,7 @@ Initialiser_le_LFB proc near
   or   ax,ax
   jnz  Initialiser_le_LFB_Erreur_assignation_de_la_limite_du_segment
 
-  ; V‚rouillage de la m‚moire lin‚aire
+  ; Vérouillage de la mémoire linéaire
   mov  eax,LFB_Taille
   push eax
   mov  eax,LFB_Adresse
@@ -563,7 +563,7 @@ Initialiser_le_LFB endp
 
 Fermer_le_LFB proc near
 
-  ; D‚v‚rouillage de la m‚moire lin‚aire
+  ; Dévérouillage de la mémoire linéaire
   mov  eax,LFB_Taille
   push eax
   mov  eax,LFB_Adresse
@@ -574,7 +574,7 @@ Fermer_le_LFB proc near
   or   ax,ax
   jnz  Fermer_le_LFB_Erreur_deverouillage_de_la_memoire_lineaire
 
-  ; D‚mapping de l'adresse physique
+  ; Démapping de l'adresse physique
   mov  eax,LFB_Adresse
   push eax
   call Free_physical_address_mapping
@@ -583,7 +583,7 @@ Fermer_le_LFB proc near
   or   ax,ax
   jnz  Fermer_le_LFB_Erreur_demapping_de_l_adresse_physique
 
-  ; Lib‚ration du descripteur LDT pour le mapping du LFB
+  ; Libération du descripteur LDT pour le mapping du LFB
   mov   ax,LFB_Selecteur
   push eax
   call Free_ldt_descriptor
@@ -695,11 +695,11 @@ Effacer_tout_l_ecran_VESA_LFB proc near
   push edi
 
 
-  ; On place EDI en d‚but d'‚cran:
+  ; On place EDI en début d'écran:
 
   mov  edi,LFB_Adresse
 
-  ; On met ECX … Largeur_ecran*Menu_Ordonnee/4:
+  ; On met ECX à Largeur_ecran*Menu_Ordonnee/4:
 
   xor  eax,eax
   xor  edx,edx
@@ -747,7 +747,7 @@ Block_VESA_LFB proc near
   push edi
 
 
-  ; Calculer dans EDI les coordonn‚es (Pos_X,Pos_Y) dans la destination
+  ; Calculer dans EDI les coordonnées (Pos_X,Pos_Y) dans la destination
   xor  eax,eax
   xor  ebx,ebx
   xor  ecx,ecx
@@ -766,7 +766,7 @@ Block_VESA_LFB proc near
   shl   eax,16
   mov   ax,cx
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov  dx,Hauteur
 
   ; On met dans EBX la distance entre 2 lignes de destination
@@ -774,13 +774,13 @@ Block_VESA_LFB proc near
   mov   bx,Largeur_ecran
   sub   bx,Largeur
 
-  ; On met dans ESI la largeur … traiter:
+  ; On met dans ESI la largeur à traiter:
   xor  esi,esi
   mov   si,Largeur
 
   Block_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov  ecx,esi
 
     ; On fait une copie de la ligne
@@ -794,7 +794,7 @@ Block_VESA_LFB proc near
     Block_VESA_LFB_Multiple_de_4:
     repne stosd
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     add  edi,ebx
     dec  dx
     jnz  Block_VESA_LFB_Pour_chaque_ligne
@@ -817,11 +817,11 @@ Block_VESA_LFB endp
 
 
 
-; -- Affichage d'un pixel dans l'‚cran, par rapport au d‚calage de l'image
-;    dans l'‚cran, en mode normal (pas en mode loupe) --
+; -- Affichage d'un pixel dans l'écran, par rapport au décalage de l'image
+;    dans l'écran, en mode normal (pas en mode loupe) --
 
-; Note: si on modifie cette proc‚dure, il faudra penser … faire ‚galement la
-;       modif dans la proc‚dure Pixel_Preview_Loupe_VESA_LFB.
+; Note: si on modifie cette procédure, il faudra penser à faire également la
+;       modif dans la procédure Pixel_Preview_Loupe_VESA_LFB.
 
 Pixel_Preview_Normal_VESA_LFB proc near
 
@@ -853,8 +853,8 @@ Pixel_Preview_Normal_VESA_LFB endp
 
 
 
-; -- Affichage d'un pixel dans l'‚cran, par rapport au d‚calage de l'image
-;    dans l'‚cran, en mode loupe --
+; -- Affichage d'un pixel dans l'écran, par rapport au décalage de l'image
+;    dans l'écran, en mode loupe --
 
 Pixel_Preview_Loupe_VESA_LFB proc near
 
@@ -866,20 +866,20 @@ Pixel_Preview_Loupe_VESA_LFB proc near
   push ebx
 
 
-  ; On affiche d'abord le pixel dans la partie non-zoom‚e
+  ; On affiche d'abord le pixel dans la partie non-zoomée
 
   mov  dl,Couleur               ; Ca ne co–te pas trop
   mov  cx,Y                     ; en code de recopier
   mov  ax,X                     ; le contenu de la
-  sub  cx,Principal_Decalage_Y  ; proc‚dure
+  sub  cx,Principal_Decalage_Y  ; procédure
   sub  ax,Principal_Decalage_X  ; Pixel_Preview_Normal_VESA_LFB
   push edx                      ; et ‡a fait gagner du
   push ecx                      ; temps, et ce temps est
-  push eax                      ; assez pr‚cieux vu que
-  call Pixel_VESA_LFB           ; c'est appel‚ TRES souvent.
+  push eax                      ; assez précieux vu que
+  call Pixel_VESA_LFB           ; c'est appelé TRES souvent.
   add  esp,12  ; 3 paramŠtres dword
 
-  ; On regarde si on peut afficher le pixel ‚galement dans la loupe
+  ; On regarde si on peut afficher le pixel également dans la loupe
 
   mov  ax,Y
   cmp  ax,Limite_Haut_Zoom
@@ -898,7 +898,7 @@ Pixel_Preview_Loupe_VESA_LFB proc near
   mov  edx,Table_mul_facteur_zoom       ; On pointe sur la table de x (OPTI)
   push eax
 
-  ; On calcule dans EAX (X) et ECX (Y) le d‚marrage du bloc:
+  ; On calcule dans EAX (X) et ECX (Y) le démarrage du bloc:
 
   xor  eax,eax
   xor  ecx,ecx
@@ -940,10 +940,10 @@ Pixel_Preview_Loupe_VESA_LFB proc near
   mov  ax,Loupe_Facteur
   push eax
 
-  ; On passe le d‚but en Y:
+  ; On passe le début en Y:
   push edx
 
-  ; On passe le d‚but en X:
+  ; On passe le début en X:
   push ebx
 
   call Block_VESA_LFB
@@ -990,19 +990,19 @@ Ligne_horizontale_XOR_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; On met dans ECX le nombre de pixels … traiter:
+  ; On met dans ECX le nombre de pixels à traiter:
   xor  ecx,ecx
   mov  cx,Largeur
 
   shr  cx,1
   jnc  Ligne_horizontale_XOR_VESA_LFB_CX_multiple_de_2
-    not  byte ptr[edi]         ; On commence par se d‚barrasser du 1er byte
-    inc  edi                   ; en cas d'imparit‚
+    not  byte ptr[edi]         ; On commence par se débarrasser du 1er byte
+    inc  edi                   ; en cas d'imparité
   Ligne_horizontale_XOR_VESA_LFB_CX_multiple_de_2:
   shr  cx,1
   jnc  Ligne_horizontale_XOR_VESA_LFB_CX_multiple_de_4
-    not  word ptr[edi]         ; On se d‚barrasse des 2Šme et 3Šme bytes en
-    add  edi,2                 ; cas de "non-multiplicit‚-de-4"
+    not  word ptr[edi]         ; On se débarrasse des 2Šme et 3Šme bytes en
+    add  edi,2                 ; cas de "non-multiplicité-de-4"
   Ligne_horizontale_XOR_VESA_LFB_CX_multiple_de_4:
 
   or   cx,cx
@@ -1059,7 +1059,7 @@ Ligne_verticale_XOR_VESA_LFB proc near
   xor  eax,eax
   mov   ax,Largeur_ecran
 
-  ; On met dans CX le nombre de lignes … traiter
+  ; On met dans CX le nombre de lignes à traiter
   mov  cx,Hauteur
 
   Ligne_verticale_XOR_VESA_LFB_Boucle:
@@ -1097,7 +1097,7 @@ Display_brush_Color_VESA_LFB proc near
   push  edi
 
 
-  ; Calculer dans EDI les coordonn‚es (Pos_X,Pos_Y) … l'‚cran
+  ; Calculer dans EDI les coordonnées (Pos_X,Pos_Y) à l'écran
   xor  eax,eax
   xor  edx,edx
   xor  ecx,ecx
@@ -1109,7 +1109,7 @@ Display_brush_Color_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; Calculer dans ESI les coordonn‚es (Decalage_X,Decalage_Y) dans la brosse
+  ; Calculer dans ESI les coordonnées (Decalage_X,Decalage_Y) dans la brosse
   xor   eax,eax
   xor   ebx,ebx
   xor   ecx,ecx
@@ -1121,20 +1121,20 @@ Display_brush_Color_VESA_LFB proc near
   add   eax,ecx
   add   esi,eax
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov   dx,Hauteur
 
   ; On place dans BH la couleur de transparence
   mov   bh,Couleur_de_transparence
 
-  ; On place dans EAX la distance entre deux lignes … l'‚cran
+  ; On place dans EAX la distance entre deux lignes à l'écran
   xor   eax,eax
   mov    ax,Largeur_ecran
   sub    ax,Largeur
 
   Display_brush_Color_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov   cx,Largeur
 
     Display_brush_Color_VESA_LFB_Pour_chaque_pixel:
@@ -1146,7 +1146,7 @@ Display_brush_Color_VESA_LFB proc near
       cmp   bl,bh
       je    Display_brush_Color_VESA_LFB_Pas_de_copie
 
-        ; On affiche le pixel de la brosse … l'‚cran
+        ; On affiche le pixel de la brosse à l'écran
         mov   [edi],bl
 
       Display_brush_Color_VESA_LFB_Pas_de_copie:
@@ -1157,7 +1157,7 @@ Display_brush_Color_VESA_LFB proc near
       dec   cx
       jnz   Display_brush_Color_VESA_LFB_Pour_chaque_pixel
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     mov   cx,Largeur_brosse
     add   edi,eax
     sub   cx,Largeur
@@ -1195,7 +1195,7 @@ Display_brush_Mono_VESA_LFB proc near
   push  edi
 
 
-  ; Calculer dans EDI les coordonn‚es (Pos_X,Pos_Y) … l'‚cran
+  ; Calculer dans EDI les coordonnées (Pos_X,Pos_Y) à l'écran
   xor  eax,eax
   xor  edx,edx
   xor  ecx,ecx
@@ -1207,7 +1207,7 @@ Display_brush_Mono_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; Calculer dans ESI les coordonn‚es (Decalage_X,Decalage_Y) dans la brosse
+  ; Calculer dans ESI les coordonnées (Decalage_X,Decalage_Y) dans la brosse
   xor   eax,eax
   xor   ebx,ebx
   xor   ecx,ecx
@@ -1219,7 +1219,7 @@ Display_brush_Mono_VESA_LFB proc near
   add   eax,ecx
   add   esi,eax
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov   dx,Hauteur
 
   ; On place dans BH la couleur de transparence
@@ -1228,23 +1228,23 @@ Display_brush_Mono_VESA_LFB proc near
   ; On place dans BL la couleur de coloriage
   mov   bl,Couleur
 
-  ; On place dans EAX la distance entre 2 lignes … l'‚cran
+  ; On place dans EAX la distance entre 2 lignes à l'écran
   xor   eax,eax
   mov    ax,Largeur_ecran
   sub    ax,Largeur
 
   Display_brush_Mono_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov   cx,Largeur
 
     Display_brush_Mono_VESA_LFB_Pour_chaque_pixel:
 
-      ; On v‚rifie que le contenu de la brosse ne soit pas transparent
+      ; On vérifie que le contenu de la brosse ne soit pas transparent
       cmp   [esi],bh
       je    Display_brush_Mono_VESA_LFB_Pas_de_copie
 
-        ; On affiche le pixel de la brosse … l'‚cran
+        ; On affiche le pixel de la brosse à l'écran
         mov   [edi],bl
 
       Display_brush_Mono_VESA_LFB_Pas_de_copie:
@@ -1255,7 +1255,7 @@ Display_brush_Mono_VESA_LFB proc near
       dec   cx
       jnz   Display_brush_Mono_VESA_LFB_Pour_chaque_pixel
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     mov   cx,Largeur_brosse
     add   edi,eax
     sub   cx,Largeur
@@ -1279,7 +1279,7 @@ Display_brush_Mono_VESA_LFB endp
 
 
 
-; Effacer la partie de la brosse affich‚e … l'‚cran en VESA LFB
+; Effacer la partie de la brosse affichée à l'écran en VESA LFB
 
 Clear_brush_VESA_LFB proc near
 
@@ -1293,7 +1293,7 @@ Clear_brush_VESA_LFB proc near
   push  edi
 
 
-  ; Calculer dans EDI les coordonn‚es (Pos_X,Pos_Y) … l'‚cran
+  ; Calculer dans EDI les coordonnées (Pos_X,Pos_Y) à l'écran
   xor  eax,eax
   xor  edx,edx
   xor  ecx,ecx
@@ -1305,7 +1305,7 @@ Clear_brush_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; Calculer dans ESI les coordonn‚es
+  ; Calculer dans ESI les coordonnées
   ; (Pos_X+Principal_Decalage_X,Pos_Y+Principal_Decalage_Y) dans l'image
   xor   eax,eax
   xor   ebx,ebx
@@ -1320,10 +1320,10 @@ Clear_brush_VESA_LFB proc near
   add   eax,ecx
   add   esi,eax
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov   dx,Hauteur
 
-  ; On met dans EBX la distance entre 2 lignes … l'‚cran
+  ; On met dans EBX la distance entre 2 lignes à l'écran
   xor   ebx,ebx
   mov    bx,Largeur_ecran
   sub    bx,Largeur
@@ -1338,7 +1338,7 @@ Clear_brush_VESA_LFB proc near
 
   Clear_brush_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov   cx,Largeur
 
     ; On fait une copie de la ligne
@@ -1352,7 +1352,7 @@ Clear_brush_VESA_LFB proc near
     Clear_brush_VESA_LFB_Multiple_de_4:
     rep   movsd
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     add   esi,eax
     add   edi,ebx
     dec   dx
@@ -1375,7 +1375,7 @@ Clear_brush_VESA_LFB endp
 
 
 
-; Remapper une partie de l'‚cran en VESA LFB
+; Remapper une partie de l'écran en VESA LFB
 
 Remap_screen_VESA_LFB proc near
 
@@ -1389,7 +1389,7 @@ Remap_screen_VESA_LFB proc near
   push  edi
 
 
-  ; Calculer dans EDI les coordonn‚es (Pos_X,Pos_Y) … l'‚cran
+  ; Calculer dans EDI les coordonnées (Pos_X,Pos_Y) à l'écran
   xor  eax,eax
   xor  edx,edx
   xor  ecx,ecx
@@ -1401,7 +1401,7 @@ Remap_screen_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov   dx,Hauteur
 
   ; On place dans EBX l'adresse de la table de conversion
@@ -1410,7 +1410,7 @@ Remap_screen_VESA_LFB proc near
   ; On nettoie (entre autres) la partie haute de EAX
   xor   eax,eax
 
-  ; On met dans ESI la distance entre la fin d'une ligne et le d‚but de la
+  ; On met dans ESI la distance entre la fin d'une ligne et le début de la
   ; suivante
   xor   esi,esi
   mov    si,Largeur_ecran
@@ -1418,7 +1418,7 @@ Remap_screen_VESA_LFB proc near
 
   Remap_screen_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov   cx,Largeur
 
     Remap_screen_VESA_LFB_Pour_chaque_pixel:
@@ -1432,7 +1432,7 @@ Remap_screen_VESA_LFB proc near
       dec  cx
       jnz  Remap_screen_VESA_LFB_Pour_chaque_pixel
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     add  edi,esi
 
     dec  dx
@@ -1456,7 +1456,7 @@ Remap_screen_VESA_LFB endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Afficher une partie de l'image tel quel sur l'‚cran
+; Afficher une partie de l'image tel quel sur l'écran
 
 Afficher_partie_de_l_ecran_VESA_LFB proc near
 
@@ -1470,10 +1470,10 @@ Afficher_partie_de_l_ecran_VESA_LFB proc near
   push edi
 
 
-  ; Calculer dans EDI les coordonn‚es (0,0) dans la destination
+  ; Calculer dans EDI les coordonnées (0,0) dans la destination
   mov  edi,LFB_Adresse
 
-  ; Calculer dans ESI les coordonn‚es (Pos_X_source,Pos_Y_source)
+  ; Calculer dans ESI les coordonnées (Pos_X_source,Pos_Y_source)
   ; dans la source
   xor  eax,eax
   xor  ebx,ebx
@@ -1486,7 +1486,7 @@ Afficher_partie_de_l_ecran_VESA_LFB proc near
   add  eax,ecx
   add  esi,eax
 
-  ; On place dans DX le nb de lignes … traiter
+  ; On place dans DX le nb de lignes à traiter
   mov  dx,Hauteur
 
   ; On met dans EBX la distance entre 2 lignes de la destination
@@ -1504,7 +1504,7 @@ Afficher_partie_de_l_ecran_VESA_LFB proc near
 
   Afficher_partie_de_l_ecran_VESA_LFB_Pour_chaque_ligne:
 
-    ; On place dans CX le nb de pixels … traiter sur la ligne
+    ; On place dans CX le nb de pixels à traiter sur la ligne
     mov  cx,Largeur
 
     ; On fait une copie de la ligne
@@ -1518,7 +1518,7 @@ Afficher_partie_de_l_ecran_VESA_LFB proc near
     Afficher_partie_de_l_ecran_VESA_LFB_Multiple_de_4:
     rep  movsd
 
-    ; On passe … la ligne suivante
+    ; On passe à la ligne suivante
     add  esi,eax
     add  edi,ebx
     dec  dx
@@ -1542,7 +1542,7 @@ Afficher_partie_de_l_ecran_VESA_LFB endp
 
 
 
-; Afficher une ligne … l'‚cran
+; Afficher une ligne à l'écran
 
 Afficher_une_ligne_a_l_ecran_VESA_LFB proc near
 
@@ -1556,7 +1556,7 @@ Afficher_une_ligne_a_l_ecran_VESA_LFB proc near
   push edi
 
 
-  ; On met dans ESI l'adresse de la ligne … copier:
+  ; On met dans ESI l'adresse de la ligne à copier:
   mov  esi,Ligne
 
   ; On calcule la valeur initiale de EDI:
@@ -1571,7 +1571,7 @@ Afficher_une_ligne_a_l_ecran_VESA_LFB proc near
   add  eax,ecx
   add  edi,eax
 
-  ; On met dans ECX le nombre de pixels … traiter:
+  ; On met dans ECX le nombre de pixels à traiter:
   xor  ecx,ecx
   mov   cx,Largeur
 
@@ -1610,7 +1610,7 @@ Afficher_une_ligne_a_l_ecran_VESA_LFB endp
 
 
 
-; Lire une ligne … l'‚cran et la stocker dans un buffer
+; Lire une ligne à l'écran et la stocker dans un buffer
 
 
 Lire_une_ligne_a_l_ecran_VESA_LFB proc near
@@ -1637,10 +1637,10 @@ Lire_une_ligne_a_l_ecran_VESA_LFB proc near
   add  eax,ecx
   add  esi,eax
 
-  ; On met dans EDI l'adresse de la ligne … copier:
+  ; On met dans EDI l'adresse de la ligne à copier:
   mov  edi,Ligne
 
-  ; On met dans ECX le nombre de pixels … traiter:
+  ; On met dans ECX le nombre de pixels à traiter:
   xor  ecx,ecx
   mov   cx,Largeur
 
@@ -1671,7 +1671,7 @@ Lire_une_ligne_a_l_ecran_VESA_LFB endp
 
 
 
-; Afficher une partie de l'image zoom‚e … l'‚cran
+; Afficher une partie de l'image zoomée à l'écran
 
 Afficher_partie_de_l_ecran_zoomee_VESA_LFB proc near
 
@@ -1680,8 +1680,8 @@ Afficher_partie_de_l_ecran_zoomee_VESA_LFB proc near
 
   arg  Largeur:word,Hauteur:word,Largeur_image:word,Buffer:dword
 
-  ; Largeur = Largeur non zoom‚e
-  ; Hauteur = Hauteur zoom‚e
+  ; Largeur = Largeur non zoomée
+  ; Hauteur = Hauteur zoomée
 
   push ebx
   push esi
@@ -1717,24 +1717,24 @@ Afficher_partie_de_l_ecran_zoomee_VESA_LFB proc near
 
   APDLEZ_VESA_LFB_Pour_chaque_ligne_a_zoomer:
 
-    ; On eclate la ligne … zoomer:
+    ; On eclate la ligne à zoomer:
     push dx
     mov  ax,Loupe_Facteur
     mov  cx,Largeur
     push ecx         ; Largeur
     push eax         ; Facteur
-    push Buffer      ; Ligne zoom‚e
+    push Buffer      ; Ligne zoomée
     push esi         ; Ligne originale
     call Zoomer_une_ligne
     add  esp,16
     pop  dx
 
-    ; On l'affiche Facteur fois … l'‚cran (sur des lignes cons‚cutives):
+    ; On l'affiche Facteur fois à l'écran (sur des lignes consécutives):
     mov  cx,Loupe_Facteur
 
     APDLEZ_VESA_LFB_Pour_chaque_ligne:
 
-      ; On affiche la ligne zoom‚e
+      ; On affiche la ligne zoomée
       push cx
       push dx
       push Buffer     ; Ligne
@@ -1747,15 +1747,15 @@ Afficher_partie_de_l_ecran_zoomee_VESA_LFB proc near
       pop  dx
       pop  cx
 
-      ; On passe … la ligne suivante
-      inc  dx                                     ; -> On v‚rifie qu'on ne soit
-      cmp  dx,Hauteur                             ;   pas arriv‚ … la ligne
+      ; On passe à la ligne suivante
+      inc  dx                                     ; -> On vérifie qu'on ne soit
+      cmp  dx,Hauteur                             ;   pas arrivé à la ligne
       je   APDLEZ_VESA_LFB_Menu_Ordonnee_atteinte ;   terminale
-      dec  cx                                     ; -> ou que l'on ai termin‚ de
-      jnz  APDLEZ_VESA_LFB_Pour_chaque_ligne      ;   traiter la ligne … zoomer
+      dec  cx                                     ; -> ou que l'on ai terminé de
+      jnz  APDLEZ_VESA_LFB_Pour_chaque_ligne      ;   traiter la ligne à zoomer
 
-    ; On passe … la ligne … zoomer suivante:
-    ; sans oublier de passer … la ligne image suivante
+    ; On passe à la ligne à zoomer suivante:
+    ; sans oublier de passer à la ligne image suivante
     add  esi,ebx
     jmp  APDLEZ_VESA_LFB_Pour_chaque_ligne_a_zoomer
 
@@ -1797,7 +1797,7 @@ Afficher_une_ligne_transparente_a_l_ecran_VESA_LFB proc near
   push edi
 
 
-  ; On met dans ESI l'adresse de la ligne … copier:
+  ; On met dans ESI l'adresse de la ligne à copier:
   mov  esi,Ligne
 
   ; On calcule la valeur initiale de EDI:
@@ -1815,7 +1815,7 @@ Afficher_une_ligne_transparente_a_l_ecran_VESA_LFB proc near
   ; On met dans AH la couleur de transparence:
   mov  ah,Couleur_transparence
 
-  ; On met dans CX le nombre de pixels … traiter:
+  ; On met dans CX le nombre de pixels à traiter:
   mov  cx,Largeur
 
   ; Pour chaque pixel de la ligne
@@ -1825,7 +1825,7 @@ Afficher_une_ligne_transparente_a_l_ecran_VESA_LFB proc near
     mov  al,[esi]
     inc  esi                                 ; MAJ du Pointeur de source
 
-    ; On v‚rifie qu'elle soit <> de la couleur de transparence
+    ; On vérifie qu'elle soit <> de la couleur de transparence
     cmp  al,ah
     je   AULTALE_VESA_LFB_Pas_de_copie
 
@@ -1866,7 +1866,7 @@ Afficher_une_ligne_transparente_mono_a_l_ecran_VESA_LFB proc near
   push edi
 
 
-  ; On met dans ESI l'adresse de la ligne … copier:
+  ; On met dans ESI l'adresse de la ligne à copier:
   mov  esi,Ligne
 
   ; On calcule la valeur initiale de EDI:
@@ -1884,16 +1884,16 @@ Afficher_une_ligne_transparente_mono_a_l_ecran_VESA_LFB proc near
   ; On met dans AL la couleur de transparence:
   mov  al,Couleur_transparence
 
-  ; On met dans DL la couleur … utiliser:
+  ; On met dans DL la couleur à utiliser:
   mov  dl,Couleur
 
-  ; On met dans CX le nombre de pixels … traiter:
+  ; On met dans CX le nombre de pixels à traiter:
   mov  cx,Largeur
 
   ; Pour chaque pixel de la ligne
   AULTMALE_VESA_LFB_Pour_chaque_pixel:
 
-    ; On v‚rifie que la source soit <> de la couleur de transparence
+    ; On vérifie que la source soit <> de la couleur de transparence
     cmp  al,[esi]
     je   AULTMALE_VESA_LFB_Pas_de_copie
 
@@ -1927,7 +1927,7 @@ Afficher_une_ligne_transparente_mono_a_l_ecran_VESA_LFB endp
 
 
 
-; Afficher une partie de la brosse zoom‚e en couleur en VESA LFB
+; Afficher une partie de la brosse zoomée en couleur en VESA LFB
 
 Display_brush_Color_Zoom_VESA_LFB proc near
 
@@ -1936,8 +1936,8 @@ Display_brush_Color_Zoom_VESA_LFB proc near
 
   arg  Pos_X:word,Pos_Y:word,Decalage_X:word,Decalage_Y:word,Largeur:word,Pos_Y_Fin:word,Couleur_de_transparence:byte,Largeur_brosse:word,Buffer:dword
 
-  ; Largeur_brosse=Largeur r‚elle de la brosse
-  ; Largeur = Largeur non zoom‚e
+  ; Largeur_brosse=Largeur réelle de la brosse
+  ; Largeur = Largeur non zoomée
 
   push ebx
   push esi
@@ -1968,13 +1968,13 @@ Display_brush_Color_Zoom_VESA_LFB proc near
 
   DBCZ_VESA_LFB_Pour_chaque_ligne_a_zoomer:
 
-    ; On eclate la ligne … zoomer:
+    ; On eclate la ligne à zoomer:
     push dx
     mov  ax,Loupe_Facteur
     mov  cx,Largeur
     push ecx         ; Largeur
     push eax         ; Facteur
-    push Buffer      ; Ligne zoom‚e
+    push Buffer      ; Ligne zoomée
     push esi         ; Ligne originale
     call Zoomer_une_ligne
     add  esp,16
@@ -1986,36 +1986,36 @@ Display_brush_Color_Zoom_VESA_LFB proc near
     ; On place dans ESI la position courante en Y
     mov  esi,edx
 
-    ; On empile … l'avance les derniers paramŠtres qui ne changent jamais le
-    ; long de la mˆme ligne zoom‚e:
+    ; On empile à l'avance les derniers paramŠtres qui ne changent jamais le
+    ; long de la mˆme ligne zoomée:
     mov  al,Couleur_de_transparence
     push eax                                      ; Couleur de transparence
     push Buffer                                   ; Ligne
     push edi                                      ; Largeur*Facteur
 
-    ; On l'affiche Facteur fois … l'‚cran (sur des lignes cons‚cutives):
-    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appel‚e
+    ; On l'affiche Facteur fois à l'écran (sur des lignes consécutives):
+    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appelée
 
     DBCZ_VESA_LFB_Pour_chaque_ligne:
 
-      ; On affiche la ligne zoom‚e
+      ; On affiche la ligne zoomée
       mov  ax,Pos_X
       push esi                                      ; Pos_Y
       push eax                                      ; Pos_X
       call Afficher_une_ligne_transparente_a_l_ecran_VESA_LFB
       add  esp,8    ; (Pos_X & Pos_Y)
 
-      ; On passe … la ligne suivante
-      inc  si                                     ; -> On v‚rifie qu'on ne soit
-      cmp  si,Pos_Y_Fin                           ;   pas arriv‚ … la ligne
+      ; On passe à la ligne suivante
+      inc  si                                     ; -> On vérifie qu'on ne soit
+      cmp  si,Pos_Y_Fin                           ;   pas arrivé à la ligne
       je   DBCZ_VESA_LFB_Hauteur_atteinte         ;   terminale
-      dec  bx                                     ; -> ou que l'on ai termin‚ de
-      jnz  DBCZ_VESA_LFB_Pour_chaque_ligne        ;   traiter la ligne … zoomer
+      dec  bx                                     ; -> ou que l'on ai terminé de
+      jnz  DBCZ_VESA_LFB_Pour_chaque_ligne        ;   traiter la ligne à zoomer
 
-    ; On passe … la ligne … zoomer suivante:
-    ; sans oublier de passer … la ligne brosse suivante
+    ; On passe à la ligne à zoomer suivante:
+    ; sans oublier de passer à la ligne brosse suivante
 
-    ; On commence par retirer les paramŠtres pr‚c‚demment pass‚s
+    ; On commence par retirer les paramŠtres précédemment passés
     add  esp,12     ; (Largeur*Facteur & Ligne & Couleur de transparence)
 
     ; On sauve la ligne courante dans DX:
@@ -2024,13 +2024,13 @@ Display_brush_Color_Zoom_VESA_LFB proc near
     ; On restaure l'ancienne valeur de ESI:
     pop  esi
 
-    mov  bx,Largeur_brosse ; En th‚orie, la partie haute de EBX est propre
+    mov  bx,Largeur_brosse ; En théorie, la partie haute de EBX est propre
     add  esi,ebx
     jmp  DBCZ_VESA_LFB_Pour_chaque_ligne_a_zoomer
 
   DBCZ_VESA_LFB_Hauteur_atteinte:
 
-  ; On ramŠne la pile dans un ‚tat normal
+  ; On ramŠne la pile dans un état normal
   add  esp,16     ; (Largeur*Facteur + Ligne + Couleur de transparence + ESI)
 
 
@@ -2051,7 +2051,7 @@ Display_brush_Color_Zoom_VESA_LFB endp
 
 
 
-; Afficher une partie de la brosse zoom‚e en monochrome en VESA LFB
+; Afficher une partie de la brosse zoomée en monochrome en VESA LFB
 
 Display_brush_Mono_Zoom_VESA_LFB proc near
 
@@ -2060,8 +2060,8 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
 
   arg  Pos_X:word,Pos_Y:word,Decalage_X:word,Decalage_Y:word,Largeur:word,Pos_Y_Fin:word,Couleur_de_transparence:byte,Couleur:byte,Largeur_brosse:word,Buffer:dword
 
-  ; Largeur_brosse=Largeur r‚elle de la brosse
-  ; Largeur = Largeur non zoom‚e
+  ; Largeur_brosse=Largeur réelle de la brosse
+  ; Largeur = Largeur non zoomée
 
   push ebx
   push esi
@@ -2092,13 +2092,13 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
 
   DBMZ_VESA_LFB_Pour_chaque_ligne_a_zoomer:
 
-    ; On eclate la ligne … zoomer:
+    ; On eclate la ligne à zoomer:
     push dx
     mov  ax,Loupe_Facteur
     mov  cx,Largeur
     push ecx         ; Largeur
     push eax         ; Facteur
-    push Buffer      ; Ligne zoom‚e
+    push Buffer      ; Ligne zoomée
     push esi         ; Ligne originale
     call Zoomer_une_ligne
     add  esp,16
@@ -2110,8 +2110,8 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
     ; On place dans ESI la position courante en Y
     mov  esi,edx
 
-    ; On empile … l'avance les derniers paramŠtres qui ne changent jamais le
-    ; long de la mˆme ligne zoom‚e:
+    ; On empile à l'avance les derniers paramŠtres qui ne changent jamais le
+    ; long de la mˆme ligne zoomée:
     mov  al,Couleur
     mov  cl,Couleur_de_transparence
     push eax                                      ; Couleur d'affichage
@@ -2119,29 +2119,29 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
     push Buffer                                   ; Ligne
     push edi                                      ; Largeur*Facteur
 
-    ; On l'affiche Facteur fois … l'‚cran (sur des lignes cons‚cutives):
-    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appel‚e
+    ; On l'affiche Facteur fois à l'écran (sur des lignes consécutives):
+    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appelée
 
     DBMZ_VESA_LFB_Pour_chaque_ligne:
 
-      ; On affiche la ligne zoom‚e
+      ; On affiche la ligne zoomée
       mov  ax,Pos_X
       push esi                                      ; Pos_Y
       push eax                                      ; Pos_X
       call Afficher_une_ligne_transparente_mono_a_l_ecran_VESA_LFB
       add  esp,8    ; (Pos_X+Pos_Y)
 
-      ; On passe … la ligne suivante
-      inc  si                                     ; -> On v‚rifie qu'on ne soit
-      cmp  si,Pos_Y_Fin                           ;   pas arriv‚ … la ligne
+      ; On passe à la ligne suivante
+      inc  si                                     ; -> On vérifie qu'on ne soit
+      cmp  si,Pos_Y_Fin                           ;   pas arrivé à la ligne
       je   DBMZ_VESA_LFB_Hauteur_atteinte         ;   terminale
-      dec  bx                                     ; -> ou que l'on ai termin‚ de
-      jnz  DBMZ_VESA_LFB_Pour_chaque_ligne        ;   traiter la ligne … zoomer
+      dec  bx                                     ; -> ou que l'on ai terminé de
+      jnz  DBMZ_VESA_LFB_Pour_chaque_ligne        ;   traiter la ligne à zoomer
 
-    ; On passe … la ligne … zoomer suivante:
-    ; sans oublier de passer … la ligne brosse suivante
+    ; On passe à la ligne à zoomer suivante:
+    ; sans oublier de passer à la ligne brosse suivante
 
-    ; On commence par retirer les paramŠtres pr‚c‚demment pass‚s
+    ; On commence par retirer les paramŠtres précédemment passés
     add  esp,16     ; (Largeur*Facteur + Ligne + Couleur de transparence + Couleur)
 
     ; On sauve la ligne courante dans DX:
@@ -2150,13 +2150,13 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
     ; On restaure l'ancienne valeur de ESI:
     pop  esi
 
-    mov  bx,Largeur_brosse ; En th‚orie, la partie haute de EBX est propre
+    mov  bx,Largeur_brosse ; En théorie, la partie haute de EBX est propre
     add  esi,ebx
     jmp  DBMZ_VESA_LFB_Pour_chaque_ligne_a_zoomer
 
   DBMZ_VESA_LFB_Hauteur_atteinte:
 
-  ; On ramŠne la pile dans un ‚tat normal
+  ; On ramŠne la pile dans un état normal
   add  esp,20     ; (Largeur*Facteur + Ligne + Couleur de transparence + Couleur + ESI)
 
   pop  edi
@@ -2174,7 +2174,7 @@ Display_brush_Mono_Zoom_VESA_LFB endp
 
 
 
-; Effacer une partie de la brosse zoom‚e en VESA LFB
+; Effacer une partie de la brosse zoomée en VESA LFB
 
 Clear_brush_Zoom_VESA_LFB proc near
 
@@ -2183,8 +2183,8 @@ Clear_brush_Zoom_VESA_LFB proc near
 
   arg  Pos_X:word,Pos_Y:word,Decalage_X:word,Decalage_Y:word,Largeur:word,Pos_Y_Fin:word,Couleur_de_transparence:byte,Largeur_image:word,Buffer:dword
 
-  ; Largeur_brosse=Largeur r‚elle de la brosse
-  ; Largeur = Largeur non zoom‚e
+  ; Largeur_brosse=Largeur réelle de la brosse
+  ; Largeur = Largeur non zoomée
 
   push ebx
   push esi
@@ -2215,13 +2215,13 @@ Clear_brush_Zoom_VESA_LFB proc near
 
   CBZ_VESA_LFB_Pour_chaque_ligne_a_zoomer:
 
-    ; On eclate la ligne … zoomer:
+    ; On eclate la ligne à zoomer:
     push dx
     mov  ax,Loupe_Facteur
     mov  cx,Largeur
     push ecx         ; Largeur
     push eax         ; Facteur
-    push Buffer      ; Ligne zoom‚e
+    push Buffer      ; Ligne zoomée
     push esi         ; Ligne originale
     call Zoomer_une_ligne
     add  esp,16
@@ -2233,34 +2233,34 @@ Clear_brush_Zoom_VESA_LFB proc near
     ; On place dans ESI la position courante en Y
     mov  esi,edx
 
-    ; On empile … l'avance les derniers paramŠtres qui ne changent jamais le
-    ; long de la mˆme ligne zoom‚e:
+    ; On empile à l'avance les derniers paramŠtres qui ne changent jamais le
+    ; long de la mˆme ligne zoomée:
     push Buffer                                   ; Ligne
     push edi                                      ; Largeur*Facteur
 
-    ; On l'affiche Facteur fois … l'‚cran (sur des lignes cons‚cutives):
-    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appel‚e
+    ; On l'affiche Facteur fois à l'écran (sur des lignes consécutives):
+    mov  bx,Loupe_Facteur ; BX n'est pas foutu en l'air par la routine appelée
 
     CBZ_VESA_LFB_Pour_chaque_ligne:
 
-      ; On affiche la ligne zoom‚e
+      ; On affiche la ligne zoomée
       mov  ax,Pos_X
       push esi                                      ; Pos_Y
       push eax                                      ; Pos_X
       call Afficher_une_ligne_a_l_ecran_VESA_LFB
       add  esp,8    ; (Pos_X+Pos_Y)
 
-      ; On passe … la ligne suivante
-      inc  si                                     ; -> On v‚rifie qu'on ne soit
-      cmp  si,Pos_Y_Fin                           ;   pas arriv‚ … la ligne
+      ; On passe à la ligne suivante
+      inc  si                                     ; -> On vérifie qu'on ne soit
+      cmp  si,Pos_Y_Fin                           ;   pas arrivé à la ligne
       je   CBZ_VESA_LFB_Hauteur_atteinte          ;   terminale
-      dec  bx                                     ; -> ou que l'on ai termin‚ de
-      jnz  CBZ_VESA_LFB_Pour_chaque_ligne         ;   traiter la ligne … zoomer
+      dec  bx                                     ; -> ou que l'on ai terminé de
+      jnz  CBZ_VESA_LFB_Pour_chaque_ligne         ;   traiter la ligne à zoomer
 
-    ; On passe … la ligne … zoomer suivante:
-    ; sans oublier de passer … la ligne brosse suivante
+    ; On passe à la ligne à zoomer suivante:
+    ; sans oublier de passer à la ligne brosse suivante
 
-    ; On commence par retirer les paramŠtres pr‚c‚demment pass‚s
+    ; On commence par retirer les paramŠtres précédemment passés
     add  esp,8      ; (Largeur*Facteur + Ligne)
 
     ; On sauve la ligne courante dans DX:
@@ -2269,13 +2269,13 @@ Clear_brush_Zoom_VESA_LFB proc near
     ; On restaure l'ancienne valeur de ESI:
     pop  esi
 
-    mov  bx,Largeur_image ; En th‚orie, la partie haute de EBX est propre
+    mov  bx,Largeur_image ; En théorie, la partie haute de EBX est propre
     add  esi,ebx
     jmp  CBZ_VESA_LFB_Pour_chaque_ligne_a_zoomer
 
   CBZ_VESA_LFB_Hauteur_atteinte:
 
-  ; On ramŠne la pile dans un ‚tat normal
+  ; On ramŠne la pile dans un état normal
   add  esp,12     ; (Largeur*Facteur + Ligne + ESI)
 
   pop  edi
