@@ -19,7 +19,7 @@
 #include "boutons.h"
 #include "operatio.h"
 
-//  On d‚clare m‚chamment le prototype de Erreur pour ‚viter de faire un
+//  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
 void Erreur(int Code);
 
@@ -67,10 +67,10 @@ void Message_Non_disponible(void)
 
   Fermer_fenetre();
 
-  //   Puisque cette fonction peut ˆtre appel‚e par plusieurs boutons et qu'on
-  // ne sait pas lequel c'est, on les d‚senclenche tous. De toutes fa‡ons, ‡a
-  // ne sert … rien d'essayer d'optimiser ‡a puisque l'utilisateur ne devrait
-  // pas souvent l'appeler, et en plus y'en a pas beaucoup … d‚senclencher. ;)
+  //   Puisque cette fonction peut être appelée par plusieurs boutons et qu'on
+  // ne sait pas lequel c'est, on les désenclenche tous. De toutes façons, ça
+  // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
+  // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
   Desenclencher_bouton(BOUTON_GRADRECT);
   Desenclencher_bouton(BOUTON_TEXTE);
 
@@ -124,14 +124,14 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
 
-  if ((*ALPHA_BETA)=='à')
+  if ((*ALPHA_BETA)=='Ó')
   {
     Print_char_transparent_dans_fenetre(43,119,'M',CM_Noir);
     Print_char_transparent_dans_fenetre(53,121,'U',CM_Noir);
     Print_char_transparent_dans_fenetre(63,119,'S',CM_Noir);
     Print_char_transparent_dans_fenetre(74,120,'T',CM_Noir);
   }
-
+    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(260*Menu_Facteur_X))>>1,(Hauteur_ecran-(172*Menu_Facteur_Y))>>1,260,172);
   Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,0x001C); // 1
 
   Afficher_curseur();
@@ -164,7 +164,7 @@ void Changer_la_forme_du_pinceau(byte Forme)
       Pinceau_Forme=FORME_PINCEAU_POINT;
       break;
     // Note: Il existe un Pinceau_Forme_avant_lasso, mais comme le lasso aura
-    // ‚t‚ automatiquement d‚sactiv‚ avant d'arriver ici, y'a pas de problŠme.
+    // été automatiquement désactivé avant d'arriver ici, y'a pas de problème.
   }
 }
 
@@ -291,12 +291,12 @@ void Bouton_Choix_backcolor(void)
 }
 
 
-//---------------------- Cacher ou r‚afficher le menu ------------------------
+//---------------------- Cacher ou réafficher le menu ------------------------
 void Pixel_dans_barre_d_outil_cachee(word X,word Y,byte Couleur)
 {
-  // C'est fait exprŠs que ce soit vide...
-  // C'est parce que y'a rien du tout … afficher vu que la barre d'outil est
-  // cach‚e... C'est simple non?
+  // C'est fait exprès que ce soit vide...
+  // C'est parce que y'a rien du tout à afficher vu que la barre d'outil est
+  // cachée... C'est simple non?
 }
 
 
@@ -321,8 +321,8 @@ void Bouton_Cacher_menu(void)
       }
     }
 
-    //   On repositionne le d‚calage de l'image pour qu'il n'y ait pas d'in-
-    // -coh‚rences lorsqu'on sortira du mode Loupe.
+    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
+    // -cohérences lorsqu'on sortira du mode Loupe.
     if (Principal_Decalage_Y+Hauteur_ecran>Principal_Hauteur_image)
     {
       if (Hauteur_ecran>Principal_Hauteur_image)
@@ -377,7 +377,7 @@ byte Bouton_Quitter_Routine_locale(void)
   if (!Principal_Image_modifiee)
     return 1;
 
-  // On commence par afficher la fenˆtre de QUIT
+  // On commence par afficher la fenêtre de QUIT
   Ouvrir_fenetre(160,84,"Quit ?");
   Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,0x0001);          // 1
   Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,0x001F);   // 2
@@ -413,14 +413,14 @@ byte Bouton_Quitter_Routine_locale(void)
                Afficher_curseur();
 
                if (!Erreur_fichier)
-                 // L'ayant sauv‚e avec succŠs,
+                 // L'ayant sauvée avec succès,
                  return 1; // On peut quitter
                else
                  // Il y a eu une erreur lors de la sauvegarde,
                  return 0; // On ne peut donc pas quitter
              }
              else
-               // L'utilisateur ne veut pas ‚craser l'ancien fichier,
+               // L'utilisateur ne veut pas écraser l'ancien fichier,
                return 0; // On doit donc rester
     case 3 : return 1; // Quitter
   }
@@ -437,7 +437,7 @@ void Bouton_Quit(void)
     if (Brouillon_Image_modifiee)
     {
       Bouton_Page(); // On passe sur le brouillon
-      // Si l'utilisateur pr‚sente les derniers symptomes de l'abandon
+      // Si l'utilisateur présente les derniers symptomes de l'abandon
       if (Bouton_Quitter_Routine_locale())
         Sortir_du_programme=1;
     }
@@ -455,7 +455,7 @@ void Bouton_Quit(void)
 }
 
 
-//---------------------------- Effacer l'‚cran -------------------------------
+//---------------------------- Effacer l'écran -------------------------------
 void Bouton_Clear(void)
 {
   Effacer_curseur();
@@ -506,13 +506,13 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
   {
     Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,0x001C); // 4
     Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,0x0001); // 5
-    // On enregistre la table dans un backup au cas o— on ferait Cancel
+    // On enregistre la table dans un backup au cas où on ferait Cancel
     memcpy(Backup_table,Table,256);
   }
   else
     Fenetre_Definir_bouton_normal(49,129,78,14,"OK"    ,0,1,0x001C); // 4
 
-  // On affiche l'‚tat actuel de la table
+  // On affiche l'état actuel de la table
   for (Indice=0; Indice<=255; Indice++)
     Stencil_Tagger_couleur(Indice, (Table[Indice])?CM_Noir:CM_Clair);
 
@@ -558,7 +558,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // R‚cup‚ration d'une couleur derriŠre le menu
+      case 0x0029 : // Récupération d'une couleur derrière le menu
       case 0x0033 :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
@@ -618,7 +618,7 @@ void Bouton_Mask_Menu(void)
 }
 
 
-//------------------------------- ParamŠtres ---------------------------------
+//------------------------------- Paramètres ---------------------------------
 
 void Settings_Afficher_config(struct S_Config * Conf)
 #define YES "YES"
@@ -629,12 +629,12 @@ void Settings_Afficher_config(struct S_Config * Conf)
 
   Effacer_curseur();
 
-  // Jauge = Jauge de sensibilit‚ Y
+  // Jauge = Jauge de sensibilité Y
   Jauge->Position=Conf->Indice_Sensibilite_souris_Y-1;
   Fenetre_Dessiner_jauge(Jauge);
 
   Jauge=Jauge->Next;
-  // Jauge = Jauge de sensibilit‚ X
+  // Jauge = Jauge de sensibilité X
   Jauge->Position=Conf->Indice_Sensibilite_souris_X-1;
   Fenetre_Dessiner_jauge(Jauge);
 
@@ -713,14 +713,14 @@ void Bouton_Settings(void)
 
   Ouvrir_fenetre(307,182,"Settings");
 
-  // On commence par dessiner tous les cƒdres
+  // On commence par dessiner tous les câdres
   Fenetre_Afficher_cadre(  5, 16,157,30);
   Fenetre_Afficher_cadre(  5, 47,157,17);
   Fenetre_Afficher_cadre(163, 16,139,60);
   Fenetre_Afficher_cadre(253, 77, 49,82);
   Fenetre_Afficher_cadre(  5, 77,247,82); // |_ Misc.
   Fenetre_Afficher_cadre(  5, 65,157,14); // |
-  // On d‚coupe le cƒdre bizarre des "Miscellaneous"
+  // On découpe le câdre bizarre des "Miscellaneous"
   Pixel_dans_fenetre(6,77,CM_Blanc);
   Pixel_dans_fenetre(5,78,CM_Fonce);
   Block(Fenetre_Pos_X+(7*Menu_Facteur_X),Fenetre_Pos_Y+(77*Menu_Facteur_Y),
@@ -753,7 +753,7 @@ void Bouton_Settings(void)
   Fenetre_Definir_bouton_normal(  9, 96,107,14,"Clear pal:   ",0,1,0xFFFF); // 7
   // Bouton Show/Hide Picture limits
   Fenetre_Definir_bouton_normal(  9,111,107,14,"Max prev.:   ",0,1,0xFFFF); // 8
-  // Bouton Effectuer des backups … chaque sauvegarde
+  // Bouton Effectuer des backups à chaque sauvegarde
   Fenetre_Definir_bouton_normal(  9,126,107,14,"Backup   :   ",0,1,0xFFFF); // 9
   // Bouton Choix du curseur
   Fenetre_Definir_bouton_normal(  9,141,107,14,"Cursor:      ",0,1,0xFFFF); // 10
@@ -764,9 +764,9 @@ void Bouton_Settings(void)
   Fenetre_Definir_bouton_normal(117, 96,131,14,"AdjBrushPick:   ",0,1,0xFFFF); // 12
   // Bouton Separate colors
   Fenetre_Definir_bouton_normal(117,111,131,14,"Separate col:   ",0,1,0xFFFF); // 13
-  // Bouton Passer dans la r‚solution appropri‚e aprŠs un chargement
+  // Bouton Passer dans la résolution appropriée après un chargement
   Fenetre_Definir_bouton_normal(117,126,131,14,"Auto-set res:   ",0,1,0xFFFF); // 14
-  // Bouton Adapter la palette aprŠs un chargement (<=> Shift+BkSpc)
+  // Bouton Adapter la palette après un chargement (<=> Shift+BkSpc)
   Fenetre_Definir_bouton_normal(117,141,131,14,"Coords:         ",0,1,0xFFFF); // 15
 
     // Bouton Reload
@@ -778,12 +778,14 @@ void Bouton_Settings(void)
     // Bouton Close
   Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,0x0001); // 19
 
-  // Jauges de sensibilit‚ de la souris (X puis Y)
+  // Jauges de sensibilité de la souris (X puis Y)
   Fenetre_Definir_bouton_scroller(265,99,56,255,1,0); // 20
   Fenetre_Definir_bouton_scroller(279,99,56,255,1,0); // 21
 
   // Zone de saisie du nb de pages de Undo
   Fenetre_Definir_bouton_saisie(140,50,2);           // 22
+
+  SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(307*Menu_Facteur_X))>>1,(Hauteur_ecran-(182*Menu_Facteur_Y))>>1,307,182);
 
   Afficher_curseur();
 
@@ -838,7 +840,7 @@ void Bouton_Settings(void)
       case 14 : // Auto-set resolution
         Config_choisie.Auto_set_res=!Config_choisie.Auto_set_res;
         break;
-      case 15 : // Coordonn‚es
+      case 15 : // Coordonnées
         Config_choisie.Coords_rel=!Config_choisie.Coords_rel;
         break;
       case 16 : // Reload
@@ -894,7 +896,7 @@ void Bouton_Settings(void)
   Config=Config_choisie;
 
   // Prise en compte de la nouvelle config
-    // Gestion de la sensibilit‚
+    // Gestion de la sensibilité
   Sensibilite_X=(Config.Indice_Sensibilite_souris_X/Menu_Facteur_X);
   Sensibilite_Y=(Config.Indice_Sensibilite_souris_Y/Menu_Facteur_Y);
   Sensibilite_X>>=Mouse_Facteur_de_correction_X;
@@ -913,11 +915,11 @@ void Bouton_Settings(void)
 
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_PARAMETRES);
-  // Raffichage du menu pour que les inscriptions qui y figurent soient retrac‚es avec la nouvelle fonte
+  // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Afficher_menu();
   Afficher_curseur();
 
-  // On v‚rifie qu'on peut bien allouer le nombre de pages Undo.
+  // On vérifie qu'on peut bien allouer le nombre de pages Undo.
   Nouveau_nombre_de_backups(Config.Nb_pages_Undo);
 }
 
@@ -933,10 +935,10 @@ void Bouton_Page(void)
 
   Effacer_curseur();
 
-  // On d‚grossit le travail avec les infos des listes de pages
+  // On dégrossit le travail avec les infos des listes de pages
   Interchanger_image_principale_et_brouillon();
 
-  // On fait le reste du travail "… la main":
+  // On fait le reste du travail "à la main":
   Short_temporaire=Brouillon_Decalage_X;
   Brouillon_Decalage_X=Principal_Decalage_X;
   Principal_Decalage_X=Short_temporaire;
@@ -991,7 +993,7 @@ void Bouton_Page(void)
   Brouillon_Loupe_Decalage_Y=Loupe_Decalage_Y;
   Loupe_Decalage_Y=Short_temporaire;
 
-  // Swap du bool‚en "Image modifi‚e"
+  // Swap du booléen "Image modifiée"
   Octet_temporaire        =Brouillon_Image_modifiee;
   Brouillon_Image_modifiee=Principal_Image_modifiee;
   Principal_Image_modifiee=Octet_temporaire;
@@ -1013,7 +1015,7 @@ void Bouton_Page(void)
   Brouillon_File_list_Decalage=Principal_File_list_Decalage;
   Principal_File_list_Decalage=Mot_temporaire;
 
-  // A la fin, on affiche l'‚cran
+  // A la fin, on affiche l'écran
   for (Octet_temporaire=0; FACTEUR_ZOOM[Octet_temporaire]!=Loupe_Facteur; Octet_temporaire++);
   Changer_facteur_loupe(Octet_temporaire);
 
@@ -1039,31 +1041,31 @@ void Copier_image_seule(void)
 
     // Copie des dimensions de l'image
     /*
-      C'est inutile, le "Backuper et redimensionner brouillon" a d‚j… modifi‚
+      C'est inutile, le "Backuper et redimensionner brouillon" a déjà modifié
       ces valeurs pour qu'elles soient correctes.
     */
     Brouillon_Largeur_image=Principal_Largeur_image;
     Brouillon_Hauteur_image=Principal_Hauteur_image;
 
-    // Copie des d‚calages de la fenˆtre principale (non zoom‚e) de l'image
+    // Copie des décalages de la fenêtre principale (non zoomée) de l'image
     Brouillon_Decalage_X=Principal_Decalage_X;
     Brouillon_Decalage_Y=Principal_Decalage_Y;
 
-    // Copie du bool‚en "Mode loupe" de l'image
+    // Copie du booléen "Mode loupe" de l'image
     Brouillon_Loupe_Mode=Loupe_Mode;
 
     // Copie du facteur de zoom du brouillon
     Brouillon_Loupe_Facteur=Loupe_Facteur;
 
-    // Copie des dimensions de la fenˆtre de zoom
+    // Copie des dimensions de la fenêtre de zoom
     Brouillon_Loupe_Largeur=Loupe_Largeur;
     Brouillon_Loupe_Hauteur=Loupe_Hauteur;
 
-    // Copie des d‚calages de la fenˆtre de zoom
+    // Copie des décalages de la fenêtre de zoom
     Brouillon_Loupe_Decalage_X=Loupe_Decalage_X;
     Brouillon_Loupe_Decalage_Y=Loupe_Decalage_Y;
 
-    // Copie des donn‚es du split du zoom
+    // Copie des données du split du zoom
     Brouillon_Split=Principal_Split;
     Brouillon_X_Zoom=Principal_X_Zoom;
     Brouillon_Proportion_split=Principal_Proportion_split;
@@ -1190,6 +1192,9 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte Etat)
   }
   Block(Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
         Menu_Facteur_X*9,Menu_Facteur_Y*3,Couleur);
+	
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
+        Menu_Facteur_X*9,Menu_Facteur_Y*3);
 }
 
 
@@ -1336,7 +1341,7 @@ void Bouton_Resol(void)
 
   Fenetre_Definir_bouton_scroller(271,69,97,NB_MODES_VIDEO,12,Debut_liste); // 6
 
-  // Les 12 petits boutons indiquant l'‚tat des modes
+  // Les 12 petits boutons indiquant l'état des modes
   for (Temp=0; Temp<12; Temp++)
     Fenetre_Definir_bouton_normal(17,70+(Temp<<3),13,7,"",0,1,0xFFFF);// 7..18
 
@@ -1358,6 +1363,8 @@ void Bouton_Resol(void)
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
 
   Afficher_liste_modes(Debut_liste,Position_curseur);
+
+    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(299*Menu_Facteur_X))>>1,(Hauteur_ecran-(190*Menu_Facteur_Y))>>1,299,190);
 
   Afficher_curseur();
 
@@ -1413,7 +1420,7 @@ void Bouton_Resol(void)
           // Si l'utilisateur s'est servi du bouton droit de la souris:
           if (Mouse_K==2)
           {
-            // On affecte ‚galement les dimensions de l'image:
+            // On affecte également les dimensions de l'image:
             Largeur_choisie=Mode_video[Mode_choisi].Largeur;
             Num2str(Largeur_choisie,Chaine,4);
             Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
@@ -1433,7 +1440,7 @@ void Bouton_Resol(void)
         Afficher_liste_modes(Debut_liste,Position_curseur);
         break;
 
-      default: // Boutons de tag des ‚tats des modes
+      default: // Boutons de tag des états des modes
         Temp=Debut_liste+Bouton_clicke-7;
         if (Temp) // On n'a pas le droit de cocher le mode 0 (320x200)
         {
@@ -1450,7 +1457,7 @@ void Bouton_Resol(void)
         }
     }
 
-    // Gestion des touches de d‚placement dans la liste
+    // Gestion des touches de déplacement dans la liste
     switch (Touche)
     {
       case 0x0048 : // Haut
@@ -1523,7 +1530,7 @@ void Bouton_Resol(void)
       Initialiser_mode_video(Mode_choisi);
     else
     {
-      Erreur(0); // On signale … l'utilisateur que c'est un mode invalide
+      Erreur(0); // On signale à l'utilisateur que c'est un mode invalide
       Initialiser_mode_video(Resolution_actuelle);
     }
 
@@ -1550,7 +1557,7 @@ void Bouton_Safety_resol(void)
 }
 
 
-//------------------ Gestion des boutons de dessin … la main -----------------
+//------------------ Gestion des boutons de dessin à la main -----------------
 
 void Bouton_Dessin(void)
 {
@@ -1625,18 +1632,18 @@ void Bouton_Ellipse_pleine(void)
 }
 
 
-// -- Gestion du menu des d‚grad‚s ------------------------------------------
+// -- Gestion du menu des dégradés ------------------------------------------
 void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
 {
   short Ligne;
 
-  // On commence par afficher les 2 c“t‚s qui constituent le d‚grad‚ de base:
-    // C“t‚ gauche (noir)
+  // On commence par afficher les 2 côtés qui constituent le dégradé de base:
+    // Côté gauche (noir)
   Block(Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
         Menu_Facteur_X*6,
         Menu_Facteur_Y*10,CM_Noir);
-    // C“t‚ droit (blanc)
+    // Côté droit (blanc)
   Block(Fenetre_Pos_X+((Pos_X+8)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
         Menu_Facteur_X*5,
@@ -1644,8 +1651,8 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
 
   switch(Technique)
   {
-    case 1 : // D‚grad‚ de trames simples
-      // Au centre, on place 10 lignes tram‚es simplement
+    case 1 : // Dégradé de trames simples
+      // Au centre, on place 10 lignes tramées simplement
       for (Ligne=2;Ligne<2+10;Ligne++)
         if (Ligne&1)
         {
@@ -1661,8 +1668,8 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
           Pixel_dans_fenetre(Pos_X+ 9,Pos_Y+Ligne,CM_Noir);
         }
       break;
-    case 2 : // D‚grad‚ de trames ‚tendues
-      // Au centre, on place 10 lignes tram‚es de fa‡on compliqu‚e
+    case 2 : // Dégradé de trames étendues
+      // Au centre, on place 10 lignes tramées de façon compliquée
       for (Ligne=2;Ligne<2+10;Ligne++)
         if (Ligne&1)
         {
@@ -1678,6 +1685,9 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
           Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+Ligne,CM_Blanc);
         }
   }
+  
+    SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
+		    Menu_Facteur_X*10,Menu_Facteur_Y*10);  
 }
 
 void Degrade_Charger_infos_du_tableau(int Indice)
@@ -1694,20 +1704,20 @@ void Degrade_Charger_infos_du_tableau(int Indice)
 
   switch(Degrade_Tableau[Indice].Technique)
   {
-    case 0 : // Degrad‚ de base
+    case 0 : // Degradé de base
       Traiter_degrade=Degrade_de_base;
       break;
-    case 1 : // D‚grad‚ de trames simples
+    case 1 : // Dégradé de trames simples
       Traiter_degrade=Degrade_de_trames_simples;
       break;
-    case 2 : // D‚grad‚ de trames ‚tendues
+    case 2 : // Dégradé de trames étendues
       Traiter_degrade=Degrade_de_trames_etendues;
   }
 }
 
 void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short Largeur,short Hauteur,int Indice)
 {
-  short Pos_X; // Variables de balayage du block en bas de l'‚cran.
+  short Pos_X; // Variables de balayage du block en bas de l'écran.
   short Pos_Y;
   short Fin_X;
   short Fin_Y;
@@ -1751,15 +1761,15 @@ void Bouton_Degrades(void)
   Ouvrir_fenetre(237,133,"Gradation menu");
 
   Fenetre_Definir_bouton_palette(48,21);                            // 1
-    // D‚finition du scrolleur <=> indice du d‚grad‚ dans le tableau
+    // Définition du scrolleur <=> indice du dégradé dans le tableau
   Fenetre_Definir_bouton_scroller(218,22,75,16,1,Degrade_Courant);  // 2
-    // D‚finition du scrolleur de m‚lange du d‚grad‚
+    // Définition du scrolleur de mélange du dégradé
   Fenetre_Definir_bouton_scroller(31,22,84,256,1,Degrade_Tableau[Degrade_Courant].Melange); // 3
   Scroller_de_melange=Fenetre_Liste_boutons_scroller;
-    // D‚finition du bouton de sens
+    // Définition du bouton de sens
   Fenetre_Definir_bouton_normal(8,22,15,14,
     (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,0x000F); // 4
-    // D‚finition du bouton de technique
+    // Définition du bouton de technique
   Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,0x010F); // 5
   Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
 
@@ -1774,7 +1784,7 @@ void Bouton_Degrades(void)
   Num2str(Degrade_Courant+1,Chaine,2);
   Print_dans_fenetre(215,100,Chaine,CM_Noir,CM_Clair);
 
-    // On affiche le cadre autour de la pr‚view
+    // On affiche le cadre autour de la préview
   Fenetre_Afficher_cadre_creux(7,111,110,16);
     // On affiche la preview
   Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
@@ -1804,11 +1814,11 @@ void Bouton_Degrades(void)
           {
             // On vient de clicker
 
-            // On met … jour l'intervalle du d‚grad‚
+            // On met à jour l'intervalle du dégradé
             Premiere_couleur=Derniere_couleur=Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Couleur_temporaire;
             // On tagge le bloc
             Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
-            // Trac‚ de la preview:
+            // Tracé de la preview:
             Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
           }
           else
@@ -1816,7 +1826,7 @@ void Bouton_Degrades(void)
             // On maintient le click, on va donc tester si le curseur bouge
             if (Couleur_temporaire!=Derniere_couleur)
             {
-              // On commence par ordonner la 1Šre et derniŠre couleur du bloc
+              // On commence par ordonner la 1ère et dernière couleur du bloc
               if (Premiere_couleur<Couleur_temporaire)
               {
                 Degrade_Tableau[Degrade_Courant].Debut=Premiere_couleur;
@@ -1831,7 +1841,7 @@ void Bouton_Degrades(void)
                 Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Premiere_couleur;
               // On tagge le bloc
               Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
-              // Trac‚ de la preview:
+              // Tracé de la preview:
               Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
               Derniere_couleur=Couleur_temporaire;
             }
@@ -1839,7 +1849,7 @@ void Bouton_Degrades(void)
           Afficher_curseur();
         }
         break;
-      case  2 : // Nouvel indice de d‚grad‚
+      case  2 : // Nouvel indice de dégradé
         Effacer_curseur();
         // Nouvel indice dans Fenetre_Attribut2
         Degrade_Courant=Fenetre_Attribut2;
@@ -1854,7 +1864,7 @@ void Bouton_Degrades(void)
         // On affiche le sens qui va avec
         Print_dans_fenetre(12,25,(Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",CM_Noir,CM_Clair);
 
-        // On raffiche le m‚lange (jauge) qui va avec
+        // On raffiche le mélange (jauge) qui va avec
         Scroller_de_melange->Position=Degrade_Tableau[Degrade_Courant].Melange;
         Fenetre_Dessiner_jauge(Scroller_de_melange);
 
@@ -1866,9 +1876,9 @@ void Bouton_Degrades(void)
 
         Afficher_curseur();
         break;
-      case  3 : // Nouveau m‚lange de d‚grad‚
+      case  3 : // Nouveau mélange de dégradé
         Effacer_curseur();
-        // Nouvel m‚lange dans Fenetre_Attribut2
+        // Nouvel mélange dans Fenetre_Attribut2
         Degrade_Tableau[Degrade_Courant].Melange=Fenetre_Attribut2;
         // On affiche la nouvelle preview
         Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
@@ -1896,7 +1906,7 @@ void Bouton_Degrades(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // R‚cup‚ration d'une couleur derriŠre le menu
+      case 0x0029 : // Récupération d'une couleur derrière le menu
       case 0x0033 :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
@@ -1904,11 +1914,11 @@ void Bouton_Degrades(void)
           Effacer_curseur();
           Couleur_temporaire=Couleur;
 
-          // On met … jour l'intervalle du d‚grad‚
+          // On met à jour l'intervalle du dégradé
           Premiere_couleur=Derniere_couleur=Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Couleur_temporaire;
           // On tagge le bloc
           Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
-          // Trac‚ de la preview:
+          // Tracé de la preview:
           Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
 
           Afficher_curseur();
@@ -1931,7 +1941,7 @@ void Bouton_Degrades(void)
 }
 
 
-// -- Gestion des boutons de cercle (ellipse) d‚grad‚(e) --------------------
+// -- Gestion des boutons de cercle (ellipse) dégradé(e) --------------------
 
 void Bouton_Cercle_degrade(void)
 {
@@ -2073,42 +2083,42 @@ void Bouton_Brosse_monochrome(void)
 
 void Print_repertoire_courant(void)
 //
-// Affiche Principal_Repertoire_courant sur 37 caractŠres
+// Affiche Principal_Repertoire_courant sur 37 caractères
 //
 {
-  char Nom_temporaire[TAILLE_MAXI_PATH+1]; // Nom tronqu‚
-  int  Longueur; // Longueur du r‚pertoire courant
-  int  Indice;   // Indice de parcours de la chaine complŠte
+  char Nom_temporaire[TAILLE_MAXI_PATH+1]; // Nom tronqué
+  int  Longueur; // Longueur du répertoire courant
+  int  Indice;   // Indice de parcours de la chaine complète
 
   Block(Fenetre_Pos_X+(Menu_Facteur_X*7),Fenetre_Pos_Y+(Menu_Facteur_Y*43),Menu_Facteur_X*37*8,Menu_Facteur_Y<<3,CM_Clair);
 
   Longueur=strlen(Principal_Repertoire_courant);
   if (Longueur>TAILLE_MAXI_PATH)
-  { // Doh! il va falloir tronquer le r‚pertoire (bouh !)
+  { // Doh! il va falloir tronquer le répertoire (bouh !)
 
-    // On commence par copier bˆtement les 3 premiers caractŠres (e.g. "C:\")
+    // On commence par copier bêtement les 3 premiers caractères (e.g. "C:\")
     for (Indice=0;Indice<3;Indice++)
       Nom_temporaire[Indice]=Principal_Repertoire_courant[Indice];
 
     // On y rajoute 3 petits points:
     strcpy(Nom_temporaire+3,"...");
 
-    //  Ensuite, on cherche un endroit … partir duquel on pourrait loger tout
+    //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
     for (Indice++;Indice<Longueur;Indice++)
       if ( (Principal_Repertoire_courant[Indice]=='\\') &&
 	   (Longueur-Indice<=TAILLE_MAXI_PATH-6) )
       {
-	// Ouf: on vient de trouver un endroit dans la chaŒne … partir duquel
+	// Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
 	// on peut faire la copie:
 	strcpy(Nom_temporaire+6,Principal_Repertoire_courant+Indice);
 	break;
       }
 
-    // Enfin, on peut afficher la chaŒne tronqu‚e
+    // Enfin, on peut afficher la chaîne tronquée
     Print_dans_fenetre(7,43,Nom_temporaire,CM_Noir,CM_Clair);
   }
-  else // Ahhh! La chaŒne peut loger tranquillement dans la fenˆtre
+  else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
     Print_dans_fenetre(7,43,Principal_Repertoire_courant,CM_Noir,CM_Clair);
 }
 
@@ -2125,7 +2135,7 @@ void Print_Nom_fichier_dans_selecteur(void)
 
 void Print_Format(void)
 //
-// Affiche le libell‚ correspondant … Principal_Format
+// Affiche le libellé correspondant à Principal_Format
 //
 {
   if (Principal_Format==0)
@@ -2148,11 +2158,11 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
   // On affiche les nouveaux:
   Afficher_la_liste_des_fichiers(Position,Decalage);
 
-  // On r‚cupŠre le nom du schmilblick … "acc‚der"
+  // On récupère le nom du schmilblick à "accéder"
   Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier);
   // On affiche le nouveau nom de fichier
   Print_Nom_fichier_dans_selecteur();
-  // On affiche le nom du r‚pertoire courant
+  // On affiche le nom du répertoire courant
   Print_repertoire_courant();
 }
 
@@ -2166,12 +2176,12 @@ void Relire_liste_fichiers(byte Filtre, short Position, short Decalage,
 }
 
   // -- Gestion du chrono --
-  byte Etat_chrono; // Etat du chrono: 0=Attente d'un XŠme de seconde
+  byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
                     //                 1=Il faut afficher la preview
-                    //                 2=Plus de chrono … gerer pour l'instant
-  long Chrono_delay;     // Nombre de 18.2Šme de secondes demand‚s
-  long Chrono_cmp;       // Heure de d‚part du chrono
-  byte Nouvelle_preview; // Bool‚en "Il faut relancer le chrono de preview"
+                    //                 2=Plus de chrono à gerer pour l'instant
+  long Chrono_delay;     // Nombre de 18.2ème de secondes demandés
+  long Chrono_cmp;       // Heure de départ du chrono
+  byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
   // Les fonctions de manipulation du chrono se trouvent dans DIVERS.ASM
 
 
@@ -2181,14 +2191,14 @@ void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Sc
 
   strcpy(Ancien_nom_de_fichier,Principal_Nom_fichier);
 
-  // On regarde si la liste a boug‚
+  // On regarde si la liste a bougé
   if (Scroller_de_fichiers->Position!=Principal_File_list_Position)
   {
-    // Si c'est le cas, il faut mettre … jour la jauge
+    // Si c'est le cas, il faut mettre à jour la jauge
     Scroller_de_fichiers->Position=Principal_File_list_Position;
     Fenetre_Dessiner_jauge(Scroller_de_fichiers);
   }
-  // On r‚cup‚re le nom du schmilblick … "acc‚der"
+  // On récupére le nom du schmilblick à "accéder"
   Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
   if (strcmp(Ancien_nom_de_fichier,Principal_Nom_fichier))
     Nouvelle_preview=1;
@@ -2286,19 +2296,19 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   short Bouton_clicke;
   struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
   short Temp;
-  unsigned Bidon=0;       // Sert … appeler _dos_setdrive
+  unsigned Bidon=0;       // Sert à appeler _dos_setdrive
   word  Drives_Debut_Y;
   byte  Charger_ou_sauver_l_image=0;
   char  Nom_drive[3]="  ";
-  byte  On_a_clicke_sur_OK=0;// Indique si on a click‚ sur Load ou Save ou sur
-                             //un bouton enclenchant Load ou Save juste aprŠs.
-  struct Composantes * Palette_initiale; // |  Donn‚es concernant l'image qui
-  byte  Image_modifiee_initiale;         // |  sont m‚moris‚es pour pouvoir
-  short Largeur_image_initiale;          // |- ˆtre restaur‚es en sortant,
+  byte  On_a_clicke_sur_OK=0;// Indique si on a clické sur Load ou Save ou sur
+                             //un bouton enclenchant Load ou Save juste après.
+  struct Composantes * Palette_initiale; // |  Données concernant l'image qui
+  byte  Image_modifiee_initiale;         // |  sont mémorisées pour pouvoir
+  short Largeur_image_initiale;          // |- être restaurées en sortant,
   short Hauteur_image_initiale;          // |  parce que la preview elle les
   byte  Back_color_initiale;             // |  fout en l'air (c'te conne).
-  char  Nom_fichier_initial[13]; // Sert … laisser le nom courant du fichier en cas de sauvegarde
-  char  Repertoire_precedent[13]; // R‚pertoire d'o— l'on vient aprŠs un CHDIR
+  char  Nom_fichier_initial[13]; // Sert à laisser le nom courant du fichier en cas de sauvegarde
+  char  Repertoire_precedent[13]; // Répertoire d'où l'on vient après un CHDIR
   char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
   char  Fichier_recherche[13]="";
   char * Fichier_le_plus_ressemblant;
@@ -2348,13 +2358,13 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_normal(125,139,51,14,"Cancel",0,1,0x0001); // 2
   Fenetre_Definir_bouton_normal(125, 89,51,14,"Delete",0,1,0x0053); // 3
 
-  // Cƒdre autour des formats
+  // Câdre autour des formats
   Fenetre_Afficher_cadre(  7, 51,103, 35);
-  // Cƒdre autour des infos sur le fichier de dessin
+  // Câdre autour des infos sur le fichier de dessin
   Fenetre_Afficher_cadre(116, 51,187, 35);
-  // Cƒdre autour de la preview
+  // Câdre autour de la preview
   Fenetre_Afficher_cadre_creux(179,88,124,84);
-  // Cƒdre autour du fileselector
+  // Câdre autour du fileselector
   Fenetre_Afficher_cadre_creux(  7,88,100,84);
 
   Fenetre_Definir_bouton_special(9,90,96,80);                      // 4
@@ -2380,7 +2390,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
   Print_Format();
 
-  // D‚finition des boutons repr‚sentant les lecteurs
+  // Définition des boutons représentant les lecteurs
   Drives_Debut_Y=(Nb_drives<=13)? 23 : 18;
   for (Temp=0; Temp<Nb_drives; Temp++)
   {
@@ -2389,7 +2399,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     Fenetre_Afficher_sprite_drive(18+((Temp%13)*20),Drives_Debut_Y+2+((Temp/13)*12),Drive[Temp].Type);
   }
 
-  // On prend bien soin de passer dans le r‚pertoire courant (le bon qui faut! Oui madame!)
+  // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   chdir(Principal_Repertoire_courant);
   /*_dos_setdrive(Principal_Repertoire_courant[0]-64,&Bidon);*/
   Determiner_repertoire_courant();
@@ -2397,13 +2407,13 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Affichage des premiers fichiers visibles:
   Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
 
-  //   Je n'efface pas cette partie parce que l'id‚e n'‚tait pas mauvaise mais
-  // ‡a chie un maximum alors autant ne pas trop compliquer les choses...
+  //   Je n'efface pas cette partie parce que l'idée n'était pas mauvaise mais
+  // ça chie un maximum alors autant ne pas trop compliquer les choses...
   /*
   if (!Load)
   {
-    // On initialise le nom de fichier … celui en cours et non pas celui sous
-    // la barre de s‚lection
+    // On initialise le nom de fichier à celui en cours et non pas celui sous
+    // la barre de sélection
     strcpy(Principal_Nom_fichier,Nom_fichier_initial);
     // On affiche le nouveau nom de fichier
     Print_Nom_fichier_dans_selecteur();
@@ -2470,9 +2480,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               // On efface le repertoire (si on peut)
               Temp=(!rmdir(Principal_Nom_fichier));
 
-            if (Temp) // Temp indique si l'effacement s'est bien pass‚
+            if (Temp) // Temp indique si l'effacement s'est bien passé
             {
-              // On remonte si c'‚tait le dernier ‚l‚ment de la liste
+              // On remonte si c'était le dernier élément de la liste
               if (Principal_File_list_Position+Principal_File_list_Decalage==Liste_Nb_elements-1)
               {
                 if (Principal_File_list_Position)
@@ -2481,7 +2491,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
                   if (Principal_File_list_Decalage)
                     Principal_File_list_Decalage--;
               }
-              else // Si ce n'‚tait pas le dernier, il faut faire gaffe … ce
+              else // Si ce n'était pas le dernier, il faut faire gaffe à ce
               {    // que ses copains d'en dessous ne remontent pas trop.
                 if ( (Principal_File_list_Position)
                   && (Principal_File_list_Position+10==Liste_Nb_elements) )
@@ -2498,8 +2508,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             else
               Erreur(0);
 
-            // On place la barre de s‚lection du brouillon au d‚but s'il a le
-            // mˆme r‚pertoire que l'image principale.
+            // On place la barre de sélection du brouillon au début s'il a le
+            // même répertoire que l'image principale.
             if (!strcmp(Principal_Repertoire_courant,Brouillon_Repertoire_courant))
             {
               Brouillon_File_list_Position=0;
@@ -2518,14 +2528,14 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         {
           if (Temp!=Principal_File_list_Decalage)
           {
-            // On met … jour le d‚calage
+            // On met à jour le décalage
             Principal_File_list_Decalage=Temp;
 
-            // On r‚cup‚re le nom du schmilblick … "acc‚der"
+            // On récupére le nom du schmilblick à "accéder"
             Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
             // On affiche le nouveau nom de fichier
             Print_Nom_fichier_dans_selecteur();
-            // On affiche … nouveau la liste
+            // On affiche à nouveau la liste
             Afficher_la_liste_des_fichiers(Principal_File_list_Position,Principal_File_list_Decalage);
 
             // On vient de changer de nom de fichier, donc on doit s'appreter
@@ -2534,10 +2544,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           }
           else
           {
-            //   En sauvegarde, si on a double-click‚ sur un r‚pertoire, il
-            // faut mettre le nom de fichier au nom du r‚pertoire. Sinon, dans
+            //   En sauvegarde, si on a double-clické sur un répertoire, il
+            // faut mettre le nom de fichier au nom du répertoire. Sinon, dans
             // certains cas, on risque de sauvegarder avec le nom du fichier
-            // actuel au lieu de changer de r‚pertoire.
+            // actuel au lieu de changer de répertoire.
             if (Principal_File_list_Position+Principal_File_list_Decalage<Liste_Nb_repertoires)
               Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
 
@@ -2552,11 +2562,11 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case  5 : // Scroller de fichiers
         Effacer_curseur();
         Principal_File_list_Position=Fenetre_Attribut2;
-        // On r‚cup‚re le nom du schmilblick … "acc‚der"
+        // On récupére le nom du schmilblick à "accéder"
         Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
         // On affiche le nouveau nom de fichier
         Print_Nom_fichier_dans_selecteur();
-        // On affiche … nouveau la liste
+        // On affiche à nouveau la liste
         Afficher_la_liste_des_fichiers(Principal_File_list_Position,Principal_File_list_Decalage);
         Afficher_curseur();
         Nouvelle_preview=1;
@@ -2564,11 +2574,11 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
       case  6 : // Scroller des formats
         Effacer_curseur();
-        // On met … jour le format de browsing du fileselect:
+        // On met à jour le format de browsing du fileselect:
         Principal_Format=(Load)?Fenetre_Attribut2:Fenetre_Attribut2+1;
         // On affiche le nouveau format de lecture:
         Print_Format();
-        // Comme on change de liste, on se place en d‚but de liste:
+        // Comme on change de liste, on se place en début de liste:
         Principal_File_list_Position=0;
         Principal_File_list_Decalage=0;
         // Affichage des premiers fichiers visibles:
@@ -2588,7 +2598,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Effacer_curseur();
 	if (Readline(202,73,Principal_Nom_fichier,12,2))
         {
-          //   On regarde s'il faut rajouter une extension. C'est-…-dire s'il
+          //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
           for(Temp=0,Bidon=0; ((Principal_Nom_fichier[Temp]) && (!Bidon)); Temp++)
             if (Principal_Nom_fichier[Temp]=='.')
@@ -2609,10 +2619,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         /* A revoir ...
         _dos_setdrive(Drive[Bouton_clicke-9].Lettre-64,&Bidon);
         */
-        // On lit le r‚pertoire courant de ce lecteur
+        // On lit le répertoire courant de ce lecteur
         Determiner_repertoire_courant();
         //   Comme on tombe sur un disque qu'on connait pas, on se place en
-        // d‚but de liste:
+        // début de liste:
         Principal_File_list_Position=0;
         Principal_File_list_Decalage=0;
         // Affichage des premiers fichiers visibles:
@@ -2662,8 +2672,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case 0x000E : // Backspace
         *Fichier_recherche=0;
-        if (Principal_Repertoire_courant[3]) // Si on n'est pas … la racine...
-        {                              // ... on va dans le r‚pertoire parent.
+        if (Principal_Repertoire_courant[3]) // Si on n'est pas à la racine...
+        {                              // ... on va dans le répertoire parent.
           strcpy(Principal_Nom_fichier,"..");
           On_a_clicke_sur_OK=1;
         }
@@ -2698,14 +2708,14 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
     if (On_a_clicke_sur_OK)
     {
-      //   Si c'est un r‚pertoire, on annule "On_a_clicke_sur_OK" et on passe
+      //   Si c'est un répertoire, on annule "On_a_clicke_sur_OK" et on passe
       // dedans.
       if (Repertoire_existe(Principal_Nom_fichier))
       {
         Effacer_curseur();
         On_a_clicke_sur_OK=0;
 
-        // On m‚morise le r‚pertoire dans lequel on ‚tait
+        // On mémorise le répertoire dans lequel on était
         if (strcmp(Principal_Nom_fichier,".."))
           strcpy(Repertoire_precedent,Nom_formate(".."));
         else
@@ -2716,14 +2726,14 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           strcpy(Repertoire_precedent,Nom_formate(Principal_Repertoire_courant+Temp));
         }
 
-        // On doit rentrer dans le r‚pertoire:
+        // On doit rentrer dans le répertoire:
         chdir(Principal_Nom_fichier);
         Determiner_repertoire_courant();
 
-        // On lit le nouveau r‚pertoire
+        // On lit le nouveau répertoire
         Lire_liste_des_fichiers(Principal_Format);
         Trier_la_liste_des_fichiers();
-        // On place la barre de s‚lection sur le r‚pertoire d'o— l'on vient
+        // On place la barre de sélection sur le répertoire d'où l'on vient
         Placer_barre_de_selection_sur(Repertoire_precedent);
         // Affichage des premiers fichiers visibles:
         Preparer_et_afficher_liste_fichiers(Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
@@ -2742,18 +2752,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     // Gestion du chrono et des previews
     if (Nouvelle_preview)
     {
-      // On efface les infos de la preview pr‚c‚dente s'il y en a une
-      // d'affich‚e
+      // On efface les infos de la preview précédente s'il y en a une
+      // d'affichée
       if (Etat_chrono==2)
       {
         Effacer_curseur();
         // On efface le "but is:"
         Block(Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+74*Menu_Facteur_Y,
               Menu_Facteur_X*80,Menu_Facteur_Y<<3,CM_Clair);
-        // On efface le commentaire pr‚c‚dent
+        // On efface le commentaire précédent
         Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+176*Menu_Facteur_Y,
               Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
-        // On n‚ttoie la zone o— va s'afficher la preview:
+        // On néttoie la zone où va s'afficher la preview:
         Block(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+ 89*Menu_Facteur_Y,
               Menu_Facteur_X*122,Menu_Facteur_Y*82,CM_Clair);
         // On efface les dimensions de l'image
@@ -2769,8 +2779,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       }
 
       Nouvelle_preview=0;
-      Etat_chrono=0;         // Etat du chrono = Attente d'un XŠme de seconde
-      // On lit le temps de d‚part du chrono
+      Etat_chrono=0;         // Etat du chrono = Attente d'un Xème de seconde
+      // On lit le temps de départ du chrono
       Initialiser_chrono(Config.Chrono_delay);
     }
 
@@ -2787,15 +2797,15 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Charger_image(Image);
         Afficher_curseur();
 
-        // AprŠs le chargement de la preview, on restaure tout ce qui aurait
-        // pu ˆtre modifi‚ par le chargement de l'image:
+        // Après le chargement de la preview, on restaure tout ce qui aurait
+        // pu être modifié par le chargement de l'image:
         memcpy(Principal_Palette,Palette_initiale,sizeof(T_Palette));
         Principal_Image_modifiee=Image_modifiee_initiale;
         Principal_Largeur_image=Largeur_image_initiale;
         Principal_Hauteur_image=Hauteur_image_initiale;
       }
 
-      Etat_chrono=2; // On arrˆte le chrono
+      Etat_chrono=2; // On arrête le chrono
     }
   }
   while ( (!On_a_clicke_sur_OK) && (Bouton_clicke!=2) );
@@ -2804,7 +2814,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   if (Bouton_clicke==2)
     strcpy(Principal_Commentaire,Commentaire_initial);
 
-  //   On restaure les donn‚es de l'image qui ont certainement ‚t‚ modifi‚es
+  //   On restaure les données de l'image qui ont certainement été modifiées
   // par la preview.
   memcpy(Principal_Palette,Palette_initiale,sizeof(T_Palette));
   Back_color=Back_color_initiale;
@@ -2833,7 +2843,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 }
 
 
-// -- Fonction renvoyant le mode vid‚o le plus adapt‚ … l'image charg‚e -----
+// -- Fonction renvoyant le mode vidéo le plus adapté à l'image chargée -----
 #define TOLERANCE_X 8
 #define TOLERANCE_Y 4
 int Meilleur_mode_video(void)
@@ -2843,7 +2853,7 @@ int Meilleur_mode_video(void)
   short Temp_X,Temp_Y;
   int Mode;
 
-  // On commence par borner les dimensions, ou du moins les rendre coh‚rentes
+  // On commence par borner les dimensions, ou du moins les rendre cohérentes
   if ((Ecran_original_X<=0) || (Config.Set_resolution_according_to==2))
     Ecran_original_X=Principal_Largeur_image;
   else
@@ -2942,7 +2952,7 @@ void Load_picture(byte Image)
   // Image=1 => On charge/sauve une image
   // Image=0 => On charge/sauve une brosse
 {
-  // Donn‚es initiales du fichier (au cas o— on voudrait annuler)
+  // Données initiales du fichier (au cas où on voudrait annuler)
   char  Repertoire_fichier_initial[256];
   char  Nom_fichier_initial[13];
   byte  Format_fichier_initial;
@@ -2992,7 +3002,7 @@ void Load_picture(byte Image)
     if (Image)
     {
       // Si c'est une image qu'on charge, on efface l'ancien commentaire
-      // C'est loin d'ˆtre indispensable, m'enfin bon...
+      // C'est loin d'être indispensable, m'enfin bon...
       if (Format_Backup_done[Principal_Format_fichier-1])
         Principal_Commentaire[0]='\0';
 
@@ -3043,7 +3053,7 @@ void Load_picture(byte Image)
       Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
       if (Config.Auto_discontinuous)
       {
-        // On se place en mode Dessin discontinu … la main
+        // On se place en mode Dessin discontinu à la main
         while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
           Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
       }
@@ -3119,7 +3129,7 @@ void Load_picture(byte Image)
 
 void Bouton_Load(void)
 {
-  // On sauve l'‚tat actuel des paramŠtres de l'image pour pouvoir les
+  // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page_principal(Principal_Backups->Pages);
 
@@ -3132,7 +3142,7 @@ void Bouton_Reload(void)
   byte Ancienne_forme_curseur;
   int  Nouveau_mode;
 
-  // On sauve l'‚tat actuel des paramŠtres de l'image pour pouvoir les
+  // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page_principal(Principal_Backups->Pages);
 
@@ -3216,10 +3226,10 @@ void Backup_du_fichier_sauvegarde(void)
   Erreur_fichier=0;
 
   // On fait un backup si le nom du fichier n'est pas celui qu'on a choisi
-  // pour nommer les backups (c'est ‚vident!).
+  // pour nommer les backups (c'est évident!).
   if (strcmp(Nouveau_nom_du_fichier,Nom_du_fichier))
   {
-    // S'il y avait d‚j… un fichier Backup, on l'efface
+    // S'il y avait déjà un fichier Backup, on l'efface
     if ((Fichier_existe(Nouveau_nom_du_fichier))
      && (remove(Nouveau_nom_du_fichier)!=0))
       Erreur_fichier=1;
@@ -3235,7 +3245,7 @@ void Save_picture(byte Image)
   // Image=1 => On charge/sauve une image
   // Image=0 => On charge/sauve une brosse
 {
-  // Donn‚es initiales du fichier (au cas o— on voudrait annuler)
+  // Données initiales du fichier (au cas où on voudrait annuler)
   char  Repertoire_fichier_initial[256];
   char  Nom_fichier_initial[13];
   byte  Format_fichier_initial;
@@ -3405,7 +3415,7 @@ void Bouton_Brosse(void)
 
 void Bouton_desenclencher_Brosse(void)
 {
-  // On fait de notre mieux pour restaurer l'ancienne op‚ration:
+  // On fait de notre mieux pour restaurer l'ancienne opération:
   Demarrer_pile_operation(Operation_avant_interruption);
 }
 
@@ -3444,7 +3454,7 @@ void Bouton_Lasso(void)
 
 void Bouton_desenclencher_Lasso(void)
 {
-  // On fait de notre mieux pour restaurer l'ancienne op‚ration:
+  // On fait de notre mieux pour restaurer l'ancienne opération:
   Demarrer_pile_operation(Operation_avant_interruption);
   Pinceau_Forme=Pinceau_Forme_avant_lasso;
 }
@@ -3481,7 +3491,7 @@ void Bouton_desenclencher_Pipette(void)
          ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
       Print_dans_menu("X:       Y:             ",0);
 
-  // On fait de notre mieux pour restaurer l'ancienne op‚ration:
+  // On fait de notre mieux pour restaurer l'ancienne opération:
   if (Operation_en_cours==OPERATION_PIPETTE)
   {
     Demarrer_pile_operation(Operation_avant_interruption);
@@ -3536,27 +3546,27 @@ void Bouton_Loupe(void)
       Demarrer_pile_operation(OPERATION_LOUPE);
     }
     else
-    { /* Ceci est de la duplication de code de presque toute l'op‚ration de */
-      /* la loupe... Il serait peut-ˆtre plus propre de faire une proc‚dure */
+    { /* Ceci est de la duplication de code de presque toute l'opération de */
+      /* la loupe... Il serait peut-être plus propre de faire une procédure */
       /* qui s'en charge... */
       // On passe en mode loupe
       Loupe_Mode=1;
 
-      // La fonction d'affichage dans la partie image est d‚sormais un affichage
-      // sp‚cial loupe.
+      // La fonction d'affichage dans la partie image est désormais un affichage
+      // spécial loupe.
       Pixel_Preview=Pixel_Preview_Loupe;
 
       // On calcule l'origine de la loupe
       Loupe_Decalage_X=Mouse_X-(Loupe_Largeur>>1);
       Loupe_Decalage_Y=Mouse_Y-(Loupe_Hauteur>>1);
 
-      // Calcul du coin haut_gauche de la fenˆtre devant ˆtre zoom‚e DANS L'ECRAN
+      // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
       if (Loupe_Decalage_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
         Loupe_Decalage_X=Limite_Droite-Loupe_Largeur-Principal_Decalage_X+1;
       if (Loupe_Decalage_Y+Loupe_Hauteur>=Limite_Bas-Principal_Decalage_Y)
         Loupe_Decalage_Y=Limite_Bas-Loupe_Hauteur-Principal_Decalage_Y+1;
 
-      // Calcul des coordonn‚es absolues de ce coin DANS L'IMAGE
+      // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
       Loupe_Decalage_X+=Principal_Decalage_X;
       Loupe_Decalage_Y+=Principal_Decalage_Y;
 
@@ -3565,12 +3575,12 @@ void Bouton_Loupe(void)
       if (Loupe_Decalage_Y<0)
         Loupe_Decalage_Y=0;
 
-      // On calcule les bornes visibles dans l'‚cran
+      // On calcule les bornes visibles dans l'écran
       Recadrer_ecran_par_rapport_au_zoom();
       Calculer_limites();
       Afficher_ecran();
 
-      // Repositionner le curseur en fonction des coordonn‚es visibles
+      // Repositionner le curseur en fonction des coordonnées visibles
       Calculer_coordonnees_pinceau();
     }
   }
@@ -3636,12 +3646,12 @@ void Bouton_desenclencher_Loupe(void)
     Loupe_Mode=0;
 
     /*
-    // --> Recalculer le d‚calage de l'‚cran lorsqu'on sort de la loupe <--
-    // Centrage "brut" de l‚cran par rapport … la loupe
+    // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
+    // Centrage "brut" de lécran par rapport à la loupe
     Principal_Decalage_X=Loupe_Decalage_X-((Largeur_ecran-Loupe_Largeur)>>1);
     Principal_Decalage_Y=Loupe_Decalage_Y-((Menu_Ordonnee-Loupe_Hauteur)>>1);
     */
-    // Correction en cas de d‚bordement de l'image
+    // Correction en cas de débordement de l'image
     if (Ancien_Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image)
       Principal_Decalage_X=Principal_Largeur_image-Largeur_ecran;
     else
@@ -3656,16 +3666,16 @@ void Bouton_desenclencher_Loupe(void)
     if (Principal_Decalage_Y<0)
       Principal_Decalage_Y=0;
 
-    // La fonction d'affichage dans l'image est d‚sormais un affichage normal.
+    // La fonction d'affichage dans l'image est désormais un affichage normal.
     Pixel_Preview=Pixel_Preview_Normal;
 
-    // Calculer les bornes visibles dans l'‚cran
+    // Calculer les bornes visibles dans l'écran
     Calculer_limites();
     Afficher_ecran();  // <=> Display_screen();
-    // Repositionner le curseur en fonction des coordonn‚es visibles
+    // Repositionner le curseur en fonction des coordonnées visibles
     Calculer_coordonnees_pinceau();
   }
-  else // On fait de notre mieux pour restaurer l'ancienne op‚ration:
+  else // On fait de notre mieux pour restaurer l'ancienne opération:
     Demarrer_pile_operation(Operation_avant_interruption);
 }
 
@@ -3849,15 +3859,15 @@ void Bouton_Brush_FX(void)
   Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,0x0001); // 1
   Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,1,1,0x002D); // 2
   Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,1,1,0x0015); // 3
-  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90ø"             ,0,1,0xFFFF); // 4
-  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180ø"            ,0,1,0xFFFF); // 5
+  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,0xFFFF); // 4
+  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,0xFFFF); // 5
   Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,0xFFFF); // 6
   Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,2,1,0x0014); // 7
   Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,1,1,0x0020); // 8
   Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,1,1,0x0013); // 9
   Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",1,1,0x0022); // 10
 
-  // Boutons repr‚sentant les coins du brush handle: (HG,HD,C,BG,BD)
+  // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
   Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,0x0047); // 11
   Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,0x0049); // 12
   Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,0x004C); // 13
@@ -3879,7 +3889,7 @@ void Bouton_Brush_FX(void)
   Print_dans_fenetre( 20,102,"Brush",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 16,110,"handle",CM_Fonce,CM_Clair);
 
-  // Dessin des pointill‚s pour le "brush handle"
+  // Dessin des pointillés pour le "brush handle"
   for (Indice=0; Indice<13; Indice+=2)
   {
     Pixel_dans_fenetre( 88+Indice, 92,CM_Fonce);
@@ -3903,7 +3913,9 @@ void Bouton_Brush_FX(void)
     // Coin BD
   Block(Fenetre_Pos_X+(Menu_Facteur_X*105),Fenetre_Pos_Y+(Menu_Facteur_Y*126),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*111),Fenetre_Pos_Y+(Menu_Facteur_Y*120),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
-
+  
+  SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(310*Menu_Facteur_X))>>1,(Hauteur_ecran-(162*Menu_Facteur_Y))>>1,310,162);
+  
   Afficher_curseur();
 
   do
@@ -3915,7 +3927,7 @@ void Bouton_Brush_FX(void)
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_EFFETS_BROSSE);
 
-  // Gestion du bouton click‚
+  // Gestion du bouton clické
   switch (Bouton_clicke)
   {
     case  2 : // Flip X
@@ -3924,10 +3936,10 @@ void Bouton_Brush_FX(void)
     case  3 : // Flip Y
       Flip_Y_LOWLEVEL();
       break;
-    case  4 : // 90ø Rotation
+    case  4 : // 90° Rotation
       Rotate_90_deg();
       break;
-    case  5 : // 180ø Rotation
+    case  5 : // 180° Rotation
       if (Brosse_Hauteur&1)
       { // Brosse de hauteur impaire
         Flip_X_LOWLEVEL();
@@ -4097,7 +4109,7 @@ void Bouton_Smooth_Menu(void)
   if (Bouton_clicke==2) // OK
   {
     memcpy(Smooth_Matrice,Matrice_choisie,sizeof(Smooth_Matrice));
-    Smooth_Mode=0; // On le met … 0 car la fonctø suivante va le passer … 1
+    Smooth_Mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
     Bouton_Smooth_Mode();
   }
 
@@ -4167,9 +4179,9 @@ void Bouton_Colorize_Mode(void)
 
 void Bouton_Colorize_Afficher_la_selection(int Numero)
 {
-  short Pos_Y=0; // Ligne o— afficher les flŠches de s‚lection
+  short Pos_Y=0; // Ligne où afficher les flèches de sélection
 
-  // On commence par effacer les anciennes s‚lections:
+  // On commence par effacer les anciennes sélections:
     // Partie gauche
   Print_dans_fenetre(4,37," ",CM_Noir,CM_Clair);
   Print_dans_fenetre(4,57," ",CM_Noir,CM_Clair);
@@ -4179,16 +4191,16 @@ void Bouton_Colorize_Afficher_la_selection(int Numero)
   Print_dans_fenetre(129,57," ",CM_Noir,CM_Clair);
   Print_dans_fenetre(129,74," ",CM_Noir,CM_Clair);
 
-  // Ensuite, on affiche la flŠche l… o— il le faut:
+  // Ensuite, on affiche la flèche là où il le faut:
   switch(Numero)
   {
-    case 0 : // M‚thode interpol‚e
+    case 0 : // Méthode interpolée
       Pos_Y=37;
       break;
-    case 1 : // M‚thode additive
+    case 1 : // Méthode additive
       Pos_Y=57;
       break;
-    case 2 : // M‚thode soustractive
+    case 2 : // Méthode soustractive
       Pos_Y=74;
   }
   Print_dans_fenetre(4,Pos_Y,"\020",CM_Noir,CM_Clair);
@@ -4231,7 +4243,7 @@ void Bouton_Colorize_Menu(void)
 
     switch(Bouton_clicke)
     {
-      case 1: // Zone de saisie de l'opacit‚
+      case 1: // Zone de saisie de l'opacité
         Effacer_curseur();
         Num2str(Opacite_choisie,Chaine,3);
         Readline(89,23,Chaine,3,1);
@@ -4245,9 +4257,9 @@ void Bouton_Colorize_Menu(void)
         }
         Afficher_curseur();
         break;
-      case 2: // M‚thode interpol‚e
-      case 3: // M‚thode additive
-      case 4: // M‚thode soustractive
+      case 2: // Méthode interpolée
+      case 3: // Méthode additive
+      case 4: // Méthode soustractive
         Mode_choisi=Bouton_clicke-2;
         Effacer_curseur();
         Bouton_Colorize_Afficher_la_selection(Mode_choisi);
@@ -4263,7 +4275,7 @@ void Bouton_Colorize_Menu(void)
     Colorize_Opacite      =Opacite_choisie;
     Colorize_Mode_en_cours=Mode_choisi;
     Calculer_les_tables_de_Colorize();
-    Colorize_Mode=0; // On le met … 0 car la fonctø suivante va le passer … 1
+    Colorize_Mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
     Bouton_Colorize_Mode();
   }
 
@@ -4320,13 +4332,13 @@ void Bouton_Tiling_Menu(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
 
-    if (Bouton_clicke==3)  // Zone de saisie du d‚calage X
+    if (Bouton_clicke==3)  // Zone de saisie du décalage X
     {
       Effacer_curseur();
       Num2str(Offset_X_choisi,Chaine,4);
       Readline(93,23,Chaine,4,1);
       Offset_X_choisi=atoi(Chaine);
-      // On corrige le d‚calage en X
+      // On corrige le décalage en X
       if (Offset_X_choisi>=Brosse_Largeur)
       {
         Offset_X_choisi=Brosse_Largeur-1;
@@ -4336,13 +4348,13 @@ void Bouton_Tiling_Menu(void)
       Afficher_curseur();
     }
     else
-    if (Bouton_clicke==4)  // Zone de saisie du d‚calage Y
+    if (Bouton_clicke==4)  // Zone de saisie du décalage Y
     {
       Effacer_curseur();
       Num2str(Offset_Y_choisi,Chaine,4);
       Readline(93,37,Chaine,4,1);
       Offset_Y_choisi=atoi(Chaine);
-      // On corrige le d‚calage en Y
+      // On corrige le décalage en Y
       if (Offset_Y_choisi>=Brosse_Hauteur)
       {
         Offset_Y_choisi=Brosse_Hauteur-1;
@@ -4368,7 +4380,7 @@ void Bouton_Tiling_Menu(void)
 }
 
 
-//---------------------------- Courbes de B‚zier ----------------------------
+//---------------------------- Courbes de Bézier ----------------------------
 
 void Bouton_Courbes(void)
 {
@@ -4460,7 +4472,7 @@ void Bouton_Spray_Menu(void)
   Fenetre_Definir_bouton_normal(194, 62,19,14,"+1"        ,0,1,0x004E); // 6
   Fenetre_Definir_bouton_normal(194, 79,19,14,"-1"        ,0,1,0x004A); // 7
   Fenetre_Definir_bouton_normal(194, 96,19,14,"x2"        ,0,1,0x0037); // 8
-  Fenetre_Definir_bouton_normal(194,113,19,14,"ö2"        ,0,1,0x00E0); // 9
+  Fenetre_Definir_bouton_normal(194,113,19,14,"÷2"        ,0,1,0x00E0); // 9
 
   Fenetre_Definir_bouton_normal(  8, 37,43,14,"Clear"     ,1,1,0x002E); // 10
 
@@ -4491,11 +4503,11 @@ void Bouton_Spray_Menu(void)
   Fenetre_Afficher_cadre(173,56,45,86);
   Fenetre_Afficher_cadre(137,19,81,33);
 
-  // On tagge toutes les couleurs utilis‚es
+  // On tagge toutes les couleurs utilisées
   for (Indice=0; Indice<256; Indice++)
     if (Spray_Multi_flow[Indice])
       Stencil_Tagger_couleur(Indice,CM_Noir);
-  // Et enfin, on tagge la couleur s‚lectionn‚e
+  // Et enfin, on tagge la couleur sélectionnée
   Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
   Spray_Rafficher_infos(Couleur_selectionnee,0);
 
@@ -4538,7 +4550,7 @@ void Bouton_Spray_Menu(void)
           Effacer_curseur();
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
 
-          // Mettre la couleur s‚lectionn‚e … jour suivant le click
+          // Mettre la couleur sélectionnée à jour suivant le click
           Couleur_selectionnee=Lit_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==2)
             Spray_Multi_flow[Couleur_selectionnee]=0;
@@ -4546,7 +4558,7 @@ void Bouton_Spray_Menu(void)
             if (Spray_Multi_flow[Couleur_selectionnee]==0)
               Spray_Multi_flow[Couleur_selectionnee]=Spray_Init;
 
-          // Tagger la couleur s‚lectionn‚e en blanc
+          // Tagger la couleur sélectionnée en blanc
           Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
@@ -4600,7 +4612,7 @@ void Bouton_Spray_Menu(void)
         Afficher_curseur();
         break;
 
-      case  9 : // ö2
+      case  9 : // ÷2
         for (Indice=0; Indice<256; Indice++)
         {
           if (Spray_Multi_flow[Indice]>1)
@@ -4613,11 +4625,11 @@ void Bouton_Spray_Menu(void)
 
       case 10 : // Clear
         memset(Spray_Multi_flow,0,256);
-        // On raffiche les infos de la couleur s‚lectionn‚e
+        // On raffiche les infos de la couleur sélectionnée
         Spray_Rafficher_infos(Couleur_selectionnee,1);
         // On efface les anciens TAGs
         Fenetre_Effacer_tags();
-        // Tagger la couleur s‚lectionn‚e en blanc
+        // Tagger la couleur sélectionnée en blanc
         Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
         break;
 
@@ -4691,7 +4703,7 @@ void Bouton_Spray_Menu(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // R‚cup‚ration d'une couleur derriŠre le menu
+      case 0x0029 : // Récupération d'une couleur derrière le menu
       case 0x0033 :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
@@ -4699,7 +4711,7 @@ void Bouton_Spray_Menu(void)
           Effacer_curseur();
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
 
-          // Mettre la couleur s‚lectionn‚e … jour suivant le click
+          // Mettre la couleur sélectionnée à jour suivant le click
           Couleur_selectionnee=Couleur;
           if (Click==2)
             Spray_Multi_flow[Couleur_selectionnee]=0;
@@ -4707,7 +4719,7 @@ void Bouton_Spray_Menu(void)
             if (Spray_Multi_flow[Couleur_selectionnee]==0)
               Spray_Multi_flow[Couleur_selectionnee]=Spray_Init;
 
-          // Tagger la couleur s‚lectionn‚e en blanc
+          // Tagger la couleur sélectionnée en blanc
           Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
@@ -4719,9 +4731,9 @@ void Bouton_Spray_Menu(void)
   Fermer_fenetre();
 
 /*
-  //   Tant que l'on aura pas r‚solu le problŠme du d‚senclenchement du mode
-  // de dessin pr‚cedent, il faudra laisser ‡a en remarque et donc passer en
-  // spray mˆme si on a click‚ sur Cancel (idem pour OK (un peu plus bas)).
+  //   Tant que l'on aura pas résolu le problème du désenclenchement du mode
+  // de dessin précedent, il faudra laisser ça en remarque et donc passer en
+  // spray même si on a clické sur Cancel (idem pour OK (un peu plus bas)).
   if (Bouton_clicke==1) // Cancel
   {
     if (Operation_en_cours!=OPERATION_SPRAY)
@@ -4758,9 +4770,9 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
   short Debut_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*78);
 
   Taille_X=Menu_Facteur_X*5; // |_ Taille d'une case
-  Taille_Y=Menu_Facteur_Y*5; // |  de la trame zoom‚e
+  Taille_Y=Menu_Facteur_Y*5; // |  de la trame zoomée
 
-  // On efface de contenu pr‚c‚dent
+  // On efface de contenu précédent
   Block(Orig_X,Orig_Y,
         Menu_Facteur_X*Fenetre_Liste_boutons_special->Largeur,
         Menu_Facteur_Y*Fenetre_Liste_boutons_special->Hauteur,CM_Clair);
@@ -4782,7 +4794,7 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
     }
 
   // Dessiner la preview de la trame
-  Taille_X=Menu_Facteur_X*51; // |_ Taille de la fenˆtre
+  Taille_X=Menu_Facteur_X*51; // |_ Taille de la fenêtre
   Taille_Y=Menu_Facteur_Y*71; // |  de la preview
   for (Pos_Y=0; Pos_Y<Taille_Y; Pos_Y++)
     for (Pos_X=0; Pos_X<Taille_X; Pos_X++)
@@ -4838,14 +4850,14 @@ void Bouton_Trame_Menu(void)
   static byte Octet_insere=0;
   struct Fenetre_Bouton_normal * Bouton_Octet_insere;
   char  Chaine[3];
-  byte  Temp; // Octet temporaire servant … n'importe quoi
+  byte  Temp; // Octet temporaire servant à n'importe quoi
   short Old_Trame_Largeur=Trame_Largeur;
   short Old_Trame_Hauteur=Trame_Hauteur;
   byte  Old_Trame[16][16];
-  short Preview_Debut_X; // |  Donn‚es pr‚calcul‚es
+  short Preview_Debut_X; // |  Données précalculées
   short Preview_Debut_Y; // |_ pour la preview
   short Preview_Fin_X;   // |  => plus grande
-  short Preview_Fin_Y;   // |  rapidit‚.
+  short Preview_Fin_Y;   // |  rapidité.
 
 
   memcpy(Old_Trame,Trame,256);
@@ -4949,10 +4961,10 @@ void Bouton_Trame_Menu(void)
               Temp=CM_Blanc;
             else
               Temp=CM_Noir;
-            // Affichage du pixel dans la fenˆtre zoom‚e
+            // Affichage du pixel dans la fenêtre zoomée
             Block(Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),
                   Pos_X-Menu_Facteur_X, Pos_Y-Menu_Facteur_Y, Temp);
-            // Mise … jour de la preview
+            // Mise à jour de la preview
             for (Pos_Y=Preview_Debut_Y+Old_Pos_Y; Pos_Y<Preview_Fin_Y; Pos_Y+=Trame_Hauteur)
               for (Pos_X=Preview_Debut_X+Old_Pos_X; Pos_X<Preview_Fin_X; Pos_X+=Trame_Largeur)
                 Pixel(Pos_X,Pos_Y,Temp);
@@ -5002,7 +5014,7 @@ void Bouton_Trame_Menu(void)
         Brosse_Decalage_Y=(Brosse_Hauteur>>1);
         break;
 
-      case  8 : // R‚duire hauteur
+      case  8 : // Réduire hauteur
         if (Trame_Hauteur>1)
         {
           Effacer_curseur();
@@ -5028,7 +5040,7 @@ void Bouton_Trame_Menu(void)
         }
         break;
 
-      case 10 : // R‚duire largeur
+      case 10 : // Réduire largeur
         if (Trame_Largeur>1)
         {
           Effacer_curseur();
@@ -5054,7 +5066,7 @@ void Bouton_Trame_Menu(void)
         }
         break;
 
-      case 12 : // Toggle octets ins‚r‚s
+      case 12 : // Toggle octets insérés
         Effacer_curseur();
         Octet_insere=!Octet_insere;
         Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
@@ -5115,7 +5127,7 @@ void Bouton_Trame_Menu(void)
         Afficher_curseur();
         break;
 
-      default : // Boutons de trames pr‚d‚finies
+      default : // Boutons de trames prédéfinies
         Effacer_curseur();
         Copier_trame_predefinie(Bouton_clicke-17);
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
@@ -5481,7 +5493,7 @@ void Bouton_Effets(void)
 
 /*
 BOUTON_GRADRECT
--BOUTON_SPHERES       (Ellipses d‚grad‚es … am‚liorer)
+-BOUTON_SPHERES       (Ellipses dégradées à améliorer)
 BOUTON_TEXTE
 -BOUTON_AJUSTER       (Effets sur l'image)
 -BOUTON_EFFETS_BROSSE (Distort, Rot. any angle)

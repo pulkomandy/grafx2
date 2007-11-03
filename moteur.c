@@ -23,7 +23,7 @@ void Erreur(int Code);
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
-  // Variables mémorisants les anciens effets
+// Variables mémorisants les anciens effets
 
 byte Shade_Mode_avant_annulation;
 byte Quick_shade_Mode_avant_annulation;

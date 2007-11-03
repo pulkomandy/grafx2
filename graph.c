@@ -230,6 +230,7 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       }
     }
   }
+  SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee_avant_fenetre,Largeur,Hauteur);
 }
 
 
@@ -880,7 +881,8 @@ void Initialiser_mode_video(int Numero)
             Lit_pixel= Lit_Pixel_SDL;
             Clear_screen= Effacer_Tout_l_Ecran_SDL;
             Display_screen= Afficher_partie_de_l_ecran_SDL;
-            Block= Block_SDL;
+            Block = Block_SDL;
+	    Block_Fast = Block_SDL_Fast;
             Pixel_Preview_Normal= Pixel_Preview_Normal_SDL;
             Pixel_Preview_Loupe=Pixel_Preview_Loupe_SDL;
             Ligne_horizontale_XOR=Ligne_horizontale_XOR_SDL;
@@ -999,14 +1001,14 @@ void Afficher_pixel(word X,word Y,byte Couleur)
 
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
-  Block(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+  Block_Fast(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
   // Affichage d'un pixel dans la fenêtre (la fenêtre doŒt être visible)
 
 void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 {
-  Block((X*Menu_Facteur_X)+Fenetre_Pos_X,(Y*Menu_Facteur_Y)+Fenetre_Pos_Y,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+    Block_Fast((X*Menu_Facteur_X)+Fenetre_Pos_X,(Y*Menu_Facteur_Y)+Fenetre_Pos_Y,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
 
@@ -1264,7 +1266,6 @@ void Afficher_menu(void)
     for (Pos_Y=0;Pos_Y<HAUTEUR_MENU;Pos_Y++)
       for (Pos_X=0;Pos_X<LARGEUR_MENU;Pos_X++)
         Pixel_dans_menu(Pos_X,Pos_Y,BLOCK_MENU[Pos_Y][Pos_X]);
-
     // Affichage de la bande grise sous la palette
     Block(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee_Texte-Menu_Facteur_Y,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),9*Menu_Facteur_Y,CM_Clair);
 
@@ -1293,6 +1294,7 @@ void Afficher_menu(void)
       }
       Print_nom_fichier();
     }
+    SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,LARGEUR_MENU*Menu_Facteur_X,HAUTEUR_MENU*Menu_Facteur_Y);
   }
 }
 
@@ -2826,6 +2828,7 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
       Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
       BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
     }
+  SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee*Menu_Facteur_Y,Pos_X*Menu_Facteur_X,Pos_Y*Menu_Facteur_Y);
 }
 
   // -- Redessiner la forme du pinceau dans le menu --
@@ -2885,6 +2888,7 @@ void Afficher_pinceau_dans_menu(void)
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }
   }
+  SDL_UpdateRect(Ecran_SDL,0,0,LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --

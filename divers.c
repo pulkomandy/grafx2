@@ -74,11 +74,11 @@ void Attendre_fin_de_click(void)
 {
     do
     {
-	SDL_PumpEvents(); 
-	puts("Attente fin clic...");
+	SDL_PumpEvents();
     }
-    while(SDL_GetMouseState(NULL, NULL)&(SDL_BUTTON(1) | SDL_BUTTON(2) | SDL_BUTTON(3))); //On attend tant que l'un des trois boutons est enfoncé
+    while(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)); //On attend tant que le bouton est enfoncé (TODO: vérif clic droit aussi ?)
     Mouse_K=0;
+    INPUT_Nouveau_Mouse_K=0;
 }
 
 void Effacer_image_courante_Stencil(byte Couleur, byte * Pochoir)
@@ -126,9 +126,8 @@ void Get_input(void)
 	{
 	    case SDL_MOUSEMOTION:
 		//Mouvement de la souris
-		INPUT_Nouveau_Mouse_X = event.motion.x;
-		INPUT_Nouveau_Mouse_Y = event.motion.y;
-		puts("Get_input: Mouse_Facteur_De_Correction_X et Mouse_Facteur_De_Correction_Y non gérés!");	 
+		INPUT_Nouveau_Mouse_X = event.motion.x*Mouse_Facteur_de_correction_X;
+		INPUT_Nouveau_Mouse_Y = event.motion.y*Mouse_Facteur_de_correction_Y;	 
 	    break;
 	    case SDL_MOUSEBUTTONDOWN:
 		//Clic sur un des boutons de la souris
@@ -424,17 +423,17 @@ void Initialiser_chrono(dword Delai)
 
 void Wait_VBL(void)
 {
-	puts("Wait_VBL non implémenté!\n");
+	puts("Wait_VBL non implémenté!");
 }
 
 void Passer_en_mode_texte(byte Nb_lignes)
 {
-	puts("Passer_en_mode_texte non implémenté!\n");
+	puts("Passer_en_mode_texte non implémenté!");
 }
 
 void Pixel_dans_brosse             (word X,word Y,byte Couleur)
 {
-	puts("Pixel_dans_brosse non implémenté!\n");
+	puts("Pixel_dans_brosse non implémenté!");
 }
 
 byte Lit_pixel_dans_brosse         (word X,word Y)
@@ -515,15 +514,22 @@ void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short 
 
 void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
 {
-	int i,j;
-	for(i=0;i<Brosse_Hauteur;i++)
-	{
-		for(j=0;j<Brosse_Largeur;j++)
-		{
-			*(Brosse+i*Largeur_image+j)=*(Principal_Ecran+Debut_X+j+(Debut_Y+i)*Largeur_image);
-		}
-	}
-	puts("Copier_image_dans_brosse à tester!\n");
+    byte* Src=Debut_Y*Largeur_image+Debut_X+Principal_Ecran; //Adr départ image (ESI)
+    byte* Dest=Brosse; //Adr dest brosse (EDI)
+    int dx;
+
+  for (dx=Brosse_Hauteur;dx!=0;dx--)
+  //Pour chaque ligne
+  {
+
+    // On fait une copie de la ligne
+    memcpy(Dest,Src,Brosse_Largeur);
+
+    // On passe à la ligne suivante
+    Src+=Largeur_image;
+    Dest+=Brosse_Largeur;
+   }
+
 }
 
 byte Lit_pixel_dans_ecran_feedback (word X,word Y)
@@ -534,8 +540,7 @@ byte Lit_pixel_dans_ecran_feedback (word X,word Y)
 
 dword Round_div(dword Numerateur,dword Diviseur)
 {
-	puts("Round_div non implémenté!\n");
-	return 0;
+	return Numerateur/Diviseur;
 }
 
 byte Effet_Trame(word X,word Y)
@@ -659,8 +664,13 @@ void Rotate_180_deg_LOWLEVEL(void)
 }
 
 void Tempo_jauge(byte Vitesse)
+//Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
 {
-	puts("Tempo_jauge non implémenté!\n");
+	while (Vitesse!=0) 
+	{
+	    Wait_VBL();
+	    Vitesse--;
+	}
 }
 
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
