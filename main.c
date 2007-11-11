@@ -473,6 +473,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Largeur=1;
   Pinceau_Hauteur=1;
 
+	puts("main.c init lister les modes SDL proprement!");
   // Détection des modes SDL en état de fonctionner:
   // Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
 

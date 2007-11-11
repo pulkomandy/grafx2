@@ -399,8 +399,9 @@ void Get_input(void)
 
 
 void Initialiser_chrono(dword Delai)
-{// Démarrer le chrono
-	puts("Initialiser_chrono non implémenté!\n");
+// Démarrer le chrono
+{
+	puts("Initialiser_chrono non implémenté!");
 /*
   push ebp
   mov  ebp,esp
@@ -422,13 +423,14 @@ void Initialiser_chrono(dword Delai)
 }
 
 void Wait_VBL(void)
+// Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple. SDL ne sait pas faire ?
 {
 	puts("Wait_VBL non implémenté!");
 }
 
 void Passer_en_mode_texte(byte Nb_lignes)
 {
-	puts("Passer_en_mode_texte non implémenté!");
+	SDL_Quit(); //Ceci sera appellé à chaque sortie de mode vidéo == sortie du programme. le Nb_Lignes serait à enlever, cela dit, SDL s'en occupe très bien tout seul.
 }
 
 void Pixel_dans_brosse             (word X,word Y,byte Couleur)
@@ -438,78 +440,78 @@ void Pixel_dans_brosse             (word X,word Y,byte Couleur)
 
 byte Lit_pixel_dans_brosse         (word X,word Y)
 {
-	puts("Lit_pixel_dans_brosse non implémenté!\n");
+	puts("Lit_pixel_dans_brosse non implémenté!");
 	return 0;
 }
 
 void Clavier_de_depart(void)
 {
-	puts("Clavier_de_depart non implémenté!\n");
+	puts("Clavier_de_depart non implémenté!");
 }
 
 void Clavier_americain(void)
 {
-	puts("Clavier_americain non implémenté!\n");
+	puts("Clavier_americain non implémenté!");
 }
 
 word Detection_souris(void)
 {
-	puts("Detection_souris non implémenté!\n");
+	puts("Detection_souris non implémenté!");
 	return 0;
 }
 
 byte Lit_pixel_dans_ecran_courant  (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_courant non implémenté!\n");
+	puts("Lit_pixel_dans_ecran_courant non implémenté!");
 	return 0;
 }
 
 void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
 {
-	puts("Pixel_dans_ecran_courant non implémenté!\n");
+	puts("Pixel_dans_ecran_courant non implémenté!");
 }
 
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 {
-	puts("Remplacer_une_couleur non implémenté!\n");
+	puts("Remplacer_une_couleur non implémenté!");
 }
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 {
-	puts("Ellipse_Calculer_limites non implémenté!\n");
+	puts("Ellipse_Calculer_limites non implémenté!");
 }
 
 byte Pixel_dans_ellipse(void)
 {
-	puts("Pixel_dans_ellipse non implémenté!\n");
+	puts("Pixel_dans_ellipse non implémenté!");
 	return 0;
 }
 
 byte Pixel_dans_cercle(void)
 {
-	puts("Pixel_dans_cercle non implémenté!\n");
+	puts("Pixel_dans_cercle non implémenté!");
 	return 0;
 }
 
 void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
 {
-	puts("Copier_une_partie_d_image_dans_une_autre non implémenté!\n");
+	puts("Copier_une_partie_d_image_dans_une_autre non implémenté!");
 }
 
 byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_brouillon non implémenté!\n");
+	puts("Lit_pixel_dans_ecran_brouillon non implémenté!");
 	return 0;
 }
 
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 {
-	puts("Rotate_90_deg_LOWLEVEL non implémenté!\n");
+	puts("Rotate_90_deg_LOWLEVEL non implémenté!");
 }
 
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
 {
-	puts("Remap_general_LOWLEVEL non implémenté!\n");
+	puts("Remap_general_LOWLEVEL non implémenté!");
 }
 
 void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
@@ -534,7 +536,7 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
 
 byte Lit_pixel_dans_ecran_feedback (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_feedback non implémenté!\n");
+	puts("Lit_pixel_dans_ecran_feedback non implémenté!");
 	return 0;
 }
 
@@ -545,28 +547,28 @@ dword Round_div(dword Numerateur,dword Diviseur)
 
 byte Effet_Trame(word X,word Y)
 {
-	puts("Effet_Trame non implémenté!\n");
+	puts("Effet_Trame non implémenté!");
 	return 0;
 }
 
 void Set_mouse_position(void)
 {
-	puts("Set_mouse_position non implémenté!\n");
+	puts("Set_mouse_position non implémenté!");
 }
 
 void Clip_mouse(void)
 {
-	puts("Clip_mouse non implémenté!\n");
+	puts("Clip_mouse non implémenté!");
 }
 
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 {
-	puts("Remplacer_toutes_les_couleurs_dans_limites non implémenté!\n");
+	puts("Remplacer_toutes_les_couleurs_dans_limites non implémenté!");
 }
 
 byte Lit_pixel_dans_ecran_backup   (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_backup non implémenté!\n");
+	puts("Lit_pixel_dans_ecran_backup non implémenté!");
 	return 0;
 }
 
@@ -581,86 +583,86 @@ byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
 //            5 : Lecteur 2.8 Mo (??? pas sur ???)
 //            6 : Lecteur 2.8 Mo
 {
-	puts("Type_de_lecteur_de_disquette non implémenté!\n");
+	puts("Type_de_lecteur_de_disquette non implémenté!");
 	return 0;
 }
 
 byte Disk_map(byte Numero_de_lecteur)
 {
-	puts("Disk_map non implémenté!\n");
+	puts("Disk_map non implémenté!");
 	return 0;
 }
 
 byte Disque_dur_present(byte Numero_de_disque)
 {
-	puts("Disque_dur_present non implémenté!\n");
+	puts("Disque_dur_present non implémenté!");
 	return 0;
 }
 
 byte Lecteur_CDROM_present(byte Numero_de_lecteur)
 {
-	puts("Lecteur_CDROM_present non implémenté!\n");
+	puts("Lecteur_CDROM_present non implémenté!");
 	return 0;
 }
 
 long Freespace(byte Numero_de_lecteur)
 {
-	puts("Freespace non implémenté!\n");
+	puts("Freespace non implémenté!");
 	return 0;
 }
 
 byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
 {
-	puts("Couleur_ILBM_line non implémenté!\n");
+	puts("Couleur_ILBM_line non implémenté!");
 	return 0;
 }
 
 void Palette_256_to_64(T_Palette Palette)
 {
-	puts("Palette_256_to_64 non implémenté!\n");
+	puts("Palette_256_to_64 non implémenté!");
 }
 
 void Palette_64_to_256(T_Palette Palette)
 {
-	puts("Palette_64_to_256 non implémenté!\n");
+	puts("Palette_64_to_256 non implémenté!");
 }
 
 byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_interpole non implémenté!\n");
+	puts("Effet_Colorize_interpole non implémenté!");
 	return 0;
 }
 
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_additif non implémenté!\n");
+	puts("Effet_Colorize_additif non implémenté!");
 	return 0;
 }
 
 byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_soustractif non implémenté!\n");
+	puts("Effet_Colorize_soustractif non implémenté!");
 	return 0;
 }
 
 void Tester_chrono(void)
 {
-	puts("Tester_chrono non implémenté!\n");
+	puts("Tester_chrono non implémenté!");
 }
 
 void Flip_Y_LOWLEVEL(void)
 {
-	puts("Flip_Y_LOWLEVEL non implémenté!\n");
+	puts("Flip_Y_LOWLEVEL non implémenté!");
 }
 
 void Flip_X_LOWLEVEL(void)
 {
-	puts("Flip_X_LOWLEVEL non implémenté!\n");
+	puts("Flip_X_LOWLEVEL non implémenté!");
 }
 
 void Rotate_180_deg_LOWLEVEL(void)
 {
-	puts("Rotate_180_deg_LOWLEVEL non implémenté!\n");
+	puts("Rotate_180_deg_LOWLEVEL non implémenté!");
 }
 
 void Tempo_jauge(byte Vitesse)
@@ -675,22 +677,22 @@ void Tempo_jauge(byte Vitesse)
 
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 {
-	puts("Meilleure_couleur_sans_exclusion non implémenté!\n");
+	puts("Meilleure_couleur_sans_exclusion non implémenté!");
 	return 0;
 }
 
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
-	puts("Set_color non implémenté!\n");
+	puts("Set_color non implémenté!");
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)
 {
-	puts("Scroll_picture non implémenté!\n");
+	puts("Scroll_picture non implémenté!");
 }
 
 byte Get_key(void)
 {
-	puts("Get_key non implémenté!\n");
+	puts("Get_key non implémenté!");
 	return 0;
 }
