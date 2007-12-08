@@ -462,8 +462,7 @@ word Detection_souris(void)
 
 byte Lit_pixel_dans_ecran_courant  (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_courant non implémenté!");
-	return 0;
+	return (*(Principal_Ecran+Y*Principal_Largeur_image+X));
 }
 
 void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
