@@ -18,7 +18,7 @@ byte Lit_Pixel_SDL            (word X,word Y)
 
 void Effacer_Tout_l_Ecran_SDL (byte Couleur)
 {
-	puts("Effacer_Tout_l_Ecran_SDL non implémenté!\n");
+	puts("Effacer_Tout_l_Ecran_SDL non implémenté!");
 }
 
 void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeur_image)
@@ -73,12 +73,20 @@ Note: si on modifie cette procédure, il faudra penser à faire également la modif
 
 void Pixel_Preview_Loupe_SDL  (word X,word Y,byte Couleur)
 {
-	puts("Pixel_Preview_Loupe_SDL non implémenté!\n");
+	puts("Pixel_Preview_Loupe_SDL non implémenté!");
 }
 
 void Ligne_horizontale_XOR_SDL(word Pos_X,word Pos_Y,word Largeur)
 {
-	puts("Ligne_horizontale_XOR_SDL non implémenté!\n");
+  //On calcule la valeur initiale de EDI:
+  byte* edi=Pos_Y*Largeur_ecran+Pos_X+Ecran;
+  
+  //On met dans ECX le nombre de pixels à traiter:
+  int ecx;
+
+  for (ecx=0;ecx<Largeur;ecx++)
+	*(edi+ecx)=!*(edi+ecx);
+  SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,1);
 }
 
 void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
@@ -95,7 +103,7 @@ void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
 
 void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
 {
-	puts("Display_brush_Color_SDL non implémenté!\n");
+	puts("Display_brush_Color_SDL non implémenté!");
 }
 
 void Display_brush_Mono_SDL   (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse)
@@ -147,7 +155,7 @@ void Clear_brush_SDL          (word Pos_X,word Pos_Y,word Decalage_X,word Decala
 
 void Remap_screen_SDL         (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
 {
-	puts("Remap_screen_SDL non implémenté!\n");
+	puts("Remap_screen_SDL non implémenté!");
 }
 
 void Afficher_une_ligne_ecran_SDL     (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
@@ -163,27 +171,27 @@ void Afficher_une_ligne_ecran_SDL     (word Pos_X,word Pos_Y,word Largeur,byte *
  
 void Lire_une_ligne_ecran_SDL         (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
 {
-	puts("Lire_une_ligne_ecran_SDL non implémenté!\n");
+	puts("Lire_une_ligne_ecran_SDL non implémenté!");
 }
   
 void Afficher_partie_de_l_ecran_zoomee_SDL(word Largeur,word Hauteur,word Largeur_image,byte * Buffer)
 {
-	puts("Afficher_partie_de_l_ecran_zoomee_SDL non implémenté!\n");
+	puts("Afficher_partie_de_l_ecran_zoomee_SDL non implémenté!");
 }
   
 void Display_brush_Color_zoom_SDL(word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer)
 {
-	puts("Display_brush_Color_zoom_SDL non implémenté!\n");
+	puts("Display_brush_Color_zoom_SDL non implémenté!");
 }
   
 void Display_brush_Mono_zoom_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer)
 {
-	puts("Display_brush_Mono_zoom_SDL non implémenté!\n");
+	puts("Display_brush_Mono_zoom_SDL non implémenté!");
 }
   
 void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
 {
-	puts("Clear_brush_zoom_SDL non implémenté!\n");
+	puts("Clear_brush_zoom_SDL non implémenté!");
 }
   
 void Set_Mode_SDL()

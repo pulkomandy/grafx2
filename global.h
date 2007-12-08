@@ -744,9 +744,9 @@ void Rien_du_tout(void);
   extern byte Format_Commentaire[NB_FORMATS_CONNUS];
 #endif
 
-GLOBAL signed char Erreur_fichier; // 0: opÚration I/O OK
-                                   // 1: Erreur dès le dÚbut de l'opÚration
-                                   // 2: Erreur durant l'opÚration => donnÚes modifiÚes
+GLOBAL signed char Erreur_fichier; // 0: opération I/O OK
+                                   // 1: Erreur dès le début de l'opération
+                                   // 2: Erreur durant l'opération => données modifiées
                                    //-1: Interruption du chargement d'une preview
 
 GLOBAL int Ligne_INI;
@@ -755,7 +755,7 @@ GLOBAL fonction_afficheur Pixel_de_chargement;
 GLOBAL fonction_lecteur   Lit_pixel_de_sauvegarde;
 
 /********************
- * SpÚcifique Ó SDL *
+ * Spécifique à SDL *
  ********************/
 GLOBAL SDL_Surface * Ecran_SDL;
 #endif
