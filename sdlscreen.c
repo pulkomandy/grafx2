@@ -83,7 +83,14 @@ void Ligne_horizontale_XOR_SDL(word Pos_X,word Pos_Y,word Largeur)
 
 void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
 {
-	puts("Ligne_verticale_XOR_SDL non implémenté!\n");
+    int i;
+    byte color;
+    for (i=Pos_Y;i<Pos_Y+Hauteur;i++)
+    {
+	color=*(Ecran+Pos_X+i*Largeur_ecran);
+	*(Ecran+Pos_X+i*Largeur_ecran)=~color;
+    }
+    SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,0,Hauteur);
 }
 
 void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)

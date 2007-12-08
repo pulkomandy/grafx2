@@ -468,7 +468,8 @@ byte Lit_pixel_dans_ecran_courant  (word X,word Y)
 
 void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
 {
-	puts("Pixel_dans_ecran_courant non implémenté!");
+    byte* dest=(X+Y*Principal_Largeur_image+Principal_Ecran);
+    *dest=Couleur;
 }
 
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
