@@ -138,15 +138,15 @@ void Get_input(void)
 
 		//On ajoute aussi l'état des modifiers
 		#define ekkm event.key.keysym.mod
-		if (ekkm & (KMOD_LSHIFT | KMOD_RSHIFT)
+		if (ekkm & (KMOD_LSHIFT | KMOD_RSHIFT))
 		{
 		    Touche |= 0x0100;
 		}
-		if (ekkm & (KMOD_LCTRL | KMOD_RCTRL)
+		if (ekkm & (KMOD_LCTRL | KMOD_RCTRL))
 		{
 		    Touche |= 0x0200;
 		}
-		if (ekkm & (KMOD_LALT | KMOD_RALT)
+		if (ekkm & (KMOD_LALT | KMOD_RALT))
 		{
 		    Touche |= 0x0400;
 		}
