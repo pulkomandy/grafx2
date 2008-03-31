@@ -7,15 +7,6 @@
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
 {
-	/*
-  mov  ax,1130h
-  xor  bh,bh
-  push es
-  int  10h
-  pop  es
-  inc  dl
-  mov  [esp+28],dl
-	*/
 	puts("Recuperer_nb_lignes non implémenté!\n");
 	return 0;
 }
@@ -44,15 +35,15 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 
     //On va maintenant compter dans la table les couleurs utilisées:
     Couleur=0;
-   do
-   {
-      if (Tableau[Couleur]!=0)
-	 Nombre_Couleurs++;
-      Couleur++;
-   }
-   while(Couleur!=0); //On sort quand on a fait le tour (la var est sur 8 bits donc 255+1=0)
+    do
+    {
+	if (Tableau[Couleur]!=0)
+	    Nombre_Couleurs++;
+	Couleur++;
+    }
+    while(Couleur!=0); //On sort quand on a fait le tour (la var est sur 8 bits donc 255+1=0)
 
-   return Nombre_Couleurs;
+    return Nombre_Couleurs;
 }
 
 void Set_palette(T_Palette Palette)
@@ -72,11 +63,13 @@ void Set_palette(T_Palette Palette)
 
 void Attendre_fin_de_click(void)
 {
-    do
-    {
-	SDL_PumpEvents();
-    }
-    while(SDL_GetMouseState(NULL, NULL)&SDL_BUTTON(1)); //On attend tant que le bouton est enfoncé (TODO: vérif clic droit aussi ?)
+    SDL_Event event;
+
+    //On attend que l'utilisateur relache la souris. Tous les autres évènements
+    //sont ignorés
+    while(SDL_PollEvent(&event) && event.type == SDL_MOUSEBUTTONUP);
+
+    //On indique à la gestion des E/S que le bouton est laché et on rend la main
     Mouse_K=0;
     INPUT_Nouveau_Mouse_K=0;
 }
@@ -104,19 +97,23 @@ void Effacer_image_courante_Stencil(byte Couleur, byte * Pochoir)
 void Effacer_image_courante(byte Couleur)
 // Effacer l'image courante avec une certaine couleur
 {
-    puts("Effacer_image_courante non implémenté!\n");
+    memset(
+	Principal_Ecran ,
+	Couleur ,
+	Principal_Largeur_image * Principal_Hauteur_image
+    );
 }
 
 void Sensibilite_souris(word X,word Y)
 {
-	puts("Sensibilite_souris non implémenté!\n");
+	puts("Sensibilite_souris non implémenté!");
 }
 
 void Get_input(void)
 //Gestion des évènements: mouvement de la souris, clic sur les boutons, et utilisation du clavier.
 {
     SDL_Event event;
-    
+
     Touche=0;
     Touche_ASCII=0; // Par défaut, il n'y a pas d'action sur le clavier.
 
@@ -127,7 +124,7 @@ void Get_input(void)
 	    case SDL_MOUSEMOTION:
 		//Mouvement de la souris
 		INPUT_Nouveau_Mouse_X = event.motion.x*Mouse_Facteur_de_correction_X;
-		INPUT_Nouveau_Mouse_Y = event.motion.y*Mouse_Facteur_de_correction_Y;	 
+		INPUT_Nouveau_Mouse_Y = event.motion.y*Mouse_Facteur_de_correction_Y;
 	    break;
 	    case SDL_MOUSEBUTTONDOWN:
 		//Clic sur un des boutons de la souris
@@ -135,47 +132,28 @@ void Get_input(void)
 	    break;
 	    case SDL_KEYDOWN:
 		//Appui sur une touche du clavier
-		puts("Get-Input: clavier pas géré !");
+
+		//On met le scancode dans Touche"
+		Touche = event.key.keysym.scancode;
+
+		//On ajoute aussi l'état des modifiers
+		#define ekkm event.key.keysym.mod
+		if (ekkm & (KMOD_LSHIFT | KMOD_RSHIFT)
+		{
+		    Touche |= 0x0100;
+		}
+		if (ekkm & (KMOD_LCTRL | KMOD_RCTRL)
+		{
+		    Touche |= 0x0200;
+		}
+		if (ekkm & (KMOD_LALT | KMOD_RALT)
+		{
+		    Touche |= 0x0400;
+		}
+
+		//Cas particulier: déplacement du curseur avec haut bas gauche droite
+		//On doit interpréter ça comme un mvt de la souris
 /*
-    ; Sinon, appel à l'interruption pour connaître son scancode
-
-    mov  ah,10h
-    int  16h
-
-      ; AH = Scancode
-      ; AL = Caractère ASCII
-
-    ; On place le scan code dans la partie basse de [Touche]
-
-    mov  byte ptr[Touche],ah
-    mov  Touche_ASCII,al      ; ... et le code ASCII dans Touche_ASCII
-
-    ; Appel à l'interruption pour connaitre l'état des touches de contrôle
-
-    mov  ah,02h
-    int  16h
-
-      ; AL = Etat des touches de contrôle
-
-
-    ; On oublie les informations sur Insert, CapsLock, NumLock et ScrollLock
-
-    and  al,00001111b
-
-    ; On associe les deux Shifts (2 bits de poids faible)
-
-    mov  ah,al
-    and  ah,00000001b
-    shr  al,1
-    or   al,ah
-
-    ; On met le resultat dans la partie haute de [Touche]
-
-    mov  byte ptr[Touche+1],al
-
-
-    ; On gère le cas où [Touche] est un déplacement du curseur
-
     mov  ax,Touche
 
     ; Test [Touche] = Emulation de MOUSE UP
@@ -272,9 +250,9 @@ void Get_input(void)
     int  33h
 	    break;
 */
-	}  
+	}
     }
-	
+
 /*
 
     Get_input_Pas_de_touche:
@@ -668,7 +646,7 @@ void Rotate_180_deg_LOWLEVEL(void)
 void Tempo_jauge(byte Vitesse)
 //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
 {
-	while (Vitesse!=0) 
+	while (Vitesse!=0)
 	{
 	    Wait_VBL();
 	    Vitesse--;

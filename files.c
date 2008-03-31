@@ -17,35 +17,35 @@
 
 #include "linux.h"
 
-#define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier    non s‚lectionn‚
-#define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de r‚pertoire non s‚lectionn‚
-#define COULEUR_FOND_NORMAL       CM_Noir  // Couleur du fond  pour une ligne non s‚lectionn‚e
-#define COULEUR_FICHIER_SELECT    CM_Blanc // Couleur du texte pour une ligne de fichier    s‚lectionn‚e
-#define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de rep‚rtoire s‚lectionn‚e
-#define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne s‚lectionn‚e
+#define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
+#define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné
+#define COULEUR_FOND_NORMAL       CM_Noir  // Couleur du fond  pour une ligne non sélectionnée
+#define COULEUR_FICHIER_SELECT    CM_Blanc // Couleur du texte pour une ligne de fichier    sélectionnée
+#define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de repértoire sélectionnée
+#define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne sélectionnée
 
 
 int Determiner_repertoire_courant(void)
 // Modifie Principal_Repertoire_courant en y mettant sa nouvelle valeur (avec le nom du
 // disque)
 //
-// Renvoie 1 s'il y a e–t une erreur d'accŠs
+// Renvoie 1 s'il y a eu une erreur d'accès
 {
   return (getcwd(Principal_Repertoire_courant,256)==NULL);
 }
 
 
 int Repertoire_existe(char * Repertoire)
-//   D‚termine si un r‚pertoire pass‚ en paramŠtre existe ou non dans le
-// r‚pertoire courant.
+//   Détermine si un répertoire passé en paramètre existe ou non dans le
+// répertoire courant.
 {
-  DIR* Enreg;    // Structure de lecture des ‚l‚ments
+  DIR* Enreg;    // Structure de lecture des éléments
 
   if (strcmp(Repertoire,"..")==0)
     return 1;
   else
   {
-    //  On va chercher si le r‚pertoire existe … l'aide d'un Opendir. S'il
+    //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
     //  renvoie NULL c'est que le répertoire n'est pas accessible...
 
     Enreg=opendir(Repertoire);

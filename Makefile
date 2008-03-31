@@ -1,4 +1,4 @@
-CC = gcc
+CC = powerpc-linux-gnu-gcc
 COPT = -Wall -Os -c
 LOPT = -lSDL -o grafx2
 

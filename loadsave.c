@@ -316,12 +316,14 @@ void Dessiner_preview_palette(void)
 // Calcul du nom complet du fichier
 void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 {
-  byte Pos;
+    byte Pos;
 
-  strcpy(Nom_du_fichier,Principal_Repertoire_fichier);
+    strcpy(Nom_du_fichier,Principal_Repertoire_fichier);
 
-  if (Nom_du_fichier[strlen(Nom_du_fichier)-1]!='\\')
-    strcat(Nom_du_fichier,"\\");
+    //On va ajouter un / à la fin du chemin s'il n'y est pas encore
+    //Attention sous windows il faut un \...
+    if (Nom_du_fichier[strlen(Nom_du_fichier)-1]!='/')
+	strcat(Nom_du_fichier,"/");
 
   // Si on est en train de sauvegarder une image Colorix, on calcule son ext.
   if (Sauve_Colorix)
