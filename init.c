@@ -257,7 +257,7 @@ void Charger_DAT(void)
   Taille_fichier=Informations_Fichier.st_size;
   if (Taille_fichier!=TAILLE_FICHIER_DATA)
     Erreur(ERREUR_DAT_CORROMPU);
-  
+
 	Handle=open(Nom_du_fichier,O_RDONLY);
 	if (Handle==-1)
 		Erreur(ERREUR_DAT_ABSENT);
@@ -304,7 +304,7 @@ void Charger_DAT(void)
   if (read(Handle,TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES)!=2*16*NB_TRAMES_PREDEFINIES)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES);
-  
+
   // Lecture des fontes 8x8:
   if (!(Fonte_temporaire=(byte *)malloc(2048)))
     Erreur(ERREUR_MEMOIRE);
@@ -372,7 +372,7 @@ void Charger_DAT(void)
   }
 
   close(Handle);
-  
+
   Section_d_aide_en_cours=0;
   Position_d_aide_en_cours=0;
 
@@ -1775,10 +1775,10 @@ int Charger_CFG(int Tout_charger)
 
   stat(Nom_du_fichier,&Informations_Fichier);
   Taille_fichier=Informations_Fichier.st_size;
-  
+
   if ((Handle=open(Nom_du_fichier,O_RDONLY))==-1)
     return ERREUR_CFG_ABSENT;
-  
+
   if ( (Taille_fichier<sizeof(CFG_Header))
     || (read(Handle,&CFG_Header,sizeof(CFG_Header))!=sizeof(CFG_Header))
     || memcmp(CFG_Header.Signature,"CFG",3) )
@@ -1789,10 +1789,10 @@ int Charger_CFG(int Tout_charger)
     || (CFG_Header.Beta1!=BETA1)
     || (CFG_Header.Beta2!=BETA2) )
     goto Erreur_config_ancienne;
-  
+
   if (Taille_fichier!=TAILLE_FICHIER_CONFIG)
     goto Erreur_lecture_config;
-  
+
   // - Lecture des infos contenues dans le fichier de config -
   while (read(Handle,&(Chunk.Numero),sizeof(byte))==sizeof(byte))
   {
@@ -1813,21 +1813,27 @@ int Charger_CFG(int Tout_charger)
               goto Erreur_lecture_config;
             else
             {
-							#if __BYTE_ORDER == __BIG_ENDIAN
-								CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
-								CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
-								CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
-							#endif
-              for (Indice2=0;
+		#if __BYTE_ORDER == __BIG_ENDIAN
+		    CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
+		    CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
+		    CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
+		#endif
+		for (Indice2=0;
                    ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
                    Indice2++);
-              if (Indice2<NB_TOUCHES)
-              {
+		if (Indice2<NB_TOUCHES)
+		{
                 switch(Ordonnancement[Indice2]>>8)
                 {
-                  case 0 : Config_Touche[Ordonnancement[Indice2]&0xFF]=CFG_Infos_touche.Touche; break;
-                  case 1 : Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche=CFG_Infos_touche.Touche; break;
-                  case 2 : Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite=CFG_Infos_touche.Touche; break;
+                  case 0 :
+		    Config_Touche[Ordonnancement[Indice2]&0xFF]=CFG_Infos_touche.Touche;
+		    break;
+                  case 1 :
+		    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche = CFG_Infos_touche.Touche;
+		    break;
+                  case 2 :
+		    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite = CFG_Infos_touche.Touche;
+		    break;
                 }
               }
               else
