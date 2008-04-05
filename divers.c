@@ -130,6 +130,10 @@ void Get_input(void)
 		//Clic sur un des boutons de la souris
 		INPUT_Nouveau_Mouse_K=event.button.button;
 	    break;
+	    case SDL_MOUSEBUTTONUP:
+		//Bouton souris relaché
+		INPUT_Nouveau_Mouse_K=0;
+	    break;
 	    case SDL_KEYDOWN:
 		//Appui sur une touche du clavier
 
@@ -226,11 +230,8 @@ void Get_input(void)
     //Gestion "avancée" du curseur: interdire la descente du curseur dans le
     //menu lorsqu'on est en train de travailler dans l'image
 
-    printf("Taille de la pile des opérations : %d\n",Operation_Taille_pile);
-
     if(Operation_Taille_pile!=0)
     {
-	puts("dans le if...");
 	byte bl=0;//BL va indiquer si on doit corriger la position du curseur
 
 	//Si le curseur ne se trouve plus dans l'image
@@ -240,38 +241,28 @@ void Get_input(void)
 	    bl++;
 	    INPUT_Nouveau_Mouse_Y=Menu_Ordonnee-1; //La ligne !!au-dessus!! du menu
 	}
-	if(Loupe_Mode != 0)
+
+	if(Loupe_Mode)
 	{
-/*
-
-      mov  ax,INPUT_Nouveau_Mouse_X
-      cmp  Operation_dans_loupe,0
-      jnz  Get_input_X_dans_loupe
-
-        mov dx,Principal_Split
-        cmp ax,dx
-        jb  Get_input_Fin_correction_X
-
-        dec dx
-        inc bl
-        mov INPUT_Nouveau_Mouse_X,dx
-
-      jmp  Get_input_Fin_correction_X
-      Get_input_X_dans_loupe:
-
-        mov dx,Principal_X_Zoom
-        cmp ax,dx
-        jae Get_input_Fin_correction_X
-
-        inc bl
-        mov INPUT_Nouveau_Mouse_X,dx
-
-      Get_input_Fin_correction_X:
-*/
-	    puts("get input: gestion de la loupe non codée !");
+	    if(Operation_dans_loupe==0)
+	    {
+		if(INPUT_Nouveau_Mouse_X>=Principal_Split)
+		{
+		    bl++;
+		    INPUT_Nouveau_Mouse_X=Principal_Split-1;
+		}
+	    }
+	    else
+	    {
+		if(INPUT_Nouveau_Mouse_X<Principal_X_Zoom)
+		{
+		    bl++;
+		    INPUT_Nouveau_Mouse_X=Principal_X_Zoom;
+		}
+	    }
 	}
 
-	if (bl!=0)
+	if (bl)
 	{
 	    SDL_WarpMouse(
 		INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X,
@@ -282,45 +273,39 @@ void Get_input(void)
 
 	if (Touche != 0)
 	{
-      //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
-      //ou de taille de pinceau lors d'une des operations suivantes:
-      //OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
-      /*
-      cmp  Autoriser_changement_de_couleur_pendant_operation,0
-      jz   Get_input_Il_faut_inhiber_les_touches
+	    //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
+	    //ou de taille de pinceau lors d'une des operations suivantes:
+	    //OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
+	    if(Autoriser_changement_de_couleur_pendant_operation)
+	    {
+		//A ce stade là, on sait qu'on est dans une des 3 opérations
+		//supportant le changement de couleur ou de taille de pinceau.
 
-      ; A ce stade là, on sait qu'on est dans une des 3 opérations supportant
-      ; le changement de couleur ou de taille de pinceau.
-      cmp  ax,word ptr [Config_Touche+12]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+14]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+16]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+18]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+20]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+22]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+24]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+26]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+28]
-      je   Get_input_Pas_de_correction
-      cmp  ax,word ptr [Config_Touche+30]
-      je   Get_input_Pas_de_correction
-
-      Get_input_Il_faut_inhiber_les_touches:
-      mov  word ptr Touche,0
-
-    Get_input_Pas_de_correction:
-*/
+		if(
+		    (Touche != Config_Touche[6]) &&
+		    (Touche != Config_Touche[7]) &&
+		    (Touche != Config_Touche[8]) &&
+		    (Touche != Config_Touche[9]) &&
+		    (Touche != Config_Touche[10]) &&
+		    (Touche != Config_Touche[11]) &&
+		    (Touche != Config_Touche[12]) &&
+		    (Touche != Config_Touche[13]) &&
+		    (Touche != Config_Touche[14]) &&
+		    (Touche != Config_Touche[15])
+		)
+		{
+			Touche=0;
+		}
+	    }
+	    else Touche = 0;
 	}
     }
 
-    if (INPUT_Nouveau_Mouse_X != Mouse_X || INPUT_Nouveau_Mouse_Y != Mouse_Y || INPUT_Nouveau_Mouse_K != Mouse_K )
+    if (
+	(INPUT_Nouveau_Mouse_X != Mouse_X) ||
+	(INPUT_Nouveau_Mouse_Y != Mouse_Y) ||
+	(INPUT_Nouveau_Mouse_K != Mouse_K)
+    )
     {
 	Forcer_affichage_curseur=0;
 	Mouse_X=INPUT_Nouveau_Mouse_X;

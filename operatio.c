@@ -22,11 +22,11 @@ void Demarrer_pile_operation(word Operation_demandee)
     case OPERATION_ETIRER_BROSSE :
     case OPERATION_TOURNER_BROSSE:
       Operation_avant_interruption=Operation_en_cours;
-      // On passe … l'operation demandée
+      // On passe à l'operation demandée
       Operation_en_cours=Operation_demandee;
       break;
     default :
-      // On passe … l'operation demandée
+      // On passe à l'operation demandée
       Operation_en_cours=Operation_demandee;
       Operation_avant_interruption=Operation_en_cours;
   }
