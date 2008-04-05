@@ -1666,7 +1666,7 @@ void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short 
 void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   // X,Y: position du centre du pinceau
   // Couleur: couleur à appliquer au pinceau
-  // Preview: "Il ne faut l'afficher qu'… l'écran"
+  // Preview: "Il ne faut l'afficher qu'à l'écran"
 {
   short Debut_X; // Position X (dans l'image) à partir de laquelle on affiche la brosse/pinceau
   short Debut_Y; // Position Y (dans l'image) à partir de laquelle on affiche la brosse/pinceau
@@ -1979,6 +1979,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         }
       }
   }
+  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
 }
 
   // -- Effacer le pinceau --
