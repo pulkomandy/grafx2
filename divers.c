@@ -123,8 +123,8 @@ void Get_input(void)
 	{
 	    case SDL_MOUSEMOTION:
 		//Mouvement de la souris
-		INPUT_Nouveau_Mouse_X = event.motion.x*Mouse_Facteur_de_correction_X;
-		INPUT_Nouveau_Mouse_Y = event.motion.y*Mouse_Facteur_de_correction_Y;
+		INPUT_Nouveau_Mouse_X = event.motion.x>>Mouse_Facteur_de_correction_X;
+		INPUT_Nouveau_Mouse_Y = event.motion.y>>Mouse_Facteur_de_correction_Y;
 	    break;
 	    case SDL_MOUSEBUTTONDOWN:
 		//Clic sur un des boutons de la souris
@@ -214,22 +214,23 @@ void Get_input(void)
 
 		if(ok)
 		{
-/*
-    dx=INPUT_Nouveau_Mouse_Y<<Mouse_Facteur_de_correction_Y
-    cx=INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X
-    mov  ax,0004h
-    int  33h
-*/
-		    puts("Get_Input > émulation curseur par clavier incomplète!");
+		    SDL_WarpMouse(
+			INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X,
+			INPUT_Nouveau_Mouse_Y<<Mouse_Facteur_de_correction_Y
+		    );
 		}
+	    break;
 	}
     }
 
-  //Gestion "avancée" du curseur: interdire la descente du curseur dans le
-  //menu lorsqu'on est en train de travailler dans l'image
+    //Gestion "avancée" du curseur: interdire la descente du curseur dans le
+    //menu lorsqu'on est en train de travailler dans l'image
+
+    printf("Taille de la pile des opérations : %d\n",Operation_Taille_pile);
 
     if(Operation_Taille_pile!=0)
     {
+	puts("dans le if...");
 	byte bl=0;//BL va indiquer si on doit corriger la position du curseur
 
 	//Si le curseur ne se trouve plus dans l'image
@@ -267,31 +268,24 @@ void Get_input(void)
 
       Get_input_Fin_correction_X:
 */
+	    puts("get input: gestion de la loupe non codée !");
 	}
-/*
 
-      or   bl,bl
-      jz   Get_input_Pas_de_correction_du_curseur
-
-        mov  cl,Mouse_Facteur_de_correction_X
-        mov  ax,INPUT_Nouveau_Mouse_X
-        mov  dx,INPUT_Nouveau_Mouse_Y
-        shl  ax,cl
-        mov  cl,Mouse_Facteur_de_correction_Y
-        shl  dx,cl
-        mov  cx,ax
-        mov  ax,0004h
-        int  33h
-
-      Get_input_Pas_de_correction_du_curseur:
+	if (bl!=0)
+	{
+	    SDL_WarpMouse(
+		INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X,
+		INPUT_Nouveau_Mouse_Y<<Mouse_Facteur_de_correction_Y
+	    );
+	}
 
 
-      mov  ax,Touche
-      or   ax,ax
-      jz   Get_input_Pas_de_correction
-      ; Enfin, on inhibe les touches (sauf si c'est un changement de couleur
-      ; ou de taille de pinceau lors d'une des operations suivantes:
-      ; OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
+	if (Touche != 0)
+	{
+      //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
+      //ou de taille de pinceau lors d'une des operations suivantes:
+      //OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
+      /*
       cmp  Autoriser_changement_de_couleur_pendant_operation,0
       jz   Get_input_Il_faut_inhiber_les_touches
 
@@ -323,6 +317,7 @@ void Get_input(void)
 
     Get_input_Pas_de_correction:
 */
+	}
     }
 
     if (INPUT_Nouveau_Mouse_X != Mouse_X || INPUT_Nouveau_Mouse_Y != Mouse_Y || INPUT_Nouveau_Mouse_K != Mouse_K )
@@ -493,7 +488,10 @@ byte Effet_Trame(word X,word Y)
 
 void Set_mouse_position(void)
 {
-	puts("Set_mouse_position non implémenté!");
+    SDL_WarpMouse(
+	Mouse_X << Mouse_Facteur_de_correction_X,
+	Mouse_Y << Mouse_Facteur_de_correction_Y
+    );
 }
 
 void Clip_mouse(void)
