@@ -2957,7 +2957,7 @@ void Load_picture(byte Image)
   char  Nom_fichier_initial[13];
   byte  Format_fichier_initial;
   byte  Ne_pas_restaurer;
-  byte  Utiliser_palette_brosse;
+  byte  Utiliser_palette_brosse = 0;
   struct Composantes * Palette_initiale=NULL;
   byte  Ancienne_forme_curseur;
   short Principal_Largeur_image_initiale=Principal_Largeur_image;
@@ -5464,9 +5464,9 @@ void Bouton_Effets(void)
         Afficher_curseur();
         break;
       case 13 : // Feedback (pour Colorize et Shade)
-        if (Config.FX_Feedback=!Config.FX_Feedback) //???
-          FX_Feedback_Ecran=Principal_Ecran;
-        else
+//        if (Config.FX_Feedback=!Config.FX_Feedback) //???
+//          FX_Feedback_Ecran=Principal_Ecran;
+//        else
           FX_Feedback_Ecran=Ecran_backup;
         Effacer_curseur();
         Afficher_etat_feedback();

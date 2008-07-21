@@ -21,6 +21,7 @@
 #include "files.h"
 #include "loadsave.h"
 #include "sdlscreen.h"
+#include "erreurs.h"
 
 byte Ancien_nb_lignes;                  // Ancien nombre de lignes de l'écran
 
@@ -503,17 +504,18 @@ void Initialisation_du_programme(int argc,char * argv[])
   Mode_dans_lequel_on_demarre=Resolution_actuelle;
   Buffer_de_ligne_horizontale=NULL;
   Resolution_actuelle=-1; // On n'était pas dans un mode graphique
+
   Initialiser_mode_video(Mode_dans_lequel_on_demarre);
 
   Principal_Largeur_image=Largeur_ecran;
   Principal_Hauteur_image=Hauteur_ecran;
   Brouillon_Largeur_image=Largeur_ecran;
   Brouillon_Hauteur_image=Hauteur_ecran;
-
+DEBUG("Avant init",0);
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Initialiser_les_listes_de_backups_en_debut_de_programme(Config.Nb_pages_Undo+1,Largeur_ecran,Hauteur_ecran)==0)
     Erreur(ERREUR_MEMOIRE);
-
+DEBUG("Apres init",1);
   // On remet le nom par défaut pour la page de brouillon car il été modifié
   // par le passage d'un fichier en paramètre lors du traitement précédent.
   // Note: le fait que l'on ne modifie que les variables globales Brouillon_*

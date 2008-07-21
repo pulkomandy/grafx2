@@ -426,7 +426,7 @@ void Gestion_principale(void)
   int  Indice_bouton_precedent=0; // Numéro de bouton de menu sur lequel on était précédemment
   byte Blink;                   // L'opération demande un effacement du curseur
   int  Bouton_Touche;           // Bouton à enclencher d'après la touche de raccourci enfoncée
-  byte Bouton_Cote;             // C“té du bouton à enclencher d'après la touche de raccourci enfoncée
+  byte Bouton_Cote = 0;         // Côté du bouton à enclencher d'après la touche de raccourci enfoncée
   int  Indice_Touche;           // Indice du tableau de touches spéciales correspondant à la touche enfoncée
   char Chaine[25];
   byte Temp;

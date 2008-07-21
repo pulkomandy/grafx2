@@ -1,29 +1,29 @@
+/************************************************************************
+*                                                                       *
+* READLINE (procÇdure permettant de saisir une chaåne de caractäres) *
+*                                                                       *
+************************************************************************/
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
 #include "graph.h"
 #include "divers.h"
-
-//€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
-//€                                                                         €∞
-//€   READLINE (procÇdure permettant de saisir une chaåne de caractäres)    €∞
-//€                                                                         €∞
-//€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€∞
-// ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+#include "linux.h"
+void Erreur(int code);
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
 #define COULEUR_TEXTE_CURSEUR CM_Noir
 #define COULEUR_FOND_CURSEUR  CM_Fonce
 
-
-// VÇrification de la validitÇ d'un nom de fichier
+// VÈrification de la validitÈ d'un nom de fichier
 byte Chaine_valide(char * Chaine)
 {
-  byte Point_trouve=0; // BoolÇen "on a trouvÇ un point dans la chaine"
+  byte Point_trouve=0; // BoolÈen "on a trouvÈ un point dans la chaine"
   byte Taille_racine=0; // Taille de la racine du nom de fichier
   byte Taille_extension=0; // Taille de l'extension du nom de fichier
-  byte Position; // Position du caractäre dans la chaåne en cours d'Çtude
+  byte Position; // Position du caractËre dans la chaÓne en cours d'Ètude
 
   for (Position=0;Chaine[Position]!='\0';Position++)
   {

@@ -98,8 +98,8 @@ void Nibble_brush(void);
 void Remplir(byte Couleur_de_remplissage);
 void Remplacer(byte Nouvelle_couleur);
 
-void Pixel_figure_Preview    (short Pos_X,short Pos_Y,byte Couleur);
-void Pixel_figure_Preview_xor(short Pos_X,short Pos_Y,byte Couleur);
+void Pixel_figure_Preview    (word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur);
 
 void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur);
 void Tracer_cercle_vide_Preview  (short Centre_X,short Centre_Y,short Rayon,byte Couleur);
@@ -142,7 +142,7 @@ void Upload_infos_page_principal(S_Page * Page);
 void Download_infos_page_brouillon(S_Page * Page);
 void Upload_infos_page_brouillon(S_Page * Page);
 void Download_infos_backup(S_Liste_de_pages * Liste);
-int  Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Largeur,int Hauteur);
+// int  Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Largeur,int Hauteur); // pages.h
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
 void Nouveau_nombre_de_backups(int Nouveau);
 int  Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur);

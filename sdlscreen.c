@@ -193,6 +193,6 @@ void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Dec
 void Set_Mode_SDL()
 /* On règle la résolution de l'écran */
 {
-	Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_HWSURFACE|SDL_FULLSCREEN);
+	Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_HWSURFACE/*|SDL_FULLSCREEN*/);
 	Ecran=Ecran_SDL->pixels;
 }

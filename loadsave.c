@@ -451,7 +451,7 @@ void Modif_Erreur_fichier(int Nouvelle_valeur)
 void Charger_image(byte Image)
 {
   int  Indice; // Indice de balayage des formats
-  int  Format; // Format du fichier à charger
+  int  Format=0; // Format du fichier à charger
 
 
   // On place par défaut Erreur_fichier à vrai au cas o— on ne sache pas
@@ -2168,7 +2168,7 @@ void Load_BMP(void)
   byte * Buffer;
   word  Indice;
   byte  Palette_locale[256][4]; // R,V,B,0
-  word  Nb_Couleurs;
+  word  Nb_Couleurs =  0;
   short Pos_X;
   short Pos_Y;
   word  Taille_ligne;

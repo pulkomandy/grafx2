@@ -11,7 +11,8 @@
 #include "boutons.h"
 #include "pages.h"
 #include "global.h"
-
+#include "struct.h"
+#include "erreurs.h"
 
 //  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
@@ -837,13 +838,11 @@ void Initialiser_mode_video(int Numero)
 {
   int Sensibilite_X;
   int Sensibilite_Y;
-  //int Indice_VESA;
 
-
-  if (Resolution_actuelle!=Numero)
+  if (Resolution_actuelle != Numero)
   {
-    Largeur_ecran=Mode_video[Numero].Largeur;
-    Hauteur_ecran=Mode_video[Numero].Hauteur;
+    Largeur_ecran = Mode_video[Numero].Largeur;
+    Hauteur_ecran = Mode_video[Numero].Hauteur;
 
     switch (Config.Ratio)
     {
@@ -877,72 +876,39 @@ void Initialiser_mode_video(int Numero)
     switch (Mode_video[Numero].Mode)
     {
         case MODE_SDL:
-            Pixel= Pixel_SDL;
+            Pixel = Pixel_SDL;
             Lit_pixel= Lit_Pixel_SDL;
-            Clear_screen= Effacer_Tout_l_Ecran_SDL;
-            Display_screen= Afficher_partie_de_l_ecran_SDL;
+            Clear_screen = Effacer_Tout_l_Ecran_SDL;
+            Display_screen = Afficher_partie_de_l_ecran_SDL;
             Block = Block_SDL;
 	    Block_Fast = Block_SDL_Fast;
-            Pixel_Preview_Normal= Pixel_Preview_Normal_SDL;
-            Pixel_Preview_Loupe=Pixel_Preview_Loupe_SDL;
-            Ligne_horizontale_XOR=Ligne_horizontale_XOR_SDL;
-            Ligne_verticale_XOR=Ligne_verticale_XOR_SDL;
-            Display_brush_Color=Display_brush_Color_SDL;
-            Display_brush_Mono=Display_brush_Mono_SDL;
-            Clear_brush=Clear_brush_SDL;
-            Remap_screen=Remap_screen_SDL;
-            Afficher_ligne=Afficher_une_ligne_ecran_SDL;
-            Lire_ligne=Lire_une_ligne_ecran_SDL;
-            Display_zoomed_screen=Afficher_partie_de_l_ecran_zoomee_SDL;
-            Display_brush_Color_zoom=Display_brush_Color_zoom_SDL;
-            Display_brush_Mono_zoom=Display_brush_Mono_zoom_SDL;
-            Clear_brush_zoom=Clear_brush_zoom_SDL;
+            Pixel_Preview_Normal = Pixel_Preview_Normal_SDL;
+            Pixel_Preview_Loupe = Pixel_Preview_Loupe_SDL;
+            Ligne_horizontale_XOR = Ligne_horizontale_XOR_SDL;
+            Ligne_verticale_XOR = Ligne_verticale_XOR_SDL;
+            Display_brush_Color = Display_brush_Color_SDL;
+            Display_brush_Mono = Display_brush_Mono_SDL;
+            Clear_brush = Clear_brush_SDL;
+            Remap_screen = Remap_screen_SDL;
+            Afficher_ligne = Afficher_une_ligne_ecran_SDL;
+            Lire_ligne = Lire_une_ligne_ecran_SDL;
+            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_SDL;
+            Display_brush_Color_zoom = Display_brush_Color_zoom_SDL;
+            Display_brush_Mono_zoom = Display_brush_Mono_zoom_SDL;
+            Clear_brush_zoom = Clear_brush_zoom_SDL;
             Set_Mode_SDL();
         break;
-/*
-        switch(Mode_video[Numero].Mode_VESA_de_base)
-        {
-          case 0x100 : Indice_VESA=0; //  640x400
-                       break;
-          case 0x101 : Indice_VESA=1; //  640x480
-                       break;
-          case 0x103 : Indice_VESA=2; //  800x600
-                       break;
-          default    : Indice_VESA=3; // 1024x768
-        }
-
-        // On regarde si le mode supporte le LFB
-        if (VESA_Mode_Infos[Indice_VESA].Adresse_physique_LFB!=0)
-        {
-          // C'est le cas => on va s'en servir
-
-          Set_VESA_mode(Mode_video[Numero].Mode_VESA_de_base | 0x4000);
-          Initialiser_le_LFB(VESA_Mode_Infos[Indice_VESA].Adresse_physique_LFB,
-                             VESA_Mode_Infos[Indice_VESA].Taille_LFB);
-          if (Mode_X_Ptr!=NULL)
-            Retoucher_CRTC();
-        }
-        else
-        {
-          // Ce n'est pas le cas, on continue comme si de rien n'était
-          Granularite    =VESA_Mode_Infos[Indice_VESA].Granularite;
-          VESA_WinFuncPtr=VESA_Mode_Infos[Indice_VESA].WinFuncPtr;
-
-          Initialiser_mode_video_VESA(Mode_video[Numero].Mode_VESA_de_base);
-          if (Mode_X_Ptr!=NULL)
-            Retoucher_CRTC();
-        }
-*/
     }
+    
     Set_palette(Principal_Palette);
 
-    Resolution_actuelle=Numero;
+    Resolution_actuelle = Numero;
 
-    Menu_Taille_couleur=((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) >> 3;
-    Menu_Ordonnee=Hauteur_ecran;
+    Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) >> 3;
+    Menu_Ordonnee = Hauteur_ecran;
     if (Menu_visible)
-      Menu_Ordonnee-=HAUTEUR_MENU*Menu_Facteur_Y;
-    Menu_Ordonnee_Texte=Hauteur_ecran-(Menu_Facteur_Y<<3);
+      Menu_Ordonnee -= HAUTEUR_MENU * Menu_Facteur_Y;
+    Menu_Ordonnee_Texte = Hauteur_ecran-(Menu_Facteur_Y<<3);
     Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur<<3)-1;
 
     Clip_mouse();
@@ -950,8 +916,8 @@ void Initialiser_mode_video(int Numero)
     Mouse_Y = Hauteur_ecran >> 1;
     Set_mouse_position();
 
-    Sensibilite_X=Config.Indice_Sensibilite_souris_X/Mode_video[Numero].Facteur_X;
-    Sensibilite_Y=Config.Indice_Sensibilite_souris_Y/Mode_video[Numero].Facteur_Y;
+    Sensibilite_X = Config.Indice_Sensibilite_souris_X / Mode_video[Numero].Facteur_X;
+    Sensibilite_Y = Config.Indice_Sensibilite_souris_Y / Mode_video[Numero].Facteur_Y;
     Sensibilite_X>>=Mouse_Facteur_de_correction_X;
     Sensibilite_Y>>=Mouse_Facteur_de_correction_Y;
     Sensibilite_souris(Sensibilite_X?Sensibilite_X:1,Sensibilite_Y?Sensibilite_Y:1);
@@ -3804,13 +3770,13 @@ void Remplir(byte Couleur_de_remplissage)
   fonction_afficheur Pixel_figure;
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
-  void Pixel_figure_Definitif(short Pos_X,short Pos_Y,byte Couleur)
+  void Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
   {
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
   }
 
   // Affichage d'un point pour une preview
-  void Pixel_figure_Preview(short Pos_X,short Pos_Y,byte Couleur)
+  void Pixel_figure_Preview(word Pos_X,word Pos_Y,byte Couleur)
   {
     if ( (Pos_X>=Limite_Gauche) &&
          (Pos_X<=Limite_Droite) &&
@@ -3820,7 +3786,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_Preview_xor(short Pos_X,short Pos_Y,byte Couleur)
+  void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur)
   {
     if ( (Pos_X>=Limite_Gauche) &&
          (Pos_X<=Limite_Droite) &&
@@ -3831,7 +3797,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
   // Effacement d'un point de preview
-  void Pixel_figure_Effacer_preview(short Pos_X,short Pos_Y,byte Couleur)
+  void Pixel_figure_Effacer_preview(word Pos_X,word Pos_Y,byte Couleur)
   {
     if ( (Pos_X>=Limite_Gauche) &&
          (Pos_X<=Limite_Droite) &&
@@ -3841,7 +3807,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
   // Affichage d'un point dans la brosse
-  void Pixel_figure_Dans_brosse(short Pos_X,short Pos_Y,byte Couleur)
+  void Pixel_figure_Dans_brosse(word Pos_X,word Pos_Y,byte Couleur)
   {
     Pos_X-=Brosse_Decalage_X;
     Pos_Y-=Brosse_Decalage_Y;

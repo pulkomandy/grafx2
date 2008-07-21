@@ -416,12 +416,12 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
 
 int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire)
 {
-  int Taille_immediatement_disponible;
-  int Taille_liste_courante;
-  int Taille_liste_brouillon;
-  int Taille_page_courante;
-  int Taille_page_brouillon;
-  int Taille_nouvelle_page;
+  unsigned int Taille_immediatement_disponible;
+  unsigned int Taille_liste_courante;
+  unsigned int Taille_liste_brouillon;
+  unsigned int Taille_page_courante;
+  unsigned int Taille_page_brouillon;
+  unsigned int Taille_nouvelle_page;
 
   Taille_immediatement_disponible=Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
   Taille_liste_courante =Taille_d_une_liste_de_pages(Liste_courante);
@@ -434,7 +434,10 @@ int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_coura
   // courante, en conservant au pire la 1ère page de brouillon.
   if ((Taille_immediatement_disponible+Taille_liste_courante+
        Taille_liste_brouillon-Taille_page_brouillon)<(2*Taille_nouvelle_page))
+  {
+    DEBUG("A",0);
     return 0;
+  }
 
   // Il faut pouvoir loger le brouillon et son backup dans la page de
   // brouillon, en conservant au pire un exemplaire de la nouvelle page dans
@@ -442,7 +445,10 @@ int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_coura
   // brouillon)
   if ((Taille_immediatement_disponible+Taille_liste_courante+
        Taille_liste_brouillon-Taille_nouvelle_page)<(2*Taille_page_brouillon))
+  {
+    DEBUG("B",1);
     return 0;
+  }
 
   return 1;
 }
@@ -677,26 +683,18 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
         Retour=1;
       }
       else
-      {
-        // Il n'est pas possible de démarrer le programme avec la page
-        // principale et la page de brouillon aux dimensions demandée par
-        // l'utilisateur. ==> On l'envoie ballader
+      {DEBUG("Il n'est pas possible de démarrer le programme avec la page principale et la page de brouillon aux dimensions demandée par l'utilisateur. ==> On l'envoie ballader",0);
         Retour=0;
       }
     }
     else
-    {
-      // On ne peut pas démarrer le programme avec ne serait-ce qu'une page
-      // de la dimension souhaitée, donc on laisse tout tomber et on le
-      // renvoie chier.
+    {DEBUG("On ne peut pas démarrer le programme avec ne serait-ce qu'une page de la dimension souhaitée, donc on laisse tout tomber et on le renvoie chier.",0);
       Retour=0;
     }
   }
   else
   {
-    // On n'a mˆme pas réussi à créer les listes. Donc c'est mˆme pas la
-    // peine de continuer : l'utilisateur ne pourra jamais rien faire, autant
-    // avorter le chargement du programme.
+  DEBUG("On n'a même pas réussi à créer les listes. Donc c'est même pas la peine de continuer : l'utilisateur ne pourra jamais rien faire, autant avorter le chargement du programme.",0);
     Retour=0;
   }
 

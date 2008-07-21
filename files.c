@@ -64,7 +64,7 @@ int Fichier_existe(char * Fichier)
 //   D‚termine si un fichier pass‚ en paramŠtre existe ou non dans le
 // r‚pertoire courant.
 {
-    struct stat* buf;
+    struct stat* buf = NULL;
     int Resultat;
 
     Resultat=stat(Fichier,buf);
@@ -161,15 +161,12 @@ void Lire_liste_des_fichiers(byte Format_demande)
 //  Cette proc‚dure charge dans la liste chain‚e les fichiers dont l'extension
 // correspond au format demand‚.
 {
-  int   Attribut;       // Attribut des fichiers/r‚pertoires … lire
   DIR*  Repertoire_Courant; //Répertoire courant
-  struct dirent* Enreg; // Structure de lecture des ‚l‚ments
-  char  Filtre[6]="*."; // Place pour ‚crire "*.XXX" et un '\0'
+  struct dirent* Enreg; // Structure de lecture des éléments
+  char  Filtre[6]="*."; // Place pour écrire "*.XXX" et un '\0'
 
-  char Chaine[20];
-
-  // Tout d'abord, on d‚duit du format demand‚ un filtre … utiliser:
-  if (Format_demande) // Format (extension) sp‚cifique
+  // Tout d'abord, on déduit du format demandé un filtre à utiliser:
+  if (Format_demande) // Format (extension) spécifique
     strcat(Filtre,Format_Extension[Format_demande-1]);
   else                // *.*
     strcat(Filtre,"*");
@@ -177,54 +174,38 @@ void Lire_liste_des_fichiers(byte Format_demande)
 
   // Ensuite, on vide la liste actuelle:
   Detruire_liste_du_fileselect();
-  // AprŠs effacement, il ne reste ni fichier ni r‚pertoire dans la liste
+  // Après effacement, il ne reste ni fichier ni répertoire dans la liste
   Liste_Nb_fichiers=0;
   Liste_Nb_repertoires=0;
 
-  // On lit tous les r‚pertoires:
+  // On lit tous les répertoires:
 
   Repertoire_Courant=opendir(getcwd(NULL,0));
-/*
-Ceci est à revoir... pas tout à fait géré pareil sous linux...
-  Attribut=(_A_NORMAL|_A_SUBDIR|//_A_RDONLY|_A_ARCH|
-            (_A_HIDDEN & Config.Lire_les_repertoires_caches)|
-            (_A_SYSTEM & Config.Lire_les_repertoires_systemes));
-*/
   Enreg=readdir(Repertoire_Courant);
   while (Enreg)
   {
-    // Si l'‚l‚ment n'est pas le r‚pertoire courant
-    if ( (strcmp(Enreg->d_name,".")!=0) &&
-    // et que l'‚l‚ment trouv‚ est r‚ellement un r‚pertoire
-         (Enreg->d_type == DT_DIR) )
+    // Si l'élément n'est pas le répertoire courant
+    if ( (Enreg->d_name[0]!='.') && (Enreg->d_name[1] != 0))
     {
-      // On rajoute le r‚pertore … la liste
-      Ajouter_element_a_la_liste(Enreg);
-      Liste_Nb_repertoires++;
+    	// et que l'élément trouvé est un répertoire
+    	if(   (Enreg->d_type == DT_DIR) &&
+    		// et qu'il n'est pas caché
+      		(Enreg->d_name[0]!='.' || Config.Lire_les_repertoires_caches))
+    	{
+      		// On rajoute le répertore à la liste
+      		Ajouter_element_a_la_liste(Enreg);
+      		Liste_Nb_repertoires++;
+    	}
+    	else if ((Enreg->d_type==DT_REG) //Il s'agit d'un fichier
+      		&& (Enreg->d_name[0]!='.' || Config.Lire_les_fichiers_caches)) //Il n'est pas caché
+      	{
+        	// On rajoute le fichier à la liste
+        	Ajouter_element_a_la_liste(Enreg);
+        	Liste_Nb_fichiers++;
+      	}
     }
-    // On cherche l'‚l‚ment suivant
-    Enreg=readdir(Repertoire_Courant);
-  }
 
-  // Enfin, on lit les fichiers du format demand‚:
-
-/*
-Ici aussi, à revoir...
-  Attribut=(_A_NORMAL|_A_SYSTEM|//_A_RDONLY|_A_ARCH|
-            (_A_HIDDEN & Config.Lire_les_fichiers_caches));
-*/
-
-    rewinddir(Repertoire_Courant);
-  Enreg=readdir(Repertoire_Courant);
-  while (Enreg)
-  {
-      if (Enreg->d_type==DT_REG) //Il s'agit bien d'un fichier
-      {
-        // On rajoute le fichier … la liste
-        Ajouter_element_a_la_liste(Enreg);
-        Liste_Nb_fichiers++;
-      }
-    // On cherche l'‚l‚ment suivant
+    // On cherche l'élément suivant
     Enreg=readdir(Repertoire_Courant);
   }
 

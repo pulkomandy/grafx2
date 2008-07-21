@@ -1,10 +1,15 @@
-CC = distcc powerpc-linux-gnu-gcc
-COPT = -Wall -Os -c
+CC = gcc
+COPT = -Wall -Os -c -g 
 LOPT = -lSDL -o grafx2
+
+debug: grafx2
+	@echo --- Everything OK.
+
+release: grafx2
+	strip grafx2
 
 grafx2 : main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o
 	$(CC) $(LOPT) main.o graph.o divers.o init.o files.o linux.o loadsave.o boutons.o moteur.o sdlscreen.o aide.o palette.o operatio.o op_c.o readline.o special.o op_asm.o
-	strip grafx2
 
 main.o : graph.o const.h struct.h global.h graph.h divers.h init.h boutons.h moteur.h files.h loadsave.h main.c readini.h saveini.h
 	$(CC) $(COPT) main.c

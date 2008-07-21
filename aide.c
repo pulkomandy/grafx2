@@ -220,7 +220,7 @@ void Bouton_Stats(void)
 
   // Affichage de la m‚moire restante
   Print_dans_fenetre(10,35,"Free memory:",STATS_COULEUR_TITRES,CM_Noir);
-  sprintf(Buffer,"%ld bytes",Memoire_libre());
+  sprintf(Buffer,"%d bytes",Memoire_libre());
   Print_dans_fenetre(114,35,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre

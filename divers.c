@@ -3,6 +3,7 @@
 #include "sdlscreen.h"
 #include "global.h"
 #include "graph.h" //Afficher_curseur
+#include "erreurs.h"
 
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
@@ -48,16 +49,14 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 
 void Set_palette(T_Palette Palette)
 {
-	SDL_Color PaletteSDL[255];
-	byte i=0;
-	do
+	register int i;
+	SDL_Color PaletteSDL[256];
+	for(i=0;i<256;i++)
 	{
 		PaletteSDL[i].r=Palette[i].R*4; //Les couleurs VGA ne vont que de 0 à 63
 		PaletteSDL[i].g=Palette[i].V*4;
 		PaletteSDL[i].b=Palette[i].B*4;
-		i++;
 	}
-	while(i!=0);
 	SDL_SetPalette(Ecran_SDL,SDL_PHYSPAL|SDL_LOGPAL,PaletteSDL,0,256);
 }
 

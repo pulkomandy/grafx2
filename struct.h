@@ -1,13 +1,14 @@
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
+#include <stdint.h>
 #include "const.h"
 
 // Déclaration des types de base /////////////////////////////////////////////
 
-typedef unsigned char  byte;
-typedef unsigned short word;
-typedef unsigned long  dword;
+typedef uint8_t  byte;
+typedef uint16_t word;
+typedef uint32_t  dword;
 
 typedef void (* fonction_action)    (void);
 typedef void (* fonction_afficheur) (word,word,byte);

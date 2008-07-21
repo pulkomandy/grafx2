@@ -35,7 +35,7 @@ void Charger_INI_Clear_string(char * String)
     {
       // Suppression d'un espace ou d'un tab:
 
-      strcpy(String+Indice,String+Indice+1);
+      memmove(String+Indice,String+Indice+1,strlen(String+Indice));
     }
     else
     if ((String[Indice]==';') ||

@@ -1,4 +1,4 @@
-
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -290,7 +290,6 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
   int r,v,b;
-  int nbocc;
 
   // On cherche les mins et les maxs de chaque composante sur la couverture
 
