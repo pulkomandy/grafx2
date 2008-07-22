@@ -132,7 +132,7 @@ void Bouton_Message_initial(void)
     Print_char_transparent_dans_fenetre(63,119,'S',CM_Noir);
     Print_char_transparent_dans_fenetre(74,120,'T',CM_Noir);
   }
-    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(260*Menu_Facteur_X))>>1,(Hauteur_ecran-(172*Menu_Facteur_Y))>>1,260,172);
+    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(260*Menu_Facteur_X))>>1,(Hauteur_ecran-(172*Menu_Facteur_Y))>>1,260*Menu_Facteur_X,172*Menu_Facteur_Y);
   Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,0x001C); // 1
 
   Afficher_curseur();

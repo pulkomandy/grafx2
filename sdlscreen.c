@@ -106,11 +106,15 @@ void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decala
 	puts("Display_brush_Color_SDL non implémenté!");
 }
 
-void Display_brush_Mono_SDL   (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse)
+void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
+	word Decalage_X, word Decalage_Y, word Largeur, word Hauteur,
+	byte Couleur_de_transparence, byte Couleur, word Largeur_brosse)
 /* On affiche la brosse en monochrome */
 {
-    byte* Dest=Pos_Y*Largeur_ecran+Pos_X+Ecran; //EDI=adr destination à l'écran
-    byte* Src=Largeur_brosse*Decalage_Y+Decalage_X+Brosse; //ESI=adr ds la brosse
+    byte* Dest=Pos_Y*Largeur_ecran+Pos_X+Ecran; // EDI = adr destination à 
+    	// l'écran
+    byte* Src=Largeur_brosse*Decalage_Y+Decalage_X+Brosse; // ESI = adr ds 
+    	// la brosse
     int dx,cx;
 
     for(dx=Hauteur;dx!=0;dx--)

@@ -199,8 +199,8 @@ void Bouton_Stats(void)
   short Bouton_clicke;
   char  Buffer[37];
   dword Utilisation_couleur[256];
-  long  Taille;
-  struct statfs* Informations_Disque = NULL;
+  unsigned long long Taille;
+  struct statfs Informations_Disque;
 
 
   Ouvrir_fenetre(310,174,"Statistics");
@@ -220,25 +220,32 @@ void Bouton_Stats(void)
 
   // Affichage de la mémoire restante
   Print_dans_fenetre(10,35,"Free memory:",STATS_COULEUR_TITRES,CM_Noir);
-  unsigned long freeRam = Memoire_libre();
-  if(freeRam > (1024*1024*1024))
-  	sprintf(Buffer,"%ld Gigabytes",freeRam/(1024*1024*1024));
-  else if(freeRam > (1024*1024))
-  	sprintf(Buffer,"%ld Megabytes",freeRam/(1024*1024));
-  else if(freeRam > 1024)
-  	sprintf(Buffer,"%ld Kilobytes",freeRam/1024);
+  unsigned long long freeRam = Memoire_libre();
+  if(freeRam > (100ULL*1024*1024*1024))
+  	sprintf(Buffer,"%d Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
+  else if(freeRam > (100*1024*1024))
+  	sprintf(Buffer,"%d Megabytes",(unsigned int)(freeRam/(1024*1024)));
+  else if(freeRam > 100*1024)
+  	sprintf(Buffer,"%d Kilobytes",(unsigned int)(freeRam/1024));
   else
-  	sprintf(Buffer,"%ld bytes",freeRam);
+  	sprintf(Buffer,"%d bytes",(unsigned int)freeRam);
   Print_dans_fenetre(114,35,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre
   sprintf(Buffer,"Free space on %c:",Principal_Repertoire_courant[0]);
   Print_dans_fenetre(10,51,Buffer,STATS_COULEUR_TITRES,CM_Noir);
-  statfs(Principal_Repertoire_courant,Informations_Disque);
-  Taille=Informations_Disque->f_bfree;
+  statfs(Principal_Repertoire_courant,&Informations_Disque);
+  Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
   if (Taille>=0)
   {
-    sprintf(Buffer,"%ld bytes",Taille);
+    if(Taille > (100ULL*1024*1024*1024))
+    	sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
+    else if(Taille > (100*1024*1024))
+    	sprintf(Buffer,"%d Megabytes",(unsigned int)(Taille/(1024*1024)));
+    else if(Taille > (100*1024))
+    	sprintf(Buffer,"%d Kilobytes",(unsigned int)(Taille/1024));
+    else 
+    	sprintf(Buffer,"%d bytes",(unsigned int)Taille);
     Print_dans_fenetre(146,51,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
   }
   else
@@ -254,6 +261,7 @@ void Bouton_Stats(void)
 
   // Affichage du nombre de couleur utilis‚
   Print_dans_fenetre(18,83,"Colors used:",STATS_COULEUR_TITRES,CM_Noir);
+  bzero(Utilisation_couleur,256*sizeof(Utilisation_couleur[0]));
   sprintf(Buffer,"%d",Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur));
   Print_dans_fenetre(122,83,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 

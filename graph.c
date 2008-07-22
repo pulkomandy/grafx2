@@ -1670,10 +1670,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_Y<=Limite_Bas) )
         Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
-	// UpdateRect
-  	  SDL_UpdateRect(Ecran_SDL,Pinceau_X,Pinceau_Y,
-	  	1,1
-	  );
+  	SDL_UpdateRect(Ecran_SDL, Pinceau_X, Pinceau_Y, 1,1 );
       break;
 
     case FORME_PINCEAU_BROSSE_COULEUR : // Brosse en couleur
@@ -1820,8 +1817,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                              Back_color,Fore_color,
                              Brosse_Largeur);
 
-	// UPDATERECT ds FCT
-
         if (Loupe_Mode)
         {
           Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
@@ -1928,8 +1923,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                              Largeur,Hauteur,
                              0,Fore_color,
                              TAILLE_MAXI_PINCEAU);
-
-	// UPDATERECT ds FCT
 
         if (Loupe_Mode)
         {

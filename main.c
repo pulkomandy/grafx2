@@ -23,7 +23,7 @@
 #include "sdlscreen.h"
 #include "erreurs.h"
 
-byte Ancien_nb_lignes;                  // Ancien nombre de lignes de l'écran
+byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---

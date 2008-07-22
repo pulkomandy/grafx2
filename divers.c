@@ -15,7 +15,7 @@ byte Recuperer_nb_lignes(void)
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {
     int Nombre_De_Pixels=0;
-    Uint8* Pixel_Courant=Ecran;
+    Uint8* Pixel_Courant=Principal_Ecran;
     Uint8 Couleur;
     word Nombre_Couleurs=0;
     int i;
@@ -24,7 +24,7 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
     Nombre_De_Pixels=Principal_Hauteur_image*Principal_Largeur_image;
 
     // On parcourt l'écran courant pour compter les utilisations des couleurs
-    for(i=0;i>Nombre_De_Pixels;i++)
+    for(i=0;i<Nombre_De_Pixels;i++)
     {
         Couleur=*Pixel_Courant; //on lit la couleur dans l'écran
 
@@ -35,14 +35,11 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
     }
 
     //On va maintenant compter dans la table les couleurs utilisées:
-    Couleur=0;
-    do
+    for(i=0;i<256;i++)
     {
-	if (Tableau[Couleur]!=0)
+	if (Tableau[i]!=0)
 	    Nombre_Couleurs++;
-	Couleur++;
     }
-    while(Couleur!=0); //On sort quand on a fait le tour (la var est sur 8 bits donc 255+1=0)
 
     return Nombre_Couleurs;
 }
