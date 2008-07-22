@@ -435,24 +435,12 @@ int Nouvelle_page_possible(
   Taille_page_brouillon =Taille_d_une_page(Liste_secondaire->Pages);
   Taille_nouvelle_page  =Taille_d_une_page(Nouvelle_page);
 
-printf("Memoire libre : %ld\n",Memoire_libre());
-DEBUG("QMin",QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER);
-
-DEBUG("Taille_immediatement_disponible",Taille_immediatement_disponible);
-DEBUG("Taille_liste_courante",Taille_immediatement_disponible);
-DEBUG("Taille_liste_brouillon",Taille_liste_brouillon);
-DEBUG("Taille_page_brouillon",Taille_page_brouillon);
-DEBUG("Taille_nouvelle_page",Taille_nouvelle_page);
-
   // Il faut pouvoir loger la nouvelle page et son backup dans la page
   // courante, en conservant au pire la 1ère page de brouillon.
   if ( (Taille_immediatement_disponible + Taille_liste_courante +
        Taille_liste_brouillon - Taille_page_brouillon)
        < (2*Taille_nouvelle_page) )
-  {
-    DEBUG("A",0);
     return 0;
-  }
 
   // Il faut pouvoir loger le brouillon et son backup dans la page de
   // brouillon, en conservant au pire un exemplaire de la nouvelle page dans
@@ -460,10 +448,7 @@ DEBUG("Taille_nouvelle_page",Taille_nouvelle_page);
   // brouillon)
   if ((Taille_immediatement_disponible+Taille_liste_courante+
        Taille_liste_brouillon-Taille_nouvelle_page)<(2*Taille_page_brouillon))
-  {
-    DEBUG("B",1);
     return 0;
-  }
 
   return 1;
 }
@@ -698,22 +683,26 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
         Retour=1;
       }
       else
-      {DEBUG("Il n'est pas possible de démarrer le programme avec la page \
-      principale et la page de brouillon aux dimensions demandée par \
-      l'utilisateur. ==> On l'envoie ballader",0);
+      {
+      	// Il n'est pas possible de démarrer le programme avec la page 
+        // principale et la page de brouillon aux dimensions demandée par 
+        // l'utilisateur. ==> On l'envoie ballader
         Retour=0;
       }
     }
     else
-    {DEBUG("On ne peut pas démarrer le programme avec ne serait-ce qu'une\
-    page de la dimension souhaitée, donc on laisse tout tomber et on le \
-    renvoie chier.",0);
+    {
+      // On ne peut pas démarrer le programme avec ne serait-ce qu'une
+      // page de la dimension souhaitée, donc on laisse tout tomber et on
+      // le renvoie chier.
       Retour=0;
     }
   }
   else
   {
-  DEBUG("On n'a même pas réussi à créer les listes. Donc c'est même pas la peine de continuer : l'utilisateur ne pourra jamais rien faire, autant avorter le chargement du programme.",0);
+    // On n'a même pas réussi à créer les listes. Donc c'est même pas la 
+    // peine de continuer : l'utilisateur ne pourra jamais rien faire, 
+    // autant avorter le chargement du programme.
     Retour=0;
   }
 

@@ -511,17 +511,15 @@ void Initialisation_du_programme(int argc,char * argv[])
   Principal_Hauteur_image=Hauteur_ecran;
   Brouillon_Largeur_image=Largeur_ecran;
   Brouillon_Hauteur_image=Hauteur_ecran;
-DEBUG("Avant init",0);
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Initialiser_les_listes_de_backups_en_debut_de_programme(Config.Nb_pages_Undo+1,Largeur_ecran,Hauteur_ecran)==0)
     Erreur(ERREUR_MEMOIRE);
-DEBUG("Apres init",1);
   // On remet le nom par défaut pour la page de brouillon car il été modifié
   // par le passage d'un fichier en paramètre lors du traitement précédent.
-  // Note: le fait que l'on ne modifie que les variables globales Brouillon_*
-  // et pas les infos contenues dans la page de brouillon elle-même ne m'ins-
-  // -pire pas confiance mais ça a l'air de marcher sans poser de problèmes,
-  // alors...
+  // Note: le fait que l'on ne modifie que les variables globales 
+  // Brouillon_* et pas les infos contenues dans la page de brouillon 
+  // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
+  // poser de problèmes, alors...
   if (Un_fichier_a_ete_passe_en_parametre)
   {
     strcpy(Brouillon_Repertoire_fichier,Brouillon_Repertoire_courant);

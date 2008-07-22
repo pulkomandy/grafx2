@@ -1634,18 +1634,28 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   // Couleur: couleur à appliquer au pinceau
   // Preview: "Il ne faut l'afficher qu'à l'écran"
 {
-  short Debut_X; // Position X (dans l'image) à partir de laquelle on affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'écran selon laquelle on affiche la brosse/pinceau
-  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on 
+  	// affiche la brosse/pinceau
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on 
+  	// affiche la brosse/pinceau
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la 
+  	// brosse/pinceau
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la 
+  	// brosse/pinceau
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir 
+  	// de laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir 
+  	// de laquelle on affiche la brosse/pinceau
   short Pos_X; // Position X (dans l'image) en cours d'affichage
   short Pos_Y; // Position Y (dans l'image) en cours d'affichage
-  short Compteur_X; // Position X (dans la brosse/pinceau) en cours d'affichage
-  short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
+  short Compteur_X; // Position X (dans la brosse/pinceau) en cours 
+  	// d'affichage
+  short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours 
+  	// d'affichage
+  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la 
+  	// brosse/pinceau
+  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la 
+  	// brosse/pinceau
   byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
   int Position;
   byte * Temp;
@@ -1659,7 +1669,13 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_Y>=Limite_Haut)
         && (Pinceau_Y<=Limite_Bas) )
         Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
+
+	// UpdateRect
+  	  SDL_UpdateRect(Ecran_SDL,Pinceau_X,Pinceau_Y,
+	  	1,1
+	  );
       break;
+
     case FORME_PINCEAU_BROSSE_COULEUR : // Brosse en couleur
       Debut_X=X-Brosse_Decalage_X;
       Debut_Y=Y-Brosse_Decalage_Y;
@@ -1673,21 +1689,31 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       if (Preview)
       {
         if ( (Largeur>0) && (Hauteur>0) )
-          Display_brush_Color(Debut_X-Principal_Decalage_X,
-                              Debut_Y-Principal_Decalage_Y,
-                              Debut_Compteur_X,Debut_Compteur_Y,
-                              Largeur,Hauteur,Back_color,
-                              Brosse_Largeur);
+          Display_brush_Color(
+	  	Debut_X-Principal_Decalage_X,
+          	Debut_Y-Principal_Decalage_Y,
+                Debut_Compteur_X,
+		Debut_Compteur_Y,
+                Largeur,
+		Hauteur,
+		Back_color,
+                Brosse_Largeur
+	  );
+
+	  // UpdateRect dans la fonction
 
         if (Loupe_Mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,
+	  	&Hauteur
+	  );
+
           Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
           Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
 
           if ( (Largeur>0) && (Hauteur>0) )
           {
-            // Corrections d–es au Zoom:
+            // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
             Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
@@ -1699,6 +1725,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                      Largeur,Hauteur,Back_color,
                                      Brosse_Largeur,
                                      Buffer_de_ligne_horizontale);
+	    // updaterect dans la fonction
           }
         }
       }
@@ -1709,30 +1736,41 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if (Smear_Debut)
           {
             if ((Largeur>0) && (Hauteur>0))
-              Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
-                                                       Debut_X,Debut_Y,
-                                                       Largeur,Hauteur,
-                                                       Principal_Largeur_image,
-                                                       Smear_Brosse,
-                                                       Debut_Compteur_X,
-                                                       Debut_Compteur_Y,
-                                                       Smear_Brosse_Largeur);
+              Copier_une_partie_d_image_dans_une_autre(
+	      	Principal_Ecran, Debut_X, Debut_Y, Largeur, Hauteur,
+                Principal_Largeur_image, Smear_Brosse,
+                Debut_Compteur_X, Debut_Compteur_Y,
+                Smear_Brosse_Largeur
+	      );
+	      // UPDATERECT
             Smear_Debut=0;
           }
           else
           {
-            for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-              for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+            for (Pos_Y = Debut_Y, Compteur_Y = Debut_Compteur_Y;
+	    	Compteur_Y < Fin_Compteur_Y;
+		Pos_Y++, Compteur_Y++
+	    )
+              for (Pos_X = Debut_X, Compteur_X = Debut_Compteur_X;
+	      	Compteur_X < Fin_Compteur_X;
+		Pos_X++, Compteur_X++
+	      )
               {
-                Couleur_temporaire=Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y);
-                Position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
-                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
+                Couleur_temporaire = Lit_pixel_dans_ecran_courant(
+			Pos_X,Pos_Y
+		);
+                Position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
+                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)
+			!= Back_color)
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
                   Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
           }
+  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	  	Fin_Compteur_X,Fin_Compteur_Y
+	  );
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
           Smear_Max_X=Fin_Compteur_X;
@@ -1755,7 +1793,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
+  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	  	Fin_Compteur_X,Fin_Compteur_Y
+	    );
         }
+
       }
       break;
     case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
@@ -1778,6 +1820,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                              Back_color,Fore_color,
                              Brosse_Largeur);
 
+	// UPDATERECT ds FCT
+
         if (Loupe_Mode)
         {
           Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
@@ -1786,7 +1830,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 
           if ( (Largeur>0) && (Hauteur>0) )
           {
-            // Corrections d–es au Zoom:
+            // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
             Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
@@ -1799,6 +1843,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                     Back_color,Fore_color,
                                     Brosse_Largeur,
                                     Buffer_de_ligne_horizontale);
+
+	// UPDATERECT ds FCT
           }
         }
       }
@@ -1817,6 +1863,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
+						       //UPDATERECT
             Smear_Debut=0;
           }
           else
@@ -1832,7 +1879,13 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
+
+  	      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	  	Fin_Compteur_X,Fin_Compteur_Y
+	      );
+
           }
+
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
           Smear_Max_X=Fin_Compteur_X;
@@ -1846,6 +1899,10 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
+
+  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	  	Fin_Compteur_X,Fin_Compteur_Y
+	    );
         }
       }
       break;
@@ -1872,6 +1929,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                              0,Fore_color,
                              TAILLE_MAXI_PINCEAU);
 
+	// UPDATERECT ds FCT
+
         if (Loupe_Mode)
         {
           Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
@@ -1880,7 +1939,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 
           if ( (Largeur>0) && (Hauteur>0) )
           {
-            // Corrections d–es au Zoom:
+            // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
             Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
@@ -1893,6 +1952,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                     0,Fore_color,
                                     TAILLE_MAXI_PINCEAU,
                                     Buffer_de_ligne_horizontale);
+
+	// UPDATERECT ds FCT
           }
         }
 
@@ -1913,6 +1974,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
+	    // UPDATERECT
             Smear_Debut=0;
           }
           else
@@ -1929,6 +1991,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
           }
+
+  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	  	Fin_Compteur_X,Fin_Compteur_Y
+	  );
+
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
           Smear_Max_X=Fin_Compteur_X;
@@ -1942,26 +2009,36 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
+
+  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+	    	Fin_Compteur_X,Fin_Compteur_Y
+	    );
         }
       }
   }
-  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
 }
 
-  // -- Effacer le pinceau --
+// -- Effacer le pinceau -- //
 
 void Effacer_pinceau(short X,short Y)
   // X,Y: position du centre du pinceau
 {
-  short Debut_X; // Position X (dans l'image) à partir de laquelle on affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'écran selon laquelle on affiche la brosse/pinceau
-  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir de laquelle on affiche la brosse/pinceau
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on 
+  	// affiche la brosse/pinceau
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on 
+  	// affiche la brosse/pinceau
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la 
+  	// brosse/pinceau
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la 
+  	// brosse/pinceau
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir 
+  	// de laquelle on affiche la brosse/pinceau
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir 
+  	// de laquelle on affiche la brosse/pinceau
   //short Pos_X; // Position X (dans l'image) en cours d'affichage
   //short Pos_Y; // Position Y (dans l'image) en cours d'affichage
-  //short Compteur_X; // Position X (dans la brosse/pinceau) en cours d'affichage
+  //short Compteur_X; // Position X (dans la brosse/pinceau) en cours 
+  	//d'affichage
   //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
   short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
   short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
