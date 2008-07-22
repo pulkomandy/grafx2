@@ -2110,8 +2110,8 @@ Display_brush_Mono_Zoom_VESA_LFB proc near
     ; On place dans ESI la position courante en Y
     mov  esi,edx
 
-    ; On empile à l'avance les derniers paramŠtres qui ne changent jamais le
-    ; long de la mˆme ligne zoomée:
+    ; On empile à l'avance les derniers paramètres qui ne changent jamais 
+    ; le long de la même ligne zoomée:
     mov  al,Couleur
     mov  cl,Couleur_de_transparence
     push eax                                      ; Couleur d'affichage

@@ -616,3 +616,20 @@ byte Get_key(void)
 	return 0;
 }
 
+void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee, 
+	word Facteur, word Largeur
+)
+{
+	byte couleur;
+	word larg;
+
+	// Pour chaque pixel
+	for(larg=0;larg<Largeur;larg++){
+		couleur = *Ligne_originale;
+
+		memset(Ligne_zoomee,couleur,Facteur);
+		Ligne_zoomee+=Facteur;
+
+		Ligne_originale++;
+	}
+}
