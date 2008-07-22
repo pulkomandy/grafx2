@@ -213,14 +213,22 @@ void Bouton_Stats(void)
 
   Fenetre_Definir_bouton_normal(120,153,70,14,"OK",0,1,0x0001); // 1
 
-  // Affichage du num‚ro de version
+  // Affichage du numéro de version
   Print_dans_fenetre(10,19,"Version:",STATS_COULEUR_TITRES,CM_Noir);
   sprintf(Buffer,"GrafX 2.00 %s%s",ALPHA_BETA,POURCENTAGE_VERSION);
   Print_dans_fenetre(82,19,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
-  // Affichage de la m‚moire restante
+  // Affichage de la mémoire restante
   Print_dans_fenetre(10,35,"Free memory:",STATS_COULEUR_TITRES,CM_Noir);
-  sprintf(Buffer,"%d bytes",Memoire_libre());
+  unsigned long freeRam = Memoire_libre();
+  if(freeRam > (1024*1024*1024))
+  	sprintf(Buffer,"%ld Gigabytes",freeRam/(1024*1024*1024));
+  else if(freeRam > (1024*1024))
+  	sprintf(Buffer,"%ld Megabytes",freeRam/(1024*1024));
+  else if(freeRam > 1024)
+  	sprintf(Buffer,"%ld Kilobytes",freeRam/1024);
+  else
+  	sprintf(Buffer,"%ld bytes",freeRam);
   Print_dans_fenetre(114,35,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre

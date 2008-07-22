@@ -393,12 +393,12 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
 
 
 // Indique quelle est la mémoire disponible
-dword Memoire_libre(void)
+unsigned long Memoire_libre(void)
 {
-  // On appelle la fonction qui optimise la mémoire libre afin d'en regagner
-  // un maximum. Sinon, tous les "free" libèrent une mémoire qui n'est pas
-  // prise en compte par la fonction, et on se retrouve avec un manque
-  // alarmant de mémoire.
+  // On appelle la fonction qui optimise la mémoire libre afin d'en 
+  // regagner un maximum. Sinon, tous les "free" libèrent une mémoire qui 
+  // n'est pas prise en compte par la fonction, et on se retrouve avec un 
+  // manque alarmant de mémoire.
   /*
   A revoir, mais est-ce vraiment utile?
   _heapmin();
@@ -406,7 +406,7 @@ dword Memoire_libre(void)
 
     struct sysinfo info;
     sysinfo(&info);
-    return info.freeram;
+    return info.freeram*info.mem_unit;
 }
 
 

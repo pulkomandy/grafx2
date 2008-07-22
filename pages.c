@@ -414,26 +414,41 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
   }
 }
 
-int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire)
+int Nouvelle_page_possible(
+	S_Page 		 * Nouvelle_page,
+	S_Liste_de_pages * Liste_courante,
+	S_Liste_de_pages * Liste_secondaire
+)
 {
-  unsigned int Taille_immediatement_disponible;
-  unsigned int Taille_liste_courante;
-  unsigned int Taille_liste_brouillon;
-  unsigned int Taille_page_courante;
-  unsigned int Taille_page_brouillon;
-  unsigned int Taille_nouvelle_page;
+  unsigned long Taille_immediatement_disponible;
+  unsigned long Taille_liste_courante;
+  unsigned long Taille_liste_brouillon;
+  unsigned long Taille_page_courante;
+  unsigned long Taille_page_brouillon;
+  unsigned long Taille_nouvelle_page;
 
-  Taille_immediatement_disponible=Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
+  Taille_immediatement_disponible = Memoire_libre()
+  	- QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
   Taille_liste_courante =Taille_d_une_liste_de_pages(Liste_courante);
   Taille_liste_brouillon=Taille_d_une_liste_de_pages(Liste_secondaire);
   Taille_page_courante  =Taille_d_une_page(Liste_courante->Pages);
   Taille_page_brouillon =Taille_d_une_page(Liste_secondaire->Pages);
   Taille_nouvelle_page  =Taille_d_une_page(Nouvelle_page);
 
+printf("Memoire libre : %ld\n",Memoire_libre());
+DEBUG("QMin",QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER);
+
+DEBUG("Taille_immediatement_disponible",Taille_immediatement_disponible);
+DEBUG("Taille_liste_courante",Taille_immediatement_disponible);
+DEBUG("Taille_liste_brouillon",Taille_liste_brouillon);
+DEBUG("Taille_page_brouillon",Taille_page_brouillon);
+DEBUG("Taille_nouvelle_page",Taille_nouvelle_page);
+
   // Il faut pouvoir loger la nouvelle page et son backup dans la page
   // courante, en conservant au pire la 1ère page de brouillon.
-  if ((Taille_immediatement_disponible+Taille_liste_courante+
-       Taille_liste_brouillon-Taille_page_brouillon)<(2*Taille_nouvelle_page))
+  if ( (Taille_immediatement_disponible + Taille_liste_courante +
+       Taille_liste_brouillon - Taille_page_brouillon)
+       < (2*Taille_nouvelle_page) )
   {
     DEBUG("A",0);
     return 0;
@@ -683,12 +698,16 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
         Retour=1;
       }
       else
-      {DEBUG("Il n'est pas possible de démarrer le programme avec la page principale et la page de brouillon aux dimensions demandée par l'utilisateur. ==> On l'envoie ballader",0);
+      {DEBUG("Il n'est pas possible de démarrer le programme avec la page \
+      principale et la page de brouillon aux dimensions demandée par \
+      l'utilisateur. ==> On l'envoie ballader",0);
         Retour=0;
       }
     }
     else
-    {DEBUG("On ne peut pas démarrer le programme avec ne serait-ce qu'une page de la dimension souhaitée, donc on laisse tout tomber et on le renvoie chier.",0);
+    {DEBUG("On ne peut pas démarrer le programme avec ne serait-ce qu'une\
+    page de la dimension souhaitée, donc on laisse tout tomber et on le \
+    renvoie chier.",0);
       Retour=0;
     }
   }

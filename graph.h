@@ -5,9 +5,11 @@
 void Remapper_ecran_apres_changement_couleurs_menu(void);
 void Calculer_couleurs_menu_optimales(struct Composantes * Palette);
 
-dword Memoire_libre(void);
+unsigned long Memoire_libre(void);
 
-void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table_dec);
+void Liste2tables(word * Liste, short Pas, byte Mode, byte * Table_inc,
+	byte * Table_dec
+);
 
 void  Num2str(dword Nombre,char * Chaine,byte Taille);
 int   Str2num(char * Chaine);
@@ -138,11 +140,8 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement);
 
 // Gestion des backups:
 void Download_infos_page_principal(S_Page * Page);
-void Upload_infos_page_principal(S_Page * Page);
 void Download_infos_page_brouillon(S_Page * Page);
-void Upload_infos_page_brouillon(S_Page * Page);
 void Download_infos_backup(S_Liste_de_pages * Liste);
-// int  Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Largeur,int Hauteur); // pages.h
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
 void Nouveau_nombre_de_backups(int Nouveau);
 int  Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur);

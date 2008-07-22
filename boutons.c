@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include "boutons.h"
 #include "operatio.h"
+#include "pages.h"
 
 //  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
