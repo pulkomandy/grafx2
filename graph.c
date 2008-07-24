@@ -1657,7 +1657,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   int Position;
   byte * Temp;
 
-  if (!(Preview && Mouse_K))
+  #define UpdateZoom(X,Y,w,h) if((Y)>= Limite_Haut_Zoom && (Y) <= Limite_visible_Bas_Zoom && (X)>= Limite_Gauche_Zoom && (X) <= Limite_visible_Droite_Zoom) SDL_UpdateRect(Ecran_SDL,Table_mul_facteur_zoom[(X)-Loupe_Decalage_X]+Principal_X_Zoom,((Y)-Loupe_Decalage_Y)*Loupe_Facteur,(w)*Loupe_Facteur,(h)*Loupe_Facteur)
+  if (!(Preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
   switch (Pinceau_Forme)
   {
     case FORME_PINCEAU_POINT : // !!! TOUJOURS EN PREVIEW !!!
@@ -1670,6 +1671,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   		SDL_UpdateRect(Ecran_SDL, 
 			Pinceau_X - Principal_Decalage_X, 
 			Pinceau_Y - Principal_Decalage_Y, 1,1 );
+		// Attention au zoom !
+		if(Loupe_Mode) UpdateZoom(X,Y,1,1);
+		DEBUG("Point définitif",0);
 	}
       break;
 
@@ -1893,9 +1897,12 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 
-  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
-	  	Fin_Compteur_X,Fin_Compteur_Y
+  	  SDL_UpdateRect(Ecran_SDL,
+	  	Debut_X+Principal_Decalage_X,
+	  	Debut_Y+Principal_Decalage_Y,
+	  	Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
 	  );
+	  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
       break;
@@ -1999,10 +2006,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-
-  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
-	    	Fin_Compteur_X,Fin_Compteur_Y
+// Ceci est testé et fonctionne :)
+  	  SDL_UpdateRect(Ecran_SDL,
+	  	Max(Debut_X-Principal_Decalage_X,0),
+	  	Max(Debut_Y-Principal_Decalage_Y,0),
+	    	Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
 	  );
+
+	  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,
+	  	Fin_Compteur_X-Debut_Compteur_X,
+		Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
   }
@@ -2042,7 +2055,12 @@ void Effacer_pinceau(short X,short Y)
         && (Pinceau_X<=Limite_Droite)
         && (Pinceau_Y>=Limite_Haut)
         && (Pinceau_Y<=Limite_Bas) )
+      {
         Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
+	SDL_UpdateRect(Ecran_SDL,Pinceau_X+Principal_Decalage_X,Pinceau_Y+Principal_Decalage_Y,1,1);
+	if(Loupe_Mode) UpdateZoom(Pinceau_X,Pinceau_Y,1,1);
+	DEBUG("Pas de clic",1);
+      }
       break;
     case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
     case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
@@ -2340,13 +2358,20 @@ void Afficher_curseur(void)
 
       Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // Largeur de la barre XOR
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
+      {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
+        SDL_UpdateRect(Ecran_SDL,0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
+      }
 
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
+      {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
+	SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+      }
 
       if (Loupe_Mode)
       {
+      	// UPDATERECT
         if ((Pinceau_Y>=Limite_Haut_Zoom) && (Pinceau_Y<=Limite_visible_Bas_Zoom))
           Ligne_horizontale_XOR_Zoom(Limite_Gauche_Zoom,Pinceau_Y,Loupe_Largeur);
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
@@ -2355,6 +2380,25 @@ void Afficher_curseur(void)
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
+
+      // Petite croix au centre
+      Debut_X=(Mouse_X-3);
+      Debut_Y=(Mouse_Y-3);
+      Fin_X  =(Mouse_X+4);
+      Fin_Y  =(Mouse_Y+4);
+      if (Debut_X<0)
+        Debut_X=0;
+      if (Debut_Y<0)
+        Debut_Y=0;
+      if (Fin_X>Largeur_ecran)
+        Fin_X=Largeur_ecran;
+      if (Fin_Y>Menu_Ordonnee)
+        Fin_Y=Menu_Ordonnee;
+
+      Ligne_horizontale_XOR(Debut_X,Mouse_Y,Fin_X-Debut_X);
+      Ligne_verticale_XOR  (Mouse_X,Debut_Y,Fin_Y-Debut_Y);
+
+      // Grand rectangle autour
       Debut_X=Mouse_X-(Loupe_Largeur>>1);
       Debut_Y=Mouse_Y-(Loupe_Hauteur>>1);
       if (Debut_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
@@ -2373,21 +2417,8 @@ void Afficher_curseur(void)
       Ligne_verticale_XOR(  Fin_X,Debut_Y+1,Loupe_Hauteur-2);
       Ligne_horizontale_XOR(Debut_X,  Fin_Y,Loupe_Largeur);
 
-      Debut_X=(Mouse_X-3);
-      Debut_Y=(Mouse_Y-3);
-      Fin_X  =(Mouse_X+4);
-      Fin_Y  =(Mouse_Y+4);
-      if (Debut_X<0)
-        Debut_X=0;
-      if (Debut_Y<0)
-        Debut_Y=0;
-      if (Fin_X>Largeur_ecran)
-        Fin_X=Largeur_ecran;
-      if (Fin_Y>Menu_Ordonnee)
-        Fin_Y=Menu_Ordonnee;
+      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 
-      Ligne_horizontale_XOR(Debut_X,Mouse_Y,Fin_X-Debut_X);
-      Ligne_verticale_XOR  (Mouse_X,Debut_Y,Fin_Y-Debut_Y);
       break;
     default: //case FORME_CURSEUR_ROTATE_XOR :
       Debut_X=1-(Brosse_Largeur>>1);
@@ -2619,6 +2650,7 @@ void Effacer_curseur(void)
 
       if (Loupe_Mode)
       {
+      	// UPDATERECT
         if ((Pinceau_Y>=Limite_Haut_Zoom) && (Pinceau_Y<=Limite_visible_Bas_Zoom))
           Ligne_horizontale_XOR_Zoom(Limite_Gauche_Zoom,Pinceau_Y,Loupe_Largeur);
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
@@ -2629,6 +2661,26 @@ void Effacer_curseur(void)
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
+
+      // Petite croix au centre
+      Debut_X=(Mouse_X-3);
+      Debut_Y=(Mouse_Y-3);
+      Fin_X  =(Mouse_X+4);
+      Fin_Y  =(Mouse_Y+4);
+      if (Debut_X<0)
+        Debut_X=0;
+      if (Debut_Y<0)
+        Debut_Y=0;
+      if (Fin_X>Largeur_ecran)
+        Fin_X=Largeur_ecran;
+      if (Fin_Y>Menu_Ordonnee)
+        Fin_Y=Menu_Ordonnee;
+
+      Ligne_horizontale_XOR(Debut_X,Mouse_Y,Fin_X-Debut_X);
+      Ligne_verticale_XOR  (Mouse_X,Debut_Y,Fin_Y-Debut_Y);
+
+      // Grand rectangle autour
+
       Debut_X=Mouse_X-(Loupe_Largeur>>1);
       Debut_Y=Mouse_Y-(Loupe_Hauteur>>1);
       if (Debut_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
@@ -2647,21 +2699,7 @@ void Effacer_curseur(void)
       Ligne_verticale_XOR(  Fin_X,Debut_Y+1,Loupe_Hauteur-2);
       Ligne_horizontale_XOR(Debut_X,  Fin_Y,Loupe_Largeur);
 
-      Debut_X=(Mouse_X-3);
-      Debut_Y=(Mouse_Y-3);
-      Fin_X  =(Mouse_X+4);
-      Fin_Y  =(Mouse_Y+4);
-      if (Debut_X<0)
-        Debut_X=0;
-      if (Debut_Y<0)
-        Debut_Y=0;
-      if (Fin_X>Largeur_ecran)
-        Fin_X=Largeur_ecran;
-      if (Fin_Y>Menu_Ordonnee)
-        Fin_Y=Menu_Ordonnee;
-
-      Ligne_horizontale_XOR(Debut_X,Mouse_Y,Fin_X-Debut_X);
-      Ligne_verticale_XOR  (Mouse_X,Debut_Y,Fin_Y-Debut_Y);
+      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 
       break;
     default: //case FORME_CURSEUR_ROTATE_XOR :
@@ -3874,7 +3912,7 @@ void Remplir(byte Couleur_de_remplissage)
   fonction_afficheur Pixel_figure;
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
-  void Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
+  void inline Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
   {
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
   }
