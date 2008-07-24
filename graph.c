@@ -2171,6 +2171,8 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 
   for (Indice=Pos_Y_reelle; Indice<Pos_Y_Fin; Indice++)
     Ligne_horizontale_XOR(Pos_X_reelle,Indice,Largeur_reelle);
+
+  SDL_UpdateRect(Ecran_SDL,Pos_X_reelle,Pos_Y_reelle,Largeur_reelle,Pos_Y_Fin-Pos_Y_reelle);
 }
 
 
@@ -2185,6 +2187,8 @@ void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
 
   for (Indice=Pos_Y_reelle; Indice<Pos_Y_Fin; Indice++)
     Ligne_horizontale_XOR(Pos_X_reelle,Indice,Loupe_Facteur);
+
+  SDL_UpdateRect(Ecran_SDL,Pos_X_reelle,Pos_Y_reelle,Loupe_Facteur,Pos_Y_Fin-Pos_Y_reelle);
 }
 
 
@@ -4018,6 +4022,9 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
   Pixel_figure(Centre_X-Rayon,Centre_Y,Couleur); // Gauche
   Pixel_figure(Centre_X+Rayon,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
+
+  SDL_UpdateRect(Ecran_SDL,Centre_X-Rayon-Principal_Decalage_X,
+  	Centre_Y-Rayon-Principal_Decalage_Y,2*Rayon+1,2*Rayon+1);
 }
 
   // -- Tracé définitif d'un cercle vide --
@@ -4075,6 +4082,9 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
     for (Pos_X=Debut_X,Cercle_Curseur_X=(long)Debut_X-Centre_X;Pos_X<=Fin_X;Pos_X++,Cercle_Curseur_X++)
       if (Pixel_dans_cercle())
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
+
+  SDL_UpdateRect(Ecran_SDL,Debut_X+Principal_Decalage_X,
+  	Debut_Y+Principal_Decalage_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 }
 
 
@@ -4389,7 +4399,16 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
   // On trace le rectangle:
   for (Pos_Y=Debut_Y;Pos_Y<=Fin_Y;Pos_Y++)
     for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
+      // Afficher_pixel traite chaque pixel avec tous les effets ! (smear, ...)
+      // Donc on ne peut pas otimiser en traçant ligne par ligne avec memset :(
       Afficher_pixel(Pos_X,Pos_Y,Couleur);
+  SDL_UpdateRect(Ecran_SDL,
+  	Debut_X-Principal_Decalage_X,
+  	Debut_Y-Principal_Decalage_Y,
+	Fin_X-Debut_X,
+	Fin_Y-Debut_Y);
+  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+
 }
 
 

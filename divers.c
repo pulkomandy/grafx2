@@ -389,40 +389,42 @@ void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
 
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 {
-	puts("Remplacer_une_couleur non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 {
-	puts("Ellipse_Calculer_limites non implémenté!");
+	UNIMPLEMENTED
 }
 
 byte Pixel_dans_ellipse(void)
 {
-	puts("Pixel_dans_ellipse non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Pixel_dans_cercle(void)
 {
-	puts("Pixel_dans_cercle non implémenté!");
+	if((Table_des_carres[abs(Cercle_Curseur_X)] + 
+	    Table_des_carres[abs(Cercle_Curseur_Y)] ) <= Cercle_Limite)
+		return 255;
 	return 0;
 }
 
 void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
 {
-	puts("Copier_une_partie_d_image_dans_une_autre non implémenté!");
+	UNIMPLEMENTED
 }
 
 byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_brouillon non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 {
-	puts("Rotate_90_deg_LOWLEVEL non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
