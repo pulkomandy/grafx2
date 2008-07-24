@@ -1,6 +1,6 @@
 CC = gcc
-COPT = -Wall -Os -c -g 
-LOPT = -lSDL -o grafx2
+COPT = -Wall -O3 -c -g 
+LOPT = -lSDL -o grafx2 
 
 debug: grafx2
 	@echo --- Everything OK.
@@ -17,7 +17,7 @@ main.o : graph.o const.h struct.h global.h graph.h divers.h init.h boutons.h mot
 init.o : const.h struct.h global.h modesvdo.h graph.h boutons.h palette.h aide.h operatio.h init.c readini.c saveini.c
 	$(CC) $(COPT) init.c
 
-graph.o : divers.o graph.c pages.c const.h struct.h global.h divers.h
+graph.o : divers.o graph.c pages.c const.h struct.h global.h divers.h erreurs.h
 	$(CC) $(COPT) graph.c
 
 divers.o : global.h const.h divers.c

@@ -16,10 +16,7 @@
 #include "boutons.h"
 #include "operatio.h"
 #include "shade.h"
-
-//  On déclare méchamment le prototype de Erreur pour éviter de faire un
-// fichier "main.h":
-void Erreur(int Code);
+#include "erreurs.h"
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
@@ -269,6 +266,11 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
         BLOCK_MENU[Fin_Y-Pos_X][Fin_X]=Couleur_Bas_droite;
       }
   }
+  SDL_UpdateRect(Ecran_SDL,
+  	Debut_X*Menu_Facteur_X,
+	Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
+	(Fin_X-Debut_X)*Menu_Facteur_X,
+	(Fin_Y-Debut_Y)*Menu_Facteur_Y);
 }
 
 

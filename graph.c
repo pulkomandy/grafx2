@@ -14,10 +14,6 @@
 #include "struct.h"
 #include "erreurs.h"
 
-//  On déclare méchamment le prototype de Erreur pour éviter de faire un
-// fichier "main.h":
-void Erreur(int Code);
-
 byte Meilleure_couleur(byte R,byte V,byte B)
 {
   short Coul;
@@ -1296,6 +1292,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne(X,Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
   }
+  SDL_UpdateRect(Ecran_SDL,X,Y,Largeur,8*Menu_Facteur_Y);
 }
 
   // -- Afficher un caractère dans une fenêtre --
@@ -1668,12 +1665,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_X<=Limite_Droite)
         && (Pinceau_Y>=Limite_Haut)
         && (Pinceau_Y<=Limite_Bas) )
-        Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
-
-  	SDL_UpdateRect(Ecran_SDL, Pinceau_X, Pinceau_Y, 1,1 );
+	{
+        	Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
+  		SDL_UpdateRect(Ecran_SDL, 
+			Pinceau_X - Principal_Decalage_X, 
+			Pinceau_Y - Principal_Decalage_Y, 1,1 );
+	}
       break;
 
     case FORME_PINCEAU_BROSSE_COULEUR : // Brosse en couleur
+
       Debut_X=X-Brosse_Decalage_X;
       Debut_Y=Y-Brosse_Decalage_Y;
       Largeur=Brosse_Largeur;
@@ -1683,6 +1684,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
       Fin_Compteur_X=Debut_Compteur_X+Largeur;
       Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+
       if (Preview)
       {
         if ( (Largeur>0) && (Hauteur>0) )
@@ -1696,8 +1698,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 		Back_color,
                 Brosse_Largeur
 	  );
-
-	  // UpdateRect dans la fonction
 
         if (Loupe_Mode)
         {
@@ -1722,7 +1722,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                      Largeur,Hauteur,Back_color,
                                      Brosse_Largeur,
                                      Buffer_de_ligne_horizontale);
-	    // updaterect dans la fonction
           }
         }
       }
@@ -1733,6 +1732,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if (Smear_Debut)
           {
             if ((Largeur>0) && (Hauteur>0))
+	    {
               Copier_une_partie_d_image_dans_une_autre(
 	      	Principal_Ecran, Debut_X, Debut_Y, Largeur, Hauteur,
                 Principal_Largeur_image, Smear_Brosse,
@@ -1740,6 +1740,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse_Largeur
 	      );
 	      // UPDATERECT
+	    }
             Smear_Debut=0;
           }
           else
@@ -1757,17 +1758,17 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 			Pos_X,Pos_Y
 		);
                 Position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
-                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)
-			!= Back_color)
+                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y) != Back_color)
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
+                  	Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
+
+  	      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y, 
+	      	Fin_Compteur_X,Fin_Compteur_Y );
           }
-  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
-	  	Fin_Compteur_X,Fin_Compteur_Y
-	  );
+
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
           Smear_Max_X=Fin_Compteur_X;
@@ -1790,10 +1791,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
-  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
-	  	Fin_Compteur_X,Fin_Compteur_Y
-	    );
         }
+  	SDL_UpdateRect(Ecran_SDL, Debut_X, Debut_Y, Fin_Compteur_X, Fin_Compteur_Y);
 
       }
       break;
@@ -1839,7 +1838,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                     Brosse_Largeur,
                                     Buffer_de_ligne_horizontale);
 
-	// UPDATERECT ds FCT
           }
         }
       }
@@ -1895,9 +1893,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 
-  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
 	  	Fin_Compteur_X,Fin_Compteur_Y
-	    );
+	  );
         }
       }
       break;
@@ -1946,7 +1944,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                     TAILLE_MAXI_PINCEAU,
                                     Buffer_de_ligne_horizontale);
 
-	// UPDATERECT ds FCT
           }
         }
 
@@ -2003,16 +2000,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 
-  	    SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
 	    	Fin_Compteur_X,Fin_Compteur_Y
-	    );
+	  );
         }
       }
   }
 }
 
 // -- Effacer le pinceau -- //
-
+//
 void Effacer_pinceau(short X,short Y)
   // X,Y: position du centre du pinceau
 {
@@ -2243,6 +2240,8 @@ void Afficher_curseur(void)
                   Pixel(Pos_X,Pos_Y,Couleur);
               }
             }
+
+	  SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
       }
       break;
@@ -2308,6 +2307,7 @@ void Afficher_curseur(void)
                   Pixel(Pos_X,Pos_Y,Couleur);
               }
             }
+	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,16,16);
         }
       }
       break;
@@ -2319,7 +2319,6 @@ void Afficher_curseur(void)
     case FORME_CURSEUR_SABLIER :
       Debut_X=Mouse_X-Curseur_Decalage_X[Forme];
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
-
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
         for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
         {
@@ -2327,11 +2326,13 @@ void Afficher_curseur(void)
           if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
             && (Pos_X>=0)            && (Pos_Y>=0) )
           {
+	    // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
             FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
             if (Couleur!=CM_Trans)
               Pixel(Pos_X,Pos_Y,Couleur);
           }
         }
+      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
       break;
     case FORME_CURSEUR_CIBLE_XOR :
       Pos_X=Pinceau_X-Principal_Decalage_X;
@@ -2456,12 +2457,12 @@ void Afficher_curseur(void)
 void Effacer_curseur(void)
 {
   byte  Forme;
-  short Debut_X;
-  short Debut_Y;
+  int Debut_X; // int car sont parfois négatifs ! (quand on dessine sur un bord)
+  int Debut_Y;
   short Fin_X;
   short Fin_Y;
-  short Pos_X;
-  short Pos_Y;
+  int Pos_X;
+  int Pos_Y;
   short Compteur_X;
   short Compteur_Y;
   //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
@@ -2507,14 +2508,18 @@ void Effacer_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
-            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+          for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+            for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
               if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
                 Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
       }
       if (!Cacher_pinceau)
+      {
         Effacer_pinceau(Pinceau_X,Pinceau_Y);
+      }
       break;
     case FORME_CURSEUR_CIBLE_PIPETTE:
       if (!Cacher_curseur)
@@ -2568,6 +2573,8 @@ void Effacer_curseur(void)
             for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
               if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
                 Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+
+	  SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
       }
       if (!Cacher_pinceau)
@@ -2587,7 +2594,9 @@ void Effacer_curseur(void)
           if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
             && (Pos_X>=0)            && (Pos_Y>=0) )
             Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
       break;
+
     case FORME_CURSEUR_CIBLE_XOR :
       Pos_X=Pinceau_X-Principal_Decalage_X;
       Pos_Y=Pinceau_Y-Principal_Decalage_Y;
@@ -2606,6 +2615,7 @@ void Effacer_curseur(void)
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
           Ligne_verticale_XOR_Zoom(Pinceau_X,Limite_Haut_Zoom,Loupe_Hauteur);
       }
+
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
@@ -2642,6 +2652,7 @@ void Effacer_curseur(void)
 
       Ligne_horizontale_XOR(Debut_X,Mouse_Y,Fin_X-Debut_X);
       Ligne_verticale_XOR  (Mouse_X,Debut_Y,Fin_Y-Debut_Y);
+
       break;
     default: //case FORME_CURSEUR_ROTATE_XOR :
       Debut_X=1-(Brosse_Largeur>>1);
