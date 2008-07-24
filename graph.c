@@ -2473,7 +2473,8 @@ void Effacer_curseur(void)
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
 
   if ( ( (Mouse_Y<Menu_Ordonnee)
-      && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
+      && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) 
+      			 || (Mouse_X>=Principal_X_Zoom) ) )
     || (Une_fenetre_est_ouverte) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
     Forme=Forme_curseur;
   else
@@ -2498,9 +2499,11 @@ void Effacer_curseur(void)
           if (Fin_X<4)
             Ligne_horizontale_XOR(Mouse_X+3,Mouse_Y,4-Fin_X);
 
-          Fin_Y=(Mouse_Y+7>Menu_Ordonnee/*Hauteur_ecran*/)?Mouse_Y+7-Menu_Ordonnee/*Hauteur_ecran*/:0;
+          Fin_Y=(Mouse_Y+7>Hauteur_ecran)?Mouse_Y+7-Hauteur_ecran:0;
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
+
+	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
         }
         else
         {
@@ -2540,11 +2543,9 @@ void Effacer_curseur(void)
           if (Fin_X<3)
             Ligne_horizontale_XOR(Mouse_X+3,Mouse_Y,3-Fin_X);
 
-          Fin_Y=(Mouse_Y+6>Menu_Ordonnee/*Hauteur_ecran*/)?Mouse_Y+6-Menu_Ordonnee/*Hauteur_ecran*/:0;
+          Fin_Y=(Mouse_Y+6>Hauteur_ecran)?Mouse_Y+6-Hauteur_ecran:0;
           if (Fin_Y<3)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,3-Fin_Y);
-
-          // Petites barres aux extrémités
 
           Debut_X=(!Mouse_X);
           Debut_Y=(!Mouse_Y);
@@ -2562,6 +2563,8 @@ void Effacer_curseur(void)
 
           if (Mouse_Y<Menu_Ordonnee-6)
             Ligne_horizontale_XOR(Debut_X+Mouse_X-1,Mouse_Y+6,3-(Debut_X+Fin_X));
+
+          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
         }
         else
         {
@@ -2603,10 +2606,16 @@ void Effacer_curseur(void)
 
       Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // Largeur de la barre XOR
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
+      {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
+        SDL_UpdateRect(Ecran_SDL,0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
+      }
 
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
+      {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
+	SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+      }
 
       if (Loupe_Mode)
       {
@@ -2615,6 +2624,7 @@ void Effacer_curseur(void)
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
           Ligne_verticale_XOR_Zoom(Pinceau_X,Limite_Haut_Zoom,Loupe_Hauteur);
       }
+
 
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :

@@ -304,10 +304,10 @@ void Get_input(void)
     )
     {
 	Forcer_affichage_curseur=0;
+	Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
 	Mouse_X=INPUT_Nouveau_Mouse_X;
 	Mouse_Y=INPUT_Nouveau_Mouse_Y;
 	Mouse_K=INPUT_Nouveau_Mouse_K;
-	Effacer_curseur();
 	Calculer_coordonnees_pinceau();
 	Afficher_curseur();
     }

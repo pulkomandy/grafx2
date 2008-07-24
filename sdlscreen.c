@@ -13,8 +13,7 @@ void inline Pixel_SDL (word X,word Y,byte Couleur)
 byte inline Lit_Pixel_SDL (word X,word Y)
 /* On retourne la couleur du pixel aux coords données */
 {
-	byte* p = Ecran + Y*Largeur_ecran + X;
-	return *p;
+	return *( Ecran + Y * Largeur_ecran + X );
 }
 
 void Effacer_Tout_l_Ecran_SDL (byte Couleur)
@@ -319,5 +318,7 @@ void Set_Mode_SDL()
 {
 	Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_HWSURFACE/*|SDL_FULLSCREEN*/);
 	Ecran=Ecran_SDL->pixels;
+
+	SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }
 
