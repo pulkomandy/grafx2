@@ -1669,11 +1669,10 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 	{
         	Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
   		SDL_UpdateRect(Ecran_SDL, 
-			Pinceau_X - Principal_Decalage_X, 
-			Pinceau_Y - Principal_Decalage_Y, 1,1 );
+			Max(Pinceau_X - Principal_Decalage_X,0), 
+			Max(Pinceau_Y - Principal_Decalage_Y,0), 1,1 );
 		// Attention au zoom !
 		if(Loupe_Mode) UpdateZoom(X,Y,1,1);
-		DEBUG("Point définitif",0);
 	}
       break;
 
@@ -1769,7 +1768,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-  	      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y, 
+  	      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
 	      	Fin_Compteur_X,Fin_Compteur_Y );
           }
 
@@ -1796,7 +1795,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-  	SDL_UpdateRect(Ecran_SDL, Debut_X, Debut_Y, Fin_Compteur_X, Fin_Compteur_Y);
+  	SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
 
       }
       break;
@@ -1877,7 +1876,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-  	      SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+  	      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),
 	  	Fin_Compteur_X,Fin_Compteur_Y
 	      );
 
@@ -1896,12 +1895,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-
+//ok
   	  SDL_UpdateRect(Ecran_SDL,
-	  	Debut_X+Principal_Decalage_X,
-	  	Debut_Y+Principal_Decalage_Y,
+	  	Max(Debut_X-Principal_Decalage_X,0),
+	  	Max(Debut_Y-Principal_Decalage_Y,0),
 	  	Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
 	  );
+	  DEBUG("X",Debut_X-Principal_Decalage_X);
+	  DEBUG("Y",Debut_Y-Principal_Decalage_Y);
+	  DEBUG("W",Fin_Compteur_X-Debut_Compteur_X);
+	  DEBUG("H",Fin_Compteur_Y-Debut_Compteur_Y);
 	  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
@@ -2007,15 +2010,21 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 // Ceci est testé et fonctionne :)
-  	  SDL_UpdateRect(Ecran_SDL,
-	  	Max(Debut_X-Principal_Decalage_X,0),
-	  	Max(Debut_Y-Principal_Decalage_Y,0),
-	    	Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
-	  );
+	  if(Fin_Compteur_X-Debut_Compteur_X > 0 
+	  	&& Fin_Compteur_Y - Debut_Compteur_Y > 0)
+	  {
+  	  	SDL_UpdateRect(Ecran_SDL,
+	  		Max(Debut_X-Principal_Decalage_X,1),
+	  		Max(Debut_Y-Principal_Decalage_Y,1),
+	    		Fin_Compteur_X-Debut_Compteur_X,
+			Fin_Compteur_Y-Debut_Compteur_Y
+	  	);
 
-	  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,
-	  	Fin_Compteur_X-Debut_Compteur_X,
-		Fin_Compteur_Y-Debut_Compteur_Y);
+	  	if(Loupe_Mode) 
+			UpdateZoom(Debut_X,Debut_Y,
+	  			Fin_Compteur_X-Debut_Compteur_X,
+				Fin_Compteur_Y-Debut_Compteur_Y);
+	  }
         }
       }
   }
@@ -2057,9 +2066,8 @@ void Effacer_pinceau(short X,short Y)
         && (Pinceau_Y<=Limite_Bas) )
       {
         Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
-	SDL_UpdateRect(Ecran_SDL,Pinceau_X+Principal_Decalage_X,Pinceau_Y+Principal_Decalage_Y,1,1);
+	SDL_UpdateRect(Ecran_SDL,Max(Pinceau_X-Principal_Decalage_X,0),Max(Pinceau_Y-Principal_Decalage_Y,0),1,1);
 	if(Loupe_Mode) UpdateZoom(Pinceau_X,Pinceau_Y,1,1);
-	DEBUG("Pas de clic",1);
       }
       break;
     case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
@@ -4023,8 +4031,9 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
   Pixel_figure(Centre_X+Rayon,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
 
-  SDL_UpdateRect(Ecran_SDL,Centre_X-Rayon-Principal_Decalage_X,
-  	Centre_Y-Rayon-Principal_Decalage_Y,2*Rayon+1,2*Rayon+1);
+  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon-Principal_Decalage_X,0),
+  	Max(Centre_Y-Rayon-Principal_Decalage_Y,0),2*Rayon+1,2*Rayon+1);
+  if(Loupe_Mode) UpdateZoom(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
 }
 
   // -- Tracé définitif d'un cercle vide --
@@ -4083,8 +4092,9 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
       if (Pixel_dans_cercle())
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
 
-  SDL_UpdateRect(Ecran_SDL,Debut_X+Principal_Decalage_X,
-  	Debut_Y+Principal_Decalage_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+  SDL_UpdateRect(Ecran_SDL,Max(Debut_X+Principal_Decalage_X,0),
+  	Max(Debut_Y+Principal_Decalage_Y,0),Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 }
 
 
