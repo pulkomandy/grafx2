@@ -4,6 +4,7 @@
 #include "global.h"
 #include "graph.h" //Afficher_curseur
 #include "erreurs.h"
+#include "boutons.h"
 
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
@@ -413,7 +414,25 @@ byte Pixel_dans_cercle(void)
 
 void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
 {
-	UNIMPLEMENTED
+	// ESI = adresse de la source en (S_Pox_X,S_Pos_Y)
+	byte* esi = Source + S_Pos_Y * Largeur_source + S_Pos_X;
+
+	// EDI = adresse de la destination (D_Pos_X,D_Pos_Y)
+	byte* edi = Destination + D_Pos_Y * Largeur_destination + D_Pos_X;
+
+	int Ligne;
+
+	// Pour chaque ligne
+	for (Ligne=0;Ligne < Hauteur; Ligne++)
+	{
+		memcpy(edi,esi,Largeur);
+
+		// Passe à la ligne suivante
+		esi+=Largeur_source - Largeur;
+		edi+=Largeur_destination - Largeur;
+	}
+	
+
 }
 
 byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
@@ -454,7 +473,7 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
 
 byte Lit_pixel_dans_ecran_feedback (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_feedback non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
@@ -465,7 +484,7 @@ dword Round_div(dword Numerateur,dword Diviseur)
 
 byte Effet_Trame(word X,word Y)
 {
-	puts("Effet_Trame non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
@@ -479,18 +498,41 @@ void Set_mouse_position(void)
 
 void Clip_mouse(void)
 {
-	puts("Clip_mouse non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 {
-	puts("Remplacer_toutes_les_couleurs_dans_limites non implémenté!");
-}
+	// ESI pointe sur le début de la ligne d'écran actuelle
+	byte* esi = Principal_Ecran + Limite_Gauche + 
+		Limite_Haut * Principal_Largeur_image;
+	
+	// EDI pointe sur la position actuelle dans l'écran
+	byte* edi = esi;
 
-byte Lit_pixel_dans_ecran_backup   (word X,word Y)
+	// On place dans CX le nombre de lignes à traiter
+	int Ligne;
+
+	// Pour chaque ligne :
+	for(Ligne = Limite_Haut;Ligne < Limite_Bas; Ligne++)
+	{
+		int Compteur;
+		// Pour chaque pixel sur la ligne :
+		for (Compteur = Limite_Gauche;Compteur < Limite_Droite;Compteur ++);
+		{
+			*edi = Table_de_remplacement[*edi];
+			edi++;
+		}
+
+		// Passage à la ligne suivante
+		esi += Principal_Largeur_image;
+		edi = esi;
+	}
+}		
+
+byte inline Lit_pixel_dans_ecran_backup (word X,word Y)
 {
-	puts("Lit_pixel_dans_ecran_backup non implémenté!");
-	return 0;
+	return *(Ecran_backup + X + Principal_Largeur_image * Y);
 }
 
 byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
@@ -504,86 +546,86 @@ byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
 //            5 : Lecteur 2.8 Mo (??? pas sur ???)
 //            6 : Lecteur 2.8 Mo
 {
-	puts("Type_de_lecteur_de_disquette non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Disk_map(byte Numero_de_lecteur)
 {
-	puts("Disk_map non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Disque_dur_present(byte Numero_de_disque)
 {
-	puts("Disque_dur_present non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Lecteur_CDROM_present(byte Numero_de_lecteur)
 {
-	puts("Lecteur_CDROM_present non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 long Freespace(byte Numero_de_lecteur)
 {
-	puts("Freespace non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
 {
-	puts("Couleur_ILBM_line non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 void Palette_256_to_64(T_Palette Palette)
 {
-	puts("Palette_256_to_64 non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Palette_64_to_256(T_Palette Palette)
 {
-	puts("Palette_64_to_256 non implémenté!");
+	UNIMPLEMENTED
 }
 
 byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_interpole non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_additif non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
 {
-	puts("Effet_Colorize_soustractif non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
-void Tester_chrono(void)
+void inline Tester_chrono(void)
 {
-	puts("Tester_chrono non implémenté!");
+	if((SDL_GetTicks()/55)-Chrono_delay>Chrono_cmp) Etat_chrono=1;
 }
 
 void Flip_Y_LOWLEVEL(void)
 {
-	puts("Flip_Y_LOWLEVEL non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Flip_X_LOWLEVEL(void)
 {
-	puts("Flip_X_LOWLEVEL non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Rotate_180_deg_LOWLEVEL(void)
 {
-	puts("Rotate_180_deg_LOWLEVEL non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Tempo_jauge(byte Vitesse)
@@ -598,24 +640,36 @@ void Tempo_jauge(byte Vitesse)
 
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 {
-	puts("Meilleure_couleur_sans_exclusion non implémenté!");
+	UNIMPLEMENTED
 	return 0;
 }
 
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
-	puts("Set_color non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)
 {
-	puts("Scroll_picture non implémenté!");
+	UNIMPLEMENTED
 }
 
 byte Get_key(void)
 {
-	puts("Get_key non implémenté!");
-	return 0;
+	SDL_Event event;
+
+	SDL_EnableUNICODE(SDL_ENABLE); // On a besoin du caractère
+
+	while(1)
+	{
+		SDL_PollEvent(&event);
+		if(event.type == SDL_KEYDOWN)
+		{
+			// On retourne en mode standard pour la gestion normale
+			SDL_EnableUNICODE(SDL_DISABLE);
+			return (byte)(event.key.keysym.unicode);
+		}
+	}
 }
 
 void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee, 

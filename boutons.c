@@ -2173,16 +2173,6 @@ void Relire_liste_fichiers(byte Filtre, short Position, short Decalage,
   Preparer_et_afficher_liste_fichiers(Position,Decalage,Enreg);
 }
 
-  // -- Gestion du chrono --
-  byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
-                    //                 1=Il faut afficher la preview
-                    //                 2=Plus de chrono à gerer pour l'instant
-  long Chrono_delay;     // Nombre de 18.2ème de secondes demandés
-  long Chrono_cmp;       // Heure de départ du chrono
-  byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
-  // Les fonctions de manipulation du chrono se trouvent dans DIVERS.ASM
-
-
 void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Scroller_de_fichiers)
 {
   char Ancien_nom_de_fichier[13];

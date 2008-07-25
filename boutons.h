@@ -158,3 +158,12 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel);
 void Bouton_Smooth_Menu(void);
 
 void Bouton_Smear_Mode(void);
+
+  // -- Gestion du chrono --
+  byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
+                    //                 1=Il faut afficher la preview
+                    //                 2=Plus de chrono à gerer pour l'instant
+  long Chrono_delay;     // Nombre de 18.2ème de secondes demandés
+  long Chrono_cmp;       // Heure de départ du chrono
+  byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
+  // Les fonctions de manipulation du chrono se trouvent dans DIVERS.ASM
