@@ -7,6 +7,7 @@
 #include "moteur.h"
 #include "readline.h"
 #include "boutons.h"
+#include "pages.h"
 
 // --------------------------- Menu des palettes -----------------------------
 char * Libelle_reduction_palette[7]=

@@ -3655,8 +3655,9 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       while (Debut_X<=Limite_Droite)
       {
         // On cherche son début
-        for (;(Debut_X<=Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1);Debut_X++);
+        while((Debut_X<=Limite_Droite) && 
+		(Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1))
+	     Debut_X++;
 
         if (Debut_X<=Limite_Droite)
         {
@@ -3840,6 +3841,7 @@ void Remplir(byte Couleur_de_remplissage)
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(Table_de_remplacement,0,256);
+    DEBUG("Num couleur",Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
     Table_de_remplacement[Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y)]=1;
     Remplacer_toutes_les_couleurs_dans_limites(Table_de_remplacement);
 
@@ -3882,6 +3884,12 @@ void Remplir(byte Couleur_de_remplissage)
                                                (Limite_atteinte_Bas-Limite_atteinte_Haut)+1,
                                                Principal_Largeur_image,Principal_Ecran,
                                                Limite_atteinte_Droite+1,Limite_atteinte_Haut,Principal_Largeur_image);
+
+    DEBUG("Haut",Limite_atteinte_Haut);
+    DEBUG("Bas",Limite_atteinte_Bas);
+
+    DEBUG("Gauche",Limite_atteinte_Gauche);
+    DEBUG("Droite",Limite_atteinte_Droite);
 
     for (Pos_Y=Limite_atteinte_Haut;Pos_Y<=Limite_atteinte_Bas;Pos_Y++)
       for (Pos_X=Limite_atteinte_Gauche;Pos_X<=Limite_atteinte_Droite;Pos_X++)

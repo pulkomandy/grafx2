@@ -10,10 +10,7 @@
 #include "global.h"
 #include "pages.h"
 #include "graph.h"
-
-//  On déclare méchamment le prototype de Erreur pour éviter de faire un
-// fichier "main.h":
-void Erreur(int Code);
+#include "erreurs.h"
 
   ///
   /// GESTION DES PAGES
@@ -52,6 +49,7 @@ void Initialiser_S_Page(S_Page * Page)
 }
 
 void Download_infos_page_principal(S_Page * Page)
+// Affiche la page à l'écran
 {
   //int Indice_facteur;
   int Dimensions_modifiees;
@@ -111,6 +109,7 @@ void Download_infos_page_principal(S_Page * Page)
 }
 
 void Upload_infos_page_principal(S_Page * Page)
+// Sauve l'écran courant dans la page
 {
   if (Page!=NULL)
   {
@@ -805,10 +804,12 @@ int Backuper_et_redimensionner_brouillon(int Largeur,int Hauteur)
 }
 
 void Backup(void)
+// Sauve la page courante comme première page de backup et crée une nouvelle page
+// pur continuer à dessiner. Utilisé par exemple pour le fill
 {
   S_Page * Nouvelle_page;
 
-  // On remet à jour l'‚tat des infos de la page courante (pour pouvoir les
+  // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_principal(Principal_Backups->Pages);
 
@@ -823,7 +824,7 @@ void Backup(void)
   Download_infos_backup(Principal_Backups);
 
   // On copie l'image du backup vers la page courante:
-  memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
+  memcpy(Ecran_backup,Principal_Ecran,Principal_Largeur_image*Principal_Hauteur_image);
 
   // On détruit le descripteur de la page courante
   free(Nouvelle_page);

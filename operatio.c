@@ -7,6 +7,7 @@
 #include "graph.h"
 #include "operatio.h"
 #include "boutons.h"
+#include "pages.h"
 
 void Demarrer_pile_operation(word Operation_demandee)
 {

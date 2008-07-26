@@ -318,24 +318,8 @@ void Get_input(void)
 void Initialiser_chrono(dword Delai)
 // Démarrer le chrono
 {
-	puts("Initialiser_chrono non implémenté!");
-/*
-  push ebp
-  mov  ebp,esp
-
-  arg  Delai:dword
-
-  mov  eax,Delai
-  mov  Chrono_delay,eax
-
-  xor  ah,ah
-  int  1Ah
-  mov  word ptr[Chrono_cmp+0],dx
-  mov  word ptr[Chrono_cmp+2],cx
-
-  mov  esp,ebp
-  pop  ebp
-*/
+  Chrono_delay = Delai;
+  Chrono_cmp = SDL_GetTicks()/55;
   return;
 }
 
@@ -379,7 +363,7 @@ word Detection_souris(void)
 
 byte Lit_pixel_dans_ecran_courant  (word X,word Y)
 {
-	return (*(Principal_Ecran+Y*Principal_Largeur_image+X));
+	return *(Principal_Ecran+Y*Principal_Largeur_image+X);
 }
 
 void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
@@ -512,14 +496,15 @@ void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 
 	// On place dans CX le nombre de lignes à traiter
 	int Ligne;
+	int Compteur;
 
 	// Pour chaque ligne :
 	for(Ligne = Limite_Haut;Ligne < Limite_Bas; Ligne++)
 	{
-		int Compteur;
 		// Pour chaque pixel sur la ligne :
 		for (Compteur = Limite_Gauche;Compteur < Limite_Droite;Compteur ++);
 		{
+			if(*edi!=0) DEBUG("c",*edi);
 			*edi = Table_de_remplacement[*edi];
 			edi++;
 		}
@@ -528,6 +513,9 @@ void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 		esi += Principal_Largeur_image;
 		edi = esi;
 	}
+
+	DEBUG("Ligne",Ligne);
+	DEBUG("Compteur",Compteur);
 }		
 
 byte inline Lit_pixel_dans_ecran_backup (word X,word Y)

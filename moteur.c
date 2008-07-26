@@ -269,8 +269,8 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
   SDL_UpdateRect(Ecran_SDL,
   	Debut_X*Menu_Facteur_X,
 	Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
-	(Fin_X-Debut_X)*Menu_Facteur_X,
-	(Fin_Y-Debut_Y)*Menu_Facteur_Y);
+	(Fin_X+1-Debut_X)*Menu_Facteur_X,
+	(Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
 }
 
 

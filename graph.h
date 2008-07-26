@@ -146,7 +146,6 @@ void Detruire_les_listes_de_backups_en_fin_de_programme(void);
 void Nouveau_nombre_de_backups(int Nouveau);
 int  Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur);
 int  Backuper_et_redimensionner_brouillon(int Largeur,int Hauteur);
-void Backup(void);
 void Undo(void);
 void Redo(void);
 void Detruire_la_page_courante(void);
