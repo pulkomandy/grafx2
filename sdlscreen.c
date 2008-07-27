@@ -4,21 +4,21 @@
 #include "divers.h"
 #include "erreurs.h"
 
-void inline Pixel_SDL (word X,word Y,byte Couleur)
+void Pixel_SDL (word X,word Y,byte Couleur)
 /* Affiche un pixel de la Couleur aux coords X;Y à l'écran */
 {
     *(Ecran + X + Y * Largeur_ecran)=Couleur;
 }
 
-byte inline Lit_Pixel_SDL (word X,word Y)
+byte Lit_Pixel_SDL (word X,word Y)
 /* On retourne la couleur du pixel aux coords données */
 {
-	return *( Ecran + Y * Largeur_ecran + X );
+        return *( Ecran + Y * Largeur_ecran + X );
 }
 
 void Effacer_Tout_l_Ecran_SDL (byte Couleur)
 {
-	UNIMPLEMENTED
+        UNIMPLEMENTED
 }
 
 void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeur_image)
@@ -44,24 +44,24 @@ void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeu
 void Block_SDL (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
 /* On affiche un rectangle de la couleur donnée */
 {
-	SDL_Rect rectangle;
-	rectangle.x=Debut_X;
-	rectangle.y=Debut_Y;
-	rectangle.w=Largeur;
-	rectangle.h=Hauteur;
-	SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
-	SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
+        SDL_Rect rectangle;
+        rectangle.x=Debut_X;
+        rectangle.y=Debut_Y;
+        rectangle.w=Largeur;
+        rectangle.h=Hauteur;
+        SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
+        SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
 }
 
 void Block_SDL_Fast (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
 /* On affiche un rectangle de la couleur donnée */
 {
-	SDL_Rect rectangle;
-	rectangle.x=Debut_X;
-	rectangle.y=Debut_Y;
-	rectangle.w=Largeur;
-	rectangle.h=Hauteur;
-	SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
+        SDL_Rect rectangle;
+        rectangle.x=Debut_X;
+        rectangle.y=Debut_Y;
+        rectangle.w=Largeur;
+        rectangle.h=Hauteur;
+        SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
 }
 
 void Pixel_Preview_Normal_SDL (word X,word Y,byte Couleur)
@@ -70,36 +70,36 @@ void Pixel_Preview_Normal_SDL (word X,word Y,byte Couleur)
  * Note: si on modifie cette procédure, il faudra penser à faire également 
  * la modif dans la procédure Pixel_Preview_Loupe_SDL. */
 {
-//	if(X-Principal_Decalage_X >= 0 && Y - Principal_Decalage_Y >= 0)
-    		Pixel_SDL(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
+//      if(X-Principal_Decalage_X >= 0 && Y - Principal_Decalage_Y >= 0)
+                Pixel_SDL(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
 }
 
 void Pixel_Preview_Loupe_SDL  (word X,word Y,byte Couleur)
 {
-	// Affiche le pixel dans la partie non zoomée
-	Pixel_SDL(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
-	
-	// Regarde si on doit aussi l'afficher dans la partie zoomée
-	if (Y >= Limite_Haut_Zoom && Y <= Limite_visible_Bas_Zoom
-		&& X >= Limite_Gauche_Zoom && X <= Limite_visible_Droite_Zoom)
-	{
-		// On est dedans
-		int hauteur;
-		int Y_Zoom = Table_mul_facteur_zoom[Y-Loupe_Decalage_Y];
+        // Affiche le pixel dans la partie non zoomée
+        Pixel_SDL(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
+        
+        // Regarde si on doit aussi l'afficher dans la partie zoomée
+        if (Y >= Limite_Haut_Zoom && Y <= Limite_visible_Bas_Zoom
+                && X >= Limite_Gauche_Zoom && X <= Limite_visible_Droite_Zoom)
+        {
+                // On est dedans
+                int hauteur;
+                int Y_Zoom = Table_mul_facteur_zoom[Y-Loupe_Decalage_Y];
 
-		if (Menu_Ordonnee - Y_Zoom < Loupe_Facteur)
-			// On ne doit dessiner qu'un morceau du pixel
-			// sinon on dépasse sur le menu
-			hauteur = Menu_Ordonnee - Y_Zoom;
-		else
-			hauteur = Loupe_Facteur;
+                if (Menu_Ordonnee - Y_Zoom < Loupe_Facteur)
+                        // On ne doit dessiner qu'un morceau du pixel
+                        // sinon on dépasse sur le menu
+                        hauteur = Menu_Ordonnee - Y_Zoom;
+                else
+                        hauteur = Loupe_Facteur;
 
-		Block_SDL_Fast(
-			Table_mul_facteur_zoom[X-Loupe_Decalage_X] 
-				+ Principal_X_Zoom, 
-			Y_Zoom, Loupe_Facteur, hauteur, Couleur
-		);
-	}
+                Block_SDL_Fast(
+                        Table_mul_facteur_zoom[X-Loupe_Decalage_X] 
+                                + Principal_X_Zoom, 
+                        Y_Zoom, Loupe_Facteur, hauteur, Couleur
+                );
+        }
 }
 
 void Ligne_horizontale_XOR_SDL(word Pos_X,word Pos_Y,word Largeur)
@@ -110,7 +110,7 @@ void Ligne_horizontale_XOR_SDL(word Pos_X,word Pos_Y,word Largeur)
   int ecx;
 
   for (ecx=0;ecx<Largeur;ecx++)
-	*(edi+ecx)=~*(edi+ecx);
+        *(edi+ecx)=~*(edi+ecx);
 }
 
 void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
@@ -119,44 +119,44 @@ void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
     byte color;
     for (i=Pos_Y;i<Pos_Y+Hauteur;i++)
     {
-	color=*(Ecran+Pos_X+i*Largeur_ecran);
-	*(Ecran+Pos_X+i*Largeur_ecran)=~color;
+        color=*(Ecran+Pos_X+i*Largeur_ecran);
+        *(Ecran+Pos_X+i*Largeur_ecran)=~color;
     }
 }
 
 void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
 {
-	UNIMPLEMENTED
+        UNIMPLEMENTED
 }
 
 void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
-	word Decalage_X, word Decalage_Y, word Largeur, word Hauteur,
-	byte Couleur_de_transparence, byte Couleur, word Largeur_brosse)
+        word Decalage_X, word Decalage_Y, word Largeur, word Hauteur,
+        byte Couleur_de_transparence, byte Couleur, word Largeur_brosse)
 /* On affiche la brosse en monochrome */
 {
     byte* Dest=Pos_Y*Largeur_ecran+Pos_X+Ecran; // EDI = adr destination à 
-    	// l'écran
+        // l'écran
     byte* Src=Largeur_brosse*Decalage_Y+Decalage_X+Brosse; // ESI = adr ds 
-    	// la brosse
+        // la brosse
     int dx,cx;
 
     for(dx=Hauteur;dx!=0;dx--)
     //Pour chaque ligne
     {
-	for(cx=Largeur;cx!=0;cx--)
-	//Pour chaque pixel
-	{
-	    if (*Src!=Couleur_de_transparence)
-	        *Dest=Couleur;
+        for(cx=Largeur;cx!=0;cx--)
+        //Pour chaque pixel
+        {
+            if (*Src!=Couleur_de_transparence)
+                *Dest=Couleur;
 
-	    // On passe au pixel suivant
-	    Src++;
-	    Dest++;
-	}
+            // On passe au pixel suivant
+            Src++;
+            Dest++;
+        }
 
-	// On passe à la ligne suivante
-	Src+=Largeur_brosse-Largeur;
-	Dest+=Largeur_ecran-Largeur;
+        // On passe à la ligne suivante
+        Src+=Largeur_brosse-Largeur;
+        Dest+=Largeur_ecran-Largeur;
     }
     SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
 }
@@ -182,10 +182,10 @@ void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word
 
 void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
 {
-	UNIMPLEMENTED
+        UNIMPLEMENTED
 }
 
-void inline Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
+void Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
     memcpy(Ecran+Pos_X+Pos_Y*Largeur_ecran,Ligne,Largeur);
@@ -193,21 +193,21 @@ void inline Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byt
 }
 
 void Afficher_une_ligne_transparente_mono_a_l_ecran_SDL(
-	word Pos_X, word Pos_Y, word Largeur, byte* Ligne, 
-	byte Couleur_transparence, byte Couleur)
+        word Pos_X, word Pos_Y, word Largeur, byte* Ligne, 
+        byte Couleur_transparence, byte Couleur)
 // Affiche une ligne à l'écran avec une couleur + transparence.
 // Utilisé par les brosses en mode zoom
 {
-	byte* Dest = Ecran+ Pos_Y * Largeur_ecran + Pos_X;
-	int Compteur;
-	// Pour chaque pixel
-	for(Compteur=0;Compteur<Largeur;Compteur++)
-	{
-		if (Couleur_transparence!=*Ligne)
-			*Dest = Couleur;
-		Ligne ++; // Pixel suivant
-		Dest++;
-	}
+        byte* Dest = Ecran+ Pos_Y * Largeur_ecran + Pos_X;
+        int Compteur;
+        // Pour chaque pixel
+        for(Compteur=0;Compteur<Largeur;Compteur++)
+        {
+                if (Couleur_transparence!=*Ligne)
+                        *Dest = Couleur;
+                Ligne ++; // Pixel suivant
+                Dest++;
+        }
 }
 
 void Lire_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
@@ -216,38 +216,41 @@ void Lire_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
 }
 
 void Afficher_partie_de_l_ecran_zoomee_SDL(
-	word Largeur, // Largeur non zoomée
-	word Hauteur, // Hauteur zoomée
-	word Largeur_image,byte * Buffer)
+        word Largeur, // Largeur non zoomée
+        word Hauteur, // Hauteur zoomée
+        word Largeur_image,byte * Buffer)
 {
     byte* ESI = Principal_Ecran + Loupe_Decalage_Y * Largeur_image 
-    			+ Loupe_Decalage_X;
+                        + Loupe_Decalage_X;
     int EDX = 0; // Ligne en cours de traitement
 
     // Pour chaque ligne à zoomer
-    while(1){
-    	// On éclate la ligne
-	Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
-	// On l'affiche Facteur fois, sur des lignes consécutives
-    	int CX = Loupe_Facteur;
-	// Pour chaque ligne
-	do{
-    		// On affiche la ligne zoomée
-		Afficher_une_ligne_ecran_SDL(
-			Principal_X_Zoom, EDX, Largeur*Loupe_Facteur,
-			Buffer
-		);
-		// On passe à la suivante
-		EDX++;
-		if(EDX==Hauteur)
-		{
-    			SDL_UpdateRect(Ecran_SDL,Principal_X_Zoom,0,
-				Largeur*Loupe_Facteur,Hauteur);
-			return;
-		}
-		CX--;
-	}while (CX > 0);
-	ESI += Largeur_image;
+    while(1)
+    {
+        int CX;
+        
+        // On éclate la ligne
+        Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+        // On l'affiche Facteur fois, sur des lignes consécutives
+        CX = Loupe_Facteur;
+        // Pour chaque ligne
+        do{
+                // On affiche la ligne zoomée
+                Afficher_une_ligne_ecran_SDL(
+                        Principal_X_Zoom, EDX, Largeur*Loupe_Facteur,
+                        Buffer
+                );
+                // On passe à la suivante
+                EDX++;
+                if(EDX==Hauteur)
+                {
+                        SDL_UpdateRect(Ecran_SDL,Principal_X_Zoom,0,
+                                Largeur*Loupe_Facteur,Hauteur);
+                        return;
+                }
+                CX--;
+        }while (CX > 0);
+        ESI += Largeur_image;
     }
 // ATTENTION on n'arrive jamais ici !
 }
@@ -258,94 +261,95 @@ void Display_brush_Color_zoom_SDL (word Pos_X,word Pos_Y,word Decalage_X,word De
 }
 
 void Display_brush_Mono_zoom_SDL (word Pos_X, word Pos_Y,
-	word Decalage_X, word Decalage_Y, 
-	word Largeur, // Largeur non zoomée 
-	word Pos_Y_Fin,
-	byte Couleur_de_transparence, byte Couleur, 
-	word Largeur_brosse, // Largeur réelle de la brosse
-	byte * Buffer
+        word Decalage_X, word Decalage_Y, 
+        word Largeur, // Largeur non zoomée 
+        word Pos_Y_Fin,
+        byte Couleur_de_transparence, byte Couleur, 
+        word Largeur_brosse, // Largeur réelle de la brosse
+        byte * Buffer
 )
 
 {
-	byte* ESI = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
-	int DX=Pos_Y;
+        byte* ESI = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
+        int DX=Pos_Y;
 
-	//Pour chaque ligne à zoomer :
-	while(1)
-	{
-		// ESI = Ligne originale
-		// On éclate la ligne
-		Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+        //Pour chaque ligne à zoomer :
+        while(1)
+        {
+            int BX;
+                // ESI = Ligne originale
+                // On éclate la ligne
+                Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
 
-		// On affiche la ligne Facteur fois à l'écran (sur des
-		// lignes consécutives)
-		int BX = Loupe_Facteur;
+                // On affiche la ligne Facteur fois à l'écran (sur des
+                // lignes consécutives)
+                BX = Loupe_Facteur;
 
-		// Pour chaque ligne écran
-		do
-		{
-			// On affiche la ligne zoomée
-			Afficher_une_ligne_transparente_mono_a_l_ecran_SDL(
-				Pos_X, DX, Largeur * Loupe_Facteur, 
-				Buffer, Couleur_de_transparence, Couleur
-			);
-			// On passe à la ligne suivante
-			DX++;
-			// On vérifie qu'on est pas à la ligne finale
-			if(DX == Pos_Y_Fin)
-			{
-				SDL_UpdateRect(Ecran_SDL, Pos_X, Pos_Y,
-					Largeur * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
-				return;
-			}
-			BX --;
-		}
-		while (BX > 0);
-		
-		// Passage à la ligne suivante dans la brosse aussi
-		ESI+=Largeur_brosse;
-	}
+                // Pour chaque ligne écran
+                do
+                {
+                        // On affiche la ligne zoomée
+                        Afficher_une_ligne_transparente_mono_a_l_ecran_SDL(
+                                Pos_X, DX, Largeur * Loupe_Facteur, 
+                                Buffer, Couleur_de_transparence, Couleur
+                        );
+                        // On passe à la ligne suivante
+                        DX++;
+                        // On vérifie qu'on est pas à la ligne finale
+                        if(DX == Pos_Y_Fin)
+                        {
+                                SDL_UpdateRect(Ecran_SDL, Pos_X, Pos_Y,
+                                        Largeur * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
+                                return;
+                        }
+                        BX --;
+                }
+                while (BX > 0);
+                
+                // Passage à la ligne suivante dans la brosse aussi
+                ESI+=Largeur_brosse;
+        }
 }
 
 void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
 {
-	// En fait on va recopier l'image non zoomée dans la partie zoomée !
-	byte* ESI = Principal_Ecran + Decalage_Y * Largeur_image + Decalage_X;
-	int DX = Pos_Y;
-	int bx;
+        // En fait on va recopier l'image non zoomée dans la partie zoomée !
+        byte* ESI = Principal_Ecran + Decalage_Y * Largeur_image + Decalage_X;
+        int DX = Pos_Y;
+        int bx;
 
-	// Pour chaque ligne à zoomer
-	while(1){
-		Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+        // Pour chaque ligne à zoomer
+        while(1){
+                Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
 
-		bx=Loupe_Facteur;
+                bx=Loupe_Facteur;
 
-		// Pour chaque ligne
-		do{
-			Afficher_une_ligne_ecran_SDL(Pos_X,DX,
-				Largeur * Loupe_Facteur,Buffer);
+                // Pour chaque ligne
+                do{
+                        Afficher_une_ligne_ecran_SDL(Pos_X,DX,
+                                Largeur * Loupe_Facteur,Buffer);
 
-			// Ligne suivante
-			DX++;
-			if(DX==Pos_Y_Fin)
-			{
-				SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,
-					Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
-				return;
-			}
-			bx--;
-		}while(bx!=0);
+                        // Ligne suivante
+                        DX++;
+                        if(DX==Pos_Y_Fin)
+                        {
+                                SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,
+                                        Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
+                                return;
+                        }
+                        bx--;
+                }while(bx!=0);
 
-		ESI+= Largeur_image;
-	}
+                ESI+= Largeur_image;
+        }
 }
 
 void Set_Mode_SDL()
 /* On règle la résolution de l'écran */
 {
-	Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_HWSURFACE/*|SDL_FULLSCREEN*/);
-	Ecran=Ecran_SDL->pixels;
+        Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_HWSURFACE/*|SDL_FULLSCREEN*/);
+        Ecran=Ecran_SDL->pixels;
 
-	SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
+        SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }
 

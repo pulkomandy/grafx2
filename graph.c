@@ -4,7 +4,6 @@
 #include <math.h>
 #include <malloc.h>
 
-#include <sys/sysinfo.h>
 #include <string.h>
 #include <stdlib.h>
 #include "moteur.h"
@@ -13,6 +12,13 @@
 #include "global.h"
 #include "struct.h"
 #include "erreurs.h"
+
+#ifdef __linux__
+    #include <sys/sysinfo.h>
+#elif __WATCOMC__
+    #define _WIN32_WINNT 0x0500
+    #include <windows.h>
+#endif
 
 byte Meilleure_couleur(byte R,byte V,byte B)
 {
@@ -399,10 +405,16 @@ unsigned long Memoire_libre(void)
   A revoir, mais est-ce vraiment utile?
   _heapmin();
   */
-
-    struct sysinfo info;
-    sysinfo(&info);
-    return info.freeram*info.mem_unit;
+    #ifdef __linux__
+        struct sysinfo info;
+        sysinfo(&info);
+        return info.freeram*info.mem_unit;
+    #elif __WATCOMC__
+         MEMORYSTATUSEX mstt;
+         mstt.dwLength = sizeof(MEMORYSTATUSEX);
+         GlobalMemoryStatusEx(&mstt);
+         return mstt.ullAvailPhys;
+    #endif
 }
 
 
@@ -877,7 +889,7 @@ void Initialiser_mode_video(int Numero)
             Clear_screen = Effacer_Tout_l_Ecran_SDL;
             Display_screen = Afficher_partie_de_l_ecran_SDL;
             Block = Block_SDL;
-	    Block_Fast = Block_SDL_Fast;
+            Block_Fast = Block_SDL_Fast;
             Pixel_Preview_Normal = Pixel_Preview_Normal_SDL;
             Pixel_Preview_Loupe = Pixel_Preview_Loupe_SDL;
             Ligne_horizontale_XOR = Ligne_horizontale_XOR_SDL;
@@ -1632,27 +1644,27 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   // Preview: "Il ne faut l'afficher qu'à l'écran"
 {
   short Debut_X; // Position X (dans l'image) à partir de laquelle on 
-  	// affiche la brosse/pinceau
+        // affiche la brosse/pinceau
   short Debut_Y; // Position Y (dans l'image) à partir de laquelle on 
-  	// affiche la brosse/pinceau
+        // affiche la brosse/pinceau
   short Largeur; // Largeur dans l'écran selon laquelle on affiche la 
-  	// brosse/pinceau
+        // brosse/pinceau
   short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la 
-  	// brosse/pinceau
+        // brosse/pinceau
   short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir 
-  	// de laquelle on affiche la brosse/pinceau
+        // de laquelle on affiche la brosse/pinceau
   short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir 
-  	// de laquelle on affiche la brosse/pinceau
+        // de laquelle on affiche la brosse/pinceau
   short Pos_X; // Position X (dans l'image) en cours d'affichage
   short Pos_Y; // Position Y (dans l'image) en cours d'affichage
   short Compteur_X; // Position X (dans la brosse/pinceau) en cours 
-  	// d'affichage
+        // d'affichage
   short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours 
-  	// d'affichage
+        // d'affichage
   short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la 
-  	// brosse/pinceau
+        // brosse/pinceau
   short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la 
-  	// brosse/pinceau
+        // brosse/pinceau
   byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
   int Position;
   byte * Temp;
@@ -1666,14 +1678,14 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_X<=Limite_Droite)
         && (Pinceau_Y>=Limite_Haut)
         && (Pinceau_Y<=Limite_Bas) )
-	{
-        	Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
-  		SDL_UpdateRect(Ecran_SDL, 
-			Max(Pinceau_X - Principal_Decalage_X,0), 
-			Max(Pinceau_Y - Principal_Decalage_Y,0), 1,1 );
-		// Attention au zoom !
-		if(Loupe_Mode) UpdateZoom(X,Y,1,1);
-	}
+        {
+                Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
+                SDL_UpdateRect(Ecran_SDL, 
+                        Max(Pinceau_X - Principal_Decalage_X,0), 
+                        Max(Pinceau_Y - Principal_Decalage_Y,0), 1,1 );
+                // Attention au zoom !
+                if(Loupe_Mode) UpdateZoom(X,Y,1,1);
+        }
       break;
 
     case FORME_PINCEAU_BROSSE_COULEUR : // Brosse en couleur
@@ -1692,21 +1704,21 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       {
         if ( (Largeur>0) && (Hauteur>0) )
           Display_brush_Color(
-	  	Debut_X-Principal_Decalage_X,
-          	Debut_Y-Principal_Decalage_Y,
+                Debut_X-Principal_Decalage_X,
+                Debut_Y-Principal_Decalage_Y,
                 Debut_Compteur_X,
-		Debut_Compteur_Y,
+                Debut_Compteur_Y,
                 Largeur,
-		Hauteur,
-		Back_color,
+                Hauteur,
+                Back_color,
                 Brosse_Largeur
-	  );
+          );
 
         if (Loupe_Mode)
         {
           Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,
-	  	&Hauteur
-	  );
+                &Hauteur
+          );
 
           Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
           Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
@@ -1735,41 +1747,41 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if (Smear_Debut)
           {
             if ((Largeur>0) && (Hauteur>0))
-	    {
+            {
               Copier_une_partie_d_image_dans_une_autre(
-	      	Principal_Ecran, Debut_X, Debut_Y, Largeur, Hauteur,
+                Principal_Ecran, Debut_X, Debut_Y, Largeur, Hauteur,
                 Principal_Largeur_image, Smear_Brosse,
                 Debut_Compteur_X, Debut_Compteur_Y,
                 Smear_Brosse_Largeur
-	      );
-	      // UPDATERECT
-	    }
+              );
+              // UPDATERECT
+            }
             Smear_Debut=0;
           }
           else
           {
             for (Pos_Y = Debut_Y, Compteur_Y = Debut_Compteur_Y;
-	    	Compteur_Y < Fin_Compteur_Y;
-		Pos_Y++, Compteur_Y++
-	    )
+                Compteur_Y < Fin_Compteur_Y;
+                Pos_Y++, Compteur_Y++
+            )
               for (Pos_X = Debut_X, Compteur_X = Debut_Compteur_X;
-	      	Compteur_X < Fin_Compteur_X;
-		Pos_X++, Compteur_X++
-	      )
+                Compteur_X < Fin_Compteur_X;
+                Pos_X++, Compteur_X++
+              )
               {
                 Couleur_temporaire = Lit_pixel_dans_ecran_courant(
-			Pos_X,Pos_Y
-		);
+                        Pos_X,Pos_Y
+                );
                 Position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
                 if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y) != Back_color)
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  	Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
+                        Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-  	      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
-	      	Fin_Compteur_X,Fin_Compteur_Y );
+              SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
+                Fin_Compteur_X,Fin_Compteur_Y );
           }
 
           Smear_Min_X=Debut_Compteur_X;
@@ -1795,7 +1807,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-  	SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
+        SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
 
       }
       break;
@@ -1859,7 +1871,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-						       //UPDATERECT
+                                                       //UPDATERECT
             Smear_Debut=0;
           }
           else
@@ -1876,9 +1888,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-  	      SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),
-	  	Fin_Compteur_X,Fin_Compteur_Y
-	      );
+              SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),
+                Fin_Compteur_X,Fin_Compteur_Y
+              );
 
           }
 
@@ -1896,16 +1908,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 //ok
-  	  SDL_UpdateRect(Ecran_SDL,
-	  	Max(Debut_X-Principal_Decalage_X,0),
-	  	Max(Debut_Y-Principal_Decalage_Y,0),
-	  	Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
-	  );
-	  DEBUG("X",Debut_X-Principal_Decalage_X);
-	  DEBUG("Y",Debut_Y-Principal_Decalage_Y);
-	  DEBUG("W",Fin_Compteur_X-Debut_Compteur_X);
-	  DEBUG("H",Fin_Compteur_Y-Debut_Compteur_Y);
-	  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
+          SDL_UpdateRect(Ecran_SDL,
+                Max(Debut_X-Principal_Decalage_X,0),
+                Max(Debut_Y-Principal_Decalage_Y,0),
+                Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
+          );
+          DEBUG("X",Debut_X-Principal_Decalage_X);
+          DEBUG("Y",Debut_Y-Principal_Decalage_Y);
+          DEBUG("W",Fin_Compteur_X-Debut_Compteur_X);
+          DEBUG("H",Fin_Compteur_Y-Debut_Compteur_Y);
+          if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
       break;
@@ -1974,7 +1986,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-	    // UPDATERECT
+            // UPDATERECT
             Smear_Debut=0;
           }
           else
@@ -1992,9 +2004,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               }
           }
 
-  	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
-	  	Fin_Compteur_X,Fin_Compteur_Y
-	  );
+          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
+                Fin_Compteur_X,Fin_Compteur_Y
+          );
 
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
@@ -2010,21 +2022,21 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 // Ceci est testé et fonctionne :)
-	  if(Fin_Compteur_X-Debut_Compteur_X > 0 
-	  	&& Fin_Compteur_Y - Debut_Compteur_Y > 0)
-	  {
-  	  	SDL_UpdateRect(Ecran_SDL,
-	  		Max(Debut_X-Principal_Decalage_X,1),
-	  		Max(Debut_Y-Principal_Decalage_Y,1),
-	    		Fin_Compteur_X-Debut_Compteur_X,
-			Fin_Compteur_Y-Debut_Compteur_Y
-	  	);
+          if(Fin_Compteur_X-Debut_Compteur_X > 0 
+                && Fin_Compteur_Y - Debut_Compteur_Y > 0)
+          {
+                SDL_UpdateRect(Ecran_SDL,
+                        Max(Debut_X-Principal_Decalage_X,1),
+                        Max(Debut_Y-Principal_Decalage_Y,1),
+                        Fin_Compteur_X-Debut_Compteur_X,
+                        Fin_Compteur_Y-Debut_Compteur_Y
+                );
 
-	  	if(Loupe_Mode) 
-			UpdateZoom(Debut_X,Debut_Y,
-	  			Fin_Compteur_X-Debut_Compteur_X,
-				Fin_Compteur_Y-Debut_Compteur_Y);
-	  }
+                if(Loupe_Mode) 
+                        UpdateZoom(Debut_X,Debut_Y,
+                                Fin_Compteur_X-Debut_Compteur_X,
+                                Fin_Compteur_Y-Debut_Compteur_Y);
+          }
         }
       }
   }
@@ -2036,21 +2048,21 @@ void Effacer_pinceau(short X,short Y)
   // X,Y: position du centre du pinceau
 {
   short Debut_X; // Position X (dans l'image) à partir de laquelle on 
-  	// affiche la brosse/pinceau
+        // affiche la brosse/pinceau
   short Debut_Y; // Position Y (dans l'image) à partir de laquelle on 
-  	// affiche la brosse/pinceau
+        // affiche la brosse/pinceau
   short Largeur; // Largeur dans l'écran selon laquelle on affiche la 
-  	// brosse/pinceau
+        // brosse/pinceau
   short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la 
-  	// brosse/pinceau
+        // brosse/pinceau
   short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir 
-  	// de laquelle on affiche la brosse/pinceau
+        // de laquelle on affiche la brosse/pinceau
   short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir 
-  	// de laquelle on affiche la brosse/pinceau
+        // de laquelle on affiche la brosse/pinceau
   //short Pos_X; // Position X (dans l'image) en cours d'affichage
   //short Pos_Y; // Position Y (dans l'image) en cours d'affichage
   //short Compteur_X; // Position X (dans la brosse/pinceau) en cours 
-  	//d'affichage
+        //d'affichage
   //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
   short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
   short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
@@ -2066,8 +2078,8 @@ void Effacer_pinceau(short X,short Y)
         && (Pinceau_Y<=Limite_Bas) )
       {
         Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
-	SDL_UpdateRect(Ecran_SDL,Max(Pinceau_X-Principal_Decalage_X,0),Max(Pinceau_Y-Principal_Decalage_Y,0),1,1);
-	if(Loupe_Mode) UpdateZoom(Pinceau_X,Pinceau_Y,1,1);
+        SDL_UpdateRect(Ecran_SDL,Max(Pinceau_X-Principal_Decalage_X,0),Max(Pinceau_Y-Principal_Decalage_Y,0),1,1);
+        if(Loupe_Mode) UpdateZoom(Pinceau_X,Pinceau_Y,1,1);
       }
       break;
     case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
@@ -2271,7 +2283,7 @@ void Afficher_curseur(void)
               }
             }
 
-	  SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
       }
       break;
@@ -2337,7 +2349,7 @@ void Afficher_curseur(void)
                   Pixel(Pos_X,Pos_Y,Couleur);
               }
             }
-	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,16,16);
+          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,16,16);
         }
       }
       break;
@@ -2356,7 +2368,7 @@ void Afficher_curseur(void)
           if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
             && (Pos_X>=0)            && (Pos_Y>=0) )
           {
-	    // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
+            // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
             FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
             if (Couleur!=CM_Trans)
               Pixel(Pos_X,Pos_Y,Couleur);
@@ -2378,12 +2390,12 @@ void Afficher_curseur(void)
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
-	SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+        SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
       }
 
       if (Loupe_Mode)
       {
-      	// UPDATERECT
+        // UPDATERECT
         if ((Pinceau_Y>=Limite_Haut_Zoom) && (Pinceau_Y<=Limite_visible_Bas_Zoom))
           Ligne_horizontale_XOR_Zoom(Limite_Gauche_Zoom,Pinceau_Y,Loupe_Largeur);
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
@@ -2517,7 +2529,7 @@ void Effacer_curseur(void)
 
   if ( ( (Mouse_Y<Menu_Ordonnee)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) 
-      			 || (Mouse_X>=Principal_X_Zoom) ) )
+                         || (Mouse_X>=Principal_X_Zoom) ) )
     || (Une_fenetre_est_ouverte) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
     Forme=Forme_curseur;
   else
@@ -2546,7 +2558,7 @@ void Effacer_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
-	  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
         }
         else
         {
@@ -2620,7 +2632,7 @@ void Effacer_curseur(void)
               if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
                 Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
 
-	  SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
       }
       if (!Cacher_pinceau)
@@ -2657,12 +2669,12 @@ void Effacer_curseur(void)
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
-	SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+        SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
       }
 
       if (Loupe_Mode)
       {
-      	// UPDATERECT
+        // UPDATERECT
         if ((Pinceau_Y>=Limite_Haut_Zoom) && (Pinceau_Y<=Limite_visible_Bas_Zoom))
           Ligne_horizontale_XOR_Zoom(Limite_Gauche_Zoom,Pinceau_Y,Loupe_Largeur);
         if ((Pinceau_X>=Limite_Gauche_Zoom) && (Pinceau_X<=Limite_visible_Droite_Zoom))
@@ -3022,8 +3034,8 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
 #define ToWinH(h) ((h)*Menu_Facteur_X)
 
   SDL_UpdateRect(Ecran_SDL, ToWinX(Orig_X), ToWinY(Orig_Y),
-  	ToWinL(Pinceau_predefini_Largeur[Numero]), 
-	ToWinH(Pinceau_predefini_Hauteur[Numero])
+        ToWinL(Pinceau_predefini_Largeur[Numero]), 
+        ToWinH(Pinceau_predefini_Hauteur[Numero])
   );
 }
 
@@ -3656,8 +3668,8 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       {
         // On cherche son début
         while((Debut_X<=Limite_Droite) && 
-		(Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1))
-	     Debut_X++;
+                (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1))
+             Debut_X++;
 
         if (Debut_X<=Limite_Droite)
         {
@@ -3973,9 +3985,7 @@ void Remplir(byte Couleur_de_remplissage)
   {
     Pos_X-=Brosse_Decalage_X;
     Pos_Y-=Brosse_Decalage_Y;
-    if ( (Pos_X>=0) &&
-         (Pos_X<Brosse_Largeur) &&
-         (Pos_Y>=0) &&
+    if ( (Pos_X<Brosse_Largeur) && // Les pos sont des word donc jamais < 0 ...
          (Pos_Y<Brosse_Hauteur) )
       Pixel_dans_brosse(Pos_X,Pos_Y,Couleur);
   }
@@ -4040,7 +4050,7 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
   Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
 
   SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon-Principal_Decalage_X,0),
-  	Max(Centre_Y-Rayon-Principal_Decalage_Y,0),2*Rayon+1,2*Rayon+1);
+        Max(Centre_Y-Rayon-Principal_Decalage_Y,0),2*Rayon+1,2*Rayon+1);
   if(Loupe_Mode) UpdateZoom(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
 }
 
@@ -4101,7 +4111,7 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
 
   SDL_UpdateRect(Ecran_SDL,Max(Debut_X+Principal_Decalage_X,0),
-  	Max(Debut_Y+Principal_Decalage_Y,0),Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+        Max(Debut_Y+Principal_Decalage_Y,0),Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
   if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 }
 
@@ -4421,10 +4431,10 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
       // Donc on ne peut pas otimiser en traçant ligne par ligne avec memset :(
       Afficher_pixel(Pos_X,Pos_Y,Couleur);
   SDL_UpdateRect(Ecran_SDL,
-  	Debut_X-Principal_Decalage_X,
-  	Debut_Y-Principal_Decalage_Y,
-	Fin_X-Debut_X,
-	Fin_Y-Debut_Y);
+        Debut_X-Principal_Decalage_X,
+        Debut_Y-Principal_Decalage_Y,
+        Fin_X-Debut_X,
+        Fin_Y-Debut_Y);
   if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
 
 }
@@ -5050,7 +5060,7 @@ void Polyfill_General(int Vertices, short * Points, int Color)
         if (edge->bottom > bottom)
           bottom = edge->bottom;
 
-	inactive_edges = add_edge(inactive_edges, edge, 0);
+        inactive_edges = add_edge(inactive_edges, edge, 0);
         edge++;
       }
     }

@@ -21,6 +21,12 @@
 #include "pages.h"
 #include "erreurs.h"
 
+#ifdef __WATCOMC__
+    #include <windows.h>
+    #define chdir(x) SetCurrentDirectory(x)
+    #define rmdir(x) DeleteFile(x)
+#endif
+
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
 void Bouton_***(void)
@@ -122,7 +128,7 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
 
-  if ((*ALPHA_BETA)=='Ó')
+  if ((*ALPHA_BETA)=='á')
   {
     Print_char_transparent_dans_fenetre(43,119,'M',CM_Noir);
     Print_char_transparent_dans_fenetre(53,121,'U',CM_Noir);
@@ -1190,7 +1196,7 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte Etat)
   }
   Block(Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
         Menu_Facteur_X*9,Menu_Facteur_Y*3,Couleur);
-	
+        
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
         Menu_Facteur_X*9,Menu_Facteur_Y*3);
 }
@@ -1685,7 +1691,7 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
   }
   
     SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
-		    Menu_Facteur_X*10,Menu_Facteur_Y*10);  
+                    Menu_Facteur_X*10,Menu_Facteur_Y*10);  
 }
 
 void Degrade_Charger_infos_du_tableau(int Indice)
@@ -2105,12 +2111,12 @@ void Print_repertoire_courant(void)
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
     for (Indice++;Indice<Longueur;Indice++)
       if ( (Principal_Repertoire_courant[Indice]=='\\') &&
-	   (Longueur-Indice<=TAILLE_MAXI_PATH-6) )
+           (Longueur-Indice<=TAILLE_MAXI_PATH-6) )
       {
-	// Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
-	// on peut faire la copie:
-	strcpy(Nom_temporaire+6,Principal_Repertoire_courant+Indice);
-	break;
+        // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
+        // on peut faire la copie:
+        strcpy(Nom_temporaire+6,Principal_Repertoire_courant+Indice);
+        break;
       }
 
     // Enfin, on peut afficher la chaîne tronquée
@@ -2449,7 +2455,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
           do
           {
-				 puts("boutons.c 2454\n");
+                                 puts("boutons.c 2454\n");
             //Etat_Du_Clavier=SDL_GetKeyState(Bidon);
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
@@ -2584,7 +2590,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
-	if (Readline(202,73,Principal_Nom_fichier,12,2))
+        if (Readline(202,73,Principal_Nom_fichier,12,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -2597,10 +2603,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             if (Principal_Format)
               strcat(Principal_Nom_fichier,Format_Extension[Principal_Format-1]);
           }
-	  On_a_clicke_sur_OK=1;
+          On_a_clicke_sur_OK=1;
         }
-	Afficher_curseur();
-	break;
+        Afficher_curseur();
+        break;
       default : // Drives
         Effacer_curseur();
         // On change de lecteur: Lecteur = Drive[Bouton_clicke-9].Lettre-64

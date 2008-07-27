@@ -16,7 +16,9 @@
 #include <unistd.h>
 #include "boutons.h"
 
-#include "linux.h"
+#ifdef __linux__
+    #include "linux.h"
+#endif
 
 //  On déclare méchamment le prototype de Erreur pour éviter de faire un
 // fichier "main.h":
@@ -323,7 +325,7 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
     //On va ajouter un / à la fin du chemin s'il n'y est pas encore
     //Attention sous windows il faut un \...
     if (Nom_du_fichier[strlen(Nom_du_fichier)-1]!='/')
-	strcat(Nom_du_fichier,"/");
+        strcat(Nom_du_fichier,"/");
 
   // Si on est en train de sauvegarder une image Colorix, on calcule son ext.
   if (Sauve_Colorix)
@@ -695,9 +697,9 @@ void Save_PAL(void)
     close(Fichier);
     remove(Nom_du_fichier);
                      //   On se fout du résultat de l'opération car si ‡a
-		     // renvoie 0 c'est que le fichier avait été partiel-
-		     // -lement écrit, sinon pas du tout. Or dans tous les
-		     // cas ‡a revient au mˆme pour nous: Sauvegarde ratée!
+                     // renvoie 0 c'est que le fichier avait été partiel-
+                     // -lement écrit, sinon pas du tout. Or dans tous les
+                     // cas ‡a revient au mˆme pour nous: Sauvegarde ratée!
   }
 }
 
@@ -901,15 +903,15 @@ void Test_PKM(void)
   {
     char Ident[3]; // ChaŒne "PKM" }
     byte Methode;  // Méthode de compression:
-		   //   0 = compression en ligne (c)KM
-		   //   autres = inconnues pour le moment
+                   //   0 = compression en ligne (c)KM
+                   //   autres = inconnues pour le moment
     byte Recon1;   // Octet de reconnaissance sur 1 octet  }
     byte Recon2;   // Octet de reconnaissance sur 2 octets }
     word Largeur;  // Largeur de l'image
     word Hauteur;  // Hauteur de l'image
     T_Palette Palette; // Palette RVB 256*3
     word Jump;     // Taille du saut entre le header et l'image:
-		   //   On va s'en servir pour rajouter un commentaire
+                   //   On va s'en servir pour rajouter un commentaire
   } Head;
 
 
@@ -1160,8 +1162,8 @@ void Load_PKM(void)
     for (Indice=1;Indice<=255;Indice++)
       if (Find_recon[Indice]<NBest)
       {
-	Best=Indice;
-	NBest=Find_recon[Indice];
+        Best=Indice;
+        NBest=Find_recon[Indice];
       }
     *Recon1=Best;
 
@@ -1172,8 +1174,8 @@ void Load_PKM(void)
     for (Indice=0;Indice<=255;Indice++)
       if ( (Find_recon[Indice]<NBest) && (Indice!=*Recon1) )
       {
-	Best=Indice;
-	NBest=Find_recon[Indice];
+        Best=Indice;
+        NBest=Find_recon[Indice];
       }
     *Recon2=Best;
   }
@@ -1187,15 +1189,15 @@ void Save_PKM(void)
   {
     char Ident[3]; // ChaŒne "PKM" }
     byte Methode;  // Méthode de compression:
-		   //   0 = compression en ligne (c)KM
-		   //   autres = inconnues pour le moment
+                   //   0 = compression en ligne (c)KM
+                   //   autres = inconnues pour le moment
     byte Recon1;   // Octet de reconnaissance sur 1 octet  }
     byte Recon2;   // Octet de reconnaissance sur 2 octets }
     word Largeur;  // Largeur de l'image
     word Hauteur;  // Hauteur de l'image
     T_Palette Palette; // Palette RVB 256*3
     word Jump;     // Taille du saut entre le header et l'image:
-		   //   On va s'en servir pour rajouter un commentaire
+                   //   On va s'en servir pour rajouter un commentaire
   } Head;
   dword Compteur_de_pixels;
   dword Taille_image;
@@ -1270,52 +1272,52 @@ void Save_PKM(void)
              && (Compteur_de_pixels<Taille_image)
              && (Compteur_de_repetitions<65535) )
         {
-	  Compteur_de_repetitions++;
-	  Compteur_de_pixels++;
+          Compteur_de_repetitions++;
+          Compteur_de_pixels++;
           Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
         }
 
         if ( (Derniere_couleur!=Head.Recon1) && (Derniere_couleur!=Head.Recon2) )
         {
-	  if (Compteur_de_repetitions==1)
+          if (Compteur_de_repetitions==1)
             Ecrire_octet(Fichier,Derniere_couleur);
           else
-	  if (Compteur_de_repetitions==2)
-	  {
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	  }
+          if (Compteur_de_repetitions==2)
+          {
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Derniere_couleur);
+          }
           else
-	  if ( (Compteur_de_repetitions>2) && (Compteur_de_repetitions<256) )
-	  { // RECON1/couleur/nombre
-	    Ecrire_octet(Fichier,Head.Recon1);
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-	  }
+          if ( (Compteur_de_repetitions>2) && (Compteur_de_repetitions<256) )
+          { // RECON1/couleur/nombre
+            Ecrire_octet(Fichier,Head.Recon1);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
           else
-	  if (Compteur_de_repetitions>=256)
-	  { // RECON2/couleur/hi(nombre)/lo(nombre)
-	    Ecrire_octet(Fichier,Head.Recon2);
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-	  }
+          if (Compteur_de_repetitions>=256)
+          { // RECON2/couleur/hi(nombre)/lo(nombre)
+            Ecrire_octet(Fichier,Head.Recon2);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
         }
         else
         {
-	  if (Compteur_de_repetitions<256)
+          if (Compteur_de_repetitions<256)
           {
-	    Ecrire_octet(Fichier,Head.Recon1);
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-	  }
-	  else
-	  {
-	    Ecrire_octet(Fichier,Head.Recon2);
-	    Ecrire_octet(Fichier,Derniere_couleur);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
-	    Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-	  }
+            Ecrire_octet(Fichier,Head.Recon1);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
+          else
+          {
+            Ecrire_octet(Fichier,Head.Recon2);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
         }
       }
 
@@ -1887,7 +1889,7 @@ void Load_LBM(void)
       if (LBM_Mode_repetition)
       {
         Ecrire_octet(LBM_Fichier,257-LBM_Taille_de_file);
-	Ecrire_octet(LBM_Fichier,LBM_File_de_couleurs[0]);
+        Ecrire_octet(LBM_Fichier,LBM_File_de_couleurs[0]);
       }
       else
       {
@@ -1927,7 +1929,7 @@ void Load_LBM(void)
           // On conserve le mode...
           {
             LBM_File_de_couleurs[LBM_Taille_de_file]=Couleur;
-	    LBM_Taille_de_file++;
+            LBM_Taille_de_file++;
             if (LBM_Taille_de_file==128)
               Transferer_couleurs();
           }

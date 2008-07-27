@@ -1,5 +1,8 @@
 #include "global.h"
 #include "graph.h"
+#include "moteur.h"
+#include "divers.h"
+#include "readline.h"
 
 void Bouton_Shade_Mode(void)
 {

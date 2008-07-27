@@ -9,6 +9,10 @@
 #include "boutons.h"
 #include "pages.h"
 
+#ifdef __WATCOMC__
+    #define M_PI 3.14159265358979323846 
+#endif
+
 void Demarrer_pile_operation(word Operation_demandee)
 {
   Brosse_Centre_rotation_defini=0;

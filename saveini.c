@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "const.h"
 #include "global.h"
+#include "readini.h"
 
 int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * Group)
 {

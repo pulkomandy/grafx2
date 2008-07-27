@@ -111,7 +111,7 @@ byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne);
 // Renvoie la couleur du pixel (ILBM) en Pos_X.
 
 // Gestion du chrono dans les fileselects
-void Initialiser_chrono(long Delai);
+void Initialiser_chrono(dword Delai);
 void Tester_chrono(void);
 
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur);
@@ -131,3 +131,11 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination);
 void Rotate_180_deg_LOWLEVEL(void);
 void Zoomer_une_ligne(byte * Ligne_originale,byte * Ligne_zoomee,word Facteur,word Largeur);
 void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination);
+
+// -- Gestion du chrono --
+byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
+                  //                 1=Il faut afficher la preview
+                  //                 2=Plus de chrono à gerer pour l'instant
+dword Chrono_delay;     // Nombre de 18.2ème de secondes demandés
+dword Chrono_cmp;       // Heure de départ du chrono
+byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"

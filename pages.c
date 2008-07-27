@@ -6,11 +6,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "linux.h"
 #include "global.h"
 #include "pages.h"
 #include "graph.h"
 #include "erreurs.h"
+
+#ifdef __linux__
+    include "linux.h"
+#endif
 
   ///
   /// GESTION DES PAGES
@@ -414,9 +417,9 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * Liste)
 }
 
 int Nouvelle_page_possible(
-	S_Page 		 * Nouvelle_page,
-	S_Liste_de_pages * Liste_courante,
-	S_Liste_de_pages * Liste_secondaire
+        S_Page           * Nouvelle_page,
+        S_Liste_de_pages * Liste_courante,
+        S_Liste_de_pages * Liste_secondaire
 )
 {
   unsigned long Taille_immediatement_disponible;
@@ -427,7 +430,7 @@ int Nouvelle_page_possible(
   unsigned long Taille_nouvelle_page;
 
   Taille_immediatement_disponible = Memoire_libre()
-  	- QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
+        - QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
   Taille_liste_courante =Taille_d_une_liste_de_pages(Liste_courante);
   Taille_liste_brouillon=Taille_d_une_liste_de_pages(Liste_secondaire);
   Taille_page_courante  =Taille_d_une_page(Liste_courante->Pages);
@@ -683,7 +686,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
       }
       else
       {
-      	// Il n'est pas possible de démarrer le programme avec la page 
+        // Il n'est pas possible de démarrer le programme avec la page 
         // principale et la page de brouillon aux dimensions demandée par 
         // l'utilisateur. ==> On l'envoie ballader
         Retour=0;

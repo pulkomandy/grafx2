@@ -12,11 +12,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "linux.h"
 #include "boutons.h"
 #include "operatio.h"
 #include "shade.h"
 #include "erreurs.h"
+
+#ifdef __linux__
+    #include "linux.h"
+#endif
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
@@ -267,10 +270,10 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
       }
   }
   SDL_UpdateRect(Ecran_SDL,
-  	Debut_X*Menu_Facteur_X,
-	Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
-	(Fin_X+1-Debut_X)*Menu_Facteur_X,
-	(Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
+        Debut_X*Menu_Facteur_X,
+        Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
+        (Fin_X+1-Debut_X)*Menu_Facteur_X,
+        (Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
 }
 
 

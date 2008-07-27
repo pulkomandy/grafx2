@@ -16,12 +16,20 @@
 #include <time.h>
 #include <SDL/SDL.h>
 #include <unistd.h>
-#include "linux.h" //Fichier avec diverses fonctions qui existaient sous dos mais pas sous linux...
 #include "pages.h"
 #include "files.h"
 #include "loadsave.h"
 #include "sdlscreen.h"
 #include "erreurs.h"
+
+#ifdef __linux__
+    #include "linux.h" //Fichier avec diverses fonctions qui existaient sous dos mais pas sous linux...
+#elif __WATCOMC__
+    #include <windows.h>
+    #include <shlwapi.h>
+    #define chdir(dir) SetCurrentDirectory(dir)
+    #define M_PI 3.14159265358979323846
+#endif
 
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 
@@ -181,7 +189,7 @@ void Erreur(int Code)
 void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 {
   byte Option2=1;
-  char *Buffer;
+  char *Buffer ;
 
 
   Un_fichier_a_ete_passe_en_parametre=0;
@@ -201,9 +209,21 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         Option2=2;
 
         // On récupère le chemin complet du paramètre
-        Buffer=realpath(argv[1],NULL);
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
+        #ifdef __linux__
+            Buffer=realpath(argv[1],NULL);
+            _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
+        #elif __WATCOMC__
+            Buffer = malloc(MAX_PATH);
+            PathCanonicalize(Buffer,argv[1]);
+            _splitpath(Buffer,
+                Principal_Repertoire_fichier,
+                Principal_Repertoire_fichier+3,
+                Principal_Nom_fichier,
+                Principal_Nom_fichier+8);
+            free(Buffer);
+        #endif
+
         // chdir(Principal_Repertoire_fichier);
       }
       else
@@ -414,7 +434,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Spray_Mono_flow=10;
   memset(Spray_Multi_flow,0,256);
   srand(time(NULL)); // On randomize un peu tout ça...
-	
+        
   // Passer en clavier américain
   Clavier_americain();
 
@@ -474,7 +494,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Largeur=1;
   Pinceau_Hauteur=1;
 
-	puts("main.c init lister les modes SDL proprement!");
+        puts("main.c init lister les modes SDL proprement!");
   // Détection des modes SDL en état de fonctionner:
   // Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
 

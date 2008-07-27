@@ -9,8 +9,11 @@
 #include "global.h"
 #include "graph.h"
 #include "divers.h"
-#include "linux.h"
-void Erreur(int code);
+#include "erreurs.h"
+
+#ifdef __linux__
+    #include "linux.h"
+#endif
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
@@ -134,8 +137,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
               // Effacement de la chaåne
               Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                     Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
-	      Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
-	    }
+              Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
+            }
             break;
           case 75 : // Gauche
             if (Position)
@@ -144,12 +147,12 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
               if (Position==Taille)
                 Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
-	      Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,--Position);
+              Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,--Position);
             }
             break;
           case 77 : // Droite
             if ((Position<Taille) && (Position<Taille_maxi-1))
-	      Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,++Position);
+              Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,++Position);
             break;
           case 71 : // Home
             if (Position)
@@ -158,12 +161,12 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
               if (Position==Taille)
                 Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
-	      Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=0);
+              Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=0);
             }
             break;
           case 79 : // End
             if ((Position<Taille) && (Position<Taille_maxi-1))
-	      Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=(Taille<Taille_maxi)?Taille:Taille-1);
+              Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=(Taille<Taille_maxi)?Taille:Taille-1);
         }
         break;
       case  8 :
@@ -174,8 +177,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
           // Effacement de la chaåne
           Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                 Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
-	  Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
-	}
+          Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
+        }
         break;
       case 13 :
         if ( (Type_saisie!=2) || (Chaine_valide(Chaine)) )

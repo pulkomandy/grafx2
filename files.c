@@ -7,15 +7,24 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-
-#include "linux.h"
+#ifdef __linux__
+    #include "linux.h"
+    #include <dirent.h>
+    #define isDir(Enreg) ((Enreg)->d_type == DT_DIR)
+    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
+    #define isFile(Enreg) (Enreg->d_type==DT_REG)
+#elif __WATCOMC__
+    #include <direct.h>
+    #define isDir(Enreg) ((Enreg)->d_attr & _A_SUBDIR)
+    #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
+    #define isFile(Enreg) ((Enreg)->d_attr & _A_SUBDIR == 0)
+#endif
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné
@@ -133,19 +142,23 @@ char * Nom_formate(char * Nom)
 }
 
 
-// -- Rajouter … la liste des ‚l‚ments de la liste un ‚l‚ment ---------------
+// -- Rajouter a la liste des elements de la liste un element ---------------
 void Ajouter_element_a_la_liste(struct dirent* Enreg)
-//  Cette proc‚dure ajoute … la liste chain‚e un fichier pass‚ en argument.
+//  Cette procedure ajoute a la liste chainee un fichier pass‚ en argument.
 {
   // Pointeur temporaire d'insertion
   struct Element_de_liste_de_fileselect * Element_temporaire;
 
-  // On alloue de la place pour un nouvel ‚l‚ment
+  // On alloue de la place pour un nouvel element
   Element_temporaire=(struct Element_de_liste_de_fileselect *)malloc(sizeof(struct Element_de_liste_de_fileselect));
 
-  // On met … jour le nouvel emplacement:
+  // On met a jour le nouvel emplacement:
   strcpy(Element_temporaire->Nom,Nom_formate(Enreg->d_name));
-  Element_temporaire->Type     =(Enreg->d_type == DT_DIR);
+  #ifdef __linux__
+    Element_temporaire->Type = (Enreg->d_type == DT_DIR);
+  #elif __WATCOMC__
+    Element_temporaire->Type = (Enreg->d_attr & _A_SUBDIR);
+  #endif  
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
   Element_temporaire->Precedent=NULL;
@@ -187,22 +200,22 @@ void Lire_liste_des_fichiers(byte Format_demande)
     // Si l'élément n'est pas le répertoire courant
     if ( (Enreg->d_name[0]!='.') && (Enreg->d_name[1] != 0))
     {
-    	// et que l'élément trouvé est un répertoire
-    	if(   (Enreg->d_type == DT_DIR) &&
-    		// et qu'il n'est pas caché
-      		(Enreg->d_name[0]!='.' || Config.Lire_les_repertoires_caches))
-    	{
-      		// On rajoute le répertore à la liste
-      		Ajouter_element_a_la_liste(Enreg);
-      		Liste_Nb_repertoires++;
-    	}
-    	else if ((Enreg->d_type==DT_REG) //Il s'agit d'un fichier
-      		&& (Enreg->d_name[0]!='.' || Config.Lire_les_fichiers_caches)) //Il n'est pas caché
-      	{
-        	// On rajoute le fichier à la liste
-        	Ajouter_element_a_la_liste(Enreg);
-        	Liste_Nb_fichiers++;
-      	}
+        // et que l'élément trouvé est un répertoire
+        if( isDir(Enreg) &&
+                // et qu'il n'est pas caché
+                ((!isHidden(Enreg)) || Config.Lire_les_repertoires_caches))
+        {
+                // On rajoute le répertore à la liste
+                Ajouter_element_a_la_liste(Enreg);
+                Liste_Nb_repertoires++;
+        }
+        else if (isFile(Enreg) //Il s'agit d'un fichier
+                && ((!isHidden(Enreg)) || Config.Lire_les_fichiers_caches)) //Il n'est pas caché
+        {
+                // On rajoute le fichier à la liste
+                Ajouter_element_a_la_liste(Enreg);
+                Liste_Nb_fichiers++;
+        }
     }
 
     // On cherche l'élément suivant

@@ -159,7 +159,7 @@ GLOBAL fonction_lecteur   Lit_pixel;      // Teste la couleur d'un pixel dans l'
 GLOBAL fonction_effaceur  Clear_screen;   // Efface rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_display   Display_screen; // Affiche rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_block     Block;          // Affiche rapidement un bloc à l'écran
-GLOBAL fonction_block	  Block_Fast;	    // Affiche rapidement un bloc à l'écran sans rafraichir
+GLOBAL fonction_block     Block_Fast;       // Affiche rapidement un bloc à l'écran sans rafraichir
 GLOBAL fonction_afficheur Pixel_Preview_Normal; // Affiche un point de l'image à l'Úcran en mode normal (pas en mode loupe)
 GLOBAL fonction_afficheur Pixel_Preview_Loupe;  // Affiche un point de l'image à l'Úcran en mode loupe
 GLOBAL fonction_afficheur Pixel_Preview;        // Affiche un point de l'image à l'Úcran en fonction de l'Útat du mode loupe
@@ -211,6 +211,10 @@ GLOBAL short Principal_Decalage_X;     // DÚcalage en X de l'Úcran par rapport a
 GLOBAL short Principal_Decalage_Y;     // DÚcalage en Y de l'Úcran par rapport au dÚbut de l'image
 GLOBAL short Ancien_Principal_Decalage_X;
 GLOBAL short Ancien_Principal_Decalage_Y;
+
+#ifdef __WATCOMC__
+    GLOBAL char Principal_Drive_fichier[2];
+#endif
 
 GLOBAL char  Principal_Repertoire_fichier[256]; // |_ Nom complet =
 GLOBAL char  Principal_Nom_fichier[13];         // |  Repertoire_fichier+"\"+Nom_fichier

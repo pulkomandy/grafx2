@@ -8,7 +8,11 @@
 
 #include <string.h>
 
-#include <sys/vfs.h>
+#ifdef __linux__
+    #include <sys/vfs.h>
+#elif __WATCOMC__
+    #include <windows.h>
+#endif
 
 // -- Menu d'aide -----------------------------------------------------------
 
@@ -199,13 +203,20 @@ void Bouton_Stats(void)
   short Bouton_clicke;
   char  Buffer[37];
   dword Utilisation_couleur[256];
-  unsigned long long Taille;
-  struct statfs Informations_Disque;
+  unsigned long long freeRam;
+
+  #ifdef __linux__
+    struct statfs Informations_Disque;
+    unsigned long long Taille = 0;
+  #elif __WATCOMC__
+    unsigned __int64 Taille;
+    ULARGE_INTEGER tailleU;
+  #endif
 
 
   Ouvrir_fenetre(310,174,"Statistics");
 
-  // dessiner de la fenˆtre o— va s'afficher le texte
+  // Dessin de la fenetre ou va s'afficher le texte
   Fenetre_Afficher_cadre_creux(8,17,294,132);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*9),
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
@@ -219,33 +230,42 @@ void Bouton_Stats(void)
   Print_dans_fenetre(82,19,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de la mémoire restante
-  Print_dans_fenetre(10,35,"Free memory:",STATS_COULEUR_TITRES,CM_Noir);
-  unsigned long long freeRam = Memoire_libre();
+  Print_dans_fenetre(10,35,"Free memory: ",STATS_COULEUR_TITRES,CM_Noir);
+
+  freeRam = Memoire_libre();
+  
   if(freeRam > (100ULL*1024*1024*1024))
-  	sprintf(Buffer,"%d Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
+        sprintf(Buffer,"%d Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
   else if(freeRam > (100*1024*1024))
-  	sprintf(Buffer,"%d Megabytes",(unsigned int)(freeRam/(1024*1024)));
+        sprintf(Buffer,"%d Megabytes",(unsigned int)(freeRam/(1024*1024)));
   else if(freeRam > 100*1024)
-  	sprintf(Buffer,"%d Kilobytes",(unsigned int)(freeRam/1024));
+        sprintf(Buffer,"%d Kilobytes",(unsigned int)(freeRam/1024));
   else
-  	sprintf(Buffer,"%d bytes",(unsigned int)freeRam);
+        sprintf(Buffer,"%d bytes",(unsigned int)freeRam);
   Print_dans_fenetre(114,35,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre
   sprintf(Buffer,"Free space on %c:",Principal_Repertoire_courant[0]);
   Print_dans_fenetre(10,51,Buffer,STATS_COULEUR_TITRES,CM_Noir);
-  statfs(Principal_Repertoire_courant,&Informations_Disque);
-  Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
+
+  #ifdef __linux__
+    statfs(Principal_Repertoire_courant,&Informations_Disque);
+    Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
+  #elif __WATCOMC__
+    GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
+    Taille = tailleU.QuadPart;
+  #endif
+  
   if (Taille>=0)
   {
     if(Taille > (100ULL*1024*1024*1024))
-    	sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
+        sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
     else if(Taille > (100*1024*1024))
-    	sprintf(Buffer,"%d Megabytes",(unsigned int)(Taille/(1024*1024)));
+        sprintf(Buffer,"%d Megabytes",(unsigned int)(Taille/(1024*1024)));
     else if(Taille > (100*1024))
-    	sprintf(Buffer,"%d Kilobytes",(unsigned int)(Taille/1024));
+        sprintf(Buffer,"%d Kilobytes",(unsigned int)(Taille/1024));
     else 
-    	sprintf(Buffer,"%d bytes",(unsigned int)Taille);
+        sprintf(Buffer,"%d bytes",(unsigned int)Taille);
     Print_dans_fenetre(146,51,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
   }
   else
