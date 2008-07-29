@@ -1151,6 +1151,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
   for (Pos_Y=0,Pos_fenetre_Y=Origine_Y+1;Pos_Y<3;Pos_Y++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
   Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
+  SDL_UpdateRect(Ecran_SDL,ToWinX(Origine_X),ToWinY(Origine_Y),ToWinL(2),ToWinH(2));
 
   if (Debut!=Fin)
   {
@@ -1166,6 +1167,8 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
       Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
     Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
+    SDL_UpdateRect(Ecran_SDL,ToWinX(Origine_X),ToWinY(Origine_Y),ToWinL(2),ToWinH(2));
+
     // On TAG toutes les couleurs intermédiaires
     for (Indice=Debut+1;Indice<Fin;Indice++)
     {
@@ -1178,6 +1181,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
                          CM_Clair);
     }
   }
+
 }
 
 

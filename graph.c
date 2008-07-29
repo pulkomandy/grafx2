@@ -4830,6 +4830,9 @@ void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclai
         Traiter_degrade(Distance_X+Distance_Y,Pos_X,Pos_Y);
       }
   }
+  
+  SDL_UpdateRect(Ecran_SDL,Debut_X-Principal_Decalage_X,Debut_Y-Principal_Decalage_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
+  UpdateZoom(Debut_X,Debut_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
 }
 
 
