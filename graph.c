@@ -3028,11 +3028,6 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
     for (Pos_fenetre_X=Orig_X,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
       Pixel_dans_fenetre(Pos_fenetre_X,Pos_fenetre_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
 
-#define ToWinX(x) (((x)*Menu_Facteur_X)+Fenetre_Pos_X)
-#define ToWinY(y) (((y)*Menu_Facteur_Y)+Fenetre_Pos_Y)
-#define ToWinL(l) ((l)*Menu_Facteur_X)
-#define ToWinH(h) ((h)*Menu_Facteur_X)
-
   SDL_UpdateRect(Ecran_SDL, ToWinX(Orig_X), ToWinY(Orig_Y),
         ToWinL(Pinceau_predefini_Largeur[Numero]), 
         ToWinH(Pinceau_predefini_Hauteur[Numero])

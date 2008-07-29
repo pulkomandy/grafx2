@@ -21,6 +21,8 @@
 #include "loadsave.h"
 #include "sdlscreen.h"
 #include "erreurs.h"
+#include "readini.h"
+#include "saveini.h"
 
 #ifdef __linux__
     #include "linux.h" //Fichier avec diverses fonctions qui existaient sous dos mais pas sous linux...

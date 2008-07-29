@@ -1741,6 +1741,7 @@ void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short Largeur,short Ha
   for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
     for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
       Traiter_degrade(Pos_X-Debut_X,Pos_X,Pos_Y);
+  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur*Menu_Facteur_X,Hauteur*Menu_Facteur_Y);
 }
 
 void Bouton_Degrades(void)
@@ -5208,6 +5209,8 @@ void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
   for (Y=0,Pos_Y=Debut_Y;Y<HAUTEUR_SPRITE_MENU;Y++,Pos_Y++)
     for (X=0,Pos_X=Debut_X;X<LARGEUR_SPRITE_MENU;X++,Pos_X++)
       Pixel_dans_fenetre(Pos_X,Pos_Y,SPRITE_EFFET[Numero_sprite][Y][X]);
+
+  SDL_UpdateRect(Ecran_SDL,ToWinX(Debut_X),ToWinY(Debut_Y),LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
 }
 
 
