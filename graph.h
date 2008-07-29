@@ -1,7 +1,3 @@
-#include "global.h"
-
-//byte Meilleure_couleur(byte Rouge, byte Vert, byte Bleu);
-
 void Remapper_ecran_apres_changement_couleurs_menu(void);
 void Calculer_couleurs_menu_optimales(struct Composantes * Palette);
 

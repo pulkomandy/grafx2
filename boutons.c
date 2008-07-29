@@ -20,6 +20,8 @@
 #include "operatio.h"
 #include "pages.h"
 #include "erreurs.h"
+#include "readini.h"
+#include "saveini.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>

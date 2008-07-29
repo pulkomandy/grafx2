@@ -1,12 +1,6 @@
 #ifndef _OP_ASM_H_
 #define _OP_ASM_H_
 
-
-
-#include "op_c.h"
-
-
-
 void OPASM_DitherFS_6123(
   Bitmap256            Destination,  // Pointeur sur le 1er pixel de la ligne
   Bitmap24B            Source,       // Idem mais sur la source

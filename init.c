@@ -1774,7 +1774,7 @@ byte Numero_option[NB_TOUCHES]=
 
 int Charger_CFG(int Tout_charger)
 {
-  int  Handle;
+  FILE*  Handle;
   char Nom_du_fichier[256];
   long Taille_fichier;
   int  Indice,Indice2;
@@ -1790,11 +1790,11 @@ int Charger_CFG(int Tout_charger)
   stat(Nom_du_fichier,&Informations_Fichier);
   Taille_fichier=Informations_Fichier.st_size;
 
-  if ((Handle=open(Nom_du_fichier,O_RDONLY))==-1)
+  if ((Handle=fopen(Nom_du_fichier,"rb"))==NULL)
     return ERREUR_CFG_ABSENT;
 
   if ( (Taille_fichier<sizeof(CFG_Header))
-    || (read(Handle,&CFG_Header,sizeof(CFG_Header))!=sizeof(CFG_Header))
+    || (fread(&CFG_Header,1,sizeof(CFG_Header),Handle)!=sizeof(CFG_Header))
     || memcmp(CFG_Header.Signature,"CFG",3) )
       goto Erreur_lecture_config;
 
@@ -1808,9 +1808,9 @@ int Charger_CFG(int Tout_charger)
     goto Erreur_lecture_config;
 
   // - Lecture des infos contenues dans le fichier de config -
-  while (read(Handle,&(Chunk.Numero),sizeof(byte))==sizeof(byte))
+  while (fread(&(Chunk.Numero),1,sizeof(byte),Handle)==sizeof(byte))
   {
-                read(Handle,&(Chunk.Taille),sizeof(word));
+                fread(&(Chunk.Taille),1,sizeof(word),Handle);
                 #ifndef __WATCOMC__
                     #if __BYTE_ORDER == __BIG_ENDIAN
                         Chunk.Taille=bswap_16(Chunk.Taille);
@@ -1825,7 +1825,7 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
           for (Indice=1; Indice<=NB_TOUCHES; Indice++)
           {
-            if (read(Handle,&CFG_Infos_touche,sizeof(CFG_Infos_touche))!=sizeof(CFG_Infos_touche))
+            if (fread(&CFG_Infos_touche,1,sizeof(CFG_Infos_touche),Handle)!=sizeof(CFG_Infos_touche))
               goto Erreur_lecture_config;
             else
             {
@@ -1861,7 +1861,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1870,9 +1870,9 @@ int Charger_CFG(int Tout_charger)
           goto Erreur_lecture_config;
         for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
         {
-                                        read(Handle,&(CFG_Mode_video.Etat),1);
-                                        read(Handle,&(CFG_Mode_video.Largeur),2);
-          if (read(Handle,&(CFG_Mode_video.Hauteur),2)!=2)
+          fread(&(CFG_Mode_video.Etat),1,1,Handle);
+          fread(&(CFG_Mode_video.Largeur),1,2,Handle);
+          if (fread(&(CFG_Mode_video.Hauteur),1,2,Handle)!=2)
             goto Erreur_lecture_config;
           else
           {
@@ -1890,11 +1890,11 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_SHADE: // Shade
         if (Tout_charger)
         {
-          if (read(Handle,&Shade_Actuel,sizeof(Shade_Actuel))!=sizeof(Shade_Actuel))
+          if (fread(&Shade_Actuel,1,sizeof(Shade_Actuel),Handle)!=sizeof(Shade_Actuel))
             goto Erreur_lecture_config;
           else
           {
-            if (read(Handle,Shade_Liste,sizeof(Shade_Liste))!=sizeof(Shade_Liste))
+            if (fread(Shade_Liste,1,sizeof(Shade_Liste),Handle)!=sizeof(Shade_Liste))
               goto Erreur_lecture_config;
             else
               Liste2tables(Shade_Liste[Shade_Actuel].Liste,
@@ -1905,91 +1905,91 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_MASQUE: // Masque
         if (Tout_charger)
         {
-          if (read(Handle,Mask,sizeof(Mask))!=sizeof(Mask))
+          if (fread(Mask,1,sizeof(Mask),Handle)!=sizeof(Mask))
             goto Erreur_lecture_config;
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_STENCIL: // Stencil
         if (Tout_charger)
         {
-          if (read(Handle,Stencil,sizeof(Stencil))!=sizeof(Stencil))
+          if (fread(Stencil,1,sizeof(Stencil),Handle)!=sizeof(Stencil))
             goto Erreur_lecture_config;
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_DEGRADES: // Infos sur les dégradés
         if (Tout_charger)
         {
-          if (read(Handle,&Degrade_Courant,1)!=1)
+          if (fread(&Degrade_Courant,1,1,Handle)!=1)
             goto Erreur_lecture_config;
-                                        for(Indice=0;Indice<16;Indice++)
-                                        {
-                                                read(Handle,&(Degrade_Tableau[Indice].Debut),1);
-                                                read(Handle,&(Degrade_Tableau[Indice].Fin),1);
-                                                read(Handle,&(Degrade_Tableau[Indice].Inverse),4);
-                                                read(Handle,&(Degrade_Tableau[Indice].Melange),4);
-                if (read(Handle,&(Degrade_Tableau[Indice]).Technique,4)!=4)
+          for(Indice=0;Indice<16;Indice++)
+          {
+                fread(&(Degrade_Tableau[Indice].Debut),1,1,Handle);
+                fread(&(Degrade_Tableau[Indice].Fin),1,1,Handle);
+                fread(&(Degrade_Tableau[Indice].Inverse),1,4,Handle);
+                fread(&(Degrade_Tableau[Indice].Melange),1,4,Handle);
+                if (fread(&(Degrade_Tableau[Indice]).Technique,1,4,Handle)!=4)
                 goto Erreur_lecture_config;
-                                        }
+          }
           Degrade_Charger_infos_du_tableau(Degrade_Courant);
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_SMOOTH: // Matrice du smooth
         if (Tout_charger)
         {
-          if (read(Handle,Smooth_Matrice,sizeof(Smooth_Matrice))!=sizeof(Smooth_Matrice))
+          if (fread(Smooth_Matrice,1,sizeof(Smooth_Matrice),Handle)!=sizeof(Smooth_Matrice))
             goto Erreur_lecture_config;
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_EXCLUDE_COLORS: // Exclude_color
         if (Tout_charger)
         {
-          if (read(Handle,Exclude_color,sizeof(Exclude_color))!=sizeof(Exclude_color))
+          if (fread(Exclude_color,1,sizeof(Exclude_color),Handle)!=sizeof(Exclude_color))
             goto Erreur_lecture_config;
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_QUICK_SHADE: // Quick-shade
         if (Tout_charger)
         {
-          if (read(Handle,&Quick_shade_Step,sizeof(Quick_shade_Step))!=sizeof(Quick_shade_Step))
+          if (fread(&Quick_shade_Step,1,sizeof(Quick_shade_Step),Handle)!=sizeof(Quick_shade_Step))
             goto Erreur_lecture_config;
-          if (read(Handle,&Quick_shade_Loop,sizeof(Quick_shade_Loop))!=sizeof(Quick_shade_Loop))
+          if (fread(&Quick_shade_Loop,1,sizeof(Quick_shade_Loop),Handle)!=sizeof(Quick_shade_Loop))
             goto Erreur_lecture_config;
         }
         else
         {
-          if (lseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1998,23 +1998,23 @@ int Charger_CFG(int Tout_charger)
     }
   }
 
-  if (close(Handle))
+  if (fclose(Handle))
     return ERREUR_CFG_CORROMPU;
 
   return 0;
 
 Erreur_lecture_config:
-  close(Handle);
+  fclose(Handle);
   return ERREUR_CFG_CORROMPU;
 Erreur_config_ancienne:
-  close(Handle);
+  fclose(Handle);
   return ERREUR_CFG_ANCIEN;
 }
 
 
 int Sauver_CFG(void)
 {
-  int  Handle;
+  FILE*  Handle;
   int  Indice;
   //byte Octet;
   char Nom_du_fichier[256];
@@ -2027,7 +2027,7 @@ int Sauver_CFG(void)
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
 
-  if ((Handle=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))<0)
+  if ((Handle=fopen(Nom_du_fichier,"wb"))==NULL)
     return ERREUR_SAUVEGARDE_CFG;
 
   // Ecriture du header
@@ -2036,7 +2036,7 @@ int Sauver_CFG(void)
   CFG_Header.Version2=VERSION2;
   CFG_Header.Beta1   =BETA1;
   CFG_Header.Beta2   =BETA2;
-  if (write(Handle,&CFG_Header,sizeof(CFG_Header))!=sizeof(CFG_Header))
+  if (fwrite(&CFG_Header,1,sizeof(CFG_Header),Handle)!=sizeof(CFG_Header))
     goto Erreur_sauvegarde_config;
 
   // Enregistrement des touches
@@ -2048,7 +2048,7 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
@@ -2067,7 +2067,7 @@ int Sauver_CFG(void)
         CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
     #endif
     #endif
-    if (write(Handle,&CFG_Infos_touche,sizeof(CFG_Infos_touche))!=sizeof(CFG_Infos_touche))
+    if (fwrite(&CFG_Infos_touche,1,sizeof(CFG_Infos_touche),Handle)!=sizeof(CFG_Infos_touche))
       goto Erreur_sauvegarde_config;
   }
 
@@ -2080,14 +2080,16 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_MODES_VIDEO; Indice++)
   {
     CFG_Mode_video.Etat   =(Mode_video[Indice].Mode<<6) | (Mode_video[Indice].Etat&3);
     CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
     CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
-    if (write(Handle,&(CFG_Mode_video.Etat),1)!=1 ||write(Handle,&(CFG_Mode_video.Largeur),2)!=2 ||write(Handle,&(CFG_Mode_video.Hauteur),2)!=2)
+    if (fwrite(&(CFG_Mode_video.Etat),1,1,Handle)!=1 ||
+	fwrite(&(CFG_Mode_video.Largeur),1,2,Handle)!=2 ||
+	fwrite(&(CFG_Mode_video.Hauteur),1,2,Handle)!=2)
       goto Erreur_sauvegarde_config;
   }
 
@@ -2100,11 +2102,12 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,&Shade_Actuel,sizeof(Shade_Actuel))!=sizeof(Shade_Actuel))
+  if (fwrite(&Shade_Actuel,1,sizeof(Shade_Actuel),Handle)!=sizeof(Shade_Actuel))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Shade_Liste,sizeof(Shade_Liste))!=sizeof(Shade_Liste))
+  if (fwrite(Shade_Liste,1,sizeof(Shade_Liste),Handle)!=sizeof(Shade_Liste))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Masque
@@ -2116,9 +2119,10 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Mask,sizeof(Mask))!=sizeof(Mask))
+  if (fwrite(Mask,1,sizeof(Mask),Handle)!=sizeof(Mask))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
@@ -2130,9 +2134,10 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Stencil,sizeof(Stencil))!=sizeof(Stencil))
+  if (fwrite(Stencil,1,sizeof(Stencil),Handle)!=sizeof(Stencil))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
@@ -2144,17 +2149,18 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,&Degrade_Courant,1)!=1)
+  if (fwrite(&Degrade_Courant,1,1,Handle)!=1)
     goto Erreur_sauvegarde_config;
   for(Indice=0;Indice<16;Indice++)
   {
-    if (write(Handle,&(Degrade_Tableau[Indice].Debut),1)!=1 ||
-        write(Handle,&(Degrade_Tableau[Indice].Fin),1)!=1 ||
-        write(Handle,&(Degrade_Tableau[Indice].Inverse),4)!=4 ||
-        write(Handle,&(Degrade_Tableau[Indice].Melange),4)!=4 ||
-        write(Handle,&(Degrade_Tableau[Indice].Technique),4)!=4 )
+    if (fwrite(&(Degrade_Tableau[Indice].Debut),1,1,Handle)!=1 ||
+        fwrite(&(Degrade_Tableau[Indice].Fin),1,1,Handle)!=1 ||
+        fwrite(&(Degrade_Tableau[Indice].Inverse),1,4,Handle)!=4 ||
+        fwrite(&(Degrade_Tableau[Indice].Melange),1,4,Handle)!=4 ||
+        fwrite(&(Degrade_Tableau[Indice].Technique),1,4,Handle)!=4 )
         goto Erreur_sauvegarde_config;
   }
 
@@ -2167,9 +2173,10 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Smooth_Matrice,sizeof(Smooth_Matrice))!=sizeof(Smooth_Matrice))
+  if (fwrite(Smooth_Matrice,1,sizeof(Smooth_Matrice),Handle)!=sizeof(Smooth_Matrice))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des couleurs à exclure
@@ -2181,9 +2188,10 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,Exclude_color,sizeof(Exclude_color))!=sizeof(Exclude_color))
+  if (fwrite(Exclude_color,1,sizeof(Exclude_color),Handle)!=sizeof(Exclude_color))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Quick-shade
@@ -2195,20 +2203,21 @@ int Sauver_CFG(void)
     Chunk.Taille=bswap_16(Chunk.Taille);
   #endif
   #endif
-  if (write(Handle,&(Chunk.Numero),sizeof(byte))!=sizeof(byte)||write(Handle,&(Chunk.Taille),sizeof(word))!=sizeof(word))
+  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
+	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,&Quick_shade_Step,sizeof(Quick_shade_Step))!=sizeof(Quick_shade_Step))
+  if (fwrite(&Quick_shade_Step,1,sizeof(Quick_shade_Step),Handle)!=sizeof(Quick_shade_Step))
     goto Erreur_sauvegarde_config;
-  if (write(Handle,&Quick_shade_Loop,sizeof(Quick_shade_Loop))!=sizeof(Quick_shade_Loop))
+  if (fwrite(&Quick_shade_Loop,1,sizeof(Quick_shade_Loop),Handle)!=sizeof(Quick_shade_Loop))
     goto Erreur_sauvegarde_config;
 
-  if (close(Handle))
+  if (fclose(Handle))
     return ERREUR_SAUVEGARDE_CFG;
 
   return 0;
 
 Erreur_sauvegarde_config:
-  close(Handle);
+  fclose(Handle);
   return ERREUR_SAUVEGARDE_CFG;
 }
 

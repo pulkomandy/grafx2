@@ -1,9 +1,7 @@
 #ifndef _OP_C_H_
 #define _OP_C_H_
 
-
 #include "struct.h"
-
 
 //////////////////////////////////////////////// D‚finition des types de base
 
