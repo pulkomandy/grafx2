@@ -19,28 +19,27 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "divers.h"
+#include "erreurs.h"
 
 #include "errno.h"
 
 #ifdef __linux__
     #include <endian.h>
     #include <byteswap.h>
+#elif __WATCOMC__
+    #include <windows.h>
 #endif
-
-//  On déclare méchamment le prototype de Erreur pour éviter de faire un
-// fichier "main.h":
-void Erreur(int Code);
 
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
-  /*int Position;
-
-  strcpy(Repertoire_du_programme,Chaine);
-  for (Position=strlen(Repertoire_du_programme);Repertoire_du_programme[Position]!='/';Position--); //sous linux c'est un /, sous windows c'est \\
-  Repertoire_du_programme[Position+1]='\0';*/
-  puts("Chercher_repertoire_du_programme: implémentation incomplète");
-  Repertoire_du_programme[0]=0; //On va travailler dans le dossier courant ...
+  #ifdef __WATCOMC__
+	GetCurrentDirectory(255,Repertoire_du_programme);
+	strcat(Repertoire_du_programme,"\\");
+  #elif __linux__
+  	puts("Chercher_repertoire_du_programme: implémentation incomplète");
+  	Repertoire_du_programme[0]=0; //On va travailler dans le dossier courant ...
+  #endif
 }
 
 
@@ -198,8 +197,8 @@ void Rechercher_drives(void)
       Ajouter_lecteur(Lecteur,DRIVE_NETWORK);
   }
 */
-//Sous linux, il n'y a pas de lecteurs, on va juste mettre un disque dur qui pointera vers la racine
-Ajouter_lecteur(0,DRIVE_HDD); //Le lecteur numéro 0 est un disque dur.
+	//Sous linux, il n'y a pas de lecteurs, on va juste mettre un disque dur qui pointera vers la racine
+	Ajouter_lecteur(0,DRIVE_HDD); //Le lecteur numéro 0 est un disque dur.
 }
 
 
@@ -207,7 +206,7 @@ Ajouter_lecteur(0,DRIVE_HDD); //Le lecteur numéro 0 est un disque dur.
 
   #define DECRYPT_TAILLE_CLE 14
   byte Decrypt_compteur=0;
-  char Decrypt_cle[DECRYPT_TAILLE_CLE]="Sunset Design";
+  const char Decrypt_cle[DECRYPT_TAILLE_CLE]="Sunset Design";
 
   byte Decrypt(byte Octet)
   {
@@ -232,7 +231,7 @@ void Decrypte(byte * Donnee,int Taille)
 
 void Charger_DAT(void)
 {
-  int  Handle;
+  FILE*  Handle;
   int  Taille_fichier;
   int  Indice;
   char Nom_du_fichier[256];
@@ -260,54 +259,61 @@ void Charger_DAT(void)
                             case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
                         #endif
                 }
+
   Taille_fichier=Informations_Fichier.st_size;
   if (Taille_fichier!=TAILLE_FICHIER_DATA)
+  {
+    DEBUG("Taille",0);
     Erreur(ERREUR_DAT_CORROMPU);
+  }
 
-        Handle=open(Nom_du_fichier,O_RDONLY);
-        if (Handle==-1)
-                Erreur(ERREUR_DAT_ABSENT);
+  Handle=fopen(Nom_du_fichier,"rb");
+  if (Handle==NULL)
+  {
+	DEBUG("Absent",0);
+  	Erreur(ERREUR_DAT_ABSENT);
+  }
 
-  if (read(Handle,Palette_defaut,sizeof(T_Palette))!=sizeof(T_Palette))
+  if (fread(Palette_defaut,1,sizeof(T_Palette),Handle)!=sizeof(T_Palette))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)Palette_defaut,sizeof(T_Palette));
 
-  if (read(Handle,BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU)!=LARGEUR_MENU*HAUTEUR_MENU)
+  if (fread(BLOCK_MENU,1,LARGEUR_MENU*HAUTEUR_MENU,Handle)!=LARGEUR_MENU*HAUTEUR_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
 
-  if (read(Handle,SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)!=
+  if (fread(SPRITE_EFFET,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS,Handle)!=
       LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS);
 
-  if (read(Handle,SPRITE_CURSEUR,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR)!=
+  if (fread(SPRITE_CURSEUR,1,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR,Handle)!=
       LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)SPRITE_CURSEUR,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR);
 
-  if (read(Handle,SPRITE_MENU,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU)!=
+  if (fread(SPRITE_MENU,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU,Handle)!=
       LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)SPRITE_MENU,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU);
 
-  if (read(Handle,SPRITE_PINCEAU,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU)!=
+  if (fread(SPRITE_PINCEAU,1,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU,Handle)!=
       LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)SPRITE_PINCEAU,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU);
 
-  if (read(Handle,SPRITE_DRIVE,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES)!=
+  if (fread(SPRITE_DRIVE,1,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES,Handle)!=
       LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)SPRITE_DRIVE,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES);
 
   if (!(Logo_GrafX2=(byte *)malloc(231*56)))
     Erreur(ERREUR_MEMOIRE);
-  if (read(Handle,Logo_GrafX2,231*56)!=(231*56))
+  if (fread(Logo_GrafX2,1,231*56,Handle)!=(231*56))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte(Logo_GrafX2,231*56);
 
-  if (read(Handle,TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES)!=2*16*NB_TRAMES_PREDEFINIES)
+  if (fread(TRAME_PREDEFINIE,1,2*16*NB_TRAMES_PREDEFINIES,Handle)!=2*16*NB_TRAMES_PREDEFINIES)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte *)TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES);
 
@@ -316,7 +322,7 @@ void Charger_DAT(void)
     Erreur(ERREUR_MEMOIRE);
 
   // Lecture de la fonte systŠme
-  if (read(Handle,Fonte_temporaire,2048)!=2048)
+  if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte(Fonte_temporaire,2048);
   for (Indice=0;Indice<256;Indice++)
@@ -325,7 +331,7 @@ void Charger_DAT(void)
         Fonte_systeme[(Indice<<6)+(Pos_X<<3)+Pos_Y]=( ((*(Fonte_temporaire+(Indice*8)+Pos_Y))&(0x80>>Pos_X)) ? 1 : 0);
 
   // Lecture de la fonte alternative
-  if (read(Handle,Fonte_temporaire,2048)!=2048)
+  if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte(Fonte_temporaire,2048);
   for (Indice=0;Indice<256;Indice++)
@@ -338,7 +344,7 @@ void Charger_DAT(void)
   Fonte=Fonte_systeme;
 
   // Lecture de la fonte 6x8: (spéciale aide)
-  if (read(Handle,Fonte_help,(315*6*8))!=(315*6*8))
+  if (fread(Fonte_help,1,315*6*8,Handle)!=(315*6*8))
     Erreur(ERREUR_DAT_CORROMPU);
   Decrypte((byte*)Fonte_help,(315*6*8));
 
@@ -348,7 +354,7 @@ void Charger_DAT(void)
   for (Indice=0;Indice<NB_SECTIONS_AIDE;Indice++)
   {
     // On lit le nombre de lignes:
-    if (read(Handle,&Mot_temporaire,2)!=2)
+    if (fread(&Mot_temporaire,1,2,Handle)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 #ifndef __WATCOMC__
     #if __BYTE_ORDER == __BIG_ENDIAN
@@ -361,7 +367,7 @@ void Charger_DAT(void)
     Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
 
     // On lit la place que la section prend en mémoire:
-    if (read(Handle,&Mot_temporaire,2)!=2)
+    if (fread(&Mot_temporaire,1,2,Handle)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
 #ifndef __WATCOMC__
     #if __BYTE_ORDER == __BIG_ENDIAN
@@ -375,11 +381,11 @@ void Charger_DAT(void)
       Erreur(ERREUR_MEMOIRE);
 
     // Et on lit la section d'aide en question:
-    if (read(Handle,Table_d_aide[Indice].Debut_de_la_liste,Mot_temporaire)!=Mot_temporaire)
+    if (fread(Table_d_aide[Indice].Debut_de_la_liste,1,Mot_temporaire,Handle)!=Mot_temporaire)
       Erreur(ERREUR_DAT_CORROMPU);
   }
 
-  close(Handle);
+  fclose(Handle);
 
   Section_d_aide_en_cours=0;
   Position_d_aide_en_cours=0;
