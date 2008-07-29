@@ -827,7 +827,7 @@ void Backup(void)
   Download_infos_backup(Principal_Backups);
 
   // On copie l'image du backup vers la page courante:
-  memcpy(Ecran_backup,Principal_Ecran,Principal_Largeur_image*Principal_Hauteur_image);
+  memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
 
   // On détruit le descripteur de la page courante
   free(Nouvelle_page);
