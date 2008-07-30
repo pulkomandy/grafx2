@@ -20,6 +20,64 @@
     #include <windows.h>
 #endif
 
+// Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
+// Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
+void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
+{
+	short L_effectif, H_effectif;
+	short X_effectif;
+	short Y_effectif;
+
+	// Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
+	if (Largeur < 0)
+	{
+		X += Largeur;
+		Largeur = 3 - Largeur;
+	}
+
+	if (Hauteur < 0)
+	{
+		Y += Hauteur;
+		Hauteur = 3 - Hauteur;
+	}
+
+	// D'abord on met à jour dans la zone écran normale
+	X_effectif = Max(X-Principal_Decalage_X,0);
+	Y_effectif = Max(Y-Principal_Decalage_Y,0);
+
+	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
+	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
+	// a rester dans la zone visible de l'image
+	if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
+	else L_effectif = Principal_Largeur_image - X_effectif;
+
+	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
+	else H_effectif = Menu_Ordonnee - Y_effectif;
+
+	SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
+
+	// Et ensuite dans la partie zoomée
+	if(Loupe_Mode)
+	{
+		X_effectif = Max(X-Loupe_Decalage_X,0) * Loupe_Facteur;
+		Y_effectif = Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur;
+
+		Largeur *= Loupe_Facteur;
+		Hauteur *= Loupe_Facteur;
+
+		// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
+		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
+		// a rester dans la zone visible de l'image
+		if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
+		else L_effectif = Principal_Largeur_image - X_effectif;
+
+		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
+		else H_effectif = Menu_Ordonnee - Y_effectif;
+
+		SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
+	}
+}
+
 byte Meilleure_couleur(byte R,byte V,byte B)
 {
   short Coul;
@@ -536,20 +594,17 @@ short Round_div_max(short Numerateur,short Diviseur)
     return (Numerateur/Diviseur)+1;
 }
 
-
-
+// Retourne le minimum entre deux nombres
 int Min(int A,int B)
 {
   return (A<B)?A:B;
 }
 
+// Retourne le maximum entre deux nombres
 int Max(int A,int B)
 {
   return (A>B)?A:B;
 }
-
-
-
 
 void Transformer_point(short X, short Y, float cosA, float sinA,
                        short * Xr, short * Yr)
@@ -4181,6 +4236,9 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
   Pixel_figure(Centre_X-Rayon_horizontal,Centre_Y,Couleur); // Gauche
   Pixel_figure(Centre_X+Rayon_horizontal,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon_vertical,Couleur);   // Bas
+
+  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon_horizontal-Principal_Decalage_X,0),Max(Centre_Y-Rayon_vertical-Principal_Decalage_Y,0),2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  UpdateZoom(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
 }
 
   // -- Tracé définitif d'une ellipse vide --
@@ -4241,6 +4299,8 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
     for (Pos_X=Debut_X,Ellipse_Curseur_X=Debut_X-Centre_X;Pos_X<=Fin_X;Pos_X++,Ellipse_Curseur_X++)
       if (Pixel_dans_ellipse())
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
+  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon_horizontal-Principal_Decalage_X,0),Max(Centre_Y-Rayon_vertical-Principal_Decalage_Y,0),2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  UpdateZoom(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
 }
 
 
@@ -4312,14 +4372,17 @@ void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, b
 
   if ( (Debut_X!=Fin_X) || (Debut_Y!=Fin_Y) )
     Pixel_figure(Fin_X,Fin_Y,Couleur);
+
 }
 
   // -- Tracer définitif d'une ligne --
 
 void Tracer_ligne_Definitif(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
 {
+
   Pixel_figure=Pixel_figure_Definitif;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
   // -- Tracer la preview d'une ligne --
@@ -4328,6 +4391,7 @@ void Tracer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,by
 {
   Pixel_figure=Pixel_figure_Preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
   // -- Tracer la preview d'une ligne en xor --
@@ -4336,6 +4400,7 @@ void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_
 {
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
   // -- Effacer la preview d'une ligne --
@@ -4344,6 +4409,7 @@ void Effacer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
 {
   Pixel_figure=Pixel_figure_Effacer_preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
 
@@ -4471,6 +4537,13 @@ void Tracer_courbe_General(short X1, short Y1,
     Old_X=X;
     Old_Y=Y;
   }
+  
+  X = Min(Min(X1,X2),Min(X3,X4));
+  Y = Min(Min(Y1,Y2),Min(Y3,Y4));
+  Old_X = Max(Max(X1,X2),Max(X3,X4)) - X;
+  Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - Y;
+  SDL_UpdateRect(Ecran_SDL,X-Principal_Decalage_X,Y-Principal_Decalage_Y,Old_X,Old_Y);
+  UpdateZoom(X,Y,Old_X,Old_Y);
 }
 
   // -- Tracer une courbe de Bézier définitivement --
@@ -4895,6 +4968,9 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
         Traiter_degrade(Distance_X+Distance_Y,Pos_X,Pos_Y);
       }
   }
+
+  SDL_UpdateRect(Ecran_SDL,Debut_X-Principal_Decalage_X,Debut_Y-Principal_Decalage_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  UpdateZoom(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
 

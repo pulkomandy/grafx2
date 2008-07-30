@@ -15,6 +15,7 @@ short Round_max(short Numerateur,short Diviseur);
 short Round_div_max(short Numerateur,short Diviseur);
 
 int Min(int A,int B);
+int Max(int A,int B);
 
 void Transformer_point(short X, short Y,
                        float cosA, float sinA, short * Xr, short * Yr);
