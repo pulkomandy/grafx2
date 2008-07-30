@@ -100,7 +100,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
   char Chaine_initiale[256];
   byte Position;
   byte Taille;
-  char Touche_lue=0;
+  word Touche_lue=0;
   byte Touche_autorisee;
 
 
@@ -120,16 +120,12 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
   Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
 
 
-  while ((Touche_lue!=13) && (Touche_lue!=27))
+  while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))
   {
     Touche_lue=Get_key();
     switch (Touche_lue)
     {
-      case  0 :
-        Touche_lue=Get_key();
-        switch (Touche_lue)
-        {
-          case 83 : // Suppr.
+      case SDLK_DELETE : // Suppr.
             if (Position<Taille)
             {
               Supprimer_caractere(Chaine,Position);
@@ -139,8 +135,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
                     Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
             }
-            break;
-          case 75 : // Gauche
+      break;
+      case SDLK_LEFT : // Gauche
             if (Position)
             {
               // Effacement de la chaŒne
@@ -149,12 +145,12 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,--Position);
             }
-            break;
-          case 77 : // Droite
+      break;
+      case SDLK_RIGHT : // Droite
             if ((Position<Taille) && (Position<Taille_maxi-1))
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,++Position);
-            break;
-          case 71 : // Home
+      break;
+      case SDLK_HOME : // Home
             if (Position)
             {
               // Effacement de la chaŒne
@@ -163,13 +159,12 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=0);
             }
-            break;
-          case 79 : // End
+      break;
+      case SDLK_END : // End
             if ((Position<Taille) && (Position<Taille_maxi-1))
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position=(Taille<Taille_maxi)?Taille:Taille-1);
-        }
-        break;
-      case  8 :
+      break;
+      case  SDLK_BACKSPACE :
         if (Position)
         {
           Supprimer_caractere(Chaine,--Position);
@@ -180,14 +175,14 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
           Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
         }
         break;
-      case 13 :
+      case SDLK_RETURN :
         if ( (Type_saisie!=2) || (Chaine_valide(Chaine)) )
           break;
         // Si on ‚tait en saisie de nom de fichier et qu'il y ait une erreur
         // dans la chaŒne
         Erreur(0); // On flash en rouge & ...
-        Touche_lue=27; // ... on simule l'appuie sur la touche [Esc]
-      case 27 :
+        Touche_lue=SDLK_ESCAPE; // ... on simule l'appuie sur la touche [Esc]
+      case SDLK_ESCAPE :
         // On restaure la chaine initiale
         strcpy(Chaine,Chaine_initiale);
         Taille=strlen(Chaine);
@@ -254,5 +249,5 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
   else
     Print_dans_fenetre(Pos_X,Pos_Y,Chaine,COULEUR_TEXTE,COULEUR_FOND);
 
-  return (Touche_lue==13);
+  return (Touche_lue==SDLK_RETURN);
 }

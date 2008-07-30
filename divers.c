@@ -647,9 +647,11 @@ void Scroll_picture(short Decalage_X,short Decalage_Y)
         UNIMPLEMENTED
 }
 
-byte Get_key(void)
+word Get_key(void)
 {
-        SDL_Event event;
+ 	SDL_Event event;
+
+	Attendre_fin_de_click(); // On prend le controle de la boucle d'évènements, donc il ne faut pas qu'on rate la fin de click !
 
         SDL_EnableUNICODE(SDL_ENABLE); // On a besoin du caractère
 
@@ -660,7 +662,13 @@ byte Get_key(void)
                 {
                         // On retourne en mode standard pour la gestion normale
                         SDL_EnableUNICODE(SDL_DISABLE);
-                        return (byte)(event.key.keysym.unicode);
+                        if (event.key.keysym.unicode <= 127 && event.key.keysym.unicode > 31)
+				return event.key.keysym.unicode; // Pas de souci, on est en ASCII standard
+			else
+			{
+				// Sinon c'est une touche spéciale, on retourne son scancode
+				return event.key.keysym.sym;
+			}
                 }
         }
 }
