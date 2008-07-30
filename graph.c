@@ -5198,6 +5198,8 @@ void Polyfill_General(int Vertices, short * Points, int Color)
   }
 
   free(initial_edge);
+  // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
+  Mettre_Ecran_A_Jour(0,top,Principal_Largeur_image,bottom-top+1);
 }
 
 

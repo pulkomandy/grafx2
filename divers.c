@@ -384,7 +384,14 @@ void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
 
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 {
-        UNIMPLEMENTED
+	byte* edi;
+	
+	// pour chaque pixel :
+	for(edi = Principal_Ecran;edi < Principal_Ecran + Principal_Hauteur_image * Principal_Largeur_image;edi++)
+		if (*edi == Ancienne_couleur)
+			*edi = Nouvelle_couleur;
+	SDL_UpdateRect(Ecran_SDL,0,0,0,0); // On pet TOUT a jour
+	// C'est pas un problème car il n'y a pas de preview
 }
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
@@ -651,7 +658,34 @@ void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)
 {
-        UNIMPLEMENTED
+	byte* esi = Ecran_backup; //Source de la copie
+	byte* edi = Principal_Ecran + Decalage_Y * Principal_Largeur_image + Decalage_X;
+	const word ax = Principal_Largeur_image - Decalage_X; // Nombre de pixels à copier à droite
+	word dx;
+	for(dx = Principal_Hauteur_image - Decalage_Y;dx>0;dx--) 
+	{
+	// Pour chaque ligne
+		memcpy(edi,esi,ax);
+		memcpy(edi - Decalage_X,esi+ax,Decalage_X);
+
+		// On passe à la ligne suivante
+		edi += Principal_Largeur_image;
+		esi += Principal_Largeur_image;
+	}
+
+	// On vient de faire le traitement pour otutes les lignes au-dessous de Decalage_Y
+	// Maintenant on traite celles au dessus
+	edi = Decalage_X + Principal_Ecran;
+	for(dx = Decalage_Y;dx>0;dx--)
+	{
+		memcpy(edi,esi,ax);
+		memcpy(edi - Decalage_X,esi+ax,Decalage_X);
+
+		edi += Principal_Largeur_image;
+		esi += Principal_Largeur_image;
+	}
+
+	SDL_UpdateRect(Ecran_SDL,0,0,0,0);
 }
 
 word Get_key(void)
