@@ -3003,7 +3003,8 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
       Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
       BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
     }
-  SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee*Menu_Facteur_Y,Pos_X*Menu_Facteur_X,Pos_Y*Menu_Facteur_Y);
+  SDL_UpdateRect(Ecran_SDL,Menu_Facteur_X*(Bouton[Numero_bouton].Decalage_X+1),(Bouton[Numero_bouton].Decalage_Y+1)*Menu_Facteur_Y,
+  	Pos_X*Menu_Facteur_X,Pos_Y*Menu_Facteur_Y);
 }
 
   // -- Redessiner la forme du pinceau dans le menu --

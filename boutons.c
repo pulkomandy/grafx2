@@ -1388,7 +1388,6 @@ void Bouton_Resol(void)
         Readline(62,37,Chaine,4,1);
         Largeur_choisie=atoi(Chaine);
         // On corrige les dimensions
-	DEBUG("Valide",0);
         if (Largeur_choisie==0)
         {
           Largeur_choisie=1;

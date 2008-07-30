@@ -126,7 +126,13 @@ void Get_input(void)
             break;
             case SDL_MOUSEBUTTONDOWN:
                 //Clic sur un des boutons de la souris
-                INPUT_Nouveau_Mouse_K=event.button.button;
+                switch(event.button.button)
+		{
+			case SDL_BUTTON_LEFT: INPUT_Nouveau_Mouse_K = 1; break;
+			case SDL_BUTTON_MIDDLE: // Pour SDL, 2 = clic milieu. Pour nous c'est le clic droit
+			case SDL_BUTTON_RIGHT: // Clic droit SDL, clic droit pour nous aussi ( pour le moment en tout cas)
+				INPUT_Nouveau_Mouse_K = 2;
+		}
             break;
             case SDL_MOUSEBUTTONUP:
                 //Bouton souris relaché
@@ -450,7 +456,7 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
 {
-        puts("Remap_general_LOWLEVEL non implémenté!");
+        UNIMPLEMENTED
 }
 
 void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)

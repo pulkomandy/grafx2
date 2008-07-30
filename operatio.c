@@ -8,6 +8,7 @@
 #include "operatio.h"
 #include "boutons.h"
 #include "pages.h"
+#include "erreurs.h"
 
 #ifdef __WATCOMC__
     #define M_PI 3.14159265358979323846 
