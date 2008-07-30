@@ -3918,6 +3918,8 @@ void Remplir(byte Couleur_de_remplissage)
     // puisque les seuls points qui ont changé dans l'image ont été raffichés
     // par l'utilisation de "Afficher_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
+
+    SDL_UpdateRect(Ecran_SDL,0,0,0,0);
   }
 }
 

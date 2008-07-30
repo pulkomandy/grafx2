@@ -497,11 +497,6 @@ void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 
 	byte Ancien;
 
-DEBUG("Haut",Limite_Haut);
-DEBUG("Bas",Limite_Bas);
-DEBUG("Gauche",Limite_Gauche);
-DEBUG("Droite",Limite_Droite);
-
         // Pour chaque ligne :
         for(Ligne = Limite_Haut;Ligne <= Limite_Bas; Ligne++)
         {
