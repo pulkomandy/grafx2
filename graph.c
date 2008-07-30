@@ -3119,6 +3119,7 @@ void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
   for (j=0; j<HAUTEUR_SPRITE_DRIVE; j++)
     for (i=0; i<LARGEUR_SPRITE_DRIVE; i++)
       Pixel_dans_fenetre(Pos_X+i,Pos_Y+j,SPRITE_DRIVE[Type][j][i]);
+  SDL_UpdateRect(Ecran_SDL,ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(LARGEUR_SPRITE_DRIVE),ToWinH(HAUTEUR_SPRITE_DRIVE));
 }
 
 
@@ -3845,12 +3846,11 @@ void Remplir(byte Couleur_de_remplissage)
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(Table_de_remplacement,0,256);
-    DEBUG("Num couleur",Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
     Table_de_remplacement[Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y)]=1;
     Remplacer_toutes_les_couleurs_dans_limites(Table_de_remplacement);
 
     // On fait maintenant un remplissage classique de la couleur 1 avec la 2
-    Fill(&Limite_atteinte_Haut  ,&Limite_atteinte_Bas,
+   Fill(&Limite_atteinte_Haut  ,&Limite_atteinte_Bas,
          &Limite_atteinte_Gauche,&Limite_atteinte_Droite);
 
     //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
@@ -3861,12 +3861,14 @@ void Remplir(byte Couleur_de_remplissage)
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (Limite_atteinte_Haut>Limite_Haut)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
-                                               Limite_Gauche,Limite_Haut,
-                                               (Limite_Droite-Limite_Gauche)+1,
-                                               Limite_atteinte_Haut-Limite_Haut,
-                                               Principal_Largeur_image,Principal_Ecran,
-                                               Limite_Gauche,Limite_Haut,Principal_Largeur_image);
+      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,					// Source
+                                               Limite_Gauche,Limite_Haut,			// Pos X et Y dans source
+                                               (Limite_Droite-Limite_Gauche)+1,			// Largeur copie
+                                               Limite_atteinte_Haut-Limite_Haut,		// Hauteur copie
+                                               Principal_Largeur_image,				// Largeur de la source
+					       Principal_Ecran,					// Destination
+                                               Limite_Gauche,Limite_Haut,			// Pos X et Y destination
+					       Principal_Largeur_image);			// Largeur destination
     if (Limite_atteinte_Bas<Limite_Bas)
       Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
                                                Limite_Gauche,Limite_atteinte_Bas+1,
@@ -3888,12 +3890,6 @@ void Remplir(byte Couleur_de_remplissage)
                                                (Limite_atteinte_Bas-Limite_atteinte_Haut)+1,
                                                Principal_Largeur_image,Principal_Ecran,
                                                Limite_atteinte_Droite+1,Limite_atteinte_Haut,Principal_Largeur_image);
-
-    DEBUG("Haut",Limite_atteinte_Haut);
-    DEBUG("Bas",Limite_atteinte_Bas);
-
-    DEBUG("Gauche",Limite_atteinte_Gauche);
-    DEBUG("Droite",Limite_atteinte_Droite);
 
     for (Pos_Y=Limite_atteinte_Haut;Pos_Y<=Limite_atteinte_Bas;Pos_Y++)
       for (Pos_X=Limite_atteinte_Gauche;Pos_X<=Limite_atteinte_Droite;Pos_X++)

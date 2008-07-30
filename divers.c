@@ -416,8 +416,8 @@ void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_
                 memcpy(edi,esi,Largeur);
 
                 // Passe à la ligne suivante
-                esi+=Largeur_source - Largeur;
-                edi+=Largeur_destination - Largeur;
+                esi+=Largeur_source;
+                edi+=Largeur_destination;
         }
         
 
@@ -491,35 +491,28 @@ void Clip_mouse(void)
 
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 {
-        // ESI pointe sur le début de la ligne d'écran actuelle
-        byte* esi = Principal_Ecran + Limite_Gauche + 
-                Limite_Haut * Principal_Largeur_image;
-        
-        // EDI pointe sur la position actuelle dans l'écran
-        byte* edi = esi;
-
-        // On place dans CX le nombre de lignes à traiter
         int Ligne;
         int Compteur;
+	byte* Adresse;
+
+	byte Ancien;
+
+DEBUG("Haut",Limite_Haut);
+DEBUG("Bas",Limite_Bas);
+DEBUG("Gauche",Limite_Gauche);
+DEBUG("Droite",Limite_Droite);
 
         // Pour chaque ligne :
-        for(Ligne = Limite_Haut;Ligne < Limite_Bas; Ligne++)
+        for(Ligne = Limite_Haut;Ligne <= Limite_Bas; Ligne++)
         {
                 // Pour chaque pixel sur la ligne :
-                for (Compteur = Limite_Gauche;Compteur < Limite_Droite;Compteur ++);
+                for (Compteur = Limite_Gauche;Compteur <= Limite_Droite;Compteur ++)
                 {
-                        if(*edi!=0) DEBUG("c",*edi);
-                        *edi = Table_de_remplacement[*edi];
-                        edi++;
+			Adresse = Principal_Ecran+Ligne*Principal_Largeur_image+Compteur;
+			Ancien=*Adresse;
+			*Adresse = Table_de_remplacement[Ancien];
                 }
-
-                // Passage à la ligne suivante
-                esi += Principal_Largeur_image;
-                edi = esi;
         }
-
-        DEBUG("Ligne",Ligne);
-        DEBUG("Compteur",Compteur);
 }               
 
 byte Lit_pixel_dans_ecran_backup (word X,word Y)
