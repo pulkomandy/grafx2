@@ -854,6 +854,8 @@ void Afficher_limites_de_l_image(void)
     for (Pos=Debut;Pos<=Fin;Pos++)
       Pixel_Preview(Principal_Largeur_image,Pos,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
+    SDL_UpdateRect(Ecran_SDL,Principal_Largeur_image,Debut,1,Fin-Debut + 1);
+
     // On restaure la bonne valeur des limites
     Limite_Droite_Zoom=Ancienne_Limite_Zoom;
   }
@@ -871,6 +873,8 @@ void Afficher_limites_de_l_image(void)
 
     for (Pos=Debut;Pos<=Fin;Pos++)
       Pixel_Preview(Pos,Principal_Hauteur_image,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
+
+    SDL_UpdateRect(Ecran_SDL,Debut,Principal_Hauteur_image,Fin-Debut + 1,1);
 
     // On restaure la bonne valeur des limites
     Limite_Bas_Zoom=Ancienne_Limite_Zoom;
