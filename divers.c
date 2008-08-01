@@ -336,7 +336,7 @@ void Initialiser_chrono(dword Delai)
 void Wait_VBL(void)
 // Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple. SDL ne sait pas faire ?
 {
-        puts("Wait_VBL non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Passer_en_mode_texte(byte Nb_lignes)
@@ -346,28 +346,27 @@ void Passer_en_mode_texte(byte Nb_lignes)
 
 void Pixel_dans_brosse             (word X,word Y,byte Couleur)
 {
-        puts("Pixel_dans_brosse non implémenté!");
+	*(Brosse+Y*Brosse_Largeur+X)=Couleur;
 }
 
 byte Lit_pixel_dans_brosse         (word X,word Y)
 {
-        puts("Lit_pixel_dans_brosse non implémenté!");
-        return 0;
+	return *(Brosse + Y * Brosse_Largeur + X);
 }
 
 void Clavier_de_depart(void)
 {
-        puts("Clavier_de_depart non implémenté!");
+	UNIMPLEMENTED
 }
 
 void Clavier_americain(void)
 {
-        puts("Clavier_americain non implémenté!");
+	UNIMPLEMENTED
 }
 
 word Detection_souris(void)
 {
-        puts("Detection_souris non implémenté!");
+	UNIMPLEMENTED
         return 0;
 }
 
@@ -458,7 +457,31 @@ byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
 
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 {
-        UNIMPLEMENTED
+	byte* esi;
+	byte* edi;
+	word dx,bx,cx;
+
+	//ESI = Point haut droit de la source
+	byte* Debut_de_colonne = Source + Brosse_Largeur - 1;
+	edi = Destination;
+
+	// Largeur de la source = Hauteur de la destination
+	dx = bx = Brosse_Largeur;
+	
+	// Pour chaque ligne
+	for(dx = Brosse_Largeur;dx>0;dx--)
+	{
+		esi = Debut_de_colonne;
+		// Pout chaque colonne
+		for(cx=Brosse_Hauteur;cx>0;cx--)
+		{
+			*edi = *esi;
+			esi+=Brosse_Largeur;
+			edi++;
+		}
+
+		Debut_de_colonne--;
+	}
 }
 
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
@@ -620,19 +643,102 @@ void Tester_chrono(void)
         if((SDL_GetTicks()/55)-Chrono_delay>Chrono_cmp) Etat_chrono=1;
 }
 
+// Effectue uyne inversion de la brosse selon une droite horizontale
 void Flip_Y_LOWLEVEL(void)
 {
-        UNIMPLEMENTED
+	// ESI pointe sur la partie haute de la brosse
+	// EDI sur la partie basse
+	byte* ESI = Brosse ;
+	byte* EDI = Brosse + (Brosse_Hauteur - 1) *Brosse_Largeur;
+	byte tmp;
+	word cx;
+
+	while(ESI < EDI)
+	{
+		// Il faut inverser les lignes pointées par ESI et
+		// EDI ("Brosse_Largeur" octets en tout)
+
+		for(cx = Brosse_Largeur;cx>0;cx--)
+		{
+			tmp = *ESI;
+			*ESI = *EDI;
+			*EDI = tmp;
+			ESI++;
+			EDI++;
+		}
+
+		// On change de ligne :
+		// ESI pointe déjà sur le début de la ligne suivante
+		// EDI pointe sur la fin de la ligne en cours, il
+		// doit pointer sur le début de la précédente...
+		EDI -= 2 * Brosse_Largeur; // On recule de 2 lignes
+	}
 }
 
+// Effectue une inversion de la brosse selon une droite verticale
 void Flip_X_LOWLEVEL(void)
 {
-        UNIMPLEMENTED
+	// ESI pointe sur la partie gauche et EDI sur la partie
+	// droite
+	byte* ESI = Brosse;
+	byte* EDI = Brosse + Brosse_Largeur - 1;
+
+	byte* Debut_Ligne;
+	byte* Fin_Ligne;
+	byte tmp;
+	word cx;
+
+	while(ESI<EDI)
+	{
+		Debut_Ligne = ESI;
+		Fin_Ligne = EDI;
+
+		// On échange par colonnes
+		for(cx=Brosse_Hauteur;cx>0;cx--)
+		{
+			tmp=*ESI;
+			*ESI=*EDI;
+			*EDI=tmp;
+			EDI+=Brosse_Largeur;
+			ESI+=Brosse_Largeur;
+		}
+
+		// On change de colonne
+		// ESI > colonne suivante
+		// EDI > colonne précédente
+		ESI = Debut_Ligne + 1;
+		EDI = Fin_Ligne - 1;
+	}
 }
 
+// Faire une rotation de 180º de la brosse
 void Rotate_180_deg_LOWLEVEL(void)
 {
-        UNIMPLEMENTED
+	// ESI pointe sur la partie supérieure de la brosse
+	// EDI pointe sur la partie basse
+	byte* ESI = Brosse;
+	byte* EDI = Brosse + Brosse_Hauteur*Brosse_Largeur - 1;
+	// EDI pointe sur le dernier pixel de la derniere ligne
+	byte tmp;
+	word cx;
+
+	while(ESI < EDI)
+	{
+		// On échange les deux lignes pointées par EDI et
+		// ESI (Brosse_Largeur octets)
+		// En même temps, on échange les pixels, donc EDI
+		// pointe sur la FIN de sa ligne
+
+		for(cx=Brosse_Largeur;cx>0;cx--)
+		{
+			tmp = *ESI;
+			*ESI = *EDI;
+			*EDI = tmp;
+		
+			EDI--; // Attention ici on recule !
+			ESI++;
+		}
+	}
 }
 
 void Tempo_jauge(byte Vitesse)

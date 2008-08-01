@@ -5550,6 +5550,8 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
 
     Pos_Y_src+=Delta_Y;
   }
+
+  SDL_UpdateRect(Ecran_SDL,Pos_X_dest_Initiale,Pos_Y_dest_Initiale,Largeur_dest,Hauteur_dest);
 }
 
 

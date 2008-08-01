@@ -126,7 +126,34 @@ void Ligne_verticale_XOR_SDL  (word Pos_X,word Pos_Y,word Hauteur)
 
 void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
 {
-        UNIMPLEMENTED
+	// EDI = Position à l'écran
+	byte* EDI = Ecran + Pos_Y * Largeur_ecran + Pos_X;
+	// ESI = Position dans la brosse
+	byte* ESI = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
+
+	word DX,CX;
+
+	// Pour chaque ligne
+	for(DX = Hauteur;DX > 0; DX--)
+	{
+		// Pour chaque pixel
+		for(CX = Largeur;CX > 0; CX--)
+		{
+			// On vérifie que ce n'est pas la transparence
+			if(*ESI != Couleur_de_transparence)
+			{
+				*EDI = *ESI;
+			}
+
+			// Pixel suivant
+			ESI++; EDI++;
+		}
+
+		// On passe à la ligne suivante
+		EDI = EDI + Largeur_ecran - Largeur;
+		ESI = ESI + Largeur_brosse - Largeur;
+	}
+	SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
@@ -255,9 +282,38 @@ void Afficher_partie_de_l_ecran_zoomee_SDL(
 // ATTENTION on n'arrive jamais ici !
 }
 
-void Display_brush_Color_zoom_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer)
+void Afficher_une_ligne_transparente_a_l_ecran_SDL(word Pos_X,word Pos_Y,word Largeur,byte* Ligne,byte Couleur_transparence)
 {
-    UNIMPLEMENTED
+	UNIMPLEMENTED
+}
+
+// Affiche une partie de la brosse couleur zoomée
+void Display_brush_Color_zoom_SDL (word Pos_X,word Pos_Y,
+	word Decalage_X,word Decalage_Y,
+	word Largeur, // Largeur non zoomée
+	word Pos_Y_Fin,byte Couleur_de_transparence,
+	word Largeur_brosse, // Largeur réelle de la brosse
+	byte * Buffer)
+{
+	byte* ESI = Brosse+Decalage_Y*Largeur_brosse + Decalage_X;
+	word DX = Pos_Y;
+	byte bx;
+
+	// Pour chaque ligne
+	while(1)
+	{
+		Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+		// On affiche facteur fois la ligne zoomée
+		for(bx=Loupe_Facteur;bx>0;bx--)
+		{
+			Afficher_une_ligne_transparente_a_l_ecran_SDL(Pos_X,DX,Largeur*Loupe_Facteur,Buffer,Couleur_de_transparence);
+			DX++;
+			if(DX==Pos_Y_Fin) return;
+		}
+		ESI += Largeur_brosse;
+		
+	}
+	// ATTENTION zone jamais atteinte
 }
 
 void Display_brush_Mono_zoom_SDL (word Pos_X, word Pos_Y,
