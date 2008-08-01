@@ -81,6 +81,8 @@ void Afficher_aide(void)
            Menu_Facteur_Y<<3,
            CM_Noir);
   }
+
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+13*Menu_Facteur_X,Fenetre_Pos_Y+19*Menu_Facteur_Y,44*6*Menu_Facteur_X,16*8*Menu_Facteur_Y);
 }
 
 
