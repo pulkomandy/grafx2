@@ -284,7 +284,19 @@ void Afficher_partie_de_l_ecran_zoomee_SDL(
 
 void Afficher_une_ligne_transparente_a_l_ecran_SDL(word Pos_X,word Pos_Y,word Largeur,byte* Ligne,byte Couleur_transparence)
 {
-	UNIMPLEMENTED
+	byte* ESI = Ligne;
+	byte* EDI = Ecran + Pos_Y * Largeur_ecran + Pos_X;
+
+	byte cx;
+
+	// Pour chaque pixel de la ligne
+	for(cx = Largeur;cx > 0;cx--)
+	{
+		if(*ESI!=Couleur_transparence)
+			*EDI = *ESI;
+		ESI++;
+		EDI++;
+	}
 }
 
 // Affiche une partie de la brosse couleur zoomée
@@ -308,7 +320,11 @@ void Display_brush_Color_zoom_SDL (word Pos_X,word Pos_Y,
 		{
 			Afficher_une_ligne_transparente_a_l_ecran_SDL(Pos_X,DX,Largeur*Loupe_Facteur,Buffer,Couleur_de_transparence);
 			DX++;
-			if(DX==Pos_Y_Fin) return;
+			if(DX==Pos_Y_Fin)
+			{
+				SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y+1);
+				return;
+			}
 		}
 		ESI += Largeur_brosse;
 		
