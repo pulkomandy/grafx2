@@ -14,16 +14,13 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include "boutons.h"
+#include "erreurs.h"
 
 #ifdef __linux__
     #include "linux.h"
 #endif
-
-//  On déclare méchamment le prototype de Erreur pour éviter de faire un
-// fichier "main.h":
-void Erreur(int Code);
-
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
@@ -607,7 +604,7 @@ void Test_PAL(void)
   int  Fichier;             // Handle du fichier
   char Nom_du_fichier[256]; // Nom complet du fichier
   long Taille_du_fichier;   // Taille du fichier
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -617,9 +614,9 @@ void Test_PAL(void)
   Fichier=open(Nom_du_fichier,O_RDONLY);
   if (Fichier!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
+      stat(Nom_du_fichier,&Informations_Fichier);
     // Lecture de la taille du fichier
-    Taille_du_fichier=Informations_Fichier->st_size;
+    Taille_du_fichier=Informations_Fichier.st_size;
     close(Fichier);
     // Le fichier ne peut ˆtre au format PAL que si sa taille vaut 768 octets
     if (Taille_du_fichier==sizeof(T_Palette))
@@ -1158,7 +1155,7 @@ void Load_PKM(void)
     // Ensuite Recon1 devient celle la moins utilisée de celles-ci
     *Recon1=0;
     Best=1;
-    NBest=1000000; // Une mˆme couleur ne pourra jamais ˆtre utilisée 1M de fois.
+    NBest=INT_MAX; // Une mˆme couleur ne pourra jamais ˆtre utilisée 1M de fois.
     for (Indice=1;Indice<=255;Indice++)
       if (Find_recon[Indice]<NBest)
       {
@@ -1170,7 +1167,7 @@ void Load_PKM(void)
     // Enfin Recon2 devient la 2Šme moins utilisée
     *Recon2=0;
     Best=0;
-    NBest=1000000;
+    NBest=INT_MAX;
     for (Indice=0;Indice<=255;Indice++)
       if ( (Find_recon[Indice]<NBest) && (Indice!=*Recon1) )
       {
@@ -2711,7 +2708,7 @@ void Load_GIF(void)
   word Valeur_Clr;        // Valeur <=> Clear tables
   word Valeur_Eof;        // Valeur <=> Fin d'image
   long Taille_du_fichier;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
@@ -2727,8 +2724,8 @@ void Load_GIF(void)
 
   if ((GIF_Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
     if ( (read(GIF_Fichier,Signature,6)==6) &&
          ( (memcmp(Signature,"GIF87a",6)==0) ||
@@ -3889,7 +3886,7 @@ void Test_CEL(void)
     word Decalage_Y;         // Decalage en Y de l'image
     byte Filler2[16];        // ???
   } Header2;
-  struct stat* Informations_Fichier =NULL;
+  struct stat Informations_Fichier;
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -3899,8 +3896,9 @@ void Test_CEL(void)
     {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
-      stat(Nom_du_fichier,Informations_Fichier);
-      Taille=(Informations_Fichier->st_size)-sizeof(struct CEL_Header1);
+      if (!stat(Nom_du_fichier,&Informations_Fichier))
+      	Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
+      Taille=(Informations_Fichier.st_size)-sizeof(struct CEL_Header1);
       if ( (!Taille) || ( (((Header1.Width+1)>>1)*Header1.Height)!=Taille ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers

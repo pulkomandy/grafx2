@@ -13,17 +13,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "erreurs.h"
+
 #ifdef __linux__
     #include "linux.h"
     #include <dirent.h>
-    #define isDir(Enreg) ((Enreg)->d_type == DT_DIR)
     #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
-    #define isFile(Enreg) (Enreg->d_type==DT_REG)
 #elif __WATCOMC__
     #include <direct.h>
-    #define isDir(Enreg) ((Enreg)->d_attr & _A_SUBDIR)
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
-    #define isFile(Enreg) ((Enreg)->d_attr & _A_SUBDIR == 0)
 #endif
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
@@ -171,12 +169,13 @@ void Ajouter_element_a_la_liste(struct dirent* Enreg)
 
 // -- Lecture d'une liste de fichiers ---------------------------------------
 void Lire_liste_des_fichiers(byte Format_demande)
-//  Cette proc‚dure charge dans la liste chain‚e les fichiers dont l'extension
-// correspond au format demand‚.
+//  Cette procédure charge dans la liste chainée les fichiers dont l'extension
+// correspond au format demandé.
 {
   DIR*  Repertoire_Courant; //Répertoire courant
   struct dirent* Enreg; // Structure de lecture des éléments
   char  Filtre[6]="*."; // Place pour écrire "*.XXX" et un '\0'
+  struct stat Infos_enreg;
 
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
   if (Format_demande) // Format (extension) spécifique
@@ -200,17 +199,18 @@ void Lire_liste_des_fichiers(byte Format_demande)
     // Si l'élément n'est pas le répertoire courant
     if ( (Enreg->d_name[0]!='.') && (Enreg->d_name[1] != 0))
     {
+    	stat(Enreg->d_name,&Infos_enreg);
         // et que l'élément trouvé est un répertoire
-        if( isDir(Enreg) &&
+        if( S_ISDIR(Infos_enreg.st_mode) &&
                 // et qu'il n'est pas caché
-                ((!isHidden(Enreg)) || Config.Lire_les_repertoires_caches))
+                ((!isHidden(Enreg)) || !Config.Lire_les_repertoires_caches))
         {
                 // On rajoute le répertore à la liste
                 Ajouter_element_a_la_liste(Enreg);
                 Liste_Nb_repertoires++;
         }
-        else if (isFile(Enreg) //Il s'agit d'un fichier
-                && ((!isHidden(Enreg)) || Config.Lire_les_fichiers_caches)) //Il n'est pas caché
+        else if (S_ISREG(Infos_enreg.st_mode) //Il s'agit d'un fichier
+                && ((!isHidden(Enreg)) || !Config.Lire_les_fichiers_caches)) //Il n'est pas caché
         {
                 // On rajoute le fichier à la liste
                 Ajouter_element_a_la_liste(Enreg);
