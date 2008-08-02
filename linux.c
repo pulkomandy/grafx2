@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier)
 {
@@ -19,8 +20,9 @@ void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier)
 
 int filelength(int fichier)
 {
-	printf("filelenght non implémenté!\n");
-	return 0;
+	struct stat infos_fichier;
+	fstat(fichier,&infos_fichier);
+	return infos_fichier.st_size;
 }
 
 void itoa(int source,char* dest, int longueur)

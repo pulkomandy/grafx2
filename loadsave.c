@@ -19,7 +19,16 @@
 #include "erreurs.h"
 
 #ifdef __linux__
+	#include <endian.h>
+	#include <byteswap.h>
     #include "linux.h"
+	#if __BYTE_ORDER == __BIG_ENDIAN
+		#define endian_magic(x) bswap_16(x)
+	#else
+		#define endian_magic(x) bswap_16(x)
+	#endif
+#elif __WATCOMC__
+	#define endian_magic(x) (x)
 #endif
 
 // Chargement des pixels dans l'écran principal
@@ -962,7 +971,7 @@ void Load_PKM(void)
   dword Taille_image;
   dword Taille_pack;
   long  Taille_du_fichier;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -971,8 +980,8 @@ void Load_PKM(void)
 
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
     if (read(Fichier,&Head,sizeof(struct Header))==sizeof(struct Header))
     {
@@ -1082,7 +1091,7 @@ void Load_PKM(void)
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
-          Taille_pack=(Informations_Fichier->st_size)-sizeof(struct Header)-Head.Jump;
+          Taille_pack=(Informations_Fichier.st_size)-sizeof(struct Header)-Head.Jump;
 
           // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
@@ -2670,12 +2679,12 @@ void Load_GIF(void)
   char Nom_du_fichier[256];
   char Signature[6];
 
-  word * Alphabet_Pile;     // Pile de décodage d'une chaŒne
+  word * Alphabet_Pile;     // Pile de décodage d'une chaîne
   word * Alphabet_Prefixe;  // Table des préfixes des codes
   word * Alphabet_Suffixe;  // Table des suffixes des codes
   word   Alphabet_Free;     // Position libre dans l'alphabet
   word   Alphabet_Max;      // Nombre d'entrées possibles dans l'alphabet
-  word   Alphabet_Pos_pile; // Position dans la pile de décodage d'un chaŒne
+  word   Alphabet_Pos_pile; // Position dans la pile de décodage d'un chaîne
 
   struct Type_LSDB
   {
@@ -2688,8 +2697,8 @@ void Load_GIF(void)
 
   struct Type_IDB
   {
-    word Pos_X;         // Abscisse o— devrait ˆtre affichée l'image
-    word Pos_Y;         // Ordonnée o— devrait ˆtre affichée l'image
+    word Pos_X;         // Abscisse où devrait être affichée l'image
+    word Pos_Y;         // Ordonnée où devrait être affichée l'image
     word Largeur_image; // Largeur de l'image
     word Hauteur_image; // Hauteur de l'image
     byte Indicateur;    // Informations diverses sur l'image
@@ -2736,12 +2745,17 @@ void Load_GIF(void)
       Alphabet_Prefixe=(word *)malloc(4096*sizeof(word));
       Alphabet_Suffixe=(word *)malloc(4096*sizeof(word));
 
-      if (read(GIF_Fichier,&LSDB,sizeof(struct Type_LSDB))==sizeof(struct Type_LSDB))
+      if (read(GIF_Fichier,&(LSDB.Largeur),sizeof(word))==sizeof(word)
+      && read(GIF_Fichier,&(LSDB.Hauteur),sizeof(word))==sizeof(word)
+      && read(GIF_Fichier,&(LSDB.Resol),sizeof(byte))==sizeof(byte)
+      && read(GIF_Fichier,&(LSDB.Backcol),sizeof(byte))==sizeof(byte)
+      && read(GIF_Fichier,&(LSDB.Aspect),sizeof(byte))==sizeof(byte)
+	  )
       {
         // Lecture du Logical Screen Descriptor Block réussie:
 
-        Ecran_original_X=LSDB.Largeur;
-        Ecran_original_Y=LSDB.Hauteur;
+        Ecran_original_X=endian_magic(LSDB.Largeur);
+        Ecran_original_Y=endian_magic(LSDB.Hauteur);
 
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
@@ -2760,7 +2774,7 @@ void Load_GIF(void)
         {
           // Palette globale dispo:
 
-          //   On commence par passer la palette en 256 comme ‡a, si la
+          //   On commence par passer la palette en 256 comme ça, si la
           // nouvelle palette a moins de 256 coul, la précédente ne souffrira
           // pas d'un assombrissement préjudiciable.
           if (Config.Clear_palette)
@@ -2787,7 +2801,7 @@ void Load_GIF(void)
           Set_palette(Principal_Palette);
         }
 
-        // On s'apprˆte à sauter tous les blocks d'extension:
+        // On s'apprête à sauter tous les blocks d'extension:
 
         // On lit un indicateur de block
         read(GIF_Fichier,&Block_indicateur,1);
@@ -2797,8 +2811,8 @@ void Load_GIF(void)
           // Lecture du code de fonction:
           read(GIF_Fichier,&Block_indicateur,1);
 
-          // On exploitera peut-ˆtre un jour ce code indicateur pour stocker
-          // des remarques dans le fichier. En attendant d'en connaŒtre plus
+          // On exploitera peut-être un jour ce code indicateur pour stocker
+          // des remarques dans le fichier. En attendant d'en connaître plus
           // on se contente de sauter tous les blocs d'extension:
 
           // Lecture de la taille du bloc:
@@ -2821,13 +2835,18 @@ void Load_GIF(void)
           // Présence d'un Image Separator Header
 
           // lecture de 10 derniers octets
-          if ( (read(GIF_Fichier,&IDB,sizeof(struct Type_IDB))==sizeof(struct Type_IDB))
+          if ( (read(GIF_Fichier,&(IDB.Pos_X),sizeof(word))==sizeof(word))
+          	&& (read(GIF_Fichier,&(IDB.Pos_Y),sizeof(word))==sizeof(word))
+          	&& (read(GIF_Fichier,&(IDB.Largeur_image),sizeof(word))==sizeof(word))
+          	&& (read(GIF_Fichier,&(IDB.Hauteur_image),sizeof(word))==sizeof(word))
+          	&& (read(GIF_Fichier,&(IDB.Indicateur),sizeof(byte))==sizeof(byte))
+          	&& (read(GIF_Fichier,&(IDB.Nb_bits_pixel),sizeof(byte))==sizeof(byte))
             && IDB.Largeur_image && IDB.Hauteur_image)
           {
-            Principal_Largeur_image=IDB.Largeur_image;
-            Principal_Hauteur_image=IDB.Hauteur_image;
+            Principal_Largeur_image=endian_magic(IDB.Largeur_image);
+            Principal_Hauteur_image=endian_magic(IDB.Hauteur_image);
 
-            Initialiser_preview(IDB.Largeur_image,IDB.Hauteur_image,Taille_du_fichier,FORMAT_GIF);
+            Initialiser_preview(endian_magic(IDB.Largeur_image),endian_magic(IDB.Hauteur_image),Taille_du_fichier,FORMAT_GIF);
 
             // Palette locale dispo = (IDB.Indicateur and $80)
             // Image entrelacée     = (IDB.Indicateur and $40)

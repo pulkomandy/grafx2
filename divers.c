@@ -612,7 +612,13 @@ byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
 
 void Palette_256_to_64(T_Palette Palette)
 {
-        UNIMPLEMENTED
+	int i;
+	for(i=0;i<256;i++)
+	{
+		Palette[i].R = Palette[i].B >> 2;
+		Palette[i].V = Palette[i].V >> 2;
+		Palette[i].B = Palette[i].R >> 2;
+	}
 }
 
 void Palette_64_to_256(T_Palette Palette)

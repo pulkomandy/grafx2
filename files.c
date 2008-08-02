@@ -71,10 +71,10 @@ int Fichier_existe(char * Fichier)
 //   D‚termine si un fichier pass‚ en paramŠtre existe ou non dans le
 // r‚pertoire courant.
 {
-    struct stat* buf = NULL;
+    struct stat buf;
     int Resultat;
 
-    Resultat=stat(Fichier,buf);
+    Resultat=stat(Fichier,&buf);
     if (Resultat!=0)
         return(errno!=ENOENT);
     else
