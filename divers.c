@@ -336,7 +336,7 @@ void Initialiser_chrono(dword Delai)
 void Wait_VBL(void)
 // Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple. SDL ne sait pas faire ?
 {
-	UNIMPLEMENTED
+	SDL_Delay(20); // On considère un écran à 50Hz
 }
 
 void Passer_en_mode_texte(byte Nb_lignes)
@@ -765,7 +765,11 @@ byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
-        UNIMPLEMENTED
+	SDL_Color comp;
+	comp.r=Rouge;
+	comp.g=Vert;
+	comp.b=Bleu;
+        SDL_SetColors(Ecran_SDL,&comp,Couleur,1);
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)
