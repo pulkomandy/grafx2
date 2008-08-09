@@ -420,7 +420,7 @@ void Set_Mode_SDL()
 /* On règle la résolution de l'écran */
 {
         #ifdef WINDOWED
-                #define FLAGS 
+                #define FLAGS 0 
         #else
                 #define FLAGS SDL_FULLSCREEN
         #endif

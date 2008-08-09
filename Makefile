@@ -1,6 +1,7 @@
 CC = gcc
 COPT = -Wall -O3 -c -g 
 LOPT = -lSDL -o grafx2 
+SCREEN = -D WINDOWED
 
 debug: grafx2
 	@echo --- Everything OK.
@@ -66,7 +67,7 @@ savenini.o : saveini.h saveini.c
 	$(CC) $(COPT) saveini.c
 
 sdlscreen.o : sdlscreen.c sdlscreen.h
-	$(CC) $(COPT) sdlscreen.c
+	$(CC) $(COPT) sdlscreen.c $(SCREEN)
 	
 special.o : const.h struct.h global.h graph.h moteur.h special.c
 	$(CC) $(COPT) special.c
