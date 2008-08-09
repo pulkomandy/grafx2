@@ -2773,6 +2773,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
           Print_dans_fenetre(46,176,Principal_Commentaire,CM_Noir,CM_Clair);
         Afficher_curseur();
+
+	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+55*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
       }
 
       Nouvelle_preview=0;
@@ -2792,6 +2794,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
         Effacer_curseur();
         Charger_image(Image);
+	SDL_UpdateRect(Ecran_SDL,ToWinX(179),ToWinY(88),ToWinL(124),ToWinH(84));
         Afficher_curseur();
 
         // Après le chargement de la preview, on restaure tout ce qui aurait

@@ -209,7 +209,24 @@ void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word
 
 void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
 {
-        UNIMPLEMENTED
+	// EDI = coords a l'écran
+	byte* EDI = Ecran + Pos_Y * Largeur_ecran + Pos_X;
+	int dx,cx;
+
+	// Pour chaque ligne
+	for(dx=Hauteur;dx>0;dx--)
+	{
+		// Pour chaque pixel
+		for(cx=Largeur;cx>0;cx--)
+		{
+			*EDI = Table_de_conversion[*EDI];
+			EDI ++;
+		}
+
+		EDI = EDI + Largeur_ecran - Largeur;
+	}
+
+	SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
