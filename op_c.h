@@ -3,64 +3,64 @@
 
 #include "struct.h"
 
-//////////////////////////////////////////////// D‚finition des types de base
+//////////////////////////////////////////////// Définition des types de base
 
 typedef struct Composantes * Bitmap24B;
 typedef byte * Bitmap256;
 
 
 
-//////////////////////////////////////// D‚finition d'une table de conversion
+//////////////////////////////////////// Définition d'une table de conversion
 
 typedef struct
 {
-  int nbb_r; // Nb de bits de pr‚cision sur les rouges
-  int nbb_v; // Nb de bits de pr‚cision sur les verts
-  int nbb_b; // Nb de bits de pr‚cision sur les bleu
+  int nbb_r; // Nb de bits de précision sur les rouges
+  int nbb_v; // Nb de bits de précision sur les verts
+  int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
   int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_v)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
-  int dec_r; // Coefficient multiplicateur d'accŠs dans la table (= nbb_v+nbb_b)
-  int dec_v; // Coefficient multiplicateur d'accŠs dans la table (= nbb_b)
-  int dec_b; // Coefficient multiplicateur d'accŠs dans la table (= 0)
+  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_v+nbb_b)
+  int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
+  int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
-  int red_r; // Coefficient r‚ducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient r‚ducteur de traduction d'une couleur verte (= 8-nbb_v)
-  int red_b; // Coefficient r‚ducteur de traduction d'une couleur bleue (= 8-nbb_b)
+  int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
+  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_v)
+  int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   byte * table;
 } Table_conversion;
 
 
 
-///////////////////////////////////////// D‚finition d'une table d'occurences
+///////////////////////////////////////// Définition d'une table d'occurences
 
 typedef struct
 {
-  int nbb_r; // Nb de bits de pr‚cision sur les rouges
-  int nbb_v; // Nb de bits de pr‚cision sur les verts
-  int nbb_b; // Nb de bits de pr‚cision sur les bleu
+  int nbb_r; // Nb de bits de précision sur les rouges
+  int nbb_v; // Nb de bits de précision sur les verts
+  int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
   int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_v)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
-  int dec_r; // Coefficient multiplicateur d'accŠs dans la table (= nbb_v+nbb_b)
-  int dec_v; // Coefficient multiplicateur d'accŠs dans la table (= nbb_b)
-  int dec_b; // Coefficient multiplicateur d'accŠs dans la table (= 0)
+  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_v+nbb_b)
+  int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
+  int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
-  int red_r; // Coefficient r‚ducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient r‚ducteur de traduction d'une couleur verte (= 8-nbb_v)
-  int red_b; // Coefficient r‚ducteur de traduction d'une couleur bleue (= 8-nbb_b)
+  int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
+  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_v)
+  int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   int * table;
 } Table_occurence;
 
 
 
-///////////////////////////////////////// D‚finition d'un ensemble de couleur
+///////////////////////////////////////// Définition d'un ensemble de couleur
 
 typedef struct
 {
@@ -77,14 +77,14 @@ typedef struct
   byte bmin,bmax;
 
   byte plus_large; // Composante ayant la plus grande variation (0=Rouge,1=Vert,2=Bleu)
-  byte r,v,b;      // Couleur synth‚tisant l'ensemble
+  byte r,v,b;      // Couleur synthétisant l'ensemble
   byte h;          // Chrominance
-  byte l;          // Luminosit‚
+  byte l;          // Luminosité
 } Cluster;
 
 
 
-//////////////////////////////////////// D‚finition d'un ensemble de clusters
+//////////////////////////////////////// Définition d'un ensemble de clusters
 
 typedef struct
 {
@@ -95,31 +95,31 @@ typedef struct
 
 
 
-///////////////////////////////////////////////////// D‚finition d'un d‚grad‚
+///////////////////////////////////////////////////// Définition d'un dégradé
 
 typedef struct
 {
-  int   nbcouleurs; // Nombre de couleurs dans le d‚grad‚
-  float min;        // Chrominance minimale du d‚grad‚
-  float max;        // Chrominance maximale du d‚grad‚
-  float hue;        // Chrominance moyenne du d‚grad‚
+  int   nbcouleurs; // Nombre de couleurs dans le dégradé
+  float min;        // Chrominance minimale du dégradé
+  float max;        // Chrominance maximale du dégradé
+  float hue;        // Chrominance moyenne du dégradé
 } Degrade;
 
 
 
-///////////////////////////////////////// D‚finition d'un ensemble de d‚grad‚
+///////////////////////////////////////// Définition d'un ensemble de dégradé
 
 typedef struct
 {
-  int nb;             // Nombre de d‚grad‚s dans l'ensemble
-  int nbmax;          // Nombre maximum de d‚grad‚s
-  Degrade * degrades; // Les d‚grad‚s
+  int nb;             // Nombre de dégradés dans l'ensemble
+  int nbmax;          // Nombre maximum de dégradés
+  Degrade * degrades; // Les dégradés
 } DegradeSet;
 
 
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////// M‚thodes de gestion des tables de conversion //
+///////////////////////////// Méthodes de gestion des tables de conversion //
 /////////////////////////////////////////////////////////////////////////////
 
 Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b);

@@ -3556,16 +3556,21 @@ void Load_PCX(void)
 
           //   On se positionne à la fin du fichier - 769 octets pour voir s'il y
           // a une palette.
-          if ( (Header.Depth==8) && (Header.Version>=5) && (Taille_du_fichier>sizeof(T_Palette)) )
+          if ( (Header.Depth==8) && (Header.Version>=5) && (Taille_du_fichier>(256*3)) )
           {
-            lseek(Fichier,Taille_du_fichier-(sizeof(T_Palette)+1),SEEK_SET);
-            // On regarde s'il y a une palette aprŠs les données de l'image
+            lseek(Fichier,Taille_du_fichier-((256*3)+1),SEEK_SET);
+            // On regarde s'il y a une palette après les données de l'image
             if (read(Fichier,&Octet1,1)==1)
               if (Octet1==12) // Lire la palette si c'est une image en 256 couleurs
               {
+	        int indice;
                 // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
-                if (read(Fichier,Principal_Palette,sizeof(T_Palette))!=sizeof(T_Palette))
-                  Erreur_fichier=2;
+		for(indice=0;indice<256;indice++);
+                	if ((read(Fichier,&Principal_Palette[indice].R,1)!=1)
+			 || (read(Fichier,&Principal_Palette[indice].V,1)!=1)
+			 || (read(Fichier,&Principal_Palette[indice].B,1)!=1))
+
+                  		Erreur_fichier=2;
               }
           }
           Palette_256_to_64(Principal_Palette);
@@ -3573,8 +3578,8 @@ void Load_PCX(void)
           Remapper_fileselect();
 
           //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
-          // à la fin, on retourne juste aprŠs le header pour lire l'image.
-          lseek(Fichier,sizeof(struct PCX_Header),SEEK_SET);
+          // à la fin, on retourne juste après le header pour lire l'image.
+          lseek(Fichier,128,SEEK_SET);
 
           if (!Erreur_fichier)
           {

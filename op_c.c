@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include "op_c.h"
 #include "op_asm.h"
+#include "erreurs.h"
 
 #undef OPTIMISATIONS_ASSEMBLEUR
 
@@ -137,10 +138,16 @@ byte TC_Get(Table_conversion * t,int r,int v,int b)
 {
   int indice;
 
+  // On réduit le nombre de bits par couleur
   r=(r>>t->red_r);
   v=(v>>t->red_v);
   b=(b>>t->red_b);
+  
+  // On recherche la couleur la plus proche dans la table de conversion
   indice=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+
+  if(r!=0 && v != 0 && b != 0)
+  	printf("%d %d %d %d\n",indice,r,v,b);
   return t->table[indice];
 }
 
@@ -881,8 +888,10 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
   ClusterSet       * cs;
   DegradeSet       * ds;
 
-  // Cr‚ation des ‚l‚ments n‚cessaires au calcul de palette optimis‚e:
+  // Création des éléments nécessaires au calcul de palette optimisée:
   to=0; tc=0; cs=0; ds=0;
+
+  DEBUG("START OPTIMIZING",1);
 
   to=TO_New(r,v,b);
   if (to!=0)
@@ -919,6 +928,8 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
     }
     TO_Delete(to);
   }
+  // Si on arrive ici c'est que l'allocation n'a pas réussi,
+  // l'appelant devra recommencer avec une précision plus faible (3 derniers paramètres)
   return 0;
 }
 
@@ -930,22 +941,24 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
 #ifdef OPTIMISATIONS_ASSEMBLEUR
 
 void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 dest,Bitmap24B source,int largeur,int hauteur,struct Composantes * palette,Table_conversion * tc)
-// Cette fonction d‚grade au fur et … mesure le bitmap source, donc soit on ne
-// s'en ressert pas, soit on passe … la fonction une copie de travail du
+// Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
+// s'en ressert pas, soit on passe à la fonction une copie de travail du
 // bitmap original.
 {
   Bitmap24B courant;
   Bitmap256 d;
   int y;
 
+
   // On initialise les variables de parcours:
   courant=source;
   d      =dest;
 
   if ((largeur>0) && (hauteur>0))
-  { if (hauteur>1)
+  { 
+    if (hauteur>1)
     {
-      // Traitement de la 1Šre ligne … l'avant-derniŠre
+      // Traitement de la 1ère ligne à l'avant-dernière
 
       if (largeur>1)
       {
@@ -1016,8 +1029,8 @@ int Valeur_modifiee(int valeur,int modif)
 }
 
 void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette,Table_conversion * tc)
-// Cette fonction d‚grade au fur et … mesure le bitmap source, donc soit on ne
-// s'en ressert pas, soit on passe … la fonction une copie de travail du
+// Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
+// s'en ressert pas, soit on passe à la fonction une copie de travail du
 // bitmap original.
 {
   Bitmap24B Courant;
@@ -1032,11 +1045,11 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   int ERouge,EVert,EBleu;
 
   // On initialise les variables de parcours:
-  Courant =Source;
-  Suivant =Courant+largeur;
-  C_plus1 =Courant+1;
-  S_moins1=Suivant-1;
-  S_plus1 =Suivant+1;
+  Courant =Source;	// Le pixel dont on s'occupe
+  Suivant =Courant+largeur; // Le pixel en dessous
+  C_plus1 =Courant+1;	// Le pixel à droite
+  S_moins1=Suivant-1;	// Le pixel en bas à gauche
+  S_plus1 =Suivant+1;	// Le pixel en bas à droite
   D       =Dest;
 
   // On parcours chaque pixel:
@@ -1050,13 +1063,13 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       Vert =Courant->V;
       Bleu =Courant->B;
       *D=TC_Get(tc,Rouge,Vert,Bleu);
-
-      // Puis on calcule pour chaque composante l'erreur d–e … l'approximation
+/*
+      // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
       Rouge=Rouge-palette[*D].R;
       Vert =Vert -palette[*D].V;
       Bleu =Bleu -palette[*D].B;
 
-      // On initialise la quantit‚ d'erreur diffus‚e
+      // On initialise la quantité d'erreur diffusée
       DRouge=Rouge;
       DVert =Vert;
       DBleu =Bleu;
@@ -1075,7 +1088,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         DRouge-=ERouge;
         DVert -=EVert;
         DBleu -=EBleu;
-      // En bas … gauche:
+      // En bas à gauche:
       if (Pos_Y+1<hauteur)
       {
         ERouge=(Rouge*3)/16;
@@ -1100,7 +1113,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         DRouge-=ERouge;
         DVert -=EVert;
         DBleu -=EBleu;
-      // En bas … droite:
+      // En bas à droite:
         if (Pos_X+1<largeur)
         {
           S_plus1->R=Valeur_modifiee(S_plus1->R,DRouge);
@@ -1108,7 +1121,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
           S_plus1->B=Valeur_modifiee(S_plus1->B,DBleu );
         }
       }
-
+*/
       // On passe au pixel suivant :
       Courant++;
       C_plus1++;
@@ -1137,15 +1150,15 @@ static const byte precision_24b[]=
  3,3,2};
 
 
-// Convertie avec le plus de pr‚cision possible une image 24b en 256c
+// Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
 int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette)
 {
   Table_conversion * table; // table de conversion
-  int                ip;    // Indice de pr‚cision pour la conversion
+  int                ip;    // Indice de précision pour la conversion
 
-  // On essaye d'obtenir une table de conversion qui loge en m‚moire, avec la
-  // meilleure pr‚cision possible
+  // On essaye d'obtenir une table de conversion qui loge en mémoire, avec la
+  // meilleure précision possible
   for (ip=0;ip<(10*3);ip+=3)
   {
     table=Optimiser_palette(Source,largeur*hauteur,palette,precision_24b[ip+0],

@@ -1,5 +1,5 @@
 #include "op_c.h"
-#include "stdio.h"
+#include <stdio.h>
 
 #include "graph.h"
 
@@ -96,6 +96,9 @@ void OPASM_DitherFS_6123(
 
 }
   
+/* Les fonctions ci-dessous servent pour les pixels des bords et des coins, car on ne peut pas les traiter normalement
+ * (segfault ou dithering sur l'autre bout de l'image) */
+
 void OPASM_DitherFS_623(
   Bitmap256            Destination,  // Pointeur sur le 1er pixel de la ligne
   Bitmap24B            Source,       // Idem mais sur la source

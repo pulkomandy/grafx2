@@ -1616,6 +1616,7 @@ void Deplacer_fenetre(short Dx, short Dy)
       Menu_visible=B;
       for (Indice=0; Indice<Hauteur; Indice++)
         Afficher_ligne(Nouveau_X,Nouveau_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
+      SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
       Fenetre_Pos_X=Nouveau_X;
       Fenetre_Pos_Y=Nouveau_Y;
     }
