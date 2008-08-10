@@ -7,7 +7,7 @@
 #include "op_c.h"
 #include "op_asm.h"
 
-#define OPTIMISATIONS_ASSEMBLEUR
+#undef OPTIMISATIONS_ASSEMBLEUR
 
 
 
@@ -305,6 +305,8 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
 
 #else
 
+  int nbocc;
+
   rmin=c->rmax; rmax=c->rmin;
   vmin=c->vmax; vmax=c->vmin;
   bmin=c->bmax; bmax=c->bmin;
@@ -547,7 +549,7 @@ void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
           cumulB+=b*nbocc;
         }
       }
-
+  
   c->r=(cumulR<<to->red_r)/c->occurences;
   c->v=(cumulV<<to->red_v)/c->occurences;
   c->b=(cumulB<<to->red_b)/c->occurences;
@@ -759,9 +761,9 @@ void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_occurence * to,Table_convers
     palette[indice].V=cs->clusters[indice].v;
     palette[indice].B=cs->clusters[indice].b;
 
-    for (r=cs->clusters[indice].Rmin;r<=cs->clusters[indice].Rmax;r++)
-      for (v=cs->clusters[indice].Vmin;v<=cs->clusters[indice].Vmax;v++)
-        for (b=cs->clusters[indice].Bmin;b<=cs->clusters[indice].Bmax;b++)
+    for (r=cs->clusters[indice].Rmin;r</*=*/cs->clusters[indice].Rmax;r++)
+      for (v=cs->clusters[indice].Vmin;v</*=*/cs->clusters[indice].Vmax;v++)
+        for (b=cs->clusters[indice].Bmin;b</*=*/cs->clusters[indice].Bmax;b++)
           TC_Set(tc,r,v,b,indice);
   }
 }

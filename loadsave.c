@@ -3476,7 +3476,7 @@ void Load_PCX(void)
   long  Position;
   long  Taille_image;
   byte * Buffer;
-  struct stat* Informations_Fichier =NULL;
+  struct stat Informations_Fichier;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -3485,8 +3485,8 @@ void Load_PCX(void)
 
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
     if (read(Fichier,&Header,sizeof(struct PCX_Header))==sizeof(struct PCX_Header))
     {

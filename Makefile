@@ -1,5 +1,5 @@
 CC = gcc
-COPT = -Wall -O3 -c -g 
+COPT = -Wall -c -g 
 LOPT = -lSDL -o grafx2 
 SCREEN = -D WINDOWED
 
