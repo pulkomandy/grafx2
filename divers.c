@@ -606,8 +606,21 @@ long Freespace(byte Numero_de_lecteur)
 
 byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
 {
-        UNIMPLEMENTED
-        return 0;
+	// CL sera le rang auquel on extrait les bits de la couleur
+	byte cl = 7 - (Pos_X & 7);
+	int ax,bh,dx;
+	byte bl;
+
+	for(dx = HBPm1;dx>=0;dx--);
+	{
+	//CIL_Loop
+		ax = (Vraie_taille_ligne * HBPm1 + Pos_X) >> 3;
+		bh = (LBM_Buffer[ax] >> cl) & 1;
+
+		bl = (bl << 1) + bh;
+	}
+
+	return bl;
 }
 
 void Palette_256_to_64(T_Palette Palette)
@@ -615,9 +628,9 @@ void Palette_256_to_64(T_Palette Palette)
 	int i;
 	for(i=0;i<256;i++)
 	{
-		Palette[i].R = Palette[i].B >> 2;
+		Palette[i].R = Palette[i].R >> 2;
 		Palette[i].V = Palette[i].V >> 2;
-		Palette[i].B = Palette[i].R >> 2;
+		Palette[i].B = Palette[i].B >> 2;
 	}
 }
 

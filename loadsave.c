@@ -25,7 +25,7 @@
 	#if __BYTE_ORDER == __BIG_ENDIAN
 		#define endian_magic(x) bswap_16(x)
 	#else
-		#define endian_magic(x) bswap_16(x)
+		#define endian_magic(x) (x)
 	#endif
 #elif __WATCOMC__
 	#define endian_magic(x) (x)
@@ -1414,9 +1414,7 @@ void Test_LBM(void)
 
 // -- Lire un fichier au format LBM -----------------------------------------
 
-  byte * LBM_Buffer;
   byte Image_HAM;
-  byte HBPm1; // Header.BitPlanes-1
 
   // ---------------- Adapter la palette pour les images HAM ----------------
   void Adapter_Palette_HAM(void)
@@ -1654,7 +1652,7 @@ void Load_LBM(void)
   short Vraie_taille_ligne; // Taille d'une ligne en pixels
   byte  Couleur;
   long  Taille_du_fichier;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -1663,8 +1661,8 @@ void Load_LBM(void)
 
   if ((LBM_Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
     // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
     read(LBM_Fichier,Section,4);
@@ -1675,7 +1673,19 @@ void Load_LBM(void)
     Lire_long();
 
     // Maintenant on lit le header pour pouvoir commencer le chargement de l'image
-    if ( (read(LBM_Fichier,&Header,sizeof(struct Header_LBM))==sizeof(struct Header_LBM))
+    if ( (read(LBM_Fichier,&Header.Width,sizeof(Header.Width))==sizeof(Header.Width))
+      && (read(LBM_Fichier,&Header.Height,sizeof(Header.Height))==sizeof(Header.Height))
+      && (read(LBM_Fichier,&Header.Xorg,sizeof(Header.Xorg))==sizeof(Header.Xorg))
+      && (read(LBM_Fichier,&Header.Yorg,sizeof(Header.Yorg))==sizeof(Header.Yorg))
+      && (read(LBM_Fichier,&Header.Bit_planes,sizeof(Header.Bit_planes))==sizeof(Header.Bit_planes))
+      && (read(LBM_Fichier,&Header.Mask,sizeof(Header.Mask))==sizeof(Header.Mask))
+      && (read(LBM_Fichier,&Header.Compression,sizeof(Header.Compression))==sizeof(Header.Compression))
+      && (read(LBM_Fichier,&Header.Pad1,sizeof(Header.Pad1))==sizeof(Header.Pad1))
+      && (read(LBM_Fichier,&Header.Transp_col,sizeof(Header.Transp_col))==sizeof(Header.Transp_col))
+      && (read(LBM_Fichier,&Header.Xaspect,sizeof(Header.Xaspect))==sizeof(Header.Xaspect))
+      && (read(LBM_Fichier,&Header.Yaspect,sizeof(Header.Yaspect))==sizeof(Header.Yaspect))
+      && (read(LBM_Fichier,&Header.Xscreen,sizeof(Header.Xscreen))==sizeof(Header.Xscreen))
+      && (read(LBM_Fichier,&Header.Yscreen,sizeof(Header.Yscreen))==sizeof(Header.Yscreen))
       && Header.Width && Header.Height)
     {
       if ( (Header.Bit_planes) && (Wait_for((byte *)"CMAP")) )
@@ -2790,7 +2800,12 @@ void Load_GIF(void)
           //   On peut maintenant charger la nouvelle palette:
           if (!(LSDB.Aspect & 0x80))
             // Palette dans l'ordre:
-            read(GIF_Fichier,Principal_Palette,Nb_couleurs*3);
+	    for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+	    {
+            	read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
+            	read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
+            	read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
+	    }
           else
           {
             // Palette triée par composantes:
@@ -2872,7 +2887,12 @@ void Load_GIF(void)
 
               if (!(IDB.Indicateur & 0x40))
                 // Palette dans l'ordre:
-                read(GIF_Fichier,Principal_Palette,Nb_couleurs*3);
+	        for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+	        {   
+            		read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
+            		read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
+            		read(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
+	        }
               else
               {
                 // Palette triée par composantes:
