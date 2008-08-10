@@ -484,9 +484,23 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 	}
 }
 
+// Remplacer une couleur par une autre dans un buffer
+
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
 {
-        UNIMPLEMENTED
+	int dx,cx;
+
+	// Pour chaque ligne
+	for(dx=Hauteur;dx>0;dx--)
+	{
+		// Pour chaque pixel
+		for(cx=Largeur;cx>0;cx--)
+		{
+		*Buffer = Table_conv[*Buffer];
+		Buffer++;
+		}
+		Buffer += Largeur_buffer-Largeur;
+	}
 }
 
 void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
@@ -779,9 +793,9 @@ byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
 	SDL_Color comp;
-	comp.r=Rouge;
-	comp.g=Vert;
-	comp.b=Bleu;
+	comp.r=Rouge << 2;
+	comp.g=Vert << 2;
+	comp.b=Bleu << 2;
         SDL_SetColors(Ecran_SDL,&comp,Couleur,1);
 }
 
