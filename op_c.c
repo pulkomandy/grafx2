@@ -146,8 +146,6 @@ byte TC_Get(Table_conversion * t,int r,int v,int b)
   // On recherche la couleur la plus proche dans la table de conversion
   indice=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
 
-  if(r!=0 && v != 0 && b != 0)
-  	printf("%d %d %d %d\n",indice,r,v,b);
   return t->table[indice];
 }
 
@@ -265,6 +263,11 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille)
 {
   Bitmap24B ptr;
   int indice;
+
+  DEBUG("reduction",t->red_r);
+  DEBUG("decalage rouge",t->dec_r);
+  DEBUG("decalage vert",t->dec_v);
+  DEBUG("decalage bleu",t->dec_b);
 
   for (indice=taille,ptr=image;indice>0;indice--,ptr++)
     TO_Inc(t,ptr->R,ptr->V,ptr->B);

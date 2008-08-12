@@ -525,8 +525,7 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
 
 byte Lit_pixel_dans_ecran_feedback (word X,word Y)
 {
-        UNIMPLEMENTED
-        return 0;
+	return *(FX_Feedback_Ecran+Y*Principal_Largeur_image+X);
 }
 
 dword Round_div(dword Numerateur,dword Diviseur)
