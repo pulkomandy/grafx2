@@ -654,8 +654,34 @@ void Palette_64_to_256(T_Palette Palette)
 
 byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 {
-        UNIMPLEMENTED
-        return 0;
+	// Facteur_A = 256*(100-Colorize_Opacite)/100
+	// Facteur_B = 256*(    Colorize_Opacite)/100
+	//
+	// (Couleur_dessous*Facteur_A+Couleur*facteur_B)/256
+	//
+
+	// On place dans ESI 3*Couleur_dessous ( = position de cette couleur dans la 
+	// palette des teintes) et dans EDI, 3*Couleur.
+	byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
+	byte Bleu=Principal_Palette[Couleur].B;
+	byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
+	byte Vert=Principal_Palette[Couleur].V;
+	byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+	byte Rouge=Principal_Palette[Couleur].R;
+	
+	// On récupère les 3 composantes RVB
+	
+
+
+	// Bleu
+	Bleu = (Table_de_multiplication_par_Facteur_B[Bleu] 
+		+ Table_de_multiplication_par_Facteur_A[Bleu_dessous]) / 256;
+	Vert = (Table_de_multiplication_par_Facteur_B[Vert] 
+		+ Table_de_multiplication_par_Facteur_A[Vert_dessous]) / 256;
+	Rouge = (Table_de_multiplication_par_Facteur_B[Rouge] 
+		+ Table_de_multiplication_par_Facteur_A[Rouge_dessous]) / 256;
+	return Meilleure_couleur(Rouge,Vert,Bleu);
+
 }
 
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
