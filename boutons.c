@@ -4799,6 +4799,7 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
   for (Pos_Y=0; Pos_Y<Taille_Y; Pos_Y++)
     for (Pos_X=0; Pos_X<Taille_X; Pos_X++)
       Pixel(Debut_X+Pos_X,Debut_Y+Pos_Y,(Trame[Pos_X%Trame_Largeur][Pos_Y%Trame_Hauteur])?CM_Blanc:CM_Noir);
+  SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Taille_X,Taille_Y);
 }
 
 
@@ -4812,6 +4813,7 @@ void Dessiner_trames_predefinies(void)
       for (i=0; i<16; i++)
         Pixel_dans_fenetre((Indice*23)+10+i,22+j,
                            ((TRAME_PREDEFINIE[Indice][j]>>(15-i))&1)?CM_Blanc:CM_Noir);
+  SDL_UpdateRect(Ecran_SDL,ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
 }
 
 

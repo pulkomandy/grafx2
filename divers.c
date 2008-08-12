@@ -451,8 +451,7 @@ void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_
 
 byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
 {
-        UNIMPLEMENTED
-        return 0;
+	return *(Brouillon_Ecran+Y*Brouillon_Largeur_image+X);
 }
 
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
@@ -535,8 +534,7 @@ dword Round_div(dword Numerateur,dword Diviseur)
 
 byte Effet_Trame(word X,word Y)
 {
-        UNIMPLEMENTED
-        return 0;
+	return Trame[X % Trame_Largeur][Y % Trame_Hauteur];
 }
 
 void Set_mouse_position(void)
