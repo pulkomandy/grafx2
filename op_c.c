@@ -1081,12 +1081,13 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       Rouge=Courant->R;
       Vert =Courant->V;
       Bleu =Courant->B;
+      // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
       *D=TC_Get(tc,Rouge,Vert,Bleu);
-/*
+
       // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
-      Rouge=Rouge-palette[*D].R;
-      Vert =Vert -palette[*D].V;
-      Bleu =Bleu -palette[*D].B;
+      Rouge=palette[*D].R - Rouge;
+      Vert =palette[*D].V - Vert;
+      Bleu =palette[*D].B - Bleu;
 
       // On initialise la quantité d'erreur diffusée
       DRouge=Rouge;
@@ -1095,11 +1096,12 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
 
       // Et dans chaque pixel voisin on propage l'erreur
       // A droite:
-        ERouge=(Rouge*7)/16;
-        EVert =(Vert *7)/16;
-        EBleu =(Bleu *7)/16;
+        ERouge=(Rouge*7)/16.0;
+        EVert =(Vert *7)/16.0;
+        EBleu =(Bleu *7)/16.0;
         if (Pos_X+1<largeur)
         {
+	  // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
           C_plus1->R=Valeur_modifiee(C_plus1->R,ERouge);
           C_plus1->V=Valeur_modifiee(C_plus1->V,EVert );
           C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );
@@ -1110,9 +1112,9 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       // En bas à gauche:
       if (Pos_Y+1<hauteur)
       {
-        ERouge=(Rouge*3)/16;
-        EVert =(Vert *3)/16;
-        EBleu =(Bleu *3)/16;
+        ERouge=(Rouge*3)/16.0;
+        EVert =(Vert *3)/16.0;
+        EBleu =(Bleu *3)/16.0;
         if (Pos_X>0)
         {
           S_moins1->R=Valeur_modifiee(S_moins1->R,ERouge);
@@ -1123,9 +1125,9 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         DVert -=EVert;
         DBleu -=EBleu;
       // En bas:
-        ERouge=(Rouge*4)/16;
-        EVert =(Vert *4)/16;
-        EBleu =(Bleu *4)/16;
+        ERouge=(Rouge/4);
+        EVert =(Vert /4);
+        EBleu =(Bleu /4);
         Suivant->R=Valeur_modifiee(Suivant->R,ERouge);
         Suivant->V=Valeur_modifiee(Suivant->V,EVert );
         Suivant->B=Valeur_modifiee(Suivant->B,EBleu );
@@ -1140,7 +1142,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
           S_plus1->B=Valeur_modifiee(S_plus1->B,DBleu );
         }
       }
-*/
+
       // On passe au pixel suivant :
       Courant++;
       C_plus1++;
