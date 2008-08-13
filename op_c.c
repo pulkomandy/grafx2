@@ -264,11 +264,6 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille)
   Bitmap24B ptr;
   int indice;
 
-  DEBUG("reduction",t->red_r);
-  DEBUG("decalage rouge",t->dec_r);
-  DEBUG("decalage vert",t->dec_v);
-  DEBUG("decalage bleu",t->dec_b);
-
   for (indice=taille,ptr=image;indice>0;indice--,ptr++)
     TO_Inc(t,ptr->R,ptr->V,ptr->B);
 }
@@ -666,18 +661,33 @@ void CS_Set(ClusterSet * cs,Cluster * c)
   cs->nb++;
 }
 
+// Détermination de la meilleure palette en utilisant l'algo Median Cut :
+// 1) On considère l'espace (R,V,B) comme 1 boîte
+// 2) On cherche les extrêmes de la boîte en (R,V,B)
+// 3) On trie les pixels de l'image selon l'axe le plus long parmi (R,V,B)
+// 4) On coupe la boîte en deux au milieu, et on compacte pour que chaque bord corresponde bien à un pixel extreme
+// 5) On recommence à couper selon le plus grand axe toutes boîtes confondues
+// 6) On s'arrête quand on a le nombre de couleurs voulu
 void CS_Generer(ClusterSet * cs,Table_occurence * to)
 {
   Cluster Courant;
   Cluster Nouveau1;
   Cluster Nouveau2;
 
+  // Tant qu'on a moins de 256 clusters
   while (cs->nb<cs->nbmax)
   {
+    // On récupère le plus grand cluster
     CS_Get(cs,&Courant);
+
+    // On le coupe en deux
     Cluster_Split(&Courant,&Nouveau1,&Nouveau2,Courant.plus_large,to);
+
+    // On compacte ces deux nouveaux (il peut y avoir un espace entre l'endroit de la coupure et les premiers pixels du cluster)
     Cluster_Analyser(&Nouveau1,to);
     Cluster_Analyser(&Nouveau2,to);
+
+    // On met ces deux nouveaux clusters dans le clusterSet
     CS_Set(cs,&Nouveau1);
     CS_Set(cs,&Nouveau2);
   }
@@ -771,9 +781,9 @@ void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_occurence * to,Table_convers
     palette[indice].V=cs->clusters[indice].v;
     palette[indice].B=cs->clusters[indice].b;
 
-    for (r=cs->clusters[indice].Rmin;r</*=*/cs->clusters[indice].Rmax;r++)
-      for (v=cs->clusters[indice].Vmin;v</*=*/cs->clusters[indice].Vmax;v++)
-        for (b=cs->clusters[indice].Bmin;b</*=*/cs->clusters[indice].Bmax;b++)
+    for (r=cs->clusters[indice].Rmin;r<=cs->clusters[indice].Rmax;r++)
+      for (v=cs->clusters[indice].Vmin;v<=cs->clusters[indice].Vmax;v++)
+        for (b=cs->clusters[indice].Bmin;b<=cs->clusters[indice].Bmax;b++)
           TC_Set(tc,r,v,b,indice);
   }
 }
@@ -894,14 +904,14 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
   // Création des éléments nécessaires au calcul de palette optimisée:
   to=0; tc=0; cs=0; ds=0;
 
-  DEBUG("START OPTIMIZING",1);
-
   to=TO_New(r,v,b);
   if (to!=0)
   {
     tc=TC_New(r,v,b);
     if (tc!=0)
     {
+
+      // Première étape : on compte les pixels de chaque couleur pour pouvoir trier là dessus
       TO_Compter_occurences(to,image,taille);
 
       cs=CS_New(256,to);
@@ -909,7 +919,10 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
       {
         // C'est bon, on a pu tout allouer
 
+	// On génère les clusters (avec l'algo du median cut)
         CS_Generer(cs,to);
+
+	// On calcule la teinte de chaque pixel (Luminance et chrominance)
         CS_Calculer_teintes(cs,to);
 
         ds=DS_New(cs);
@@ -919,8 +932,11 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
           DS_Delete(ds);
         }
 
+	// Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
         CS_Trier_par_luminance(cs);
         CS_Trier_par_chrominance(cs);
+
+	// Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
         CS_Generer_TC_et_Palette(cs,to,tc,palette);
 
         CS_Delete(cs);
@@ -1155,6 +1171,9 @@ static const byte precision_24b[]=
 
 // Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
+
+// Cette fonction utilise l'algorithme "median cut" (Optimiser_palette) pour trouver la palette, et diffuse les erreurs avec floyd-steinberg.
+
 int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette)
 {
   Table_conversion * table; // table de conversion

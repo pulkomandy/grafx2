@@ -1719,7 +1719,7 @@ void Load_LBM(void)
           // Deluxe paint le fait... alors on le fait...
           Back_color=Header.Transp_col;
 
-          // On commence par passer la palette en 256 comme ‡a, si la nouvelle
+          // On commence par passer la palette en 256 comme ça, si la nouvelle
           // palette a moins de 256 coul, la précédente ne souffrira pas d'un
           // assombrissement préjudiciable.
           if (Config.Clear_palette)

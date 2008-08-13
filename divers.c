@@ -615,12 +615,15 @@ long Freespace(byte Numero_de_lecteur)
         return 0;
 }
 
+// Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
+// en faire du chunky
+
 byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne)
 {
 	// CL sera le rang auquel on extrait les bits de la couleur
 	byte cl = 7 - (Pos_X & 7);
 	int ax,bh,dx;
-	byte bl;
+	byte bl=0;
 
 	for(dx = HBPm1;dx>=0;dx--);
 	{
@@ -699,7 +702,7 @@ void Tester_chrono(void)
         if((SDL_GetTicks()/55)-Chrono_delay>Chrono_cmp) Etat_chrono=1;
 }
 
-// Effectue uyne inversion de la brosse selon une droite horizontale
+// Effectue une inversion de la brosse selon une droite horizontale
 void Flip_Y_LOWLEVEL(void)
 {
 	// ESI pointe sur la partie haute de la brosse

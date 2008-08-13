@@ -2293,7 +2293,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   short Bouton_clicke;
   struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
   short Temp;
-  unsigned Bidon=0;       // Sert à appeler _dos_setdrive
+  int Bidon=0;       // Sert à appeler SDL_GetKeyState
   word  Drives_Debut_Y;
   byte  Charger_ou_sauver_l_image=0;
   char  Nom_drive[3]="  ";
@@ -2458,8 +2458,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
           do
           {
-                                 puts("boutons.c 2454\n");
-            //Etat_Du_Clavier=SDL_GetKeyState(Bidon);
+          	Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
           // On efface la demande de confirmation
