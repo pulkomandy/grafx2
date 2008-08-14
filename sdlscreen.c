@@ -441,8 +441,15 @@ void Set_Mode_SDL()
         #else
                 #define FLAGS SDL_FULLSCREEN
         #endif
+
+	DEBUG("Mode L",Largeur_ecran);
+	DEBUG("Mode H",Hauteur_ecran);
+
         Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,FLAGS);
-        Ecran=Ecran_SDL->pixels;
+	if(Ecran_SDL != NULL)
+        	Ecran=Ecran_SDL->pixels;
+	else
+		DEBUG("Erreur changement de mode video !!",0);
 
         SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }

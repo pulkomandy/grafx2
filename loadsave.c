@@ -1395,9 +1395,9 @@ void Test_LBM(void)
     else
     {
       Lire_long(); //   On aurait pu vérifier que ce long est égal à la taille
-                   // du fichier - 8, mais ‡a aurait interdit de charger des
+                   // du fichier - 8, mais ça aurait interdit de charger des
                    // fichiers tronqués (et déjà que c'est chiant de perdre
-                   // une partie du fichier il faut quand mˆme pouvoir en
+                   // une partie du fichier il faut quand même pouvoir en
                    // garder un peu... Sinon, moi je pleure :'( !!! )
       if (read(LBM_Fichier,Format,4)!=4)
         Erreur_fichier=1;
@@ -1555,7 +1555,9 @@ void Test_LBM(void)
     if (Image_HAM<=1)                                               // ILBM
     {
       for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
+      {
         Pixel_de_chargement(Pos_X,Pos_Y,Couleur_ILBM_line(Pos_X,Vraie_taille_ligne));
+      }
     }
     else
     {
@@ -1769,6 +1771,7 @@ void Load_LBM(void)
                   if (!Header.Compression)
                   {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
+			DEBUG("Fichier LBM NON compressé",0);
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
                       if (read(LBM_Fichier,LBM_Buffer,Taille_ligne)==Taille_ligne)
@@ -1780,6 +1783,8 @@ void Load_LBM(void)
                   }
                   else
                   {                                               // compressé
+			DEBUG("Fichier LBM compressé",0);
+			Pixel_de_chargement=Pixel_Chargement_dans_ecran_courant;
                     Init_lecture();
 
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
@@ -1789,6 +1794,8 @@ void Load_LBM(void)
                       for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
                       {
                         Octet=Lire_octet(LBM_Fichier);
+			// Si Octet > 127 alors il faut répéter 256-'Octet' fois la couleur de l'octet suivant
+			// Si Octet <= 127 alors il faut afficher directement les 'Octet' octets suivants
                         if (Octet>127)
                         {
                           Couleur=Lire_octet(LBM_Fichier);
@@ -2121,43 +2128,62 @@ void Save_LBM(void)
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
+struct BMP_Header
+{
+    word Signature;   // ='BM' = 0x4D42
+    uint32_t Taille_1;    // =Taille du fichier
+    word Reserv_1;    // =0
+    word Reserv_2;    // =0
+    uint32_t Decalage;    // Nb octets avant les données bitmap
+
+    uint32_t Taille_2;    // =40 
+    uint32_t Largeur;
+    uint32_t Hauteur;
+    word Plans;       // =1
+    word Nb_bits;     // =1,4,8 ou 24
+    uint32_t Compression;
+    uint32_t Taille_3;
+    uint32_t XPM;
+    uint32_t YPM;
+    uint32_t Nb_Clr;
+    uint32_t Clr_Imprt;
+};
 
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(void)
 {
   char Nom_du_fichier[256];
   int  Fichier;
-  struct BMP_Header
-  {
-    word Signature;   // ='BM' = 0x4D42
-    long Taille_1;    // =Taille du fichier
-    word Reserv_1;    // =0
-    word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les données bitmap
-
-    long Taille_2;    // =40
-    long Largeur;
-    long Hauteur;
-    word Plans;       // =1
-    word Nb_bits;     // =1,4,8 ou 24
-    long Compression;
-    long Taille_3;
-    long XPM;
-    long YPM;
-    long Nb_Clr;
-    long Clr_Imprt;
-  } Header;
-
+  struct BMP_Header Header;
 
   Erreur_fichier=1;
   Nom_fichier_complet(Nom_du_fichier,0);
 
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-    if (read(Fichier,&Header,sizeof(struct BMP_Header))==sizeof(struct BMP_Header))
+    if (read(Fichier,&(Header.Signature),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Taille_1),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Reserv_1),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Reserv_2),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Decalage),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Taille_2),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Largeur),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Hauteur),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Plans),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Nb_bits),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Compression),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Taille_3),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.XPM),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.YPM),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Nb_Clr),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Clr_Imprt),sizeof(uint32_t))==sizeof(uint32_t)
+
+	)
+     {
       if ( (Header.Signature==0x4D42) && (Header.Taille_2==40)
         && Header.Largeur && Header.Hauteur )
         Erreur_fichier=0;
+     }
     close(Fichier);
   }
 }
@@ -2168,26 +2194,7 @@ void Load_BMP(void)
 {
   char Nom_du_fichier[256];
   int  Fichier;
-  struct BMP_Header
-  {
-    word Signature;   // ='BM' = 0x4D42
-    long Taille_1;    // =Taille du fichier
-    word Reserv_1;    // =0
-    word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les données bitmap
-
-    long Taille_2;    // =40
-    long Largeur;
-    long Hauteur;
-    word Plans;       // =1
-    word Nb_bits;     // =1,4,8 ou 24
-    long Compression;
-    long Taille_3;
-    long XPM;
-    long YPM;
-    long Nb_Clr;
-    long Clr_Imprt;
-  } Header;
+  struct BMP_Header Header;
   byte * Buffer;
   word  Indice;
   byte  Palette_locale[256][4]; // R,V,B,0
@@ -2197,7 +2204,7 @@ void Load_BMP(void)
   word  Taille_ligne;
   byte  A,B,C=0;
   long  Taille_du_fichier;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -2206,10 +2213,26 @@ void Load_BMP(void)
 
   if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
-    if (read(Fichier,&Header,sizeof(struct BMP_Header))==sizeof(struct BMP_Header))
+    if (read(Fichier,&(Header.Signature),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Taille_1),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Reserv_1),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Reserv_2),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Decalage),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Taille_2),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Largeur),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Hauteur),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Plans),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Nb_bits),sizeof(word))==sizeof(word)
+     && read(Fichier,&(Header.Compression),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Taille_3),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.XPM),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.YPM),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Nb_Clr),sizeof(uint32_t))==sizeof(uint32_t)
+     && read(Fichier,&(Header.Clr_Imprt),sizeof(uint32_t))==sizeof(uint32_t)
+    )
     {
       switch (Header.Nb_bits)
       {
@@ -2232,7 +2255,7 @@ void Load_BMP(void)
         {
           if (read(Fichier,Palette_locale,Nb_Couleurs<<2)==(Nb_Couleurs<<2))
           {
-            //   On commence par passer la palette en 256 comme ‡a, si la nouvelle
+            //   On commence par passer la palette en 256 comme ça, si la nouvelle
             // palette a moins de 256 coul, la précédente ne souffrira pas d'un
             // assombrissement préjudiciable.
             if (Config.Clear_palette)
@@ -3475,7 +3498,7 @@ void Load_PCX(void)
     byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (débile!)
     byte Reserved;           // Ca me plait ‡a aussi!
     byte Plane;              // 4 => 16c , 1 => 256c , ...
-    word Bytes_per_plane_line;// Doit toujours ˆtre pair
+    word Bytes_per_plane_line;// Doit toujours être pair
     word Palette_info;       // 1 => Couleur , 2 => Gris (ignoré à partir de la version 4)
     word Screen_X;           // |_ Dimensions de
     word Screen_Y;           // |  l'écran d'origine
@@ -3565,12 +3588,15 @@ void Load_PCX(void)
               {
 	        int indice;
                 // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
-		for(indice=0;indice<256;indice++);
+		for(indice=0;indice<256;indice++)
                 	if ((read(Fichier,&Principal_Palette[indice].R,1)!=1)
 			 || (read(Fichier,&Principal_Palette[indice].V,1)!=1)
 			 || (read(Fichier,&Principal_Palette[indice].B,1)!=1))
-
+			{
                   		Erreur_fichier=2;
+				DEBUG("ERROR READING PCX PALETTE !",indice);
+				break;
+			}
               }
           }
           Palette_256_to_64(Principal_Palette);

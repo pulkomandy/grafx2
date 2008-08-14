@@ -216,13 +216,13 @@ GLOBAL short Ancien_Principal_Decalage_Y;
     GLOBAL char Principal_Drive_fichier[2];
 #endif
 
-GLOBAL char  Principal_Repertoire_fichier[256]; // |_ Nom complet =
-GLOBAL char  Principal_Nom_fichier[13];         // |  Repertoire_fichier+"\"+Nom_fichier
+GLOBAL char  Principal_Repertoire_fichier[1024]; // |_ Nom complet =
+GLOBAL char  Principal_Nom_fichier[256];         // |  Repertoire_fichier+"\"+Nom_fichier
 GLOBAL byte  Principal_Format_fichier;          // Format auquel il faut lire et Úcrire le fichier
 GLOBAL byte  Principal_Format;               // Format du fileselect
 GLOBAL short Principal_File_list_Position; // DÚbut de la partie affichÚe dans la liste de fichiers
 GLOBAL short Principal_File_list_Decalage; // DÚcalage de la barre de sÚlection dans le fileselector
-GLOBAL char  Principal_Repertoire_courant[256]; // RÚpertoire actuel sur disque
+GLOBAL char  Principal_Repertoire_courant[1024]; // RÚpertoire actuel sur disque
 GLOBAL char  Principal_Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image
 
 GLOBAL short Principal_Split; // Position en X du bord gauche du split de la loupe
