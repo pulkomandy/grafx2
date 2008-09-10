@@ -1,6 +1,15 @@
 #define TAILLE_FICHIER_DATA  84369  // Taille du fichier GFX2.DAT
 
 #include <fcntl.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <SDL/SDL_byteorder.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -10,25 +19,10 @@
 #include "palette.h"
 #include "aide.h"
 #include "operatio.h"
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include "divers.h"
 #include "erreurs.h"
 
 #include "errno.h"
-
-#ifdef __linux__
-    #include <endian.h>
-    #include <byteswap.h>
-#elif __WATCOMC__
-    #include <windows.h>
-#endif
 
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
@@ -36,7 +30,7 @@ void Chercher_repertoire_du_programme(char * Chaine)
   #ifdef __WATCOMC__
 	GetCurrentDirectory(255,Repertoire_du_programme);
 	strcat(Repertoire_du_programme,"\\");
-  #elif __linux__
+  #else
   	puts("Chercher_repertoire_du_programme: implémentation incomplète");
   	Repertoire_du_programme[0]=0; //On va travailler dans le dossier courant ...
   #endif
@@ -276,46 +270,37 @@ void Charger_DAT(void)
 
   if (fread(Palette_defaut,1,sizeof(T_Palette),Handle)!=sizeof(T_Palette))
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)Palette_defaut,sizeof(T_Palette));
 
   if (fread(BLOCK_MENU,1,LARGEUR_MENU*HAUTEUR_MENU,Handle)!=LARGEUR_MENU*HAUTEUR_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU);
 
   if (fread(SPRITE_EFFET,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS,Handle)!=
       LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS);
 
   if (fread(SPRITE_CURSEUR,1,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR,Handle)!=
       LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)SPRITE_CURSEUR,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR);
 
   if (fread(SPRITE_MENU,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU,Handle)!=
       LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)SPRITE_MENU,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU);
 
   if (fread(SPRITE_PINCEAU,1,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU,Handle)!=
       LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)SPRITE_PINCEAU,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU);
 
   if (fread(SPRITE_DRIVE,1,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES,Handle)!=
       LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)SPRITE_DRIVE,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES);
 
   if (!(Logo_GrafX2=(byte *)malloc(231*56)))
     Erreur(ERREUR_MEMOIRE);
   if (fread(Logo_GrafX2,1,231*56,Handle)!=(231*56))
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte(Logo_GrafX2,231*56);
 
   if (fread(TRAME_PREDEFINIE,1,2*16*NB_TRAMES_PREDEFINIES,Handle)!=2*16*NB_TRAMES_PREDEFINIES)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte *)TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES);
 
   // Lecture des fontes 8x8:
   if (!(Fonte_temporaire=(byte *)malloc(2048)))
@@ -324,7 +309,6 @@ void Charger_DAT(void)
   // Lecture de la fonte systŠme
   if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte(Fonte_temporaire,2048);
   for (Indice=0;Indice<256;Indice++)
     for (Pos_X=0;Pos_X<8;Pos_X++)
       for (Pos_Y=0;Pos_Y<8;Pos_Y++)
@@ -333,7 +317,6 @@ void Charger_DAT(void)
   // Lecture de la fonte alternative
   if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte(Fonte_temporaire,2048);
   for (Indice=0;Indice<256;Indice++)
     for (Pos_X=0;Pos_X<8;Pos_X++)
       for (Pos_Y=0;Pos_Y<8;Pos_Y++)
@@ -346,7 +329,6 @@ void Charger_DAT(void)
   // Lecture de la fonte 6x8: (spéciale aide)
   if (fread(Fonte_help,1,315*6*8,Handle)!=(315*6*8))
     Erreur(ERREUR_DAT_CORROMPU);
-  Decrypte((byte*)Fonte_help,(315*6*8));
 
   // Lecture des différentes sections de l'aide:
 
@@ -356,11 +338,9 @@ void Charger_DAT(void)
     // On lit le nombre de lignes:
     if (fread(&Mot_temporaire,1,2,Handle)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
-#ifndef __WATCOMC__
-    #if __BYTE_ORDER == __BIG_ENDIAN
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
         //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
         Mot_temporaire=bswap_16(Mot_temporaire);
-    #endif
 #endif
 
     // On copie ce nombre de lignes dans la table:
@@ -369,11 +349,9 @@ void Charger_DAT(void)
     // On lit la place que la section prend en mémoire:
     if (fread(&Mot_temporaire,1,2,Handle)!=2)
       Erreur(ERREUR_DAT_CORROMPU);
-#ifndef __WATCOMC__
-    #if __BYTE_ORDER == __BIG_ENDIAN
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
         //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
         Mot_temporaire=bswap_16(Mot_temporaire);
-    #endif
 #endif
 
     // On alloue la mémoire correspondante:
@@ -1811,10 +1789,8 @@ int Charger_CFG(int Tout_charger)
   while (fread(&(Chunk.Numero),1,sizeof(byte),Handle)==sizeof(byte))
   {
                 fread(&(Chunk.Taille),1,sizeof(word),Handle);
-                #ifndef __WATCOMC__
-                    #if __BYTE_ORDER == __BIG_ENDIAN
+                #if SDL_BYTEORDER == SDL_BIG_ENDIAN
                         Chunk.Taille=bswap_16(Chunk.Taille);
-                    #endif
                 #endif
     switch (Chunk.Numero)
     {
@@ -1829,12 +1805,10 @@ int Charger_CFG(int Tout_charger)
               goto Erreur_lecture_config;
             else
             {
-                #ifndef __WATCOMC__
-                #if __BYTE_ORDER == __BIG_ENDIAN
+                #if SDL_BYTEORDER == SDL_BIG_ENDIAN
                     CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
                     CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
                     CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
-                #endif
                 #endif
                 for (Indice2=0;
                    ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
@@ -2042,11 +2016,9 @@ int Sauver_CFG(void)
   // Enregistrement des touches
   Chunk.Numero=CHUNK_TOUCHES;
   Chunk.Taille=NB_TOUCHES*sizeof(CFG_Infos_touche);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
@@ -2060,12 +2032,10 @@ int Sauver_CFG(void)
       case 2 : CFG_Infos_touche.Touche=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite; break;
     }
     CFG_Infos_touche.Touche2=0x00FF;
-    #ifndef __WATCOMC__
-    #if __BYTE_ORDER == __BIG_ENDIAN
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
         CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
         CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
-    #endif
     #endif
     if (fwrite(&CFG_Infos_touche,1,sizeof(CFG_Infos_touche),Handle)!=sizeof(CFG_Infos_touche))
       goto Erreur_sauvegarde_config;
@@ -2074,11 +2044,9 @@ int Sauver_CFG(void)
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
   Chunk.Taille=NB_MODES_VIDEO*5 /*sizeof(CFG_Mode_video)*/;
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
     goto Erreur_sauvegarde_config;
@@ -2096,11 +2064,9 @@ int Sauver_CFG(void)
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Numero=CHUNK_SHADE;
   Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2113,11 +2079,9 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Masque
   Chunk.Numero=CHUNK_MASQUE;
   Chunk.Taille=sizeof(Mask);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2128,11 +2092,9 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Stencil
   Chunk.Numero=CHUNK_STENCIL;
   Chunk.Taille=sizeof(Stencil);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2143,11 +2105,9 @@ int Sauver_CFG(void)
   // Sauvegarde des informations des dégradés
   Chunk.Numero=CHUNK_DEGRADES;
   Chunk.Taille=sizeof(Degrade_Tableau)+1;
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2167,11 +2127,9 @@ int Sauver_CFG(void)
   // Sauvegarde de la matrice du Smooth
   Chunk.Numero=CHUNK_SMOOTH;
   Chunk.Taille=sizeof(Smooth_Matrice);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2182,11 +2140,9 @@ int Sauver_CFG(void)
   // Sauvegarde des couleurs à exclure
   Chunk.Numero=CHUNK_EXCLUDE_COLORS;
   Chunk.Taille=sizeof(Exclude_color);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
@@ -2197,11 +2153,9 @@ int Sauver_CFG(void)
   // Sauvegarde des informations du Quick-shade
   Chunk.Numero=CHUNK_QUICK_SHADE;
   Chunk.Taille=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
-  #ifndef __WATCOMC__
-  #if __BYTE_ORDER == __BIG_ENDIAN
+  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
   #endif
   if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
 	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
