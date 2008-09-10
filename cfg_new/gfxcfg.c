@@ -376,40 +376,40 @@ void Scroll_haut(uint16_t* Decalage_curseur, uint16_t* Position_curseur)
 {
     if(*Position_curseur + *Decalage_curseur > 0)
     {
-        if(*Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+        if(*Position_curseur < HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
         {
-            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur),*Position_curseur + *Decalage_curseur,
                     COULEUR_SETUP);
             (*Position_curseur) -- ;
-            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur),*Position_curseur + *Decalage_curseur,
                     COULEUR_SELECT);
         }
         else
         {
             (*Decalage_curseur) -- ;
         }
-        Ecrire_commentaire(*Position_curseur + *Decalage_curseur - 1);
+        Ecrire_commentaire(*Position_curseur + *Decalage_curseur);
     }
 }
 
 /* Moves one line down */
 void Scroll_bas(uint16_t* Decalage_curseur, uint16_t* Position_curseur)
 {
-    if(*Position_curseur + *Decalage_curseur <= NB_OPTIONS)
+    if(*Position_curseur + *Decalage_curseur < NB_OPTIONS)
     {
-        if(*Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+        if(*Position_curseur < HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
         {
-            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) ,*Position_curseur + *Decalage_curseur,
                     COULEUR_SETUP);
             (*Position_curseur) ++ ;
-            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) ,*Position_curseur + *Decalage_curseur,
                     COULEUR_SELECT);
         }
         else
         {
             (*Decalage_curseur) ++ ;
         }
-        Ecrire_commentaire(*Position_curseur + *Decalage_curseur - 1);
+        Ecrire_commentaire(*Position_curseur + *Decalage_curseur );
     }
 }
 
@@ -419,7 +419,7 @@ void Setup()
     bool Sortie_OK = false;
     SDL_keysym Touche;
     uint16_t Decalage_curseur=0;
-    uint16_t Position_curseur=1;
+    uint16_t Position_curseur=0;
     Test_duplic();
     Tout_ecrire(0,1);
     do{
