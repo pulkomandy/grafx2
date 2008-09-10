@@ -106,7 +106,6 @@ void Nom_touche(uint16_t Touche,char* Temp)
     {
         case 1:
             strcpy(Temp2,Table_Normal[Touche & 0xFF]);
-            printf("k: %x\n",Touche & 0xFF);
             if (strcmp(Temp2,"???") == 0)
                 strcpy(Temp,"********** Invalid key! **********");
             else if (Temp2[0]==0)
@@ -147,7 +146,7 @@ void Dessiner_ecran_principal()
     SFont_Write(Ecran, MyFont, 8,18,"Use Up/Down arrows & Page-Up/Page-Down to scroll, Enter to modify, Delete to remove a hot-key, and Escape to validate or cancel.");
     SFont_Write(Ecran, MyFont, 8,30,"DO NOT USE Print-screen, Pause, and other special keys!");
 
-    Cadre(3,46,630,400,COULEUR_SETUP);
+//    Cadre(3,46,630,400,COULEUR_SETUP);
     SFont_Write(Ecran,MyFont,8,48,"Option");
     SFont_Write(Ecran,MyFont,8*38,48,"Hot-Key");
     SFont_Write(Ecran,MyFont,8*75,48,"Err");
@@ -160,21 +159,24 @@ void Dessiner_ecran_principal()
 void Ecrire(uint8_t Ligne, uint16_t Num_option, uint8_t Couleur)
 {
     char NomTouche[35];
-    puts(Config[Num_option].Libelle);
+    Cadre(3,Ligne*9,630,9,Couleur);
     SFont_Write(Ecran,MyFont,8,Ligne*9,Config[Num_option].Libelle);
     Nom_touche(Config[Num_option].Touche,NomTouche);
     SFont_Write(Ecran,MyFont,40*8,Ligne*9,NomTouche);
     if(Config[Num_option].Erreur)
         SFont_Write(Ecran,MyFont,77*8,Ligne*9,"X");
-    else
-        Cadre(77*8,Ligne*9,8,8,Couleur);
+    Cadre(36*8,Ligne*9,1,9,255);
+    Cadre(74*8,Ligne*9,1,9,255);
+    SDL_UpdateRect(Ecran,3,Ligne*9,630,9);
 }
 
 /* Displays comment about an option */
 void Ecrire_commentaire(uint16_t Num_option)
 {
+    Cadre(8,50*9,630,18,0);
     SFont_Write(Ecran,MyFont,8,50*9,Config[Num_option].Explic1);
     SFont_Write(Ecran,MyFont,8,51*9,Config[Num_option].Explic2);
+    SDL_UpdateRect(Ecran,8,50*9,631,19);
 }
 
 /* Display the options list */
@@ -182,19 +184,19 @@ void Tout_ecrire(uint16_t Decalage_curseur,uint16_t Position_curseur)
 {
     uint8_t i = HAUTEUR_DEBUT_SETUP;
 
-    Cadre(3,(HAUTEUR_DEBUT_SETUP+Position_curseur - 1)*9,630,8,COULEUR_SELECT);
-
     while(i<=HAUTEUR_FIN_SETUP && i <= NB_OPTIONS + HAUTEUR_DEBUT_SETUP)
     {
-        Ecrire(i,Decalage_curseur+i-HAUTEUR_DEBUT_SETUP,COULEUR_SETUP);
+        Ecrire(i,Decalage_curseur+i-HAUTEUR_DEBUT_SETUP,
+                (i==HAUTEUR_DEBUT_SETUP)?COULEUR_SELECT:COULEUR_SETUP);
         i++;
     }
 
     Cadre(36*8,46,1,400,255);
-    Cadre(78*8,46,1,400,255);
+    Cadre(74*8,46,1,400,255);
+
+    SDL_UpdateRect(Ecran,0,0,640,480);
 
     Ecrire_commentaire(Decalage_curseur+Position_curseur-1);
-    SDL_UpdateRect(Ecran,0,0,640,480);
 }
 
 /*** Configuration handling functions ***/
@@ -243,11 +245,84 @@ bool Initialiser_config()
     NB_OPTIONS = Numero_definition_option - 1;
 }
 
-uint8_t Fenetre_choix(uint8_t Largeur, uint8_t Hauteur, char* Titre, char* Choix, uint8_t Choix_debut,
+uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
         uint8_t Couleur,uint8_t Couleur_choix)
 {
-    puts("FENETRE CHOIX UNIMPLEMENTED !!!");
-    return 0;
+    char Temp[70];
+    uint8_t i,j,Num_titre,Num_choix;
+    uint16_t x1,y1;
+    uint8_t Option_choisie;
+    SDL_keysym Touche;
+
+    Hauteur *= 9;
+    Largeur *= 9;
+    x1=(640 - Largeur)/2;
+    y1=(480 - Hauteur)/2;
+
+    Cadre(x1+5,y1+5,Largeur,Hauteur,1);
+    Cadre(x1,y1,Largeur,Hauteur,Couleur);
+
+    Num_choix =  0;
+    Num_titre=1;
+    j=0;
+
+    // SFont ne gère pas les \n donc on le fait nous même
+    for(i=0;i<=strlen(Titre);i++)
+    {   
+        if (Titre[i]=='\n' || Titre[i]==0)
+        {
+            memcpy(Temp,Titre+j,i-j);
+            Temp[i-j]=0;
+            j=i+1;
+            SFont_Write(Ecran,MyFont,x1+3,y1+Num_titre*9,Temp);
+            Num_titre++;
+        }
+    }
+
+    // Maintenant on fait pareil pour les divers choix proposés
+    j=0;
+
+    // SFont ne gère pas les \n donc on le fait nous même
+    for(i=0;i<=strlen(Choix);i++)
+    {   
+        if (Choix[i]=='\n' || Choix[i]==0)
+        {
+            memcpy(Temp,Choix+j,i-j);
+            Temp[i-j]=0;
+            j=i+1;
+            SFont_Write(Ecran,MyFont,x1+3+50*Num_choix,y1+(Num_titre+2)*9,Temp);
+            Num_choix++;
+        }
+    }
+
+    Option_choisie = Choix_debut;
+    Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
+    SDL_UpdateRect(Ecran,x1,y1,Largeur+5,Hauteur+5);
+
+    do
+    {
+        Touche = Lire_Touche();
+        switch(Touche.sym)
+        {
+            case SDLK_LEFT:
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
+                if(Option_choisie==0) Option_choisie = Num_choix - 1;
+                else Option_choisie --;
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
+                break;
+            case SDLK_RIGHT:
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
+                if(Option_choisie==Num_choix-1) Option_choisie = 0;
+                else Option_choisie ++;
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
+            default:
+                break;
+            
+        }
+        SDL_UpdateRect(Ecran,x1+3,y1+(Num_titre+3)*9,50*Num_choix,2);
+    }while(Touche.sym!=SDLK_RETURN);
+
+    return Option_choisie;
 }
 
 /* Checks if some key is used twice */
@@ -296,6 +371,48 @@ bool Validation()
     if (Choix_enreg!=3) return true; else return false;
 }
 
+/* Move one line up */
+void Scroll_haut(uint16_t* Decalage_curseur, uint16_t* Position_curseur)
+{
+    if(*Position_curseur + *Decalage_curseur > 0)
+    {
+        if(*Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+        {
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+                    COULEUR_SETUP);
+            (*Position_curseur) -- ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+                    COULEUR_SELECT);
+        }
+        else
+        {
+            (*Decalage_curseur) -- ;
+        }
+        Ecrire_commentaire(*Position_curseur + *Decalage_curseur - 1);
+    }
+}
+
+/* Moves one line down */
+void Scroll_bas(uint16_t* Decalage_curseur, uint16_t* Position_curseur)
+{
+    if(*Position_curseur + *Decalage_curseur <= NB_OPTIONS)
+    {
+        if(*Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+        {
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+                    COULEUR_SETUP);
+            (*Position_curseur) ++ ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (*Position_curseur) - 1,*Position_curseur + *Decalage_curseur-1,
+                    COULEUR_SELECT);
+        }
+        else
+        {
+            (*Decalage_curseur) ++ ;
+        }
+        Ecrire_commentaire(*Position_curseur + *Decalage_curseur - 1);
+    }
+}
+
 /* Let the user do things */
 void Setup()
 {
@@ -310,7 +427,11 @@ void Setup()
         switch(Touche.sym)
         {
             case SDLK_UP:
+                Scroll_haut(&Decalage_curseur, &Position_curseur);
+                break;
             case SDLK_DOWN:
+                Scroll_bas(&Decalage_curseur, &Position_curseur);
+                break;
             case SDLK_PAGEUP:
             case SDLK_PAGEDOWN:
             case SDLK_RETURN:

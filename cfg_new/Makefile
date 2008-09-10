@@ -1,5 +1,5 @@
-COPT = -c `sdl-config --cflags` -Wall
-LOPT = `sdl-config --libs` -lSDL_image -lSDL_gfx
+COPT = -c `sdl-config --cflags` -Wall -g
+LOPT = `sdl-config --libs` -lSDL_image -lSDL_gfx -g
 
 gfxcfg: gfxcfg.o SFont.o
 	gcc gfxcfg.o SFont.o -o gfxcfg $(LOPT)
