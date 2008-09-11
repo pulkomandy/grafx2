@@ -2,6 +2,7 @@ CC = gcc
 COPT = -Wall -c -g 
 LOPT = -lSDL -o grafx2 
 SCREEN = -D WINDOWED
+OBJDIR = obj/
 
 debug: grafx2
 	@echo --- Everything OK.
@@ -9,8 +10,8 @@ debug: grafx2
 release: grafx2
 	strip grafx2
 
-grafx2 : main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o
-	$(CC) $(LOPT) main.o graph.o divers.o init.o files.o linux.o loadsave.o boutons.o moteur.o sdlscreen.o aide.o palette.o pages.o operatio.o op_c.o readline.o special.o op_asm.o readini.o saveini.o
+grafx2 : main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o
+	$(CC) $(LOPT) main.o graph.o divers.o init.o files.o linux.o loadsave.o boutons.o moteur.o sdlscreen.o aide.o palette.o pages.o operatio.o op_c.o readline.o special.o op_asm.o readini.o saveini.o shade.o
 
 aide.o : const.h struct.h global.h divers.h graph.h moteur.h aide.h aide.c
 	$(CC) $(COPT) aide.c
@@ -27,7 +28,7 @@ files.o : const.h struct.h global.h graph.h divers.h files.h files.c
 graph.o : graph.c pages.c const.h struct.h global.h divers.h erreurs.h
 	$(CC) $(COPT) graph.c
 
-init.o : const.h struct.h global.h modesvdo.h graph.h boutons.h palette.h aide.h operatio.h init.c readini.c saveini.c
+init.o : const.h struct.h global.h graph.h boutons.h palette.h aide.h operatio.h init.c readini.c saveini.c
 	$(CC) $(COPT) init.c
 
 linux.o : linux.h linux.c
@@ -68,6 +69,9 @@ savenini.o : saveini.h saveini.c
 
 sdlscreen.o : sdlscreen.c sdlscreen.h
 	$(CC) $(COPT) sdlscreen.c $(SCREEN)
+
+shade.o : shade.c shade.h
+	$(CC) $(COPT) shade.c
 	
 special.o : const.h struct.h global.h graph.h moteur.h special.c
 	$(CC) $(COPT) special.c
