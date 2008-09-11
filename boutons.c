@@ -2080,12 +2080,6 @@ void Bouton_Brosse_monochrome(void)
   Afficher_curseur();
 }
 
-
-//-------------------------------- Mode Shade --------------------------------
-#include "shade.c"
-
-
-
 //------------------------ Chargements et sauvegardes ------------------------
 
 void Print_repertoire_courant(void)
