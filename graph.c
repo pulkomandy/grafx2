@@ -472,6 +472,8 @@ unsigned long Memoire_libre(void)
          mstt.dwLength = sizeof(MEMORYSTATUSEX);
          GlobalMemoryStatusEx(&mstt);
          return mstt.ullAvailPhys;
+    #else
+        return 10*1024*1024;
     #endif
 }
 

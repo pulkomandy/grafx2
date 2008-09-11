@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdlib.h>
 #include "global.h"
 #include "graph.h"
 #include "moteur.h"

@@ -1,9 +1,11 @@
+#include <stdlib.h>
+#include <string.h>
 #include "const.h"
 #include "struct.h"
 #include "global.h"
 #include "graph.h"
 #include "moteur.h"
-#include <stdlib.h>
+
 
 
 //---------------------- Modifier le pinceau sp‚cial -------------------------

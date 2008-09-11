@@ -1,4 +1,6 @@
 #include <SDL/SDL.h>
+#include <string.h>
+#include <stdlib.h>
 #include "struct.h"
 #include "sdlscreen.h"
 #include "global.h"

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -10,7 +11,7 @@
 
 #ifdef __linux__
     #include <sys/vfs.h>
-#elif __WATCOMC__
+#else
     #include <windows.h>
 #endif
 
@@ -210,7 +211,7 @@ void Bouton_Stats(void)
   #ifdef __linux__
     struct statfs Informations_Disque;
     unsigned long long Taille = 0;
-  #elif __WATCOMC__
+  #else
     unsigned __int64 Taille;
     ULARGE_INTEGER tailleU;
   #endif
@@ -253,7 +254,7 @@ void Bouton_Stats(void)
   #ifdef __linux__
     statfs(Principal_Repertoire_courant,&Informations_Disque);
     Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
-  #elif __WATCOMC__
+  #else
     GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
     Taille = tailleU.QuadPart;
   #endif

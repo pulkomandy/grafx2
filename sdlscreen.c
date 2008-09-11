@@ -1,3 +1,4 @@
+#include <string.h>
 #include <SDL/SDL.h>
 #include "global.h"
 #include "sdlscreen.h"

@@ -1,3 +1,11 @@
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <SDL/SDL.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -8,20 +16,13 @@
 #include "files.h"
 #include "loadsave.h"
 #include "init.h"
-#include <fcntl.h>
-#include <stdio.h>
-
-#include <SDL/SDL.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <ctype.h>
 #include "boutons.h"
 #include "operatio.h"
 #include "pages.h"
 #include "erreurs.h"
 #include "readini.h"
 #include "saveini.h"
+#include "shade.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>

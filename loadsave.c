@@ -1,5 +1,14 @@
 #define _XOPEN_SOURCE
 
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <limits.h>
+#include <SDL/SDL_byteorder.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -7,28 +16,19 @@
 #include "divers.h"
 #include "pages.h"
 #include "op_c.h"
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string.h>
-#include <unistd.h>
-#include <limits.h>
 #include "boutons.h"
 #include "erreurs.h"
 
-#ifdef __linux__
-	#include <endian.h>
-	#include <byteswap.h>
-    #include "linux.h"
-	#if __BYTE_ORDER == __BIG_ENDIAN
-		#define endian_magic(x) bswap_16(x)
-	#else
-		#define endian_magic(x) (x)
-	#endif
-#elif __WATCOMC__
-	#define endian_magic(x) (x)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+  #define endian_magic(x) (x)
+#else
+  #define endian_magic(x) (SDL_Swap16(x))
+#endif
+
+#ifdef S_IRGRP
+  #define PERMISSIONS_ECRITURE (S_IRUSR|S_IWUSR|S_IRGRP)
+#else
+  #define PERMISSIONS_ECRITURE (S_IRUSR|S_IWUSR)
 #endif
 
 // Chargement des pixels dans l'écran principal
@@ -689,7 +689,7 @@ void Save_PAL(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Enregistrement de Principal_Palette dans le fichier
@@ -850,7 +850,7 @@ void Save_IMG(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     memcpy(IMG_Header.Filler1,Signature,6);
@@ -1239,7 +1239,7 @@ void Save_PKM(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Ecriture du header
@@ -2021,7 +2021,7 @@ void Save_LBM(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   // Ouverture du fichier
-  LBM_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  LBM_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (LBM_Fichier!=-1)
   {
     write(LBM_Fichier,"FORM",4);
@@ -2499,7 +2499,7 @@ void Save_BMP(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     if (Principal_Largeur_image & 7)
@@ -3158,7 +3158,7 @@ void Save_GIF(void)
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  GIF_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  GIF_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (GIF_Fichier!=-1)
   {
     // On écrit la signature du fichier
@@ -3846,7 +3846,7 @@ void Save_PCX(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
   {
     // On prépare la palette pour écrire les 16 premieres valeurs
     Palette_64_to_256(Principal_Palette);
@@ -4169,7 +4169,7 @@ void Save_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
   {
     // On regarde si des couleurs >16 sont utilisées dans l'image
     for (Pos_X=16;((Pos_X<256) && (!Utilisation[Pos_X]));Pos_X++);
@@ -4509,7 +4509,7 @@ void Save_KCF(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
   {
     // Sauvegarde de la palette
 
@@ -4729,7 +4729,7 @@ void Save_SCx(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     memcpy(SCx_Header.Filler1,"RIX3",4);
@@ -5000,7 +5000,7 @@ void Save_PI1(void)
 
   Erreur_fichier=0;
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // allocation d'un buffer mémoire
@@ -5343,7 +5343,7 @@ void Save_PC1(void)
 
   Erreur_fichier=0;
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Allocation des buffers mémoire

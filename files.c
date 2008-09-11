@@ -19,9 +19,13 @@
     #include "linux.h"
     #include <dirent.h>
     #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
-#elif __WATCOMC__
+#elif defined(__WATCOMC__)
     #include <direct.h>
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
+#elif defined(__MINGW32__)
+    #include <dirent.h>
+/* TODO: trouver une méthode portable pour déterminer si un fichier est caché */
+    #define isHidden(Enreg) (0)
 #endif
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
