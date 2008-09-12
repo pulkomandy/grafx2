@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
-#include <SDL/SDL_byteorder.h>
+#include <SDL/SDL_endian.h>
 
 #include "const.h"
 #include "struct.h"
@@ -31,6 +31,60 @@
 #else
   #define PERMISSIONS_ECRITURE (S_IRUSR|S_IWUSR)
 #endif
+
+// Lit un ou plusieurs word Little-Endian
+size_t read_word_le(int fd, word *buffer, size_t number)
+{
+    size_t Charge = read(fd, buffer, number * sizeof(word));
+    #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+    {
+        int i;
+        for (i = 0; i < number; i++)
+            buffer[i] = SDL_Swap16(buffer[i]);
+    }
+    #endif
+    return Charge;
+}
+// Lit un ou plusieurs word Big-Endian
+size_t read_word_be(int fd, word *buffer, size_t number)
+{
+    size_t Charge = read(fd, buffer, number * sizeof(word));
+    #if SDL_BYTEORDER != SDL_BIG_ENDIAN
+    {
+        int i;
+        for (i = 0; i < number; i++)
+            buffer[i] = SDL_Swap16(buffer[i]);
+    }
+    #endif
+    return Charge;
+}
+
+// Lit un ou plusieurs dword Little-Endian
+size_t read_dword_le(int fd, dword *buffer, size_t number)
+{
+    size_t Charge = read(fd, buffer, number * sizeof(dword));
+    #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+    {
+        int i;
+        for (i = 0; i < number; i++)
+            buffer[i] = SDL_Swap32(buffer[i]);
+    }
+    #endif
+    return Charge;
+}
+// Lit un ou plusieurs dword Big-Endian
+size_t read_dword_be(int fd, dword *buffer, size_t number)
+{
+    size_t Charge = read(fd, buffer, number * sizeof(dword));
+    #if SDL_BYTEORDER != SDL_BIG_ENDIAN
+    {
+        int i;
+        for (i = 0; i < number; i++)
+            buffer[i] = SDL_Swap32(buffer[i]);
+    }
+    #endif
+    return Charge;
+}
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
@@ -626,7 +680,7 @@ void Test_PAL(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_RDONLY);
+  Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Fichier!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
@@ -652,7 +706,7 @@ void Load_PAL(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Handle=open(Nom_du_fichier,O_RDONLY);
+  Handle=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Handle!=-1)
   {
     // Initialiser_preview(???); // Pas possible... pas d'image...
@@ -690,7 +744,7 @@ void Save_PAL(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Enregistrement de Principal_Palette dans le fichier
@@ -744,7 +798,7 @@ void Test_IMG(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Handle=open(Nom_du_fichier,O_RDONLY);
+  Handle=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Handle!=-1)
   {
     // Lecture et vérification de la signature
@@ -784,7 +838,7 @@ void Load_IMG(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,Informations_Fichier);
     Taille_du_fichier=Informations_Fichier->st_size;
@@ -851,7 +905,7 @@ void Save_IMG(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     memcpy(IMG_Header.Filler1,Signature,6);
@@ -932,7 +986,7 @@ void Test_PKM(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_RDONLY);
+  Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Fichier!=-1)
   {
     // Lecture du header du fichier
@@ -984,7 +1038,7 @@ void Load_PKM(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
@@ -1240,7 +1294,7 @@ void Save_PKM(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Ecriture du header
@@ -1386,7 +1440,7 @@ void Test_LBM(void)
 
   Erreur_fichier=0;
 
-  if ((LBM_Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((LBM_Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (read(LBM_Fichier,Section,4)!=4)
       Erreur_fichier=1;
@@ -1662,7 +1716,7 @@ void Load_LBM(void)
 
   Erreur_fichier=0;
 
-  if ((LBM_Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((LBM_Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
@@ -2022,7 +2076,7 @@ void Save_LBM(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   // Ouverture du fichier
-  LBM_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  LBM_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (LBM_Fichier!=-1)
   {
     write(LBM_Fichier,"FORM",4);
@@ -2160,7 +2214,7 @@ void Test_BMP(void)
   Erreur_fichier=1;
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (read(Fichier,&(Header.Signature),sizeof(word))==sizeof(word)
      && read(Fichier,&(Header.Taille_1),sizeof(uint32_t))==sizeof(uint32_t)
@@ -2212,7 +2266,7 @@ void Load_BMP(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
@@ -2500,7 +2554,7 @@ void Save_BMP(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     if (Principal_Largeur_image & 7)
@@ -2603,7 +2657,7 @@ void Test_GIF(void)
   Erreur_fichier=1;
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (
         (read(Fichier,Signature,6)==6) &&
@@ -2770,7 +2824,7 @@ void Load_GIF(void)
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  if ((GIF_Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((GIF_Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
@@ -3159,7 +3213,7 @@ void Save_GIF(void)
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  GIF_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  GIF_Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (GIF_Fichier!=-1)
   {
     // On écrit la signature du fichier
@@ -3438,7 +3492,7 @@ void Test_PCX(void)
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (read(Fichier,&Header,sizeof(struct PCX_Header))==sizeof(struct PCX_Header))
     {
@@ -3504,7 +3558,7 @@ void Load_PCX(void)
     word Screen_X;           // |_ Dimensions de
     word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
-  } Header; // Je hais ce header!
+  } __attribute__((__packed__)) Header; // Je hais ce header!
   short Taille_ligne;
   short Vraie_taille_ligne; // Largeur de l'image corrigée
   short Largeur_lue;
@@ -3527,13 +3581,16 @@ void Load_PCX(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
 
     if (read(Fichier,&Header,sizeof(struct PCX_Header))==sizeof(struct PCX_Header))
     {
+      // Ce format est Little-Endian
+      //SDL_SwapLE16(Header.);
+      
       Principal_Largeur_image=Header.X_max-Header.X_min+1;
       Principal_Hauteur_image=Header.Y_max-Header.Y_min+1;
 
@@ -3847,7 +3904,7 @@ void Save_PCX(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE))!=-1)
   {
     // On prépare la palette pour écrire les 16 premieres valeurs
     Palette_64_to_256(Principal_Palette);
@@ -3966,7 +4023,7 @@ void Test_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (read(Fichier,&Header1,sizeof(struct CEL_Header1))==sizeof(struct CEL_Header1))
     {
@@ -4036,7 +4093,7 @@ void Load_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (read(Fichier,&Header1,sizeof(struct CEL_Header1))==sizeof(struct CEL_Header1))
     {
@@ -4170,7 +4227,7 @@ void Save_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE))!=-1)
   {
     // On regarde si des couleurs >16 sont utilisées dans l'image
     for (Pos_X=16;((Pos_X<256) && (!Utilisation[Pos_X]));Pos_X++);
@@ -4302,7 +4359,7 @@ void Test_KCF(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     if (filelength(Fichier)==sizeof(struct KCF_Header))
     {
@@ -4373,7 +4430,7 @@ void Load_KCF(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     Taille_du_fichier=filelength(Fichier);
     if (Taille_du_fichier==sizeof(struct KCF_Header))
@@ -4510,7 +4567,7 @@ void Save_KCF(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
-  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE))!=-1)
   {
     // Sauvegarde de la palette
 
@@ -4601,7 +4658,7 @@ void Test_SCx(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Handle=open(Nom_du_fichier,O_RDONLY);
+  Handle=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Handle!=-1)
   {
     // Lecture et vérification de la signature
@@ -4640,7 +4697,7 @@ void Load_SCx(void)
 
   Erreur_fichier=0;
 
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     Taille_du_fichier=filelength(Fichier);
 
@@ -4730,7 +4787,7 @@ void Save_SCx(void)
   Erreur_fichier=0;
 
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     memcpy(SCx_Header.Filler1,"RIX3",4);
@@ -4904,7 +4961,7 @@ void Test_PI1(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Handle=open(Nom_du_fichier,O_RDONLY);
+  Handle=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Handle!=-1)
   {
     // Vérification de la taille
@@ -4937,7 +4994,7 @@ void Load_PI1(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   Erreur_fichier=0;
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
@@ -5001,7 +5058,7 @@ void Save_PI1(void)
 
   Erreur_fichier=0;
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // allocation d'un buffer mémoire
@@ -5234,7 +5291,7 @@ void Test_PC1(void)
   Erreur_fichier=1;
 
   // Ouverture du fichier
-  Handle=open(Nom_du_fichier,O_RDONLY);
+  Handle=open(Nom_du_fichier,O_RDONLY|O_BINARY);
   if (Handle!=-1)
   {
     // Vérification de la taille
@@ -5269,7 +5326,7 @@ void Load_PC1(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   Erreur_fichier=0;
-  if ((Fichier=open(Nom_du_fichier,O_RDONLY))!=-1)
+  if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     Taille=filelength(Fichier);
     // allocation des buffers mémoire
@@ -5344,7 +5401,7 @@ void Save_PC1(void)
 
   Erreur_fichier=0;
   // Ouverture du fichier
-  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC,PERMISSIONS_ECRITURE);
+  Fichier=open(Nom_du_fichier,O_WRONLY|O_CREAT|O_TRUNC|O_BINARY,PERMISSIONS_ECRITURE);
   if (Fichier!=-1)
   {
     // Allocation des buffers mémoire

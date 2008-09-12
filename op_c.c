@@ -1207,7 +1207,7 @@ void Load_RAW_24B(int Largeur,int Hauteur,Bitmap24B Source)
 {
   int Fichier;
 
-  Fichier=open("TEST.RAW",O_RDONLY);
+  Fichier=open("TEST.RAW",O_RDONLY|O_BINARY);
   if (read(Fichier,Source,Largeur*Hauteur*sizeof(struct Composantes))!=Largeur*Hauteur*sizeof(struct Composantes))
     exit(3);
   close(Fichier);
@@ -1234,7 +1234,7 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
   int x,y,py,skip,t;
   byte * buffer;
 
-  fichier=open(nom,O_RDONLY);
+  fichier=open(nom,O_RDONLY|O_BINARY);
   read(fichier,&TGA_Header,sizeof(TGA_Header));
   if (TGA_Header.Image_type_code==2)
   {
