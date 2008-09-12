@@ -18,6 +18,7 @@
 #include "op_c.h"
 #include "boutons.h"
 #include "erreurs.h"
+#include "linux.h"
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
   #define endian_magic(x) (x)
