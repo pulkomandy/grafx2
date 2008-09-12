@@ -121,7 +121,42 @@ void Nom_touche(uint16_t Touche,char* Temp)
             break;
         case 2:
             strcpy(Temp2,Table_Shift[Touche & 0xFF]); 
-
+            if (strcmp(Temp2,"???") == 0)
+                strcpy(Temp,"**** Invalid key combination! ****");
+            else if (Temp2[0]==0)
+                Temp[0]=0;
+            else
+            {
+                strcat(Temp,"<");
+                strcat(Temp,Temp2);
+                strcat(Temp,">");
+            }
+            break;
+        case 3:
+            strcpy(Temp2,Table_Ctrl[Touche & 0xFF]); 
+            if (strcmp(Temp2,"???") == 0)
+                strcpy(Temp,"**** Invalid key combination! ****");
+            else if (Temp2[0]==0)
+                Temp[0]=0;
+            else
+            {
+                strcat(Temp,"<");
+                strcat(Temp,Temp2);
+                strcat(Temp,">");
+            }
+            break;
+        case 4:
+            strcpy(Temp2,Table_Alt[Touche & 0xFF]); 
+            if (strcmp(Temp2,"???") == 0)
+                strcpy(Temp,"**** Invalid key combination! ****");
+            else if (Temp2[0]==0)
+                Temp[0]=0;
+            else
+            {
+                strcat(Temp,"<");
+                strcat(Temp,Temp2);
+                strcat(Temp,">");
+            }
             break;
     }
 }
@@ -190,7 +225,7 @@ void Tout_ecrire()
     while(i<=HAUTEUR_FIN_SETUP && i <= NB_OPTIONS + HAUTEUR_DEBUT_SETUP)
     {
         Ecrire(i,Decalage_curseur+i-HAUTEUR_DEBUT_SETUP,
-                (i==HAUTEUR_DEBUT_SETUP+Position_curseur-Decalage_curseur)?COULEUR_SELECT:COULEUR_SETUP);
+                (i==HAUTEUR_DEBUT_SETUP+Position_curseur)?COULEUR_SELECT:COULEUR_SETUP);
         i++;
     }
 
@@ -923,7 +958,7 @@ void Scroll_haut()
 {
     if(Position_curseur + Decalage_curseur > 0)
     {
-	if(Position_curseur < HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+	if(Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP && Position_curseur > 0)
 	{
 	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
 		    COULEUR_SETUP);
@@ -931,12 +966,14 @@ void Scroll_haut()
 	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
 		    COULEUR_SELECT);
 	}
-	else
+	else if(Decalage_curseur>0)
 	{
 	    (Decalage_curseur) -- ;
+	    Tout_ecrire();
 	}
 	Ecrire_commentaire(Position_curseur + Decalage_curseur);
     }
+    printf("%d %d \n",Position_curseur, Decalage_curseur);
 }
 
 /* Moves one line down */
@@ -952,12 +989,14 @@ void Scroll_bas()
 	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
 		    COULEUR_SELECT);
 	}
-	else
+	else if(Decalage_curseur < NB_OPTIONS)
 	{
 	    (Decalage_curseur) ++ ;
+	    Tout_ecrire();
 	}
 	Ecrire_commentaire(Position_curseur + Decalage_curseur );
     }
+    printf("%d %d \n",Position_curseur, Decalage_curseur);
 }
 
 /* Let the user do things */
