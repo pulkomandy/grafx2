@@ -973,7 +973,6 @@ void Scroll_haut()
 	}
 	Ecrire_commentaire(Position_curseur + Decalage_curseur);
     }
-    printf("%d %d \n",Position_curseur, Decalage_curseur);
 }
 
 /* Moves one line down */
@@ -999,6 +998,58 @@ void Scroll_bas()
     printf("%d %d \n",Position_curseur, Decalage_curseur);
 }
 
+/* Moves one screen up */
+void Page_up()
+{
+    if(Position_curseur+Decalage_curseur>0)
+    {
+	if(Position_curseur>0)
+	{
+	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+		    COULEUR_SETUP);
+	    Position_curseur = 0 ;
+	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+		    COULEUR_SELECT);
+	}
+	else if(Decalage_curseur>0)
+	{
+	    if(Decalage_curseur > HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
+		Decalage_curseur-=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
+	    else Decalage_curseur=0;
+
+	    Tout_ecrire();
+	}
+	Ecrire_commentaire(Position_curseur+Decalage_curseur);
+    }
+}
+
+/* Moves one screen down */
+void Page_down()
+{
+    if(Position_curseur+Decalage_curseur<NB_OPTIONS)
+    {
+	if(Position_curseur<HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
+	{ 
+	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+		    COULEUR_SETUP);
+	    Position_curseur = HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP ;
+	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+		    COULEUR_SELECT);
+	}
+	else if(Decalage_curseur<NB_OPTIONS)
+	{
+	    if(Decalage_curseur + Position_curseur + HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP < NB_OPTIONS)
+	    {
+		Decalage_curseur+=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
+	    }
+	    else Decalage_curseur=NB_OPTIONS-HAUTEUR_FIN_SETUP+HAUTEUR_DEBUT_SETUP-1;
+
+	    Tout_ecrire();
+	}
+	Ecrire_commentaire(Position_curseur+Decalage_curseur);
+    }
+}
+
 /* Let the user do things */
 void Setup()
 {
@@ -1017,9 +1068,16 @@ void Setup()
 		Scroll_bas();
 		break;
 	    case SDLK_PAGEUP:
+		Page_up();
+		break;
 	    case SDLK_PAGEDOWN:
+		Page_down();
+		break;
 	    case SDLK_RETURN:
+		//Select();
+		break;
 	    case SDLK_DELETE:
+		//Unselect();
 		break;
 	    case SDLK_ESCAPE:
 		Sortie_OK=Validation();
