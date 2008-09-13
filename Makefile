@@ -3,7 +3,7 @@ ifdef COMSPEC
 DELCOMMAND = del
 BIN = grafx2.exe
 COPT = -Wall -O -g -ggdb -Dmain=SDL_main $(SCREEN)
-LOPT = -mwindows -lmingw32 -lSDLmain -lSDL
+LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi
 else
 # Linux specific
 DELCOMMAND = rm -rf

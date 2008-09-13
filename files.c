@@ -121,6 +121,7 @@ char * Nom_formate(char * Nom)
   static char Resultat[13];
   int         Curseur;
   int         Autre_curseur;
+  int         Pos_DernierPoint;
 
   if (strcmp(Nom,"..")==0)
   {
@@ -131,12 +132,19 @@ char * Nom_formate(char * Nom)
     strcpy(Resultat,"        .   ");
     // On commence par recopier la partie pr‚c‚dent le point:
     for (Curseur=0;( (Nom[Curseur]!='.') && (Nom[Curseur]!='\0') );Curseur++)
-      Resultat[Curseur]=Nom[Curseur];
+    {
+      if (Curseur < 8)
+        Resultat[Curseur]=Nom[Curseur];
+    }
+    // On recherche le dernier point dans le reste du nom
+    for (Pos_DernierPoint = Curseur; Nom[Curseur]!='\0'; Curseur++)
+      if (Nom[Curseur]=='.')
+        Pos_DernierPoint = Curseur;
 
     // Ensuite on recopie la partie qui suit le point (si n‚cessaire):
-    if (Nom[Curseur])
+    if (Nom[Pos_DernierPoint])
     {
-      for (Curseur++,Autre_curseur=9;Nom[Curseur]!='\0';Curseur++,Autre_curseur++)
+      for (Curseur = Pos_DernierPoint+1,Autre_curseur=9;Nom[Curseur]!='\0' && Autre_curseur < 12;Curseur++,Autre_curseur++)
         Resultat[Autre_curseur]=Nom[Curseur];
     }
   }

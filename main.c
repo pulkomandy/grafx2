@@ -26,7 +26,7 @@
 
 #ifdef __linux__
     #include "linux.h" //Fichier avec diverses fonctions qui existaient sous dos mais pas sous linux...
-#elif __WATCOMC__
+#else
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
@@ -215,14 +215,28 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         #ifdef __linux__
             Buffer=realpath(argv[1],NULL);
             _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
-        #elif __WATCOMC__
+        #else
             Buffer = malloc(MAX_PATH);
-            PathCanonicalize(Buffer,argv[1]);
-            _splitpath(Buffer,
-                Principal_Repertoire_fichier,
-                Principal_Repertoire_fichier+3,
-                Principal_Nom_fichier,
-                Principal_Nom_fichier+8);
+            _fullpath(Buffer,argv[1],MAX_PATH);
+            {
+              // Découpage du nom canonique de fichier en chemin + nom.
+              // On croirait que c'est du classique pour la LibC, mais non...
+              int i;
+              int PosDernierSeparateur = 0;
+              for (i=0; Buffer[i]!='\0'; i++)
+              {
+                Principal_Repertoire_fichier[i] = Buffer[i];
+                if (Buffer[i]=='\\')
+                  PosDernierSeparateur = i;
+              }
+              Principal_Repertoire_fichier[PosDernierSeparateur]='\0';
+              for (i=0; Buffer[PosDernierSeparateur + i + 1]!='\0'; i++)
+              {
+                Principal_Nom_fichier[i] = Buffer[PosDernierSeparateur + i + 1];
+              }
+              Principal_Nom_fichier[i]='\0';
+              
+            }
             free(Buffer);
         #endif
 
