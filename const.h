@@ -45,6 +45,7 @@
 #define NB_PAGES_UNDO_MAX         99    // Nombre maximal de pages d'undo
 #define FACTEUR_DE_ZOOM_PAR_DEFAUT 4    // Facteur de zoom initial
 #define NB_SECTIONS_AIDE          3     // Nombre de sections dans l'aide
+#define TAILLE_CHEMIN_FICHIER     2048  // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
 
 // On impose à l'allocation dynamique des pages de backups de conserver un
 // minimum de 256 Ko pour que le reste du programme puisse continuer à

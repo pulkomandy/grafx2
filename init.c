@@ -228,7 +228,7 @@ void Charger_DAT(void)
   FILE*  Handle;
   int  Taille_fichier;
   int  Indice;
-  char Nom_du_fichier[256];
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   byte * Fonte_temporaire;
   byte Pos_X;
   byte Pos_Y;
@@ -1753,7 +1753,7 @@ byte Numero_option[NB_TOUCHES]=
 int Charger_CFG(int Tout_charger)
 {
   FILE*  Handle;
-  char Nom_du_fichier[256];
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   long Taille_fichier;
   int  Indice,Indice2;
   struct Config_Header       CFG_Header;
@@ -1991,7 +1991,7 @@ int Sauver_CFG(void)
   FILE*  Handle;
   int  Indice;
   //byte Octet;
-  char Nom_du_fichier[256];
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   struct Config_Header       CFG_Header;
   struct Config_Chunk        Chunk;
   struct Config_Infos_touche CFG_Infos_touche;

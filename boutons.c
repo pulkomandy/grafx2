@@ -378,7 +378,7 @@ byte Bouton_Quitter_Routine_locale(void)
 {
   short Bouton_clicke;
   //byte  Enregistrer;
-  char  Nom_du_fichier[256];
+  static char  Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   byte  Ancienne_forme_curseur;
 
   if (!Principal_Image_modifiee)
@@ -3210,8 +3210,8 @@ void Nom_fichier_backup(char * Nom, char * Nom_backup)
 
 void Backup_du_fichier_sauvegarde(void)
 {
-  char Nom_du_fichier[256];         // Nom complet du fichier
-  char Nouveau_nom_du_fichier[256]; // Nom complet du fichier backup
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
+  char Nouveau_nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier backup
 
   Nom_fichier_complet(Nom_du_fichier,0);
   // Calcul du nom complet du fichier backup
@@ -3324,7 +3324,7 @@ void Bouton_Save(void)
 void Bouton_Autosave(void)
 {
   byte Ancienne_forme_curseur;
-  char Nom_du_fichier[256];
+  static char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   byte Le_fichier_existe;
 
 
