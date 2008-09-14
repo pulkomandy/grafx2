@@ -1,5 +1,7 @@
 //C
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 //POSIX
 #include <unistd.h>
@@ -7,7 +9,8 @@
 //SDL
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_gfxPrimitives.h>
+#include <SDL_events.h>
+//#include <SDL_gfxPrimitives.h>
 
 //mine
 #include "SFont.h"
@@ -403,11 +406,11 @@ bool Initialiser_config()
 	    "Allows you to replace all the pixels of the color pointed by the mouse with",
 	    "the fore-color or the back-color.",
 	    true,0x0121);  /*Shift + F*/
-    Definir_option(31,"B‚zier""s curves",
+    Definir_option(31,"Bézier""s curves",
 	    "Allows you to draw B‚zier""s curves.",
 	    "",
 	    true,0x0017);  /*I*/
-    Definir_option(32,"B‚zier""s curve with 3 or 4 points",
+    Definir_option(32,"Bézier""s curve with 3 or 4 points",
 	    "Allows you to choose whether you want to draw B‚zier""s curves with 3 or 4",
 	    "points.",
 	    true,0x0117);  /*Shift + I*/
@@ -754,7 +757,7 @@ bool Initialiser_config()
     Definir_option(112,"Center brush attachment point",
 	    "Set the attachement of the user-defined brush to its center.",
 	    "",
-	    true,0x028F);  /*Ctrl + 5 (pav‚ num‚rique)*/
+	    true,0x028F);  /*Ctrl + 5 (pavé numérique)*/
     Definir_option(113,"Top-left brush attachment point",
 	    "Set the attachement of the user-defined brush to its top-left corner.",
 	    "",
@@ -1121,7 +1124,7 @@ void Enregistrer_config()
 
 /*** Main program ***/
 
-int main(void)
+int main(int argc, char * argv[])
 {	
 
     if (Verifier_ecriture_possible())
@@ -1132,7 +1135,7 @@ int main(void)
 	SDL_WM_SetCaption ("Grafx2 configuration tool","../gfx2.gif");
 
 	/* On initialise SFont */
-	MyFont = SFont_InitFont(IMG_Load("5pxtinyfont.png"));
+	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));
 
 	Dessiner_ecran_principal();
 

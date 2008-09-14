@@ -168,6 +168,10 @@ void Ajouter_element_a_la_liste(struct dirent* Enreg)
     Element_temporaire->Type = (Enreg->d_type == DT_DIR);
   #elif __WATCOMC__
     Element_temporaire->Type = (Enreg->d_attr & _A_SUBDIR);
+  #else
+    struct stat Infos_enreg;
+    stat(Enreg->d_name,&Infos_enreg);
+    Element_temporaire->Type = S_ISDIR(Infos_enreg.st_mode);
   #endif  
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
