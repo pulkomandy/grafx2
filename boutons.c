@@ -5462,9 +5462,9 @@ void Bouton_Effets(void)
         Afficher_curseur();
         break;
       case 13 : // Feedback (pour Colorize et Shade)
-//        if (Config.FX_Feedback=!Config.FX_Feedback) //???
-//          FX_Feedback_Ecran=Principal_Ecran;
-//        else
+        if ((Config.FX_Feedback=!Config.FX_Feedback)) //!!!
+          FX_Feedback_Ecran=Principal_Ecran;
+        else
           FX_Feedback_Ecran=Ecran_backup;
         Effacer_curseur();
         Afficher_etat_feedback();

@@ -358,7 +358,7 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 
 void Clavier_de_depart(void)
 {
-	UNIMPLEMENTED
+	SDL_EnableKeyRepeat(250, 32);
 }
 
 void Clavier_americain(void)
