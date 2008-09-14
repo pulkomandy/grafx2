@@ -32,6 +32,8 @@
   #define PERMISSIONS_ECRITURE (S_IRUSR|S_IWUSR)
 #endif
 
+#define FILENAMESPACE 16
+
 // Conversion des words d'une structure, si necessaire sur cette plate-forme
 void Retraite_Word_LittleEndian(word ** Adresse)
 {
@@ -254,16 +256,15 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
     // Affichage du vrai format
     if (Format!=Principal_Format)
     {
-      Print_dans_fenetre( 27,74,"but is:",CM_Fonce,CM_Clair);
-      Print_dans_fenetre( 83,74,Format_Extension[Format-1],CM_Noir,CM_Clair);
+      Print_dans_fenetre( 274,72,Format_Extension[Format-1],CM_Noir,CM_Clair);
     }
 
     // On efface le commentaire précédent
-    Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+176*Menu_Facteur_Y,
+    Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(176+FILENAMESPACE)*Menu_Facteur_Y,
           Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
     // Affichage du commentaire
     if (Format_Commentaire[Format-1])
-      Print_dans_fenetre(46,176,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
 
     // Calculs des données nécessaires à l'affichage de la preview:
     Preview_Facteur_X=Round_div_max(Largeur,122*Menu_Facteur_X);
@@ -278,7 +279,7 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
     }
 
     Preview_Pos_X=Fenetre_Pos_X+180*Menu_Facteur_X;
-    Preview_Pos_Y=Fenetre_Pos_Y+ 89*Menu_Facteur_Y;
+    Preview_Pos_Y=Fenetre_Pos_Y+ (89+FILENAMESPACE)*Menu_Facteur_Y;
 
     // On nettoie la zone o— va s'afficher la preview:
     Block(Preview_Pos_X,Preview_Pos_Y,
@@ -335,7 +336,7 @@ void Dessiner_preview_palette(void)
 {
   short Indice;
   short Preview_Pos_X=Fenetre_Pos_X+186*Menu_Facteur_X;
-  short Preview_Pos_Y=Fenetre_Pos_Y+ 90*Menu_Facteur_Y;
+  short Preview_Pos_Y=Fenetre_Pos_Y+ (90+FILENAMESPACE)*Menu_Facteur_Y;
 
   if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
     for (Indice=0; Indice<256; Indice++)
@@ -745,21 +746,21 @@ void Save_PAL(void)
 //////////////////////////////////// IMG ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+typedef struct
+{
+  byte Filler1[6];
+  word Largeur;
+  word Hauteur;
+  byte Filler2[118];
+  T_Palette Palette;
+} T_Header_IMG;
 
 // -- Tester si un fichier est au format IMG --------------------------------
 void Test_IMG(void)
 {
   int  Handle;              // Handle du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  struct Header
-  {
-    byte Filler1[6];
-    word Largeur;
-    word Hauteur;
-    byte Filler2[118];
-    T_Palette Palette;
-  } IMG_Header;
+  T_Header_IMG IMG_Header;
   byte Signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
 
@@ -772,7 +773,7 @@ void Test_IMG(void)
   if (Handle!=-1)
   {
     // Lecture et vérification de la signature
-    if ((read(Handle,&IMG_Header,sizeof(struct Header)))==sizeof(struct Header))
+    if ((read(Handle,&IMG_Header,sizeof(T_Header_IMG)))==sizeof(T_Header_IMG))
     {
       if ( (!memcmp(IMG_Header.Filler1,Signature,6))
         && IMG_Header.Largeur && IMG_Header.Hauteur)
@@ -793,14 +794,7 @@ void Load_IMG(void)
   word Pos_X,Pos_Y;
   long Largeur_lue;
   long Taille_du_fichier;
-  struct Header
-  {
-    byte Filler1[6];
-    word Largeur;
-    word Hauteur;
-    byte Filler2[118];
-    T_Palette Palette;
-  } IMG_Header;
+  T_Header_IMG IMG_Header;
   struct stat* Informations_Fichier=NULL;
 
 
@@ -813,7 +807,7 @@ void Load_IMG(void)
       stat(Nom_du_fichier,Informations_Fichier);
     Taille_du_fichier=Informations_Fichier->st_size;
 
-    if (read(Fichier,&IMG_Header,sizeof(struct Header))==sizeof(struct Header))
+    if (read(Fichier,&IMG_Header,sizeof(T_Header_IMG))==sizeof(T_Header_IMG))
     {
       Buffer=(byte *)malloc(IMG_Header.Largeur);
 
@@ -860,14 +854,7 @@ void Save_IMG(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   int   Fichier;
   short Pos_X,Pos_Y;
-  struct Header
-  {
-    byte Filler1[6]; // Signature (??!)
-    word Largeur;
-    word Hauteur;
-    byte Filler2[118];
-    T_Palette Palette;
-  } IMG_Header;
+  T_Header_IMG IMG_Header;
   byte Signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -893,7 +880,7 @@ void Save_IMG(void)
     memcpy(IMG_Header.Palette,Principal_Palette,sizeof(T_Palette));
     Palette_256_to_64(Principal_Palette);
 
-    if (write(Fichier,&IMG_Header,sizeof(struct Header))!=-1)
+    if (write(Fichier,&IMG_Header,sizeof(T_Header_IMG))!=-1)
     {
       Init_ecriture();
 
@@ -928,27 +915,27 @@ void Save_IMG(void)
 //////////////////////////////////// PKM ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+typedef struct
+{
+  char Ident[3]; // Chaîne "PKM" }
+  byte Methode;  // Méthode de compression:
+                 //   0 = compression en ligne (c)KM
+                 //   autres = inconnues pour le moment
+  byte Recon1;   // Octet de reconnaissance sur 1 octet  }
+  byte Recon2;   // Octet de reconnaissance sur 2 octets }
+  word Largeur;  // Largeur de l'image
+  word Hauteur;  // Hauteur de l'image
+  T_Palette Palette; // Palette RVB 256*3
+  word Jump;     // Taille du saut entre le header et l'image:
+                 //   On va s'en servir pour rajouter un commentaire
+} T_Header_PKM;
 
 // -- Tester si un fichier est au format PKM --------------------------------
 void Test_PKM(void)
 {
   int  Fichier;             // Handle du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  struct Header
-  {
-    char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // Méthode de compression:
-                   //   0 = compression en ligne (c)KM
-                   //   autres = inconnues pour le moment
-    byte Recon1;   // Octet de reconnaissance sur 1 octet  }
-    byte Recon2;   // Octet de reconnaissance sur 2 octets }
-    word Largeur;  // Largeur de l'image
-    word Hauteur;  // Hauteur de l'image
-    T_Palette Palette; // Palette RVB 256*3
-    word Jump;     // Taille du saut entre le header et l'image:
-                   //   On va s'en servir pour rajouter un commentaire
-  } Head;
+  T_Header_PKM Head;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -960,7 +947,7 @@ void Test_PKM(void)
   if (Fichier!=-1)
   {
     // Lecture du header du fichier
-    if (read(Fichier,&Head,sizeof(struct Header))==sizeof(struct Header))
+    if (read(Fichier,&Head,sizeof(T_Header_PKM))==sizeof(T_Header_PKM))
     {
       // On regarde s'il y a la signature PKM suivie de la méthode 0.
       // La constante "PKM" étant un chaŒne, elle se termine toujours par 0.
@@ -978,20 +965,7 @@ void Load_PKM(void)
 {
   int  Fichier;             // Handle du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  struct Header
-  {
-    char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // Méthode de compression:
-                   //   0 = compression en ligne (c)KM
-                   //   autres = inconnues pour le moment
-    byte Recon1;   // Octet de reconnaissance sur 1 octet  }
-    byte Recon2;   // Octet de reconnaissance sur 2 octets }
-    word Largeur;  // Largeur de l'image
-    word Hauteur;  // Hauteur de l'image
-    T_Palette Palette; // Palette RVB 256*3
-    word Jump;     // Taille du saut entre le header et l'image:
-                   //   On va s'en servir pour rajouter un commentaire
-  } Head;
+  T_Header_PKM Head;
   byte  Couleur;
   byte  Octet;
   word  Mot;
@@ -1013,7 +987,7 @@ void Load_PKM(void)
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
 
-    if (read(Fichier,&Head,sizeof(struct Header))==sizeof(struct Header))
+    if (read(Fichier,&Head,sizeof(T_Header_PKM))==sizeof(T_Header_PKM))
     {
       Principal_Commentaire[0]='\0'; // On efface le commentaire
       if (Head.Jump)
@@ -1121,7 +1095,7 @@ void Load_PKM(void)
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
-          Taille_pack=(Informations_Fichier.st_size)-sizeof(struct Header)-Head.Jump;
+          Taille_pack=(Informations_Fichier.st_size)-sizeof(T_Header_PKM)-Head.Jump;
 
           // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
@@ -1221,20 +1195,7 @@ void Save_PKM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct Header
-  {
-    char Ident[3]; // ChaŒne "PKM" }
-    byte Methode;  // Méthode de compression:
-                   //   0 = compression en ligne (c)KM
-                   //   autres = inconnues pour le moment
-    byte Recon1;   // Octet de reconnaissance sur 1 octet  }
-    byte Recon2;   // Octet de reconnaissance sur 2 octets }
-    word Largeur;  // Largeur de l'image
-    word Hauteur;  // Hauteur de l'image
-    T_Palette Palette; // Palette RVB 256*3
-    word Jump;     // Taille du saut entre le header et l'image:
-                   //   On va s'en servir pour rajouter un commentaire
-  } Head;
+  T_Header_PKM Head;
   dword Compteur_de_pixels;
   dword Taille_image;
   word  Compteur_de_repetitions;
@@ -1268,7 +1229,7 @@ void Save_PKM(void)
   if (Fichier!=-1)
   {
     // Ecriture du header
-    if (write(Fichier,&Head,sizeof(struct Header))!=-1)
+    if (write(Fichier,&Head,sizeof(T_Header_PKM))!=-1)
     {
       Init_ecriture();
 
@@ -1380,7 +1341,22 @@ void Save_PKM(void)
 //////////////////////////////////// LBM ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+typedef struct
+{
+  word  Width;
+  word  Height;
+  short Xorg;       // Inutile
+  short Yorg;       // Inutile
+  byte  BitPlanes;
+  byte  Mask;
+  byte  Compression;
+  byte  Pad1;       // Inutile
+  word  Transp_col;
+  byte  Xaspect;    // Inutile
+  byte  Yaspect;    // Inutile
+  short Xscreen;
+  short Yscreen;
+}  T_Header_LBM;
 
 // -- Tester si un fichier est au format LBM --------------------------------
 
@@ -1650,22 +1626,7 @@ void Load_LBM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   //int   Fichier;
-  struct Header_LBM
-  {
-    word  Width;
-    word  Height;
-    short Xorg;       // Inutile
-    short Yorg;       // Inutile
-    byte  Bit_planes;
-    byte  Mask;
-    byte  Compression;
-    byte  Pad1;       // Inutile
-    word  Transp_col;
-    byte  Xaspect;    // Inutile
-    byte  Yaspect;    // Inutile
-    short Xscreen;
-    short Yscreen;
-  } Header;
+  T_Header_LBM Header;
   char  Format[4];
   char  Section[4];
   byte  Octet;
@@ -1704,7 +1665,7 @@ void Load_LBM(void)
       && (read(LBM_Fichier,&Header.Height,sizeof(Header.Height))==sizeof(Header.Height))
       && (read(LBM_Fichier,&Header.Xorg,sizeof(Header.Xorg))==sizeof(Header.Xorg))
       && (read(LBM_Fichier,&Header.Yorg,sizeof(Header.Yorg))==sizeof(Header.Yorg))
-      && (read(LBM_Fichier,&Header.Bit_planes,sizeof(Header.Bit_planes))==sizeof(Header.Bit_planes))
+      && (read(LBM_Fichier,&Header.BitPlanes,sizeof(Header.BitPlanes))==sizeof(Header.BitPlanes))
       && (read(LBM_Fichier,&Header.Mask,sizeof(Header.Mask))==sizeof(Header.Mask))
       && (read(LBM_Fichier,&Header.Compression,sizeof(Header.Compression))==sizeof(Header.Compression))
       && (read(LBM_Fichier,&Header.Pad1,sizeof(Header.Pad1))==sizeof(Header.Pad1))
@@ -1715,20 +1676,20 @@ void Load_LBM(void)
       && (read(LBM_Fichier,&Header.Yscreen,sizeof(Header.Yscreen))==sizeof(Header.Yscreen))
       && Header.Width && Header.Height)
     {
-      if ( (Header.Bit_planes) && (Wait_for((byte *)"CMAP")) )
+      if ( (Header.BitPlanes) && (Wait_for((byte *)"CMAP")) )
       {
         Nb_couleurs=Lire_long()/3;
 
-        if (((int)1<<Header.Bit_planes)!=Nb_couleurs)
+        if (((int)1<<Header.BitPlanes)!=Nb_couleurs)
         {
-          if ((Nb_couleurs==32) && (Header.Bit_planes==6))
+          if ((Nb_couleurs==32) && (Header.BitPlanes==6))
           {              // Ce n'est pas une image HAM mais une image 64 coul.
             Image_HAM=1; // Sauvée en 32 coul. => il faut copier les 32 coul.
           }              // sur les 32 suivantes et assombrir ces derniŠres.
           else
           {
-            if ((Header.Bit_planes==6) || (Header.Bit_planes==8))
-              Image_HAM=Header.Bit_planes;
+            if ((Header.BitPlanes==6) || (Header.BitPlanes==8))
+              Image_HAM=Header.BitPlanes;
             else
               // Erreur_fichier=1; /* C'est censé ˆtre incorrect mais j'ai */
               Image_HAM=0;         /* trouvé un fichier comme ‡a, alors... */
@@ -1739,9 +1700,9 @@ void Load_LBM(void)
 
         if ( (!Erreur_fichier) && (Nb_couleurs>=2) && (Nb_couleurs<=256) )
         {
-          HBPm1=Header.Bit_planes-1;
+          HBPm1=Header.BitPlanes-1;
           if (Header.Mask==1)
-            Header.Bit_planes++;
+            Header.BitPlanes++;
 
           // Deluxe paint le fait... alors on le fait...
           Back_color=Header.Transp_col;
@@ -1785,12 +1746,12 @@ void Load_LBM(void)
                   if (Principal_Largeur_image & 15)
                   {
                     Vraie_taille_ligne=( (Principal_Largeur_image+16) >> 4 ) << 4;
-                    Taille_ligne=( (Principal_Largeur_image+16) >> 4 )*(Header.Bit_planes<<1);
+                    Taille_ligne=( (Principal_Largeur_image+16) >> 4 )*(Header.BitPlanes<<1);
                   }
                   else
                   {
                     Vraie_taille_ligne=Principal_Largeur_image;
-                    Taille_ligne=(Principal_Largeur_image>>3)*Header.Bit_planes;
+                    Taille_ligne=(Principal_Largeur_image>>3)*Header.BitPlanes;
                   }
 
                   if (!Header.Compression)
@@ -2019,22 +1980,7 @@ void Load_LBM(void)
 void Save_LBM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  struct Header_LBM
-  {
-    word  Width;
-    word  Height;
-    short Xorg;       // Inutile
-    short Yorg;       // Inutile
-    byte  BitPlanes;
-    byte  Mask;
-    byte  Compression;
-    byte  Pad1;       // Inutile
-    word  Transp_col; // Inutile
-    byte  Xaspect;    // Inutile
-    byte  Yaspect;    // Inutile
-    short Xscreen;
-    short Yscreen;
-  } Header;
+  T_Header_LBM Header;
   word Pos_X;
   word Pos_Y;
   byte Octet;
@@ -2073,7 +2019,7 @@ void Save_LBM(void)
     swab((byte *)&Largeur_ecran,(byte *)&Header.Xscreen,2);
     swab((byte *)&Hauteur_ecran,(byte *)&Header.Yscreen,2);
 
-    write(LBM_Fichier,&Header,sizeof(struct Header_LBM));
+    write(LBM_Fichier,&Header,sizeof(T_Header_LBM));
 
     write(LBM_Fichier,"CMAP",4);
     Ecrire_long(sizeof(T_Palette));
@@ -2153,7 +2099,7 @@ void Save_LBM(void)
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-struct BMP_Header
+typedef struct
 {
     word Signature;   // ='BM' = 0x4D42
     uint32_t Taille_1;    // =Taille du fichier
@@ -2172,14 +2118,14 @@ struct BMP_Header
     uint32_t YPM;
     uint32_t Nb_Clr;
     uint32_t Clr_Imprt;
-};
+} T_BMP_Header;
 
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct BMP_Header Header;
+  T_BMP_Header Header;
 
   Erreur_fichier=1;
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -2219,7 +2165,7 @@ void Load_BMP(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct BMP_Header Header;
+  T_BMP_Header Header;
   byte * Buffer;
   word  Indice;
   byte  Palette_locale[256][4]; // R,V,B,0
@@ -2493,26 +2439,7 @@ void Save_BMP(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct BMP_Header
-  {
-    word Signature;   // ='BM' = 0x4D42
-    long Taille_1;    // =Taille du fichier
-    word Reserv_1;    // =0
-    word Reserv_2;    // =0
-    long Decalage;    // Nb octets avant les données bitmap
-
-    long Taille_2;    // =40
-    long Largeur;
-    long Hauteur;
-    word Plans;       // =1
-    word Nb_bits;     // =1,4,8 ou 24
-    long Compression;
-    long Taille_3;
-    long XPM;
-    long YPM;
-    long Nb_Clr;
-    long Clr_Imprt;
-  } Header;
+  T_BMP_Header Header;
   short Pos_X;
   short Pos_Y;
   long Taille_ligne;
@@ -2549,7 +2476,7 @@ void Save_BMP(void)
     Header.Nb_Clr     =0;
     Header.Clr_Imprt  =0;
 
-    if (write(Fichier,&Header,sizeof(struct BMP_Header))!=-1)
+    if (write(Fichier,&Header,sizeof(T_BMP_Header))!=-1)
     {
       //   Chez Bill, ils ont dit: "On va mettre les couleur dans l'ordre
       // inverse, et pour faire chier, on va les mettre sur une échelle de
@@ -2613,7 +2540,24 @@ void Save_BMP(void)
 //////////////////////////////////// GIF ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+  word Largeur; // Largeur de l'écran virtuel
+  word Hauteur; // Hauteur de l'écran virtuel
+  byte Resol;   // Informations sur la résolution (et autres)
+  byte Backcol; // Couleur de fond
+  byte Aspect;  // Informations sur l'aspect ratio (et autres)
+} T_LSDB; // Logical Screen Descriptor Block
 
+typedef struct
+{
+  word Pos_X;         // Abscisse où devrait être affichée l'image
+  word Pos_Y;         // Ordonnée où devrait être affichée l'image
+  word Largeur_image; // Largeur de l'image
+  word Hauteur_image; // Hauteur de l'image
+  byte Indicateur;    // Informations diverses sur l'image
+  byte Nb_bits_pixel; // Nb de bits par pixel
+} T_IDB; // Image Descriptor Block
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -2749,24 +2693,8 @@ void Load_GIF(void)
   word   Alphabet_Max;      // Nombre d'entrées possibles dans l'alphabet
   word   Alphabet_Pos_pile; // Position dans la pile de décodage d'un chaîne
 
-  struct Type_LSDB
-  {
-    word Largeur; // Largeur de l'écran virtuel
-    word Hauteur; // Hauteur de l'écran virtuel
-    byte Resol;   // Informations sur la résolution (et autres)
-    byte Backcol; // Couleur de fond
-    byte Aspect;  // Informations sur l'aspect ratio (et autres)
-  } LSDB; // Logical Screen Descriptor Block
-
-  struct Type_IDB
-  {
-    word Pos_X;         // Abscisse où devrait être affichée l'image
-    word Pos_Y;         // Ordonnée où devrait être affichée l'image
-    word Largeur_image; // Largeur de l'image
-    word Hauteur_image; // Hauteur de l'image
-    byte Indicateur;    // Informations diverses sur l'image
-    byte Nb_bits_pixel; // Nb de bits par pixel
-  } IDB; // Image Descriptor Block
+  T_LSDB LSDB;
+  T_IDB IDB;
 
   word Nb_couleurs;       // Nombre de couleurs dans l'image
   word Indice_de_couleur; // Indice de traitement d'une couleur
@@ -3147,24 +3075,9 @@ void Save_GIF(void)
   word   Depart;            // Code précédent (sert au linkage des chaŒnes)
   int    Descente;          // Booléen "On vient de descendre"
 
-  struct Type_LSDB
-  {
-    word Largeur; // Largeur de l'écran virtuel |_ Dimensions de l'image si 1
-    word Hauteur; // Hauteur de l'écran virtuel |  seule image dans le fichier (ce qui est notre cas)
-    byte Resol;   // Informations sur la résolution (et autres)
-    byte Backcol; // Couleur de fond
-    byte Aspect;  // Informations sur l'aspect ratio (et autres)
-  } LSDB; // Logical Screen Descriptor Block
+  T_LSDB LSDB;
+  T_IDB IDB;
 
-  struct Type_IDB
-  {
-    word Pos_X;         // Abscisse o— devrait ˆtre affichée l'image
-    word Pos_Y;         // Ordonnée o— devrait ˆtre affichée l'image
-    word Largeur_image; // Largeur de l'image
-    word Hauteur_image; // Hauteur de l'image
-    byte Indicateur;    // Informations diverses sur l'image
-    byte Nb_bits_pixel; // Nb de bits par pixel
-  } IDB; // Image Descriptor Block
 
   byte Block_indicateur;  // Code indicateur du type de bloc en cours
   word Chaine_en_cours;   // Code de la chaŒne en cours de traitement
@@ -3214,7 +3127,7 @@ void Save_GIF(void)
 
       // On sauve le LSDB dans le fichier
 
-      if (write(GIF_Fichier,&LSDB,sizeof(struct Type_LSDB))==sizeof(struct Type_LSDB))
+      if (write(GIF_Fichier,&LSDB,sizeof(T_LSDB))==sizeof(T_LSDB))
       {
         // Le LSDB a été correctement écrit.
 
@@ -3239,7 +3152,7 @@ void Save_GIF(void)
           IDB.Nb_bits_pixel=8; // Image 256 couleurs;
 
           if ( (write(GIF_Fichier,&Block_indicateur,1)==1) &&
-               (write(GIF_Fichier,&IDB,sizeof(struct Type_IDB))==sizeof(struct Type_IDB)) )
+               (write(GIF_Fichier,&IDB,sizeof(T_IDB))==sizeof(T_IDB)) )
           {
             //   Le block indicateur d'IDB et l'IDB ont étés correctements
             // écrits.
@@ -3941,7 +3854,24 @@ void Save_PCX(void)
 //////////////////////////////////// CEL ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+  word Width;              // Largeur de l'image
+  word Height;             // Hauteur de l'image
+} T_CEL_Header1;
 
+typedef struct
+{
+  byte Signa[4];           // Signature du format
+  byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
+  byte Nbbits;             // Nombre de bits
+  word Filler1;            // ???
+  word Largeur;            // Largeur de l'image
+  word Hauteur;            // Hauteur de l'image
+  word Decalage_X;         // Decalage en X de l'image
+  word Decalage_Y;         // Decalage en Y de l'image
+  byte Filler2[16];        // ???
+} T_CEL_Header2;
 
 // -- Tester si un fichier est au format CEL --------------------------------
 
@@ -3950,42 +3880,27 @@ void Test_CEL(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Taille;
   int  Fichier;
-  struct CEL_Header1
-  {
-    word Width;              // Largeur de l'image
-    word Height;             // Hauteur de l'image
-  } Header1;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image
-    word Hauteur;            // Hauteur de l'image
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_CEL_Header1 Header1;
+  T_CEL_Header2 Header2;
   struct stat Informations_Fichier;
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
-    if (read(Fichier,&Header1,sizeof(struct CEL_Header1))==sizeof(struct CEL_Header1))
+    if (read(Fichier,&Header1,sizeof(T_CEL_Header1))==sizeof(T_CEL_Header1))
     {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
       if (!stat(Nom_du_fichier,&Informations_Fichier))
       	Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
-      Taille=(Informations_Fichier.st_size)-sizeof(struct CEL_Header1);
+      Taille=(Informations_Fichier.st_size)-sizeof(T_CEL_Header1);
       if ( (!Taille) || ( (((Header1.Width+1)>>1)*Header1.Height)!=Taille ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers
 
         lseek(Fichier,0,SEEK_SET);
-        if (read(Fichier,&Header2,sizeof(struct CEL_Header2))==sizeof(struct CEL_Header2))
+        if (read(Fichier,&Header2,sizeof(T_CEL_Header2))==sizeof(T_CEL_Header2))
         {
           if (memcmp(Header2.Signa,"KiSS",4)==0)
           {
@@ -4015,23 +3930,8 @@ void Load_CEL(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct CEL_Header1
-  {
-    word Width;              // Largeur de l'image
-    word Height;             // Hauteur de l'image
-  } Header1;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image
-    word Hauteur;            // Hauteur de l'image
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_CEL_Header1 Header1;
+  T_CEL_Header2 Header2;
   short Pos_X;
   short Pos_Y;
   byte  Dernier_octet=0;
@@ -4043,12 +3943,12 @@ void Load_CEL(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
-    if (read(Fichier,&Header1,sizeof(struct CEL_Header1))==sizeof(struct CEL_Header1))
+    if (read(Fichier,&Header1,sizeof(T_CEL_Header1))==sizeof(T_CEL_Header1))
     {
         stat(Nom_du_fichier,Informations_Fichier);
       Taille_du_fichier=Informations_Fichier->st_size;
-      if ( (Taille_du_fichier>sizeof(struct CEL_Header1))
-        && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-sizeof(struct CEL_Header1)) ) )
+      if ( (Taille_du_fichier>sizeof(T_CEL_Header1))
+        && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-sizeof(T_CEL_Header1)) ) )
       {
         // Chargement d'un fichier CEL sans signature (vieux fichiers)
         Principal_Largeur_image=Header1.Width;
@@ -4077,7 +3977,7 @@ void Load_CEL(void)
         // On réessaye avec le nouveau format
 
         lseek(Fichier,0,SEEK_SET);
-        if (read(Fichier,&Header2,sizeof(struct CEL_Header2))==sizeof(struct CEL_Header2))
+        if (read(Fichier,&Header2,sizeof(T_CEL_Header2))==sizeof(T_CEL_Header2))
         {
           // Chargement d'un fichier CEL avec signature (nouveaux fichiers)
 
@@ -4147,23 +4047,8 @@ void Save_CEL(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct CEL_Header1
-  {
-    word Width;              // Largeur de l'image
-    word Height;             // Hauteur de l'image
-  } Header1;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image
-    word Hauteur;            // Hauteur de l'image
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_CEL_Header1 Header1;
+  T_CEL_Header2 Header2;
   short Pos_X;
   short Pos_Y;
   byte  Dernier_octet=0;
@@ -4187,7 +4072,7 @@ void Save_CEL(void)
       Header1.Width =Principal_Largeur_image;
       Header1.Height=Principal_Hauteur_image;
 
-      if (write(Fichier,&Header1,sizeof(struct CEL_Header1))!=-1)
+      if (write(Fichier,&Header1,sizeof(T_CEL_Header1))!=-1)
       {
         // Sauvegarde de l'image
         Init_ecriture();
@@ -4244,7 +4129,7 @@ void Save_CEL(void)
       for (Pos_X=0;Pos_X<16;Pos_X++)  // Initialisation du filler 2 (???)
         Header2.Filler2[Pos_X]=0;
 
-      if (write(Fichier,&Header2,sizeof(struct CEL_Header2))!=-1)
+      if (write(Fichier,&Header2,sizeof(T_CEL_Header2))!=-1)
       {
         // Sauvegarde de l'image
         Init_ecriture();
@@ -4271,7 +4156,17 @@ void Save_CEL(void)
 //////////////////////////////////// KCF ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+typedef struct
+{
+  struct
+  {
+    struct
+    {
+      byte Octet1;
+      byte Octet2;
+    } Couleur[16];
+  } Palette[10];
+} T_KCF_Header;
 
 // -- Tester si un fichier est au format KCF --------------------------------
 
@@ -4279,29 +4174,8 @@ void Test_KCF(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct KCF_Header
-  {
-    struct
-    {
-      struct
-      {
-        byte Octet1;
-        byte Octet2;
-      } Couleur[16];
-    } Palette[10];
-  } Buffer;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image
-    word Hauteur;            // Hauteur de l'image
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_KCF_Header Buffer;
+  T_CEL_Header2 Header2;
   int Indice_palette;
   int Indice_couleur;
 
@@ -4309,9 +4183,9 @@ void Test_KCF(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
-    if (filelength(Fichier)==sizeof(struct KCF_Header))
+    if (filelength(Fichier)==sizeof(T_KCF_Header))
     {
-      read(Fichier,&Buffer,sizeof(struct KCF_Header));
+      read(Fichier,&Buffer,sizeof(T_KCF_Header));
       // On vérifie une propriété de la structure de palette:
       for (Indice_palette=0;Indice_palette<10;Indice_palette++)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
@@ -4320,7 +4194,7 @@ void Test_KCF(void)
     }
     else
     {
-      if (read(Fichier,&Header2,sizeof(struct CEL_Header2))==sizeof(struct CEL_Header2))
+      if (read(Fichier,&Header2,sizeof(T_CEL_Header2))==sizeof(T_CEL_Header2))
       {
         if (memcmp(Header2.Signa,"KiSS",4)==0)
         {
@@ -4346,29 +4220,8 @@ void Load_KCF(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct KCF_Header
-  {
-    struct
-    {
-      struct
-      {
-        byte Octet1;
-        byte Octet2;
-      } Couleur[16];
-    } Palette[10];
-  } Buffer;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image ou nb de couleurs définies
-    word Hauteur;            // Hauteur de l'image ou nb de palettes définies
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_KCF_Header Buffer;
+  T_CEL_Header2 Header2;
   byte Octet[3];
   int Indice_palette;
   int Indice_couleur;
@@ -4381,11 +4234,11 @@ void Load_KCF(void)
   if ((Fichier=open(Nom_du_fichier,O_RDONLY|O_BINARY))!=-1)
   {
     Taille_du_fichier=filelength(Fichier);
-    if (Taille_du_fichier==sizeof(struct KCF_Header))
+    if (Taille_du_fichier==sizeof(T_KCF_Header))
     {
       // Fichier KCF à l'ancien format
 
-      if (read(Fichier,&Buffer,sizeof(struct KCF_Header))==sizeof(struct KCF_Header))
+      if (read(Fichier,&Buffer,sizeof(T_KCF_Header))==sizeof(T_KCF_Header))
       {
         // Initialiser_preview(???); // Pas possible... pas d'image...
 
@@ -4419,7 +4272,7 @@ void Load_KCF(void)
     {
       // Fichier KCF au nouveau format
 
-      if (read(Fichier,&Header2,sizeof(struct CEL_Header2))==sizeof(struct CEL_Header2))
+      if (read(Fichier,&Header2,sizeof(T_CEL_Header2))==sizeof(T_CEL_Header2))
       {
         // Initialiser_preview(???); // Pas possible... pas d'image...
 
@@ -4481,29 +4334,8 @@ void Save_KCF(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   int  Fichier;
-  struct KCF_Header
-  {
-    struct
-    {
-      struct
-      {
-        byte Octet1;
-        byte Octet2;
-      } Couleur[16];
-    } Palette[10];
-  } Buffer;
-  struct CEL_Header2
-  {
-    byte Signa[4];           // Signature du format
-    byte Kind;               // Type de fichier ($10=PALette $20=BitMaP)
-    byte Nbbits;             // Nombre de bits
-    word Filler1;            // ???
-    word Largeur;            // Largeur de l'image ou nb de couleurs définies
-    word Hauteur;            // Hauteur de l'image ou nb de palettes définies
-    word Decalage_X;         // Decalage en X de l'image
-    word Decalage_Y;         // Decalage en Y de l'image
-    byte Filler2[16];        // ???
-  } Header2;
+  T_KCF_Header Buffer;
+  T_CEL_Header2 Header2;
   byte Octet[3];
   int Indice_palette;
   int Indice_couleur;
@@ -4534,7 +4366,7 @@ void Save_KCF(void)
           Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2=Principal_Palette[Indice].V>>2;
         }
 
-      if (write(Fichier,&Buffer,sizeof(struct KCF_Header))!=sizeof(struct KCF_Header))
+      if (write(Fichier,&Buffer,sizeof(T_KCF_Header))!=sizeof(T_KCF_Header))
         Erreur_fichier=1;
     }
     else
@@ -4552,7 +4384,7 @@ void Save_KCF(void)
       for (Indice=0;Indice<16;Indice++) // Initialisation du filler 2 (???)
         Header2.Filler2[Indice]=0;
 
-      if (write(Fichier,&Header2,sizeof(struct CEL_Header2))!=sizeof(struct CEL_Header2))
+      if (write(Fichier,&Header2,sizeof(T_CEL_Header2))!=sizeof(T_CEL_Header2))
         Erreur_fichier=1;
 
       for (Indice=0;(Indice<256) && (!Erreur_fichier);Indice++)
@@ -4583,7 +4415,14 @@ void Save_KCF(void)
 //////////////////////////////////// SCx ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+typedef struct
+{
+  byte Filler1[4];
+  word Largeur;
+  word Hauteur;
+  byte Filler2;
+  byte Plans;
+} T_SCx_Header;
 
 // -- Tester si un fichier est au format SCx --------------------------------
 void Test_SCx(void)
@@ -4591,14 +4430,7 @@ void Test_SCx(void)
   int  Handle;              // Handle du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   //byte Signature[3];
-  struct Header
-  {
-    byte Filler1[4];
-    word Largeur;
-    word Hauteur;
-    byte Filler2;
-    byte Plans;
-  } SCx_Header;
+  T_SCx_Header SCx_Header;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -4610,7 +4442,7 @@ void Test_SCx(void)
   if (Handle!=-1)
   {
     // Lecture et vérification de la signature
-    if ((read(Handle,&SCx_Header,sizeof(struct Header)))==sizeof(struct Header))
+    if ((read(Handle,&SCx_Header,sizeof(T_SCx_Header)))==sizeof(T_SCx_Header))
     {
       if ( (!memcmp(SCx_Header.Filler1,"RIX",3))
         && SCx_Header.Largeur && SCx_Header.Hauteur)
@@ -4630,14 +4462,7 @@ void Load_SCx(void)
   word Pos_X,Pos_Y;
   long Taille,Vraie_taille;
   long Taille_du_fichier;
-  struct Header
-  {
-    byte Filler1[4];
-    word Largeur;
-    word Hauteur;
-    byte Filler2;
-    byte Plans;
-  } SCx_Header;
+  T_SCx_Header SCx_Header;
   T_Palette SCx_Palette;
 
 
@@ -4649,7 +4474,7 @@ void Load_SCx(void)
   {
     Taille_du_fichier=filelength(Fichier);
 
-    if ((read(Fichier,&SCx_Header,sizeof(struct Header)))==sizeof(struct Header))
+    if ((read(Fichier,&SCx_Header,sizeof(T_SCx_Header)))==sizeof(T_SCx_Header))
     {
       Initialiser_preview(SCx_Header.Largeur,SCx_Header.Hauteur,Taille_du_fichier,FORMAT_SCx);
       if (Erreur_fichier==0)
@@ -4721,14 +4546,7 @@ void Save_SCx(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   int   Fichier;
   short Pos_X,Pos_Y;
-  struct Header
-  {
-    byte Filler1[4];
-    word Largeur;
-    word Hauteur;
-    word Filler2;
-    T_Palette Palette;
-  } SCx_Header;
+  T_SCx_Header SCx_Header;
 
   Nom_fichier_complet(Nom_du_fichier,1);
 
@@ -4741,10 +4559,11 @@ void Save_SCx(void)
     memcpy(SCx_Header.Filler1,"RIX3",4);
     SCx_Header.Largeur=Principal_Largeur_image;
     SCx_Header.Hauteur=Principal_Hauteur_image;
-    SCx_Header.Filler2=0x00AF;
-    memcpy(SCx_Header.Palette,Principal_Palette,sizeof(T_Palette));
+    SCx_Header.Filler2=0xAF;
+    SCx_Header.Plans=0x00;
 
-    if (write(Fichier,&SCx_Header,sizeof(struct Header))!=-1)
+    if (write(Fichier,&SCx_Header,sizeof(T_SCx_Header))!=-1 &&
+      write(Fichier,&Principal_Palette,sizeof(T_Palette))!=-1)
     {
       Init_ecriture();
 

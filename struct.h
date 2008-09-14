@@ -93,7 +93,8 @@ struct T_Drive
 // Déclaration du type d'élément qu'on va mémoriser dans la liste:
 struct Element_de_liste_de_fileselect
 {
-  char Nom[13]; // Le nom du fichier ou du répertoire
+  char NomAbrege[13]; // Le nom tel qu'affiché dans le fileselector
+  char NomComplet[256]; // Le nom du fichier ou du répertoire
   byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire
 
   // données de chaŒnage de la liste
@@ -179,8 +180,8 @@ typedef struct
 
   char      Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image
 
-  char      Repertoire_fichier[256]; // |_ Nom complet =
-  char      Nom_fichier[13];         // |  Repertoire_fichier+"\"+Nom_fichier
+  char      Repertoire_fichier[TAILLE_CHEMIN_FICHIER]; // |_ Nom complet =
+  char      Nom_fichier[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
   byte      Format_fichier;          // Format auquel il faut lire et écrire le fichier
 
 /*

@@ -242,13 +242,13 @@ GLOBAL short Brouillon_Decalage_Y;     // DÚcalage en Y du brouillon par rapport
 GLOBAL short Ancien_Brouillon_Decalage_X;
 GLOBAL short Ancien_Brouillon_Decalage_Y;
 
-GLOBAL char  Brouillon_Repertoire_fichier[256]; // |_ Nom complet =
-GLOBAL char  Brouillon_Nom_fichier[13];         // |  Repertoire_fichier+"\"+Nom_fichier
+GLOBAL char  Brouillon_Repertoire_fichier[TAILLE_CHEMIN_FICHIER]; // |_ Nom complet =
+GLOBAL char  Brouillon_Nom_fichier[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
 GLOBAL byte  Brouillon_Format_fichier;          // Format auquel il faut lire et Úcrire le fichier
 GLOBAL byte  Brouillon_Format;               // Format du fileselect
 GLOBAL short Brouillon_File_list_Position; // DÚbut de la partie affichÚe dans la liste de fichiers
 GLOBAL short Brouillon_File_list_Decalage; // DÚcalage de la barre de sÚlection dans le fileselector
-GLOBAL char  Brouillon_Repertoire_courant[256]; // RÚpertoire actuel sur disque
+GLOBAL char  Brouillon_Repertoire_courant[TAILLE_CHEMIN_FICHIER]; // RÚpertoire actuel sur disque
 GLOBAL char  Brouillon_Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image
 
 GLOBAL short Brouillon_Split; // Position en X du bord gauche du split de la loupe
@@ -279,14 +279,14 @@ GLOBAL word Brosse_Decalage_Y; // Centre vertical de la brosse
 GLOBAL word Brosse_Largeur;    // Largeur de la brosse
 GLOBAL word Brosse_Hauteur;    // Hauteur de la brosse
 
-GLOBAL char  Brosse_Repertoire_fichier[256];           // |
-GLOBAL char  Brosse_Nom_fichier[13];                   // |
-GLOBAL byte  Brosse_Format_fichier;                    // |  Infos sur le
-GLOBAL byte  Brosse_Format;                            // |_ sÚlecteur de
-GLOBAL short Brosse_File_list_Position;                // |  fichiers de la
-GLOBAL short Brosse_File_list_Decalage;                // |  brosse.
-GLOBAL char  Brosse_Repertoire_courant[256];           // |
-GLOBAL char  Brosse_Commentaire[TAILLE_COMMENTAIRE+1]; // |
+GLOBAL char  Brosse_Repertoire_fichier[TAILLE_CHEMIN_FICHIER];// |
+GLOBAL char  Brosse_Nom_fichier[TAILLE_CHEMIN_FICHIER];       // |
+GLOBAL byte  Brosse_Format_fichier;                           // |  Infos sur le
+GLOBAL byte  Brosse_Format;                                   // |_ sÚlecteur de
+GLOBAL short Brosse_File_list_Position;                       // |  fichiers de la
+GLOBAL short Brosse_File_list_Decalage;                       // |  brosse.
+GLOBAL char  Brosse_Repertoire_courant[256];                  // |
+GLOBAL char  Brosse_Commentaire[TAILLE_COMMENTAIRE+1];        // |
 
 GLOBAL byte  Brosse_Centre_rotation_defini; // |  Infos sur le
 GLOBAL short Brosse_Centre_rotation_X;      // |- centre de rotation

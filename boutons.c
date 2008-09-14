@@ -30,6 +30,8 @@
     #define rmdir(x) DeleteFile(x)
 #endif
 
+#define FILENAMESPACE 16
+
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
 void Bouton_***(void)
@@ -2130,8 +2132,8 @@ void Print_Nom_fichier_dans_selecteur(void)
 // Affiche Principal_Nom_fichier dans le Fileselect
 //
 {
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*202),Fenetre_Pos_Y+(Menu_Facteur_Y*73),Menu_Facteur_X*96,Menu_Facteur_Y<<3,CM_Clair);
-  Print_dans_fenetre(202,73,Principal_Nom_fichier,CM_Noir,CM_Clair);
+  Block(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3,CM_Clair);
+  Print_dans_fenetre(13+9*8,90,Principal_Nom_fichier,CM_Noir,CM_Clair);
 }
 
 
@@ -2156,7 +2158,7 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
   Calculer_hauteur_curseur_jauge(Enreg);
   Fenetre_Dessiner_jauge(Enreg);
   // On efface les anciens noms de fichier:
-  Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*98,Menu_Facteur_Y*82,CM_Noir);
+  Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82,CM_Noir);
   // On affiche les nouveaux:
   Afficher_la_liste_des_fichiers(Position,Decalage);
 
@@ -2179,7 +2181,7 @@ void Relire_liste_fichiers(byte Filtre, short Position, short Decalage,
 
 void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Scroller_de_fichiers)
 {
-  char Ancien_nom_de_fichier[13];
+  char Ancien_nom_de_fichier[TAILLE_CHEMIN_FICHIER];
 
   strcpy(Ancien_nom_de_fichier,Principal_Nom_fichier);
 
@@ -2207,7 +2209,7 @@ short Position_fichier_dans_liste(char * Nom)
   short  Indice;
 
   for (Indice=0, Element_courant=Liste_du_fileselect;
-       ((Element_courant!=NULL) && (strcmp(Element_courant->Nom,Nom)));
+       ((Element_courant!=NULL) && (strcmp(Element_courant->NomComplet,Nom)));
        Indice++,Element_courant=Element_courant->Suivant);
 
   return (Element_courant!=NULL)?Indice:0;
@@ -2241,10 +2243,10 @@ void Placer_barre_de_selection_sur(char * Nom)
 }
 
 
-char FFF_Meilleur_nom[13];
+char FFF_Meilleur_nom[TAILLE_CHEMIN_FICHIER];
 char * Nom_correspondant_le_mieux_a(char * Nom)
 {
-  char Nom_courant[13];
+  char Nom_courant[TAILLE_CHEMIN_FICHIER];
   char * Pointeur1;
   char * Pointeur2;
   char * Pointeur_Meilleur_nom;
@@ -2262,7 +2264,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
     {
       // On copie le nom de la liste en cours de traitement dans Nom_courant
       // tout en le remettant sous forme normale.
-      for (Pointeur1=Element_courant->Nom,Pointeur2=Nom_courant;*Pointeur1;Pointeur1++)
+      for (Pointeur1=Element_courant->NomComplet,Pointeur2=Nom_courant;*Pointeur1;Pointeur1++)
         if (*Pointeur1!=' ')
           *(Pointeur2++)=*Pointeur1;
       *Pointeur2=0;
@@ -2272,7 +2274,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
       {
         Lettres_identiques=Compteur;
         strcpy(FFF_Meilleur_nom,Nom_courant);
-        Pointeur_Meilleur_nom=Element_courant->Nom;
+        Pointeur_Meilleur_nom=Element_courant->NomComplet;
       }
     }
   }
@@ -2299,10 +2301,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   short Largeur_image_initiale;          // |- être restaurées en sortant,
   short Hauteur_image_initiale;          // |  parce que la preview elle les
   byte  Back_color_initiale;             // |  fout en l'air (c'te conne).
-  char  Nom_fichier_initial[13]; // Sert à laisser le nom courant du fichier en cas de sauvegarde
-  char  Repertoire_precedent[13]; // Répertoire d'où l'on vient après un CHDIR
+  char  Nom_fichier_initial[TAILLE_CHEMIN_FICHIER]; // Sert à laisser le nom courant du fichier en cas de sauvegarde
+  char  Repertoire_precedent[TAILLE_CHEMIN_FICHIER]; // Répertoire d'où l'on vient après un CHDIR
   char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
-  char  Fichier_recherche[13]="";
+  char  Fichier_recherche[TAILLE_CHEMIN_FICHIER]="";
   char * Fichier_le_plus_ressemblant;
 
   Palette_initiale=(struct Composantes *)malloc(sizeof(T_Palette));
@@ -2317,18 +2319,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   if (Load)
   {
     if (Image)
-      Ouvrir_fenetre(310,190,"Load picture");
+      Ouvrir_fenetre(310,190+FILENAMESPACE,"Load picture");
     else
-      Ouvrir_fenetre(310,190,"Load brush");
-    Fenetre_Definir_bouton_normal(125,157,51,14,"Load",0,1,0x001C); // 1
+      Ouvrir_fenetre(310,190+FILENAMESPACE,"Load brush");
+    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Load",0,1,0x001C); // 1
   }
   else
   {
     if (Image)
-      Ouvrir_fenetre(310,190,"Save picture");
+      Ouvrir_fenetre(310,190+FILENAMESPACE,"Save picture");
     else
-      Ouvrir_fenetre(310,190,"Save brush");
-    Fenetre_Definir_bouton_normal(125,157,51,14,"Save",0,1,0x001C); // 1
+      Ouvrir_fenetre(310,190+FILENAMESPACE,"Save brush");
+    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Save",0,1,0x001C); // 1
     if (Principal_Format==0) // Correction du *.*
     {
       Principal_Format=Principal_Format_fichier;
@@ -2344,41 +2346,44 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     }
     // Affichage du commentaire
     if (Format_Commentaire[Principal_Format-1])
-      Print_dans_fenetre(46,176,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
-  Fenetre_Definir_bouton_normal(125,139,51,14,"Cancel",0,1,0x0001); // 2
-  Fenetre_Definir_bouton_normal(125, 89,51,14,"Delete",0,1,0x0053); // 3
+  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,0x0001); // 2
+  Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,0x0053); // 3
 
   // Câdre autour des formats
   Fenetre_Afficher_cadre(  7, 51,103, 35);
   // Câdre autour des infos sur le fichier de dessin
   Fenetre_Afficher_cadre(116, 51,187, 35);
   // Câdre autour de la preview
-  Fenetre_Afficher_cadre_creux(179,88,124,84);
+  Fenetre_Afficher_cadre_creux(179,88+FILENAMESPACE,124,84);
   // Câdre autour du fileselector
-  Fenetre_Afficher_cadre_creux(  7,88,100,84);
+  Fenetre_Afficher_cadre_creux(  7,88+FILENAMESPACE,100,84);
 
-  Fenetre_Definir_bouton_special(9,90,96,80);                      // 4
+  Fenetre_Definir_bouton_special(9,90+FILENAMESPACE,96,80);                      // 4
 
   // Scroller du fileselector
-  Fenetre_Definir_bouton_scroller(110,89,82,1,10,0);               // 5
+  Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
   Scroller_de_fichiers=Fenetre_Liste_boutons_scroller;
 
   // Scroller des formats
   Fenetre_Definir_bouton_scroller(12,55,27,(Load)?NB_FORMATS_LOAD+1:NB_FORMATS_SAVE,1,(Load)?Principal_Format:Principal_Format-1); // 6
 
   // Texte de commentaire des dessins
-  Print_dans_fenetre(7,176,"Txt:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(44,174,TAILLE_COMMENTAIRE); // 7
+  Print_dans_fenetre(7,176+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(44,174+FILENAMESPACE,TAILLE_COMMENTAIRE); // 7
 
+  // Cadre autour du nom de fichier
+  //Fenetre_Afficher_cadre_creux(  7,87,296,15);
+  Print_dans_fenetre(9,90,"Filename:",CM_Fonce,CM_Clair);
   // Saisie du nom de fichier
-  Fenetre_Definir_bouton_saisie(200,71,12); // 8
+  Fenetre_Definir_bouton_saisie(11+9*8,88,27); // 8
 
   Print_dans_fenetre( 27,65,"Format:",CM_Fonce,CM_Clair);
   Print_dans_fenetre(120,55,"Image size :",CM_Fonce,CM_Clair);
   Print_dans_fenetre(120,63,"File size  :",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(120,73,"File name:",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(120,72,"Format     :",CM_Fonce,CM_Clair);
 
   Print_Format();
 
@@ -2441,15 +2446,15 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           // On affiche une demande de confirmation
           if (Principal_File_list_Position+Principal_File_list_Decalage>=Liste_Nb_repertoires)
           {
-            Print_dans_fenetre(127,107,"Delete",CM_Fonce,CM_Clair);
-            Print_dans_fenetre(127,115,"file ?",CM_Fonce,CM_Clair);
+            Print_dans_fenetre(127,107+FILENAMESPACE,"Delete",CM_Fonce,CM_Clair);
+            Print_dans_fenetre(127,115+FILENAMESPACE,"file ?",CM_Fonce,CM_Clair);
           }
           else
           {
-            Print_dans_fenetre(127,107,"Remove",CM_Fonce,CM_Clair);
-            Print_dans_fenetre(127,115,"dir. ?",CM_Fonce,CM_Clair);
+            Print_dans_fenetre(127,107+FILENAMESPACE,"Remove",CM_Fonce,CM_Clair);
+            Print_dans_fenetre(127,115+FILENAMESPACE,"dir. ?",CM_Fonce,CM_Clair);
           }
-          Print_dans_fenetre(127,123,"Yes/No",CM_Fonce,CM_Clair);
+          Print_dans_fenetre(127,123+FILENAMESPACE,"Yes/No",CM_Fonce,CM_Clair);
 
           do
           {
@@ -2457,7 +2462,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
           // On efface la demande de confirmation
-          Block(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+107*Menu_Facteur_Y,
+          Block(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
                 Menu_Facteur_X*48,Menu_Facteur_Y*24,CM_Clair);
 
           // Si l'utilisateur confirme,
@@ -2581,13 +2586,13 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
         {
           Effacer_curseur();
-          Readline(46,176,Principal_Commentaire,32,0);
+          Readline(46,176+FILENAMESPACE,Principal_Commentaire,32,0);
           Afficher_curseur();
         }
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
-        if (Readline(202,73,Principal_Nom_fichier,12,2))
+        if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -2748,14 +2753,11 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       if (Etat_chrono==2)
       {
         Effacer_curseur();
-        // On efface le "but is:"
-        Block(Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+74*Menu_Facteur_Y,
-              Menu_Facteur_X*80,Menu_Facteur_Y<<3,CM_Clair);
         // On efface le commentaire précédent
-        Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+176*Menu_Facteur_Y,
+        Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+(176+FILENAMESPACE)*Menu_Facteur_Y,
               Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
         // On néttoie la zone où va s'afficher la preview:
-        Block(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+ 89*Menu_Facteur_Y,
+        Block(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+ (89+FILENAMESPACE)*Menu_Facteur_Y,
               Menu_Facteur_X*122,Menu_Facteur_Y*82,CM_Clair);
         // On efface les dimensions de l'image
         Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 55*Menu_Facteur_Y,
@@ -2763,12 +2765,15 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         // On efface la taille du fichier
         Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 63*Menu_Facteur_Y,
               Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
+        // On efface le format du fichier
+        Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 72*Menu_Facteur_Y,
+              Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
         // Affichage du commentaire
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
-          Print_dans_fenetre(46,176,Principal_Commentaire,CM_Noir,CM_Clair);
+          Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         Afficher_curseur();
 
-	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+55*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
+	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
       }
 
       Nouvelle_preview=0;
@@ -2788,7 +2793,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
         Effacer_curseur();
         Charger_image(Image);
-	SDL_UpdateRect(Ecran_SDL,ToWinX(179),ToWinY(88),ToWinL(124),ToWinH(84));
+	SDL_UpdateRect(Ecran_SDL,ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
         Afficher_curseur();
 
         // Après le chargement de la preview, on restaure tout ce qui aurait
@@ -2947,8 +2952,8 @@ void Load_picture(byte Image)
   // Image=0 => On charge/sauve une brosse
 {
   // Données initiales du fichier (au cas où on voudrait annuler)
-  char  Repertoire_fichier_initial[256];
-  char  Nom_fichier_initial[13];
+  char  Repertoire_fichier_initial[TAILLE_CHEMIN_FICHIER];
+  char  Nom_fichier_initial[TAILLE_CHEMIN_FICHIER];
   byte  Format_fichier_initial;
   byte  Ne_pas_restaurer;
   byte  Utiliser_palette_brosse = 0;
@@ -3240,8 +3245,8 @@ void Save_picture(byte Image)
   // Image=0 => On charge/sauve une brosse
 {
   // Données initiales du fichier (au cas où on voudrait annuler)
-  char  Repertoire_fichier_initial[256];
-  char  Nom_fichier_initial[13];
+  char  Repertoire_fichier_initial[TAILLE_CHEMIN_FICHIER];
+  char  Nom_fichier_initial[TAILLE_CHEMIN_FICHIER];
   byte  Format_fichier_initial;
   byte  Ne_pas_restaurer;
   byte  Ancienne_forme_curseur;

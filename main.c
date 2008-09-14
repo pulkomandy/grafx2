@@ -216,8 +216,8 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
             Buffer=realpath(argv[1],NULL);
             _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
         #else
-            Buffer = malloc(MAX_PATH);
-            _fullpath(Buffer,argv[1],MAX_PATH);
+            Buffer = malloc(TAILLE_CHEMIN_FICHIER);
+            _fullpath(Buffer,argv[1],TAILLE_CHEMIN_FICHIER);
             {
               // Découpage du nom canonique de fichier en chemin + nom.
               // On croirait que c'est du classique pour la LibC, mais non...
