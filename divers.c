@@ -652,7 +652,13 @@ void Palette_256_to_64(T_Palette Palette)
 
 void Palette_64_to_256(T_Palette Palette)
 {
-        UNIMPLEMENTED
+	int i;
+	for(i=0;i<256;i++)
+	{
+		Palette[i].R = Palette[i].R << 2;
+		Palette[i].V = Palette[i].V << 2;
+		Palette[i].B = Palette[i].B << 2;
+	}
 }
 
 byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
