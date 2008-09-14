@@ -62,7 +62,7 @@ int read_bytes(FILE *Fichier, void *Dest, size_t Taille)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int write_bytes(FILE *Fichier, void *Dest, size_t Taille)
 {
-  return fwrite(Dest, Taille, 1, Fichier) == Taille;
+  return fwrite(Dest, 1, Taille, Fichier) == Taille;
 }
 
 
