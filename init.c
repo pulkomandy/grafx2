@@ -24,6 +24,10 @@
 
 #include "errno.h"
 
+#ifndef __linux__
+#include "windows.h"
+#endif
+
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
@@ -68,9 +72,9 @@ word Drive_Touche[26]=
 };
 
 // Ajouter un lecteur à la liste de lecteurs
-void Ajouter_lecteur(byte Numero, byte Type)
+void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
 {
-  Drive[Nb_drives].Lettre=Numero+65;
+  Drive[Nb_drives].Lettre=Lettre;
   Drive[Nb_drives].Type  =Type;
   Drive[Nb_drives].Touche=Drive_Touche[Numero];
 
@@ -81,120 +85,68 @@ void Ajouter_lecteur(byte Numero, byte Type)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
-/*
-  byte Lecteur;
-  byte Nb_lecteurs_disquettes;
-  byte Lecteur_de_disquettes;
-  byte Type_de_lecteur=42;
-  //char Bidon[256];
+  int DriveBits = GetLogicalDrives();
+  int IndiceLecteur;
+  int IndiceBit;
 
-  Nb_drives=0;
-  Nb_lecteurs_disquettes=(Type_de_lecteur_de_disquette(0)>0)+(Type_de_lecteur_de_disquette(1)>0);
-
-  // Test du type des lecteurs A: et B:
-  if (Nb_lecteurs_disquettes==2)
-  for (Lecteur=0; Lecteur<=1; Lecteur++)
-  {
-    switch (Type_de_lecteur_de_disquette(Lecteur))
-    {
-      case 1 :
-      case 2 :
-        Ajouter_lecteur(Lecteur,DRIVE_FLOPPY_5_25);
-        break;
-      default:
-        Ajouter_lecteur(Lecteur,DRIVE_FLOPPY_3_5);
+  #ifdef __linux__
+	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
+	// un disque dur qui pointera vers la racine,
+	// et un autre vers le home directory de l'utilisateur.
+	Ajouter_lecteur(0,'/', LECTEUR_HDD);
+	Ajouter_lecteur(1,'~', LECTEUR_HDD);
+	#else
+	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
+	IndiceLecteur = 0;
+	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
+	{
+	  if ( (1 << IndiceBit) & DriveBits )
+	  {
+	    // On a ce lecteur, il faut maintenant déterminer son type "physique".
+	    // pour profiter des jolies icones de X-man.
+	    int TypeLecteur;
+	    char CheminLecteur[]="A:\\";
+	    // Cette API Windows est étrange, je dois m'y faire...
+	    CheminLecteur[0]='A'+IndiceBit;
+	    switch (GetDriveType(CheminLecteur))
+	    {
+	      case DRIVE_CDROM:
+	        TypeLecteur=LECTEUR_CDROM;
+	        break;
+	      case DRIVE_REMOTE:
+	        TypeLecteur=LECTEUR_NETWORK;
+	        break;
+	      case DRIVE_REMOVABLE:
+	        TypeLecteur=LECTEUR_FLOPPY_3_5;
+	        break;
+	      case DRIVE_FIXED:
+	        TypeLecteur=LECTEUR_HDD;
+	        break;
+	      default:
+	        TypeLecteur=LECTEUR_NETWORK;
+	        break;
+	    }
+	    Ajouter_lecteur(IndiceBit, 'A'+IndiceBit, TypeLecteur);
+    	IndiceLecteur++;
     }
-  }
-  else // On n'a pas 2 lecteurs donc on regarde si "logiquement" c'est A: ou B:
-  if (Nb_lecteurs_disquettes==1)
-  {
-    if (Disk_map(2)==Disk_map(1))
-    {
-      // Il n'y a pas de lecteur émulé par un SUBST
-      Lecteur_de_disquettes=Disk_map(1)-1;
-      for (Lecteur=0; Lecteur<=1; Lecteur++)
-      {
-        switch (Type_de_lecteur_de_disquette(Lecteur))
-        {
-          case 0 :
-            break;
-          case 1 :
-          case 2 :
-            Ajouter_lecteur(Lecteur_de_disquettes,DRIVE_FLOPPY_5_25);
-            break;
-          default:
-            Ajouter_lecteur(Lecteur_de_disquettes,DRIVE_FLOPPY_3_5);
-        }
-      }
-    }
-    else
-    {
-      // Il y a un lecteur émulé par un SUBST
-      Lecteur_de_disquettes=Disk_map(1)-1;
-
-      // On cherche d'abord sur quel lecteur le lecteur physique est dispo
-      for (Lecteur=0; Lecteur<=1; Lecteur++)
-      {
-        switch (Type_de_lecteur_de_disquette(Lecteur))
-        {
-          case 0 :
-            break;
-          case 1 :
-          case 2 :
-            Type_de_lecteur=DRIVE_FLOPPY_5_25;
-            break;
-          default:
-            Type_de_lecteur=DRIVE_FLOPPY_3_5;
-        }
-      }
-
-      // On déclare les trucs maintenant
-      if (Lecteur_de_disquettes==0)
-      {
-        // Situation : On a un lecteur A: qui est réel et un lecteur B: émulé
-        Ajouter_lecteur(0,Type_de_lecteur);
-        Ajouter_lecteur(1,DRIVE_NETWORK);
-      }
-      else
-      {
-        // Situation : On a un lecteur A: qui est réel et un lecteur B: émulé
-        Ajouter_lecteur(0,DRIVE_NETWORK);
-        Ajouter_lecteur(1,Type_de_lecteur);
-      }
-    }
-  }
-  else
-    //  Il n'y a pas de lecteur de D7 physique, mais on vérifie s'il n'y en a
-    // pas qui seraient émulés par SUBST
-    for (Lecteur=0; Lecteur<=1; Lecteur++)
-    {
-      switch (Freespace(Lecteur+1))
-      {
-        case -1:
-          break;
-        default:
-          Ajouter_lecteur(Lecteur,DRIVE_NETWORK);
-      }
-    }
-
-  // Test de la présence d'autres lecteurs (HDD, CD, Réseau)
-  // On les met tous en réseau avant de tester leur vrai type.
-  for (Lecteur=2; Lecteur<=25; Lecteur++)
-  {
-    if (Disque_dur_present(Lecteur-2))
-      Ajouter_lecteur(Lecteur,DRIVE_HDD);
-    else
-    if (Lecteur_CDROM_present(Lecteur))
-      Ajouter_lecteur(Lecteur,DRIVE_CDROM);
-    else
-    if (Freespace(Lecteur+1)!=-1)
-      Ajouter_lecteur(Lecteur,DRIVE_NETWORK);
-  }
-*/
-	//Sous linux, il n'y a pas de lecteurs, on va juste mettre un disque dur qui pointera vers la racine
-	Ajouter_lecteur(0,DRIVE_HDD); //Le lecteur numéro 0 est un disque dur.
+	}
+	#endif
 }
 
+// Active un lecteur, changeant normalement le répertoire en cours.
+// Renvoie 0 si ok, -1 si problème.
+int ActiverLecteur(int NumeroLecteur)
+{
+  #ifdef __linux__
+    char NomLecteur[]=" ";
+    NomLecteur[0]=Drive[NumeroLecteur].Lettre;
+    return chdir(NomLecteur);
+  #else
+    char NomLecteur[]="A:\\";
+    NomLecteur[0]=Drive[NumeroLecteur].Lettre;
+    return ! SetCurrentDirectory(NomLecteur);
+  #endif
+}
 
 // Fonction de décryptage
 

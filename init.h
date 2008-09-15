@@ -10,3 +10,4 @@ void Initialiser_la_table_des_carres(void);
 void Initialiser_la_table_precalculee_des_distances_de_couleur(void);
 
 void Definition_des_modes_video(void);
+int ActiverLecteur(int);

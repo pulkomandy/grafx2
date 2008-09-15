@@ -2611,21 +2611,26 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Afficher_curseur();
         break;
       default : // Drives
-        Effacer_curseur();
         // On change de lecteur: Lecteur = Drive[Bouton_clicke-9].Lettre-64
-        /* A revoir ...
-        _dos_setdrive(Drive[Bouton_clicke-9].Lettre-64,&Bidon);
-        */
-        // On lit le répertoire courant de ce lecteur
-        Determiner_repertoire_courant();
-        //   Comme on tombe sur un disque qu'on connait pas, on se place en
-        // début de liste:
-        Principal_File_list_Position=0;
-        Principal_File_list_Decalage=0;
-        // Affichage des premiers fichiers visibles:
-        Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
-        Afficher_curseur();
-        Nouvelle_preview=1;
+        if (! ActiverLecteur(Bouton_clicke-9))
+        {
+          Effacer_curseur();
+          // On lit le répertoire courant de ce lecteur
+          Determiner_repertoire_courant();
+          //   Comme on tombe sur un disque qu'on connait pas, on se place en
+          // début de liste:
+          Principal_File_list_Position=0;
+          Principal_File_list_Decalage=0;
+          // Affichage des premiers fichiers visibles:
+          Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
+          Afficher_curseur();
+          Nouvelle_preview=1;
+        }
+        else
+        {
+          // Un ptit flash rouge pour signaler le lecteur invalide.
+          Erreur(0);
+        }
     }
 
     switch (Touche)

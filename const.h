@@ -276,11 +276,11 @@ enum CHUNKS_CFG
 
 enum TYPES_DE_LECTEURS
 {
-  DRIVE_FLOPPY_3_5,   // 0: Diskette 3"«
-  DRIVE_FLOPPY_5_25,  // 1: Diskette 5"¬
-  DRIVE_HDD,          // 2: HDD
-  DRIVE_CDROM,        // 3: CD-ROM
-  DRIVE_NETWORK       // 4: Logique (réseau?)
+  LECTEUR_FLOPPY_3_5,   // 0: Diskette 3"«
+  LECTEUR_FLOPPY_5_25,  // 1: Diskette 5"¬
+  LECTEUR_HDD,          // 2: HDD
+  LECTEUR_CDROM,        // 3: CD-ROM
+  LECTEUR_NETWORK       // 4: Logique (réseau?)
 };
 
   // Les différents boutons:
