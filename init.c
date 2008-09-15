@@ -85,18 +85,21 @@ void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
-  int DriveBits = GetLogicalDrives();
-  int IndiceLecteur;
-  int IndiceBit;
-
   #ifdef __linux__
+
 	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
 	// un disque dur qui pointera vers la racine,
 	// et un autre vers le home directory de l'utilisateur.
 	Ajouter_lecteur(0,'/', LECTEUR_HDD);
 	Ajouter_lecteur(1,'~', LECTEUR_HDD);
+
 	#else
+
 	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
+
+  int DriveBits = GetLogicalDrives();
+  int IndiceLecteur;
+  int IndiceBit;
 	IndiceLecteur = 0;
 	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
 	{
