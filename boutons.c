@@ -722,14 +722,14 @@ void Bouton_Settings(void)
 
   Ouvrir_fenetre(307,182,"Settings");
 
-  // On commence par dessiner tous les câdres
+  // On commence par dessiner tous les Cadres
   Fenetre_Afficher_cadre(  5, 16,157,30);
   Fenetre_Afficher_cadre(  5, 47,157,17);
   Fenetre_Afficher_cadre(163, 16,139,60);
   Fenetre_Afficher_cadre(253, 77, 49,82);
   Fenetre_Afficher_cadre(  5, 77,247,82); // |_ Misc.
   Fenetre_Afficher_cadre(  5, 65,157,14); // |
-  // On découpe le câdre bizarre des "Miscellaneous"
+  // On découpe le Cadre bizarre des "Miscellaneous"
   Pixel_dans_fenetre(6,77,CM_Blanc);
   Pixel_dans_fenetre(5,78,CM_Fonce);
   Block(Fenetre_Pos_X+(7*Menu_Facteur_X),Fenetre_Pos_Y+(77*Menu_Facteur_Y),
@@ -2352,13 +2352,13 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,0x0001); // 2
   Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,0x0053); // 3
 
-  // Câdre autour des formats
+  // Cadre autour des formats
   Fenetre_Afficher_cadre(  7, 51,103, 35);
-  // Câdre autour des infos sur le fichier de dessin
+  // Cadre autour des infos sur le fichier de dessin
   Fenetre_Afficher_cadre(116, 51,187, 35);
-  // Câdre autour de la preview
+  // Cadre autour de la preview
   Fenetre_Afficher_cadre_creux(179,88+FILENAMESPACE,124,84);
-  // Câdre autour du fileselector
+  // Cadre autour du fileselector
   Fenetre_Afficher_cadre_creux(  7,88+FILENAMESPACE,100,84);
 
   Fenetre_Definir_bouton_special(9,90+FILENAMESPACE,96,80);                      // 4
@@ -2458,6 +2458,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
           do
           {
+            SDL_PumpEvents();
           	Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
@@ -2466,7 +2467,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
                 Menu_Facteur_X*48,Menu_Facteur_Y*24,CM_Clair);
 
           // Si l'utilisateur confirme,
-          if (Touche=='Y')
+          if (Etat_Du_Clavier[SDLK_y])
           {
             // Si c'est un fichier
             if (Principal_File_list_Position+Principal_File_list_Decalage>=Liste_Nb_repertoires)

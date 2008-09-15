@@ -1,6 +1,6 @@
 /************************************************************************
 *                                                                       *
-* READLINE (proc‚dure permettant de saisir une chaŒne de caractŠres) *
+* READLINE (procédure permettant de saisir une chaîne de caractères) *
 *                                                                       *
 ************************************************************************/
 
@@ -23,37 +23,7 @@
 #define COULEUR_TEXTE_CURSEUR CM_Noir
 #define COULEUR_FOND_CURSEUR  CM_Fonce
 
-// Vérification de la validité d'un nom de fichier
-byte Chaine_valide(char * Chaine)
-{
-  byte Point_trouve=0; // Booléen "on a trouvé un point dans la chaine"
-  byte Taille_racine=0; // Taille de la racine du nom de fichier
-  byte Taille_extension=0; // Taille de l'extension du nom de fichier
-  byte Position; // Position du caractère dans la chaîne en cours d'étude
-
-  for (Position=0;Chaine[Position]!='\0';Position++)
-  {
-    if (Chaine[Position]!='.')
-    {
-      if (Point_trouve)
-        Taille_extension++;
-      else
-        Taille_racine++;
-    }
-    else
-    {
-      if (Point_trouve)
-        return 0;
-      else
-        Point_trouve=1;
-    }
-  }
-
-  return ( (Taille_racine>0) && (Taille_racine<=8) && (Taille_extension<=3) );
-}
-
-
-// Suppresion d'un caractŠre … une certaine POSITION dans une CHAINE.
+// Suppresion d'un caractère à une certaine POSITION dans une CHAINE.
 void Supprimer_caractere(char * Chaine, byte Position)
 {
   for (;Chaine[Position]!='\0';Position++)
@@ -62,24 +32,44 @@ void Supprimer_caractere(char * Chaine, byte Position)
 
 
 void Inserer_caractere(char * Chaine, char Lettre, byte Position)
-//  Insertion d'une LETTRE … une certaine POSITION
+//  Insertion d'une LETTRE à une certaine POSITION
 //  dans une CHAINE d'une certaine TAILLE.
 {
   char Char_tempo;
 
   for (;Lettre!='\0';Position++)
   {
-    // On m‚morise le caractŠre qui se trouve en "Position"
+    // On mémorise le caractère qui se trouve en "Position"
     Char_tempo=Chaine[Position];
-    // On splotch la lettre … ins‚rer
+    // On splotch la lettre à insérer
     Chaine[Position]=Lettre;
-    // On place le caractŠre m‚moris‚ dans "Lettre" comme nouvelle lettre … ins‚rer
+    // On place le caractère mémorisé dans "Lettre" comme nouvelle lettre à insérer
     Lettre=Char_tempo;
   }
   // On termine la chaine
   Chaine[Position]='\0';
 }
 
+int CaractereValide(int Caractere)
+{
+  // Sous Linux: Seul le / est strictement interdit, mais beaucoup
+  // d'autres poseront des problèmes au shell, alors on évite.
+  // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
+  #ifdef __linux__  
+  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>'};
+  #else
+  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+  #endif
+  
+  if (Caractere < ' ' || Caractere > 255)
+    return 0;
+  
+  int Position;
+  for (Position=0; Position<sizeof(CaracteresInterdits); Position++)
+    if (Caractere == CaracteresInterdits[Position])
+      return 0;
+  return 1;
+}
 
 void Rafficher_toute_la_chaine(word Pos_X,word Pos_Y,char * Chaine,byte Position)
 {
@@ -92,11 +82,11 @@ void Rafficher_toute_la_chaine(word Pos_X,word Pos_Y,char * Chaine,byte Position
 //*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
 //****************************************************************************
 byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_saisie)
-// ParamŠtres:
-//   Pos_X, Pos_Y : Coordonn‚es de la saisie dans la fenˆtre
-//   Chaine       : ChaŒne recevant la saisie (et contenant ‚ventuellement une valeur initiale)
-//   Taille_maxi  : Nombre de caractŠres logeant dans la zone de saisie
-//   Type_saisie  : 0=ChaŒne, 1=Nombre, 2=Nom de fichier (12 carcactŠres)
+// Paramètres:
+//   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
+//   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   Taille_maxi  : Nombre de caractères logeant dans la zone de saisie
+//   Type_saisie  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
@@ -107,16 +97,16 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
   byte Touche_autorisee;
 
 
-  // Effacement de la chaŒne
+  // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
 
-  // Mise … jour des variables se rapportant … la chaŒne en fonction de la chaŒne initiale
+  // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(Chaine_initiale,Chaine);
 
   if (Type_saisie==1)
-    itoa(atoi(Chaine),Chaine,10); // On tasse la chaine … gauche
-  //  Chaine[0]='\0';    // On efface la chaŒne si c'est valeur num‚rique
+    itoa(atoi(Chaine),Chaine,10); // On tasse la chaine à gauche
+  //  Chaine[0]='\0';    // On efface la chaîne si c'est valeur numérique
 
   Taille=strlen(Chaine);
   Position=(Taille<Taille_maxi)? Taille:Taille-1;
@@ -133,7 +123,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
             {
               Supprimer_caractere(Chaine,Position);
               Taille--;
-              // Effacement de la chaŒne
+              // Effacement de la chaîne
               Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                     Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
               Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
@@ -142,7 +132,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
       case SDLK_LEFT : // Gauche
             if (Position)
             {
-              // Effacement de la chaŒne
+              // Effacement de la chaîne
               if (Position==Taille)
                 Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
@@ -156,7 +146,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
       case SDLK_HOME : // Home
             if (Position)
             {
-              // Effacement de la chaŒne
+              // Effacement de la chaîne
               if (Position==Taille)
                 Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                       Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
@@ -172,19 +162,15 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
         {
           Supprimer_caractere(Chaine,--Position);
           Taille--;
-          // Effacement de la chaŒne
+          // Effacement de la chaîne
           Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
                 Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
           Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine,Position);
         }
         break;
       case SDLK_RETURN :
-        if ( (Type_saisie!=2) || (Chaine_valide(Chaine)) )
-          break;
-        // Si on ‚tait en saisie de nom de fichier et qu'il y ait une erreur
-        // dans la chaŒne
-        Erreur(0); // On flash en rouge & ...
-        Touche_lue=SDLK_ESCAPE; // ... on simule l'appuie sur la touche [Esc]
+        break;
+        
       case SDLK_ESCAPE :
         // On restaure la chaine initiale
         strcpy(Chaine,Chaine_initiale);
@@ -197,8 +183,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
           Touche_autorisee=0; // On commence par supposer qu'elle est interdite
           switch(Type_saisie)
           {
-            case 0 : // N'importe quelle chaŒne:
-              if (Touche_lue>=' ')
+            case 0 : // N'importe quelle chaîne:
+              if (Touche_lue>=' ' && Touche_lue<= 255)
                 Touche_autorisee=1;
               break;
             case 1 : // Nombre
@@ -206,27 +192,19 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
                 Touche_autorisee=1;
               break;
             default : // Nom de fichier
-              // On commence par passez la lettre en majuscule
-              if ( (Touche_lue>='a') && (Touche_lue<='z') )
-                Touche_lue-=32;
-              // Ensuite on regarde si la touche est autoris‚e
-              if ( (Touche_lue> ' ') && (Touche_lue!='+') && (Touche_lue!='\\') &&
-                   (Touche_lue!='>') && (Touche_lue!='<') && (Touche_lue!='*')  &&
-                   (Touche_lue!='?') && (Touche_lue!=':') && (Touche_lue!='|')  &&
-                   (Touche_lue!='/') && (Touche_lue!='"') && (Touche_lue!='=')  &&
-                   (Touche_lue!=',') && (Touche_lue!=';') && (Touche_lue!='[')  &&
-                   (Touche_lue!=']') )
+              // On regarde si la touche est autorisée
+              if ( CaractereValide(Touche_lue))
                 Touche_autorisee=1;
           } // Fin du "switch(Type_saisie)"
 
-          // Si la touche ‚tait autoris‚e...
+          // Si la touche était autorisée...
           if (Touche_autorisee)
           {
-            // ... alors on l'insŠre ...
+            // ... alors on l'insère ...
             Inserer_caractere(Chaine,Touche_lue,Position/*,Taille*/);
             // ce qui augmente la taille de la chaine
             Taille++;
-            // et qui risque de d‚placer le curseur vers la droite
+            // et qui risque de déplacer le curseur vers la droite
             if (Taille<Taille_maxi)
               Position++;
             // Enfin, on raffiche la chaine
@@ -236,7 +214,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
     } // Fin du "switch(Touche_lue)"
   } // Fin du "while"
 
-  // Effacement de la chaŒne
+  // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
   // On raffiche la chaine correctement
