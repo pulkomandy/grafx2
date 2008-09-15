@@ -243,7 +243,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
   while (Enreg)
   {
     // Si l'élément n'est pas le répertoire courant
-    if ( (Enreg->d_name[0]!='.') && (Enreg->d_name[1] != 0))
+    if ( (Enreg->d_name[0]!='.') || (Enreg->d_name[1] != 0))
     {
     	stat(Enreg->d_name,&Infos_enreg);
         // et que l'élément trouvé est un répertoire
