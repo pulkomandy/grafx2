@@ -5214,3 +5214,107 @@ void Save_PC1(void)
     Erreur_fichier=1;
   }
 }
+
+/******************************************************************************************
+  Functions from op_c.c : load raw 24B (for testing) and load_tga (broken ? incomplete ?)
+  Saving would be nice as well.
+******************************************************************************************/
+void Load_RAW_24B(int Largeur,int Hauteur,Bitmap24B Source)
+{
+  FILE* Fichier;
+
+  Fichier=fopen("TEST.RAW","rb");
+  if (read_bytes(Fichier,Source,Largeur*Hauteur*sizeof(struct Composantes))!=Largeur*Hauteur*sizeof(struct Composantes))
+    exit(3);
+  fclose(Fichier);
+}
+
+void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
+{
+  FILE* fichier;
+  struct
+  {
+    byte Id_field_size;        // Taille des donn‚es sp‚cifiques plac‚es aprŠs le header
+    byte Color_map_type;       // Pr‚sence d'une palette
+    byte Image_type_code;      // Type d'image
+    word Color_map_origin;     // Indice de d‚part de la palette
+    word Color_map_length;     // Taille de la palette
+    byte Color_map_entry_size; // Palette sur 16, 24 ou 32 bits
+    word X_origin;             // Coordonn‚es de d‚part
+    word Y_origin;
+    word Width;                // Largeur de l'image
+    word Height;               // Hauteur de l'image
+    byte Pixel_size;           // Pixels sur 16, 24 ou 32 bits
+    byte Descriptor;           // ParamŠtres divers
+  } TGA_Header;
+  int x,y,py,skip,t;
+  byte * buffer;
+
+  fichier=fopen(nom,"rb");
+  read_bytes(fichier,&TGA_Header,sizeof(TGA_Header));
+  if (TGA_Header.Image_type_code==2)
+  {
+    *larg=TGA_Header.Width;
+    *haut=TGA_Header.Height;
+    *dest=(Bitmap24B)malloc((*larg)*(*haut)*3);
+
+    // On saute l'ID field
+    fseek(fichier,TGA_Header.Id_field_size,SEEK_CUR);
+
+    // On saute la palette
+    if (TGA_Header.Color_map_type==0)
+      skip=0;
+    else
+    {
+      skip=TGA_Header.Color_map_length;
+      if (TGA_Header.Color_map_entry_size==16)
+        skip*=2;
+      else
+      if (TGA_Header.Color_map_entry_size==24)
+        skip*=3;
+      else
+      if (TGA_Header.Color_map_entry_size==32)
+        skip*=4;
+    }
+    fseek(fichier,skip,SEEK_CUR);
+
+    // Lecture des pixels
+    skip=(*larg);
+    if (TGA_Header.Pixel_size==16)
+      skip*=2;
+    else
+    if (TGA_Header.Pixel_size==24)
+      skip*=3;
+    else
+    if (TGA_Header.Pixel_size==32)
+      skip*=4;
+
+    buffer=(byte *)malloc(skip);
+    for (y=0;y<(*haut);y++)
+    {
+      read_bytes(fichier,buffer,skip);
+
+      // Inversion du rouge et du bleu
+      for (x=0;x<(*larg);x++)
+      {
+        t=buffer[(x*3)+0];
+        buffer[(x*3)+0]=buffer[(x*3)+2];
+        buffer[(x*3)+2]=t;
+      }
+
+      // Prise en compte du sens d'‚criture verticale
+      if (TGA_Header.Descriptor & 0x20)
+        py=y;
+      else
+        py=(*haut)-y-1;
+
+      // Prise en compte de l'interleave verticale
+      if (TGA_Header.Descriptor & 0xC0)
+        py=((py % (*haut))*2)+(py/(*haut));
+
+      memcpy((*dest)+(py*(*larg)),buffer,skip);
+    }
+    free(buffer);
+  }
+  fclose(fichier);
+}
