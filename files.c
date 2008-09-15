@@ -18,7 +18,7 @@
 #ifdef __linux__
     #include "linux.h"
     #include <dirent.h>
-    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
+    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.' && (Enreg)->d_name[1]!='\0')
 #elif defined(__WATCOMC__)
     #include <direct.h>
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
@@ -34,6 +34,10 @@
 #define COULEUR_FICHIER_SELECT    CM_Blanc // Couleur du texte pour une ligne de fichier    sélectionnée
 #define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de repértoire sélectionnée
 #define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne sélectionnée
+
+// Caractères présents dans les deux fontes
+#define CARACTERE_TRIANGLE_DROIT  16
+#define CARACTERE_TRIANGLE_GAUCHE 17
 
 #define FILENAMESPACE 16
 
@@ -128,6 +132,16 @@ char * Nom_formate(char * Nom)
   {
     strcpy(Resultat,"..          ");
   }
+  else if (Nom[0]=='.')
+  {
+    // Fichiers ".quelquechose": Calé à gauche sur 12 caractères maximum.
+    strcpy(Resultat,"            ");
+    for (Curseur=0;Nom[Curseur]!='\0' && Curseur < 12;Curseur++)
+      Resultat[Curseur]=Nom[Curseur];
+    // Un caractère spécial pour indiquer que l'affichage est tronqué
+    if (Curseur >= 12)
+      Resultat[11]=CARACTERE_TRIANGLE_DROIT;
+  }
   else
   {
     strcpy(Resultat,"        .   ");
@@ -137,6 +151,9 @@ char * Nom_formate(char * Nom)
       if (Curseur < 8)
         Resultat[Curseur]=Nom[Curseur];
     }
+    // Un caractère spécial pour indiquer que l'affichage est tronqué
+    if (Curseur > 8)
+      Resultat[7]=CARACTERE_TRIANGLE_DROIT;
     // On recherche le dernier point dans le reste du nom
     for (Pos_DernierPoint = Curseur; Nom[Curseur]!='\0'; Curseur++)
       if (Nom[Curseur]=='.')

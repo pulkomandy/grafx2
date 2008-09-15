@@ -1343,7 +1343,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
   word  Indice;
   short Pos_X;
   short Pos_Y;
-  char  Caractere;
+  unsigned char Caractere;
   short Reel_X;
   short Reel_Y;
   short Largeur;
