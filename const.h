@@ -47,6 +47,10 @@
 #define NB_SECTIONS_AIDE          3     // Nombre de sections dans l'aide
 #define TAILLE_CHEMIN_FICHIER     260   // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
 
+// Caractères présents dans les deux fontes
+#define CARACTERE_TRIANGLE_DROIT  16
+#define CARACTERE_TRIANGLE_GAUCHE 17
+
 // On impose à l'allocation dynamique des pages de backups de conserver un
 // minimum de 256 Ko pour que le reste du programme puisse continuer à
 // fonctionner.

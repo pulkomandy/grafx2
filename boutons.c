@@ -2593,7 +2593,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
-        if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
+        if (Readline(13+9*8,90,Principal_Nom_fichier,50,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.

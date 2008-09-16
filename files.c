@@ -35,10 +35,6 @@
 #define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de repértoire sélectionnée
 #define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne sélectionnée
 
-// Caractères présents dans les deux fontes
-#define CARACTERE_TRIANGLE_DROIT  16
-#define CARACTERE_TRIANGLE_GAUCHE 17
-
 #define FILENAMESPACE 16
 
 int Determiner_repertoire_courant(void)
