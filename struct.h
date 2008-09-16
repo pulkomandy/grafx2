@@ -108,8 +108,8 @@ struct Element_de_liste_de_fileselect
 // Déclaration d'une section d'aide:
 struct Section_d_aide
 {
+  const char ** Table_aide; // Pointeur sur le début de la table d'aide
   word Nombre_de_lignes;
-  byte * Debut_de_la_liste; // PremiŠre ligne de la liste
 };
 
 // Déclaration d'une info sur un dégradé

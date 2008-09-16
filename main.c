@@ -594,7 +594,6 @@ void Initialisation_du_programme(int argc,char * argv[])
 // ------------------------- Fermeture du programme --------------------------
 void Fermeture_du_programme(void)
 {
-  unsigned Bidon;
   int      Retour;
 
   // On libère le buffer de gestion de lignes
@@ -611,10 +610,6 @@ void Fermeture_du_programme(void)
   Nouveau_nombre_de_backups(0);
   free(Brouillon_Ecran);
   free(Principal_Ecran);
-
-  // On libère également les données de l'aide:
-  for (Bidon=0;Bidon<NB_SECTIONS_AIDE;Bidon++)
-    free(Table_d_aide[Bidon].Debut_de_la_liste);
 
   Passer_en_mode_texte(Ancien_nb_lignes);
   Clavier_de_depart();

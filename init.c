@@ -1,4 +1,4 @@
-#define TAILLE_FICHIER_DATA  84369  // Taille du fichier GFX2.DAT
+#define TAILLE_FICHIER_DATA  78544  // Taille du fichier GFX2.DAT
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -187,7 +187,6 @@ void Charger_DAT(void)
   byte * Fonte_temporaire;
   byte Pos_X;
   byte Pos_Y;
-  word Mot_temporaire;
 
   struct stat Informations_Fichier;
 
@@ -285,38 +284,8 @@ void Charger_DAT(void)
   if (fread(Fonte_help,1,315*6*8,Handle)!=(315*6*8))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  // Lecture des différentes sections de l'aide:
-
-  // Pour chaque section "Indice" de l'aide:
-  for (Indice=0;Indice<NB_SECTIONS_AIDE;Indice++)
-  {
-    // On lit le nombre de lignes:
-    if (fread(&Mot_temporaire,1,2,Handle)!=2)
-      Erreur(ERREUR_DAT_CORROMPU);
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
-        Mot_temporaire=bswap_16(Mot_temporaire);
-#endif
-
-    // On copie ce nombre de lignes dans la table:
-    Table_d_aide[Indice].Nombre_de_lignes=Mot_temporaire;
-
-    // On lit la place que la section prend en mémoire:
-    if (fread(&Mot_temporaire,1,2,Handle)!=2)
-      Erreur(ERREUR_DAT_CORROMPU);
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        //Si on est en big endian il faut échanger les octets car la structure est prévue pour du x86.
-        Mot_temporaire=bswap_16(Mot_temporaire);
-#endif
-
-    // On alloue la mémoire correspondante:
-    if (!(Table_d_aide[Indice].Debut_de_la_liste=(byte *)malloc(Mot_temporaire)))
-      Erreur(ERREUR_MEMOIRE);
-
-    // Et on lit la section d'aide en question:
-    if (fread(Table_d_aide[Indice].Debut_de_la_liste,1,Mot_temporaire,Handle)!=Mot_temporaire)
-      Erreur(ERREUR_DAT_CORROMPU);
-  }
+  // Le reste est actuellement une copie du fichier INI par défaut:
+  // Pas besoin ici.
 
   fclose(Handle);
 

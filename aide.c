@@ -6,6 +6,7 @@
 #include "divers.h"
 #include "graph.h"
 #include "moteur.h"
+#include "tables_aide.h"
 
 #include <string.h>
 
@@ -19,66 +20,83 @@
 
 void Afficher_aide(void)
 {
-  byte * Curseur;
-  byte * Curseur_initial;
-  word   Debut_de_fonte;
-  short  X;                   // Indices d'affichage d'un caractŠre
+  short  X;                   // Indices d'affichage d'un caractère
   short  Y;
   short  Position_X;          // Parcours de remplissage du buffer de ligne
   short  Indice_de_ligne;     // 0-15 (16 lignes de textes)
-  short  Indice_de_caractere; // Parcours des caractŠres d'une ligne
+  short  Indice_de_caractere; // Parcours des caractères d'une ligne
   short  Ligne_de_depart=Position_d_aide_en_cours;
-  short  Longueur_de_ligne;   // Longueur en char d'une ligne de texte
   short  Repeat_Menu_Facteur_X;
   short  Repeat_Menu_Facteur_Y;
   short  Pos_Reel_X;
   short  Pos_Reel_Y;
+  int    Curseur;
   short  Largeur;             // Largeur physique d'une ligne de texte
+  char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
+                              // -: Ligne inférieur de sous-titre
+  const unsigned char  * Ligne;
 
   Pos_Reel_X=Fenetre_Pos_X+(13*Menu_Facteur_X);
   Pos_Reel_Y=Fenetre_Pos_Y+(19*Menu_Facteur_Y);
 
-  for (Curseur=Table_d_aide[Section_d_aide_en_cours].Debut_de_la_liste;
-       Ligne_de_depart>0;
-       Ligne_de_depart--)
-    Curseur+=( (*Curseur) & 0x7F )+1;
-
   for (Indice_de_ligne=0;Indice_de_ligne<16;Indice_de_ligne++)
   {
     // On affiche la ligne
-    Debut_de_fonte     =((*Curseur) & 0x80)?147:0;
-    Indice_de_caractere=((*Curseur) & 0x7F);
-    Curseur++;
+    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne];
+    TypeLigne = Ligne[0];
+    // Si c'est une sous-ligne de titre, on utilise le texte de la ligne précédente
+    if (TypeLigne == '-' && (Ligne_de_depart + Indice_de_ligne > 0))
+      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1];
+    // On ignore le premier caractère
+    Ligne++;
+    // Calcul de la taille
+    Largeur=strlen(Ligne);
+    // Les lignes de titres prennent plus de place
+    if (TypeLigne == 'T' || TypeLigne == '-')
+      Largeur = Largeur*2;
 
-    Curseur_initial=Curseur;
-    Longueur_de_ligne=Indice_de_caractere;
-    Largeur=Longueur_de_ligne*Menu_Facteur_X*6;
-
-    // Pour chaque ligne dans la fenˆtre:
+    // Pour chaque ligne dans la fenêtre:
     for (Y=0;Y<8;Y++)
     {
-      Curseur=Curseur_initial;
       Position_X=0;
-
-      // On cr‚e une nouvelle ligne … splotcher
-      for (Indice_de_caractere=0;Indice_de_caractere<Longueur_de_ligne;Indice_de_caractere++)
+      // On crée une nouvelle ligne à splotcher
+      for (Indice_de_caractere=0;Indice_de_caractere<Largeur;Indice_de_caractere++)
       {
+        // Recherche du caractère dans la fonte de 315 symboles.
+        // Ligne titre : Si l'indice est impair on dessine le quart de caractère
+        // qui va a gauche, sinon celui qui va a droite.
+        
+        if (TypeLigne=='T')
+          Curseur=Caracteres_Aide_Titre_haut[Ligne[Indice_de_caractere/2]-' '] + (Indice_de_caractere & 1);
+        else if (TypeLigne=='-')
+          Curseur=Caracteres_Aide_Titre_bas[Ligne[Indice_de_caractere/2]-' '] + (Indice_de_caractere & 1);
+        else if (TypeLigne=='S')
+          Curseur=Caracteres_Aide_S[Ligne[Indice_de_caractere]-' '];
+        else if (TypeLigne=='N')
+          Curseur=Caracteres_Aide_N[Ligne[Indice_de_caractere]-' '];
+        else
+          Curseur=1; // Un garde-fou en cas de probleme
+          
+        // Un deuxième garde-fou
+        if (Curseur < 0 || Curseur > 315)
+          Curseur = 1; // '!' affiché pour les caractères non prévus
+        
         for (X=0;X<6;X++)
           for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
-            Buffer_de_ligne_horizontale[Position_X++]=Fonte_help[(*Curseur)+Debut_de_fonte][X][Y];
-
-        Curseur++;
+            Buffer_de_ligne_horizontale[Position_X++]=Fonte_help[Curseur][X][Y];
       }
 
       // On la splotche
       for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
-        Afficher_ligne(Pos_Reel_X,Pos_Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
+        Afficher_ligne(Pos_Reel_X,Pos_Reel_Y++,Largeur*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
     }
 
     // On efface la fin de la ligne:
-    Block (Pos_Reel_X+Largeur,
+    Block (Pos_Reel_X+Largeur*Menu_Facteur_X*6,
            Pos_Reel_Y-(8*Menu_Facteur_Y),
-           ((44*6*Menu_Facteur_X)-Largeur)+1, // 44 = Nb max de char (+1 pour ‚viter les plantages en mode X caus‚s par une largeur = 0)
+           ((44*6*Menu_Facteur_X)-Largeur*Menu_Facteur_X*6)+1,
+           // 44 = Nb max de char (+1 pour éviter les plantages en mode X
+           // causés par une largeur = 0)
            Menu_Facteur_Y<<3,
            CM_Noir);
   }
@@ -105,7 +123,7 @@ void Bouton_Aide(void)
 
   Ouvrir_fenetre(310,175,"Help / About...");
 
-  // dessiner de la fenˆtre o— va d‚filer le texte
+  // dessiner de la fenêtre où va défiler le texte
   Fenetre_Afficher_cadre_creux(8,17,274,132);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*9),
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
@@ -153,7 +171,7 @@ void Bouton_Aide(void)
     }
 
 
-    // Gestion des touches de d‚placement dans la liste
+    // Gestion des touches de déplacement dans la liste
     switch (Touche)
     {
       case 0x0048 : // Haut
@@ -282,13 +300,13 @@ void Bouton_Stats(void)
   sprintf(Buffer,"%dx%d",Principal_Largeur_image,Principal_Hauteur_image);
   Print_dans_fenetre(122,75,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
-  // Affichage du nombre de couleur utilis‚
+  // Affichage du nombre de couleur utilisé
   Print_dans_fenetre(18,83,"Colors used:",STATS_COULEUR_TITRES,CM_Noir);
   bzero(Utilisation_couleur,256*sizeof(Utilisation_couleur[0]));
   sprintf(Buffer,"%d",Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur));
   Print_dans_fenetre(122,83,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
-  // Affichage des dimensions de l'‚cran
+  // Affichage des dimensions de l'écran
   Print_dans_fenetre(10,99,"Resolution:",STATS_COULEUR_TITRES,CM_Noir);
   sprintf(Buffer,"%dx%d",Largeur_ecran,Hauteur_ecran);
   Print_dans_fenetre(106,99,Buffer,STATS_COULEUR_DONNEES,CM_Noir);

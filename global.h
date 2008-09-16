@@ -549,7 +549,6 @@ GLOBAL byte * Fonte;
 
   // Les données de l'aide:
 
-GLOBAL struct Section_d_aide Table_d_aide[NB_SECTIONS_AIDE];
 GLOBAL byte Section_d_aide_en_cours;  // Indice de la table d'aide en cours de consultation
 GLOBAL word Position_d_aide_en_cours; // Numéro de la ligne d'aide en cours de consultation
 
