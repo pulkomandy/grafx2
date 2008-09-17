@@ -55,9 +55,9 @@ void Set_palette(T_Palette Palette)
         SDL_Color PaletteSDL[256];
         for(i=0;i<256;i++)
         {
-                PaletteSDL[i].r=Palette[i].R*4; //Les couleurs VGA ne vont que de 0 à 63
-                PaletteSDL[i].g=Palette[i].V*4;
-                PaletteSDL[i].b=Palette[i].B*4;
+                PaletteSDL[i].r=(Palette[i].R<<2) + (Palette[i].R>>4); //Les couleurs VGA ne vont que de 0 à 63
+                PaletteSDL[i].g=(Palette[i].V<<2) + (Palette[i].V>>4);
+                PaletteSDL[i].b=(Palette[i].B<<2) + (Palette[i].B>>4);
         }
         SDL_SetPalette(Ecran_SDL,SDL_PHYSPAL|SDL_LOGPAL,PaletteSDL,0,256);
 }
