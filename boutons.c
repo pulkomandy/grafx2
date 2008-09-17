@@ -2269,7 +2269,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
           *(Pointeur2++)=*Pointeur1;
       *Pointeur2=0;
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (Compteur=0; Nom_courant[Compteur]==Nom[Compteur]; Compteur++);
+      for (Compteur=0; tolower(Nom_courant[Compteur])==tolower(Nom[Compteur]); Compteur++);
       if (Compteur>Lettres_identiques)
       {
         Lettres_identiques=Compteur;
