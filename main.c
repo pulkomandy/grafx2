@@ -373,6 +373,11 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Loupe_Decalage_X=0;
   Brouillon_Loupe_Decalage_Y=0;
 
+  // SDL
+  SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
+  SDL_EnableKeyRepeat(250, 32);
+  SDL_EnableUNICODE(SDL_ENABLE);
+
   // On initialise tous les modes vidéo
   Definition_des_modes_video();
 

@@ -8,12 +8,12 @@
 #define M_2PI 6.28318530717958647692528676656
 
 // Note: La taille du fichier GFX2.DAT est définie au début de INIT.C !
-#define POURCENTAGE_VERSION     "96.5%" // Libellé du pourcentage de la version á
+#define POURCENTAGE_VERSION     "96.5%" // Libellé du pourcentage de la version ß
 #define VERSION1                  2     // |
 #define VERSION2                  0     // |_ Numéro de version découpé en
-#define BETA1                     96    // |  plusieurs parties => 2.0 á95.5%
+#define BETA1                     96    // |  plusieurs parties => 2.0 ß95.5%
 #define BETA2                     5     // |
-#define ALPHA_BETA                "á"   // Type de la version "à" ou "á"
+#define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
 #define TAILLE_FICHIER_CONFIG     10351 // Taille du fichier GFX2.CFG
 #define NB_MODES_VIDEO            60    // Nombre de modes vidéo
 #define NB_BOUTONS                38    // Nombre de boutons à gérer

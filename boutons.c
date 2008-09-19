@@ -133,7 +133,7 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
 
-  if ((*ALPHA_BETA)=='á')
+  if ((*ALPHA_BETA)=='ß')
   {
     Print_char_transparent_dans_fenetre(43,119,'M',CM_Noir);
     Print_char_transparent_dans_fenetre(53,121,'U',CM_Noir);

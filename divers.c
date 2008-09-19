@@ -358,12 +358,13 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 
 void Clavier_de_depart(void)
 {
-	SDL_EnableKeyRepeat(250, 32);
+  //SDL_EnableUNICODE(SDL_ENABLE);
+	//SDL_EnableKeyRepeat(250, 32); // TODO … placer … un meilleur endroit
 }
 
 void Clavier_americain(void)
 {
-	UNIMPLEMENTED
+  //SDL_EnableUNICODE(SDL_DISABLE);
 }
 
 word Detection_souris(void)
@@ -870,25 +871,93 @@ word Get_key(void)
  	SDL_Event event;
 
 	Attendre_fin_de_click(); // On prend le controle de la boucle d'évènements, donc il ne faut pas qu'on rate la fin de click !
-
-        SDL_EnableUNICODE(SDL_ENABLE); // On a besoin du caractère
-
-        while(1)
-        {
-                SDL_PollEvent(&event);
-                if(event.type == SDL_KEYDOWN)
-                {
-                        // On retourne en mode standard pour la gestion normale
-                        SDL_EnableUNICODE(SDL_DISABLE);
-                        if (event.key.keysym.unicode <= 127 && event.key.keysym.unicode > 31)
-				return event.key.keysym.unicode; // Pas de souci, on est en ASCII standard
-			else
-			{
-				// Sinon c'est une touche spéciale, on retourne son scancode
-				return event.key.keysym.sym;
-			}
-                }
-        }
+  Clavier_de_depart();
+  while(1)
+  {
+    SDL_WaitEvent(&event);
+    if(event.type == SDL_KEYDOWN)
+    {
+      if ( event.key.keysym.unicode == 0)
+      {
+        return event.key.keysym.sym;
+      }
+      if ( event.key.keysym.unicode < 127)
+      {
+        //printf("ascii %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
+        return event.key.keysym.unicode; // Pas de souci, on est en ASCII standard
+      }
+      
+      // Quelques conversions Unicode-ANSI
+      switch(event.key.keysym.unicode)
+      {
+        case 0x8100:
+          return 'ü'; // ü
+        case 0x1A20:
+          return 'é'; // é
+        case 0x201A:
+          return 'è'; // è
+        case 0x9201:
+          return 'â'; // â
+        case 0x1E20:
+          return 'ä'; // ä
+        case 0x2620:
+          return 'à'; // à
+        case 0x2020: 
+          return 'å'; // å
+        case 0x2120: 
+          return 'ç'; // ç
+        case 0xC602: 
+          return 'ê'; // ê
+        case 0x3020: 
+          return 'ë'; // ë
+        case 0x6001: 
+          return 'è'; // è
+        case 0x3920: 
+          return 'ï'; // ï
+        case 0x5201: 
+          return 'î'; // î
+        case 0x8D00: 
+          return 'ì'; // ì
+        case 0x1C20: 
+          return 'ô'; // ô
+        case 0x1D20: 
+          return 'ö'; // ö
+        case 0x2220: 
+          return 'ò'; // ò
+        case 0x1320: 
+          return 'û'; // û
+        case 0x1420: 
+          return 'ù'; // ù
+        case 0xDC02: 
+          return 'ÿ'; // ÿ
+        case 0x5301: 
+          return '£'; // £
+        case 0xA000: 
+          return 'á'; // á
+        case 0xA100: 
+          return 'í'; // í
+        case 0xA200: 
+          return 'ó'; // ó
+        case 0xA300: 
+          return 'ú'; // ú
+        case 0xA400: 
+          return 'ñ'; // ñ
+        case 0xA700: 
+          return 'º'; // º
+        case 0xC600: 
+          return 'ã'; // ã
+      }
+      // Touche entre 127 et 255
+      if (event.key.keysym.unicode<256)
+      {
+        //printf("ascii etendu %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
+        return event.key.keysym.unicode;
+      }
+    	// Sinon c'est une touche spéciale, on retourne son scancode
+      //printf("non ascii %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
+    	return event.key.keysym.sym;
+    }
+  }
 }
 
 void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee, 
