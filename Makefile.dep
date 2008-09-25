@@ -1,7 +1,7 @@
 main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
   init.h boutons.h moteur.h pages.h files.h sdlscreen.h erreurs.h \
-  readini.h saveini.h
-init.o: init.c const.h struct.h global.h loadsave.h graph.h \
+  readini.h saveini.h linux.h
+init.o: init.c const.h struct.h global.h loadsave.h modesvdo.h graph.h \
   boutons.h palette.h aide.h operatio.h divers.h erreurs.h
 graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
   boutons.h pages.h global.h loadsave.h erreurs.h
@@ -17,19 +17,19 @@ boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
 palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h boutons.h pages.h
 aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
-  moteur.h
+  moteur.h tables_aide.h
 operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
   moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
 pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \
-  erreurs.h
+  erreurs.h linux.h
 loadsave.o: loadsave.c const.h struct.h global.h loadsave.h graph.h \
-  divers.h pages.h op_c.h boutons.h erreurs.h
+  divers.h pages.h op_c.h boutons.h erreurs.h linux.h
 readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
-  divers.h erreurs.h
-moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
-  special.h boutons.h operatio.h shade.h erreurs.h
+  divers.h erreurs.h linux.h
+moteur.o: moteur.c boutons.h operatio.h shade.h erreurs.h const.h \
+  struct.h global.h loadsave.h graph.h divers.h special.h linux.h
 files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h \
-  erreurs.h
+  erreurs.h linux.h
 op_c.o: op_c.c op_c.h struct.h const.h op_asm.h erreurs.h
 linux.o: linux.c
 op_asm.o: op_asm.c op_c.h struct.h const.h graph.h

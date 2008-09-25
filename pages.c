@@ -10,10 +10,7 @@
 #include "pages.h"
 #include "graph.h"
 #include "erreurs.h"
-
-#ifdef __linux__
-    #include "linux.h"
-#endif
+#include "linux.h"
 
   ///
   /// GESTION DES PAGES

@@ -23,10 +23,9 @@
 #include "erreurs.h"
 #include "readini.h"
 #include "saveini.h"
+#include "linux.h"
 
-#ifdef __linux__
-    #include "linux.h" //Fichier avec diverses fonctions qui existaient sous dos mais pas sous linux...
-#else
+#ifndef __linux__
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)

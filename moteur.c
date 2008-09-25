@@ -1,6 +1,9 @@
 //
 //  Ce fichier contient la gestion du moteur
 //
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "const.h"
 #include "struct.h"
@@ -8,18 +11,11 @@
 #include "graph.h"
 #include "divers.h"
 #include "special.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "boutons.h"
 #include "operatio.h"
 #include "shade.h"
 #include "erreurs.h"
-
-#ifdef __linux__
-    #include "linux.h"
-#endif
+#include "linux.h"
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 

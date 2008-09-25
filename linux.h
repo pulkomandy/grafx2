@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _LINUX_H_
+#define _LINUX_H_
+
 #ifdef __linux__
 
 void _splitpath(char* Buffer, char* Chemin, char* Nom_Fichier);
@@ -13,5 +15,7 @@ int filelength(int);
 
 void itoa(int source,char* dest, int longueur);
 /* Integer TO Ascii */
+
+#endif
 
 #endif

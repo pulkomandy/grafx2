@@ -14,9 +14,9 @@
 #include <unistd.h>
 
 #include "erreurs.h"
+#include "linux.h"
 
 #ifdef __linux__
-    #include "linux.h"
     #include <dirent.h>
     #define isHidden(Enreg) ((Enreg)->d_name[0]=='.' && (Enreg)->d_name[1]!='\0')
 #elif defined(__WATCOMC__)

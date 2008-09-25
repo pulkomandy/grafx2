@@ -1,3 +1,6 @@
+// Diverses fonctions qui existaient sous dos mais pas sous linux...
+#ifdef __linux__
+
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -29,3 +32,5 @@ void itoa(int source,char* dest, int longueur)
 {
 	snprintf(dest,longueur,"%d",source);
 }
+
+#endif

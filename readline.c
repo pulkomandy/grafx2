@@ -14,10 +14,7 @@
 #include "divers.h"
 #include "erreurs.h"
 #include "const.h"
-
-#ifdef __linux__
-    #include "linux.h"
-#endif
+#include "linux.h"
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
