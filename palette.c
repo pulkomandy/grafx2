@@ -576,9 +576,9 @@ void Afficher_les_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
 
   if (Bloc_selectionne)
   {
-    Palette_Modifier_jauge(Jauge_rouge,127,63,"ñ 0",176);
-    Palette_Modifier_jauge(Jauge_verte,127,63,"ñ 0",203);
-    Palette_Modifier_jauge(Jauge_bleue,127,63,"ñ 0",230);
+    Palette_Modifier_jauge(Jauge_rouge,127,63,"± 0",176);
+    Palette_Modifier_jauge(Jauge_verte,127,63,"± 0",203);
+    Palette_Modifier_jauge(Jauge_bleue,127,63,"± 0",230);
   }
   else
   {
@@ -608,15 +608,15 @@ void Palette_Reafficher_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
     // Dans le cas d'un bloc, tout … 0.
     Jauge_rouge->Position   =63;
     Fenetre_Dessiner_jauge(Jauge_rouge);
-    Print_dans_fenetre(176,172,"ñ 0",CM_Noir,CM_Clair);
+    Print_dans_fenetre(176,172,"± 0",CM_Noir,CM_Clair);
 
     Jauge_verte->Position   =63;
     Fenetre_Dessiner_jauge(Jauge_verte);
-    Print_dans_fenetre(203,172,"ñ 0",CM_Noir,CM_Clair);
+    Print_dans_fenetre(203,172,"± 0",CM_Noir,CM_Clair);
 
     Jauge_bleue->Position   =63;
     Fenetre_Dessiner_jauge(Jauge_bleue);
-    Print_dans_fenetre(230,172,"ñ 0",CM_Noir,CM_Clair);
+    Print_dans_fenetre(230,172,"± 0",CM_Noir,CM_Clair);
   }
   else
   {
@@ -940,7 +940,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
         }
@@ -977,7 +977,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
         }
@@ -1014,7 +1014,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
         }
@@ -1331,7 +1331,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
 
@@ -1352,7 +1352,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
 
@@ -1373,7 +1373,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
         }
@@ -1453,7 +1453,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
 
@@ -1474,7 +1474,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
 
@@ -1495,7 +1495,7 @@ void Bouton_Palette(void)
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"ñ 0");
+            strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
         }

@@ -110,7 +110,7 @@ void Aff_coords_rel_ou_abs(short Debut_X, short Debut_Y)
         Chaine[0]='-';
       }
       else
-        strcpy(Chaine,"ñ   0");
+        strcpy(Chaine,"±   0");
       Print_dans_menu(Chaine,2);
 
       if (Pinceau_Y>Debut_Y)
@@ -124,7 +124,7 @@ void Aff_coords_rel_ou_abs(short Debut_X, short Debut_Y)
         Chaine[0]='-';
       }
       else
-        strcpy(Chaine,"ñ   0");
+        strcpy(Chaine,"±   0");
       Print_dans_menu(Chaine,12);
     }
   }
@@ -400,7 +400,7 @@ void Ligne_12_0(void)
   }
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -512,7 +512,7 @@ void K_Ligne_12_0(void)
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Mouse_K | 0x80);
   Operation_PUSH(Couleur);
@@ -586,7 +586,7 @@ void K_Ligne_0_6(void)
   Operation_POP(&Direction);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
   Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
@@ -1082,7 +1082,7 @@ void Ellipse_12_0(void)
   }
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -1519,7 +1519,7 @@ void Courbe_34_points_1_0(void)
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Fore_color);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Fore_color);
   Operation_PUSH(Pinceau_X);
@@ -1546,7 +1546,7 @@ void Courbe_34_points_2_0(void)
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Back_color);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Back_color);
   Operation_PUSH(Pinceau_X);
@@ -2061,7 +2061,7 @@ void Polygone_12_0(void)
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -2167,7 +2167,7 @@ void Polyfill_12_0(void)
   Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -2203,7 +2203,7 @@ void Polyfill_0_8(void)
   Operation_POP(&Direction);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
 
@@ -3567,7 +3567,7 @@ void Scroll_12_0(void)
   Cacher_curseur_avant_scroll=Cacher_curseur;
   Cacher_curseur=1;
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 }
 
 
@@ -3916,7 +3916,7 @@ void Ellipse_degradee_12_0(void)
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Mouse_K);
   Operation_PUSH(Couleur);
@@ -4121,7 +4121,7 @@ void Lignes_centrees_12_0(void)
   Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
 
   if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:ñ   0   Y:ñ   0",0);
+    Print_dans_menu("X:±   0   Y:±   0",0);
 
   Operation_PUSH(Mouse_K);
   Operation_PUSH(Pinceau_X);
