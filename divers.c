@@ -336,9 +336,22 @@ void Initialiser_chrono(dword Delai)
 }
 
 void Wait_VBL(void)
-// Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple. SDL ne sait pas faire ?
+// Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple.
+// SDL ne sait pas faire, alors on simule un timer qui a une fréquence de 100Hz,
+// sans charger inutilement le CPU par du busy-wait (on n'est pas à 10ms près)
 {
-	SDL_Delay(20); // On considère un écran à 50Hz
+  const int Delai = 10;
+  
+	Uint32 debut;
+  debut = SDL_GetTicks();
+  // Première attente : le complément de "Delai" millisecondes
+  SDL_Delay(Delai - (debut % Delai));
+  // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
+  // (Remarque, Windows arrondit généralement aux 10ms supérieures)
+  while (SDL_GetTicks() / Delai == debut / Delai)
+  {
+    SDL_Delay(1);
+  } 
 }
 
 void Passer_en_mode_texte(byte Nb_lignes)
