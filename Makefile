@@ -12,7 +12,7 @@ COPT = -Wall -c -g $(SCREEN)
 LOPT = -lSDL -o $(BIN)
 endif
 
-.PHONY : all debug release clean depend
+.PHONY : all debug release clean depend zip
 
 CC = gcc
 OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o
@@ -26,6 +26,10 @@ debug : $(BIN)
 
 release : $(BIN)
 	strip $(BIN)
+
+# A raw source archive
+zip :
+	tar cvzf gfx2-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ini gfx2.cfg doc/gpl-2.0.txt
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
