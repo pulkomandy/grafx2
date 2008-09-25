@@ -542,7 +542,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
 }
 
 
-// Transformer un nombre (entier naturel) en chaŒne
+// Transformer un nombre (entier naturel) en chaîne
 void Num2str(dword Nombre,char * Chaine,byte Taille)
 {
   int Indice;
@@ -558,7 +558,7 @@ void Num2str(dword Nombre,char * Chaine,byte Taille)
   Chaine[Taille]='\0';
 }
 
-// Transformer une chaŒne en un entier naturel (renvoie -1 si ch. invalide)
+// Transformer une chaîne en un entier naturel (renvoie -1 si ch. invalide)
 int Str2num(char * Chaine)
 {
   int Valeur=0;
@@ -1032,14 +1032,14 @@ void Afficher_pixel(word X,word Y,byte Couleur)
 
 // -- Interface avec le menu et les fenêtres ---------------------------------
 
-  // Affichage d'un pixel dans le menu (le menu doŒt être visible)
+  // Affichage d'un pixel dans le menu (le menu doît être visible)
 
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
   Block_Fast(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
-  // Affichage d'un pixel dans la fenêtre (la fenêtre doŒt être visible)
+  // Affichage d'un pixel dans la fenêtre (la fenêtre doît être visible)
 
 void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 {
@@ -1354,7 +1354,7 @@ unsigned char Caractere_OEM[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 
 
 // -- Affichage de texte -----------------------------------------------------
 
-  // -- Afficher une chaŒne n'importe o— à l'écran --
+  // -- Afficher une chaîne n'importe où à l'écran --
 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -1388,10 +1388,9 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
 
   // -- Afficher un caractère dans une fenêtre --
 
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur_texte,byte Couleur_fond)
+void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
 {
   short X,Y;
-
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
 
@@ -1404,7 +1403,7 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur
 
   // -- Afficher un caractère sans fond dans une fenêtre --
 
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur)
+void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur)
 {
   short X,Y;
 
@@ -1420,7 +1419,23 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,
     }
 }
 
-  // -- Afficher une chaŒne dans une fenêtre --
+  // -- Afficher une chaîne dans une fenêtre, avec taille maxi --
+
+void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond)
+{
+  char Chaine_affichee[256];
+  strncpy(Chaine_affichee, Chaine, Taille);
+  Chaine_affichee[255]='\0';
+  
+  if (strlen(Chaine_affichee) > Taille)
+  {
+    Chaine_affichee[Taille-1]=CARACTERE_TRIANGLE_DROIT;
+    Chaine_affichee[Taille]='\0';
+  }
+  Print_dans_fenetre(X, Y, Chaine_affichee, Couleur_texte, Couleur_fond);
+}
+
+  // -- Afficher une chaîne dans une fenêtre --
 
 void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -1429,7 +1444,7 @@ void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Co
                 Chaine,Couleur_texte,Couleur_fond);
 }
 
-  // -- Afficher une chaŒne dans le menu --
+  // -- Afficher une chaîne dans le menu --
 
 void Print_dans_menu(char * Chaine, short Position)
 {
@@ -1473,15 +1488,24 @@ void Print_coordonnees(void)
 void Print_nom_fichier(void)
 {
   short Debut_X;
-
+  
   if (Menu_visible)
   {
+    // Si le nom de fichier fait plus de 12 caractères, on n'affiche que les 12 derniers
+    char * Nom_affiche = Principal_Nom_fichier;
+    int Taille_nom =strlen(Principal_Nom_fichier);
+    if (Taille_nom>12)
+    {
+      Nom_affiche=Principal_Nom_fichier + Taille_nom - 12;
+      Taille_nom = 12;
+    }
+    
     Block((LARGEUR_MENU+2+((Menu_Taille_couleur-12)<<3))*Menu_Facteur_X,
           Menu_Ordonnee_Texte,Menu_Facteur_X*96,Menu_Facteur_Y<<3,CM_Clair);
 
-    Debut_X=LARGEUR_MENU+2+((Menu_Taille_couleur-strlen(Principal_Nom_fichier))<<3);
+    Debut_X=LARGEUR_MENU+2+((Menu_Taille_couleur-Taille_nom)<<3);
 
-    Print_general(Debut_X*Menu_Facteur_X,Menu_Ordonnee_Texte,Principal_Nom_fichier,CM_Noir,CM_Clair);
+    Print_general(Debut_X*Menu_Facteur_X,Menu_Ordonnee_Texte,Nom_affiche,CM_Noir,CM_Clair);
   }
 }
 
@@ -4727,12 +4751,12 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
   // dans cette procédure par "Position_dans_degrade", on calcule la position
   // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traŒnent de ce c“té du segment se voient subir
+  //         Ú Les indices qui traînent de ce c“té du segment se voient subir
   //         ³ une incrémentation conditionnelle à leur position dans l'écran.
   //         v
   //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
   //   ^
-  //   ÀÄ Les indices qui traŒnent de ce c“té du segment se voient subir une
+  //   ÀÄ Les indices qui traînent de ce c“té du segment se voient subir une
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
@@ -4799,12 +4823,12 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
   // dans cette procédure par "Position_dans_degrade", on calcule la position
   // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traŒnent de ce c“té du segment se voient subir
+  //         Ú Les indices qui traînent de ce c“té du segment se voient subir
   //         ³ une incrémentation conditionnelle à leur position dans l'écran.
   //         v
   //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
   //   ^
-  //   ÀÄ Les indices qui traŒnent de ce c“té du segment se voient subir une
+  //   ÀÄ Les indices qui traînent de ce c“té du segment se voient subir une
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel

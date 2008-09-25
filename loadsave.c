@@ -758,7 +758,7 @@ typedef struct
   word Hauteur;
   byte Filler2[118];
   T_Palette Palette;
-} T_Header_IMG;
+} __attribute__((__packed__)) T_Header_IMG;
 
 // -- Tester si un fichier est au format IMG --------------------------------
 void Test_IMG(void)
@@ -931,7 +931,7 @@ typedef struct
   T_Palette Palette; // Palette RVB 256*3
   word Jump;     // Taille du saut entre le header et l'image:
                  //   On va s'en servir pour rajouter un commentaire
-} T_Header_PKM;
+} __attribute__((__packed__)) T_Header_PKM;
 
 // -- Tester si un fichier est au format PKM --------------------------------
 void Test_PKM(void)
@@ -1357,7 +1357,7 @@ typedef struct
   byte  Yaspect;    // Inutile
   short Xscreen;
   short Yscreen;
-}  T_Header_LBM;
+} __attribute__((__packed__)) T_Header_LBM;
 
 // -- Tester si un fichier est au format LBM --------------------------------
 
@@ -2118,7 +2118,7 @@ typedef struct
     uint32_t YPM;
     uint32_t Nb_Clr;
     uint32_t Clr_Imprt;
-} T_BMP_Header;
+} __attribute__((__packed__)) T_BMP_Header;
 
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(void)
@@ -2545,7 +2545,7 @@ typedef struct
   byte Resol;   // Informations sur la résolution (et autres)
   byte Backcol; // Couleur de fond
   byte Aspect;  // Informations sur l'aspect ratio (et autres)
-} T_LSDB; // Logical Screen Descriptor Block
+} __attribute__((__packed__)) T_LSDB; // Logical Screen Descriptor Block
 
 typedef struct
 {
@@ -2555,7 +2555,7 @@ typedef struct
   word Hauteur_image; // Hauteur de l'image
   byte Indicateur;    // Informations diverses sur l'image
   byte Nb_bits_pixel; // Nb de bits par pixel
-} T_IDB; // Image Descriptor Block
+} __attribute__((__packed__)) T_IDB; // Image Descriptor Block
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -3855,7 +3855,7 @@ typedef struct
 {
   word Width;              // Largeur de l'image
   word Height;             // Hauteur de l'image
-} T_CEL_Header1;
+} __attribute__((__packed__))  T_CEL_Header1;
 
 typedef struct
 {
@@ -3868,7 +3868,7 @@ typedef struct
   word Decalage_X;         // Decalage en X de l'image
   word Decalage_Y;         // Decalage en Y de l'image
   byte Filler2[16];        // ???
-} T_CEL_Header2;
+} __attribute__((__packed__))  T_CEL_Header2;
 
 // -- Tester si un fichier est au format CEL --------------------------------
 
@@ -4163,7 +4163,7 @@ typedef struct
       byte Octet2;
     } Couleur[16];
   } Palette[10];
-} T_KCF_Header;
+} __attribute__((__packed__)) T_KCF_Header;
 
 // -- Tester si un fichier est au format KCF --------------------------------
 
@@ -4419,7 +4419,7 @@ typedef struct
   word Hauteur;
   byte Filler2;
   byte Plans;
-} T_SCx_Header;
+} __attribute__((__packed__)) T_SCx_Header;
 
 // -- Tester si un fichier est au format SCx --------------------------------
 void Test_SCx(void)

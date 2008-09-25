@@ -79,7 +79,7 @@ void Rafficher_toute_la_chaine(word Pos_X,word Pos_Y,char * Chaine,byte Position
 //****************************************************************************
 //*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
 //****************************************************************************
-byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_saisie)
+byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type_saisie)
 // Paramètres:
 //   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
 //   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
@@ -94,13 +94,13 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
   byte Taille;
   word Touche_lue=0;
   byte Touche_autorisee;
-  byte Taille_affichee;
+  byte Taille_maxi;
   // Grosse astuce pour les noms de fichiers: La taille affichée est différente
   // de la taille maximum gérée.
   if (Type_saisie == 2)
-    Taille_affichee = 27;
+    Taille_maxi = 255;
   else
-    Taille_affichee = Taille_maxi;
+    Taille_maxi = Taille_affichee;
   byte Offset=0; // Indice du premier caractère affiché
 
 
@@ -118,6 +118,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
 
   Taille=strlen(Chaine);
   Position=(Taille<Taille_maxi)? Taille:Taille-1;
+  if (Position-Offset>Taille_affichee)
+    Offset=Position-Taille_affichee+1;
   // Formatage d'une partie de la chaine (si trop longue pour tenir)
   strncpy(Chaine_affichee, Chaine + Offset, Taille_affichee);
   Chaine_affichee[Taille_affichee]='\0';
@@ -191,10 +193,13 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
               goto affichage;
             }
       break;
-      case  SDLK_BACKSPACE :
+      case  SDLK_BACKSPACE : // Backspace : combinaison de gauche + suppr
         if (Position)
-        {
-          Supprimer_caractere(Chaine,--Position);
+        {       
+          Position--;
+          if (Offset > 0 && (Position == 0 || Position < (Offset + 1)))
+            Offset--;
+          Supprimer_caractere(Chaine,Position);
           Taille--;
           // Effacement de la chaîne
           Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
@@ -242,8 +247,6 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
             if (Taille<Taille_maxi)
             {
               Position++;
-              //if (Position > Taille_affichee + Offset - 2 && !(Position<Taille) && (Position<Taille_maxi-1))
-              //if (Offset + Taille_affichee < Taille_maxi && (Position == Taille || (Position > Taille_affichee + Offset - 2)))
               if (Chaine_affichee[Position-Offset]==CARACTERE_TRIANGLE_DROIT || Position-Offset>=Taille_affichee)
                 Offset++;
             }
@@ -270,7 +273,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
 
   // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
-        Taille_maxi*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
   // On raffiche la chaine correctement
   if (Type_saisie==1)
   {
@@ -282,7 +285,9 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_sai
     Print_dans_fenetre(Pos_X+((Taille_maxi-Taille)<<3),Pos_Y,Chaine,COULEUR_TEXTE,COULEUR_FOND);
   }
   else
-    Print_dans_fenetre(Pos_X,Pos_Y,Chaine,COULEUR_TEXTE,COULEUR_FOND);
+  {
+    Print_dans_fenetre_limite(Pos_X,Pos_Y,Chaine,Taille_affichee,COULEUR_TEXTE,COULEUR_FOND);
+  }
 
   return (Touche_lue==SDLK_RETURN);
 }

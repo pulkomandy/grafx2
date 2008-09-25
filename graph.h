@@ -38,8 +38,9 @@ void Recadrer_palette(void);
 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
 void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur_texte,byte Couleur_fond);
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,char Caractere,byte Couleur);
+void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond);
+void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond);
+void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur);
 void Print_dans_menu(char * Chaine, short Position);
 void Print_coordonnees(void);
 void Print_nom_fichier(void);

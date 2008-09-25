@@ -1,5 +1,5 @@
 
-byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_maxi,byte Type_saisie);
+byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type_saisie);
 // Paramètres:
 //   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
 //   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)

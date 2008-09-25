@@ -140,6 +140,19 @@ void Rechercher_drives(void)
 // Renvoie 0 si ok, -1 si problème.
 int ActiverLecteur(int NumeroLecteur)
 {
+  // Cas particulier du lecteur ~
+  if (Drive[NumeroLecteur].Lettre == '~')
+  {
+    char * Home = getenv("HOME");
+    if (! Home)
+      return -1;
+  #ifdef __linux__
+    return chdir(Home);
+  #else
+    return ! SetCurrentDirectory(Home);
+  #endif
+  }
+
   #ifdef __linux__
     char NomLecteur[]=" ";
     NomLecteur[0]=Drive[NumeroLecteur].Lettre;

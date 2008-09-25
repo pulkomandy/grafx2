@@ -2133,7 +2133,7 @@ void Print_Nom_fichier_dans_selecteur(void)
 //
 {
   Block(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3,CM_Clair);
-  Print_dans_fenetre(13+9*8,90,Principal_Nom_fichier,CM_Noir,CM_Clair);
+  Print_dans_fenetre_limite(13+9*8,90,Principal_Nom_fichier,27,CM_Noir,CM_Clair);
 }
 
 
@@ -2593,7 +2593,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
-        if (Readline(13+9*8,90,Principal_Nom_fichier,50,2))
+        if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
