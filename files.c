@@ -18,7 +18,7 @@
 
 #ifdef __linux__
     #include <dirent.h>
-    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.' && (Enreg)->d_name[1]!='\0')
+    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
 #elif defined(__WATCOMC__)
     #include <direct.h>
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
@@ -92,7 +92,7 @@ int Fichier_existe(char * Fichier)
 // Conventions:
 //
 // * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
-//   qu'un findfirst dans le répertoire courant … faire:
+//   qu'un findfirst dans le répertoire courant à faire:
 
 
 // -- Déstruction de la liste chaŒnée ---------------------------------------
@@ -170,6 +170,7 @@ char * Nom_formate(char * Nom)
 void Ajouter_element_a_la_liste(struct dirent* Enreg)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
+  struct stat Infos_enreg;
   // Pointeur temporaire d'insertion
   struct Element_de_liste_de_fileselect * Element_temporaire;
 
@@ -179,15 +180,8 @@ void Ajouter_element_a_la_liste(struct dirent* Enreg)
   // On met a jour le nouvel emplacement:
   strcpy(Element_temporaire->NomAbrege,Nom_formate(Enreg->d_name));
   strcpy(Element_temporaire->NomComplet,Enreg->d_name);
-  #ifdef __linux__
-    Element_temporaire->Type = (Enreg->d_type == DT_DIR);
-  #elif __WATCOMC__
-    Element_temporaire->Type = (Enreg->d_attr & _A_SUBDIR);
-  #else
-    struct stat Infos_enreg;
-    stat(Enreg->d_name,&Infos_enreg);
-    Element_temporaire->Type = S_ISDIR(Infos_enreg.st_mode);
-  #endif  
+  stat(Enreg->d_name,&Infos_enreg);
+  Element_temporaire->Type = S_ISDIR(Infos_enreg.st_mode); 
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
   Element_temporaire->Precedent=NULL;
@@ -252,36 +246,37 @@ void Lire_liste_des_fichiers(byte Format_demande)
   // On lit tous les répertoires:
 
   Repertoire_Courant=opendir(getcwd(NULL,0));
-  Enreg=readdir(Repertoire_Courant);
-  while (Enreg)
+  while ((Enreg=readdir(Repertoire_Courant)))
   {
-    // Si l'élément n'est pas le répertoire courant
-    if ( (Enreg->d_name[0]!='.') || (Enreg->d_name[1] != 0))
+    // On ignore le répertoire courant
+    if ( !strcmp(Enreg->d_name, "."))
     {
-    	stat(Enreg->d_name,&Infos_enreg);
-        // et que l'élément trouvé est un répertoire
-        if( S_ISDIR(Infos_enreg.st_mode) &&
-          // et qu'il n'est pas caché
-          ((!isHidden(Enreg)) || !Config.Lire_les_repertoires_caches))
-        {
-          // On rajoute le répertore à la liste
-          Ajouter_element_a_la_liste(Enreg);
-          Liste_Nb_repertoires++;
-        }
-        else if (S_ISREG(Infos_enreg.st_mode) //Il s'agit d'un fichier
-          && ((!isHidden(Enreg)) || !Config.Lire_les_fichiers_caches)) //Il n'est pas caché
-        {
-          if (VerifieExtension(Enreg->d_name, Filtre))
-          {
-            // On rajoute le fichier à la liste
-            Ajouter_element_a_la_liste(Enreg);
-            Liste_Nb_fichiers++;
-          }
-        }
+      continue;
     }
-
-    // On cherche l'élément suivant
-    Enreg=readdir(Repertoire_Courant);
+    stat(Enreg->d_name,&Infos_enreg);
+    // et que l'élément trouvé est un répertoire
+    if( S_ISDIR(Infos_enreg.st_mode) &&
+      // et que c'est ".."
+      (!strcmp(Enreg->d_name, "..") ||
+      // ou qu'il n'est pas caché
+       Config.Lire_les_repertoires_caches ||
+     !isHidden(Enreg)))
+    {
+      // On rajoute le répertore à la liste
+      Ajouter_element_a_la_liste(Enreg);
+      Liste_Nb_repertoires++;
+    }
+    else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
+      (Config.Lire_les_fichiers_caches || //Il n'est pas caché
+      !isHidden(Enreg))) 
+    {
+      if (VerifieExtension(Enreg->d_name, Filtre))
+      {
+        // On rajoute le fichier à la liste
+        Ajouter_element_a_la_liste(Enreg);
+        Liste_Nb_fichiers++;
+      }
+    }
   }
 
   closedir(Repertoire_Courant);
@@ -357,11 +352,11 @@ void Trier_la_liste_des_fichiers(void)
           if (Element_suivant_le_suivant!=NULL)
             Element_suivant_le_suivant->Precedent=Element_courant;
 
-          // On fait bien attention … modifier la tête de liste en cas de besoin
+          // On fait bien attention à modifier la tête de liste en cas de besoin
           if (Element_courant==Liste_du_fileselect)
             Liste_du_fileselect=Element_suivant;
 
-          // Ensuite, on se prépare … étudier les éléments précédents:
+          // Ensuite, on se prépare à étudier les éléments précédents:
           Element_courant=Element_precedent;
 
           // Et on constate que la liste n'était pas encore génialement triée
@@ -401,12 +396,12 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
   // On vérifie s'il y a au moins 1 fichier dans la liste:
   if (Liste_Nb_elements>0)
   {
-    // On commence par chercher … pointer sur le premier fichier visible:
+    // On commence par chercher à pointer sur le premier fichier visible:
     Element_courant=Liste_du_fileselect;
     for (;Decalage_premier>0;Decalage_premier--)
       Element_courant=Element_courant->Suivant;
 
-    // Pour chacun des 10 éléments inscriptibles … l'écran
+    // Pour chacun des 10 éléments inscriptibles à l'écran
     for (Indice=0;Indice<10;Indice++)
     {
       // S'il est sélectionné:
@@ -434,7 +429,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
       // On affiche l'élément
       Print_dans_fenetre(9,90+FILENAMESPACE+(Indice<<3),Element_courant->NomAbrege,Couleur_texte,Couleur_fond);
 
-      // On passe … la ligne suivante
+      // On passe à la ligne suivante
       Decalage_select--;
       Element_courant=Element_courant->Suivant;
       if (!Element_courant)
@@ -452,14 +447,12 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 //                   sélecteur et le premier fichier de la liste
 //
 // Decalage_select  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier … récupérer
+//                   sélecteur et le fichier à récupérer
 //
 // Libelle          = Chaine de réception du libellé de l'élément
 //
 {
   struct Element_de_liste_de_fileselect * Element_courant;
-  char * Curseur;
-
 
   // On vérifie s'il y a au moins 1 fichier dans la liste:
   if (Liste_Nb_elements>0)
@@ -578,7 +571,7 @@ void Select_Home(short * Decalage_premier,short * Decalage_select)
 short Calculer_decalage_click_dans_fileselector(void)
 /*
   Renvoie le décalage dans le sélecteur de fichier sur lequel on a clické.
-  Renvoie le décalage du dernier fichier si on a clické au del….
+  Renvoie le décalage du dernier fichier si on a clické au delà.
   Renvoie -1 si le sélecteur est vide.
 */
 {
