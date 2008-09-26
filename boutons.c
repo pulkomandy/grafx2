@@ -40,7 +40,7 @@ void Bouton_***(void)
 
   Ouvrir_fenetre(310,190,"***");
 
-  Fenetre_Definir_bouton_normal(103,137,80,14,"OK",0,1,0x001C); // 1
+  Fenetre_Definir_bouton_normal(103,137,80,14,"OK",0,1,SDLK_RETURN); // 1
   Fenetre_Definir_bouton_scroller(18,44,88,16,4,0);             // 2
 
   Afficher_curseur();
@@ -67,12 +67,12 @@ void Message_Non_disponible(void)
   Print_dans_fenetre(8,20,"This function will",CM_Noir,CM_Clair);
   Print_dans_fenetre(12,28,"be implemented in",CM_Noir,CM_Clair);
   Print_dans_fenetre(16,36,"a later version.",CM_Noir,CM_Clair);
-  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,0x001C); // 1
+  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
   Afficher_curseur();
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=0x0001) && (Touche!=0x0018));
+  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
   Fermer_fenetre();
 
@@ -96,12 +96,12 @@ void Message_Memoire_insuffisante(void)
   Print_dans_fenetre(8,20,"Please consult the manual",CM_Noir,CM_Clair);
   Print_dans_fenetre(24,28,"to know how to obtain",CM_Noir,CM_Clair);
   Print_dans_fenetre(36,36,"more memory space.",CM_Noir,CM_Clair);
-  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,0x001C); // 1
+  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
   Afficher_curseur();
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=0x0001) && (Touche!=0x0018));
+  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
   Fermer_fenetre();
   Afficher_curseur();
@@ -114,7 +114,7 @@ void Bouton_Message_initial(void)
   char  Chaine[21];
   int   Pos_X,Offs_Y,X,Y;
 
-  sprintf(Chaine,"GrafX 2.00 %s%s",ALPHA_BETA,POURCENTAGE_VERSION);
+  sprintf(Chaine,"GrafX %d.%.2d%s%s",VERSION1, VERSION2, ALPHA_BETA,POURCENTAGE_VERSION);
   Ouvrir_fenetre(260,172,Chaine);
 
   Fenetre_Afficher_cadre_creux(10,20,239,62);
@@ -133,15 +133,8 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
 
-  if ((*ALPHA_BETA)=='ß')
-  {
-    Print_char_transparent_dans_fenetre(43,119,'M',CM_Noir);
-    Print_char_transparent_dans_fenetre(53,121,'U',CM_Noir);
-    Print_char_transparent_dans_fenetre(63,119,'S',CM_Noir);
-    Print_char_transparent_dans_fenetre(74,120,'T',CM_Noir);
-  }
     SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(260*Menu_Facteur_X))>>1,(Hauteur_ecran-(172*Menu_Facteur_Y))>>1,260*Menu_Facteur_X,172*Menu_Facteur_Y);
-  Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,0x001C); // 1
+  Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,SDLK_RETURN); // 1
 
   Afficher_curseur();
 
@@ -149,7 +142,7 @@ void Bouton_Message_initial(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
   }
-  while ((Bouton_clicke!=1) && (Touche!=0x0001) && (Touche!=0x0018));
+  while ((Bouton_clicke!=1) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
   Fermer_fenetre();
   Afficher_curseur();
@@ -388,9 +381,9 @@ byte Bouton_Quitter_Routine_locale(void)
 
   // On commence par afficher la fenêtre de QUIT
   Ouvrir_fenetre(160,84,"Quit ?");
-  Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,0x0001);          // 1
-  Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,0x001F);   // 2
-  Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,0x0020);// 3
+  Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,SDLK_ESCAPE);          // 1
+  Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
+  Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
   Afficher_curseur();
 
   do
@@ -509,17 +502,17 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
   Ouvrir_fenetre(176,150,En_tete);
 
   Fenetre_Definir_bouton_palette(6,38);                            // 1
-  Fenetre_Definir_bouton_normal( 7, 19,78,14,"Clear" ,1,1,0x002E); // 2
-  Fenetre_Definir_bouton_normal(91, 19,78,14,"Invert",1,1,0x0017); // 3
+  Fenetre_Definir_bouton_normal( 7, 19,78,14,"Clear" ,1,1,SDLK_c); // 2
+  Fenetre_Definir_bouton_normal(91, 19,78,14,"Invert",1,1,SDLK_i); // 3
   if (Cancel)
   {
-    Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,0x001C); // 4
-    Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,0x0001); // 5
+    Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
+    Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,SDLK_ESCAPE); // 5
     // On enregistre la table dans un backup au cas où on ferait Cancel
     memcpy(Backup_table,Table,256);
   }
   else
-    Fenetre_Definir_bouton_normal(49,129,78,14,"OK"    ,0,1,0x001C); // 4
+    Fenetre_Definir_bouton_normal(49,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
 
   // On affiche l'état actuel de la table
   for (Indice=0; Indice<=255; Indice++)
@@ -567,8 +560,8 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // Récupération d'une couleur derrière le menu
-      case 0x0033 :
+      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_COMMA :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
         {
@@ -748,44 +741,44 @@ void Bouton_Settings(void)
   Print_dans_fenetre(292,123,"Y"               ,CM_Fonce,CM_Clair);
 
   // Boutons de fontes
-  Fenetre_Definir_bouton_normal(17,28,59,14,"Classic",0,1,0xFFFF); // 1
-  Fenetre_Definir_bouton_normal(91,28,59,14,"Fun"    ,0,1,0xFFFF); // 2
+  Fenetre_Definir_bouton_normal(17,28,59,14,"Classic",0,1,SDLK_LAST); // 1
+  Fenetre_Definir_bouton_normal(91,28,59,14,"Fun"    ,0,1,SDLK_LAST); // 2
 
   // Bouton Show/Hide dans le fileselect
-  Fenetre_Definir_bouton_normal(167, 28,131,14,"Hidden files:   ",0,1,0xFFFF); // 3
-  Fenetre_Definir_bouton_normal(167, 43,131,14,"Hidden dir. :   ",0,1,0xFFFF); // 4
-  Fenetre_Definir_bouton_normal(167, 58,131,14,"System dir. :   ",0,1,0xFFFF); // 5
+  Fenetre_Definir_bouton_normal(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 3
+  Fenetre_Definir_bouton_normal(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 4
+  Fenetre_Definir_bouton_normal(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
 
   // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9, 81,107,14,"Limits   :   ",0,1,0xFFFF); // 6
+  Fenetre_Definir_bouton_normal(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 6
   // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9, 96,107,14,"Clear pal:   ",0,1,0xFFFF); // 7
+  Fenetre_Definir_bouton_normal(  9, 96,107,14,"Clear pal:   ",0,1,SDLK_LAST); // 7
   // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9,111,107,14,"Max prev.:   ",0,1,0xFFFF); // 8
+  Fenetre_Definir_bouton_normal(  9,111,107,14,"Max prev.:   ",0,1,SDLK_LAST); // 8
   // Bouton Effectuer des backups à chaque sauvegarde
-  Fenetre_Definir_bouton_normal(  9,126,107,14,"Backup   :   ",0,1,0xFFFF); // 9
+  Fenetre_Definir_bouton_normal(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 9
   // Bouton Choix du curseur
-  Fenetre_Definir_bouton_normal(  9,141,107,14,"Cursor:      ",0,1,0xFFFF); // 10
+  Fenetre_Definir_bouton_normal(  9,141,107,14,"Cursor:      ",0,1,SDLK_LAST); // 10
 
   // Bouton Safety colors
-  Fenetre_Definir_bouton_normal(117, 81,131,14,"Safe. colors:   ",0,1,0xFFFF); // 11
+  Fenetre_Definir_bouton_normal(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 11
   // Bouton Adjust Brush Pick
-  Fenetre_Definir_bouton_normal(117, 96,131,14,"AdjBrushPick:   ",0,1,0xFFFF); // 12
+  Fenetre_Definir_bouton_normal(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 12
   // Bouton Separate colors
-  Fenetre_Definir_bouton_normal(117,111,131,14,"Separate col:   ",0,1,0xFFFF); // 13
+  Fenetre_Definir_bouton_normal(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 13
   // Bouton Passer dans la résolution appropriée après un chargement
-  Fenetre_Definir_bouton_normal(117,126,131,14,"Auto-set res:   ",0,1,0xFFFF); // 14
+  Fenetre_Definir_bouton_normal(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 14
   // Bouton Adapter la palette après un chargement (<=> Shift+BkSpc)
-  Fenetre_Definir_bouton_normal(117,141,131,14,"Coords:         ",0,1,0xFFFF); // 15
+  Fenetre_Definir_bouton_normal(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 15
 
     // Bouton Reload
-  Fenetre_Definir_bouton_normal(  6,163, 51,14,"Reload"       ,0,1,0xFFFF); // 16
+  Fenetre_Definir_bouton_normal(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 16
     // Bouton Auto-save
-  Fenetre_Definir_bouton_normal( 73,163,107,14,"Auto-save:   ",0,1,0xFFFF); // 17
+  Fenetre_Definir_bouton_normal( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 17
     // Bouton Save
-  Fenetre_Definir_bouton_normal(183,163, 51,14,"Save"         ,0,1,0xFFFF); // 18
+  Fenetre_Definir_bouton_normal(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 18
     // Bouton Close
-  Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,0x0001); // 19
+  Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,SDLK_ESCAPE); // 19
 
   // Jauges de sensibilité de la souris (X puis Y)
   Fenetre_Definir_bouton_scroller(265,99,56,255,1,0); // 20
@@ -900,7 +893,7 @@ void Bouton_Settings(void)
     if ((Bouton_clicke>=1) && (Bouton_clicke<=17))
       Settings_Afficher_config(&Config_choisie);
   }
-  while ( (Bouton_clicke!=19) && (Touche!=0x001C) );
+  while ( (Bouton_clicke!=19) && (Touche!=SDLK_RETURN) );
 
   Config=Config_choisie;
 
@@ -1108,12 +1101,12 @@ void Bouton_Copy_page(void)
 
   Ouvrir_fenetre(168,137,"Copy to spare page");
 
-  Fenetre_Definir_bouton_normal(10, 20,148,14,"Pixels + palette" , 0,1,0x001C); // 1
-  Fenetre_Definir_bouton_normal(10, 37,148,14,"Pixels only"      , 3,1,0x002D); // 2
-  Fenetre_Definir_bouton_normal(10, 54,148,14,"Palette only"     , 1,1,0x0019); // 3
-  Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,0x002E); // 4
-  Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,0x0013); // 5
-  Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,0x0001); // 6
+  Fenetre_Definir_bouton_normal(10, 20,148,14,"Pixels + palette" , 0,1,SDLK_RETURN); // 1
+  Fenetre_Definir_bouton_normal(10, 37,148,14,"Pixels only"      , 3,1,SDLK_x); // 2
+  Fenetre_Definir_bouton_normal(10, 54,148,14,"Palette only"     , 1,1,SDLK_p); // 3
+  Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
+  Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
+  Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,SDLK_ESCAPE); // 6
 
   Afficher_curseur();
 
@@ -1317,8 +1310,8 @@ void Bouton_Resol(void)
   Print_dans_fenetre(102,170,"Imperfect"       ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(196,170,"Unsupported"     ,CM_Fonce,CM_Clair);
 
-  Fenetre_Definir_bouton_normal(223, 18,67,14,"OK"      ,0,1,0x001C); // 1
-  Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,0x0001); // 2
+  Fenetre_Definir_bouton_normal(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
+  Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,SDLK_ESCAPE); // 2
 
   Fenetre_Definir_bouton_saisie( 60, 35,4);                           // 3
   Bouton_saisie_Width=Fenetre_Liste_boutons_special;
@@ -1352,7 +1345,7 @@ void Bouton_Resol(void)
 
   // Les 12 petits boutons indiquant l'état des modes
   for (Temp=0; Temp<12; Temp++)
-    Fenetre_Definir_bouton_normal(17,70+(Temp<<3),13,7,"",0,1,0xFFFF);// 7..18
+    Fenetre_Definir_bouton_normal(17,70+(Temp<<3),13,7,"",0,1,SDLK_LAST);// 7..18
 
   Fenetre_Dessiner_bouton_normal( 16,170,13,7,"",0,0);
   Cocher_bouton_mode( 18,172,0);
@@ -1469,7 +1462,7 @@ void Bouton_Resol(void)
     // Gestion des touches de déplacement dans la liste
     switch (Touche)
     {
-      case 0x0048 : // Haut
+      case SDLK_UP : // Haut
         if (Position_curseur>0)
           Position_curseur--;
         else
@@ -1477,7 +1470,7 @@ void Bouton_Resol(void)
             Debut_liste--;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
-      case 0x0050 : // Bas
+      case SDLK_DOWN : // Bas
         if (Position_curseur<11)
           Position_curseur++;
         else
@@ -1485,7 +1478,7 @@ void Bouton_Resol(void)
             Debut_liste++;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
-      case 0x0049 : // PageUp
+      case SDLK_PAGEUP : // PageUp
         if (Position_curseur>0)
           Position_curseur=0;
         else
@@ -1497,7 +1490,7 @@ void Bouton_Resol(void)
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
-      case 0x0051 : // PageDown
+      case SDLK_PAGEDOWN : // PageDown
         if (Position_curseur<11)
           Position_curseur=11;
         else
@@ -1509,12 +1502,12 @@ void Bouton_Resol(void)
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
-      case 0x0047 : // Home
+      case SDLK_HOME : // Home
         Debut_liste=0;
         Position_curseur=0;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
-      case 0x004F : // End
+      case SDLK_END : // End
         Debut_liste=NB_MODES_VIDEO-12;
         Position_curseur=11;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
@@ -1778,13 +1771,13 @@ void Bouton_Degrades(void)
   Scroller_de_melange=Fenetre_Liste_boutons_scroller;
     // Définition du bouton de sens
   Fenetre_Definir_bouton_normal(8,22,15,14,
-    (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,0x000F); // 4
+    (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
     // Définition du bouton de technique
-  Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,0x010F); // 5
+  Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,SDLK_TAB|0x1000); // 5
   Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
 
-  Fenetre_Definir_bouton_normal(178,112,51,14,"OK",0,1,0x001C);     // 6
-  Fenetre_Definir_bouton_normal(123,112,51,14,"Cancel",0,1,0x0001); // 7
+  Fenetre_Definir_bouton_normal(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
+  Fenetre_Definir_bouton_normal(123,112,51,14,"Cancel",0,1,SDLK_ESCAPE); // 7
 
   Print_dans_fenetre(5,60,"MIX",CM_Fonce,CM_Clair);
 
@@ -1916,8 +1909,8 @@ void Bouton_Degrades(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // Récupération d'une couleur derrière le menu
-      case 0x0033 :
+      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_COMMA :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
         {
@@ -2033,13 +2026,13 @@ void Bouton_Menu_pinceaux(void)
 
   Fenetre_Afficher_cadre(8,21,294,107);
 
-  Fenetre_Definir_bouton_normal(122,133,67,14,"Cancel",0,1,0x0001); // 1
+  Fenetre_Definir_bouton_normal(122,133,67,14,"Cancel",0,1,SDLK_ESCAPE); // 1
 
   for (Indice=0; Indice<NB_SPRITES_PINCEAU; Indice++)
   {
     Pos_X=13+((Indice%12)*24);
     Pos_Y=27+((Indice/12)*25);
-    Fenetre_Definir_bouton_normal(Pos_X  ,Pos_Y  ,20,20,"",0,1,0xFFFF);
+    Fenetre_Definir_bouton_normal(Pos_X  ,Pos_Y  ,20,20,"",0,1,SDLK_LAST);
     Afficher_pinceau_dans_fenetre(Pos_X+2,Pos_Y+2,Indice);
   }
 
@@ -2322,7 +2315,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       Ouvrir_fenetre(310,190+FILENAMESPACE,"Load picture");
     else
       Ouvrir_fenetre(310,190+FILENAMESPACE,"Load brush");
-    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Load",0,1,0x001C); // 1
+    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Load",0,1,SDLK_RETURN); // 1
   }
   else
   {
@@ -2330,7 +2323,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       Ouvrir_fenetre(310,190+FILENAMESPACE,"Save picture");
     else
       Ouvrir_fenetre(310,190+FILENAMESPACE,"Save brush");
-    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Save",0,1,0x001C); // 1
+    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Save",0,1,SDLK_RETURN); // 1
     if (Principal_Format==0) // Correction du *.*
     {
       Principal_Format=Principal_Format_fichier;
@@ -2349,8 +2342,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
-  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,0x0001); // 2
-  Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,0x0053); // 3
+  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,SDLK_DELETE); // 3
 
   // Cadre autour des formats
   Fenetre_Afficher_cadre(  7, 51,103, 35);
@@ -2392,7 +2385,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   for (Temp=0; Temp<Nb_drives; Temp++)
   {
     Nom_drive[0]=Drive[Temp].Lettre;
-    Fenetre_Definir_bouton_normal(8+((Temp%13)*20),Drives_Debut_Y+((Temp/13)*12),19,11,Nom_drive,0,1,Drive[Temp].Touche); // 9 et +
+    Fenetre_Definir_bouton_normal(8+((Temp%13)*20),Drives_Debut_Y+((Temp/13)*12),19,11,Nom_drive,0,1,(Temp < 10) ? SDLK_F1 + Temp : SDLK_LAST); // 9 et +
     Fenetre_Afficher_sprite_drive(18+((Temp%13)*20),Drives_Debut_Y+2+((Temp/13)*12),Drive[Temp].Type);
   }
 
@@ -2635,44 +2628,44 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
     switch (Touche)
     {
-      case 0x0000 : break;
-      case 0x0050 : // Bas
+      case SDLK_UNKNOWN : break;
+      case SDLK_DOWN : // Bas
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Scroll_Down(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x0048 : // Haut
+      case SDLK_UP : // Haut
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Scroll_Up(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x0051 : // Page Down
+      case SDLK_PAGEDOWN : // Page Down
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x0049 : // Page Up
+      case SDLK_PAGEUP : // Page Up
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x004F : // End
+      case SDLK_END : // End
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_End(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x0047 : // Home
+      case SDLK_HOME : // Home
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Home(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         break;
-      case 0x000E : // Backspace
+      case SDLK_BACKSPACE : // Backspace
         *Fichier_recherche=0;
         if (Principal_Repertoire_courant[3]) // Si on n'est pas à la racine...
         {                              // ... on va dans le répertoire parent.
@@ -3599,20 +3592,20 @@ void Bouton_Menu_Loupe(void)
 
   Ouvrir_fenetre(141,114,"Zoom factors");
 
-  Fenetre_Definir_bouton_normal(45,88,51,14,"Cancel",0,1,0x0001); // 1
+  Fenetre_Definir_bouton_normal(45,88,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
 
-  Fenetre_Definir_bouton_normal(  9,25,27,14, "x2",0,Loupe_Facteur!= 2,0x003B);    // 2
-  Fenetre_Definir_bouton_normal( 41,25,27,14, "x3",0,Loupe_Facteur!= 3,0x003C);    // 3
-  Fenetre_Definir_bouton_normal( 73,25,27,14, "x4",0,Loupe_Facteur!= 4,0x003D);    // 4
-  Fenetre_Definir_bouton_normal(105,25,27,14, "x5",0,Loupe_Facteur!= 5,0x003E);    // 5
-  Fenetre_Definir_bouton_normal(  9,45,27,14, "x6",0,Loupe_Facteur!= 6,0x003F);    // 6
-  Fenetre_Definir_bouton_normal( 41,45,27,14, "x8",0,Loupe_Facteur!= 8,0x0040);    // 7
-  Fenetre_Definir_bouton_normal( 73,45,27,14,"x10",0,Loupe_Facteur!=10,0x0041);    // 8
-  Fenetre_Definir_bouton_normal(105,45,27,14,"x12",0,Loupe_Facteur!=12,0x0042);    // 9
-  Fenetre_Definir_bouton_normal(  9,65,27,14,"x14",0,Loupe_Facteur!=14,0x0043);    // 10
-  Fenetre_Definir_bouton_normal( 41,65,27,14,"x16",0,Loupe_Facteur!=16,0x0044);    // 11
-  Fenetre_Definir_bouton_normal( 73,65,27,14,"x18",0,Loupe_Facteur!=18,0x0085);    // 12
-  Fenetre_Definir_bouton_normal(105,65,27,14,"x20",0,Loupe_Facteur!=20,0x0086);    // 13
+  Fenetre_Definir_bouton_normal(  9,25,27,14, "x2",0,Loupe_Facteur!= 2,SDLK_F1);    // 2
+  Fenetre_Definir_bouton_normal( 41,25,27,14, "x3",0,Loupe_Facteur!= 3,SDLK_F2);    // 3
+  Fenetre_Definir_bouton_normal( 73,25,27,14, "x4",0,Loupe_Facteur!= 4,SDLK_F3);    // 4
+  Fenetre_Definir_bouton_normal(105,25,27,14, "x5",0,Loupe_Facteur!= 5,SDLK_F4);    // 5
+  Fenetre_Definir_bouton_normal(  9,45,27,14, "x6",0,Loupe_Facteur!= 6,SDLK_F5);    // 6
+  Fenetre_Definir_bouton_normal( 41,45,27,14, "x8",0,Loupe_Facteur!= 8,SDLK_F6);    // 7
+  Fenetre_Definir_bouton_normal( 73,45,27,14,"x10",0,Loupe_Facteur!=10,SDLK_F7);    // 8
+  Fenetre_Definir_bouton_normal(105,45,27,14,"x12",0,Loupe_Facteur!=12,SDLK_F8);    // 9
+  Fenetre_Definir_bouton_normal(  9,65,27,14,"x14",0,Loupe_Facteur!=14,SDLK_F9);    // 10
+  Fenetre_Definir_bouton_normal( 41,65,27,14,"x16",0,Loupe_Facteur!=16,SDLK_F10);    // 11
+  Fenetre_Definir_bouton_normal( 73,65,27,14,"x18",0,Loupe_Facteur!=18,SDLK_F11);    // 12
+  Fenetre_Definir_bouton_normal(105,65,27,14,"x20",0,Loupe_Facteur!=20,SDLK_F12);    // 13
 
   Afficher_curseur();
 
@@ -3714,8 +3707,8 @@ void Bouton_Menu_Grille(void)
 
   Ouvrir_fenetre(133,98,"Grid");
 
-  Fenetre_Definir_bouton_normal(12,72,51,14,"Cancel",0,1,0x0001); // 1
-  Fenetre_Definir_bouton_normal(70,72,51,14,"OK"    ,0,1,0x001C); // 2
+  Fenetre_Definir_bouton_normal(12,72,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(70,72,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Print_dans_fenetre(19,26, "X:",CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(37,24,2); // 3
@@ -3861,29 +3854,29 @@ void Bouton_Brush_FX(void)
   Fenetre_Afficher_cadre(  6,83,122,53);
   Fenetre_Afficher_cadre(137,83,167,53);
 
-  Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,0x0001); // 1
-  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,1,1,0x002D); // 2
-  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,1,1,0x0015); // 3
-  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,0xFFFF); // 4
-  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,0xFFFF); // 5
-  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,0xFFFF); // 6
-  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,2,1,0x0014); // 7
-  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,1,1,0x0020); // 8
-  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,1,1,0x0013); // 9
-  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",1,1,0x0022); // 10
+  Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,1,1,SDLK_x); // 2
+  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,1,1,SDLK_y); // 3
+  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,SDLK_LAST); // 4
+  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,SDLK_LAST); // 5
+  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,SDLK_LAST); // 6
+  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,2,1,SDLK_t); // 7
+  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,1,1,SDLK_d); // 8
+  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,1,1,SDLK_r); // 9
+  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",1,1,SDLK_g); // 10
 
   // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
-  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,0x0047); // 11
-  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,0x0049); // 12
-  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,0x004C); // 13
-  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,0x004F); // 14
-  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,0x0051); // 15
+  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,SDLK_HOME); // 11
+  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,SDLK_PAGEUP); // 12
+  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,SDLK_KP5); // 13
+  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,SDLK_END); // 14
+  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,SDLK_PAGEDOWN); // 15
 
-  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",1,1,0x0018); // 16
-  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,1,1,0x0031); // 17
+  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",1,1,SDLK_o); // 16
+  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,1,1,SDLK_n); // 17
 
-  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",1,1,0x0026); // 18
-  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",1,1,0x001F); // 19
+  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",1,1,SDLK_l); // 18
+  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",1,1,SDLK_s); // 19
 
   Print_dans_fenetre( 80, 24,"Shape modifications",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 10, 36,"Mirror",CM_Fonce,CM_Clair);
@@ -4052,13 +4045,13 @@ void Bouton_Smooth_Menu(void)
 
   Ouvrir_fenetre(142,109,"Smooth");
 
-  Fenetre_Definir_bouton_normal(82,59,53,14,"Cancel",0,1,0x0001); // 1
-  Fenetre_Definir_bouton_normal(82,88,53,14,"OK"    ,0,1,0x001C); // 2
+  Fenetre_Definir_bouton_normal(82,59,53,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(82,88,53,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Fenetre_Afficher_cadre(6,17,130,37);
   for (X=11,Y=0; Y<4; X+=31,Y++)
   {
-    Fenetre_Definir_bouton_normal(X,22,27,27,"",0,1,0xFFFF);      // 3,4,5,6
+    Fenetre_Definir_bouton_normal(X,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
     for (J=0; J<3; J++)
       for (I=0; I<3; I++)
         Print_char_dans_fenetre(X+2+(I<<3),24+(J<<3),'0'+Smooth_Matrice_defaut[Y][I][J],CM_Noir,CM_Clair);
@@ -4224,14 +4217,14 @@ void Bouton_Colorize_Menu(void)
   Print_dans_fenetre(16,23,"Opacity:",CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(87,21,3);                               // 1
   Print_dans_fenetre(117,23,"%",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_normal(16,34,108,14,"Interpolate",1,1,0x0017); // 2
+  Fenetre_Definir_bouton_normal(16,34,108,14,"Interpolate",1,1,SDLK_i); // 2
   Fenetre_Afficher_cadre(12,18,116,34);
 
-  Fenetre_Definir_bouton_normal(16,54,108,14,"Additive"   ,2,1,0x0020); // 3
-  Fenetre_Definir_bouton_normal(16,71,108,14,"Subtractive",1,1,0x001F); // 4
+  Fenetre_Definir_bouton_normal(16,54,108,14,"Additive"   ,2,1,SDLK_d); // 3
+  Fenetre_Definir_bouton_normal(16,71,108,14,"Subtractive",1,1,SDLK_s); // 4
 
-  Fenetre_Definir_bouton_normal(16,94, 51,14,"Cancel"     ,0,1,0x0001); // 5
-  Fenetre_Definir_bouton_normal(73,94, 51,14,"OK"         ,0,1,0x001C); // 6
+  Fenetre_Definir_bouton_normal(16,94, 51,14,"Cancel"     ,0,1,SDLK_ESCAPE); // 5
+  Fenetre_Definir_bouton_normal(73,94, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
 
   Num2str(Colorize_Opacite,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
@@ -4317,8 +4310,8 @@ void Bouton_Tiling_Menu(void)
 
   Ouvrir_fenetre(138,79,"Tiling");
 
-  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,0x0001); // 1
-  Fenetre_Definir_bouton_normal(74,55,51,14,"OK"    ,0,1,0x001C); // 2
+  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(74,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
   Fenetre_Definir_bouton_saisie(91,21,4);                         // 3
   Bouton_saisie_Decalage_X=Fenetre_Liste_boutons_special;
   Fenetre_Definir_bouton_saisie(91,35,4);                         // 4
@@ -4461,25 +4454,25 @@ void Bouton_Spray_Menu(void)
 
   Ouvrir_fenetre(226,170,"Spray");
 
-  Fenetre_Definir_bouton_normal(110,148,51,14,"Cancel"    ,0,1,0x0001); // 1
-  Fenetre_Definir_bouton_normal(166,148,51,14,"OK"        ,0,1,0x001C); // 2
+  Fenetre_Definir_bouton_normal(110,148,51,14,"Cancel"    ,0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(166,148,51,14,"OK"        ,0,1,SDLK_RETURN); // 2
 
   Fenetre_Definir_bouton_scroller(178,62,74,50,1,49-Spray_Multi_flow[Couleur_selectionnee]); // 3
 
   Fenetre_Definir_bouton_palette(7,56);                                 // 4
 
-  Fenetre_Definir_bouton_normal(  8,148,83,14,"Mode:     ",0,1,0x000F); // 5
+  Fenetre_Definir_bouton_normal(  8,148,83,14,"Mode:     ",0,1,SDLK_TAB); // 5
   if (Spray_Mode)
     Print_dans_fenetre(50,151," Mono",CM_Noir,CM_Clair);
   else
     Print_dans_fenetre(50,151,"Multi",CM_Noir,CM_Clair);
 
-  Fenetre_Definir_bouton_normal(194, 62,19,14,"+1"        ,0,1,0x004E); // 6
-  Fenetre_Definir_bouton_normal(194, 79,19,14,"-1"        ,0,1,0x004A); // 7
-  Fenetre_Definir_bouton_normal(194, 96,19,14,"x2"        ,0,1,0x0037); // 8
-  Fenetre_Definir_bouton_normal(194,113,19,14,"÷2"        ,0,1,0x00E0); // 9
+  Fenetre_Definir_bouton_normal(194, 62,19,14,"+1"        ,0,1,SDLK_KP_PLUS); // 6
+  Fenetre_Definir_bouton_normal(194, 79,19,14,"-1"        ,0,1,SDLK_KP_MINUS); // 7
+  Fenetre_Definir_bouton_normal(194, 96,19,14,"x2"        ,0,1,SDLK_KP_MULTIPLY); // 8
+  Fenetre_Definir_bouton_normal(194,113,19,14,"÷2"        ,0,1,SDLK_KP_ENTER); // 9
 
-  Fenetre_Definir_bouton_normal(  8, 37,43,14,"Clear"     ,1,1,0x002E); // 10
+  Fenetre_Definir_bouton_normal(  8, 37,43,14,"Clear"     ,1,1,SDLK_c); // 10
 
   Print_dans_fenetre(142,25,"Size:"     ,CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(186,23,3);                              // 11
@@ -4708,8 +4701,8 @@ void Bouton_Spray_Menu(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x0029 : // Récupération d'une couleur derrière le menu
-      case 0x0033 :
+      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_COMMA :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
         {
@@ -4888,34 +4881,32 @@ void Bouton_Trame_Menu(void)
 
   Fenetre_Definir_bouton_special(143,69,80,80);                     // 1
 
-  Fenetre_Definir_bouton_normal(175,157,51,14,"Cancel",0,1,0x0001); // 2
-  Fenetre_Definir_bouton_normal(230,157,51,14,"OK"    ,0,1,0x001C); // 3
+  Fenetre_Definir_bouton_normal(175,157,51,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(230,157,51,14,"OK"    ,0,1,SDLK_RETURN); // 3
 
-  Fenetre_Definir_bouton_normal(  8,157,51,14,"Clear" ,1,1,0x002E); // 4
-  Fenetre_Definir_bouton_normal( 63,157,51,14,"Invert",1,1,0x0017); // 5
+  Fenetre_Definir_bouton_normal(  8,157,51,14,"Clear" ,1,1,SDLK_c); // 4
+  Fenetre_Definir_bouton_normal( 63,157,51,14,"Invert",1,1,SDLK_i); // 5
 
-  Fenetre_Definir_bouton_normal(  8,46,131,14,"Get from brush"   ,1,1,0x0022); // 6
-  Fenetre_Definir_bouton_normal(142,46,139,14,"Transfer to brush",1,1,0x0014); // 7
+  Fenetre_Definir_bouton_normal(  8,46,131,14,"Get from brush"   ,1,1,SDLK_g); // 6
+  Fenetre_Definir_bouton_normal(142,46,139,14,"Transfer to brush",1,1,SDLK_t); // 7
 
-  Fenetre_Definir_bouton_normal(109,114,11,11,"\030",0,1,0x0148); // 8
-  Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,0x0150); // 9
-  Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,0x014B); // 10
-  Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,0x014D); // 11
-  Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,0x0052); // 12
+  Fenetre_Definir_bouton_normal(109,114,11,11,"\030",0,1,SDLK_UP|0x1000); // 8
+  Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,SDLK_DOWN|0x1000); // 9
+  Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,SDLK_LEFT|0x1000); // 10
+  Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,SDLK_RIGHT|0x1000); // 11
+  Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
   Bouton_Octet_insere=Fenetre_Liste_boutons_normal;
   Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
         Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
         Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
 
-  Fenetre_Definir_bouton_normal(109, 69,11,11,"\030",0,1,0x0048); // 13
-  Fenetre_Definir_bouton_normal(109, 93,11,11,"\031",0,1,0x0050); // 14
-  Fenetre_Definir_bouton_normal( 97, 81,11,11,"\033",0,1,0x004B); // 15
-  Fenetre_Definir_bouton_normal(121, 81,11,11,"\032",0,1,0x004D); // 16
+  Fenetre_Definir_bouton_normal(109, 69,11,11,"\030",0,1,SDLK_UP); // 13
+  Fenetre_Definir_bouton_normal(109, 93,11,11,"\031",0,1,SDLK_DOWN); // 14
+  Fenetre_Definir_bouton_normal( 97, 81,11,11,"\033",0,1,SDLK_LEFT); // 15
+  Fenetre_Definir_bouton_normal(121, 81,11,11,"\032",0,1,SDLK_RIGHT); // 16
 
-  for (Indice=0; Indice<10; Indice++)
-    Fenetre_Definir_bouton_normal((Indice*23)+8,20,20,20,"",0,1,0x003B+Indice); // 17 -> 26
-  Fenetre_Definir_bouton_normal(238,20,20,20,"",0,1,0x0085); // 27
-  Fenetre_Definir_bouton_normal(261,20,20,20,"",0,1,0x0086); // 28
+  for (Indice=0; Indice<12; Indice++)
+    Fenetre_Definir_bouton_normal((Indice*23)+8,20,20,20,"",0,1,SDLK_F1+Indice); // 17 -> 28
   Dessiner_trames_predefinies();
 
   Orig_X=Fenetre_Pos_X+(Menu_Facteur_X*Fenetre_Liste_boutons_special->Pos_X);
@@ -5264,19 +5255,19 @@ void Bouton_Effets(void)
 
   Ouvrir_fenetre(270,152,"Drawing modes (effects)");
 
-  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,0x003B); // 1
-  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,0x003C); // 2
-  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,0x003D); // 3
-  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,0x003E); // 4
-  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,0x003F); // 5
-  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,0x0040); // 6
-  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,0x0041); // 7
-  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,0x0042); // 8
-  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,0x0043); // 9
-  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,0x0044); // 10
-  Fenetre_Definir_bouton_normal(195,131, 68,14,"Close",0,1,0x001C); // 11
-  Fenetre_Definir_bouton_normal(  7,131, 68,14,"All off",0,1,0x0053); // 12
-  Fenetre_Definir_bouton_normal( 83,131,104,14,"Feedback:   ",1,1,0x0021); // 13
+  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,SDLK_F1); // 1
+  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,SDLK_F2); // 2
+  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,SDLK_F3); // 3
+  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,SDLK_F4); // 4
+  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,SDLK_F5); // 5
+  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,SDLK_F6); // 6
+  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,SDLK_F7); // 7
+  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,SDLK_F8); // 8
+  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,SDLK_F9); // 9
+  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,SDLK_F10); // 10
+  Fenetre_Definir_bouton_normal(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
+  Fenetre_Definir_bouton_normal(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
+  Fenetre_Definir_bouton_normal( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
   Afficher_etat_feedback();
   Afficher_sprite_effet(0,  8,20);
   Afficher_sprite_effet(0,  8,39);
@@ -5298,7 +5289,7 @@ void Bouton_Effets(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
 
-    if (Touche==0x0001)
+    if (Touche==SDLK_ESCAPE)
       Bouton_clicke=11;
 
     switch (Bouton_clicke)

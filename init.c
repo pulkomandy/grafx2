@@ -21,6 +21,7 @@
 #include "operatio.h"
 #include "divers.h"
 #include "erreurs.h"
+#include "clavier.h"
 
 #include "errno.h"
 
@@ -1698,6 +1699,7 @@ int Charger_CFG(int Tout_charger)
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
   struct stat Informations_Fichier;
+  int Conversion_touches = 0;
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
@@ -1713,7 +1715,17 @@ int Charger_CFG(int Tout_charger)
     || memcmp(CFG_Header.Signature,"CFG",3) )
       goto Erreur_lecture_config;
 
-  if ( (CFG_Header.Version1!=VERSION1)
+  // Version DOS de Robinson et X-Man
+  if ( (CFG_Header.Version1== 2)
+    && (CFG_Header.Version2== 0)
+    && (CFG_Header.Beta1== 96)
+    && (CFG_Header.Beta2== 5) )
+  {
+    // Les touches (scancodes) sont à convertir)
+    Conversion_touches = 1;
+  }
+  // Version SDL
+  else if ( (CFG_Header.Version1!=VERSION1)
     || (CFG_Header.Version2!=VERSION2)
     || (CFG_Header.Beta1!=BETA1)
     || (CFG_Header.Beta2!=BETA2) )
@@ -1747,6 +1759,10 @@ int Charger_CFG(int Tout_charger)
                     CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
                     CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
                 #endif
+                if (Conversion_touches)
+                {
+                  CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
+                }
                 for (Indice2=0;
                    ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
                    Indice2++);

@@ -1410,7 +1410,7 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
       return Couleur_choisie;
     }
 
-    if ((Mouse_K==A_DROITE) || (Touche==0x0001))
+    if ((Mouse_K==A_DROITE) || (Touche==SDLK_ESCAPE))
     {
       Attendre_fin_de_click();
       Effacer_curseur();
@@ -1503,7 +1503,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
       Ancien_X=Mouse_X;
       Ancien_Y=Mouse_Y;
-    } while (!(Mouse_K || (Touche==0x0001)));
+    } while (!(Mouse_K || (Touche==SDLK_ESCAPE)));
 
     if (Mouse_K)
     {
@@ -1796,7 +1796,7 @@ short Fenetre_Numero_bouton_touche(void)
 {
   struct Fenetre_Bouton_normal * Temp;
 
-  if ((Touche&0xFF00)==0x0100)
+  if (Touche & 0x1000)
     Fenetre_Attribut1=A_DROITE;
   else
     Fenetre_Attribut1=A_GAUCHE;
@@ -1818,7 +1818,7 @@ short Fenetre_Numero_bouton_touche(void)
     Temp=Fenetre_Liste_boutons_normal;
     while (Temp!=NULL)
     {
-      if (Temp->Raccourci==(Touche&0x00FF))
+      if (Temp->Raccourci==(Touche&0x0FFF))
         return Temp->Numero;
       Temp=Temp->Next;
     }

@@ -129,13 +129,13 @@ void Bouton_Aide(void)
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
         Menu_Facteur_X*272,Menu_Facteur_Y*130,CM_Noir);
 
-  Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,0x0001); // 1
+  Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,SDLK_ESCAPE); // 1
   Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
                                   16,Position_d_aide_en_cours);   // 2
 
-  Fenetre_Definir_bouton_normal(  9,154, 59,14,"Credits"  ,1,1,0x002E); // 3
-  Fenetre_Definir_bouton_normal( 71,154, 75,14,"Register?",1,1,0x0013); // 4
-  Fenetre_Definir_bouton_normal(149,154, 75,14,"Greetings",1,1,0x0022); // 5
+  Fenetre_Definir_bouton_normal(  9,154, 59,14,"Credits"  ,1,1,SDLK_c); // 3
+  Fenetre_Definir_bouton_normal( 71,154, 75,14,"Register?",1,1,SDLK_r); // 4
+  Fenetre_Definir_bouton_normal(149,154, 75,14,"Greetings",1,1,SDLK_g); // 5
 
   Afficher_aide();
 
@@ -174,42 +174,42 @@ void Bouton_Aide(void)
     // Gestion des touches de déplacement dans la liste
     switch (Touche)
     {
-      case 0x0048 : // Haut
+      case SDLK_UP : // Haut
         if (Position_d_aide_en_cours>0)
           Position_d_aide_en_cours--;
         Scroller_aide();
         break;
-      case 0x0050 : // Bas
+      case SDLK_DOWN : // Bas
         if (Position_d_aide_en_cours<Nb_lignes-16)
           Position_d_aide_en_cours++;
         Scroller_aide();
         break;
-      case 0x0049 : // PageUp
+      case SDLK_PAGEUP : // PageUp
         if (Position_d_aide_en_cours>15)
           Position_d_aide_en_cours-=15;
         else
           Position_d_aide_en_cours=0;
         Scroller_aide();
         break;
-      case 0x0051 : // PageDown
+      case SDLK_PAGEDOWN : // PageDown
         if (Position_d_aide_en_cours<Nb_lignes-31)
           Position_d_aide_en_cours+=15;
         else
           Position_d_aide_en_cours=Nb_lignes-16;
         Scroller_aide();
         break;
-      case 0x0047 : // Home
+      case SDLK_HOME : // Home
         Position_d_aide_en_cours=0;
         Scroller_aide();
         break;
-      case 0x004F : // End
+      case SDLK_END : // End
         Position_d_aide_en_cours=Nb_lignes-16;
         Scroller_aide();
         break;
     }
 
   }
-  while ((Bouton_clicke!=1) && (Touche!=0x001C));
+  while ((Bouton_clicke!=1) && (Touche!=SDLK_RETURN));
 
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_AIDE);
@@ -243,7 +243,7 @@ void Bouton_Stats(void)
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
         Menu_Facteur_X*292,Menu_Facteur_Y*130,CM_Noir);
 
-  Fenetre_Definir_bouton_normal(120,153,70,14,"OK",0,1,0x0001); // 1
+  Fenetre_Definir_bouton_normal(120,153,70,14,"OK",0,1,SDLK_ESCAPE); // 1
 
   // Affichage du numéro de version
   Print_dans_fenetre(10,19,"Version:",STATS_COULEUR_TITRES,CM_Noir);
@@ -338,7 +338,7 @@ void Bouton_Stats(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
   }
-  while ( (Bouton_clicke!=1) && (Touche!=0x001C) );
+  while ( (Bouton_clicke!=1) && (Touche!=SDLK_RETURN) );
 
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_AIDE);

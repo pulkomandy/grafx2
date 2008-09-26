@@ -83,7 +83,7 @@ void Shade_Blocs_degrades(void)
     {
       // On regarde quel shade on va afficher en preview
       Shade_traite=((Pos_Y-Debut_Y)*Nb_shades)/Taille_Y;
-      // Si ce n'est pas le shade pr‚c‚demment trait‚ on calcule ses infos
+      // Si ce n'est pas le shade précédemment traité on calcule ses infos
       if (Shade_traite>Ancien_shade_traite)
       {
         // On commence par sauter tous les vides jusqu'au prochain shade
@@ -134,7 +134,7 @@ void Tagger_shades(word Select_Debut,word Select_Fin)
       Pos_X=Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8));
       Pos_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*((Ligne*7)+131));
 
-      // On regarde si la case est "disabl‚e"
+      // On regarde si la case est "disablée"
       if (Shade_Liste[Shade_Actuel].Liste[Position]&0x8000)
       {
         if ((Position>=Select_Debut) && (Position<=Select_Fin))
@@ -145,7 +145,7 @@ void Tagger_shades(word Select_Debut,word Select_Fin)
         else
           Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Blanc);
       }
-      else // "enabl‚e"
+      else // "enablée"
       {
         if ((Position>=Select_Debut) && (Position<=Select_Fin))
           Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Noir);
@@ -265,8 +265,8 @@ void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Deb
     Premiere_couleur=Temp;
   }
 
-  // Avant d'ins‚rer quoi que ce soit, on efface les ‚ventuelles couleurs que
-  // l'on va r‚ins‚rer:
+  // Avant d'insérer quoi que ce soit, on efface les éventuelles couleurs que
+  // l'on va réinsérer:
   Limite=512-Select_Debut;
   for (Curseur=0; Curseur<512; Curseur++)
   {
@@ -276,7 +276,7 @@ void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Deb
           && ((Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF)==Temp) )
           Shade_Liste[Shade_Actuel].Liste[Curseur]=(Shade_Liste[Shade_Actuel].Liste[Curseur]&0x8000)|0x0100;
   }
-  // Voil…... Maintenant on peut y aller peinard.
+  // Voilà... Maintenant on peut y aller peinard.
 
   Temp=1+Derniere_couleur-Premiere_couleur;
   Limite=Select_Debut+Temp;
@@ -329,7 +329,7 @@ short Attendre_click_dans_shade()
       Case_choisie=(((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)/7)<<6)+
                     ((((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-8 )>>2);
 
-    if ((Mouse_K==A_DROITE) || (Touche==0x0001))
+    if ((Mouse_K==A_DROITE) || (Touche==SDLK_ESCAPE))
       Case_choisie=512; // valeur indiquant que l'on n'a rien choisi
   }
 
@@ -355,7 +355,7 @@ void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
   Shade_temporaire=(word *)malloc(512*sizeof(word));
   memcpy(Shade_temporaire,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
 
-  // On calcul les derniŠres couleurs de chaque bloc.
+  // On calcul les dernières couleurs de chaque bloc.
   Fin_1=Debut_Bloc_1+Taille_du_bloc-1;
   Fin_2=Debut_Bloc_2+Taille_du_bloc-1;
 
@@ -366,7 +366,7 @@ void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
     {
       // Il faut transformer la case Pos_1 en Pos_2:
       Shade_Liste[Shade_Actuel].Liste[Pos_1]=Shade_temporaire[Pos_2];
-      // On gŠre la mise … jour de Pos_2
+      // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_2)
         Pos_2=Debut_Bloc_1;
       else
@@ -376,12 +376,12 @@ void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
   else
   if ((Debut_Bloc_2<Debut_Bloc_1) && (Fin_2>=Debut_Bloc_1))
   {
-    // Le bloc destination d‚borde dans le bloc source.
+    // Le bloc destination déborde dans le bloc source.
     for (Pos_1=Debut_Bloc_2,Pos_2=Debut_Bloc_1;Pos_1<=Fin_1;Pos_1++)
     {
       // Il faut transformer la couleur Pos_1 en Pos_2:
       Shade_Liste[Shade_Actuel].Liste[Pos_1]=Shade_temporaire[Pos_2];
-      // On gŠre la mise … jour de Pos_2
+      // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_1)
         Pos_2=Debut_Bloc_2;
       else
@@ -393,7 +393,7 @@ void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
     // Le bloc source et le bloc destination sont distincts.
     for (Pos_1=Debut_Bloc_1,Pos_2=Debut_Bloc_2;Pos_1<=Fin_1;Pos_1++,Pos_2++)
     {
-      // On ‚change les cases
+      // On échange les cases
       Temp                                  =Shade_Liste[Shade_Actuel].Liste[Pos_1];
       Shade_Liste[Shade_Actuel].Liste[Pos_1]=Shade_Liste[Shade_Actuel].Liste[Pos_2];
       Shade_Liste[Shade_Actuel].Liste[Pos_2]=Temp;
@@ -406,9 +406,9 @@ void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
 
 int Menu_Shade(void)
 {
-  short Bouton_clicke;  // Num‚ro du bouton sur lequel l'utilisateur a click‚
-  char Chaine[4];        // Chaine d'affichage du nø de shade actif et du Pas
-  word Ancien_Mouse_X,Ancien_Mouse_X2; // M‚mo. de l'ancienne pos. du curseur
+  short Bouton_clicke;  // Numéro du bouton sur lequel l'utilisateur a clické
+  char Chaine[4];        // Chaine d'affichage du n° de shade actif et du Pas
+  word Ancien_Mouse_X,Ancien_Mouse_X2; // Mémo. de l'ancienne pos. du curseur
   word Ancien_Mouse_Y,Ancien_Mouse_Y2;
   byte Ancien_Mouse_K,Ancien_Mouse_K2;
   byte Couleur_temporaire; // Variables de gestion des clicks dans la palette
@@ -433,50 +433,50 @@ int Menu_Shade(void)
   // Ouverture de la fenˆtre du menu
   Ouvrir_fenetre(310,190,"Shade");
 
-  // D‚claration & trac‚ du bouton de palette
+  // Déclaration & tracé du bouton de palette
   Fenetre_Definir_bouton_palette(5,16);                             // 1
 
-  // D‚claration & trac‚ du scroller de s‚lection du nø de d‚grad‚
+  // Déclaration & tracé du scroller de sélection du n° de dégradé
   Fenetre_Definir_bouton_scroller(192,17,84,8,1,Shade_Actuel);      // 2
 
-  // D‚claration & trac‚ de la zone de d‚finition des d‚grad‚s
+  // Déclaration & tracé de la zone de définition des dégradés
   Fenetre_Definir_bouton_special(8,127,256,53);                     // 3
 
-  // D‚claration & trac‚ des boutons de sortie
-  Fenetre_Definir_bouton_normal(207,17,51,14,"Cancel",0,1,0x0001);  // 4
-  Fenetre_Definir_bouton_normal(261,17,43,14,"OK"    ,0,1,0x001C);  // 5
+  // Déclaration & tracé des boutons de sortie
+  Fenetre_Definir_bouton_normal(207,17,51,14,"Cancel",0,1,SDLK_ESCAPE);  // 4
+  Fenetre_Definir_bouton_normal(261,17,43,14,"OK"    ,0,1,SDLK_RETURN);  // 5
 
-  // D‚claration & trac‚ des boutons de copie de shade
-  Fenetre_Definir_bouton_normal(206,87,27,14,"Cpy"   ,1,1,0x002E);  // 6
-  Fenetre_Definir_bouton_normal(234,87,43,14,"Paste" ,1,1,0x0019);  // 7
+  // Déclaration & tracé des boutons de copie de shade
+  Fenetre_Definir_bouton_normal(206,87,27,14,"Cpy"   ,1,1,SDLK_c);  // 6
+  Fenetre_Definir_bouton_normal(234,87,43,14,"Paste" ,1,1,SDLK_p);  // 7
 
   // On tagge le bloc
   Tagger_intervalle_palette(0,0);
 
-  // Trac‚ d'un cadre creux autour du bloc d‚grad‚
+  // Tracé d'un cadre creux autour du bloc dégradé
   Fenetre_Afficher_cadre_creux(171,26,18,66);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*172),Fenetre_Pos_Y+(Menu_Facteur_Y*27),
         Menu_Facteur_X<<4,Menu_Facteur_Y<<6,CM_Noir);
-  // Trac‚ d'un cadre creux autour de tous les d‚grad‚s
+  // Tracé d'un cadre creux autour de tous les dégradés
   Fenetre_Afficher_cadre_creux(223,34,66,50);
   Shade_Blocs_degrades();
-  // Trac‚ d'un cadre autour de la zone de d‚finition de d‚grad‚s
+  // Tracé d'un cadre autour de la zone de définition de dégradés
   Fenetre_Afficher_cadre(5,124,262,61);
   Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
 
-  // D‚claration & trac‚ des boutons d'‚dition de shade
-  Fenetre_Definir_bouton_normal(  6,107,27,14,"Ins"  ,0,1,0x0052);  // 8
-  Fenetre_Definir_bouton_normal( 38,107,27,14,"Del"  ,0,1,0x0053);  // 9
-  Fenetre_Definir_bouton_normal( 66,107,43,14,"Blank",1,1,0x0030);  // 10
-  Fenetre_Definir_bouton_normal(110,107,27,14,"Inv"  ,1,1,0x0017);  // 11
-  Fenetre_Definir_bouton_normal(138,107,27,14,"Swp"  ,1,1,0x001F);  // 12
+  // Déclaration & tracé des boutons d'édition de shade
+  Fenetre_Definir_bouton_normal(  6,107,27,14,"Ins"  ,0,1,SDLK_INSERT);  // 8
+  Fenetre_Definir_bouton_normal( 38,107,27,14,"Del"  ,0,1,SDLK_DELETE);  // 9
+  Fenetre_Definir_bouton_normal( 66,107,43,14,"Blank",1,1,SDLK_b);  // 10
+  Fenetre_Definir_bouton_normal(110,107,27,14,"Inv"  ,1,1,SDLK_i);  // 11
+  Fenetre_Definir_bouton_normal(138,107,27,14,"Swp"  ,1,1,SDLK_s);  // 12
 
-  // D‚claration & trac‚ des boutons de taggage
+  // Déclaration & tracé des boutons de taggage
   Print_dans_fenetre(268,123,"Disbl"/*"Dsabl"*/,CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_normal(274,133,27,14,"Set"   ,0,1,0x003B); // 13
-  Fenetre_Definir_bouton_normal(274,148,27,14,"Clr"   ,0,1,0x003C); // 14
+  Fenetre_Definir_bouton_normal(274,133,27,14,"Set"   ,0,1,SDLK_F1); // 13
+  Fenetre_Definir_bouton_normal(274,148,27,14,"Clr"   ,0,1,SDLK_F2); // 14
 
-  // D‚claration & trac‚ de la zone de saisie du pas
+  // Déclaration & tracé de la zone de saisie du pas
   Print_dans_fenetre(272,165,"Step",CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(274,174,3);                         // 15
   Bouton_saisie=Fenetre_Liste_boutons_special;
@@ -484,14 +484,14 @@ int Menu_Shade(void)
   Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
 
   // Bouton Undo
-  Fenetre_Definir_bouton_normal(170,107,35,14,"Undo",1,1,0x0016);   // 16
+  Fenetre_Definir_bouton_normal(170,107,35,14,"Undo",1,1,SDLK_u);   // 16
   // Bouton Clear
-  Fenetre_Definir_bouton_normal(278,87,27,14,"Clr",0,1,0x000E);     // 17
+  Fenetre_Definir_bouton_normal(278,87,27,14,"Clr",0,1,SDLK_BACKSPACE);     // 17
 
   // Bouton Mode
-  Fenetre_Definir_bouton_normal(244,107,60,14,"",0,1,0x000F);       // 18
+  Fenetre_Definir_bouton_normal(244,107,60,14,"",0,1,SDLK_TAB);       // 18
 
-  // Affichage du nø de shade actif
+  // Affichage du n° de shade actif
   Num2str(Shade_Actuel+1,Chaine,1);
   Print_dans_fenetre(210,55,Chaine,CM_Noir,CM_Clair);
 
@@ -501,8 +501,8 @@ int Menu_Shade(void)
   Afficher_curseur();
 
 /*TODO A vérifier :)
-  Clavier_americain(); // On est oblig‚ de rester en clavier am‚ricain pour
-                       // que l'on puisse d‚caler la couleur s‚lectionn‚e …
+  Clavier_americain(); // On est obligé de rester en clavier américain pour
+                       // que l'on puisse décaler la couleur sélectionnée à
                        // l'aide des touches "^" et "$" ("[" et "]").
 */
   do
@@ -527,11 +527,11 @@ int Menu_Shade(void)
           if (!Ancien_Mouse_K)
           { // On vient de clicker
 
-            // On met … jour l'intervalle du Shade
+            // On met à jour l'intervalle du Shade
             Premiere_couleur=Derniere_couleur=Couleur_temporaire;
             // On tagge le bloc
             Tagger_intervalle_palette(Premiere_couleur,Derniere_couleur);
-            // Trac‚ du bloc d‚grad‚:
+            // Tracé du bloc dégradé:
             Bloc_degrade_dans_fenetre(172,27,Premiere_couleur,Derniere_couleur);
           }
           else
@@ -554,7 +554,7 @@ int Menu_Shade(void)
             }
           }
 
-          // On affiche le num‚ro de la couleur s‚lectionn‚e
+          // On affiche le numéro de la couleur sélectionnée
           Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
 
           Afficher_curseur();
@@ -564,20 +564,20 @@ int Menu_Shade(void)
       case  2 : // Gestion du changement de Shade (scroller)
         Effacer_curseur();
         Shade_Actuel=Fenetre_Attribut2;
-        // Affichade du nø de shade actif
+        // Affichade du n° de shade actif
         Num2str(Shade_Actuel+1,Chaine,1);
         Print_dans_fenetre(210,55,Chaine,CM_Noir,CM_Clair);
         // Affichade du Pas
         Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
         Print_dans_fenetre(276,176,Chaine,CM_Noir,CM_Clair);
-        // Trac‚ du bloc d‚grad‚:
+        // Tracé du bloc dégradé:
         Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
         Afficher_curseur();
         // On place le nouveau shade dans le buffer du Undo
         memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
         break;
 
-      case  3 : // Gestion de la zone de d‚finition de shades
+      case  3 : // Gestion de la zone de définition de shades
         if (((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)%7)<4)
         if ( (Mouse_X!=Ancien_Mouse_X2) || (Mouse_Y!=Ancien_Mouse_Y2) || (Mouse_K!=Ancien_Mouse_K2) )
         {
@@ -615,12 +615,12 @@ int Menu_Shade(void)
         else
           Temp=Premiere_couleur-Derniere_couleur;
 
-        if (Select_Debut==Select_Fin) // Une couleur s‚lectionn‚e
+        if (Select_Debut==Select_Fin) // Une couleur sélectionnée
         {
           if (Fenetre_Attribut1==2)
             Supprimer_shade(Select_Debut,Select_Debut+Temp);
         }
-        else                          // Un bloc s‚lectionn‚
+        else                          // Un bloc sélectionné
         {
           Supprimer_shade(Select_Debut,Select_Fin);
 
@@ -647,7 +647,7 @@ int Menu_Shade(void)
         }
         Inserer_shade(Premiere_couleur,Derniere_couleur,Select_Debut);
 
-        // On s‚lectionne la position juste aprŠs ce qu'on vient d'ins‚rer
+        // On sélectionne la position juste après ce qu'on vient d'insérer
         Select_Debut+=Temp+1;
         if (Select_Debut>=512)
           Select_Debut=511;
@@ -752,7 +752,7 @@ int Menu_Shade(void)
           // On place le shade dans le buffer du Undo
           memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
           // Et on le modifie
-          // On ‚change le bloc avec sa destination
+          // On échange le bloc avec sa destination
           if (Select_Debut<=Select_Fin)
           {
             Temp=(Case_temporaire+Select_Fin-Select_Debut<512)?Select_Fin+1-Select_Debut:512-Case_temporaire;
@@ -763,7 +763,7 @@ int Menu_Shade(void)
             Temp=(Case_temporaire+Select_Debut-Select_Fin<512)?Select_Debut+1-Select_Fin:512-Case_temporaire;
             Swap_shade(Select_Fin,Case_temporaire,Temp);
           }
-          // On place la s‚lection sur la nouvelle position du bloc
+          // On place la sélection sur la nouvelle position du bloc
           Select_Debut=Case_temporaire;
           Select_Fin=Select_Debut+Temp-1;
           // Et on raffiche tout
@@ -853,11 +853,11 @@ int Menu_Shade(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x001A : // D‚caler couleur dans palette vers la gauche
-      case 0x001B : // D‚caler couleur dans palette vers la droite
+      case 0x001A : // Décaler couleur dans palette vers la gauche
+      case 0x001B : // Décaler couleur dans palette vers la droite
         if (Premiere_couleur==Derniere_couleur)
         {
-          if (Touche==0x001A)
+          if (Touche==SDLK_LEFTBRACKET)
           {
             Premiere_couleur--;
             Derniere_couleur--;
@@ -872,7 +872,7 @@ int Menu_Shade(void)
           Block(Fenetre_Pos_X+(Menu_Facteur_X*172),
                 Fenetre_Pos_Y+(Menu_Facteur_Y*27),
                 Menu_Facteur_X<<4,Menu_Facteur_Y*64,Premiere_couleur);
-          // On affiche le num‚ro de la couleur s‚lectionn‚e
+          // On affiche le numéro de la couleur sélectionnée
           Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
           Afficher_curseur();
         }
@@ -925,7 +925,7 @@ int Menu_Shade(void)
         }
         break;
 
-      case 0x0029 : // R‚cup‚ration d'une couleur derriŠre le menu
+      case 0x0029 : // Récupération d'une couleur derrière le menu
       case 0x0033 :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
@@ -933,14 +933,14 @@ int Menu_Shade(void)
           Effacer_curseur();
           Couleur_temporaire=Couleur;
 
-          // On met … jour l'intervalle du Shade
+          // On met à jour l'intervalle du Shade
           Premiere_couleur=Derniere_couleur=Couleur_temporaire;
           // On tagge le bloc
           Tagger_intervalle_palette(Premiere_couleur,Derniere_couleur);
-          // Trac‚ du bloc d‚grad‚:
+          // Tracé du bloc dégradé:
           Bloc_degrade_dans_fenetre(172,27,Premiere_couleur,Derniere_couleur);
 
-          // On affiche le num‚ro de la couleur s‚lectionn‚e
+          // On affiche le numéro de la couleur sélectionnée
           Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
 
           Afficher_curseur();
@@ -951,7 +951,7 @@ int Menu_Shade(void)
 
 /* TODO  Clavier_de_depart(); */
 
-  // Actions … r‚aliser en sortant du menu suivant OK ou Cancel
+  // Actions à réaliser en sortant du menu suivant OK ou Cancel
 
   Fermer_fenetre();
   free(Buffer_Undo);
@@ -965,11 +965,11 @@ int Menu_Shade(void)
 
 void Bouton_Shade_Menu(void)
 {
-  struct T_Shade * Shade_Liste_Backup;        // Anciennes donn‚es des shades
-  byte Ancien_shade;                              // Ancien nø de shade actif
+  struct T_Shade * Shade_Liste_Backup;        // Anciennes données des shades
+  byte Ancien_shade;                              // Ancien n° de shade actif
 
 
-  // Backup des anciennes donn‚es
+  // Backup des anciennes données
   Shade_Liste_Backup=(struct T_Shade *)malloc(sizeof(Shade_Liste));
   memcpy(Shade_Liste_Backup,Shade_Liste,sizeof(Shade_Liste));
   Ancien_shade=Shade_Actuel;
@@ -986,7 +986,7 @@ void Bouton_Shade_Menu(void)
                  Shade_Liste[Shade_Actuel].Mode,
                  Shade_Table_gauche,Shade_Table_droite);
 
-    // Si avant de rentrer dans le menu on n'‚tait pas en mode Shade
+    // Si avant de rentrer dans le menu on n'était pas en mode Shade
     if (!Shade_Mode)
       Bouton_Shade_Mode(); // => On y passe (cool!)
   }
@@ -1005,17 +1005,17 @@ void Bouton_Quick_shade_Menu(void)
   int Temp;
   char Chaine[4];
   byte Step_Backup=Quick_shade_Step; // Backup des
-  byte Loop_Backup=Quick_shade_Loop; // anciennes donn‚es
+  byte Loop_Backup=Quick_shade_Loop; // anciennes données
 
 
   Ouvrir_fenetre(142,56,"Quick-shade");
 
-  Fenetre_Definir_bouton_normal(76,36,60,14,"OK",0,1,0x001C);     // 1
-  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,0x0001); // 2
-  Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,0x000F);       // 3
+  Fenetre_Definir_bouton_normal(76,36,60,14,"OK",0,1,SDLK_RETURN);     // 1
+  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,SDLK_TAB);       // 3
   Afficher_mode_du_shade(83,21,Quick_shade_Loop);
 
-  // D‚claration & trac‚ de la zone de saisie du pas
+  // Déclaration & tracé de la zone de saisie du pas
   Print_dans_fenetre(5,21,"Step",CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(40,19,3);                         // 4
   Num2str(Quick_shade_Step,Chaine,3);
@@ -1069,7 +1069,7 @@ void Bouton_Quick_shade_Menu(void)
   }
   else // OK
   {
-    // Si avant de rentrer dans le menu on n'‚tait pas en mode Quick-Shade
+    // Si avant de rentrer dans le menu on n'était pas en mode Quick-Shade
     if (!Quick_shade_Mode)
       Bouton_Quick_shade_Mode(); // => On y passe (cool!)
   }

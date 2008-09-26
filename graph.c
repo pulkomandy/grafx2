@@ -2909,16 +2909,16 @@ byte Demande_de_confirmation(char * Message)
 
   Print_dans_fenetre((Largeur_de_la_fenetre>>1)-(strlen(Message)<<2),20,Message,CM_Noir,CM_Clair);
 
-  Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre/3)-20     ,37,40,14,"Yes",1,1,0x0015); // 1
-  Fenetre_Definir_bouton_normal(((Largeur_de_la_fenetre<<1)/3)-20,37,40,14,"No" ,1,1,0x0031); // 2
+  Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre/3)-20     ,37,40,14,"Yes",1,1,SDLK_y); // 1
+  Fenetre_Definir_bouton_normal(((Largeur_de_la_fenetre<<1)/3)-20,37,40,14,"No" ,1,1,SDLK_n); // 2
 
   Afficher_curseur();
 
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==0x001C) Bouton_clicke=1;
-    if (Touche==0x0001) Bouton_clicke=2;
+    if (Touche==SDLK_RETURN) Bouton_clicke=1;
+    if (Touche==SDLK_ESCAPE) Bouton_clicke=2;
   }
   while (Bouton_clicke<=0);
 
@@ -2943,12 +2943,12 @@ void Warning_message(char * Message)
   Ouvrir_fenetre(Largeur_de_la_fenetre,60,"Warning!");
 
   Print_dans_fenetre((Largeur_de_la_fenetre>>1)-(strlen(Message)<<2),20,Message,CM_Noir,CM_Clair);
-  Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre>>1)-20     ,37,40,14,"OK",1,1,0x001C); // 1
+  Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre>>1)-20     ,37,40,14,"OK",1,1,SDLK_RETURN); // 1
   Afficher_curseur();
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=0x0001) && (Touche!=0x0018));
+  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
   Fermer_fenetre();
   Afficher_curseur();

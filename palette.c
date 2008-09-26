@@ -134,7 +134,7 @@ void Remap_image_HIGH(byte * Table_de_conversion)
   Remap_general_LOWLEVEL(Table_de_conversion,Principal_Ecran,
                          Principal_Largeur_image,Principal_Hauteur_image,Principal_Largeur_image);
 
-  // On calcule les limites … l'écran de l'image
+  // On calcule les limites à l'écran de l'image
   if (Principal_Hauteur_image>=Menu_Ordonnee_avant_fenetre)
     Fin_Y=Menu_Ordonnee_avant_fenetre;
   else
@@ -166,13 +166,13 @@ void Remap_image_HIGH(byte * Table_de_conversion)
       Fin_Y_Loupe=Principal_Hauteur_image*Loupe_Facteur;
   }
 
-  // On doit maintenant faire la traduction … l'écran
+  // On doit maintenant faire la traduction à l'écran
   Remap_zone_HIGH(0,0,Fin_X,Fin_Y,Table_de_conversion);
 
   if (Loupe_Mode)
   {
     Remap_zone_HIGH(Principal_Split,0,Fin_X_Loupe,Fin_Y_Loupe,Table_de_conversion);
-    // Il peut encore rester le bas de la barre de split … remapper si la
+    // Il peut encore rester le bas de la barre de split à remapper si la
     // partie zoomée ne descend pas jusqu'en bas...
     Remap_zone_HIGH(Principal_Split,Fin_Y_Loupe,
                     (Principal_Split+(LARGEUR_BARRE_SPLIT*Menu_Facteur_X)),
@@ -202,7 +202,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   Utilisation_temporaire=(dword *)malloc(sizeof(dword)*256);
   memcpy(Utilisation_temporaire,Utilisation_couleur,sizeof(dword)*256);
 
-  // On commence … initialiser la table de conversion … un état o— elle ne
+  // On commence à initialiser la table de conversion à un état o— elle ne
   // fera aucune conversion.
   for (Pos_1=0;Pos_1<=255;Pos_1++)
     Table_de_conversion[Pos_1]=Pos_1;
@@ -225,7 +225,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
       Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
-      // On gŠre la mise … jour de Pos_2
+      // On gŠre la mise à jour de Pos_2
       if (Pos_2==Fin_2)
         Pos_2=Debut_Bloc_1;
       else
@@ -247,7 +247,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
       Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
-      // On gŠre la mise … jour de Pos_2
+      // On gŠre la mise à jour de Pos_2
       if (Pos_2==Fin_1)
         Pos_2=Debut_Bloc_2;
       else
@@ -289,7 +289,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   free(Palette_temporaire);
 
   // Maintenant, tous ces calculs doivent êtres pris en compte dans la
-  // palette, l'image et … l'écran.
+  // palette, l'image et à l'écran.
   Set_palette(Palette);
 
   if (X_Swap)
@@ -358,7 +358,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
     Table_de_remplacement[Nouvelles[Indice]]=Meilleure_couleur_sans_exclusion
                                   (RVB[Indice].R,RVB[Indice].V,RVB[Indice].B);
 
-  // On fait un changement des couleurs visibles … l'écran et dans l'image
+  // On fait un changement des couleurs visibles à l'écran et dans l'image
   Remap_image_HIGH(Table_de_remplacement);
 
   Afficher_curseur();
@@ -391,7 +391,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
   Effacer_curseur();
 
-  //   On tasse la palette vers le début parce qu'elle doit ressembler …
+  //   On tasse la palette vers le début parce qu'elle doit ressembler à
   // du GruyŠre (et comme Papouille il aime pas le fromage...)
 
   // Pour cela, on va scruter la couleur Couleur_1 et se servir de l'indice
@@ -405,14 +405,14 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
       Palette[Couleur_2].V=Palette[Couleur_1].V;
       Palette[Couleur_2].B=Palette[Couleur_1].B;
 
-      // Ensuite, on met … jour le tableau d'occupation des couleurs.
+      // Ensuite, on met à jour le tableau d'occupation des couleurs.
       Utilisation_couleur[Couleur_2]=Utilisation_couleur[Couleur_1];
 
       // On va maintenant s'occuper de la table de conversion:
       Table_de_conversion[Couleur_1]=Couleur_2;
 
       // Maintenant, la place désignée par Couleur_2 est occupée, alors on
-      // doit passer … un indice de destination suivant.
+      // doit passer à un indice de destination suivant.
       Couleur_2++;
     }
   }
@@ -427,7 +427,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   }
 
   //   Maintenant qu'on a une palette clean, on va boucler en réduisant
-  // le nombre de couleurs jusqu'… ce qu'on atteigne le nombre désiré.
+  // le nombre de couleurs jusqu'à ce qu'on atteigne le nombre désiré.
   while ((*Nb_couleurs_utilisees)>Nb_couleurs_demandees)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
@@ -459,14 +459,14 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
           }
         }
 
-    //   Maintenant qu'on les a trouvées, on va pouvoir mettre … jour nos
+    //   Maintenant qu'on les a trouvées, on va pouvoir mettre à jour nos
     // données pour que le remplacement se fasse sans encombres.
 
     // En somme, on va remplacer Meilleure_couleur_2 par Meilleure_couleur_1,
     // mais attention, on ne remplace pas Meilleure_couleur_1 par
     // Meilleure_couleur_2 !
 
-    // On met … jour la palette.
+    // On met à jour la palette.
     Palette[Meilleure_couleur_1].R=Round_div((Utilisation_couleur[Meilleure_couleur_1]*Palette[Meilleure_couleur_1].R)+
                                              (Utilisation_couleur[Meilleure_couleur_2]*Palette[Meilleure_couleur_2].R),
                                              Meilleure_utilisation);
@@ -477,26 +477,26 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
                                              (Utilisation_couleur[Meilleure_couleur_2]*Palette[Meilleure_couleur_2].B),
                                              Meilleure_utilisation);
 
-    // On met … jour la table d'utilisation.
+    // On met à jour la table d'utilisation.
     Utilisation_couleur[Meilleure_couleur_1]+=Utilisation_couleur[Meilleure_couleur_2];
     Utilisation_couleur[Meilleure_couleur_2]=0;
 
-    // On met … jour la table de conversion.
+    // On met à jour la table de conversion.
     for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
     {
       if (Table_de_conversion[Couleur_1]==Meilleure_couleur_2)
       {
-        //   La Couleur_1 avait déj… prévue de se faire remplacer par la
+        //   La Couleur_1 avait déjà prévue de se faire remplacer par la
         // couleur que l'on veut maintenant éliminer. On va maintenant
-        // demander … ce que la Couleur_1 se fasse remplacer par la
+        // demander à ce que la Couleur_1 se fasse remplacer par la
         // Meilleure_couleur_1.
         Table_de_conversion[Couleur_1]=Meilleure_couleur_1;
       }
     }
 
     //   Bon, maintenant que l'on a fait bouger nos petites choses concernants
-    // la couleur … éliminer, on va s'occuper de faire bouger les couleurs
-    // situées aprŠs la couleur … éliminer pour qu'elles se dépla‡ent d'une
+    // la couleur à éliminer, on va s'occuper de faire bouger les couleurs
+    // situées aprŠs la couleur à éliminer pour qu'elles se dépla‡ent d'une
     // couleur en arriŠre.
     for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
     {
@@ -522,11 +522,11 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
       // s'occuper de notre table de conversion.
       if (Table_de_conversion[Couleur_1]>Meilleure_couleur_2)
         //   La Couleur_1 avait l'intention de se faire remplacer par une
-        // couleur que l'on va (ou que l'on a déj…) bouger en arriŠre.
+        // couleur que l'on va (ou que l'on a déjà) bouger en arriŠre.
         Table_de_conversion[Couleur_1]--;
     }
 
-    //   On vient d'éjecter une couleur, donc on peut mettre … jour le nombre
+    //   On vient d'éjecter une couleur, donc on peut mettre à jour le nombre
     // de couleurs utilisées.
     (*Nb_couleurs_utilisees)--;
 
@@ -536,18 +536,18 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     Palette[*Nb_couleurs_utilisees].V=0;
     Palette[*Nb_couleurs_utilisees].B=0;
 
-    // Au passage, on va s'assurer que l'on a pas oublié de la mettre … une
+    // Au passage, on va s'assurer que l'on a pas oublié de la mettre à une
     // utilisation nulle.
     Utilisation_couleur[*Nb_couleurs_utilisees]=0;
 
-    // AprŠs avoir éjecté une couleur, on le fait savoir … l'utilisateur par
+    // AprŠs avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*Nb_couleurs_utilisees,Chaine,3);
     Print_dans_fenetre(186,23,Chaine,CM_Noir,CM_Clair);
   }
 
   //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
-  // palette, l'image et … l'écran.
+  // palette, l'image et à l'écran.
   Remap_image_HIGH(Table_de_conversion); // Et voila pour l'image et l'écran
   Afficher_curseur();
 }
@@ -605,7 +605,7 @@ void Palette_Reafficher_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
   // Réaffichage des jauges:
   if (Debut!=Fin)
   {
-    // Dans le cas d'un bloc, tout … 0.
+    // Dans le cas d'un bloc, tout à 0.
     Jauge_rouge->Position   =63;
     Fenetre_Dessiner_jauge(Jauge_rouge);
     Print_dans_fenetre(176,172,"± 0",CM_Noir,CM_Clair);
@@ -693,7 +693,7 @@ void Bouton_Palette(void)
   Fenetre_Afficher_cadre      (173, 67,121,116);
   Fenetre_Afficher_cadre      (128, 16, 91, 39);
   Fenetre_Afficher_cadre      (221, 16, 73, 39);
-  // Cadre creux destiné … l'affichage de la(les) couleur(s) sélectionnée(s)
+  // Cadre creux destiné à l'affichage de la(les) couleur(s) sélectionnée(s)
   Fenetre_Afficher_cadre_creux(259, 88, 26, 74);
 
   // Graduation des jauges de couleur
@@ -737,34 +737,34 @@ void Bouton_Palette(void)
   Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
 
 
-  Fenetre_Definir_bouton_normal( 6,17,59,14,"Default",3,1,0x0021);   // 5
-  Fenetre_Definir_bouton_normal(66,17,29,14,"Gry"    ,1,1,0x0022);   // 6
-  Fenetre_Definir_bouton_normal( 6,47,59,14,"Swap"   ,1,1,0x001F);   // 7
-  Fenetre_Definir_bouton_normal(66,47,59,14,"X-Swap" ,1,1,0x002D);   // 8
-  Fenetre_Definir_bouton_normal( 6,62,59,14,"Copy"   ,1,1,0x002E);   // 9
-  Fenetre_Definir_bouton_normal(66,62,59,14,"Spread" ,4,1,0x0012);   // 10
+  Fenetre_Definir_bouton_normal( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
+  Fenetre_Definir_bouton_normal(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
+  Fenetre_Definir_bouton_normal( 6,47,59,14,"Swap"   ,1,1,SDLK_s);   // 7
+  Fenetre_Definir_bouton_normal(66,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
+  Fenetre_Definir_bouton_normal( 6,62,59,14,"Copy"   ,1,1,SDLK_c);   // 9
+  Fenetre_Definir_bouton_normal(66,62,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
-  Fenetre_Definir_bouton_normal(239,20,51,14,"Reduce" ,1,1,0x0013);  // 11
+  Fenetre_Definir_bouton_normal(239,20,51,14,"Reduce" ,1,1,SDLK_r);  // 11
   Print_dans_fenetre(241,41,"to",CM_Fonce,CM_Clair);
 
-  Fenetre_Definir_bouton_normal(  6,168,35,14,"Undo"  ,1,1,0x0016);  // 12
-  Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,0x0001);  // 13
-  Fenetre_Definir_bouton_normal(117,168,51,14,"OK"    ,0,1,0x001C);  // 14
+  Fenetre_Definir_bouton_normal(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
+  Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,SDLK_ESCAPE);  // 13
+  Fenetre_Definir_bouton_normal(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,0x0020);// 15
+  Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
   Bouton_Used=Fenetre_Liste_boutons_normal;
-  Fenetre_Definir_bouton_normal(132,37,83,14,"Zap unused",0,1,0x0053);//16
+  Fenetre_Definir_bouton_normal(132,37,83,14,"Zap unused",0,1,SDLK_DELETE);//16
 
   // Jauge de réduction de palette
   Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
   Jauge_Reduction=Fenetre_Liste_boutons_scroller;
 
-  Fenetre_Definir_bouton_normal(266, 74,12,11,"+",0,1,0x004E);       // 18
-  Fenetre_Definir_bouton_normal(266,165,12,11,"-",0,1,0x004A);       // 19
+  Fenetre_Definir_bouton_normal(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
+  Fenetre_Definir_bouton_normal(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
 
-  Fenetre_Definir_bouton_normal(96,17,29,14,"Neg"    ,1,1,0x0031);   // 20
-  Fenetre_Definir_bouton_normal( 6,32,59,14,"Invert" ,1,1,0x0017);   // 21
-  Fenetre_Definir_bouton_normal(66,32,59,14,"X-Inv." ,5,1,0x002F);   // 22
+  Fenetre_Definir_bouton_normal(96,17,29,14,"Neg"    ,1,1,SDLK_n);   // 20
+  Fenetre_Definir_bouton_normal( 6,32,59,14,"Invert" ,1,1,SDLK_i);   // 21
+  Fenetre_Definir_bouton_normal(66,32,59,14,"X-Inv." ,5,1,SDLK_v);   // 22
 
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
   // Affichage du facteur de réduction de la palette
@@ -780,7 +780,7 @@ void Bouton_Palette(void)
   Afficher_curseur();
 
   Clavier_americain(); // On est obligé de rester en clavier américain pour
-                       // que l'on puisse décaler la couleur sélectionnée …
+                       // que l'on puisse décaler la couleur sélectionnée à
                        // l'aide des touche "^" et "$" ("[" et "]").
 
   if (Config.Auto_nb_used)
@@ -1595,7 +1595,7 @@ void Bouton_Palette(void)
     {
       switch (Touche)
       {
-        case 0x001A : // Décaler Forecolor vers la gauche
+        case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
           if (Debut_block==Fin_block)
           {
             Fore_color--;
@@ -1615,7 +1615,7 @@ void Bouton_Palette(void)
           }
           break;
 
-        case 0x001B : // Décaler Forecolor vers la droite
+        case SDLK_RIGHTBRACKET : // Décaler Forecolor vers la droite
           if (Debut_block==Fin_block)
           {
             Fore_color++;
@@ -1635,10 +1635,11 @@ void Bouton_Palette(void)
           }
           break;
 
-        case 0x011A : // Decaler Backcolor vers la gauche
+        case (SDLK_LEFTBRACKET|0x1000) : // Decaler Backcolor vers la gauche
           Back_color--;
-        case 0x011B : // Decaler Backcolor vers la droite
-          if (Touche==0x011B)
+        case (SDLK_RIGHTBRACKET|0x1000) : // Decaler Backcolor vers la droite
+          // attention: pas de break ci-dessus
+          if (Touche==(SDLK_RIGHTBRACKET|0x1000))
             Back_color++;
           Effacer_curseur();
           Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
@@ -1648,7 +1649,7 @@ void Bouton_Palette(void)
           Afficher_curseur();
           break;
 
-        case 0x000E : // Remise des couleurs du menu … l'état normal en essayant
+        case SDLK_BACKSPACE : // Remise des couleurs du menu à l'état normal en essayant
                       // de ne pas trop modifier l'image.
           if (!Backup_de_l_image_effectue)
           {
@@ -1671,8 +1672,8 @@ void Bouton_Palette(void)
           Il_faut_remapper=1;
           break;
 
-        case 0x0029 : // Récupération d'une couleur derriŠre le menu
-        case 0x0033 :
+        case SDLK_BACKQUOTE : // Récupération d'une couleur derriŠre le menu
+        case SDLK_COMMA :
           Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
           if (Click)
           {
@@ -1805,9 +1806,9 @@ void Bouton_Palette_secondaire(void)
 
   Ouvrir_fenetre(200,80,"Palettes");
 
-  Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,0x0030); // 1
-  Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,0x001F); // 2
-  Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,0x0001); // 3
+  Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
+  Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
+  Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,SDLK_ESCAPE); // 3
 
   Afficher_curseur();
 
