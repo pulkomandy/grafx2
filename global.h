@@ -108,9 +108,9 @@ GLOBAL struct Composantes Coul_menu_pref[4];
 GLOBAL word Mouse_X; // Abscisse de la souris
 GLOBAL word Mouse_Y; // Ordonnée de la souris
 GLOBAL byte Mouse_K; // Etat des boutons de la souris
-GLOBAL dword Touche;
+GLOBAL dword Touche; // Touche tapée
+GLOBAL dword Touche_ANSI; // Caractère tapé
 GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat des touches de ctrl
-GLOBAL byte Touche_ASCII; // Code ASCII de la touche en cours
 
 GLOBAL byte Mouse_Facteur_de_correction_X;
 GLOBAL byte Mouse_Facteur_de_correction_Y;

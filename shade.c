@@ -853,8 +853,8 @@ int Menu_Shade(void)
     if (!Mouse_K)
     switch (Touche)
     {
-      case 0x001A : // Décaler couleur dans palette vers la gauche
-      case 0x001B : // Décaler couleur dans palette vers la droite
+      case SDLK_LEFTBRACKET : // Décaler couleur dans palette vers la gauche
+      case SDLK_RIGHTBRACKET : // Décaler couleur dans palette vers la droite
         if (Premiere_couleur==Derniere_couleur)
         {
           if (Touche==SDLK_LEFTBRACKET)
@@ -878,15 +878,15 @@ int Menu_Shade(void)
         }
         break;
 
-      case 0x0048 : // Select Haut
-      case 0x0050 : // Select Bas
-      case 0x004B : // Select Gauche
-      case 0x004D : // Select Droite
+      case SDLK_UP    : // Select Haut
+      case SDLK_DOWN  : // Select Bas
+      case SDLK_LEFT  : // Select Gauche
+      case SDLK_RIGHT : // Select Droite
         if (Select_Debut==Select_Fin)
         {
           switch (Touche)
           {
-            case 0x0048 : // Select Haut
+            case SDLK_UP : // Select Haut
               if (Select_Debut>=64)
               {
                 Select_Debut-=64;
@@ -895,7 +895,7 @@ int Menu_Shade(void)
               else
                 Select_Debut=Select_Fin=0;
               break;
-            case 0x0050 : // Select Bas
+            case SDLK_DOWN : // Select Bas
               if (Select_Debut<448)
               {
                 Select_Debut+=64;
@@ -904,7 +904,7 @@ int Menu_Shade(void)
               else
                 Select_Debut=Select_Fin=511;
               break;
-            case 0x004B : // Select Gauche
+            case SDLK_LEFT : // Select Gauche
               if (Select_Debut>0)
               {
                 Select_Debut--;
@@ -925,8 +925,8 @@ int Menu_Shade(void)
         }
         break;
 
-      case 0x0029 : // Récupération d'une couleur derrière le menu
-      case 0x0033 :
+      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_COMMA :
         Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
         if (Click)
         {

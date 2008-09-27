@@ -9,6 +9,7 @@
 #include "boutons.h"
 #include "moteur.h"
 #include "divers.h"
+#include "clavier.h"
 
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
@@ -108,158 +109,6 @@ void Sensibilite_souris(word X,word Y)
 {
         puts("Sensibilite_souris non implémenté!");
 }
-word Touche_SDL(SDL_keysym Sym)
-{
-  word Retour = 0;
-  // On ignore shift, alt et control isolés.
-  if (Sym.sym == SDLK_RSHIFT || Sym.sym == SDLK_LSHIFT ||
-      Sym.sym == SDLK_RCTRL  || Sym.sym == SDLK_LCTRL ||
-      Sym.sym == SDLK_RALT   || Sym.sym == SDLK_LALT ||
-      Sym.sym == SDLK_MODE) // AltGr
-  return 0;
-  
-  // Les touches qui n'ont qu'une valeur unicode (très rares)
-  // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
-  if (Sym.sym > 0)
-    Retour = Sym.sym;
-  else if (Sym.unicode > 0)
-    Retour = (Sym.unicode & 0x07FF) | 0x0800;
-  
-  if (Sym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-    Retour |= 0x1000;
-  if (Sym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-    Retour |= 0x2000;
-  if (Sym.mod & (KMOD_LALT | KMOD_RALT | KMOD_MODE))
-    Retour |= 0x4000;
-  return Retour;
-}
-
-const char * Nom_touche(word Touche)
-{
-  typedef struct
-  {
-  word Sym;
-  char *Nom_touche;
-  } S_Libelle_touche;
-  S_Libelle_touche Table_touches[] =
-  {
-    { SDLK_BACKSPACE   , "Backspace" },
-    { SDLK_TAB         , "Tab" },
-    { SDLK_CLEAR       , "Clear" },
-    { SDLK_RETURN      , "Return" },
-    { SDLK_PAUSE       , "Pause" },
-    { SDLK_ESCAPE      , "Esc" },
-    { SDLK_DELETE      , "Del" },
-    { SDLK_KP0         , "KP 0" },
-    { SDLK_KP1         , "KP 1" },
-    { SDLK_KP2         , "KP 2" },
-    { SDLK_KP3         , "KP 3" },
-    { SDLK_KP4         , "KP 4" },
-    { SDLK_KP5         , "KP 5" },
-    { SDLK_KP6         , "KP 6" },
-    { SDLK_KP7         , "KP 7" },
-    { SDLK_KP8         , "KP 8" },
-    { SDLK_KP9         , "KP 9" },
-    { SDLK_KP_PERIOD   , "KP ." },
-    { SDLK_KP_DIVIDE   , "KP /" },
-    { SDLK_KP_MULTIPLY,  "KP *" },
-    { SDLK_KP_MINUS    , "KP -" },
-    { SDLK_KP_PLUS     , "KP Plus" },
-    { SDLK_KP_ENTER    , "KP Enter" },
-    { SDLK_KP_EQUALS   , "KP =" },
-    { SDLK_UP          , "Up" },
-    { SDLK_DOWN        , "Down" },
-    { SDLK_RIGHT       , "Right" },
-    { SDLK_LEFT        , "Left" },
-    { SDLK_INSERT      , "Ins" },
-    { SDLK_HOME        , "Home" },
-    { SDLK_END         , "End" },
-    { SDLK_PAGEUP      , "PgUp" },
-    { SDLK_PAGEDOWN    , "PgDn" },
-    { SDLK_F1          , "F1" },
-    { SDLK_F2          , "F2" },
-    { SDLK_F3          , "F3" },
-    { SDLK_F4          , "F4" },
-    { SDLK_F5          , "F5" },
-    { SDLK_F6          , "F6" },
-    { SDLK_F7          , "F7" },
-    { SDLK_F8          , "F8" },
-    { SDLK_F9          , "F9" },
-    { SDLK_F10         , "F10" },
-    { SDLK_F11         , "F11" },
-    { SDLK_F12         , "F12" },
-    { SDLK_F13         , "F13" },
-    { SDLK_F14         , "F14" },
-    { SDLK_F15         , "F15" },
-    { SDLK_NUMLOCK     , "NumLock" },
-    { SDLK_CAPSLOCK    , "CapsLck" },
-    { SDLK_SCROLLOCK   , "ScrlLock" },
-    { SDLK_RSHIFT      , "RShift" },
-    { SDLK_LSHIFT      , "LShift" },
-    { SDLK_RCTRL       , "RCtrol" },
-    { SDLK_LCTRL       , "LCtrl" },
-    { SDLK_RALT        , "RAlt" },
-    { SDLK_LALT        , "LAlt" },
-    { SDLK_RMETA       , "RMeta" },
-    { SDLK_LMETA       , "LMeta" },
-    { SDLK_LSUPER      , "LWin" },
-    { SDLK_RSUPER      , "RWin" },
-    { SDLK_MODE        , "AltGr" },
-    { SDLK_COMPOSE     , "Comp" },
-    { SDLK_HELP        , "Help" },
-    { SDLK_PRINT       , "Print" },
-    { SDLK_SYSREQ      , "SysReq" },
-    { SDLK_BREAK       , "Break" },
-    { SDLK_MENU        , "Menu" },
-    { SDLK_POWER       , "Power" },
-    { SDLK_EURO        , "Euro" },
-    { SDLK_UNDO        , "Undo" }
-  };
-
-  int Indice;
-  static char Buffer[25];
-  Buffer[0] = '\0';
-
-  if (Touche & 0x2000)
-    strcat(Buffer, "Ctrl+");
-  if (Touche & 0x4000)
-    strcat(Buffer, "Alt+");
-  if (Touche & 0x1000)
-    strcat(Buffer, "Shift+");
-
-  if (Touche & 0x8000)
-  {
-    sprintf(Buffer+strlen(Buffer), "[%d]", Touche & 0xFFF);
-    return Buffer;
-  }
-  Touche = Touche & 0xFFF;
-  // Touches ASCII
-  if (Touche>=' ' && Touche < 127)
-  {
-    sprintf(Buffer+strlen(Buffer), "'%c'", Touche);
-    return Buffer;
-  }
-  // Touches 'World'
-  if (Touche>=SDLK_WORLD_0 && Touche <= SDLK_WORLD_95)
-  {
-    sprintf(Buffer+strlen(Buffer), "w%d", Touche - SDLK_WORLD_0);
-    return Buffer;
-  }
-                             
-  // Touches au libellé connu
-  for (Indice=0; Indice < sizeof(Table_touches)/sizeof(S_Libelle_touche);Indice++)
-  {
-    if (Touche == Table_touches[Indice].Sym)
-    {
-      sprintf(Buffer+strlen(Buffer), "%s", Table_touches[Indice].Nom_touche);
-      return Buffer;
-    }
-  }
-  // Autres touches inconnues
-  sprintf(Buffer+strlen(Buffer), "(%d)", Touche);
-  return Buffer;
-
-}  
 
 void Get_input(void)
 //Gestion des évènements: mouvement de la souris, clic sur les boutons, et utilisation du clavier.
@@ -267,7 +116,6 @@ void Get_input(void)
     SDL_Event event;
 
     Touche=0;
-    Touche_ASCII=0; // Par défaut, il n'y a pas d'action sur le clavier.
 
     if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
     {
@@ -296,7 +144,8 @@ void Get_input(void)
             {
                 byte ok = 0;
                 //Appui sur une touche du clavier
-            		Touche = Touche_SDL(event.key.keysym);
+            		Touche = Conversion_Touche(event.key.keysym);
+                Touche_ANSI = Conversion_ANSI(event.key.keysym);
                 
                 //Cas particulier: déplacement du curseur avec haut bas gauche droite
                 //On doit interpréter ça comme un mvt de la souris
@@ -1018,85 +867,7 @@ word Get_key(void)
     SDL_WaitEvent(&event);
     if(event.type == SDL_KEYDOWN)
     {
-      if ( event.key.keysym.unicode == 0)
-      {
-        return event.key.keysym.sym;
-      }
-      if ( event.key.keysym.unicode < 127)
-      {
-        //printf("ascii %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
-        return event.key.keysym.unicode; // Pas de souci, on est en ASCII standard
-      }
-      
-      // Quelques conversions Unicode-ANSI
-      switch(event.key.keysym.unicode)
-      {
-        case 0x8100:
-          return 'ü'; // ü
-        case 0x1A20:
-          return 'é'; // é
-        case 0x201A:
-          return 'è'; // è
-        case 0x9201:
-          return 'â'; // â
-        case 0x1E20:
-          return 'ä'; // ä
-        case 0x2620:
-          return 'à'; // à
-        case 0x2020: 
-          return 'å'; // å
-        case 0x2120: 
-          return 'ç'; // ç
-        case 0xC602: 
-          return 'ê'; // ê
-        case 0x3020: 
-          return 'ë'; // ë
-        case 0x6001: 
-          return 'è'; // è
-        case 0x3920: 
-          return 'ï'; // ï
-        case 0x5201: 
-          return 'î'; // î
-        case 0x8D00: 
-          return 'ì'; // ì
-        case 0x1C20: 
-          return 'ô'; // ô
-        case 0x1D20: 
-          return 'ö'; // ö
-        case 0x2220: 
-          return 'ò'; // ò
-        case 0x1320: 
-          return 'û'; // û
-        case 0x1420: 
-          return 'ù'; // ù
-        case 0xDC02: 
-          return 'ÿ'; // ÿ
-        case 0x5301: 
-          return '£'; // £
-        case 0xA000: 
-          return 'á'; // á
-        case 0xA100: 
-          return 'í'; // í
-        case 0xA200: 
-          return 'ó'; // ó
-        case 0xA300: 
-          return 'ú'; // ú
-        case 0xA400: 
-          return 'ñ'; // ñ
-        case 0xA700: 
-          return 'º'; // º
-        case 0xC600: 
-          return 'ã'; // ã
-      }
-      // Touche entre 127 et 255
-      if (event.key.keysym.unicode<256)
-      {
-        //printf("ascii etendu %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
-        return event.key.keysym.unicode;
-      }
-    	// Sinon c'est une touche spéciale, on retourne son scancode
-      //printf("non ascii %x, %d %s\n",event.key.keysym.unicode, event.key.keysym.sym ,SDL_GetKeyName(event.key.keysym.sym) );
-    	return event.key.keysym.sym;
+      return Conversion_ANSI(event.key.keysym);
     }
   }
 }

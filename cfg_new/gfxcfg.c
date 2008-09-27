@@ -15,7 +15,10 @@
 //mine
 #include "SFont.h"
 
-#include "scancodes.h"
+typedef uint8_t  byte;
+typedef uint16_t word;
+typedef uint32_t  dword;
+#include "../clavier.h"
 
 /*** Constants ***/
 #define NB_MAX_OPTIONS 134
@@ -37,7 +40,7 @@ typedef struct{
     char Explic2[77];
     bool Erreur;
     bool Suppr;
-} Options;
+} __attribute__((__packed__)) Options;
 
 typedef struct{
     char Signature[3];
@@ -45,14 +48,14 @@ typedef struct{
     uint8_t Version2;
     uint8_t Beta1;
     uint8_t Beta2;
-} Type_header;
+} __attribute__((__packed__)) Type_header;
 
 #define Header_size 7
 
 typedef struct{
     uint8_t Numero;
     uint16_t Taille;
-} Type_chunk;
+} __attribute__((__packed__)) Type_chunk;
 
 #define Chunk_size 3
 
@@ -68,100 +71,20 @@ uint16_t Position_curseur=0;
 
 /*** Fonctions de gestion des évènements SDL ***/
 
-/* Attend qu'une touche soit pressée. Retourne le keysym. */
-SDL_keysym Lire_Touche(void)
+/* Attend qu'une touche soit pressée. Retourne le code touche. */
+word Lire_Touche(void)
 {
     SDL_Event Event;
 
     do{
         SDL_WaitEvent(&Event);
-        if(Event.type==SDL_KEYDOWN) break;
+        if(Event.type==SDL_KEYDOWN)
+        {
+          word Touche = Conversion_Touche(Event.key.keysym);
+          if (Touche != 0)
+            return Touche;
+        }
     }while(1);
-
-    return Event.key.keysym;
-}
-
-/* Writes human-readable key name to buffer Temp. Temp must be at least 35 bytes long ! */
-void Nom_touche(uint16_t Touche,char* Temp)
-{
-    char Temp2[28];
-    uint8_t Num_table =1;
-
-    Temp[0] = Temp2[0] = 0;
-
-    if((Touche & 0x0100) > 0)
-    {
-        strcat(Temp,"<Shift> + ");
-        Num_table = 2;
-    }
-
-    if((Touche & 0x0200) > 0)
-    {
-        strcat(Temp,"<Ctrl> + ");
-        Num_table = 3;
-    }
-
-    if((Touche & 0x0400) > 0)
-    {
-        strcat(Temp,"<Alt> + ");
-        Num_table = 4;
-    }
-
-    switch(Num_table)
-    {
-        case 1:
-            strcpy(Temp2,Table_Normal[Touche & 0xFF]);
-            if (strcmp(Temp2,"???") == 0)
-                strcpy(Temp,"********** Invalid key! **********");
-            else if (Temp2[0]==0)
-                Temp[0]=0;
-            else
-            {
-                strcat(Temp,"<");
-                strcat(Temp,Temp2);
-                strcat(Temp,">");
-            }
-            break;
-        case 2:
-            strcpy(Temp2,Table_Shift[Touche & 0xFF]); 
-            if (strcmp(Temp2,"???") == 0)
-                strcpy(Temp,"**** Invalid key combination! ****");
-            else if (Temp2[0]==0)
-                Temp[0]=0;
-            else
-            {
-                strcat(Temp,"<");
-                strcat(Temp,Temp2);
-                strcat(Temp,">");
-            }
-            break;
-        case 3:
-            strcpy(Temp2,Table_Ctrl[Touche & 0xFF]); 
-            if (strcmp(Temp2,"???") == 0)
-                strcpy(Temp,"**** Invalid key combination! ****");
-            else if (Temp2[0]==0)
-                Temp[0]=0;
-            else
-            {
-                strcat(Temp,"<");
-                strcat(Temp,Temp2);
-                strcat(Temp,">");
-            }
-            break;
-        case 4:
-            strcpy(Temp2,Table_Alt[Touche & 0xFF]); 
-            if (strcmp(Temp2,"???") == 0)
-                strcpy(Temp,"**** Invalid key combination! ****");
-            else if (Temp2[0]==0)
-                Temp[0]=0;
-            else
-            {
-                strcat(Temp,"<");
-                strcat(Temp,Temp2);
-                strcat(Temp,">");
-            }
-            break;
-    }
 }
 
 /*** Drawing functions ***/
@@ -198,11 +121,9 @@ void Dessiner_ecran_principal()
 /* Displays informations about an option */
 void Ecrire(uint8_t Ligne, uint16_t Num_option, uint8_t Couleur)
 {
-    char NomTouche[35];
     Cadre(3,Ligne*9,630,9,Couleur);
     SFont_Write(Ecran,MyFont,8,Ligne*9,Config[Num_option].Libelle);
-    Nom_touche(Config[Num_option].Touche,NomTouche);
-    SFont_Write(Ecran,MyFont,40*8,Ligne*9,NomTouche);
+    SFont_Write(Ecran,MyFont,40*8,Ligne*9,Nom_touche(Config[Num_option].Touche));
     if(Config[Num_option].Erreur)
         SFont_Write(Ecran,MyFont,77*8,Ligne*9,"X");
     Cadre(36*8,Ligne*9,1,9,255);
@@ -281,539 +202,539 @@ bool Initialiser_config()
     Definir_option(0,"Scroll up",
             "Scrolls the picture up, both in magnify and normal mode.",
             "This hotkey cannot be removed.",
-            false, 0x48); // HAUT
+            false, SDLK_UP); // HAUT
     Definir_option(1,"Scroll down",
             "Scrolls the picture down, both in magnify and normal mode.",
             "This hotkey cannot be removed.",
-            false, 0x50); // BAS
+            false, SDLK_DOWN); // BAS
     Definir_option(2,"Scroll left",
             "Scrolls the picture to the left, both in magnify and normal mode.",
             "This hotkey cannot be removed.",
-            false, 0x4B); // GAUCHE
+            false, SDLK_LEFT); // GAUCHE
     Definir_option(3,"Scroll right",
             "Scrolls the picture to the right, both in magnify and normal mode.",
             "This hotkey cannot be removed.",
-            false, 0x4D); // DROITE
+            false, SDLK_RIGHT); // DROITE
     Definir_option(4,"Faster scroll up",
 	    "Used to scroll upwards in the picture fast, either in magnify and normal",
 	    "mode.",
-	    true,0x0148);  /*Shift + Haut*/
+	    true,SDLK_UP|0x1000);  /*Shift + Haut*/
     Definir_option(5,"Faster scroll down",
 	    "Used to scroll downwards in the picture fast, either in magnify and normal",
 	    "mode.",
-	    true,0x0150);  /*Shift + Bas*/
+	    true,SDLK_DOWN|0x1000);  /*Shift + Bas*/
     Definir_option(6,"Faster scroll left",
 	    "Used to scroll to the left in the picture fast, either in magnify and normal",
 	    "mode.",
-	    true,0x014B);  /*Shift + Gauche*/
+	    true,SDLK_LEFT|0x1000);  /*Shift + Gauche*/
     Definir_option(7,"Faster scroll right",
 	    "Used to scroll to the right in the picture fast, either in magnify and",
 	    "normal mode.",
-	    true,0x014D);  /*Shift + Droite*/
+	    true,SDLK_RIGHT|0x1000);  /*Shift + Droite*/
     Definir_option(8,"Slower scroll up",
 	    "Used to scroll upwards in the picture pixel by pixel, either in magnify and",
 	    "normal mode.",
-	    true,0x0498);  /*Alt + Haut*/
+	    true,SDLK_UP|0x4000);  /*Alt + Haut*/
     Definir_option(9,"Slower scroll down",
 	    "Used to scroll downwards in the picture pixel by pixel, either in magnify and",
 	    "normal mode.",
-	    true,0x04A0);  /*Alt + Bas*/
+	    true,SDLK_DOWN|0x4000);  /*Alt + Bas*/
     Definir_option(10,"Slower scroll left",
 	    "Used to scroll to the left in the picture pixel by pixel, either in magnify",
 	    "and normal mode.",
-	    true,0x049B);  /*Alt + Gauche*/
+	    true,SDLK_LEFT|0x4000);  /*Alt + Gauche*/
     Definir_option(11,"Slower scroll right",
 	    "Used to scroll to the right in the picture pixel by pixel, either in magnify",
 	    "and normal mode.",
-	    true,0x049D);  /*Alt + Droite*/
+	    true,SDLK_RIGHT|0x4000);  /*Alt + Droite*/
     Definir_option(12,"Move mouse cursor 1 pixel up",
 	    "Used to simulate a very small mouse deplacement upwards.",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x028D);  /*Ctrl + Haut*/
+	    true,SDLK_UP|0x2000);  /*Ctrl + Haut*/
     Definir_option(13,"Move mouse cursor 1 pixel down",
 	    "Used to simulate a very small mouse deplacement downwards.",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x0291);  /*Ctrl + Bas*/
+	    true,SDLK_DOWN|0x2000);  /*Ctrl + Bas*/
     Definir_option(14,"Move mouse cursor 1 pixel left",
 	    "Used to simulate a very small mouse deplacement to the left.",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x0273);  /*Ctrl + Gauche*/
+	    true,SDLK_LEFT|0x2000);  /*Ctrl + Gauche*/
     Definir_option(15,"Move mouse cursor 1 pixel right",
 	    "Used to simulate a very small mouse deplacement to the right.",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x0274);  /*Ctrl + Droite*/
+	    true,SDLK_RIGHT|0x2000);  /*Ctrl + Droite*/
     Definir_option(16,"Simulate left mouse click",
 	    "Used to simulate a click with the left mouse button..",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x0039);  /*Space*/
+	    true,SDLK_SPACE);  /*Space*/
     Definir_option(17,"Simulate right mouse click",
 	    "Used to simulate a click with the right mouse button..",
 	    "It""s very useful when you want a ultra-high precision.",
-	    true,0x0139);  /*Shift + Space*/
+	    true,SDLK_SPACE|0x1000);  /*Shift + Space*/
     Definir_option(18,"Show/hide option menu",
 	    "Switch the tool bar display on/off.",
 	    "This hot-key cannot be removed.",
-	    false,0x0044); /*F10*/
+	    false,SDLK_F10); /*F10*/
     Definir_option(19,"Show/hide cursor",
 	    "Switch the cursor display on/off.",
 	    "This only works on the \"small cross\" and \"hand\" cursors.",
-	    true,0x0043);  /*F9*/
+	    true,SDLK_F9);  /*F9*/
     Definir_option(20,"Set paintbrush to 1 pixel",
 	    "Useful when you want to use a \"single-pixel-brush\".",
 	    "",
-	    true,0x0053);  /*Del*/
+	    true,SDLK_DELETE);  /*Del*/
     Definir_option(21,"Paintbrush choice",
 	    "Opens a menu where you can choose a paintbrush out of 24 predefined ones.",
 	    "",
-	    true,0x003E);  /*F4*/
+	    true,SDLK_F4);  /*F4*/
     Definir_option(22,"Monochrome brush",
 	    "Turn your current user-defined brush into a single colored one.",
 	    "All non-transparent colors are set to current foreground color.",
-	    true,0x0157);  /*Shift + F4*/
+	    true,SDLK_F4|0x1000);  /*Shift + F4*/
     Definir_option(23,"Freehand drawing",
 	    "Set the drawing mode to the classical freehand one.",
 	    "",
-	    true,0x0020);  /*D*/
+	    true,SDLK_d);  /*D*/
     Definir_option(24,"Switch freehand drawing mode",
 	    "Switch between the 3 ways to use freehand drawing.",
 	    "These modes are: continuous, discontinuous and point by point.",
-	    true,0x0120);  /*Shift + D*/
+	    true,SDLK_d|0x1000);  /*Shift + D*/
     Definir_option(25,"Continuous freehand drawing",
 	    "Switch directly to continuous freehand drawing mode.",
 	    "",
-	    true,0x0220);  /*Ctrl + D*/
+	    true,SDLK_d|0x2000);  /*Ctrl + D*/
     Definir_option(26,"Line",
 	    "Allows you to draw lines.",
 	    "",
-	    true,0x0026);  /*L*/
+	    true,SDLK_l);  /*L*/
     Definir_option(27,"Knotted lines",
 	    "Allows you to draw linked lines.",
 	    "This mode can also be called \"Polyline\".",
-	    true,0x0126);  /*Shift + L*/
+	    true,SDLK_l|0x1000);  /*Shift + L*/
     Definir_option(28,"Spray",
 	    "Allows you to spray brushes randomly in the picture.",
 	    "",
-	    true,0x001E);  /*A (Q en AZERTY)*/
+	    true,SDLK_a);  /*A (Q en AZERTY)*/
     Definir_option(29,"Spray menu",
 	    "Opens a menu in which you can configure the spray flow and size.",
 	    "",
-	    true,0x011E);  /*Shift + A*/
+	    true,SDLK_a|0x1000);  /*Shift + A*/
     Definir_option(30,"Flood-fill",
 	    "Allows you to fill an area of the picture made of pixels of the same color.",
 	    "",
-	    true,0x0021);  /*F*/
+	    true,SDLK_f);  /*F*/
     Definir_option(124,"Replace color",
 	    "Allows you to replace all the pixels of the color pointed by the mouse with",
 	    "the fore-color or the back-color.",
-	    true,0x0121);  /*Shift + F*/
+	    true,SDLK_f|0x1000);  /*Shift + F*/
     Definir_option(31,"Bézier""s curves",
-	    "Allows you to draw B‚zier""s curves.",
+	    "Allows you to draw Bézier""s curves.",
 	    "",
-	    true,0x0017);  /*I*/
+	    true,SDLK_i);  /*I*/
     Definir_option(32,"Bézier""s curve with 3 or 4 points",
-	    "Allows you to choose whether you want to draw B‚zier""s curves with 3 or 4",
+	    "Allows you to choose whether you want to draw Bézier""s curves with 3 or 4",
 	    "points.",
-	    true,0x0117);  /*Shift + I*/
+	    true,SDLK_i|0x1000);  /*Shift + I*/
     Definir_option(33,"Empty rectangle",
 	    "Allows you to draw a rectangle using the brush.",
 	    "",
-	    true,0x0013);  /*R*/
+	    true,SDLK_r);  /*R*/
     Definir_option(34,"Filled rectangle",
 	    "Allows you to draw a filled rectangle.",
 	    "",
-	    true,0x0113);  /*Shift + R*/
+	    true,SDLK_r|0x1000);  /*Shift + R*/
     Definir_option(35,"Empty circle",
 	    "Allows you to draw a circle using the brush.",
 	    "",
-	    true,0x002E);  /*C*/
+	    true,SDLK_c);  /*C*/
     Definir_option(36,"Empty ellipse",
 	    "Allows you to draw an ellipse using the brush.",
 	    "",
-	    true,0x022E);  /*Ctrl + C*/
+	    true,SDLK_c|0x2000);  /*Ctrl + C*/
     Definir_option(37,"Filled circle",
 	    "Allows you to draw a filled circle.",
 	    "",
-	    true,0x012E);  /*Shift + C*/
+	    true,SDLK_c|0x1000);  /*Shift + C*/
     Definir_option(38,"Filled ellipse",
 	    "Allows you to draw a filled ellipse.",
 	    "",
-	    true,0x032E);  /*Shift + Ctrl + C*/
+	    true,SDLK_c|0x1000|0x2000);  /*Shift + Ctrl + C*/
     Definir_option(39,"Empty polygon",
 	    "Allows you to draw a polygon using the brush.",
 	    "",
-	    true,0x0031);  /*N*/
+	    true,SDLK_n);  /*N*/
     Definir_option(40,"Empty \"polyform\"",
 	    "Allows you to draw a freehand polygon using the brush.",
 	    "",
-	    true,0x0231);  /*Ctrl + N*/
+	    true,SDLK_n|0x2000);  /*Ctrl + N*/
     Definir_option(41,"Filled polygon",
 	    "Allows you to draw a filled polygon.",
 	    "",
-	    true,0x0131);  /*Shift + N*/
+	    true,SDLK_n|0x1000);  /*Shift + N*/
     Definir_option(42,"Filled \"polyform\"",
 	    "Allows you to draw a filled freehand polygon.",
 	    "",
-	    true,0x0331);  /*Shift + Ctrl + N*/
+	    true,SDLK_n|0x1000|0x2000);  /*Shift + Ctrl + N*/
     Definir_option(43,"Rectangle with gradation",
 	    "Allows you to draw a rectangle with a color gradation.",
 	    "",
-	    true,0x0413);  /*Alt + R*/
+	    true,SDLK_r|0x4000);  /*Alt + R*/
     Definir_option(44,"Gradation menu",
 	    "Allows you to configure the way color gradations are calculated.",
 	    "",
-	    true,0x0422);  /*Alt + G*/
+	    true,SDLK_g|0x4000);  /*Alt + G*/
     Definir_option(45,"Sphere with gradation",
 	    "Allows you to draw a rectangle with a color gradation.",
 	    "",
-	    true,0x042E);  /*Alt + C*/
+	    true,SDLK_c|0x4000);  /*Alt + C*/
     Definir_option(46,"Ellipse with gradation",
 	    "Allows you to draw an ellipse filled with a color gradation.",
 	    "",
-	    true,0x052E);  /*Shift + Alt + C*/
+	    true,SDLK_c|0x1000|0x4000);  /*Shift + Alt + C*/
     Definir_option(47,"Adjust picture",
 	    "Allows you to move the whole picture in order to re-center it.",
 	    "Notice that what gets out from a side reappears on the other.",
-	    true,0x004C);  /*Kpad5*/
+	    true,SDLK_KP5);  /*Kpad5*/
     Definir_option(48,"Flip/shrink picture menu",
 	    "Opens a menu which allows you to flip the picture horizontally/vertically or",
 	    "to shrink it to half-scale horizontally and/or vertically.",
-	    true,0x014C);  /*Shift + Kpad5*/
+	    true,SDLK_KP5|0x1000);  /*Shift + Kpad5*/
     Definir_option(49,"Drawing effects",
 	    "Opens a menu where you can enable/disable and configure the drawing effects",
 	    "listed below.",
-	    true,0x0012);  /*E*/
+	    true,SDLK_e);  /*E*/
     Definir_option(50,"Shade mode",
 	    "Allows you to shade or lighten some pixels of the picture belonging to a",
 	    "color range, in addition of any drawing tool.",
-	    true,0x003F);  /*F5*/
+	    true,SDLK_F5);  /*F5*/
     Definir_option(51,"Shade menu",
 	    "Opens a menu where you can choose color ranges to use with the Shade mode.",
 	    "This menu also contains parameters used both in Shade and Quick-shade modes.",
-	    true,0x0158);  /*Shift + F5*/
+	    true,SDLK_F5|0x1000);  /*Shift + F5*/
     Definir_option(131,"Quick-shade mode",
 	    "Does the same thing as shade mode with a simpler method (faster to define",
 	    "but a bit less powerful).",
-	    true,0x0262);  /*Ctrl + F5*/
+	    true,SDLK_F5|0x2000);  /*Ctrl + F5*/
     Definir_option(132,"Quick-shade menu",
 	    "Opens a menu where you can define the parameters of the quick-shade mode.",
 	    "",
-	    true,0x0362);  /*Shift + Ctrl + F5*/
+	    true,SDLK_F5|0x1000|0x2000);  /*Shift + Ctrl + F5*/
     Definir_option(52,"Stencil mode",
 	    "Allows you to mask colors that must not be affected when you are drawing.",
 	    "",
-	    true,0x0040);  /*F6*/
+	    true,SDLK_F6);  /*F6*/
     Definir_option(53,"Stencil menu",
 	    "Opens a menu where you can choose colors masked by the Stencil mode.",
 	    "",
-	    true,0x0159);  /*Shift + F6*/
+	    true,SDLK_F6|0x1000);  /*Shift + F6*/
     Definir_option(54,"Mask mode",
 	    "Allows you to mask colors of the spare page that will keep you from ",
 	    "drawing. This mode should be called \"True stencil\".",
-	    true,0x046D);  /*Alt + F6*/
+	    true,SDLK_F6|0x4000);  /*Alt + F6*/
     Definir_option(55,"Mask menu",
 	    "Opens a menu where you can choose colors for the Mask mode.",
 	    "",
-	    true,0x056D);  /*Shift + Alt + F6*/
+	    true,SDLK_F6|0x1000|0x4000);  /*Shift + Alt + F6*/
     Definir_option(56,"Grid mode",
 	    "Force the cursor to snap up grid points.",
 	    "",
-	    true,0x0022);  /*G*/
+	    true,SDLK_g);  /*G*/
     Definir_option(57,"Grid menu",
 	    "Open a menu where you can configure the grid used by Grid mode.",
 	    "",
-	    true,0x0122);  /*Shift + G*/
+	    true,SDLK_g|0x1000);  /*Shift + G*/
     Definir_option(58,"Sieve mode",
 	    "Only draws pixels on certain positions matching with a sieve.",
 	    "",
-	    true,0x0222);  /*Ctrl + G*/
+	    true,SDLK_g|0x2000);  /*Ctrl + G*/
     Definir_option(59,"Sieve menu",
 	    "Opens a menu where you can configure the sieve.",
 	    "",
-	    true,0x0322);  /*Shift + Ctrl + G*/
+	    true,SDLK_g|0x1000|0x2000);  /*Shift + Ctrl + G*/
     Definir_option(60,"Invert sieve",
 	    "Inverts the pattern defined in the Sieve menu.",
 	    "",
-	    true,0x0622);  /*Ctrl + Alt + G*/
+	    true,SDLK_g|0x2000|0x4000);  /*Ctrl + Alt + G*/
     Definir_option(61,"Colorize mode",
 	    "Allows you to colorize the pixels on which your brush is pasted.",
 	    "This permits you to make transparency effects.",
-	    true,0x0041);  /*F7*/
+	    true,SDLK_F7);  /*F7*/
     Definir_option(62,"Colorize menu",
 	    "Opens a menu where you can give the opacity percentage for Colorize mode.",
 	    "",
-	    true,0x015A);  /*Shift + F7*/
+	    true,SDLK_F7|0x1000);  /*Shift + F7*/
     Definir_option(63,"Smooth mode",
 	    "Soften pixels on which your brush is pasted.",
 	    "",
-	    true,0x0042);  /*F8*/
+	    true,SDLK_F8);  /*F8*/
     Definir_option(123,"Smooth menu",
 	    "Opens a menu where you can define the Smooth matrix.",
 	    "",
-	    true,0x015B);  /*Shift + F8*/
+	    true,SDLK_F8|0x1000);  /*Shift + F8*/
     Definir_option(64,"Smear mode",
 	    "Smears the pixels when you move your brush on the picture.",
 	    "",
-	    true,0x046F);  /*Alt + F8*/
+	    true,SDLK_F8|0x4000);  /*Alt + F8*/
     Definir_option(65,"Tiling mode",
 	    "Puts parts of the brush where you draw.",
 	    "",
-	    true,0x0430);  /*Alt + B*/
+	    true,SDLK_b|0x4000);  /*Alt + B*/
     Definir_option(66,"Tiling menu",
 	    "Opens a menu where you can configure the origin of the tiling.",
 	    "",
-	    true,0x0530);  /*Shift + Alt + B*/
+	    true,SDLK_b|0x1000|0x4000);  /*Shift + Alt + B*/
     Definir_option(67,"Classical brush grabbing",
 	    "Allows you to pick a brush defined within a rectangle.",
 	    "",
-	    true,0x0030);  /*B*/
+	    true,SDLK_b);  /*B*/
     Definir_option(68,"\"Lasso\" brush grabbing",
 	    "Allows you to pick a brush defined within a freehand polygon.",
 	    "",
-	    true,0x0230);  /*Ctrl + B*/
+	    true,SDLK_b|0x2000);  /*Ctrl + B*/
     Definir_option(69,"Get previous brush back",
 	    "Restore the last user-defined brush.",
 	    "",
-	    true,0x0130);  /*Shift + B*/
+	    true,SDLK_b|0x1000);  /*Shift + B*/
     Definir_option(70,"Horizontal brush flipping",
 	    "Reverse brush horizontally.",
 	    "",
-	    true,0x002D);  /*X*/
+	    true,SDLK_x);  /*X*/
     Definir_option(71,"Vertical brush flipping",
 	    "Reverse brush vertically.",
 	    "",
-	    true,0x0015);  /*Y*/
+	    true,SDLK_y);  /*Y*/
     Definir_option(72,"90ø brush rotation",
 	    "Rotate the user-defined brush by 90ø (counter-clockwise).",
 	    "",
-	    true,0x002C);  /*Z (W en AZERTY)*/
+	    true,SDLK_z);  /*Z (W en AZERTY)*/
     Definir_option(73,"180ø brush rotation",
 	    "Rotate the user-defined brush by 180ø.",
 	    "",
-	    true,0x012C);  /*Shift + Z*/
+	    true,SDLK_z|0x1000);  /*Shift + Z*/
     Definir_option(74,"Strech brush",
 	    "Allows you to resize the user-defined brush.",
 	    "",
-	    true,0x001F);  /*S*/
+	    true,SDLK_s);  /*S*/
     Definir_option(75,"Distort brush",
 	    "Allows you to distort the user-defined brush.",
 	    "",
-	    true,0x011F);  /*Shift + S*/
+	    true,SDLK_s|0x1000);  /*Shift + S*/
     Definir_option(76,"Outline brush",
 	    "Outlines the user-defined brush with the fore color.",
 	    "",
-	    true,0x0018);  /*O*/
+	    true,SDLK_o);  /*O*/
     Definir_option(77,"Nibble brush",
 	    "Deletes the borders of the user-defined brush.",
 	    "This does the opposite of the Outline option.",
-	    true,0x0118);  /*Shift + O*/
+	    true,SDLK_o|0x1000);  /*Shift + O*/
     Definir_option(78,"Get colors from brush",
 	    "Copy colors of the spare page that are used in the brush.",
 	    "",
-	    true,0x0085);  /*F11*/
+	    true,SDLK_F11);  /*F11*/
     Definir_option(79,"Recolorize brush",
 	    "Recolorize pixels of the user-defined brush in order to get a brush which",
 	    "looks like the one grabbed in the spare page.",
-	    true,0x0086);  /*F12*/
+	    true,SDLK_F12);  /*F12*/
     Definir_option(80,"Rotate by any angle",
 	    "Rotate the brush by an angle that you can define.",
 	    "",
-	    true,0x0011);  /*W (Z en AZERTY)*/
+	    true,SDLK_w);  /*W (Z en AZERTY)*/
     Definir_option(81,"Pipette",
 	    "Allows you to copy the color of a pixel in the picture into the foreground",
 	    "or background color.",
-	    true,0x0029);  /*`~ (Touche sous le Esc - ý en AZERTY)*/
+	    true,SDLK_BACKQUOTE);  /*`~ (Touche sous le Esc - ² en AZERTY)*/
     Definir_option(82,"Swap foreground/background colors",
 	    "Invert foreground and background colors.",
 	    "",
-	    true,0x0129);  /*Shift + `~*/
+	    true,SDLK_BACKQUOTE|0x1000);  /*Shift + `~*/
     Definir_option(83,"Magnifier mode",
 	    "Allows you to zoom into the picture.",
 	    "",
-	    true,0x0032);  /*M (,? sur AZERTY)*/
+	    true,SDLK_m);  /*M (,? sur AZERTY)*/
     Definir_option(84,"Zoom factor menu",
 	    "Opens a menu where you can choose a magnifying factor.",
 	    "",
-	    true,0x0132);  /*Shift + M*/
+	    true,SDLK_m|0x1000);  /*Shift + M*/
     Definir_option(85,"Zoom in",
 	    "Increase magnifying factor.",
 	    "",
-	    true,0x004E);  /*Grey +*/
+	    true,SDLK_KP_PLUS);  /*Grey +*/
     Definir_option(86,"Zoom out",
 	    "Decrease magnifying factor.",
 	    "",
-	    true,0x004A);  /*Grey -*/
+	    true,SDLK_KP_MINUS);  /*Grey -*/
     Definir_option(87,"Brush effects menu",
 	    "Opens a menu which proposes different effects on the user-defined brush.",
 	    "",
-	    true,0x0630);  /*Ctrl + Alt + B*/
+	    true,SDLK_b|0x2000|0x4000);  /*Ctrl + Alt + B*/
     Definir_option(88,"Text",
 	    "Opens a menu which permits you to type in a character string and to choose a",
 	    "font, and then creates a new user-defined brush fitting to your choices.",
-	    true,0x0014);  /*T*/
+	    true,SDLK_t);  /*T*/
     Definir_option(89,"Screen resolution menu",
 	    "Opens a menu where you can choose the dimensions of the screen in which you",
 	    "want to draw among the numerous X and SVGA proposed modes.",
-	    true,0x001C);  /*Enter*/
+	    true,SDLK_RETURN);  /*Enter*/
     Definir_option(90,"\"Safety\" resolution",
 	    "Set resolution to 320x200. This can be useful if you choosed a resolution",
 	    "that is not supported by your monitor and video card. Cannot be removed.",
-	    false,0x011C); /*Shift + Enter*/
+	    false,SDLK_RETURN|0x1000); /*Shift + Enter*/
     Definir_option(91,"Help and credits",
 	    "Opens a window where you can get information about the program.",
 	    "",
-	    true,0x003B);  /*F1*/
+	    true,SDLK_F1);  /*F1*/
     Definir_option(92,"Statistics",
 	    "Displays miscellaneous more or less useful information.",
 	    "",
-	    true,0x0154);  /*Shift + F1*/
+	    true,SDLK_F1|0x1000);  /*Shift + F1*/
     Definir_option(93,"Jump to spare page",
 	    "Swap current page and spare page.",
 	    "",
-	    true,0x000F);  /*Tab*/
+	    true,SDLK_TAB);  /*Tab*/
     Definir_option(94,"Copy current page to spare page",
 	    "Copy current page to spare page.",
 	    "",
-	    true,0x010F);  /*Shift + Tab*/
+	    true,SDLK_TAB|0x1000);  /*Shift + Tab*/
     Definir_option(95,"Save picture as...",
 	    "Opens a file-selector that allows you to save your picture with a new",
 	    "path-name.",
-	    true,0x003C);  /*F2*/
+	    true,SDLK_F2);  /*F2*/
     Definir_option(96,"Save picture",
 	    "Saves your picture with the last name you gave it.",
 	    "",
-	    true,0x0155);  /*Shift + F2*/
+	    true,SDLK_F2|0x1000);  /*Shift + F2*/
     Definir_option(97,"Load picture",
 	    "Opens a file-selector that allows you to load a new picture.",
 	    "",
-	    true,0x003D);  /*F3*/
+	    true,SDLK_F3);  /*F3*/
     Definir_option(98,"Re-load picture",
 	    "Re-load the current picture.",
 	    "This allows you to cancel modifications made since last saving.",
-	    true,0x0156);  /*Shift + F3*/
+	    true,SDLK_F3|0x1000);  /*Shift + F3*/
     Definir_option(99,"Save brush",
 	    "Opens a file-selector that allows you to save your current user-defined",
 	    "brush.",
-	    true,0x025F);  /*Ctrl + F2*/
+	    true,SDLK_F2|0x2000);  /*Ctrl + F2*/
     Definir_option(100,"Load brush",
 	    "Opens a file-selector that allows you to load a brush.",
 	    "",
-	    true,0x0260);  /*Ctrl + F3*/
+	    true,SDLK_F3|0x2000);  /*Ctrl + F3*/
     Definir_option(101,"Settings",
 	    "Opens a menu which permits you to set the dimension of your picture, and to",
 	    "modify some parameters of the program.",
-	    true,0x015D);  /*Shift + F10*/
+	    true,SDLK_F10|0x1000);  /*Shift + F10*/
     Definir_option(102,"Undo (Oops!)",
 	    "Cancel the last action which modified the picture. This has no effect after",
 	    "a jump to the spare page, loading a picture or modifying its size.",
-	    true,0x0016);  /*U*/
+	    true,SDLK_u);  /*U*/
     Definir_option(103,"Redo",
 	    "Redo the last undone action. This has no effect after a jump to the spare",
 	    "page, loading a picture or modifying its size.",
-	    true,0x0116);  /*Shift + U*/
+	    true,SDLK_u|0x1000);  /*Shift + U*/
     Definir_option(133,"Kill",
 	    "Kills the current page. It actually removes the current page from the list",
 	    "of \"Undo\" pages.",
-	    true,0x0153);  /*Shift + Suppr*/
+	    true,SDLK_DELETE|0x1000);  /*Shift + Suppr*/
     Definir_option(104,"Clear page",
 	    "Clears the picture with the first color of the palette (usually black).",
 	    "",
-	    true,0x000E);  /*BackSpace*/
+	    true,SDLK_BACKSPACE);  /*BackSpace*/
     Definir_option(105,"Clear page with backcolor",
 	    "Clears the picture with the backcolor.",
 	    "",
-	    true,0x010E);  /*Shift + BackSpace*/
+	    true,SDLK_BACKSPACE|0x1000);  /*Shift + BackSpace*/
     Definir_option(106,"Quit program",
 	    "Allows you to leave the program.",
 	    "If modifications were not saved, confirmation is asked.",
-	    false,0x0010);  /*Q (A en AZERTY)*/
+	    false,SDLK_q);  /*Q (A en AZERTY)*/
     Definir_option(107,"Palette menu",
 	    "Opens a menu which allows you to modify the current palette.",
 	    "",
-	    true,0x0019);  /*P*/
+	    true,SDLK_p);  /*P*/
     Definir_option(125,"Secondary palette menu",
 	    "Opens a menu which allows you to define color series and some tagged colors.",
 	    "",
-	    true,0x0119);  /*Shift + P*/
+	    true,SDLK_p|0x1000);  /*Shift + P*/
     Definir_option(130,"Exclude colors menu",
 	    "Opens a menu which allows you to define the colors you don""t want to use in",
 	    "modes such as Smooth and Transparency, or when remapping a brush.",
-	    true,0x0219);  /*Ctrl + P*/
+	    true,SDLK_p|0x2000);  /*Ctrl + P*/
     Definir_option(108,"Scroll palette to the left",
 	    "Scroll palette in the tool bar to the left, column by column.",
 	    "",
-	    true,0x0049);  /*PgUp*/
+	    true,SDLK_PAGEUP);  /*PgUp*/
     Definir_option(109,"Scroll palette to the right",
 	    "Scroll palette in the tool bar to the right, column by column.",
 	    "",
-	    true,0x0051);  /*PgDn*/
+	    true,SDLK_PAGEDOWN);  /*PgDn*/
     Definir_option(110,"Scroll palette to the left faster",
 	    "Scroll palette in the tool bar to the left, 8 columns by 8 columns.",
 	    "",
-	    true,0x0149);  /*Shift + PgUp*/
+	    true,SDLK_PAGEUP|0x1000);  /*Shift + PgUp*/
     Definir_option(111,"Scroll palette to the right faster",
 	    "Scroll palette in the tool bar to the right, 8 columns by 8 columns.",
 	    "",
-	    true,0x0151);  /*Shift + PgDn*/
+	    true,SDLK_PAGEDOWN|0x1000);  /*Shift + PgDn*/
     Definir_option(112,"Center brush attachment point",
 	    "Set the attachement of the user-defined brush to its center.",
 	    "",
-	    true,0x028F);  /*Ctrl + 5 (pavé numérique)*/
+	    true,SDLK_KP5|0x2000);  /*Ctrl + 5 (pavé numérique)*/
     Definir_option(113,"Top-left brush attachment point",
 	    "Set the attachement of the user-defined brush to its top-left corner.",
 	    "",
-	    true,0x0277);  /*Ctrl + 7*/
+	    true,SDLK_HOME|0x2000);  /*Ctrl + 7*/
     Definir_option(114,"Top-right brush attachment point",
 	    "Set the attachement of the user-defined brush to its top-right corner.",
 	    "",
-	    true,0x0284);  /*Ctrl + 9*/
+	    true,SDLK_PAGEUP|0x2000);  /*Ctrl + 9*/
     Definir_option(115,"Bottom-left brush attachment point",
 	    "Set the attachement of the user-defined brush to its bottom-left corner.",
 	    "",
-	    true,0x0275);  /*Ctrl + 1*/
+	    true,SDLK_END|0x2000);  /*Ctrl + 1*/
     Definir_option(116,"Bottom-right brush attachment point",
 	    "Set the attachement of the user-defined brush to its bottom-right corner.",
 	    "",
-	    true,0x0276);  /*Ctrl + 3*/
+	    true,SDLK_PAGEDOWN|0x2000);  /*Ctrl + 3*/
     Definir_option(117,"Next foreground color",
 	    "Set the foreground color to the next in the palette.",
 	    "",
-	    true,0x001B);  /*] (0x en AZERTY)*/
+	    true,SDLK_RIGHTBRACKET);  /*] (0x en AZERTY)*/
     Definir_option(118,"Previous foreground color",
 	    "Set the foreground color to the previous in the palette.",
 	    "",
-	    true,0x001A);  /*[ (^ en AZERTY)*/
+	    true,SDLK_LEFTBRACKET);  /*[ (^ en AZERTY)*/
     Definir_option(119,"Next background color",
 	    "Set the background color to the next in the palette.",
 	    "",
-	    true,0x011B);  /*Shift + ]*/
+	    true,SDLK_RIGHTBRACKET|0x1000);  /*Shift + ]*/
     Definir_option(120,"Previous background color",
 	    "Set the background color to the previous in the palette.",
 	    "",
-	    true,0x011A);  /*Shift + [*/
+	    true,SDLK_LEFTBRACKET|0x1000);  /*Shift + [*/
     Definir_option(126,"Next user-defined forecolor",
 	    "Set the foreground color to the next in the user-defined color series.",
 	    "",
-	    true,0x000D);  /*"=+"*/
+	    true,SDLK_EQUALS);  /*"=+"*/
     Definir_option(127,"Previous user-defined forecolor",
 	    "Set the foreground color to the previous in the user-defined color series.",
 	    "",
-	    true,0x000C);  /*"-_" (")ø" en AZERTY*/
+	    true,SDLK_MINUS);  /*"-_" (")ø" en AZERTY*/
     Definir_option(128,"Next user-defined backcolor",
 	    "Set the background color to the next in the user-defined color series.",
 	    "",
-	    true,0x010D);  /*Shift + "=+"*/
+	    true,SDLK_EQUALS|0x1000);  /*Shift + "=+"*/
     Definir_option(129,"Previous user-defined backcolor",
 	    "Set the background color to the previous in the user-defined color series.",
 	    "",
-	    true,0x010C);  /*Shift + "-_" (")ø" en AZERTY*/
+	    true,SDLK_MINUS|0x1000);  /*Shift + "-_" (")ø" en AZERTY*/
     Definir_option(121,"Shrink paintbrush",
 	    "Decrease the width of the paintbrush if it is special circle or square.",
 	    "",
-	    true,0x0033);  /*,< (;. en AZERTY)*/
+	    true,SDLK_COMMA);  /*,< (;. en AZERTY)*/
     Definir_option(122,"Enlarge paintbrush",
 	    "Increase the width of the paintbrush if it is special circle or square.",
 	    "",
-	    true,0x0034);  /*.> (:/ en AZERTY)*/
+	    true,SDLK_PERIOD);  /*.> (:/ en AZERTY)*/
 
 
     NB_OPTIONS = Numero_definition_option - 1;
@@ -836,7 +757,7 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
     uint8_t i,j,Num_titre,Num_choix;
     uint16_t x1,y1;
     uint8_t Option_choisie;
-    SDL_keysym Touche;
+    word Touche;
 
     Hauteur *= 9;
     Largeur *= 9;
@@ -886,7 +807,7 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
     do
     {
 	Touche = Lire_Touche();
-	switch(Touche.sym)
+	switch(Touche)
 	{
 	    case SDLK_LEFT:
 		Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
@@ -904,7 +825,7 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
 
 	}
 	SDL_UpdateRect(Ecran,x1+3,y1+(Num_titre+3)*9,50*Num_choix,2);
-    }while(Touche.sym!=SDLK_RETURN);
+    }while(Touche!=SDLK_RETURN);
 
     Tout_ecrire(); // Efface la boite de dialogue
     return Option_choisie+1;
@@ -918,7 +839,7 @@ void Test_duplic()
 
     for(i=0;i<NB_OPTIONS;i++)
     {
-	if(Config[i].Touche!=0xFF)
+	if(Config[i].Touche!=0xFF) // FIXME
 	{
 	    j=1;
 	    Pas_encore_erreur=true;
@@ -1053,16 +974,39 @@ void Page_down()
     }
 }
 
+void Select()
+{
+  word Touche;
+  Cadre(36*8+1,(HAUTEUR_DEBUT_SETUP+Position_curseur)*9,38*8-2,9,COULEUR_SETUP);
+  SFont_Write(Ecran,MyFont,40*8,(HAUTEUR_DEBUT_SETUP+Position_curseur)*9,
+    "-- Press a key --");
+  SDL_UpdateRect(Ecran,3,(HAUTEUR_DEBUT_SETUP+Position_curseur)*9,630,9);
+  while (1)
+  {
+  	Touche = Lire_Touche();
+    if (Touche == SDLK_ESCAPE)
+      return;
+    if (Touche != 0)
+    {
+      Config[Position_curseur+Decalage_curseur].Touche = Touche;
+      Test_duplic();
+      Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
+		    COULEUR_SETUP);
+      return;
+    }
+  }
+}
+
 /* Let the user do things */
 void Setup()
 {
     bool Sortie_OK = false;
-    SDL_keysym Touche;
+    word Touche;
     Test_duplic();
     Tout_ecrire();
     do{
 	Touche = Lire_Touche();
-	switch(Touche.sym)
+	switch(Touche)
 	{
 	    case SDLK_UP:
 		Scroll_haut();
@@ -1077,7 +1021,7 @@ void Setup()
 		Page_down();
 		break;
 	    case SDLK_RETURN:
-		//Select();
+		Select();
 		break;
 	    case SDLK_DELETE:
 		//Unselect();
@@ -1108,7 +1052,7 @@ void Enregistrer_config()
 
     if(Choix_enreg==true) // Save keys if wanted
     {
-	Fichier = fopen("gfx2.cfg","wb");
+	Fichier = fopen("gfx2.cfg","ab");
 	fseek(Fichier,Header_size+Chunk_size,SEEK_SET); // Positionnement sur la première touche
 
 	for(Indice = 0;Indice < NB_OPTIONS;Indice++)
@@ -1133,6 +1077,7 @@ int main(int argc, char * argv[])
 	SDL_Init(SDL_INIT_VIDEO);
 	Ecran = SDL_SetVideoMode(640,480,8,0);
 	SDL_WM_SetCaption ("Grafx2 configuration tool","../gfx2.gif");
+  SDL_EnableKeyRepeat(250, 32);
 
 	/* On initialise SFont */
 	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));

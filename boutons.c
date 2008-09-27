@@ -2677,9 +2677,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         if (Bouton_clicke<=0)
         {
           Temp=strlen(Fichier_recherche);
-          if (Temp<12)
+          if (Touche_ANSI>= ' ' && Touche_ANSI < 255 && Temp<50)
           {
-            Fichier_recherche[Temp]=toupper(Touche_ASCII);
+            Fichier_recherche[Temp]=toupper(Touche_ANSI);
             Fichier_recherche[Temp+1]=0;
             Fichier_le_plus_ressemblant=Nom_correspondant_le_mieux_a(Fichier_recherche);
             if ( (Fichier_le_plus_ressemblant)

@@ -3171,36 +3171,36 @@ void Etirer_brosse_0_7(void)
     }
   }
 
-  if (Touche_ASCII)
+  if (Touche)
   {
     Changement_de_taille=1;
-    switch (Touche_ASCII)
+    switch (Touche)
     {
-      case 'd': // Double
+      case SDLK_d: // Double
         Largeur=Debut_X+(Brosse_Largeur<<1)-1;
         Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
-      case 'x': // Double X
+      case SDLK_x: // Double X
         Largeur=Debut_X+(Brosse_Largeur<<1)-1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case 'y': // Double Y
+      case SDLK_y: // Double Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
-      case 'h': // Moitié
+      case SDLK_h: // Moitié
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case 'X': // Moitié X
+      case SDLK_x|0x1000: // Moitié X
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case 'Y': // Moitié Y
+      case SDLK_y|0x1000: // Moitié Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case 'n': // Normal
+      case SDLK_n: // Normal
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
@@ -3439,21 +3439,21 @@ void Tourner_brosse_0_5(void)
     }
   }
 
-  if (Touche_ASCII)
+  if (Touche)
   {
     Changement_angle=1;
     Calcul_X=Brosse_Centre_rotation_X;
     Calcul_Y=Brosse_Centre_rotation_Y;
-    switch (Touche_ASCII)
+    switch (Touche)
     {
-      case '6': Angle=     0.0 ; Calcul_X++;             break;
-      case '9': Angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
-      case '8': Angle=M_PI*0.5 ;             Calcul_Y--; break;
-      case '7': Angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
-      case '4': Angle=M_PI     ; Calcul_X--;             break;
-      case '1': Angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
-      case '2': Angle=M_PI*1.5 ;             Calcul_Y++; break;
-      case '3': Angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
+      case SDLK_6:case SDLK_KP6: Angle=     0.0 ; Calcul_X++;             break;
+      case SDLK_9:case SDLK_KP9: Angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
+      case SDLK_8:case SDLK_KP8: Angle=M_PI*0.5 ;             Calcul_Y--; break;
+      case SDLK_7:case SDLK_KP7: Angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
+      case SDLK_4:case SDLK_KP4: Angle=M_PI     ; Calcul_X--;             break;
+      case SDLK_1:case SDLK_KP1: Angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
+      case SDLK_2:case SDLK_KP2: Angle=M_PI*1.5 ;             Calcul_Y++; break;
+      case SDLK_3:case SDLK_KP3: Angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
       default :
         Changement_angle=0;
     }
