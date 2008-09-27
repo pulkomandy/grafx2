@@ -1635,11 +1635,11 @@ void Bouton_Palette(void)
           }
           break;
 
-        case (SDLK_LEFTBRACKET|0x1000) : // Decaler Backcolor vers la gauche
+        case (SDLK_LEFTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la gauche
           Back_color--;
-        case (SDLK_RIGHTBRACKET|0x1000) : // Decaler Backcolor vers la droite
+        case (SDLK_RIGHTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la droite
           // attention: pas de break ci-dessus
-          if (Touche==(SDLK_RIGHTBRACKET|0x1000))
+          if (Touche==(SDLK_RIGHTBRACKET|MOD_SHIFT))
             Back_color++;
           Effacer_curseur();
           Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);

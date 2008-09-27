@@ -1773,7 +1773,7 @@ void Bouton_Degrades(void)
   Fenetre_Definir_bouton_normal(8,22,15,14,
     (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
     // Définition du bouton de technique
-  Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,SDLK_TAB|0x1000); // 5
+  Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
   Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
 
   Fenetre_Definir_bouton_normal(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
@@ -4890,10 +4890,10 @@ void Bouton_Trame_Menu(void)
   Fenetre_Definir_bouton_normal(  8,46,131,14,"Get from brush"   ,1,1,SDLK_g); // 6
   Fenetre_Definir_bouton_normal(142,46,139,14,"Transfer to brush",1,1,SDLK_t); // 7
 
-  Fenetre_Definir_bouton_normal(109,114,11,11,"\030",0,1,SDLK_UP|0x1000); // 8
-  Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,SDLK_DOWN|0x1000); // 9
-  Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,SDLK_LEFT|0x1000); // 10
-  Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,SDLK_RIGHT|0x1000); // 11
+  Fenetre_Definir_bouton_normal(109,114,11,11,"\030",0,1,SDLK_UP|MOD_SHIFT); // 8
+  Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,SDLK_DOWN|MOD_SHIFT); // 9
+  Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,SDLK_LEFT|MOD_SHIFT); // 10
+  Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,SDLK_RIGHT|MOD_SHIFT); // 11
   Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
   Bouton_Octet_insere=Fenetre_Liste_boutons_normal;
   Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),

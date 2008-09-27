@@ -111,6 +111,10 @@ GLOBAL byte Mouse_K; // Etat des boutons de la souris
 GLOBAL dword Touche; // Touche tapée
 GLOBAL dword Touche_ANSI; // Caractère tapé
 GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat des touches de ctrl
+// Modificateurs pour Touche
+#define MOD_SHIFT 0x1000
+#define MOD_CTRL  0x2000
+#define MOD_ALT   0x4000
 
 GLOBAL byte Mouse_Facteur_de_correction_X;
 GLOBAL byte Mouse_Facteur_de_correction_Y;

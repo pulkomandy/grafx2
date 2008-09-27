@@ -304,11 +304,11 @@ word Conversion_Touche(SDL_keysym Sym)
     Retour = (Sym.unicode & 0x07FF) | 0x0800;
   
   if (Sym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-    Retour |= 0x1000;
+    Retour |= MOD_SHIFT;
   if (Sym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-    Retour |= 0x2000;
+    Retour |= MOD_CTRL;
   if (Sym.mod & (KMOD_LALT | KMOD_RALT | KMOD_MODE))
-    Retour |= 0x4000;
+    Retour |= MOD_ALT;
   return Retour;
 }
 
@@ -398,11 +398,11 @@ const char * Nom_touche(word Touche)
   static char Buffer[41];
   Buffer[0] = '\0';
 
-  if (Touche & 0x2000)
+  if (Touche & MOD_CTRL)
     strcat(Buffer, "<Ctrl> + ");
-  if (Touche & 0x4000)
+  if (Touche & MOD_ALT)
     strcat(Buffer, "<Alt> + ");
-  if (Touche & 0x1000)
+  if (Touche & MOD_SHIFT)
     strcat(Buffer, "<Shift> + ");
 
   if (Touche & 0x8000)

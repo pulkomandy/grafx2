@@ -1796,7 +1796,7 @@ short Fenetre_Numero_bouton_touche(void)
 {
   struct Fenetre_Bouton_normal * Temp;
 
-  if (Touche & 0x1000)
+  if (Touche & MOD_SHIFT)
     Fenetre_Attribut1=A_DROITE;
   else
     Fenetre_Attribut1=A_GAUCHE;

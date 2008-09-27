@@ -3192,11 +3192,11 @@ void Etirer_brosse_0_7(void)
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case SDLK_x|0x1000: // Moitié X
+      case SDLK_x|MOD_SHIFT: // Moitié X
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case SDLK_y|0x1000: // Moitié Y
+      case SDLK_y|MOD_SHIFT: // Moitié Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
