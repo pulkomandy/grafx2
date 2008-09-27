@@ -278,9 +278,9 @@ void Desenclencher_bouton(int Numero)
 {
   if (Bouton[Numero].Enfonce)
   {
-    // On affiche le cadre autour du bouton de fa‡on à ce qu'il paraisse relƒché
+    // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
     Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_RELACHE);
-    // On considère que le bouton est relƒché
+    // On considère que le bouton est relâché
     Bouton[Numero].Enfonce=BOUTON_RELACHE;
     // On appelle le désenclenchement particulier au bouton:
     Bouton[Numero].Desenclencher();
@@ -339,12 +339,12 @@ void Enclencher_bouton(int Numero,byte Click)
           Desenclencher_bouton(Curseur);
   }
 
-  // On affiche le cadre autour du bouton de fa‡on à ce qu'il paraisse enfoncé
+  // On affiche le cadre autour du bouton de façon à ce qu'il paraisse enfoncé
   Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_ENFONCE);
 
   Afficher_curseur();
 
-  // On attend ensuite que l'utilisateur lƒche son bouton:
+  // On attend ensuite que l'utilisateur lâche son bouton:
   Attendre_fin_de_click();
 
   // On considère que le bouton est enfoncé
@@ -978,7 +978,7 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Fenetre_Liste_boutons_special =NULL;
   Nb_boutons_fenetre            =0;
 
-  // On (re)passe dans le clavier de départ (fran‡ais pour nous)
+  // On (re)passe dans le clavier de départ (français pour nous)
   Clavier_de_depart();
 }
 
@@ -1024,7 +1024,7 @@ void Fermer_fenetre(void)
 
   Une_fenetre_est_ouverte=0;
   Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
-                                 // d'outils si le curseur est sur une ic“ne.
+                                 // d'outils si le curseur est sur une icône.
 
   Calculer_coordonnees_pinceau();
 
@@ -1433,7 +1433,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
   short Ancien_X=-1;
   short Ancien_Y=-1;
   short Indice;
-  short A,B,C,D; // Variables temporaires et multitƒches...
+  short A,B,C,D; // Variables temporaires et multitâches...
   byte * Buffer;
   char Chaine[25];
   byte Cacher_curseur_avant_recuperation;
@@ -1460,7 +1460,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
     Forme_curseur=FORME_CURSEUR_CIBLE_PIPETTE;
     B=Cacher_pinceau;
     Cacher_pinceau=1;
-    C=-1; // Couleur pointée: au début aucune, comme ‡a on initialise tout
+    C=-1; // Couleur pointée: au début aucune, comme ça on initialise tout
     if (Menu_visible_avant_fenetre)
       Print_dans_menu(TITRE_BOUTON[BOUTON_CHOIX_COL],0);
 
@@ -1740,7 +1740,7 @@ short Fenetre_Numero_bouton_clicke(void)
 
           Hauteur_maxi_jauge=(Temp3->Hauteur-24);
 
-          // Fenetre_Attribut2 re‡oit la position dans la jauge correspondant au click
+          // Fenetre_Attribut2 reçoit la position dans la jauge correspondant au click
           Fenetre_Attribut2 =(Mouse_Y-Fenetre_Pos_Y) / Menu_Facteur_Y;
           Fenetre_Attribut2-=(Temp3->Pos_Y+12+((Temp3->Hauteur_curseur-1)>>1));
           Fenetre_Attribut2*=(Temp3->Nb_elements-Temp3->Nb_visibles);

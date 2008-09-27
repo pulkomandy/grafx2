@@ -331,7 +331,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
       Afficher_palette_du_menu_en_evitant_la_fenetre(Table_de_conversion);
     }
     /*
-       Il faudrait peut-ˆtre remapper les pointillés délimitant l'image.
+       Il faudrait peut-être remapper les pointillés délimitant l'image.
        Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
        Mais de toutes façons, c'est franchement facultatif...
     */
@@ -1047,7 +1047,7 @@ void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 }
 
 
-// -- Affichages de différents cƒdres dans une fenêtre -----------------------
+// -- Affichages de différents cadres dans une fenêtre -----------------------
 
   // -- Cadre général avec couleurs paramètrables --
 
@@ -3189,11 +3189,11 @@ void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
   word Ancienne_largeur=Principal_Largeur_image;
   word Ancienne_hauteur=Principal_Hauteur_image;
 
-  // ÚÄÂÄ¿
-  // ³C³ ³  A+B+C = Ancienne image
-  // ÃÄ´A³
-  // ³B³ ³    C   = Nouvelle image
-  // ÀÄÁÄÙ
+  // +-+-+
+  // |C| |  A+B+C = Ancienne image
+  // +-+A|
+  // |B| |    C   = Nouvelle image
+  // +-+-+
 
   if (Backup_avec_nouvelles_dimensions(1,Largeur_choisie,Hauteur_choisie))
   {
@@ -3382,7 +3382,7 @@ void Remap_brosse(void)
   //   On va maintenant se servir de la table "Utilisee" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilisées on besoin d'ˆtres recalculées: les
+  // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
   //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
@@ -3427,7 +3427,7 @@ void Remap_picture(void)
   //   On va maintenant se servir de la table "Utilisee" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilisées on besoin d'ˆtres recalculées: les
+  // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans l'image, donc elles
   //       ne seront pas utilisées par Remap_general_LOWLEVEL.
@@ -3726,7 +3726,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
 // l'image. Les limites employées sont Limite_Haut, Limite_Bas, Limite_Gauche
 // et Limite_Droite. Le point de départ du remplissage est Pinceau_X,Pinceau_Y
 // et s'effectue en théorie sur la couleur 1 et emploie la couleur 2 pour le
-// remplissage. Ces restrictions sont d–es à l'utilisation qu'on en fait dans
+// remplissage. Ces restrictions sont dûes à l'utilisation qu'on en fait dans
 // la fonction principale "Remplir", qui se charge de faire une gestion de
 // tous les effets.
 //   Cette fonction ne doit pas être directement appelée.
@@ -4751,12 +4751,12 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
   // dans cette procédure par "Position_dans_degrade", on calcule la position
   // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traînent de ce c“té du segment se voient subir
-  //         ³ une incrémentation conditionnelle à leur position dans l'écran.
+  //         | Les indices qui traînent de ce côté du segment se voient subir
+  //         | une incrémentation conditionnelle à leur position dans l'écran.
   //         v
-  //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
+  //  |---|---|---|---- - - -
   //   ^
-  //   ÀÄ Les indices qui traînent de ce c“té du segment se voient subir une
+  //   |_ Les indices qui traînent de ce côté du segment se voient subir une
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
@@ -4789,7 +4789,7 @@ void Degrade_de_trames_simples(long Indice,short Pos_X,short Pos_Y)
       // suffisament au centre du segment pour ne pas avoir à subir la trame
 
     case 3 : // On est sur la droite du segment
-      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“tés de la trame.
+      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
         Position_dans_degrade++;
   }
 
@@ -4818,17 +4818,17 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
   long Position_dans_degrade;
   long Position_dans_segment;
 
-  //
+//
   //   But de l'opération: en plus de calculer la position de base (désignée
   // dans cette procédure par "Position_dans_degrade", on calcule la position
   // de l'indice dans le schéma suivant:
   //
-  //         Ú Les indices qui traînent de ce c“té du segment se voient subir
-  //         ³ une incrémentation conditionnelle à leur position dans l'écran.
+  //         | Les indices qui traînent de ce côté du segment se voient subir
+  //         | une incrémentation conditionnelle à leur position dans l'écran.
   //         v
-  //  ÃÄÄÄÅÄÄÄÅÄÄÄÅÄÄÄúúú ú ú
+  //  |---|---|---|---- - - -
   //   ^
-  //   ÀÄ Les indices qui traînent de ce c“té du segment se voient subir une
+  //   |_ Les indices qui traînent de ce côté du segment se voient subir une
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
@@ -4873,7 +4873,7 @@ void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y)
       break;
 
     case 7 : // On est sur l'extreme droite du segment
-      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 c“tés de la trame.
+      if (((Pos_X+Pos_Y)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
         Position_dans_degrade++;
   }
 
@@ -5029,7 +5029,7 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
 
 
 
-  // -- Tracer un polyg“ne plein --
+  // -- Tracer un polygône plein --
 
 typedef struct POLYGON_EDGE      /* an active edge */
 {
@@ -5512,7 +5512,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   else
   {
     // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
-    // o— c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
     // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
@@ -5907,7 +5907,7 @@ void Tourner_brosse(float Angle)
   else
   {
     // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
-    // o— c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
     // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);

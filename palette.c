@@ -56,7 +56,7 @@ void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 
 void Degrader_palette(short Debut,short Fin,T_Palette Palette)
 // Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
-// passées en paramŠtre
+// passées en paramètre
 {
   short Debut_Rouge;
   short Debut_Vert;
@@ -202,12 +202,12 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   Utilisation_temporaire=(dword *)malloc(sizeof(dword)*256);
   memcpy(Utilisation_temporaire,Utilisation_couleur,sizeof(dword)*256);
 
-  // On commence à initialiser la table de conversion à un état o— elle ne
+  // On commence à initialiser la table de conversion à un état où elle ne
   // fera aucune conversion.
   for (Pos_1=0;Pos_1<=255;Pos_1++)
     Table_de_conversion[Pos_1]=Pos_1;
 
-  // On calcul les derniŠres couleurs de chaque bloc.
+  // On calcul les dernières couleurs de chaque bloc.
   Fin_1=Debut_Bloc_1+Taille_du_bloc-1;
   Fin_2=Debut_Bloc_2+Taille_du_bloc-1;
 
@@ -225,7 +225,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
       Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
-      // On gŠre la mise à jour de Pos_2
+      // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_2)
         Pos_2=Debut_Bloc_1;
       else
@@ -247,7 +247,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
       Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
-      // On gŠre la mise à jour de Pos_2
+      // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_1)
         Pos_2=Debut_Bloc_2;
       else
@@ -322,7 +322,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
     }
 
   // On trie maintenant la table dans le sens décroissant.
-  // (Ce n'est pas indispensable, mais ‡a fera plus joli dans la palette).
+  // (Ce n'est pas indispensable, mais ça fera plus joli dans la palette).
   do
   {
     Couleur=0; // Booléen qui dit si le tri n'est pas terminé.
@@ -379,7 +379,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   dword Utilisation;
   dword Meilleure_utilisation;
 
-  //   On commence par initialiser la table de conversion dans un état o—
+  //   On commence par initialiser la table de conversion dans un état où
   // aucune conversion ne sera effectuée.
   for (Couleur_1=0; Couleur_1<=255; Couleur_1++)
     Table_de_conversion[Couleur_1]=Couleur_1;
@@ -392,7 +392,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   Effacer_curseur();
 
   //   On tasse la palette vers le début parce qu'elle doit ressembler à
-  // du GruyŠre (et comme Papouille il aime pas le fromage...)
+  // du Gruyère (et comme Papouille il aime pas le fromage...)
 
   // Pour cela, on va scruter la couleur Couleur_1 et se servir de l'indice
   // Couleur_2 comme position de destination.
@@ -431,7 +431,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   while ((*Nb_couleurs_utilisees)>Nb_couleurs_demandees)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
-    // parmis celles qui sont utilisées (bien s–r) et de les remplacer par
+    // parmis celles qui sont utilisées (bien sûr) et de les remplacer par
     // une seule couleur qui est la moyenne pondérée de ces 2 couleurs
     // en fonction de leur utilisation dans l'image.
 
@@ -496,23 +496,23 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
     //   Bon, maintenant que l'on a fait bouger nos petites choses concernants
     // la couleur à éliminer, on va s'occuper de faire bouger les couleurs
-    // situées aprŠs la couleur à éliminer pour qu'elles se dépla‡ent d'une
-    // couleur en arriŠre.
+    // situées après la couleur à éliminer pour qu'elles se déplaçent d'une
+    // couleur en arrière.
     for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
     {
-      //   Commen‡ons par nous occuper des tables d'utilisation et de la
+      //   Commençons par nous occuper des tables d'utilisation et de la
       // palette.
 
       if (Couleur_1>Meilleure_couleur_2)
       {
-        // La Couleur_1 va scroller en arriŠre.
+        // La Couleur_1 va scroller en arrière.
 
-        //   Donc on transfŠre son utilisation dans l'utilisation de la
-        // couleur qui la précŠde.
+        //   Donc on transfère son utilisation dans l'utilisation de la
+        // couleur qui la précède.
         Utilisation_couleur[Couleur_1-1]=Utilisation_couleur[Couleur_1];
 
-        //   Et on transfŠre ses teintes dans les teintes de la couleur qui
-        // la précŠde.
+        //   Et on transfère ses teintes dans les teintes de la couleur qui
+        // la précède.
         Palette[Couleur_1-1].R=Palette[Couleur_1].R;
         Palette[Couleur_1-1].V=Palette[Couleur_1].V;
         Palette[Couleur_1-1].B=Palette[Couleur_1].B;
@@ -522,7 +522,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
       // s'occuper de notre table de conversion.
       if (Table_de_conversion[Couleur_1]>Meilleure_couleur_2)
         //   La Couleur_1 avait l'intention de se faire remplacer par une
-        // couleur que l'on va (ou que l'on a déjà) bouger en arriŠre.
+        // couleur que l'on va (ou que l'on a déjà) bouger en arrière.
         Table_de_conversion[Couleur_1]--;
     }
 
@@ -540,7 +540,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     // utilisation nulle.
     Utilisation_couleur[*Nb_couleurs_utilisees]=0;
 
-    // AprŠs avoir éjecté une couleur, on le fait savoir à l'utilisateur par
+    // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*Nb_couleurs_utilisees,Chaine,3);
     Print_dans_fenetre(186,23,Chaine,CM_Noir,CM_Clair);
@@ -850,7 +850,7 @@ void Bouton_Palette(void)
               // On maintient le click, on va donc tester si le curseur bouge
               if (Couleur_temporaire!=Derniere_couleur)
               {
-                // On commence par ordonner la 1Šre et derniŠre couleur du bloc
+                // On commence par ordonner la 1ère et dernière couleur du bloc
                 if (Premiere_couleur<Couleur_temporaire)
                 {
                   Debut_block=Premiere_couleur;
@@ -859,7 +859,7 @@ void Bouton_Palette(void)
                   // Affichage du nø de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
-                  Chaine[3]=26; // FlŠche vers la droite
+                  Chaine[3]=26; // Flèche vers la droite
                   Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
 
                   // Affichage des jauges
@@ -876,7 +876,7 @@ void Bouton_Palette(void)
                   // Affichage du nø de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
-                  Chaine[3]=26; // FlŠche vers la droite
+                  Chaine[3]=26; // Flèche vers la droite
                   Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
 
                   // Affichage des jauges
@@ -1088,7 +1088,7 @@ void Bouton_Palette(void)
             // Cas d'un bloc multi-couleur
             Num2str(Debut_block,Chaine  ,3);
             Num2str(Fin_block  ,Chaine+4,3);
-            Chaine[3]=26; // FlŠche vers la droite
+            Chaine[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
           }
@@ -1130,7 +1130,7 @@ void Bouton_Palette(void)
             // Cas d'un bloc multi-couleur
             Num2str(Debut_block,Chaine  ,3);
             Num2str(Fin_block  ,Chaine+4,3);
-            Chaine[3]=26; // FlŠche vers la droite
+            Chaine[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
           }
@@ -1672,7 +1672,7 @@ void Bouton_Palette(void)
           Il_faut_remapper=1;
           break;
 
-        case SDLK_BACKQUOTE : // Récupération d'une couleur derriŠre le menu
+        case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
         case SDLK_COMMA :
           Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
           if (Click)

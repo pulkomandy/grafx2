@@ -82,7 +82,7 @@ GLOBAL struct S_Mode_video Mode_video[NB_MODES_VIDEO];
 GLOBAL struct
 {
   byte   Granularite;   // Facteur de gestion de la granularité
-  byte   Code_fenetres; // Utilisation des fenˆtres: 0=AA 1=BB 2=AB 3=BA
+  byte   Code_fenetres; // Utilisation des fenêtres: 0=AA 1=BB 2=AB 3=BA
   byte * WinFuncPtr;
   byte * Adresse_physique_LFB; // Si = 0 => Pas de LFB
   dword  Taille_LFB;           // Taille de la mémoire LFB
@@ -124,7 +124,7 @@ GLOBAL byte Autoriser_changement_de_couleur_pendant_operation;
   // Données sur le curseur
 
 GLOBAL byte Forme_curseur;
-GLOBAL byte Forme_curseur_avant_fenetre; // Forme du curseur avant l'ouverture d'une fenˆtre
+GLOBAL byte Forme_curseur_avant_fenetre; // Forme du curseur avant l'ouverture d'une fenêtre
 GLOBAL byte Forcer_affichage_curseur;    // Forcer l'affichage du curseur au prochain Get_input();
 GLOBAL byte Cacher_curseur;
 GLOBAL byte Curseur_dans_menu;           // Booléen "Le curseur se trouve dans le menu"
@@ -157,25 +157,25 @@ GLOBAL short Pinceau_Decalage_Y;
 
   // Commandes graphiques
 
-GLOBAL fonction_afficheur Pixel;          // Affiche un point … l'‚cran
+GLOBAL fonction_afficheur Pixel;          // Affiche un point à l'écran
 GLOBAL fonction_afficheur Pixel_dans_menu;// Affiche un point dans le menu (ou pas si le menu est invisible)
 GLOBAL fonction_lecteur   Lit_pixel;      // Teste la couleur d'un pixel dans l'écran
-GLOBAL fonction_effaceur  Clear_screen;   // Efface rapidement tout l'‚cran (en faisant attention de ne pas effacer le menu)
-GLOBAL fonction_display   Display_screen; // Affiche rapidement tout l'‚cran (en faisant attention de ne pas effacer le menu)
-GLOBAL fonction_block     Block;          // Affiche rapidement un bloc … l'‚cran
-GLOBAL fonction_block     Block_Fast;       // Affiche rapidement un bloc … l'‚cran sans rafraichir
-GLOBAL fonction_afficheur Pixel_Preview_Normal; // Affiche un point de l'image … l'écran en mode normal (pas en mode loupe)
-GLOBAL fonction_afficheur Pixel_Preview_Loupe;  // Affiche un point de l'image … l'écran en mode loupe
-GLOBAL fonction_afficheur Pixel_Preview;        // Affiche un point de l'image … l'écran en fonction de l'état du mode loupe
+GLOBAL fonction_effaceur  Clear_screen;   // Efface rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
+GLOBAL fonction_display   Display_screen; // Affiche rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
+GLOBAL fonction_block     Block;          // Affiche rapidement un bloc à l'écran
+GLOBAL fonction_block     Block_Fast;       // Affiche rapidement un bloc à l'écran sans rafraichir
+GLOBAL fonction_afficheur Pixel_Preview_Normal; // Affiche un point de l'image à l'écran en mode normal (pas en mode loupe)
+GLOBAL fonction_afficheur Pixel_Preview_Loupe;  // Affiche un point de l'image à l'écran en mode loupe
+GLOBAL fonction_afficheur Pixel_Preview;        // Affiche un point de l'image à l'écran en fonction de l'état du mode loupe
 GLOBAL fonction_Ligne_XOR Ligne_horizontale_XOR;// Affiche une ligne horizontale en XOR (pour placer la loupe)
 GLOBAL fonction_Ligne_XOR Ligne_verticale_XOR;  // Affiche une ligne verticale en XOR (pour placer la loupe)
 GLOBAL fonction_display_brush_Color Display_brush_Color; // Affiche une partie de la brosse en couleur
 GLOBAL fonction_display_brush_Mono  Display_brush_Mono;  // Affiche une partie de la brosse en monochrome
-GLOBAL fonction_display_brush_Color Clear_brush;         // Efface la partie de la brosse affichée … l'écran
+GLOBAL fonction_display_brush_Color Clear_brush;         // Efface la partie de la brosse affichée à l'écran
 GLOBAL fonction_remap     Remap_screen;   // Remappe une partie de l'écran avec les nouvelles couleurs du menu
 GLOBAL fonction_procsline Afficher_ligne;  // Afficher une ligne
 GLOBAL fonction_procsline Lire_ligne;      // Afficher ou lire une ligne
-GLOBAL fonction_display_zoom Display_zoomed_screen; // Affiche rapidement toute la partie zoomée … l'écran (en faisant attention de ne pas effacer le menu)
+GLOBAL fonction_display_zoom Display_zoomed_screen; // Affiche rapidement toute la partie zoomée à l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_display_brush_Color_zoom Display_brush_Color_zoom;
 GLOBAL fonction_display_brush_Mono_zoom  Display_brush_Mono_zoom;
 GLOBAL fonction_display_brush_Color_zoom Clear_brush_zoom;
@@ -184,7 +184,7 @@ GLOBAL fonction_display_brush_Color_zoom Clear_brush_zoom;
 
 GLOBAL int   Resolution_actuelle; // Résolution graphique courante
 GLOBAL short Ecran_original_X;    // |_ Dimensions de l'écran d'origine de
-GLOBAL short Ecran_original_Y;    // |  l'image qui vient d'ˆtre chargée.
+GLOBAL short Ecran_original_Y;    // |  l'image qui vient d'être chargée.
 GLOBAL short Largeur_ecran;       // Largeur de l'écran
 GLOBAL short Hauteur_ecran;       // Hauteur de l'écran
 GLOBAL short Limite_Haut;         // |
@@ -192,13 +192,13 @@ GLOBAL short Limite_Bas;          // |_ Limites dans lesquelles
 GLOBAL short Limite_Gauche;       // |  on peut écrire
 GLOBAL short Limite_Droite;       // |
 GLOBAL short Limite_visible_Bas;    // |_ Derniers points visibles
-GLOBAL short Limite_visible_Droite; // |  "… l'image"
+GLOBAL short Limite_visible_Droite; // |  "à l'image"
 
 GLOBAL short Limite_Haut_Zoom;         // |
 GLOBAL short Limite_Bas_Zoom;          // |_ Limites dans lesquelles on peut
 GLOBAL short Limite_Gauche_Zoom;       // |  écrire dans la partie zoomée
 GLOBAL short Limite_Droite_Zoom;       // |
-GLOBAL short Limite_visible_Bas_Zoom;    // |_ Derniers points visibles "…
+GLOBAL short Limite_visible_Bas_Zoom;    // |_ Derniers points visibles "à
 GLOBAL short Limite_visible_Droite_Zoom; // |  l'image" dans la partie zoomée
 
 GLOBAL byte * Buffer_de_ligne_horizontale; // Buffer d'affichage de lignes
@@ -231,7 +231,7 @@ GLOBAL char  Principal_Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'im
 
 GLOBAL short Principal_Split; // Position en X du bord gauche du split de la loupe
 GLOBAL short Principal_X_Zoom; // (Menu_Facteur_X) + Position en X du bord droit du split de la loupe
-GLOBAL float Principal_Proportion_split; // Proportion de la zone non-zoomée par rapport … l'écran
+GLOBAL float Principal_Proportion_split; // Proportion de la zone non-zoomée par rapport à l'écran
 
   // Données sur le brouillon:
 
@@ -257,16 +257,16 @@ GLOBAL char  Brouillon_Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'im
 
 GLOBAL short Brouillon_Split; // Position en X du bord gauche du split de la loupe
 GLOBAL short Brouillon_X_Zoom; // (Menu_Facteur_X) + Position en X du bord droit du split de la loupe
-GLOBAL float Brouillon_Proportion_split; // Proportion de la zone non-zoomée par rapport … l'écran
+GLOBAL float Brouillon_Proportion_split; // Proportion de la zone non-zoomée par rapport à l'écran
 
 GLOBAL byte  Brouillon_Loupe_Mode;      // On est en mode loupe dans le brouillon
 GLOBAL word  Brouillon_Loupe_Facteur;   // Facteur de zoom dans le brouillon
-GLOBAL word  Brouillon_Loupe_Hauteur;   // Largeur de la fenˆtre de zoom dans le brouillon
-GLOBAL word  Brouillon_Loupe_Largeur;   // Hauteur de la fenˆtre de zoom dans le brouillon
-GLOBAL short Brouillon_Loupe_Decalage_X;// Decalage horizontal de la fenˆtre de zoom dans le brouillon
-GLOBAL short Brouillon_Loupe_Decalage_Y;// Decalage vertical   de la fenˆtre de zoom dans le brouillon
+GLOBAL word  Brouillon_Loupe_Hauteur;   // Largeur de la fenêtre de zoom dans le brouillon
+GLOBAL word  Brouillon_Loupe_Largeur;   // Hauteur de la fenêtre de zoom dans le brouillon
+GLOBAL short Brouillon_Loupe_Decalage_X;// Decalage horizontal de la fenêtre de zoom dans le brouillon
+GLOBAL short Brouillon_Loupe_Decalage_Y;// Decalage vertical   de la fenêtre de zoom dans le brouillon
 
-GLOBAL byte Masque_copie_couleurs[256]; // Tableau des couleurs … copier vers le brouillon
+GLOBAL byte Masque_copie_couleurs[256]; // Tableau des couleurs à copier vers le brouillon
 
   // Sauvegarde de l'image:
 
@@ -298,26 +298,26 @@ GLOBAL short Brosse_Centre_rotation_Y;      // |  de la brosse
 
   // Données sur le menu
 
-GLOBAL byte  Menu_visible;        // Le menu est actif … l'écran
-GLOBAL word  Menu_Ordonnee;       // Ordonnée o— commence le menu
-GLOBAL word  Menu_Ordonnee_Texte; // Ordonnée o— commence le texte dans le menu
+GLOBAL byte  Menu_visible;        // Le menu est actif à l'écran
+GLOBAL word  Menu_Ordonnee;       // Ordonnée où commence le menu
+GLOBAL word  Menu_Ordonnee_Texte; // Ordonnée où commence le texte dans le menu
 GLOBAL word  Menu_Facteur_X;      // Facteur de grossissement du menu en X
 GLOBAL word  Menu_Facteur_Y;      // Facteur de grossissement du menu en Y
 GLOBAL word  Menu_Taille_couleur; // Taille d'une couleur de la palette du menu
 
 
-  // Données sur la fenˆtre de menu
+  // Données sur la fenêtre de menu
 
 GLOBAL byte Une_fenetre_est_ouverte;
 
-GLOBAL word Fenetre_Pos_X;   // Position du bord gauche de la fenˆtre dans l'écran
-GLOBAL word Fenetre_Pos_Y;   // Position du bord haut   de la fenˆtre dans l'écran
-GLOBAL word Fenetre_Largeur; // Largeur de la fenˆtre
-GLOBAL word Fenetre_Hauteur; // Hauteur de la fenˆtre
+GLOBAL word Fenetre_Pos_X;   // Position du bord gauche de la fenêtre dans l'écran
+GLOBAL word Fenetre_Pos_Y;   // Position du bord haut   de la fenêtre dans l'écran
+GLOBAL word Fenetre_Largeur; // Largeur de la fenêtre
+GLOBAL word Fenetre_Hauteur; // Hauteur de la fenêtre
 
-GLOBAL byte Menu_visible_avant_fenetre;  // Le menu était visible avant d'ouvir une fenˆtre
-GLOBAL word Menu_Ordonnee_avant_fenetre; // Ordonnée du menu avant d'ouvrir une fenˆtre
-GLOBAL byte Cacher_pinceau_avant_fenetre;// Le pinceau étatit déj… caché avant l'ouverture de la fenetre?
+GLOBAL byte Menu_visible_avant_fenetre;  // Le menu était visible avant d'ouvir une fenêtre
+GLOBAL word Menu_Ordonnee_avant_fenetre; // Ordonnée du menu avant d'ouvrir une fenêtre
+GLOBAL byte Cacher_pinceau_avant_fenetre;// Le pinceau étatit déjà caché avant l'ouverture de la fenetre?
 
 GLOBAL word Nb_boutons_fenetre;
 GLOBAL struct Fenetre_Bouton_normal   * Fenetre_Liste_boutons_normal;
@@ -335,7 +335,7 @@ GLOBAL int Fenetre_Attribut2;
 GLOBAL struct
 {
   // Informations sur l'aspect du bouton (graphisme):
-  word            Decalage_X;        // Décalage par rapport … la gauche du menu
+  word            Decalage_X;        // Décalage par rapport à la gauche du menu
   word            Decalage_Y;        // Décalage par rapport au haut du menu
   word            Largeur;           // Largeur du bouton
   word            Hauteur;           // Hauteur du bouton
@@ -345,8 +345,8 @@ GLOBAL struct
   // Information sur les clicks de la souris:
   fonction_action Gauche;            // Action déclenchée par un click gauche sur le bouton
   fonction_action Droite;            // Action déclenchée par un click droit  sur le bouton
-  word            Raccourci_gauche;  // Raccourci clavier équivalent … un click gauche sur le bouton
-  word            Raccourci_droite;  // Raccourci clavier équivalent … un click droit  sur le bouton
+  word            Raccourci_gauche;  // Raccourci clavier équivalent à un click gauche sur le bouton
+  word            Raccourci_droite;  // Raccourci clavier équivalent à un click droit  sur le bouton
 
   // Informations sur le désenclenchement du bouton géré par le moteur:
   fonction_action Desenclencher;     // Action appelée lors du désenclenchement du bouton
@@ -362,7 +362,7 @@ GLOBAL fonction_effet Fonction_effet;
 
 GLOBAL byte * FX_Feedback_Ecran;
 
-GLOBAL byte Exclude_color[256]; // Couleurs … exclure pour Meilleure_couleur
+GLOBAL byte Exclude_color[256]; // Couleurs à exclure pour Meilleure_couleur
 
   // Mode smear:
 
@@ -396,7 +396,7 @@ GLOBAL byte Stencil[256];  // Tableau des couleurs protégées
 GLOBAL byte  Snap_Mode;       // Le mode grille est enclenché
 GLOBAL short Snap_Largeur;    // Largeur entre 2 points de la grille
 GLOBAL short Snap_Hauteur;    // Hauteur entre 2 points de la grille
-GLOBAL short Snap_Decalage_X; // Position en X du point le + … gauche
+GLOBAL short Snap_Decalage_X; // Position en X du point le + à gauche
 GLOBAL short Snap_Decalage_Y; // Position en Y du point le + en haut
 
   // Mode trame:
@@ -467,7 +467,7 @@ GLOBAL short Degrade_Borne_Inferieure;   // Plus petite couleur englobée par le 
 GLOBAL short Degrade_Borne_Superieure;   // Plus grande couleur englobée par le dégradé
 GLOBAL int   Degrade_Inverse;            // Booléen "Le dégradé est en réalité inversé"
 GLOBAL long  Degrade_Intervalle_bornes;  // = Abs(Degrade_Borne_Inferieure-Degrade_Borne_Superieure)+1
-GLOBAL long  Degrade_Intervalle_total;   // Valeur maximum des indices passés … la fonction de dégradé (!!! >0 !!!)
+GLOBAL long  Degrade_Intervalle_total;   // Valeur maximum des indices passés à la fonction de dégradé (!!! >0 !!!)
 GLOBAL long  Degrade_Melange_aleatoire;  // Facteur de mélange (1-256+) du dégradé
 GLOBAL fonction_degrade Traiter_degrade; // Fonction de traitement du dégradé, varie selon la méthode choisie par l'utilisateur.
 GLOBAL fonction_afficheur Traiter_pixel_de_degrade; // Redirection de l'affichage
@@ -480,9 +480,9 @@ GLOBAL int Degrade_Courant;             // Indice du tableau correspondant au dé
   // Données sur le Spray:
 
 GLOBAL byte  Spray_Mode;            // Mode Mono(1) ou Multicolore(0)
-GLOBAL short Spray_Size;            // DiamŠtre du spray en pixels
+GLOBAL short Spray_Size;            // Diamètre du spray en pixels
 GLOBAL byte  Spray_Delay;           // Délai en VBLs entre 2 "pschiitt"
-GLOBAL byte  Spray_Mono_flow;       // Nombre de pixels qui sortent en mˆme temps en mono
+GLOBAL byte  Spray_Mono_flow;       // Nombre de pixels qui sortent en même temps en mono
 GLOBAL byte  Spray_Multi_flow[256]; // Idem pour chaque couleur
 
 
@@ -490,7 +490,7 @@ GLOBAL byte  Spray_Multi_flow[256]; // Idem pour chaque couleur
 
 GLOBAL byte Sortir_du_programme;
 GLOBAL char Repertoire_du_programme[256]; // Répertoire dans lequel se trouve le programme
-GLOBAL char Repertoire_initial[256];      // Répertoire … partir duquel … été lancé le programme
+GLOBAL char Repertoire_initial[256];      // Répertoire à partir duquel à été lancé le programme
 GLOBAL byte Fore_color;
 GLOBAL byte Back_color;
 GLOBAL byte Mode_de_dessin_en_cours;
@@ -498,7 +498,7 @@ GLOBAL byte Courbe_en_cours;
 GLOBAL byte Ligne_en_cours;
 GLOBAL byte Couleur_debut_palette;
 GLOBAL byte Un_fichier_a_ete_passe_en_parametre;
-GLOBAL byte Une_resolution_a_ete_passee_en_parametre; // utilisée uniquement si la variable précédente est … 1
+GLOBAL byte Une_resolution_a_ete_passee_en_parametre; // utilisée uniquement si la variable précédente est à 1
 
   // Variables concernant l'OBJ DIVERS
 
@@ -527,7 +527,7 @@ GLOBAL byte * VESA_WinFuncPtr; // Handler software de changement de banque
 GLOBAL word * VESA_Liste_des_modes;
 GLOBAL dword  VESA_Decalage_synchro;
 GLOBAL word   VESA_Largeur_ecran_en_dword;
-GLOBAL byte   VESA_Banque_en_cours; // Variable normalement locale … VIDEO.ASM
+GLOBAL byte   VESA_Banque_en_cours; // Variable normalement locale à VIDEO.ASM
 GLOBAL byte   VESA_Derniere_banque_Fenetre_A_utilisee;
 GLOBAL byte   VESA_Derniere_banque_Fenetre_B_utilisee;
 GLOBAL fonction_action VESA_Change_banque_lecture;
@@ -572,9 +572,9 @@ GLOBAL short Pipette_Y;
 #ifdef VARIABLES_GLOBALES
   byte CURSEUR_D_OPERATION[NB_OPERATIONS]=
   {
-    FORME_CURSEUR_CIBLE            , // Dessin … la main continu
-    FORME_CURSEUR_CIBLE            , // Dessin … la main discontinu
-    FORME_CURSEUR_CIBLE            , // Dessin … la main point par point
+    FORME_CURSEUR_CIBLE            , // Dessin à la main continu
+    FORME_CURSEUR_CIBLE            , // Dessin à la main discontinu
+    FORME_CURSEUR_CIBLE            , // Dessin à la main point par point
     FORME_CURSEUR_CIBLE            , // Lignes
     FORME_CURSEUR_CIBLE            , // Lignes reliées
     FORME_CURSEUR_CIBLE            , // Lignes centrées
@@ -589,9 +589,9 @@ GLOBAL short Pipette_Y;
     FORME_CURSEUR_CIBLE_XOR        , // Prise de brosse rectangulaire
     FORME_CURSEUR_CIBLE            , // Prise d'une brosse multiforme
     FORME_CURSEUR_CIBLE_PIPETTE    , // Récupération d'une couleur
-    FORME_CURSEUR_RECTANGLE_XOR    , // Positionnement de la fenˆtre de loupe
-    FORME_CURSEUR_CIBLE            , // Courbe … 3 points
-    FORME_CURSEUR_CIBLE            , // Courbe … 4 points
+    FORME_CURSEUR_RECTANGLE_XOR    , // Positionnement de la fenêtre de loupe
+    FORME_CURSEUR_CIBLE            , // Courbe à 3 points
+    FORME_CURSEUR_CIBLE            , // Courbe à 4 points
     FORME_CURSEUR_CIBLE            , // Spray
     FORME_CURSEUR_CIBLE            , // Polygone
     FORME_CURSEUR_CIBLE            , // Polyforme
@@ -609,7 +609,7 @@ GLOBAL short Pipette_Y;
 #endif
 
 
-  // Procédures … appeler: Opération,Mouse_K,Etat de la pile
+  // Procédures à appeler: Opération,Mouse_K,Etat de la pile
 
 GLOBAL struct
 {
@@ -632,7 +632,7 @@ GLOBAL byte SPRITE_DRIVE[NB_SPRITES_DRIVES][HAUTEUR_SPRITE_DRIVE][LARGEUR_SPRITE
 GLOBAL short Liste_Nb_elements;
 GLOBAL short Liste_Nb_fichiers;
 GLOBAL short Liste_Nb_repertoires;
-  // Tˆte de la liste chaŒnée:
+  // Tête de la liste chaînée:
 GLOBAL struct Element_de_liste_de_fileselect * Liste_du_fileselect;
 
 // ------------------- Inititialisation des formats connus -------------------
@@ -658,7 +658,7 @@ void Rien_du_tout(void);
     "pal"  // PAL
   };
 
-  // Fonction … appeler pour vérifier la signature du fichier
+  // Fonction à appeler pour vérifier la signature du fichier
   fonction_action Format_Test[NB_FORMATS_LOAD]=
   {
     Test_PKM, // PKM
@@ -675,7 +675,7 @@ void Rien_du_tout(void);
     Test_PAL  // PAL
   };
 
-  // Fonction … appeler pour charger l'image
+  // Fonction à appeler pour charger l'image
   fonction_action Format_Load[NB_FORMATS_LOAD]=
   {
     Load_PKM, // PKM
@@ -692,7 +692,7 @@ void Rien_du_tout(void);
     Load_PAL  // PAL
   };
 
-  // Fonction … appeler pour sauvegarder l'image
+  // Fonction à appeler pour sauvegarder l'image
   fonction_action Format_Save[NB_FORMATS_SAVE]=
   {
     Save_PKM, // PKM
@@ -751,9 +751,9 @@ void Rien_du_tout(void);
   extern byte Format_Commentaire[NB_FORMATS_CONNUS];
 #endif
 
-GLOBAL signed char Erreur_fichier; // 0: op‚ration I/O OK
-                                   // 1: Erreur dŠs le d‚but de l'op‚ration
-                                   // 2: Erreur durant l'op‚ration => donn‚es modifi‚es
+GLOBAL signed char Erreur_fichier; // 0: opération I/O OK
+                                   // 1: Erreur dès le début de l'opération
+                                   // 2: Erreur durant l'opération => données modifiées
                                    //-1: Interruption du chargement d'une preview
 
 GLOBAL int Ligne_INI;
@@ -762,7 +762,7 @@ GLOBAL fonction_afficheur Pixel_de_chargement;
 GLOBAL fonction_lecteur   Lit_pixel_de_sauvegarde;
 
 /********************
- * Sp‚cifique … SDL *
+ * Spécifique à SDL *
  ********************/
 GLOBAL SDL_Surface * Ecran_SDL;
 #endif

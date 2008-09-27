@@ -8,7 +8,7 @@
 
 
 
-//---------------------- Modifier le pinceau sp‚cial -------------------------
+//---------------------- Modifier le pinceau spécial -------------------------
 
 void Modifier_pinceau(int Largeur, int Hauteur)
 {
@@ -192,7 +192,7 @@ void Grossir_pinceau(void)
 }
 
 
-//--------------------- Passer … la ForeColor suivante -----------------------
+//--------------------- Passer à la ForeColor suivante -----------------------
 void Special_Next_forecolor(void)
 {
   Effacer_curseur();
@@ -207,7 +207,7 @@ void Special_Next_forecolor(void)
   Afficher_curseur();
 }
 
-//-------------------- Passer … la ForeColor pr‚c‚dente ----------------------
+//-------------------- Passer à la ForeColor précédente ----------------------
 void Special_Previous_forecolor(void)
 {
   Effacer_curseur();
@@ -222,7 +222,7 @@ void Special_Previous_forecolor(void)
   Afficher_curseur();
 }
 
-//--------------------- Passer … la BackColor suivante -----------------------
+//--------------------- Passer à la BackColor suivante -----------------------
 void Special_Next_backcolor(void)
 {
   Effacer_curseur();
@@ -231,7 +231,7 @@ void Special_Next_backcolor(void)
   Afficher_curseur();
 }
 
-//-------------------- Passer … la BackColor pr‚c‚dente ----------------------
+//-------------------- Passer à la BackColor précédente ----------------------
 void Special_Previous_backcolor(void)
 {
   Effacer_curseur();
@@ -241,7 +241,7 @@ void Special_Previous_backcolor(void)
 }
 
 
-// ------------------- Scroller l'‚cran (pas en mode loupe) ------------------
+// ------------------- Scroller l'écran (pas en mode loupe) ------------------
 void Scroller_ecran(short Decalage_en_X,short Decalage_en_Y)
 {
   short Decalage_temporaire_X;
@@ -275,7 +275,7 @@ void Scroller_ecran(short Decalage_en_X,short Decalage_en_Y)
 }
 
 
-// ---------------------- Scroller la fenˆtre de la loupe --------------------
+// ---------------------- Scroller la fenêtre de la loupe --------------------
 void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y)
 {
   short Decalage_temporaire_X;
@@ -311,7 +311,7 @@ void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y)
 }
 
 
-// -------------- Changer le Zoom (grƒce aux touches [+] et [-]) -------------
+// -------------- Changer le Zoom (grâce aux touches [+] et [-]) -------------
 void Zoom(short Sens)
 {
   short Indice;

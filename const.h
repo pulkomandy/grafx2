@@ -79,7 +79,7 @@ enum FORMATS_RECONNUS
   FORMAT_PCX,        // |  GLOBAL.H si on modifie ces cons-
   FORMAT_IMG,        // |_ tantes.
   FORMAT_SCx,        // |
-  FORMAT_PI1,        // |    Elles représentent l'indice o—
+  FORMAT_PI1,        // |    Elles représentent l'indice où
   FORMAT_PC1,        // |  l'on doit aller piocher ces
   FORMAT_CEL,        // |  données.
   FORMAT_KCF,        // |
@@ -192,7 +192,7 @@ enum MODES_VIDEO
 enum FAMILLES_DE_BOUTONS
 {
   FAMILLE_OUTIL=1,          // Outils de dessin
-  FAMILLE_INTERRUPTION,     // Opération éphémŠre
+  FAMILLE_INTERRUPTION,     // Opération éphémère
   FAMILLE_INSTANTANE,       // Pif paf
   FAMILLE_TOOLBAR,          // Cache/Montre la barre d'outils
   FAMILLE_EFFETS            // Effets
@@ -241,7 +241,7 @@ enum FORMES_DE_PINCEAUX
   FORME_PINCEAU_LOSANGE,
   FORME_PINCEAU_ROND_TRAME,
   FORME_PINCEAU_CARRE_TRAME,
-  FORME_PINCEAU_DIVERS,// Ce doit être le dernier des types de pinceaux, comme ‡a il indique le nombre de types de pinceaux (-1)
+  FORME_PINCEAU_DIVERS,// Ce doit être le dernier des types de pinceaux, comme ça il indique le nombre de types de pinceaux (-1)
   FORME_PINCEAU_POINT, // Utilisé pour réduire de pinceau à 1 point dans certaines opérations
   FORME_PINCEAU_BROSSE_COULEUR,
   FORME_PINCEAU_BROSSE_MONOCHROME

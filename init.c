@@ -273,7 +273,7 @@ void Charger_DAT(void)
   if (!(Fonte_temporaire=(byte *)malloc(2048)))
     Erreur(ERREUR_MEMOIRE);
 
-  // Lecture de la fonte systŠme
+  // Lecture de la fonte système
   if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
     Erreur(ERREUR_DAT_CORROMPU);
   for (Indice=0;Indice<256;Indice++)

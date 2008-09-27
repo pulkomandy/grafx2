@@ -349,7 +349,7 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 void Clavier_de_depart(void)
 {
   //SDL_EnableUNICODE(SDL_ENABLE);
-	//SDL_EnableKeyRepeat(250, 32); // TODO … placer … un meilleur endroit
+	//SDL_EnableKeyRepeat(250, 32); // TODO à placer à un meilleur endroit
 }
 
 void Clavier_americain(void)

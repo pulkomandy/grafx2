@@ -1,4 +1,4 @@
-// Diff‚rentes tables utilis‚es pour les changements de modes vid‚os X
+// Différentes tables utilisées pour les changements de modes vidéos X
 
 /*
 word X376Y564[] =
@@ -172,7 +172,7 @@ word X400Y600[] =
     0x0008, 0x6009, 0x7C10, 0x8C11, 0x5712, 0x3213, 0x0014, 0x5815, 0x7016,
     0xE317 };
 
-// Diff‚rentes tables utilis‚es pour les modifications de modes vid‚os VESA
+// Différentes tables utilisées pour les modifications de modes vidéos VESA
 
 word Y224[] =
   { 0x09A3, 0x6F06, 0xBA07, 0x0008, 0x4109, 0x0810, 0x8A11, 0xBF12, 0xC715,

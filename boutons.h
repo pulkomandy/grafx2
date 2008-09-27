@@ -16,7 +16,7 @@ void Bouton_Choix_backcolor(void);
 void Bouton_Brosse_monochrome(void);
 void Bouton_Menu_pinceaux(void);
 
-// Boutons relatifs au mode de dessin … main lev‚e
+// Boutons relatifs au mode de dessin à main levée
 void Bouton_Dessin(void);
 void Bouton_Dessin_Switch_mode(void);
 
@@ -33,7 +33,7 @@ void Bouton_desenclencher_Fill(void);
 void Bouton_Spray(void);
 void Bouton_Spray_Menu(void);
 
-// Courbes de B‚zier
+// Courbes de Bézier
 void Bouton_Courbes(void);
 void Bouton_Courbes_Switch_mode(void);
 
@@ -41,10 +41,10 @@ void Bouton_Courbes_Switch_mode(void);
 void Bouton_Rectangle_vide(void);
 void Bouton_Rectangle_plein(void);
 
-// Boutons relatifs aux d‚grad‚s
+// Boutons relatifs aux dégradés
 void Bouton_Degrades(void);
 void Degrade_Charger_infos_du_tableau(int Indice);
-// Boutons relatifs aux cercles (ellipses) d‚grad‚(e)s
+// Boutons relatifs aux cercles (ellipses) dégradé(e)s
 void Bouton_Cercle_degrade(void);
 void Bouton_Ellipse_degrade(void);
 
@@ -102,7 +102,7 @@ void Bouton_desenclencher_Brosse(void);
 void Bouton_Lasso(void);
 void Bouton_desenclencher_Lasso(void);
 
-// Bouton relatifs … la pipette
+// Bouton relatifs à la pipette
 void Bouton_Pipette(void);
 void Bouton_desenclencher_Pipette(void);
 void Bouton_Inverser_foreback(void);
@@ -112,16 +112,16 @@ void Bouton_Loupe(void);
 void Bouton_Menu_Loupe(void);
 void Bouton_desenclencher_Loupe(void);
 
-// Les diff‚rents effets sur la brosse
+// Les différents effets sur la brosse
 void Bouton_Brush_FX(void);
 
-// Boutons relatifs aux diff‚rentes pages
+// Boutons relatifs aux différentes pages
 void Bouton_Page(void);
 void Bouton_Copy_page(void);
 void Copier_image_seule(void);
 void Bouton_Kill(void);
 
-// Boutons relatifs aux changements de r‚solution et de taille d'image
+// Boutons relatifs aux changements de résolution et de taille d'image
 void Bouton_Resol(void);
 void Bouton_Safety_resol(void);
 
@@ -131,10 +131,10 @@ void Bouton_Reload(void);
 void Bouton_Save(void);
 void Bouton_Autosave(void);
 
-// R‚glage des paramŠtres de l'utilisateur
+// Réglage des paramètres de l'utilisateur
 void Bouton_Settings(void);
 
-// Annulation de la derniŠre modification
+// Annulation de la dernière modification
 void Bouton_Undo(void);
 void Bouton_Redo(void);
 

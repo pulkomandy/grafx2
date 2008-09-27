@@ -729,7 +729,7 @@ void Rectangle_12_0(void)
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("\035:   1   \022:   1",0);
-  // On laisse une trace du curseur … l'écran
+  // On laisse une trace du curseur à l'écran
   Afficher_curseur();
 
   if (Mouse_K==A_GAUCHE)
@@ -2406,7 +2406,7 @@ void Polyform_12_8(void)
       // On efface la preview du segment validé:
       Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
 
-      // On l'affiche de fa‡on définitive:
+      // On l'affiche de façon définitive:
       Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
 
       // Et on affiche un pixel de preview en (Pinceau_X,Pinceau_Y):
@@ -2438,7 +2438,7 @@ void Polyform_12_8(void)
     // On efface la preview du segment annulé:
     Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
 
-    // On affiche de fa‡on définitive le bouclage du polygone:
+    // On affiche de façon définitive le bouclage du polygone:
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Initial_X,Initial_Y,Couleur);
 
     Afficher_curseur();
@@ -2473,7 +2473,7 @@ void Polyform_0_8(void)
     Operation_POP(&Debut_X);
     Operation_POP(&Couleur);
 
-    // On met … jour l'affichage de la preview du prochain segment:
+    // On met à jour l'affichage de la preview du prochain segment:
     Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
     Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
 
@@ -2568,7 +2568,7 @@ void Filled_polyform_12_8(void)
       Effacer_curseur();
       Print_coordonnees();
 
-      // On le place … l'écran
+      // On le place à l'écran
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
@@ -2597,7 +2597,7 @@ void Filled_polyform_12_8(void)
           Effacer_curseur();
           Print_coordonnees();
 
-          // On le place … l'écran
+          // On le place à l'écran
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
           Afficher_curseur();
@@ -2671,7 +2671,7 @@ void Filled_polyform_0_8(void)
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
 
-    // On met … jour l'affichage de la preview du prochain segment:
+    // On met à jour l'affichage de la preview du prochain segment:
     Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
     Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
@@ -2703,14 +2703,14 @@ void Brosse_12_0(void)
   if (Mouse_K==A_DROITE) // Besoin d'effacer la brosse après ?
   {
     Operation_PUSH(1);
-    // Puisque la zone o— on prend la brosse sera effacée, on fait un backup
+    // Puisque la zone où on prend la brosse sera effacée, on fait un backup
     Backup();
   }
   else
     Operation_PUSH(0);
 
   // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
-  // o— demarre sa brosse:
+  // où demarre sa brosse:
   Afficher_curseur();
 
   Operation_PUSH(Pinceau_X); // Début X
@@ -2797,7 +2797,7 @@ void Brosse_0_5(void)
   Ancien_Pinceau_Y=Pinceau_Y;
   Pinceau_X=Debut_X;
   Pinceau_Y=Debut_Y;
-  Effacer_curseur(); // Maintenant, il n'y a plus de croix … l'écran.
+  Effacer_curseur(); // Maintenant, il n'y a plus de croix à l'écran.
 
   Pinceau_X=Ancien_Pinceau_X;
   Pinceau_Y=Ancien_Pinceau_Y;
@@ -2836,12 +2836,12 @@ void Brosse_0_5(void)
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
-    // On se place en mode Dessin discontinu … la main
+    // On se place en mode Dessin discontinu à la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel … cette action:
+  // d'appel à cette action:
   Effacer_curseur();
 
   // On passe en brosse couleur:
@@ -2891,7 +2891,7 @@ void Polybrosse_12_8(void)
       Effacer_curseur();
       Print_coordonnees();
 
-      // On le place … l'écran
+      // On le place à l'écran
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
       Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
@@ -2920,7 +2920,7 @@ void Polybrosse_12_8(void)
           Effacer_curseur();
           Print_coordonnees();
 
-          // On le place … l'écran
+          // On le place à l'écran
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
           Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
           Afficher_curseur();
@@ -2982,12 +2982,12 @@ void Polybrosse_12_8(void)
     Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
     if (Config.Auto_discontinuous)
     {
-      // On se place en mode Dessin discontinu … la main
+      // On se place en mode Dessin discontinu à la main
       while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
         Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
     }
     // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-    // d'appel … cette action:
+    // d'appel à cette action:
     Effacer_curseur();
 
     // On passe en brosse couleur:
@@ -3014,7 +3014,7 @@ void Etirer_brosse_12_0(void)
   if (Mouse_K==A_GAUCHE)
   {
     // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
-    // o— demarre sa brosse:
+    // où demarre sa brosse:
     Afficher_curseur();
 
     Operation_PUSH(Pinceau_X); // Dernier calcul X
@@ -3276,12 +3276,12 @@ void Etirer_brosse_2_7(void)
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
-    // On se place en mode Dessin discontinu … la main
+    // On se place en mode Dessin discontinu à la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel … cette action:
+  // d'appel à cette action:
   Effacer_curseur();
 
   // On passe en brosse couleur:
@@ -3501,7 +3501,7 @@ void Tourner_brosse_2_5(void)
   Operation_POP(&Calcul_Y);
   Operation_POP(&Calcul_X);
 
-  // Calcul de l'angle par rapport … la dernière position calculée
+  // Calcul de l'angle par rapport à la dernière position calculée
   if ( (Brosse_Centre_rotation_X==Calcul_X)
     && (Brosse_Centre_rotation_Y==Calcul_Y) )
     Angle=0.0;
@@ -3525,12 +3525,12 @@ void Tourner_brosse_2_5(void)
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
-    // On se place en mode Dessin discontinu … la main
+    // On se place en mode Dessin discontinu à la main
     while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
       Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel … cette action:
+  // d'appel à cette action:
   Effacer_curseur();
 
   // On passe en brosse couleur:

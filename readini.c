@@ -48,13 +48,13 @@ int Charger_INI_Seek_pattern(char * Buffer,char * Pattern)
   // A partir de chaque lettre de la chaîne Buffer
   for (Indice_buffer=0;Buffer[Indice_buffer]!='\0';Indice_buffer++)
   {
-    // On regarde si la chaîne Pattern est équivalente … la position courante
+    // On regarde si la chaîne Pattern est équivalente à la position courante
     // de la chaîne Buffer:
     for (Indice_pattern=0;(Pattern[Indice_pattern]!='\0') && (Buffer[Indice_buffer+Indice_pattern]==Pattern[Indice_pattern]);Indice_pattern++);
 
     // Si on a trouvé la chaîne Pattern dans la chaîne Buffer, on renvoie la
-    // position … laquelle on l'a trouvée (+1 pour que si on la trouve au
-    // début ‡a ne renvoie pas la mˆme chose que si on ne l'avait pas
+    // position à laquelle on l'a trouvée (+1 pour que si on la trouve au
+    // début ça ne renvoie pas la même chose que si on ne l'avait pas
     // trouvée):
     if (Pattern[Indice_pattern]=='\0')
       return (Indice_buffer+1);
@@ -76,7 +76,7 @@ int Charger_INI_Reach_group(FILE * File,char * Buffer,char * Group)
   Group_upper=(char *)malloc(1024);
   Buffer_upper=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule du groupe … rechercher:
+  // On commence par se faire une version majuscule du groupe à rechercher:
   strcpy(Group_upper,Group);
   Charger_INI_Clear_string(Group_upper);
 
@@ -241,7 +241,7 @@ int Charger_INI_Get_values(FILE * File,char * Buffer,char * Option,int Nb_values
   Option_upper=(char *)malloc(1024);
   Buffer_upper=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule de l'option … rechercher:
+  // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(Option_upper,Option);
   Charger_INI_Clear_string(Option_upper);
 

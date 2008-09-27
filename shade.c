@@ -430,7 +430,7 @@ int Menu_Shade(void)
   Buffer_Undo  =(word *)malloc(512*sizeof(word));
   Pointeur_temp=(word *)malloc(512*sizeof(word));
 
-  // Ouverture de la fenˆtre du menu
+  // Ouverture de la fenêtre du menu
   Ouvrir_fenetre(310,190,"Shade");
 
   // Déclaration & tracé du bouton de palette

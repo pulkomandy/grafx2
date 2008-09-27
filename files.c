@@ -73,7 +73,7 @@ int Repertoire_existe(char * Repertoire)
 
 
 int Fichier_existe(char * Fichier)
-//   Détermine si un fichier passé en paramŠtre existe ou non dans le
+//   Détermine si un fichier passé en paramètre existe ou non dans le
 // répertoire courant.
 {
     struct stat buf;
@@ -95,7 +95,7 @@ int Fichier_existe(char * Fichier)
 //   qu'un findfirst dans le répertoire courant à faire:
 
 
-// -- Déstruction de la liste chaŒnée ---------------------------------------
+// -- Déstruction de la liste chaînée ---------------------------------------
 void Detruire_liste_du_fileselect(void)
 //  Cette procédure détruit la chaine des fichiers. Elle doit être appelée
 // avant de rappeler la fonction Lire_liste_des_fichiers, ainsi qu'en fin de
@@ -305,7 +305,7 @@ void Trier_la_liste_des_fichiers(void)
   {
     do
     {
-      // Par défaut, on considŠre que la liste est triée
+      // Par défaut, on considère que la liste est triée
       La_liste_est_triee=1;
 
       Element_courant=Liste_du_fileselect;
@@ -340,13 +340,13 @@ void Trier_la_liste_des_fichiers(void)
           Element_precedent         =Element_courant->Precedent;
           Element_suivant_le_suivant=Element_suivant->Suivant;
 
-          // On permute le chaŒnage des deux éléments entree eux
+          // On permute le chaînage des deux éléments entree eux
           Element_courant->Suivant  =Element_suivant_le_suivant;
           Element_courant->Precedent=Element_suivant;
           Element_suivant->Suivant  =Element_courant;
           Element_suivant->Precedent=Element_precedent;
 
-          // On tente un chaŒnage des éléments encapsulant les compŠres:
+          // On tente un chaînage des éléments encapsulant les compères:
           if (Element_precedent!=NULL)
             Element_precedent->Suivant=Element_suivant;
           if (Element_suivant_le_suivant!=NULL)

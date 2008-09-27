@@ -134,7 +134,7 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
         // On commence par inscrire le symbole '$':
         Destination[Indice_destination]='$';
 
-        // Puis on y concatŠne la valeur:
+        // Puis on y concatène la valeur:
         sprintf(Destination+Indice_destination+1,"%x",Values[Indice_valeur]);
         Indice_destination+=strlen(Destination+Indice_destination);
       }
@@ -154,14 +154,14 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
     {
       // Il reste d'autres valeurs à écrire
 
-      // On recopie tous les caractŠres de la source jusqu'au suivant qui
+      // On recopie tous les caractères de la source jusqu'au suivant qui
       // désigne une valeur:
       for (;(!Sauver_INI_char_in_value_alphabet(Source[Indice_source])) && (Source[Indice_source]!='\0');Indice_source++,Indice_destination++)
         Destination[Indice_destination]=Source[Indice_source];
     }
     else
     {
-      // C'est la derniŠre valeur à initialiser
+      // C'est la dernière valeur à initialiser
 
       // On recopie toute la fin de la ligne:
       for (;Source[Indice_source]!='\0';Indice_source++,Indice_destination++)

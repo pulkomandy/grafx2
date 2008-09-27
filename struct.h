@@ -98,7 +98,7 @@ struct Element_de_liste_de_fileselect
   char NomComplet[256]; // Le nom du fichier ou du répertoire
   byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire
 
-  // données de chaŒnage de la liste
+  // données de chaînage de la liste
   struct Element_de_liste_de_fileselect * Suivant;
   struct Element_de_liste_de_fileselect * Precedent;
 };
@@ -115,11 +115,11 @@ struct Section_d_aide
 // Déclaration d'une info sur un dégradé
 struct T_Degrade_Tableau
 {
-  byte Debut;     // PremiŠre couleur du dégradé
-  byte Fin;       // DerniŠre couleur du dégradé
-  dword Inverse;   // "Le dégradé va de Fin … Debut" //INT
+  byte Debut;     // Première couleur du dégradé
+  byte Fin;       // Dernière couleur du dégradé
+  dword Inverse;   // "Le dégradé va de Fin à Debut" //INT
   dword Melange;   // Valeur de mélange du dégradé (0-255) //LONG
-  dword Technique; // Technique … utiliser (0-2) //INT
+  dword Technique; // Technique à utiliser (0-2) //INT
 };
 
 // Déclaration d'une info de shade
@@ -166,10 +166,10 @@ struct Config_Infos_touche
 
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gŠrera les animations, il faudra aussi des listes de listes de
+// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulées … travers des fonctions de gestion du
+// Ces structures sont manipulées à travers des fonctions de gestion du
 // backup dans "graph.c".
 
 typedef struct
@@ -188,19 +188,19 @@ typedef struct
 /*
   short     Decalage_X; // Décalage en X de l'écran par rapport au début de l'image
   short     Decalage_Y; // Décalage en Y de l'écran par rapport au début de l'image
-  short     Ancien_Decalage_X; // Le mˆme avant le passage en mode loupe
-  short     Ancien_Decalage_Y; // Le mˆme avant le passage en mode loupe
+  short     Ancien_Decalage_X; // Le même avant le passage en mode loupe
+  short     Ancien_Decalage_Y; // Le même avant le passage en mode loupe
 
   short     Split; // Position en X du bord gauche du split de la loupe
   short     X_Zoom; // (Menu_Facteur_X) + Position en X du bord droit du split de la loupe
-  float     Proportion_split; // Proportion de la zone non-zoomée par rapport … l'écran
+  float     Proportion_split; // Proportion de la zone non-zoomée par rapport à l'écran
 
   byte      Loupe_Mode;       // On est en mode loupe
   word      Loupe_Facteur;    // Facteur de zoom
-  word      Loupe_Hauteur;    // Largeur de la fenˆtre de zoom
-  word      Loupe_Largeur;    // Hauteur de la fenˆtre de zoom
-  short     Loupe_Decalage_X; // Decalage horizontal de la fenˆtre de zoom
-  short     Loupe_Decalage_Y; // Decalage vertical   de la fenˆtre de zoom
+  word      Loupe_Hauteur;    // Largeur de la fenêtre de zoom
+  word      Loupe_Largeur;    // Hauteur de la fenêtre de zoom
+  short     Loupe_Decalage_X; // Decalage horizontal de la fenêtre de zoom
+  short     Loupe_Decalage_Y; // Decalage vertical   de la fenêtre de zoom
 */
 } S_Page;
 
