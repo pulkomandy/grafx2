@@ -1,4 +1,3 @@
-#define TAILLE_FICHIER_DATA  78544  // Taille du fichier GFX2.DAT
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -223,7 +222,7 @@ void Charger_DAT(void)
                 }
 
   Taille_fichier=Informations_Fichier.st_size;
-  if (Taille_fichier!=TAILLE_FICHIER_DATA)
+  if (Taille_fichier<DAT_DEBUT_INI_PAR_DEFAUT)
   {
     DEBUG("Taille",0);
     Erreur(ERREUR_DAT_CORROMPU);

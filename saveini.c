@@ -4,6 +4,8 @@
 #include "const.h"
 #include "global.h"
 #include "readini.h"
+#include "files.h"
+#include "erreurs.h"
 
 int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * Group)
 {
@@ -11,11 +13,11 @@ int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * 
   char * Group_upper;
   char * Buffer_upper;
 
-  // On alloue les zones de m‚moire:
+  // On alloue les zones de mémoire:
   Group_upper =(char *)malloc(1024);
   Buffer_upper=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule du groupe … rechercher:
+  // On commence par se faire une version majuscule du groupe à rechercher:
   strcpy(Group_upper,Group);
   Charger_INI_Clear_string(Group_upper);
 
@@ -34,7 +36,7 @@ int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * 
     strcpy(Buffer_upper,Buffer);
     Charger_INI_Clear_string(Buffer_upper);
 
-    // On compare la chaŒne avec le groupe recherch‚:
+    // On compare la chaîne avec le groupe recherché:
     Arret=Charger_INI_Seek_pattern(Buffer_upper,Group_upper);
     if (fprintf(New_file,"%s",Buffer)<0)
     {
@@ -68,7 +70,7 @@ int Sauver_INI_char_in_value_alphabet(char Char)
          (Char>='a') &&
          (Char<='z')
        ) ||
-       (Char == '$')        // Symbole d'hexad‚cimal
+       (Char == '$')        // Symbole d'hexadécimal
      )
     return 1;
   else
@@ -95,20 +97,20 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
   for (;Source[Indice_source]==' ';Indice_source++)
     Destination[Indice_source]=Source[Indice_source];
 
-  // Pour l'instant, la source et la destination en sont au mˆme point:
+  // Pour l'instant, la source et la destination en sont au même point:
   Indice_destination=Indice_source;
 
-  // Puis pour chaque valeur … recopier:
+  // Puis pour chaque valeur à recopier:
   for (Indice_valeur=0;Indice_valeur<Nb_values_to_set;Indice_valeur++)
   {
-    // Dans la destination, on ‚crit la valeur:
+    // Dans la destination, on écrit la valeur:
     if (Litteral)
     {
-      // La valeur doit ˆtre ‚crite sous la forme Yes/No
+      // La valeur doit être écrite sous la forme Yes/No
 
       if (Values[Indice_valeur])
       {
-        // La valeur <=> Yes
+        // La valeur <=> Yes  
 
         memcpy(Destination+Indice_destination,"yes",3);
         Indice_destination+=3;
@@ -123,11 +125,11 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
     }
     else
     {
-      // La valeur doit ˆtre ‚crite sous forme num‚rique
+      // La valeur doit être écrite sous forme numérique
 
       if (Source[Indice_source]=='$')
       {
-        // On va ‚crire la valeur sous forme hexad‚cimale:
+        // On va écrire la valeur sous forme hexadécimale:
 
         // On commence par inscrire le symbole '$':
         Destination[Indice_destination]='$';
@@ -138,7 +140,7 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
       }
       else
       {
-        // On va ‚crire la valeur sous forme d‚cimale:
+        // On va écrire la valeur sous forme décimale:
 
         sprintf(Destination+Indice_destination,"%d",Values[Indice_valeur]);
         Indice_destination+=strlen(Destination+Indice_destination);
@@ -150,16 +152,16 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
 
     if (Indice_valeur!=(Nb_values_to_set-1))
     {
-      // Il reste d'autres valeurs … ‚crire
+      // Il reste d'autres valeurs à écrire
 
       // On recopie tous les caractŠres de la source jusqu'au suivant qui
-      // d‚signe une valeur:
+      // désigne une valeur:
       for (;(!Sauver_INI_char_in_value_alphabet(Source[Indice_source])) && (Source[Indice_source]!='\0');Indice_source++,Indice_destination++)
         Destination[Indice_destination]=Source[Indice_source];
     }
     else
     {
-      // C'est la derniŠre valeur … initialiser
+      // C'est la derniŠre valeur à initialiser
 
       // On recopie toute la fin de la ligne:
       for (;Source[Indice_source]!='\0';Indice_source++,Indice_destination++)
@@ -181,12 +183,12 @@ int Sauver_INI_Set_values(FILE * Old_file,FILE * New_file,char * Buffer,char * O
   char * Buffer_resultat;
   //int    Indice_buffer;
 
-  // On alloue les zones de m‚moire:
+  // On alloue les zones de mémoire:
   Option_upper=(char *)malloc(1024);
   Buffer_upper=(char *)malloc(1024);
   Buffer_resultat=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule de l'option … rechercher:
+  // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(Option_upper,Option);
   Charger_INI_Clear_string(Option_upper);
 
@@ -206,12 +208,12 @@ int Sauver_INI_Set_values(FILE * Old_file,FILE * New_file,char * Buffer,char * O
     strcpy(Buffer_upper,Buffer);
     Charger_INI_Clear_string(Buffer_upper);
 
-    // On compare la chaŒne avec l'option recherch‚e:
+    // On compare la chaîne avec l'option recherchée:
     Arret=Charger_INI_Seek_pattern(Buffer_upper,Option_upper);
 
     if (Arret)
     {
-      // On l'a trouv‚e:
+      // On l'a trouvée:
 
       Sauver_INI_Set_value(Buffer_resultat,Buffer,Nb_values_to_set,Values,Litteral);
       if (fprintf(New_file,"%s",Buffer_resultat)<0)
@@ -224,7 +226,7 @@ int Sauver_INI_Set_values(FILE * Old_file,FILE * New_file,char * Buffer,char * O
     }
     else
     {
-      // On l'a pas trouv‚e:
+      // On l'a pas trouvée:
 
       if (fprintf(New_file,"%s",Buffer)<0)
       {
@@ -260,228 +262,230 @@ int Sauver_INI(struct S_Config * Conf)
   FILE * Nouveau_fichier;
   char * Buffer;
   int    Valeurs[3];
-  char * Nom_du_fichier;
-  char * Nom_du_fichier_temporaire;
+  char   Nom_du_fichier[256];
+  char   Nom_du_fichier_temporaire[256];
   int    Retour;
+  char   Nom_du_fichier_DAT[256];
+  int    Ini_existe;
 
-  // On alloue les zones de m‚moire:
+  // On alloue les zones de mémoire:
   Buffer=(char *)malloc(1024);
-  Nom_du_fichier=(char *)malloc(256);
-  Nom_du_fichier_temporaire=(char *)malloc(256);
-
+  
   // On calcule les noms des fichiers qu'on manipule:
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.ini");
 
-  strcpy(Nom_du_fichier_temporaire,Repertoire_du_programme);
-  strcat(Nom_du_fichier_temporaire,"gfx2.$$$");
-
-  // On renome l'ancienne version du fichier INI vers un fichier temporaire:
-  if (rename(Nom_du_fichier,Nom_du_fichier_temporaire)!=0)
-    goto Erreur_ERREUR_SAUVEGARDE_INI;
-
-  Ancien_fichier=fopen(Nom_du_fichier_temporaire,"r");
-  if (Ancien_fichier!=0)
+  // On vérifie si le fichier INI existe
+  if ((Ini_existe = Fichier_existe(Nom_du_fichier)))
   {
-    Nouveau_fichier=fopen(Nom_du_fichier,"w");
-    if (Nouveau_fichier!=0)
+    strcpy(Nom_du_fichier_temporaire,Repertoire_du_programme);
+    strcat(Nom_du_fichier_temporaire,"gfx2.$$$");
+    
+    // On renome l'ancienne version du fichier INI vers un fichier temporaire:
+    if (rename(Nom_du_fichier,Nom_du_fichier_temporaire)!=0)
     {
-      if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MOUSE]")))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Indice_Sensibilite_souris_X;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"X_sensitivity",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Indice_Sensibilite_souris_Y;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Y_sensitivity",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Mouse_Facteur_de_correction_X;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"X_correction_factor",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Mouse_Facteur_de_correction_Y;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Y_correction_factor",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=(Conf->Curseur)+1;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Cursor_aspect",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-
-      if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MENU]")))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Coul_menu_pref[2].R;
-      Valeurs[1]=Conf->Coul_menu_pref[2].V;
-      Valeurs[2]=Conf->Coul_menu_pref[2].B;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Light_color",3,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Coul_menu_pref[1].R;
-      Valeurs[1]=Conf->Coul_menu_pref[1].V;
-      Valeurs[2]=Conf->Coul_menu_pref[1].B;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Dark_color",3,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Ratio;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Menu_ratio",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=(Conf->Fonte)+1;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Font",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-
-      if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[FILE_SELECTOR]")))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Lire_les_fichiers_caches?1:0;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_hidden_files",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Lire_les_repertoires_caches?1:0;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_hidden_directories",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Lire_les_repertoires_systemes?1:0;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_system_directories",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Chrono_delay;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Preview_delay",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Maximize_preview;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Maximize_preview",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Find_file_fast;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Find_file_fast",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-
-      if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[LOADING]")))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Auto_set_res;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_set_resolution",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Set_resolution_according_to;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Set_resolution_according_to",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Clear_palette;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Clear_palette",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-
-      if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MISCELLANEOUS]")))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Afficher_limites_image;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Draw_limits",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Adjust_brush_pick;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Adjust_brush_pick",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=2-Conf->Coords_rel;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Coordinates",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Backup;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Backup",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Nb_pages_Undo;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Undo_pages",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Valeur_tempo_jauge_gauche;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Gauges_scrolling_speed_Left",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Valeur_tempo_jauge_droite;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Gauges_scrolling_speed_Right",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Auto_save;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_save",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Nb_max_de_vertex_par_polygon;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Vertices_per_polygon",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Fast_zoom;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Fast_zoom",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Couleurs_separees;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Separate_colors",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->FX_Feedback;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"FX_feedback",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Safety_colors;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Safety_colors",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Opening_message;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Opening_message",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Clear_with_stencil;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Clear_with_stencil",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Auto_discontinuous;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_discontinuous",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Taille_ecran_dans_GIF;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Save_screen_size_in_GIF",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Auto_nb_used;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_nb_colors_used",1,Valeurs,1)))
-        goto Erreur_Retour;
-
-      Valeurs[0]=Conf->Resolution_par_defaut;
-      if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_video_mode",1,Valeurs,0)))
-        goto Erreur_Retour;
-
-      Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);
-
-      fclose(Nouveau_fichier);
-    }
-    else
-    {
-      fclose(Ancien_fichier);
       goto Erreur_ERREUR_SAUVEGARDE_INI;
     }
-
-    fclose(Ancien_fichier);
   }
-  else
+  // On récupère un fichier INI "propre" dans GFX2.DAT
+  strcpy(Nom_du_fichier_DAT,Repertoire_du_programme);
+  strcat(Nom_du_fichier_DAT,"gfx2.dat");
+  Ancien_fichier=fopen(Nom_du_fichier_DAT,"rb");
+  if (Ancien_fichier==0)
   {
-    free(Nom_du_fichier_temporaire);
-    free(Nom_du_fichier);
-    free(Buffer);
-    return ERREUR_INI_ABSENT;
+    fclose(Ancien_fichier);
+    return ERREUR_DAT_ABSENT;
   }
+  if (fseek(Ancien_fichier, DAT_DEBUT_INI_PAR_DEFAUT, SEEK_SET))
+  {
+    fclose(Ancien_fichier);
+    return ERREUR_DAT_CORROMPU;
+  }
+  Nouveau_fichier=fopen(Nom_du_fichier,"wb");
+  if (Nouveau_fichier==0)
+  {
+    free(Buffer);
+    return ERREUR_SAUVEGARDE_INI;
+  }
+  if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MOUSE]")))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Indice_Sensibilite_souris_X;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"X_sensitivity",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Indice_Sensibilite_souris_Y;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Y_sensitivity",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Mouse_Facteur_de_correction_X;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"X_correction_factor",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Mouse_Facteur_de_correction_Y;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Y_correction_factor",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=(Conf->Curseur)+1;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Cursor_aspect",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+
+  if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MENU]")))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Coul_menu_pref[2].R;
+  Valeurs[1]=Conf->Coul_menu_pref[2].V;
+  Valeurs[2]=Conf->Coul_menu_pref[2].B;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Light_color",3,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Coul_menu_pref[1].R;
+  Valeurs[1]=Conf->Coul_menu_pref[1].V;
+  Valeurs[2]=Conf->Coul_menu_pref[1].B;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Dark_color",3,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Ratio;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Menu_ratio",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=(Conf->Fonte)+1;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Font",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+
+  if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[FILE_SELECTOR]")))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Lire_les_fichiers_caches?1:0;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_hidden_files",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Lire_les_repertoires_caches?1:0;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_hidden_directories",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Lire_les_repertoires_systemes?1:0;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_system_directories",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Chrono_delay;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Preview_delay",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Maximize_preview;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Maximize_preview",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Find_file_fast;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Find_file_fast",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+
+  if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[LOADING]")))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Auto_set_res;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_set_resolution",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Set_resolution_according_to;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Set_resolution_according_to",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Clear_palette;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Clear_palette",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+
+  if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MISCELLANEOUS]")))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Afficher_limites_image;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Draw_limits",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Adjust_brush_pick;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Adjust_brush_pick",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=2-Conf->Coords_rel;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Coordinates",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Backup;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Backup",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Nb_pages_Undo;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Undo_pages",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Valeur_tempo_jauge_gauche;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Gauges_scrolling_speed_Left",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Valeur_tempo_jauge_droite;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Gauges_scrolling_speed_Right",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Auto_save;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_save",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Nb_max_de_vertex_par_polygon;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Vertices_per_polygon",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Fast_zoom;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Fast_zoom",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Couleurs_separees;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Separate_colors",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->FX_Feedback;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"FX_feedback",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Safety_colors;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Safety_colors",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Opening_message;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Opening_message",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Clear_with_stencil;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Clear_with_stencil",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Auto_discontinuous;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_discontinuous",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Taille_ecran_dans_GIF;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Save_screen_size_in_GIF",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Auto_nb_used;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_nb_colors_used",1,Valeurs,1)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Conf->Resolution_par_defaut;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_video_mode",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);
+
+  fclose(Nouveau_fichier);
+  fclose(Ancien_fichier);
 
   // On efface le fichier temporaire <=> Ancienne version du .INI
-  remove(Nom_du_fichier_temporaire);
-
-  free(Nom_du_fichier_temporaire);
-  free(Nom_du_fichier);
+  if (Ini_existe)
+    remove(Nom_du_fichier_temporaire);
   free(Buffer);
   return 0;
 
@@ -491,15 +495,11 @@ int Sauver_INI(struct S_Config * Conf)
 
     fclose(Nouveau_fichier);
     fclose(Ancien_fichier);
-    free(Nom_du_fichier_temporaire);
-    free(Nom_du_fichier);
     free(Buffer);
     return Retour;
 
   Erreur_ERREUR_SAUVEGARDE_INI:
 
-    free(Nom_du_fichier_temporaire);
-    free(Nom_du_fichier);
     free(Buffer);
     return ERREUR_SAUVEGARDE_INI;
 }

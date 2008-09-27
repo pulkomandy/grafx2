@@ -170,10 +170,9 @@ void Erreur(int Code)
                                        break;
       case ERREUR_REPERTOIRE_DISPARU : printf("Error: Directory you ran the program from not found!\n");
                                        break;
-      case ERREUR_INI_ABSENT         : printf("Error: File GFX2.INI is missing!\n");
-                                       break;
       case ERREUR_INI_CORROMPU       : printf("Error: File GFX2.INI is corrupt!\n");
                                        printf("It contains bad values at line %d.\n",Ligne_INI);
+                                       printf("You can re-generate it by deleting the file and running grafX2 again.\n");
                                        break;
       case ERREUR_SAUVEGARDE_INI     : printf("Error: Cannot rewrite file GFX2.INI!\n");
                                        break;

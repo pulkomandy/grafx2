@@ -15,6 +15,7 @@
 #define BETA2                     0     // |
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
 #define TAILLE_FICHIER_CONFIG     10351 // Taille du fichier GFX2.CFG
+#define DAT_DEBUT_INI_PAR_DEFAUT  0xF385 // Dans gfx2.dat, début du fichier gfx2.ini standard
 #define NB_MODES_VIDEO            60    // Nombre de modes vidéo
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
@@ -104,7 +105,6 @@ enum CODES_D_ERREURS
   ERREUR_NUMERO_MODE,           // Erreur de choix de mode sur la ligne de commande
   ERREUR_SAUVEGARDE_CFG,        // Erreur en écriture pour GFX2.CFG
   ERREUR_REPERTOIRE_DISPARU,    // Le répertoire de lancement n'existe plus
-  ERREUR_INI_ABSENT,            // Le fichier GFX2.INI est absent
   ERREUR_INI_CORROMPU,          // Le fichier GFX2.INI est corrompu
   ERREUR_SAUVEGARDE_INI,        // Le fichier GFX2.INI n'est pas inscriptible
   ERREUR_SORRY_SORRY_SORRY      // On le refera plus, promis

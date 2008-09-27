@@ -8,7 +8,7 @@ graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
 sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
   divers.h erreurs.h
 divers.o: divers.c struct.h const.h sdlscreen.h global.h loadsave.h \
-  graph.h erreurs.h boutons.h moteur.h divers.h
+  graph.h erreurs.h boutons.h moteur.h divers.h clavier.h
 special.o: special.c const.h struct.h global.h loadsave.h graph.h \
   moteur.h
 boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
@@ -34,7 +34,8 @@ op_c.o: op_c.c op_c.h struct.h const.h op_asm.h erreurs.h
 linux.o: linux.c
 op_asm.o: op_asm.c op_c.h struct.h const.h graph.h
 readini.o: readini.c const.h global.h struct.h loadsave.h
-saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h
+saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
+  files.h erreurs.h
 shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
   divers.h readline.h
 clavier.o: clavier.c global.h struct.h const.h loadsave.h
