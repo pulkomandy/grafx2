@@ -1,7 +1,7 @@
 main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
   init.h boutons.h moteur.h pages.h files.h sdlscreen.h erreurs.h \
   readini.h saveini.h linux.h
-init.o: init.c const.h struct.h global.h loadsave.h modesvdo.h graph.h \
+init.o: init.c const.h struct.h global.h loadsave.h graph.h \
   boutons.h palette.h aide.h operatio.h divers.h erreurs.h clavier.h
 graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
   boutons.h pages.h global.h loadsave.h erreurs.h
