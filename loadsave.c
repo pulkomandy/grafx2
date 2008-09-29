@@ -7,7 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
-#include <SDL/SDL_endian.h>
 
 #include "const.h"
 #include "struct.h"
@@ -19,52 +18,9 @@
 #include "boutons.h"
 #include "erreurs.h"
 #include "linux.h"
-
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-  #define endian_magic(x) (x)
-#else
-  #define endian_magic(x) (SDL_Swap16(x))
-#endif
+#include "io.h"
 
 #define FILENAMESPACE 16
-
-// Conversion des words d'une structure, si necessaire sur cette plate-forme
-void Retraite_Word_LittleEndian(word ** Adresse)
-{
-  #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    while (*Adresse != NULL)
-    {
-      word ValeurConvertie = SDL_Swap16(**Adresse);
-      **Adresse = ValeurConvertie;
-      Adresse++;
-    }
-  #endif
-}
-void Retraite_DWord_LittleEndian(dword * Adresse[])
-{
-  #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    while (*Adresse != NULL)
-    {
-      dword ValeurConvertie = SDL_Swap32(**Adresse);
-      **Adresse = ValeurConvertie;
-      Adresse++;
-    }
-  #endif
-}
-
-// Lit des octets
-// Renvoie -1 si OK, 0 en cas d'erreur
-int read_bytes(FILE *Fichier, void *Dest, size_t Taille)
-{
-  return fread(Dest, 1, Taille, Fichier) == Taille;
-}
-// Ecrit des octets
-// Renvoie -1 si OK, 0 en cas d'erreur
-int write_bytes(FILE *Fichier, void *Dest, size_t Taille)
-{
-  return fwrite(Dest, 1, Taille, Fichier) == Taille;
-}
-
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
@@ -88,6 +44,8 @@ short Preview_Facteur_X;
 short Preview_Facteur_Y;
 short Preview_Pos_X;
 short Preview_Pos_Y;
+
+byte HBPm1; // Header.BitPlanes-1
 
 
 // Chargement des pixels dans la preview
@@ -353,9 +311,9 @@ void Dessiner_preview_palette(void)
             5*Menu_Facteur_X,5*Menu_Facteur_Y,Indice);
 
   SDL_UpdateRect(Ecran_SDL,
-  	Preview_Pos_X*Menu_Facteur_X,
-	Preview_Pos_Y*Menu_Facteur_Y,
-	5*Menu_Facteur_X*256,5*Menu_Facteur_Y*256);
+    Preview_Pos_X*Menu_Facteur_X,
+  Preview_Pos_Y*Menu_Facteur_Y,
+  5*Menu_Facteur_X*256,5*Menu_Facteur_Y*256);
 }
 
 
@@ -408,29 +366,11 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 //                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
-byte * Tampon_lecture;
-word   Index_lecture;
-
-void Init_lecture(void)
+void Lire_octet(FILE * Fichier, byte *Octet)
 {
-  Tampon_lecture=(byte *)malloc(64000);
-  Index_lecture=64000;
-}
-
-byte Lire_octet(FILE *Fichier)
-{
-  if (++Index_lecture>=64000)
-  {
-    if (read_bytes(Fichier,Tampon_lecture,64000))
-      Erreur_fichier=2;
-    Index_lecture=0;
-  }
-  return Tampon_lecture[Index_lecture];
-}
-
-void Close_lecture(void)
-{
-  free(Tampon_lecture);
+  // FIXME : Remplacer les appelants par read_bytes(), et gérer les retours d'erreur.
+  if (!read_bytes(Fichier, Octet, 1))
+  ;//  Erreur_fichier = 2;
 }
 
 // --------------------------------------------------------------------------
@@ -1035,8 +975,8 @@ void Load_PKM(void)
                   if (Octet==4)
                   {
                     Indice+=4;
-                    if ( ! read_bytes(Fichier,&Ecran_original_X,2)
-                      || !read_bytes(Fichier,&Ecran_original_Y,2) )
+                    if ( ! read_word_le(Fichier,&Ecran_original_X)
+                      || !read_word_le(Fichier,&Ecran_original_Y) )
                       Erreur_fichier=2;
                   }
                   else
@@ -1080,7 +1020,7 @@ void Load_PKM(void)
           Erreur_fichier=2;
       }
 
-      Init_lecture();
+      /*Init_lecture();*/
 
       if (!Erreur_fichier)
       {
@@ -1102,7 +1042,7 @@ void Load_PKM(void)
           // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
           {
-            Octet=Lire_octet(Fichier);
+            Lire_octet(Fichier, &Octet);
 
             // Si ce n'est pas un octet de reconnaissance, c'est un pixel brut
             if ( (Octet!=Head.Recon1) && (Octet!=Head.Recon2) )
@@ -1117,8 +1057,8 @@ void Load_PKM(void)
             { // ... nombre de pixels tenant sur un byte
               if (Octet==Head.Recon1)
               {
-                Couleur=Lire_octet(Fichier);
-                Octet=Lire_octet(Fichier);
+                Lire_octet(Fichier, &Couleur);
+                Lire_octet(Fichier, &Octet);
                 for (Indice=0; Indice<Octet; Indice++)
                   Pixel_de_chargement((Compteur_de_pixels+Indice) % Principal_Largeur_image,
                                       (Compteur_de_pixels+Indice) / Principal_Largeur_image,
@@ -1128,8 +1068,8 @@ void Load_PKM(void)
               }
               else // ... nombre de pixels tenant sur un word
               {
-                Couleur=Lire_octet(Fichier);
-                Mot=(word)(Lire_octet(Fichier)<<8)+Lire_octet(Fichier);
+                Lire_octet(Fichier, &Couleur);
+                read_word_be(Fichier, &Mot);
                 for (Indice=0; Indice<Mot; Indice++)
                   Pixel_de_chargement((Compteur_de_pixels+Indice) % Principal_Largeur_image,
                                       (Compteur_de_pixels+Indice) / Principal_Largeur_image,
@@ -1141,7 +1081,7 @@ void Load_PKM(void)
           }
         }
       }
-      Close_lecture();
+      /*Close_lecture();*/
     }
     else // Lecture header impossible: Erreur ne modifiant pas l'image
       Erreur_fichier=1;
@@ -1363,25 +1303,12 @@ typedef struct
 
   FILE *LBM_Fichier;
 
-  // ------------ Lire et traduire une valeur au format Motorola ------------
-  dword Lire_long(void)
-  {
-    dword Temp;
-    dword Valeur;
-
-    if (!read_bytes(LBM_Fichier,&Valeur,4))
-      Erreur_fichier=1;
-    swab((char *)&Valeur,(char *)&Temp,4);
-    return ((Temp>>16)+(Temp<<16));
-  }
-
-
 void Test_LBM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   char  Format[4];
   char  Section[4];
-
+  dword Dummy;
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -1396,7 +1323,8 @@ void Test_LBM(void)
       Erreur_fichier=1;
     else
     {
-      Lire_long(); //   On aurait pu vérifier que ce long est égal à la taille
+      read_dword_be(LBM_Fichier, &Dummy);
+                   //   On aurait pu vérifier que ce long est égal à la taille
                    // du fichier - 8, mais ça aurait interdit de charger des
                    // fichiers tronqués (et déjà que c'est chiant de perdre
                    // une partie du fichier il faut quand même pouvoir en
@@ -1533,8 +1461,7 @@ void Test_LBM(void)
       return 0;
     while (memcmp(Section_lue,Section_attendue,4)) // Sect. pas encore trouvée
     {
-      Taille_section=Lire_long();
-      if (Erreur_fichier)
+      if (!read_dword_be(LBM_Fichier,&Taille_section))
         return 0;
       if (Taille_section&1)
         Taille_section++;
@@ -1558,7 +1485,7 @@ void Test_LBM(void)
     {
       for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
       {
-        Pixel_de_chargement(Pos_X,Pos_Y,Couleur_ILBM_line(Pos_X,Vraie_taille_ligne));
+        Pixel_de_chargement(Pos_X,Pos_Y,Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1));
       }
     }
     else
@@ -1570,7 +1497,7 @@ void Test_LBM(void)
       if (Image_HAM==6)
       for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)         // HAM6
       {
-        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne);
+        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1);
         switch (Temp & 0xF0)
         {
           case 0x10: // Bleu
@@ -1596,7 +1523,7 @@ void Test_LBM(void)
       else
       for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)         // HAM8
       {
-        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne);
+        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1);
         switch (Temp & 0x03)
         {
           case 0x01: // Bleu
@@ -1626,7 +1553,6 @@ void Test_LBM(void)
 void Load_LBM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  //int   Fichier;
   T_Header_LBM Header;
   char  Format[4];
   char  Section[4];
@@ -1642,7 +1568,7 @@ void Load_LBM(void)
   byte  Couleur;
   long  Taille_du_fichier;
   struct stat Informations_Fichier;
-
+  dword Dummy;
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -1655,31 +1581,32 @@ void Load_LBM(void)
 
     // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
     read_bytes(LBM_Fichier,Section,4);
-    Lire_long();
+    read_dword_be(LBM_Fichier,&Dummy);
     read_bytes(LBM_Fichier,Format,4);
     if (!Wait_for((byte *)"BMHD"))
       Erreur_fichier=1;
-    Lire_long();
+    read_dword_be(LBM_Fichier,&Dummy);
 
     // Maintenant on lit le header pour pouvoir commencer le chargement de l'image
-    if ( (read_bytes(LBM_Fichier,&Header.Width,sizeof(Header.Width)))
-      && (read_bytes(LBM_Fichier,&Header.Height,sizeof(Header.Height)))
-      && (read_bytes(LBM_Fichier,&Header.Xorg,sizeof(Header.Xorg)))
-      && (read_bytes(LBM_Fichier,&Header.Yorg,sizeof(Header.Yorg)))
-      && (read_bytes(LBM_Fichier,&Header.BitPlanes,sizeof(Header.BitPlanes)))
-      && (read_bytes(LBM_Fichier,&Header.Mask,sizeof(Header.Mask)))
-      && (read_bytes(LBM_Fichier,&Header.Compression,sizeof(Header.Compression)))
-      && (read_bytes(LBM_Fichier,&Header.Pad1,sizeof(Header.Pad1)))
-      && (read_bytes(LBM_Fichier,&Header.Transp_col,sizeof(Header.Transp_col)))
-      && (read_bytes(LBM_Fichier,&Header.Xaspect,sizeof(Header.Xaspect)))
-      && (read_bytes(LBM_Fichier,&Header.Yaspect,sizeof(Header.Yaspect)))
-      && (read_bytes(LBM_Fichier,&Header.Xscreen,sizeof(Header.Xscreen)))
-      && (read_bytes(LBM_Fichier,&Header.Yscreen,sizeof(Header.Yscreen)))
+    if ( (read_word_be(LBM_Fichier,&Header.Width))
+      && (read_word_be(LBM_Fichier,&Header.Height))
+      && (read_word_be(LBM_Fichier,&Header.Xorg))
+      && (read_word_be(LBM_Fichier,&Header.Yorg))
+      && (read_bytes(LBM_Fichier,&Header.BitPlanes,1))
+      && (read_bytes(LBM_Fichier,&Header.Mask,1))
+      && (read_bytes(LBM_Fichier,&Header.Compression,1))
+      && (read_bytes(LBM_Fichier,&Header.Pad1,1))
+      && (read_word_be(LBM_Fichier,&Header.Transp_col))
+      && (read_bytes(LBM_Fichier,&Header.Xaspect,1))
+      && (read_bytes(LBM_Fichier,&Header.Yaspect,1))
+      && (read_word_be(LBM_Fichier,&Header.Xscreen))
+      && (read_word_be(LBM_Fichier,&Header.Yscreen))
       && Header.Width && Header.Height)
     {
       if ( (Header.BitPlanes) && (Wait_for((byte *)"CMAP")) )
       {
-        Nb_couleurs=Lire_long()/3;
+        read_dword_be(LBM_Fichier,&Nb_couleurs);
+        Nb_couleurs/=3;
 
         if (((int)1<<Header.BitPlanes)!=Nb_couleurs)
         {
@@ -1731,12 +1658,16 @@ void Load_LBM(void)
 
             if ( (Wait_for((byte *)"BODY")) && (!Erreur_fichier) )
             {
-              Taille_image=Lire_long();
-              swab((char *)&Header.Width ,(char *)&Principal_Largeur_image,2);
-              swab((char *)&Header.Height,(char *)&Principal_Hauteur_image,2);
+              read_dword_be(LBM_Fichier,&Taille_image);
+              //swab((char *)&Header.Width ,(char *)&Principal_Largeur_image,2);
+              //swab((char *)&Header.Height,(char *)&Principal_Hauteur_image,2);
+              Principal_Largeur_image = Header.Width;
+              Principal_Hauteur_image = Header.Height;
 
-              swab((char *)&Header.Xscreen,(char *)&Ecran_original_X,2);
-              swab((char *)&Header.Yscreen,(char *)&Ecran_original_Y,2);
+              //swab((char *)&Header.Xscreen,(char *)&Ecran_original_X,2);
+              //swab((char *)&Header.Yscreen,(char *)&Ecran_original_Y,2);
+              Ecran_original_X = Header.Xscreen;
+              Ecran_original_Y = Header.Yscreen;
 
               Initialiser_preview(Principal_Largeur_image,Principal_Hauteur_image,Taille_du_fichier,FORMAT_LBM);
               if (Erreur_fichier==0)
@@ -1758,7 +1689,6 @@ void Load_LBM(void)
                   if (!Header.Compression)
                   {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
-			DEBUG("Fichier LBM NON compressé",0);
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
                       if (read_bytes(LBM_Fichier,LBM_Buffer,Taille_ligne))
@@ -1770,9 +1700,7 @@ void Load_LBM(void)
                   }
                   else
                   {                                               // compressé
-			DEBUG("Fichier LBM compressé",0);
-			Pixel_de_chargement=Pixel_Chargement_dans_ecran_courant;
-                    Init_lecture();
+                    /*Init_lecture();*/
 
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
 
@@ -1780,12 +1708,12 @@ void Load_LBM(void)
                     {
                       for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
                       {
-                        Octet=Lire_octet(LBM_Fichier);
-			// Si Octet > 127 alors il faut répéter 256-'Octet' fois la couleur de l'octet suivant
-			// Si Octet <= 127 alors il faut afficher directement les 'Octet' octets suivants
+                        Lire_octet(LBM_Fichier, &Octet);
+                        // Si Octet > 127 alors il faut répéter 256-'Octet' fois la couleur de l'octet suivant
+                        // Si Octet <= 127 alors il faut afficher directement les 'Octet' octets suivants
                         if (Octet>127)
                         {
-                          Couleur=Lire_octet(LBM_Fichier);
+                          Lire_octet(LBM_Fichier, &Couleur);
                           B256=(short)(256-Octet);
                           for (Compteur=0; Compteur<=B256; Compteur++)
                             if (Pos_X<Taille_ligne)
@@ -1796,7 +1724,7 @@ void Load_LBM(void)
                         else
                           for (Compteur=0; Compteur<=(short)(Octet); Compteur++)
                             if (Pos_X<Taille_ligne)
-                              LBM_Buffer[Pos_X++]=Lire_octet(LBM_Fichier);
+                              Lire_octet(LBM_Fichier, &(LBM_Buffer[Pos_X++]));
                             else
                               Erreur_fichier=2;
                       }
@@ -1805,7 +1733,7 @@ void Load_LBM(void)
                     }
 
                     free(LBM_Buffer);
-                    Close_lecture();
+                    /*Close_lecture();*/
                   }
                 }
                 else                               // "PBM ": Planar(?) BitMap
@@ -1827,25 +1755,29 @@ void Load_LBM(void)
                   }
                   else
                   {                                               // compressé
-                    Init_lecture();
+                    /*Init_lecture();*/
                     for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
                     {
                       for (Pos_X=0; ((Pos_X<Vraie_taille_ligne) && (!Erreur_fichier)); )
                       {
-                        Octet=Lire_octet(LBM_Fichier);
+                        Lire_octet(LBM_Fichier, &Octet);
                         if (Octet>127)
                         {
-                          Couleur=Lire_octet(LBM_Fichier);
+                          Lire_octet(LBM_Fichier, &Couleur);
                           B256=256-Octet;
                           for (Compteur=0; Compteur<=B256; Compteur++)
                             Pixel_de_chargement(Pos_X++,Pos_Y,Couleur);
                         }
                         else
                           for (Compteur=0; Compteur<=Octet; Compteur++)
-                            Pixel_de_chargement(Pos_X++,Pos_Y,Lire_octet(LBM_Fichier));
+                          {
+                            byte Lu=0;
+                            Lire_octet(LBM_Fichier, &Lu);
+                            Pixel_de_chargement(Pos_X++,Pos_Y,Lu);
+                          }
                       }
                     }
-                    Close_lecture();
+                    /*Close_lecture();*/
                   }
                 }
               }
@@ -1882,17 +1814,6 @@ void Load_LBM(void)
   byte LBM_File_de_couleurs[129];
   word LBM_Taille_de_file;
   byte LBM_Mode_repetition;
-
-  // ----------- Traduire et écrire une valeur au format Motorola -----------
-  void Ecrire_long(dword Valeur)
-  {
-    dword Temp;
-
-    swab((char *)&Valeur,(char *)&Temp,4);
-    Valeur=(Temp>>16)+(Temp<<16);
-    if (! write_bytes(LBM_Fichier,&Valeur,4))
-      Erreur_fichier=1;
-  }
 
   // ------------- Ecrire les couleurs que l'on vient de traiter ------------
   void Transferer_couleurs(void)
@@ -1996,10 +1917,10 @@ void Save_LBM(void)
   if ((LBM_Fichier=fopen(Nom_du_fichier,"wb")))
   {
     write_bytes(LBM_Fichier,"FORM",4);
-    Ecrire_long(0); // On mettra la taille à jour à la fin
+    write_dword_be(LBM_Fichier,0); // On mettra la taille à jour à la fin
 
     write_bytes(LBM_Fichier,"PBM BMHD",8);
-    Ecrire_long(20);
+    write_dword_be(LBM_Fichier,20);
 
     // On corrige la largeur de l'image pour qu'elle soit multiple de 2
     Vraie_largeur=Principal_Largeur_image+(Principal_Largeur_image&1);
@@ -2007,6 +1928,9 @@ void Save_LBM(void)
     //swab((byte *)&Vraie_largeur,(byte *)&Header.Width,2);
     swab((byte *)&Principal_Largeur_image,(byte *)&Header.Width,2);
     swab((byte *)&Principal_Hauteur_image,(byte *)&Header.Height,2);
+    //Header.Width=Principal_Largeur_image;
+    //Header.Height=Principal_Hauteur_image;
+    
     Header.Xorg=0;
     Header.Yorg=0;
     Header.BitPlanes=8;
@@ -2018,18 +1942,20 @@ void Save_LBM(void)
     Header.Yaspect=1;
     swab((byte *)&Largeur_ecran,(byte *)&Header.Xscreen,2);
     swab((byte *)&Hauteur_ecran,(byte *)&Header.Yscreen,2);
+    //Header.Xscreen = Largeur_ecran;
+    //Header.Yscreen = Hauteur_ecran;
 
     write_bytes(LBM_Fichier,&Header,sizeof(T_Header_LBM));
 
     write_bytes(LBM_Fichier,"CMAP",4);
-    Ecrire_long(sizeof(T_Palette));
+    write_dword_be(LBM_Fichier,sizeof(T_Palette));
 
     Palette_64_to_256(Principal_Palette);
     write_bytes(LBM_Fichier,Principal_Palette,sizeof(T_Palette));
     Palette_256_to_64(Principal_Palette);
 
     write_bytes(LBM_Fichier,"BODY",4);
-    Ecrire_long(0); // On mettra la taille à jour à la fin
+    write_dword_be(LBM_Fichier,0); // On mettra la taille à jour à la fin
 
     Init_ecriture();
 
@@ -2053,7 +1979,7 @@ void Save_LBM(void)
 
       fseek(LBM_Fichier,820,SEEK_SET);
       stat(Nom_du_fichier,Informations_Fichier);
-      Ecrire_long((Informations_Fichier->st_size)-824);
+      write_dword_be(LBM_Fichier,Informations_Fichier->st_size-824);
 
       if (!Erreur_fichier)
       {
@@ -2063,14 +1989,14 @@ void Save_LBM(void)
         // impaire, on rajoute un 0 (Padding) à la fin.
         if ((Informations_Fichier->st_size) & 1)
         {
-          Ecrire_long((Informations_Fichier->st_size)-7);
+          write_dword_be(LBM_Fichier,Informations_Fichier->st_size-7);
           fseek(LBM_Fichier,0,SEEK_END);
           Octet=0;
           if (! write_bytes(LBM_Fichier,&Octet,1))
             Erreur_fichier=1;
         }
         else
-          Ecrire_long((Informations_Fichier->st_size)-8);
+          write_dword_be(LBM_Fichier,Informations_Fichier->st_size-8);
 
         fclose(LBM_Fichier);
 
@@ -2132,23 +2058,23 @@ void Test_BMP(void)
 
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    if (read_bytes(Fichier,&(Header.Signature),sizeof(word))
-     && read_bytes(Fichier,&(Header.Taille_1),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Reserv_1),sizeof(word))
-     && read_bytes(Fichier,&(Header.Reserv_2),sizeof(word))
-     && read_bytes(Fichier,&(Header.Decalage),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Taille_2),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Largeur),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Hauteur),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Plans),sizeof(word))
-     && read_bytes(Fichier,&(Header.Nb_bits),sizeof(word))
-     && read_bytes(Fichier,&(Header.Compression),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Taille_3),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.XPM),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.YPM),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Nb_Clr),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Clr_Imprt),sizeof(uint32_t))
-	)
+    if (read_bytes(Fichier,&(Header.Signature),2) // "BM"
+     && read_dword_le(Fichier,&(Header.Taille_1))
+     && read_word_le(Fichier,&(Header.Reserv_1))
+     && read_word_le(Fichier,&(Header.Reserv_2))
+     && read_dword_le(Fichier,&(Header.Decalage))
+     && read_dword_le(Fichier,&(Header.Taille_2))
+     && read_dword_le(Fichier,&(Header.Largeur))
+     && read_dword_le(Fichier,&(Header.Hauteur))
+     && read_word_le(Fichier,&(Header.Plans))
+     && read_word_le(Fichier,&(Header.Nb_bits))
+     && read_dword_le(Fichier,&(Header.Compression))
+     && read_dword_le(Fichier,&(Header.Taille_3))
+     && read_dword_le(Fichier,&(Header.XPM))
+     && read_dword_le(Fichier,&(Header.YPM))
+     && read_dword_le(Fichier,&(Header.Nb_Clr))
+     && read_dword_le(Fichier,&(Header.Clr_Imprt))
+        )
      {
       if ( (Header.Signature==0x4D42) && (Header.Taille_2==40)
         && Header.Largeur && Header.Hauteur )
@@ -2186,22 +2112,22 @@ void Load_BMP(void)
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
 
-    if (read_bytes(Fichier,&(Header.Signature),sizeof(word))
-     && read_bytes(Fichier,&(Header.Taille_1),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Reserv_1),sizeof(word))
-     && read_bytes(Fichier,&(Header.Reserv_2),sizeof(word))
-     && read_bytes(Fichier,&(Header.Decalage),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Taille_2),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Largeur),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Hauteur),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Plans),sizeof(word))
-     && read_bytes(Fichier,&(Header.Nb_bits),sizeof(word))
-     && read_bytes(Fichier,&(Header.Compression),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Taille_3),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.XPM),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.YPM),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Nb_Clr),sizeof(uint32_t))
-     && read_bytes(Fichier,&(Header.Clr_Imprt),sizeof(uint32_t))
+    if (read_word_le(Fichier,&(Header.Signature))
+     && read_dword_le(Fichier,&(Header.Taille_1))
+     && read_word_le(Fichier,&(Header.Reserv_1))
+     && read_word_le(Fichier,&(Header.Reserv_2))
+     && read_dword_le(Fichier,&(Header.Decalage))
+     && read_dword_le(Fichier,&(Header.Taille_2))
+     && read_dword_le(Fichier,&(Header.Largeur))
+     && read_dword_le(Fichier,&(Header.Hauteur))
+     && read_word_le(Fichier,&(Header.Plans))
+     && read_word_le(Fichier,&(Header.Nb_bits))
+     && read_dword_le(Fichier,&(Header.Compression))
+     && read_dword_le(Fichier,&(Header.Taille_3))
+     && read_dword_le(Fichier,&(Header.XPM))
+     && read_dword_le(Fichier,&(Header.YPM))
+     && read_dword_le(Fichier,&(Header.Nb_Clr))
+     && read_dword_le(Fichier,&(Header.Clr_Imprt))
     )
     {
       switch (Header.Nb_bits)
@@ -2287,9 +2213,9 @@ void Load_BMP(void)
                 Pos_X=0;
                 Pos_Y=Principal_Hauteur_image-1;
 
-                Init_lecture();
-                A=Lire_octet(Fichier);
-                B=Lire_octet(Fichier);
+                /*Init_lecture();*/
+                Lire_octet(Fichier, &A);
+                Lire_octet(Fichier, &B);
                 while ( (!Erreur_fichier) && ((A)||(B!=1)) )
                 {
                   if (A) // Encoded mode
@@ -2305,16 +2231,16 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        A=Lire_octet(Fichier);
-                        B=Lire_octet(Fichier);
+                        Lire_octet(Fichier, &A);
+                        Lire_octet(Fichier, &B);
                         Pos_X+=A;
                         Pos_Y-=B;
                         break;
                       default: // Nouvelle série
                         while (B)
                         {
-                          A=Lire_octet(Fichier);
-                          C=Lire_octet(Fichier);
+                          Lire_octet(Fichier, &A);
+                          Lire_octet(Fichier, &C);
                           Pixel_de_chargement(Pos_X++,Pos_Y,A);
                           if (--B)
                           {
@@ -2323,19 +2249,19 @@ void Load_BMP(void)
                           }
                         }
                     }
-                  A=Lire_octet(Fichier);
-                  B=Lire_octet(Fichier);
+                  Lire_octet(Fichier, &A);
+                  Lire_octet(Fichier, &B);
                 }
-                Close_lecture();
+                /*Close_lecture();*/
                 break;
 
               case 2 : // Compression RLE 4 bits
                 Pos_X=0;
                 Pos_Y=Principal_Hauteur_image-1;
 
-                Init_lecture();
-                A=Lire_octet(Fichier);
-                B=Lire_octet(Fichier);
+                /*Init_lecture();*/
+                Lire_octet(Fichier, &A);
+                Lire_octet(Fichier, &B);
                 while ( (!Erreur_fichier) && ((A)||(B!=1)) )
                 {
                   if (A) // Encoded mode (A fois les 1/2 pixels de B)
@@ -2357,8 +2283,8 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        A=Lire_octet(Fichier);
-                        B=Lire_octet(Fichier);
+                        Lire_octet(Fichier, &A);
+                        Lire_octet(Fichier, &B);
                         Pos_X+=A;
                         Pos_Y-=B;
                         break;
@@ -2367,7 +2293,7 @@ void Load_BMP(void)
                         {
                           if (Indice&1)
                           {
-                            C=Lire_octet(Fichier);
+                            Lire_octet(Fichier, &C);
                             Pixel_de_chargement(Pos_X,Pos_Y,C>>4);
                           }
                           else
@@ -2376,12 +2302,15 @@ void Load_BMP(void)
                         //   On lit l'octet rendant le nombre d'octets pair, si
                         // nécessaire. Encore un truc de crétin "made in MS".
                         if ( ((B&3)==1) || ((B&3)==2) )
-                          Lire_octet(Fichier);
+                        {
+                          byte Dummy;
+                          Lire_octet(Fichier, &Dummy);
+                        }
                     }
-                  A=Lire_octet(Fichier);
-                  B=Lire_octet(Fichier);
+                  Lire_octet(Fichier, &A);
+                  Lire_octet(Fichier, &B);
                 }
-                Close_lecture();
+                /*Close_lecture();*/
             }
             fclose(Fichier);
           }
@@ -2587,9 +2516,9 @@ void Test_GIF(void)
   // Définition de quelques variables globales au chargement du GIF87a
   word GIF_Nb_bits;        // Nb de bits composants un code complet
   word GIF_Rest_bits;      // Nb de bits encore dispos dans GIF_Last_byte
-  word GIF_Rest_byte;      // Nb d'octets avant le prochain bloc de Raster Data
+  byte GIF_Rest_byte;      // Nb d'octets avant le prochain bloc de Raster Data
   word GIF_Code_actuel;    // Code traité (qui vient d'être lu en général)
-  word GIF_Last_byte;      // Octet de lecture des bits
+  byte GIF_Last_byte;      // Octet de lecture des bits
   word GIF_Pos_X;          // Coordonnées d'affichage de l'image
   word GIF_Pos_Y;
   word GIF_Entrelacee;     // L'image est entrelacée
@@ -2616,8 +2545,8 @@ void Test_GIF(void)
         // Si on a atteint la fin du bloc de Raster Data
         if (GIF_Rest_byte==0)
           // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
-          GIF_Rest_byte=Lire_octet(GIF_Fichier);
-        GIF_Last_byte=Lire_octet(GIF_Fichier);
+          Lire_octet(GIF_Fichier, &GIF_Rest_byte);
+        Lire_octet(GIF_Fichier,&GIF_Last_byte);
         GIF_Rest_byte--;
         GIF_Rest_bits=8;
       }
@@ -2734,17 +2663,17 @@ void Load_GIF(void)
       Alphabet_Prefixe=(word *)malloc(4096*sizeof(word));
       Alphabet_Suffixe=(word *)malloc(4096*sizeof(word));
 
-      if (read_bytes(GIF_Fichier,&(LSDB.Largeur),sizeof(word))
-      && read_bytes(GIF_Fichier,&(LSDB.Hauteur),sizeof(word))
-      && read_bytes(GIF_Fichier,&(LSDB.Resol),sizeof(byte))
-      && read_bytes(GIF_Fichier,&(LSDB.Backcol),sizeof(byte))
-      && read_bytes(GIF_Fichier,&(LSDB.Aspect),sizeof(byte))
-	  )
+      if (read_word_le(GIF_Fichier,&(LSDB.Largeur))
+      && read_word_le(GIF_Fichier,&(LSDB.Hauteur))
+      && read_bytes(GIF_Fichier,&(LSDB.Resol),1)
+      && read_bytes(GIF_Fichier,&(LSDB.Backcol),1)
+      && read_bytes(GIF_Fichier,&(LSDB.Aspect),1)
+        )
       {
         // Lecture du Logical Screen Descriptor Block réussie:
 
-        Ecran_original_X=endian_magic(LSDB.Largeur);
-        Ecran_original_Y=endian_magic(LSDB.Hauteur);
+        Ecran_original_X=endian_magic16(LSDB.Largeur);
+        Ecran_original_Y=endian_magic16(LSDB.Hauteur);
 
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
@@ -2774,12 +2703,12 @@ void Load_GIF(void)
           //   On peut maintenant charger la nouvelle palette:
           if (!(LSDB.Aspect & 0x80))
             // Palette dans l'ordre:
-	    for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-	    {
-            	read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
-            	read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
-            	read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
-	    }
+            for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+            {
+              read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
+              read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
+              read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
+            }
           else
           {
             // Palette triée par composantes:
@@ -2829,18 +2758,18 @@ void Load_GIF(void)
           // Présence d'un Image Separator Header
 
           // lecture de 10 derniers octets
-          if ( read_bytes(GIF_Fichier,&(IDB.Pos_X),sizeof(word))
-          	&& read_bytes(GIF_Fichier,&(IDB.Pos_Y),sizeof(word))
-          	&& read_bytes(GIF_Fichier,&(IDB.Largeur_image),sizeof(word))
-          	&& read_bytes(GIF_Fichier,&(IDB.Hauteur_image),sizeof(word))
-          	&& read_bytes(GIF_Fichier,&(IDB.Indicateur),sizeof(byte))
-          	&& read_bytes(GIF_Fichier,&(IDB.Nb_bits_pixel),sizeof(byte))
+          if ( read_word_le(GIF_Fichier,&(IDB.Pos_X))
+            && read_word_le(GIF_Fichier,&(IDB.Pos_Y))
+            && read_word_le(GIF_Fichier,&(IDB.Largeur_image))
+            && read_word_le(GIF_Fichier,&(IDB.Hauteur_image))
+            && read_bytes(GIF_Fichier,&(IDB.Indicateur),1)
+            && read_bytes(GIF_Fichier,&(IDB.Nb_bits_pixel),1)
             && IDB.Largeur_image && IDB.Hauteur_image)
           {
-            Principal_Largeur_image=endian_magic(IDB.Largeur_image);
-            Principal_Hauteur_image=endian_magic(IDB.Hauteur_image);
+            Principal_Largeur_image=endian_magic16(IDB.Largeur_image);
+            Principal_Hauteur_image=endian_magic16(IDB.Hauteur_image);
 
-            Initialiser_preview(endian_magic(IDB.Largeur_image),endian_magic(IDB.Hauteur_image),Taille_du_fichier,FORMAT_GIF);
+            Initialiser_preview(endian_magic16(IDB.Largeur_image),endian_magic16(IDB.Hauteur_image),Taille_du_fichier,FORMAT_GIF);
 
             // Palette locale dispo = (IDB.Indicateur and $80)
             // Image entrelacée     = (IDB.Indicateur and $40)
@@ -2861,12 +2790,12 @@ void Load_GIF(void)
 
               if (!(IDB.Indicateur & 0x40))
                 // Palette dans l'ordre:
-	        for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-	        {   
-            		read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
-            		read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
-            		read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
-	        }
+                for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+                {   
+                  read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R,1);
+                  read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V,1);
+                  read_bytes(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B,1);
+                }
               else
               {
                 // Palette triée par composantes:
@@ -2892,7 +2821,7 @@ void Load_GIF(void)
             GIF_Entrelacee    =(IDB.Indicateur & 0x40);
             GIF_Passe         =0;
 
-            Init_lecture();
+            /*Init_lecture();*/
 
             Erreur_fichier=0;
             GIF_Image_entrelacee_terminee=0;
@@ -2947,7 +2876,7 @@ void Load_GIF(void)
                 Erreur_fichier=2;
             } // Code End-Of-Information ou erreur de fichier rencontré
 
-            Close_lecture();
+            /*Close_lecture();*/
 
             if (Erreur_fichier>=0)
             if ( /* (GIF_Pos_X!=0) || */
@@ -3362,20 +3291,6 @@ typedef struct
 
 T_PCX_Header PCX_Header;
 
-word * PCX_words[] = {
-  &PCX_Header.X_min, 
-  &PCX_Header.Y_min, 
-  &PCX_Header.X_max, 
-  &PCX_Header.Y_max,
-  &PCX_Header.X_dpi, 
-  &PCX_Header.Y_dpi,
-  &PCX_Header.Bytes_per_plane_line,
-  &PCX_Header.Palette_info,
-  &PCX_Header.Screen_X,
-  &PCX_Header.Screen_Y,
-  NULL
-  };
-
 // -- Tester si un fichier est au format PCX --------------------------------
 
 void Test_PCX(void)
@@ -3388,9 +3303,25 @@ void Test_PCX(void)
 
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    if (read_bytes(Fichier,&PCX_Header,sizeof(T_PCX_Header)))
+    if (read_bytes(Fichier,&(PCX_Header.Manufacturer),1) &&
+        read_bytes(Fichier,&(PCX_Header.Version),1) &&
+        read_bytes(Fichier,&(PCX_Header.Compression),1) &&
+        read_bytes(Fichier,&(PCX_Header.Depth),1) &&
+        read_word_le(Fichier,&(PCX_Header.X_min)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_min)) &&
+        read_word_le(Fichier,&(PCX_Header.X_max)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_max)) &&
+        read_word_le(Fichier,&(PCX_Header.X_dpi)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_dpi)) &&
+        read_bytes(Fichier,&(PCX_Header.Palette_16c),48) &&        
+        read_bytes(Fichier,&(PCX_Header.Reserved),1) &&
+        read_bytes(Fichier,&(PCX_Header.Plane),1) &&
+        read_word_le(Fichier,&(PCX_Header.Bytes_per_plane_line)) &&
+        read_word_le(Fichier,&(PCX_Header.Palette_info)) &&
+        read_word_le(Fichier,&(PCX_Header.Screen_X)) &&
+        read_word_le(Fichier,&(PCX_Header.Screen_Y)) &&
+        read_bytes(Fichier,&(PCX_Header.Filler),54) )
     {
-      Retraite_Word_LittleEndian(PCX_words);
     
       //   Vu que ce header a une signature de merde et peu significative, il
       // va falloir que je teste différentes petites valeurs dont je connais
@@ -3452,7 +3383,6 @@ void Load_PCX(void)
   byte * Buffer;
   struct stat Informations_Fichier;
 
-
   Nom_fichier_complet(Nom_du_fichier,0);
 
   Erreur_fichier=0;
@@ -3461,11 +3391,29 @@ void Load_PCX(void)
   {
       stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
-
+    /*
     if (read_bytes(Fichier,&PCX_Header,sizeof(T_PCX_Header)))
+    {*/
+    
+    if (read_bytes(Fichier,&(PCX_Header.Manufacturer),1) &&
+        read_bytes(Fichier,&(PCX_Header.Version),1) &&
+        read_bytes(Fichier,&(PCX_Header.Compression),1) &&
+        read_bytes(Fichier,&(PCX_Header.Depth),1) &&
+        read_word_le(Fichier,&(PCX_Header.X_min)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_min)) &&
+        read_word_le(Fichier,&(PCX_Header.X_max)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_max)) &&
+        read_word_le(Fichier,&(PCX_Header.X_dpi)) &&
+        read_word_le(Fichier,&(PCX_Header.Y_dpi)) &&
+        read_bytes(Fichier,&(PCX_Header.Palette_16c),48) &&        
+        read_bytes(Fichier,&(PCX_Header.Reserved),1) &&
+        read_bytes(Fichier,&(PCX_Header.Plane),1) &&
+        read_word_le(Fichier,&(PCX_Header.Bytes_per_plane_line)) &&
+        read_word_le(Fichier,&(PCX_Header.Palette_info)) &&
+        read_word_le(Fichier,&(PCX_Header.Screen_X)) &&
+        read_word_le(Fichier,&(PCX_Header.Screen_Y)) &&
+        read_bytes(Fichier,&(PCX_Header.Filler),54) )
     {
-      // Ce format est Little-Endian
-      Retraite_Word_LittleEndian(PCX_words);
       
       Principal_Largeur_image=PCX_Header.X_max-PCX_Header.X_min+1;
       Principal_Hauteur_image=PCX_Header.Y_max-PCX_Header.Y_min+1;
@@ -3520,17 +3468,17 @@ void Load_PCX(void)
             if (read_bytes(Fichier,&Octet1,1))
               if (Octet1==12) // Lire la palette si c'est une image en 256 couleurs
               {
-	        int indice;
+                int indice;
                 // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
-		for(indice=0;indice<256;indice++)
-                	if ( ! read_bytes(Fichier,&Principal_Palette[indice].R,1)
-			 || ! read_bytes(Fichier,&Principal_Palette[indice].V,1)
-			 || ! read_bytes(Fichier,&Principal_Palette[indice].B,1) )
-			{
-                  		Erreur_fichier=2;
-				DEBUG("ERROR READING PCX PALETTE !",indice);
-				break;
-			}
+                for(indice=0;indice<256;indice++)
+                  if ( ! read_bytes(Fichier,&Principal_Palette[indice].R,1)
+                   || ! read_bytes(Fichier,&Principal_Palette[indice].V,1)
+                   || ! read_bytes(Fichier,&Principal_Palette[indice].B,1) )
+                  {
+                    Erreur_fichier=2;
+                    DEBUG("ERROR READING PCX PALETTE !",indice);
+                    break;
+                  }
               }
           }
           Palette_256_to_64(Principal_Palette);
@@ -3540,7 +3488,6 @@ void Load_PCX(void)
           //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
           // à la fin, on retourne juste après le header pour lire l'image.
           fseek(Fichier,128,SEEK_SET);
-
           if (!Erreur_fichier)
           {
             Taille_ligne=PCX_Header.Bytes_per_plane_line*PCX_Header.Plane;
@@ -3554,8 +3501,8 @@ void Load_PCX(void)
             // Chargement de l'image
             if (PCX_Header.Compression)  // Image compressée
             {
-              Init_lecture();
-
+              /*Init_lecture();*/
+  
               Taille_image=(long)PCX_Header.Bytes_per_plane_line*Principal_Hauteur_image;
 
               if (PCX_Header.Depth==8) // 256 couleurs (1 plan)
@@ -3563,13 +3510,13 @@ void Load_PCX(void)
                 for (Position=0; ((Position<Taille_image) && (!Erreur_fichier));)
                 {
                   // Lecture et décompression de la ligne
-                  Octet1=Lire_octet(Fichier);
+                  Lire_octet(Fichier,&Octet1);
                   if (!Erreur_fichier)
                   {
                     if ((Octet1&0xC0)==0xC0)
                     {
                       Octet1-=0xC0;               // facteur de répétition
-                      Octet2=Lire_octet(Fichier); // octet à répéter
+                      Lire_octet(Fichier,&Octet2); // octet à répéter
                       if (!Erreur_fichier)
                       {
                         for (Indice=0; Indice<Octet1; Indice++,Position++)
@@ -3597,13 +3544,13 @@ void Load_PCX(void)
                 {
                   for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
                   {
-                    Octet1=Lire_octet(Fichier);
+                    Lire_octet(Fichier,&Octet1);
                     if (!Erreur_fichier)
                     {
                       if ((Octet1&0xC0)==0xC0)
                       {
                         Octet1-=0xC0;               // facteur de répétition
-                        Octet2=Lire_octet(Fichier); // octet à répéter
+                        Lire_octet(Fichier,&Octet2); // octet à répéter
                         if (!Erreur_fichier)
                         {
                           for (Indice=0; Indice<Octet1; Indice++)
@@ -3627,7 +3574,7 @@ void Load_PCX(void)
                 }
               }
 
-              Close_lecture();
+              /*Close_lecture();*/
             }
             else                     // Image non compressée
             {
@@ -3681,18 +3628,18 @@ void Load_PCX(void)
           }
           else
           {
-            Init_lecture();
+            /*Init_lecture();*/
 
             for (Pos_Y=0,Position=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);)
             {
               // Lecture et décompression de la ligne
-              Octet1=Lire_octet(Fichier);
+              Lire_octet(Fichier,&Octet1);
               if (!Erreur_fichier)
               {
                 if ((Octet1 & 0xC0)==0xC0)
                 {
                   Octet1-=0xC0;               // facteur de répétition
-                  Octet2=Lire_octet(Fichier); // octet à répéter
+                  Lire_octet(Fichier,&Octet2); // octet à répéter
                   if (!Erreur_fichier)
                   {
                     for (Indice=0; (Indice<Octet1) && (!Erreur_fichier); Indice++)
@@ -3724,13 +3671,12 @@ void Load_PCX(void)
             if (Position!=0)
               Erreur_fichier=2;
 
-            Close_lecture();
+            /*Close_lecture();*/
           }
           free(Buffer);
         }
       }
     }
-    else
       Erreur_fichier=1;
 
     fclose(Fichier);
@@ -3784,10 +3730,25 @@ void Save_PCX(void)
     PCX_Header.Screen_Y=Hauteur_ecran;
     memset(PCX_Header.Filler,0,54);
 
-    Retraite_Word_LittleEndian(PCX_words);
-    if (write_bytes(Fichier,&PCX_Header,sizeof(T_PCX_Header)))
+    if (write_bytes(Fichier,&(PCX_Header.Manufacturer),1) &&
+        write_bytes(Fichier,&(PCX_Header.Version),1) &&
+        write_bytes(Fichier,&(PCX_Header.Compression),1) &&
+        write_bytes(Fichier,&(PCX_Header.Depth),1) &&
+        write_word_le(Fichier,PCX_Header.X_min) &&
+        write_word_le(Fichier,PCX_Header.Y_min) &&
+        write_word_le(Fichier,PCX_Header.X_max) &&
+        write_word_le(Fichier,PCX_Header.Y_max) &&
+        write_word_le(Fichier,PCX_Header.X_dpi) &&
+        write_word_le(Fichier,PCX_Header.Y_dpi) &&
+        write_bytes(Fichier,&(PCX_Header.Palette_16c),sizeof(PCX_Header.Palette_16c)) &&        
+        write_bytes(Fichier,&(PCX_Header.Reserved),1) &&
+        write_bytes(Fichier,&(PCX_Header.Plane),1) &&
+        write_word_le(Fichier,PCX_Header.Bytes_per_plane_line) &&
+        write_word_le(Fichier,PCX_Header.Palette_info) &&
+        write_word_le(Fichier,PCX_Header.Screen_X) &&
+        write_word_le(Fichier,PCX_Header.Screen_Y) &&
+        write_bytes(Fichier,&(PCX_Header.Filler),sizeof(PCX_Header.Filler)) )
     {
-      Retraite_Word_LittleEndian(PCX_words);
       Taille_ligne=PCX_Header.Bytes_per_plane_line*PCX_Header.Plane;
      
       Init_ecriture();
@@ -3890,7 +3851,7 @@ void Test_CEL(void)
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
       if (!stat(Nom_du_fichier,&Informations_Fichier))
-      	Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
+        Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
       Taille=(Informations_Fichier.st_size)-sizeof(T_CEL_Header1);
       if ( (!Taille) || ( (((Header1.Width+1)>>1)*Header1.Height)!=Taille ) )
       {
@@ -3956,17 +3917,17 @@ void Load_CEL(void)
         if (Erreur_fichier==0)
         {
           // Chargement de l'image
-          Init_lecture();
+          /*Init_lecture();*/
           for (Pos_Y=0;((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier));Pos_Y++)
             for (Pos_X=0;((Pos_X<Principal_Largeur_image) && (!Erreur_fichier));Pos_X++)
               if ((Pos_X & 1)==0)
               {
-                Dernier_octet=Lire_octet(Fichier);
+                Lire_octet(Fichier,&Dernier_octet);
                 Pixel_de_chargement(Pos_X,Pos_Y,(Dernier_octet >> 4));
               }
               else
                 Pixel_de_chargement(Pos_X,Pos_Y,(Dernier_octet & 15));
-          Close_lecture();
+          /*Close_lecture();*/
         }
       }
       else
@@ -3986,7 +3947,7 @@ void Load_CEL(void)
           if (Erreur_fichier==0)
           {
             // Chargement de l'image
-            Init_lecture();
+            /*Init_lecture();*/
 
             if (!Erreur_fichier)
             {
@@ -4005,7 +3966,7 @@ void Load_CEL(void)
                     for (Pos_X=0;((Pos_X<Header2.Largeur) && (!Erreur_fichier));Pos_X++)
                       if ((Pos_X & 1)==0)
                       {
-                        Dernier_octet=Lire_octet(Fichier);
+                        Lire_octet(Fichier,&Dernier_octet);
                         Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,(Dernier_octet >> 4));
                       }
                       else
@@ -4015,14 +3976,18 @@ void Load_CEL(void)
                 case 8:
                   for (Pos_Y=0;((Pos_Y<Header2.Hauteur) && (!Erreur_fichier));Pos_Y++)
                     for (Pos_X=0;((Pos_X<Header2.Largeur) && (!Erreur_fichier));Pos_X++)
-                      Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,Lire_octet(Fichier));
+                    {
+                      byte Lu;
+                      Lire_octet(Fichier,&Lu);
+                      Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,Lu);
+                      }
                   break;
 
                 default:
                   Erreur_fichier=1;
               }
             }
-            Close_lecture();
+            /*Close_lecture();*/
           }
         }
         else
@@ -4461,7 +4426,6 @@ void Load_SCx(void)
   T_SCx_Header SCx_Header;
   T_Palette SCx_Palette;
 
-
   Nom_fichier_complet(Nom_du_fichier,0);
 
   Erreur_fichier=0;
@@ -4730,7 +4694,7 @@ void Test_PI1(void)
     if ((Taille==32034) || (Taille==32066))
     {
       // Lecture et vérification de la résolution
-      if ((read_bytes(Fichier,&Res,2)))
+      if (read_word_le(Fichier,&Res))
       {
         if (Res==0x0000)
           Erreur_fichier=0;
@@ -5058,7 +5022,7 @@ void Test_PC1(void)
     if ((Taille<=32066))
     {
       // Lecture et vérification de la résolution
-      if ((read_bytes(Fichier,&Res,2)))
+      if (read_word_le(Fichier,&Res))
       {
         if (Res==0x0080)
           Erreur_fichier=0;

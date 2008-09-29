@@ -1717,8 +1717,7 @@ int Charger_CFG(int Tout_charger)
   // Version DOS de Robinson et X-Man
   if ( (CFG_Header.Version1== 2)
     && (CFG_Header.Version2== 0)
-    && (CFG_Header.Beta1== 96)
-    && (CFG_Header.Beta2== 5) )
+    && (CFG_Header.Beta1== 96))
   {
     // Les touches (scancodes) sont à convertir)
     Conversion_touches = 1;
@@ -1792,7 +1791,7 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_MODES_VIDEO: // Modes vidéo
-        if ((Chunk.Taille/5/*sizeof(CFG_Mode_video)*/)!=NB_MODES_VIDEO)
+        if ((Chunk.Taille/sizeof(CFG_Mode_video))!=NB_MODES_VIDEO)
           goto Erreur_lecture_config;
         for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
         {
@@ -1862,6 +1861,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_DEGRADES: // Infos sur les dégradés
         if (Tout_charger)
         {
+          // fixme endianness : Degrade_Courant est un int, enregistre en byte
           if (fread(&Degrade_Courant,1,1,Handle)!=1)
             goto Erreur_lecture_config;
           for(Indice=0;Indice<16;Indice++)
@@ -1995,7 +1995,7 @@ int Sauver_CFG(void)
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
-  Chunk.Taille=NB_MODES_VIDEO*5 /*sizeof(CFG_Mode_video)*/;
+  Chunk.Taille=NB_MODES_VIDEO * sizeof(CFG_Mode_video);
   #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     //On remet les octets dans l'ordre "normal"
     Chunk.Taille=bswap_16(Chunk.Taille);

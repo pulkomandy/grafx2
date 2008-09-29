@@ -107,7 +107,7 @@ byte Pixel_dans_cercle(void);
 byte Bit(byte Octet, byte Rang);
 // Extrait un bit d'un certain rang à partir d'un octet.
 
-byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne);
+byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1);
 // Renvoie la couleur du pixel (ILBM) en Pos_X.
 
 // Gestion du chrono dans les fileselects

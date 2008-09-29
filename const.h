@@ -265,15 +265,16 @@ enum MODES_DE_SHADE
 
 enum CHUNKS_CFG
 {
-  CHUNK_TOUCHES,
-  CHUNK_MODES_VIDEO,
-  CHUNK_SHADE,
-  CHUNK_MASQUE,
-  CHUNK_STENCIL,
-  CHUNK_DEGRADES,
-  CHUNK_SMOOTH,
-  CHUNK_EXCLUDE_COLORS,
-  CHUNK_QUICK_SHADE
+  CHUNK_TOUCHES            = 0,
+  CHUNK_MODES_VIDEO        = 1,
+  CHUNK_SHADE              = 2,
+  CHUNK_MASQUE             = 3,
+  CHUNK_STENCIL            = 4,
+  CHUNK_DEGRADES           = 5,
+  CHUNK_SMOOTH             = 6,
+  CHUNK_EXCLUDE_COLORS     = 7,
+  CHUNK_QUICK_SHADE        = 8,
+  CHUNK_MAX 
 };
 
   // Les différents types de lecteurs:

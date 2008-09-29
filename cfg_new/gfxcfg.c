@@ -15,20 +15,23 @@
 //mine
 #include "SFont.h"
 
-typedef uint8_t  byte;
-typedef uint16_t word;
-typedef uint32_t  dword;
 // Modificateurs pour Touche
 #define MOD_SHIFT 0x1000
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000
 
+#include "../struct.h"
 #include "../clavier.h"
+#include "../const.h"
+#include "../io.h"
+
 
 /*** Constants ***/
 #define NB_MAX_OPTIONS 134
 #define HAUTEUR_DEBUT_SETUP 7
 #define HAUTEUR_FIN_SETUP 44
+#define Header_size sizeof(struct Config_Header)
+#define Chunk_size sizeof(struct Config_Chunk)
 
 /* Colors */
 #define COULEUR_SETUP 1
@@ -47,23 +50,6 @@ typedef struct{
     bool Suppr;
 } __attribute__((__packed__)) Options;
 
-typedef struct{
-    char Signature[3];
-    uint8_t Version1;
-    uint8_t Version2;
-    uint8_t Beta1;
-    uint8_t Beta2;
-} __attribute__((__packed__)) Type_header;
-
-#define Header_size 7
-
-typedef struct{
-    uint8_t Numero;
-    uint16_t Taille;
-} __attribute__((__packed__)) Type_chunk;
-
-#define Chunk_size 3
-
 /*** Global variables ***/
 SFont_Font* MyFont;
 SDL_Surface* Ecran;
@@ -73,6 +59,14 @@ uint8_t Choix_enreg;
 uint16_t NB_OPTIONS;
 uint16_t Decalage_curseur=0;
 uint16_t Position_curseur=0;
+
+byte * FichierConfig = NULL;
+byte * ChunkData[CHUNK_MAX];
+struct Config_Chunk Chunk[CHUNK_MAX];
+
+
+uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
+	uint8_t Couleur,uint8_t Couleur_choix);
 
 /*** Fonctions de gestion des évènements SDL ***/
 
@@ -168,17 +162,104 @@ void Tout_ecrire()
 
 /*** Configuration handling functions ***/
 
-/* Generate the INI file from the CFG */
-bool Recreer_INI()
-{
-    puts("RECREER INI");
-    return false;
-}
 
 /* Reads the config file */
-void Interpretation_du_fichier_config()
+/* returns an error message, or NULL if everything OK */
+char * Interpretation_du_fichier_config()
 {
-    puts("INTERPRETATION FICHIER CONFIG");
+
+  FILE* Fichier;
+  long int Taille_fichier;
+  byte Numero_chunk;
+  word Taille_chunk;
+  byte * Ptr;
+  int i;
+
+  Fichier = fopen("gfx2.cfg","rb");
+  if (!Fichier)
+  {
+    return "gfx2.cfg is missing! Please run the\nmain program to generate it.";
+  }
+  fseek(Fichier,0,SEEK_END); // Positionnement à la fin
+  Taille_fichier = ftell(Fichier);
+  if (!Taille_fichier)
+  {
+    fclose(Fichier);
+    return "gfx2.cfg is empty. Please run the main\nprogram to generate it.";
+  }
+  FichierConfig = malloc(Taille_fichier);
+  if (!Fichier)
+  {
+    fclose(Fichier);
+    return "Out of memory when reading gfx2.cfg.";
+  }
+  fseek(Fichier,0,SEEK_SET); // Positionnement au début
+  if (! read_bytes(Fichier, FichierConfig, Taille_fichier))
+  {
+    fclose(Fichier);
+    return "Error while reading gfx2.cfg.";
+  }
+  fclose(Fichier);
+  
+  // Initialisation des "index"
+  for (i=0; i<CHUNK_MAX; i++)
+  {
+    Chunk[i].Taille=0;
+    Chunk[i].Numero=i;
+    ChunkData[i]=NULL;
+  }
+  
+  // Pour faire simple, on saute l'en-tete
+  Ptr = FichierConfig + Header_size;
+  while (Ptr < FichierConfig + Taille_fichier)
+  {
+    // Lecture chunk
+    Numero_chunk = *Ptr;
+    Ptr++;
+    Taille_chunk = endian_magic16(*((word *)Ptr)); 
+    Ptr+=2;
+    if (Numero_chunk>= CHUNK_MAX)
+      return "File gfx2.cfg invalid.";
+
+    ChunkData[Numero_chunk] = Ptr;
+    Chunk[Numero_chunk].Taille = Taille_chunk;
+    printf("%d %6X %d\n", Numero_chunk, Ptr - FichierConfig, Taille_chunk);
+    Ptr+=Taille_chunk;
+  }
+  // Si la config contenait des touches, on les initialise:
+  if (Chunk[CHUNK_TOUCHES].Taille)
+  {
+    int Indice_config;
+    Ptr = ChunkData[CHUNK_TOUCHES];
+    for (Indice_config=0; Indice_config< Chunk[CHUNK_TOUCHES].Taille / sizeof(struct Config_Infos_touche) ; Indice_config++)
+    {
+      word Numero;
+      word Touche;
+      word Touche2;
+      int Indice_touche;
+      
+      Numero = endian_magic16(*((word *)Ptr));
+      Ptr+=2;
+      Touche = endian_magic16(*((word *)Ptr));
+      Ptr+=2;
+      Touche2 = endian_magic16(*((word *)Ptr));
+      Ptr+=2;
+      //printf("%4d %4X %4X\t", Numero, Touche, Touche2);
+      // Recherche de la touche qui porte ce numéro
+      for (Indice_touche=0; Indice_touche <= NB_OPTIONS; Indice_touche ++)
+      {
+        if (Config[Indice_touche].Numero == Numero)
+        {
+          Config[Indice_touche].Touche = Touche;
+          Config[Indice_touche].Touche2 = Touche2;
+          //printf("%4d %s\n", Indice_touche, Nom_touche(Touche));
+          break;
+        }
+      }
+      
+    }
+  } 
+  return NULL;
 }
 
 /* Defines an option */
@@ -199,8 +280,7 @@ void Definir_option(uint16_t Numero, char* Libelle, char* Explic1, char* Explic2
 /* Initialize configuration */
 bool Initialiser_config()
 {
-    bool Erreur = false;
-    FILE* Fichier_INI;
+    char * MessageErreur = NULL;
 
     Numero_definition_option = 0;
 
@@ -332,12 +412,12 @@ bool Initialiser_config()
 	    "Allows you to replace all the pixels of the color pointed by the mouse with",
 	    "the fore-color or the back-color.",
 	    true,SDLK_f|MOD_SHIFT);  /*Shift + F*/
-    Definir_option(31,"Bézier""s curves",
-	    "Allows you to draw Bézier""s curves.",
+    Definir_option(31,"Bezier""s curves",
+	    "Allows you to draw Bezier""s curves.",
 	    "",
 	    true,SDLK_i);  /*I*/
-    Definir_option(32,"Bézier""s curve with 3 or 4 points",
-	    "Allows you to choose whether you want to draw Bézier""s curves with 3 or 4",
+    Definir_option(32,"Bezier""s curve with 3 or 4 points",
+	    "Allows you to choose whether you want to draw Bezier""s curves with 3 or 4",
 	    "points.",
 	    true,SDLK_i|MOD_SHIFT);  /*Shift + I*/
     Definir_option(33,"Empty rectangle",
@@ -744,15 +824,14 @@ bool Initialiser_config()
 
     NB_OPTIONS = Numero_definition_option - 1;
 
-    Fichier_INI = fopen("gfx2.ini","r");
-    if(Fichier_INI == NULL)
-	Erreur=Recreer_INI();
-    else
-	fclose(Fichier_INI);
+    MessageErreur = Interpretation_du_fichier_config();
 
-    if(Erreur==0) Interpretation_du_fichier_config();
-
-    return Erreur;
+    if (MessageErreur)
+    {
+      Fenetre_choix(30,10,MessageErreur,"Ok",0,0x2A,0x6F);
+      return 1;
+    }
+    return 0;
 }
 
 uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
@@ -842,13 +921,13 @@ void Test_duplic()
     uint16_t i,j;
     bool Pas_encore_erreur;
 
-    for(i=0;i<NB_OPTIONS;i++)
+    for(i=0;i<=NB_OPTIONS;i++)
     {
 	if(Config[i].Touche!=0xFF) // FIXME
 	{
-	    j=1;
+	    j=0;
 	    Pas_encore_erreur=true;
-	    while(j<NB_OPTIONS && Pas_encore_erreur)
+	    while(j<=NB_OPTIONS && Pas_encore_erreur)
 	    {
 		if(i!=j && Config[i].Touche==Config[j].Touche)
 		{
@@ -868,7 +947,7 @@ bool Validation()
     bool Y_a_des_erreurs = false;
     uint16_t i = 0;
 
-    while(i<NB_OPTIONS && !Y_a_des_erreurs)
+    while(i<=NB_OPTIONS && !Y_a_des_erreurs)
     {
 	Y_a_des_erreurs = Config[i].Erreur;
 	i++;
@@ -924,7 +1003,6 @@ void Scroll_bas()
 	}
 	Ecrire_commentaire(Position_curseur + Decalage_curseur );
     }
-    printf("%d %d \n",Position_curseur, Decalage_curseur);
 }
 
 /* Moves one screen up */
@@ -971,7 +1049,7 @@ void Page_down()
 	    {
 		Decalage_curseur+=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
 	    }
-	    else Decalage_curseur=NB_OPTIONS-HAUTEUR_FIN_SETUP+HAUTEUR_DEBUT_SETUP-1;
+	    else Decalage_curseur=NB_OPTIONS-HAUTEUR_FIN_SETUP+HAUTEUR_DEBUT_SETUP;
 
 	    Tout_ecrire();
 	}
@@ -990,13 +1068,18 @@ void Select()
   {
   	Touche = Lire_Touche();
     if (Touche == SDLK_ESCAPE)
-      return;
+    {
+      Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
+		    COULEUR_SETUP);
+		  return;
+    }
     if (Touche != 0)
     {
       Config[Position_curseur+Decalage_curseur].Touche = Touche;
       Test_duplic();
-      Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
-		    COULEUR_SETUP);
+      // Des X ont pu être ajoutés ou enlevés sur n'importe quelle ligne..
+      // pour faire simple, on rafraîchit toute la page. 
+	    Tout_ecrire();
       return;
     }
   }
@@ -1053,21 +1136,47 @@ bool Verifier_ecriture_possible()
 void Enregistrer_config()
 {
     FILE* Fichier;
-    uint16_t Indice;
+    struct Config_Header Header;
+    int Indice_chunk;
 
     if(Choix_enreg==true) // Save keys if wanted
     {
-	Fichier = fopen("gfx2.cfg","ab");
-	fseek(Fichier,Header_size+Chunk_size,SEEK_SET); // Positionnement sur la première touche
+    	Fichier = fopen("gfx2.cfg","wb");
+      
+      // En-tete
+      sprintf(Header.Signature,"CFG");
+      Header.Version1 = VERSION1;
+      Header.Version2 = VERSION2;
+      Header.Beta1 = BETA1;
+      Header.Beta2 = BETA2;
+      write_bytes(Fichier, &Header, sizeof(Header));
 
-	for(Indice = 0;Indice < NB_OPTIONS;Indice++)
-	{
-	    fwrite(&Config[Indice].Numero,sizeof(uint16_t),1,Fichier);
-	    fwrite(&Config[Indice].Touche,sizeof(uint16_t),1,Fichier);
-	    fwrite(&Config[Indice].Touche2,sizeof(uint16_t),1,Fichier);
-	}
+      Chunk[CHUNK_TOUCHES].Taille=sizeof(struct Config_Infos_touche)*(NB_OPTIONS+1);
+      Chunk[CHUNK_TOUCHES].Numero=CHUNK_TOUCHES;
 
-	fclose(Fichier);
+      for (Indice_chunk=0; Indice_chunk<CHUNK_MAX; Indice_chunk++)
+      {
+        // Ecriture en-tete chunk
+        write_bytes(Fichier, &(Chunk[Indice_chunk].Numero), 1);
+        write_word_le(Fichier, Chunk[Indice_chunk].Taille);
+
+        if (Indice_chunk == CHUNK_TOUCHES)
+        {
+          int Indice_touche;
+
+          for(Indice_touche=0; Indice_touche<=NB_OPTIONS;Indice_touche++)
+          {
+      	    write_word_le(Fichier,Config[Indice_touche].Numero);
+      	    write_word_le(Fichier,Config[Indice_touche].Touche);
+      	    write_word_le(Fichier,Config[Indice_touche].Touche2);
+          }
+        }
+        else
+        {
+          write_bytes(Fichier, ChunkData[Indice_chunk], Chunk[Indice_chunk].Taille);
+        }
+      }
+       fclose(Fichier);   	
     }
 }
 
@@ -1076,21 +1185,22 @@ void Enregistrer_config()
 int main(int argc, char * argv[])
 {	
 
-    if (Verifier_ecriture_possible())
-    {
-	/* On initialise SDL */
-	SDL_Init(SDL_INIT_VIDEO);
-	Ecran = SDL_SetVideoMode(640,480,8,0);
-	SDL_WM_SetCaption ("Grafx2 configuration tool","../gfx2.gif");
-  SDL_EnableKeyRepeat(250, 32);
+  if (Verifier_ecriture_possible())
+  {
+  	/* On initialise SDL */
+  	SDL_Init(SDL_INIT_VIDEO);
+  	Ecran = SDL_SetVideoMode(640,480,8,0);
+  	SDL_WM_SetCaption ("Grafx2 configuration tool","../gfx2.gif");
+    SDL_EnableKeyRepeat(250, 32);
+    SDL_EnableUNICODE(SDL_ENABLE);
 
-	/* On initialise SFont */
-	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));
+  	/* On initialise SFont */
+  	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));
 
-	Dessiner_ecran_principal();
+  	Dessiner_ecran_principal();
 
-	if(!Initialiser_config())
-	{
+  	if(!Initialiser_config())
+  	{
 	    Setup();
 	    Enregistrer_config();
 
@@ -1098,24 +1208,23 @@ int main(int argc, char * argv[])
 	    SFont_FreeFont(MyFont);
 	    SDL_Quit();
 	    exit(0);
-	}
-	else
-	{
-	    puts("Error reading GFX2.DAT! File is absent or corrupt.");
+	  }
+  	else
+  	{
 	    SFont_FreeFont(MyFont);
 	    SDL_Quit();
 	    exit(1);
-	}
-    }
-    else
-    {
-	puts("Error: you mustn't run this setup program from a read-only drive!\n");
-	puts("The most probable cause of this error is that you are running this program");
-	puts("from a CD-Rom or a protected floppy disk.");
-	puts("You should try to copy all the files of Grafx2 on a hard drive or to");
-	puts("unprotect your floppy disk if you really want to run it from this outdated medium.");
-	exit(1);
-    }
+	  }
+  }
+  else
+  {
+  	puts("Error: you mustn't run this setup program from a read-only drive!\n");
+  	puts("The most probable cause of this error is that you are running this program");
+  	puts("from a CD-Rom or a protected floppy disk.");
+  	puts("You should try to copy all the files of Grafx2 on a hard drive or to");
+  	puts("unprotect your floppy disk if you really want to run it from this outdated medium.");
+  	exit(1);
+  }
 
-    return 0;
+  return 0;
 }

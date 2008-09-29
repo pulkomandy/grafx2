@@ -15,7 +15,7 @@ endif
 .PHONY : all debug release clean depend zip
 
 CC = gcc
-OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o clavier.o
+OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o clavier.o io.o
 
 SCREEN = -D WINDOWED
 OBJDIR = obj/

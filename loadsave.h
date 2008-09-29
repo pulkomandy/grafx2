@@ -19,7 +19,7 @@ void Load_LBM(void);
 void Save_LBM(void);
 
   byte * LBM_Buffer;
-  byte HBPm1; // Header.BitPlanes-1
+
 
 // -- GIF -------------------------------------------------------------------
 void Test_GIF(void);

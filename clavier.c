@@ -298,10 +298,12 @@ word Conversion_Touche(SDL_keysym Sym)
   
   // Les touches qui n'ont qu'une valeur unicode (très rares)
   // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
-  if (Sym.sym > 0)
+  if (Sym.sym != 0)
     Retour = Sym.sym;
-  else if (Sym.unicode > 0)
-    Retour = (Sym.unicode & 0x07FF) | 0x0800;
+  else if (Sym.scancode != 0)
+  {
+    Retour = (Sym.scancode & 0x07FF) | 0x0800;
+  }
   
   if (Sym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
     Retour |= MOD_SHIFT;
@@ -434,7 +436,7 @@ const char * Nom_touche(word Touche)
     }
   }
   // Autres touches inconnues
-  sprintf(Buffer+strlen(Buffer), "(%d)", Touche);
+  sprintf(Buffer+strlen(Buffer), "0x%X", Touche & 0x7FF);
   return Buffer;
 
 }

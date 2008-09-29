@@ -120,7 +120,7 @@ struct T_Degrade_Tableau
   dword Inverse;   // "Le dégradé va de Fin à Debut" //INT
   dword Melange;   // Valeur de mélange du dégradé (0-255) //LONG
   dword Technique; // Technique à utiliser (0-2) //INT
-};
+} __attribute__((__packed__));
 
 // Déclaration d'une info de shade
 struct T_Shade
@@ -139,7 +139,7 @@ struct Config_Mode_video
   byte Etat;
   word Largeur;
   word Hauteur;
-};
+} __attribute__((__packed__));
 
 struct Config_Header
 {
@@ -148,20 +148,20 @@ struct Config_Header
   byte Version2;
   byte Beta1;
   byte Beta2;
-};
+} __attribute__((__packed__));
 
 struct Config_Chunk
 {
   byte Numero;
   word Taille;
-};
+} __attribute__((__packed__));
 
 struct Config_Infos_touche
 {
   word Numero;
   word Touche;
   word Touche2;
-};
+} __attribute__((__packed__));
 
 
 
