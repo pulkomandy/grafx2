@@ -29,7 +29,8 @@ release : $(BIN)
 
 # A raw source archive
 zip :
-	tar cvzf gfx2-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ini gfx2.cfg doc/gpl-2.0.txt
+	tar cvzf gfx2-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ini gfx2.cfg doc/gpl-2.0.txt \
+    cfg_new/*.c cfg_new/*.h cfg_new/Makefile cfg_new/8pxfont.png 
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
