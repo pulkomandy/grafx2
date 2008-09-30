@@ -35,7 +35,7 @@
 #define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de repértoire sélectionnée
 #define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne sélectionnée
 
-#define FILENAMESPACE 16
+#define FILENAMESPACE 13
 
 int Determiner_repertoire_courant(void)
 // Modifie Principal_Repertoire_courant en y mettant sa nouvelle valeur (avec le nom du

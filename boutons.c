@@ -30,7 +30,7 @@
     #define rmdir(x) DeleteFile(x)
 #endif
 
-#define FILENAMESPACE 16
+#define FILENAMESPACE 13
 
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
@@ -2312,17 +2312,17 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   if (Load)
   {
     if (Image)
-      Ouvrir_fenetre(310,190+FILENAMESPACE,"Load picture");
+      Ouvrir_fenetre(310,187+FILENAMESPACE,"Load picture");
     else
-      Ouvrir_fenetre(310,190+FILENAMESPACE,"Load brush");
+      Ouvrir_fenetre(310,187+FILENAMESPACE,"Load brush");
     Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Load",0,1,SDLK_RETURN); // 1
   }
   else
   {
     if (Image)
-      Ouvrir_fenetre(310,190+FILENAMESPACE,"Save picture");
+      Ouvrir_fenetre(310,187+FILENAMESPACE,"Save picture");
     else
-      Ouvrir_fenetre(310,190+FILENAMESPACE,"Save brush");
+      Ouvrir_fenetre(310,187+FILENAMESPACE,"Save brush");
     Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Save",0,1,SDLK_RETURN); // 1
     if (Principal_Format==0) // Correction du *.*
     {
@@ -2339,7 +2339,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     }
     // Affichage du commentaire
     if (Format_Commentaire[Principal_Format-1])
-      Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
   Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,SDLK_ESCAPE); // 2
@@ -2364,8 +2364,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_scroller(12,55,27,(Load)?NB_FORMATS_LOAD+1:NB_FORMATS_SAVE,1,(Load)?Principal_Format:Principal_Format-1); // 6
 
   // Texte de commentaire des dessins
-  Print_dans_fenetre(7,176+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(44,174+FILENAMESPACE,TAILLE_COMMENTAIRE); // 7
+  Print_dans_fenetre(7,174+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(44,173+FILENAMESPACE,TAILLE_COMMENTAIRE); // 7
 
   // Cadre autour du nom de fichier
   //Fenetre_Afficher_cadre_creux(  7,87,296,15);
@@ -2580,7 +2580,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
         {
           Effacer_curseur();
-          Readline(46,176+FILENAMESPACE,Principal_Commentaire,32,0);
+          Readline(46,175+FILENAMESPACE,Principal_Commentaire,32,0);
           Afficher_curseur();
         }
         break;
@@ -2753,9 +2753,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       {
         Effacer_curseur();
         // On efface le commentaire précédent
-        Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+(176+FILENAMESPACE)*Menu_Facteur_Y,
+        Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,
               Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
-        // On néttoie la zone où va s'afficher la preview:
+        // On nettoie la zone où va s'afficher la preview:
         Block(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+ (89+FILENAMESPACE)*Menu_Facteur_Y,
               Menu_Facteur_X*122,Menu_Facteur_Y*82,CM_Clair);
         // On efface les dimensions de l'image
@@ -2769,7 +2769,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
         // Affichage du commentaire
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
-          Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+          Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         Afficher_curseur();
 
 	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);

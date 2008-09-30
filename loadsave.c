@@ -20,7 +20,7 @@
 #include "linux.h"
 #include "io.h"
 
-#define FILENAMESPACE 16
+#define FILENAMESPACE 13
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
@@ -226,11 +226,11 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
     }
 
     // On efface le commentaire précédent
-    Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(176+FILENAMESPACE)*Menu_Facteur_Y,
+    Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,
           Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
     // Affichage du commentaire
     if (Format_Commentaire[Format-1])
-      Print_dans_fenetre(46,176+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
 
     // Calculs des données nécessaires à l'affichage de la preview:
     Preview_Facteur_X=Round_div_max(Largeur,122*Menu_Facteur_X);
@@ -739,7 +739,7 @@ void Load_IMG(void)
   long Largeur_lue;
   long Taille_du_fichier;
   T_Header_IMG IMG_Header;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -748,8 +748,8 @@ void Load_IMG(void)
 
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier->st_size;
+      stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
 
     if (read_bytes(Fichier,&IMG_Header,sizeof(T_Header_IMG)))
     {
@@ -1907,7 +1907,7 @@ void Save_LBM(void)
   word Pos_Y;
   byte Octet;
   word Vraie_largeur;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Erreur_fichier=0;
@@ -1926,11 +1926,8 @@ void Save_LBM(void)
     Vraie_largeur=Principal_Largeur_image+(Principal_Largeur_image&1);
 
     //swab((byte *)&Vraie_largeur,(byte *)&Header.Width,2);
-    swab((byte *)&Principal_Largeur_image,(byte *)&Header.Width,2);
-    swab((byte *)&Principal_Hauteur_image,(byte *)&Header.Height,2);
-    //Header.Width=Principal_Largeur_image;
-    //Header.Height=Principal_Hauteur_image;
-    
+    Header.Width=Principal_Largeur_image;
+    Header.Height=Principal_Hauteur_image;
     Header.Xorg=0;
     Header.Yorg=0;
     Header.BitPlanes=8;
@@ -1940,12 +1937,22 @@ void Save_LBM(void)
     Header.Transp_col=Back_color;
     Header.Xaspect=1;
     Header.Yaspect=1;
-    swab((byte *)&Largeur_ecran,(byte *)&Header.Xscreen,2);
-    swab((byte *)&Hauteur_ecran,(byte *)&Header.Yscreen,2);
-    //Header.Xscreen = Largeur_ecran;
-    //Header.Yscreen = Hauteur_ecran;
+    Header.Xscreen = Largeur_ecran;
+    Header.Yscreen = Hauteur_ecran;
 
-    write_bytes(LBM_Fichier,&Header,sizeof(T_Header_LBM));
+    write_word_be(LBM_Fichier,Header.Width);
+    write_word_be(LBM_Fichier,Header.Height);
+    write_word_be(LBM_Fichier,Header.Xorg);
+    write_word_be(LBM_Fichier,Header.Yorg);
+    write_bytes(LBM_Fichier,&Header.BitPlanes,1);
+    write_bytes(LBM_Fichier,&Header.Mask,1);
+    write_bytes(LBM_Fichier,&Header.Compression,1);
+    write_bytes(LBM_Fichier,&Header.Pad1,1);
+    write_word_be(LBM_Fichier,Header.Transp_col);
+    write_bytes(LBM_Fichier,&Header.Xaspect,1);
+    write_bytes(LBM_Fichier,&Header.Yaspect,1);
+    write_word_be(LBM_Fichier,Header.Xscreen);
+    write_word_be(LBM_Fichier,Header.Yscreen);
 
     write_bytes(LBM_Fichier,"CMAP",4);
     write_dword_be(LBM_Fichier,sizeof(T_Palette));
@@ -1975,11 +1982,11 @@ void Save_LBM(void)
 
     if (!Erreur_fichier)
     {
-      LBM_Fichier=fopen(Nom_du_fichier,"rb+");
+      stat(Nom_du_fichier,&Informations_Fichier);
 
+      LBM_Fichier=fopen(Nom_du_fichier,"rb+");
       fseek(LBM_Fichier,820,SEEK_SET);
-      stat(Nom_du_fichier,Informations_Fichier);
-      write_dword_be(LBM_Fichier,Informations_Fichier->st_size-824);
+      write_dword_be(LBM_Fichier,Informations_Fichier.st_size-824);
 
       if (!Erreur_fichier)
       {
@@ -1987,16 +1994,16 @@ void Save_LBM(void)
 
         //   Si la taille de la section de l'image (taille fichier-8) est
         // impaire, on rajoute un 0 (Padding) à la fin.
-        if ((Informations_Fichier->st_size) & 1)
+        if ((Informations_Fichier.st_size) & 1)
         {
-          write_dword_be(LBM_Fichier,Informations_Fichier->st_size-7);
+          write_dword_be(LBM_Fichier,Informations_Fichier.st_size-7);
           fseek(LBM_Fichier,0,SEEK_END);
           Octet=0;
           if (! write_bytes(LBM_Fichier,&Octet,1))
             Erreur_fichier=1;
         }
         else
-          write_dword_be(LBM_Fichier,Informations_Fichier->st_size-8);
+          write_dword_be(LBM_Fichier,Informations_Fichier.st_size-8);
 
         fclose(LBM_Fichier);
 
@@ -3894,7 +3901,7 @@ void Load_CEL(void)
   short Pos_Y;
   byte  Dernier_octet=0;
   long  Taille_du_fichier;
-  struct stat* Informations_Fichier=NULL;
+  struct stat Informations_Fichier;
 
 
   Erreur_fichier=0;
@@ -3903,8 +3910,8 @@ void Load_CEL(void)
   {
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
     {
-        stat(Nom_du_fichier,Informations_Fichier);
-      Taille_du_fichier=Informations_Fichier->st_size;
+        stat(Nom_du_fichier,&Informations_Fichier);
+      Taille_du_fichier=Informations_Fichier.st_size;
       if ( (Taille_du_fichier>sizeof(T_CEL_Header1))
         && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-sizeof(T_CEL_Header1)) ) )
       {
