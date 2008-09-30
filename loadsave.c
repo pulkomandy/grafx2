@@ -3854,14 +3854,18 @@ void Test_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
+  if (!stat(Nom_du_fichier,&Informations_Fichier))
+  {
+    Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
+    return;
+  }
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
     {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
-      if (!stat(Nom_du_fichier,&Informations_Fichier))
-        Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
+      
       Taille=(Informations_Fichier.st_size)-sizeof(T_CEL_Header1);
       if ( (!Taille) || ( (((Header1.Width+1)>>1)*Header1.Height)!=Taille ) )
       {
@@ -3909,11 +3913,12 @@ void Load_CEL(void)
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
+  stat(Nom_du_fichier,&Informations_Fichier);
+
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
     {
-        stat(Nom_du_fichier,&Informations_Fichier);
       Taille_du_fichier=Informations_Fichier.st_size;
       if ( (Taille_du_fichier>sizeof(T_CEL_Header1))
         && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-sizeof(T_CEL_Header1)) ) )
