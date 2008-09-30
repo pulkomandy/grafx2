@@ -59,8 +59,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
 	{
-		X_effectif = Max(X-Loupe_Decalage_X,0) * Loupe_Facteur;
-		Y_effectif = Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur;
+		X_effectif = Min(Max(X-Loupe_Decalage_X,0) * Loupe_Facteur, Principal_Largeur_image);
+		Y_effectif = Min(Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur, Menu_Ordonnee);
 
 		Largeur *= Loupe_Facteur;
 		Hauteur *= Loupe_Facteur;
@@ -69,7 +69,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 		// a rester dans la zone visible de l'image
 		if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
-		else L_effectif = Principal_Largeur_image - X_effectif;
+		else L_effectif = Principal_Largeur_image - X_effectif - 1;
 
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 		else H_effectif = Menu_Ordonnee - Y_effectif;
@@ -912,6 +912,7 @@ void Initialiser_mode_video(int Numero)
   {
     Largeur_ecran = Mode_video[Numero].Largeur;
     Hauteur_ecran = Mode_video[Numero].Hauteur;
+    Plein_ecran   = Mode_video[Numero].Fullscreen;
 
     switch (Config.Ratio)
     {

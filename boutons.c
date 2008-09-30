@@ -1233,10 +1233,16 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     switch (Mode_video[Mode_courant].Mode)
     {
       case MODE_SDL :
-        memcpy(Chaine+8,"    SDL   ",10);
+        memcpy(Chaine+8," SDL      ",10);
         break;
 
     }
+
+    if(Mode_video[Mode_courant].Fullscreen == 1)
+	memcpy(Chaine+13,"Full",4);
+    else
+	memcpy(Chaine+13,"Win ",4);
+
     if (Mode_video[Mode_courant].Refresh>0)
     {
       Num2str(Mode_video[Mode_courant].Refresh,Chaine+18,2);
@@ -1302,7 +1308,7 @@ void Bouton_Resol(void)
   Print_dans_fenetre(108, 37,"Height:"         ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 16, 60,"OK"              ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 55, 60,"X   Y"           ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(131, 60,"Mode"            ,CM_Fonce,CM_Clair);
+  Print_dans_fenetre(104, 60,"Mode Full"       ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(183, 60,"Hz"              ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(219, 60,"Ratio"           ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 30,170,"\03"             ,CM_Fonce,CM_Clair);
@@ -1324,14 +1330,14 @@ void Bouton_Resol(void)
 
   if (Mode_choisi>=6)
   {
-    if (Mode_choisi<NB_MODES_VIDEO-6)
+    if (Mode_choisi<2*NB_MODES_VIDEO-6)
     {
       Debut_liste=Mode_choisi-5;
       Position_curseur=5;
     }
     else
     {
-      Debut_liste=NB_MODES_VIDEO-12;
+      Debut_liste=2*NB_MODES_VIDEO-12;
       Position_curseur=Mode_choisi-Debut_liste;
     }
   }
@@ -1341,7 +1347,7 @@ void Bouton_Resol(void)
     Position_curseur=Mode_choisi;
   }
 
-  Fenetre_Definir_bouton_scroller(271,69,97,NB_MODES_VIDEO,12,Debut_liste); // 6
+  Fenetre_Definir_bouton_scroller(271,69,97,2*NB_MODES_VIDEO,12,Debut_liste); // 6
 
   // Les 12 petits boutons indiquant l'état des modes
   for (Temp=0; Temp<12; Temp++)
@@ -1474,7 +1480,7 @@ void Bouton_Resol(void)
         if (Position_curseur<11)
           Position_curseur++;
         else
-          if (Debut_liste<NB_MODES_VIDEO-12)
+          if (Debut_liste<2*NB_MODES_VIDEO-12)
             Debut_liste++;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1495,10 +1501,10 @@ void Bouton_Resol(void)
           Position_curseur=11;
         else
         {
-          if (Debut_liste<NB_MODES_VIDEO-23)
+          if (Debut_liste<2*NB_MODES_VIDEO-23)
             Debut_liste+=11;
           else
-            Debut_liste=NB_MODES_VIDEO-12;
+            Debut_liste=2*NB_MODES_VIDEO-12;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1508,7 +1514,7 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_END : // End
-        Debut_liste=NB_MODES_VIDEO-12;
+        Debut_liste=2*NB_MODES_VIDEO-12;
         Position_curseur=11;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;

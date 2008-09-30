@@ -12,7 +12,6 @@
 #include "const.h"
 #include "struct.h"
 #include "global.h"
-#include "modesvdo.h"
 #include "graph.h"
 #include "boutons.h"
 #include "palette.h"
@@ -85,21 +84,18 @@ void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
-  #ifdef __linux__
 
+  #ifdef __linux__
 	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
 	// un disque dur qui pointera vers la racine,
 	// et un autre vers le home directory de l'utilisateur.
 	Ajouter_lecteur(0,'/', LECTEUR_HDD);
 	Ajouter_lecteur(1,'~', LECTEUR_HDD);
-
-	#else
-
+   #else
+	int DriveBits = GetLogicalDrives();
+	int IndiceLecteur;
+        int IndiceBit;
 	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
-
-  int DriveBits = GetLogicalDrives();
-  int IndiceLecteur;
-  int IndiceBit;
 	IndiceLecteur = 0;
 	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
 	{
@@ -130,8 +126,8 @@ void Rechercher_drives(void)
 	        break;
 	    }
 	    Ajouter_lecteur(IndiceBit, 'A'+IndiceBit, TypeLecteur);
-    	IndiceLecteur++;
-    }
+	    IndiceLecteur++;
+	  }
 	}
 	#endif
 }
@@ -1319,90 +1315,103 @@ void Definir_mode_video(int    Numero,
                         word   Facteur_X, word Facteur_Y,
                         char * Ratio,
                         unsigned char Refresh,
-                        word   Mode_VESA_de_base,
+                        word   Plein_Ecran,
                         void * Pointeur)
 {
-  Mode_video[Numero].Largeur          =Largeur;
-  Mode_video[Numero].Hauteur          =Hauteur;
-  Mode_video[Numero].Mode             =Mode;
-  Mode_video[Numero].Facteur_X        =Facteur_X;
-  Mode_video[Numero].Facteur_Y        =Facteur_Y;
+  Mode_video[Numero].Largeur          = Largeur;
+  Mode_video[Numero].Hauteur          = Hauteur;
+  Mode_video[Numero].Mode             = Mode;
+  Mode_video[Numero].Facteur_X        = Facteur_X;
+  Mode_video[Numero].Facteur_Y        = Facteur_Y;
   strcpy(Mode_video[Numero].Ratio,Ratio);
-  Mode_video[Numero].Refresh          =Refresh;
-  Mode_video[Numero].Mode_VESA_de_base=Mode_VESA_de_base;
-  Mode_video[Numero].Pointeur         =Pointeur;
+  Mode_video[Numero].Refresh          = Refresh;
+  Mode_video[Numero].Fullscreen	      = 0;
+  Mode_video[Numero].Pointeur         = Pointeur;
+
+  // On passe aux modes plein écran
+  Numero += NB_MODES_VIDEO;
+
+  Mode_video[Numero].Largeur          = Largeur;
+  Mode_video[Numero].Hauteur          = Hauteur;
+  Mode_video[Numero].Mode             = Mode;
+  Mode_video[Numero].Facteur_X        = Facteur_X;
+  Mode_video[Numero].Facteur_Y        = Facteur_Y;
+  strcpy(Mode_video[Numero].Ratio,Ratio);
+  Mode_video[Numero].Refresh          = Refresh;
+  Mode_video[Numero].Fullscreen	      = 1;
+  Mode_video[Numero].Pointeur         = Pointeur;
 }
 
 
   // Initiliseur de toutes les opérations:
 
 void Definition_des_modes_video(void)
-{                   // Numero       LargHaut Mode      FXFY Ratio Ref Vesa  Pointeur
-  Definir_mode_video( MODE_320_200, 320,200,MODE_SDL  ,1,1,"0.85", 71,0    ,NULL    );
-  Definir_mode_video( MODE_320_224, 320,224,MODE_SDL  ,1,1,"1.20", 51,0    ,X320Y224);
-  Definir_mode_video( MODE_320_240, 320,240,MODE_SDL  ,1,1,"1.00", 60,0    ,X320Y240);
-  Definir_mode_video( MODE_320_256, 320,256,MODE_SDL  ,1,1,"1.10", 58,0    ,X320Y256);
-  Definir_mode_video( MODE_320_270, 320,270,MODE_SDL  ,1,1,"1.15", 64,0    ,X320Y270);
-  Definir_mode_video( MODE_320_282, 320,282,MODE_SDL  ,1,1,"1.20", 52,0    ,X320Y282);
-  Definir_mode_video( MODE_320_300, 320,300,MODE_SDL  ,1,1,"1.20",-49,0    ,X320Y300);
-  Definir_mode_video( MODE_320_360, 320,360,MODE_SDL  ,1,1,"1.65", 71,0    ,X320Y360);
-  Definir_mode_video( MODE_320_400, 320,400,MODE_SDL  ,1,2,"1.70", 71,0    ,X320Y400);
-  Definir_mode_video( MODE_320_448, 320,448,MODE_SDL  ,1,2,"2.20", 51,0    ,X320Y448);
-  Definir_mode_video( MODE_320_480, 320,480,MODE_SDL  ,1,2,"2.00", 60,0    ,X320Y480);
-  Definir_mode_video( MODE_320_512, 320,512,MODE_SDL  ,1,2,"2.20", 58,0    ,X320Y512);
-  Definir_mode_video( MODE_320_540, 320,540,MODE_SDL  ,1,2,"2.25", 64,0    ,X320Y540);
-  Definir_mode_video( MODE_320_564, 320,564,MODE_SDL  ,1,2,"2.40", 59,0    ,X320Y564);
-  Definir_mode_video( MODE_320_600, 320,600,MODE_SDL  ,1,2,"2.80", 51,0    ,X320Y600);
+{                   // Numero       LargHaut Mode      FXFY Ratio Ref WinOnly Pointeur
+  Definir_mode_video( MODE_320_200, 320,200,MODE_SDL  ,1,1,"0.85", 71,0    ,NULL);
+  Definir_mode_video( MODE_320_224, 320,224,MODE_SDL  ,1,1,"1.20", 51,0    ,NULL);
+  Definir_mode_video( MODE_320_240, 320,240,MODE_SDL  ,1,1,"1.00", 60,0    ,NULL);
+  Definir_mode_video( MODE_320_256, 320,256,MODE_SDL  ,1,1,"1.10", 58,0    ,NULL);
+  Definir_mode_video( MODE_320_270, 320,270,MODE_SDL  ,1,1,"1.15", 64,0    ,NULL);
+  Definir_mode_video( MODE_320_282, 320,282,MODE_SDL  ,1,1,"1.20", 52,0    ,NULL);
+  Definir_mode_video( MODE_320_300, 320,300,MODE_SDL  ,1,1,"1.20",-49,0    ,NULL);
+  Definir_mode_video( MODE_320_360, 320,360,MODE_SDL  ,1,1,"1.65", 71,0    ,NULL);
+  Definir_mode_video( MODE_320_400, 320,400,MODE_SDL  ,1,2,"1.70", 71,0    ,NULL);
+  Definir_mode_video( MODE_320_448, 320,448,MODE_SDL  ,1,2,"2.20", 51,0    ,NULL);
+  Definir_mode_video( MODE_320_480, 320,480,MODE_SDL  ,1,2,"2.00", 60,0    ,NULL);
+  Definir_mode_video( MODE_320_512, 320,512,MODE_SDL  ,1,2,"2.20", 58,0    ,NULL);
+  Definir_mode_video( MODE_320_540, 320,540,MODE_SDL  ,1,2,"2.25", 64,0    ,NULL);
+  Definir_mode_video( MODE_320_564, 320,564,MODE_SDL  ,1,2,"2.40", 59,0    ,NULL);
+  Definir_mode_video( MODE_320_600, 320,600,MODE_SDL  ,1,2,"2.80", 51,0    ,NULL);
 
-  Definir_mode_video( MODE_360_200, 360,200,MODE_SDL  ,1,1,"0.80", 72,0    ,X360Y200);
-  Definir_mode_video( MODE_360_224, 360,224,MODE_SDL  ,1,1,"1.10", 51,0    ,X360Y224);
-  Definir_mode_video( MODE_360_240, 360,240,MODE_SDL  ,1,1,"0.90", 61,0    ,X360Y240);
-  Definir_mode_video( MODE_360_256, 360,256,MODE_SDL  ,1,1,"1.00", 57,0    ,X360Y256);
-  Definir_mode_video( MODE_360_270, 360,270,MODE_SDL  ,1,1,"0.95", 57,0    ,X360Y270);
-  Definir_mode_video( MODE_360_282, 360,282,MODE_SDL  ,1,1,"1.10", 52,0    ,X360Y282);
-  Definir_mode_video( MODE_360_300, 360,300,MODE_SDL  ,1,1,"1.10",-49,0    ,X360Y300);
-  Definir_mode_video( MODE_360_360, 360,360,MODE_SDL  ,1,1,"1.50", 72,0    ,X360Y360);
-  Definir_mode_video( MODE_360_400, 360,400,MODE_SDL  ,1,2,"1.60", 72,0    ,X360Y400);
-  Definir_mode_video( MODE_360_448, 360,448,MODE_SDL  ,1,2,"2.20", 51,0    ,X360Y448);
-  Definir_mode_video( MODE_360_480, 360,480,MODE_SDL  ,1,2,"1.80", 61,0    ,X360Y480);
-  Definir_mode_video( MODE_360_512, 360,512,MODE_SDL  ,1,2,"2.00", 57,0    ,X360Y512);
-  Definir_mode_video( MODE_360_540, 360,540,MODE_SDL  ,1,2,"1.85", 57,0    ,X360Y540);
-  Definir_mode_video( MODE_360_564, 360,564,MODE_SDL  ,1,2,"2.20", 60,0    ,X360Y564);
-  Definir_mode_video( MODE_360_600, 360,600,MODE_SDL  ,1,2,"2.40", 45,0    ,X360Y600);
+  Definir_mode_video( MODE_360_200, 360,200,MODE_SDL  ,1,1,"0.80", 72,0    ,NULL);
+  Definir_mode_video( MODE_360_224, 360,224,MODE_SDL  ,1,1,"1.10", 51,0    ,NULL);
+  Definir_mode_video( MODE_360_240, 360,240,MODE_SDL  ,1,1,"0.90", 61,0    ,NULL);
+  Definir_mode_video( MODE_360_256, 360,256,MODE_SDL  ,1,1,"1.00", 57,0    ,NULL);
+  Definir_mode_video( MODE_360_270, 360,270,MODE_SDL  ,1,1,"0.95", 57,0    ,NULL);
+  Definir_mode_video( MODE_360_282, 360,282,MODE_SDL  ,1,1,"1.10", 52,0    ,NULL);
+  Definir_mode_video( MODE_360_300, 360,300,MODE_SDL  ,1,1,"1.10",-49,0    ,NULL);
+  Definir_mode_video( MODE_360_360, 360,360,MODE_SDL  ,1,1,"1.50", 72,0    ,NULL);
+  Definir_mode_video( MODE_360_400, 360,400,MODE_SDL  ,1,2,"1.60", 72,0    ,NULL);
+  Definir_mode_video( MODE_360_448, 360,448,MODE_SDL  ,1,2,"2.20", 51,0    ,NULL);
+  Definir_mode_video( MODE_360_480, 360,480,MODE_SDL  ,1,2,"1.80", 61,0    ,NULL);
+  Definir_mode_video( MODE_360_512, 360,512,MODE_SDL  ,1,2,"2.00", 57,0    ,NULL);
+  Definir_mode_video( MODE_360_540, 360,540,MODE_SDL  ,1,2,"1.85", 57,0    ,NULL);
+  Definir_mode_video( MODE_360_564, 360,564,MODE_SDL  ,1,2,"2.20", 60,0    ,NULL);
+  Definir_mode_video( MODE_360_600, 360,600,MODE_SDL  ,1,2,"2.40", 45,0    ,NULL);
 
-  Definir_mode_video( MODE_400_200, 400,200,MODE_SDL  ,1,1,"0.75", 68,0    ,X400Y200);
-  Definir_mode_video( MODE_400_224, 400,224,MODE_SDL  ,1,1,"1.00", 49,0    ,X400Y224);
-  Definir_mode_video( MODE_400_240, 400,240,MODE_SDL  ,1,1,"0.85", 58,0    ,X400Y240);
-  Definir_mode_video( MODE_400_256, 400,256,MODE_SDL  ,1,1,"0.90", 55,0    ,X400Y256);
-  Definir_mode_video( MODE_400_270, 400,270,MODE_SDL  ,1,1,"0.90", 54,0    ,X400Y270);
-  Definir_mode_video( MODE_400_282, 400,282,MODE_SDL  ,1,1,"1.00", 50,0    ,X400Y282);
-  Definir_mode_video( MODE_400_300, 400,300,MODE_SDL  ,1,1,"1.00",-46,0    ,X400Y300);
-  Definir_mode_video( MODE_400_360, 400,360,MODE_SDL  ,1,1,"1.40", 68,0    ,X400Y360);
-  Definir_mode_video( MODE_400_400, 400,400,MODE_SDL  ,1,2,"1.50", 67,0    ,X400Y400);
-  Definir_mode_video( MODE_400_448, 400,448,MODE_SDL  ,1,2,"1.95", 49,0    ,X400Y448);
-  Definir_mode_video( MODE_400_480, 400,480,MODE_SDL  ,1,2,"1.70", 58,0    ,X400Y480);
-  Definir_mode_video( MODE_400_512, 400,512,MODE_SDL  ,1,2,"1.80", 55,0    ,X400Y512);
-  Definir_mode_video( MODE_400_540, 400,540,MODE_SDL  ,1,2,"1.90", 54,0    ,X400Y540);
-  Definir_mode_video( MODE_400_564, 400,564,MODE_SDL  ,1,2,"2.00", 57,0    ,X400Y564);
-  Definir_mode_video( MODE_400_600, 400,600,MODE_SDL  ,1,2,"2.20", 43,0    ,X400Y600);
+  Definir_mode_video( MODE_400_200, 400,200,MODE_SDL  ,1,1,"0.75", 68,0    ,NULL);
+  Definir_mode_video( MODE_400_224, 400,224,MODE_SDL  ,1,1,"1.00", 49,0    ,NULL);
+  Definir_mode_video( MODE_400_240, 400,240,MODE_SDL  ,1,1,"0.85", 58,0    ,NULL);
+  Definir_mode_video( MODE_400_256, 400,256,MODE_SDL  ,1,1,"0.90", 55,0    ,NULL);
+  Definir_mode_video( MODE_400_270, 400,270,MODE_SDL  ,1,1,"0.90", 54,0    ,NULL);
+  Definir_mode_video( MODE_400_282, 400,282,MODE_SDL  ,1,1,"1.00", 50,0    ,NULL);
+  Definir_mode_video( MODE_400_300, 400,300,MODE_SDL  ,1,1,"1.00",-46,0    ,NULL);
+  Definir_mode_video( MODE_400_360, 400,360,MODE_SDL  ,1,1,"1.40", 68,0    ,NULL);
+  Definir_mode_video( MODE_400_400, 400,400,MODE_SDL  ,1,2,"1.50", 67,0    ,NULL);
+  Definir_mode_video( MODE_400_448, 400,448,MODE_SDL  ,1,2,"1.95", 49,0    ,NULL);
+  Definir_mode_video( MODE_400_480, 400,480,MODE_SDL  ,1,2,"1.70", 58,0    ,NULL);
+  Definir_mode_video( MODE_400_512, 400,512,MODE_SDL  ,1,2,"1.80", 55,0    ,NULL);
+  Definir_mode_video( MODE_400_540, 400,540,MODE_SDL  ,1,2,"1.90", 54,0    ,NULL);
+  Definir_mode_video( MODE_400_564, 400,564,MODE_SDL  ,1,2,"2.00", 57,0    ,NULL);
+  Definir_mode_video( MODE_400_600, 400,600,MODE_SDL  ,1,2,"2.20", 43,0    ,NULL);
 
-  Definir_mode_video( MODE_640_224, 640,224,MODE_SDL  ,2,1,"0.60", -1,0x101,Y224);
-  Definir_mode_video( MODE_640_240, 640,240,MODE_SDL  ,2,1,"0.50", -1,0x101,Y240);
-  Definir_mode_video( MODE_640_256, 640,256,MODE_SDL  ,2,1,"0.55", -1,0x101,Y256);
-  Definir_mode_video( MODE_640_270, 640,270,MODE_SDL  ,2,1,"0.60", -1,0x101,Y270);
-//  Definir_mode_video( MODE_640_282, 640,282,MODE_SDL  ,2,1,"?.??", -1,0x101,Y282);
-  Definir_mode_video( MODE_640_300, 640,300,MODE_SDL  ,2,1,"0.60", -1,0x101,Y300);
-  Definir_mode_video( MODE_640_350, 640,350,MODE_SDL  ,2,1,"0.75", -1,0x100,Y350);
-//  Definir_mode_video( MODE_640_360, 640,360,MODE_SDL  ,2,1,"?.??", -1,0x101,Y360);
-  Definir_mode_video( MODE_640_400, 640,400,MODE_SDL  ,2,2,"0.85", -1,0x100,NULL);
-  Definir_mode_video( MODE_640_448, 640,448,MODE_SDL  ,2,2,"1.20", -1,0x101,Y448);
-  Definir_mode_video( MODE_640_480, 640,480,MODE_SDL  ,2,2,"1.00", -1,0x101,NULL);
-  Definir_mode_video( MODE_640_512, 640,512,MODE_SDL  ,2,2,"1.10", -1,0x101,Y512);
-  Definir_mode_video( MODE_640_540, 640,540,MODE_SDL  ,2,2,"1.15", -1,0x101,Y540);
-  Definir_mode_video( MODE_640_564, 640,564,MODE_SDL  ,2,2,"1.25", -1,0x101,Y564);
-  Definir_mode_video( MODE_640_600, 640,600,MODE_SDL  ,2,2,"1.45", -1,0x101,Y600);
-  Definir_mode_video( MODE_800_600, 800,600,MODE_SDL  ,2,2,"1.00", -1,0x103,NULL);
-  Definir_mode_video(MODE_1024_768,1024,768,MODE_SDL  ,3,3,"1.00", -1,0x105,NULL);
+  Definir_mode_video( MODE_640_224, 640,224,MODE_SDL  ,2,1,"0.60", -1,0	   ,NULL);
+  Definir_mode_video( MODE_640_240, 640,240,MODE_SDL  ,2,1,"0.50", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_256, 640,256,MODE_SDL  ,2,1,"0.55", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_270, 640,270,MODE_SDL  ,2,1,"0.60", -1,0    ,NULL);
+  //Definir_mode_video( MODE_640_282, 640,282,MODE_SDL  ,2,1,"?.??", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_300, 640,300,MODE_SDL  ,2,1,"0.60", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_350, 640,350,MODE_SDL  ,2,1,"0.75", -1,0    ,NULL);
+  //Definir_mode_video( MODE_640_360, 640,360,MODE_SDL  ,2,1,"?.??", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_400, 640,400,MODE_SDL  ,2,2,"0.85", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_448, 640,448,MODE_SDL  ,2,2,"1.20", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_480, 640,480,MODE_SDL  ,2,2,"1.00", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_512, 640,512,MODE_SDL  ,2,2,"1.10", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_540, 640,540,MODE_SDL  ,2,2,"1.15", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_564, 640,564,MODE_SDL  ,2,2,"1.25", -1,0    ,NULL);
+  Definir_mode_video( MODE_640_600, 640,600,MODE_SDL  ,2,2,"1.45", -1,0    ,NULL);
+  Definir_mode_video( MODE_800_600, 800,600,MODE_SDL  ,2,2,"1.00", -1,0    ,NULL);
+  Definir_mode_video(MODE_1024_768,1024,768,MODE_SDL  ,3,3,"1.00", -1,0    ,NULL);
 }
 
 //---------------------------------------------------------------------------

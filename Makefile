@@ -2,13 +2,13 @@
 ifdef COMSPEC
 DELCOMMAND = del
 BIN = grafx2.exe
-COPT = -Wall -O -g -ggdb -Dmain=SDL_main $(SCREEN)
+COPT = -Wall -O -g -ggdb -Dmain=SDL_main
 LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi
 else
 # Linux specific
 DELCOMMAND = rm -rf
 BIN = grafx2
-COPT = -Wall -c -g $(SCREEN)
+COPT = -Wall -c -g
 LOPT = -lSDL -o $(BIN)
 endif
 
@@ -17,7 +17,6 @@ endif
 CC = gcc
 OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o clavier.o io.o
 
-SCREEN = -D WINDOWED
 OBJDIR = obj/
 
 all : $(BIN)

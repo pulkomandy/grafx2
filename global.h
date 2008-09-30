@@ -72,11 +72,11 @@ struct S_Mode_video
   word   Facteur_Y;
   char   Ratio[5];
   signed char Refresh; // <0 => entrelacé
-  word   Mode_VESA_de_base;
+  word   Fullscreen;
   void * Pointeur;
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
 };
-GLOBAL struct S_Mode_video Mode_video[NB_MODES_VIDEO];
+GLOBAL struct S_Mode_video Mode_video[2*NB_MODES_VIDEO];
 
 
 GLOBAL struct
@@ -187,6 +187,7 @@ GLOBAL short Ecran_original_X;    // |_ Dimensions de l'écran d'origine de
 GLOBAL short Ecran_original_Y;    // |  l'image qui vient d'être chargée.
 GLOBAL short Largeur_ecran;       // Largeur de l'écran
 GLOBAL short Hauteur_ecran;       // Hauteur de l'écran
+GLOBAL byte Plein_ecran;	  // Indique si on est en mode plein écran ou fenêtré
 GLOBAL short Limite_Haut;         // |
 GLOBAL short Limite_Bas;          // |_ Limites dans lesquelles
 GLOBAL short Limite_Gauche;       // |  on peut écrire
