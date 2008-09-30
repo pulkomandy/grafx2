@@ -305,7 +305,7 @@ void Afficher_une_ligne_transparente_a_l_ecran_SDL(word Pos_X,word Pos_Y,word La
         byte* ESI = Ligne;
         byte* EDI = Ecran + Pos_Y * Largeur_ecran + Pos_X;
 
-        byte cx;
+        word cx;
 
         // Pour chaque pixel de la ligne
         for(cx = Largeur;cx > 0;cx--)
@@ -340,7 +340,6 @@ void Display_brush_Color_zoom_SDL (word Pos_X,word Pos_Y,
                         DX++;
                         if(DX==Pos_Y_Fin)
                         {
-                                SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y+1);
                                 return;
                         }
                 }

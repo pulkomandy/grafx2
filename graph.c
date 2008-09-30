@@ -74,6 +74,11 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 		else H_effectif = Menu_Ordonnee - Y_effectif;
 
+		DEBUG("X ",X_effectif);
+		DEBUG("Y ",Y_effectif);
+		DEBUG("L ",L_effectif);
+		DEBUG("H ",H_effectif);
+
 		SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
 	}
 }
@@ -1773,7 +1778,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   int Position;
   byte * Temp;
 
-  #define UpdateZoom(X,Y,w,h) if((Y)>= Limite_Haut_Zoom && (Y) <= Limite_visible_Bas_Zoom && (X)>= Limite_Gauche_Zoom && (X) <= Limite_visible_Droite_Zoom) SDL_UpdateRect(Ecran_SDL,Table_mul_facteur_zoom[(X)-Loupe_Decalage_X]+Principal_X_Zoom,((Y)-Loupe_Decalage_Y)*Loupe_Facteur,(w)*Loupe_Facteur,(h)*Loupe_Facteur)
   if (!(Preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
   switch (Pinceau_Forme)
   {
@@ -1784,11 +1788,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_Y<=Limite_Bas) )
         {
                 Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
-                SDL_UpdateRect(Ecran_SDL, 
-                        Max(Pinceau_X - Principal_Decalage_X,0), 
-                        Max(Pinceau_Y - Principal_Decalage_Y,0), 1,1 );
-                // Attention au zoom !
-                if(Loupe_Mode) UpdateZoom(X,Y,1,1);
+                if(Loupe_Mode) Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
         }
       break;
 
@@ -1843,6 +1843,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                      Buffer_de_ligne_horizontale);
           }
         }
+
+	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+
       }
       else
       {
@@ -2012,16 +2015,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
 //ok
-          SDL_UpdateRect(Ecran_SDL,
-                Max(Debut_X-Principal_Decalage_X,0),
-                Max(Debut_Y-Principal_Decalage_Y,0),
-                Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y
-          );
-          DEBUG("X",Debut_X-Principal_Decalage_X);
-          DEBUG("Y",Debut_Y-Principal_Decalage_Y);
-          DEBUG("W",Fin_Compteur_X-Debut_Compteur_X);
-          DEBUG("H",Fin_Compteur_Y-Debut_Compteur_Y);
-          if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
+          if(Loupe_Mode) Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
       break;
@@ -2125,22 +2119,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-// Ceci est testé et fonctionne :)
-          if(Fin_Compteur_X-Debut_Compteur_X > 0 
-                && Fin_Compteur_Y - Debut_Compteur_Y > 0)
-          {
-                SDL_UpdateRect(Ecran_SDL,
-                        Max(Debut_X-Principal_Decalage_X,1),
-                        Max(Debut_Y-Principal_Decalage_Y,1),
-                        Fin_Compteur_X-Debut_Compteur_X,
-                        Fin_Compteur_Y-Debut_Compteur_Y
-                );
-
-                if(Loupe_Mode) 
-                        UpdateZoom(Debut_X,Debut_Y,
+                        Mettre_Ecran_A_Jour(Debut_X,Debut_Y,
                                 Fin_Compteur_X-Debut_Compteur_X,
                                 Fin_Compteur_Y-Debut_Compteur_Y);
-          }
         }
       }
   }
@@ -2182,8 +2163,7 @@ void Effacer_pinceau(short X,short Y)
         && (Pinceau_Y<=Limite_Bas) )
       {
         Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
-        SDL_UpdateRect(Ecran_SDL,Max(Pinceau_X-Principal_Decalage_X,0),Max(Pinceau_Y-Principal_Decalage_Y,0),1,1);
-        if(Loupe_Mode) UpdateZoom(Pinceau_X,Pinceau_Y,1,1);
+        if(Loupe_Mode) Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
       }
       break;
     case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
@@ -4145,9 +4125,7 @@ void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte C
   Pixel_figure(Centre_X+Rayon,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
 
-  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon-Principal_Decalage_X,0),
-        Max(Centre_Y-Rayon-Principal_Decalage_Y,0),2*Rayon+1,2*Rayon+1);
-  if(Loupe_Mode) UpdateZoom(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
+  if(Loupe_Mode) Mettre_Ecran_A_Jour(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
 }
 
   // -- Tracé définitif d'un cercle vide --
@@ -4206,9 +4184,7 @@ void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
       if (Pixel_dans_cercle())
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
 
-  SDL_UpdateRect(Ecran_SDL,Max(Debut_X+Principal_Decalage_X,0),
-        Max(Debut_Y+Principal_Decalage_Y,0),Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
-  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
 }
 
 
@@ -4288,8 +4264,7 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
   Pixel_figure(Centre_X+Rayon_horizontal,Centre_Y,Couleur); // Droite
   Pixel_figure(Centre_X,Centre_Y+Rayon_vertical,Couleur);   // Bas
 
-  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon_horizontal-Principal_Decalage_X,0),Max(Centre_Y-Rayon_vertical-Principal_Decalage_Y,0),2*Rayon_horizontal+1,2*Rayon_vertical+1);
-  UpdateZoom(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  Mettre_Ecran_A_Jour(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
 }
 
   // -- Tracé définitif d'une ellipse vide --
@@ -4350,8 +4325,7 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
     for (Pos_X=Debut_X,Ellipse_Curseur_X=Debut_X-Centre_X;Pos_X<=Fin_X;Pos_X++,Ellipse_Curseur_X++)
       if (Pixel_dans_ellipse())
         Afficher_pixel(Pos_X,Pos_Y,Couleur);
-  SDL_UpdateRect(Ecran_SDL,Max(Centre_X-Rayon_horizontal-Principal_Decalage_X,0),Max(Centre_Y-Rayon_vertical-Principal_Decalage_Y,0),2*Rayon_horizontal+1,2*Rayon_vertical+1);
-  UpdateZoom(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  Mettre_Ecran_A_Jour(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
 }
 
 
@@ -4537,12 +4511,7 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
       // Afficher_pixel traite chaque pixel avec tous les effets ! (smear, ...)
       // Donc on ne peut pas otimiser en traçant ligne par ligne avec memset :(
       Afficher_pixel(Pos_X,Pos_Y,Couleur);
-  SDL_UpdateRect(Ecran_SDL,
-        Debut_X-Principal_Decalage_X,
-        Debut_Y-Principal_Decalage_Y,
-        Fin_X-Debut_X,
-        Fin_Y-Debut_Y);
-  if(Loupe_Mode) UpdateZoom(Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
 
 }
 
@@ -4593,8 +4562,7 @@ void Tracer_courbe_General(short X1, short Y1,
   Y = Min(Min(Y1,Y2),Min(Y3,Y4));
   Old_X = Max(Max(X1,X2),Max(X3,X4)) - X;
   Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - Y;
-  SDL_UpdateRect(Ecran_SDL,X-Principal_Decalage_X,Y-Principal_Decalage_Y,Old_X,Old_Y);
-  UpdateZoom(X,Y,Old_X,Old_Y);
+  Mettre_Ecran_A_Jour(X,Y,Old_X,Old_Y); //A optimiser !! on update à chaque pixel affiché !
 }
 
   // -- Tracer une courbe de Bézier définitivement --
@@ -4953,8 +4921,7 @@ void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclai
       }
   }
   
-  SDL_UpdateRect(Ecran_SDL,Debut_X-Principal_Decalage_X,Debut_Y-Principal_Decalage_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
-  UpdateZoom(Debut_X,Debut_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
 }
 
 
@@ -5020,8 +4987,7 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
       }
   }
 
-  SDL_UpdateRect(Ecran_SDL,Debut_X-Principal_Decalage_X,Debut_Y-Principal_Decalage_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
-  UpdateZoom(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }
 
 
