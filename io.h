@@ -2,6 +2,9 @@
 word  endian_magic16(word x);
 dword endian_magic32(dword x);
 
+int read_byte(FILE *Fichier, byte *Dest);
+int write_byte(FILE *Fichier, byte Byte);
+
 int read_bytes(FILE *Fichier, void *Dest, size_t Taille);
 int write_bytes(FILE *Fichier, void *Dest, size_t Taille);
 

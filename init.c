@@ -20,6 +20,7 @@
 #include "divers.h"
 #include "erreurs.h"
 #include "clavier.h"
+#include "io.h"
 
 #include "errno.h"
 
@@ -231,38 +232,33 @@ void Charger_DAT(void)
   	Erreur(ERREUR_DAT_ABSENT);
   }
 
-  if (fread(Palette_defaut,1,sizeof(T_Palette),Handle)!=sizeof(T_Palette))
+  if (!read_bytes(Handle, Palette_defaut,sizeof(T_Palette)))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(BLOCK_MENU,1,LARGEUR_MENU*HAUTEUR_MENU,Handle)!=LARGEUR_MENU*HAUTEUR_MENU)
+  if (!read_bytes(Handle, BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(SPRITE_EFFET,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS,Handle)!=
-      LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS)
+  if (!read_bytes(Handle, SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(SPRITE_CURSEUR,1,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR,Handle)!=
-      LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR)
+  if (!read_bytes(Handle, SPRITE_CURSEUR,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(SPRITE_MENU,1,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU,Handle)!=
-      LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU)
+  if (!read_bytes(Handle, SPRITE_MENU,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(SPRITE_PINCEAU,1,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU,Handle)!=
-      LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU)
+  if (!read_bytes(Handle, SPRITE_PINCEAU,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(SPRITE_DRIVE,1,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES,Handle)!=
-      LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES)
+  if (!read_bytes(Handle, SPRITE_DRIVE,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES))
     Erreur(ERREUR_DAT_CORROMPU);
 
   if (!(Logo_GrafX2=(byte *)malloc(231*56)))
     Erreur(ERREUR_MEMOIRE);
-  if (fread(Logo_GrafX2,1,231*56,Handle)!=(231*56))
+  if (!read_bytes(Handle, Logo_GrafX2,231*56))
     Erreur(ERREUR_DAT_CORROMPU);
 
-  if (fread(TRAME_PREDEFINIE,1,2*16*NB_TRAMES_PREDEFINIES,Handle)!=2*16*NB_TRAMES_PREDEFINIES)
+  if (!read_bytes(Handle, TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES))
     Erreur(ERREUR_DAT_CORROMPU);
 
   // Lecture des fontes 8x8:
@@ -270,7 +266,7 @@ void Charger_DAT(void)
     Erreur(ERREUR_MEMOIRE);
 
   // Lecture de la fonte système
-  if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
+  if (!read_bytes(Handle, Fonte_temporaire,2048))
     Erreur(ERREUR_DAT_CORROMPU);
   for (Indice=0;Indice<256;Indice++)
     for (Pos_X=0;Pos_X<8;Pos_X++)
@@ -278,7 +274,7 @@ void Charger_DAT(void)
         Fonte_systeme[(Indice<<6)+(Pos_X<<3)+Pos_Y]=( ((*(Fonte_temporaire+(Indice*8)+Pos_Y))&(0x80>>Pos_X)) ? 1 : 0);
 
   // Lecture de la fonte alternative
-  if (fread(Fonte_temporaire,1,2048,Handle)!=2048)
+  if (!read_bytes(Handle, Fonte_temporaire,2048))
     Erreur(ERREUR_DAT_CORROMPU);
   for (Indice=0;Indice<256;Indice++)
     for (Pos_X=0;Pos_X<8;Pos_X++)
@@ -290,7 +286,7 @@ void Charger_DAT(void)
   Fonte=Fonte_systeme;
 
   // Lecture de la fonte 6x8: (spéciale aide)
-  if (fread(Fonte_help,1,315*6*8,Handle)!=(315*6*8))
+  if (!read_bytes(Handle, Fonte_help,315*6*8))
     Erreur(ERREUR_DAT_CORROMPU);
 
   // Le reste est actuellement une copie du fichier INI par défaut:
@@ -1719,8 +1715,12 @@ int Charger_CFG(int Tout_charger)
     return ERREUR_CFG_ABSENT;
 
   if ( (Taille_fichier<sizeof(CFG_Header))
-    || (fread(&CFG_Header,1,sizeof(CFG_Header),Handle)!=sizeof(CFG_Header))
-    || memcmp(CFG_Header.Signature,"CFG",3) )
+    || (!read_bytes(Handle, &CFG_Header.Signature, 3))
+    || memcmp(CFG_Header.Signature,"CFG",3)
+    || (!read_byte(Handle, &CFG_Header.Version1))
+    || (!read_byte(Handle, &CFG_Header.Version2))
+    || (!read_byte(Handle, &CFG_Header.Beta1))
+    || (!read_byte(Handle, &CFG_Header.Beta2)) )
       goto Erreur_lecture_config;
 
   // Version DOS de Robinson et X-Man
@@ -1738,43 +1738,32 @@ int Charger_CFG(int Tout_charger)
     || (CFG_Header.Beta2!=BETA2) )
     goto Erreur_config_ancienne;
 
-  if (Taille_fichier!=TAILLE_FICHIER_CONFIG)
-    goto Erreur_lecture_config;
-
   // - Lecture des infos contenues dans le fichier de config -
-  while (fread(&(Chunk.Numero),1,sizeof(byte),Handle)==sizeof(byte))
+  while (read_byte(Handle, &Chunk.Numero))
   {
-                fread(&(Chunk.Taille),1,sizeof(word),Handle);
-                #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                        Chunk.Taille=bswap_16(Chunk.Taille);
-                #endif
+    read_word_le(Handle, &Chunk.Taille);
     switch (Chunk.Numero)
     {
       case CHUNK_TOUCHES: // Touches
         if (Tout_charger)
         {
-          if ((Chunk.Taille/sizeof(CFG_Infos_touche))!=NB_TOUCHES)
-            goto Erreur_lecture_config;
-          for (Indice=1; Indice<=NB_TOUCHES; Indice++)
+          for (Indice=0; Indice<(Chunk.Taille/sizeof(CFG_Infos_touche)); Indice++)
           {
-            if (fread(&CFG_Infos_touche,1,sizeof(CFG_Infos_touche),Handle)!=sizeof(CFG_Infos_touche))
+            if (!read_word_le(Handle, &CFG_Infos_touche.Numero) ||
+                !read_word_le(Handle, &CFG_Infos_touche.Touche) ||
+                !read_word_le(Handle, &CFG_Infos_touche.Touche2) )
               goto Erreur_lecture_config;
             else
             {
-                #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-                    CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
-                    CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
-                    CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
-                #endif
-                if (Conversion_touches)
-                {
-                  CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
-                }
-                for (Indice2=0;
-                   ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
-                   Indice2++);
-                if (Indice2<NB_TOUCHES)
-                {
+              if (Conversion_touches)
+              {
+                CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
+              }
+              for (Indice2=0;
+                 ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
+                 Indice2++);
+              if (Indice2<NB_TOUCHES)
+              {
                 switch(Ordonnancement[Indice2]>>8)
                 {
                   case 0 :
@@ -1804,38 +1793,44 @@ int Charger_CFG(int Tout_charger)
           goto Erreur_lecture_config;
         for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
         {
-          fread(&(CFG_Mode_video.Etat),1,1,Handle);
-          fread(&(CFG_Mode_video.Largeur),1,2,Handle);
-          if (fread(&(CFG_Mode_video.Hauteur),1,2,Handle)!=2)
+          if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
+              !read_word_le(Handle, &CFG_Mode_video.Largeur) ||
+              !read_word_le(Handle, &CFG_Mode_video.Hauteur) )
             goto Erreur_lecture_config;
-          else
+          
+          for (Indice2=0; Indice2<NB_MODES_VIDEO; Indice2++)
           {
-            for (Indice2=0;
-                 ( (Indice2<NB_MODES_VIDEO) &&
-                   ( (Mode_video[Indice2].Largeur!=CFG_Mode_video.Largeur) ||
-                     (Mode_video[Indice2].Hauteur!=CFG_Mode_video.Hauteur) ||
-                     (Mode_video[Indice2].Mode!=(CFG_Mode_video.Etat>>6)) ) );
-                 Indice2++);
-            if (Indice2<NB_MODES_VIDEO)
+            if (Mode_video[Indice2].Largeur==CFG_Mode_video.Largeur &&
+                Mode_video[Indice2].Hauteur==CFG_Mode_video.Hauteur &&
+                Mode_video[Indice2].Mode==(CFG_Mode_video.Etat>>6))
+            {
               Mode_video[Indice2].Etat=(Mode_video[Indice2].Etat&0xFC) | (CFG_Mode_video.Etat&3);
+              break;
+            }
           }
         }
         break;
       case CHUNK_SHADE: // Shade
         if (Tout_charger)
         {
-          if (fread(&Shade_Actuel,1,sizeof(Shade_Actuel),Handle)!=sizeof(Shade_Actuel))
+          if (! read_byte(Handle, &Shade_Actuel) )
             goto Erreur_lecture_config;
-          else
+
+          for (Indice=0; Indice<8; Indice++)
           {
-            if (fread(Shade_Liste,1,sizeof(Shade_Liste),Handle)!=sizeof(Shade_Liste))
-              goto Erreur_lecture_config;
-            else
-              Liste2tables(Shade_Liste[Shade_Actuel].Liste,
-                           Shade_Liste[Shade_Actuel].Pas,
-                           Shade_Liste[Shade_Actuel].Mode,
-                           Shade_Table_gauche,Shade_Table_droite);
+            for (Indice2=0; Indice2<512; Indice2++)
+            {
+              if (! read_word_le(Handle, &Shade_Liste[Indice].Liste[Indice2]))
+                goto Erreur_lecture_config;
+            }
+            if (! read_byte(Handle, &Shade_Liste[Indice].Pas) ||
+              ! read_byte(Handle, &Shade_Liste[Indice].Mode) )
+            goto Erreur_lecture_config;
           }
+          Liste2tables(Shade_Liste[Shade_Actuel].Liste,
+            Shade_Liste[Shade_Actuel].Pas,
+            Shade_Liste[Shade_Actuel].Mode,
+            Shade_Table_gauche,Shade_Table_droite);        
         }
         else
         {
@@ -1846,7 +1841,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_MASQUE: // Masque
         if (Tout_charger)
         {
-          if (fread(Mask,1,sizeof(Mask),Handle)!=sizeof(Mask))
+          if (!read_bytes(Handle, Mask, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1858,7 +1853,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_STENCIL: // Stencil
         if (Tout_charger)
         {
-          if (fread(Stencil,1,sizeof(Stencil),Handle)!=sizeof(Stencil))
+          if (!read_bytes(Handle, Stencil, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1871,16 +1866,16 @@ int Charger_CFG(int Tout_charger)
         if (Tout_charger)
         {
           // fixme endianness : Degrade_Courant est un int, enregistre en byte
-          if (fread(&Degrade_Courant,1,1,Handle)!=1)
+          if (! read_byte(Handle, &Degrade_Courant))
             goto Erreur_lecture_config;
           for(Indice=0;Indice<16;Indice++)
           {
-                fread(&(Degrade_Tableau[Indice].Debut),1,1,Handle);
-                fread(&(Degrade_Tableau[Indice].Fin),1,1,Handle);
-                fread(&(Degrade_Tableau[Indice].Inverse),1,4,Handle);
-                fread(&(Degrade_Tableau[Indice].Melange),1,4,Handle);
-                if (fread(&(Degrade_Tableau[Indice]).Technique,1,4,Handle)!=4)
-                goto Erreur_lecture_config;
+            if (!read_byte(Handle, &Degrade_Tableau[Indice].Debut) ||
+                !read_byte(Handle, &Degrade_Tableau[Indice].Fin) ||
+                !read_dword_le(Handle, &Degrade_Tableau[Indice].Inverse) ||
+                !read_dword_le(Handle, &Degrade_Tableau[Indice].Melange) ||
+                !read_dword_le(Handle, &Degrade_Tableau[Indice].Technique) )
+            goto Erreur_lecture_config;
           }
           Degrade_Charger_infos_du_tableau(Degrade_Courant);
         }
@@ -1893,8 +1888,10 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_SMOOTH: // Matrice du smooth
         if (Tout_charger)
         {
-          if (fread(Smooth_Matrice,1,sizeof(Smooth_Matrice),Handle)!=sizeof(Smooth_Matrice))
-            goto Erreur_lecture_config;
+          for (Indice=0; Indice<3; Indice++)
+            for (Indice2=0; Indice2<3; Indice2++)
+              if (!read_byte(Handle, &(Smooth_Matrice[Indice][Indice2])))
+                goto Erreur_lecture_config;
         }
         else
         {
@@ -1905,7 +1902,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_EXCLUDE_COLORS: // Exclude_color
         if (Tout_charger)
         {
-          if (fread(Exclude_color,1,sizeof(Exclude_color),Handle)!=sizeof(Exclude_color))
+          if (!read_bytes(Handle, Exclude_color, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1917,9 +1914,27 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_QUICK_SHADE: // Quick-shade
         if (Tout_charger)
         {
-          if (fread(&Quick_shade_Step,1,sizeof(Quick_shade_Step),Handle)!=sizeof(Quick_shade_Step))
+          if (!read_byte(Handle, &Quick_shade_Step))
             goto Erreur_lecture_config;
-          if (fread(&Quick_shade_Loop,1,sizeof(Quick_shade_Loop),Handle)!=sizeof(Quick_shade_Loop))
+          if (!read_byte(Handle, &Quick_shade_Loop))
+            goto Erreur_lecture_config;
+        }
+        else
+        {
+          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+            goto Erreur_lecture_config;
+        }
+        break;
+        case CHUNK_GRILLE: // Grille
+        if (Tout_charger)
+        {
+          if (!read_word_le(Handle, &Snap_Largeur))
+            goto Erreur_lecture_config;
+          if (!read_word_le(Handle, &Snap_Hauteur))
+            goto Erreur_lecture_config;
+          if (!read_word_le(Handle, &Snap_Decalage_X))
+            goto Erreur_lecture_config;
+          if (!read_word_le(Handle, &Snap_Decalage_Y))
             goto Erreur_lecture_config;
         }
         else
@@ -1951,6 +1966,7 @@ int Sauver_CFG(void)
 {
   FILE*  Handle;
   int  Indice;
+  int  Indice2;
   //byte Octet;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   struct Config_Header       CFG_Header;
@@ -1971,17 +1987,19 @@ int Sauver_CFG(void)
   CFG_Header.Version2=VERSION2;
   CFG_Header.Beta1   =BETA1;
   CFG_Header.Beta2   =BETA2;
-  if (fwrite(&CFG_Header,1,sizeof(CFG_Header),Handle)!=sizeof(CFG_Header))
+  if (!write_bytes(Handle, &CFG_Header.Signature,3) ||
+      !write_byte(Handle, CFG_Header.Version1) ||
+      !write_byte(Handle, CFG_Header.Version2) ||
+      !write_byte(Handle, CFG_Header.Beta1) ||
+      !write_byte(Handle, CFG_Header.Beta2) )
     goto Erreur_sauvegarde_config;
 
   // Enregistrement des touches
   Chunk.Numero=CHUNK_TOUCHES;
   Chunk.Taille=NB_TOUCHES*sizeof(CFG_Infos_touche);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
@@ -1993,139 +2011,133 @@ int Sauver_CFG(void)
       case 2 : CFG_Infos_touche.Touche=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite; break;
     }
     CFG_Infos_touche.Touche2=0x00FF;
-    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        CFG_Infos_touche.Touche=bswap_16(CFG_Infos_touche.Touche);
-        CFG_Infos_touche.Touche2=bswap_16(CFG_Infos_touche.Touche2);
-        CFG_Infos_touche.Numero=bswap_16(CFG_Infos_touche.Numero);
-    #endif
-    if (fwrite(&CFG_Infos_touche,1,sizeof(CFG_Infos_touche),Handle)!=sizeof(CFG_Infos_touche))
+    if (!write_word_le(Handle, CFG_Infos_touche.Numero) ||
+        !write_word_le(Handle, CFG_Infos_touche.Touche) ||
+        !write_word_le(Handle, CFG_Infos_touche.Touche2) )
       goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
   Chunk.Taille=NB_MODES_VIDEO * sizeof(CFG_Mode_video);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_MODES_VIDEO; Indice++)
   {
     CFG_Mode_video.Etat   =(Mode_video[Indice].Mode<<6) | (Mode_video[Indice].Etat&3);
     CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
     CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
-    if (fwrite(&(CFG_Mode_video.Etat),1,1,Handle)!=1 ||
-	fwrite(&(CFG_Mode_video.Largeur),1,2,Handle)!=2 ||
-	fwrite(&(CFG_Mode_video.Hauteur),1,2,Handle)!=2)
+    
+    if (!write_byte(Handle, CFG_Mode_video.Etat) ||
+      !write_word_le(Handle, CFG_Mode_video.Largeur) ||
+      !write_word_le(Handle, CFG_Mode_video.Hauteur) )
       goto Erreur_sauvegarde_config;
   }
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Numero=CHUNK_SHADE;
   Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(&Shade_Actuel,1,sizeof(Shade_Actuel),Handle)!=sizeof(Shade_Actuel))
+  if (!write_byte(Handle, Shade_Actuel))
     goto Erreur_sauvegarde_config;
-  if (fwrite(Shade_Liste,1,sizeof(Shade_Liste),Handle)!=sizeof(Shade_Liste))
+  for (Indice=0; Indice<8; Indice++)
+  {
+    for (Indice2=0; Indice2<512; Indice2++)
+    {
+      if (! write_word_le(Handle, Shade_Liste[Indice].Liste[Indice2]))
+        goto Erreur_sauvegarde_config;
+    }
+    if (! write_byte(Handle, Shade_Liste[Indice].Pas) ||
+      ! write_byte(Handle, Shade_Liste[Indice].Mode) )
     goto Erreur_sauvegarde_config;
+  }    
 
   // Sauvegarde des informations du Masque
   Chunk.Numero=CHUNK_MASQUE;
   Chunk.Taille=sizeof(Mask);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(Mask,1,sizeof(Mask),Handle)!=sizeof(Mask))
+  if (!write_bytes(Handle, Mask,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
   Chunk.Numero=CHUNK_STENCIL;
   Chunk.Taille=sizeof(Stencil);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(Stencil,1,sizeof(Stencil),Handle)!=sizeof(Stencil))
+  if (!write_bytes(Handle, Stencil,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
   Chunk.Numero=CHUNK_DEGRADES;
   Chunk.Taille=sizeof(Degrade_Tableau)+1;
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(&Degrade_Courant,1,1,Handle)!=1)
+  if (!write_byte(Handle, Degrade_Courant))
     goto Erreur_sauvegarde_config;
   for(Indice=0;Indice<16;Indice++)
   {
-    if (fwrite(&(Degrade_Tableau[Indice].Debut),1,1,Handle)!=1 ||
-        fwrite(&(Degrade_Tableau[Indice].Fin),1,1,Handle)!=1 ||
-        fwrite(&(Degrade_Tableau[Indice].Inverse),1,4,Handle)!=4 ||
-        fwrite(&(Degrade_Tableau[Indice].Melange),1,4,Handle)!=4 ||
-        fwrite(&(Degrade_Tableau[Indice].Technique),1,4,Handle)!=4 )
+    if (!write_byte(Handle,Degrade_Tableau[Indice].Debut) ||
+        !write_byte(Handle,Degrade_Tableau[Indice].Fin) ||
+        !write_dword_le(Handle, Degrade_Tableau[Indice].Inverse) ||
+        !write_dword_le(Handle, Degrade_Tableau[Indice].Melange) ||
+        !write_dword_le(Handle, Degrade_Tableau[Indice].Technique) )
         goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Numero=CHUNK_SMOOTH;
   Chunk.Taille=sizeof(Smooth_Matrice);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(Smooth_Matrice,1,sizeof(Smooth_Matrice),Handle)!=sizeof(Smooth_Matrice))
-    goto Erreur_sauvegarde_config;
+  for (Indice=0; Indice<3; Indice++)
+    for (Indice2=0; Indice2<3; Indice2++)
+      if (!write_byte(Handle, Smooth_Matrice[Indice][Indice2]))
+        goto Erreur_sauvegarde_config;
 
   // Sauvegarde des couleurs à exclure
   Chunk.Numero=CHUNK_EXCLUDE_COLORS;
   Chunk.Taille=sizeof(Exclude_color);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(Exclude_color,1,sizeof(Exclude_color),Handle)!=sizeof(Exclude_color))
+ if (!write_bytes(Handle, Exclude_color, 256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Quick-shade
   Chunk.Numero=CHUNK_QUICK_SHADE;
   Chunk.Taille=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
-  #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    //On remet les octets dans l'ordre "normal"
-    Chunk.Taille=bswap_16(Chunk.Taille);
-  #endif
-  if (fwrite(&(Chunk.Numero),1,sizeof(byte),Handle)!=sizeof(byte)||
-	fwrite(&(Chunk.Taille),1,sizeof(word),Handle)!=sizeof(word))
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (fwrite(&Quick_shade_Step,1,sizeof(Quick_shade_Step),Handle)!=sizeof(Quick_shade_Step))
+  if (!write_byte(Handle, Quick_shade_Step))
     goto Erreur_sauvegarde_config;
-  if (fwrite(&Quick_shade_Loop,1,sizeof(Quick_shade_Loop),Handle)!=sizeof(Quick_shade_Loop))
+  if (!write_byte(Handle, Quick_shade_Loop))
     goto Erreur_sauvegarde_config;
 
+  // Sauvegarde des informations de la grille
+  Chunk.Numero=CHUNK_GRILLE;
+  Chunk.Taille=8;
+  if (!write_byte(Handle, Chunk.Numero) ||
+      !write_word_le(Handle, Chunk.Taille) )
+    goto Erreur_sauvegarde_config;
+  if (!write_word_le(Handle, Snap_Largeur))
+    goto Erreur_sauvegarde_config;
+  if (!write_word_le(Handle, Snap_Hauteur))
+    goto Erreur_sauvegarde_config;
+  if (!write_word_le(Handle, Snap_Decalage_X))
+    goto Erreur_sauvegarde_config;
+  if (!write_word_le(Handle, Snap_Decalage_Y))
+    goto Erreur_sauvegarde_config;
+
+  
   if (fclose(Handle))
     return ERREUR_SAUVEGARDE_CFG;
 

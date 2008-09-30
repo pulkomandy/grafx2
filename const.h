@@ -14,7 +14,6 @@
 #define BETA1                     97    // |  plusieurs parties => 2.0 ß95.5%
 #define BETA2                     0     // |
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
-#define TAILLE_FICHIER_CONFIG     10351 // Taille du fichier GFX2.CFG
 #define DAT_DEBUT_INI_PAR_DEFAUT  0xF385 // Dans gfx2.dat, début du fichier gfx2.ini standard
 #define NB_MODES_VIDEO            60    // Nombre de modes vidéo
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
@@ -274,6 +273,7 @@ enum CHUNKS_CFG
   CHUNK_SMOOTH             = 6,
   CHUNK_EXCLUDE_COLORS     = 7,
   CHUNK_QUICK_SHADE        = 8,
+  CHUNK_GRILLE             = 9,
   CHUNK_MAX 
 };
 

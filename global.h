@@ -474,7 +474,7 @@ GLOBAL fonction_degrade Traiter_degrade; // Fonction de traitement du dégradé, v
 GLOBAL fonction_afficheur Traiter_pixel_de_degrade; // Redirection de l'affichage
 
 GLOBAL struct T_Degrade_Tableau Degrade_Tableau[16]; // Données de tous les dégradés
-GLOBAL int Degrade_Courant;             // Indice du tableau correspondant au dégradé courant
+GLOBAL byte Degrade_Courant;             // Indice du tableau correspondant au dégradé courant
 
 
 

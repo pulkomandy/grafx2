@@ -22,6 +22,18 @@ word endian_magic32(word x)
   #endif
 }
 
+// Lit un octet
+// Renvoie -1 si OK, 0 en cas d'erreur
+int read_byte(FILE *Fichier, byte *Dest)
+{
+  return fread(Dest, 1, 1, Fichier) == 1;
+}
+// Ecrit un octet
+// Renvoie -1 si OK, 0 en cas d'erreur
+int write_byte(FILE *Fichier, byte Byte)
+{
+  return fwrite(&Byte, 1, 1, Fichier) == 1;
+}
 // Lit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
 int read_bytes(FILE *Fichier, void *Dest, size_t Taille)
