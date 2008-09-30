@@ -8,5 +8,6 @@
 
 #define UNTESTED printf("%s %d %s à tester !\n",__FILE__,__LINE__,__func__);
 
-void Erreur(int);
+void Erreur_fonction(int, const char *, int, const char *);
+#define Erreur(n) Erreur_fonction(n, __FILE__,__LINE__,__func__)
 

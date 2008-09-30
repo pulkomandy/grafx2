@@ -105,10 +105,14 @@ void Afficher_syntaxe(void)
 
 
 // ---------------------------- Sortie impromptue ----------------------------
-void Erreur(int Code)
+void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const char *Nom_fonction)
 {
   T_Palette Palette_temporaire;
   int       Indice;
+  printf("Code %d\n", Code);
+  printf("File %s\n", Nom_fichier);
+  printf("Line %d\n", Numero_ligne);
+  printf("Function %s\n", Nom_fonction);
 
   if (Code==0)
   {

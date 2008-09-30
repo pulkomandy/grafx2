@@ -3684,7 +3684,10 @@ void Load_PCX(void)
         }
       }
     }
+    else
+    {
       Erreur_fichier=1;
+    }
 
     fclose(Fichier);
   }
