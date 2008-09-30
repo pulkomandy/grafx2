@@ -601,7 +601,7 @@ void Test_PAL(void)
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
+    stat(Nom_du_fichier,&Informations_Fichier);
     // Lecture de la taille du fichier
     Taille_du_fichier=Informations_Fichier.st_size;
     fclose(Fichier);
@@ -742,13 +742,13 @@ void Load_IMG(void)
   struct stat Informations_Fichier;
 
 
+  stat(Nom_du_fichier,&Informations_Fichier);
+  
   Nom_fichier_complet(Nom_du_fichier,0);
-
   Erreur_fichier=0;
 
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
     Taille_du_fichier=Informations_Fichier.st_size;
 
     if (read_bytes(Fichier,&IMG_Header,sizeof(T_Header_IMG)))
@@ -770,12 +770,15 @@ void Load_IMG(void)
 
         Principal_Largeur_image=IMG_Header.Largeur;
         Principal_Hauteur_image=IMG_Header.Hauteur;
+        Largeur_lue=IMG_Header.Largeur;
 
         for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
         {
-          if ((Largeur_lue=read_bytes(Fichier,Buffer,Principal_Largeur_image)))
-            for (Pos_X=0; Pos_X<Largeur_lue;Pos_X++)
+          if (read_bytes(Fichier,Buffer,Principal_Largeur_image))
+          {
+            for (Pos_X=0; Pos_X<Principal_Largeur_image;Pos_X++)
               Pixel_de_chargement(Pos_X,Pos_Y,Buffer[Pos_X]);
+          }
           else
             Erreur_fichier=2;
         }
@@ -3853,12 +3856,12 @@ void Test_CEL(void)
   struct stat Informations_Fichier;
 
   Erreur_fichier=0;
-  Nom_fichier_complet(Nom_du_fichier,0);
   if (!stat(Nom_du_fichier,&Informations_Fichier))
   {
     Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
     return;
   }
+  Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
@@ -3912,9 +3915,8 @@ void Load_CEL(void)
 
 
   Erreur_fichier=0;
-  Nom_fichier_complet(Nom_du_fichier,0);
   stat(Nom_du_fichier,&Informations_Fichier);
-
+  Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
