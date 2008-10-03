@@ -1808,18 +1808,18 @@ void Calculer_courbe_3_points(short X1, short Y1, short X4, short Y4,
                               short * X2, short * Y2, short * X3, short * Y3)
 {
   float CX,CY; // Centre de (X1,Y1) et (X4,Y4)
-  float BX,BY; // Intersectø des dtes ((X1,Y1),(X2,Y2)) et ((X3,Y3),(X4,Y4))
+  float BX,BY; // Intersect. des dtes ((X1,Y1),(X2,Y2)) et ((X3,Y3),(X4,Y4))
 
   CX=(float)(X1+X4)/2.0;           // P1*--_               Légende:
-  CY=(float)(Y1+Y4)/2.0;           //   ú   \úú P2         -_\|/ : courbe
-                                   //   ú    \ ú*ú         * : point important
-  BX=CX+((8.0/3.0)*(Pinceau_X-CX));//   ú     |   úú       ú : pointillé
-  BY=CY+((8.0/3.0)*(Pinceau_Y-CY));//   ú     |P    úú  B
-                                   // C *úúúúú*úúúúúúúúú*  P=Pos. du pinceau
-  *X2=Round((BX+X1)/2.0);          //   ú     |     úú     C=milieu de [P1,P4]
-  *Y2=Round((BY+Y1)/2.0);          //   ú     |   úú       B=point tel que
-                                   //   ú    / ú*ú         C->B=(8/3) * C->P
-  *X3=Round((BX+X4)/2.0);          //   ú  _/úú P3         P2=milieu de [P1,B]
+  CY=(float)(Y1+Y4)/2.0;           //   ·   \·· P2         -_\|/ : courbe
+                                   //   ·    \ ·*·         * : point important
+  BX=CX+((8.0/3.0)*(Pinceau_X-CX));//   ·     |   ··       · : pointillÚ
+  BY=CY+((8.0/3.0)*(Pinceau_Y-CY));//   ·     |P    ··  B
+                                   // C *·····*·········*  P=Pos. du pinceau
+  *X2=Round((BX+X1)/2.0);          //   ·     |     ··     C=milieu de [P1,P4]
+  *Y2=Round((BY+Y1)/2.0);          //   ·     |   ··       B=point tel que
+                                   //   ·    / ·*·         C->B=(8/3) * C->P
+  *X3=Round((BX+X4)/2.0);          //   ·  _/·· P3         P2=milieu de [P1,B]
   *Y3=Round((BY+Y4)/2.0);          // P4*--                P3=milieu de [P4,B]
 }
 
@@ -3320,7 +3320,7 @@ void Tourner_brosse_12_0(void)
     Operation_PUSH(1); // Etat précédent
 
     if ((Config.Coords_rel) && (Menu_visible))
-      Print_dans_menu("Angle:   0ø    ",0);
+      Print_dans_menu("Angle:   0°    ",0);
   }
   else
   {

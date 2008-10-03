@@ -436,12 +436,37 @@ void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Dec
 void Set_Mode_SDL()
 /* On règle la résolution de l'écran */
 {
-        Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_FULLSCREEN*Plein_ecran);
+  Ecran_SDL=SDL_SetVideoMode(Largeur_ecran,Hauteur_ecran,8,SDL_FULLSCREEN*Plein_ecran|SDL_RESIZABLE);
 	if(Ecran_SDL != NULL)
-        	Ecran=Ecran_SDL->pixels;
+	{
+    // Vérification du mode obtenu (ce n'est pas toujours celui demandé)
+    if (Ecran_SDL->w != Largeur_ecran || Ecran_SDL->h != Hauteur_ecran)
+    {
+  		DEBUG("Erreur mode video obtenu différent de celui demandé !!",0);
+  		Largeur_ecran = Ecran_SDL->w;
+  		Hauteur_ecran = Ecran_SDL->h;
+    }
+    Ecran=Ecran_SDL->pixels;
+  }
 	else
 		DEBUG("Erreur changement de mode video !!",0);
 
         SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
+}
+
+// Fonction qui filtre les evenements génériques.
+void Gere_Evenement_SDL(SDL_Event * event)
+{
+  // Redimensionnement fenetre
+  if (event->type == SDL_VIDEORESIZE )
+  {
+    Resize_Largeur = event->resize.w;
+    Resize_Hauteur = event->resize.h;
+  }
+  // Fermeture
+  if (event->type == SDL_QUIT )
+  {
+    Quit_demande=1;
+  }
 }
 

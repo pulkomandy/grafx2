@@ -4601,7 +4601,7 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
   w3=(((word)Src[6])<<8) | Src[7];
   for (i=0;i<16;i++)
   {
-    // Pour décoder le pixel nøi, il faut traiter les 4 words sur leur bit
+    // Pour décoder le pixel n°i, il faut traiter les 4 words sur leur bit
     // correspondant à celui du masque
 
     Dst[i]=((w0 & masque)?0x01:0x00) |
@@ -4624,7 +4624,7 @@ void PI1_16p_to_8b(byte * Src,byte * Dst)
   w0=w1=w2=w3=0;
   for (i=0;i<16;i++)
   {
-    // Pour coder le pixel nøi, il faut modifier les 4 words sur leur bit
+    // Pour coder le pixel n°i, il faut modifier les 4 words sur leur bit
     // correspondant à celui du masque
 
     w0|=(Src[i] & 0x01)?masque:0x00;

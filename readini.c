@@ -606,7 +606,7 @@ int Charger_INI(struct S_Config * Conf)
 
   if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Default_video_mode",1,Valeurs)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<MODE_320_200) || (Valeurs[0]>MODE_1024_768))
+  if ((Valeurs[0]<0) || (Valeurs[0]>NB_MODES_VIDEO))
     goto Erreur_ERREUR_INI_CORROMPU;
   Conf->Resolution_par_defaut=Valeurs[0];
 

@@ -261,11 +261,12 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
           Afficher_syntaxe();
           exit(0);
         }
-
+/*
         Resolution_actuelle=Str2num(argv[Option2]); // Mode désiré par l'utilisateur
         if ( (Resolution_actuelle<MODE_320_200) || (Resolution_actuelle>MODE_1024_768) )
           Erreur(ERREUR_NUMERO_MODE);
         Une_resolution_a_ete_passee_en_parametre=Un_fichier_a_ete_passe_en_parametre;
+*/
       }
       break;
 
@@ -385,6 +386,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   // On initialise les données sur l'état du programme:
     // Donnée sur la sortie du programme:
+  Quit_demande=0;
   Sortir_du_programme=0;
     // Données sur l'état du menu:
   Pixel_dans_menu=Pixel_dans_barre_d_outil;
@@ -548,7 +550,10 @@ void Initialisation_du_programme(int argc,char * argv[])
   Buffer_de_ligne_horizontale=NULL;
   Resolution_actuelle=-1; // On n'était pas dans un mode graphique
 
-  Initialiser_mode_video(Mode_dans_lequel_on_demarre);
+  Initialiser_mode_video(
+    Mode_video[Mode_dans_lequel_on_demarre].Largeur,
+    Mode_video[Mode_dans_lequel_on_demarre].Hauteur,
+    Mode_video[Mode_dans_lequel_on_demarre].Fullscreen);
 
   Principal_Largeur_image=Largeur_ecran;
   Principal_Hauteur_image=Hauteur_ecran;

@@ -59,7 +59,7 @@ byte Disk_map(byte Numero_de_lecteur);
 // Renseigne sur la lettre logique d'un lecteur
 // (utile pour tester si un lecteur de disquette est A: ou B: aux yeux du DOS)
 //
-// Entrée: Octet = nø du lecteur (1=A, 2=B ...)
+// Entrée: Octet = n° du lecteur (1=A, 2=B ...)
 //
 // Sortie: Octet = 0FFh : Pas de lecteur (???)
 //                 sinon: numéro représenatan la lettre logique du lecteur

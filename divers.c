@@ -10,6 +10,7 @@
 #include "moteur.h"
 #include "divers.h"
 #include "clavier.h"
+#include "sdlscreen.h"
 
 // Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
 byte Recuperer_nb_lignes(void)
@@ -69,7 +70,12 @@ void Attendre_fin_de_click(void)
 
     //On attend que l'utilisateur relache la souris. Tous les autres évènements
     //sont ignorés
-    while(SDL_PollEvent(&event) && event.type == SDL_MOUSEBUTTONUP);
+    while(SDL_PollEvent(&event))
+    {
+      Gere_Evenement_SDL(&event);
+      if (event.type == SDL_MOUSEBUTTONUP)
+        break;
+    }
 
     //On indique à la gestion des E/S que le bouton est laché et on rend la main
     Mouse_K=0;
@@ -119,6 +125,7 @@ void Get_input(void)
 
     if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
     {
+      Gere_Evenement_SDL(&event);
         switch( event.type)
         {
             case SDL_MOUSEMOTION:
@@ -869,6 +876,8 @@ word Get_key(void)
     {
       return Conversion_ANSI(event.key.keysym);
     }
+    else
+      Gere_Evenement_SDL(&event);
   }
 }
 

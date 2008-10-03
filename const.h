@@ -15,7 +15,7 @@
 #define BETA2                     0     // |
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
 #define DAT_DEBUT_INI_PAR_DEFAUT  0xF385 // Dans gfx2.dat, début du fichier gfx2.ini standard
-#define NB_MODES_VIDEO            60    // Nombre de modes vidéo
+#define NB_MODES_VIDEO            61    // Nombre de modes vidéo
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
 #define NB_TOUCHES_SPECIALES      72    // Nombre de touches spéciales
@@ -118,72 +118,6 @@ enum TYPES_DE_MODES_VIDEO
   MODE_X,
   MODE_VESA,       // Attention! Si on change la numérotation, il faut
   MODE_XVESA       // que les 2 plus grandes valeurs soient ces 2 modes!*/
-};
-
-  // Les différents modes vidéos (avec leur nø d'ordre)
-
-enum MODES_VIDEO
-{
-  MODE_320_200, // !!! MODE 0 !!!
-  MODE_320_224,
-  MODE_320_240,
-  MODE_320_256,
-  MODE_320_270,
-  MODE_320_282,
-  MODE_320_300,
-  MODE_320_360,
-  MODE_320_400,
-  MODE_320_448,
-  MODE_320_480,
-  MODE_320_512,
-  MODE_320_540,
-  MODE_320_564,
-  MODE_320_600,
-  MODE_360_200, // 15
-  MODE_360_224,
-  MODE_360_240,
-  MODE_360_256,
-  MODE_360_270,
-  MODE_360_282,
-  MODE_360_300,
-  MODE_360_360,
-  MODE_360_400,
-  MODE_360_448,
-  MODE_360_480,
-  MODE_360_512,
-  MODE_360_540,
-  MODE_360_564,
-  MODE_360_600,
-  MODE_400_200, // 30
-  MODE_400_224,
-  MODE_400_240,
-  MODE_400_256,
-  MODE_400_270,
-  MODE_400_282,
-  MODE_400_300,
-  MODE_400_360,
-  MODE_400_400,
-  MODE_400_448,
-  MODE_400_480,
-  MODE_400_512,
-  MODE_400_540,
-  MODE_400_564,
-  MODE_400_600,
-  MODE_640_224, // 45
-  MODE_640_240,
-  MODE_640_256,
-  MODE_640_270,
-  MODE_640_300,
-  MODE_640_350,
-  MODE_640_400,
-  MODE_640_448,
-  MODE_640_480,
-  MODE_640_512,
-  MODE_640_540,
-  MODE_640_564,
-  MODE_640_600,
-  MODE_800_600,
-  MODE_1024_768 // 59
 };
 
   // Les différentes catégories de bouton:

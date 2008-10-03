@@ -908,35 +908,46 @@ char * Libelle_mode(int Mode)
 void * Mode_X_Ptr; // Pointeur sur la table à utiliser pour le changement de
                    // mode vidéo X
 
-void Initialiser_mode_video(int Numero)
+void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
 {
   int Sensibilite_X;
   int Sensibilite_Y;
+  int Indice;
+  
+  // Valeurs raisonnables: minimum 320x200
+  if (Largeur < 320)
+    Largeur = 320;
+  if (Hauteur < 200)
+    Hauteur = 200;
+  // La largeur doit être un multiple de 4
+  Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
 
-  if (Resolution_actuelle != Numero)
+  if (Largeur_ecran!=Largeur ||
+      Hauteur_ecran!=Hauteur ||
+      Mode_video[Resolution_actuelle].Fullscreen != Fullscreen)
   {
-    Largeur_ecran = Mode_video[Numero].Largeur;
-    Hauteur_ecran = Mode_video[Numero].Hauteur;
-    Plein_ecran   = Mode_video[Numero].Fullscreen;
+    // Taille des menus
+    int Facteur;
+    if (Largeur/320 > Hauteur/200)
+      Facteur=Hauteur/200;
+    else
+      Facteur=Largeur/320;
+  
+    Largeur_ecran = Largeur;
+    Hauteur_ecran = Hauteur;
+    Plein_ecran   = Fullscreen;
 
     switch (Config.Ratio)
     {
       case 1: // adapter tout
-        Menu_Facteur_X=Mode_video[Numero].Facteur_X;
-        Menu_Facteur_Y=Mode_video[Numero].Facteur_Y;
+        Menu_Facteur_X=Facteur;
+        Menu_Facteur_Y=Facteur;
         break;
       case 2: // adapter légèrement
-        Menu_Facteur_X=Mode_video[Numero].Facteur_X-1;
+        Menu_Facteur_X=Facteur-1;
         if (Menu_Facteur_X<1) Menu_Facteur_X=1;
-        Menu_Facteur_Y=Mode_video[Numero].Facteur_Y-1;
+        Menu_Facteur_Y=Facteur-1;
         if (Menu_Facteur_Y<1) Menu_Facteur_Y=1;
-        if ( (Mode_video[Numero].Facteur_X<Mode_video[Numero].Facteur_Y)
-          && (Menu_Facteur_X==Menu_Facteur_Y) )
-          Menu_Facteur_Y++;
-        else
-        if ( (Mode_video[Numero].Facteur_X>Mode_video[Numero].Facteur_Y)
-          && (Menu_Facteur_X==Menu_Facteur_Y) )
-          Menu_Facteur_X++;
         break;
       default: // ne pas adapter
         Menu_Facteur_X=1;
@@ -948,7 +959,7 @@ void Initialiser_mode_video(int Numero)
 
     Buffer_de_ligne_horizontale=(byte *)malloc((Largeur_ecran>Principal_Largeur_image)?Largeur_ecran:Principal_Largeur_image);
 
-    switch (Mode_video[Numero].Mode)
+    switch (MODE_SDL)
     {
         case MODE_SDL:
             Pixel = Pixel_SDL;
@@ -977,7 +988,19 @@ void Initialiser_mode_video(int Numero)
     
     Set_palette(Principal_Palette);
 
-    Resolution_actuelle = Numero;
+    if (!Fullscreen)
+      Resolution_actuelle=0;
+    else
+      for (Indice=1; Indice<NB_MODES_VIDEO; Indice++)
+      {
+        if (Mode_video[Indice].Largeur==Largeur_ecran &&
+            Mode_video[Indice].Hauteur==Hauteur_ecran)
+        {
+          Resolution_actuelle=Indice;
+          break;
+        }
+      }
+    //Resolution_actuelle = ?
 
     Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) >> 3;
     Menu_Ordonnee = Hauteur_ecran;
@@ -986,13 +1009,8 @@ void Initialiser_mode_video(int Numero)
     Menu_Ordonnee_Texte = Hauteur_ecran-(Menu_Facteur_Y<<3);
     Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur<<3)-1;
 
-    Clip_mouse();
-    Mouse_X = Largeur_ecran >> 1;
-    Mouse_Y = Hauteur_ecran >> 1;
-    Set_mouse_position();
-
-    Sensibilite_X = Config.Indice_Sensibilite_souris_X / Mode_video[Numero].Facteur_X;
-    Sensibilite_Y = Config.Indice_Sensibilite_souris_Y / Mode_video[Numero].Facteur_Y;
+    Sensibilite_X = Config.Indice_Sensibilite_souris_X;
+    Sensibilite_Y = Config.Indice_Sensibilite_souris_Y;
     Sensibilite_X>>=Mouse_Facteur_de_correction_X;
     Sensibilite_Y>>=Mouse_Facteur_de_correction_Y;
     Sensibilite_souris(Sensibilite_X?Sensibilite_X:1,Sensibilite_Y?Sensibilite_Y:1);
@@ -1010,6 +1028,9 @@ void Initialiser_mode_video(int Numero)
   Calculer_donnees_loupe();
   Calculer_limites();
   Calculer_coordonnees_pinceau();
+  
+  Resize_Largeur=0;
+  Resize_Hauteur=0;
 }
 
 
@@ -3737,7 +3758,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
     for (Ligne=Limite_courante_Haut;Ligne<=Limite_courante_Bas;Ligne++)
     {
       Ligne_modifiee=0;
-      // On va traiter le cas de la ligne nø Ligne.
+      // On va traiter le cas de la ligne n° Ligne.
 
       // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;
@@ -3817,7 +3838,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
     for (Ligne=Limite_courante_Bas;Ligne>=Limite_courante_Haut;Ligne--)
     {
       Ligne_modifiee=0;
-      // On va traiter le cas de la ligne nø Ligne.
+      // On va traiter le cas de la ligne n° Ligne.
 
       // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;

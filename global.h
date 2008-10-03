@@ -68,15 +68,10 @@ struct S_Mode_video
   short  Largeur;
   short  Hauteur;
   byte   Mode;
-  word   Facteur_X;
-  word   Facteur_Y;
-  char   Ratio[5];
-  signed char Refresh; // <0 => entrelacé
   word   Fullscreen;
-  void * Pointeur;
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
 };
-GLOBAL struct S_Mode_video Mode_video[2*NB_MODES_VIDEO];
+GLOBAL struct S_Mode_video Mode_video[NB_MODES_VIDEO];
 
 
 GLOBAL struct
@@ -115,6 +110,7 @@ GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat des to
 #define MOD_SHIFT 0x1000
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000
+GLOBAL byte Quit_demande; // !=0 lorsque l'utilisateur demande la fermeture de fenêtre.
 
 GLOBAL byte Mouse_Facteur_de_correction_X;
 GLOBAL byte Mouse_Facteur_de_correction_Y;
@@ -182,6 +178,8 @@ GLOBAL fonction_display_brush_Color_zoom Clear_brush_zoom;
 
   // Données sur les dimensions de l'écran
 
+GLOBAL int   Resize_Largeur;      // \__ Positionnées lorsque l'utilisateur tire
+GLOBAL int   Resize_Hauteur;      // /      un bord de la fenêtre.
 GLOBAL int   Resolution_actuelle; // Résolution graphique courante
 GLOBAL short Ecran_original_X;    // |_ Dimensions de l'écran d'origine de
 GLOBAL short Ecran_original_Y;    // |  l'image qui vient d'être chargée.
@@ -559,8 +557,8 @@ GLOBAL word Position_d_aide_en_cours; // Numéro de la ligne d'aide en cours de c
 
   // Données sur les opérations
 
-GLOBAL word Operation_avant_interruption; // Nø de l'opération en cours avant l'utilisation d'une interruption
-GLOBAL word Operation_en_cours;           // Nø de l'opération en cours
+GLOBAL word Operation_avant_interruption; // N° de l'opération en cours avant l'utilisation d'une interruption
+GLOBAL word Operation_en_cours;           // N° de l'opération en cours
 GLOBAL word Operation_Pile[TAILLE_PILE_OPERATIONS]; // Pile simplifiée
 GLOBAL byte Operation_Taille_pile;    // Taille effective de la pile (0=vide)
 GLOBAL byte Operation_dans_loupe;     // Indique si l'opération a commencé dans la partie Zoomée ou non

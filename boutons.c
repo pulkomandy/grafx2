@@ -1206,6 +1206,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
   short Pos_Y;
   byte  Couleur_texte,Couleur_fond;
   char Chaine[29];
+  char *Ratio;
 
   for (Mode_courant=Debut_liste,Indice=0; Indice<12; Indice++,Mode_courant++)
   {
@@ -1230,38 +1231,21 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     }
     Num2str(Mode_video[Mode_courant].Largeur,Chaine,4);
     Num2str(Mode_video[Mode_courant].Hauteur,Chaine+4,4);
-    switch (Mode_video[Mode_courant].Mode)
-    {
-      case MODE_SDL :
-        memcpy(Chaine+8," SDL      ",10);
-        break;
-
-    }
 
     if(Mode_video[Mode_courant].Fullscreen == 1)
-	memcpy(Chaine+13,"Full",4);
+	    memcpy(Chaine+8,"  Fullscreen  ",15);
     else
-	memcpy(Chaine+13,"Win ",4);
+	    memcpy(Chaine+8,"    Window    ",15);
 
-    if (Mode_video[Mode_courant].Refresh>0)
-    {
-      Num2str(Mode_video[Mode_courant].Refresh,Chaine+18,2);
-      Chaine[20]=' ';
-    }
+    if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
+      Ratio=" 4/3  ";
+    else if (Mode_video[Mode_courant].Largeur*9 == Mode_video[Mode_courant].Hauteur*16)
+      Ratio="16/9  ";
+    else if (Mode_video[Mode_courant].Largeur*10 == Mode_video[Mode_courant].Hauteur*16)
+      Ratio="16/10 ";
     else
-    {
-      if (Mode_video[Mode_courant].Refresh==-1)
-        memcpy(Chaine+18,"   ",3);
-      else
-      {
-        Num2str(-Mode_video[Mode_courant].Refresh,Chaine+18,2);
-        Chaine[20]='i';
-      }
-    }
-    memcpy(Chaine+21,"  ",2);
-    memcpy(Chaine+23,Mode_video[Mode_courant].Ratio,4);
-    Chaine[27]=' ';
-    Chaine[28]=0;
+      Ratio="      ";
+    strcat(Chaine,Ratio);
 
     Print_dans_fenetre(39,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
   }
@@ -1308,8 +1292,7 @@ void Bouton_Resol(void)
   Print_dans_fenetre(108, 37,"Height:"         ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 16, 60,"OK"              ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 55, 60,"X   Y"           ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(104, 60,"Mode Full"       ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(183, 60,"Hz"              ,CM_Fonce,CM_Clair);
+  Print_dans_fenetre(120, 60,"Win / Full"      ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(219, 60,"Ratio"           ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 30,170,"\03"             ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 62,170,"OK"              ,CM_Fonce,CM_Clair);
@@ -1330,14 +1313,14 @@ void Bouton_Resol(void)
 
   if (Mode_choisi>=6)
   {
-    if (Mode_choisi<2*NB_MODES_VIDEO-6)
+    if (Mode_choisi<NB_MODES_VIDEO-6)
     {
       Debut_liste=Mode_choisi-5;
       Position_curseur=5;
     }
     else
     {
-      Debut_liste=2*NB_MODES_VIDEO-12;
+      Debut_liste=NB_MODES_VIDEO-12;
       Position_curseur=Mode_choisi-Debut_liste;
     }
   }
@@ -1347,7 +1330,7 @@ void Bouton_Resol(void)
     Position_curseur=Mode_choisi;
   }
 
-  Fenetre_Definir_bouton_scroller(271,69,97,2*NB_MODES_VIDEO,12,Debut_liste); // 6
+  Fenetre_Definir_bouton_scroller(271,69,97,NB_MODES_VIDEO,12,Debut_liste); // 6
 
   // Les 12 petits boutons indiquant l'état des modes
   for (Temp=0; Temp<12; Temp++)
@@ -1450,7 +1433,7 @@ void Bouton_Resol(void)
 
       default: // Boutons de tag des états des modes
         Temp=Debut_liste+Bouton_clicke-7;
-        if (Temp) // On n'a pas le droit de cocher le mode 0 (320x200)
+        if (Temp) // On n'a pas le droit de cocher le mode fenêtré
         {
           Temp2=(Mode_video[Temp].Etat & 0x80)?128:0;
 
@@ -1480,7 +1463,7 @@ void Bouton_Resol(void)
         if (Position_curseur<11)
           Position_curseur++;
         else
-          if (Debut_liste<2*NB_MODES_VIDEO-12)
+          if (Debut_liste<NB_MODES_VIDEO-12)
             Debut_liste++;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1501,10 +1484,10 @@ void Bouton_Resol(void)
           Position_curseur=11;
         else
         {
-          if (Debut_liste<2*NB_MODES_VIDEO-23)
+          if (Debut_liste<NB_MODES_VIDEO-23)
             Debut_liste+=11;
           else
-            Debut_liste=2*NB_MODES_VIDEO-12;
+            Debut_liste=NB_MODES_VIDEO-12;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1514,7 +1497,7 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_END : // End
-        Debut_liste=2*NB_MODES_VIDEO-12;
+        Debut_liste=NB_MODES_VIDEO-12;
         Position_curseur=11;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1535,16 +1518,26 @@ void Bouton_Resol(void)
       Redimentionner_image(Largeur_choisie,Hauteur_choisie);
 
     if (Mode_video[Mode_choisi].Etat<=2)
-      Initialiser_mode_video(Mode_choisi);
+      Initialiser_mode_video(
+        Mode_video[Mode_choisi].Largeur,
+        Mode_video[Mode_choisi].Hauteur,
+        Mode_video[Mode_choisi].Fullscreen);
     else
     {
       Erreur(0); // On signale à l'utilisateur que c'est un mode invalide
-      Initialiser_mode_video(Resolution_actuelle);
+      Initialiser_mode_video(
+        Mode_video[Resolution_actuelle].Largeur,
+        Mode_video[Resolution_actuelle].Hauteur,
+        Mode_video[Resolution_actuelle].Fullscreen);
     }
 
     Afficher_menu();
     Afficher_ecran();
   }
+  Mouse_X = Largeur_ecran >> 1;
+  Mouse_Y = Hauteur_ecran >> 1;
+  Set_mouse_position();
+
 
   Desenclencher_bouton(BOUTON_RESOL);
   Afficher_curseur();
@@ -1556,7 +1549,8 @@ void Bouton_Safety_resol(void)
   Effacer_curseur();
 
   Desenclencher_bouton(BOUTON_LOUPE);
-  Initialiser_mode_video(MODE_320_200);
+  Initialiser_mode_video(640, 400, 0);
+  Resolution_actuelle=0;
   Afficher_menu();
   Afficher_ecran();
 
@@ -2857,6 +2851,10 @@ int Meilleur_mode_video(void)
   short Temp_X,Temp_Y;
   int Mode;
 
+  // Si mode fenêtre, on reste dans ce mode.
+  if (Resolution_actuelle == 0)
+    return 0;
+    
   // On commence par borner les dimensions, ou du moins les rendre cohérentes
   if ((Ecran_original_X<=0) || (Config.Set_resolution_according_to==2))
     Ecran_original_X=Principal_Largeur_image;
@@ -2882,9 +2880,9 @@ int Meilleur_mode_video(void)
   Meilleure_hauteur=0;
 
 
-  for (Mode=MODE_320_200; Mode<=MODE_1024_768; Mode++)
+  for (Mode=0; Mode<=NB_MODES_VIDEO; Mode++)
   {
-    if (Mode_video[Mode].Etat<2)
+    if (Mode_video[Mode].Fullscreen && Mode_video[Mode].Etat<2)
     {
       Temp_X=Mode_video[Mode].Largeur;
       Temp_Y=Mode_video[Mode].Hauteur;
@@ -3091,7 +3089,10 @@ void Load_picture(byte Image)
         Nouveau_mode=Meilleur_mode_video();
         if ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle))
         {
-          Initialiser_mode_video(Nouveau_mode);
+          Initialiser_mode_video(
+            Mode_video[Nouveau_mode].Largeur,
+            Mode_video[Nouveau_mode].Hauteur,
+            Mode_video[Nouveau_mode].Fullscreen);
           Afficher_menu();
         }
         else
@@ -3177,7 +3178,10 @@ void Bouton_Reload(void)
       if ( ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle)) &&
            (!Une_resolution_a_ete_passee_en_parametre) )
       {
-        Initialiser_mode_video(Nouveau_mode);
+        Initialiser_mode_video(
+        Mode_video[Nouveau_mode].Largeur,
+        Mode_video[Nouveau_mode].Hauteur,
+        Mode_video[Nouveau_mode].Fullscreen);
         Afficher_menu();
       }
       else

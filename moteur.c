@@ -441,8 +441,27 @@ void Gestion_principale(void)
   {
     Get_input();
 
+    // Redimensionnement demandé
+    if (Resize_Largeur || Resize_Hauteur)
+    {
+      Effacer_curseur();
+      Initialiser_mode_video(Resize_Largeur, Resize_Hauteur, 0);
+      Mode_video[0].Largeur = Largeur_ecran;
+      Mode_video[0].Hauteur = Hauteur_ecran;
+      // Remise à zero des variables indiquant le Redimensionnement demandé
+      Afficher_menu();
+      Afficher_ecran();
+      Afficher_curseur();
+    }
+    
+    // Evenement de fermeture
+    if (Quit_demande)
+    {
+      Quit_demande=0;
+      Bouton_Quit();
+    }
+    
     // Gestion des touches
-
     if (Touche)
     {
       for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && (Touche!=Config_Touche[Indice_Touche]);Indice_Touche++);
@@ -584,12 +603,12 @@ void Gestion_principale(void)
           Flip_Y_LOWLEVEL();
           Afficher_curseur();
           break;
-        case SPECIAL_ROTATE_90 : // 90ø brush rotation
+        case SPECIAL_ROTATE_90 : // 90° brush rotation
           Effacer_curseur();
           Rotate_90_deg();
           Afficher_curseur();
           break;
-        case SPECIAL_ROTATE_180 : // 180ø brush rotation
+        case SPECIAL_ROTATE_180 : // 180° brush rotation
           Effacer_curseur();
           if (Brosse_Hauteur&1)
           {
@@ -1101,7 +1120,7 @@ void Fenetre_Dessiner_bouton_palette(word Pos_X,word Pos_Y)
 
 
 // -------------------- Effacer les TAGs sur les palette ---------------------
-// Cette fonctø ne sert plus que lorsqu'on efface les tags dans le menu Spray.
+// Cette fonct° ne sert plus que lorsqu'on efface les tags dans le menu Spray.
 void Fenetre_Effacer_tags(void)
 {
   word Origine_X;

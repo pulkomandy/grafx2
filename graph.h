@@ -28,7 +28,7 @@ void Calculer_coordonnees_pinceau(void);
 
 char* Libelle_mode(int Mode);
 
-void Initialiser_mode_video(int Numero);
+void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur);
 void Pixel_dans_fenetre(word X,word Y,byte Couleur);
 void Encadrer_couleur_menu(byte Couleur);

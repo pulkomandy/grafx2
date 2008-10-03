@@ -829,7 +829,7 @@ void Bouton_Palette(void)
                 Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur_temporaire;
                 Tagger_intervalle_palette(Debut_block,Fin_block);
 
-                // Affichage du nø de la couleur sélectionnée
+                // Affichage du n° de la couleur sélectionnée
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
                 Num2str(Fore_color,Chaine,3);
                 Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
@@ -856,7 +856,7 @@ void Bouton_Palette(void)
                   Debut_block=Premiere_couleur;
                   Fin_block=Couleur_temporaire;
 
-                  // Affichage du nø de la couleur sélectionnée
+                  // Affichage du n° de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
                   Chaine[3]=26; // Flèche vers la droite
@@ -873,7 +873,7 @@ void Bouton_Palette(void)
                   Debut_block=Couleur_temporaire;
                   Fin_block=Premiere_couleur;
 
-                  // Affichage du nø de la couleur sélectionnée
+                  // Affichage du n° de la couleur sélectionnée
                   Num2str(Debut_block,Chaine  ,3);
                   Num2str(Fin_block  ,Chaine+4,3);
                   Chaine[3]=26; // Flèche vers la droite
@@ -890,7 +890,7 @@ void Bouton_Palette(void)
                   Debut_block=Fin_block=Premiere_couleur;
                   Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
 
-                  // Affichage du nø de la couleur sélectionnée
+                  // Affichage du n° de la couleur sélectionnée
                   Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
                   Num2str(Fore_color,Chaine,3);
                   Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
@@ -1082,7 +1082,7 @@ void Bouton_Palette(void)
           // On déplace le bloc vers les modifs:
           Derniere_couleur=Fin_block=Couleur_temporaire+Premiere_couleur-1;
           Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
-          // On raffiche le nø des bornes du bloc:
+          // On raffiche le n° des bornes du bloc:
           if (Debut_block!=Fin_block)
           {
             // Cas d'un bloc multi-couleur
@@ -1124,7 +1124,7 @@ void Bouton_Palette(void)
           // On déplace le bloc vers les modifs:
           Derniere_couleur=Fin_block=((Couleur_temporaire+Fin_block-Debut_block<=255)?(Couleur_temporaire+Fin_block-Debut_block):255);
           Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
-          // On raffiche le nø des bornes du bloc:
+          // On raffiche le n° des bornes du bloc:
           if (Debut_block!=Fin_block)
           {
             // Cas d'un bloc multi-couleur
@@ -1606,7 +1606,7 @@ void Bouton_Palette(void)
             Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
             Effacer_curseur();
             Tagger_intervalle_palette(Debut_block,Fin_block);
-            // Affichage du nø de la couleur sélectionnée
+            // Affichage du n° de la couleur sélectionnée
             Num2str(Fore_color,Chaine,3);
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
@@ -1626,7 +1626,7 @@ void Bouton_Palette(void)
             Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
             Effacer_curseur();
             Tagger_intervalle_palette(Debut_block,Fin_block);
-            // Affichage du nø de la couleur sélectionnée
+            // Affichage du n° de la couleur sélectionnée
             Num2str(Fore_color,Chaine,3);
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
@@ -1695,7 +1695,7 @@ void Bouton_Palette(void)
               Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur;
               Tagger_intervalle_palette(Debut_block,Fin_block);
 
-              // Affichage du nø de la couleur sélectionnée
+              // Affichage du n° de la couleur sélectionnée
               Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
               Num2str(Fore_color,Chaine,3);
               Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
