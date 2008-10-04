@@ -3115,7 +3115,7 @@ void Afficher_pinceau_dans_menu(void)
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }
   }
-  SDL_UpdateRect(Ecran_SDL,0,0,LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
+  SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,LARGEUR_SPRITE_MENU*Menu_Facteur_X+3,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y+3);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --
