@@ -3,7 +3,9 @@
 // little-endian.
 
 #include <SDL/SDL_endian.h>
+#include <string.h>
 #include "struct.h"
+#include "io.h"
 
 word endian_magic16(word x)
 {
@@ -13,7 +15,7 @@ word endian_magic16(word x)
     return SDL_Swap16(x);
   #endif
 }
-word endian_magic32(word x)
+dword endian_magic32(dword x)
 {
   #if SDL_BYTEORDER == SDL_LIL_ENDIAN
     return x;
@@ -128,3 +130,44 @@ int write_dword_be(FILE *Fichier, dword Mot)
   #endif
   return fwrite(&Mot, 1, sizeof(dword), Fichier) == sizeof(dword);
 }
+
+// Détermine la position du dernier '/' ou '\\' dans une chaine,
+// typiquement pour séparer le nom de fichier d'un chemin.
+// Attention, sous Windows, il faut s'attendre aux deux car 
+// par exemple un programme lancé sous GDB aura comme argv[0]:
+// d:\Data\C\GFX2\grafx2/grafx2.exe
+char * Position_dernier_slash(const char * Chaine)
+{
+  const char * Position = NULL;
+  for (; *Chaine != '\0'; Chaine++)
+    if (*Chaine == SEPARATEUR_CHEMIN[0]
+#ifdef __WIN32__    
+     || *Chaine == '/'
+#endif
+     )
+      Position = Chaine;
+  return (char *)Position;
+}
+// Récupère la partie "nom de fichier seul" d'un chemin
+void Extraire_nom_fichier(char *Destination, const char *Source)
+{
+  const char * Position = Position_dernier_slash(Source);
+
+  if (Position)
+    strcpy(Destination,Position+1);
+  else
+    strcpy(Destination,Source);
+}
+// Récupère la partie "répertoire+/" d'un chemin.
+void Extraire_chemin(char *Destination, const char *Source)
+{
+  char * Position;
+
+  strcpy(Destination,Source);
+  Position = Position_dernier_slash(Destination);
+  if (Position)
+    *(Position+1) = '\0';
+  else
+    strcat(Destination, SEPARATEUR_CHEMIN);
+}
+

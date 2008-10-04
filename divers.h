@@ -35,52 +35,6 @@ byte Lit_pixel_dans_ecran_backup   (word X,word Y);
 byte Lit_pixel_dans_ecran_feedback (word X,word Y);
 byte Lit_pixel_dans_brosse         (word X,word Y);
 
-long Freespace(byte Numero_de_lecteur);
-// Numero_de_lecteur = 0 : Disque courant
-//                     1 : lecteur A:
-//                     2 : lecteur B:
-//                     3 : lecteur C:
-//                   ... : ...
-//
-// Résultat = -1 si lecteur invalide, taille disponible sinon
-
-byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur);
-// Numero_de_lecteur compris entre 0 et 3 (4 lecteurs de disquettes)
-//
-// Résultat = 0 : Pas de lecteur
-//            1 : Lecteur 360 Ko
-//            2 : Lecteur 1.2 Mo
-//            3 : Lecteur 720 Ko
-//            4 : Lecteur 1.4 Mo
-//            5 : Lecteur 2.8 Mo (??? pas sur ???)
-//            6 : Lecteur 2.8 Mo
-
-byte Disk_map(byte Numero_de_lecteur);
-// Renseigne sur la lettre logique d'un lecteur
-// (utile pour tester si un lecteur de disquette est A: ou B: aux yeux du DOS)
-//
-// Entrée: Octet = n° du lecteur (1=A, 2=B ...)
-//
-// Sortie: Octet = 0FFh : Pas de lecteur (???)
-//                 sinon: numéro représenatan la lettre logique du lecteur
-//                        (commence à 1)
-
-byte Disque_dur_present(byte Numero_de_disque);
-// Numero_de_disque = 0:C, 1:D, 2:E, ...
-//
-// Résultat = 0 : Pas de disque dur présent
-//            1 : Disque dur présent
-
-byte Lecteur_CDROM_present(byte Numero_de_lecteur);
-// Numero_de_lecteur = 0 : lecteur A:
-//                     1 : lecteur B:
-//                     2 : lecteur C:
-//                   ... : ...
-//
-// Résultat = 0 : Pas de lecteur CD-ROM présent
-//            1 : Lecteur CD-ROM présent
-
-
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical);
 // Calcule les valeurs suivantes en fonction des deux paramètres:
 //

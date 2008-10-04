@@ -31,13 +31,7 @@
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
-  #ifdef __WATCOMC__
-	GetCurrentDirectory(255,Repertoire_du_programme);
-	strcat(Repertoire_du_programme,"\\");
-  #else
-  	puts("Chercher_repertoire_du_programme: implémentation incomplète");
-  	Repertoire_du_programme[0]=0; //On va travailler dans le dossier courant ...
-  #endif
+  Extraire_chemin(Repertoire_du_programme, Chaine);
 }
 
 
@@ -202,21 +196,23 @@ void Charger_DAT(void)
 
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.dat");
-
+  
   if(stat(Nom_du_fichier,&Informations_Fichier))
-        switch errno
-                {
-                        case EACCES: puts("La permission de parcours est refusée pour un des répertoires contenu dans le chemin path."); break;
-                        case EBADF:  puts("filedes est un mauvais descripteur."); break;
-                        case EFAULT: puts("Un pointeur se trouve en dehors de l'espace d'adressage."); break;
-                        case ENAMETOOLONG: puts("Nom de fichier trop long."); break;
-                        case ENOENT: puts("Un composant du chemin path n'existe pas, ou il s'agit d'une chaîne vide."); break;
-                        case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
-                        case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
-                        #ifdef __linux__
-                            case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
-                        #endif
-                }
+  {
+    switch errno
+    {
+      case EACCES: puts("La permission de parcours est refusée pour un des répertoires contenu dans le chemin path."); break;
+      case EBADF:  puts("filedes est un mauvais descripteur."); break;
+      case EFAULT: puts("Un pointeur se trouve en dehors de l'espace d'adressage."); break;
+      case ENAMETOOLONG: puts("Nom de fichier trop long."); break;
+      case ENOENT: puts("Un composant du chemin path n'existe pas, ou il s'agit d'une chaîne vide."); break;
+      case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
+      case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
+      #ifdef __linux__
+          case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
+      #endif
+    }
+  }
 
   Taille_fichier=Informations_Fichier.st_size;
   if (Taille_fichier<DAT_DEBUT_INI_PAR_DEFAUT)

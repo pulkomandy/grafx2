@@ -17,3 +17,14 @@ int read_word_be(FILE *Fichier, word *Dest);
 int write_word_be(FILE *Fichier, word Mot);
 int read_dword_be(FILE *Fichier, dword *Dest);
 int write_dword_be(FILE *Fichier, dword Mot);
+
+void Extraire_nom_fichier(char *Destination, const char *Source);
+void Extraire_chemin(char *Destination, const char *Source);
+
+char * Position_dernier_slash(const char * Chaine);
+
+#ifdef __linux__
+  #define SEPARATEUR_CHEMIN "/"
+#else
+  #define SEPARATEUR_CHEMIN "\\"
+#endif

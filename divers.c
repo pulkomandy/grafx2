@@ -578,45 +578,6 @@ byte Lit_pixel_dans_ecran_backup (word X,word Y)
         return *(Ecran_backup + X + Principal_Largeur_image * Y);
 }
 
-byte Type_de_lecteur_de_disquette(byte Numero_de_lecteur)
-// Numero_de_lecteur compris entre 0 et 3 (4 lecteurs de disquettes)
-//
-// Résultat = 0 : Pas de lecteur
-//            1 : Lecteur 360 Ko
-//            2 : Lecteur 1.2 Mo
-//            3 : Lecteur 720 Ko
-//            4 : Lecteur 1.4 Mo
-//            5 : Lecteur 2.8 Mo (??? pas sur ???)
-//            6 : Lecteur 2.8 Mo
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
-byte Disk_map(byte Numero_de_lecteur)
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
-byte Disque_dur_present(byte Numero_de_disque)
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
-byte Lecteur_CDROM_present(byte Numero_de_lecteur)
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
-long Freespace(byte Numero_de_lecteur)
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
 // Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
 // en faire du chunky
 

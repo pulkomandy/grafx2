@@ -23,6 +23,7 @@
 #include "readini.h"
 #include "saveini.h"
 #include "shade.h"
+#include "io.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>
@@ -2103,7 +2104,7 @@ void Print_repertoire_courant(void)
     //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
     for (Indice++;Indice<Longueur;Indice++)
-      if ( (Principal_Repertoire_courant[Indice]=='\\') &&
+      if ( (Principal_Repertoire_courant[Indice]==SEPARATEUR_CHEMIN[0]) &&
            (Longueur-Indice<=TAILLE_MAXI_PATH-6) )
       {
         // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
@@ -2239,9 +2240,6 @@ void Placer_barre_de_selection_sur(char * Nom)
 char FFF_Meilleur_nom[TAILLE_CHEMIN_FICHIER];
 char * Nom_correspondant_le_mieux_a(char * Nom)
 {
-  char Nom_courant[TAILLE_CHEMIN_FICHIER];
-  char * Pointeur1;
-  char * Pointeur2;
   char * Pointeur_Meilleur_nom;
   struct Element_de_liste_de_fileselect * Element_courant;
   byte   Lettres_identiques=0;
@@ -2255,18 +2253,12 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
     if ( (!Config.Find_file_fast)
       || (Config.Find_file_fast==(Element_courant->Type+1)) )
     {
-      // On copie le nom de la liste en cours de traitement dans Nom_courant
-      // tout en le remettant sous forme normale.
-      for (Pointeur1=Element_courant->NomComplet,Pointeur2=Nom_courant;*Pointeur1;Pointeur1++)
-        if (*Pointeur1!=' ')
-          *(Pointeur2++)=*Pointeur1;
-      *Pointeur2=0;
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (Compteur=0; tolower(Nom_courant[Compteur])==tolower(Nom[Compteur]); Compteur++);
+      for (Compteur=0; tolower(Element_courant->NomComplet[Compteur])==tolower(Nom[Compteur]); Compteur++);
       if (Compteur>Lettres_identiques)
       {
         Lettres_identiques=Compteur;
-        strcpy(FFF_Meilleur_nom,Nom_courant);
+        strcpy(FFF_Meilleur_nom,Element_courant->NomComplet);
         Pointeur_Meilleur_nom=Element_courant->NomComplet;
       }
     }
@@ -2390,16 +2382,20 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   }
 
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
-  chdir(Principal_Repertoire_courant);
-  /*_dos_setdrive(Principal_Repertoire_courant[0]-64,&Bidon);*/
-  Determiner_repertoire_courant();
-
+  if (Load)
+  {
+    chdir(Principal_Repertoire_courant);
+    Determiner_repertoire_courant();
+  }
+  else
+  {
+    chdir(Principal_Repertoire_fichier);
+    Determiner_repertoire_courant();
+  }
+  
   // Affichage des premiers fichiers visibles:
   Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
 
-  //   Je n'efface pas cette partie parce que l'idée n'était pas mauvaise mais
-  // ça chie un maximum alors autant ne pas trop compliquer les choses...
-  /*
   if (!Load)
   {
     // On initialise le nom de fichier à celui en cours et non pas celui sous
@@ -2408,7 +2404,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     // On affiche le nouveau nom de fichier
     Print_Nom_fichier_dans_selecteur();
   }
-  */
 
   Pixel_de_chargement=Pixel_Chargement_dans_preview;
   Nouvelle_preview=1;
@@ -2679,11 +2674,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Temp=strlen(Fichier_recherche);
           if (Touche_ANSI>= ' ' && Touche_ANSI < 255 && Temp<50)
           {
-            Fichier_recherche[Temp]=toupper(Touche_ANSI);
-            Fichier_recherche[Temp+1]=0;
+            Fichier_recherche[Temp]=Touche_ANSI;
+            Fichier_recherche[Temp+1]='\0';
             Fichier_le_plus_ressemblant=Nom_correspondant_le_mieux_a(Fichier_recherche);
-            if ( (Fichier_le_plus_ressemblant)
-              && (!memcmp(Fichier_recherche,FFF_Meilleur_nom,Temp+1)) )
+            if ( (Fichier_le_plus_ressemblant) )
             {
               Temp=Principal_File_list_Position+Principal_File_list_Decalage;
               Effacer_curseur();
@@ -2694,7 +2688,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
                 Nouvelle_preview=1;
             }
             else
-              Fichier_recherche[Temp]=0;
+              *Fichier_recherche=0;
           }
         }
         else
@@ -2715,10 +2709,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           strcpy(Repertoire_precedent,Nom_formate(".."));
         else
         {
-          for (Temp=strlen(Principal_Repertoire_courant);
-               (Temp>0) && (Principal_Repertoire_courant[Temp-1]!='\\');
-               Temp--);
-          strcpy(Repertoire_precedent,Nom_formate(Principal_Repertoire_courant+Temp));
+          strcpy(Repertoire_precedent,
+            Nom_formate(Position_dernier_slash(Principal_Repertoire_courant))
+            );
         }
 
         // On doit rentrer dans le répertoire:

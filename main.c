@@ -24,6 +24,7 @@
 #include "readini.h"
 #include "saveini.h"
 #include "linux.h"
+#include "io.h"
 
 #ifndef __linux__
     #include <windows.h>
@@ -215,34 +216,17 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         #ifdef __linux__
-            Buffer=realpath(argv[1],NULL);
-            _splitpath(Buffer,Principal_Repertoire_fichier,Principal_Nom_fichier);
+          Buffer=realpath(argv[1],NULL);
         #else
-            Buffer = malloc(TAILLE_CHEMIN_FICHIER);
-            _fullpath(Buffer,argv[1],TAILLE_CHEMIN_FICHIER);
-            {
-              // Découpage du nom canonique de fichier en chemin + nom.
-              // On croirait que c'est du classique pour la LibC, mais non...
-              int i;
-              int PosDernierSeparateur = 0;
-              for (i=0; Buffer[i]!='\0'; i++)
-              {
-                Principal_Repertoire_fichier[i] = Buffer[i];
-                if (Buffer[i]=='\\')
-                  PosDernierSeparateur = i;
-              }
-              Principal_Repertoire_fichier[PosDernierSeparateur]='\0';
-              for (i=0; Buffer[PosDernierSeparateur + i + 1]!='\0'; i++)
-              {
-                Principal_Nom_fichier[i] = Buffer[PosDernierSeparateur + i + 1];
-              }
-              Principal_Nom_fichier[i]='\0';
-              
-            }
-            free(Buffer);
+          Buffer = malloc(TAILLE_CHEMIN_FICHIER);
+          _fullpath(Buffer,argv[1],TAILLE_CHEMIN_FICHIER);
         #endif
-
-        // chdir(Principal_Repertoire_fichier);
+        Extraire_chemin(Principal_Repertoire_fichier, Buffer);
+        Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
+        #ifndef __linux__
+          free(Buffer);
+        #endif
+        chdir(Principal_Repertoire_fichier);
       }
       else
       {
@@ -309,6 +293,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   // On détermine dès le départ où se trouve le fichier:
   Chercher_repertoire_du_programme(argv[0]);
+  
   // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
   // On détermine le répertoire courant:
@@ -630,9 +615,6 @@ void Fermeture_du_programme(void)
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Repertoire_initial)!=-1)
   {
-    /* A revoir ...
-    _dos_setdrive(Repertoire_initial[0]-64,&Bidon);
-    */
     // On sauvegarde les données dans le .CFG et dans le .INI
     if (Config.Auto_save)
     {
