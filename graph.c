@@ -914,18 +914,18 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   int Sensibilite_Y;
   int Indice;
   
-  // Valeurs raisonnables: minimum 320x200
-  if (Largeur < 320)
-    Largeur = 320;
-  if (Hauteur < 200)
-    Hauteur = 200;
-  // La largeur doit être un multiple de 4
-  Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
-
   if (Largeur_ecran!=Largeur ||
       Hauteur_ecran!=Hauteur ||
       Mode_video[Resolution_actuelle].Fullscreen != Fullscreen)
   {
+    // Valeurs raisonnables: minimum 320x200
+    if (Largeur < 320)
+      Largeur = 320;
+    if (Hauteur < 200)
+      Hauteur = 200;
+    // La largeur doit être un multiple de 4
+    Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
+
     // Taille des menus
     int Facteur;
     if (Largeur/320 > Hauteur/200)
