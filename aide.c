@@ -228,7 +228,7 @@ void Bouton_Stats(void)
 
   #ifdef __linux__
     struct statfs Informations_Disque;
-    unsigned long long Taille = 0;
+    uint64_t Taille = 0;
   #else
     unsigned __int64 Taille;
     ULARGE_INTEGER tailleU;
@@ -277,8 +277,6 @@ void Bouton_Stats(void)
     Taille = tailleU.QuadPart;
   #endif
   
-  if (Taille>=0)
-  {
     if(Taille > (100ULL*1024*1024*1024))
         sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
     else if(Taille > (100*1024*1024))
@@ -288,9 +286,6 @@ void Bouton_Stats(void)
     else 
         sprintf(Buffer,"%d bytes",(unsigned int)Taille);
     Print_dans_fenetre(146,51,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
-  }
-  else
-    Print_dans_fenetre(146,51,"* Error *",STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage des informations sur l'image
   Print_dans_fenetre(10,67,"Picture info.:",STATS_COULEUR_TITRES,CM_Noir);

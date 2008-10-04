@@ -27,6 +27,8 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
     word Nombre_Couleurs=0;
     int i;
 
+    for (i=0;i<256;i++) Tableau[i]=0;
+
     //Calcul du nombre de pixels dans l'image
     Nombre_De_Pixels=Principal_Hauteur_image*Principal_Largeur_image;
 

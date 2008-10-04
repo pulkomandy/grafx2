@@ -4453,7 +4453,6 @@ void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
 //  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
-  DEBUG("XE",Fin_X);
   SDL_UpdateRect(Ecran_SDL,0,0,0,0);
 }
 
