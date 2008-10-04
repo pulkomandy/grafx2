@@ -95,7 +95,7 @@ void Pixel_Preview_Loupe_SDL  (word X,word Y,byte Couleur)
                 else
                         hauteur = Loupe_Facteur;
 
-                Block_SDL_Fast(
+		Block_SDL_Fast(
                         Table_mul_facteur_zoom[X-Loupe_Decalage_X] 
                                 + Principal_X_Zoom, 
                         Y_Zoom, Loupe_Facteur, hauteur, Couleur

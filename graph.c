@@ -48,8 +48,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 	// a rester dans la zone visible de l'image
-	if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
-	else L_effectif = Principal_Largeur_image - X_effectif;
+	if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
+	else L_effectif = Largeur_ecran - X_effectif;
 
 	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 	else H_effectif = Menu_Ordonnee - Y_effectif;
@@ -59,7 +59,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
 	{
-		X_effectif = Min(Max(X-Loupe_Decalage_X,0) * Loupe_Facteur, Principal_Largeur_image);
+		X_effectif = Min(Max(X-Loupe_Decalage_X,0) * Loupe_Facteur, Largeur_ecran);
 		Y_effectif = Min(Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur, Menu_Ordonnee);
 
 		Largeur *= Loupe_Facteur;
@@ -68,17 +68,17 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 		// a rester dans la zone visible de l'image
-		if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
-		else L_effectif = Principal_Largeur_image - X_effectif - 1;
+		if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
+		else L_effectif = Largeur_ecran - X_effectif;
 
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 		else H_effectif = Menu_Ordonnee - Y_effectif;
-
+/*
 		DEBUG("X ",X_effectif);
 		DEBUG("Y ",Y_effectif);
 		DEBUG("L ",L_effectif);
 		DEBUG("H ",H_effectif);
-
+*/
 		SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
 	}
 }
@@ -4446,7 +4446,9 @@ void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_
 {
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+//  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  DEBUG("XE",Fin_X);
+  SDL_UpdateRect(Ecran_SDL,0,0,0,0);
 }
 
   // -- Effacer la preview d'une ligne --
