@@ -48,8 +48,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 	// a rester dans la zone visible de l'image
-	if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
-	else L_effectif = Largeur_ecran - X_effectif;
+	if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
+	else L_effectif = Principal_Largeur_image - X_effectif;
 
 	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 	else H_effectif = Menu_Ordonnee - Y_effectif;
@@ -4155,6 +4155,7 @@ void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte
 {
   Pixel_figure=Pixel_figure_Definitif;
   Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,Couleur);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
 }
 
   // -- Tracer la preview d'un cercle vide --
@@ -4163,6 +4164,7 @@ void Tracer_cercle_vide_Preview(short Centre_X,short Centre_Y,short Rayon,byte C
 {
   Pixel_figure=Pixel_figure_Preview;
   Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,Couleur);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
 }
 
   // -- Effacer la preview d'un cercle vide --
@@ -4171,6 +4173,7 @@ void Effacer_cercle_vide_Preview(short Centre_X,short Centre_Y,short Rayon)
 {
   Pixel_figure=Pixel_figure_Effacer_preview;
   Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,0);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
 }
 
   // -- Tracer un cercle plein --
@@ -4294,6 +4297,7 @@ void Tracer_ellipse_vide_Definitif(short Centre_X,short Centre_Y,short Rayon_hor
 {
   Pixel_figure=Pixel_figure_Definitif;
   Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical+1);
 }
 
   // -- Tracer la preview d'une ellipse vide --
@@ -4302,6 +4306,7 @@ void Tracer_ellipse_vide_Preview(short Centre_X,short Centre_Y,short Rayon_horiz
 {
   Pixel_figure=Pixel_figure_Preview;
   Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical +1);
 }
 
   // -- Effacer la preview d'une ellipse vide --
@@ -4310,6 +4315,7 @@ void Effacer_ellipse_vide_Preview(short Centre_X,short Centre_Y,short Rayon_hori
 {
   Pixel_figure=Pixel_figure_Effacer_preview;
   Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,0);
+  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical+1);
 }
 
   // -- Tracer une ellipse pleine --
@@ -4944,7 +4950,7 @@ void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclai
       }
   }
   
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Y-Debut_Y+1,Fin_X-Debut_X+1);
+  Mettre_Ecran_A_Jour(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
 }
 
 
