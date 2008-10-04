@@ -1619,6 +1619,8 @@ void Deplacer_fenetre(short Dx, short Dy)
         Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
         Afficher_curseur();
       }
+    SDL_UpdateRect(Ecran_SDL,Ancien_X,Ancien_Y,Largeur,Hauteur);
+    SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
     }
 
     Effacer_curseur();
@@ -1650,6 +1652,8 @@ void Deplacer_fenetre(short Dx, short Dy)
     Afficher_curseur();
 
     free(Buffer);
+
+    DEBUG("Deplace",0);
   }
   else
   {
