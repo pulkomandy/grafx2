@@ -2039,6 +2039,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if(Loupe_Mode) Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
+	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
       break;
     default : // Pinceau
       Debut_X=X-Pinceau_Decalage_X;
