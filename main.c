@@ -380,6 +380,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
+  SDL_WM_SetCaption("GrafX2 beta 97.0% - USE AT YOUR OWN RISK","grafx2.gif");
 
   // On initialise tous les modes vidéo
   Definition_des_modes_video();

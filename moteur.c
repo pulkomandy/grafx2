@@ -444,6 +444,8 @@ void Gestion_principale(void)
     // Redimensionnement demandé
     if (Resize_Largeur || Resize_Hauteur)
     {
+      if(Resize_Largeur<320) Resize_Largeur =320;
+      if(Resize_Hauteur<200) Resize_Hauteur = 200;
       Effacer_curseur();
       Initialiser_mode_video(Resize_Largeur, Resize_Hauteur, 0);
       Mode_video[0].Largeur = Largeur_ecran;
