@@ -1781,7 +1781,7 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_MODES_VIDEO: // Modes vidéo
-        for (Indice=1; Indice<=NB_MODES_VIDEO; Indice++)
+        for (Indice=0; Indice<(Chunk.Taille/sizeof(CFG_Mode_video)); Indice++)
         {
           if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
               !read_word_le(Handle, &CFG_Mode_video.Largeur) ||
