@@ -1215,7 +1215,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     if (Position_curseur!=Indice)
     {
       Couleur_fond =CM_Noir;
-      if (Mode_video[Mode_courant].Etat<128)
+      if ((Mode_video[Mode_courant].Etat & 3) != 3)
         Couleur_texte=CM_Clair;
       else
         Couleur_texte=CM_Fonce;
@@ -1223,18 +1223,19 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     else
     {
       Couleur_fond =CM_Fonce;
-      if (Mode_video[Mode_courant].Etat<128)
+      if ((Mode_video[Mode_courant].Etat & 3) != 3)
         Couleur_texte=CM_Blanc;
       else
         Couleur_texte=CM_Clair;
     }
     Num2str(Mode_video[Mode_courant].Largeur,Chaine,4);
-    Num2str(Mode_video[Mode_courant].Hauteur,Chaine+4,4);
+    Chaine[4]=' ';
+    Num2str(Mode_video[Mode_courant].Hauteur,Chaine+5,4);
 
     if(Mode_video[Mode_courant].Fullscreen == 1)
-	    memcpy(Chaine+8,"  Fullscreen  ",15);
+	    memcpy(Chaine+9," Fullscreen  ",15);
     else
-	    memcpy(Chaine+8,"    Window    ",15);
+	    memcpy(Chaine+9,"   Window    ",15);
 
     if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
       Ratio=" 4/3  ";
@@ -1244,6 +1245,9 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
       Ratio="16/10 ";
     else
       Ratio="      ";
+    if (Mode_courant == 0)
+      Ratio="      ";
+
     strcat(Chaine,Ratio);
 
     Print_dans_fenetre(39,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
@@ -1289,7 +1293,7 @@ void Bouton_Resol(void)
   Print_dans_fenetre( 12, 37,"Width:"          ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(108, 37,"Height:"         ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 16, 60,"OK"              ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 55, 60,"X   Y"           ,CM_Fonce,CM_Clair);
+  Print_dans_fenetre( 55, 60,"X    Y"          ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(120, 60,"Win / Full"      ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(219, 60,"Ratio"           ,CM_Fonce,CM_Clair);
   Print_dans_fenetre( 30,170,"\03"             ,CM_Fonce,CM_Clair);
@@ -1438,9 +1442,10 @@ void Bouton_Resol(void)
             Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+1)&3;
           else
             Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+3)&3;
-
+            
           Effacer_curseur();
           Cocher_bouton_mode(19,16+(Bouton_clicke<<3),Mode_video[Temp].Etat);
+          Afficher_liste_modes(Debut_liste,Position_curseur);
           Afficher_curseur();
         }
     }
@@ -1514,7 +1519,7 @@ void Bouton_Resol(void)
       || (Hauteur_choisie!=Principal_Hauteur_image) )
       Redimentionner_image(Largeur_choisie,Hauteur_choisie);
 
-    if (Mode_video[Mode_choisi].Etat<=2)
+    if ((Mode_video[Mode_choisi].Etat & 3) != 3)
       Initialiser_mode_video(
         Mode_video[Mode_choisi].Largeur,
         Mode_video[Mode_choisi].Hauteur,
@@ -2869,9 +2874,9 @@ int Meilleur_mode_video(void)
   Meilleure_hauteur=0;
 
 
-  for (Mode=0; Mode<Nb_modes_video; Mode++)
+  for (Mode=1; Mode<Nb_modes_video; Mode++)
   {
-    if (Mode_video[Mode].Fullscreen && Mode_video[Mode].Etat<2)
+    if (Mode_video[Mode].Fullscreen && (Mode_video[Mode].Etat&3)<2)
     {
       Temp_X=Mode_video[Mode].Largeur;
       Temp_Y=Mode_video[Mode].Hauteur;

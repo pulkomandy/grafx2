@@ -1289,8 +1289,8 @@ typedef struct
 {
   word  Width;
   word  Height;
-  short Xorg;       // Inutile
-  short Yorg;       // Inutile
+  word  Xorg;       // Inutile
+  word  Yorg;       // Inutile
   byte  BitPlanes;
   byte  Mask;
   byte  Compression;
@@ -1298,8 +1298,8 @@ typedef struct
   word  Transp_col;
   byte  Xaspect;    // Inutile
   byte  Yaspect;    // Inutile
-  short Xscreen;
-  short Yscreen;
+  word  Xscreen;
+  word  Yscreen;
 } __attribute__((__packed__)) T_Header_LBM;
 
 // -- Tester si un fichier est au format LBM --------------------------------
