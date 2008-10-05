@@ -1331,9 +1331,22 @@ void Definir_mode_video(short  Largeur,
   Nb_modes_video ++;
 }
 
+// Utilisé pour trier les modes retournés par SDL
+int Compare_modes_video(const void *p1, const void *p2)
+{
+  const struct S_Mode_video *Mode1 = (const struct S_Mode_video *)p1;
+  const struct S_Mode_video *Mode2 = (const struct S_Mode_video *)p2;
 
-  // Initiliseur de toutes les opérations:
+  // Tris par largeur
+  if(Mode1->Largeur - Mode2->Largeur)
+    return Mode1->Largeur - Mode2->Largeur;
 
+  // Tri par hauteur
+  return Mode1->Hauteur - Mode2->Hauteur;
+}
+
+
+// Initiliseur de tous les modes video:
 void Definition_des_modes_video(void)
 {                   // Numero       LargHaut Mode      FXFY Ratio Ref WinOnly Pointeur
   SDL_Rect** Modes;
@@ -1422,7 +1435,8 @@ void Definition_des_modes_video(void)
         Definir_mode_video(Modes[Indice]->w,Modes[Indice]->h,MODE_SDL, 1);
       }
     }
-    return;
+    // Tri des modes : ceux trouvés par SDL ont été listés à la fin.
+    qsort(&Mode_video[1], Nb_modes_video - 1, sizeof(struct S_Mode_video), Compare_modes_video);
   }
 }
 
