@@ -71,8 +71,9 @@ struct S_Mode_video
   word   Fullscreen;
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
 };
-GLOBAL struct S_Mode_video Mode_video[NB_MODES_VIDEO];
+GLOBAL struct S_Mode_video Mode_video[MAX_MODES_VIDEO];
 
+GLOBAL int  Nb_modes_video; // Nombre de modes réellement recensés dans Mode_video[]
 
 GLOBAL struct
 {

@@ -1184,9 +1184,7 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte Etat)
 {
   byte Couleur;
 
-  if (Etat>=128)
-    Etat-=128;
-  switch (Etat)
+  switch (Etat & 0x7F)
   {
     case 0 : Couleur=CM_Blanc; break;
     case 1 : Couleur=CM_Clair; break;
@@ -1276,7 +1274,6 @@ void Bouton_Resol(void)
   short Debut_liste;
   short Position_curseur;
   short Temp;
-  byte  Temp2;
   char  Chaine[5];
   struct Fenetre_Bouton_special * Bouton_saisie_Width, * Bouton_saisie_Height;
 
@@ -1314,14 +1311,14 @@ void Bouton_Resol(void)
 
   if (Mode_choisi>=6)
   {
-    if (Mode_choisi<NB_MODES_VIDEO-6)
+    if (Mode_choisi<Nb_modes_video-6)
     {
       Debut_liste=Mode_choisi-5;
       Position_curseur=5;
     }
     else
     {
-      Debut_liste=NB_MODES_VIDEO-12;
+      Debut_liste=Nb_modes_video-12;
       Position_curseur=Mode_choisi-Debut_liste;
     }
   }
@@ -1331,7 +1328,7 @@ void Bouton_Resol(void)
     Position_curseur=Mode_choisi;
   }
 
-  Fenetre_Definir_bouton_scroller(271,69,97,NB_MODES_VIDEO,12,Debut_liste); // 6
+  Fenetre_Definir_bouton_scroller(271,69,97,Nb_modes_video,12,Debut_liste); // 6
 
   // Les 12 petits boutons indiquant l'état des modes
   for (Temp=0; Temp<12; Temp++)
@@ -1434,14 +1431,13 @@ void Bouton_Resol(void)
 
       default: // Boutons de tag des états des modes
         Temp=Debut_liste+Bouton_clicke-7;
-        if (Temp) // On n'a pas le droit de cocher le mode fenêtré
+        if (Temp && // On n'a pas le droit de cocher le mode fenêtré
+            !(Mode_video[Temp].Etat & 128)) // Ni ceux non détectés par SDL
         {
-          Temp2=(Mode_video[Temp].Etat & 0x80)?128:0;
-
           if (Fenetre_Attribut1==A_GAUCHE)
-            Mode_video[Temp].Etat=Temp2+(((Mode_video[Temp].Etat&0x7F)+1)&3);
+            Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+1)&3;
           else
-            Mode_video[Temp].Etat=Temp2+(((Mode_video[Temp].Etat&0x7F)+3)&3);
+            Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+3)&3;
 
           Effacer_curseur();
           Cocher_bouton_mode(19,16+(Bouton_clicke<<3),Mode_video[Temp].Etat);
@@ -1464,7 +1460,7 @@ void Bouton_Resol(void)
         if (Position_curseur<11)
           Position_curseur++;
         else
-          if (Debut_liste<NB_MODES_VIDEO-12)
+          if (Debut_liste<Nb_modes_video-12)
             Debut_liste++;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1485,10 +1481,10 @@ void Bouton_Resol(void)
           Position_curseur=11;
         else
         {
-          if (Debut_liste<NB_MODES_VIDEO-23)
+          if (Debut_liste<Nb_modes_video-23)
             Debut_liste+=11;
           else
-            Debut_liste=NB_MODES_VIDEO-12;
+            Debut_liste=Nb_modes_video-12;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -1498,7 +1494,7 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_END : // End
-        Debut_liste=NB_MODES_VIDEO-12;
+        Debut_liste=Nb_modes_video-12;
         Position_curseur=11;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
@@ -2873,7 +2869,7 @@ int Meilleur_mode_video(void)
   Meilleure_hauteur=0;
 
 
-  for (Mode=0; Mode<=NB_MODES_VIDEO; Mode++)
+  for (Mode=0; Mode<Nb_modes_video; Mode++)
   {
     if (Mode_video[Mode].Fullscreen && Mode_video[Mode].Etat<2)
     {

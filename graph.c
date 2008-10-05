@@ -991,7 +991,7 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     if (!Fullscreen)
       Resolution_actuelle=0;
     else
-      for (Indice=1; Indice<NB_MODES_VIDEO; Indice++)
+      for (Indice=1; Indice<Nb_modes_video; Indice++)
       {
         if (Mode_video[Indice].Largeur==Largeur_ecran &&
             Mode_video[Indice].Hauteur==Hauteur_ecran)

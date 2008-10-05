@@ -1302,14 +1302,30 @@ void Initialisation_des_operations(void)
   // Définition d'un mode:
 
 void Definir_mode_video(int    Numero,
-                        short  Largeur, short Hauteur,
+                        short  Largeur,
+                        short  Hauteur,
                         byte   Mode,
-                        word   Plein_Ecran)
-{
+                        word   Fullscreen)
+{                   
+  byte Supporte = 0;
+  
+  if (Numero >= MAX_MODES_VIDEO)
+  {
+    DEBUG("Erreur! Tentative de créer un mode de trop:", Numero);
+    return;
+  }
+  if (!Fullscreen)
+    Supporte = 128; // Prefere, non modifiable
+  else if (SDL_VideoModeOK(Largeur, Hauteur, 8, SDL_FULLSCREEN))
+    Supporte = 1; // Supporte
+  else
+    Supporte = 128+3; // Non supporte, non modifiable
+
   Mode_video[Numero].Largeur          = Largeur;
   Mode_video[Numero].Hauteur          = Hauteur;
   Mode_video[Numero].Mode             = Mode;
-  Mode_video[Numero].Fullscreen	      = Plein_Ecran;
+  Mode_video[Numero].Fullscreen	      = Fullscreen;
+  Mode_video[Numero].Etat	            = Supporte;
 }
 
 
@@ -1318,88 +1334,91 @@ void Definir_mode_video(int    Numero,
 void Definition_des_modes_video(void)
 {                   // Numero       LargHaut Mode      FXFY Ratio Ref WinOnly Pointeur
   SDL_Rect** Modes;
-  int Indice=0;
-  Definir_mode_video( Indice++, 640,480,MODE_SDL, 0);
-  Definir_mode_video( Indice++, 320,200,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,224,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,240,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,256,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,270,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,282,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,300,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,360,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,400,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,448,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,480,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,512,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,540,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,564,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 320,600,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,200,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,224,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,240,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,256,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,270,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,282,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,300,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,360,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,400,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,448,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,480,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,512,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,540,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,564,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 360,600,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,200,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,224,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,240,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,256,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,270,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,282,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,300,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,360,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,400,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,448,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,480,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,512,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,540,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,564,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 400,600,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,224,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,240,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,256,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,270,MODE_SDL, 1);
-  //Definir_mode_video( Indice++, 640,282,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,300,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,350,MODE_SDL, 1);
-  //Definir_mode_video( Indice++, 640,360,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,400,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,448,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,480,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,512,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,540,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,564,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 640,600,MODE_SDL, 1);
-  Definir_mode_video( Indice++, 800,600,MODE_SDL, 1);
-  Definir_mode_video(Indice++,1024,768,MODE_SDL, 1);
+  Nb_modes_video=0;
+  Definir_mode_video( Nb_modes_video++, 640,480,MODE_SDL, 0);
+  Definir_mode_video( Nb_modes_video++, 320,200,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,224,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,240,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,256,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,270,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,282,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,300,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,360,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,400,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,448,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,480,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,512,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,540,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,564,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 320,600,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,200,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,224,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,240,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,256,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,270,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,282,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,300,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,360,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,400,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,448,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,480,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,512,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,540,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,564,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 360,600,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,200,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,224,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,240,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,256,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,270,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,282,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,300,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,360,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,400,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,448,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,480,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,512,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,540,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,564,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 400,600,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,224,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,240,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,256,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,270,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,300,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,350,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,400,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,448,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,480,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,512,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,540,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,564,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 640,600,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++, 800,600,MODE_SDL, 1);
+  Definir_mode_video( Nb_modes_video++,1024,768,MODE_SDL, 1);
 
   Modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
   if ((Modes != (SDL_Rect**)0) && (Modes!=(SDL_Rect**)-1))
   {
+    int Indice;
     for (Indice=0; Modes[Indice]; Indice++)
     {
       int Indice2;
-      for (Indice2=0; Indice2 < NB_MODES_VIDEO; Indice2++)
+      for (Indice2=1; Indice2 < Nb_modes_video; Indice2++)
         if (Modes[Indice]->w == Mode_video[Indice2].Largeur && 
             Modes[Indice]->h == Mode_video[Indice2].Hauteur)
         {
-          Mode_video[Indice2].Etat = 1;
+          // Mode déja prévu: ok
           break;
         }
+      if (Indice2 >= Nb_modes_video)
+      {
+        // Nouveau mode à ajouter à la liste
+        Definir_mode_video( Nb_modes_video++,Modes[Indice]->w,Modes[Indice]->h,MODE_SDL, 1);
+      }
     }
     return;
   }
-
 }
 
 //---------------------------------------------------------------------------
@@ -1787,14 +1806,18 @@ int Charger_CFG(int Tout_charger)
               !read_word_le(Handle, &CFG_Mode_video.Largeur) ||
               !read_word_le(Handle, &CFG_Mode_video.Hauteur) )
             goto Erreur_lecture_config;
-          
-          for (Indice2=0; Indice2<NB_MODES_VIDEO; Indice2++)
+
+          for (Indice2=1; Indice2<Nb_modes_video; Indice2++)
           {
             if (Mode_video[Indice2].Largeur==CFG_Mode_video.Largeur &&
-                Mode_video[Indice2].Hauteur==CFG_Mode_video.Hauteur &&
-                Mode_video[Indice2].Mode==(CFG_Mode_video.Etat>>6))
+                Mode_video[Indice2].Hauteur==CFG_Mode_video.Hauteur)
             {
-              Mode_video[Indice2].Etat=(Mode_video[Indice2].Etat&0xFC) | (CFG_Mode_video.Etat&3);
+              // On ne prend le paramètre utilisateur que si la résolution
+              // est effectivement supportée par SDL
+              // Seules les deux petits bits sont récupérés, car les anciens fichiers
+              // de configuration (DOS 96.5%) utilisaient d'autres bits.
+              if (! (Mode_video[Indice2].Etat & 128))
+                Mode_video[Indice2].Etat=CFG_Mode_video.Etat&3;
               break;
             }
           }
@@ -1957,6 +1980,7 @@ int Sauver_CFG(void)
   FILE*  Handle;
   int  Indice;
   int  Indice2;
+  int Modes_a_sauver;
   //byte Octet;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   struct Config_Header       CFG_Header;
@@ -2007,23 +2031,31 @@ int Sauver_CFG(void)
       goto Erreur_sauvegarde_config;
   }
 
+  // D'abord compter les modes pour lesquels l'utilisateur a mis une préférence
+  Modes_a_sauver=0;
+  for (Indice=1; Indice<Nb_modes_video; Indice++)
+    if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
+      Modes_a_sauver++;
+
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Numero=CHUNK_MODES_VIDEO;
-  Chunk.Taille=NB_MODES_VIDEO * sizeof(CFG_Mode_video);
+  Chunk.Taille=Modes_a_sauver * sizeof(CFG_Mode_video);
+
   if (!write_byte(Handle, Chunk.Numero) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  for (Indice=0; Indice<NB_MODES_VIDEO; Indice++)
-  {
-    CFG_Mode_video.Etat   =(Mode_video[Indice].Mode<<6) | (Mode_video[Indice].Etat&3);
-    CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
-    CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
-    
-    if (!write_byte(Handle, CFG_Mode_video.Etat) ||
-      !write_word_le(Handle, CFG_Mode_video.Largeur) ||
-      !write_word_le(Handle, CFG_Mode_video.Hauteur) )
-      goto Erreur_sauvegarde_config;
-  }
+  for (Indice=1; Indice<Nb_modes_video; Indice++)
+    if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
+    {
+      CFG_Mode_video.Etat   =Mode_video[Indice].Etat;
+      CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
+      CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
+      
+      if (!write_byte(Handle, CFG_Mode_video.Etat) ||
+        !write_word_le(Handle, CFG_Mode_video.Largeur) ||
+        !write_word_le(Handle, CFG_Mode_video.Hauteur) )
+        goto Erreur_sauvegarde_config;
+    }
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Numero=CHUNK_SHADE;

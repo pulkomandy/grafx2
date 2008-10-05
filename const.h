@@ -15,7 +15,7 @@
 #define BETA2                     0     // |
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
 #define DAT_DEBUT_INI_PAR_DEFAUT  0xF385 // Dans gfx2.dat, début du fichier gfx2.ini standard
-#define NB_MODES_VIDEO            61    // Nombre de modes vidéo
+#define MAX_MODES_VIDEO           100   // Nombre de modes vidéo maxi
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
 #define NB_TOUCHES_SPECIALES      72    // Nombre de touches spéciales
@@ -99,7 +99,6 @@ enum CODES_D_ERREURS
   ERREUR_MEMOIRE,               // Plus de mémoire
   ERREUR_LIGNE_COMMANDE,        // Erreur sur la ligne de commande
   ERREUR_DRIVER_SOURIS,         // Pas de driver souris installé
-  ERREUR_MODE_VESA_INVALIDE,    // Mode VESA demandé sur la ligne de commande invalide
   ERREUR_MODE_INTERDIT,         // Mode demandé sur la ligne de commande interdit (coché en noir)
   ERREUR_NUMERO_MODE,           // Erreur de choix de mode sur la ligne de commande
   ERREUR_SAUVEGARDE_CFG,        // Erreur en écriture pour GFX2.CFG

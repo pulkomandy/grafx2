@@ -158,9 +158,6 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
       case ERREUR_DRIVER_SOURIS      : printf("Error: No mouse detected!\n");
                                        printf("Check if a mouse driver is installed and if your mouse is correctly connected.\n");
                                        break;
-      case ERREUR_MODE_VESA_INVALIDE : printf("Error: Requested VESA mode not supported by your video card!\n");
-                                       printf("You should try to run a VESA driver such as UNIVESA or UNIVBE.\n");
-                                       break;
       case ERREUR_MODE_INTERDIT      : printf("Error: The requested video mode has been disabled from the resolution menu!\n");
                                        printf("If you want to run the program in this mode, you'll have to start it with an\n");
                                        printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
@@ -259,11 +256,8 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
       Erreur(ERREUR_LIGNE_COMMANDE);
   }
 
-  if (Mode_video[Resolution_actuelle].Etat>=128)
-    Erreur(ERREUR_MODE_VESA_INVALIDE);
-  else
-    if (Mode_video[Resolution_actuelle].Etat==3)
-      Erreur(ERREUR_MODE_INTERDIT);
+  if ((Mode_video[Resolution_actuelle].Etat & 0x7F) == 3)
+    Erreur(ERREUR_MODE_INTERDIT);
 }
 
 // ------------------------ Initialiser le programme -------------------------
