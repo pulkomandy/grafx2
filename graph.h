@@ -27,6 +27,7 @@ void Calculer_limites(void);
 void Calculer_coordonnees_pinceau(void);
 
 char* Libelle_mode(int Mode);
+int Conversion_argument_mode(const char *Argument);
 
 void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur);

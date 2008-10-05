@@ -39,69 +39,14 @@ byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Afficher_syntaxe(void)
 {
-  printf("Syntax: GFX2 [<picture>] [<Video mode number>|<Help>]\n\n");
-  printf("<Help> can be /? or /h\n\n");
-  printf("Available video modes:\nÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ\n");
-  printf("\t 0:%s",Libelle_mode(0));
-  printf("\t15:%s",Libelle_mode(15));
-  printf("\t30:%s",Libelle_mode(30));
-  printf("\t45:%s\n",Libelle_mode(45));
-  printf("\t 1:%s",Libelle_mode(1));
-  printf("\t16:%s",Libelle_mode(16));
-  printf("\t31:%s",Libelle_mode(31));
-  printf("\t46:%s\n",Libelle_mode(46));
-  printf("\t 2:%s",Libelle_mode(2));
-  printf("\t17:%s",Libelle_mode(17));
-  printf("\t32:%s",Libelle_mode(32));
-  printf("\t47:%s\n",Libelle_mode(47));
-  printf("\t 3:%s",Libelle_mode(3));
-  printf("\t18:%s",Libelle_mode(18));
-  printf("\t33:%s",Libelle_mode(33));
-  printf("\t48:%s\n",Libelle_mode(48));
-  printf("\t 4:%s",Libelle_mode(4));
-  printf("\t19:%s",Libelle_mode(19));
-  printf("\t34:%s",Libelle_mode(34));
-  printf("\t49:%s\n",Libelle_mode(49));
-  printf("\t 5:%s",Libelle_mode(5));
-  printf("\t20:%s",Libelle_mode(20));
-  printf("\t35:%s",Libelle_mode(35));
-  printf("\t50:%s\n",Libelle_mode(50));
-  printf("\t 6:%s",Libelle_mode(6));
-  printf("\t21:%s",Libelle_mode(21));
-  printf("\t36:%s",Libelle_mode(36));
-  printf("\t51:%s\n",Libelle_mode(51));
-  printf("\t 7:%s",Libelle_mode(7));
-  printf("\t22:%s",Libelle_mode(22));
-  printf("\t37:%s",Libelle_mode(37));
-  printf("\t52:%s\n",Libelle_mode(52));
-  printf("\t 8:%s",Libelle_mode(8));
-  printf("\t23:%s",Libelle_mode(23));
-  printf("\t38:%s",Libelle_mode(38));
-  printf("\t53:%s\n",Libelle_mode(53));
-  printf("\t 9:%s",Libelle_mode(9));
-  printf("\t24:%s",Libelle_mode(24));
-  printf("\t39:%s",Libelle_mode(39));
-  printf("\t54:%s\n",Libelle_mode(54));
-  printf("\t10:%s",Libelle_mode(10));
-  printf("\t25:%s",Libelle_mode(25));
-  printf("\t40:%s",Libelle_mode(40));
-  printf("\t55:%s\n",Libelle_mode(55));
-  printf("\t11:%s",Libelle_mode(11));
-  printf("\t26:%s",Libelle_mode(26));
-  printf("\t41:%s",Libelle_mode(41));
-  printf("\t56:%s\n",Libelle_mode(56));
-  printf("\t12:%s",Libelle_mode(12));
-  printf("\t27:%s",Libelle_mode(27));
-  printf("\t42:%s",Libelle_mode(42));
-  printf("\t57:%s\n",Libelle_mode(57));
-  printf("\t13:%s",Libelle_mode(13));
-  printf("\t28:%s",Libelle_mode(28));
-  printf("\t43:%s",Libelle_mode(43));
-  printf("\t58:%s\n",Libelle_mode(58));
-  printf("\t14:%s",Libelle_mode(14));
-  printf("\t29:%s",Libelle_mode(29));
-  printf("\t44:%s",Libelle_mode(44));
-  printf("\t59:%s\n",Libelle_mode(59));
+  int Indice_mode;
+  printf("Syntax: GFX2 [<arguments>] [<picture>]\n\n");
+  printf("<arguments> can be:]\n");
+  printf("\t/? /h /help        for this help screen\n");
+  printf("\t/mode <videomode>  to set a video mode\n\n");
+  printf("Available video modes:\n\n");
+  for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
+    printf("\t%s\n",Libelle_mode(Indice_mode));
 }
 
 
@@ -152,9 +97,6 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
                                        printf("This also requires 16 free Megabytes on your disk to create the memory cache.\n");
                                        printf("This will slow down the program but, at least, you'll get GrafX2 running.\n");
                                        break;
-      case ERREUR_LIGNE_COMMANDE     : printf("Error: Too many parameters.\n\n");
-                                       Afficher_syntaxe();
-                                       break;
       case ERREUR_DRIVER_SOURIS      : printf("Error: No mouse detected!\n");
                                        printf("Check if a mouse driver is installed and if your mouse is correctly connected.\n");
                                        break;
@@ -163,7 +105,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
                                        printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
                                        printf("Check also if the 'Default_video_mode' parameter in GFX2.INI is correct.\n");
                                        break;
-      case ERREUR_NUMERO_MODE        : printf("Error: Invalid parameter or file not found.\n\n");
+      case ERREUR_LIGNE_COMMANDE     : printf("Error: Invalid parameter or file not found.\n\n");
                                        Afficher_syntaxe();
                                        break;
       case ERREUR_SAUVEGARDE_CFG     : printf("Error: Write error while saving settings!\n");
@@ -186,37 +128,76 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
   }
 }
 
-
 // --------------------- Analyse de la ligne de commande ---------------------
 void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 {
-  byte Option2=1;
   char *Buffer ;
+  int Indice;
 
 
   Un_fichier_a_ete_passe_en_parametre=0;
   Une_resolution_a_ete_passee_en_parametre=0;
-
-  switch (argc)
+  
+  Resolution_actuelle=Config.Resolution_par_defaut;
+  
+  for (Indice=1; Indice<argc; Indice++)
   {
-    case 1 : // Mode par défaut
-      Resolution_actuelle=Config.Resolution_par_defaut;
-      break;
-
-    case 2 :
-    case 3 :
-      if (Fichier_existe(argv[1]))
+    if ( !strcmp(argv[Indice],"/?") ||
+         !strcmp(argv[Indice],"/h") ||
+         !strcmp(argv[Indice],"/H") )
+    {
+      // help
+      Afficher_syntaxe();
+      exit(0);
+    }
+    else if ( !strcmp(argv[Indice],"/mode") )
+    {
+      // mode
+      Indice++;
+      if (Indice<argc)
+      {    
+        Une_resolution_a_ete_passee_en_parametre = 1;
+        Resolution_actuelle=Conversion_argument_mode(argv[Indice]);
+        if (Resolution_actuelle == -1)
+        {
+          Erreur(ERREUR_LIGNE_COMMANDE);
+          Afficher_syntaxe();
+          exit(0);
+        }
+        if ((Mode_video[Resolution_actuelle].Etat & 0x7F) == 3)
+        {
+          Erreur(ERREUR_MODE_INTERDIT);
+          exit(0);
+        }
+      }
+      else
+      {
+        Erreur(ERREUR_LIGNE_COMMANDE);
+        Afficher_syntaxe();
+        exit(0);
+      }
+    }
+    else
+    {
+      // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
+      if (Un_fichier_a_ete_passe_en_parametre)
+      {
+        // plusieurs noms de fichier en argument
+        Erreur(ERREUR_LIGNE_COMMANDE);
+        Afficher_syntaxe();
+        exit(0);
+      }
+      else if (Fichier_existe(argv[Indice]))
       {
         Un_fichier_a_ete_passe_en_parametre=1;
-        Option2=2;
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         #ifdef __linux__
-          Buffer=realpath(argv[1],NULL);
+          Buffer=realpath(argv[Indice],NULL);
         #else
           Buffer = malloc(TAILLE_CHEMIN_FICHIER);
-          _fullpath(Buffer,argv[1],TAILLE_CHEMIN_FICHIER);
+          _fullpath(Buffer,argv[Indice],TAILLE_CHEMIN_FICHIER);
         #endif
         Extraire_chemin(Principal_Repertoire_fichier, Buffer);
         Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
@@ -227,37 +208,12 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
       }
       else
       {
-        if (argc==3)
-          Erreur(ERREUR_NUMERO_MODE);
+        Erreur(ERREUR_LIGNE_COMMANDE);
+        Afficher_syntaxe();
+        exit(0);
       }
-
-      if (Option2<argc)
-      {
-        if ( (!strcmp(argv[Option2],"/?")) ||
-             (!strcmp(argv[Option2],"/h")) ||
-             (!strcmp(argv[Option2],"/H")) )
-        {
-          Passer_en_mode_texte(Ancien_nb_lignes);
-          Clavier_de_depart();
-          Afficher_syntaxe();
-          exit(0);
-        }
-/*
-        Resolution_actuelle=Str2num(argv[Option2]); // Mode désiré par l'utilisateur
-        if ( (Resolution_actuelle<MODE_320_200) || (Resolution_actuelle>MODE_1024_768) )
-          Erreur(ERREUR_NUMERO_MODE);
-        Une_resolution_a_ete_passee_en_parametre=Un_fichier_a_ete_passe_en_parametre;
-*/
-      }
-      break;
-
-    default:
-      // Erreur: trop de paramètres sur la ligne de commande
-      Erreur(ERREUR_LIGNE_COMMANDE);
+    }
   }
-
-  if ((Mode_video[Resolution_actuelle].Etat & 0x7F) == 3)
-    Erreur(ERREUR_MODE_INTERDIT);
 }
 
 // ------------------------ Initialiser le programme -------------------------
@@ -529,7 +485,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Mode_dans_lequel_on_demarre=Resolution_actuelle;
   Buffer_de_ligne_horizontale=NULL;
   Resolution_actuelle=-1; // On n'était pas dans un mode graphique
-
+  
   Initialiser_mode_video(
     Mode_video[Mode_dans_lequel_on_demarre].Largeur,
     Mode_video[Mode_dans_lequel_on_demarre].Hauteur,

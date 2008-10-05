@@ -6,6 +6,7 @@
 #include "readini.h"
 #include "files.h"
 #include "erreurs.h"
+#include "graph.h"
 
 int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * Group)
 {
@@ -173,7 +174,111 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
   }
 }
 
+void Sauver_INI_Set_string(char * Destination,char * Source,char * Value)
+{
+  int Indice_destination;
+  int Indice_source;
+     
+  // On commence par recopier tout jusqu'au symbole '=':
+  for (Indice_source=0;Source[Indice_source]!='=';Indice_source++)
+    Destination[Indice_source]=Source[Indice_source];
 
+  // Puis on recopie le symbole '=':
+  Destination[Indice_source]=Source[Indice_source];
+  Indice_source++;
+
+  // Puis on recopie tous les espaces qui suivent:
+  for (;Source[Indice_source]==' ';Indice_source++)
+    Destination[Indice_source]=Source[Indice_source];
+
+  // Pour l'instant, la source et la destination en sont au même point:
+  Indice_destination=Indice_source;
+
+  // Dans la destination, on écrit la valeur:
+  strcpy(Destination+Indice_destination,Value);
+  Indice_destination+=strlen(Value);
+
+  // Dans la source, on saute la valeur:
+  for (;Sauver_INI_char_in_value_alphabet(Source[Indice_source]) && (Source[Indice_source]!='\0');Indice_source++);
+
+  // On recopie toute la fin de la ligne:
+  for (;Source[Indice_source]!='\0';Indice_source++,Indice_destination++)
+    Destination[Indice_destination]=Source[Indice_source];
+
+  // Et on n'oublie pas d'y mettre l''\0':
+  Destination[Indice_destination]='\0';
+}
+
+int Sauver_INI_Set_strings(FILE * Old_file,FILE * New_file,char * Buffer,char * Option,char * Value)
+{
+  int    Arret;
+  char * Option_upper;
+  char * Buffer_upper;
+  char * Buffer_resultat;
+  //int    Indice_buffer;
+
+  // On alloue les zones de mémoire:
+  Option_upper=(char *)malloc(1024);
+  Buffer_upper=(char *)malloc(1024);
+  Buffer_resultat=(char *)malloc(1024);
+
+  // On commence par se faire une version majuscule de l'option à rechercher:
+  strcpy(Option_upper,Option);
+  Charger_INI_Clear_string(Option_upper);
+
+  Arret=0;
+  do
+  {
+    // On lit une ligne dans le fichier:
+    if (fgets(Buffer,1024,Old_file)==0)
+    {
+      free(Buffer_resultat);
+      free(Buffer_upper);
+      free(Option_upper);
+      return ERREUR_INI_CORROMPU;
+    }
+
+    // On s'en fait une version en majuscule:
+    strcpy(Buffer_upper,Buffer);
+    Charger_INI_Clear_string(Buffer_upper);
+
+    // On compare la chaîne avec l'option recherchée:
+    Arret=Charger_INI_Seek_pattern(Buffer_upper,Option_upper);
+
+    if (Arret)
+    {
+      // On l'a trouvée:
+
+      Sauver_INI_Set_string(Buffer_resultat,Buffer,Value);
+      if (fprintf(New_file,"%s",Buffer_resultat)<0)
+      {
+        free(Buffer_resultat);
+        free(Buffer_upper);
+        free(Option_upper);
+        return ERREUR_SAUVEGARDE_INI;
+      }
+    }
+    else
+    {
+      // On l'a pas trouvée:
+
+      if (fprintf(New_file,"%s",Buffer)<0)
+      {
+        free(Buffer_resultat);
+        free(Buffer_upper);
+        free(Option_upper);
+        return ERREUR_SAUVEGARDE_INI;
+      }
+    }
+  }
+  while (Arret==0);
+
+  free(Buffer_resultat);
+  free(Buffer_upper);
+  free(Option_upper);
+
+  return 0;
+}
 
 int Sauver_INI_Set_values(FILE * Old_file,FILE * New_file,char * Buffer,char * Option,int Nb_values_to_set,int * Values,int Litteral)
 {
@@ -474,8 +579,12 @@ int Sauver_INI(struct S_Config * Conf)
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Auto_nb_colors_used",1,Valeurs,1)))
     goto Erreur_Retour;
 
-  Valeurs[0]=Conf->Resolution_par_defaut;
-  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_video_mode",1,Valeurs,0)))
+  if ((Retour=Sauver_INI_Set_strings (Ancien_fichier,Nouveau_fichier,Buffer,"Default_video_mode",Libelle_mode(Conf->Resolution_par_defaut))))
+    goto Erreur_Retour;
+
+  Valeurs[0]=Mode_video[0].Largeur;
+  Valeurs[1]=Mode_video[0].Hauteur;
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_window_size",2,Valeurs,0)))
     goto Erreur_Retour;
 
   Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);

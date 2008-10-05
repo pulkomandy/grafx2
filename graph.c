@@ -893,14 +893,27 @@ void Afficher_limites_de_l_image(void)
 // Fonction retournant le libellé d'une mode (ex: " 320x200")
 char * Libelle_mode(int Mode)
 {
-  static char Chaine[9];
+  static char Chaine[24];
+  if (! Mode_video[Mode].Fullscreen)
+    return "window";
+  sprintf(Chaine, "%dx%d", Mode_video[Mode].Largeur, Mode_video[Mode].Hauteur);
 
-  Num2str(Mode_video[Mode].Largeur,Chaine,4);
-  Chaine[4]='x';
-  Num2str(Mode_video[Mode].Hauteur,Chaine+5,3);
   return Chaine;
 }
 
+// Trouve un mode video à partir d'une chaine: soit "window",
+// soit de la forme "320x200"
+// Renvoie -1 si la chaine n'est pas convertible
+int Conversion_argument_mode(const char *Argument)
+{
+  // Je suis paresseux alors je vais juste tester les libellés
+  int Indice_mode;
+  for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
+    if (!stricmp(Libelle_mode(Indice_mode), Argument))
+      return Indice_mode;
+
+  return -1;
+}
 
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
@@ -1000,7 +1013,6 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
           break;
         }
       }
-    //Resolution_actuelle = ?
 
     Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) >> 3;
     Menu_Ordonnee = Hauteur_ecran;

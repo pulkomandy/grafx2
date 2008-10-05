@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "const.h"
 #include "global.h"
+#include "graph.h"
 
 void Charger_INI_Clear_string(char * String)
 {
@@ -108,7 +109,61 @@ int Charger_INI_Reach_group(FILE * File,char * Buffer,char * Group)
   return 0;
 }
 
+int Charger_INI_Get_string(FILE * File,char * Buffer,char * Option,char * Retour)
+{
+  int    Arret;
+  char * Option_upper;
+  char * Buffer_upper;
+  int    Indice_buffer;
 
+  // On alloue les zones de mémoire:
+  Option_upper=(char *)malloc(1024);
+  Buffer_upper=(char *)malloc(1024);
+
+  // On commence par se faire une version majuscule de l'option à rechercher:
+  strcpy(Option_upper,Option);
+  Charger_INI_Clear_string(Option_upper);
+
+  Arret=0;
+  do
+  {
+    // On lit une ligne dans le fichier:
+    if (fgets(Buffer,1024,File)==0)
+    {
+      free(Buffer_upper);
+      free(Option_upper);
+      return ERREUR_INI_CORROMPU;
+    }
+
+    Ligne_INI++;
+
+    // On s'en fait une version en majuscule:
+    strcpy(Buffer_upper,Buffer);
+    Charger_INI_Clear_string(Buffer_upper);
+
+    // On compare la chaîne avec l'option recherchée:
+    Arret=Charger_INI_Seek_pattern(Buffer_upper,Option_upper);
+
+    // Si on l'a trouvée:
+    if (Arret)
+    {
+      // On se positionne juste après la chaîne "="
+      Indice_buffer=Charger_INI_Seek_pattern(Buffer_upper,"=");
+
+      strcpy(Retour, Buffer_upper + Indice_buffer);
+      // On coupe la chaine au premier espace ou ; (commentaire)
+      for (Indice_buffer=0; Retour[Indice_buffer]!='\0' && Retour[Indice_buffer]!=' ' && Retour[Indice_buffer]!=';'; Indice_buffer++)
+        ;
+      Retour[Indice_buffer]='\0';
+    }
+  }
+  while (!Arret);
+
+  free(Buffer_upper);
+  free(Option_upper);
+
+  return 0;
+}
 
 int Charger_INI_Get_value(char * String,int * Index,int * Value)
 {
@@ -317,6 +372,7 @@ int Charger_INI(struct S_Config * Conf)
   //int    Indice;
   char * Nom_du_fichier;
   int    Retour;
+  char   Libelle_resolution[1024];
 
   Ligne_INI=0;
 
@@ -604,12 +660,26 @@ int Charger_INI(struct S_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   Conf->Auto_nb_used=Valeurs[0];
 
-  if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Default_video_mode",1,Valeurs)))
-    goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>=Nb_modes_video))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Resolution_par_defaut=Valeurs[0];
-
+  // Optionnel, le mode video par défaut (à partir de beta 97.0%)
+  Conf->Resolution_par_defaut=0;
+  if (!Charger_INI_Get_string (Fichier,Buffer,"Default_video_mode",Libelle_resolution))
+  {
+    int Mode = Conversion_argument_mode(Libelle_resolution);
+    if (Mode>=0)
+      Conf->Resolution_par_defaut=Mode;
+  }
+  
+  // Optionnel, les dimensions de la fenêtre (à partir de beta 97.0%)
+  Mode_video[0].Largeur = 640;
+  Mode_video[0].Hauteur = 480;
+  if (!Charger_INI_Get_values (Fichier,Buffer,"Default_window_size",2,Valeurs))
+  {
+    if ((Valeurs[0]>=320))
+      Mode_video[0].Largeur = Valeurs[0];
+    if ((Valeurs[1]>=200))
+      Mode_video[0].Hauteur = Valeurs[1];
+  }
+  
   fclose(Fichier);
 
   free(Nom_du_fichier);

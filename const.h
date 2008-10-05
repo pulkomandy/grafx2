@@ -100,7 +100,6 @@ enum CODES_D_ERREURS
   ERREUR_LIGNE_COMMANDE,        // Erreur sur la ligne de commande
   ERREUR_DRIVER_SOURIS,         // Pas de driver souris installé
   ERREUR_MODE_INTERDIT,         // Mode demandé sur la ligne de commande interdit (coché en noir)
-  ERREUR_NUMERO_MODE,           // Erreur de choix de mode sur la ligne de commande
   ERREUR_SAUVEGARDE_CFG,        // Erreur en écriture pour GFX2.CFG
   ERREUR_REPERTOIRE_DISPARU,    // Le répertoire de lancement n'existe plus
   ERREUR_INI_CORROMPU,          // Le fichier GFX2.INI est corrompu
