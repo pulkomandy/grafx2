@@ -1217,7 +1217,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
   char Chaine[29];
   char *Ratio;
 
-  for (Mode_courant=Debut_liste,Indice=0; Indice<12; Indice++,Mode_courant++)
+  for (Mode_courant=Debut_liste,Indice=0; Indice<12 && Mode_courant < Nb_modes_video ; Indice++,Mode_courant++)
   {
     Pos_Y=70+(Indice<<3);
     Cocher_bouton_mode(19,Pos_Y+2,Mode_video[Mode_courant].Etat);
@@ -1345,7 +1345,7 @@ void Bouton_Resol(void)
   Fenetre_Definir_bouton_scroller(271,69,97,Nb_modes_video,12,Debut_liste); // 6
 
   // Les 12 petits boutons indiquant l'état des modes
-  for (Temp=0; Temp<12; Temp++)
+  for (Temp=0; Temp<12 && Temp < Nb_modes_video; Temp++)
     Fenetre_Definir_bouton_normal(17,70+(Temp<<3),13,7,"",0,1,SDLK_LAST);// 7..18
 
   Fenetre_Dessiner_bouton_normal( 16,170,13,7,"",0,0);
@@ -1411,7 +1411,7 @@ void Bouton_Resol(void)
 
       case 5: // Liste des modes
         Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-70)>>3;
-        if ((Mouse_K==2) || (Temp!=Position_curseur))
+        if (Temp<Nb_modes_video && ((Mouse_K==2) || (Temp!=Position_curseur)))
         {
           Effacer_curseur();
           if (Temp!=Position_curseur)
@@ -1472,7 +1472,7 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_DOWN : // Bas
-        if (Position_curseur<11)
+        if (Position_curseur<11 && Position_curseur<(Nb_modes_video-1))
           Position_curseur++;
         else
           if (Debut_liste<Nb_modes_video-12)
@@ -1492,7 +1492,9 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_PAGEDOWN : // PageDown
-        if (Position_curseur<11)
+        if (Nb_modes_video<12)
+          Position_curseur=Nb_modes_video-1;
+        else if (Position_curseur<11)
           Position_curseur=11;
         else
         {
@@ -1509,8 +1511,13 @@ void Bouton_Resol(void)
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
       case SDLK_END : // End
-        Debut_liste=Nb_modes_video-12;
-        Position_curseur=11;
+        if (Nb_modes_video<12)
+          Position_curseur=Nb_modes_video-1;
+        else
+        {        
+          Debut_liste=Nb_modes_video-12;
+          Position_curseur=11;
+        }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
     }
