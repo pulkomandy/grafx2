@@ -389,7 +389,7 @@ void Deplacer_Split(void)
       Ligne_verticale_XOR(Ancien_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Ancien_X_Zoom-1,0,Menu_Ordonnee);
 
-      SDL_UpdateRect(Ecran_SDL,Ancien_Split,0,Ancien_Split-Principal_X_Zoom+1,Menu_Ordonnee);
+      SDL_UpdateRect(Ecran_SDL,Ancien_Split,0,abs(Ancien_Split-Ancien_X_Zoom)+1,Menu_Ordonnee);
 
       Ancien_Split=Principal_Split;
       Ancien_X_Zoom=Principal_X_Zoom;
@@ -398,7 +398,7 @@ void Deplacer_Split(void)
       Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
 
-      SDL_UpdateRect(Ecran_SDL,Principal_Split,0,Principal_Split-Principal_X_Zoom+1,Menu_Ordonnee);
+      SDL_UpdateRect(Ecran_SDL,Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
 
       Afficher_curseur();
     }

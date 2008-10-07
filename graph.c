@@ -1324,6 +1324,8 @@ void Afficher_barre_de_split(void)
   // Coin haut droite
   Block(Principal_X_Zoom-(Menu_Facteur_X<<1),0,
         Menu_Facteur_X,Menu_Facteur_Y,CM_Clair);
+
+  SDL_UpdateRect(Ecran_SDL,Principal_Split,0,LARGEUR_BARRE_SPLIT*Menu_Facteur_X,Menu_Ordonnee); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
 }
 
   // -- Afficher tout le menu --
@@ -3008,7 +3010,7 @@ void Afficher_ecran(void)
   // Effacement de la partie non-image dans la partie non zoomée:
   if (Loupe_Mode)
   {
-    if (Principal_Largeur_image<Principal_Split)
+    if (Principal_Largeur_image<Principal_Split && Principal_Largeur_image < Largeur_ecran)
       Block(Principal_Largeur_image,0,(Principal_Split-Principal_Largeur_image),Menu_Ordonnee,0);
   }
   else
@@ -3018,6 +3020,7 @@ void Afficher_ecran(void)
   }
   if (Principal_Hauteur_image<Menu_Ordonnee)
     Block(0,Principal_Hauteur_image,Largeur,(Menu_Ordonnee-Hauteur),0);
+  SDL_UpdateRect(Ecran_SDL,0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Loupe_Mode)
