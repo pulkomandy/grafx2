@@ -308,26 +308,6 @@ void Bouton_Stats(void)
   sprintf(Buffer,"%dx%d",Largeur_ecran,Hauteur_ecran);
   Print_dans_fenetre(106,99,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
-  // Affichage des infos VESA
-  Print_dans_fenetre(10,115,"VESA info.:",STATS_COULEUR_TITRES,CM_Noir);
-  if (((VESA_Version_Unite*10)+VESA_Version_Decimale)>=12)
-  {
-    Print_dans_fenetre(18,123,"Version  :",STATS_COULEUR_TITRES,CM_Noir);
-    sprintf(Buffer,"%d.%d",VESA_Version_Unite,VESA_Version_Decimale);
-    Print_dans_fenetre(106,123,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
-
-    Print_dans_fenetre(18,131,"Manufact.:",STATS_COULEUR_TITRES,CM_Noir);
-    strncpy(Buffer,VESA_Constructeur,TAILLE_NOM_CONSTRUCTEUR);
-    Buffer[TAILLE_NOM_CONSTRUCTEUR]='\0';
-    Print_dans_fenetre(106,131,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
-
-    Print_dans_fenetre(18,139,"Memory   :",STATS_COULEUR_TITRES,CM_Noir);
-    sprintf(Buffer,"%d Kb",VESA_Taille_memoire*64);
-    Print_dans_fenetre(106,139,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
-  }
-  else
-    Print_dans_fenetre(106,115,"* No VESA support *",STATS_COULEUR_DONNEES,CM_Noir);
-
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*174);
 
   Afficher_curseur();
