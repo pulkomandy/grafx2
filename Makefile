@@ -42,7 +42,7 @@ zip :
 
 # A release zip archive
 ziprelease:
-	zip grafx2-beta-svn`svnversion`.zip $(BIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll
+	zip grafx2-beta-svn`svnversion`.zip $(BIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll gfx2.cfg
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
