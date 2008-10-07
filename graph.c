@@ -2387,9 +2387,11 @@ void Afficher_curseur(void)
           if (Fin_X<4)
             Ligne_horizontale_XOR(Mouse_X+3,Mouse_Y,4-Fin_X);
 
-          Fin_Y=(Mouse_Y+7>Menu_Ordonnee/*Hauteur_ecran*/)?Mouse_Y+7-Menu_Ordonnee/*Hauteur_ecran*/:0;
+          Fin_Y=(Mouse_Y+7>/*Menu_Ordonnee*/Hauteur_ecran)?Mouse_Y+7-/*Menu_Ordonnee*/Hauteur_ecran:0;
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
+
+          SDL_UpdateRect(Ecran_SDL,Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
         }
         else
         {
@@ -2685,7 +2687,7 @@ void Effacer_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
-          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,(Fin_X>=Debut_X)?Fin_X-Debut_X+1:0,(Fin_X>=Debut_X)?Fin_Y-Debut_Y+1:0);
+          SDL_UpdateRect(Ecran_SDL,Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
         }
         else
         {
