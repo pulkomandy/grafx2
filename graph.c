@@ -59,7 +59,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
 	{
-		X_effectif = Min(Max(X-Loupe_Decalage_X,0) * Loupe_Facteur, Largeur_ecran);
+		X_effectif = Min(Max((X-Loupe_Decalage_X+2)*Loupe_Facteur,0) + Principal_Split, Largeur_ecran);
 		Y_effectif = Min(Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur, Menu_Ordonnee);
 
 		Largeur *= Loupe_Facteur;
@@ -68,7 +68,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 		// a rester dans la zone visible de l'image
-		if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
+		if(X_effectif + Largeur < Largeur_ecran) L_effectif = Largeur + 2 * Menu_Facteur_X;
 		else L_effectif = Largeur_ecran - X_effectif;
 
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
