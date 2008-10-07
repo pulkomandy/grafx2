@@ -160,7 +160,6 @@ GLOBAL fonction_lecteur   Lit_pixel;      // Teste la couleur d'un pixel dans l'
 GLOBAL fonction_effaceur  Clear_screen;   // Efface rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_display   Display_screen; // Affiche rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_block     Block;          // Affiche rapidement un bloc à l'écran
-GLOBAL fonction_block     Block_Fast;       // Affiche rapidement un bloc à l'écran sans rafraichir
 GLOBAL fonction_afficheur Pixel_Preview_Normal; // Affiche un point de l'image à l'écran en mode normal (pas en mode loupe)
 GLOBAL fonction_afficheur Pixel_Preview_Loupe;  // Affiche un point de l'image à l'écran en mode loupe
 GLOBAL fonction_afficheur Pixel_Preview;        // Affiche un point de l'image à l'écran en fonction de l'état du mode loupe

@@ -777,6 +777,8 @@ void Bouton_Palette(void)
   Dessiner_zigouigoui(263,165,CM_Fonce,-1);
   Dessiner_zigouigoui(280,165,CM_Fonce,+1);
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,299*Menu_Facteur_X,188*Menu_Facteur_Y);
+
   Afficher_curseur();
 
   Clavier_americain(); // On est obligé de rester en clavier américain pour
@@ -840,6 +842,7 @@ void Bouton_Palette(void)
 
                 // Affichage dans le block de visu de la couleur en cours
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+                SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
 
                 memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
                 memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
@@ -1809,6 +1812,8 @@ void Bouton_Palette_secondaire(void)
   Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
   Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
   Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,SDLK_ESCAPE); // 3
+
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*200,Menu_Facteur_Y*80);
 
   Afficher_curseur();
 

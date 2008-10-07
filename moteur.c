@@ -389,12 +389,16 @@ void Deplacer_Split(void)
       Ligne_verticale_XOR(Ancien_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Ancien_X_Zoom-1,0,Menu_Ordonnee);
 
+      SDL_UpdateRect(Ecran_SDL,Ancien_Split,0,Ancien_Split-Principal_X_Zoom+1,Menu_Ordonnee);
+
       Ancien_Split=Principal_Split;
       Ancien_X_Zoom=Principal_X_Zoom;
 
       // Rafficher la barre en XOR
       Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
+
+      SDL_UpdateRect(Ecran_SDL,Principal_Split,0,Principal_Split-Principal_X_Zoom+1,Menu_Ordonnee);
 
       Afficher_curseur();
     }
@@ -1133,6 +1137,7 @@ void Fenetre_Effacer_tags(void)
   Origine_Y=Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3)*Menu_Facteur_Y;
   for (Pos_X=0,Pos_fenetre_X=Origine_X;Pos_X<16;Pos_X++,Pos_fenetre_X+=(Menu_Facteur_X*10))
     Block(Pos_fenetre_X,Origine_Y,Menu_Facteur_X*3,Menu_Facteur_Y*80,CM_Clair);
+  SDL_UpdateRect(Ecran_SDL,Origine_X,Origine_Y,ToWinL(160),ToWinH(80));
 }
 
 
@@ -1166,7 +1171,6 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
   for (Pos_Y=0,Pos_fenetre_Y=Origine_Y+1;Pos_Y<3;Pos_Y++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
   Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
-  SDL_UpdateRect(Ecran_SDL,ToWinX(Origine_X),ToWinY(Origine_Y),ToWinL(2),ToWinH(2));
 
   if (Debut!=Fin)
   {
@@ -1197,7 +1201,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 
   }
 
-  SDL_UpdateRect(Ecran_SDL,ToWinX(Fenetre_Liste_boutons_palette->Pos_X+3+(Debut>>4)*10),ToWinY(Fenetre_Liste_boutons_palette->Pos_Y+3+(Debut&15)*5),ToWinL(4),ToWinH((Fin-Debut+1)*5));
+  SDL_UpdateRect(Ecran_SDL,ToWinX(Fenetre_Liste_boutons_palette->Pos_X+3),ToWinY(Fenetre_Liste_boutons_palette->Pos_Y+3),ToWinL(12*16),ToWinH(5*16));
 
 }
 
@@ -1234,6 +1238,10 @@ void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg)
   Block(Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+(Position_curseur_jauge*Menu_Facteur_Y),
         11*Menu_Facteur_X,Enreg->Hauteur_curseur*Menu_Facteur_Y,CM_Clair/*CM_Blanc*/);
+
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
+        Fenetre_Pos_Y+Enreg->Pos_Y*Menu_Facteur_Y,
+        11*Menu_Facteur_X,(Enreg->Hauteur)*Menu_Facteur_Y);
 }
 
 void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg)
@@ -1651,7 +1659,6 @@ void Deplacer_fenetre(short Dx, short Dy)
 
     free(Buffer);
 
-    DEBUG("Deplace",0);
   }
   else
   {

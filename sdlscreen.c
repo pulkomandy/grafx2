@@ -51,18 +51,7 @@ void Block_SDL (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur
         rectangle.w=Largeur;
         rectangle.h=Hauteur;
         SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
-        SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
-}
-
-void Block_SDL_Fast (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
-/* On affiche un rectangle de la couleur donnée */
-{
-        SDL_Rect rectangle;
-        rectangle.x=Debut_X;
-        rectangle.y=Debut_Y;
-        rectangle.w=Largeur;
-        rectangle.h=Hauteur;
-        SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
+//        SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
 }
 
 void Pixel_Preview_Normal_SDL (word X,word Y,byte Couleur)
@@ -95,7 +84,7 @@ void Pixel_Preview_Loupe_SDL  (word X,word Y,byte Couleur)
                 else
                         hauteur = Loupe_Facteur;
 
-		Block_SDL_Fast(
+		Block_SDL(
                         Table_mul_facteur_zoom[X-Loupe_Decalage_X] 
                                 + Principal_X_Zoom, 
                         Y_Zoom, Loupe_Facteur, hauteur, Couleur

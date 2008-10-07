@@ -139,6 +139,8 @@ void Bouton_Aide(void)
 
   Afficher_aide();
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,310*Menu_Facteur_X,175*Menu_Facteur_Y);
+
   Afficher_curseur();
 
   do
@@ -326,6 +328,7 @@ void Bouton_Stats(void)
   else
     Print_dans_fenetre(106,115,"* No VESA support *",STATS_COULEUR_DONNEES,CM_Noir);
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*174);
 
   Afficher_curseur();
 

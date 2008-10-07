@@ -32,13 +32,13 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	if (Largeur < 0)
 	{
 		X += Largeur;
-		Largeur = 3 - Largeur;
+		Largeur = - Largeur;
 	}
 
 	if (Hauteur < 0)
 	{
 		Y += Hauteur;
-		Hauteur = 3 - Hauteur;
+		Hauteur = - Hauteur;
 	}
 
 	// D'abord on met à jour dans la zone écran normale
@@ -296,7 +296,8 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       }
     }
   }
-  SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee_avant_fenetre,Largeur,Hauteur);
+  SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee*Menu_Facteur_Y,Largeur,Hauteur);
+//    SDL_UpdateRect(Ecran_SDL,LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
 }
 
 
@@ -909,7 +910,7 @@ int Conversion_argument_mode(const char *Argument)
   // Je suis paresseux alors je vais juste tester les libellés
   int Indice_mode;
   for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
-    if (!stricmp(Libelle_mode(Indice_mode), Argument))
+    if (!strcmp(Libelle_mode(Indice_mode), Argument))
       return Indice_mode;
 
   return -1;
@@ -980,7 +981,6 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
             Clear_screen = Effacer_Tout_l_Ecran_SDL;
             Display_screen = Afficher_partie_de_l_ecran_SDL;
             Block = Block_SDL;
-            Block_Fast = Block_SDL_Fast;
             Pixel_Preview_Normal = Pixel_Preview_Normal_SDL;
             Pixel_Preview_Loupe = Pixel_Preview_Loupe_SDL;
             Ligne_horizontale_XOR = Ligne_horizontale_XOR_SDL;
@@ -1075,14 +1075,14 @@ void Afficher_pixel(word X,word Y,byte Couleur)
 
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
-  Block_Fast(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+  Block(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
   // Affichage d'un pixel dans la fenêtre (la fenêtre doît être visible)
 
 void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 {
-    Block_Fast((X*Menu_Facteur_X)+Fenetre_Pos_X,(Y*Menu_Facteur_Y)+Fenetre_Pos_Y,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+    Block((X*Menu_Facteur_X)+Fenetre_Pos_X,(Y*Menu_Facteur_Y)+Fenetre_Pos_Y,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
 
@@ -1260,6 +1260,7 @@ void Afficher_palette_du_menu(void)
               Couleur_debut_palette+Couleur);
 
     Encadrer_couleur_menu(CM_Blanc);
+    SDL_UpdateRect(Ecran_SDL,LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
   }
 }
 
@@ -1422,7 +1423,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne(X,Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
   }
-  SDL_UpdateRect(Ecran_SDL,X,Y,Largeur,8*Menu_Facteur_Y);
+  SDL_UpdateRect(Ecran_SDL,X,Y,Largeur,8*Menu_Facteur_Y); // TODO: pas utile dans Print_Dans_Fenetre, donc voir ou on en a vraiment besoin...
 }
 
   // -- Afficher un caractère dans une fenêtre --
@@ -2927,6 +2928,8 @@ byte Demande_de_confirmation(char * Message)
   Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre/3)-20     ,37,40,14,"Yes",1,1,SDLK_y); // 1
   Fenetre_Definir_bouton_normal(((Largeur_de_la_fenetre<<1)/3)-20,37,40,14,"No" ,1,1,SDLK_n); // 2
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*Largeur_de_la_fenetre,Menu_Facteur_Y*60);
+
   Afficher_curseur();
 
   do
@@ -2959,6 +2962,7 @@ void Warning_message(char * Message)
 
   Print_dans_fenetre((Largeur_de_la_fenetre>>1)-(strlen(Message)<<2),20,Message,CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre>>1)-20     ,37,40,14,"OK",1,1,SDLK_RETURN); // 1
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*Largeur_de_la_fenetre,Menu_Facteur_Y*60);
   Afficher_curseur();
 
   do
@@ -3193,6 +3197,8 @@ void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_b
 
   for (Indice=Debut_Y;Indice<Fin_Y;Indice++,Ligne_en_cours++)
     Block(Debut_X,Indice,Largeur_ligne,1,Debut_block+(Nb_couleurs*Ligne_en_cours)/Total_lignes);
+
+  SDL_UpdateRect(Ecran_SDL,ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(16),ToWinH(64));
 }
 
 

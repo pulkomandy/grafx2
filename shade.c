@@ -498,6 +498,8 @@ int Menu_Shade(void)
   memcpy(Buffer     ,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
   memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*190);
+
   Afficher_curseur();
 
 /*TODO A vérifier :)
@@ -1020,6 +1022,8 @@ void Bouton_Quick_shade_Menu(void)
   Fenetre_Definir_bouton_saisie(40,19,3);                         // 4
   Num2str(Quick_shade_Step,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*142,Menu_Facteur_Y*26);
 
   Afficher_curseur();
 

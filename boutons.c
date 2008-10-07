@@ -33,6 +33,8 @@
 
 #define FILENAMESPACE 13
 
+#define Display_Window(X,Y) SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,X*Menu_Facteur_X,Y*Menu_Facteur_Y);
+
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
 void Bouton_***(void)
@@ -43,6 +45,8 @@ void Bouton_***(void)
 
   Fenetre_Definir_bouton_normal(103,137,80,14,"OK",0,1,SDLK_RETURN); // 1
   Fenetre_Definir_bouton_scroller(18,44,88,16,4,0);             // 2
+
+  Display_Window(310,190);
 
   Afficher_curseur();
 
@@ -69,6 +73,7 @@ void Message_Non_disponible(void)
   Print_dans_fenetre(12,28,"be implemented in",CM_Noir,CM_Clair);
   Print_dans_fenetre(16,36,"a later version.",CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Display_Window(160,76);
   Afficher_curseur();
 
   do
@@ -98,6 +103,7 @@ void Message_Memoire_insuffisante(void)
   Print_dans_fenetre(24,28,"to know how to obtain",CM_Noir,CM_Clair);
   Print_dans_fenetre(36,36,"more memory space.",CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Display_Window(216,76);
   Afficher_curseur();
 
   do
@@ -134,8 +140,9 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
 
-    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(260*Menu_Facteur_X))>>1,(Hauteur_ecran-(172*Menu_Facteur_Y))>>1,260*Menu_Facteur_X,172*Menu_Facteur_Y);
   Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,SDLK_RETURN); // 1
+
+  Display_Window(260,172);
 
   Afficher_curseur();
 
@@ -385,6 +392,7 @@ byte Bouton_Quitter_Routine_locale(void)
   Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,SDLK_ESCAPE);          // 1
   Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
   Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
+  Display_Window(160,84);
   Afficher_curseur();
 
   do
@@ -519,6 +527,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
   for (Indice=0; Indice<=255; Indice++)
     Stencil_Tagger_couleur(Indice, (Table[Indice])?CM_Noir:CM_Clair);
 
+  Display_Window(176,150);
   Afficher_curseur();
 
   do
@@ -788,7 +797,7 @@ void Bouton_Settings(void)
   // Zone de saisie du nb de pages de Undo
   Fenetre_Definir_bouton_saisie(140,50,2);           // 22
 
-  SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(307*Menu_Facteur_X))>>1,(Hauteur_ecran-(182*Menu_Facteur_Y))>>1,307,182);
+  Display_Window(307,182);
 
   Afficher_curseur();
 
@@ -1108,6 +1117,7 @@ void Bouton_Copy_page(void)
   Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
   Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
   Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,SDLK_ESCAPE); // 6
+  Display_Window(168,137);
 
   Afficher_curseur();
 
@@ -1357,7 +1367,7 @@ void Bouton_Resol(void)
 
   Afficher_liste_modes(Debut_liste,Position_curseur);
 
-    SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(299*Menu_Facteur_X))>>1,(Hauteur_ecran-(190*Menu_Facteur_Y))>>1,299,190);
+  Display_Window(299,190);
 
   Afficher_curseur();
 
@@ -1795,6 +1805,7 @@ void Bouton_Degrades(void)
   Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
 
   Premiere_couleur=Derniere_couleur=(Degrade_Tableau[Degrade_Courant].Inverse)?Degrade_Tableau[Degrade_Courant].Fin:Degrade_Tableau[Degrade_Courant].Debut;
+  Display_Window(237,133);
 
   Afficher_curseur();
 
@@ -2037,6 +2048,7 @@ void Bouton_Menu_pinceaux(void)
     Fenetre_Definir_bouton_normal(Pos_X  ,Pos_Y  ,20,20,"",0,1,SDLK_LAST);
     Afficher_pinceau_dans_fenetre(Pos_X+2,Pos_Y+2,Indice);
   }
+  Display_Window(310,155);
 
   Afficher_curseur();
 
@@ -2408,6 +2420,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
   Pixel_de_chargement=Pixel_Chargement_dans_preview;
   Nouvelle_preview=1;
+  Display_Window(310,(187+FILENAMESPACE));
 
   Afficher_curseur();
 
@@ -3610,6 +3623,7 @@ void Bouton_Menu_Loupe(void)
   Fenetre_Definir_bouton_normal( 41,65,27,14,"x16",0,Loupe_Facteur!=16,SDLK_F10);    // 11
   Fenetre_Definir_bouton_normal( 73,65,27,14,"x18",0,Loupe_Facteur!=18,SDLK_F11);    // 12
   Fenetre_Definir_bouton_normal(105,65,27,14,"x20",0,Loupe_Facteur!=20,SDLK_F12);    // 13
+  Display_Window(141,114);
 
   Afficher_curseur();
 
@@ -3737,6 +3751,7 @@ void Bouton_Menu_Grille(void)
   Bouton_saisie_dY=Fenetre_Liste_boutons_special;
   Num2str(dY_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
+  Display_Window(133,98);
 
   Afficher_curseur();
 
@@ -3916,7 +3931,7 @@ void Bouton_Brush_FX(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*105),Fenetre_Pos_Y+(Menu_Facteur_Y*126),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*111),Fenetre_Pos_Y+(Menu_Facteur_Y*120),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
   
-  SDL_UpdateRect(Ecran_SDL,(Largeur_ecran-(310*Menu_Facteur_X))>>1,(Hauteur_ecran-(162*Menu_Facteur_Y))>>1,310,162);
+  Display_Window(310,162);
   
   Afficher_curseur();
 
@@ -4070,6 +4085,7 @@ void Bouton_Smooth_Menu(void)
       Num2str(Matrice_choisie[I][J]=Smooth_Matrice[I][J],Chaine,2);
       Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
     }
+  Display_Window(142,109);
 
   Afficher_curseur();
 
@@ -4237,6 +4253,7 @@ void Bouton_Colorize_Menu(void)
   Opacite_choisie=Colorize_Opacite;
   Mode_choisi    =Colorize_Mode_en_cours;
 
+  Display_Window(140,118);
   Afficher_curseur();
 
   do
@@ -4328,6 +4345,7 @@ void Bouton_Tiling_Menu(void)
   Num2str(Tiling_Decalage_Y,Chaine,4);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_Y,Chaine);
 
+  Display_Window(138,79);
   Afficher_curseur();
 
   do
@@ -4513,6 +4531,7 @@ void Bouton_Spray_Menu(void)
   Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
   Spray_Rafficher_infos(Couleur_selectionnee,0);
 
+  Display_Window(226,170);
   Afficher_curseur();
 
 
@@ -4922,6 +4941,7 @@ void Bouton_Trame_Menu(void)
   Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
   Dessiner_trame_zoomee(Orig_X,Orig_Y);
 
+  Display_Window(290,179);
 
   Afficher_curseur();
 
@@ -5287,6 +5307,7 @@ void Bouton_Effets(void)
 
   Print_dans_fenetre(12,117,"Click: Left:Switch / Right:Edit",CM_Fonce,CM_Clair);
 
+  Display_Window(270,152);
   Afficher_curseur();
 
   do
