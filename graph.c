@@ -1169,6 +1169,8 @@ void Afficher_foreback(void)
   {
     Block((LARGEUR_MENU-17)*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y,Menu_Facteur_X<<4,Menu_Facteur_Y*7,Back_color);
     Block((LARGEUR_MENU-13)*Menu_Facteur_X,Menu_Ordonnee+(Menu_Facteur_Y<<1),Menu_Facteur_X<<3,Menu_Facteur_Y*5,Fore_color);
+
+    SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU-17)*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y,Menu_Facteur_X<<4,Menu_Facteur_Y*7);
   }
 }
 
@@ -1201,6 +1203,8 @@ void Encadrer_couleur_menu(byte Couleur)
 
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y<<2,Fore_color);
+
+        SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*4); // TODO On met à jour toute la palette... peut mieux faire
       }
       else
       {
@@ -1229,6 +1233,8 @@ void Encadrer_couleur_menu(byte Couleur)
           Block(Indice*Menu_Facteur_X,Menu_Ordonnee+(Fin_Y*Menu_Facteur_Y),
                 Menu_Facteur_X,Menu_Facteur_Y,
                 ((Indice+Fin_Y)&1)?CM_Blanc:CM_Noir);
+
+        SDL_UpdateRect(Ecran_SDL,Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_X,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*4);
       }
     }
   }
