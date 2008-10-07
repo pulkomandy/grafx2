@@ -2685,7 +2685,7 @@ void Effacer_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
-          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+          SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,(Fin_X>=Debut_X)?Fin_X-Debut_X+1:0,(Fin_X>=Debut_X)?Fin_Y-Debut_Y+1:0);
         }
         else
         {
