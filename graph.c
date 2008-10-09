@@ -68,8 +68,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 	// a rester dans la zone visible de l'image
-	if(X_effectif + Largeur <= Principal_Largeur_image) L_effectif = Largeur;
-	else L_effectif = Principal_Largeur_image - X_effectif;
+	if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
+	else L_effectif = Largeur_ecran - X_effectif;
 
 	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 	else H_effectif = Menu_Ordonnee - Y_effectif;
@@ -88,7 +88,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 		// a rester dans la zone visible de l'image
-		if(X_effectif + Largeur < Largeur_ecran) L_effectif = (Largeur+2) * Menu_Facteur_X;
+		if(X_effectif + (Largeur+2)*Menu_Facteur_X < Largeur_ecran) L_effectif = (Largeur+2) * Menu_Facteur_X;
 		else L_effectif = Largeur_ecran - X_effectif;
 
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
@@ -1392,7 +1392,7 @@ void Afficher_menu(void)
       }
       Print_nom_fichier();
     }
-    SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,LARGEUR_MENU*Menu_Facteur_X,HAUTEUR_MENU*Menu_Facteur_Y);
+    SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'étant avec le nom du fichier
   }
 }
 
@@ -1918,7 +1918,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Debut_Compteur_X, Debut_Compteur_Y,
                 Smear_Brosse_Largeur
               );
-              // UPDATERECT
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
             }
             Smear_Debut=0;
           }
@@ -1944,8 +1944,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-              SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
-                Fin_Compteur_X,Fin_Compteur_Y );
+              //SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
+              //  Fin_Compteur_X,Fin_Compteur_Y );
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
           }
 
           Smear_Min_X=Debut_Compteur_X;
@@ -1971,7 +1972,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-        SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
+//        SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X,Fin_Compteur_Y);
 
       }
       break;
