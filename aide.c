@@ -62,6 +62,18 @@ void Afficher_aide(void)
 
   for (Indice_de_ligne=0;Indice_de_ligne<16;Indice_de_ligne++)
   {
+    // Raccourci au cas ou la section fait moins de 16 lignes
+    if (Indice_de_ligne >= Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes)
+    {
+      Block (Pos_Reel_X,
+           Pos_Reel_Y-(8*Menu_Facteur_Y),
+           44*6*Menu_Facteur_X,
+           // 44 = Nb max de char (+1 pour éviter les plantages en mode X
+           // causés par une largeur = 0)
+           (Menu_Facteur_Y<<3) * (17 - Indice_de_ligne),
+           CM_Noir);
+      break;
+    }
     // On affiche la ligne
     Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne];
     TypeLigne = Ligne[0];
@@ -121,7 +133,15 @@ void Afficher_aide(void)
            Menu_Facteur_Y<<3,
            CM_Noir);
   }
-
+  
+  if (Section_d_aide_en_cours == 0)
+  {
+    // Logo GrafX2
+    int   Pos_X,Offs_Y,X,Y;
+    for (Y=25,Offs_Y=0; Y<81; Offs_Y+=231,Y++)
+      for (X=30,Pos_X=0; Pos_X<231; Pos_X++,X++)
+        Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+Pos_X]);
+  } 
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+13*Menu_Facteur_X,Fenetre_Pos_Y+19*Menu_Facteur_Y,44*6*Menu_Facteur_X,16*8*Menu_Facteur_Y);
 }
 
@@ -154,9 +174,11 @@ void Bouton_Aide(void)
   Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
                                   16,Position_d_aide_en_cours);   // 2
 
-  Fenetre_Definir_bouton_normal(  9,154, 59,14,"Credits"  ,1,1,SDLK_c); // 3
-  Fenetre_Definir_bouton_normal( 71,154, 75,14,"Register?",1,1,SDLK_r); // 4
-  Fenetre_Definir_bouton_normal(149,154, 75,14,"Greetings",1,1,SDLK_g); // 5
+  Fenetre_Definir_bouton_normal(  9,154, 6*8,14,"About"  ,1,1,SDLK_a); // 3
+
+  Fenetre_Definir_bouton_normal( 9+6*8+4,154, 8*8,14,"License",1,1,SDLK_l); // 4
+  Fenetre_Definir_bouton_normal( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,SDLK_h); // 5
+  Fenetre_Definir_bouton_normal(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,SDLK_c); // 6
 
   Afficher_aide();
 

@@ -153,13 +153,12 @@ void Bouton_Message_initial(void)
     for (X=14,Pos_X=0; Pos_X<231; Pos_X++,X++)
       Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+Pos_X]);
 
-  Print_dans_fenetre(27, 88,"Copyright (c) 1996-1999 by",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(79, 96,"Sunset Design",CM_Noir,CM_Clair);
-  Print_dans_fenetre(55,104,"All rights reserved",CM_Fonce,CM_Clair);
-
-  Print_dans_fenetre( 7,120,"You should read the README!.1ST",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 7,128,"file before using this program",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 7,136,"for the first time.",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(120-4*21,88,"Copyright (c) 2007 by",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(120-4*16,96,"the contributors",CM_Noir,CM_Clair);
+  Print_dans_fenetre(120-4*26,112,"Copyright (c) 1996-1999 by",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(120-4*13,120,"Sunset Design",CM_Noir,CM_Clair);
+  //Print_dans_fenetre( 120-4*13,128,"(placeholder)",CM_Fonce,CM_Clair);
+  //Print_dans_fenetre( 120-4*13,136,"(placeholder)",CM_Fonce,CM_Clair);
 
   Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,SDLK_RETURN); // 1
 

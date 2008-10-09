@@ -242,11 +242,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   int Temp;
   int Mode_dans_lequel_on_demarre;
 
-  // On commence également par interdire d'appuyer sur Ctrl+Pause et Ctrl+C
-  // signal(SIGINT  ,SIG_IGN);
-
-  printf("°±²Û GrafX 2.00 %s%s þ Copyright (c)1996-1999 Sunset Design Û²±°\n",ALPHA_BETA,POURCENTAGE_VERSION);
-
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
@@ -608,7 +603,7 @@ int main(int argc,char * argv[])
 
   if (Config.Opening_message && (!Un_fichier_a_ete_passe_en_parametre))
     Bouton_Message_initial();
-  free(Logo_GrafX2);
+  //free(Logo_GrafX2); // Utilisé dans le About
 
   if (Un_fichier_a_ete_passe_en_parametre)
   {
