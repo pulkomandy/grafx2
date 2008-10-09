@@ -470,31 +470,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Largeur=1;
   Pinceau_Hauteur=1;
 
-        puts("main.c init lister les modes SDL proprement!");
-  // Détection des modes SDL en état de fonctionner:
-  // Liste_Modes_Videos_SDL= SDL_ListModes(NULL, 0);
-
-//Ici, trier les modes dispos ou pas dans le tableau global ...
-
-  /*
-  Support_VESA();
-  if (!VESA_Erreur)
-  {
-    Mode_VESA_supporte(0x100,0);
-    Mode_VESA_supporte(0x101,1);
-    Mode_VESA_supporte(0x103,2);
-    Mode_VESA_supporte(0x105,3);
-  }
-  else
-  //Pas de VESA...
-  {
-    for (Temp=0; Temp<NB_MODES_VIDEO; Temp++)
-    {
-      if (Mode_video[Temp].Mode>=MODE_VESA)
-        Mode_video[Temp].Etat+=128;
-    }
-  }*/
-
   Analyse_de_la_ligne_de_commande(argc,argv);
 
   Mode_dans_lequel_on_demarre=Resolution_actuelle;
