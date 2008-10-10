@@ -1856,6 +1856,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       Largeur=Brosse_Largeur;
       Hauteur=Brosse_Hauteur;
       Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+      if (Largeur<=0 || Hauteur<=0)
+        break;
       Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
       Fin_Compteur_X=Debut_Compteur_X+Largeur;
