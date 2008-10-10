@@ -4481,37 +4481,40 @@ void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, b
 void Tracer_ligne_Definitif(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
 {
 
+  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Definitif;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }
 
   // -- Tracer la preview d'une ligne --
 
 void Tracer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
+  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }
 
   // -- Tracer la preview d'une ligne en xor --
 
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
+  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-//  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
-  SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }
 
   // -- Effacer la preview d'une ligne --
 
 void Effacer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
 {
+  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Effacer_preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }
 
 
