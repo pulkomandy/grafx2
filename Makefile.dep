@@ -33,10 +33,12 @@ files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h \
 op_c.o: op_c.c op_c.h struct.h const.h op_asm.h erreurs.h
 linux.o: linux.c
 op_asm.o: op_asm.c op_c.h struct.h const.h graph.h
-readini.o: readini.c const.h global.h struct.h loadsave.h
+readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
 saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
-  files.h erreurs.h
+  files.h erreurs.h graph.h
 shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
   divers.h readline.h
 clavier.o: clavier.c global.h struct.h const.h loadsave.h
 io.o: io.c struct.h const.h io.h
+gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h
+SFont.o: SFont.c SFont.h

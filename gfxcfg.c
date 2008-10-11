@@ -41,10 +41,10 @@
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000
 
-#include "../struct.h"
-#include "../clavier.h"
-#include "../const.h"
-#include "../io.h"
+#include "struct.h"
+#include "clavier.h"
+#include "const.h"
+#include "io.h"
 
 
 /*** Constants ***/
