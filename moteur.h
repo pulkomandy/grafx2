@@ -63,3 +63,4 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg);
 void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click);
 
 short Fenetre_Bouton_clicke(void);
+int Numero_bouton_sous_souris(void);

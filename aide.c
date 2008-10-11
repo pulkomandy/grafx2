@@ -133,15 +133,6 @@ void Afficher_aide(void)
            Menu_Facteur_Y<<3,
            CM_Noir);
   }
-  
-  if (Section_d_aide_en_cours == 0)
-  {
-    // Logo GrafX2
-    int   Pos_X,Offs_Y,X,Y;
-    for (Y=25,Offs_Y=0; Y<81; Offs_Y+=231,Y++)
-      for (X=30,Pos_X=0; Pos_X<231; Pos_X++,X++)
-        Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+Pos_X]);
-  } 
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+13*Menu_Facteur_X,Fenetre_Pos_Y+19*Menu_Facteur_Y,44*6*Menu_Facteur_X,16*8*Menu_Facteur_Y);
 }
 
@@ -160,7 +151,18 @@ void Scroller_aide(void)
 void Bouton_Aide(void)
 {
   short Bouton_clicke;
-  short Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
+  short Nb_lignes;
+  short Numero_bouton;
+  
+  // Aide contextuelle
+  Numero_bouton = Numero_bouton_sous_souris();
+  if (Numero_bouton != -1)
+  {
+    Section_d_aide_en_cours = 4 + Numero_bouton;
+    Position_d_aide_en_cours = 0;
+  }
+  
+  Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
 
   Ouvrir_fenetre(310,175,"Help / About...");
 
