@@ -128,6 +128,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
   // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
+        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(Chaine_initiale,Chaine);
@@ -150,6 +152,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
     Chaine_affichee[Taille_affichee-1]=CARACTERE_TRIANGLE_DROIT;
   
   Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine_affichee,Position - Offset);
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
+        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
 
   while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))
@@ -288,6 +292,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
           Chaine_affichee[Taille_affichee-1]=CARACTERE_TRIANGLE_DROIT;
         
         Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine_affichee,Position - Offset);
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
+        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
       
     } // Fin du "switch(Touche_lue)"
   } // Fin du "while"
@@ -309,6 +315,8 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
   {
     Print_dans_fenetre_limite(Pos_X,Pos_Y,Chaine,Taille_affichee,COULEUR_TEXTE,COULEUR_FOND);
   }
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
+        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
   return (Touche_lue==SDLK_RETURN);
 }
