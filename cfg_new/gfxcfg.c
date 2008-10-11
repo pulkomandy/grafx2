@@ -135,7 +135,6 @@ void Dessiner_ecran_principal()
     SFont_Write(Ecran,MyFont,8*75,48,"Err");
 
     SDL_UpdateRect(Ecran,0,0,640,480);
-
 }
 
 /* Displays informations about an option */
@@ -273,7 +272,11 @@ char * Interpretation_du_fichier_config()
         {
           Config[Indice_touche].Touche = Touche;
           Config[Indice_touche].Touche2 = Touche2;
-          //printf("%4d %s\n", Indice_touche, Nom_touche(Touche));
+// Utilisé pour afficher la liste complète des raccourcis dans le format du wiki...
+/*          printf("||%s||%s||%s %s||\n", Config[Indice_touche].Libelle, 
+			    Nom_touche(Touche),
+			    Config[Indice_touche].Explic1, 
+			    Config[Indice_touche].Explic2); */
           break;
         }
       }
