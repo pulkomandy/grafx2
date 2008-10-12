@@ -1293,7 +1293,7 @@ static const char * TableAideEffets[] =
   AIDE_TEXTE("white pixels.")
   AIDE_TEXTE("")
   AIDE_TEXTE("")
-  AIDE_TITRE("TRANSPARENT")
+  AIDE_TITRE("TRANSPARENCY")
   AIDE_TEXTE(" This allows to mix the color(s) of the")
   AIDE_TEXTE("paintbrush with the colors of the   picture.")
   AIDE_TEXTE("It's used to make transparency effects like")

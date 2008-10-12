@@ -20,3 +20,4 @@
 */
 void Bouton_Aide(void);
 void Bouton_Stats(void);
+void Fenetre_aide(int, const char *);

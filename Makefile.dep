@@ -13,11 +13,11 @@ special.o: special.c const.h struct.h global.h loadsave.h graph.h \
   moteur.h
 boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h files.h init.h boutons.h operatio.h pages.h \
-  erreurs.h readini.h saveini.h shade.h io.h
+  erreurs.h readini.h saveini.h shade.h io.h aide.h
 palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h boutons.h pages.h
 aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
-  moteur.h tables_aide.h
+  moteur.h tables_aide.h aide.h
 operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
   moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
 pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \

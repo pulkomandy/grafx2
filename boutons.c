@@ -45,6 +45,7 @@
 #include "saveini.h"
 #include "shade.h"
 #include "io.h"
+#include "aide.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>
@@ -5343,6 +5344,46 @@ void Bouton_Effets(void)
 
     if (Touche==SDLK_ESCAPE)
       Bouton_clicke=11;
+    else if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    {
+      // Aide contextuelle
+      switch(Fenetre_Numero_bouton_clicke())
+      {
+        case 1:
+          Fenetre_aide(BOUTON_EFFETS, "SHADE");
+          break;
+        case 2:
+          Fenetre_aide(BOUTON_EFFETS, "QUICK SHADE");
+          break;
+        case 3:
+          Fenetre_aide(BOUTON_EFFETS, "TRANSPARENCY");
+          break;
+        case 4:
+          Fenetre_aide(BOUTON_EFFETS, "SMOOTH");
+          break;
+        case 5:
+          Fenetre_aide(BOUTON_EFFETS, "SMEAR");
+          break;
+        case 6:
+          Fenetre_aide(BOUTON_EFFETS, "STENCIL");
+          break;
+        case 7:
+          Fenetre_aide(BOUTON_EFFETS, "MASK");
+          break;
+        case 8:
+          Fenetre_aide(BOUTON_EFFETS, "SIEVE");
+          break;
+        case 9:
+          Fenetre_aide(BOUTON_EFFETS, "GRID");
+          break;
+        case 10:
+          Fenetre_aide(BOUTON_EFFETS, "TILING");
+          break;
+        default:
+          Fenetre_aide(BOUTON_EFFETS, NULL);
+      }
+      continue;  
+    }
 
     switch (Bouton_clicke)
     {

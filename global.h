@@ -327,24 +327,44 @@ GLOBAL word  Menu_Taille_couleur; // Taille d'une couleur de la palette du menu
 
   // Données sur la fenêtre de menu
 
-GLOBAL byte Fenetre;
-
-GLOBAL word Fenetre_Pos_X;   // Position du bord gauche de la fenêtre dans l'écran
-GLOBAL word Fenetre_Pos_Y;   // Position du bord haut   de la fenêtre dans l'écran
-GLOBAL word Fenetre_Largeur; // Largeur de la fenêtre
-GLOBAL word Fenetre_Hauteur; // Hauteur de la fenêtre
+GLOBAL byte Fenetre; // Nombre de fenetres empilées. 0 si pas de fenetre ouverte.
 
 GLOBAL byte Menu_visible_avant_fenetre;  // Le menu était visible avant d'ouvir une fenêtre
 GLOBAL word Menu_Ordonnee_avant_fenetre; // Ordonnée du menu avant d'ouvrir une fenêtre
 GLOBAL byte Cacher_pinceau_avant_fenetre;// Le pinceau étatit déjà caché avant l'ouverture de la fenetre?
 
-GLOBAL word Nb_boutons_fenetre;
-GLOBAL struct Fenetre_Bouton_normal   * Fenetre_Liste_boutons_normal;
-GLOBAL struct Fenetre_Bouton_palette  * Fenetre_Liste_boutons_palette;
-GLOBAL struct Fenetre_Bouton_scroller * Fenetre_Liste_boutons_scroller;
-GLOBAL struct Fenetre_Bouton_special  * Fenetre_Liste_boutons_special;
-GLOBAL int Fenetre_Attribut1;
-GLOBAL int Fenetre_Attribut2;
+GLOBAL word Pile_Fenetre_Pos_X[8];   // Position du bord gauche de la fenêtre dans l'écran
+#define Fenetre_Pos_X Pile_Fenetre_Pos_X[Fenetre-1]
+
+GLOBAL word Pile_Fenetre_Pos_Y[8];   // Position du bord haut   de la fenêtre dans l'écran
+#define Fenetre_Pos_Y Pile_Fenetre_Pos_Y[Fenetre-1]
+
+GLOBAL word Pile_Fenetre_Largeur[8]; // Largeur de la fenêtre
+#define Fenetre_Largeur Pile_Fenetre_Largeur[Fenetre-1]
+
+GLOBAL word Pile_Fenetre_Hauteur[8]; // Hauteur de la fenêtre
+#define Fenetre_Hauteur Pile_Fenetre_Hauteur[Fenetre-1]
+
+GLOBAL word Pile_Nb_boutons_fenetre[8];
+#define Nb_boutons_fenetre Pile_Nb_boutons_fenetre[Fenetre-1]
+
+GLOBAL struct Fenetre_Bouton_normal   * Pile_Fenetre_Liste_boutons_normal[8];
+#define Fenetre_Liste_boutons_normal Pile_Fenetre_Liste_boutons_normal[Fenetre-1]
+
+GLOBAL struct Fenetre_Bouton_palette  * Pile_Fenetre_Liste_boutons_palette[8];
+#define Fenetre_Liste_boutons_palette Pile_Fenetre_Liste_boutons_palette[Fenetre-1]
+
+GLOBAL struct Fenetre_Bouton_scroller * Pile_Fenetre_Liste_boutons_scroller[8];
+#define Fenetre_Liste_boutons_scroller Pile_Fenetre_Liste_boutons_scroller[Fenetre-1]
+
+GLOBAL struct Fenetre_Bouton_special  * Pile_Fenetre_Liste_boutons_special[8];
+#define Fenetre_Liste_boutons_special Pile_Fenetre_Liste_boutons_special[Fenetre-1]
+
+GLOBAL int Pile_Fenetre_Attribut1[8];
+#define Fenetre_Attribut1 Pile_Fenetre_Attribut1[Fenetre-1]
+
+GLOBAL int Pile_Fenetre_Attribut2[8];
+#define Fenetre_Attribut2 Pile_Fenetre_Attribut2[Fenetre-1]
 
 
 

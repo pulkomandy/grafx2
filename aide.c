@@ -28,6 +28,7 @@
 #include "graph.h"
 #include "moteur.h"
 #include "tables_aide.h"
+#include "aide.h"
 
 #include <string.h>
 
@@ -150,8 +151,6 @@ void Scroller_aide(void)
 
 void Bouton_Aide(void)
 {
-  short Bouton_clicke;
-  short Nb_lignes;
   short Numero_bouton;
   
   // Aide contextuelle
@@ -160,12 +159,37 @@ void Bouton_Aide(void)
     Numero_bouton = Numero_bouton_sous_souris();
     if (Numero_bouton != -1)
     {
-      Section_d_aide_en_cours = 4 + Numero_bouton;
-      Position_d_aide_en_cours = 0;
+      Fenetre_aide(Numero_bouton, NULL);
+      return;
     }
   }
-  
+  Fenetre_aide(-1, NULL);
+}
+// Ouvre l'ecran d'aide. Passer -1 pour la section par défaut (ou derniere,)
+// Ou un nombre de l'enumération NUMEROS_DE_BOUTONS pour l'aide contextuelle.
+void Fenetre_aide(int Section, const char *Sous_section)
+{
+  short Bouton_clicke;
+  short Nb_lignes;
+
+  if (Section!=-1)
+  {
+    Section_d_aide_en_cours = 4 + Section;
+    Position_d_aide_en_cours = 0;
+  }
   Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
+  if (Section!=-1 && Sous_section!=NULL)
+  {
+    int Indice=0;
+    for (Indice=0; Indice<Nb_lignes; Indice++)
+      if (Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice][0] == 'T' &&
+        !strcmp(Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice]+1, Sous_section))
+      {
+        Position_d_aide_en_cours = Indice;
+        break;
+      }
+  }
+
 
   Ouvrir_fenetre(310,175,"Help / About...");
 

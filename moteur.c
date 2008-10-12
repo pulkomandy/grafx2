@@ -1026,14 +1026,17 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
 
   Print_dans_fenetre((Largeur-(strlen(Titre)<<3))>>1,3,Titre,CM_Noir,CM_Clair);
 
-  Menu_visible_avant_fenetre=Menu_visible;
-  Menu_visible=0;
-  Menu_Ordonnee_avant_fenetre=Menu_Ordonnee;
-  Menu_Ordonnee=Hauteur_ecran;
-  Forme_curseur_avant_fenetre=Forme_curseur;
-  Forme_curseur=FORME_CURSEUR_FLECHE;
-  Cacher_pinceau_avant_fenetre=Cacher_pinceau;
-  Cacher_pinceau=1;
+  if (Fenetre == 1)
+  {
+    Menu_visible_avant_fenetre=Menu_visible;
+    Menu_visible=0;
+    Menu_Ordonnee_avant_fenetre=Menu_Ordonnee;
+    Menu_Ordonnee=Hauteur_ecran;
+    Forme_curseur_avant_fenetre=Forme_curseur;
+    Forme_curseur=FORME_CURSEUR_FLECHE;
+    Cacher_pinceau_avant_fenetre=Cacher_pinceau;
+    Cacher_pinceau=1;
+  }
 
   // Initialisation des listes de boutons de la fenêtre
   Fenetre_Liste_boutons_normal  =NULL;
@@ -1058,8 +1061,6 @@ void Fermer_fenetre(void)
   struct Fenetre_Bouton_special  * Temp4;
 
   Effacer_curseur();
-
-  Cacher_pinceau=Cacher_pinceau_avant_fenetre;
 
   while (Fenetre_Liste_boutons_normal)
   {
@@ -1086,18 +1087,23 @@ void Fermer_fenetre(void)
     Fenetre_Liste_boutons_special=Temp4;
   }
 
-  Fenetre--;
-  Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
-                                 // d'outils si le curseur est sur une icône.
-
-  Calculer_coordonnees_pinceau();
-
-  Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-  Menu_visible=Menu_visible_avant_fenetre;
-  Forme_curseur=Forme_curseur_avant_fenetre;
-
+  if (Fenetre == 1)
+  {
+  
+    Cacher_pinceau=Cacher_pinceau_avant_fenetre;
+  
+    Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
+                                   // d'outils si le curseur est sur une icône.
+  
+    Calculer_coordonnees_pinceau();
+  
+    Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
+    Menu_visible=Menu_visible_avant_fenetre;
+    Forme_curseur=Forme_curseur_avant_fenetre;
+  }
+  
   // Restore de ce que la fenêtre cachait
-  Restaure_fond(Fond_fenetre[Fenetre], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+  Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
 
   //Afficher_ecran();
@@ -1106,8 +1112,8 @@ void Fermer_fenetre(void)
   Touche=0;
   Mouse_K=0;
 
-  // On (re)passe dans le clavier américain
-  Clavier_americain();
+  Fenetre--;
+
 }
 
 

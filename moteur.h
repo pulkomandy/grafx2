@@ -64,3 +64,4 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click);
 
 short Fenetre_Bouton_clicke(void);
 int Numero_bouton_sous_souris(void);
+short Fenetre_Numero_bouton_clicke(void);
