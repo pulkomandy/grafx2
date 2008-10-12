@@ -419,7 +419,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   // Initialisation des opérations
   Initialisation_des_operations();
 
-  Une_fenetre_est_ouverte=0;
+  Fenetre=0;
   
   // Charger les sprites et la palette
   Charger_DAT();

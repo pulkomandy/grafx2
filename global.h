@@ -327,7 +327,7 @@ GLOBAL word  Menu_Taille_couleur; // Taille d'une couleur de la palette du menu
 
   // Données sur la fenêtre de menu
 
-GLOBAL byte Une_fenetre_est_ouverte;
+GLOBAL byte Fenetre;
 
 GLOBAL word Fenetre_Pos_X;   // Position du bord gauche de la fenêtre dans l'écran
 GLOBAL word Fenetre_Pos_Y;   // Position du bord haut   de la fenêtre dans l'écran

@@ -50,6 +50,8 @@ byte Smooth_Mode_avant_annulation;
 byte Tiling_Mode_avant_annulation;
 fonction_effet Fonction_effet_avant_annulation;
 
+byte * Fond_fenetre[8];
+
 void Annuler_les_effets(void)
 {
   Shade_Mode_avant_annulation=Shade_Mode;
@@ -133,6 +135,22 @@ char * TITRE_BOUTON[NB_BOUTONS]=
   "Color #"                 ,
   "Hide tool bar           "
 };
+// Sauvegarde un bloc (généralement l'arrière-plan d'une fenêtre)
+void Sauve_fond(byte **Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
+{
+  int Indice;
+  *Buffer=(byte *) malloc(Largeur*Menu_Facteur_X*Hauteur*Menu_Facteur_Y);
+  for (Indice=0; Indice<(Hauteur*Menu_Facteur_Y); Indice++)
+    Lire_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,(*Buffer)+((int)Indice*Largeur*Menu_Facteur_X));
+}
+// Restaure de ce que la fenêtre cachait
+void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
+{
+  int Indice;
+  for (Indice=0; Indice<Hauteur*Menu_Facteur_Y; Indice++)
+    Afficher_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_Y));
+  free(Buffer);
+}
 
 
 
@@ -390,7 +408,7 @@ void Deplacer_Split(void)
 
   // Afficher la barre en XOR
   Effacer_curseur();
-  Une_fenetre_est_ouverte=1;
+  Fenetre=1;
   Forme_curseur=FORME_CURSEUR_HORIZONTAL;
   Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
   Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
@@ -430,7 +448,7 @@ void Deplacer_Split(void)
   Effacer_curseur();
   Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
   Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
-  Une_fenetre_est_ouverte=0;
+  Fenetre=0;
   Forme_curseur=Ancienne_forme_curseur;
   Calculer_donnees_loupe();
   Recadrer_ecran_par_rapport_au_zoom();
@@ -980,7 +998,7 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
 
   Effacer_curseur();
 
-  Une_fenetre_est_ouverte=1;
+  Fenetre++;
 
   Fenetre_Largeur=Largeur;
   Fenetre_Hauteur=Hauteur;
@@ -989,6 +1007,9 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Fenetre_Pos_X=(Largeur_ecran-(Largeur*Menu_Facteur_X))>>1;
 
   Fenetre_Pos_Y=(Hauteur_ecran-(Hauteur*Menu_Facteur_Y))>>1;
+
+  // Sauvegarde de ce que la fenêtre remplace
+  Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, Largeur, Hauteur);
 
   // Fenêtre grise
   Block(Fenetre_Pos_X+(Menu_Facteur_X<<1),Fenetre_Pos_Y+(Menu_Facteur_Y<<1),(Largeur-4)*Menu_Facteur_X,(Hauteur-4)*Menu_Facteur_Y,CM_Clair);
@@ -1065,7 +1086,7 @@ void Fermer_fenetre(void)
     Fenetre_Liste_boutons_special=Temp4;
   }
 
-  Une_fenetre_est_ouverte=0;
+  Fenetre--;
   Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
                                  // d'outils si le curseur est sur une icône.
 
@@ -1075,8 +1096,12 @@ void Fermer_fenetre(void)
   Menu_visible=Menu_visible_avant_fenetre;
   Forme_curseur=Forme_curseur_avant_fenetre;
 
-  Afficher_ecran();
-  Afficher_menu();
+  // Restore de ce que la fenêtre cachait
+  Restaure_fond(Fond_fenetre[Fenetre], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+
+  //Afficher_ecran();
+  //Afficher_menu();
 
   Touche=0;
   Mouse_K=0;
@@ -1596,97 +1621,100 @@ void Deplacer_fenetre(short Dx, short Dy)
   short Ancien_Y;
   short Largeur=Fenetre_Largeur*Menu_Facteur_X;
   short Hauteur=Fenetre_Hauteur*Menu_Facteur_Y;
-  short Indice;
   short A;
   byte  B;
-  byte * Buffer;
+  byte  *Buffer=NULL;
 
+  Effacer_curseur();
 
-  if ((Buffer=(byte *) malloc(Largeur*Hauteur)))
+  Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
+  Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
+  Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
+  Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
+  Forme_curseur=FORME_CURSEUR_MULTIDIRECTIONNEL;
+  Afficher_curseur();
+
+  while (Mouse_K)
   {
-    Effacer_curseur();
-    for (Indice=0; Indice<Hauteur; Indice++)
-      Lire_ligne(Nouveau_X,Nouveau_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
-    Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
-    Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
-    Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
-    Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
-    Forme_curseur=FORME_CURSEUR_MULTIDIRECTIONNEL;
-    Afficher_curseur();
+    Ancien_X=Nouveau_X;
+    Ancien_Y=Nouveau_Y;
 
-    while (Mouse_K)
+    Get_input();
+
+    Nouveau_X=Mouse_X-Dx;
+    if (Nouveau_X<0)
+      Nouveau_X=0;
+    if (Nouveau_X>Largeur_ecran-Largeur)
+      Nouveau_X=Largeur_ecran-Largeur;
+
+    Nouveau_Y=Mouse_Y-Dy;
+    if (Nouveau_Y<0)
+      Nouveau_Y=0;
+    if (Nouveau_Y>Hauteur_ecran-Hauteur)
+      Nouveau_Y=Hauteur_ecran-Hauteur;
+
+    if ((Nouveau_X!=Ancien_X)
+     || (Nouveau_Y!=Ancien_Y))
     {
-      Ancien_X=Nouveau_X;
-      Ancien_Y=Nouveau_Y;
-
-      Get_input();
-
-      Nouveau_X=Mouse_X-Dx;
-      if (Nouveau_X<0)
-        Nouveau_X=0;
-      if (Nouveau_X>Largeur_ecran-Largeur)
-        Nouveau_X=Largeur_ecran-Largeur;
-
-      Nouveau_Y=Mouse_Y-Dy;
-      if (Nouveau_Y<0)
-        Nouveau_Y=0;
-      if (Nouveau_Y>Hauteur_ecran-Hauteur)
-        Nouveau_Y=Hauteur_ecran-Hauteur;
-
-      if ((Nouveau_X!=Ancien_X)
-       || (Nouveau_Y!=Ancien_Y))
-      {
-        Effacer_curseur();
-        Ligne_horizontale_XOR(Ancien_X,Ancien_Y,Largeur);
-        Ligne_verticale_XOR(Ancien_X,Ancien_Y+1,Hauteur-2);
-        Ligne_verticale_XOR(Ancien_X+Largeur-1,Ancien_Y+1,Hauteur-2);
-        Ligne_horizontale_XOR(Ancien_X,Ancien_Y+Hauteur-1,Largeur);
-        Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
-        Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
-        Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
-        Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
-        Afficher_curseur();
-      }
-    SDL_UpdateRect(Ecran_SDL,Ancien_X,Ancien_Y,Largeur,Hauteur);
-    SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
-    }
-
-    Effacer_curseur();
-    if ((Nouveau_X!=Fenetre_Pos_X)
-     || (Nouveau_Y!=Fenetre_Pos_Y))
-    {
-      A=Menu_Ordonnee;
-      Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-      B=Menu_visible;
-      Menu_visible=Menu_visible_avant_fenetre;
-      Afficher_ecran();
-      Afficher_menu();
-      Menu_Ordonnee=A;
-      Menu_visible=B;
-      for (Indice=0; Indice<Hauteur; Indice++)
-        Afficher_ligne(Nouveau_X,Nouveau_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
-      SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
-      Fenetre_Pos_X=Nouveau_X;
-      Fenetre_Pos_Y=Nouveau_Y;
-    }
-    else
-    {
+      Effacer_curseur();
+      Ligne_horizontale_XOR(Ancien_X,Ancien_Y,Largeur);
+      Ligne_verticale_XOR(Ancien_X,Ancien_Y+1,Hauteur-2);
+      Ligne_verticale_XOR(Ancien_X+Largeur-1,Ancien_Y+1,Hauteur-2);
+      Ligne_horizontale_XOR(Ancien_X,Ancien_Y+Hauteur-1,Largeur);
       Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
       Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
       Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
       Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
+      Afficher_curseur();
     }
-    Forme_curseur=FORME_CURSEUR_FLECHE;
-    Afficher_curseur();
-
-    free(Buffer);
-
+    SDL_UpdateRect(Ecran_SDL,Ancien_X,Ancien_Y,Largeur,Hauteur);
+    SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
   }
-  else
+
+  Effacer_curseur();
+  Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
+  Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
+  Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
+  Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
+
+  if ((Nouveau_X!=Fenetre_Pos_X)
+   || (Nouveau_Y!=Fenetre_Pos_Y))
   {
-    Erreur(0);
-    Attendre_fin_de_click();
+    A=Menu_Ordonnee;
+    Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
+    B=Menu_visible;
+    Menu_visible=Menu_visible_avant_fenetre;
+    //Afficher_ecran();
+    //Afficher_menu();
+    Menu_Ordonnee=A;
+    Menu_visible=B;
+
+    // Sauvegarde du contenu actuel de la fenêtre
+    Sauve_fond(&Buffer, Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    
+    // Restore de ce que la fenêtre cachait
+    Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+
+    // Sauvegarde de ce que la fenêtre remplace
+    Sauve_fond(&(Fond_fenetre[Fenetre-1]), Nouveau_X, Nouveau_Y, Fenetre_Largeur, Fenetre_Hauteur);
+
+    // Raffichage de la fenêtre
+    Restaure_fond(Buffer, Nouveau_X, Nouveau_Y, Fenetre_Largeur, Fenetre_Hauteur);
+
+    // Mise à jour du rectangle englobant
+    SDL_UpdateRect(Ecran_SDL,
+      (Nouveau_X>Fenetre_Pos_X)?Fenetre_Pos_X:Nouveau_X,
+      (Nouveau_Y>Fenetre_Pos_Y)?Fenetre_Pos_Y:Nouveau_Y,
+      ((Nouveau_X>Fenetre_Pos_X)?(Nouveau_X-Fenetre_Pos_X):(Fenetre_Pos_X-Nouveau_X)) + Fenetre_Largeur*Menu_Facteur_X,
+      ((Nouveau_Y>Fenetre_Pos_Y)?(Nouveau_Y-Fenetre_Pos_Y):(Fenetre_Pos_Y-Nouveau_Y)) + Fenetre_Hauteur*Menu_Facteur_Y);
+
+    Fenetre_Pos_X=Nouveau_X;
+    Fenetre_Pos_Y=Nouveau_Y;
+
   }
+  Forme_curseur=FORME_CURSEUR_FLECHE;
+  Afficher_curseur();
+
 }
 
 

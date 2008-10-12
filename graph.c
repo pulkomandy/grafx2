@@ -1373,7 +1373,7 @@ void Afficher_menu(void)
     // Affichage des couleurs de travail
     Afficher_foreback();
 
-    if (!Une_fenetre_est_ouverte)
+    if (!Fenetre)
     {
       if ((Mouse_Y<Menu_Ordonnee) &&
           ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ))
@@ -2380,7 +2380,7 @@ void Afficher_curseur(void)
 
   if ( ( (Mouse_Y<Menu_Ordonnee)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-    || (Une_fenetre_est_ouverte) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
+    || (Fenetre) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
     Forme=Forme_curseur;
   else
     Forme=FORME_CURSEUR_FLECHE;
@@ -2678,7 +2678,7 @@ void Effacer_curseur(void)
   if ( ( (Mouse_Y<Menu_Ordonnee)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) 
                          || (Mouse_X>=Principal_X_Zoom) ) )
-    || (Une_fenetre_est_ouverte) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
+    || (Fenetre) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
     Forme=Forme_curseur;
   else
     Forme=FORME_CURSEUR_FLECHE;
