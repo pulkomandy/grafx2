@@ -19,7 +19,7 @@
 #  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 # Windows specific
-  ifdef COMSPEC
+ifdef COMSPEC
   DELCOMMAND = del
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
@@ -39,7 +39,7 @@ else
   else
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -Wall -c -g
+    COPT = -Wall -c -g `sdl-config --cflags`
     LOPT = -lSDL -o $(BIN)
     CC = gcc
   endif
