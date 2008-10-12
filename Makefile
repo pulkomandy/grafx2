@@ -23,8 +23,8 @@ ifdef COMSPEC
   DELCOMMAND = del
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
-  COPT = -Wall -O -g -ggdb -Dmain=SDL_main
-  LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi
+  COPT = -Wall -O -g -ggdb `sdl-config --cflags`
+  LOPT = `sdl-config --libs`
   CC = gcc
 else
   # Linux specific
