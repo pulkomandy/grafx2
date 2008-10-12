@@ -67,11 +67,11 @@ void Afficher_aide(void)
     if (Indice_de_ligne >= Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes)
     {
       Block (Pos_Reel_X,
-           Pos_Reel_Y-(8*Menu_Facteur_Y),
+           Pos_Reel_Y,
            44*6*Menu_Facteur_X,
            // 44 = Nb max de char (+1 pour éviter les plantages en mode X
            // causés par une largeur = 0)
-           (Menu_Facteur_Y<<3) * (17 - Indice_de_ligne),
+           (Menu_Facteur_Y<<3) * (16 - Indice_de_ligne),
            CM_Noir);
       break;
     }

@@ -173,7 +173,7 @@ void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage);
 void Load_picture(byte Image);
 void Save_picture(byte Image);
 
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel);
+void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, const char *Section_aide);
 
 void Bouton_Smooth_Menu(void);
 

@@ -200,8 +200,6 @@ static const char * TableAideAbout[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("Copyright 2007 by the Grafx2 project team")
   AIDE_TEXTE("   Copyright 1996-2001 by SUNSET DESIGN")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideLicense[] =
 {
@@ -226,7 +224,6 @@ static const char * TableAideLicense[] =
   AIDE_TEXTE("write to the Free Software Foundation, Inc.")
   AIDE_TEXTE(" 59 Temple Place - Suite 330, Boston,")
   AIDE_TEXTE(" MA  02111-1307, USA.")
-  AIDE_TEXTE("")
 
 };
 static const char * TableAideHelp[] =
@@ -235,9 +232,7 @@ static const char * TableAideHelp[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("  Contextual help is available.")
   AIDE_TEXTE("  Just press your Help key (usually <F1>)")
-  AIDE_TEXTE("  while hovering an icon.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
+  AIDE_TEXTE("  while hovering an icon, or inside a menu.")
 };
 static const char * TableAideCredits[] =
 {
@@ -714,7 +709,6 @@ static const char * TableAidePolygones[] =
   AIDE_TEXTE("left mouse button, and vice versa) to")
   AIDE_TEXTE("terminate the operation. The two extremities")
   AIDE_TEXTE("will be linked automatically.")
-
 };
 static const char * TableAidePolyfill[] =
 {
@@ -766,8 +760,6 @@ static const char * TableAideCercles[] =
   AIDE_TEXTE("Position the center of the cercle and")
   AIDE_TEXTE("maintain the mouse button to select its")
   AIDE_TEXTE("dimensions.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideFillCerc[] =
 {
@@ -775,16 +767,12 @@ static const char * TableAideFillCerc[] =
   AIDE_TITRE(" AND ELLIPSES")
   AIDE_TEXTE("")
   AIDE_TEXTE("Works like empty circles and ellipses.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideGradRect[] =
 {
   AIDE_TITRE("GRAD RECTANGLE")
   AIDE_TEXTE("")
   AIDE_TEXTE("   *** Not implemented yet ***")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideGradMenu[] =
 {
@@ -812,8 +800,6 @@ static const char * TableAideGradMenu[] =
   AIDE_TEXTE("- Index scroller: Defines the current")
   AIDE_TEXTE("gradation among a set of 16 that will be")
   AIDE_TEXTE("memorised.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideSpheres[] =
 {
@@ -841,7 +827,6 @@ static const char * TableAideSpheres[] =
   AIDE_TEXTE("gradation with the right mouse button, the")
   AIDE_TEXTE("result will be the same figure filled with")
   AIDE_TEXTE("the Back-color.")
-  AIDE_TEXTE("")
 };
 static const char * TableAideBrosse[] =
 {
@@ -864,7 +849,6 @@ static const char * TableAideBrosse[] =
   AIDE_BOLD ("RIGHT CLICK")
   AIDE_TEXTE("")
   AIDE_TEXTE("Restores the old brush.")
-  AIDE_TEXTE("")
 };
 static const char * TableAidePolybrosse[] =
 {
@@ -879,8 +863,6 @@ static const char * TableAidePolybrosse[] =
   AIDE_BOLD ("RIGHT CLICK")
   AIDE_TEXTE("")
   AIDE_TEXTE("Restores the old brush (same as above).")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideEffetsBrosse[] =
 {
@@ -966,8 +948,6 @@ static const char * TableAideEffetsBrosse[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("- Load / Save: load or save a brush from")
   AIDE_TEXTE("disk.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideEffets[] =
 {
@@ -1380,15 +1360,11 @@ static const char * TableAideEffets[] =
   AIDE_TEXTE("Opens a menu where you can define the Tiling")
   AIDE_TEXTE("parameters. These parameters are the offsets")
   AIDE_TEXTE("of the tiling.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideTexte[] =
 {
   AIDE_TITRE("TEXT")
   AIDE_TEXTE("   *** Not implemented yet ***")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideLoupe[] =
 {
@@ -1409,8 +1385,6 @@ static const char * TableAideLoupe[] =
   AIDE_TEXTE("move the \"split\" bar by   clicking on it and")
   AIDE_TEXTE("moving your mouse left or right while")
   AIDE_TEXTE("holding the mouse   button down.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAidePipette[] =
 {
@@ -1433,8 +1407,6 @@ static const char * TableAidePipette[] =
   AIDE_TEXTE("displayed in the tool-bar right   after the")
   AIDE_TEXTE("coordinates. If you click outside the")
   AIDE_TEXTE("picture, the color 0 will be returned.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAideResol[] =
 {
@@ -1506,8 +1478,6 @@ static const char * TableAideResol[] =
   AIDE_BOLD ("RIGHT CLICK")
   AIDE_TEXTE(" Automaticaly switches to the 640x400 window")
   AIDE_TEXTE("mode.")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("")
 };
 static const char * TableAidePage[] =
 {
@@ -1581,7 +1551,7 @@ static const char * TableAideSauver[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("Note: The Backspace key brings you directly")
   AIDE_TEXTE("to the parent directory.     Type in the 1st")
-  AIDE_TEXTE("lettets of a filename you are looking for to")
+  AIDE_TEXTE("letters of a filename you are looking for to")
   AIDE_TEXTE("access it faster.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")

@@ -419,6 +419,8 @@ byte Bouton_Quitter_Routine_locale(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_QUIT, NULL);
   }
   while (Bouton_clicke<=0);
   Attendre_fin_de_click();
@@ -516,7 +518,7 @@ void Bouton_Clear_colore(void)
 
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
+void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, const char *Section_aide)
 {
   short Bouton_clicke;
   byte Backup_table[256];
@@ -602,6 +604,13 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel)
           Stencil_Tagger_couleur(Couleur_taggee,(Click==A_GAUCHE)?CM_Noir:CM_Clair);
           Afficher_curseur();
         }
+        break;
+      default:
+      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      {
+        Fenetre_aide(BOUTON_EFFETS, Section_aide);
+        break;
+      }
     }
   }
   while (Bouton_clicke<4);
@@ -634,7 +643,7 @@ void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage)
 
 void Bouton_Menu_Stencil(void)
 {
-  Menu_Tag_couleurs("Stencil",Stencil,&Stencil_Mode,1);
+  Menu_Tag_couleurs("Stencil",Stencil,&Stencil_Mode,1, "STENCIL");
 }
 
 
@@ -647,7 +656,7 @@ void Bouton_Mask_Mode(void)
 
 void Bouton_Mask_Menu(void)
 {
-  Menu_Tag_couleurs("Mask",Mask,&Mask_Mode,1);
+  Menu_Tag_couleurs("Mask",Mask,&Mask_Mode,1, "MASK");
 }
 
 
@@ -923,6 +932,9 @@ void Bouton_Settings(void)
 
     if ((Bouton_clicke>=1) && (Bouton_clicke<=17))
       Settings_Afficher_config(&Config_choisie);
+      
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_PARAMETRES, NULL);
   }
   while ( (Bouton_clicke!=19) && (Touche!=SDLK_RETURN) );
 
@@ -1112,7 +1124,7 @@ void Copier_certaines_couleurs(void)
 {
   short Indice;
 
-  Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,NULL,0);
+  Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,NULL,0, NULL);
 
   if ( (!Brouillon_Image_modifiee)
     || (Demande_de_confirmation("Spare page was modified. Proceed?")) )
@@ -1145,6 +1157,8 @@ void Bouton_Copy_page(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_PAGE, NULL);
   }
   while (Bouton_clicke<=0);
 
@@ -1541,6 +1555,12 @@ void Bouton_Resol(void)
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
         break;
+      default:
+        if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+        {
+          Fenetre_aide(BOUTON_RESOL, NULL);
+          break;
+        }
     }
 
   }
@@ -1967,6 +1987,13 @@ void Bouton_Degrades(void)
 
           Afficher_curseur();
         }
+        break;
+      default:
+        if (Touche==Bouton[BOUTON_GRADMENU].Raccourci_gauche)
+        {
+          Fenetre_aide(BOUTON_PINCEAUX, NULL);
+          break;
+        }
     }
   }
   while (Bouton_clicke<6);
@@ -2083,6 +2110,8 @@ void Bouton_Menu_pinceaux(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_PINCEAUX, NULL);
   }
   while (Bouton_clicke<=0);
 
@@ -2418,7 +2447,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   for (Temp=0; Temp<Nb_drives; Temp++)
   {
     Nom_drive[0]=Drive[Temp].Lettre;
-    Fenetre_Definir_bouton_normal(8+((Temp%13)*20),Drives_Debut_Y+((Temp/13)*12),19,11,Nom_drive,0,1,(Temp < 10) ? SDLK_F1 + Temp : SDLK_LAST); // 9 et +
+    Fenetre_Definir_bouton_normal(8+((Temp%13)*20),Drives_Debut_Y+((Temp/13)*12),19,11,Nom_drive,0,1, SDLK_LAST); // 9 et +
     Fenetre_Afficher_sprite_drive(18+((Temp%13)*20),Drives_Debut_Y+2+((Temp/13)*12),Drive[Temp].Type);
   }
 
@@ -2713,6 +2742,11 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       default: // Autre => On se place sur le nom de fichier qui correspond
         if (Bouton_clicke<=0)
         {
+          if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+          {
+            Fenetre_aide(Load?BOUTON_CHARGER:BOUTON_SAUVER, NULL);
+            break;
+          }
           Temp=strlen(Fichier_recherche);
           if (Touche_ANSI>= ' ' && Touche_ANSI < 255 && Temp<50)
           {
@@ -3658,6 +3692,8 @@ void Bouton_Menu_Loupe(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_LOUPE, NULL);
   }
   while (Bouton_clicke<=0);
 
@@ -3867,6 +3903,8 @@ void Bouton_Menu_Grille(void)
 
         Afficher_curseur();
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "GRID");
   }
   while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
 
@@ -3966,6 +4004,8 @@ void Bouton_Brush_FX(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS_BROSSE, NULL);
   }
   while (Bouton_clicke<=0);
 
@@ -4147,6 +4187,8 @@ void Bouton_Smooth_Menu(void)
         Afficher_curseur();
       }
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "SMOOTH");
   }
   while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
 
@@ -4312,6 +4354,8 @@ void Bouton_Colorize_Menu(void)
         Bouton_Colorize_Afficher_la_selection(Mode_choisi);
         Afficher_curseur();
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "TRANSPARENCY");
   }
   while (Bouton_clicke<5);
 
@@ -4411,6 +4455,8 @@ void Bouton_Tiling_Menu(void)
       }
       Afficher_curseur();
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "TILING");
   }
   while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
 
@@ -4773,6 +4819,14 @@ void Bouton_Spray_Menu(void)
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
         }
+        break;
+      default:
+      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      {
+        Fenetre_aide(BOUTON_SPRAY, NULL);
+        break;
+      }
+        
     }
   }
   while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
@@ -4992,6 +5046,7 @@ void Bouton_Trame_Menu(void)
           Pos_X/=5;
           Pos_Y/=5;
           if ( (Pos_X<Trame_Largeur) && (Pos_Y<Trame_Hauteur) )
+        }
         */
         Pos_X=(Mouse_X-Orig_X)/(Menu_Facteur_X*5);
         Pos_Y=(Mouse_Y-Orig_Y)/(Menu_Facteur_Y*5);
@@ -5188,6 +5243,8 @@ void Bouton_Trame_Menu(void)
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "SIEVE");
   }
   while ( (Bouton_clicke!=2) && (Bouton_clicke!=3) );
 

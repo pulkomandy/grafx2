@@ -25,6 +25,7 @@
 #include "moteur.h"
 #include "divers.h"
 #include "readline.h"
+#include "aide.h"
 
 void Bouton_Shade_Mode(void)
 {
@@ -970,6 +971,10 @@ int Menu_Shade(void)
 
           Afficher_curseur();
         }
+        break;
+      default:
+        if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+          Fenetre_aide(BOUTON_EFFETS, "SHADE");
     }
   }
   while ((Bouton_clicke!=4) && (Bouton_clicke!=5));
@@ -1084,6 +1089,8 @@ void Bouton_Quick_shade_Menu(void)
         Quick_shade_Step=Temp;
         Afficher_curseur();
     }
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_EFFETS, "QUICK SHADE");
   }
   while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
 

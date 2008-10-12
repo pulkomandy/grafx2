@@ -738,7 +738,7 @@ void Gestion_principale(void)
           Afficher_curseur();
           break;
         case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
-          Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Temp,1);
+          Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Temp,1, NULL);
           break;
         case SPECIAL_INVERT_SIEVE :
           Inverser_trame();

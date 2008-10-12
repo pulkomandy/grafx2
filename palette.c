@@ -30,6 +30,7 @@
 #include "readline.h"
 #include "boutons.h"
 #include "pages.h"
+#include "aide.h"
 
 // --------------------------- Menu des palettes -----------------------------
 char * Libelle_reduction_palette[7]=
@@ -1755,6 +1756,13 @@ void Bouton_Palette(void)
             }
             Afficher_curseur();
           }
+          break;
+        default:
+          if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+          {
+            Fenetre_aide(BOUTON_PALETTE, NULL);
+            break;
+          }
       }
 
       if (Il_faut_remapper)
@@ -1840,6 +1848,8 @@ void Bouton_Palette_secondaire(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      Fenetre_aide(BOUTON_PALETTE, NULL);
   }
   while (Bouton_clicke<=0);
 
@@ -1849,7 +1859,7 @@ void Bouton_Palette_secondaire(void)
 
   if (Bouton_clicke==1)
   {
-    Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Dummy,1);
+    Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Dummy,1, NULL);
   }
 /*
   else
