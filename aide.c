@@ -155,11 +155,14 @@ void Bouton_Aide(void)
   short Numero_bouton;
   
   // Aide contextuelle
-  Numero_bouton = Numero_bouton_sous_souris();
-  if (Numero_bouton != -1)
+  if (Touche!=0)
   {
-    Section_d_aide_en_cours = 4 + Numero_bouton;
-    Position_d_aide_en_cours = 0;
+    Numero_bouton = Numero_bouton_sous_souris();
+    if (Numero_bouton != -1)
+    {
+      Section_d_aide_en_cours = 4 + Numero_bouton;
+      Position_d_aide_en_cours = 0;
+    }
   }
   
   Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
