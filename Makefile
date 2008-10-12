@@ -40,7 +40,7 @@ else
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -c -g `sdl-config --cflags`
-    LOPT = -lSDL -o $(BIN)
+    LOPT = `sdl-config --libs`
     CC = gcc
   endif
 endif
