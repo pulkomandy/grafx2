@@ -420,13 +420,23 @@ void Initialisation_du_programme(int argc,char * argv[])
   Initialisation_des_operations();
 
   Une_fenetre_est_ouverte=0;
-
+  
   // Charger les sprites et la palette
   Charger_DAT();
   // Charger la configuration des touches
-  Temp=Charger_CFG(1);
-  if (Temp)
-    Erreur(Temp);
+  Config_par_defaut();
+  switch(Charger_CFG(1))
+  {
+    case ERREUR_CFG_ABSENT:
+      // Pas un problème, on a les valeurs par défaut.
+      break;
+    case ERREUR_CFG_CORROMPU:
+      DEBUG("Corrupted CFG file.",0);
+      break;
+    case ERREUR_CFG_ANCIEN:
+      DEBUG("Unknown CFG file version, not loaded.",0);
+      break;
+  }
   // Charger la configuration du .INI
   Temp=Charger_INI(&Config);
   if (Temp)

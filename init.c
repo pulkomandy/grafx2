@@ -42,6 +42,7 @@
 #include "erreurs.h"
 #include "clavier.h"
 #include "io.h"
+#include "hotkeys.h"
 
 #include "errno.h"
 
@@ -1604,145 +1605,6 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_GROSSIR_PINCEAU           // Grossir le pinceau
 };
 
-byte Numero_option[NB_TOUCHES]=
-{
-    0, // Scroll up
-    1, // Scroll down
-    2, // Scroll left
-    3, // Scroll right
-    4, // Scroll up faster
-    5, // Scroll down faster
-    6, // Scroll left faster
-    7, // Scroll right faster
-    8, // Scroll up slower
-    9, // Scroll down slower
-   10, // Scroll left slower
-   11, // Scroll right slower
-   12, // Emulate mouse up
-   13, // Emulate mouse down
-   14, // Emulate mouse left
-   15, // Emulate mouse right
-   16, // Emulate mouse click left
-   17, // Emulate mouse click right
-   18, // Show / Hide menu
-   19, // Show / Hide cursor
-   20, // Paintbrush = "."
-   21, // Paintbrush choice
-   22, // Monochrome brush
-   23, // Freehand drawing
-   24, // Switch freehand drawing mode
-   25, // Continuous freehand drawing
-   26, // Line
-   27, // Knotted lines
-   28, // Spray
-   29, // Spray menu
-   30, // Floodfill
-  124, // Replace color
-   31, // Bézier's curves
-   32, // Bézier's curve with 3 or 4 points
-   33, // Empty rectangle
-   34, // Filled rectangle
-   35, // Empty circle
-   36, // Empty ellipse
-   37, // Filled circle
-   38, // Filled ellipse
-   39, // Empty polygon
-   40, // Empty polyform
-   41, // Polyfill
-   42, // Filled polyform
-   43, // Gradient rectangle
-   44, // Gradation menu
-   45, // Spheres
-   46, // Gradient ellipses
-   47, // Adjust picture
-   48, // Flip picture menu
-   49, // Menu des effets
-   50, // Shade mode
-   51, // Shade menu
-  131, // Quick-shade mode
-  132, // Quick-shade menu
-   52, // Stencil mode
-   53, // Stencil menu
-   54, // Mask mode
-   55, // Mask menu
-   56, // Grid mode
-   57, // Grid menu
-   58, // Sieve mode
-   59, // Sieve menu
-   60, // Inverser la trame du mode Sieve
-   61, // Colorize mode
-   62, // Colorize menu
-   63, // Smooth mode
-  123, // Smooth menu
-   64, // Smear mode
-   65, // Tiling mode
-   66, // Tiling menu
-   67, // Pick brush
-   68, // Pick polyform brush
-   69, // Restore brush
-   70, // Flip X
-   71, // Flip Y
-   72, // 90° brush rotation
-   73, // 180° brush rotation
-   74, // Stretch brush
-   75, // Distort brush
-   76, // Outline brush
-   77, // Nibble brush
-   78, // Get colors from brush
-   79, // Recolorize brush
-   80, // Rotate brush by any angle
-   81, // Pipette
-   82, // Swap fore/back color
-   83, // Magnifier mode
-   84, // Zoom factor menu
-   85, // Zoom in
-   86, // Zoom out
-   87, // Brush effects menu
-   88, // Text
-   89, // Resolution menu
-   90, // Safety resolution
-   91, // Help & credits
-   92, // Statistics
-   93, // Go to spare page
-   94, // Copy to spare page
-   95, // Save as
-   96, // Save
-   97, // Load
-   98, // Re-load
-   99, // Save brush
-  100, // Load brush
-  101, // Settings
-  102, // Undo
-  103, // Redo
-  133, // Kill
-  104, // Clear
-  105, // Clear with backcolor
-  106, // Quit
-  107, // Palette menu
-  125, // Palette menu secondaire
-  130, // Exclude colors menu
-  108, // Scroll palette left
-  109, // Scroll palette right
-  110, // Scroll palette left faster
-  111, // Scroll palette right faster
-  112, // Center brush attachement
-  113, // Top-left brush attachement
-  114, // Top-right brush attachement
-  115, // Bottom-left brush attachement
-  116, // Bottom right brush attachement
-  117, // Next foreground color
-  118, // Previous foreground color
-  119, // Next background color
-  120, // Previous background color
-  126, // Next user-defined foreground color
-  127, // Previous user-defined foreground color
-  128, // Next user-defined background color
-  129, // Previous user-defined background color
-  121, // Rétrécir le pinceau
-  122  // Grossir le pinceau
-};
-
-
 int Charger_CFG(int Tout_charger)
 {
   FILE*  Handle;
@@ -1811,7 +1673,7 @@ int Charger_CFG(int Tout_charger)
                 CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
               }
               for (Indice2=0;
-                 ((Indice2<NB_TOUCHES) && (Numero_option[Indice2]!=CFG_Infos_touche.Numero));
+                 ((Indice2<NB_TOUCHES) && (ConfigTouche[Indice2].Numero!=CFG_Infos_touche.Numero));
                  Indice2++);
               if (Indice2<NB_TOUCHES)
               {
@@ -1918,7 +1780,6 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_DEGRADES: // Infos sur les dégradés
         if (Tout_charger)
         {
-          // fixme endianness : Degrade_Courant est un int, enregistre en byte
           if (! read_byte(Handle, &Degrade_Courant))
             goto Erreur_lecture_config;
           for(Indice=0;Indice<16;Indice++)
@@ -2057,7 +1918,7 @@ int Sauver_CFG(void)
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
-    CFG_Infos_touche.Numero =Numero_option[Indice];
+    CFG_Infos_touche.Numero = ConfigTouche[Indice].Numero;
     switch(Ordonnancement[Indice]>>8)
     {
       case 0 : CFG_Infos_touche.Touche=Config_Touche[Ordonnancement[Indice]&0xFF]; break;
@@ -2268,4 +2129,89 @@ void Initialiser_la_table_precalculee_des_distances_de_couleur(void)
       MC_Table_differences[Indice+256]=((128-Indice)*11)*((128-Indice)*11);
     }
   }
+}
+
+// (Ré)assigne toutes les valeurs de configuration par défaut
+void Config_par_defaut(void)
+{
+  int Indice, Indice2;
+
+  // Raccourcis clavier
+  for (Indice=0; Indice<NB_TOUCHES; Indice++)
+  {
+    switch(Ordonnancement[Indice]>>8)
+    {
+      case 0 :
+        Config_Touche[Ordonnancement[Indice]&0xFF]=ConfigTouche[Indice].Touche;
+        break;
+      case 1 :
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche = ConfigTouche[Indice].Touche;
+        break;
+      case 2 :
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite = ConfigTouche[Indice].Touche;
+        break;
+    }
+  }
+  // Shade
+  Shade_Actuel=0;
+  for (Indice=0; Indice<8; Indice++)
+  {
+    Shade_Liste[Indice].Pas=1;
+    Shade_Liste[Indice].Mode=0;
+    for (Indice2=0; Indice2<512; Indice2++)
+      Shade_Liste[Indice].Liste[Indice2]=256;
+  }
+  // Shade par défaut pour la palette standard
+  for (Indice=0; Indice<7; Indice++)
+    for (Indice2=0; Indice2<16; Indice2++)
+      Shade_Liste[0].Liste[Indice*17+Indice2]=Indice*16+Indice2+16;
+  
+  Liste2tables(Shade_Liste[Shade_Actuel].Liste,
+            Shade_Liste[Shade_Actuel].Pas,
+            Shade_Liste[Shade_Actuel].Mode,
+            Shade_Table_gauche,Shade_Table_droite);
+
+  // Masque
+  for (Indice=0; Indice<256; Indice++)
+    Mask[Indice]=0;
+
+  // Stencil
+  for (Indice=0; Indice<256; Indice++)
+    Stencil[Indice]=1;
+
+  // Dégradés
+  Degrade_Courant=0;
+  for(Indice=0;Indice<16;Indice++)
+  {
+    Degrade_Tableau[Indice].Debut=0;
+    Degrade_Tableau[Indice].Fin=0;
+    Degrade_Tableau[Indice].Inverse=0;
+    Degrade_Tableau[Indice].Melange=0;
+    Degrade_Tableau[Indice].Technique=0;
+  }
+  Degrade_Charger_infos_du_tableau(Degrade_Courant);
+  
+  // Smooth
+  Smooth_Matrice[0][0]=1;
+  Smooth_Matrice[0][1]=2;
+  Smooth_Matrice[0][2]=1;
+  Smooth_Matrice[1][0]=2;
+  Smooth_Matrice[1][1]=4;
+  Smooth_Matrice[1][2]=2;
+  Smooth_Matrice[2][0]=1;
+  Smooth_Matrice[2][1]=2;
+  Smooth_Matrice[2][2]=1;
+
+  // Exclude colors
+  for (Indice=0; Indice<256; Indice++)
+    Exclude_color[Indice]=0;
+
+  // Quick shade    
+  Quick_shade_Step=1;
+  Quick_shade_Loop=0;
+  
+  // Grille
+  Snap_Largeur=Snap_Hauteur=8;
+  Snap_Decalage_X=Snap_Decalage_Y=0;
+  
 }

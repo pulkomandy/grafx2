@@ -31,3 +31,4 @@ void Initialiser_la_table_precalculee_des_distances_de_couleur(void);
 
 void Definition_des_modes_video(void);
 int ActiverLecteur(int);
+void Config_par_defaut(void);

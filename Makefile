@@ -62,12 +62,12 @@ release : $(BIN) $(CFGBIN)
 
 # A raw source archive
 zip :
-	tar cvzf gfx2-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ini gfx2.cfg doc/gpl-2.0.txt \
+	tar cvzf gfx2-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ini doc/gpl-2.0.txt \
     8pxfont.png 
 
 # A release zip archive
 ziprelease:
-	zip grafx2-beta-svn`svnversion`.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll gfx2.cfg
+	zip grafx2-beta-svn`svnversion`.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
