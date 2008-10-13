@@ -418,23 +418,18 @@ void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 {
-	uint64_t Ellipse_Limite;
 	Ellipse_Rayon_horizontal_au_carre = 
 		Rayon_horizontal * Rayon_horizontal;
 	Ellipse_Rayon_vertical_au_carre = 
 		Rayon_vertical * Rayon_vertical;
 	Ellipse_Limite = Ellipse_Rayon_horizontal_au_carre * Ellipse_Rayon_vertical_au_carre;
-	Ellipse_Limite_Low = Ellipse_Limite & 0xFFFFFFFF;
-	Ellipse_Limite >>= 32;
-	Ellipse_Limite_High = Ellipse_Limite;
 }
 
 byte Pixel_dans_ellipse(void)
 {
 	uint64_t ediesi = Ellipse_Curseur_X * Ellipse_Curseur_X * Ellipse_Rayon_vertical_au_carre + 
 			  Ellipse_Curseur_Y * Ellipse_Curseur_Y * Ellipse_Rayon_horizontal_au_carre;
-	if((ediesi >> 32) <= Ellipse_Limite_High &&
-	(ediesi & 0xFFFFFFFF)  <= Ellipse_Limite_Low) return 255;
+	if((ediesi) <= Ellipse_Limite) return 255;
 	
         return 0;
 }
