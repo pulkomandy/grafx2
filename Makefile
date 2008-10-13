@@ -34,8 +34,8 @@ else
     CC = i586-mingw32msvc-gcc
     BIN = grafx2.exe
     CFGBIN = gfxcfg.exe
-    COPT = -Wall -O -g -ggdb -Dmain=SDL_main
-    LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi
+    COPT = -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
+    LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs`
   else
     BIN = grafx2
     CFGBIN = gfxcfg
@@ -63,7 +63,7 @@ release : $(BIN) $(CFGBIN)
 # A release zip archive
 ziprelease:
 	tar cvzf src-svn`svnversion`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-beta-svn`svnversion`.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png src-svn`svnversion`.tgz
+	zip grafx2-beta-svn`svnversion`-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png SDL_image.dll
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
