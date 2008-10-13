@@ -925,7 +925,8 @@ int Conversion_argument_mode(const char *Argument)
   // Je suis paresseux alors je vais juste tester les libellés
   int Indice_mode;
   for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
-    if (!strcmp(Libelle_mode(Indice_mode), Argument))
+    // Attention les vieilles fonctions de lecture .ini mettent tout en MAJUSCULE.
+    if (!strcasecmp(Libelle_mode(Indice_mode), Argument))
       return Indice_mode;
 
   return -1;
