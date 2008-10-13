@@ -420,9 +420,9 @@ void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 {
 	uint64_t Ellipse_Limite;
 	Ellipse_Rayon_horizontal_au_carre = 
-		Table_des_carres[Rayon_horizontal];
+		Rayon_horizontal * Rayon_horizontal;
 	Ellipse_Rayon_vertical_au_carre = 
-		Table_des_carres[Rayon_vertical];
+		Rayon_vertical * Rayon_vertical;
 	Ellipse_Limite = Ellipse_Rayon_horizontal_au_carre * Ellipse_Rayon_vertical_au_carre;
 	Ellipse_Limite_Low = Ellipse_Limite & 0xFFFFFFFF;
 	Ellipse_Limite >>= 32;
@@ -431,10 +431,8 @@ void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 
 byte Pixel_dans_ellipse(void)
 {
-	uint64_t ediesi = Table_des_carres[abs(Ellipse_Curseur_X)] *
-		(Ellipse_Rayon_vertical_au_carre) + 
-		Table_des_carres[abs(Ellipse_Curseur_Y)] * 
-		(Ellipse_Rayon_horizontal_au_carre);
+	uint64_t ediesi = Ellipse_Curseur_X * Ellipse_Curseur_X * Ellipse_Rayon_vertical_au_carre + 
+			  Ellipse_Curseur_Y * Ellipse_Curseur_Y * Ellipse_Rayon_horizontal_au_carre;
 	if((ediesi >> 32) <= Ellipse_Limite_High &&
 	(ediesi & 0xFFFFFFFF)  <= Ellipse_Limite_Low) return 255;
 	
@@ -443,8 +441,8 @@ byte Pixel_dans_ellipse(void)
 
 byte Pixel_dans_cercle(void)
 {
-        if((Table_des_carres[abs(Cercle_Curseur_X)] + 
-            Table_des_carres[abs(Cercle_Curseur_Y)] ) <= Cercle_Limite)
+        if(Cercle_Curseur_X * Cercle_Curseur_X + 
+            Cercle_Curseur_Y * Cercle_Curseur_Y <= Cercle_Limite)
                 return 255;
         return 0;
 }

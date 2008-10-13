@@ -359,9 +359,6 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   Forcer_affichage_curseur=0;
 
-  // On initialise la table des carrés:
-  Initialiser_la_table_des_carres();
-
   // On initialise tout ce qui concerne les opérations et les effets
   Operation_Taille_pile=0;
   Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;

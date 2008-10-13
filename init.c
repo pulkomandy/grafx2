@@ -2089,16 +2089,6 @@ void Initialiser_les_tables_de_multiplication(void)
   }
 }
 
-
-void Initialiser_la_table_des_carres(void)
-{
-  long Indice;
-
-  for (Indice=0;Indice<1025;Indice++)
-    Table_des_carres[Indice]=(Indice*Indice);
-}
-
-
 void Initialiser_la_table_precalculee_des_distances_de_couleur(void)
 {
   int Indice;

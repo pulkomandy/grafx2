@@ -489,7 +489,6 @@ GLOBAL word  TABLE_ZOOM[NB_FACTEURS_DE_ZOOM][512];
 
   // Données sur les ellipses et les cercles:
 
-GLOBAL dword Table_des_carres[1025];
 GLOBAL long  Ellipse_Curseur_X;
 GLOBAL long  Ellipse_Curseur_Y;
 GLOBAL long  Ellipse_Rayon_vertical_au_carre;
