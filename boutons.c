@@ -2226,6 +2226,8 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
   // On affiche les nouveaux:
   Afficher_la_liste_des_fichiers(Position,Decalage);
 
+  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82);
+
   // On récupère le nom du schmilblick à "accéder"
   Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier);
   // On affiche le nouveau nom de fichier
