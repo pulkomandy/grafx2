@@ -236,8 +236,8 @@ static const char * TableAideHelp[] =
 };
 static const char * TableAideCredits[] =
 {
-  AIDE_TITRE("GRAFX2 IS CREATED BY")
-  AIDE_BOLD ("       THE GRAFX2 PROJECT TEAM")
+  AIDE_TITRE(" GRAFX2 IS CREATED BY")
+  AIDE_BOLD ("         THE GRAFX2 PROJECT TEAM")
   AIDE_TEXTE("")
   AIDE_TEXTE("  Adrien Destugues (pulkomandy@gmail.com)")
   AIDE_TEXTE("  Yves Rizoud (yrizoud@gmail.com)")
@@ -247,19 +247,32 @@ static const char * TableAideCredits[] =
   AIDE_TEXTE("  GrafX2 logo by Made (www.m4de.com)")
   AIDE_TEXTE("  Icons and fonts by X-Man ")
   AIDE_TEXTE("")
-  AIDE_BOLD ("    OUR HOMEPAGE")
+  AIDE_BOLD ("              AMIGA OS 4 PORT")
+  AIDE_TEXTE("")
+  AIDE_TEXTE("  xeron")
+  AIDE_TEXTE("")
+  AIDE_BOLD ("               MAC OS X PORT")              //
+  AIDE_TEXTE("")                                          //
+  AIDE_TEXTE("  hitchhikr")                               //
+  AIDE_TEXTE("")
+  AIDE_BOLD("                 BUGFINDERS")                //
+  AIDE_TEXTE("")                                          //
+  AIDE_TEXTE("  Ced        El Topo    Frost         Grimmy")
+  AIDE_TEXTE("  keito      kusma      Lord Graga    mind")
+  AIDE_TEXTE("  MooZ       tempest    titus^Rab")
+  AIDE_TEXTE("")
+  AIDE_BOLD ("               OUR HOMEPAGE")               //
+  AIDE_TEXTE("")                                          //
   AIDE_TEXTE("http://grafx2.codegoogle.com")
   AIDE_TEXTE("Please report any bug you may find there")
   AIDE_TEXTE("")
-  AIDE_BOLD ("    GREETINGS")
-  AIDE_TEXTE("- To all the guys who tested the program,")
-  AIDE_TEXTE("found the nasty bugs, and made the hard")
-  AIDE_TEXTE("to program features requests.")
+  AIDE_BOLD ("               GREETINGS")
+  AIDE_TEXTE("")                                          //
   AIDE_TEXTE("- To the Pouet.net BBS posters, the #CPC")
   AIDE_TEXTE(" trolls and the bitfellas")
-  AIDE_TEXTE("- To Ced and Exin for nights spent tracking")
-  AIDE_TEXTE("odd bugs.")
   AIDE_TEXTE("- To every people who makes the scene alive!")
+  AIDE_TEXTE("- To all guys making nice pixelled pictures")
+  AIDE_TEXTE("  (with or without GrafX2)")
   AIDE_TEXTE("")
   AIDE_TITRE("    SUNSET DESIGN")
   AIDE_BOLD ("       AUTHORS OF GRAFX2.0 BETA 96.5%")
