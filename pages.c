@@ -827,13 +827,25 @@ void Backup(void)
 // Sauve la page courante comme première page de backup et crée une nouvelle page
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
-  S_Page * Nouvelle_page;
+  #ifdef __macosx__
+    S_Page Nouvelle_page;
+  #else
+    S_Page * Nouvelle_page;
+  #endif
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_principal(Principal_Backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
+#ifdef __macosx__
+  Initialiser_S_Page(&Nouvelle_page);
+
+  // Enrichissement de l'historique
+  Copier_S_page(&Nouvelle_page,Principal_Backups->Pages);
+  Creer_nouvelle_page(&Nouvelle_page,Principal_Backups,Brouillon_Backups);
+  Download_infos_page_principal(&Nouvelle_page);
+#else
   Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
   Initialiser_S_Page(Nouvelle_page);
 
@@ -841,13 +853,17 @@ void Backup(void)
   Copier_S_page(Nouvelle_page,Principal_Backups->Pages);
   Creer_nouvelle_page(Nouvelle_page,Principal_Backups,Brouillon_Backups);
   Download_infos_page_principal(Nouvelle_page);
+#endif
+
   Download_infos_backup(Principal_Backups);
 
   // On copie l'image du backup vers la page courante:
   memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
 
   // On détruit le descripteur de la page courante
+#ifndef __macosx__
   free(Nouvelle_page);
+#endif
 
   // On allume l'indicateur de modification de l'image
   Principal_Image_modifiee=1;

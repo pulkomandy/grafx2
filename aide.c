@@ -33,7 +33,12 @@
 #include <string.h>
 
 #ifdef __linux__
+  #ifdef __macosx__
+    #include <sys/param.h>
+    #include <sys/mount.h>
+  #else
     #include <sys/vfs.h>
+  #endif
 #else
 #ifndef __amigaos4__
     #include <windows.h>

@@ -52,10 +52,22 @@
 #endif
 #endif
 
+#ifdef __macosx__
+  #import <corefoundation/corefoundation.h>
+  #import <sys/param.h>
+#endif
+
 // Chercher le répertoire contenant GFX2.EXE
 void Chercher_repertoire_du_programme(char * Chaine)
 {
-  Extraire_chemin(Repertoire_du_programme, Chaine);
+  #ifdef __macosx__
+    CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFURLGetFileSystemRepresentation(url,true,(UInt8*)Repertoire_du_programme,MAXPATHLEN);
+    CFRelease(url);
+    strcat(Repertoire_du_programme,"Contents/Resources");
+  #else
+    Extraire_chemin(Repertoire_du_programme, Chaine);
+  #endif
 }
 
 

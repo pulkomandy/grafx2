@@ -22,7 +22,11 @@
 #include "graph.h"
 #include "divers.h"
 #include <math.h>
-#include <malloc.h>
+#ifdef __macosx__
+    #include <sys/malloc.h>
+#else
+    #include <malloc.h>
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -34,7 +38,11 @@
 #include "erreurs.h"
 
 #ifdef __linux__
+  #ifdef __macosx__
+    #include <sys/sysctl.h>
+  #else
     #include <sys/sysinfo.h>
+  #endif
 #elif __WATCOMC__
     #define _WIN32_WINNT 0x0500
     #include <windows.h>
@@ -485,9 +493,21 @@ unsigned long Memoire_libre(void)
   _heapmin();
   */
     #ifdef __linux__
+      #ifdef __macosx__
+        int mib[2];
+	int maxmem;
+	size_t len;
+
+	mib[0] = CTL_HW;
+	mib[1] = HW_USERMEM;
+	len = sizeof(maxmem);
+	sysctl(mib,2,&maxmem,&len,NULL,0);
+	return maxmem;
+      #else
         struct sysinfo info;
         sysinfo(&info);
         return info.freeram*info.mem_unit;
+      #endif
     #elif __WATCOMC__
          MEMORYSTATUSEX mstt;
          mstt.dwLength = sizeof(MEMORYSTATUSEX);

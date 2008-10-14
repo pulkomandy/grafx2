@@ -661,6 +661,12 @@ int main(int argc, char * argv[])
   	/* On initialise SFont */
   	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));
 
+	if(MyFont==NULL)
+	{
+	    SDL_Quit();
+	    exit(0);
+	}
+
   	Dessiner_ecran_principal();
 
   	if(!Initialiser_config())

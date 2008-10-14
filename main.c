@@ -55,6 +55,7 @@
 #endif
 #endif
 
+
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 
 
