@@ -2407,7 +2407,7 @@ void Afficher_curseur(void)
           if (Fin_X<4)
             Ligne_horizontale_XOR(Mouse_X+3,Mouse_Y,4-Fin_X);
 
-          Fin_Y=(Mouse_Y+7>/*Menu_Ordonnee*/Hauteur_ecran)?Mouse_Y+7-/*Menu_Ordonnee*/Hauteur_ecran:0;
+          Fin_Y=(Mouse_Y+7>Hauteur_ecran)?Mouse_Y+7-Hauteur_ecran:0;
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
@@ -2420,19 +2420,21 @@ void Afficher_curseur(void)
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
           for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+	  {
+	    if( Pos_X < 0 ) continue;
+	    else if (Pos_X > Largeur_ecran) break;
             for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
             {
+	      if( Pos_Y < 0 ) continue;
+	      else if (Pos_Y > Hauteur_ecran) break;
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
-              if ( (Pos_X>=0) && (Pos_X<Largeur_ecran)
-                && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
-              {
-                FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
-                if (Couleur!=CM_Trans)
+              FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+              if (Couleur!=CM_Trans)
                   Pixel(Pos_X,Pos_Y,Couleur);
-              }
             }
+	  }
 
-          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Compteur_X - 1,Compteur_Y-1);
         }
       }
       break;
@@ -2716,11 +2718,17 @@ void Effacer_curseur(void)
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
           for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+	  {
+	    if(Pos_Y>=Hauteur_ecran) break;
             for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
-              if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
-                Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+	    {
+              if ( (Pos_X<0) || (Pos_Y < 0)) continue;
+	      else if (Pos_X>=Largeur_ecran) break;
+              Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+	    }
+	  }
 
-          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Pos_X-Debut_X,Pos_Y-Debut_Y);
         }
       }
       if (!Cacher_pinceau)

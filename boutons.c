@@ -3631,6 +3631,8 @@ void Bouton_Loupe(void)
       // On passe en mode loupe
       Loupe_Mode=1;
 
+	DEBUG("plop",1);
+
       // La fonction d'affichage dans la partie image est désormais un affichage
       // spécial loupe.
       Pixel_Preview=Pixel_Preview_Loupe;
