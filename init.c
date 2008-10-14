@@ -47,7 +47,9 @@
 #include "errno.h"
 
 #ifndef __linux__
+#ifndef __amigaos4__
 #include "windows.h"
+#endif
 #endif
 
 // Chercher le répertoire contenant GFX2.EXE
@@ -102,7 +104,7 @@ void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
 void Rechercher_drives(void)
 {
 
-  #ifdef __linux__
+  #if defined(__linux__) || defined(__amigaos4__)
 	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
 	// un disque dur qui pointera vers la racine,
 	// et un autre vers le home directory de l'utilisateur.
@@ -159,14 +161,14 @@ int ActiverLecteur(int NumeroLecteur)
     char * Home = getenv("HOME");
     if (! Home)
       return -1;
-  #ifdef __linux__
+  #if defined(__linux__)||defined(__amigaos4__)
     return chdir(Home);
   #else
     return ! SetCurrentDirectory(Home);
   #endif
   }
 
-  #ifdef __linux__
+  #if defined(__linux__)||defined(__amigaos4__)
     char NomLecteur[]=" ";
     NomLecteur[0]=Drive[NumeroLecteur].Lettre;
     return chdir(NomLecteur);
@@ -203,7 +205,6 @@ void Decrypte(byte * Donnee,int Taille)
     *(Donnee+Indice)=Decrypt(*(Donnee+Indice));
 }
 
-
 void Charger_DAT(void)
 {
   FILE*  Handle;
@@ -216,8 +217,12 @@ void Charger_DAT(void)
 
   struct stat Informations_Fichier;
 
+#ifdef __amigaos4__
+  strcpy(Nom_du_fichier,"PROGDIR:gfx2.dat");
+#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.dat");
+#endif
   
   if(stat(Nom_du_fichier,&Informations_Fichier))
   {
@@ -230,7 +235,7 @@ void Charger_DAT(void)
       case ENOENT: puts("Un composant du chemin path n'existe pas, ou il s'agit d'une chaîne vide."); break;
       case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
       case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
-      #ifdef __linux__
+      #if defined(__linux__)||defined(__amigaos4__)
           case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
       #endif
     }
@@ -1618,8 +1623,12 @@ int Charger_CFG(int Tout_charger)
   struct stat Informations_Fichier;
   int Conversion_touches = 0;
 
+#ifdef __amigaos4__
+  strcpy(Nom_du_fichier,"PROGDIR:gfx2.cfg");
+#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
+#endif
 
   stat(Nom_du_fichier,&Informations_Fichier);
   Taille_fichier=Informations_Fichier.st_size;
@@ -1889,9 +1898,12 @@ int Sauver_CFG(void)
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
 
-
+#ifdef __amigaos4__
+  strcpy(Nom_du_fichier,"PROGDIR:gfx2.cfg");
+#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
+#endif
 
   if ((Handle=fopen(Nom_du_fichier,"wb"))==NULL)
     return ERREUR_SAUVEGARDE_CFG;

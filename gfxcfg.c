@@ -29,7 +29,7 @@
 
 //SDL
 #include <SDL.h>
-#include <SDL_image.h>
+#include <SDL/SDL_image.h>
 #include <SDL_events.h>
 //#include <SDL_gfxPrimitives.h>
 
@@ -587,7 +587,13 @@ void Setup()
 /* Checks if we can write the config file */
 bool Verifier_ecriture_possible()
 {
+  #ifdef __amigaos4__
+    // TODO: Make it work :)
+    return 1;
+  #else
+    // Doesn't work on OS4.
     return access("./",W_OK) == 0;
+  #endif
 }
 
 /* Save the config file */

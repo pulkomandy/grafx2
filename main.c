@@ -34,6 +34,7 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+#include <SDL/SDL.h>
 #include <unistd.h>
 #include "pages.h"
 #include "files.h"
@@ -46,10 +47,12 @@
 #include "io.h"
 
 #ifndef __linux__
+#ifndef __amigaos4__
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
     #define M_PI 3.14159265358979323846
+#endif
 #endif
 
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
@@ -212,7 +215,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        #ifdef __linux__
+        #if defined(__linux__) || defined(__amigaos4__)
           Buffer=realpath(argv[Indice],NULL);
         #else
           Buffer = malloc(TAILLE_CHEMIN_FICHIER);
@@ -221,7 +224,9 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         Extraire_chemin(Principal_Repertoire_fichier, Buffer);
         Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
         #ifndef __linux__
+        #ifndef __amigaos4__
           free(Buffer);
+        #endif
         #endif
         chdir(Principal_Repertoire_fichier);
       }

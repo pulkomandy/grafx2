@@ -398,14 +398,22 @@ int Sauver_INI(struct S_Config * Conf)
   Buffer=(char *)malloc(1024);
   
   // On calcule les noms des fichiers qu'on manipule:
+#ifdef __amigaos4__
+  strcpy(Nom_du_fichier,"PROGDIR:gfx2.ini");
+#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.ini");
+#endif
 
   // On vérifie si le fichier INI existe
   if ((Ini_existe = Fichier_existe(Nom_du_fichier)))
   {
+#ifdef __amigaos4__
+    strcpy(Nom_du_fichier_temporaire,"PROGDIR:gfx2.$$$");
+#else
     strcpy(Nom_du_fichier_temporaire,Repertoire_du_programme);
     strcat(Nom_du_fichier_temporaire,"gfx2.$$$");
+#endif
     
     // On renome l'ancienne version du fichier INI vers un fichier temporaire:
     if (rename(Nom_du_fichier,Nom_du_fichier_temporaire)!=0)
@@ -414,8 +422,12 @@ int Sauver_INI(struct S_Config * Conf)
     }
   }
   // On récupère un fichier INI "propre" dans GFX2.DAT
+#ifdef __amigaos4__
+  strcpy(Nom_du_fichier_DAT,"PROGDIR:gfx2.dat");
+#else
   strcpy(Nom_du_fichier_DAT,Repertoire_du_programme);
   strcat(Nom_du_fichier_DAT,"gfx2.dat");
+#endif
   Ancien_fichier=fopen(Nom_du_fichier_DAT,"rb");
   if (Ancien_fichier==0)
   {

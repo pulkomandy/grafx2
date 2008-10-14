@@ -19,7 +19,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // Diverses fonctions qui existaient sous dos mais pas sous linux...
-#ifdef __linux__
+#if defined(__linux__)||defined(__amigaos4__)
 
 #include <string.h>
 #include <stdio.h>

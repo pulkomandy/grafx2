@@ -35,7 +35,9 @@
 #ifdef __linux__
     #include <sys/vfs.h>
 #else
+#ifndef __amigaos4__
     #include <windows.h>
+#endif
 #endif
 
 // -- Menu d'aide -----------------------------------------------------------
@@ -304,8 +306,12 @@ void Bouton_Stats(void)
     struct statfs Informations_Disque;
     uint64_t Taille = 0;
   #else
-    unsigned __int64 Taille;
-    ULARGE_INTEGER tailleU;
+    #ifdef __amigaos4__
+      uint64_t Taille = 0;
+    #else
+      unsigned __int64 Taille;
+      ULARGE_INTEGER tailleU;
+    #endif
   #endif
 
 
@@ -347,8 +353,11 @@ void Bouton_Stats(void)
     statfs(Principal_Repertoire_courant,&Informations_Disque);
     Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
   #else
-    GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
-    Taille = tailleU.QuadPart;
+    #ifdef __amigaos4__
+    #else
+      GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
+      Taille = tailleU.QuadPart;
+    #endif
   #endif
   
     if(Taille > (100ULL*1024*1024*1024))

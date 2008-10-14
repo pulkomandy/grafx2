@@ -39,6 +39,9 @@
 #ifdef __linux__
     #include <dirent.h>
     #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
+#elif defined(__amigaos4__)
+    #include <dirent.h>
+    #define isHidden(Enreg) (0)
 #elif defined(__WATCOMC__)
     #include <direct.h>
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
