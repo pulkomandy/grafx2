@@ -1947,8 +1947,31 @@ short Fenetre_Bouton_clicke(void)
   return 0;
 }
 
-
-
-
 //int Moteur_Dernier_bouton_clicke;
 //int Moteur_Type_dernier_bouton_clicke;
+
+// Fonction qui sert à remapper les parties sauvegardées derriere les
+// fenetres ouvertes. C'est utilisé par exemple par la fenetre de palette
+// Qui remappe des couleurs, afin de propager les changements.
+void Remappe_fond_fenetres(byte * Table_de_conversion)
+{
+  int Indice_fenetre; 
+	byte* EDI;
+	int dx,cx;
+
+  for (Indice_fenetre=0; Indice_fenetre<Fenetre; Indice_fenetre++)
+  {
+    EDI = Fond_fenetre[Indice_fenetre];
+  
+  	// Pour chaque ligne
+  	for(dx=Pile_Fenetre_Hauteur[Indice_fenetre];dx>0;dx--)
+  	{
+  		// Pour chaque pixel
+  		for(cx=Pile_Fenetre_Largeur[Indice_fenetre];cx>0;cx--)
+  		{
+  			*EDI = Table_de_conversion[*EDI];
+  			EDI ++;
+  		}
+  	}
+  }
+}

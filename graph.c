@@ -364,7 +364,9 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
        Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
        Mais de toutes façons, c'est franchement facultatif...
     */
+    Remappe_fond_fenetres(Table_de_conversion);
   }
+  
 }
 
 

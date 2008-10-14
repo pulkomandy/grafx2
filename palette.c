@@ -199,8 +199,9 @@ void Remap_image_HIGH(byte * Table_de_conversion)
                     (Principal_Split+(LARGEUR_BARRE_SPLIT*Menu_Facteur_X)),
                     Menu_Ordonnee_avant_fenetre,Table_de_conversion);
   }
+  // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
+  Remappe_fond_fenetres(Table_de_conversion);
 }
-
 
 
 void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur)
@@ -314,7 +315,9 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   Set_palette(Palette);
 
   if (X_Swap)
+  {
     Remap_image_HIGH(Table_de_conversion);
+  }
 }
 
 
@@ -381,7 +384,6 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
 
   // On fait un changement des couleurs visibles à l'écran et dans l'image
   Remap_image_HIGH(Table_de_remplacement);
-
   Afficher_curseur();
 }
 
