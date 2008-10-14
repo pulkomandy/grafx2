@@ -1777,6 +1777,8 @@ void Bouton_Palette(void)
         Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*24,Menu_Facteur_Y*72,Back_color);
         Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
 
+	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+82*Menu_Facteur_Y,Menu_Facteur_X*16*10,Menu_Facteur_Y*5*16);
+
         Afficher_curseur();
         Il_faut_remapper=0;
       }

@@ -2226,7 +2226,7 @@ void Effacer_pinceau(short X,short Y)
         && (Pinceau_Y<=Limite_Bas) )
       {
         Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
-        if(Loupe_Mode) Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+        Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
       }
       break;
     case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
