@@ -34,7 +34,6 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
-#include <SDL/SDL.h>
 #include <unistd.h>
 #include "pages.h"
 #include "files.h"
