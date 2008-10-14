@@ -4945,6 +4945,12 @@ void Inverser_trame(void)
       Trame[Pos_X][Pos_Y]=!(Trame[Pos_X][Pos_Y]);
 }
 
+// Rafraichit toute la zone correspondant à la trame zoomee.
+void Mettre_a_jour_trame(short X, short Y)
+{
+  SDL_UpdateRect(Ecran_SDL,X,Y,80*Menu_Facteur_X,80*Menu_Facteur_Y);
+}
+
 
 void Bouton_Trame_Menu(void)
 {
@@ -5035,6 +5041,10 @@ void Bouton_Trame_Menu(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
 
+  Orig_X=Fenetre_Pos_X+(Menu_Facteur_X*Fenetre_Liste_boutons_special->Pos_X);
+  Orig_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*Fenetre_Liste_boutons_special->Pos_Y);
+
+
     switch (Bouton_clicke)
     {
       case -1 :
@@ -5074,10 +5084,10 @@ void Bouton_Trame_Menu(void)
             Block(Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),
                   Pos_X-Menu_Facteur_X, Pos_Y-Menu_Facteur_Y, Temp);
             // Mise à jour de la preview
-            for (Pos_Y=Preview_Debut_Y+Old_Pos_Y; Pos_Y<Preview_Fin_Y; Pos_Y+=Trame_Hauteur)
-              for (Pos_X=Preview_Debut_X+Old_Pos_X; Pos_X<Preview_Fin_X; Pos_X+=Trame_Largeur)
-                Pixel(Pos_X,Pos_Y,Temp);
+            Dessiner_trame_zoomee(Orig_X,Orig_Y);
             Afficher_curseur();
+            // Maj de la case seule
+            SDL_UpdateRect(Ecran_SDL,Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),Menu_Facteur_X*5,Menu_Facteur_Y*5);
           }
         }
         break;
@@ -5091,6 +5101,7 @@ void Bouton_Trame_Menu(void)
         memset(Trame,Octet_insere,256);
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case  5 : // Invert
@@ -5098,6 +5109,7 @@ void Bouton_Trame_Menu(void)
         Inverser_trame();
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case  6 : // Get from brush
@@ -5108,11 +5120,17 @@ void Bouton_Trame_Menu(void)
           for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
             Trame[Pos_X][Pos_Y]=(Lit_pixel_dans_brosse(Pos_X,Pos_Y)!=Back_color);
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
+        Num2str(Trame_Hauteur,Chaine,2);
+        Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
+        Num2str(Trame_Largeur,Chaine,2);
+        Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case  7 : // Transfer to brush
-        free(Brosse);
+        if (Brosse)
+          free(Brosse);
         Brosse_Largeur=Trame_Largeur;
         Brosse_Hauteur=Trame_Hauteur;
         Brosse=(byte *)malloc(((long)Brosse_Hauteur)*Brosse_Largeur);
@@ -5121,6 +5139,7 @@ void Bouton_Trame_Menu(void)
             Pixel_dans_brosse(Pos_X,Pos_Y,(Trame[Pos_X][Pos_Y])?Fore_color:Back_color);
         Brosse_Decalage_X=(Brosse_Largeur>>1);
         Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
         break;
 
       case  8 : // Réduire hauteur
@@ -5132,6 +5151,7 @@ void Bouton_Trame_Menu(void)
           Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
           Dessiner_trame_zoomee(Orig_X,Orig_Y);
           Afficher_curseur();
+          Mettre_a_jour_trame(Orig_X, Orig_Y);
         }
         break;
 
@@ -5146,6 +5166,7 @@ void Bouton_Trame_Menu(void)
           Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
           Dessiner_trame_zoomee(Orig_X,Orig_Y);
           Afficher_curseur();
+          Mettre_a_jour_trame(Orig_X, Orig_Y);
         }
         break;
 
@@ -5158,6 +5179,7 @@ void Bouton_Trame_Menu(void)
           Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
           Dessiner_trame_zoomee(Orig_X,Orig_Y);
           Afficher_curseur();
+          Mettre_a_jour_trame(Orig_X, Orig_Y);
         }
         break;
 
@@ -5172,6 +5194,7 @@ void Bouton_Trame_Menu(void)
           Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
           Dessiner_trame_zoomee(Orig_X,Orig_Y);
           Afficher_curseur();
+          Mettre_a_jour_trame(Orig_X, Orig_Y);
         }
         break;
 
@@ -5182,6 +5205,12 @@ void Bouton_Trame_Menu(void)
               Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
               Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
         Afficher_curseur();
+        SDL_UpdateRect(Ecran_SDL,
+          Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
+          Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
+          Menu_Facteur_X*7,
+          Menu_Facteur_Y*7);
+
         break;
 
       case 13 : // Scroll vers le haut
@@ -5195,6 +5224,7 @@ void Bouton_Trame_Menu(void)
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case 14 : // Scroll vers le bas
@@ -5208,6 +5238,7 @@ void Bouton_Trame_Menu(void)
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case 15 : // Scroll vers la gauche
@@ -5221,6 +5252,7 @@ void Bouton_Trame_Menu(void)
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       case 16 : // Scroll vers la droite
@@ -5234,6 +5266,7 @@ void Bouton_Trame_Menu(void)
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
         break;
 
       default : // Boutons de trames prédéfinies
@@ -5246,6 +5279,7 @@ void Bouton_Trame_Menu(void)
         Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
+        Mettre_a_jour_trame(Orig_X, Orig_Y);
     }
     if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
       Fenetre_aide(BOUTON_EFFETS, "SIEVE");
