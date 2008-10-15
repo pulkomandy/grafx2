@@ -25,6 +25,7 @@
 #include "sdlscreen.h"
 #include "divers.h"
 #include "erreurs.h"
+#include "graph.h"
 
 // Mise à jour minimaliste en nombre de pixels
 #define METHODE_UPDATE_MULTI_RECTANGLE 1
@@ -497,12 +498,40 @@ void Gere_Evenement_SDL(SDL_Event * event)
   }
 }
 
+#if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+short Min_X=0;
+short Min_Y=0;
+short Max_X=10000;
+short Max_Y=10000;
+#endif
+
+#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+  int Update_necessaire=0;
+#endif
+
 void Flush_update(void)
 {
   #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
   // Mise à jour de la totalité de l'écran
+  if (Update_necessaire)
+  {
     SDL_UpdateRect(Ecran_SDL, 0, 0, 0, 0);
+    Update_necessaire=0;
+  }
   #endif
+  #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+  if (Min_X>=Max_X || Min_Y>=Max_Y)
+  {
+    ; // Rien a faire
+  }
+  else
+  {
+    SDL_UpdateRect(Ecran_SDL, Max(Min_X,0), Max(Min_Y,0), Min(Largeur_ecran, Max_X-Min_X), Min(Hauteur_ecran, Max_Y-Min_Y));
+
+    Min_X=Min_Y=10000;
+    Max_X=Max_Y=0;
+  }
+    #endif
   
 }
 
@@ -511,16 +540,27 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
   #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
     SDL_UpdateRect(Ecran_SDL, (X), (Y), (Largeur), (Hauteur));
   #endif
+  
+  #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+  if (Largeur==0 || Hauteur==0)
+  {
+    Min_X=Min_Y=0;
+    Max_X=Max_Y=10000;
+  }
+  else
+  {
+    if (X < Min_X)
+      Min_X = X;
+    if (Y < Min_Y)
+      Min_Y = Y;
+    if (X+Largeur>Max_X)
+      Max_X=X+Largeur;
+    if (Y+Hauteur>Max_Y)
+      Max_Y=Y+Hauteur;
+  }
+  #endif
+  
+  #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+  Update_necessaire=1;
+  #endif
 }
-
-
-#if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
-
-#endif
-#if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
-
-#endif
-#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
-
-#endif
-
