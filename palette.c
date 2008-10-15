@@ -200,7 +200,7 @@ void Remap_image_HIGH(byte * Table_de_conversion)
                     Menu_Ordonnee_avant_fenetre,Table_de_conversion);
   }
   // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
-  Remappe_fond_fenetres(Table_de_conversion);
+  Remappe_fond_fenetres(Table_de_conversion, 0, Hauteur_ecran-HAUTEUR_MENU*Menu_Facteur_Y);
 }
 
 
