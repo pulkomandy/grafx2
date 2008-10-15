@@ -800,7 +800,9 @@ void Bouton_Palette(void)
   Dessiner_zigouigoui(263,165,CM_Fonce,-1);
   Dessiner_zigouigoui(280,165,CM_Fonce,+1);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,299*Menu_Facteur_X,188*Menu_Facteur_Y);
+#endif
 
   Afficher_curseur();
 
@@ -865,7 +867,9 @@ void Bouton_Palette(void)
 
                 // Affichage dans le block de visu de la couleur en cours
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+#ifndef __macosx__
                 SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
+#endif
 
                 memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
                 memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
@@ -1136,8 +1140,10 @@ void Bouton_Palette(void)
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
           
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
+#ifndef __macosx__
           if (Bouton_clicke==8)
             SDL_UpdateRect(Ecran_SDL,0, 0, Largeur_ecran, Menu_Ordonnee_avant_fenetre);
+#endif
           
         }
         break;
@@ -1784,7 +1790,9 @@ void Bouton_Palette(void)
         Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*24,Menu_Facteur_Y*72,Back_color);
         Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
 
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+82*Menu_Facteur_Y,Menu_Facteur_X*16*10,Menu_Facteur_Y*5*16);
+#endif
 
         Afficher_curseur();
         Il_faut_remapper=0;
@@ -1850,7 +1858,9 @@ void Bouton_Palette_secondaire(void)
   Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
   Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,SDLK_ESCAPE); // 3
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*200,Menu_Facteur_Y*80);
+#endif
 
   Afficher_curseur();
 

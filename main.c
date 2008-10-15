@@ -55,6 +55,10 @@
 #endif
 #endif
 
+#ifdef __macosx__
+#import <corefoundation/corefoundation.h>
+#import <sys/param.h>
+#endif
 
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 
@@ -262,7 +266,15 @@ void Initialisation_du_programme(int argc,char * argv[])
   Initialiser_la_table_precalculee_des_distances_de_couleur();
 
   // On détermine dès le départ où se trouve le fichier:
+  // On détermine dès le départ où se trouve le fichier:
+#ifdef __macosx__
+  CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+  CFURLGetFileSystemRepresentation(url, true, (UInt8 *) Repertoire_du_programme, MAXPATHLEN);
+  CFRelease(url);
+  strcat(Repertoire_du_programme, "/Contents/Resources/");
+#else
   Chercher_repertoire_du_programme(argv[0]);
+#endif
   
   // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
@@ -335,7 +347,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
-  SDL_WM_SetCaption("GrafX2 beta 97.0% - USE AT YOUR OWN RISK","grafx2.gif");
+  SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","grafx2.gif");
 
   // On initialise tous les modes vidéo
   Definition_des_modes_video();

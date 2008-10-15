@@ -60,7 +60,9 @@ void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeu
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,0,0,Largeur,Hauteur);
+#endif
 }
 
 void Block_SDL (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
@@ -164,7 +166,9 @@ void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decala
                 EDI = EDI + Largeur_ecran - Largeur;
                 ESI = ESI + Largeur_brosse - Largeur;
         }
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
+#endif
 }
 
 void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
@@ -196,7 +200,9 @@ void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
         Src+=Largeur_brosse-Largeur;
         Dest+=Largeur_ecran-Largeur;
     }
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
+#endif
 }
 
 void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image)
@@ -215,7 +221,9 @@ void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
+#endif
 }
 
 void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
@@ -237,7 +245,9 @@ void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Ta
 		EDI = EDI + Largeur_ecran - Largeur;
 	}
 
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
+#endif
 }
 
 void Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
@@ -299,8 +309,10 @@ void Afficher_partie_de_l_ecran_zoomee_SDL(
                 EDX++;
                 if(EDX==Hauteur)
                 {
+#ifndef __macosx__
                         SDL_UpdateRect(Ecran_SDL,Principal_X_Zoom,0,
                                 Largeur*Loupe_Facteur,Hauteur);
+#endif
                         return;
                 }
                 CX--;
@@ -397,8 +409,10 @@ void Display_brush_Mono_zoom_SDL (word Pos_X, word Pos_Y,
                         // On vérifie qu'on est pas à la ligne finale
                         if(DX == Pos_Y_Fin)
                         {
+#ifndef __macosx__
                                 SDL_UpdateRect(Ecran_SDL, Pos_X, Pos_Y,
                                         Largeur * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
+#endif
                                 return;
                         }
                         BX --;
@@ -432,8 +446,10 @@ void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Dec
                         DX++;
                         if(DX==Pos_Y_Fin)
                         {
+#ifndef __macosx__
                                 SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,
                                         Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
+#endif
                                 return;
                         }
                         bx--;

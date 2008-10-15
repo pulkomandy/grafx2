@@ -55,7 +55,11 @@
 
 #define FILENAMESPACE 13
 
+#ifdef __macosx__
+#define Display_Window(X,Y)
+#else
 #define Display_Window(X,Y) SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,X*Menu_Facteur_X,Y*Menu_Facteur_Y);
+#endif
 
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
@@ -1239,8 +1243,10 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte Etat)
   Block(Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
         Menu_Facteur_X*9,Menu_Facteur_Y*3,Couleur);
         
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
         Menu_Facteur_X*9,Menu_Facteur_Y*3);
+#endif
 }
 
 
@@ -1748,8 +1754,10 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
         }
   }
   
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
                     Menu_Facteur_X*10,Menu_Facteur_Y*10);  
+#endif
 }
 
 void Degrade_Charger_infos_du_tableau(int Indice)
@@ -1797,7 +1805,9 @@ void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short Largeur,short Ha
   for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
     for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
       Traiter_degrade(Pos_X-Debut_X,Pos_X,Pos_Y);
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur*Menu_Facteur_X,Hauteur*Menu_Facteur_Y);
+#endif
 }
 
 void Bouton_Degrades(void)
@@ -2226,7 +2236,9 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
   // On affiche les nouveaux:
   Afficher_la_liste_des_fichiers(Position,Decalage);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82);
+#endif
 
   // On récupère le nom du schmilblick à "accéder"
   Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier);
@@ -2843,7 +2855,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         Afficher_curseur();
 
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
+#endif
       }
 
       Nouvelle_preview=0;
@@ -2863,7 +2877,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
         Effacer_curseur();
         Charger_image(Image);
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
+#endif
         Afficher_curseur();
 
         // Après le chargement de la preview, on restaure tout ce qui aurait
@@ -3664,7 +3680,9 @@ void Bouton_Loupe(void)
     }
   }
   Afficher_curseur();
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+#endif
 }
 
 
@@ -3713,7 +3731,9 @@ void Bouton_Menu_Loupe(void)
 
   Afficher_curseur();
     Afficher_ecran();
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,Principal_Split,0,Largeur_ecran-Principal_Split,Menu_Ordonnee);
+#endif
 
   if ( (Bouton_clicke>1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Passage en mode zoom
   {
@@ -4908,7 +4928,9 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
   for (Pos_Y=0; Pos_Y<Taille_Y; Pos_Y++)
     for (Pos_X=0; Pos_X<Taille_X; Pos_X++)
       Pixel(Debut_X+Pos_X,Debut_Y+Pos_Y,(Trame[Pos_X%Trame_Largeur][Pos_Y%Trame_Hauteur])?CM_Blanc:CM_Noir);
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Taille_X,Taille_Y);
+#endif
 }
 
 
@@ -4922,7 +4944,9 @@ void Dessiner_trames_predefinies(void)
       for (i=0; i<16; i++)
         Pixel_dans_fenetre((Indice*23)+10+i,22+j,
                            ((TRAME_PREDEFINIE[Indice][j]>>(15-i))&1)?CM_Blanc:CM_Noir);
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
+#endif
 }
 
 
@@ -4950,7 +4974,9 @@ void Inverser_trame(void)
 // Rafraichit toute la zone correspondant à la trame zoomee.
 void Mettre_a_jour_trame(short X, short Y)
 {
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,X,Y,80*Menu_Facteur_X,80*Menu_Facteur_Y);
+#endif
 }
 
 
@@ -5089,7 +5115,9 @@ void Bouton_Trame_Menu(void)
             Dessiner_trame_zoomee(Orig_X,Orig_Y);
             Afficher_curseur();
             // Maj de la case seule
+#ifndef __macosx__
             SDL_UpdateRect(Ecran_SDL,Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),Menu_Facteur_X*5,Menu_Facteur_Y*5);
+#endif
           }
         }
         break;
@@ -5207,11 +5235,13 @@ void Bouton_Trame_Menu(void)
               Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
               Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
         Afficher_curseur();
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,
           Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
           Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
           Menu_Facteur_X*7,
           Menu_Facteur_Y*7);
+#endif
 
         break;
 
@@ -5360,7 +5390,9 @@ void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
     for (X=0,Pos_X=Debut_X;X<LARGEUR_SPRITE_MENU;X++,Pos_X++)
       Pixel_dans_fenetre(Pos_X,Pos_Y,SPRITE_EFFET[Numero_sprite][Y][X]);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,ToWinX(Debut_X),ToWinY(Debut_Y),LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
+#endif
 }
 
 

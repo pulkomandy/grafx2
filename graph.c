@@ -82,7 +82,9 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 	else H_effectif = Menu_Ordonnee - Y_effectif;
 
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
+#endif
 
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
@@ -108,7 +110,9 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 		r.h=r.w=3;
 		SDL_FillRect(Ecran_SDL,&r,3);
 */
+#ifndef __macosx__
 		SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
+#endif
 	}
 }
 
@@ -325,7 +329,9 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       }
     }
   }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee*Menu_Facteur_Y,Largeur,Hauteur);
+#endif
 //    SDL_UpdateRect(Ecran_SDL,LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
 }
 
@@ -907,8 +913,9 @@ void Afficher_limites_de_l_image(void)
     for (Pos=Debut;Pos<=Fin;Pos++)
       Pixel_Preview(Principal_Largeur_image,Pos,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,Principal_Largeur_image,Debut,1,Fin-Debut + 1);
-
+#endif
     // On restaure la bonne valeur des limites
     Limite_Droite_Zoom=Ancienne_Limite_Zoom;
   }
@@ -927,7 +934,9 @@ void Afficher_limites_de_l_image(void)
     for (Pos=Debut;Pos<=Fin;Pos++)
       Pixel_Preview(Pos,Principal_Hauteur_image,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,Debut,Principal_Hauteur_image,Fin-Debut + 1,1);
+#endif
 
     // On restaure la bonne valeur des limites
     Limite_Bas_Zoom=Ancienne_Limite_Zoom;
@@ -1216,7 +1225,9 @@ void Afficher_foreback(void)
     Block((LARGEUR_MENU-17)*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y,Menu_Facteur_X<<4,Menu_Facteur_Y*7,Back_color);
     Block((LARGEUR_MENU-13)*Menu_Facteur_X,Menu_Ordonnee+(Menu_Facteur_Y<<1),Menu_Facteur_X<<3,Menu_Facteur_Y*5,Fore_color);
 
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,(LARGEUR_MENU-17)*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y,Menu_Facteur_X<<4,Menu_Facteur_Y*7);
+#endif
   }
 }
 
@@ -1250,7 +1261,9 @@ void Encadrer_couleur_menu(byte Couleur)
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y<<2,Fore_color);
 
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*4); // TODO On met à jour toute la palette... peut mieux faire
+#endif
       }
       else
       {
@@ -1280,7 +1293,9 @@ void Encadrer_couleur_menu(byte Couleur)
                 Menu_Facteur_X,Menu_Facteur_Y,
                 ((Indice+Fin_Y)&1)?CM_Blanc:CM_Noir);
 
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_X,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*4);
+#endif
       }
     }
   }
@@ -1312,7 +1327,9 @@ void Afficher_palette_du_menu(void)
               Couleur_debut_palette+Couleur);
 
     Encadrer_couleur_menu(CM_Blanc);
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
+#endif
   }
 }
 
@@ -1377,7 +1394,9 @@ void Afficher_barre_de_split(void)
   Block(Principal_X_Zoom-(Menu_Facteur_X<<1),0,
         Menu_Facteur_X,Menu_Facteur_Y,CM_Clair);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Principal_Split,0,LARGEUR_BARRE_SPLIT*Menu_Facteur_X,Menu_Ordonnee); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
+#endif
 }
 
   // -- Afficher tout le menu --
@@ -1423,7 +1442,9 @@ void Afficher_menu(void)
       }
       Print_nom_fichier();
     }
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'étant avec le nom du fichier
+#endif
   }
 }
 
@@ -1477,7 +1498,9 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne(X,Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
   }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,X,Y,Largeur,8*Menu_Facteur_Y); // TODO: pas utile dans Print_Dans_Fenetre, donc voir ou on en a vraiment besoin...
+#endif
 }
 
   // -- Afficher un caractère dans une fenêtre --
@@ -2084,9 +2107,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
+#ifndef __macosx__
               SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),
                 Fin_Compteur_X,Fin_Compteur_Y
               );
+#endif
 
           }
 
@@ -2191,9 +2216,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               }
           }
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,
                 Fin_Compteur_X,Fin_Compteur_Y
           );
+#endif
 
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
@@ -2365,7 +2392,9 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
   for (Indice=Pos_Y_reelle; Indice<Pos_Y_Fin; Indice++)
     Ligne_horizontale_XOR(Pos_X_reelle,Indice,Largeur_reelle);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Pos_X_reelle,Pos_Y_reelle,Largeur_reelle,Pos_Y_Fin-Pos_Y_reelle);
+#endif
 }
 
 
@@ -2381,7 +2410,9 @@ void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
   for (Indice=Pos_Y_reelle; Indice<Pos_Y_Fin; Indice++)
     Ligne_horizontale_XOR(Pos_X_reelle,Indice,Loupe_Facteur);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Pos_X_reelle,Pos_Y_reelle,Loupe_Facteur,Pos_Y_Fin-Pos_Y_reelle);
+#endif
 }
 
 
@@ -2437,7 +2468,9 @@ void Afficher_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
+#endif
         }
         else
         {
@@ -2460,7 +2493,9 @@ void Afficher_curseur(void)
 	    if (Pos_X >= Largeur_ecran) break;
 	  }
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
+#endif
         }
       }
       break;
@@ -2526,7 +2561,9 @@ void Afficher_curseur(void)
                   Pixel(Pos_X,Pos_Y,Couleur);
               }
             }
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,16,16);
+#endif
         }
       }
       break;
@@ -2551,7 +2588,9 @@ void Afficher_curseur(void)
               Pixel(Pos_X,Pos_Y,Couleur);
           }
         }
+#ifndef __macosx__
       SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+#endif
       break;
     case FORME_CURSEUR_CIBLE_XOR :
       Pos_X=Pinceau_X-Principal_Decalage_X;
@@ -2561,13 +2600,17 @@ void Afficher_curseur(void)
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
+#endif
       }
 
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+#endif
       }
 
       if (Loupe_Mode)
@@ -2618,7 +2661,9 @@ void Afficher_curseur(void)
       Ligne_verticale_XOR(  Fin_X,Debut_Y+1,Loupe_Hauteur-2);
       Ligne_horizontale_XOR(Debut_X,  Fin_Y,Loupe_Largeur);
 
+#ifndef __macosx__
       SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+#endif
 
       break;
     default: //case FORME_CURSEUR_ROTATE_XOR :
@@ -2735,7 +2780,9 @@ void Effacer_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
+#endif
         }
         else
         {
@@ -2754,7 +2801,9 @@ void Effacer_curseur(void)
 	    }
 	  }
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Pos_X-Debut_X,Pos_Y-Debut_Y);
+#endif
         }
       }
       if (!Cacher_pinceau)
@@ -2802,7 +2851,9 @@ void Effacer_curseur(void)
           if (Mouse_Y<Menu_Ordonnee-6)
             Ligne_horizontale_XOR(Debut_X+Mouse_X-1,Mouse_Y+6,3-(Debut_X+Fin_X));
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+#endif
         }
         else
         {
@@ -2815,7 +2866,9 @@ void Effacer_curseur(void)
               if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
                 Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
 
+#ifndef __macosx__
           SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+#endif
         }
       }
       if (!Cacher_pinceau)
@@ -2835,7 +2888,9 @@ void Effacer_curseur(void)
           if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
             && (Pos_X>=0)            && (Pos_Y>=0) )
             Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+#ifndef __macosx__
       SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),16,16);
+#endif
       break;
 
     case FORME_CURSEUR_CIBLE_XOR :
@@ -2846,13 +2901,17 @@ void Effacer_curseur(void)
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
+#endif
       }
 
       if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
+#ifndef __macosx__
         SDL_UpdateRect(Ecran_SDL,Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
+#endif
       }
 
       if (Loupe_Mode)
@@ -2906,7 +2965,9 @@ void Effacer_curseur(void)
       Ligne_verticale_XOR(  Fin_X,Debut_Y+1,Loupe_Hauteur-2);
       Ligne_horizontale_XOR(Debut_X,  Fin_Y,Loupe_Largeur);
 
+#ifndef __macosx__
       SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+#endif
 
       break;
     default: //case FORME_CURSEUR_ROTATE_XOR :
@@ -2992,7 +3053,9 @@ byte Demande_de_confirmation(char * Message)
   Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre/3)-20     ,37,40,14,"Yes",1,1,SDLK_y); // 1
   Fenetre_Definir_bouton_normal(((Largeur_de_la_fenetre<<1)/3)-20,37,40,14,"No" ,1,1,SDLK_n); // 2
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*Largeur_de_la_fenetre,Menu_Facteur_Y*60);
+#endif
 
   Afficher_curseur();
 
@@ -3026,7 +3089,9 @@ void Warning_message(char * Message)
 
   Print_dans_fenetre((Largeur_de_la_fenetre>>1)-(strlen(Message)<<2),20,Message,CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal((Largeur_de_la_fenetre>>1)-20     ,37,40,14,"OK",1,1,SDLK_RETURN); // 1
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*Largeur_de_la_fenetre,Menu_Facteur_Y*60);
+#endif
   Afficher_curseur();
 
   do
@@ -3115,7 +3180,9 @@ void Afficher_ecran(void)
   // ---/\/\/\ Affichage des limites /\/\/\---
   if (Config.Afficher_limites_image)
     Afficher_limites_de_l_image();
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
+#endif
 }
 
   // -- Redessiner le sprite d'un bouton dans le menu --
@@ -3135,9 +3202,11 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
       Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
       BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
     }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Menu_Facteur_X*(Bouton[Numero_bouton].Decalage_X+1),
   	(Bouton[Numero_bouton].Decalage_Y+1)*Menu_Facteur_Y+Menu_Ordonnee,
   	LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
+#endif
 }
 
   // -- Redessiner la forme du pinceau dans le menu --
@@ -3197,7 +3266,9 @@ void Afficher_pinceau_dans_menu(void)
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }
   }
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,0,Menu_Ordonnee,LARGEUR_SPRITE_MENU*Menu_Facteur_X+3,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y+3);
+#endif
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --
@@ -3217,10 +3288,12 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
     for (Pos_fenetre_X=Orig_X,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
       Pixel_dans_fenetre(Pos_fenetre_X,Pos_fenetre_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL, ToWinX(Orig_X), ToWinY(Orig_Y),
         ToWinL(Pinceau_predefini_Largeur[Numero]), 
         ToWinH(Pinceau_predefini_Hauteur[Numero])
   );
+#endif
 }
 
   // -- Dessiner des zigouigouis --
@@ -3263,7 +3336,9 @@ void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_b
   for (Indice=Debut_Y;Indice<Fin_Y;Indice++,Ligne_en_cours++)
     Block(Debut_X,Indice,Largeur_ligne,1,Debut_block+(Nb_couleurs*Ligne_en_cours)/Total_lignes);
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(16),ToWinH(64));
+#endif
 }
 
 
@@ -3310,7 +3385,9 @@ void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
   for (j=0; j<HAUTEUR_SPRITE_DRIVE; j++)
     for (i=0; i<LARGEUR_SPRITE_DRIVE; i++)
       Pixel_dans_fenetre(Pos_X+i,Pos_Y+j,SPRITE_DRIVE[Type][j][i]);
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(LARGEUR_SPRITE_DRIVE),ToWinH(HAUTEUR_SPRITE_DRIVE));
+#endif
 }
 
 
@@ -4110,7 +4187,9 @@ void Remplir(byte Couleur_de_remplissage)
     // par l'utilisation de "Afficher_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
 
+#ifndef __macosx__
     SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+#endif
   }
 }
 
@@ -5681,7 +5760,9 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
     Pos_Y_src+=Delta_Y;
   }
 
+#ifndef __macosx__
   SDL_UpdateRect(Ecran_SDL,Pos_X_dest_Initiale,Pos_Y_dest_Initiale,Largeur_dest,Hauteur_dest);
+#endif
 }
 
 

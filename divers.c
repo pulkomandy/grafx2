@@ -160,7 +160,20 @@ void Get_input(void)
                 //Clic sur un des boutons de la souris
                 switch(event.button.button)
 		{
+#ifdef __macosx__
+			// fc: poor poor mac users with a signle button mouse...
+			// emulated with the shifts keys
+			case SDL_BUTTON_LEFT:
+				INPUT_Nouveau_Mouse_K = 1;
+                if(SDL_GetModState() & KMOD_LSHIFT ||
+                   SDL_GetModState() & KMOD_RSHIFT)
+                {
+				    INPUT_Nouveau_Mouse_K = 2;
+                }
+				break;
+#else
 			case SDL_BUTTON_LEFT: INPUT_Nouveau_Mouse_K = 1; break;
+#endif
 			case SDL_BUTTON_MIDDLE: // Pour SDL, 2 = clic milieu. Pour nous c'est le clic droit
 			case SDL_BUTTON_RIGHT: // Clic droit SDL, clic droit pour nous aussi ( pour le moment en tout cas)
 				INPUT_Nouveau_Mouse_K = 2;
@@ -331,6 +344,14 @@ void Get_input(void)
         Calculer_coordonnees_pinceau();
         Afficher_curseur();
     }
+
+#ifdef __macosx__
+    // Flush
+  	SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+	//updaterect() waits for vblank on macosx
+	//SDL_Flip(Ecran_SDL); 
+#endif
+
 }
 
 
@@ -412,7 +433,9 @@ void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 	for(edi = Principal_Ecran;edi < Principal_Ecran + Principal_Hauteur_image * Principal_Largeur_image;edi++)
 		if (*edi == Ancienne_couleur)
 			*edi = Nouvelle_couleur;
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,0,0,0,0); // On pet TOUT a jour
+#endif
 	// C'est pas un problème car il n'y a pas de preview
 }
 
@@ -837,7 +860,9 @@ void Scroll_picture(short Decalage_X,short Decalage_Y)
 		esi += Principal_Largeur_image;
 	}
 
+#ifndef __macosx__
 	SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+#endif
 }
 
 word Get_key(void)
