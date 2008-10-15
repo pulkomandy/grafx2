@@ -371,7 +371,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
        Mais de toutes façons, c'est franchement facultatif...
     */
     // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-    Remappe_fond_fenetres(Table_de_conversion, Hauteur_ecran-HAUTEUR_MENU*Menu_Facteur_Y, Hauteur_ecran);
+    Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
   }
   
 }
