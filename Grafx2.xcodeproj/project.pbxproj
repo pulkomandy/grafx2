@@ -1,0 +1,460 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
+		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
+		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */ = {isa = PBXBuildFile; fileRef = F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */; };
+		F5B19B8D0EA4BE3E003F4BA4 /* aide.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B750EA4BE3E003F4BA4 /* aide.c */; };
+		F5B19B8E0EA4BE3E003F4BA4 /* boutons.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B760EA4BE3E003F4BA4 /* boutons.c */; };
+		F5B19B8F0EA4BE3E003F4BA4 /* clavier.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B770EA4BE3E003F4BA4 /* clavier.c */; };
+		F5B19B900EA4BE3E003F4BA4 /* divers.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B780EA4BE3E003F4BA4 /* divers.c */; };
+		F5B19B910EA4BE3E003F4BA4 /* files.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B790EA4BE3E003F4BA4 /* files.c */; };
+		F5B19B930EA4BE3E003F4BA4 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7B0EA4BE3E003F4BA4 /* graph.c */; };
+		F5B19B940EA4BE3E003F4BA4 /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7C0EA4BE3E003F4BA4 /* init.c */; };
+		F5B19B950EA4BE3E003F4BA4 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7D0EA4BE3E003F4BA4 /* io.c */; };
+		F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7E0EA4BE3E003F4BA4 /* linux.c */; };
+		F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */; };
+		F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B800EA4BE3E003F4BA4 /* moteur.c */; };
+		F5B19B990EA4BE3E003F4BA4 /* op_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B810EA4BE3E003F4BA4 /* op_asm.c */; };
+		F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B820EA4BE3E003F4BA4 /* op_c.c */; };
+		F5B19B9B0EA4BE3E003F4BA4 /* operatio.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B830EA4BE3E003F4BA4 /* operatio.c */; };
+		F5B19B9C0EA4BE3E003F4BA4 /* pages.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B840EA4BE3E003F4BA4 /* pages.c */; };
+		F5B19B9D0EA4BE3E003F4BA4 /* palette.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B850EA4BE3E003F4BA4 /* palette.c */; };
+		F5B19B9E0EA4BE3E003F4BA4 /* readini.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B860EA4BE3E003F4BA4 /* readini.c */; };
+		F5B19B9F0EA4BE3E003F4BA4 /* readline.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B870EA4BE3E003F4BA4 /* readline.c */; };
+		F5B19BA00EA4BE3E003F4BA4 /* saveini.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B880EA4BE3E003F4BA4 /* saveini.c */; };
+		F5B19BA10EA4BE3E003F4BA4 /* sdlscreen.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B890EA4BE3E003F4BA4 /* sdlscreen.c */; };
+		F5B19BA20EA4BE3E003F4BA4 /* SFont.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */; };
+		F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8B0EA4BE3E003F4BA4 /* shade.c */; };
+		F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8C0EA4BE3E003F4BA4 /* special.c */; };
+		F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */; };
+		F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */; };
+		F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */; };
+		F5B19C360EA4DB69003F4BA4 /* gfx2.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C350EA4DB69003F4BA4 /* gfx2.ini */; };
+		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
+		F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BB0EA5116B0065B0EF /* SDL_image */; };
+		F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BD0EA5118E0065B0EF /* SDL */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */,
+				F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */,
+			);
+			name = "Copy Frameworks into .app bundle";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		002F39F909D0881F00EBEB88 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		002F3A2B09D0888800EBEB88 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
+		002F3A2C09D0888800EBEB88 /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
+		002F3A3E09D088BA00EBEB88 /* main.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = SOURCE_ROOT; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grafx2_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* Grafx2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grafx2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
+		F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 8pxfont.png; sourceTree = "<group>"; };
+		F5B19B750EA4BE3E003F4BA4 /* aide.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aide.c; sourceTree = "<group>"; };
+		F5B19B760EA4BE3E003F4BA4 /* boutons.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = boutons.c; sourceTree = "<group>"; };
+		F5B19B770EA4BE3E003F4BA4 /* clavier.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = clavier.c; sourceTree = "<group>"; };
+		F5B19B780EA4BE3E003F4BA4 /* divers.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = divers.c; sourceTree = "<group>"; };
+		F5B19B790EA4BE3E003F4BA4 /* files.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = files.c; sourceTree = "<group>"; };
+		F5B19B7A0EA4BE3E003F4BA4 /* gfxcfg.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = gfxcfg.c; sourceTree = "<group>"; };
+		F5B19B7B0EA4BE3E003F4BA4 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = graph.c; sourceTree = "<group>"; };
+		F5B19B7C0EA4BE3E003F4BA4 /* init.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; };
+		F5B19B7D0EA4BE3E003F4BA4 /* io.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = io.c; sourceTree = "<group>"; };
+		F5B19B7E0EA4BE3E003F4BA4 /* linux.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = linux.c; sourceTree = "<group>"; };
+		F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = loadsave.c; sourceTree = "<group>"; };
+		F5B19B800EA4BE3E003F4BA4 /* moteur.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = moteur.c; sourceTree = "<group>"; };
+		F5B19B810EA4BE3E003F4BA4 /* op_asm.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = op_asm.c; sourceTree = "<group>"; };
+		F5B19B820EA4BE3E003F4BA4 /* op_c.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = op_c.c; sourceTree = "<group>"; };
+		F5B19B830EA4BE3E003F4BA4 /* operatio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = operatio.c; sourceTree = "<group>"; };
+		F5B19B840EA4BE3E003F4BA4 /* pages.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pages.c; sourceTree = "<group>"; };
+		F5B19B850EA4BE3E003F4BA4 /* palette.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = palette.c; sourceTree = "<group>"; };
+		F5B19B860EA4BE3E003F4BA4 /* readini.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = readini.c; sourceTree = "<group>"; };
+		F5B19B870EA4BE3E003F4BA4 /* readline.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = readline.c; sourceTree = "<group>"; };
+		F5B19B880EA4BE3E003F4BA4 /* saveini.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = saveini.c; sourceTree = "<group>"; };
+		F5B19B890EA4BE3E003F4BA4 /* sdlscreen.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = sdlscreen.c; sourceTree = "<group>"; };
+		F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SFont.c; sourceTree = "<group>"; };
+		F5B19B8B0EA4BE3E003F4BA4 /* shade.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = shade.c; sourceTree = "<group>"; };
+		F5B19B8C0EA4BE3E003F4BA4 /* special.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = special.c; sourceTree = "<group>"; };
+		F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.cfg; sourceTree = "<group>"; };
+		F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.dat; sourceTree = "<group>"; };
+		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
+		F5B19C350EA4DB69003F4BA4 /* gfx2.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2.ini; sourceTree = "<group>"; };
+		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/SDL_image; sourceTree = "<absolute>"; };
+		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/SDL; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				002F3A2B09D0888800EBEB88 /* SDLMain.h */,
+				002F3A2C09D0888800EBEB88 /* SDLMain.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				002F39F909D0881F00EBEB88 /* SDL.framework */,
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* Grafx2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
+			isa = PBXGroup;
+			children = (
+				F5DCE2BD0EA5118E0065B0EF /* SDL */,
+				F5DCE2BB0EA5116B0065B0EF /* SDL_image */,
+				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
+				F5B19C350EA4DB69003F4BA4 /* gfx2.ini */,
+				F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */,
+				F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */,
+				F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */,
+				F5B19B750EA4BE3E003F4BA4 /* aide.c */,
+				F5B19B760EA4BE3E003F4BA4 /* boutons.c */,
+				F5B19B770EA4BE3E003F4BA4 /* clavier.c */,
+				F5B19B780EA4BE3E003F4BA4 /* divers.c */,
+				F5B19B790EA4BE3E003F4BA4 /* files.c */,
+				F5B19B7A0EA4BE3E003F4BA4 /* gfxcfg.c */,
+				F5B19B7B0EA4BE3E003F4BA4 /* graph.c */,
+				F5B19B7C0EA4BE3E003F4BA4 /* init.c */,
+				F5B19B7D0EA4BE3E003F4BA4 /* io.c */,
+				F5B19B7E0EA4BE3E003F4BA4 /* linux.c */,
+				F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */,
+				F5B19B800EA4BE3E003F4BA4 /* moteur.c */,
+				F5B19B810EA4BE3E003F4BA4 /* op_asm.c */,
+				F5B19B820EA4BE3E003F4BA4 /* op_c.c */,
+				F5B19B830EA4BE3E003F4BA4 /* operatio.c */,
+				F5B19B840EA4BE3E003F4BA4 /* pages.c */,
+				F5B19B850EA4BE3E003F4BA4 /* palette.c */,
+				F5B19B860EA4BE3E003F4BA4 /* readini.c */,
+				F5B19B870EA4BE3E003F4BA4 /* readline.c */,
+				F5B19B880EA4BE3E003F4BA4 /* saveini.c */,
+				F5B19B890EA4BE3E003F4BA4 /* sdlscreen.c */,
+				F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */,
+				F5B19B8B0EA4BE3E003F4BA4 /* shade.c */,
+				F5B19B8C0EA4BE3E003F4BA4 /* special.c */,
+				F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */,
+				F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = Grafx2;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */,
+				002F3A3E09D088BA00EBEB88 /* main.c */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107310486CEB800E47090 /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1107260486CEB800E47090 /* Grafx2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Grafx2" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+				002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Grafx2;
+			productInstallPath = "$(HOME)/Applications";
+			productName = Grafx2;
+			productReference = 8D1107320486CEB800E47090 /* Grafx2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Grafx2" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* Grafx2 */;
+			projectDirPath = "";
+			targets = (
+				8D1107260486CEB800E47090 /* Grafx2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */,
+				F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */,
+				F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */,
+				F5B19C360EA4DB69003F4BA4 /* gfx2.ini in Resources */,
+				F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */,
+				002F3A3F09D088BA00EBEB88 /* main.c in Sources */,
+				F5B19B8D0EA4BE3E003F4BA4 /* aide.c in Sources */,
+				F5B19B8E0EA4BE3E003F4BA4 /* boutons.c in Sources */,
+				F5B19B8F0EA4BE3E003F4BA4 /* clavier.c in Sources */,
+				F5B19B900EA4BE3E003F4BA4 /* divers.c in Sources */,
+				F5B19B910EA4BE3E003F4BA4 /* files.c in Sources */,
+				F5B19B930EA4BE3E003F4BA4 /* graph.c in Sources */,
+				F5B19B940EA4BE3E003F4BA4 /* init.c in Sources */,
+				F5B19B950EA4BE3E003F4BA4 /* io.c in Sources */,
+				F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */,
+				F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */,
+				F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */,
+				F5B19B990EA4BE3E003F4BA4 /* op_asm.c in Sources */,
+				F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */,
+				F5B19B9B0EA4BE3E003F4BA4 /* operatio.c in Sources */,
+				F5B19B9C0EA4BE3E003F4BA4 /* pages.c in Sources */,
+				F5B19B9D0EA4BE3E003F4BA4 /* palette.c in Sources */,
+				F5B19B9E0EA4BE3E003F4BA4 /* readini.c in Sources */,
+				F5B19B9F0EA4BE3E003F4BA4 /* readline.c in Sources */,
+				F5B19BA00EA4BE3E003F4BA4 /* saveini.c in Sources */,
+				F5B19BA10EA4BE3E003F4BA4 /* sdlscreen.c in Sources */,
+				F5B19BA20EA4BE3E003F4BA4 /* SFont.c in Sources */,
+				F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */,
+				F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F5B19C3C0EA4DC91003F4BA4 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_image.framework\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL.framework\"";
+				PRODUCT_NAME = Grafx2;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_image.framework\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL.framework\"";
+				PRODUCT_NAME = Grafx2;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks",
+					/Library/Frameworks,
+					"$(FRAMEWORK_SEARCH_PATHS)",
+				);
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__macosx__,
+					__linux__,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				PREBINDING = NO;
+				PRELINK_LIBS = "-lSDL_Image";
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks",
+					/Library/Frameworks,
+					"$(FRAMEWORK_SEARCH_PATHS)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__macosx__,
+					__linux__,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				PREBINDING = NO;
+				PRELINK_LIBS = "-lSDL_Image";
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Grafx2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Grafx2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}

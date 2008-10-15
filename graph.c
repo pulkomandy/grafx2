@@ -2205,9 +2205,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-                        Mettre_Ecran_A_Jour(Debut_X,Debut_Y,
+              /*          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,
                                 Fin_Compteur_X-Debut_Compteur_X,
-                                Fin_Compteur_Y-Debut_Compteur_Y);
+                                Fin_Compteur_Y-Debut_Compteur_Y);*/
         }
       }
   }

@@ -1,0 +1,9 @@
+//
+// Prefix header for all source files of the 'Grafx2' target in the 'Grafx2' project
+//
+
+#include "SDL.h"
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
