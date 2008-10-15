@@ -866,9 +866,6 @@ void Changer_facteur_loupe(byte Indice_facteur)
 
     Pixel_Preview=Pixel_Preview_Loupe;
 
-    DEBUG("CHL",3);
-    Afficher_ecran();
-    SDL_UpdateRect(Ecran_SDL,0,0,0,0);
   }
   else
     Pixel_Preview=Pixel_Preview_Normal;
@@ -2211,11 +2208,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-	  DEBUG("PINCEAU",435);
 	  #ifndef __macosx__
-	    Mettre_Ecran_A_Jour(X,Y,
-		Largeur,
-		Hauteur);
+	    Mettre_Ecran_A_Jour(X,Y,Largeur,Hauteur);
 	  #endif
         }
       }

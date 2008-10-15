@@ -3622,8 +3622,6 @@ void Bouton_Loupe(void)
     if ((!Config.Fast_zoom) || (Mouse_Y>=Menu_Ordonnee) || On_vient_du_menu_de_facteurs_de_zoom)
     {
       On_vient_du_menu_de_facteurs_de_zoom=0;
-  DEBUG("BUTL",2);
-  SDL_UpdateRect(Ecran_SDL,0,0,0,0);
       Demarrer_pile_operation(OPERATION_LOUPE);
     }
     else
@@ -3632,8 +3630,6 @@ void Bouton_Loupe(void)
       /* qui s'en charge... */
       // On passe en mode loupe
       Loupe_Mode=1;
-
-	DEBUG("plop",1);
 
       // La fonction d'affichage dans la partie image est désormais un affichage
       // spécial loupe.
@@ -3668,7 +3664,6 @@ void Bouton_Loupe(void)
     }
   }
   Afficher_curseur();
-  DEBUG("BUTL",1);
   SDL_UpdateRect(Ecran_SDL,0,0,0,0);
 }
 
@@ -3705,11 +3700,9 @@ void Bouton_Menu_Loupe(void)
   }
   while (Bouton_clicke<=0);
 
-    DEBUG("BUTM",3);
   if (Bouton_clicke>1)
   {
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-    DEBUG("BUTM",42);
     Changer_facteur_loupe(Bouton_clicke-2);
   }
 
@@ -3719,8 +3712,8 @@ void Bouton_Menu_Loupe(void)
     Desenclencher_bouton(BOUTON_LOUPE);
 
   Afficher_curseur();
-  DEBUG("BUTM",1);
-  SDL_UpdateRect(Ecran_SDL,0,0,0,0);
+    Afficher_ecran();
+    SDL_UpdateRect(Ecran_SDL,Principal_Split,0,Largeur_ecran-Principal_Split,Menu_Ordonnee);
 
   if ( (Bouton_clicke>1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Passage en mode zoom
   {
