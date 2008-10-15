@@ -141,9 +141,7 @@ void Afficher_aide(void)
            Menu_Facteur_Y<<3,
            CM_Noir);
   }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+13*Menu_Facteur_X,Fenetre_Pos_Y+19*Menu_Facteur_Y,44*6*Menu_Facteur_X,16*8*Menu_Facteur_Y);
-#endif
+  UpdateRect(Fenetre_Pos_X+13*Menu_Facteur_X,Fenetre_Pos_Y+19*Menu_Facteur_Y,44*6*Menu_Facteur_X,16*8*Menu_Facteur_Y);
 }
 
 
@@ -220,9 +218,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
 
   Afficher_aide();
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,310*Menu_Facteur_X,175*Menu_Facteur_Y);
-#endif
+  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,310*Menu_Facteur_X,175*Menu_Facteur_Y);
 
   Afficher_curseur();
 
@@ -398,9 +394,7 @@ void Bouton_Stats(void)
   sprintf(Buffer,"%dx%d",Largeur_ecran,Hauteur_ecran);
   Print_dans_fenetre(106,99,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*174);
-#endif
+  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*174);
 
   Afficher_curseur();
 

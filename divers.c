@@ -345,12 +345,9 @@ void Get_input(void)
         Afficher_curseur();
     }
 
-#ifdef __macosx__
-    // Flush
-  	SDL_UpdateRect(Ecran_SDL,0,0,0,0);
-	//updaterect() waits for vblank on macosx
+  // Vidage de toute mise à jour qui serait encore en attente.
+  Flush_update();
 	//SDL_Flip(Ecran_SDL); 
-#endif
 
 }
 
@@ -433,9 +430,7 @@ void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
 	for(edi = Principal_Ecran;edi < Principal_Ecran + Principal_Hauteur_image * Principal_Largeur_image;edi++)
 		if (*edi == Ancienne_couleur)
 			*edi = Nouvelle_couleur;
-#ifndef __macosx__
-	SDL_UpdateRect(Ecran_SDL,0,0,0,0); // On pet TOUT a jour
-#endif
+	UpdateRect(0,0,0,0); // On peut TOUT a jour
 	// C'est pas un problème car il n'y a pas de preview
 }
 
@@ -860,9 +855,7 @@ void Scroll_picture(short Decalage_X,short Decalage_Y)
 		esi += Principal_Largeur_image;
 	}
 
-#ifndef __macosx__
-	SDL_UpdateRect(Ecran_SDL,0,0,0,0);
-#endif
+	UpdateRect(0,0,0,0);
 }
 
 word Get_key(void)

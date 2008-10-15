@@ -40,6 +40,7 @@
 #include "erreurs.h"
 #include "linux.h"
 #include "io.h"
+#include "sdlscreen.h"
 
 #define FILENAMESPACE 13
 
@@ -331,12 +332,10 @@ void Dessiner_preview_palette(void)
             Preview_Pos_Y+(((Indice&15)*5)*Menu_Facteur_Y),
             5*Menu_Facteur_X,5*Menu_Facteur_Y,Indice);
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,
+  UpdateRect(
     Preview_Pos_X*Menu_Facteur_X,
   Preview_Pos_Y*Menu_Facteur_Y,
   5*Menu_Facteur_X*256,5*Menu_Facteur_Y*256);
-#endif
 }
 
 

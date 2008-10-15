@@ -26,6 +26,7 @@
 #include "divers.h"
 #include "readline.h"
 #include "aide.h"
+#include "sdlscreen.h"
 
 void Bouton_Shade_Mode(void)
 {
@@ -131,9 +132,7 @@ void Shade_Blocs_degrades(void)
     Block(Fenetre_Pos_X+(Menu_Facteur_X*225),Fenetre_Pos_Y+(Menu_Facteur_Y*36),
           Menu_Facteur_X*62,Menu_Facteur_Y*46,CM_Clair);
   }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Menu_Facteur_X*224),Fenetre_Pos_Y+(Menu_Facteur_Y*35),Menu_Facteur_X*64,Menu_Facteur_Y*48);
-#endif
+  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*224),Fenetre_Pos_Y+(Menu_Facteur_Y*35),Menu_Facteur_X*64,Menu_Facteur_Y*48);
 }
 
 
@@ -177,9 +176,7 @@ void Tagger_shades(word Select_Debut,word Select_Fin)
           Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Clair);
       }
     }
-#ifndef __macosx__
-    SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+131*Menu_Facteur_Y,Menu_Facteur_X*64<<2,Menu_Facteur_Y*8<<3);
-#endif
+    UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+131*Menu_Facteur_Y,Menu_Facteur_X*64<<2,Menu_Facteur_Y*8<<3);
 }
 
 
@@ -253,9 +250,7 @@ void Afficher_tout_le_shade(word Select_Debut1,word Select_Fin1,
               Menu_Facteur_X<<2,Menu_Facteur_Y<<2,
               Shade_Liste[Shade_Actuel].Liste[Position]&0xFF);
     }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+7*Menu_Facteur_X,Fenetre_Pos_Y+126*Menu_Facteur_Y,Menu_Facteur_X*((64<<2)+2),Menu_Facteur_Y*((8<<2)+2));
-#endif
+  UpdateRect(Fenetre_Pos_X+7*Menu_Facteur_X,Fenetre_Pos_Y+126*Menu_Facteur_Y,Menu_Facteur_X*((64<<2)+2),Menu_Facteur_Y*((8<<2)+2));
   Tagger_shades(Select_Debut2,Select_Fin2);
   Shade_Blocs_degrades();
   Afficher_couleur_case_selectionnee(Select_Debut2,Select_Fin2);
@@ -528,9 +523,7 @@ int Menu_Shade(void)
   memcpy(Buffer     ,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
   memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].Liste,512*sizeof(word));
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*190);
-#endif
+  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*190);
 
   Afficher_curseur();
 
@@ -1059,9 +1052,7 @@ void Bouton_Quick_shade_Menu(void)
   Num2str(Quick_shade_Step,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*142,Menu_Facteur_Y*56);
-#endif
+  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*142,Menu_Facteur_Y*56);
 
   Afficher_curseur();
 

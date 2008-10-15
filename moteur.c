@@ -36,6 +36,7 @@
 #include "shade.h"
 #include "erreurs.h"
 #include "linux.h"
+#include "sdlscreen.h"
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
@@ -303,13 +304,11 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
         BLOCK_MENU[Fin_Y-Pos_X][Fin_X]=Couleur_Bas_droite;
       }
   }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,
+  UpdateRect(
         Debut_X*Menu_Facteur_X,
         Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
         (Fin_X+1-Debut_X)*Menu_Facteur_X,
         (Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
-#endif
 }
 
 
@@ -429,9 +428,7 @@ void Deplacer_Split(void)
       Ligne_verticale_XOR(Ancien_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Ancien_X_Zoom-1,0,Menu_Ordonnee);
 
-#ifndef __macosx__
-      SDL_UpdateRect(Ecran_SDL,Ancien_Split,0,abs(Ancien_Split-Ancien_X_Zoom)+1,Menu_Ordonnee);
-#endif
+      UpdateRect(Ancien_Split,0,abs(Ancien_Split-Ancien_X_Zoom)+1,Menu_Ordonnee);
 
       Ancien_Split=Principal_Split;
       Ancien_X_Zoom=Principal_X_Zoom;
@@ -440,9 +437,7 @@ void Deplacer_Split(void)
       Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
       Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
 
-#ifndef __macosx__
-      SDL_UpdateRect(Ecran_SDL,Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
-#endif
+      UpdateRect(Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
 
       Afficher_curseur();
     }
@@ -1110,9 +1105,7 @@ void Fermer_fenetre(void)
   
   // Restore de ce que la fenêtre cachait
   Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
-#endif
+  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
 
   //Afficher_ecran();
   //Afficher_menu();
@@ -1161,18 +1154,14 @@ void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Haut
 void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Noir,CM_Fonce,CM_Fonce,CM_Noir);
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Pos_X, Pos_Y, Largeur, Hauteur);
-#endif
+  UpdateRect(Pos_X, Pos_Y, Largeur, Hauteur);
 }
 
 // -- Bouton normal désenfoncé dans la fenêtre --
 void Fenetre_Desenfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,Largeur,Hauteur);
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+Pos_X*Menu_Facteur_X, Fenetre_Pos_Y+Pos_Y*Menu_Facteur_X, Largeur*Menu_Facteur_X, Hauteur*Menu_Facteur_Y);
-#endif
+  UpdateRect(Fenetre_Pos_X+Pos_X*Menu_Facteur_X, Fenetre_Pos_Y+Pos_Y*Menu_Facteur_X, Largeur*Menu_Facteur_X, Hauteur*Menu_Facteur_Y);
 }
 
 
@@ -1202,9 +1191,7 @@ void Fenetre_Effacer_tags(void)
   Origine_Y=Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3)*Menu_Facteur_Y;
   for (Pos_X=0,Pos_fenetre_X=Origine_X;Pos_X<16;Pos_X++,Pos_fenetre_X+=(Menu_Facteur_X*10))
     Block(Pos_fenetre_X,Origine_Y,Menu_Facteur_X*3,Menu_Facteur_Y*80,CM_Clair);
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Origine_X,Origine_Y,ToWinL(160),ToWinH(80));
-#endif
+  UpdateRect(Origine_X,Origine_Y,ToWinL(160),ToWinH(80));
 }
 
 
@@ -1268,9 +1255,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 
   }
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,ToWinX(Fenetre_Liste_boutons_palette->Pos_X+3),ToWinY(Fenetre_Liste_boutons_palette->Pos_Y+3),ToWinL(12*16),ToWinH(5*16));
-#endif
+  UpdateRect(ToWinX(Fenetre_Liste_boutons_palette->Pos_X+3),ToWinY(Fenetre_Liste_boutons_palette->Pos_Y+3),ToWinL(12*16),ToWinH(5*16));
 
 }
 
@@ -1308,11 +1293,9 @@ void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg)
         Fenetre_Pos_Y+(Position_curseur_jauge*Menu_Facteur_Y),
         11*Menu_Facteur_X,Enreg->Hauteur_curseur*Menu_Facteur_Y,CM_Clair/*CM_Blanc*/);
 
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
+  UpdateRect(Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+Enreg->Pos_Y*Menu_Facteur_Y,
         11*Menu_Facteur_X,(Enreg->Hauteur)*Menu_Facteur_Y);
-#endif
 }
 
 void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg)
@@ -1691,10 +1674,8 @@ void Deplacer_fenetre(short Dx, short Dy)
       Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
       Afficher_curseur();
     }
-#ifndef __macosx__
-    SDL_UpdateRect(Ecran_SDL,Ancien_X,Ancien_Y,Largeur,Hauteur);
-    SDL_UpdateRect(Ecran_SDL,Nouveau_X,Nouveau_Y,Largeur,Hauteur);
-#endif
+    UpdateRect(Ancien_X,Ancien_Y,Largeur,Hauteur);
+    UpdateRect(Nouveau_X,Nouveau_Y,Largeur,Hauteur);
   }
 
   Effacer_curseur();
@@ -1728,13 +1709,11 @@ void Deplacer_fenetre(short Dx, short Dy)
     Restaure_fond(Buffer, Nouveau_X, Nouveau_Y, Fenetre_Largeur, Fenetre_Hauteur);
 
     // Mise à jour du rectangle englobant
-#ifndef __macosx__
-    SDL_UpdateRect(Ecran_SDL,
+    UpdateRect(
       (Nouveau_X>Fenetre_Pos_X)?Fenetre_Pos_X:Nouveau_X,
       (Nouveau_Y>Fenetre_Pos_Y)?Fenetre_Pos_Y:Nouveau_Y,
       ((Nouveau_X>Fenetre_Pos_X)?(Nouveau_X-Fenetre_Pos_X):(Fenetre_Pos_X-Nouveau_X)) + Fenetre_Largeur*Menu_Facteur_X,
       ((Nouveau_Y>Fenetre_Pos_Y)?(Nouveau_Y-Fenetre_Pos_Y):(Fenetre_Pos_Y-Nouveau_Y)) + Fenetre_Hauteur*Menu_Facteur_Y);
-#endif
     Fenetre_Pos_X=Nouveau_X;
     Fenetre_Pos_Y=Nouveau_Y;
 

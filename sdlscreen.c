@@ -26,6 +26,23 @@
 #include "divers.h"
 #include "erreurs.h"
 
+// Mise à jour minimaliste en nombre de pixels
+#define METHODE_UPDATE_MULTI_RECTANGLE 1
+// Mise à jour intermédiaire, par rectangle inclusif.
+#define METHODE_UPDATE_PAR_CUMUL       2
+// Mise à jour totale, pour les plate-formes qui imposent un Vsync à chaque mise à jour écran.
+#define METHODE_UPDATE_PLEINE_PAGE     3
+
+// METHODE_UPDATE peut être fixé depuis le makefile, sinon c'est ici:
+#ifndef METHODE_UPDATE
+  #ifdef __macosx__
+    #define METHODE_UPDATE     METHODE_UPDATE_PLEINE_PAGE
+  #else
+    #define METHODE_UPDATE     METHODE_UPDATE_MULTI_RECTANGLE
+  #endif
+#endif
+
+
 void Pixel_SDL (word X,word Y,byte Couleur)
 /* Affiche un pixel de la Couleur aux coords X;Y à l'écran */
 {
@@ -60,9 +77,7 @@ void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeu
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,0,0,Largeur,Hauteur);
-#endif
+  UpdateRect(0,0,Largeur,Hauteur);
 }
 
 void Block_SDL (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
@@ -74,7 +89,7 @@ void Block_SDL (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur
         rectangle.w=Largeur;
         rectangle.h=Hauteur;
         SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
-//        SDL_UpdateRect(Ecran_SDL,Debut_X,Debut_Y,Largeur,Hauteur);
+//        UpdateRect(Debut_X,Debut_Y,Largeur,Hauteur);
 }
 
 void Pixel_Preview_Normal_SDL (word X,word Y,byte Couleur)
@@ -166,9 +181,7 @@ void Display_brush_Color_SDL  (word Pos_X,word Pos_Y,word Decalage_X,word Decala
                 EDI = EDI + Largeur_ecran - Largeur;
                 ESI = ESI + Largeur_brosse - Largeur;
         }
-#ifndef __macosx__
-        SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
-#endif
+        UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
@@ -200,9 +213,7 @@ void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
         Src+=Largeur_brosse-Largeur;
         Dest+=Largeur_ecran-Largeur;
     }
-#ifndef __macosx__
-    SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
-#endif
+    UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image)
@@ -221,9 +232,7 @@ void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
-#ifndef __macosx__
-  SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
-#endif
+  UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
@@ -245,16 +254,14 @@ void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Ta
 		EDI = EDI + Largeur_ecran - Largeur;
 	}
 
-#ifndef __macosx__
-	SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,Hauteur);
-#endif
+	UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
 void Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
     memcpy(Ecran+Pos_X+Pos_Y*Largeur_ecran,Ligne,Largeur);
-    //SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,Largeur,1);
+    //UpdateRect(Pos_X,Pos_Y,Largeur,1);
 }
 
 void Afficher_une_ligne_transparente_mono_a_l_ecran_SDL(
@@ -309,10 +316,8 @@ void Afficher_partie_de_l_ecran_zoomee_SDL(
                 EDX++;
                 if(EDX==Hauteur)
                 {
-#ifndef __macosx__
-                        SDL_UpdateRect(Ecran_SDL,Principal_X_Zoom,0,
+                        UpdateRect(Principal_X_Zoom,0,
                                 Largeur*Loupe_Facteur,Hauteur);
-#endif
                         return;
                 }
                 CX--;
@@ -409,10 +414,8 @@ void Display_brush_Mono_zoom_SDL (word Pos_X, word Pos_Y,
                         // On vérifie qu'on est pas à la ligne finale
                         if(DX == Pos_Y_Fin)
                         {
-#ifndef __macosx__
-                                SDL_UpdateRect(Ecran_SDL, Pos_X, Pos_Y,
+                                UpdateRect( Pos_X, Pos_Y,
                                         Largeur * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
-#endif
                                 return;
                         }
                         BX --;
@@ -446,10 +449,8 @@ void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Dec
                         DX++;
                         if(DX==Pos_Y_Fin)
                         {
-#ifndef __macosx__
-                                SDL_UpdateRect(Ecran_SDL,Pos_X,Pos_Y,
+                                UpdateRect(Pos_X,Pos_Y,
                                         Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
-#endif
                                 return;
                         }
                         bx--;
@@ -495,4 +496,31 @@ void Gere_Evenement_SDL(SDL_Event * event)
     Quit_demande=1;
   }
 }
+
+void Flush_update(void)
+{
+  #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+  // Mise à jour de la totalité de l'écran
+    SDL_UpdateRect(Ecran_SDL, 0, 0, 0, 0);
+  #endif
+  
+}
+
+void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur)
+{
+  #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
+    SDL_UpdateRect(Ecran_SDL, (X), (Y), (Largeur), (Hauteur));
+  #endif
+}
+
+
+#if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
+
+#endif
+#if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+
+#endif
+#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+
+#endif
 

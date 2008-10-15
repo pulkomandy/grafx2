@@ -51,4 +51,8 @@
   SDL_Rect ** Liste_Modes_Videos_SDL;
   byte* Ecran;
 
+  void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur);
+  void Flush_update(void);
+
+  
 #endif // SDLSCREEN_H_INCLUDED
