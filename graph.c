@@ -87,7 +87,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
 	{
-		X_effectif = Min(Max((X-Loupe_Decalage_X + 1)*Loupe_Facteur + 2 + Principal_Split + LARGEUR_BARRE_SPLIT,0), Largeur_ecran);
+		X_effectif = Min(Max((X-Loupe_Decalage_X)*Loupe_Facteur + 6 + Principal_Split + LARGEUR_BARRE_SPLIT,0), Largeur_ecran); // TODO: trouver d'ou sort le 6!
 		Y_effectif = Min(Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur, Menu_Ordonnee);
 
 		Largeur *= Loupe_Facteur / 2; // ???!
@@ -101,7 +101,13 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 
 		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 		else H_effectif = Menu_Ordonnee - Y_effectif;
-
+/* Très utile pour le debug :)
+		SDL_Rect r;
+		r.x=X_effectif;
+		r.y=Y_effectif;
+		r.h=r.w=3;
+		SDL_FillRect(Ecran_SDL,&r,3);
+*/
 		SDL_UpdateRect(Ecran_SDL,X_effectif,Y_effectif,L_effectif,H_effectif);
 	}
 }
@@ -859,6 +865,10 @@ void Changer_facteur_loupe(byte Indice_facteur)
     Recadrer_ecran_par_rapport_au_zoom();
 
     Pixel_Preview=Pixel_Preview_Loupe;
+
+    DEBUG("CHL",3);
+    Afficher_ecran();
+    SDL_UpdateRect(Ecran_SDL,0,0,0,0);
   }
   else
     Pixel_Preview=Pixel_Preview_Normal;
@@ -1869,7 +1879,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         && (Pinceau_Y<=Limite_Bas) )
         {
                 Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
-                if(Loupe_Mode) Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+                Mettre_Ecran_A_Jour(X,Y,1,1);
         }
       break;
 
@@ -1970,8 +1980,6 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-              //SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0), 
-              //  Fin_Compteur_X,Fin_Compteur_Y );
 	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
           }
 
@@ -1998,8 +2006,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-//        SDL_UpdateRect(Ecran_SDL, Max(Debut_X,0), Max(Debut_Y,0), Fin_Compteur_X, Fin_Compteur_Y);
-	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X,Fin_Compteur_Y);
+	Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X,Fin_Compteur_Y);
 
       }
       break;
@@ -2099,8 +2106,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-//ok
-          if(Loupe_Mode) Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
+          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
 	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
@@ -2205,9 +2211,12 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-              /*          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,
-                                Fin_Compteur_X-Debut_Compteur_X,
-                                Fin_Compteur_Y-Debut_Compteur_Y);*/
+	  DEBUG("PINCEAU",435);
+	  #ifndef __macosx__
+	    Mettre_Ecran_A_Jour(X,Y,
+		Largeur,
+		Hauteur);
+	  #endif
         }
       }
   }
@@ -2445,19 +2454,19 @@ void Afficher_curseur(void)
           for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
 	  {
 	    if( Pos_X < 0 ) continue;
-	    else if (Pos_X > Largeur_ecran) break;
             for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
             {
 	      if( Pos_Y < 0 ) continue;
-	      else if (Pos_Y > Hauteur_ecran) break;
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
               FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
               if (Couleur!=CM_Trans)
                   Pixel(Pos_X,Pos_Y,Couleur);
+	      if (Pos_Y > Hauteur_ecran) break;
             }
+	    if (Pos_X >= Largeur_ecran) break;
 	  }
 
-          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Compteur_X - 1,Compteur_Y-1);
+          SDL_UpdateRect(Ecran_SDL,Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
         }
       }
       break;
@@ -3079,7 +3088,6 @@ void Afficher_ecran(void)
   }
   if (Principal_Hauteur_image<Menu_Ordonnee)
     Block(0,Principal_Hauteur_image,Largeur,(Menu_Ordonnee-Hauteur),0);
-  SDL_UpdateRect(Ecran_SDL,0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Loupe_Mode)
@@ -3113,6 +3121,7 @@ void Afficher_ecran(void)
   // ---/\/\/\ Affichage des limites /\/\/\---
   if (Config.Afficher_limites_image)
     Afficher_limites_de_l_image();
+  SDL_UpdateRect(Ecran_SDL,0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
 }
 
   // -- Redessiner le sprite d'un bouton dans le menu --
@@ -4586,6 +4595,9 @@ void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,b
 
   for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
     Afficher_pinceau(Pos_X,  Fin_Y,Couleur,0);
+#ifdef __macosx__
+  Mettre_Ecran_A_Jour(Debut_X,Fin_X,Fin_X-Debut_X,Fin_Y-Debut_Y);
+#endif
 }
 
   // -- Tracer un rectangle plein --
