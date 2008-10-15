@@ -1134,6 +1134,11 @@ void Bouton_Palette(void)
 
           Afficher_curseur();
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+          
+          // En cas de X-Swap, tout l'ecran a pu changer de couleur.
+          if (Bouton_clicke==8)
+            SDL_UpdateRect(Ecran_SDL,0, 0, Largeur_ecran, Menu_Ordonnee_avant_fenetre);
+          
         }
         break;
 
