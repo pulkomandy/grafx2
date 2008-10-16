@@ -1964,17 +1964,17 @@ void Remappe_fond_fenetres(byte * Table_de_conversion, int Min_Y, int Max_Y)
     EDI = Fond_fenetre[Indice_fenetre];
   
   	// Pour chaque ligne
-  	for(dx=0; dx<Pile_Fenetre_Hauteur[Indice_fenetre];dx++)
+  	for(dx=0; dx<Pile_Fenetre_Hauteur[Indice_fenetre]*Menu_Facteur_Y;dx++)
   	{
   	  if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]>Max_Y)
   	    return;
   	  if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]<Min_Y)
   	  {
-  	    EDI += Pile_Fenetre_Largeur[Indice_fenetre];
+  	    EDI += Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;
   	  }
   	  else
   		// Pour chaque pixel
-  		for(cx=Pile_Fenetre_Largeur[Indice_fenetre];cx>0;cx--)
+  		for(cx=Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;cx>0;cx--)
   		{
   			*EDI = Table_de_conversion[*EDI];
   			EDI ++;

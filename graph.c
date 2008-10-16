@@ -326,7 +326,7 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       }
     }
   }
-  UpdateRect((LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee*Menu_Facteur_Y,Largeur,Hauteur);
+  UpdateRect((LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee,Largeur,Hauteur);
 //    UpdateRect(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
 }
 
@@ -372,7 +372,8 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
        Mais de toutes façons, c'est franchement facultatif...
     */
     // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-    Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
+    if (Menu_visible_avant_fenetre)
+      Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
   }
   
 }
