@@ -535,9 +535,18 @@ word Conversion_ANSI(SDL_keysym Sym)
     case 0xC600: 
       return 'ã'; // ã
   }
+  
   // Touche entre 127 et 255
   if (Sym.unicode<256)
   {
+#ifdef __macosx__
+    // fc: Looks like there's a mismatch with delete & backspace
+    //     i don't why SDLK_DELETE was returned instead of SDLK_BACKSPACE
+    if(Sym.unicode == 127)
+    {
+        return(SDLK_BACKSPACE);
+    }
+#endif
     return Sym.unicode;
   }
 	// Sinon c'est une touche spéciale, on retourne son scancode

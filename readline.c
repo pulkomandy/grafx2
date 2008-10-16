@@ -156,6 +156,10 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
   UpdateRect(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
+#ifdef __macosx__
+    Flush_update();
+#endif
+
   while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))
   {
     Touche_lue=Get_key();
@@ -219,6 +223,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
             }
       break;
       case  SDLK_BACKSPACE : // Backspace : combinaison de gauche + suppr
+
         if (Position)
         {       
           Position--;
@@ -279,9 +284,9 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
             goto affichage;
           } // Fin du test d'autorisation de touche
         } // Fin du test de place libre
-      break;
+        break;
       
-      affichage:
+affichage:
         Taille=strlen(Chaine);
         // Formatage d'une partie de la chaine (si trop longue pour tenir)
         strncpy(Chaine_affichee, Chaine + Offset, Taille_affichee);
@@ -295,6 +300,9 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
         UpdateRect(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
     } // Fin du "switch(Touche_lue)"
+#ifdef __macosx__
+    Flush_update();
+#endif
   } // Fin du "while"
 
   // Effacement de la chaîne
