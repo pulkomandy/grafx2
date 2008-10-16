@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -830,7 +831,7 @@ void Backup(void)
   #ifdef __macosx__
     S_Page Nouvelle_page;
   #else
-    S_Page * Nouvelle_page;
+    S_Page *Nouvelle_page;
   #endif
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les

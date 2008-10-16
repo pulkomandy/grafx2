@@ -1,6 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -161,7 +162,7 @@ void Get_input(void)
                 switch(event.button.button)
 		{
 #ifdef __macosx__
-			// fc: poor poor mac users with a signle button mouse...
+			// fc: poor poor mac users with a single button mouse...
 			// emulated with the shifts keys
 			case SDL_BUTTON_LEFT:
 				INPUT_Nouveau_Mouse_K = 1;

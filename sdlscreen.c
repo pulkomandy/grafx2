@@ -1,6 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 

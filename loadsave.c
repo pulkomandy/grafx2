@@ -1,6 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -775,6 +776,12 @@ void Load_IMG(void)
 
     if (read_bytes(Fichier,&IMG_Header,sizeof(T_Header_IMG)))
     {
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    IMG_Header.Largeur = SDL_Swap16(IMG_Header.Largeur);
+    IMG_Header.Hauteur = SDL_Swap16(IMG_Header.Hauteur);
+#endif
+
       Buffer=(byte *)malloc(IMG_Header.Largeur);
 
       Initialiser_preview(IMG_Header.Largeur,IMG_Header.Hauteur,Taille_du_fichier,FORMAT_IMG);
@@ -847,6 +854,11 @@ void Save_IMG(void)
     Palette_64_to_256(Principal_Palette);
     memcpy(IMG_Header.Palette,Principal_Palette,sizeof(T_Palette));
     Palette_256_to_64(Principal_Palette);
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    IMG_Header.Largeur = SDL_Swap16(IMG_Header.Largeur);
+    IMG_Header.Hauteur = SDL_Swap16(IMG_Header.Hauteur);
+#endif
 
     if (write_bytes(Fichier,&IMG_Header,sizeof(T_Header_IMG)))
     {
@@ -956,6 +968,13 @@ void Load_PKM(void)
 
     if (read_bytes(Fichier,&Head,sizeof(T_Header_PKM)))
     {
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    Head.Largeur = SDL_Swap16(Head.Largeur);
+    Head.Hauteur = SDL_Swap16(Head.Hauteur);
+    Head.Jump = SDL_Swap16(Head.Jump);
+#endif
+
       Principal_Commentaire[0]='\0'; // On efface le commentaire
       if (Head.Jump)
       {
@@ -1194,6 +1213,13 @@ void Save_PKM(void)
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    Head.Largeur = SDL_Swap16(Head.Largeur);
+    Head.Hauteur = SDL_Swap16(Head.Hauteur);
+    Head.Jump = SDL_Swap16(Head.Jump);
+#endif
+
     // Ecriture du header
     if (write_bytes(Fichier,&Head,sizeof(T_Header_PKM)))
     {
@@ -2108,6 +2134,11 @@ void Test_BMP(void)
      && read_dword_le(Fichier,&(Header.Clr_Imprt))
         )
      {
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      Header.Signature = SDL_Swap16(Header.Signature);
+#endif
+
       if ( (Header.Signature==0x4D42) && (Header.Taille_2==40)
         && Header.Largeur && Header.Hauteur )
         Erreur_fichier=0;
@@ -2418,7 +2449,11 @@ void Save_BMP(void)
     else
       Taille_ligne=Principal_Largeur_image;
 
-    Header.Signature  =0x4D42;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    Header.Signature  = 0x424D;
+#else
+    Header.Signature  = 0x4D42;
+#endif
     Header.Taille_1   =(Taille_ligne*Principal_Hauteur_image)+1078;
     Header.Reserv_1   =0;
     Header.Reserv_2   =0;
@@ -2690,6 +2725,7 @@ void Load_GIF(void)
          ( (memcmp(Signature,"GIF87a",6)==0) ||
            (memcmp(Signature,"GIF89a",6)==0) ) )
     {
+
       // Allocation de mémoire pour les tables & piles de traitement:
       Alphabet_Pile   =(word *)malloc(4096*sizeof(word));
       Alphabet_Prefixe=(word *)malloc(4096*sizeof(word));
@@ -2704,8 +2740,8 @@ void Load_GIF(void)
       {
         // Lecture du Logical Screen Descriptor Block réussie:
 
-        Ecran_original_X=endian_magic16(LSDB.Largeur);
-        Ecran_original_Y=endian_magic16(LSDB.Hauteur);
+        Ecran_original_X=LSDB.Largeur;
+        Ecran_original_Y=LSDB.Hauteur;
 
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
@@ -2797,10 +2833,10 @@ void Load_GIF(void)
             && read_byte(GIF_Fichier,&(IDB.Nb_bits_pixel))
             && IDB.Largeur_image && IDB.Hauteur_image)
           {
-            Principal_Largeur_image=endian_magic16(IDB.Largeur_image);
-            Principal_Hauteur_image=endian_magic16(IDB.Hauteur_image);
+            Principal_Largeur_image=IDB.Largeur_image;
+            Principal_Hauteur_image=IDB.Hauteur_image;
 
-            Initialiser_preview(endian_magic16(IDB.Largeur_image),endian_magic16(IDB.Hauteur_image),Taille_du_fichier,FORMAT_GIF);
+            Initialiser_preview(IDB.Largeur_image,IDB.Hauteur_image,Taille_du_fichier,FORMAT_GIF);
 
             // Palette locale dispo = (IDB.Indicateur and $80)
             // Image entrelacée     = (IDB.Indicateur and $40)
@@ -3084,6 +3120,11 @@ void Save_GIF(void)
 
       // On sauve le LSDB dans le fichier
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+      LSDB.Largeur = SDL_Swap16(LSDB.Largeur);
+      LSDB.Hauteur = SDL_Swap16(LSDB.Hauteur);
+#endif
+
       if (write_bytes(GIF_Fichier,&LSDB,sizeof(T_LSDB)))
       {
         // Le LSDB a été correctement écrit.
@@ -3107,6 +3148,11 @@ void Save_GIF(void)
           IDB.Hauteur_image=Principal_Hauteur_image;
           IDB.Indicateur=0x07;    // Image non entrelacée, pas de palette locale.
           IDB.Nb_bits_pixel=8; // Image 256 couleurs;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+          IDB.Largeur_image = SDL_Swap16(IDB.Largeur_image);
+          IDB.Hauteur_image = SDL_Swap16(IDB.Hauteur_image);
+#endif
 
           if ( write_bytes(GIF_Fichier,&Block_indicateur,1) &&
                write_bytes(GIF_Fichier,&IDB,sizeof(T_IDB)) )

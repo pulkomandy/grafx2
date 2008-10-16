@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -504,14 +505,14 @@ unsigned long Memoire_libre(void)
     #ifdef __linux__
       #ifdef __macosx__
         int mib[2];
-	int maxmem;
-	size_t len;
+        int maxmem;
+        size_t len;
 
-	mib[0] = CTL_HW;
-	mib[1] = HW_USERMEM;
-	len = sizeof(maxmem);
-	sysctl(mib,2,&maxmem,&len,NULL,0);
-	return maxmem;
+        mib[0] = CTL_HW;
+        mib[1] = HW_USERMEM;
+        len = sizeof(maxmem);
+        sysctl(mib,2,&maxmem,&len,NULL,0);
+        return maxmem;
       #else
         struct sysinfo info;
         sysinfo(&info);
