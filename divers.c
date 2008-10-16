@@ -161,20 +161,7 @@ void Get_input(void)
                 //Clic sur un des boutons de la souris
                 switch(event.button.button)
 		{
-#ifdef __macosx__
-			// fc: poor poor mac users with a single button mouse...
-			// emulated with the shifts keys
-			case SDL_BUTTON_LEFT:
-				INPUT_Nouveau_Mouse_K = 1;
-                if(SDL_GetModState() & KMOD_LSHIFT ||
-                   SDL_GetModState() & KMOD_RSHIFT)
-                {
-				    INPUT_Nouveau_Mouse_K = 2;
-                }
-				break;
-#else
 			case SDL_BUTTON_LEFT: INPUT_Nouveau_Mouse_K = 1; break;
-#endif
 			case SDL_BUTTON_MIDDLE: // Pour SDL, 2 = clic milieu. Pour nous c'est le clic droit
 			case SDL_BUTTON_RIGHT: // Clic droit SDL, clic droit pour nous aussi ( pour le moment en tout cas)
 				INPUT_Nouveau_Mouse_K = 2;

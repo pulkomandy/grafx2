@@ -29,7 +29,7 @@
 #define M_2PI 6.28318530717958647692528676656
 
 // Note: La taille du fichier GFX2.DAT est définie au début de INIT.C !
-#define POURCENTAGE_VERSION     "97.4%" // Libellé du pourcentage de la version ß
+#define POURCENTAGE_VERSION     "97.5%" // Libellé du pourcentage de la version ß
 #define VERSION1                  2     // |
 #define VERSION2                  0     // |_ Numéro de version découpé en
 #define BETA1                     97    // |  plusieurs parties => 2.0 ß95.5%
