@@ -634,8 +634,6 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 	byte Rouge=Principal_Palette[Couleur].R;
 	
 	// On récupère les 3 composantes RVB
-	
-
 
 	// Bleu
 	Bleu = (Table_de_multiplication_par_Facteur_B[Bleu] 
@@ -650,14 +648,32 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
 {
-        UNIMPLEMENTED
-        return 0;
+	byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
+	byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
+	byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+	byte Bleu=Principal_Palette[Couleur].B;
+	byte Vert=Principal_Palette[Couleur].V;
+	byte Rouge=Principal_Palette[Couleur].R;
+	
+	return Meilleure_couleur(
+	  Rouge>Rouge_dessous?Rouge:Rouge_dessous,
+	  Vert>Vert_dessous?Vert:Vert_dessous,
+	  Bleu>Bleu_dessous?Bleu:Bleu_dessous);
 }
 
 byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
 {
-        UNIMPLEMENTED
-        return 0;
+	byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
+	byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
+	byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+	byte Bleu=Principal_Palette[Couleur].B;
+	byte Vert=Principal_Palette[Couleur].V;
+	byte Rouge=Principal_Palette[Couleur].R;
+	
+	return Meilleure_couleur(
+	  Rouge<Rouge_dessous?Rouge:Rouge_dessous,
+	  Vert<Vert_dessous?Vert:Vert_dessous,
+	  Bleu<Bleu_dessous?Bleu:Bleu_dessous);
 }
 
 void Tester_chrono(void)
