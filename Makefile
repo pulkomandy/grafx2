@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2008 Yves Rizoud
 #  Copyright 2007 Adrien Destugues
 #  Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 #  
@@ -45,9 +46,11 @@ else
   endif
 endif
 
-.PHONY : all debug release clean depend zip
+.PHONY : all debug release clean depend zip version force
 
-OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o linux.o op_asm.o readini.o saveini.o shade.o clavier.o io.o
+OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o \
+      aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o \
+      linux.o op_asm.o readini.o saveini.o shade.o clavier.o io.o version.o
 CFGOBJ = gfxcfg.o SFont.o clavier.o io.o
 
 OBJDIR = obj/
@@ -61,16 +64,30 @@ release : $(BIN) $(CFGBIN)
 	strip $(CFGBIN)
 
 # A release zip archive
-ziprelease:
+ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-beta-svn`svnversion`-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png SDL_image.dll
+	zip grafx2-svn`svnversion`-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png SDL_image.dll src-svn`svnversion`.tgz
+	$(DELCOMMAND) src-svn`svnversion`.tgz
+	tar cvzf grafx2-svn`svnversion`-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt 8pxfont.png
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
 
 $(CFGBIN) : $(CFGOBJ)
 	$(CC) $(CFGOBJ) -o $(CFGBIN) $(LOPT) -lSDL_image
+
+# SVN revision number
+version.c :
+	echo "char SVNRevision[]=\"`svnversion`\";" > version.c
+
+version.o : version.c
+	$(CC) $(COPT) -c $*.c -o $*.o
 	
+version : delversion version.c version.o
+
+delversion :
+	$(DELCOMMAND) version.c
+
 %.o :
 	$(CC) $(COPT) -c $*.c -o $*.o
 
@@ -81,5 +98,7 @@ clean :
 	$(DELCOMMAND) *.o
 	$(DELCOMMAND) $(BIN)
 	$(DELCOMMAND) $(CFGBIN)
+
+test :
 
 include Makefile.dep
