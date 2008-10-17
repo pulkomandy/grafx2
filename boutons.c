@@ -163,7 +163,8 @@ void Bouton_Message_initial(void)
   //Print_dans_fenetre( 120-4*13,128,"(placeholder)",CM_Fonce,CM_Clair);
   Print_dans_fenetre(130-4*28,136,"http://grafx2.googlecode.com",CM_Fonce,CM_Clair);
 
-  Fenetre_Definir_bouton_normal(90,151,80,14,"OK",0,1,SDLK_RETURN); // 1
+  // Pour faire un vrai splash screen, voici un bouton qui prend toute la fenetre.
+  Fenetre_Definir_bouton_normal(1,1,258,170,"",0,1,SDLK_RETURN); // 1
 
   Display_Window(260,172);
 
@@ -173,10 +174,15 @@ void Bouton_Message_initial(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
   }
-  while ((Bouton_clicke!=1) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
+  while (Bouton_clicke==0 && Touche==0);
 
   Fermer_fenetre();
   Afficher_curseur();
+
+  // Si la page a été fermée par clic, ne pas faire un bête point vide dans la page.
+  // Par contre, un clic dans le menu est bien pris en compte.
+  if (Bouton_clicke && Mouse_Y<Menu_Ordonnee)
+    Attendre_fin_de_click();
 }
 
 
