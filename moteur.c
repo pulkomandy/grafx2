@@ -1154,7 +1154,7 @@ void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Haut
 void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Noir,CM_Fonce,CM_Fonce,CM_Noir);
-  UpdateRect(Pos_X, Pos_Y, Largeur, Hauteur);
+  UpdateRect(Fenetre_Pos_X+Pos_X*Menu_Facteur_X, Fenetre_Pos_Y+Pos_Y*Menu_Facteur_X, Largeur*Menu_Facteur_X, Hauteur*Menu_Facteur_Y);
 }
 
 // -- Bouton normal désenfoncé dans la fenêtre --
@@ -1784,7 +1784,7 @@ short Fenetre_Numero_bouton_clicke(void)
         }
         else
           Fenetre_Attribut1=0;
-
+        
         Afficher_curseur();
 
         Tempo_jauge((Mouse_K==1)? Config.Valeur_tempo_jauge_gauche : Config.Valeur_tempo_jauge_droite);

@@ -517,8 +517,7 @@ void Bouton_Clear_colore(void)
   Desenclencher_bouton(BOUTON_CLEAR);
   Afficher_curseur();
 }
-
-
+ 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, const char *Section_aide)
 {
@@ -576,6 +575,9 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Mouse_K==A_GAUCHE)?CM_Noir:CM_Clair);
           Afficher_curseur();
+          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_taggee >> 4)*10)),
+            Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_taggee & 15)* 5)),
+            Menu_Facteur_X<<1,Menu_Facteur_Y*5);
         }
         break;
       case  2 : // Clear
@@ -584,12 +586,14 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
         for (Indice=0; Indice<=255; Indice++)
           Stencil_Tagger_couleur(Indice,CM_Clair);
         Afficher_curseur();
+        Display_Window(Fenetre_Largeur, Fenetre_Hauteur);
         break;
       case  3 : // Invert
         Effacer_curseur();
         for (Indice=0; Indice<=255; Indice++)
           Stencil_Tagger_couleur(Indice,(Table[Indice]^=1)?CM_Noir:CM_Clair);
         Afficher_curseur();
+        Display_Window(Fenetre_Largeur, Fenetre_Hauteur);
     }
 
     if (!Mouse_K)
@@ -2190,6 +2194,8 @@ void Print_repertoire_courant(void)
   }
   else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
     Print_dans_fenetre(7,43,Principal_Repertoire_courant,CM_Noir,CM_Clair);
+    
+  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*7),Fenetre_Pos_Y+(Menu_Facteur_Y*43),Menu_Facteur_X*37*8,Menu_Facteur_Y<<3);
 }
 
 
@@ -2200,6 +2206,7 @@ void Print_Nom_fichier_dans_selecteur(void)
 {
   Block(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3,CM_Clair);
   Print_dans_fenetre_limite(13+9*8,90,Principal_Nom_fichier,27,CM_Noir,CM_Clair);
+  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3);
 }
 
 
@@ -2528,6 +2535,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           // On efface la demande de confirmation
           Block(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
                 Menu_Facteur_X*48,Menu_Facteur_Y*24,CM_Clair);
+          UpdateRect(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
+                Menu_Facteur_X*48,Menu_Facteur_Y*24);
 
           // Si l'utilisateur confirme,
           if (Etat_Du_Clavier[SDLK_y])
