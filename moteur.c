@@ -1716,6 +1716,11 @@ void Deplacer_fenetre(short Dx, short Dy)
     Fenetre_Pos_Y=Nouveau_Y;
 
   }
+  else
+  {
+    // Update pour effacer le rectangle XOR
+    UpdateRect(Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur*Menu_Facteur_X, Fenetre_Hauteur*Menu_Facteur_Y);
+  }    
   Forme_curseur=FORME_CURSEUR_FLECHE;
   Afficher_curseur();
 

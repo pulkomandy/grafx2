@@ -107,7 +107,6 @@ struct T_Drive
 {
   char Lettre;
   byte Type; // 0: Diskette 3"« / 1: Diskette 5"¬ / 2: HDD / 3: CD-ROM / 4: Logique
-  word Touche2;
   char Chemin[4]; // Reservé pour "x:\", ou "/", ou "~"
 };
 
