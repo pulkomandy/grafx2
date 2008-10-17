@@ -11,6 +11,7 @@
 		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
 		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AD4B1E0EA8CCF0009CCAC4 /* version.c */; };
 		F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */ = {isa = PBXBuildFile; fileRef = F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */; };
 		F5B19B8D0EA4BE3E003F4BA4 /* aide.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B750EA4BE3E003F4BA4 /* aide.c */; };
 		F5B19B8E0EA4BE3E003F4BA4 /* boutons.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B760EA4BE3E003F4BA4 /* boutons.c */; };
@@ -48,11 +49,21 @@
 		002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
+			dstPath = SDL_image.framework/Versions/A;
+			dstSubfolderSpec = 10;
+			files = (
+				F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */,
+			);
+			name = "Copy Frameworks into .app bundle";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		002F39FD09D0883400EBEB89 /* Copy Frameworks into .app bundle */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = SDL.framework/Versions/A;
 			dstSubfolderSpec = 10;
 			files = (
 				F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */,
-				F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */,
 			);
 			name = "Copy Frameworks into .app bundle";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -70,6 +81,7 @@
 		32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grafx2_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Grafx2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grafx2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5AD4B1E0EA8CCF0009CCAC4 /* version.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = version.c; sourceTree = "<group>"; };
 		F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
 		F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 8pxfont.png; sourceTree = "<group>"; };
 		F5B19B750EA4BE3E003F4BA4 /* aide.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aide.c; sourceTree = "<group>"; };
@@ -101,8 +113,8 @@
 		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
 		F5B19C350EA4DB69003F4BA4 /* gfx2.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2.ini; sourceTree = "<group>"; };
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/SDL_image; sourceTree = "<absolute>"; };
-		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/SDL; sourceTree = "<absolute>"; };
+		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/Versions/A/SDL_image; sourceTree = "<absolute>"; };
+		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/Versions/A/SDL; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +169,7 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5AD4B1E0EA8CCF0009CCAC4 /* version.c */,
 				F5DCE2BD0EA5118E0065B0EF /* SDL */,
 				F5DCE2BB0EA5116B0065B0EF /* SDL_image */,
 				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
@@ -236,6 +249,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */,
+				002F39FD09D0883400EBEB89 /* Copy Frameworks into .app bundle */,
 			);
 			buildRules = (
 			);
@@ -307,6 +321,7 @@
 				F5B19BA20EA4BE3E003F4BA4 /* SFont.c in Sources */,
 				F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */,
 				F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */,
+				F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
