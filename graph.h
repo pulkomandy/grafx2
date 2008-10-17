@@ -178,3 +178,6 @@ void Remap_picture(void);
 #define ToWinY(y) (((y)*Menu_Facteur_Y)+Fenetre_Pos_Y)
 #define ToWinL(l) ((l)*Menu_Facteur_X)
 #define ToWinH(h) ((h)*Menu_Facteur_X)
+
+byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
+byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);

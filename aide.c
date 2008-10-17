@@ -30,6 +30,7 @@
 #include "moteur.h"
 #include "tables_aide.h"
 #include "aide.h"
+#include "sdlscreen.h"
 
 #include <string.h>
 

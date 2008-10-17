@@ -799,12 +799,6 @@ void Tempo_jauge(byte Vitesse)
         }
 }
 
-byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
-{
-        UNIMPLEMENTED
-        return 0;
-}
-
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
 	SDL_Color comp;

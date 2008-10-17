@@ -143,6 +143,32 @@ byte Meilleure_couleur(byte R,byte V,byte B)
   return Best_color;
 }
 
+byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
+{
+  short Coul;
+  int   Delta_R,Delta_V,Delta_B;
+  int   Dist;
+  int   Best_dist=0x7FFFFFFF;
+  byte  Best_color=0;
+
+  for (Coul=0; Coul<256; Coul++)
+  {
+    Delta_R=(int)Principal_Palette[Coul].R-Rouge;
+    Delta_V=(int)Principal_Palette[Coul].V-Vert;
+    Delta_B=(int)Principal_Palette[Coul].B-Bleu;
+
+    if (!(Dist=(Delta_R*Delta_R*30)+(Delta_V*Delta_V*59)+(Delta_B*Delta_B*11)))
+      return Coul;
+
+    if (Dist<Best_dist)
+    {
+      Best_dist=Dist;
+      Best_color=Coul;
+    }
+  }
+  return Best_color;
+}
+
 void Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
      (byte Rouge, byte Vert, byte Bleu, struct Composantes * Palette, byte * Table)
 {
@@ -3474,7 +3500,6 @@ void Remap_brosse(void)
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
       Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
-      //Utilisee[Couleur]=Meilleure_couleur_sans_exclusion(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
@@ -3519,7 +3544,6 @@ void Remap_picture(void)
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
       Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
-      //Utilisee[Couleur]=Meilleure_couleur_sans_exclusion(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les

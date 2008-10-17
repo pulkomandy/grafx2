@@ -91,9 +91,6 @@ void Tester_chrono(void);
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur);
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement);
 
-byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
-byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);
-
 byte Effet_Colorize_interpole  (word X,word Y,byte Couleur);
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur);
 byte Effet_Colorize_soustractif(word X,word Y,byte Couleur);
