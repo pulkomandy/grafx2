@@ -1129,17 +1129,19 @@ void Copier_image_seule(void)
 void Copier_certaines_couleurs(void)
 {
   short Indice;
+  byte Confirme=0;
 
-  Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,NULL,0, NULL);
+  Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,&Confirme,0, NULL);
 
-  if ( (!Brouillon_Image_modifiee)
-    || (Demande_de_confirmation("Spare page was modified. Proceed?")) )
+  if (Confirme)
+  {
     for (Indice=0; Indice<256; Indice++)
     {
       if (Masque_copie_couleurs[Indice])
         memcpy(Brouillon_Palette+Indice,Principal_Palette+Indice,
                sizeof(struct Composantes));
     }
+  }
 }
 
 
