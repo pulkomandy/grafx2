@@ -24,15 +24,10 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
 void Permuter_dans_l_image_les_couleurs(byte Couleur_1,byte Couleur_2);
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer);
 void Scroll_picture(short Decalage_X,short Decalage_Y);
-void Clavier_americain(void);
-void Clavier_de_depart(void);
 byte Recuperer_nb_lignes(void);
-void Passer_en_mode_texte(byte Nb_lignes);
-word Detection_souris(void);
 void Set_mouse_video_mode_number(void);
 void Get_input(void);
 void Set_mouse_position(void);
-void Clip_mouse(void);
 void Attendre_fin_de_click(void);
 void Sensibilite_souris(word X,word Y);
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu);

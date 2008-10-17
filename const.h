@@ -62,7 +62,6 @@
 #define TAILLE_PILE_OPERATIONS    16    // Nombre maximum d'éléments utilisés par les opérations
 #define TAILLE_MAXI_PATH          37    // Taille maximum affichable du répertoire courant dans les fenêtres du fileselect
 #define TAILLE_COMMENTAIRE        32    // Taille maxi des commentaires pour le PKM
-#define TAILLE_NOM_CONSTRUCTEUR   24    // Taille maxi du nom de constructeur VESA dans la fenêtre de stats.
 #define NB_PAGES_UNDO_MAX         99    // Nombre maximal de pages d'undo
 #define FACTEUR_DE_ZOOM_PAR_DEFAUT 4    // Facteur de zoom initial
 #define TAILLE_CHEMIN_FICHIER     260   // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
@@ -132,10 +131,6 @@ enum CODES_D_ERREURS
 enum TYPES_DE_MODES_VIDEO
 {
     MODE_SDL
-  /*MODE_MCGA,
-  MODE_X,
-  MODE_VESA,       // Attention! Si on change la numérotation, il faut
-  MODE_XVESA       // que les 2 plus grandes valeurs soient ces 2 modes!*/
 };
 
   // Les différentes catégories de bouton:

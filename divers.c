@@ -367,11 +367,6 @@ void Wait_VBL(void)
   } 
 }
 
-void Passer_en_mode_texte(byte Nb_lignes)
-{
-        SDL_Quit(); //Ceci sera appellé à chaque sortie de mode vidéo == sortie du programme. le Nb_Lignes serait à enlever, cela dit, SDL s'en occupe très bien tout seul.
-}
-
 void Pixel_dans_brosse             (word X,word Y,byte Couleur)
 {
 	*(Brosse+Y*Brosse_Largeur+X)=Couleur;
@@ -382,22 +377,6 @@ byte Lit_pixel_dans_brosse         (word X,word Y)
 	return *(Brosse + Y * Brosse_Largeur + X);
 }
 
-void Clavier_de_depart(void)
-{
-  //SDL_EnableUNICODE(SDL_ENABLE);
-	//SDL_EnableKeyRepeat(250, 32); // TODO à placer à un meilleur endroit
-}
-
-void Clavier_americain(void)
-{
-  //SDL_EnableUNICODE(SDL_DISABLE);
-}
-
-word Detection_souris(void)
-{
-	UNIMPLEMENTED
-        return 0;
-}
 
 byte Lit_pixel_dans_ecran_courant  (word X,word Y)
 {
@@ -565,11 +544,6 @@ void Set_mouse_position(void)
         Mouse_X << Mouse_Facteur_de_correction_X,
         Mouse_Y << Mouse_Facteur_de_correction_Y
     );
-}
-
-void Clip_mouse(void)
-{
-        UNIMPLEMENTED
 }
 
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
@@ -845,7 +819,6 @@ word Get_key(void)
  	SDL_Event event;
 
 	Attendre_fin_de_click(); // On prend le controle de la boucle d'évènements, donc il ne faut pas qu'on rate la fin de click !
-  Clavier_de_depart();
   while(1)
   {
     SDL_WaitEvent(&event);

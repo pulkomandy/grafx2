@@ -6,7 +6,7 @@ init.o: init.c const.h struct.h global.h loadsave.h graph.h boutons.h \
 graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
   boutons.h pages.h global.h loadsave.h erreurs.h
 sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
-  divers.h erreurs.h
+  divers.h erreurs.h graph.h
 divers.o: divers.c struct.h const.h sdlscreen.h global.h loadsave.h \
   graph.h erreurs.h boutons.h moteur.h divers.h clavier.h
 special.o: special.c const.h struct.h global.h loadsave.h graph.h \
@@ -17,7 +17,7 @@ boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
 palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h
 aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
-  moteur.h tables_aide.h aide.h
+  moteur.h tables_aide.h aide.h sdlscreen.h
 operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
   moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
 pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \
@@ -40,6 +40,7 @@ shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
   divers.h readline.h aide.h sdlscreen.h
 clavier.o: clavier.c global.h struct.h const.h loadsave.h
 io.o: io.c struct.h const.h io.h
+version.o: version.c
 gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h
 SFont.o: SFont.c SFont.h
 clavier.o: clavier.c global.h struct.h const.h loadsave.h

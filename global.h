@@ -92,18 +92,7 @@ struct S_Mode_video
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
 };
 GLOBAL struct S_Mode_video Mode_video[MAX_MODES_VIDEO];
-
 GLOBAL int  Nb_modes_video; // Nombre de modes réellement recensés dans Mode_video[]
-
-GLOBAL struct
-{
-  byte   Granularite;   // Facteur de gestion de la granularité
-  byte   Code_fenetres; // Utilisation des fenêtres: 0=AA 1=BB 2=AB 3=BA
-  byte * WinFuncPtr;
-  byte * Adresse_physique_LFB; // Si = 0 => Pas de LFB
-  dword  Taille_LFB;           // Taille de la mémoire LFB
-} VESA_Mode_Infos[4];
-
 
 
   // Palette par défaut
@@ -234,10 +223,6 @@ GLOBAL short Principal_Decalage_X;     // Décalage en X de l'écran par rapport a
 GLOBAL short Principal_Decalage_Y;     // Décalage en Y de l'écran par rapport au début de l'image
 GLOBAL short Ancien_Principal_Decalage_X;
 GLOBAL short Ancien_Principal_Decalage_Y;
-
-#ifdef __WATCOMC__
-    GLOBAL char Principal_Drive_fichier[2];
-#endif
 
 GLOBAL char  Principal_Repertoire_fichier[1024]; // |_ Nom complet =
 GLOBAL char  Principal_Nom_fichier[256];         // |  Repertoire_fichier+"\"+Nom_fichier
@@ -545,37 +530,6 @@ GLOBAL word INPUT_Nouveau_Mouse_X;
 GLOBAL word INPUT_Nouveau_Mouse_Y;
 GLOBAL byte INPUT_Nouveau_Mouse_K;
 GLOBAL byte INPUT_Keyb_mode;
-
-GLOBAL int MC_Indice;
-GLOBAL int MC_DR;
-GLOBAL int MC_DV;
-GLOBAL int MC_DB;
-GLOBAL int * MC_Table_differences;
-
-  // Variables concernant l'OBJ VIDEO
-
-    // Partie concernant le mode X:
-GLOBAL dword MODE_X_Decalage_synchro;
-GLOBAL word  MODE_X_Largeur_de_ligne;
-GLOBAL dword MODE_X_Valeur_initiale_de_esi;
-GLOBAL dword MODE_X_Valeur_initiale_de_edi;
-    // Partie concernant le VESA:
-GLOBAL byte   Granularite; // Facteur de gestion de la granularité de la carte
-GLOBAL byte   VESA_Erreur;
-GLOBAL byte * VESA_WinFuncPtr; // Handler software de changement de banque
-GLOBAL word * VESA_Liste_des_modes;
-GLOBAL dword  VESA_Decalage_synchro;
-GLOBAL word   VESA_Largeur_ecran_en_dword;
-GLOBAL byte   VESA_Banque_en_cours; // Variable normalement locale à VIDEO.ASM
-GLOBAL byte   VESA_Derniere_banque_Fenetre_A_utilisee;
-GLOBAL byte   VESA_Derniere_banque_Fenetre_B_utilisee;
-GLOBAL fonction_action VESA_Change_banque_lecture;
-GLOBAL fonction_action VESA_Change_banque_ecriture;
-GLOBAL fonction_action VESA_Change_banque_lect_ecr;
-GLOBAL byte VESA_Version_Unite;
-GLOBAL byte VESA_Version_Decimale;
-GLOBAL char VESA_Constructeur[TAILLE_NOM_CONSTRUCTEUR+1];
-GLOBAL word VESA_Taille_memoire;
 
   // Les différents sprites:
 

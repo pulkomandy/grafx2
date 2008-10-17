@@ -1046,8 +1046,6 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Fenetre_Liste_boutons_special =NULL;
   Nb_boutons_fenetre            =0;
 
-  // On (re)passe dans le clavier de départ (français pour nous)
-  Clavier_de_depart();
 }
 
 //----------------------- Fermer une fenêtre d'options -----------------------

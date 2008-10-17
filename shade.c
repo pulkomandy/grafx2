@@ -527,11 +527,6 @@ int Menu_Shade(void)
 
   Afficher_curseur();
 
-/*TODO A vérifier :)
-  Clavier_americain(); // On est obligé de rester en clavier américain pour
-                       // que l'on puisse décaler la couleur sélectionnée à
-                       // l'aide des touches "^" et "$" ("[" et "]").
-*/
   do
   {
     Ancien_Mouse_X=Ancien_Mouse_X2=Mouse_X;
@@ -979,10 +974,6 @@ int Menu_Shade(void)
     }
   }
   while ((Bouton_clicke!=4) && (Bouton_clicke!=5));
-
-/* TODO  Clavier_de_depart(); */
-
-  // Actions à réaliser en sortant du menu suivant OK ou Cancel
 
   Fermer_fenetre();
   free(Buffer_Undo);

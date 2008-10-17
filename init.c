@@ -71,43 +71,11 @@ void Chercher_repertoire_du_programme(char * Chaine)
   #endif
 }
 
-
-word Drive_Touche[26]=
-{
-  0x041E,
-  0x0430,
-  0x042E,
-  0x0420,
-  0x0412,
-  0x0421,
-  0x0422,
-  0x0423,
-  0x0417,
-  0x0424,
-  0x0425,
-  0x0426,
-  0x0432,
-  0x0431,
-  0x0418,
-  0x0419,
-  0x0410,
-  0x0413,
-  0x041F,
-  0x0414,
-  0x0416,
-  0x042F,
-  0x0411,
-  0x042D,
-  0x0415,
-  0x042C
-};
-
 // Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
 {
   Drive[Nb_drives].Lettre=Lettre;
   Drive[Nb_drives].Type  =Type;
-  Drive[Nb_drives].Touche=Drive_Touche[Numero];
 
   Nb_drives++;
 }
@@ -190,32 +158,6 @@ int ActiverLecteur(int NumeroLecteur)
     NomLecteur[0]=Drive[NumeroLecteur].Lettre;
     return ! SetCurrentDirectory(NomLecteur);
   #endif
-}
-
-// Fonction de décryptage
-
-  #define DECRYPT_TAILLE_CLE 14
-  byte Decrypt_compteur=0;
-  const char Decrypt_cle[DECRYPT_TAILLE_CLE]="Sunset Design";
-
-  byte Decrypt(byte Octet)
-  {
-    byte Temp;
-
-    Temp=Octet ^ Decrypt_cle[Decrypt_compteur];
-    if ((++Decrypt_compteur)>=(DECRYPT_TAILLE_CLE-1))
-      Decrypt_compteur=0;
-    return Temp;
-  }
-
-// Décryptage d'une donnée
-
-void Decrypte(byte * Donnee,int Taille)
-{
-  int Indice;
-
-  for (Indice=0;Indice<Taille;Indice++)
-    *(Donnee+Indice)=Decrypt(*(Donnee+Indice));
 }
 
 void Charger_DAT(void)
@@ -2110,38 +2052,6 @@ void Initialiser_les_tables_de_multiplication(void)
     for (Indice_de_multiplication=0;Indice_de_multiplication<512;Indice_de_multiplication++)
     {
       TABLE_ZOOM[Indice_de_facteur][Indice_de_multiplication]=Facteur_de_zoom*Indice_de_multiplication;
-    }
-  }
-}
-
-void Initialiser_la_table_precalculee_des_distances_de_couleur(void)
-{
-  int Indice;
-
-  // On commence par allouer la mémoire utilisée par la table:
-  // 128 valeurs pour chaque teinte, 3 teintes (Rouge, vert et bleu)
-  MC_Table_differences=(int *)malloc(sizeof(int)*(3*128));
-
-  // Pour chacune des 128 positions correspondant à une valeur de différence:
-  for (Indice=0;Indice<128;Indice++)
-  {
-    if (Indice<64)
-    {
-      // Valeur pour le rouge:
-      MC_Table_differences[Indice+  0]=(Indice*30)*(Indice*30);
-      // Valeur pour le vert :
-      MC_Table_differences[Indice+128]=(Indice*59)*(Indice*59);
-      // Valeur pour le bleu :
-      MC_Table_differences[Indice+256]=(Indice*11)*(Indice*11);
-    }
-    else
-    {
-      // Valeur pour le rouge:
-      MC_Table_differences[Indice+  0]=((128-Indice)*30)*((128-Indice)*30);
-      // Valeur pour le vert :
-      MC_Table_differences[Indice+128]=((128-Indice)*59)*((128-Indice)*59);
-      // Valeur pour le bleu :
-      MC_Table_differences[Indice+256]=((128-Indice)*11)*((128-Indice)*11);
     }
   }
 }

@@ -805,10 +805,6 @@ void Bouton_Palette(void)
 
   Afficher_curseur();
 
-  Clavier_americain(); // On est obligé de rester en clavier américain pour
-                       // que l'on puisse décaler la couleur sélectionnée à
-                       // l'aide des touche "^" et "$" ("[" et "]").
-
   if (Config.Auto_nb_used)
     Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
 
@@ -1793,8 +1789,6 @@ void Bouton_Palette(void)
     }
   }
   while ((Bouton_clicke!=13) && (Bouton_clicke!=14));
-
-  Clavier_de_depart();
 
   if (Bouton_clicke==14)         // Sortie par OK
   {

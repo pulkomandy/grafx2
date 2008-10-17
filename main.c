@@ -100,7 +100,6 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
   }
   else
   {
-    Passer_en_mode_texte(Ancien_nb_lignes);
     switch (Code)
     {
       case ERREUR_DAT_ABSENT         : printf("Error: File GFX2.DAT is missing!\n");
@@ -151,7 +150,8 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
       case ERREUR_SORRY_SORRY_SORRY  : printf("Error: Sorry! Sorry! Sorry! Please forgive me!\n");
                                        break;
     }
-    Clavier_de_depart();
+
+    SDL_Quit();
     exit(Code);
   }
 }
@@ -260,11 +260,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
   Initialiser_S_Liste_de_pages(Principal_Backups);
   Initialiser_S_Liste_de_pages(Brouillon_Backups);
-
-  // On calcule tout de suite la table précalculée utilisée pour la recherche
-  // des meilleures couleurs afin de ne pas avoir de valeurs catastrophiques
-  // désignées au démarrage (couleurs du menu, ...)
-  Initialiser_la_table_precalculee_des_distances_de_couleur();
 
   // On détermine dès le départ où se trouve le fichier:
   // On détermine dès le départ où se trouve le fichier:
@@ -425,9 +420,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   Spray_Mono_flow=10;
   memset(Spray_Multi_flow,0,256);
   srand(time(NULL)); // On randomize un peu tout ça...
-        
-  // Passer en clavier américain
-  Clavier_americain();
 
   // Initialisation des boutons
   Initialisation_des_boutons();
@@ -565,17 +557,11 @@ void Fermeture_du_programme(void)
   // On libère le pinceau spécial
   free(Pinceau_Sprite);
 
-  // On libère la table précalculée des distances de teintes
-  free(MC_Table_differences);
-
   // On libère les différents écrans virtuels et brosse:
   free(Brosse);
   Nouveau_nombre_de_backups(0);
   free(Brouillon_Ecran);
   free(Principal_Ecran);
-
-  Passer_en_mode_texte(Ancien_nb_lignes);
-  Clavier_de_depart();
 
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Repertoire_initial)!=-1)
@@ -593,6 +579,8 @@ void Fermeture_du_programme(void)
   }
   else
     Erreur(ERREUR_REPERTOIRE_DISPARU);
+    
+  SDL_Quit();
 }
 
 

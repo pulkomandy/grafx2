@@ -992,9 +992,6 @@ int Conversion_argument_mode(const char *Argument)
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
-void * Mode_X_Ptr; // Pointeur sur la table à utiliser pour le changement de
-                   // mode vidéo X
-
 void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
 {
   int Sensibilite_X;
