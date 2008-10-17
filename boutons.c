@@ -1139,7 +1139,8 @@ void Copier_certaines_couleurs(void)
 
   Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,&Confirme,0, NULL);
 
-  if (Confirme)
+  if (Confirme &&
+    (!Brouillon_Image_modifiee || Demande_de_confirmation("Spare page was modified. Proceed?")))
   {
     for (Indice=0; Indice<256; Indice++)
     {
