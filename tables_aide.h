@@ -198,8 +198,8 @@ static const char * TableAideAbout[] =
   AIDE_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
   AIDE_TEXTE("       http://grafx2.googlecode.com")
   AIDE_TEXTE("")
-  AIDE_TEXTE("Copyright 2007 by the Grafx2 project team")
-  AIDE_TEXTE("   Copyright 1996-2001 by SUNSET DESIGN")
+  AIDE_TEXTE("  Copyright 2007 by the Grafx2 project team")
+  AIDE_TEXTE("    Copyright 1996-2001 by SUNSET DESIGN")
 };
 static const char * TableAideLicense[] =
 {
