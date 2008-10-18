@@ -85,7 +85,7 @@ int CaractereValide(int Caractere)
     return 0;
   
   int Position;
-  for (Position=0; Position<sizeof(CaracteresInterdits); Position++)
+  for (Position=0; Position<(long)sizeof(CaracteresInterdits); Position++)
     if (Caractere == CaracteresInterdits[Position])
       return 0;
   return 1;

@@ -27,7 +27,6 @@
 
   void Pixel_SDL                (word X,word Y,byte Couleur);
   byte Lit_Pixel_SDL            (word X,word Y);
-  void Effacer_Tout_l_Ecran_SDL (byte Couleur);
   void Block_SDL                (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur);
   void Block_SDL_Fast           (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur);
   void Pixel_Preview_Normal_SDL (word X,word Y,byte Couleur);

@@ -447,7 +447,7 @@ const char * Nom_touche(word Touche)
   }
                              
   // Touches au libellé connu
-  for (Indice=0; Indice < sizeof(Table_touches)/sizeof(S_Libelle_touche);Indice++)
+  for (Indice=0; Indice < (long)sizeof(Table_touches)/(long)sizeof(S_Libelle_touche);Indice++)
   {
     if (Touche == Table_touches[Indice].Sym)
     {

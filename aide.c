@@ -67,7 +67,7 @@ void Afficher_aide(void)
   short  Largeur;             // Largeur physique d'une ligne de texte
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
-  const unsigned char  * Ligne;
+  const char * Ligne;
 
   Pos_Reel_X=Fenetre_Pos_X+(13*Menu_Facteur_X);
   Pos_Reel_Y=Fenetre_Pos_Y+(19*Menu_Facteur_Y);
@@ -391,7 +391,7 @@ void Bouton_Stats(void)
 
   // Affichage du nombre de couleur utilisé
   Print_dans_fenetre(18,91,"Colors used:",STATS_COULEUR_TITRES,CM_Noir);
-  bzero(Utilisation_couleur,256*sizeof(Utilisation_couleur[0]));
+  memset(Utilisation_couleur,0,sizeof(Utilisation_couleur));
   sprintf(Buffer,"%d",Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur));
   Print_dans_fenetre(122,91,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 

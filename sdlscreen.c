@@ -57,11 +57,6 @@ byte Lit_Pixel_SDL (word X,word Y)
         return *( Ecran + Y * Largeur_ecran + X );
 }
 
-void Effacer_Tout_l_Ecran_SDL (byte Couleur)
-{
-        UNIMPLEMENTED
-}
-
 void Afficher_partie_de_l_ecran_SDL       (word Largeur,word Hauteur,word Largeur_image)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
@@ -429,7 +424,7 @@ void Display_brush_Mono_zoom_SDL (word Pos_X, word Pos_Y,
         }
 }
 
-void Clear_brush_zoom_SDL        (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
+void Clear_brush_zoom_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,__attribute__((unused)) byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
 {
         // En fait on va recopier l'image non zoomée dans la partie zoomée !
         byte* ESI = Principal_Ecran + Decalage_Y * Largeur_image + Decalage_X;

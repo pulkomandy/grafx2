@@ -1048,7 +1048,6 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         case MODE_SDL:
             Pixel = Pixel_SDL;
             Lit_pixel= Lit_Pixel_SDL;
-            Clear_screen = Effacer_Tout_l_Ecran_SDL;
             Display_screen = Afficher_partie_de_l_ecran_SDL;
             Block = Block_SDL;
             Pixel_Preview_Normal = Pixel_Preview_Normal_SDL;
@@ -1632,14 +1631,14 @@ void Print_nom_fichier(void)
 
   // -- Aucun effet en cours --
 
-byte Aucun_effet(word X,word Y,byte Couleur)
+byte Aucun_effet(__attribute__((unused)) word X,__attribute__((unused)) word Y,byte Couleur)
 {
   return Couleur;
 }
 
   // -- Effet de Shading --
 
-byte Effet_Shade(word X,word Y,byte Couleur)
+byte Effet_Shade(word X,word Y,__attribute__((unused)) byte Couleur)
 {
   return Shade_Table[Lit_pixel_dans_ecran_feedback(X,Y)];
 }
@@ -1693,7 +1692,7 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
 
   // -- Effet de Tiling --
 
-byte Effet_Tiling(word X,word Y,byte Couleur)
+byte Effet_Tiling(word X,word Y,__attribute__((unused)) byte Couleur)
 {
   return Lit_pixel_dans_brosse((X+Brosse_Largeur-Tiling_Decalage_X)%Brosse_Largeur,
                                (Y+Brosse_Hauteur-Tiling_Decalage_Y)%Brosse_Hauteur);
@@ -1701,7 +1700,7 @@ byte Effet_Tiling(word X,word Y,byte Couleur)
 
   // -- Effet de Smooth --
 
-byte Effet_Smooth(word X,word Y,byte Couleur)
+byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 {
   int R,V,B;
   byte C;
@@ -4145,7 +4144,7 @@ void Remplir(byte Couleur_de_remplissage)
   fonction_afficheur Pixel_figure;
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
-  void inline Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
+  inline void Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
   {
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
   }
@@ -4161,7 +4160,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur)
+  void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,__attribute__((unused)) byte Couleur)
   {
     if ( (Pos_X>=Limite_Gauche) &&
          (Pos_X<=Limite_Droite) &&
@@ -4172,7 +4171,7 @@ void Remplir(byte Couleur_de_remplissage)
   }
 
   // Effacement d'un point de preview
-  void Pixel_figure_Effacer_preview(word Pos_X,word Pos_Y,byte Couleur)
+  void Pixel_figure_Effacer_preview(word Pos_X,word Pos_Y,__attribute__((unused)) byte Couleur)
   {
     if ( (Pos_X>=Limite_Gauche) &&
          (Pos_X<=Limite_Droite) &&

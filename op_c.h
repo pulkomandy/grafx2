@@ -184,7 +184,7 @@ void CS_Get(ClusterSet * cs,Cluster * c);
 void CS_Set(ClusterSet * cs,Cluster * c);
 void CS_Generer(ClusterSet * cs,Table_occurence * to);
 void CS_Calculer_teintes(ClusterSet * cs,Table_occurence * to);
-void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_occurence * to,Table_conversion * tc,struct Composantes * palette);
+void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Composantes * palette);
 
 
 

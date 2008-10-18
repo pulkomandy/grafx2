@@ -391,8 +391,7 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 void Lire_octet(FILE * Fichier, byte *Octet)
 {
   // FIXME : Remplacer les appelants par read_bytes(), et gérer les retours d'erreur.
-  if (!read_byte(Fichier, Octet))
-  ;//  Erreur_fichier = 2;
+  read_byte(Fichier, Octet);
 }
 
 // --------------------------------------------------------------------------
@@ -426,22 +425,7 @@ void Close_ecriture(FILE *Fichier)
 }
 
 
-
 /////////////////////////////////////////////////////////////////////////////
-
-void (/*__interrupt __near*/ *Ancien_handler_clavier)(void);
-void /*__interrupt __near*/ Nouveau_handler_clavier(void)
-{
-  /* A revoir ...
-  _disable();
-  if (!Erreur_fichier)
-    Erreur_fichier=-1;
-  _enable();
-  _chain_intr(Ancien_handler_clavier);
-  */
-  ;
-}
-
 
 // -------- Modifier la valeur du code d'erreur d'accès à un fichier --------
 //   On n'est pas obligé d'utiliser cette fonction à chaque fois mais il est
@@ -495,24 +479,10 @@ void Charger_image(byte Image)
   // Si on a su déterminer avec succès le format du fichier:
   if (!Erreur_fichier)
   {
-    // Installer le handler d'interruption du clavier pour stopper une preview
-    if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
-    {
-        /* A revoir ...
-      Ancien_handler_clavier=_dos_getvect(9);
-      _dos_setvect(9,Nouveau_handler_clavier);
-      */;
-    }
 
     // On peut charger le fichier:
     Image_24b=0;
     Format_Load[Format]();
-
-    // Désinstaller le handler d'interruption du clavier
-    if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
-    /*A revoir ...
-      _dos_setvect(9,Ancien_handler_clavier);
-      */;
 
     if (Erreur_fichier>0)
       Erreur(0);
@@ -1658,7 +1628,7 @@ void Load_LBM(void)
         read_dword_be(LBM_Fichier,&Nb_couleurs);
         Nb_couleurs/=3;
 
-        if (((int)1<<Header.BitPlanes)!=Nb_couleurs)
+        if (((dword)1<<Header.BitPlanes)!=Nb_couleurs)
         {
           if ((Nb_couleurs==32) && (Header.BitPlanes==6))
           {              // Ce n'est pas une image HAM mais une image 64 coul.
@@ -3422,7 +3392,7 @@ void Test_PCX(void)
 // -- Lire un fichier au format PCX -----------------------------------------
 
   // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
-  void Draw_PCX_line(short Pos_Y, short Vraie_taille_ligne, byte Depth)
+  void Draw_PCX_line(short Pos_Y, byte Depth)
   {
     short Pos_X;
     byte  Couleur;
@@ -3646,7 +3616,7 @@ void Load_PCX(void)
                   if (PCX_Header.Depth==1)
                     Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
                   else
-                    Draw_PCX_line(Pos_Y,Vraie_taille_ligne,PCX_Header.Depth);
+                    Draw_PCX_line(Pos_Y,PCX_Header.Depth);
                 }
               }
 
@@ -3666,7 +3636,7 @@ void Load_PCX(void)
                     if (PCX_Header.Depth==1)
                       Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
                     else
-                      Draw_PCX_line(Pos_Y,Vraie_taille_ligne,PCX_Header.Depth);
+                      Draw_PCX_line(Pos_Y,PCX_Header.Depth);
                   }
                 }
                 else
@@ -3996,8 +3966,8 @@ void Load_CEL(void)
     if (read_bytes(Fichier,&Header1,sizeof(T_CEL_Header1)))
     {
       Taille_du_fichier=Informations_Fichier.st_size;
-      if ( (Taille_du_fichier>sizeof(T_CEL_Header1))
-        && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-sizeof(T_CEL_Header1)) ) )
+      if ( (Taille_du_fichier>(long int)sizeof(T_CEL_Header1))
+        && ( (((Header1.Width+1)>>1)*Header1.Height)==(Taille_du_fichier-(long int)sizeof(T_CEL_Header1)) ) )
       {
         // Chargement d'un fichier CEL sans signature (vieux fichiers)
         Principal_Largeur_image=Header1.Width;

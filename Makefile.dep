@@ -30,9 +30,8 @@ moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
   special.h boutons.h operatio.h shade.h erreurs.h linux.h sdlscreen.h
 files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h \
   erreurs.h linux.h
-op_c.o: op_c.c op_c.h struct.h const.h op_asm.h erreurs.h
+op_c.o: op_c.c op_c.h struct.h const.h erreurs.h
 linux.o: linux.c
-op_asm.o: op_asm.c op_c.h struct.h const.h graph.h
 readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
 saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
   files.h erreurs.h graph.h

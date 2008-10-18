@@ -239,9 +239,9 @@ char * Interpretation_du_fichier_config()
   // Si la config contenait des touches, on les initialise:
   if (Chunk[CHUNK_TOUCHES].Taille)
   {
-    int Indice_config;
+    unsigned int Indice_config;
     Ptr = ChunkData[CHUNK_TOUCHES];
-    for (Indice_config=0; Indice_config< Chunk[CHUNK_TOUCHES].Taille / sizeof(struct Config_Infos_touche) ; Indice_config++)
+    for (Indice_config=0; Indice_config<Chunk[CHUNK_TOUCHES].Taille / sizeof(struct Config_Infos_touche) ; Indice_config++)
     {
       word Numero;
       word Touche;
@@ -646,7 +646,7 @@ void Enregistrer_config()
 
 /*** Main program ***/
 
-int main(int argc, char * argv[])
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {	
 
   if (Verifier_ecriture_possible())

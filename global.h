@@ -166,7 +166,6 @@ GLOBAL short Pinceau_Decalage_Y;
 GLOBAL fonction_afficheur Pixel;          // Affiche un point à l'écran
 GLOBAL fonction_afficheur Pixel_dans_menu;// Affiche un point dans le menu (ou pas si le menu est invisible)
 GLOBAL fonction_lecteur   Lit_pixel;      // Teste la couleur d'un pixel dans l'écran
-GLOBAL fonction_effaceur  Clear_screen;   // Efface rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_display   Display_screen; // Affiche rapidement tout l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_block     Block;          // Affiche rapidement un bloc à l'écran
 GLOBAL fonction_afficheur Pixel_Preview_Normal; // Affiche un point de l'image à l'écran en mode normal (pas en mode loupe)
@@ -418,10 +417,10 @@ GLOBAL byte Stencil[256];  // Tableau des couleurs protégées
   // Mode grille:
 
 GLOBAL byte  Snap_Mode;       // Le mode grille est enclenché
-GLOBAL short Snap_Largeur;    // Largeur entre 2 points de la grille
-GLOBAL short Snap_Hauteur;    // Hauteur entre 2 points de la grille
-GLOBAL short Snap_Decalage_X; // Position en X du point le + à gauche
-GLOBAL short Snap_Decalage_Y; // Position en Y du point le + en haut
+GLOBAL word Snap_Largeur;    // Largeur entre 2 points de la grille
+GLOBAL word Snap_Hauteur;    // Hauteur entre 2 points de la grille
+GLOBAL word Snap_Decalage_X; // Position en X du point le + à gauche
+GLOBAL word Snap_Decalage_Y; // Position en Y du point le + en haut
 
   // Mode trame:
 

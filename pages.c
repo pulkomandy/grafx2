@@ -511,7 +511,7 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
   (  (Liste_courante->Taille_liste==Liste_courante->Nb_pages_allouees)
     // ou qu'il ne reste plus assez de place pour allouer la Nouvelle_page
   || ( (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<
-       (Nouvelle_page->Hauteur*Nouvelle_page->Largeur) )  );
+       (unsigned long)(Nouvelle_page->Hauteur*Nouvelle_page->Largeur) )  );
 
   if (!Il_faut_liberer)
   {
@@ -578,7 +578,7 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
 
         // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=(Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)
-                       <(Nouvelle_page->Hauteur*Nouvelle_page->Largeur);
+                       <(unsigned long)(Nouvelle_page->Hauteur*Nouvelle_page->Largeur);
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
         // pour la Nouvelle_page
@@ -990,7 +990,7 @@ void * Emprunter_memoire_de_page(int taille)
   {
     // On regarde s'il faut libérer des pages:
     Il_faut_liberer=
-      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<taille;
+      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)taille;
 
     if (!Il_faut_liberer)
     {
@@ -1039,7 +1039,7 @@ void * Emprunter_memoire_de_page(int taille)
 
         // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=
-          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<taille;
+          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)taille;
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
         // pour la Nouvelle_page

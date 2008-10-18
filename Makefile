@@ -24,7 +24,7 @@ ifdef COMSPEC
   DELCOMMAND = del
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
-  COPT = -Wall -O -g -ggdb `sdl-config --cflags`
+  COPT = -W -Wall -O -g -ggdb `sdl-config --cflags`
   LOPT = `sdl-config --libs`
   CC = gcc
 else
@@ -50,7 +50,7 @@ endif
 
 OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o \
       aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o \
-      linux.o op_asm.o readini.o saveini.o shade.o clavier.o io.o version.o
+      linux.o readini.o saveini.o shade.o clavier.o io.o version.o
 CFGOBJ = gfxcfg.o SFont.o clavier.o io.o
 
 OBJDIR = obj/

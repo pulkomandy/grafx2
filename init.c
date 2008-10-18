@@ -72,7 +72,7 @@ void Chercher_repertoire_du_programme(char * Chaine)
 }
 
 // Ajouter un lecteur à la liste de lecteurs
-void Ajouter_lecteur(byte Numero, char Lettre, byte Type)
+void Ajouter_lecteur(char Lettre, byte Type)
 {
   Drive[Nb_drives].Lettre=Lettre;
   Drive[Nb_drives].Type  =Type;
@@ -89,8 +89,8 @@ void Rechercher_drives(void)
 	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
 	// un disque dur qui pointera vers la racine,
 	// et un autre vers le home directory de l'utilisateur.
-	Ajouter_lecteur(0,'/', LECTEUR_HDD);
-	Ajouter_lecteur(1,'~', LECTEUR_HDD);
+	Ajouter_lecteur('/', LECTEUR_HDD);
+	Ajouter_lecteur('~', LECTEUR_HDD);
    #else
 	int DriveBits = GetLogicalDrives();
 	int IndiceLecteur;
@@ -125,7 +125,7 @@ void Rechercher_drives(void)
 	        TypeLecteur=LECTEUR_NETWORK;
 	        break;
 	    }
-	    Ajouter_lecteur(IndiceBit, 'A'+IndiceBit, TypeLecteur);
+	    Ajouter_lecteur('A'+IndiceBit, TypeLecteur);
 	    IndiceLecteur++;
 	  }
 	}
@@ -1591,7 +1591,7 @@ int Charger_CFG(int Tout_charger)
   if ((Handle=fopen(Nom_du_fichier,"rb"))==NULL)
     return ERREUR_CFG_ABSENT;
 
-  if ( (Taille_fichier<sizeof(CFG_Header))
+  if ( (Taille_fichier<(long)sizeof(CFG_Header))
     || (!read_bytes(Handle, &CFG_Header.Signature, 3))
     || memcmp(CFG_Header.Signature,"CFG",3)
     || (!read_byte(Handle, &CFG_Header.Version1))
@@ -1624,7 +1624,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_TOUCHES: // Touches
         if (Tout_charger)
         {
-          for (Indice=0; Indice<(Chunk.Taille/sizeof(CFG_Infos_touche)); Indice++)
+          for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Infos_touche)); Indice++)
           {
             if (!read_word_le(Handle, &CFG_Infos_touche.Numero) ||
                 !read_word_le(Handle, &CFG_Infos_touche.Touche) ||
@@ -1666,7 +1666,7 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_MODES_VIDEO: // Modes vidéo
-        for (Indice=0; Indice<(Chunk.Taille/sizeof(CFG_Mode_video)); Indice++)
+        for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Mode_video)); Indice++)
         {
           if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
               !read_word_le(Handle, &CFG_Mode_video.Largeur) ||

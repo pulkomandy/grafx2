@@ -25,7 +25,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "op_c.h"
-#include "op_asm.h"
 #include "erreurs.h"
 
 #undef OPTIMISATIONS_ASSEMBLEUR
@@ -790,7 +789,7 @@ void CS_Trier_par_luminance(ClusterSet * cs)
   cs->clusters=nc;
 }
 
-void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_occurence * to,Table_conversion * tc,struct Composantes * palette)
+void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Composantes * palette)
 {
   int indice;
   int r,v,b;
@@ -957,7 +956,7 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
         CS_Trier_par_chrominance(cs);
 
 	// Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
-        CS_Generer_TC_et_Palette(cs,to,tc,palette);
+        CS_Generer_TC_et_Palette(cs,tc,palette);
 
         CS_Delete(cs);
         TO_Delete(to);

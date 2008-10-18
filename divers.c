@@ -135,7 +135,7 @@ void Effacer_image_courante(byte Couleur)
     );
 }
 
-void Sensibilite_souris(word X,word Y)
+void Sensibilite_souris(__attribute__((unused)) word X,__attribute__((unused)) word Y)
 {
         puts("Sensibilite_souris non implémenté!");
 }

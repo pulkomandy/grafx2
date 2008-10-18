@@ -331,7 +331,7 @@ void Bouton_Choix_backcolor(void)
 
 
 //---------------------- Cacher ou réafficher le menu ------------------------
-void Pixel_dans_barre_d_outil_cachee(word X,word Y,byte Couleur)
+void Pixel_dans_barre_d_outil_cachee(__attribute__((unused)) word X,__attribute__((unused)) word Y,__attribute__((unused)) byte Couleur)
 {
   // C'est fait exprès que ce soit vide...
   // C'est parce que y'a rien du tout à afficher vu que la barre d'outil est
