@@ -1,46 +1,44 @@
-main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
-  init.h boutons.h moteur.h pages.h files.h sdlscreen.h erreurs.h \
-  readini.h saveini.h linux.h io.h
-init.o: init.c const.h struct.h global.h loadsave.h graph.h boutons.h \
-  palette.h aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h
-graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
-  boutons.h pages.h global.h loadsave.h erreurs.h
-sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
-  divers.h erreurs.h graph.h
-divers.o: divers.c struct.h const.h sdlscreen.h global.h loadsave.h \
-  graph.h erreurs.h boutons.h moteur.h divers.h clavier.h
-special.o: special.c const.h struct.h global.h loadsave.h graph.h \
-  moteur.h
-boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
+obj/win32/SFont.o: SFont.c SFont.h
+obj/win32/aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
+  moteur.h tables_aide.h aide.h sdlscreen.h
+obj/win32/boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h files.h init.h boutons.h operatio.h pages.h \
   erreurs.h readini.h saveini.h shade.h io.h aide.h sdlscreen.h
-palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
-  graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h
-aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
-  moteur.h tables_aide.h aide.h sdlscreen.h
-operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
-  moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
-pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \
+obj/win32/clavier.o: clavier.c global.h struct.h const.h loadsave.h
+obj/win32/divers.o: divers.c struct.h const.h sdlscreen.h global.h loadsave.h \
+  graph.h erreurs.h boutons.h moteur.h divers.h clavier.h
+obj/win32/files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h \
   erreurs.h linux.h
-loadsave.o: loadsave.c const.h struct.h global.h loadsave.h graph.h \
+obj/win32/gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h
+obj/win32/graph.o: graph.c sdlscreen.h struct.h const.h graph.h divers.h moteur.h \
+  boutons.h pages.h global.h loadsave.h erreurs.h
+obj/win32/init.o: init.c const.h struct.h global.h loadsave.h graph.h boutons.h \
+  palette.h aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h
+obj/win32/io.o: io.c struct.h const.h io.h
+obj/win32/linux.o: linux.c
+obj/win32/loadsave.o: loadsave.c const.h struct.h global.h loadsave.h graph.h \
   divers.h pages.h op_c.h boutons.h erreurs.h linux.h io.h sdlscreen.h
-readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
-  divers.h erreurs.h linux.h sdlscreen.h
-moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
+obj/win32/main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
+  init.h boutons.h moteur.h pages.h files.h sdlscreen.h erreurs.h \
+  readini.h saveini.h linux.h io.h
+obj/win32/moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
   special.h boutons.h operatio.h shade.h erreurs.h linux.h sdlscreen.h
-files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h \
+obj/win32/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h
+obj/win32/operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
+  moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
+obj/win32/pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \
   erreurs.h linux.h
-op_c.o: op_c.c op_c.h struct.h const.h erreurs.h
-linux.o: linux.c
-readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
-saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
+obj/win32/palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
+  graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h
+obj/win32/readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
+obj/win32/readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
+  divers.h erreurs.h linux.h sdlscreen.h
+obj/win32/saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
   files.h erreurs.h graph.h
-shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
+obj/win32/sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
+  divers.h erreurs.h graph.h
+obj/win32/shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
   divers.h readline.h aide.h sdlscreen.h
-clavier.o: clavier.c global.h struct.h const.h loadsave.h
-io.o: io.c struct.h const.h io.h
-version.o: version.c
-gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h
-SFont.o: SFont.c SFont.h
-clavier.o: clavier.c global.h struct.h const.h loadsave.h
-io.o: io.c struct.h const.h io.h
+obj/win32/special.o: special.c const.h struct.h global.h loadsave.h graph.h \
+  moteur.h
+obj/win32/version.o: version.c

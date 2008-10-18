@@ -22,38 +22,45 @@
 # Windows specific
 ifdef COMSPEC
   DELCOMMAND = del
+  MKDIR = mkdir /s
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
   COPT = -W -Wall -O -g -ggdb `sdl-config --cflags`
   LOPT = `sdl-config --libs`
   CC = gcc
+  OBJDIR = obj/win32
 else
   # Linux specific
   DELCOMMAND = rm -rf
+  MKDIR = mkdir -p
   ifdef WIN32CROSS
     #cross compile a Win32 executable
     CC = i586-mingw32msvc-gcc
     BIN = grafx2.exe
     CFGBIN = gfxcfg.exe
-    COPT = -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
+    COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
     LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs`
+    OBJDIR = obj/win32
   else
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -c -g `sdl-config --cflags`
     LOPT = `sdl-config --libs`
     CC = gcc
+    OBJDIR = obj/unix
   endif
 endif
 
 .PHONY : all debug release clean depend zip version force
 
-OBJ = main.o init.o graph.o sdlscreen.o divers.o special.o boutons.o palette.o \
-      aide.o operatio.o pages.o loadsave.o readline.o moteur.o files.o op_c.o \
-      linux.o readini.o saveini.o shade.o clavier.o io.o version.o
-CFGOBJ = gfxcfg.o SFont.o clavier.o io.o
-
-OBJDIR = obj/
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o \
+ $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o \
+ $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o \
+ $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o\
+ $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/linux.o $(OBJDIR)/readini.o \
+ $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o \
+ $(OBJDIR)/version.o
+CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o
 
 all : $(BIN) $(CFGBIN)
 
@@ -88,17 +95,20 @@ version : delversion version.c version.o
 delversion :
 	$(DELCOMMAND) version.c
 
-%.o :
-	$(CC) $(COPT) -c $*.c -o $*.o
+$(OBJDIR)/%.o : $(OBJDIR)
+	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
+
+$(OBJDIR) :
+	$(MKDIR) $(OBJDIR)
 
 depend :
-	$(CC) -MM $(OBJ:.o=.c) $(CFGOBJ:.o=.c) > Makefile.dep
+	$(CC) -MM *.c | sed 's:^[^ ]:$(OBJDIR)/&:' > Makefile.dep
+
 
 clean :
-	$(DELCOMMAND) *.o
-	$(DELCOMMAND) $(BIN)
-	$(DELCOMMAND) $(CFGBIN)
+	$(DELCOMMAND) $(OBJ) $(CFGOBJ)
+	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
 test :
 
-include Makefile.dep
+-include Makefile.dep
