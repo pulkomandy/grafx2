@@ -32,6 +32,10 @@
 #include "pages.h"
 #include "aide.h"
 #include "sdlscreen.h"
+#include "erreurs.h"
+#include "op_c.h"
+
+byte Palette_mode_RGB = 1; // Indique si on est en HSV ou en RGB
 
 // --------------------------- Menu des palettes -----------------------------
 char * Libelle_reduction_palette[7]=
@@ -763,10 +767,10 @@ void Bouton_Palette(void)
 
   Fenetre_Definir_bouton_normal( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
   Fenetre_Definir_bouton_normal(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
-  Fenetre_Definir_bouton_normal( 6,47,59,14,"Swap"   ,1,1,SDLK_s);   // 7
-  Fenetre_Definir_bouton_normal(66,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
-  Fenetre_Definir_bouton_normal( 6,62,59,14,"Copy"   ,1,1,SDLK_c);   // 9
-  Fenetre_Definir_bouton_normal(66,62,59,14,"Spread" ,4,1,SDLK_e);   // 10
+  Fenetre_Definir_bouton_normal(66,47,29,14,"Swp"    ,1,1,SDLK_s);   // 7
+  Fenetre_Definir_bouton_normal( 6,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
+  Fenetre_Definir_bouton_normal(66,32,29,14,"Cpy"    ,1,1,SDLK_c);   // 9
+  Fenetre_Definir_bouton_normal( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
   Fenetre_Definir_bouton_normal(239,20,51,14,"Reduce" ,1,1,SDLK_r);  // 11
   Print_dans_fenetre(241,41,"to",CM_Fonce,CM_Clair);
@@ -787,10 +791,13 @@ void Bouton_Palette(void)
   Fenetre_Definir_bouton_normal(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
 
   Fenetre_Definir_bouton_normal(96,17,29,14,"Neg"    ,1,1,SDLK_n);   // 20
-  Fenetre_Definir_bouton_normal( 6,32,59,14,"Invert" ,1,1,SDLK_i);   // 21
-  Fenetre_Definir_bouton_normal(66,32,59,14,"X-Inv." ,5,1,SDLK_v);   // 22
+  Fenetre_Definir_bouton_normal(66,62,29,14,"Inv"    ,1,1,SDLK_i);   // 21
+  Fenetre_Definir_bouton_normal( 6,62,59,14,"X-Inv." ,5,1,SDLK_v);   // 22
 
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
+
+  Fenetre_Definir_bouton_normal(96,32,29,14,"HSV"    ,1,1,SDLK_n);   // 24
+  Fenetre_Definir_bouton_normal(96,47,29,14,"Sort"   ,1,1,SDLK_o);   // 25
   // Affichage du facteur de réduction de la palette
   Num2str(Reduce_Nb_couleurs,Chaine,3);
   Print_dans_fenetre(265,41,Chaine,CM_Noir,CM_Clair);
@@ -1616,17 +1623,73 @@ void Bouton_Palette(void)
         }
         Afficher_curseur();
         break;
+
+	case 24 : // HSV <> RGB
+	    // TODO unfinished !
+	    if(Palette_mode_RGB)
+	    {
+		// On passe en HSV
+		Print_dans_fenetre(184,71,"H",CM_Fonce,CM_Clair);
+		Print_dans_fenetre(211,71,"S",CM_Fonce,CM_Clair);
+		Print_dans_fenetre(238,71,"V",CM_Fonce,CM_Clair);
+	    }
+	    else
+	    {
+		// On passe en RGB
+		Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
+		Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
+		Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
+	    }
+
+	    Palette_mode_RGB = !Palette_mode_RGB ;
+	break;
+
+	case 25 : // Sort palette
+	{
+	    int h = 0, l = 0;
+	    int oh=0,ol=0; // Valeur pour la couleur précédente
+	    int swap=1;
+
+	    while(swap==1)
+	    {
+		swap=0;
+		h=0;l=0;
+		for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
+		{
+		    oh=h; ol=l;
+		    // On trie par Chrominance (H) et Luminance (L)
+		    rgb2hl(Palette_de_travail[Couleur_temporaire].R,
+			    Palette_de_travail[Couleur_temporaire].V,
+			    Palette_de_travail[Couleur_temporaire].B,&h,&l);
+
+		    // Note : comparer seulement H et L ne suffit pas toujours à trancher...
+		    // donc on regarde aussi les composantes R G B s'il y a un doute
+		    if((h<oh) || (h==oh && (l<ol
+			|| ( l==ol && (Palette_de_travail[Couleur_temporaire].V < Palette_de_travail[Couleur_temporaire-1].V
+			|| (Palette_de_travail[Couleur_temporaire].V == Palette_de_travail[Couleur_temporaire-1].V && Palette_de_travail[Couleur_temporaire].R < Palette_de_travail[Couleur_temporaire-1].R)
+			|| (Palette_de_travail[Couleur_temporaire].V == Palette_de_travail[Couleur_temporaire-1].V && Palette_de_travail[Couleur_temporaire].R < Palette_de_travail[Couleur_temporaire-1].R && Palette_de_travail[Couleur_temporaire].B < Palette_de_travail[Couleur_temporaire-1].B)))))
+			)
+		    {
+			// On échange la couleur avec la précédente
+			Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
+			swap=1;
+			DEBUG("swap",Couleur_temporaire);
+		    }
+		}
+	    }
+	}
+	break;
     }
 
 
     if (!Mouse_K)
     {
-      switch (Touche)
-      {
-        case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
-          if (Debut_block==Fin_block)
-          {
-            Fore_color--;
+	switch (Touche)
+	{
+	    case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
+		if (Debut_block==Fin_block)
+		{
+		    Fore_color--;
             Premiere_couleur--;
             Derniere_couleur--;
             Debut_block--;

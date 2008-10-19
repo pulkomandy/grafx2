@@ -44,7 +44,7 @@ else
   else
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -Wall -c -g `sdl-config --cflags`
+    COPT = -W -Wall -c -g `sdl-config --cflags`
     LOPT = `sdl-config --libs`
     CC = gcc
     OBJDIR = obj/unix

@@ -147,6 +147,7 @@ void TC_Delete(Table_conversion * t);
 byte TC_Get(Table_conversion * t,int r,int v,int b);
 void TC_Set(Table_conversion * t,int r,int v,int b,byte i);
 
+void rgb2hl(int r, int v,int b, byte* h, byte*l);
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -185,8 +186,6 @@ void CS_Set(ClusterSet * cs,Cluster * c);
 void CS_Generer(ClusterSet * cs,Table_occurence * to);
 void CS_Calculer_teintes(ClusterSet * cs,Table_occurence * to);
 void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Composantes * palette);
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////////// M‚thodes de gestion des ensembles de d‚grad‚s //

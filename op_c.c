@@ -24,8 +24,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include "op_c.h"
 #include "erreurs.h"
+#include "graph.h"
 
 #undef OPTIMISATIONS_ASSEMBLEUR
 
@@ -807,79 +809,77 @@ void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Compo
   }
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// M‚thodes de gestion des d‚grad‚s //
+///////////////////////////////////////// Méthodes de gestion des dégradés //
 /////////////////////////////////////////////////////////////////////////////
 
 void DS_Init(DegradeSet * ds,ClusterSet * cs)
 {
-  ds->degrades[0].nbcouleurs=1;
-  ds->degrades[0].min=cs->clusters[0].h;
-  ds->degrades[0].max=cs->clusters[0].h;
-  ds->degrades[0].hue=cs->clusters[0].h;
-  // Et hop : le 1er ensemble de d‚grad‚s est initialis‚
-  ds->nb=1;
+    ds->degrades[0].nbcouleurs=1;
+    ds->degrades[0].min=cs->clusters[0].h;
+    ds->degrades[0].max=cs->clusters[0].h;
+    ds->degrades[0].hue=cs->clusters[0].h;
+    // Et hop : le 1er ensemble de d‚grad‚s est initialis‚
+    ds->nb=1;
 }
 
 DegradeSet * DS_New(ClusterSet * cs)
 {
-  DegradeSet * n;
+    DegradeSet * n;
 
-  n=(DegradeSet *)malloc(sizeof(DegradeSet));
-  if (n!=0)
-  {
-    // On recopie les paramŠtres demand‚s
-    n->nbmax=cs->nbmax;
-
-    // On tente d'allouer la table
-    n->degrades=(Degrade *)malloc((n->nbmax)*sizeof(Degrade));
-    if (n->degrades!=0)
-      // C'est bon! On initialise
-      DS_Init(n,cs);
-    else
+    n=(DegradeSet *)malloc(sizeof(DegradeSet));
+    if (n!=0)
     {
-      // Table impossible … allouer
-      free(n);
-      n=0;
-    }
-  }
+	// On recopie les paramŠtres demand‚s
+	n->nbmax=cs->nbmax;
 
-  return n;
+	// On tente d'allouer la table
+	n->degrades=(Degrade *)malloc((n->nbmax)*sizeof(Degrade));
+	if (n->degrades!=0)
+	    // C'est bon! On initialise
+	    DS_Init(n,cs);
+	else
+	{
+	    // Table impossible … allouer
+	    free(n);
+	    n=0;
+	}
+    }
+
+    return n;
 }
 
 void DS_Delete(DegradeSet * ds)
 {
-  free(ds->degrades);
-  free(ds);
+    free(ds->degrades);
+    free(ds);
 }
 
 void DS_Generer(DegradeSet * ds,ClusterSet * cs)
 {
-  int ic,id; // Les indices de parcours des ensembles
-  int mdegr; // Meilleur d‚grad‚
-  int mdiff; // Meilleure diff‚rence de chrominance
-  int diff;  // Diff‚rence de chrominance courante
+    int ic,id; // Les indices de parcours des ensembles
+    int mdegr; // Meilleur d‚grad‚
+    int mdiff; // Meilleure diff‚rence de chrominance
+    int diff;  // Diff‚rence de chrominance courante
 
-  // Pour chacun des clusters … traiter
-  for (ic=1;ic<cs->nb;ic++)
-  {
-    // On recherche le d‚grad‚ le plus proche de la chrominance du cluster
-    mdegr=-1;
-    mdiff=99999999;
-    for (id=0;id<ds->nb;id++)
+    // Pour chacun des clusters … traiter
+    for (ic=1;ic<cs->nb;ic++)
     {
-      diff=abs(cs->clusters[ic].h - ds->degrades[id].hue);
-      if ((mdiff>diff) && (diff<16))
-      {
-        mdegr=id;
-        mdiff=diff;
-      }
-    }
+	// On recherche le d‚grad‚ le plus proche de la chrominance du cluster
+	mdegr=-1;
+	mdiff=99999999;
+	for (id=0;id<ds->nb;id++)
+	{
+	    diff=abs(cs->clusters[ic].h - ds->degrades[id].hue);
+	    if ((mdiff>diff) && (diff<16))
+	    {
+		mdegr=id;
+		mdiff=diff;
+	    }
+	}
 
-    // Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
-    if (mdegr!=-1)
+	// Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
+	if (mdegr!=-1)
     {
       // On met … jour le d‚grad‚
       if (cs->clusters[ic].h < ds->degrades[mdegr].min)
