@@ -43,6 +43,8 @@
 #define COULEUR_TEXTE_CURSEUR CM_Noir
 #define COULEUR_FOND_CURSEUR  CM_Fonce
 
+extern int Update_necessaire;
+
 // Suppresion d'un caractère à une certaine POSITION dans une CHAINE.
 void Supprimer_caractere(char * Chaine, byte Position)
 {
@@ -157,6 +159,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
 #ifdef __macosx__
+    Update_necessaire = 1;
     Flush_update();
 #endif
 
@@ -300,9 +303,12 @@ affichage:
         UpdateRect(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
     } // Fin du "switch(Touche_lue)"
+
 #ifdef __macosx__
+    Update_necessaire = 1;
     Flush_update();
 #endif
+
   } // Fin du "while"
 
   // Effacement de la chaîne

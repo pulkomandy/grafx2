@@ -218,16 +218,14 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   dword Tempo;
   byte  Table_de_conversion[256];
 
-  struct Composantes * Palette_temporaire;
-  dword * Utilisation_temporaire;
+  struct Composantes Palette_temporaire[256];
+  dword Utilisation_temporaire[256];
 
   // On fait une copie de la palette
-  Palette_temporaire=(struct Composantes *)malloc(sizeof(T_Palette));
-  memcpy(Palette_temporaire,Palette,sizeof(T_Palette));
+  memcpy(Palette_temporaire, Palette, sizeof(T_Palette));
 
   // On fait une copie de la table d'utilisation des couleurs
-  Utilisation_temporaire=(dword *)malloc(sizeof(dword)*256);
-  memcpy(Utilisation_temporaire,Utilisation_couleur,sizeof(dword)*256);
+  memcpy(Utilisation_temporaire, Utilisation_couleur, sizeof(dword) * 256);
 
   // On commence à initialiser la table de conversion à un état où elle ne
   // fera aucune conversion.
@@ -311,9 +309,6 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_2].B=Tempo;
     }
   }
-
-  free(Utilisation_temporaire);
-  free(Palette_temporaire);
 
   // Maintenant, tous ces calculs doivent êtres pris en compte dans la
   // palette, l'image et à l'écran.
@@ -797,7 +792,7 @@ void Bouton_Palette(void)
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
 
   Fenetre_Definir_bouton_normal(96,32,29,14,"HSV"    ,1,1,SDLK_n);   // 24
-  Fenetre_Definir_bouton_normal(96,47,29,14,"Sort"   ,1,1,SDLK_o);   // 25
+  Fenetre_Definir_bouton_normal(96,47,29,14,"Srt"    ,1,1,SDLK_o);   // 25
   // Affichage du facteur de réduction de la palette
   Num2str(Reduce_Nb_couleurs,Chaine,3);
   Print_dans_fenetre(265,41,Chaine,CM_Noir,CM_Clair);
@@ -978,6 +973,7 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
 
         Afficher_curseur();
+        
         break;
       case  3 : // Jauge verte
         Effacer_curseur();

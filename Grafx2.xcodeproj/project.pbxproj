@@ -24,7 +24,6 @@
 		F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7E0EA4BE3E003F4BA4 /* linux.c */; };
 		F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */; };
 		F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B800EA4BE3E003F4BA4 /* moteur.c */; };
-		F5B19B990EA4BE3E003F4BA4 /* op_asm.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B810EA4BE3E003F4BA4 /* op_asm.c */; };
 		F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B820EA4BE3E003F4BA4 /* op_c.c */; };
 		F5B19B9B0EA4BE3E003F4BA4 /* operatio.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B830EA4BE3E003F4BA4 /* operatio.c */; };
 		F5B19B9C0EA4BE3E003F4BA4 /* pages.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B840EA4BE3E003F4BA4 /* pages.c */; };
@@ -39,8 +38,8 @@
 		F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */; };
 		F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */; };
 		F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */; };
-		F5B19C360EA4DB69003F4BA4 /* gfx2.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C350EA4DB69003F4BA4 /* gfx2.ini */; };
 		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
+		F5B1EE850EAD0F4E00B087B5 /* gfx2.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */; };
 		F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BB0EA5116B0065B0EF /* SDL_image */; };
 		F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BD0EA5118E0065B0EF /* SDL */; };
 /* End PBXBuildFile section */
@@ -96,7 +95,6 @@
 		F5B19B7E0EA4BE3E003F4BA4 /* linux.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = linux.c; sourceTree = "<group>"; };
 		F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = loadsave.c; sourceTree = "<group>"; };
 		F5B19B800EA4BE3E003F4BA4 /* moteur.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = moteur.c; sourceTree = "<group>"; };
-		F5B19B810EA4BE3E003F4BA4 /* op_asm.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = op_asm.c; sourceTree = "<group>"; };
 		F5B19B820EA4BE3E003F4BA4 /* op_c.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = op_c.c; sourceTree = "<group>"; };
 		F5B19B830EA4BE3E003F4BA4 /* operatio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = operatio.c; sourceTree = "<group>"; };
 		F5B19B840EA4BE3E003F4BA4 /* pages.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pages.c; sourceTree = "<group>"; };
@@ -111,8 +109,8 @@
 		F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.cfg; sourceTree = "<group>"; };
 		F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.dat; sourceTree = "<group>"; };
 		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
-		F5B19C350EA4DB69003F4BA4 /* gfx2.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2.ini; sourceTree = "<group>"; };
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = gfx2.ini; path = dat/gfx2.ini; sourceTree = "<group>"; };
 		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/Versions/A/SDL_image; sourceTree = "<absolute>"; };
 		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/Versions/A/SDL; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -169,11 +167,11 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */,
 				F5AD4B1E0EA8CCF0009CCAC4 /* version.c */,
 				F5DCE2BD0EA5118E0065B0EF /* SDL */,
 				F5DCE2BB0EA5116B0065B0EF /* SDL_image */,
 				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
-				F5B19C350EA4DB69003F4BA4 /* gfx2.ini */,
 				F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */,
 				F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */,
 				F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */,
@@ -189,7 +187,6 @@
 				F5B19B7E0EA4BE3E003F4BA4 /* linux.c */,
 				F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */,
 				F5B19B800EA4BE3E003F4BA4 /* moteur.c */,
-				F5B19B810EA4BE3E003F4BA4 /* op_asm.c */,
 				F5B19B820EA4BE3E003F4BA4 /* op_c.c */,
 				F5B19B830EA4BE3E003F4BA4 /* operatio.c */,
 				F5B19B840EA4BE3E003F4BA4 /* pages.c */,
@@ -284,8 +281,8 @@
 				F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */,
 				F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */,
 				F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */,
-				F5B19C360EA4DB69003F4BA4 /* gfx2.ini in Resources */,
 				F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */,
+				F5B1EE850EAD0F4E00B087B5 /* gfx2.ini in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,7 +306,6 @@
 				F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */,
 				F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */,
 				F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */,
-				F5B19B990EA4BE3E003F4BA4 /* op_asm.c in Sources */,
 				F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */,
 				F5B19B9B0EA4BE3E003F4BA4 /* operatio.c in Sources */,
 				F5B19B9C0EA4BE3E003F4BA4 /* pages.c in Sources */,

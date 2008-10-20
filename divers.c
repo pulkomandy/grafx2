@@ -85,7 +85,8 @@ void Set_palette(T_Palette Palette)
                 PaletteSDL[i].g=(Palette[i].V<<2) + (Palette[i].V>>4);
                 PaletteSDL[i].b=(Palette[i].B<<2) + (Palette[i].B>>4);
         }
-        SDL_SetPalette(Ecran_SDL,SDL_PHYSPAL|SDL_LOGPAL,PaletteSDL,0,256);
+        //SDL_PHYSPAL|
+        SDL_SetPalette(Ecran_SDL,SDL_LOGPAL,PaletteSDL,0,256);
 }
 
 void Attendre_fin_de_click(void)
@@ -333,10 +334,8 @@ void Get_input(void)
         Afficher_curseur();
     }
 
-  // Vidage de toute mise à jour qui serait encore en attente.
-  Flush_update();
-	//SDL_Flip(Ecran_SDL); 
-
+    // Vidage de toute mise à jour qui serait encore en attente.
+    Flush_update();
 }
 
 
@@ -795,7 +794,7 @@ void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 	comp.r=Rouge << 2;
 	comp.g=Vert << 2;
 	comp.b=Bleu << 2;
-        SDL_SetColors(Ecran_SDL,&comp,Couleur,1);
+    SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)

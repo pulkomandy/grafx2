@@ -507,14 +507,14 @@ short Max_Y=10000;
 
 void Flush_update(void)
 {
-  #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
   // Mise à jour de la totalité de l'écran
   if (Update_necessaire)
   {
     SDL_UpdateRect(Ecran_SDL, 0, 0, 0, 0);
     Update_necessaire=0;
   }
-  #endif
+#endif
   #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
   if (Min_X>=Max_X || Min_Y>=Max_Y)
   {
