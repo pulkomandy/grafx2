@@ -1646,37 +1646,34 @@ void Bouton_Palette(void)
 
 	case 25 : // Sort palette
 	{
-	    int h = 0, l = 0;
-	    int oh=0,ol=0; // Valeur pour la couleur précédente
+	    byte h = 0, l = 0, s=0;
+	    byte oh=0,ol=0,os=0; // Valeur pour la couleur précédente
 	    int swap=1;
 
 	    while(swap==1)
 	    {
 		swap=0;
-		h=0;l=0;
+		h=0;l=0;s=0;
 		for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
 		{
-		    oh=h; ol=l;
+		    oh=h; ol=l; os=s;
 		    // On trie par Chrominance (H) et Luminance (L)
 		    rgb2hl(Palette_de_travail[Couleur_temporaire].R,
 			    Palette_de_travail[Couleur_temporaire].V,
-			    Palette_de_travail[Couleur_temporaire].B,&h,&l);
+			    Palette_de_travail[Couleur_temporaire].B,&h,&l,&s);
 
-		    // Note : comparer seulement H et L ne suffit pas toujours à trancher...
-		    // donc on regarde aussi les composantes R G B s'il y a un doute
-		    if((h<oh) || (h==oh && (l<ol
-			|| ( l==ol && (Palette_de_travail[Couleur_temporaire].V < Palette_de_travail[Couleur_temporaire-1].V
-			|| (Palette_de_travail[Couleur_temporaire].V == Palette_de_travail[Couleur_temporaire-1].V && Palette_de_travail[Couleur_temporaire].R < Palette_de_travail[Couleur_temporaire-1].R)
-			|| (Palette_de_travail[Couleur_temporaire].V == Palette_de_travail[Couleur_temporaire-1].V && Palette_de_travail[Couleur_temporaire].R < Palette_de_travail[Couleur_temporaire-1].R && Palette_de_travail[Couleur_temporaire].B < Palette_de_travail[Couleur_temporaire-1].B)))))
-			)
+		    if(
+			    ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
+			    || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
+				&& (h<oh || (h==oh && l<ol))))		// Dans ce cas on décide avec chroma puis lumi
 		    {
 			// On échange la couleur avec la précédente
 			Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
 			swap=1;
-			DEBUG("swap",Couleur_temporaire);
 		    }
 		}
 	    }
+            Il_faut_remapper=1;
 	}
 	break;
     }

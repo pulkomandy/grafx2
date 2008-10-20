@@ -33,7 +33,7 @@
 
 
 
-void rgb2hl(int r,int g,int b,byte * hr,byte * lr)
+void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
 {
   double rd,gd,bd,h,s,v,l,max,min,del,rc,gc,bc;
 
@@ -100,6 +100,7 @@ void rgb2hl(int r,int g,int b,byte * hr,byte * lr)
 
   *hr = (h*255.0)/360;
   *lr = (l*255.0);
+  *sr = (s*255.0);
 }
 
 
@@ -559,7 +560,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
 void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
 {
   int cumulR,cumulV,cumulB;
-  int r,v,b;
+  int r,v,b,s=0;
   int nbocc;
 
   cumulR=cumulV=cumulB=0;
@@ -579,7 +580,7 @@ void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
   c->r=(cumulR<<to->red_r)/c->occurences;
   c->v=(cumulV<<to->red_v)/c->occurences;
   c->b=(cumulB<<to->red_b)/c->occurences;
-  rgb2hl(c->r,c->v,c->b,&c->h,&c->l);
+  rgb2hl(c->r,c->v,c->b,&c->h,&c->l,&s);
 }
 
 

@@ -147,7 +147,7 @@ void TC_Delete(Table_conversion * t);
 byte TC_Get(Table_conversion * t,int r,int v,int b);
 void TC_Set(Table_conversion * t,int r,int v,int b,byte i);
 
-void rgb2hl(int r, int v,int b, byte* h, byte*l);
+void rgb2hl(int r, int v,int b, byte* h, byte*l, byte* s);
 
 
 /////////////////////////////////////////////////////////////////////////////
