@@ -400,6 +400,8 @@ void Ligne_12_0(void)
 // Taille_Pile : 0
 //
 //  Souris effacée: Oui
+
+//  Début du tracé d'une ligne (premier clic)
 {
   Initialiser_debut_operation();
   Backup();
@@ -435,6 +437,8 @@ void Ligne_12_5(void)
 // Taille_Pile : 5
 //
 // Souris effacée: Non
+
+// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le curseur appuyé)
 {
   short Debut_X;
   short Debut_Y;
@@ -444,8 +448,13 @@ void Ligne_12_5(void)
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
 
+
+  DEBUG("px ",Pinceau_X);
   if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
   {
+      // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+      if(SDL_GetModState() & KMOD_SHIFT)
+	  Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
     Effacer_curseur();
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
@@ -480,6 +489,8 @@ void Ligne_0_5(void)
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
+
+// Fin du tracé d'une ligne (relachage du bouton)
 {
   short Debut_X;
   short Debut_Y;
@@ -492,6 +503,10 @@ void Ligne_0_5(void)
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
+
+  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  if(SDL_GetModState() & KMOD_SHIFT)
+      Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Fin_X,&Fin_Y);
 
   Pinceau_Forme=Pinceau_Forme_avant_operation;
 

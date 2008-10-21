@@ -132,6 +132,7 @@ void Tracer_ellipse_vide_Preview  (short Centre_X,short Centre_Y,short Rayon_hor
 void Effacer_ellipse_vide_Preview (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical);
 void Tracer_ellipse_pleine        (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur);
 
+void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY);
 void Tracer_ligne_Definitif  (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview    (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);

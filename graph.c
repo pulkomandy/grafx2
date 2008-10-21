@@ -4458,6 +4458,51 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
   Mettre_Ecran_A_Jour(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
 }
 
+/******************
+* TRACÉ DE LIGNES *
+******************/
+
+void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
+// Modifie BX et BY pour que la ligne AXAY - BXBY soit
+//	- une droite horizontale
+//	- une droite verticale
+//	- une droite avec une pente de 45 degrés
+{
+    int dx, dy;
+
+    DEBUG("ax",AX);
+    dx = (*BX)-AX;
+    dy = AY- *BY; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
+
+    if (dx==0) return; // On est en lockx et de toutes façons le X n'a pas bougé, on sort tout de suite pour éviter une méchante division par 0
+
+    float tan = dy/dx;
+
+    if (tan <= 0.4142 && tan >= -0.4142)
+    {
+	// Cas 1 : Lock Y
+	*BY = AY;
+	DEBUG("horiz",dx);
+    }
+    else if ( tan > 0.4142 && tan < 2.4142)
+    {
+	// Cas 2 : dy=dx
+	DEBUG("PLOP",dx);
+    }
+    else if (tan < -0.4142 && tan >= -2.4142)
+    {
+	// Cas 8 : dy = -dx
+	DEBUG("PLiP",dx);
+    }
+    else
+    {
+	// Cas 3 : Lock X
+	*BX = AX;
+	DEBUG("vert",dx);
+    }
+
+    return;
+}
 
   // -- Tracer général d'une ligne ------------------------------------------
 

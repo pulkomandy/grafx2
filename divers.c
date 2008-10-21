@@ -343,7 +343,8 @@ void Get_input(void)
         Afficher_curseur();
     }
 
-    // Vidage de toute mise à jour qui serait encore en attente.
+    // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente. 
+    // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
     Flush_update();
 }
 
