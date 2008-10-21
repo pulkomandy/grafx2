@@ -1298,19 +1298,21 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
 	    memcpy(Chaine+9,"   Window    ",15);
 
     if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
-      Ratio=" 4/3  ";
+      Ratio="    4:3";
     else if (Mode_video[Mode_courant].Largeur*9 == Mode_video[Mode_courant].Hauteur*16)
-      Ratio="16/9  ";
+      Ratio="   16:9";
     else if (Mode_video[Mode_courant].Largeur*10 == Mode_video[Mode_courant].Hauteur*16)
-      Ratio="16/10 ";
+      Ratio="  16:10";
+    else if (Mode_video[Mode_courant].Largeur*145 == Mode_video[Mode_courant].Hauteur*192)
+      Ratio="192:145";
     else
-      Ratio="      ";
+      Ratio="       ";
     if (Mode_courant == 0)
-      Ratio="      ";
+      Ratio="       ";
 
     strcat(Chaine,Ratio);
 
-    Print_dans_fenetre(39,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
+    Print_dans_fenetre(30,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
   }
 }
 
