@@ -86,7 +86,16 @@ void Set_palette(T_Palette Palette)
                 PaletteSDL[i].b=(Palette[i].B<<2) + (Palette[i].B>>4);
         }
         //SDL_PHYSPAL|
-        SDL_SetPalette(Ecran_SDL,SDL_LOGPAL,PaletteSDL,0,256);
+        SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+}
+
+void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
+{
+	SDL_Color comp;
+	comp.r=Rouge << 2;
+	comp.g=Vert << 2;
+	comp.b=Bleu << 2;
+    SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
 }
 
 void Attendre_fin_de_click(void)
@@ -786,15 +795,6 @@ void Tempo_jauge(byte Vitesse)
             Wait_VBL();
             Vitesse--;
         }
-}
-
-void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
-{
-	SDL_Color comp;
-	comp.r=Rouge << 2;
-	comp.g=Vert << 2;
-	comp.b=Bleu << 2;
-    SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)

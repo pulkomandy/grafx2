@@ -209,7 +209,7 @@ void Remap_image_HIGH(byte * Table_de_conversion)
 }
 
 
-void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur)
+void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur, int update_palette)
 {
   short Pos_1;
   short Pos_2;
@@ -309,10 +309,6 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Palette[Pos_2].B=Tempo;
     }
   }
-
-  // Maintenant, tous ces calculs doivent êtres pris en compte dans la
-  // palette, l'image et à l'écran.
-  Set_palette(Palette);
 
   if (X_Swap)
   {
@@ -968,12 +964,13 @@ void Bouton_Palette(void)
             strcpy(Chaine,"± 0");
           }
           Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
+
         }
 
         Il_faut_remapper=1;
 
         Afficher_curseur();
-        
+		Set_palette(Palette_de_travail);
         break;
       case  3 : // Jauge verte
         Effacer_curseur();
@@ -1011,7 +1008,9 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
 
         Afficher_curseur();
+        Set_palette(Palette_de_travail);
         break;
+
       case  4 : // Jauge bleue
         Effacer_curseur();
         if (Debut_block==Fin_block)
@@ -1048,6 +1047,7 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
 
         Afficher_curseur();
+        Set_palette(Palette_de_travail);
         break;
 
       case 5 : // Default
@@ -1075,6 +1075,7 @@ void Bouton_Palette(void)
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
         // On prépare la "modifiabilité" des nouvelles couleurs
+		Set_palette(Palette_de_travail);
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1101,7 +1102,7 @@ void Bouton_Palette(void)
               Backup_de_l_image_effectue=1;
             }
 
-          Swap(Bouton_clicke==8,Debut_block,Couleur_temporaire,Premiere_couleur,Palette_de_travail,Utilisation_couleur);
+          Swap(Bouton_clicke==8,Debut_block,Couleur_temporaire,Premiere_couleur,Palette_de_travail,Utilisation_couleur, 1);
 
           memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1205,6 +1206,9 @@ void Bouton_Palette(void)
 
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
         // On prépare la "modifiabilité" des nouvelles couleurs
+
+		Set_palette(Palette_de_travail);
+
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1412,6 +1416,7 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
 
         Afficher_curseur();
+		Set_palette(Palette_de_travail);
         break;
 
       case 19 : // [-]
@@ -1534,6 +1539,7 @@ void Bouton_Palette(void)
         Il_faut_remapper=1;
 
         Afficher_curseur();
+		Set_palette(Palette_de_travail);
         break;
 
       case 20 : // Negative
@@ -1547,6 +1553,7 @@ void Bouton_Palette(void)
           Modifier_Bleu (i,63-Palette_de_travail[i].B,Palette_de_travail);
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+		Set_palette(Palette_de_travail);
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1591,6 +1598,7 @@ void Bouton_Palette(void)
           Afficher_curseur();
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
+		Set_palette(Palette_de_travail);
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1648,28 +1656,33 @@ void Bouton_Palette(void)
 
 	    while(swap==1)
 	    {
-		swap=0;
-		h=0;l=0;s=0;
-		for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
-		{
-		    oh=h; ol=l; os=s;
-		    // On trie par Chrominance (H) et Luminance (L)
-		    rgb2hl(Palette_de_travail[Couleur_temporaire].R,
-			    Palette_de_travail[Couleur_temporaire].V,
-			    Palette_de_travail[Couleur_temporaire].B,&h,&l,&s);
-
-		    if(
-			    ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
-			    || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
-				&& (h<oh || (h==oh && l<ol))))		// Dans ce cas on décide avec chroma puis lumi
-		    {
-			// On échange la couleur avec la précédente
-			Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
-			swap=1;
-		    }
-		}
+			swap=0;
+			h=0;l=0;s=0;
+			for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
+			{
+			    oh=h; ol=l; os=s;
+			    // On trie par Chrominance (H) et Luminance (L)
+			    rgb2hl(Palette_de_travail[Couleur_temporaire].R,
+				    Palette_de_travail[Couleur_temporaire].V,
+				    Palette_de_travail[Couleur_temporaire].B,&h,&l,&s);
+	
+			    if(
+				    ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
+				    || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
+					&& (h<oh || (h==oh && l<ol))))		// Dans ce cas on décide avec chroma puis lumi
+			    {
+				// On échange la couleur avec la précédente
+				Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur, 0);
+				swap=1;
+			    }
+			}
 	    }
-            Il_faut_remapper=1;
+        
+        // Maintenant, tous ces calculs doivent êtres pris en compte dans la
+        // palette, l'image et à l'écran.
+        Set_palette(Palette_de_travail);
+	    
+        Il_faut_remapper=1;
 	}
 	break;
     }
