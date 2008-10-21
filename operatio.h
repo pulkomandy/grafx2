@@ -181,6 +181,16 @@ void Ellipse_degradee_12_6(void);
 void Ellipse_degradee_0_6(void);
 void Ellipse_degradee_12_8(void);
 
+///////////////////////////////////////////////// OPERATION_RECTANGLE_DEGRADE
+
+void Rectangle_Degrade_12_0(void);
+void Rectangle_Degrade_12_5(void);
+void Rectangle_Degrade_0_5(void);
+void Rectangle_Degrade_0_7(void);
+void Rectangle_Degrade_12_7(void);
+void Rectangle_Degrade_12_9(void);
+void Rectangle_Degrade_0_9(void);
+
 /////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
 
 void Lignes_centrees_12_0(void);

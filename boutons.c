@@ -110,7 +110,7 @@ void Message_Non_disponible(void)
   // ne sait pas lequel c'est, on les désenclenche tous. De toutes façons, ça
   // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
   // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
-  Desenclencher_bouton(BOUTON_GRADRECT);
+//  Desenclencher_bouton(BOUTON_GRADRECT);
   Desenclencher_bouton(BOUTON_TEXTE);
 
   Afficher_curseur();
@@ -2029,7 +2029,7 @@ void Bouton_Degrades(void)
 }
 
 
-// -- Gestion des boutons de cercle (ellipse) dégradé(e) --------------------
+// -- Gestion des boutons de cercle / ellipse / rectangle dégradés --------------------
 
 void Bouton_Cercle_degrade(void)
 {
@@ -2043,6 +2043,14 @@ void Bouton_Ellipse_degrade(void)
 {
   Effacer_curseur();
   Demarrer_pile_operation(OPERATION_ELLIPSE_DEGRADEE);
+  Afficher_curseur();
+}
+
+
+void Bouton_Rectangle_degrade(void)
+{
+  Effacer_curseur();
+  Demarrer_pile_operation(OPERATION_RECTANGLE_DEGRADE);
   Afficher_curseur();
 }
 

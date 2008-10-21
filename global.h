@@ -594,7 +594,8 @@ GLOBAL short Pipette_Y;
     FORME_CURSEUR_CIBLE            , // Ellipses dégradées
     FORME_CURSEUR_ROTATE_XOR       , // Faire tourner brosse
     FORME_CURSEUR_CIBLE_XOR        , // Etirer brosse
-    FORME_CURSEUR_CIBLE              // Deformer brosse
+    FORME_CURSEUR_CIBLE            , // Deformer brosse
+    FORME_CURSEUR_CIBLE_XOR        , // Rectangle degrade
   };
 #else
   extern byte CURSEUR_D_OPERATION[NB_OPERATIONS];

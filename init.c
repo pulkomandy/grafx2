@@ -669,9 +669,9 @@ void Initialisation_des_boutons(void)
                      85,1,
                      15,15,
                      FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Message_Non_disponible,Message_Non_disponible,
+                     Bouton_Rectangle_degrade,Bouton_Rectangle_degrade,
                      Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     FAMILLE_OUTIL);
 /*
   Initialiser_bouton(BOUTON_GRADRECT,
                      85,1,
@@ -1258,6 +1258,15 @@ void Initialisation_des_operations(void)
                         Ellipse_degradee_12_8,1);
   Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,2,8,
                         Ellipse_degradee_12_8,1);
+
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,0,Rectangle_Degrade_12_0,0);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,5,Rectangle_Degrade_12_5,0);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,5,Rectangle_Degrade_0_5,1);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,7,Rectangle_Degrade_0_7,0);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,7,Rectangle_Degrade_12_7,1);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,9,Rectangle_Degrade_12_9,0);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,9,Rectangle_Degrade_0_9,1);
+
 
   Initialiser_operation(OPERATION_LIGNES_CENTREES,1,0,
                         Lignes_centrees_12_0,1);

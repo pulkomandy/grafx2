@@ -40,7 +40,7 @@
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
 #define NB_TOUCHES_SPECIALES      72    // Nombre de touches spéciales
-#define NB_OPERATIONS             32    // Nombre d'opérations gérées par le moteur
+#define NB_OPERATIONS             33    // Nombre d'opérations gérées par le moteur
 #define NB_FACTEURS_DE_ZOOM       12    // Nombre de facteurs de zoom
 #define LARGEUR_MENU              254   // Largeur du menu en taille réelle
 #define HAUTEUR_MENU              44    // Hauteur du menu en taille réelle
@@ -392,6 +392,7 @@ enum OPERATIONS
   OPERATION_TOURNER_BROSSE,     // Faire tourner brosse
   OPERATION_ETIRER_BROSSE,      // Etirer brosse
   OPERATION_DEFORMER_BROSSE,    // Deformer brosse
+  OPERATION_RECTANGLE_DEGRADE,  // Rectangle dégradé
 
   OPERATION_AUCUNE
 };

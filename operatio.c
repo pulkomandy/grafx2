@@ -4139,7 +4139,231 @@ void Ellipse_degradee_12_8(void)
   }
 }
 
+/******************************
+* Operation_Rectangle_Degrade *
+******************************/
 
+// 1) tracé d'un rectangle classique avec les lignes XOR
+// 2) tracé d'une ligne vecteur de dégradé, comme une ligne normale
+// 3) dessin du dégradé
+
+
+void Rectangle_Degrade_12_0(void)
+// Opération   : OPERATION_RECTANGLE_DEGRADE
+// Click Souris: 1 ou 2
+// Taille_Pile : 0
+//
+// Souris effacée: Oui
+
+// Initialisation de l'étape 1, on commence à dessiner le rectangle
+{
+  Initialiser_debut_operation();
+
+  if ((Config.Coords_rel) && (Menu_visible))
+    Print_dans_menu("\035:   1   \022:   1",0);
+  // On laisse une trace du curseur à l'écran
+  Afficher_curseur();
+
+  if (Mouse_K==A_GAUCHE)
+  {
+    Shade_Table=Shade_Table_gauche;
+    Operation_PUSH(Fore_color);
+  }
+  else
+  {
+    Shade_Table=Shade_Table_droite;
+    Operation_PUSH(Back_color);
+  }
+
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+
+  DEBUG("12 ",0);
+}
+
+
+void Rectangle_Degrade_12_5(void)
+// Opération   : OPERATION_RECTANGLE_DEGRADE
+// Click Souris: 1 ou 2
+// Taille_Pile : 5
+//
+// Souris effacée: Non
+
+// Modification de la taille du rectangle
+{
+  short Debut_X;
+  short Debut_Y;
+  short Ancien_X;
+  short Ancien_Y;
+  char  Chaine[5];
+
+  Operation_POP(&Ancien_Y);
+  Operation_POP(&Ancien_X);
+
+  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y))
+  {
+    Operation_POP(&Debut_Y);
+    Operation_POP(&Debut_X);
+
+    if ((Config.Coords_rel) && (Menu_visible))
+    {
+      Num2str(((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1,Chaine,4);
+      Print_dans_menu(Chaine,2);
+      Num2str(((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1,Chaine,4);
+      Print_dans_menu(Chaine,11);
+    }
+    else
+      Print_coordonnees();
+
+    Operation_PUSH(Debut_X);
+    Operation_PUSH(Debut_Y);
+  }
+
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+  DEBUG("12 ",5);
+}
+
+void Rectangle_Degrade_0_5(void)
+// OPERATION_RECTANGLE_DEGRADE
+// Clic souris 0
+// Taile pile : 5
+//
+// Souris effacée : non
+
+// Le rectangle est en place, maintenant il faut tracer le vecteur de dégradé,
+// on doit donc attendre que l'utilisateur clique quelque part
+// On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
+{
+  DEBUG("0 ",5);
+  Forme_curseur = FORME_CURSEUR_CIBLE;
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+}
+
+void Rectangle_Degrade_0_7(void)
+// OPERATION_RECTANGLE_DEGRADE
+// Clic souris 0
+// Taile pile : 5
+//
+// Souris effacée : non
+
+// On continue à attendre que l'utilisateur clique en gardant les coords à jour
+{
+    Operation_Taille_pile -= 2;
+    Print_coordonnees();
+    Operation_PUSH(Pinceau_X);
+    Operation_PUSH(Pinceau_Y);
+  DEBUG("0 ",7);
+}
+
+void Rectangle_Degrade_12_7(void)
+// Opération   : OPERATION_RECTANGLE_DEGRADE
+// Click Souris: 1 ou 2
+// Taille_Pile : 7
+//
+//  Souris effacée: Oui
+
+//  Début du tracé du vecteur (premier clic)
+// On garde les anciennes coordonnées dans la pile, et on ajoute les nouvelles par dessus
+{
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+  DEBUG("12 ",7);
+}
+
+void Rectangle_Degrade_12_9(void)
+// Opération   : OPERATION_RECTANGLE_DEGRADE
+// Click Souris: 1
+// Taille_Pile : 5
+//
+// Souris effacée: Non
+
+// Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
+{
+  short Debut_X;
+  short Debut_Y;
+  short Fin_X;
+  short Fin_Y;
+
+  Operation_POP(&Fin_Y);
+  Operation_POP(&Fin_X);
+
+  DEBUG("12 ",9);
+  if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+  {
+    Effacer_curseur();
+    Operation_POP(&Debut_Y);
+    Operation_POP(&Debut_X);
+      // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+      if(SDL_GetModState() & KMOD_SHIFT)
+	  Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
+
+    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+
+    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
+    if (Mouse_K==A_GAUCHE)
+    {
+      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Fore_color);
+    }
+    else
+    {
+      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Back_color);
+    }
+
+    Operation_PUSH(Debut_X);
+    Operation_PUSH(Debut_Y);
+    Afficher_curseur();
+  }
+
+  Operation_PUSH(Pinceau_X);
+  Operation_PUSH(Pinceau_Y);
+}
+
+void Rectangle_Degrade_0_9(void)
+// Opération   : OPERATION_RECTANGLE_DEGRADE
+// Click Souris: 1 ou 2
+// Taille_Pile : 0
+//
+//  Souris effacée: Oui
+
+// Ouf, fini ! on dessine enfin le rectangle avec son dégradé
+{
+    short Rect_Debut_X;
+    short Rect_Debut_Y;
+    short Rect_Fin_X;
+    short Rect_Fin_Y;
+
+    short Vecteur_Debut_X;
+    short Vecteur_Debut_Y;
+    short Vecteur_Fin_X;
+    short Vecteur_Fin_Y;
+
+  DEBUG("FINISH ",9);
+    Operation_POP(&Vecteur_Fin_Y);
+    Operation_POP(&Vecteur_Fin_X);
+    Operation_POP(&Vecteur_Debut_Y);
+    Operation_POP(&Vecteur_Debut_X);
+    Operation_POP(&Rect_Fin_Y);
+    Operation_POP(&Rect_Fin_X);
+    Operation_POP(&Rect_Debut_Y);
+    Operation_POP(&Rect_Debut_X);
+    Operation_Taille_pile --;
+
+    // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
+    Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
+   
+    Effacer_curseur(); 
+    Forme_curseur = FORME_CURSEUR_CIBLE_XOR; // Ceci nous permet d'effacer correctement le curseur
+    // On remet le pinceau en haut à droite du rectangle pour effacer le curseur qui y traine
+    Pinceau_X = Rect_Debut_X;
+    Pinceau_Y = Rect_Debut_Y;
+    Effacer_curseur();
+
+    // Et enfin on trace le rectangle avec le dégradé dedans !
+}
 /////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
 
 

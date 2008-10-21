@@ -64,9 +64,11 @@ void Bouton_Rectangle_plein(void);
 // Boutons relatifs aux dégradés
 void Bouton_Degrades(void);
 void Degrade_Charger_infos_du_tableau(int Indice);
+
 // Boutons relatifs aux cercles (ellipses) dégradé(e)s
 void Bouton_Cercle_degrade(void);
 void Bouton_Ellipse_degrade(void);
+void Bouton_Rectangle_degrade(void);
 
 // Boutons relatifs aux cercles (ellipses) plein(e)s et vides
 void Bouton_Cercle_vide(void);
