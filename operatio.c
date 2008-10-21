@@ -448,16 +448,14 @@ void Ligne_12_5(void)
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
 
-
-  DEBUG("px ",Pinceau_X);
   if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
   {
-      // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-      if(SDL_GetModState() & KMOD_SHIFT)
-	  Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
     Effacer_curseur();
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
+      // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+      if(SDL_GetModState() & KMOD_SHIFT)
+	  Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
 
     Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
 
@@ -513,7 +511,7 @@ void Ligne_0_5(void)
   Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
   Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
   Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
-  Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+  Tracer_ligne_Definitif(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
 
   if ( (Config.Coords_rel) && (Menu_visible) )
   {
