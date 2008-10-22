@@ -5174,7 +5174,44 @@ void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizonta
 }
 
 
+// Tracé d'un rectangle (RAX RAY - RBX RBY) dégradé selon le vecteur (VAX VAY - VBX - VBY)
+void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY)
+{
+    short Pos_Y, Pos_X;
 
+    // On commence par s'assurer que le rectangle est à l'endroit
+    if(RBX < RAX)
+    {
+	Pos_X = RBX;
+	RBX = RAX;
+	RAX = Pos_X;
+    }
+
+    if(RBY < RAY)
+    {
+	Pos_Y = RBY;
+	RBY = RAY;
+	RAY = Pos_Y;
+    }
+
+    Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
+
+    short a = (VBY - VAY)/(VBX - VAX);
+    short b = a * VAX - VAY;
+    short Distance_X, Distance_Y;
+
+    for (Pos_Y=RAY;Pos_Y<RBY;Pos_Y++)
+	for (Pos_X = RAX;Pos_X<RBX;Pos_X++)
+    {
+	// On calcule ou on en est dans le dégradé
+	Distance_X = VAX - ((Pos_X - a*b + a*Pos_Y) / (1+a*a));
+	Distance_Y = VAY - (b + a*(Pos_X - b + a * Pos_Y) / (1+a*a));
+	
+	Traiter_degrade(sqrt(Distance_X*Distance_X + Distance_Y*Distance_Y),Pos_X,Pos_Y);
+    }
+
+    Mettre_Ecran_A_Jour(RAX,RAY,RBX,RBY);
+}
 
 
 

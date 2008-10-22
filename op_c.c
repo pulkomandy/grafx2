@@ -560,8 +560,10 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
 void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
 {
   int cumulR,cumulV,cumulB;
-  int r,v,b,s=0;
+  int r,v,b;
   int nbocc;
+
+  byte s=0;
 
   cumulR=cumulV=cumulB=0;
   for (r=c->rmin;r<=c->rmax;r++)

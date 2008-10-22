@@ -154,6 +154,7 @@ void Degrade_aleatoire         (long Indice,short Pos_X,short Pos_Y);
 
 void Tracer_cercle_degrade  (short Centre_X,short Centre_Y,short Rayon,short Eclairage_X,short Eclairage_Y);
 void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y);
+void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY);
 
 void Polyfill(int Vertices, short * Points, int Color);
 void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement);

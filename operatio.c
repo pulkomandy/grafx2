@@ -4179,8 +4179,6 @@ void Rectangle_Degrade_12_0(void)
   Operation_PUSH(Pinceau_Y);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-
-  DEBUG("12 ",0);
 }
 
 
@@ -4223,7 +4221,6 @@ void Rectangle_Degrade_12_5(void)
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  DEBUG("12 ",5);
 }
 
 void Rectangle_Degrade_0_5(void)
@@ -4237,7 +4234,6 @@ void Rectangle_Degrade_0_5(void)
 // on doit donc attendre que l'utilisateur clique quelque part
 // On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
 {
-  DEBUG("0 ",5);
   Forme_curseur = FORME_CURSEUR_CIBLE;
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -4256,7 +4252,6 @@ void Rectangle_Degrade_0_7(void)
     Print_coordonnees();
     Operation_PUSH(Pinceau_X);
     Operation_PUSH(Pinceau_Y);
-  DEBUG("0 ",7);
 }
 
 void Rectangle_Degrade_12_7(void)
@@ -4271,7 +4266,6 @@ void Rectangle_Degrade_12_7(void)
 {
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  DEBUG("12 ",7);
 }
 
 void Rectangle_Degrade_12_9(void)
@@ -4291,7 +4285,6 @@ void Rectangle_Degrade_12_9(void)
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
 
-  DEBUG("12 ",9);
   if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
   {
     Effacer_curseur();
@@ -4341,7 +4334,6 @@ void Rectangle_Degrade_0_9(void)
     short Vecteur_Fin_X;
     short Vecteur_Fin_Y;
 
-  DEBUG("FINISH ",9);
     Operation_POP(&Vecteur_Fin_Y);
     Operation_POP(&Vecteur_Fin_X);
     Operation_POP(&Vecteur_Debut_Y);
@@ -4363,96 +4355,106 @@ void Rectangle_Degrade_0_9(void)
     Effacer_curseur();
 
     // Et enfin on trace le rectangle avec le dégradé dedans !
+//    if (Mouse_K==Ancien_Mouse_K)				// TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
+	Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
+
+    Attendre_fin_de_click();
+
+    if ((Config.Coords_rel) && (Menu_visible))
+    {
+	Print_dans_menu("X:       Y:             ",0);
+	Print_coordonnees();
+    }
 }
 /////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
 
 
 void Lignes_centrees_12_0(void)
-// Opération   : OPERATION_LIGNES_CENTREES
-// Click Souris: 1 ou 2
-// Taille_Pile : 0
-//
-//  Souris effacée: Oui
+    // Opération   : OPERATION_LIGNES_CENTREES
+    // Click Souris: 1 ou 2
+    // Taille_Pile : 0
+    //
+    //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
-  Backup();
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
+    Initialiser_debut_operation();
+    Backup();
+    Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+    if ((Config.Coords_rel) && (Menu_visible))
+	Print_dans_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Mouse_K);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+    Operation_PUSH(Mouse_K);
+    Operation_PUSH(Pinceau_X);
+    Operation_PUSH(Pinceau_Y);
 }
 
 
 void Lignes_centrees_12_3(void)
-// Opération   : OPERATION_LIGNES_CENTREES
-// Click Souris: 1 ou 2
-// Taille_Pile : 3
-//
-// Souris effacée: Non
+    // Opération   : OPERATION_LIGNES_CENTREES
+    // Click Souris: 1 ou 2
+    // Taille_Pile : 3
+    //
+    // Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
+    short Debut_X;
+    short Debut_Y;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+    Operation_POP(&Debut_Y);
+    Operation_POP(&Debut_X);
+    Operation_PUSH(Pinceau_X);
+    Operation_PUSH(Pinceau_Y);
 }
 
 
 void Lignes_centrees_0_3(void)
-// Opération   : OPERATION_LIGNES_CENTREES
-// Click Souris: 0
-// Taille_Pile : 3
-//
-// Souris effacée: Oui
+    // Opération   : OPERATION_LIGNES_CENTREES
+    // Click Souris: 0
+    // Taille_Pile : 3
+    //
+    // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Bouton;
-  short Couleur;
+    short Debut_X;
+    short Debut_Y;
+    short Bouton;
+    short Couleur;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Bouton);
+    Operation_POP(&Debut_Y);
+    Operation_POP(&Debut_X);
+    Operation_POP(&Bouton);
 
-  Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+    Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
 
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+    Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+    Pinceau_Forme_avant_operation=Pinceau_Forme;
+    Pinceau_Forme=FORME_PINCEAU_POINT;
 
-  Operation_PUSH(Bouton);
-  Operation_PUSH(Pinceau_X); // Nouveau début X
-  Operation_PUSH(Pinceau_Y); // Nouveau début Y
-  Operation_PUSH(Pinceau_X); // Nouvelle dernière fin X
-  Operation_PUSH(Pinceau_Y); // Nouvelle dernière fin Y
-  Operation_PUSH(Pinceau_X); // Nouvelle dernière position X
-  Operation_PUSH(Pinceau_Y); // Nouvelle dernière position Y
+    Operation_PUSH(Bouton);
+    Operation_PUSH(Pinceau_X); // Nouveau début X
+    Operation_PUSH(Pinceau_Y); // Nouveau début Y
+    Operation_PUSH(Pinceau_X); // Nouvelle dernière fin X
+    Operation_PUSH(Pinceau_Y); // Nouvelle dernière fin Y
+    Operation_PUSH(Pinceau_X); // Nouvelle dernière position X
+    Operation_PUSH(Pinceau_Y); // Nouvelle dernière position Y
 }
 
 
 void Lignes_centrees_12_7(void)
-// Opération   : OPERATION_LIGNES_CENTREES
-// Click Souris: 1 ou 2
-// Taille_Pile : 7
-//
-// Souris effacée: Non
+    // Opération   : OPERATION_LIGNES_CENTREES
+    // Click Souris: 1 ou 2
+    // Taille_Pile : 7
+    //
+    // Souris effacée: Non
 {
-  short Bouton;
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Dernier_X;
-  short Dernier_Y;
-  short Couleur;
+    short Bouton;
+    short Debut_X;
+    short Debut_Y;
+    short Fin_X;
+    short Fin_Y;
+    short Dernier_X;
+    short Dernier_Y;
+    short Couleur;
 
-  Operation_POP(&Dernier_Y);
+    Operation_POP(&Dernier_Y);
   Operation_POP(&Dernier_X);
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
