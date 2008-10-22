@@ -544,13 +544,13 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>F5D4B83C0EAD7B9F00BCEF63</string>
+										<string>F5C3D2870EAE1EE800264A2B</string>
 										<key>history</key>
 										<array>
 											<string>F5B19C160EA4D6E8003F4BA4</string>
 											<string>F5B1D1770EA5FE2100AB8D0F</string>
 											<string>F5B1EEA80EAD15CD00B087B5</string>
-											<string>F5B1EEBC0EAD20DC00B087B5</string>
+											<string>F5C3D2770EAE1BA000264A2B</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -590,7 +590,7 @@
 									<key>ContentConfiguration</key>
 									<dict>
 										<key>PBXBuildLogShowsTranscriptDefaultKey</key>
-										<string>{{0, 267}, {696, 148}}</string>
+										<string>{{0, 166}, {696, 249}}</string>
 										<key>PBXProjectModuleGUID</key>
 										<string>XCMainBuildResultsModuleGUID</string>
 										<key>PBXProjectModuleLabel</key>
@@ -685,14 +685,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F5D4B83D0EAD7B9F00BCEF63</string>
+				<string>F5C3D2830EAE1D5C00264A2B</string>
 				<string>1CA23EE50692099D00951B8B</string>
-				<string>F5D4B83E0EAD7B9F00BCEF63</string>
+				<string>F5C3D2840EAE1D5C00264A2B</string>
 				<string>F5B19BA70EA4BF24003F4BA4</string>
-				<string>F5D4B83F0EAD7B9F00BCEF63</string>
+				<string>F5C3D2850EAE1D5C00264A2B</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 				<string>1CA23EE80692099D00951B8B</string>
-				<string>F5D4B8400EAD7B9F00BCEF63</string>
+				<string>F5C3D2860EAE1D5C00264A2B</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.buildAndRun</string>

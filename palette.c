@@ -1133,6 +1133,8 @@ void Bouton_Palette(void)
 
           Il_faut_remapper=1;
 
+		  Set_palette(Palette_de_travail);
+
           Afficher_curseur();
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
           
