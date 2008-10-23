@@ -30,24 +30,40 @@ ifdef COMSPEC
   CC = gcc
   OBJDIR = obj/win32
 else
-  # Linux specific
-  DELCOMMAND = rm -rf
-  MKDIR = mkdir -p
-  ifdef WIN32CROSS
-    #cross compile a Win32 executable
-    CC = i586-mingw32msvc-gcc
-    BIN = grafx2.exe
-    CFGBIN = gfxcfg.exe
-    COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
-    LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs`
-    OBJDIR = obj/win32
-  else
+
+  PLATFORM = $(shell uname)
+
+  #OS4 specific
+  ifeq ($(PLATFORM),AmigaOS)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -W -Wall -c -g `sdl-config --cflags`
-    LOPT = `sdl-config --libs`
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags`
+    LOPT = `sdl-config --libs` -lpng -ljpeg -lz
     CC = gcc
-    OBJDIR = obj/unix
+    OBJDIR = obj/amiga
+  else
+
+    # Linux specific
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    ifdef WIN32CROSS
+      #cross compile a Win32 executable
+      CC = i586-mingw32msvc-gcc
+      BIN = grafx2.exe
+      CFGBIN = gfxcfg.exe
+      COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs`
+      OBJDIR = obj/win32
+    else
+      BIN = grafx2
+      CFGBIN = gfxcfg
+      COPT = -W -Wall -c -g `sdl-config --cflags`
+      LOPT = `sdl-config --libs`
+      CC = gcc
+      OBJDIR = obj/unix
+    endif
   endif
 endif
 
