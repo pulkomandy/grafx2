@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2008 Peter Gordon
 #  Copyright 2008 Yves Rizoud
 #  Copyright 2007 Adrien Destugues
 #  Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -19,14 +20,24 @@
 #  write to the Free Software Foundation, Inc.,
 #  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#TrueType is optional: make NOTTF=1 to disable support and dependencies.
+ifeq ($(NOTTF),1)
+  TTFCOPT = -DNOTTF=1
+  TTFLOPT =
+else
+  TTFCOPT = 
+  TTFLOPT = -L/usr/local/lib -lSDL_ttf
+endif
+
+
 # Windows specific
 ifdef COMSPEC
   DELCOMMAND = del
   MKDIR = mkdir /s
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
-  COPT = -W -Wall -O -g -ggdb `sdl-config --cflags`
-  LOPT = `sdl-config --libs`
+  COPT = -W -Wall -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
   CC = gcc
   OBJDIR = obj/win32
 else
@@ -39,8 +50,8 @@ else
     MKDIR = mkdir -p
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags`
-    LOPT = `sdl-config --libs` -lpng -ljpeg -lz
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` $(TTFCOPT)
+    LOPT = `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/amiga
   else
@@ -53,14 +64,14 @@ else
       CC = i586-mingw32msvc-gcc
       BIN = grafx2.exe
       CFGBIN = gfxcfg.exe
-      COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags`
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs`
+      COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` $(TTFLOPT)
       OBJDIR = obj/win32
     else
       BIN = grafx2
       CFGBIN = gfxcfg
-      COPT = -W -Wall -c -g `sdl-config --cflags`
-      LOPT = `sdl-config --libs`
+      COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+      LOPT = `sdl-config --libs` $(TTFLOPT)
       CC = gcc
       OBJDIR = obj/unix
     endif
@@ -75,7 +86,7 @@ OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o \
  $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o\
  $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/linux.o $(OBJDIR)/readini.o \
  $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o \
- $(OBJDIR)/version.o
+ $(OBJDIR)/version.o $(OBJDIR)/texte.o 
 CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o
 
 all : $(BIN) $(CFGBIN)
@@ -97,7 +108,7 @@ $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
 
 $(CFGBIN) : $(CFGOBJ)
-	$(CC) $(CFGOBJ) -o $(CFGBIN) $(LOPT) -lSDL_image
+	$(CC) $(CFGOBJ) -o $(CFGBIN) $(LOPT)
 
 # SVN revision number
 version.c :
@@ -118,7 +129,7 @@ $(OBJDIR) :
 	$(MKDIR) $(OBJDIR)
 
 depend :
-	$(CC) -MM *.c | sed 's:^[^ ]:$(OBJDIR)/&:' > Makefile.dep
+	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
 
 clean :

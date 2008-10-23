@@ -735,7 +735,7 @@ void Initialisation_des_boutons(void)
                      123,18,
                      16,16,
                      FORME_BOUTON_RECTANGLE,
-                     Message_Non_disponible,Message_Non_disponible,
+                     Bouton_Texte,Message_Non_disponible,
                      Rien_du_tout,
                      FAMILLE_INSTANTANE);
 /*

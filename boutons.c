@@ -46,7 +46,7 @@
 #include "shade.h"
 #include "io.h"
 #include "aide.h"
-#include "sdlscreen.h"
+#include "texte.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>
@@ -5707,7 +5707,167 @@ void Bouton_Effets(void)
   Afficher_curseur();
 }
 
+void Bouton_Texte()
+{
+  static char Chaine[256]="";
+  static int Taille_police=16;
+  static int AntiAlias=0;
 
+  byte * Nouvelle_Brosse;
+  int Nouvelle_Largeur;
+  int Nouvelle_Hauteur;
+  int Bouton_clicke;  
+  const int NB_FONTES=8;
+  char Buffer_taille[3];
+  struct Fenetre_Bouton_special * Bouton_taille_texte;
+  struct Fenetre_Bouton_special * Bouton_texte;
+  byte A_redessiner=1;
+  
+  Ouvrir_fenetre(288,180,"Text");
+
+  // Texte saisi
+  Print_dans_fenetre(6,19,"Txt:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(41,18,30); // 1
+  Bouton_texte=Fenetre_Liste_boutons_special;
+  
+  // Bouton 'Clear Text'
+  Fenetre_Definir_bouton_normal(9,33,80,14,"Clear Txt",0,1,SDLK_LAST); // 2
+
+  // AA
+  Fenetre_Definir_bouton_normal(9,51,80,14,"",0,1,SDLK_LAST); // 3
+  Print_dans_fenetre(13,53,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+  
+  // Scroller des fontes
+  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,12,1,0); // 4
+  
+  // Liste des fontes disponibles
+  Fenetre_Definir_bouton_special(110,32,172,NB_FONTES*8); // 5
+  Fenetre_Afficher_cadre_creux(109, 31, 174, NB_FONTES*8+4);
+  
+  // Taille texte
+  Print_dans_fenetre(32,71,"Size:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(35,84,3); // 6
+  Bouton_taille_texte=Fenetre_Liste_boutons_special;
+  Fenetre_Definir_bouton_normal(18,84,14,11,"-",0,1,SDLK_LAST); // 7
+  Fenetre_Definir_bouton_normal(64,84,14,11,"+",0,1,SDLK_LAST); // 8
+  
+  // Preview
+  Fenetre_Definir_bouton_special(7,105,276,50); // 9
+  Fenetre_Afficher_cadre_creux(6, 104, 278, 52);
+  
+  Fenetre_Definir_bouton_special(110,32,172,NB_FONTES*8); // 10
+  
+  Fenetre_Definir_bouton_normal(7,161,40,14,"OK",0,1,SDLK_RETURN); // 11
+  Fenetre_Definir_bouton_normal(53,161,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
+  Display_Window(288,180);
+  
+  // Redessin
+  
+  // Chaine texte
+  Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
+  // Taille police
+  A_redessiner=1;
+  // --
+
+  while (1)
+  {
+    if (A_redessiner)
+    {
+      Num2str(Taille_police,Buffer_taille,3);
+      Fenetre_Contenu_bouton_saisie(Bouton_taille_texte,Buffer_taille);
+      A_redessiner=0;
+      Afficher_curseur();
+    }
+  
+    Bouton_clicke=Fenetre_Bouton_clicke();
+    switch(Bouton_clicke)
+    {
+      case 1: // Texte saisi
+      Effacer_curseur();
+      Readline(43,20,Chaine,30,0);
+      Afficher_curseur();
+      break;
+      
+      case 2: // Clear
+      Chaine[0]='\0';
+      Effacer_curseur();
+      Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
+      Afficher_curseur();
+      break;
+      
+      case 3: // AA
+      AntiAlias = (AntiAlias==0);
+      Effacer_curseur();
+      Print_dans_fenetre(13,53,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+      Afficher_curseur();
+      break;
+            
+      case 6: // Taille du texte (nombre)
+      Effacer_curseur();
+      Readline(37,86,Buffer_taille,3,1);
+      Taille_police=atoi(Buffer_taille);
+      // On corrige les dimensions
+      if (Taille_police < 1)
+      {
+        Taille_police = 1;
+      }
+      else if (Taille_police>500)
+      {
+        Taille_police = 500;
+      }
+      A_redessiner=1;
+      break;
+      
+      case 7: // Taille -
+      if (Taille_police > 0)
+      {
+        Taille_police--;
+        Effacer_curseur();
+        A_redessiner=1;
+      }
+      break;
+      
+      case 8: // Taille +
+      if (Taille_police < 255)
+      {
+        Taille_police++;
+        Effacer_curseur();
+        A_redessiner=1;
+      }
+      break;
+      
+    
+      case 11: // OK
+      // Rendu texte
+      Nouvelle_Brosse = Rendu_Texte(Chaine, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      if (!Nouvelle_Brosse)
+      {
+        Fermer_fenetre();
+        Desenclencher_bouton(BOUTON_TEXTE);
+        Afficher_curseur();
+        Erreur(0);
+        return;
+      }
+      Effacer_curseur();
+      // On passe en brosse monochrome:
+      Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      if (Brosse) free(Brosse);
+    
+      Brosse=Nouvelle_Brosse;
+      Brosse_Largeur=Nouvelle_Largeur;
+      Brosse_Hauteur=Nouvelle_Hauteur;
+      Brosse_Decalage_X=Brosse_Largeur>>1;
+      Brosse_Decalage_Y=Brosse_Hauteur>>1;
+      
+      // Attention pas de break
+      case 12: // Cancel
+      Fermer_fenetre();
+      Desenclencher_bouton(BOUTON_TEXTE);
+      Afficher_curseur();
+      return;
+    }
+  }
+}
 
 
 

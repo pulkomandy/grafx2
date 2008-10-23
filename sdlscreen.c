@@ -559,4 +559,50 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
   #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
   Update_necessaire=1;
   #endif
+
+}
+
+// Convertit une SDL_Surface (couleurs indexées ou RGB) en tableau de bytes (couleurs indexées)
+// Si on passe NULL comme destination, elle est allouée par malloc(). Sinon,
+// attention aux dimensions!
+byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
+{
+  byte *Src;
+  byte *Dst;
+  int Y;
+  int Reste;
+
+  // Support seulement des images 256 couleurs
+  if (Source->format->BytesPerPixel != 1)
+    return NULL;
+
+  if (Source->w & 3)
+    Reste=4-(Source->w&3);
+  else
+    Reste=0;
+  
+  if (Destination==NULL)
+    Destination=(byte *)malloc(Source->w*Source->h);
+
+  Dst=Destination;
+  Src=(byte *)(Source->pixels);
+  for(Y=0; Y < Source->h; Y++)
+  {
+    memcpy(Dst, Src,Source->w);
+    Dst += Source->w;
+    Src += Source->w + Reste;
+  }
+  return Destination;
+
+}
+
+// Convertit un index de palette en couleur RGB 24 bits
+SDL_Color Conversion_couleur_SDL(byte Index)
+{
+  SDL_Color Couleur;
+  Couleur.r = (Principal_Palette[Index].R<<2) + (Principal_Palette[Index].R>>4);
+  Couleur.g = (Principal_Palette[Index].V<<2) + (Principal_Palette[Index].V>>4);
+  Couleur.b = (Principal_Palette[Index].B<<2) + (Principal_Palette[Index].B>>4);
+  Couleur.unused = 255;
+  return Couleur;
 }

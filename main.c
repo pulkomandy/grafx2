@@ -345,6 +345,9 @@ void Initialisation_du_programme(int argc,char * argv[])
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","grafx2.gif");
 
+  // Texte
+  Initialisation_Texte();
+
   // On initialise tous les modes vidéo
   Definition_des_modes_video();
 

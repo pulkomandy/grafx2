@@ -52,6 +52,7 @@
 
   void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur);
   void Flush_update(void);
-
+  byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination);
+  SDL_Color Conversion_couleur_SDL(byte);
   
 #endif // SDLSCREEN_H_INCLUDED

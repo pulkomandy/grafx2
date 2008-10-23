@@ -61,6 +61,9 @@ void Bouton_Courbes_Switch_mode(void);
 void Bouton_Rectangle_vide(void);
 void Bouton_Rectangle_plein(void);
 
+// Boutons relatifs au texte
+void Bouton_Texte(void);
+
 // Boutons relatifs aux dégradés
 void Bouton_Degrades(void);
 void Degrade_Charger_infos_du_tableau(int Indice);

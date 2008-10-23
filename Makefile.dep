@@ -3,7 +3,7 @@ $(OBJDIR)/aide.o: aide.c const.h struct.h global.h loadsave.h divers.h graph.h \
   moteur.h tables_aide.h aide.h sdlscreen.h
 $(OBJDIR)/boutons.o: boutons.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h files.h init.h boutons.h operatio.h pages.h \
-  erreurs.h readini.h saveini.h shade.h io.h aide.h sdlscreen.h
+  erreurs.h readini.h saveini.h shade.h io.h aide.h texte.h
 $(OBJDIR)/clavier.o: clavier.c global.h struct.h const.h loadsave.h
 $(OBJDIR)/divers.o: divers.c struct.h const.h sdlscreen.h global.h loadsave.h \
   graph.h erreurs.h boutons.h moteur.h divers.h clavier.h
@@ -23,13 +23,14 @@ $(OBJDIR)/main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
   readini.h saveini.h linux.h io.h
 $(OBJDIR)/moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
   special.h boutons.h operatio.h shade.h erreurs.h linux.h sdlscreen.h
-$(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h
+$(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h graph.h
 $(OBJDIR)/operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
   moteur.h graph.h operatio.h boutons.h pages.h erreurs.h
 $(OBJDIR)/pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h \
   erreurs.h linux.h
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
-  graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h
+  graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h \
+  erreurs.h op_c.h
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
   divers.h erreurs.h linux.h sdlscreen.h
@@ -41,4 +42,5 @@ $(OBJDIR)/shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h
   divers.h readline.h aide.h sdlscreen.h
 $(OBJDIR)/special.o: special.c const.h struct.h global.h loadsave.h graph.h \
   moteur.h
+$(OBJDIR)/texte.o: texte.c SFont.h sdlscreen.h struct.h const.h global.h loadsave.h
 $(OBJDIR)/version.o: version.c
