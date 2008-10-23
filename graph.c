@@ -5197,17 +5197,21 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
     Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
 
     short a = (VBY - VAY)/(VBX - VAX);
-    short b = a * VAX - VAY;
+    short b = VAY - a*VAX;
     short Distance_X, Distance_Y;
+
+    DEBUG("inttotal",Degrade_Intervalle_total);
 
     for (Pos_Y=RAY;Pos_Y<RBY;Pos_Y++)
 	for (Pos_X = RAX;Pos_X<RBX;Pos_X++)
     {
 	// On calcule ou on en est dans le dégradé
-	Distance_X = VAX - ((Pos_X - a*b + a*Pos_Y) / (1+a*a));
-	Distance_Y = VAY - (b + a*(Pos_X - b + a * Pos_Y) / (1+a*a));
+	Distance_X = pow(Pos_Y - VAY,2)+pow(Pos_X - VAX,2);
+	Distance_Y = pow(-a * Pos_X + Pos_Y - b,2)/(a*a+1);
+
+	printf("%d\t%d\t%d\n",Pos_X,Distance_X,Distance_Y);
 	
-	Traiter_degrade(sqrt(Distance_X*Distance_X + Distance_Y*Distance_Y),Pos_X,Pos_Y);
+	Traiter_degrade(sqrt(Distance_X - Distance_Y),Pos_X,Pos_Y);
     }
 
     Mettre_Ecran_A_Jour(RAX,RAY,RBX,RBY);
