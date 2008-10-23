@@ -24,9 +24,13 @@
 ifeq ($(NOTTF),1)
   TTFCOPT = -DNOTTF=1
   TTFLOPT =
+  TTFLIBS =
+  TTFLABEL = -nottf
 else
   TTFCOPT = 
   TTFLOPT = -L/usr/local/lib -lSDL_ttf
+  TTFLIBS = libfreetype-6.dll SDL_ttf.dll
+  TTFLABEL = 
 endif
 
 
@@ -99,10 +103,10 @@ release : $(BIN) $(CFGBIN)
 
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
-	tar cvzf src-svn`svnversion`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-svn`svnversion`-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png SDL_image.dll src-svn`svnversion`.tgz
-	$(DELCOMMAND) src-svn`svnversion`.tgz
-	tar cvzf grafx2-svn`svnversion`-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt 8pxfont.png
+	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep
+	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll 8pxfont.png SDL_image.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
+	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt 8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
@@ -114,10 +118,7 @@ $(CFGBIN) : $(CFGOBJ)
 version.c :
 	echo "char SVNRevision[]=\"`svnversion`\";" > version.c
 
-version.o : version.c
-	$(CC) $(COPT) -c $*.c -o $*.o
-	
-version : delversion version.c version.o
+version : delversion version.c $(OBJDIR)/version.o
 
 delversion :
 	$(DELCOMMAND) version.c
