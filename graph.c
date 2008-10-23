@@ -2485,6 +2485,7 @@ void Afficher_curseur(void)
         }
       }
       break;
+
     case FORME_CURSEUR_CIBLE_PIPETTE:
       if (!Cacher_pinceau)
         Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,1);
@@ -2551,29 +2552,34 @@ void Afficher_curseur(void)
         }
       }
       break;
+
     case FORME_CURSEUR_MULTIDIRECTIONNEL :
     case FORME_CURSEUR_HORIZONTAL :
       if (Cacher_curseur)
         break;
+
     case FORME_CURSEUR_FLECHE :
     case FORME_CURSEUR_SABLIER :
       Debut_X=Mouse_X-Curseur_Decalage_X[Forme];
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+      {
+	if(Pos_X<0) continue;
+	if(Pos_X>=Largeur_ecran) break;
         for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
         {
+	  if(Pos_Y<0) continue;
+	  if(Pos_Y>=Hauteur_ecran) break;
           Couleur=SPRITE_CURSEUR[Forme][Compteur_Y][Compteur_X];
-          if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
-            && (Pos_X>=0)            && (Pos_Y>=0) )
-          {
-            // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
-            FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
-            if (Couleur!=CM_Trans)
-              Pixel(Pos_X,Pos_Y,Couleur);
-          }
-        }
-      UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),16,16);
+	  // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
+	  FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+	  if (Couleur!=CM_Trans)
+	      Pixel(Pos_X,Pos_Y,Couleur);
+	}
+      }
+      UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;
+
     case FORME_CURSEUR_CIBLE_XOR :
       Pos_X=Pinceau_X-Principal_Decalage_X;
       Pos_Y=Pinceau_Y-Principal_Decalage_Y;
@@ -2783,6 +2789,7 @@ void Effacer_curseur(void)
         Effacer_pinceau(Pinceau_X,Pinceau_Y);
       }
       break;
+
     case FORME_CURSEUR_CIBLE_PIPETTE:
       if (!Cacher_curseur)
       {
@@ -2842,21 +2849,29 @@ void Effacer_curseur(void)
       if (!Cacher_pinceau)
         Effacer_pinceau(Pinceau_X,Pinceau_Y);
       break;
+      
     case FORME_CURSEUR_MULTIDIRECTIONNEL :
     case FORME_CURSEUR_HORIZONTAL :
       if (Cacher_curseur)
         break;
+
     case FORME_CURSEUR_FLECHE :
     case FORME_CURSEUR_SABLIER :
       Debut_X=Mouse_X-Curseur_Decalage_X[Forme];
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
 
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+      {
+	if(Pos_X<0) continue;
+	if(Pos_X>=Largeur_ecran) break;
         for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
-          if ( (Pos_X<Largeur_ecran) && (Pos_Y<Hauteur_ecran)
-            && (Pos_X>=0)            && (Pos_Y>=0) )
+	{
+	    if(Pos_Y<0) continue;
+	    if(Pos_Y>=Hauteur_ecran) break;
             Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
-      UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),16,16);
+	}
+      }
+      UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;
 
     case FORME_CURSEUR_CIBLE_XOR :
