@@ -55,7 +55,7 @@ else
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` $(TTFCOPT)
-    LOPT = `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/amiga
   else
@@ -69,13 +69,13 @@ else
       BIN = grafx2.exe
       CFGBIN = gfxcfg.exe
       COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` $(TTFLOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
       OBJDIR = obj/win32
     else
       BIN = grafx2
       CFGBIN = gfxcfg
       COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
-      LOPT = `sdl-config --libs` $(TTFLOPT)
+      LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
       CC = gcc
       OBJDIR = obj/unix
     endif
@@ -84,13 +84,7 @@ endif
 
 .PHONY : all debug release clean depend zip version force
 
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o \
- $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o \
- $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o \
- $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o\
- $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/linux.o $(OBJDIR)/readini.o \
- $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o \
- $(OBJDIR)/version.o $(OBJDIR)/texte.o 
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/linux.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o
 CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o
 
 all : $(BIN) $(CFGBIN)
@@ -123,11 +117,9 @@ version : delversion version.c $(OBJDIR)/version.o
 delversion :
 	$(DELCOMMAND) version.c
 
-$(OBJDIR)/%.o : $(OBJDIR)
+$(OBJDIR)/%.o :
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
-
-$(OBJDIR) :
-	$(MKDIR) $(OBJDIR)
 
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
