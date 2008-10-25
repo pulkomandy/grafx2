@@ -32,12 +32,14 @@ int Fichier_existe(char * Fichier);
 void Detruire_liste_du_fileselect(void);
 // -- Lecture d'une liste de fichiers ---------------------------------------
 void Lire_liste_des_fichiers(byte Format_demande);
+// -- Lecture d'une liste de lecteurs / volumes -----------------------------
+void Lire_liste_des_lecteurs(void);
 // -- Tri de la liste des fichiers et répertoires ---------------------------
 void Trier_la_liste_des_fichiers(void);
 // -- Affichage des éléments de la liste de fichier / répertoire ------------
 void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select);
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle);
+void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle,int *Type);
 
 // -- Déplacements dans la liste des fichiers -------------------------------
 
@@ -50,4 +52,4 @@ void Select_Home       (short * Decalage_premier,short * Decalage_select);
 
 short Calculer_decalage_click_dans_fileselector(void);
 
-char * Nom_formate(char * Nom);
+char * Nom_formate(char * Nom, int Type);

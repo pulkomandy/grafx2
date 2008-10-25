@@ -1,5 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2008 Peter Gordon
+    Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -140,7 +142,7 @@ void Detruire_liste_du_fileselect(void)
 
 
 // -- Formatage graphique des noms de fichier / répertoire ------------------
-char * Nom_formate(char * Nom)
+char * Nom_formate(char * Nom, int Type)
 {
   static char Resultat[13];
   int         Curseur;
@@ -151,9 +153,9 @@ char * Nom_formate(char * Nom)
   {
     strcpy(Resultat,"..          ");
   }
-  else if (Nom[0]=='.')
+  else if (Nom[0]=='.' || Type==2)
   {
-    // Fichiers ".quelquechose": Calé à gauche sur 12 caractères maximum.
+    // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 12 caractères maximum.
     strcpy(Resultat,"            ");
     for (Curseur=0;Nom[Curseur]!='\0' && Curseur < 12;Curseur++)
       Resultat[Curseur]=Nom[Curseur];
@@ -190,10 +192,9 @@ char * Nom_formate(char * Nom)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Ajouter_element_a_la_liste(struct dirent* Enreg)
+void Ajouter_element_a_la_liste(char * Nom, int Type)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
-  struct stat Infos_enreg;
   // Pointeur temporaire d'insertion
   struct Element_de_liste_de_fileselect * Element_temporaire;
 
@@ -201,10 +202,9 @@ void Ajouter_element_a_la_liste(struct dirent* Enreg)
   Element_temporaire=(struct Element_de_liste_de_fileselect *)malloc(sizeof(struct Element_de_liste_de_fileselect));
 
   // On met a jour le nouvel emplacement:
-  strcpy(Element_temporaire->NomAbrege,Nom_formate(Enreg->d_name));
-  strcpy(Element_temporaire->NomComplet,Enreg->d_name);
-  stat(Enreg->d_name,&Infos_enreg);
-  Element_temporaire->Type = S_ISDIR(Infos_enreg.st_mode); 
+  strcpy(Element_temporaire->NomAbrege,Nom_formate(Nom, Type));
+  strcpy(Element_temporaire->NomComplet,Nom);
+  Element_temporaire->Type = Type; 
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
   Element_temporaire->Precedent=NULL;
@@ -285,8 +285,8 @@ void Lire_liste_des_fichiers(byte Format_demande)
        Config.Lire_les_repertoires_caches ||
      !isHidden(Enreg)))
     {
-      // On rajoute le répertore à la liste
-      Ajouter_element_a_la_liste(Enreg);
+      // On rajoute le répertoire à la liste
+      Ajouter_element_a_la_liste(Enreg->d_name, 1);
       Liste_Nb_repertoires++;
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
@@ -296,7 +296,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
       if (VerifieExtension(Enreg->d_name, Filtre))
       {
         // On rajoute le fichier à la liste
-        Ajouter_element_a_la_liste(Enreg);
+        Ajouter_element_a_la_liste(Enreg->d_name, 0);
         Liste_Nb_fichiers++;
       }
     }
@@ -304,6 +304,42 @@ void Lire_liste_des_fichiers(byte Format_demande)
 
   closedir(Repertoire_Courant);
 
+  Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
+}
+// -- Lecture d'une liste de lecteurs / volumes -----------------------------
+void Lire_liste_des_lecteurs(void)
+{
+  int Indice;
+  
+  // Empty the current content of fileselector:
+  Detruire_liste_du_fileselect();
+  // Reset number of items
+  Liste_Nb_fichiers=0;
+  Liste_Nb_repertoires=0;
+
+  // AmigaOS4
+  #ifdef __amigaos4__
+  // Peter, this is where you act :)
+  // The strings you pass will be copied as needed.
+  // The 2 is for drive/volume; 0 and 1 would be files and directories.
+  // samples:
+  Ajouter_element_a_la_liste("df0", 2);
+  Liste_Nb_repertoires++;
+  Ajouter_element_a_la_liste("df1", 2);
+  Liste_Nb_repertoires++;
+  Ajouter_element_a_la_liste("hd0", 2);
+  Liste_Nb_repertoires++;
+
+  // Other platforms: simply read the "static" list of Drives.
+  #else
+  for (Indice=0; Indice<Nb_drives; Indice++)
+  {
+      // Add the drive's name ("c:\\", "/" etc.) to the list
+      Ajouter_element_a_la_liste(Drive[Indice].Chemin, 2);
+      Liste_Nb_repertoires++;
+  }
+  #endif
+  
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
 }
 
@@ -344,7 +380,7 @@ void Trier_la_liste_des_fichiers(void)
 
           // Si l'élément courant est un fichier est que le suivant est
           // un répertoire -> Inversion
-        if ( (Element_courant->Type==0) && (Element_suivant->Type==1) )
+        if ( Element_courant->Type < Element_suivant->Type )
           Inversion=1;
           // Si les deux éléments sont de même type et que le nom du suivant
           // est plus petit que celui du courant -> Inversion
@@ -464,7 +500,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
 
 
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle)
+void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle,int *Type)
 //
 // Decalage_premier = Décalage entre le premier fichier visible dans le
 //                   sélecteur et le premier fichier de la liste
@@ -474,6 +510,8 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 //
 // Libelle          = Chaine de réception du libellé de l'élément
 //
+// Type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
+//                    Passer NULL si pas interessé.
 {
   struct Element_de_liste_de_fileselect * Element_courant;
 
@@ -491,6 +529,9 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 
     // On recopie la chaîne
     strcpy(Libelle, Element_courant->NomComplet);
+    
+    if (Type != NULL)
+      *Type=Element_courant->Type;
   } // Fin du test d'existence de fichiers
 }
 

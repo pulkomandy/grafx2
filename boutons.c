@@ -47,6 +47,7 @@
 #include "io.h"
 #include "aide.h"
 #include "texte.h"
+#include "sdlscreen.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>
@@ -2241,6 +2242,8 @@ void Print_Format(void)
 }
 
 
+int   Type_selectionne; // Utilisé pour mémoriser le type d'entrée choisi
+                        // dans le selecteur de fichier.
 
 void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
                                          struct Fenetre_Bouton_scroller * Enreg)
@@ -2257,7 +2260,7 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
   UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82);
 
   // On récupère le nom du schmilblick à "accéder"
-  Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier);
+  Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier,&Type_selectionne);
   // On affiche le nouveau nom de fichier
   Print_Nom_fichier_dans_selecteur();
   // On affiche le nom du répertoire courant
@@ -2287,7 +2290,7 @@ void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Sc
     Fenetre_Dessiner_jauge(Scroller_de_fichiers);
   }
   // On récupére le nom du schmilblick à "accéder"
-  Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
+  Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
   if (strcmp(Ancien_nom_de_fichier,Principal_Nom_fichier))
     Nouvelle_preview=1;
 
@@ -2366,7 +2369,6 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
 
   return Pointeur_Meilleur_nom;
 }
-
 
 byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Load=1 => On affiche le menu du bouton LOAD
@@ -2472,13 +2474,16 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
   Print_Format();
 
+  // Selecteur de Lecteur / Volume
+  Fenetre_Definir_bouton_normal(8,21,120,14,"Select drive",0,1,SDLK_LAST); // 9
+
   // Définition des boutons représentant les lecteurs
-  Drives_Debut_Y=(Nb_drives<=13)? 23 : 18;
+  Drives_Debut_Y=(Nb_drives<=8)? 23 : 18;
   for (Temp=0; Temp<Nb_drives; Temp++)
   {
     Nom_drive[0]=Drive[Temp].Lettre;
-    Fenetre_Definir_bouton_normal(8+((Temp%13)*20),Drives_Debut_Y+((Temp/13)*12),19,11,Nom_drive,0,1, SDLK_LAST); // 9 et +
-    Fenetre_Afficher_sprite_drive(18+((Temp%13)*20),Drives_Debut_Y+2+((Temp/13)*12),Drive[Temp].Type);
+    Fenetre_Definir_bouton_normal(130+((Temp%8)*20),Drives_Debut_Y+((Temp/8)*12),19,11,Nom_drive,0,1, SDLK_LAST); // 10 et +
+    Fenetre_Afficher_sprite_drive(140+((Temp%8)*20),Drives_Debut_Y+2+((Temp/8)*12),Drive[Temp].Type);
   }
 
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
@@ -2529,7 +2534,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
 
       case  3 : // Delete
-        if (Liste_Nb_elements && (*Principal_Nom_fichier!='.'))
+        if (Liste_Nb_elements && (*Principal_Nom_fichier!='.') && Type_selectionne!=2)
         {
           Effacer_curseur();
           // On affiche une demande de confirmation
@@ -2620,7 +2625,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             Principal_File_list_Decalage=Temp;
 
             // On récupére le nom du schmilblick à "accéder"
-            Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
+            Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
             // On affiche le nouveau nom de fichier
             Print_Nom_fichier_dans_selecteur();
             // On affiche à nouveau la liste
@@ -2637,7 +2642,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             // certains cas, on risque de sauvegarder avec le nom du fichier
             // actuel au lieu de changer de répertoire.
             if (Principal_File_list_Position+Principal_File_list_Decalage<Liste_Nb_repertoires)
-              Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
+              Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
 
             On_a_clicke_sur_OK=1;
             Nouvelle_preview=1;
@@ -2651,7 +2656,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Effacer_curseur();
         Principal_File_list_Position=Fenetre_Attribut2;
         // On récupére le nom du schmilblick à "accéder"
-        Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier);
+        Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
         // On affiche le nouveau nom de fichier
         Print_Nom_fichier_dans_selecteur();
         // On affiche à nouveau la liste
@@ -2701,9 +2706,22 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         }
         Afficher_curseur();
         break;
+      case  9 : // Volume Select
+          Effacer_curseur();
+          //   Comme on tombe sur un disque qu'on connait pas, on se place en
+          // début de liste:
+          Principal_File_list_Position=0;
+          Principal_File_list_Decalage=0;
+          // Affichage des premiers fichiers visibles:
+          Lire_liste_des_lecteurs();
+          Trier_la_liste_des_fichiers();
+          Preparer_et_afficher_liste_fichiers(Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
+          Afficher_curseur();
+          Nouvelle_preview=1;
+          break;
       default : // Drives
-        // On change de lecteur: Lecteur = Drive[Bouton_clicke-9].Lettre-64
-        if (! ActiverLecteur(Bouton_clicke-9))
+        // On change de lecteur:
+        if (! ActiverLecteur(Bouton_clicke-10))
         {
           Effacer_curseur();
           // On lit le répertoire courant de ce lecteur
@@ -2807,18 +2825,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     {
       //   Si c'est un répertoire, on annule "On_a_clicke_sur_OK" et on passe
       // dedans.
-      if (Repertoire_existe(Principal_Nom_fichier))
+      if (Type_selectionne!=0)
       {
         Effacer_curseur();
         On_a_clicke_sur_OK=0;
 
         // On mémorise le répertoire dans lequel on était
         if (strcmp(Principal_Nom_fichier,".."))
-          strcpy(Repertoire_precedent,Nom_formate(".."));
+          strcpy(Repertoire_precedent,Nom_formate("..", 1));
         else
         {
           strcpy(Repertoire_precedent,
-            Nom_formate(Position_dernier_slash(Principal_Repertoire_courant))
+            Nom_formate(Position_dernier_slash(Principal_Repertoire_courant), 1)
             );
         }
 

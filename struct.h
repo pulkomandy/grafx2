@@ -106,8 +106,8 @@ struct Fenetre_Bouton_special
 struct T_Drive
 {
   char Lettre;
-  byte Type; // 0: Diskette 3"« / 1: Diskette 5"¬ / 2: HDD / 3: CD-ROM / 4: Logique
-  char Chemin[4]; // Reservé pour "x:\", ou "/", ou "~"
+  byte Type; // 0: Diskette 3.5" / 1: Diskette 5.25" / 2: HDD / 3: CD-ROM / 4: Logique
+  char *Chemin; // Reservé pour "x:\", ou "/", "DF0:", etc.
 };
 
 
@@ -116,7 +116,7 @@ struct Element_de_liste_de_fileselect
 {
   char NomAbrege[13]; // Le nom tel qu'affiché dans le fileselector
   char NomComplet[256]; // Le nom du fichier ou du répertoire
-  byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire
+  byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire, 2 = Lecteur
 
   // données de chaînage de la liste
   struct Element_de_liste_de_fileselect * Suivant;

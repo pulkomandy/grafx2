@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -72,11 +73,13 @@ void Chercher_repertoire_du_programme(char * Chaine)
 }
 
 // Ajouter un lecteur à la liste de lecteurs
-void Ajouter_lecteur(char Lettre, byte Type)
-{
+void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
+{ 
   Drive[Nb_drives].Lettre=Lettre;
   Drive[Nb_drives].Type  =Type;
-
+  Drive[Nb_drives].Chemin=(char *)malloc(strlen(Chemin)+1);
+  strcpy(Drive[Nb_drives].Chemin, Chemin);
+  
   Nb_drives++;
 }
 
@@ -85,16 +88,22 @@ void Ajouter_lecteur(char Lettre, byte Type)
 void Rechercher_drives(void)
 {
 
-  #if defined(__linux__) || defined(__amigaos4__)
+  #if defined(__linux__)
 	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
 	// un disque dur qui pointera vers la racine,
 	// et un autre vers le home directory de l'utilisateur.
-	Ajouter_lecteur('/', LECTEUR_HDD);
-	Ajouter_lecteur('~', LECTEUR_HDD);
-   #else
+	char * Home = getenv("HOME");
+	Ajouter_lecteur('/', LECTEUR_HDD, "/");
+	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
+
+  #elif defined(__amigaos4__)
+  // No icons by default.
+  // It's possible to add some here.
+  #elif defined (__WIN32__)
+  char NomLecteur[]="A:\\";
 	int DriveBits = GetLogicalDrives();
 	int IndiceLecteur;
-        int IndiceBit;
+  int IndiceBit;
 	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
 	IndiceLecteur = 0;
 	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
@@ -125,7 +134,8 @@ void Rechercher_drives(void)
 	        TypeLecteur=LECTEUR_NETWORK;
 	        break;
 	    }
-	    Ajouter_lecteur('A'+IndiceBit, TypeLecteur);
+      NomLecteur[0]='A'+IndiceBit;
+	    Ajouter_lecteur(NomLecteur[0], TypeLecteur,NomLecteur);
 	    IndiceLecteur++;
 	  }
 	}
@@ -136,28 +146,7 @@ void Rechercher_drives(void)
 // Renvoie 0 si ok, -1 si problème.
 int ActiverLecteur(int NumeroLecteur)
 {
-  // Cas particulier du lecteur ~
-  if (Drive[NumeroLecteur].Lettre == '~')
-  {
-    char * Home = getenv("HOME");
-    if (! Home)
-      return -1;
-  #if defined(__linux__)||defined(__amigaos4__)
-    return chdir(Home);
-  #else
-    return ! SetCurrentDirectory(Home);
-  #endif
-  }
-
-  #if defined(__linux__)||defined(__amigaos4__)
-    char NomLecteur[]=" ";
-    NomLecteur[0]=Drive[NumeroLecteur].Lettre;
-    return chdir(NomLecteur);
-  #else
-    char NomLecteur[]="A:\\";
-    NomLecteur[0]=Drive[NumeroLecteur].Lettre;
-    return ! SetCurrentDirectory(NomLecteur);
-  #endif
+  return chdir(Drive[NumeroLecteur].Chemin);
 }
 
 void Charger_DAT(void)
