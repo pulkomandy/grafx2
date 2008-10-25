@@ -31,6 +31,7 @@
 #include "tables_aide.h"
 #include "aide.h"
 #include "sdlscreen.h"
+#include "texte.h"
 
 #include <string.h>
 
@@ -340,9 +341,12 @@ void Bouton_Stats(void)
   Print_dans_fenetre(146,19,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
   Print_dans_fenetre(10,27,"SVN revision #:",STATS_COULEUR_TITRES,CM_Noir);
   Print_dans_fenetre(146,27,SVNRevision,STATS_COULEUR_DONNEES,CM_Noir);
+  Print_dans_fenetre(10,35,"Build options:",STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(146,35,Support_TrueType()?"TTF fonts":"no TTF fonts",STATS_COULEUR_DONNEES,CM_Noir);
+
 
   // Affichage de la mémoire restante
-  Print_dans_fenetre(10,43,"Free memory: ",STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(10,51,"Free memory: ",STATS_COULEUR_TITRES,CM_Noir);
 
   freeRam = Memoire_libre();
   
@@ -354,11 +358,11 @@ void Bouton_Stats(void)
         sprintf(Buffer,"%d Kilobytes",(unsigned int)(freeRam/1024));
   else
         sprintf(Buffer,"%d bytes",(unsigned int)freeRam);
-  Print_dans_fenetre(114,43,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
+  Print_dans_fenetre(114,51,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre
   sprintf(Buffer,"Free space on %c:",Principal_Repertoire_courant[0]);
-  Print_dans_fenetre(10,59,Buffer,STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(10,67,Buffer,STATS_COULEUR_TITRES,CM_Noir);
 
   #ifdef __linux__
     statfs(Principal_Repertoire_courant,&Informations_Disque);
@@ -379,26 +383,26 @@ void Bouton_Stats(void)
         sprintf(Buffer,"%d Kilobytes",(unsigned int)(Taille/1024));
     else 
         sprintf(Buffer,"%d bytes",(unsigned int)Taille);
-    Print_dans_fenetre(146,59,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
+    Print_dans_fenetre(146,67,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage des informations sur l'image
-  Print_dans_fenetre(10,75,"Picture info.:",STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(10,83,"Picture info.:",STATS_COULEUR_TITRES,CM_Noir);
 
   // Affichage des dimensions de l'image
-  Print_dans_fenetre(18,83,"Dimensions :",STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(18,91,"Dimensions :",STATS_COULEUR_TITRES,CM_Noir);
   sprintf(Buffer,"%dx%d",Principal_Largeur_image,Principal_Hauteur_image);
-  Print_dans_fenetre(122,83,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
-
-  // Affichage du nombre de couleur utilisé
-  Print_dans_fenetre(18,91,"Colors used:",STATS_COULEUR_TITRES,CM_Noir);
-  memset(Utilisation_couleur,0,sizeof(Utilisation_couleur));
-  sprintf(Buffer,"%d",Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur));
   Print_dans_fenetre(122,91,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
+  // Affichage du nombre de couleur utilisé
+  Print_dans_fenetre(18,99,"Colors used:",STATS_COULEUR_TITRES,CM_Noir);
+  memset(Utilisation_couleur,0,sizeof(Utilisation_couleur));
+  sprintf(Buffer,"%d",Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur));
+  Print_dans_fenetre(122,99,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
+
   // Affichage des dimensions de l'écran
-  Print_dans_fenetre(10,107,"Resolution:",STATS_COULEUR_TITRES,CM_Noir);
+  Print_dans_fenetre(10,115,"Resolution:",STATS_COULEUR_TITRES,CM_Noir);
   sprintf(Buffer,"%dx%d",Largeur_ecran,Hauteur_ecran);
-  Print_dans_fenetre(106,107,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
+  Print_dans_fenetre(106,115,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*174);
 

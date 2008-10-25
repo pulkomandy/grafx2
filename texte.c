@@ -36,11 +36,21 @@
 #include "struct.h"
 #include "global.h"
 
-
+// Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void)
 {
   #ifndef NOTTF
   TTF_Init();
+  #endif
+}
+
+// Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
+int Support_TrueType()
+{
+  #ifdef NOTTF
+  return 0;
+  #else
+  return 1;
   #endif
 }
 
@@ -127,6 +137,9 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
 }
 #endif
 
+// Crée une brosse à partir des paramètres de texte demandés.
+// Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 
+// et retourne l'adresse du bloc d'octets.
 byte *Rendu_Texte(const char *Chaine, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
 {
   #ifndef NOTTF 
