@@ -260,6 +260,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
   struct dirent* Enreg; // Structure de lecture des éléments
   char * Filtre = "*"; // Extension demandée
   struct stat Infos_enreg;
+  char * Chemin_courant;
 
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
   if (Format_demande) // Format (extension) spécifique
@@ -272,8 +273,8 @@ void Lire_liste_des_fichiers(byte Format_demande)
   Liste_Nb_repertoires=0;
 
   // On lit tous les répertoires:
-
-  Repertoire_Courant=opendir(getcwd(NULL,0));
+  Chemin_courant=getcwd(NULL,0);
+  Repertoire_Courant=opendir(Chemin_courant);
   while ((Enreg=readdir(Repertoire_Courant)))
   {
     // On ignore le répertoire courant
@@ -308,6 +309,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
   }
 
   closedir(Repertoire_Courant);
+  free(Chemin_courant);
 
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
 }
