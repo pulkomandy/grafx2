@@ -35,8 +35,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef __amigaos4__
+#include <proto/dos.h>
+#endif
+
 #include "erreurs.h"
 #include "linux.h"
+
 
 #ifdef __linux__
     #include <dirent.h>
@@ -306,6 +311,22 @@ void Lire_liste_des_fichiers(byte Format_demande)
 
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
 }
+
+#ifdef __amigaos4__
+void bstrtostr( BSTR in, STRPTR out, TEXT max )
+{
+  STRPTR iptr;
+  uint32 i;
+  
+  iptr = BADDR( in );
+  
+  if( max > iptr[0] ) max = iptr[0];
+  
+  for( i=0; i<max; i++ ) out[i] = iptr[i+1];
+  out[i] = 0;
+}
+#endif
+
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
 void Lire_liste_des_lecteurs(void)
 {
@@ -319,16 +340,23 @@ void Lire_liste_des_lecteurs(void)
 
   // AmigaOS4
   #ifdef __amigaos4__
-  // Peter, this is where you act :)
-  // The strings you pass will be copied as needed.
-  // The 2 is for drive/volume; 0 and 1 would be files and directories.
-  // samples:
-  Ajouter_element_a_la_liste("df0", 2);
-  Liste_Nb_repertoires++;
-  Ajouter_element_a_la_liste("df1", 2);
-  Liste_Nb_repertoires++;
-  Ajouter_element_a_la_liste("hd0", 2);
-  Liste_Nb_repertoires++;
+  {
+    struct DosList *dl;
+    char tmp[256];
+    
+    dl = IDOS->LockDosList( LDF_VOLUMES | LDF_READ );
+    if( dl )
+    {
+      while( ( dl = IDOS->NextDosEntry( dl, LDF_VOLUMES | LDF_READ ) ) )
+      {
+        bstrtostr( dl->dol_Name, tmp, 254 );
+        strcat( tmp, ":" );
+        Ajouter_element_a_la_liste( tmp, 2 );
+        Liste_Nb_repertoires++;
+      }
+      IDOS->UnLockDosList( LDF_VOLUMES | LDF_READ );
+    }
+  }
 
   // Other platforms: simply read the "static" list of Drives.
   #else
