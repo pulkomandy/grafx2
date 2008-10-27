@@ -60,13 +60,30 @@
 #endif
 
 // Chercher le répertoire contenant GFX2.EXE
-void Chercher_repertoire_du_programme(char * Chaine)
+// en: Determine which directory contains the executable, data, and configuration.
+// The argument is argv[0], but some platforms don't need it.
+#if defined(__macosx__) || defined(__amigaos4__)
+  #define ARG_UNUSED __attribute__((unused))
+#else
+  #define ARG_UNUSED
+#endif
+void Chercher_repertoire_du_programme(ARG_UNUSED char * Chaine)
 {
-  #ifdef __macosx__
+  #undef ARG_UNUSED
+  
+  // MacOSX
+  #if defined(__macosx__)
     CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     CFURLGetFileSystemRepresentation(url,true,(UInt8*)Repertoire_du_programme,MAXPATHLEN);
     CFRelease(url);
-    strcat(Repertoire_du_programme,"Contents/Resources");
+    strcat(Repertoire_du_programme,"/Contents/Resources/");
+  
+  // AmigaOS4: hard-coded volume name.
+  #elif defined(__amigaos4__)
+    strcpy(Repertoire_du_programme,"PROGDIR:");
+  
+  // Windows, linux: The part of argv[0] before the executable name.
+  // Keep the last / or \.
   #else
     Extraire_chemin(Repertoire_du_programme, Chaine);
   #endif
@@ -161,12 +178,8 @@ void Charger_DAT(void)
 
   struct stat Informations_Fichier;
 
-#ifdef __amigaos4__
-  strcpy(Nom_du_fichier,"PROGDIR:gfx2.dat");
-#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.dat");
-#endif
   
   if(stat(Nom_du_fichier,&Informations_Fichier))
   {
@@ -1576,12 +1589,8 @@ int Charger_CFG(int Tout_charger)
   struct stat Informations_Fichier;
   int Conversion_touches = 0;
 
-#ifdef __amigaos4__
-  strcpy(Nom_du_fichier,"PROGDIR:gfx2.cfg");
-#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
-#endif
 
   stat(Nom_du_fichier,&Informations_Fichier);
   Taille_fichier=Informations_Fichier.st_size;
@@ -1851,12 +1860,8 @@ int Sauver_CFG(void)
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
 
-#ifdef __amigaos4__
-  strcpy(Nom_du_fichier,"PROGDIR:gfx2.cfg");
-#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.cfg");
-#endif
 
   if ((Handle=fopen(Nom_du_fichier,"wb"))==NULL)
     return ERREUR_SAUVEGARDE_CFG;

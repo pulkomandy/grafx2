@@ -403,23 +403,15 @@ int Charger_INI(struct S_Config * Conf)
   Nom_du_fichier=(char *)malloc(256);
 
   // On calcule le nom du fichier qu'on manipule:
-#ifdef __amigaos4__
-  strcpy(Nom_du_fichier,"PROGDIR:gfx2.ini");
-#else
   strcpy(Nom_du_fichier,Repertoire_du_programme);
   strcat(Nom_du_fichier,"gfx2.ini");
-#endif
 
   Fichier=fopen(Nom_du_fichier,"rb");
   if (Fichier==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2.dat
-    #ifdef __amigaos4__
-    strcpy(Nom_du_fichier,"PROGDIR:gfx2.dat");
-    #else
     strcpy(Nom_du_fichier,Repertoire_du_programme);
     strcat(Nom_du_fichier,"gfx2.dat");
-    #endif
     Fichier=fopen(Nom_du_fichier,"rb");
     if (Fichier == 0)
     {

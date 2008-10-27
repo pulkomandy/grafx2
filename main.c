@@ -264,15 +264,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Initialiser_S_Liste_de_pages(Brouillon_Backups);
 
   // On détermine dès le départ où se trouve le fichier:
-  // On détermine dès le départ où se trouve le fichier:
-#ifdef __macosx__
-  CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-  CFURLGetFileSystemRepresentation(url, true, (UInt8 *) Repertoire_du_programme, MAXPATHLEN);
-  CFRelease(url);
-  strcat(Repertoire_du_programme, "/Contents/Resources/");
-#else
   Chercher_repertoire_du_programme(argv[0]);
-#endif
   
   // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
