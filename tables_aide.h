@@ -257,9 +257,9 @@ static const char * TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_BOLD("                 BUGFINDERS")                //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  Ced        El Topo    Frost         Grimmy")
-  AIDE_TEXTE("  keito      kusma      Lord Graga    mind")
-  AIDE_TEXTE("  MooZ       tempest    titus^Rab")
+  AIDE_TEXTE("  Ced       El Topo   fallenblood Frost")
+  AIDE_TEXTE("  Grimmy    keito     kusma       Lord Graga")
+  AIDE_TEXTE("  mind      MooZ      tempest     titus^Rab")
   AIDE_TEXTE("")
   AIDE_BOLD ("               OUR HOMEPAGE")               //
   AIDE_TEXTE("")                                          //

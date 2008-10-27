@@ -5213,7 +5213,7 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
 
     short a = (VBY - VAY)/(VBX - VAX);
     short b = VAY - a*VAX;
-    short Distance_X, Distance_Y;
+    int Distance_X, Distance_Y;
 
     DEBUG("inttotal",Degrade_Intervalle_total);
 
@@ -5221,8 +5221,8 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
 	for (Pos_X = RAX;Pos_X<RBX;Pos_X++)
     {
 	// On calcule ou on en est dans le dégradé
-	Distance_X = pow(Pos_Y - VAY,2)+pow(Pos_X - VAX,2);
-	Distance_Y = pow(-a * Pos_X + Pos_Y - b,2)/(a*a+1);
+	Distance_X = pow((int)(Pos_Y - VAY),2)+pow((int)(Pos_X - VAX),2);
+	Distance_Y = pow((int)(-a * Pos_X + Pos_Y - b),2)/(a*a+1);
 
 	printf("%d\t%d\t%d\n",Pos_X,Distance_X,Distance_Y);
 	

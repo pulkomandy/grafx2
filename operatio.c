@@ -4234,9 +4234,38 @@ void Rectangle_Degrade_0_5(void)
 // on doit donc attendre que l'utilisateur clique quelque part
 // On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
 {
+  short RAX;
+  short RAY;
+  short RBX;
+  short RBY;
+
+
+  // Tracé propre du rectangle
+  Operation_POP(&RBY);
+  Operation_POP(&RBX);
+  Operation_POP(&RAY);
+  Operation_POP(&RAX);
+
+  Pinceau_X = RAX;
+  Pinceau_Y = RAY;
+  Effacer_curseur();
+
+  short largeur = abs(RBX-RAX);
+  short hauteur = abs(RBY-RAY);
+  Ligne_horizontale_XOR(Min(RAX,RBX),Min(RAY,RBY),largeur);
+  Ligne_horizontale_XOR(Min(RAX,RBX),Max(RAY,RBY)-1,largeur);
+  Ligne_verticale_XOR(Min(RAX,RBX),Min(RAY,RBY),hauteur);
+  Ligne_verticale_XOR(Max(RAX,RBX)-1,Min(RAY,RBY),hauteur);
+  UpdateRect(Min(RAX,RBX),Min(RAY,RBY),largeur+1,hauteur+1);
+
+  Operation_PUSH(RAX);
+  Operation_PUSH(RAY);
+  Operation_PUSH(RBX);
+  Operation_PUSH(RBY);
+
   Forme_curseur = FORME_CURSEUR_CIBLE;
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_PUSH(RBX);
+  Operation_PUSH(RBY);
 }
 
 void Rectangle_Degrade_0_7(void)
@@ -4352,7 +4381,6 @@ void Rectangle_Degrade_0_9(void)
     // On remet le pinceau en haut à droite du rectangle pour effacer le curseur qui y traine
     Pinceau_X = Rect_Debut_X;
     Pinceau_Y = Rect_Debut_Y;
-    Effacer_curseur();
 
     // Et enfin on trace le rectangle avec le dégradé dedans !
 //    if (Mouse_K==Ancien_Mouse_K)				// TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
