@@ -259,17 +259,6 @@ void TO_Set(Table_occurence * t,int r,int v,int b,int i)
   t->table[indice]=i;
 }
 
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille)
-{
-  OPASM_Compter_occurences(t->table,image,taille,
-                           t->red_r,t->red_v,t->red_b,
-                           t->nbb_v,t->nbb_b);
-}
-
-#else
-
 void TO_Inc(Table_occurence * t,int r,int v,int b)
 {
   int indice;
@@ -289,8 +278,6 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille)
   for (indice=taille,ptr=image;indice>0;indice--,ptr++)
     TO_Inc(t,ptr->R,ptr->V,ptr->B);
 }
-
-#endif
 
 int TO_Compter_couleurs(Table_occurence * t)
 {
@@ -1174,6 +1161,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       D++;
     }
   }
+
 }
 
 #endif
@@ -1181,7 +1169,10 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
 
 
 static const byte precision_24b[]=
-{6,6,5,
+{
+ 8,8,8,
+ 6,6,6,
+ 6,6,5,
  5,6,5,
  5,5,5,
  5,5,4,

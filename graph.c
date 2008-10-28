@@ -5209,42 +5209,49 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
 	RAY = Pos_Y;
     }
 
-    Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
-
-    short a = (VBY - VAY)/(VBX - VAX);
-    short b = VAY - a*VAX;
-    int Distance_X, Distance_Y;
-
-    DEBUG("inttotal",Degrade_Intervalle_total);
-
-    for (Pos_Y=RAY;Pos_Y<RBY;Pos_Y++)
-	for (Pos_X = RAX;Pos_X<RBX;Pos_X++)
+    if(VBX == VAX)
     {
-	// On calcule ou on en est dans le dégradé
-	Distance_X = pow((int)(Pos_Y - VAY),2)+pow((int)(Pos_X - VAX),2);
-	Distance_Y = pow((int)(-a * Pos_X + Pos_Y - b),2)/(a*a+1);
+	// Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...
+	if (VBY == VAY) return;	// L'utilisateur fait n'importe quoi
+	Degrade_Intervalle_total = abs(VBY - VAY);
+	for(Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
+	    for(Pos_X=RAX;Pos_X<=RBX;Pos_X++)
+		Traiter_degrade(abs(VBY - Pos_Y),Pos_X,Pos_Y);
 
-	printf("%d\t%d\t%d\n",Pos_X,Distance_X,Distance_Y);
-	
-	Traiter_degrade(sqrt(Distance_X - Distance_Y),Pos_X,Pos_Y);
     }
+    else
+    {
+	Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
+	short a = (VBY - VAY)/(VBX - VAX);
+	short b = VAY - a*VAX;
+	int Distance_X, Distance_Y;
 
+	for (Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
+	    for (Pos_X = RAX;Pos_X<=RBX;Pos_X++)
+	    {
+		// On calcule ou on en est dans le dégradé
+		Distance_X = pow((int)(Pos_Y - VAY),2)+pow((int)(Pos_X - VAX),2);
+		Distance_Y = pow((int)(-a * Pos_X + Pos_Y - b),2)/(a*a+1);
+
+		Traiter_degrade(sqrt(Distance_X - Distance_Y),Pos_X,Pos_Y);
+	    }
+    }
     Mettre_Ecran_A_Jour(RAX,RAY,RBX,RBY);
 }
 
 
 
 
-  // -- Tracer un polygône plein --
+// -- Tracer un polygône plein --
 
 typedef struct POLYGON_EDGE      /* an active edge */
 {
-  short top;                     /* top y position */
-  short bottom;                  /* bottom y position */
-  float x, dx;                   /* floating point x position and gradient */
-  float w;                       /* width of line segment */
-  struct POLYGON_EDGE *prev;     /* doubly linked list */
-  struct POLYGON_EDGE *next;
+    short top;                     /* top y position */
+    short bottom;                  /* bottom y position */
+    float x, dx;                   /* floating point x position and gradient */
+    float w;                       /* width of line segment */
+    struct POLYGON_EDGE *prev;     /* doubly linked list */
+    struct POLYGON_EDGE *next;
 } POLYGON_EDGE;
 
 
