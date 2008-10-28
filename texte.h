@@ -20,6 +20,17 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-int Support_TrueType();
+// Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void);
+// Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
+int Support_TrueType(void);
+// Ajout d'une fonte à la liste.
+void Ajout_fonte(char *Nom, int EstTrueType, int EstImage);
+// Crée une brosse à partir des paramètres de texte demandés.
 byte *Rendu_Texte(const char *Chaine, int Taille, int AntiAlias, int *Largeur, int *Hauteur);
+// Trouve le libellé d'affichage d'une fonte par son numéro
+char * Libelle_fonte(int Indice);
+// Trouve le nom d'une fonte par son numéro
+char * Nom_fonte(int Indice);
+// Nombre de fontes déclarées
+extern int Fonte_nombre;

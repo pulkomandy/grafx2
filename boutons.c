@@ -5725,6 +5725,16 @@ void Bouton_Effets(void)
   Afficher_curseur();
 }
 
+// Affiche tout le selecteur de fontes
+void Dessiner_selecteur_fontes(short X, short Y, short Debut_liste, short Position_curseur, short Nombre_visibles)
+{
+  int Indice;
+  for (Indice=0; Indice < Nombre_visibles; Indice++)
+  {
+    Print_dans_fenetre(X,Y+Indice*8,Libelle_fonte(Indice+Debut_liste), CM_Noir, (Position_curseur==Indice)?CM_Fonce:CM_Clair);
+  }
+}
+
 void Bouton_Texte()
 {
   static char Chaine[256]="";
@@ -5740,6 +5750,8 @@ void Bouton_Texte()
   struct Fenetre_Bouton_special * Bouton_taille_texte;
   struct Fenetre_Bouton_special * Bouton_texte;
   byte A_redessiner=1;
+  short Debut_liste, Position_curseur; // Selecteur de fonte
+  short Temp;
   
   Ouvrir_fenetre(288,180,"Text");
 
@@ -5753,14 +5765,17 @@ void Bouton_Texte()
 
   // AA
   Fenetre_Definir_bouton_normal(9,51,80,14,"",0,1,SDLK_LAST); // 3
-  Print_dans_fenetre(13,53,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+  Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
   
   // Scroller des fontes
-  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,12,1,0); // 4
+  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,0); // 4
   
   // Liste des fontes disponibles
-  Fenetre_Definir_bouton_special(110,32,172,NB_FONTES*8); // 5
-  Fenetre_Afficher_cadre_creux(109, 31, 174, NB_FONTES*8+4);
+  Fenetre_Definir_bouton_special(111,32,168,NB_FONTES*8); // 5
+  Fenetre_Afficher_cadre_creux(110, 31, 170, NB_FONTES*8+4);
+  Debut_liste=0;
+  Position_curseur=0;
+
   
   // Taille texte
   Print_dans_fenetre(32,71,"Size:",CM_Fonce,CM_Clair);
@@ -5773,7 +5788,7 @@ void Bouton_Texte()
   Fenetre_Definir_bouton_special(7,105,276,50); // 9
   Fenetre_Afficher_cadre_creux(6, 104, 278, 52);
   
-  Fenetre_Definir_bouton_special(110,32,172,NB_FONTES*8); // 10
+  Fenetre_Definir_bouton_special(0,0,1,1); // 10 ???
   
   Fenetre_Definir_bouton_normal(7,161,40,14,"OK",0,1,SDLK_RETURN); // 11
   Fenetre_Definir_bouton_normal(53,161,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
@@ -5791,8 +5806,12 @@ void Bouton_Texte()
   {
     if (A_redessiner)
     {
+      // Taille
       Num2str(Taille_police,Buffer_taille,3);
       Fenetre_Contenu_bouton_saisie(Bouton_taille_texte,Buffer_taille);
+      // Selecteur de fonte
+      Dessiner_selecteur_fontes(111, 33, Debut_liste, Position_curseur, NB_FONTES);
+      
       A_redessiner=0;
       Afficher_curseur();
     }
@@ -5816,8 +5835,31 @@ void Bouton_Texte()
       case 3: // AA
       AntiAlias = (AntiAlias==0);
       Effacer_curseur();
-      Print_dans_fenetre(13,53,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+      Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
       Afficher_curseur();
+      break;
+      
+      case 4: // Scroller des fontes
+      if (Debut_liste!=Fenetre_Attribut2)
+      {
+        Position_curseur+=Debut_liste;
+        Debut_liste=Fenetre_Attribut2;
+        Position_curseur-=Debut_liste;
+        // On affiche à nouveau la liste
+        Effacer_curseur();
+        A_redessiner=1;
+      }
+      break;
+      
+      case 5: // Selecteur de fonte
+      Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-32)>>3;
+      if (Temp!=Position_curseur)
+      {
+        Position_curseur=Temp;
+        // On affiche à nouveau la liste
+        Effacer_curseur();
+        A_redessiner=1;
+      }
       break;
             
       case 6: // Taille du texte (nombre)

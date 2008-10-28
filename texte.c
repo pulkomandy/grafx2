@@ -23,6 +23,8 @@
 // Pour désactiver le support TrueType, définir NOTTF
 // To disable TrueType support, define NOTTF
 
+#include <string.h>
+#include <stdlib.h>
 
 // TrueType
 #ifndef NOTTF
@@ -32,15 +34,112 @@
 #include <SDL/SDL_image.h>
 #include "SFont.h"
 
-#include "sdlscreen.h"
 #include "struct.h"
 #include "global.h"
+#include "sdlscreen.h"
+#include "io.h"
+
+typedef struct T_FONTE
+{
+  char * Nom;
+  int    EstTrueType;
+  int    EstImage;
+  
+  // Liste chainée simple
+  struct T_FONTE * Suivante;
+} T_FONTE;
+// Liste chainée des polices de texte
+T_FONTE * Liste_fontes_debut;
+T_FONTE * Liste_fontes_fin;
+int Fonte_nombre;
+
+// Ajout d'une fonte à la liste.
+void Ajout_fonte(char *Nom, int EstTrueType, int EstImage)
+{
+  T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
+  Fonte->Nom = (char *)malloc(strlen(Nom)+1);
+  strcpy(Fonte->Nom, Nom);  
+  Fonte->EstTrueType = EstTrueType;
+  Fonte->EstImage = EstImage;
+
+  // Gestion Liste
+  Fonte->Suivante = NULL;
+  if (Liste_fontes_debut==NULL)
+    Liste_fontes_debut = Fonte;
+  else
+    Liste_fontes_fin->Suivante = Fonte;
+  Liste_fontes_fin = Fonte;
+  Fonte_nombre++;
+
+}
+
+// Trouve le nom d'une fonte par son numéro
+char * Nom_fonte(int Indice)
+{
+  T_FONTE *Fonte = Liste_fontes_debut;
+  if (Indice<0 ||Indice>=Fonte_nombre)
+    return "";
+  while (Indice--)
+    Fonte = Fonte->Suivante;
+  return Fonte->Nom;
+}
+// Trouve le libellé d'affichage d'une fonte par son numéro
+char * Libelle_fonte(int Indice)
+{
+  T_FONTE *Fonte;
+  static char Libelle[22];
+  char * Nom_fonte;
+  
+  strcpy(Libelle, "                     ");
+  
+  // Recherche de la fonte
+  Fonte = Liste_fontes_debut;
+  if (Indice<0 ||Indice>=Fonte_nombre)
+    return Libelle;
+  while (Indice--)
+    Fonte = Fonte->Suivante;
+  
+  // Libellé
+  if (Fonte->EstTrueType)
+    Libelle[19]=Libelle[20]='T'; // Logo TT
+  Nom_fonte=Position_dernier_slash(Fonte->Nom);
+  if (Nom_fonte==NULL)
+    Nom_fonte=Fonte->Nom;
+  else
+    Nom_fonte++;
+  for (Indice=0; Indice < 19 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
+    Libelle[Indice]=Nom_fonte[Indice];
+  return Libelle;
+}
+
 
 // Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void)
 {
+
   #ifndef NOTTF
+  // Initialisation de TTF
   TTF_Init();
+  
+  // Initialisation des fontes
+  Liste_fontes_debut = Liste_fontes_fin = NULL;
+  Fonte_nombre=0;
+  // Parcours du répertoire "fontes"
+  Ajout_fonte("fonts/Tuffy.ttf", 1, 0);
+  Ajout_fonte("fonts/Otherfont.ttf", 1, 0);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("8pxfont.png", 0, 1);
+  Ajout_fonte("fonts/Tuffy.ttf", 1, 0);
   #endif
 }
 
@@ -58,19 +157,19 @@ int Support_TrueType()
 #ifndef NOTTF
 byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
 {
- TTF_Font *Police;
+ TTF_Font *Fonte;
   SDL_Surface * TexteColore;
   SDL_Surface * Texte8Bit;
   byte * BrosseRetour;
   int Indice;
   SDL_Color PaletteSDL[256];
   
-  SDL_Color Couleur_Avant; // FIXME couleur avant
-  SDL_Color Couleur_Arriere; // FIXME couleur arriere
+  SDL_Color Couleur_Avant;
+  SDL_Color Couleur_Arriere;
 
-  // Chargement de la police
-  Police=TTF_OpenFont("fonts/Tuffy.ttf", Taille); // FIXME police en dur
-  if (!Police)
+  // Chargement de la fonte
+  Fonte=TTF_OpenFont(Nom_fonte(0), Taille); // FIXME fonte en dur
+  if (!Fonte)
   {
     return NULL;
   }
@@ -80,12 +179,12 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
   
   // Rendu du texte: crée une surface SDL RGB 24bits
   if (AntiAlias)
-    TexteColore=TTF_RenderText_Shaded(Police, Chaine, Couleur_Avant, Couleur_Arriere );
+    TexteColore=TTF_RenderText_Shaded(Fonte, Chaine, Couleur_Avant, Couleur_Arriere );
   else
-    TexteColore=TTF_RenderText_Solid(Police, Chaine, Couleur_Avant);
+    TexteColore=TTF_RenderText_Solid(Fonte, Chaine, Couleur_Avant);
   if (!TexteColore)
   {
-    TTF_CloseFont(Police);
+    TTF_CloseFont(Fonte);
     return NULL;
   }
   
@@ -96,7 +195,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
   if (!Texte8Bit)
   {
     SDL_FreeSurface(TexteColore);
-    TTF_CloseFont(Police);
+    TTF_CloseFont(Fonte);
     return NULL;
   }
 
@@ -116,7 +215,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
   {
     SDL_FreeSurface(TexteColore);
     SDL_FreeSurface(Texte8Bit);
-    TTF_CloseFont(Police);
+    TTF_CloseFont(Fonte);
     return NULL;
   }
   if (!AntiAlias)
