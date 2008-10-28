@@ -988,8 +988,8 @@ void Load_PKM(void)
                   if (Octet==4)
                   {
                     Indice+=4;
-                    if ( ! read_word_le(Fichier,&Ecran_original_X)
-                      || !read_word_le(Fichier,&Ecran_original_Y) )
+                    if ( ! read_word_le(Fichier,(word *) &Ecran_original_X)
+                      || !read_word_le(Fichier,(word *) &Ecran_original_Y) )
                       Erreur_fichier=2;
                   }
                   else

@@ -4158,6 +4158,7 @@ void Rectangle_Degrade_12_0(void)
 // Initialisation de l'étape 1, on commence à dessiner le rectangle
 {
   Initialiser_debut_operation();
+  Backup();
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("\035:   1   \022:   1",0);

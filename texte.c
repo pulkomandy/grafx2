@@ -28,10 +28,14 @@
 
 // TrueType
 #ifndef NOTTF
+#ifdef __macosx__
+#include <SDL_ttf/SDL_ttf.h>
+#else
 #include <SDL/SDL_ttf.h>
 #endif
-// SFont
+#endif
 #include <SDL/SDL_image.h>
+// SFont
 #include "SFont.h"
 
 #include "struct.h"
