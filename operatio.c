@@ -31,6 +31,7 @@
 #include "boutons.h"
 #include "pages.h"
 #include "erreurs.h"
+#include "sdlscreen.h"
 
 #ifdef __WATCOMC__
     #define M_PI 3.14159265358979323846 

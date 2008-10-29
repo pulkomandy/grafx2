@@ -234,7 +234,7 @@ char * Interpretation_du_fichier_config()
 
     ChunkData[Numero_chunk] = Ptr;
     Chunk[Numero_chunk].Taille = Taille_chunk;
-    printf("%d %6X %d\n", Numero_chunk, Ptr - FichierConfig, Taille_chunk);
+//    printf("%d %6X %d\n", Numero_chunk, Ptr - FichierConfig, Taille_chunk);
     Ptr+=Taille_chunk;
   }
   // Si la config contenait des touches, on les initialise:

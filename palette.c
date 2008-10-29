@@ -209,7 +209,7 @@ void Remap_image_HIGH(byte * Table_de_conversion)
 }
 
 
-void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur, int update_palette)
+void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur)
 {
   short Pos_1;
   short Pos_2;
@@ -1102,7 +1102,7 @@ void Bouton_Palette(void)
               Backup_de_l_image_effectue=1;
             }
 
-          Swap(Bouton_clicke==8,Debut_block,Couleur_temporaire,Premiere_couleur,Palette_de_travail,Utilisation_couleur, 1);
+          Swap(Bouton_clicke==8,Debut_block,Couleur_temporaire,Premiere_couleur,Palette_de_travail,Utilisation_couleur);
 
           memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1674,7 +1674,7 @@ void Bouton_Palette(void)
 					&& (h<oh || (h==oh && l<ol))))		// Dans ce cas on décide avec chroma puis lumi
 			    {
 				// On échange la couleur avec la précédente
-				Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur, 0);
+				Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
 				swap=1;
 			    }
 			}

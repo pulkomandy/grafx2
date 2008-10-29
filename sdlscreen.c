@@ -213,7 +213,7 @@ void Display_brush_Mono_SDL (word Pos_X, word Pos_Y,
     UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
 
-void Clear_brush_SDL (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image)
+void Clear_brush_SDL (word Pos_X,word Pos_Y,__attribute__((unused)) word Decalage_X,__attribute__((unused)) word Decalage_Y,word Largeur,word Hauteur,__attribute__((unused))byte Couleur_de_transparence,word Largeur_image)
 {
     byte* Dest=Ecran+Pos_X+Pos_Y*Largeur_ecran; //On va se mettre en 0,0 dans l'écran (EDI)
     byte* Src = ( Pos_Y + Principal_Decalage_Y ) * Largeur_image + Pos_X + Principal_Decalage_X + Principal_Ecran; //Coords de départ ds la source (ESI)
