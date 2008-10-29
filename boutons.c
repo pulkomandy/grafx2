@@ -5740,6 +5740,7 @@ void Bouton_Texte()
   static char Chaine[256]="";
   static int Taille_police=16;
   static int AntiAlias=0;
+  short Debut_liste=0, Position_curseur=0; // Selecteur de fonte
 
   byte * Nouvelle_Brosse;
   int Nouvelle_Largeur;
@@ -5750,7 +5751,6 @@ void Bouton_Texte()
   struct Fenetre_Bouton_special * Bouton_taille_texte;
   struct Fenetre_Bouton_special * Bouton_texte;
   byte A_redessiner=1;
-  short Debut_liste, Position_curseur; // Selecteur de fonte
   short Temp;
   
   Ouvrir_fenetre(288,180,"Text");
@@ -5768,14 +5768,11 @@ void Bouton_Texte()
   Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
   
   // Scroller des fontes
-  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,0); // 4
+  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 4
   
   // Liste des fontes disponibles
   Fenetre_Definir_bouton_special(111,32,168,NB_FONTES*8); // 5
   Fenetre_Afficher_cadre_creux(110, 31, 170, NB_FONTES*8+4);
-  Debut_liste=0;
-  Position_curseur=0;
-
   
   // Taille texte
   Print_dans_fenetre(32,71,"Size:",CM_Fonce,CM_Clair);
@@ -5853,7 +5850,7 @@ void Bouton_Texte()
       
       case 5: // Selecteur de fonte
       Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-32)>>3;
-      if (Temp!=Position_curseur)
+      if (Temp!=Position_curseur && Temp < Fonte_nombre)
       {
         Position_curseur=Temp;
         // On affiche à nouveau la liste
@@ -5899,7 +5896,7 @@ void Bouton_Texte()
     
       case 11: // OK
       // Rendu texte
-      Nouvelle_Brosse = Rendu_Texte(Chaine, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (!Nouvelle_Brosse)
       {
         Fermer_fenetre();
@@ -5909,8 +5906,11 @@ void Bouton_Texte()
         return;
       }
       Effacer_curseur();
-      // On passe en brosse monochrome:
-      Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      // On passe en brosse:
+      //if (AntiAlias)
+        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      //else
+      //  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);
       if (Brosse) free(Brosse);
     
       Brosse=Nouvelle_Brosse;

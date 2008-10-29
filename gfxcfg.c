@@ -660,7 +660,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     SDL_EnableUNICODE(SDL_ENABLE);
 
   	/* On initialise SFont */
-  	MyFont = SFont_InitFont(IMG_Load("8pxfont.png"));
+  	MyFont = SFont_InitFont(IMG_Load("fonts/8pxfont.png"));
 
 	if(MyFont==NULL)
 	{

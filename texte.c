@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 // TrueType
 #ifndef NOTTF
@@ -58,11 +59,12 @@ T_FONTE * Liste_fontes_fin;
 int Fonte_nombre;
 
 // Ajout d'une fonte à la liste.
-void Ajout_fonte(char *Nom, int EstTrueType, int EstImage)
+void Ajout_fonte(char *Chemin, char *Nom, int EstTrueType, int EstImage)
 {
   T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
-  Fonte->Nom = (char *)malloc(strlen(Nom)+1);
-  strcpy(Fonte->Nom, Nom);  
+  Fonte->Nom = (char *)malloc(strlen(Chemin)+strlen(Nom)+1);
+  strcpy(Fonte->Nom, Chemin);  
+  strcat(Fonte->Nom, Nom);  
   Fonte->EstTrueType = EstTrueType;
   Fonte->EstImage = EstImage;
 
@@ -120,31 +122,46 @@ char * Libelle_fonte(int Indice)
 // Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void)
 {
-
+  // Pour scan de répertoire
+  //DIR*  Repertoire_Courant; //Répertoire courant
+  //struct dirent* Enreg; // Structure de lecture des éléments
+  //char Nom_repertoire[TAILLE_CHEMIN_FICHIER];
+  
   #ifndef NOTTF
   // Initialisation de TTF
   TTF_Init();
+  #endif
   
   // Initialisation des fontes
   Liste_fontes_debut = Liste_fontes_fin = NULL;
   Fonte_nombre=0;
-  // Parcours du répertoire "fontes"
-  Ajout_fonte("fonts/Tuffy.ttf", 1, 0);
-  Ajout_fonte("fonts/Otherfont.ttf", 1, 0);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("8pxfont.png", 0, 1);
-  Ajout_fonte("fonts/Tuffy.ttf", 1, 0);
+  // Parcours du répertoire "fonts"
+  /*strcpy(Nom_repertoire, Repertoire_du_programme);
+  strcat(Nom_repertoire, "fonts");
+  Repertoire_Courant=opendir(Nom_repertoire);
+  strcat(Nom_repertoire, SEPARATEUR_CHEMIN);
+  while ((Enreg=readdir(Repertoire_Courant)))
+  {
+    struct stat Infos_enreg;
+    stat(Enreg->d_name,&Infos_enreg);
+    if (S_ISREG(Infos_enreg.st_mode))
+    {
+      Ajout_fonte(Repertoire_Courant,Enreg->d_name, 1, 0);
+    }
+  }
+  */
+  
+  Ajout_fonte(Repertoire_du_programme,"fonts/Tuffy.ttf", 1, 0);
+  Ajout_fonte(Repertoire_du_programme,"fonts/5pxtinyfont.png", 0, 1);
+  Ajout_fonte(Repertoire_du_programme,"fonts/colorfont.pcx", 0, 1);
+  Ajout_fonte(Repertoire_du_programme,"fonts/8pxfont.png", 0, 1);
+  
+  // Parcours du répertoire systeme windows "fontes"
+  #ifdef __WIN32__
+  Ajout_fonte("c:/windows/fonts/","arial.ttf", 1, 0);
+  Ajout_fonte("c:/windows/fonts/","cour.ttf", 1, 0);
   #endif
+  
 }
 
 // Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
@@ -159,7 +176,7 @@ int Support_TrueType()
 
   
 #ifndef NOTTF
-byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
+byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
 {
  TTF_Font *Fonte;
   SDL_Surface * TexteColore;
@@ -172,7 +189,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
   SDL_Color Couleur_Arriere;
 
   // Chargement de la fonte
-  Fonte=TTF_OpenFont(Nom_fonte(0), Taille); // FIXME fonte en dur
+  Fonte=TTF_OpenFont(Nom_fonte(Numero_fonte), Taille);
   if (!Fonte)
   {
     return NULL;
@@ -235,21 +252,85 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Taille, int AntiAlias, int *Largeu
   *Largeur=Texte8Bit->w;
   *Hauteur=Texte8Bit->h;
   SDL_FreeSurface(Texte8Bit);
-
+  TTF_CloseFont(Fonte);
   return BrosseRetour;
 }
 #endif
 
+byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int *Hauteur)
+{
+  SFont_Font *Fonte;
+  SDL_Surface * TexteColore;
+  SDL_Surface * Texte8Bit;
+  SDL_Surface *Surface_fonte;
+  byte * BrosseRetour;
+
+  // Chargement de la fonte
+  Surface_fonte=IMG_Load(Nom_fonte(Numero_fonte));
+  if (!Surface_fonte)
+    return NULL;
+  Fonte=SFont_InitFont(Surface_fonte);
+  if (!Fonte)
+  {
+    return NULL;
+  }
+  
+  // Calcul des dimensions
+  *Hauteur=SFont_TextHeight(Fonte);
+  *Largeur=SFont_TextWidth(Fonte, Chaine);
+  // Allocation d'une surface SDL
+  TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *Largeur, *Hauteur, 24, 0, 0, 0, 0);
+  // Rendu du texte
+  SFont_Write(TexteColore, Fonte, 0, 0, Chaine);
+  if (!TexteColore)
+  {
+    SFont_FreeFont(Fonte);
+    return NULL;
+  }
+  
+  Texte8Bit=SDL_DisplayFormat(TexteColore);
+  SDL_FreeSurface(TexteColore);
+    
+  BrosseRetour=Surface_en_bytefield(Texte8Bit, NULL);
+  if (!BrosseRetour)
+  {
+    SDL_FreeSurface(TexteColore);
+    SDL_FreeSurface(Texte8Bit);
+    SFont_FreeFont(Fonte);
+    return NULL;
+  }
+  SDL_FreeSurface(Texte8Bit);
+  SFont_FreeFont(Fonte);
+
+  return BrosseRetour;
+}
+
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 
 // et retourne l'adresse du bloc d'octets.
-byte *Rendu_Texte(const char *Chaine, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
+byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
 {
+  T_FONTE *Fonte = Liste_fontes_debut;
+  int Indice=Numero_fonte;
+  
+  // Verification type de la fonte
+  if (Numero_fonte<0 ||Numero_fonte>=Fonte_nombre)
+    return NULL;
+    
+  while (Indice--)
+    Fonte = Fonte->Suivante;
+  if (Fonte->EstTrueType)
+  {
   #ifndef NOTTF 
-    return Rendu_Texte_TTF(Chaine, Taille, AntiAlias, Largeur, Hauteur);
+    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, AntiAlias, Largeur, Hauteur);
   #else
     return NULL;
   #endif
+  }
+  else
+  {
+    return Rendu_Texte_SFont(Chaine, Numero_fonte, Largeur, Hauteur);
+  }
 }
 
 
