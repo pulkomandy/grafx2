@@ -5740,7 +5740,7 @@ void Bouton_Texte()
   static char Chaine[256]="";
   static int Taille_police=16;
   static int AntiAlias=0;
-  short Debut_liste=0, Position_curseur=0; // Selecteur de fonte
+  static short Debut_liste=0, Position_curseur=0; // Selecteur de fonte
 
   byte * Nouvelle_Brosse;
   int Nouvelle_Largeur;
@@ -5896,7 +5896,7 @@ void Bouton_Texte()
     
       case 11: // OK
       // Rendu texte
-      Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (!Nouvelle_Brosse)
       {
         Fermer_fenetre();

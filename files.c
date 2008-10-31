@@ -41,6 +41,7 @@
 
 #include "erreurs.h"
 #include "linux.h"
+#include "io.h"
 
 
 #ifdef __linux__
@@ -676,4 +677,27 @@ short Calculer_decalage_click_dans_fileselector(void)
     Decalage_calcule=Liste_Nb_elements-1;
 
   return Decalage_calcule;
+}
+
+void for_each_file(const char * Nom_repertoire, void Callback(const char *))
+{
+  // Pour scan de répertoire
+  DIR*  Repertoire_Courant; //Répertoire courant
+  struct dirent* Enreg; // Structure de lecture des éléments
+  char Nom_fichier_complet[TAILLE_CHEMIN_FICHIER];
+  int Position_nom_fichier;
+  strcpy(Nom_fichier_complet, Nom_repertoire);
+  Repertoire_Courant=opendir(Nom_repertoire);
+  strcat(Nom_fichier_complet, SEPARATEUR_CHEMIN);
+  Position_nom_fichier = strlen(Nom_fichier_complet);
+  while ((Enreg=readdir(Repertoire_Courant)))
+  {
+    struct stat Infos_enreg;
+    strcpy(&Nom_fichier_complet[Position_nom_fichier], Enreg->d_name);
+    stat(Nom_fichier_complet,&Infos_enreg);
+    if (S_ISREG(Infos_enreg.st_mode))
+    {
+      Callback(Nom_fichier_complet);
+    }
+  }
 }

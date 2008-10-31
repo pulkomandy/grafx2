@@ -25,7 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
+#include <ctype.h> // tolower()
 
 // TrueType
 #ifndef NOTTF
@@ -43,6 +43,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "io.h"
+#include "files.h"
 
 typedef struct T_FONTE
 {
@@ -59,15 +60,28 @@ T_FONTE * Liste_fontes_fin;
 int Fonte_nombre;
 
 // Ajout d'une fonte à la liste.
-void Ajout_fonte(char *Chemin, char *Nom, int EstTrueType, int EstImage)
+void Ajout_fonte(const char *Nom)
 {
   T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
-  Fonte->Nom = (char *)malloc(strlen(Chemin)+strlen(Nom)+1);
-  strcpy(Fonte->Nom, Chemin);  
-  strcat(Fonte->Nom, Nom);  
-  Fonte->EstTrueType = EstTrueType;
-  Fonte->EstImage = EstImage;
-
+  int Taille=strlen(Nom)+1;
+  Fonte->Nom = (char *)malloc(Taille);
+  strcpy(Fonte->Nom, Nom);
+  // Détermination du type:
+  // On va faire simple: .TTF c'est TrueType, sinon on tente Bitmap.
+  if (Taille>=5 &&
+    Fonte->Nom[Taille-5]=='.' &&
+    tolower(Fonte->Nom[Taille-4]) == 't' &&
+    tolower(Fonte->Nom[Taille-3]) == 't' &&
+    tolower(Fonte->Nom[Taille-2]) == 'f')
+  {
+    Fonte->EstTrueType = 1;
+    Fonte->EstImage = 0;
+  }
+  else
+  {
+    Fonte->EstTrueType = 0;
+    Fonte->EstImage = 1;
+  }
   // Gestion Liste
   Fonte->Suivante = NULL;
   if (Liste_fontes_debut==NULL)
@@ -122,11 +136,12 @@ char * Libelle_fonte(int Indice)
 // Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void)
 {
+/*
   // Pour scan de répertoire
-  //DIR*  Repertoire_Courant; //Répertoire courant
-  //struct dirent* Enreg; // Structure de lecture des éléments
-  //char Nom_repertoire[TAILLE_CHEMIN_FICHIER];
-  
+  DIR*  Repertoire_Courant; //Répertoire courant
+  struct dirent* Enreg; // Structure de lecture des éléments
+*/
+  char Nom_repertoire[TAILLE_CHEMIN_FICHIER];
   #ifndef NOTTF
   // Initialisation de TTF
   TTF_Init();
@@ -136,30 +151,15 @@ void Initialisation_Texte(void)
   Liste_fontes_debut = Liste_fontes_fin = NULL;
   Fonte_nombre=0;
   // Parcours du répertoire "fonts"
-  /*strcpy(Nom_repertoire, Repertoire_du_programme);
+  strcpy(Nom_repertoire, Repertoire_du_programme);
   strcat(Nom_repertoire, "fonts");
-  Repertoire_Courant=opendir(Nom_repertoire);
-  strcat(Nom_repertoire, SEPARATEUR_CHEMIN);
-  while ((Enreg=readdir(Repertoire_Courant)))
-  {
-    struct stat Infos_enreg;
-    stat(Enreg->d_name,&Infos_enreg);
-    if (S_ISREG(Infos_enreg.st_mode))
-    {
-      Ajout_fonte(Repertoire_Courant,Enreg->d_name, 1, 0);
-    }
-  }
-  */
+  for_each_file(Nom_repertoire, Ajout_fonte);
   
-  Ajout_fonte(Repertoire_du_programme,"fonts/Tuffy.ttf", 1, 0);
-  Ajout_fonte(Repertoire_du_programme,"fonts/5pxtinyfont.png", 0, 1);
-  Ajout_fonte(Repertoire_du_programme,"fonts/colorfont.pcx", 0, 1);
-  Ajout_fonte(Repertoire_du_programme,"fonts/8pxfont.png", 0, 1);
-  
-  // Parcours du répertoire systeme windows "fontes"
+  // Parcours du répertoire systeme windows "fonts"
   #ifdef __WIN32__
-  Ajout_fonte("c:/windows/fonts/","arial.ttf", 1, 0);
-  Ajout_fonte("c:/windows/fonts/","cour.ttf", 1, 0);
+  #ifndef NOTTF
+  for_each_file("c:\\windows\\fonts", Ajout_fonte);
+  #endif
   #endif
   
 }

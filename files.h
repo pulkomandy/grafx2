@@ -53,3 +53,6 @@ void Select_Home       (short * Decalage_premier,short * Decalage_select);
 short Calculer_decalage_click_dans_fileselector(void);
 
 char * Nom_formate(char * Nom, int Type);
+
+// Scans a directory, calls Callback for each file in it,
+void for_each_file(const char * Nom_repertoire, void Callback(const char *));
