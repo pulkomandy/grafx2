@@ -5825,7 +5825,7 @@ void Bouton_Texte()
       case 2: // Clear
       Chaine[0]='\0';
       Effacer_curseur();
-      Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
+      Fenetre_Effacer_bouton_saisie(Bouton_texte);
       Afficher_curseur();
       break;
       
@@ -5896,7 +5896,11 @@ void Bouton_Texte()
     
       case 11: // OK
       // Rendu texte
-      Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      Nouvelle_Brosse = NULL;
+      if (Chaine[0])
+      {
+        Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      }
       if (!Nouvelle_Brosse)
       {
         Fermer_fenetre();
@@ -5906,11 +5910,6 @@ void Bouton_Texte()
         return;
       }
       Effacer_curseur();
-      // On passe en brosse:
-      //if (AntiAlias)
-        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
-      //else
-      //  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);
       if (Brosse) free(Brosse);
     
       Brosse=Nouvelle_Brosse;
@@ -5918,6 +5917,23 @@ void Bouton_Texte()
       Brosse_Hauteur=Nouvelle_Hauteur;
       Brosse_Decalage_X=Brosse_Largeur>>1;
       Brosse_Decalage_Y=Brosse_Hauteur>>1;
+      Fermer_fenetre();
+      Desenclencher_bouton(BOUTON_TEXTE);
+      
+      // On passe en brosse:
+      if (AntiAlias || !TrueType_fonte(Position_curseur+Debut_liste))
+        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      else
+        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);
+
+      Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
+      if (Config.Auto_discontinuous)
+      {
+        // On se place en mode Dessin discontinu à la main
+        while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
+          Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+      }
+      return;
       
       // Attention pas de break
       case 12: // Cancel

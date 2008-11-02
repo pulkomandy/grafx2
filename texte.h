@@ -32,5 +32,7 @@ byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlia
 char * Libelle_fonte(int Indice);
 // Trouve le nom d'une fonte par son numéro
 char * Nom_fonte(int Indice);
+// Vérifie si une fonte donnée est TrueType
+char * TrueType_fonte(int Indice);
 // Nombre de fontes déclarées
 extern int Fonte_nombre;

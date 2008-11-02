@@ -39,6 +39,7 @@ void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg);
 void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg);
 
 void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char * Contenu);
+void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg);
 void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
 
 void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,

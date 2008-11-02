@@ -131,6 +131,17 @@ char * Libelle_fonte(int Indice)
     Libelle[Indice]=Nom_fonte[Indice];
   return Libelle;
 }
+// Vérifie si une fonte donnée est TrueType
+int TrueType_fonte(int Indice)
+{
+  T_FONTE *Fonte = Liste_fontes_debut;
+  if (Indice<0 ||Indice>=Fonte_nombre)
+    return 0;
+  while (Indice--)
+    Fonte = Fonte->Suivante;
+  return Fonte->EstTrueType;
+}
+
 
 
 // Initialisation à faire une fois au début du programme
@@ -195,8 +206,17 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
     return NULL;
   }
   // Couleurs
-  Couleur_Avant = Conversion_couleur_SDL(Fore_color);
-  Couleur_Arriere = Conversion_couleur_SDL(Back_color);
+  if (AntiAlias)
+  {
+    Couleur_Avant = Conversion_couleur_SDL(Fore_color);
+    Couleur_Arriere = Conversion_couleur_SDL(Back_color);
+  }
+  else
+  {
+    Couleur_Avant = Conversion_couleur_SDL(CM_Blanc);
+    Couleur_Arriere = Conversion_couleur_SDL(CM_Noir);
+  }
+
   
   // Rendu du texte: crée une surface SDL RGB 24bits
   if (AntiAlias)
@@ -241,14 +261,15 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
   }
   if (!AntiAlias)
   {
-  // Mappage des couleurs
-  /*for (Indice=0; Indice < Texte8Bit->w * Texte8Bit->h; Indice++)
-  {
-    if ()
-    *(BrosseRetour+Indice)=*(BrosseRetour+Indice) ? (*(BrosseRetour+Indice)+96-15) : 0;
-  }*/
+    // Mappage des couleurs
+    for (Indice=0; Indice < Texte8Bit->w * Texte8Bit->h; Indice++)
+    {
+      if (*(BrosseRetour+Indice) == CM_Noir)
+      *(BrosseRetour+Indice)=Back_color;
+      else if (*(BrosseRetour+Indice) == CM_Blanc)
+      *(BrosseRetour+Indice)=Fore_color;
+    }
   }
-  
   *Largeur=Texte8Bit->w;
   *Hauteur=Texte8Bit->h;
   SDL_FreeSurface(Texte8Bit);

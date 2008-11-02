@@ -1323,6 +1323,13 @@ void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char *
   Print_dans_fenetre(Enreg->Pos_X+2,Enreg->Pos_Y+2,Contenu,CM_Noir,CM_Clair);
 }
 
+//------------ Effacer le contenu (caption) d'une zone de saisie ------------
+
+void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg)
+{
+  Block((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,(Enreg->Largeur/8)*8*Menu_Facteur_X,8*Menu_Facteur_Y,CM_Clair);
+  UpdateRect((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,Enreg->Largeur/8*8*Menu_Facteur_X,8*Menu_Facteur_Y);
+}
 
 
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
