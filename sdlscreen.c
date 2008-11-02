@@ -21,6 +21,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <string.h>
+#include <stdlib.h>
 #include <SDL/SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
@@ -230,6 +231,38 @@ void Clear_brush_SDL (word Pos_X,word Pos_Y,__attribute__((unused)) word Decalag
     Dest+=Largeur_ecran;
   }
   UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
+}
+
+// Affiche une brosse (arbitraire) à l'écran
+void Affiche_brosse_SDL(byte * B, word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
+{
+  // EDI = Position à l'écran
+  byte* EDI = Ecran + Pos_Y * Largeur_ecran + Pos_X;
+  // ESI = Position dans la brosse
+  byte* ESI = B + Decalage_Y * Largeur_brosse + Decalage_X;
+  
+  word DX,CX;
+  
+  // Pour chaque ligne
+  for(DX = Hauteur;DX > 0; DX--)
+  {
+    // Pour chaque pixel
+    for(CX = Largeur;CX > 0; CX--)
+    {
+      // On vérifie que ce n'est pas la transparence
+      if(*ESI != Couleur_de_transparence)
+      {
+        *EDI = *ESI;
+      }
+
+      // Pixel suivant
+      ESI++; EDI++;
+    }
+
+    // On passe à la ligne suivante
+    EDI = EDI + Largeur_ecran - Largeur;
+    ESI = ESI + Largeur_brosse - Largeur;
+  }
 }
 
 void Remap_screen_SDL (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)

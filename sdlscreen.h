@@ -54,5 +54,6 @@
   void Flush_update(void);
   byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination);
   SDL_Color Conversion_couleur_SDL(byte);
-  
+  void Affiche_brosse_SDL(byte * B, word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
+
 #endif // SDLSCREEN_H_INCLUDED

@@ -5742,7 +5742,7 @@ void Bouton_Texte()
   static int AntiAlias=0;
   static short Debut_liste=0, Position_curseur=0; // Selecteur de fonte
 
-  byte * Nouvelle_Brosse;
+  byte * Nouvelle_Brosse=NULL;
   int Nouvelle_Largeur;
   int Nouvelle_Hauteur;
   int Bouton_clicke;  
@@ -5750,7 +5750,9 @@ void Bouton_Texte()
   char Buffer_taille[3];
   struct Fenetre_Bouton_special * Bouton_taille_texte;
   struct Fenetre_Bouton_special * Bouton_texte;
+  struct Fenetre_Bouton_special * Bouton_preview;
   byte A_redessiner=1;
+  byte A_previsionner=1;
   short Temp;
   
   Ouvrir_fenetre(288,180,"Text");
@@ -5783,6 +5785,7 @@ void Bouton_Texte()
   
   // Preview
   Fenetre_Definir_bouton_special(7,105,276,50); // 9
+  Bouton_preview=Fenetre_Liste_boutons_special;
   Fenetre_Afficher_cadre_creux(6, 104, 278, 52);
   
   Fenetre_Definir_bouton_special(0,0,1,1); // 10 ???
@@ -5790,8 +5793,6 @@ void Bouton_Texte()
   Fenetre_Definir_bouton_normal(7,161,40,14,"OK",0,1,SDLK_RETURN); // 11
   Fenetre_Definir_bouton_normal(53,161,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
   Display_Window(288,180);
-  
-  // Redessin
   
   // Chaine texte
   Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
@@ -5808,32 +5809,85 @@ void Bouton_Texte()
       Fenetre_Contenu_bouton_saisie(Bouton_taille_texte,Buffer_taille);
       // Selecteur de fonte
       Dessiner_selecteur_fontes(111, 33, Debut_liste, Position_curseur, NB_FONTES);
-      
+    }
+    if (A_previsionner)
+    {
+      const char * Chaine_preview = "AaBbCcDdEeFf012345";
+      if (Chaine[0])
+        Chaine_preview=Chaine;
+      if (Nouvelle_Brosse)
+      {
+        free(Nouvelle_Brosse);
+      }
+      Block(
+        Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
+        Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
+        Bouton_preview->Largeur*Menu_Facteur_X,
+        Bouton_preview->Hauteur*Menu_Facteur_Y,
+        CM_Clair);
+      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      if (Nouvelle_Brosse)
+      {
+        Affiche_brosse_SDL(
+          Nouvelle_Brosse,
+          Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
+          Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
+          0,
+          0,
+          Min(Bouton_preview->Largeur*Menu_Facteur_X, Nouvelle_Largeur),
+          Min(Bouton_preview->Hauteur*Menu_Facteur_Y, Nouvelle_Hauteur),
+          Back_color,
+          Nouvelle_Largeur);
+      }
+      UpdateRect(
+        Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
+        Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
+        Bouton_preview->Largeur*Menu_Facteur_X,
+        Bouton_preview->Hauteur*Menu_Facteur_Y);
+    }
+    if (A_redessiner || A_previsionner)
+    {    
       A_redessiner=0;
+      A_previsionner=0;
       Afficher_curseur();
     }
   
     Bouton_clicke=Fenetre_Bouton_clicke();
+    if (Bouton_clicke==0)
+    {
+      if (Touche==SDLK_UP && Debut_liste>1)
+      {
+        Touche=0;
+        Bouton_clicke=4;
+        Fenetre_Attribut2=Debut_liste-1;
+      }
+      if (Touche==SDLK_DOWN && Debut_liste+1+NB_FONTES<=Fonte_nombre)
+      {
+        Touche=0;
+        Bouton_clicke=4;
+        Fenetre_Attribut2=Debut_liste+1;
+      }      
+    }
     switch(Bouton_clicke)
     {
       case 1: // Texte saisi
       Effacer_curseur();
       Readline(43,20,Chaine,30,0);
-      Afficher_curseur();
+      A_previsionner=1;
       break;
       
       case 2: // Clear
       Chaine[0]='\0';
       Effacer_curseur();
       Fenetre_Effacer_bouton_saisie(Bouton_texte);
-      Afficher_curseur();
+      A_previsionner=1;
       break;
       
       case 3: // AA
       AntiAlias = (AntiAlias==0);
       Effacer_curseur();
       Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
-      Afficher_curseur();
+      A_previsionner=1;
       break;
       
       case 4: // Scroller des fontes
@@ -5856,6 +5910,7 @@ void Bouton_Texte()
         // On affiche à nouveau la liste
         Effacer_curseur();
         A_redessiner=1;
+        A_previsionner=1;
       }
       break;
             
@@ -5873,14 +5928,16 @@ void Bouton_Texte()
         Taille_police = 500;
       }
       A_redessiner=1;
+      A_previsionner=1;
       break;
       
       case 7: // Taille -
-      if (Taille_police > 0)
+      if (Taille_police > 1)
       {
         Taille_police--;
         Effacer_curseur();
         A_redessiner=1;
+        A_previsionner=1;
       }
       break;
       
@@ -5890,19 +5947,21 @@ void Bouton_Texte()
         Taille_police++;
         Effacer_curseur();
         A_redessiner=1;
+        A_previsionner=1;
       }
       break;
       
     
       case 11: // OK
-      // Rendu texte
-      Nouvelle_Brosse = NULL;
-      if (Chaine[0])
+      if (Chaine[0]=='\0')
       {
-        Nouvelle_Brosse = Rendu_Texte(Chaine, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+        // Pas de texte saisie: on fait seulement le ménage et on sort.
+        free(Nouvelle_Brosse);
+        Nouvelle_Brosse=NULL;
       }
       if (!Nouvelle_Brosse)
       {
+        // Pas de texte saisi, ou echec de rendu.
         Fermer_fenetre();
         Desenclencher_bouton(BOUTON_TEXTE);
         Afficher_curseur();
@@ -5935,8 +5994,9 @@ void Bouton_Texte()
       }
       return;
       
-      // Attention pas de break
       case 12: // Cancel
+      if (Nouvelle_Brosse)
+        free(Nouvelle_Brosse);
       Fermer_fenetre();
       Desenclencher_bouton(BOUTON_TEXTE);
       Afficher_curseur();
