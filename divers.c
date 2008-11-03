@@ -156,6 +156,7 @@ void Get_input(void)
     SDL_Event event;
 
     Touche=0;
+    byte ok = 0;
 
     if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
     {
@@ -181,9 +182,24 @@ void Get_input(void)
                 //Bouton souris relaché
                 INPUT_Nouveau_Mouse_K=0;
             break;
+	    case SDL_KEYUP:
+            	Touche = Conversion_Touche(event.key.keysym);
+                Touche_ANSI = Conversion_ANSI(event.key.keysym);
+
+		if(Touche == Config_Touche[4])
+		{
+                    INPUT_Nouveau_Mouse_K=0;
+                    ok=1;
+		}
+                else if(Touche == Config_Touche[5])
+                {
+                    //[Touche] = Emulation de MOUSE CLICK RIGHT
+                    INPUT_Nouveau_Mouse_K=0;
+                    ok=1;
+                }
+	    break;
             case SDL_KEYDOWN:
             {
-                byte ok = 0;
                 //Appui sur une touche du clavier
             		Touche = Conversion_Touche(event.key.keysym);
                 Touche_ANSI = Conversion_ANSI(event.key.keysym);
