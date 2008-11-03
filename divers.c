@@ -183,15 +183,14 @@ void Get_input(void)
                 INPUT_Nouveau_Mouse_K=0;
             break;
 	    case SDL_KEYUP:
-            	Touche = Conversion_Touche(event.key.keysym);
-                Touche_ANSI = Conversion_ANSI(event.key.keysym);
+            	int ToucheR = Conversion_Touche(event.key.keysym);
 
-		if(Touche == Config_Touche[4])
+		if(ToucheR == Config_Touche[4])
 		{
                     INPUT_Nouveau_Mouse_K=0;
                     ok=1;
 		}
-                else if(Touche == Config_Touche[5])
+                else if(ToucheR == Config_Touche[5])
                 {
                     //[Touche] = Emulation de MOUSE CLICK RIGHT
                     INPUT_Nouveau_Mouse_K=0;
