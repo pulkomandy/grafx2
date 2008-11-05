@@ -5738,9 +5738,10 @@ void Dessiner_selecteur_fontes(short X, short Y, short Debut_liste, short Positi
 void Bouton_Texte()
 {
   static char Chaine[256]="";
-  static int Taille_police=16;
-  static int AntiAlias=0;
-  static short Debut_liste=0, Position_curseur=0; // Selecteur de fonte
+  static int Taille_police=32;
+  static int AntiAlias=1;
+  static short Debut_liste=0; // Indice de le premiere fonte dans le selector
+  static short Position_curseur=0; // Indice de la ligne active dans le selector
 
   byte * Nouvelle_Brosse=NULL;
   int Nouvelle_Largeur;
@@ -5751,6 +5752,7 @@ void Bouton_Texte()
   struct Fenetre_Bouton_special * Bouton_taille_texte;
   struct Fenetre_Bouton_special * Bouton_texte;
   struct Fenetre_Bouton_special * Bouton_preview;
+  struct Fenetre_Bouton_scroller * Scroller_de_fontes;
   byte A_redessiner=1;
   byte A_previsionner=1;
   short Temp;
@@ -5771,7 +5773,7 @@ void Bouton_Texte()
   
   // Scroller des fontes
   Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 4
-  
+  Scroller_de_fontes=Fenetre_Liste_boutons_scroller;
   // Liste des fontes disponibles
   Fenetre_Definir_bouton_special(111,32,168,NB_FONTES*8); // 5
   Fenetre_Afficher_cadre_creux(110, 31, 170, NB_FONTES*8+4);
@@ -5855,18 +5857,75 @@ void Bouton_Texte()
     Bouton_clicke=Fenetre_Bouton_clicke();
     if (Bouton_clicke==0)
     {
-      if (Touche==SDLK_UP && Debut_liste>1)
+      if (Touche==SDLK_UP && (Position_curseur+Debut_liste)>0)
       {
         Touche=0;
-        Bouton_clicke=4;
-        Fenetre_Attribut2=Debut_liste-1;
+        Effacer_curseur();
+        Position_curseur--;
+        if (Position_curseur<0)
+        {
+          Debut_liste=Debut_liste+Position_curseur;
+          Position_curseur=0;
+          // Mise à jour du scroller
+          Scroller_de_fontes->Position=Debut_liste;
+          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        }
+        A_redessiner=1;
+        A_previsionner=1;
       }
-      if (Touche==SDLK_DOWN && Debut_liste+1+NB_FONTES<=Fonte_nombre)
+      if (Touche==SDLK_DOWN && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
       {
         Touche=0;
-        Bouton_clicke=4;
-        Fenetre_Attribut2=Debut_liste+1;
-      }      
+        Effacer_curseur();
+        Position_curseur++;
+        if (Position_curseur>(NB_FONTES-1))
+        {
+          Debut_liste=Debut_liste+Position_curseur-(NB_FONTES-1);
+          Position_curseur=(NB_FONTES-1);
+          // Mise à jour du scroller
+          Scroller_de_fontes->Position=Debut_liste;
+          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        }
+        A_redessiner=1;
+        A_previsionner=1;
+      }
+      if (Touche==SDLK_HOME && (Position_curseur!=0 || Debut_liste!=0))
+      {
+        Touche=0;
+        Effacer_curseur();
+        Position_curseur=0;
+        Debut_liste=0;
+        // Mise à jour du scroller
+        Scroller_de_fontes->Position=Debut_liste;
+        Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        A_redessiner=1;
+        A_previsionner=1;
+      }
+      if (Touche==SDLK_END && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
+      {
+        Touche=0;
+        Effacer_curseur();
+        /*
+        if (Position_curseur<(NB_FONTES-1))
+          Position_curseur=(NB_FONTES-1);
+        else
+        {
+          Position_curseur+=NB_FONTES;
+          if (Position_curseur+Debut_liste >= (Fonte_nombre-1))
+            Position_curseur = Fonte_nombre-1-Debut_liste;
+        }*/
+        Position_curseur=(Fonte_nombre-1)-Debut_liste;
+        if (Position_curseur>(NB_FONTES-1))
+        {
+          Debut_liste=Debut_liste+Position_curseur-(NB_FONTES-1);
+          Position_curseur=(NB_FONTES-1);
+          // Mise à jour du scroller
+          Scroller_de_fontes->Position=Debut_liste;
+          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        }
+        A_redessiner=1;
+        A_previsionner=1;
+      }
     }
     switch(Bouton_clicke)
     {
@@ -5953,22 +6012,15 @@ void Bouton_Texte()
       
     
       case 11: // OK
-      if (Chaine[0]=='\0')
-      {
-        // Pas de texte saisie: on fait seulement le ménage et on sort.
-        free(Nouvelle_Brosse);
-        Nouvelle_Brosse=NULL;
-      }
       if (!Nouvelle_Brosse)
       {
-        // Pas de texte saisi, ou echec de rendu.
+        // Si echec de rendu
         Fermer_fenetre();
         Desenclencher_bouton(BOUTON_TEXTE);
         Afficher_curseur();
         Erreur(0);
         return;
       }
-      Effacer_curseur();
       if (Brosse) free(Brosse);
     
       Brosse=Nouvelle_Brosse;
@@ -5976,10 +6028,13 @@ void Bouton_Texte()
       Brosse_Hauteur=Nouvelle_Hauteur;
       Brosse_Decalage_X=Brosse_Largeur>>1;
       Brosse_Decalage_Y=Brosse_Hauteur>>1;
+ 
+      // Fermeture
       Fermer_fenetre();
       Desenclencher_bouton(BOUTON_TEXTE);
       
       // On passe en brosse:
+      Afficher_curseur();
       if (AntiAlias || !TrueType_fonte(Position_curseur+Debut_liste))
         Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
       else
@@ -5992,6 +6047,7 @@ void Bouton_Texte()
         while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
           Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
       }
+      //Afficher_curseur();
       return;
       
       case 12: // Cancel
