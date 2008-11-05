@@ -47,7 +47,31 @@ else
     NOTTF = 1
   else
 
-    # Linux specific
+  #BeOS specific
+  ifeq ($(PLATFORM),BeOS)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    BIN = grafx2
+    CFGBIN = gfxcfg
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    CC = gcc
+    OBJDIR = obj/beos
+  else
+
+  #Haiku specific
+  ifeq ($(PLATFORM),Haiku)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    BIN = grafx2
+    CFGBIN = gfxcfg
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    CC = gcc
+    OBJDIR = obj/haiku
+  else
+  
+      # Linux specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     ifdef WIN32CROSS
@@ -68,6 +92,8 @@ else
     endif
   endif
 endif
+endif
+endif
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
 ifeq ($(NOTTF),1)
@@ -77,7 +103,7 @@ ifeq ($(NOTTF),1)
   TTFLABEL = -nottf
 else
   TTFCOPT = 
-  TTFLOPT = -L/usr/local/lib -lSDL_ttf
+  TTFLOPT = `sdl-config --libs` -lSDL_ttf
   TTFLIBS = libfreetype-6.dll SDL_ttf.dll
   TTFLABEL = 
 endif

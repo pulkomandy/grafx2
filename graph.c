@@ -997,6 +997,7 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   int Sensibilite_X;
   int Sensibilite_Y;
   int Indice;
+  int Facteur;
   
   if (Largeur_ecran!=Largeur ||
       Hauteur_ecran!=Hauteur ||
@@ -1011,7 +1012,6 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
 
     // Taille des menus
-    int Facteur;
     if (Largeur/320 > Hauteur/200)
       Facteur=Hauteur/200;
     else
@@ -4484,13 +4484,14 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
 //	- une droite avec une pente de 45 degrés
 {
     int dx, dy;
+    float tan;
 
     dx = (*BX)-AX;
     dy = AY- *BY; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
 
     if (dx==0) return; // On est en lockx et de toutes façons le X n'a pas bougé, on sort tout de suite pour éviter une méchante division par 0
 
-    float tan = (float)dy/(float)dx;
+    tan = (float)dy/(float)dx;
 
     if (tan <= 0.4142 && tan >= -0.4142)
     {
@@ -5221,10 +5222,12 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
     }
     else
     {
-	Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
-	short a = (VBY - VAY)/(VBX - VAX);
-	short b = VAY - a*VAX;
+	short a,b;
 	int Distance_X, Distance_Y;
+
+	Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
+	a = (VBY - VAY)/(VBX - VAX);
+	b = VAY - a*VAX;
 
 	for (Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
 	    for (Pos_X = RAX;Pos_X<=RBX;Pos_X++)

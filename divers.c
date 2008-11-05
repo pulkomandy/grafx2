@@ -156,6 +156,7 @@ void Get_input(void)
   SDL_Event event;
 
   Touche=0;
+  {
   byte ok = 0;
 
   if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
@@ -363,6 +364,7 @@ void Get_input(void)
   // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente. 
   // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
   Flush_update();
+  }
 }
 
 

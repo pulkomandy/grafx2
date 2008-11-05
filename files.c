@@ -44,7 +44,7 @@
 #include "io.h"
 
 
-#ifdef __linux__
+#if defined(__linux__)||defined(__BEOS__)||defined(__HAIKU__)
     #include <dirent.h>
     #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
 #elif defined(__amigaos4__)

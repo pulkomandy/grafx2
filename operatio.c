@@ -4239,7 +4239,7 @@ void Rectangle_Degrade_0_5(void)
   short RAX;
   short RAY;
   short RBX;
-  short RBY;
+  short RBY, largeur,hauteur;
 
 
   // Tracé propre du rectangle
@@ -4252,8 +4252,8 @@ void Rectangle_Degrade_0_5(void)
   Pinceau_Y = RAY;
   Effacer_curseur();
 
-  short largeur = abs(RBX-RAX);
-  short hauteur = abs(RBY-RAY);
+  largeur = abs(RBX-RAX);
+  hauteur = abs(RBY-RAY);
   Ligne_horizontale_XOR(Min(RAX,RBX),Min(RAY,RBY),largeur);
   Ligne_horizontale_XOR(Min(RAX,RBX),Max(RAY,RBY)-1,largeur);
   Ligne_verticale_XOR(Min(RAX,RBX),Min(RAY,RBY),hauteur);

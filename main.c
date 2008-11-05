@@ -51,10 +51,14 @@
 
 #ifndef __linux__
 #ifndef __amigaos4__
+#ifndef __BEOS__
+#ifndef __HAIKU__
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
     #define M_PI 3.14159265358979323846
+#endif
+#endif
 #endif
 #endif
 
@@ -223,7 +227,7 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        #if defined(__linux__) || defined(__amigaos4__)
+        #if defined(__linux__) || defined(__amigaos4__) || defined(__BEOS__) || defined(__HAIKU__)
           Buffer=realpath(argv[Indice],NULL);
         #else
           Buffer = malloc(TAILLE_CHEMIN_FICHIER);
@@ -233,7 +237,11 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
         #ifndef __linux__
         #ifndef __amigaos4__
+        #ifndef __BEOS__
+        #ifndef __HAIKU__
           free(Buffer);
+        #endif
+        #endif
         #endif
         #endif
         chdir(Principal_Repertoire_fichier);

@@ -50,7 +50,11 @@
 
 #ifndef __linux__
 #ifndef __amigaos4__
+#ifndef __BEOS__
+#ifndef __HAIKU__
 #include "windows.h"
+#endif
+#endif
 #endif
 #endif
 
@@ -112,7 +116,10 @@ void Rechercher_drives(void)
 	char * Home = getenv("HOME");
 	Ajouter_lecteur('/', LECTEUR_HDD, "/");
 	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
-
+  #elif defined(__BEOS__) || defined(__HAIKU__)
+	char * Home = getenv("$HOME");
+	Ajouter_lecteur('/', LECTEUR_HDD, "/");
+	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
   #elif defined(__amigaos4__)
   // No icons by default.
   // It's possible to add some here.
@@ -189,10 +196,10 @@ void Charger_DAT(void)
       case EBADF:  puts("filedes est un mauvais descripteur."); break;
       case EFAULT: puts("Un pointeur se trouve en dehors de l'espace d'adressage."); break;
       case ENAMETOOLONG: puts("Nom de fichier trop long."); break;
-      case ENOENT: puts("Un composant du chemin path n'existe pas, ou il s'agit d'une chaîne vide."); break;
+      case ENOENT: puts("The file path is empty or points to a non-existing directory."); break;
       case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
       case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
-      #if defined(__linux__)||defined(__amigaos4__)
+      #if defined(__linux__)||defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
           case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
       #endif
     }

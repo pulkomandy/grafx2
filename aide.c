@@ -45,7 +45,11 @@
   #endif
 #else
 #ifndef __amigaos4__
+#ifndef __BEOS__
+#ifndef __HAIKU__
     #include <windows.h>
+#endif
+#endif
 #endif
 #endif
 
@@ -317,7 +321,7 @@ void Bouton_Stats(void)
     struct statfs Informations_Disque;
     uint64_t Taille = 0;
   #else
-    #ifdef __amigaos4__
+    #if defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
       uint64_t Taille = 0;
     #else
       unsigned __int64 Taille;
@@ -368,11 +372,11 @@ void Bouton_Stats(void)
   #ifdef __linux__
     statfs(Principal_Repertoire_courant,&Informations_Disque);
     Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
-  #else
-    #ifdef __amigaos4__
     #else
-      GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
-      Taille = tailleU.QuadPart;
+      #if defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
+    #else
+     GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
+     Taille = tailleU.QuadPart;
     #endif
   #endif
   

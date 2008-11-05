@@ -255,6 +255,10 @@ static const char * TableAideCredits[] =
   AIDE_TEXTE("")                                          //
   AIDE_TEXTE("  hitchhikr")                               //
   AIDE_TEXTE("")
+  AIDE_BOLD ("           HAIKU OS AND BEOS PORT")         //
+  AIDE_TEXTE("")                                          //
+  AIDE_TEXTE("  Luc Schrijvers (begasus@skynet.be)")      //
+  AIDE_TEXTE("")
   AIDE_BOLD("                 BUGFINDERS")                //
   AIDE_TEXTE("")                                          //
   AIDE_TEXTE("  Ced       El Topo   fallenblood Frost")
