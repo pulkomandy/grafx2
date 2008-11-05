@@ -37,6 +37,7 @@
 #include "const.h"
 #include "linux.h"
 #include "sdlscreen.h"
+#include "readline.h"
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
@@ -99,11 +100,32 @@ void Rafficher_toute_la_chaine(word Pos_X,word Pos_Y,char * Chaine,byte Position
   Print_char_dans_fenetre(Pos_X+(Position<<3),Pos_Y,Chaine[Position],COULEUR_TEXTE_CURSEUR,COULEUR_FOND_CURSEUR);
 }
 
-
 //****************************************************************************
 //*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
 //****************************************************************************
 byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type_saisie)
+// Paramètres:
+//   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
+//   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   Taille_maxi  : Nombre de caractères logeant dans la zone de saisie
+//   Type_saisie  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+// Sortie:
+//   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
+{
+  byte Taille_maxi;
+  // Grosse astuce pour les noms de fichiers: La taille affichée est différente
+  // de la taille maximum gérée.
+  if (Type_saisie == 2)
+    Taille_maxi = 255;
+  else
+    Taille_maxi = Taille_affichee;
+  return Readline_ex(Pos_X,Pos_Y,Chaine,Taille_affichee,Taille_maxi,Type_saisie);
+}
+
+//****************************************************************************
+//*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
+//****************************************************************************
+byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Taille_maxi, byte Type_saisie)
 // Paramètres:
 //   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
 //   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
@@ -118,13 +140,7 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
   byte Taille;
   word Touche_lue=0;
   byte Touche_autorisee;
-  byte Taille_maxi;
-  // Grosse astuce pour les noms de fichiers: La taille affichée est différente
-  // de la taille maximum gérée.
-  if (Type_saisie == 2)
-    Taille_maxi = 255;
-  else
-    Taille_maxi = Taille_affichee;
+
   byte Offset=0; // Indice du premier caractère affiché
 
 

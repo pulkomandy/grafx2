@@ -1320,7 +1320,7 @@ void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caract
 
 void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char * Contenu)
 {
-  Print_dans_fenetre(Enreg->Pos_X+2,Enreg->Pos_Y+2,Contenu,CM_Noir,CM_Clair);
+  Print_dans_fenetre_limite(Enreg->Pos_X+2,Enreg->Pos_Y+2,Contenu,Enreg->Largeur/8,CM_Noir,CM_Clair);
 }
 
 //------------ Effacer le contenu (caption) d'une zone de saisie ------------

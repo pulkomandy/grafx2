@@ -1542,7 +1542,7 @@ void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Co
 {
   char Chaine_affichee[256];
   strncpy(Chaine_affichee, Chaine, Taille);
-  Chaine_affichee[255]='\0';
+  Chaine_affichee[Taille]='\0';
   
   if (strlen(Chaine_affichee) > Taille)
   {

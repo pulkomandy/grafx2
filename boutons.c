@@ -5905,15 +5905,6 @@ void Bouton_Texte()
       {
         Touche=0;
         Effacer_curseur();
-        /*
-        if (Position_curseur<(NB_FONTES-1))
-          Position_curseur=(NB_FONTES-1);
-        else
-        {
-          Position_curseur+=NB_FONTES;
-          if (Position_curseur+Debut_liste >= (Fonte_nombre-1))
-            Position_curseur = Fonte_nombre-1-Debut_liste;
-        }*/
         Position_curseur=(Fonte_nombre-1)-Debut_liste;
         if (Position_curseur>(NB_FONTES-1))
         {
@@ -5931,7 +5922,7 @@ void Bouton_Texte()
     {
       case 1: // Texte saisi
       Effacer_curseur();
-      Readline(43,20,Chaine,30,0);
+      Readline_ex(43,20,Chaine,30,250,0);
       A_previsionner=1;
       break;
       
