@@ -53,7 +53,7 @@ else
     MKDIR = mkdir -p
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/beos
@@ -65,7 +65,7 @@ else
     MKDIR = mkdir -p
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/haiku
