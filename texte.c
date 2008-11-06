@@ -59,29 +59,46 @@ T_FONTE * Liste_fontes_debut;
 T_FONTE * Liste_fontes_fin;
 int Fonte_nombre;
 
+// Inspiré par Allegro
+#define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
+
 // Ajout d'une fonte à la liste.
 void Ajout_fonte(const char *Nom)
 {
   T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
   int Taille=strlen(Nom)+1;
+  // Détermination du type:
+  if (Taille<5 ||
+    Nom[Taille-5]!='.')
+    return;
+  switch (EXTID(tolower(Nom[Taille-4]), tolower(Nom[Taille-3]), tolower(Nom[Taille-2])))
+  {
+    case EXTID('t','t','f'):
+    case EXTID('f','o','n'):
+      Fonte->EstTrueType = 1;
+      Fonte->EstImage = 0;
+      break;
+    case EXTID('b','m','p'):
+    case EXTID('g','i','f'):
+    case EXTID('j','p','g'):
+    case EXTID('l','b','m'):
+    case EXTID('p','c','x'):
+    case EXTID('p','n','g'):
+    case EXTID('t','g','a'):
+    case EXTID('t','i','f'):
+    case EXTID('x','c','f'):
+    case EXTID('x','p','m'):
+    case EXTID('.','x','v'):
+      Fonte->EstTrueType = 0;
+      Fonte->EstImage = 1;
+      break;
+    default:
+      return;
+  }
+
   Fonte->Nom = (char *)malloc(Taille);
   strcpy(Fonte->Nom, Nom);
-  // Détermination du type:
-  // On va faire simple: .TTF c'est TrueType, sinon on tente Bitmap.
-  if (Taille>=5 &&
-    Fonte->Nom[Taille-5]=='.' &&
-    tolower(Fonte->Nom[Taille-4]) == 't' &&
-    tolower(Fonte->Nom[Taille-3]) == 't' &&
-    tolower(Fonte->Nom[Taille-2]) == 'f')
-  {
-    Fonte->EstTrueType = 1;
-    Fonte->EstImage = 0;
-  }
-  else
-  {
-    Fonte->EstTrueType = 0;
-    Fonte->EstImage = 1;
-  }
+
   // Gestion Liste
   Fonte->Suivante = NULL;
   if (Liste_fontes_debut==NULL)
@@ -194,7 +211,6 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
   SDL_Surface * Texte8Bit;
   byte * BrosseRetour;
   int Indice;
-  SDL_Color PaletteSDL[256];
   
   SDL_Color Couleur_Avant;
   SDL_Color Couleur_Arriere;
@@ -230,25 +246,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
   }
   
   Texte8Bit=SDL_DisplayFormat(TexteColore);
-  /*
-  
-  Texte8Bit=SDL_CreateRGBSurface(SDL_SWSURFACE, TexteColore->w, TexteColore->h, 8, 0, 0, 0, 0);
-  if (!Texte8Bit)
-  {
-    SDL_FreeSurface(TexteColore);
-    TTF_CloseFont(Fonte);
-    return NULL;
-  }
 
-  for(Indice=0;Indice<256;Indice++)
-  {
-    PaletteSDL[Indice].r=(Principal_Palette[Indice].R<<2) + (Principal_Palette[Indice].R>>4); //Les couleurs VGA ne vont que de 0 à 63
-    PaletteSDL[Indice].g=(Principal_Palette[Indice].V<<2) + (Principal_Palette[Indice].V>>4);
-    PaletteSDL[Indice].b=(Principal_Palette[Indice].B<<2) + (Principal_Palette[Indice].B>>4);
-  }
-  SDL_SetPalette(Texte8Bit,SDL_PHYSPAL|SDL_LOGPAL,PaletteSDL,0,256);
-  SDL_BlitSurface(TexteColore, NULL, Texte8Bit, NULL);
-  */
   SDL_FreeSurface(TexteColore);
     
   BrosseRetour=Surface_en_bytefield(Texte8Bit, NULL);

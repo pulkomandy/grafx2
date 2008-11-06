@@ -5917,6 +5917,8 @@ void Bouton_Texte()
         A_redessiner=1;
         A_previsionner=1;
       }
+      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+        Fenetre_aide(BOUTON_TEXTE, NULL);
     }
     switch(Bouton_clicke)
     {

@@ -103,7 +103,7 @@ ifeq ($(NOTTF),1)
   TTFLABEL = -nottf
 else
   TTFCOPT = 
-  TTFLOPT = `sdl-config --libs` -lSDL_ttf
+  TTFLOPT = -L/usr/local/lib -lSDL_ttf
   TTFLIBS = libfreetype-6.dll SDL_ttf.dll
   TTFLABEL = 
 endif
