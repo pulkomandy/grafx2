@@ -4254,8 +4254,8 @@ void Rectangle_Degrade_0_5(void)
 
   largeur = abs(RBX-RAX);
   hauteur = abs(RBY-RAY);
-  Ligne_horizontale_XOR(Min(RAX,RBX),Min(RAY,RBY),largeur);
-  Ligne_horizontale_XOR(Min(RAX,RBX),Max(RAY,RBY)-1,largeur);
+  Ligne_horizontale_XOR(Min(RAX,RBX),Min(RAY,RBY),largeur); // FIXME: ceci ne gère pas le zoom
+  Ligne_horizontale_XOR(Min(RAX,RBX),Max(RAY,RBY)-1,largeur); // ni si l'offset est !=0
   Ligne_verticale_XOR(Min(RAX,RBX),Min(RAY,RBY),hauteur);
   Ligne_verticale_XOR(Max(RAX,RBX)-1,Min(RAY,RBY),hauteur);
   UpdateRect(Min(RAX,RBX),Min(RAY,RBY),largeur+1,hauteur+1);

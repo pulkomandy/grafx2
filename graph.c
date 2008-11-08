@@ -56,6 +56,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	short L_effectif, H_effectif;
 	short X_effectif;
 	short Y_effectif;
+	short Diff;
 
 	// Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
 	if (Largeur < 0)
@@ -71,8 +72,22 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 	}
 
 	// D'abord on met à jour dans la zone écran normale
-	X_effectif = Max(X-Principal_Decalage_X,0);
-	Y_effectif = Max(Y-Principal_Decalage_Y,0);
+  Diff = X-Principal_Decalage_X;
+  if (Diff<0)
+  {
+    Largeur += Diff;
+    X_effectif = 0;
+  }
+  else
+    X_effectif = Diff;
+  Diff = Y-Principal_Decalage_Y;
+  if (Diff<0)
+  {
+    Hauteur += Diff;
+    Y_effectif = 0;
+  }
+  else
+    Y_effectif = Diff;
 
 	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
@@ -82,33 +97,54 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 
 	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
 	else H_effectif = Menu_Ordonnee - Y_effectif;
-
+	/*
+		SDL_Rect r;
+		r.x=X_effectif;
+		r.y=Y_effectif;
+		r.h=H_effectif;
+		r.w=L_effectif;
+		SDL_FillRect(Ecran_SDL,&r,3);
+  */
 	UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
 
 	// Et ensuite dans la partie zoomée
 	if(Loupe_Mode)
 	{
-		X_effectif = Min(Max((X-Loupe_Decalage_X)*Loupe_Facteur + 6 + Principal_Split + LARGEUR_BARRE_SPLIT,0), Largeur_ecran); // TODO: trouver d'ou sort le 6!
-		Y_effectif = Min(Max(Y-Loupe_Decalage_Y,0) * Loupe_Facteur, Menu_Ordonnee);
+	  // Clipping en X
+	  X_effectif = (X-Loupe_Decalage_X)*Loupe_Facteur;
+	  Y_effectif = (Y-Loupe_Decalage_Y)*Loupe_Facteur;
+	  L_effectif = Largeur * Loupe_Facteur;
+		H_effectif = Hauteur * Loupe_Facteur;
+		
+	  if (X_effectif < 0)
+	  {
+	    L_effectif+=X_effectif;
+      X_effectif = Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
+	  }
+	  else
+	    X_effectif += Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
+	  Diff = X_effectif+L_effectif-Largeur_ecran;
+	  if (Diff>0)
+	    L_effectif -=Diff;
+    
+    // Clipping en Y
+	  if (Y_effectif < 0)
+	  {
+	    H_effectif+=Y_effectif;
+      Y_effectif = 0;
+	  }
+	  Diff = Y_effectif+H_effectif-Menu_Ordonnee;
+	  if (Diff>0)
+	    H_effectif -=Diff;
 
-		Largeur *= Loupe_Facteur / 2; // ???!
-		Hauteur *= Loupe_Facteur;
-
-		// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
-		// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
-		// a rester dans la zone visible de l'image
-		if(X_effectif + (Largeur+2)*Menu_Facteur_X < Largeur_ecran) L_effectif = (Largeur+2) * Menu_Facteur_X;
-		else L_effectif = Largeur_ecran - X_effectif;
-
-		if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
-		else H_effectif = Menu_Ordonnee - Y_effectif;
-/* Très utile pour le debug :)
-		SDL_Rect r;
+ // Très utile pour le debug :)
+		/*SDL_Rect r;
 		r.x=X_effectif;
 		r.y=Y_effectif;
-		r.h=r.w=3;
-		SDL_FillRect(Ecran_SDL,&r,3);
-*/
+		r.h=H_effectif;
+		r.w=L_effectif;
+		SDL_FillRect(Ecran_SDL,&r,3);*/
+
 		UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
 	}
 }
@@ -1957,7 +1993,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           }
         }
 
-	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+	      Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
 
       }
       else
@@ -1974,7 +2010,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Debut_Compteur_X, Debut_Compteur_Y,
                 Smear_Brosse_Largeur
               );
-	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
             }
             Smear_Debut=0;
           }
@@ -2000,7 +2036,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
           }
 
           Smear_Min_X=Debut_Compteur_X;
@@ -2126,10 +2162,10 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
+            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
         }
       }
-	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+	    Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
       break;
     default : // Pinceau
       Debut_X=X-Pinceau_Decalage_X;
@@ -2231,7 +2267,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-	        Mettre_Ecran_A_Jour(X,Y,Largeur,Hauteur);
+	          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
         }
       }
   }
