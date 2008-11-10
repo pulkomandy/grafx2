@@ -8,13 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
+		002F39FA09D0881F10EBEB88 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F10EBEB88 /* SDL_image.framework */; };
 		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
 		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		F51CBD2E0EC8A3E1005C06AC /* 5pxtinyfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */; };
+		F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */; };
+		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
+		F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5A33E690EC893F800F8052D /* 8pxfont.png */; };
 		F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AD4B1E0EA8CCF0009CCAC4 /* version.c */; };
 		F5B138940EB71977000B83CC /* texte.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B138930EB71977000B83CC /* texte.c */; };
 		F5B138C30EB71D28000B83CC /* SDL_ttf in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B138C20EB71D28000B83CC /* SDL_ttf */; };
-		F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */ = {isa = PBXBuildFile; fileRef = F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */; };
 		F5B19B8D0EA4BE3E003F4BA4 /* aide.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B750EA4BE3E003F4BA4 /* aide.c */; };
 		F5B19B8E0EA4BE3E003F4BA4 /* boutons.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B760EA4BE3E003F4BA4 /* boutons.c */; };
 		F5B19B8F0EA4BE3E003F4BA4 /* clavier.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B770EA4BE3E003F4BA4 /* clavier.c */; };
@@ -81,10 +85,25 @@
 			name = "Copy Frameworks into .app bundle";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F5A33F1D0EC8A26C00F8052D /* Copy fonts */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */,
+				F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */,
+				F51CBD2E0EC8A3E1005C06AC /* 5pxtinyfont.png in Copy fonts */,
+				F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */,
+			);
+			name = "Copy fonts";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		002F39F909D0881F00EBEB88 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		002F39F909D0881F10EBEB88 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
 		002F3A2B09D0888800EBEB88 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
 		002F3A2C09D0888800EBEB88 /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
 		002F3A3E09D088BA00EBEB88 /* main.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = SOURCE_ROOT; };
@@ -94,11 +113,14 @@
 		32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grafx2_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Grafx2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grafx2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 5pxtinyfont.png; path = fonts/5pxtinyfont.png; sourceTree = "<group>"; };
+		F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */ = {isa = PBXFileReference; lastKnownFileType = file; name = colorfont.pcx; path = fonts/colorfont.pcx; sourceTree = "<group>"; };
+		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
+		F5A33E690EC893F800F8052D /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 8pxfont.png; path = fonts/8pxfont.png; sourceTree = "<group>"; };
 		F5AD4B1E0EA8CCF0009CCAC4 /* version.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = version.c; sourceTree = "<group>"; };
 		F5B138930EB71977000B83CC /* texte.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = texte.c; sourceTree = "<group>"; };
 		F5B138C20EB71D28000B83CC /* SDL_ttf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_ttf; path = /Library/Frameworks/SDL_ttf.framework/SDL_ttf; sourceTree = "<absolute>"; };
 		F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
-		F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 8pxfont.png; sourceTree = "<group>"; };
 		F5B19B750EA4BE3E003F4BA4 /* aide.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = aide.c; sourceTree = "<group>"; };
 		F5B19B760EA4BE3E003F4BA4 /* boutons.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = boutons.c; sourceTree = "<group>"; };
 		F5B19B770EA4BE3E003F4BA4 /* clavier.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = clavier.c; sourceTree = "<group>"; };
@@ -138,6 +160,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */,
+				002F39FA09D0881F10EBEB88 /* SDL_image.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */,
 				F5B138C30EB71D28000B83CC /* SDL_ttf in Frameworks */,
@@ -160,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				002F39F909D0881F00EBEB88 /* SDL.framework */,
+				002F39F909D0881F10EBEB88 /* SDL_image.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -185,6 +209,10 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */,
+				F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */,
+				F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */,
+				F5A33E690EC893F800F8052D /* 8pxfont.png */,
 				F5B138C20EB71D28000B83CC /* SDL_ttf */,
 				F5B138930EB71977000B83CC /* texte.c */,
 				F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */,
@@ -219,7 +247,6 @@
 				F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */,
 				F5B19B8B0EA4BE3E003F4BA4 /* shade.c */,
 				F5B19B8C0EA4BE3E003F4BA4 /* special.c */,
-				F5B19B730EA4BDF5003F4BA4 /* 8pxfont.png */,
 				F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -269,6 +296,7 @@
 				002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */,
 				002F39FD09D0883400EBEB89 /* Copy Frameworks into .app bundle */,
 				002F39FD09D0883400EBEB8A /* Copy Frameworks into .app bundle */,
+				F5A33F1D0EC8A26C00F8052D /* Copy fonts */,
 			);
 			buildRules = (
 			);
@@ -300,7 +328,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5B19B740EA4BDF5003F4BA4 /* 8pxfont.png in Resources */,
 				F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */,
 				F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */,
 				F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */,
@@ -422,7 +449,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
 					"$(FRAMEWORK_SEARCH_PATHS)",
 				);
@@ -440,7 +466,7 @@
 					"$(HEADER_SEARCH_PATHS)",
 				);
 				PREBINDING = NO;
-				PRELINK_LIBS = "-lSDL_Image";
+				PRELINK_LIBS = SDL_Image;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				ZERO_LINK = YES;
 			};
@@ -451,7 +477,6 @@
 			buildSettings = {
 				DEAD_CODE_STRIPPING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
 					"$(FRAMEWORK_SEARCH_PATHS)",
 				);
@@ -467,7 +492,7 @@
 					"$(HEADER_SEARCH_PATHS)",
 				);
 				PREBINDING = NO;
-				PRELINK_LIBS = "-lSDL_Image";
+				PRELINK_LIBS = SDL_Image;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;

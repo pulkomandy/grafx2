@@ -371,8 +371,8 @@ void Bouton_Stats(void)
 
   #ifdef __linux__
     statfs(Principal_Repertoire_courant,&Informations_Disque);
-    Taille=Informations_Disque.f_bfree * Informations_Disque.f_bsize;
-    #else
+    Taille=(uint64_t) Informations_Disque.f_bfree * (uint64_t) Informations_Disque.f_bsize;
+   #else
       #if defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
     #else
      GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);

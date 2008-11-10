@@ -1306,6 +1306,14 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
       Ratio="  16:10";
     else if (Mode_video[Mode_courant].Largeur*145 == Mode_video[Mode_courant].Hauteur*192)
       Ratio="192:145";
+    else if (Mode_video[Mode_courant].Largeur*2 == Mode_video[Mode_courant].Hauteur*3)
+      Ratio="    3:2";
+    else if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*5)
+      Ratio="    5:3";
+    else if (Mode_video[Mode_courant].Largeur*4 == Mode_video[Mode_courant].Hauteur*5)
+      Ratio="    5:4";
+    else if (Mode_video[Mode_courant].Largeur*16 == Mode_video[Mode_courant].Hauteur*25)
+      Ratio="  25:16";
     else
       Ratio="       ";
     if (Mode_courant == 0)
