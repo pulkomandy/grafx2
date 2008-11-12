@@ -2400,6 +2400,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   char  Repertoire_precedent[TAILLE_CHEMIN_FICHIER]; // Répertoire d'où l'on vient après un CHDIR
   char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
   char  Fichier_recherche[TAILLE_CHEMIN_FICHIER]="";
+  char  Nom_fichier_Save[TAILLE_CHEMIN_FICHIER];
   char * Fichier_le_plus_ressemblant;
 
   Palette_initiale=(struct Composantes *)malloc(sizeof(T_Palette));
@@ -2535,6 +2536,24 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
 
       case  1 : // Load ou Save
+	    if(Load)
+        {
+	      // Determine the type
+	      if(Fichier_existe(Principal_Nom_fichier)) 
+	      {
+	        Type_selectionne = 0;
+	        if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+	      }
+	      else
+	      {
+	        Type_selectionne = 1;
+	      }
+        }
+        else
+        {
+          if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+	      else Type_selectionne = 0;
+        }
         On_a_clicke_sur_OK=1;
         break;
 
@@ -2633,7 +2652,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             Principal_File_list_Decalage=Temp;
 
             // On récupére le nom du schmilblick à "accéder"
-                         Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
+            Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
             // On affiche le nouveau nom de fichier
             Print_Nom_fichier_dans_selecteur();
             // On affiche à nouveau la liste
@@ -2697,7 +2716,16 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
-        Principal_Nom_fichier[0] = '\0';
+
+        // Save the filename
+        strcpy(Nom_fichier_Save, Principal_Nom_fichier);
+
+        // Erase the content when the right mouse button is used.
+
+        if (Mouse_K==2)
+        {
+          Principal_Nom_fichier[0] = '\0';
+        }
         if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
@@ -2745,6 +2773,12 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 	        else Type_selectionne = 0;
           }
           On_a_clicke_sur_OK=1;
+        }
+        else
+        {
+          // Restore the old filename
+          strcpy(Principal_Nom_fichier, Nom_fichier_Save);
+          Print_dans_fenetre(13+9*8,90,Principal_Nom_fichier,CM_Noir,CM_Clair);
         }
         Afficher_curseur();
         break;
