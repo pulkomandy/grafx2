@@ -258,16 +258,14 @@
 						<dict>
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
+								<string>29B97314FDCFA39411CA2CEA</string>
 								<string>1C37FBAC04509CD000000102</string>
-								<string>F51CBD120EC8A302005C06AC</string>
-								<string>F51CBD3B0EC8AB35005C06AC</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
 									<integer>9</integer>
-									<integer>2</integer>
-									<integer>1</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -413,11 +411,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F51CBD140EC8A305005C06AC</string>
+				<string>F5368CFF0EC8ADDF00444B30</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>F51CBD150EC8A305005C06AC</string>
+				<string>F5368D000EC8ADDF00444B30</string>
 				<string>F5A33EBD0EC89C3000F8052D</string>
-				<string>F51CBD160EC8A305005C06AC</string>
+				<string>F5368D010EC8ADDF00444B30</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -483,7 +481,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {193, 604}}</string>
+							<string>{{0, 0}, {0, 0}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -544,7 +542,7 @@
 						</dict>
 						<dict>
 							<key>Proportion</key>
-							<string>617pt</string>
+							<string>0pt</string>
 							<key>Tabs</key>
 							<array>
 								<dict>
@@ -562,7 +560,7 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {762, 590}}</string>
+										<string>{{10, 27}, {0, -27}}</string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
@@ -624,7 +622,7 @@
 						</dict>
 					</array>
 					<key>Proportion</key>
-					<string>762pt</string>
+					<string>0pt</string>
 				</dict>
 			</array>
 			<key>Name</key>
@@ -642,14 +640,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F51CBD1B0EC8A347005C06AC</string>
+				<string>F5368D020EC8ADDF00444B30</string>
 				<string>1CA23EE50692099D00951B8B</string>
-				<string>F51CBD1C0EC8A347005C06AC</string>
+				<string>F5368D030EC8ADDF00444B30</string>
 				<string>F5A33EC20EC89C3000F8052D</string>
-				<string>F51CBD1D0EC8A347005C06AC</string>
+				<string>F5368D040EC8ADDF00444B30</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 				<string>1CA23EE80692099D00951B8B</string>
-				<string>F51CBD1E0EC8A347005C06AC</string>
+				<string>F5368D050EC8ADDF00444B30</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.buildAndRun</string>

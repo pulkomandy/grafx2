@@ -2633,7 +2633,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             Principal_File_list_Decalage=Temp;
 
             // On récupére le nom du schmilblick à "accéder"
-            Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
+                         Determiner_element_de_la_liste(Principal_File_list_Position,Principal_File_list_Decalage,Principal_Nom_fichier,&Type_selectionne);
             // On affiche le nouveau nom de fichier
             Print_Nom_fichier_dans_selecteur();
             // On affiche à nouveau la liste
@@ -2697,6 +2697,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case  8 : // Saisie du nom de fichier
         Effacer_curseur();
+        Principal_Nom_fichier[0] = '\0';
         if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
@@ -2706,9 +2707,42 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               Bidon=1;
           if (!Bidon)
           {
-            strcat(Principal_Nom_fichier,".");
             if (Principal_Format)
-              strcat(Principal_Nom_fichier,Format_Extension[Principal_Format-1]);
+            {
+	          if(!Repertoire_existe(Principal_Nom_fichier))
+	          {
+                 strcat(Principal_Nom_fichier,".");
+                 strcat(Principal_Nom_fichier,Format_Extension[Principal_Format-1]);
+              }
+            }
+            else
+            {
+              // put default extension
+              // (but maybe we should browse through all available ones until we find
+              //  something suitable ?)
+	          if(!Repertoire_existe(Principal_Nom_fichier))
+	          {
+                 strcat(Principal_Nom_fichier, ".pkm");
+              }
+            }
+          }
+	      if(Load)
+	      {
+	        // Determine the type
+	        if(Fichier_existe(Principal_Nom_fichier)) 
+	        {
+	          Type_selectionne = 0;
+	          if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+	        }
+	        else
+	        {
+	          Type_selectionne = 1;
+	        }
+          }
+          else
+          {
+            if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+	        else Type_selectionne = 0;
           }
           On_a_clicke_sur_OK=1;
         }

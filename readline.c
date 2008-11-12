@@ -175,8 +175,8 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
 
 #ifdef __macosx__
-    Update_necessaire = 1;
-    Flush_update();
+  Update_necessaire = 1;
+  Flush_update();
 #endif
 
   while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))

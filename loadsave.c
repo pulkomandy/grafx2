@@ -1225,13 +1225,17 @@ void Save_PKM(void)
         Compteur_de_pixels++;
         Compteur_de_repetitions=1;
         Derniere_couleur=Valeur_pixel;
-        Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
+        if(Compteur_de_pixels<Taille_image)
+        {
+          Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
+        }
         while ( (Valeur_pixel==Derniere_couleur)
              && (Compteur_de_pixels<Taille_image)
              && (Compteur_de_repetitions<65535) )
         {
-          Compteur_de_repetitions++;
           Compteur_de_pixels++;
+          Compteur_de_repetitions++;
+          if(Compteur_de_pixels>=Taille_image) break;
           Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
         }
 

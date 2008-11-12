@@ -466,10 +466,6 @@ const char * Nom_touche(word Touche)
 // Renvoie 0 s'il n'y a pas de caractère associé (shift, backspace, etc)
 word Conversion_ANSI(SDL_keysym Sym)
 {
-  if ( Sym.unicode == 0)
-  {
-    return Sym.sym;
-  }
   if ( Sym.unicode > 32 && Sym.unicode < 127)
   {
     return Sym.unicode; // Pas de souci, on est en ASCII standard
@@ -546,9 +542,15 @@ word Conversion_ANSI(SDL_keysym Sym)
     {
         return(SDLK_BACKSPACE);
     }
+    // We make to difference between return & enter in the app context.
+    if(Sym.unicode == 3)
+    {
+        return(SDLK_RETURN);
+    }
 #endif
     return Sym.unicode;
   }
-	// Sinon c'est une touche spéciale, on retourne son scancode
+
+ // Sinon c'est une touche spéciale, on retourne son scancode
   return Sym.sym;
 }
