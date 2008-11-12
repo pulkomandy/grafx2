@@ -1294,9 +1294,9 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     Num2str(Mode_video[Mode_courant].Hauteur,Chaine+5,4);
 
     if(Mode_video[Mode_courant].Fullscreen == 1)
-	    memcpy(Chaine+9," Fullscreen  ",15);
+      memcpy(Chaine+9," Fullscreen  ",15);
     else
-	    memcpy(Chaine+9,"   Window    ",15);
+      memcpy(Chaine+9,"   Window    ",15);
 
     if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
       Ratio="    4:3";
@@ -2536,23 +2536,23 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
 
       case  1 : // Load ou Save
-	    if(Load)
+      if(Load)
         {
-	      // Determine the type
-	      if(Fichier_existe(Principal_Nom_fichier)) 
-	      {
-	        Type_selectionne = 0;
-	        if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
-	      }
-	      else
-	      {
-	        Type_selectionne = 1;
-	      }
+          // Determine the type
+          if(Fichier_existe(Principal_Nom_fichier)) 
+          {
+            Type_selectionne = 0;
+            if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+          }
+          else
+          {
+            Type_selectionne = 1;
+          }
         }
         else
         {
           if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
-	      else Type_selectionne = 0;
+          else Type_selectionne = 0;
         }
         On_a_clicke_sur_OK=1;
         break;
@@ -2580,7 +2580,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           do
           {
             SDL_PumpEvents();
-          	Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
+            Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
           } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
 
           // On efface la demande de confirmation
@@ -2737,8 +2737,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           {
             if (Principal_Format)
             {
-	          if(!Repertoire_existe(Principal_Nom_fichier))
-	          {
+              if(!Repertoire_existe(Principal_Nom_fichier))
+              {
                  strcat(Principal_Nom_fichier,".");
                  strcat(Principal_Nom_fichier,Format_Extension[Principal_Format-1]);
               }
@@ -2748,29 +2748,29 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               // put default extension
               // (but maybe we should browse through all available ones until we find
               //  something suitable ?)
-	          if(!Repertoire_existe(Principal_Nom_fichier))
-	          {
+              if(!Repertoire_existe(Principal_Nom_fichier))
+              {
                  strcat(Principal_Nom_fichier, ".pkm");
               }
             }
           }
-	      if(Load)
-	      {
-	        // Determine the type
-	        if(Fichier_existe(Principal_Nom_fichier)) 
-	        {
-	          Type_selectionne = 0;
-	          if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
-	        }
-	        else
-	        {
-	          Type_selectionne = 1;
-	        }
+          if(Load)
+          {
+            // Determine the type
+            if(Fichier_existe(Principal_Nom_fichier)) 
+            {
+              Type_selectionne = 0;
+              if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
+            }
+            else
+            {
+              Type_selectionne = 1;
+            }
           }
           else
           {
             if(Repertoire_existe(Principal_Nom_fichier)) Type_selectionne = 1;
-	        else Type_selectionne = 0;
+            else Type_selectionne = 0;
           }
           On_a_clicke_sur_OK=1;
         }
@@ -2778,7 +2778,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         {
           // Restore the old filename
           strcpy(Principal_Nom_fichier, Nom_fichier_Save);
-          Print_dans_fenetre(13+9*8,90,Principal_Nom_fichier,CM_Noir,CM_Clair);
+          Print_Nom_fichier_dans_selecteur();
         }
         Afficher_curseur();
         break;
@@ -2967,7 +2967,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         Afficher_curseur();
 
-      	UpdateRect(Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
+        UpdateRect(Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
       }
 
       Nouvelle_preview=0;
@@ -2987,7 +2987,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
         Effacer_curseur();
         Charger_image(Image);
-      	UpdateRect(ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
+        UpdateRect(ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
         Afficher_curseur();
 
         // Après le chargement de la preview, on restaure tout ce qui aurait
