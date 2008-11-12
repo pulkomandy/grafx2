@@ -43,7 +43,7 @@ void Extraire_chemin(char *Destination, const char *Source);
 
 char * Position_dernier_slash(const char * Chaine);
 
-#ifdef __linux__
+#if defined(__linux__)||defined(__BEOS__)||defined(__HAIKU__)
   #define SEPARATEUR_CHEMIN "/"
 #else
   #define SEPARATEUR_CHEMIN "\\"
