@@ -5246,6 +5246,16 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
 	RAY = Pos_Y;
     }
 
+    // Correction des bornes d'après les limites
+    if (RAY<Limite_Haut)
+	RAY=Limite_Haut;
+    if (RBY>Limite_Bas)
+	RBY=Limite_Bas;
+    if (RAX<Limite_Gauche)
+	RAX=Limite_Gauche;
+    if (RBX>Limite_Droite)
+	RBX=Limite_Droite;
+
     if(VBX == VAX)
     {
 	// Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...

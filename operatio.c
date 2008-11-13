@@ -4236,10 +4236,15 @@ void Rectangle_Degrade_0_5(void)
 // on doit donc attendre que l'utilisateur clique quelque part
 // On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
 {
+  // !!! Cette fonction remet RAX RAY RBX RBY dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
   short RAX;
   short RAY;
   short RBX;
   short RBY, largeur,hauteur;
+  short decalage_largeur = 0;
+  short decalage_hauteur = 0;
+  short decalage_gauche = 0;
+  short decalage_haut = 0;
 
 
   // Tracé propre du rectangle
@@ -4254,11 +4259,53 @@ void Rectangle_Degrade_0_5(void)
 
   largeur = abs(RBX-RAX);
   hauteur = abs(RBY-RAY);
-  Ligne_horizontale_XOR(Min(RAX,RBX),Min(RAY,RBY),largeur); // FIXME: ceci ne gère pas le zoom
-  Ligne_horizontale_XOR(Min(RAX,RBX),Max(RAY,RBY)-1,largeur); // ni si l'offset est !=0
-  Ligne_verticale_XOR(Min(RAX,RBX),Min(RAY,RBY),hauteur);
-  Ligne_verticale_XOR(Max(RAX,RBX)-1,Min(RAY,RBY),hauteur);
-  UpdateRect(Min(RAX,RBX),Min(RAY,RBY),largeur+1,hauteur+1);
+
+  if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
+    decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+
+  if (Max(RAY,RBY)-Principal_Decalage_Y > Menu_Ordonnee)
+      decalage_hauteur = Max(RAY,RBY) - Menu_Ordonnee;
+
+  // Dessin dans la zone de dessin normale
+  Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur - decalage_largeur);
+  if(decalage_hauteur == 0)
+    Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,largeur - decalage_largeur);
+  Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+  if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+    Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+
+  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_largeur);
+
+  // Dessin dans la zone zoomée
+  if(Loupe_Mode)
+  {
+    decalage_largeur = 0;
+    if(Min(RAX,RBX)<Limite_Gauche_Zoom)
+    {
+	decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RAY);
+	decalage_gauche = Limite_Gauche_Zoom;
+    }
+    if(Max(RAX,RAY)>Limite_visible_Droite_Zoom)
+	decalage_largeur += Max(RAX,RAY) - Limite_visible_Droite_Zoom;
+
+    decalage_hauteur=0;
+    if(Min(RAY,RBY)<Limite_Haut_Zoom)
+    {
+	decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
+	decalage_haut = Limite_Haut_Zoom;
+    }
+    if(Max(RAY,RBY)>Limite_visible_Bas_Zoom)
+	decalage_hauteur += Max(RAX,RAY) + Limite_visible_Bas_Zoom;
+
+    if(decalage_haut==0)
+	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),largeur-decalage_largeur);
+    if(Max(RAY,RBY)<Limite_visible_Bas_Zoom)
+	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),largeur-decalage_largeur);
+    if(decalage_gauche==0)
+	Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+    if(Max(RAX,RBX)<Limite_visible_Droite_Zoom)
+	Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+  }
 
   Operation_PUSH(RAX);
   Operation_PUSH(RAY);
