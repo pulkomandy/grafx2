@@ -669,7 +669,7 @@ void Bouton_Mask_Mode(void)
 
 void Bouton_Mask_Menu(void)
 {
-  Menu_Tag_couleurs("Mask",Mask,&Mask_Mode,1, "MASK");
+  Menu_Tag_couleurs("Mask",Mask_table,&Mask_Mode,1, "MASK");
 }
 
 

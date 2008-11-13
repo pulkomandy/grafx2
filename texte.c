@@ -30,9 +30,13 @@
 // TrueType
 #ifndef NOTTF
 #ifdef __macosx__
-#include <SDL_ttf/SDL_ttf.h>
+  #include <SDL_ttf/SDL_ttf.h>
 #else
-#include <SDL/SDL_ttf.h>
+  #include <SDL/SDL_ttf.h>
+#endif
+
+#ifdef __linux__
+  #include <X11/Xlib.h>
 #endif
 #endif
 #include <SDL/SDL_image.h>
@@ -110,6 +114,7 @@ void Ajout_fonte(const char *Nom)
 
 }
 
+
 // Trouve le nom d'une fonte par son numéro
 char * Nom_fonte(int Indice)
 {
@@ -120,6 +125,8 @@ char * Nom_fonte(int Indice)
     Fonte = Fonte->Suivante;
   return Fonte->Nom;
 }
+
+
 // Trouve le libellé d'affichage d'une fonte par son numéro
 char * Libelle_fonte(int Indice)
 {
@@ -148,6 +155,8 @@ char * Libelle_fonte(int Indice)
     Libelle[Indice]=Nom_fonte[Indice];
   return Libelle;
 }
+
+
 // Vérifie si une fonte donnée est TrueType
 int TrueType_fonte(int Indice)
 {
@@ -183,13 +192,24 @@ void Initialisation_Texte(void)
   strcat(Nom_repertoire, "fonts");
   for_each_file(Nom_repertoire, Ajout_fonte);
   
-  // Parcours du répertoire systeme windows "fonts"
   #ifdef __WIN32__
-  #ifndef NOTTF
-  for_each_file("c:\\windows\\fonts", Ajout_fonte);
+    // Parcours du répertoire systeme windows "fonts"
+    #ifndef NOTTF
+    for_each_file("c:\\windows\\fonts", Ajout_fonte);
+    #endif
+  #elif defined(__linux__)
+    // Récupération de la liste des fonts avec fontconfig
+    #define USE_XLIB
+
+    #ifdef USE_XLIB
+	int i,number;
+	Display* dpy = XOpenDisplay(NULL);
+	char** font_path_list = XGetFontPath(dpy,&number);
+
+	for(i=0;i<number;i++)
+	    for_each_file(*(font_path_list+i),Ajout_fonte);
+    #endif
   #endif
-  #endif
-  
 }
 
 // Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
@@ -276,6 +296,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
 }
 #endif
 
+
 byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int *Hauteur)
 {
   SFont_Font *Fonte;
@@ -323,6 +344,7 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int 
 
   return BrosseRetour;
 }
+
 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 

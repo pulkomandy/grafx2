@@ -688,6 +688,7 @@ void for_each_file(const char * Nom_repertoire, void Callback(const char *))
   int Position_nom_fichier;
   strcpy(Nom_fichier_complet, Nom_repertoire);
   Repertoire_Courant=opendir(Nom_repertoire);
+  if(Repertoire_Courant == NULL) return;	// Répertoire invalide ...
   strcat(Nom_fichier_complet, SEPARATEUR_CHEMIN);
   Position_nom_fichier = strlen(Nom_fichier_complet);
   while ((Enreg=readdir(Repertoire_Courant)))

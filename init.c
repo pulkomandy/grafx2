@@ -1734,7 +1734,7 @@ int Charger_CFG(int Tout_charger)
       case CHUNK_MASQUE: // Masque
         if (Tout_charger)
         {
-          if (!read_bytes(Handle, Mask, 256))
+          if (!read_bytes(Handle, Mask_table, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1957,11 +1957,11 @@ int Sauver_CFG(void)
 
   // Sauvegarde des informations du Masque
   Chunk.Numero=CHUNK_MASQUE;
-  Chunk.Taille=sizeof(Mask);
+  Chunk.Taille=sizeof(Mask_table);
   if (!write_byte(Handle, Chunk.Numero) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
-  if (!write_bytes(Handle, Mask,256))
+  if (!write_bytes(Handle, Mask_table,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
@@ -2108,7 +2108,7 @@ void Config_par_defaut(void)
 
   // Masque
   for (Indice=0; Indice<256; Indice++)
-    Mask[Indice]=0;
+    Mask_table[Indice]=0;
 
   // Stencil
   for (Indice=0; Indice<256; Indice++)

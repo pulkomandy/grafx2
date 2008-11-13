@@ -71,7 +71,7 @@ else
     OBJDIR = obj/haiku
   else
   
-      # Linux specific
+    # Linux specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     ifdef WIN32CROSS
@@ -103,7 +103,7 @@ ifeq ($(NOTTF),1)
   TTFLABEL = -nottf
 else
   TTFCOPT = 
-  TTFLOPT = -L/usr/local/lib -lSDL_ttf
+  TTFLOPT = -L/usr/local/lib -lSDL_ttf -lX11
   TTFLIBS = libfreetype-6.dll SDL_ttf.dll
   TTFLABEL = 
 endif

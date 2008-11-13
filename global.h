@@ -452,7 +452,7 @@ GLOBAL short Tiling_Decalage_Y; // Décalage du tiling en Y
   // Mode Mask
 
 GLOBAL byte Mask_Mode;  // Le mode Masque est enclenché
-GLOBAL byte Mask[256];  // Tableau des couleurs constituant le masque
+GLOBAL byte Mask_table[256];  // Tableau des couleurs constituant le masque
 
   // Mode loupe:
 

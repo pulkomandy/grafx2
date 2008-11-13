@@ -1165,7 +1165,7 @@ void Afficher_pixel(word X,word Y,byte Couleur)
 {
   if ( ( (!Trame_Mode)   || (Effet_Trame(X,Y)) )
     && (!((Stencil_Mode) && (Stencil[Lit_pixel_dans_ecran_courant(X,Y)])))
-    && (!((Mask_Mode)    && (Mask[Lit_pixel_dans_ecran_brouillon(X,Y)]))) )
+    && (!((Mask_Mode)    && (Mask_table[Lit_pixel_dans_ecran_brouillon(X,Y)]))) )
   {
     Couleur=Fonction_effet(X,Y,Couleur);
     Pixel_dans_ecran_courant(X,Y,Couleur);
