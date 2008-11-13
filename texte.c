@@ -208,6 +208,8 @@ void Initialisation_Texte(void)
 
 	for(i=0;i<number;i++)
 	    for_each_file(*(font_path_list+i),Ajout_fonte);
+
+	XFreeFontPath(font_path_list);
     #endif
   #endif
 }
