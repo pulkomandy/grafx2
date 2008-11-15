@@ -4263,18 +4263,19 @@ void Rectangle_Degrade_0_5(void)
   if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
     decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
 
-  if (Max(RAY,RBY)-Principal_Decalage_Y > Menu_Ordonnee)
-      decalage_hauteur = Max(RAY,RBY) - Menu_Ordonnee;
+  if (Max(RAY,RBY)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
+      decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
 
   // Dessin dans la zone de dessin normale
   Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur - decalage_largeur);
   if(decalage_hauteur == 0)
     Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,largeur - decalage_largeur);
+
   Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
   if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
     Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
 
-  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_largeur);
+  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_hauteur);
 
   // Dessin dans la zone zoomée
   if(Loupe_Mode)

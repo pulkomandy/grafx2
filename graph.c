@@ -5268,11 +5268,12 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
     }
     else
     {
-	short a,b;
+	float a;
+	float b;
 	int Distance_X, Distance_Y;
 
 	Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
-	a = (VBY - VAY)/(VBX - VAX);
+	a = (float)(VBY - VAY)/(float)(VBX - VAX);
 	b = VAY - a*VAX;
 
 	for (Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
