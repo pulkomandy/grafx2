@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "op_c.h"
 #include "erreurs.h"
@@ -103,10 +104,43 @@ void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
   *sr = (s*255.0);
 }
 
+void HLStoRGB(byte H,byte L,byte S, byte* R, byte* G, byte* B)
+{
+    float OffsetSaturation;
+    float rf,gf,bf;
 
+    S = 255 - S;
+
+    if(H < 85)
+	rf = fminf(1, (85 - H)  / 42.5);
+
+    else if(H > 170)
+	rf = fminf(1, (H - 170) / 42.5);
+
+    if (H < 170)
+	gf = fminf(1, (85 - abs(H -  85)) / 42.5);
+
+    if (H > 85)
+	bf = fminf(1, (85 - abs(H - 170)) / 42.5);
+
+    if (S < 255)
+    {
+	rf = rf * (S / 255.0);
+	gf = gf * (S / 255.0);
+	bf = bf * (S / 255.0);
+	OffsetSaturation = /*128 **/ (255 - S) / 255.0;
+	rf += OffsetSaturation;
+	gf += OffsetSaturation;
+	bf += OffsetSaturation;
+    }
+
+    *R = rf * ((255 - abs(L - 255)) / 255.0);
+    *G = gf * ((255 - abs(L - 255)) / 255.0);
+    *B = bf * ((255 - abs(L - 255)) / 255.0);
+}
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////// M‚thodes de gestion des tables de conversion //
+///////////////////////////// Méthodes de gestion des tables de conversion //
 /////////////////////////////////////////////////////////////////////////////
 
 Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b)

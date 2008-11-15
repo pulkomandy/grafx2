@@ -937,8 +937,21 @@ void Bouton_Palette(void)
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-          Modifier_Rouge(Fore_color,63-Jauge_rouge->Position,Palette_de_travail);
-          Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
+	  if(Palette_mode_RGB)
+	  {
+	      Modifier_Rouge(Fore_color,63-Jauge_rouge->Position,Palette_de_travail);
+	      Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
+	  } 
+	  else
+	  {
+	      byte h,l,s;
+
+	      rgb2hl(Palette_de_travail[Fore_color].R,Palette_de_travail[Fore_color].V,Palette_de_travail[Fore_color].B,&h,&l,&s);
+	      h=(63-Jauge_rouge->Position)*4; // Enlever le *4 quand le slider ira de 0 à 255 comme il faut
+	      HLStoRGB(h,l,s,&Palette_de_travail[Fore_color].R,&Palette_de_travail[Fore_color].V,&Palette_de_travail[Fore_color].B);
+	      
+	      Num2str((int)h>>2,Chaine,2);
+	  }
           Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
         }
         else
@@ -976,7 +989,21 @@ void Bouton_Palette(void)
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-          Modifier_Vert (Fore_color,63-Jauge_verte->Position,Palette_de_travail);
+	  if(Palette_mode_RGB)
+	  {
+	      Modifier_Vert (Fore_color,63-Jauge_verte->Position,Palette_de_travail);
+	      Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
+	  } 
+	  else
+	  {
+	      byte h,l,s;
+
+	      rgb2hl(Palette_de_travail[Fore_color].R,Palette_de_travail[Fore_color].V,Palette_de_travail[Fore_color].B,&h,&l,&s);
+	      l=(63-Jauge_verte->Position)*4; // Mettre +1 quand on aura modifié la plage du slider
+	      HLStoRGB(h,l,s,&Palette_de_travail[Fore_color].R,&Palette_de_travail[Fore_color].V,&Palette_de_travail[Fore_color].B);
+	      
+	      Num2str((int)h>>2,Chaine,2);
+	  }
           Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
           Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
         }
