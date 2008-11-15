@@ -183,3 +183,6 @@ void Remap_picture(void);
 
 byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);
+
+void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur);
+void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur);

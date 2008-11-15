@@ -4313,7 +4313,7 @@ void Rectangle_Degrade_0_5(void)
   Operation_PUSH(RBX);
   Operation_PUSH(RBY);
 
-  Forme_curseur = FORME_CURSEUR_CIBLE;
+//  Forme_curseur = FORME_CURSEUR_CIBLE; // On reste en mode cible XOR pour ne pas effacer l'empreinte du rectangle ...
   Operation_PUSH(RBX);
   Operation_PUSH(RBY);
 }
@@ -4352,7 +4352,7 @@ void Rectangle_Degrade_12_9(void)
 // Click Souris: 1
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacée: Oui
 
 // Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
 {
@@ -4366,7 +4366,6 @@ void Rectangle_Degrade_12_9(void)
 
   if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
   {
-    Effacer_curseur();
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
       // On corrige les coordonnées de la ligne si la touche shift est appuyée...
@@ -4387,8 +4386,8 @@ void Rectangle_Degrade_12_9(void)
 
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);
-    Afficher_curseur();
   }
+
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -4426,12 +4425,6 @@ void Rectangle_Degrade_0_9(void)
     // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
     Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
    
-    Effacer_curseur(); 
-    Forme_curseur = FORME_CURSEUR_CIBLE_XOR; // Ceci nous permet d'effacer correctement le curseur
-    // On remet le pinceau en haut à droite du rectangle pour effacer le curseur qui y traine
-    Pinceau_X = Rect_Debut_X;
-    Pinceau_Y = Rect_Debut_Y;
-
     // Et enfin on trace le rectangle avec le dégradé dedans !
 //    if (Mouse_K==Ancien_Mouse_K)				// TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
 	Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
