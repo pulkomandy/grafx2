@@ -1294,9 +1294,9 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
     Num2str(Mode_video[Mode_courant].Hauteur,Chaine+5,4);
 
     if(Mode_video[Mode_courant].Fullscreen == 1)
-      memcpy(Chaine+9," Fullscreen  ",15);
+      memcpy(Chaine+9," Fullscreen ",13);
     else
-      memcpy(Chaine+9,"   Window    ",15);
+      memcpy(Chaine+9,"   Window   ",13);
 
     if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
       Ratio="    4:3";
@@ -1321,7 +1321,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
 
     strcat(Chaine,Ratio);
 
-    Print_dans_fenetre(30,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
+    Print_dans_fenetre(38,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
   }
 }
 

@@ -469,7 +469,7 @@ word Conversion_ANSI(SDL_keysym Sym)
   // This part was removed from the MacOSX port, but I put it back for others
   // as on Linux and Windows, it's what allows editing a text line with the keys
   // SDLK_LEFT, SDLK_RIGHT, SDLK_HOME, SDLK_END etc.
-  #ifndef __MACOSX__
+  #ifndef __macosx__
   if ( Sym.unicode == 0)
   {
     return Sym.sym;

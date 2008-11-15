@@ -45,26 +45,16 @@
 #include "erreurs.h"
 #include "readini.h"
 #include "saveini.h"
-#include "linux.h"
 #include "io.h"
 #include "texte.h"
 
-#ifndef __linux__
-#ifndef __amigaos4__
-#ifndef __BEOS__
-#ifndef __HAIKU__
+#if defined(__WIN32__)
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
-    #define M_PI 3.14159265358979323846
-#endif
-#endif
-#endif
-#endif
-
-#ifdef __macosx__
-#import <corefoundation/corefoundation.h>
-#import <sys/param.h>
+#elif defined(__macosx__)
+    #import <corefoundation/corefoundation.h>
+    #import <sys/param.h>
 #endif
 
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
@@ -227,22 +217,16 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        #if defined(__linux__) || defined(__amigaos4__) || defined(__BEOS__) || defined(__HAIKU__)
-          Buffer=realpath(argv[Indice],NULL);
-        #else
+        #if defined(__WIN32__)
           Buffer = malloc(TAILLE_CHEMIN_FICHIER);
           _fullpath(Buffer,argv[Indice],TAILLE_CHEMIN_FICHIER);
+        #else
+          Buffer=realpath(argv[Indice],NULL);
         #endif
         Extraire_chemin(Principal_Repertoire_fichier, Buffer);
         Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
-        #ifndef __linux__
-        #ifndef __amigaos4__
-        #ifndef __BEOS__
-        #ifndef __HAIKU__
+        #if defined(__WIN32__)
           free(Buffer);
-        #endif
-        #endif
-        #endif
         #endif
         chdir(Principal_Repertoire_fichier);
       }

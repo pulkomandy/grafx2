@@ -39,11 +39,18 @@
 #include "op_c.h"
 #include "boutons.h"
 #include "erreurs.h"
-#include "linux.h"
 #include "io.h"
 #include "sdlscreen.h"
 
 #define FILENAMESPACE 13
+
+// Taille de fichier, en octets
+int FileLength(FILE * Fichier)
+{
+	struct stat infos_fichier;
+	fstat(fileno(Fichier),&infos_fichier);
+	return infos_fichier.st_size;
+}
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
@@ -4210,7 +4217,7 @@ void Test_KCF(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    if (filelength(fileno(Fichier))==sizeof(T_KCF_Header))
+    if (FileLength(Fichier)==sizeof(T_KCF_Header))
     {
       read_bytes(Fichier,&Buffer,sizeof(T_KCF_Header));
       // On vérifie une propriété de la structure de palette:
@@ -4260,7 +4267,7 @@ void Load_KCF(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    Taille_du_fichier=filelength(fileno(Fichier));
+    Taille_du_fichier=FileLength(Fichier);
     if (Taille_du_fichier==sizeof(T_KCF_Header))
     {
       // Fichier KCF à l'ancien format
@@ -4497,7 +4504,7 @@ void Load_SCx(void)
 
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    Taille_du_fichier=filelength(fileno(Fichier));
+    Taille_du_fichier=FileLength(Fichier);
 
     if ((read_bytes(Fichier,&SCx_Header,sizeof(T_SCx_Header))))
     {
@@ -4755,7 +4762,7 @@ void Test_PI1(void)
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     // Vérification de la taille
-    Taille=filelength(fileno(Fichier));
+    Taille=FileLength(Fichier);
     if ((Taille==32034) || (Taille==32066))
     {
       // Lecture et vérification de la résolution
@@ -4794,7 +4801,7 @@ void Load_PI1(void)
       if (read_bytes(Fichier,buffer,32034))
       {
         // Initialisation de la preview
-        Initialiser_preview(320,200,filelength(fileno(Fichier)),FORMAT_PI1);
+        Initialiser_preview(320,200,FileLength(Fichier),FORMAT_PI1);
         if (Erreur_fichier==0)
         {
           // Initialisation de la palette
@@ -5083,7 +5090,7 @@ void Test_PC1(void)
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     // Vérification de la taille
-    Taille=filelength(fileno(Fichier));
+    Taille=FileLength(Fichier);
     if ((Taille<=32066))
     {
       // Lecture et vérification de la résolution
@@ -5116,7 +5123,7 @@ void Load_PC1(void)
   Erreur_fichier=0;
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
-    Taille=filelength(fileno(Fichier));
+    Taille=FileLength(Fichier);
     // allocation des buffers mémoire
     buffercomp=(byte *)malloc(Taille);
     bufferdecomp=(byte *)malloc(32000);
@@ -5126,7 +5133,7 @@ void Load_PC1(void)
       if (read_bytes(Fichier,buffercomp,Taille))
       {
         // Initialisation de la preview
-        Initialiser_preview(320,200,filelength(fileno(Fichier)),FORMAT_PC1);
+        Initialiser_preview(320,200,FileLength(Fichier),FORMAT_PC1);
         if (Erreur_fichier==0)
         {
           // Initialisation de la palette

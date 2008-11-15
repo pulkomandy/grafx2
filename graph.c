@@ -19,35 +19,28 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "sdlscreen.h"
-#include "graph.h"
-#include "divers.h"
-#include <math.h>
-#ifdef __macosx__
-    #include <sys/malloc.h>
+#if defined(__WIN32__)
+    #define _WIN32_WINNT 0x0500
+    #include <windows.h>
+#elif defined(__macosx__)
+    #include <sys/sysctl.h>
 #else
-    #include <malloc.h>
+    #include <sys/sysinfo.h>
 #endif
 
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+
+#include "global.h"
+#include "struct.h"
 #include "moteur.h"
 #include "boutons.h"
 #include "pages.h"
-#include "global.h"
-#include "struct.h"
 #include "erreurs.h"
-
-#ifdef __linux__
-  #ifdef __macosx__
-    #include <sys/sysctl.h>
-  #else
-    #include <sys/sysinfo.h>
-  #endif
-#elif __WATCOMC__
-    #define _WIN32_WINNT 0x0500
-    #include <windows.h>
-#endif
+#include "sdlscreen.h"
+#include "graph.h"
+#include "divers.h"
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
@@ -565,8 +558,15 @@ unsigned long Memoire_libre(void)
   A revoir, mais est-ce vraiment utile?
   _heapmin();
   */
-    #ifdef __linux__
-      #ifdef __macosx__
+    // Memory is no longer relevant. If there is ANY problem or doubt here,
+    // you can simply return 10*1024*1024 (10Mb), to make the "Pages"something
+    // memory allocation functions happy.
+    #if defined(__WIN32__)
+        MEMORYSTATUSEX mstt;
+        mstt.dwLength = sizeof(MEMORYSTATUSEX);
+        GlobalMemoryStatusEx(&mstt);
+        return mstt.ullAvailPhys;
+    #elif defined(__macosx__)
         int mib[2];
         int maxmem;
         size_t len;
@@ -576,18 +576,10 @@ unsigned long Memoire_libre(void)
         len = sizeof(maxmem);
         sysctl(mib,2,&maxmem,&len,NULL,0);
         return maxmem;
-      #else
+    #else
         struct sysinfo info;
         sysinfo(&info);
         return info.freeram*info.mem_unit;
-      #endif
-    #elif __WATCOMC__
-         MEMORYSTATUSEX mstt;
-         mstt.dwLength = sizeof(MEMORYSTATUSEX);
-         GlobalMemoryStatusEx(&mstt);
-         return mstt.ullAvailPhys;
-    #else
-        return 10*1024*1024;
     #endif
 }
 

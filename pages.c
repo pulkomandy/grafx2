@@ -31,7 +31,6 @@
 #include "pages.h"
 #include "graph.h"
 #include "erreurs.h"
-#include "linux.h"
 
   ///
   /// GESTION DES PAGES

@@ -35,7 +35,6 @@
 #include "operatio.h"
 #include "shade.h"
 #include "erreurs.h"
-#include "linux.h"
 #include "sdlscreen.h"
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------

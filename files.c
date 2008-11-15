@@ -20,11 +20,6 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "const.h"
-#include "struct.h"
-#include "global.h"
-#include "graph.h"
-#include "divers.h"
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
@@ -35,29 +30,29 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef __amigaos4__
-#include <proto/dos.h>
-#endif
-
-#include "erreurs.h"
-#include "linux.h"
-#include "io.h"
-
-
-#if defined(__linux__)||defined(__BEOS__)||defined(__HAIKU__)
-    #include <dirent.h>
-    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
-#elif defined(__amigaos4__)
+#if defined(__amigaos4__)
+    #include <proto/dos.h>
     #include <dirent.h>
     #define isHidden(Enreg) (0)
 #elif defined(__WATCOMC__)
     #include <direct.h>
     #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
-#elif defined(__MINGW32__)
+#elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
     #define isHidden(Enreg) (GetFileAttributesA((Enreg)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#else
+    #include <dirent.h>
+    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
 #endif
+
+#include "const.h"
+#include "struct.h"
+#include "global.h"
+#include "graph.h"
+#include "divers.h"
+#include "erreurs.h"
+#include "io.h"
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné

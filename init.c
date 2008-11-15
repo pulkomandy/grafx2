@@ -48,17 +48,9 @@
 
 #include "errno.h"
 
-#ifndef __linux__
-#ifndef __amigaos4__
-#ifndef __BEOS__
-#ifndef __HAIKU__
-#include "windows.h"
-#endif
-#endif
-#endif
-#endif
-
-#ifdef __macosx__
+#if defined(__WIN32__)
+  #include <windows.h>
+#elif defined(__macosx__)
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
 #endif
@@ -108,22 +100,13 @@ void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
+  #if defined(__amigaos4__)
 
-  #if defined(__linux__)
-	//Sous linux, il n'y a pas de lecteurs, on va juste mettre 
-	// un disque dur qui pointera vers la racine,
-	// et un autre vers le home directory de l'utilisateur.
-	char * Home = getenv("HOME");
-	Ajouter_lecteur('/', LECTEUR_HDD, "/");
-	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
-  #elif defined(__BEOS__) || defined(__HAIKU__)
-	char * Home = getenv("$HOME");
-	Ajouter_lecteur('/', LECTEUR_HDD, "/");
-	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
-  #elif defined(__amigaos4__)
   // No icons by default.
   // It's possible to add some here.
+
   #elif defined (__WIN32__)
+
   char NomLecteur[]="A:\\";
 	int DriveBits = GetLogicalDrives();
 	int IndiceLecteur;
@@ -163,6 +146,19 @@ void Rechercher_drives(void)
 	    IndiceLecteur++;
 	  }
 	}
+
+  #else
+
+	//Sous les différents unix, il n'y a pas de lecteurs, on va juste mettre 
+	// un disque dur qui pointera vers la racine,
+	// et un autre vers le home directory de l'utilisateur.
+	#if defined(__BEOS__) || defined(__HAIKU__)
+  	char * Home = getenv("$HOME");
+  #else
+	  char * Home = getenv("HOME");
+  #endif	
+	Ajouter_lecteur('/', LECTEUR_HDD, "/");
+	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
 	#endif
 }
 
@@ -199,7 +195,7 @@ void Charger_DAT(void)
       case ENOENT: puts("The file path is empty or points to a non-existing directory."); break;
       case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
       case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
-      #if defined(__linux__)||defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
+      #ifdef ELOOP
           case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
       #endif
     }

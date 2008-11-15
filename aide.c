@@ -23,6 +23,16 @@
 */
 #include <stdio.h>
 #include <string.h>
+
+#if defined(__WIN32__)
+    #include <windows.h>
+#elif defined(__macosx__)
+    #include <sys/param.h>
+    #include <sys/mount.h>
+#elif defined (__linux__)
+    #include <sys/vfs.h>
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -33,25 +43,6 @@
 #include "aide.h"
 #include "sdlscreen.h"
 #include "texte.h"
-
-#include <string.h>
-
-#ifdef __linux__
-  #ifdef __macosx__
-    #include <sys/param.h>
-    #include <sys/mount.h>
-  #else
-    #include <sys/vfs.h>
-  #endif
-#else
-#ifndef __amigaos4__
-#ifndef __BEOS__
-#ifndef __HAIKU__
-    #include <windows.h>
-#endif
-#endif
-#endif
-#endif
 
 extern char SVNRevision[];
 
@@ -316,19 +307,7 @@ void Bouton_Stats(void)
   char  Buffer[37];
   dword Utilisation_couleur[256];
   unsigned long long freeRam;
-
-  #ifdef __linux__
-    struct statfs Informations_Disque;
-    uint64_t Taille = 0;
-  #else
-    #if defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
-      uint64_t Taille = 0;
-    #else
-      unsigned __int64 Taille;
-      ULARGE_INTEGER tailleU;
-    #endif
-  #endif
-
+  uint64_t Taille = 0;
 
   Ouvrir_fenetre(310,174,"Statistics");
 
@@ -369,16 +348,22 @@ void Bouton_Stats(void)
   sprintf(Buffer,"Free space on %c:",Principal_Repertoire_courant[0]);
   Print_dans_fenetre(10,67,Buffer,STATS_COULEUR_TITRES,CM_Noir);
 
-  #ifdef __linux__
-    statfs(Principal_Repertoire_courant,&Informations_Disque);
-    Taille=(uint64_t) Informations_Disque.f_bfree * (uint64_t) Informations_Disque.f_bsize;
-   #else
-      #if defined(__amigaos4__)||defined(__BEOS__)||defined(__HAIKU__)
-    #else
-     GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
-     Taille = tailleU.QuadPart;
-    #endif
-  #endif
+#if defined(__WIN32__)
+    {
+      ULARGE_INTEGER tailleU;
+      GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
+      Taille = tailleU.QuadPart;
+    }
+#elif defined(__linux__) || (__macosx__)
+    // Note: under MacOSX, both macros are defined anyway.
+    {
+      struct statfs Informations_Disque;
+      statfs(Principal_Repertoire_courant,&Informations_Disque);
+      Taille=(uint64_t) Informations_Disque.f_bfree * (uint64_t) Informations_Disque.f_bsize;
+    }
+#else
+    // Free disk space is only for shows. Other platforms can display 0.
+#endif
   
     if(Taille > (100ULL*1024*1024*1024))
         sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));

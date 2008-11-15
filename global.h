@@ -117,6 +117,16 @@ GLOBAL dword Touche; // Touche tapée
 GLOBAL dword Touche_ANSI; // Caractère tapé
 GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat des touches de ctrl
 // Modificateurs pour Touche
+// (Name conflict with windows.h)
+#ifdef MOD_SHIFT
+  #undef MOD_SHIFT
+#endif
+#ifdef MOD_CTRL
+  #undef MOD_CTRL
+#endif
+#ifdef MOD_ALT
+  #undef MOD_ALT
+#endif
 #define MOD_SHIFT 0x1000
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000

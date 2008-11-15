@@ -35,7 +35,6 @@
 #include "divers.h"
 #include "erreurs.h"
 #include "const.h"
-#include "linux.h"
 #include "sdlscreen.h"
 #include "readline.h"
 
@@ -43,8 +42,6 @@
 #define COULEUR_FOND          CM_Clair
 #define COULEUR_TEXTE_CURSEUR CM_Noir
 #define COULEUR_FOND_CURSEUR  CM_Fonce
-
-extern int Update_necessaire;
 
 // Suppresion d'un caractère à une certaine POSITION dans une CHAINE.
 void Supprimer_caractere(char * Chaine, byte Position)
@@ -78,10 +75,13 @@ int CaractereValide(int Caractere)
   // Sous Linux: Seul le / est strictement interdit, mais beaucoup
   // d'autres poseront des problèmes au shell, alors on évite.
   // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
-  #ifdef __linux__  
-  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>'};
-  #else
+  // AmigaOS4: Pas de ':' car utilisé pour les volumes.
+  #if defined(__WIN32__)
   char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+  #elif defined (__amigaos4__)
+  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>', ':'};
+  #else
+  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>'};
   #endif
   
   if (Caractere < ' ' || Caractere > 255)
@@ -154,7 +154,7 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
   strcpy(Chaine_initiale,Chaine);
 
   if (Type_saisie==1)
-    itoa(atoi(Chaine),Chaine,10); // On tasse la chaine à gauche
+    snprintf(Chaine,10,"%d",atoi(Chaine)); // On tasse la chaine à gauche
   //  Chaine[0]='\0';    // On efface la chaîne si c'est valeur numérique
 
 
@@ -173,11 +173,7 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
   Rafficher_toute_la_chaine(Pos_X,Pos_Y,Chaine_affichee,Position - Offset);
   UpdateRect(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
-
-#ifdef __macosx__
-  Update_necessaire = 1;
   Flush_update();
-#endif
 
   while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))
   {
@@ -319,11 +315,7 @@ affichage:
         UpdateRect(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
     } // Fin du "switch(Touche_lue)"
-
-#ifdef __macosx__
-    Update_necessaire = 1;
     Flush_update();
-#endif
 
   } // Fin du "while"
 

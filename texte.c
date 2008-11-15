@@ -199,6 +199,7 @@ void Initialisation_Texte(void)
     #endif
   #elif defined(__linux__)
     // Récupération de la liste des fonts avec fontconfig
+    #ifndef NOTTF
     #define USE_XLIB
 
     #ifdef USE_XLIB
@@ -210,6 +211,7 @@ void Initialisation_Texte(void)
 	    for_each_file(*(font_path_list+i),Ajout_fonte);
 
 	XFreeFontPath(font_path_list);
+    #endif
     #endif
   #endif
 }

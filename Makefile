@@ -89,6 +89,7 @@ else
       LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
       CC = gcc
       OBJDIR = obj/unix
+      X11LOPT = -lX11
     endif
   endif
 endif
@@ -103,7 +104,7 @@ ifeq ($(NOTTF),1)
   TTFLABEL = -nottf
 else
   TTFCOPT = 
-  TTFLOPT = -L/usr/local/lib -lSDL_ttf -lX11
+  TTFLOPT = -L/usr/local/lib -lSDL_ttf $(X11LOPT)
   TTFLIBS = libfreetype-6.dll SDL_ttf.dll
   TTFLABEL = 
 endif
@@ -111,7 +112,7 @@ endif
 
 .PHONY : all debug release clean depend zip version force
 
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/linux.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o $(OBJDIR)/SFont.o
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o $(OBJDIR)/SFont.o
 CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o
 
 all : $(BIN) $(CFGBIN)
@@ -125,7 +126,7 @@ release : $(BIN) $(CFGBIN)
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
+	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll zlib1.dll libpng13.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
 	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
