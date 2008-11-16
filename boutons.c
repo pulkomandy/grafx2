@@ -5993,6 +5993,54 @@ void Bouton_Texte()
         A_redessiner=1;
         A_previsionner=1;
       }
+      if (Touche==SDLK_PAGEDOWN && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
+      {
+        Touche=0;
+        Effacer_curseur();
+        if (Fonte_nombre<NB_FONTES)
+        {
+          Position_curseur=Fonte_nombre-1;
+        }
+        else if(Position_curseur!=NB_FONTES-1)
+        {
+          Position_curseur=NB_FONTES-1;
+        }
+        else
+        {
+          Debut_liste+=NB_FONTES;
+          if (Debut_liste+NB_FONTES>Fonte_nombre)
+          {
+            Debut_liste=Fonte_nombre-NB_FONTES;
+          }
+          // Mise à jour du scroller
+          Scroller_de_fontes->Position=Debut_liste;
+          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        }
+        A_redessiner=1;
+        A_previsionner=1;
+      }
+      if (Touche==SDLK_PAGEUP && (Position_curseur+Debut_liste)>0)
+      {
+        Touche=0;
+        Effacer_curseur();
+        if(Position_curseur!=0)
+        {
+          Position_curseur=0;
+        }
+        else
+        {
+          Debut_liste-=NB_FONTES;
+          if (Debut_liste<0)
+          {
+            Debut_liste=0;
+          }
+          // Mise à jour du scroller
+          Scroller_de_fontes->Position=Debut_liste;
+          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        }
+        A_redessiner=1;
+        A_previsionner=1;
+      }
       if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
         Fenetre_aide(BOUTON_TEXTE, NULL);
     }

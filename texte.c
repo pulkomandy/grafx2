@@ -54,23 +54,36 @@ typedef struct T_FONTE
   char * Nom;
   int    EstTrueType;
   int    EstImage;
+  char   Libelle[22];
   
   // Liste chainée simple
   struct T_FONTE * Suivante;
+  struct T_FONTE * Precedente;
 } T_FONTE;
 // Liste chainée des polices de texte
 T_FONTE * Liste_fontes_debut;
-T_FONTE * Liste_fontes_fin;
 int Fonte_nombre;
 
 // Inspiré par Allegro
 #define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
 
+int Compare_fontes(T_FONTE * Fonte1, T_FONTE * Fonte2)
+{
+  if (Fonte1->EstImage && !Fonte2->EstImage)
+    return -1;
+  if (Fonte2->EstImage && !Fonte1->EstImage)
+    return 1;
+  return strcmp(Fonte1->Libelle, Fonte2->Libelle);
+}
+
 // Ajout d'une fonte à la liste.
 void Ajout_fonte(const char *Nom)
 {
+  char * Nom_fonte;
   T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
   int Taille=strlen(Nom)+1;
+  int Indice;
+  
   // Détermination du type:
   if (Taille<5 ||
     Nom[Taille-5]!='.')
@@ -102,16 +115,64 @@ void Ajout_fonte(const char *Nom)
 
   Fonte->Nom = (char *)malloc(Taille);
   strcpy(Fonte->Nom, Nom);
+  // Libelle
+  strcpy(Fonte->Libelle, "                     ");
+  if (Fonte->EstTrueType)
+    Fonte->Libelle[19]=Fonte->Libelle[20]='T'; // Logo TT
+  Nom_fonte=Position_dernier_slash(Fonte->Nom);
+  if (Nom_fonte==NULL)
+    Nom_fonte=Fonte->Nom;
+  else
+    Nom_fonte++;
+  for (Indice=0; Indice < 19 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
+    Fonte->Libelle[Indice]=Nom_fonte[Indice];
 
   // Gestion Liste
   Fonte->Suivante = NULL;
+  Fonte->Precedente = NULL;
   if (Liste_fontes_debut==NULL)
+  {
+    // Premiere (liste vide)
     Liste_fontes_debut = Fonte;
+    Fonte_nombre++;
+  }
   else
-    Liste_fontes_fin->Suivante = Fonte;
-  Liste_fontes_fin = Fonte;
-  Fonte_nombre++;
-
+  {
+    int Compare;
+    Compare = Compare_fontes(Fonte, Liste_fontes_debut);
+    if (Compare<=0)
+    {
+      if (Compare==0 && !strcmp(Fonte->Nom, Liste_fontes_debut->Nom))
+      {
+        // Doublon
+        free(Fonte->Nom);
+        free(Fonte);
+        return;
+      }
+      // Avant la premiere
+      Fonte->Suivante=Liste_fontes_debut;
+      Liste_fontes_debut=Fonte;
+      Fonte_nombre++;
+    }
+    else
+    {
+      T_FONTE *Fonte_cherchee;
+      Fonte_cherchee=Liste_fontes_debut;
+      while (Fonte_cherchee->Suivante && (Compare=Compare_fontes(Fonte, Fonte_cherchee->Suivante))>0)
+        Fonte_cherchee=Fonte_cherchee->Suivante;
+      // Après Fonte_cherchee
+      if (Compare==0 && strcmp(Fonte->Nom, Fonte_cherchee->Suivante->Nom)==0)
+      {
+        // Doublon
+        free(Fonte->Nom);
+        free(Fonte);
+        return;
+      }
+      Fonte->Suivante=Fonte_cherchee->Suivante;
+      Fonte_cherchee->Suivante=Fonte;
+      Fonte_nombre++;
+    }
+  }
 }
 
 
@@ -128,11 +189,11 @@ char * Nom_fonte(int Indice)
 
 
 // Trouve le libellé d'affichage d'une fonte par son numéro
+// Renvoie un pointeur sur un buffer statique de 22 caracteres.
 char * Libelle_fonte(int Indice)
 {
   T_FONTE *Fonte;
   static char Libelle[22];
-  char * Nom_fonte;
   
   strcpy(Libelle, "                     ");
   
@@ -144,15 +205,7 @@ char * Libelle_fonte(int Indice)
     Fonte = Fonte->Suivante;
   
   // Libellé
-  if (Fonte->EstTrueType)
-    Libelle[19]=Libelle[20]='T'; // Logo TT
-  Nom_fonte=Position_dernier_slash(Fonte->Nom);
-  if (Nom_fonte==NULL)
-    Nom_fonte=Fonte->Nom;
-  else
-    Nom_fonte++;
-  for (Indice=0; Indice < 19 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
-    Libelle[Indice]=Nom_fonte[Indice];
+  strcpy(Libelle, Fonte->Libelle);
   return Libelle;
 }
 
@@ -185,7 +238,7 @@ void Initialisation_Texte(void)
   #endif
   
   // Initialisation des fontes
-  Liste_fontes_debut = Liste_fontes_fin = NULL;
+  Liste_fontes_debut = NULL;
   Fonte_nombre=0;
   // Parcours du répertoire "fonts"
   strcpy(Nom_repertoire, Repertoire_du_programme);
@@ -195,7 +248,14 @@ void Initialisation_Texte(void)
   #ifdef __WIN32__
     // Parcours du répertoire systeme windows "fonts"
     #ifndef NOTTF
-    for_each_file("c:\\windows\\fonts", Ajout_fonte);
+    {
+      char * WindowsPath=getenv("windir");
+      if (WindowsPath)
+      {
+        sprintf(Nom_repertoire, "%s\\FONTS", WindowsPath);
+        for_each_file(Nom_repertoire, Ajout_fonte);
+      }
+    }
     #endif
   #elif defined(__linux__)
     // Récupération de la liste des fonts avec fontconfig
