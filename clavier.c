@@ -552,7 +552,7 @@ word Conversion_ANSI(SDL_keysym Sym)
     {
         return(SDLK_BACKSPACE);
     }
-    // We make to difference between return & enter in the app context.
+    // We don't make any difference between return & enter in the app context.
     if(Sym.unicode == 3)
     {
         return(SDLK_RETURN);

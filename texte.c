@@ -1,6 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
     Copyright 2008 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -36,7 +37,13 @@
 #endif
 
 #ifdef __linux__
+#ifdef __macosx__
+  #include <Carbon/Carbon.h>
+  #import <corefoundation/corefoundation.h>
+  #import <sys/param.h>
+#else
   #include <X11/Xlib.h>
+#endif
 #endif
 #endif
 #include <SDL/SDL_image.h>
@@ -66,6 +73,7 @@ int Fonte_nombre;
 
 // Inspiré par Allegro
 #define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
+#define EXTID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
 int Compare_fontes(T_FONTE * Fonte1, T_FONTE * Fonte2)
 {
@@ -85,13 +93,34 @@ void Ajout_fonte(const char *Nom)
   int Indice;
   
   // Détermination du type:
+
+#ifdef __macosx__
+
+  if (Taille < 6) return;
+  
+  char strFontName[512];
+  CFStringRef CFSFontName;// = CFSTR(Nom);
+
+  CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) Nom, Taille - 1, kCFStringEncodingASCII, false);
+  // Fix some funny names
+  CFStringGetCString(CFSFontName, strFontName, 512, kCFStringEncodingASCII);
+
+  // Now we have a printable font name, use it
+  Nom = strFontName;
+
+#else
   if (Taille<5 ||
-    Nom[Taille-5]!='.')
+      Nom[Taille-5]!='.')
     return;
+#endif
+
   switch (EXTID(tolower(Nom[Taille-4]), tolower(Nom[Taille-3]), tolower(Nom[Taille-2])))
   {
     case EXTID('t','t','f'):
     case EXTID('f','o','n'):
+#ifdef __macosx__
+    case EXTID('o','t','f'):
+#endif
       Fonte->EstTrueType = 1;
       Fonte->EstImage = 0;
       break;
@@ -110,7 +139,19 @@ void Ajout_fonte(const char *Nom)
       Fonte->EstImage = 1;
       break;
     default:
-      return;
+      #ifdef __macosx__
+         if(strcasecmp(&Nom[Taille-6], "dfont") == 0)
+         {
+           Fonte->EstTrueType = 1;
+           Fonte->EstImage = 0;
+         }
+         else
+         {
+  	       return;
+         }
+      #else
+         return;
+      #endif
   }
 
   Fonte->Nom = (char *)malloc(Taille);
@@ -260,18 +301,43 @@ void Initialisation_Texte(void)
   #elif defined(__linux__)
     // Récupération de la liste des fonts avec fontconfig
     #ifndef NOTTF
-    #define USE_XLIB
 
-    #ifdef USE_XLIB
-	int i,number;
-	Display* dpy = XOpenDisplay(NULL);
-	char** font_path_list = XGetFontPath(dpy,&number);
+    #ifdef __macosx__
 
-	for(i=0;i<number;i++)
-	    for_each_file(*(font_path_list+i),Ajout_fonte);
+      int i,number;
+      char home_dir[MAXPATHLEN];
+      char *font_path_list[3] = {
+      	 "/System/Library/Fonts",
+      	 "/Library/Fonts"
+      };
+      number = 3;
+      // Make sure we also search into the user's fonts directory
+      CFURLRef url = (CFURLRef) CFCopyHomeDirectoryURLForUser(NULL);
+      CFURLGetFileSystemRepresentation(url, true, (UInt8 *) home_dir, MAXPATHLEN);
+      strcat(home_dir, "/Library/Fonts");
+      font_path_list[2] = home_dir;
 
-	XFreeFontPath(font_path_list);
+      for(i=0;i<number;i++)
+         for_each_file(*(font_path_list+i),Ajout_fonte);
+
+      CFRelease(url);
+
+    #else
+       #define USE_XLIB
+    
+       #ifdef USE_XLIB
+	      int i,number;
+	      Display* dpy = XOpenDisplay(NULL);
+	      char** font_path_list = XGetFontPath(dpy,&number);
+
+	      for(i=0;i<number;i++)
+	         for_each_file(*(font_path_list+i),Ajout_fonte);
+
+	      XFreeFontPath(font_path_list);
+	   #endif
     #endif
+
+
     #endif
   #endif
 }

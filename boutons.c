@@ -5845,7 +5845,7 @@ void Bouton_Texte()
 
   // AA
   Fenetre_Definir_bouton_normal(9,51,80,14,"",0,1,SDLK_LAST); // 3
-  Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+  Print_dans_fenetre(13,54,AntiAlias?"  No AA  ":"AntiAlias", CM_Noir, CM_Clair);
   
   // Scroller des fontes
   Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 4
@@ -6062,7 +6062,7 @@ void Bouton_Texte()
       case 3: // AA
       AntiAlias = (AntiAlias==0);
       Effacer_curseur();
-      Print_dans_fenetre(13,54,AntiAlias?"AntiAlias":"  No AA  ", CM_Noir, CM_Clair);
+      Print_dans_fenetre(13,54,AntiAlias?"  No AA  ":"AntiAlias", CM_Noir, CM_Clair);
       A_previsionner=1;
       break;
       

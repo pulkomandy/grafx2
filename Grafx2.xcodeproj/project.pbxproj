@@ -17,6 +17,7 @@
 		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
 		F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5A33E690EC893F800F8052D /* 8pxfont.png */; };
 		F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AD4B1E0EA8CCF0009CCAC4 /* version.c */; };
+		F5AE83FD0ECF8FD300200704 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */; };
 		F5B138940EB71977000B83CC /* texte.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B138930EB71977000B83CC /* texte.c */; };
 		F5B138C30EB71D28000B83CC /* SDL_ttf in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B138C20EB71D28000B83CC /* SDL_ttf */; };
 		F5B19B8D0EA4BE3E003F4BA4 /* aide.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B750EA4BE3E003F4BA4 /* aide.c */; };
@@ -27,7 +28,6 @@
 		F5B19B930EA4BE3E003F4BA4 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7B0EA4BE3E003F4BA4 /* graph.c */; };
 		F5B19B940EA4BE3E003F4BA4 /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7C0EA4BE3E003F4BA4 /* init.c */; };
 		F5B19B950EA4BE3E003F4BA4 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7D0EA4BE3E003F4BA4 /* io.c */; };
-		F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7E0EA4BE3E003F4BA4 /* linux.c */; };
 		F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */; };
 		F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B800EA4BE3E003F4BA4 /* moteur.c */; };
 		F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B820EA4BE3E003F4BA4 /* op_c.c */; };
@@ -118,6 +118,7 @@
 		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
 		F5A33E690EC893F800F8052D /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 8pxfont.png; path = fonts/8pxfont.png; sourceTree = "<group>"; };
 		F5AD4B1E0EA8CCF0009CCAC4 /* version.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = version.c; sourceTree = "<group>"; };
+		F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F5B138930EB71977000B83CC /* texte.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = texte.c; sourceTree = "<group>"; };
 		F5B138C20EB71D28000B83CC /* SDL_ttf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_ttf; path = /Library/Frameworks/SDL_ttf.framework/SDL_ttf; sourceTree = "<absolute>"; };
 		F5B19B6C0EA4BDA8003F4BA4 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
@@ -130,7 +131,6 @@
 		F5B19B7B0EA4BE3E003F4BA4 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = graph.c; sourceTree = "<group>"; };
 		F5B19B7C0EA4BE3E003F4BA4 /* init.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; };
 		F5B19B7D0EA4BE3E003F4BA4 /* io.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = io.c; sourceTree = "<group>"; };
-		F5B19B7E0EA4BE3E003F4BA4 /* linux.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = linux.c; sourceTree = "<group>"; };
 		F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = loadsave.c; sourceTree = "<group>"; };
 		F5B19B800EA4BE3E003F4BA4 /* moteur.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = moteur.c; sourceTree = "<group>"; };
 		F5B19B820EA4BE3E003F4BA4 /* op_c.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = op_c.c; sourceTree = "<group>"; };
@@ -164,6 +164,7 @@
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */,
 				F5B138C30EB71D28000B83CC /* SDL_ttf in Frameworks */,
+				F5AE83FD0ECF8FD300200704 /* ApplicationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +210,7 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */,
 				F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */,
 				F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */,
 				F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */,
@@ -233,7 +235,6 @@
 				F5B19B7B0EA4BE3E003F4BA4 /* graph.c */,
 				F5B19B7C0EA4BE3E003F4BA4 /* init.c */,
 				F5B19B7D0EA4BE3E003F4BA4 /* io.c */,
-				F5B19B7E0EA4BE3E003F4BA4 /* linux.c */,
 				F5B19B7F0EA4BE3E003F4BA4 /* loadsave.c */,
 				F5B19B800EA4BE3E003F4BA4 /* moteur.c */,
 				F5B19B820EA4BE3E003F4BA4 /* op_c.c */,
@@ -352,7 +353,6 @@
 				F5B19B930EA4BE3E003F4BA4 /* graph.c in Sources */,
 				F5B19B940EA4BE3E003F4BA4 /* init.c in Sources */,
 				F5B19B950EA4BE3E003F4BA4 /* io.c in Sources */,
-				F5B19B960EA4BE3E003F4BA4 /* linux.c in Sources */,
 				F5B19B970EA4BE3E003F4BA4 /* loadsave.c in Sources */,
 				F5B19B980EA4BE3E003F4BA4 /* moteur.c in Sources */,
 				F5B19B9A0EA4BE3E003F4BA4 /* op_c.c in Sources */,
@@ -392,8 +392,10 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -405,10 +407,12 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_image.framework\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL.framework\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_ttf.framework\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework\"";
 				PRODUCT_NAME = Grafx2;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -425,8 +429,10 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INFOPLIST_FILE = Info.plist;
@@ -436,10 +442,12 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_image.framework\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL.framework\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_ttf.framework\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework\"";
 				PRODUCT_NAME = Grafx2;
 				WRAPPER_EXTENSION = app;
 			};
