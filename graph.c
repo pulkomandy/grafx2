@@ -3469,6 +3469,7 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
           Pixel_dans_ecran_courant(Pos_X,Pos_Y,Back_color);
           Pixel_Preview           (Pos_X,Pos_Y,Back_color);
         }
+      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Brosse_Largeur,Brosse_Hauteur);
     }
 
     // On centre la prise sur la brosse
