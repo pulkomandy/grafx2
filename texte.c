@@ -118,9 +118,7 @@ void Ajout_fonte(const char *Nom)
   {
     case EXTID('t','t','f'):
     case EXTID('f','o','n'):
-#ifdef __macosx__
     case EXTID('o','t','f'):
-#endif
       Fonte->EstTrueType = 1;
       Fonte->EstImage = 0;
       break;
