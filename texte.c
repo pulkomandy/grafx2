@@ -155,15 +155,15 @@ void Ajout_fonte(const char *Nom)
   Fonte->Nom = (char *)malloc(Taille);
   strcpy(Fonte->Nom, Nom);
   // Libelle
-  strcpy(Fonte->Libelle, "                     ");
+  strcpy(Fonte->Libelle, "                   ");
   if (Fonte->EstTrueType)
-    Fonte->Libelle[19]=Fonte->Libelle[20]='T'; // Logo TT
+    Fonte->Libelle[17]=Fonte->Libelle[18]='T'; // Logo TT
   Nom_fonte=Position_dernier_slash(Fonte->Nom);
   if (Nom_fonte==NULL)
     Nom_fonte=Fonte->Nom;
   else
     Nom_fonte++;
-  for (Indice=0; Indice < 19 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
+  for (Indice=0; Indice < 17 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
     Fonte->Libelle[Indice]=Nom_fonte[Indice];
 
   // Gestion Liste
@@ -228,13 +228,13 @@ char * Nom_fonte(int Indice)
 
 
 // Trouve le libellé d'affichage d'une fonte par son numéro
-// Renvoie un pointeur sur un buffer statique de 22 caracteres.
+// Renvoie un pointeur sur un buffer statique de 20 caracteres.
 char * Libelle_fonte(int Indice)
 {
   T_FONTE *Fonte;
-  static char Libelle[22];
+  static char Libelle[20];
   
-  strcpy(Libelle, "                     ");
+  strcpy(Libelle, "                   ");
   
   // Recherche de la fonte
   Fonte = Liste_fontes_debut;
@@ -352,13 +352,14 @@ int Support_TrueType()
 
   
 #ifndef NOTTF
-byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
+byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int Bold, int Italic, int *Largeur, int *Hauteur)
 {
  TTF_Font *Fonte;
   SDL_Surface * TexteColore;
   SDL_Surface * Texte8Bit;
   byte * BrosseRetour;
   int Indice;
+  int Style;
   
   SDL_Color Couleur_Avant;
   SDL_Color Couleur_Arriere;
@@ -369,6 +370,13 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
   {
     return NULL;
   }
+  // Style
+  Style=0;
+  if (Italic)
+    Style|=TTF_STYLE_ITALIC;
+  if (Bold)
+    Style|=TTF_STYLE_BOLD;
+  TTF_SetFontStyle(Fonte, Style);
   // Couleurs
   if (AntiAlias)
   {
@@ -477,7 +485,7 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 
 // et retourne l'adresse du bloc d'octets.
-byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int *Largeur, int *Hauteur)
+byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int Bold, int Italic, int *Largeur, int *Hauteur)
 {
   T_FONTE *Fonte = Liste_fontes_debut;
   int Indice=Numero_fonte;
@@ -491,7 +499,7 @@ byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlia
   if (Fonte->EstTrueType)
   {
   #ifndef NOTTF 
-    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, AntiAlias, Largeur, Hauteur);
+    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, AntiAlias, Bold, Italic, Largeur, Hauteur);
   #else
     return NULL;
   #endif

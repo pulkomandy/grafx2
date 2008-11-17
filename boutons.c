@@ -2720,12 +2720,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         // Save the filename
         strcpy(Nom_fichier_Save, Principal_Nom_fichier);
 
-        // Erase the content when the right mouse button is used.
-
-        if (Mouse_K==2)
-        {
-          Principal_Nom_fichier[0] = '\0';
-        }
         if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
@@ -5818,6 +5812,8 @@ void Bouton_Texte()
   static int AntiAlias=1;
   static short Debut_liste=0; // Indice de le premiere fonte dans le selector
   static short Position_curseur=0; // Indice de la ligne active dans le selector
+  static short Style_Bold=0;
+  static short Style_Italic=0;
 
   byte * Nouvelle_Brosse=NULL;
   int Nouvelle_Largeur;
@@ -5836,40 +5832,43 @@ void Bouton_Texte()
   Ouvrir_fenetre(288,180,"Text");
 
   // Texte saisi
-  Print_dans_fenetre(6,19,"Txt:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(41,18,30); // 1
+  Print_dans_fenetre(6,20,"Text:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(48,18,29); // 1
   Bouton_texte=Fenetre_Liste_boutons_special;
   
-  // Bouton 'Clear Text'
-  Fenetre_Definir_bouton_normal(9,33,80,14,"Clear Txt",0,1,SDLK_LAST); // 2
-
+  // TrueType options
+  Fenetre_Afficher_cadre_creux(182,34,100,68);
+  Print_dans_fenetre(199,31,"TrueType", CM_Fonce, CM_Clair);
   // AA
-  Fenetre_Definir_bouton_normal(9,51,80,14,"",0,1,SDLK_LAST); // 3
-  Print_dans_fenetre(13,54,AntiAlias?"  No AA  ":"AntiAlias", CM_Noir, CM_Clair);
+  Fenetre_Definir_bouton_normal(188,58,13,11,AntiAlias?"X":" ",0,1,SDLK_a); // 2
+  Print_dans_fenetre(206,60,"AntiAlias", CM_Fonce, CM_Clair);
+  // Bold
+  Fenetre_Definir_bouton_normal(188,72,13,11,Style_Bold?"X":" ",0,1,SDLK_b); // 3
+  Print_dans_fenetre(206,75,"Bold", CM_Fonce, CM_Clair);
+  // Italic
+  Fenetre_Definir_bouton_normal(188,86,13,11,Style_Italic?"X":" ",0,1,SDLK_i); // 4
+  Print_dans_fenetre(206,89,"Italic", CM_Fonce, CM_Clair);
   
   // Scroller des fontes
-  Fenetre_Definir_bouton_scroller(94,33,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 4
+  Fenetre_Definir_bouton_scroller(165,35,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 5
   Scroller_de_fontes=Fenetre_Liste_boutons_scroller;
   // Liste des fontes disponibles
-  Fenetre_Definir_bouton_special(111,32,168,NB_FONTES*8); // 5
-  Fenetre_Afficher_cadre_creux(110, 31, 170, NB_FONTES*8+4);
+  Fenetre_Definir_bouton_special(8,34,152,NB_FONTES*8); // 6
+  Fenetre_Afficher_cadre_creux(7, 33, 154, NB_FONTES*8+4);
   
   // Taille texte
-  Print_dans_fenetre(32,71,"Size:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(35,84,3); // 6
+  Fenetre_Definir_bouton_saisie(220,43,3); // 7
   Bouton_taille_texte=Fenetre_Liste_boutons_special;
-  Fenetre_Definir_bouton_normal(18,84,14,11,"-",0,1,SDLK_LAST); // 7
-  Fenetre_Definir_bouton_normal(64,84,14,11,"+",0,1,SDLK_LAST); // 8
+  Fenetre_Definir_bouton_normal(202,43,13,11,"-",0,1,SDLK_LAST); // 8
+  Fenetre_Definir_bouton_normal(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
   // Preview
-  Fenetre_Definir_bouton_special(7,105,276,50); // 9
+  Fenetre_Definir_bouton_special(8,106,273,50); // 10
   Bouton_preview=Fenetre_Liste_boutons_special;
-  Fenetre_Afficher_cadre_creux(6, 104, 278, 52);
+  Fenetre_Afficher_cadre_creux(7, 105, 275, 52);
   
-  Fenetre_Definir_bouton_special(0,0,1,1); // 10 ???
-  
-  Fenetre_Definir_bouton_normal(7,161,40,14,"OK",0,1,SDLK_RETURN); // 11
-  Fenetre_Definir_bouton_normal(53,161,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
+  Fenetre_Definir_bouton_normal(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
+  Fenetre_Definir_bouton_normal(54,160,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
   Display_Window(288,180);
   
   // Chaine texte
@@ -5886,7 +5885,7 @@ void Bouton_Texte()
       Num2str(Taille_police,Buffer_taille,3);
       Fenetre_Contenu_bouton_saisie(Bouton_taille_texte,Buffer_taille);
       // Selecteur de fonte
-      Dessiner_selecteur_fontes(111, 33, Debut_liste, Position_curseur, NB_FONTES);
+      Dessiner_selecteur_fontes(8, 35, Debut_liste, Position_curseur, NB_FONTES);
     }
     if (A_previsionner)
     {
@@ -5903,7 +5902,7 @@ void Bouton_Texte()
         Bouton_preview->Largeur*Menu_Facteur_X,
         Bouton_preview->Hauteur*Menu_Facteur_Y,
         CM_Clair);
-      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, AntiAlias, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, AntiAlias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (Nouvelle_Brosse)
       {
         Affiche_brosse_SDL(
@@ -6048,25 +6047,32 @@ void Bouton_Texte()
     {
       case 1: // Texte saisi
       Effacer_curseur();
-      Readline_ex(43,20,Chaine,30,250,0);
+      Readline_ex(50,20,Chaine,29,250,0);
       A_previsionner=1;
       break;
-      
-      case 2: // Clear
-      Chaine[0]='\0';
-      Effacer_curseur();
-      Fenetre_Effacer_bouton_saisie(Bouton_texte);
-      A_previsionner=1;
-      break;
-      
-      case 3: // AA
+
+      case 2: // AA
       AntiAlias = (AntiAlias==0);
       Effacer_curseur();
-      Print_dans_fenetre(13,54,AntiAlias?"  No AA  ":"AntiAlias", CM_Noir, CM_Clair);
+      Print_dans_fenetre(191,60,AntiAlias?"X":" ", CM_Noir, CM_Clair);
+      A_previsionner=1;
+      break;
+
+      case 3: // Bold
+      Style_Bold = (Style_Bold==0);
+      Effacer_curseur();
+      Print_dans_fenetre(191,74,Style_Bold?"X":" ", CM_Noir, CM_Clair);
+      A_previsionner=1;
+      break;
+
+      case 4: // Italic
+      Style_Italic = (Style_Italic==0);
+      Effacer_curseur();
+      Print_dans_fenetre(191,88,Style_Italic?"X":" ", CM_Noir, CM_Clair);
       A_previsionner=1;
       break;
       
-      case 4: // Scroller des fontes
+      case 5: // Scroller des fontes
       if (Debut_liste!=Fenetre_Attribut2)
       {
         Position_curseur+=Debut_liste;
@@ -6078,7 +6084,7 @@ void Bouton_Texte()
       }
       break;
       
-      case 5: // Selecteur de fonte
+      case 6: // Selecteur de fonte
       Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-32)>>3;
       if (Temp!=Position_curseur && Temp < Fonte_nombre)
       {
@@ -6090,9 +6096,9 @@ void Bouton_Texte()
       }
       break;
             
-      case 6: // Taille du texte (nombre)
+      case 7: // Taille du texte (nombre)
       Effacer_curseur();
-      Readline(37,86,Buffer_taille,3,1);
+      Readline(222,45,Buffer_taille,3,1);
       Taille_police=atoi(Buffer_taille);
       // On corrige les dimensions
       if (Taille_police < 1)
@@ -6107,7 +6113,7 @@ void Bouton_Texte()
       A_previsionner=1;
       break;
       
-      case 7: // Taille -
+      case 8: // Taille -
       if (Taille_police > 1)
       {
         Taille_police--;
@@ -6117,7 +6123,7 @@ void Bouton_Texte()
       }
       break;
       
-      case 8: // Taille +
+      case 9: // Taille +
       if (Taille_police < 255)
       {
         Taille_police++;

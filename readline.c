@@ -153,9 +153,11 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(Chaine_initiale,Chaine);
 
-  if (Type_saisie==1)
+  // Si on a commencé à editer par un clic-droit, on vide la chaine.
+  if (Mouse_K==A_DROITE)
+    Chaine[0]='\0';
+  else if (Type_saisie==1)
     snprintf(Chaine,10,"%d",atoi(Chaine)); // On tasse la chaine à gauche
-  //  Chaine[0]='\0';    // On efface la chaîne si c'est valeur numérique
 
 
   Taille=strlen(Chaine);
