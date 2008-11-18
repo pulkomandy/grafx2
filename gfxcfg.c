@@ -655,7 +655,23 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
   	/* On initialise SDL */
   	SDL_Init(SDL_INIT_VIDEO);
   	Ecran = SDL_SetVideoMode(640,480,8,0);
-  	SDL_WM_SetCaption ("Grafx2 configuration tool","../gfx2.gif");
+  	SDL_WM_SetCaption ("Grafx2 configuration tool","Gfx2Cfg");
+    {
+      // Routine pour définir l'icone.
+      SDL_Surface * Icone = IMG_Load("gfx2cfg.gif");
+      byte *Masque_icone;
+      if (Icone)
+      {
+        int x,y;
+        Masque_icone=malloc(128);
+        memset(Masque_icone,0,128);
+        for (y=0;y<32;y++)
+          for (x=0;x<32;x++)
+            if (((byte *)(Icone->pixels))[(y*32+x)] != 255)
+              Masque_icone[(y*32+x)/8] |=0x80>>(x&7);
+        SDL_WM_SetIcon(Icone,Masque_icone);
+      }
+    }
     SDL_EnableKeyRepeat(250, 32);
     SDL_EnableUNICODE(SDL_ENABLE);
 

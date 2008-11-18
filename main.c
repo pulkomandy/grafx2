@@ -37,6 +37,7 @@
 #include <signal.h>
 #include <time.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <unistd.h>
 #include "pages.h"
 #include "files.h"
@@ -329,8 +330,25 @@ void Initialisation_du_programme(int argc,char * argv[])
   SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
-  SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","grafx2.gif");
-
+  SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","GrafX2");
+  {
+    // Routine pour définir l'icone.
+    char Chemin_icone[256];
+    sprintf(Chemin_icone, "%s%s", Repertoire_du_programme, "gfx2.gif");
+    SDL_Surface * Icone = IMG_Load(Chemin_icone);
+    if (Icone)
+    {
+      byte *Masque_icone;
+      int x,y;
+      Masque_icone=malloc(128);
+      memset(Masque_icone,0,128);
+      for (y=0;y<32;y++)
+        for (x=0;x<32;x++)
+          if (((byte *)(Icone->pixels))[(y*32+x)] != 255)
+            Masque_icone[(y*32+x)/8] |=0x80>>(x&7);
+      SDL_WM_SetIcon(Icone,Masque_icone);
+    }
+  }
   // Texte
   Initialisation_Texte();
 

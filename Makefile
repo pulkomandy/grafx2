@@ -33,6 +33,7 @@ ifdef COMSPEC
   # Resources (icon)
   WINDRES = windres.exe
   OBJRES = $(OBJDIR)/winres.o
+  CFGOBJRES = $(OBJDIR)/wincfgres.o
 else
 
   PLATFORM = $(shell uname)
@@ -129,15 +130,15 @@ release : $(BIN) $(CFGBIN)
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.ico doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll zlib1.dll libpng13.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
+	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll zlib1.dll libpng13.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
 
-$(CFGBIN) : $(CFGOBJ)
-	$(CC) $(CFGOBJ) -o $(CFGBIN) $(LOPT)
+$(CFGBIN) : $(CFGOBJ) $(CFGOBJRES)
+	$(CC) $(CFGOBJ) $(CFGOBJRES) -o $(CFGBIN) $(LOPT)
 
 # SVN revision number
 version.c :
@@ -157,9 +158,11 @@ depend :
 
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+$(OBJDIR)/wincfgres.o : gfx2cfg.ico
+	echo "1 ICON \"gfx2cfg.ico\"" | $(WINDRES) -o $(OBJDIR)/wincfgres.o
 
 clean :
-	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES)
+	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES) $(CFGOBJRES)
 	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
 test :
