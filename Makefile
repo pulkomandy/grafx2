@@ -30,6 +30,9 @@ ifdef COMSPEC
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
   CC = gcc
   OBJDIR = obj/win32
+  # Resources (icon)
+  WINDRES = windres.exe
+  OBJRES = $(OBJDIR)/winres.o
 else
 
   PLATFORM = $(shell uname)
@@ -130,8 +133,8 @@ ziprelease: version $(BIN) $(BINCFG) release
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
 	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
-$(BIN) : $(OBJ)
-	$(CC) $(OBJ) -o $(BIN) $(LOPT)
+$(BIN) : $(OBJ) $(OBJRES)
+	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
 
 $(CFGBIN) : $(CFGOBJ)
 	$(CC) $(CFGOBJ) -o $(CFGBIN) $(LOPT)
@@ -152,9 +155,11 @@ $(OBJDIR)/%.o :
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
+$(OBJDIR)/winres.o : gfx2.ico
+	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
 
 clean :
-	$(DELCOMMAND) $(OBJ) $(CFGOBJ)
+	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES)
 	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
 test :
