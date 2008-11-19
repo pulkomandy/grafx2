@@ -946,10 +946,23 @@ void Bouton_Palette(void)
 	  {
 	      byte h,l,s;
 
-	      rgb2hl(Palette_de_travail[Fore_color].R,Palette_de_travail[Fore_color].V,Palette_de_travail[Fore_color].B,&h,&l,&s);
+	      DEBUG("ra",Palette_de_travail[Fore_color].R);
+	      DEBUG("ga",Palette_de_travail[Fore_color].V);
+	      DEBUG("ba",Palette_de_travail[Fore_color].B);
+	      rgb2hl(Palette_de_travail[Fore_color].R*4,Palette_de_travail[Fore_color].V*4,Palette_de_travail[Fore_color].B*4,&h,&l,&s);
+	      DEBUG("h",h);
+	      DEBUG("l",l);
+	      DEBUG("s",s);
 	      h=(63-Jauge_rouge->Position)*4; // Enlever le *4 quand le slider ira de 0 à 255 comme il faut
 	      HLStoRGB(h,l,s,&Palette_de_travail[Fore_color].R,&Palette_de_travail[Fore_color].V,&Palette_de_travail[Fore_color].B);
 	      
+	      Palette_de_travail[Fore_color].R /= 4; // On ne compte que de 0 à 63 ici
+	      Palette_de_travail[Fore_color].V /= 4; // On ne compte que de 0 à 63 ici
+	      Palette_de_travail[Fore_color].B /= 4; // On ne compte que de 0 à 63 ici
+
+	      DEBUG("rb",Palette_de_travail[Fore_color].R);
+	      DEBUG("gb",Palette_de_travail[Fore_color].V);
+	      DEBUG("bb",Palette_de_travail[Fore_color].B);
 	      Num2str((int)h>>2,Chaine,2);
 	  }
           Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);

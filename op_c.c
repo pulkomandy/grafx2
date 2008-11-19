@@ -36,7 +36,7 @@
 
 void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
 {
-  double rd,gd,bd,h,s,v,l,max,min,del,rc,gc,bc;
+  double rd,gd,bd,h,s,l,max,min;
 
   // convert RGB to HSV
   rd = r / 255.0;            // rd,gd,bd range 0-1 instead of 0-255
@@ -44,7 +44,7 @@ void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
   bd = b / 255.0;
 
   // compute L
-  l=(rd*0.30)+(gd*0.59)+(bd*0.11);
+//  l=(rd*0.30)+(gd*0.59)+(bd*0.11);
 
   // compute maximum of rd,gd,bd
   if (rd>=gd)
@@ -77,66 +77,95 @@ void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
     else
       min = bd;
   }
-  del = max - min;
-  v = max;
-  if (max != 0.0)
-    s = (del) / max;
+
+  l = (max + min) / 2.0;
+
+  if(max==min)
+      s = h = 0;
   else
-    s = 0.0;
-
-  h = -1;
-  if (s != 0.0)
   {
-    rc = (max - rd) / del;
-    gc = (max - gd) / del;
-    bc = (max - bd) / del;
+    if (l<=0.5)
+	s = (max - min) / (max + min);
+    else
+	s = (max - min) / (2 - (max + min));
 
-    if      (rd==max) h = bc - gc;
-    else if (gd==max) h = 2 + rc - bc;
-    else if (bd==max) h = 4 + gc - rc;
-
-    h = h * 60;
-    if (h<0) h += 360;
+    if (max == rd)
+	h = 42.5 * (gd-bd)/(max-min);
+    else if (max == gd)
+	h = 42.5 * (bd-rd)/(max-min)+85;
+    else
+	h = 42.5 * (rd-gd)/(max-min)+170;
+    if (h<0) h+=255;
   }
 
-  *hr = (h*255.0)/360;
+  *hr = h;
   *lr = (l*255.0);
   *sr = (s*255.0);
 }
 
 void HLStoRGB(byte H,byte L,byte S, byte* R, byte* G, byte* B)
 {
-    float OffsetSaturation;
-    float rf,gf,bf;
+    float rf =0 ,gf = 0,bf = 0;
+    float hf,lf,sf;
+    float p,q;
 
-    S = 255 - S;
-
-    if(H < 85)
-	rf = fminf(1, (85 - H)  / 42.5);
-
-    else if(H > 170)
-	rf = fminf(1, (H - 170) / 42.5);
-
-    if (H < 170)
-	gf = fminf(1, (85 - abs(H -  85)) / 42.5);
-
-    if (H > 85)
-	bf = fminf(1, (85 - abs(H - 170)) / 42.5);
-
-    if (S < 255)
+    if(S==0)
     {
-	rf = rf * (S / 255.0);
-	gf = gf * (S / 255.0);
-	bf = bf * (S / 255.0);
-	OffsetSaturation = /*128 **/ (255 - S) / 255.0;
-	rf += OffsetSaturation;
-	gf += OffsetSaturation;
-	bf += OffsetSaturation;
+	*R=*G=*B=L;
+	return;
     }
 
-    *R = rf * ((255 - abs(L - 255)) / 255.0);
-    *G = gf * ((255 - abs(L - 255)) / 255.0);
-    *B = bf * ((255 - abs(L - 255)) / 255.0);
+    hf = H / 255.0;
+    lf = L / 255.0;
+    sf = S / 255.0;
+
+    if (lf<=0.5)
+	q = lf*(1+sf);
+    else
+	q = lf+sf-lf*sf;
+    p = 2*lf-q;
+
+    rf = hf + (1 / 3.0);
+    gf = hf;
+    bf = hf - (1 / 3.0);
+
+    if (rf < 0) rf+=1;
+    if (rf > 1) rf-=1;
+    if (gf < 0) gf+=1;
+    if (gf > 1) gf-=1;
+    if (bf < 0) bf+=1;
+    if (bf > 1) bf-=1;
+
+    if (rf < 1/6.0)
+	rf = p + ((q-p)*6*rf);
+    else if(rf < 0.5)
+	rf = q;
+    else if(rf < 2/3.0)
+	rf = p + ((q-p)*6*(2/3.0-rf));
+    else
+	rf = p;
+
+    if (gf < 1/6.0)
+	gf = p + ((q-p)*6*gf);
+    else if(gf < 0.5)
+	gf = q;
+    else if(gf < 2/3.0)
+	gf = p + ((q-p)*6*(2/3.0-gf));
+    else
+	gf = p;
+
+    if (bf < 1/6.0)
+	bf = p + ((q-p)*6*bf);
+    else if(rf < 0.5)
+	bf = q;
+    else if(bf < 2/3.0)
+	bf = p + ((q-p)*6*(2/3.0-bf));
+    else
+	bf = p;
+
+    *R = rf * (255);
+    *G = gf * (255);
+    *B = bf * (255);
 }
 
 /////////////////////////////////////////////////////////////////////////////
