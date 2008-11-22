@@ -615,6 +615,9 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Couleur_taggee=Couleur;
           Table[Couleur_taggee]=(Click==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Click==A_GAUCHE)?CM_Noir:CM_Clair);
+          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_taggee >> 4)*10)),
+            Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_taggee & 15)* 5)),
+            Menu_Facteur_X<<1,Menu_Facteur_Y*5);
           Afficher_curseur();
         }
         break;
@@ -2958,10 +2961,14 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
         // Affichage du commentaire
         if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
+        {
           Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+        }
         Afficher_curseur();
-
-        UpdateRect(Fenetre_Pos_X+27*Menu_Facteur_X,Fenetre_Pos_Y+(55+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X<<9,Menu_Facteur_Y<<4);
+        // Un update pour couvrir les 4 zones: 3 libellés plus la zone de preview
+        UpdateRect(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+55*Menu_Facteur_Y,Menu_Facteur_X*122,Menu_Facteur_Y*(116+FILENAMESPACE));
+        // Zone de commentaire
+        UpdateRect(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X*32*8,Menu_Facteur_Y*8);
       }
 
       Nouvelle_preview=0;

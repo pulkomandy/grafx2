@@ -475,9 +475,10 @@ void Gestion_principale(void)
   byte Temp;
 
 
-  // Au démarrage, on sait que le curseur n'est pas dans le menu
+  // Au démarrage, on considère que le curseur est dans le menu
+  // pour forcer un affichage des coordonnées
 
-  Curseur_dans_menu_precedent=0;
+  Curseur_dans_menu_precedent=1;
 
   do
   {
@@ -866,6 +867,7 @@ void Gestion_principale(void)
             // On nettoie les coordonnées
             Effacer_curseur();
             Block(18*Menu_Facteur_X,Menu_Ordonnee_Texte,192*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
+            UpdateRect(18*Menu_Facteur_X,Menu_Ordonnee_Texte,192*Menu_Facteur_X,Menu_Facteur_Y<<3);
             Afficher_curseur();
           }
         }
@@ -1090,22 +1092,25 @@ void Fermer_fenetre(void)
   
     Cacher_pinceau=Cacher_pinceau_avant_fenetre;
   
-    Curseur_dans_menu_precedent=0; // il faut rafficher le libellé dans la barre
-                                   // d'outils si le curseur est sur une icône.
+    // il faut rafficher le libellé dans la barre
+    // d'outils si le curseur est sur une icône.
+    Curseur_dans_menu_precedent=1;
   
     Calculer_coordonnees_pinceau();
   
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
     Menu_visible=Menu_visible_avant_fenetre;
     Forme_curseur=Forme_curseur_avant_fenetre;
+    
+    Afficher_ecran();
+    Afficher_menu();
   }
-  
-  // Restore de ce que la fenêtre cachait
-  Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
-  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
-
-  //Afficher_ecran();
-  //Afficher_menu();
+  else
+  {
+    // Restore de ce que la fenêtre cachait
+    Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+  }
 
   Touche=0;
   Mouse_K=0;
@@ -1607,6 +1612,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
     for (Indice=0; Indice<Hauteur; Indice++)
       Afficher_ligne(Fenetre_Pos_X,Fenetre_Pos_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
+    UpdateRect(Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur*Menu_Facteur_X, Fenetre_Hauteur*Menu_Facteur_Y);
     Forme_curseur=FORME_CURSEUR_FLECHE;
     Cacher_pinceau=B;
     Cacher_curseur=Cacher_curseur_avant_recuperation;
