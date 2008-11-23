@@ -68,28 +68,37 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
   Diff = X-Principal_Decalage_X;
   if (Diff<0)
   {
-    Largeur += Diff;
+    L_effectif = Largeur + Diff;
     X_effectif = 0;
   }
   else
+  {
+    L_effectif = Largeur;
     X_effectif = Diff;
+  }
   Diff = Y-Principal_Decalage_Y;
   if (Diff<0)
   {
-    Hauteur += Diff;
+    H_effectif = Hauteur + Diff;
     Y_effectif = 0;
   }
   else
+  {
+    H_effectif = Hauteur;
     Y_effectif = Diff;
+  }
 
 	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
 	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
 	// a rester dans la zone visible de l'image
-	if(X_effectif + Largeur <= Largeur_ecran) L_effectif = Largeur;
-	else L_effectif = Largeur_ecran - X_effectif;
+	// ...Sauf l'affichage de brosse en preview - yr
+	if(Loupe_Mode && X_effectif + L_effectif > Principal_Split)
+	  L_effectif = Principal_Split - X_effectif;
+	else if(X_effectif + L_effectif > Largeur_ecran)
+	  L_effectif = Largeur_ecran - X_effectif;
 
-	if(Y_effectif + Hauteur <= Menu_Ordonnee) H_effectif = Hauteur;
-	else H_effectif = Menu_Ordonnee - Y_effectif;
+	if(Y_effectif + H_effectif > Menu_Ordonnee)
+	  H_effectif = Menu_Ordonnee - Y_effectif;
 	/*
 		SDL_Rect r;
 		r.x=X_effectif;
