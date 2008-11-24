@@ -123,12 +123,16 @@ struct Element_de_liste_de_fileselect
   struct Element_de_liste_de_fileselect * Precedent;
 };
 
-
+typedef struct {
+  char type;
+  char * texte;
+  int valeur;
+} T_TABLEAIDE;
 
 // Déclaration d'une section d'aide:
 struct Section_d_aide
 {
-  const char ** Table_aide; // Pointeur sur le début de la table d'aide
+  const T_TABLEAIDE* Table_aide; // Pointeur sur le début de la table d'aide
   word Nombre_de_lignes;
 };
 

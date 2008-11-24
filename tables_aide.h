@@ -18,6 +18,9 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+#include "const.h" // Utilise les enumerations BOUTON_ et SPECIAL_
+
 // Les tables suivantes servent de table de conversion entre un caractère ASCII
 // et le sprite qui le représente dans la Fonte
 
@@ -172,18 +175,21 @@ static const int Caracteres_Aide_Titre_bas[] = { // Commence à ' '
 };
 
 // Quelques formules magiques:
-#define AIDE_TEXTE(x) "N" x,
-// Génère une ligne "Ntexte",
+#define AIDE_TEXTE(x) {'N', x, 0},
+// Génère une ligne 'N' (Normale)
 
-#define AIDE_BOLD(x) "S" x,
-// Génère une ligne "Stexte",
+#define AIDE_LIEN(x,y) {'K', x, y},
+// Génère une ligne 'K' (Key)
 
-#define AIDE_TITRE(x) "T" x, "-",
-// Génère une ligne "Ttexte",
-// et une deuxième  "-",
+#define AIDE_BOLD(x) {'S', x, 0},
+// Génère une ligne 'S' (BOLD)
+
+#define AIDE_TITRE(x) {'T', x, 0}, {'-', x, 0},
+// Génère une ligne 'T' (Titre partie haute)
+// et une deuxième  '-' (Titre partie basse)
 // (pour gérer les gros titres qui occupent deux lignes)
 
-static const char * TableAideAbout[] =
+static const T_TABLEAIDE TableAideAbout[] =
 /*
   AIDE_TEXTE("--------------------------------------------")
 */
@@ -201,7 +207,7 @@ static const char * TableAideAbout[] =
   AIDE_TEXTE("  Copyright 2007 by the Grafx2 project team")
   AIDE_TEXTE("    Copyright 1996-2001 by SUNSET DESIGN")
 };
-static const char * TableAideLicense[] =
+static const T_TABLEAIDE TableAideLicense[] =
 {
   AIDE_TITRE("       LICENSE")
   AIDE_TEXTE("")
@@ -226,15 +232,175 @@ static const char * TableAideLicense[] =
   AIDE_TEXTE(" MA  02111-1307, USA.")
 
 };
-static const char * TableAideHelp[] =
+static const T_TABLEAIDE TableAideHelp[] =
 {
   AIDE_TITRE("HELP")
   AIDE_TEXTE("")
-  AIDE_TEXTE("  Contextual help is available.")
-  AIDE_TEXTE("  Just press your Help key (usually <F1>)")
-  AIDE_TEXTE("  while hovering an icon, or inside a menu.")
+  AIDE_TEXTE("  Contextual help is available by pressing")
+  AIDE_LIEN ("  the %s key",0x100+BOUTON_AIDE)
+  AIDE_TEXTE("  You can do it while hovering a menu icon,")
+  AIDE_TEXTE("  or while a window is open.")
+  AIDE_TEXTE("")
+  AIDE_BOLD ("   LIST OF KEYBOARD SHORTCUTS")
+  AIDE_TEXTE("")
+  AIDE_TEXTE("This is your current configuration.")
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Scroll visible area")
+  AIDE_LIEN ("  up:                %s",   SPECIAL_SCROLL_UP)
+  AIDE_LIEN ("  down:              %s",   SPECIAL_SCROLL_DOWN)
+  AIDE_LIEN ("  left:              %s",   SPECIAL_SCROLL_LEFT)
+  AIDE_LIEN ("  right:             %s",   SPECIAL_SCROLL_RIGHT)
+  AIDE_LIEN ("  up faster:         %s",   SPECIAL_SCROLL_UP_FAST)
+  AIDE_LIEN ("  down faster:       %s",   SPECIAL_SCROLL_DOWN_FAST)
+  AIDE_LIEN ("  left faster:       %s",   SPECIAL_SCROLL_LEFT_FAST)
+  AIDE_LIEN ("  right faster:      %s",   SPECIAL_SCROLL_RIGHT_FAST)
+  AIDE_LIEN ("  up slower:         %s",   SPECIAL_SCROLL_UP_SLOW)
+  AIDE_LIEN ("  down slower:       %s",   SPECIAL_SCROLL_DOWN_SLOW)
+  AIDE_LIEN ("  left slower:       %s",   SPECIAL_SCROLL_LEFT_SLOW)
+  AIDE_LIEN ("  right slower:      %s",   SPECIAL_SCROLL_RIGHT_SLOW)
+  AIDE_TEXTE("Emulate mouse")
+  AIDE_LIEN ("  Up:                %s",   SPECIAL_MOUSE_UP)
+  AIDE_LIEN ("  Down:              %s",   SPECIAL_MOUSE_DOWN)
+  AIDE_LIEN ("  Left:              %s",   SPECIAL_MOUSE_LEFT)
+  AIDE_LIEN ("  Right:             %s",   SPECIAL_MOUSE_RIGHT)
+  AIDE_LIEN ("  Left click:        %s",   SPECIAL_CLICK_LEFT)
+  AIDE_LIEN ("  Right click:       %s",   SPECIAL_CLICK_RIGHT)
+  AIDE_LIEN ("Show / Hide menu:    %s",   0x100+BOUTON_CACHER)
+  AIDE_LIEN ("Show / Hide cursor:  %s",   SPECIAL_SHOW_HIDE_CURSOR)
+  AIDE_LIEN ("Paintbrush = \".\":    %s",   SPECIAL_PINCEAU_POINT)
+  AIDE_LIEN ("Paintbrush choice:   %s",   0x100+BOUTON_PINCEAUX)
+  AIDE_LIEN ("Monochrome brush:    %s",   0x200+BOUTON_PINCEAUX)
+  AIDE_LIEN ("Freehand drawing:    %s",   0x100+BOUTON_DESSIN)
+  AIDE_TEXTE("Switch freehand")
+  AIDE_LIEN ("  drawing mode:      %s",   0x200+BOUTON_DESSIN)
+  AIDE_TEXTE("Continuous freehand")
+  AIDE_LIEN ("  drawing:           %s",   SPECIAL_DESSIN_CONTINU)
+  AIDE_LIEN ("Line:                %s",   0x100+BOUTON_LIGNES)
+  AIDE_LIEN ("Knotted lines:       %s",   0x200+BOUTON_LIGNES)
+  AIDE_LIEN ("Spray:               %s",   0x100+BOUTON_SPRAY)
+  AIDE_LIEN ("Spray menu:          %s",   0x200+BOUTON_SPRAY)
+  AIDE_LIEN ("Floodfill:           %s",   0x100+BOUTON_FLOODFILL)
+  AIDE_LIEN ("Replace color:       %s",   0x200+BOUTON_FLOODFILL)
+  AIDE_LIEN ("Bezier's curves:     %s",   0x100+BOUTON_COURBES)
+  AIDE_TEXTE("Bezier's curve with")
+  AIDE_LIEN ("  3 or 4 points      %s",   0x200+BOUTON_COURBES)
+  AIDE_LIEN ("Empty rectangle:     %s",   0x100+BOUTON_RECTANGLES)
+  AIDE_LIEN ("Filled rectangle:    %s",   0x100+BOUTON_FILLRECT)
+  AIDE_LIEN ("Empty circle:        %s",   0x100+BOUTON_CERCLES)
+  AIDE_LIEN ("Empty ellipse:       %s",   0x200+BOUTON_CERCLES)
+  AIDE_LIEN ("Filled circle:       %s",   0x100+BOUTON_FILLCERC)
+  AIDE_LIEN ("Filled ellipse:      %s",   0x200+BOUTON_FILLCERC)
+  AIDE_LIEN ("Empty polygon:       %s",   0x100+BOUTON_POLYGONES)
+  AIDE_LIEN ("Empty polyform:      %s",   0x200+BOUTON_POLYGONES)
+  AIDE_LIEN ("Polyfill:            %s",   0x100+BOUTON_POLYFILL)
+  AIDE_LIEN ("Filled polyform:     %s",   0x200+BOUTON_POLYFILL)
+  AIDE_LIEN ("Gradient rectangle:  %s",   0x100+BOUTON_GRADRECT)
+  AIDE_LIEN ("Gradation menu:      %s",   0x100+BOUTON_GRADMENU)
+  AIDE_LIEN ("Spheres:             %s",   0x100+BOUTON_SPHERES)
+  AIDE_LIEN ("Gradient ellipses:   %s",   0x200+BOUTON_SPHERES)
+  AIDE_LIEN ("Adjust picture:      %s",   0x100+BOUTON_AJUSTER)
+  AIDE_LIEN ("Flip picture menu:   %s",   0x200+BOUTON_AJUSTER)
+  AIDE_LIEN ("Effects menu:        %s",   0x100+BOUTON_EFFETS)
+  AIDE_LIEN ("Shade mode:          %s",   SPECIAL_SHADE_MODE)
+  AIDE_LIEN ("Shade menu:          %s",   SPECIAL_SHADE_MENU)
+  AIDE_LIEN ("Quick-shade mode:    %s",   SPECIAL_QUICK_SHADE_MODE)
+  AIDE_LIEN ("Quick-shade menu:    %s",   SPECIAL_QUICK_SHADE_MENU)
+  AIDE_LIEN ("Stencil mode:        %s",   SPECIAL_STENCIL_MODE)
+  AIDE_LIEN ("Stencil menu:        %s",   SPECIAL_STENCIL_MENU)
+  AIDE_LIEN ("Mask mode:           %s",   SPECIAL_MASK_MODE)
+  AIDE_LIEN ("Mask menu:           %s",   SPECIAL_MASK_MENU)
+  AIDE_LIEN ("Grid mode:           %s",   SPECIAL_GRID_MODE)
+  AIDE_LIEN ("Grid menu:           %s",   SPECIAL_GRID_MENU)
+  AIDE_LIEN ("Sieve mode:          %s",   SPECIAL_SIEVE_MODE)
+  AIDE_LIEN ("Sieve menu:          %s",   SPECIAL_SIEVE_MENU)
+  AIDE_LIEN ("Invert Sieve:        %s",   SPECIAL_INVERT_SIEVE)
+  AIDE_LIEN ("Colorize mode:       %s",   SPECIAL_COLORIZE_MODE)
+  AIDE_LIEN ("Colorize menu:       %s",   SPECIAL_COLORIZE_MENU)
+  AIDE_LIEN ("Smooth mode:         %s",   SPECIAL_SMOOTH_MODE)
+  AIDE_LIEN ("Smooth menu:         %s",   SPECIAL_SMOOTH_MENU)
+  AIDE_LIEN ("Smear mode:          %s",   SPECIAL_SMEAR_MODE)
+  AIDE_LIEN ("Tiling mode:         %s",   SPECIAL_TILING_MODE)
+  AIDE_LIEN ("Tiling menu:         %s",   SPECIAL_TILING_MENU)
+  AIDE_LIEN ("Pick brush:          %s",   0x100+BOUTON_BROSSE)
+  AIDE_LIEN ("Pick polyform brush: %s",   0x100+BOUTON_POLYBROSSE)
+  AIDE_LIEN ("Restore brush:       %s",   0x200+BOUTON_BROSSE)
+  AIDE_LIEN ("Flip X:              %s",   SPECIAL_FLIP_X)
+  AIDE_LIEN ("Flip Y:              %s",   SPECIAL_FLIP_Y)
+  AIDE_LIEN ("90' brush rotation:  %s",   SPECIAL_ROTATE_90)
+  AIDE_LIEN ("180' brush rotation: %s",   SPECIAL_ROTATE_180)
+  AIDE_LIEN ("Stretch brush:       %s",   SPECIAL_STRETCH)
+  AIDE_LIEN ("Distort brush:       %s",   SPECIAL_DISTORT)
+  AIDE_LIEN ("Outline brush:       %s",   SPECIAL_OUTLINE)
+  AIDE_LIEN ("Nibble brush:        %s",   SPECIAL_NIBBLE)
+  AIDE_LIEN ("Get brush colors:    %s",   SPECIAL_GET_BRUSH_COLORS)
+  AIDE_LIEN ("Recolorize brush:    %s",   SPECIAL_RECOLORIZE_BRUSH)
+  AIDE_LIEN ("Rotate brush:        %s",   SPECIAL_ROTATE_ANY_ANGLE)
+  AIDE_LIEN ("Pipette:             %s",   0x100+BOUTON_PIPETTE)
+  AIDE_LIEN ("Swap fore/back color:%s",   0x200+BOUTON_PIPETTE)
+  AIDE_LIEN ("Magnifier mode:      %s",   0x100+BOUTON_LOUPE)
+  AIDE_LIEN ("Zoom factor menu:    %s",   0x200+BOUTON_LOUPE)
+  AIDE_LIEN ("Zoom in:             %s",   SPECIAL_ZOOM_IN)
+  AIDE_LIEN ("Zoom out:            %s",   SPECIAL_ZOOM_OUT)
+  AIDE_LIEN ("Brush effects menu:  %s",   0x100+BOUTON_EFFETS_BROSSE)
+  AIDE_LIEN ("Text:                %s",   0x100+BOUTON_TEXTE)
+  AIDE_LIEN ("Resolution menu:     %s",   0x100+BOUTON_RESOL)
+  AIDE_LIEN ("Safety resolution:   %s",   0x200+BOUTON_RESOL)
+  AIDE_LIEN ("Help:                %s",   0x100+BOUTON_AIDE)
+  AIDE_LIEN ("Statistics:          %s",   0x200+BOUTON_AIDE)
+  AIDE_LIEN ("Go to spare page:    %s",   0x100+BOUTON_PAGE)
+  AIDE_LIEN ("Copy to spare page:  %s",   0x200+BOUTON_PAGE)
+  AIDE_LIEN ("Save as:             %s",   0x100+BOUTON_SAUVER)
+  AIDE_LIEN ("Save:                %s",   0x200+BOUTON_SAUVER)
+  AIDE_LIEN ("Load:                %s",   0x100+BOUTON_CHARGER)
+  AIDE_LIEN ("Re-load:             %s",   0x200+BOUTON_CHARGER)
+  AIDE_LIEN ("Save brush:          %s",   SPECIAL_SAVE_BRUSH)
+  AIDE_LIEN ("Load brush:          %s",   SPECIAL_LOAD_BRUSH)
+  AIDE_LIEN ("Larger brush size:   %s",   SPECIAL_GROSSIR_PINCEAU)
+  AIDE_LIEN ("Smaller brush size:  %s",   SPECIAL_RETRECIR_PINCEAU)
+  AIDE_LIEN ("Settings:            %s",   0x100+BOUTON_PARAMETRES)
+  AIDE_LIEN ("Undo:                %s",   0x100+BOUTON_UNDO)
+  AIDE_LIEN ("Redo:                %s",   0x200+BOUTON_UNDO)
+  AIDE_LIEN ("Kill page:           %s",   0x100+BOUTON_KILL)
+  AIDE_LIEN ("Clear:               %s",   0x100+BOUTON_CLEAR)
+  AIDE_LIEN ("Clear with BG color: %s",   0x200+BOUTON_CLEAR)
+  AIDE_LIEN ("Quit:                %s",   0x100+BOUTON_QUIT)
+  AIDE_LIEN ("Palette menu:        %s",   0x100+BOUTON_PALETTE)
+  AIDE_LIEN ("2nd Palette menu:    %s",   0x200+BOUTON_PALETTE)
+  AIDE_LIEN ("Exclude colors menu: %s",   SPECIAL_EXCLUDE_COLORS_MENU)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Scroll palette")
+  AIDE_LIEN ("  Left: %s",   0x100+BOUTON_PAL_LEFT)
+  AIDE_LIEN ("  Right: %s",   0x100+BOUTON_PAL_RIGHT)
+  AIDE_LIEN ("  Left faster: %s",   0x200+BOUTON_PAL_LEFT)
+  AIDE_LIEN ("  Right faster: %s",   0x200+BOUTON_PAL_RIGHT)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Change brush attachement")
+  AIDE_LIEN ("  Center      : %s",   SPECIAL_CENTER_ATTACHMENT)
+  AIDE_LIEN ("  Top-left    : %s",   SPECIAL_TOP_LEFT_ATTACHMENT)
+  AIDE_LIEN ("  Top-right   : %s",   SPECIAL_TOP_RIGHT_ATTACHMENT)
+  AIDE_LIEN ("  Bottom-left : %s",   SPECIAL_BOTTOM_LEFT_ATTACHMENT)  
+  AIDE_LIEN ("  Bottom-right: %s",   SPECIAL_BOTTOM_RIGHT_ATTACHMENT)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Select foreground color")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("  Next    : %s",   SPECIAL_NEXT_FORECOLOR)
+  AIDE_LIEN ("  Previous: %s",   SPECIAL_PREVIOUS_FORECOLOR)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Select background color")
+  AIDE_LIEN ("  Next    : %s",   SPECIAL_NEXT_BACKCOLOR)
+  AIDE_LIEN ("  Previous: %s",   SPECIAL_PREVIOUS_BACKCOLOR)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Select user-defined foreground color")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("  Next    : %s",   SPECIAL_NEXT_USER_FORECOLOR)
+  AIDE_LIEN ("  Previous: %s",   SPECIAL_PREVIOUS_USER_FORECOLOR)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Select user-defined background color")
+  AIDE_LIEN ("  Next    : %s",   SPECIAL_NEXT_USER_BACKCOLOR)
+  AIDE_LIEN ("  Previous: %s",   SPECIAL_PREVIOUS_USER_BACKCOLOR)
+  AIDE_TEXTE("")
 };
-static const char * TableAideCredits[] =
+static const T_TABLEAIDE TableAideCredits[] =
 {
   AIDE_TITRE(" GRAFX2 IS CREATED BY")
   AIDE_BOLD ("         THE GRAFX2 PROJECT TEAM")
@@ -400,11 +566,12 @@ static const char * TableAideCredits[] =
   AIDE_TEXTE("  Fennec        Phar          Zebig")
   AIDE_TEXTE("  and all #pixel, #demofr and #coders.")
 };
-static const char * TableAidePinceaux[] =
+static const T_TABLEAIDE TableAidePinceaux[] =
 {
   AIDE_TITRE("PAINTBRUSHES")
   AIDE_TEXTE("")
   AIDE_BOLD ("    LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_PINCEAUX)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where you can choose the")
   AIDE_TEXTE("shape of your paintbrush.")
@@ -456,6 +623,7 @@ static const char * TableAidePinceaux[] =
   AIDE_TEXTE("cannot be modified.")
   AIDE_TEXTE("")
   AIDE_BOLD ("    RIGHT CLICK     ")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_PINCEAUX)
   AIDE_TEXTE("")
   AIDE_TEXTE("Transforms your current user-defined brush")
   AIDE_TEXTE("into a paintbrush. This is actually a")
@@ -468,16 +636,17 @@ static const char * TableAidePinceaux[] =
   AIDE_TEXTE("to get your brush back.")
   AIDE_TEXTE("")
   AIDE_TEXTE("Note: When you press (not in the menu) the")
-  AIDE_TEXTE("<Delete> key (default value), the current")
+  AIDE_LIEN ("key %s, the current",SPECIAL_PINCEAU_POINT)
   AIDE_TEXTE("paintbrush becomes the smallest member of")
   AIDE_TEXTE("the \"Disc\" family: i.e one pixel.")
 
 };
-static const char * TableAideAjuster[] =
+static const T_TABLEAIDE TableAideAjuster[] =
 {
   AIDE_TITRE("ADJUST PICTURE")
   AIDE_TEXTE("")
   AIDE_BOLD ("    LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_AJUSTER)
   AIDE_TEXTE("")
   AIDE_TEXTE("Allows you to scroll the picture to")
   AIDE_TEXTE("re-center your graph for example.")
@@ -491,15 +660,17 @@ static const char * TableAideAjuster[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("")
   AIDE_BOLD ("    RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_AJUSTER)
   AIDE_TEXTE("")
   AIDE_TEXTE("        *** Not implemented yet ***")
 
 };
-static const char * TableAideDessin[] =
+static const T_TABLEAIDE TableAideDessin[] =
 {
   AIDE_TITRE("HAND-DRAWING")
   AIDE_TEXTE("")
   AIDE_BOLD ("    LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_DESSIN)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the current hand-drawing mode as the")
   AIDE_TEXTE("active drawing tool. There are 3")
@@ -525,16 +696,18 @@ static const char * TableAideDessin[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("")
   AIDE_BOLD ("    RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_DESSIN)
   AIDE_TEXTE("")
   AIDE_TEXTE("Toggles the different hand-drawing modes")
   AIDE_TEXTE("and activates, at the same time, the")
   AIDE_TEXTE("hand-drawing tool.")
 };
-static const char * TableAideCourbes[] =
+static const T_TABLEAIDE TableAideCourbes[] =
 {
   AIDE_TITRE("SPLINES")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_COURBES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the current curve-drawing mode as")
   AIDE_TEXTE("the active drawing tool. There are 2")
@@ -555,16 +728,18 @@ static const char * TableAideCourbes[] =
   AIDE_TEXTE("point.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_COURBES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Toggles the different curve-drawing modes")
   AIDE_TEXTE("and activates, at the same time, the")
   AIDE_TEXTE("curve-drawing tool.")
 };
-static const char * TableAideLignes[] =
+static const T_TABLEAIDE TableAideLignes[] =
 {
   AIDE_TITRE("LINES")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_LIGNES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the current line-drawing mode as the")
   AIDE_TEXTE("active drawing tool. There are 3")
@@ -601,23 +776,26 @@ static const char * TableAideLignes[] =
   AIDE_TEXTE("the fore and back colors when being in use.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_LIGNES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Toggles the different line-drawing modes and")
   AIDE_TEXTE("activates, at the same time, the")
   AIDE_TEXTE("line-drawing tool.")
 
 };
-static const char * TableAideSpray[] =
+static const T_TABLEAIDE TableAideSpray[] =
 {
   AIDE_TITRE("SPRAY")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_SPRAY)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the spray as the active drawing")
   AIDE_TEXTE("tool. This drawing tool allows to change the")
   AIDE_TEXTE("fore and back colors when being in use.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_SPRAY)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where you can configure the")
   AIDE_TEXTE("spray:")
@@ -667,11 +845,12 @@ static const char * TableAideSpray[] =
   AIDE_TEXTE("click a few hundredths of second to modify a")
   AIDE_TEXTE("color.")
 };
-static const char * TableAideFloodfill[] =
+static const T_TABLEAIDE TableAideFloodfill[] =
 {
   AIDE_TITRE("FLOODFILL")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_FLOODFILL)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the filler as the active drawing")
   AIDE_TEXTE("tool. The filler, as any drawing tool, will")
@@ -685,6 +864,7 @@ static const char * TableAideFloodfill[] =
   AIDE_TEXTE("by the user).")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_FLOODFILL)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the color replacement as the active")
   AIDE_TEXTE("drawing tool.")
@@ -700,11 +880,12 @@ static const char * TableAideFloodfill[] =
   AIDE_TEXTE("limit modifications only to the visible part")
   AIDE_TEXTE("of the picture.")
 };
-static const char * TableAidePolygones[] =
+static const T_TABLEAIDE TableAidePolygones[] =
 {
   AIDE_TITRE("POLYGONS")
   AIDE_TITRE("POLYFORMS")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_POLYGONES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the polygons as the active drawing")
   AIDE_TEXTE("tool.")
@@ -713,6 +894,7 @@ static const char * TableAidePolygones[] =
   AIDE_TEXTE("the extremities when you're finished.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_POLYGONES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the polyforms as the active drawing")
   AIDE_TEXTE("tool.")
@@ -730,16 +912,19 @@ static const char * TableAidePolygones[] =
   AIDE_TEXTE("terminate the operation. The two extremities")
   AIDE_TEXTE("will be linked automatically.")
 };
-static const char * TableAidePolyfill[] =
+static const T_TABLEAIDE TableAidePolyfill[] =
 {
   AIDE_TITRE("FILLED POLY")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_POLYFILL)
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_POLYFILL)
   AIDE_TEXTE(" Work exactly the same way as the polygons")
   AIDE_TEXTE("et polyforms above, but fill in the interior")
   AIDE_TEXTE("of the drawn shapes.")
 };
-static const char * TableAideRectangles[] =
+static const T_TABLEAIDE TableAideRectangles[] =
 {
   AIDE_TITRE("RECTANGLES")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_RECTANGLES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the empty rectangles as the active")
   AIDE_TEXTE("drawing tool.")
@@ -749,21 +934,23 @@ static const char * TableAideRectangles[] =
   AIDE_TEXTE("release the mouse button to set it")
   AIDE_TEXTE("definitively.")
 };
-static const char * TableAideFillRect[] =
+static const T_TABLEAIDE TableAideFillRect[] =
 {
   AIDE_TITRE("FILLED RECT")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_FILLRECT)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the filled rectangles as the active")
   AIDE_TEXTE("drawing tool.")
   AIDE_TEXTE("")
   AIDE_TEXTE("Works like an empty rectangle.")
 };
-static const char * TableAideCercles[] =
+static const T_TABLEAIDE TableAideCercles[] =
 {
   AIDE_TITRE("CIRCLES")
   AIDE_TITRE("ELLIPSES")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_CERCLES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the empty circles as the active")
   AIDE_TEXTE("drawing tool.")
@@ -773,6 +960,7 @@ static const char * TableAideCercles[] =
   AIDE_TEXTE("radius.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_CERCLES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the empty ellipses as the active")
   AIDE_TEXTE("drawing tool.")
@@ -781,22 +969,33 @@ static const char * TableAideCercles[] =
   AIDE_TEXTE("maintain the mouse button to select its")
   AIDE_TEXTE("dimensions.")
 };
-static const char * TableAideFillCerc[] =
+static const T_TABLEAIDE TableAideFillCerc[] =
 {
   AIDE_TITRE("FILLED CIRCLES")
   AIDE_TITRE(" AND ELLIPSES")
   AIDE_TEXTE("")
-  AIDE_TEXTE("Works like empty circles and ellipses.")
+  AIDE_BOLD ("FILLED CIRCLES")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_CERCLES)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Works like empty circles.")
+  AIDE_TEXTE("")
+  AIDE_BOLD ("FILLED ELLIPSES")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_CERCLES)
+  AIDE_TEXTE("")
+  AIDE_TEXTE("Works like empty ellipses.")
 };
-static const char * TableAideGradRect[] =
+static const T_TABLEAIDE TableAideGradRect[] =
 {
   AIDE_TITRE("GRAD RECTANGLE")
   AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_GRADRECT)
   AIDE_TEXTE("   *** Not implemented yet ***")
 };
-static const char * TableAideGradMenu[] =
+static const T_TABLEAIDE TableAideGradMenu[] =
 {
   AIDE_TITRE("GRAD MENU")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_GRADMENU)
   AIDE_TEXTE("")
   AIDE_TEXTE("Opens a window where you can define the way")
   AIDE_TEXTE("gradations are processed. The different")
@@ -821,10 +1020,11 @@ static const char * TableAideGradMenu[] =
   AIDE_TEXTE("gradation among a set of 16 that will be")
   AIDE_TEXTE("memorised.")
 };
-static const char * TableAideSpheres[] =
+static const T_TABLEAIDE TableAideSpheres[] =
 {
   AIDE_TITRE("GRAD SPHERE")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_SPHERES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the spheres as the active drawing")
   AIDE_TEXTE("tool.")
@@ -834,6 +1034,7 @@ static const char * TableAideSpheres[] =
   AIDE_TEXTE("radius. Then place the spot-light.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_SPHERES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Selects the ellipses with gradation as the")
   AIDE_TEXTE("active drawing tool.")
@@ -848,12 +1049,13 @@ static const char * TableAideSpheres[] =
   AIDE_TEXTE("result will be the same figure filled with")
   AIDE_TEXTE("the Back-color.")
 };
-static const char * TableAideBrosse[] =
+static const T_TABLEAIDE TableAideBrosse[] =
 {
   AIDE_TITRE("GRAB BRUSH")
   AIDE_BOLD ("  OR RESTORE BRUSH")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_BROSSE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Engages a brush grabbing.")
   AIDE_TEXTE("")
@@ -867,26 +1069,31 @@ static const char * TableAideBrosse[] =
   AIDE_TEXTE("Back-color.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_BROSSE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Restores the old brush.")
 };
-static const char * TableAidePolybrosse[] =
+static const T_TABLEAIDE TableAidePolybrosse[] =
 {
   AIDE_TITRE("POLY GRAB")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_POLYBROSSE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Grabs a brush of any shape by defining a")
   AIDE_TEXTE("polyform (please refer to section 8 for more")
   AIDE_TEXTE("explanations).")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_BROSSE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Restores the old brush (same as above).")
 };
-static const char * TableAideEffetsBrosse[] =
+static const T_TABLEAIDE TableAideEffetsBrosse[] =
 {
   AIDE_TITRE("BRUSH FX")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_EFFETS_BROSSE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where the following options")
   AIDE_TEXTE("are available:")
@@ -969,9 +1176,11 @@ static const char * TableAideEffetsBrosse[] =
   AIDE_TEXTE("- Load / Save: load or save a brush from")
   AIDE_TEXTE("disk.")
 };
-static const char * TableAideEffets[] =
+static const T_TABLEAIDE TableAideEffets[] =
 {
   AIDE_TITRE("DRAW MODES")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_EFFETS)
+  AIDE_TEXTE("")
   AIDE_TEXTE(" This button opens a menu where you can")
   AIDE_TEXTE("switch on or off the different   drawing")
   AIDE_TEXTE("modes. ([F1]-[F9] keys correspond to the 9")
@@ -1381,9 +1590,11 @@ static const char * TableAideEffets[] =
   AIDE_TEXTE("parameters. These parameters are the offsets")
   AIDE_TEXTE("of the tiling.")
 };
-static const char * TableAideTexte[] =
+static const T_TABLEAIDE TableAideTexte[] =
 {
   AIDE_TITRE("TEXT")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_TEXTE)
   AIDE_TEXTE("")
   AIDE_TEXTE("The text menu allows you to enter some text")
   AIDE_TEXTE("and render it as a brush.")
@@ -1419,17 +1630,19 @@ static const char * TableAideTexte[] =
   AIDE_TEXTE("- Preview area: Shows what the brush will")
   AIDE_TEXTE("look like.")
 };
-static const char * TableAideLoupe[] =
+static const T_TABLEAIDE TableAideLoupe[] =
 {
   AIDE_TITRE("MAGNIFIER")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_LOUPE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Engages/Disengages the choice of the zoomed")
   AIDE_TEXTE("window. If you're already in magnifier mode,")
   AIDE_TEXTE("you'll return to normal mode.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_LOUPE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where you can choose the")
   AIDE_TEXTE("magnifying factor.")
@@ -1439,11 +1652,12 @@ static const char * TableAideLoupe[] =
   AIDE_TEXTE("moving your mouse left or right while")
   AIDE_TEXTE("holding the mouse   button down.")
 };
-static const char * TableAidePipette[] =
+static const T_TABLEAIDE TableAidePipette[] =
 {
   AIDE_TITRE("PIPETTE")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_PIPETTE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Engages a color grabbing.")
   AIDE_TEXTE("")
@@ -1453,6 +1667,7 @@ static const char * TableAidePipette[] =
   AIDE_TEXTE("left or right mouse button.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_PIPETTE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Swap Fore-color and Back-color.")
   AIDE_TEXTE("")
@@ -1461,12 +1676,13 @@ static const char * TableAidePipette[] =
   AIDE_TEXTE("coordinates. If you click outside the")
   AIDE_TEXTE("picture, the color 0 will be returned.")
 };
-static const char * TableAideResol[] =
+static const T_TABLEAIDE TableAideResol[] =
 {
   AIDE_TITRE("RESOLUTION AND")
   AIDE_TITRE(" IMAGE SIZE")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_RESOL)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where you can define the")
   AIDE_TEXTE("size of your picture (up to 1024x768) by")
@@ -1529,14 +1745,17 @@ static const char * TableAideResol[] =
   AIDE_TEXTE("menu of resolutions.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_RESOL)
+  AIDE_TEXTE("")
   AIDE_TEXTE(" Automaticaly switches to the 640x400 window")
   AIDE_TEXTE("mode.")
 };
-static const char * TableAidePage[] =
+static const T_TABLEAIDE TableAidePage[] =
 {
   AIDE_TITRE("SPARE")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_PAGE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Jumps to spare page. The current page is")
   AIDE_TEXTE("then considered as the new spare page, and")
@@ -1544,6 +1763,7 @@ static const char * TableAidePage[] =
   AIDE_TEXTE("page.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_PAGE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Opens a menu where you can choose whether")
   AIDE_TEXTE("you want to copy the whole picture (keyboard")
@@ -1563,11 +1783,12 @@ static const char * TableAidePage[] =
   AIDE_TEXTE("quickly remap a picture with the palette of")
   AIDE_TEXTE("another.")
 };
-static const char * TableAideSauver[] =
+static const T_TABLEAIDE TableAideSauver[] =
 {
   AIDE_TITRE("SAVE")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_SAUVER)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a fileselector where the following")
   AIDE_TEXTE("options are available:")
@@ -1608,6 +1829,7 @@ static const char * TableAideSauver[] =
   AIDE_TEXTE("access it faster.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_SAUVER)
   AIDE_TEXTE("")
   AIDE_TEXTE("Save the current picture with its current")
   AIDE_TEXTE("filename, format and comment.")
@@ -1615,12 +1837,13 @@ static const char * TableAideSauver[] =
   AIDE_TEXTE("If the file already exists, a confirmation")
   AIDE_TEXTE("box will appear.")
 };
-static const char * TableAideCharger[] =
+static const T_TABLEAIDE TableAideCharger[] =
 {
 
   AIDE_TITRE("LOAD")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_CHARGER)
   AIDE_TEXTE("")
   AIDE_TEXTE("This works the same way as Save.")
   AIDE_TEXTE("")
@@ -1629,6 +1852,7 @@ static const char * TableAideCharger[] =
   AIDE_TEXTE("able to type in any comment.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_CHARGER)
   AIDE_TEXTE("")
   AIDE_TEXTE("Reloads the picture.")
   AIDE_TEXTE("")
@@ -1637,9 +1861,11 @@ static const char * TableAideCharger[] =
   AIDE_TEXTE("current picture, a confirmation box will")
   AIDE_TEXTE("appear.")
 };
-static const char * TableAideParametres[] =
+static const T_TABLEAIDE TableAideParametres[] =
 {
   AIDE_TITRE("SETTINGS")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_PARAMETRES)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where you can configure some")
   AIDE_TEXTE("miscellaneous elements of the program:")
@@ -1743,31 +1969,35 @@ static const char * TableAideParametres[] =
   AIDE_TEXTE(" All modifications will be effective just")
   AIDE_TEXTE("after closing the menu.")
 };
-static const char * TableAideClear[] =
+static const T_TABLEAIDE TableAideClear[] =
 {
 
   AIDE_TITRE("CLEAR")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_CLEAR)
   AIDE_TEXTE("")
   AIDE_TEXTE("Clears the picture with the color number 0.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_CLEAR)
   AIDE_TEXTE("")
   AIDE_TEXTE("Clears the picture with the Back-color.")
 };
-static const char * TableAideAide[] =
+static const T_TABLEAIDE TableAideAide[] =
 {
 
   AIDE_TITRE("HELP STATS")
   AIDE_TEXTE("")
   AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_AIDE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays an info window where you'll find")
   AIDE_TEXTE("some credits, help about the credits,")
   AIDE_TEXTE("different effects, greetings, registering...")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_AIDE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a window where you'll find")
   AIDE_TEXTE("miscellaneous informations about the system.")
@@ -1775,13 +2005,15 @@ static const char * TableAideAide[] =
   AIDE_TEXTE("than 128 Kb in order to let the   program")
   AIDE_TEXTE("run in a proper way.")
 };
-static const char * TableAideUndo[] =
+static const T_TABLEAIDE TableAideUndo[] =
 {
 
   AIDE_TITRE("OOPS")
   AIDE_TEXTE("(UNDO/REDO)")
   AIDE_TEXTE("LEFT CLICK Allows you to undo the last")
   AIDE_TEXTE("modification on the picture.")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_UNDO)
+  AIDE_TEXTE("")
   AIDE_TEXTE("RIGHT CLICK Allows you to redo the last")
   AIDE_TEXTE("modification undone on the         picture.")
   AIDE_TEXTE("The maximum number of UNDO that you can")
@@ -1790,12 +2022,15 @@ static const char * TableAideUndo[] =
   AIDE_TEXTE("Undo/Redo aren't effective after page")
   AIDE_TEXTE("switching, picture loading and   picture")
   AIDE_TEXTE("size modifications.")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_UNDO)
 };
-static const char * TableAideKill[] =
+static const T_TABLEAIDE TableAideKill[] =
 {
 
   AIDE_TITRE("KILL")
   AIDE_TEXTE("KILL CURRENT PAGE")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_KILL)
   AIDE_TEXTE("")
   AIDE_TEXTE("Removes the current page from the list of")
   AIDE_TEXTE("\"Undo\" pages. This allows you to free some")
@@ -1812,10 +2047,12 @@ static const char * TableAideKill[] =
   AIDE_TEXTE("allocated by the big brush will be thus")
   AIDE_TEXTE("freed.")
 };
-static const char * TableAideQuit[] =
+static const T_TABLEAIDE TableAideQuit[] =
 {
 
   AIDE_TITRE("QUIT")
+  AIDE_TEXTE("")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_QUIT)
   AIDE_TEXTE("")
   AIDE_TEXTE("Allows you to leave GrafX2. If there are")
   AIDE_TEXTE("unsaved modifications in the current or")
@@ -1824,10 +2061,13 @@ static const char * TableAideQuit[] =
   AIDE_TEXTE("want to save (Auto-save, no fileselector) or")
   AIDE_TEXTE("if you want to stay in GrafX2.")
 };
-static const char * TableAidePalette[] =
+static const T_TABLEAIDE TableAidePalette[] =
 {
 
   AIDE_TITRE("PAL MENU")
+  AIDE_TEXTE("")
+  AIDE_BOLD ("LEFT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x100+BOUTON_PALETTE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Displays a menu where the following options")
   AIDE_TEXTE("are available:")
@@ -1926,6 +2166,7 @@ static const char * TableAidePalette[] =
   AIDE_TEXTE("Only Cancel will.")
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
+  AIDE_LIEN ("(Key:%s)",0x200+BOUTON_PALETTE)
   AIDE_TEXTE("")
   AIDE_TEXTE("Opens a menu from where you can access the")
   AIDE_TEXTE("following menus:")
@@ -1939,7 +2180,7 @@ static const char * TableAidePalette[] =
   AIDE_TEXTE("series.")
   AIDE_TEXTE("*** Not implemented yet ***")
 };
-static const char * TableAidePalScroll[] =
+static const T_TABLEAIDE TableAidePalScroll[] =
 {
 
   AIDE_TITRE("SCROLL PAL")
@@ -1948,12 +2189,17 @@ static const char * TableAidePalScroll[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("Scrolls the palette window in the right of")
   AIDE_TEXTE("the menu.")
+  AIDE_LIEN ("Key for left:  %s",0x100+BOUTON_PAL_LEFT)
+  AIDE_LIEN ("Key for right: %s",0x100+BOUTON_PAL_RIGHT)
   AIDE_TEXTE("")
   AIDE_BOLD ("RIGHT CLICK")
   AIDE_TEXTE("")
   AIDE_TEXTE("Same as above, but faster.")
+  AIDE_LIEN ("Key for left:  %s",0x200+BOUTON_PAL_LEFT)
+  AIDE_LIEN ("Key for right: %s",0x200+BOUTON_PAL_RIGHT)
+  AIDE_TEXTE("")
 };
-static const char * TableAideChoixCol[] =
+static const T_TABLEAIDE TableAideChoixCol[] =
 {
 
   AIDE_TITRE("PALETTE")
@@ -1966,19 +2212,19 @@ static const char * TableAideChoixCol[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("Defines the Back-color.")
 };
-static const char * TableAideCacher[] =
+static const T_TABLEAIDE TableAideCacher[] =
 {
 
   AIDE_TITRE("HIDE MENU")
   AIDE_TEXTE("")
   AIDE_TEXTE("Allows you to hide the menu. If you do this,")
   AIDE_TEXTE("take care to watch before the key to press")
-  AIDE_TEXTE("to show the menu back (the default key is")
-  AIDE_TEXTE("<F10>).")
+  AIDE_TEXTE("to show the menu back (the key is")
+  AIDE_LIEN ("%s).",0x100+BOUTON_CACHER)
 
 };
 
-#define DECLARATION_TABLE_AIDE(x) {x, sizeof(x)/sizeof(const char **)},
+#define DECLARATION_TABLE_AIDE(x) {x, sizeof(x)/sizeof(const T_TABLEAIDE)},
 
 struct Section_d_aide Table_d_aide[] =
 {

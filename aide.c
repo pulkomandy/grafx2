@@ -43,8 +43,34 @@
 #include "aide.h"
 #include "sdlscreen.h"
 #include "texte.h"
+#include "clavier.h"
+
 
 extern char SVNRevision[];
+
+// Recherche un raccourci clavier:
+word * Raccourci(word NumeroRaccourci)
+{
+  if (NumeroRaccourci & 0x100)
+    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_gauche);
+  if (NumeroRaccourci & 0x200)
+    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_droite);
+  return &(Config_Touche[NumeroRaccourci & 0xFF]);
+}
+
+// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// de type 0x100+BOUTON_* ou SPECIAL_*
+const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
+{
+  word * Pointeur = Raccourci(NumeroRaccourci);
+  if (Pointeur == NULL)
+    return "(Problem)";
+  else if (*Pointeur == 0 || *Pointeur == 0xFFFF)
+    return "None";
+  else
+    return Nom_touche(*Pointeur);
+}
+
 
 // -- Menu d'aide -----------------------------------------------------------
 
@@ -65,6 +91,10 @@ void Afficher_aide(void)
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
   const char * Ligne;
+  char   Buffer[44];          // Buffer texte utilisé pour formater les noms de 
+                              // raccourcis clavier
+  short  Position_lien=0;     // Position du premier caractère "variable"
+  short  Taille_lien=0;       // Taille de la partie variable
 
   Pos_Reel_X=Fenetre_Pos_X+(13*Menu_Facteur_X);
   Pos_Reel_Y=Fenetre_Pos_Y+(19*Menu_Facteur_Y);
@@ -84,13 +114,21 @@ void Afficher_aide(void)
       break;
     }
     // On affiche la ligne
-    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne];
-    TypeLigne = Ligne[0];
+    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].texte;
+    TypeLigne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].type;
     // Si c'est une sous-ligne de titre, on utilise le texte de la ligne précédente
     if (TypeLigne == '-' && (Ligne_de_depart + Indice_de_ligne > 0))
-      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1];
-    // On ignore le premier caractère
-    Ligne++;
+      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1].texte;
+    else if (TypeLigne == 'K')
+    {
+      const char *Lien;
+      Position_lien = strstr(Ligne,"%s") - Ligne;
+      Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].valeur);
+      Taille_lien=strlen(Lien);
+      sprintf(Buffer, Ligne, Lien);
+      Ligne = Buffer;
+    }
+    
     // Calcul de la taille
     Largeur=strlen(Ligne);
     // Les lignes de titres prennent plus de place
@@ -114,7 +152,7 @@ void Afficher_aide(void)
           Curseur=Caracteres_Aide_Titre_bas[Ligne[Indice_de_caractere/2]-' '] + (Indice_de_caractere & 1);
         else if (TypeLigne=='S')
           Curseur=Caracteres_Aide_S[Ligne[Indice_de_caractere]-' '];
-        else if (TypeLigne=='N')
+        else if (TypeLigne=='N' || TypeLigne=='K')
           Curseur=Caracteres_Aide_N[Ligne[Indice_de_caractere]-' '];
         else
           Curseur=1; // Un garde-fou en cas de probleme
@@ -125,9 +163,22 @@ void Afficher_aide(void)
         
         for (X=0;X<6;X++)
           for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
-            Buffer_de_ligne_horizontale[Position_X++]=Fonte_help[Curseur][X][Y];
+          {
+            byte Couleur = Fonte_help[Curseur][X][Y];
+            // Surlignement pour liens
+            if (TypeLigne=='K' && Indice_de_caractere>=Position_lien
+              && Indice_de_caractere<(Position_lien+Taille_lien))
+            {
+              if (Couleur == CM_Clair)
+                Couleur=CM_Blanc;
+              else if (Couleur == CM_Fonce)
+                Couleur=CM_Clair;
+              else if (Y<7)
+                Couleur=CM_Fonce;
+            }
+            Buffer_de_ligne_horizontale[Position_X++]=Couleur;
+          }
       }
-
       // On la splotche
       for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
         Afficher_ligne(Pos_Reel_X,Pos_Reel_Y++,Largeur*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
@@ -190,8 +241,8 @@ void Fenetre_aide(int Section, const char *Sous_section)
   {
     int Indice=0;
     for (Indice=0; Indice<Nb_lignes; Indice++)
-      if (Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice][0] == 'T' &&
-        !strcmp(Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice]+1, Sous_section))
+      if (Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].type == 'T' &&
+        !strcmp(Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].texte, Sous_section))
       {
         Position_d_aide_en_cours = Indice;
         break;
@@ -408,3 +459,4 @@ void Bouton_Stats(void)
   Desenclencher_bouton(BOUTON_AIDE);
   Afficher_curseur();
 }
+

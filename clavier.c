@@ -19,6 +19,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <string.h>
+#include <ctype.h>
 #include "global.h"
 
 // Table de correspondance des scancode de clavier IBM PC AT vers
@@ -421,11 +422,11 @@ const char * Nom_touche(word Touche)
   Buffer[0] = '\0';
 
   if (Touche & MOD_CTRL)
-    strcat(Buffer, "<Ctrl> + ");
+    strcat(Buffer, "Ctrl+");
   if (Touche & MOD_ALT)
-    strcat(Buffer, "<Alt> + ");
+    strcat(Buffer, "Alt+");
   if (Touche & MOD_SHIFT)
-    strcat(Buffer, "<Shift> + ");
+    strcat(Buffer, "Shift+");
 
   if (Touche & 0x8000)
   {
@@ -436,7 +437,7 @@ const char * Nom_touche(word Touche)
   // Touches ASCII
   if (Touche>=' ' && Touche < 127)
   {
-    sprintf(Buffer+strlen(Buffer), "'%c'", Touche);
+    sprintf(Buffer+strlen(Buffer), "'%c'", toupper(Touche));
     return Buffer;
   }
   // Touches 'World'
