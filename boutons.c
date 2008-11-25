@@ -2368,7 +2368,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
       || (Config.Find_file_fast==(Element_courant->Type+1)) )
     {
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (Compteur=0; tolower(Element_courant->NomComplet[Compteur])==tolower(Nom[Compteur]); Compteur++);
+      for (Compteur=0; Nom[Compteur]!='\0' && tolower(Element_courant->NomComplet[Compteur])==tolower(Nom[Compteur]); Compteur++);
       if (Compteur>Lettres_identiques)
       {
         Lettres_identiques=Compteur;
