@@ -430,6 +430,7 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("  Ced       El Topo   fallenblood Frost")
   AIDE_TEXTE("  Grimmy    keito     kusma       Lord Graga")
   AIDE_TEXTE("  mind      MooZ      tempest     titus^Rab")
+  AIDE_TEXTE("  tobe")
   AIDE_TEXTE("")
   AIDE_BOLD ("               OUR HOMEPAGE")               //
   AIDE_TEXTE("")                                          //

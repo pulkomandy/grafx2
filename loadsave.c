@@ -4858,7 +4858,7 @@ void Save_PI1(void)
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
     // allocation d'un buffer mémoire
-    buffer=(byte *)malloc(32034);
+    buffer=(byte *)malloc(32066);
     // Codage de la résolution
     buffer[0]=0x00;
     buffer[1]=0x00;
@@ -4883,7 +4883,9 @@ void Save_PI1(void)
       }
     }
 
-    if (write_bytes(Fichier,buffer,32034))
+    memset(buffer+32034,0,32); // 32 extra NULL bytes at the end of the file to make ST Deluxe Paint happy
+
+    if (write_bytes(Fichier,buffer,32066))
     {
       fclose(Fichier);
     }
