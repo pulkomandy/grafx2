@@ -334,8 +334,9 @@ void Initialisation_du_programme(int argc,char * argv[])
   {
     // Routine pour définir l'icone.
     char Chemin_icone[256];
+    SDL_Surface * Icone;
     sprintf(Chemin_icone, "%s%s", Repertoire_du_programme, "gfx2.gif");
-    SDL_Surface * Icone = IMG_Load(Chemin_icone);
+    Icone = IMG_Load(Chemin_icone);
     if (Icone)
     {
       byte *Masque_icone;

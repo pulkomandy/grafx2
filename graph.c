@@ -24,8 +24,10 @@
     #include <windows.h>
 #elif defined(__macosx__)
     #include <sys/sysctl.h>
+#elif defined(__BEOS__) || defined(__HAIKU__)
+    // sysinfo not implemented
 #else
-    #include <sys/sysinfo.h>
+    #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
 
 #include <string.h>
@@ -585,6 +587,9 @@ unsigned long Memoire_libre(void)
         len = sizeof(maxmem);
         sysctl(mib,2,&maxmem,&len,NULL,0);
         return maxmem;
+    #elif defined(__BEOS__) || defined(__HAIKU__)
+        // No <sys/sysctl.h> on BeOS or Haiku
+        return 10*1024*1024;
     #else
         struct sysinfo info;
         sysinfo(&info);
