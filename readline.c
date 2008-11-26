@@ -83,11 +83,11 @@ int CaractereValide(int Caractere)
   #else
   char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>'};
   #endif
+  int Position;
   
   if (Caractere < ' ' || Caractere > 255)
     return 0;
   
-  int Position;
   for (Position=0; Position<(long)sizeof(CaracteresInterdits); Position++)
     if (Caractere == CaracteresInterdits[Position])
       return 0;

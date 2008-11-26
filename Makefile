@@ -26,7 +26,7 @@ ifdef COMSPEC
   MKDIR = mkdir /s
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
-  COPT = -W -Wall -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
   CC = gcc
   OBJDIR = obj/win32
@@ -83,13 +83,13 @@ else
       CC = i586-mingw32msvc-gcc
       BIN = grafx2.exe
       CFGBIN = gfxcfg.exe
-      COPT = -W -Wall -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
       LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
       OBJDIR = obj/win32
     else
       BIN = grafx2
       CFGBIN = gfxcfg
-      COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -c -g `sdl-config --cflags` $(TTFCOPT)
       LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
       CC = gcc
       OBJDIR = obj/unix
