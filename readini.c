@@ -403,14 +403,14 @@ int Charger_INI(struct S_Config * Conf)
   Nom_du_fichier=(char *)malloc(256);
 
   // On calcule le nom du fichier qu'on manipule:
-  strcpy(Nom_du_fichier,Repertoire_du_programme);
+  strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.ini");
 
   Fichier=fopen(Nom_du_fichier,"rb");
   if (Fichier==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2.dat
-    strcpy(Nom_du_fichier,Repertoire_du_programme);
+    strcpy(Nom_du_fichier,Repertoire_des_donnees);
     strcat(Nom_du_fichier,"gfx2.dat");
     Fichier=fopen(Nom_du_fichier,"rb");
     if (Fichier == 0)

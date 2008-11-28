@@ -522,8 +522,9 @@ GLOBAL byte  Spray_Multi_flow[256]; // Idem pour chaque couleur
   // Données diverses sur le programme:
 
 GLOBAL byte Sortir_du_programme;
-GLOBAL char Repertoire_du_programme[256]; // Répertoire dans lequel se trouve le programme
-GLOBAL char Repertoire_initial[256];      // Répertoire à partir duquel à été lancé le programme
+GLOBAL char Repertoire_initial[256];          // Répertoire à partir duquel à été lancé le programme
+GLOBAL char Repertoire_des_donnees[256];      // Répertoire contenant les fichiers lus (interface graphique, etc)
+GLOBAL char Repertoire_de_configuration[256]; // Répertoire contenant les fichiers .ini et .cfg
 GLOBAL byte Fore_color;
 GLOBAL byte Back_color;
 GLOBAL byte Mode_de_dessin_en_cours;

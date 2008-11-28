@@ -1,5 +1,8 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2008 Peter Gordon
+    Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -18,13 +21,7 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Rechercher_drives(void);
-void Charger_DAT(void);
-void Initialisation_des_boutons(void);
-void Initialisation_des_operations(void);
-int  Charger_CFG(int Tout_charger);
-int  Sauver_CFG(void);
-void Initialiser_les_tables_de_multiplication(void);
-void Definition_des_modes_video(void);
-int ActiverLecteur(int);
-void Config_par_defaut(void);
+void Set_Program_Directory(const char * argv0,char * Program_Dir);
+void Set_Data_Directory(const char * Program_Dir, char * Data_Dir);
+void Set_Config_Directory(const char * Program_Dir, char * Config_Dir);
+  

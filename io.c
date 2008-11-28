@@ -25,6 +25,20 @@
 
 #include <SDL/SDL_endian.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
+#if defined(__amigaos4__)
+    #include <proto/dos.h>
+    #include <dirent.h>
+#elif defined(__WATCOMC__)
+    #include <direct.h>
+#elif defined(__WIN32__)
+    #include <dirent.h>
+    #include <windows.h>
+#else
+    #include <dirent.h>
+#endif
+
 #include "struct.h"
 #include "io.h"
 
@@ -192,3 +206,40 @@ void Extraire_chemin(char *Destination, const char *Source)
     strcat(Destination, SEPARATEUR_CHEMIN);
 }
 
+int Fichier_existe(char * Fichier)
+//   Détermine si un fichier passé en paramètre existe ou non dans le
+// répertoire courant.
+{
+    struct stat buf;
+    int Resultat;
+
+    Resultat=stat(Fichier,&buf);
+    if (Resultat!=0)
+        return(errno!=ENOENT);
+    else
+        return 1;
+
+}
+int Repertoire_existe(char * Repertoire)
+//   Détermine si un répertoire passé en paramètre existe ou non dans le
+// répertoire courant.
+{
+  DIR* Enreg;    // Structure de lecture des éléments
+
+  if (strcmp(Repertoire,"..")==0)
+    return 1;
+  else
+  {
+    //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
+    //  renvoie NULL c'est que le répertoire n'est pas accessible...
+
+    Enreg=opendir(Repertoire);
+    if (Enreg==NULL)
+        return 0;
+    else
+    {
+        closedir(Enreg);
+        return 1;
+    }
+  }
+}

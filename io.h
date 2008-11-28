@@ -48,3 +48,10 @@ char * Position_dernier_slash(const char * Chaine);
 #else
   #define SEPARATEUR_CHEMIN "/"
 #endif
+
+//   Détermine si un fichier passé en paramètre existe ou non dans le
+// répertoire courant.
+int Fichier_existe(char * Fichier);
+//   Détermine si un répertoire passé en paramètre existe ou non dans le
+// répertoire courant.
+int  Repertoire_existe(char * Repertoire);

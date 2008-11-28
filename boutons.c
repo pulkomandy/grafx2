@@ -3107,7 +3107,7 @@ int Meilleur_mode_video(void)
 
 void Swapper_infos_selecteurs_image_et_brosse(void)
 {
-  char  Chaine_temporaire[256];
+  char  Chaine_temporaire[TAILLE_CHEMIN_FICHIER];
   byte  Octet_temporaire;
   short Entier_temporaire;
 

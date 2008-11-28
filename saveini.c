@@ -26,7 +26,7 @@
 #include "const.h"
 #include "global.h"
 #include "readini.h"
-#include "files.h"
+#include "io.h"
 #include "erreurs.h"
 #include "graph.h"
 
@@ -389,23 +389,23 @@ int Sauver_INI(struct S_Config * Conf)
   FILE * Nouveau_fichier;
   char * Buffer;
   int    Valeurs[3];
-  char   Nom_du_fichier[256];
-  char   Nom_du_fichier_temporaire[256];
+  char   Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
+  char   Nom_du_fichier_temporaire[TAILLE_CHEMIN_FICHIER];
   int    Retour;
-  char   Nom_du_fichier_DAT[256];
+  char   Nom_du_fichier_DAT[TAILLE_CHEMIN_FICHIER];
   int    Ini_existe;
 
   // On alloue les zones de mémoire:
   Buffer=(char *)malloc(1024);
   
   // On calcule les noms des fichiers qu'on manipule:
-  strcpy(Nom_du_fichier,Repertoire_du_programme);
+  strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.ini");
 
   // On vérifie si le fichier INI existe
   if ((Ini_existe = Fichier_existe(Nom_du_fichier)))
   {
-    strcpy(Nom_du_fichier_temporaire,Repertoire_du_programme);
+    strcpy(Nom_du_fichier_temporaire,Repertoire_de_configuration);
     strcat(Nom_du_fichier_temporaire,"gfx2.$$$");
     
     // On renome l'ancienne version du fichier INI vers un fichier temporaire:
@@ -415,7 +415,7 @@ int Sauver_INI(struct S_Config * Conf)
     }
   }
   // On récupère un fichier INI "propre" dans GFX2.DAT
-  strcpy(Nom_du_fichier_DAT,Repertoire_du_programme);
+  strcpy(Nom_du_fichier_DAT,Repertoire_des_donnees);
   strcat(Nom_du_fichier_DAT,"gfx2.dat");
   Ancien_fichier=fopen(Nom_du_fichier_DAT,"rb");
   if (Ancien_fichier==0)

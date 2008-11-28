@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -71,49 +70,6 @@ int Determiner_repertoire_courant(void)
 {
   return (getcwd(Principal_Repertoire_courant,256)==NULL);
 }
-
-
-int Repertoire_existe(char * Repertoire)
-//   Détermine si un répertoire passé en paramètre existe ou non dans le
-// répertoire courant.
-{
-  DIR* Enreg;    // Structure de lecture des éléments
-
-  if (strcmp(Repertoire,"..")==0)
-    return 1;
-  else
-  {
-    //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
-    //  renvoie NULL c'est que le répertoire n'est pas accessible...
-
-    Enreg=opendir(Repertoire);
-    if (Enreg==NULL)
-        return 0;
-    else
-    {
-        closedir(Enreg);
-        return 1;
-    }
-  }
-}
-
-
-int Fichier_existe(char * Fichier)
-//   Détermine si un fichier passé en paramètre existe ou non dans le
-// répertoire courant.
-{
-    struct stat buf;
-    int Resultat;
-
-    Resultat=stat(Fichier,&buf);
-    if (Resultat!=0)
-        return(errno!=ENOENT);
-    else
-        return 1;
-
-}
-
-
 
 // Conventions:
 //

@@ -21,12 +21,6 @@
 // Modifie Principal_Repertoire_courant en y mettant sa nouvelle valeur
 // (avec le nom du disque)
 int  Determiner_repertoire_courant(void);
-//   Détermine si un répertoire passé en paramètre existe ou non dans le
-// répertoire courant.
-int  Repertoire_existe(char * Repertoire);
-//   Détermine si un fichier passé en paramètre existe ou non dans le
-// répertoire courant.
-int Fichier_existe(char * Fichier);
 
 // -- Destruction de la liste chaînée ---------------------------------------
 void Detruire_liste_du_fileselect(void);
@@ -56,3 +50,4 @@ char * Nom_formate(char * Nom, int Type);
 
 // Scans a directory, calls Callback for each file in it,
 void for_each_file(const char * Nom_repertoire, void Callback(const char *));
+

@@ -29,9 +29,9 @@
 #include <unistd.h>
 
 //SDL
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-#include <SDL_events.h>
+#include <SDL/SDL_events.h>
 //#include <SDL_gfxPrimitives.h>
 
 //mine
@@ -47,7 +47,7 @@
 #include "const.h"
 #include "io.h"
 #include "hotkeys.h"
-
+#include "setup.h"
 
 /*** Constants ***/
 #define NB_MAX_TOUCHES 134
@@ -65,7 +65,8 @@
 /*** Global variables ***/
 SFont_Font* MyFont;
 SDL_Surface* Ecran;
-
+char Repertoire_config[TAILLE_CHEMIN_FICHIER];
+char Repertoire_donnees[TAILLE_CHEMIN_FICHIER];
 
 bool Erreur[NB_MAX_TOUCHES];
 uint8_t Choix_enreg;
@@ -178,7 +179,7 @@ void Tout_ecrire()
 /* returns an error message, or NULL if everything OK */
 char * Interpretation_du_fichier_config()
 {
-
+  char Nom_Fichier[TAILLE_CHEMIN_FICHIER];
   FILE* Fichier;
   long int Taille_fichier;
   byte Numero_chunk;
@@ -186,7 +187,9 @@ char * Interpretation_du_fichier_config()
   byte * Ptr;
   int i;
 
-  Fichier = fopen("gfx2.cfg","rb");
+  strcpy(Nom_Fichier, Repertoire_config);
+  strcat(Nom_Fichier, "gfx2.cfg");
+  Fichier = fopen(Nom_Fichier,"rb");
   if (!Fichier)
   {
     return "gfx2.cfg is missing! Please run the\nmain program to generate it.";
@@ -593,7 +596,7 @@ bool Verifier_ecriture_possible()
     return 1;
   #else
     // Doesn't work on OS4.
-    return access("./",W_OK) == 0;
+    return access(Repertoire_config,W_OK) == 0;
   #endif
 }
 
@@ -606,7 +609,10 @@ void Enregistrer_config()
 
     if(Choix_enreg==true) // Save keys if wanted
     {
-    	Fichier = fopen("gfx2.cfg","wb");
+      char Nom_Fichier[TAILLE_CHEMIN_FICHIER];
+      strcpy(Nom_Fichier, Repertoire_config);
+      strcat(Nom_Fichier, "gfx2.cfg");
+      Fichier = fopen(Nom_Fichier,"wb");
       
       // En-tete
       sprintf(Header.Signature,"CFG");
@@ -649,17 +655,24 @@ void Enregistrer_config()
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {	
+  char Repertoire_programme[TAILLE_CHEMIN_FICHIER];
+  char Nom_fichier[TAILLE_CHEMIN_FICHIER];
+
+  Set_Program_Directory(argv[0],Repertoire_programme);
+  Set_Config_Directory(Repertoire_programme,Repertoire_config);
+  Set_Data_Directory(Repertoire_programme,Repertoire_donnees);
 
   if (Verifier_ecriture_possible())
   {
   	/* On initialise SDL */
   	SDL_Init(SDL_INIT_VIDEO);
-  	Ecran = SDL_SetVideoMode(640,480,8,0);
-  	SDL_WM_SetCaption ("Grafx2 configuration tool","Gfx2Cfg");
     {
       // Routine pour définir l'icone.
-      SDL_Surface * Icone = IMG_Load("gfx2cfg.gif");
+      SDL_Surface * Icone;
       byte *Masque_icone;
+      strcpy(Nom_fichier, Repertoire_donnees);
+      strcat(Nom_fichier, "gfx2cfg.gif");
+      Icone = IMG_Load(Nom_fichier);
       if (Icone)
       {
         int x,y;
@@ -672,11 +685,15 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         SDL_WM_SetIcon(Icone,Masque_icone);
       }
     }
+    Ecran = SDL_SetVideoMode(640,480,8,0);
+    SDL_WM_SetCaption ("Grafx2 configuration tool","Gfx2Cfg");
     SDL_EnableKeyRepeat(250, 32);
     SDL_EnableUNICODE(SDL_ENABLE);
 
   	/* On initialise SFont */
-  	MyFont = SFont_InitFont(IMG_Load("fonts/8pxfont.png"));
+    strcpy(Nom_fichier, Repertoire_donnees);
+    strcat(Nom_fichier, "fonts/8pxfont.png");
+    MyFont = SFont_InitFont(IMG_Load(Nom_fichier));
 
 	if(MyFont==NULL)
 	{

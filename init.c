@@ -30,7 +30,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <SDL/SDL_byteorder.h>
+#if defined(__WIN32__)
+  #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
+#endif
 
 #include "const.h"
 #include "struct.h"
@@ -45,45 +49,9 @@
 #include "clavier.h"
 #include "io.h"
 #include "hotkeys.h"
+#include "files.h"
+#include "setup.h"
 
-#include "errno.h"
-
-#if defined(__WIN32__)
-  #include <windows.h>
-#elif defined(__macosx__)
-  #import <corefoundation/corefoundation.h>
-  #import <sys/param.h>
-#endif
-
-// Chercher le répertoire contenant GFX2.EXE
-// en: Determine which directory contains the executable, data, and configuration.
-// The argument is argv[0], but some platforms don't need it.
-#if defined(__macosx__) || defined(__amigaos4__)
-  #define ARG_UNUSED __attribute__((unused))
-#else
-  #define ARG_UNUSED
-#endif
-void Chercher_repertoire_du_programme(ARG_UNUSED char * Chaine)
-{
-  #undef ARG_UNUSED
-  
-  // MacOSX
-  #if defined(__macosx__)
-    CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFURLGetFileSystemRepresentation(url,true,(UInt8*)Repertoire_du_programme,MAXPATHLEN);
-    CFRelease(url);
-    strcat(Repertoire_du_programme,"/Contents/Resources/");
-  
-  // AmigaOS4: hard-coded volume name.
-  #elif defined(__amigaos4__)
-    strcpy(Repertoire_du_programme,"PROGDIR:");
-  
-  // Windows, linux: The part of argv[0] before the executable name.
-  // Keep the last / or \.
-  #else
-    Extraire_chemin(Repertoire_du_programme, Chaine);
-  #endif
-}
 
 // Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
@@ -181,7 +149,7 @@ void Charger_DAT(void)
 
   struct stat Informations_Fichier;
 
-  strcpy(Nom_du_fichier,Repertoire_du_programme);
+  strcpy(Nom_du_fichier,Repertoire_des_donnees);
   strcat(Nom_du_fichier,"gfx2.dat");
   
   if(stat(Nom_du_fichier,&Informations_Fichier))
@@ -1592,7 +1560,7 @@ int Charger_CFG(int Tout_charger)
   struct stat Informations_Fichier;
   int Conversion_touches = 0;
 
-  strcpy(Nom_du_fichier,Repertoire_du_programme);
+  strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.cfg");
 
   stat(Nom_du_fichier,&Informations_Fichier);
@@ -1863,7 +1831,7 @@ int Sauver_CFG(void)
   struct Config_Infos_touche CFG_Infos_touche;
   struct Config_Mode_video   CFG_Mode_video;
 
-  strcpy(Nom_du_fichier,Repertoire_du_programme);
+  strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.cfg");
 
   if ((Handle=fopen(Nom_du_fichier,"wb"))==NULL)

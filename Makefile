@@ -20,10 +20,19 @@
 #  write to the Free Software Foundation, Inc.,
 #  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Overridable defaults
+  prefix = /usr/local
+  exec_prefix = $(prefix)
+  bindir = $(exec_prefix)/bin
+  datarootdir = $(prefix)/share
+  datadir = $(datarootdir)
+
 # Windows specific
 ifdef COMSPEC
-  DELCOMMAND = del
-  MKDIR = mkdir /s
+  DELCOMMAND = rm -f
+  MKDIR = mkdir
+  RMDIR = rmdir
+  CP = cp
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
@@ -42,6 +51,8 @@ else
   ifeq ($(PLATFORM),AmigaOS)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` $(TTFCOPT)
@@ -55,6 +66,8 @@ else
   ifeq ($(PLATFORM),BeOS)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
@@ -67,6 +80,8 @@ else
   ifeq ($(PLATFORM),Haiku)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
@@ -78,6 +93,8 @@ else
     # Linux specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
     ifdef WIN32CROSS
       #cross compile a Win32 executable
       CC = i586-mingw32msvc-gcc
@@ -114,10 +131,10 @@ else
 endif
 
 
-.PHONY : all debug release clean depend zip version force
+.PHONY : all debug release clean depend zip version force install uninstall
 
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o $(OBJDIR)/SFont.o
-CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o
+CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/setup.o
 
 all : $(BIN) $(CFGBIN)
 
@@ -165,6 +182,35 @@ clean :
 	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES) $(CFGOBJRES)
 	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
-test :
+install : $(BIN) $(CFGBIN)
+	echo "#!/bin/sh" > $(bindir)/grafx2
+	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(bindir)/grafx2
+	chmod 755 $(bindir)/grafx2
+	echo "#!/bin/sh" > $(bindir)/gfxcfg
+	echo $(datadir)/grafx2/$(CFGBIN) '$$*' >> $(bindir)/gfxcfg
+	chmod 755 $(bindir)/gfxcfg
+	$(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
+	$(CP) $(BIN) $(datadir)/grafx2/
+	$(CP) $(CFGBIN) $(datadir)/grafx2/
+	$(CP) gfx2.dat $(datadir)/grafx2/
+	$(CP) gfx2.gif $(datadir)/grafx2/
+	$(CP) gfx2cfg.gif $(datadir)/grafx2/
+	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
+	cd fonts && $(CP) * $(datadir)/grafx2/fonts/
+	@echo Install complete
+  
+uninstall :
+	$(DELCOMMAND) $(bindir)/grafx2
+	$(DELCOMMAND) $(bindir)/gfxcfg
+	$(DELCOMMAND) $(datadir)/grafx2/$(BIN)
+	$(DELCOMMAND) $(datadir)/grafx2/$(CFGBIN)
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2.dat
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2cfg.gif
+	$(DELCOMMAND) $(datadir)/grafx2/fonts/*
+	$(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
+	$(if $(wildcard $(datadir)/grafx2),,$(RMDIR) $(datadir)/grafx2)
+	@echo Uninstall complete
 
 -include Makefile.dep
+

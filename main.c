@@ -32,7 +32,6 @@
 #include "moteur.h"
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
 #include <signal.h>
 #include <time.h>
@@ -48,6 +47,7 @@
 #include "saveini.h"
 #include "io.h"
 #include "texte.h"
+#include "setup.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -246,6 +246,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 {
   int Temp;
   int Mode_dans_lequel_on_demarre;
+  char Repertoire_du_programme[TAILLE_CHEMIN_FICHIER];
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -256,9 +257,13 @@ void Initialisation_du_programme(int argc,char * argv[])
   Initialiser_S_Liste_de_pages(Principal_Backups);
   Initialiser_S_Liste_de_pages(Brouillon_Backups);
 
-  // On détermine dès le départ où se trouve le fichier:
-  Chercher_repertoire_du_programme(argv[0]);
-  
+  // Determine the executable directory
+  Set_Program_Directory(argv[0],Repertoire_du_programme);
+  // Choose directory for data (read only)
+  Set_Data_Directory(Repertoire_du_programme,Repertoire_des_donnees);
+  // Choose directory for settings (read/write)
+  Set_Config_Directory(Repertoire_du_programme,Repertoire_de_configuration);
+
   // On détecte les lecteurs qui sont accessibles:
   Rechercher_drives();
   // On détermine le répertoire courant:
@@ -333,9 +338,9 @@ void Initialisation_du_programme(int argc,char * argv[])
   SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","GrafX2");
   {
     // Routine pour définir l'icone.
-    char Chemin_icone[256];
+    char Chemin_icone[TAILLE_CHEMIN_FICHIER];
     SDL_Surface * Icone;
-    sprintf(Chemin_icone, "%s%s", Repertoire_du_programme, "gfx2.gif");
+    sprintf(Chemin_icone, "%s%s", Repertoire_des_donnees, "gfx2.gif");
     Icone = IMG_Load(Chemin_icone);
     if (Icone)
     {

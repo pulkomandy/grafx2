@@ -265,11 +265,6 @@ int TrueType_fonte(int Indice)
 // Initialisation à faire une fois au début du programme
 void Initialisation_Texte(void)
 {
-/*
-  // Pour scan de répertoire
-  DIR*  Repertoire_Courant; //Répertoire courant
-  struct dirent* Enreg; // Structure de lecture des éléments
-*/
   char Nom_repertoire[TAILLE_CHEMIN_FICHIER];
   #ifndef NOTTF
   // Initialisation de TTF
@@ -280,7 +275,7 @@ void Initialisation_Texte(void)
   Liste_fontes_debut = NULL;
   Fonte_nombre=0;
   // Parcours du répertoire "fonts"
-  strcpy(Nom_repertoire, Repertoire_du_programme);
+  strcpy(Nom_repertoire, Repertoire_des_donnees);
   strcat(Nom_repertoire, "fonts");
   for_each_file(Nom_repertoire, Ajout_fonte);
   
@@ -324,6 +319,7 @@ void Initialisation_Texte(void)
        #define USE_XLIB
     
        #ifdef USE_XLIB
+       {
 	      int i,number;
 	      Display* dpy = XOpenDisplay(NULL);
 	      char** font_path_list = XGetFontPath(dpy,&number);
@@ -332,6 +328,7 @@ void Initialisation_Texte(void)
 	         for_each_file(*(font_path_list+i),Ajout_fonte);
 
 	      XFreeFontPath(font_path_list);
+	    }
 	   #endif
     #endif
 
