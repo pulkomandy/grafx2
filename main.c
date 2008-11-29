@@ -219,16 +219,13 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         #if defined(__WIN32__)
-          Buffer = malloc(TAILLE_CHEMIN_FICHIER);
-          _fullpath(Buffer,argv[Indice],TAILLE_CHEMIN_FICHIER);
+          Buffer=_fullpath(NULL,argv[Indice],TAILLE_CHEMIN_FICHIER);
         #else
           Buffer=realpath(argv[Indice],NULL);
         #endif
         Extraire_chemin(Principal_Repertoire_fichier, Buffer);
         Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
-        #if defined(__WIN32__)
-          free(Buffer);
-        #endif
+        free(Buffer);
         chdir(Principal_Repertoire_fichier);
       }
       else

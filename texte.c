@@ -119,6 +119,7 @@ void Ajout_fonte(const char *Nom)
     case EXTID('t','t','f'):
     case EXTID('f','o','n'):
     case EXTID('o','t','f'):
+    case EXTID('p','f','b'):
       Fonte->EstTrueType = 1;
       Fonte->EstImage = 0;
       break;
