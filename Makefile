@@ -146,8 +146,8 @@ release : $(BIN) $(CFGBIN)
 
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
-	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep
-	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll zlib1.dll libpng13.dll $(TTFLIBS) fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
+	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
+	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-win32.zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt SDL.dll fonts/8pxfont.png SDL_image.dll zlib1.dll libpng13.dll $(TTFLIBS) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
 	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
