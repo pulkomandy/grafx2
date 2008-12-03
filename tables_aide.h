@@ -427,11 +427,11 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_BOLD("                 BUGFINDERS")                //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  Ced           El Topo       fallenblood")
-  AIDE_TEXTE("  Frost         Grimmy        keito")
-  AIDE_TEXTE("  kusma         Lord Graga    mind")
-  AIDE_TEXTE("  MooZ          richienyhus   tempest")
-  AIDE_TEXTE("  titus^Rab     tobe")
+  AIDE_TEXTE("  BDCIron       Ced           El Topo    ")
+  AIDE_TEXTE("  fallenblood   Frost         Grimmy     ")
+  AIDE_TEXTE("  keito         kusma         Lord Graga ")
+  AIDE_TEXTE("  mind          MooZ          richienyhus")
+  AIDE_TEXTE("  tempest       titus^Rab     tobe")
   AIDE_TEXTE("")
   AIDE_BOLD ("               OUR HOMEPAGE")               //
   AIDE_TEXTE("")                                          //

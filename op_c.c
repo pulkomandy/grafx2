@@ -178,7 +178,7 @@ Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b)
   int taille;
 
   n=(Table_conversion *)malloc(sizeof(Table_conversion));
-  if (n!=0)
+  if (n!=NULL)
   {
     // On recopie les paramŠtres demand‚s
     n->nbb_r=nbb_r;
@@ -199,14 +199,14 @@ Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b)
     // On tente d'allouer la table
     taille=(n->rng_r)*(n->rng_v)*(n->rng_b);
     n->table=(byte *)malloc(taille);
-    if (n->table!=0)
+    if (n->table!=NULL)
       // C'est bon!
       memset(n->table,0,taille); // Inutile, mais plus propre
     else
     {
       // Table impossible … allouer
       free(n);
-      n=0;
+      n=NULL;
     }
   }
 
@@ -663,12 +663,16 @@ ClusterSet * CS_New(int nbmax,Table_occurence * to)
   {
     // On recopie les paramŠtres demand‚s
     n->nbmax=TO_Compter_couleurs(to);
+
+    // On vient de compter le nombre de couleurs existantes, s'il est plus grand que 256 on limite à 256 (nombre de couleurs voulu au final)
     if (n->nbmax>nbmax)
+    {
       n->nbmax=nbmax;
+    }
 
     // On tente d'allouer la table
     n->clusters=(Cluster *)malloc(nbmax*sizeof(Cluster));
-    if (n->clusters!=0)
+    if (n->clusters!=NULL)
       // C'est bon! On initialise
       CS_Init(n,to);
     else
@@ -761,9 +765,11 @@ void CS_Generer(ClusterSet * cs,Table_occurence * to)
     Cluster_Analyser(&Nouveau1,to);
     Cluster_Analyser(&Nouveau2,to);
 
-    // On met ces deux nouveaux clusters dans le clusterSet
-    CS_Set(cs,&Nouveau1);
-    CS_Set(cs,&Nouveau2);
+    // On met ces deux nouveaux clusters dans le clusterSet... sauf s'ils sont vides
+    if(Nouveau1.occurences>0)
+	CS_Set(cs,&Nouveau1);
+    if(Nouveau2.occurences>0)
+	CS_Set(cs,&Nouveau2);
   }
 }
 
@@ -881,7 +887,7 @@ DegradeSet * DS_New(ClusterSet * cs)
     DegradeSet * n;
 
     n=(DegradeSet *)malloc(sizeof(DegradeSet));
-    if (n!=0)
+    if (n!=NULL)
     {
 	// On recopie les paramŠtres demand‚s
 	n->nbmax=cs->nbmax;
@@ -1113,9 +1119,13 @@ int Valeur_modifiee(int valeur,int modif)
 {
   valeur+=modif;
   if (valeur<0)
+  {
     valeur=0;
+  }
   else if (valeur>255)
+  {
     valeur=255;
+  }
   return valeur;
 }
 
@@ -1132,8 +1142,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   Bitmap256 D;
   int Pos_X,Pos_Y;
   int Rouge,Vert,Bleu;
-  int DRouge,DVert,DBleu;
-  int ERouge,EVert,EBleu;
+  float ERouge,EVert,EBleu;
 
   // On initialise les variables de parcours:
   Courant =Source;	// Le pixel dont on s'occupe
@@ -1157,14 +1166,9 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       *D=TC_Get(tc,Rouge,Vert,Bleu);
 
       // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
-      Rouge=palette[*D].R - Rouge;
-      Vert =palette[*D].V - Vert;
-      Bleu =palette[*D].B - Bleu;
-
-      // On initialise la quantité d'erreur diffusée
-      DRouge=Rouge;
-      DVert =Vert;
-      DBleu =Bleu;
+      Rouge-=palette[*D].R;
+      Vert -=palette[*D].V;
+      Bleu -=palette[*D].B;
 
       // Et dans chaque pixel voisin on propage l'erreur
       // A droite:
@@ -1178,9 +1182,6 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
           C_plus1->V=Valeur_modifiee(C_plus1->V,EVert );
           C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );
         }
-        DRouge-=ERouge;
-        DVert -=EVert;
-        DBleu -=EBleu;
       // En bas à gauche:
       if (Pos_Y+1<hauteur)
       {
@@ -1193,25 +1194,22 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
           S_moins1->V=Valeur_modifiee(S_moins1->V,EVert );
           S_moins1->B=Valeur_modifiee(S_moins1->B,EBleu );
         }
-        DRouge-=ERouge;
-        DVert -=EVert;
-        DBleu -=EBleu;
       // En bas:
-        ERouge=(Rouge/4);
-        EVert =(Vert /4);
-        EBleu =(Bleu /4);
+        ERouge=(Rouge*5/16.0);
+        EVert =(Vert*5 /16.0);
+        EBleu =(Bleu*5 /16.0);
         Suivant->R=Valeur_modifiee(Suivant->R,ERouge);
         Suivant->V=Valeur_modifiee(Suivant->V,EVert );
         Suivant->B=Valeur_modifiee(Suivant->B,EBleu );
-        DRouge-=ERouge;
-        DVert -=EVert;
-        DBleu -=EBleu;
       // En bas à droite:
         if (Pos_X+1<largeur)
         {
-          S_plus1->R=Valeur_modifiee(S_plus1->R,DRouge);
-          S_plus1->V=Valeur_modifiee(S_plus1->V,DVert );
-          S_plus1->B=Valeur_modifiee(S_plus1->B,DBleu );
+        ERouge=(Rouge/16.0);
+        EVert =(Vert /16.0);
+        EBleu =(Bleu /16.0);
+          S_plus1->R=Valeur_modifiee(S_plus1->R,ERouge);
+          S_plus1->V=Valeur_modifiee(S_plus1->V,EVert );
+          S_plus1->B=Valeur_modifiee(S_plus1->B,EBleu );
         }
       }
 
