@@ -468,9 +468,9 @@ int Charger_INI(struct S_Config * Conf)
   Conf->Coul_menu_pref[0].R=0;
   Conf->Coul_menu_pref[0].V=0;
   Conf->Coul_menu_pref[0].B=0;
-  Conf->Coul_menu_pref[3].R=63;
-  Conf->Coul_menu_pref[3].V=63;
-  Conf->Coul_menu_pref[3].B=63;
+  Conf->Coul_menu_pref[3].R=255;
+  Conf->Coul_menu_pref[3].V=255;
+  Conf->Coul_menu_pref[3].B=255;
 
   if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Light_color",3,Valeurs)))
     goto Erreur_Retour;
@@ -480,9 +480,9 @@ int Charger_INI(struct S_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   if ((Valeurs[2]<0) || (Valeurs[2]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[2].R=Valeurs[0];
-  Conf->Coul_menu_pref[2].V=Valeurs[1];
-  Conf->Coul_menu_pref[2].B=Valeurs[2];
+  Conf->Coul_menu_pref[2].R=(Valeurs[0]<<2)|(Valeurs[0]>>4);
+  Conf->Coul_menu_pref[2].V=(Valeurs[1]<<2)|(Valeurs[1]>>4);
+  Conf->Coul_menu_pref[2].B=(Valeurs[2]<<2)|(Valeurs[2]>>4);
 
   if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Dark_color",3,Valeurs)))
     goto Erreur_Retour;
@@ -492,9 +492,9 @@ int Charger_INI(struct S_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   if ((Valeurs[2]<0) || (Valeurs[2]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[1].R=Valeurs[0];
-  Conf->Coul_menu_pref[1].V=Valeurs[1];
-  Conf->Coul_menu_pref[1].B=Valeurs[2];
+  Conf->Coul_menu_pref[1].R=(Valeurs[0]<<2)|(Valeurs[0]>>4);
+  Conf->Coul_menu_pref[1].V=(Valeurs[1]<<2)|(Valeurs[1]>>4);
+  Conf->Coul_menu_pref[1].B=(Valeurs[2]<<2)|(Valeurs[2]>>4);
 
   if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Menu_ratio",1,Valeurs)))
     goto Erreur_Retour;

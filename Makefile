@@ -30,7 +30,7 @@
 # Windows specific
 ifdef COMSPEC
   DELCOMMAND = rm -f
-  MKDIR = mkdir
+  MKDIR = mkdir -p
   RMDIR = rmdir
   CP = cp
   BIN = grafx2.exe

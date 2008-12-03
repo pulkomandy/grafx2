@@ -445,8 +445,8 @@ GLOBAL short Trame_Hauteur; // Hauteur de la trame
 GLOBAL byte Colorize_Mode;          // Le mode Colorize est enclenché
 GLOBAL byte Colorize_Opacite;       // Intensité du Colorize
 GLOBAL byte Colorize_Mode_en_cours; // Le type de Colorize en cours (0-2)
-GLOBAL word Table_de_multiplication_par_Facteur_A[64];
-GLOBAL word Table_de_multiplication_par_Facteur_B[64];
+GLOBAL word Table_de_multiplication_par_Facteur_A[256];
+GLOBAL word Table_de_multiplication_par_Facteur_B[256];
 
   // Mode smooth:
 

@@ -148,9 +148,9 @@ void Palette_fake_24b(T_Palette Palette)
   // Génération de la palette
   for (Couleur=0;Couleur<256;Couleur++)
   {
-    Palette[Couleur].R=((Couleur & 0xE0)>>5)<<3;
-    Palette[Couleur].V=((Couleur & 0x1C)>>2)<<3;
-    Palette[Couleur].B=((Couleur & 0x03)>>0)<<4;
+    Palette[Couleur].R=((Couleur & 0xE0)>>5)<<5;
+    Palette[Couleur].V=((Couleur & 0x1C)>>2)<<5;
+    Palette[Couleur].B=((Couleur & 0x03)>>0)<<6;
   }
 }
 
@@ -512,8 +512,10 @@ void Charger_image(byte Image)
           if (Convert_bitmap_24B_to_256(Brosse,Buffer_image_24b,Brosse_Largeur,Brosse_Hauteur,Principal_Palette))
             Erreur_fichier=2;
         }
-        if (!Erreur_fichier)
-          Palette_256_to_64(Principal_Palette);
+        //if (!Erreur_fichier)
+        //  Palette_256_to_64(Principal_Palette);
+        // Normalement plus besoin car 256 color natif, et c'etait probablement
+        // un bug - yr
       }
 
       free(Buffer_image_24b);
@@ -625,11 +627,14 @@ void Load_PAL(void)
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
+    T_Palette Palette_64;
     // Initialiser_preview(???); // Pas possible... pas d'image...
 
     // Lecture du fichier dans Principal_Palette
-    if (read_bytes(Fichier,Principal_Palette,sizeof(T_Palette)))
+    if (read_bytes(Fichier,Palette_64,sizeof(T_Palette)))
     {
+      Palette_64_to_256(Palette_64);
+      memcpy(Principal_Palette,Palette_64,sizeof(T_Palette));
       Set_palette(Principal_Palette);
       Remapper_fileselect();
 
@@ -662,8 +667,11 @@ void Save_PAL(void)
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
+    T_Palette Palette_64;
+    memcpy(Palette_64,Principal_Palette,sizeof(T_Palette));
+    Palette_256_to_64(Palette_64);
     // Enregistrement de Principal_Palette dans le fichier
-    if (! write_bytes(Fichier,Principal_Palette,sizeof(T_Palette)))
+    if (! write_bytes(Fichier,Palette_64,sizeof(T_Palette)))
     {
       Erreur_fichier=1;
       fclose(Fichier);
@@ -763,13 +771,7 @@ void Load_IMG(void)
       Initialiser_preview(IMG_Header.Largeur,IMG_Header.Hauteur,Taille_du_fichier,FORMAT_IMG);
       if (Erreur_fichier==0)
       {
-        //   On commence par passer la palette en 256 comme ça, si la nouvelle
-        // palette a moins de 256 coul, la précédente ne souffrira pas d'un
-        // assombrissement préjudiciable.
-        Palette_64_to_256(Principal_Palette);
-        //   On peut maintenant transférer la nouvelle palette
         memcpy(Principal_Palette,IMG_Header.Palette,sizeof(T_Palette));
-        Palette_256_to_64(Principal_Palette);
         Set_palette(Principal_Palette);
         Remapper_fileselect();
 
@@ -827,9 +829,7 @@ void Save_IMG(void)
     IMG_Header.Filler2[23]=0;  // Hi(Longueur de la signature)
     memcpy(IMG_Header.Filler2+23,"GRAFX2 by SunsetDesign (IMG format taken from PV (c)W.Wiedmann)",64);
 
-    Palette_64_to_256(Principal_Palette);
     memcpy(IMG_Header.Palette,Principal_Palette,sizeof(T_Palette));
-    Palette_256_to_64(Principal_Palette);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     IMG_Header.Largeur = SDL_Swap16(IMG_Header.Largeur);
@@ -1047,11 +1047,13 @@ void Load_PKM(void)
         Initialiser_preview(Head.Largeur,Head.Hauteur,Taille_du_fichier,FORMAT_PKM);
         if (Erreur_fichier==0)
         {
+          
           Principal_Largeur_image=Head.Largeur;
           Principal_Hauteur_image=Head.Hauteur;
           Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
-
+          // Palette lue en 64
           memcpy(Principal_Palette,Head.Palette,sizeof(T_Palette));
+          Palette_64_to_256(Principal_Palette);
           Set_palette(Principal_Palette);
           Remapper_fileselect();
 
@@ -1174,6 +1176,7 @@ void Save_PKM(void)
   Head.Largeur=Principal_Largeur_image;
   Head.Hauteur=Principal_Hauteur_image;
   memcpy(Head.Palette,Principal_Palette,sizeof(T_Palette));
+  Palette_256_to_64(Head.Palette);
 
   // Calcul de la taille du Post-Header
   Head.Jump=9; // 6 pour les dimensions de l'ecran + 3 pour la back-color
@@ -1679,6 +1682,7 @@ void Load_LBM(void)
             Palette_256_to_64(Principal_Palette);
             if (Image_HAM)
               Adapter_Palette_HAM();
+            Palette_64_to_256(Principal_Palette);
             Set_palette(Principal_Palette);
             Remapper_fileselect();
 
@@ -1818,9 +1822,6 @@ void Load_LBM(void)
           }
           else
           {
-            //   On restore l'ancienne palette en cas d'erreur...
-            Palette_256_to_64(Principal_Palette);
-            // ... ce qui permet de ne renvoyer qu'une erreur 1 (pas de modif)
             Erreur_fichier=1;
           }
         }
@@ -1988,9 +1989,7 @@ void Save_LBM(void)
     write_bytes(LBM_Fichier,"CMAP",4);
     write_dword_be(LBM_Fichier,sizeof(T_Palette));
 
-    Palette_64_to_256(Principal_Palette);
     write_bytes(LBM_Fichier,Principal_Palette,sizeof(T_Palette));
-    Palette_256_to_64(Principal_Palette);
 
     write_bytes(LBM_Fichier,"BODY",4);
     write_dword_be(LBM_Fichier,0); // On mettra la taille à jour à la fin
@@ -2199,8 +2198,6 @@ void Load_BMP(void)
             // assombrissement préjudiciable.
             if (Config.Clear_palette)
               memset(Principal_Palette,0,sizeof(T_Palette));
-            else
-              Palette_64_to_256(Principal_Palette);
             //   On peut maintenant transférer la nouvelle palette
             for (Indice=0; Indice<Nb_Couleurs; Indice++)
             {
@@ -2208,7 +2205,6 @@ void Load_BMP(void)
               Principal_Palette[Indice].V=Palette_locale[Indice][1];
               Principal_Palette[Indice].B=Palette_locale[Indice][0];
             }
-            Palette_256_to_64(Principal_Palette);
             Set_palette(Principal_Palette);
             Remapper_fileselect();
 
@@ -2459,7 +2455,6 @@ void Save_BMP(void)
       // toujours à 0 pour forcer les gens à s'acheter des gros disques
       // durs... Comme ça, ça fera passer la pillule lorsqu'on sortira
       // Windows 95." ...
-      Palette_64_to_256(Principal_Palette);
       for (Indice=0; Indice<256; Indice++)
       {
         Palette_locale[Indice][0]=Principal_Palette[Indice].B;
@@ -2467,7 +2462,6 @@ void Save_BMP(void)
         Palette_locale[Indice][2]=Principal_Palette[Indice].R;
         Palette_locale[Indice][3]=0;
       }
-      Palette_256_to_64(Principal_Palette);
 
       if (write_bytes(Fichier,Palette_locale,1024))
       {
@@ -2740,13 +2734,8 @@ void Load_GIF(void)
         {
           // Palette globale dispo:
 
-          //   On commence par passer la palette en 256 comme ça, si la
-          // nouvelle palette a moins de 256 coul, la précédente ne souffrira
-          // pas d'un assombrissement préjudiciable.
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
-          else
-            Palette_64_to_256(Principal_Palette);
 
           //   On peut maintenant charger la nouvelle palette:
           if (!(LSDB.Aspect & 0x80))
@@ -2767,8 +2756,6 @@ void Load_GIF(void)
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
               read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
           }
-
-          Palette_256_to_64(Principal_Palette);
           Set_palette(Principal_Palette);
         }
 
@@ -2830,11 +2817,6 @@ void Load_GIF(void)
               Nb_couleurs=(1 << ((IDB.Indicateur & 0x07)+1));
               Nb_bits_initial=(IDB.Indicateur & 0x07)+2;
 
-              //   On commence par passer la palette en 256 comme ça, si la
-              // nouvelle palette a moins de 256 coul, la précédente ne
-              // souffrira pas d'un assombrissement préjudiciable.
-              Palette_64_to_256(Principal_Palette);
-
               if (!(IDB.Indicateur & 0x40))
                 // Palette dans l'ordre:
                 for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
@@ -2853,8 +2835,6 @@ void Load_GIF(void)
                 for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
                   read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
               }
-
-              Palette_256_to_64(Principal_Palette);
               Set_palette(Principal_Palette);
             }
 
@@ -3110,8 +3090,6 @@ void Save_GIF(void)
         // Le LSDB a été correctement écrit.
 
         // On sauve la palette
-
-        Palette_64_to_256(Principal_Palette);
         if (write_bytes(GIF_Fichier,Principal_Palette,768))
         {
           // La palette a été correctement écrite.
@@ -3290,7 +3268,6 @@ void Save_GIF(void)
         else
           Erreur_fichier=1;
 
-        Palette_256_to_64(Principal_Palette);
       } // On a pu écrire le LSDB
       else
         Erreur_fichier=1;
@@ -3486,8 +3463,6 @@ void Load_PCX(void)
           // On prépare la palette à accueillir les valeurs du fichier PCX
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
-          else
-            Palette_64_to_256(Principal_Palette);
           Nb_couleurs=(dword)(1<<PCX_Header.Plane)<<(PCX_Header.Depth-1);
 
           if (Nb_couleurs>4)
@@ -3538,7 +3513,6 @@ void Load_PCX(void)
                   }
               }
           }
-          Palette_256_to_64(Principal_Palette);
           Set_palette(Principal_Palette);
           Remapper_fileselect();
 
@@ -3768,8 +3742,6 @@ void Save_PCX(void)
 
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
-    // On prépare la palette pour écrire les 16 premieres valeurs
-    Palette_64_to_256(Principal_Palette);
 
     PCX_Header.Manufacturer=10;
     PCX_Header.Version=5;
@@ -3859,8 +3831,6 @@ void Save_PCX(void)
     if (Erreur_fichier)
       remove(Nom_du_fichier);
        
-    // On remet la palette à son état normal
-    Palette_256_to_64(Principal_Palette);
   }    
   else 
     Erreur_fichier=1;
@@ -4284,9 +4254,9 @@ void Load_KCF(void)
           for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
           {
             Indice=16+(Indice_palette*16)+Indice_couleur;
-            Principal_Palette[Indice].R=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 >> 4) << 2);
-            Principal_Palette[Indice].B=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 & 15) << 2);
-            Principal_Palette[Indice].V=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2 & 15) << 2);
+            Principal_Palette[Indice].R=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 >> 4) << 4);
+            Principal_Palette[Indice].B=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 & 15) << 4);
+            Principal_Palette[Indice].V=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2 & 15) << 4);
           }
 
         for (Indice=0;Indice<16;Indice++)
@@ -4323,16 +4293,16 @@ void Load_KCF(void)
              {
                case 12: // RRRR BBBB | 0000 VVVV
                  read_bytes(Fichier,Octet,2);
-                 Principal_Palette[Indice].R=(Octet[0] >> 4) << 2;
-                 Principal_Palette[Indice].B=(Octet[0] & 15) << 2;
-                 Principal_Palette[Indice].V=(Octet[1] & 15) << 2;
+                 Principal_Palette[Indice].R=(Octet[0] >> 4) << 4;
+                 Principal_Palette[Indice].B=(Octet[0] & 15) << 4;
+                 Principal_Palette[Indice].V=(Octet[1] & 15) << 4;
                  break;
 
                case 24: // RRRR RRRR | VVVV VVVV | BBBB BBBB
                  read_bytes(Fichier,Octet,3);
-                 Principal_Palette[Indice].R=Octet[0]>>2;
-                 Principal_Palette[Indice].V=Octet[1]>>2;
-                 Principal_Palette[Indice].B=Octet[2]>>2;
+                 Principal_Palette[Indice].R=Octet[0];
+                 Principal_Palette[Indice].V=Octet[1];
+                 Principal_Palette[Indice].B=Octet[2];
              }
 
              Indice++;
@@ -4396,8 +4366,8 @@ void Save_KCF(void)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
         {
           Indice=16+(Indice_palette*16)+Indice_couleur;
-          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1=((Principal_Palette[Indice].R>>2)<<4) | (Principal_Palette[Indice].B>>2);
-          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2=Principal_Palette[Indice].V>>2;
+          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1=((Principal_Palette[Indice].R>>4)<<4) | (Principal_Palette[Indice].B>>4);
+          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2=Principal_Palette[Indice].V>>4;
         }
 
       if (! write_bytes(Fichier,&Buffer,sizeof(T_KCF_Header)))
@@ -4423,9 +4393,9 @@ void Save_KCF(void)
 
       for (Indice=0;(Indice<256) && (!Erreur_fichier);Indice++)
       {
-        Octet[0]=Principal_Palette[Indice].R<<2;
-        Octet[1]=Principal_Palette[Indice].V<<2;
-        Octet[2]=Principal_Palette[Indice].B<<2;
+        Octet[0]=Principal_Palette[Indice].R;
+        Octet[1]=Principal_Palette[Indice].V;
+        Octet[2]=Principal_Palette[Indice].B;
         if (! write_bytes(Fichier,Octet,3))
           Erreur_fichier=1;
       }
@@ -4521,6 +4491,7 @@ void Load_SCx(void)
           if (Config.Clear_palette)
             memset(Principal_Palette,0,sizeof(T_Palette));
 
+          Palette_64_to_256(SCx_Palette);
           memcpy(Principal_Palette,SCx_Palette,Taille);
           Set_palette(Principal_Palette);
           Remapper_fileselect();
@@ -4587,6 +4558,10 @@ void Save_SCx(void)
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
+    T_Palette Palette_64;
+    memcpy(Palette_64,Principal_Palette,sizeof(T_Palette));
+    Palette_256_to_64(Palette_64);
+    
     memcpy(SCx_Header.Filler1,"RIX3",4);
     SCx_Header.Largeur=Principal_Largeur_image;
     SCx_Header.Hauteur=Principal_Hauteur_image;
@@ -4594,7 +4569,7 @@ void Save_SCx(void)
     SCx_Header.Plans=0x00;
 
     if (write_bytes(Fichier,&SCx_Header,sizeof(T_SCx_Header)) &&
-      write_bytes(Fichier,&Principal_Palette,sizeof(T_Palette)))
+      write_bytes(Fichier,&Palette_64,sizeof(T_Palette)))
     {
       Init_ecriture();
 
@@ -4711,9 +4686,9 @@ void PI1_Decoder_palette(byte * Src,byte * Pal)
     w=((word)Src[(i*2)+1]<<8) | Src[(i*2)+0];
 
     // Traitement des couleurs rouge, verte et bleue:
-    Pal[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 2;
-    Pal[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 2;
-    Pal[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 2;
+    Pal[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
+    Pal[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
+    Pal[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
   }
 }
 
@@ -4735,9 +4710,9 @@ void PI1_Coder_palette(byte * Pal,byte * Dst)
   for (i=0;i<16;i++)
   {
     // Traitement des couleurs rouge, verte et bleue:
-    w =(((word)Pal[ip] & 0x38) >> 3) | (((word)Pal[ip] & 0x04) <<  1); ip++;
-    w|=(((word)Pal[ip] & 0x38) << 9) | (((word)Pal[ip] & 0x04) << 13); ip++;
-    w|=(((word)Pal[ip] & 0x38) << 5) | (((word)Pal[ip] & 0x04) <<  9); ip++;
+    w =(((word)(Pal[ip]>>2) & 0x38) >> 3) | (((word)(Pal[ip]>>2) & 0x04) <<  1); ip++;
+    w|=(((word)(Pal[ip]>>2) & 0x38) << 9) | (((word)(Pal[ip]>>2) & 0x04) << 13); ip++;
+    w|=(((word)(Pal[ip]>>2) & 0x38) << 5) | (((word)(Pal[ip]>>2) & 0x04) <<  9); ip++;
 
     Dst[(i*2)+0]=w & 0x00FF;
     Dst[(i*2)+1]=(w>>8);

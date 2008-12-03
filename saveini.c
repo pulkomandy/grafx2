@@ -461,15 +461,15 @@ int Sauver_INI(struct S_Config * Conf)
   if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MENU]")))
     goto Erreur_Retour;
 
-  Valeurs[0]=Conf->Coul_menu_pref[2].R;
-  Valeurs[1]=Conf->Coul_menu_pref[2].V;
-  Valeurs[2]=Conf->Coul_menu_pref[2].B;
+  Valeurs[0]=Conf->Coul_menu_pref[2].R>>2;
+  Valeurs[1]=Conf->Coul_menu_pref[2].V>>2;
+  Valeurs[2]=Conf->Coul_menu_pref[2].B>>2;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Light_color",3,Valeurs,0)))
     goto Erreur_Retour;
 
-  Valeurs[0]=Conf->Coul_menu_pref[1].R;
-  Valeurs[1]=Conf->Coul_menu_pref[1].V;
-  Valeurs[2]=Conf->Coul_menu_pref[1].B;
+  Valeurs[0]=Conf->Coul_menu_pref[1].R>>2;
+  Valeurs[1]=Conf->Coul_menu_pref[1].V>>2;
+  Valeurs[2]=Conf->Coul_menu_pref[1].B>>2;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Dark_color",3,Valeurs,0)))
     goto Erreur_Retour;
 

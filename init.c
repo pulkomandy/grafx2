@@ -185,6 +185,7 @@ void Charger_DAT(void)
 
   if (!read_bytes(Handle, Palette_defaut,sizeof(T_Palette)))
     Erreur(ERREUR_DAT_CORROMPU);
+  Palette_64_to_256(Palette_defaut);
 
   if (!read_bytes(Handle, BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU))
     Erreur(ERREUR_DAT_CORROMPU);

@@ -34,7 +34,7 @@
 
 
 
-void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
+void RGBtoHSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
 {
   double rd,gd,bd,h,s,l,max,min;
 
@@ -103,7 +103,7 @@ void rgb2hl(int r,int g,int b,byte * hr,byte * lr,byte* sr)
   *sr = (s*255.0);
 }
 
-void HLStoRGB(byte H,byte L,byte S, byte* R, byte* G, byte* B)
+void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
 {
     float rf =0 ,gf = 0,bf = 0;
     float hf,lf,sf;
@@ -156,7 +156,7 @@ void HLStoRGB(byte H,byte L,byte S, byte* R, byte* G, byte* B)
 
     if (bf < 1/6.0)
 	bf = p + ((q-p)*6*bf);
-    else if(rf < 0.5)
+    else if(bf < 0.5)
 	bf = q;
     else if(bf < 2/3.0)
 	bf = p + ((q-p)*6*(2/3.0-bf));
@@ -632,7 +632,7 @@ void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
   c->r=(cumulR<<to->red_r)/c->occurences;
   c->v=(cumulV<<to->red_v)/c->occurences;
   c->b=(cumulB<<to->red_b)/c->occurences;
-  rgb2hl(c->r,c->v,c->b,&c->h,&c->l,&s);
+  RGBtoHSL(c->r,c->v,c->b,&c->h,&s,&c->l);
 }
 
 

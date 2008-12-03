@@ -4362,7 +4362,7 @@ void Calculer_les_tables_de_Colorize(void)
   Facteur_A=256*(100-Colorize_Opacite)/100;
   Facteur_B=256*(    Colorize_Opacite)/100;
 
-  for (Indice=0;Indice<64;Indice++)
+  for (Indice=0;Indice<256;Indice++)
   {
     Table_de_multiplication_par_Facteur_A[Indice]=Indice*Facteur_A;
     Table_de_multiplication_par_Facteur_B[Indice]=Indice*Facteur_B;

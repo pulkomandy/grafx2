@@ -633,9 +633,9 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
 SDL_Color Conversion_couleur_SDL(byte Index)
 {
   SDL_Color Couleur;
-  Couleur.r = (Principal_Palette[Index].R<<2) + (Principal_Palette[Index].R>>4);
-  Couleur.g = (Principal_Palette[Index].V<<2) + (Principal_Palette[Index].V>>4);
-  Couleur.b = (Principal_Palette[Index].B<<2) + (Principal_Palette[Index].B>>4);
+  Couleur.r = Principal_Palette[Index].R;
+  Couleur.g = Principal_Palette[Index].V;
+  Couleur.b = Principal_Palette[Index].B;
   Couleur.unused = 255;
   return Couleur;
 }

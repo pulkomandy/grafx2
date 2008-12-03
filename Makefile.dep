@@ -35,8 +35,8 @@ $(OBJDIR)/palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
   divers.h erreurs.h sdlscreen.h readline.h
-$(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h \
-  files.h erreurs.h graph.h
+$(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h io.h \
+  erreurs.h graph.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
   divers.h erreurs.h graph.h
 $(OBJDIR)/setup.o: setup.c struct.h const.h io.h files.h

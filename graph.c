@@ -1668,6 +1668,203 @@ void Print_nom_fichier(void)
   }
 }
 
+// Fonction d'affichage d'une chaine numérique avec une fonte très fine
+// Spécialisée pour les compteurs RGB
+void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
+{
+  // Macros pour écrire des litteraux binaires.
+  // Ex: Ob(11110000) == 0xF0
+  #define Ob(x)  ((unsigned)Ob_(0 ## x ## uL))
+  #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |		\
+	  (x >> 8 & 16) | (x >> 10 & 32) | (x >> 12 & 64) | (x >> 14 & 128))
+
+  byte Caractere[14][8] = {
+   { // 0
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // 1
+    Ob(00001100),
+    Ob(00011100),
+    Ob(00111100),
+    Ob(00001100),
+    Ob(00001100),
+    Ob(00001100),
+    Ob(00001100),
+    Ob(00001100)
+   },
+   { // 2
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00001100),
+    Ob(00011000),
+    Ob(00111110)
+   },
+   { // 3
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00000110),
+    Ob(00001100),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // 4
+    Ob(00001100),
+    Ob(00001100),
+    Ob(00011000),
+    Ob(00011000),
+    Ob(00110000),
+    Ob(00110100),
+    Ob(00111110),
+    Ob(00000100)
+   },
+   { // 5
+    Ob(00111110),
+    Ob(00110000),
+    Ob(00110000),
+    Ob(00111100),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // 6
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00110000),
+    Ob(00111100),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // 7
+    Ob(00111110),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00001100),
+    Ob(00011000),
+    Ob(00011000),
+    Ob(00011000),
+    Ob(00011000)
+   },
+   { // 8
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // 9
+    Ob(00011100),
+    Ob(00110110),
+    Ob(00110110),
+    Ob(00011110),
+    Ob(00000110),
+    Ob(00000110),
+    Ob(00110110),
+    Ob(00011100)
+   },
+   { // (espace)
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000)
+   },
+   { // +
+    Ob(00000000),
+    Ob(00001000),
+    Ob(00001000),
+    Ob(00111110),
+    Ob(00001000),
+    Ob(00001000),
+    Ob(00000000),
+    Ob(00000000)
+   },
+   { // -
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00111110),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000),
+    Ob(00000000)
+   },
+   { // +-
+    Ob(00001000),
+    Ob(00001000),
+    Ob(00111110),
+    Ob(00001000),
+    Ob(00001000),
+    Ob(00000000),
+    Ob(00111110),
+    Ob(00000000)
+   } };
+
+  word  Indice;
+  short Pos_X;
+  short Pos_Y;
+  for (Indice=0;Chaine[Indice]!='\0';Indice++)
+  {
+    int Numero_car;
+    switch(Chaine[Indice])
+    {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        Numero_car=Chaine[Indice]-'0';
+        break;
+      case ' ':
+      default:
+        Numero_car=10;
+        break;
+      case '+':
+        Numero_car=11;
+        break;
+      case '-':
+        Numero_car=12;
+        break;
+      case '±':
+        Numero_car=13;
+        break;
+    }
+    for (Pos_Y=0;Pos_Y<8;Pos_Y++)
+    {
+      for (Pos_X=0;Pos_X<6;Pos_X++)
+      {
+        byte Couleur = (Caractere[Numero_car][Pos_Y] & (1 << (6-Pos_X))) ? Couleur_texte:Couleur_fond;
+        Pixel_dans_fenetre(X+(Indice*6+Pos_X),Y+Pos_Y,Couleur);
+      }
+    }
+  }
+  UpdateRect(Fenetre_Pos_X+X*Menu_Facteur_X,Fenetre_Pos_Y+Y*Menu_Facteur_Y,strlen(Chaine)*Menu_Facteur_X*6,8*Menu_Facteur_Y);
+}
 
 // -- Calcul des différents effets -------------------------------------------
 

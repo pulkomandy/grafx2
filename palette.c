@@ -35,7 +35,7 @@
 #include "erreurs.h"
 #include "op_c.h"
 
-byte Palette_mode_RGB = 1; // Indique si on est en HSV ou en RGB
+byte Palette_mode_RGB = 1; // Indique si on est en HSL ou en RGB
 
 // --------------------------- Menu des palettes -----------------------------
 char * Libelle_reduction_palette[7]=
@@ -43,13 +43,56 @@ char * Libelle_reduction_palette[7]=
   "128"," 64"," 32"," 16","  8","  4","  2"
 };
 
+// Nombre de graduations pour une composante RGB
+const int Graduations_RGB =256; // 24bit
+//const int Graduations_RGB = 64; // VGA
+//const int Graduations_RGB = 16; // Amiga
+//const int Graduations_RGB =  3; // Amstrad CPC
+
+
+// Nombre de graduations pour une composante dans le mode actuel
+int Color_Count;
+// Les composantes vont de 0 à (Color_Count-1)
+int Color_Max;
+// Le demi-pas est une quantité que l'on ajoute à une composante
+// avant de faire un arrondi par division.
+int Color_DemiPas;
+
+// Définir les unités pour les graduationss R G B ou H S V
+void Unite_Composantes(int Count)
+{
+  Color_Count = Count;
+  Color_Max = Count-1;
+  Color_DemiPas = 256/Count/2;
+}
+
+void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Couleur, short Difference_H, short Difference_S, short Difference_L)
+{
+    byte H, S, L;
+    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].V,Palette_depart[Couleur].B,&H,&S,&L);
+    // La teinte (Hue) est cyclique
+    H=(Difference_H+256+H);
+    // Pour les autres (Saturation, Lightness), au lieu d'additionner,
+    // on va faire un ratio, cela utilise mieux la plage de valeurs 0-255
+    if (Difference_S<0)
+      S=(255+Difference_S)*S/255;
+    else if (Difference_S>0)
+      S=255-(255-Difference_S)*(255-S)/255;
+    if (Difference_L<0)
+      L=(255+Difference_L)*L/255;
+    else if (Difference_L>0)
+      L=255-(255-Difference_L)*(255-L)/255;
+    HSLtoRGB(H,S,L,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].V,&Palette_arrivee[Couleur].B);
+}
 
 void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>63)
-    Nouvelle_teinte=63;
+  if (Nouvelle_teinte>255)
+    Nouvelle_teinte=255;
+  // Arrondi
+  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
 
   Palette[Couleur].R=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
@@ -60,8 +103,10 @@ void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>63)
-    Nouvelle_teinte=63;
+  if (Nouvelle_teinte>255)
+    Nouvelle_teinte=255;
+  // Arrondi
+  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
 
   Palette[Couleur].V=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
@@ -72,13 +117,22 @@ void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>63)
-    Nouvelle_teinte=63;
+  if (Nouvelle_teinte>255)
+    Nouvelle_teinte=255;
+  // Arrondi
+  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
 
   Palette[Couleur].B=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
 }
 
+void Formate_composante(byte Valeur, char *Chaine)
+// Formate une chaine de 4 caractères+\0 : "nnn "
+{
+  Num2str(Valeur,Chaine,3);
+  Chaine[3]=' ';
+  Chaine[4]='\0';
+}
 
 void Degrader_palette(short Debut,short Fin,T_Palette Palette)
 // Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
@@ -387,7 +441,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
 
 void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Palette Palette,dword * Utilisation_couleur)
 {
-  char  Chaine[4];                // Buffer d'affichage du compteur
+  char  Chaine[5];                // Buffer d'affichage du compteur
   byte  Table_de_conversion[256]; // Table de conversion
   int   Couleur_1;                // |_ Variables de balayages
   int   Couleur_2;                // |  de la palette
@@ -581,7 +635,7 @@ void Palette_Modifier_jauge(struct Fenetre_Bouton_scroller * Jauge,
   Jauge->Position=Position;
   Calculer_hauteur_curseur_jauge(Jauge);
   Fenetre_Dessiner_jauge(Jauge);
-  Print_dans_fenetre(Pos_X,172,Valeur,CM_Noir,CM_Clair);
+  Print_compteur(Pos_X,172,Valeur,CM_Noir,CM_Clair);
 }
 
 
@@ -591,22 +645,31 @@ void Afficher_les_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
                          struct Fenetre_Bouton_scroller * Jauge_bleue,
                          byte Bloc_selectionne, struct Composantes * Palette)
 {
-  char Chaine[3];
+  char Chaine[5];
 
   if (Bloc_selectionne)
   {
-    Palette_Modifier_jauge(Jauge_rouge,127,63,"± 0",176);
-    Palette_Modifier_jauge(Jauge_verte,127,63,"± 0",203);
-    Palette_Modifier_jauge(Jauge_bleue,127,63,"± 0",230);
+    Palette_Modifier_jauge(Jauge_rouge,Color_Max*2+1,Color_Max,"±  0",176);
+    Palette_Modifier_jauge(Jauge_verte,Color_Max*2+1,Color_Max,"±  0",203);
+    Palette_Modifier_jauge(Jauge_bleue,Color_Max*2+1,Color_Max,"±  0",230);
   }
   else
   {
-    Num2str(Palette[Fore_color].R,Chaine,2);
-    Palette_Modifier_jauge(Jauge_rouge,64,63-Palette[Fore_color].R,Chaine,180);
-    Num2str(Palette[Fore_color].V,Chaine,2);
-    Palette_Modifier_jauge(Jauge_verte,64,63-Palette[Fore_color].V,Chaine,207);
-    Num2str(Palette[Fore_color].B,Chaine,2);
-    Palette_Modifier_jauge(Jauge_bleue,64,63-Palette[Fore_color].B,Chaine,234);
+    byte j1, j2, j3;
+    j1= Palette[Fore_color].R;
+    j2= Palette[Fore_color].V;
+    j3= Palette[Fore_color].B;
+    if (!Palette_mode_RGB)
+    {
+      RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
+    }
+
+    Formate_composante(j1*Color_Max/255,Chaine);
+    Palette_Modifier_jauge(Jauge_rouge,Color_Count,Color_Max-j1*Color_Max/255,Chaine,176);
+    Formate_composante(j2*Color_Max/255,Chaine);
+    Palette_Modifier_jauge(Jauge_verte,Color_Count,Color_Max-j2*Color_Max/255,Chaine,203);
+    Formate_composante(j3*Color_Max/255,Chaine);
+    Palette_Modifier_jauge(Jauge_bleue,Color_Count,Color_Max-j3*Color_Max/255,Chaine,230);
   }
 }
 
@@ -617,46 +680,50 @@ void Palette_Reafficher_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
                                struct Fenetre_Bouton_scroller * Jauge_bleue,
                                T_Palette Palette,byte Debut,byte Fin)
 {
-  byte Couleur;
-  char Chaine[3];
+  char Chaine[5];
 
   Effacer_curseur();
   // Réaffichage des jauges:
   if (Debut!=Fin)
   {
     // Dans le cas d'un bloc, tout à 0.
-    Jauge_rouge->Position   =63;
+    Jauge_rouge->Position   =Color_Max;
     Fenetre_Dessiner_jauge(Jauge_rouge);
-    Print_dans_fenetre(176,172,"± 0",CM_Noir,CM_Clair);
+    Print_compteur(176,172,"±  0",CM_Noir,CM_Clair);
 
-    Jauge_verte->Position   =63;
+    Jauge_verte->Position   =Color_Max;
     Fenetre_Dessiner_jauge(Jauge_verte);
-    Print_dans_fenetre(203,172,"± 0",CM_Noir,CM_Clair);
+    Print_compteur(203,172,"±  0",CM_Noir,CM_Clair);
 
-    Jauge_bleue->Position   =63;
+    Jauge_bleue->Position   =Color_Max;
     Fenetre_Dessiner_jauge(Jauge_bleue);
-    Print_dans_fenetre(230,172,"± 0",CM_Noir,CM_Clair);
+    Print_compteur(230,172,"±  0",CM_Noir,CM_Clair);
   }
   else
   {
     // Dans le cas d'une seule couleur, composantes.
-    Couleur=Palette[Debut].R;
-    Num2str(Couleur,Chaine,2);
-    Jauge_rouge->Position=63-Couleur;
+    byte j1, j2, j3;
+    j1= Palette[Debut].R;
+    j2= Palette[Debut].V;
+    j3= Palette[Debut].B;
+    if (!Palette_mode_RGB)
+    {
+      RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
+    }
+    Formate_composante(j1*Color_Max/255,Chaine);
+    Jauge_rouge->Position=Color_Max-j1*Color_Max/255;
     Fenetre_Dessiner_jauge(Jauge_rouge);
-    Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
+    Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
 
-    Couleur=Palette[Debut].V;
-    Num2str(Couleur,Chaine,2);
-    Jauge_verte->Position=63-Couleur;
+    Formate_composante(j2*Color_Max/255,Chaine);
+    Jauge_verte->Position=Color_Max-j2*Color_Max/255;
     Fenetre_Dessiner_jauge(Jauge_verte);
-    Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
+    Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
 
-    Couleur=Palette[Debut].B;
-    Num2str(Couleur,Chaine,2);
-    Jauge_bleue->Position=63-Couleur;
+    Formate_composante(j3*Color_Max/255,Chaine);
+    Jauge_bleue->Position=Color_Max-j3*Color_Max/255;
     Fenetre_Dessiner_jauge(Jauge_bleue);
-    Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+    Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
   }
   Afficher_curseur();
 }
@@ -696,10 +763,11 @@ void Bouton_Palette(void)
   struct Composantes * Palette_temporaire;
   struct Composantes * Palette_de_travail;
 
-
   Palette_backup    =(struct Composantes *)malloc(sizeof(T_Palette));
   Palette_temporaire=(struct Composantes *)malloc(sizeof(T_Palette));
   Palette_de_travail=(struct Composantes *)malloc(sizeof(T_Palette));
+
+  Unite_Composantes(Graduations_RGB);
 
   Ouvrir_fenetre(299,188,"Palette");
 
@@ -726,11 +794,11 @@ void Bouton_Palette(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*206),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
   // Jauges de couleur
-  Fenetre_Definir_bouton_scroller(182, 81, 88,64,1,63-Palette_de_travail[Fore_color].R);// 2
+  Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
   Jauge_rouge=Fenetre_Liste_boutons_scroller;
-  Fenetre_Definir_bouton_scroller(209, 81, 88,64,1,63-Palette_de_travail[Fore_color].V);// 3
+  Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].V*Color_Max/255);// 3
   Jauge_verte=Fenetre_Liste_boutons_scroller;
-  Fenetre_Definir_bouton_scroller(236, 81, 88,64,1,63-Palette_de_travail[Fore_color].B);// 4
+  Fenetre_Definir_bouton_scroller(236, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].B*Color_Max/255);// 4
   Jauge_bleue=Fenetre_Liste_boutons_scroller;
   Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
   Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
@@ -744,12 +812,12 @@ void Bouton_Palette(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
-  Num2str(Principal_Palette[Fore_color].R,Chaine,2);
-  Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
-  Num2str(Principal_Palette[Fore_color].V,Chaine,2);
-  Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
-  Num2str(Principal_Palette[Fore_color].B,Chaine,2);
-  Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+  Formate_composante(Principal_Palette[Fore_color].R*Color_Max/255,Chaine);
+  Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+  Formate_composante(Principal_Palette[Fore_color].V*Color_Max/255,Chaine);
+  Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+  Formate_composante(Principal_Palette[Fore_color].B*Color_Max/255,Chaine);
+  Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
 
   Print_dans_fenetre(129,58,"Color number:",CM_Fonce,CM_Clair);
   Num2str(Fore_color,Chaine,3);
@@ -787,7 +855,7 @@ void Bouton_Palette(void)
 
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
 
-  Fenetre_Definir_bouton_normal(96,32,29,14,"HSV"    ,1,1,SDLK_n);   // 24
+  Fenetre_Definir_bouton_normal(96,32,29,14,"HSL"    ,1,1,SDLK_n);   // 24
   Fenetre_Definir_bouton_normal(96,47,29,14,"Srt"    ,1,1,SDLK_o);   // 25
   // Affichage du facteur de réduction de la palette
   Num2str(Reduce_Nb_couleurs,Chaine,3);
@@ -922,6 +990,7 @@ void Bouton_Palette(void)
 
                   // Affichage dans le block de visu de la couleur en cours
                   Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+                  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
                 }
 
                 // On tagge le bloc (ou la couleur)
@@ -938,112 +1007,130 @@ void Bouton_Palette(void)
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-	  if(Palette_mode_RGB)
-	  {
-	      Modifier_Rouge(Fore_color,63-Jauge_rouge->Position,Palette_de_travail);
-	      Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
-	  } 
-	  else
-	  {
-	      byte h,l,s;
-
-	      DEBUG("ra",Palette_de_travail[Fore_color].R);
-	      DEBUG("ga",Palette_de_travail[Fore_color].V);
-	      DEBUG("ba",Palette_de_travail[Fore_color].B);
-	      rgb2hl(Palette_de_travail[Fore_color].R*4,Palette_de_travail[Fore_color].V*4,Palette_de_travail[Fore_color].B*4,&h,&l,&s);
-	      DEBUG("h",h);
-	      DEBUG("l",l);
-	      DEBUG("s",s);
-	      h=(63-Jauge_rouge->Position)*4; // Enlever le *4 quand le slider ira de 0 à 255 comme il faut
-	      HLStoRGB(h,l,s,&Palette_de_travail[Fore_color].R,&Palette_de_travail[Fore_color].V,&Palette_de_travail[Fore_color].B);
-	      
-	      Palette_de_travail[Fore_color].R /= 4; // On ne compte que de 0 à 63 ici
-	      Palette_de_travail[Fore_color].V /= 4; // On ne compte que de 0 à 63 ici
-	      Palette_de_travail[Fore_color].B /= 4; // On ne compte que de 0 à 63 ici
-
-	      DEBUG("rb",Palette_de_travail[Fore_color].R);
-	      DEBUG("gb",Palette_de_travail[Fore_color].V);
-	      DEBUG("bb",Palette_de_travail[Fore_color].B);
-	      Num2str((int)h>>2,Chaine,2);
-	  }
-          Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
+          if(Palette_mode_RGB)
+          {
+            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
+          } 
+          else
+          {
+            HSLtoRGB(
+              255-Jauge_rouge->Position,
+              255-Jauge_verte->Position,
+              255-Jauge_bleue->Position,
+              &Palette_de_travail[Fore_color].R,
+              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].B);
+            Formate_composante((int)255-Jauge_rouge->Position,Chaine);
+          }
+          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
         }
         else
         {
+          if(Palette_mode_RGB)
+          {
           for (i=Debut_block; i<=Fin_block; i++)
-            Modifier_Rouge(i,Palette_temporaire[i].R+63-Jauge_rouge->Position,Palette_de_travail);
+              Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+          }
+          else
+          {
+            for (i=Debut_block; i<=Fin_block; i++)
+              Modifier_HSL(
+                Palette_temporaire,
+                Palette_de_travail,
+                i,
+                Color_Max-Jauge_rouge->Position,
+                Color_Max-Jauge_verte->Position,
+                Color_Max-Jauge_bleue->Position
+                );
+          }
 
-          if (Jauge_rouge->Position>63)
+          if (Jauge_rouge->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_rouge->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_rouge->Position<63)
+          else if (Jauge_rouge->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_rouge->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
 
         }
 
         Il_faut_remapper=1;
 
         Afficher_curseur();
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         break;
       case  3 : // Jauge verte
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-	  if(Palette_mode_RGB)
-	  {
-	      Modifier_Vert (Fore_color,63-Jauge_verte->Position,Palette_de_travail);
-	      Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
-	  } 
-	  else
-	  {
-	      byte h,l,s;
-
-	      rgb2hl(Palette_de_travail[Fore_color].R,Palette_de_travail[Fore_color].V,Palette_de_travail[Fore_color].B,&h,&l,&s);
-	      l=(63-Jauge_verte->Position)*4; // Mettre +1 quand on aura modifié la plage du slider
-	      HLStoRGB(h,l,s,&Palette_de_travail[Fore_color].R,&Palette_de_travail[Fore_color].V,&Palette_de_travail[Fore_color].B);
-	      
-	      Num2str((int)h>>2,Chaine,2);
-	  }
-          Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
-          Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
+          if(Palette_mode_RGB)
+          {
+            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+          } 
+          else
+          {
+            HSLtoRGB(
+              255-Jauge_rouge->Position,
+              255-Jauge_verte->Position,
+              255-Jauge_bleue->Position,
+              &Palette_de_travail[Fore_color].R,
+              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].B);
+            Formate_composante((int)255-Jauge_verte->Position,Chaine);
+          }
+          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
         }
         else
         {
+          if(Palette_mode_RGB)
+          {
+            for (i=Debut_block; i<=Fin_block; i++)
+              Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+          }
+          else
+          {
           for (i=Debut_block; i<=Fin_block; i++)
-            Modifier_Vert (i,Palette_temporaire[i].V+63-Jauge_verte->Position,Palette_de_travail);
+              Modifier_HSL(
+                Palette_temporaire,
+                Palette_de_travail,
+                i,
+                Color_Max-Jauge_rouge->Position,
+                Color_Max-Jauge_verte->Position,
+                Color_Max-Jauge_bleue->Position
+                );
+          }
 
-          if (Jauge_verte->Position>63)
+          if (Jauge_verte->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_verte->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_verte->Position<63)
+          else if (Jauge_verte->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_verte->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
         }
 
         Il_faut_remapper=1;
@@ -1056,33 +1143,62 @@ void Bouton_Palette(void)
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-          Modifier_Bleu (Fore_color,63-Jauge_bleue->Position,Palette_de_travail);
-          Num2str(Palette_de_travail[Fore_color].B,Chaine,2);
-          Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+          if(Palette_mode_RGB)
+          {
+            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
+          } 
+          else
+          {
+            HSLtoRGB(
+              255-Jauge_rouge->Position,
+              255-Jauge_verte->Position,
+              255-Jauge_bleue->Position,
+              &Palette_de_travail[Fore_color].R,
+              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].B);
+            Formate_composante((int)255-Jauge_bleue->Position,Chaine);
+          }          
+          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
         }
         else
         {
+          if(Palette_mode_RGB)
+          {
           for (i=Debut_block; i<=Fin_block; i++)
-            Modifier_Bleu(i,Palette_temporaire[i].B+63-Jauge_bleue->Position,Palette_de_travail);
+              Modifier_Bleu(i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+          }
+          else
+          {
+            for (i=Debut_block; i<=Fin_block; i++)
+              Modifier_HSL(
+                Palette_temporaire,
+                Palette_de_travail,
+                i,
+                Color_Max-Jauge_rouge->Position,
+                Color_Max-Jauge_verte->Position,
+                Color_Max-Jauge_bleue->Position
+                );
+          }
 
-          if (Jauge_bleue->Position>63)
+          if (Jauge_bleue->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_bleue->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_bleue->Position<63)
+          else if (Jauge_bleue->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_bleue->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
         }
 
         Il_faut_remapper=1;
@@ -1116,7 +1232,7 @@ void Bouton_Palette(void)
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
         // On prépare la "modifiabilité" des nouvelles couleurs
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1174,7 +1290,7 @@ void Bouton_Palette(void)
 
           Il_faut_remapper=1;
 
-		  Set_palette(Palette_de_travail);
+          Set_palette(Palette_de_travail);
 
           Afficher_curseur();
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
@@ -1250,7 +1366,7 @@ void Bouton_Palette(void)
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
         // On prépare la "modifiabilité" des nouvelles couleurs
 
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
 
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1340,6 +1456,8 @@ void Bouton_Palette(void)
         break;
 
       case 18 : // [+]
+       if (!Palette_mode_RGB)
+          break;
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
@@ -1347,25 +1465,25 @@ void Bouton_Palette(void)
           {
             (Jauge_rouge->Position)--;
             Fenetre_Dessiner_jauge(Jauge_rouge);
-            Modifier_Rouge(Fore_color,63-Jauge_rouge->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
-            Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
+            Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
           }
           if (Jauge_verte->Position)
           {
             (Jauge_verte->Position)--;
             Fenetre_Dessiner_jauge(Jauge_verte);
-            Modifier_Vert (Fore_color,63-Jauge_verte->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
-            Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+            Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
           }
           if (Jauge_bleue->Position)
           {
             (Jauge_bleue->Position)--;
             Fenetre_Dessiner_jauge(Jauge_bleue);
-            Modifier_Bleu (Fore_color,63-Jauge_bleue->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].B,Chaine,2);
-            Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
+            Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
           }
         }
         else
@@ -1388,122 +1506,124 @@ void Bouton_Palette(void)
 
           for (i=Debut_block; i<=Fin_block; i++)
           {
-            Modifier_Rouge(i,Palette_temporaire[i].R+63-Jauge_rouge->Position,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].V+63-Jauge_verte->Position,Palette_de_travail);
-            Modifier_Bleu (i,Palette_temporaire[i].B+63-Jauge_bleue->Position,Palette_de_travail);
+            Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
           }
 
           // -- Rouge --
-          if (Jauge_rouge->Position>63)
+          if (Jauge_rouge->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_rouge->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_rouge->Position<63)
+          else if (Jauge_rouge->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_rouge->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
 
 
           // -- Vert --
-          if (Jauge_verte->Position>63)
+          if (Jauge_verte->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_verte->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_verte->Position<63)
+          else if (Jauge_verte->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_verte->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
 
 
           // -- Bleu --
-          if (Jauge_bleue->Position>63)
+          if (Jauge_bleue->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_bleue->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_bleue->Position<63)
+          else if (Jauge_bleue->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_bleue->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
         }
 
         Il_faut_remapper=1;
 
         Afficher_curseur();
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         break;
 
       case 19 : // [-]
+        if (!Palette_mode_RGB)
+          break;
         Effacer_curseur();
         if (Debut_block==Fin_block)
         {
-          if (Jauge_rouge->Position<63)
+          if (Jauge_rouge->Position<Color_Max)
           {
             (Jauge_rouge->Position)++;
             Fenetre_Dessiner_jauge(Jauge_rouge);
-            Modifier_Rouge(Fore_color,63-Jauge_rouge->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
-            Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
+            Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
           }
-          if (Jauge_verte->Position<63)
+          if (Jauge_verte->Position<Color_Max)
           {
             (Jauge_verte->Position)++;
             Fenetre_Dessiner_jauge(Jauge_verte);
-            Modifier_Vert (Fore_color,63-Jauge_verte->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
-            Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+            Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
           }
-          if (Jauge_bleue->Position<63)
+          if (Jauge_bleue->Position<Color_Max)
           {
             (Jauge_bleue->Position)++;
             Fenetre_Dessiner_jauge(Jauge_bleue);
-            Modifier_Bleu (Fore_color,63-Jauge_bleue->Position,Palette_de_travail);
-            Num2str(Palette_de_travail[Fore_color].B,Chaine,2);
-            Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
+            Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
           }
         }
         else
         {
-          if (Jauge_rouge->Position<126)
+          if (Jauge_rouge->Position<(Color_Max*2))
           {
             (Jauge_rouge->Position)++;
             Fenetre_Dessiner_jauge(Jauge_rouge);
           }
-          if (Jauge_verte->Position<126)
+          if (Jauge_verte->Position<(Color_Max*2))
           {
             (Jauge_verte->Position)++;
             Fenetre_Dessiner_jauge(Jauge_verte);
           }
-          if (Jauge_bleue->Position<126)
+          if (Jauge_bleue->Position<(Color_Max*2))
           {
             (Jauge_bleue->Position)++;
             Fenetre_Dessiner_jauge(Jauge_bleue);
@@ -1511,78 +1631,78 @@ void Bouton_Palette(void)
 
           for (i=Debut_block; i<=Fin_block; i++)
           {
-            Modifier_Rouge(i,Palette_temporaire[i].R+63-Jauge_rouge->Position,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].V+63-Jauge_verte->Position,Palette_de_travail);
-            Modifier_Bleu (i,Palette_temporaire[i].B+63-Jauge_bleue->Position,Palette_de_travail);
+            Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
           }
 
           // -- Rouge --
-          if (Jauge_rouge->Position>63)
+          if (Jauge_rouge->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_rouge->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_rouge->Position<63)
+          else if (Jauge_rouge->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_rouge->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
 
 
           // -- Vert --
-          if (Jauge_verte->Position>63)
+          if (Jauge_verte->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_verte->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_verte->Position<63)
+          else if (Jauge_verte->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_verte->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
 
 
           // -- Bleu --
-          if (Jauge_bleue->Position>63)
+          if (Jauge_bleue->Position>Color_Max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(63-Jauge_bleue->Position),Chaine,3);
+            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
             Chaine[0]='-';
           }
-          else if (Jauge_bleue->Position<63)
+          else if (Jauge_bleue->Position<Color_Max)
           {
             // Jauge dans les positifs:
-            Num2str(  63-Jauge_bleue->Position ,Chaine,3);
+            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
             Chaine[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"± 0");
+            strcpy(Chaine,"±  0");
           }
-          Print_dans_fenetre(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
         }
 
         Il_faut_remapper=1;
 
         Afficher_curseur();
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         break;
 
       case 20 : // Negative
@@ -1591,12 +1711,12 @@ void Bouton_Palette(void)
         // Negative
         for (i=Debut_block;i<=Fin_block;i++)
         {
-          Modifier_Rouge(i,63-Palette_de_travail[i].R,Palette_de_travail);
-          Modifier_Vert (i,63-Palette_de_travail[i].V,Palette_de_travail);
-          Modifier_Bleu (i,63-Palette_de_travail[i].B,Palette_de_travail);
+          Modifier_Rouge(i,255-Palette_de_travail[i].R,Palette_de_travail);
+          Modifier_Vert (i,255-Palette_de_travail[i].V,Palette_de_travail);
+          Modifier_Bleu (i,255-Palette_de_travail[i].B,Palette_de_travail);
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
@@ -1641,7 +1761,7 @@ void Bouton_Palette(void)
           Afficher_curseur();
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
-		Set_palette(Palette_de_travail);
+        Set_palette(Palette_de_travail);
         memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
 
         Il_faut_remapper=1;
@@ -1671,74 +1791,81 @@ void Bouton_Palette(void)
         Afficher_curseur();
         break;
 
-	case 24 : // HSV <> RGB
-	    // TODO unfinished !
-	    if(Palette_mode_RGB)
-	    {
-		// On passe en HSV
-		Print_dans_fenetre(184,71,"H",CM_Fonce,CM_Clair);
-		Print_dans_fenetre(211,71,"S",CM_Fonce,CM_Clair);
-		Print_dans_fenetre(238,71,"V",CM_Fonce,CM_Clair);
-	    }
-	    else
-	    {
-		// On passe en RGB
-		Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
-		Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
-		Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
-	    }
+      case 24 : // HSL <> RGB
+        
+        // Acte les changements en cours sur une ou plusieurs couleurs
+        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
 
-	    Palette_mode_RGB = !Palette_mode_RGB ;
-	break;
+        Palette_mode_RGB = !Palette_mode_RGB;
 
-	case 25 : // Sort palette
-	{
-	    byte h = 0, l = 0, s=0;
-	    byte oh=0,ol=0,os=0; // Valeur pour la couleur précédente
-	    int swap=1;
+        if(! Palette_mode_RGB)
+        {
+          // On passe en HSL
+          Print_dans_fenetre(184,71,"H",CM_Fonce,CM_Clair);
+          Print_dans_fenetre(211,71,"S",CM_Fonce,CM_Clair);
+          Print_dans_fenetre(238,71,"L",CM_Fonce,CM_Clair);
+          Unite_Composantes(256);
+        }
+        else
+        {
+          // On passe en RGB
+          Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
+          Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
+          Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
+          Unite_Composantes(Graduations_RGB);
+        }
+        Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,(Debut_block!=Fin_block),Palette_de_travail);
+      break;
 
-	    while(swap==1)
-	    {
-			swap=0;
-			h=0;l=0;s=0;
-			for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
-			{
-			    oh=h; ol=l; os=s;
-			    // On trie par Chrominance (H) et Luminance (L)
-			    rgb2hl(Palette_de_travail[Couleur_temporaire].R,
-				    Palette_de_travail[Couleur_temporaire].V,
-				    Palette_de_travail[Couleur_temporaire].B,&h,&l,&s);
-	
-			    if(
-				    ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
-				    || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
-					&& (h<oh || (h==oh && l<ol))))		// Dans ce cas on décide avec chroma puis lumi
-			    {
-				// On échange la couleur avec la précédente
-				Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
-				swap=1;
-			    }
-			}
-	    }
+      case 25 : // Sort palette
+      {
+        byte h = 0, l = 0, s=0;
+        byte oh=0,ol=0,os=0; // Valeur pour la couleur précédente
+        int swap=1;
+
+        while(swap==1)
+        {
+          swap=0;
+          h=0;l=0;s=0;
+          for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
+          {
+            oh=h; ol=l; os=s;
+            // On trie par Chrominance (H) et Luminance (L)
+            RGBtoHSL(Palette_de_travail[Couleur_temporaire].R,
+            Palette_de_travail[Couleur_temporaire].V,
+            Palette_de_travail[Couleur_temporaire].B,&h,&s,&l);
+
+            if(
+              ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
+              || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
+              && (h<oh || (h==oh && l<ol))))  // Dans ce cas on décide avec chroma puis lumi
+            {
+              // On échange la couleur avec la précédente
+              Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
+              swap=1;
+            }
+          }
+        }
         
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(Palette_de_travail);
-	    
+      
         Il_faut_remapper=1;
-	}
-	break;
+      }
+      break;
     }
 
 
     if (!Mouse_K)
     {
-	switch (Touche)
-	{
-	    case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
-		if (Debut_block==Fin_block)
-		{
-		    Fore_color--;
+      switch (Touche)
+      {
+        case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
+          if (Debut_block==Fin_block)
+          {
+            Fore_color--;
             Premiere_couleur--;
             Derniere_couleur--;
             Debut_block--;
@@ -1751,6 +1878,7 @@ void Bouton_Palette(void)
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
             Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+            UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
             Afficher_curseur();
           }
           break;
@@ -1771,6 +1899,7 @@ void Bouton_Palette(void)
             Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
             // Affichage dans le block de visu de la couleur en cours
             Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+            UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
             Afficher_curseur();
           }
           break;
@@ -1786,6 +1915,7 @@ void Bouton_Palette(void)
           Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*157),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
           Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
           Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
+          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
           Afficher_curseur();
           break;
 
@@ -1828,6 +1958,7 @@ void Bouton_Palette(void)
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*157),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
+                UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
               }
             }
             else
@@ -1841,32 +1972,12 @@ void Bouton_Palette(void)
               Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
 
               // Affichage des jauges
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
-
-              Jauge_rouge->Nb_elements=64;
-              Jauge_rouge->Position   =63-Palette_de_travail[Fore_color].R;
-              Calculer_hauteur_curseur_jauge(Jauge_rouge);
-              Fenetre_Dessiner_jauge(Jauge_rouge);
-              Num2str(Palette_de_travail[Fore_color].R,Chaine,2);
-              Print_dans_fenetre(180,172,Chaine,CM_Noir,CM_Clair);
-
-              Jauge_verte->Nb_elements=64;
-              Jauge_verte->Position   =63-Palette_de_travail[Fore_color].V;
-              Calculer_hauteur_curseur_jauge(Jauge_verte);
-              Fenetre_Dessiner_jauge(Jauge_verte);
-              Num2str(Palette_de_travail[Fore_color].V,Chaine,2);
-              Print_dans_fenetre(207,172,Chaine,CM_Noir,CM_Clair);
-
-              Jauge_bleue->Nb_elements=64;
-              Jauge_bleue->Position   =63-Palette_de_travail[Fore_color].B;
-              Calculer_hauteur_curseur_jauge(Jauge_bleue);
-              Fenetre_Dessiner_jauge(Jauge_bleue);
-              Num2str(Palette_de_travail[Fore_color].B,Chaine,2);
-              Print_dans_fenetre(234,172,Chaine,CM_Noir,CM_Clair);
+              Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,0,Palette_de_travail);
 
               // Affichage dans le block de visu de la couleur en cours
               Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-
+              UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
+              
               memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
               memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
             }
@@ -1893,7 +2004,7 @@ void Bouton_Palette(void)
         Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*24,Menu_Facteur_Y*72,Back_color);
         Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
 
-      	UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+82*Menu_Facteur_Y,Menu_Facteur_X*16*10,Menu_Facteur_Y*5*16);
+        UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+82*Menu_Facteur_Y,Menu_Facteur_X*16*10,Menu_Facteur_Y*5*16);
 
         Afficher_curseur();
         Il_faut_remapper=0;

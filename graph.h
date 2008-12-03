@@ -65,6 +65,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char C
 void Print_dans_menu(char * Chaine, short Position);
 void Print_coordonnees(void);
 void Print_nom_fichier(void);
+void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
 
 byte Aucun_effet(word X,word Y,byte Couleur);
 byte Effet_Shade(word X,word Y,byte Couleur);

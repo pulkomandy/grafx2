@@ -81,9 +81,9 @@ void Set_palette(T_Palette Palette)
   SDL_Color PaletteSDL[256];
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=(Palette[i].R<<2) + (Palette[i].R>>4); //Les couleurs VGA ne vont que de 0 à 63
-    PaletteSDL[i].g=(Palette[i].V<<2) + (Palette[i].V>>4);
-    PaletteSDL[i].b=(Palette[i].B<<2) + (Palette[i].B>>4);
+    PaletteSDL[i].r=Palette[i].R;
+    PaletteSDL[i].g=Palette[i].V;
+    PaletteSDL[i].b=Palette[i].B;
   }
   //SDL_PHYSPAL|
   SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
@@ -92,9 +92,9 @@ void Set_palette(T_Palette Palette)
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 {
   SDL_Color comp;
-  comp.r=Rouge << 2;
-  comp.g=Vert << 2;
-  comp.b=Bleu << 2;
+  comp.r=Rouge;
+  comp.g=Vert;
+  comp.b=Bleu;
   SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
 }
 
@@ -638,9 +638,9 @@ void Palette_64_to_256(T_Palette Palette)
   int i;
   for(i=0;i<256;i++)
   {
-    Palette[i].R = Palette[i].R << 2;
-    Palette[i].V = Palette[i].V << 2;
-    Palette[i].B = Palette[i].B << 2;
+    Palette[i].R = (Palette[i].R << 2)|(Palette[i].R >> 4);
+    Palette[i].V = (Palette[i].V << 2)|(Palette[i].V >> 4);
+    Palette[i].B = (Palette[i].B << 2)|(Palette[i].B >> 4);
   }
 }
 
