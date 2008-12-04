@@ -67,3 +67,4 @@ short Fenetre_Bouton_clicke(void);
 int Numero_bouton_sous_souris(void);
 short Fenetre_Numero_bouton_clicke(void);
 void Remappe_fond_fenetres(byte * Table_de_conversion, int Min_Y, int Max_Y);
+void Pixel_fond(int Pos_X, int Pos_Y, byte Couleur);

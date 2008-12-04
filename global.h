@@ -357,6 +357,9 @@ GLOBAL struct Fenetre_Bouton_special  * Pile_Fenetre_Liste_boutons_special[8];
 GLOBAL int Pile_Fenetre_Attribut1[8];
 #define Fenetre_Attribut1 Pile_Fenetre_Attribut1[Fenetre-1]
 
+// Cette variable sert à stocker 2 informations:
+// - Sur le click d'un scroller, la position active (0-n)
+// - Sur le click d'une palette, le numero de couleur (0-255).
 GLOBAL int Pile_Fenetre_Attribut2[8];
 #define Fenetre_Attribut2 Pile_Fenetre_Attribut2[Fenetre-1]
 

@@ -151,6 +151,11 @@ void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
     Afficher_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_Y));
   free(Buffer);
 }
+// Ecrit un pixel dans un fond de fenêtre
+void Pixel_fond(int Pos_X, int Pos_Y, byte Couleur)
+{
+  (Fond_fenetre[0][Pos_X+Pos_Y*Fenetre_Largeur*Menu_Facteur_X])=Couleur;
+}
 
 
 
@@ -1477,29 +1482,33 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
   {
     Get_input();
 
-    if ( (Mouse_K==A_GAUCHE) &&
-         (
-           (
-             (Fenetre_click_dans_zone(Debut_X,Debut_Y,Fin_X,Fin_Y)) &&
-             ( (  ((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-Enreg->Pos_X-1) % 10 >= 5 )
-           )
-           ||
-           (
-             (Mouse_X<Fenetre_Pos_X) || (Mouse_Y<Fenetre_Pos_Y) ||
-             (Mouse_X>=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) ||
-             (Mouse_Y>=Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y))
-           )
-         )
-       )
+    if (Mouse_K==A_GAUCHE)
     {
-      Attendre_fin_de_click();
-      Effacer_curseur();
-      Couleur_choisie=Lit_pixel(Mouse_X,Mouse_Y);
-      Forme_curseur=FORME_CURSEUR_FLECHE;
-      Cacher_curseur=Ancien_Cacher_curseur;
-      Loupe_Mode=Ancien_Loupe_Mode;
-      Afficher_curseur();
-      return Couleur_choisie;
+      if (Fenetre_click_dans_zone(Debut_X,Debut_Y,Fin_X,Fin_Y))
+      {
+        Attendre_fin_de_click();
+        Effacer_curseur();
+        Couleur_choisie=(((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Enreg->Pos_X+2)) / 10 * 16 +
+        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(Enreg->Pos_Y+3)) / 5;
+        Forme_curseur=FORME_CURSEUR_FLECHE;
+        Cacher_curseur=Ancien_Cacher_curseur;
+        Loupe_Mode=Ancien_Loupe_Mode;
+        Afficher_curseur();
+        return Couleur_choisie;
+      }
+      if ((Mouse_X<Fenetre_Pos_X) || (Mouse_Y<Fenetre_Pos_Y) ||
+          (Mouse_X>=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) ||
+          (Mouse_Y>=Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) )
+      {
+        Attendre_fin_de_click();
+        Effacer_curseur();
+        Couleur_choisie=Lit_pixel(Mouse_X,Mouse_Y);
+        Forme_curseur=FORME_CURSEUR_FLECHE;
+        Cacher_curseur=Ancien_Cacher_curseur;
+        Loupe_Mode=Ancien_Loupe_Mode;
+        Afficher_curseur();
+        return Couleur_choisie;
+      }
     }
 
     if ((Mouse_K==A_DROITE) || (Touche==SDLK_ESCAPE))
@@ -1774,7 +1783,9 @@ short Fenetre_Numero_bouton_clicke(void)
   {
     if (Fenetre_click_dans_zone(Temp2->Pos_X+5,Temp2->Pos_Y+3,Temp2->Pos_X+160,Temp2->Pos_Y+82))
     {
-      if ( (((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Temp2->Pos_X+1)) % 10 >= 5 )
+      // On stocke dans Attribut2 le numero de couleur cliqué
+      Fenetre_Attribut2 = (((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Temp2->Pos_X+2)) / 10 * 16 +
+        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(Temp2->Pos_Y+3)) / 5;
         return Temp2->Numero;
     }
   }

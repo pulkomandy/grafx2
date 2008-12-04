@@ -34,13 +34,6 @@
 #include "clavier.h"
 #include "sdlscreen.h"
 
-// Gestion du mode texte de départ (pour pouvoir y retourner en cas de problème
-byte Recuperer_nb_lignes(void)
-{
-  puts("Recuperer_nb_lignes non implémenté!\n");
-  return 0;
-}
-
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {
   int Nombre_De_Pixels=0;
@@ -147,7 +140,7 @@ void Effacer_image_courante(byte Couleur)
 
 void Sensibilite_souris(__attribute__((unused)) word X,__attribute__((unused)) word Y)
 {
-  puts("Sensibilite_souris non implémenté!");
+  
 }
 
 void Get_input(void)

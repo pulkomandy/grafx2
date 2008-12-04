@@ -578,7 +578,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
           Effacer_curseur();
-          Couleur_taggee=Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_taggee=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
           Table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Mouse_K==A_GAUCHE)?CM_Noir:CM_Clair);
           Afficher_curseur();
@@ -1901,7 +1901,7 @@ void Bouton_Degrades(void)
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
           Effacer_curseur();
-          Couleur_temporaire=Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
 
           if (!Ancien_Mouse_K)
           {
@@ -4777,7 +4777,7 @@ void Bouton_Spray_Menu(void)
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
 
           // Mettre la couleur sélectionnée à jour suivant le click
-          Couleur_selectionnee=Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_selectionnee=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==2)
             Spray_Multi_flow[Couleur_selectionnee]=0;
           else

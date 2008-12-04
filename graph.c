@@ -313,8 +313,8 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
   word Fin_X,Fin_Y;
   word Largeur;
   word Hauteur;
-  word Coin_X=Fenetre_Pos_X+Fenetre_Largeur; // |_ Coin bas-droit
-  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur; // |  de la fenêtre +1
+  word Coin_X=Fenetre_Pos_X+Fenetre_Largeur*Menu_Facteur_X; // |_ Coin bas-droit
+  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur*Menu_Facteur_Y; // |  de la fenêtre +1
 
 
   if (Config.Couleurs_separees)
@@ -390,10 +390,25 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
           }
         }
       }
+      {
+        // Affichage du bloc directement dans le "buffer de fond" de la fenetre.
+        // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
+        short Pos_X;
+        short Pos_Y;
+        short Deb_X; // besoin d'une variable signée
+        short Deb_Y; // besoin d'une variable signée
+        // Attention aux unités
+        Deb_X = ((short)Debut_X - (short)Fenetre_Pos_X);
+        Deb_Y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
+        
+        for (Pos_Y=Deb_Y;Pos_Y<(Deb_Y+Hauteur)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
+          for (Pos_X=Deb_X;Pos_X<(Deb_X+Largeur)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
+            if (Pos_X>=0&&Pos_Y>=0)
+              Pixel_fond(Pos_X,Pos_Y,Vraie_couleur);
+      }
     }
   }
-  UpdateRect((LARGEUR_MENU+1)*Menu_Facteur_X,Menu_Ordonnee,Largeur,Hauteur);
-//    UpdateRect(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
+  UpdateRect(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee_avant_fenetre,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
 }
 
 
@@ -429,17 +444,16 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
       Remap_screen(0, Menu_Ordonnee_avant_fenetre,
                    Largeur_ecran, Hauteur_ecran-Menu_Ordonnee_avant_fenetre,
                    Table_de_conversion);
+      // Remappage de la partie du fond de la fenetre qui cacherait le menu...
+      Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
+      /*
+         Il faudrait peut-être remapper les pointillés délimitant l'image.
+         Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
+         Mais de toutes façons, c'est franchement facultatif...
+      */
       // On passe la table juste pour ne rafficher que les couleurs modifiées
       Afficher_palette_du_menu_en_evitant_la_fenetre(Table_de_conversion);
     }
-    /*
-       Il faudrait peut-être remapper les pointillés délimitant l'image.
-       Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
-       Mais de toutes façons, c'est franchement facultatif...
-    */
-    // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-    if (Menu_visible_avant_fenetre)
-      Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
   }
   
 }

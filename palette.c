@@ -794,6 +794,7 @@ void Bouton_Palette(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*206),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
   // Jauges de couleur
+  Palette_mode_RGB=1;
   Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
   Jauge_rouge=Fenetre_Liste_boutons_scroller;
   Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].V*Color_Max/255);// 3
@@ -855,8 +856,8 @@ void Bouton_Palette(void)
 
   Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
 
-  Fenetre_Definir_bouton_normal(96,32,29,14,"HSL"    ,1,1,SDLK_n);   // 24
-  Fenetre_Definir_bouton_normal(96,47,29,14,"Srt"    ,1,1,SDLK_o);   // 25
+  Fenetre_Definir_bouton_normal(96,32,29,14,"HSL"    ,1,1,SDLK_h);   // 24
+  Fenetre_Definir_bouton_normal(96,47,29,14,"Srt"    ,1,1,SDLK_s);   // 25
   // Affichage du facteur de réduction de la palette
   Num2str(Reduce_Nb_couleurs,Chaine,3);
   Print_dans_fenetre(265,41,Chaine,CM_Noir,CM_Clair);
@@ -890,7 +891,7 @@ void Bouton_Palette(void)
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
           Effacer_curseur();
-          Couleur_temporaire=Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==A_DROITE)
           {
             if (Back_color!=Couleur_temporaire)

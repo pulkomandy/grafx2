@@ -544,7 +544,7 @@ int Menu_Shade(void)
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
           Effacer_curseur();
-          Couleur_temporaire=Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
 
           if (!Ancien_Mouse_K)
           { // On vient de clicker
