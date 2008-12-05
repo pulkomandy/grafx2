@@ -2856,9 +2856,12 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
       case SDLK_BACKSPACE : // Backspace
         *Fichier_recherche=0;
-        if (Principal_Repertoire_courant[3]) // Si on n'est pas à la racine...
-        {                              // ... on va dans le répertoire parent.
+        // Si le choix ".." est bien en tête des propositions...
+        if (!strcmp(Liste_du_fileselect->NomComplet,".."))
+        {                              
+          // On va dans le répertoire parent.
           strcpy(Principal_Nom_fichier,"..");
+          Type_selectionne=1;
           On_a_clicke_sur_OK=1;
         }
         break;
