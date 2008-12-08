@@ -370,29 +370,18 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
 
   // On cherche les mins et les maxs de chaque composante sur la couverture
 
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-  rmin=(c->rmin << to->dec_r); rmax=(c->rmax << to->dec_r);
-  vmin=(c->vmin << to->dec_v); vmax=(c->vmax << to->dec_v);
-  bmin=(c->bmin << to->dec_b); bmax=(c->bmax << to->dec_b);
-  OPASM_Analyser_cluster(to->table,&rmin,&vmin,&bmin,&rmax,&vmax,&bmax,
-                         to->dec_r,to->dec_v,to->dec_b,
-                         (1 << to->dec_r),(1 << to->dec_v),(1 << to->dec_b),
-                         &c->occurences);
-
-#else
-
   int nbocc;
 
-  rmin=c->rmax; rmax=c->rmin;
-  vmin=c->vmax; vmax=c->vmin;
+  // On prédécale tout pour éviter de faire trop de bazar en se forçant à utiliser TO_Get, plus rapide
+  rmin=c->rmax <<16; rmax=c->rmin << 16;
+  vmin=c->vmax << 8; vmax=c->vmin << 8;
   bmin=c->bmax; bmax=c->bmin;
   c->occurences=0;
-  for (r=c->rmin;r<=c->rmax;r++)
-    for (v=c->vmin;v<=c->vmax;v++)
+  for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
+    for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       for (b=c->bmin;b<=c->bmax;b++)
       {
-        nbocc=TO_Get(to,r,v,b);
+	nbocc=to->table[r + v + b]; // TO_Get
         if (nbocc)
         {
           if (r<rmin) rmin=r;
@@ -405,10 +394,8 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
         }
       }
 
-#endif
-
-  c->rmin=rmin; c->rmax=rmax;
-  c->vmin=vmin; c->vmax=vmax;
+  c->rmin=rmin>>16; c->rmax=rmax>>16;
+  c->vmin=vmin>>8; c->vmax=vmax>>8;
   c->bmin=bmin; c->bmax=bmax;
 
   // On regarde la composante qui a la variation la plus grande
@@ -456,18 +443,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
   cumul=0;
   if (teinte==0)
   {
-
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-    OPASM_Split_cluster_Rouge(to->table,
-                              (c->rmin << to->dec_r),(c->vmin << to->dec_v),
-                              (c->bmin << to->dec_b),(c->rmax << to->dec_r),
-                              (c->vmax << to->dec_v),(c->bmax << to->dec_b),
-                              (1 << to->dec_r),(1 << to->dec_v),
-                              (1 << to->dec_b),limite,to->dec_r,&r);
-
-#else
-
     for (r=c->rmin;r<=c->rmax;r++)
     {
       for (v=c->vmin;v<=c->vmax;v++)
@@ -484,8 +459,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
-
-#endif
 
     if (r==c->rmin)
       r++;
@@ -508,17 +481,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
   if (teinte==1)
   {
 
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-    OPASM_Split_cluster_Vert(to->table,
-                             (c->rmin << to->dec_r),(c->vmin << to->dec_v),
-                             (c->bmin << to->dec_b),(c->rmax << to->dec_r),
-                             (c->vmax << to->dec_v),(c->bmax << to->dec_b),
-                             (1 << to->dec_r),(1 << to->dec_v),
-                             (1 << to->dec_b),limite,to->dec_v,&v);
-
-#else
-
     for (v=c->vmin;v<=c->vmax;v++)
     {
       for (r=c->rmin;r<=c->rmax;r++)
@@ -535,8 +497,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
-
-#endif
 
     if (v==c->vmin)
       v++;
@@ -558,17 +518,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
   else
   {
 
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-    OPASM_Split_cluster_Bleu(to->table,
-                             (c->rmin << to->dec_r),(c->vmin << to->dec_v),
-                             (c->bmin << to->dec_b),(c->rmax << to->dec_r),
-                             (c->vmax << to->dec_v),(c->bmax << to->dec_b),
-                             (1 << to->dec_r),(1 << to->dec_v),
-                             (1 << to->dec_b),limite,to->dec_b,&b);
-
-#else
-
     for (b=c->bmin;b<=c->bmax;b++)
     {
       for (v=c->vmin;v<=c->vmax;v++)
@@ -585,8 +534,6 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
-
-#endif
 
     if (b==c->bmin)
       b++;
@@ -1030,91 +977,6 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
   return 0;
 }
 
-
-
-
-
-
-#ifdef OPTIMISATIONS_ASSEMBLEUR
-
-void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 dest,Bitmap24B source,int largeur,int hauteur,struct Composantes * palette,Table_conversion * tc)
-// Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
-// s'en ressert pas, soit on passe à la fonction une copie de travail du
-// bitmap original.
-{
-  Bitmap24B courant;
-  Bitmap256 d;
-  int y;
-
-
-  // On initialise les variables de parcours:
-  courant=source;
-  d      =dest;
-
-  if ((largeur>0) && (hauteur>0))
-  { 
-    if (hauteur>1)
-    {
-      // Traitement de la 1ère ligne à l'avant-dernière
-
-      if (largeur>1)
-      {
-        // Il y a plusieurs colonnes
-        for (y=0;y<hauteur-1;y++)
-        {
-          // Premier pixel de la ligne
-          OPASM_DitherFS_623(d,courant,largeur-2,palette,tc->table,
-                             tc->red_r,tc->red_v,tc->red_b,
-                             tc->nbb_v,tc->nbb_b);
-          courant++;
-          d++;
-          // Pixels interm‚diaires de la ligne
-          if (largeur>2)
-          {
-            OPASM_DitherFS_6123(d,courant,largeur-2,palette,tc->table,
-                                tc->red_r,tc->red_v,tc->red_b,
-                                tc->nbb_v,tc->nbb_b);
-            courant+=largeur-2;
-            d+=largeur-2;
-          }
-          // Dernier pixel de la ligne
-          OPASM_DitherFS_12(d,courant,largeur-2,palette,tc->table,
-                            tc->red_r,tc->red_v,tc->red_b,
-                            tc->nbb_v,tc->nbb_b);
-          courant++;
-          d++;
-        }
-      }
-      else
-      {
-        OPASM_DitherFS_2(d,courant,hauteur-1,palette,tc->table,
-                         tc->red_r,tc->red_v,tc->red_b,
-                         tc->nbb_v,tc->nbb_b);
-        courant+=hauteur-1;
-        d+=hauteur-1;
-      }
-    }
-
-    // Traitement de la derniŠre ligne
-
-    if (largeur>1)
-    {
-      // Il y a plusieurs colonnes
-      OPASM_DitherFS_6(d,courant,largeur-1,palette,tc->table,
-                       tc->red_r,tc->red_v,tc->red_b,
-                       tc->nbb_v,tc->nbb_b);
-      courant+=largeur-1;
-      d+=largeur-1;
-    }
-    // Le dernier pixel
-    OPASM_DitherFS(d,courant,tc->table,
-                   tc->red_r,tc->red_v,tc->red_b,
-                   tc->nbb_v,tc->nbb_b);
-  }
-}
-
-#else
-
 int Valeur_modifiee(int valeur,int modif)
 {
   valeur+=modif;
@@ -1224,8 +1086,6 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   }
 
 }
-
-#endif
 
 
 

@@ -748,7 +748,6 @@ void Loupe_12_0(void)
 
   // On fait de notre mieux pour restaurer l'ancienne opération:
   Demarrer_pile_operation(Operation_avant_interruption);
-  DEBUG("OP",0);
 }
 
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????

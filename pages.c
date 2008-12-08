@@ -714,6 +714,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int Large
       // On ne peut pas démarrer le programme avec ne serait-ce qu'une
       // page de la dimension souhaitée, donc on laisse tout tomber et on
       // le renvoie chier.
+      free(Page);
       Retour=0;
     }
   }

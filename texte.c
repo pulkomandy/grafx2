@@ -88,7 +88,7 @@ int Compare_fontes(T_FONTE * Fonte1, T_FONTE * Fonte2)
 void Ajout_fonte(const char *Nom)
 {
   char * Nom_fonte;
-  T_FONTE * Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
+  T_FONTE * Fonte;
   int Taille=strlen(Nom)+1;
   int Indice;
   
@@ -113,6 +113,8 @@ void Ajout_fonte(const char *Nom)
       Nom[Taille-5]!='.')
     return;
 #endif
+
+  Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
 
   switch (EXTID(tolower(Nom[Taille-4]), tolower(Nom[Taille-3]), tolower(Nom[Taille-2])))
   {
