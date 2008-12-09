@@ -370,13 +370,14 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
 
   // On cherche les mins et les maxs de chaque composante sur la couverture
 
-  int nbocc;
+  // int nbocc;
 
   // On prédécale tout pour éviter de faire trop de bazar en se forçant à utiliser TO_Get, plus rapide
   rmin=c->rmax <<16; rmax=c->rmin << 16;
   vmin=c->vmax << 8; vmax=c->vmin << 8;
   bmin=c->bmax; bmax=c->bmin;
   c->occurences=0;
+  /*
   for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       for (b=c->bmin;b<=c->bmax;b++)
@@ -385,23 +386,102 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
         if (nbocc)
         {
           if (r<rmin) rmin=r;
-          if (r>rmax) rmax=r;
+	  else if (r>rmax) rmax=r;
           if (v<vmin) vmin=v;
-          if (v>vmax) vmax=v;
+	  else if (v>vmax) vmax=v;
           if (b<bmin) bmin=b;
-          if (b>bmax) bmax=b;
+	  else if (b>bmax) bmax=b;
           c->occurences+=nbocc;
         }
       }
+  */
+
+  // On recherche le minimum et le maximum en parcourant le cluster selon chaque composante, 
+  // ça évite des accès mémoires inutiles, de plus chaque boucle est plus petite que la 
+  // précédente puisqu'on connait une borne supplémentaire
+
+  for(r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
+      for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+	  for(b=c->bmin;b<=c->bmax;b++)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		rmin=r;
+		goto RMAX;
+	    }
+	  }
+RMAX:
+  for(r=c->rmax<<16;r>=rmin;r-=1<<16)
+      for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+	  for(b=c->bmin;b<=c->bmax;b++)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		rmax=r;
+		goto VMIN;
+	    }
+	  }
+VMIN:
+  for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+      for(r=rmin;r<=rmax;r+=1<<16)
+	  for(b=c->bmin;b<=c->bmax;b++)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		vmin=v;
+		goto VMAX;
+	    }
+	  }
+VMAX:
+  for(v=c->vmax<<8;v>=vmin;v-=1<<8)
+      for(r=rmin;r<=rmax;r+=1<<16)
+	  for(b=c->bmin;b<=c->bmax;b++)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		vmax=v;
+		goto BMIN;
+	    }
+	  }
+BMIN:
+  for(b=c->bmin;b<=c->bmax;b++)
+      for(r=rmin;r<=rmax;r+=1<<16)
+	  for(v=vmin;v<=vmax;v+=1<<8)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		bmin=b;
+		goto BMAX;
+	    }
+	  }
+BMAX:
+  for(b=c->bmax;b>=bmin;b--)
+      for(r=rmin;r<=rmax;r+=1<<16)
+	  for(v=vmin;v<=vmax;v+=1<<8)
+	  {
+	    if(to->table[r + v + b]) // TO_Get
+	    {
+		bmax=b;
+		goto ENDCRUSH;
+	    }
+	  }
+ENDCRUSH:
+  // Il faut quand même parcourir la partie utile du cluster, pour savoir combien il y a d'occurences
+  for(r=rmin;r<=rmax;r+=1<<16)
+      for(v=vmin;v<=vmax;v+=1<<8)
+	  for(b=bmin;b<=bmax;b++)
+	  {
+	    c->occurences+=to->table[r + v + b]; // TO_Get
+	  }
 
   c->rmin=rmin>>16; c->rmax=rmax>>16;
-  c->vmin=vmin>>8; c->vmax=vmax>>8;
-  c->bmin=bmin; c->bmax=bmax;
+  c->vmin=vmin>>8;  c->vmax=vmax>>8;
+  c->bmin=bmin;     c->bmax=bmax;
 
   // On regarde la composante qui a la variation la plus grande
-  r=((c->rmax-c->rmin)<<to->red_r)*299;
-  v=((c->vmax-c->vmin)<<to->red_v)*587;
-  b=((c->bmax-c->bmin)<<to->red_b)*114;
+  r=(c->rmax-c->rmin)*299;
+  v=(c->vmax-c->vmin)*587;
+  b=(c->bmax-c->bmin)*114;
 
   if (v>=r)
   {
@@ -443,13 +523,13 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
   cumul=0;
   if (teinte==0)
   {
-    for (r=c->rmin;r<=c->rmax;r++)
+    for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     {
-      for (v=c->vmin;v<=c->vmax;v++)
+      for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       {
         for (b=c->bmin;b<=c->bmax;b++)
         {
-          cumul+=TO_Get(to,r,v,b);
+          cumul+=to->table[r + v + b];
           if (cumul>=limite)
             break;
         }
@@ -459,6 +539,9 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
+
+    r>>=16;
+    v>>=8;
 
     if (r==c->rmin)
       r++;
@@ -481,13 +564,13 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
   if (teinte==1)
   {
 
-    for (v=c->vmin;v<=c->vmax;v++)
+    for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
     {
-      for (r=c->rmin;r<=c->rmax;r++)
+      for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
       {
         for (b=c->bmin;b<=c->bmax;b++)
         {
-          cumul+=TO_Get(to,r,v,b);
+          cumul+=to->table[r + v + b];
           if (cumul>=limite)
             break;
         }
@@ -497,6 +580,8 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
+
+    r>>=16; v>>=8;
 
     if (v==c->vmin)
       v++;
@@ -520,11 +605,11 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
 
     for (b=c->bmin;b<=c->bmax;b++)
     {
-      for (v=c->vmin;v<=c->vmax;v++)
+      for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       {
-        for (r=c->rmin;r<=c->rmax;r++)
+        for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
         {
-          cumul+=TO_Get(to,r,v,b);
+          cumul+=to->table[r + v + b];
           if (cumul>=limite)
             break;
         }
@@ -534,6 +619,8 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occure
       if (cumul>=limite)
         break;
     }
+
+    r>>=16; v>>=8;
 
     if (b==c->bmin)
       b++;
@@ -643,21 +730,31 @@ void CS_Get(ClusterSet * cs,Cluster * c)
 {
   int indice;
 
+  // On cherche un cluster que l'on peut couper en deux, donc avec au moins deux valeurs
+  // différentes sur l'une des composantes
   for (indice=0;indice<cs->nb;indice++)
     if ( (cs->clusters[indice].rmin<cs->clusters[indice].rmax) ||
          (cs->clusters[indice].vmin<cs->clusters[indice].vmax) ||
          (cs->clusters[indice].bmin<cs->clusters[indice].bmax) )
       break;
 
+  // On le recopie dans c
   *c=cs->clusters[indice];
+
+  // On décrémente le nombre et on décale tous les clusters suivants
+  // Sachant qu'on va réinsérer juste après, il me semble que ça serait une bonne idée de gérer les clusters 
+  // comme une liste chainée... on n'a aucun accès direct dedans, que des parcours ...
   cs->nb--;
   memcpy((cs->clusters+indice),(cs->clusters+indice+1),(cs->nb-indice)*sizeof(Cluster));
 }
 
 void CS_Set(ClusterSet * cs,Cluster * c)
 {
-  int indice,decalage;
+  int indice;
+  // int decalage;
 
+  // Le tableau des clusters est trié par nombre d'occurences. Donc on cherche la position du premier cluster 
+  // qui est plus grand que le notre
   for (indice=0;indice<cs->nb;indice++)
     if (cs->clusters[indice].occurences<c->occurences)
 /*
@@ -675,11 +772,12 @@ void CS_Set(ClusterSet * cs,Cluster * c)
   if (indice<cs->nb)
   {
     // On distingue ici une insertion plutot qu'un placement en fin de liste.
-    // On doit donc d‚caler les ensembles suivants vers la fin pour se faire
+    // On doit donc décaler les ensembles suivants vers la fin pour se faire
     // une place dans la liste.
 
-    for (decalage=cs->nb;decalage>indice;decalage--)
-      memcpy((cs->clusters+decalage),(cs->clusters+decalage-1),sizeof(Cluster));
+    //for (decalage=cs->nb;decalage>indice;decalage--)
+    //  memcpy((cs->clusters+decalage),(cs->clusters+decalage-1),sizeof(Cluster));
+    memmove(cs->clusters+indice+1,cs->clusters+indice,(cs->nb-indice)*sizeof(Cluster));
   }
 
   cs->clusters[indice]=*c;
