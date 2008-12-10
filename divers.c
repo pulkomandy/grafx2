@@ -154,7 +154,7 @@ void Get_input(void)
 
   if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
   {
-  Gere_Evenement_SDL(&event);
+    Gere_Evenement_SDL(&event);
     switch( event.type)
     {
       case SDL_MOUSEMOTION:

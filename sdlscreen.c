@@ -290,7 +290,6 @@ void Afficher_une_ligne_ecran_SDL (word Pos_X,word Pos_Y,word Largeur,byte * Lig
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
   memcpy(Ecran+Pos_X+Pos_Y*Largeur_ecran,Ligne,Largeur);
-  //UpdateRect(Pos_X,Pos_Y,Largeur,1);
 }
 
 void Afficher_une_ligne_transparente_mono_a_l_ecran_SDL(

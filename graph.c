@@ -1534,29 +1534,26 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
   word  Indice;
   short Pos_X;
   short Pos_Y;
-  unsigned char Caractere;
+  short Caractere;
   short Reel_X;
   short Reel_Y;
-  short Largeur;
-  short Repeat_Menu_Facteur_X;
-  short Repeat_Menu_Facteur_Y;
+  byte Repeat_Menu_Facteur_X;
+  byte Repeat_Menu_Facteur_Y;
 
   Reel_Y=Y;
-  Largeur=strlen(Chaine)*Menu_Facteur_X*8;
   for (Pos_Y=0;Pos_Y<8;Pos_Y++)
   {
     Reel_X=0; // Position dans le buffer
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
-      Caractere=Chaine[Indice];
-      for (Pos_X=0;Pos_X<8;Pos_X++)
+      Caractere=(Chaine[Indice])<<6;
+      for (Pos_X=0;Pos_X<8<<3;Pos_X+=1<<3)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
-          Buffer_de_ligne_horizontale[Reel_X++]=(*(Fonte+(*(Caractere_OEM+Caractere)<<6)+(Pos_X<<3)+Pos_Y)?Couleur_texte:Couleur_fond);
+          Buffer_de_ligne_horizontale[Reel_X++]=Fonte[Caractere+Pos_X+Pos_Y]?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
-      Afficher_ligne(X,Reel_Y++,Largeur,Buffer_de_ligne_horizontale);
+      Afficher_ligne(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
   }
-  UpdateRect(X,Y,Largeur,8*Menu_Facteur_Y); // TODO: pas utile dans Print_Dans_Fenetre, donc voir ou on en a vraiment besoin...
 }
 
   // -- Afficher un caractère dans une fenêtre --
@@ -1622,6 +1619,7 @@ void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Co
 void Print_dans_menu(char * Chaine, short Position)
 {
   Print_general((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,Chaine,CM_Noir,CM_Clair);
+  UpdateRect((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,strlen(Chaine)*8*Menu_Facteur_X,8*Menu_Facteur_Y);
 }
 
   // -- Afficher les coordonnées du pinceau dans le menu --
