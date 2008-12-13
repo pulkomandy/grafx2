@@ -126,11 +126,14 @@ enum CODES_D_ERREURS
   ERREUR_SORRY_SORRY_SORRY      // On le refera plus, promis
 };
 
-  // Les différents types de modes vidéos
+  // Les différents types de pixels
 
-enum TYPES_DE_MODES_VIDEO
+enum PIXEL_RATIO
 {
-    MODE_SDL
+    PIXEL_SIMPLE,
+    PIXEL_WIDE,
+    PIXEL_TALL,
+    PIXEL_DOUBLE
 };
 
   // Les différentes catégories de bouton:

@@ -173,6 +173,9 @@ GLOBAL short Pinceau_Decalage_Y;
 
   // Commandes graphiques
 
+GLOBAL int Pixel_ratio;
+GLOBAL int Pixel_width;
+GLOBAL int Pixel_height;
 GLOBAL fonction_afficheur Pixel;          // Affiche un point à l'écran
 GLOBAL fonction_afficheur Pixel_dans_menu;// Affiche un point dans le menu (ou pas si le menu est invisible)
 GLOBAL fonction_lecteur   Lit_pixel;      // Teste la couleur d'un pixel dans l'écran
@@ -193,7 +196,7 @@ GLOBAL fonction_display_zoom Display_zoomed_screen; // Affiche rapidement toute 
 GLOBAL fonction_display_brush_Color_zoom Display_brush_Color_zoom;
 GLOBAL fonction_display_brush_Mono_zoom  Display_brush_Mono_zoom;
 GLOBAL fonction_display_brush_Color_zoom Clear_brush_zoom;
-
+GLOBAL fonction_affiche_brosse Affiche_brosse;
   // Données sur les dimensions de l'écran
 
 GLOBAL int   Resize_Largeur;      // \__ Positionnées lorsque l'utilisateur tire
@@ -203,7 +206,6 @@ GLOBAL short Ecran_original_X;    // |_ Dimensions de l'écran d'origine de
 GLOBAL short Ecran_original_Y;    // |  l'image qui vient d'être chargée.
 GLOBAL short Largeur_ecran;       // Largeur de l'écran
 GLOBAL short Hauteur_ecran;       // Hauteur de l'écran
-GLOBAL byte Plein_ecran;	  // Indique si on est en mode plein écran ou fenêtré
 GLOBAL short Limite_Haut;         // |
 GLOBAL short Limite_Bas;          // |_ Limites dans lesquelles
 GLOBAL short Limite_Gauche;       // |  on peut écrire

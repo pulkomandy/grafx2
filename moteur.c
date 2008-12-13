@@ -148,7 +148,7 @@ void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
 {
   int Indice;
   for (Indice=0; Indice<Hauteur*Menu_Facteur_Y; Indice++)
-    Afficher_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_Y));
+    Afficher_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_X));
   free(Buffer);
 }
 // Ecrit un pixel dans un fond de fenêtre
@@ -494,8 +494,8 @@ void Gestion_principale(void)
     {
       Effacer_curseur();
       Initialiser_mode_video(Resize_Largeur, Resize_Hauteur, 0);
-      Mode_video[0].Largeur = Largeur_ecran;
-      Mode_video[0].Hauteur = Hauteur_ecran;
+      Mode_video[0].Largeur = Largeur_ecran*Pixel_width;
+      Mode_video[0].Hauteur = Hauteur_ecran*Pixel_height;
       // Remise à zero des variables indiquant le Redimensionnement demandé
       Afficher_menu();
       Afficher_ecran();
@@ -897,14 +897,9 @@ void Gestion_principale(void)
               {
                 Effacer_curseur();
                 Temp_color=Couleur_debut_palette;
-
-
-                if (Config.Couleurs_separees)
-                  Temp=Lit_pixel(Mouse_X,Mouse_Y);
-                else
-                  Temp=Temp_color+
-                       ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)<<3)+
-                       ((((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_X)-2)>>2);
+                Temp=Temp_color+
+                     ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)<<3)+
+                     ((((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)>>2);
 
                 strcpy(Chaine,TITRE_BOUTON[Indice_bouton]);
                 sprintf(Chaine+strlen(Chaine),"%d",Temp);

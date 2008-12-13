@@ -48,6 +48,7 @@ typedef void (* fonction_procsline) (word,word,word,byte *);
 typedef void (* fonction_display_zoom) (word,word,word,byte *);
 typedef void (* fonction_display_brush_Color_zoom) (word,word,word,word,word,word,byte,word,byte *);
 typedef void (* fonction_display_brush_Mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
+typedef void (* fonction_affiche_brosse) (byte *,word,word,word,word,word,word,byte,word);
 
 struct __attribute__ ((__packed__)) Composantes
 {

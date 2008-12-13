@@ -12,7 +12,7 @@ $(OBJDIR)/files.o: files.c const.h struct.h global.h loadsave.h graph.h divers.h
 $(OBJDIR)/gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h \
   setup.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h loadsave.h moteur.h boutons.h \
-  pages.h erreurs.h sdlscreen.h graph.h divers.h
+  pages.h erreurs.h sdlscreen.h graph.h divers.h pxsimple.h pxtall.h
 $(OBJDIR)/init.o: init.c const.h struct.h global.h loadsave.h graph.h boutons.h \
   palette.h aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h \
   files.h setup.h
@@ -32,13 +32,17 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h loadsave.h pages.h graph.h 
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h loadsave.h divers.h \
   graph.h moteur.h readline.h boutons.h pages.h aide.h sdlscreen.h \
   erreurs.h op_c.h
+$(OBJDIR)/pxsimple.o: pxsimple.c global.h struct.h const.h loadsave.h sdlscreen.h \
+  divers.h
+$(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h loadsave.h sdlscreen.h \
+  divers.h pxsimple.h
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h loadsave.h graph.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
   divers.h erreurs.h sdlscreen.h readline.h
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h io.h \
   erreurs.h graph.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \
-  divers.h erreurs.h graph.h
+  erreurs.h graph.h
 $(OBJDIR)/setup.o: setup.c struct.h const.h io.h files.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h loadsave.h graph.h moteur.h \
   divers.h readline.h aide.h sdlscreen.h

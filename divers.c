@@ -159,8 +159,8 @@ void Get_input(void)
     {
       case SDL_MOUSEMOTION:
         //Mouvement de la souris
-        INPUT_Nouveau_Mouse_X = event.motion.x>>Mouse_Facteur_de_correction_X;
-        INPUT_Nouveau_Mouse_Y = event.motion.y>>Mouse_Facteur_de_correction_Y;
+        INPUT_Nouveau_Mouse_X = event.motion.x/Pixel_width;
+        INPUT_Nouveau_Mouse_Y = event.motion.y/Pixel_height;
         break;
       case SDL_MOUSEBUTTONDOWN:
         //Clic sur un des boutons de la souris
@@ -256,8 +256,8 @@ void Get_input(void)
         if(ok)
         {
           SDL_WarpMouse(
-            INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X,
-            INPUT_Nouveau_Mouse_Y<<Mouse_Facteur_de_correction_Y
+            INPUT_Nouveau_Mouse_X*Pixel_width,
+            INPUT_Nouveau_Mouse_Y*Pixel_height
           );
         }
       }
@@ -303,8 +303,8 @@ void Get_input(void)
     if (bl)
     {
       SDL_WarpMouse(
-        INPUT_Nouveau_Mouse_X<<Mouse_Facteur_de_correction_X,
-        INPUT_Nouveau_Mouse_Y<<Mouse_Facteur_de_correction_Y
+        INPUT_Nouveau_Mouse_X*Pixel_width,
+        INPUT_Nouveau_Mouse_Y*Pixel_height
       );
     }
 
@@ -562,8 +562,8 @@ byte Effet_Trame(word X,word Y)
 void Set_mouse_position(void)
 {
     SDL_WarpMouse(
-        Mouse_X << Mouse_Facteur_de_correction_X,
-        Mouse_Y << Mouse_Facteur_de_correction_Y
+        Mouse_X*Pixel_width,
+        Mouse_Y*Pixel_height
     );
 }
 

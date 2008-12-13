@@ -202,6 +202,10 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
         exit(0);
       }
     }
+    else if ( !strcmp(argv[Indice],"/tall") )
+    {
+      Pixel_ratio = PIXEL_TALL;
+    }
     else
     {
       // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
@@ -357,7 +361,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   // On initialise tous les modes vidéo
   Definition_des_modes_video();
-
+  Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
     // Donnée sur la sortie du programme:
   Quit_demande=0;
@@ -508,10 +512,10 @@ void Initialisation_du_programme(int argc,char * argv[])
     Mode_video[Mode_dans_lequel_on_demarre].Hauteur,
     Mode_video[Mode_dans_lequel_on_demarre].Fullscreen);
 
-  Principal_Largeur_image=Largeur_ecran;
-  Principal_Hauteur_image=Hauteur_ecran;
-  Brouillon_Largeur_image=Largeur_ecran;
-  Brouillon_Hauteur_image=Hauteur_ecran;
+  Principal_Largeur_image=Largeur_ecran/Pixel_width;
+  Principal_Hauteur_image=Hauteur_ecran/Pixel_height;
+  Brouillon_Largeur_image=Largeur_ecran/Pixel_width;
+  Brouillon_Hauteur_image=Hauteur_ecran/Pixel_height;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Initialiser_les_listes_de_backups_en_debut_de_programme(Config.Nb_pages_Undo+1,Largeur_ecran,Hauteur_ecran)==0)
     Erreur(ERREUR_MEMOIRE);

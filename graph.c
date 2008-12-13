@@ -43,6 +43,8 @@
 #include "sdlscreen.h"
 #include "graph.h"
 #include "divers.h"
+#include "pxsimple.h"
+#include "pxtall.h"
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
@@ -1059,23 +1061,81 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
       Hauteur_ecran!=Hauteur ||
       Mode_video[Resolution_actuelle].Fullscreen != Fullscreen)
   {
+    switch (Pixel_ratio)
+    {
+        case PIXEL_SIMPLE:
+            Pixel_width=1;
+            Pixel_height=1;
+            Pixel = Pixel_Simple ;
+            Lit_pixel= Lit_Pixel_Simple ;
+            Display_screen = Afficher_partie_de_l_ecran_Simple ;
+            Block = Block_Simple ;
+            Pixel_Preview_Normal = Pixel_Preview_Normal_Simple ;
+            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Simple ;
+            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Simple ;
+            Ligne_verticale_XOR = Ligne_verticale_XOR_Simple ;
+            Display_brush_Color = Display_brush_Color_Simple ;
+            Display_brush_Mono = Display_brush_Mono_Simple ;
+            Clear_brush = Clear_brush_Simple ;
+            Remap_screen = Remap_screen_Simple ;
+            Afficher_ligne = Afficher_une_ligne_ecran_Simple ;
+            Lire_ligne = Lire_une_ligne_ecran_Simple ;
+            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Simple ;
+            Display_brush_Color_zoom = Display_brush_Color_zoom_Simple ;
+            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Simple ;
+            Clear_brush_zoom = Clear_brush_zoom_Simple ;
+            Affiche_brosse = Affiche_brosse_Simple ;
+        break;
+        case PIXEL_TALL:
+            Pixel_width=1;
+            Pixel_height=2;
+            Pixel = Pixel_Tall;
+            Lit_pixel= Lit_Pixel_Tall;
+            Display_screen = Afficher_partie_de_l_ecran_Tall;
+            Block = Block_Tall;
+            Pixel_Preview_Normal = Pixel_Preview_Normal_Tall;
+            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Tall;
+            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Tall;
+            Ligne_verticale_XOR = Ligne_verticale_XOR_Tall;
+            Display_brush_Color = Display_brush_Color_Tall;
+            Display_brush_Mono = Display_brush_Mono_Tall;
+            Clear_brush = Clear_brush_Tall;
+            Remap_screen = Remap_screen_Tall;
+            Afficher_ligne = Afficher_une_ligne_ecran_Tall;
+            Lire_ligne = Lire_une_ligne_ecran_Tall;
+            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Tall;
+            Display_brush_Color_zoom = Display_brush_Color_zoom_Tall;
+            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Tall;
+            Clear_brush_zoom = Clear_brush_zoom_Tall;
+            Affiche_brosse = Affiche_brosse_Tall;
+        break;
+    }
     // Valeurs raisonnables: minimum 320x200
-    if (Largeur < 320)
-      Largeur = 320;
-    if (Hauteur < 200)
-      Hauteur = 200;
+    if (Pixel_width==1 && Pixel_height==1)
+    {
+      if (Largeur < 320)
+        Largeur = 320;
+      if (Hauteur < 200)
+        Hauteur = 200;
+    }
+    else
+    {
+      if (Largeur < 640)
+        Largeur = 640;
+      if (Hauteur < 400)
+        Hauteur = 400;
+    }
     // La largeur doit être un multiple de 4
     Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
+    Set_Mode_SDL(&Largeur, &Hauteur,Fullscreen);
+    Largeur_ecran = Largeur/Pixel_width;
+    Hauteur_ecran = Hauteur/Pixel_height;
 
     // Taille des menus
-    if (Largeur/320 > Hauteur/200)
-      Facteur=Hauteur/200;
+    if (Largeur_ecran/320 > Hauteur_ecran/200)
+      Facteur=Hauteur_ecran/200;
     else
-      Facteur=Largeur/320;
-  
-    Largeur_ecran = Largeur;
-    Hauteur_ecran = Hauteur;
-    Plein_ecran   = Fullscreen;
+      Facteur=Largeur_ecran/320;
 
     switch (Config.Ratio)
     {
@@ -1093,36 +1153,14 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         Menu_Facteur_X=1;
         Menu_Facteur_Y=1;
     }
-
+    if (Pixel_height>Pixel_width)
+      Menu_Facteur_X*=2;
+    else if (Pixel_width>Pixel_height)
+      Menu_Facteur_Y*=2;
     if (Buffer_de_ligne_horizontale)
       free(Buffer_de_ligne_horizontale);
 
-    Buffer_de_ligne_horizontale=(byte *)malloc((Largeur_ecran>Principal_Largeur_image)?Largeur_ecran:Principal_Largeur_image);
-
-    switch (MODE_SDL)
-    {
-        case MODE_SDL:
-            Pixel = Pixel_SDL;
-            Lit_pixel= Lit_Pixel_SDL;
-            Display_screen = Afficher_partie_de_l_ecran_SDL;
-            Block = Block_SDL;
-            Pixel_Preview_Normal = Pixel_Preview_Normal_SDL;
-            Pixel_Preview_Loupe = Pixel_Preview_Loupe_SDL;
-            Ligne_horizontale_XOR = Ligne_horizontale_XOR_SDL;
-            Ligne_verticale_XOR = Ligne_verticale_XOR_SDL;
-            Display_brush_Color = Display_brush_Color_SDL;
-            Display_brush_Mono = Display_brush_Mono_SDL;
-            Clear_brush = Clear_brush_SDL;
-            Remap_screen = Remap_screen_SDL;
-            Afficher_ligne = Afficher_une_ligne_ecran_SDL;
-            Lire_ligne = Lire_une_ligne_ecran_SDL;
-            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_SDL;
-            Display_brush_Color_zoom = Display_brush_Color_zoom_SDL;
-            Display_brush_Mono_zoom = Display_brush_Mono_zoom_SDL;
-            Clear_brush_zoom = Clear_brush_zoom_SDL;
-            Set_Mode_SDL();
-        break;
-    }
+    Buffer_de_ligne_horizontale=(byte *)malloc(Pixel_width*((Largeur_ecran>Principal_Largeur_image)?Largeur_ecran:Principal_Largeur_image));
     
     Set_palette(Principal_Palette);
 
@@ -1359,7 +1397,7 @@ void Encadrer_couleur_menu(byte Couleur)
                 Menu_Facteur_X,Menu_Facteur_Y,
                 ((Indice+Fin_Y)&1)?CM_Blanc:CM_Noir);
 
-        UpdateRect(Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_X,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*4);
+        UpdateRect(Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*4);
       }
     }
   }
@@ -1548,7 +1586,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     {
       Caractere=(Chaine[Indice])<<6;
       for (Pos_X=0;Pos_X<8<<3;Pos_X+=1<<3)
-        for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
+        for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
           Buffer_de_ligne_horizontale[Reel_X++]=Fonte[Caractere+Pos_X+Pos_Y]?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)

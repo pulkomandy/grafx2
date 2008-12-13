@@ -1488,11 +1488,11 @@ void Bouton_Resol(void)
           if (Mouse_K==2)
           {
             // On affecte également les dimensions de l'image:
-            Largeur_choisie=Mode_video[Mode_choisi].Largeur;
+            Largeur_choisie=Mode_video[Mode_choisi].Largeur/Pixel_width;
             Num2str(Largeur_choisie,Chaine,4);
             Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
 
-            Hauteur_choisie=Mode_video[Mode_choisi].Hauteur;
+            Hauteur_choisie=Mode_video[Mode_choisi].Hauteur/Pixel_height;
             Num2str(Hauteur_choisie,Chaine,4);
             Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
           }
@@ -5915,7 +5915,7 @@ void Bouton_Texte()
       Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, AntiAlias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (Nouvelle_Brosse)
       {
-        Affiche_brosse_SDL(
+        Affiche_brosse(
           Nouvelle_Brosse,
           Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
           Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,

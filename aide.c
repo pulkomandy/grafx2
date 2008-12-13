@@ -177,6 +177,8 @@ void Afficher_aide(void)
                 Couleur=CM_Fonce;
             }
             Buffer_de_ligne_horizontale[Position_X++]=Couleur;
+            if (Pixel_width>1)
+              Buffer_de_ligne_horizontale[Position_X++]=Couleur;
           }
       }
       // On la splotche
