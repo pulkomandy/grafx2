@@ -25,7 +25,7 @@ void Permuter_dans_l_image_les_couleurs(byte Couleur_1,byte Couleur_2);
 void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer);
 void Scroll_picture(short Decalage_X,short Decalage_Y);
 void Set_mouse_video_mode_number(void);
-void Get_input(void);
+int  Get_input(void);
 void Set_mouse_position(void);
 void Attendre_fin_de_click(void);
 void Sensibilite_souris(word X,word Y);

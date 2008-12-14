@@ -446,7 +446,7 @@ void Deplacer_Split(void)
       Afficher_curseur();
     }
 
-    Get_input();
+    while(!Get_input())Wait_VBL();
   }
 
   // Effacer la barre en XOR
@@ -487,8 +487,8 @@ void Gestion_principale(void)
 
   do
   {
-    Get_input();
-
+    if(!Get_input())
+    {
     // Redimensionnement demandé
     if (Resize_Largeur || Resize_Hauteur)
     {
@@ -844,6 +844,9 @@ void Gestion_principale(void)
         Afficher_curseur();
       }
     }
+    }
+    else Wait_VBL(); // S'il n'y a pas d'évènement, on ne gère pas tout ça et on attend un peu. La partie en dessous doit être exécutée quand
+		     // même pour les trucs asynchrones, par exemple le spray.
 
     // Gestion de la souris
 
@@ -1475,7 +1478,7 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
 
   for (;;)
   {
-    Get_input();
+    while(!Get_input())Wait_VBL();
 
     if (Mouse_K==A_GAUCHE)
     {
@@ -1564,7 +1567,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
     do
     {
-      Get_input();
+      while(!Get_input())Wait_VBL();
 
       if ((Mouse_X!=Ancien_X) || (Mouse_Y!=Ancien_Y))
       {
@@ -1660,7 +1663,7 @@ void Deplacer_fenetre(short Dx, short Dy)
     Ancien_X=Nouveau_X;
     Ancien_Y=Nouveau_Y;
 
-    Get_input();
+    while(!Get_input())Wait_VBL();
 
     Nouveau_X=Mouse_X-Dx;
     if (Nouveau_X<0)
@@ -1940,7 +1943,7 @@ short Fenetre_Bouton_clicke(void)
 {
   short Bouton;
 
-  Get_input();
+  while(!Get_input())Wait_VBL();
 
   // Gestion des clicks
   if (Mouse_K)

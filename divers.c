@@ -143,14 +143,14 @@ void Sensibilite_souris(__attribute__((unused)) word X,__attribute__((unused)) w
   
 }
 
-void Get_input(void)
+int Get_input(void)
 //Gestion des évènements: mouvement de la souris, clic sur les boutons, et utilisation du clavier.
 {
   SDL_Event event;
+  byte ok;
 
   Touche=0;
-  {
-  byte ok = 0;
+  ok = 0;
 
   if( SDL_PollEvent(&event)) /* Il y a un évènement en attente */
   {
@@ -172,10 +172,12 @@ void Get_input(void)
           INPUT_Nouveau_Mouse_K = 2;
         }
         break;
+
       case SDL_MOUSEBUTTONUP:
         //Bouton souris relaché
         INPUT_Nouveau_Mouse_K=0;
         break;
+
       case SDL_KEYUP:
       {
         int ToucheR = Conversion_Touche(event.key.keysym);
@@ -193,6 +195,7 @@ void Get_input(void)
         }
         break;
       }
+
       case SDL_KEYDOWN:
       {
         //Appui sur une touche du clavier
@@ -264,6 +267,7 @@ void Get_input(void)
       break;
     }
   }
+  else return 0; // Il ne s'est rien passé
 
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
@@ -357,7 +361,7 @@ void Get_input(void)
   // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente. 
   // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
   Flush_update();
-  }
+  return 1; // Il y a des choses à faire
 }
 
 
@@ -382,8 +386,9 @@ void Wait_VBL(void)
   SDL_Delay(Delai - (debut % Delai));
   // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
   // (Remarque, Windows arrondit généralement aux 10ms supérieures)
-  while (SDL_GetTicks() / Delai == debut / Delai)
+  while (SDL_GetTicks() / Delai <= debut / Delai)
   {
+      puts("Waiting...");
     SDL_Delay(1);
   } 
 }
