@@ -72,7 +72,7 @@ void Afficher_partie_de_l_ecran_Tall (word Largeur,word Hauteur,word Largeur_ima
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
-  UpdateRect(0,0,Largeur,Hauteur);
+  //UpdateRect(0,0,Largeur,Hauteur);
 }
 
 void Pixel_Preview_Normal_Tall (word X,word Y,byte Couleur)

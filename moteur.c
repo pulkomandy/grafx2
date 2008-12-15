@@ -959,7 +959,7 @@ void Gestion_principale(void)
           Print_dans_menu("X:       Y:       (    )",0);
           //Num2str(Pipette_Couleur,Chaine,3);
           //Print_dans_menu(Chaine,20);
-          Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte,"@",0,Pipette_Couleur);
+          //Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
         }
         Print_coordonnees();
       }

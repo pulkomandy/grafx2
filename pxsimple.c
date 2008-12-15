@@ -68,7 +68,7 @@ void Afficher_partie_de_l_ecran_Simple (word Largeur,word Hauteur,word Largeur_i
     Src+=Largeur_image;
     Dest+=Largeur_ecran;
   }
-  UpdateRect(0,0,Largeur,Hauteur);
+  //UpdateRect(0,0,Largeur,Hauteur);
 }
 
 void Pixel_Preview_Normal_Simple (word X,word Y,byte Couleur)
