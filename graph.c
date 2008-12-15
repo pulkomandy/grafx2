@@ -3564,13 +3564,22 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
   word Pos_Y;
   word Pos_fenetre_X;
   word Pos_fenetre_Y;
+  int Taille_X;
+  int Taille_Y;
+  word Orig_X;
+  word Orig_Y;
 
-  word Orig_X = X + 8 - Pinceau_predefini_Decalage_X[Numero];
-  word Orig_Y = Y + 8 - Pinceau_predefini_Decalage_Y[Numero];
+  Taille_X=Menu_Facteur_X/Pixel_height;
+  Taille_Y=Menu_Facteur_Y/Pixel_width;
 
-  for (Pos_fenetre_Y=Orig_Y,Pos_Y=0; Pos_Y<Pinceau_predefini_Hauteur[Numero]; Pos_fenetre_Y++,Pos_Y++)
-    for (Pos_fenetre_X=Orig_X,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
-      Pixel_dans_fenetre(Pos_fenetre_X,Pos_fenetre_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
+  Orig_X = (X + 8)*Menu_Facteur_X - (Pinceau_predefini_Decalage_X[Numero])*Taille_X+Fenetre_Pos_X;
+  Orig_Y = (Y + 8)*Menu_Facteur_Y - (Pinceau_predefini_Decalage_Y[Numero])*Taille_Y+Fenetre_Pos_Y;
+    
+  for (Pos_fenetre_Y=0,Pos_Y=0; Pos_Y<Pinceau_predefini_Hauteur[Numero]; Pos_fenetre_Y++,Pos_Y++)
+    for (Pos_fenetre_X=0,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
+      Block(Orig_X+Pos_fenetre_X*Taille_X,Orig_Y+Pos_fenetre_Y*Taille_Y,Taille_X,Taille_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
+  // On n'utilise pas Pixel_dans_fenetre() car on ne dessine pas
+  // forcément avec la même taille de pixel.
 
   UpdateRect( ToWinX(Orig_X), ToWinY(Orig_Y),
         ToWinL(Pinceau_predefini_Largeur[Numero]), 
