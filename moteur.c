@@ -487,7 +487,7 @@ void Gestion_principale(void)
 
   do
   {
-    if(!Get_input())
+    if(Get_input())
     {
     // Redimensionnement demandé
     if (Resize_Largeur || Resize_Hauteur)
