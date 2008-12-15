@@ -173,8 +173,6 @@ void Bouton_Quit(void);
 // Cacher le menu
 void Bouton_Cacher_menu(void);
 
-void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage);
-
 void Load_picture(byte Image);
 void Save_picture(byte Image);
 

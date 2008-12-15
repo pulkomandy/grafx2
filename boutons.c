@@ -87,6 +87,8 @@ void Bouton_***(void)
 }
 */
 
+void Stencil_Actualiser_couleur(byte Couleur);
+void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage);
 
 void Message_Non_disponible(void)
 {
@@ -582,9 +584,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Mouse_K==A_GAUCHE)?CM_Noir:CM_Clair);
           Afficher_curseur();
-          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_taggee >> 4)*10)),
-            Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_taggee & 15)* 5)),
-            Menu_Facteur_X<<1,Menu_Facteur_Y*5);
+          Stencil_Actualiser_couleur(Couleur_taggee);
         }
         break;
       case  2 : // Clear
@@ -615,9 +615,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Couleur_taggee=Couleur;
           Table[Couleur_taggee]=(Click==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Click==A_GAUCHE)?CM_Noir:CM_Clair);
-          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_taggee >> 4)*10)),
-            Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_taggee & 15)* 5)),
-            Menu_Facteur_X<<1,Menu_Facteur_Y*5);
+          Stencil_Actualiser_couleur(Couleur_taggee);
           Afficher_curseur();
         }
         break;
@@ -656,6 +654,12 @@ void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage)
         Menu_Facteur_X<<1,Menu_Facteur_Y*5,Couleur_de_taggage);
 }
 
+void Stencil_Actualiser_couleur(byte Couleur)
+{
+  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur >> 4)*10)),
+      Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur & 15)* 5)),
+      Menu_Facteur_X<<1,Menu_Facteur_Y*5);
+}
 
 void Bouton_Menu_Stencil(void)
 {
@@ -4653,6 +4657,10 @@ void Spray_Rafficher_infos(byte Couleur_selectionnee, byte Rafficher_jauge)
   }
   Num2str(Spray_Multi_flow[Couleur_selectionnee],Chaine,2);
   Print_dans_fenetre(196,130,Chaine,CM_Noir,CM_Clair);
+  
+  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_selectionnee >> 4)*10)),
+      Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_selectionnee & 15)* 5)),
+      Menu_Facteur_X<<1,Menu_Facteur_Y*5);
 }
 
 
@@ -4741,6 +4749,7 @@ void Bouton_Spray_Menu(void)
 
   Display_Window(226,170);
   Afficher_curseur();
+  Stencil_Actualiser_couleur(Couleur_selectionnee);
 
 
   do
@@ -4778,9 +4787,9 @@ void Bouton_Spray_Menu(void)
         {
           Effacer_curseur();
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
-
+          Stencil_Actualiser_couleur(Couleur_selectionnee);
           // Mettre la couleur sélectionnée à jour suivant le click
-          Couleur_selectionnee=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
+          Couleur_selectionnee=(Bouton_clicke==4) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==2)
             Spray_Multi_flow[Couleur_selectionnee]=0;
           else
@@ -4791,6 +4800,7 @@ void Bouton_Spray_Menu(void)
           Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
+          Stencil_Actualiser_couleur(Couleur_selectionnee);
         }
         break;
 
@@ -4861,6 +4871,7 @@ void Bouton_Spray_Menu(void)
         Fenetre_Effacer_tags();
         // Tagger la couleur sélectionnée en blanc
         Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
+        Stencil_Actualiser_couleur(Couleur_selectionnee);
         break;
 
       case 11 : // Size
@@ -4940,7 +4951,7 @@ void Bouton_Spray_Menu(void)
         {
           Effacer_curseur();
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
-
+          Stencil_Actualiser_couleur(Couleur_selectionnee);
           // Mettre la couleur sélectionnée à jour suivant le click
           Couleur_selectionnee=Couleur;
           if (Click==2)
@@ -4953,6 +4964,7 @@ void Bouton_Spray_Menu(void)
           Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
+          Stencil_Actualiser_couleur(Couleur_selectionnee);
         }
         break;
       default:
