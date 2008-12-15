@@ -905,14 +905,7 @@ void Gestion_principale(void)
                      ((((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)>>2);
 
                 strcpy(Chaine,TITRE_BOUTON[Indice_bouton]);
-                sprintf(Chaine+strlen(Chaine),"%d",Temp);
-                strcat(Chaine," (");
-                sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[Temp].R);
-                strcat(Chaine,",");
-                sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[Temp].V);
-                strcat(Chaine,",");
-                sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[Temp].B);
-                strcat(Chaine,")");
+                sprintf(Chaine+strlen(Chaine),"%d (%d,%d,%d)",Temp,Principal_Palette[Temp].R,Principal_Palette[Temp].V,Principal_Palette[Temp].B);
                 for (Temp=strlen(Chaine); Temp<24; Temp++)
                   Chaine[Temp]=' ';
                 Chaine[24]=0;
@@ -964,9 +957,9 @@ void Gestion_principale(void)
         else
         {
           Print_dans_menu("X:       Y:       (    )",0);
-          Num2str(Pipette_Couleur,Chaine,3);
-          Print_dans_menu(Chaine,20);
-          Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
+          //Num2str(Pipette_Couleur,Chaine,3);
+          //Print_dans_menu(Chaine,20);
+          Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte,"@",0,Pipette_Couleur);
         }
         Print_coordonnees();
       }

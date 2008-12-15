@@ -1662,6 +1662,7 @@ void Print_dans_menu(char * Chaine, short Position)
 
   // -- Afficher les coordonnées du pinceau dans le menu --
 
+// Note : cette fonction n'affiche que les chiffres, pas les X: Y: qui sont dans la gestion principale, car elle est apellée très souvent.
 void Print_coordonnees(void)
 {
   char Tempo[5];
@@ -1683,6 +1684,7 @@ void Print_coordonnees(void)
       Num2str(Pipette_Couleur,Tempo,3);
       Print_dans_menu(Tempo,20);
       Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
+      UpdateRect(170*Menu_Facteur_X,Menu_Ordonnee_Texte,8*Menu_Facteur_X,8*Menu_Facteur_Y);
     }
 
     Num2str((dword)Pinceau_X,Tempo,4);

@@ -388,7 +388,6 @@ void Wait_VBL(void)
   // (Remarque, Windows arrondit généralement aux 10ms supérieures)
   while (SDL_GetTicks() / Delai <= debut / Delai)
   {
-      puts("Waiting...");
     SDL_Delay(1);
   } 
 }
