@@ -45,6 +45,7 @@
 #include "divers.h"
 #include "pxsimple.h"
 #include "pxtall.h"
+#include "pxwide.h"
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
@@ -1079,6 +1080,7 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
             Clear_brush = Clear_brush_Simple ;
             Remap_screen = Remap_screen_Simple ;
             Afficher_ligne = Afficher_une_ligne_ecran_Simple ;
+            Afficher_ligne_fast = Afficher_une_ligne_ecran_Simple ;
             Lire_ligne = Lire_une_ligne_ecran_Simple ;
             Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Simple ;
             Display_brush_Color_zoom = Display_brush_Color_zoom_Simple ;
@@ -1102,12 +1104,37 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
             Clear_brush = Clear_brush_Tall;
             Remap_screen = Remap_screen_Tall;
             Afficher_ligne = Afficher_une_ligne_ecran_Tall;
+            Afficher_ligne_fast = Afficher_une_ligne_ecran_Tall;
             Lire_ligne = Lire_une_ligne_ecran_Tall;
             Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Tall;
             Display_brush_Color_zoom = Display_brush_Color_zoom_Tall;
             Display_brush_Mono_zoom = Display_brush_Mono_zoom_Tall;
             Clear_brush_zoom = Clear_brush_zoom_Tall;
             Affiche_brosse = Affiche_brosse_Tall;
+        break;
+        case PIXEL_WIDE:
+            Pixel_width=2;
+            Pixel_height=1;
+            Pixel = Pixel_Wide ;
+            Lit_pixel= Lit_Pixel_Wide ;
+            Display_screen = Afficher_partie_de_l_ecran_Wide ;
+            Block = Block_Wide ;
+            Pixel_Preview_Normal = Pixel_Preview_Normal_Wide ;
+            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Wide ;
+            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Wide ;
+            Ligne_verticale_XOR = Ligne_verticale_XOR_Wide ;
+            Display_brush_Color = Display_brush_Color_Wide ;
+            Display_brush_Mono = Display_brush_Mono_Wide ;
+            Clear_brush = Clear_brush_Wide ;
+            Remap_screen = Remap_screen_Wide ;
+            Afficher_ligne = Afficher_une_ligne_ecran_Wide ;
+            Afficher_ligne_fast = Afficher_une_ligne_ecran_fast_Wide ;
+            Lire_ligne = Lire_une_ligne_ecran_Wide ;
+            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Wide ;
+            Display_brush_Color_zoom = Display_brush_Color_zoom_Wide ;
+            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Wide ;
+            Clear_brush_zoom = Clear_brush_zoom_Wide ;
+            Affiche_brosse = Affiche_brosse_Wide ;
         break;
     }
     // Valeurs raisonnables: minimum 320x200
@@ -1590,7 +1617,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
           Buffer_de_ligne_horizontale[Reel_X++]=Fonte[Caractere+Pos_X+Pos_Y]?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
-      Afficher_ligne(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
+      Afficher_ligne_fast(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
   }
 }
 

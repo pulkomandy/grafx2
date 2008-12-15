@@ -206,6 +206,10 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
     {
       Pixel_ratio = PIXEL_TALL;
     }
+    else if ( !strcmp(argv[Indice],"/wide") )
+    {
+      Pixel_ratio = PIXEL_WIDE;
+    }
     else
     {
       // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir

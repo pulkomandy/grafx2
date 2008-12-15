@@ -191,6 +191,7 @@ GLOBAL fonction_display_brush_Mono  Display_brush_Mono;  // Affiche une partie d
 GLOBAL fonction_display_brush_Color Clear_brush;         // Efface la partie de la brosse affichée à l'écran
 GLOBAL fonction_remap     Remap_screen;   // Remappe une partie de l'écran avec les nouvelles couleurs du menu
 GLOBAL fonction_procsline Afficher_ligne;  // Afficher une ligne
+GLOBAL fonction_procsline Afficher_ligne_fast;  // Afficher une ligne talle quelle (sans la doubler en mode wide)
 GLOBAL fonction_procsline Lire_ligne;      // Afficher ou lire une ligne
 GLOBAL fonction_display_zoom Display_zoomed_screen; // Affiche rapidement toute la partie zoomée à l'écran (en faisant attention de ne pas effacer le menu)
 GLOBAL fonction_display_brush_Color_zoom Display_brush_Color_zoom;

@@ -139,16 +139,16 @@ char * TITRE_BOUTON[NB_BOUTONS]=
 void Sauve_fond(byte **Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
 {
   int Indice;
-  *Buffer=(byte *) malloc(Largeur*Menu_Facteur_X*Hauteur*Menu_Facteur_Y);
+  *Buffer=(byte *) malloc(Largeur*Menu_Facteur_X*Hauteur*Menu_Facteur_Y*Pixel_width);
   for (Indice=0; Indice<(Hauteur*Menu_Facteur_Y); Indice++)
-    Lire_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,(*Buffer)+((int)Indice*Largeur*Menu_Facteur_X));
+    Lire_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,(*Buffer)+((int)Indice*Largeur*Menu_Facteur_X*Pixel_width));
 }
 // Restaure de ce que la fenêtre cachait
 void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
 {
   int Indice;
   for (Indice=0; Indice<Hauteur*Menu_Facteur_Y; Indice++)
-    Afficher_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_X));
+    Afficher_ligne_fast(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,Buffer+((int)Indice*Largeur*Menu_Facteur_X*Pixel_width));
   free(Buffer);
 }
 // Ecrit un pixel dans un fond de fenêtre
@@ -1539,7 +1539,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
     Cacher_curseur=0;
 
     for (Indice=0; Indice<Hauteur; Indice++)
-      Lire_ligne(Fenetre_Pos_X,Fenetre_Pos_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
+      Lire_ligne(Fenetre_Pos_X,Fenetre_Pos_Y+Indice,Largeur,Buffer+((int)Indice*Largeur*Pixel_width));
     A=Menu_Ordonnee;
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
     B=Menu_visible;

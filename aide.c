@@ -177,13 +177,13 @@ void Afficher_aide(void)
                 Couleur=CM_Fonce;
             }
             Buffer_de_ligne_horizontale[Position_X++]=Couleur;
-            if (Pixel_width>1)
+            if (Pixel_width==2)
               Buffer_de_ligne_horizontale[Position_X++]=Couleur;
           }
       }
       // On la splotche
       for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
-        Afficher_ligne(Pos_Reel_X,Pos_Reel_Y++,Largeur*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
+        Afficher_ligne_fast(Pos_Reel_X,Pos_Reel_Y++,Largeur*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
     }
 
     // On efface la fin de la ligne:
