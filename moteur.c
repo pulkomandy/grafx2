@@ -921,8 +921,6 @@ void Gestion_principale(void)
                   Afficher_curseur();
                 }
               }
-              Old_MX=Mouse_X;
-              Old_MY=Mouse_Y;
             }
           }
         }
@@ -949,7 +947,7 @@ void Gestion_principale(void)
     {
       // Le curseur se trouve dans l'image
 
-      if ( (Curseur_dans_menu_precedent) && (Menu_visible) )
+      if ( (Curseur_dans_menu_precedent) && (Menu_visible) && Old_MY!=Mouse_Y && Old_MX != Mouse_X) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
       {
         if ( (Operation_en_cours!=OPERATION_PIPETTE)
           && (Operation_en_cours!=OPERATION_REMPLACER) )
@@ -963,6 +961,8 @@ void Gestion_principale(void)
         }
         Print_coordonnees();
       }
+      Old_MX=Mouse_X;
+      Old_MY=Mouse_Y;
 
       Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
 
