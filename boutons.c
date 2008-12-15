@@ -5045,12 +5045,17 @@ void Dessiner_trames_predefinies(void)
 {
   short Indice;
   short i,j;
+  short Taille_X,Taille_Y;
+  Taille_X=Menu_Facteur_X/Pixel_height;
+  Taille_Y=Menu_Facteur_Y/Pixel_width;
 
   for (Indice=0; Indice<12; Indice++)
-    for (j=0; j<16; j++)
-      for (i=0; i<16; i++)
-        Pixel_dans_fenetre((Indice*23)+10+i,22+j,
-                           ((TRAME_PREDEFINIE[Indice][j]>>(15-i))&1)?CM_Blanc:CM_Noir);
+    for (j=0; j<16*Pixel_width; j++)
+      for (i=0; i<16*Pixel_height; i++)
+        Block(((Indice*23+10)*Menu_Facteur_X)+i*Taille_X+Fenetre_Pos_X,
+          (22*Menu_Facteur_Y)+j*Taille_Y+Fenetre_Pos_Y,Taille_X,Taille_Y,
+          ((TRAME_PREDEFINIE[Indice][j&0xF]>>(15-(i&0xF)))&1)?CM_Blanc:CM_Noir);
+
   UpdateRect(ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
 }
 
