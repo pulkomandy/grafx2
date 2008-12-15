@@ -1677,6 +1677,7 @@ void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Co
   Print_general((X*Menu_Facteur_X)+Fenetre_Pos_X,
                 (Y*Menu_Facteur_Y)+Fenetre_Pos_Y,
                 Chaine,Couleur_texte,Couleur_fond);
+  UpdateRect(X*Menu_Facteur_X+Fenetre_Pos_X,Y*Menu_Facteur_Y+Fenetre_Pos_Y,8*Menu_Facteur_X*strlen(Chaine),8*Menu_Facteur_Y);
 }
 
   // -- Afficher une chaîne dans le menu --
@@ -5080,7 +5081,7 @@ void Tracer_courbe_General(short X1, short Y1,
   Y = Min(Min(Y1,Y2),Min(Y3,Y4));
   Old_X = Max(Max(X1,X2),Max(X3,X4)) - X;
   Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - Y;
-  Mettre_Ecran_A_Jour(X,Y,Old_X,Old_Y); //A optimiser !! on update à chaque pixel affiché !
+  Mettre_Ecran_A_Jour(X,Y,Old_X,Old_Y);
 }
 
   // -- Tracer une courbe de Bézier définitivement --
