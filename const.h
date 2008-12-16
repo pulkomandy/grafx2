@@ -69,6 +69,7 @@
 // Caractères présents dans les deux fontes
 #define CARACTERE_TRIANGLE_DROIT  16
 #define CARACTERE_TRIANGLE_GAUCHE 17
+#define CARACTERE_SUSPENSION      '…'
 
 // On impose à l'allocation dynamique des pages de backups de conserver un
 // minimum de 256 Ko pour que le reste du programme puisse continuer à

@@ -1571,25 +1571,6 @@ void Afficher_menu(void)
   }
 }
 
-// Table de conversion ANSI->OEM
-// Les deux fontes générales sont en encodage OEM
-unsigned char Caractere_OEM[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
- 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 
- 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 
- 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 
- 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 
- 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 
- 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 
- 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 
- 63, 63, 39, 159, 34, 46, 197, 206, 94, 37, 83, 60, 79, 63, 90, 63, 
- 63, 39, 39, 34, 34, 7, 45, 45, 126, 84, 115, 62, 111, 63, 122, 89, 
- 255, 173, 189, 156, 207, 190, 221, 245, 249, 184, 166, 174, 170, 240, 169, 238, 
- 248, 241, 253, 252, 239, 230, 244, 250, 247, 251, 167, 175, 172, 171, 243, 168, 
- 183, 181, 182, 199, 142, 143, 146, 128, 212, 144, 210, 211, 222, 214, 215, 216, 
- 209, 165, 227, 224, 226, 229, 153, 158, 157, 235, 233, 234, 154, 237, 232, 225, 
- 133, 160, 131, 198, 132, 134, 145, 135, 138, 130, 136, 137, 141, 161, 140, 139, 
- 208, 164, 149, 162, 147, 228, 148, 246, 155, 151, 163, 150, 129, 236, 231}; 
-
 // -- Affichage de texte -----------------------------------------------------
 
   // -- Afficher une chaîne n'importe où à l'écran --
@@ -1597,9 +1578,9 @@ unsigned char Caractere_OEM[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
   word  Indice;
-  short Pos_X;
-  short Pos_Y;
-  short Caractere;
+  int Pos_X;
+  int Pos_Y;
+  byte *Caractere;
   short Reel_X;
   short Reel_Y;
   byte Repeat_Menu_Facteur_X;
@@ -1611,10 +1592,11 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     Reel_X=0; // Position dans le buffer
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
-      Caractere=(Chaine[Indice])<<6;
+      // Pointeur sur le premier pixel du caractère
+      Caractere=Fonte+(((unsigned char)Chaine[Indice])<<6);
       for (Pos_X=0;Pos_X<8<<3;Pos_X+=1<<3)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
-          Buffer_de_ligne_horizontale[Reel_X++]=Fonte[Caractere+Pos_X+Pos_Y]?Couleur_texte:Couleur_fond;
+          Buffer_de_ligne_horizontale[Reel_X++]=*(Caractere+Pos_X+Pos_Y)?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne_fast(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
@@ -1626,14 +1608,16 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
 void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
 {
   short X,Y;
+  byte *Carac;
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
-
+  // Premier pixel du caractère
+  Carac=Fonte + (Caractere<<6);
   for (X=0;X<8;X++)
     for (Y=0;Y<8;Y++)
       Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
             Menu_Facteur_X, Menu_Facteur_Y,
-            (*(Fonte+(*(Caractere_OEM+Caractere)<<6)+(X<<3)+Y)?Couleur_texte:Couleur_fond));
+            (*(Carac+(X<<3)+Y)?Couleur_texte:Couleur_fond));
 }
 
   // -- Afficher un caractère sans fond dans une fenêtre --
@@ -1648,7 +1632,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char C
   for (X=0;X<8;X++)
     for (Y=0;Y<8;Y++)
     {
-      if (*(Fonte+(*(Caractere_OEM+Caractere)<<6)+(X<<3)+Y))
+      if (*(Fonte+((int)Caractere<<6)+(X<<3)+Y))
         Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
@@ -1662,10 +1646,9 @@ void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Co
   strncpy(Chaine_affichee, Chaine, Taille);
   Chaine_affichee[Taille]='\0';
   
-  if (strlen(Chaine_affichee) > Taille)
+  if (strlen(Chaine) > Taille)
   {
-    Chaine_affichee[Taille-1]=CARACTERE_TRIANGLE_DROIT;
-    Chaine_affichee[Taille]='\0';
+    Chaine_affichee[Taille-1]=CARACTERE_SUSPENSION;
   }
   Print_dans_fenetre(X, Y, Chaine_affichee, Couleur_texte, Couleur_fond);
 }
@@ -1727,15 +1710,17 @@ void Print_coordonnees(void)
 void Print_nom_fichier(void)
 {
   short Debut_X;
-  
+  char Nom_affiche[12+1];
+  int Taille_nom;
   if (Menu_visible)
   {
     // Si le nom de fichier fait plus de 12 caractères, on n'affiche que les 12 derniers
-    char * Nom_affiche = Principal_Nom_fichier;
-    int Taille_nom =strlen(Principal_Nom_fichier);
+    strncpy(Nom_affiche,Principal_Nom_fichier,12);
+    Taille_nom=strlen(Principal_Nom_fichier);
+    Nom_affiche[12]='\0';
     if (Taille_nom>12)
     {
-      Nom_affiche=Principal_Nom_fichier + Taille_nom - 12;
+      Nom_affiche[11]=CARACTERE_SUSPENSION;
       Taille_nom = 12;
     }
     

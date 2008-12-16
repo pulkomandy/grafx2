@@ -118,7 +118,7 @@ char * Nom_formate(char * Nom, int Type)
       Resultat[Curseur]=Nom[Curseur];
     // Un caractère spécial pour indiquer que l'affichage est tronqué
     if (Curseur >= 12)
-      Resultat[11]=CARACTERE_TRIANGLE_DROIT;
+      Resultat[11]=CARACTERE_SUSPENSION;
   }
   else
   {
@@ -131,7 +131,7 @@ char * Nom_formate(char * Nom, int Type)
     }
     // Un caractère spécial pour indiquer que l'affichage est tronqué
     if (Curseur > 8)
-      Resultat[7]=CARACTERE_TRIANGLE_DROIT;
+      Resultat[7]=CARACTERE_SUSPENSION;
     // On recherche le dernier point dans le reste du nom
     for (Pos_DernierPoint = Curseur; Nom[Curseur]!='\0'; Curseur++)
       if (Nom[Curseur]=='.')

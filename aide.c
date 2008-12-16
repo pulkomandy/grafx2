@@ -90,7 +90,7 @@ void Afficher_aide(void)
   short  Largeur;             // Largeur physique d'une ligne de texte
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
-  const char * Ligne;
+  const unsigned char * Ligne;
   char   Buffer[44];          // Buffer texte utilisé pour formater les noms de 
                               // raccourcis clavier
   short  Position_lien=0;     // Position du premier caractère "variable"
@@ -122,7 +122,7 @@ void Afficher_aide(void)
     else if (TypeLigne == 'K')
     {
       const char *Lien;
-      Position_lien = strstr(Ligne,"%s") - Ligne;
+      Position_lien = (unsigned char *)strstr(Ligne,"%s") - Ligne;
       Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].valeur);
       Taille_lien=strlen(Lien);
       sprintf(Buffer, Ligne, Lien);
