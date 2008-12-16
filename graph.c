@@ -6580,4 +6580,9 @@ void Tourner_brosse_preview(float Angle)
                                 X2,Y2,Brosse_Largeur-1,               0,
                                 X3,Y3,               0,Brosse_Hauteur-1,
                                 X4,Y4,Brosse_Largeur-1,Brosse_Hauteur-1);
+  Debut_X=Min(Min(X1,X2),Min(X3,X4));
+  Fin_X=Max(Max(X1,X2),Max(X3,X4));
+  Debut_Y=Min(Min(Y1,Y2),Min(Y3,Y4));
+  Fin_Y=Max(Max(Y1,Y2),Max(Y3,Y4));
+  UpdateRect(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }

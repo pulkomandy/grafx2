@@ -40,7 +40,7 @@
   #ifdef __macosx__
     #define METHODE_UPDATE     METHODE_UPDATE_PLEINE_PAGE
   #else
-    #define METHODE_UPDATE     METHODE_UPDATE_MULTI_RECTANGLE
+    #define METHODE_UPDATE     METHODE_UPDATE_PAR_CUMUL
   #endif
 #endif
 
