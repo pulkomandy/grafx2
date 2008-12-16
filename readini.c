@@ -27,6 +27,7 @@
 #include "const.h"
 #include "global.h"
 #include "graph.h"
+#include "windows.h"
 
 void Charger_INI_Clear_string(char * String)
 {

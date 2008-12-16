@@ -51,6 +51,7 @@
 #include "hotkeys.h"
 #include "files.h"
 #include "setup.h"
+#include "windows.h"
 
 
 // Ajouter un lecteur à la liste de lecteurs
@@ -638,7 +639,6 @@ void Initialisation_des_boutons(void)
                      Rien_du_tout,
                      FAMILLE_OUTIL);
 
-// !!! TEMPORAIRE !!!
   Initialiser_bouton(BOUTON_GRADRECT,
                      85,1,
                      15,15,
@@ -646,15 +646,6 @@ void Initialisation_des_boutons(void)
                      Bouton_Rectangle_degrade,Bouton_Rectangle_degrade,
                      Rien_du_tout,
                      FAMILLE_OUTIL);
-/*
-  Initialiser_bouton(BOUTON_GRADRECT,
-                     85,1,
-                     15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Rien_du_tout,Rien_du_tout,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
-*/
 
   Initialiser_bouton(BOUTON_GRADMENU,
                      86,2,
@@ -712,15 +703,6 @@ void Initialisation_des_boutons(void)
                      Bouton_Texte,Message_Non_disponible,
                      Rien_du_tout,
                      FAMILLE_INSTANTANE);
-/*
-  Initialiser_bouton(BOUTON_TEXTE,
-                     123,18,
-                     16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Rien_du_tout,Rien_du_tout,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
-*/
 
   Initialiser_bouton(BOUTON_LOUPE,
                      140,1,

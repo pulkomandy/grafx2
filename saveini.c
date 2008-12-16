@@ -29,6 +29,7 @@
 #include "io.h"
 #include "erreurs.h"
 #include "graph.h"
+#include "divers.h"
 
 int Sauver_INI_Reach_group(FILE * Old_file,FILE * New_file,char * Buffer,char * Group)
 {

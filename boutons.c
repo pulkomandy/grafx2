@@ -48,6 +48,8 @@
 #include "aide.h"
 #include "texte.h"
 #include "sdlscreen.h"
+#include "windows.h"
+#include "brush.h"
 
 #ifdef __WATCOMC__
     #include <windows.h>

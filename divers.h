@@ -104,3 +104,19 @@ byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
 dword Chrono_delay;     // Nombre de 18.2ème de secondes demandés
 dword Chrono_cmp;       // Heure de départ du chrono
 byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
+
+
+unsigned long Memoire_libre(void);
+
+void  Num2str(dword Nombre,char * Chaine,byte Taille);
+int   Str2num(char * Chaine);
+
+short Round(float Valeur);
+short Round_max(short Numerateur,short Diviseur);
+short Round_div_max(short Numerateur,short Diviseur);
+
+int Min(int A,int B);
+int Max(int A,int B);
+
+char* Libelle_mode(int Mode);
+int Conversion_argument_mode(const char *Argument);

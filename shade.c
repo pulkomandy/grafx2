@@ -27,6 +27,7 @@
 #include "readline.h"
 #include "aide.h"
 #include "sdlscreen.h"
+#include "windows.h"
 
 void Bouton_Shade_Mode(void)
 {

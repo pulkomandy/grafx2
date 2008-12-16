@@ -1,6 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2008 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -18,54 +18,15 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Remapper_ecran_apres_changement_couleurs_menu(void);
-void Calculer_couleurs_menu_optimales(struct Composantes * Palette);
-
-unsigned long Memoire_libre(void);
 
 void Liste2tables(word * Liste, short Pas, byte Mode, byte * Table_inc,
 	byte * Table_dec
 );
 
-void  Num2str(dword Nombre,char * Chaine,byte Taille);
-int   Str2num(char * Chaine);
-
-short Round(float Valeur);
-short Round_max(short Numerateur,short Diviseur);
-short Round_div_max(short Numerateur,short Diviseur);
-
-int Min(int A,int B);
-int Max(int A,int B);
-
 void Transformer_point(short X, short Y,
                        float cosA, float sinA, short * Xr, short * Yr);
 
-void Recadrer_ecran_par_rapport_au_zoom(void);
-void Calculer_split(void);
-void Calculer_donnees_loupe(void);
-void Calculer_limites(void);
-void Calculer_coordonnees_pinceau(void);
-
-char* Libelle_mode(int Mode);
-int Conversion_argument_mode(const char *Argument);
-
 void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
-void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur);
-void Pixel_dans_fenetre(word X,word Y,byte Couleur);
-void Encadrer_couleur_menu(byte Couleur);
-void Afficher_palette_du_menu(void);
-void Afficher_menu(void);
-void Recadrer_palette(void);
-
-void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond);
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond);
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur);
-void Print_dans_menu(char * Chaine, short Position);
-void Print_coordonnees(void);
-void Print_nom_fichier(void);
-void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
 
 byte Aucun_effet(word X,word Y,byte Couleur);
 byte Effet_Shade(word X,word Y,byte Couleur);
@@ -83,45 +44,14 @@ void Effacer_pinceau(short X,short Y);
 void Effacer_curseur(void);
 void Afficher_curseur(void);
 
-byte Demande_de_confirmation(char * Message);
-void Warning_message(char * Message);
-
-void Afficher_limites_de_l_image(void);
-void Afficher_ecran(void);
-void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
-                                    byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD);
-void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte Couleur);
-void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-
-void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite);
-void Afficher_pinceau_dans_menu(void);
-void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero);
-
-void Dessiner_zigouigoui(word X,word Y, byte Couleur, short Sens);
-void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_block);
 void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
-
-void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type);
-
-void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short Effacement);
-void Rotate_90_deg(void);
-void Etirer_brosse(short X1, short Y1, short X2, short Y2);
-void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2);
-void Tourner_brosse(float Angle);
-void Tourner_brosse_preview(float Angle);
-
-void Remap_brosse(void);
-void Get_colors_from_brush(void);
-void Outline_brush(void);
-void Nibble_brush(void);
 
 void Remplir(byte Couleur_de_remplissage);
 void Remplacer(byte Nouvelle_couleur);
 
 void Pixel_figure_Preview    (word Pos_X,word Pos_Y,byte Couleur);
 void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_figure_Dans_brosse(word Pos_X,word Pos_Y,byte Couleur);
 
 void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur);
 void Tracer_cercle_vide_Preview  (short Centre_X,short Centre_Y,short Rayon,byte Couleur);
@@ -134,6 +64,7 @@ void Effacer_ellipse_vide_Preview (short Centre_X,short Centre_Y,short Rayon_hor
 void Tracer_ellipse_pleine        (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur);
 
 void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY);
+void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur);
 void Tracer_ligne_Definitif  (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview    (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
@@ -157,8 +88,8 @@ void Tracer_cercle_degrade  (short Centre_X,short Centre_Y,short Rayon,short Ecl
 void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y);
 void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY);
 
+void Polyfill_General(int Vertices, short * Points, int Color);
 void Polyfill(int Vertices, short * Points, int Color);
-void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement);
 
 // Gestion des backups:
 void Download_infos_page_principal(S_Page * Page);
@@ -182,8 +113,6 @@ void Remap_picture(void);
 #define ToWinL(l) ((l)*Menu_Facteur_X)
 #define ToWinH(h) ((h)*Menu_Facteur_Y)
 
-byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
-byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);
-
-void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur);
-void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur);
+// Définition d'une fonction générique de traçage de figures:
+fonction_afficheur Pixel_figure;
+void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur);

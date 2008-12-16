@@ -48,6 +48,8 @@
 #include "io.h"
 #include "texte.h"
 #include "setup.h"
+#include "windows.h"
+#include "brush.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
