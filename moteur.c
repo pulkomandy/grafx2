@@ -36,6 +36,8 @@
 #include "shade.h"
 #include "erreurs.h"
 #include "sdlscreen.h"
+#include "windows.h"
+#include "brush.h"
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 

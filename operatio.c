@@ -21,6 +21,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -32,6 +33,8 @@
 #include "pages.h"
 #include "erreurs.h"
 #include "sdlscreen.h"
+#include "brush.h"
+#include "windows.h"
 
 #ifdef __WATCOMC__
     #define M_PI 3.14159265358979323846 

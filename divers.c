@@ -33,6 +33,7 @@
 #include "divers.h"
 #include "clavier.h"
 #include "sdlscreen.h"
+#include "windows.h"
 
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {

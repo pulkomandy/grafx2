@@ -28,6 +28,7 @@
 #include "global.h"
 #include "graph.h"
 #include "windows.h"
+#include "divers.h"
 
 void Charger_INI_Clear_string(char * String)
 {

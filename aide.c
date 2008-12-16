@@ -44,6 +44,7 @@
 #include "sdlscreen.h"
 #include "texte.h"
 #include "clavier.h"
+#include "windows.h"
 
 
 extern char SVNRevision[];

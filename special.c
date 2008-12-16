@@ -25,6 +25,7 @@
 #include "global.h"
 #include "graph.h"
 #include "moteur.h"
+#include "windows.h"
 
 
 

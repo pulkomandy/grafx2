@@ -34,6 +34,7 @@
 #include "sdlscreen.h"
 #include "erreurs.h"
 #include "op_c.h"
+#include "windows.h"
 
 byte Palette_mode_RGB = 1; // Indique si on est en HSL ou en RGB
 

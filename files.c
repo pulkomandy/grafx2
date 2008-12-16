@@ -52,6 +52,7 @@
 #include "divers.h"
 #include "erreurs.h"
 #include "io.h"
+#include "windows.h"
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné

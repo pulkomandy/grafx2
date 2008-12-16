@@ -27,6 +27,7 @@
 #include "sdlscreen.h"
 #include "erreurs.h"
 #include "graph.h"
+#include "divers.h"
 
 // Mise à jour minimaliste en nombre de pixels
 #define METHODE_UPDATE_MULTI_RECTANGLE 1

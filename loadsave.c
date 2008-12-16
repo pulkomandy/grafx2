@@ -41,6 +41,7 @@
 #include "erreurs.h"
 #include "io.h"
 #include "sdlscreen.h"
+#include "windows.h"
 
 #define FILENAMESPACE 13
 

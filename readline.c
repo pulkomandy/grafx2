@@ -37,6 +37,7 @@
 #include "const.h"
 #include "sdlscreen.h"
 #include "readline.h"
+#include "windows.h"
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
