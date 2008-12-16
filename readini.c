@@ -524,12 +524,12 @@ int Charger_INI(struct S_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   Conf->Lire_les_repertoires_caches=Valeurs[0]?-1:0;
 
-  if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Show_system_directories",1,Valeurs)))
+/*  if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Show_system_directories",1,Valeurs)))
     goto Erreur_Retour;
   if ((Valeurs[0]<0) || (Valeurs[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
   Conf->Lire_les_repertoires_systemes=Valeurs[0]?-1:0;
-
+*/
   if ((Retour=Charger_INI_Get_values (Fichier,Buffer,"Preview_delay",1,Valeurs)))
     goto Erreur_Retour;
   if ((Valeurs[0]<1) || (Valeurs[0]>256))

@@ -493,10 +493,10 @@ int Sauver_INI(struct S_Config * Conf)
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_hidden_directories",1,Valeurs,1)))
     goto Erreur_Retour;
 
-  Valeurs[0]=Conf->Lire_les_repertoires_systemes?1:0;
+/*  Valeurs[0]=Conf->Lire_les_repertoires_systemes?1:0;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Show_system_directories",1,Valeurs,1)))
     goto Erreur_Retour;
-
+*/
   Valeurs[0]=Conf->Chrono_delay;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Preview_delay",1,Valeurs,0)))
     goto Erreur_Retour;

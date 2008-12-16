@@ -702,7 +702,7 @@ void Settings_Afficher_config(struct S_Config * Conf)
 
   Print_dans_fenetre(273, 31,(Conf->Lire_les_fichiers_caches)?YES:NO,CM_Noir,CM_Clair);
   Print_dans_fenetre(273, 46,(Conf->Lire_les_repertoires_caches)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(273, 61,(Conf->Lire_les_repertoires_systemes)?YES:NO,CM_Noir,CM_Clair);
+//  Print_dans_fenetre(273, 61,(Conf->Lire_les_repertoires_systemes)?YES:NO,CM_Noir,CM_Clair);
 
   Print_dans_fenetre(223, 84,(Conf->Safety_colors)?YES:NO,CM_Noir,CM_Clair);
   Print_dans_fenetre(223, 99,(Conf->Adjust_brush_pick)?YES:NO,CM_Noir,CM_Clair);
@@ -776,12 +776,12 @@ void Bouton_Settings(void)
   Ouvrir_fenetre(307,182,"Settings");
 
   // On commence par dessiner tous les Cadres
-  Fenetre_Afficher_cadre(  5, 16,157,30);
-  Fenetre_Afficher_cadre(  5, 47,157,17);
-  Fenetre_Afficher_cadre(163, 16,139,60);
-  Fenetre_Afficher_cadre(253, 77, 49,82);
-  Fenetre_Afficher_cadre(  5, 77,247,82); // |_ Misc.
-  Fenetre_Afficher_cadre(  5, 65,157,14); // |
+  Fenetre_Afficher_cadre(  5, 16,157,30); // Font
+  Fenetre_Afficher_cadre(  5, 47,157,17); // Nb UNDO
+  Fenetre_Afficher_cadre(163, 16,139,48); // Show in filelist
+  Fenetre_Afficher_cadre(253, 77, 49,82); // Mouse sens.
+  Fenetre_Afficher_cadre(  5, 65,247,96); // |_ Misc.
+/*  Fenetre_Afficher_cadre(  5, 65,157,14); // |
   // On découpe le Cadre bizarre des "Miscellaneous"
   Pixel_dans_fenetre(6,77,CM_Blanc);
   Pixel_dans_fenetre(5,78,CM_Fonce);
@@ -789,12 +789,12 @@ void Bouton_Settings(void)
         Menu_Facteur_X*154,Menu_Facteur_Y<<1,CM_Clair);
   Pixel_dans_fenetre(161,77,CM_Clair);
   Pixel_dans_fenetre(160,77,CM_Fonce);
-
+*/
   // On affiche maintenant tout le blabla
   Print_dans_fenetre( 69, 19,"Font"            ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(169, 19,"Show in filelist",CM_Fonce,CM_Clair);
   Print_dans_fenetre(  9, 52,"Nb of UNDO pages",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 32, 70,"Miscellaneous"   ,CM_Fonce,CM_Clair);
+  Print_dans_fenetre( 80, 70,"Miscellaneous"   ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(258, 80,"Mouse"           ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(258, 88,"Sens."           ,CM_Fonce,CM_Clair);
   Print_dans_fenetre(256,123,"X"               ,CM_Fonce,CM_Clair);
@@ -807,7 +807,7 @@ void Bouton_Settings(void)
   // Bouton Show/Hide dans le fileselect
   Fenetre_Definir_bouton_normal(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 3
   Fenetre_Definir_bouton_normal(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 4
-  Fenetre_Definir_bouton_normal(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
+//  Fenetre_Definir_bouton_normal(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
 
   // Bouton Show/Hide Picture limits
   Fenetre_Definir_bouton_normal(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 6
@@ -872,56 +872,57 @@ void Bouton_Settings(void)
       case  4 : // Hidden dir.
         Config_choisie.Lire_les_repertoires_caches=(Config_choisie.Lire_les_repertoires_caches)?0:-1;
         break;
-      case  5 : // System dir.
-        Config_choisie.Lire_les_repertoires_systemes=(Config_choisie.Lire_les_repertoires_systemes)?0:-1;
-        break;
-      case  6 : // Draw limits
+//      case  5 : // System dir.
+//        Config_choisie.Lire_les_repertoires_systemes=(Config_choisie.Lire_les_repertoires_systemes)?0:-1;
+//        break;
+      case  5 : // Draw limits
         Config_choisie.Afficher_limites_image=!Config_choisie.Afficher_limites_image;
         break;
-      case  7 : // Clear palette
+      case  6 : // Clear palette
         Config_choisie.Clear_palette=!Config_choisie.Clear_palette;
         break;
-      case  8 : // Maximize preview
+      case  7 : // Maximize preview
         Config_choisie.Maximize_preview=!Config_choisie.Maximize_preview;
         break;
-      case  9 : // Backup
+      case  8 : // Backup
         Config_choisie.Backup=!Config_choisie.Backup;
         break;
-      case 10 : // Curseur
+      case 9 : // Curseur
         Config_choisie.Curseur=(Config_choisie.Curseur+1)%3;
         break;
-      case 11 : // Safety colors
+      case 10 : // Safety colors
         Config_choisie.Safety_colors=!Config_choisie.Safety_colors;
         break;
-      case 12 : // Adjust brush pick
+      case 11 : // Adjust brush pick
         Config_choisie.Adjust_brush_pick=!Config_choisie.Adjust_brush_pick;
         break;
-      case 13 : // Separate colors
+      case 12 : // Separate colors
         Config_choisie.Couleurs_separees=!Config_choisie.Couleurs_separees;
         break;
-      case 14 : // Auto-set resolution
+      case 13 : // Auto-set resolution
         Config_choisie.Auto_set_res=!Config_choisie.Auto_set_res;
         break;
-      case 15 : // Coordonnées
+      case 14 : // Coordonnées
         Config_choisie.Coords_rel=!Config_choisie.Coords_rel;
         break;
-      case 16 : // Reload
+      case 15 : // Reload
         Settings_Charger_config(&Config_choisie);
         On_a_recharge_la_config=1;
         break;
-      case 17 : // Auto-save
+      case 16 : // Auto-save
         Config_choisie.Auto_save=!Config_choisie.Auto_save;
         break;
-      case 18 : // Save
+      case 17 : // Save
         Settings_Sauver_config(&Config_choisie);
         break;
-      case 20 : // X Sensib.
+      // 18 : OK
+      case 19 : // X Sensib.
         Config_choisie.Indice_Sensibilite_souris_X=Fenetre_Attribut2+1;
         break;
-      case 21 : // Y Sensib.
+      case 20 : // Y Sensib.
         Config_choisie.Indice_Sensibilite_souris_Y=Fenetre_Attribut2+1;
         break;
-      case 22 : // Nb pages Undo
+      case 21 : // Nb pages Undo
         Effacer_curseur();
         Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
         Readline(142,52,Chaine,2,1);
@@ -942,7 +943,7 @@ void Bouton_Settings(void)
         Afficher_curseur();
     }
 
-    if ((Bouton_clicke>=3) && (Bouton_clicke<=5))
+    if ((Bouton_clicke>=3) && (Bouton_clicke<=4))
     {
       Principal_File_list_Position=0;
       Principal_File_list_Decalage=0;
@@ -950,13 +951,13 @@ void Bouton_Settings(void)
       Brouillon_File_list_Decalage=0;
     }
 
-    if ((Bouton_clicke>=1) && (Bouton_clicke<=17))
+    if ((Bouton_clicke>=1) && (Bouton_clicke<=18))
       Settings_Afficher_config(&Config_choisie);
       
     if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
       Fenetre_aide(BOUTON_PARAMETRES, NULL);
   }
-  while ( (Bouton_clicke!=19) && (Touche!=SDLK_RETURN) );
+  while ( (Bouton_clicke!=18) && (Touche!=SDLK_RETURN) );
 
   Config=Config_choisie;
 

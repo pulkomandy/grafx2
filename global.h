@@ -44,7 +44,7 @@ GLOBAL struct S_Config
   byte Fonte;
   int  Lire_les_fichiers_caches;
   int  Lire_les_repertoires_caches;
-  int  Lire_les_repertoires_systemes;
+//  int  Lire_les_repertoires_systemes;
   byte Afficher_limites_image;
   byte Curseur;
   byte Maximize_preview;
