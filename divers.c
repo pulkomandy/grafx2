@@ -268,7 +268,11 @@ int Get_input(void)
       break;
     }
   }
-  else return 0; // Il ne s'est rien passé
+  else
+  {
+    Flush_update();
+    return 0; // Il ne s'est rien passé
+  }
 
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
