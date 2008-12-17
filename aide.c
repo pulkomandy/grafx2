@@ -91,7 +91,7 @@ void Afficher_aide(void)
   short  Largeur;             // Largeur physique d'une ligne de texte
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
-  const unsigned char * Ligne;
+  const char * Ligne;
   char   Buffer[44];          // Buffer texte utilisé pour formater les noms de 
                               // raccourcis clavier
   short  Position_lien=0;     // Position du premier caractère "variable"
@@ -123,7 +123,7 @@ void Afficher_aide(void)
     else if (TypeLigne == 'K')
     {
       const char *Lien;
-      Position_lien = (unsigned char *)strstr(Ligne,"%s") - Ligne;
+      Position_lien = strstr(Ligne,"%s") - Ligne;
       Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].valeur);
       Taille_lien=strlen(Lien);
       sprintf(Buffer, Ligne, Lien);
@@ -148,13 +148,13 @@ void Afficher_aide(void)
         // qui va a gauche, sinon celui qui va a droite.
         
         if (TypeLigne=='T')
-          Curseur=Caracteres_Aide_Titre_haut[Ligne[Indice_de_caractere/2]-' '] + (Indice_de_caractere & 1);
+          Curseur=Caracteres_Aide_Titre_haut[(unsigned char)(Ligne[Indice_de_caractere/2])-' '] + (Indice_de_caractere & 1);
         else if (TypeLigne=='-')
-          Curseur=Caracteres_Aide_Titre_bas[Ligne[Indice_de_caractere/2]-' '] + (Indice_de_caractere & 1);
+          Curseur=Caracteres_Aide_Titre_bas[(unsigned char)(Ligne[Indice_de_caractere/2])-' '] + (Indice_de_caractere & 1);
         else if (TypeLigne=='S')
-          Curseur=Caracteres_Aide_S[Ligne[Indice_de_caractere]-' '];
+          Curseur=Caracteres_Aide_S[(unsigned char)(Ligne[Indice_de_caractere])-' '];
         else if (TypeLigne=='N' || TypeLigne=='K')
-          Curseur=Caracteres_Aide_N[Ligne[Indice_de_caractere]-' '];
+          Curseur=Caracteres_Aide_N[(unsigned char)(Ligne[Indice_de_caractere])-' '];
         else
           Curseur=1; // Un garde-fou en cas de probleme
           
