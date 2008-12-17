@@ -1938,7 +1938,7 @@ short Fenetre_Bouton_clicke(void)
 {
   short Bouton;
 
-  while(!Get_input())Wait_VBL();
+  if(!Get_input())Wait_VBL();
 
   // Gestion des clicks
   if (Mouse_K)
