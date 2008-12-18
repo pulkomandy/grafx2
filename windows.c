@@ -25,6 +25,7 @@
 */
 
 #include <math.h>
+#include <string.h> // strncpy() strlen()
 
 #include "windows.h"
 #include "global.h"
@@ -33,13 +34,13 @@
 #include "divers.h"
 #include "sdlscreen.h"
 
-// Affichage d'un pixel dans le menu (le menu doÃ®t Ãªtre visible)
+// Affichage d'un pixel dans le menu (le menu doit être visible)
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
   Block(X*Menu_Facteur_X,(Y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
-  // Affichage d'un pixel dans la fenÃªtre (la fenÃªtre doÃ®t Ãªtre visible)
+  // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
 
 void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 {
@@ -47,35 +48,35 @@ void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 }
 
 
-// -- Affichages de diffÃ©rents cadres dans une fenÃªtre -----------------------
+// -- Affichages de différents cadres dans une fenêtre -----------------------
 
-  // -- Cadre gÃ©nÃ©ral avec couleurs paramÃ¨trables --
+  // -- Cadre général avec couleurs paramètrables --
 
 void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD)
-// ParamÃ¨tres de couleurs:
+// Paramètres de couleurs:
 // Couleur_HG =Bords Haut et Gauche
 // Couleur_BD =Bords Bas et Droite
 // Couleur_S  =Coins Haut-Droite et Bas-Gauche
 // Couleur_CHG=Coin Haut-Gauche
 // Couleur_CBD=Coin Bas-Droite
 {
-  // Bord haut (sans les extrÃ©mitÃ©s)
+  // Bord haut (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
         Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_HG);
 
-  // Bord bas (sans les extrÃ©mitÃ©s)
+  // Bord bas (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+Hauteur-1)*Menu_Facteur_Y),
         (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_BD);
 
-  // Bord gauche (sans les extrÃ©mitÃ©s)
+  // Bord gauche (sans les extrémités)
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_HG);
 
-  // Bord droite (sans les extrÃ©mitÃ©s)
+  // Bord droite (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+Largeur-1)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_BD);
@@ -97,21 +98,21 @@ void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word Largeur,word Hauteur
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,Couleur,Couleur,Couleur,Couleur,Couleur);
 }
 
-  // -- Cadre creux: foncÃ© en haut-gauche et clair en bas-droite --
+  // -- Cadre creux: foncé en haut-gauche et clair en bas-droite --
 
 void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
 }
 
-  // -- Cadre bombÃ©: clair en haut-gauche et foncÃ© en bas-droite --
+  // -- Cadre bombé: clair en haut-gauche et foncé en bas-droite --
 
 void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
 }
 
-  // -- Cadre de sÃ©paration: un cadre bombÃ© dans un cadre creux (3D!!!) --
+  // -- Cadre de séparation: un cadre bombé dans un cadre creux (3D!!!) --
 
 void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
@@ -120,7 +121,7 @@ void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 }
 
 
-//-- Affichages relatifs Ã  la palette dans le menu ---------------------------
+//-- Affichages relatifs à la palette dans le menu ---------------------------
 
   // -- Affichage des couleurs courante (fore/back) de pinceau dans le menu --
 
@@ -165,7 +166,7 @@ void Encadrer_couleur_menu(byte Couleur)
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y<<2,Fore_color);
 
-        UpdateRect(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*4); // TODO On met Ã  jour toute la palette... peut mieux faire
+        UpdateRect(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*4); // TODO On met à jour toute la palette... peut mieux faire
       }
       else
       {
@@ -297,13 +298,13 @@ void Afficher_menu(void)
       }
       Print_nom_fichier();
     }
-    UpdateRect(0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur Ã  jour, Ã§a inclut la palette et la zone d'Ã©tant avec le nom du fichier
+    UpdateRect(0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'étant avec le nom du fichier
   }
 }
 
 // -- Affichage de texte -----------------------------------------------------
 
-  // -- Afficher une chaÃ®ne n'importe oÃ¹ Ã  l'Ã©cran --
+  // -- Afficher une chaîne n'importe où à l'écran --
 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -322,7 +323,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
     Reel_X=0; // Position dans le buffer
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
-      // Pointeur sur le premier pixel du caractÃ¨re
+      // Pointeur sur le premier pixel du caractère
       Caractere=Fonte+(((unsigned char)Chaine[Indice])<<6);
       for (Pos_X=0;Pos_X<8<<3;Pos_X+=1<<3)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
@@ -333,7 +334,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
   }
 }
 
-  // -- Afficher un caractÃ¨re dans une fenÃªtre --
+  // -- Afficher un caractère dans une fenêtre --
 
 void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
 {
@@ -341,7 +342,7 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byt
   byte *Carac;
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
-  // Premier pixel du caractÃ¨re
+  // Premier pixel du caractère
   Carac=Fonte + (Caractere<<6);
   for (X=0;X<8;X++)
     for (Y=0;Y<8;Y++)
@@ -350,7 +351,7 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byt
             (*(Carac+(X<<3)+Y)?Couleur_texte:Couleur_fond));
 }
 
-  // -- Afficher un caractÃ¨re sans fond dans une fenÃªtre --
+  // -- Afficher un caractère sans fond dans une fenêtre --
 
 void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur)
 {
@@ -368,7 +369,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char C
     }
 }
 
-  // -- Afficher une chaÃ®ne dans une fenÃªtre, avec taille maxi --
+  // -- Afficher une chaîne dans une fenêtre, avec taille maxi --
 
 void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond)
 {
@@ -383,7 +384,7 @@ void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Co
   Print_dans_fenetre(X, Y, Chaine_affichee, Couleur_texte, Couleur_fond);
 }
 
-  // -- Afficher une chaÃ®ne dans une fenÃªtre --
+  // -- Afficher une chaîne dans une fenêtre --
 
 void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
@@ -393,7 +394,7 @@ void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Co
   UpdateRect(X*Menu_Facteur_X+Fenetre_Pos_X,Y*Menu_Facteur_Y+Fenetre_Pos_Y,8*Menu_Facteur_X*strlen(Chaine),8*Menu_Facteur_Y);
 }
 
-  // -- Afficher une chaÃ®ne dans le menu --
+  // -- Afficher une chaîne dans le menu --
 
 void Print_dans_menu(char * Chaine, short Position)
 {
@@ -401,9 +402,9 @@ void Print_dans_menu(char * Chaine, short Position)
   UpdateRect((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,strlen(Chaine)*8*Menu_Facteur_X,8*Menu_Facteur_Y);
 }
 
-  // -- Afficher les coordonnÃ©es du pinceau dans le menu --
+  // -- Afficher les coordonnées du pinceau dans le menu --
 
-// Note : cette fonction n'affiche que les chiffres, pas les X: Y: qui sont dans la gestion principale, car elle est apellÃ©e trÃ¨s souvent.
+// Note : cette fonction n'affiche que les chiffres, pas les X: Y: qui sont dans la gestion principale, car elle est apellée très souvent.
 void Print_coordonnees(void)
 {
   char Tempo[5];
@@ -444,7 +445,7 @@ void Print_nom_fichier(void)
   int Taille_nom;
   if (Menu_visible)
   {
-    // Si le nom de fichier fait plus de 12 caractÃ¨res, on n'affiche que les 12 derniers
+    // Si le nom de fichier fait plus de 12 caractères, on n'affiche que les 12 derniers
     strncpy(Nom_affiche,Principal_Nom_fichier,12);
     Taille_nom=strlen(Principal_Nom_fichier);
     Nom_affiche[12]='\0';
@@ -463,11 +464,11 @@ void Print_nom_fichier(void)
   }
 }
 
-// Fonction d'affichage d'une chaine numÃ©rique avec une fonte trÃ¨s fine
-// SpÃ©cialisÃ©e pour les compteurs RGB
+// Fonction d'affichage d'une chaine numérique avec une fonte très fine
+// Spécialisée pour les compteurs RGB
 void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
-  // Macros pour Ã©crire des litteraux binaires.
+  // Macros pour écrire des litteraux binaires.
   // Ex: Ob(11110000) == 0xF0
   #define Ob(x)  ((unsigned)Ob_(0 ## x ## uL))
   #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |		\
@@ -663,7 +664,7 @@ void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleu
 
 
 
-//---- FenÃªtre demandant de confirmer une action et renvoyant la rÃ©ponse -----
+//---- Fenêtre demandant de confirmer une action et renvoyant la réponse -----
 byte Demande_de_confirmation(char * Message)
 {
   short Bouton_clicke;
@@ -701,7 +702,7 @@ byte Demande_de_confirmation(char * Message)
 
 
 
-//---- FenÃªtre avertissant de quelque chose et attendant un click sur OK -----
+//---- Fenêtre avertissant de quelque chose et attendant un click sur OK -----
 void Warning_message(char * Message)
 {
   short Bouton_clicke;
@@ -773,7 +774,7 @@ void Afficher_pinceau_dans_menu(void)
         }
       break;
     default : // Pinceau
-      // On efface le pinceau prÃ©cÃ©dent
+      // On efface le pinceau précédent
       for (Pos_menu_Y=2,Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,Pos_Y++)
         for (Pos_menu_X=1,Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_menu_X++,Pos_X++)
         {
@@ -810,10 +811,10 @@ void Afficher_pinceau_dans_menu(void)
   UpdateRect(0,Menu_Ordonnee,LARGEUR_SPRITE_MENU*Menu_Facteur_X+3,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y+3);
 }
 
-  // -- Dessiner un pinceau prÃ©dÃ©fini dans la fenÃªtre --
+  // -- Dessiner un pinceau prédéfini dans la fenêtre --
 
 void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
-  // Pinceau = 0..NB_SPRITES_PINCEAU-1 : Pinceau prÃ©dÃ©fini
+  // Pinceau = 0..NB_SPRITES_PINCEAU-1 : Pinceau prédéfini
 {
   word Pos_X;
   word Pos_Y;
@@ -834,7 +835,7 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
     for (Pos_fenetre_X=0,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
       Block(Orig_X+Pos_fenetre_X*Taille_X,Orig_Y+Pos_fenetre_Y*Taille_Y,Taille_X,Taille_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
   // On n'utilise pas Pixel_dans_fenetre() car on ne dessine pas
-  // forcÃ©ment avec la mÃªme taille de pixel.
+  // forcément avec la même taille de pixel.
 
   UpdateRect( ToWinX(Orig_X), ToWinY(Orig_Y),
         ToWinL(Pinceau_predefini_Largeur[Numero]),
@@ -857,16 +858,16 @@ void Dessiner_zigouigoui(word X,word Y, byte Couleur, short Sens)
   Pixel_dans_fenetre(X,Y+5,Couleur);
 }
 
-  // -- Dessiner un bloc de couleurs dÃ©gradÃ© verticalement
+  // -- Dessiner un bloc de couleurs dégradé verticalement
 
 void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_block)
 {
-  word Total_lignes  =Menu_Facteur_Y<<6; // <=> Ã  64 lignes fct(Menu_Facteur)
+  word Total_lignes  =Menu_Facteur_Y<<6; // <=> à 64 lignes fct(Menu_Facteur)
   word Nb_couleurs   =(Debut_block<=Fin_block)?Fin_block-Debut_block+1:Debut_block-Fin_block+1;
   word Ligne_en_cours=(Debut_block<=Fin_block)?0:Total_lignes-1;
 
   word Debut_X       =Fenetre_Pos_X+(Menu_Facteur_X*Pos_X);
-  word Largeur_ligne =Menu_Facteur_X<<4; // <=> Ã  16 pixels fct(Menu_Facteur)
+  word Largeur_ligne =Menu_Facteur_X<<4; // <=> à 16 pixels fct(Menu_Facteur)
 
   word Debut_Y       =Fenetre_Pos_Y+(Menu_Facteur_Y*Pos_Y);
   word Fin_Y         =Debut_Y+Total_lignes;
@@ -887,7 +888,7 @@ void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_b
 
 
 
-  // -- Dessiner un petit sprite reprÃ©sentant le type d'un drive --
+  // -- Dessiner un petit sprite représentant le type d'un drive --
 
 void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
 {
@@ -903,15 +904,15 @@ void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
 
 void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
 {
-  // On part du principe qu'il n'y a que le bas d'une fenÃªtre qui puisse
-  // empiÃ©ter sur la palette... Et c'est dÃ©jÃ  pas mal!
+  // On part du principe qu'il n'y a que le bas d'une fenêtre qui puisse
+  // empiéter sur la palette... Et c'est déjà pas mal!
   byte Couleur,Vraie_couleur;
   word Debut_X,Debut_Y;
   word Fin_X,Fin_Y;
   word Largeur;
   word Hauteur;
   word Coin_X=Fenetre_Pos_X+Fenetre_Largeur*Menu_Facteur_X; // |_ Coin bas-droit
-  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur*Menu_Facteur_Y; // |  de la fenÃªtre +1
+  word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur*Menu_Facteur_Y; // |  de la fenêtre +1
 
 
   if (Config.Couleurs_separees)
@@ -934,8 +935,8 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       Fin_X=Debut_X+Largeur;
       Fin_Y=Debut_Y+Hauteur;
 
-      //   On affiche le bloc en entier si on peut, sinon on le dÃ©coupe autour
-      // de la fenÃªtre.
+      //   On affiche le bloc en entier si on peut, sinon on le découpe autour
+      // de la fenêtre.
       if ( (Debut_Y>=Coin_Y) || (Fin_X<=Fenetre_Pos_X) || (Debut_X>=Coin_X) )
         Block(Debut_X,Debut_Y,Largeur,Hauteur,Vraie_couleur);
       else
@@ -989,12 +990,12 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       }
       {
         // Affichage du bloc directement dans le "buffer de fond" de la fenetre.
-        // Cela permet au bloc de couleur d'apparaitre si on dÃ©place la fenetre.
+        // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
         short Pos_X;
         short Pos_Y;
-        short Deb_X; // besoin d'une variable signÃ©e
-        short Deb_Y; // besoin d'une variable signÃ©e
-        // Attention aux unitÃ©s
+        short Deb_X; // besoin d'une variable signée
+        short Deb_Y; // besoin d'une variable signée
+        // Attention aux unités
         Deb_X = ((short)Debut_X - (short)Fenetre_Pos_X);
         Deb_Y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
 
@@ -1008,15 +1009,15 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
   UpdateRect(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee_avant_fenetre,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y);
 }
 
-// -------- Calcul des bornes de la partie d'image visible Ã  l'Ã©cran ---------
+// -------- Calcul des bornes de la partie d'image visible à l'écran ---------
 void Calculer_limites(void)
 /*
-  Avant l'appel Ã  cette fonction, les donnÃ©es de la loupe doivent Ãªtre Ã  jour.
+  Avant l'appel à cette fonction, les données de la loupe doivent être à jour.
 */
 {
   if (Loupe_Mode)
   {
-    // -- Calcul des limites de la partie non zoomÃ©e de l'image --
+    // -- Calcul des limites de la partie non zoomée de l'image --
     Limite_Haut  =Principal_Decalage_Y;
     Limite_Gauche=Principal_Decalage_X;
     Limite_visible_Bas   =Limite_Haut+Menu_Ordonnee-1;
@@ -1032,7 +1033,7 @@ void Calculer_limites(void)
     else
       Limite_Droite=Limite_visible_Droite;
 
-    // -- Calcul des limites de la partie zoomÃ©e de l'image --
+    // -- Calcul des limites de la partie zoomée de l'image --
     Limite_Haut_Zoom  =Loupe_Decalage_Y;
     Limite_Gauche_Zoom=Loupe_Decalage_X;
     Limite_visible_Bas_Zoom   =Limite_Haut_Zoom+Loupe_Hauteur-1;
@@ -1069,7 +1070,7 @@ void Calculer_limites(void)
 }
 
 
-// -- Calculer les coordonnÃ©es du pinceau en fonction du snap et de la loupe -
+// -- Calculer les coordonnées du pinceau en fonction du snap et de la loupe -
 void Calculer_coordonnees_pinceau(void)
 {
   if ((Loupe_Mode) && (Mouse_X>=Principal_X_Zoom))
@@ -1106,7 +1107,7 @@ void Afficher_limites_de_l_image(void)
   Bas_visible   =Principal_Hauteur_image<Menu_Ordonnee;
 
 
-  // On vÃ©rifie que la limite Ã  droite est visible:
+  // On vérifie que la limite à droite est visible:
   if (Droite_visible)
   {
     Debut=Limite_Haut;
@@ -1116,7 +1117,7 @@ void Afficher_limites_de_l_image(void)
     if (Bas_visible)
       Fin++;
 
-    // Juste le temps d'afficher les limites, on Ã©tend les limites de la loupe
+    // Juste le temps d'afficher les limites, on étend les limites de la loupe
     // aux limites visibles, car sinon Pixel_Preview ne voudra pas afficher.
     Ancienne_Limite_Zoom=Limite_Droite_Zoom;
     Limite_Droite_Zoom=Limite_visible_Droite_Zoom;
@@ -1129,14 +1130,14 @@ void Afficher_limites_de_l_image(void)
     Limite_Droite_Zoom=Ancienne_Limite_Zoom;
   }
 
-  // On vÃ©rifie que la limite en bas est visible:
+  // On vérifie que la limite en bas est visible:
   if (Bas_visible)
   {
     Debut=Limite_Gauche;
     Fin=(Limite_Droite<Principal_Largeur_image)?
         Limite_Droite:Principal_Largeur_image;
 
-    // On Ã©tend Ã©galement les limites en bas (comme pour la limite droit)
+    // On étend également les limites en bas (comme pour la limite droit)
     Ancienne_Limite_Zoom=Limite_Bas_Zoom;
     Limite_Bas_Zoom=Limite_visible_Bas_Zoom;
 
@@ -1152,7 +1153,7 @@ void Afficher_limites_de_l_image(void)
 
 
 
-// -- Recadrer la partie non-zoomÃ©e de l'image par rapport Ã  la partie zoomÃ©e
+// -- Recadrer la partie non-zoomée de l'image par rapport à la partie zoomée
 //    lorsqu'on scrolle en mode Loupe --
 void Recadrer_ecran_par_rapport_au_zoom(void)
 {
@@ -1186,7 +1187,7 @@ void Recadrer_ecran_par_rapport_au_zoom(void)
 }
 
 
-// - Calcul des donnÃ©es du split en fonction de la proportion de chaque zone -
+// - Calcul des données du split en fonction de la proportion de chaque zone -
 void Calculer_split(void)
 {
   //short Temp;
@@ -1195,13 +1196,13 @@ void Calculer_split(void)
   Principal_X_Zoom=Largeur_ecran-(((Largeur_ecran+(Loupe_Facteur>>1)-X_theorique)/Loupe_Facteur)*Loupe_Facteur);
   Principal_Split=Principal_X_Zoom-(Menu_Facteur_X*LARGEUR_BARRE_SPLIT);
 
-  // Correction en cas de dÃ©bordement sur la gauche
+  // Correction en cas de débordement sur la gauche
   while (Principal_Split*(Loupe_Facteur+1)<Largeur_ecran-(Menu_Facteur_X*LARGEUR_BARRE_SPLIT))
   {
     Principal_Split+=Loupe_Facteur;
     Principal_X_Zoom+=Loupe_Facteur;
   }
-  // Correction en cas de dÃ©bordement sur la droite
+  // Correction en cas de débordement sur la droite
   X_theorique=Largeur_ecran-((NB_PIXELS_ZOOMES_MIN-1)*Loupe_Facteur);
   while (Principal_X_Zoom>=X_theorique)
   {
@@ -1215,7 +1216,7 @@ void Calculer_split(void)
 // -------------------- Calcul des information de la loupe -------------------
 void Calculer_donnees_loupe(void)
 /*
-  AprÃ¨s modification des donnÃ©es de la loupe, il faut recalculer les limites.
+  Après modification des données de la loupe, il faut recalculer les limites.
 */
 {
   Calculer_split();
@@ -1236,7 +1237,7 @@ void Calculer_donnees_loupe(void)
 
 
 
-// ------------ Changer le facteur de zoom et tout mettre Ã  jour -------------
+// ------------ Changer le facteur de zoom et tout mettre à jour -------------
 void Changer_facteur_loupe(byte Indice_facteur)
 {
   short Centre_X;
@@ -1251,11 +1252,11 @@ void Changer_facteur_loupe(byte Indice_facteur)
 
   if (Loupe_Mode)
   {
-    // Recalculer le dÃ©calage de la loupe
-    // Centrage "brut" de lÃ©cran par rapport Ã  la loupe
+    // Recalculer le décalage de la loupe
+    // Centrage "brut" de lécran par rapport à la loupe
     Loupe_Decalage_X=Centre_X-(Loupe_Largeur>>1);
     Loupe_Decalage_Y=Centre_Y-(Loupe_Hauteur>>1);
-    // Correction en cas de dÃ©bordement de l'image
+    // Correction en cas de débordement de l'image
     if (Loupe_Decalage_X+Loupe_Largeur>Principal_Largeur_image)
       Loupe_Decalage_X=Principal_Largeur_image-Loupe_Largeur;
     if (Loupe_Decalage_Y+Loupe_Hauteur>Principal_Hauteur_image)
@@ -1279,7 +1280,7 @@ void Changer_facteur_loupe(byte Indice_facteur)
 
 
 
-  // -- Afficher la barre de sÃ©paration entre les parties zoomÃ©es ou non en
+  // -- Afficher la barre de séparation entre les parties zoomées ou non en
   //    mode Loupe --
 
 void Afficher_barre_de_split(void)
@@ -1303,11 +1304,11 @@ void Afficher_barre_de_split(void)
   Block(Principal_Split+Menu_Facteur_X,Menu_Facteur_Y,
         Menu_Facteur_X,(Menu_Ordonnee-(Menu_Facteur_Y<<1)),CM_Blanc);
 
-  // Bord droite (gris foncÃ©)
+  // Bord droite (gris foncé)
   Block(Principal_X_Zoom-(Menu_Facteur_X<<1),Menu_Facteur_Y,
         Menu_Facteur_X,(Menu_Ordonnee-(Menu_Facteur_Y<<1)),CM_Fonce);
 
-  // Bord bas (gris foncÃ©)
+  // Bord bas (gris foncé)
   Block(Principal_Split+(Menu_Facteur_X<<1),Menu_Ordonnee-Menu_Facteur_Y,
         (LARGEUR_BARRE_SPLIT-3)*Menu_Facteur_X,Menu_Facteur_Y,CM_Fonce);
 
@@ -1318,7 +1319,7 @@ void Afficher_barre_de_split(void)
   Block(Principal_X_Zoom-(Menu_Facteur_X<<1),0,
         Menu_Facteur_X,Menu_Facteur_Y,CM_Clair);
 
-  UpdateRect(Principal_Split,0,LARGEUR_BARRE_SPLIT*Menu_Facteur_X,Menu_Ordonnee); // On rÃ©affiche toute la partie Ã  gauche du split, ce qui permet d'effacer son ancienne position
+  UpdateRect(Principal_Split,0,LARGEUR_BARRE_SPLIT*Menu_Facteur_X,Menu_Ordonnee); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
 }
 
 
@@ -1326,7 +1327,7 @@ void Afficher_barre_de_split(void)
 // -- Fonctions de manipulation du curseur -----------------------------------
 
 
-  // -- Afficher une barre horizontale XOR zoomÃ©e
+  // -- Afficher une barre horizontale XOR zoomée
 
 void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 {
@@ -1343,7 +1344,7 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 }
 
 
-  // -- Afficher une barre verticale XOR zoomÃ©e
+  // -- Afficher une barre verticale XOR zoomée
 
 void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
 {
@@ -1372,8 +1373,8 @@ void Afficher_curseur(void)
   short Pos_Y;
   short Compteur_X;
   short Compteur_Y;
-  //short Fin_Compteur_X; // Position X ou s'arrÃªte l'affichage de la brosse/pinceau
-  //short Fin_Compteur_Y; // Position Y ou s'arrÃªte l'affichage de la brosse/pinceau
+  //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
+  //short Fin_Compteur_Y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   Temp;
   byte  Couleur;
   float cosA,sinA;
@@ -1464,7 +1465,7 @@ void Afficher_curseur(void)
           if (Fin_Y<3)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,3-Fin_Y);
 
-          // Petites barres aux extrÃ©mitÃ©s
+          // Petites barres aux extrémités
 
           Debut_X=(!Mouse_X);
           Debut_Y=(!Mouse_Y);
@@ -1560,7 +1561,7 @@ void Afficher_curseur(void)
       }
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
-      // !!! Cette forme ne peut pas Ãªtre utilisÃ©e en mode Loupe !!!
+      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
 
       // Petite croix au centre
       Debut_X=(Mouse_X-3);
@@ -1669,7 +1670,7 @@ void Afficher_curseur(void)
 void Effacer_curseur(void)
 {
   byte  Forme;
-  int Debut_X; // int car sont parfois nÃ©gatifs ! (quand on dessine sur un bord)
+  int Debut_X; // int car sont parfois négatifs ! (quand on dessine sur un bord)
   int Debut_Y;
   short Fin_X;
   short Fin_Y;
@@ -1677,8 +1678,8 @@ void Effacer_curseur(void)
   int Pos_Y;
   short Compteur_X;
   short Compteur_Y;
-  //short Fin_Compteur_X; // Position X ou s'arrÃªte l'affichage de la brosse/pinceau
-  //short Fin_Compteur_Y; // Position Y ou s'arrÃªte l'affichage de la brosse/pinceau
+  //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
+  //short Fin_Compteur_Y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   Temp;
   //byte  Couleur;
   float cosA,sinA;
@@ -1856,7 +1857,7 @@ void Effacer_curseur(void)
 
       break;
     case FORME_CURSEUR_RECTANGLE_XOR :
-      // !!! Cette forme ne peut pas Ãªtre utilisÃ©e en mode Loupe !!!
+      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
 
       // Petite croix au centre
       Debut_X=(Mouse_X-3);
@@ -1972,7 +1973,7 @@ void Afficher_ecran(void)
   word Largeur;
   word Hauteur;
 
-  // ---/\/\/\  Partie non zoomÃ©e: /\/\/\---
+  // ---/\/\/\  Partie non zoomée: /\/\/\---
   if (Loupe_Mode)
   {
     if (Principal_Largeur_image<Principal_Split)
@@ -1993,7 +1994,7 @@ void Afficher_ecran(void)
     Hauteur=Menu_Ordonnee;
   Display_screen(Largeur,Hauteur,Principal_Largeur_image);
 
-  // Effacement de la partie non-image dans la partie non zoomÃ©e:
+  // Effacement de la partie non-image dans la partie non zoomée:
   if (Loupe_Mode)
   {
     if (Principal_Largeur_image<Principal_Split && Principal_Largeur_image < Largeur_ecran)
@@ -2007,7 +2008,7 @@ void Afficher_ecran(void)
   if (Principal_Hauteur_image<Menu_Ordonnee)
     Block(0,Principal_Hauteur_image,Largeur,(Menu_Ordonnee-Hauteur),0);
 
-  // ---/\/\/\  Partie zoomÃ©e: /\/\/\---
+  // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Loupe_Mode)
   {
     // Affichage de la barre de split
@@ -2019,7 +2020,7 @@ void Afficher_ecran(void)
     else
       Largeur=Loupe_Largeur;
 
-    // Calcul du nombre de lignes visibles de l'image zoomÃ©e
+    // Calcul du nombre de lignes visibles de l'image zoomée
     if (Principal_Hauteur_image<Loupe_Hauteur)
       Hauteur=Principal_Hauteur_image*Loupe_Facteur;
     else
@@ -2027,7 +2028,7 @@ void Afficher_ecran(void)
 
     Display_zoomed_screen(Largeur,Hauteur,Principal_Largeur_image,Buffer_de_ligne_horizontale);
 
-    // Effacement de la partie non-image dans la partie zoomÃ©e:
+    // Effacement de la partie non-image dans la partie zoomée:
     if (Principal_Largeur_image<Loupe_Largeur)
       Block(Principal_X_Zoom+(Principal_Largeur_image*Loupe_Facteur),0,
             (Loupe_Largeur-Principal_Largeur_image)*Loupe_Facteur,
@@ -2039,7 +2040,7 @@ void Afficher_ecran(void)
   // ---/\/\/\ Affichage des limites /\/\/\---
   if (Config.Afficher_limites_image)
     Afficher_limites_de_l_image();
-  UpdateRect(0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en Ã©vitant de mettre Ã  jour la partie Ã  droite du split quand on est en mode loupe. Mais c'est pas vraiment intÃ©ressant ?
+  UpdateRect(0,0,Largeur_ecran,Menu_Ordonnee); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
 }
 
 
@@ -2170,7 +2171,7 @@ byte Old_Trans;
 void Remap_pixel(byte * Pix)
 {
   if (*Pix==Old_Clair)         // On commence par tester le Gris clair
-    *Pix=CM_Clair;             // qui est pas mal utilisÃ©.
+    *Pix=CM_Clair;             // qui est pas mal utilisé.
   else
   {
     if (*Pix==Old_Noir)        // Puis le Noir...
@@ -2204,7 +2205,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
   if ( (CM_Clair!=Old_Clair) || (CM_Fonce!=Old_Fonce) || (CM_Blanc!=Old_Blanc) || (CM_Noir !=Old_Noir )
     || (CM_Trans!=Old_Trans) )
   {
-    // CrÃ©ation de la table de conversion
+    // Création de la table de conversion
     for (Indice=0; Indice<256; Indice++)
       Table_de_conversion[Indice]=Indice;
 
@@ -2213,7 +2214,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
     Table_de_conversion[Old_Clair]=CM_Clair;
     Table_de_conversion[Old_Blanc]=CM_Blanc;
 
-    // Remappage de l'Ã©cran
+    // Remappage de l'écran
 
     Temp=Fenetre_Hauteur*Menu_Facteur_Y;
 
@@ -2230,11 +2231,11 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
       // Remappage de la partie du fond de la fenetre qui cacherait le menu...
       Remappe_fond_fenetres(Table_de_conversion, Menu_Ordonnee_avant_fenetre, Hauteur_ecran);
       /*
-         Il faudrait peut-Ãªtre remapper les pointillÃ©s dÃ©limitant l'image.
-         Mais Ã§a va Ãªtre chiant parce qu'ils peuvent Ãªtre affichÃ©s en mode Loupe.
-         Mais de toutes faÃ§ons, c'est franchement facultatif...
+         Il faudrait peut-être remapper les pointillés délimitant l'image.
+         Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
+         Mais de toutes façons, c'est franchement facultatif...
       */
-      // On passe la table juste pour ne rafficher que les couleurs modifiÃ©es
+      // On passe la table juste pour ne rafficher que les couleurs modifiées
       Afficher_palette_du_menu_en_evitant_la_fenetre(Table_de_conversion);
     }
   }
@@ -2282,7 +2283,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
       CM_Clair=Table[2];
   }
 
-  // Recherche du gris foncÃ©
+  // Recherche du gris foncé
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
     (Coul_menu_pref[1].R, Coul_menu_pref[1].V, Coul_menu_pref[1].B,Palette,Table);
   if ( (CM_Noir!=Table[0]) && (CM_Blanc!=Table[0]) && (CM_Clair!=Table[0]) )
@@ -2300,7 +2301,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
     }
   }
 
-  // C'est peu probable mais il est possible que CM_Clair soit plus foncÃ©e que
+  // C'est peu probable mais il est possible que CM_Clair soit plus foncée que
   // CM_Fonce. Dans ce cas, on les inverse.
   if ( ((Palette[CM_Clair].R*30)+(Palette[CM_Clair].V*59)+(Palette[CM_Clair].B*11)) <
        ((Palette[CM_Fonce].R*30)+(Palette[CM_Fonce].V*59)+(Palette[CM_Fonce].B*11)) )
@@ -2310,7 +2311,7 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
     CM_Fonce=I;
   }
 
-  // On cherche une couleur de transparence diffÃ©rente des 4 autres.
+  // On cherche une couleur de transparence différente des 4 autres.
   for (CM_Trans=0; ((CM_Trans==CM_Noir) || (CM_Trans==CM_Fonce) ||
                    (CM_Trans==CM_Clair) || (CM_Trans==CM_Blanc)); CM_Trans++);
 

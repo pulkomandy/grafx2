@@ -25,6 +25,8 @@
 */
 
 #include <math.h>
+#include <stdlib.h>
+#include <string.h> // memset()
 
 #include "global.h"
 #include "graph.h"
@@ -33,8 +35,8 @@
 #include "windows.h"
 #include "sdlscreen.h"
 
-// Calcul de redimensionnement du pinceau pour Ã©viter les dÃ©bordements de
-// l'Ã©cran et de l'image
+// Calcul de redimensionnement du pinceau pour éviter les débordements de
+// l'écran et de l'image
 void Calculer_dimensions_clipees(short * X,short * Y,short * Largeur,short * Hauteur)
 {
   if ((*X)<Limite_Gauche)
@@ -60,8 +62,8 @@ void Calculer_dimensions_clipees(short * X,short * Y,short * Largeur,short * Hau
   }
 }
 
-  // -- Calcul de redimensionnement du pinceau pour Ã©viter les dÃ©bordements
-  //    de l'Ã©cran zoomÃ© et de l'image --
+  // -- Calcul de redimensionnement du pinceau pour éviter les débordements
+  //    de l'écran zoomé et de l'image --
 
 void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short * Hauteur)
 {
@@ -89,24 +91,24 @@ void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short 
 }
 
 
-  // -- Afficher le pinceau (de faÃ§on dÃ©finitive ou non) --
+  // -- Afficher le pinceau (de façon définitive ou non) --
 
 void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   // X,Y: position du centre du pinceau
-  // Couleur: couleur Ã  appliquer au pinceau
-  // Preview: "Il ne faut l'afficher qu'Ã  l'Ã©cran"
+  // Couleur: couleur à appliquer au pinceau
+  // Preview: "Il ne faut l'afficher qu'à l'écran"
 {
-  short Debut_X; // Position X (dans l'image) Ã  partir de laquelle on
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) Ã  partir de laquelle on
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'Ã©cran selon laquelle on affiche la
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Hauteur; // Hauteur dans l'Ã©cran selon laquelle on affiche la
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) Ã  partir
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) Ã  partir
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
   short Pos_X; // Position X (dans l'image) en cours d'affichage
   short Pos_Y; // Position Y (dans l'image) en cours d'affichage
@@ -114,15 +116,15 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         // d'affichage
   short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours
         // d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrÃªte l'affichade de la
+  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la
         // brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrÃªte l'affichade de la
+  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la
         // brosse/pinceau
   byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
   int Position;
   byte * Temp;
 
-  if (!(Preview && Mouse_K)) // Si bouton enfoncÃ© & preview > pas de dessin
+  if (!(Preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
   switch (Pinceau_Forme)
   {
     case FORME_PINCEAU_POINT : // !!! TOUJOURS EN PREVIEW !!!
@@ -475,25 +477,25 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 void Effacer_pinceau(short X,short Y)
   // X,Y: position du centre du pinceau
 {
-  short Debut_X; // Position X (dans l'image) Ã  partir de laquelle on
+  short Debut_X; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) Ã  partir de laquelle on
+  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'Ã©cran selon laquelle on affiche la
+  short Largeur; // Largeur dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Hauteur; // Hauteur dans l'Ã©cran selon laquelle on affiche la
+  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) Ã  partir
+  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) Ã  partir
+  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
   //short Pos_X; // Position X (dans l'image) en cours d'affichage
   //short Pos_Y; // Position Y (dans l'image) en cours d'affichage
   //short Compteur_X; // Position X (dans la brosse/pinceau) en cours
         //d'affichage
   //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrÃªte l'affichade de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrÃªte l'affichade de la brosse/pinceau
+  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
+  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
   byte * Temp;
 
   if (!Mouse_K)
@@ -632,10 +634,10 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
 
   if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
   {
-    // On met les dÃ©calages du tiling Ã  0 pour eviter toute incohÃ©rence.
-    // Si par hasard on voulait les mettre Ã 
+    // On met les décalages du tiling à 0 pour eviter toute incohérence.
+    // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser Ã  les initialiser Ã  0 dans "MAIN.C".
+    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
     Tiling_Decalage_X=0;
     Tiling_Decalage_Y=0;
 
@@ -670,7 +672,7 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mÃªme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -738,11 +740,11 @@ void Remap_brosse(void)
 {
   short Pos_X; // Variable de balayage de la brosse
   short Pos_Y; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de boolÃ©ens "La couleur est utilisÃ©e"
+  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
   int   Couleur;
 
 
-  // On commence par initialiser le tableau de boolÃ©ens Ã  faux
+  // On commence par initialiser le tableau de booléens à faux
   for (Couleur=0;Couleur<=255;Couleur++)
     Utilisee[Couleur]=0;
 
@@ -751,32 +753,32 @@ void Remap_brosse(void)
     for (Pos_X=0;Pos_X<Brosse_Largeur;Pos_X++)
       Utilisee[Lit_pixel_dans_brosse(Pos_X,Pos_Y)]=1;
 
-  //  On n'est pas censÃ© remapper la couleur de transparence, sinon la brosse
-  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisÃ©e
-  // ainsi on ne s'embÃªtera pas Ã  la recalculer
+  //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
+  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
+  // ainsi on ne s'embêtera pas à la recalculer
   Utilisee[Back_color]=0;
 
   //   On va maintenant se servir de la table "Utilisee" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilisÃ©es on besoin d'Ãªtres recalculÃ©es: les
-  //       autres ne seront jamais consultÃ©es dans la nouvelle table de
+  // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
+  //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
-  //       ne seront pas utilisÃ©es par Remap_brush_LOWLEVEL.
+  //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
       Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
 
-  //   Il reste une couleur non calculÃ©e dans la table qu'il faut mettre Ã 
-  // jour: c'est la couleur de fond. On l'avait inhibÃ©e pour Ã©viter son
-  // calcul inutile, mais comme il est possible qu'elle soit quand mÃªme dans
-  // la brosse, on va mettre dans la table une relation d'Ã©quivalence entre
-  // les deux palettes: comme on ne veut pas que la couleur soit remplacÃ©e,
-  // on va dire qu'on veut qu'elle soit remplacÃ©e par la couleur en question.
+  //   Il reste une couleur non calculée dans la table qu'il faut mettre à
+  // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
+  // calcul inutile, mais comme il est possible qu'elle soit quand même dans
+  // la brosse, on va mettre dans la table une relation d'équivalence entre
+  // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
+  // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
   Utilisee[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
-  // qui craint un peu, on peut faire l'Ã©change dans la brosse de toutes les
+  // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   Remap_general_LOWLEVEL(Utilisee,Brosse,Brosse_Largeur,Brosse_Hauteur,Brosse_Largeur);
   //Remap_brush_LOWLEVEL(Utilisee);
@@ -800,7 +802,7 @@ void Outline_brush(void)
 
   if (Nouvelle_brosse)
   {
-    // On remplit la bordure ajoutÃ©e par la Backcolor
+    // On remplit la bordure ajoutée par la Backcolor
     memset(Nouvelle_brosse,Back_color,((long)Largeur)*Hauteur);
 
     // On copie la brosse courante dans la nouvelle
@@ -821,7 +823,7 @@ void Outline_brush(void)
     Largeur-=2;
     Hauteur-=2;
 
-    // Si on "outline" avec une couleur diffÃ©rente de la Back_color on y va!
+    // Si on "outline" avec une couleur différente de la Back_color on y va!
     if (Fore_color!=Back_color)
     {
       // 1er balayage (horizontal)
@@ -847,12 +849,12 @@ void Outline_brush(void)
             }
           }
         }
-        // Cas du dernier pixel Ã  droite de la ligne
+        // Cas du dernier pixel à droite de la ligne
         if (Etat)
           Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
       }
 
-      // 2Ã¨me balayage (vertical)
+      // 2ème balayage (vertical)
       for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
       {
         Etat=0;
@@ -885,16 +887,16 @@ void Outline_brush(void)
     Brosse_Decalage_X=(Brosse_Largeur>>1);
     Brosse_Decalage_Y=(Brosse_Hauteur>>1);
 
-    free(Temporaire); // LibÃ©ration de l'ancienne brosse
+    free(Temporaire); // Libération de l'ancienne brosse
 
-    // RÃ©allocation d'un buffer de Smear
+    // Réallocation d'un buffer de Smear
     free(Smear_Brosse);
     Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
   }
   else
-    Erreur(0); // Pas assez de mÃ©moire!
+    Erreur(0); // Pas assez de mémoire!
 }
 
 
@@ -959,12 +961,12 @@ void Nibble_brush(void)
             }
           }
         }
-        // Cas du dernier pixel Ã  droite de la ligne
+        // Cas du dernier pixel à droite de la ligne
         if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
           Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
       }
 
-      // 2Ã¨me balayage (vertical)
+      // 2ème balayage (vertical)
       for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
       {
         Etat=(Temporaire[Largeur+Pos_X+1]!=Back_color);;
@@ -997,16 +999,16 @@ void Nibble_brush(void)
       Brosse_Decalage_X=(Brosse_Largeur>>1);
       Brosse_Decalage_Y=(Brosse_Hauteur>>1);
 
-      free(Temporaire); // LibÃ©ration de l'ancienne brosse
+      free(Temporaire); // Libération de l'ancienne brosse
 
-      // RÃ©allocation d'un buffer de Smear
+      // Réallocation d'un buffer de Smear
       free(Smear_Brosse);
       Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
       Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
       Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
     }
     else
-      Erreur(0);  // Pas assez de mÃ©moire!
+      Erreur(0);  // Pas assez de mémoire!
   }
 }
 
@@ -1040,7 +1042,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
       Fin_Y=Pos_Y;
   }
 
-  // On clippe ces bornes Ã  l'Ã©cran:
+  // On clippe ces bornes à l'écran:
   if (Debut_X<Limite_Gauche)
     Debut_X=Limite_Gauche;
   if (Fin_X>Limite_Droite)
@@ -1055,10 +1057,10 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
 
   if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
   {
-    // On met les dÃ©calages du tiling Ã  0 pour eviter toute incohÃ©rence.
-    // Si par hasard on voulait les mettre Ã 
+    // On met les décalages du tiling à 0 pour eviter toute incohérence.
+    // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser Ã  les initialiser Ã  0 dans "MAIN.C".
+    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
     Tiling_Decalage_X=0;
     Tiling_Decalage_Y=0;
 
@@ -1088,7 +1090,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mÃªme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -1120,7 +1122,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
                          Points[0],Points[1],
                          ~Back_color);
 
-    // On scanne la brosse pour remplacer tous les pixels affectÃ©s par le
+    // On scanne la brosse pour remplacer tous les pixels affectés par le
     // polyfill par ceux de l'image:
     for (Pos_Y=Debut_Y;Pos_Y<=Fin_Y;Pos_Y++)
       for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
@@ -1152,9 +1154,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 
   int    Pos_X_dans_brosse;   // Position courante dans l'ancienne brosse
   int    Pos_Y_dans_brosse;
-  int    Delta_X_dans_brosse; // "Vecteur incrÃ©mental" du point prÃ©cÃ©dent
+  int    Delta_X_dans_brosse; // "Vecteur incrémental" du point précédent
   int    Delta_Y_dans_brosse;
-  int    Pos_X_initial;       // Position X de dÃ©but de parcours de ligne
+  int    Pos_X_initial;       // Position X de début de parcours de ligne
   int    Dx,Dy;
 
   Dx=(X1<X2)?1:-1;
@@ -1171,7 +1173,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 
   // Calcul des anciennes dimensions de la brosse:
 
-  // Calcul du "vecteur incrÃ©mental":
+  // Calcul du "vecteur incrémental":
   Delta_X_dans_brosse=(Brosse_Largeur<<16)/(X2-X1+Dx);
   Delta_Y_dans_brosse=(Brosse_Hauteur<<16)/(Y2-Y1+Dy);
 
@@ -1181,7 +1183,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   else
     Pos_X_initial = (Brosse_Largeur<<16)-1; // Inversion en X de la brosse
 
-  free(Smear_Brosse); // On libÃ¨re un peu de mÃ©moire
+  free(Smear_Brosse); // On libère un peu de mémoire
 
   if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
   {
@@ -1196,7 +1198,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
     // Pour chaque ligne
     for (Ligne=0;Ligne<New_Brosse_Hauteur;Ligne++)
     {
-      // On repart du dÃ©but de la ligne:
+      // On repart du début de la ligne:
       Pos_X_dans_brosse=Pos_X_initial;
 
       // Pour chaque colonne:
@@ -1204,13 +1206,13 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
       {
         // On copie le pixel:
         New_Brosse[Offset]=Lit_pixel_dans_brosse(Pos_X_dans_brosse>>16,Pos_Y_dans_brosse>>16);
-        // On passe Ã  la colonne de brosse suivante:
+        // On passe à la colonne de brosse suivante:
         Pos_X_dans_brosse+=Delta_X_dans_brosse;
         // On passe au pixel suivant de la nouvelle brosse:
         Offset++;
       }
 
-      // On passe Ã  la ligne de brosse suivante:
+      // On passe à la ligne de brosse suivante:
       Pos_Y_dans_brosse+=Delta_Y_dans_brosse;
     }
 
@@ -1224,7 +1226,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mÃªme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -1243,9 +1245,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   }
   else
   {
-    // Ici la libÃ©ration de mÃ©moire n'a pas suffit donc on remet dans l'Ã©tat
-    // oÃ¹ c'etait avant. On a juste Ã  rÃ©allouer la Smear_Brosse car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu Ãªtre allouÃ©
+    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
+    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
     Erreur(0);
@@ -1276,7 +1278,7 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
   Largeur_dest=Pos_X_dest_Finale-Pos_X_dest_Initiale+1;
   Hauteur_dest=Pos_Y_dest_Finale-Pos_Y_dest_Initiale+1;
 
-  // Calcul des vecteurs d'incrÃ©mentation :
+  // Calcul des vecteurs d'incrémentation :
   Delta_X=(Brosse_Largeur<<16)/Largeur_dest;
   Delta_Y=(Brosse_Hauteur<<16)/Hauteur_dest;
 
@@ -1394,7 +1396,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       {
         Xt=(((float)((Pos_X-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
         Yt=(((float)((Pos_X-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non dÃ©fini
+        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
         {
           ScanY_X[0][Pos_Y]=Pos_X;
           ScanY_Xt[0][Pos_Y]=Xt;
@@ -1404,7 +1406,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         {
           if (Pos_X>=ScanY_X[0][Pos_Y])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non dÃ©fini
+            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
              || (Pos_X>ScanY_X[1][Pos_Y]))
             {
               ScanY_X[1][Pos_Y]=Pos_X;
@@ -1414,7 +1416,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non dÃ©fini
+            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
             {
               ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
               ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
@@ -1451,7 +1453,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       {
         Xt=(((float)((Pos_Y-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
         Yt=(((float)((Pos_Y-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non dÃ©fini
+        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
         {
           ScanY_X[0][Pos_Y]=Pos_X;
           ScanY_Xt[0][Pos_Y]=Xt;
@@ -1461,7 +1463,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         {
           if (Pos_X>=ScanY_X[0][Pos_Y])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non dÃ©fini
+            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
              || (Pos_X>ScanY_X[1][Pos_Y]))
             {
               ScanY_X[1][Pos_Y]=Pos_X;
@@ -1471,7 +1473,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non dÃ©fini
+            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
             {
               ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
               ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
@@ -1519,7 +1521,7 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
   ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
 
-  // Remplir avec des valeurs Ã©gales Ã  INDEFINI.
+  // Remplir avec des valeurs égales à INDEFINI.
   for (Y=0; Y<Hauteur; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
@@ -1574,7 +1576,7 @@ void Tourner_brosse(float Angle)
   float cosA=cos(Angle);
   float sinA=sin(Angle);
 
-  // Calcul des coordonnÃ©es des 4 coins:
+  // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
@@ -1597,11 +1599,11 @@ void Tourner_brosse(float Angle)
   New_Brosse_Largeur=Xmax+1-Xmin;
   New_Brosse_Hauteur=Ymax+1-Ymin;
 
-  free(Smear_Brosse); // On libÃ¨re un peu de mÃ©moire
+  free(Smear_Brosse); // On libère un peu de mémoire
 
   if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
   {
-    // Et maintenant on calcule la nouvelle brosse tournÃ©e.
+    // Et maintenant on calcule la nouvelle brosse tournée.
     Calculer_quad_texture(X1,Y1,               0,               0,
                           X2,Y2,Brosse_Largeur-1,               0,
                           X3,Y3,               0,Brosse_Hauteur-1,
@@ -1618,7 +1620,7 @@ void Tourner_brosse(float Angle)
     Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
 
-    if (!Smear_Brosse) // On ne peut mÃªme pas allouer la brosse du smear!
+    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
     {
       Erreur(0);
 
@@ -1637,9 +1639,9 @@ void Tourner_brosse(float Angle)
   }
   else
   {
-    // Ici la libÃ©ration de mÃ©moire n'a pas suffit donc on remet dans l'Ã©tat
-    // oÃ¹ c'etait avant. On a juste Ã  rÃ©allouer la Smear_Brosse car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu Ãªtre allouÃ©
+    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
+    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
     Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
     Erreur(0);
@@ -1673,7 +1675,7 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
   ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
 
-  // Remplir avec des valeurs Ã©gales Ã  INDEFINI.
+  // Remplir avec des valeurs égales à INDEFINI.
   for (Y=0; Y<Hauteur; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
@@ -1728,7 +1730,7 @@ void Tourner_brosse_preview(float Angle)
   float cosA=cos(Angle);
   float sinA=sin(Angle);
 
-  // Calcul des coordonnÃ©es des 4 coins:
+  // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
@@ -1751,7 +1753,7 @@ void Tourner_brosse_preview(float Angle)
   X4+=Brosse_Centre_rotation_X;
   Y4+=Brosse_Centre_rotation_Y;
 
-  // Et maintenant on dessine la brosse tournÃ©e.
+  // Et maintenant on dessine la brosse tournée.
   Dessiner_quad_texture_preview(X1,Y1,               0,               0,
                                 X2,Y2,Brosse_Largeur-1,               0,
                                 X3,Y3,               0,Brosse_Hauteur-1,
