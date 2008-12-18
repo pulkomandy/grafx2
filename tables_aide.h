@@ -419,7 +419,7 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_BOLD ("               MAC OS X PORT")              //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  hitchhikr")                               //
+  AIDE_TEXTE("  Franck Charlet (hitchhikr@australia.edu)") //
   AIDE_TEXTE("")
   AIDE_BOLD ("           HAIKU OS AND BEOS PORT")         //
   AIDE_TEXTE("")                                          //
