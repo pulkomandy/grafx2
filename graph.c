@@ -335,12 +335,11 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     Brouillon_Decalage_Y=0; // |- de décalage du brouillon par rapport à
     Brouillon_Loupe_Mode=0; // |  la résolution.
   }
+  if (Loupe_Mode)
+    Pixel_Preview=Pixel_Preview_Loupe;
+  else
+    Pixel_Preview=Pixel_Preview_Normal;
 
-  Pixel_Preview=Pixel_Preview_Normal;
-
-  Principal_Decalage_X=0; // Il faut quand même modifier ces valeurs à chaque
-  Principal_Decalage_Y=0; // fois car on n'est pas à l'abri d'une modification
-                          // des dimensions de l'image.
   Calculer_donnees_loupe();
   Calculer_limites();
   Calculer_coordonnees_pinceau();
