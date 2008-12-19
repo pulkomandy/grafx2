@@ -3189,8 +3189,8 @@ void Etirer_brosse_0_7(void)
   short Debut_Y;
   short Ancien_X;
   short Ancien_Y;
-  short Largeur;
-  short Hauteur;
+  short Largeur=0;
+  short Hauteur=0;
   byte  Changement_de_taille;
   short Etat_prec;
 
@@ -3219,36 +3219,38 @@ void Etirer_brosse_0_7(void)
     }
   }
 
-  if (Touche)
+  // Utilise Touche_ANSI au lieu de Touche, car Get_input() met ce dernier
+  // à zero si une operation est en cours (Operation_Taille_pile!=0)
+  if (Touche_ANSI)
   {
     Changement_de_taille=1;
-    switch (Touche)
+    switch (Touche_ANSI)
     {
-      case SDLK_d: // Double
+      case 'd': // Double
         Largeur=Debut_X+(Brosse_Largeur<<1)-1;
         Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
-      case SDLK_x: // Double X
+      case 'x': // Double X
         Largeur=Debut_X+(Brosse_Largeur<<1)-1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case SDLK_y: // Double Y
+      case 'y': // Double Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
-      case SDLK_h: // Moitié
+      case 'h': // Moitié
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case SDLK_x|MOD_SHIFT: // Moitié X
+      case 'X': // Moitié X
         Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
-      case SDLK_y|MOD_SHIFT: // Moitié Y
+      case 'Y': // Moitié Y
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
-      case SDLK_n: // Normal
+      case 'n': // Normal
         Largeur=Debut_X+Brosse_Largeur-1;
         Hauteur=Debut_Y+Brosse_Hauteur-1;
         break;
@@ -3451,11 +3453,11 @@ void Tourner_brosse_0_5(void)
   char  Chaine[4];
   short Ancien_X;
   short Ancien_Y;
-  short Calcul_X;
-  short Calcul_Y;
+  short Calcul_X=0;
+  short Calcul_Y=0;
   byte  Changement_angle;
   short Etat_prec;
-  float Angle;
+  float Angle=0.0;
   int dX,dY;
 
   Operation_POP(&Etat_prec);
@@ -3487,21 +3489,23 @@ void Tourner_brosse_0_5(void)
     }
   }
 
-  if (Touche)
+  // Utilise Touche_ANSI au lieu de Touche, car Get_input() met ce dernier
+  // à zero si une operation est en cours (Operation_Taille_pile!=0)
+  if (Touche_ANSI)
   {
     Changement_angle=1;
     Calcul_X=Brosse_Centre_rotation_X;
     Calcul_Y=Brosse_Centre_rotation_Y;
-    switch (Touche)
+    switch (Touche_ANSI)
     {
-      case SDLK_6:case SDLK_KP6: Angle=     0.0 ; Calcul_X++;             break;
-      case SDLK_9:case SDLK_KP9: Angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
-      case SDLK_8:case SDLK_KP8: Angle=M_PI*0.5 ;             Calcul_Y--; break;
-      case SDLK_7:case SDLK_KP7: Angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
-      case SDLK_4:case SDLK_KP4: Angle=M_PI     ; Calcul_X--;             break;
-      case SDLK_1:case SDLK_KP1: Angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
-      case SDLK_2:case SDLK_KP2: Angle=M_PI*1.5 ;             Calcul_Y++; break;
-      case SDLK_3:case SDLK_KP3: Angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
+      case '6': Angle=     0.0 ; Calcul_X++;             break;
+      case '9': Angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
+      case '8': Angle=M_PI*0.5 ;             Calcul_Y--; break;
+      case '7': Angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
+      case '4': Angle=M_PI     ; Calcul_X--;             break;
+      case '1': Angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
+      case '2': Angle=M_PI*1.5 ;             Calcul_Y++; break;
+      case '3': Angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
       default :
         Changement_angle=0;
     }
