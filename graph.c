@@ -336,14 +336,30 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     Brouillon_Loupe_Mode=0; // |  la résolution.
   }
   if (Loupe_Mode)
+  {
     Pixel_Preview=Pixel_Preview_Loupe;
+  }
   else
+  {
     Pixel_Preview=Pixel_Preview_Normal;
+    // Recaler la vue (meme clipping que dans Scroller_ecran())
+    if (Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image)
+      Principal_Decalage_X=Principal_Largeur_image-Largeur_ecran;
+    else if (Principal_Decalage_X<0)
+      Principal_Decalage_X=0;
+    if (Principal_Decalage_Y+Menu_Ordonnee>Principal_Hauteur_image)
+      Principal_Decalage_Y=Principal_Hauteur_image-Menu_Ordonnee;
+    else if (Principal_Decalage_Y<0)
+      Principal_Decalage_Y=0;
+  }
 
   Calculer_donnees_loupe();
+  if (Loupe_Mode)
+    Recadrer_ecran_par_rapport_au_zoom();
   Calculer_limites();
   Calculer_coordonnees_pinceau();
-
+  Afficher_ecran();
+  
   Resize_Largeur=0;
   Resize_Hauteur=0;
 }

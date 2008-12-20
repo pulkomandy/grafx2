@@ -1233,6 +1233,13 @@ void Calculer_donnees_loupe(void)
       Loupe_Decalage_X=Principal_Largeur_image-Loupe_Largeur;
     if (Loupe_Decalage_X<0) Loupe_Decalage_X=0;
   }
+  if (Loupe_Mode && Loupe_Decalage_Y)
+  {
+    if (Principal_Hauteur_image<Loupe_Decalage_Y+Loupe_Hauteur)
+      Loupe_Decalage_Y=Principal_Hauteur_image-Loupe_Hauteur;
+    if (Loupe_Decalage_Y<0) Loupe_Decalage_Y=0;
+  }
+  
 }
 
 
