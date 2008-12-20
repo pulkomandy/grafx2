@@ -800,6 +800,15 @@ void Remplir(byte Couleur_de_remplissage)
          (Pos_Y<=Limite_Bas) )
       Pixel_Preview(Pos_X,Pos_Y,Couleur);
   }
+  // Affichage d'un point pour une preview, avec sa propre couleur
+  void Pixel_figure_Preview_auto(word Pos_X,word Pos_Y)
+  {
+    if ( (Pos_X>=Limite_Gauche) &&
+         (Pos_X<=Limite_Droite) &&
+         (Pos_Y>=Limite_Haut)   &&
+         (Pos_Y<=Limite_Bas) )
+      Pixel_Preview(Pos_X,Pos_Y,Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y));
+  }
 
   // Affichage d'un point pour une preview en xor
   void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,__attribute__((unused)) byte Couleur)

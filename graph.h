@@ -50,6 +50,7 @@ void Remplir(byte Couleur_de_remplissage);
 void Remplacer(byte Nouvelle_couleur);
 
 void Pixel_figure_Preview    (word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_figure_Preview_auto(word Pos_X,word Pos_Y);
 void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur);
 void Pixel_figure_Dans_brosse(word Pos_X,word Pos_Y,byte Couleur);
 

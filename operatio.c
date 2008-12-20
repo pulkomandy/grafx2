@@ -523,7 +523,7 @@ void Ligne_0_5(void)
 
   Pinceau_Forme=Pinceau_Forme_avant_operation;
 
-  Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+  Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
   Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
   Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
   Tracer_ligne_Definitif(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
@@ -636,7 +636,7 @@ void K_Ligne_0_6(void)
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
 
-  Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+  Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
   Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
 
   Pinceau_Forme=Pinceau_Forme_avant_operation;
@@ -695,7 +695,7 @@ void K_Ligne_12_7(void)
   {
     // La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne
-    Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
     Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
 
     Afficher_curseur();
@@ -2160,7 +2160,7 @@ void Polygone_12_9(void)
   {
     //   La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
-    Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
     Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
     Operation_POP(&Fin_Y);
     Operation_POP(&Fin_X);
@@ -4561,7 +4561,7 @@ void Lignes_centrees_12_7(void)
 
       Pinceau_Forme=Pinceau_Forme_avant_operation;
 
-      Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+      Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
       Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
 
       Smear_Debut=1;
@@ -4589,7 +4589,7 @@ void Lignes_centrees_12_7(void)
 
     Pinceau_Forme=Pinceau_Forme_avant_operation;
 
-    Pixel_figure_Preview  (Debut_X,Debut_Y,Lit_pixel_dans_ecran_courant(Debut_X,Debut_Y));
+    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
     Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
 
     if ( (Config.Coords_rel) && (Menu_visible) )
