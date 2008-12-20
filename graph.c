@@ -345,11 +345,11 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     // Recaler la vue (meme clipping que dans Scroller_ecran())
     if (Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image)
       Principal_Decalage_X=Principal_Largeur_image-Largeur_ecran;
-    else if (Principal_Decalage_X<0)
+    if (Principal_Decalage_X<0)
       Principal_Decalage_X=0;
     if (Principal_Decalage_Y+Menu_Ordonnee>Principal_Hauteur_image)
       Principal_Decalage_Y=Principal_Hauteur_image-Menu_Ordonnee;
-    else if (Principal_Decalage_Y<0)
+    if (Principal_Decalage_Y<0)
       Principal_Decalage_Y=0;
   }
 
