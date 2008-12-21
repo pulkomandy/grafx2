@@ -1427,19 +1427,17 @@ void Afficher_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15 && Pos_X < Largeur_ecran;Pos_X++,Compteur_X++)
 	        {
 	          if( Pos_X < 0 ) continue;
-            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15 && Pos_Y < Hauteur_ecran;Pos_Y++,Compteur_Y++)
             {
-	            if( Pos_Y < 0 ) continue;
+	            if( Pos_Y < 0 || Pos_Y >= Hauteur_ecran) continue;
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
               FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
               if (Couleur!=CM_Trans)
                 Pixel(Pos_X,Pos_Y,Couleur);
-	            if (Pos_Y > Hauteur_ecran) break;
             }
-	          if (Pos_X >= Largeur_ecran) break;
 	        }
 
           UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);

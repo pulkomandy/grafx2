@@ -40,6 +40,8 @@
 #ifndef METHODE_UPDATE
   #ifdef __macosx__
     #define METHODE_UPDATE     METHODE_UPDATE_PLEINE_PAGE
+  #elif defined(__WINDOWS__)
+    #define METHODE_UPDATE     METHODE_UPDATE_MULTI_RECTANGLE
   #else
     #define METHODE_UPDATE     METHODE_UPDATE_PAR_CUMUL
   #endif
@@ -110,7 +112,11 @@ void Flush_update(void)
   }
   else
   {
-    SDL_UpdateRect(Ecran_SDL, Max(Min_X,0)*Pixel_width, Max(Min_Y,0)*Pixel_height, Min(Largeur_ecran, Max_X-Min_X)*Pixel_width, Min(Hauteur_ecran, Max_Y-Min_Y)*Pixel_height);
+    if (Min_X<0)
+      Min_X=0;
+    if (Min_Y<0)
+      Min_Y=0;
+    SDL_UpdateRect(Ecran_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Largeur_ecran-Min_X, Max_X-Min_X)*Pixel_width, Min(Hauteur_ecran-Min_Y, Max_Y-Min_Y)*Pixel_height);
 
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
