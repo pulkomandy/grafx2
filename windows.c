@@ -1419,7 +1419,7 @@ void Afficher_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
-          UpdateRect(Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
+          UpdateRect(Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,13-Fin_X,13-Fin_Y);
         }
         else
         {
@@ -1721,7 +1721,7 @@ void Effacer_curseur(void)
           if (Fin_Y<4)
             Ligne_verticale_XOR  (Mouse_X,Mouse_Y+3,4-Fin_Y);
 
-          UpdateRect(Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,12-Fin_X,12-Fin_Y);
+          UpdateRect(Mouse_X+Debut_X-6,Mouse_Y+Debut_Y-6,13-Fin_X,13-Fin_Y);
         }
         else
         {
