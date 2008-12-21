@@ -310,11 +310,14 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
         BLOCK_MENU[Fin_Y-Pos_X][Fin_X]=Couleur_Bas_droite;
       }
   }
-  UpdateRect(
-        Debut_X*Menu_Facteur_X,
-        Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
-        (Fin_X+1-Debut_X)*Menu_Facteur_X,
-        (Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
+  if (Menu_visible)
+  {
+    UpdateRect(
+      Debut_X*Menu_Facteur_X,
+      Debut_Y*Menu_Facteur_Y + Menu_Ordonnee,
+      (Fin_X+1-Debut_X)*Menu_Facteur_X,
+      (Fin_Y+1-Debut_Y)*Menu_Facteur_Y);
+  }
 }
 
 
