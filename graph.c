@@ -47,25 +47,25 @@
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
 void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
 {
-	short L_effectif, H_effectif;
-	short X_effectif;
-	short Y_effectif;
-	short Diff;
+  short L_effectif, H_effectif;
+  short X_effectif;
+  short Y_effectif;
+  short Diff;
 
-	// Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
-	if (Largeur < 0)
-	{
-		X += Largeur;
-		Largeur = - Largeur;
-	}
+  // Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
+  if (Largeur < 0)
+  {
+    X += Largeur;
+    Largeur = - Largeur;
+  }
 
-	if (Hauteur < 0)
-	{
-		Y += Hauteur;
-		Hauteur = - Hauteur;
-	}
+  if (Hauteur < 0)
+  {
+    Y += Hauteur;
+    Hauteur = - Hauteur;
+  }
 
-	// D'abord on met à jour dans la zone écran normale
+  // D'abord on met à jour dans la zone écran normale
   Diff = X-Principal_Decalage_X;
   if (Diff<0)
   {
@@ -89,67 +89,81 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
     Y_effectif = Diff;
   }
 
-	// Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
-	// mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
-	// a rester dans la zone visible de l'image
-	// ...Sauf l'affichage de brosse en preview - yr
-	if(Loupe_Mode && X_effectif + L_effectif > Principal_Split)
-	  L_effectif = Principal_Split - X_effectif;
-	else if(X_effectif + L_effectif > Largeur_ecran)
-	  L_effectif = Largeur_ecran - X_effectif;
+  // Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
+  // mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
+  // a rester dans la zone visible de l'image
+  // ...Sauf l'affichage de brosse en preview - yr
+  if(Loupe_Mode && X_effectif + L_effectif > Principal_Split)
+    L_effectif = Principal_Split - X_effectif;
+  else if(X_effectif + L_effectif > Largeur_ecran)
+    L_effectif = Largeur_ecran - X_effectif;
 
-	if(Y_effectif + H_effectif > Menu_Ordonnee)
-	  H_effectif = Menu_Ordonnee - Y_effectif;
-	/*
-		SDL_Rect r;
-		r.x=X_effectif;
-		r.y=Y_effectif;
-		r.h=H_effectif;
-		r.w=L_effectif;
-		SDL_FillRect(Ecran_SDL,&r,3);
+  if(Y_effectif + H_effectif > Menu_Ordonnee)
+    H_effectif = Menu_Ordonnee - Y_effectif;
+  /*
+  SDL_Rect r;
+  r.x=X_effectif;
+  r.y=Y_effectif;
+  r.h=H_effectif;
+  r.w=L_effectif;
+  SDL_FillRect(Ecran_SDL,&r,3);
   */
-	UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
+  UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
 
-	// Et ensuite dans la partie zoomée
-	if(Loupe_Mode)
-	{
-	  // Clipping en X
-	  X_effectif = (X-Loupe_Decalage_X)*Loupe_Facteur;
-	  Y_effectif = (Y-Loupe_Decalage_Y)*Loupe_Facteur;
-	  L_effectif = Largeur * Loupe_Facteur;
-		H_effectif = Hauteur * Loupe_Facteur;
+  // Et ensuite dans la partie zoomée
+  if(Loupe_Mode)
+  {
+    // Clipping en X
+    X_effectif = (X-Loupe_Decalage_X)*Loupe_Facteur;
+    Y_effectif = (Y-Loupe_Decalage_Y)*Loupe_Facteur;
+    L_effectif = Largeur * Loupe_Facteur;
+    H_effectif = Hauteur * Loupe_Facteur;
 
-	  if (X_effectif < 0)
-	  {
-	    L_effectif+=X_effectif;
+    if (X_effectif < 0)
+    {
+      L_effectif+=X_effectif;
+      if (L_effectif<0)
+        return;
+
       X_effectif = Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
-	  }
-	  else
-	    X_effectif += Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
-	  Diff = X_effectif+L_effectif-Largeur_ecran;
-	  if (Diff>0)
-	    L_effectif -=Diff;
+    }
+    else
+      X_effectif += Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
+    Diff = X_effectif+L_effectif-Largeur_ecran;
+    if (Diff>0)
+    {
+      L_effectif -=Diff;
+      if (L_effectif<0)
+        return;
+    }
+
 
     // Clipping en Y
-	  if (Y_effectif < 0)
-	  {
-	    H_effectif+=Y_effectif;
+    if (Y_effectif < 0)
+    {
+      H_effectif+=Y_effectif;
+      if (H_effectif<0)
+        return;
       Y_effectif = 0;
-	  }
-	  Diff = Y_effectif+H_effectif-Menu_Ordonnee;
-	  if (Diff>0)
-	    H_effectif -=Diff;
+    }
+    Diff = Y_effectif+H_effectif-Menu_Ordonnee;
+    if (Diff>0)
+    {
+      H_effectif -=Diff;
+      if (H_effectif<0)
+        return;
+    }
 
  // Très utile pour le debug :)
-		/*SDL_Rect r;
-		r.x=X_effectif;
-		r.y=Y_effectif;
-		r.h=H_effectif;
-		r.w=L_effectif;
-		SDL_FillRect(Ecran_SDL,&r,3);*/
+    /*SDL_Rect r;
+    r.x=X_effectif;
+    r.y=Y_effectif;
+    r.h=H_effectif;
+    r.w=L_effectif;
+    SDL_FillRect(Ecran_SDL,&r,3);*/
 
-		UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
-	}
+    UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
+  }
 }
 
 
@@ -731,14 +745,14 @@ void Remplir(byte Couleur_de_remplissage)
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (Limite_atteinte_Haut>Limite_Haut)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,					// Source
-                                               Limite_Gauche,Limite_Haut,			// Pos X et Y dans source
-                                               (Limite_Droite-Limite_Gauche)+1,			// Largeur copie
-                                               Limite_atteinte_Haut-Limite_Haut,		// Hauteur copie
-                                               Principal_Largeur_image,				// Largeur de la source
-					       Principal_Ecran,					// Destination
-                                               Limite_Gauche,Limite_Haut,			// Pos X et Y destination
-					       Principal_Largeur_image);			// Largeur destination
+      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,                    // Source
+                                               Limite_Gauche,Limite_Haut,       // Pos X et Y dans source
+                                               (Limite_Droite-Limite_Gauche)+1, // Largeur copie
+                                               Limite_atteinte_Haut-Limite_Haut,// Hauteur copie
+                                               Principal_Largeur_image,         // Largeur de la source
+                                               Principal_Ecran,                 // Destination
+                                               Limite_Gauche,Limite_Haut,       // Pos X et Y destination
+                                               Principal_Largeur_image);        // Largeur destination
     if (Limite_atteinte_Bas<Limite_Bas)
       Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
                                                Limite_Gauche,Limite_atteinte_Bas+1,
@@ -1131,9 +1145,9 @@ void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,
 
 void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
 // Modifie BX et BY pour que la ligne AXAY - BXBY soit
-//	- une droite horizontale
-//	- une droite verticale
-//	- une droite avec une pente de 45 degrés
+//  - une droite horizontale
+//  - une droite verticale
+//  - une droite avec une pente de 45 degrés
 {
     int dx, dy;
     float tan;
@@ -1147,27 +1161,27 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
 
     if (tan <= 0.4142 && tan >= -0.4142)
     {
-	// Cas 1 : Lock Y
-	*BY = AY;
+      // Cas 1 : Lock Y
+      *BY = AY;
     }
     else if ( tan > 0.4142 && tan < 2.4142)
     {
-	// Cas 2 : dy=dx
-	int nBY = AY - dx;
-	*BY = (*BY + nBY)/2;
-	*BX = AX  + AY - *BY;
+      // Cas 2 : dy=dx
+      int nBY = AY - dx;
+      *BY = (*BY + nBY)/2;
+      *BX = AX  + AY - *BY;
     }
     else if (tan < -0.4142 && tan >= -2.4142)
     {
-	// Cas 8 : dy = -dx
-	int nBY = AY + dx;
-	*BY = (*BY + nBY)/2;
-	*BX = AX  - AY + *BY;
+      // Cas 8 : dy = -dx
+      int nBY = AY + dx;
+      *BY = (*BY + nBY)/2;
+      *BX = AX  - AY + *BY;
     }
     else
     {
-	// Cas 3 : Lock X
-	*BX = AX;
+      // Cas 3 : Lock X
+      *BX = AX;
     }
 
     return;
@@ -1846,57 +1860,57 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
     // On commence par s'assurer que le rectangle est à l'endroit
     if(RBX < RAX)
     {
-	Pos_X = RBX;
-	RBX = RAX;
-	RAX = Pos_X;
+      Pos_X = RBX;
+      RBX = RAX;
+      RAX = Pos_X;
     }
 
     if(RBY < RAY)
     {
-	Pos_Y = RBY;
-	RBY = RAY;
-	RAY = Pos_Y;
+      Pos_Y = RBY;
+      RBY = RAY;
+      RAY = Pos_Y;
     }
 
     // Correction des bornes d'après les limites
     if (RAY<Limite_Haut)
-	RAY=Limite_Haut;
+      RAY=Limite_Haut;
     if (RBY>Limite_Bas)
-	RBY=Limite_Bas;
+      RBY=Limite_Bas;
     if (RAX<Limite_Gauche)
-	RAX=Limite_Gauche;
+      RAX=Limite_Gauche;
     if (RBX>Limite_Droite)
-	RBX=Limite_Droite;
+      RBX=Limite_Droite;
 
     if(VBX == VAX)
     {
-	// Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...
-	if (VBY == VAY) return;	// L'utilisateur fait n'importe quoi
-	Degrade_Intervalle_total = abs(VBY - VAY);
-	for(Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
-	    for(Pos_X=RAX;Pos_X<=RBX;Pos_X++)
-		Traiter_degrade(abs(VBY - Pos_Y),Pos_X,Pos_Y);
+      // Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...
+      if (VBY == VAY) return;  // L'utilisateur fait n'importe quoi
+      Degrade_Intervalle_total = abs(VBY - VAY);
+      for(Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
+        for(Pos_X=RAX;Pos_X<=RBX;Pos_X++)
+          Traiter_degrade(abs(VBY - Pos_Y),Pos_X,Pos_Y);
 
     }
     else
     {
-	float a;
-	float b;
-	float Distance_X, Distance_Y;
+      float a;
+      float b;
+      float Distance_X, Distance_Y;
 
-	Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
-	a = (float)(VBY - VAY)/(float)(VBX - VAX);
-	b = VAY - a*VAX;
-
-	for (Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
-	    for (Pos_X = RAX;Pos_X<=RBX;Pos_X++)
-	    {
-		// On calcule ou on en est dans le dégradé
-		Distance_X = pow((Pos_Y - VAY),2)+pow((Pos_X - VAX),2);
-		Distance_Y = pow((-a * Pos_X + Pos_Y - b),2)/(a*a+1);
-
-		Traiter_degrade((int)sqrt(Distance_X - Distance_Y),Pos_X,Pos_Y);
-	    }
+      Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
+      a = (float)(VBY - VAY)/(float)(VBX - VAX);
+      b = VAY - a*VAX;
+      
+      for (Pos_Y=RAY;Pos_Y<=RBY;Pos_Y++)
+        for (Pos_X = RAX;Pos_X<=RBX;Pos_X++)
+        {
+          // On calcule ou on en est dans le dégradé
+          Distance_X = pow((Pos_Y - VAY),2)+pow((Pos_X - VAX),2);
+          Distance_Y = pow((-a * Pos_X + Pos_Y - b),2)/(a*a+1);
+      
+          Traiter_degrade((int)sqrt(Distance_X - Distance_Y),Pos_X,Pos_Y);
+        }
     }
     Mettre_Ecran_A_Jour(RAX,RAY,RBX,RBY);
 }
