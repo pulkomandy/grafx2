@@ -39,6 +39,10 @@
 #include "windows.h"
 #include "brush.h"
 
+// we need this as global
+static short Old_MX=0;
+static short Old_MY=0;
+
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
 // Variables mémorisants les anciens effets
@@ -473,8 +477,6 @@ void Deplacer_Split(void)
 void Gestion_principale(void)
 {
   static byte Temp_color;
-  static short Old_MX=0;
-  static short Old_MY=0;
   int  Indice_bouton;           // Numéro de bouton de menu en cours
   int  Indice_bouton_precedent=0; // Numéro de bouton de menu sur lequel on était précédemment
   byte Blink;                   // L'opération demande un effacement du curseur
@@ -947,12 +949,15 @@ void Gestion_principale(void)
         else
           if (Loupe_Mode) Deplacer_Split();
       }
+
+      Old_MX=Mouse_X;
+      Old_MY=Mouse_Y;
+
     }
     else
     {
       // Le curseur se trouve dans l'image
-
-      if ( (Curseur_dans_menu_precedent) && (Menu_visible) && Old_MY!=Mouse_Y && Old_MX != Mouse_X) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
+      if ( (Curseur_dans_menu_precedent) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
       {
         if ( (Operation_en_cours!=OPERATION_PIPETTE)
           && (Operation_en_cours!=OPERATION_REMPLACER) )
@@ -1115,6 +1120,9 @@ void Fermer_fenetre(void)
 
   Touche=0;
   Mouse_K=0;
+  
+  Old_MX = -1;
+  Old_MY = -1;
 
   Fenetre--;
 

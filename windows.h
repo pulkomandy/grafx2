@@ -19,8 +19,8 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __WINDOWSH__
-#define __WINDOWSH__
+#ifndef __WINDOWS_H_
+#define __WINDOWS_H_
 
 #include "struct.h"
 

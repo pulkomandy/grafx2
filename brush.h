@@ -19,8 +19,8 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __BRUSHH__
-#define __BRUSHH__
+#ifndef __BRUSH_H_
+#define __BRUSH_H_
 
 void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short Effacement);
 void Rotate_90_deg(void);

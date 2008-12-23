@@ -33,8 +33,8 @@
 *  contact me, if you problem isn' addressed anywhere.                  *
 *                                                                       *
 ************************************************************************/
-#ifndef SFONT_H
-#define SFONT_H
+#ifndef _SFONT_H_
+#define _SFONT_H_
 
 #include <SDL/SDL.h>
 
