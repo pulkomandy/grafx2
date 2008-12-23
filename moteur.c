@@ -990,15 +990,6 @@ void Gestion_principale(void)
     Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
 
     if (Blink) Afficher_curseur();
- 
-/*    if(Force_Curseur_dans_menu_precedent)
-    {
-       Force_Curseur_dans_menu_precedent = 0;
-    }
-    else
-    {
-       Curseur_dans_menu_precedent = Curseur_dans_menu;
-    }*/
   }
   while (!Sortir_du_programme);
 }
@@ -1112,10 +1103,6 @@ void Fermer_fenetre(void)
   {
   
     Cacher_pinceau=Cacher_pinceau_avant_fenetre;
-  
-    // il faut rafficher le libellé dans la barre
-    // d'outils si le curseur est sur une icône.
-    //Curseur_dans_menu_precedent=1;
   
     Calculer_coordonnees_pinceau();
   
