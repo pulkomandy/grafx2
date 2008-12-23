@@ -61,6 +61,9 @@
 
 #define Display_Window(X,Y) UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,X*Menu_Facteur_X,Y*Menu_Facteur_Y);
 
+extern short Old_MX;
+extern short Old_MY;
+
 
 //-- MODELE DE BOUTON DE MENU ------------------------------------------------
 /*
@@ -3895,6 +3898,9 @@ void Bouton_desenclencher_Loupe(void)
     Afficher_ecran();  // <=> Display_screen();
     // Repositionner le curseur en fonction des coordonnées visibles
     Calculer_coordonnees_pinceau();
+    
+    Old_MX = -1;
+    Old_MY = -1;
   }
   else // On fait de notre mieux pour restaurer l'ancienne opération:
     Demarrer_pile_operation(Operation_avant_interruption);

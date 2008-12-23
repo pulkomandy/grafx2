@@ -40,8 +40,8 @@
 #include "brush.h"
 
 // we need this as global
-static short Old_MX=0;
-static short Old_MY=0;
+short Old_MX = -1;
+short Old_MY = -1;
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
