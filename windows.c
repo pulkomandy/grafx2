@@ -409,7 +409,7 @@ void Print_coordonnees(void)
 {
   char Tempo[5];
 
-  if (Menu_visible)
+  if (Menu_visible && !Curseur_dans_menu)
   {
     if ( (Operation_en_cours==OPERATION_PIPETTE)
       || (Operation_en_cours==OPERATION_REMPLACER) )

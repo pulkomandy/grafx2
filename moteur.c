@@ -486,12 +486,6 @@ void Gestion_principale(void)
   char Chaine[25];
   byte Temp;
 
-
-  // Au démarrage, on considère que le curseur est dans le menu
-  // pour forcer un affichage des coordonnées
-
-  Curseur_dans_menu_precedent=1;
-
   do
   {
     if(Get_input())
@@ -950,40 +944,61 @@ void Gestion_principale(void)
           if (Loupe_Mode) Deplacer_Split();
       }
 
-      Old_MX=Mouse_X;
-      Old_MY=Mouse_Y;
-
     }
-    else
+
+    // we need to refresh that one as we may come from a sub window
+    Curseur_dans_menu=(Mouse_Y>=Menu_Ordonnee) ||
+                      ( (Loupe_Mode) && (Mouse_X>=Principal_Split) &&
+                        (Mouse_X<Principal_X_Zoom) );
+
+
+    // Le curseur se trouve dans l'image
+    if ( (!Curseur_dans_menu) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
     {
-      // Le curseur se trouve dans l'image
-      if ( (Curseur_dans_menu_precedent) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
-      {
-        if ( (Operation_en_cours!=OPERATION_PIPETTE)
-          && (Operation_en_cours!=OPERATION_REMPLACER) )
-          Print_dans_menu("X:       Y:             ",0);
-        else
-        {
-          Print_dans_menu("X:       Y:       (    )",0);
+       if ( (Operation_en_cours!=OPERATION_PIPETTE) && (Operation_en_cours!=OPERATION_REMPLACER) )
+       {
+          if(!Curseur_dans_menu_precedent)
+          {
+             Print_dans_menu("X:       Y:             ",0);
+          }
+          Curseur_dans_menu_precedent = 1;
+       }
+       else
+       {
+          if(!Curseur_dans_menu_precedent)
+          {
+             Print_dans_menu("X:       Y:       (    )",0);
+          }
+          Curseur_dans_menu_precedent = 1;
           //Num2str(Pipette_Couleur,Chaine,3);
           //Print_dans_menu(Chaine,20);
           //Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
-        }
-        Print_coordonnees();
-      }
-      Old_MX=Mouse_X;
-      Old_MY=Mouse_Y;
-
-      Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
-
-      if (Blink) Effacer_curseur();
-
-      Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
-
-      if (Blink) Afficher_curseur();
+       }
+       Print_coordonnees();
     }
+    if(Curseur_dans_menu)
+    {
+    	Curseur_dans_menu_precedent = 0;
+    }
+    Old_MX=Mouse_X;
+    Old_MY=Mouse_Y;
+ 
+    Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
+ 
+    if (Blink) Effacer_curseur();
+ 
+    Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
 
-    Curseur_dans_menu_precedent=Curseur_dans_menu;
+    if (Blink) Afficher_curseur();
+ 
+/*    if(Force_Curseur_dans_menu_precedent)
+    {
+       Force_Curseur_dans_menu_precedent = 0;
+    }
+    else
+    {
+       Curseur_dans_menu_precedent = Curseur_dans_menu;
+    }*/
   }
   while (!Sortir_du_programme);
 }
@@ -1100,7 +1115,7 @@ void Fermer_fenetre(void)
   
     // il faut rafficher le libellé dans la barre
     // d'outils si le curseur est sur une icône.
-    Curseur_dans_menu_precedent=1;
+    //Curseur_dans_menu_precedent=1;
   
     Calculer_coordonnees_pinceau();
   
