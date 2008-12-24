@@ -192,7 +192,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           }
         }
 
-	      Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+	Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
 
       }
       else
@@ -209,7 +209,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Debut_Compteur_X, Debut_Compteur_Y,
                 Smear_Brosse_Largeur
               );
-	            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
             }
             Smear_Debut=0;
           }
@@ -235,7 +236,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-	          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
           }
 
           Smear_Min_X=Debut_Compteur_X;
@@ -261,7 +262,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-	Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X,Fin_Compteur_Y);
+	Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
 
       }
       break;
@@ -309,6 +310,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 
           }
         }
+
+        Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
       }
       else
       {
@@ -317,6 +320,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if (Smear_Debut)
           {
             if ((Largeur>0) && (Hauteur>0))
+	    {
               Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
                                                        Debut_X,Debut_Y,
                                                        Largeur,Hauteur,
@@ -325,7 +329,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-                                                       //UPDATERECT
+              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	    }
             Smear_Debut=0;
           }
           else
@@ -342,9 +347,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-            UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),
-              Fin_Compteur_X,Fin_Compteur_Y
-            );
+            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
 
           }
 
@@ -361,10 +364,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_Compteur_X-Debut_Compteur_X,Fin_Compteur_Y-Debut_Compteur_Y);
+          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
         }
       }
-	    Mettre_Ecran_A_Jour(X-Brosse_Decalage_X,Y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
       break;
     default : // Pinceau
       Debut_X=X-Pinceau_Decalage_X;
@@ -423,6 +425,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           if (Smear_Debut)
           {
             if ((Largeur>0) && (Hauteur>0))
+	    {
               Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
                                                        Debut_X,Debut_Y,
                                                        Largeur,Hauteur,
@@ -431,7 +434,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-            // UPDATERECT
+	      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	    }
             Smear_Debut=0;
           }
           else
@@ -441,17 +445,15 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               {
                 Couleur_temporaire=Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y);
                 Position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
-                if ( (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
-                  && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
+                if ( (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X]) // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
+                  && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)	   // On clippe l'effet smear entre Smear_Min et Smear_Max
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
                   Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
+              Mettre_Ecran_A_Jour(Debut_X, Debut_Y, Largeur, Hauteur);
           }
 
-          UpdateRect(Debut_X,Debut_Y,
-                Fin_Compteur_X,Fin_Compteur_Y
-          );
 
           Smear_Min_X=Debut_Compteur_X;
           Smear_Min_Y=Debut_Compteur_Y;
@@ -466,7 +468,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-	          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+	  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
         }
       }
   }
