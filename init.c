@@ -538,18 +538,9 @@ void Initialisation_des_boutons(void)
                      0,18,
                      16,16,
                      FORME_BOUTON_RECTANGLE,
-                     Bouton_Ajuster,Bouton_Ajuster,
+                     Bouton_Ajuster,Message_Non_disponible,
                      Rien_du_tout,
                      FAMILLE_OUTIL);
-/*
-  Initialiser_bouton(BOUTON_AJUSTER,
-                     0,18,
-                     16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Ajuster,Rien_du_tout,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
-*/
 
   Initialiser_bouton(BOUTON_DESSIN,
                      17,1,
@@ -695,12 +686,11 @@ void Initialisation_des_boutons(void)
                      Rien_du_tout,
                      FAMILLE_EFFETS);
 
-// !!! TEMPORAIRE !!!
   Initialiser_bouton(BOUTON_TEXTE,
                      123,18,
                      16,16,
                      FORME_BOUTON_RECTANGLE,
-                     Bouton_Texte,Message_Non_disponible,
+                     Bouton_Texte,Bouton_Texte,
                      Rien_du_tout,
                      FAMILLE_INSTANTANE);
 
