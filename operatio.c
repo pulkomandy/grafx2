@@ -1534,17 +1534,21 @@ void Courbe_Tracer_croix(short Pos_X, short Pos_Y)
   else
     Fin_Y=3+(Limite_visible_Bas-Pos_Y);
 
-  for (i=Debut_X; i<=Fin_X; i++)
-  {
-    Temp=Pos_X+i-3;
-    Pixel_Preview(Temp,Pos_Y,~Lit_pixel(Temp -Principal_Decalage_X,
-                                        Pos_Y-Principal_Decalage_Y));
-  }
-  for (i=Debut_Y; i<=Fin_Y; i++)
-  {
-    Temp=Pos_Y+i-3;
-    Pixel_Preview(Pos_X,Temp,~Lit_pixel(Pos_X-Principal_Decalage_X,
-                                        Temp -Principal_Decalage_Y));
+  if (Debut_X<=Fin_X && Debut_Y<=Fin_Y)
+  {    
+    for (i=Debut_X; i<=Fin_X; i++)
+    {
+      Temp=Pos_X+i-3;
+      Pixel_Preview(Temp,Pos_Y,~Lit_pixel(Temp -Principal_Decalage_X,
+                                          Pos_Y-Principal_Decalage_Y));
+    }
+    for (i=Debut_Y; i<=Fin_Y; i++)
+    {
+      Temp=Pos_Y+i-3;
+      Pixel_Preview(Pos_X,Temp,~Lit_pixel(Pos_X-Principal_Decalage_X,
+                                          Temp -Principal_Decalage_Y));
+    }
+    Mettre_Ecran_A_Jour(Pos_X+Debut_X-3,Pos_Y+Debut_Y-3,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
   }
 }
 
@@ -4391,15 +4395,8 @@ void Rectangle_Degrade_12_9(void)
 
     Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
 
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
-    if (Mouse_K==A_GAUCHE)
-    {
-      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Fore_color);
-    }
-    else
-    {
-      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Back_color);
-    }
+    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
 
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);

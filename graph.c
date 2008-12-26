@@ -1427,7 +1427,7 @@ void Tracer_courbe_General(short X1, short Y1,
   Y = Min(Min(Y1,Y2),Min(Y3,Y4));
   Old_X = Max(Max(X1,X2),Max(X3,X4)) - X;
   Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - Y;
-  Mettre_Ecran_A_Jour(X,Y,Old_X,Old_Y);
+  Mettre_Ecran_A_Jour(X,Y,Old_X+1,Old_Y+1);
 }
 
   // -- Tracer une courbe de Bézier définitivement --
