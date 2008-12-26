@@ -212,7 +212,10 @@ int Get_input(void)
           //si on est déjà en haut on peut plus bouger
           if(INPUT_Nouveau_Mouse_Y!=0)
           {
-            INPUT_Nouveau_Mouse_Y--;
+	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+		INPUT_Nouveau_Mouse_Y-=Loupe_Facteur;
+	    else
+                INPUT_Nouveau_Mouse_Y--;
             ok=1;
           }
         }
@@ -221,7 +224,10 @@ int Get_input(void)
           //[Touche] = Emulation de MOUSE DOWN
           if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
           {
-            INPUT_Nouveau_Mouse_Y++;
+	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+		INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+	    else
+                INPUT_Nouveau_Mouse_Y++;
             ok=1;
           }
         }
@@ -230,7 +236,10 @@ int Get_input(void)
           //[Touche] = Emulation de MOUSE LEFT
           if(INPUT_Nouveau_Mouse_X!=0)
           {
-            INPUT_Nouveau_Mouse_X--;
+	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+		INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+	    else
+                INPUT_Nouveau_Mouse_X--;
             ok=1;
           }
         }
@@ -240,7 +249,10 @@ int Get_input(void)
 
           if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
           {
-            INPUT_Nouveau_Mouse_X++;
+	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+		INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+	    else
+                INPUT_Nouveau_Mouse_X++;
             ok=1;
           }
         }
