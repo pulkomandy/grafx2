@@ -427,6 +427,7 @@ void Deplacer_Split(void)
   Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
   Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
   Afficher_curseur();
+  UpdateRect(Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
 
   while (Mouse_K)
   {

@@ -3838,19 +3838,19 @@ void Bouton_Menu_Loupe(void)
   }
   while (Bouton_clicke<=0);
 
+  Fermer_fenetre();
+
   if (Bouton_clicke>1)
   {
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
     Changer_facteur_loupe(Bouton_clicke-2);
   }
 
-  Fermer_fenetre();
-
   if ( (Bouton_clicke==1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Cancel
     Desenclencher_bouton(BOUTON_LOUPE);
 
-  Afficher_curseur();
   Afficher_ecran();
+  Afficher_curseur();
   UpdateRect(Principal_Split,0,Largeur_ecran-Principal_Split,Menu_Ordonnee);
 
   if ( (Bouton_clicke>1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Passage en mode zoom
