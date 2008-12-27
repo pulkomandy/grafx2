@@ -294,11 +294,10 @@ void Initialisation_Texte(void)
       }
     }
     #endif
-  #elif defined(__linux__)
+  #elif defined(__macosx__)
     // Récupération de la liste des fonts avec fontconfig
     #ifndef NOTTF
 
-    #ifdef __macosx__
 
       int i,number;
       char home_dir[MAXPATHLEN];
@@ -317,26 +316,28 @@ void Initialisation_Texte(void)
          for_each_file(*(font_path_list+i),Ajout_fonte);
 
       CFRelease(url);
+    #endif
 
-    #else
+  #elif defined(__linux__)
        #define USE_XLIB
     
        #ifdef USE_XLIB
        {
-	      int i,number;
-	      Display* dpy = XOpenDisplay(NULL);
-	      char** font_path_list = XGetFontPath(dpy,&number);
+	int i,number;
+	Display* dpy = XOpenDisplay(NULL);
+	char** font_path_list = XGetFontPath(dpy,&number);
 
-	      for(i=0;i<number;i++)
-	         for_each_file(*(font_path_list+i),Ajout_fonte);
+	for(i=0;i<number;i++)
+	    for_each_file(*(font_path_list+i),Ajout_fonte);
 
-	      XFreeFontPath(font_path_list);
-	    }
-	   #endif
+	XFreeFontPath(font_path_list);
+       }
+       #endif
+  #elif defined(__BEOS__)
+    #ifndef NOTTF
+      for_each_file("/etc/fonts/ttfonts", Ajout_fonte);
     #endif
 
-
-    #endif
   #endif
 }
 
