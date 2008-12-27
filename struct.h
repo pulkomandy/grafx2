@@ -22,7 +22,12 @@
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
-#include <stdint.h>
+#if defined(__BEOS__)
+    #include <inttypes.h>
+#else
+    #include <stdint.h>
+#endif
+
 #include "const.h"
 
 // Déclaration des types de base /////////////////////////////////////////////

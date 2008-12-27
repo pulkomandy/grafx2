@@ -32,12 +32,13 @@ static char *sep(char *path)
 char *realpath(const char *_path, char *resolved_path)
 {
 	int fd = open(".", O_RDONLY), l;
+	char current_dir_path[PATH_MAX];
 	char path[PATH_MAX], lnk[PATH_MAX], *tmp = (char *)"";
-	char tmp2[PATH_MAX];
 	
 	if (fd < 0) {
 		return NULL;
 	}
+	getcwd(current_dir_path,PATH_MAX);
 	strncpy(path, _path, PATH_MAX);
 	
 	if (chdir(path)) {
@@ -79,7 +80,7 @@ char *realpath(const char *_path, char *resolved_path)
 	
 	strcat(resolved_path, tmp);
       abort:
-	fchdir(fd);
+	chdir(current_dir_path);
 	close(fd);
 	return resolved_path;
 }
