@@ -74,6 +74,7 @@ else
     LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
     CC = i386-linux-aros-gcc
     OBJDIR = obj/aros
+  else
 
   #BeOS specific
   ifeq ($(PLATFORM),BeOS)
@@ -126,6 +127,7 @@ else
       X11LOPT = -lX11
     endif
   endif
+endif
 endif
 endif
 endif
