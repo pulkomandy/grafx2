@@ -331,6 +331,7 @@ int Get_input(void)
 
     if (bl)
     {
+    DEBUG("warp",Operation_Taille_pile);
       SDL_WarpMouse(
         INPUT_Nouveau_Mouse_X*Pixel_width,
         INPUT_Nouveau_Mouse_Y*Pixel_height

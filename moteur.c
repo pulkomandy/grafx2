@@ -961,7 +961,7 @@ void Gestion_principale(void)
           {
              Print_dans_menu("X:       Y:             ",0);
           }
-          Curseur_dans_menu_precedent = 1;
+          Curseur_dans_menu_precedent = 0;
        }
        else
        {
@@ -969,7 +969,7 @@ void Gestion_principale(void)
           {
              Print_dans_menu("X:       Y:       (    )",0);
           }
-          Curseur_dans_menu_precedent = 1;
+          Curseur_dans_menu_precedent = 0;
           //Num2str(Pipette_Couleur,Chaine,3);
           //Print_dans_menu(Chaine,20);
           //Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
@@ -978,18 +978,21 @@ void Gestion_principale(void)
     }
     if(Curseur_dans_menu)
     {
-    	Curseur_dans_menu_precedent = 0;
+    	Curseur_dans_menu_precedent = 1;
+    }
+    else
+    {
+ 
+      Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
+ 
+      if (Blink) Effacer_curseur();
+ 
+      Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
+
+      if (Blink) Afficher_curseur();
     }
     Old_MX=Mouse_X;
     Old_MY=Mouse_Y;
- 
-    Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
- 
-    if (Blink) Effacer_curseur();
- 
-    Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
-
-    if (Blink) Afficher_curseur();
   }
   while (!Sortir_du_programme);
 }
