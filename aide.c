@@ -417,6 +417,7 @@ void Bouton_Stats(void)
     }
 #else
     // Free disk space is only for shows. Other platforms can display 0.
+    Taille=0;
 #endif
   
     if(Taille > (100ULL*1024*1024*1024))

@@ -23,7 +23,7 @@ $(OBJDIR)/loadsave.o: loadsave.c const.h struct.h global.h loadsave.h graph.h \
   divers.h pages.h op_c.h boutons.h erreurs.h io.h sdlscreen.h windows.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
   init.h boutons.h moteur.h pages.h files.h sdlscreen.h erreurs.h \
-  readini.h saveini.h io.h texte.h setup.h windows.h brush.h
+  readini.h saveini.h io.h texte.h setup.h windows.h brush.h realpath.h
 $(OBJDIR)/moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
   special.h boutons.h operatio.h shade.h erreurs.h sdlscreen.h windows.h brush.h
 $(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h graph.h
@@ -43,6 +43,7 @@ $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h loadsave.h sdlscreen.h \
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h loadsave.h graph.h divers.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h loadsave.h graph.h \
   divers.h erreurs.h sdlscreen.h readline.h windows.h
+$(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h loadsave.h readini.h io.h \
   erreurs.h graph.h divers.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h loadsave.h sdlscreen.h \

@@ -62,6 +62,19 @@ else
     NOTTF = 1
   else
 
+  #AROS specific
+  ifeq ($(PLATFORM),AROS)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    BIN = grafx2
+    CFGBIN = gfxcfg
+    COPT = -Wall _c _g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
+    LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    CC = i386-linux-aros-gcc
+    OBJDIR = obj/aros
+
   #BeOS specific
   ifeq ($(PLATFORM),BeOS)
     DELCOMMAND = rm -rf

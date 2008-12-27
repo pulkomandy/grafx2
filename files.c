@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#if defined(__amigaos4__)
+#if defined(__amigaos4__) || defined(__AROS__)
     #include <proto/dos.h>
     #include <dirent.h>
     #define isHidden(Enreg) (0)

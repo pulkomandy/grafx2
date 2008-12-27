@@ -58,6 +58,8 @@
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
+#elif defined(__AROS__) || defined(__BEOS__)
+    #include "realpath.h"
 #endif
 
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran

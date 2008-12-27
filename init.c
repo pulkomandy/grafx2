@@ -69,7 +69,7 @@ void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
-  #if defined(__amigaos4__)
+  #if defined(__amigaos4__) || defined(__AROS__)
 
   // No icons by default.
   // It's possible to add some here.
@@ -124,7 +124,7 @@ void Rechercher_drives(void)
 	#if defined(__BEOS__) || defined(__HAIKU__)
   	char * Home = getenv("$HOME");
   #else
-	  char * Home = getenv("HOME");
+	char * Home = getenv("HOME");
   #endif	
 	Ajouter_lecteur('/', LECTEUR_HDD, "/");
 	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");

@@ -49,7 +49,7 @@ int Create_ConfigDirectory(char * Config_Dir)
   #endif
 }
 
-#if defined(__macosx__) || defined(__amigaos4__)
+#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__)
   #define ARG_UNUSED __attribute__((unused))
 #else
   #define ARG_UNUSED
@@ -70,7 +70,7 @@ void Set_Program_Directory(ARG_UNUSED const char * argv0,char * Program_Dir)
     strcat(Program_Dir    ,"/");
   
   // AmigaOS4: hard-coded volume name.
-  #elif defined(__amigaos4__)
+  #elif defined(__amigaos4__) || defined(__AROS__)
     strcpy(Program_Dir,"PROGDIR:");
 
   // Others: The part of argv[0] before the executable name.    
@@ -113,7 +113,7 @@ void Set_Config_Directory(const char * Program_Dir, char * Config_Dir)
     strcpy(Config_Dir,Program_Dir);
     strcat(Config_Dir,"Contents/Resources/");
   // AmigaOS4
-  #elif defined(__amigaos4__)
+  #elif defined(__amigaos4__) || defined(__AROS__)
     strcpy(Config_Dir,"PROGDIR:");
   #else
     char FileName[TAILLE_CHEMIN_FICHIER];
