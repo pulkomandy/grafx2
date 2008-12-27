@@ -4306,12 +4306,12 @@ void Rectangle_Degrade_0_5(void)
 
     if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
     {
-	decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RAY);
+	decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
 	decalage_gauche = Limite_Gauche_Zoom;
     }
 
-    if(Max(RAX,RAY)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
-	decalage_largeur += Max(RAX,RAY) - Limite_visible_Droite_Zoom;
+    if(Max(RAX,RBX)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
+	decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
 
     if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
     {
@@ -4320,7 +4320,7 @@ void Rectangle_Degrade_0_5(void)
     }
 
     if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
-	decalage_hauteur += Max(RAX,RAY) + Limite_visible_Bas_Zoom;
+	decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
 
     if(largeur > decalage_largeur)
     {
