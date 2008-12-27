@@ -333,7 +333,7 @@ void Initialisation_Texte(void)
 	XFreeFontPath(font_path_list);
        }
        #endif
-  #elif defined(__BEOS__)
+  #elif defined(__BEOS__) || defined(__HAIKU__)
     #ifndef NOTTF
       for_each_file("/etc/fonts/ttfonts", Ajout_fonte);
     #endif
