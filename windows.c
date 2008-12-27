@@ -33,6 +33,7 @@
 #include "moteur.h"
 #include "divers.h"
 #include "sdlscreen.h"
+#include "erreurs.h"
 
 // Affichage d'un pixel dans le menu (le menu doit être visible)
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
@@ -279,10 +280,11 @@ void Afficher_menu(void)
     // Affichage des couleurs de travail
     Afficher_foreback();
 
+
     if (!Fenetre)
     {
-      if ((Mouse_Y<Menu_Ordonnee) &&
-          ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ))
+      if ((Mouse_Y<Menu_Ordonnee) /*&&
+          ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) )*/)
       {
         if ( (Operation_en_cours!=OPERATION_PIPETTE)
           && (Operation_en_cours!=OPERATION_REMPLACER) )

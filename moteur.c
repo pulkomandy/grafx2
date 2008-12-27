@@ -953,7 +953,7 @@ void Gestion_principale(void)
 
 
     // Le curseur se trouve dans l'image
-    if ( (!Curseur_dans_menu) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
+    if ( (!Curseur_dans_menu) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Touche || Mouse_K)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
     {
        if ( (Operation_en_cours!=OPERATION_PIPETTE) && (Operation_en_cours!=OPERATION_REMPLACER) )
        {
@@ -1112,6 +1112,9 @@ void Fermer_fenetre(void)
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
     Menu_visible=Menu_visible_avant_fenetre;
     Forme_curseur=Forme_curseur_avant_fenetre;
+
+    // On le fait ici car Afficher_menu s'en sert pour savoir s'il doit remetre X: Y: dans la toolbar.
+    Fenetre--;
     
     Afficher_ecran();
     Afficher_menu();
@@ -1121,6 +1124,7 @@ void Fermer_fenetre(void)
     // Restore de ce que la fenêtre cachait
     Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
     UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+    Fenetre--;
   }
 
   Touche=0;
@@ -1129,7 +1133,6 @@ void Fermer_fenetre(void)
   Old_MX = -1;
   Old_MY = -1;
 
-  Fenetre--;
 
 }
 
