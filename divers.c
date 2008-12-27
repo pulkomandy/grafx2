@@ -212,9 +212,9 @@ int Get_input(void)
           //si on est déjà en haut on peut plus bouger
           if(INPUT_Nouveau_Mouse_Y!=0)
           {
-	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-		INPUT_Nouveau_Mouse_Y-=Loupe_Facteur;
-	    else
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
+            else
                 INPUT_Nouveau_Mouse_Y--;
             ok=1;
           }
@@ -224,9 +224,13 @@ int Get_input(void)
           //[Touche] = Emulation de MOUSE DOWN
           if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
           {
-	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-		INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
-	    else
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
+                    INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
+            }
+            else
                 INPUT_Nouveau_Mouse_Y++;
             ok=1;
           }
@@ -236,9 +240,9 @@ int Get_input(void)
           //[Touche] = Emulation de MOUSE LEFT
           if(INPUT_Nouveau_Mouse_X!=0)
           {
-	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-		INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
-	    else
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+            else
                 INPUT_Nouveau_Mouse_X--;
             ok=1;
           }
@@ -249,9 +253,13 @@ int Get_input(void)
 
           if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
           {
-	    if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-		INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
-	    else
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
+                    INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
+            }
+            else
                 INPUT_Nouveau_Mouse_X++;
             ok=1;
           }
@@ -294,7 +302,7 @@ int Get_input(void)
     byte bl=0;//BL va indiquer si on doit corriger la position du curseur
 
     //Si le curseur ne se trouve plus dans l'image
-    if(Menu_Ordonnee<INPUT_Nouveau_Mouse_Y)
+    if(Menu_Ordonnee<=INPUT_Nouveau_Mouse_Y)
     {
       //On bloque le curseur en fin d'image
       bl++;
