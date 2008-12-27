@@ -4299,34 +4299,46 @@ void Rectangle_Degrade_0_5(void)
   UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_hauteur);
 
   // Dessin dans la zone zoomée
-  if(Loupe_Mode)
+  if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
   {
     decalage_largeur = 0;
-    if(Min(RAX,RBX)<Limite_Gauche_Zoom)
+    decalage_hauteur=0;
+
+    if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
     {
 	decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RAY);
 	decalage_gauche = Limite_Gauche_Zoom;
     }
-    if(Max(RAX,RAY)>Limite_visible_Droite_Zoom)
+
+    if(Max(RAX,RAY)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
 	decalage_largeur += Max(RAX,RAY) - Limite_visible_Droite_Zoom;
 
-    decalage_hauteur=0;
-    if(Min(RAY,RBY)<Limite_Haut_Zoom)
+    if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
     {
 	decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
 	decalage_haut = Limite_Haut_Zoom;
     }
-    if(Max(RAY,RBY)>Limite_visible_Bas_Zoom)
+
+    if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
 	decalage_hauteur += Max(RAX,RAY) + Limite_visible_Bas_Zoom;
 
-    if(decalage_haut==0)
+    if(largeur > decalage_largeur)
+    {
+      if(decalage_haut==0) // La ligne du haut est visible
 	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),largeur-decalage_largeur);
-    if(Max(RAY,RBY)<Limite_visible_Bas_Zoom)
+
+      if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
 	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),largeur-decalage_largeur);
-    if(decalage_gauche==0)
+    }
+
+    if(hauteur>decalage_hauteur)
+    {
+      if(decalage_gauche==0) // La ligne de gauche est visible
 	Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
-    if(Max(RAX,RBX)<Limite_visible_Droite_Zoom)
+
+      if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
 	Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+    }
   }
 
   Operation_PUSH(RAX);
