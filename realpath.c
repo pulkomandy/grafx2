@@ -43,7 +43,12 @@ char *realpath(const char *_path, char *resolved_path)
 	
 	if (chdir(path)) {
 		if (errno == ENOTDIR) {
+		  #if defined(__WIN32__)
+		  // No symbolic links and no readlink()
+		  l = -1;
+		  #else
 			l = readlink(path, lnk, PATH_MAX);
+			#endif
 			if (!(tmp = sep(path))) {
 				resolved_path = NULL;
 				goto abort;
