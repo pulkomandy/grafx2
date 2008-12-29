@@ -72,9 +72,9 @@ else
     CP = cp
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -Wall _c _g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
-    LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
-    CC = i386-linux-aros-gcc
+    COPT = -Wall -g `sdl-config --cflags` $(TTFCOPT)
+    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    CC = gcc
     OBJDIR = obj/aros
   else
 

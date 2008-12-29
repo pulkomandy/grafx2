@@ -915,6 +915,8 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
     #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
     // sysinfo not implemented
+#elif defined(__AROS__)
+    #include <proto/exec.h>
 #else
     #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
@@ -951,6 +953,8 @@ unsigned long Memoire_libre(void)
     #elif defined(__BEOS__) || defined(__HAIKU__)
         // No <sys/sysctl.h> on BeOS or Haiku
         return 10*1024*1024;
+    #elif defined(__AROS__)
+	return AvailMem(MEMF_ANY);
     #else
         struct sysinfo info;
         sysinfo(&info);
