@@ -430,6 +430,10 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")                                          //
   AIDE_TEXTE("  Luc Schrijvers (begasus@skynet.be)")      //
   AIDE_TEXTE("")
+  AIDE_BOLD ("                 SKYOS PORT")         //
+  AIDE_TEXTE("")                                          //
+  AIDE_TEXTE("  Luc Schrijvers (begasus@skynet.be)")      //
+  AIDE_TEXTE("")
   AIDE_BOLD("                 BUGFINDERS")                //
   AIDE_TEXTE("")                                          //
   AIDE_TEXTE("  BDCIron       Ced           El Topo    ")

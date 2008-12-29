@@ -917,6 +917,8 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
     // sysinfo not implemented
 #elif defined(__AROS__)
     #include <proto/exec.h>
+#elif defined(__SKYOS__)
+    #include <skyos/sysinfo.h>
 #else
     #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
@@ -950,7 +952,7 @@ unsigned long Memoire_libre(void)
         len = sizeof(maxmem);
         sysctl(mib,2,&maxmem,&len,NULL,0);
         return maxmem;
-    #elif defined(__BEOS__) || defined(__HAIKU__)
+    #elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__)
         // No <sys/sysctl.h> on BeOS or Haiku
         return 10*1024*1024;
     #elif defined(__AROS__)

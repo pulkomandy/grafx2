@@ -105,6 +105,20 @@ else
     CC = gcc
     OBJDIR = obj/haiku
   else
+
+  #SkyOS specific
+  ifeq ($(PLATFORM),skyos)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    BIN = grafx2
+    CFGBIN = gfxcfg
+    COPT = -W -Wall -Wdeclaration-after-statement -c -g `sdl-config --cflags` $(TTFCOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    CC = gcc
+    OBJDIR = obj/skyos
+  else
   
     # Linux specific
     DELCOMMAND = rm -rf

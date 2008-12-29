@@ -338,6 +338,11 @@ void Initialisation_Texte(void)
       for_each_file("/etc/fonts/ttfonts", Ajout_fonte);
     #endif
 
+  #elif defined(__SKYOS__)
+    #ifndef NOTTF
+      for_each_file("/boot/system/fonts", Ajout_fonte);
+    #endif
+
   #endif
 }
 
