@@ -283,9 +283,10 @@ void Afficher_menu(void)
 
     if (!Fenetre)
     {
-      if ((Mouse_Y<Menu_Ordonnee) /*&&
-          ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) )*/)
+      if ((Mouse_Y<Menu_Ordonnee) ||							// Souris dans le menu
+          ( (Loupe_Mode) && (Mouse_X<Principal_Split) && (Mouse_X>=Principal_X_Zoom) )) // Souris sur la barre de split (dans ces deux cas on ne va pas exécuter l'acion d'une opération)
       {
+	// Dans ces deux cas, on met dans la barre les XY courant, même s'il y a des chances que ça soit recouvert si la souris est sur un bouton (trop chiant à vérifier)
         if ( (Operation_en_cours!=OPERATION_PIPETTE)
           && (Operation_en_cours!=OPERATION_REMPLACER) )
           Print_dans_menu("X:       Y:             ",0);
@@ -300,7 +301,7 @@ void Afficher_menu(void)
       }
       Print_nom_fichier();
     }
-    UpdateRect(0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'étant avec le nom du fichier
+    UpdateRect(0,Menu_Ordonnee,Largeur_ecran,HAUTEUR_MENU*Menu_Facteur_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'état avec le nom du fichier
   }
 }
 

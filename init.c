@@ -863,7 +863,7 @@ void Initialisation_des_operations(void)
   for (Numero=0;Numero<NB_OPERATIONS;Numero++)
     for (Bouton=0;Bouton<3;Bouton++)
       for (Taille=0;Taille<TAILLE_PILE_OPERATIONS;Taille++)
-        Initialiser_operation(Numero,Bouton,Taille,/*Print_coordonnees*/Rien_du_tout,0);
+        Initialiser_operation(Numero,Bouton,Taille,Print_coordonnees,0);
 
 
   // Ici viennent les déclarations détaillées des opérations
