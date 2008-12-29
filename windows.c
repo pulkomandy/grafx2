@@ -283,10 +283,10 @@ void Afficher_menu(void)
 
     if (!Fenetre)
     {
-      if ((Mouse_Y<Menu_Ordonnee) ||							// Souris dans le menu
-          ( (Loupe_Mode) && (Mouse_X<Principal_Split) && (Mouse_X>=Principal_X_Zoom) )) // Souris sur la barre de split (dans ces deux cas on ne va pas exécuter l'acion d'une opération)
+      if ((Mouse_Y<Menu_Ordonnee) &&							// Souris dans l'image
+          ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ))
       {
-	// Dans ces deux cas, on met dans la barre les XY courant, même s'il y a des chances que ça soit recouvert si la souris est sur un bouton (trop chiant à vérifier)
+        // Dans ces deux cas, on met dans la barre les XY courant, même s'il y a des chances que ça soit recouvert si la souris est sur un bouton (trop chiant à vérifier)
         if ( (Operation_en_cours!=OPERATION_PIPETTE)
           && (Operation_en_cours!=OPERATION_REMPLACER) )
           Print_dans_menu("X:       Y:             ",0);
