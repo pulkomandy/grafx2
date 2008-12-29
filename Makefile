@@ -147,6 +147,7 @@ endif
 endif
 endif
 endif
+endif
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
 ifeq ($(NOTTF),1)

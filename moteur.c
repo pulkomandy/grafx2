@@ -954,29 +954,26 @@ void Gestion_principale(void)
 
 
     // Le curseur se trouve dans l'image
-    if ( (!Curseur_dans_menu) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Touche || Mouse_K)) // On ne met les coordonnées à jour que si la souris a bougé. Problème, ça va merder si on scroll l'écran...
+    if ( (!Curseur_dans_menu) && (Menu_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Touche || Mouse_K)) // On ne met les coordonnées à jour que si l'utilisateur a fait un truc
     {
        if ( (Operation_en_cours!=OPERATION_PIPETTE) && (Operation_en_cours!=OPERATION_REMPLACER) )
        {
-          if(!Curseur_dans_menu_precedent)
+          if(Curseur_dans_menu_precedent)
           {
              Print_dans_menu("X:       Y:             ",0);
           }
-          Curseur_dans_menu_precedent = 0;
        }
        else
        {
-          if(!Curseur_dans_menu_precedent)
+          if(Curseur_dans_menu_precedent)
           {
              Print_dans_menu("X:       Y:       (    )",0);
           }
-          Curseur_dans_menu_precedent = 0;
-          //Num2str(Pipette_Couleur,Chaine,3);
-          //Print_dans_menu(Chaine,20);
-          //Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
        }
+       Curseur_dans_menu_precedent = 0;
        Print_coordonnees();
     }
+
     if(Curseur_dans_menu)
     {
     	Curseur_dans_menu_precedent = 1;
