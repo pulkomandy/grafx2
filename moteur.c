@@ -971,7 +971,6 @@ void Gestion_principale(void)
           }
        }
        Curseur_dans_menu_precedent = 0;
-       //Print_coordonnees();
     }
 
     if(Curseur_dans_menu)

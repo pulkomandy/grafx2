@@ -415,7 +415,7 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_BOLD ("              AMIGA OS 4 PORT")
   AIDE_TEXTE("")
-  AIDE_TEXTE("  xeron")
+  AIDE_TEXTE("  Peter Gordon (pete@petergordon.org.uk)")
   AIDE_TEXTE("")
   AIDE_BOLD ("                 AROS PORT")
   AIDE_TEXTE("")
