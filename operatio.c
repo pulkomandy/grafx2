@@ -3261,6 +3261,7 @@ void Etirer_brosse_0_7(void)
       default :
         Changement_de_taille=0;
     }
+    Touche_ANSI=0;
   }
   else
     Changement_de_taille=0;
@@ -3513,6 +3514,7 @@ void Tourner_brosse_0_5(void)
       default :
         Changement_angle=0;
     }
+    Touche_ANSI=0;
   }
   else
     Changement_angle=0;
