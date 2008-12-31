@@ -915,7 +915,7 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
     #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
     // sysinfo not implemented
-#elif defined(__AROS__)
+#elif defined(__AROS__) || defined(__amigaos4__)
     #include <proto/exec.h>
 #elif defined(__SKYOS__)
     #include <skyos/sysinfo.h>
@@ -952,8 +952,9 @@ unsigned long Memoire_libre(void)
         len = sizeof(maxmem);
         sysctl(mib,2,&maxmem,&len,NULL,0);
         return maxmem;
-    #elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__)
+    #elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__)
         // No <sys/sysctl.h> on BeOS or Haiku
+        // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
         return 10*1024*1024;
     #elif defined(__AROS__)
 	return AvailMem(MEMF_ANY);
