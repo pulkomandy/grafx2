@@ -2446,6 +2446,17 @@ void Save_BMP(void)
     Header.Nb_Clr     =0;
     Header.Clr_Imprt  =0;
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    Header.Taille_1   = SDL_Swap32( Header.Taille_1 );
+    Header.Decalage   = SDL_Swap32( Header.Decalage );
+    Header.Taille_2   = SDL_Swap32( Header.Taille_2 );
+    Header.Largeur    = SDL_Swap32( Header.Largeur );
+    Header.Hauteur    = SDL_Swap32( Header.Hauteur );
+    Header.Plans      = SDL_Swap16( Header.Plans );
+    Header.Nb_bits    = SDL_Swap16( Header.Nb_bits );
+    // If you ever set any more fields to non-zero, please swap here!
+#endif
+
     if (write_bytes(Fichier,&Header,sizeof(T_BMP_Header)))
     {
       //   Chez Bill, ils ont dit: "On va mettre les couleur dans l'ordre
