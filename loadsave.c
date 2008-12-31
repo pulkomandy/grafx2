@@ -487,7 +487,6 @@ void Charger_image(byte Image)
   // Si on a su déterminer avec succès le format du fichier:
   if (!Erreur_fichier)
   {
-
     // On peut charger le fichier:
     Image_24b=0;
     Format_Load[Format]();
@@ -896,7 +895,7 @@ void Test_PKM(void)
 
 
   Nom_fichier_complet(Nom_du_fichier,0);
-
+  
   Erreur_fichier=1;
 
   // Ouverture du fichier
@@ -937,7 +936,7 @@ void Load_PKM(void)
   Nom_fichier_complet(Nom_du_fichier,0);
 
   Erreur_fichier=0;
-
+  
   if ((Fichier=fopen(Nom_du_fichier, "rb")))
   {
     stat(Nom_du_fichier,&Informations_Fichier);
