@@ -58,10 +58,10 @@ else
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` $(TTFCOPT)
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = obj/amiga
-    NOTTF = 1
+#    NOTTF = 1
   else
 
   #AROS specific

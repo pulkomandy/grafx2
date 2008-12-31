@@ -333,6 +333,10 @@ void Initialisation_Texte(void)
 	XFreeFontPath(font_path_list);
        }
        #endif
+  #elif defined(__amigaos4__)
+    #ifndef NOTTF
+      for_each_file( "FONTS:_TrueType", Ajout_fonte );
+    #endif
   #elif defined(__BEOS__) || defined(__HAIKU__)
     #ifndef NOTTF
       for_each_file("/etc/fonts/ttfonts", Ajout_fonte);
