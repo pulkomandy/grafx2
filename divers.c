@@ -162,15 +162,23 @@ int Get_input(void)
         //Mouvement de la souris
         INPUT_Nouveau_Mouse_X = event.motion.x/Pixel_width;
         INPUT_Nouveau_Mouse_Y = event.motion.y/Pixel_height;
+
+	// Il peut arriver (à cause de la division ci dessus) que les nouvelles coordonnees soient égales aux anciennes...
+	// Dans ce cas on ne traite pas l'évènement.
+	if (INPUT_Nouveau_Mouse_X == Mouse_X && INPUT_Nouveau_Mouse_Y == Mouse_Y) return 0;
         break;
+
       case SDL_MOUSEBUTTONDOWN:
         //Clic sur un des boutons de la souris
         switch(event.button.button)
         {
-          case SDL_BUTTON_LEFT: INPUT_Nouveau_Mouse_K = 1; break;
+          case SDL_BUTTON_LEFT: 
+	      INPUT_Nouveau_Mouse_K = 1; 
+	      break;
+
           case SDL_BUTTON_MIDDLE: // Pour SDL, 2 = clic milieu. Pour nous c'est le clic droit
           case SDL_BUTTON_RIGHT: // Clic droit SDL, clic droit pour nous aussi ( pour le moment en tout cas)
-          INPUT_Nouveau_Mouse_K = 2;
+              INPUT_Nouveau_Mouse_K = 2;
         }
         break;
 
@@ -181,6 +189,7 @@ int Get_input(void)
 
       case SDL_KEYUP:
       {
+	// Il faut remettre à 0 les touches qui simulent un clic sinon c'est comme 
         int ToucheR = Conversion_Touche(event.key.keysym);
 
         if(ToucheR == Config_Touche[4])
