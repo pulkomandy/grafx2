@@ -118,12 +118,12 @@ void Dessiner_ecran_principal()
 {
     Cadre(3,3,630,40,2);
     SFont_Write(Ecran, MyFont, 8,6,"Setup program for Grafx2 (c) 1996-98 Sunset Design and 2008 PulkoMandy");
-    SFont_Write(Ecran, MyFont, 8,18,"Use Up/Down arrows & Page-Up/Page-Down to scroll, Enter to modify, Delete to remove a hot-key, and Escape to validate or cancel.");
-    SFont_Write(Ecran, MyFont, 8,30,"DO NOT USE Print-screen, Pause, and other special keys!");
+    SFont_Write(Ecran, MyFont, 8,18,"Use Up/Down arrows & Page-Up/Page-Down to scroll, Enter to modify,");
+    SFont_Write(Ecran, MyFont, 8,30,"Delete to remove a hot-key and Escape to validate or cancel.");
 
-//    Cadre(3,46,630,400,COULEUR_SETUP);
-    SFont_Write(Ecran,MyFont,8,48,"Option");
-    SFont_Write(Ecran,MyFont,8*38,48,"Hot-Key");
+    Cadre(3,47,630,10,86);
+    SFont_Write(Ecran,MyFont,8   ,48,"Option");
+    SFont_Write(Ecran,MyFont,8*40,48,"Hot-Key");
     SFont_Write(Ecran,MyFont,8*75,48,"Err");
 
     SDL_UpdateRect(Ecran,0,0,640,480);
@@ -137,7 +137,7 @@ void Ecrire(uint8_t Ligne, uint16_t Num_option, uint8_t Couleur)
     SFont_Write(Ecran,MyFont,40*8,Ligne*9,Nom_touche(ConfigTouche[Num_option].Touche));
     if(Erreur[Num_option])
         SFont_Write(Ecran,MyFont,77*8,Ligne*9,"X");
-    Cadre(36*8,Ligne*9,1,9,255);
+    Cadre(39*8,Ligne*9,1,9,255);
     Cadre(74*8,Ligne*9,1,9,255);
     SDL_UpdateRect(Ecran,3,Ligne*9,630,9);
 }
@@ -156,7 +156,7 @@ void Tout_ecrire()
 {
     uint8_t i = HAUTEUR_DEBUT_SETUP;
 
-    Cadre(3,46,630,400,COULEUR_SETUP);
+    Cadre(3,64,630,340,COULEUR_SETUP);
     while(i<=HAUTEUR_FIN_SETUP && i < NB_MAX_TOUCHES + HAUTEUR_DEBUT_SETUP)
     {
         Ecrire(i,Decalage_curseur+i-HAUTEUR_DEBUT_SETUP,
@@ -164,8 +164,8 @@ void Tout_ecrire()
         i++;
     }
 
-    Cadre(36*8,46,1,400,255);
-    Cadre(74*8,46,1,400,255);
+    Cadre(39*8,46,1,360,255);
+    Cadre(74*8,46,1,360,255);
 
     SDL_UpdateRect(Ecran,0,0,640,480);
 
@@ -304,12 +304,12 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
     uint8_t Option_choisie;
     word Touche;
 
-    Hauteur *= 9;
-    Largeur *= 9;
+    Hauteur *= 8;
+    Largeur *= 8;
     x1=(640 - Largeur)/2;
     y1=(480 - Hauteur)/2;
 
-    Cadre(x1+5,y1+5,Largeur,Hauteur,1);
+    Cadre(x1+5,y1+5,Largeur,Hauteur,0);
     Cadre(x1,y1,Largeur,Hauteur,Couleur);
 
     Num_choix =  0;

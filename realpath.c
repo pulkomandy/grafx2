@@ -43,7 +43,7 @@ char *realpath(const char *_path, char *resolved_path)
 	
 	if (chdir(path)) {
 		if (errno == ENOTDIR) {
-		  #if defined(__WIN32__)
+		  #if defined(__WIN32__) || defined(__MORPHOS__)
 		  // No symbolic links and no readlink()
 		  l = -1;
 		  #else

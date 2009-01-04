@@ -79,7 +79,6 @@ void Set_palette(T_Palette Palette)
     PaletteSDL[i].g=Palette[i].V;
     PaletteSDL[i].b=Palette[i].B;
   }
-  //SDL_PHYSPAL|
   SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
 }
 
@@ -926,7 +925,7 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
     #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
     // sysinfo not implemented
-#elif defined(__AROS__) || defined(__amigaos4__)
+#elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__)
     #include <proto/exec.h>
 #elif defined(__SKYOS__)
     #include <skyos/sysinfo.h>
@@ -967,7 +966,7 @@ unsigned long Memoire_libre(void)
         // No <sys/sysctl.h> on BeOS or Haiku
         // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
         return 10*1024*1024;
-    #elif defined(__AROS__)
+    #elif defined(__AROS__) || defined(__MORPHOS__)
 	return AvailMem(MEMF_ANY);
     #else
         struct sysinfo info;

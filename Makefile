@@ -49,7 +49,7 @@ else
 
   PLATFORM = $(shell uname)
 
-  #OS4 specific
+  #AmigaOS4 specific
   ifeq ($(PLATFORM),AmigaOS)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -76,6 +76,20 @@ else
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/aros
+  else
+
+  #MorphOS specific
+  ifeq ($(PLATFORM),MorphOS) 
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    BIN = grafx2
+    CFGBIN = gfxcfg
+    COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
+    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    CC = gcc
+    OBJDIR = obj/morphos
   else
 
   #BeOS specific
@@ -143,6 +157,7 @@ else
       X11LOPT = -lX11
     endif
   endif
+endif
 endif
 endif
 endif

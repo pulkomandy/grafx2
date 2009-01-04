@@ -155,7 +155,7 @@ void Charger_DAT(void)
   
   if(stat(Nom_du_fichier,&Informations_Fichier))
   {
-    switch errno
+    switch(errno)
     {
       case EACCES: puts("La permission de parcours est refusée pour un des répertoires contenu dans le chemin path."); break;
       case EBADF:  puts("filedes est un mauvais descripteur."); break;

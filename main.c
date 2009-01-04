@@ -58,7 +58,7 @@
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
-#elif defined(__AROS__) || defined(__BEOS__)
+#elif defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__)
     #include "realpath.h"
 #endif
 
