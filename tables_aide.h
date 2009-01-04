@@ -422,6 +422,10 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("  masta-uy")
   AIDE_TEXTE("  Markus Weiss (mweiss@id-architekten.de)")
   AIDE_TEXTE("")
+  AIDE_BOLD ("                MORPHOS PORT")
+  AIDE_TEXTE("")
+  AIDE_TEXTE("  Rusback (rusback@wanadoo.fr)")
+  AIDE_TEXTE("")
   AIDE_BOLD ("               MAC OS X PORT")              //
   AIDE_TEXTE("")                                          //
   AIDE_TEXTE("  Franck Charlet (hitchhikr@australia.edu)") //
