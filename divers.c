@@ -841,11 +841,13 @@ void Rotate_180_deg_LOWLEVEL(void)
 void Tempo_jauge(byte Vitesse)
 //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
 {
-        while (Vitesse!=0)
-        {
-            Wait_VBL();
-            Vitesse--;
-        }
+  Uint32 Fin;
+  byte MouseK_Original = Mouse_K;
+  Fin = SDL_GetTicks() + Vitesse*10;
+  do
+  {
+    if (!Get_input()) Wait_VBL();
+  } while (Mouse_K == MouseK_Original && SDL_GetTicks()<Fin);
 }
 
 void Scroll_picture(short Decalage_X,short Decalage_Y)
