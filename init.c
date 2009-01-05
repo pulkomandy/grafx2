@@ -58,12 +58,12 @@
 
 // Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
-{ 
+{
   Drive[Nb_drives].Lettre=Lettre;
   Drive[Nb_drives].Type  =Type;
   Drive[Nb_drives].Chemin=(char *)malloc(strlen(Chemin)+1);
   strcpy(Drive[Nb_drives].Chemin, Chemin);
-  
+
   Nb_drives++;
 }
 
@@ -73,8 +73,38 @@ void Rechercher_drives(void)
 {
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
 
-  // No icons by default.
-  // It's possible to add some here.
+    DosList *dosList;
+    CONST ULONG lockDosListFlags = LDF_READ | LDF_VOLUMES;
+
+    dosList = LockDosList(lockDosListFlags);
+    if (dosList)
+    {
+	dosList = NextDosEntry(dosList, LDF_VOLUMES);
+	while (dosList)
+	{
+	    if (dosList->dol_Type == DLT_VOLUME dosList->dol_Name && dosList->dol_Task)
+	    {
+		TEXT name[256];
+		CONST_STRPTR volume_name = (CONST_STRPTR)BADDR(dosList->dol_Name)+1;
+		CONST_STRPTR device_name = (CONST_STRPTR)((struct Task *)dosList->dol_Task->mp_SigTask)->tc_Node.ln_Name;
+		BPTR volume_lock;
+
+		stccpy(name, volume_name, sizeof(name));
+		strncat(name, ":", sizeof(name));
+
+		volume_lock = Lock(name, SHARED_LOCK);
+		if (volume_lock)
+		{
+		    Ajouter_lecteur(device_name[0],LECTEUR_HDD,name);
+		    UnLock(volume_lock);
+		}
+	    }
+	    dosList = NextDosEntry(dosList, LDF_VOLUMES);
+	}
+
+	UnLockDosList(lockDosListFlags);
+	}
+
 
   #elif defined (__WIN32__)
 
@@ -133,9 +163,9 @@ void Rechercher_drives(void)
   	char * Home = getenv("$HOME");
     #else
 	char * Home = getenv("HOME");
-    #endif	
+    #endif
     Ajouter_lecteur('/', LECTEUR_HDD, "/");
-    if(Home) 
+    if(Home)
 	Ajouter_lecteur('~', LECTEUR_HDD, Home);
 
     Liste_points_montage = read_file_system_list(false);
@@ -147,7 +177,7 @@ void Rechercher_drives(void)
 	    Ajouter_lecteur(lettre++,
 		Liste_points_montage->me_remote==1?LECTEUR_NETWORK:LECTEUR_HDD,
 		Liste_points_montage->me_mountdir);
-	}   
+	}
 	next = Liste_points_montage -> me_next;
 	free(Liste_points_montage -> me_type);
 	free(Liste_points_montage);
@@ -178,7 +208,7 @@ void Charger_DAT(void)
 
   strcpy(Nom_du_fichier,Repertoire_des_donnees);
   strcat(Nom_du_fichier,"gfx2.dat");
-  
+
   if(stat(Nom_du_fichier,&Informations_Fichier))
   {
     switch(errno)
@@ -1268,9 +1298,9 @@ void Definir_mode_video(short  Largeur,
                         short  Hauteur,
                         byte   Mode,
                         word   Fullscreen)
-{                   
+{
   byte Supporte = 0;
-  
+
   if (Nb_modes_video >= MAX_MODES_VIDEO-1)
   {
     DEBUG("Erreur! Tentative de créer un mode de trop! Limite:", MAX_MODES_VIDEO);
@@ -1316,7 +1346,7 @@ void Definition_des_modes_video(void)
   Nb_modes_video=0;
   // Doit être en premier pour avoir le numéro 0:
   Definir_mode_video( 640,480,0, 0);
- 
+
   Definir_mode_video( 320,200,0, 1);
   Definir_mode_video( 320,224,0, 1);
   Definir_mode_video( 320,240,0, 1);
@@ -1386,7 +1416,7 @@ void Definition_des_modes_video(void)
     {
       int Indice2;
       for (Indice2=1; Indice2 < Nb_modes_video; Indice2++)
-        if (Modes[Indice]->w == Mode_video[Indice2].Largeur && 
+        if (Modes[Indice]->w == Mode_video[Indice2].Largeur &&
             Modes[Indice]->h == Mode_video[Indice2].Hauteur)
         {
           // Mode déja prévu: ok
@@ -1686,7 +1716,7 @@ int Charger_CFG(int Tout_charger)
           Liste2tables(Shade_Liste[Shade_Actuel].Liste,
             Shade_Liste[Shade_Actuel].Pas,
             Shade_Liste[Shade_Actuel].Mode,
-            Shade_Table_gauche,Shade_Table_droite);        
+            Shade_Table_gauche,Shade_Table_droite);
         }
         else
         {
@@ -1891,7 +1921,7 @@ int Sauver_CFG(void)
       CFG_Mode_video.Etat   =Mode_video[Indice].Etat;
       CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
       CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
-      
+
       if (!write_byte(Handle, CFG_Mode_video.Etat) ||
         !write_word_le(Handle, CFG_Mode_video.Largeur) ||
         !write_word_le(Handle, CFG_Mode_video.Hauteur) )
@@ -1916,7 +1946,7 @@ int Sauver_CFG(void)
     if (! write_byte(Handle, Shade_Liste[Indice].Pas) ||
       ! write_byte(Handle, Shade_Liste[Indice].Mode) )
     goto Erreur_sauvegarde_config;
-  }    
+  }
 
   // Sauvegarde des informations du Masque
   Chunk.Numero=CHUNK_MASQUE;
@@ -2000,7 +2030,7 @@ int Sauver_CFG(void)
   if (!write_word_le(Handle, Snap_Decalage_Y))
     goto Erreur_sauvegarde_config;
 
-  
+
   if (fclose(Handle))
     return ERREUR_SAUVEGARDE_CFG;
 
@@ -2063,7 +2093,7 @@ void Config_par_defaut(void)
   for (Indice=0; Indice<7; Indice++)
     for (Indice2=0; Indice2<16; Indice2++)
       Shade_Liste[0].Liste[Indice*17+Indice2]=Indice*16+Indice2+16;
-  
+
   Liste2tables(Shade_Liste[Shade_Actuel].Liste,
             Shade_Liste[Shade_Actuel].Pas,
             Shade_Liste[Shade_Actuel].Mode,
@@ -2088,7 +2118,7 @@ void Config_par_defaut(void)
     Degrade_Tableau[Indice].Technique=0;
   }
   Degrade_Charger_infos_du_tableau(Degrade_Courant);
-  
+
   // Smooth
   Smooth_Matrice[0][0]=1;
   Smooth_Matrice[0][1]=2;
@@ -2104,12 +2134,12 @@ void Config_par_defaut(void)
   for (Indice=0; Indice<256; Indice++)
     Exclude_color[Indice]=0;
 
-  // Quick shade    
+  // Quick shade
   Quick_shade_Step=1;
   Quick_shade_Loop=0;
-  
+
   // Grille
   Snap_Largeur=Snap_Hauteur=8;
   Snap_Decalage_X=Snap_Decalage_Y=0;
-  
+
 }
