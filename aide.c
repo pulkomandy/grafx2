@@ -389,13 +389,13 @@ void Bouton_Stats(void)
   freeRam = Memoire_libre();
   
   if(freeRam > (100ULL*1024*1024*1024))
-        sprintf(Buffer,"%d Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
+        sprintf(Buffer,"%u Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
   else if(freeRam > (100*1024*1024))
-        sprintf(Buffer,"%d Megabytes",(unsigned int)(freeRam/(1024*1024)));
+        sprintf(Buffer,"%u Megabytes",(unsigned int)(freeRam/(1024*1024)));
   else if(freeRam > 100*1024)
-        sprintf(Buffer,"%d Kilobytes",(unsigned int)(freeRam/1024));
+        sprintf(Buffer,"%u Kilobytes",(unsigned int)(freeRam/1024));
   else
-        sprintf(Buffer,"%d bytes",(unsigned int)freeRam);
+        sprintf(Buffer,"%u bytes",(unsigned int)freeRam);
   Print_dans_fenetre(114,51,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage de l'espace disque libre

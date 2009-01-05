@@ -320,8 +320,8 @@ GFX2_GLOBAL short Brosse_Centre_rotation_Y;      // |  de la brosse
 GFX2_GLOBAL byte  Menu_visible;        // Le menu est actif à l'écran
 GFX2_GLOBAL word  Menu_Ordonnee;       // Ordonnée où commence le menu
 GFX2_GLOBAL word  Menu_Ordonnee_Texte; // Ordonnée où commence le texte dans le menu
-GFX2_GLOBAL word  Menu_Facteur_X;      // Facteur de grossissement du menu en X
-GFX2_GLOBAL word  Menu_Facteur_Y;      // Facteur de grossissement du menu en Y
+GFX2_GLOBAL byte  Menu_Facteur_X;      // Facteur de grossissement du menu en X
+GFX2_GLOBAL byte  Menu_Facteur_Y;      // Facteur de grossissement du menu en Y
 GFX2_GLOBAL word  Menu_Taille_couleur; // Taille d'une couleur de la palette du menu
 
 

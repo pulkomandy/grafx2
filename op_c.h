@@ -158,7 +158,7 @@ void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 void TO_Init(Table_occurence * t);
 Table_occurence * TO_New(int nbb_r,int nbb_v,int nbb_b);
 void TO_Delete(Table_occurence * t);
-inline int TO_Get(Table_occurence * t,int r,int v,int b);
+int TO_Get(Table_occurence * t,int r,int v,int b);
 void TO_Set(Table_occurence * t,int r,int v,int b,int i);
 void TO_Inc(Table_occurence * t,int r,int v,int b);
 void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille);

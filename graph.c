@@ -820,7 +820,7 @@ void Remplir(byte Couleur_de_remplissage)
 
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
-  inline void Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
+  void Pixel_figure_Definitif(word Pos_X,word Pos_Y,byte Couleur)
   {
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
   }

@@ -101,9 +101,9 @@ void Rafficher_toute_la_chaine(word Pos_X,word Pos_Y,char * Chaine,byte Position
   Print_char_dans_fenetre(Pos_X+(Position<<3),Pos_Y,Chaine[Position],COULEUR_TEXTE_CURSEUR,COULEUR_FOND_CURSEUR);
 }
 
-//****************************************************************************
-//*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
-//****************************************************************************
+/****************************************************************************
+*           Enhanced super scanf deluxe pro plus giga mieux :-)             *
+****************************************************************************/
 byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type_saisie)
 // Paramètres:
 //   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre
@@ -123,9 +123,9 @@ byte Readline(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Type
   return Readline_ex(Pos_X,Pos_Y,Chaine,Taille_affichee,Taille_maxi,Type_saisie);
 }
 
-//****************************************************************************
-//*           Enhanced super scanf deluxe pro plus giga mieux :-)            *
-//****************************************************************************
+/****************************************************************************
+*           Enhanced super scanf deluxe pro plus giga mieux :-)             *
+****************************************************************************/
 byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte Taille_maxi, byte Type_saisie)
 // Paramètres:
 //   Pos_X, Pos_Y : Coordonnées de la saisie dans la fenêtre

@@ -1654,8 +1654,8 @@ void Load_LBM(void)
             if ((Header.BitPlanes==6) || (Header.BitPlanes==8))
               Image_HAM=Header.BitPlanes;
             else
-              // Erreur_fichier=1; /* C'est censé être incorrect mais j'ai */
-              Image_HAM=0;         /* trouvé un fichier comme ça, alors... */
+              /* Erreur_fichier=1;*/  /* C'est censé être incorrect mais j'ai */
+              Image_HAM=0;            /* trouvé un fichier comme ça, alors... */
           }
         }
         else

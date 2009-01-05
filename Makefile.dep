@@ -26,6 +26,7 @@ $(OBJDIR)/main.o: main.c const.h struct.h global.h loadsave.h graph.h divers.h \
   readini.h saveini.h io.h texte.h setup.h windows.h brush.h realpath.h
 $(OBJDIR)/moteur.o: moteur.c const.h struct.h global.h loadsave.h graph.h divers.h \
   special.h boutons.h operatio.h shade.h erreurs.h sdlscreen.h windows.h brush.h
+$(OBJDIR)/mountlist.o: mountlist.h mountlist.c
 $(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h graph.h
 $(OBJDIR)/operatio.o: operatio.c const.h struct.h global.h loadsave.h divers.h \
   moteur.h graph.h operatio.h boutons.h pages.h erreurs.h sdlscreen.h brush.h windows.h

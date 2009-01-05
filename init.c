@@ -34,6 +34,8 @@
 #include <SDL/SDL_byteorder.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
+#else
+  #include "mountlist.h" // read_file_system_list
 #endif
 
 #include "const.h"
@@ -69,17 +71,17 @@ void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
 // Rechercher la liste et le type des lecteurs de la machine
 void Rechercher_drives(void)
 {
-  #if defined(__amigaos4__) || defined(__AROS__)
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
 
   // No icons by default.
   // It's possible to add some here.
 
   #elif defined (__WIN32__)
 
-  char NomLecteur[]="A:\\";
+	char NomLecteur[]="A:\\";
 	int DriveBits = GetLogicalDrives();
 	int IndiceLecteur;
-  int IndiceBit;
+	int IndiceBit;
 	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
 	IndiceLecteur = 0;
 	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
@@ -117,18 +119,42 @@ void Rechercher_drives(void)
 	}
 
   #else
+    //Sous les différents unix, on va mettre
+    // un disque dur qui pointera vers la racine,
+    // et un autre vers le home directory de l'utilisateur.
 
-	//Sous les différents unix, il n'y a pas de lecteurs, on va juste mettre 
-	// un disque dur qui pointera vers la racine,
-	// et un autre vers le home directory de l'utilisateur.
-	#if defined(__BEOS__) || defined(__HAIKU__)
+    // Ensuite on utilise read_file_system_list pour compléter
+
+    struct mount_entry* Liste_points_montage;
+    struct mount_entry* next;
+    char lettre = 'A';
+
+    #if defined(__BEOS__) || defined(__HAIKU__)
   	char * Home = getenv("$HOME");
-  #else
+    #else
 	char * Home = getenv("HOME");
-  #endif	
-	Ajouter_lecteur('/', LECTEUR_HDD, "/");
-	Ajouter_lecteur('~', LECTEUR_HDD, Home ? Home : "");
-	#endif
+    #endif	
+    Ajouter_lecteur('/', LECTEUR_HDD, "/");
+    if(Home) 
+	Ajouter_lecteur('~', LECTEUR_HDD, Home);
+
+    Liste_points_montage = read_file_system_list(false);
+
+    while(Liste_points_montage != NULL)
+    {
+	if(Liste_points_montage -> me_dummy == 0 && !strcmp(Liste_points_montage->me_mountdir,"/") && !strcmp(Liste_points_montage->me_mountdir,"/home"))
+	{
+	    Ajouter_lecteur(lettre++,
+		Liste_points_montage->me_remote==1?LECTEUR_NETWORK:LECTEUR_HDD,
+		Liste_points_montage->me_mountdir);
+	}   
+	next = Liste_points_montage -> me_next;
+	free(Liste_points_montage -> me_type);
+	free(Liste_points_montage);
+	Liste_points_montage = next;
+    }
+
+  #endif
 }
 
 // Active un lecteur, changeant normalement le répertoire en cours.
