@@ -22,7 +22,7 @@
 */
 #include <string.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
 #include "erreurs.h"

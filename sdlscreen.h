@@ -22,7 +22,7 @@
 #ifndef SDLSCREEN_H_INCLUDED
 #define SDLSCREEN_H_INCLUDED
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "struct.h"
 
   void Set_Mode_SDL(int *,int *,int);

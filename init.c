@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <SDL/SDL_byteorder.h>
+#include <SDL_byteorder.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif

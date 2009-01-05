@@ -23,7 +23,7 @@
 // Fonctions de lecture/ecriture fichier, gèrent les systèmes big-endian et
 // little-endian.
 
-#include <SDL/SDL_endian.h>
+#include <SDL_endian.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>

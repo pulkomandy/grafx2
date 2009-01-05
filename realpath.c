@@ -9,6 +9,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined(__GP2X__)
+    // This is a random default value ...
+    #define PATH_MAX 32768
+#endif
+
 static char *sep(char *path)
 {
 	char *tmp, c;

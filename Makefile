@@ -139,6 +139,7 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
+
     ifdef WIN32CROSS
       #cross compile a Win32 executable
       CC = i586-mingw32msvc-gcc
@@ -148,13 +149,27 @@ else
       LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
       OBJDIR = obj/win32
     else
-      BIN = grafx2
-      CFGBIN = gfxcfg
-      COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
-      LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
-      CC = gcc
-      OBJDIR = obj/unix
-      X11LOPT = -lX11
+
+      ifdef GP2XCROSS
+	#cross compile an exec for the gp2x
+        CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
+        BIN = grafx2.gpe
+        CFGBIN = gfxcfg.gpe
+        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -c -g -O3 `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__
+        LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT)
+        OBJDIR = obj/gp2x
+        NOTTF = 1
+      else
+
+        # Compiles a regular linux exectutable for the native platform
+        BIN = grafx2
+        CFGBIN = gfxcfg
+        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
+        CC = gcc
+        OBJDIR = obj/unix
+        X11LOPT = -lX11
+      endif
     endif
   endif
 endif

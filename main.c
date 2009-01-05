@@ -35,8 +35,8 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <unistd.h>
 #include "pages.h"
 #include "files.h"
@@ -58,7 +58,7 @@
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
-#elif defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__)
+#elif defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__)
     #include "realpath.h"
 #endif
 

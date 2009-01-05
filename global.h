@@ -39,7 +39,7 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "struct.h"
 
 GFX2_GLOBAL struct S_Config

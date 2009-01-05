@@ -24,8 +24,8 @@
     GERMANY
     karlb@gmx.net                                                      
 */                                                                            
-#include <SDL/SDL.h>
-#include <SDL/SDL_video.h>
+#include <SDL.h>
+#include <SDL_video.h>
 
 #include <assert.h>
 #include <stdlib.h>

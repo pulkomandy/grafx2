@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include "const.h"
 #include "struct.h"

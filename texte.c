@@ -33,7 +33,7 @@
 #ifdef __macosx__
   #include <SDL_ttf/SDL_ttf.h>
 #else
-  #include <SDL/SDL_ttf.h>
+  #include <SDL_ttf.h>
 #endif
 
 #ifdef __linux__
@@ -46,7 +46,8 @@
 #endif
 #endif
 #endif
-#include <SDL/SDL_image.h>
+
+#include <SDL_image.h>
 // SFont
 #include "SFont.h"
 
@@ -319,6 +320,7 @@ void Initialisation_Texte(void)
     #endif
 
   #elif defined(__linux__)
+    #ifndef NOTTF
        #define USE_XLIB
     
        #ifdef USE_XLIB
@@ -333,6 +335,7 @@ void Initialisation_Texte(void)
 	XFreeFontPath(font_path_list);
        }
        #endif
+    #endif
   #elif defined(__amigaos4__)
     #ifndef NOTTF
       for_each_file( "FONTS:_TrueType", Ajout_fonte );

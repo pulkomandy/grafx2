@@ -285,7 +285,6 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
 void Lire_liste_des_lecteurs(void)
 {
-// Fixes a warning on os4
 #ifndef __amigaos4__
   int Indice;
 #endif
