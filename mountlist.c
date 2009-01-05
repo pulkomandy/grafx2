@@ -16,6 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#if(!defined(__WIN32__))
+
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #define MOUNTED_GETMNTENT1
 // --- END GRAFX2 CUSTOM CONFIG ---
@@ -887,3 +889,5 @@ read_file_system_list (bool need_fs_type)
     return NULL;
   }
 }
+
+#endif

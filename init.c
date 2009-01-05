@@ -34,8 +34,6 @@
 #include <SDL/SDL_byteorder.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
-#else
-  #include "mountlist.h" // read_file_system_list
 #endif
 
 #include "const.h"
@@ -54,7 +52,7 @@
 #include "files.h"
 #include "setup.h"
 #include "windows.h"
-
+#include "mountlist.h" // read_file_system_list
 
 // Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
