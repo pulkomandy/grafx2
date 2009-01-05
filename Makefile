@@ -73,7 +73,7 @@ else
     BIN = grafx2
     CFGBIN = gfxcfg
     COPT = -Wall -g `sdl-config --cflags` $(TTFCOPT)
-    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = obj/aros
   else
@@ -150,7 +150,7 @@ else
     else
       BIN = grafx2
       CFGBIN = gfxcfg
-      COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g -O3 `sdl-config --cflags` $(TTFCOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
       LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
       CC = gcc
       OBJDIR = obj/unix
