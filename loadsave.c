@@ -48,9 +48,9 @@
 // Taille de fichier, en octets
 int FileLength(FILE * Fichier)
 {
-	struct stat infos_fichier;
-	fstat(fileno(Fichier),&infos_fichier);
-	return infos_fichier.st_size;
+        struct stat infos_fichier;
+        fstat(fileno(Fichier),&infos_fichier);
+        return infos_fichier.st_size;
 }
 
 // Chargement des pixels dans l'écran principal

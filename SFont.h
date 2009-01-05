@@ -46,9 +46,9 @@ extern "C" {
 // To load the fonts, load the font image into YourFont->Surface
 // and call InitFont( YourFont );
 typedef struct {
-	SDL_Surface *Surface;	
-	int CharPos[512];
-	int MaxPos;
+        SDL_Surface *Surface;   
+        int CharPos[512];
+        int MaxPos;
 } SFont_Font;
 
 // Initializes the font
@@ -65,7 +65,7 @@ void SFont_FreeFont(SFont_Font* Font);
 // Destination: the suface you want to blit to
 // text: a string containing the text you want to blit.
 void SFont_Write(SDL_Surface *Surface, const SFont_Font *Font, int x, int y,
-				 const char *text);
+                                 const char *text);
 
 // Returns the width of "text" in pixels
 int SFont_TextWidth(const SFont_Font* Font, const char *text);
@@ -74,7 +74,7 @@ int SFont_TextHeight(const SFont_Font* Font);
 
 // Blits a string to Surface with centered x position
 void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font* Font, int y,
-					   const char *text);
+                                           const char *text);
 
 #ifdef __cplusplus
 }

@@ -77,74 +77,74 @@ void Rechercher_drives(void)
     dosList = LockDosList(lockDosListFlags);
     if (dosList)
     {
-	dosList = NextDosEntry(dosList, LDF_VOLUMES);
-	while (dosList)
-	{
-	    if (dosList->dol_Type == DLT_VOLUME dosList->dol_Name && dosList->dol_Task)
-	    {
-		TEXT name[256];
-		CONST_STRPTR volume_name = (CONST_STRPTR)BADDR(dosList->dol_Name)+1;
-		CONST_STRPTR device_name = (CONST_STRPTR)((struct Task *)dosList->dol_Task->mp_SigTask)->tc_Node.ln_Name;
-		BPTR volume_lock;
+        dosList = NextDosEntry(dosList, LDF_VOLUMES);
+        while (dosList)
+        {
+            if (dosList->dol_Type == DLT_VOLUME dosList->dol_Name && dosList->dol_Task)
+            {
+                TEXT name[256];
+                CONST_STRPTR volume_name = (CONST_STRPTR)BADDR(dosList->dol_Name)+1;
+                CONST_STRPTR device_name = (CONST_STRPTR)((struct Task *)dosList->dol_Task->mp_SigTask)->tc_Node.ln_Name;
+                BPTR volume_lock;
 
-		stccpy(name, volume_name, sizeof(name));
-		strncat(name, ":", sizeof(name));
+                stccpy(name, volume_name, sizeof(name));
+                strncat(name, ":", sizeof(name));
 
-		volume_lock = Lock(name, SHARED_LOCK);
-		if (volume_lock)
-		{
-		    Ajouter_lecteur(device_name[0],LECTEUR_HDD,name);
-		    UnLock(volume_lock);
-		}
-	    }
-	    dosList = NextDosEntry(dosList, LDF_VOLUMES);
-	}
+                volume_lock = Lock(name, SHARED_LOCK);
+                if (volume_lock)
+                {
+                    Ajouter_lecteur(device_name[0],LECTEUR_HDD,name);
+                    UnLock(volume_lock);
+                }
+            }
+            dosList = NextDosEntry(dosList, LDF_VOLUMES);
+        }
 
-	UnLockDosList(lockDosListFlags);
-	}
+        UnLockDosList(lockDosListFlags);
+        }
 
 
   #elif defined (__WIN32__)
 
-	char NomLecteur[]="A:\\";
-	int DriveBits = GetLogicalDrives();
-	int IndiceLecteur;
-	int IndiceBit;
-	// Sous Windows, on a la totale, presque aussi bien que sous DOS:
-	IndiceLecteur = 0;
-	for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
-	{
-	  if ( (1 << IndiceBit) & DriveBits )
-	  {
-	    // On a ce lecteur, il faut maintenant déterminer son type "physique".
-	    // pour profiter des jolies icones de X-man.
-	    int TypeLecteur;
-	    char CheminLecteur[]="A:\\";
-	    // Cette API Windows est étrange, je dois m'y faire...
-	    CheminLecteur[0]='A'+IndiceBit;
-	    switch (GetDriveType(CheminLecteur))
-	    {
-	      case DRIVE_CDROM:
-	        TypeLecteur=LECTEUR_CDROM;
-	        break;
-	      case DRIVE_REMOTE:
-	        TypeLecteur=LECTEUR_NETWORK;
-	        break;
-	      case DRIVE_REMOVABLE:
-	        TypeLecteur=LECTEUR_FLOPPY_3_5;
-	        break;
-	      case DRIVE_FIXED:
-	        TypeLecteur=LECTEUR_HDD;
-	        break;
-	      default:
-	        TypeLecteur=LECTEUR_NETWORK;
-	        break;
-	    }
+        char NomLecteur[]="A:\\";
+        int DriveBits = GetLogicalDrives();
+        int IndiceLecteur;
+        int IndiceBit;
+        // Sous Windows, on a la totale, presque aussi bien que sous DOS:
+        IndiceLecteur = 0;
+        for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
+        {
+          if ( (1 << IndiceBit) & DriveBits )
+          {
+            // On a ce lecteur, il faut maintenant déterminer son type "physique".
+            // pour profiter des jolies icones de X-man.
+            int TypeLecteur;
+            char CheminLecteur[]="A:\\";
+            // Cette API Windows est étrange, je dois m'y faire...
+            CheminLecteur[0]='A'+IndiceBit;
+            switch (GetDriveType(CheminLecteur))
+            {
+              case DRIVE_CDROM:
+                TypeLecteur=LECTEUR_CDROM;
+                break;
+              case DRIVE_REMOTE:
+                TypeLecteur=LECTEUR_NETWORK;
+                break;
+              case DRIVE_REMOVABLE:
+                TypeLecteur=LECTEUR_FLOPPY_3_5;
+                break;
+              case DRIVE_FIXED:
+                TypeLecteur=LECTEUR_HDD;
+                break;
+              default:
+                TypeLecteur=LECTEUR_NETWORK;
+                break;
+            }
       NomLecteur[0]='A'+IndiceBit;
-	    Ajouter_lecteur(NomLecteur[0], TypeLecteur,NomLecteur);
-	    IndiceLecteur++;
-	  }
-	}
+            Ajouter_lecteur(NomLecteur[0], TypeLecteur,NomLecteur);
+            IndiceLecteur++;
+          }
+        }
 
   #else
     //Sous les différents unix, on va mettre
@@ -158,28 +158,28 @@ void Rechercher_drives(void)
     char lettre = 'A';
 
     #if defined(__BEOS__) || defined(__HAIKU__)
-  	char * Home = getenv("$HOME");
+        char * Home = getenv("$HOME");
     #else
-	char * Home = getenv("HOME");
+        char * Home = getenv("HOME");
     #endif
     Ajouter_lecteur('/', LECTEUR_HDD, "/");
     if(Home)
-	Ajouter_lecteur('~', LECTEUR_HDD, Home);
+        Ajouter_lecteur('~', LECTEUR_HDD, Home);
 
     Liste_points_montage = read_file_system_list(false);
 
     while(Liste_points_montage != NULL)
     {
-	if(Liste_points_montage -> me_dummy == 0 && !strcmp(Liste_points_montage->me_mountdir,"/") && !strcmp(Liste_points_montage->me_mountdir,"/home"))
-	{
-	    Ajouter_lecteur(lettre++,
-		Liste_points_montage->me_remote==1?LECTEUR_NETWORK:LECTEUR_HDD,
-		Liste_points_montage->me_mountdir);
-	}
-	next = Liste_points_montage -> me_next;
-	free(Liste_points_montage -> me_type);
-	free(Liste_points_montage);
-	Liste_points_montage = next;
+        if(Liste_points_montage -> me_dummy == 0 && !strcmp(Liste_points_montage->me_mountdir,"/") && !strcmp(Liste_points_montage->me_mountdir,"/home"))
+        {
+            Ajouter_lecteur(lettre++,
+                Liste_points_montage->me_remote==1?LECTEUR_NETWORK:LECTEUR_HDD,
+                Liste_points_montage->me_mountdir);
+        }
+        next = Liste_points_montage -> me_next;
+        free(Liste_points_montage -> me_type);
+        free(Liste_points_montage);
+        Liste_points_montage = next;
     }
 
   #endif
@@ -234,8 +234,8 @@ void Charger_DAT(void)
   Handle=fopen(Nom_du_fichier,"rb");
   if (Handle==NULL)
   {
-	DEBUG("Absent",0);
-  	Erreur(ERREUR_DAT_ABSENT);
+        DEBUG("Absent",0);
+        Erreur(ERREUR_DAT_ABSENT);
   }
 
   if (!read_bytes(Handle, Palette_defaut,sizeof(T_Palette)))
@@ -1317,8 +1317,8 @@ void Definir_mode_video(short  Largeur,
   Mode_video[Nb_modes_video].Largeur          = Largeur;
   Mode_video[Nb_modes_video].Hauteur          = Hauteur;
   Mode_video[Nb_modes_video].Mode             = Mode;
-  Mode_video[Nb_modes_video].Fullscreen	      = Fullscreen;
-  Mode_video[Nb_modes_video].Etat	            = Supporte;
+  Mode_video[Nb_modes_video].Fullscreen       = Fullscreen;
+  Mode_video[Nb_modes_video].Etat                   = Supporte;
   Nb_modes_video ++;
 }
 

@@ -85,16 +85,16 @@ void RGBtoHSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
   else
   {
     if (l<=0.5)
-	s = (max - min) / (max + min);
+        s = (max - min) / (max + min);
     else
-	s = (max - min) / (2 - (max + min));
+        s = (max - min) / (2 - (max + min));
 
     if (max == rd)
-	h = 42.5 * (gd-bd)/(max-min);
+        h = 42.5 * (gd-bd)/(max-min);
     else if (max == gd)
-	h = 42.5 * (bd-rd)/(max-min)+85;
+        h = 42.5 * (bd-rd)/(max-min)+85;
     else
-	h = 42.5 * (rd-gd)/(max-min)+170;
+        h = 42.5 * (rd-gd)/(max-min)+170;
     if (h<0) h+=255;
   }
 
@@ -111,8 +111,8 @@ void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
 
     if(S==0)
     {
-	*R=*G=*B=L;
-	return;
+        *R=*G=*B=L;
+        return;
     }
 
     hf = H / 255.0;
@@ -120,9 +120,9 @@ void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
     sf = S / 255.0;
 
     if (lf<=0.5)
-	q = lf*(1+sf);
+        q = lf*(1+sf);
     else
-	q = lf+sf-lf*sf;
+        q = lf+sf-lf*sf;
     p = 2*lf-q;
 
     rf = hf + (1 / 3.0);
@@ -137,31 +137,31 @@ void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
     if (bf > 1) bf-=1;
 
     if (rf < 1/6.0)
-	rf = p + ((q-p)*6*rf);
+        rf = p + ((q-p)*6*rf);
     else if(rf < 0.5)
-	rf = q;
+        rf = q;
     else if(rf < 2/3.0)
-	rf = p + ((q-p)*6*(2/3.0-rf));
+        rf = p + ((q-p)*6*(2/3.0-rf));
     else
-	rf = p;
+        rf = p;
 
     if (gf < 1/6.0)
-	gf = p + ((q-p)*6*gf);
+        gf = p + ((q-p)*6*gf);
     else if(gf < 0.5)
-	gf = q;
+        gf = q;
     else if(gf < 2/3.0)
-	gf = p + ((q-p)*6*(2/3.0-gf));
+        gf = p + ((q-p)*6*(2/3.0-gf));
     else
-	gf = p;
+        gf = p;
 
     if (bf < 1/6.0)
-	bf = p + ((q-p)*6*bf);
+        bf = p + ((q-p)*6*bf);
     else if(bf < 0.5)
-	bf = q;
+        bf = q;
     else if(bf < 2/3.0)
-	bf = p + ((q-p)*6*(2/3.0-bf));
+        bf = p + ((q-p)*6*(2/3.0-bf));
     else
-	bf = p;
+        bf = p;
 
     *R = rf * (255);
     *G = gf * (255);
@@ -382,15 +382,15 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
     for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       for (b=c->bmin;b<=c->bmax;b++)
       {
-	nbocc=to->table[r + v + b]; // TO_Get
+        nbocc=to->table[r + v + b]; // TO_Get
         if (nbocc)
         {
           if (r<rmin) rmin=r;
-	  else if (r>rmax) rmax=r;
+          else if (r>rmax) rmax=r;
           if (v<vmin) vmin=v;
-	  else if (v>vmax) vmax=v;
+          else if (v>vmax) vmax=v;
           if (b<bmin) bmin=b;
-	  else if (b>bmax) bmax=b;
+          else if (b>bmax) bmax=b;
           c->occurences+=nbocc;
         }
       }
@@ -402,77 +402,77 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
 
   for(r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
       for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
-	  for(b=c->bmin;b<=c->bmax;b++)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		rmin=r;
-		goto RMAX;
-	    }
-	  }
+          for(b=c->bmin;b<=c->bmax;b++)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                rmin=r;
+                goto RMAX;
+            }
+          }
 RMAX:
   for(r=c->rmax<<16;r>=rmin;r-=1<<16)
       for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
-	  for(b=c->bmin;b<=c->bmax;b++)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		rmax=r;
-		goto VMIN;
-	    }
-	  }
+          for(b=c->bmin;b<=c->bmax;b++)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                rmax=r;
+                goto VMIN;
+            }
+          }
 VMIN:
   for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
-	  for(b=c->bmin;b<=c->bmax;b++)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		vmin=v;
-		goto VMAX;
-	    }
-	  }
+          for(b=c->bmin;b<=c->bmax;b++)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                vmin=v;
+                goto VMAX;
+            }
+          }
 VMAX:
   for(v=c->vmax<<8;v>=vmin;v-=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
-	  for(b=c->bmin;b<=c->bmax;b++)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		vmax=v;
-		goto BMIN;
-	    }
-	  }
+          for(b=c->bmin;b<=c->bmax;b++)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                vmax=v;
+                goto BMIN;
+            }
+          }
 BMIN:
   for(b=c->bmin;b<=c->bmax;b++)
       for(r=rmin;r<=rmax;r+=1<<16)
-	  for(v=vmin;v<=vmax;v+=1<<8)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		bmin=b;
-		goto BMAX;
-	    }
-	  }
+          for(v=vmin;v<=vmax;v+=1<<8)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                bmin=b;
+                goto BMAX;
+            }
+          }
 BMAX:
   for(b=c->bmax;b>=bmin;b--)
       for(r=rmin;r<=rmax;r+=1<<16)
-	  for(v=vmin;v<=vmax;v+=1<<8)
-	  {
-	    if(to->table[r + v + b]) // TO_Get
-	    {
-		bmax=b;
-		goto ENDCRUSH;
-	    }
-	  }
+          for(v=vmin;v<=vmax;v+=1<<8)
+          {
+            if(to->table[r + v + b]) // TO_Get
+            {
+                bmax=b;
+                goto ENDCRUSH;
+            }
+          }
 ENDCRUSH:
   // Il faut quand même parcourir la partie utile du cluster, pour savoir combien il y a d'occurences
   for(r=rmin;r<=rmax;r+=1<<16)
       for(v=vmin;v<=vmax;v+=1<<8)
-	  for(b=bmin;b<=bmax;b++)
-	  {
-	    c->occurences+=to->table[r + v + b]; // TO_Get
-	  }
+          for(b=bmin;b<=bmax;b++)
+          {
+            c->occurences+=to->table[r + v + b]; // TO_Get
+          }
 
   c->rmin=rmin>>16; c->rmax=rmax>>16;
   c->vmin=vmin>>8;  c->vmax=vmax>>8;
@@ -812,9 +812,9 @@ void CS_Generer(ClusterSet * cs,Table_occurence * to)
 
     // On met ces deux nouveaux clusters dans le clusterSet... sauf s'ils sont vides
     if(Nouveau1.occurences>0)
-	CS_Set(cs,&Nouveau1);
+        CS_Set(cs,&Nouveau1);
     if(Nouveau2.occurences>0)
-	CS_Set(cs,&Nouveau2);
+        CS_Set(cs,&Nouveau2);
   }
 }
 
@@ -934,20 +934,20 @@ DegradeSet * DS_New(ClusterSet * cs)
     n=(DegradeSet *)malloc(sizeof(DegradeSet));
     if (n!=NULL)
     {
-	// On recopie les paramŠtres demand‚s
-	n->nbmax=cs->nbmax;
+        // On recopie les paramŠtres demand‚s
+        n->nbmax=cs->nbmax;
 
-	// On tente d'allouer la table
-	n->degrades=(Degrade *)malloc((n->nbmax)*sizeof(Degrade));
-	if (n->degrades!=0)
-	    // C'est bon! On initialise
-	    DS_Init(n,cs);
-	else
-	{
-	    // Table impossible … allouer
-	    free(n);
-	    n=0;
-	}
+        // On tente d'allouer la table
+        n->degrades=(Degrade *)malloc((n->nbmax)*sizeof(Degrade));
+        if (n->degrades!=0)
+            // C'est bon! On initialise
+            DS_Init(n,cs);
+        else
+        {
+            // Table impossible … allouer
+            free(n);
+            n=0;
+        }
     }
 
     return n;
@@ -969,21 +969,21 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
     // Pour chacun des clusters … traiter
     for (ic=1;ic<cs->nb;ic++)
     {
-	// On recherche le d‚grad‚ le plus proche de la chrominance du cluster
-	mdegr=-1;
-	mdiff=99999999;
-	for (id=0;id<ds->nb;id++)
-	{
-	    diff=abs(cs->clusters[ic].h - ds->degrades[id].hue);
-	    if ((mdiff>diff) && (diff<16))
-	    {
-		mdegr=id;
-		mdiff=diff;
-	    }
-	}
+        // On recherche le d‚grad‚ le plus proche de la chrominance du cluster
+        mdegr=-1;
+        mdiff=99999999;
+        for (id=0;id<ds->nb;id++)
+        {
+            diff=abs(cs->clusters[ic].h - ds->degrades[id].hue);
+            if ((mdiff>diff) && (diff<16))
+            {
+                mdegr=id;
+                mdiff=diff;
+            }
+        }
 
-	// Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
-	if (mdegr!=-1)
+        // Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
+        if (mdegr!=-1)
     {
       // On met … jour le d‚grad‚
       if (cs->clusters[ic].h < ds->degrades[mdegr].min)
@@ -1042,10 +1042,10 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
       {
         // C'est bon, on a pu tout allouer
 
-	// On génère les clusters (avec l'algo du median cut)
+        // On génère les clusters (avec l'algo du median cut)
         CS_Generer(cs,to);
 
-	// On calcule la teinte de chaque pixel (Luminance et chrominance)
+        // On calcule la teinte de chaque pixel (Luminance et chrominance)
         CS_Calculer_teintes(cs,to);
 
         ds=DS_New(cs);
@@ -1055,11 +1055,11 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composant
           DS_Delete(ds);
         }
 
-	// Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
+        // Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
         CS_Trier_par_luminance(cs);
         CS_Trier_par_chrominance(cs);
 
-	// Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
+        // Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
         CS_Generer_TC_et_Palette(cs,tc,palette);
 
         CS_Delete(cs);
@@ -1105,11 +1105,11 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   float ERouge,EVert,EBleu;
 
   // On initialise les variables de parcours:
-  Courant =Source;	// Le pixel dont on s'occupe
+  Courant =Source;      // Le pixel dont on s'occupe
   Suivant =Courant+largeur; // Le pixel en dessous
-  C_plus1 =Courant+1;	// Le pixel à droite
-  S_moins1=Suivant-1;	// Le pixel en bas à gauche
-  S_plus1 =Suivant+1;	// Le pixel en bas à droite
+  C_plus1 =Courant+1;   // Le pixel à droite
+  S_moins1=Suivant-1;   // Le pixel en bas à gauche
+  S_plus1 =Suivant+1;   // Le pixel en bas à droite
   D       =Dest;
 
   // On parcours chaque pixel:
@@ -1137,7 +1137,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         EBleu =(Bleu *7)/16.0;
         if (Pos_X+1<largeur)
         {
-	  // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
+          // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
           C_plus1->R=Valeur_modifiee(C_plus1->R,ERouge);
           C_plus1->V=Valeur_modifiee(C_plus1->V,EVert );
           C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );

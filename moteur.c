@@ -848,7 +848,7 @@ void Gestion_principale(void)
     }
     }
     else Wait_VBL(); // S'il n'y a pas d'évènement, on ne gère pas tout ça et on attend un peu. La partie en dessous doit être exécutée quand
-		     // même pour les trucs asynchrones, par exemple le spray.
+                     // même pour les trucs asynchrones, par exemple le spray.
 
     // Gestion de la souris
 
@@ -975,7 +975,7 @@ void Gestion_principale(void)
 
     if(Curseur_dans_menu)
     {
-    	Curseur_dans_menu_precedent = 1;
+        Curseur_dans_menu_precedent = 1;
     }
     else
     {
@@ -1991,29 +1991,29 @@ short Fenetre_Bouton_clicke(void)
 void Remappe_fond_fenetres(byte * Table_de_conversion, int Min_Y, int Max_Y)
 {
   int Indice_fenetre; 
-	byte* EDI;
-	int dx,cx;
+        byte* EDI;
+        int dx,cx;
 
   for (Indice_fenetre=0; Indice_fenetre<Fenetre; Indice_fenetre++)
   {
     EDI = Fond_fenetre[Indice_fenetre];
   
-  	// Pour chaque ligne
-  	for(dx=0; dx<Pile_Fenetre_Hauteur[Indice_fenetre]*Menu_Facteur_Y;dx++)
-  	{
-  	  if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]>Max_Y)
-  	    return;
-  	  if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]<Min_Y)
-  	  {
-  	    EDI += Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;
-  	  }
-  	  else
-  		// Pour chaque pixel
-  		for(cx=Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;cx>0;cx--)
-  		{
-  			*EDI = Table_de_conversion[*EDI];
-  			EDI ++;
-  		}
-  	}
+        // Pour chaque ligne
+        for(dx=0; dx<Pile_Fenetre_Hauteur[Indice_fenetre]*Menu_Facteur_Y;dx++)
+        {
+          if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]>Max_Y)
+            return;
+          if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]<Min_Y)
+          {
+            EDI += Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;
+          }
+          else
+                // Pour chaque pixel
+                for(cx=Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;cx>0;cx--)
+                {
+                        *EDI = Table_de_conversion[*EDI];
+                        EDI ++;
+                }
+        }
   }
 }

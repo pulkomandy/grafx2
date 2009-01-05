@@ -4308,38 +4308,38 @@ void Rectangle_Degrade_0_5(void)
 
     if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
     {
-	decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
-	decalage_gauche = Limite_Gauche_Zoom;
+        decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
+        decalage_gauche = Limite_Gauche_Zoom;
     }
 
     if(Max(RAX,RBX)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
-	decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
+        decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
 
     if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
     {
-	decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
-	decalage_haut = Limite_Haut_Zoom;
+        decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
+        decalage_haut = Limite_Haut_Zoom;
     }
 
     if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
-	decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
+        decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
 
     if(largeur > decalage_largeur)
     {
       if(decalage_haut==0) // La ligne du haut est visible
-	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),largeur-decalage_largeur);
+        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),largeur-decalage_largeur);
 
       if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-	Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),largeur-decalage_largeur);
+        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),largeur-decalage_largeur);
     }
 
     if(hauteur>decalage_hauteur)
     {
       if(decalage_gauche==0) // La ligne de gauche est visible
-	Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+        Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
 
       if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-	Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+        Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
     }
   }
 
@@ -4405,7 +4405,7 @@ void Rectangle_Degrade_12_9(void)
     Operation_POP(&Debut_X);
       // On corrige les coordonnées de la ligne si la touche shift est appuyée...
       if(SDL_GetModState() & KMOD_SHIFT)
-	  Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
+          Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
 
     Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
 
@@ -4454,15 +4454,15 @@ void Rectangle_Degrade_0_9(void)
     Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
    
     // Et enfin on trace le rectangle avec le dégradé dedans !
-//    if (Mouse_K==Ancien_Mouse_K)				// TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
-	Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
+//    if (Mouse_K==Ancien_Mouse_K)                              // TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
+        Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
 
     Attendre_fin_de_click();
 
     if ((Config.Coords_rel) && (Menu_visible))
     {
-	Print_dans_menu("X:       Y:             ",0);
-	Print_coordonnees();
+        Print_dans_menu("X:       Y:             ",0);
+        Print_coordonnees();
     }
 }
 /////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
@@ -4480,7 +4480,7 @@ void Lignes_centrees_12_0(void)
     Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
 
     if ((Config.Coords_rel) && (Menu_visible))
-	Print_dans_menu("X:±   0   Y:±   0",0);
+        Print_dans_menu("X:±   0   Y:±   0",0);
 
     Operation_PUSH(Mouse_K);
     Operation_PUSH(Pinceau_X);

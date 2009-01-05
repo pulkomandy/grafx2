@@ -20,7 +20,7 @@
 */
 
 void Liste2tables(word * Liste, short Pas, byte Mode, byte * Table_inc,
-	byte * Table_dec
+        byte * Table_dec
 );
 
 void Transformer_point(short X, short Y,

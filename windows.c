@@ -1,6 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2008	Franck Charlet
+    Copyright 2008      Franck Charlet
     Copyright 2007-2008 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -283,7 +283,7 @@ void Afficher_menu(void)
 
     if (!Fenetre)
     {
-      if ((Mouse_Y<Menu_Ordonnee) &&							// Souris dans l'image
+      if ((Mouse_Y<Menu_Ordonnee) &&                                                    // Souris dans l'image
           ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ))
       {
         // Dans ces deux cas, on met dans la barre les XY courant, même s'il y a des chances que ça soit recouvert si la souris est sur un bouton (trop chiant à vérifier)
@@ -474,8 +474,8 @@ void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleu
   // Macros pour écrire des litteraux binaires.
   // Ex: Ob(11110000) == 0xF0
   #define Ob(x)  ((unsigned)Ob_(0 ## x ## uL))
-  #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |		\
-	  (x >> 8 & 16) | (x >> 10 & 32) | (x >> 12 & 64) | (x >> 14 & 128))
+  #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |                \
+          (x >> 8 & 16) | (x >> 10 & 32) | (x >> 12 & 64) | (x >> 14 & 128))
 
   byte Caractere[14][8] = {
    { // 0
@@ -1431,17 +1431,17 @@ void Afficher_curseur(void)
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
           for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15 && Pos_X < Largeur_ecran;Pos_X++,Compteur_X++)
-	        {
-	          if( Pos_X < 0 ) continue;
+                {
+                  if( Pos_X < 0 ) continue;
             for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15 && Pos_Y < Hauteur_ecran;Pos_Y++,Compteur_Y++)
             {
-	            if( Pos_Y < 0 || Pos_Y >= Hauteur_ecran) continue;
+                    if( Pos_Y < 0 || Pos_Y >= Hauteur_ecran) continue;
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
               FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
               if (Couleur!=CM_Trans)
                 Pixel(Pos_X,Pos_Y,Couleur);
             }
-	        }
+                }
 
           UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
         }
@@ -1526,18 +1526,18 @@ void Afficher_curseur(void)
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
       {
-	if(Pos_X<0) continue;
-	if(Pos_X>=Largeur_ecran) break;
+        if(Pos_X<0) continue;
+        if(Pos_X>=Largeur_ecran) break;
         for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
         {
-	  if(Pos_Y<0) continue;
-	  if(Pos_Y>=Hauteur_ecran) break;
+          if(Pos_Y<0) continue;
+          if(Pos_Y>=Hauteur_ecran) break;
           Couleur=SPRITE_CURSEUR[Forme][Compteur_Y][Compteur_X];
-	  // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
-	  FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
-	  if (Couleur!=CM_Trans)
-	      Pixel(Pos_X,Pos_Y,Couleur);
-	}
+          // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
+          FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+          if (Couleur!=CM_Trans)
+              Pixel(Pos_X,Pos_Y,Couleur);
+        }
       }
       UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;
@@ -1824,14 +1824,14 @@ void Effacer_curseur(void)
 
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
       {
-	if(Pos_X<0) continue;
-	if(Pos_X>=Largeur_ecran) break;
+        if(Pos_X<0) continue;
+        if(Pos_X>=Largeur_ecran) break;
         for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
-	{
-	    if(Pos_Y<0) continue;
-	    if(Pos_Y>=Hauteur_ecran) break;
+        {
+            if(Pos_Y<0) continue;
+            if(Pos_Y>=Hauteur_ecran) break;
             Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
-	}
+        }
       }
       UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;

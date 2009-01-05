@@ -4820,7 +4820,7 @@ void Bouton_Spray_Menu(void)
           Print_dans_fenetre(50,151," Mono",CM_Noir,CM_Clair);
         else
           Print_dans_fenetre(50,151,"Multi",CM_Noir,CM_Clair);
-	UpdateRect(Fenetre_Pos_X+50*Menu_Facteur_X,Fenetre_Pos_Y+151*Menu_Facteur_Y,5*8*Menu_Facteur_X,8*Menu_Facteur_Y);
+        UpdateRect(Fenetre_Pos_X+50*Menu_Facteur_X,Fenetre_Pos_Y+151*Menu_Facteur_Y,5*8*Menu_Facteur_X,8*Menu_Facteur_Y);
         Afficher_curseur();
         break;
 

@@ -163,9 +163,9 @@ int Get_input(void)
         INPUT_Nouveau_Mouse_X = event.motion.x/Pixel_width;
         INPUT_Nouveau_Mouse_Y = event.motion.y/Pixel_height;
 
-	// Il peut arriver (à cause de la division ci dessus) que les nouvelles coordonnees soient égales aux anciennes...
-	// Dans ce cas on ne traite pas l'évènement.
-	if (INPUT_Nouveau_Mouse_X == Mouse_X && INPUT_Nouveau_Mouse_Y == Mouse_Y) return 0;
+        // Il peut arriver (à cause de la division ci dessus) que les nouvelles coordonnees soient égales aux anciennes...
+        // Dans ce cas on ne traite pas l'évènement.
+        if (INPUT_Nouveau_Mouse_X == Mouse_X && INPUT_Nouveau_Mouse_Y == Mouse_Y) return 0;
         break;
 
       case SDL_MOUSEBUTTONDOWN:
@@ -173,8 +173,8 @@ int Get_input(void)
         switch(event.button.button)
         {
           case SDL_BUTTON_LEFT: 
-	      INPUT_Nouveau_Mouse_K = 1; 
-	      break;
+              INPUT_Nouveau_Mouse_K = 1; 
+              break;
 
           case SDL_BUTTON_MIDDLE: // Pour SDL, 2 = clic milieu. Pour nous c'est le clic droit
           case SDL_BUTTON_RIGHT: // Clic droit SDL, clic droit pour nous aussi ( pour le moment en tout cas)
@@ -189,7 +189,7 @@ int Get_input(void)
 
       case SDL_KEYUP:
       {
-	// Il faut remettre à 0 les touches qui simulent un clic sinon c'est comme 
+        // Il faut remettre à 0 les touches qui simulent un clic sinon c'est comme 
         int ToucheR = Conversion_Touche(event.key.keysym);
 
         if(ToucheR == Config_Touche[4])
@@ -300,23 +300,23 @@ int Get_input(void)
     // Mostly useful for the gp2x
     // FIXME : should be made configurable with gfxcfg.
     case SDL_JOYBUTTONUP:
-	if(event.jbutton.button==13 || event.jbutton.button==14)
-	    INPUT_Nouveau_Mouse_K=0;
+        if(event.jbutton.button==13 || event.jbutton.button==14)
+            INPUT_Nouveau_Mouse_K=0;
 
     break;
 
     case SDL_JOYBUTTONDOWN:
-	switch(event.jbutton.button)
-	{
+        switch(event.jbutton.button)
+        {
 
-	    case 13:
-		INPUT_Nouveau_Mouse_K = 1;
-		break;
+            case 13:
+                INPUT_Nouveau_Mouse_K = 1;
+                break;
 
-	    case 14:
-		INPUT_Nouveau_Mouse_K = 2;
-		break;
-	}
+            case 14:
+                INPUT_Nouveau_Mouse_K = 2;
+                break;
+        }
     break;
     }
   }
@@ -484,12 +484,12 @@ int Get_input(void)
             INPUT_Nouveau_Mouse_X*Pixel_width,
             INPUT_Nouveau_Mouse_Y*Pixel_height
           );
-	 SDL_Delay(10/Menu_Facteur_X); // Histoire que ça bouge pas trop vite ... 
+         SDL_Delay(10/Menu_Facteur_X); // Histoire que ça bouge pas trop vite ... 
         }
-	else{
+        else{
           Flush_update();
           return 0; // Il ne s'est rien passé
-	}
+        }
   }
 
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
@@ -1157,7 +1157,7 @@ unsigned long Memoire_libre(void)
         // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
         return 10*1024*1024;
     #elif defined(__AROS__) || defined(__MORPHOS__)
-	return AvailMem(MEMF_ANY);
+        return AvailMem(MEMF_ANY);
     #else
         struct sysinfo info;
         sysinfo(&info);

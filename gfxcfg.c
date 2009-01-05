@@ -79,7 +79,7 @@ struct Config_Chunk Chunk[CHUNK_MAX];
 
 
 uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
-	uint8_t Couleur,uint8_t Couleur_choix);
+        uint8_t Couleur,uint8_t Couleur_choix);
 
 /*** Fonctions de gestion des évènements SDL ***/
 
@@ -268,9 +268,9 @@ char * Interpretation_du_fichier_config()
 
 // Utilisé pour afficher la liste complète des raccourcis dans le format du wiki...
 /*          printf("||%s||%s||%s %s||\n", ConfigTouche[Indice_touche].Libelle, 
-			    Nom_touche(Touche),
-			    ConfigTouche[Indice_touche].Explic1, 
-			    ConfigTouche[Indice_touche].Explic2); */
+                            Nom_touche(Touche),
+                            ConfigTouche[Indice_touche].Explic1, 
+                            ConfigTouche[Indice_touche].Explic2); */
           break;
         }
       }
@@ -296,7 +296,7 @@ bool Initialiser_config()
 }
 
 uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
-	uint8_t Couleur,uint8_t Couleur_choix)
+        uint8_t Couleur,uint8_t Couleur_choix)
 {
     char Temp[70];
     uint8_t i,j,Num_titre,Num_choix;
@@ -319,14 +319,14 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
     // SFont ne gère pas les \n donc on le fait nous même
     for(i=0;i<=strlen(Titre);i++)
     {   
-	if (Titre[i]=='\n' || Titre[i]==0)
-	{
-	    memcpy(Temp,Titre+j,i-j);
-	    Temp[i-j]=0;
-	    j=i+1;
-	    SFont_Write(Ecran,MyFont,x1+3,y1+Num_titre*9,Temp);
-	    Num_titre++;
-	}
+        if (Titre[i]=='\n' || Titre[i]==0)
+        {
+            memcpy(Temp,Titre+j,i-j);
+            Temp[i-j]=0;
+            j=i+1;
+            SFont_Write(Ecran,MyFont,x1+3,y1+Num_titre*9,Temp);
+            Num_titre++;
+        }
     }
 
     // Maintenant on fait pareil pour les divers choix proposés
@@ -335,14 +335,14 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
     // SFont ne gère pas les \n donc on le fait nous même
     for(i=0;i<=strlen(Choix);i++)
     {   
-	if (Choix[i]=='\n' || Choix[i]==0)
-	{
-	    memcpy(Temp,Choix+j,i-j);
-	    Temp[i-j]=0;
-	    j=i+1;
-	    SFont_Write(Ecran,MyFont,x1+3+50*Num_choix,y1+(Num_titre+2)*9,Temp);
-	    Num_choix++;
-	}
+        if (Choix[i]=='\n' || Choix[i]==0)
+        {
+            memcpy(Temp,Choix+j,i-j);
+            Temp[i-j]=0;
+            j=i+1;
+            SFont_Write(Ecran,MyFont,x1+3+50*Num_choix,y1+(Num_titre+2)*9,Temp);
+            Num_choix++;
+        }
     }
 
     Option_choisie = Choix_debut;
@@ -351,25 +351,25 @@ uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* C
 
     do
     {
-	Touche = Lire_Touche();
-	switch(Touche)
-	{
-	    case SDLK_LEFT:
-		Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
-		if(Option_choisie==0) Option_choisie = Num_choix - 1;
-		else Option_choisie --;
-		Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
-		break;
-	    case SDLK_RIGHT:
-		Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
-		if(Option_choisie==Num_choix-1) Option_choisie = 0;
-		else Option_choisie ++;
-		Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
-	    default:
-		break;
+        Touche = Lire_Touche();
+        switch(Touche)
+        {
+            case SDLK_LEFT:
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
+                if(Option_choisie==0) Option_choisie = Num_choix - 1;
+                else Option_choisie --;
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
+                break;
+            case SDLK_RIGHT:
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur);
+                if(Option_choisie==Num_choix-1) Option_choisie = 0;
+                else Option_choisie ++;
+                Cadre(x1+3+50*Option_choisie,y1+(Num_titre+3)*9,15,2,Couleur_choix);
+            default:
+                break;
 
-	}
-	SDL_UpdateRect(Ecran,x1+3,y1+(Num_titre+3)*9,50*Num_choix,2);
+        }
+        SDL_UpdateRect(Ecran,x1+3,y1+(Num_titre+3)*9,50*Num_choix,2);
     }while(Touche!=SDLK_RETURN);
 
     Tout_ecrire(); // Efface la boite de dialogue
@@ -384,21 +384,21 @@ void Test_duplic()
 
     for(i=0;i<NB_MAX_TOUCHES;i++)
     {
-	if(ConfigTouche[i].Touche!=0xFF) // FIXME
-	{
-	    j=0;
-	    Pas_encore_erreur=true;
-	    while(j<NB_MAX_TOUCHES && Pas_encore_erreur)
-	    {
-		if(i!=j && ConfigTouche[i].Touche==ConfigTouche[j].Touche)
-		{
-		    Pas_encore_erreur = false;
-		    Erreur[i] = true;
-		}
-		j++;
-	    }
-	    if (Pas_encore_erreur) Erreur[i] = false;
-	}
+        if(ConfigTouche[i].Touche!=0xFF) // FIXME
+        {
+            j=0;
+            Pas_encore_erreur=true;
+            while(j<NB_MAX_TOUCHES && Pas_encore_erreur)
+            {
+                if(i!=j && ConfigTouche[i].Touche==ConfigTouche[j].Touche)
+                {
+                    Pas_encore_erreur = false;
+                    Erreur[i] = true;
+                }
+                j++;
+            }
+            if (Pas_encore_erreur) Erreur[i] = false;
+        }
     }
 }
 
@@ -410,15 +410,15 @@ bool Validation()
 
     while(i<NB_MAX_TOUCHES && !Y_a_des_erreurs)
     {
-	Y_a_des_erreurs = Erreur[i];
-	i++;
+        Y_a_des_erreurs = Erreur[i];
+        i++;
     }
 
     if (Y_a_des_erreurs)
-	Choix_enreg = 4 - Fenetre_choix(30,12,
-		"There are errors in the\nhot-keys configuration.\nCheck out the \"Err\" column\nin order to correct them.","OK\nQuit anyway",1,0x4C,0x3F);
+        Choix_enreg = 4 - Fenetre_choix(30,12,
+                "There are errors in the\nhot-keys configuration.\nCheck out the \"Err\" column\nin order to correct them.","OK\nQuit anyway",1,0x4C,0x3F);
     else
-	Choix_enreg = Fenetre_choix(30,10,"Save configuration?","Yes\nNo\nCancel",1,0x2A,0x6F);
+        Choix_enreg = Fenetre_choix(30,10,"Save configuration?","Yes\nNo\nCancel",1,0x2A,0x6F);
     if (Choix_enreg!=3) return true; else return false;
 }
 
@@ -427,20 +427,20 @@ void Scroll_haut()
 {
     if(Position_curseur + Decalage_curseur > 0)
     {
-	if(Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP && Position_curseur > 0)
-	{
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SETUP);
-	    (Position_curseur) -- ;
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SELECT);
-	}
-	else if(Decalage_curseur>0)
-	{
-	    (Decalage_curseur) -- ;
-	    Tout_ecrire();
-	}
-	Ecrire_commentaire(Position_curseur + Decalage_curseur);
+        if(Position_curseur <= HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP && Position_curseur > 0)
+        {
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SETUP);
+            (Position_curseur) -- ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SELECT);
+        }
+        else if(Decalage_curseur>0)
+        {
+            (Decalage_curseur) -- ;
+            Tout_ecrire();
+        }
+        Ecrire_commentaire(Position_curseur + Decalage_curseur);
     }
 }
 
@@ -449,20 +449,20 @@ void Scroll_bas()
 {
   if(Position_curseur + Decalage_curseur < (NB_MAX_TOUCHES-1))
   {
-  	if(Position_curseur < HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
-  	{
-  	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
-  		    COULEUR_SETUP);
-  	    (Position_curseur) ++ ;
-  	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
-  		    COULEUR_SELECT);
-  	}
-  	else if(Decalage_curseur < (NB_MAX_TOUCHES-1))
-  	{
-  	    (Decalage_curseur) ++ ;
-  	    Tout_ecrire();
-  	}
-  	Ecrire_commentaire(Position_curseur + Decalage_curseur );
+        if(Position_curseur < HAUTEUR_FIN_SETUP - HAUTEUR_DEBUT_SETUP)
+        {
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
+                    COULEUR_SETUP);
+            (Position_curseur) ++ ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
+                    COULEUR_SELECT);
+        }
+        else if(Decalage_curseur < (NB_MAX_TOUCHES-1))
+        {
+            (Decalage_curseur) ++ ;
+            Tout_ecrire();
+        }
+        Ecrire_commentaire(Position_curseur + Decalage_curseur );
   }
 }
 
@@ -471,23 +471,23 @@ void Page_up()
 {
     if(Position_curseur+Decalage_curseur>0)
     {
-	if(Position_curseur>0)
-	{
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SETUP);
-	    Position_curseur = 0 ;
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SELECT);
-	}
-	else if(Decalage_curseur>0)
-	{
-	    if(Decalage_curseur > HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
-		Decalage_curseur-=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
-	    else Decalage_curseur=0;
+        if(Position_curseur>0)
+        {
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SETUP);
+            Position_curseur = 0 ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SELECT);
+        }
+        else if(Decalage_curseur>0)
+        {
+            if(Decalage_curseur > HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
+                Decalage_curseur-=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
+            else Decalage_curseur=0;
 
-	    Tout_ecrire();
-	}
-	Ecrire_commentaire(Position_curseur+Decalage_curseur);
+            Tout_ecrire();
+        }
+        Ecrire_commentaire(Position_curseur+Decalage_curseur);
     }
 }
 
@@ -496,26 +496,26 @@ void Page_down()
 {
   if(Position_curseur+Decalage_curseur<(NB_MAX_TOUCHES-1))
   {
-  	if(Position_curseur<HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
-  	{ 
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SETUP);
-	    Position_curseur = HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP ;
-	    Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
-		    COULEUR_SELECT);
-  	}
-  	else if(Decalage_curseur<(NB_MAX_TOUCHES-1))
-  	{
-	    if(Decalage_curseur + Position_curseur + HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP < (NB_MAX_TOUCHES-1))
-	    {
-  		  Decalage_curseur+=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
-  	  }
-  	  else
-  	    Decalage_curseur=NB_MAX_TOUCHES-1-HAUTEUR_FIN_SETUP+HAUTEUR_DEBUT_SETUP;
+        if(Position_curseur<HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP)
+        { 
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SETUP);
+            Position_curseur = HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP ;
+            Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur),Position_curseur + Decalage_curseur,
+                    COULEUR_SELECT);
+        }
+        else if(Decalage_curseur<(NB_MAX_TOUCHES-1))
+        {
+            if(Decalage_curseur + Position_curseur + HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP < (NB_MAX_TOUCHES-1))
+            {
+                  Decalage_curseur+=HAUTEUR_FIN_SETUP-HAUTEUR_DEBUT_SETUP;
+          }
+          else
+            Decalage_curseur=NB_MAX_TOUCHES-1-HAUTEUR_FIN_SETUP+HAUTEUR_DEBUT_SETUP;
 
-  	  Tout_ecrire();
-  	}
-	Ecrire_commentaire(Position_curseur+Decalage_curseur);
+          Tout_ecrire();
+        }
+        Ecrire_commentaire(Position_curseur+Decalage_curseur);
   }
 }
 
@@ -528,12 +528,12 @@ void Select()
   SDL_UpdateRect(Ecran,3,(HAUTEUR_DEBUT_SETUP+Position_curseur)*9,630,9);
   while (1)
   {
-  	Touche = Lire_Touche();
+        Touche = Lire_Touche();
     if (Touche == SDLK_ESCAPE)
     {
       Ecrire(HAUTEUR_DEBUT_SETUP + (Position_curseur) ,Position_curseur + Decalage_curseur,
-		    COULEUR_SETUP);
-		  return;
+                    COULEUR_SETUP);
+                  return;
     }
     if (Touche != 0)
     {
@@ -541,7 +541,7 @@ void Select()
       Test_duplic();
       // Des X ont pu être ajoutés ou enlevés sur n'importe quelle ligne..
       // pour faire simple, on rafraîchit toute la page. 
-	    Tout_ecrire();
+            Tout_ecrire();
       return;
     }
   }
@@ -555,33 +555,33 @@ void Setup()
     Test_duplic();
     Tout_ecrire();
     do{
-	Touche = Lire_Touche();
-	switch(Touche)
-	{
-	    case SDLK_UP:
-		Scroll_haut();
-		break;
-	    case SDLK_DOWN:
-		Scroll_bas();
-		break;
-	    case SDLK_PAGEUP:
-		Page_up();
-		break;
-	    case SDLK_PAGEDOWN:
-		Page_down();
-		break;
-	    case SDLK_RETURN:
-		Select();
-		break;
-	    case SDLK_DELETE:
-		//Unselect();
-		break;
-	    case SDLK_ESCAPE:
-		Sortie_OK=Validation();
-		break; 
-	    default:
-		break; // On ne fait rien pour les autres touches
-	}
+        Touche = Lire_Touche();
+        switch(Touche)
+        {
+            case SDLK_UP:
+                Scroll_haut();
+                break;
+            case SDLK_DOWN:
+                Scroll_bas();
+                break;
+            case SDLK_PAGEUP:
+                Page_up();
+                break;
+            case SDLK_PAGEDOWN:
+                Page_down();
+                break;
+            case SDLK_RETURN:
+                Select();
+                break;
+            case SDLK_DELETE:
+                //Unselect();
+                break;
+            case SDLK_ESCAPE:
+                Sortie_OK=Validation();
+                break; 
+            default:
+                break; // On ne fait rien pour les autres touches
+        }
     } while(!Sortie_OK);
 
 }
@@ -637,9 +637,9 @@ void Enregistrer_config()
 
           for(Indice_touche=0; Indice_touche<NB_MAX_TOUCHES;Indice_touche++)
           {
-      	    write_word_le(Fichier,ConfigTouche[Indice_touche].Numero);
-      	    write_word_le(Fichier,ConfigTouche[Indice_touche].Touche);
-      	    write_word_le(Fichier,0xFF);
+            write_word_le(Fichier,ConfigTouche[Indice_touche].Numero);
+            write_word_le(Fichier,ConfigTouche[Indice_touche].Touche);
+            write_word_le(Fichier,0xFF);
           }
         }
         else
@@ -647,14 +647,14 @@ void Enregistrer_config()
           write_bytes(Fichier, ChunkData[Indice_chunk], Chunk[Indice_chunk].Taille);
         }
       }
-       fclose(Fichier);   	
+       fclose(Fichier);         
     }
 }
 
 /*** Main program ***/
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
-{	
+{       
   char Repertoire_programme[TAILLE_CHEMIN_FICHIER];
   char Nom_fichier[TAILLE_CHEMIN_FICHIER];
 
@@ -664,8 +664,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 
   if (Verifier_ecriture_possible())
   {
-  	/* On initialise SDL */
-  	SDL_Init(SDL_INIT_VIDEO);
+        /* On initialise SDL */
+        SDL_Init(SDL_INIT_VIDEO);
     {
       // Routine pour définir l'icone.
       SDL_Surface * Icone;
@@ -690,44 +690,44 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     SDL_EnableKeyRepeat(250, 32);
     SDL_EnableUNICODE(SDL_ENABLE);
 
-  	/* On initialise SFont */
+        /* On initialise SFont */
     strcpy(Nom_fichier, Repertoire_donnees);
     strcat(Nom_fichier, "fonts/8pxfont.png");
     MyFont = SFont_InitFont(IMG_Load(Nom_fichier));
 
-	if(MyFont==NULL)
-	{
-	    SDL_Quit();
-	    exit(0);
-	}
+        if(MyFont==NULL)
+        {
+            SDL_Quit();
+            exit(0);
+        }
 
-  	Dessiner_ecran_principal();
+        Dessiner_ecran_principal();
 
-  	if(!Initialiser_config())
-  	{
-	    Setup();
-	    Enregistrer_config();
+        if(!Initialiser_config())
+        {
+            Setup();
+            Enregistrer_config();
 
-	    /* On fait un peu de nettoyage avant de s'en aller */
-	    SFont_FreeFont(MyFont);
-	    SDL_Quit();
-	    exit(0);
-	  }
-  	else
-  	{
-	    SFont_FreeFont(MyFont);
-	    SDL_Quit();
-	    exit(1);
-	  }
+            /* On fait un peu de nettoyage avant de s'en aller */
+            SFont_FreeFont(MyFont);
+            SDL_Quit();
+            exit(0);
+          }
+        else
+        {
+            SFont_FreeFont(MyFont);
+            SDL_Quit();
+            exit(1);
+          }
   }
   else
   {
-  	puts("Error: you mustn't run this setup program from a read-only drive!\n");
-  	puts("The most probable cause of this error is that you are running this program");
-  	puts("from a CD-Rom or a protected floppy disk.");
-  	puts("You should try to copy all the files of Grafx2 on a hard drive or to");
-  	puts("unprotect your floppy disk if you really want to run it from this outdated medium.");
-  	exit(1);
+        puts("Error: you mustn't run this setup program from a read-only drive!\n");
+        puts("The most probable cause of this error is that you are running this program");
+        puts("from a CD-Rom or a protected floppy disk.");
+        puts("You should try to copy all the files of Grafx2 on a hard drive or to");
+        puts("unprotect your floppy disk if you really want to run it from this outdated medium.");
+        exit(1);
   }
 
   return 0;

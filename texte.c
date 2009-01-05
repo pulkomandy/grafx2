@@ -149,7 +149,7 @@ void Ajout_fonte(const char *Nom)
          }
          else
          {
-  	       return;
+               return;
          }
       #else
          return;
@@ -303,8 +303,8 @@ void Initialisation_Texte(void)
       int i,number;
       char home_dir[MAXPATHLEN];
       char *font_path_list[3] = {
-      	 "/System/Library/Fonts",
-      	 "/Library/Fonts"
+         "/System/Library/Fonts",
+         "/Library/Fonts"
       };
       number = 3;
       // Make sure we also search into the user's fonts directory
@@ -325,14 +325,14 @@ void Initialisation_Texte(void)
     
        #ifdef USE_XLIB
        {
-	int i,number;
-	Display* dpy = XOpenDisplay(NULL);
-	char** font_path_list = XGetFontPath(dpy,&number);
+        int i,number;
+        Display* dpy = XOpenDisplay(NULL);
+        char** font_path_list = XGetFontPath(dpy,&number);
 
-	for(i=0;i<number;i++)
-	    for_each_file(*(font_path_list+i),Ajout_fonte);
+        for(i=0;i<number;i++)
+            for_each_file(*(font_path_list+i),Ajout_fonte);
 
-	XFreeFontPath(font_path_list);
+        XFreeFontPath(font_path_list);
        }
        #endif
     #endif
