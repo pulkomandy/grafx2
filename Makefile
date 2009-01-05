@@ -207,76 +207,77 @@ all : $(BIN) $(CFGBIN)
 debug : $(BIN)
 
 release : $(BIN) $(CFGBIN)
-        $(STRIP) $(BIN)
-        $(STRIP) $(CFGBIN)
+	$(STRIP) $(BIN)
+	$(STRIP) $(CFGBIN)
 
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
-        tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
-        zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
-        $(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-        tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
+	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
-        $(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
+	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
 
 $(CFGBIN) : $(CFGOBJ) $(CFGOBJRES)
-        $(CC) $(CFGOBJ) $(CFGOBJRES) -o $(CFGBIN) $(LOPT)
+	$(CC) $(CFGOBJ) $(CFGOBJRES) -o $(CFGBIN) $(LOPT)
 
 # SVN revision number
 version.c :
-        echo "char SVNRevision[]=\"`svnversion`\";" > version.c
+	echo "char SVNRevision[]=\"`svnversion`\";" > version.c
 
 version : delversion version.c $(OBJDIR)/version.o
 
 delversion :
-        $(DELCOMMAND) version.c
+	$(DELCOMMAND) version.c
 
 $(OBJDIR)/%.o :
-        $(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
-        $(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
 
 depend :
-        $(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
+	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
 $(OBJDIR)/winres.o : gfx2.ico
-        echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+
 $(OBJDIR)/wincfgres.o : gfx2cfg.ico
-        echo "1 ICON \"gfx2cfg.ico\"" | $(WINDRES) -o $(OBJDIR)/wincfgres.o
+	echo "1 ICON \"gfx2cfg.ico\"" | $(WINDRES) -o $(OBJDIR)/wincfgres.o
 
 clean :
-        $(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES) $(CFGOBJRES)
-        $(DELCOMMAND) $(BIN) $(CFGBIN)
+	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES) $(CFGOBJRES)
+	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
 install : $(BIN) $(CFGBIN)
-        echo "#!/bin/sh" > $(bindir)/grafx2
-        echo $(datadir)/grafx2/$(BIN) '$$*' >> $(bindir)/grafx2
-        chmod 755 $(bindir)/grafx2
-        echo "#!/bin/sh" > $(bindir)/gfxcfg
-        echo $(datadir)/grafx2/$(CFGBIN) '$$*' >> $(bindir)/gfxcfg
-        chmod 755 $(bindir)/gfxcfg
-        $(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
-        $(CP) $(BIN) $(datadir)/grafx2/
-        $(CP) $(CFGBIN) $(datadir)/grafx2/
-        $(CP) gfx2.dat $(datadir)/grafx2/
-        $(CP) gfx2.gif $(datadir)/grafx2/
-        $(CP) gfx2cfg.gif $(datadir)/grafx2/
-        $(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
-        cd fonts && $(CP) * $(datadir)/grafx2/fonts/
-        @echo Install complete
+	echo "#!/bin/sh" > $(bindir)/grafx2
+	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(bindir)/grafx2
+	chmod 755 $(bindir)/grafx2
+	echo "#!/bin/sh" > $(bindir)/gfxcfg
+	echo $(datadir)/grafx2/$(CFGBIN) '$$*' >> $(bindir)/gfxcfg
+	chmod 755 $(bindir)/gfxcfg
+	$(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
+	$(CP) $(BIN) $(datadir)/grafx2/
+	$(CP) $(CFGBIN) $(datadir)/grafx2/
+	$(CP) gfx2.dat $(datadir)/grafx2/
+	$(CP) gfx2.gif $(datadir)/grafx2/
+	$(CP) gfx2cfg.gif $(datadir)/grafx2/
+	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
+	cd fonts && $(CP) * $(datadir)/grafx2/fonts/
+	@echo Install complete
   
 uninstall :
-        $(DELCOMMAND) $(bindir)/grafx2
-        $(DELCOMMAND) $(bindir)/gfxcfg
-        $(DELCOMMAND) $(datadir)/grafx2/$(BIN)
-        $(DELCOMMAND) $(datadir)/grafx2/$(CFGBIN)
-        $(DELCOMMAND) $(datadir)/grafx2/gfx2.dat
-        $(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
-        $(DELCOMMAND) $(datadir)/grafx2/gfx2cfg.gif
-        $(DELCOMMAND) $(datadir)/grafx2/fonts/*
-        $(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
-        $(if $(wildcard $(datadir)/grafx2),,$(RMDIR) $(datadir)/grafx2)
-        @echo Uninstall complete
+	$(DELCOMMAND) $(bindir)/grafx2
+	$(DELCOMMAND) $(bindir)/gfxcfg
+	$(DELCOMMAND) $(datadir)/grafx2/$(BIN)
+	$(DELCOMMAND) $(datadir)/grafx2/$(CFGBIN)
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2.dat
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2cfg.gif
+	$(DELCOMMAND) $(datadir)/grafx2/fonts/*
+	$(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
+	$(if $(wildcard $(datadir)/grafx2),,$(RMDIR) $(datadir)/grafx2)
+	@echo Uninstall complete
 
 -include Makefile.dep
 
