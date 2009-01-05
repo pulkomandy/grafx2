@@ -778,4 +778,5 @@ GFX2_GLOBAL fonction_lecteur   Lit_pixel_de_sauvegarde;
  * Spécifique à SDL *
  ********************/
 GFX2_GLOBAL SDL_Surface * Ecran_SDL;
+GFX2_GLOBAL SDL_Joystick* joystick;
 #endif

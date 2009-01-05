@@ -341,7 +341,9 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Loupe_Decalage_Y=0;
 
   // SDL
-  SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
+
+  SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);
+  joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","GrafX2");

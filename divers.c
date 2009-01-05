@@ -295,12 +295,201 @@ int Get_input(void)
         }
       }
       break;
+
+    // Joystick handling
+    // Mostly useful for the gp2x
+    // FIXME : should be made configurable with gfxcfg.
+    case SDL_JOYBUTTONUP:
+	if(event.jbutton.button==13 || event.jbutton.button==14)
+	    INPUT_Nouveau_Mouse_K=0;
+
+    break;
+
+    case SDL_JOYBUTTONDOWN:
+	switch(event.jbutton.button)
+	{
+
+	    case 13:
+		INPUT_Nouveau_Mouse_K = 1;
+		break;
+
+	    case 14:
+		INPUT_Nouveau_Mouse_K = 2;
+		break;
+	}
+    break;
     }
   }
   else
   {
-    Flush_update();
-    return 0; // Il ne s'est rien passé
+      if(SDL_JoystickGetButton(joystick,0))
+      {
+          if(INPUT_Nouveau_Mouse_Y!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_Y--;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,1))
+      {
+          if(INPUT_Nouveau_Mouse_Y!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_Y--;
+            ok=1;
+          }
+
+          if(INPUT_Nouveau_Mouse_X!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_X--;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,2))
+      {
+          if(INPUT_Nouveau_Mouse_X!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_X--;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,3))
+      {
+          if(INPUT_Nouveau_Mouse_X!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_X--;
+            ok=1;
+          }
+
+          if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
+                    INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_Y++;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,4))
+      {
+          if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
+                    INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_Y++;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,5))
+      {
+          if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
+                    INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_Y++;
+            ok=1;
+          }
+
+          if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
+                    INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_X++;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,6))
+      {
+          if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
+                    INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_X++;
+            ok=1;
+          }
+      }
+      else
+      if(SDL_JoystickGetButton(joystick,7))
+      {
+          if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+                INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+                if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
+                    INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_X++;
+            ok=1;
+          }
+
+          if(INPUT_Nouveau_Mouse_Y!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+                INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
+            else
+                INPUT_Nouveau_Mouse_Y--;
+            ok=1;
+          }
+      }
+
+        if(ok)
+        {
+          SDL_WarpMouse(
+            INPUT_Nouveau_Mouse_X*Pixel_width,
+            INPUT_Nouveau_Mouse_Y*Pixel_height
+          );
+	 Wait_VBL(); // Histoire que ça bouge pas trop vite ... 
+        }
+	else{
+          Flush_update();
+          return 0; // Il ne s'est rien passé
+	}
   }
 
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
