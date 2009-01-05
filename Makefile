@@ -139,6 +139,7 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
+    STRIP = strip
 
     ifdef WIN32CROSS
       #cross compile a Win32 executable
@@ -148,6 +149,7 @@ else
       COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
       LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
       OBJDIR = obj/win32
+      PLATFORM = win32
     else
 
       ifdef GP2XCROSS
@@ -159,6 +161,8 @@ else
         LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT)
         OBJDIR = obj/gp2x
         NOTTF = 1
+        PLATFORM = gp2x
+        STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
       else
 
         # Compiles a regular linux exectutable for the native platform
@@ -203,8 +207,8 @@ all : $(BIN) $(CFGBIN)
 debug : $(BIN)
 
 release : $(BIN) $(CFGBIN)
-	strip $(BIN)
-	strip $(CFGBIN)
+	$(STRIP) $(BIN)
+	$(STRIP) $(CFGBIN)
 
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release

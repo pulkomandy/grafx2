@@ -484,7 +484,7 @@ int Get_input(void)
             INPUT_Nouveau_Mouse_X*Pixel_width,
             INPUT_Nouveau_Mouse_Y*Pixel_height
           );
-	 Wait_VBL(); // Histoire que ça bouge pas trop vite ... 
+	 SDL_Delay(10/Menu_Facteur_X); // Histoire que ça bouge pas trop vite ... 
         }
 	else{
           Flush_update();
