@@ -322,6 +322,7 @@ int Get_input(void)
   }
   else
   {
+      // No SDL event, now we have to look at the joystick ones
       if(SDL_JoystickGetButton(joystick,0))
       {
           if(INPUT_Nouveau_Mouse_Y!=0)
@@ -333,7 +334,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,1))
       {
           if(INPUT_Nouveau_Mouse_Y!=0)
@@ -354,7 +355,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,2))
       {
           if(INPUT_Nouveau_Mouse_X!=0)
@@ -366,7 +367,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,3))
       {
           if(INPUT_Nouveau_Mouse_X!=0)
@@ -391,7 +392,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,4))
       {
           if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
@@ -407,7 +408,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,5))
       {
           if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
@@ -436,7 +437,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,6))
       {
           if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
@@ -452,7 +453,7 @@ int Get_input(void)
             ok=1;
           }
       }
-      else
+
       if(SDL_JoystickGetButton(joystick,7))
       {
           if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
@@ -478,18 +479,18 @@ int Get_input(void)
           }
       }
 
-        if(ok)
-        {
+      if(ok)
+      {
           SDL_WarpMouse(
             INPUT_Nouveau_Mouse_X*Pixel_width,
             INPUT_Nouveau_Mouse_Y*Pixel_height
           );
          SDL_Delay(10/Menu_Facteur_X); // Histoire que ça bouge pas trop vite ... 
-        }
-        else{
+      }
+      else{
           Flush_update();
           return 0; // Il ne s'est rien passé
-        }
+      }
   }
 
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
