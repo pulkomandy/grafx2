@@ -57,7 +57,7 @@ else
     CP = cp
     BIN = grafx2
     CFGBIN = gfxcfg
-    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` $(TTFCOPT)
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -D__USE_INLINE__ $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = obj/amiga

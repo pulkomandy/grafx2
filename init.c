@@ -36,6 +36,11 @@
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
 
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#include <proto/exec.h>
+#include <proto/dos.h>
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -67,42 +72,28 @@ void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
 
 
 // Rechercher la liste et le type des lecteurs de la machine
+
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+void bstrtostr( BSTR in, STRPTR out, TEXT max );
+#endif
+
 void Rechercher_drives(void)
 {
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+    struct DosList *dl;
+    char tmp[256];
 
-    DosList *dosList;
-    CONST ULONG lockDosListFlags = LDF_READ | LDF_VOLUMES;
-
-    dosList = LockDosList(lockDosListFlags);
-    if (dosList)
+    dl = LockDosList( LDF_VOLUMES | LDF_READ );
+    if( dl )
     {
-        dosList = NextDosEntry(dosList, LDF_VOLUMES);
-        while (dosList)
-        {
-            if (dosList->dol_Type == DLT_VOLUME dosList->dol_Name && dosList->dol_Task)
-            {
-                TEXT name[256];
-                CONST_STRPTR volume_name = (CONST_STRPTR)BADDR(dosList->dol_Name)+1;
-                CONST_STRPTR device_name = (CONST_STRPTR)((struct Task *)dosList->dol_Task->mp_SigTask)->tc_Node.ln_Name;
-                BPTR volume_lock;
-
-                stccpy(name, volume_name, sizeof(name));
-                strncat(name, ":", sizeof(name));
-
-                volume_lock = Lock(name, SHARED_LOCK);
-                if (volume_lock)
-                {
-                    Ajouter_lecteur(device_name[0],LECTEUR_HDD,name);
-                    UnLock(volume_lock);
-                }
-            }
-            dosList = NextDosEntry(dosList, LDF_VOLUMES);
-        }
-
-        UnLockDosList(lockDosListFlags);
-        }
-
+      while( ( dl = NextDosEntry( dl, LDF_VOLUMES | LDF_READ ) ) )
+      {
+        bstrtostr( dl->dol_Name, tmp, 254 );
+        strcat( tmp, ":" );
+        Ajouter_lecteur(':',LECTEUR_HDD,tmp);
+      }
+      UnLockDosList( LDF_VOLUMES | LDF_READ );
+    }
 
   #elif defined (__WIN32__)
 

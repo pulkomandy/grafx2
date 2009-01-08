@@ -267,7 +267,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
 }
 
-#ifdef __amigaos4__
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
 void bstrtostr( BSTR in, STRPTR out, TEXT max )
 {
   STRPTR iptr;
@@ -295,23 +295,22 @@ void Lire_liste_des_lecteurs(void)
   Liste_Nb_fichiers=0;
   Liste_Nb_repertoires=0;
 
-  // AmigaOS4
-  #ifdef __amigaos4__
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
   {
     struct DosList *dl;
     char tmp[256];
     
-    dl = IDOS->LockDosList( LDF_VOLUMES | LDF_READ );
+    dl = LockDosList( LDF_VOLUMES | LDF_READ );
     if( dl )
     {
-      while( ( dl = IDOS->NextDosEntry( dl, LDF_VOLUMES | LDF_READ ) ) )
+      while( ( dl = NextDosEntry( dl, LDF_VOLUMES | LDF_READ ) ) )
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
         Ajouter_element_a_la_liste( tmp, 2 );
         Liste_Nb_repertoires++;
       }
-      IDOS->UnLockDosList( LDF_VOLUMES | LDF_READ );
+      UnLockDosList( LDF_VOLUMES | LDF_READ );
     }
   }
 
