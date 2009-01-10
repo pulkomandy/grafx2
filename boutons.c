@@ -4910,9 +4910,9 @@ void Bouton_Spray_Menu(void)
         Readline(196,39,Chaine,2,1);
         Spray_Delay=atoi(Chaine);
         // On corrige le delai
-        if (Spray_Delay>10)
+        if (Spray_Delay>99)
         {
-          Spray_Delay=10;
+          Spray_Delay=99;
           Num2str(Spray_Delay,Chaine,2);
           Fenetre_Contenu_bouton_saisie(Saisie_Delay,Chaine);
         }

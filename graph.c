@@ -1534,9 +1534,6 @@ void Aerographe(short Bouton_clicke)
   }
 
   Afficher_curseur();
-
-  for (Count=1; Count<=Spray_Delay; Count++)
-    Wait_VBL();
 }
 
 

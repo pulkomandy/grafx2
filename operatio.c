@@ -2007,7 +2007,7 @@ void Courbe_3_points_12_11(void)
 
 ///////////////////////////////////////////////////////////// OPERATION_SPRAY
 
-
+Uint32 Spray_next_time;
 void Spray_1_0(void)
 //
 //  Opération   : OPERATION_SPRAY
@@ -2020,6 +2020,8 @@ void Spray_1_0(void)
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_gauche;
+
+  Spray_next_time = SDL_GetTicks()+Spray_Delay*10;
   Aerographe(A_GAUCHE);
 
   Operation_PUSH(Pinceau_X);
@@ -2039,6 +2041,7 @@ void Spray_2_0(void)
   Initialiser_debut_operation();
   Backup();
   Shade_Table=Shade_Table_droite;
+  Spray_next_time = SDL_GetTicks()+Spray_Delay*10;
   Aerographe(A_DROITE);
 
   Operation_PUSH(Pinceau_X);
@@ -2069,7 +2072,11 @@ void Spray_12_3(void)
     Afficher_curseur();
   }
 
-  Aerographe(Bouton_clicke);
+  if (SDL_GetTicks()>Spray_next_time)
+  {
+    Spray_next_time+=Spray_Delay*10;
+    Aerographe(Bouton_clicke);
+  }
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
