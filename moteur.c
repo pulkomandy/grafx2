@@ -1099,8 +1099,17 @@ void Fermer_fenetre(void)
     Fenetre_Liste_boutons_special=Temp4;
   }
 
-  if (Fenetre == 1)
+  if (Fenetre != 1)
   {
+    // Restore de ce que la fenêtre cachait
+    Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+    Fenetre--;
+  }
+  else
+  {
+    free(Fond_fenetre[Fenetre-1]);
+    Fenetre--;
   
     Cacher_pinceau=Cacher_pinceau_avant_fenetre;
   
@@ -1109,19 +1118,9 @@ void Fermer_fenetre(void)
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
     Menu_visible=Menu_visible_avant_fenetre;
     Forme_curseur=Forme_curseur_avant_fenetre;
-
-    // On le fait ici car Afficher_menu s'en sert pour savoir s'il doit remetre X: Y: dans la toolbar.
-    Fenetre--;
     
     Afficher_ecran();
     Afficher_menu();
-  }
-  else
-  {
-    // Restore de ce que la fenêtre cachait
-    Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
-    UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
-    Fenetre--;
   }
 
   Touche=0;
@@ -1666,6 +1665,7 @@ void Deplacer_fenetre(short Dx, short Dy)
   Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
   Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
   Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
+  UpdateRect(Nouveau_X,Nouveau_Y,Largeur,Hauteur);
   Forme_curseur=FORME_CURSEUR_MULTIDIRECTIONNEL;
   Afficher_curseur();
 
