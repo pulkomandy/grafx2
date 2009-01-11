@@ -489,11 +489,14 @@ void Charger_image(byte Image)
   {
     // On peut charger le fichier:
     Image_24b=0;
+    // Dans certains cas il est possible que le chargement plante
+    // après avoir modifié la palette. TODO
     Format_Load[Format]();
 
-    // FIXME Le déclenchement de cette erreur 0 après lecture ratée d'une image produit un flash rouge, puis restaure la palette de l'image. Il faudrait plutot restaurer la palette qu'il y avait avant d'avoir tout cassé, non ?
     if (Erreur_fichier>0)
+    {
       Erreur(0);
+    }
 
     if (Image_24b)
     {

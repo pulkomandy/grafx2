@@ -593,6 +593,7 @@ bool Verifier_ecriture_possible()
 {
   #ifdef __amigaos4__
     // TODO: Make it work :)
+    #warning "There is some code missing here for your platform ! please check and correct :)"
     return 1;
   #else
     // Doesn't work on OS4.

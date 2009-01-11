@@ -1127,17 +1127,14 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
 // Indique quelle est la mémoire disponible
 unsigned long Memoire_libre(void)
 {
-  // On appelle la fonction qui optimise la mémoire libre afin d'en
-  // regagner un maximum. Sinon, tous les "free" libèrent une mémoire qui
-  // n'est pas prise en compte par la fonction, et on se retrouve avec un
-  // manque alarmant de mémoire.
-  /*
-  A revoir, mais est-ce vraiment utile?
-  _heapmin();
-  */
     // Memory is no longer relevant. If there is ANY problem or doubt here,
     // you can simply return 10*1024*1024 (10Mb), to make the "Pages"something
     // memory allocation functions happy.
+
+    // However, it is still a good idea to make a proper function if you can...
+    // If Grafx2 thinks the memory is full, weird things may happen. And if memory 
+    // ever becomes full and you're still saying there are 10MB free here, the 
+    // program will crash without saving any picture backup ! You've been warned...
     #if defined(__WIN32__)
         MEMORYSTATUSEX mstt;
         mstt.dwLength = sizeof(MEMORYSTATUSEX);
@@ -1156,6 +1153,7 @@ unsigned long Memoire_libre(void)
     #elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__)
         // No <sys/sysctl.h> on BeOS or Haiku
         // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
+        #warning "There is missing code there for your platform ! please check and correct :)"
         return 10*1024*1024;
     #elif defined(__AROS__) || defined(__MORPHOS__)
         return AvailMem(MEMF_ANY);

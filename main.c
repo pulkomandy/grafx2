@@ -84,13 +84,12 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
 {
   T_Palette Palette_temporaire;
   int       Indice;
-  printf("Code %d\n", Code);
-  printf("File %s\n", Nom_fichier);
-  printf("Line %d\n", Numero_ligne);
-  printf("Function %s\n", Nom_fonction);
+  printf("Error number %d occured in file %s, line %d, function %s.\n", Code, Nom_fichier,Numero_ligne,Nom_fonction);
 
   if (Code==0)
   {
+    // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'écran pour dire qu'il y a un problème.
+    // Toutes les autres erreurs déclenchent toujours une sortie en catastrophe du programme !
     memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
     for (Indice=0;Indice<=255;Indice++)
       Palette_temporaire[Indice].R=255;
@@ -119,11 +118,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
                                        printf("Please run GFXCFG to update this file.\n");
                                        break;
       case ERREUR_MEMOIRE            : printf("Error: Not enough memory!\n\n");
-                                       printf("You should try removing memory drivers and useless TSRs to free some memory.\n\n");
-                                       printf("If it still doesn't work, try running GFX2_MEM.BAT if you have got DOS4GW.EXE\n");
-                                       printf("somewhere on your disk (after having edited the batch file).\n");
-                                       printf("This also requires 16 free Megabytes on your disk to create the memory cache.\n");
-                                       printf("This will slow down the program but, at least, you'll get GrafX2 running.\n");
+                                       printf("You should try exiting other programs to free some bytes for Grafx2.\n\n");
                                        break;
       case ERREUR_DRIVER_SOURIS      : printf("Error: No mouse detected!\n");
                                        printf("Check if a mouse driver is installed and if your mouse is correctly connected.\n");
@@ -144,7 +139,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
                                        break;
       case ERREUR_INI_CORROMPU       : printf("Error: File GFX2.INI is corrupt!\n");
                                        printf("It contains bad values at line %d.\n",Ligne_INI);
-                                       printf("You can re-generate it by deleting the file and running grafX2 again.\n");
+                                       printf("You can re-generate it by deleting the file and running GrafX2 again.\n");
                                        break;
       case ERREUR_SAUVEGARDE_INI     : printf("Error: Cannot rewrite file GFX2.INI!\n");
                                        break;

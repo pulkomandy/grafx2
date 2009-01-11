@@ -545,6 +545,8 @@ void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courant
         }
         else
         {
+          // Bon, alors là, on vient de vider toutes les pages et on a toujours pas asez de mémoire... C'est donc qu'un vilain programmeur a oublié de vérifier avec Noiuvelle_page_possible avant de venir ici.
+          // On sort méchament du programme sans sauvegarde ni rien. De toutes façons, ça ne devrait jamais se produire...
           Erreur(ERREUR_SORRY_SORRY_SORRY);
         }
       }

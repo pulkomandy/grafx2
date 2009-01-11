@@ -282,6 +282,7 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     }
     // La largeur doit être un multiple de 4
 #ifdef __amigaos4__
+    // On AmigaOS the systems adds some more constraints on that ...
     Largeur = (Largeur + 15) & 0xFFFFFFF0;
 #else
     Largeur = (Largeur + 3 ) & 0xFFFFFFFC;

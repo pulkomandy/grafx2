@@ -56,7 +56,7 @@ byte Smooth_Mode_avant_annulation;
 byte Tiling_Mode_avant_annulation;
 fonction_effet Fonction_effet_avant_annulation;
 
-byte * Fond_fenetre[8];
+byte* Fond_fenetre[8];
 
 void Annuler_les_effets(void)
 {
@@ -145,6 +145,7 @@ char * TITRE_BOUTON[NB_BOUTONS]=
 void Sauve_fond(byte **Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
 {
   int Indice;
+  if(*Buffer != NULL) DEBUG("WARNING : Buffer already allocated !!!",0);
   *Buffer=(byte *) malloc(Largeur*Menu_Facteur_X*Hauteur*Menu_Facteur_Y*Pixel_width);
   for (Indice=0; Indice<(Hauteur*Menu_Facteur_Y); Indice++)
     Lire_ligne(Pos_X,Pos_Y+Indice,Largeur*Menu_Facteur_X,(*Buffer)+((int)Indice*Largeur*Menu_Facteur_X*Pixel_width));
@@ -1109,6 +1110,7 @@ void Fermer_fenetre(void)
   else
   {
     free(Fond_fenetre[Fenetre-1]);
+    Fond_fenetre[Fenetre-1]=NULL;
     Fenetre--;
   
     Cacher_pinceau=Cacher_pinceau_avant_fenetre;
@@ -1444,6 +1446,127 @@ void Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracte
 
 
 
+//----------------------- Ouverture d'un pop-up -----------------------
+
+void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
+// Lors de l'appel à cette procédure, la souris doit être affichée.
+// En sortie de cette procedure, la souris est effacée.
+
+// Note : les pop-ups sont gérés comme s'ils étaient des sous-fenêtres, ils ont donc leur propre boucle d'évènements et tout, on peut ajouter des widgets dedans, ...
+// Les différences sont surtout graphiques :
+    // -Possibilité de préciser la position XY
+    // -Pas de titre
+    // -Pas de cadre en relief mais seulement un plat, et il est blanc au lieu de noir.
+{
+  Effacer_curseur();
+
+  Fenetre++;
+
+  Fenetre_Largeur=Largeur;
+  Fenetre_Hauteur=Hauteur;
+  Fenetre_Pos_X=Pos_X*Menu_Facteur_X;
+  Fenetre_Pos_Y=Pos_Y*Menu_Facteur_X;
+
+  // Sauvegarde de ce que la fenêtre remplace
+  Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, Largeur*Menu_Facteur_X, Hauteur*Menu_Facteur_X);
+
+  // Fenêtre grise
+  Block(Fenetre_Pos_X+(Menu_Facteur_X),Fenetre_Pos_Y+(Menu_Facteur_Y),(Largeur-2)*Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,CM_Clair);
+
+  // Cadre noir puis en relief
+  Fenetre_Afficher_cadre_mono(0,0,Largeur,Hauteur,CM_Blanc);
+
+  if (Fenetre == 1)
+  {
+    Menu_visible_avant_fenetre=Menu_visible;
+    Menu_visible=0;
+    Menu_Ordonnee_avant_fenetre=Menu_Ordonnee;
+    Menu_Ordonnee=Hauteur_ecran;
+    Forme_curseur_avant_fenetre=Forme_curseur;
+    Forme_curseur=FORME_CURSEUR_FLECHE;
+    Cacher_pinceau_avant_fenetre=Cacher_pinceau;
+    Cacher_pinceau=1;
+  }
+
+  // Initialisation des listes de boutons de la fenêtre
+  Fenetre_Liste_boutons_normal  =NULL;
+  Fenetre_Liste_boutons_palette =NULL;
+  Fenetre_Liste_boutons_scroller=NULL;
+  Fenetre_Liste_boutons_special =NULL;
+  Nb_boutons_fenetre            =0;
+
+}
+
+//----------------------- Fermer une fenêtre d'options -----------------------
+
+void Fermer_popup(void)
+// Lors de l'appel à cette procedure, la souris doit être affichée.
+// En sortie de cette procedure, la souris est effacée.
+{
+  struct Fenetre_Bouton_normal   * Temp1;
+  struct Fenetre_Bouton_palette  * Temp2;
+  struct Fenetre_Bouton_scroller * Temp3;
+  struct Fenetre_Bouton_special  * Temp4;
+
+  Effacer_curseur();
+
+  while (Fenetre_Liste_boutons_normal)
+  {
+    Temp1=Fenetre_Liste_boutons_normal->Next;
+    free(Fenetre_Liste_boutons_normal);
+    Fenetre_Liste_boutons_normal=Temp1;
+  }
+  while (Fenetre_Liste_boutons_palette)
+  {
+    Temp2=Fenetre_Liste_boutons_palette->Next;
+    free(Fenetre_Liste_boutons_palette);
+    Fenetre_Liste_boutons_palette=Temp2;
+  }
+  while (Fenetre_Liste_boutons_scroller)
+  {
+    Temp3=Fenetre_Liste_boutons_scroller->Next;
+    free(Fenetre_Liste_boutons_scroller);
+    Fenetre_Liste_boutons_scroller=Temp3;
+  }
+  while (Fenetre_Liste_boutons_special)
+  {
+    Temp4=Fenetre_Liste_boutons_special->Next;
+    free(Fenetre_Liste_boutons_special);
+    Fenetre_Liste_boutons_special=Temp4;
+  }
+
+  if (Fenetre != 1)
+  {
+    // Restore de ce que la fenêtre cachait
+    Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+    Fenetre--;
+  }
+  else
+  {
+    free(Fond_fenetre[Fenetre-1]);
+    Fenetre--;
+  
+    Cacher_pinceau=Cacher_pinceau_avant_fenetre;
+  
+    Calculer_coordonnees_pinceau();
+  
+    Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
+    Menu_visible=Menu_visible_avant_fenetre;
+    Forme_curseur=Forme_curseur_avant_fenetre;
+    
+    Afficher_ecran();
+    Afficher_menu();
+  }
+
+  Touche=0;
+  Mouse_K=0;
+  
+  Old_MX = -1;
+  Old_MY = -1;
+
+
+}
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
 //       Mini-MOTEUR utilisé dans les fenêtres (menus des boutons...)       //

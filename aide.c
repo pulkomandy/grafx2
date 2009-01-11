@@ -417,6 +417,7 @@ void Bouton_Stats(void)
     }
 #else
     // Free disk space is only for shows. Other platforms can display 0.
+    #warning "Missing code for your platform !!! Check and correct please :)"
     Taille=0;
 #endif
   

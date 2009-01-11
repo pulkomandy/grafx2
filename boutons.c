@@ -1670,6 +1670,7 @@ void Bouton_Dessin(void)
 
 void Bouton_Dessin_Switch_mode(void)
 {
+/* ANCIEN CODE SANS POPUPS */
   Mode_de_dessin_en_cours++;
   if (Mode_de_dessin_en_cours>OPERATION_DESSIN_POINT)
     Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
@@ -1678,6 +1679,35 @@ void Bouton_Dessin_Switch_mode(void)
   Afficher_sprite_dans_menu(BOUTON_DESSIN,Mode_de_dessin_en_cours);
   Demarrer_pile_operation(Mode_de_dessin_en_cours);
   Afficher_curseur();
+/* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
+    short Bouton_clicke;
+    Ouvrir_popup(16,Menu_Ordonnee/Menu_Facteur_X-32,18,50);
+    Fenetre_Definir_bouton_normal(1,1,16,16,"A",0,1,SDLK_ESCAPE); // 1
+    Afficher_curseur();
+
+    UpdateRect(16*Menu_Facteur_X,Menu_Ordonnee-32*Menu_Facteur_X,18*Menu_Facteur_X,50*Menu_Facteur_X);
+
+    do
+    {
+        while(!Get_input())Wait_VBL();
+        Bouton_clicke = Fenetre_Numero_bouton_clicke();
+
+        switch(Bouton_clicke)
+        {
+            case 1:
+                Mode_de_dessin_en_cours++;
+                if (Mode_de_dessin_en_cours>OPERATION_DESSIN_POINT)
+                    Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
+                break;
+        }
+    }
+    while (Mouse_K);
+
+    Fermer_popup();
+    Afficher_sprite_dans_menu(BOUTON_DESSIN,Mode_de_dessin_en_cours);
+    Demarrer_pile_operation(Mode_de_dessin_en_cours);
+    Afficher_curseur();
+*/
 }
 
 
@@ -3024,6 +3054,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   //   On restaure les données de l'image qui ont certainement été modifiées
   // par la preview.
   memcpy(Principal_Palette,Palette_initiale,sizeof(T_Palette));
+  Set_palette(Principal_Palette);
   Back_color=Back_color_initiale;
   Principal_Image_modifiee=Image_modifiee_initiale;
   Principal_Largeur_image=Largeur_image_initiale;

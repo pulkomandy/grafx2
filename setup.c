@@ -57,6 +57,7 @@ int Create_ConfigDirectory(char * Config_Dir)
 // Determine which directory contains the executable.
 // IN: Main's argv[0], some platforms need it, some don't.
 // OUT: Write into Program_Dir. Trailing / or \ is kept.
+// Note : in fact this is only used to check for the datafiles and fonts in this same directory.
 void Set_Program_Directory(ARG_UNUSED const char * argv0,char * Program_Dir)
 {
   #undef ARG_UNUSED
