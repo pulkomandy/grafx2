@@ -131,7 +131,7 @@ void Rechercher_drives(void)
                 TypeLecteur=LECTEUR_NETWORK;
                 break;
             }
-      NomLecteur[0]='A'+IndiceBit;
+      		NomLecteur[0]='A'+IndiceBit;
             Ajouter_lecteur(NomLecteur[0], TypeLecteur,NomLecteur);
             IndiceLecteur++;
           }
@@ -161,14 +161,16 @@ void Rechercher_drives(void)
 
     while(Liste_points_montage != NULL)
     {
-        if(Liste_points_montage -> me_dummy == 0 && !strcmp(Liste_points_montage->me_mountdir,"/") && !strcmp(Liste_points_montage->me_mountdir,"/home"))
+        if(Liste_points_montage->me_dummy == 0 && strcmp(Liste_points_montage->me_mountdir,"/") && strcmp(Liste_points_montage->me_mountdir,"/home"))
         {
             Ajouter_lecteur(lettre++,
                 Liste_points_montage->me_remote==1?LECTEUR_NETWORK:LECTEUR_HDD,
                 Liste_points_montage->me_mountdir);
         }
         next = Liste_points_montage -> me_next;
+#ifndef __macosx__
         free(Liste_points_montage -> me_type);
+#endif
         free(Liste_points_montage);
         Liste_points_montage = next;
     }

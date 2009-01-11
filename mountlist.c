@@ -19,7 +19,11 @@
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
+#ifdef __macosx__			// MacOS X is POSIX compliant
+#define MOUNTED_GETMNTINFO
+#else
 #define MOUNTED_GETMNTENT1
+#endif
 // --- END GRAFX2 CUSTOM CONFIG ---
 
 #include "mountlist.h"
@@ -151,6 +155,26 @@
 #undef closedir
 
 #ifndef ME_DUMMY
+#ifdef __macosx__
+# define ME_DUMMY(Fs_name, Fs_type)             \
+    (strcmp (Fs_type, "autofs") == 0            \
+     || strcmp (Fs_type, "none") == 0           \
+     || strcmp (Fs_type, "proc") == 0           \
+     || strcmp (Fs_type, "subfs") == 0          \
+     || strcmp (Fs_type, "sysfs") == 0          \
+     || strcmp (Fs_type, "usbfs") == 0          \
+     || strcmp (Fs_type, "devpts") == 0         \
+     || strcmp (Fs_type, "tmpfs") == 0          \
+     /* for NetBSD 3.0 */                       \
+     || strcmp (Fs_type, "kernfs") == 0         \
+     /* for Irix 6.5 */                         \
+     || strcmp (Fs_type, "ignore") == 0         \
+     /* for MacOSX */                           \
+     || strcmp (Fs_type, "devfs") == 0          \
+     || strcmp (Fs_type, "fdesc") == 0          \
+     || strcmp (Fs_type, "nfs") == 0            \
+     || strcmp (Fs_type, "volfs") == 0)
+#else
 # define ME_DUMMY(Fs_name, Fs_type)             \
     (strcmp (Fs_type, "autofs") == 0            \
      || strcmp (Fs_type, "none") == 0           \
@@ -165,6 +189,7 @@
      /* for Irix 6.5 */                         \
      || strcmp (Fs_type, "ignore") == 0)
 #endif
+#endif  // ME_DUMMY
 
 #ifndef ME_REMOTE
 /* A file system is `remote' if its Fs_name contains a `:'
@@ -177,7 +202,7 @@
              || strcmp (Fs_type, "cifs") == 0)))
 #endif
 
-#if MOUNTED_GETMNTINFO
+#ifdef MOUNTED_GETMNTINFO
 
 # if ! HAVE_STRUCT_STATFS_F_FSTYPENAME
 static char *
@@ -413,7 +438,35 @@ read_file_system_list (bool need_fs_type)
   }
 #endif /* MOUNTED_GETMNTENT1. */
 
-#ifdef MOUNTED_GETMNTINFO       /* 4.4BSD.  */
+
+#ifdef MOUNTED_GETMNTINFO	/* 4.4BSD.  */
+#ifdef __macosx__
+  {
+    struct statfs *fsp;
+    int entries;
+	int i;
+
+    entries = getmntinfo (&fsp, MNT_NOWAIT);
+    if (entries < 0)
+      return NULL;
+    for (i = 0; i < entries; i++)
+	{
+        me = malloc (sizeof *me);
+        me->me_devname = strdup (fsp->f_mntfromname);
+        me->me_mountdir = strdup (fsp->f_mntonname);
+        me->me_type = fsp->f_fstypename;
+        me->me_type_malloced = 0;
+        me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
+        me->me_remote = ME_REMOTE (me->me_devname, me->me_type);
+        me->me_dev = (dev_t) -1;        /* Magic; means not known yet. */
+
+        /* Add to the linked list. */
+        *mtail = me;
+        mtail = &me->me_next;
+		fsp++;
+    }
+  }
+#else
   {
     struct statfs *fsp;
     int entries;
@@ -423,23 +476,25 @@ read_file_system_list (bool need_fs_type)
       return NULL;
     for (; entries-- > 0; fsp++)
       {
-        char *fs_type = fsp_to_string (fsp);
+	char *fs_type = fsp_to_string (fsp);
 
-        me = xmalloc (sizeof *me);
-        me->me_devname = xstrdup (fsp->f_mntfromname);
-        me->me_mountdir = xstrdup (fsp->f_mntonname);
-        me->me_type = fs_type;
-        me->me_type_malloced = 0;
-        me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
-        me->me_remote = ME_REMOTE (me->me_devname, me->me_type);
-        me->me_dev = (dev_t) -1;        /* Magic; means not known yet. */
+	me = xmalloc (sizeof *me);
+	me->me_devname = xstrdup (fsp->f_mntfromname);
+	me->me_mountdir = xstrdup (fsp->f_mntonname);
+	me->me_type = fs_type;
+	me->me_type_malloced = 0;
+	me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
+	me->me_remote = ME_REMOTE (me->me_devname, me->me_type);
+	me->me_dev = (dev_t) -1;	/* Magic; means not known yet. */
 
-        /* Add to the linked list. */
-        *mtail = me;
-        mtail = &me->me_next;
+	/* Add to the linked list. */
+	*mtail = me;
+	mtail = &me->me_next;
       }
   }
+#endif
 #endif /* MOUNTED_GETMNTINFO */
+
 
 #ifdef MOUNTED_GETMNTINFO2      /* NetBSD 3.0.  */
   {
@@ -456,6 +511,7 @@ read_file_system_list (bool need_fs_type)
         me->me_mountdir = xstrdup (fsp->f_mntonname);
         me->me_type = xstrdup (fsp->f_fstypename);
         me->me_type_malloced = 1;
+        prtinf("device: %s\n", me->me_devname);
         me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
         me->me_remote = ME_REMOTE (me->me_devname, me->me_type);
         me->me_dev = (dev_t) -1;        /* Magic; means not known yet. */

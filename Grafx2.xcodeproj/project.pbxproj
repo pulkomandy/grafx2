@@ -19,6 +19,7 @@
 		F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AD4B1E0EA8CCF0009CCAC4 /* version.c */; };
 		F5AE6F990EDA119D000CE0EF /* GrafX2_Classic.gif in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5AE6F980EDA119D000CE0EF /* GrafX2_Classic.gif */; };
 		F5AE83FD0ECF8FD300200704 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */; };
+		F5AED03E0F1989E00090A93F /* mountlist.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AED03C0F1989E00090A93F /* mountlist.c */; };
 		F5AFA00D0EFAC7D300663B43 /* brush.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AFA0070EFAC7D300663B43 /* brush.c */; };
 		F5AFA00E0EFAC7D300663B43 /* pxsimple.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AFA0080EFAC7D300663B43 /* pxsimple.c */; };
 		F5AFA00F0EFAC7D300663B43 /* pxtall.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AFA0090EFAC7D300663B43 /* pxtall.c */; };
@@ -128,6 +129,7 @@
 		F5AD4B1E0EA8CCF0009CCAC4 /* version.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = version.c; sourceTree = "<group>"; };
 		F5AE6F980EDA119D000CE0EF /* GrafX2_Classic.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = GrafX2_Classic.gif; path = fonts/GrafX2_Classic.gif; sourceTree = "<group>"; };
 		F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		F5AED03C0F1989E00090A93F /* mountlist.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = mountlist.c; sourceTree = "<group>"; };
 		F5AFA0070EFAC7D300663B43 /* brush.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = brush.c; sourceTree = "<group>"; };
 		F5AFA0080EFAC7D300663B43 /* pxsimple.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxsimple.c; sourceTree = "<group>"; };
 		F5AFA0090EFAC7D300663B43 /* pxtall.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxtall.c; sourceTree = "<group>"; };
@@ -225,6 +227,7 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5AED03C0F1989E00090A93F /* mountlist.c */,
 				F5AFA0070EFAC7D300663B43 /* brush.c */,
 				F5AFA0080EFAC7D300663B43 /* pxsimple.c */,
 				F5AFA0090EFAC7D300663B43 /* pxtall.c */,
@@ -396,6 +399,7 @@
 				F5AFA0100EFAC7D300663B43 /* pxwide.c in Sources */,
 				F5AFA0110EFAC7D300663B43 /* setup.c in Sources */,
 				F5AFA0120EFAC7D300663B43 /* windows.c in Sources */,
+				F5AED03E0F1989E00090A93F /* mountlist.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +432,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__macosx__,
+					__linux__,
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
@@ -463,6 +471,10 @@
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__macosx__,
+					__linux__,
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
