@@ -1331,7 +1331,7 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
 
     Pos_Y_src+=Delta_Y;
   }
-  UpdateRect(Pos_X_dest_Initiale,Pos_Y_dest_Initiale,Largeur_dest,Hauteur_dest);
+  Mettre_Ecran_A_Jour(Pos_X_dest_Initiale,Pos_Y_dest_Initiale,Largeur_dest,Hauteur_dest);
 }
 
 
@@ -1764,5 +1764,5 @@ void Tourner_brosse_preview(float Angle)
   Fin_X=Max(Max(X1,X2),Max(X3,X4));
   Debut_Y=Min(Min(Y1,Y2),Min(Y3,Y4));
   Fin_Y=Max(Max(Y1,Y2),Max(Y3,Y4));
-  UpdateRect(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
 }

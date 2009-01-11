@@ -4087,28 +4087,28 @@ void Bouton_Brush_FX(void)
   Fenetre_Afficher_cadre(137,83,167,53);
 
   Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,SDLK_ESCAPE); // 1
-  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,1,1,SDLK_x); // 2
-  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,1,1,SDLK_y); // 3
-  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,SDLK_LAST); // 4
-  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,SDLK_LAST); // 5
-  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,SDLK_LAST); // 6
-  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,2,1,SDLK_t); // 7
-  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,1,1,SDLK_d); // 8
-  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,1,1,SDLK_r); // 9
-  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",1,1,SDLK_g); // 10
+  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,0,1,Config_Touche[SPECIAL_FLIP_X]); // 2
+  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,0,1,Config_Touche[SPECIAL_FLIP_Y]); // 3
+  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,Config_Touche[SPECIAL_ROTATE_90]); // 4
+  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,Config_Touche[SPECIAL_ROTATE_180]); // 5
+  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,Config_Touche[SPECIAL_ROTATE_ANY_ANGLE]); // 6
+  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,0,1,Config_Touche[SPECIAL_STRETCH]); // 7
+  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,0,1,Config_Touche[SPECIAL_DISTORT]); // 8
+  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,0,1,Config_Touche[SPECIAL_RECOLORIZE_BRUSH]); // 9
+  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",0,1,Config_Touche[SPECIAL_GET_BRUSH_COLORS]); // 10
 
   // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
-  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,SDLK_HOME); // 11
-  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,SDLK_PAGEUP); // 12
-  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,SDLK_KP5); // 13
-  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,SDLK_END); // 14
-  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,SDLK_PAGEDOWN); // 15
+  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_LEFT_ATTACHMENT]); // 11
+  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_RIGHT_ATTACHMENT]); // 12
+  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,Config_Touche[SPECIAL_CENTER_ATTACHMENT]); // 13
+  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_LEFT_ATTACHMENT]); // 14
+  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_RIGHT_ATTACHMENT]); // 15
 
-  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",1,1,SDLK_o); // 16
-  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,1,1,SDLK_n); // 17
+  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",0,1,Config_Touche[SPECIAL_OUTLINE]); // 16
+  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,0,1,Config_Touche[SPECIAL_NIBBLE]); // 17
 
-  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",1,1,SDLK_l); // 18
-  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",1,1,SDLK_s); // 19
+  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",0,1,Config_Touche[SPECIAL_LOAD_BRUSH]); // 18
+  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",0,1,Config_Touche[SPECIAL_SAVE_BRUSH]); // 19
 
   Print_dans_fenetre( 80, 24,"Shape modifications",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 10, 36,"Mirror",CM_Fonce,CM_Clair);
@@ -5559,16 +5559,16 @@ void Bouton_Effets(void)
 
   Ouvrir_fenetre(270,152,"Drawing modes (effects)");
 
-  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,SDLK_F1); // 1
-  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,SDLK_F2); // 2
-  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,SDLK_F3); // 3
-  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,SDLK_F4); // 4
-  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,SDLK_F5); // 5
-  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,SDLK_F6); // 6
-  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,SDLK_F7); // 7
-  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,SDLK_F8); // 8
-  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,SDLK_F9); // 9
-  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,SDLK_F10); // 10
+  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,Config_Touche[SPECIAL_SHADE_MODE]); // 1
+  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,Config_Touche[SPECIAL_QUICK_SHADE_MODE]); // 2
+  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,Config_Touche[SPECIAL_COLORIZE_MODE]); // 3
+  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,Config_Touche[SPECIAL_SMOOTH_MODE]); // 4
+  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,Config_Touche[SPECIAL_SMEAR_MODE]); // 5
+  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,Config_Touche[SPECIAL_MASK_MODE]); // 6
+  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,Config_Touche[SPECIAL_STENCIL_MODE]); // 7
+  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,Config_Touche[SPECIAL_SIEVE_MODE]); // 8
+  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,Config_Touche[SPECIAL_GRID_MODE]); // 9
+  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,Config_Touche[SPECIAL_TILING_MODE]); // 10
   Fenetre_Definir_bouton_normal(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
   Fenetre_Definir_bouton_normal(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
   Fenetre_Definir_bouton_normal( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
