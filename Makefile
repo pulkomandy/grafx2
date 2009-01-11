@@ -27,6 +27,8 @@
   datarootdir = $(prefix)/share
   datadir = $(datarootdir)
 
+  STRIP = strip
+
 # Windows specific
 ifdef COMSPEC
   DELCOMMAND = rm -f
@@ -139,7 +141,6 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    STRIP = strip
 
     ifdef WIN32CROSS
       #cross compile a Win32 executable
