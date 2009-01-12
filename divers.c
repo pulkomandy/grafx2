@@ -94,20 +94,22 @@ void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 
 void Attendre_fin_de_click(void)
 {
-  SDL_Event event;
+    SDL_Event event;
 
-  //On attend que l'utilisateur relache la souris. Tous les autres évènements
-  //sont ignorés
-  while(SDL_PollEvent(&event))
-  {
-    Gere_Evenement_SDL(&event);
-    if (event.type == SDL_MOUSEBUTTONUP)
-      break;
-  }
+    if(Mouse_K==0) return; // Le bouton était déjà relaché
 
-  //On indique à la gestion des E/S que le bouton est laché et on rend la main
-  Mouse_K=0;
-  INPUT_Nouveau_Mouse_K=0;
+    //On attend que l'utilisateur relache la souris. Tous les autres évènements
+    //sont ignorés
+    while(SDL_WaitEvent(&event))
+    {
+      Gere_Evenement_SDL(&event);
+      if (event.type == SDL_MOUSEBUTTONUP)
+        break;
+    }
+
+    //On indique à la gestion des E/S que le bouton est laché et on rend la main
+    Mouse_K=0;
+    INPUT_Nouveau_Mouse_K=0;
 }
 
 void Effacer_image_courante_Stencil(byte Couleur, byte * Pochoir)
