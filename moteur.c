@@ -376,7 +376,7 @@ void Enclencher_bouton(int Numero,byte Click)
       // On désenclenche D'ABORD les interruptions
       // Pour chaque bouton:
       for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
-        // S'il est de la même famille
+        // S'il est de la famille interruption
         if ( (Curseur!=Numero)
           && (Bouton[Curseur].Famille==FAMILLE_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe

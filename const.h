@@ -105,12 +105,13 @@ enum FORMATS_RECONNUS
   FORMAT_PAL         // |
 };
 
-#define FORMAT_PAR_DEFAUT    FORMAT_PKM // Format par défaut (ah bon? oh!)
+#define FORMAT_PAR_DEFAUT    FORMAT_GIF // Format par défaut (ah bon? oh!)
 
   // Les différentes erreurs:
 
 enum CODES_D_ERREURS
 {
+  // 0 = Flash rouge de l'écran, erreur non critique
   ERREUR_DAT_ABSENT=1,          // Le fichier GFX2.DAT est absent
   ERREUR_DAT_CORROMPU,          // Mauvais fichier GFX2.DAT
   ERREUR_CFG_ABSENT,            // Le fichier GFX2.CFG est absent
@@ -124,7 +125,7 @@ enum CODES_D_ERREURS
   ERREUR_REPERTOIRE_DISPARU,    // Le répertoire de lancement n'existe plus
   ERREUR_INI_CORROMPU,          // Le fichier GFX2.INI est corrompu
   ERREUR_SAUVEGARDE_INI,        // Le fichier GFX2.INI n'est pas inscriptible
-  ERREUR_SORRY_SORRY_SORRY      // On le refera plus, promis
+  ERREUR_SORRY_SORRY_SORRY      // On le refera plus, promis (erreur d'allocation de page qui ne devrait JAMAIS se produire)
 };
 
   // Les différents types de pixels
@@ -141,9 +142,9 @@ enum PIXEL_RATIO
 
 enum FAMILLES_DE_BOUTONS
 {
-  FAMILLE_OUTIL=1,          // Outils de dessin
-  FAMILLE_INTERRUPTION,     // Opération éphémère
-  FAMILLE_INSTANTANE,       // Pif paf
+  FAMILLE_OUTIL=1,          // Outils de dessin (exemple : Freehand draw)
+  FAMILLE_INTERRUPTION,     // Opération éphémère (exemple : changement de brosse) > Interruption de l'opération courante pour faire autre chose, puis on revient
+  FAMILLE_INSTANTANE,       // Pif paf (exemple : changement de couleur) > ça sera fini dès qu'on lache le bouton, pas d'utilisation de la pile d'opérations
   FAMILLE_TOOLBAR,          // Cache/Montre la barre d'outils
   FAMILLE_EFFETS            // Effets
 };

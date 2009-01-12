@@ -28,6 +28,9 @@ void Restaurer_les_effets          (void);
 void Ouvrir_fenetre                (word Largeur,word Hauteur, char * Titre);
 void Fermer_fenetre                (void);
 
+void Ouvrir_popup                  (word Pos_X, word Pos_Y, word Largeur, word Hauteur);
+void Fermer_popup                  (void);
+
 void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
                                     char * Titre,byte Lettre_soulignee,byte Clickable);
 void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
