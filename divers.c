@@ -35,6 +35,7 @@
 #include "clavier.h"
 #include "sdlscreen.h"
 #include "windows.h"
+#include "palette.h"
 
 word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
 {
@@ -76,9 +77,9 @@ void Set_palette(T_Palette Palette)
   SDL_Color PaletteSDL[256];
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=Palette[i].R;
-    PaletteSDL[i].g=Palette[i].V;
-    PaletteSDL[i].b=Palette[i].B;
+    PaletteSDL[i].r=(Palette[i].R=Palette_Scale_Component(Palette[i].R));
+    PaletteSDL[i].g=(Palette[i].V=Palette_Scale_Component(Palette[i].V));
+    PaletteSDL[i].b=(Palette[i].B=Palette_Scale_Component(Palette[i].B));
   }
   SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
 }

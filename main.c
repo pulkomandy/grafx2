@@ -22,6 +22,15 @@
 */
 #define VARIABLES_GLOBALES
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+#include <time.h>
+#include <unistd.h>
+#include <SDL.h>
+#include <SDL_image.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -30,14 +39,6 @@
 #include "init.h"
 #include "boutons.h"
 #include "moteur.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <time.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <unistd.h>
 #include "pages.h"
 #include "files.h"
 #include "loadsave.h"
@@ -50,6 +51,7 @@
 #include "setup.h"
 #include "windows.h"
 #include "brush.h"
+#include "palette.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -72,6 +74,8 @@ void Afficher_syntaxe(void)
   printf("Syntax: GFX2 [<arguments>] [<picture>]\n\n");
   printf("<arguments> can be:]\n");
   printf("\t/? /h /help        for this help screen\n");
+  printf("\t/wide              to emulate a video mode with wide pixels (2x1)\n");
+  printf("\t/tall              to emulate a video mode with tall pixels (1x2)\n");
   printf("\t/mode <videomode>  to set a video mode\n\n");
   printf("Available video modes:\n\n");
   for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
@@ -208,6 +212,29 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
     else if ( !strcmp(argv[Indice],"/wide") )
     {
       Pixel_ratio = PIXEL_WIDE;
+    }
+    else if ( !strcmp(argv[Indice],"/rgb") )
+    {
+      // echelle des composants RGB
+      Indice++;
+      if (Indice<argc)
+      {
+        int Grad;
+        Grad = atoi(argv[Indice]);
+        if (Grad < 2 || Grad > 256)
+        {
+          Erreur(ERREUR_LIGNE_COMMANDE);
+          Afficher_syntaxe();
+          exit(0);
+        }
+        Set_Palette_RGB_Scale(Grad);
+      }
+      else
+      {
+        Erreur(ERREUR_LIGNE_COMMANDE);
+        Afficher_syntaxe();
+        exit(0);
+      }
     }
     else
     {

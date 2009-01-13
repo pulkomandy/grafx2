@@ -45,19 +45,31 @@ char * Libelle_reduction_palette[7]=
 };
 
 // Nombre de graduations pour une composante RGB
-const int Graduations_RGB =256; // 24bit
-//const int Graduations_RGB = 64; // VGA
-//const int Graduations_RGB = 16; // Amiga
-//const int Graduations_RGB =  3; // Amstrad CPC
-
+int Graduations_RGB = 256; // 24bit
+//int Graduations_RGB = 64; // VGA
+//int Graduations_RGB = 16; // Amiga
+//int Graduations_RGB =  4; // MSX2
+//int Graduations_RGB =  3; // Amstrad CPC
 
 // Nombre de graduations pour une composante dans le mode actuel
-int Color_Count;
+int Color_Count=256;
 // Les composantes vont de 0 à (Color_Count-1)
-int Color_Max;
+int Color_Max=255;
 // Le demi-pas est une quantité que l'on ajoute à une composante
 // avant de faire un arrondi par division.
-int Color_DemiPas;
+int Color_DemiPas=0;
+
+
+void Set_Palette_RGB_Scale(int Grad)
+{
+  if (Grad>= 2 && Grad <= 256)
+    Graduations_RGB = Grad;
+}
+
+byte Palette_Scale_Component(byte Comp)
+{
+  return ((Comp+128/Graduations_RGB)*(Graduations_RGB-1)/255*255+(Graduations_RGB&1?1:0))/(Graduations_RGB-1);
+}
 
 // Définir les unités pour les graduationss R G B ou H S V
 void Unite_Composantes(int Count)
@@ -93,7 +105,7 @@ void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   if (Nouvelle_teinte>255)
     Nouvelle_teinte=255;
   // Arrondi
-  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
+  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
   Palette[Couleur].R=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
@@ -107,7 +119,7 @@ void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   if (Nouvelle_teinte>255)
     Nouvelle_teinte=255;
   // Arrondi
-  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
+  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
   Palette[Couleur].V=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
@@ -121,7 +133,7 @@ void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   if (Nouvelle_teinte>255)
     Nouvelle_teinte=255;
   // Arrondi
-  Nouvelle_teinte=255*((Nouvelle_teinte+Color_DemiPas)*Color_Max/255)/Color_Max;
+  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
   Palette[Couleur].B=Nouvelle_teinte;
   Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
