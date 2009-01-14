@@ -98,8 +98,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
     for (Indice=0;Indice<=255;Indice++)
       Palette_temporaire[Indice].R=255;
     Set_palette(Palette_temporaire);
-    for (Indice=0;Indice<10;Indice++)
-      Wait_VBL();
+    SDL_Delay(500);
     Set_palette(Principal_Palette);
   }
   else
