@@ -101,7 +101,9 @@ void Attendre_fin_de_click(void)
 
     //On attend que l'utilisateur relache la souris. Tous les autres évènements
     //sont ignorés
-    while(SDL_WaitEvent(&event))
+    while(SDL_PollEvent(&event)) // ça devrait être un Wait_event, mais ça foire méchament
+        // 1 ça bloque le prog complètement
+        // 2 ça marche pas quand on appuie sur espace
     {
       Gere_Evenement_SDL(&event);
       if (event.type == SDL_MOUSEBUTTONUP)
