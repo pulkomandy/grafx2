@@ -933,9 +933,10 @@ void Bouton_Palette(void)
                 Tagger_intervalle_palette(Debut_block,Fin_block);
 
                 // Affichage du n° de la couleur sélectionnée
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
+                Block(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y*7,CM_Clair);
                 Num2str(Fore_color,Chaine,3);
                 Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+                UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y*7);
 
                 // Affichage des jauges
                 Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
