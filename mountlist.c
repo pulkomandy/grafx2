@@ -20,9 +20,13 @@
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #ifdef __macosx__			// MacOS X is POSIX compliant
-#define MOUNTED_GETMNTINFO
+    #define MOUNTED_GETMNTINFO
+#elif defined(__BEOS__) || defined(__HAIKU__)
+    #define MOUNTED_FS_STAT_DEV
+#elif defined(__SKYOS__)
+    #warning "Your platform is missing some specific code here ! please check and fix :)"
 #else
-#define MOUNTED_GETMNTENT1
+    #define MOUNTED_GETMNTENT1
 #endif
 // --- END GRAFX2 CUSTOM CONFIG ---
 
@@ -594,17 +598,17 @@ read_file_system_list (bool need_fs_type)
               continue;
 
             if (strcmp (d->d_name, ".") == 0)
-              name = xstrdup ("/");
+              name = strdup ("/");
             else
               {
-                name = xmalloc (1 + strlen (d->d_name) + 1);
+                name = malloc (1 + strlen (d->d_name) + 1);
                 name[0] = '/';
                 strcpy (name + 1, d->d_name);
               }
 
             if (lstat (name, &statbuf) >= 0 && S_ISDIR (statbuf.st_mode))
               {
-                struct rootdir_entry *re = xmalloc (sizeof *re);
+                struct rootdir_entry *re = malloc (sizeof *re);
                 re->name = name;
                 re->dev = statbuf.st_dev;
                 re->ino = statbuf.st_ino;
@@ -630,10 +634,10 @@ read_file_system_list (bool need_fs_type)
             if (re->dev == fi.dev && re->ino == fi.root)
               break;
 
-          me = xmalloc (sizeof *me);
-          me->me_devname = xstrdup (fi.device_name[0] != '\0' ? fi.device_name : fi.fsh_name);
-          me->me_mountdir = xstrdup (re != NULL ? re->name : fi.fsh_name);
-          me->me_type = xstrdup (fi.fsh_name);
+          me = malloc (sizeof *me);
+          me->me_devname = strdup (fi.device_name[0] != '\0' ? fi.device_name : fi.fsh_name);
+          me->me_mountdir = strdup (re != NULL ? re->name : fi.fsh_name);
+          me->me_type = strdup (fi.fsh_name);
           me->me_type_malloced = 1;
           me->me_dev = fi.dev;
           me->me_dummy = 0;

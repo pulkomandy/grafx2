@@ -46,7 +46,7 @@ ifdef COMSPEC
   OBJRES = $(OBJDIR)/winres.o
   CFGOBJRES = $(OBJDIR)/wincfgres.o
   PLATFORM = win32 #no uname so we'll do that ourselve
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfxcfg.ico grafx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
 else
 
   PLATFORM = $(shell uname)
@@ -216,7 +216,7 @@ ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
 	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2cfg.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
