@@ -47,6 +47,7 @@ ifdef COMSPEC
   CFGOBJRES = $(OBJDIR)/wincfgres.o
   PLATFORM = win32 #no uname so we'll do that ourselve
   PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfxcfg.ico grafx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  ZIP = zip
 else
 
   PLATFORM = $(shell uname)
@@ -63,7 +64,8 @@ else
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = obj/amiga
-#    NOTTF = 1
+    ZIP = lha
+    ZIPOPT = a
   else
 
   #AROS specific
@@ -78,6 +80,8 @@ else
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = obj/aros
+    ZIP = lha
+    ZIPOPT = a
   else
 
   #MorphOS specific
@@ -92,6 +96,8 @@ else
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/morphos
+    ZIP = lha
+    ZIPOPT = a
   else
 
   #BeOS specific
@@ -106,6 +112,7 @@ else
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/beos
+    ZIP = zip
   else
 
   #Haiku specific
@@ -120,6 +127,7 @@ else
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/haiku
+    ZIP = zip
   else
 
   #SkyOS specific
@@ -134,6 +142,7 @@ else
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = obj/skyos
+    ZIP = zip
   else
   
     # Linux specific
@@ -141,6 +150,7 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
+    ZIP = zip
 
     ifdef WIN32CROSS
       #cross compile a Win32 executable
@@ -214,7 +224,7 @@ release : $(BIN) $(CFGBIN)
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
-	zip grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).zip $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
 	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2cfg.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 

@@ -226,7 +226,7 @@ int Repertoire_existe(char * Repertoire)
 {
   DIR* Enreg;    // Structure de lecture des éléments
 
-  if (strcmp(Repertoire,"..")==0)
+  if (strcmp(Repertoire,PARENT_DIR)==0)
     return 1;
   else
   {

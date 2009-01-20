@@ -107,9 +107,9 @@ char * Nom_formate(char * Nom, int Type)
   int         Autre_curseur;
   int         Pos_DernierPoint;
 
-  if (strcmp(Nom,"..")==0)
+  if (strcmp(Nom,PARENT_DIR)==0)
   {
-    strcpy(Resultat,"..          ");
+    strcpy(Resultat,"<-PARENT DIR");
   }
   else if (Nom[0]=='.' || Type==2)
   {
@@ -239,7 +239,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
     // et que l'élément trouvé est un répertoire
     if( S_ISDIR(Infos_enreg.st_mode) &&
       // et que c'est ".."
-      (!strcmp(Enreg->d_name, "..") ||
+      (!strcmp(Enreg->d_name, PARENT_DIR) ||
       // ou qu'il n'est pas caché
        Config.Lire_les_repertoires_caches ||
      !isHidden(Enreg)))
@@ -260,6 +260,11 @@ void Lire_liste_des_fichiers(byte Format_demande)
       }
     }
   }
+
+#if defined(__MORPHOS__) || defined (__amigaos4__) || defined(__amigaos__)
+  Ajouter_element_a_la_liste("/",1); // on amiga systems, / means parent. And there is no ..
+  Liste_Nb_Repertoires ++;
+#endif
 
   closedir(Repertoire_Courant);
   free(Chemin_courant);

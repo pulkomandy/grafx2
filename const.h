@@ -83,6 +83,12 @@
 #define PROPORTION_SPLIT          0.3   // proportion de la zone non-zoomée en largeur par rapport à l'écran
 #define NB_PIXELS_ZOOMES_MIN      4     // Nombre minimal de pixels zoomés en largeur (Note: En dessous de 4, on ne peut plus scroller!)
 
+#if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__)
+   #define PARENT_DIR "/"
+#else
+   #define PARENT_DIR ".."
+#endif
+
   // Les différents formats de fichiers:
 
 #define NB_FORMATS_CONNUS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))

@@ -2897,10 +2897,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case SDLK_BACKSPACE : // Backspace
         *Fichier_recherche=0;
         // Si le choix ".." est bien en tête des propositions...
-        if (!strcmp(Liste_du_fileselect->NomComplet,".."))
+        if (!strcmp(Liste_du_fileselect->NomComplet,PARENT_DIR))
         {                              
           // On va dans le répertoire parent.
-          strcpy(Principal_Nom_fichier,"..");
+          strcpy(Principal_Nom_fichier,PARENT_DIR);
           Type_selectionne=1;
           On_a_clicke_sur_OK=1;
         }
@@ -2947,8 +2947,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         On_a_clicke_sur_OK=0;
 
         // On mémorise le répertoire dans lequel on était
-        if (strcmp(Principal_Nom_fichier,".."))
-          strcpy(Repertoire_precedent,Nom_formate("..", 1));
+        if (strcmp(Principal_Nom_fichier,PARENT_DIR))
+          strcpy(Repertoire_precedent,Nom_formate(PARENT_DIR, 1));
         else
         {
           strcpy(Repertoire_precedent,
