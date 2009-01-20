@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#if defined(__amigaos4__) || defined(__AROS__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
     #include <proto/dos.h>
     #include <dirent.h>
     #define isHidden(Enreg) (0)
@@ -162,7 +162,7 @@ void Ajouter_element_a_la_liste(char * Nom, int Type)
   // On met a jour le nouvel emplacement:
   strcpy(Element_temporaire->NomAbrege,Nom_formate(Nom, Type));
   strcpy(Element_temporaire->NomComplet,Nom);
-  Element_temporaire->Type = Type; 
+  Element_temporaire->Type = Type;
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
   Element_temporaire->Precedent=NULL;
@@ -188,7 +188,7 @@ int VerifieExtension(const char *NomFichier, char * Filtre)
   // Fichier sans extension (ca arrive)
   if (Pos_DernierPoint == -1)
     return (Filtre[0] == '\0');
-  
+
   // Vérification caractère par caractère, case-insensitive.
   Curseur = 0;
   do
@@ -196,10 +196,10 @@ int VerifieExtension(const char *NomFichier, char * Filtre)
     if (Filtre[Curseur] != '?' &&
       tolower(Filtre[Curseur]) != tolower(NomFichier[Pos_DernierPoint + 1 + Curseur]))
       return 0;
-    
+
      Curseur++;
   } while (Filtre[Curseur++] != '\0');
-  
+
   return 1;
 }
 
@@ -250,7 +250,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
       (Config.Lire_les_fichiers_caches || //Il n'est pas caché
-      !isHidden(Enreg))) 
+      !isHidden(Enreg)))
     {
       if (VerifieExtension(Enreg->d_name, Filtre))
       {
@@ -271,12 +271,12 @@ void Lire_liste_des_fichiers(byte Format_demande)
 void bstrtostr( BSTR in, STRPTR out, TEXT max )
 {
   STRPTR iptr;
-  uint32 i;
-  
+  uint32_t i;
+
   iptr = BADDR( in );
-  
+
   if( max > iptr[0] ) max = iptr[0];
-  
+
   for( i=0; i<max; i++ ) out[i] = iptr[i+1];
   out[i] = 0;
 }
@@ -299,7 +299,7 @@ void Lire_liste_des_lecteurs(void)
   {
     struct DosList *dl;
     char tmp[256];
-    
+
     dl = LockDosList( LDF_VOLUMES | LDF_READ );
     if( dl )
     {
@@ -315,7 +315,7 @@ void Lire_liste_des_lecteurs(void)
   }
 
   // Other platforms: simply read the "static" list of Drives.
-  // This should be made dynamic because in the multitask world, user can mount new drives, 
+  // This should be made dynamic because in the multitask world, user can mount new drives,
   // connect to network ones, and so on, while Grafx2 is running.
   #else
     #warning "Your platform is missing some specific code here ! please check and correct ! :)"
@@ -326,7 +326,7 @@ void Lire_liste_des_lecteurs(void)
       Liste_Nb_repertoires++;
     }
   #endif
-  
+
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
 }
 
@@ -516,7 +516,7 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 
     // On recopie la chaîne
     strcpy(Libelle, Element_courant->NomComplet);
-    
+
     if (Type != NULL)
       *Type=Element_courant->Type;
   } // Fin du test d'existence de fichiers
