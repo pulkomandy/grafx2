@@ -151,6 +151,7 @@ else
     RMDIR = rmdir
     CP = cp
     ZIP = zip
+    PLATFORMFILES = gfx2.png
 
     ifdef WIN32CROSS
       #cross compile a Win32 executable
