@@ -263,7 +263,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
 
 #if defined(__MORPHOS__) || defined (__amigaos4__) || defined(__amigaos__)
   Ajouter_element_a_la_liste("/",1); // on amiga systems, / means parent. And there is no ..
-  Liste_Nb_Repertoires ++;
+  Liste_Nb_repertoires ++;
 #endif
 
   closedir(Repertoire_Courant);
