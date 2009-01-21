@@ -323,13 +323,18 @@ void Lire_liste_des_lecteurs(void)
   // This should be made dynamic because in the multitask world, user can mount new drives,
   // connect to network ones, and so on, while Grafx2 is running.
   #else
+
+#ifndef __macosx__
     #warning "Your platform is missing some specific code here ! please check and correct ! :)"
+#endif
+
     for (Indice=0; Indice<Nb_drives; Indice++)
     {
       // Add the drive's name ("c:\\", "/" etc.) to the list
       Ajouter_element_a_la_liste(Drive[Indice].Chemin, 2);
       Liste_Nb_repertoires++;
     }
+
   #endif
 
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;

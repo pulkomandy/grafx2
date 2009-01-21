@@ -473,7 +473,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {252, 402}}</string>
+							<string>{{0, 0}, {252, 590}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -483,14 +483,14 @@
 					<key>GeometryConfiguration</key>
 					<dict>
 						<key>Frame</key>
-						<string>{{0, 0}, {269, 420}}</string>
+						<string>{{0, 0}, {269, 608}}</string>
 						<key>GroupTreeTableConfiguration</key>
 						<array>
 							<string>MainColumn</string>
 							<real>252</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>-288 -7 1469 461 0 0 1024 746 </string>
+						<string>289 18 1045 649 0 0 1024 746 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -527,9 +527,9 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1195, 0}}</string>
+								<string>{{0, 0}, {771, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>-288 -7 1469 461 0 0 1024 746 </string>
+								<string>289 18 1045 649 0 0 1024 746 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -538,7 +538,7 @@
 						</dict>
 						<dict>
 							<key>Proportion</key>
-							<string>415pt</string>
+							<string>603pt</string>
 							<key>Tabs</key>
 							<array>
 								<dict>
@@ -558,9 +558,9 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1195, 388}}</string>
+										<string>{{10, 27}, {771, 576}}</string>
 										<key>RubberWindowFrame</key>
-										<string>-288 -7 1469 461 0 0 1024 746 </string>
+										<string>289 18 1045 649 0 0 1024 746 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
@@ -622,7 +622,7 @@
 						</dict>
 					</array>
 					<key>Proportion</key>
-					<string>1195pt</string>
+					<string>771pt</string>
 				</dict>
 			</array>
 			<key>Name</key>
@@ -640,14 +640,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F5AED06C0F1999130090A93F</string>
+				<string>F5AD90FC0F269BDD00DE11EE</string>
 				<string>1CA23EE50692099D00951B8B</string>
-				<string>F5AED06D0F1999130090A93F</string>
+				<string>F5AD90FD0F269BDD00DE11EE</string>
 				<string>F5A33EC20EC89C3000F8052D</string>
-				<string>F5AED06E0F1999130090A93F</string>
+				<string>F5AD90FE0F269BDD00DE11EE</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 				<string>1CA23EE80692099D00951B8B</string>
-				<string>F5AED06F0F1999130090A93F</string>
+				<string>F5AD90FF0F269BDD00DE11EE</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.buildAndRun</string>
@@ -795,7 +795,7 @@
 	<key>PerspectivesBarVisible</key>
 	<true/>
 	<key>PinnedNavigatorIdentifier</key>
-	<string>F5AED0670F1998B10090A93F</string>
+	<string>F5AD90FA0F269A5E00DE11EE</string>
 	<key>ShelfIsVisible</key>
 	<false/>
 	<key>SourceDescription</key>
@@ -818,11 +818,10 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>F5AED0750F1999130090A93F</string>
 		<string>/Users/xx/Grafx2/Grafx2.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>-288 -7 1469 461 0 0 1024 746 </string>
+	<string>289 18 1045 649 0 0 1024 746 </string>
 	<key>WindowTools</key>
 	<array>
 		<dict>
