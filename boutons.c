@@ -1650,6 +1650,8 @@ void Bouton_Safety_resol(void)
   Desenclencher_bouton(BOUTON_LOUPE);
   Initialiser_mode_video(640, 400, 0);
   Resolution_actuelle=0;
+  Mode_video[0].Largeur = Largeur_ecran*Pixel_width;
+  Mode_video[0].Hauteur = Hauteur_ecran*Pixel_height;
   Afficher_menu();
   Afficher_ecran();
 
