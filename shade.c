@@ -20,6 +20,7 @@
 */
 #include <string.h>
 #include <stdlib.h>
+
 #include "global.h"
 #include "graph.h"
 #include "moteur.h"
@@ -28,6 +29,7 @@
 #include "aide.h"
 #include "sdlscreen.h"
 #include "windows.h"
+#include "input.h"
 
 void Bouton_Shade_Mode(void)
 {

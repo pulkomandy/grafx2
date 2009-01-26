@@ -19,6 +19,6 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Handle_Window_event(SDL_Event * event);
+void Gere_Evenement_SDL(SDL_Event * event);
 
 int  Get_input(void);

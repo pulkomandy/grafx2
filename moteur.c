@@ -38,6 +38,7 @@
 #include "sdlscreen.h"
 #include "windows.h"
 #include "brush.h"
+#include "input.h"
 
 // we need this as global
 short Old_MX = -1;

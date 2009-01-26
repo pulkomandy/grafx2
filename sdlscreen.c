@@ -66,22 +66,6 @@ void Set_Mode_SDL(int *Largeur, int *Hauteur, int Fullscreen)
   SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }
 
-// Fonction qui filtre les evenements génériques.
-void Gere_Evenement_SDL(SDL_Event * event)
-{
-  // Redimensionnement fenetre
-  if (event->type == SDL_VIDEORESIZE )
-  {
-    Resize_Largeur = event->resize.w;
-    Resize_Hauteur = event->resize.h;
-  }
-  // Fermeture
-  if (event->type == SDL_QUIT )
-  {
-    Quit_demande=1;
-  }
-}
-
 #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
 short Min_X=0;
 short Min_Y=0;
@@ -120,7 +104,7 @@ void Flush_update(void)
     Max_X=Max_Y=0;
   }
     #endif
-  
+
 }
 
 void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur)
@@ -128,7 +112,7 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
   #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
     SDL_UpdateRect(Ecran_SDL, X*Pixel_width, Y*Pixel_height, Largeur*Pixel_width, Hauteur*Pixel_height);
   #endif
-  
+
   #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
   if (Largeur==0 || Hauteur==0)
   {
@@ -147,7 +131,7 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
       Max_Y=Y+Hauteur;
   }
   #endif
-  
+
   #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
   Update_necessaire=1;
   #endif
@@ -172,7 +156,7 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
     Reste=4-(Source->w&3);
   else
     Reste=0;
-  
+
   if (Destination==NULL)
     Destination=(byte *)malloc(Source->w*Source->h);
 

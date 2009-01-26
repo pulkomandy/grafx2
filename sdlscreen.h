@@ -26,7 +26,6 @@
 #include "struct.h"
 
   void Set_Mode_SDL(int *,int *,int);
-  void Gere_Evenement_SDL(SDL_Event * event);
 
   SDL_Rect ** Liste_Modes_Videos_SDL;
   byte* Ecran;
