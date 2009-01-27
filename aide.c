@@ -87,7 +87,7 @@ void Afficher_aide(void)
   short  Repeat_Menu_Facteur_Y;
   short  Pos_Reel_X;
   short  Pos_Reel_Y;
-  int    Curseur;
+  byte * Curseur;
   short  Largeur;             // Largeur physique d'une ligne de texte
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
@@ -143,29 +143,38 @@ void Afficher_aide(void)
       // On crée une nouvelle ligne à splotcher
       for (Indice_de_caractere=0;Indice_de_caractere<Largeur;Indice_de_caractere++)
       {
-        // Recherche du caractère dans la fonte de 315 symboles.
+        // Recherche du caractère dans les fontes de l'aide.
         // Ligne titre : Si l'indice est impair on dessine le quart de caractère
         // qui va a gauche, sinon celui qui va a droite.
-        
         if (TypeLigne=='T')
-          Curseur=Caracteres_Aide_Titre_haut[(unsigned char)(Ligne[Indice_de_caractere/2])-' '] + (Indice_de_caractere & 1);
+        {
+          if (Ligne[Indice_de_caractere/2]>'_' || Ligne[Indice_de_caractere/2]<' ')
+            Curseur=&(Fonte_help_norm['!'][0][0]); // Caractère pas géré
+          else if (Indice_de_caractere & 1)
+            Curseur=&(Fonte_help_t2[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+          else
+            Curseur=&(Fonte_help_t1[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+        }
         else if (TypeLigne=='-')
-          Curseur=Caracteres_Aide_Titre_bas[(unsigned char)(Ligne[Indice_de_caractere/2])-' '] + (Indice_de_caractere & 1);
+        {
+          if (Ligne[Indice_de_caractere/2]>'_' || Ligne[Indice_de_caractere/2]<' ')
+            Curseur=&(Fonte_help_norm['!'][0][0]); // Caractère pas géré
+          else if (Indice_de_caractere & 1)
+            Curseur=&(Fonte_help_t4[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+          else
+            Curseur=&(Fonte_help_t3[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+        }
         else if (TypeLigne=='S')
-          Curseur=Caracteres_Aide_S[(unsigned char)(Ligne[Indice_de_caractere])-' '];
+          Curseur=&(Fonte_help_bold[(unsigned char)(Ligne[Indice_de_caractere])][0][0]);
         else if (TypeLigne=='N' || TypeLigne=='K')
-          Curseur=Caracteres_Aide_N[(unsigned char)(Ligne[Indice_de_caractere])-' '];
+          Curseur=&(Fonte_help_norm[(unsigned char)(Ligne[Indice_de_caractere])][0][0]);
         else
-          Curseur=1; // Un garde-fou en cas de probleme
+          Curseur=&(Fonte_help_norm['!'][0][0]); // Un garde-fou en cas de probleme
           
-        // Un deuxième garde-fou
-        if (Curseur < 0 || Curseur > 315)
-          Curseur = 1; // '!' affiché pour les caractères non prévus
-        
         for (X=0;X<6;X++)
           for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
           {
-            byte Couleur = Fonte_help[Curseur][X][Y];
+            byte Couleur = *(Curseur+X+Y*6);
             // Surlignement pour liens
             if (TypeLigne=='K' && Indice_de_caractere>=Position_lien
               && Indice_de_caractere<(Position_lien+Taille_lien))

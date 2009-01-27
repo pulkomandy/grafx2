@@ -225,9 +225,9 @@ release : $(BIN) $(CFGBIN)
 # A release zip archive
 ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
-	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) $(CFGBIN) gfx2.dat gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) $(CFGBIN) gfx2def.ini gfx2gui.gif gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2.dat gfx2.ico gfx2cfg.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini gfx2gui.gif gfx2.ico gfx2cfg.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
@@ -249,7 +249,7 @@ $(OBJDIR)/%.o :
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
 
 depend :
-	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
+	$(CC) -MMG *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
@@ -271,7 +271,8 @@ install : $(BIN) $(CFGBIN)
 	$(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
 	$(CP) $(BIN) $(datadir)/grafx2/
 	$(CP) $(CFGBIN) $(datadir)/grafx2/
-	$(CP) gfx2.dat $(datadir)/grafx2/
+	$(CP) gfx2def.ini $(datadir)/grafx2/
+	$(CP) gfx2gui.gif $(datadir)/grafx2/
 	$(CP) gfx2.gif $(datadir)/grafx2/
 	$(CP) gfx2cfg.gif $(datadir)/grafx2/
 	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
@@ -283,7 +284,8 @@ uninstall :
 	$(DELCOMMAND) $(bindir)/gfxcfg
 	$(DELCOMMAND) $(datadir)/grafx2/$(BIN)
 	$(DELCOMMAND) $(datadir)/grafx2/$(CFGBIN)
-	$(DELCOMMAND) $(datadir)/grafx2/gfx2.dat
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2def.ini
+	$(DELCOMMAND) $(datadir)/grafx2/gfx2gui.gif
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2cfg.gif
 	$(DELCOMMAND) $(datadir)/grafx2/fonts/*

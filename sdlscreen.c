@@ -182,3 +182,10 @@ SDL_Color Conversion_couleur_SDL(byte Index)
   Couleur.unused = 255;
   return Couleur;
 }
+
+// Lecture d'un pixel pour une surface SDL.
+// Attention, ne fonctionne que pour les surfaces 8-bit
+byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int X, int Y)
+{
+  return ((byte *)(Bmp->pixels))[(Y*Bmp->pitch+X)];
+}

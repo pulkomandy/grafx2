@@ -415,19 +415,14 @@ int Sauver_INI(struct S_Config * Conf)
       goto Erreur_ERREUR_SAUVEGARDE_INI;
     }
   }
-  // On récupère un fichier INI "propre" dans GFX2.DAT
+  // On récupère un fichier INI "propre" à partir de gfx2def.ini
   strcpy(Nom_du_fichier_DAT,Repertoire_des_donnees);
-  strcat(Nom_du_fichier_DAT,"gfx2.dat");
+  strcat(Nom_du_fichier_DAT,"gfx2def.ini");
   Ancien_fichier=fopen(Nom_du_fichier_DAT,"rb");
   if (Ancien_fichier==0)
   {
     fclose(Ancien_fichier);
-    return ERREUR_DAT_ABSENT;
-  }
-  if (fseek(Ancien_fichier, DAT_DEBUT_INI_PAR_DEFAUT, SEEK_SET))
-  {
-    fclose(Ancien_fichier);
-    return ERREUR_DAT_CORROMPU;
+    return ERREUR_INI_ABSENT;
   }
   Nouveau_fichier=fopen(Nom_du_fichier,"wb");
   if (Nouveau_fichier==0)

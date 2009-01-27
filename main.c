@@ -105,11 +105,14 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
   {
     switch (Code)
     {
-      case ERREUR_DAT_ABSENT         : printf("Error: File GFX2.DAT is missing!\n");
+      case ERREUR_GUI_ABSENT         : printf("Error: File gfx2gui.gif is missing!\n");
                                        printf("This program cannot run without this file.\n");
                                        break;
-      case ERREUR_DAT_CORROMPU       : printf("Error: File GFX2.DAT is corrupt!\n");
+      case ERREUR_GUI_CORROMPU       : printf("Error: File gfx2gui.gif is corrupt!\n");
                                        printf("This program cannot run without a correct version of this file.\n");
+                                       break;
+      case ERREUR_INI_ABSENT         : printf("Error: File gfx2def.ini is missing!\n");
+                                       printf("This program cannot run without this file.\n");
                                        break;
       case ERREUR_CFG_ABSENT         : printf("Error: File GFX2.CFG is missing!\n");
                                        printf("Please run GFXCFG to create it.\n");
@@ -496,17 +499,12 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   // Transfert des valeurs du .INI qui ne changent pas dans des variables
   // plus accessibles:
-  Palette_defaut[252]=Coul_menu_pref[0]=Config.Coul_menu_pref[0];
-  Palette_defaut[253]=Coul_menu_pref[1]=Config.Coul_menu_pref[1];
-  Palette_defaut[254]=Coul_menu_pref[2]=Config.Coul_menu_pref[2];
-  Palette_defaut[255]=Coul_menu_pref[3]=Config.Coul_menu_pref[3];
+  Palette_defaut[CM_Noir] =Coul_menu_pref[0]=Config.Coul_menu_pref[0];
+  Palette_defaut[CM_Fonce]=Coul_menu_pref[1]=Config.Coul_menu_pref[1];
+  Palette_defaut[CM_Clair]=Coul_menu_pref[2]=Config.Coul_menu_pref[2];
+  Palette_defaut[CM_Blanc]=Coul_menu_pref[3]=Config.Coul_menu_pref[3];
   memcpy(Principal_Palette,Palette_defaut,sizeof(T_Palette));
 
-  CM_Noir =0;
-  CM_Fonce=25;
-  CM_Clair=7;
-  CM_Blanc=15;
-  CM_Trans=1;
   Calculer_couleurs_menu_optimales(Palette_defaut);
 
   // Infos sur les trames (Sieve)

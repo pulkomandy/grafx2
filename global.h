@@ -560,7 +560,14 @@ GFX2_GLOBAL byte * Logo_GrafX2;
 
 GFX2_GLOBAL byte Fonte_systeme[256*8*8];
 GFX2_GLOBAL byte Fonte_fun    [256*8*8];
-GFX2_GLOBAL byte Fonte_help   [315][6][8];
+GFX2_GLOBAL byte Fonte_help_norm [256][6][8];
+GFX2_GLOBAL byte Fonte_help_bold [256][6][8];
+// 12
+// 34
+GFX2_GLOBAL byte Fonte_help_t1 [64][6][8];
+GFX2_GLOBAL byte Fonte_help_t2 [64][6][8];
+GFX2_GLOBAL byte Fonte_help_t3 [64][6][8];
+GFX2_GLOBAL byte Fonte_help_t4 [64][6][8];
 GFX2_GLOBAL byte * Fonte;
 
   // Les données de l'aide:

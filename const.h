@@ -28,14 +28,12 @@
 
 #define M_2PI 6.28318530717958647692528676656
 
-// Note: La taille du fichier GFX2.DAT est définie au début de INIT.C !
 #define POURCENTAGE_VERSION     "98.0%" // Libellé du pourcentage de la version ß
 #define VERSION1                  2     // |
 #define VERSION2                  0     // |_ Numéro de version découpé en
 #define BETA1                     97    // |  plusieurs parties => 2.0 ß95.5%
 #define BETA2                     0     // |  (utilisé pour le fichier de config)
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
-#define DAT_DEBUT_INI_PAR_DEFAUT  0xF385 // Dans gfx2.dat, début du fichier gfx2.ini standard
 #define MAX_MODES_VIDEO           100   // Nombre de modes vidéo maxi
 #define NB_BOUTONS                38    // Nombre de boutons à gérer
 #define NB_TOUCHES                134   // Nombre de combinaisons de touches
@@ -118,8 +116,9 @@ enum FORMATS_RECONNUS
 enum CODES_D_ERREURS
 {
   // 0 = Flash rouge de l'écran, erreur non critique
-  ERREUR_DAT_ABSENT=1,          // Le fichier GFX2.DAT est absent
-  ERREUR_DAT_CORROMPU,          // Mauvais fichier GFX2.DAT
+  ERREUR_GUI_ABSENT=1,          // Le fichier gfx2gui.gif est absent
+  ERREUR_GUI_CORROMPU,          // Mauvais fichier gfx2gui.gif
+  ERREUR_INI_ABSENT,            // Le fichier gfx2def.ini est absent
   ERREUR_CFG_ABSENT,            // Le fichier GFX2.CFG est absent
   ERREUR_CFG_CORROMPU,          // Mauvais fichier GFX2.CFG
   ERREUR_CFG_ANCIEN,            // Ancienne version du fichier GFX2.CFG

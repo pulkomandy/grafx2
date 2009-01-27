@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <SDL_byteorder.h>
+#include <SDL_image.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
@@ -57,6 +58,7 @@
 #include "files.h"
 #include "setup.h"
 #include "windows.h"
+#include "sdlscreen.h"
 #include "mountlist.h" // read_file_system_list
 
 // Ajouter un lecteur à la liste de lecteurs
@@ -185,114 +187,439 @@ int ActiverLecteur(int NumeroLecteur)
   return chdir(Drive[NumeroLecteur].Chemin);
 }
 
-void Charger_DAT(void)
+// Fonctions de lecture dans la skin de l'interface graphique
+void Chercher_bas(SDL_Surface *GUI, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * Section)
 {
-  FILE*  Handle;
-  int  Taille_fichier;
-  int  Indice;
-  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  byte * Fonte_temporaire;
-  byte Pos_X;
-  byte Pos_Y;
-
-  struct stat Informations_Fichier;
-
-  strcpy(Nom_du_fichier,Repertoire_des_donnees);
-  strcat(Nom_du_fichier,"gfx2.dat");
-
-  if(stat(Nom_du_fichier,&Informations_Fichier))
+  byte Couleur;
+  int Y;
+  Y=*Debut_Y;
+  *Debut_X=0;
+  do
   {
-    switch(errno)
+    Couleur=Sdl_Get_pixel_8(GUI,*Debut_X,Y);
+    if (Couleur!=Couleur_neutre)
     {
-      case EACCES: puts("La permission de parcours est refusée pour un des répertoires contenu dans le chemin path."); break;
-      case EBADF:  puts("filedes est un mauvais descripteur."); break;
-      case EFAULT: puts("Un pointeur se trouve en dehors de l'espace d'adressage."); break;
-      case ENAMETOOLONG: puts("Nom de fichier trop long."); break;
-      case ENOENT: puts("The file path is empty or points to a non-existing directory."); break;
-      case ENOMEM: puts("Pas assez de mémoire pour le noyau."); break;
-      case ENOTDIR: puts("Un composant du chemin d'accès n'est pas un répertoire."); break;
-      #ifdef ELOOP
-          case ELOOP:  puts("Trop de liens symboliques rencontrés dans le chemin d'accès."); break;
-      #endif
+      *Debut_Y=Y;
+      return;
+    }
+    Y++;
+  } while (Y<GUI->h);
+  
+  printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
+    *Debut_X, *Debut_Y, Section);
+  Erreur(ERREUR_GUI_CORROMPU);
+}
+
+void Chercher_droite(SDL_Surface *GUI, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * Section)
+{
+  byte Couleur;
+  int X;
+  X=*Debut_X;
+  
+  do
+  {
+    Couleur=Sdl_Get_pixel_8(GUI,X,Debut_Y);
+    if (Couleur!=Couleur_neutre)
+    {
+      *Debut_X=X;
+      return;
+    }
+    X++;
+  } while (X<GUI->w);
+  
+  printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
+    *Debut_X, Debut_Y, Section);
+  Erreur(ERREUR_GUI_CORROMPU);
+}
+
+void Lire_bloc(SDL_Surface *GUI, int Debut_X, int Debut_Y, void *Dest, int Largeur, int Hauteur, char * Section, int Type)
+{
+  // Type: 0 = normal GUI element, only 4 colors allowed
+  // Type: 1 = mouse cursor, 4 colors allowed + transparent
+  // Type: 2 = brush icon or sieve pattern (only CM_Blanc and CM_Trans)
+  // Type: 3 = raw bitmap (splash screen)
+  
+  byte * Ptr=Dest;
+  int X,Y;
+  byte Couleur;
+
+  // Verification taille
+  if (Debut_Y+Hauteur>=GUI->h || Debut_X+Largeur>=GUI->w)
+  {
+    printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
+      Debut_X, Debut_Y, Hauteur, Largeur, Section);
+    Erreur(ERREUR_GUI_CORROMPU);
+  }
+
+  for (Y=Debut_Y; Y<Debut_Y+Hauteur; Y++)
+  {
+    for (X=Debut_X; X<Debut_X+Largeur; X++)
+    {
+      Couleur=Sdl_Get_pixel_8(GUI,X,Y);
+      if (Type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
+      {
+        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
+          Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
+        Erreur(ERREUR_GUI_CORROMPU);
+      }
+      if (Type==1 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc && Couleur != CM_Trans))
+      {
+        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
+          Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
+        Erreur(ERREUR_GUI_CORROMPU);
+      }
+      if (Type==2)
+      {
+        if (Couleur != CM_Blanc && Couleur != CM_Trans)
+        {
+          printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
+            Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Blanc, CM_Trans);
+          Erreur(ERREUR_GUI_CORROMPU);
+        }
+        // Conversion en 0/1 pour les brosses monochromes internes
+        Couleur = (Couleur != CM_Trans);
+      }
+      *Ptr=Couleur;
+      Ptr++;
     }
   }
+}
 
-  Taille_fichier=Informations_Fichier.st_size;
-  if (Taille_fichier<DAT_DEBUT_INI_PAR_DEFAUT)
+void Lire_trame(SDL_Surface *GUI, int Debut_X, int Debut_Y, word *Dest, char * Section)
+{
+  byte Buffer[256];
+  int X,Y;
+  
+  Lire_bloc(GUI, Debut_X, Debut_Y, Buffer, 16, 16, Section, 2);
+
+  for (Y=0; Y<16; Y++)
   {
-    DEBUG("Taille",0);
-    Erreur(ERREUR_DAT_CORROMPU);
+    *Dest=0;
+    for (X=0; X<16; X++)
+    {
+      *Dest=*Dest | Buffer[Y*16+X]<<X;
+    }
+    Dest++;
   }
+}
 
-  Handle=fopen(Nom_du_fichier,"rb");
-  if (Handle==NULL)
+
+void Charger_DAT(void)
+{
+  int  Indice;
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
+  SDL_Surface * GUI;
+  SDL_Palette * SDLPal;
+  int i;
+  int Curseur_X=0,Curseur_Y=0;
+  byte Couleur;
+  byte CM_Neutre; // Couleur neutre utilisée pour délimiter les éléments GUI
+  int Car_1=0;  // Indices utilisés pour les 4 "fontes" qui composent les
+  int Car_2=0;  // grands titres de l'aide. Chaque indice avance dans 
+  int Car_3=0;  // l'une des fontes dans l'ordre :  1 2
+  int Car_4=0;  //                                  3 4
+  
+  // Lecture du fichier "skin"
+  strcpy(Nom_du_fichier,Repertoire_des_donnees);
+  strcat(Nom_du_fichier,"gfx2gui.gif");
+  GUI=IMG_Load(Nom_du_fichier);
+  if (!GUI)
   {
-        DEBUG("Absent",0);
-        Erreur(ERREUR_DAT_ABSENT);
+    Erreur(ERREUR_GUI_ABSENT);
   }
+  if (!GUI->format || GUI->format->BitsPerPixel != 8)
+  {
+    printf("Not a 8-bit image");
+    Erreur(ERREUR_GUI_CORROMPU);
+  }
+  SDLPal=GUI->format->palette;
+  if (!SDLPal || SDLPal->ncolors!=256)
+  {
+    printf("Not a 256-color palette");
+    Erreur(ERREUR_GUI_CORROMPU);
+  }
+  // Lecture de la palette par défaut
+  for (i=0; i<256; i++)
+  {
+    Palette_defaut[i].R=SDLPal->colors[i].r;
+    Palette_defaut[i].V=SDLPal->colors[i].g;
+    Palette_defaut[i].B=SDLPal->colors[i].b;
+  }
+  
+  // Carré "noir"
+  CM_Noir = Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  do
+  {
+    if (++Curseur_X>=GUI->w)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  } while(Couleur==CM_Noir);
+  // Carré "foncé"
+  CM_Fonce=Couleur;
+  do
+  {
+    if (++Curseur_X>=GUI->w)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  } while(Couleur==CM_Fonce);
+  // Carré "clair"
+  CM_Clair=Couleur;
+  do
+  {
+    if (++Curseur_X>GUI->w)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  } while(Couleur==CM_Clair);
+  // Carré "blanc"
+  CM_Blanc=Couleur;
+  do
+  {
+    if (++Curseur_X>=GUI->w)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  } while(Couleur==CM_Blanc);
+  // Carré "transparent"
+  CM_Trans=Couleur;
+  do
+  {
+    if (++Curseur_X>=GUI->w)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  } while(Couleur==CM_Trans);
+  // Reste : couleur neutre
+  CM_Neutre=Couleur;
 
-  if (!read_bytes(Handle, Palette_defaut,sizeof(T_Palette)))
-    Erreur(ERREUR_DAT_CORROMPU);
-  Palette_64_to_256(Palette_defaut);
+  
+  Curseur_X=0;
+  Curseur_Y=1;
+  while ((Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y))==CM_Noir)
+  {
+    Curseur_Y++;
+    if (Curseur_Y>=GUI->h)
+    {
+      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      Erreur(ERREUR_GUI_CORROMPU);
+    }
+  }
+  
+  // Menu
+  Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "menu");
+  Lire_bloc(GUI, Curseur_X, Curseur_Y, BLOCK_MENU, LARGEUR_MENU, HAUTEUR_MENU,"menu",0);
+  Curseur_Y+=HAUTEUR_MENU;
 
-  if (!read_bytes(Handle, BLOCK_MENU,LARGEUR_MENU*HAUTEUR_MENU))
-    Erreur(ERREUR_DAT_CORROMPU);
+  // Effets
+  for (i=0; i<NB_SPRITES_EFFETS; i++)
+  {
+    if (i==0)
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "effect sprite");
+    else
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "effect sprite");
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_EFFET[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "effect sprite",0);
+    Curseur_X+=LARGEUR_SPRITE_MENU;
+  }
+  Curseur_Y+=HAUTEUR_SPRITE_MENU;
+  
+  // Curseurs souris
+  for (i=0; i<NB_SPRITES_CURSEUR; i++)
+  {
+    if (i==0)
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "mouse cursor");
+    else
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "mouse cursor");
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_CURSEUR[i], LARGEUR_SPRITE_CURSEUR, HAUTEUR_SPRITE_CURSEUR, "mouse cursor",1);
+    Curseur_X+=LARGEUR_SPRITE_CURSEUR;
+  }
+  Curseur_Y+=HAUTEUR_SPRITE_CURSEUR;
+  
+  // Sprites menu
+  for (i=0; i<NB_SPRITES_MENU; i++)
+  {
+    if (i==0)
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "menu sprite");
+    else
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "menu sprite");
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_MENU[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "menu sprite",1);
+    Curseur_X+=LARGEUR_SPRITE_MENU;
+  }
+  Curseur_Y+=HAUTEUR_SPRITE_MENU;
+  
+  // Icones des Pinceaux
+  for (i=0; i<NB_SPRITES_PINCEAU; i++)
+  {
+    // Rangés par ligne de 12
+    if ((i%12)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=HAUTEUR_PINCEAU;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "brush icon");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "brush icon");
+    }
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_PINCEAU[i], LARGEUR_PINCEAU, HAUTEUR_PINCEAU, "brush icon",2);
+    Curseur_X+=LARGEUR_PINCEAU;
+  }
+  Curseur_Y+=HAUTEUR_PINCEAU;
 
-  if (!read_bytes(Handle, SPRITE_EFFET,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_EFFETS))
-    Erreur(ERREUR_DAT_CORROMPU);
+  // Sprites drive
+  for (i=0; i<NB_SPRITES_DRIVES; i++)
+  {
+    if (i==0)
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "sprite drive");
+    else
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "sprite drive");
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_DRIVE[i], LARGEUR_SPRITE_DRIVE, HAUTEUR_SPRITE_DRIVE, "sprite drive",1);
+    Curseur_X+=LARGEUR_SPRITE_DRIVE;
+  }
+  Curseur_Y+=HAUTEUR_SPRITE_DRIVE;
 
-  if (!read_bytes(Handle, SPRITE_CURSEUR,LARGEUR_SPRITE_CURSEUR*HAUTEUR_SPRITE_CURSEUR*NB_SPRITES_CURSEUR))
-    Erreur(ERREUR_DAT_CORROMPU);
-
-  if (!read_bytes(Handle, SPRITE_MENU,LARGEUR_SPRITE_MENU*HAUTEUR_SPRITE_MENU*NB_SPRITES_MENU))
-    Erreur(ERREUR_DAT_CORROMPU);
-
-  if (!read_bytes(Handle, SPRITE_PINCEAU,LARGEUR_PINCEAU*HAUTEUR_PINCEAU*NB_SPRITES_PINCEAU))
-    Erreur(ERREUR_DAT_CORROMPU);
-
-  if (!read_bytes(Handle, SPRITE_DRIVE,LARGEUR_SPRITE_DRIVE*HAUTEUR_SPRITE_DRIVE*NB_SPRITES_DRIVES))
-    Erreur(ERREUR_DAT_CORROMPU);
-
+  // Logo splash screen
   if (!(Logo_GrafX2=(byte *)malloc(231*56)))
     Erreur(ERREUR_MEMOIRE);
-  if (!read_bytes(Handle, Logo_GrafX2,231*56))
-    Erreur(ERREUR_DAT_CORROMPU);
 
-  if (!read_bytes(Handle, TRAME_PREDEFINIE,2*16*NB_TRAMES_PREDEFINIES))
-    Erreur(ERREUR_DAT_CORROMPU);
-
-  // Lecture des fontes 8x8:
-  if (!(Fonte_temporaire=(byte *)malloc(2048)))
-    Erreur(ERREUR_MEMOIRE);
-
-  // Lecture de la fonte système
-  if (!read_bytes(Handle, Fonte_temporaire,2048))
-    Erreur(ERREUR_DAT_CORROMPU);
-  for (Indice=0;Indice<256;Indice++)
-    for (Pos_X=0;Pos_X<8;Pos_X++)
-      for (Pos_Y=0;Pos_Y<8;Pos_Y++)
-        Fonte_systeme[(Indice<<6)+(Pos_X<<3)+Pos_Y]=( ((*(Fonte_temporaire+(Indice*8)+Pos_Y))&(0x80>>Pos_X)) ? 1 : 0);
-
-  // Lecture de la fonte alternative
-  if (!read_bytes(Handle, Fonte_temporaire,2048))
-    Erreur(ERREUR_DAT_CORROMPU);
-  for (Indice=0;Indice<256;Indice++)
-    for (Pos_X=0;Pos_X<8;Pos_X++)
-      for (Pos_Y=0;Pos_Y<8;Pos_Y++)
-        Fonte_fun[(Indice<<6)+(Pos_X<<3)+Pos_Y]=( ((*(Fonte_temporaire+(Indice*8)+Pos_Y))&(0x80>>Pos_X)) ? 1 : 0);
-
-  free(Fonte_temporaire);
-
+  Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "logo menu");
+  Lire_bloc(GUI, Curseur_X, Curseur_Y, Logo_GrafX2, 231, 56, "logo menu",3);
+  Curseur_Y+=56;
+  
+  // Trames
+  for (i=0; i<NB_TRAMES_PREDEFINIES; i++)
+  {
+    if (i==0)
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "sieve pattern");
+    else
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "sieve pattern");
+    Lire_trame(GUI, Curseur_X, Curseur_Y, TRAME_PREDEFINIE[i],"sieve pattern");
+    Curseur_X+=16;
+  }
+  Curseur_Y+=16;
+  
+  // Fonte Système
+  for (i=0; i<256; i++)
+  {
+    // Rangés par ligne de 32
+    if ((i%32)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=8;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "system font");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "system font");
+    }
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, &Fonte_systeme[i*64], 8, 8, "system font",2);
+    Curseur_X+=8;
+  }
+  Curseur_Y+=8;
   Fonte=Fonte_systeme;
 
-  // Lecture de la fonte 6x8: (spéciale aide)
-  if (!read_bytes(Handle, Fonte_help,315*6*8))
-    Erreur(ERREUR_DAT_CORROMPU);
+  // Fonte Fun
+  for (i=0; i<256; i++)
+  {
+    // Rangés par ligne de 32
+    if ((i%32)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=8;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "fun font");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "fun font");
+    }
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, &Fonte_fun[i*64], 8, 8, "fun font",2);
+    Curseur_X+=8;
+  }
+  Curseur_Y+=8;
 
-  // Le reste est actuellement une copie du fichier INI par défaut:
-  // Pas besoin ici.
+  // Fonte help normale
+  for (i=0; i<256; i++)
+  {
+    // Rangés par ligne de 32
+    if ((i%32)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=8;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (norm)");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (norm)");
+    }
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, &(Fonte_help_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    Curseur_X+=6;
+  }
+  Curseur_Y+=8;
+  
+  // Fonte help bold
+  for (i=0; i<256; i++)
+  {
+    // Rangés par ligne de 32
+    if ((i%32)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=8;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (bold)");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (bold)");
+    }
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, &(Fonte_help_bold[i][0][0]), 6, 8, "help font (bold)",0);
+    Curseur_X+=6;
+  }
+  Curseur_Y+=8;
 
-  fclose(Handle);
+  // Fonte help titre
+  for (i=0; i<256; i++)
+  {
+    byte * Dest;
+    // Rangés par ligne de 64
+    if ((i%64)==0)
+    {
+      if (i!=0)
+        Curseur_Y+=8;
+      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (title)");
+    }
+    else
+    {
+      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (title)");
+    }
+    
+    if (i&1)
+      if (i&64)
+        Dest=&(Fonte_help_t4[Car_4++][0][0]);
+      else
+        Dest=&(Fonte_help_t2[Car_2++][0][0]);
+    else
+      if (i&64)
+        Dest=&(Fonte_help_t3[Car_3++][0][0]);
+      else
+        Dest=&(Fonte_help_t1[Car_1++][0][0]);
+    
+    Lire_bloc(GUI, Curseur_X, Curseur_Y, Dest, 6, 8, "help font (title)",0);
+    Curseur_X+=6;
+  }
+  Curseur_Y+=8;
+  
+  // Terminé: libération de l'image skin
+  SDL_FreeSurface(GUI);
 
   Section_d_aide_en_cours=0;
   Position_d_aide_en_cours=0;

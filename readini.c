@@ -411,22 +411,15 @@ int Charger_INI(struct S_Config * Conf)
   Fichier=fopen(Nom_du_fichier,"rb");
   if (Fichier==0)
   {
-    // Si le fichier ini est absent on le relit depuis gfx2.dat
+    // Si le fichier ini est absent on le relit depuis gfx2def.ini
     strcpy(Nom_du_fichier,Repertoire_des_donnees);
-    strcat(Nom_du_fichier,"gfx2.dat");
+    strcat(Nom_du_fichier,"gfx2def.ini");
     Fichier=fopen(Nom_du_fichier,"rb");
     if (Fichier == 0)
     {
       free(Nom_du_fichier);
       free(Buffer);
-      return ERREUR_DAT_ABSENT;
-    }
-    if (fseek(Fichier, DAT_DEBUT_INI_PAR_DEFAUT ,SEEK_SET))
-    {
-      fclose(Fichier);
-      free(Nom_du_fichier);
-      free(Buffer);
-      return ERREUR_DAT_CORROMPU;
+      return ERREUR_INI_ABSENT;
     }
   }
   

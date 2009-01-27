@@ -321,14 +321,14 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
   byte Repeat_Menu_Facteur_Y;
 
   Reel_Y=Y;
-  for (Pos_Y=0;Pos_Y<8;Pos_Y++)
+  for (Pos_Y=0;Pos_Y<8<<3;Pos_Y+=1<<3)
   {
     Reel_X=0; // Position dans le buffer
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
       // Pointeur sur le premier pixel du caractère
       Caractere=Fonte+(((unsigned char)Chaine[Indice])<<6);
-      for (Pos_X=0;Pos_X<8<<3;Pos_X+=1<<3)
+      for (Pos_X=0;Pos_X<8;Pos_X+=1)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
           Buffer_de_ligne_horizontale[Reel_X++]=*(Caractere+Pos_X+Pos_Y)?Couleur_texte:Couleur_fond;
     }
@@ -363,10 +363,10 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char C
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
 
-  for (X=0;X<8;X++)
-    for (Y=0;Y<8;Y++)
+  for (Y=0;Y<8;Y++)
+    for (X=0;X<8;X++)
     {
-      if (*(Fonte+((int)Caractere<<6)+(X<<3)+Y))
+      if (*(Fonte+((int)Caractere<<6)+(Y<<3)+X))
         Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
@@ -2330,31 +2330,52 @@ void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
     || (CM_Noir !=Old_Noir )
     || (CM_Trans!=Old_Trans) )
   {
-      // Sprites du curseur
+    // Sprites du curseur
     for (K=0; K<NB_SPRITES_CURSEUR; K++)
       for (J=0; J<HAUTEUR_SPRITE_CURSEUR; J++)
         for (I=0; I<LARGEUR_SPRITE_CURSEUR; I++)
           Remap_pixel(&SPRITE_CURSEUR[K][J][I]);
-      // Le menu
+    // Le menu
     for (J=0; J<HAUTEUR_MENU; J++)
       for (I=0; I<LARGEUR_MENU; I++)
         Remap_pixel(&BLOCK_MENU[J][I]);
-      // Sprites du menu
+    // Sprites du menu
     for (K=0; K<NB_SPRITES_MENU; K++)
       for (J=0; J<HAUTEUR_SPRITE_MENU; J++)
         for (I=0; I<LARGEUR_SPRITE_MENU; I++)
           Remap_pixel(&SPRITE_MENU[K][J][I]);
-      // Sprites d'effets
+    // Sprites d'effets
     for (K=0; K<NB_SPRITES_EFFETS; K++)
       for (J=0; J<HAUTEUR_SPRITE_MENU; J++)
         for (I=0; I<LARGEUR_SPRITE_MENU; I++)
           Remap_pixel(&SPRITE_EFFET[K][J][I]);
-      // Fonte de l'aide
-    for (K=0; K<315; K++)
+    // Fontes de l'aide
+    for (K=0; K<256; K++)
       for (J=0; J<8; J++)
         for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help[K][I][J]);
-      // Sprites de lecteurs (drives)
+          Remap_pixel(&Fonte_help_norm[K][I][J]);
+    for (K=0; K<256; K++)
+      for (J=0; J<8; J++)
+        for (I=0; I<6; I++)
+          Remap_pixel(&Fonte_help_bold[K][I][J]);
+    for (K=0; K<64; K++)
+      for (J=0; J<8; J++)
+        for (I=0; I<6; I++)
+          Remap_pixel(&Fonte_help_t1[K][I][J]);
+    for (K=0; K<64; K++)
+      for (J=0; J<8; J++)
+        for (I=0; I<6; I++)
+          Remap_pixel(&Fonte_help_t2[K][I][J]);
+    for (K=0; K<64; K++)
+      for (J=0; J<8; J++)
+        for (I=0; I<6; I++)
+          Remap_pixel(&Fonte_help_t3[K][I][J]);
+    for (K=0; K<64; K++)
+      for (J=0; J<8; J++)
+        for (I=0; I<6; I++)
+          Remap_pixel(&Fonte_help_t4[K][I][J]);
+        
+    // Sprites de lecteurs (drives)
     for (K=0; K<NB_SPRITES_DRIVES; K++)
       for (J=0; J<HAUTEUR_SPRITE_DRIVE; J++)
         for (I=0; I<LARGEUR_SPRITE_DRIVE; I++)
