@@ -347,11 +347,12 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byt
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
   // Premier pixel du caractère
   Carac=Fonte + (Caractere<<6);
-  for (X=0;X<8;X++)
-    for (Y=0;Y<8;Y++)
+  
+  for (Y=0;Y<8;Y++)
+    for (X=0;X<8;X++)
       Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
             Menu_Facteur_X, Menu_Facteur_Y,
-            (*(Carac+(X<<3)+Y)?Couleur_texte:Couleur_fond));
+            (*(Carac++)?Couleur_texte:Couleur_fond));
 }
 
   // -- Afficher un caractère sans fond dans une fenêtre --
@@ -359,14 +360,16 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byt
 void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur)
 {
   short X,Y;
-
+  byte *Carac;
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
-
+  // Premier pixel du caractère
+  Carac=Fonte + (Caractere<<6);
+  
   for (Y=0;Y<8;Y++)
     for (X=0;X<8;X++)
     {
-      if (*(Fonte+((int)Caractere<<6)+(Y<<3)+X))
+      if (*(Carac++))
         Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
