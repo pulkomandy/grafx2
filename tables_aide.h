@@ -255,14 +255,14 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("  Guillaume Dorme alias \"Robinson\" (code)")
   AIDE_TEXTE("  Karl Maritaud   alias \"X-Man\" (code&gfx)")
-  AIDE_TEXTE("                    (k.maritaud@laposte.net)")
+  AIDE_TEXTE("                    (k.maritaud\100laposte.net)")
   AIDE_TEXTE("")
   AIDE_TEXTE("   Re-licensed GrafX2 under the GPL in 2001")
   AIDE_TEXTE("")
   AIDE_BOLD ("         THE GRAFX2 PROJECT TEAM")          //
   AIDE_TEXTE("")
-  AIDE_TEXTE("  Adrien Destugues (pulkomandy@gmail.com)") //
-  AIDE_TEXTE("  Yves Rizoud (yrizoud@gmail.com)")         //
+  AIDE_TEXTE("  Adrien Destugues (pulkomandy\100gmail.com)") //
+  AIDE_TEXTE("  Yves Rizoud (yrizoud\100gmail.com)")         //
   AIDE_TEXTE("")
   AIDE_TEXTE("   Got the source back to life in 2006")    //
   AIDE_TEXTE("")
@@ -276,33 +276,33 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TITRE(" OTHER MACHINES PORTS")                 //
   AIDE_BOLD ("              AMIGA OS 4 PORT")             //
   AIDE_TEXTE("")
-  AIDE_TEXTE("  Peter Gordon (pete@petergordon.org.uk)")  //
+  AIDE_TEXTE("  Peter Gordon (pete\100petergordon.org.uk)")  //
   AIDE_TEXTE("")
   AIDE_BOLD ("                 AROS PORT")                //
   AIDE_TEXTE("")
-  AIDE_TEXTE("  Fernando Mastandrea (masta.uy@gmail.com)")//
-  AIDE_TEXTE("  Markus Weiss (mweiss@id-architekten.de)") //
+  AIDE_TEXTE("  Fernando Mastandrea (masta.uy\100gmail.com)")//
+  AIDE_TEXTE("  Markus Weiss (mweiss\100id-architekten.de)") //
   AIDE_TEXTE("")
   AIDE_BOLD ("                FREEBSD PORT")              //
   AIDE_TEXTE("")
   AIDE_TEXTE("  Jean-Baptiste Berlioz")                   //
-  AIDE_TEXTE("                    (tobe@freemind-tobe.com)")
+  AIDE_TEXTE("                    (tobe\100freemind-tobe.com)")
   AIDE_TEXTE("")
   AIDE_BOLD ("           HAIKU OS AND BEOS PORT")         //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  Luc Schrijvers (begasus@skynet.be)")      //
+  AIDE_TEXTE("  Luc Schrijvers (begasus\100skynet.be)")      //
   AIDE_TEXTE("")
   AIDE_BOLD ("               MAC OS X PORT")              //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  Franck Charlet (hitchhikr@australia.edu)")//
+  AIDE_TEXTE("  Franck Charlet (hitchhikr\100australia.edu)")//
   AIDE_TEXTE("")
   AIDE_BOLD ("                MORPHOS PORT")
   AIDE_TEXTE("")
-  AIDE_TEXTE("  Rusback (rusback@wanadoo.fr)")
+  AIDE_TEXTE("  Rusback (rusback\100wanadoo.fr)")
   AIDE_TEXTE("")
   AIDE_BOLD ("                 SKYOS PORT")         //
   AIDE_TEXTE("")                                          //
-  AIDE_TEXTE("  Luc Schrijvers (begasus@skynet.be)")      //
+  AIDE_TEXTE("  Luc Schrijvers (begasus\100skynet.be)")      //
   AIDE_TEXTE("")
   AIDE_TEXTE("  Made it work on your favourite toaster")
   AIDE_TEXTE("")
