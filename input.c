@@ -356,6 +356,7 @@ int Get_input(void)
 
             case SDL_QUIT:
                 Handle_Window_Exit(&event);
+                User_Feedback_Required = 1;
                 break;
 
             case SDL_MOUSEMOTION:
