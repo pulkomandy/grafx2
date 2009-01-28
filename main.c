@@ -307,7 +307,7 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   // On initialise les données sur le nom de fichier de l'image principale:
   strcpy(Principal_Repertoire_fichier,Principal_Repertoire_courant);
-  strcpy(Principal_Nom_fichier,"NO_NAME.PKM");
+  strcpy(Principal_Nom_fichier,"NO_NAME.GIF");
   Principal_Format_fichier=FORMAT_PAR_DEFAUT;
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Brouillon_Repertoire_courant,Principal_Repertoire_courant);
@@ -557,7 +557,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   if (Un_fichier_a_ete_passe_en_parametre)
   {
     strcpy(Brouillon_Repertoire_fichier,Brouillon_Repertoire_courant);
-    strcpy(Brouillon_Nom_fichier,"NO_NAME.PKM");
+    strcpy(Brouillon_Nom_fichier,"NO_NAME.GIF");
     Brouillon_Format_fichier=FORMAT_PAR_DEFAUT;
   }
 
