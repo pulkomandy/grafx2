@@ -201,6 +201,7 @@ int Handle_Key_Press(SDL_Event* event)
                 INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
             else
                 INPUT_Nouveau_Mouse_Y--;
+            if(Move_cursor_with_constraints()) return 0;
             return 1;
         }
     }
