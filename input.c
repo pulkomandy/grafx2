@@ -317,6 +317,9 @@ void Handle_Key_Release(SDL_Event* event)
         INPUT_Nouveau_Mouse_K=0;
         Move_cursor_with_constraints();
     }
+
+    Touche = 0;
+    Touche_ANSI=0;
 }
 
 
@@ -398,5 +401,5 @@ int Get_input(void)
     // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
     Flush_update();
 
-    return 0;
+    return User_Feedback_Required;
 }
