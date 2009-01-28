@@ -60,6 +60,8 @@
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
+#elif defined(__FreeBSD__)
+    #import <sys/param.h>
 #elif defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__)
     #include "realpath.h"
 #endif

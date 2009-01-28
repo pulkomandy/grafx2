@@ -170,7 +170,7 @@ void Rechercher_drives(void)
                 Liste_points_montage->me_mountdir);
         }
         next = Liste_points_montage -> me_next;
-#ifndef __macosx__
+#if !(defined(__macosx__) || defined(__FreeBSD__))
         free(Liste_points_montage -> me_type);
 #endif
         free(Liste_points_montage);

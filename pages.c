@@ -832,7 +832,7 @@ void Backup(void)
 // Sauve la page courante comme première page de backup et crée une nouvelle page
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
-  #ifdef __macosx__
+  #if defined(__macosx__) || defined(__FreeBSD__)
     S_Page Nouvelle_page;
   #else
     S_Page *Nouvelle_page;
@@ -843,7 +843,7 @@ void Backup(void)
   Upload_infos_page_principal(Principal_Backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
-#ifdef __macosx__
+#if defined(__macosx__) || defined(__FreeBSD__)
   Initialiser_S_Page(&Nouvelle_page);
 
   // Enrichissement de l'historique
@@ -866,7 +866,7 @@ void Backup(void)
   memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
 
   // On détruit le descripteur de la page courante
-#ifndef __macosx__
+#if !(defined(__macosx__) || defined(__FreeBSD__))
   free(Nouvelle_page);
 #endif
 

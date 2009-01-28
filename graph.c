@@ -1341,7 +1341,7 @@ void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,b
 
   for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
     Afficher_pinceau(Pos_X,  Fin_Y,Couleur,0);
-#ifdef __macosx__
+#if defined(__macosx__) || defined(__FreeBSD__)
   Mettre_Ecran_A_Jour(Debut_X,Fin_X,Fin_X-Debut_X,Fin_Y-Debut_Y);
 #endif
 }

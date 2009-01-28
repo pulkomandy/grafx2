@@ -470,7 +470,7 @@ word Conversion_ANSI(SDL_keysym Sym)
   // This part was removed from the MacOSX port, but I put it back for others
   // as on Linux and Windows, it's what allows editing a text line with the keys
   // SDLK_LEFT, SDLK_RIGHT, SDLK_HOME, SDLK_END etc.
-  #ifndef __macosx__
+  #if !(defined(__macosx__) || defined(__FreeBSD__))
   if ( Sym.unicode == 0)
   {
     return Sym.sym;
@@ -546,7 +546,7 @@ word Conversion_ANSI(SDL_keysym Sym)
   // Touche entre 127 et 255
   if (Sym.unicode<256)
   {
-#ifdef __macosx__
+#if defined(__macosx__) || defined(__FreeBSD__)
     // fc: Looks like there's a mismatch with delete & backspace
     //     i don't why SDLK_DELETE was returned instead of SDLK_BACKSPACE
     if(Sym.unicode == 127)

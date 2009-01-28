@@ -38,7 +38,7 @@
 
 // METHODE_UPDATE peut être fixé depuis le makefile, sinon c'est ici:
 #ifndef METHODE_UPDATE
-  #ifdef __macosx__
+  #if defined(__macosx__) || defined(__FreeBSD__)
     #define METHODE_UPDATE     METHODE_UPDATE_PLEINE_PAGE
   #else
     #define METHODE_UPDATE     METHODE_UPDATE_PAR_CUMUL

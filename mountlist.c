@@ -19,7 +19,7 @@
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
-#ifdef __macosx__			// MacOS X is POSIX compliant
+#if defined(__macosx__)||defined(__FreeBSD__)			// MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
 #elif defined(__BEOS__) || defined(__HAIKU__)
     #define MOUNTED_FS_STAT_DEV
@@ -444,7 +444,7 @@ read_file_system_list (bool need_fs_type)
 
 
 #ifdef MOUNTED_GETMNTINFO	/* 4.4BSD.  */
-#ifdef __macosx__
+#if defined(__macosx__) || defined(__FreeBSD__)
   {
     struct statfs *fsp;
     int entries;

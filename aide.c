@@ -26,7 +26,7 @@
 
 #if defined(__WIN32__)
     #include <windows.h>
-#elif defined(__macosx__)
+#elif defined(__macosx__) || defined(__FreeBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
 #elif defined (__linux__)
@@ -417,7 +417,7 @@ void Bouton_Stats(void)
       GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
       Taille = tailleU.QuadPart;
     }
-#elif defined(__linux__) || (__macosx__)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD)
     // Note: under MacOSX, both macros are defined anyway.
     {
       struct statfs Informations_Disque;
