@@ -125,7 +125,7 @@ T_Format FormatFichier[NB_FORMATS_CONNUS] = {
   {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
-  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 0}
+  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
 };
 
 // Taille de fichier, en octets
@@ -5531,6 +5531,26 @@ void Load_PNG(void)
               
               if (bit_depth <= 8 && (color_type == PNG_COLOR_TYPE_PALETTE || PNG_COLOR_TYPE_GRAY))
               {
+                int num_text;
+                png_text *text_ptr;
+
+                // Commentaire
+                Principal_Commentaire[0]='\0'; // On efface le commentaire
+                if ((num_text=png_get_text(png_ptr, info_ptr, &text_ptr, NULL)))
+                {
+                  while (num_text--)
+                  {
+                    if (!strcmp(text_ptr[num_text].key,"Title"))
+                    {
+                      int Taille;
+                      Taille = Min(text_ptr[num_text].text_length, TAILLE_COMMENTAIRE);
+                      strncpy(Principal_Commentaire, text_ptr[num_text].text, Taille);
+                      Principal_Commentaire[Taille]='\0';
+                      break; // Pas besoin de vérifier les suivants
+                    }
+                  }
+                }
+
                 Initialiser_preview(info_ptr->width,info_ptr->height,Taille_du_fichier,FORMAT_PNG);
 
                 if (Erreur_fichier==0)
@@ -5538,7 +5558,7 @@ void Load_PNG(void)
                   int x,y;
                   png_colorp palette;
                   int num_palette;
-                  
+                                    
                   if (color_type == PNG_COLOR_TYPE_GRAY)
                   {
                     if (bit_depth < 8)
@@ -5553,7 +5573,7 @@ void Load_PNG(void)
                   }
                   else
                   {
-                    // conversion des fichiers de moins de 256 couleurs
+                    // image couleurs
                     if (bit_depth < 8)
                     {
                       png_set_packing(png_ptr);
@@ -5577,7 +5597,6 @@ void Load_PNG(void)
                   Principal_Largeur_image=info_ptr->width;
                   Principal_Hauteur_image=info_ptr->height;
                   Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
-                  Principal_Commentaire[0]='\0'; // On efface le commentaire
                 
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
@@ -5630,153 +5649,97 @@ void Save_PNG(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   FILE *Fichier;
-  T_Header_PKM Head;
-  dword Compteur_de_pixels;
-  dword Taille_image;
-  word  Compteur_de_repetitions;
-  byte  Derniere_couleur;
-  byte  Valeur_pixel;
-  byte  Taille_commentaire;
-
-
-
-  // Construction du header
-  memcpy(Head.Ident,"PKM",3);
-  Head.Methode=0;
-  Trouver_recon(&Head.Recon1,&Head.Recon2);
-  Head.Largeur=Principal_Largeur_image;
-  Head.Hauteur=Principal_Hauteur_image;
-  memcpy(Head.Palette,Principal_Palette,sizeof(T_Palette));
-  Palette_256_to_64(Head.Palette);
-
-  // Calcul de la taille du Post-Header
-  Head.Jump=9; // 6 pour les dimensions de l'ecran + 3 pour la back-color
-  Taille_commentaire=strlen(Principal_Commentaire);
-  if (Taille_commentaire)
-    Head.Jump+=Taille_commentaire+2;
-
-
+  int y;
+  byte * PixelPtr;
+  png_structp png_ptr;
+  png_infop info_ptr;
+  
   Nom_fichier_complet(Nom_du_fichier,0);
-
   Erreur_fichier=0;
-
+  row_pointers = NULL;
+  
   // Ouverture du fichier
   if ((Fichier=fopen(Nom_du_fichier,"wb")))
   {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    Head.Largeur = SDL_Swap16(Head.Largeur);
-    Head.Hauteur = SDL_Swap16(Head.Hauteur);
-    Head.Jump = SDL_Swap16(Head.Jump);
-#endif
-
-    // Ecriture du header
-    if (write_bytes(Fichier,&Head,sizeof(T_Header_PKM)))
+    /* initialisation */
+    if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
+      && (info_ptr = png_create_info_struct(png_ptr)))
     {
-      Init_ecriture();
-
-      // Ecriture du commentaire
-      // (Compteur_de_pixels est utilisé ici comme simple indice de comptage)
-      if (Taille_commentaire)
-      {
-        Ecrire_octet(Fichier,0);
-        Ecrire_octet(Fichier,Taille_commentaire);
-        for (Compteur_de_pixels=0; Compteur_de_pixels<Taille_commentaire; Compteur_de_pixels++)
-          Ecrire_octet(Fichier,Principal_Commentaire[Compteur_de_pixels]);
-      }
-      // Ecriture des dimensions de l'écran
-      Ecrire_octet(Fichier,1);
-      Ecrire_octet(Fichier,4);
-      Ecrire_octet(Fichier,Largeur_ecran&0xFF);
-      Ecrire_octet(Fichier,Largeur_ecran>>8);
-      Ecrire_octet(Fichier,Hauteur_ecran&0xFF);
-      Ecrire_octet(Fichier,Hauteur_ecran>>8);
-      // Ecriture de la back-color
-      Ecrire_octet(Fichier,2);
-      Ecrire_octet(Fichier,1);
-      Ecrire_octet(Fichier,Back_color);
-
-      // Routine de compression PKM de l'image
-      Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
-      Compteur_de_pixels=0;
-      Valeur_pixel=Lit_pixel_de_sauvegarde(0,0);
-
-      while ( (Compteur_de_pixels<Taille_image) && (!Erreur_fichier) )
-      {
-        Compteur_de_pixels++;
-        Compteur_de_repetitions=1;
-        Derniere_couleur=Valeur_pixel;
-        if(Compteur_de_pixels<Taille_image)
+  
+      if (!setjmp(png_jmpbuf(png_ptr)))
+      {    
+        png_init_io(png_ptr, Fichier);
+      
+        /* en-tete */
+        if (!setjmp(png_jmpbuf(png_ptr)))
         {
-          Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
-        }
-        while ( (Valeur_pixel==Derniere_couleur)
-             && (Compteur_de_pixels<Taille_image)
-             && (Compteur_de_repetitions<65535) )
-        {
-          Compteur_de_pixels++;
-          Compteur_de_repetitions++;
-          if(Compteur_de_pixels>=Taille_image) break;
-          Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
-        }
+          png_set_IHDR(png_ptr, info_ptr, Principal_Largeur_image, Principal_Hauteur_image,
+            8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-        if ( (Derniere_couleur!=Head.Recon1) && (Derniere_couleur!=Head.Recon2) )
-        {
-          if (Compteur_de_repetitions==1)
-            Ecrire_octet(Fichier,Derniere_couleur);
-          else
-          if (Compteur_de_repetitions==2)
+          png_set_PLTE(png_ptr, info_ptr, (png_colorp)Principal_Palette, 256);
           {
-            Ecrire_octet(Fichier,Derniere_couleur);
-            Ecrire_octet(Fichier,Derniere_couleur);
+            // Commentaires texte PNG
+            // Cette partie est optionnelle
+            png_text text_ptr[2] = {
+              {-1, "Software", "Grafx2", 6},
+              {-1, "Title", NULL, 0}
+            };
+            int Nb_texte=1;
+            if (Principal_Commentaire[0])
+            {
+              text_ptr[1].text=Principal_Commentaire;
+              text_ptr[1].text_length=strlen(Principal_Commentaire);
+              Nb_texte=2;
+            }
+            png_set_text(png_ptr, info_ptr, text_ptr, Nb_texte);
+          }
+          png_write_info(png_ptr, info_ptr);
+
+          /* ecriture des pixels de l'image */
+          row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Principal_Hauteur_image);
+          PixelPtr = (Lit_pixel_de_sauvegarde==Lit_pixel_dans_ecran_courant)?Principal_Ecran:Brosse;
+          for (y=0; y<Principal_Hauteur_image; y++)
+            row_pointers[y] = (png_byte*)(PixelPtr+y*Principal_Largeur_image);
+
+          if (!setjmp(png_jmpbuf(png_ptr)))
+          {
+            png_write_image(png_ptr, row_pointers);
+          
+            /* cloture png */
+            if (!setjmp(png_jmpbuf(png_ptr)))
+            {          
+              png_write_end(png_ptr, NULL);
+            }
+            else
+              Erreur_fichier=1;
           }
           else
-          if ( (Compteur_de_repetitions>2) && (Compteur_de_repetitions<256) )
-          { // RECON1/couleur/nombre
-            Ecrire_octet(Fichier,Head.Recon1);
-            Ecrire_octet(Fichier,Derniere_couleur);
-            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-          }
-          else
-          if (Compteur_de_repetitions>=256)
-          { // RECON2/couleur/hi(nombre)/lo(nombre)
-            Ecrire_octet(Fichier,Head.Recon2);
-            Ecrire_octet(Fichier,Derniere_couleur);
-            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
-            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-          }
+            Erreur_fichier=1;
         }
         else
-        {
-          if (Compteur_de_repetitions<256)
-          {
-            Ecrire_octet(Fichier,Head.Recon1);
-            Ecrire_octet(Fichier,Derniere_couleur);
-            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-          }
-          else
-          {
-            Ecrire_octet(Fichier,Head.Recon2);
-            Ecrire_octet(Fichier,Derniere_couleur);
-            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
-            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
-          }
-        }
+          Erreur_fichier=1;
       }
-
-      Close_ecriture(Fichier);
+      else
+      {
+        Erreur_fichier=1;
+      }
+      png_destroy_write_struct(&png_ptr, &info_ptr);
     }
     else
       Erreur_fichier=1;
+    // fermeture du fichier
     fclose(Fichier);
   }
-  else
-  {
-    Erreur_fichier=1;
-    fclose(Fichier);
-  }
+
   //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
   // ce fichier pourri traîner... Ca fait pas propre.
   if (Erreur_fichier)
     remove(Nom_du_fichier);
+  
+  if (row_pointers)
+  {
+    free(row_pointers);
+    row_pointers=NULL;
+  }
 }
