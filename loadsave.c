@@ -43,8 +43,90 @@
 #include "io.h"
 #include "sdlscreen.h"
 #include "windows.h"
+#include "loadsave.h"
 
 #define FILENAMESPACE 13
+
+// -- PKM -------------------------------------------------------------------
+void Test_PKM(void);
+void Load_PKM(void);
+void Save_PKM(void);
+
+// -- LBM -------------------------------------------------------------------
+void Test_LBM(void);
+void Load_LBM(void);
+void Save_LBM(void);
+
+// -- GIF -------------------------------------------------------------------
+void Test_GIF(void);
+void Load_GIF(void);
+void Save_GIF(void);
+
+// -- PCX -------------------------------------------------------------------
+void Test_PCX(void);
+void Load_PCX(void);
+void Save_PCX(void);
+
+// -- BMP -------------------------------------------------------------------
+void Test_BMP(void);
+void Load_BMP(void);
+void Save_BMP(void);
+
+// -- IMG -------------------------------------------------------------------
+void Test_IMG(void);
+void Load_IMG(void);
+void Save_IMG(void);
+
+// -- SCx -------------------------------------------------------------------
+void Test_SCx(void);
+void Load_SCx(void);
+void Save_SCx(void);
+
+// -- CEL -------------------------------------------------------------------
+void Test_CEL(void);
+void Load_CEL(void);
+void Save_CEL(void);
+
+// -- KCF -------------------------------------------------------------------
+void Test_KCF(void);
+void Load_KCF(void);
+void Save_KCF(void);
+
+// -- PAL -------------------------------------------------------------------
+void Test_PAL(void);
+void Load_PAL(void);
+void Save_PAL(void);
+
+// -- PI1 -------------------------------------------------------------------
+void Test_PI1(void);
+void Load_PI1(void);
+void Save_PI1(void);
+
+// -- PC1 -------------------------------------------------------------------
+void Test_PC1(void);
+void Load_PC1(void);
+void Save_PC1(void);
+
+// -- PNG -------------------------------------------------------------------
+void Test_PNG(void);
+void Load_PNG(void);
+void Save_PNG(void);
+
+T_Format FormatFichier[NB_FORMATS_CONNUS] = {
+  {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
+  {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0},
+  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 0},
+  {"bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0},
+  {"pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0},
+  {"img", Test_IMG, Load_IMG, Save_IMG, 1, 0},
+  {"sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0},
+  {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0},
+  {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0},
+  {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
+  {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
+  {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
+  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 0}
+};
 
 // Taille de fichier, en octets
 int FileLength(FILE * Fichier)
@@ -254,14 +336,14 @@ void Initialiser_preview(short Largeur,short Hauteur,long Taille,int Format)
     // Affichage du vrai format
     if (Format!=Principal_Format)
     {
-      Print_dans_fenetre( 274,72,Format_Extension[Format-1],CM_Noir,CM_Clair);
+      Print_dans_fenetre( 274,72,FormatFichier[Format-1].Extension,CM_Noir,CM_Clair);
     }
 
     // On efface le commentaire précédent
     Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,
           Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
     // Affichage du commentaire
-    if (Format_Commentaire[Format-1])
+    if (FormatFichier[Format-1].Commentaire)
       Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
 
     // Calculs des données nécessaires à l'affichage de la preview:
@@ -462,7 +544,7 @@ void Charger_image(byte Image)
 
   if (Principal_Format!=0)
   {
-    Format_Test[Principal_Format-1]();
+    FormatFichier[Principal_Format-1].Test();
     if (!Erreur_fichier)
       // Si dans le sélecteur il y a un format valide on le prend tout de suite
       Format=Principal_Format-1;
@@ -475,7 +557,7 @@ void Charger_image(byte Image)
     for (Indice=0;Indice<NB_FORMATS_LOAD;Indice++)
     {
       // On appelle le testeur du format:
-      Format_Test[Indice]();
+      FormatFichier[Indice].Test();
       // On s'arrête si le fichier est au bon format:
       if (Erreur_fichier==0)
       {
@@ -492,7 +574,7 @@ void Charger_image(byte Image)
     Image_24b=0;
     // Dans certains cas il est possible que le chargement plante
     // après avoir modifié la palette. TODO
-    Format_Load[Format]();
+    FormatFichier[Format].Load();
 
     if (Erreur_fichier>0)
     {
@@ -528,7 +610,7 @@ void Charger_image(byte Image)
 
     if (Image)
     {
-      if ( (Erreur_fichier!=1) && (Format_Backup_done[Format]) )
+      if ( (Erreur_fichier!=1) && (FormatFichier[Format].Backup_done) )
       {
         // On considère que l'image chargée n'est plus modifiée
         Principal_Image_modifiee=0;
@@ -574,13 +656,13 @@ void Sauver_image(byte Image)
 
   Lit_pixel_de_sauvegarde=(Image)?Lit_pixel_dans_ecran_courant:Lit_pixel_dans_brosse;
 
-  Format_Save[Principal_Format_fichier-1]();
+  FormatFichier[Principal_Format_fichier-1].Save();
 
   if (Erreur_fichier)
     Erreur(0);
   else
   {
-    if ((Image) && (Format_Backup_done[Principal_Format_fichier-1]))
+    if ((Image) && (FormatFichier[Principal_Format_fichier-1].Backup_done))
       Principal_Image_modifiee=0;
   }
 }
@@ -1338,9 +1420,10 @@ typedef struct
   word  Yscreen;
 } __attribute__((__packed__)) T_Header_LBM;
 
-// -- Tester si un fichier est au format LBM --------------------------------
+byte * LBM_Buffer;
+FILE *LBM_Fichier;
 
-  FILE *LBM_Fichier;
+// -- Tester si un fichier est au format LBM --------------------------------
 
 void Test_LBM(void)
 {
@@ -1511,6 +1594,29 @@ void Test_LBM(void)
     }
     return 1;
   }
+
+// Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
+// en faire du chunky
+
+byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
+{
+  // Renvoie la couleur du pixel (ILBM) en Pos_X.
+  // CL sera le rang auquel on extrait les bits de la couleur
+  byte cl = 7 - (Pos_X & 7);
+  int ax,bh,dx;
+  byte bl=0;
+
+  for(dx=HBPm1;dx>=0;dx--)
+  {
+  //CIL_Loop
+    ax = (Vraie_taille_ligne * dx + Pos_X) >> 3;
+    bh = (LBM_Buffer[ax] >> cl) & 1;
+
+    bl = (bl << 1) + bh;
+  }
+
+  return bl;
+}
 
   // ----------------------- Afficher une ligne ILBM ------------------------
   void Draw_ILBM_line(short Pos_Y, short Vraie_taille_ligne)
@@ -5462,7 +5568,7 @@ void Load_PNG(void)
                       Principal_Palette[x].V=palette[x].green;
                       Principal_Palette[x].B=palette[x].blue;
                     }
-                    //free(palette);
+                    free(palette);
                   }
                   Set_palette(Principal_Palette);
                   Remapper_fileselect();

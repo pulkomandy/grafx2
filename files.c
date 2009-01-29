@@ -53,6 +53,7 @@
 #include "erreurs.h"
 #include "io.h"
 #include "windows.h"
+#include "loadsave.h"
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné
@@ -217,7 +218,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
 
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
   if (Format_demande) // Format (extension) spécifique
-    Filtre = Format_Extension[Format_demande-1];
+    Filtre = FormatFichier[Format_demande-1].Extension;
 
   // Ensuite, on vide la liste actuelle:
   Detruire_liste_du_fileselect();

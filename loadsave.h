@@ -28,70 +28,15 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix);
 void Charger_image(byte Image);
 void Sauver_image(byte Image);
 
-// -- PKM -------------------------------------------------------------------
-void Test_PKM(void);
-void Load_PKM(void);
-void Save_PKM(void);
+typedef struct {
+  char *Extension;
+  fonction_action Test;
+  fonction_action Load;
+  fonction_action Save;
+  byte Backup_done; // Le format enregistre toute l'image, on la considère à jour.
+  byte Commentaire; // Le format de fichier autorise un commentaire.
+} T_Format;
 
-// -- LBM -------------------------------------------------------------------
-void Test_LBM(void);
-void Load_LBM(void);
-void Save_LBM(void);
+// Tableau des formats connus
+extern T_Format FormatFichier[NB_FORMATS_CONNUS];
 
-  byte * LBM_Buffer;
-
-
-// -- GIF -------------------------------------------------------------------
-void Test_GIF(void);
-void Load_GIF(void);
-void Save_GIF(void);
-
-// -- PCX -------------------------------------------------------------------
-void Test_PCX(void);
-void Load_PCX(void);
-void Save_PCX(void);
-
-// -- BMP -------------------------------------------------------------------
-void Test_BMP(void);
-void Load_BMP(void);
-void Save_BMP(void);
-
-// -- IMG -------------------------------------------------------------------
-void Test_IMG(void);
-void Load_IMG(void);
-void Save_IMG(void);
-
-// -- SCx -------------------------------------------------------------------
-void Test_SCx(void);
-void Load_SCx(void);
-void Save_SCx(void);
-
-// -- CEL -------------------------------------------------------------------
-void Test_CEL(void);
-void Load_CEL(void);
-void Save_CEL(void);
-
-// -- KCF -------------------------------------------------------------------
-void Test_KCF(void);
-void Load_KCF(void);
-void Save_KCF(void);
-
-// -- PAL -------------------------------------------------------------------
-void Test_PAL(void);
-void Load_PAL(void);
-void Save_PAL(void);
-
-// -- PI1 -------------------------------------------------------------------
-void Test_PI1(void);
-void Load_PI1(void);
-void Save_PI1(void);
-
-// -- PC1 -------------------------------------------------------------------
-void Test_PC1(void);
-void Load_PC1(void);
-void Save_PC1(void);
-
-// -- PNG -------------------------------------------------------------------
-void Test_PNG(void);
-void Load_PNG(void);
-void Save_PNG(void);

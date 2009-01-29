@@ -2291,7 +2291,7 @@ void Print_Format(void)
   if (Principal_Format==0)
     Print_dans_fenetre(83,65,"*.*",CM_Noir,CM_Clair);
   else
-    Print_dans_fenetre(83,65,Format_Extension[Principal_Format-1],CM_Noir,CM_Clair);
+    Print_dans_fenetre(83,65,FormatFichier[Principal_Format-1].Extension,CM_Noir,CM_Clair);
 }
 
 
@@ -2486,7 +2486,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       Principal_File_list_Decalage=0;
     }
     // Affichage du commentaire
-    if (Format_Commentaire[Principal_Format-1])
+    if (FormatFichier[Principal_Format-1].Commentaire)
       Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
@@ -2752,7 +2752,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Nouvelle_preview=1;
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
-        if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
+        if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
           Effacer_curseur();
           Readline(46,175+FILENAMESPACE,Principal_Commentaire,32,0);
@@ -2779,7 +2779,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               if(!Repertoire_existe(Principal_Nom_fichier))
               {
                  strcat(Principal_Nom_fichier,".");
-                 strcat(Principal_Nom_fichier,Format_Extension[Principal_Format-1]);
+                 strcat(Principal_Nom_fichier,FormatFichier[Principal_Format-1].Extension);
               }
             }
             else
@@ -3005,7 +3005,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 72*Menu_Facteur_Y,
               Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
         // Affichage du commentaire
-        if ( (!Load) && (Format_Commentaire[Principal_Format-1]) )
+        if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
           Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         }
@@ -3247,7 +3247,7 @@ void Load_picture(byte Image)
     {
       // Si c'est une image qu'on charge, on efface l'ancien commentaire
       // C'est loin d'être indispensable, m'enfin bon...
-      if (Format_Backup_done[Principal_Format_fichier-1])
+      if (FormatFichier[Principal_Format_fichier-1].Backup_done)
         Principal_Commentaire[0]='\0';
 
       Ecran_original_X=0;
@@ -3311,7 +3311,7 @@ void Load_picture(byte Image)
       Forme_curseur=Ancienne_forme_curseur;
     }
 
-    if ( (Erreur_fichier==1) || (!Format_Backup_done[Principal_Format_fichier-1]) )
+    if ( (Erreur_fichier==1) || (!FormatFichier[Principal_Format_fichier-1].Backup_done) )
     {
       Ne_pas_restaurer=0;
       if (Erreur_fichier!=1)
@@ -3550,7 +3550,7 @@ void Save_picture(byte Image)
     Effacer_curseur();
     Forme_curseur=Ancienne_forme_curseur;
 
-    if ((Erreur_fichier==1) || (!Format_Backup_done[Principal_Format_fichier-1]))
+    if ((Erreur_fichier==1) || (!FormatFichier[Principal_Format_fichier-1].Backup_done))
       Ne_pas_restaurer=0;
 
     Afficher_curseur();

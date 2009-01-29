@@ -382,28 +382,6 @@ byte Lit_pixel_dans_ecran_backup (word X,word Y)
   return *(Ecran_backup + X + Principal_Largeur_image * Y);
 }
 
-// Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
-// en faire du chunky
-
-byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
-{
-  // CL sera le rang auquel on extrait les bits de la couleur
-  byte cl = 7 - (Pos_X & 7);
-  int ax,bh,dx;
-  byte bl=0;
-
-  for(dx=HBPm1;dx>=0;dx--)
-  {
-  //CIL_Loop
-    ax = (Vraie_taille_ligne * dx + Pos_X) >> 3;
-    bh = (LBM_Buffer[ax] >> cl) & 1;
-
-    bl = (bl << 1) + bh;
-  }
-
-  return bl;
-}
-
 void Palette_256_to_64(T_Palette Palette)
 {
   int i;
