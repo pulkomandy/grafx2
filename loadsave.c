@@ -5465,7 +5465,7 @@ void Test_PNG(void)
 {
   FILE *Fichier;             // Fichier du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  char PNG_header[8];
+  byte PNG_header[8];
   
   Nom_fichier_complet(Nom_du_fichier,0);
   
@@ -5490,7 +5490,7 @@ void Load_PNG(void)
 {
   FILE *Fichier;             // Fichier du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  char PNG_header[8];  
+  byte PNG_header[8];  
   dword Taille_image;
   long  Taille_du_fichier;
   struct stat Informations_Fichier;
