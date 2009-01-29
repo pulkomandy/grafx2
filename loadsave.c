@@ -5409,20 +5409,20 @@ void Load_PNG(void)
         if (png_ptr)
         {
           info_ptr = png_create_info_struct(png_ptr);
-	        if (info_ptr)
-	        {
-	          png_byte color_type;
+          if (info_ptr)
+          {
+            png_byte color_type;
             png_byte bit_depth;
             
-	          if (!setjmp(png_jmpbuf(png_ptr)))
-	          {
-	            png_init_io(png_ptr, Fichier);
-            	png_set_sig_bytes(png_ptr, 8);
+            if (!setjmp(png_jmpbuf(png_ptr)))
+            {
+              png_init_io(png_ptr, Fichier);
+              png_set_sig_bytes(png_ptr, 8);
             
-            	png_read_info(png_ptr, info_ptr);
-            	color_type = info_ptr->color_type;
-            	bit_depth = info_ptr->bit_depth;
-            	
+              png_read_info(png_ptr, info_ptr);
+              color_type = info_ptr->color_type;
+              bit_depth = info_ptr->bit_depth;
+              
               if (bit_depth <= 8 && (color_type == PNG_COLOR_TYPE_PALETTE || PNG_COLOR_TYPE_GRAY))
               {
                 Initialiser_preview(info_ptr->width,info_ptr->height,Taille_du_fichier,FORMAT_PNG);
@@ -5430,26 +5430,26 @@ void Load_PNG(void)
                 if (Erreur_fichier==0)
                 {
                   int x,y;
-              	  png_colorp palette;
-              	  int num_palette;
-                	
-                	if (color_type == PNG_COLOR_TYPE_GRAY)
-                	{
-                	  if (bit_depth < 8)
-                	    png_set_gray_1_2_4_to_8(png_ptr);
-                	  // palette de niveaux de gris
-                	  for (x=0;x<num_palette;x++)
+                  png_colorp palette;
+                  int num_palette;
+                  
+                  if (color_type == PNG_COLOR_TYPE_GRAY)
+                  {
+                    if (bit_depth < 8)
+                      png_set_gray_1_2_4_to_8(png_ptr);
+                    // palette de niveaux de gris
+                    for (x=0;x<num_palette;x++)
                     {
                       Principal_Palette[x].R=x;
                       Principal_Palette[x].V=x;
                       Principal_Palette[x].B=x;
                     } 
-                	}
-                	else
-                	{
-                	  // conversion des fichiers de moins de 256 couleurs
-                	  if (bit_depth < 8)
-                	  {
+                  }
+                  else
+                  {
+                    // conversion des fichiers de moins de 256 couleurs
+                    if (bit_depth < 8)
+                    {
                       png_set_packing(png_ptr);
                       if (Config.Clear_palette)
                         memset(Principal_Palette,0,sizeof(T_Palette));
@@ -5473,34 +5473,40 @@ void Load_PNG(void)
                   Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
                   Principal_Commentaire[0]='\0'; // On efface le commentaire
                 
-                	png_set_interlace_handling(png_ptr);
-                	png_read_update_info(png_ptr, info_ptr);
-      	          /* read file */
-                	if (!setjmp(png_jmpbuf(png_ptr)))
-                	{
-                  	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Principal_Hauteur_image);
-                  	for (y=0; y<Principal_Hauteur_image; y++)
-                  		row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
-                  	png_read_image(png_ptr, row_pointers);
-                  	
-                  	for (y=0; y<Principal_Hauteur_image; y++)
-                  	  for (x=0; x<Principal_Largeur_image; x++)
-                  	    Pixel_de_chargement(x, y, row_pointers[y][x]);
-                  	
-    	            }
-    	            else
-    	              Erreur_fichier=2;
-    	              
+                  png_set_interlace_handling(png_ptr);
+                  png_read_update_info(png_ptr, info_ptr);
+                  /* read file */
+                  if (!setjmp(png_jmpbuf(png_ptr)))
+                  {
+                    row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Principal_Hauteur_image);
+                    for (y=0; y<Principal_Hauteur_image; y++)
+                      row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                    png_read_image(png_ptr, row_pointers);
+                    
+                    for (y=0; y<Principal_Hauteur_image; y++)
+                      for (x=0; x<Principal_Largeur_image; x++)
+                        Pixel_de_chargement(x, y, row_pointers[y][x]);
+                    
+                  }
+                  else
+                    Erreur_fichier=2;
+                    
                   /* cleanup heap allocation */
-                	for (y=0; y<Principal_Hauteur_image; y++)
-                		free(row_pointers[y]);
-                	free(row_pointers);
-    	          }
-    	          else
-    	            Erreur_fichier=2;
-    	        }
-	          }
-	        }
+                  for (y=0; y<Principal_Hauteur_image; y++)
+                    free(row_pointers[y]);
+                  free(row_pointers);
+                }
+                else
+                  Erreur_fichier=2;
+              }
+              else
+               Erreur_fichier=1;
+            }
+            else
+             Erreur_fichier=1;
+          }
+          else
+            Erreur_fichier=1;
         }
       }
       /*Close_lecture();*/
