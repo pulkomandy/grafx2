@@ -38,7 +38,7 @@ ifdef COMSPEC
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
   CC = gcc
   OBJDIR = obj/win32
   # Resources (icon)

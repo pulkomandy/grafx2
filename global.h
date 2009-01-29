@@ -675,7 +675,8 @@ void Rien_du_tout(void);
     "pc1", // PC1
     "cel", // CEL
     "kcf", // KCF
-    "pal"  // PAL
+    "pal", // PAL
+    "png", // PNG
   };
 
   // Fonction à appeler pour vérifier la signature du fichier
@@ -692,7 +693,8 @@ void Rien_du_tout(void);
     Test_PC1, // PC1
     Test_CEL, // CEL
     Test_KCF, // KCF
-    Test_PAL  // PAL
+    Test_PAL, // PAL
+    Test_PNG  // PNG
   };
 
   // Fonction à appeler pour charger l'image
@@ -709,7 +711,8 @@ void Rien_du_tout(void);
     Load_PC1, // PC1
     Load_CEL, // CEL
     Load_KCF, // KCF
-    Load_PAL  // PAL
+    Load_PAL, // PAL
+    Load_PNG  // PNG
   };
 
   // Fonction à appeler pour sauvegarder l'image
@@ -726,7 +729,8 @@ void Rien_du_tout(void);
     Save_PC1, // PC1
     Save_CEL, // CEL
     Save_KCF, // KCF
-    Save_PAL  // PAL
+    Save_PAL, // PAL
+    Save_PNG  // PNG
   };
 
   // indique si l'on doit considérer que l'image n'est plus modifiée
@@ -743,7 +747,8 @@ void Rien_du_tout(void);
     1, // PC1
     1, // CEL
     0, // KCF
-    0  // PAL
+    0, // PAL
+    1  // PNG
   };
 
   // Le format de fichier autorise un commentaire
@@ -760,7 +765,8 @@ void Rien_du_tout(void);
     0, // PC1
     0, // CEL
     0, // KCF
-    0  // PAL
+    0, // PAL
+    0  // PNG
   };
 #else
   extern char Format_Extension[NB_FORMATS_CONNUS][4];

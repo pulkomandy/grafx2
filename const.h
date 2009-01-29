@@ -89,9 +89,9 @@
 
   // Les différents formats de fichiers:
 
-#define NB_FORMATS_CONNUS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
-#define NB_FORMATS_LOAD           12    // Nombre de formats que l'on sait charger
-#define NB_FORMATS_SAVE           12    // Nombre de formats que l'on sait sauver
+#define NB_FORMATS_CONNUS         13    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
+#define NB_FORMATS_LOAD           13    // Nombre de formats que l'on sait charger
+#define NB_FORMATS_SAVE           13    // Nombre de formats que l'on sait sauver
 
 enum FORMATS_RECONNUS
 {
@@ -106,7 +106,8 @@ enum FORMATS_RECONNUS
   FORMAT_PC1,        // |  l'on doit aller piocher ces
   FORMAT_CEL,        // |  données.
   FORMAT_KCF,        // |
-  FORMAT_PAL         // |
+  FORMAT_PAL,        // |
+  FORMAT_PNG         // |
 };
 
 #define FORMAT_PAR_DEFAUT    FORMAT_GIF // Format par défaut (ah bon? oh!)

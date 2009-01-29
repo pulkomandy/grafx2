@@ -90,3 +90,8 @@ void Save_PI1(void);
 void Test_PC1(void);
 void Load_PC1(void);
 void Save_PC1(void);
+
+// -- PNG -------------------------------------------------------------------
+void Test_PNG(void);
+void Load_PNG(void);
+void Save_PNG(void);

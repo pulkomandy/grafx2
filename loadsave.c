@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <png.h>
 
 #include "const.h"
 #include "struct.h"
@@ -5345,4 +5346,325 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
     free(buffer);
   }
   fclose(fichier);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// PNG ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+// -- Tester si un fichier est au format PNG --------------------------------
+void Test_PNG(void)
+{
+  FILE *Fichier;             // Fichier du fichier
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
+  char PNG_header[8];
+  
+  Nom_fichier_complet(Nom_du_fichier,0);
+  
+  Erreur_fichier=1;
+
+  // Ouverture du fichier
+  if ((Fichier=fopen(Nom_du_fichier, "rb")))
+  {
+    // Lecture du header du fichier
+    if (read_bytes(Fichier,PNG_header,8))
+    {
+      if ( !png_sig_cmp(PNG_header, 0, 8))
+        Erreur_fichier=0;
+    }
+    fclose(Fichier);
+  }
+}
+
+png_bytep * row_pointers;
+// -- Lire un fichier au format PNG -----------------------------------------
+void Load_PNG(void)
+{
+  FILE *Fichier;             // Fichier du fichier
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
+  char PNG_header[8];  
+  dword Taille_image;
+  long  Taille_du_fichier;
+  struct stat Informations_Fichier;
+ 
+  png_structp png_ptr;
+  png_infop info_ptr;
+
+  Nom_fichier_complet(Nom_du_fichier,0);
+
+  Erreur_fichier=0;
+  
+  if ((Fichier=fopen(Nom_du_fichier, "rb")))
+  {
+    stat(Nom_du_fichier,&Informations_Fichier);
+    Taille_du_fichier=Informations_Fichier.st_size;
+
+    if (read_bytes(Fichier,PNG_header,8))
+    {
+      if ( !png_sig_cmp(PNG_header, 0, 8))
+      {
+        png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if (png_ptr)
+        {
+          info_ptr = png_create_info_struct(png_ptr);
+	        if (info_ptr)
+	        {
+	          png_byte color_type;
+            png_byte bit_depth;
+            
+	          if (!setjmp(png_jmpbuf(png_ptr)))
+	          {
+	            png_init_io(png_ptr, Fichier);
+            	png_set_sig_bytes(png_ptr, 8);
+            
+            	png_read_info(png_ptr, info_ptr);
+            	color_type = info_ptr->color_type;
+            	bit_depth = info_ptr->bit_depth;
+            	
+              if (bit_depth <= 8 && (color_type == PNG_COLOR_TYPE_PALETTE || PNG_COLOR_TYPE_GRAY))
+              {
+                Initialiser_preview(info_ptr->width,info_ptr->height,Taille_du_fichier,FORMAT_PNG);
+
+                if (Erreur_fichier==0)
+                {
+                  int x,y;
+              	  png_colorp palette;
+              	  int num_palette;
+                	
+                	if (color_type == PNG_COLOR_TYPE_GRAY)
+                	{
+                	  if (bit_depth < 8)
+                	    png_set_gray_1_2_4_to_8(png_ptr);
+                	  // palette de niveaux de gris
+                	  for (x=0;x<num_palette;x++)
+                    {
+                      Principal_Palette[x].R=x;
+                      Principal_Palette[x].V=x;
+                      Principal_Palette[x].B=x;
+                    } 
+                	}
+                	else
+                	{
+                	  // conversion des fichiers de moins de 256 couleurs
+                	  if (bit_depth < 8)
+                	  {
+                      png_set_packing(png_ptr);
+                      if (Config.Clear_palette)
+                        memset(Principal_Palette,0,sizeof(T_Palette));
+                    }
+                    png_get_PLTE(png_ptr, info_ptr, &palette,
+                       &num_palette);
+                    for (x=0;x<num_palette;x++)
+                    {
+                      Principal_Palette[x].R=palette[x].red;
+                      Principal_Palette[x].V=palette[x].green;
+                      Principal_Palette[x].B=palette[x].blue;
+                    }
+                    //free(palette);
+                  }
+                  Set_palette(Principal_Palette);
+                  Remapper_fileselect();
+                  //
+                  
+                  Principal_Largeur_image=info_ptr->width;
+                  Principal_Hauteur_image=info_ptr->height;
+                  Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
+                  Principal_Commentaire[0]='\0'; // On efface le commentaire
+                
+                	png_set_interlace_handling(png_ptr);
+                	png_read_update_info(png_ptr, info_ptr);
+      	          /* read file */
+                	if (!setjmp(png_jmpbuf(png_ptr)))
+                	{
+                  	row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Principal_Hauteur_image);
+                  	for (y=0; y<Principal_Hauteur_image; y++)
+                  		row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                  	png_read_image(png_ptr, row_pointers);
+                  	
+                  	for (y=0; y<Principal_Hauteur_image; y++)
+                  	  for (x=0; x<Principal_Largeur_image; x++)
+                  	    Pixel_de_chargement(x, y, row_pointers[y][x]);
+                  	
+    	            }
+    	            else
+    	              Erreur_fichier=2;
+    	              
+                  /* cleanup heap allocation */
+                	for (y=0; y<Principal_Hauteur_image; y++)
+                		free(row_pointers[y]);
+                	free(row_pointers);
+    	          }
+    	          else
+    	            Erreur_fichier=2;
+    	        }
+	          }
+	        }
+        }
+      }
+      /*Close_lecture();*/
+    }
+    else // Lecture header impossible: Erreur ne modifiant pas l'image
+      Erreur_fichier=1;
+
+    fclose(Fichier);
+  }
+  else // Ouv. fichier impossible: Erreur ne modifiant pas l'image
+    Erreur_fichier=1;
+}
+
+void Save_PNG(void)
+{
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
+  FILE *Fichier;
+  T_Header_PKM Head;
+  dword Compteur_de_pixels;
+  dword Taille_image;
+  word  Compteur_de_repetitions;
+  byte  Derniere_couleur;
+  byte  Valeur_pixel;
+  byte  Taille_commentaire;
+
+
+
+  // Construction du header
+  memcpy(Head.Ident,"PKM",3);
+  Head.Methode=0;
+  Trouver_recon(&Head.Recon1,&Head.Recon2);
+  Head.Largeur=Principal_Largeur_image;
+  Head.Hauteur=Principal_Hauteur_image;
+  memcpy(Head.Palette,Principal_Palette,sizeof(T_Palette));
+  Palette_256_to_64(Head.Palette);
+
+  // Calcul de la taille du Post-Header
+  Head.Jump=9; // 6 pour les dimensions de l'ecran + 3 pour la back-color
+  Taille_commentaire=strlen(Principal_Commentaire);
+  if (Taille_commentaire)
+    Head.Jump+=Taille_commentaire+2;
+
+
+  Nom_fichier_complet(Nom_du_fichier,0);
+
+  Erreur_fichier=0;
+
+  // Ouverture du fichier
+  if ((Fichier=fopen(Nom_du_fichier,"wb")))
+  {
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    Head.Largeur = SDL_Swap16(Head.Largeur);
+    Head.Hauteur = SDL_Swap16(Head.Hauteur);
+    Head.Jump = SDL_Swap16(Head.Jump);
+#endif
+
+    // Ecriture du header
+    if (write_bytes(Fichier,&Head,sizeof(T_Header_PKM)))
+    {
+      Init_ecriture();
+
+      // Ecriture du commentaire
+      // (Compteur_de_pixels est utilisé ici comme simple indice de comptage)
+      if (Taille_commentaire)
+      {
+        Ecrire_octet(Fichier,0);
+        Ecrire_octet(Fichier,Taille_commentaire);
+        for (Compteur_de_pixels=0; Compteur_de_pixels<Taille_commentaire; Compteur_de_pixels++)
+          Ecrire_octet(Fichier,Principal_Commentaire[Compteur_de_pixels]);
+      }
+      // Ecriture des dimensions de l'écran
+      Ecrire_octet(Fichier,1);
+      Ecrire_octet(Fichier,4);
+      Ecrire_octet(Fichier,Largeur_ecran&0xFF);
+      Ecrire_octet(Fichier,Largeur_ecran>>8);
+      Ecrire_octet(Fichier,Hauteur_ecran&0xFF);
+      Ecrire_octet(Fichier,Hauteur_ecran>>8);
+      // Ecriture de la back-color
+      Ecrire_octet(Fichier,2);
+      Ecrire_octet(Fichier,1);
+      Ecrire_octet(Fichier,Back_color);
+
+      // Routine de compression PKM de l'image
+      Taille_image=(dword)(Principal_Largeur_image*Principal_Hauteur_image);
+      Compteur_de_pixels=0;
+      Valeur_pixel=Lit_pixel_de_sauvegarde(0,0);
+
+      while ( (Compteur_de_pixels<Taille_image) && (!Erreur_fichier) )
+      {
+        Compteur_de_pixels++;
+        Compteur_de_repetitions=1;
+        Derniere_couleur=Valeur_pixel;
+        if(Compteur_de_pixels<Taille_image)
+        {
+          Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
+        }
+        while ( (Valeur_pixel==Derniere_couleur)
+             && (Compteur_de_pixels<Taille_image)
+             && (Compteur_de_repetitions<65535) )
+        {
+          Compteur_de_pixels++;
+          Compteur_de_repetitions++;
+          if(Compteur_de_pixels>=Taille_image) break;
+          Valeur_pixel=Lit_pixel_de_sauvegarde(Compteur_de_pixels % Principal_Largeur_image,Compteur_de_pixels / Principal_Largeur_image);
+        }
+
+        if ( (Derniere_couleur!=Head.Recon1) && (Derniere_couleur!=Head.Recon2) )
+        {
+          if (Compteur_de_repetitions==1)
+            Ecrire_octet(Fichier,Derniere_couleur);
+          else
+          if (Compteur_de_repetitions==2)
+          {
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Derniere_couleur);
+          }
+          else
+          if ( (Compteur_de_repetitions>2) && (Compteur_de_repetitions<256) )
+          { // RECON1/couleur/nombre
+            Ecrire_octet(Fichier,Head.Recon1);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
+          else
+          if (Compteur_de_repetitions>=256)
+          { // RECON2/couleur/hi(nombre)/lo(nombre)
+            Ecrire_octet(Fichier,Head.Recon2);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
+        }
+        else
+        {
+          if (Compteur_de_repetitions<256)
+          {
+            Ecrire_octet(Fichier,Head.Recon1);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
+          else
+          {
+            Ecrire_octet(Fichier,Head.Recon2);
+            Ecrire_octet(Fichier,Derniere_couleur);
+            Ecrire_octet(Fichier,Compteur_de_repetitions>>8);
+            Ecrire_octet(Fichier,Compteur_de_repetitions&0xFF);
+          }
+        }
+      }
+
+      Close_ecriture(Fichier);
+    }
+    else
+      Erreur_fichier=1;
+    fclose(Fichier);
+  }
+  else
+  {
+    Erreur_fichier=1;
+    fclose(Fichier);
+  }
+  //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
+  // ce fichier pourri traîner... Ca fait pas propre.
+  if (Erreur_fichier)
+    remove(Nom_du_fichier);
 }
