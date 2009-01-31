@@ -899,9 +899,9 @@ void Gestion_principale(void)
           // on lance le bouton.
           if (Bouton_Touche!=-1)
           {
+            Touche=0;
             Enclencher_bouton(Bouton_Touche,Bouton_Cote);
             Indice_bouton_precedent=-1;
-            Touche=0;
           }
       }
 

@@ -250,7 +250,7 @@ $(OBJDIR)/%.o :
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
 
 depend :
-	$(CC) -MMG *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
+	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
