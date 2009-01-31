@@ -527,111 +527,134 @@ void Gestion_principale(void)
             Scroller_loupe(0,-(Loupe_Hauteur>>2));
           else
             Scroller_ecran(0,-(Hauteur_ecran>>3));
+          Touche=0;
           break;
         case SPECIAL_SCROLL_DOWN : // Scroll down
           if (Loupe_Mode)
             Scroller_loupe(0,(Loupe_Hauteur>>2));
           else
             Scroller_ecran(0,(Hauteur_ecran>>3));
+          Touche=0;
           break;
         case SPECIAL_SCROLL_LEFT : // Scroll left
           if (Loupe_Mode)
             Scroller_loupe(-(Loupe_Largeur>>2),0);
           else
             Scroller_ecran(-(Largeur_ecran>>3),0);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_RIGHT : // Scroll right
           if (Loupe_Mode)
             Scroller_loupe((Loupe_Largeur>>2),0);
           else
             Scroller_ecran((Largeur_ecran>>3),0);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_UP_FAST : // Scroll up faster
           if (Loupe_Mode)
             Scroller_loupe(0,-(Loupe_Hauteur>>1));
           else
             Scroller_ecran(0,-(Hauteur_ecran>>2));
+          Touche=0;
           break;
         case SPECIAL_SCROLL_DOWN_FAST : // Scroll down faster
           if (Loupe_Mode)
             Scroller_loupe(0,(Loupe_Hauteur>>1));
           else
             Scroller_ecran(0,(Hauteur_ecran>>2));
+          Touche=0;
           break;
         case SPECIAL_SCROLL_LEFT_FAST : // Scroll left faster
           if (Loupe_Mode)
             Scroller_loupe(-(Loupe_Largeur>>1),0);
           else
             Scroller_ecran(-(Largeur_ecran>>2),0);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_RIGHT_FAST : // Scroll right faster
           if (Loupe_Mode)
             Scroller_loupe((Loupe_Largeur>>1),0);
           else
             Scroller_ecran((Largeur_ecran>>2),0);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_UP_SLOW : // Scroll up slower
           if (Loupe_Mode)
             Scroller_loupe(0,-1);
           else
             Scroller_ecran(0,-1);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_DOWN_SLOW : // Scroll down slower
           if (Loupe_Mode)
             Scroller_loupe(0,1);
           else
             Scroller_ecran(0,1);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_LEFT_SLOW : // Scroll left slower
           if (Loupe_Mode)
             Scroller_loupe(-1,0);
           else
             Scroller_ecran(-1,0);
+          Touche=0;
           break;
         case SPECIAL_SCROLL_RIGHT_SLOW : // Scroll right slower
           if (Loupe_Mode)
             Scroller_loupe(1,0);
           else
             Scroller_ecran(1,0);
+          Touche=0;
           break;
         case SPECIAL_NEXT_FORECOLOR : // Next foreground color
           Special_Next_forecolor();
+          Touche=0;
           break;
         case SPECIAL_PREVIOUS_FORECOLOR : // Previous foreground color
           Special_Previous_forecolor();
+          Touche=0;
           break;
         case SPECIAL_NEXT_BACKCOLOR : // Next background color
           Special_Next_backcolor();
+          Touche=0;
           break;
         case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
           Special_Previous_backcolor();
+          Touche=0;
           break;
         case SPECIAL_RETRECIR_PINCEAU: // Rétrécir le pinceau
           Retrecir_pinceau();
+          Touche=0;
           break;
         case SPECIAL_GROSSIR_PINCEAU: // Grossir le pinceau
           Grossir_pinceau();
+          Touche=0;
           break;
         case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
           Message_Non_disponible(); // !!! TEMPORAIRE !!!
           //Special_Next_user_forecolor();
+          Touche=0;
           break;
         case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
           Message_Non_disponible(); // !!! TEMPORAIRE !!!
           //Special_Previous_user_forecolor();
+          Touche=0;
           break;
         case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
           Message_Non_disponible(); // !!! TEMPORAIRE !!!
           //Special_Next_user_backcolor();
+          Touche=0;
           break;
         case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
           Message_Non_disponible(); // !!! TEMPORAIRE !!!
           //Special_Previous_user_backcolor();
+          Touche=0;
           break;
         case SPECIAL_SHOW_HIDE_CURSOR : // Show / Hide cursor
           Effacer_curseur();
           Cacher_curseur=!Cacher_curseur;
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_PINCEAU_POINT : // Paintbrush = "."
           Effacer_curseur();
@@ -639,26 +662,32 @@ void Gestion_principale(void)
           Modifier_pinceau(1,1);
           Changer_la_forme_du_pinceau(FORME_PINCEAU_ROND);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_DESSIN_CONTINU : // Continuous freehand drawing
           Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
+          // ATTENTION CE TRUC EST MOCHE ET VA MERDER SI ON SE MET A UTILISER DES BOUTONS POPUPS
           while (Operation_en_cours!=OPERATION_DESSIN_CONTINU)
             Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+          Touche=0;
           break;
         case SPECIAL_FLIP_X : // Flip X
           Effacer_curseur();
           Flip_X_LOWLEVEL();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_FLIP_Y : // Flip Y
           Effacer_curseur();
           Flip_Y_LOWLEVEL();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_ROTATE_90 : // 90° brush rotation
           Effacer_curseur();
           Rotate_90_deg();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_ROTATE_180 : // 180° brush rotation
           Effacer_curseur();
@@ -673,142 +702,180 @@ void Gestion_principale(void)
           Brosse_Decalage_X=(Brosse_Largeur>>1);
           Brosse_Decalage_Y=(Brosse_Hauteur>>1);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_STRETCH : // Stretch brush
           Effacer_curseur();
           Demarrer_pile_operation(OPERATION_ETIRER_BROSSE);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_DISTORT : // Distort brush
           Message_Non_disponible(); // !!! TEMPORAIRE !!!
+          Touche=0;
           break;
         case SPECIAL_ROTATE_ANY_ANGLE : // Rotate brush by any angle
           Effacer_curseur();
           Demarrer_pile_operation(OPERATION_TOURNER_BROSSE);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_OUTLINE : // Outline brush
           Effacer_curseur();
           Outline_brush();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_NIBBLE : // Nibble brush
           Effacer_curseur();
           Nibble_brush();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_GET_BRUSH_COLORS : // Get colors from brush
           Get_colors_from_brush();
+          Touche=0;
           break;
         case SPECIAL_RECOLORIZE_BRUSH : // Recolorize brush
           Effacer_curseur();
           Remap_brosse();
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_LOAD_BRUSH :
           Load_picture(0);
+          Touche=0;
           break;
         case SPECIAL_SAVE_BRUSH :
           Save_picture(0);
+          Touche=0;
           break;
         case SPECIAL_ZOOM_IN : // Zoom in
           Zoom(+1);
+          Touche=0;
           break;
         case SPECIAL_ZOOM_OUT : // Zoom out
           Zoom(-1);
+          Touche=0;
           break;
         case SPECIAL_CENTER_ATTACHMENT : // Center brush attachment
           Effacer_curseur();
           Brosse_Decalage_X=(Brosse_Largeur>>1);
           Brosse_Decalage_Y=(Brosse_Hauteur>>1);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_TOP_LEFT_ATTACHMENT : // Top-left brush attachment
           Effacer_curseur();
           Brosse_Decalage_X=0;
           Brosse_Decalage_Y=0;
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_TOP_RIGHT_ATTACHMENT : // Top-right brush attachment
           Effacer_curseur();
           Brosse_Decalage_X=(Brosse_Largeur-1);
           Brosse_Decalage_Y=0;
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_BOTTOM_LEFT_ATTACHMENT : // Bottom-left brush attachment
           Effacer_curseur();
           Brosse_Decalage_X=0;
           Brosse_Decalage_Y=(Brosse_Hauteur-1);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_BOTTOM_RIGHT_ATTACHMENT : // Bottom right brush attachment
           Effacer_curseur();
           Brosse_Decalage_X=(Brosse_Largeur-1);
           Brosse_Decalage_Y=(Brosse_Hauteur-1);
           Afficher_curseur();
+          Touche=0;
           break;
         case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
           Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Temp,1, NULL);
+          Touche=0;
           break;
         case SPECIAL_INVERT_SIEVE :
           Inverser_trame();
+          Touche=0;
           break;
         case SPECIAL_SHADE_MODE :
           Bouton_Shade_Mode();
+          Touche=0;
           break;
         case SPECIAL_SHADE_MENU :
           Bouton_Shade_Menu();
+          Touche=0;
           break;
         case SPECIAL_QUICK_SHADE_MODE :
           Bouton_Quick_shade_Mode();
+          Touche=0;
           break;
         case SPECIAL_QUICK_SHADE_MENU :
           Bouton_Quick_shade_Menu();
+          Touche=0;
           break;
         case SPECIAL_STENCIL_MODE :
           Bouton_Stencil_Mode();
+          Touche=0;
           break;
         case SPECIAL_STENCIL_MENU :
           Bouton_Menu_Stencil();
+          Touche=0;
           break;
         case SPECIAL_MASK_MODE :
           Bouton_Mask_Mode();
+          Touche=0;
           break;
         case SPECIAL_MASK_MENU :
           Bouton_Mask_Menu();
+          Touche=0;
           break;
         case SPECIAL_GRID_MODE :
           Bouton_Snap_Mode();
+          Touche=0;
           break;
         case SPECIAL_GRID_MENU :
           Bouton_Menu_Grille();
+          Touche=0;
           break;
         case SPECIAL_SIEVE_MODE :
           Bouton_Trame_Mode();
+          Touche=0;
           break;
         case SPECIAL_SIEVE_MENU :
           Bouton_Trame_Menu();
+          Touche=0;
           break;
         case SPECIAL_COLORIZE_MODE :
           Bouton_Colorize_Mode();
+          Touche=0;
           break;
         case SPECIAL_COLORIZE_MENU :
           Bouton_Colorize_Menu();
+          Touche=0;
           break;
         case SPECIAL_SMOOTH_MODE :
           Bouton_Smooth_Mode();
+          Touche=0;
           break;
         case SPECIAL_SMOOTH_MENU :
           Bouton_Smooth_Menu();
+          Touche=0;
           break;
         case SPECIAL_SMEAR_MODE :
           Bouton_Smear_Mode();
+          Touche=0;
           break;
         case SPECIAL_TILING_MODE :
           Bouton_Tiling_Mode();
+          Touche=0;
           break;
         case SPECIAL_TILING_MENU :
           Bouton_Tiling_Menu();
+          Touche=0;
           break;
         default   : // Gestion des touches de raccourci de bouton:
           // Pour chaque bouton
@@ -834,6 +901,7 @@ void Gestion_principale(void)
           {
             Enclencher_bouton(Bouton_Touche,Bouton_Cote);
             Indice_bouton_precedent=-1;
+            Touche=0;
           }
       }
 
@@ -1105,6 +1173,7 @@ void Fermer_fenetre(void)
   {
     // Restore de ce que la fenêtre cachait
     Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    Fond_fenetre[Fenetre-1]=NULL;
     UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
     Fenetre--;
   }
@@ -1540,6 +1609,7 @@ void Fermer_popup(void)
   {
     // Restore de ce que la fenêtre cachait
     Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    Fond_fenetre[Fenetre-1]=NULL;
     UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
     Fenetre--;
   }
@@ -1798,36 +1868,55 @@ void Deplacer_fenetre(short Dx, short Dy)
     Ancien_X=Nouveau_X;
     Ancien_Y=Nouveau_Y;
 
-    while(!Get_input())Wait_VBL();
+    while(!Get_input())
+    {
+        Wait_VBL();
+    }
 
     Nouveau_X=Mouse_X-Dx;
+
     if (Nouveau_X<0)
+    {
       Nouveau_X=0;
+      Dx = Mouse_X;
+    }
     if (Nouveau_X>Largeur_ecran-Largeur)
+    {
       Nouveau_X=Largeur_ecran-Largeur;
+      Dx = Mouse_X - Nouveau_X;
+    }
 
     Nouveau_Y=Mouse_Y-Dy;
-    if (Nouveau_Y<0)
-      Nouveau_Y=0;
-    if (Nouveau_Y>Hauteur_ecran-Hauteur)
-      Nouveau_Y=Hauteur_ecran-Hauteur;
 
-    if ((Nouveau_X!=Ancien_X)
-     || (Nouveau_Y!=Ancien_Y))
+    if (Nouveau_Y<0)
+    {
+      Nouveau_Y=0;
+      Dy = Mouse_Y;
+    }
+    if (Nouveau_Y>Hauteur_ecran-Hauteur)
+    {
+      Nouveau_Y=Hauteur_ecran-Hauteur;
+      Dy = Mouse_Y - Nouveau_Y;
+    }
+
+    if ((Nouveau_X!=Ancien_X) || (Nouveau_Y!=Ancien_Y))
     {
       Effacer_curseur();
+
       Ligne_horizontale_XOR(Ancien_X,Ancien_Y,Largeur);
       Ligne_verticale_XOR(Ancien_X,Ancien_Y+1,Hauteur-2);
       Ligne_verticale_XOR(Ancien_X+Largeur-1,Ancien_Y+1,Hauteur-2);
       Ligne_horizontale_XOR(Ancien_X,Ancien_Y+Hauteur-1,Largeur);
+
       Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y,Largeur);
       Ligne_verticale_XOR(Nouveau_X,Nouveau_Y+1,Hauteur-2);
       Ligne_verticale_XOR(Nouveau_X+Largeur-1,Nouveau_Y+1,Hauteur-2);
       Ligne_horizontale_XOR(Nouveau_X,Nouveau_Y+Hauteur-1,Largeur);
+
       Afficher_curseur();
+      UpdateRect(Ancien_X,Ancien_Y,Largeur,Hauteur);
+      UpdateRect(Nouveau_X,Nouveau_Y,Largeur,Hauteur);
     }
-    UpdateRect(Ancien_X,Ancien_Y,Largeur,Hauteur);
-    UpdateRect(Nouveau_X,Nouveau_Y,Largeur,Hauteur);
   }
 
   Effacer_curseur();
@@ -1853,12 +1942,14 @@ void Deplacer_fenetre(short Dx, short Dy)
     
     // Restore de ce que la fenêtre cachait
     Restaure_fond(Fond_fenetre[Fenetre-1], Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    Fond_fenetre[Fenetre-1] = NULL;
 
     // Sauvegarde de ce que la fenêtre remplace
     Sauve_fond(&(Fond_fenetre[Fenetre-1]), Nouveau_X, Nouveau_Y, Fenetre_Largeur, Fenetre_Hauteur);
 
     // Raffichage de la fenêtre
     Restaure_fond(Buffer, Nouveau_X, Nouveau_Y, Fenetre_Largeur, Fenetre_Hauteur);
+    Buffer = NULL;
 
     // Mise à jour du rectangle englobant
     UpdateRect(
@@ -2100,7 +2191,11 @@ short Fenetre_Bouton_clicke(void)
   if (Touche)
   {
     Bouton=Fenetre_Numero_bouton_touche();
-    if (Bouton) return Bouton;
+    if (Bouton)
+    {
+        Touche=0;
+        return Bouton;
+    }
   }
 
   return 0;

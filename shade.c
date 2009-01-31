@@ -901,6 +901,7 @@ int Menu_Shade(void)
           Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
           Afficher_curseur();
         }
+        Touche=0;
         break;
 
       case SDLK_UP    : // Select Haut
@@ -948,6 +949,7 @@ int Menu_Shade(void)
           Afficher_couleur_case_selectionnee(Select_Debut,Select_Debut);
           Afficher_curseur();
         }
+        Touche=0;
         break;
 
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
@@ -970,10 +972,14 @@ int Menu_Shade(void)
 
           Afficher_curseur();
         }
+        Touche=0;
         break;
       default:
         if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+        {
+          Touche=0;
           Fenetre_aide(BOUTON_EFFETS, "SHADE");
+        }
     }
   }
   while ((Bouton_clicke!=4) && (Bouton_clicke!=5));

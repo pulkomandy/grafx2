@@ -294,22 +294,22 @@ enum NUMEROS_DE_BOUTONS
 
 enum ACTIONS_SPECIALES
 {
-  SPECIAL_MOUSE_UP,                // |
-  SPECIAL_MOUSE_DOWN,              // |
-  SPECIAL_MOUSE_LEFT,              // |
-  SPECIAL_MOUSE_RIGHT,             // |
-  SPECIAL_CLICK_LEFT,              // |  Il faut garder
-  SPECIAL_CLICK_RIGHT,             // |  ces constantes
-  SPECIAL_NEXT_FORECOLOR,          // |  au début de la
-  SPECIAL_PREVIOUS_FORECOLOR,      // |_ liste car elles
-  SPECIAL_NEXT_BACKCOLOR,          // |  sont réutilisées
-  SPECIAL_PREVIOUS_BACKCOLOR,      // |  avec leurs valeurs
-  SPECIAL_RETRECIR_PINCEAU,        // |  brutes en ASM dans
-  SPECIAL_GROSSIR_PINCEAU,         // |  Get_input !!!
-  SPECIAL_NEXT_USER_FORECOLOR,     // |
-  SPECIAL_PREVIOUS_USER_FORECOLOR, // |
-  SPECIAL_NEXT_USER_BACKCOLOR,     // |
-  SPECIAL_PREVIOUS_USER_BACKCOLOR, // |
+  SPECIAL_MOUSE_UP,                
+  SPECIAL_MOUSE_DOWN,              
+  SPECIAL_MOUSE_LEFT,              
+  SPECIAL_MOUSE_RIGHT,             
+  SPECIAL_CLICK_LEFT,               
+  SPECIAL_CLICK_RIGHT,             
+  SPECIAL_NEXT_FORECOLOR,         
+  SPECIAL_PREVIOUS_FORECOLOR,      
+  SPECIAL_NEXT_BACKCOLOR,          
+  SPECIAL_PREVIOUS_BACKCOLOR,      
+  SPECIAL_RETRECIR_PINCEAU,         
+  SPECIAL_GROSSIR_PINCEAU,          
+  SPECIAL_NEXT_USER_FORECOLOR,     
+  SPECIAL_PREVIOUS_USER_FORECOLOR, 
+  SPECIAL_NEXT_USER_BACKCOLOR,     
+  SPECIAL_PREVIOUS_USER_BACKCOLOR, 
   SPECIAL_SCROLL_UP,
   SPECIAL_SCROLL_DOWN,
   SPECIAL_SCROLL_LEFT,

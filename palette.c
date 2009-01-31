@@ -1896,6 +1896,7 @@ void Bouton_Palette(void)
             UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
             Afficher_curseur();
           }
+          Touche=0;
           break;
 
         case SDLK_RIGHTBRACKET : // Décaler Forecolor vers la droite
@@ -1917,6 +1918,7 @@ void Bouton_Palette(void)
             UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
             Afficher_curseur();
           }
+          Touche=0;
           break;
 
         case (SDLK_LEFTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la gauche
@@ -1932,6 +1934,7 @@ void Bouton_Palette(void)
           Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
           UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
           Afficher_curseur();
+          Touche=0;
           break;
 
         case SDLK_BACKSPACE : // Remise des couleurs du menu à l'état normal en essayant
@@ -1955,6 +1958,7 @@ void Bouton_Palette(void)
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
           Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
           Il_faut_remapper=1;
+          Touche=0;
           break;
 
         case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
@@ -1998,10 +2002,12 @@ void Bouton_Palette(void)
             }
             Afficher_curseur();
           }
+          Touche=0;
           break;
         default:
           if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
           {
+            Touche=0;
             Fenetre_aide(BOUTON_PALETTE, NULL);
             break;
           }
@@ -2091,7 +2097,10 @@ void Bouton_Palette_secondaire(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
     if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    {
+      Touche=0;
       Fenetre_aide(BOUTON_PALETTE, NULL);
+    }
   }
   while (Bouton_clicke<=0);
 

@@ -372,7 +372,10 @@ void Initialisation_du_programme(int argc,char * argv[])
   joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
-  SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION" - USE AT YOUR OWN RISK","GrafX2");
+  if(ALPHA_BETA[0]=='ß')
+    SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION""" - USE AT YOUR OWN RISK","GrafX2");
+  else
+    SDL_WM_SetCaption("GrafX2 v2.00 final","GrafX2");
   {
     // Routine pour définir l'icone.
     char Chemin_icone[TAILLE_CHEMIN_FICHIER];

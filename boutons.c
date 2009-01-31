@@ -112,6 +112,8 @@ void Message_Non_disponible(void)
     Bouton_clicke=Fenetre_Bouton_clicke();
   while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
+  if(Bouton_clicke<=0) Touche=0;
+
   Fermer_fenetre();
 
   //   Puisque cette fonction peut être appelée par plusieurs boutons et qu'on
@@ -142,6 +144,7 @@ void Message_Memoire_insuffisante(void)
     Bouton_clicke=Fenetre_Bouton_clicke();
   while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
 
+  if(Bouton_clicke<=0) Touche=0;
   Fermer_fenetre();
   Afficher_curseur();
 }
@@ -184,6 +187,7 @@ void Bouton_Message_initial(void)
   }
   while (Bouton_clicke==0 && Touche==0);
 
+  if(Bouton_clicke!=0) Touche=0;
   Fermer_fenetre();
   Afficher_curseur();
 
@@ -623,11 +627,13 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Stencil_Actualiser_couleur(Couleur_taggee);
           Afficher_curseur();
         }
+        Touche=0;
         break;
       default:
       if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
       {
         Fenetre_aide(BOUTON_EFFETS, Section_aide);
+        Touche=0;
         break;
       }
     }
@@ -1544,6 +1550,7 @@ void Bouton_Resol(void)
           if (Debut_liste>0)
             Debut_liste--;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       case SDLK_DOWN : // Bas
         if (Position_curseur<11 && Position_curseur<(Nb_modes_video-1))
@@ -1552,6 +1559,7 @@ void Bouton_Resol(void)
           if (Debut_liste<Nb_modes_video-12)
             Debut_liste++;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       case SDLK_PAGEUP : // PageUp
         if (Position_curseur>0)
@@ -1564,6 +1572,7 @@ void Bouton_Resol(void)
             Debut_liste=0;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
         if (Nb_modes_video<12)
@@ -1578,11 +1587,13 @@ void Bouton_Resol(void)
             Debut_liste=Nb_modes_video-12;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       case SDLK_HOME : // Home
         Debut_liste=0;
         Position_curseur=0;
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       case SDLK_END : // End
         if (Nb_modes_video<12)
@@ -1593,11 +1604,13 @@ void Bouton_Resol(void)
           Position_curseur=11;
         }
         Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
+        Touche=0;
         break;
       default:
         if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
         {
           Fenetre_aide(BOUTON_RESOL, NULL);
+          Touche=0;
           break;
         }
     }
@@ -2058,11 +2071,13 @@ void Bouton_Degrades(void)
 
           Afficher_curseur();
         }
+        Touche=0;
         break;
       default:
         if (Touche==Bouton[BOUTON_GRADMENU].Raccourci_gauche)
         {
           Fenetre_aide(BOUTON_PINCEAUX, NULL);
+          Touche=0;
           break;
         }
     }
@@ -2865,36 +2880,42 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Effacer_curseur();
         Select_Scroll_Down(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_UP : // Haut
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Scroll_Up(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_PAGEDOWN : // Page Down
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_PAGEUP : // Page Up
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_END : // End
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_End(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_HOME : // Home
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Home(&Principal_File_list_Position,&Principal_File_list_Decalage);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
         break;
       case SDLK_BACKSPACE : // Backspace
         *Fichier_recherche=0;
@@ -2906,6 +2927,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Type_selectionne=1;
           On_a_clicke_sur_OK=1;
         }
+        Touche=0;
         break;
       default: // Autre => On se place sur le nom de fichier qui correspond
         if (Bouton_clicke<=0)
@@ -2933,6 +2955,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             }
             else
               *Fichier_recherche=0;
+            Touche=0;
           }
         }
         else
@@ -4185,7 +4208,10 @@ void Bouton_Brush_FX(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
     if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    {
+      Touche=0;
       Fenetre_aide(BOUTON_EFFETS_BROSSE, NULL);
+    }
   }
   while (Bouton_clicke<=0);
 
@@ -5008,11 +5034,13 @@ void Bouton_Spray_Menu(void)
           Afficher_curseur();
           Stencil_Actualiser_couleur(Couleur_selectionnee);
         }
+        Touche=0;
         break;
       default:
       if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
       {
         Fenetre_aide(BOUTON_SPRAY, NULL);
+        Touche=0;
         break;
       }
         
@@ -5472,7 +5500,10 @@ void Bouton_Trame_Menu(void)
         Mettre_a_jour_trame(Orig_X, Orig_Y);
     }
     if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    {
+      Touche=0;
       Fenetre_aide(BOUTON_EFFETS, "SIEVE");
+    }
   }
   while ( (Bouton_clicke!=2) && (Bouton_clicke!=3) );
 
@@ -5628,9 +5659,13 @@ void Bouton_Effets(void)
     Bouton_clicke=Fenetre_Bouton_clicke();
 
     if (Touche==SDLK_ESCAPE)
+    {
       Bouton_clicke=11;
+      Touche=0;
+    }
     else if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
     {
+      Touche=0;
       // Aide contextuelle
       switch(Fenetre_Numero_bouton_clicke())
       {

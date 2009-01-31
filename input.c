@@ -133,9 +133,7 @@ int Handle_Mouse_Move(SDL_Event* event)
     INPUT_Nouveau_Mouse_X = event->motion.x/Pixel_width;
     INPUT_Nouveau_Mouse_Y = event->motion.y/Pixel_height;
 
-    if(Move_cursor_with_constraints()) return 0;
-
-    return 1;
+    return Move_cursor_with_constraints();
 }
 
 void Handle_Mouse_Click(SDL_Event* event)
@@ -190,10 +188,8 @@ int Handle_Key_Press(SDL_Event* event)
     Touche = Conversion_Touche(event->key.keysym);
     Touche_ANSI = Conversion_ANSI(event->key.keysym);
 
-    // Instead of all this mess, send back a mouse event !
-    if(Touche == Config_Touche[0])
+    if(Touche == Config_Touche[SPECIAL_MOUSE_UP])
     {
-        //[Touche] = Emulation de MOUSE UP
         //si on est déjà en haut on peut plus bouger
         if(INPUT_Nouveau_Mouse_Y!=0)
         {
@@ -205,9 +201,8 @@ int Handle_Key_Press(SDL_Event* event)
             return 1;
         }
     }
-    else if(Touche == Config_Touche[1])
+    else if(Touche == Config_Touche[SPECIAL_MOUSE_DOWN])
     {
-        //[Touche] = Emulation de MOUSE DOWN
         if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
         {
             if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
@@ -222,9 +217,8 @@ int Handle_Key_Press(SDL_Event* event)
             return 1;
         }
     }
-    else if(Touche == Config_Touche[2])
+    else if(Touche == Config_Touche[SPECIAL_MOUSE_LEFT])
     {
-        //[Touche] = Emulation de MOUSE LEFT
         if(INPUT_Nouveau_Mouse_X!=0)
         {
             if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
@@ -235,10 +229,8 @@ int Handle_Key_Press(SDL_Event* event)
             return 1;
         }
     }
-    else if(Touche == Config_Touche[3])
+    else if(Touche == Config_Touche[SPECIAL_MOUSE_RIGHT])
     {
-        //[Touche] = Emulation de MOUSE RIGHT
-
         if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
         {
             if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
@@ -253,51 +245,46 @@ int Handle_Key_Press(SDL_Event* event)
             return 1;
         }
     }
-    else if(Touche == Config_Touche[4])
+    else if(Touche == Config_Touche[SPECIAL_CLICK_LEFT])
     {
-        //[Touche] = Emulation de MOUSE CLICK LEFT
         INPUT_Nouveau_Mouse_K=1;
         Move_cursor_with_constraints();
         return 1;
     }
-    else if(Touche == Config_Touche[5])
+    else if(Touche == Config_Touche[SPECIAL_CLICK_RIGHT])
     {
-        //[Touche] = Emulation de MOUSE CLICK RIGHT
         INPUT_Nouveau_Mouse_K=2;
         Move_cursor_with_constraints();
         return 1;
     }
 
-    if(Operation_Taille_pile!=0)
+    if (Operation_Taille_pile!=0 && Touche != 0)
     {
-        if (Touche != 0)
+        //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
+        //ou de taille de pinceau lors d'une des operations suivantes:
+        //OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
+        if(Autoriser_changement_de_couleur_pendant_operation)
         {
-            //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
-            //ou de taille de pinceau lors d'une des operations suivantes:
-            //OPERATION_DESSIN_CONTINU, OPERATION_DESSIN_DISCONTINU, OPERATION_SPRAY)
-            if(Autoriser_changement_de_couleur_pendant_operation)
-            {
-                //A ce stade là, on sait qu'on est dans une des 3 opérations
-                //supportant le changement de couleur ou de taille de pinceau.
+            //A ce stade là, on sait qu'on est dans une des 3 opérations
+            //supportant le changement de couleur ou de taille de pinceau.
 
-                if(
-                        (Touche != Config_Touche[6]) &&
-                        (Touche != Config_Touche[7]) &&
-                        (Touche != Config_Touche[8]) &&
-                        (Touche != Config_Touche[9]) &&
-                        (Touche != Config_Touche[10]) &&
-                        (Touche != Config_Touche[11]) &&
-                        (Touche != Config_Touche[12]) &&
-                        (Touche != Config_Touche[13]) &&
-                        (Touche != Config_Touche[14]) &&
-                        (Touche != Config_Touche[15])
-                  )
-                {
-                    Touche=0;
-                }
+            if(
+                    (Touche != Config_Touche[SPECIAL_NEXT_FORECOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_PREVIOUS_FORECOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_NEXT_BACKCOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_PREVIOUS_BACKCOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_RETRECIR_PINCEAU]) &&
+                    (Touche != Config_Touche[SPECIAL_GROSSIR_PINCEAU]) &&
+                    (Touche != Config_Touche[SPECIAL_NEXT_USER_FORECOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_PREVIOUS_USER_FORECOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_NEXT_USER_BACKCOLOR]) &&
+                    (Touche != Config_Touche[SPECIAL_PREVIOUS_USER_BACKCOLOR])
+              )
+            {
+                Touche=0;
             }
-            else Touche = 0;
         }
+        else Touche = 0;
     }
     return 0;
 }
@@ -306,21 +293,20 @@ void Handle_Key_Release(SDL_Event* event)
 {
     int ToucheR = Conversion_Touche(event->key.keysym);
 
-    // Send back a mouse event instead. Or extract the code and put it in common.
-    if(ToucheR == Config_Touche[4])
+    if(ToucheR == Config_Touche[SPECIAL_CLICK_LEFT])
     {
-        INPUT_Nouveau_Mouse_K=0;
+        INPUT_Nouveau_Mouse_K &= ~1;
         Move_cursor_with_constraints();
     }
-    else if(ToucheR == Config_Touche[5])
+    else if(ToucheR == Config_Touche[SPECIAL_CLICK_RIGHT])
     {
-        //[Touche] = Emulation de MOUSE CLICK RIGHT
-        INPUT_Nouveau_Mouse_K=0;
+        INPUT_Nouveau_Mouse_K &= ~2;
         Move_cursor_with_constraints();
     }
 
-    Touche = 0;
-    Touche_ANSI=0;
+    // Other keys don't need to be released : they are handled as "events" and procesed only once.
+    // These clicks are apart because they need to be continuous (ie move while key pressed)
+    // We are relying on "hardware" keyrepeat to achieve that.
 }
 
 
@@ -343,10 +329,12 @@ int Get_input(void)
     SDL_Event event;
     int User_Feedback_Required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
 
+    /*Touche =*/ Touche_ANSI = 0;
+
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while( !User_Feedback_Required && SDL_PollEvent(&event))
+    while( (!User_Feedback_Required) && SDL_PollEvent(&event))
     {
         switch(event.type)
         {
@@ -361,7 +349,7 @@ int Get_input(void)
                 break;
 
             case SDL_MOUSEMOTION:
-                Handle_Mouse_Move(&event);
+                User_Feedback_Required = Handle_Mouse_Move(&event); // On ne sort que si la souris a vraiment bougé
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
@@ -393,7 +381,7 @@ int Get_input(void)
                 break;
 
             default:
-                DEBUG("Unhandled SDL event !",0);
+                DEBUG("Unhandled SDL event number : ",event.type);
                 break;
         }
     }

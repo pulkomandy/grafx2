@@ -323,11 +323,13 @@ void Fenetre_aide(int Section, const char *Sous_section)
         if (Position_d_aide_en_cours>0)
           Position_d_aide_en_cours--;
         Scroller_aide();
+        Touche=0;
         break;
       case SDLK_DOWN : // Bas
         if (Position_d_aide_en_cours<Nb_lignes-16)
           Position_d_aide_en_cours++;
         Scroller_aide();
+        Touche=0;
         break;
       case SDLK_PAGEUP : // PageUp
         if (Position_d_aide_en_cours>15)
@@ -335,6 +337,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
         else
           Position_d_aide_en_cours=0;
         Scroller_aide();
+        Touche=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
         if (Position_d_aide_en_cours<Nb_lignes-31)
@@ -342,20 +345,24 @@ void Fenetre_aide(int Section, const char *Sous_section)
         else
           Position_d_aide_en_cours=Nb_lignes-16;
         Scroller_aide();
+        Touche=0;
         break;
       case SDLK_HOME : // Home
         Position_d_aide_en_cours=0;
         Scroller_aide();
+        Touche=0;
         break;
       case SDLK_END : // End
         Position_d_aide_en_cours=Nb_lignes-16;
         Scroller_aide();
+        Touche=0;
         break;
     }
 
   }
   while ((Bouton_clicke!=1) && (Touche!=SDLK_RETURN));
 
+  if(Touche==SDLK_RETURN) Touche=0;
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_AIDE);
   Afficher_curseur();
@@ -468,6 +475,8 @@ void Bouton_Stats(void)
     Bouton_clicke=Fenetre_Bouton_clicke();
   }
   while ( (Bouton_clicke!=1) && (Touche!=SDLK_RETURN) );
+
+  if(Touche==SDLK_RETURN)Touche=0;
 
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_AIDE);

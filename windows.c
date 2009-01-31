@@ -699,6 +699,7 @@ byte Demande_de_confirmation(char * Message)
     if (Touche==SDLK_ESCAPE) Bouton_clicke=2;
   }
   while (Bouton_clicke<=0);
+  Touche=0;
 
   Fermer_fenetre();
   Afficher_curseur();
@@ -728,6 +729,7 @@ void Warning_message(char * Message)
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
   while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
+  Touche=0;
 
   Fermer_fenetre();
   Afficher_curseur();

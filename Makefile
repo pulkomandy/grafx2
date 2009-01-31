@@ -145,7 +145,7 @@ else
     ZIP = zip
   else
   
-    # Linux specific
+    # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -183,6 +183,7 @@ else
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
         CC = gcc
+        #CC = nccgen -ncgcc -ncld -ncfabs #ncc makes callgraphs
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
