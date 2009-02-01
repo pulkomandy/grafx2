@@ -776,7 +776,7 @@ void Afficher_pinceau_dans_menu(void)
       for (Pos_menu_Y=2,Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,Pos_Y++)
         for (Pos_menu_X=1,Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_menu_X++,Pos_X++)
         {
-          Couleur=SPRITE_MENU[3][Pos_Y][Pos_X];
+          Couleur=SPRITE_MENU[4][Pos_Y][Pos_X];
           Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }

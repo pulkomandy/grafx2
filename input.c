@@ -173,9 +173,6 @@ void Handle_Mouse_Release(SDL_Event* event)
         case SDL_BUTTON_RIGHT:
             INPUT_Nouveau_Mouse_K &= ~2;
             break;
-        default:
-            DEBUG("Unknown mouse button!",0);
-            return;
     }
     Move_cursor_with_constraints();
 }

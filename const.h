@@ -46,7 +46,7 @@
 #define LARGEUR_SPRITE_CURSEUR    15    // Largeur d'un sprite de curseur en pixels
 #define HAUTEUR_SPRITE_CURSEUR    15    // Hauteur d'un sprite de curseur en pixels
 #define NB_SPRITES_EFFETS         9     // Nombre de sprites d'effets
-#define NB_SPRITES_MENU           9     // Nombre de sprites de menu
+#define NB_SPRITES_MENU           18    // Nombre de sprites de menu
 #define LARGEUR_SPRITE_MENU       14    // Largeur d'un sprite de menu en pixels
 #define HAUTEUR_SPRITE_MENU       14    // Hauteur d'un sprite de menu en pixels
 #define LARGEUR_PINCEAU           16    // Largeur d'un sprite de pinceau prédéfini

@@ -902,6 +902,7 @@ void Gestion_principale(void)
             Touche=0;
             Enclencher_bouton(Bouton_Touche,Bouton_Cote);
             Indice_bouton_precedent=-1;
+            Touche=0;
           }
       }
 
