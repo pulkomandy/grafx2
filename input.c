@@ -329,12 +329,12 @@ int Get_input(void)
     SDL_Event event;
     int User_Feedback_Required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
 
-    /*Touche =*/ Touche_ANSI = 0;
+    Touche_ANSI = 0;
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while( (!User_Feedback_Required) && SDL_PollEvent(&event))
+    while( (!User_Feedback_Required) && SDL_PollEvent(&event)) // Try to cumulate for a full VBL except if there is a required feedback
     {
         switch(event.type)
         {
@@ -349,7 +349,7 @@ int Get_input(void)
                 break;
 
             case SDL_MOUSEMOTION:
-                User_Feedback_Required = Handle_Mouse_Move(&event); // On ne sort que si la souris a vraiment bougé
+                User_Feedback_Required = Handle_Mouse_Move(&event);
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
@@ -385,7 +385,6 @@ int Get_input(void)
                 break;
         }
     }
-//    DEBUG("Exiting event loop",0);
 
     // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente.
     // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)

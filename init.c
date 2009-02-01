@@ -1471,12 +1471,12 @@ void Initialisation_des_operations(void)
                         Spray_1_0,0);
   Initialiser_operation(OPERATION_SPRAY,2,0,
                         Spray_2_0,0);
-  Initialiser_operation(OPERATION_SPRAY,1,3,
-                        Spray_12_3,0);
-  Initialiser_operation(OPERATION_SPRAY,2,3,
-                        Spray_12_3,0);
-  Initialiser_operation(OPERATION_SPRAY,0,3,
-                        Spray_0_3,0);
+  Initialiser_operation(OPERATION_SPRAY,1,2,
+                        Spray_12_2,0);
+  Initialiser_operation(OPERATION_SPRAY,2,2,
+                        Spray_12_2,0);
+  Initialiser_operation(OPERATION_SPRAY,0,2,
+                        Spray_0_2,0);
 
   Initialiser_operation(OPERATION_POLYGONE,1,0,
                         Polygone_12_0,1);

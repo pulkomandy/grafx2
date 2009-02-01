@@ -2026,7 +2026,6 @@ void Spray_1_0(void)
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(A_GAUCHE);
 }
 
 void Spray_2_0(void)
@@ -2046,22 +2045,19 @@ void Spray_2_0(void)
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(A_DROITE);
 }
 
-void Spray_12_3(void)
+void Spray_12_2(void)
 //
 //  Opération   : OPERATION_SPRAY
 //  Click Souris: 1 ou 2
-//  Taille_Pile : 1
+//  Taille_Pile : 2
 //
 //  Souris effacée: Non
 //
 {
-  short Bouton_clicke;
   short Ancien_X,Ancien_Y;
 
-  Operation_POP(&Bouton_clicke);
   Operation_POP(&Ancien_Y);
   Operation_POP(&Ancien_X);
 
@@ -2075,24 +2071,23 @@ void Spray_12_3(void)
   if (SDL_GetTicks()>Spray_next_time)
   {
     Spray_next_time+=Spray_Delay*10;
-    Aerographe(Bouton_clicke);
+    Aerographe(Mouse_K_Unique);
   }
 
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Bouton_clicke);
 }
 
-void Spray_0_3(void)
+void Spray_0_2(void)
 //
 //  Opération   : OPERATION_SPRAY
 //  Click Souris: 0
-//  Taille_Pile : 3
+//  Taille_Pile : 2
 //
 //  Souris effacée: Non
 //
 {
-  Operation_Taille_pile-=3;
+  Operation_Taille_pile-=2;
 }
 
 

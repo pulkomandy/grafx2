@@ -139,8 +139,8 @@ void Courbe_3_points_12_11(void);
 
 void Spray_1_0(void);
 void Spray_2_0(void);
-void Spray_12_3(void);
-void Spray_0_3(void);
+void Spray_12_2(void);
+void Spray_0_2(void);
 
 //////////////////////////////////////////////////////////// OPERATION_*POLY*
 

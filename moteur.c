@@ -1049,12 +1049,11 @@ void Gestion_principale(void)
     }
     else
     {
- 
-      Blink=Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Effacer_curseur;
+      Blink=Operation[Operation_en_cours][Mouse_K_Unique][Operation_Taille_pile].Effacer_curseur;
  
       if (Blink) Effacer_curseur();
  
-      Operation[Operation_en_cours][Mouse_K][Operation_Taille_pile].Action();
+      Operation[Operation_en_cours][Mouse_K_Unique][Operation_Taille_pile].Action();
 
       if (Blink) Afficher_curseur();
     }
@@ -1868,10 +1867,7 @@ void Deplacer_fenetre(short Dx, short Dy)
     Ancien_X=Nouveau_X;
     Ancien_Y=Nouveau_Y;
 
-    while(!Get_input())
-    {
-        Wait_VBL();
-    }
+    while(!Get_input()) Wait_VBL();
 
     Nouveau_X=Mouse_X-Dx;
 

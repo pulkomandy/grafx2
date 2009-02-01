@@ -115,7 +115,10 @@ GFX2_GLOBAL struct Composantes Coul_menu_pref[4];
 
 GFX2_GLOBAL word Mouse_X; // Abscisse de la souris
 GFX2_GLOBAL word Mouse_Y; // Ordonnée de la souris
-GFX2_GLOBAL byte Mouse_K; // Etat des boutons de la souris
+GFX2_GLOBAL byte Mouse_K; // Etat des boutons de la souris (tient comte des boutons appuyés simultanéments
+
+#define Mouse_K_Unique (Mouse_K==0?0:(Mouse_K&1?1:(Mouse_K&2?2:0))) // Etat des boutons de la souris (un seul bouton à la fois, on regarde d'abord le 1, puis le 2, ...)
+
 GFX2_GLOBAL dword Touche; // Touche tapée
 GFX2_GLOBAL dword Touche_ANSI; // Caractère tapé
 GFX2_GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat des touches de ctrl
