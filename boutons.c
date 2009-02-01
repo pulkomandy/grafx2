@@ -1687,7 +1687,7 @@ void Bouton_Dessin_Switch_mode(void)
 {
 /* ANCIEN CODE SANS POPUPS */
   Mode_de_dessin_en_cours++;
-  if (Mode_de_dessin_en_cours>OPERATION_DESSIN_POINT)
+  if (Mode_de_dessin_en_cours>OPERATION_FILLED_CONTOUR)
     Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
 
   Effacer_curseur();
@@ -1711,7 +1711,7 @@ void Bouton_Dessin_Switch_mode(void)
         {
             case 1:
                 Mode_de_dessin_en_cours++;
-                if (Mode_de_dessin_en_cours>OPERATION_DESSIN_POINT)
+                if (Mode_de_dessin_en_cours>OPERATION_FILLED_CONTOUR)
                     Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
                 break;
         }

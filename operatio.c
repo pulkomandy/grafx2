@@ -2740,6 +2740,46 @@ void Filled_polyform_0_8(void)
   Operation_PUSH(Clic);
 }
 
+void Filled_contour_0_8(void)
+//  Opération   : OPERATION_FILLED_CONTOUR
+//  Click Souris: 0
+//  Taille_Pile : 8
+//
+//  Souris effacée: Non
+{
+  short Clic;
+  short Fin_Y;
+  short Fin_X;
+  short Debut_Y;
+  short Debut_X;
+  short Couleur;
+  short Initial_Y;
+  short Initial_X;
+
+  Operation_POP(&Clic);
+  Operation_POP(&Fin_Y);
+  Operation_POP(&Fin_X);
+  Operation_POP(&Debut_Y);
+  Operation_POP(&Debut_X);
+  Operation_POP(&Couleur);
+  Operation_POP(&Initial_Y);
+  Operation_POP(&Initial_X);
+
+  Attendre_fin_de_click();
+  Effacer_curseur();
+  Print_coordonnees();
+
+  // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
+  // puisque on les effaces toutes d'un coup.
+
+  Afficher_ecran();
+  Polyfill(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Couleur);
+  free(Polyfill_Table_de_points);
+
+  Cacher_pinceau=0;
+
+  Afficher_curseur();
+}
 
 ////////////////////////////////////////////////////// OPERATION_PRISE_BROSSE
 

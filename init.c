@@ -1534,6 +1534,17 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_FILLED_POLYFORM,0,8,
                         Filled_polyform_0_8,0);
 
+  Initialiser_operation(OPERATION_FILLED_CONTOUR,1,0,
+                        Filled_polyform_12_0,1);
+  Initialiser_operation(OPERATION_FILLED_CONTOUR,2,0,
+                        Filled_polyform_12_0,1);
+  Initialiser_operation(OPERATION_FILLED_CONTOUR,1,8,
+                        Filled_polyform_12_8,0);
+  Initialiser_operation(OPERATION_FILLED_CONTOUR,2,8,
+                        Filled_polyform_12_8,0);
+  Initialiser_operation(OPERATION_FILLED_CONTOUR,0,8,
+                        Filled_contour_0_8,0);
+
   Initialiser_operation(OPERATION_SCROLL,1,0,
                         Scroll_12_0,1);
   Initialiser_operation(OPERATION_SCROLL,2,0,

@@ -375,6 +375,7 @@ enum OPERATIONS
   OPERATION_DESSIN_CONTINU,     // Dessin à la main continu
   OPERATION_DESSIN_DISCONTINU,  // Dessin à la main discontinu
   OPERATION_DESSIN_POINT,       // Dessin à la main point par point
+  OPERATION_FILLED_CONTOUR,     // Contour rempli
   OPERATION_LIGNE,              // Lignes
   OPERATION_K_LIGNE,            // Lignes reliées
   OPERATION_LIGNES_CENTREES,    // Lignes concentriques

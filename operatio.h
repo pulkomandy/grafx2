@@ -159,6 +159,7 @@ void Polyform_0_8(void);
 void Filled_polyform_12_0(void);
 void Filled_polyform_12_8(void);
 void Filled_polyform_0_8(void);
+void Filled_contour_0_8(void);
 
 //////////////////////////////////////////////////////////// OPERATION_SCROLL
 
