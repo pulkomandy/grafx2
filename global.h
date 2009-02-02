@@ -597,6 +597,7 @@ GFX2_GLOBAL short Pipette_Y;
     FORME_CURSEUR_CIBLE            , // Dessin à la main continu
     FORME_CURSEUR_CIBLE            , // Dessin à la main discontinu
     FORME_CURSEUR_CIBLE            , // Dessin à la main point par point
+    FORME_CURSEUR_CIBLE            , // Contour fill
     FORME_CURSEUR_CIBLE            , // Lignes
     FORME_CURSEUR_CIBLE            , // Lignes reliées
     FORME_CURSEUR_CIBLE            , // Lignes centrées

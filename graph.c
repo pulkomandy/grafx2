@@ -2049,7 +2049,6 @@ void Polyfill_General(int Vertices, short * Points, int Color)
   POLYGON_EDGE *active_edges = NULL;
   POLYGON_EDGE *inactive_edges = NULL;
 
-
   /* allocate some space and fill the edge table */
   initial_edge=edge=(POLYGON_EDGE *) malloc(sizeof(POLYGON_EDGE) * Vertices);
 
@@ -2138,6 +2137,7 @@ void Polyfill_General(int Vertices, short * Points, int Color)
   }
 
   free(initial_edge);
+
   // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
   Mettre_Ecran_A_Jour(0,top,Principal_Largeur_image,bottom-top+1);
 }
@@ -2145,8 +2145,28 @@ void Polyfill_General(int Vertices, short * Points, int Color)
 
 void Polyfill(int Vertices, short * Points, int Color)
 {
+  int Indice;
+  byte *FX_Feedback_Ecran_avant_remplissage;
+
+  // Comme pour le Fill, cette operation fait un peu d'"overdraw"
+  // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
+  FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
+  FX_Feedback_Ecran=Ecran_backup;
+    
   Pixel_figure=Afficher_pixel;
   Polyfill_General(Vertices,Points,Color);
+
+  // Remarque: pour dessiner la bordure avec la brosse en cours au lieu
+  // d'un pixel de couleur premier-plan, il suffit de mettre ici:
+  // Pixel_figure=Pixel_figure_Definitif;
+
+  // Dessin du contour
+  for (Indice=0; Indice<Vertices-1;Indice+=1)
+    Tracer_ligne_General(Points[Indice*2],Points[Indice*2+1],Points[Indice*2+2],Points[Indice*2+3],Color);
+  Tracer_ligne_General(Points[0],Points[1],Points[Indice*2],Points[Indice*2+1],Color);
+
+  // restore de l'etat du FX Feedback  
+  FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;  
 }
 
 

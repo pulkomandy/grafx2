@@ -2560,7 +2560,7 @@ void Filled_polyform_12_0(void)
 
   // Cette opération étant également utilisée pour le lasso, on ne fait pas de
   // backup si on prend une brosse au lasso avec le bouton gauche.
-  if ((Operation_en_cours==OPERATION_FILLED_POLYFORM) || (Mouse_K==A_DROITE))
+  if ((Operation_en_cours==OPERATION_FILLED_POLYFORM) || (Operation_en_cours==OPERATION_FILLED_CONTOUR) || (Mouse_K==A_DROITE))
     Backup();
 
   Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
