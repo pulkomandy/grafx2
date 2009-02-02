@@ -310,6 +310,8 @@ word Touche_pour_scancode(word scancode)
 word Conversion_Touche(SDL_keysym Sym)
 {
   word Retour = 0;
+  word Mod;
+  
   // On ignore shift, alt et control isolés.
   if (Sym.sym == SDLK_RSHIFT || Sym.sym == SDLK_LSHIFT ||
       Sym.sym == SDLK_RCTRL  || Sym.sym == SDLK_LCTRL ||
@@ -326,11 +328,16 @@ word Conversion_Touche(SDL_keysym Sym)
     Retour = (Sym.scancode & 0x07FF) | 0x0800;
   }
   
-  if (Sym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
+  // Normally I should test Sym.mod here, but on windows the implementation
+  // is buggy: if you release a modifier key, the following keys (when they repeat)
+  // still name the original modifiers.
+  Mod=SDL_GetModState();
+  // SDL_GetModState() seems to get the right up-to-date info.
+  if (Mod & (KMOD_LSHIFT | KMOD_RSHIFT))
     Retour |= MOD_SHIFT;
-  if (Sym.mod & (KMOD_LCTRL | KMOD_RCTRL))
+  if (Mod & (KMOD_LCTRL | KMOD_RCTRL))
     Retour |= MOD_CTRL;
-  if (Sym.mod & (KMOD_LALT | KMOD_RALT | KMOD_MODE))
+  if (Mod & (KMOD_LALT | KMOD_RALT | KMOD_MODE))
     Retour |= MOD_ALT;
   return Retour;
 }

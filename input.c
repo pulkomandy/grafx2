@@ -31,6 +31,17 @@
 void Handle_Window_Resize(SDL_Event* event);
 void Handle_Window_Exit(SDL_Event* event);
 
+byte Directional_up;
+byte Directional_up_right;
+byte Directional_right;
+byte Directional_down_right;
+byte Directional_down;
+byte Directional_down_left;
+byte Directional_left;
+byte Directional_up_left;
+long Directional_delay;
+long Directional_last_move;
+long Directional_step;
 
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
 int Move_cursor_with_constraints()
@@ -187,60 +198,23 @@ int Handle_Key_Press(SDL_Event* event)
 
     if(Touche == Config_Touche[SPECIAL_MOUSE_UP])
     {
-        //si on est déjà en haut on peut plus bouger
-        if(INPUT_Nouveau_Mouse_Y!=0)
-        {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-                INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
-            else
-                INPUT_Nouveau_Mouse_Y--;
-            if(Move_cursor_with_constraints()) return 0;
-            return 1;
-        }
+      Directional_up=1;
+      return 0;
     }
     else if(Touche == Config_Touche[SPECIAL_MOUSE_DOWN])
     {
-        if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
-        {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-            {
-                INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
-                if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
-                    INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
-            }
-            else
-                INPUT_Nouveau_Mouse_Y++;
-            if(Move_cursor_with_constraints()) return 0;
-            return 1;
-        }
+      Directional_down=1;
+      return 0;
     }
     else if(Touche == Config_Touche[SPECIAL_MOUSE_LEFT])
     {
-        if(INPUT_Nouveau_Mouse_X!=0)
-        {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-                INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
-            else
-                INPUT_Nouveau_Mouse_X--;
-            if(Move_cursor_with_constraints()) return 0;
-            return 1;
-        }
+      Directional_left=1;
+      return 0;
     }
     else if(Touche == Config_Touche[SPECIAL_MOUSE_RIGHT])
     {
-        if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
-        {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-            {
-                INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
-                if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
-                    INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
-            }
-            else
-                INPUT_Nouveau_Mouse_X++;
-            if(Move_cursor_with_constraints()) return 0;
-            return 1;
-        }
+      Directional_right=1;
+      return 0;
     }
     else if(Touche == Config_Touche[SPECIAL_CLICK_LEFT])
     {
@@ -288,14 +262,50 @@ int Handle_Key_Press(SDL_Event* event)
 
 void Handle_Key_Release(SDL_Event* event)
 {
-    int ToucheR = Conversion_Touche(event->key.keysym);
+    int Modifieur;
+    int ToucheR = Conversion_Touche(event->key.keysym) & 0x0FFF;
 
-    if(ToucheR == Config_Touche[SPECIAL_CLICK_LEFT])
+    switch(event->key.keysym.sym)
+    {
+      case SDLK_RSHIFT:
+      case SDLK_LSHIFT:
+        Modifieur=MOD_SHIFT;
+        break;
+      case SDLK_RCTRL:
+      case SDLK_LCTRL:
+        Modifieur=MOD_CTRL;
+        break;
+      case SDLK_RALT:
+      case SDLK_LALT:
+      case SDLK_MODE:
+        Modifieur=MOD_ALT;
+        break;
+      default:
+        Modifieur=0;
+    }
+
+    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_UP]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP]&Modifieur))
+    {
+      Directional_up=0;
+    }
+    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_DOWN]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN]&Modifieur))
+    {
+      Directional_down=0;
+    }
+    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT]&Modifieur))
+    {
+      Directional_left=0;
+    }
+    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT]&Modifieur))
+    {
+      Directional_right=0;
+    }
+    if(ToucheR == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~1;
         Move_cursor_with_constraints();
     }
-    else if(ToucheR == Config_Touche[SPECIAL_CLICK_RIGHT])
+    if(ToucheR == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~2;
         Move_cursor_with_constraints();
@@ -311,12 +321,133 @@ void Handle_Key_Release(SDL_Event* event)
 
 void Handle_Joystick_Press(SDL_Event* event)
 {
-
+  if (event->jbutton.which==0) // joystick number 0
+  {
+    #ifdef __gp2x__
+    switch(event->jbutton.button)
+    {
+      case 0:
+        Directional_up=1;
+        break;
+      case 7:
+        Directional_up_right=1;
+        break;
+      case 6:
+        Directional_right=1;
+        break;
+      case 5:
+        Directional_down_right=1;
+        break;
+      case 4:
+        Directional_down=1;
+        break;
+      case 3:
+        Directional_down_left=1;
+        break;
+      case 2:
+        Directional_left=1;
+        break;
+      case 1:
+        Directional_up_left=1;
+        break;
+      case 12: // A
+        INPUT_Nouveau_Mouse_K=1;
+        break;
+      case 13: // B
+        INPUT_Nouveau_Mouse_K=2;
+        break;
+    }
+    #else
+    switch(event->jbutton.button)
+    {
+      case 0: // A
+        INPUT_Nouveau_Mouse_K=1;
+        break;
+      case 1: // B
+        INPUT_Nouveau_Mouse_K=2;
+        break;
+    }
+    #endif
+  }
 }
 
 void Handle_Joystick_Release(SDL_Event* event)
 {
+  if (event->jbutton.which==0) // joystick number 0
+  {
+    #ifdef __gp2x__
+    switch(event->jbutton.button)
+    {
+      case 0:
+        Directional_up=0;
+        break;
+      case 7:
+        Directional_up_right=0;
+        break;
+      case 6:
+        Directional_right=0;
+        break;
+      case 5:
+        Directional_down_right=0;
+        break;
+      case 4:
+        Directional_down=0;
+        break;
+      case 3:
+        Directional_down_left=0;
+        break;
+      case 2:
+        Directional_left=0;
+        break;
+      case 1:
+        Directional_up_left=0;
+        break;
+      case 12: // A
+        INPUT_Nouveau_Mouse_K &= ~1;
+        break;
+      case 13: // B
+        INPUT_Nouveau_Mouse_K &= ~2;
+        break;
+    }
+    #else
+    switch(event->jbutton.button)
+    {
+      case 0: // A
+        INPUT_Nouveau_Mouse_K &= ~1;
+        break;
+      case 1: // B
+        INPUT_Nouveau_Mouse_K &= ~2;
+        break;
+    }
+    #endif
+  }
+}
 
+void Handle_Joystick_Movement(SDL_Event* event)
+{
+  if (event->jaxis.which==0) // joystick number 0
+  {
+    if (event->jaxis.axis==0) // X
+    {
+      Directional_right=Directional_left=0;
+      if (event->jaxis.value<-1000)
+      {
+        Directional_left=1;
+      }
+      else if (event->jaxis.value>1000)
+        Directional_right=1;
+    }
+    else if (event->jaxis.axis==1) // Y
+    {
+      Directional_up=Directional_down=0;
+      if (event->jaxis.value<-1000)
+      {
+        Directional_up=1;
+      }
+      else if (event->jaxis.value>1000)
+        Directional_down=1;
+    }
+  }
 }
 
 // Main input handling function
@@ -327,6 +458,7 @@ int Get_input(void)
     int User_Feedback_Required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
 
     Touche_ANSI = 0;
+    Touche = 0;
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
@@ -369,20 +501,116 @@ int Get_input(void)
                 break;
 
             case SDL_JOYBUTTONUP:
-                Handle_Joystick_Press(&event);
-                break;
-
-            case SDL_JOYBUTTONDOWN:
                 Handle_Joystick_Release(&event);
                 User_Feedback_Required = 1;
                 break;
 
+            case SDL_JOYBUTTONDOWN:
+                Handle_Joystick_Press(&event);
+                User_Feedback_Required = 1;
+                break;
+
+            case SDL_JOYAXISMOTION:
+                Handle_Joystick_Movement(&event);
+                break;
+                
             default:
                 DEBUG("Unhandled SDL event number : ",event.type);
                 break;
         }
     }
-
+    // Directional controller
+    if (!(Directional_up||Directional_up_right||Directional_right||
+    Directional_down_right||Directional_down||Directional_down_left||
+      Directional_left||Directional_up_left))
+    {
+      Directional_delay=-1;
+      Directional_last_move=SDL_GetTicks();
+    }
+    else
+    {
+      long Now;
+      
+      Now=SDL_GetTicks();
+      
+      if (Now>Directional_last_move+Directional_delay)
+      {
+        if (Directional_delay==-1)
+        {
+          Directional_delay=150;
+          Directional_step=16;
+        }
+        else if (Directional_delay==150)
+          Directional_delay=40;
+        else if (Directional_delay!=0)
+          Directional_delay=Directional_delay*8/10;
+        else if (Directional_step<16*4)
+          Directional_step++;
+        Directional_last_move = Now;
+      
+        // Directional controller UP
+        if ((Directional_up||Directional_up_left||Directional_up_right) &&
+           !(Directional_down_right||Directional_down||Directional_down_left))
+        {
+          //si on est déjà en haut on peut plus bouger
+          if(INPUT_Nouveau_Mouse_Y!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+              INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
+            else
+              INPUT_Nouveau_Mouse_Y-=Directional_step/16;
+            Move_cursor_with_constraints();
+          }
+        }
+        // Directional controller RIGHT
+        if ((Directional_up_right||Directional_right||Directional_down_right) &&
+           !(Directional_down_left||Directional_left||Directional_up_left))
+        {
+          if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+              INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
+              if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
+                INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
+            }
+            else
+              INPUT_Nouveau_Mouse_X+=Directional_step/16;
+            Move_cursor_with_constraints();
+          }
+        }    
+        // Directional controller DOWN
+        if ((Directional_down_right||Directional_down||Directional_down_left) &&
+           !(Directional_up_left||Directional_up||Directional_up_right))
+        {
+          if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+            {
+              INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
+              if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
+                  INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
+            }
+            else
+                INPUT_Nouveau_Mouse_Y+=Directional_step/16;
+            Move_cursor_with_constraints();
+          }
+        }
+        // Directional controller LEFT
+        if ((Directional_down_left||Directional_left||Directional_up_left) &&
+           !(Directional_up_right||Directional_right||Directional_down_right))
+        {
+          if(INPUT_Nouveau_Mouse_X!=0)
+          {
+            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+              INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
+            else
+              INPUT_Nouveau_Mouse_X-=Directional_step/16;
+            Move_cursor_with_constraints();
+          }
+        }
+      }
+    }
     // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente.
     // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
     Flush_update();
