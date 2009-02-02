@@ -347,8 +347,27 @@ void Enclencher_bouton(int Numero,byte Click)
 {
   int Famille;
   int Curseur;
+  int Icone;
 
   Effacer_curseur();
+
+  // Certains boutons ont deux icones
+  Icone=-1;
+  switch(Numero)
+  {
+    case BOUTON_POLYGONES:
+    case BOUTON_POLYFILL:
+      Icone=12;break;
+    case BOUTON_FLOODFILL:
+      Icone=14;break;
+    case BOUTON_CERCLES:
+    case BOUTON_FILLCERC:
+      Icone=10;break;
+    case BOUTON_SPHERES:
+      Icone=16;break;
+  }
+  if (Icone!=-1)
+    Afficher_sprite_dans_menu(Numero,Icone+(Click==A_DROITE));
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
   Famille=Bouton[Numero].Famille;

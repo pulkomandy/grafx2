@@ -1749,7 +1749,6 @@ void Bouton_Rectangle_plein(void)
 void Bouton_Cercle_vide(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_CERCLES,10);
   Demarrer_pile_operation(OPERATION_CERCLE_VIDE);
   Afficher_curseur();
 }
@@ -1758,7 +1757,6 @@ void Bouton_Cercle_vide(void)
 void Bouton_Ellipse_vide(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_CERCLES,11);
   Demarrer_pile_operation(OPERATION_ELLIPSE_VIDE);
   Afficher_curseur();
 }
@@ -1767,7 +1765,6 @@ void Bouton_Ellipse_vide(void)
 void Bouton_Cercle_plein(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_CERCLES,10);
   Demarrer_pile_operation(OPERATION_CERCLE_PLEIN);
   Afficher_curseur();
 }
@@ -1776,7 +1773,6 @@ void Bouton_Cercle_plein(void)
 void Bouton_Ellipse_pleine(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_CERCLES,11);
   Demarrer_pile_operation(OPERATION_ELLIPSE_PLEINE);
   Afficher_curseur();
 }
@@ -2107,7 +2103,6 @@ void Bouton_Degrades(void)
 void Bouton_Cercle_degrade(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_SPHERES,16);
   Demarrer_pile_operation(OPERATION_CERCLE_DEGRADE);
   Afficher_curseur();
 }
@@ -2116,7 +2111,6 @@ void Bouton_Cercle_degrade(void)
 void Bouton_Ellipse_degrade(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_SPHERES,17);
   Demarrer_pile_operation(OPERATION_ELLIPSE_DEGRADEE);
   Afficher_curseur();
 }
@@ -2137,7 +2131,6 @@ void Bouton_Fill(void)
   if (Operation_en_cours!=OPERATION_FILL)
   {
     Effacer_curseur();
-    Afficher_sprite_dans_menu(BOUTON_FLOODFILL,14);
 
     if (Operation_en_cours!=OPERATION_REMPLACER)
     {
@@ -2159,7 +2152,6 @@ void Bouton_Remplacer(void)
   if (Operation_en_cours!=OPERATION_REMPLACER)
   {
     Effacer_curseur();
-    Afficher_sprite_dans_menu(BOUTON_FLOODFILL,15);
     if (Operation_en_cours!=OPERATION_FILL)
     {
       Pinceau_Forme_avant_fill=Pinceau_Forme;
@@ -5538,7 +5530,6 @@ void Bouton_Trame_Menu(void)
 void Bouton_Polygone(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_POLYGONES,12);
   Demarrer_pile_operation(OPERATION_POLYGONE);
   Afficher_curseur();
 }
@@ -5547,7 +5538,6 @@ void Bouton_Polygone(void)
 void Bouton_Polyform(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_POLYGONES,13);
   Demarrer_pile_operation(OPERATION_POLYFORM);
   Afficher_curseur();
 }
@@ -5556,7 +5546,6 @@ void Bouton_Polyform(void)
 void Bouton_Polyfill(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_POLYGONES,12);
   Demarrer_pile_operation(OPERATION_POLYFILL);
   Afficher_curseur();
 }
@@ -5565,7 +5554,6 @@ void Bouton_Polyfill(void)
 void Bouton_Filled_polyform(void)
 {
   Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_POLYGONES,13);
   Demarrer_pile_operation(OPERATION_FILLED_POLYFORM);
   Afficher_curseur();
 }

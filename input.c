@@ -28,8 +28,8 @@
 #include "windows.h"
 #include "erreurs.h"
 
-void Handle_Window_Resize(SDL_Event* event);
-void Handle_Window_Exit(SDL_Event* event);
+void Handle_Window_Resize(SDL_ResizeEvent event);
+void Handle_Window_Exit(SDL_QuitEvent event);
 
 byte Directional_up;
 byte Directional_up_right;
@@ -114,42 +114,42 @@ void Gere_Evenement_SDL(SDL_Event * event)
     // Redimensionnement fenetre
     if (event->type == SDL_VIDEORESIZE )
     {
-        Handle_Window_Resize(event);
+        Handle_Window_Resize(event->resize);
     }
     // Fermeture
     if (event->type == SDL_QUIT )
     {
-        Handle_Window_Exit(event);
+        Handle_Window_Exit(event->quit);
     }
 }
 
 
 // WM events management
 
-void Handle_Window_Resize(SDL_Event* event)
+void Handle_Window_Resize(SDL_ResizeEvent event)
 {
-    Resize_Largeur = event->resize.w;
-    Resize_Hauteur = event->resize.h;
+    Resize_Largeur = event.w;
+    Resize_Hauteur = event.h;
 }
 
-void Handle_Window_Exit(SDL_Event* event)
+void Handle_Window_Exit(__attribute__((unused)) SDL_QuitEvent event)
 {
     Quit_demande = 1;
 }
 
 // Mouse events management
 
-int Handle_Mouse_Move(SDL_Event* event)
+int Handle_Mouse_Move(SDL_MouseMotionEvent event)
 {
-    INPUT_Nouveau_Mouse_X = event->motion.x/Pixel_width;
-    INPUT_Nouveau_Mouse_Y = event->motion.y/Pixel_height;
+    INPUT_Nouveau_Mouse_X = event.x/Pixel_width;
+    INPUT_Nouveau_Mouse_Y = event.y/Pixel_height;
 
     return Move_cursor_with_constraints();
 }
 
-void Handle_Mouse_Click(SDL_Event* event)
+void Handle_Mouse_Click(SDL_MouseButtonEvent event)
 {
-    switch(event->button.button)
+    switch(event.button)
     {
         case SDL_BUTTON_LEFT:
             INPUT_Nouveau_Mouse_K |= 1;
@@ -169,9 +169,9 @@ void Handle_Mouse_Click(SDL_Event* event)
     Move_cursor_with_constraints();
 }
 
-void Handle_Mouse_Release(SDL_Event* event)
+void Handle_Mouse_Release(SDL_MouseButtonEvent event)
 {
-    switch(event->button.button)
+    switch(event.button)
     {
         case SDL_BUTTON_LEFT:
             INPUT_Nouveau_Mouse_K &= ~1;
@@ -190,11 +190,11 @@ void Handle_Mouse_Release(SDL_Event* event)
 
 // Keyboard management
 
-int Handle_Key_Press(SDL_Event* event)
+int Handle_Key_Press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
-    Touche = Conversion_Touche(event->key.keysym);
-    Touche_ANSI = Conversion_ANSI(event->key.keysym);
+    Touche = Conversion_Touche(event.keysym);
+    Touche_ANSI = Conversion_ANSI(event.keysym);
 
     if(Touche == Config_Touche[SPECIAL_MOUSE_UP])
     {
@@ -260,12 +260,12 @@ int Handle_Key_Press(SDL_Event* event)
     return 0;
 }
 
-void Handle_Key_Release(SDL_Event* event)
+void Handle_Key_Release(SDL_KeyboardEvent event)
 {
     int Modifieur;
-    int ToucheR = Conversion_Touche(event->key.keysym) & 0x0FFF;
+    int ToucheR = Conversion_Touche(event.keysym) & 0x0FFF;
 
-    switch(event->key.keysym.sym)
+    switch(event.keysym.sym)
     {
       case SDLK_RSHIFT:
       case SDLK_LSHIFT:
@@ -319,46 +319,48 @@ void Handle_Key_Release(SDL_Event* event)
 
 // Joystick management
 
-void Handle_Joystick_Press(SDL_Event* event)
+void Handle_Joystick_Press(SDL_JoyButtonEvent event)
 {
-  if (event->jbutton.which==0) // joystick number 0
+  if (event.which==0) // joystick number 0
   {
     #ifdef __gp2x__
-    switch(event->jbutton.button)
+    switch(event.button)
     {
-      case 0:
+      #ifndef NO_JOYCURSOR
+      case GP2X_BUTTON_UP:
         Directional_up=1;
         break;
-      case 7:
+      case GP2X_BUTTON_UPRIGHT:
         Directional_up_right=1;
         break;
-      case 6:
+      case GP2X_BUTTON_RIGHT:
         Directional_right=1;
         break;
-      case 5:
+      case GP2X_BUTTON_DOWNRIGHT:
         Directional_down_right=1;
         break;
-      case 4:
+      case GP2X_BUTTON_DOWN:
         Directional_down=1;
         break;
-      case 3:
+      case GP2X_BUTTON_DOWNLEFT:
         Directional_down_left=1;
         break;
-      case 2:
+      case GP2X_BUTTON_LEFT:
         Directional_left=1;
         break;
-      case 1:
+      case GP2X_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
-      case 12: // A
+      #endif
+      case GP2X_BUTTON_A: // A
         INPUT_Nouveau_Mouse_K=1;
         break;
-      case 13: // B
+      case GP2X_BUTTON_B: // B
         INPUT_Nouveau_Mouse_K=2;
         break;
     }
     #else
-    switch(event->jbutton.button)
+    switch(event.button)
     {
       case 0: // A
         INPUT_Nouveau_Mouse_K=1;
@@ -371,46 +373,46 @@ void Handle_Joystick_Press(SDL_Event* event)
   }
 }
 
-void Handle_Joystick_Release(SDL_Event* event)
+void Handle_Joystick_Release(SDL_JoyButtonEvent event)
 {
-  if (event->jbutton.which==0) // joystick number 0
+  if (event.which==0) // joystick number 0
   {
     #ifdef __gp2x__
-    switch(event->jbutton.button)
+    switch(event.button)
     {
-      case 0:
+      case GP2X_BUTTON_UP:
         Directional_up=0;
         break;
-      case 7:
+      case GP2X_BUTTON_UPRIGHT:
         Directional_up_right=0;
         break;
-      case 6:
+      case GP2X_BUTTON_RIGHT:
         Directional_right=0;
         break;
-      case 5:
+      case GP2X_BUTTON_DOWNRIGHT:
         Directional_down_right=0;
         break;
-      case 4:
+      case GP2X_BUTTON_DOWN:
         Directional_down=0;
         break;
-      case 3:
+      case GP2X_BUTTON_DOWNLEFT:
         Directional_down_left=0;
         break;
-      case 2:
+      case GP2X_BUTTON_LEFT:
         Directional_left=0;
         break;
-      case 1:
+      case GP2X_BUTTON_UPLEFT:
         Directional_up_left=0;
         break;
-      case 12: // A
+      case GP2X_BUTTON_A: // A
         INPUT_Nouveau_Mouse_K &= ~1;
         break;
-      case 13: // B
+      case GP2X_BUTTON_B: // B
         INPUT_Nouveau_Mouse_K &= ~2;
         break;
     }
     #else
-    switch(event->jbutton.button)
+    switch(event.button)
     {
       case 0: // A
         INPUT_Nouveau_Mouse_K &= ~1;
@@ -423,30 +425,32 @@ void Handle_Joystick_Release(SDL_Event* event)
   }
 }
 
-void Handle_Joystick_Movement(SDL_Event* event)
+void Handle_Joystick_Movement(SDL_JoyAxisEvent event)
 {
-  if (event->jaxis.which==0) // joystick number 0
+  if (event.which==0) // joystick number 0
   {
-    if (event->jaxis.axis==0) // X
+    #ifndef NO_JOYCURSOR
+    if (event.axis==0) // X
     {
       Directional_right=Directional_left=0;
-      if (event->jaxis.value<-1000)
+      if (event.value<-1000)
       {
         Directional_left=1;
       }
-      else if (event->jaxis.value>1000)
+      else if (event.value>1000)
         Directional_right=1;
     }
-    else if (event->jaxis.axis==1) // Y
+    else if (event.axis==1) // Y
     {
       Directional_up=Directional_down=0;
-      if (event->jaxis.value<-1000)
+      if (event.value<-1000)
       {
         Directional_up=1;
       }
-      else if (event->jaxis.value>1000)
+      else if (event.value>1000)
         Directional_down=1;
     }
+    #endif
   }
 }
 
@@ -468,50 +472,50 @@ int Get_input(void)
         switch(event.type)
         {
             case SDL_VIDEORESIZE:
-                Handle_Window_Resize(&event);
+                Handle_Window_Resize(event.resize);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_QUIT:
-                Handle_Window_Exit(&event);
+                Handle_Window_Exit(event.quit);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_MOUSEMOTION:
-                User_Feedback_Required = Handle_Mouse_Move(&event);
+                User_Feedback_Required = Handle_Mouse_Move(event.motion);
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
-                Handle_Mouse_Click(&event);
+                Handle_Mouse_Click(event.button);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_MOUSEBUTTONUP:
-                Handle_Mouse_Release(&event);
+                Handle_Mouse_Release(event.button);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_KEYDOWN:
-                Handle_Key_Press(&event);
+                Handle_Key_Press(event.key);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_KEYUP:
-                Handle_Key_Release(&event);
+                Handle_Key_Release(event.key);
                 break;
 
             case SDL_JOYBUTTONUP:
-                Handle_Joystick_Release(&event);
+                Handle_Joystick_Release(event.jbutton);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_JOYBUTTONDOWN:
-                Handle_Joystick_Press(&event);
+                Handle_Joystick_Press(event.jbutton);
                 User_Feedback_Required = 1;
                 break;
 
             case SDL_JOYAXISMOTION:
-                Handle_Joystick_Movement(&event);
+                Handle_Joystick_Movement(event.jaxis);
                 break;
                 
             default:

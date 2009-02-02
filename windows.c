@@ -747,12 +747,20 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
   word Pos_menu_Y;
   byte Couleur;
 
-  for (Pos_Y=0,Pos_menu_Y=Bouton[Numero_bouton].Decalage_Y+1;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_Y++,Pos_menu_Y++)
-    for (Pos_X=0,Pos_menu_X=Bouton[Numero_bouton].Decalage_X+1;Pos_X<LARGEUR_SPRITE_MENU;Pos_X++,Pos_menu_X++)
+  Pos_menu_Y=Bouton[Numero_bouton].Decalage_Y;
+  Pos_menu_X=Bouton[Numero_bouton].Decalage_X;
+  if (Bouton[Numero_bouton].Forme != FORME_BOUTON_TRIANGLE_BAS_DROITE)
+  {
+    Pos_menu_Y+=1;
+    Pos_menu_X+=1;
+  }
+  
+  for (Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_Y++)
+    for (Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_X++)
     {
       Couleur=SPRITE_MENU[Numero_sprite][Pos_Y][Pos_X];
-      Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
-      BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
+      Pixel_dans_menu(Pos_menu_X+Pos_X,Pos_menu_Y+Pos_Y,Couleur);
+      BLOCK_MENU[Pos_menu_Y+Pos_Y][Pos_menu_X+Pos_X]=Couleur;
     }
   UpdateRect(Menu_Facteur_X*(Bouton[Numero_bouton].Decalage_X+1),
     (Bouton[Numero_bouton].Decalage_Y+1)*Menu_Facteur_Y+Menu_Ordonnee,
