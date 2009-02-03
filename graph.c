@@ -2148,6 +2148,13 @@ void Polyfill(int Vertices, short * Points, int Color)
   int Indice;
   byte *FX_Feedback_Ecran_avant_remplissage;
 
+  Afficher_pixel(Points[0],Points[1],Color);
+  if (Vertices==1)
+  {
+    Mettre_Ecran_A_Jour(Points[0],Points[1],1,1);
+    return;
+  }
+
   // Comme pour le Fill, cette operation fait un peu d'"overdraw"
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
   FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
