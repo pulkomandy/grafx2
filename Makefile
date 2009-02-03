@@ -37,7 +37,7 @@ ifdef COMSPEC
   CP = cp
   BIN = grafx2.exe
   CFGBIN = gfxcfg.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
   CC = gcc
   OBJDIR = obj/win32
@@ -209,6 +209,14 @@ else
   TTFLABEL = 
 endif
 
+#To disable Joystick emulation of cursor, make NOTTF=1 (for input.o)
+#This can be necessary to test keyboard cursor code, because an existing
+#joystick will keep reporting a contradicting position.
+ifeq ($(NOJOY),1)
+  JOYCOPT = -DNO_JOYCURSOR
+else
+  JOYCOPT =
+endif
 
 .PHONY : all debug release clean depend zip version force install uninstall
 

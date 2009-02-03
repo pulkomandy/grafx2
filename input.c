@@ -27,6 +27,7 @@
 #include "sdlscreen.h"
 #include "windows.h"
 #include "erreurs.h"
+#include "divers.h"
 
 void Handle_Window_Resize(SDL_ResizeEvent event);
 void Handle_Window_Exit(SDL_QuitEvent event);
@@ -147,7 +148,7 @@ int Handle_Mouse_Move(SDL_MouseMotionEvent event)
     return Move_cursor_with_constraints();
 }
 
-void Handle_Mouse_Click(SDL_MouseButtonEvent event)
+int Handle_Mouse_Click(SDL_MouseButtonEvent event)
 {
     switch(event.button)
     {
@@ -164,12 +165,12 @@ void Handle_Mouse_Click(SDL_MouseButtonEvent event)
             break;
         default:
             DEBUG("Unknown mouse button!",0);
-            return;
+            return 0;
     }
-    Move_cursor_with_constraints();
+    return Move_cursor_with_constraints();
 }
 
-void Handle_Mouse_Release(SDL_MouseButtonEvent event)
+int Handle_Mouse_Release(SDL_MouseButtonEvent event)
 {
     switch(event.button)
     {
@@ -185,7 +186,7 @@ void Handle_Mouse_Release(SDL_MouseButtonEvent event)
             INPUT_Nouveau_Mouse_K &= ~2;
             break;
     }
-    Move_cursor_with_constraints();
+    return Move_cursor_with_constraints();
 }
 
 // Keyboard management
@@ -219,14 +220,12 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
     else if(Touche == Config_Touche[SPECIAL_CLICK_LEFT])
     {
         INPUT_Nouveau_Mouse_K=1;
-        Move_cursor_with_constraints();
-        return 1;
+        return Move_cursor_with_constraints();
     }
     else if(Touche == Config_Touche[SPECIAL_CLICK_RIGHT])
     {
         INPUT_Nouveau_Mouse_K=2;
-        Move_cursor_with_constraints();
-        return 1;
+        return Move_cursor_with_constraints();
     }
 
     if (Operation_Taille_pile!=0 && Touche != 0)
@@ -260,11 +259,11 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
     return 0;
 }
 
-void Handle_Key_Release(SDL_KeyboardEvent event)
+int Handle_Key_Release(SDL_KeyboardEvent event)
 {
     int Modifieur;
     int ToucheR = Conversion_Touche(event.keysym) & 0x0FFF;
-
+  
     switch(event.keysym.sym)
     {
       case SDLK_RSHIFT:
@@ -283,7 +282,7 @@ void Handle_Key_Release(SDL_KeyboardEvent event)
       default:
         Modifieur=0;
     }
-
+  
     if(ToucheR == (Config_Touche[SPECIAL_MOUSE_UP]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP]&Modifieur))
     {
       Directional_up=0;
@@ -303,23 +302,24 @@ void Handle_Key_Release(SDL_KeyboardEvent event)
     if(ToucheR == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~1;
-        Move_cursor_with_constraints();
+        return Move_cursor_with_constraints();
     }
     if(ToucheR == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~2;
-        Move_cursor_with_constraints();
+        return Move_cursor_with_constraints();
     }
-
+  
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.
+    return 0;
 }
 
 
 // Joystick management
 
-void Handle_Joystick_Press(SDL_JoyButtonEvent event)
+int Handle_Joystick_Press(SDL_JoyButtonEvent event)
 {
   if (event.which==0) // joystick number 0
   {
@@ -371,9 +371,10 @@ void Handle_Joystick_Press(SDL_JoyButtonEvent event)
     }
     #endif
   }
+  return Move_cursor_with_constraints();
 }
 
-void Handle_Joystick_Release(SDL_JoyButtonEvent event)
+int Handle_Joystick_Release(SDL_JoyButtonEvent event)
 {
   if (event.which==0) // joystick number 0
   {
@@ -423,6 +424,7 @@ void Handle_Joystick_Release(SDL_JoyButtonEvent event)
     }
     #endif
   }
+  return Move_cursor_with_constraints();
 }
 
 void Handle_Joystick_Movement(SDL_JoyAxisEvent event)
@@ -453,6 +455,40 @@ void Handle_Joystick_Movement(SDL_JoyAxisEvent event)
     #endif
   }
 }
+
+// Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
+int Cursor_displace(short Delta_X, short Delta_Y)
+{
+  short X=INPUT_Nouveau_Mouse_X;
+  short Y=INPUT_Nouveau_Mouse_Y;
+  
+  if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
+  {
+    // Cursor in zoomed area
+    
+    if (Delta_X<0)
+      INPUT_Nouveau_Mouse_X = Max(Principal_Split, X-Loupe_Facteur);
+    else if (Delta_X>0)
+      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, X+Loupe_Facteur);
+    if (Delta_Y<0)
+      INPUT_Nouveau_Mouse_Y = Max(0, Y-Loupe_Facteur);
+    else if (Delta_Y>0)
+      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, Y+Loupe_Facteur);
+  }
+  else
+  {
+    if (Delta_X<0)
+      INPUT_Nouveau_Mouse_X = Max(0, X+Delta_X);
+    else if (Delta_X>0)
+      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, X+Delta_X);
+    if (Delta_Y<0)
+      INPUT_Nouveau_Mouse_Y = Max(0, Y+Delta_Y);
+    else if (Delta_Y>0)
+      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, Y+Delta_Y);
+  }
+  return Move_cursor_with_constraints();
+}
+
 
 // Main input handling function
 
@@ -539,6 +575,7 @@ int Get_input(void)
       
       if (Now>Directional_last_move+Directional_delay)
       {
+        // Speed parameters, acceleration etc. are here
         if (Directional_delay==-1)
         {
           Directional_delay=150;
@@ -556,62 +593,25 @@ int Get_input(void)
         if ((Directional_up||Directional_up_left||Directional_up_right) &&
            !(Directional_down_right||Directional_down||Directional_down_left))
         {
-          //si on est déjà en haut on peut plus bouger
-          if(INPUT_Nouveau_Mouse_Y!=0)
-          {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-              INPUT_Nouveau_Mouse_Y=INPUT_Nouveau_Mouse_Y<Loupe_Facteur?0:INPUT_Nouveau_Mouse_Y-Loupe_Facteur;
-            else
-              INPUT_Nouveau_Mouse_Y-=Directional_step/16;
-            Move_cursor_with_constraints();
-          }
+          Cursor_displace(0, -Directional_step/16);
         }
         // Directional controller RIGHT
         if ((Directional_up_right||Directional_right||Directional_down_right) &&
            !(Directional_down_left||Directional_left||Directional_up_left))
         {
-          if(INPUT_Nouveau_Mouse_X<Largeur_ecran-1)
-          {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-            {
-              INPUT_Nouveau_Mouse_X+=Loupe_Facteur;
-              if (INPUT_Nouveau_Mouse_X>=Largeur_ecran)
-                INPUT_Nouveau_Mouse_X=Largeur_ecran-1;
-            }
-            else
-              INPUT_Nouveau_Mouse_X+=Directional_step/16;
-            Move_cursor_with_constraints();
-          }
+          Cursor_displace(Directional_step/16,0);
         }    
         // Directional controller DOWN
         if ((Directional_down_right||Directional_down||Directional_down_left) &&
            !(Directional_up_left||Directional_up||Directional_up_right))
         {
-          if(INPUT_Nouveau_Mouse_Y<Hauteur_ecran-1)
-          {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-            {
-              INPUT_Nouveau_Mouse_Y+=Loupe_Facteur;
-              if (INPUT_Nouveau_Mouse_Y>=Hauteur_ecran)
-                  INPUT_Nouveau_Mouse_Y=Hauteur_ecran-1;
-            }
-            else
-                INPUT_Nouveau_Mouse_Y+=Directional_step/16;
-            Move_cursor_with_constraints();
-          }
+          Cursor_displace(0, Directional_step/16);
         }
         // Directional controller LEFT
         if ((Directional_down_left||Directional_left||Directional_up_left) &&
            !(Directional_up_right||Directional_right||Directional_down_right))
         {
-          if(INPUT_Nouveau_Mouse_X!=0)
-          {
-            if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
-              INPUT_Nouveau_Mouse_X-=Loupe_Facteur;
-            else
-              INPUT_Nouveau_Mouse_X-=Directional_step/16;
-            Move_cursor_with_constraints();
-          }
+          Cursor_displace(-Directional_step/16,0);
         }
       }
     }
