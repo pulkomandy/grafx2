@@ -45,8 +45,8 @@ ifdef COMSPEC
   WINDRES = windres.exe
   OBJRES = $(OBJDIR)/winres.o
   CFGOBJRES = $(OBJDIR)/wincfgres.o
-  PLATFORM = win32 #no uname so we'll do that ourselve
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfxcfg.ico grafx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  PLATFORM = win32
+  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2cfg.ico gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
   ZIP = zip
 else
 
