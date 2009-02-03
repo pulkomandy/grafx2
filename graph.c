@@ -855,6 +855,18 @@ void Remplir(byte Couleur_de_remplissage)
       Pixel_Preview(Pos_X,Pos_Y,~Lit_pixel(Pos_X-Principal_Decalage_X,
                                            Pos_Y-Principal_Decalage_Y));
   }
+  
+  // Affichage d'un point pour une preview en xor additif
+  // (Il lit la couleur depuis la page backup)
+  void Pixel_figure_Preview_xorback(word Pos_X,word Pos_Y,__attribute__((unused)) byte Couleur)
+  {
+    if ( (Pos_X>=Limite_Gauche) &&
+         (Pos_X<=Limite_Droite) &&
+         (Pos_Y>=Limite_Haut)   &&
+         (Pos_Y<=Limite_Bas) )
+      Pixel_Preview(Pos_X,Pos_Y,~Ecran_backup[Pos_X+Pos_Y*Principal_Largeur_image]);
+  }
+  
 
   // Effacement d'un point de preview
   void Pixel_figure_Effacer_preview(word Pos_X,word Pos_Y,__attribute__((unused)) byte Couleur)
@@ -1290,6 +1302,16 @@ void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_
 {
   int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Preview_xor;
+  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+}
+
+  // -- Tracer la preview d'une ligne en xor additif --
+
+void Tracer_ligne_Preview_xorback(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+{
+  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  Pixel_figure=Pixel_figure_Preview_xorback;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
   Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }

@@ -2623,8 +2623,16 @@ void Filled_polyform_12_8(void)
       Print_coordonnees();
 
       // On le place à l'écran
-      Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-      Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+      if (Operation_en_cours==OPERATION_FILLED_CONTOUR)
+      {
+        Tracer_ligne_Preview_xorback(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+        Tracer_ligne_Preview_xorback(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+      }
+      else
+      {
+        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+      }
 
       // On peut le rajouter au polygone
 

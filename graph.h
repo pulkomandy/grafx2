@@ -52,6 +52,7 @@ void Remplacer(byte Nouvelle_couleur);
 void Pixel_figure_Preview    (word Pos_X,word Pos_Y,byte Couleur);
 void Pixel_figure_Preview_auto(word Pos_X,word Pos_Y);
 void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_figure_Preview_xorback(word Pos_X,word Pos_Y,byte Couleur);
 void Pixel_figure_Dans_brosse(word Pos_X,word Pos_Y,byte Couleur);
 
 void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur);
@@ -69,6 +70,7 @@ void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, b
 void Tracer_ligne_Definitif  (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview    (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
+void Tracer_ligne_Preview_xorback(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
 void Effacer_ligne_Preview   (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
 
 void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
