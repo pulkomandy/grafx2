@@ -2004,15 +2004,35 @@ short Fenetre_Numero_bouton_clicke(void)
   {
     if (Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1))
     {
-      Effacer_curseur();
-      Fenetre_Enfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
-      Afficher_curseur();
       Fenetre_Attribut1=Mouse_K;
-      Attendre_fin_de_click();
-      Effacer_curseur();
-      Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
-      Afficher_curseur();
-      return Temp1->Numero;
+      while(1)
+      {
+        Effacer_curseur();
+        Fenetre_Enfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
+        Afficher_curseur();
+        while (Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1))
+        {
+          if(!Get_input())
+            Wait_VBL();
+          if (!Mouse_K)
+          {
+            Effacer_curseur();
+            Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
+            Afficher_curseur();
+            return Temp1->Numero;
+          }
+        }
+        Effacer_curseur();
+        Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
+        Afficher_curseur();
+        while (!(Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1)))
+        {
+          if(!Get_input())
+            Wait_VBL();
+          if (!Mouse_K)
+            return 0;
+        }
+      }
     }
   }
 
