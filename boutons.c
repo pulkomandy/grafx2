@@ -50,6 +50,8 @@
 #include "sdlscreen.h"
 #include "windows.h"
 #include "brush.h"
+#include "input.h"
+
 
 #ifdef __WATCOMC__
     #include <windows.h>
@@ -2893,14 +2895,14 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case SDLK_PAGEDOWN : // Page Down
         *Fichier_recherche=0;
         Effacer_curseur();
-        Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage);
+        Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage,9);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         Touche=0;
         break;
       case SDLK_PAGEUP : // Page Up
         *Fichier_recherche=0;
         Effacer_curseur();
-        Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage);
+        Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage,9);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         Touche=0;
         break;
@@ -2915,6 +2917,20 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Home(&Principal_File_list_Position,&Principal_File_list_Decalage);
+        On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
+        break;
+      case TOUCHE_MOUSEWHEELDOWN :
+        *Fichier_recherche=0;
+        Effacer_curseur();
+        Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage,3);
+        On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
+        Touche=0;
+        break;
+      case TOUCHE_MOUSEWHEELUP :
+        *Fichier_recherche=0;
+        Effacer_curseur();
+        Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage,3);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         Touche=0;
         break;
@@ -6145,6 +6161,37 @@ void Bouton_Texte()
         }
         A_redessiner=1;
         A_previsionner=1;
+      }
+      if (Touche == TOUCHE_MOUSEWHEELUP && Debut_liste>0)
+      {
+        Position_curseur+=Debut_liste;
+        if (Debut_liste>=3)
+          Debut_liste-=3;
+        else
+          Debut_liste=0;
+        Position_curseur-=Debut_liste;
+        // On affiche à nouveau la liste
+        Effacer_curseur();
+        A_redessiner=1;
+        // Mise à jour du scroller
+        Scroller_de_fontes->Position=Debut_liste;
+        Fenetre_Dessiner_jauge(Scroller_de_fontes);
+      }
+      if (Touche==TOUCHE_MOUSEWHEELDOWN && Debut_liste<Fonte_nombre-NB_FONTES)
+      {
+        Position_curseur+=Debut_liste;
+        Debut_liste+=3;
+        if (Debut_liste+NB_FONTES>Fonte_nombre)
+        {
+          Debut_liste=Fonte_nombre-NB_FONTES;
+        }          
+        Position_curseur-=Debut_liste;
+        // On affiche à nouveau la liste
+        Effacer_curseur();
+        A_redessiner=1;
+        // Mise à jour du scroller
+        Scroller_de_fontes->Position=Debut_liste;
+        Fenetre_Dessiner_jauge(Scroller_de_fontes);
       }
       if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
         Fenetre_aide(BOUTON_TEXTE, NULL);

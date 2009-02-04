@@ -339,13 +339,35 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Scroller_aide();
         Touche=0;
         break;
-      case SDLK_PAGEDOWN : // PageDown
-        if (Position_d_aide_en_cours<Nb_lignes-31)
-          Position_d_aide_en_cours+=15;
+      case (SDLK_LAST+2) : // WheelUp
+        if (Position_d_aide_en_cours>3)
+          Position_d_aide_en_cours-=3;
         else
-          Position_d_aide_en_cours=Nb_lignes-16;
+          Position_d_aide_en_cours=0;
         Scroller_aide();
         Touche=0;
+        break;
+      case SDLK_PAGEDOWN : // PageDown
+        if (Nb_lignes>16)
+        {
+          if (Position_d_aide_en_cours<Nb_lignes-16-15)
+            Position_d_aide_en_cours+=15;
+          else
+            Position_d_aide_en_cours=Nb_lignes-16;
+          Scroller_aide();
+          Touche=0;
+        }
+        break;
+      case (SDLK_LAST+3) : // Wheeldown
+        if (Nb_lignes>16)
+        {
+          if (Position_d_aide_en_cours<Nb_lignes-16-3)
+            Position_d_aide_en_cours+=3;
+          else
+            Position_d_aide_en_cours=Nb_lignes-16;
+          Scroller_aide();
+          Touche=0;
+        }
         break;
       case SDLK_HOME : // Home
         Position_d_aide_en_cours=0;

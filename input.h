@@ -22,3 +22,8 @@
 void Gere_Evenement_SDL(SDL_Event * event);
 
 int  Get_input(void);
+
+#define TOUCHE_MOUSEMIDDLE     (SDLK_LAST+1)
+#define TOUCHE_MOUSEWHEELUP    (SDLK_LAST+2)
+#define TOUCHE_MOUSEWHEELDOWN  (SDLK_LAST+3)
+#define TOUCHE_BUTTON          (SDLK_LAST+4)

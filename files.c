@@ -561,7 +561,7 @@ void Select_Scroll_Up(short * Decalage_premier,short * Decalage_select)
 }
 
 
-void Select_Page_Down(short * Decalage_premier,short * Decalage_select)
+void Select_Page_Down(short * Decalage_premier,short * Decalage_select, short Lignes)
 {
   if (Liste_Nb_elements-1>*Decalage_premier+*Decalage_select)
   {
@@ -577,7 +577,7 @@ void Select_Page_Down(short * Decalage_premier,short * Decalage_select)
     else
     {
       if (Liste_Nb_elements>*Decalage_premier+18)
-        *Decalage_premier+=9;
+        *Decalage_premier+=Lignes;
       else
       {
         *Decalage_premier=Liste_Nb_elements-10;
@@ -589,7 +589,7 @@ void Select_Page_Down(short * Decalage_premier,short * Decalage_select)
 }
 
 
-void Select_Page_Up(short * Decalage_premier,short * Decalage_select)
+void Select_Page_Up(short * Decalage_premier,short * Decalage_select, short Lignes)
 {
   if (*Decalage_premier+*Decalage_select>0)
   {
@@ -597,8 +597,8 @@ void Select_Page_Up(short * Decalage_premier,short * Decalage_select)
       *Decalage_select=0;
     else
     {
-      if (*Decalage_premier>9)
-        *Decalage_premier-=9;
+      if (*Decalage_premier>Lignes)
+        *Decalage_premier-=Lignes;
       else
         *Decalage_premier=0;
     }

@@ -28,6 +28,7 @@
 #include "windows.h"
 #include "erreurs.h"
 #include "divers.h"
+#include "input.h"
 
 void Handle_Window_Resize(SDL_ResizeEvent event);
 void Handle_Window_Exit(SDL_QuitEvent event);
@@ -43,6 +44,14 @@ byte Directional_up_left;
 long Directional_delay;
 long Directional_last_move;
 long Directional_step;
+
+// TODO: move to config
+short Button_shift=-1; // Button number that serves as a "shift" modifier
+short Button_control=-1; // Button number that serves as a "ctrl" modifier
+short Button_alt=-1; // Button number that serves as a "alt" modifier
+short Button_clic_gauche=0; // Button number that serves as left click
+short Button_clic_droit=0; // Button number that serves as right-click
+
 
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
 int Move_cursor_with_constraints()
@@ -156,16 +165,24 @@ int Handle_Mouse_Click(SDL_MouseButtonEvent event)
             INPUT_Nouveau_Mouse_K |= 1;
             break;
 
-        case SDL_BUTTON_MIDDLE:
-            INPUT_Nouveau_Mouse_K |= 4;
-            break;
-
         case SDL_BUTTON_RIGHT:
             INPUT_Nouveau_Mouse_K |= 2;
             break;
-        default:
-            DEBUG("Unknown mouse button!",0);
+
+        case SDL_BUTTON_MIDDLE:
+            Touche = TOUCHE_MOUSEMIDDLE;
+            // TODO: systeme de répétition
             return 0;
+
+        case SDL_BUTTON_WHEELUP:
+            Touche = TOUCHE_MOUSEWHEELUP;
+            return 0;
+
+        case SDL_BUTTON_WHEELDOWN:
+            Touche = TOUCHE_MOUSEWHEELDOWN;
+            return 0;
+        default:
+        return 0;
     }
     return Move_cursor_with_constraints();
 }
@@ -176,10 +193,6 @@ int Handle_Mouse_Release(SDL_MouseButtonEvent event)
     {
         case SDL_BUTTON_LEFT:
             INPUT_Nouveau_Mouse_K &= ~1;
-            break;
-
-        case SDL_BUTTON_MIDDLE:
-            INPUT_Nouveau_Mouse_K &= ~4;
             break;
 
         case SDL_BUTTON_RIGHT:
@@ -259,6 +272,43 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
     return 0;
 }
 
+int Relache_controle(int CodeTouche, int Modifieur)
+{
+
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_UP]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP]&Modifieur))
+    {
+      Directional_up=0;
+    }
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_DOWN]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN]&Modifieur))
+    {
+      Directional_down=0;
+    }
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT]&Modifieur))
+    {
+      Directional_left=0;
+    }
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT]&Modifieur))
+    {
+      Directional_right=0;
+    }
+    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
+    {
+        INPUT_Nouveau_Mouse_K &= ~1;
+        return Move_cursor_with_constraints();
+    }
+    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
+    {
+        INPUT_Nouveau_Mouse_K &= ~2;
+        return Move_cursor_with_constraints();
+    }
+  
+    // Other keys don't need to be released : they are handled as "events" and procesed only once.
+    // These clicks are apart because they need to be continuous (ie move while key pressed)
+    // We are relying on "hardware" keyrepeat to achieve that.
+    return 0;
+}
+
+
 int Handle_Key_Release(SDL_KeyboardEvent event)
 {
     int Modifieur;
@@ -282,38 +332,7 @@ int Handle_Key_Release(SDL_KeyboardEvent event)
       default:
         Modifieur=0;
     }
-  
-    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_UP]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP]&Modifieur))
-    {
-      Directional_up=0;
-    }
-    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_DOWN]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN]&Modifieur))
-    {
-      Directional_down=0;
-    }
-    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT]&Modifieur))
-    {
-      Directional_left=0;
-    }
-    if(ToucheR == (Config_Touche[SPECIAL_MOUSE_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT]&Modifieur))
-    {
-      Directional_right=0;
-    }
-    if(ToucheR == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
-    {
-        INPUT_Nouveau_Mouse_K &= ~1;
-        return Move_cursor_with_constraints();
-    }
-    if(ToucheR == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
-    {
-        INPUT_Nouveau_Mouse_K &= ~2;
-        return Move_cursor_with_constraints();
-    }
-  
-    // Other keys don't need to be released : they are handled as "events" and procesed only once.
-    // These clicks are apart because they need to be continuous (ie move while key pressed)
-    // We are relying on "hardware" keyrepeat to achieve that.
-    return 0;
+    return Relache_controle(ToucheR, Modifieur);
 }
 
 
@@ -323,6 +342,31 @@ int Handle_Joystick_Press(SDL_JoyButtonEvent event)
 {
   if (event.which==0) // joystick number 0
   {
+    if (event.button == Button_shift)
+    {
+      SDL_SetModState(SDL_GetModState() | KMOD_SHIFT);
+      return 0;
+    }
+    if (event.button == Button_control)
+    {
+      SDL_SetModState(SDL_GetModState() | KMOD_CTRL);
+      return 0;
+    }
+    if (event.button == Button_alt)
+    {
+      SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
+      return 0;
+    }
+    if (event.button == Button_clic_gauche)
+    {
+      INPUT_Nouveau_Mouse_K=1;
+      return Move_cursor_with_constraints();
+    }
+    if (event.button == Button_clic_droit)
+    {
+      INPUT_Nouveau_Mouse_K=2;
+      return Move_cursor_with_constraints();
+    }
     #ifdef __gp2x__
     switch(event.button)
     {
@@ -352,32 +396,37 @@ int Handle_Joystick_Press(SDL_JoyButtonEvent event)
         Directional_up_left=1;
         break;
       #endif
-      case GP2X_BUTTON_A: // A
-        INPUT_Nouveau_Mouse_K=1;
-        break;
-      case GP2X_BUTTON_B: // B
-        INPUT_Nouveau_Mouse_K=2;
-        break;
-    }
-    #else
-    switch(event.button)
-    {
-      case 0: // A
-        INPUT_Nouveau_Mouse_K=1;
-        break;
-      case 1: // B
-        INPUT_Nouveau_Mouse_K=2;
-        break;
+      default:
     }
     #endif
+    Touche = TOUCHE_BUTTON+event.button;
+    // TODO: systeme de répétition
+    
+    return Move_cursor_with_constraints();
   }
-  return Move_cursor_with_constraints();
+  return 0;
 }
 
 int Handle_Joystick_Release(SDL_JoyButtonEvent event)
 {
   if (event.which==0) // joystick number 0
   {
+    if (event.button == Button_shift)
+    {
+      SDL_SetModState(SDL_GetModState() & ~KMOD_SHIFT);
+      return Relache_controle(0,MOD_SHIFT);
+    }
+    if (event.button == Button_control)
+    {
+      SDL_SetModState(SDL_GetModState() & ~KMOD_CTRL);
+      return Relache_controle(0,MOD_CTRL);
+    }
+    if (event.button == Button_alt)
+    {
+      SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_META));
+      return Relache_controle(0,MOD_ALT);
+    }
+  
     #ifdef __gp2x__
     switch(event.button)
     {

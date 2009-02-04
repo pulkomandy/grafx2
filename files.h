@@ -39,8 +39,8 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 
 void Select_Scroll_Down(short * Decalage_premier,short * Decalage_select);
 void Select_Scroll_Up  (short * Decalage_premier,short * Decalage_select);
-void Select_Page_Down  (short * Decalage_premier,short * Decalage_select);
-void Select_Page_Up    (short * Decalage_premier,short * Decalage_select);
+void Select_Page_Down  (short * Decalage_premier,short * Decalage_select, short Lignes);
+void Select_Page_Up    (short * Decalage_premier,short * Decalage_select, short Lignes);
 void Select_End        (short * Decalage_premier,short * Decalage_select);
 void Select_Home       (short * Decalage_premier,short * Decalage_select);
 
