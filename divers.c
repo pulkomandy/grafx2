@@ -94,6 +94,7 @@ void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
   SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
 }
 
+/*
 void Attendre_fin_de_click(void)
 {
     SDL_Event event;
@@ -112,6 +113,17 @@ void Attendre_fin_de_click(void)
     }
 
     //On indique à la gestion des E/S que le bouton est laché et on rend la main
+    Mouse_K=0;
+    INPUT_Nouveau_Mouse_K=0;
+}
+*/
+
+void Attendre_fin_de_click(void)
+{
+    // On désactive tous les raccourcis clavier
+    Desactiver_clavier=1;
+
+    // On force la souris à se mettre à 0
     Mouse_K=0;
     INPUT_Nouveau_Mouse_K=0;
 }

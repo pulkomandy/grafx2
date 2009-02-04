@@ -136,6 +136,9 @@ GFX2_GLOBAL Uint8* Etat_Du_Clavier;  // Scancode de la touche en cours et etat d
 #define MOD_SHIFT 0x1000
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000
+
+GFX2_GLOBAL byte Desactiver_clavier;
+
 GFX2_GLOBAL byte Quit_demande; // !=0 lorsque l'utilisateur demande la fermeture de fenêtre.
 
 GFX2_GLOBAL byte Mouse_Facteur_de_correction_X;
