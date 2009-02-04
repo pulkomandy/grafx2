@@ -5251,10 +5251,10 @@ void Bouton_Trame_Menu(void)
         Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
         Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
 
-  Fenetre_Definir_bouton_normal(109, 69,11,11,"\030",0,1,SDLK_UP); // 13
-  Fenetre_Definir_bouton_normal(109, 93,11,11,"\031",0,1,SDLK_DOWN); // 14
-  Fenetre_Definir_bouton_normal( 97, 81,11,11,"\033",0,1,SDLK_LEFT); // 15
-  Fenetre_Definir_bouton_normal(121, 81,11,11,"\032",0,1,SDLK_RIGHT); // 16
+  Fenetre_Definir_bouton_repetable(109, 69,11,11,"\030",0,1,SDLK_UP); // 13
+  Fenetre_Definir_bouton_repetable(109, 93,11,11,"\031",0,1,SDLK_DOWN); // 14
+  Fenetre_Definir_bouton_repetable( 97, 81,11,11,"\033",0,1,SDLK_LEFT); // 15
+  Fenetre_Definir_bouton_repetable(121, 81,11,11,"\032",0,1,SDLK_RIGHT); // 16
 
   for (Indice=0; Indice<12; Indice++)
     Fenetre_Definir_bouton_normal((Indice*23)+8,20,20,20,"",0,1,SDLK_F1+Indice); // 17 -> 28
@@ -5982,8 +5982,8 @@ void Bouton_Texte()
   // Taille texte
   Fenetre_Definir_bouton_saisie(220,43,3); // 7
   Bouton_taille_texte=Fenetre_Liste_boutons_special;
-  Fenetre_Definir_bouton_normal(202,43,13,11,"-",0,1,SDLK_LAST); // 8
-  Fenetre_Definir_bouton_normal(251,43,13,11,"+",0,1,SDLK_LAST); // 9
+  Fenetre_Definir_bouton_repetable(202,43,13,11,"-",0,1,SDLK_LAST); // 8
+  Fenetre_Definir_bouton_repetable(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
   // Preview
   Fenetre_Definir_bouton_special(8,106,273,50); // 10

@@ -73,6 +73,7 @@ struct Fenetre_Bouton_normal
   word Largeur;
   word Hauteur;
   byte Clickable;
+  byte Repetable;
   word Raccourci;
   struct Fenetre_Bouton_normal * Next;
 };

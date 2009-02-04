@@ -860,8 +860,8 @@ void Bouton_Palette(void)
   Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
   Jauge_Reduction=Fenetre_Liste_boutons_scroller;
 
-  Fenetre_Definir_bouton_normal(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
-  Fenetre_Definir_bouton_normal(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
+  Fenetre_Definir_bouton_repetable(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
+  Fenetre_Definir_bouton_repetable(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
 
   Fenetre_Definir_bouton_normal(96,17,29,14,"Neg"    ,1,1,SDLK_n);   // 20
   Fenetre_Definir_bouton_normal(66,62,29,14,"Inv"    ,1,1,SDLK_i);   // 21

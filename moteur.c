@@ -1458,6 +1458,7 @@ void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
     Temp->Largeur  =Largeur;
     Temp->Hauteur  =Hauteur;
     Temp->Raccourci=Raccourci;
+    Temp->Repetable=0;
 
     Temp->Next=Fenetre_Liste_boutons_normal;
     Fenetre_Liste_boutons_normal=Temp;
@@ -1465,7 +1466,34 @@ void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
 
   Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
 }
+//------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
+void Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+                                   word Largeur, word Hauteur,
+                                   char * Titre, byte Lettre_soulignee,
+                                   byte Clickable, word Raccourci)
+{
+  struct Fenetre_Bouton_normal * Temp;
+
+  Nb_boutons_fenetre++;
+
+  if (Clickable)
+  {
+    Temp=(struct Fenetre_Bouton_normal *)malloc(sizeof(struct Fenetre_Bouton_normal));
+    Temp->Numero   =Nb_boutons_fenetre;
+    Temp->Pos_X    =Pos_X;
+    Temp->Pos_Y    =Pos_Y;
+    Temp->Largeur  =Largeur;
+    Temp->Hauteur  =Hauteur;
+    Temp->Raccourci=Raccourci;
+    Temp->Repetable=1;
+
+    Temp->Next=Fenetre_Liste_boutons_normal;
+    Fenetre_Liste_boutons_normal=Temp;
+  }
+
+  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
+}
 
 void Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
 {
@@ -2004,7 +2032,17 @@ short Fenetre_Numero_bouton_clicke(void)
   {
     if (Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1))
     {
-      Fenetre_Attribut1=Mouse_K;
+      if (Temp1->Repetable)
+      {
+        Effacer_curseur();
+        Fenetre_Enfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
+        Afficher_curseur();
+        Tempo_jauge((Mouse_K==1)? Config.Valeur_tempo_jauge_gauche : Config.Valeur_tempo_jauge_droite);
+        Effacer_curseur();
+        Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
+        Afficher_curseur();        
+        return Temp1->Numero;
+      }
       while(1)
       {
         Effacer_curseur();
@@ -2019,6 +2057,8 @@ short Fenetre_Numero_bouton_clicke(void)
             Effacer_curseur();
             Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
             Afficher_curseur();
+            
+            Fenetre_Attribut1=Mouse_K;
             return Temp1->Numero;
           }
         }

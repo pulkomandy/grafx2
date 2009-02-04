@@ -49,6 +49,10 @@ void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre,byte Lettre_soulignee,
                                    byte Clickable, word Raccourci);
+void Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+                                   word Largeur, word Hauteur,
+                                   char * Titre,byte Lettre_soulignee,
+                                   byte Clickable, word Raccourci);
 
 void Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y);
 void Fenetre_Effacer_tags(void);
