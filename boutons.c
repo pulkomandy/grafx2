@@ -936,6 +936,7 @@ void Bouton_Settings(void)
         Config_choisie.Indice_Sensibilite_souris_Y=Fenetre_Attribut2+1;
         break;
       case 21 : // Nb pages Undo
+        Attendre_fin_de_click();
         Effacer_curseur();
         Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
         Readline(142,52,Chaine,2,1);

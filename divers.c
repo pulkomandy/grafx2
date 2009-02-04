@@ -97,7 +97,6 @@ void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
 void Attendre_fin_de_click(void)
 {
     // On désactive tous les raccourcis clavier
-    Desactiver_clavier=1;
 
     while(Mouse_K) if(!Get_input()) Wait_VBL();
 }

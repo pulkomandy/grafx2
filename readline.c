@@ -144,7 +144,6 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
 
   byte Offset=0; // Indice du premier caractère affiché
 
-
   // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);

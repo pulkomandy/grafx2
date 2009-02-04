@@ -199,7 +199,6 @@ int Handle_Mouse_Release(SDL_MouseButtonEvent event)
             INPUT_Nouveau_Mouse_K &= ~2;
             break;
     }
-    if(INPUT_Nouveau_Mouse_K==0) Desactiver_clavier=0;
     return Move_cursor_with_constraints();
 }
 
@@ -271,7 +270,6 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
         else Touche = 0;
     }
 
-    if (Desactiver_clavier) Touche=0; // Utilisé uniquement dans Attendre fin de clic
     return 0;
 }
 
@@ -297,13 +295,11 @@ int Relache_controle(int CodeTouche, int Modifieur)
     if(CodeTouche == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~1;
-        if(INPUT_Nouveau_Mouse_K==0) Desactiver_clavier=0;
         return Move_cursor_with_constraints();
     }
     if(CodeTouche == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~2;
-        if(INPUT_Nouveau_Mouse_K==0) Desactiver_clavier=0;
         return Move_cursor_with_constraints();
     }
   
