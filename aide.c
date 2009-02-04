@@ -45,7 +45,7 @@
 #include "texte.h"
 #include "clavier.h"
 #include "windows.h"
-
+#include "input.h"
 
 extern char SVNRevision[];
 
@@ -339,7 +339,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Scroller_aide();
         Touche=0;
         break;
-      case (SDLK_LAST+2) : // WheelUp
+      case (TOUCHE_MOUSEWHEELUP) : // WheelUp
         if (Position_d_aide_en_cours>3)
           Position_d_aide_en_cours-=3;
         else
@@ -358,7 +358,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Touche=0;
         }
         break;
-      case (SDLK_LAST+3) : // Wheeldown
+      case (TOUCHE_MOUSEWHEELDOWN) : // Wheeldown
         if (Nb_lignes>16)
         {
           if (Position_d_aide_en_cours<Nb_lignes-16-3)
@@ -375,9 +375,12 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Touche=0;
         break;
       case SDLK_END : // End
+      if (Nb_lignes>16)
+      {
         Position_d_aide_en_cours=Nb_lignes-16;
         Scroller_aide();
         Touche=0;
+      }
         break;
     }
 
