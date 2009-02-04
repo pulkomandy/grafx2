@@ -678,4 +678,16 @@ GFX2_GLOBAL fonction_lecteur   Lit_pixel_de_sauvegarde;
  ********************/
 GFX2_GLOBAL SDL_Surface * Ecran_SDL;
 GFX2_GLOBAL SDL_Joystick* joystick;
+
+#define TOUCHE_MOUSEMIDDLE     (SDLK_LAST+1)
+#define TOUCHE_MOUSEWHEELUP    (SDLK_LAST+2)
+#define TOUCHE_MOUSEWHEELDOWN  (SDLK_LAST+3)
+#define TOUCHE_BUTTON          (SDLK_LAST+4)
+
+#ifdef __gp2x__
+  #define TOUCHE_ESC (TOUCHE_BUTTON+GP2X_BUTTON_X)
+#else
+  #define TOUCHE_ESC SDLK_ESCAPE
+#endif
+
 #endif

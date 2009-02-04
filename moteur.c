@@ -1730,7 +1730,7 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
       }
     }
 
-    if ((Mouse_K==A_DROITE) || (Touche==SDLK_ESCAPE))
+    if ((Mouse_K==A_DROITE) || (Touche==TOUCHE_ESC))
     {
       Attendre_fin_de_click();
       Effacer_curseur();
@@ -1823,7 +1823,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
       Ancien_X=Mouse_X;
       Ancien_Y=Mouse_Y;
-    } while (!(Mouse_K || (Touche==SDLK_ESCAPE)));
+    } while (!(Mouse_K || (Touche==TOUCHE_ESC)));
 
     if (Mouse_K)
     {

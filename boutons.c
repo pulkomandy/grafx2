@@ -112,7 +112,7 @@ void Message_Non_disponible(void)
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
+  while ((Bouton_clicke<=0) && (Touche!=TOUCHE_ESC) && (Touche!=SDLK_o));
 
   if(Bouton_clicke<=0) Touche=0;
 
@@ -144,7 +144,7 @@ void Message_Memoire_insuffisante(void)
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
+  while ((Bouton_clicke<=0) && (Touche!=TOUCHE_ESC) && (Touche!=SDLK_o));
 
   if(Bouton_clicke<=0) Touche=0;
   Fermer_fenetre();
@@ -432,7 +432,7 @@ byte Bouton_Quitter_Routine_locale(void)
 
   // On commence par afficher la fenêtre de QUIT
   Ouvrir_fenetre(160,84,"Quit ?");
-  Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,SDLK_ESCAPE);          // 1
+  Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,TOUCHE_ESC);          // 1
   Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
   Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
   Display_Window(160,84);
@@ -560,7 +560,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
   if (Cancel)
   {
     Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
-    Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,SDLK_ESCAPE); // 5
+    Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,TOUCHE_ESC);  // 5
     // On enregistre la table dans un backup au cas où on ferait Cancel
     memcpy(Backup_table,Table,256);
   }
@@ -851,7 +851,7 @@ void Bouton_Settings(void)
     // Bouton Save
   Fenetre_Definir_bouton_normal(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 18
     // Bouton Close
-  Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,SDLK_ESCAPE); // 19
+  Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,TOUCHE_ESC); // 19
 
   // Jauges de sensibilité de la souris (X puis Y)
   Fenetre_Definir_bouton_scroller(265,99,56,255,1,0); // 20
@@ -1186,7 +1186,7 @@ void Bouton_Copy_page(void)
   Fenetre_Definir_bouton_normal(10, 54,148,14,"Palette only"     , 1,1,SDLK_p); // 3
   Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
   Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
-  Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,SDLK_ESCAPE); // 6
+  Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,TOUCHE_ESC); // 6
   Display_Window(168,137);
 
   Afficher_curseur();
@@ -1394,7 +1394,7 @@ void Bouton_Resol(void)
   Print_dans_fenetre(196,170,"Unsupported"     ,CM_Fonce,CM_Clair);
 
   Fenetre_Definir_bouton_normal(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
-  Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,TOUCHE_ESC);  // 2
 
   Fenetre_Definir_bouton_saisie( 60, 35,4);                           // 3
   Bouton_saisie_Width=Fenetre_Liste_boutons_special;
@@ -1699,7 +1699,7 @@ void Bouton_Dessin_Switch_mode(void)
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
     short Bouton_clicke;
     Ouvrir_popup(16,Menu_Ordonnee/Menu_Facteur_X-32,18,50);
-    Fenetre_Definir_bouton_normal(1,1,16,16,"A",0,1,SDLK_ESCAPE); // 1
+    Fenetre_Definir_bouton_normal(1,1,16,16,"A",0,1,TOUCHE_ESC); // 1
     Afficher_curseur();
 
     UpdateRect(16*Menu_Facteur_X,Menu_Ordonnee-32*Menu_Facteur_X,18*Menu_Facteur_X,50*Menu_Facteur_X);
@@ -1923,7 +1923,7 @@ void Bouton_Degrades(void)
   Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
 
   Fenetre_Definir_bouton_normal(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
-  Fenetre_Definir_bouton_normal(123,112,51,14,"Cancel",0,1,SDLK_ESCAPE); // 7
+  Fenetre_Definir_bouton_normal(123,112,51,14,"Cancel",0,1,TOUCHE_ESC);  // 7
 
   Print_dans_fenetre(5,60,"MIX",CM_Fonce,CM_Clair);
 
@@ -2191,7 +2191,7 @@ void Bouton_Menu_pinceaux(void)
 
   Fenetre_Afficher_cadre(8,21,294,107);
 
-  Fenetre_Definir_bouton_normal(122,133,67,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(122,133,67,14,"Cancel",0,1,TOUCHE_ESC); // 1
 
   for (Indice=0; Indice<NB_SPRITES_PINCEAU; Indice++)
   {
@@ -2508,7 +2508,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
-  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,TOUCHE_ESC);  // 2
   Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,SDLK_DELETE); // 3
 
   // Cadre autour des formats
@@ -2644,7 +2644,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           {
             SDL_PumpEvents();
             Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
-          } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[SDLK_ESCAPE]==0));
+          } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[TOUCHE_ESC]==0));
 
           // On efface la demande de confirmation
           Block(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
@@ -3885,7 +3885,7 @@ void Bouton_Menu_Loupe(void)
 
   Ouvrir_fenetre(141,114,"Zoom factors");
 
-  Fenetre_Definir_bouton_normal(45,88,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(45,88,51,14,"Cancel",0,1,TOUCHE_ESC); // 1
 
   Fenetre_Definir_bouton_normal(  9,25,27,14, "x2",0,Loupe_Facteur!= 2,SDLK_F1);    // 2
   Fenetre_Definir_bouton_normal( 41,25,27,14, "x3",0,Loupe_Facteur!= 3,SDLK_F2);    // 3
@@ -4009,7 +4009,7 @@ void Bouton_Menu_Grille(void)
 
   Ouvrir_fenetre(133,98,"Grid");
 
-  Fenetre_Definir_bouton_normal(12,72,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(12,72,51,14,"Cancel",0,1,TOUCHE_ESC);  // 1
   Fenetre_Definir_bouton_normal(70,72,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Print_dans_fenetre(19,26, "X:",CM_Fonce,CM_Clair);
@@ -4159,7 +4159,7 @@ void Bouton_Brush_FX(void)
   Fenetre_Afficher_cadre(  6,83,122,53);
   Fenetre_Afficher_cadre(137,83,167,53);
 
-  Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,TOUCHE_ESC); // 1
   Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,0,1,Config_Touche[SPECIAL_FLIP_X]); // 2
   Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,0,1,Config_Touche[SPECIAL_FLIP_Y]); // 3
   Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,Config_Touche[SPECIAL_ROTATE_90]); // 4
@@ -4355,7 +4355,7 @@ void Bouton_Smooth_Menu(void)
 
   Ouvrir_fenetre(142,109,"Smooth");
 
-  Fenetre_Definir_bouton_normal(82,59,53,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(82,59,53,14,"Cancel",0,1,TOUCHE_ESC); // 1
   Fenetre_Definir_bouton_normal(82,88,53,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Fenetre_Afficher_cadre(6,17,130,37);
@@ -4536,7 +4536,7 @@ void Bouton_Colorize_Menu(void)
   Fenetre_Definir_bouton_normal(16,54,108,14,"Additive"   ,2,1,SDLK_d); // 3
   Fenetre_Definir_bouton_normal(16,71,108,14,"Subtractive",1,1,SDLK_s); // 4
 
-  Fenetre_Definir_bouton_normal(16,94, 51,14,"Cancel"     ,0,1,SDLK_ESCAPE); // 5
+  Fenetre_Definir_bouton_normal(16,94, 51,14,"Cancel"     ,0,1,TOUCHE_ESC); // 5
   Fenetre_Definir_bouton_normal(73,94, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
 
   Num2str(Colorize_Opacite,Chaine,3);
@@ -4626,7 +4626,7 @@ void Bouton_Tiling_Menu(void)
 
   Ouvrir_fenetre(138,79,"Tiling");
 
-  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,TOUCHE_ESC); // 1
   Fenetre_Definir_bouton_normal(74,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
   Fenetre_Definir_bouton_saisie(91,21,4);                         // 3
   Bouton_saisie_Decalage_X=Fenetre_Liste_boutons_special;
@@ -4777,7 +4777,7 @@ void Bouton_Spray_Menu(void)
 
   Ouvrir_fenetre(226,170,"Spray");
 
-  Fenetre_Definir_bouton_normal(110,148,51,14,"Cancel"    ,0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(110,148,51,14,"Cancel"    ,0,1,TOUCHE_ESC); // 1
   Fenetre_Definir_bouton_normal(166,148,51,14,"OK"        ,0,1,SDLK_RETURN); // 2
 
   Fenetre_Definir_bouton_scroller(178,62,74,50,1,49-Spray_Multi_flow[Couleur_selectionnee]); // 3
@@ -5231,7 +5231,7 @@ void Bouton_Trame_Menu(void)
 
   Fenetre_Definir_bouton_special(143,69,80,80);                     // 1
 
-  Fenetre_Definir_bouton_normal(175,157,51,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal(175,157,51,14,"Cancel",0,1,TOUCHE_ESC); // 2
   Fenetre_Definir_bouton_normal(230,157,51,14,"OK"    ,0,1,SDLK_RETURN); // 3
 
   Fenetre_Definir_bouton_normal(  8,157,51,14,"Clear" ,1,1,SDLK_c); // 4
@@ -5675,7 +5675,7 @@ void Bouton_Effets(void)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
 
-    if (Touche==SDLK_ESCAPE)
+    if (Touche==TOUCHE_ESC)
     {
       Bouton_clicke=11;
       Touche=0;
@@ -5990,7 +5990,7 @@ void Bouton_Texte()
   Fenetre_Afficher_cadre_creux(7, 105, 275, 52);
   
   Fenetre_Definir_bouton_normal(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
-  Fenetre_Definir_bouton_normal(54,160,60,14,"Cancel",0,1,SDLK_ESCAPE); // 12
+  Fenetre_Definir_bouton_normal(54,160,60,14,"Cancel",0,1,TOUCHE_ESC); // 12
   Display_Window(288,180);
   
   // Chaine texte

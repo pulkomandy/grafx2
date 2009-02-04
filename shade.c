@@ -357,7 +357,7 @@ short Attendre_click_dans_shade()
       Case_choisie=(((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)/7)<<6)+
                     ((((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-8 )>>2);
 
-    if ((Mouse_K==A_DROITE) || (Touche==SDLK_ESCAPE))
+    if ((Mouse_K==A_DROITE) || (Touche==TOUCHE_ESC))
       Case_choisie=512; // valeur indiquant que l'on n'a rien choisi
   }
 
@@ -471,7 +471,7 @@ int Menu_Shade(void)
   Fenetre_Definir_bouton_special(8,127,256,53);                     // 3
 
   // Déclaration & tracé des boutons de sortie
-  Fenetre_Definir_bouton_normal(207,17,51,14,"Cancel",0,1,SDLK_ESCAPE);  // 4
+  Fenetre_Definir_bouton_normal(207,17,51,14,"Cancel",0,1,TOUCHE_ESC);   // 4
   Fenetre_Definir_bouton_normal(261,17,43,14,"OK"    ,0,1,SDLK_RETURN);  // 5
 
   // Déclaration & tracé des boutons de copie de shade
@@ -1042,7 +1042,7 @@ void Bouton_Quick_shade_Menu(void)
   Ouvrir_fenetre(142,56,"Quick-shade");
 
   Fenetre_Definir_bouton_normal(76,36,60,14,"OK",0,1,SDLK_RETURN);     // 1
-  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,SDLK_ESCAPE); // 2
+  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,TOUCHE_ESC); // 2
   Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,SDLK_TAB);       // 3
   Afficher_mode_du_shade(83,21,Quick_shade_Loop);
 

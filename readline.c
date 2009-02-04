@@ -178,7 +178,7 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
   Flush_update();
 
-  while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=SDLK_ESCAPE))
+  while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=TOUCHE_ESC))
   {
     Touche_lue=Get_key();
     switch (Touche_lue)
@@ -258,7 +258,7 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
       case SDLK_RETURN :
         break;
         
-      case SDLK_ESCAPE :
+      case TOUCHE_ESC :
         // On restaure la chaine initiale
         strcpy(Chaine,Chaine_initiale);
         Taille=strlen(Chaine);

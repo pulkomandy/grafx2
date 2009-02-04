@@ -849,7 +849,7 @@ void Bouton_Palette(void)
   Print_dans_fenetre(241,41,"to",CM_Fonce,CM_Clair);
 
   Fenetre_Definir_bouton_normal(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
-  Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,SDLK_ESCAPE);  // 13
+  Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,TOUCHE_ESC);  // 13
   Fenetre_Definir_bouton_normal(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
   Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
@@ -2087,7 +2087,7 @@ void Bouton_Palette_secondaire(void)
 
   Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
   Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
-  Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,SDLK_ESCAPE); // 3
+  Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,TOUCHE_ESC); // 3
 
   UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*200,Menu_Facteur_Y*80);
 

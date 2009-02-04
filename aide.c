@@ -270,7 +270,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
         Menu_Facteur_X*272,Menu_Facteur_Y*130,CM_Noir);
 
-  Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,TOUCHE_ESC); // 1
   Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
                                   16,Position_d_aide_en_cours);   // 2
 
@@ -412,7 +412,7 @@ void Bouton_Stats(void)
         Fenetre_Pos_Y+(Menu_Facteur_Y*18),
         Menu_Facteur_X*292,Menu_Facteur_Y*130,CM_Noir);
 
-  Fenetre_Definir_bouton_normal(120,153,70,14,"OK",0,1,SDLK_ESCAPE); // 1
+  Fenetre_Definir_bouton_normal(120,153,70,14,"OK",0,1,TOUCHE_ESC); // 1
 
   // Affichage du numéro de version
   Print_dans_fenetre(10,19,"Program version:",STATS_COULEUR_TITRES,CM_Noir);

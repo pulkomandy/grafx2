@@ -696,7 +696,7 @@ byte Demande_de_confirmation(char * Message)
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
     if (Touche==SDLK_RETURN) Bouton_clicke=1;
-    if (Touche==SDLK_ESCAPE) Bouton_clicke=2;
+    if (Touche==TOUCHE_ESC) Bouton_clicke=2;
   }
   while (Bouton_clicke<=0);
   Touche=0;
@@ -728,7 +728,7 @@ void Warning_message(char * Message)
 
   do
     Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=SDLK_ESCAPE) && (Touche!=SDLK_o));
+  while ((Bouton_clicke<=0) && (Touche!=TOUCHE_ESC) && (Touche!=SDLK_o));
   Touche=0;
 
   Fermer_fenetre();
