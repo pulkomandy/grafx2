@@ -156,6 +156,8 @@ void Encadrer_couleur_menu(byte Couleur)
 
       Block(Debut_X,Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*3,Couleur);
       Block(Debut_X+(Menu_Taille_couleur*Menu_Facteur_X),Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*3,Couleur);
+
+      UpdateRect(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y*4);
     }
     else
     {
@@ -167,7 +169,7 @@ void Encadrer_couleur_menu(byte Couleur)
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y<<2,Fore_color);
 
-        UpdateRect(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*4); // TODO On met à jour toute la palette... peut mieux faire
+        UpdateRect(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y*4);
       }
       else
       {

@@ -30,10 +30,6 @@
 #include "erreurs.h"
 #include "graph.h"
 
-#undef OPTIMISATIONS_ASSEMBLEUR
-
-
-
 void RGBtoHSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
 {
   double rd,gd,bd,h,s,l,max,min;
