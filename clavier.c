@@ -437,10 +437,38 @@ const char * Nom_touche(word Touche)
     strcat(Buffer, "Alt+");
   if (Touche & MOD_SHIFT)
     strcat(Buffer, "Shift+");
-
   if (Touche>=TOUCHE_BUTTON && Touche<=TOUCHE_BUTTON+18)
   {
+#ifdef __gp2x__
+    
+    char *NomBouton;
+    switch(Touche)
+    {    
+      case GP2X_BUTTON_UP: NomBouton="[UP]"; break;
+      case GP2X_BUTTON_DOWN: NomBouton="[DOWN]"; break;
+      case GP2X_BUTTON_LEFT: NomBouton="[LEFT]"; break;
+      case GP2X_BUTTON_RIGHT: NomBouton="[RIGHT]"; break;
+      case GP2X_BUTTON_UPLEFT: NomBouton="[UP-LEFT]"; break;
+      case GP2X_BUTTON_UPRIGHT: NomBouton="[UP-RIGHT]"; break;
+      case GP2X_BUTTON_DOWNLEFT: NomBouton="[DOWN-LEFT]"; break;
+      case GP2X_BUTTON_DOWNRIGHT: NomBouton="[DOWN-RIGHT]"; break;
+      case GP2X_BUTTON_CLICK: NomBouton="[CLICK]"; break;
+      case GP2X_BUTTON_A: NomBouton="[A]"; break;
+      case GP2X_BUTTON_B: NomBouton="[B]"; break;
+      case GP2X_BUTTON_X: NomBouton="[X]"; break;
+      case GP2X_BUTTON_Y: NomBouton="[Y]"; break;
+      case GP2X_BUTTON_L: NomBouton="[L]"; break;
+      case GP2X_BUTTON_R: NomBouton="[R]"; break;
+      case GP2X_BUTTON_START: NomBouton="[START]"; break;
+      case GP2X_BUTTON_SELECT: NomBouton="[SELECT]"; break;
+      case GP2X_BUTTON_VOLUP: NomBouton="[VOL UP]"; break;
+      case GP2X_BUTTON_VOLDOWN: NomBouton="[VOL DOWN]"; break;
+      default: sprintf(Buffer+strlen(Buffer), "[B%d]", Touche);return Buffer;
+    }
+    strcat(Buffer,NomBouton);
+#else    
     sprintf(Buffer+strlen(Buffer), "[B%d]", Touche);
+#endif
     return Buffer;
   }
   
