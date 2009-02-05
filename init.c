@@ -886,8 +886,10 @@ void Initialisation_des_boutons(void)
 
   for (Indice_bouton=0;Indice_bouton<NB_BOUTONS;Indice_bouton++)
   {
-    Bouton[Indice_bouton].Raccourci_gauche=0xFFFF;
-    Bouton[Indice_bouton].Raccourci_droite=0xFFFF;
+    Bouton[Indice_bouton].Raccourci_gauche[0]=0xFFFF;
+    Bouton[Indice_bouton].Raccourci_gauche[1]=0xFFFF;
+    Bouton[Indice_bouton].Raccourci_droite[0]=0xFFFF;
+    Bouton[Indice_bouton].Raccourci_droite[1]=0xFFFF;
     Initialiser_bouton(Indice_bouton,
                        0,0,
                        1,1,
@@ -1944,6 +1946,14 @@ int Charger_CFG(int Tout_charger)
     // Les touches (scancodes) sont à convertir)
     Conversion_touches = 1;
   }
+  // Version SDL jusqu'a 98%
+  else if ( (CFG_Header.Version1== 2)
+    && (CFG_Header.Version2== 0)
+    && (CFG_Header.Beta1== 97))
+  {
+    // Les touches 00FF (pas de touche) sont a comprendre comme 0xFFFF
+    Conversion_touches = 2;
+  }
   // Version SDL
   else if ( (CFG_Header.Version1!=VERSION1)
     || (CFG_Header.Version2!=VERSION2)
@@ -1968,10 +1978,18 @@ int Charger_CFG(int Tout_charger)
               goto Erreur_lecture_config;
             else
             {
-              if (Conversion_touches)
+              if (Conversion_touches==1)
               {
                 CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
               }
+              else if (Conversion_touches==2)
+              {
+                if (CFG_Infos_touche.Touche == 0x00FF)
+                  CFG_Infos_touche.Touche = 0xFFFF;
+                if (CFG_Infos_touche.Touche2 == 0x00FF)
+                  CFG_Infos_touche.Touche2 = 0xFFFF;
+              }
+              
               for (Indice2=0;
                  ((Indice2<NB_TOUCHES) && (ConfigTouche[Indice2].Numero!=CFG_Infos_touche.Numero));
                  Indice2++);
@@ -1980,13 +1998,16 @@ int Charger_CFG(int Tout_charger)
                 switch(Ordonnancement[Indice2]>>8)
                 {
                   case 0 :
-                    Config_Touche[Ordonnancement[Indice2]&0xFF]=CFG_Infos_touche.Touche;
+                    Config_Touche[Ordonnancement[Indice2]&0xFF][0]=CFG_Infos_touche.Touche;
+                    Config_Touche[Ordonnancement[Indice2]&0xFF][1]=CFG_Infos_touche.Touche2;
                     break;
                   case 1 :
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche = CFG_Infos_touche.Touche;
+                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche[0] = CFG_Infos_touche.Touche;
+                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche[1] = CFG_Infos_touche.Touche2;
                     break;
                   case 2 :
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite = CFG_Infos_touche.Touche;
+                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite[0] = CFG_Infos_touche.Touche;
+                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite[1] = CFG_Infos_touche.Touche2;
                     break;
                 }
               }
@@ -2220,11 +2241,19 @@ int Sauver_CFG(void)
     CFG_Infos_touche.Numero = ConfigTouche[Indice].Numero;
     switch(Ordonnancement[Indice]>>8)
     {
-      case 0 : CFG_Infos_touche.Touche=Config_Touche[Ordonnancement[Indice]&0xFF]; break;
-      case 1 : CFG_Infos_touche.Touche=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche; break;
-      case 2 : CFG_Infos_touche.Touche=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite; break;
+      case 0 :
+        CFG_Infos_touche.Touche =Config_Touche[Ordonnancement[Indice]&0xFF][0]; 
+        CFG_Infos_touche.Touche2=Config_Touche[Ordonnancement[Indice]&0xFF][1]; 
+        break;
+      case 1 :
+        CFG_Infos_touche.Touche =Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[0]; 
+        CFG_Infos_touche.Touche2=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[1]; 
+        break;
+      case 2 : 
+        CFG_Infos_touche.Touche =Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[0]; 
+        CFG_Infos_touche.Touche2=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[1]; 
+        break;
     }
-    CFG_Infos_touche.Touche2=0x00FF;
     if (!write_word_le(Handle, CFG_Infos_touche.Numero) ||
         !write_word_le(Handle, CFG_Infos_touche.Touche) ||
         !write_word_le(Handle, CFG_Infos_touche.Touche2) )
@@ -2399,13 +2428,16 @@ void Config_par_defaut(void)
     switch(Ordonnancement[Indice]>>8)
     {
       case 0 :
-        Config_Touche[Ordonnancement[Indice]&0xFF]=ConfigTouche[Indice].Touche;
+        Config_Touche[Ordonnancement[Indice]&0xFF][0]=ConfigTouche[Indice].Touche;
+        Config_Touche[Ordonnancement[Indice]&0xFF][1]=ConfigTouche[Indice].Touche2;
         break;
       case 1 :
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche = ConfigTouche[Indice].Touche;
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[0] = ConfigTouche[Indice].Touche;
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[1] = ConfigTouche[Indice].Touche2;
         break;
       case 2 :
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite = ConfigTouche[Indice].Touche;
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[0] = ConfigTouche[Indice].Touche;
+        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[1] = ConfigTouche[Indice].Touche2;
         break;
     }
   }

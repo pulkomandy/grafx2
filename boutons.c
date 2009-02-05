@@ -441,7 +441,7 @@ byte Bouton_Quitter_Routine_locale(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_QUIT, NULL);
   }
   while (Bouton_clicke<=0);
@@ -631,7 +631,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
         Touche=0;
         break;
       default:
-      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       {
         Fenetre_aide(BOUTON_EFFETS, Section_aide);
         Touche=0;
@@ -967,7 +967,7 @@ void Bouton_Settings(void)
     if ((Bouton_clicke>=1) && (Bouton_clicke<=18))
       Settings_Afficher_config(&Config_choisie);
       
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_PARAMETRES, NULL);
   }
   while ( (Bouton_clicke!=18) && (Touche!=SDLK_RETURN) );
@@ -1194,7 +1194,7 @@ void Bouton_Copy_page(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_PAGE, NULL);
   }
   while (Bouton_clicke<=0);
@@ -1609,7 +1609,7 @@ void Bouton_Resol(void)
         Touche=0;
         break;
       default:
-        if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
         {
           Fenetre_aide(BOUTON_RESOL, NULL);
           Touche=0;
@@ -2076,9 +2076,9 @@ void Bouton_Degrades(void)
         Touche=0;
         break;
       default:
-        if (Touche==Bouton[BOUTON_GRADMENU].Raccourci_gauche)
+        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
         {
-          Fenetre_aide(BOUTON_PINCEAUX, NULL);
+          Fenetre_aide(BOUTON_GRADMENU, NULL);
           Touche=0;
           break;
         }
@@ -2207,7 +2207,7 @@ void Bouton_Menu_pinceaux(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_PINCEAUX, NULL);
   }
   while (Bouton_clicke<=0);
@@ -2949,7 +2949,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       default: // Autre => On se place sur le nom de fichier qui correspond
         if (Bouton_clicke<=0)
         {
-          if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+          if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
           {
             Fenetre_aide(Load?BOUTON_CHARGER:BOUTON_SAUVER, NULL);
             break;
@@ -3906,7 +3906,7 @@ void Bouton_Menu_Loupe(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_LOUPE, NULL);
   }
   while (Bouton_clicke<=0);
@@ -4123,7 +4123,7 @@ void Bouton_Menu_Grille(void)
 
         Afficher_curseur();
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_EFFETS, "GRID");
   }
   while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
@@ -4160,28 +4160,28 @@ void Bouton_Brush_FX(void)
   Fenetre_Afficher_cadre(137,83,167,53);
 
   Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,TOUCHE_ESC); // 1
-  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,0,1,Config_Touche[SPECIAL_FLIP_X]); // 2
-  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,0,1,Config_Touche[SPECIAL_FLIP_Y]); // 3
-  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,Config_Touche[SPECIAL_ROTATE_90]); // 4
-  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,Config_Touche[SPECIAL_ROTATE_180]); // 5
-  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,Config_Touche[SPECIAL_ROTATE_ANY_ANGLE]); // 6
-  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,0,1,Config_Touche[SPECIAL_STRETCH]); // 7
-  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,0,1,Config_Touche[SPECIAL_DISTORT]); // 8
-  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,0,1,Config_Touche[SPECIAL_RECOLORIZE_BRUSH]); // 9
-  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",0,1,Config_Touche[SPECIAL_GET_BRUSH_COLORS]); // 10
+  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,0,1,Config_Touche[SPECIAL_FLIP_X][0]); // 2
+  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,0,1,Config_Touche[SPECIAL_FLIP_Y][0]); // 3
+  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,Config_Touche[SPECIAL_ROTATE_90][0]); // 4
+  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,Config_Touche[SPECIAL_ROTATE_180][0]); // 5
+  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,Config_Touche[SPECIAL_ROTATE_ANY_ANGLE][0]); // 6
+  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,0,1,Config_Touche[SPECIAL_STRETCH][0]); // 7
+  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,0,1,Config_Touche[SPECIAL_DISTORT][0]); // 8
+  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,0,1,Config_Touche[SPECIAL_RECOLORIZE_BRUSH][0]); // 9
+  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",0,1,Config_Touche[SPECIAL_GET_BRUSH_COLORS][0]); // 10
 
   // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
-  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_LEFT_ATTACHMENT]); // 11
-  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_RIGHT_ATTACHMENT]); // 12
-  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,Config_Touche[SPECIAL_CENTER_ATTACHMENT]); // 13
-  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_LEFT_ATTACHMENT]); // 14
-  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_RIGHT_ATTACHMENT]); // 15
+  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_LEFT_ATTACHMENT][0]); // 11
+  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_RIGHT_ATTACHMENT][0]); // 12
+  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,Config_Touche[SPECIAL_CENTER_ATTACHMENT][0]); // 13
+  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_LEFT_ATTACHMENT][0]); // 14
+  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_RIGHT_ATTACHMENT][0]); // 15
 
-  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",0,1,Config_Touche[SPECIAL_OUTLINE]); // 16
-  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,0,1,Config_Touche[SPECIAL_NIBBLE]); // 17
+  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",0,1,Config_Touche[SPECIAL_OUTLINE][0]); // 16
+  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,0,1,Config_Touche[SPECIAL_NIBBLE][0]); // 17
 
-  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",0,1,Config_Touche[SPECIAL_LOAD_BRUSH]); // 18
-  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",0,1,Config_Touche[SPECIAL_SAVE_BRUSH]); // 19
+  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",0,1,Config_Touche[SPECIAL_LOAD_BRUSH][0]); // 18
+  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",0,1,Config_Touche[SPECIAL_SAVE_BRUSH][0]); // 19
 
   Print_dans_fenetre( 80, 24,"Shape modifications",CM_Fonce,CM_Clair);
   Print_dans_fenetre( 10, 36,"Mirror",CM_Fonce,CM_Clair);
@@ -4224,7 +4224,7 @@ void Bouton_Brush_FX(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
     {
       Touche=0;
       Fenetre_aide(BOUTON_EFFETS_BROSSE, NULL);
@@ -4410,7 +4410,7 @@ void Bouton_Smooth_Menu(void)
         Afficher_curseur();
       }
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_EFFETS, "SMOOTH");
   }
   while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
@@ -4577,7 +4577,7 @@ void Bouton_Colorize_Menu(void)
         Bouton_Colorize_Afficher_la_selection(Mode_choisi);
         Afficher_curseur();
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_EFFETS, "TRANSPARENCY");
   }
   while (Bouton_clicke<5);
@@ -4678,7 +4678,7 @@ void Bouton_Tiling_Menu(void)
       }
       Afficher_curseur();
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_EFFETS, "TILING");
   }
   while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
@@ -5054,7 +5054,7 @@ void Bouton_Spray_Menu(void)
         Touche=0;
         break;
       default:
-      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       {
         Fenetre_aide(BOUTON_SPRAY, NULL);
         Touche=0;
@@ -5516,7 +5516,7 @@ void Bouton_Trame_Menu(void)
         Afficher_curseur();
         Mettre_a_jour_trame(Orig_X, Orig_Y);
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
     {
       Touche=0;
       Fenetre_aide(BOUTON_EFFETS, "SIEVE");
@@ -5640,16 +5640,16 @@ void Bouton_Effets(void)
 
   Ouvrir_fenetre(270,152,"Drawing modes (effects)");
 
-  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,Config_Touche[SPECIAL_SHADE_MODE]); // 1
-  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,Config_Touche[SPECIAL_QUICK_SHADE_MODE]); // 2
-  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,Config_Touche[SPECIAL_COLORIZE_MODE]); // 3
-  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,Config_Touche[SPECIAL_SMOOTH_MODE]); // 4
-  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,Config_Touche[SPECIAL_SMEAR_MODE]); // 5
-  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,Config_Touche[SPECIAL_MASK_MODE]); // 6
-  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,Config_Touche[SPECIAL_STENCIL_MODE]); // 7
-  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,Config_Touche[SPECIAL_SIEVE_MODE]); // 8
-  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,Config_Touche[SPECIAL_GRID_MODE]); // 9
-  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,Config_Touche[SPECIAL_TILING_MODE]); // 10
+  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,Config_Touche[SPECIAL_SHADE_MODE][0]); // 1
+  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,Config_Touche[SPECIAL_QUICK_SHADE_MODE][0]); // 2
+  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,Config_Touche[SPECIAL_COLORIZE_MODE][0]); // 3
+  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,Config_Touche[SPECIAL_SMOOTH_MODE][0]); // 4
+  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,Config_Touche[SPECIAL_SMEAR_MODE][0]); // 5
+  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,Config_Touche[SPECIAL_MASK_MODE][0]); // 6
+  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,Config_Touche[SPECIAL_STENCIL_MODE][0]); // 7
+  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,Config_Touche[SPECIAL_SIEVE_MODE][0]); // 8
+  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,Config_Touche[SPECIAL_GRID_MODE][0]); // 9
+  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,Config_Touche[SPECIAL_TILING_MODE][0]); // 10
   Fenetre_Definir_bouton_normal(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
   Fenetre_Definir_bouton_normal(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
   Fenetre_Definir_bouton_normal( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
@@ -5680,7 +5680,7 @@ void Bouton_Effets(void)
       Bouton_clicke=11;
       Touche=0;
     }
-    else if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    else if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
     {
       Touche=0;
       // Aide contextuelle
@@ -6193,7 +6193,7 @@ void Bouton_Texte()
         Scroller_de_fontes->Position=Debut_liste;
         Fenetre_Dessiner_jauge(Scroller_de_fontes);
       }
-      if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
         Fenetre_aide(BOUTON_TEXTE, NULL);
     }
     switch(Bouton_clicke)

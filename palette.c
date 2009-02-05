@@ -35,6 +35,7 @@
 #include "erreurs.h"
 #include "op_c.h"
 #include "windows.h"
+#include "input.h"
 
 byte Palette_mode_RGB = 1; // Indique si on est en HSL ou en RGB
 
@@ -2005,7 +2006,7 @@ void Bouton_Palette(void)
           Touche=0;
           break;
         default:
-          if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+          if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
           {
             Touche=0;
             Fenetre_aide(BOUTON_PALETTE, NULL);
@@ -2096,7 +2097,7 @@ void Bouton_Palette_secondaire(void)
   do
   {
     Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
     {
       Touche=0;
       Fenetre_aide(BOUTON_PALETTE, NULL);

@@ -975,7 +975,7 @@ int Menu_Shade(void)
         Touche=0;
         break;
       default:
-        if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
         {
           Touche=0;
           Fenetre_aide(BOUTON_EFFETS, "SHADE");
@@ -1090,7 +1090,7 @@ void Bouton_Quick_shade_Menu(void)
         Quick_shade_Step=Temp;
         Afficher_curseur();
     }
-    if (Touche==Bouton[BOUTON_AIDE].Raccourci_gauche)
+    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
       Fenetre_aide(BOUTON_EFFETS, "QUICK SHADE");
   }
   while ((Bouton_clicke!=1) && (Bouton_clicke!=2));

@@ -535,7 +535,7 @@ void Gestion_principale(void)
     // Gestion des touches
     if (Touche)
     {
-      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && (Touche!=Config_Touche[Indice_Touche]);Indice_Touche++);
+      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && (Touche!=Config_Touche[Indice_Touche][0]) && (Touche!=Config_Touche[Indice_Touche][1]);Indice_Touche++);
 
       // Gestion des touches spéciales:
       if (Indice_Touche>SPECIAL_CLICK_RIGHT)
@@ -901,13 +901,13 @@ void Gestion_principale(void)
           Bouton_Touche=-1;
           for (Indice_bouton=0;Indice_bouton<NB_BOUTONS;Indice_bouton++)
           {
-            if (Touche==Bouton[Indice_bouton].Raccourci_gauche)
+            if (Est_Raccourci(Touche,0x100+Indice_bouton))
             {
               Bouton_Touche=Indice_bouton;
               Bouton_Cote  =A_GAUCHE;
               Indice_bouton=NB_BOUTONS;
             }
-            else if (Touche==Bouton[Indice_bouton].Raccourci_droite)
+            else if (Est_Raccourci(Touche,0x200+Indice_bouton))
             {
               Bouton_Touche=Indice_bouton;
               Bouton_Cote  =A_DROITE;

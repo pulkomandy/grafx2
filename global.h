@@ -83,7 +83,7 @@ GFX2_GLOBAL struct S_Config
 } Config;
 
   // Tableau des touches spéciales
-GFX2_GLOBAL word Config_Touche[NB_TOUCHES_SPECIALES];
+GFX2_GLOBAL word Config_Touche[NB_TOUCHES_SPECIALES][2];
 
 
 struct S_Mode_video
@@ -391,8 +391,8 @@ GFX2_GLOBAL struct
   // Information sur les clicks de la souris:
   fonction_action Gauche;            // Action déclenchée par un click gauche sur le bouton
   fonction_action Droite;            // Action déclenchée par un click droit  sur le bouton
-  word            Raccourci_gauche;  // Raccourci clavier équivalent à un click gauche sur le bouton
-  word            Raccourci_droite;  // Raccourci clavier équivalent à un click droit  sur le bouton
+  word            Raccourci_gauche[2];  // Raccourci clavier équivalent à un click gauche sur le bouton
+  word            Raccourci_droite[2];  // Raccourci clavier équivalent à un click droit  sur le bouton
 
   // Informations sur le désenclenchement du bouton géré par le moteur:
   fonction_action Desenclencher;     // Action appelée lors du désenclenchement du bouton

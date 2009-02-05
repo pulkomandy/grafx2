@@ -53,23 +53,31 @@ extern char SVNRevision[];
 word * Raccourci(word NumeroRaccourci)
 {
   if (NumeroRaccourci & 0x100)
-    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_gauche);
+    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_gauche[0]);
   if (NumeroRaccourci & 0x200)
-    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_droite);
-  return &(Config_Touche[NumeroRaccourci & 0xFF]);
+    return &(Bouton[NumeroRaccourci & 0xFF].Raccourci_droite[0]);
+  return &(Config_Touche[NumeroRaccourci & 0xFF][0]);
 }
 
 // Nom de la touche actuallement assignée à un raccourci d'après son numéro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
 {
+  static char Noms_raccourcis[80];
   word * Pointeur = Raccourci(NumeroRaccourci);
   if (Pointeur == NULL)
     return "(Problem)";
-  else if (*Pointeur == 0 || *Pointeur == 0xFFFF)
-    return "None";
   else
-    return Nom_touche(*Pointeur);
+  {
+    if (Pointeur[0] == 0 || Pointeur[0] == 0xFFFF)
+      return "None";
+    strcpy(Noms_raccourcis, Nom_touche(Pointeur[0]));
+    if (Pointeur[1] == 0 || Pointeur[1] == 0xFFFF)
+      return Noms_raccourcis;
+    strcat(Noms_raccourcis, " ");
+    strcat(Noms_raccourcis, Nom_touche(Pointeur[1]));
+    return Noms_raccourcis;
+  }
 }
 
 

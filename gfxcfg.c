@@ -42,6 +42,17 @@
 #define MOD_CTRL  0x2000
 #define MOD_ALT   0x4000
 
+#define TOUCHE_MOUSEMIDDLE     (SDLK_LAST+1)
+#define TOUCHE_MOUSEWHEELUP    (SDLK_LAST+2)
+#define TOUCHE_MOUSEWHEELDOWN  (SDLK_LAST+3)
+#define TOUCHE_BUTTON          (SDLK_LAST+4)
+
+#ifdef __gp2x__
+  #define TOUCHE_ESC (TOUCHE_BUTTON+GP2X_BUTTON_X)
+#else
+  #define TOUCHE_ESC SDLK_ESCAPE
+#endif
+
 #include "struct.h"
 #include "clavier.h"
 #include "const.h"
@@ -640,7 +651,7 @@ void Enregistrer_config()
           {
             write_word_le(Fichier,ConfigTouche[Indice_touche].Numero);
             write_word_le(Fichier,ConfigTouche[Indice_touche].Touche);
-            write_word_le(Fichier,0xFF);
+            write_word_le(Fichier,ConfigTouche[Indice_touche].Touche2);
           }
         }
         else

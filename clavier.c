@@ -421,7 +421,10 @@ const char * Nom_touche(word Touche)
     { SDLK_MENU        , "Menu" },
     { SDLK_POWER       , "Power" },
     { SDLK_EURO        , "Euro" },
-    { SDLK_UNDO        , "Undo" }
+    { SDLK_UNDO        , "Undo" },
+    { TOUCHE_MOUSEMIDDLE, "Mouse3" },
+    { TOUCHE_MOUSEWHEELUP, "WheelUp" },
+    { TOUCHE_MOUSEWHEELDOWN, "WheelDown" }
   };
 
   int Indice;
@@ -435,6 +438,12 @@ const char * Nom_touche(word Touche)
   if (Touche & MOD_SHIFT)
     strcat(Buffer, "Shift+");
 
+  if (Touche>=TOUCHE_BUTTON && Touche<=TOUCHE_BUTTON+18)
+  {
+    sprintf(Buffer+strlen(Buffer), "[B%d]", Touche);
+    return Buffer;
+  }
+  
   if (Touche & 0x8000)
   {
     sprintf(Buffer+strlen(Buffer), "[%d]", Touche & 0xFFF);

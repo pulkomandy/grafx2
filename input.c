@@ -52,6 +52,30 @@ short Button_alt=-1; // Button number that serves as a "alt" modifier
 short Button_clic_gauche=0; // Button number that serves as left click
 short Button_clic_droit=0; // Button number that serves as right-click
 
+int Est_Raccourci(word Touche, word Fonction)
+{
+  if (Fonction & 0x100)
+  {
+    if (Bouton[Fonction&0xFF].Raccourci_gauche[0]==Touche)
+      return 1;
+    if (Bouton[Fonction&0xFF].Raccourci_gauche[1]==Touche)
+      return 1;
+    return 0;
+  }
+  if (Fonction & 0x200)
+  {
+    if (Bouton[Fonction&0xFF].Raccourci_droite[0]==Touche)
+      return 1;
+    if (Bouton[Fonction&0xFF].Raccourci_droite[1]==Touche)
+      return 1;
+    return 0;
+  }
+  if(Touche == Config_Touche[Fonction][0])
+    return 1;
+  if(Touche == Config_Touche[Fonction][1])
+    return 1;
+  return 0; 
+}
 
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
 int Move_cursor_with_constraints()
@@ -210,32 +234,32 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
     Touche = Conversion_Touche(event.keysym);
     Touche_ANSI = Conversion_ANSI(event.keysym);
 
-    if(Touche == Config_Touche[SPECIAL_MOUSE_UP])
+    if(Est_Raccourci(Touche,SPECIAL_MOUSE_UP))
     {
       Directional_up=1;
       return 0;
     }
-    else if(Touche == Config_Touche[SPECIAL_MOUSE_DOWN])
+    else if(Est_Raccourci(Touche,SPECIAL_MOUSE_DOWN))
     {
       Directional_down=1;
       return 0;
     }
-    else if(Touche == Config_Touche[SPECIAL_MOUSE_LEFT])
+    else if(Est_Raccourci(Touche,SPECIAL_MOUSE_LEFT))
     {
       Directional_left=1;
       return 0;
     }
-    else if(Touche == Config_Touche[SPECIAL_MOUSE_RIGHT])
+    else if(Est_Raccourci(Touche,SPECIAL_MOUSE_RIGHT))
     {
       Directional_right=1;
       return 0;
     }
-    else if(Touche == Config_Touche[SPECIAL_CLICK_LEFT])
+    else if(Est_Raccourci(Touche,SPECIAL_CLICK_LEFT))
     {
         INPUT_Nouveau_Mouse_K=1;
         return Move_cursor_with_constraints();
     }
-    else if(Touche == Config_Touche[SPECIAL_CLICK_RIGHT])
+    else if(Est_Raccourci(Touche,SPECIAL_CLICK_RIGHT))
     {
         INPUT_Nouveau_Mouse_K=2;
         return Move_cursor_with_constraints();
@@ -252,16 +276,16 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
             //supportant le changement de couleur ou de taille de pinceau.
 
             if(
-                    (Touche != Config_Touche[SPECIAL_NEXT_FORECOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_PREVIOUS_FORECOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_NEXT_BACKCOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_PREVIOUS_BACKCOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_RETRECIR_PINCEAU]) &&
-                    (Touche != Config_Touche[SPECIAL_GROSSIR_PINCEAU]) &&
-                    (Touche != Config_Touche[SPECIAL_NEXT_USER_FORECOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_PREVIOUS_USER_FORECOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_NEXT_USER_BACKCOLOR]) &&
-                    (Touche != Config_Touche[SPECIAL_PREVIOUS_USER_BACKCOLOR])
+                    (!Est_Raccourci(Touche,SPECIAL_NEXT_FORECOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_PREVIOUS_FORECOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_NEXT_BACKCOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_PREVIOUS_BACKCOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_RETRECIR_PINCEAU)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_GROSSIR_PINCEAU)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_NEXT_USER_FORECOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_PREVIOUS_USER_FORECOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_NEXT_USER_BACKCOLOR)) &&
+                    (!Est_Raccourci(Touche,SPECIAL_PREVIOUS_USER_BACKCOLOR))
               )
             {
                 Touche=0;
@@ -276,28 +300,34 @@ int Handle_Key_Press(SDL_KeyboardEvent event)
 int Relache_controle(int CodeTouche, int Modifieur)
 {
 
-    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_UP]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_UP][0]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_MOUSE_UP][1]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_UP][1]&Modifieur))
     {
       Directional_up=0;
     }
-    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_DOWN]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_DOWN][0]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_MOUSE_DOWN][1]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_DOWN][1]&Modifieur))
     {
       Directional_down=0;
     }
-    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_LEFT][0]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_MOUSE_LEFT][1]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_LEFT][1]&Modifieur))
     {
       Directional_left=0;
     }
-    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_MOUSE_RIGHT][0]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_MOUSE_RIGHT][1]&0x0FFF) || (Config_Touche[SPECIAL_MOUSE_RIGHT][1]&Modifieur))
     {
       Directional_right=0;
     }
-    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_LEFT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_LEFT][0]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_CLICK_LEFT][1]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_LEFT][1]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~1;
         return Move_cursor_with_constraints();
     }
-    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_RIGHT]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT]&Modifieur))
+    if(CodeTouche == (Config_Touche[SPECIAL_CLICK_RIGHT][0]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT][0]&Modifieur) ||
+      CodeTouche == (Config_Touche[SPECIAL_CLICK_RIGHT][1]&0x0FFF) || (Config_Touche[SPECIAL_CLICK_RIGHT][1]&Modifieur))
     {
         INPUT_Nouveau_Mouse_K &= ~2;
         return Move_cursor_with_constraints();
@@ -605,7 +635,7 @@ int Get_input(void)
                 break;
                 
             default:
-                DEBUG("Unhandled SDL event number : ",event.type);
+            //    DEBUG("Unhandled SDL event number : ",event.type);
                 break;
         }
     }
