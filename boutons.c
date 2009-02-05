@@ -2626,34 +2626,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case  3 : // Delete
         if (Liste_Nb_elements && (*Principal_Nom_fichier!='.') && Type_selectionne!=2)
         {
+          char * Message;
           Effacer_curseur();
           // On affiche une demande de confirmation
           if (Principal_File_list_Position+Principal_File_list_Decalage>=Liste_Nb_repertoires)
           {
-            Print_dans_fenetre(127,107+FILENAMESPACE,"Delete",CM_Fonce,CM_Clair);
-            Print_dans_fenetre(127,115+FILENAMESPACE,"file ?",CM_Fonce,CM_Clair);
+            Message="Delete file ?";
           }
           else
           {
-            Print_dans_fenetre(127,107+FILENAMESPACE,"Remove",CM_Fonce,CM_Clair);
-            Print_dans_fenetre(127,115+FILENAMESPACE,"dir. ?",CM_Fonce,CM_Clair);
+            Message="Remove directory ?";
           }
-          Print_dans_fenetre(127,123+FILENAMESPACE,"Yes/No",CM_Fonce,CM_Clair);
-
-          do
-          {
-            SDL_PumpEvents();
-            Etat_Du_Clavier=SDL_GetKeyState(&Bidon);
-          } while ((Etat_Du_Clavier[SDLK_y]==0) && (Etat_Du_Clavier[SDLK_n]==0) && (Etat_Du_Clavier[TOUCHE_ESC]==0));
-
-          // On efface la demande de confirmation
-          Block(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
-                Menu_Facteur_X*48,Menu_Facteur_Y*24,CM_Clair);
-          UpdateRect(Fenetre_Pos_X+127*Menu_Facteur_X,Fenetre_Pos_Y+(107+FILENAMESPACE)*Menu_Facteur_Y,
-                Menu_Facteur_X*48,Menu_Facteur_Y*24);
-
-          // Si l'utilisateur confirme,
-          if (Etat_Du_Clavier[SDLK_y])
+          if (Demande_de_confirmation(Message))
           {
             // Si c'est un fichier
             if (Principal_File_list_Position+Principal_File_list_Decalage>=Liste_Nb_repertoires)
@@ -2699,7 +2683,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               Brouillon_File_list_Decalage=0;
             }
           }
-          Afficher_curseur();
         }
         break;
 
