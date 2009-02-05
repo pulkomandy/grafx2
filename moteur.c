@@ -535,7 +535,7 @@ void Gestion_principale(void)
     // Gestion des touches
     if (Touche)
     {
-      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && (Touche!=Config_Touche[Indice_Touche][0]) && (Touche!=Config_Touche[Indice_Touche][1]);Indice_Touche++);
+      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && !Est_Raccourci(Touche,Indice_bouton);Indice_Touche++);
 
       // Gestion des touches spéciales:
       if (Indice_Touche>SPECIAL_CLICK_RIGHT)
