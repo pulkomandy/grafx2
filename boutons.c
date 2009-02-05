@@ -445,7 +445,6 @@ byte Bouton_Quitter_Routine_locale(void)
       Fenetre_aide(BOUTON_QUIT, NULL);
   }
   while (Bouton_clicke<=0);
-  Attendre_fin_de_click();
 
   Fermer_fenetre();
   Afficher_curseur();

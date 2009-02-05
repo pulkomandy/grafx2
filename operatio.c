@@ -724,7 +724,6 @@ void Loupe_12_0(void)
 // Souris effacée: Oui
 
 {
-  Attendre_fin_de_click();
 
   // On passe en mode loupe
   Loupe_Mode=1;
@@ -762,6 +761,8 @@ void Loupe_12_0(void)
 
   // On fait de notre mieux pour restaurer l'ancienne opération:
   Demarrer_pile_operation(Operation_avant_interruption);
+  Afficher_curseur();
+  Attendre_fin_de_click();
 }
 
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????
@@ -1284,12 +1285,14 @@ void Fill_1_0(void)
 // Souris effacée: Oui
 //
 {
+  Effacer_curseur();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
   Shade_Table=Shade_Table_gauche;
   Remplir(Fore_color);
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -1303,12 +1306,14 @@ void Fill_2_0(void)
 // Souris effacée: Oui
 //
 {
+  Effacer_curseur();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
   Shade_Table=Shade_Table_droite;
   Remplir(Back_color);
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -1325,12 +1330,14 @@ void Remplacer_1_0(void)
 // Souris effacée: Oui
 //
 {
+  Effacer_curseur();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
 //  Shade_Table=Shade_Table_gauche;
   Remplacer(Fore_color);
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -1344,12 +1351,14 @@ void Remplacer_2_0(void)
 // Souris effacée: Oui
 //
 {
+  Effacer_curseur();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
 //  Shade_Table=Shade_Table_droite;
   Remplacer(Back_color);
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -1840,6 +1849,8 @@ void Courbe_4_points_2_9(void)
   Operation_POP(&X1);
   Operation_POP(&Couleur);
 
+  Effacer_curseur();
+  
   Courbe_Tracer_croix(X2,Y2);
   Courbe_Tracer_croix(X3,Y3);
 
@@ -1849,6 +1860,7 @@ void Courbe_4_points_2_9(void)
   Effacer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
   Tracer_courbe_Definitif(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
 
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -1996,11 +2008,14 @@ void Courbe_3_points_12_11(void)
   Operation_POP(&Couleur);
 
   Cacher_pinceau=0;
+  
+  Effacer_curseur();
 
   Effacer_courbe_Preview (X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
   Calculer_courbe_3_points(X1,Y1,X4,Y4,&X2,&Y2,&X3,&Y3);
   Tracer_courbe_Definitif(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
 
+  Afficher_curseur();
   Attendre_fin_de_click();
 }
 
@@ -2364,14 +2379,11 @@ void Polyfill_12_9(void)
   {
     //   La série de lignes est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
+    Effacer_curseur();
     Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
     Operation_POP(&Fin_Y);
     Operation_POP(&Fin_X);
     Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-
-    Afficher_curseur();
-    Attendre_fin_de_click();
-    Effacer_curseur();
 
     Afficher_ecran();
     Polyfill(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Couleur);
@@ -2384,6 +2396,9 @@ void Polyfill_12_9(void)
     }
 
     Cacher_pinceau=0;
+
+    Afficher_curseur();
+    Attendre_fin_de_click();
   }
 }
 
@@ -2485,7 +2500,6 @@ void Polyform_12_8(void)
     Operation_POP(&Initial_Y);
     Operation_POP(&Initial_X);
 
-    Attendre_fin_de_click();
     Effacer_curseur();
     Print_coordonnees();
 
@@ -2496,6 +2510,7 @@ void Polyform_12_8(void)
     Tracer_ligne_Definitif(Debut_X,Debut_Y,Initial_X,Initial_Y,Couleur);
 
     Afficher_curseur();
+    Attendre_fin_de_click();
   }
 }
 
@@ -2690,7 +2705,6 @@ void Filled_polyform_12_8(void)
     Operation_POP(&Initial_Y);
     Operation_POP(&Initial_X);
 
-    Attendre_fin_de_click();
     Effacer_curseur();
     Print_coordonnees();
 
@@ -2704,6 +2718,7 @@ void Filled_polyform_12_8(void)
     Cacher_pinceau=0;
 
     Afficher_curseur();
+    Attendre_fin_de_click();
   }
 }
 
@@ -2773,7 +2788,6 @@ void Filled_contour_0_8(void)
   Operation_POP(&Initial_Y);
   Operation_POP(&Initial_X);
 
-  Attendre_fin_de_click();
   Effacer_curseur();
   Print_coordonnees();
 
@@ -3053,7 +3067,6 @@ void Polybrosse_12_8(void)
     Operation_POP(&Initial_Y);
     Operation_POP(&Initial_X);
 
-    Attendre_fin_de_click();
     Effacer_curseur();
     Print_coordonnees();
 
@@ -3080,6 +3093,7 @@ void Polybrosse_12_8(void)
     // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
     // préalable:
     Afficher_curseur();
+    Attendre_fin_de_click();
     // !!! Efface la croix puis affiche le viseur !!!
     Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
     if (Config.Auto_discontinuous)
@@ -3429,8 +3443,8 @@ void Tourner_brosse_12_0(void)
   }
   else
   {
-    Attendre_fin_de_click();
     Demarrer_pile_operation(Operation_avant_interruption);
+    Attendre_fin_de_click(); // FIXME: celui-la il donne un résultat pas très chouette en visuel
   }
 }
 
@@ -3937,7 +3951,8 @@ void Cercle_degrade_12_8(void)
   Operation_POP(&Centre_X);
   Operation_POP(&Couleur);
   Operation_POP(&Ancien_Mouse_K);
-
+  
+  Effacer_curseur();
   // On efface la croix XOR au centre du cercle
   Courbe_Tracer_croix(Centre_X,Centre_Y);
 
@@ -3952,6 +3967,7 @@ void Cercle_degrade_12_8(void)
   if (Mouse_K==Ancien_Mouse_K)
     Tracer_cercle_degrade(Centre_X,Centre_Y,Rayon,Pinceau_X,Pinceau_Y);
 
+  Afficher_curseur();
   Attendre_fin_de_click();
 
   if ((Config.Coords_rel) && (Menu_visible))
@@ -4500,6 +4516,7 @@ void Rectangle_Degrade_0_9(void)
     Operation_POP(&Rect_Debut_X);
     Operation_Taille_pile --;
 
+    Effacer_curseur();
     // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
     Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
    
@@ -4507,6 +4524,7 @@ void Rectangle_Degrade_0_9(void)
 //    if (Mouse_K==Ancien_Mouse_K)                              // TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
         Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
 
+    Afficher_curseur();
     Attendre_fin_de_click();
 
     if ((Config.Coords_rel) && (Menu_visible))
@@ -4660,7 +4678,6 @@ void Lignes_centrees_12_7(void)
     }
 
     Afficher_curseur();
-
     Attendre_fin_de_click();
   }
 }

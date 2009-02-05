@@ -1365,14 +1365,14 @@ void Initialisation_des_operations(void)
                         Ellipse_pleine_0_5,1);
 
   Initialiser_operation(OPERATION_FILL,1,0,
-                        Fill_1_0,1);
+                        Fill_1_0,0);
   Initialiser_operation(OPERATION_FILL,2,0,
-                        Fill_2_0,1);
+                        Fill_2_0,0);
 
   Initialiser_operation(OPERATION_REMPLACER,1,0,
-                        Remplacer_1_0,1);
+                        Remplacer_1_0,0);
   Initialiser_operation(OPERATION_REMPLACER,2,0,
-                        Remplacer_2_0,1);
+                        Remplacer_2_0,0);
 
   Initialiser_operation(OPERATION_PRISE_BROSSE,1,0,
                         Brosse_12_0,1);
@@ -1431,9 +1431,9 @@ void Initialisation_des_operations(void)
                         Pipette_0_1,1);
 
   Initialiser_operation(OPERATION_LOUPE,1,0,
-                        Loupe_12_0,1);
+                        Loupe_12_0,0);
   Initialiser_operation(OPERATION_LOUPE,2,0,
-                        Loupe_12_0,1);
+                        Loupe_12_0,0);
 
   Initialiser_operation(OPERATION_COURBE_4_POINTS,1,0,
                         Courbe_34_points_1_0,1);
@@ -1448,7 +1448,7 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_COURBE_4_POINTS,1,9,
                         Courbe_4_points_1_9,0);
   Initialiser_operation(OPERATION_COURBE_4_POINTS,2,9,
-                        Courbe_4_points_2_9,1);
+                        Courbe_4_points_2_9,0);
 
   Initialiser_operation(OPERATION_COURBE_3_POINTS,1,0,
                         Courbe_34_points_1_0,1);
@@ -1463,9 +1463,9 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_COURBE_3_POINTS,0,11,
                         Courbe_3_points_0_11,0);
   Initialiser_operation(OPERATION_COURBE_3_POINTS,1,11,
-                        Courbe_3_points_12_11,1);
+                        Courbe_3_points_12_11,0);
   Initialiser_operation(OPERATION_COURBE_3_POINTS,2,11,
-                        Courbe_3_points_12_11,1);
+                        Courbe_3_points_12_11,0);
 
   Initialiser_operation(OPERATION_SPRAY,1,0,
                         Spray_1_0,0);
@@ -1504,9 +1504,9 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_POLYFILL,2,8,
                         Polyfill_12_8,0);
   Initialiser_operation(OPERATION_POLYFILL,1,9,
-                        Polyfill_12_9,1);
+                        Polyfill_12_9,0);
   Initialiser_operation(OPERATION_POLYFILL,2,9,
-                        Polyfill_12_9,1);
+                        Polyfill_12_9,0);
   Initialiser_operation(OPERATION_POLYFILL,0,8,
                         Polyfill_0_8,1);
   Initialiser_operation(OPERATION_POLYFILL,0,9,
@@ -1567,9 +1567,9 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_CERCLE_DEGRADE,0,6,
                         Cercle_degrade_0_6,1);
   Initialiser_operation(OPERATION_CERCLE_DEGRADE,1,8,
-                        Cercle_degrade_12_8,1);
+                        Cercle_degrade_12_8,0);
   Initialiser_operation(OPERATION_CERCLE_DEGRADE,2,8,
-                        Cercle_degrade_12_8,1);
+                        Cercle_degrade_12_8,0);
   Initialiser_operation(OPERATION_CERCLE_DEGRADE,0,8,
                         Cercle_ou_ellipse_degrade_0_8,0);
 
@@ -1596,7 +1596,7 @@ void Initialisation_des_operations(void)
   Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,7,Rectangle_Degrade_0_7,0);
   Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,7,Rectangle_Degrade_12_7,1);
   Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,9,Rectangle_Degrade_12_9,1);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,9,Rectangle_Degrade_0_9,1);
+  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,9,Rectangle_Degrade_0_9,0);
 
 
   Initialiser_operation(OPERATION_LIGNES_CENTREES,1,0,

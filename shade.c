@@ -361,7 +361,6 @@ short Attendre_click_dans_shade()
       Case_choisie=512; // valeur indiquant que l'on n'a rien choisi
   }
 
-  Attendre_fin_de_click();
   Effacer_curseur();
   Forme_curseur=FORME_CURSEUR_FLECHE;
   Cacher_curseur=Ancien_Cacher_curseur;
@@ -796,6 +795,7 @@ int Menu_Shade(void)
           Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
           Afficher_curseur();
         }
+        Attendre_fin_de_click();
         break;
 
       case 13 : // Set (disable)
