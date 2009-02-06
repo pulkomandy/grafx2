@@ -535,7 +535,7 @@ void Gestion_principale(void)
     // Gestion des touches
     if (Touche)
     {
-      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && !Est_Raccourci(Touche,Indice_bouton);Indice_Touche++);
+      for (Indice_Touche=0;(Indice_Touche<NB_TOUCHES_SPECIALES) && !Est_Raccourci(Touche,Indice_Touche);Indice_Touche++);
 
       // Gestion des touches spéciales:
       if (Indice_Touche>SPECIAL_CLICK_RIGHT)
@@ -2026,6 +2026,7 @@ short Fenetre_Numero_bouton_clicke(void)
   //long Hauteur_Curseur_jauge;
   long Hauteur_maxi_jauge;
 
+  Fenetre_Attribut1=Mouse_K;
 
   // Test du click sur les boutons normaux
   for (Temp1=Fenetre_Liste_boutons_normal; Temp1; Temp1=Temp1->Next)
@@ -2057,8 +2058,6 @@ short Fenetre_Numero_bouton_clicke(void)
             Effacer_curseur();
             Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
             Afficher_curseur();
-            
-            Fenetre_Attribut1=Mouse_K;
             return Temp1->Numero;
           }
         }
