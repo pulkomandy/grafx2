@@ -178,6 +178,47 @@ void Remapper_fileselect(void)
   if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
   {
     Calculer_couleurs_menu_optimales(Principal_Palette);
+
+    if(
+            (
+            Principal_Palette[CM_Noir].R==Principal_Palette[CM_Fonce].R &&
+            Principal_Palette[CM_Noir].V==Principal_Palette[CM_Fonce].V &&
+            Principal_Palette[CM_Noir].B==Principal_Palette[CM_Fonce].B
+            ) ||
+            (
+            Principal_Palette[CM_Clair].R==Principal_Palette[CM_Fonce].R &&
+            Principal_Palette[CM_Clair].V==Principal_Palette[CM_Fonce].V &&
+            Principal_Palette[CM_Clair].B==Principal_Palette[CM_Fonce].B
+            ) ||
+            (
+            Principal_Palette[CM_Blanc].R==Principal_Palette[CM_Clair].R &&
+            Principal_Palette[CM_Blanc].V==Principal_Palette[CM_Clair].V &&
+            Principal_Palette[CM_Blanc].B==Principal_Palette[CM_Clair].B
+            )
+      )
+    {
+        // Si on charge une image monochrome, le fileselect ne sera plus visible. Dans ce cas on force quelques couleurs à des valeurs sures
+
+        int Noir =
+            Principal_Palette[CM_Noir].R +
+            Principal_Palette[CM_Noir].V +
+            Principal_Palette[CM_Noir].B;
+        int Blanc =
+            Principal_Palette[CM_Blanc].R +
+            Principal_Palette[CM_Blanc].V +
+            Principal_Palette[CM_Blanc].B;
+
+        //Set_color(CM_Clair,(2*Blanc+Noir)/9,(2*Blanc+Noir)/9,(2*Blanc+Noir)/9);
+        //Set_color(CM_Fonce,(2*Noir+Blanc)/9,(2*Noir+Blanc)/9,(2*Noir+Blanc)/9);
+        Principal_Palette[CM_Fonce].R=(2*Noir+Blanc)/9;
+        Principal_Palette[CM_Fonce].V=(2*Noir+Blanc)/9;
+        Principal_Palette[CM_Fonce].B=(2*Noir+Blanc)/9;
+        Principal_Palette[CM_Clair].R=(2*Blanc+Noir)/9;
+        Principal_Palette[CM_Clair].V=(2*Blanc+Noir)/9;
+        Principal_Palette[CM_Clair].B=(2*Blanc+Noir)/9;
+
+        Set_palette(Principal_Palette);
+    }
     Remapper_ecran_apres_changement_couleurs_menu();
   }
 }
