@@ -69,11 +69,14 @@ const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
     return "(Problem)";
   else
   {
-    if (Pointeur[0] == 0 || Pointeur[0] == 0xFFFF)
+    if (Pointeur[0] == 0 && Pointeur[1] == 0)
       return "None";
+    if (Pointeur[0] != 0 && Pointeur[1] == 0)
+      return Nom_touche(Pointeur[0]);
+    if (Pointeur[0] == 0 && Pointeur[1] != 0)
+      return Nom_touche(Pointeur[1]);
+      
     strcpy(Noms_raccourcis, Nom_touche(Pointeur[0]));
-    if (Pointeur[1] == 0 || Pointeur[1] == 0xFFFF)
-      return Noms_raccourcis;
     strcat(Noms_raccourcis, " ");
     strcat(Noms_raccourcis, Nom_touche(Pointeur[1]));
     return Noms_raccourcis;
@@ -100,7 +103,7 @@ void Afficher_aide(void)
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
   const char * Ligne;
-  char   Buffer[44];          // Buffer texte utilisé pour formater les noms de 
+  char   Buffer[45];          // Buffer texte utilisé pour formater les noms de 
                               // raccourcis clavier
   short  Position_lien=0;     // Position du premier caractère "variable"
   short  Taille_lien=0;       // Taille de la partie variable
@@ -134,7 +137,12 @@ void Afficher_aide(void)
       Position_lien = strstr(Ligne,"%s") - Ligne;
       Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].valeur);
       Taille_lien=strlen(Lien);
-      sprintf(Buffer, Ligne, Lien);
+      snprintf(Buffer, 44, Ligne, Lien);
+      if (strlen(Ligne)+Taille_lien-2>44)
+      {
+        Buffer[43]=CARACTERE_SUSPENSION;
+        Buffer[44]='\0';
+      }
       Ligne = Buffer;
     }
     

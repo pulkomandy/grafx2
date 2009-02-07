@@ -54,6 +54,9 @@ short Button_clic_droit=0; // Button number that serves as right-click
 
 int Est_Raccourci(word Touche, word Fonction)
 {
+  if (Touche == 0)
+    return 0;
+    
   if (Fonction & 0x100)
   {
     if (Bouton[Fonction&0xFF].Raccourci_gauche[0]==Touche)

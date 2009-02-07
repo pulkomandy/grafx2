@@ -886,10 +886,10 @@ void Initialisation_des_boutons(void)
 
   for (Indice_bouton=0;Indice_bouton<NB_BOUTONS;Indice_bouton++)
   {
-    Bouton[Indice_bouton].Raccourci_gauche[0]=0xFFFF;
-    Bouton[Indice_bouton].Raccourci_gauche[1]=0xFFFF;
-    Bouton[Indice_bouton].Raccourci_droite[0]=0xFFFF;
-    Bouton[Indice_bouton].Raccourci_droite[1]=0xFFFF;
+    Bouton[Indice_bouton].Raccourci_gauche[0]=0;
+    Bouton[Indice_bouton].Raccourci_gauche[1]=0;
+    Bouton[Indice_bouton].Raccourci_droite[0]=0;
+    Bouton[Indice_bouton].Raccourci_droite[1]=0;
     Initialiser_bouton(Indice_bouton,
                        0,0,
                        1,1,
@@ -1951,7 +1951,7 @@ int Charger_CFG(int Tout_charger)
     && (CFG_Header.Version2== 0)
     && (CFG_Header.Beta1== 97))
   {
-    // Les touches 00FF (pas de touche) sont a comprendre comme 0xFFFF
+    // Les touches 00FF (pas de touche) sont a comprendre comme 0x0000
     Conversion_touches = 2;
   }
   // Version SDL
@@ -1985,9 +1985,9 @@ int Charger_CFG(int Tout_charger)
               else if (Conversion_touches==2)
               {
                 if (CFG_Infos_touche.Touche == 0x00FF)
-                  CFG_Infos_touche.Touche = 0xFFFF;
+                  CFG_Infos_touche.Touche = 0x0000;
                 if (CFG_Infos_touche.Touche2 == 0x00FF)
-                  CFG_Infos_touche.Touche2 = 0xFFFF;
+                  CFG_Infos_touche.Touche2 = 0x0000;
               }
               
               for (Indice2=0;
