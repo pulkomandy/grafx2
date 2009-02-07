@@ -379,7 +379,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char C
 
   // -- Afficher une chaîne dans une fenêtre, avec taille maxi --
 
-void Print_dans_fenetre_limite(short X,short Y,char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond)
+void Print_dans_fenetre_limite(short X,short Y,const char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond)
 {
   char Chaine_affichee[256];
   strncpy(Chaine_affichee, Chaine, Taille);

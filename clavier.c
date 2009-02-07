@@ -307,6 +307,21 @@ word Touche_pour_scancode(word scancode)
     return Scancode_to_Sym[scancode & 0xFF][0];
 }
 
+// Convertit des modificateurs de touches SDL en modificateurs GrafX2
+word Modificateurs_Touche(SDLMod Mod)
+{
+  word Modificateur=0;
+  
+    if (Mod & KMOD_CTRL )
+      Modificateur|=MOD_CTRL;
+    if (Mod & KMOD_SHIFT )
+      Modificateur|=MOD_SHIFT;
+    if (Mod & (KMOD_ALT|KMOD_MODE))
+      Modificateur|=MOD_ALT;
+
+  return Modificateur;
+}
+
 word Conversion_Touche(SDL_keysym Sym)
 {
   word Retour = 0;
@@ -331,14 +346,9 @@ word Conversion_Touche(SDL_keysym Sym)
   // Normally I should test Sym.mod here, but on windows the implementation
   // is buggy: if you release a modifier key, the following keys (when they repeat)
   // still name the original modifiers.
-  Mod=SDL_GetModState();
+  Mod=Modificateurs_Touche(SDL_GetModState());
   // SDL_GetModState() seems to get the right up-to-date info.
-  if (Mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-    Retour |= MOD_SHIFT;
-  if (Mod & (KMOD_LCTRL | KMOD_RCTRL))
-    Retour |= MOD_CTRL;
-  if (Mod & (KMOD_LALT | KMOD_RALT | KMOD_MODE))
-    Retour |= MOD_ALT;
+  Retour |= Mod;
   return Retour;
 }
 
@@ -431,12 +441,18 @@ const char * Nom_touche(word Touche)
   static char Buffer[41];
   Buffer[0] = '\0';
 
+  if (Touche == SDLK_UNKNOWN)
+    return "None";
+  
   if (Touche & MOD_CTRL)
     strcat(Buffer, "Ctrl+");
   if (Touche & MOD_ALT)
     strcat(Buffer, "Alt+");
   if (Touche & MOD_SHIFT)
     strcat(Buffer, "Shift+");
+  
+  Touche=Touche & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
+  
   if (Touche>=TOUCHE_BUTTON && Touche<=TOUCHE_BUTTON+18)
   {
 #ifdef __gp2x__
@@ -467,7 +483,7 @@ const char * Nom_touche(word Touche)
     }
     strcat(Buffer,NomBouton);
 #else    
-    sprintf(Buffer+strlen(Buffer), "[B%d]", Touche);
+    sprintf(Buffer+strlen(Buffer), "[B%d]", Touche-TOUCHE_BUTTON);
 #endif
     return Buffer;
   }

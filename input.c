@@ -197,16 +197,16 @@ int Handle_Mouse_Click(SDL_MouseButtonEvent event)
             break;
 
         case SDL_BUTTON_MIDDLE:
-            Touche = TOUCHE_MOUSEMIDDLE;
+            Touche = TOUCHE_MOUSEMIDDLE|Modificateurs_Touche(SDL_GetModState());
             // TODO: systeme de répétition
             return 0;
 
         case SDL_BUTTON_WHEELUP:
-            Touche = TOUCHE_MOUSEWHEELUP;
+            Touche = TOUCHE_MOUSEWHEELUP|Modificateurs_Touche(SDL_GetModState());
             return 0;
 
         case SDL_BUTTON_WHEELDOWN:
-            Touche = TOUCHE_MOUSEWHEELDOWN;
+            Touche = TOUCHE_MOUSEWHEELDOWN|Modificateurs_Touche(SDL_GetModState());
             return 0;
         default:
         return 0;
@@ -433,7 +433,7 @@ int Handle_Joystick_Press(SDL_JoyButtonEvent event)
       default:
     }
     #endif
-    Touche = TOUCHE_BUTTON+event.button;
+    Touche = (TOUCHE_BUTTON+event.button)|Modificateurs_Touche(SDL_GetModState());
     // TODO: systeme de répétition
     
     return Move_cursor_with_constraints();

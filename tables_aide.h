@@ -81,16 +81,17 @@ static const T_TABLEAIDE TableAideLicense[] =
 };
 static const T_TABLEAIDE TableAideHelp[] =
 {
-  AIDE_TITRE("HELP")
+  AIDE_TITRE("         HELP")
   AIDE_TEXTE("")
   AIDE_TEXTE("  Contextual help is available by pressing")
   AIDE_LIEN ("  the %s key",0x100+BOUTON_AIDE)
   AIDE_TEXTE("  You can do it while hovering a menu icon,")
   AIDE_TEXTE("  or while a window is open.")
+  AIDE_TEXTE("  When a keyboard shortcut is displayed it's")
+  AIDE_TEXTE("  your current configuration and you can")
+  AIDE_TEXTE("  change it by clicking it.")
   AIDE_TEXTE("")
-  AIDE_BOLD ("   LIST OF KEYBOARD SHORTCUTS")
-  AIDE_TEXTE("")
-  AIDE_TEXTE("This is your current configuration.")
+  AIDE_TITRE("  KEYBOARD SHORTCUTS")
   AIDE_TEXTE("")
   AIDE_TEXTE("Scroll visible area")
   AIDE_LIEN ("  up:                %s",   SPECIAL_SCROLL_UP)

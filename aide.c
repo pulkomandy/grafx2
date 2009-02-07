@@ -46,6 +46,8 @@
 #include "clavier.h"
 #include "windows.h"
 #include "input.h"
+#include "hotkeys.h"
+#include "erreurs.h"
 
 extern char SVNRevision[];
 
@@ -77,12 +79,156 @@ const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
       return Nom_touche(Pointeur[1]);
       
     strcpy(Noms_raccourcis, Nom_touche(Pointeur[0]));
-    strcat(Noms_raccourcis, " ");
+    strcat(Noms_raccourcis, " or ");
     strcat(Noms_raccourcis, Nom_touche(Pointeur[1]));
     return Noms_raccourcis;
   }
 }
+void Redefinir_controle(word *Raccourci, int Pos_X, int Pos_Y)
+{
+  Effacer_curseur();
+  Print_dans_fenetre(Pos_X,Pos_Y,"*PRESS KEY OR BUTTON*",CM_Noir,CM_Clair);
+  Afficher_curseur();
+  while (1)
+  {
+    while(!Get_input())Wait_VBL();
+    if (Touche==TOUCHE_ESC)
+      return;
+    if (Touche!=0)
+    {
+      *Raccourci=Touche;
+      return;
+    }
+  }    
+}
 
+void Fenetre_controle(int NumeroControle)
+{
+  short Bouton_clicke;
+  short IndiceOrdo;
+  short IndiceConfig;
+  short Redessiner_controles=1;
+  word * PtrRaccourci=NULL;
+  word Sauve_raccourci[2];
+  
+  PtrRaccourci=Raccourci(NumeroControle);
+
+  Sauve_raccourci[0]=PtrRaccourci[0];
+  Sauve_raccourci[1]=PtrRaccourci[1];
+
+  // Recherche dans hotkeys
+  IndiceOrdo=0;
+  while (Ordonnancement[IndiceOrdo]!=NumeroControle)
+  {
+    IndiceOrdo++;
+    if (IndiceOrdo>=134)
+    {
+      Erreur(0);
+      return;
+    }
+  }
+  /*
+  IndiceConfig=0;
+  while (ConfigTouche[IndiceConfig].Numero!=IndiceOrdo)
+  {
+    IndiceConfig++;
+    if (IndiceConfig>=134)
+    {
+      Erreur(0);
+      return;
+    }
+  }
+  */
+  IndiceConfig=IndiceOrdo; // Comprends pas... ça devrait pas marcher
+  
+  Ouvrir_fenetre(302,131,"Keyboard shortcut");
+  Fenetre_Definir_bouton_normal(181,111,55,14,"Cancel",0,1,TOUCHE_ESC); // 1
+  Fenetre_Definir_bouton_normal(241,111,55,14,"OK",0,1,SDLK_RETURN); // 2
+
+  Fenetre_Definir_bouton_normal(6,111,111,14,"Reset default",0,1,TOUCHE_AUCUNE); // 3
+
+  // Titre
+  Block(Fenetre_Pos_X+(Menu_Facteur_X*5),
+        Fenetre_Pos_Y+(Menu_Facteur_Y*16),
+        Menu_Facteur_X*292,Menu_Facteur_Y*11,CM_Noir);
+  Print_dans_fenetre(7,18,ConfigTouche[IndiceConfig].Libelle,CM_Blanc,CM_Noir);
+
+  // Zone de description
+  Fenetre_Afficher_cadre_creux(5,68,292,37);
+  Print_dans_fenetre(9,70,ConfigTouche[IndiceConfig].Explic1,CM_Noir,CM_Clair);
+  Print_dans_fenetre(9,78,ConfigTouche[IndiceConfig].Explic2,CM_Noir,CM_Clair);
+  Print_dans_fenetre(9,86,ConfigTouche[IndiceConfig].Explic3,CM_Noir,CM_Clair);
+
+  // Raccourci 0
+  Fenetre_Definir_bouton_normal(27,30,177,14,"",0,1,TOUCHE_AUCUNE); // 4
+  Fenetre_Definir_bouton_normal(209,30,56,14,"Remove",0,1,TOUCHE_AUCUNE); // 5
+
+  // Raccourci 1
+  Fenetre_Definir_bouton_normal(27,49,177,14,"",0,1,TOUCHE_AUCUNE); // 6
+  Fenetre_Definir_bouton_normal(209,49,56,14,"Remove",0,1,TOUCHE_AUCUNE); // 7
+
+  Afficher_curseur();
+  do
+  {
+    if (Redessiner_controles)
+    {
+      Effacer_curseur();
+      Block(Fenetre_Pos_X+(Menu_Facteur_X*32),
+            Fenetre_Pos_Y+(Menu_Facteur_Y*33),
+            Menu_Facteur_X*21*8,Menu_Facteur_Y*8,CM_Clair);
+      Print_dans_fenetre_limite(32,33,Nom_touche(PtrRaccourci[0]),21,CM_Noir,CM_Clair);
+      Block(Fenetre_Pos_X+(Menu_Facteur_X*32),
+            Fenetre_Pos_Y+(Menu_Facteur_Y*52),
+            Menu_Facteur_X*21*8,Menu_Facteur_Y*8,CM_Clair);
+      Print_dans_fenetre_limite(32,52,Nom_touche(PtrRaccourci[1]),21,CM_Noir,CM_Clair);
+    
+      UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,302*Menu_Facteur_X,131*Menu_Facteur_Y);
+    
+      Afficher_curseur();
+      Redessiner_controles=0;
+    }
+    
+    Bouton_clicke=Fenetre_Bouton_clicke();
+
+    switch (Bouton_clicke)
+    {
+      case -1:
+      case  0:
+      break;
+      case 4: // Change 0
+        Redefinir_controle(&PtrRaccourci[0], 32, 33);
+        Redessiner_controles=1;
+        break;
+      case 6: // Change 1
+        Redefinir_controle(&PtrRaccourci[1], 32, 52);
+        Redessiner_controles=1;
+        break;
+      case 5: // Remove 0
+        PtrRaccourci[0]=0;
+        Redessiner_controles=1;
+        break;
+      case 7: // Remove 1
+        PtrRaccourci[1]=0;
+        Redessiner_controles=1;
+        break;
+      case 3: // Defaults
+        PtrRaccourci[0]=ConfigTouche[IndiceConfig].Touche;
+        PtrRaccourci[1]=ConfigTouche[IndiceConfig].Touche2;
+        Redessiner_controles=1;
+        break;
+      case  1: // Cancel
+        PtrRaccourci[0]=Sauve_raccourci[0];
+        PtrRaccourci[1]=Sauve_raccourci[1];
+      case 2: // OK
+      default:
+        break;
+    }
+  }
+  while ((Bouton_clicke!=1) && (Bouton_clicke!=2) && (Touche!=SDLK_RETURN));
+  Touche=0;
+  Fermer_fenetre();
+  Afficher_curseur();
+}
 
 // -- Menu d'aide -----------------------------------------------------------
 
@@ -296,6 +442,8 @@ void Fenetre_aide(int Section, const char *Sous_section)
   Fenetre_Definir_bouton_normal( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,SDLK_h); // 5
   Fenetre_Definir_bouton_normal(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,SDLK_c); // 6
 
+  Fenetre_Definir_bouton_special(9,18,272,130); // 7
+
   Afficher_aide();
 
   UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,310*Menu_Facteur_X,175*Menu_Facteur_Y);
@@ -312,6 +460,30 @@ void Fenetre_aide(int Section, const char *Sous_section)
       case  0:
       case  1:
         break;
+      case  7: // Zone de texte
+        {
+          int Ligne = ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8;
+          Attendre_fin_de_click();
+          if (Ligne == ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8)
+          {
+            if (Position_d_aide_en_cours+Ligne<Nb_lignes)
+            {
+              switch (Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].type)
+              {
+                case 'K':
+                  Fenetre_controle(Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].valeur);
+                break;
+                // Ici on peut gérer un cas 'lien hypertexte'
+                default:
+                break;
+              }
+              Effacer_curseur();
+              Afficher_aide();
+              Afficher_curseur();
+            }
+          }
+          break;
+        }
       default:
         Effacer_curseur();
         if (Bouton_clicke>2)
