@@ -143,41 +143,42 @@ void Encadrer_couleur_menu(byte Couleur)
 {
   word Debut_X,Debut_Y,Fin_X,Fin_Y;
   word Indice;
+  word Hauteur_cellule=32/Config.Palette_Cells_Y;
 
-  if ((Fore_color>=Couleur_debut_palette) && (Fore_color<Couleur_debut_palette+64) && (Menu_visible))
+  if ((Fore_color>=Couleur_debut_palette) && (Fore_color<Couleur_debut_palette+Config.Palette_Cells_X*Config.Palette_Cells_Y) && (Menu_visible))
   {
     if (Config.Couleurs_separees)
     {
-      Debut_X=(LARGEUR_MENU+((Fore_color-Couleur_debut_palette)>>3)*Menu_Taille_couleur)*Menu_Facteur_X;
-      Debut_Y=Menu_Ordonnee+((1+(((Fore_color-Couleur_debut_palette)&7)<<2))*Menu_Facteur_Y);
+      Debut_X=(LARGEUR_MENU+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+      Debut_Y=Menu_Ordonnee+((1+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y);
 
       Block(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y,Couleur);
-      Block(Debut_X,Debut_Y+(Menu_Facteur_Y<<2),(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+      Block(Debut_X,Debut_Y+(Menu_Facteur_Y*Hauteur_cellule),(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 
-      Block(Debut_X,Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*3,Couleur);
-      Block(Debut_X+(Menu_Taille_couleur*Menu_Facteur_X),Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*3,Couleur);
+      Block(Debut_X,Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*(Hauteur_cellule-1),Couleur);
+      Block(Debut_X+(Menu_Taille_couleur*Menu_Facteur_X),Debut_Y+Menu_Facteur_Y,Menu_Facteur_X,Menu_Facteur_Y*(Hauteur_cellule-1),Couleur);
 
-      UpdateRect(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y*4);
+      UpdateRect(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y*(Hauteur_cellule+1));
     }
     else
     {
       if (Couleur==CM_Noir)
       {
-        Debut_X=(LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)>>3)*Menu_Taille_couleur)*Menu_Facteur_X;
-        Debut_Y=Menu_Ordonnee+((2+(((Fore_color-Couleur_debut_palette)&7)<<2))*Menu_Facteur_Y);
+        Debut_X=(LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+        Debut_Y=Menu_Ordonnee+((2+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y);
 
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
-              Menu_Facteur_Y<<2,Fore_color);
+              Menu_Facteur_Y*Hauteur_cellule,Fore_color);
 
-        UpdateRect(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y*4);
+        UpdateRect(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Facteur_Y*Hauteur_cellule);
       }
       else
       {
-        Debut_X=LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)>>3)*Menu_Taille_couleur;
-        Debut_Y=2+(((Fore_color-Couleur_debut_palette)&7)<<2);
+        Debut_X=LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur;
+        Debut_Y=2+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule);
 
         Fin_X=Debut_X+Menu_Taille_couleur-1;
-        Fin_Y=Debut_Y+3;
+        Fin_Y=Debut_Y+Hauteur_cellule-1;
 
         for (Indice=Debut_X; Indice<=Fin_X; Indice++)
           Block(Indice*Menu_Facteur_X,Menu_Ordonnee+(Debut_Y*Menu_Facteur_Y),
@@ -199,7 +200,7 @@ void Encadrer_couleur_menu(byte Couleur)
                 Menu_Facteur_X,Menu_Facteur_Y,
                 ((Indice+Fin_Y)&1)?CM_Blanc:CM_Noir);
 
-        UpdateRect(Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*4);
+        UpdateRect(Debut_X*Menu_Facteur_X,Debut_Y*Menu_Facteur_Y,Menu_Taille_couleur*Menu_Facteur_X,Menu_Ordonnee+Menu_Facteur_Y*Hauteur_cellule);
       }
     }
   }
@@ -209,25 +210,27 @@ void Encadrer_couleur_menu(byte Couleur)
 
 void Afficher_palette_du_menu(void)
 {
-  byte Couleur;
-
+  int Couleur;
+  byte Hauteur_cellule=32/Config.Palette_Cells_Y;
+  // Largeur: Menu_Taille_couleur
+  
   if (Menu_visible)
   {
     Block(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y,CM_Noir);
 
     if (Config.Couleurs_separees)
-      for (Couleur=0;Couleur<64;Couleur++)
-        Block((LARGEUR_MENU+1+(Couleur>>3)*Menu_Taille_couleur)*Menu_Facteur_X,
-              Menu_Ordonnee+((2+((Couleur&7)<<2))*Menu_Facteur_Y),
+      for (Couleur=0;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++)
+        Block((LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
+              Menu_Ordonnee+((2+((Couleur%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y),
               (Menu_Taille_couleur-1)*Menu_Facteur_X,
-              Menu_Facteur_Y*3,
+              Menu_Facteur_Y*(Hauteur_cellule-1),
               Couleur_debut_palette+Couleur);
     else
-      for (Couleur=0;Couleur<64;Couleur++)
-        Block((LARGEUR_MENU+1+(Couleur>>3)*Menu_Taille_couleur)*Menu_Facteur_X,
-              Menu_Ordonnee+((2+((Couleur&7)<<2))*Menu_Facteur_Y),
+      for (Couleur=0;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++)
+        Block((LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
+              Menu_Ordonnee+((2+((Couleur%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y),
               Menu_Taille_couleur*Menu_Facteur_X,
-              Menu_Facteur_Y<<2,
+              Menu_Facteur_Y*Hauteur_cellule,
               Couleur_debut_palette+Couleur);
 
     Encadrer_couleur_menu(CM_Blanc);
@@ -245,17 +248,29 @@ void Recadrer_palette(void)
   if (Fore_color<Couleur_debut_palette)
   {
     while (Fore_color<Couleur_debut_palette)
-      Couleur_debut_palette-=8;
+      Couleur_debut_palette-=Config.Palette_Cells_Y;
   }
   else
   {
-    while (Fore_color>=Couleur_debut_palette+64)
-      Couleur_debut_palette+=8;
+    while (Fore_color>=Couleur_debut_palette+Config.Palette_Cells_X*Config.Palette_Cells_Y)
+      Couleur_debut_palette+=Config.Palette_Cells_Y;
   }
   if (Ancienne_couleur!=Couleur_debut_palette)
     Afficher_palette_du_menu();
 }
 
+void Changer_cellules_palette(byte Cells_X, byte Cells_Y)
+{
+  Config.Palette_Cells_X=Cells_X;
+  Config.Palette_Cells_Y=Cells_Y;
+  
+  // Cale Couleur_debut_palette sur un multiple de Cells_Y (arrondi inférieur)
+  Couleur_debut_palette=Couleur_debut_palette/Cells_Y*Cells_Y;
+
+  // Mise à jour du menu
+  Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) / Cells_X;
+  Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Config.Palette_Cells_X)-1;
+}
 
 
   // -- Afficher tout le menu --
@@ -448,7 +463,6 @@ void Print_coordonnees(void)
 
 void Print_nom_fichier(void)
 {
-  short Debut_X;
   char Nom_affiche[12+1];
   int Taille_nom;
   if (Menu_visible)
@@ -462,13 +476,11 @@ void Print_nom_fichier(void)
       Nom_affiche[11]=CARACTERE_SUSPENSION;
       Taille_nom = 12;
     }
-
-    Block((LARGEUR_MENU+2+((Menu_Taille_couleur-12)<<3))*Menu_Facteur_X,
+    
+    Block(Largeur_ecran-96*Menu_Facteur_X,
           Menu_Ordonnee_Texte,Menu_Facteur_X*96,Menu_Facteur_Y<<3,CM_Clair);
 
-    Debut_X=LARGEUR_MENU+2+((Menu_Taille_couleur-Taille_nom)<<3);
-
-    Print_general(Debut_X*Menu_Facteur_X,Menu_Ordonnee_Texte,Nom_affiche,CM_Noir,CM_Clair);
+    Print_general(Largeur_ecran-Taille_nom*8*Menu_Facteur_X,Menu_Ordonnee_Texte,Nom_affiche,CM_Noir,CM_Clair);
   }
 }
 
@@ -936,20 +948,20 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
   if (Config.Couleurs_separees)
   {
     Largeur=(Menu_Taille_couleur-1)*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y*3;
+    Hauteur=Menu_Facteur_Y*(32/Config.Palette_Cells_Y-1);
   }
   else
   {
     Largeur=Menu_Taille_couleur*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y<<2;
+    Hauteur=Menu_Facteur_Y*(32/Config.Palette_Cells_Y);
   }
 
-  for (Couleur=0,Vraie_couleur=Couleur_debut_palette;Couleur<64;Couleur++,Vraie_couleur++)
+  for (Couleur=0,Vraie_couleur=Couleur_debut_palette;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++,Vraie_couleur++)
   {
     if (Table[Vraie_couleur]!=Vraie_couleur)
     {
-      Debut_X=(LARGEUR_MENU+1+(Couleur>>3)*Menu_Taille_couleur)*Menu_Facteur_X;
-      Debut_Y=Menu_Ordonnee_avant_fenetre+((2+((Couleur&7)<<2))*Menu_Facteur_Y);
+      Debut_X=(LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+      Debut_Y=Menu_Ordonnee_avant_fenetre+((2+((Couleur%Config.Palette_Cells_Y)*(32/Config.Palette_Cells_Y)))*Menu_Facteur_Y);
       Fin_X=Debut_X+Largeur;
       Fin_Y=Debut_Y+Hauteur;
 

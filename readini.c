@@ -704,6 +704,25 @@ int Charger_INI(struct S_Config * Conf)
       goto Erreur_ERREUR_INI_CORROMPU;
     Conf->Mouse_Merge_movement=Valeurs[0];
   }
+
+  Conf->Palette_Cells_X=8;
+  // Optionnel, nombre de colonnes dans la palette (>98.0%)
+  if (!Charger_INI_Get_values (Fichier,Buffer,"Palette_Cells_X",1,Valeurs))
+  {
+    if ((Valeurs[0]<1) || (Valeurs[0]>32))
+      goto Erreur_ERREUR_INI_CORROMPU;
+    Conf->Palette_Cells_X=Valeurs[0];
+  }
+  Conf->Palette_Cells_Y=8;
+  // Optionnel, nombre de lignes dans la palette (>98.0%)
+  if (!Charger_INI_Get_values (Fichier,Buffer,"Palette_Cells_Y",1,Valeurs))
+  {
+    if (Valeurs[0]!=1 && Valeurs[0]!=2 && Valeurs[0]!=4 && Valeurs[0]!=8 && Valeurs[0]!=16)
+      goto Erreur_ERREUR_INI_CORROMPU;
+    Conf->Palette_Cells_Y=Valeurs[0];
+  }
+  if (Conf->Palette_Cells_X*Conf->Palette_Cells_Y>256)
+    Conf->Palette_Cells_X=256/Conf->Palette_Cells_Y;
   
   fclose(Fichier);
 

@@ -608,6 +608,14 @@ int Sauver_INI(struct S_Config * Conf)
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Merge_movement",1,Valeurs,0)))
     goto Erreur_Retour;
 
+  Valeurs[0]=(Conf->Palette_Cells_X);
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Palette_Cells_X",1,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=(Conf->Palette_Cells_Y);
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Palette_Cells_Y",1,Valeurs,0)))
+    goto Erreur_Retour;
+    
   Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);
 
   fclose(Nouveau_fichier);

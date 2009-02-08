@@ -337,12 +337,21 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         }
       }
 
-    Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) >> 3;
+    while (1)
+    {
+      Changer_cellules_palette(Config.Palette_Cells_X, Config.Palette_Cells_Y);
+      if (Menu_Taille_couleur>2)
+        break;
+      Config.Palette_Cells_X--;
+    }
+    
+    Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) / Config.Palette_Cells_X;
+    Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Config.Palette_Cells_X)-1;
+
     Menu_Ordonnee = Hauteur_ecran;
     if (Menu_visible)
       Menu_Ordonnee -= HAUTEUR_MENU * Menu_Facteur_Y;
     Menu_Ordonnee_Texte = Hauteur_ecran-(Menu_Facteur_Y<<3);
-    Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur<<3)-1;
 
     Sensibilite_X = Config.Indice_Sensibilite_souris_X;
     Sensibilite_Y = Config.Indice_Sensibilite_souris_Y;

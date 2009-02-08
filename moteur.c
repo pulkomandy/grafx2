@@ -984,15 +984,13 @@ void Gestion_principale(void)
             }
             else
             { // Le curseur est-il sur une couleur de la palette?
-              if ( (!Config.Couleurs_separees)
-                || ( ( ((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))%Menu_Taille_couleur != Menu_Taille_couleur-1 )
-                  && ( (( ((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y) -2)&3)!=3 ) ) )
+              if (1)
               {
                 Effacer_curseur();
                 Temp_color=Couleur_debut_palette;
                 Temp=Temp_color+
-                     ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)<<3)+
-                     ((((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)>>2);
+                     ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)*Config.Palette_Cells_Y)+
+                     ((((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)/(32/Config.Palette_Cells_Y));
 
                 strcpy(Chaine,TITRE_BOUTON[Indice_bouton]);
                 sprintf(Chaine+strlen(Chaine),"%d (%d,%d,%d)",Temp,Principal_Palette[Temp].R,Principal_Palette[Temp].V,Principal_Palette[Temp].B);
