@@ -38,6 +38,7 @@
 #include "sdlscreen.h"
 #include "readline.h"
 #include "windows.h"
+#include "input.h"
 
 #define COULEUR_TEXTE         CM_Noir
 #define COULEUR_FOND          CM_Clair
@@ -144,6 +145,7 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
 
   byte Offset=0; // Indice du premier caractère affiché
 
+  Effacer_curseur();
   // Effacement de la chaîne
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
         Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
@@ -179,7 +181,13 @@ byte Readline_ex(word Pos_X,word Pos_Y,char * Chaine,byte Taille_affichee,byte T
 
   while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=TOUCHE_ESC))
   {
-    Touche_lue=Get_key();
+    Afficher_curseur();
+    do
+    {
+      if(!Get_input()) Wait_VBL();
+      Touche_lue=Touche_ANSI;
+    } while(Touche_lue==0);
+    Effacer_curseur();
     switch (Touche_lue)
     {
       case SDLK_DELETE : // Suppr.

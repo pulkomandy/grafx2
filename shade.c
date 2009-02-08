@@ -828,7 +828,6 @@ int Menu_Shade(void)
         break;
 
       case 15 : // Saisie du pas
-        Effacer_curseur();
         Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
         Readline(276,176,Chaine,3,1);
         Temp=atoi(Chaine);
@@ -1070,7 +1069,6 @@ void Bouton_Quick_shade_Menu(void)
         break;
 
       case 4 : // Saisie du pas
-        Effacer_curseur();
         Num2str(Quick_shade_Step,Chaine,3);
         Readline(42,21,Chaine,3,1);
         Temp=atoi(Chaine);

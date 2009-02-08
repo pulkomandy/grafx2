@@ -38,7 +38,6 @@ void Wait_VBL(void);
 void Tempo_jauge(byte Vitesse);
 dword Round_div(dword Numerateur,dword Diviseur);
 word Palette_Compter_nb_couleurs_utilisees(dword * Tableau);
-word Get_key(void);
 
 void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur);
 void Pixel_dans_brosse             (word X,word Y,byte Couleur);

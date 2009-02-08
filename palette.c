@@ -841,7 +841,7 @@ void Bouton_Palette(void)
 
   Fenetre_Definir_bouton_normal( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
   Fenetre_Definir_bouton_normal(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
-  Fenetre_Definir_bouton_normal(66,47,29,14,"Swp"    ,1,1,SDLK_s);   // 7
+  Fenetre_Definir_bouton_normal(66,47,29,14,"Swp"    ,0,1,TOUCHE_AUCUNE);   // 7
   Fenetre_Definir_bouton_normal( 6,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
   Fenetre_Definir_bouton_normal(66,32,29,14,"Cpy"    ,1,1,SDLK_c);   // 9
   Fenetre_Definir_bouton_normal( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
@@ -1785,7 +1785,6 @@ void Bouton_Palette(void)
 
       case 23 : // Saisie du nombre de couleurs pour la réduction de palette
         Num2str(Reduce_Nb_couleurs,Chaine,3);
-        Effacer_curseur();
 
         if (Readline(265,41,Chaine,3,1))
         {

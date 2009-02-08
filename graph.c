@@ -1300,9 +1300,19 @@ void Tracer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,by
 
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
-  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  int L, H;
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  if (Debut_X<0)
+    Debut_X=0;
+  if (Debut_Y<0)
+    Debut_Y=0;
+  if (Fin_X<0)
+    Fin_X=0;
+  if (Fin_Y<0)
+    Fin_Y=0;
+  L = Fin_X-Debut_X;
+  H = Fin_Y-Debut_Y;
   Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
 }
 

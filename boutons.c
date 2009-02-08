@@ -936,7 +936,6 @@ void Bouton_Settings(void)
         break;
       case 21 : // Nb pages Undo
         Attendre_fin_de_click();
-        Effacer_curseur();
         Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
         Readline(142,52,Chaine,2,1);
         Config_choisie.Nb_pages_Undo=atoi(Chaine);
@@ -1462,7 +1461,6 @@ void Bouton_Resol(void)
         break;
 
       case 3 : // Largeur
-        Effacer_curseur();
         Num2str(Largeur_choisie,Chaine,4);
         Readline(62,37,Chaine,4,1);
         Largeur_choisie=atoi(Chaine);
@@ -1477,7 +1475,6 @@ void Bouton_Resol(void)
         break;
 
       case 4 : // Hauteur
-        Effacer_curseur();
         Num2str(Hauteur_choisie,Chaine,4);
         Readline(166,37,Chaine,4,1);
         Hauteur_choisie=atoi(Chaine);
@@ -2755,13 +2752,11 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
-          Effacer_curseur();
           Readline(46,175+FILENAMESPACE,Principal_Commentaire,32,0);
           Afficher_curseur();
         }
         break;
       case  8 : // Saisie du nom de fichier
-        Effacer_curseur();
 
         // Save the filename
         strcpy(Nom_fichier_Save, Principal_Nom_fichier);
@@ -4029,7 +4024,6 @@ void Bouton_Menu_Grille(void)
     switch (Bouton_clicke)
     {
       case 3 :
-        Effacer_curseur();
         Num2str(X_choisi,Chaine,2);
         Readline(39,26,Chaine,2,1);
         X_choisi=atoi(Chaine);
@@ -4052,7 +4046,6 @@ void Bouton_Menu_Grille(void)
         Afficher_curseur();
         break;
       case 4 :
-        Effacer_curseur();
         Num2str(Y_choisi,Chaine,2);
         Readline(39,47,Chaine,2,1);
         Y_choisi=atoi(Chaine);
@@ -4075,7 +4068,6 @@ void Bouton_Menu_Grille(void)
         Afficher_curseur();
         break;
       case 5 :
-        Effacer_curseur();
         Num2str(dX_choisi,Chaine,2);
         Readline(97,26,Chaine,2,1);
         dX_choisi=atoi(Chaine);
@@ -4091,7 +4083,6 @@ void Bouton_Menu_Grille(void)
         Afficher_curseur();
         break;
       case 6 :
-        Effacer_curseur();
         Num2str(dY_choisi,Chaine,2);
         Readline(97,47,Chaine,2,1);
         dY_choisi=atoi(Chaine);
@@ -4383,7 +4374,6 @@ void Bouton_Smooth_Menu(void)
       }
       else
       {
-        Effacer_curseur();
         I=Bouton_clicke-7; X=I%3; Y=I/3;
         Num2str(Matrice_choisie[X][Y],Chaine,2);
         Readline(Matrice_Zone_saisie[X][Y]->Pos_X+2,
@@ -4539,7 +4529,6 @@ void Bouton_Colorize_Menu(void)
     switch(Bouton_clicke)
     {
       case 1: // Zone de saisie de l'opacité
-        Effacer_curseur();
         Num2str(Opacite_choisie,Chaine,3);
         Readline(89,23,Chaine,3,1);
         Opacite_choisie=atoi(Chaine);
@@ -4632,7 +4621,6 @@ void Bouton_Tiling_Menu(void)
 
     if (Bouton_clicke==3)  // Zone de saisie du décalage X
     {
-      Effacer_curseur();
       Num2str(Offset_X_choisi,Chaine,4);
       Readline(93,23,Chaine,4,1);
       Offset_X_choisi=atoi(Chaine);
@@ -4648,7 +4636,6 @@ void Bouton_Tiling_Menu(void)
     else
     if (Bouton_clicke==4)  // Zone de saisie du décalage Y
     {
-      Effacer_curseur();
       Num2str(Offset_Y_choisi,Chaine,4);
       Readline(93,37,Chaine,4,1);
       Offset_Y_choisi=atoi(Chaine);
@@ -4943,7 +4930,6 @@ void Bouton_Spray_Menu(void)
         break;
 
       case 11 : // Size
-        Effacer_curseur();
         Num2str(Spray_Size,Chaine,3);
         Readline(188,25,Chaine,3,1);
         Spray_Size=atoi(Chaine);
@@ -4964,7 +4950,6 @@ void Bouton_Spray_Menu(void)
         break;
 
       case 12 : // Delay
-        Effacer_curseur();
         Num2str(Spray_Delay,Chaine,2);
         Readline(196,39,Chaine,2,1);
         Spray_Delay=atoi(Chaine);
@@ -4979,7 +4964,6 @@ void Bouton_Spray_Menu(void)
         break;
 
       case 13 : // Mono-Flow
-        Effacer_curseur();
         Num2str(Spray_Mono_flow,Chaine,2);
         Readline(113,24,Chaine,2,1);
         Spray_Mono_flow=atoi(Chaine);
@@ -4994,7 +4978,6 @@ void Bouton_Spray_Menu(void)
         break;
 
       case 14 : // Init
-        Effacer_curseur();
         Num2str(Spray_Init,Chaine,2);
         Readline(113,40,Chaine,2,1);
         Spray_Init=atoi(Chaine);
@@ -6182,7 +6165,6 @@ void Bouton_Texte()
     switch(Bouton_clicke)
     {
       case 1: // Texte saisi
-      Effacer_curseur();
       Readline_ex(50,20,Chaine,29,250,0);
       A_previsionner=1;
       break;
@@ -6233,7 +6215,6 @@ void Bouton_Texte()
       break;
             
       case 7: // Taille du texte (nombre)
-      Effacer_curseur();
       Readline(222,45,Buffer_taille,3,1);
       Taille_police=atoi(Buffer_taille);
       // On corrige les dimensions

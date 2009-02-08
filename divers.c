@@ -596,23 +596,6 @@ void Scroll_picture(short Decalage_X,short Decalage_Y)
   UpdateRect(0,0,0,0);
 }
 
-word Get_key(void)
-{
-   SDL_Event event;
-
-  Attendre_fin_de_click(); // On prend le controle de la boucle d'évènements, donc il ne faut pas qu'on rate la fin de click !
-  while(1)
-  {
-    SDL_WaitEvent(&event);
-    if(event.type == SDL_KEYDOWN)
-    {
-      return Conversion_ANSI(event.key.keysym);
-    }
-    else
-      Gere_Evenement_SDL(&event);
-  }
-}
-
 void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
         word Facteur, word Largeur
 )
