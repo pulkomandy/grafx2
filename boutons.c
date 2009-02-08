@@ -177,7 +177,7 @@ void Bouton_Message_initial(void)
   Print_dans_fenetre(130-4*28,136,"http://grafx2.googlecode.com",CM_Fonce,CM_Clair);
 
   // Pour faire un vrai splash screen, voici un bouton qui prend toute la fenetre.
-  //Fenetre_Definir_bouton_normal(1,1,258,170,"",0,1,SDLK_RETURN); // 1
+  Fenetre_Definir_bouton_normal(1,1,258,170,"",0,1,SDLK_RETURN); // 1
 
   Display_Window(260,172);
 
