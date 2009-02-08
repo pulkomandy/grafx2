@@ -2217,7 +2217,19 @@ short Fenetre_Numero_bouton_touche(void)
   while (Temp!=NULL)
   {
     if (Temp->Raccourci==Touche)
+    {
+      Effacer_curseur();
+      Fenetre_Enfoncer_bouton_normal(Temp->Pos_X,Temp->Pos_Y,Temp->Largeur,Temp->Hauteur);
+      Afficher_curseur();
+      
+      Tempo_jauge(Config.Valeur_tempo_jauge_droite);
+      
+      Effacer_curseur();
+      Fenetre_Desenfoncer_bouton_normal(Temp->Pos_X,Temp->Pos_Y,Temp->Largeur,Temp->Hauteur);
+      Afficher_curseur();
+
       return Temp->Numero;
+    }
     Temp=Temp->Next;
   }
 
@@ -2266,8 +2278,8 @@ short Fenetre_Bouton_clicke(void)
     Bouton=Fenetre_Numero_bouton_touche();
     if (Bouton)
     {
-        Touche=0;
-        return Bouton;
+      Touche=0;
+      return Bouton;
     }
   }
 
