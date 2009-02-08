@@ -453,7 +453,6 @@ int Sauver_INI(struct S_Config * Conf)
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Cursor_aspect",1,Valeurs,0)))
     goto Erreur_Retour;
 
-
   if ((Retour=Sauver_INI_Reach_group(Ancien_fichier,Nouveau_fichier,Buffer,"[MENU]")))
     goto Erreur_Retour;
 
@@ -603,6 +602,10 @@ int Sauver_INI(struct S_Config * Conf)
   Valeurs[0]=Mode_video[0].Largeur;
   Valeurs[1]=Mode_video[0].Hauteur;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_window_size",2,Valeurs,0)))
+    goto Erreur_Retour;
+
+  Valeurs[0]=(Conf->Mouse_Merge_movement);
+  if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Merge_movement",1,Valeurs,0)))
     goto Erreur_Retour;
 
   Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);

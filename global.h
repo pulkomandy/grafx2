@@ -61,6 +61,7 @@ GFX2_GLOBAL struct S_Config
   byte Indice_Sensibilite_souris_Y;
   byte Mouse_Facteur_de_correction_X;
   byte Mouse_Facteur_de_correction_Y;
+  byte Mouse_Merge_movement;
   byte Valeur_tempo_jauge_gauche;
   byte Valeur_tempo_jauge_droite;
   long Chrono_delay;

@@ -44,6 +44,7 @@ byte Directional_up_left;
 long Directional_delay;
 long Directional_last_move;
 long Directional_step;
+short Mouse_count; // Number of mouse movements received in the current Get_input()
 
 // TODO: move to config
 short Button_shift=-1; // Button number that serves as a "shift" modifier
@@ -83,6 +84,8 @@ int Est_Raccourci(word Touche, word Fonction)
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
 int Move_cursor_with_constraints()
 {
+  int Retour=0;
+  
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
   if (Operation_Taille_pile != 0)
@@ -125,24 +128,27 @@ int Move_cursor_with_constraints()
                     );
         }
   }
-
-  if (
-          (INPUT_Nouveau_Mouse_X != Mouse_X) ||
-          (INPUT_Nouveau_Mouse_Y != Mouse_Y) ||
-          (INPUT_Nouveau_Mouse_K != Mouse_K)
-     )
+  if ((INPUT_Nouveau_Mouse_X != Mouse_X) ||
+    (INPUT_Nouveau_Mouse_Y == Mouse_Y))
   {
-      Forcer_affichage_curseur=0;
-      Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
-      Mouse_X=INPUT_Nouveau_Mouse_X;
-      Mouse_Y=INPUT_Nouveau_Mouse_Y;
-      Mouse_K=INPUT_Nouveau_Mouse_K;
-      Calculer_coordonnees_pinceau();
-      Afficher_curseur();
-      return 1;
+    Forcer_affichage_curseur=0;
+    Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
+    Mouse_X=INPUT_Nouveau_Mouse_X;
+    Mouse_Y=INPUT_Nouveau_Mouse_Y;
+    Calculer_coordonnees_pinceau();
+    Afficher_curseur();
+    
+    Mouse_count++;
+    if (Mouse_count>Config.Mouse_Merge_movement)
+      Retour=1;
   }
-  else
-    return 0;
+  if ((INPUT_Nouveau_Mouse_K != Mouse_K))
+  {
+    Mouse_K=INPUT_Nouveau_Mouse_K;
+    Retour=1;        
+  }
+
+  return Retour;
 }
 
 // Fonction qui filtre les evenements génériques.
@@ -582,6 +588,7 @@ int Get_input(void)
 
     Touche_ANSI = 0;
     Touche = 0;
+    Mouse_count=0;
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high

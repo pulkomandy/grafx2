@@ -456,7 +456,6 @@ int Charger_INI(struct S_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   Conf->Curseur=Valeurs[0]-1;
 
-
   if ((Retour=Charger_INI_Reach_group(Fichier,Buffer,"[MENU]")))
     goto Erreur_Retour;
 
@@ -695,6 +694,15 @@ int Charger_INI(struct S_Config * Conf)
       Mode_video[0].Largeur = Valeurs[0];
     if ((Valeurs[1]>=200))
       Mode_video[0].Hauteur = Valeurs[1];
+  }
+
+  Conf->Mouse_Merge_movement=100;
+  // Optionnel, paramètre pour grouper les mouvements souris (>98.0%)
+  if (!Charger_INI_Get_values (Fichier,Buffer,"Merge_movement",1,Valeurs))
+  {
+    if ((Valeurs[0]<0) || (Valeurs[0]>1000))
+      goto Erreur_ERREUR_INI_CORROMPU;
+    Conf->Mouse_Merge_movement=Valeurs[0];
   }
   
   fclose(Fichier);
