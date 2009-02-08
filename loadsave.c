@@ -128,6 +128,10 @@ T_Format FormatFichier[NB_FORMATS_CONNUS] = {
   {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
 };
 
+// Cette variable est alimentée après chargement réussi d'une image.
+// Actuellement seul le format PNG peut donner autre chose que PIXEL_SIMPLE.
+enum PIXEL_RATIO Ratio_image_chargee=PIXEL_SIMPLE;
+
 // Taille de fichier, en octets
 int FileLength(FILE * Fichier)
 {
@@ -613,6 +617,7 @@ void Charger_image(byte Image)
   {
     // On peut charger le fichier:
     Image_24b=0;
+    Ratio_image_chargee=PIXEL_SIMPLE;
     // Dans certains cas il est possible que le chargement plante
     // après avoir modifié la palette. TODO
     FormatFichier[Format].Load();
@@ -5574,8 +5579,12 @@ void Load_PNG(void)
               {
                 int num_text;
                 png_text *text_ptr;
+                
+                int unit_type;
+                png_uint_32 res_x;
+                png_uint_32 res_y;
 
-                // Commentaire
+                // Commentaire (tEXt)
                 Principal_Commentaire[0]='\0'; // On efface le commentaire
                 if ((num_text=png_get_text(png_ptr, info_ptr, &text_ptr, NULL)))
                 {
@@ -5591,7 +5600,23 @@ void Load_PNG(void)
                     }
                   }
                 }
-
+                // Pixel Ratio (pHYs)
+                if (png_get_pHYs(png_ptr, info_ptr, &res_x, &res_y, &unit_type))
+                {
+                  // Ignore unit, and use the X/Y ratio as a hint for
+                  // WIDE or TALL pixels
+                  if (res_x>0 && res_y>0)
+                  {
+                    if (res_y/res_x>1)
+                    {
+                      Ratio_image_chargee=PIXEL_WIDE;
+                    }
+                    else if (res_x/res_y>1)
+                    {
+                      Ratio_image_chargee=PIXEL_TALL;
+                    }
+                  }
+                }
                 Initialiser_preview(info_ptr->width,info_ptr->height,Taille_du_fichier,FORMAT_PNG);
 
                 if (Erreur_fichier==0)
@@ -5735,6 +5760,17 @@ void Save_PNG(void)
             }
             png_set_text(png_ptr, info_ptr, text_ptr, Nb_texte);
           }
+          switch(Pixel_ratio)
+          {
+            case PIXEL_WIDE:
+              png_set_pHYs(png_ptr, info_ptr, 3000, 6000, PNG_RESOLUTION_METER);
+              break;
+            case PIXEL_TALL:
+              png_set_pHYs(png_ptr, info_ptr, 6000, 3000, PNG_RESOLUTION_METER);
+              break;
+            default:
+              break;
+          }          
           png_write_info(png_ptr, info_ptr);
 
           /* ecriture des pixels de l'image */

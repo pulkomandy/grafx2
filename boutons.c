@@ -3347,6 +3347,8 @@ void Load_picture(byte Image)
         }
 
         Nouveau_mode=Meilleur_mode_video();
+        // TODO : Utiliser içi Ratio_image_chargee pour passer dans la
+        // bonne taille de pixels.
         if ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle))
         {
           Initialiser_mode_video(
@@ -3435,6 +3437,8 @@ void Bouton_Reload(void)
       }
 
       Nouveau_mode=Meilleur_mode_video();
+      // TODO : Utiliser içi Ratio_image_chargee pour passer dans la
+      // bonne taille de pixels.      
       if ( ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle)) &&
            (!Une_resolution_a_ete_passee_en_parametre) )
       {
