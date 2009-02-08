@@ -637,7 +637,6 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   "Rotate the user-defined brush by 90°",
   "(counter-clockwise).",
   "",
-  "",
   true,
   SDLK_z, // Z (W en AZERTY)
   0},
@@ -868,8 +867,8 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   {101,
   "Settings",
   "Opens a menu which permits you to",
-  "modify some parameters of the program.",
-  "",
+  "modify some parameters of the",
+  "program.",
   true,
   SDLK_F10|MOD_SHIFT, // Shift + F10
   0},
@@ -884,6 +883,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   {103,
   "Redo",
   "Redo the last undone action.",
+  "",
   "",
   true,
   SDLK_u|MOD_SHIFT, // Shift + U
