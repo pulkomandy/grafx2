@@ -4258,12 +4258,12 @@ void Rectangle_Degrade_12_0(void)
   if (Mouse_K==A_GAUCHE)
   {
     Shade_Table=Shade_Table_gauche;
-    Operation_PUSH(Fore_color);
+    Operation_PUSH(Mouse_K);
   }
   else
   {
     Shade_Table=Shade_Table_droite;
-    Operation_PUSH(Back_color);
+    Operation_PUSH(Mouse_K);
   }
 
   Operation_PUSH(Pinceau_X);
@@ -4414,7 +4414,7 @@ void Rectangle_Degrade_0_5(void)
   Operation_PUSH(RBX);
   Operation_PUSH(RBY);
 
-//  Forme_curseur = FORME_CURSEUR_CIBLE; // On reste en mode cible XOR pour ne pas effacer l'empreinte du rectangle ...
+  // On ajoute des trucs dans la pile pour forcer le passage à l'étape suivante
   Operation_PUSH(RBX);
   Operation_PUSH(RBY);
 }
@@ -4443,58 +4443,155 @@ void Rectangle_Degrade_12_7(void)
 
 //  Début du tracé du vecteur (premier clic)
 // On garde les anciennes coordonnées dans la pile, et on ajoute les nouvelles par dessus
+
+// Si l'utilisateur utilise le mauvais bouton, on annule le tracé. Mais ça nous oblige à vider toute la pile pour vérifier :(
 {
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  short RAX,RBX,RAY,RBY,VAX,VAY,Clic;
+
+  Operation_POP(&VAY);
+  Operation_POP(&VAX);
+  Operation_POP(&RAY);
+  Operation_POP(&RAX);
+  Operation_POP(&RBY);
+  Operation_POP(&RBX);
+  Operation_POP(&Clic);
+
+
+  if(Clic==Mouse_K)
+  {
+      Operation_PUSH(Clic);
+      Operation_PUSH(RBX);
+      Operation_PUSH(RBY);
+      Operation_PUSH(RAX);
+      Operation_PUSH(RAY);
+      Operation_PUSH(VAX);
+      Operation_PUSH(VAY);
+      Operation_PUSH(Pinceau_X);
+      Operation_PUSH(Pinceau_Y);
+
+  }
+  else
+  {
+      // Mauvais bouton > anulation de l'opération.
+      // On a déjà vidé la pile, il reste à effacer le rectangle XOR
+      short largeur, hauteur;
+      short decalage_largeur = 0;
+      short decalage_hauteur = 0;
+      short decalage_gauche = 0;
+      short decalage_haut = 0;
+
+      largeur = abs(RBX-RAX);
+      hauteur = abs(RBY-RAY);
+
+      if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
+          decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+
+      if (Max(RAY,RBY)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
+          decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
+
+      // Dessin dans la zone de dessin normale
+      Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur - decalage_largeur);
+      if(decalage_hauteur == 0)
+          Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,largeur - decalage_largeur);
+
+      Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+      if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+          Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+
+      UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_hauteur);
+
+      // Dessin dans la zone zoomée
+      if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
+      {
+          decalage_largeur = 0;
+          decalage_hauteur=0;
+
+          if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
+          {
+              decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
+              decalage_gauche = Limite_Gauche_Zoom;
+          }
+
+          if(Max(RAX,RBX)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
+              decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
+
+          if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
+          {
+              decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
+              decalage_haut = Limite_Haut_Zoom;
+          }
+
+          if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
+              decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
+
+          if(largeur > decalage_largeur)
+          {
+              if(decalage_haut==0) // La ligne du haut est visible
+                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),largeur-decalage_largeur);
+
+              if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
+                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),largeur-decalage_largeur);
+          }
+
+          if(hauteur>decalage_hauteur)
+          {
+              if(decalage_gauche==0) // La ligne de gauche est visible
+                  Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+
+              if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
+                  Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),hauteur-decalage_hauteur);
+          }
+      }
+  }
 }
 
 void Rectangle_Degrade_12_9(void)
-// Opération   : OPERATION_RECTANGLE_DEGRADE
-// Click Souris: 1
-// Taille_Pile : 5
-//
-// Souris effacée: Oui
+    // Opération   : OPERATION_RECTANGLE_DEGRADE
+    // Click Souris: 1
+    // Taille_Pile : 5
+    //
+    // Souris effacée: Oui
 
-// Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
+    // Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
+    short Debut_X;
+    short Debut_Y;
+    short Fin_X;
+    short Fin_Y;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-
-  if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
-  {
+    Operation_POP(&Fin_Y);
+    Operation_POP(&Fin_X);
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
-      // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-      if(SDL_GetModState() & KMOD_SHIFT)
-          Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
 
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+    if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+    {
+        // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+        if(SDL_GetModState() & KMOD_SHIFT)
+            Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
 
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+        Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+
+        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+
+    }
+
 
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);
-  }
-
-
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+    Operation_PUSH(Pinceau_X);
+    Operation_PUSH(Pinceau_Y);
 }
 
 void Rectangle_Degrade_0_9(void)
-// Opération   : OPERATION_RECTANGLE_DEGRADE
-// Click Souris: 1 ou 2
-// Taille_Pile : 0
-//
-//  Souris effacée: Oui
+    // Opération   : OPERATION_RECTANGLE_DEGRADE
+    // Click Souris: 0
+    // Taille_Pile : 9
+    //
+    //  Souris effacée: Oui
 
-// Ouf, fini ! on dessine enfin le rectangle avec son dégradé
+    // Ouf, fini ! on dessine enfin le rectangle avec son dégradé
 {
     short Rect_Debut_X;
     short Rect_Debut_Y;
@@ -4514,14 +4611,87 @@ void Rectangle_Degrade_0_9(void)
     Operation_POP(&Rect_Fin_X);
     Operation_POP(&Rect_Debut_Y);
     Operation_POP(&Rect_Debut_X);
-    Operation_Taille_pile --;
+    Operation_Taille_pile--;
 
     Effacer_curseur();
     // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
     Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
-   
+
     // Et enfin on trace le rectangle avec le dégradé dedans !
-//    if (Mouse_K==Ancien_Mouse_K)                              // TODO sauver l'ancien mouse K à la place de la couleur dans l'étape 1. Modifier aussi les autres étapes pour pouvoir annuler à tout moment.
+    if (Vecteur_Fin_X==Vecteur_Debut_X && Vecteur_Fin_Y==Vecteur_Debut_Y)
+    {
+        // Vecteur nul > pas de rectangle tracé
+        // Du coup on doit effacer la preview xor ...
+        short largeur, hauteur;
+        short decalage_largeur = 0;
+        short decalage_hauteur = 0;
+        short decalage_gauche = 0;
+        short decalage_haut = 0;
+
+        largeur = abs(Rect_Fin_X-Rect_Debut_X);
+        hauteur = abs(Rect_Fin_Y-Rect_Debut_Y);
+
+        if (Max(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
+            decalage_largeur = Max(Rect_Debut_X,Rect_Fin_X) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+
+        if (Max(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
+            decalage_hauteur = Max(Rect_Debut_Y,Rect_Fin_Y) - Min(Principal_Hauteur_image,Menu_Ordonnee);
+
+        // Dessin dans la zone de dessin normale
+        Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,largeur - decalage_largeur);
+        if(decalage_hauteur == 0)
+            Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Max(Rect_Debut_Y,Rect_Fin_Y)-1-Principal_Decalage_Y,largeur - decalage_largeur);
+
+        Ligne_verticale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+        if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+            Ligne_verticale_XOR(Max(Rect_Debut_X,Rect_Fin_X)-1-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,hauteur-decalage_hauteur);
+
+        UpdateRect(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,largeur+1-decalage_largeur,hauteur+1-decalage_hauteur);
+
+        // Dessin dans la zone zoomée
+        if(Loupe_Mode && Min(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom && Max(Rect_Debut_X,Rect_Fin_X)>Limite_Gauche_Zoom && Min(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom && Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_Haut_Zoom )
+        {
+            decalage_largeur = 0;
+            decalage_hauteur=0;
+
+            if(Min(Rect_Debut_X,Rect_Fin_X)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
+            {
+                decalage_largeur += Limite_Gauche_Zoom - Min(Rect_Debut_X,Rect_Fin_X);
+                decalage_gauche = Limite_Gauche_Zoom;
+            }
+
+            if(Max(Rect_Debut_X,Rect_Fin_X)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
+                decalage_largeur += Max(Rect_Debut_X,Rect_Fin_X) - Limite_visible_Droite_Zoom;
+
+            if(Min(Rect_Debut_Y,Rect_Fin_Y)<Limite_Haut_Zoom) // On dépasse du zoom en haut
+            {
+                decalage_hauteur += Limite_Haut_Zoom - Min(Rect_Debut_Y,Rect_Fin_Y);
+                decalage_haut = Limite_Haut_Zoom;
+            }
+
+            if(Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
+                decalage_hauteur += Max(Rect_Debut_Y,Rect_Fin_Y) - Limite_visible_Bas_Zoom;
+
+            if(largeur > decalage_largeur)
+            {
+                if(decalage_haut==0) // La ligne du haut est visible
+                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Min(Rect_Debut_Y,Rect_Fin_Y),largeur-decalage_largeur);
+
+                if(Max(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
+                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Max(Rect_Debut_Y,Rect_Fin_Y),largeur-decalage_largeur);
+            }
+
+            if(hauteur>decalage_hauteur)
+            {
+                if(decalage_gauche==0) // La ligne de gauche est visible
+                    Ligne_verticale_XOR_Zoom(Min(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),hauteur-decalage_hauteur);
+
+                if(Max(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
+                    Ligne_verticale_XOR_Zoom(Max(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),hauteur-decalage_hauteur);
+            }
+        }
+    }
+    else
         Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
 
     Afficher_curseur();
@@ -4622,114 +4792,114 @@ void Lignes_centrees_12_7(void)
     short Couleur;
 
     Operation_POP(&Dernier_Y);
-  Operation_POP(&Dernier_X);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Bouton);
-
-  if (Mouse_K==Bouton)
-  {
-    if ( (Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y) ||
-         (Dernier_X!=Pinceau_X) || (Dernier_Y!=Pinceau_Y) )
-    {
-      Effacer_curseur();
-
-      Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
-
-      Pinceau_Forme=Pinceau_Forme_avant_operation;
-
-      Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-      Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
-
-      Smear_Debut=1;
-      Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
-      Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
-
-      Pinceau_Forme=FORME_PINCEAU_POINT;
-      Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-      Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
-
-      Afficher_curseur();
-    }
-
-    Operation_PUSH(Bouton);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
-  }
-  else
-  {
-    Effacer_curseur();
-
-    Pinceau_Forme=Pinceau_Forme_avant_operation;
-
-    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-    Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
-
-    if ( (Config.Coords_rel) && (Menu_visible) )
-    {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
-    }
-
-    Afficher_curseur();
-    Attendre_fin_de_click();
-  }
-}
-
-
-void Lignes_centrees_0_7(void)
-// Opération   : OPERATION_LIGNES_CENTREES
-// Click Souris: 0
-// Taille_Pile : 7
-//
-// Souris effacée: Non
-{
-  short Bouton;
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Dernier_X;
-  short Dernier_Y;
-  short Couleur;
-
-  Operation_POP(&Dernier_Y);
-  Operation_POP(&Dernier_X);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-
-  if ((Pinceau_X!=Dernier_X) || (Pinceau_Y!=Dernier_Y))
-  {
-    Effacer_curseur();
+    Operation_POP(&Dernier_X);
+    Operation_POP(&Fin_Y);
+    Operation_POP(&Fin_X);
     Operation_POP(&Debut_Y);
     Operation_POP(&Debut_X);
     Operation_POP(&Bouton);
 
-    Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+    if (Mouse_K==Bouton)
+    {
+        if ( (Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y) ||
+                (Dernier_X!=Pinceau_X) || (Dernier_Y!=Pinceau_Y) )
+        {
+            Effacer_curseur();
 
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+            Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
 
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+            Pinceau_Forme=Pinceau_Forme_avant_operation;
 
-    Pixel_figure_Preview(Debut_X,Debut_Y,Couleur);
-    Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+            Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
+            Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
 
-    Operation_PUSH(Bouton);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Afficher_curseur();
-  }
+            Smear_Debut=1;
+            Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
+            Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
 
-  Operation_PUSH(Fin_X);
-  Operation_PUSH(Fin_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+            Pinceau_Forme=FORME_PINCEAU_POINT;
+            Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+            Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+
+            Afficher_curseur();
+        }
+
+        Operation_PUSH(Bouton);
+        Operation_PUSH(Debut_X);
+        Operation_PUSH(Debut_Y);
+        Operation_PUSH(Pinceau_X);
+        Operation_PUSH(Pinceau_Y);
+        Operation_PUSH(Pinceau_X);
+        Operation_PUSH(Pinceau_Y);
+    }
+    else
+    {
+        Effacer_curseur();
+
+        Pinceau_Forme=Pinceau_Forme_avant_operation;
+
+        Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
+        Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+
+        if ( (Config.Coords_rel) && (Menu_visible) )
+        {
+            Print_dans_menu("X:       Y:             ",0);
+            Print_coordonnees();
+        }
+
+        Afficher_curseur();
+        Attendre_fin_de_click();
+    }
+}
+
+
+void Lignes_centrees_0_7(void)
+    // Opération   : OPERATION_LIGNES_CENTREES
+    // Click Souris: 0
+    // Taille_Pile : 7
+    //
+    // Souris effacée: Non
+{
+    short Bouton;
+    short Debut_X;
+    short Debut_Y;
+    short Fin_X;
+    short Fin_Y;
+    short Dernier_X;
+    short Dernier_Y;
+    short Couleur;
+
+    Operation_POP(&Dernier_Y);
+    Operation_POP(&Dernier_X);
+    Operation_POP(&Fin_Y);
+    Operation_POP(&Fin_X);
+
+    if ((Pinceau_X!=Dernier_X) || (Pinceau_Y!=Dernier_Y))
+    {
+        Effacer_curseur();
+        Operation_POP(&Debut_Y);
+        Operation_POP(&Debut_X);
+        Operation_POP(&Bouton);
+
+        Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+
+        Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+
+        Effacer_ligne_Preview(Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+
+        Pixel_figure_Preview(Debut_X,Debut_Y,Couleur);
+        Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+
+        Operation_PUSH(Bouton);
+        Operation_PUSH(Debut_X);
+        Operation_PUSH(Debut_Y);
+        Afficher_curseur();
+    }
+
+    Operation_PUSH(Fin_X);
+    Operation_PUSH(Fin_Y);
+    Operation_PUSH(Pinceau_X);
+    Operation_PUSH(Pinceau_Y);
 }
 
 
