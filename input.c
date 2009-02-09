@@ -129,7 +129,7 @@ int Move_cursor_with_constraints()
         }
   }
   if ((INPUT_Nouveau_Mouse_X != Mouse_X) ||
-    (INPUT_Nouveau_Mouse_Y == Mouse_Y))
+    (INPUT_Nouveau_Mouse_Y != Mouse_Y))
   {
     Forcer_affichage_curseur=0;
     Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
