@@ -73,8 +73,8 @@ GFX2_GLOBAL struct S_Config
   byte Fast_zoom;
   byte Find_file_fast;
   byte Couleurs_separees;
-  short Palette_Cells_X;
-  short Palette_Cells_Y;
+  word Palette_Cells_X;
+  word Palette_Cells_Y;
   byte FX_Feedback;
   byte Safety_colors;
   byte Opening_message;

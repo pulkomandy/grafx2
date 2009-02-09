@@ -35,6 +35,20 @@
 #include "sdlscreen.h"
 #include "erreurs.h"
 
+// L'encapsulation tente une percée...ou un dernier combat.
+
+// Nombre de cellules réel dans la palette du menu
+word Menu_Cellules_X;
+word Palette_Cells_X()
+{
+  return Menu_Cellules_X;
+}
+word Menu_Cellules_Y;
+word Palette_Cells_Y()
+{
+  return Menu_Cellules_Y;
+}
+
 // Affichage d'un pixel dans le menu (le menu doit être visible)
 void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur)
 {
@@ -143,14 +157,14 @@ void Encadrer_couleur_menu(byte Couleur)
 {
   word Debut_X,Debut_Y,Fin_X,Fin_Y;
   word Indice;
-  word Hauteur_cellule=32/Config.Palette_Cells_Y;
+  word Hauteur_cellule=32/Menu_Cellules_Y;
 
-  if ((Fore_color>=Couleur_debut_palette) && (Fore_color<Couleur_debut_palette+Config.Palette_Cells_X*Config.Palette_Cells_Y) && (Menu_visible))
+  if ((Fore_color>=Couleur_debut_palette) && (Fore_color<Couleur_debut_palette+Menu_Cellules_X*Menu_Cellules_Y) && (Menu_visible))
   {
     if (Config.Couleurs_separees)
     {
-      Debut_X=(LARGEUR_MENU+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
-      Debut_Y=Menu_Ordonnee+((1+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y);
+      Debut_X=(LARGEUR_MENU+((Fore_color-Couleur_debut_palette)/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+      Debut_Y=Menu_Ordonnee+((1+(((Fore_color-Couleur_debut_palette)%Menu_Cellules_Y)*Hauteur_cellule))*Menu_Facteur_Y);
 
       Block(Debut_X,Debut_Y,(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y,Couleur);
       Block(Debut_X,Debut_Y+(Menu_Facteur_Y*Hauteur_cellule),(Menu_Taille_couleur+1)*Menu_Facteur_X,Menu_Facteur_Y,Couleur);
@@ -164,8 +178,8 @@ void Encadrer_couleur_menu(byte Couleur)
     {
       if (Couleur==CM_Noir)
       {
-        Debut_X=(LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
-        Debut_Y=Menu_Ordonnee+((2+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y);
+        Debut_X=(LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+        Debut_Y=Menu_Ordonnee+((2+(((Fore_color-Couleur_debut_palette)%Menu_Cellules_Y)*Hauteur_cellule))*Menu_Facteur_Y);
 
         Block(Debut_X,Debut_Y,Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y*Hauteur_cellule,Fore_color);
@@ -174,8 +188,8 @@ void Encadrer_couleur_menu(byte Couleur)
       }
       else
       {
-        Debut_X=LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Config.Palette_Cells_Y)*Menu_Taille_couleur;
-        Debut_Y=2+(((Fore_color-Couleur_debut_palette)%Config.Palette_Cells_Y)*Hauteur_cellule);
+        Debut_X=LARGEUR_MENU+1+((Fore_color-Couleur_debut_palette)/Menu_Cellules_Y)*Menu_Taille_couleur;
+        Debut_Y=2+(((Fore_color-Couleur_debut_palette)%Menu_Cellules_Y)*Hauteur_cellule);
 
         Fin_X=Debut_X+Menu_Taille_couleur-1;
         Fin_Y=Debut_Y+Hauteur_cellule-1;
@@ -211,7 +225,7 @@ void Encadrer_couleur_menu(byte Couleur)
 void Afficher_palette_du_menu(void)
 {
   int Couleur;
-  byte Hauteur_cellule=32/Config.Palette_Cells_Y;
+  byte Hauteur_cellule=32/Menu_Cellules_Y;
   // Largeur: Menu_Taille_couleur
   
   if (Menu_visible)
@@ -219,16 +233,16 @@ void Afficher_palette_du_menu(void)
     Block(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),(HAUTEUR_MENU-9)*Menu_Facteur_Y,CM_Noir);
 
     if (Config.Couleurs_separees)
-      for (Couleur=0;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++)
-        Block((LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
-              Menu_Ordonnee+((2+((Couleur%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y),
+      for (Couleur=0;Couleur_debut_palette+Couleur<256&&Couleur<Menu_Cellules_X*Menu_Cellules_Y;Couleur++)
+        Block((LARGEUR_MENU+1+(Couleur/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
+              Menu_Ordonnee+((2+((Couleur%Menu_Cellules_Y)*Hauteur_cellule))*Menu_Facteur_Y),
               (Menu_Taille_couleur-1)*Menu_Facteur_X,
               Menu_Facteur_Y*(Hauteur_cellule-1),
               Couleur_debut_palette+Couleur);
     else
-      for (Couleur=0;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++)
-        Block((LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
-              Menu_Ordonnee+((2+((Couleur%Config.Palette_Cells_Y)*Hauteur_cellule))*Menu_Facteur_Y),
+      for (Couleur=0;Couleur_debut_palette+Couleur<256&&Couleur<Menu_Cellules_X*Menu_Cellules_Y;Couleur++)
+        Block((LARGEUR_MENU+1+(Couleur/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X,
+              Menu_Ordonnee+((2+((Couleur%Menu_Cellules_Y)*Hauteur_cellule))*Menu_Facteur_Y),
               Menu_Taille_couleur*Menu_Facteur_X,
               Menu_Facteur_Y*Hauteur_cellule,
               Couleur_debut_palette+Couleur);
@@ -248,30 +262,71 @@ void Recadrer_palette(void)
   if (Fore_color<Couleur_debut_palette)
   {
     while (Fore_color<Couleur_debut_palette)
-      Couleur_debut_palette-=Config.Palette_Cells_Y;
+      Couleur_debut_palette-=Menu_Cellules_Y;
   }
   else
   {
-    while (Fore_color>=Couleur_debut_palette+Config.Palette_Cells_X*Config.Palette_Cells_Y)
-      Couleur_debut_palette+=Config.Palette_Cells_Y;
+    while (Fore_color>=Couleur_debut_palette+Menu_Cellules_X*Menu_Cellules_Y)
+      Couleur_debut_palette+=Menu_Cellules_Y;
   }
   if (Ancienne_couleur!=Couleur_debut_palette)
     Afficher_palette_du_menu();
 }
 
-void Changer_cellules_palette(byte Cells_X, byte Cells_Y)
+void Changer_cellules_palette()
 {
-  Config.Palette_Cells_X=Cells_X;
-  Config.Palette_Cells_Y=Cells_Y;
+  // On initialise avec la configuration de l'utilisateur
+  Menu_Cellules_X=Config.Palette_Cells_X;
+  Menu_Cellules_Y=Config.Palette_Cells_Y;
+  // Mais on sait jamais
+  if (Menu_Cellules_X<1)
+    Menu_Cellules_X=1;
+  if (Menu_Cellules_Y<1)
+    Menu_Cellules_Y=1;
+  
+  while (1)
+  {
+    Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) / Menu_Cellules_X;
+
+    // Si ça tient, c'est bon. Sinon, on retente avec une colonne de moins
+    if (Menu_Taille_couleur>2)
+      break;
+    Menu_Cellules_X--;
+  }
   
   // Cale Couleur_debut_palette sur un multiple de Cells_Y (arrondi inférieur)
-  Couleur_debut_palette=Couleur_debut_palette/Cells_Y*Cells_Y;
+  Couleur_debut_palette=Couleur_debut_palette/Menu_Cellules_Y*Menu_Cellules_Y;
 
-  // Mise à jour du menu
-  Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) / Cells_X;
-  Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Config.Palette_Cells_X)-1;
+  // Si le nombre de cellules a beaucoup augmenté et qu'on était près de
+  // la fin, il faut reculer Couleur_debut_palette pour montrer plein
+  // de couleurs.
+  if ((int)Couleur_debut_palette+(Menu_Cellules_Y)*Menu_Cellules_X*2>=256)
+    Couleur_debut_palette=255/Menu_Cellules_Y*Menu_Cellules_Y-(Menu_Cellules_X-1)*Menu_Cellules_Y;
+
+  // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
+  // la bordure noire soit active.
+  Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Menu_Cellules_X)-1;
+  Bouton[BOUTON_CHOIX_COL].Hauteur=32/Menu_Cellules_Y*Menu_Cellules_Y-1;
 }
 
+// Retrouve la couleur sur laquelle pointe le curseur souris.
+// Cette fonction suppose qu'on a déja vérifié que le curseur est dans
+// la zone rectangulaire du BOUTON_CHOIX_COL
+// La fonction renvoie -1 si on est "trop à gauche" (pas possible)
+// ou après la couleur 255 (Ce qui peut arriver si la palette est affichée
+// avec un nombre de lignes qui n'est pas une puissance de deux.)
+int Couleur_palette()
+{
+  int Col;
+  int Ligne;
+  Ligne=(((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)/(32/Menu_Cellules_Y);
+  
+  Col=Couleur_debut_palette+Ligne+
+    ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)*Menu_Cellules_Y);
+  if (Col<0 || Col>255)
+    return -1;
+  return Col;
+}
 
   // -- Afficher tout le menu --
 
@@ -948,20 +1003,20 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
   if (Config.Couleurs_separees)
   {
     Largeur=(Menu_Taille_couleur-1)*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y*(32/Config.Palette_Cells_Y-1);
+    Hauteur=Menu_Facteur_Y*(32/Menu_Cellules_Y-1);
   }
   else
   {
     Largeur=Menu_Taille_couleur*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y*(32/Config.Palette_Cells_Y);
+    Hauteur=Menu_Facteur_Y*(32/Menu_Cellules_Y);
   }
 
-  for (Couleur=0,Vraie_couleur=Couleur_debut_palette;Couleur<Config.Palette_Cells_X*Config.Palette_Cells_Y;Couleur++,Vraie_couleur++)
+  for (Couleur=0,Vraie_couleur=Couleur_debut_palette;Couleur<Menu_Cellules_X*Menu_Cellules_Y;Couleur++,Vraie_couleur++)
   {
     if (Table[Vraie_couleur]!=Vraie_couleur)
     {
-      Debut_X=(LARGEUR_MENU+1+(Couleur/Config.Palette_Cells_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
-      Debut_Y=Menu_Ordonnee_avant_fenetre+((2+((Couleur%Config.Palette_Cells_Y)*(32/Config.Palette_Cells_Y)))*Menu_Facteur_Y);
+      Debut_X=(LARGEUR_MENU+1+(Couleur/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
+      Debut_Y=Menu_Ordonnee_avant_fenetre+((2+((Couleur%Menu_Cellules_Y)*(32/Menu_Cellules_Y)))*Menu_Facteur_Y);
       Fin_X=Debut_X+Largeur;
       Fin_Y=Debut_Y+Hauteur;
 

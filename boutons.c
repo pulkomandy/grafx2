@@ -257,11 +257,13 @@ void Bouton_Redo(void)
 //---------------------------- SCROLL PALETTE LEFT ---------------------------
 void Bouton_Pal_left(void)
 {
+  short Cells_Y = Palette_Cells_Y();
+
   Effacer_curseur();
   if (Couleur_debut_palette)
   {
-    if (Couleur_debut_palette>=Config.Palette_Cells_Y)
-      Couleur_debut_palette-=Config.Palette_Cells_Y;
+    if (Couleur_debut_palette>=Cells_Y)
+      Couleur_debut_palette-=Cells_Y;
     else
       Couleur_debut_palette=0;
     Afficher_palette_du_menu();
@@ -272,11 +274,14 @@ void Bouton_Pal_left(void)
 
 void Bouton_Pal_left_fast(void)
 {
+  short Cells_X = Palette_Cells_X();
+  short Cells_Y = Palette_Cells_Y();
+
   Effacer_curseur();
   if (Couleur_debut_palette)
   {
-    if (Couleur_debut_palette>=Config.Palette_Cells_Y*Config.Palette_Cells_X)
-      Couleur_debut_palette-=Config.Palette_Cells_Y*Config.Palette_Cells_X;
+    if (Couleur_debut_palette>=Cells_Y*Cells_X)
+      Couleur_debut_palette-=Cells_Y*Cells_X;
     else
       Couleur_debut_palette=0;
     Afficher_palette_du_menu();
@@ -289,13 +294,12 @@ void Bouton_Pal_left_fast(void)
 //--------------------------- SCROLL PALETTE RIGHT ---------------------------
 void Bouton_Pal_right(void)
 {
+  short Cells_Y = Palette_Cells_Y();
+
   Effacer_curseur();
-  if ((int)Couleur_debut_palette+Config.Palette_Cells_Y*Config.Palette_Cells_X<256)
+  if ((int)Couleur_debut_palette+Cells_Y*Palette_Cells_X()<256)
   {
-    if ((int)Couleur_debut_palette+(Config.Palette_Cells_Y+1)*Config.Palette_Cells_X<256)
-      Couleur_debut_palette+=Config.Palette_Cells_Y;
-    else
-      Couleur_debut_palette=256-Config.Palette_Cells_Y*Config.Palette_Cells_X;
+    Couleur_debut_palette+=Cells_Y;
     Afficher_palette_du_menu();
   }
   Desenclencher_bouton(BOUTON_PAL_RIGHT);
@@ -304,13 +308,16 @@ void Bouton_Pal_right(void)
 
 void Bouton_Pal_right_fast(void)
 {
+  short Cells_X = Palette_Cells_X();
+  short Cells_Y = Palette_Cells_Y();
+
   Effacer_curseur();
-  if ((int)Couleur_debut_palette+Config.Palette_Cells_Y*Config.Palette_Cells_X<256)
+  if ((int)Couleur_debut_palette+Cells_Y*Cells_X<256)
   {
-    if ((int)Couleur_debut_palette+(Config.Palette_Cells_Y)*Config.Palette_Cells_X*2<256)
-      Couleur_debut_palette+=Config.Palette_Cells_X*Config.Palette_Cells_Y;
+    if ((int)Couleur_debut_palette+(Cells_Y)*Cells_X*2<256)
+      Couleur_debut_palette+=Cells_X*Cells_Y;
     else
-      Couleur_debut_palette=256-Config.Palette_Cells_Y*Config.Palette_Cells_X;
+      Couleur_debut_palette=255/Cells_Y*Cells_Y-(Cells_X-1)*Cells_Y;
     Afficher_palette_du_menu();
   }
   Desenclencher_bouton(BOUTON_PAL_RIGHT);
@@ -320,31 +327,31 @@ void Bouton_Pal_right_fast(void)
 //-------------------- Choix de la forecolor dans le menu --------------------
 void Bouton_Choix_forecolor(void)
 {
-  word Pos_X, Pos_Y;
+  int Couleur=Couleur_palette();
 
-  Pos_X=(Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1);
-  Pos_Y=((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2;
-
-  Effacer_curseur();
-  Encadrer_couleur_menu(CM_Noir);
-  Fore_color=Couleur_debut_palette+((Pos_X/Menu_Taille_couleur)*Config.Palette_Cells_Y)+(Pos_Y/(32/Config.Palette_Cells_Y));
-  Encadrer_couleur_menu(CM_Blanc);
-  Afficher_foreback();
-  Afficher_curseur();
+  if (Couleur!=-1)
+  {
+    Effacer_curseur();
+    Encadrer_couleur_menu(CM_Noir);
+    Fore_color=Couleur;
+    Encadrer_couleur_menu(CM_Blanc);
+    Afficher_foreback();
+    Afficher_curseur();
+  }
 }
 
 //-------------------- Choix de la backcolor dans le menu --------------------
 void Bouton_Choix_backcolor(void)
 {
-  word Pos_X, Pos_Y;
+  int Couleur=Couleur_palette();
 
-  Pos_X=(Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1);
-  Pos_Y=((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2;
-
-  Effacer_curseur();
-  Back_color=Couleur_debut_palette+((Pos_X/Menu_Taille_couleur)*Config.Palette_Cells_Y)+(Pos_Y/(32/Config.Palette_Cells_Y));
-  Afficher_foreback();
-  Afficher_curseur();
+  if (Couleur!=-1)
+  {
+    Effacer_curseur();
+    Back_color=Couleur;
+    Afficher_foreback();
+    Afficher_curseur();
+  }
 }
 
 

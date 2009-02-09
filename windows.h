@@ -39,7 +39,10 @@ void Encadrer_couleur_menu(byte Couleur);
 void Afficher_palette_du_menu(void);
 void Afficher_menu(void);
 void Recadrer_palette(void);
-void Changer_cellules_palette(byte Cells_X, byte Cells_Y);
+void Changer_cellules_palette(void);
+int Couleur_palette(void);
+word Palette_Cells_X(void);
+word Palette_Cells_Y(void);
 
 void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);
 void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond);

@@ -337,17 +337,8 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         }
       }
 
-    while (1)
-    {
-      Changer_cellules_palette(Config.Palette_Cells_X, Config.Palette_Cells_Y);
-      if (Menu_Taille_couleur>2)
-        break;
-      Config.Palette_Cells_X--;
-    }
+    Changer_cellules_palette();
     
-    Menu_Taille_couleur = ((Largeur_ecran/Menu_Facteur_X)-(LARGEUR_MENU+2)) / Config.Palette_Cells_X;
-    Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Config.Palette_Cells_X)-1;
-
     Menu_Ordonnee = Hauteur_ecran;
     if (Menu_visible)
       Menu_Ordonnee -= HAUTEUR_MENU * Menu_Facteur_Y;
