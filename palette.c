@@ -2081,13 +2081,39 @@ void Bouton_Palette_secondaire(void)
 {
   short Bouton_clicke;
   byte Dummy;
-
-
-  Ouvrir_fenetre(200,80,"Palettes");
+  struct Fenetre_Bouton_scroller * Jauge_Colonnes;
+  struct Fenetre_Bouton_scroller * Jauge_Lignes;
+  struct Fenetre_Bouton_scroller * Jauge_RGBScale;
+  char Chaine[4];
+  byte Palette_a_redessiner=0;
+  
+  Ouvrir_fenetre(200,146,"Palettes");
 
   Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
   Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
-  Fenetre_Definir_bouton_normal(60,60, 80,14,"Cancel"               , 0,1,TOUCHE_ESC); // 3
+  Fenetre_Definir_bouton_normal(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
+  Fenetre_Definir_bouton_normal( 80,126,53,14,"Cancel"              , 0,1,TOUCHE_ESC); // 4
+  Fenetre_Afficher_cadre(10,55,122,51);
+  Print_dans_fenetre(18,59,"Palette layout",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(35,77,"Cols",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(84,77,"Lines",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(157,66,"RGB",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(152,76,"Scale",CM_Fonce,CM_Clair);
+  
+  Fenetre_Definir_bouton_scroller(19,72,29,255,1,256-Config.Palette_Cells_X);// 5
+  Jauge_Colonnes=Fenetre_Liste_boutons_scroller;
+  Num2str(Config.Palette_Cells_X,Chaine,3);
+  Print_dans_fenetre(38,89,Chaine,CM_Noir,CM_Clair);
+  
+  Fenetre_Definir_bouton_scroller(70,72,29,15,1,16-Config.Palette_Cells_Y);// 6
+  Jauge_Lignes=Fenetre_Liste_boutons_scroller;
+  Num2str(Config.Palette_Cells_Y,Chaine,3);
+  Print_dans_fenetre(94,89,Chaine,CM_Noir,CM_Clair);
+  
+  Fenetre_Definir_bouton_scroller(137,73,29,254,1,256-Graduations_RGB);// 7
+  Jauge_RGBScale=Fenetre_Liste_boutons_scroller;
+  Num2str(Graduations_RGB,Chaine,3);
+  Print_dans_fenetre(157,89,Chaine,CM_Noir,CM_Clair);
 
   UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*200,Menu_Facteur_Y*80);
 
@@ -2101,24 +2127,49 @@ void Bouton_Palette_secondaire(void)
       Touche=0;
       Fenetre_aide(BOUTON_PALETTE, NULL);
     }
+    switch(Bouton_clicke)
+    {
+      case 5:
+        Num2str(256-Fenetre_Attribut2,Chaine,3);
+        Print_dans_fenetre(38,89,Chaine,CM_Noir,CM_Clair);
+        break;    
+      case 6:
+        Num2str(16-Fenetre_Attribut2,Chaine,3);
+        Print_dans_fenetre(94,89,Chaine,CM_Noir,CM_Clair);
+        break;
+      case 7:
+        Num2str(256-Fenetre_Attribut2,Chaine,3);
+        Print_dans_fenetre(157,89,Chaine,CM_Noir,CM_Clair);
+        break;            
+    }
   }
-  while (Bouton_clicke<=0);
+  while (Bouton_clicke!=1 && Bouton_clicke!=3 && Bouton_clicke!=4);
 
   Fermer_fenetre();
   Desenclencher_bouton(BOUTON_PALETTE);
   Afficher_curseur();
+  
+  if (Bouton_clicke==4) // Cancel
+    return;
+
+  if (Jauge_Colonnes->Position!=256-Config.Palette_Cells_X ||
+    Jauge_Lignes->Position!=16-Config.Palette_Cells_Y)
+  {
+    Config.Palette_Cells_X = 256-Jauge_Colonnes->Position;
+    Config.Palette_Cells_Y = 16-Jauge_Lignes->Position;
+    Changer_cellules_palette();
+    Palette_a_redessiner=1;
+  }
+  if (Jauge_RGBScale->Position!=256-Graduations_RGB)
+  {
+    Set_Palette_RGB_Scale(256-Jauge_RGBScale->Position);
+    Set_palette(Principal_Palette);
+  }
 
   if (Bouton_clicke==1)
   {
     Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Dummy,1, NULL);
   }
-/*
-  else
-  {
-    if (Bouton_clicke==2)
-    {
-
-    }
-  }
-*/
+  if (Palette_a_redessiner)
+    Afficher_menu();
 }
