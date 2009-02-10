@@ -115,7 +115,7 @@ void Save_PNG(void);
 T_Format FormatFichier[NB_FORMATS_CONNUS] = {
   {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
   {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0},
-  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 0},
+  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 1},
   {"bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0},
   {"pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0},
   {"img", Test_IMG, Load_IMG, Save_IMG, 1, 0},
@@ -2845,7 +2845,7 @@ void Load_GIF(void)
   word Valeur_Eof;        // Valeur <=> Fin d'image
   long Taille_du_fichier;
   struct stat Informations_Fichier;
-
+  int Nombre_LID; // Nombre d'images trouvées dans le fichier
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
@@ -2855,7 +2855,8 @@ void Load_GIF(void)
   GIF_Last_byte=0;
   GIF_Rest_bits=0;
   GIF_Rest_byte=0;
-
+  Nombre_LID=0;
+  
   Nom_fichier_complet(Nom_du_fichier,0);
 
   if ((GIF_Fichier=fopen(Nom_du_fichier, "rb")))
@@ -2927,166 +2928,191 @@ void Load_GIF(void)
           Set_palette(Principal_Palette);
         }
 
-        // On s'apprête à sauter tous les blocks d'extension:
-
         // On lit un indicateur de block
         read_byte(GIF_Fichier,&Block_indicateur);
-        // Si l'indicateur de block annonce un block d'extension:
-        while (Block_indicateur==0x21)
+        while (Block_indicateur!=0x3B && !Erreur_fichier)
         {
-          // Lecture du code de fonction:
-          read_byte(GIF_Fichier,&Block_indicateur);
-
-          // On exploitera peut-être un jour ce code indicateur pour stocker
-          // des remarques dans le fichier. En attendant d'en connaître plus
-          // on se contente de sauter tous les blocs d'extension:
-
-          // Lecture de la taille du bloc:
-          read_byte(GIF_Fichier,&Taille_de_lecture);
-          while (Taille_de_lecture!=0)
+          switch (Block_indicateur)
           {
-            // On saute le bloc:
-            fseek(GIF_Fichier,Taille_de_lecture,SEEK_CUR);
-            // Lecture de la taille du bloc suivant:
-            read_byte(GIF_Fichier,&Taille_de_lecture);
+            case 0x21: // Bloc d'extension
+            {
+              byte Code_Fonction;
+              // Lecture du code de fonction:
+              read_byte(GIF_Fichier,&Code_Fonction);   
+              // Lecture de la taille du bloc:
+              read_byte(GIF_Fichier,&Taille_de_lecture);
+              while (Taille_de_lecture!=0 && !Erreur_fichier)
+              {
+                switch(Code_Fonction)
+                {
+                  case 0xFE: // Comment Block Extension
+                    // On récupère le premier commentaire non-vide, 
+                    // on jette les autres.
+                    if (Principal_Commentaire[0]=='\0')
+                    {
+                      int Caracteres_a_garder=Min(Taille_de_lecture,TAILLE_COMMENTAIRE);
+                      
+                      read_bytes(GIF_Fichier,Principal_Commentaire,Caracteres_a_garder);
+                      Principal_Commentaire[Caracteres_a_garder+1]='\0';
+                      // Si le commentaire etait trop long, on fait avance-rapide
+                      // sur la suite.
+                      if (Taille_de_lecture>Caracteres_a_garder)
+                        fseek(GIF_Fichier,Taille_de_lecture-Caracteres_a_garder,SEEK_CUR);
+                    }
+                    break;
+                  case 0xF9: // Graphics Control Extension
+                    // Prévu pour la transparence
+                    
+                  default:
+                    // On saute le bloc:
+                    fseek(GIF_Fichier,Taille_de_lecture,SEEK_CUR);
+                    break;
+                }
+                // Lecture de la taille du bloc suivant:
+                read_byte(GIF_Fichier,&Taille_de_lecture);
+              }
+            }
+            break;
+            case 0x2C: // Local Image Descriptor
+            {
+              // Si on a deja lu une image, c'est une GIF animée ou bizarroide, on sort.
+              if (Nombre_LID!=0)
+              {
+                Erreur_fichier=2;
+                break;
+              }
+              Nombre_LID++;
+              
+              // lecture de 10 derniers octets
+              if ( read_word_le(GIF_Fichier,&(IDB.Pos_X))
+                && read_word_le(GIF_Fichier,&(IDB.Pos_Y))
+                && read_word_le(GIF_Fichier,&(IDB.Largeur_image))
+                && read_word_le(GIF_Fichier,&(IDB.Hauteur_image))
+                && read_byte(GIF_Fichier,&(IDB.Indicateur))
+                && read_byte(GIF_Fichier,&(IDB.Nb_bits_pixel))
+                && IDB.Largeur_image && IDB.Hauteur_image)
+              {
+                Principal_Largeur_image=IDB.Largeur_image;
+                Principal_Hauteur_image=IDB.Hauteur_image;
+    
+                Initialiser_preview(IDB.Largeur_image,IDB.Hauteur_image,Taille_du_fichier,FORMAT_GIF);
+    
+                // Palette locale dispo = (IDB.Indicateur and $80)
+                // Image entrelacée     = (IDB.Indicateur and $40)
+                // Ordre de classement  = (IDB.Indicateur and $20)
+                // Nombre de bits/pixel = (IDB.Indicateur and $07)+1 (si palette locale dispo)
+    
+                if (IDB.Indicateur & 0x80)
+                {
+                  // Palette locale dispo
+    
+                  Nb_couleurs=(1 << ((IDB.Indicateur & 0x07)+1));
+                  Nb_bits_initial=(IDB.Indicateur & 0x07)+2;
+    
+                  if (!(IDB.Indicateur & 0x40))
+                    // Palette dans l'ordre:
+                    for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+                    {   
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
+                    }
+                  else
+                  {
+                    // Palette triée par composantes:
+                    for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
+                    for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+                    for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
+                  }
+                  Set_palette(Principal_Palette);
+                }
+    
+                Remapper_fileselect();
+    
+                Valeur_Clr   =Nb_couleurs+0;
+                Valeur_Eof   =Nb_couleurs+1;
+                Alphabet_Free=Nb_couleurs+2;
+                GIF_Nb_bits  =Nb_bits_initial;
+                Alphabet_Max      =((1 <<  GIF_Nb_bits)-1);
+                GIF_Entrelacee    =(IDB.Indicateur & 0x40);
+                GIF_Passe         =0;
+    
+                /*Init_lecture();*/
+    
+                Erreur_fichier=0;
+                GIF_Image_entrelacee_terminee=0;
+    
+                //////////////////////////////////////////// DECOMPRESSION LZW //
+    
+                while ( (GIF_Get_next_code()!=Valeur_Eof) && (!Erreur_fichier) )
+                {
+                  if (GIF_Code_actuel<=Alphabet_Free)
+                  {
+                    if (GIF_Code_actuel!=Valeur_Clr)
+                    {
+                      if (Alphabet_Free==(Read_byte=GIF_Code_actuel))
+                      {
+                        GIF_Code_actuel=Code_ancien;
+                        Alphabet_Pile[Alphabet_Pos_pile++]=Cas_special;
+                      }
+    
+                      while (GIF_Code_actuel>Valeur_Clr)
+                      {
+                        Alphabet_Pile[Alphabet_Pos_pile++]=Alphabet_Suffixe[GIF_Code_actuel];
+                        GIF_Code_actuel=Alphabet_Prefixe[GIF_Code_actuel];
+                      }
+    
+                      Cas_special=Alphabet_Pile[Alphabet_Pos_pile++]=GIF_Code_actuel;
+    
+                      do
+                        GIF_Nouveau_pixel(Alphabet_Pile[--Alphabet_Pos_pile]);
+                      while (Alphabet_Pos_pile!=0);
+    
+                      Alphabet_Prefixe[Alphabet_Free  ]=Code_ancien;
+                      Alphabet_Suffixe[Alphabet_Free++]=GIF_Code_actuel;
+                      Code_ancien=Read_byte;
+    
+                      if (Alphabet_Free>Alphabet_Max)
+                      {
+                        if (GIF_Nb_bits<12)
+                          Alphabet_Max      =((1 << (++GIF_Nb_bits))-1);
+                      }
+                    }
+                    else // Code Clear rencontré
+                    {
+                      GIF_Nb_bits       =Nb_bits_initial;
+                      Alphabet_Max      =((1 <<  GIF_Nb_bits)-1);
+                      Alphabet_Free     =Nb_couleurs+2;
+                      Cas_special       =GIF_Get_next_code();
+                      Code_ancien       =GIF_Code_actuel;
+                      GIF_Nouveau_pixel(GIF_Code_actuel);
+                    }
+                  }
+                  else
+                    Erreur_fichier=2;
+                } // Code End-Of-Information ou erreur de fichier rencontré
+    
+                /*Close_lecture();*/
+    
+                if (Erreur_fichier>=0)
+                if ( /* (GIF_Pos_X!=0) || */
+                     ( ( (!GIF_Entrelacee) && (GIF_Pos_Y!=Principal_Hauteur_image) ) ||
+                       (  (GIF_Entrelacee) && (!GIF_Image_entrelacee_terminee) )
+                     ) )
+                  Erreur_fichier=2;
+              } // Le fichier contenait un IDB
+              else
+                Erreur_fichier=2;
+            }
+            default:
+            break;
           }
-
           // Lecture du code de fonction suivant:
           read_byte(GIF_Fichier,&Block_indicateur);
         }
-
-        if (Block_indicateur==0x2C)
-        {
-          // Présence d'un Image Separator Header
-
-          // lecture de 10 derniers octets
-          if ( read_word_le(GIF_Fichier,&(IDB.Pos_X))
-            && read_word_le(GIF_Fichier,&(IDB.Pos_Y))
-            && read_word_le(GIF_Fichier,&(IDB.Largeur_image))
-            && read_word_le(GIF_Fichier,&(IDB.Hauteur_image))
-            && read_byte(GIF_Fichier,&(IDB.Indicateur))
-            && read_byte(GIF_Fichier,&(IDB.Nb_bits_pixel))
-            && IDB.Largeur_image && IDB.Hauteur_image)
-          {
-            Principal_Largeur_image=IDB.Largeur_image;
-            Principal_Hauteur_image=IDB.Hauteur_image;
-
-            Initialiser_preview(IDB.Largeur_image,IDB.Hauteur_image,Taille_du_fichier,FORMAT_GIF);
-
-            // Palette locale dispo = (IDB.Indicateur and $80)
-            // Image entrelacée     = (IDB.Indicateur and $40)
-            // Ordre de classement  = (IDB.Indicateur and $20)
-            // Nombre de bits/pixel = (IDB.Indicateur and $07)+1 (si palette locale dispo)
-
-            if (IDB.Indicateur & 0x80)
-            {
-              // Palette locale dispo
-
-              Nb_couleurs=(1 << ((IDB.Indicateur & 0x07)+1));
-              Nb_bits_initial=(IDB.Indicateur & 0x07)+2;
-
-              if (!(IDB.Indicateur & 0x40))
-                // Palette dans l'ordre:
-                for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-                {   
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
-                }
-              else
-              {
-                // Palette triée par composantes:
-                for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
-                for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
-                for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-                  read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
-              }
-              Set_palette(Principal_Palette);
-            }
-
-            Remapper_fileselect();
-
-            Valeur_Clr   =Nb_couleurs+0;
-            Valeur_Eof   =Nb_couleurs+1;
-            Alphabet_Free=Nb_couleurs+2;
-            GIF_Nb_bits  =Nb_bits_initial;
-            Alphabet_Max      =((1 <<  GIF_Nb_bits)-1);
-            GIF_Entrelacee    =(IDB.Indicateur & 0x40);
-            GIF_Passe         =0;
-
-            /*Init_lecture();*/
-
-            Erreur_fichier=0;
-            GIF_Image_entrelacee_terminee=0;
-
-            //////////////////////////////////////////// DECOMPRESSION LZW //
-
-            while ( (GIF_Get_next_code()!=Valeur_Eof) && (!Erreur_fichier) )
-            {
-              if (GIF_Code_actuel<=Alphabet_Free)
-              {
-                if (GIF_Code_actuel!=Valeur_Clr)
-                {
-                  if (Alphabet_Free==(Read_byte=GIF_Code_actuel))
-                  {
-                    GIF_Code_actuel=Code_ancien;
-                    Alphabet_Pile[Alphabet_Pos_pile++]=Cas_special;
-                  }
-
-                  while (GIF_Code_actuel>Valeur_Clr)
-                  {
-                    Alphabet_Pile[Alphabet_Pos_pile++]=Alphabet_Suffixe[GIF_Code_actuel];
-                    GIF_Code_actuel=Alphabet_Prefixe[GIF_Code_actuel];
-                  }
-
-                  Cas_special=Alphabet_Pile[Alphabet_Pos_pile++]=GIF_Code_actuel;
-
-                  do
-                    GIF_Nouveau_pixel(Alphabet_Pile[--Alphabet_Pos_pile]);
-                  while (Alphabet_Pos_pile!=0);
-
-                  Alphabet_Prefixe[Alphabet_Free  ]=Code_ancien;
-                  Alphabet_Suffixe[Alphabet_Free++]=GIF_Code_actuel;
-                  Code_ancien=Read_byte;
-
-                  if (Alphabet_Free>Alphabet_Max)
-                  {
-                    if (GIF_Nb_bits<12)
-                      Alphabet_Max      =((1 << (++GIF_Nb_bits))-1);
-                  }
-                }
-                else // Code Clear rencontré
-                {
-                  GIF_Nb_bits       =Nb_bits_initial;
-                  Alphabet_Max      =((1 <<  GIF_Nb_bits)-1);
-                  Alphabet_Free     =Nb_couleurs+2;
-                  Cas_special       =GIF_Get_next_code();
-                  Code_ancien       =GIF_Code_actuel;
-                  GIF_Nouveau_pixel(GIF_Code_actuel);
-                }
-              }
-              else
-                Erreur_fichier=2;
-            } // Code End-Of-Information ou erreur de fichier rencontré
-
-            /*Close_lecture();*/
-
-            if (Erreur_fichier>=0)
-            if ( /* (GIF_Pos_X!=0) || */
-                 ( ( (!GIF_Entrelacee) && (GIF_Pos_Y!=Principal_Hauteur_image) ) ||
-                   (  (GIF_Entrelacee) && (!GIF_Image_entrelacee_terminee) )
-                 ) )
-              Erreur_fichier=2;
-          } // Le fichier contenait un IDB
-          else
-            Erreur_fichier=2;
-
-        } // Le fichier contenait une image
-        else
-          Erreur_fichier=2;
-
       } // Le fichier contenait un LSDB
       else
         Erreur_fichier=1;
@@ -3221,7 +3247,7 @@ void Save_GIF(void)
   if ((GIF_Fichier=fopen(Nom_du_fichier,"wb")))
   {
     // On écrit la signature du fichier
-    if (write_bytes(GIF_Fichier,"GIF87a",6))
+    if (write_bytes(GIF_Fichier,"GIF89a",6))
     {
       // La signature du fichier a été correctement écrite.
 
@@ -3265,6 +3291,19 @@ void Save_GIF(void)
           //   Le jour où on se servira des blocks d'extensions pour placer
           // des commentaires, on le fera ici.
 
+          // Ecriture de la transparence
+          //write_bytes(GIF_Fichier,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
+
+          // Ecriture du commentaire
+          if (Principal_Commentaire[0])
+          {
+            write_bytes(GIF_Fichier,"\x21\xFE",2);
+            write_byte(GIF_Fichier,strlen(Principal_Commentaire));
+            write_bytes(GIF_Fichier,Principal_Commentaire,strlen(Principal_Commentaire)+1);
+          }
+                            
+
+          
           // On va écrire un block indicateur d'IDB et l'IDB du fichier
 
           Block_indicateur=0x2C;
@@ -3423,9 +3462,14 @@ void Save_GIF(void)
               GIF_Vider_le_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
               Close_ecriture(GIF_Fichier);   // On envoie les dernières données du buffer KM  dans le fichier
 
-              Chaine_en_cours=0x3B00;        // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
-              if (! write_bytes(GIF_Fichier,&Chaine_en_cours,sizeof(Chaine_en_cours)))
+              // On écrit un \0
+              if (! write_byte(GIF_Fichier,'\x00'))
                 Erreur_fichier=1;
+              // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
+              if (! write_byte(GIF_Fichier,'\x3B'))
+                Erreur_fichier=1;
+
+              
             }
 
           } // On a pu écrire l'IDB

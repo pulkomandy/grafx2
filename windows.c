@@ -991,7 +991,7 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
 {
   // On part du principe qu'il n'y a que le bas d'une fenêtre qui puisse
   // empiéter sur la palette... Et c'est déjà pas mal!
-  byte Couleur,Vraie_couleur;
+  word Couleur,Vraie_couleur;
   word Debut_X,Debut_Y;
   word Fin_X,Fin_Y;
   word Largeur;
