@@ -970,6 +970,7 @@ int Menu_Shade(void)
           Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
 
           Afficher_curseur();
+          Attendre_fin_de_click();
         }
         Touche=0;
         break;

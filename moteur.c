@@ -440,6 +440,7 @@ void Deplacer_Split(void)
   short Ancien_X_Zoom=Principal_X_Zoom;
   short Decalage=Principal_X_Zoom-Mouse_X;
   byte  Ancienne_forme_curseur=Forme_curseur;
+  short Ancien_Mouse_X=-1;
 
   // Afficher la barre en XOR
   Effacer_curseur();
@@ -452,32 +453,35 @@ void Deplacer_Split(void)
 
   while (Mouse_K)
   {
-    Principal_Proportion_split=(float)(Mouse_X+Decalage)/Largeur_ecran;
-    Calculer_split();
-
-    if (Principal_X_Zoom!=Ancien_X_Zoom)
+    if (Mouse_X!=Ancien_Mouse_X)
     {
-      Effacer_curseur();
-
-      // Effacer la barre en XOR
-      Ligne_verticale_XOR(Ancien_Split,0,Menu_Ordonnee);
-      Ligne_verticale_XOR(Ancien_X_Zoom-1,0,Menu_Ordonnee);
-
-      UpdateRect(Ancien_Split,0,abs(Ancien_Split-Ancien_X_Zoom)+1,Menu_Ordonnee);
-
-      Ancien_Split=Principal_Split;
-      Ancien_X_Zoom=Principal_X_Zoom;
-
-      // Rafficher la barre en XOR
-      Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
-      Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
-
-      UpdateRect(Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
-
-      Afficher_curseur();
+      Ancien_Mouse_X=Mouse_X;
+      Principal_Proportion_split=(float)(Mouse_X+Decalage)/Largeur_ecran;
+      Calculer_split();
+  
+      if (Principal_X_Zoom!=Ancien_X_Zoom)
+      {
+        Effacer_curseur();
+  
+        // Effacer la barre en XOR
+        Ligne_verticale_XOR(Ancien_Split,0,Menu_Ordonnee);
+        Ligne_verticale_XOR(Ancien_X_Zoom-1,0,Menu_Ordonnee);
+  
+        UpdateRect(Ancien_Split,0,abs(Ancien_Split-Ancien_X_Zoom)+1,Menu_Ordonnee);
+  
+        Ancien_Split=Principal_Split;
+        Ancien_X_Zoom=Principal_X_Zoom;
+  
+        // Rafficher la barre en XOR
+        Ligne_verticale_XOR(Principal_Split,0,Menu_Ordonnee);
+        Ligne_verticale_XOR(Principal_X_Zoom-1,0,Menu_Ordonnee);
+  
+        UpdateRect(Principal_Split,0,abs(Principal_Split-Principal_X_Zoom)+1,Menu_Ordonnee);
+  
+        Afficher_curseur();
+      }
     }
-
-    while(!Get_input())Wait_VBL();
+    if(!Get_input())Wait_VBL();
   }
 
   // Effacer la barre en XOR
@@ -1727,7 +1731,6 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
     {
       if (Fenetre_click_dans_zone(Debut_X,Debut_Y,Fin_X,Fin_Y))
       {
-        Attendre_fin_de_click();
         Effacer_curseur();
         Couleur_choisie=(((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Enreg->Pos_X+2)) / 10 * 16 +
         (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(Enreg->Pos_Y+3)) / 5;
@@ -1741,7 +1744,6 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
           (Mouse_X>=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) ||
           (Mouse_Y>=Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) )
       {
-        Attendre_fin_de_click();
         Effacer_curseur();
         Couleur_choisie=Lit_pixel(Mouse_X,Mouse_Y);
         Forme_curseur=FORME_CURSEUR_FLECHE;
@@ -1754,7 +1756,6 @@ short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
 
     if ((Mouse_K==A_DROITE) || (Touche==TOUCHE_ESC))
     {
-      Attendre_fin_de_click();
       Effacer_curseur();
       Forme_curseur=FORME_CURSEUR_FLECHE;
       Cacher_curseur=Ancien_Cacher_curseur;
@@ -1810,7 +1811,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
     do
     {
-      while(!Get_input())Wait_VBL();
+      if(!Get_input())Wait_VBL();
 
       if ((Mouse_X!=Ancien_X) || (Mouse_Y!=Ancien_Y))
       {
@@ -1852,7 +1853,6 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
       Effacer_curseur();
       *Click=Mouse_K;
       *Couleur=Lit_pixel(Mouse_X,Mouse_Y);
-      Attendre_fin_de_click();
     }
     else
     {
@@ -1873,7 +1873,6 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
   else
   {
     Erreur(0);
-    Attendre_fin_de_click();
   }
 }
 

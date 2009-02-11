@@ -1314,7 +1314,7 @@ void Bouton_Palette(void)
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
           if (Bouton_clicke==8)
             UpdateRect(0, 0, Largeur_ecran, Menu_Ordonnee_avant_fenetre);
-          
+          Attendre_fin_de_click();
         }
         break;
 
@@ -1357,6 +1357,7 @@ void Bouton_Palette(void)
 
           Afficher_curseur();
           Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+          Attendre_fin_de_click();
         }
         break;
 
@@ -1376,6 +1377,7 @@ void Bouton_Palette(void)
               Degrader_palette(Couleur_temporaire,Fore_color,Palette_de_travail);
             else
               Degrader_palette(Fore_color,Couleur_temporaire,Palette_de_travail);
+            Attendre_fin_de_click();
           }
         }
 
@@ -2001,6 +2003,7 @@ void Bouton_Palette(void)
               memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
             }
             Afficher_curseur();
+            Attendre_fin_de_click();
           }
           Touche=0;
           break;

@@ -638,6 +638,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
           Stencil_Tagger_couleur(Couleur_taggee,(Click==A_GAUCHE)?CM_Noir:CM_Clair);
           Stencil_Actualiser_couleur(Couleur_taggee);
           Afficher_curseur();
+          Attendre_fin_de_click();
         }
         Touche=0;
         break;
@@ -2078,8 +2079,8 @@ void Bouton_Degrades(void)
           Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
           // Tracé de la preview:
           Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-
           Afficher_curseur();
+          Attendre_fin_de_click();
         }
         Touche=0;
         break;
@@ -5031,6 +5032,7 @@ void Bouton_Spray_Menu(void)
           Spray_Rafficher_infos(Couleur_selectionnee,1);
           Afficher_curseur();
           Stencil_Actualiser_couleur(Couleur_selectionnee);
+          Attendre_fin_de_click();
         }
         Touche=0;
         break;
