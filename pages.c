@@ -48,9 +48,9 @@ void Initialiser_S_Page(S_Page * Page)
     Page->Largeur=0;
     Page->Hauteur=0;
     memset(Page->Palette,0,sizeof(T_Palette));
-    memset(Page->Commentaire,0,TAILLE_COMMENTAIRE+1);
-    memset(Page->Repertoire_fichier,0,256);
-    memset(Page->Nom_fichier,0,13);
+    Page->Commentaire[0]='\0';
+    Page->Repertoire_fichier[0]='\0';
+    Page->Nom_fichier[0]='\0';
     Page->Format_fichier=FORMAT_PAR_DEFAUT;
 /*
     Page->Decalage_X=0;
@@ -85,9 +85,9 @@ void Download_infos_page_principal(S_Page * Page)
     Principal_Largeur_image=Page->Largeur;
     Principal_Hauteur_image=Page->Hauteur;
     memcpy(Principal_Palette,Page->Palette,sizeof(T_Palette));
-    memcpy(Principal_Commentaire,Page->Commentaire,TAILLE_COMMENTAIRE+1);
-    memcpy(Principal_Repertoire_fichier,Page->Repertoire_fichier,256);
-    memcpy(Principal_Nom_fichier,Page->Nom_fichier,13);
+    strcpy(Principal_Commentaire,Page->Commentaire);
+    strcpy(Principal_Repertoire_fichier,Page->Repertoire_fichier);
+    strcpy(Principal_Nom_fichier,Page->Nom_fichier);
     Principal_Format_fichier=Page->Format_fichier;
 /*
     Principal_Decalage_X=Page->Decalage_X;
@@ -139,9 +139,9 @@ void Upload_infos_page_principal(S_Page * Page)
     Page->Largeur=Principal_Largeur_image;
     Page->Hauteur=Principal_Hauteur_image;
     memcpy(Page->Palette,Principal_Palette,sizeof(T_Palette));
-    memcpy(Page->Commentaire,Principal_Commentaire,TAILLE_COMMENTAIRE+1);
-    memcpy(Page->Repertoire_fichier,Principal_Repertoire_fichier,256);
-    memcpy(Page->Nom_fichier,Principal_Nom_fichier,13);
+    strcpy(Page->Commentaire,Principal_Commentaire);
+    strcpy(Page->Repertoire_fichier,Principal_Repertoire_fichier);
+    strcpy(Page->Nom_fichier,Principal_Nom_fichier);
     Page->Format_fichier=Principal_Format_fichier;
 /*
     Page->Decalage_X=Principal_Decalage_X;
@@ -169,9 +169,9 @@ void Download_infos_page_brouillon(S_Page * Page)
     Brouillon_Largeur_image=Page->Largeur;
     Brouillon_Hauteur_image=Page->Hauteur;
     memcpy(Brouillon_Palette,Page->Palette,sizeof(T_Palette));
-    memcpy(Brouillon_Commentaire,Page->Commentaire,TAILLE_COMMENTAIRE+1);
-    memcpy(Brouillon_Repertoire_fichier,Page->Repertoire_fichier,256);
-    memcpy(Brouillon_Nom_fichier,Page->Nom_fichier,13);
+    strcpy(Brouillon_Commentaire,Page->Commentaire);
+    strcpy(Brouillon_Repertoire_fichier,Page->Repertoire_fichier);
+    strcpy(Brouillon_Nom_fichier,Page->Nom_fichier);
     Brouillon_Format_fichier=Page->Format_fichier;
 /*
     Brouillon_Decalage_X=Page->Decalage_X;
@@ -199,9 +199,9 @@ void Upload_infos_page_brouillon(S_Page * Page)
     Page->Largeur=Brouillon_Largeur_image;
     Page->Hauteur=Brouillon_Hauteur_image;
     memcpy(Page->Palette,Brouillon_Palette,sizeof(T_Palette));
-    memcpy(Page->Commentaire,Brouillon_Commentaire,TAILLE_COMMENTAIRE+1);
-    memcpy(Page->Repertoire_fichier,Brouillon_Repertoire_fichier,256);
-    memcpy(Page->Nom_fichier,Brouillon_Nom_fichier,13);
+    strcpy(Page->Commentaire,Brouillon_Commentaire);
+    strcpy(Page->Repertoire_fichier,Brouillon_Repertoire_fichier);
+    strcpy(Page->Nom_fichier,Brouillon_Nom_fichier);
     Page->Format_fichier=Brouillon_Format_fichier;
 /*
     Page->Decalage_X=Brouillon_Decalage_X;
