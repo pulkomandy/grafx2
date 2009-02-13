@@ -536,7 +536,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   Pinceau_Hauteur=1;
 
   Analyse_de_la_ligne_de_commande(argc,argv);
-
   Mode_dans_lequel_on_demarre=Resolution_actuelle;
   Buffer_de_ligne_horizontale=NULL;
   Resolution_actuelle=-1; // On n'était pas dans un mode graphique
@@ -583,6 +582,9 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   Brouillon_Image_modifiee=0;
   Principal_Image_modifiee=0;
+
+  // Gestionnaire de signaux, quand il ne reste plus aucun espoir
+  Initialiser_sighandler();
 
   // Le programme débute en mode de dessin à la main
   Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
@@ -635,18 +637,58 @@ void Fermeture_du_programme(void)
 // -------------------------- Procédure principale ---------------------------
 int main(int argc,char * argv[])
 {
+  int PhoenixTrouve=0;
+  int Phoenix2Trouve=0;
+  char Nom_du_fichier_Phoenix[TAILLE_CHEMIN_FICHIER];
+  char Nom_du_fichier_Phoenix2[TAILLE_CHEMIN_FICHIER];
+
   Initialisation_du_programme(argc,argv);
 
-  if (Config.Opening_message && (!Un_fichier_a_ete_passe_en_parametre))
-    Bouton_Message_initial();
-  //free(Logo_GrafX2); // Utilisé dans le About
-
-  if (Un_fichier_a_ete_passe_en_parametre)
+  // Test de recuperation de fichiers sauvés
+  strcpy(Nom_du_fichier_Phoenix,Repertoire_de_configuration);
+  strcat(Nom_du_fichier_Phoenix,"phoenix.img");
+  strcpy(Nom_du_fichier_Phoenix2,Repertoire_de_configuration);
+  strcat(Nom_du_fichier_Phoenix2,"phoenix2.img");
+  if (Fichier_existe(Nom_du_fichier_Phoenix))
+    PhoenixTrouve=1;
+  if (Fichier_existe(Nom_du_fichier_Phoenix2))
+    Phoenix2Trouve=1;
+  if (PhoenixTrouve || Phoenix2Trouve)
   {
-    Bouton_Reload();
-    Une_resolution_a_ete_passee_en_parametre=0;
+    if (Phoenix2Trouve)
+    {
+      strcpy(Principal_Repertoire_fichier,Repertoire_de_configuration);
+      strcpy(Principal_Nom_fichier,"phoenix2.img");
+      chdir(Principal_Repertoire_fichier);
+      Bouton_Reload();
+      Warning_message("Spare page recovered");
+      // I don't really like this, but...
+      remove(Nom_du_fichier_Phoenix2);
+      Bouton_Page();
+    }
+    if (PhoenixTrouve)
+    {
+      strcpy(Principal_Repertoire_fichier,Repertoire_de_configuration);
+      strcpy(Principal_Nom_fichier,"phoenix.img");
+      chdir(Principal_Repertoire_fichier);
+      Bouton_Reload();
+      Warning_message("Main page recovered");
+      // I don't really like this, but...
+      remove(Nom_du_fichier_Phoenix);
+    }
   }
-
+  else
+  {
+    if (Config.Opening_message && (!Un_fichier_a_ete_passe_en_parametre))
+      Bouton_Message_initial();
+    //free(Logo_GrafX2); // Utilisé dans le About
+  
+    if (Un_fichier_a_ete_passe_en_parametre)
+    {
+      Bouton_Reload();
+      Une_resolution_a_ete_passee_en_parametre=0;
+    }
+  }
   Gestion_principale();
 
   Fermeture_du_programme();

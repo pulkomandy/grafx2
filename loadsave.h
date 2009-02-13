@@ -40,3 +40,5 @@ typedef struct {
 // Tableau des formats connus
 extern T_Format FormatFichier[NB_FORMATS_CONNUS];
 
+// Fonction de sauvegarde en cas de probleme
+void Image_emergency_backup(void);

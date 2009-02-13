@@ -22,6 +22,11 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+// Signal handler: I activate it for the two platforms who certainly
+// support them. Feel free to check with others.
+#if defined(__WIN32__) || defined(__linux__)
+  #define GRAFX2_CATCHES_SIGNALS
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -36,10 +41,12 @@
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
-
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
-#include <proto/exec.h>
-#include <proto/dos.h>
+  #include <proto/exec.h>
+  #include <proto/dos.h>
+#endif
+#ifdef GRAFX2_CATCHES_SIGNALS
+  #include <signal.h>
 #endif
 
 #include "const.h"
@@ -60,6 +67,7 @@
 #include "windows.h"
 #include "sdlscreen.h"
 #include "mountlist.h" // read_file_system_list
+#include "loadsave.h" // Image_emergency_backup
 
 // Ajouter un lecteur à la liste de lecteurs
 void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
@@ -71,7 +79,6 @@ void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
 
   Nb_drives++;
 }
-
 
 // Rechercher la liste et le type des lecteurs de la machine
 
@@ -2364,3 +2371,47 @@ void Config_par_defaut(void)
   Snap_Decalage_X=Snap_Decalage_Y=0;
 
 }
+
+#ifdef GRAFX2_CATCHES_SIGNALS
+
+// Memorize the signal handlers of SDL
+__p_sig_fn_t Handler_TERM=SIG_DFL;
+__p_sig_fn_t Handler_INT=SIG_DFL;
+__p_sig_fn_t Handler_ABRT=SIG_DFL;
+__p_sig_fn_t Handler_SEGV=SIG_DFL;
+__p_sig_fn_t Handler_FPE=SIG_DFL;
+
+void sig_handler(int sig)
+{
+  // Restore default behaviour
+  signal(SIGTERM, Handler_TERM);
+  signal(SIGINT, Handler_INT);
+  signal(SIGABRT, Handler_ABRT);
+  signal(SIGSEGV, Handler_SEGV);
+  signal(SIGFPE, Handler_FPE);
+  
+  switch(sig)
+  {
+    case SIGTERM:
+    case SIGINT:
+    case SIGABRT:
+    case SIGSEGV:
+      Image_emergency_backup();
+    default:
+    break;
+   }
+}
+#endif
+
+void Initialiser_sighandler(void)
+{
+#ifdef GRAFX2_CATCHES_SIGNALS
+  Handler_TERM=signal(SIGTERM,sig_handler);
+  Handler_INT =signal(SIGINT,sig_handler);
+  Handler_ABRT=signal(SIGABRT,sig_handler);
+  Handler_SEGV=signal(SIGSEGV,sig_handler);
+  Handler_FPE =signal(SIGFPE,sig_handler);
+  
+#endif
+}
+

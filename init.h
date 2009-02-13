@@ -28,3 +28,4 @@ void Initialiser_les_tables_de_multiplication(void);
 void Definition_des_modes_video(void);
 int ActiverLecteur(int);
 void Config_par_defaut(void);
+void Initialiser_sighandler(void);

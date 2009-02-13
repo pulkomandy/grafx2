@@ -5864,3 +5864,58 @@ void Save_PNG(void)
     row_pointers=NULL;
   }
 }
+
+// Saves an image.
+// This routine will only be called when all hope is lost, memory thrashed, etc
+// It's the last chance to save anything, but the code has to be extremely careful,
+// anything could happen.
+// The chosen format is IMG since it's extremely simple, difficult to make it create an unusable image.
+void Emergency_backup(const char *Fname, byte *Source, int Largeur, int Hauteur, T_Palette *Palette)
+{
+  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
+  FILE *Fichier;
+  short Pos_X,Pos_Y;
+  T_Header_IMG IMG_Header;
+
+  strcpy(Nom_du_fichier,Repertoire_de_configuration);
+  strcat(Nom_du_fichier,Fname);
+
+  // Ouverture du fichier
+  Fichier=fopen(Nom_du_fichier,"wb");
+  if (!Fichier)
+    return;
+
+  memcpy(IMG_Header.Filler1,"\x01\x00\x47\x12\x6D\xB0",6);
+  memset(IMG_Header.Filler2,0,118);
+  IMG_Header.Filler2[4]=0xFF;
+  IMG_Header.Filler2[22]=64; // Lo(Longueur de la signature)
+  IMG_Header.Filler2[23]=0;  // Hi(Longueur de la signature)
+  memcpy(IMG_Header.Filler2+23,"GRAFX2 by SunsetDesign (IMG format taken from PV (c)W.Wiedmann)",64);
+
+  if (!write_bytes(Fichier,IMG_Header.Filler1,6) ||
+      !write_word_le(Fichier,Largeur) ||
+      !write_word_le(Fichier,Hauteur) ||
+      !write_bytes(Fichier,IMG_Header.Filler2,118) ||
+      !write_bytes(Fichier,Palette,sizeof(T_Palette)))
+    {
+      fclose(Fichier);
+      return;
+    }
+
+  for (Pos_Y=0; ((Pos_Y<Hauteur) && (!Erreur_fichier)); Pos_Y++)
+    for (Pos_X=0; Pos_X<Largeur; Pos_X++)
+      if (!write_byte(Fichier,*(Source+Pos_Y*Largeur+Pos_X)))
+      {
+        fclose(Fichier);
+        return;
+      }
+
+  // Ouf, sauvé
+  fclose(Fichier);
+}
+
+void Image_emergency_backup()
+{
+  Emergency_backup("phoenix.img",Principal_Ecran, Principal_Largeur_image, Principal_Hauteur_image, &Principal_Palette);
+  Emergency_backup("phoenix2.img",Brouillon_Ecran, Brouillon_Largeur_image, Brouillon_Hauteur_image, &Brouillon_Palette);
+}

@@ -1216,7 +1216,6 @@ void Fermer_fenetre(void)
   Old_MX = -1;
   Old_MY = -1;
 
-
 }
 
 
