@@ -643,10 +643,10 @@ unsigned long Memoire_libre(void)
     // ever becomes full and you're still saying there are 10MB free here, the
     // program will crash without saving any picture backup ! You've been warned...
     #if defined(__WIN32__)
-        MEMORYSTATUSEX mstt;
-        mstt.dwLength = sizeof(MEMORYSTATUSEX);
-        GlobalMemoryStatusEx(&mstt);
-        return mstt.ullAvailPhys;
+        MEMORYSTATUS mstt;
+        mstt.dwLength = sizeof(MEMORYSTATUS);
+        GlobalMemoryStatus(&mstt);
+        return mstt.dwAvailPhys;
     #elif defined(__macosx__) || defined(__FreeBSD__)
         int mib[2];
         int maxmem;
