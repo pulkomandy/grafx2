@@ -1640,12 +1640,11 @@ void Bouton_Resol(void)
       || (Hauteur_choisie!=Principal_Hauteur_image) )
       Redimentionner_image(Largeur_choisie,Hauteur_choisie);
 
-    if ((Mode_video[Mode_choisi].Etat & 3) != 3)
-      Initialiser_mode_video(
+    if ((Mode_video[Mode_choisi].Etat & 3) == 3 ||
+      !Initialiser_mode_video(
         Mode_video[Mode_choisi].Largeur,
         Mode_video[Mode_choisi].Hauteur,
-        Mode_video[Mode_choisi].Fullscreen);
-    else
+        Mode_video[Mode_choisi].Fullscreen))
     {
       Erreur(0); // On signale à l'utilisateur que c'est un mode invalide
       Initialiser_mode_video(

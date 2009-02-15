@@ -337,6 +337,7 @@ void Afficher_aide(void)
           for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
           {
             byte Couleur = *(Curseur+X+Y*6);
+            byte Repetition = Pixel_width-1;
             // Surlignement pour liens
             if (TypeLigne=='K' && Indice_de_caractere>=Position_lien
               && Indice_de_caractere<(Position_lien+Taille_lien))
@@ -349,7 +350,7 @@ void Afficher_aide(void)
                 Couleur=CM_Fonce;
             }
             Buffer_de_ligne_horizontale[Position_X++]=Couleur;
-            if (Pixel_width==2)
+            while (Repetition--)
               Buffer_de_ligne_horizontale[Position_X++]=Couleur;
           }
       }

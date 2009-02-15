@@ -911,7 +911,11 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
   word Orig_Y;
 
   Taille_X=Menu_Facteur_X/Pixel_height;
+  if (Taille_X<1)
+    Taille_X=1;
   Taille_Y=Menu_Facteur_Y/Pixel_width;
+  if (Taille_Y<1)
+    Taille_Y=1;
 
   Orig_X = (X + 8)*Menu_Facteur_X - (Pinceau_predefini_Decalage_X[Numero])*Taille_X+Fenetre_Pos_X;
   Orig_Y = (Y + 8)*Menu_Facteur_Y - (Pinceau_predefini_Decalage_Y[Numero])*Taille_Y+Fenetre_Pos_Y;

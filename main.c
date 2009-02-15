@@ -78,6 +78,7 @@ void Afficher_syntaxe(void)
   printf("\t/? /h /help        for this help screen\n");
   printf("\t/wide              to emulate a video mode with wide pixels (2x1)\n");
   printf("\t/tall              to emulate a video mode with tall pixels (1x2)\n");
+  printf("\t/double            to emulate a video mode with double pixels (2x2)\n");
   printf("\t/mode <videomode>  to set a video mode\n\n");
   printf("Available video modes:\n\n");
   for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
@@ -216,6 +217,10 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
     else if ( !strcmp(argv[Indice],"/wide") )
     {
       Pixel_ratio = PIXEL_WIDE;
+    }
+    else if ( !strcmp(argv[Indice],"/double") )
+    {
+      Pixel_ratio = PIXEL_DOUBLE;
     }
     else if ( !strcmp(argv[Indice],"/rgb") )
     {

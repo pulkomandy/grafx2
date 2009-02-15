@@ -26,7 +26,7 @@ void Liste2tables(word * Liste, short Pas, byte Mode, byte * Table_inc,
 void Transformer_point(short X, short Y,
                        float cosA, float sinA, short * Xr, short * Yr);
 
-void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
+int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
 
 byte Aucun_effet(word X,word Y,byte Couleur);
 byte Effet_Shade(word X,word Y,byte Couleur);

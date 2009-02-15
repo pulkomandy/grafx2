@@ -41,6 +41,7 @@
 #include "pxsimple.h"
 #include "pxtall.h"
 #include "pxwide.h"
+#include "pxdouble.h"
 #include "windows.h"
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
@@ -179,7 +180,7 @@ void Transformer_point(short X, short Y, float cosA, float sinA,
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
-void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
+int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
 {
   int Sensibilite_X;
   int Sensibilite_Y;
@@ -264,21 +265,43 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
             Clear_brush_zoom = Clear_brush_zoom_Wide ;
             Affiche_brosse = Affiche_brosse_Wide ;
         break;
+        case PIXEL_DOUBLE:
+            Pixel_width=2;
+            Pixel_height=2;
+            Pixel = Pixel_Double ;
+            Lit_pixel= Lit_Pixel_Double ;
+            Display_screen = Afficher_partie_de_l_ecran_Double ;
+            Block = Block_Double ;
+            Pixel_Preview_Normal = Pixel_Preview_Normal_Double ;
+            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Double ;
+            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Double ;
+            Ligne_verticale_XOR = Ligne_verticale_XOR_Double ;
+            Display_brush_Color = Display_brush_Color_Double ;
+            Display_brush_Mono = Display_brush_Mono_Double ;
+            Clear_brush = Clear_brush_Double ;
+            Remap_screen = Remap_screen_Double ;
+            Afficher_ligne = Afficher_une_ligne_ecran_Double ;
+            Afficher_ligne_fast = Afficher_une_ligne_ecran_fast_Double ;
+            Lire_ligne = Lire_une_ligne_ecran_Double ;
+            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Double ;
+            Display_brush_Color_zoom = Display_brush_Color_zoom_Double ;
+            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Double ;
+            Clear_brush_zoom = Clear_brush_zoom_Double ;
+            Affiche_brosse = Affiche_brosse_Double ;
+        break;
     }
     // Valeurs raisonnables: minimum 320x200
-    if (Pixel_width==1 && Pixel_height==1)
+    if (!Fullscreen)
     {
-      if (Largeur < 320)
-        Largeur = 320;
-      if (Hauteur < 200)
-        Hauteur = 200;
+      if (Largeur < 320*Pixel_width)
+          Largeur = 320*Pixel_width;
+      if (Hauteur < 200*Pixel_height)
+          Hauteur = 200*Pixel_height;
     }
     else
     {
-      if (Largeur < 640)
-        Largeur = 640;
-      if (Hauteur < 400)
-        Hauteur = 400;
+      if (Largeur < 320*Pixel_width || Hauteur < 200*Pixel_height)
+        return 1;
     }
     // La largeur doit être un multiple de 4
 #ifdef __amigaos4__
@@ -313,13 +336,13 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         Menu_Facteur_X=1;
         Menu_Facteur_Y=1;
     }
-    if (Pixel_height>Pixel_width)
+    if (Pixel_height>Pixel_width && Largeur_ecran>=640)
       Menu_Facteur_X*=2;
-    else if (Pixel_width>Pixel_height)
+    else if (Pixel_width>Pixel_height && Hauteur_ecran>=400)
       Menu_Facteur_Y*=2;
+      
     if (Buffer_de_ligne_horizontale)
       free(Buffer_de_ligne_horizontale);
-
     Buffer_de_ligne_horizontale=(byte *)malloc(Pixel_width*((Largeur_ecran>Principal_Largeur_image)?Largeur_ecran:Principal_Largeur_image));
 
     Set_palette(Principal_Palette);
@@ -381,6 +404,7 @@ void Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   
   Resize_Largeur=0;
   Resize_Hauteur=0;
+  return 0;
 }
 
 

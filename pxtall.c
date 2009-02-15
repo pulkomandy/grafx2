@@ -56,8 +56,8 @@ void Block_Tall (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleu
 void Afficher_partie_de_l_ecran_Tall (word Largeur,word Hauteur,word Largeur_image)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
-  byte* Dest=Ecran; //On va se mettre en 0,0 dans l'écran (EDI)
-  byte* Src=Principal_Decalage_Y*Largeur_image+Principal_Decalage_X+Principal_Ecran; //Coords de départ ds la source (ESI)
+  byte* Dest=Ecran; //On va se mettre en 0,0 dans l'écran (Dest)
+  byte* Src=Principal_Decalage_Y*Largeur_image+Principal_Decalage_X+Principal_Ecran; //Coords de départ ds la source (Src)
   int dx;
 
   for(dx=Hauteur;dx!=0;dx--)
@@ -114,17 +114,17 @@ void Pixel_Preview_Loupe_Tall  (word X,word Y,byte Couleur)
 
 void Ligne_horizontale_XOR_Tall(word Pos_X,word Pos_Y,word Largeur)
 {
-  //On calcule la valeur initiale de EDI:
-  byte* edi=Pos_Y*2*Largeur_ecran+Pos_X+Ecran;
+  //On calcule la valeur initiale de Dest:
+  byte* Dest=Pos_Y*2*Largeur_ecran+Pos_X+Ecran;
 
   int ecx;
 
   for (ecx=0;ecx<Largeur;ecx++)
-    *(edi+ecx)=~*(edi+ecx);
+    *(Dest+ecx)=~*(Dest+ecx);
 
-  edi=(Pos_Y*2+1)*Largeur_ecran+Pos_X+Ecran;
+  Dest=(Pos_Y*2+1)*Largeur_ecran+Pos_X+Ecran;
   for (ecx=0;ecx<Largeur;ecx++)
-    *(edi+ecx)=~*(edi+ecx);
+    *(Dest+ecx)=~*(Dest+ecx);
 }
 
 void Ligne_verticale_XOR_Tall(word Pos_X,word Pos_Y,word Hauteur)
@@ -140,10 +140,10 @@ void Ligne_verticale_XOR_Tall(word Pos_X,word Pos_Y,word Hauteur)
 
 void Display_brush_Color_Tall(word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
 {
-  // EDI = Position à l'écran
-  byte* EDI = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
-  // ESI = Position dans la brosse
-  byte* ESI = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
+  // Dest = Position à l'écran
+  byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
+  // Src = Position dans la brosse
+  byte* Src = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
 
   word DX,CX;
 
@@ -154,19 +154,19 @@ void Display_brush_Color_Tall(word Pos_X,word Pos_Y,word Decalage_X,word Decalag
     for(CX = Largeur;CX > 0; CX--)
     {
       // On vérifie que ce n'est pas la transparence
-      if(*ESI != Couleur_de_transparence)
+      if(*Src != Couleur_de_transparence)
       {
-        *EDI = *ESI;
-        *(EDI+Largeur_ecran) = *ESI;
+        *Dest = *Src;
+        *(Dest+Largeur_ecran) = *Src;
       }
 
       // Pixel suivant
-      ESI++; EDI++;
+      Src++; Dest++;
     }
 
     // On passe à la ligne suivante
-    EDI = EDI + 2 * Largeur_ecran - Largeur;
-    ESI = ESI + Largeur_brosse - Largeur;
+    Dest = Dest + 2 * Largeur_ecran - Largeur;
+    Src = Src + Largeur_brosse - Largeur;
   }
   UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
 }
@@ -176,9 +176,9 @@ void Display_brush_Mono_Tall(word Pos_X, word Pos_Y,
         byte Couleur_de_transparence, byte Couleur, word Largeur_brosse)
 /* On affiche la brosse en monochrome */
 {
-  byte* Dest=Pos_Y*2*Largeur_ecran+Pos_X+Ecran; // EDI = adr destination à 
+  byte* Dest=Pos_Y*2*Largeur_ecran+Pos_X+Ecran; // Dest = adr Destination à 
       // l'écran
-  byte* Src=Largeur_brosse*Decalage_Y+Decalage_X+Brosse; // ESI = adr ds 
+  byte* Src=Largeur_brosse*Decalage_Y+Decalage_X+Brosse; // Src = adr ds 
       // la brosse
   int dx,cx;
 
@@ -208,8 +208,8 @@ void Display_brush_Mono_Tall(word Pos_X, word Pos_Y,
 
 void Clear_brush_Tall(word Pos_X,word Pos_Y,__attribute__((unused)) word Decalage_X,__attribute__((unused)) word Decalage_Y,word Largeur,word Hauteur,__attribute__((unused))byte Couleur_de_transparence,word Largeur_image)
 {
-  byte* Dest=Ecran+Pos_X+Pos_Y*2*Largeur_ecran; //On va se mettre en 0,0 dans l'écran (EDI)
-  byte* Src = ( Pos_Y + Principal_Decalage_Y ) * Largeur_image + Pos_X + Principal_Decalage_X + Principal_Ecran; //Coords de départ ds la source (ESI)
+  byte* Dest=Ecran+Pos_X+Pos_Y*2*Largeur_ecran; //On va se mettre en 0,0 dans l'écran (Dest)
+  byte* Src = ( Pos_Y + Principal_Decalage_Y ) * Largeur_image + Pos_X + Principal_Decalage_X + Principal_Ecran; //Coords de départ ds la source (Src)
   int dx;
 
   for(dx=Hauteur;dx!=0;dx--)
@@ -230,10 +230,10 @@ void Clear_brush_Tall(word Pos_X,word Pos_Y,__attribute__((unused)) word Decalag
 // Affiche une brosse (arbitraire) à l'écran
 void Affiche_brosse_Tall(byte * B, word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
 {
-  // EDI = Position à l'écran
-  byte* EDI = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
-  // ESI = Position dans la brosse
-  byte* ESI = B + Decalage_Y * Largeur_brosse + Decalage_X;
+  // Dest = Position à l'écran
+  byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
+  // Src = Position dans la brosse
+  byte* Src = B + Decalage_Y * Largeur_brosse + Decalage_X;
   
   word DX,CX;
   
@@ -244,26 +244,26 @@ void Affiche_brosse_Tall(byte * B, word Pos_X,word Pos_Y,word Decalage_X,word De
     for(CX = Largeur;CX > 0; CX--)
     {
       // On vérifie que ce n'est pas la transparence
-      if(*ESI != Couleur_de_transparence)
+      if(*Src != Couleur_de_transparence)
       {
-        *EDI = *ESI;
-        *(EDI+Largeur_ecran) = *ESI;
+        *Dest = *Src;
+        *(Dest+Largeur_ecran) = *Src;
       }
 
       // Pixel suivant
-      ESI++; EDI++;
+      Src++; Dest++;
     }
 
     // On passe à la ligne suivante
-    EDI = EDI + Largeur_ecran * 2 - Largeur;
-    ESI = ESI + Largeur_brosse - Largeur;
+    Dest = Dest + Largeur_ecran * 2 - Largeur;
+    Src = Src + Largeur_brosse - Largeur;
   }
 }
 
 void Remap_screen_Tall(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
 {
-  // EDI = coords a l'écran
-  byte* EDI = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
+  // Dest = coords a l'écran
+  byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X;
   int dx,cx;
 
   // Pour chaque ligne
@@ -272,11 +272,11 @@ void Remap_screen_Tall(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Ta
     // Pour chaque pixel
     for(cx=Largeur;cx>0;cx--)
     {
-      *EDI = Table_de_conversion[*EDI];
-      EDI ++;
+      *Dest = Table_de_conversion[*Dest];
+      Dest ++;
     }
 
-    EDI = EDI + Largeur_ecran - Largeur;
+    Dest = Dest + Largeur_ecran - Largeur;
   }
 
   UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
@@ -299,7 +299,7 @@ void Afficher_partie_de_l_ecran_zoomee_Tall(
         word Hauteur, // Hauteur zoomée
         word Largeur_image,byte * Buffer)
 {
-  byte* ESI = Principal_Ecran + Loupe_Decalage_Y * Largeur_image 
+  byte* Src = Principal_Ecran + Loupe_Decalage_Y * Largeur_image 
                       + Loupe_Decalage_X;
   int EDX = 0; // Ligne en cours de traitement
 
@@ -309,7 +309,7 @@ void Afficher_partie_de_l_ecran_zoomee_Tall(
     int CX;
     
     // On éclate la ligne
-    Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
     // On l'affiche Facteur fois, sur des lignes consécutives
     CX = Loupe_Facteur*2;
     // Pour chaque ligne
@@ -329,7 +329,7 @@ void Afficher_partie_de_l_ecran_zoomee_Tall(
       }
       CX--;
     }while (CX > 0);
-    ESI += Largeur_image;
+    Src += Largeur_image;
   }
 // ATTENTION on n'arrive jamais ici !
 }
@@ -342,14 +342,14 @@ void Display_brush_Color_zoom_Tall(word Pos_X,word Pos_Y,
         word Largeur_brosse, // Largeur réelle de la brosse
         byte * Buffer)
 {
-  byte* ESI = Brosse+Decalage_Y*Largeur_brosse + Decalage_X;
+  byte* Src = Brosse+Decalage_Y*Largeur_brosse + Decalage_X;
   word DX = Pos_Y;
   byte bx;
 
   // Pour chaque ligne
   while(1)
   {
-    Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
     // On affiche facteur fois la ligne zoomée
     for(bx=Loupe_Facteur;bx>0;bx--)
     {
@@ -361,7 +361,7 @@ void Display_brush_Color_zoom_Tall(word Pos_X,word Pos_Y,
         return;
       }
     }
-    ESI += Largeur_brosse;
+    Src += Largeur_brosse;
   }
   // ATTENTION zone jamais atteinte
 }
@@ -376,16 +376,16 @@ void Display_brush_Mono_zoom_Tall(word Pos_X, word Pos_Y,
 )
 
 {
-  byte* ESI = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
+  byte* Src = Brosse + Decalage_Y * Largeur_brosse + Decalage_X;
   int DX=Pos_Y*2;
 
   //Pour chaque ligne à zoomer :
   while(1)
   {
     int BX;
-    // ESI = Ligne originale
+    // Src = Ligne originale
     // On éclate la ligne
-    Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
 
     // On affiche la ligne Facteur fois à l'écran (sur des
     // lignes consécutives)
@@ -413,20 +413,20 @@ void Display_brush_Mono_zoom_Tall(word Pos_X, word Pos_Y,
     while (BX > 0);
     
     // Passage à la ligne suivante dans la brosse aussi
-    ESI+=Largeur_brosse;
+    Src+=Largeur_brosse;
   }
 }
 
 void Clear_brush_zoom_Tall(word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,__attribute__((unused)) byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
 {
   // En fait on va recopier l'image non zoomée dans la partie zoomée !
-  byte* ESI = Principal_Ecran + Decalage_Y * Largeur_image + Decalage_X;
+  byte* Src = Principal_Ecran + Decalage_Y * Largeur_image + Decalage_X;
   int DX = Pos_Y;
   int bx;
 
   // Pour chaque ligne à zoomer
   while(1){
-    Zoomer_une_ligne(ESI,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
 
     bx=Loupe_Facteur;
 
@@ -446,6 +446,6 @@ void Clear_brush_zoom_Tall(word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y
       bx--;
     }while(bx!=0);
 
-    ESI+= Largeur_image;
+    Src+= Largeur_image;
   }
 }
