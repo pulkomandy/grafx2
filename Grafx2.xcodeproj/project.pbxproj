@@ -16,6 +16,9 @@
 		F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */; };
 		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
 		F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5A33E690EC893F800F8052D /* 8pxfont.png */; };
+		F5AC28BC0F4873C700455509 /* hotkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28B90F4873C700455509 /* hotkeys.c */; };
+		F5AC28BD0F4873C700455509 /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28BA0F4873C700455509 /* input.c */; };
+		F5AC28BE0F4873C700455509 /* realpath.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28BB0F4873C700455509 /* realpath.c */; };
 		F5AD4B1F0EA8CCF0009CCAC4 /* version.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AD4B1E0EA8CCF0009CCAC4 /* version.c */; };
 		F5AE6F990EDA119D000CE0EF /* GrafX2_Classic.gif in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5AE6F980EDA119D000CE0EF /* GrafX2_Classic.gif */; };
 		F5AE83FD0ECF8FD300200704 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */; };
@@ -50,10 +53,10 @@
 		F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8B0EA4BE3E003F4BA4 /* shade.c */; };
 		F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8C0EA4BE3E003F4BA4 /* special.c */; };
 		F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */; };
-		F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */; };
 		F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */; };
 		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
-		F5B1EE850EAD0F4E00B087B5 /* gfx2.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */; };
+		F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */; };
+		F5B1EE850EAD0F4E00B087B6 /* gfx2gui.gif in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B6 /* gfx2gui.gif */; };
 		F5DCE2BC0EA5116A0065B0EF /* SDL_ttf in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BE0EA5118F0065B0EF /* SDL_ttf */; };
 		F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BB0EA5116B0065B0EF /* SDL_image */; };
 		F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BD0EA5118E0065B0EF /* SDL */; };
@@ -126,6 +129,9 @@
 		F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */ = {isa = PBXFileReference; lastKnownFileType = file; name = colorfont.pcx; path = fonts/colorfont.pcx; sourceTree = "<group>"; };
 		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
 		F5A33E690EC893F800F8052D /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 8pxfont.png; path = fonts/8pxfont.png; sourceTree = "<group>"; };
+		F5AC28B90F4873C700455509 /* hotkeys.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = hotkeys.c; sourceTree = "<group>"; };
+		F5AC28BA0F4873C700455509 /* input.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = input.c; sourceTree = "<group>"; };
+		F5AC28BB0F4873C700455509 /* realpath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = realpath.c; sourceTree = "<group>"; };
 		F5AD4B1E0EA8CCF0009CCAC4 /* version.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = version.c; sourceTree = "<group>"; };
 		F5AE6F980EDA119D000CE0EF /* GrafX2_Classic.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = GrafX2_Classic.gif; path = fonts/GrafX2_Classic.gif; sourceTree = "<group>"; };
 		F5AE83FC0ECF8FD300200704 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
@@ -162,10 +168,10 @@
 		F5B19B8B0EA4BE3E003F4BA4 /* shade.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = shade.c; sourceTree = "<group>"; };
 		F5B19B8C0EA4BE3E003F4BA4 /* special.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = special.c; sourceTree = "<group>"; };
 		F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.cfg; sourceTree = "<group>"; };
-		F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.dat; sourceTree = "<group>"; };
 		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = gfx2.ini; path = dat/gfx2.ini; sourceTree = "<group>"; };
+		F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2def.ini; sourceTree = "<group>"; };
+		F5B1EE840EAD0F4E00B087B6 /* gfx2gui.gif */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2gui.gif; sourceTree = "<group>"; };
 		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/Versions/A/SDL_image; sourceTree = "<absolute>"; };
 		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/Versions/A/SDL; sourceTree = "<absolute>"; };
 		F5DCE2BE0EA5118F0065B0EF /* SDL_ttf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_ttf; path = /Library/Frameworks/SDL_ttf.framework/Versions/A/SDL_ttf; sourceTree = "<absolute>"; };
@@ -227,6 +233,9 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5AC28B90F4873C700455509 /* hotkeys.c */,
+				F5AC28BA0F4873C700455509 /* input.c */,
+				F5AC28BB0F4873C700455509 /* realpath.c */,
 				F5AED03C0F1989E00090A93F /* mountlist.c */,
 				F5AFA0070EFAC7D300663B43 /* brush.c */,
 				F5AFA0080EFAC7D300663B43 /* pxsimple.c */,
@@ -242,7 +251,8 @@
 				F5A33E690EC893F800F8052D /* 8pxfont.png */,
 				F5B138C20EB71D28000B83CC /* SDL_ttf */,
 				F5B138930EB71977000B83CC /* texte.c */,
-				F5B1EE840EAD0F4E00B087B5 /* gfx2.ini */,
+				F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */,
+				F5B1EE840EAD0F4E00B087B6 /* gfx2gui.gif */,
 				F5AD4B1E0EA8CCF0009CCAC4 /* version.c */,
 				F5DCE2BD0EA5118E0065B0EF /* SDL */,
 				F5DCE2BB0EA5116B0065B0EF /* SDL_image */,
@@ -250,7 +260,6 @@
 				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
 				F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */,
 				F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */,
-				F5B19BE00EA4C65A003F4BA4 /* gfx2.dat */,
 				F5B19B750EA4BE3E003F4BA4 /* aide.c */,
 				F5B19B760EA4BE3E003F4BA4 /* boutons.c */,
 				F5B19B770EA4BE3E003F4BA4 /* clavier.c */,
@@ -355,9 +364,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */,
-				F5B19BE20EA4C65A003F4BA4 /* gfx2.dat in Resources */,
 				F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */,
-				F5B1EE850EAD0F4E00B087B5 /* gfx2.ini in Resources */,
+				F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */,
+				F5B1EE850EAD0F4E00B087B6 /* gfx2gui.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,6 +409,9 @@
 				F5AFA0110EFAC7D300663B43 /* setup.c in Sources */,
 				F5AFA0120EFAC7D300663B43 /* windows.c in Sources */,
 				F5AED03E0F1989E00090A93F /* mountlist.c in Sources */,
+				F5AC28BC0F4873C700455509 /* hotkeys.c in Sources */,
+				F5AC28BD0F4873C700455509 /* input.c in Sources */,
+				F5AC28BE0F4873C700455509 /* realpath.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

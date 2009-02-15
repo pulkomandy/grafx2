@@ -89,9 +89,16 @@
 
   // Les différents formats de fichiers:
 
+#ifndef __no_pnglib__
 #define NB_FORMATS_CONNUS         13    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
 #define NB_FORMATS_LOAD           13    // Nombre de formats que l'on sait charger
 #define NB_FORMATS_SAVE           13    // Nombre de formats que l'on sait sauver
+#else
+// Without pnglib
+#define NB_FORMATS_CONNUS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
+#define NB_FORMATS_LOAD           12    // Nombre de formats que l'on sait charger
+#define NB_FORMATS_SAVE           12    // Nombre de formats que l'on sait sauver
+#endif
 
 enum FORMATS_RECONNUS
 {

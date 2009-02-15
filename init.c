@@ -49,6 +49,10 @@
   #include <signal.h>
 #endif
 
+#if defined(__macosx__)
+#define __p_sig_fn_t sig_t
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"

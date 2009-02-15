@@ -22,6 +22,10 @@
 */
 #define _XOPEN_SOURCE
 
+#if defined(__macosx__)
+#define __no_pnglib__
+#endif
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -29,7 +33,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#ifndef __no_pnglib__
 #include <png.h>
+#endif
 
 #include "const.h"
 #include "struct.h"
@@ -108,9 +114,11 @@ void Load_PC1(void);
 void Save_PC1(void);
 
 // -- PNG -------------------------------------------------------------------
+#ifndef __no_pnglib__
 void Test_PNG(void);
 void Load_PNG(void);
 void Save_PNG(void);
+#endif
 
 T_Format FormatFichier[NB_FORMATS_CONNUS] = {
   {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
@@ -125,7 +133,9 @@ T_Format FormatFichier[NB_FORMATS_CONNUS] = {
   {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
+#ifndef __no_pnglib__
   {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
+#endif
 };
 
 // Cette variable est alimentée après chargement réussi d'une image.
@@ -5550,6 +5560,8 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef __no_pnglib__
+
 // -- Tester si un fichier est au format PNG --------------------------------
 void Test_PNG(void)
 {
@@ -5854,7 +5866,7 @@ void Save_PNG(void)
   }
 
   //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
-  // ce fichier pourri traîner... Ca fait pas propre.
+  // ce fichier pourri trainait... Ca fait pas propre.
   if (Erreur_fichier)
     remove(Nom_du_fichier);
   
@@ -5864,6 +5876,7 @@ void Save_PNG(void)
     row_pointers=NULL;
   }
 }
+#endif  // __no_pnglib__
 
 // Saves an image.
 // This routine will only be called when all hope is lost, memory thrashed, etc
