@@ -1641,7 +1641,7 @@ void Bouton_Resol(void)
       Redimentionner_image(Largeur_choisie,Hauteur_choisie);
 
     if ((Mode_video[Mode_choisi].Etat & 3) == 3 ||
-      !Initialiser_mode_video(
+      Initialiser_mode_video(
         Mode_video[Mode_choisi].Largeur,
         Mode_video[Mode_choisi].Hauteur,
         Mode_video[Mode_choisi].Fullscreen))
