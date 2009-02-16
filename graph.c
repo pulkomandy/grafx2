@@ -850,6 +850,16 @@ void Remplir(byte Couleur_de_remplissage)
     Afficher_pinceau(Pos_X,Pos_Y,Couleur,0);
   }
 
+  // Affichage d'un point de façon définitive
+  void Pixel_clippe(word Pos_X,word Pos_Y,byte Couleur)
+  {
+    if ( (Pos_X>=Limite_Gauche) &&
+         (Pos_X<=Limite_Droite) &&
+         (Pos_Y>=Limite_Haut)   &&
+         (Pos_Y<=Limite_Bas) )
+    Afficher_pixel(Pos_X,Pos_Y,Couleur);
+  }
+  
   // Affichage d'un point pour une preview
   void Pixel_figure_Preview(word Pos_X,word Pos_Y,byte Couleur)
   {
@@ -2204,7 +2214,7 @@ void Polyfill(int Vertices, short * Points, int Color)
   int Indice;
   byte *FX_Feedback_Ecran_avant_remplissage;
 
-  Afficher_pixel(Points[0],Points[1],Color);
+  Pixel_clippe(Points[0],Points[1],Color);
   if (Vertices==1)
   {
     Mettre_Ecran_A_Jour(Points[0],Points[1],1,1);
@@ -2215,8 +2225,8 @@ void Polyfill(int Vertices, short * Points, int Color)
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
   FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
   FX_Feedback_Ecran=Ecran_backup;
-    
-  Pixel_figure=Afficher_pixel;
+
+  Pixel_figure=Pixel_clippe;    
   Polyfill_General(Vertices,Points,Color);
 
   // Remarque: pour dessiner la bordure avec la brosse en cours au lieu
@@ -2229,7 +2239,8 @@ void Polyfill(int Vertices, short * Points, int Color)
   Tracer_ligne_General(Points[0],Points[1],Points[Indice*2],Points[Indice*2+1],Color);
 
   // restore de l'etat du FX Feedback  
-  FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;  
+  FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;
+
 }
 
 
