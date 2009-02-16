@@ -50,7 +50,9 @@
 #endif
 
 #if defined(__macosx__)
-#define __p_sig_fn_t sig_t
+    #define __p_sig_fn_t sig_t
+#elif defined(__linux__)
+    #define __p_sig_fn_t sighandler_t
 #endif
 
 #include "const.h"
