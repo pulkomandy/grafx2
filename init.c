@@ -47,13 +47,6 @@
 #endif
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
-  #if defined(__WIN32__)
-    #define SIGHANDLER_T __p_sig_fn_t
-  #elif defined(__macosx__)
-    #define SIGHANDLER_T sig_t
-  #else
-    #define SIGHANDLER_T __sighandler_t
-  #endif
 #endif
 
 #include "const.h"
@@ -2381,6 +2374,14 @@ void Config_par_defaut(void)
 
 #ifdef GRAFX2_CATCHES_SIGNALS
 
+#if defined(__WIN32__)
+  #define SIGHANDLER_T __p_sig_fn_t
+#elif defined(__macosx__)
+  #define SIGHANDLER_T sig_t
+#else
+  #define SIGHANDLER_T __sighandler_t
+#endif
+
 // Memorize the signal handlers of SDL
 SIGHANDLER_T Handler_TERM=SIG_DFL;
 SIGHANDLER_T Handler_INT=SIG_DFL;
@@ -2418,7 +2419,6 @@ void Initialiser_sighandler(void)
   Handler_ABRT=signal(SIGABRT,sig_handler);
   Handler_SEGV=signal(SIGSEGV,sig_handler);
   Handler_FPE =signal(SIGFPE,sig_handler);
-  
 #endif
 }
 
