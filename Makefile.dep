@@ -1,5 +1,6 @@
 $(OBJDIR)/aide.o: aide.c const.h struct.h global.h divers.h graph.h moteur.h \
-  tables_aide.h aide.h sdlscreen.h texte.h clavier.h windows.h input.h
+  tables_aide.h aide.h sdlscreen.h texte.h clavier.h windows.h input.h \
+  hotkeys.h erreurs.h
 $(OBJDIR)/boutons.o: boutons.c const.h struct.h global.h divers.h graph.h moteur.h \
   readline.h files.h loadsave.h init.h boutons.h operatio.h pages.h \
   erreurs.h readini.h saveini.h shade.h io.h aide.h texte.h sdlscreen.h \
@@ -14,12 +15,10 @@ $(OBJDIR)/files.o: files.c const.h struct.h global.h graph.h divers.h erreurs.h 
   io.h windows.h loadsave.h
 $(OBJDIR)/gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h \
   setup.h
-$(OBJDIR)/graph.o: graph.c global.h struct.h const.h moteur.h boutons.h pages.h \
-  erreurs.h sdlscreen.h graph.h divers.h pxsimple.h pxtall.h pxwide.h \
-  windows.h
+$(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c const.h struct.h global.h graph.h boutons.h palette.h \
   aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h files.h \
-  setup.h windows.h sdlscreen.h mountlist.h
+  setup.h windows.h sdlscreen.h mountlist.h loadsave.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h clavier.h graph.h sdlscreen.h \
   windows.h erreurs.h divers.h input.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h
@@ -45,10 +44,9 @@ $(OBJDIR)/pxsimple.o: pxsimple.c global.h struct.h const.h sdlscreen.h divers.h
 $(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h divers.h \
   pxsimple.h
 $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h divers.h
-$(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h divers.h
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h graph.h windows.h divers.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h graph.h divers.h \
-  erreurs.h sdlscreen.h readline.h windows.h
+  erreurs.h sdlscreen.h readline.h windows.h input.h
 $(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h erreurs.h \
   graph.h divers.h
