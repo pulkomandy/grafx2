@@ -42,7 +42,6 @@ void Afficher_pixel(word X,word Y,byte Couleur);
 void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview);
 void Effacer_pinceau(short X,short Y);
 void Effacer_curseur(void);
-void Afficher_curseur(void);
 
 void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
 

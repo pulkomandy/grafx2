@@ -1469,13 +1469,12 @@ void Afficher_curseur(void)
   short Pos_Y;
   short Compteur_X;
   short Compteur_Y;
-  //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
-  //short Fin_Compteur_Y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   Temp;
   byte  Couleur;
   float cosA,sinA;
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
 
+  // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flèche.
   if ( ( (Mouse_Y<Menu_Ordonnee)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
     || (Fenetre) || (Forme_curseur==FORME_CURSEUR_SABLIER) )

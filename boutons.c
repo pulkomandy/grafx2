@@ -1659,6 +1659,8 @@ void Bouton_Resol(void)
   Mouse_X = Largeur_ecran >> 1;
   Mouse_Y = Hauteur_ecran >> 1;
   Set_mouse_position();
+  Pinceau_X = Mouse_X;
+  Pinceau_Y = Mouse_Y;
 
 
   Desenclencher_bouton(BOUTON_RESOL);
@@ -1679,6 +1681,7 @@ void Bouton_Safety_resol(void)
   Afficher_ecran();
 
   Desenclencher_bouton(BOUTON_RESOL);
+  // Le pinceau est affiché à la position du clic et pas 
   Afficher_curseur();
 }
 
