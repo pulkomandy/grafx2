@@ -162,7 +162,9 @@ void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int Largeur, int Hauteur)
 // Ecrit un pixel dans un fond de fenêtre
 void Pixel_fond(int Pos_X, int Pos_Y, byte Couleur)
 {
-  (Fond_fenetre[0][Pos_X+Pos_Y*Fenetre_Largeur*Menu_Facteur_X])=Couleur;
+  int Repetitions_X=Pixel_width;
+  while (Repetitions_X--)
+    (Fond_fenetre[0][Pos_X*Pixel_width+Repetitions_X+Pos_Y*Fenetre_Largeur*Pixel_width*Menu_Facteur_X])=Couleur;
 }
 
 
@@ -2301,11 +2303,11 @@ void Remappe_fond_fenetres(byte * Table_de_conversion, int Min_Y, int Max_Y)
             return;
           if (dx+Pile_Fenetre_Pos_Y[Indice_fenetre]<Min_Y)
           {
-            EDI += Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;
+            EDI += Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X*Pixel_width;
           }
           else
                 // Pour chaque pixel
-                for(cx=Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X;cx>0;cx--)
+                for(cx=Pile_Fenetre_Largeur[Indice_fenetre]*Menu_Facteur_X*Pixel_width;cx>0;cx--)
                 {
                         *EDI = Table_de_conversion[*EDI];
                         EDI ++;
