@@ -129,23 +129,22 @@ int Move_cursor_with_constraints()
         }
   }
   if ((INPUT_Nouveau_Mouse_X != Mouse_X) ||
-    (INPUT_Nouveau_Mouse_Y != Mouse_Y))
+    (INPUT_Nouveau_Mouse_Y != Mouse_Y) ||
+    (INPUT_Nouveau_Mouse_K != Mouse_K))
   {
+    if ((INPUT_Nouveau_Mouse_K != Mouse_K))
+      Retour=1;        
     Forcer_affichage_curseur=0;
     Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
     Mouse_X=INPUT_Nouveau_Mouse_X;
     Mouse_Y=INPUT_Nouveau_Mouse_Y;
+    Mouse_K=INPUT_Nouveau_Mouse_K;
     Calculer_coordonnees_pinceau();
     Afficher_curseur();
     
     Mouse_count++;
     if (Mouse_count>Config.Mouse_Merge_movement)
       Retour=1;
-  }
-  if ((INPUT_Nouveau_Mouse_K != Mouse_K))
-  {
-    Mouse_K=INPUT_Nouveau_Mouse_K;
-    Retour=1;        
   }
 
   return Retour;
