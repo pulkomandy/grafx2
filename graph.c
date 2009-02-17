@@ -2396,7 +2396,7 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
   {
     Largeur=1+Fin-Debut;
 
-    if ( ((Mouse_K==A_GAUCHE) && Sens) || ((Mouse_K==A_DROITE) && (!Sens)) )
+    if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
       C-=Quick_shade_Step%Largeur;
     else
       C+=Quick_shade_Step%Largeur;

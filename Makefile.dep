@@ -1,3 +1,4 @@
+$(OBJDIR)/SFont.o: SFont.c SFont.h
 $(OBJDIR)/aide.o: aide.c const.h struct.h global.h divers.h graph.h moteur.h \
   tables_aide.h aide.h sdlscreen.h texte.h clavier.h windows.h input.h \
   hotkeys.h erreurs.h
@@ -15,6 +16,9 @@ $(OBJDIR)/files.o: files.c const.h struct.h global.h graph.h divers.h erreurs.h 
   io.h windows.h loadsave.h
 $(OBJDIR)/gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h \
   setup.h
+$(OBJDIR)/graph.o: graph.c global.h struct.h const.h moteur.h boutons.h pages.h \
+  erreurs.h sdlscreen.h graph.h divers.h pxsimple.h pxtall.h pxwide.h \
+  pxdouble.h windows.h
 $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c const.h struct.h global.h graph.h boutons.h palette.h \
   aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h files.h \
@@ -40,6 +44,7 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h graph.h erreurs.h \
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h divers.h graph.h moteur.h \
   readline.h boutons.h pages.h aide.h sdlscreen.h erreurs.h op_c.h \
   windows.h input.h
+$(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h divers.h
 $(OBJDIR)/pxsimple.o: pxsimple.c global.h struct.h const.h sdlscreen.h divers.h
 $(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h divers.h \
   pxsimple.h
@@ -53,7 +58,6 @@ $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h erreurs.
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h sdlscreen.h erreurs.h \
   graph.h divers.h
 $(OBJDIR)/setup.o: setup.c struct.h const.h io.h files.h
-$(OBJDIR)/SFont.o: SFont.c SFont.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h moteur.h divers.h \
   readline.h aide.h sdlscreen.h windows.h input.h
 $(OBJDIR)/special.o: special.c const.h struct.h global.h graph.h moteur.h windows.h
