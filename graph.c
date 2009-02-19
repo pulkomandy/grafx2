@@ -336,9 +336,9 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         Menu_Facteur_X=1;
         Menu_Facteur_Y=1;
     }
-    if (Pixel_height>Pixel_width && Largeur_ecran>=640)
+    if (Pixel_height>Pixel_width && Largeur_ecran>=Menu_Facteur_X*2*320)
       Menu_Facteur_X*=2;
-    else if (Pixel_width>Pixel_height && Hauteur_ecran>=400)
+    else if (Pixel_width>Pixel_height && Hauteur_ecran>=Menu_Facteur_Y*2*200)
       Menu_Facteur_Y*=2;
       
     if (Buffer_de_ligne_horizontale)
