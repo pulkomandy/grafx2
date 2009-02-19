@@ -28,7 +28,6 @@
 
 #include "op_c.h"
 #include "erreurs.h"
-#include "graph.h"
 
 void RGBtoHSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
 {

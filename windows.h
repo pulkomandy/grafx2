@@ -25,6 +25,7 @@
 #include "struct.h"
 
 void Afficher_curseur(void);
+void Effacer_curseur(void);
 
 void Remapper_ecran_apres_changement_couleurs_menu(void);
 void Calculer_couleurs_menu_optimales(struct Composantes * Palette);

@@ -1439,12 +1439,12 @@ void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg)
 
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
                                    byte Clickable, word Raccourci)
 {
-  struct Fenetre_Bouton_normal * Temp;
+  struct Fenetre_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
@@ -1464,15 +1464,16 @@ void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
   }
 
   Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
+  return Temp;
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-void Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
                                    byte Clickable, word Raccourci)
 {
-  struct Fenetre_Bouton_normal * Temp;
+  struct Fenetre_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
@@ -1492,9 +1493,10 @@ void Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
   }
 
   Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
+  return Temp;
 }
 
-void Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
+struct Fenetre_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
 {
   struct Fenetre_Bouton_palette * Temp;
 
@@ -1507,10 +1509,11 @@ void Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
   Fenetre_Liste_boutons_palette=Temp;
 
   Fenetre_Dessiner_bouton_palette(Pos_X,Pos_Y);
+  return Temp;
 }
 
 
-void Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
                                      word Hauteur,
                                      word Nb_elements,
                                      word Nb_elements_visibles,
@@ -1532,10 +1535,11 @@ void Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
   Fenetre_Liste_boutons_scroller=Temp;
 
   Fenetre_Dessiner_bouton_scroller(Temp);
+  return Temp;
 }
 
 
-void Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
+struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
   struct Fenetre_Bouton_special * Temp;
 
@@ -1548,13 +1552,16 @@ void Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Haut
 
   Temp->Next=Fenetre_Liste_boutons_special;
   Fenetre_Liste_boutons_special=Temp;
+  return Temp;
 }
 
 
-void Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
+struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
 {
-  Fenetre_Definir_bouton_special(Pos_X,Pos_Y,(Largeur_en_caracteres<<3)+3,11);
+  struct Fenetre_Bouton_special *Temp;
+  Temp=Fenetre_Definir_bouton_special(Pos_X,Pos_Y,(Largeur_en_caracteres<<3)+3,11);
   Fenetre_Dessiner_bouton_saisie(Pos_X,Pos_Y,Largeur_en_caracteres);
+  return Temp;
 }
 
 

@@ -1,7 +1,7 @@
 $(OBJDIR)/SFont.o: SFont.c SFont.h
-$(OBJDIR)/aide.o: aide.c const.h struct.h global.h divers.h graph.h moteur.h \
-  tables_aide.h aide.h sdlscreen.h texte.h clavier.h windows.h input.h \
-  hotkeys.h erreurs.h
+$(OBJDIR)/aide.o: aide.c const.h struct.h global.h divers.h moteur.h tables_aide.h \
+  aide.h sdlscreen.h texte.h clavier.h windows.h input.h hotkeys.h \
+  erreurs.h
 $(OBJDIR)/boutons.o: boutons.c const.h struct.h global.h divers.h graph.h moteur.h \
   readline.h files.h loadsave.h init.h boutons.h operatio.h pages.h \
   erreurs.h readini.h saveini.h shade.h io.h aide.h texte.h sdlscreen.h \
@@ -9,11 +9,10 @@ $(OBJDIR)/boutons.o: boutons.c const.h struct.h global.h divers.h graph.h moteur
 $(OBJDIR)/brush.o: brush.c global.h struct.h const.h graph.h divers.h erreurs.h \
   windows.h sdlscreen.h
 $(OBJDIR)/clavier.o: clavier.c global.h struct.h const.h
-$(OBJDIR)/divers.o: divers.c struct.h const.h sdlscreen.h global.h graph.h \
-  erreurs.h boutons.h moteur.h divers.h clavier.h windows.h palette.h \
-  input.h
-$(OBJDIR)/files.o: files.c const.h struct.h global.h graph.h divers.h erreurs.h \
-  io.h windows.h loadsave.h
+$(OBJDIR)/divers.o: divers.c struct.h const.h sdlscreen.h global.h erreurs.h \
+  boutons.h moteur.h divers.h clavier.h windows.h palette.h input.h
+$(OBJDIR)/files.o: files.c const.h struct.h global.h divers.h erreurs.h io.h \
+  windows.h loadsave.h
 $(OBJDIR)/gfxcfg.o: gfxcfg.c SFont.h struct.h const.h clavier.h io.h hotkeys.h \
   setup.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h moteur.h boutons.h pages.h \
@@ -23,25 +22,25 @@ $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c const.h struct.h global.h graph.h boutons.h palette.h \
   aide.h operatio.h divers.h erreurs.h clavier.h io.h hotkeys.h files.h \
   setup.h windows.h sdlscreen.h mountlist.h loadsave.h
-$(OBJDIR)/input.o: input.c global.h struct.h const.h clavier.h graph.h sdlscreen.h \
+$(OBJDIR)/input.o: input.c global.h struct.h const.h clavier.h sdlscreen.h \
   windows.h erreurs.h divers.h input.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h
-$(OBJDIR)/loadsave.o: loadsave.c const.h struct.h global.h graph.h divers.h pages.h \
-  op_c.h boutons.h erreurs.h io.h sdlscreen.h windows.h loadsave.h
+$(OBJDIR)/loadsave.o: loadsave.c const.h struct.h global.h divers.h pages.h op_c.h \
+  boutons.h erreurs.h io.h sdlscreen.h windows.h loadsave.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h divers.h init.h \
   boutons.h moteur.h pages.h files.h loadsave.h sdlscreen.h erreurs.h \
   readini.h saveini.h io.h texte.h setup.h windows.h brush.h palette.h
 $(OBJDIR)/moteur.o: moteur.c const.h struct.h global.h graph.h divers.h special.h \
   boutons.h operatio.h shade.h erreurs.h sdlscreen.h windows.h brush.h \
   input.h
-$(OBJDIR)/mountlist.o: mountlist.c mountlist.h
-$(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h graph.h
+$(OBJDIR)/mountlist.o: mountlist.c
+$(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h erreurs.h
 $(OBJDIR)/operatio.o: operatio.c const.h struct.h global.h divers.h moteur.h \
   graph.h operatio.h boutons.h pages.h erreurs.h sdlscreen.h brush.h \
   windows.h
-$(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h graph.h erreurs.h \
-  divers.h windows.h
-$(OBJDIR)/palette.o: palette.c const.h struct.h global.h divers.h graph.h moteur.h \
+$(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h erreurs.h divers.h \
+  windows.h
+$(OBJDIR)/palette.o: palette.c const.h struct.h global.h divers.h moteur.h \
   readline.h boutons.h pages.h aide.h sdlscreen.h erreurs.h op_c.h \
   windows.h input.h
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h divers.h
@@ -49,14 +48,14 @@ $(OBJDIR)/pxsimple.o: pxsimple.c global.h struct.h const.h sdlscreen.h divers.h
 $(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h divers.h \
   pxsimple.h
 $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h divers.h
-$(OBJDIR)/readini.o: readini.c const.h global.h struct.h graph.h windows.h divers.h
-$(OBJDIR)/readline.o: readline.c const.h struct.h global.h graph.h divers.h \
-  erreurs.h sdlscreen.h readline.h windows.h input.h
+$(OBJDIR)/readini.o: readini.c const.h global.h struct.h divers.h
+$(OBJDIR)/readline.o: readline.c const.h struct.h global.h divers.h erreurs.h \
+  sdlscreen.h readline.h windows.h input.h
 $(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h erreurs.h \
-  graph.h divers.h
+  divers.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h sdlscreen.h erreurs.h \
-  graph.h divers.h
+  divers.h
 $(OBJDIR)/setup.o: setup.c struct.h const.h io.h files.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h moteur.h divers.h \
   readline.h aide.h sdlscreen.h windows.h input.h

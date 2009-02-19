@@ -505,8 +505,7 @@ int Menu_Shade(void)
 
   // Déclaration & tracé de la zone de saisie du pas
   Print_dans_fenetre(272,165,"Step",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(274,174,3);                         // 15
-  Bouton_saisie=Fenetre_Liste_boutons_special;
+  Bouton_saisie = Fenetre_Definir_bouton_saisie(274,174,3);          // 15
   Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
 
@@ -1037,20 +1036,20 @@ void Bouton_Quick_shade_Menu(void)
   char Chaine[4];
   byte Step_Backup=Quick_shade_Step; // Backup des
   byte Loop_Backup=Quick_shade_Loop; // anciennes données
-
+  struct Fenetre_Bouton_special * BoutonPas;
 
   Ouvrir_fenetre(142,56,"Quick-shade");
 
   Fenetre_Definir_bouton_normal(76,36,60,14,"OK",0,1,SDLK_RETURN);     // 1
-  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,TOUCHE_ESC); // 2
-  Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,SDLK_TAB);       // 3
+  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,TOUCHE_ESC);  // 2
+  Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,SDLK_TAB);          // 3
   Afficher_mode_du_shade(83,21,Quick_shade_Loop);
 
   // Déclaration & tracé de la zone de saisie du pas
   Print_dans_fenetre(5,21,"Step",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(40,19,3);                         // 4
+  BoutonPas = Fenetre_Definir_bouton_saisie(40,19,3);                  // 4
   Num2str(Quick_shade_Step,Chaine,3);
-  Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+  Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
 
   UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*142,Menu_Facteur_Y*56);
 
@@ -1078,13 +1077,13 @@ void Bouton_Quick_shade_Menu(void)
         {
           Temp=1;
           Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+          Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
         }
         else if (Temp>255)
         {
           Temp=255;
           Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+          Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
         }
         Quick_shade_Step=Temp;
         Afficher_curseur();

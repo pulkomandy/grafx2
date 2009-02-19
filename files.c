@@ -48,7 +48,6 @@
 #include "const.h"
 #include "struct.h"
 #include "global.h"
-#include "graph.h"
 #include "divers.h"
 #include "erreurs.h"
 #include "io.h"

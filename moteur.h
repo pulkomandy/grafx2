@@ -45,26 +45,26 @@ void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char *
 void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg);
 void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
 
-void Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre,byte Lettre_soulignee,
                                    byte Clickable, word Raccourci);
-void Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre,byte Lettre_soulignee,
                                    byte Clickable, word Raccourci);
 
-void Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y);
+struct Fenetre_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y);
 void Fenetre_Effacer_tags(void);
 void Tagger_intervalle_palette(byte Debut,byte Fin);
 
-void Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
+struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
                                      word Hauteur,
                                      word Nb_elements,
                                      word Nb_elements_visibles,
                                      word Position_initiale);
-void Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-void Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
+struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
+struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
 
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
 short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg);

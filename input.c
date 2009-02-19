@@ -23,7 +23,6 @@
 
 #include "global.h"
 #include "clavier.h"
-#include "graph.h"
 #include "sdlscreen.h"
 #include "windows.h"
 #include "erreurs.h"

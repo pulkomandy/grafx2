@@ -26,7 +26,6 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "erreurs.h"
-#include "graph.h"
 #include "divers.h"
 
 // Mise à jour minimaliste en nombre de pixels

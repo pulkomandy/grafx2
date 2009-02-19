@@ -40,7 +40,6 @@
 #include "const.h"
 #include "struct.h"
 #include "global.h"
-#include "graph.h"
 #include "divers.h"
 #include "pages.h"
 #include "op_c.h"

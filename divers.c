@@ -27,7 +27,6 @@
 #include "struct.h"
 #include "sdlscreen.h"
 #include "global.h"
-#include "graph.h" //Afficher_curseur
 #include "erreurs.h"
 #include "boutons.h"
 #include "moteur.h"

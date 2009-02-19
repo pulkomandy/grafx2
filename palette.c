@@ -25,7 +25,6 @@
 #include "struct.h"
 #include "global.h"
 #include "divers.h"
-#include "graph.h"
 #include "moteur.h"
 #include "readline.h"
 #include "boutons.h"
@@ -809,12 +808,9 @@ void Bouton_Palette(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
   // Jauges de couleur
   Palette_mode_RGB=1;
-  Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
-  Jauge_rouge=Fenetre_Liste_boutons_scroller;
-  Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].V*Color_Max/255);// 3
-  Jauge_verte=Fenetre_Liste_boutons_scroller;
-  Fenetre_Definir_bouton_scroller(236, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].B*Color_Max/255);// 4
-  Jauge_bleue=Fenetre_Liste_boutons_scroller;
+  Jauge_rouge = Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
+  Jauge_verte = Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].V*Color_Max/255);// 3
+  Jauge_bleue = Fenetre_Definir_bouton_scroller(236, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].B*Color_Max/255);// 4
   Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
   Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
   Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
@@ -853,13 +849,11 @@ void Bouton_Palette(void)
   Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,TOUCHE_ESC);  // 13
   Fenetre_Definir_bouton_normal(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
-  Bouton_Used=Fenetre_Liste_boutons_normal;
+  Bouton_Used = Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
   Fenetre_Definir_bouton_normal(132,37,83,14,"Zap unused",0,1,SDLK_DELETE);//16
 
   // Jauge de réduction de palette
-  Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
-  Jauge_Reduction=Fenetre_Liste_boutons_scroller;
+  Jauge_Reduction = Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
 
   Fenetre_Definir_bouton_repetable(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
   Fenetre_Definir_bouton_repetable(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
@@ -2103,18 +2097,15 @@ void Bouton_Palette_secondaire(void)
   Print_dans_fenetre(157,66,"RGB",CM_Fonce,CM_Clair);
   Print_dans_fenetre(152,76,"Scale",CM_Fonce,CM_Clair);
   
-  Fenetre_Definir_bouton_scroller(19,72,29,255,1,256-Config.Palette_Cells_X);// 5
-  Jauge_Colonnes=Fenetre_Liste_boutons_scroller;
+  Jauge_Colonnes = Fenetre_Definir_bouton_scroller(19,72,29,255,1,256-Config.Palette_Cells_X);// 5
   Num2str(Config.Palette_Cells_X,Chaine,3);
   Print_dans_fenetre(38,89,Chaine,CM_Noir,CM_Clair);
   
-  Fenetre_Definir_bouton_scroller(70,72,29,15,1,16-Config.Palette_Cells_Y);// 6
-  Jauge_Lignes=Fenetre_Liste_boutons_scroller;
+  Jauge_Lignes = Fenetre_Definir_bouton_scroller(70,72,29,15,1,16-Config.Palette_Cells_Y);// 6
   Num2str(Config.Palette_Cells_Y,Chaine,3);
   Print_dans_fenetre(94,89,Chaine,CM_Noir,CM_Clair);
   
-  Fenetre_Definir_bouton_scroller(137,73,29,254,1,256-Graduations_RGB);// 7
-  Jauge_RGBScale=Fenetre_Liste_boutons_scroller;
+  Jauge_RGBScale = Fenetre_Definir_bouton_scroller(137,73,29,254,1,256-Graduations_RGB);// 7
   Num2str(Graduations_RGB,Chaine,3);
   Print_dans_fenetre(157,89,Chaine,CM_Noir,CM_Clair);
 

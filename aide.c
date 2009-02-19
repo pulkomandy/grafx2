@@ -37,7 +37,6 @@
 #include "struct.h"
 #include "global.h"
 #include "divers.h"
-#include "graph.h"
 #include "moteur.h"
 #include "tables_aide.h"
 #include "aide.h"
@@ -372,12 +371,12 @@ void Afficher_aide(void)
 }
 
 
-void Scroller_aide(void)
+void Scroller_aide(struct Fenetre_Bouton_scroller * Scroller)
 {
   Effacer_curseur();
-  Fenetre_Liste_boutons_scroller->Position=Position_d_aide_en_cours;
-  Calculer_hauteur_curseur_jauge(Fenetre_Liste_boutons_scroller);
-  Fenetre_Dessiner_jauge(Fenetre_Liste_boutons_scroller);
+  Scroller->Position=Position_d_aide_en_cours;
+  Calculer_hauteur_curseur_jauge(Scroller);
+  Fenetre_Dessiner_jauge(Scroller);
   Afficher_aide();
   Afficher_curseur();
 }
@@ -405,6 +404,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
 {
   short Bouton_clicke;
   short Nb_lignes;
+  struct Fenetre_Bouton_scroller * Scroller;
 
   if (Section!=-1)
   {
@@ -434,7 +434,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Menu_Facteur_X*272,Menu_Facteur_Y*130,CM_Noir);
 
   Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,TOUCHE_ESC); // 1
-  Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
+  Scroller=Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
                                   16,Position_d_aide_en_cours);   // 2
 
   Fenetre_Definir_bouton_normal(  9,154, 6*8,14,"About"  ,1,1,SDLK_a); // 3
@@ -492,10 +492,10 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Section_d_aide_en_cours=Bouton_clicke-3;
           Position_d_aide_en_cours=0;
           Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
-          Fenetre_Liste_boutons_scroller->Position=0;
-          Fenetre_Liste_boutons_scroller->Nb_elements=Nb_lignes;
-          Calculer_hauteur_curseur_jauge(Fenetre_Liste_boutons_scroller);
-          Fenetre_Dessiner_jauge(Fenetre_Liste_boutons_scroller);
+          Scroller->Position=0;
+          Scroller->Nb_elements=Nb_lignes;
+          Calculer_hauteur_curseur_jauge(Scroller);
+          Fenetre_Dessiner_jauge(Scroller);
         }
         else
           Position_d_aide_en_cours=Fenetre_Attribut2;
@@ -511,13 +511,13 @@ void Fenetre_aide(int Section, const char *Sous_section)
       case SDLK_UP : // Haut
         if (Position_d_aide_en_cours>0)
           Position_d_aide_en_cours--;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
         break;
       case SDLK_DOWN : // Bas
         if (Position_d_aide_en_cours<Nb_lignes-16)
           Position_d_aide_en_cours++;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
         break;
       case SDLK_PAGEUP : // PageUp
@@ -525,7 +525,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Position_d_aide_en_cours-=15;
         else
           Position_d_aide_en_cours=0;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
         break;
       case (TOUCHE_MOUSEWHEELUP) : // WheelUp
@@ -533,7 +533,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Position_d_aide_en_cours-=3;
         else
           Position_d_aide_en_cours=0;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
@@ -543,7 +543,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
             Position_d_aide_en_cours+=15;
           else
             Position_d_aide_en_cours=Nb_lignes-16;
-          Scroller_aide();
+          Scroller_aide(Scroller);
           Touche=0;
         }
         break;
@@ -554,20 +554,20 @@ void Fenetre_aide(int Section, const char *Sous_section)
             Position_d_aide_en_cours+=3;
           else
             Position_d_aide_en_cours=Nb_lignes-16;
-          Scroller_aide();
+          Scroller_aide(Scroller);
           Touche=0;
         }
         break;
       case SDLK_HOME : // Home
         Position_d_aide_en_cours=0;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
         break;
       case SDLK_END : // End
       if (Nb_lignes>16)
       {
         Position_d_aide_en_cours=Nb_lignes-16;
-        Scroller_aide();
+        Scroller_aide(Scroller);
         Touche=0;
       }
         break;

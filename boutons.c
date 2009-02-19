@@ -1407,10 +1407,9 @@ void Bouton_Resol(void)
   Fenetre_Definir_bouton_normal(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
   Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,TOUCHE_ESC);  // 2
 
-  Fenetre_Definir_bouton_saisie( 60, 35,4);                           // 3
-  Bouton_saisie_Width=Fenetre_Liste_boutons_special;
-  Fenetre_Definir_bouton_saisie(164, 35,4);                           // 4
-  Bouton_saisie_Height=Fenetre_Liste_boutons_special;
+  Bouton_saisie_Width=Fenetre_Definir_bouton_saisie( 60, 35,4);            // 3
+  
+  Bouton_saisie_Height=Fenetre_Definir_bouton_saisie(164, 35,4);           // 4
 
   Fenetre_Definir_bouton_special(38,70,225,96);                       // 5
 
@@ -1924,8 +1923,8 @@ void Bouton_Degrades(void)
     // Définition du scrolleur <=> indice du dégradé dans le tableau
   Fenetre_Definir_bouton_scroller(218,22,75,16,1,Degrade_Courant);  // 2
     // Définition du scrolleur de mélange du dégradé
-  Fenetre_Definir_bouton_scroller(31,22,84,256,1,Degrade_Tableau[Degrade_Courant].Melange); // 3
-  Scroller_de_melange=Fenetre_Liste_boutons_scroller;
+  Scroller_de_melange = Fenetre_Definir_bouton_scroller(31,22,84,256,1,
+    Degrade_Tableau[Degrade_Courant].Melange);                      // 3
     // Définition du bouton de sens
   Fenetre_Definir_bouton_normal(8,22,15,14,
     (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
@@ -2534,8 +2533,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_special(9,90+FILENAMESPACE,96,80);                      // 4
 
   // Scroller du fileselector
-  Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
-  Scroller_de_fichiers=Fenetre_Liste_boutons_scroller;
+  Scroller_de_fichiers = Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
 
   // Scroller des formats
   Fenetre_Definir_bouton_scroller(12,55,27,(Load)?NB_FORMATS_LOAD+1:NB_FORMATS_SAVE,1,(Load)?Principal_Format:Principal_Format-1); // 6
@@ -4009,26 +4007,22 @@ void Bouton_Menu_Grille(void)
   Fenetre_Definir_bouton_normal(70,72,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Print_dans_fenetre(19,26, "X:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(37,24,2); // 3
-  Bouton_saisie_X=Fenetre_Liste_boutons_special;
+  Bouton_saisie_X = Fenetre_Definir_bouton_saisie(37,24,2); // 3
   Num2str(X_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_X,Chaine);
 
   Print_dans_fenetre(19,47, "Y:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(37,45,2); // 4
-  Bouton_saisie_Y=Fenetre_Liste_boutons_special;
+  Bouton_saisie_Y = Fenetre_Definir_bouton_saisie(37,45,2); // 4
   Num2str(Y_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_Y,Chaine);
 
   Print_dans_fenetre(69,26,"dX:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(95,24,2); // 5
-  Bouton_saisie_dX=Fenetre_Liste_boutons_special;
+  Bouton_saisie_dX = Fenetre_Definir_bouton_saisie(95,24,2); // 5
   Num2str(dX_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_dX,Chaine);
 
   Print_dans_fenetre(69,47,"dY:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(95,45,2); // 6
-  Bouton_saisie_dY=Fenetre_Liste_boutons_special;
+  Bouton_saisie_dY = Fenetre_Definir_bouton_saisie(95,45,2); // 6
   Num2str(dY_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
   Display_Window(133,98);
@@ -4363,10 +4357,9 @@ void Bouton_Smooth_Menu(void)
   for (J=0; J<3; J++)
     for (I=0; I<3; I++)
     {
-      Fenetre_Definir_bouton_saisie(10+(I*21),62+(J*13),2);       // 7..15
-      Matrice_Zone_saisie[I][J]=Fenetre_Liste_boutons_special;
+      Matrice_Zone_saisie[I][J]=Fenetre_Definir_bouton_saisie(10+(I*21),62+(J*13),2); // 7..15
       Num2str(Matrice_choisie[I][J]=Smooth_Matrice[I][J],Chaine,2);
-      Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+      Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[I][J],Chaine);
     }
   Display_Window(142,109);
 
@@ -4616,12 +4609,10 @@ void Bouton_Tiling_Menu(void)
 
   Ouvrir_fenetre(138,79,"Tiling");
 
-  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,TOUCHE_ESC); // 1
+  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,TOUCHE_ESC);  // 1
   Fenetre_Definir_bouton_normal(74,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
-  Fenetre_Definir_bouton_saisie(91,21,4);                         // 3
-  Bouton_saisie_Decalage_X=Fenetre_Liste_boutons_special;
-  Fenetre_Definir_bouton_saisie(91,35,4);                         // 4
-  Bouton_saisie_Decalage_Y=Fenetre_Liste_boutons_special;
+  Bouton_saisie_Decalage_X = Fenetre_Definir_bouton_saisie(91,21,4);   // 3
+  Bouton_saisie_Decalage_Y = Fenetre_Definir_bouton_saisie(91,35,4);   // 4
   Print_dans_fenetre(12,23,"Offset X:",CM_Fonce,CM_Clair);
   Print_dans_fenetre(12,37,"Offset Y:",CM_Fonce,CM_Clair);
 
@@ -4786,26 +4777,22 @@ void Bouton_Spray_Menu(void)
   Fenetre_Definir_bouton_normal(  8, 37,43,14,"Clear"     ,1,1,SDLK_c); // 10
 
   Print_dans_fenetre(142,25,"Size:"     ,CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(186,23,3);                              // 11
-  Saisie_Size=Fenetre_Liste_boutons_special;
+  Saisie_Size = Fenetre_Definir_bouton_saisie(186,23,3);                // 11
   Num2str(Spray_Size,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Saisie_Size,Chaine);
 
   Print_dans_fenetre(142,39,"Delay:"    ,CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(194,37,2);                              // 12
-  Saisie_Delay=Fenetre_Liste_boutons_special;
+  Saisie_Delay = Fenetre_Definir_bouton_saisie(194,37,2);               // 12
   Num2str(Spray_Delay,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Saisie_Delay,Chaine);
 
   Print_dans_fenetre( 27,24,"Mono-Flow:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(111,22,2);                              // 13
-  Saisie_Mono_flow=Fenetre_Liste_boutons_special;
+  Saisie_Mono_flow = Fenetre_Definir_bouton_saisie(111,22,2);           // 13
   Num2str(Spray_Mono_flow,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Saisie_Mono_flow,Chaine);
 
   Print_dans_fenetre( 67,40,"Init:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(111,38,2);                              // 14
-  Saisie_Init=Fenetre_Liste_boutons_special;
+  Saisie_Init = Fenetre_Definir_bouton_saisie(111,38,2);                // 14
   Num2str(Spray_Init,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Saisie_Init,Chaine);
 
@@ -5229,8 +5216,7 @@ void Bouton_Trame_Menu(void)
   Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,SDLK_DOWN|MOD_SHIFT); // 9
   Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,SDLK_LEFT|MOD_SHIFT); // 10
   Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,SDLK_RIGHT|MOD_SHIFT); // 11
-  Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
-  Bouton_Octet_insere=Fenetre_Liste_boutons_normal;
+  Bouton_Octet_insere = Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
   Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
         Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
         Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
@@ -5940,8 +5926,7 @@ void Bouton_Texte()
 
   // Texte saisi
   Print_dans_fenetre(6,20,"Text:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(48,18,29); // 1
-  Bouton_texte=Fenetre_Liste_boutons_special;
+  Bouton_texte = Fenetre_Definir_bouton_saisie(48,18,29); // 1
   
   // TrueType options
   Fenetre_Afficher_cadre_creux(182,34,100,68);
@@ -5957,21 +5942,18 @@ void Bouton_Texte()
   Print_dans_fenetre(206,89,"Italic", CM_Fonce, CM_Clair);
   
   // Scroller des fontes
-  Fenetre_Definir_bouton_scroller(165,35,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 5
-  Scroller_de_fontes=Fenetre_Liste_boutons_scroller;
+  Scroller_de_fontes = Fenetre_Definir_bouton_scroller(165,35,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 5
   // Liste des fontes disponibles
   Fenetre_Definir_bouton_special(8,34,152,NB_FONTES*8); // 6
   Fenetre_Afficher_cadre_creux(7, 33, 154, NB_FONTES*8+4);
   
   // Taille texte
-  Fenetre_Definir_bouton_saisie(220,43,3); // 7
-  Bouton_taille_texte=Fenetre_Liste_boutons_special;
+  Bouton_taille_texte = Fenetre_Definir_bouton_saisie(220,43,3); // 7
   Fenetre_Definir_bouton_repetable(202,43,13,11,"-",0,1,SDLK_LAST); // 8
   Fenetre_Definir_bouton_repetable(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
   // Preview
-  Fenetre_Definir_bouton_special(8,106,273,50); // 10
-  Bouton_preview=Fenetre_Liste_boutons_special;
+  Bouton_preview = Fenetre_Definir_bouton_special(8,106,273,50); // 10
   Fenetre_Afficher_cadre_creux(7, 105, 275, 52);
   
   Fenetre_Definir_bouton_normal(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11

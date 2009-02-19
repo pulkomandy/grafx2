@@ -29,7 +29,6 @@
 
 #include "global.h"
 #include "pages.h"
-#include "graph.h"
 #include "erreurs.h"
 #include "divers.h"
 #include "windows.h"
