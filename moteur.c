@@ -1160,6 +1160,7 @@ void Fermer_fenetre(void)
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
   struct Fenetre_Bouton_dropdown * Temp5;
+  struct Bouton_dropdown_choix   * Temp6;
 
   Effacer_curseur();
 
@@ -1190,6 +1191,15 @@ void Fermer_fenetre(void)
   while (Fenetre_Liste_boutons_dropdown)
   {
     Temp5=Fenetre_Liste_boutons_dropdown->Next;
+
+    // Il faut libérer la liste des boutons qui sont dans le dropdown
+    while (Fenetre_Liste_boutons_dropdown->Premier_choix)
+    {
+        Temp6 = Fenetre_Liste_boutons_dropdown->Premier_choix->Next;
+        free(Fenetre_Liste_boutons_dropdown->Premier_choix);
+        Fenetre_Liste_boutons_dropdown->Premier_choix = Temp6;
+    }
+
     free(Fenetre_Liste_boutons_dropdown);
     Fenetre_Liste_boutons_dropdown=Temp5;
   }
@@ -1607,6 +1617,7 @@ void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Nume
   Dernier=Dropdown->Premier_choix;
   if (Dernier)
   {
+    // On cherche le dernier élément
     for (;Dernier->Next;Dernier=Dernier->Next)
       ;
     Dernier->Next=Temp;
