@@ -398,6 +398,8 @@ void Initialisation_du_programme(int argc,char * argv[])
           if (((byte *)(Icone->pixels))[(y*32+x)] != 255)
             Masque_icone[(y*32+x)/8] |=0x80>>(x&7);
       SDL_WM_SetIcon(Icone,Masque_icone);
+      free(Masque_icone);
+      SDL_FreeSurface(Icone);
     }
   }
   // Texte
