@@ -2311,15 +2311,15 @@ void Print_Nom_fichier_dans_selecteur(void)
 }
 
 
-void Print_Format(void)
+void Print_Format(struct Fenetre_Bouton_dropdown * Dropdown)
 //
 // Affiche le libellé correspondant à Principal_Format
 //
 {
   if (Principal_Format==0)
-    Print_dans_fenetre(83,65,"*.*",CM_Noir,CM_Clair);
+    Print_dans_fenetre(Dropdown->Pos_X+2+7*8,Dropdown->Pos_Y+2,"*.*",CM_Noir,CM_Clair);
   else
-    Print_dans_fenetre(83,65,FormatFichier[Principal_Format-1].Extension,CM_Noir,CM_Clair);
+    Print_dans_fenetre(Dropdown->Pos_X+2+7*8,Dropdown->Pos_Y+2,FormatFichier[Principal_Format-1].Extension,CM_Noir,CM_Clair);
 }
 
 
@@ -2457,6 +2457,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 {
   short Bouton_clicke;
   struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
+  struct Fenetre_Bouton_dropdown * Dropdown_des_formats;
   short Temp;
   int Bidon=0;       // Sert à appeler SDL_GetKeyState
   word  Drives_Debut_Y;
@@ -2522,7 +2523,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,SDLK_DELETE); // 3
 
   // Cadre autour des formats
-  Fenetre_Afficher_cadre(  7, 51,103, 35);
+  Fenetre_Afficher_cadre(  7, 51,104, 35);
   // Cadre autour des infos sur le fichier de dessin
   Fenetre_Afficher_cadre(116, 51,187, 35);
   // Cadre autour de la preview
@@ -2535,8 +2536,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Scroller du fileselector
   Scroller_de_fichiers = Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
 
-  // Scroller des formats
-  Fenetre_Definir_bouton_scroller(12,55,27,(Load)?NB_FORMATS_LOAD+1:NB_FORMATS_SAVE,1,(Load)?Principal_Format:Principal_Format-1); // 6
+  // Dropdown pour les formats de fichier
+  Dropdown_des_formats=Fenetre_Definir_bouton_dropdown(12,56,94,11,"",1); // 6
+  if (Load)
+    Fenetre_Dropdown_choix(Dropdown_des_formats,0,"*.*");
+  for (Temp=0;Temp<NB_FORMATS_CONNUS;Temp++)
+  {
+    if ((Load && FormatFichier[Temp].Load) || 
+      (!Load && FormatFichier[Temp].Save))
+        Fenetre_Dropdown_choix(Dropdown_des_formats,Temp+1,FormatFichier[Temp].Extension);
+  }
+  Print_dans_fenetre(Dropdown_des_formats->Pos_X+2,Dropdown_des_formats->Pos_Y+2,"Format",CM_Noir,CM_Clair);
+  Print_Format(Dropdown_des_formats);
 
   // Texte de commentaire des dessins
   Print_dans_fenetre(7,174+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
@@ -2548,12 +2559,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Saisie du nom de fichier
   Fenetre_Definir_bouton_saisie(11+9*8,88,27); // 8
 
-  Print_dans_fenetre( 27,65,"Format:",CM_Fonce,CM_Clair);
   Print_dans_fenetre(120,55,"Image size :",CM_Fonce,CM_Clair);
   Print_dans_fenetre(120,63,"File size  :",CM_Fonce,CM_Clair);
   Print_dans_fenetre(120,72,"Format     :",CM_Fonce,CM_Clair);
-
-  Print_Format();
 
   // Selecteur de Lecteur / Volume
   Fenetre_Definir_bouton_normal(8,21,120,14,"Select drive",0,1,SDLK_LAST); // 9
@@ -2566,7 +2574,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     Fenetre_Definir_bouton_normal(130+((Temp%8)*20),Drives_Debut_Y+((Temp/8)*12),19,11,Nom_drive,0,1, SDLK_LAST); // 10 et +
     Fenetre_Afficher_sprite_drive(140+((Temp%8)*20),Drives_Debut_Y+2+((Temp/8)*12),Drive[Temp].Type);
   }
-
+    
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (Load)
   {
@@ -2750,9 +2758,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       case  6 : // Scroller des formats
         Effacer_curseur();
         // On met à jour le format de browsing du fileselect:
-        Principal_Format=(Load)?Fenetre_Attribut2:Fenetre_Attribut2+1;
+        Principal_Format=Fenetre_Attribut2;
         // On affiche le nouveau format de lecture:
-        Print_Format();
+        Print_Format(Dropdown_des_formats);
         // Comme on change de liste, on se place en début de liste:
         Principal_File_list_Position=0;
         Principal_File_list_Decalage=0;

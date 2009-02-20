@@ -109,6 +109,25 @@ struct Fenetre_Bouton_special
   struct Fenetre_Bouton_special * Next;
 };
 
+struct Bouton_dropdown_choix
+{
+  short Numero;
+  const char * Libelle;
+  struct Bouton_dropdown_choix * Next;
+};
+
+struct Fenetre_Bouton_dropdown
+{
+  short Numero;
+  word Pos_X;
+  word Pos_Y;
+  word Largeur;
+  word Hauteur;
+  byte AfficheChoix;
+  struct Bouton_dropdown_choix * Premier_choix;
+  struct Fenetre_Bouton_dropdown * Next;
+};
+
 
 struct T_Drive
 {

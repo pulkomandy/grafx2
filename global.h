@@ -367,6 +367,10 @@ GFX2_GLOBAL struct Fenetre_Bouton_scroller * Pile_Fenetre_Liste_boutons_scroller
 GFX2_GLOBAL struct Fenetre_Bouton_special  * Pile_Fenetre_Liste_boutons_special[8];
 #define Fenetre_Liste_boutons_special Pile_Fenetre_Liste_boutons_special[Fenetre-1]
 
+GFX2_GLOBAL struct Fenetre_Bouton_dropdown  * Pile_Fenetre_Liste_boutons_dropdown[8];
+#define Fenetre_Liste_boutons_dropdown Pile_Fenetre_Liste_boutons_dropdown[Fenetre-1]
+
+
 GFX2_GLOBAL int Pile_Fenetre_Attribut1[8];
 #define Fenetre_Attribut1 Pile_Fenetre_Attribut1[Fenetre-1]
 

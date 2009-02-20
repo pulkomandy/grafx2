@@ -381,7 +381,7 @@ void Afficher_menu(void)
 
   // -- Afficher une chaîne n'importe où à l'écran --
 
-void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
+void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
   word  Indice;
   int Pos_X;
@@ -411,7 +411,7 @@ void Print_general(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur
 
   // -- Afficher un caractère dans une fenêtre --
 
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
+void Print_char_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
 {
   short X,Y;
   byte *Carac;
@@ -429,7 +429,7 @@ void Print_char_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byt
 
   // -- Afficher un caractère sans fond dans une fenêtre --
 
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,unsigned char Caractere,byte Couleur)
+void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char Caractere,byte Couleur)
 {
   short X,Y;
   byte *Carac;
@@ -464,7 +464,7 @@ void Print_dans_fenetre_limite(short X,short Y,const char * Chaine,byte Taille,b
 
   // -- Afficher une chaîne dans une fenêtre --
 
-void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
+void Print_dans_fenetre(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
   Print_general((X*Menu_Facteur_X)+Fenetre_Pos_X,
                 (Y*Menu_Facteur_Y)+Fenetre_Pos_Y,
@@ -474,7 +474,7 @@ void Print_dans_fenetre(short X,short Y,char * Chaine,byte Couleur_texte,byte Co
 
   // -- Afficher une chaîne dans le menu --
 
-void Print_dans_menu(char * Chaine, short Position)
+void Print_dans_menu(const char * Chaine, short Position)
 {
   Print_general((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,Chaine,CM_Noir,CM_Clair);
   UpdateRect((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,strlen(Chaine)*8*Menu_Facteur_X,8*Menu_Facteur_Y);
@@ -541,7 +541,7 @@ void Print_nom_fichier(void)
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
 // Spécialisée pour les compteurs RGB
-void Print_compteur(short X,short Y,char * Chaine,byte Couleur_texte,byte Couleur_fond)
+void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
   // Macros pour écrire des litteraux binaires.
   // Ex: Ob(11110000) == 0xF0

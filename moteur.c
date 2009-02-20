@@ -1144,6 +1144,7 @@ void Ouvrir_fenetre(word Largeur,word Hauteur, char * Titre)
   Fenetre_Liste_boutons_palette =NULL;
   Fenetre_Liste_boutons_scroller=NULL;
   Fenetre_Liste_boutons_special =NULL;
+  Fenetre_Liste_boutons_dropdown=NULL;
   Nb_boutons_fenetre            =0;
 
 }
@@ -1158,6 +1159,7 @@ void Fermer_fenetre(void)
   struct Fenetre_Bouton_palette  * Temp2;
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
+  struct Fenetre_Bouton_dropdown * Temp5;
 
   Effacer_curseur();
 
@@ -1184,6 +1186,12 @@ void Fermer_fenetre(void)
     Temp4=Fenetre_Liste_boutons_special->Next;
     free(Fenetre_Liste_boutons_special);
     Fenetre_Liste_boutons_special=Temp4;
+  }
+  while (Fenetre_Liste_boutons_dropdown)
+  {
+    Temp5=Fenetre_Liste_boutons_dropdown->Next;
+    free(Fenetre_Liste_boutons_dropdown);
+    Fenetre_Liste_boutons_dropdown=Temp5;
   }
 
   if (Fenetre != 1)
@@ -1564,8 +1572,50 @@ struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Po
   return Temp;
 }
 
+struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,char *Libelle,byte Affiche_choix)
+{
+  struct Fenetre_Bouton_dropdown *Temp;
+  
+  Temp=(struct Fenetre_Bouton_dropdown *)malloc(sizeof(struct Fenetre_Bouton_dropdown));
+  Temp->Numero       =++Nb_boutons_fenetre;
+  Temp->Pos_X        =Pos_X;
+  Temp->Pos_Y        =Pos_Y;
+  Temp->Largeur      =Largeur;
+  Temp->Hauteur      =Hauteur;
+  Temp->AfficheChoix =Affiche_choix;
+  Temp->Premier_choix=NULL;
 
+  Temp->Next=Fenetre_Liste_boutons_dropdown;
+  Fenetre_Liste_boutons_dropdown=Temp;
+  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Libelle,-1,1);
+  return Temp;
+}
 
+// Ajoute un choix à une dropdown. Le libellé est seulement référencé,
+// il doit pointer sur une zone qui doit être encore valide à la fermeture 
+// de la fenêtre (comprise).
+void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Numero, const char *Libelle)
+{
+  struct Bouton_dropdown_choix *Temp;
+  struct Bouton_dropdown_choix *Dernier;
+  
+  Temp=(struct Bouton_dropdown_choix *)malloc(sizeof(struct Bouton_dropdown_choix));
+  Temp->Numero =Numero;
+  Temp->Libelle=Libelle;
+  Temp->Next=NULL;
+
+  Dernier=Dropdown->Premier_choix;
+  if (Dernier)
+  {
+    for (;Dernier->Next;Dernier=Dernier->Next)
+      ;
+    Dernier->Next=Temp;
+  }
+  else
+  {
+    Dropdown->Premier_choix=Temp;
+  }
+}
 
 //----------------------- Ouverture d'un pop-up -----------------------
 
@@ -1579,20 +1629,20 @@ void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
     // -Pas de titre
     // -Pas de cadre en relief mais seulement un plat, et il est blanc au lieu de noir.
 {
-  Effacer_curseur();
-
   Fenetre++;
 
   Fenetre_Largeur=Largeur;
   Fenetre_Hauteur=Hauteur;
-  Fenetre_Pos_X=Pos_X*Menu_Facteur_X;
-  Fenetre_Pos_Y=Pos_Y*Menu_Facteur_X;
+  Fenetre_Pos_X=Pos_X;
+  Fenetre_Pos_Y=Pos_Y;
 
   // Sauvegarde de ce que la fenêtre remplace
-  Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, Largeur*Menu_Facteur_X, Hauteur*Menu_Facteur_X);
+  Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, Largeur, Hauteur);
 
   // Fenêtre grise
-  Block(Fenetre_Pos_X+(Menu_Facteur_X),Fenetre_Pos_Y+(Menu_Facteur_Y),(Largeur-2)*Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,CM_Clair);
+  Block(Fenetre_Pos_X+1*Menu_Facteur_X,
+        Fenetre_Pos_Y+1*Menu_Facteur_Y,
+        (Largeur-2)*Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,CM_Clair);
 
   // Cadre noir puis en relief
   Fenetre_Afficher_cadre_mono(0,0,Largeur,Hauteur,CM_Blanc);
@@ -1614,6 +1664,7 @@ void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
   Fenetre_Liste_boutons_palette =NULL;
   Fenetre_Liste_boutons_scroller=NULL;
   Fenetre_Liste_boutons_special =NULL;
+  Fenetre_Liste_boutons_dropdown =NULL;
   Nb_boutons_fenetre            =0;
 
 }
@@ -1628,6 +1679,7 @@ void Fermer_popup(void)
   struct Fenetre_Bouton_palette  * Temp2;
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
+  struct Fenetre_Bouton_dropdown  * Temp5;
 
   Effacer_curseur();
 
@@ -1654,6 +1706,19 @@ void Fermer_popup(void)
     Temp4=Fenetre_Liste_boutons_special->Next;
     free(Fenetre_Liste_boutons_special);
     Fenetre_Liste_boutons_special=Temp4;
+  }
+  while (Fenetre_Liste_boutons_dropdown)
+  {
+    while (Fenetre_Liste_boutons_dropdown->Premier_choix)
+    {
+      struct Bouton_dropdown_choix *Temp6;
+      Temp6=Fenetre_Liste_boutons_dropdown->Premier_choix->Next;
+      free(Fenetre_Liste_boutons_dropdown->Premier_choix);
+      Fenetre_Liste_boutons_dropdown->Premier_choix=Temp6;
+    }
+    Temp5=Fenetre_Liste_boutons_dropdown->Next;
+    free(Fenetre_Liste_boutons_dropdown);
+    Fenetre_Liste_boutons_dropdown=Temp5;
   }
 
   if (Fenetre != 1)
@@ -2014,7 +2079,95 @@ void Deplacer_fenetre(short Dx, short Dy)
 
 }
 
+// Gestion des dropdown
+short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
+{
+  short Nb_choix;
+  short Indice_choix;
+  short Indice_selectionne;
+  short Ancien_Indice_selectionne;
+  short Hauteur_boite;
+  struct Bouton_dropdown_choix *Choix;
+  
+  // Comptage des items pour calculer la taille
+  Nb_choix=0;
+  for (Choix=Bouton->Premier_choix; Choix!=NULL; Choix=Choix->Next)
+  {
+    Nb_choix++;
+  }
+  Hauteur_boite=2+Nb_choix*8+1;
+  
+  Effacer_curseur();
+  Fenetre_Enfoncer_bouton_normal(Bouton->Pos_X,Bouton->Pos_Y,Bouton->Largeur,Bouton->Hauteur);
+  Ouvrir_popup(
+    Fenetre_Pos_X+(Bouton->Pos_X)*Menu_Facteur_X,
+    Fenetre_Pos_Y+(Bouton->Pos_Y+Bouton->Hauteur)*Menu_Facteur_Y,
+    Bouton->Largeur,
+    Hauteur_boite);
+  
+  Indice_selectionne=-1;
+  while (1)
+  {
+    Ancien_Indice_selectionne = Indice_selectionne;
+    // Fenêtre grise
+    Block(Fenetre_Pos_X+1*Menu_Facteur_X,
+        Fenetre_Pos_Y+1*Menu_Facteur_Y,
+        (Bouton->Largeur-2)*Menu_Facteur_X,(Hauteur_boite-2)*Menu_Facteur_Y,CM_Clair);
+    // Affichage des items
+    for(Choix=Bouton->Premier_choix,Indice_choix=0; Choix!=NULL; Choix=Choix->Next,Indice_choix++)
+    {
+      byte C1;
+      byte C2;
+      if (Indice_choix==Indice_selectionne)
+      {
+        C1=CM_Blanc;
+        C2=CM_Fonce;
+        Block(Fenetre_Pos_X+2*Menu_Facteur_X,
+        Fenetre_Pos_Y+((1+Indice_choix*8)*Menu_Facteur_Y),
+        (Bouton->Largeur-4)*Menu_Facteur_X,(8)*Menu_Facteur_Y,CM_Fonce);
+      }
+      else
+      {
+        C1=CM_Noir;
+        C2=CM_Clair;
+      }
+      Print_dans_fenetre(3,1+Indice_choix*8,Choix->Libelle,C1,C2);
+    }
+    UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
+    Afficher_curseur();
 
+    do 
+    {
+      // Attente
+      if(!Get_input())
+        Wait_VBL();
+      // Mise à jour du survol
+      Indice_selectionne=Fenetre_click_dans_zone(1,1,Bouton->Largeur-1,Hauteur_boite-1)?
+        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y-1)>>3) : -1;
+
+    } while (Mouse_K && Indice_selectionne==Ancien_Indice_selectionne);
+    
+    if (!Mouse_K)
+      break;
+    Effacer_curseur();
+  }
+
+  Fermer_popup();  
+
+
+  Fenetre_Desenfoncer_bouton_normal(Bouton->Pos_X,Bouton->Pos_Y,Bouton->Largeur,Bouton->Hauteur);
+  Afficher_curseur();
+
+  Fenetre_Attribut2=0;  
+  if (Indice_selectionne>=0 && Indice_selectionne<Nb_choix)
+  {
+    for(Choix=Bouton->Premier_choix; Indice_selectionne; Choix=Choix->Next,Indice_selectionne--)
+      ;
+    Fenetre_Attribut2=Choix->Numero;
+    return Bouton->Numero;
+  }
+  return 0;
+}
 
 // --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
 short Fenetre_Numero_bouton_clicke(void)
@@ -2023,6 +2176,7 @@ short Fenetre_Numero_bouton_clicke(void)
   struct Fenetre_Bouton_palette  * Temp2;
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
+  struct Fenetre_Bouton_dropdown * Temp5;
 
   //long Hauteur_Curseur_jauge;
   long Hauteur_maxi_jauge;
@@ -2198,6 +2352,13 @@ short Fenetre_Numero_bouton_clicke(void)
   {
     if (Fenetre_click_dans_zone(Temp4->Pos_X,Temp4->Pos_Y,Temp4->Pos_X+Temp4->Largeur-1,Temp4->Pos_Y+Temp4->Hauteur-1))
       return Temp4->Numero;
+  }
+
+  // Test du click sur une dropdown
+  for (Temp5=Fenetre_Liste_boutons_dropdown; Temp5; Temp5=Temp5->Next)
+  {
+    if (Fenetre_click_dans_zone(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Pos_X+Temp5->Largeur-1,Temp5->Pos_Y+Temp5->Hauteur-1))
+      return Fenetre_Dropdown_click(Temp5);
   }
 
   return 0;

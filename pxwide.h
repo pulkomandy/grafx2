@@ -42,3 +42,4 @@
   void Affiche_brosse_Wide             (byte * B, word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
 
   void Afficher_une_ligne_ecran_fast_Wide   (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
+  void Afficher_une_ligne_transparente_a_l_ecran_Wide(word Pos_X,word Pos_Y,word Largeur,byte* Ligne,byte Couleur_transparence);

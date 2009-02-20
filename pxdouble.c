@@ -27,6 +27,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "divers.h"
+#include "pxwide.h" // for Afficher_une_ligne_transparente_a_l_ecran_Wide()
 
 #define ZOOMX 2
 #define ZOOMY 2
