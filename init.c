@@ -180,6 +180,8 @@ void Rechercher_drives(void)
 #if !(defined(__macosx__) || defined(__FreeBSD__))
         free(Liste_points_montage -> me_type);
 #endif
+        free(Liste_points_montage -> me_devname);
+        free(Liste_points_montage -> me_mountdir);
         free(Liste_points_montage);
         Liste_points_montage = next;
     }

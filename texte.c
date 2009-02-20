@@ -149,9 +149,11 @@ void Ajout_fonte(const char *Nom)
          }
          else
          {
-               return;
+            free(Fonte);
+            return;
          }
       #else
+         free(Fonte);
          return;
       #endif
   }
@@ -328,6 +330,7 @@ void Initialisation_Texte(void)
         int i,number;
         Display* dpy = XOpenDisplay(NULL);
         char** font_path_list = XGetFontPath(dpy,&number);
+        XCloseDisplay(dpy);
 
         for(i=0;i<number;i++)
             for_each_file(*(font_path_list+i),Ajout_fonte);

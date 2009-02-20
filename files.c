@@ -667,4 +667,5 @@ void for_each_file(const char * Nom_repertoire, void Callback(const char *))
       Callback(Nom_fichier_complet);
     }
   }
+  closedir(Repertoire_Courant);
 }
