@@ -1655,9 +1655,6 @@ void Bouton_Resol(void)
     Afficher_menu();
     Afficher_ecran();
   }
-  Mouse_X = Largeur_ecran >> 1;
-  Mouse_Y = Hauteur_ecran >> 1;
-  Set_mouse_position();
   Pinceau_X = Mouse_X;
   Pinceau_Y = Mouse_Y;
 

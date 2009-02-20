@@ -666,6 +666,7 @@ int main(int argc,char * argv[])
       strcpy(Principal_Nom_fichier,"phoenix2.img");
       chdir(Principal_Repertoire_fichier);
       Bouton_Reload();
+      Principal_Image_modifiee=1;
       Warning_message("Spare page recovered");
       // I don't really like this, but...
       remove(Nom_du_fichier_Phoenix2);
@@ -677,6 +678,7 @@ int main(int argc,char * argv[])
       strcpy(Principal_Nom_fichier,"phoenix.img");
       chdir(Principal_Repertoire_fichier);
       Bouton_Reload();
+      Principal_Image_modifiee=1;
       Warning_message("Main page recovered");
       // I don't really like this, but...
       remove(Nom_du_fichier_Phoenix);
@@ -686,7 +688,7 @@ int main(int argc,char * argv[])
   {
     if (Config.Opening_message && (!Un_fichier_a_ete_passe_en_parametre))
       Bouton_Message_initial();
-    //free(Logo_GrafX2); // Utilisé dans le About
+    free(Logo_GrafX2); // Pas encore utilisé dans le About
   
     if (Un_fichier_a_ete_passe_en_parametre)
     {

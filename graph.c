@@ -187,8 +187,14 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   int Indice;
   int Facteur;
 
-  if (Largeur_ecran!=Largeur ||
-      Hauteur_ecran!=Hauteur ||
+  // Pour la première entrée dans cette fonction
+  if (Pixel_width<1)
+    Pixel_width=1;
+  if (Pixel_height<1)
+    Pixel_height=1;
+  
+  if (Largeur_ecran!=Largeur/Pixel_width ||
+      Hauteur_ecran!=Hauteur/Pixel_height ||
       Mode_video[Resolution_actuelle].Fullscreen != Fullscreen)
   {
     switch (Pixel_ratio)
@@ -347,18 +353,19 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
 
     Set_palette(Principal_Palette);
 
-    if (!Fullscreen)
-      Resolution_actuelle=0;
-    else
+    Resolution_actuelle=0;
+    if (Fullscreen)
+    {
       for (Indice=1; Indice<Nb_modes_video; Indice++)
       {
-        if (Mode_video[Indice].Largeur==Largeur_ecran &&
-            Mode_video[Indice].Hauteur==Hauteur_ecran)
+        if (Mode_video[Indice].Largeur/Pixel_width==Largeur_ecran &&
+            Mode_video[Indice].Hauteur/Pixel_height==Hauteur_ecran)
         {
           Resolution_actuelle=Indice;
           break;
         }
       }
+    }
 
     Changer_cellules_palette();
     
