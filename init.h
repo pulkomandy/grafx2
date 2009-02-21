@@ -18,7 +18,6 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Rechercher_drives(void);
 void Charger_DAT(void);
 void Initialisation_des_boutons(void);
 void Initialisation_des_operations(void);
@@ -26,6 +25,5 @@ int  Charger_CFG(int Tout_charger);
 int  Sauver_CFG(void);
 void Initialiser_les_tables_de_multiplication(void);
 void Definition_des_modes_video(void);
-int ActiverLecteur(int);
 void Config_par_defaut(void);
 void Initialiser_sighandler(void);

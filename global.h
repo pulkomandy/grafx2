@@ -651,10 +651,7 @@ GFX2_GLOBAL struct
 
 
 
-// Informations sur les lecteurs
-
-GFX2_GLOBAL byte Nb_drives;
-GFX2_GLOBAL struct T_Drive Drive[26];
+// Informations sur les lecteurs et autres images
 GFX2_GLOBAL byte SPRITE_DRIVE[NB_SPRITES_DRIVES][HAUTEUR_SPRITE_DRIVE][LARGEUR_SPRITE_DRIVE];
 
 

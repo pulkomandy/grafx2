@@ -2457,9 +2457,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   struct Fenetre_Bouton_dropdown * Dropdown_des_formats;
   short Temp;
   int Bidon=0;       // Sert à appeler SDL_GetKeyState
-  word  Drives_Debut_Y;
   byte  Charger_ou_sauver_l_image=0;
-  char  Nom_drive[3]="  ";
   byte  On_a_clicke_sur_OK=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
   struct Composantes * Palette_initiale; // |  Données concernant l'image qui
@@ -2568,15 +2566,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Selecteur de Lecteur / Volume
   Fenetre_Definir_bouton_normal(8,21,120,14,"Select drive",0,1,SDLK_LAST); // 9
 
-  // Définition des boutons représentant les lecteurs
-  Drives_Debut_Y=(Nb_drives<=8)? 23 : 18;
-  for (Temp=0; Temp<Nb_drives; Temp++)
-  {
-    Nom_drive[0]=Drive[Temp].Lettre;
-    Fenetre_Definir_bouton_normal(130+((Temp%8)*20),Drives_Debut_Y+((Temp/8)*12),19,11,Nom_drive,0,1, SDLK_LAST); // 10 et +
-    Fenetre_Afficher_sprite_drive(140+((Temp%8)*20),Drives_Debut_Y+2+((Temp/8)*12),Drive[Temp].Type);
-  }
-    
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (Load)
   {
@@ -2852,27 +2841,8 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Afficher_curseur();
           Nouvelle_preview=1;
           break;
-      default : // Drives
-        // On change de lecteur:
-        if (! ActiverLecteur(Bouton_clicke-10))
-        {
-          Effacer_curseur();
-          // On lit le répertoire courant de ce lecteur
-          Determiner_repertoire_courant();
-          //   Comme on tombe sur un disque qu'on connait pas, on se place en
-          // début de liste:
-          Principal_File_list_Position=0;
-          Principal_File_list_Decalage=0;
-          // Affichage des premiers fichiers visibles:
-          Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
-          Afficher_curseur();
-          Nouvelle_preview=1;
-        }
-        else
-        {
-          // Un ptit flash rouge pour signaler le lecteur invalide.
-          Erreur(0);
-        }
+      default:
+        break;
     }
 
     switch (Touche)

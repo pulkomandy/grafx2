@@ -304,8 +304,6 @@ void Initialisation_du_programme(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Set_Config_Directory(Repertoire_du_programme,Repertoire_de_configuration);
 
-  // On détecte les lecteurs qui sont accessibles:
-  Rechercher_drives();
   // On détermine le répertoire courant:
   Determiner_repertoire_courant();
 

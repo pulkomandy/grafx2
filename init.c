@@ -69,23 +69,12 @@
 #include "mountlist.h" // read_file_system_list
 #include "loadsave.h" // Image_emergency_backup
 
-// Ajouter un lecteur à la liste de lecteurs
-void Ajouter_lecteur(char Lettre, byte Type, char *Chemin)
-{
-  Drive[Nb_drives].Lettre=Lettre;
-  Drive[Nb_drives].Type  =Type;
-  Drive[Nb_drives].Chemin=(char *)malloc(strlen(Chemin)+1);
-  strcpy(Drive[Nb_drives].Chemin, Chemin);
-
-  Nb_drives++;
-}
-
 // Rechercher la liste et le type des lecteurs de la machine
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
 void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
-
+/*
 void Rechercher_drives(void)
 {
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
@@ -188,14 +177,7 @@ void Rechercher_drives(void)
 
   #endif
 }
-
-// Active un lecteur, changeant normalement le répertoire en cours.
-// Renvoie 0 si ok, -1 si problème.
-int ActiverLecteur(int NumeroLecteur)
-{
-  return chdir(Drive[NumeroLecteur].Chemin);
-}
-
+*/
 // Fonctions de lecture dans la skin de l'interface graphique
 void Chercher_bas(SDL_Surface *GUI, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * Section)
 {

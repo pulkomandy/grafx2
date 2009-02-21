@@ -290,9 +290,6 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
 void Lire_liste_des_lecteurs(void)
 {
-#ifndef __amigaos4__
-  int Indice;
-#endif
 
   // Empty the current content of fileselector:
   Detruire_liste_du_fileselect();
@@ -318,23 +315,89 @@ void Lire_liste_des_lecteurs(void)
       UnLockDosList( LDF_VOLUMES | LDF_READ );
     }
   }
-
-  // Other platforms: simply read the "static" list of Drives.
-  // This should be made dynamic because in the multitask world, user can mount new drives,
-  // connect to network ones, and so on, while Grafx2 is running.
-  #else
-
-#ifndef __macosx__
-    #warning "Your platform is missing some specific code here ! please check and correct ! :)"
-#endif
-
-    for (Indice=0; Indice<Nb_drives; Indice++)
+  #elif defined (__WIN32__)
+  {
+    char NomLecteur[]="A:\\";
+    int DriveBits = GetLogicalDrives();
+    int IndiceLecteur;
+    int IndiceBit;
+    // Sous Windows, on a la totale, presque aussi bien que sous DOS:
+    IndiceLecteur = 0;
+    for (IndiceBit=0; IndiceBit<26 && IndiceLecteur<23; IndiceBit++)
     {
-      // Add the drive's name ("c:\\", "/" etc.) to the list
-      Ajouter_element_a_la_liste(Drive[Indice].Chemin, 2);
-      Liste_Nb_repertoires++;
+      if ( (1 << IndiceBit) & DriveBits )
+      {
+        // On a ce lecteur, il faut maintenant déterminer son type "physique".
+        // pour profiter des jolies icones de X-man.
+        int TypeLecteur;
+        char CheminLecteur[]="A:\\";
+        // Cette API Windows est étrange, je dois m'y faire...
+        CheminLecteur[0]='A'+IndiceBit;
+        switch (GetDriveType(CheminLecteur))
+        {
+          case DRIVE_CDROM:
+            TypeLecteur=LECTEUR_CDROM;
+            break;
+          case DRIVE_REMOTE:
+            TypeLecteur=LECTEUR_NETWORK;
+            break;
+          case DRIVE_REMOVABLE:
+            TypeLecteur=LECTEUR_FLOPPY_3_5;
+            break;
+          case DRIVE_FIXED:
+            TypeLecteur=LECTEUR_HDD;
+            break;
+          default:
+            TypeLecteur=LECTEUR_NETWORK;
+            break;
+        }
+    		NomLecteur[0]='A'+IndiceBit;
+    		Ajouter_element_a_la_liste(NomLecteur,2);
+    		Liste_Nb_repertoires++;
+        IndiceLecteur++;
+      }
+    }
+  }
+  #else
+  {
+    //Sous les différents unix, on va mettre
+    // un disque dur qui pointera vers la racine,
+    // et un autre vers le home directory de l'utilisateur.
+
+    // Ensuite on utilise read_file_system_list pour compléter
+
+    struct mount_entry* Liste_points_montage;
+    struct mount_entry* next;
+
+    #if defined(__BEOS__) || defined(__HAIKU__)
+        char * Home = getenv("$HOME");
+    #else
+        char * Home = getenv("HOME");
+    #endif
+    Ajouter_lecteur('/', LECTEUR_HDD, "/");
+    if(Home)
+        Ajouter_lecteur('~', LECTEUR_HDD, Home);
+
+    Liste_points_montage = read_file_system_list(false);
+
+    while(Liste_points_montage != NULL)
+    {
+        if(Liste_points_montage->me_dummy == 0 && strcmp(Liste_points_montage->me_mountdir,"/") && strcmp(Liste_points_montage->me_mountdir,"/home"))
+        {
+            Ajouter_element_a_la_liste(Liste_points_montage->me_mountdir,2);
+            Liste_Nb_repertoires++;
+        }
+        next = Liste_points_montage -> me_next;
+#if !(defined(__macosx__) || defined(__FreeBSD__))
+        free(Liste_points_montage -> me_type);
+#endif
+        free(Liste_points_montage -> me_devname);
+        free(Liste_points_montage -> me_mountdir);
+        free(Liste_points_montage);
+        Liste_points_montage = next;
     }
 
+  }
   #endif
 
   Liste_Nb_elements=Liste_Nb_repertoires+Liste_Nb_fichiers;
