@@ -53,6 +53,7 @@
 #include "io.h"
 #include "windows.h"
 #include "loadsave.h"
+#include "mountlist.h"
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné
@@ -351,9 +352,9 @@ void Lire_liste_des_lecteurs(void)
             TypeLecteur=LECTEUR_NETWORK;
             break;
         }
-    		NomLecteur[0]='A'+IndiceBit;
-    		Ajouter_element_a_la_liste(NomLecteur,2);
-    		Liste_Nb_repertoires++;
+    	NomLecteur[0]='A'+IndiceBit;
+    	Ajouter_element_a_la_liste(NomLecteur,2);
+    	Liste_Nb_repertoires++;
         IndiceLecteur++;
       }
     }
@@ -374,11 +375,15 @@ void Lire_liste_des_lecteurs(void)
     #else
         char * Home = getenv("HOME");
     #endif
-    Ajouter_lecteur('/', LECTEUR_HDD, "/");
+    Ajouter_element_a_la_liste("/", 2);
+    Liste_Nb_repertoires++;
     if(Home)
-        Ajouter_lecteur('~', LECTEUR_HDD, Home);
+    {
+        Ajouter_element_a_la_liste(Home, 2);
+        Liste_Nb_repertoires++;
+    }
 
-    Liste_points_montage = read_file_system_list(false);
+    Liste_points_montage = read_file_system_list(0);
 
     while(Liste_points_montage != NULL)
     {
@@ -388,9 +393,9 @@ void Lire_liste_des_lecteurs(void)
             Liste_Nb_repertoires++;
         }
         next = Liste_points_montage -> me_next;
-#if !(defined(__macosx__) || defined(__FreeBSD__))
-        free(Liste_points_montage -> me_type);
-#endif
+        #if !(defined(__macosx__) || defined(__FreeBSD__))
+          free(Liste_points_montage -> me_type);
+        #endif
         free(Liste_points_montage -> me_devname);
         free(Liste_points_montage -> me_mountdir);
         free(Liste_points_montage);
