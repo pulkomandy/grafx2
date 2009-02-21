@@ -271,6 +271,7 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("")
   AIDE_TEXTE("  GrafX2 logo by Made (www.m4de.com)")      //
   AIDE_TEXTE("  Icons and fonts by X-Man ")               //
+  AIDE_TEXTE("  Additional graphics by iLKke")
   AIDE_TEXTE("")
   AIDE_TEXTE("  Pixelled all the graphics")               //
   AIDE_TEXTE("")
@@ -314,7 +315,7 @@ static const T_TABLEAIDE TableAideCredits[] =
   AIDE_TEXTE("  iLKke         keito         kusma      ")
   AIDE_TEXTE("  Lord Graga    mind          MooZ       ")
   AIDE_TEXTE("  richienyhus   tempest       Timo Kurrpa")
-  AIDE_TEXTE("  titus^Rab     Tobé")
+  AIDE_TEXTE("  titus^Rab     Tobé          00ai99")
   AIDE_TEXTE("")
   AIDE_TEXTE("  Posted the annoying bugreports")
   AIDE_TEXTE("")

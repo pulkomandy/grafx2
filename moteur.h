@@ -65,7 +65,7 @@ struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, wor
                                      word Position_initiale);
 struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
 struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
-struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,char *Libelle,byte Affiche_choix);
+struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif);
 void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Numero, const char *Libelle);
 
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);

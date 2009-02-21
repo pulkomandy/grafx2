@@ -52,9 +52,9 @@
 #define LARGEUR_PINCEAU           16    // Largeur d'un sprite de pinceau prédéfini
 #define HAUTEUR_PINCEAU           16    // Hauteur d'un sprite de pinceau prédéfini
 #define TAILLE_MAXI_PINCEAU       127   // Taille maxi des pinceaux
-#define NB_SPRITES_DRIVES         5     // Nombre de sprites de drives
-#define LARGEUR_SPRITE_DRIVE      7     // Largeur d'un sprite de drive en pixels
-#define HAUTEUR_SPRITE_DRIVE      7     // Hauteur d'un sprite de drive en pixels
+#define NB_SPRITES_DRIVES         7     // Nombre de sprites de drives
+#define LARGEUR_SPRITE_DRIVE      8     // Largeur d'un sprite de drive en pixels
+#define HAUTEUR_SPRITE_DRIVE      8     // Hauteur d'un sprite de drive en pixels
 #define NB_SPRITES_PINCEAU        48    // Nombre de sprites de pinceau
 #define NB_TRAMES_PREDEFINIES     12    // Nombre de trames prédéfinies
 #define TAILLE_PILE_OPERATIONS    16    // Nombre maximum d'éléments utilisés par les opérations

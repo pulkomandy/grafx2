@@ -123,7 +123,11 @@ struct Fenetre_Bouton_dropdown
   word Pos_Y;
   word Largeur;
   word Hauteur;
-  byte AfficheChoix;
+  byte Affiche_choix;  // The selected item's label is printed in the dropdown area
+  byte Affiche_centre; // Center labels (otherwise, align left)
+  byte Affiche_fleche; // Display a "down" arrow box in top right
+  byte Bouton_actif; // Mouse button: A_GAUCHE || A_DROITE || (A_GAUCHE|A_DROITE)
+  word Largeur_choix; // 0 for "same as control"
   struct Bouton_dropdown_choix * Premier_choix;
   struct Fenetre_Bouton_dropdown * Next;
 };

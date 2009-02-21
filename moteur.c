@@ -1582,7 +1582,7 @@ struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Po
   return Temp;
 }
 
-struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,char *Libelle,byte Affiche_choix)
+struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif)
 {
   struct Fenetre_Bouton_dropdown *Temp;
   
@@ -1592,12 +1592,21 @@ struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word
   Temp->Pos_Y        =Pos_Y;
   Temp->Largeur      =Largeur;
   Temp->Hauteur      =Hauteur;
-  Temp->AfficheChoix =Affiche_choix;
+  Temp->Affiche_choix =Affiche_choix;
   Temp->Premier_choix=NULL;
+  Temp->Largeur_choix=Largeur_choix?Largeur_choix:Largeur;
+  Temp->Affiche_centre=Affiche_centre;
+  Temp->Affiche_fleche=Affiche_fleche;
+  Temp->Bouton_actif=Bouton_actif;
 
   Temp->Next=Fenetre_Liste_boutons_dropdown;
   Fenetre_Liste_boutons_dropdown=Temp;
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Libelle,-1,1);
+  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,"",-1,1);
+  if (Libelle && Libelle[0])
+    Print_dans_fenetre(Temp->Pos_X+2,Temp->Pos_Y+(Temp->Hauteur-7)/2,Libelle,CM_Noir,CM_Clair);
+  if (Affiche_fleche)
+    Fenetre_Afficher_sprite_drive(Temp->Pos_X+Temp->Largeur-10,Temp->Pos_Y+(Temp->Hauteur-7)/2,6);
+  
   return Temp;
 }
 
@@ -1650,6 +1659,7 @@ void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
   // Sauvegarde de ce que la fenêtre remplace
   Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, Largeur, Hauteur);
 
+/*
   // Fenêtre grise
   Block(Fenetre_Pos_X+1*Menu_Facteur_X,
         Fenetre_Pos_Y+1*Menu_Facteur_Y,
@@ -1657,7 +1667,7 @@ void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
 
   // Cadre noir puis en relief
   Fenetre_Afficher_cadre_mono(0,0,Largeur,Hauteur,CM_Blanc);
-
+*/
   if (Fenetre == 1)
   {
     Menu_visible_avant_fenetre=Menu_visible;
@@ -2099,6 +2109,10 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
   short Ancien_Indice_selectionne;
   short Hauteur_boite;
   struct Bouton_dropdown_choix *Choix;
+  // Taille de l'ombre portée (en plus des dimensions normales)
+  #define OMBRE_DROITE 3
+  #define OMBRE_BAS 4
+
   
   // Comptage des items pour calculer la taille
   Nb_choix=0;
@@ -2106,24 +2120,44 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
   {
     Nb_choix++;
   }
-  Hauteur_boite=2+Nb_choix*8+1;
+  Hauteur_boite=3+Nb_choix*8+1;
   
   Effacer_curseur();
   Fenetre_Enfoncer_bouton_normal(Bouton->Pos_X,Bouton->Pos_Y,Bouton->Largeur,Bouton->Hauteur);
   Ouvrir_popup(
     Fenetre_Pos_X+(Bouton->Pos_X)*Menu_Facteur_X,
     Fenetre_Pos_Y+(Bouton->Pos_Y+Bouton->Hauteur)*Menu_Facteur_Y,
-    Bouton->Largeur,
-    Hauteur_boite);
-  
+    Bouton->Largeur_choix+OMBRE_DROITE,
+    Hauteur_boite+OMBRE_BAS);
+
+  // Dessin de la boite
+
+  // Bord gauche
+  Block(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X,Hauteur_boite*Menu_Facteur_Y,CM_Noir);
+  // Cadre fonce et blanc
+  Fenetre_Afficher_cadre_bombe(1,0,Bouton->Largeur_choix-1,Hauteur_boite);
+  // Ombre portée
+  if (OMBRE_BAS)
+    Block(Fenetre_Pos_X+OMBRE_DROITE*Menu_Facteur_X,
+        Fenetre_Pos_Y+Hauteur_boite*Menu_Facteur_Y,
+        Bouton->Largeur_choix*Menu_Facteur_X,
+        OMBRE_BAS*Menu_Facteur_Y,
+        CM_Noir);
+  if (OMBRE_DROITE)
+    Block(Fenetre_Pos_X+Bouton->Largeur_choix*Menu_Facteur_X,
+        Fenetre_Pos_Y+OMBRE_BAS*Menu_Facteur_Y,
+        OMBRE_DROITE*Menu_Facteur_X,
+        (Hauteur_boite-OMBRE_BAS)*Menu_Facteur_Y,
+        CM_Noir);
+
   Indice_selectionne=-1;
   while (1)
   {
     Ancien_Indice_selectionne = Indice_selectionne;
     // Fenêtre grise
-    Block(Fenetre_Pos_X+1*Menu_Facteur_X,
-        Fenetre_Pos_Y+1*Menu_Facteur_Y,
-        (Bouton->Largeur-2)*Menu_Facteur_X,(Hauteur_boite-2)*Menu_Facteur_Y,CM_Clair);
+    Block(Fenetre_Pos_X+2*Menu_Facteur_X,
+        Fenetre_Pos_Y+2*Menu_Facteur_Y,
+        (Bouton->Largeur_choix-3)*Menu_Facteur_X,(Hauteur_boite-3)*Menu_Facteur_Y,CM_Clair);
     // Affichage des items
     for(Choix=Bouton->Premier_choix,Indice_choix=0; Choix!=NULL; Choix=Choix->Next,Indice_choix++)
     {
@@ -2133,16 +2167,16 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
       {
         C1=CM_Blanc;
         C2=CM_Fonce;
-        Block(Fenetre_Pos_X+2*Menu_Facteur_X,
-        Fenetre_Pos_Y+((1+Indice_choix*8)*Menu_Facteur_Y),
-        (Bouton->Largeur-4)*Menu_Facteur_X,(8)*Menu_Facteur_Y,CM_Fonce);
+        Block(Fenetre_Pos_X+3*Menu_Facteur_X,
+        Fenetre_Pos_Y+((2+Indice_choix*8)*Menu_Facteur_Y),
+        (Bouton->Largeur_choix-5)*Menu_Facteur_X,(8)*Menu_Facteur_Y,CM_Fonce);
       }
       else
       {
         C1=CM_Noir;
         C2=CM_Clair;
       }
-      Print_dans_fenetre(3,1+Indice_choix*8,Choix->Libelle,C1,C2);
+      Print_dans_fenetre(3,2+Indice_choix*8,Choix->Libelle,C1,C2);
     }
     UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
     Afficher_curseur();
@@ -2153,8 +2187,8 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
       if(!Get_input())
         Wait_VBL();
       // Mise à jour du survol
-      Indice_selectionne=Fenetre_click_dans_zone(1,1,Bouton->Largeur-1,Hauteur_boite-1)?
-        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y-1)>>3) : -1;
+      Indice_selectionne=Fenetre_click_dans_zone(2,2,Bouton->Largeur_choix-2,Hauteur_boite-1)?
+        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y-2)>>3) : -1;
 
     } while (Mouse_K && Indice_selectionne==Ancien_Indice_selectionne);
     
@@ -2175,9 +2209,49 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
     for(Choix=Bouton->Premier_choix; Indice_selectionne; Choix=Choix->Next,Indice_selectionne--)
       ;
     Fenetre_Attribut2=Choix->Numero;
+    if (Bouton->Affiche_choix)
+    {
+      // Mettre à jour automatiquement le libellé de la dropdown
+      Print_dans_fenetre(Bouton->Pos_X+2,Bouton->Pos_Y+(Bouton->Hauteur-7)/2,Choix->Libelle,CM_Noir,CM_Clair);
+    }
     return Bouton->Numero;
   }
   return 0;
+}
+
+// --- Fonction de clic sur un bouton a peu près ordinaire:
+// Attend que l'on relache le bouton, et renvoie le numero du bouton si on
+// est resté dessus, 0 si on a annulé en sortant du bouton.
+short Fenetre_bouton_normal_click(word Pos_X, word Pos_Y, word Largeur, word Hauteur, short Numero)
+{
+  while(1)
+  {
+    Effacer_curseur();
+    Fenetre_Enfoncer_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur);
+    Afficher_curseur();
+    while (Fenetre_click_dans_zone(Pos_X,Pos_Y,Pos_X+Largeur-1,Pos_Y+Hauteur-1))
+    {
+      if(!Get_input())
+        Wait_VBL();
+      if (!Mouse_K)
+      {
+        Effacer_curseur();
+        Fenetre_Desenfoncer_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur);
+        Afficher_curseur();
+        return Numero;
+      }
+    }
+    Effacer_curseur();
+    Fenetre_Desenfoncer_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur);
+    Afficher_curseur();
+    while (!(Fenetre_click_dans_zone(Pos_X,Pos_Y,Pos_X+Largeur-1,Pos_Y+Hauteur-1)))
+    {
+      if(!Get_input())
+        Wait_VBL();
+      if (!Mouse_K)
+        return 0;
+    }
+  }
 }
 
 // --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
@@ -2210,34 +2284,7 @@ short Fenetre_Numero_bouton_clicke(void)
         Afficher_curseur();        
         return Temp1->Numero;
       }
-      while(1)
-      {
-        Effacer_curseur();
-        Fenetre_Enfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
-        Afficher_curseur();
-        while (Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1))
-        {
-          if(!Get_input())
-            Wait_VBL();
-          if (!Mouse_K)
-          {
-            Effacer_curseur();
-            Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
-            Afficher_curseur();
-            return Temp1->Numero;
-          }
-        }
-        Effacer_curseur();
-        Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur);
-        Afficher_curseur();
-        while (!(Fenetre_click_dans_zone(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Pos_X+Temp1->Largeur-1,Temp1->Pos_Y+Temp1->Hauteur-1)))
-        {
-          if(!Get_input())
-            Wait_VBL();
-          if (!Mouse_K)
-            return 0;
-        }
-      }
+      return Fenetre_bouton_normal_click(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Largeur,Temp1->Hauteur,Temp1->Numero);
     }
   }
 
@@ -2369,7 +2416,12 @@ short Fenetre_Numero_bouton_clicke(void)
   for (Temp5=Fenetre_Liste_boutons_dropdown; Temp5; Temp5=Temp5->Next)
   {
     if (Fenetre_click_dans_zone(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Pos_X+Temp5->Largeur-1,Temp5->Pos_Y+Temp5->Hauteur-1))
-      return Fenetre_Dropdown_click(Temp5);
+    {
+      if (Mouse_K & Temp5->Bouton_actif)
+        return Fenetre_Dropdown_click(Temp5);
+      else
+        return Fenetre_bouton_normal_click(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Largeur,Temp5->Hauteur,Temp5->Numero);
+    }
   }
 
   return 0;

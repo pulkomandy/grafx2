@@ -2534,7 +2534,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Scroller_de_fichiers = Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
 
   // Dropdown pour les formats de fichier
-  Dropdown_des_formats=Fenetre_Definir_bouton_dropdown(12,56,94,11,"",1); // 6
+  Dropdown_des_formats=
+    Fenetre_Definir_bouton_dropdown(70,56,36,16,0,
+      (Principal_Format==0)?"*.*":FormatFichier[Principal_Format-1].Extension,
+      1,0,1,A_DROITE|A_GAUCHE); // 6
   if (Load)
     Fenetre_Dropdown_choix(Dropdown_des_formats,0,"*.*");
   for (Temp=0;Temp<NB_FORMATS_CONNUS;Temp++)
@@ -2543,8 +2546,10 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       (!Load && FormatFichier[Temp].Save))
         Fenetre_Dropdown_choix(Dropdown_des_formats,Temp+1,FormatFichier[Temp].Extension);
   }
-  Print_dans_fenetre(Dropdown_des_formats->Pos_X+2,Dropdown_des_formats->Pos_Y+2,"Format",CM_Noir,CM_Clair);
-  Print_Format(Dropdown_des_formats);
+  Print_dans_fenetre(12,61,"Format:",CM_Fonce,CM_Clair);
+  
+  //Print_dans_fenetre(Dropdown_des_formats->Pos_X+2,Dropdown_des_formats->Pos_Y+2,"Format",CM_Noir,CM_Clair);
+  //Print_Format(Dropdown_des_formats);
 
   // Texte de commentaire des dessins
   Print_dans_fenetre(7,174+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
@@ -2757,7 +2762,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         // On met à jour le format de browsing du fileselect:
         Principal_Format=Fenetre_Attribut2;
         // On affiche le nouveau format de lecture:
-        Print_Format(Dropdown_des_formats);
+        //Print_Format(Dropdown_des_formats);
         // Comme on change de liste, on se place en début de liste:
         Principal_File_list_Position=0;
         Principal_File_list_Decalage=0;
