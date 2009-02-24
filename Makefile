@@ -145,6 +145,28 @@ else
     ZIP = zip
   else
   
+    # Amiga classic
+    
+    $(shell version >PIPE:gfx2ver)
+    AMIGA=$(shell sed -e s/\(Kickstart\).*/\1/g <PIPE:gfx2ver)
+    
+    ifeq ($(AMIGA),Kickstart)
+      DELCOMMAND = Delete -r
+      MKDIR = Makedir
+      RMDIR = Delete
+      CP = copy
+      ZIP = zip
+      PLATFORMFILS = gfx2.png
+      BIN = grafx2
+      CFGBIN = gfxcfg
+      COPT = -c99
+      LOPT =
+      CC = Logiciels:vbcc/bin/vc
+      OBJDIR = obj/Amiga68k
+      # No strip command with vbcc, do some dummy thingsto make Make happy
+      STRIP = echo
+    else
+  
     # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -182,12 +204,13 @@ else
         CFGBIN = gfxcfg
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
-        CC = gcc
-        #CC = nccgen -ncgcc -ncld -ncfabs #ncc makes callgraphs
+        #CC = gcc
+        CC = $(AMIGA)
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
     endif
+  endif
   endif
 endif
 endif
