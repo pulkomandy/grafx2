@@ -204,8 +204,7 @@ else
         CFGBIN = gfxcfg
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
-        #CC = gcc
-        CC = $(AMIGA)
+        CC = gcc
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
