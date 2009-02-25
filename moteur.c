@@ -2138,17 +2138,31 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
   Fenetre_Afficher_cadre_bombe(1,0,Bouton->Largeur_choix-1,Hauteur_boite);
   // Ombre portée
   if (OMBRE_BAS)
+  {
     Block(Fenetre_Pos_X+OMBRE_DROITE*Menu_Facteur_X,
         Fenetre_Pos_Y+Hauteur_boite*Menu_Facteur_Y,
         Bouton->Largeur_choix*Menu_Facteur_X,
         OMBRE_BAS*Menu_Facteur_Y,
         CM_Noir);
+    Block(Fenetre_Pos_X,
+        Fenetre_Pos_Y+Hauteur_boite*Menu_Facteur_Y,
+        OMBRE_DROITE*Menu_Facteur_X,
+        Menu_Facteur_Y,
+        CM_Noir);
+  }
   if (OMBRE_DROITE)
+  {
     Block(Fenetre_Pos_X+Bouton->Largeur_choix*Menu_Facteur_X,
         Fenetre_Pos_Y+OMBRE_BAS*Menu_Facteur_Y,
         OMBRE_DROITE*Menu_Facteur_X,
         (Hauteur_boite-OMBRE_BAS)*Menu_Facteur_Y,
         CM_Noir);
+    Block(Fenetre_Pos_X+Bouton->Largeur_choix*Menu_Facteur_X,
+        Fenetre_Pos_Y,
+        Menu_Facteur_X,
+        OMBRE_BAS*Menu_Facteur_Y,
+        CM_Noir);
+  }
 
   Indice_selectionne=-1;
   while (1)
@@ -2156,8 +2170,8 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
     Ancien_Indice_selectionne = Indice_selectionne;
     // Fenêtre grise
     Block(Fenetre_Pos_X+2*Menu_Facteur_X,
-        Fenetre_Pos_Y+2*Menu_Facteur_Y,
-        (Bouton->Largeur_choix-3)*Menu_Facteur_X,(Hauteur_boite-3)*Menu_Facteur_Y,CM_Clair);
+        Fenetre_Pos_Y+1*Menu_Facteur_Y,
+        (Bouton->Largeur_choix-3)*Menu_Facteur_X,(Hauteur_boite-2)*Menu_Facteur_Y,CM_Clair);
     // Affichage des items
     for(Choix=Bouton->Premier_choix,Indice_choix=0; Choix!=NULL; Choix=Choix->Next,Indice_choix++)
     {

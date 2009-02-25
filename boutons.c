@@ -2307,19 +2307,6 @@ void Print_Nom_fichier_dans_selecteur(void)
   UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3);
 }
 
-
-void Print_Format(struct Fenetre_Bouton_dropdown * Dropdown)
-//
-// Affiche le libellé correspondant à Principal_Format
-//
-{
-  if (Principal_Format==0)
-    Print_dans_fenetre(Dropdown->Pos_X+2+7*8,Dropdown->Pos_Y+2,"*.*",CM_Noir,CM_Clair);
-  else
-    Print_dans_fenetre(Dropdown->Pos_X+2+7*8,Dropdown->Pos_Y+2,FormatFichier[Principal_Format-1].Extension,CM_Noir,CM_Clair);
-}
-
-
 int   Type_selectionne; // Utilisé pour mémoriser le type d'entrée choisi
                         // dans le selecteur de fichier.
 
@@ -2455,6 +2442,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   short Bouton_clicke;
   struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
   struct Fenetre_Bouton_dropdown * Dropdown_des_formats;
+  struct Fenetre_Bouton_dropdown * Dropdown_bookmark[4];
   short Temp;
   int Bidon=0;       // Sert à appeler SDL_GetKeyState
   byte  Charger_ou_sauver_l_image=0;
@@ -2546,9 +2534,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   }
   Print_dans_fenetre(12,61,"Format:",CM_Fonce,CM_Clair);
   
-  //Print_dans_fenetre(Dropdown_des_formats->Pos_X+2,Dropdown_des_formats->Pos_Y+2,"Format",CM_Noir,CM_Clair);
-  //Print_Format(Dropdown_des_formats);
-
   // Texte de commentaire des dessins
   Print_dans_fenetre(7,174+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
   Fenetre_Definir_bouton_saisie(44,173+FILENAMESPACE,TAILLE_COMMENTAIRE); // 7
@@ -2564,8 +2549,20 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Print_dans_fenetre(120,72,"Format     :",CM_Fonce,CM_Clair);
 
   // Selecteur de Lecteur / Volume
-  Fenetre_Definir_bouton_normal(8,21,120,14,"Select drive",0,1,SDLK_LAST); // 9
+  Fenetre_Definir_bouton_normal(8,17,117,23,"Select drive",0,1,SDLK_LAST); // 9
 
+  // Bookmarks
+  for (Temp=0;Temp<4;Temp++)
+  {
+    static const char *Lib[4] = {"My Docs", "USBdrive", "Desktop", "--------"};
+    Dropdown_bookmark[Temp]=
+      Fenetre_Definir_bouton_dropdown(126+(88+1)*(Temp%2),17+(Temp/2)*12,88,11,56,"",0,0,1,A_DROITE); // 10-13
+    Fenetre_Afficher_sprite_drive(Dropdown_bookmark[Temp]->Pos_X+3,Dropdown_bookmark[Temp]->Pos_Y+2,5);
+    Print_dans_fenetre(Dropdown_bookmark[Temp]->Pos_X+3+10,Dropdown_bookmark[Temp]->Pos_Y+2,Lib[Temp],Temp<3?CM_Noir:CM_Fonce,CM_Clair);
+    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],0,"Set");
+    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],1,"Rename");
+    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],2,"Clear");
+  }
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (Load)
   {
@@ -2750,8 +2747,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Effacer_curseur();
         // On met à jour le format de browsing du fileselect:
         Principal_Format=Fenetre_Attribut2;
-        // On affiche le nouveau format de lecture:
-        //Print_Format(Dropdown_des_formats);
         // Comme on change de liste, on se place en début de liste:
         Principal_File_list_Position=0;
         Principal_File_list_Decalage=0;
