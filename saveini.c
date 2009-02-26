@@ -244,6 +244,10 @@ int Sauver_INI_Set_strings(FILE * Old_file,FILE * New_file,char * Buffer,char * 
   Buffer_upper=(char *)malloc(1024);
   Buffer_resultat=(char *)malloc(1024);
 
+  // On convertit un eventuel argument NULL en chaine vide.
+  if (Value == NULL)
+    Value="";
+
   // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(Option_upper,Option);
   Charger_INI_Clear_string(Option_upper);
@@ -394,6 +398,7 @@ int Sauver_INI(struct S_Config * Conf)
   int    Retour;
   char   Nom_du_fichier_DAT[TAILLE_CHEMIN_FICHIER];
   int    Ini_existe;
+  int Indice;
 
   // On alloue les zones de mémoire:
   Buffer=(char *)malloc(1024);
@@ -614,6 +619,14 @@ int Sauver_INI(struct S_Config * Conf)
   Valeurs[0]=(Conf->Palette_Cells_Y);
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Palette_Cells_Y",1,Valeurs,0)))
     goto Erreur_Retour;
+
+  for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
+  {
+    if ((Retour=Sauver_INI_Set_strings (Ancien_fichier,Nouveau_fichier,Buffer,"Bookmark_label",Conf->Bookmark_label[Indice])))
+      goto Erreur_Retour;
+    if ((Retour=Sauver_INI_Set_strings (Ancien_fichier,Nouveau_fichier,Buffer,"Bookmark_directory",Conf->Bookmark_directory[Indice])))
+      goto Erreur_Retour;
+  }
     
   Sauver_INI_Flush(Ancien_fichier,Nouveau_fichier,Buffer);
 

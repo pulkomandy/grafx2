@@ -2217,7 +2217,6 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
   Fenetre_Desenfoncer_bouton_normal(Bouton->Pos_X,Bouton->Pos_Y,Bouton->Largeur,Bouton->Hauteur);
   Afficher_curseur();
 
-  Fenetre_Attribut2=0;  
   if (Indice_selectionne>=0 && Indice_selectionne<Nb_choix)
   {
     for(Choix=Bouton->Premier_choix; Indice_selectionne; Choix=Choix->Next,Indice_selectionne--)
@@ -2230,6 +2229,7 @@ short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
     }
     return Bouton->Numero;
   }
+  Fenetre_Attribut2=-1;
   return 0;
 }
 
@@ -2434,7 +2434,10 @@ short Fenetre_Numero_bouton_clicke(void)
       if (Mouse_K & Temp5->Bouton_actif)
         return Fenetre_Dropdown_click(Temp5);
       else
+      {
+        Fenetre_Attribut2=-1;
         return Fenetre_bouton_normal_click(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Largeur,Temp5->Hauteur,Temp5->Numero);
+      }
     }
   }
 

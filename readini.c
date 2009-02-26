@@ -31,14 +31,21 @@
 void Charger_INI_Clear_string(char * String)
 {
   int Indice;
+  int Egal_trouve=0;
 
   for (Indice=0;String[Indice]!='\0';)
   {
-    if ((String[Indice]==' ') ||
-        (String[Indice]=='\t'))
+    if ((String[Indice]=='='))
+    {
+      Egal_trouve=1;
+      Indice++;
+      // On enleve les espaces après le '='
+      while (String[Indice]==' ' || String[Indice]=='\t')
+        memmove(String+Indice,String+Indice+1,strlen(String+Indice));
+    }
+    else if ((String[Indice]==' ' && !Egal_trouve) || (String[Indice]=='\t'))
     {
       // Suppression d'un espace ou d'un tab:
-
       memmove(String+Indice,String+Indice+1,strlen(String+Indice));
     }
     else
@@ -48,16 +55,24 @@ void Charger_INI_Clear_string(char * String)
         (String[Indice]=='\n'))
     {
       // Rencontre d'un commentaire ou d'un saut de ligne:
-
       String[Indice]='\0';
     }
     else
     {
-      // Passage en majuscule d'un caractère:
-
-      String[Indice]=toupper((int)String[Indice]);
+      if (!Egal_trouve)
+      {
+        // Passage en majuscule d'un caractère:
+  
+        String[Indice]=toupper((int)String[Indice]);
+      }
       Indice++;
     }
+  }
+  // On enlève les espaces avant la fin de chaine
+  while (Indice>0 && (String[Indice-1]==' ' || String[Indice-1]=='\t'))
+  {
+    Indice--;
+    String[Indice]='\0';
   }
 }
 
@@ -173,10 +188,6 @@ int Charger_INI_Get_string(FILE * File,char * Buffer,char * Option,char * Retour
       Indice_buffer=Charger_INI_Seek_pattern(Buffer_upper,"=");
 
       strcpy(Retour, Buffer_upper + Indice_buffer);
-      // On coupe la chaine au premier espace ou ; (commentaire)
-      for (Indice_buffer=0; Retour[Indice_buffer]!='\0' && Retour[Indice_buffer]!=' ' && Retour[Indice_buffer]!=';'; Indice_buffer++)
-        ;
-      Retour[Indice_buffer]='\0';
     }
   }
   while (!Arret);
@@ -191,28 +202,28 @@ int Charger_INI_Get_value(char * String,int * Index,int * Value)
 {
   // On teste si la valeur actuelle est YES (ou Y):
 
-  if (Charger_INI_Seek_pattern(String+(*Index),"YES,")==1)
+  if (Charger_INI_Seek_pattern(String+(*Index),"yes,")==1)
   {
     (*Value)=1;
     (*Index)+=4;
     return 0;
   }
   else
-  if (strcmp(String+(*Index),"YES")==0)
+  if (strcmp(String+(*Index),"yes")==0)
   {
     (*Value)=1;
     (*Index)+=3;
     return 0;
   }
   else
-  if (Charger_INI_Seek_pattern(String+(*Index),"Y,")==1)
+  if (Charger_INI_Seek_pattern(String+(*Index),"y,")==1)
   {
     (*Value)=1;
     (*Index)+=2;
     return 0;
   }
   else
-  if (strcmp(String+(*Index),"Y")==0)
+  if (strcmp(String+(*Index),"y")==0)
   {
     (*Value)=1;
     (*Index)+=1;
@@ -222,28 +233,28 @@ int Charger_INI_Get_value(char * String,int * Index,int * Value)
 
   // On teste si la valeur actuelle est NO (ou N):
 
-  if (Charger_INI_Seek_pattern(String+(*Index),"NO,")==1)
+  if (Charger_INI_Seek_pattern(String+(*Index),"no,")==1)
   {
     (*Value)=0;
     (*Index)+=3;
     return 0;
   }
   else
-  if (strcmp(String+(*Index),"NO")==0)
+  if (strcmp(String+(*Index),"no")==0)
   {
     (*Value)=0;
     (*Index)+=2;
     return 0;
   }
   else
-  if (Charger_INI_Seek_pattern(String+(*Index),"N,")==1)
+  if (Charger_INI_Seek_pattern(String+(*Index),"n,")==1)
   {
     (*Value)=0;
     (*Index)+=2;
     return 0;
   }
   else
-  if (strcmp(String+(*Index),"N")==0)
+  if (strcmp(String+(*Index),"n")==0)
   {
     (*Value)=0;
     (*Index)+=1;
@@ -391,10 +402,10 @@ int Charger_INI(struct S_Config * Conf)
   FILE * Fichier;
   char * Buffer;
   int    Valeurs[3];
-  //int    Indice;
+  int    Indice;
   char * Nom_du_fichier;
   int    Retour;
-  char   Libelle_resolution[1024];
+  char   Libelle_valeur[1024];
 
   Ligne_INI=0;
 
@@ -676,9 +687,9 @@ int Charger_INI(struct S_Config * Conf)
 
   // Optionnel, le mode video par défaut (à partir de beta 97.0%)
   Conf->Resolution_par_defaut=0;
-  if (!Charger_INI_Get_string (Fichier,Buffer,"Default_video_mode",Libelle_resolution))
+  if (!Charger_INI_Get_string (Fichier,Buffer,"Default_video_mode",Libelle_valeur))
   {
-    int Mode = Conversion_argument_mode(Libelle_resolution);
+    int Mode = Conversion_argument_mode(Libelle_valeur);
     if (Mode>=0)
       Conf->Resolution_par_defaut=Mode;
   }
@@ -719,6 +730,41 @@ int Charger_INI(struct S_Config * Conf)
       goto Erreur_ERREUR_INI_CORROMPU;
     Conf->Palette_Cells_Y=Valeurs[0];
   }
+  // Optionnel, bookmarks (>98.0%)
+  for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
+  {
+    Conf->Bookmark_directory[Indice]=NULL;
+    Conf->Bookmark_label[Indice][0]='\0';  
+  }
+  for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
+  {
+    if (!Charger_INI_Get_string (Fichier,Buffer,"Bookmark_label",Libelle_valeur))
+    {
+      int Taille=0;
+      if (Libelle_valeur && (Taille=strlen(Libelle_valeur))!=0)
+      {
+        if (Taille>8)
+        {
+          Libelle_valeur[7]=CARACTERE_SUSPENSION;
+          Libelle_valeur[8]='\0';
+        }
+        strcpy(Conf->Bookmark_label[Indice],Libelle_valeur);
+      }
+    }
+    else
+      break;
+    if (!Charger_INI_Get_string (Fichier,Buffer,"Bookmark_directory",Libelle_valeur))
+    {
+      int Taille=0;
+      if (Libelle_valeur && (Taille=strlen(Libelle_valeur))!=0)
+      {
+        Conf->Bookmark_directory[Indice]=(char *)malloc(Taille+1);
+        strcpy(Conf->Bookmark_directory[Indice],Libelle_valeur);
+      }
+    }
+    else
+      break;
+  }
   
   fclose(Fichier);
 
@@ -729,7 +775,7 @@ int Charger_INI(struct S_Config * Conf)
   // Gestion des erreurs:
 
   Erreur_Retour:
-
+  printf(Buffer);
     fclose(Fichier);
     free(Nom_du_fichier);
     free(Buffer);

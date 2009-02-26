@@ -63,7 +63,7 @@
 #define NB_PAGES_UNDO_MAX         99    // Nombre maximal de pages d'undo
 #define FACTEUR_DE_ZOOM_PAR_DEFAUT 4    // Facteur de zoom initial
 #define TAILLE_CHEMIN_FICHIER     260   // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
-
+#define NB_BOOKMARKS               4    // Nombre de boutons "signet" dans l'ecran Save/Load
 // Caractères présents dans les deux fontes
 #define CARACTERE_TRIANGLE_DROIT  16
 #define CARACTERE_TRIANGLE_GAUCHE 17

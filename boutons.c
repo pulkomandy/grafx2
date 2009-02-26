@@ -2552,16 +2552,15 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Fenetre_Definir_bouton_normal(8,17,117,23,"Select drive",0,1,SDLK_LAST); // 9
 
   // Bookmarks
-  for (Temp=0;Temp<4;Temp++)
+  for (Temp=0;Temp<NB_BOOKMARKS;Temp++)
   {
-    static const char *Lib[4] = {"My Docs", "USBdrive", "Desktop", "--------"};
     Dropdown_bookmark[Temp]=
       Fenetre_Definir_bouton_dropdown(126+(88+1)*(Temp%2),17+(Temp/2)*12,88,11,56,"",0,0,1,A_DROITE); // 10-13
     Fenetre_Afficher_sprite_drive(Dropdown_bookmark[Temp]->Pos_X+3,Dropdown_bookmark[Temp]->Pos_Y+2,5);
-    Print_dans_fenetre(Dropdown_bookmark[Temp]->Pos_X+3+10,Dropdown_bookmark[Temp]->Pos_Y+2,Lib[Temp],Temp<3?CM_Noir:CM_Fonce,CM_Clair);
     Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],0,"Set");
     Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],1,"Rename");
     Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],2,"Clear");
+    Afficher_bookmark(Dropdown_bookmark[Temp],Temp);
   }
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (Load)
@@ -2837,7 +2836,67 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Nouvelle_preview=1;
           break;
       default:
-        break;
+          if (Bouton_clicke>=10 && Bouton_clicke<10+NB_BOOKMARKS)
+          {
+            // Bookmark
+            char * Nom_repertoire;
+            
+            switch(Fenetre_Attribut2)
+            {
+              case -1: // bouton lui-même: aller au répertoire mémorisé
+                if (Config.Bookmark_directory[Bouton_clicke-10])
+                {
+                  *Fichier_recherche=0;
+                  strcpy(Principal_Nom_fichier,Config.Bookmark_directory[Bouton_clicke-10]);
+                  Type_selectionne=1;
+                  On_a_clicke_sur_OK=1;
+                }
+                break;
+                
+              case 0: // Set
+                if (Config.Bookmark_directory[Bouton_clicke-10])
+                  free(Config.Bookmark_directory[Bouton_clicke-10]);
+                Config.Bookmark_label[Bouton_clicke-10][0]='\0';
+                Temp=strlen(Principal_Repertoire_courant);
+                Config.Bookmark_directory[Bouton_clicke-10]=malloc(Temp+1);
+                strcpy(Config.Bookmark_directory[Bouton_clicke-10],Principal_Repertoire_courant);
+                
+                Nom_repertoire=Position_dernier_slash(Principal_Repertoire_courant);
+                if (Nom_repertoire && Nom_repertoire[1]!='\0')
+                  Nom_repertoire++;
+                else
+                  Nom_repertoire=Principal_Repertoire_courant;
+                Temp=strlen(Nom_repertoire);
+                strncpy(Config.Bookmark_label[Bouton_clicke-10],Nom_repertoire,8);
+                if (Temp>8)
+                {
+                  Config.Bookmark_label[Bouton_clicke-10][7]=CARACTERE_SUSPENSION;
+                  Config.Bookmark_label[Bouton_clicke-10][8]='\0';
+                }
+                Afficher_bookmark(Dropdown_bookmark[Bouton_clicke-10],Bouton_clicke-10);
+                break;
+                
+              case 1: // Rename
+                if (Config.Bookmark_directory[Bouton_clicke-10])
+                {
+                  Readline_ex(Dropdown_bookmark[Bouton_clicke-10]->Pos_X+3+10,Dropdown_bookmark[Bouton_clicke-10]->Pos_Y+2,Config.Bookmark_label[Bouton_clicke-10],8,8,0);
+                  Afficher_bookmark(Dropdown_bookmark[Bouton_clicke-10],Bouton_clicke-10);
+                  Afficher_curseur();
+                }
+                break;
+
+              case 2: // Clear
+                if (Config.Bookmark_directory[Bouton_clicke-10])
+                {
+                  free(Config.Bookmark_directory[Bouton_clicke-10]);
+                  Config.Bookmark_directory[Bouton_clicke-10]=NULL;
+                  Config.Bookmark_label[Bouton_clicke-10][0]='\0';
+                  Afficher_bookmark(Dropdown_bookmark[Bouton_clicke-10],Bouton_clicke-10);
+                }
+                break;
+            }
+          }
+          break;
     }
 
     switch (Touche)
@@ -2964,14 +3023,18 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         }
 
         // On doit rentrer dans le répertoire:
-        chdir(Principal_Nom_fichier);
-        Determiner_repertoire_courant();
-
-        // On lit le nouveau répertoire
-        Lire_liste_des_fichiers(Principal_Format);
-        Trier_la_liste_des_fichiers();
-        // On place la barre de sélection sur le répertoire d'où l'on vient
-        Placer_barre_de_selection_sur(Repertoire_precedent);
+        if (!chdir(Principal_Nom_fichier))
+        {
+          Determiner_repertoire_courant();
+  
+          // On lit le nouveau répertoire
+          Lire_liste_des_fichiers(Principal_Format);
+          Trier_la_liste_des_fichiers();
+          // On place la barre de sélection sur le répertoire d'où l'on vient
+          Placer_barre_de_selection_sur(Repertoire_precedent);
+        }
+        else
+          Erreur(0);
         // Affichage des premiers fichiers visibles:
         Preparer_et_afficher_liste_fichiers(Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
         Afficher_curseur();

@@ -83,6 +83,8 @@ GFX2_GLOBAL struct S_Config
   byte Taille_ecran_dans_GIF;
   byte Auto_nb_used;
   byte Resolution_par_defaut;
+  char *Bookmark_directory[NB_BOOKMARKS]; // independant malloc of adaptive size
+  char Bookmark_label[NB_BOOKMARKS][8+1];
 } Config;
 
   // Tableau des touches spéciales
