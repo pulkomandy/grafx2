@@ -1745,7 +1745,7 @@ void Definition_des_modes_video(void)
           // Mode déja prévu: ok
           break;
         }
-      if (Indice2 >= Nb_modes_video)
+      if (Indice2 >= Nb_modes_video && Modes[Indice]->w>=320 && Modes[Indice]->h>=200)
       {
         // Nouveau mode à ajouter à la liste
         Definir_mode_video(Modes[Indice]->w,Modes[Indice]->h,0, 1);
