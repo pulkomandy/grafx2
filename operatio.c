@@ -640,7 +640,10 @@ void K_Ligne_0_6(void)
 
   Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
   Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
-
+  /* Doesn't work if fast moving
+  Pixel_figure_Preview_xor (Debut_X,Debut_Y, 0);
+  Tracer_ligne_Preview_xor (Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+  */
   Pinceau_Forme=Pinceau_Forme_avant_operation;
   if (Direction & 0x80)
   {
@@ -2479,6 +2482,7 @@ void Polyform_12_8(void)
       Operation_POP(&Couleur);
 
       // On efface la preview du segment validé:
+      Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
       Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
 
       // On l'affiche de façon définitive:

@@ -154,7 +154,6 @@ void Message_Memoire_insuffisante(void)
 
 void Bouton_Message_initial(void)
 {
-  short Bouton_clicke;
   char  Chaine[21];
   int   Pos_X,Offs_Y,X,Y;
 
@@ -176,27 +175,16 @@ void Bouton_Message_initial(void)
   //Print_dans_fenetre( 120-4*13,128,"(placeholder)",CM_Fonce,CM_Clair);
   Print_dans_fenetre(130-4*28,136,"http://grafx2.googlecode.com",CM_Fonce,CM_Clair);
 
-  // Pour faire un vrai splash screen, voici un bouton qui prend toute la fenetre.
-  Fenetre_Definir_bouton_normal(1,1,258,170,"",0,1,SDLK_RETURN); // 1
-
   Display_Window(260,172);
 
   Afficher_curseur();
 
-  do
-  {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-  }
-  while (Bouton_clicke==0 && Touche==0);
+  while(!Mouse_K && !Touche) if(!Get_input()) Wait_VBL();
+  if (Mouse_K)
+    Attendre_fin_de_click();
 
-  if(Bouton_clicke!=0) Touche=0;
   Fermer_fenetre();
   Afficher_curseur();
-
-  // Si la page a été fermée par clic, ne pas faire un bête point vide dans la page.
-  // Par contre, un clic dans le menu est bien pris en compte.
-  if (Bouton_clicke && Mouse_Y<Menu_Ordonnee)
-    Attendre_fin_de_click();
 }
 
 
@@ -2711,6 +2699,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
             // On vient de changer de nom de fichier, donc on doit s'appreter
             // a rafficher une preview
             Nouvelle_preview=1;
+            *Fichier_recherche=0;
           }
           else
           {
@@ -2723,6 +2712,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
 
             On_a_clicke_sur_OK=1;
             Nouvelle_preview=1;
+            *Fichier_recherche=0;
           }
         }
         Afficher_curseur();
@@ -2740,6 +2730,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Afficher_la_liste_des_fichiers(Principal_File_list_Position,Principal_File_list_Decalage);
         Afficher_curseur();
         Nouvelle_preview=1;
+        *Fichier_recherche=0;
         break;
 
       case  6 : // Scroller des formats
@@ -2753,6 +2744,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
         Afficher_curseur();
         Nouvelle_preview=1;
+        *Fichier_recherche=0;
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
@@ -2834,6 +2826,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
           Preparer_et_afficher_liste_fichiers(Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
           Afficher_curseur();
           Nouvelle_preview=1;
+          *Fichier_recherche=0;
           break;
       default:
           if (Bouton_clicke>=10 && Bouton_clicke<10+NB_BOOKMARKS)
@@ -2850,6 +2843,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
                   strcpy(Principal_Nom_fichier,Config.Bookmark_directory[Bouton_clicke-10]);
                   Type_selectionne=1;
                   On_a_clicke_sur_OK=1;
+                  *Fichier_recherche=0;
                 }
                 break;
                 
