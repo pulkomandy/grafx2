@@ -740,8 +740,8 @@ int Charger_INI(struct S_Config * Conf)
   {
     if (!Charger_INI_Get_string (Fichier,Buffer,"Bookmark_label",Libelle_valeur))
     {
-      int Taille=0;
-      if (Libelle_valeur && (Taille=strlen(Libelle_valeur))!=0)
+      int Taille=strlen(Libelle_valeur);
+      if (Taille!=0)
       {
         if (Taille>8)
         {
@@ -755,8 +755,8 @@ int Charger_INI(struct S_Config * Conf)
       break;
     if (!Charger_INI_Get_string (Fichier,Buffer,"Bookmark_directory",Libelle_valeur))
     {
-      int Taille=0;
-      if (Libelle_valeur && (Taille=strlen(Libelle_valeur))!=0)
+      int Taille=strlen(Libelle_valeur);
+      if (Taille!=0)
       {
         Conf->Bookmark_directory[Indice]=(char *)malloc(Taille+1);
         strcpy(Conf->Bookmark_directory[Indice],Libelle_valeur);
