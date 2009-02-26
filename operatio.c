@@ -416,12 +416,14 @@ void Ligne_12_0(void)
   {
     Shade_Table=Shade_Table_gauche;
     Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Fore_color);
+    Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
     Operation_PUSH(Fore_color);
   }
   else
   {
     Shade_Table=Shade_Table_droite;
     Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Back_color);
+    Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
     Operation_PUSH(Back_color);
   }
 
@@ -1578,6 +1580,7 @@ void Courbe_34_points_1_0(void)
   Cacher_pinceau=1;
 
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Fore_color);
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
@@ -1605,6 +1608,7 @@ void Courbe_34_points_2_0(void)
   Cacher_pinceau=1;
 
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Back_color);
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
@@ -2128,6 +2132,7 @@ void Polygone_12_0(void)
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
@@ -2234,7 +2239,8 @@ void Polyfill_12_0(void)
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
-
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
 
@@ -2590,7 +2596,8 @@ void Filled_polyform_12_0(void)
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
-
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  
   Operation_PUSH(Pinceau_X); // X Initial
   Operation_PUSH(Pinceau_Y); // X Initial
   Operation_PUSH(Couleur);   // Couleur de remplissage
@@ -3784,7 +3791,8 @@ void Cercle_degrade_12_0(void)
   Cacher_pinceau=1;
 
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("Radius:   0    ",0);
 
@@ -4038,7 +4046,8 @@ void Ellipse_degradee_12_0(void)
   Cacher_pinceau=1;
 
   Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-
+  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
 
