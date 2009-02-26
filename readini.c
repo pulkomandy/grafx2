@@ -775,7 +775,6 @@ int Charger_INI(struct S_Config * Conf)
   // Gestion des erreurs:
 
   Erreur_Retour:
-  printf(Buffer);
     fclose(Fichier);
     free(Nom_du_fichier);
     free(Buffer);
