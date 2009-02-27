@@ -2545,9 +2545,6 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     Dropdown_bookmark[Temp]=
       Fenetre_Definir_bouton_dropdown(126+(88+1)*(Temp%2),17+(Temp/2)*12,88,11,56,"",0,0,1,A_DROITE); // 10-13
     Fenetre_Afficher_sprite_drive(Dropdown_bookmark[Temp]->Pos_X+3,Dropdown_bookmark[Temp]->Pos_Y+2,5);
-    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],0,"Set");
-    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],1,"Rename");
-    Fenetre_Dropdown_choix(Dropdown_bookmark[Temp],2,"Clear");
     Afficher_bookmark(Dropdown_bookmark[Temp],Temp);
   }
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
@@ -2873,14 +2870,20 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               case 1: // Rename
                 if (Config.Bookmark_directory[Bouton_clicke-10])
                 {
-                  Readline_ex(Dropdown_bookmark[Bouton_clicke-10]->Pos_X+3+10,Dropdown_bookmark[Bouton_clicke-10]->Pos_Y+2,Config.Bookmark_label[Bouton_clicke-10],8,8,0);
+                  // On enlève les "..." avant l'édition
+                  char Bookmark_label[8+1];
+                  strcpy(Bookmark_label, Config.Bookmark_label[Bouton_clicke-10]);
+                  if (Bookmark_label[7]==CARACTERE_SUSPENSION)
+                    Bookmark_label[7]='\0';
+                  if (Readline_ex(Dropdown_bookmark[Bouton_clicke-10]->Pos_X+3+10,Dropdown_bookmark[Bouton_clicke-10]->Pos_Y+2,Bookmark_label,8,8,0))
+                    strcpy(Config.Bookmark_label[Bouton_clicke-10],Bookmark_label);
                   Afficher_bookmark(Dropdown_bookmark[Bouton_clicke-10],Bouton_clicke-10);
                   Afficher_curseur();
                 }
                 break;
 
               case 2: // Clear
-                if (Config.Bookmark_directory[Bouton_clicke-10])
+                if (Config.Bookmark_directory[Bouton_clicke-10] && Demande_de_confirmation("Erase bookmark ?"))
                 {
                   free(Config.Bookmark_directory[Bouton_clicke-10]);
                   Config.Bookmark_directory[Bouton_clicke-10]=NULL;

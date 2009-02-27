@@ -54,6 +54,7 @@
 #include "windows.h"
 #include "loadsave.h"
 #include "mountlist.h"
+#include "moteur.h"
 
 #define COULEUR_FICHIER_NORMAL    CM_Clair // Couleur du texte pour une ligne de fichier non sélectionné
 #define COULEUR_REPERTOIRE_NORMAL CM_Fonce // Couleur du texte pour une ligne de répertoire non sélectionné
@@ -718,13 +719,29 @@ void Afficher_bookmark(struct Fenetre_Bouton_dropdown * Bouton, int Numero_bookm
   if (Config.Bookmark_directory[Numero_bookmark])
   {
     int Taille;
+    // Libellé
     Print_dans_fenetre_limite(Bouton->Pos_X+3+10,Bouton->Pos_Y+2,Config.Bookmark_label[Numero_bookmark],8,CM_Noir,CM_Clair);
     Taille=strlen(Config.Bookmark_label[Numero_bookmark]);
     if (Taille<8)
       Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton->Pos_X+3+10+Taille*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton->Pos_Y+2)),Menu_Facteur_X*(8-Taille)*8,Menu_Facteur_Y*8,CM_Clair);
+    // Menu apparait sur clic droit
+    Bouton->Bouton_actif=A_DROITE;
+    // Choix actifs
+    Fenetre_Dropdown_vider_choix(Bouton);
+    Fenetre_Dropdown_choix(Bouton,0,"Set");
+    Fenetre_Dropdown_choix(Bouton,1,"Rename");
+    Fenetre_Dropdown_choix(Bouton,2,"Clear");    
   }
   else
+  {
+    // Libellé
     Print_dans_fenetre(Bouton->Pos_X+3+10,Bouton->Pos_Y+2,"--------",CM_Fonce,CM_Clair);
+    // Menu apparait sur clic droit ou gauche
+    Bouton->Bouton_actif=A_DROITE|A_GAUCHE;
+    // Choix actifs
+    Fenetre_Dropdown_vider_choix(Bouton);
+    Fenetre_Dropdown_choix(Bouton,0,"Set");
+  }
 }
 
 

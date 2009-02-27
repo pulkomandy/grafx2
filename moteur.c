@@ -39,6 +39,8 @@
 #include "windows.h"
 #include "brush.h"
 #include "input.h"
+#include "moteur.h"
+
 
 // we need this as global
 short Old_MX = -1;
@@ -1160,7 +1162,6 @@ void Fermer_fenetre(void)
   struct Fenetre_Bouton_scroller * Temp3;
   struct Fenetre_Bouton_special  * Temp4;
   struct Fenetre_Bouton_dropdown * Temp5;
-  struct Bouton_dropdown_choix   * Temp6;
 
   Effacer_curseur();
 
@@ -1191,15 +1192,7 @@ void Fermer_fenetre(void)
   while (Fenetre_Liste_boutons_dropdown)
   {
     Temp5=Fenetre_Liste_boutons_dropdown->Next;
-
-    // Il faut libérer la liste des boutons qui sont dans le dropdown
-    while (Fenetre_Liste_boutons_dropdown->Premier_choix)
-    {
-        Temp6 = Fenetre_Liste_boutons_dropdown->Premier_choix->Next;
-        free(Fenetre_Liste_boutons_dropdown->Premier_choix);
-        Fenetre_Liste_boutons_dropdown->Premier_choix = Temp6;
-    }
-
+    Fenetre_Dropdown_vider_choix(Fenetre_Liste_boutons_dropdown);
     free(Fenetre_Liste_boutons_dropdown);
     Fenetre_Liste_boutons_dropdown=Temp5;
   }
@@ -1637,6 +1630,18 @@ void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Nume
   }
 }
 
+// ------------- Suppression de tous les choix d'une dropdown ---------
+void Fenetre_Dropdown_vider_choix(struct Fenetre_Bouton_dropdown * Dropdown)
+{
+  struct Bouton_dropdown_choix * Choix_suivant;
+    while (Dropdown->Premier_choix)
+    {
+      Choix_suivant=Dropdown->Premier_choix->Next;
+      free(Dropdown->Premier_choix);
+      Dropdown->Premier_choix=Choix_suivant;
+    }
+}
+
 //----------------------- Ouverture d'un pop-up -----------------------
 
 void Ouvrir_popup(word Pos_X, word Pos_Y, word Largeur,word Hauteur)
@@ -1730,13 +1735,7 @@ void Fermer_popup(void)
   }
   while (Fenetre_Liste_boutons_dropdown)
   {
-    while (Fenetre_Liste_boutons_dropdown->Premier_choix)
-    {
-      struct Bouton_dropdown_choix *Temp6;
-      Temp6=Fenetre_Liste_boutons_dropdown->Premier_choix->Next;
-      free(Fenetre_Liste_boutons_dropdown->Premier_choix);
-      Fenetre_Liste_boutons_dropdown->Premier_choix=Temp6;
-    }
+    Fenetre_Dropdown_vider_choix(Fenetre_Liste_boutons_dropdown);
     Temp5=Fenetre_Liste_boutons_dropdown->Next;
     free(Fenetre_Liste_boutons_dropdown);
     Fenetre_Liste_boutons_dropdown=Temp5;

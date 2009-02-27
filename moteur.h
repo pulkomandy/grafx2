@@ -67,7 +67,7 @@ struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word P
 struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
 struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif);
 void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Numero, const char *Libelle);
-
+void Fenetre_Dropdown_vider_choix(struct Fenetre_Bouton_dropdown * Dropdown);
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
 short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg);
 void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click);
