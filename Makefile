@@ -29,6 +29,10 @@
 
   STRIP = strip
 
+
+### PLATFORM DETECTION AND CONFIGURATION ###
+
+# There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
 ifdef COMSPEC
   DELCOMMAND = rm -f
@@ -50,6 +54,7 @@ ifdef COMSPEC
   ZIP = zip
 else
 
+#For all other platforms, we can rely on uname
   PLATFORM = $(shell uname)
 
   #AmigaOS4 specific
@@ -66,10 +71,9 @@ else
     OBJDIR = obj/amiga
     ZIP = lha
     ZIPOPT = a
-  else
+  else ifeq ($(PLATFORM),AROS)
 
   #AROS specific
-  ifeq ($(PLATFORM),AROS)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -82,10 +86,9 @@ else
     OBJDIR = obj/aros
     ZIP = lha
     ZIPOPT = a
-  else
+  else ifeq ($(PLATFORM),MorphOS) 
 
   #MorphOS specific
-  ifeq ($(PLATFORM),MorphOS) 
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -98,10 +101,9 @@ else
     OBJDIR = obj/morphos
     ZIP = lha
     ZIPOPT = a
-  else
+  else ifeq ($(PLATFORM),BeOS)
 
   #BeOS specific
-  ifeq ($(PLATFORM),BeOS)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -113,10 +115,9 @@ else
     CC = gcc
     OBJDIR = obj/beos
     ZIP = zip
-  else
+  else ifeq ($(PLATFORM),Haiku)
 
   #Haiku specific
-  ifeq ($(PLATFORM),Haiku)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -128,10 +129,9 @@ else
     CC = gcc
     OBJDIR = obj/haiku
     ZIP = zip
-  else
+  else ifeq ($(PLATFORM),skyos)
 
   #SkyOS specific
-  ifeq ($(PLATFORM),skyos)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -145,11 +145,14 @@ else
     ZIP = zip
   else
   
-    # Amiga classic
-    
+# If we got here, we haven't found any specific system for uname. There is a little problem : Amiga 68k does not have uname !
+
+    # The trick here is to use the "version" command and see if the answer starts with Kickstart. This is the typical footprint of an amiga system.
+    # Te problem is these commands are also launched for other platforms where the "version" command is not available, so sh gives an error under linux/freebsd...
     $(shell version >PIPE:gfx2ver)
     AMIGA=$(shell sed -e s/\(Kickstart\).*/\1/g <PIPE:gfx2ver)
     
+    # Amiga classic
     ifeq ($(AMIGA),Kickstart)
       DELCOMMAND = Delete -r
       MKDIR = Makedir
@@ -163,30 +166,31 @@ else
       LOPT =
       CC = Logiciels:vbcc/bin/vc
       OBJDIR = obj/Amiga68k
-      # No strip command with vbcc, do some dummy thingsto make Make happy
+      # No strip command with vbcc, do some dummy thing to make Make happy
       STRIP = echo
     else
   
-    # Linux and FreeBSD specific (default rules)
-    DELCOMMAND = rm -rf
-    MKDIR = mkdir -p
-    RMDIR = rmdir
-    CP = cp
-    ZIP = zip
-    PLATFORMFILES = gfx2.png
+      # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
+      # Linux and FreeBSD specific (default rules)
+      DELCOMMAND = rm -rf
+      MKDIR = mkdir -p
+      RMDIR = rmdir
+      CP = cp
+      ZIP = zip
+      PLATFORMFILES = gfx2.png
 
-    ifdef WIN32CROSS
-      #cross compile a Win32 executable
-      CC = i586-mingw32msvc-gcc
-      BIN = grafx2.exe
-      CFGBIN = gfxcfg.exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
-      OBJDIR = obj/win32
-      PLATFORM = win32
-    else
+      # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
+      ifdef WIN32CROSS
+        #cross compile a Win32 executable
+        CC = i586-mingw32msvc-gcc
+        BIN = grafx2.exe
+        CFGBIN = gfxcfg.exe
+        COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
+        LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
+        OBJDIR = obj/win32
+        PLATFORM = win32
+      else ifdef GP2XCROSS
 
-      ifdef GP2XCROSS
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
         BIN = grafx2.gpe
@@ -210,13 +214,9 @@ else
       endif
     endif
   endif
-  endif
 endif
-endif
-endif
-endif
-endif
-endif
+
+### BUILD SETTINGS are set according to vars set in the platform selection, the "overridable defaults", and environment variables set before launching make
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
 ifeq ($(NOTTF),1)
@@ -240,8 +240,11 @@ else
   JOYCOPT =
 endif
 
+### And now for the real build rules ###
+
 .PHONY : all debug release clean depend zip version force install uninstall
 
+# This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/divers.o $(OBJDIR)/special.o $(OBJDIR)/boutons.o $(OBJDIR)/palette.o $(OBJDIR)/aide.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/moteur.o $(OBJDIR)/files.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/texte.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o
 CFGOBJ = $(OBJDIR)/gfxcfg.o $(OBJDIR)/SFont.o $(OBJDIR)/clavier.o $(OBJDIR)/io.o $(OBJDIR)/setup.o  $(OBJDIR)/hotkeys.o
 
@@ -249,11 +252,12 @@ all : $(BIN) $(CFGBIN)
 
 debug : $(BIN)
 
+# Make release will strip the executable to make it smaller but non-debugable
 release : $(BIN) $(CFGBIN)
 	$(STRIP) $(BIN)
 	$(STRIP) $(CFGBIN)
 
-# A release zip archive
+# Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) $(BINCFG) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
 	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) $(CFGBIN) gfx2def.ini gfx2gui.gif gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
@@ -282,6 +286,7 @@ $(OBJDIR)/%.o :
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
+# Link the icons to the program under windows
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
 
@@ -292,6 +297,7 @@ clean :
 	$(DELCOMMAND) $(OBJ) $(CFGOBJ) $(OBJDIR)/version.o $(OBJRES) $(CFGOBJRES)
 	$(DELCOMMAND) $(BIN) $(CFGBIN)
 
+# Linux installation of the program
 install : $(BIN) $(CFGBIN)
 	echo "#!/bin/sh" > $(bindir)/grafx2
 	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(bindir)/grafx2
@@ -310,6 +316,7 @@ install : $(BIN) $(CFGBIN)
 	cd fonts && $(CP) * $(datadir)/grafx2/fonts/
 	@echo Install complete
   
+# Linux uninstallation of the program
 uninstall :
 	$(DELCOMMAND) $(bindir)/grafx2
 	$(DELCOMMAND) $(bindir)/gfxcfg
