@@ -18,30 +18,112 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+#ifndef __BOUTONS_H_
+#define __BOUTONS_H_
+
+/*!
+    Displays an error message when calling an unavailable function.
+    Only used in the beta versions for things we haven't coded yet.
+*/
 void Message_Non_disponible(void);
+
+/*!
+    Displays an error message when there is no more memory for the requested operation. 
+*/
 void Message_Memoire_insuffisante(void);
+
+/*!
+    Displays the splash screen at program startup.
+*/
 void Bouton_Message_initial(void);
 
+/*!
+    Changes brush shape. 
+    This function saves the current brush shape and swith to the default one (single pixel brush) for the filler and the color picker. 
+    These functions don't need (and will not work with) a custom brush.
+*/
 void Changer_la_forme_du_pinceau(byte Numero);
 
 // Boutons relatifs aux couleurs
+
+
+/*!
+    Callback for the palette scroller buttons left click.
+    Scrolls the menubar palette one column to the left.
+*/
 void Bouton_Pal_left(void);
+
+/*!
+    Callback for the palette scroller buttons right click.
+    Scrolls the menubar palette faster to the left.
+*/
 void Bouton_Pal_left_fast(void);
+
+/*!
+    Callback for the palette scroller buttons left click.
+    Scrolls the menubar palette one column to the right.
+*/
 void Bouton_Pal_right(void);
+
+/*!
+    Callback for the palette scroller buttons right click.
+    Scrolls the menubar palette faster to the right.
+*/
 void Bouton_Pal_right_fast(void);
+
+/*!
+    Callback for the palette color buttons left click.
+    Selects the foreground drawing color when clicking on the menubar palette.
+*/
 void Bouton_Choix_forecolor(void);
+
+/*!
+    Callback for the palette color buttons right click.
+    Selects the background drawing color when clicking on the menubar palette.
+*/
 void Bouton_Choix_backcolor(void);
 
 // Boutons relatifs au pinceaux
+
+/*!
+    Callback for the brush button left click.
+    Selects the monochrome brush mode when right clicking on the brush button.
+*/
 void Bouton_Brosse_monochrome(void);
+
+/*!
+    Callback for the brush button right click.
+    Displays the "Paintbrush menu".
+*/
 void Bouton_Menu_pinceaux(void);
 
 // Boutons relatifs au mode de dessin à main levée
+
+/*!
+    Callback for the freehand draw button left click.
+    Selects freehand drawing mode, depending on the current state of the freehand button.
+*/
 void Bouton_Dessin(void);
+
+/*!
+    Callback for the freehand draw button right click.
+    Cycles the drawing modes for the freehand tool.
+*/
 void Bouton_Dessin_Switch_mode(void);
 
 // Dessin par ligne
+
+/*!
+    Callback for the lines button left click.
+    Selects lines drawing mode, depending on the current state of the lines button.
+*/
 void Bouton_Lignes(void);
+
+/*!
+    Callback for the lines button right click.
+    Cycles the drawing modes for the lines tool.
+*/
 void Bouton_Lignes_Switch_mode(void);
 
 // Bouton relatif au remplissage
@@ -181,3 +263,6 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
 void Bouton_Smooth_Menu(void);
 
 void Bouton_Smear_Mode(void);
+
+#endif
+

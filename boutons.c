@@ -123,7 +123,7 @@ void Message_Non_disponible(void)
   // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
   // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
 //  Desenclencher_bouton(BOUTON_GRADRECT);
-  Desenclencher_bouton(BOUTON_TEXTE);
+//  Desenclencher_bouton(BOUTON_TEXTE);
 
   Afficher_curseur();
 }
