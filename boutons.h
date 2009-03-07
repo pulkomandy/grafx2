@@ -127,47 +127,168 @@ void Bouton_Lignes(void);
 void Bouton_Lignes_Switch_mode(void);
 
 // Bouton relatif au remplissage
+
+/*!
+    Callback for the fill button left click.
+    Start the filling operation.
+*/
 void Bouton_Fill(void);
+
+/*!
+    Callback for the fill button right click.
+    Start the color replace operation.
+*/
 void Bouton_Remplacer(void);
+
+/*!
+    Disable and release the fill button.
+    Restores the cursor (custom brushes are disabled for the fill operation).
+    Cleans the status bar if the color replacement tool put a preview color inside it.
+*/
 void Bouton_desenclencher_Fill(void);
 
 // Spray
+
+/*!
+    Callback for the spray button left click.
+    Start the spray operation.
+*/
 void Bouton_Spray(void);
+
+/*!
+    Callback for the spray button right click.
+    Opens the spray's setup menu.
+*/
 void Bouton_Spray_Menu(void);
 
 // Courbes de Bézier
+
+/*!
+    Callback for the curves button left click.
+    Start curve operation according to the selected mode.
+*/
 void Bouton_Courbes(void);
+
+/*!
+    Callback for the curves button right click.
+    Select the curve mode (1-point, 2-point)
+*/
 void Bouton_Courbes_Switch_mode(void);
 
 // Boutons relatifs aux rectangles pleins et vides
+
+/*!
+    Callback for the empty rectangle button.
+    Start the rectangle operation.
+*/
 void Bouton_Rectangle_vide(void);
+
+/*!
+    Callback for the filled rectangle button.
+    Start the filled rectangle operation.
+*/
 void Bouton_Rectangle_plein(void);
 
 // Boutons relatifs au texte
+
+/*!
+    Callback for the text button.
+    Opens the text setup window.
+*/
 void Bouton_Texte(void);
 
 // Boutons relatifs aux dégradés
+
+/*!
+    Callback for the gradation button.
+    Opens the "Gradation menu". 
+*/
 void Bouton_Degrades(void);
+
+/*!
+    Gets the informations from the gradations table and set the global vars for the current gradation.
+    @param Indice index of the selected gradation
+*/
 void Degrade_Charger_infos_du_tableau(int Indice);
 
 // Boutons relatifs aux cercles (ellipses) dégradé(e)s
+
+/*!
+    Callback for the gradation circle button left click.
+    Starts drawing a gradation circle.
+*/
 void Bouton_Cercle_degrade(void);
+
+/*!
+    Callback for the gradation circle right click.
+    Starts drawing a gradation ellipsis.
+*/
 void Bouton_Ellipse_degrade(void);
+
+/*!
+   Callback for the gradation rectangle button.
+   Starts the gradation rectangle drawing operation.
+*/
 void Bouton_Rectangle_degrade(void);
 
 // Boutons relatifs aux cercles (ellipses) plein(e)s et vides
+
+/*!
+    Callback for the circle button left click.
+    Starts drawing an empty circle
+*/
 void Bouton_Cercle_vide(void);
+
+/*!
+    Callback for the circle button left click.
+    Starts drawing an empty ellipsis
+*/
 void Bouton_Ellipse_vide(void);
+
+/*!
+    Callback for the filled circle button ledt click.
+    Starts drawing a filled circle.
+*/
 void Bouton_Cercle_plein(void);
+
+/*!
+    Callback for the filled circle right click.
+    Starts drawing a filled ellipsis.
+*/
 void Bouton_Ellipse_pleine(void);
 
 // Boutons relatifs aux polygones vides et pleins
+
+/*!
+    Callback for the polyline button left click.
+    Starts drawing a polygon.
+*/
 void Bouton_Polygone(void);
+
+/*!
+    Callback for the polyline right click.
+    Starts drawing a polyform.
+*/
 void Bouton_Polyform(void);
+
+/*!
+    Callback for the polyfill button left click.
+    Starts drawing a filled polygon.
+*/
 void Bouton_Polyfill(void);
+
+/*!
+    Callback for the polyfill button right click.
+    Starts drawing a filled polyform.
+*/
 void Bouton_Filled_polyform(void);
 
 // Boutons d'ajustement de l'image
+
+/*!
+    Callback for the adjust picture button.
+    Start the adjust picture operation.
+*/
 void Bouton_Ajuster(void);
 
 // Gestion du mode Shade
