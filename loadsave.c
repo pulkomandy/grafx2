@@ -2601,7 +2601,7 @@ void Save_BMP(void)
     Header.Reserv_2   =0;
     Header.Decalage   =1078;
     Header.Taille_2   =40;
-    Header.Largeur    =Taille_ligne;
+    Header.Largeur    =Principal_Largeur_image;
     Header.Hauteur    =Principal_Hauteur_image;
     Header.Plans      =1;
     Header.Nb_bits    =8;
@@ -2649,7 +2649,7 @@ void Save_BMP(void)
         // parce que faut pas pousser."
         for (Pos_Y=Principal_Hauteur_image-1; ((Pos_Y>=0) && (!Erreur_fichier)); Pos_Y--)
           for (Pos_X=0; Pos_X<Taille_ligne; Pos_X++)
-            Ecrire_octet(Fichier,Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
+                Ecrire_octet(Fichier,Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
 
         Close_ecriture(Fichier);
         fclose(Fichier);
