@@ -45,6 +45,10 @@ long Directional_last_move;
 long Directional_step;
 short Mouse_count; // Number of mouse movements received in the current Get_input()
 
+word INPUT_Nouveau_Mouse_X;
+word INPUT_Nouveau_Mouse_Y;
+byte INPUT_Nouveau_Mouse_K;
+
 // TODO: move to config
 short Button_shift=-1; // Button number that serves as a "shift" modifier
 short Button_control=-1; // Button number that serves as a "ctrl" modifier
@@ -133,7 +137,6 @@ int Move_cursor_with_constraints()
   {
     if ((INPUT_Nouveau_Mouse_K != Mouse_K))
       Retour=1;        
-    Forcer_affichage_curseur=0;
     Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
     Mouse_X=INPUT_Nouveau_Mouse_X;
     Mouse_Y=INPUT_Nouveau_Mouse_Y;

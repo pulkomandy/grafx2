@@ -428,8 +428,6 @@ void Initialisation_du_programme(int argc,char * argv[])
 
   Pixel_de_chargement=Pixel_Chargement_dans_ecran_courant;
 
-  Forcer_affichage_curseur=0;
-
   // On initialise tout ce qui concerne les opérations et les effets
   Operation_Taille_pile=0;
   Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;

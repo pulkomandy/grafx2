@@ -2849,7 +2849,7 @@ void Load_GIF(void)
   word Nb_bits_initial;   // Nb de bits au début du traitement LZW
   word Cas_special=0;       // Mémoire pour le cas spécial
   word Code_ancien=0;       // Code précédent
-  word Read_byte;         // Sauvegarde du code en cours de lecture
+  word Octet_lu;         // Sauvegarde du code en cours de lecture
   word Valeur_Clr;        // Valeur <=> Clear tables
   word Valeur_Eof;        // Valeur <=> Fin d'image
   long Taille_du_fichier;
@@ -3062,7 +3062,7 @@ void Load_GIF(void)
                   {
                     if (GIF_Code_actuel!=Valeur_Clr)
                     {
-                      if (Alphabet_Free==(Read_byte=GIF_Code_actuel))
+                      if (Alphabet_Free==(Octet_lu=GIF_Code_actuel))
                       {
                         GIF_Code_actuel=Code_ancien;
                         Alphabet_Pile[Alphabet_Pos_pile++]=Cas_special;
@@ -3082,7 +3082,7 @@ void Load_GIF(void)
     
                       Alphabet_Prefixe[Alphabet_Free  ]=Code_ancien;
                       Alphabet_Suffixe[Alphabet_Free++]=GIF_Code_actuel;
-                      Code_ancien=Read_byte;
+                      Code_ancien=Octet_lu;
     
                       if (Alphabet_Free>Alphabet_Max)
                       {

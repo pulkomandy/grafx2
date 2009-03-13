@@ -153,7 +153,6 @@ GFX2_GLOBAL byte Autoriser_changement_de_couleur_pendant_operation;
 
 GFX2_GLOBAL byte Forme_curseur;
 GFX2_GLOBAL byte Forme_curseur_avant_fenetre; // Forme du curseur avant l'ouverture d'une fenêtre
-GFX2_GLOBAL byte Forcer_affichage_curseur;    // Forcer l'affichage du curseur au prochain Get_input();
 GFX2_GLOBAL byte Cacher_curseur;
 GFX2_GLOBAL byte Curseur_dans_menu;           // Booléen "Le curseur se trouve dans le menu"
 GFX2_GLOBAL byte Curseur_dans_menu_precedent; // Booléen "Le curseur se trouvait précédemment dans le menu"
@@ -556,14 +555,7 @@ GFX2_GLOBAL byte Couleur_debut_palette;
 GFX2_GLOBAL byte Un_fichier_a_ete_passe_en_parametre;
 GFX2_GLOBAL byte Une_resolution_a_ete_passee_en_parametre; // utilisée uniquement si la variable précédente est à 1
 
-  // Variables concernant l'OBJ DIVERS
-
-GFX2_GLOBAL word INPUT_Nouveau_Mouse_X;
-GFX2_GLOBAL word INPUT_Nouveau_Mouse_Y;
-GFX2_GLOBAL byte INPUT_Nouveau_Mouse_K;
-GFX2_GLOBAL byte INPUT_Keyb_mode;
-
-  // Les différents sprites:
+// Les différents sprites:
 
 GFX2_GLOBAL byte BLOCK_MENU[HAUTEUR_MENU][LARGEUR_MENU];
 GFX2_GLOBAL byte SPRITE_MENU[NB_SPRITES_MENU][HAUTEUR_SPRITE_MENU][LARGEUR_SPRITE_MENU];

@@ -272,7 +272,7 @@ $(CFGBIN) : $(CFGOBJ) $(CFGOBJRES)
 
 # SVN revision number
 version.c :
-	echo "char SVNRevision[]=\"`svnversion`\";" > version.c
+	echo "char SVN_revision[]=\"`svnversion`\";" > version.c
 
 version : delversion version.c $(OBJDIR)/version.o
 

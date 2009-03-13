@@ -48,7 +48,7 @@
 #include "hotkeys.h"
 #include "erreurs.h"
 
-extern char SVNRevision[];
+extern char SVN_revision[]; // generated in version.c
 
 // Recherche un raccourci clavier:
 word * Raccourci(word NumeroRaccourci)
@@ -608,7 +608,7 @@ void Bouton_Stats(void)
   sprintf(Buffer,"GrafX 2.00 %s%s",ALPHA_BETA,POURCENTAGE_VERSION);
   Print_dans_fenetre(146,19,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
   Print_dans_fenetre(10,27,"SVN revision #:",STATS_COULEUR_TITRES,CM_Noir);
-  Print_dans_fenetre(146,27,SVNRevision,STATS_COULEUR_DONNEES,CM_Noir);
+  Print_dans_fenetre(146,27,SVN_revision,STATS_COULEUR_DONNEES,CM_Noir);
   Print_dans_fenetre(10,35,"Build options:",STATS_COULEUR_TITRES,CM_Noir);
   Print_dans_fenetre(146,35,Support_TrueType()?"TTF fonts":"no TTF fonts",STATS_COULEUR_DONNEES,CM_Noir);
 
