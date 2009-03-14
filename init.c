@@ -1764,10 +1764,10 @@ int Charger_CFG(int Tout_charger)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   long Taille_fichier;
   int  Indice,Indice2;
-  struct Config_Header       CFG_Header;
-  struct Config_Chunk        Chunk;
-  struct Config_Infos_touche CFG_Infos_touche;
-  struct Config_Mode_video   CFG_Mode_video;
+  Config_Header       CFG_Header;
+  Config_Chunk        Chunk;
+  Config_Infos_touche CFG_Infos_touche;
+  Config_Mode_video   CFG_Mode_video;
   struct stat Informations_Fichier;
   int Conversion_touches = 0;
 
@@ -2056,10 +2056,10 @@ int Sauver_CFG(void)
   int Modes_a_sauver;
   //byte Octet;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  struct Config_Header       CFG_Header;
-  struct Config_Chunk        Chunk;
-  struct Config_Infos_touche CFG_Infos_touche;
-  struct Config_Mode_video   CFG_Mode_video;
+  Config_Header CFG_Header;
+  Config_Chunk Chunk;
+  Config_Infos_touche CFG_Infos_touche;
+  Config_Mode_video   CFG_Mode_video;
 
   strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.cfg");

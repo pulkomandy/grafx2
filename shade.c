@@ -443,7 +443,7 @@ int Menu_Shade(void)
   byte Derniere_couleur=0;
   word Select_Debut=0;
   word Select_Fin=0;
-  struct Fenetre_Bouton_special * Bouton_saisie;
+  T_Bouton_special * Bouton_saisie;
   short Temp,Temp2;
   word Case_temporaire;
   word * Buffer;       // Buffer du Copy/Paste
@@ -995,12 +995,12 @@ int Menu_Shade(void)
 
 void Bouton_Shade_Menu(void)
 {
-  struct T_Shade * Shade_Liste_Backup;        // Anciennes données des shades
-  byte Ancien_shade;                              // Ancien n° de shade actif
+  T_Shade * Shade_Liste_Backup; // Anciennes données des shades
+  byte Ancien_shade; // Ancien n° de shade actif
 
 
   // Backup des anciennes données
-  Shade_Liste_Backup=(struct T_Shade *)malloc(sizeof(Shade_Liste));
+  Shade_Liste_Backup=(T_Shade *)malloc(sizeof(Shade_Liste));
   memcpy(Shade_Liste_Backup,Shade_Liste,sizeof(Shade_Liste));
   Ancien_shade=Shade_Actuel;
 
@@ -1036,7 +1036,7 @@ void Bouton_Quick_shade_Menu(void)
   char Chaine[4];
   byte Step_Backup=Quick_shade_Step; // Backup des
   byte Loop_Backup=Quick_shade_Loop; // anciennes données
-  struct Fenetre_Bouton_special * BoutonPas;
+  T_Bouton_special * BoutonPas;
 
   Ouvrir_fenetre(142,56,"Quick-shade");
 

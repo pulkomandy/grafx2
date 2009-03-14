@@ -250,7 +250,7 @@ enum TYPES_DE_LECTEURS
   LECTEUR_FLOPPY_5_25,  // 1: Diskette 5"¬
   LECTEUR_HDD,          // 2: HDD
   LECTEUR_CDROM,        // 3: CD-ROM
-  LECTEUR_NETWORK       // 4: Logique (réseau?)
+  LECTEUR_NETWORK,      // 4: Logique (réseau?)
 };
 
   // Les différents boutons:

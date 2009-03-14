@@ -698,7 +698,7 @@ void Settings_Afficher_config(struct S_Config * Conf)
 #define YES "YES"
 #define NO  " NO"
 {
-  struct Fenetre_Bouton_scroller * Jauge=Fenetre_Liste_boutons_scroller;
+  T_Bouton_scroller * Jauge=Fenetre_Liste_boutons_scroller;
   char Chaine[4];
 
   Effacer_curseur();
@@ -1167,7 +1167,7 @@ void Copier_certaines_couleurs(void)
     {
       if (Masque_copie_couleurs[Indice])
         memcpy(Brouillon_Palette+Indice,Principal_Palette+Indice,
-               sizeof(struct Composantes));
+               sizeof(Composantes));
     }
   }
 }
@@ -1370,7 +1370,7 @@ void Bouton_Resol(void)
   short Position_curseur;
   short Temp;
   char  Chaine[5];
-  struct Fenetre_Bouton_special * Bouton_saisie_Width, * Bouton_saisie_Height;
+  T_Bouton_special * Bouton_saisie_Width, * Bouton_saisie_Height;
 
   Ouvrir_fenetre(299,190,"Picture & screen sizes");
 
@@ -1885,9 +1885,9 @@ void Bouton_Degrades(void)
 {
   short Bouton_clicke;
   char  Chaine[3];
-  struct T_Degrade_Tableau Backup_Degrade_Tableau[16];
+  T_Degrade_Tableau Backup_Degrade_Tableau[16];
   int   Ancien_Degrade_Courant;
-  struct Fenetre_Bouton_scroller * Scroller_de_melange;
+  T_Bouton_scroller * Scroller_de_melange;
   short Ancien_Mouse_X;
   short Ancien_Mouse_Y;
   byte  Ancien_Mouse_K;
@@ -1900,7 +1900,7 @@ void Bouton_Degrades(void)
 
   Traiter_pixel_de_degrade=Pixel;
   Ancien_Degrade_Courant=Degrade_Courant;
-  memcpy(Backup_Degrade_Tableau,Degrade_Tableau,sizeof(struct T_Degrade_Tableau)*16);
+  memcpy(Backup_Degrade_Tableau,Degrade_Tableau,sizeof(T_Degrade_Tableau)*16);
 
   Ouvrir_fenetre(237,133,"Gradation menu");
 
@@ -2089,7 +2089,7 @@ void Bouton_Degrades(void)
   if (Bouton_clicke==7) // Cancel
   {
     Degrade_Courant=Ancien_Degrade_Courant;
-    memcpy(Degrade_Tableau,Backup_Degrade_Tableau,sizeof(struct T_Degrade_Tableau)*16);
+    memcpy(Degrade_Tableau,Backup_Degrade_Tableau,sizeof(T_Degrade_Tableau)*16);
     Degrade_Charger_infos_du_tableau(Degrade_Courant);
   }
 }
@@ -2299,7 +2299,7 @@ int   Type_selectionne; // Utilisé pour mémoriser le type d'entrée choisi
                         // dans le selecteur de fichier.
 
 void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
-                                         struct Fenetre_Bouton_scroller * Enreg)
+                                         T_Bouton_scroller * Enreg)
 {
   Enreg->Nb_elements=Liste_Nb_elements;
   Enreg->Position=Position;
@@ -2322,14 +2322,14 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
 
 
 void Relire_liste_fichiers(byte Filtre, short Position, short Decalage,
-                           struct Fenetre_Bouton_scroller * Enreg)
+                           T_Bouton_scroller * Enreg)
 {
   Lire_liste_des_fichiers(Filtre);
   Trier_la_liste_des_fichiers();
   Preparer_et_afficher_liste_fichiers(Position,Decalage,Enreg);
 }
 
-void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Scroller_de_fichiers)
+void On_vient_de_scroller_dans_le_fileselect(T_Bouton_scroller * Scroller_de_fichiers)
 {
   char Ancien_nom_de_fichier[TAILLE_CHEMIN_FICHIER];
 
@@ -2355,7 +2355,7 @@ void On_vient_de_scroller_dans_le_fileselect(struct Fenetre_Bouton_scroller * Sc
 
 short Position_fichier_dans_liste(char * Nom)
 {
-  struct Element_de_liste_de_fileselect * Element_courant;
+  Element_de_liste_de_fileselect * Element_courant;
   short  Indice;
 
   for (Indice=0, Element_courant=Liste_du_fileselect;
@@ -2397,7 +2397,7 @@ char FFF_Meilleur_nom[TAILLE_CHEMIN_FICHIER];
 char * Nom_correspondant_le_mieux_a(char * Nom)
 {
   char * Pointeur_Meilleur_nom;
-  struct Element_de_liste_de_fileselect * Element_courant;
+  Element_de_liste_de_fileselect * Element_courant;
   byte   Lettres_identiques=0;
   byte   Compteur;
 
@@ -2428,15 +2428,15 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Load=0 => On affiche le menu du bouton SAVE
 {
   short Bouton_clicke;
-  struct Fenetre_Bouton_scroller * Scroller_de_fichiers;
-  struct Fenetre_Bouton_dropdown * Dropdown_des_formats;
-  struct Fenetre_Bouton_dropdown * Dropdown_bookmark[4];
+  T_Bouton_scroller * Scroller_de_fichiers;
+  T_Bouton_dropdown * Dropdown_des_formats;
+  T_Bouton_dropdown * Dropdown_bookmark[4];
   short Temp;
   int Bidon=0;       // Sert à appeler SDL_GetKeyState
   byte  Charger_ou_sauver_l_image=0;
   byte  On_a_clicke_sur_OK=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
-  struct Composantes * Palette_initiale; // |  Données concernant l'image qui
+  Composantes * Palette_initiale; // |  Données concernant l'image qui
   byte  Image_modifiee_initiale;         // |  sont mémorisées pour pouvoir
   short Largeur_image_initiale;          // |- être restaurées en sortant,
   short Hauteur_image_initiale;          // |  parce que la preview elle les
@@ -2448,7 +2448,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   char  Nom_fichier_Save[TAILLE_CHEMIN_FICHIER];
   char * Fichier_le_plus_ressemblant;
 
-  Palette_initiale=(struct Composantes *)malloc(sizeof(T_Palette));
+  Palette_initiale=(Composantes *)malloc(sizeof(T_Palette));
   memcpy(Palette_initiale,Principal_Palette,sizeof(T_Palette));
 
   Back_color_initiale=Back_color;
@@ -3267,7 +3267,7 @@ void Load_picture(byte Image)
   byte  Format_fichier_initial;
   byte  Ne_pas_restaurer;
   byte  Utiliser_palette_brosse = 0;
-  struct Composantes * Palette_initiale=NULL;
+  Composantes * Palette_initiale=NULL;
   byte  Ancienne_forme_curseur;
   short Principal_Largeur_image_initiale=Principal_Largeur_image;
   short Principal_Hauteur_image_initiale=Principal_Hauteur_image;
@@ -3284,7 +3284,7 @@ void Load_picture(byte Image)
 
   if (!Image)
   {
-    Palette_initiale=(struct Composantes *)malloc(sizeof(T_Palette));
+    Palette_initiale=(Composantes *)malloc(sizeof(T_Palette));
     memcpy(Palette_initiale,Principal_Palette,sizeof(T_Palette));
   }
 
@@ -4028,10 +4028,10 @@ void Bouton_Menu_Grille(void)
   short dX_choisi=Snap_Decalage_X;
   short dY_choisi=Snap_Decalage_Y;
 
-  struct Fenetre_Bouton_special * Bouton_saisie_X;
-  struct Fenetre_Bouton_special * Bouton_saisie_Y;
-  struct Fenetre_Bouton_special * Bouton_saisie_dX;
-  struct Fenetre_Bouton_special * Bouton_saisie_dY;
+  T_Bouton_special * Bouton_saisie_X;
+  T_Bouton_special * Bouton_saisie_Y;
+  T_Bouton_special * Bouton_saisie_dX;
+  T_Bouton_special * Bouton_saisie_dY;
 
   char Chaine[3];
 
@@ -4371,7 +4371,7 @@ void Bouton_Smooth_Menu(void)
   short Bouton_clicke;
   short X,Y,I,J;
   byte  Matrice_choisie[3][3];
-  struct Fenetre_Bouton_special * Matrice_Zone_saisie[3][3];
+  T_Bouton_special * Matrice_Zone_saisie[3][3];
   char  Chaine[3];
 
   Ouvrir_fenetre(142,109,"Smooth");
@@ -4639,8 +4639,8 @@ void Bouton_Tiling_Menu(void)
   short Offset_X_choisi=Tiling_Decalage_X;
   short Offset_Y_choisi=Tiling_Decalage_Y;
   char  Chaine[5];
-  struct Fenetre_Bouton_special * Bouton_saisie_Decalage_X;
-  struct Fenetre_Bouton_special * Bouton_saisie_Decalage_Y;
+  T_Bouton_special * Bouton_saisie_Decalage_X;
+  T_Bouton_special * Bouton_saisie_Decalage_Y;
 
   Ouvrir_fenetre(138,79,"Tiling");
 
@@ -4775,10 +4775,10 @@ void Bouton_Spray_Menu(void)
   byte   Old_Spray_Delay    =Spray_Delay;
   byte   Old_Spray_Mono_flow=Spray_Mono_flow;
   byte   Old_Spray_Multi_flow[256];
-  struct Fenetre_Bouton_special * Saisie_Size;
-  struct Fenetre_Bouton_special * Saisie_Delay;
-  struct Fenetre_Bouton_special * Saisie_Mono_flow;
-  struct Fenetre_Bouton_special * Saisie_Init;
+  T_Bouton_special * Saisie_Size;
+  T_Bouton_special * Saisie_Delay;
+  T_Bouton_special * Saisie_Mono_flow;
+  T_Bouton_special * Saisie_Init;
   word Ancien_Mouse_X;
   word Ancien_Mouse_Y;
   byte Ancien_Mouse_K;
@@ -5209,7 +5209,7 @@ void Bouton_Trame_Menu(void)
   short Orig_X;
   short Orig_Y;
   static byte Octet_insere=0;
-  struct Fenetre_Bouton_normal * Bouton_Octet_insere;
+  T_Bouton_normal * Bouton_Octet_insere;
   char  Chaine[3];
   byte  Temp; // Octet temporaire servant à n'importe quoi
   short Old_Trame_Largeur=Trame_Largeur;
@@ -5953,10 +5953,10 @@ void Bouton_Texte()
   int Bouton_clicke;  
   const int NB_FONTES=8;
   char Buffer_taille[3];
-  struct Fenetre_Bouton_special * Bouton_taille_texte;
-  struct Fenetre_Bouton_special * Bouton_texte;
-  struct Fenetre_Bouton_special * Bouton_preview;
-  struct Fenetre_Bouton_scroller * Scroller_de_fontes;
+  T_Bouton_special * Bouton_taille_texte;
+  T_Bouton_special * Bouton_texte;
+  T_Bouton_special * Bouton_preview;
+  T_Bouton_scroller * Scroller_de_fontes;
   byte A_redessiner=1;
   byte A_previsionner=1;
   short Temp;

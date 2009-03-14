@@ -1157,11 +1157,11 @@ void Fermer_fenetre(void)
 // Lors de l'appel à cette procedure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 {
-  struct Fenetre_Bouton_normal   * Temp1;
-  struct Fenetre_Bouton_palette  * Temp2;
-  struct Fenetre_Bouton_scroller * Temp3;
-  struct Fenetre_Bouton_special  * Temp4;
-  struct Fenetre_Bouton_dropdown * Temp5;
+  T_Bouton_normal   * Temp1;
+  T_Bouton_palette  * Temp2;
+  T_Bouton_scroller * Temp3;
+  T_Bouton_special  * Temp4;
+  T_Bouton_dropdown * Temp5;
 
   Effacer_curseur();
 
@@ -1376,7 +1376,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 
 //------------------ Dessiner un scroller dans une fenêtre -------------------
 
-void Calculer_hauteur_curseur_jauge(struct Fenetre_Bouton_scroller * Enreg)
+void Calculer_hauteur_curseur_jauge(T_Bouton_scroller * Enreg)
 {
   if (Enreg->Nb_elements>Enreg->Nb_visibles)
   {
@@ -1390,7 +1390,7 @@ void Calculer_hauteur_curseur_jauge(struct Fenetre_Bouton_scroller * Enreg)
   }
 }
 
-void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg)
+void Fenetre_Dessiner_jauge(T_Bouton_scroller * Enreg)
 {
   word Position_curseur_jauge;
 
@@ -1412,7 +1412,7 @@ void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg)
         11*Menu_Facteur_X,(Enreg->Hauteur)*Menu_Facteur_Y);
 }
 
-void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg)
+void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * Enreg)
 {
   Fenetre_Afficher_cadre_general(Enreg->Pos_X-1,Enreg->Pos_Y-1,13,Enreg->Hauteur+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
   Fenetre_Afficher_cadre_mono(Enreg->Pos_X-1,Enreg->Pos_Y+11,13,Enreg->Hauteur-22,CM_Noir);
@@ -1434,14 +1434,14 @@ void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caract
 
 //------------ Modifier le contenu (caption) d'une zone de saisie ------------
 
-void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char * Contenu)
+void Fenetre_Contenu_bouton_saisie(T_Bouton_special * Enreg, char * Contenu)
 {
   Print_dans_fenetre_limite(Enreg->Pos_X+2,Enreg->Pos_Y+2,Contenu,Enreg->Largeur/8,CM_Noir,CM_Clair);
 }
 
 //------------ Effacer le contenu (caption) d'une zone de saisie ------------
 
-void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg)
+void Fenetre_Effacer_bouton_saisie(T_Bouton_special * Enreg)
 {
   Block((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,(Enreg->Largeur/8)*8*Menu_Facteur_X,8*Menu_Facteur_Y,CM_Clair);
   UpdateRect((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,Enreg->Largeur/8*8*Menu_Facteur_X,8*Menu_Facteur_Y);
@@ -1450,18 +1450,18 @@ void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg)
 
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
                                    byte Clickable, word Raccourci)
 {
-  struct Fenetre_Bouton_normal * Temp=NULL;
+  T_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
   if (Clickable)
   {
-    Temp=(struct Fenetre_Bouton_normal *)malloc(sizeof(struct Fenetre_Bouton_normal));
+    Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
     Temp->Numero   =Nb_boutons_fenetre;
     Temp->Pos_X    =Pos_X;
     Temp->Pos_Y    =Pos_Y;
@@ -1479,18 +1479,18 @@ struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Po
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
                                    byte Clickable, word Raccourci)
 {
-  struct Fenetre_Bouton_normal * Temp=NULL;
+  T_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
   if (Clickable)
   {
-    Temp=(struct Fenetre_Bouton_normal *)malloc(sizeof(struct Fenetre_Bouton_normal));
+    Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
     Temp->Numero   =Nb_boutons_fenetre;
     Temp->Pos_X    =Pos_X;
     Temp->Pos_Y    =Pos_Y;
@@ -1507,11 +1507,11 @@ struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word
   return Temp;
 }
 
-struct Fenetre_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
+T_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
 {
-  struct Fenetre_Bouton_palette * Temp;
+  T_Bouton_palette * Temp;
 
-  Temp=(struct Fenetre_Bouton_palette *)malloc(sizeof(struct Fenetre_Bouton_palette));
+  Temp=(T_Bouton_palette *)malloc(sizeof(T_Bouton_palette));
   Temp->Numero   =++Nb_boutons_fenetre;
   Temp->Pos_X    =Pos_X;
   Temp->Pos_Y    =Pos_Y;
@@ -1524,15 +1524,15 @@ struct Fenetre_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word 
 }
 
 
-struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
+T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
                                      word Hauteur,
                                      word Nb_elements,
                                      word Nb_elements_visibles,
                                      word Position_initiale)
 {
-  struct Fenetre_Bouton_scroller * Temp;
+  T_Bouton_scroller * Temp;
 
-  Temp=(struct Fenetre_Bouton_scroller *)malloc(sizeof(struct Fenetre_Bouton_scroller));
+  Temp=(T_Bouton_scroller *)malloc(sizeof(T_Bouton_scroller));
   Temp->Numero        =++Nb_boutons_fenetre;
   Temp->Pos_X         =Pos_X;
   Temp->Pos_Y         =Pos_Y;
@@ -1550,11 +1550,11 @@ struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, wor
 }
 
 
-struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
+T_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
 {
-  struct Fenetre_Bouton_special * Temp;
+  T_Bouton_special * Temp;
 
-  Temp=(struct Fenetre_Bouton_special *)malloc(sizeof(struct Fenetre_Bouton_special));
+  Temp=(T_Bouton_special *)malloc(sizeof(T_Bouton_special));
   Temp->Numero   =++Nb_boutons_fenetre;
   Temp->Pos_X    =Pos_X;
   Temp->Pos_Y    =Pos_Y;
@@ -1567,19 +1567,19 @@ struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word P
 }
 
 
-struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
+T_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
 {
-  struct Fenetre_Bouton_special *Temp;
+  T_Bouton_special *Temp;
   Temp=Fenetre_Definir_bouton_special(Pos_X,Pos_Y,(Largeur_en_caracteres<<3)+3,11);
   Fenetre_Dessiner_bouton_saisie(Pos_X,Pos_Y,Largeur_en_caracteres);
   return Temp;
 }
 
-struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif)
+T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif)
 {
-  struct Fenetre_Bouton_dropdown *Temp;
+  T_Bouton_dropdown *Temp;
   
-  Temp=(struct Fenetre_Bouton_dropdown *)malloc(sizeof(struct Fenetre_Bouton_dropdown));
+  Temp=(T_Bouton_dropdown *)malloc(sizeof(T_Bouton_dropdown));
   Temp->Numero       =++Nb_boutons_fenetre;
   Temp->Pos_X        =Pos_X;
   Temp->Pos_Y        =Pos_Y;
@@ -1606,12 +1606,12 @@ struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word
 // Ajoute un choix à une dropdown. Le libellé est seulement référencé,
 // il doit pointer sur une zone qui doit être encore valide à la fermeture 
 // de la fenêtre (comprise).
-void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Numero, const char *Libelle)
+void Fenetre_Dropdown_choix(T_Bouton_dropdown * Dropdown, word Numero, const char *Libelle)
 {
-  struct Bouton_dropdown_choix *Temp;
-  struct Bouton_dropdown_choix *Dernier;
+  T_Dropdown_choix *Temp;
+  T_Dropdown_choix *Dernier;
   
-  Temp=(struct Bouton_dropdown_choix *)malloc(sizeof(struct Bouton_dropdown_choix));
+  Temp=(T_Dropdown_choix *)malloc(sizeof(T_Dropdown_choix));
   Temp->Numero =Numero;
   Temp->Libelle=Libelle;
   Temp->Next=NULL;
@@ -1631,9 +1631,9 @@ void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Nume
 }
 
 // ------------- Suppression de tous les choix d'une dropdown ---------
-void Fenetre_Dropdown_vider_choix(struct Fenetre_Bouton_dropdown * Dropdown)
+void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * Dropdown)
 {
-  struct Bouton_dropdown_choix * Choix_suivant;
+  T_Dropdown_choix * Choix_suivant;
     while (Dropdown->Premier_choix)
     {
       Choix_suivant=Dropdown->Premier_choix->Next;
@@ -1701,11 +1701,11 @@ void Fermer_popup(void)
 // Lors de l'appel à cette procedure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 {
-  struct Fenetre_Bouton_normal   * Temp1;
-  struct Fenetre_Bouton_palette  * Temp2;
-  struct Fenetre_Bouton_scroller * Temp3;
-  struct Fenetre_Bouton_special  * Temp4;
-  struct Fenetre_Bouton_dropdown  * Temp5;
+  T_Bouton_normal   * Temp1;
+  T_Bouton_palette  * Temp2;
+  T_Bouton_scroller * Temp3;
+  T_Bouton_special  * Temp4;
+  T_Bouton_dropdown  * Temp5;
 
   Effacer_curseur();
 
@@ -1798,7 +1798,7 @@ byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y
 
 // --- Attend que l'on clique dans la palette pour renvoyer la couleur choisie
 // ou bien renvoie -1 si on a annulé l'action pas click-droit ou Escape ------
-short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg)
+short Attendre_click_dans_palette(T_Bouton_palette * Enreg)
 {
   short Debut_X=Enreg->Pos_X+5;
   short Debut_Y=Enreg->Pos_Y+3;
@@ -2100,14 +2100,14 @@ void Deplacer_fenetre(short Dx, short Dy)
 }
 
 // Gestion des dropdown
-short Fenetre_Dropdown_click(struct Fenetre_Bouton_dropdown *Bouton)
+short Fenetre_Dropdown_click(T_Bouton_dropdown *Bouton)
 {
   short Nb_choix;
   short Indice_choix;
   short Indice_selectionne;
   short Ancien_Indice_selectionne;
   short Hauteur_boite;
-  struct Bouton_dropdown_choix *Choix;
+  T_Dropdown_choix *Choix;
   // Taille de l'ombre portée (en plus des dimensions normales)
   #define OMBRE_DROITE 3
   #define OMBRE_BAS 4
@@ -2270,11 +2270,11 @@ short Fenetre_bouton_normal_click(word Pos_X, word Pos_Y, word Largeur, word Hau
 // --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
 short Fenetre_Numero_bouton_clicke(void)
 {
-  struct Fenetre_Bouton_normal   * Temp1;
-  struct Fenetre_Bouton_palette  * Temp2;
-  struct Fenetre_Bouton_scroller * Temp3;
-  struct Fenetre_Bouton_special  * Temp4;
-  struct Fenetre_Bouton_dropdown * Temp5;
+  T_Bouton_normal   * Temp1;
+  T_Bouton_palette  * Temp2;
+  T_Bouton_scroller * Temp3;
+  T_Bouton_special  * Temp4;
+  T_Bouton_dropdown * Temp5;
 
   //long Hauteur_Curseur_jauge;
   long Hauteur_maxi_jauge;
@@ -2446,7 +2446,7 @@ short Fenetre_Numero_bouton_clicke(void)
 
 short Fenetre_Numero_bouton_touche(void)
 {
-  struct Fenetre_Bouton_normal * Temp;
+  T_Bouton_normal * Temp;
 
   if (Touche & MOD_SHIFT)
     Fenetre_Attribut1=A_DROITE;

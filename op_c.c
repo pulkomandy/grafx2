@@ -890,7 +890,7 @@ void CS_Trier_par_luminance(ClusterSet * cs)
   cs->clusters=nc;
 }
 
-void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Composantes * palette)
+void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,Composantes * palette)
 {
   int indice;
   int r,v,b;
@@ -1012,7 +1012,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
 
 
 
-Table_conversion * Optimiser_palette(Bitmap24B image,int taille,struct Composantes * palette,int r,int v,int b)
+Table_conversion * Optimiser_palette(Bitmap24B image,int taille,Composantes * palette,int r,int v,int b)
 {
   Table_occurence  * to;
   Table_conversion * tc;
@@ -1084,7 +1084,7 @@ int Valeur_modifiee(int valeur,int modif)
   return valeur;
 }
 
-void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette,Table_conversion * tc)
+void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,Composantes * palette,Table_conversion * tc)
 // Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
 // s'en ressert pas, soit on passe à la fonction une copie de travail du
 // bitmap original.
@@ -1203,7 +1203,7 @@ static const byte precision_24b[]=
 
 // Cette fonction utilise l'algorithme "median cut" (Optimiser_palette) pour trouver la palette, et diffuse les erreurs avec floyd-steinberg.
 
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette)
+int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,Composantes * palette)
 {
   Table_conversion * table; // table de conversion
   int                ip;    // Indice de précision pour la conversion

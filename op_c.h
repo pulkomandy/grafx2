@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////// Définition des types de base
 
-typedef struct Composantes * Bitmap24B;
+typedef Composantes * Bitmap24B;
 typedef byte * Bitmap256;
 
 
@@ -152,7 +152,7 @@ void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
 
 /////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// M‚thodes de gestion des tables d'occurence //
+/////////////////////////////// Méthodes de gestion des tables d'occurence //
 /////////////////////////////////////////////////////////////////////////////
 
 void TO_Init(Table_occurence * t);
@@ -166,7 +166,7 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille);
 
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// M‚thodes de gestion des clusters //
+///////////////////////////////////////// Méthodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
 void Cluster_Analyser(Cluster * c,Table_occurence * to);
@@ -176,7 +176,7 @@ void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to);
 
 
 /////////////////////////////////////////////////////////////////////////////
-//////////////////////////// M‚thodes de gestion des ensembles de clusters //
+//////////////////////////// Méthodes de gestion des ensembles de clusters //
 /////////////////////////////////////////////////////////////////////////////
 
 void CS_Init(ClusterSet * cs,Table_occurence * to);
@@ -186,10 +186,10 @@ void CS_Get(ClusterSet * cs,Cluster * c);
 void CS_Set(ClusterSet * cs,Cluster * c);
 void CS_Generer(ClusterSet * cs,Table_occurence * to);
 void CS_Calculer_teintes(ClusterSet * cs,Table_occurence * to);
-void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,struct Composantes * palette);
+void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,Composantes * palette);
 
 /////////////////////////////////////////////////////////////////////////////
-//////////////////////////// M‚thodes de gestion des ensembles de d‚grad‚s //
+//////////////////////////// Méthodes de gestion des ensembles de dégradés //
 /////////////////////////////////////////////////////////////////////////////
 
 void DS_Init(DegradeSet * ds,ClusterSet * cs);
@@ -199,9 +199,9 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs);
 
 
 
-// Convertie avec le plus de pr‚cision possible une image 24b en 256c
+// Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,struct Composantes * palette);
+int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,Composantes * palette);
 
 
 

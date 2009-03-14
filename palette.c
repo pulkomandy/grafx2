@@ -285,7 +285,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   dword Tempo;
   byte  Table_de_conversion[256];
 
-  struct Composantes Palette_temporaire[256];
+  Composantes Palette_temporaire[256];
   dword Utilisation_temporaire[256];
 
   // On fait une copie de la palette
@@ -390,7 +390,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
   short Indice,Indice2;
   byte Couleur;
   byte Table_de_remplacement[256];
-  struct Composantes RVB[4];
+  Composantes RVB[4];
   short Nouvelles[4]={255,254,253,252};
 
   // On initialise la table de remplacement
@@ -640,7 +640,7 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
 
 
-void Palette_Modifier_jauge(struct Fenetre_Bouton_scroller * Jauge,
+void Palette_Modifier_jauge(T_Bouton_scroller * Jauge,
                             word Nb_elements, word Position,
                             char * Valeur, short Pos_X)
 {
@@ -653,10 +653,10 @@ void Palette_Modifier_jauge(struct Fenetre_Bouton_scroller * Jauge,
 
 
 
-void Afficher_les_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
-                         struct Fenetre_Bouton_scroller * Jauge_verte,
-                         struct Fenetre_Bouton_scroller * Jauge_bleue,
-                         byte Bloc_selectionne, struct Composantes * Palette)
+void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
+                         T_Bouton_scroller * Jauge_verte,
+                         T_Bouton_scroller * Jauge_bleue,
+                         byte Bloc_selectionne, Composantes * Palette)
 {
   char Chaine[5];
 
@@ -688,9 +688,9 @@ void Afficher_les_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
 
 
 
-void Palette_Reafficher_jauges(struct Fenetre_Bouton_scroller * Jauge_rouge,
-                               struct Fenetre_Bouton_scroller * Jauge_verte,
-                               struct Fenetre_Bouton_scroller * Jauge_bleue,
+void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
+                               T_Bouton_scroller * Jauge_verte,
+                               T_Bouton_scroller * Jauge_bleue,
                                T_Palette Palette,byte Debut,byte Fin)
 {
   char Chaine[5];
@@ -760,11 +760,11 @@ void Bouton_Palette(void)
   char   Chaine[10];
   word   i;
   //short  Pos_X,Pos_Y;
-  struct Fenetre_Bouton_normal   * Bouton_Used;
-  struct Fenetre_Bouton_scroller * Jauge_rouge;
-  struct Fenetre_Bouton_scroller * Jauge_verte;
-  struct Fenetre_Bouton_scroller * Jauge_bleue;
-  struct Fenetre_Bouton_scroller * Jauge_Reduction;
+  T_Bouton_normal   * Bouton_Used;
+  T_Bouton_scroller * Jauge_rouge;
+  T_Bouton_scroller * Jauge_verte;
+  T_Bouton_scroller * Jauge_bleue;
+  T_Bouton_scroller * Jauge_Reduction;
   byte   Backup_de_l_image_effectue=0;
   byte   Il_faut_remapper=0;
 
@@ -772,13 +772,13 @@ void Bouton_Palette(void)
   short  Nb_couleurs_utilisees=-1; // -1 <=> Inconnu
   byte   Table_de_conversion[256];
 
-  struct Composantes * Palette_backup;
-  struct Composantes * Palette_temporaire;
-  struct Composantes * Palette_de_travail;
+  Composantes * Palette_backup;
+  Composantes * Palette_temporaire;
+  Composantes * Palette_de_travail;
 
-  Palette_backup    =(struct Composantes *)malloc(sizeof(T_Palette));
-  Palette_temporaire=(struct Composantes *)malloc(sizeof(T_Palette));
-  Palette_de_travail=(struct Composantes *)malloc(sizeof(T_Palette));
+  Palette_backup    =(Composantes *)malloc(sizeof(T_Palette));
+  Palette_temporaire=(Composantes *)malloc(sizeof(T_Palette));
+  Palette_de_travail=(Composantes *)malloc(sizeof(T_Palette));
 
   Unite_Composantes(Graduations_RGB);
 
@@ -2078,9 +2078,9 @@ void Bouton_Palette_secondaire(void)
 {
   short Bouton_clicke;
   byte Dummy;
-  struct Fenetre_Bouton_scroller * Jauge_Colonnes;
-  struct Fenetre_Bouton_scroller * Jauge_Lignes;
-  struct Fenetre_Bouton_scroller * Jauge_RGBScale;
+  T_Bouton_scroller * Jauge_Colonnes;
+  T_Bouton_scroller * Jauge_Lignes;
+  T_Bouton_scroller * Jauge_RGBScale;
   char Chaine[4];
   byte Palette_a_redessiner=0;
   

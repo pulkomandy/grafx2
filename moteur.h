@@ -37,39 +37,39 @@ void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Haut
 void Fenetre_Desenfoncer_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
 void Fenetre_Dessiner_bouton_palette(word Pos_X,word Pos_Y);
 
-void Calculer_hauteur_curseur_jauge(struct Fenetre_Bouton_scroller * Enreg);
-void Fenetre_Dessiner_jauge(struct Fenetre_Bouton_scroller * Enreg);
-void Fenetre_Dessiner_bouton_scroller(struct Fenetre_Bouton_scroller * Enreg);
+void Calculer_hauteur_curseur_jauge(T_Bouton_scroller * Enreg);
+void Fenetre_Dessiner_jauge(T_Bouton_scroller * Enreg);
+void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * Enreg);
 
-void Fenetre_Contenu_bouton_saisie(struct Fenetre_Bouton_special * Enreg, char * Contenu);
-void Fenetre_Effacer_bouton_saisie(struct Fenetre_Bouton_special * Enreg);
+void Fenetre_Contenu_bouton_saisie(T_Bouton_special * Enreg, char * Contenu);
+void Fenetre_Effacer_bouton_saisie(T_Bouton_special * Enreg);
 void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
 
-struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre,byte Lettre_soulignee,
                                    byte Clickable, word Raccourci);
-struct Fenetre_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre,byte Lettre_soulignee,
                                    byte Clickable, word Raccourci);
 
-struct Fenetre_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y);
+T_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y);
 void Fenetre_Effacer_tags(void);
 void Tagger_intervalle_palette(byte Debut,byte Fin);
 
-struct Fenetre_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
+T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
                                      word Hauteur,
                                      word Nb_elements,
                                      word Nb_elements_visibles,
                                      word Position_initiale);
-struct Fenetre_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-struct Fenetre_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
-struct Fenetre_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif);
-void Fenetre_Dropdown_choix(struct Fenetre_Bouton_dropdown * Dropdown, word Numero, const char *Libelle);
-void Fenetre_Dropdown_vider_choix(struct Fenetre_Bouton_dropdown * Dropdown);
+T_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
+T_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres);
+T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif);
+void Fenetre_Dropdown_choix(T_Bouton_dropdown * Dropdown, word Numero, const char *Libelle);
+void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * Dropdown);
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
-short Attendre_click_dans_palette(struct Fenetre_Bouton_palette * Enreg);
+short Attendre_click_dans_palette(T_Bouton_palette * Enreg);
 void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click);
 
 short Fenetre_Bouton_clicke(void);

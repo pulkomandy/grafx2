@@ -2195,7 +2195,7 @@ byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 }
 
 void Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-     (byte Rouge, byte Vert, byte Bleu, struct Composantes * Palette, byte * Table)
+     (byte Rouge, byte Vert, byte Bleu, Composantes * Palette, byte * Table)
 {
   short Coul;
   int   Delta_R,Delta_V,Delta_B;
@@ -2338,7 +2338,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
 
 
 
-void Calculer_couleurs_menu_optimales(struct Composantes * Palette)
+void Calculer_couleurs_menu_optimales(Composantes * Palette)
 {
   byte Table[4];
   short I,J,K;

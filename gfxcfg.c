@@ -64,8 +64,8 @@
 #define NB_MAX_TOUCHES 134
 #define HAUTEUR_DEBUT_SETUP 7
 #define HAUTEUR_FIN_SETUP 44
-#define Header_size sizeof(struct Config_Header)
-#define Chunk_size sizeof(struct Config_Chunk)
+#define Header_size sizeof(Config_Header)
+#define Chunk_size sizeof(Config_Chunk)
 
 /* Colors */
 #define COULEUR_SETUP 1
@@ -86,7 +86,7 @@ uint16_t Position_curseur=0;
 
 byte * FichierConfig = NULL;
 byte * ChunkData[CHUNK_MAX];
-struct Config_Chunk Chunk[CHUNK_MAX];
+Config_Chunk Chunk[CHUNK_MAX];
 
 
 uint8_t Fenetre_choix(int Largeur, int Hauteur, const char* Titre, const char* Choix, uint8_t Choix_debut,
@@ -256,7 +256,7 @@ char * Interpretation_du_fichier_config()
   {
     unsigned int Indice_config;
     Ptr = ChunkData[CHUNK_TOUCHES];
-    for (Indice_config=0; Indice_config<Chunk[CHUNK_TOUCHES].Taille / sizeof(struct Config_Infos_touche) ; Indice_config++)
+    for (Indice_config=0; Indice_config<Chunk[CHUNK_TOUCHES].Taille / sizeof(Config_Infos_touche) ; Indice_config++)
     {
       word Numero;
       word Touche;
@@ -616,7 +616,7 @@ bool Verifier_ecriture_possible()
 void Enregistrer_config()
 {
     FILE* Fichier;
-    struct Config_Header Header;
+    Config_Header Header;
     int Indice_chunk;
 
     if(Choix_enreg==true) // Save keys if wanted
@@ -634,7 +634,7 @@ void Enregistrer_config()
       Header.Beta2 = BETA2;
       write_bytes(Fichier, &Header, sizeof(Header));
 
-      Chunk[CHUNK_TOUCHES].Taille=sizeof(struct Config_Infos_touche)*(NB_MAX_TOUCHES);
+      Chunk[CHUNK_TOUCHES].Taille=sizeof(Config_Infos_touche)*(NB_MAX_TOUCHES);
       Chunk[CHUNK_TOUCHES].Numero=CHUNK_TOUCHES;
 
       for (Indice_chunk=0; Indice_chunk<CHUNK_MAX; Indice_chunk++)

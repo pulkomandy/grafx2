@@ -242,7 +242,7 @@ void Remapper_fileselect(void)
 #define FORMAT_24B 0x100
 typedef void (* fonction_afficheur_24b) (short,short,byte,byte,byte);
 int                    Image_24b;
-struct Composantes *   Buffer_image_24b;
+Composantes *   Buffer_image_24b;
 fonction_afficheur_24b Pixel_Chargement_24b;
 
 
@@ -313,7 +313,7 @@ void Initialiser_preview_24b(int Largeur,int Hauteur)
 
     // Allocation du buffer 24b
     Buffer_image_24b=
-      (struct Composantes *)Emprunter_memoire_de_page(Largeur*Hauteur*sizeof(struct Composantes));
+      (Composantes *)Emprunter_memoire_de_page(Largeur*Hauteur*sizeof(Composantes));
     if (!Buffer_image_24b)
     {
       // Afficher un message d'erreur
@@ -4705,7 +4705,7 @@ void Load_SCx(void)
         if (!SCx_Header.Plans)
           Taille=sizeof(T_Palette);
         else
-          Taille=sizeof(struct Composantes)*(1<<SCx_Header.Plans);
+          Taille=sizeof(Composantes)*(1<<SCx_Header.Plans);
 
         if (read_bytes(Fichier,SCx_Palette,Taille))
         {
@@ -5458,7 +5458,7 @@ void Load_RAW_24B(int Largeur,int Hauteur,Bitmap24B Source)
   FILE* Fichier;
 
   Fichier=fopen("TEST.RAW","rb");
-  if (read_bytes(Fichier,Source,Largeur*Hauteur*sizeof(struct Composantes)))
+  if (read_bytes(Fichier,Source,Largeur*Hauteur*sizeof(Composantes)))
     exit(3);
   fclose(Fichier);
 }

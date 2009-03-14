@@ -371,7 +371,7 @@ void Afficher_aide(void)
 }
 
 
-void Scroller_aide(struct Fenetre_Bouton_scroller * Scroller)
+void Scroller_aide(T_Bouton_scroller * Scroller)
 {
   Effacer_curseur();
   Scroller->Position=Position_d_aide_en_cours;
@@ -404,7 +404,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
 {
   short Bouton_clicke;
   short Nb_lignes;
-  struct Fenetre_Bouton_scroller * Scroller;
+  T_Bouton_scroller * Scroller;
 
   if (Section!=-1)
   {

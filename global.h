@@ -65,7 +65,7 @@ GFX2_GLOBAL struct S_Config
   byte Valeur_tempo_jauge_gauche;
   byte Valeur_tempo_jauge_droite;
   long Chrono_delay;
-  struct Composantes Coul_menu_pref[4];
+  Composantes Coul_menu_pref[4];
   int  Nb_max_de_vertex_par_polygon;
   byte Clear_palette;
   byte Set_resolution_according_to;
@@ -114,7 +114,7 @@ GFX2_GLOBAL byte CM_Fonce;
 GFX2_GLOBAL byte CM_Clair;
 GFX2_GLOBAL byte CM_Blanc;
 GFX2_GLOBAL byte CM_Trans;
-GFX2_GLOBAL struct Composantes Coul_menu_pref[4];
+GFX2_GLOBAL Composantes Coul_menu_pref[4];
 
   // Etat des entrées
 
@@ -356,19 +356,19 @@ GFX2_GLOBAL word Pile_Fenetre_Hauteur[8]; // Hauteur de la fenêtre
 GFX2_GLOBAL word Pile_Nb_boutons_fenetre[8];
 #define Nb_boutons_fenetre Pile_Nb_boutons_fenetre[Fenetre-1]
 
-GFX2_GLOBAL struct Fenetre_Bouton_normal   * Pile_Fenetre_Liste_boutons_normal[8];
+GFX2_GLOBAL T_Bouton_normal   * Pile_Fenetre_Liste_boutons_normal[8];
 #define Fenetre_Liste_boutons_normal Pile_Fenetre_Liste_boutons_normal[Fenetre-1]
 
-GFX2_GLOBAL struct Fenetre_Bouton_palette  * Pile_Fenetre_Liste_boutons_palette[8];
+GFX2_GLOBAL T_Bouton_palette  * Pile_Fenetre_Liste_boutons_palette[8];
 #define Fenetre_Liste_boutons_palette Pile_Fenetre_Liste_boutons_palette[Fenetre-1]
 
-GFX2_GLOBAL struct Fenetre_Bouton_scroller * Pile_Fenetre_Liste_boutons_scroller[8];
+GFX2_GLOBAL T_Bouton_scroller * Pile_Fenetre_Liste_boutons_scroller[8];
 #define Fenetre_Liste_boutons_scroller Pile_Fenetre_Liste_boutons_scroller[Fenetre-1]
 
-GFX2_GLOBAL struct Fenetre_Bouton_special  * Pile_Fenetre_Liste_boutons_special[8];
+GFX2_GLOBAL T_Bouton_special  * Pile_Fenetre_Liste_boutons_special[8];
 #define Fenetre_Liste_boutons_special Pile_Fenetre_Liste_boutons_special[Fenetre-1]
 
-GFX2_GLOBAL struct Fenetre_Bouton_dropdown  * Pile_Fenetre_Liste_boutons_dropdown[8];
+GFX2_GLOBAL T_Bouton_dropdown  * Pile_Fenetre_Liste_boutons_dropdown[8];
 #define Fenetre_Liste_boutons_dropdown Pile_Fenetre_Liste_boutons_dropdown[Fenetre-1]
 
 
@@ -429,7 +429,7 @@ GFX2_GLOBAL short Smear_Min_X,Smear_Max_X,Smear_Min_Y,Smear_Max_Y; // Bornes de 
 
   // Mode shade:
 
-GFX2_GLOBAL struct T_Shade Shade_Liste[8]; // Listes de shade
+GFX2_GLOBAL T_Shade        Shade_Liste[8]; // Listes de shade
 GFX2_GLOBAL byte           Shade_Actuel;   // Numéro du shade en cours
 GFX2_GLOBAL byte *         Shade_Table;    // Table de conversion de shade en cours
 GFX2_GLOBAL byte           Shade_Table_gauche[256]; // Table de conversion de shade pour un clic gauche
@@ -526,7 +526,7 @@ GFX2_GLOBAL long  Degrade_Melange_aleatoire;  // Facteur de mélange (1-256+) du 
 GFX2_GLOBAL fonction_degrade Traiter_degrade; // Fonction de traitement du dégradé, varie selon la méthode choisie par l'utilisateur.
 GFX2_GLOBAL fonction_afficheur Traiter_pixel_de_degrade; // Redirection de l'affichage
 
-GFX2_GLOBAL struct T_Degrade_Tableau Degrade_Tableau[16]; // Données de tous les dégradés
+GFX2_GLOBAL T_Degrade_Tableau Degrade_Tableau[16]; // Données de tous les dégradés
 GFX2_GLOBAL byte Degrade_Courant;             // Indice du tableau correspondant au dégradé courant
 
 
@@ -656,7 +656,7 @@ GFX2_GLOBAL short Liste_Nb_elements;
 GFX2_GLOBAL short Liste_Nb_fichiers;
 GFX2_GLOBAL short Liste_Nb_repertoires;
   // Tête de la liste chaînée:
-GFX2_GLOBAL struct Element_de_liste_de_fileselect * Liste_du_fileselect;
+GFX2_GLOBAL Element_de_liste_de_fileselect * Liste_du_fileselect;
 
 // ------------------- Inititialisation des formats connus -------------------
 

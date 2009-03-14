@@ -43,7 +43,6 @@ typedef void (* fonction_effaceur)  (byte);
 typedef void (* fonction_display)   (word,word,word);
 typedef byte (* fonction_effet)     (word,word,byte);
 typedef void (* fonction_block)     (word,word,word,word,byte);
-typedef byte (* fonction_test_sign) (void);
 typedef void (* fonction_Ligne_XOR) (word,word,word);
 typedef void (* fonction_display_brush_Color) (word,word,word,word,word,word,byte,word);
 typedef void (* fonction_display_brush_Mono)  (word,word,word,word,word,word,byte,byte,word);
@@ -55,17 +54,14 @@ typedef void (* fonction_display_brush_Color_zoom) (word,word,word,word,word,wor
 typedef void (* fonction_display_brush_Mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
 typedef void (* fonction_affiche_brosse) (byte *,word,word,word,word,word,word,byte,word);
 
-struct __attribute__ ((__packed__)) Composantes
+typedef struct
 {
   byte R;
   byte V;
   byte B;
-};
-typedef struct Composantes T_Palette[256];
+}__attribute__ ((__packed__)) Composantes, T_Palette[256];
 
-
-
-struct Fenetre_Bouton_normal
+typedef struct T_Bouton_normal
 {
   short Numero;
   word Pos_X;
@@ -75,18 +71,18 @@ struct Fenetre_Bouton_normal
   byte Clickable;
   byte Repetable;
   word Raccourci;
-  struct Fenetre_Bouton_normal * Next;
-};
+  struct T_Bouton_normal * Next;
+} T_Bouton_normal;
 
-struct Fenetre_Bouton_palette
+typedef struct T_Bouton_palette
 {
   short Numero;
   word Pos_X;
   word Pos_Y;
-  struct Fenetre_Bouton_palette * Next;
-};
+  struct T_Bouton_palette * Next;
+} T_Bouton_palette;
 
-struct Fenetre_Bouton_scroller
+typedef struct T_Bouton_scroller
 {
   short Numero;
   word Pos_X;
@@ -96,27 +92,27 @@ struct Fenetre_Bouton_scroller
   word Nb_visibles;
   word Position;
   word Hauteur_curseur;
-  struct Fenetre_Bouton_scroller * Next;
-};
+  struct T_Bouton_scroller * Next;
+} T_Bouton_scroller;
 
-struct Fenetre_Bouton_special
+typedef struct T_Bouton_special
 {
   short Numero;
   word Pos_X;
   word Pos_Y;
   word Largeur;
   word Hauteur;
-  struct Fenetre_Bouton_special * Next;
-};
+  struct T_Bouton_special * Next;
+} T_Bouton_special;
 
-struct Bouton_dropdown_choix
+typedef struct T_Dropdown_choix
 {
   short Numero;
   const char * Libelle;
-  struct Bouton_dropdown_choix * Next;
-};
+  struct T_Dropdown_choix * Next;
+} T_Dropdown_choix;
 
-struct Fenetre_Bouton_dropdown
+typedef struct T_Bouton_dropdown
 {
   short Numero;
   word Pos_X;
@@ -128,21 +124,12 @@ struct Fenetre_Bouton_dropdown
   byte Affiche_fleche; // Display a "down" arrow box in top right
   byte Bouton_actif; // Mouse button: A_GAUCHE || A_DROITE || (A_GAUCHE|A_DROITE)
   word Largeur_choix; // 0 for "same as control"
-  struct Bouton_dropdown_choix * Premier_choix;
-  struct Fenetre_Bouton_dropdown * Next;
-};
-
-
-struct T_Drive
-{
-  char Lettre;
-  byte Type; // 0: Diskette 3.5" / 1: Diskette 5.25" / 2: HDD / 3: CD-ROM / 4: Logique
-  char *Chemin; // Reservé pour "x:\", ou "/", "DF0:", etc.
-};
-
+  T_Dropdown_choix * Premier_choix;
+  struct T_Bouton_dropdown * Next;
+} T_Bouton_dropdown;
 
 // Déclaration du type d'élément qu'on va mémoriser dans la liste:
-struct Element_de_liste_de_fileselect
+typedef struct Element_de_liste_de_fileselect
 {
   char NomAbrege[13]; // Le nom tel qu'affiché dans le fileselector
   char NomComplet[256]; // Le nom du fichier ou du répertoire
@@ -151,7 +138,7 @@ struct Element_de_liste_de_fileselect
   // données de chaînage de la liste
   struct Element_de_liste_de_fileselect * Suivant;
   struct Element_de_liste_de_fileselect * Precedent;
-};
+} Element_de_liste_de_fileselect;
 
 typedef struct {
   char type;
@@ -160,62 +147,62 @@ typedef struct {
 } T_TABLEAIDE;
 
 // Déclaration d'une section d'aide:
-struct Section_d_aide
+typedef struct
 {
   const T_TABLEAIDE* Table_aide; // Pointeur sur le début de la table d'aide
   word Nombre_de_lignes;
-};
+} Section_d_aide;
 
 // Déclaration d'une info sur un dégradé
-struct T_Degrade_Tableau
+typedef struct
 {
   byte Debut;     // Première couleur du dégradé
   byte Fin;       // Dernière couleur du dégradé
   dword Inverse;   // "Le dégradé va de Fin à Debut" //INT
   dword Melange;   // Valeur de mélange du dégradé (0-255) //LONG
   dword Technique; // Technique à utiliser (0-2) //INT
-} __attribute__((__packed__));
+} __attribute__((__packed__)) T_Degrade_Tableau;
 
 // Déclaration d'une info de shade
-struct T_Shade
+typedef struct
 {
   word Liste[512]; // Liste de couleurs
   byte Pas;        // Pas d'incrémentation/décrémentation
   byte Mode;       // Mode d'utilisation (Normal/Boucle/Non-saturé)
-};
+} T_Shade;
 
 
 
 // Structure des données dans le fichier de config.
 
-struct Config_Mode_video
+typedef struct
 {
   byte Etat;
   word Largeur;
   word Hauteur;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) Config_Mode_video;
 
-struct Config_Header
+typedef struct
 {
   char Signature[3];
   byte Version1;
   byte Version2;
   byte Beta1;
   byte Beta2;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) Config_Header;
 
-struct Config_Chunk
+typedef struct
 {
   byte Numero;
   word Taille;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) Config_Chunk;
 
-struct Config_Infos_touche
+typedef struct
 {
   word Numero;
   word Touche;
   word Touche2;
-} __attribute__((__packed__));
+} __attribute__((__packed__)) Config_Infos_touche;
 
 
 

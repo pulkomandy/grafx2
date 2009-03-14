@@ -35,7 +35,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
 // -- Récupérer le libellé d'un élément de la liste -------------------------
 void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle,int *Type);
 
-void Afficher_bookmark(struct Fenetre_Bouton_dropdown * Bouton, int Numero_bookmark);
+void Afficher_bookmark(T_Bouton_dropdown * Bouton, int Numero_bookmark);
 
 // -- Déplacements dans la liste des fichiers -------------------------------
 

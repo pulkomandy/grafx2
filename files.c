@@ -87,7 +87,7 @@ void Detruire_liste_du_fileselect(void)
 // programme.
 {
   // Pointeur temporaire de destruction
-  struct Element_de_liste_de_fileselect * Element_temporaire;
+  Element_de_liste_de_fileselect * Element_temporaire;
 
   while (Liste_du_fileselect!=NULL)
   {
@@ -156,10 +156,10 @@ void Ajouter_element_a_la_liste(char * Nom, int Type)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
   // Pointeur temporaire d'insertion
-  struct Element_de_liste_de_fileselect * Element_temporaire;
+  Element_de_liste_de_fileselect * Element_temporaire;
 
   // On alloue de la place pour un nouvel element
-  Element_temporaire=(struct Element_de_liste_de_fileselect *)malloc(sizeof(struct Element_de_liste_de_fileselect));
+  Element_temporaire=(Element_de_liste_de_fileselect *)malloc(sizeof(Element_de_liste_de_fileselect));
 
   // On met a jour le nouvel emplacement:
   strcpy(Element_temporaire->NomAbrege,Nom_formate(Nom, Type));
@@ -419,10 +419,10 @@ void Trier_la_liste_des_fichiers(void)
 {
   byte   La_liste_est_triee; // Booléen "La liste est triée"
   byte   Inversion;          // Booléen "Il faut inverser les éléments"
-  struct Element_de_liste_de_fileselect * Element_precedent;
-  struct Element_de_liste_de_fileselect * Element_courant;
-  struct Element_de_liste_de_fileselect * Element_suivant;
-  struct Element_de_liste_de_fileselect * Element_suivant_le_suivant;
+  Element_de_liste_de_fileselect * Element_precedent;
+  Element_de_liste_de_fileselect * Element_courant;
+  Element_de_liste_de_fileselect * Element_suivant;
+  Element_de_liste_de_fileselect * Element_suivant_le_suivant;
 
   // Avant de trier quoi que ce soit, on vérifie qu'il y ait suffisamment
   // d'éléments pour qu'il soit possibles qu'ils soient en désordre:
@@ -512,7 +512,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
 //                   sélecteur et le fichier sélectionné dans la liste
 //
 {
-  struct Element_de_liste_de_fileselect * Element_courant;
+  Element_de_liste_de_fileselect * Element_courant;
   byte   Indice;  // Indice du fichier qu'on affiche (0 -> 9)
   byte   Couleur_texte;
   byte   Couleur_fond;
@@ -579,7 +579,7 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 // Type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
 //                    Passer NULL si pas interessé.
 {
-  struct Element_de_liste_de_fileselect * Element_courant;
+  Element_de_liste_de_fileselect * Element_courant;
 
   // On vérifie s'il y a au moins 1 fichier dans la liste:
   if (Liste_Nb_elements>0)
@@ -714,7 +714,7 @@ short Calculer_decalage_click_dans_fileselector(void)
   return Decalage_calcule;
 }
 
-void Afficher_bookmark(struct Fenetre_Bouton_dropdown * Bouton, int Numero_bookmark)
+void Afficher_bookmark(T_Bouton_dropdown * Bouton, int Numero_bookmark)
 {
   if (Config.Bookmark_directory[Numero_bookmark])
   {

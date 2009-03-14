@@ -2155,7 +2155,7 @@ static const T_TABLEAIDE TableAideCacher[] =
 
 #define DECLARATION_TABLE_AIDE(x) {x, sizeof(x)/sizeof(const T_TABLEAIDE)},
 
-struct Section_d_aide Table_d_aide[] =
+Section_d_aide Table_d_aide[] =
 {
   DECLARATION_TABLE_AIDE(TableAideAbout)
   DECLARATION_TABLE_AIDE(TableAideLicense)
