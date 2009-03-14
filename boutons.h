@@ -292,97 +292,348 @@ void Bouton_Filled_polyform(void);
 void Bouton_Ajuster(void);
 
 // Gestion du mode Shade
+
+/*!
+    Callback for the shade button (in the FX window).
+    Toogle the shade mode.
+*/
 void Bouton_Shade_Mode(void);
+
+/*!
+    Callback for the QSHade button (in the FX window).
+    Toogle the Quick Shade effect.
+*/
 void Bouton_Quick_shade_Mode(void);
+
+/*!
+    Callback for the Shade button (in the FX window) right click.
+    Displays the shade setup menu.
+*/
 void Bouton_Shade_Menu(void);
+
 // Gestion du Stencil
+
+/*!
+    Callback for the Stencil button (in the FX window) left click.
+    Toogle stencil mode.
+*/
 void Bouton_Stencil_Mode(void);
+
+/*!
+    Callback for the Stencil button (in the FX window) right click.
+    Displays the stencil setup menu.
+*/
 void Bouton_Menu_Stencil(void);
+
 // Gestion du Masque
+
+/*!
+    Callback for the Mask button (in the FX window) left click.
+    Toogles the mask mode/
+*/
 void Bouton_Mask_Mode(void);
+
+/*!
+    Callback for the Mask button (in the FX window) right click.
+    Displays the mask setup menu.
+*/
 void Bouton_Mask_Menu(void);
+
 // Mode grille (Snap)
+
+/*!
+    Callback for the Grid button (in the FX window) left click.
+    Toogle the grid.
+*/
+
 void Bouton_Snap_Mode(void);
+
+/*!
+    Callback for the Grid button (in the FX window) right click.
+    Displays the grid setup menu.
+*/
 void Bouton_Menu_Grille(void);
+
 // Mode trame (Sieve)
+
+/*!
+    In the sieve window, copy one of the presets patterns to the current one.
+    @param Indice Index of the pattern to copy
+*/
 void Copier_trame_predefinie(byte Indice);
+
+/*!
+    In the sieve window, swaps black and white in the current pattern.
+*/
 void Inverser_trame(void);
+
+/*!
+    Callback for the Sieve button (in the FX window) left click.
+    Toogle sieve mode.
+*/
 void Bouton_Trame_Mode(void);
+
+/*!
+    Callback for the Sieve button (in the FX window) right click.
+    Displays the sieve setup menu.
+*/
 void Bouton_Trame_Menu(void);
+
 // Mode Smooth
+
+/*!
+    Callback for the smooth button (in the FX window) left click.
+    Toogles smooth mode.
+*/
 void Bouton_Smooth_Mode(void);
+
+/*!
+    Callback for the Smooth button (in the FX window) right click.
+    Displays the smooth setup menu.
+*/
 void Bouton_Smooth_Mode(void);
+
 // Boutons relatifs au mode Colorize
+
+/*!
+    Computes the tables used by the transparency/colorize mode.
+    These tables are used to match the drawing color*picture color to the color that is painted on screen.
+*/
 void Calculer_les_tables_de_Colorize(void);
+
+/*!
+    Callback for the Tranparency button (in the FX window) left click.
+    Toogles transparent drawing mode.
+*/
 void Bouton_Colorize_Mode(void);
+
+/*!
+    Callback for the Transparency button (in the FX window) right click.
+    Displays the tranparency setup menu.
+*/
 void Bouton_Colorize_Menu(void);
+
 // Boutons relatifs au mode Tiling
+
+/*!
+    Callback for the Tiling button (in the FX window) left click.
+    Toogles tiling mode.
+*/
 void Bouton_Tiling_Mode(void);
+
+/*!
+    Callback for the Tiling button (in the FX window) right click.
+    Displays the tiling setup menu.
+*/
 void Bouton_Tiling_Menu(void);
 // Menu des effets
+
+/*!
+    Callback for the effects button click.
+    Displays the effect selection menu.
+*/
 void Bouton_Effets(void);
 
 // Prise de brosse
+
+/*!
+    Callback for the brush button left click.
+    Start the brush picking operation.
+*/
 void Bouton_Brosse(void);
+
+/*!
+    Callback for the brush button right click.
+    Activates the last captured custom brush.
+*/
 void Bouton_Restaurer_brosse(void);
+
+/*!
+    Disables the custom brush and set back a regular one.
+*/
 void Bouton_desenclencher_Brosse(void);
 // Prise de brosse au lasso
+
+/*!
+    Callback for the freehand brush pick button left click.
+    Starts freehand brush picking operation.
+*/
 void Bouton_Lasso(void);
+
+/*!
+    Disables the custom freehand brush and set back a regular one.
+*/
 void Bouton_desenclencher_Lasso(void);
 
 // Bouton relatifs à la pipette
+
+/*!
+    Starts the color picking operation.
+*/
 void Bouton_Pipette(void);
+
+/*!
+    Disables the color picker button and get back to the previously selected drawing mode.
+*/
 void Bouton_desenclencher_Pipette(void);
+
+/*!
+    Swap fore- and background colors.
+*/
 void Bouton_Inverser_foreback(void);
 
 // Mode loupe
+
+/*!
+    Enters magnify mode.
+*/
 void Bouton_Loupe(void);
+
+/*!
+    Displays magnify menu.
+*/
 void Bouton_Menu_Loupe(void);
+
+/*!
+    Exit magnify mode.
+*/
 void Bouton_desenclencher_Loupe(void);
 
 // Les différents effets sur la brosse
+
+/*!
+    Display the Brush effects window.
+*/
 void Bouton_Brush_FX(void);
 
 // Boutons relatifs aux différentes pages
+
+/*!
+    Swap main and spare drawing pages.
+*/
 void Bouton_Page(void);
+
+/*!
+    Copy main page to spare page.
+*/
 void Bouton_Copy_page(void);
+
+/*!
+    Copy only pixel data from main page to spare page (no palette copy).
+*/
 void Copier_image_seule(void);
+
+/*!
+    Kill (free from memory) the current page.
+*/
 void Bouton_Kill(void);
 
 // Boutons relatifs aux changements de résolution et de taille d'image
+
+/*!
+    Display the screenmode menu.
+*/
 void Bouton_Resol(void);
+
+/*!
+    Set the screen to the "safe resolution" (320x200 pixel window).
+*/
 void Bouton_Safety_resol(void);
 
 // Boutons relatifs aux chargements et sauvegardes
+
+/*!
+    Opens the load file dialog.
+*/
 void Bouton_Load(void);
+
+/*!
+    Reload current picture from disk.
+*/
 void Bouton_Reload(void);
+
+/*!
+    Open the save file dialog.
+*/
 void Bouton_Save(void);
+
+/*!
+    Saves the current file without asking for a new name.
+*/
 void Bouton_Autosave(void);
 
 // Réglage des paramètres de l'utilisateur
+
+/*!
+    Display the setting menu.
+*/
 void Bouton_Settings(void);
 
 // Annulation de la dernière modification
+
+/*!
+    Undo the last modification to the picture.
+*/
 void Bouton_Undo(void);
+
+/*!
+    Redo an operation that has been undone.
+*/
 void Bouton_Redo(void);
 
 // Boutons relatifs aux effacements d'images
+
+/*!
+    Clear the whole screen with black (color index 0).
+*/
 void Bouton_Clear(void);
+
+/*!
+    Clear the screen with the selected backcolor.
+*/
 void Bouton_Clear_colore(void);
 
 // Quitter le programme
+
+/*!
+    Quits the program. Display a requester to save the changes to the picture before exiting if the pic was modified since last save.
+*/
 void Bouton_Quit(void);
 
 // Cacher le menu
+
+/*!
+    Hides the menubar.
+*/
 void Bouton_Cacher_menu(void);
 
+
+/*!
+    Load picture from file.
+*/
 void Load_picture(byte Image);
+
+/*!
+    Save picture to file.
+*/
 void Save_picture(byte Image);
 
+
+/*!
+    Generic color tagging menu, for various effects.
+*/
 void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, const char *Section_aide);
 
+
+/*!
+    Display the menu for the smooth effect.
+*/
 void Bouton_Smooth_Menu(void);
 
+
+/*!
+    Toogles the smear mode.
+*/
 void Bouton_Smear_Mode(void);
 
 #endif
