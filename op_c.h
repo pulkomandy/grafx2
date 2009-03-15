@@ -161,7 +161,7 @@ void TO_Delete(Table_occurence * t);
 int TO_Get(Table_occurence * t,int r,int v,int b);
 void TO_Set(Table_occurence * t,int r,int v,int b,int i);
 void TO_Inc(Table_occurence * t,int r,int v,int b);
-void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille);
+void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int Taille);
 
 
 
@@ -170,7 +170,7 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int taille);
 /////////////////////////////////////////////////////////////////////////////
 
 void Cluster_Analyser(Cluster * c,Table_occurence * to);
-void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int teinte,Table_occurence * to);
+void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occurence * to);
 void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to);
 
 
@@ -201,7 +201,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs);
 
 // Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int largeur,int hauteur,Composantes * palette);
+int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Hauteur,Composantes * palette);
 
 
 

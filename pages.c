@@ -956,7 +956,7 @@ void Interchanger_image_principale_et_brouillon(void)
 }
 
 
-int Emprunt_memoire_de_page_possible(int taille)
+int Emprunt_memoire_de_page_possible(int Taille)
 {
   int Taille_immediatement_disponible;
   int Taille_liste_courante;
@@ -976,30 +976,30 @@ int Emprunt_memoire_de_page_possible(int taille)
       +Taille_liste_courante
       +Taille_liste_brouillon
       -Taille_page_courante
-      -Taille_page_brouillon)<taille)
+      -Taille_page_brouillon)<Taille)
     return 0;
 
   return 1;
 }
 
-void * Emprunter_memoire_de_page(int taille)
+void * Emprunter_memoire_de_page(int Taille)
 {
   int                Il_faut_liberer;
   S_Liste_de_pages * Liste_a_raboter;
   S_Page *           Page_a_supprimer;
   //int                Indice;
 
-  if (Emprunt_memoire_de_page_possible(taille))
+  if (Emprunt_memoire_de_page_possible(Taille))
   {
     // On regarde s'il faut libérer des pages:
     Il_faut_liberer=
-      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)taille;
+      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)Taille;
 
     if (!Il_faut_liberer)
     {
       // On a assez de place pour allouer une page. On n'a donc aucune page
       // à supprimer. On peut allouer de la mémoire directement.
-      return malloc(taille);
+      return malloc(Taille);
     }
     else
     {
@@ -1042,12 +1042,12 @@ void * Emprunter_memoire_de_page(int taille)
 
         // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=
-          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)taille;
+          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)Taille;
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
         // pour la Nouvelle_page
         if (!Il_faut_liberer)
-          return malloc(taille);
+          return malloc(Taille);
       }
     }
   }

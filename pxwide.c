@@ -98,19 +98,19 @@ void Pixel_Preview_Loupe_Wide  (word X,word Y,byte Couleur)
           && X >= Limite_Gauche_Zoom && X <= Limite_visible_Droite_Zoom)
   {
     // On est dedans
-    int hauteur;
+    int Hauteur;
     int Y_Zoom = Table_mul_facteur_zoom[Y-Loupe_Decalage_Y];
 
     if (Menu_Ordonnee - Y_Zoom < Loupe_Facteur)
       // On ne doit dessiner qu'un morceau du pixel
       // sinon on dépasse sur le menu
-      hauteur = Menu_Ordonnee - Y_Zoom;
+      Hauteur = Menu_Ordonnee - Y_Zoom;
     else
-      hauteur = Loupe_Facteur;
+      Hauteur = Loupe_Facteur;
 
     Block_Wide(
       Table_mul_facteur_zoom[X-Loupe_Decalage_X]+Principal_X_Zoom, 
-      Y_Zoom, Loupe_Facteur, hauteur, Couleur
+      Y_Zoom, Loupe_Facteur, Hauteur, Couleur
       );
   }
 }
@@ -120,22 +120,22 @@ void Ligne_horizontale_XOR_Wide(word Pos_X,word Pos_Y,word Largeur)
   //On calcule la valeur initiale de Dest:
   byte* Dest=Pos_Y*2*Largeur_ecran+Pos_X*2+Ecran;
 
-  int ecx;
+  int X;
 
-  for (ecx=0;ecx<Largeur*2;ecx+=2)
-    *(Dest+ecx+1)=*(Dest+ecx)=~*(Dest+ecx);
+  for (X=0;X<Largeur*2;X+=2)
+    *(Dest+X+1)=*(Dest+X)=~*(Dest+X);
 }
 
 void Ligne_verticale_XOR_Wide(word Pos_X,word Pos_Y,word Hauteur)
 {
   int i;
-  byte color;
+  byte Color;
   byte *Dest=Ecran+Pos_X*2+Pos_Y*Largeur_ecran*2;
   for (i=Hauteur;i>0;i--)
   {
-    color=~*Dest;
-    *Dest=color;
-    *(Dest+1)=color;
+    Color=~*Dest;
+    *Dest=Color;
+    *(Dest+1)=Color;
     Dest+=Largeur_ecran*2;
   }
 }

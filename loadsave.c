@@ -249,15 +249,15 @@ fonction_afficheur_24b Pixel_Chargement_24b;
 // Chargement des pixels dans le buffer 24b
 void Pixel_Chargement_dans_buffer_24b(short Pos_X,short Pos_Y,byte R,byte V,byte B)
 {
-  int indice;
+  int index;
 
   if ((Pos_X>=0) && (Pos_Y>=0))
   if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
   {
-    indice=(Pos_Y*Principal_Largeur_image)+Pos_X;
-    Buffer_image_24b[indice].R=R;
-    Buffer_image_24b[indice].V=V;
-    Buffer_image_24b[indice].B=B;
+    index=(Pos_Y*Principal_Largeur_image)+Pos_X;
+    Buffer_image_24b[index].R=R;
+    Buffer_image_24b[index].V=V;
+    Buffer_image_24b[index].B=B;
   }
 }
 
@@ -1347,7 +1347,7 @@ void Save_PKM(void)
       Init_ecriture();
 
       // Ecriture du commentaire
-      // (Compteur_de_pixels est utilisé ici comme simple indice de comptage)
+      // (Compteur_de_pixels est utilisé ici comme simple index de comptage)
       if (Taille_commentaire)
       {
         Ecrire_octet(Fichier,0);
@@ -3721,15 +3721,15 @@ void Load_PCX(void)
             if (read_byte(Fichier,&Octet1))
               if (Octet1==12) // Lire la palette si c'est une image en 256 couleurs
               {
-                int indice;
+                int index;
                 // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
-                for(indice=0;indice<256;indice++)
-                  if ( ! read_byte(Fichier,&Principal_Palette[indice].R)
-                   || ! read_byte(Fichier,&Principal_Palette[indice].V)
-                   || ! read_byte(Fichier,&Principal_Palette[indice].B) )
+                for(index=0;index<256;index++)
+                  if ( ! read_byte(Fichier,&Principal_Palette[index].R)
+                   || ! read_byte(Fichier,&Principal_Palette[index].V)
+                   || ! read_byte(Fichier,&Principal_Palette[index].B) )
                   {
                     Erreur_fichier=2;
-                    DEBUG("ERROR READING PCX PALETTE !",indice);
+                    DEBUG("ERROR READING PCX PALETTE !",index);
                     break;
                   }
               }
@@ -4835,10 +4835,10 @@ void Save_SCx(void)
 void PI1_8b_to_16p(byte * Src,byte * Dst)
 {
   int  i;           // Indice du pixel à calculer
-  word masque;      // Masque de decodage
+  word Mask;      // Masque de decodage
   word w0,w1,w2,w3; // Les 4 words bien ordonnés de la source
 
-  masque=0x8000;
+  Mask=0x8000;
   w0=(((word)Src[0])<<8) | Src[1];
   w1=(((word)Src[2])<<8) | Src[3];
   w2=(((word)Src[4])<<8) | Src[5];
@@ -4848,11 +4848,11 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
     // Pour décoder le pixel n°i, il faut traiter les 4 words sur leur bit
     // correspondant à celui du masque
 
-    Dst[i]=((w0 & masque)?0x01:0x00) |
-           ((w1 & masque)?0x02:0x00) |
-           ((w2 & masque)?0x04:0x00) |
-           ((w3 & masque)?0x08:0x00);
-    masque>>=1;
+    Dst[i]=((w0 & Mask)?0x01:0x00) |
+           ((w1 & Mask)?0x02:0x00) |
+           ((w2 & Mask)?0x04:0x00) |
+           ((w3 & Mask)?0x08:0x00);
+    Mask>>=1;
   }
 }
 
@@ -4861,21 +4861,21 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
 void PI1_16p_to_8b(byte * Src,byte * Dst)
 {
   int  i;           // Indice du pixel à calculer
-  word masque;      // Masque de codage
+  word Mask;      // Masque de codage
   word w0,w1,w2,w3; // Les 4 words bien ordonnés de la destination
 
-  masque=0x8000;
+  Mask=0x8000;
   w0=w1=w2=w3=0;
   for (i=0;i<16;i++)
   {
     // Pour coder le pixel n°i, il faut modifier les 4 words sur leur bit
     // correspondant à celui du masque
 
-    w0|=(Src[i] & 0x01)?masque:0x00;
-    w1|=(Src[i] & 0x02)?masque:0x00;
-    w2|=(Src[i] & 0x04)?masque:0x00;
-    w3|=(Src[i] & 0x08)?masque:0x00;
-    masque>>=1;
+    w0|=(Src[i] & 0x01)?Mask:0x00;
+    w1|=(Src[i] & 0x02)?Mask:0x00;
+    w2|=(Src[i] & 0x04)?Mask:0x00;
+    w3|=(Src[i] & 0x08)?Mask:0x00;
+    Mask>>=1;
   }
   Dst[0]=w0 >> 8;
   Dst[1]=w0 & 0x00FF;
@@ -5212,7 +5212,7 @@ void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
 {
   int  i,j;         // Compteurs
   int  ip;          // Indice du pixel à calculer
-  byte masque;      // Masque de decodage
+  byte Mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
   ip=0;
@@ -5224,14 +5224,14 @@ void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
     b2=Src2[i];
     b3=Src3[i];
     // Pour chacun des 8 bits des octets
-    masque=0x80;
+    Mask=0x80;
     for (j=0;j<8;j++)
     {
-      Dst[ip++]=((b0 & masque)?0x01:0x00) |
-                ((b1 & masque)?0x02:0x00) |
-                ((b2 & masque)?0x04:0x00) |
-                ((b3 & masque)?0x08:0x00);
-      masque>>=1;
+      Dst[ip++]=((b0 & Mask)?0x01:0x00) |
+                ((b1 & Mask)?0x02:0x00) |
+                ((b2 & Mask)?0x04:0x00) |
+                ((b3 & Mask)?0x08:0x00);
+      Mask>>=1;
     }
   }
 }
@@ -5244,7 +5244,7 @@ void PC1_1lp_to_4pb(byte * Src,byte * Dst0,byte * Dst1,byte * Dst2,byte * Dst3)
 {
   int  i,j;         // Compteurs
   int  ip;          // Indice du pixel à calculer
-  byte masque;      // Masque de decodage
+  byte Mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
   ip=0;
@@ -5252,16 +5252,16 @@ void PC1_1lp_to_4pb(byte * Src,byte * Dst0,byte * Dst1,byte * Dst2,byte * Dst3)
   for (i=0;i<40;i++)
   {
     // Pour chacun des 8 bits des octets
-    masque=0x80;
+    Mask=0x80;
     b0=b1=b2=b3=0;
     for (j=0;j<8;j++)
     {
-      b0|=(Src[ip] & 0x01)?masque:0x00;
-      b1|=(Src[ip] & 0x02)?masque:0x00;
-      b2|=(Src[ip] & 0x04)?masque:0x00;
-      b3|=(Src[ip] & 0x08)?masque:0x00;
+      b0|=(Src[ip] & 0x01)?Mask:0x00;
+      b1|=(Src[ip] & 0x02)?Mask:0x00;
+      b2|=(Src[ip] & 0x04)?Mask:0x00;
+      b3|=(Src[ip] & 0x08)?Mask:0x00;
       ip++;
-      masque>>=1;
+      Mask>>=1;
     }
     Dst0[i]=b0;
     Dst1[i]=b1;
@@ -5463,7 +5463,7 @@ void Load_RAW_24B(int Largeur,int Hauteur,Bitmap24B Source)
   fclose(Fichier);
 }
 
-void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
+void Load_TGA(char * Nom,Bitmap24B * dest,int * Largeur,int * Hauteur)
 {
   FILE* fichier;
   struct
@@ -5484,13 +5484,13 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
   int x,y,py,skip,t;
   byte * buffer;
 
-  fichier=fopen(nom,"rb");
+  fichier=fopen(Nom,"rb");
   read_bytes(fichier,&TGA_Header,sizeof(TGA_Header));
   if (TGA_Header.Image_type_code==2)
   {
-    *larg=TGA_Header.Width;
-    *haut=TGA_Header.Height;
-    *dest=(Bitmap24B)malloc((*larg)*(*haut)*3);
+    *Largeur=TGA_Header.Width;
+    *Hauteur=TGA_Header.Height;
+    *dest=(Bitmap24B)malloc((*Largeur)*(*Hauteur)*3);
 
     // On saute l'ID field
     fseek(fichier,TGA_Header.Id_field_size,SEEK_CUR);
@@ -5513,7 +5513,7 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
     fseek(fichier,skip,SEEK_CUR);
 
     // Lecture des pixels
-    skip=(*larg);
+    skip=(*Largeur);
     if (TGA_Header.Pixel_size==16)
       skip*=2;
     else
@@ -5524,12 +5524,12 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
       skip*=4;
 
     buffer=(byte *)malloc(skip);
-    for (y=0;y<(*haut);y++)
+    for (y=0;y<(*Hauteur);y++)
     {
       read_bytes(fichier,buffer,skip);
 
       // Inversion du rouge et du bleu
-      for (x=0;x<(*larg);x++)
+      for (x=0;x<(*Largeur);x++)
       {
         t=buffer[(x*3)+0];
         buffer[(x*3)+0]=buffer[(x*3)+2];
@@ -5540,13 +5540,13 @@ void Load_TGA(char * nom,Bitmap24B * dest,int * larg,int * haut)
       if (TGA_Header.Descriptor & 0x20)
         py=y;
       else
-        py=(*haut)-y-1;
+        py=(*Hauteur)-y-1;
 
       // Prise en compte de l'interleave verticale
       if (TGA_Header.Descriptor & 0xC0)
-        py=((py % (*haut))*2)+(py/(*haut));
+        py=((py % (*Hauteur))*2)+(py/(*Hauteur));
 
-      memcpy((*dest)+(py*(*larg)),buffer,skip);
+      memcpy((*dest)+(py*(*Largeur)),buffer,skip);
     }
     free(buffer);
   }

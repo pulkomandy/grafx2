@@ -599,14 +599,14 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
         word Facteur, word Largeur
 )
 {
-        byte couleur;
-        word larg;
+        byte Color;
+        word X;
 
         // Pour chaque pixel
-        for(larg=0;larg<Largeur;larg++){
-                couleur = *Ligne_originale;
+        for(X=0;X<Largeur;X++){
+                Color = *Ligne_originale;
 
-                memset(Ligne_zoomee,couleur,Facteur);
+                memset(Ligne_zoomee,Color,Facteur);
                 Ligne_zoomee+=Facteur;
 
                 Ligne_originale++;

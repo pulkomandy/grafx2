@@ -83,8 +83,8 @@ void Interchanger_image_principale_et_brouillon(void);
   /// GESTION DES EMPRUNTS DE MEMOIRE DE PAGE
   ///
 
-int Emprunt_memoire_de_page_possible(int taille);
-void * Emprunter_memoire_de_page(int taille);
+int Emprunt_memoire_de_page_possible(int Taille);
+void * Emprunter_memoire_de_page(int Taille);
 
 
 

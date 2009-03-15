@@ -271,16 +271,16 @@ void Afficher_aide(void)
       break;
     }
     // On affiche la ligne
-    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].texte;
-    TypeLigne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].type;
+    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Text;
+    TypeLigne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Line_type;
     // Si c'est une sous-ligne de titre, on utilise le texte de la ligne précédente
     if (TypeLigne == '-' && (Ligne_de_depart + Indice_de_ligne > 0))
-      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1].texte;
+      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1].Text;
     else if (TypeLigne == 'K')
     {
       const char *Lien;
       Position_lien = strstr(Ligne,"%s") - Ligne;
-      Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].valeur);
+      Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Line_parameter);
       Taille_lien=strlen(Lien);
       snprintf(Buffer, 44, Ligne, Lien);
       if (strlen(Ligne)+Taille_lien-2>44)
@@ -416,8 +416,8 @@ void Fenetre_aide(int Section, const char *Sous_section)
   {
     int Indice=0;
     for (Indice=0; Indice<Nb_lignes; Indice++)
-      if (Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].type == 'T' &&
-        !strcmp(Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].texte, Sous_section))
+      if (Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].Line_type == 'T' &&
+        !strcmp(Table_d_aide[Section_d_aide_en_cours].Table_aide[Indice].Text, Sous_section))
       {
         Position_d_aide_en_cours = Indice;
         break;
@@ -469,10 +469,10 @@ void Fenetre_aide(int Section, const char *Sous_section)
           {
             if (Position_d_aide_en_cours+Ligne<Nb_lignes)
             {
-              switch (Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].type)
+              switch (Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].Line_type)
               {
                 case 'K':
-                  Fenetre_controle(Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].valeur);
+                  Fenetre_controle(Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].Line_parameter);
                 break;
                 // Ici on peut gérer un cas 'lien hypertexte'
                 default:

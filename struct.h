@@ -141,9 +141,9 @@ typedef struct Element_de_liste_de_fileselect
 } Element_de_liste_de_fileselect;
 
 typedef struct {
-  char type;
-  char * texte;
-  int valeur;
+  char Line_type;
+  char * Text;
+  int Line_parameter;
 } T_TABLEAIDE;
 
 // Déclaration d'une section d'aide:
