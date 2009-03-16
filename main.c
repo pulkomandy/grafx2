@@ -66,6 +66,13 @@
     #include "realpath.h"
 #endif
 
+#if defined (__WIN32__)
+  // On Windows, SDL_putenv is not present in any compilable header.
+  // It can be linked anyway, this declaration only avoids
+  // a compilation warning.
+  extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
+#endif
+
 byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
 
 
