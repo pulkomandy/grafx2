@@ -282,7 +282,8 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 }
 
 // ------------------------ Initialiser le programme -------------------------
-void Initialisation_du_programme(int argc,char * argv[])
+// Returns 0 on fail
+int Initialisation_du_programme(int argc,char * argv[])
 {
   int Temp;
   int Mode_dans_lequel_on_demarre;
@@ -369,9 +370,16 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Loupe_Decalage_X=0;
   Brouillon_Loupe_Decalage_Y=0;
 
-  // SDL
+  SDL_putenv("SDL_VIDEO_WINDOW_POS=center");
+  SDL_putenv("SDL_VIDEO_CENTERED=1");
 
-  SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);
+  // SDL
+  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  {
+    // The program can't continue without that anyway
+    printf("Couldn't initialize SDL.\n");
+    return(0);
+  }
   joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
@@ -597,6 +605,7 @@ void Initialisation_du_programme(int argc,char * argv[])
   Brosse_Hauteur=1;
   Capturer_brosse(0,0,0,0,0);
   *Brosse=CM_Blanc;
+  return(1);
 }
 
 // ------------------------- Fermeture du programme --------------------------
@@ -645,7 +654,10 @@ int main(int argc,char * argv[])
   char Nom_du_fichier_Phoenix[TAILLE_CHEMIN_FICHIER];
   char Nom_du_fichier_Phoenix2[TAILLE_CHEMIN_FICHIER];
 
-  Initialisation_du_programme(argc,argv);
+  if(!Initialisation_du_programme(argc,argv))
+  {
+    return 0;
+  }
 
   // Test de recuperation de fichiers sauvés
   strcpy(Nom_du_fichier_Phoenix,Repertoire_de_configuration);

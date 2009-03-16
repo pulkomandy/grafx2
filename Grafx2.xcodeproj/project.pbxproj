@@ -57,6 +57,7 @@
 		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
 		F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */; };
 		F5B1EE850EAD0F4E00B087B6 /* gfx2gui.gif in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B6 /* gfx2gui.gif */; };
+		F5CDCE320F6EA6D600B31F63 /* pxdouble.c in Sources */ = {isa = PBXBuildFile; fileRef = F5CDCE310F6EA6D600B31F63 /* pxdouble.c */; };
 		F5DCE2BC0EA5116A0065B0EF /* SDL_ttf in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BE0EA5118F0065B0EF /* SDL_ttf */; };
 		F5DCE2BC0EA5116B0065B0EF /* SDL_image in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BB0EA5116B0065B0EF /* SDL_image */; };
 		F5DCE2BE0EA5118E0065B0EF /* SDL in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = F5DCE2BD0EA5118E0065B0EF /* SDL */; };
@@ -172,6 +173,7 @@
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2def.ini; sourceTree = "<group>"; };
 		F5B1EE840EAD0F4E00B087B6 /* gfx2gui.gif */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2gui.gif; sourceTree = "<group>"; };
+		F5CDCE310F6EA6D600B31F63 /* pxdouble.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxdouble.c; sourceTree = "<group>"; };
 		F5DCE2BB0EA5116B0065B0EF /* SDL_image */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_image; path = /Library/Frameworks/SDL_image.framework/Versions/A/SDL_image; sourceTree = "<absolute>"; };
 		F5DCE2BD0EA5118E0065B0EF /* SDL */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL; path = /Library/Frameworks/SDL.framework/Versions/A/SDL; sourceTree = "<absolute>"; };
 		F5DCE2BE0EA5118F0065B0EF /* SDL_ttf */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = SDL_ttf; path = /Library/Frameworks/SDL_ttf.framework/Versions/A/SDL_ttf; sourceTree = "<absolute>"; };
@@ -233,6 +235,7 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F5CDCE310F6EA6D600B31F63 /* pxdouble.c */,
 				F5AC28B90F4873C700455509 /* hotkeys.c */,
 				F5AC28BA0F4873C700455509 /* input.c */,
 				F5AC28BB0F4873C700455509 /* realpath.c */,
@@ -412,6 +415,7 @@
 				F5AC28BC0F4873C700455509 /* hotkeys.c in Sources */,
 				F5AC28BD0F4873C700455509 /* input.c in Sources */,
 				F5AC28BE0F4873C700455509 /* realpath.c in Sources */,
+				F5CDCE320F6EA6D600B31F63 /* pxdouble.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,11 +527,18 @@
 					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
 					/Library/Frameworks/SDL.framework/Headers,
 					/Library/SDL_ttf.framework/Headers,
+					/usr/local/include,
 					"$(HEADER_SEARCH_PATHS)",
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-lpng",
+					"-lz",
 				);
 				PREBINDING = NO;
 				PRELINK_LIBS = SDL_Image;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -549,11 +560,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
 					/Library/Frameworks/SDL.framework/Headers,
+					/usr/local/include,
 					"$(HEADER_SEARCH_PATHS)",
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-lpng",
+					"-lz",
 				);
 				PREBINDING = NO;
 				PRELINK_LIBS = SDL_Image;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 			};
 			name = Release;
 		};

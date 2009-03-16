@@ -22,10 +22,6 @@
 */
 #define _XOPEN_SOURCE
 
-#if defined(__macosx__)
-#define __no_pnglib__
-#endif
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdio.h>
