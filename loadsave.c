@@ -243,7 +243,7 @@ fonction_afficheur_24b Pixel_Chargement_24b;
 
 
 // Chargement des pixels dans le buffer 24b
-void Pixel_Chargement_dans_buffer_24b(short Pos_X,short Pos_Y,byte R,byte V,byte B)
+void Pixel_Chargement_dans_buffer_24b(short Pos_X,short Pos_Y,byte r,byte g,byte b)
 {
   int index;
 
@@ -251,23 +251,23 @@ void Pixel_Chargement_dans_buffer_24b(short Pos_X,short Pos_Y,byte R,byte V,byte
   if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
   {
     index=(Pos_Y*Principal_Largeur_image)+Pos_X;
-    Buffer_image_24b[index].R=R;
-    Buffer_image_24b[index].V=V;
-    Buffer_image_24b[index].B=B;
+    Buffer_image_24b[index].R=r;
+    Buffer_image_24b[index].V=g;
+    Buffer_image_24b[index].B=b;
   }
 }
 
 // Chargement des pixels dans la preview en 24b
-void Pixel_Chargement_dans_preview_24b(short Pos_X,short Pos_Y,byte R,byte V,byte B)
+void Pixel_Chargement_dans_preview_24b(short Pos_X,short Pos_Y,byte r,byte g,byte b)
 {
   byte Couleur;
 
   if (((Pos_X % Preview_Facteur_X)==0) && ((Pos_Y % Preview_Facteur_Y)==0))
   if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
   {
-    Couleur=((R >> 5) << 5) |
-            ((V >> 5) << 2) |
-            ((B >> 6));
+    Couleur=((r >> 5) << 5) |
+            ((g >> 5) << 2) |
+            ((b >> 6));
     Pixel(Preview_Pos_X+(Pos_X/Preview_Facteur_X),
           Preview_Pos_Y+(Pos_Y/Preview_Facteur_Y),
           Couleur);
@@ -1061,7 +1061,7 @@ void Load_PKM(void)
   T_Header_PKM Head;
   byte  Couleur;
   byte  Octet;
-  word  Mot;
+  word  len;
   word  Indice;
   dword Compteur_de_pixels;
   dword Compteur_de_donnees_packees;
@@ -1229,12 +1229,12 @@ void Load_PKM(void)
               else // ... nombre de pixels tenant sur un word
               {
                 Lire_octet(Fichier, &Couleur);
-                read_word_be(Fichier, &Mot);
-                for (Indice=0; Indice<Mot; Indice++)
+                read_word_be(Fichier, &len);
+                for (Indice=0; Indice<len; Indice++)
                   Pixel_de_chargement((Compteur_de_pixels+Indice) % Principal_Largeur_image,
                                       (Compteur_de_pixels+Indice) / Principal_Largeur_image,
                                       Couleur);
-                Compteur_de_pixels+=Mot;
+                Compteur_de_pixels+=len;
                 Compteur_de_donnees_packees+=4;
               }
             }
@@ -1522,90 +1522,90 @@ void Test_LBM(void)
   // ---------------- Adapter la palette pour les images HAM ----------------
   void Adapter_Palette_HAM(void)
   {
-    short I,J,Temp;
+    short i,j,Temp;
     byte  Couleur;
 
     if (Image_HAM==6)
     {
-      for (I=1; I<=14; I++)
+      for (i=1; i<=14; i++)
       {
         // On recopie a palette de base
-        memcpy(Principal_Palette+(I<<4),Principal_Palette,48);
+        memcpy(Principal_Palette+(i<<4),Principal_Palette,48);
         // On modifie les teintes de cette palette
-        for (J=0; J<16; J++)
+        for (j=0; j<16; j++)
         {
-          Couleur=(I<<4)+J;
-          if (I<=7)
+          Couleur=(i<<4)+j;
+          if (i<=7)
           {
-            if (I&1)
+            if (i&1)
             {
-              Temp=Principal_Palette[J].R+16;
+              Temp=Principal_Palette[j].R+16;
               Principal_Palette[Couleur].R=(Temp<63)?Temp:63;
             }
-            if (I&2)
+            if (i&2)
             {
-              Temp=Principal_Palette[J].V+16;
+              Temp=Principal_Palette[j].V+16;
               Principal_Palette[Couleur].V=(Temp<63)?Temp:63;
             }
-            if (I&4)
+            if (i&4)
             {
-              Temp=Principal_Palette[J].B+16;
+              Temp=Principal_Palette[j].B+16;
               Principal_Palette[Couleur].B=(Temp<63)?Temp:63;
             }
           }
           else
           {
-            if ((I-7)&1)
+            if ((i-7)&1)
             {
-              Temp=Principal_Palette[J].R-16;
+              Temp=Principal_Palette[j].R-16;
               Principal_Palette[Couleur].R=(Temp>=0)?Temp:0;
             }
-            if ((I-7)&2)
+            if ((i-7)&2)
             {
-              Temp=Principal_Palette[J].V-16;
+              Temp=Principal_Palette[j].V-16;
               Principal_Palette[Couleur].V=(Temp>=0)?Temp:0;
             }
-            if ((I-7)&4)
+            if ((i-7)&4)
             {
-              Temp=Principal_Palette[J].B-16;
+              Temp=Principal_Palette[j].B-16;
               Principal_Palette[Couleur].B=(Temp>=0)?Temp:0;
             }
           }
         }
       }
       // Ici, il reste les 16 dernières couleurs à modifier
-      for (I=240,J=0; J<16; I++,J++)
+      for (i=240,j=0; j<16; i++,j++)
       {
-        Temp=Principal_Palette[J].R+8;
-        Principal_Palette[I].R=(Temp<63)?Temp:63;
-        Temp=Principal_Palette[J].V+8;
-        Principal_Palette[I].V=(Temp<63)?Temp:63;
-        Temp=Principal_Palette[J].B+8;
-        Principal_Palette[I].B=(Temp<63)?Temp:63;
+        Temp=Principal_Palette[j].R+8;
+        Principal_Palette[i].R=(Temp<63)?Temp:63;
+        Temp=Principal_Palette[j].V+8;
+        Principal_Palette[i].V=(Temp<63)?Temp:63;
+        Temp=Principal_Palette[j].B+8;
+        Principal_Palette[i].B=(Temp<63)?Temp:63;
       }
     }
     else if (Image_HAM==8)
     {
-      for (I=1; I<=3; I++)
+      for (i=1; i<=3; i++)
       {
         // On recopie la palette de base
-        memcpy(Principal_Palette+(I<<6),Principal_Palette,192);
+        memcpy(Principal_Palette+(i<<6),Principal_Palette,192);
         // On modifie les teintes de cette palette
-        for (J=0; J<64; J++)
+        for (j=0; j<64; j++)
         {
-          Couleur=(I<<6)+J;
-          switch (I)
+          Couleur=(i<<6)+j;
+          switch (i)
           {
             case 1 :
-              Temp=Principal_Palette[J].R+16;
+              Temp=Principal_Palette[j].R+16;
               Principal_Palette[Couleur].R=(Temp<63)?Temp:63;
               break;
             case 2 :
-              Temp=Principal_Palette[J].V+16;
+              Temp=Principal_Palette[j].V+16;
               Principal_Palette[Couleur].V=(Temp<63)?Temp:63;
               break;
             default:
-              Temp=Principal_Palette[J].B+16;
+              Temp=Principal_Palette[j].B+16;
               Principal_Palette[Couleur].B=(Temp<63)?Temp:63;
           }
         }
@@ -1613,12 +1613,12 @@ void Test_LBM(void)
     }
     else // Image 64 couleurs sauvée en 32.
     {
-      for (I=0; I<32; I++)
+      for (i=0; i<32; i++)
       {
-        J=I+32;
-        Principal_Palette[J].R=Principal_Palette[I].R>>1;
-        Principal_Palette[J].V=Principal_Palette[I].V>>1;
-        Principal_Palette[J].B=Principal_Palette[I].B>>1;
+        j=i+32;
+        Principal_Palette[j].R=Principal_Palette[i].R>>1;
+        Principal_Palette[j].V=Principal_Palette[i].V>>1;
+        Principal_Palette[j].B=Principal_Palette[i].B>>1;
       }
     }
   }
@@ -1758,7 +1758,7 @@ void Load_LBM(void)
   dword Taille_image;
   short Pos_X;
   short Pos_Y;
-  short Compteur;
+  short counter;
   short Taille_ligne;       // Taille d'une ligne en octets
   short Vraie_taille_ligne; // Taille d'une ligne en pixels
   byte  Couleur;
@@ -1912,14 +1912,14 @@ void Load_LBM(void)
                         {
                           Lire_octet(LBM_Fichier, &Couleur);
                           B256=(short)(256-Octet);
-                          for (Compteur=0; Compteur<=B256; Compteur++)
+                          for (counter=0; counter<=B256; counter++)
                             if (Pos_X<Taille_ligne)
                               LBM_Buffer[Pos_X++]=Couleur;
                             else
                               Erreur_fichier=2;
                         }
                         else
-                          for (Compteur=0; Compteur<=(short)(Octet); Compteur++)
+                          for (counter=0; counter<=(short)(Octet); counter++)
                             if (Pos_X<Taille_ligne)
                               Lire_octet(LBM_Fichier, &(LBM_Buffer[Pos_X++]));
                             else
@@ -1962,11 +1962,11 @@ void Load_LBM(void)
                         {
                           Lire_octet(LBM_Fichier, &Couleur);
                           B256=256-Octet;
-                          for (Compteur=0; Compteur<=B256; Compteur++)
+                          for (counter=0; counter<=B256; counter++)
                             Pixel_de_chargement(Pos_X++,Pos_Y,Couleur);
                         }
                         else
-                          for (Compteur=0; Compteur<=Octet; Compteur++)
+                          for (counter=0; counter<=Octet; counter++)
                           {
                             byte Lu=0;
                             Lire_octet(LBM_Fichier, &Lu);
@@ -2302,7 +2302,7 @@ void Load_BMP(void)
   short Pos_X;
   short Pos_Y;
   word  Taille_ligne;
-  byte  A,B,C=0;
+  byte  a,b,c=0;
   long  Taille_du_fichier;
   struct stat Informations_Fichier;
 
@@ -2415,15 +2415,15 @@ void Load_BMP(void)
                 Pos_Y=Principal_Hauteur_image-1;
 
                 /*Init_lecture();*/
-                Lire_octet(Fichier, &A);
-                Lire_octet(Fichier, &B);
-                while ( (!Erreur_fichier) && ((A)||(B!=1)) )
+                Lire_octet(Fichier, &a);
+                Lire_octet(Fichier, &b);
+                while ( (!Erreur_fichier) && ((a)||(b!=1)) )
                 {
-                  if (A) // Encoded mode
-                    for (Indice=1; Indice<=A; Indice++)
-                      Pixel_de_chargement(Pos_X++,Pos_Y,B);
+                  if (a) // Encoded mode
+                    for (Indice=1; Indice<=a; Indice++)
+                      Pixel_de_chargement(Pos_X++,Pos_Y,b);
                   else   // Absolute mode
-                    switch (B)
+                    switch (b)
                     {
                       case 0 : // End of line
                         Pos_X=0;
@@ -2432,26 +2432,26 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        Lire_octet(Fichier, &A);
-                        Lire_octet(Fichier, &B);
-                        Pos_X+=A;
-                        Pos_Y-=B;
+                        Lire_octet(Fichier, &a);
+                        Lire_octet(Fichier, &b);
+                        Pos_X+=a;
+                        Pos_Y-=b;
                         break;
                       default: // Nouvelle série
-                        while (B)
+                        while (b)
                         {
-                          Lire_octet(Fichier, &A);
-                          Lire_octet(Fichier, &C);
-                          Pixel_de_chargement(Pos_X++,Pos_Y,A);
-                          if (--B)
+                          Lire_octet(Fichier, &a);
+                          Lire_octet(Fichier, &c);
+                          Pixel_de_chargement(Pos_X++,Pos_Y,a);
+                          if (--c)
                           {
-                            Pixel_de_chargement(Pos_X++,Pos_Y,C);
-                            B--;
+                            Pixel_de_chargement(Pos_X++,Pos_Y,c);
+                            b--;
                           }
                         }
                     }
-                  Lire_octet(Fichier, &A);
-                  Lire_octet(Fichier, &B);
+                  Lire_octet(Fichier, &a);
+                  Lire_octet(Fichier, &b);
                 }
                 /*Close_lecture();*/
                 break;
@@ -2461,21 +2461,21 @@ void Load_BMP(void)
                 Pos_Y=Principal_Hauteur_image-1;
 
                 /*Init_lecture();*/
-                Lire_octet(Fichier, &A);
-                Lire_octet(Fichier, &B);
-                while ( (!Erreur_fichier) && ((A)||(B!=1)) )
+                Lire_octet(Fichier, &a);
+                Lire_octet(Fichier, &b);
+                while ( (!Erreur_fichier) && ((a)||(b!=1)) )
                 {
-                  if (A) // Encoded mode (A fois les 1/2 pixels de B)
-                    for (Indice=1; Indice<=A; Indice++)
+                  if (a) // Encoded mode (A fois les 1/2 pixels de B)
+                    for (Indice=1; Indice<=a; Indice++)
                     {
                       if (Indice & 1)
-                        Pixel_de_chargement(Pos_X,Pos_Y,B>>4);
+                        Pixel_de_chargement(Pos_X,Pos_Y,b>>4);
                       else
-                        Pixel_de_chargement(Pos_X,Pos_Y,B&0xF);
+                        Pixel_de_chargement(Pos_X,Pos_Y,b&0xF);
                       Pos_X++;
                     }
                   else   // Absolute mode
-                    switch (B)
+                    switch (b)
                     {
                       case 0 : //End of line
                         Pos_X=0;
@@ -2484,32 +2484,32 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        Lire_octet(Fichier, &A);
-                        Lire_octet(Fichier, &B);
-                        Pos_X+=A;
-                        Pos_Y-=B;
+                        Lire_octet(Fichier, &a);
+                        Lire_octet(Fichier, &b);
+                        Pos_X+=a;
+                        Pos_Y-=b;
                         break;
                       default: // Nouvelle série (B 1/2 pixels bruts)
-                        for (Indice=1; ((Indice<=B) && (!Erreur_fichier)); Indice++,Pos_X++)
+                        for (Indice=1; ((Indice<=b) && (!Erreur_fichier)); Indice++,Pos_X++)
                         {
                           if (Indice&1)
                           {
-                            Lire_octet(Fichier, &C);
-                            Pixel_de_chargement(Pos_X,Pos_Y,C>>4);
+                            Lire_octet(Fichier, &c);
+                            Pixel_de_chargement(Pos_X,Pos_Y,c>>4);
                           }
                           else
-                            Pixel_de_chargement(Pos_X,Pos_Y,C&0xF);
+                            Pixel_de_chargement(Pos_X,Pos_Y,c&0xF);
                         }
                         //   On lit l'octet rendant le nombre d'octets pair, si
                         // nécessaire. Encore un truc de crétin "made in MS".
-                        if ( ((B&3)==1) || ((B&3)==2) )
+                        if ( ((b&3)==1) || ((b&3)==2) )
                         {
                           byte Dummy;
                           Lire_octet(Fichier, &Dummy);
                         }
                     }
-                  Lire_octet(Fichier, &A);
-                  Lire_octet(Fichier, &B);
+                  Lire_octet(Fichier, &a);
+                  Lire_octet(Fichier, &b);
                 }
                 /*Close_lecture();*/
             }
@@ -3234,7 +3234,7 @@ void Save_GIF(void)
 
   byte Block_indicateur;  // Code indicateur du type de bloc en cours
   word Chaine_en_cours;   // Code de la chaîne en cours de traitement
-  byte Caractere;         // Caractère à coder
+  byte current_char;         // Caractère à coder
   word Indice;            // Indice de recherche de chaîne
 
 
@@ -3354,14 +3354,14 @@ void Save_GIF(void)
 
             do
             {
-              Caractere=GIF_Pixel_suivant();
+              current_char=GIF_Pixel_suivant();
 
               //   On regarde si dans la table on aurait pas une chaîne
               // équivalente à Chaine_en_cours+Caractere
 
               while ( (Indice<Alphabet_Free) &&
                       ( (Chaine_en_cours!=Alphabet_Prefixe[Indice]) ||
-                        (Caractere      !=Alphabet_Suffixe[Indice]) ) )
+                        (current_char      !=Alphabet_Suffixe[Indice]) ) )
               {
                 Descente=0;
                 Depart=Indice;
@@ -3387,7 +3387,7 @@ void Save_GIF(void)
 
                 // On rajoute la chaîne Chaine_en_cours+Caractere à la table
                 Alphabet_Prefixe[Alphabet_Free  ]=Chaine_en_cours;
-                Alphabet_Suffixe[Alphabet_Free++]=Caractere;
+                Alphabet_Suffixe[Alphabet_Free++]=current_char;
 
                 // On écrit le code dans le fichier
                 GIF_Set_code(Chaine_en_cours);
@@ -3414,8 +3414,8 @@ void Save_GIF(void)
                 }
 
                 // On initialise la Chaine_en_cours et le reste pour la suite
-                Indice=Alphabet_Fille[Caractere];
-                Depart=Chaine_en_cours=Caractere;
+                Indice=Alphabet_Fille[current_char];
+                Depart=Chaine_en_cours=current_char;
                 Descente=1;
               }
             }
@@ -3947,7 +3947,7 @@ void Save_PCX(void)
   short Taille_ligne;
   short Pos_X;
   short Pos_Y;
-  byte  Compteur;
+  byte  counter;
   byte  Last_pixel;
   byte  Pixel_lu;
 
@@ -4012,16 +4012,16 @@ void Save_PCX(void)
           Pos_X++;
           Last_pixel=Pixel_lu;
           Pixel_lu=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
-          Compteur=1;
-          while ( (Compteur<63) && (Pos_X<Taille_ligne) && (Pixel_lu==Last_pixel) )
+          counter=1;
+          while ( (counter<63) && (Pos_X<Taille_ligne) && (Pixel_lu==Last_pixel) )
           {
-            Compteur++;
+            counter++;
             Pos_X++;
             Pixel_lu=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
           }
       
-          if ( (Compteur>1) || (Last_pixel>=0xC0) )
-            Ecrire_octet(Fichier,Compteur|0xC0);
+          if ( (counter>1) || (Last_pixel>=0xC0) )
+            Ecrire_octet(Fichier,counter|0xC0);
           Ecrire_octet(Fichier,Last_pixel);
       
         }
@@ -4831,10 +4831,10 @@ void Save_SCx(void)
 void PI1_8b_to_16p(byte * Src,byte * Dst)
 {
   int  i;           // Indice du pixel à calculer
-  word Mask;      // Masque de decodage
+  word byte_mask;      // Masque de decodage
   word w0,w1,w2,w3; // Les 4 words bien ordonnés de la source
 
-  Mask=0x8000;
+  byte_mask=0x8000;
   w0=(((word)Src[0])<<8) | Src[1];
   w1=(((word)Src[2])<<8) | Src[3];
   w2=(((word)Src[4])<<8) | Src[5];
@@ -4844,11 +4844,11 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
     // Pour décoder le pixel n°i, il faut traiter les 4 words sur leur bit
     // correspondant à celui du masque
 
-    Dst[i]=((w0 & Mask)?0x01:0x00) |
-           ((w1 & Mask)?0x02:0x00) |
-           ((w2 & Mask)?0x04:0x00) |
-           ((w3 & Mask)?0x08:0x00);
-    Mask>>=1;
+    Dst[i]=((w0 & byte_mask)?0x01:0x00) |
+           ((w1 & byte_mask)?0x02:0x00) |
+           ((w2 & byte_mask)?0x04:0x00) |
+           ((w3 & byte_mask)?0x08:0x00);
+    byte_mask>>=1;
   }
 }
 
@@ -4857,21 +4857,21 @@ void PI1_8b_to_16p(byte * Src,byte * Dst)
 void PI1_16p_to_8b(byte * Src,byte * Dst)
 {
   int  i;           // Indice du pixel à calculer
-  word Mask;      // Masque de codage
+  word byte_mask;      // Masque de codage
   word w0,w1,w2,w3; // Les 4 words bien ordonnés de la destination
 
-  Mask=0x8000;
+  byte_mask=0x8000;
   w0=w1=w2=w3=0;
   for (i=0;i<16;i++)
   {
     // Pour coder le pixel n°i, il faut modifier les 4 words sur leur bit
     // correspondant à celui du masque
 
-    w0|=(Src[i] & 0x01)?Mask:0x00;
-    w1|=(Src[i] & 0x02)?Mask:0x00;
-    w2|=(Src[i] & 0x04)?Mask:0x00;
-    w3|=(Src[i] & 0x08)?Mask:0x00;
-    Mask>>=1;
+    w0|=(Src[i] & 0x01)?byte_mask:0x00;
+    w1|=(Src[i] & 0x02)?byte_mask:0x00;
+    w2|=(Src[i] & 0x04)?byte_mask:0x00;
+    w3|=(Src[i] & 0x08)?byte_mask:0x00;
+    byte_mask>>=1;
   }
   Dst[0]=w0 >> 8;
   Dst[1]=w0 & 0x00FF;
@@ -5208,7 +5208,7 @@ void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
 {
   int  i,j;         // Compteurs
   int  ip;          // Indice du pixel à calculer
-  byte Mask;      // Masque de decodage
+  byte byte_mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
   ip=0;
@@ -5220,14 +5220,14 @@ void PC1_4pb_to_1lp(byte * Src0,byte * Src1,byte * Src2,byte * Src3,byte * Dst)
     b2=Src2[i];
     b3=Src3[i];
     // Pour chacun des 8 bits des octets
-    Mask=0x80;
+    byte_mask=0x80;
     for (j=0;j<8;j++)
     {
-      Dst[ip++]=((b0 & Mask)?0x01:0x00) |
-                ((b1 & Mask)?0x02:0x00) |
-                ((b2 & Mask)?0x04:0x00) |
-                ((b3 & Mask)?0x08:0x00);
-      Mask>>=1;
+      Dst[ip++]=((b0 & byte_mask)?0x01:0x00) |
+                ((b1 & byte_mask)?0x02:0x00) |
+                ((b2 & byte_mask)?0x04:0x00) |
+                ((b3 & byte_mask)?0x08:0x00);
+      byte_mask>>=1;
     }
   }
 }
@@ -5240,7 +5240,7 @@ void PC1_1lp_to_4pb(byte * Src,byte * Dst0,byte * Dst1,byte * Dst2,byte * Dst3)
 {
   int  i,j;         // Compteurs
   int  ip;          // Indice du pixel à calculer
-  byte Mask;      // Masque de decodage
+  byte byte_mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
   ip=0;
@@ -5248,16 +5248,16 @@ void PC1_1lp_to_4pb(byte * Src,byte * Dst0,byte * Dst1,byte * Dst2,byte * Dst3)
   for (i=0;i<40;i++)
   {
     // Pour chacun des 8 bits des octets
-    Mask=0x80;
+    byte_mask=0x80;
     b0=b1=b2=b3=0;
     for (j=0;j<8;j++)
     {
-      b0|=(Src[ip] & 0x01)?Mask:0x00;
-      b1|=(Src[ip] & 0x02)?Mask:0x00;
-      b2|=(Src[ip] & 0x04)?Mask:0x00;
-      b3|=(Src[ip] & 0x08)?Mask:0x00;
+      b0|=(Src[ip] & 0x01)?byte_mask:0x00;
+      b1|=(Src[ip] & 0x02)?byte_mask:0x00;
+      b2|=(Src[ip] & 0x04)?byte_mask:0x00;
+      b3|=(Src[ip] & 0x08)?byte_mask:0x00;
       ip++;
-      Mask>>=1;
+      byte_mask>>=1;
     }
     Dst0[i]=b0;
     Dst1[i]=b1;

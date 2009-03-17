@@ -1225,15 +1225,13 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
     else if ( tan > 0.4142 && tan < 2.4142)
     {
       // Cas 2 : dy=dx
-      int nBY = AY - dx;
-      *BY = (*BY + nBY)/2;
+      *BY = (*BY + AY - dx)/2;
       *BX = AX  + AY - *BY;
     }
     else if (tan < -0.4142 && tan >= -2.4142)
     {
       // Cas 8 : dy = -dx
-      int nBY = AY + dx;
-      *BY = (*BY + nBY)/2;
+      *BY = (*BY + AY + dx)/2;
       *BX = AX  - AY + *BY;
     }
     else
@@ -1321,27 +1319,27 @@ void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, b
 void Tracer_ligne_Definitif(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
 {
 
-  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Definitif;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne --
 
 void Tracer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
-  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne en xor --
 
 void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
-  int L, H;
+  int w, h;
   Pixel_figure=Pixel_figure_Preview_xor;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
   if (Debut_X<0)
@@ -1352,29 +1350,29 @@ void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_
     Fin_X=0;
   if (Fin_Y<0)
     Fin_Y=0;
-  L = Fin_X-Debut_X;
-  H = Fin_Y-Debut_Y;
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+  w = Fin_X-Debut_X;
+  h = Fin_Y-Debut_Y;
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne en xor additif --
 
 void Tracer_ligne_Preview_xorback(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
 {
-  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Preview_xorback;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
 }
 
   // -- Effacer la preview d'une ligne --
 
 void Effacer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
 {
-  int L = Fin_X-Debut_X, H = Fin_Y - Debut_Y;
+  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
   Pixel_figure=Pixel_figure_Effacer_preview;
   Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(L)+1,abs(H)+1);
+  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
 }
 
 
@@ -1469,7 +1467,7 @@ void Tracer_courbe_General(short X1, short Y1,
                            short X4, short Y4,
                            byte Couleur)
 {
-  float Delta,T,T2,T3;
+  float Delta,t,t2,t3;
   short X,Y,Old_X,Old_Y;
   word  i;
   int   CX[4];
@@ -1490,12 +1488,12 @@ void Tracer_courbe_General(short X1, short Y1,
   Old_Y=Y1;
   Pixel_figure(Old_X,Old_Y,Couleur);
   Delta=0.05; // 1.0/20
-  T=0;
+  t=0;
   for (i=1; i<=20; i++)
   {
-    T=T+Delta; T2=T*T; T3=T2*T;
-    X=Round(T3*CX[0] + T2*CX[1] + T*CX[2] + CX[3]);
-    Y=Round(T3*CY[0] + T2*CY[1] + T*CY[2] + CY[3]);
+    t=t+Delta; t2=t*t; t3=t2*t;
+    X=Round(t3*CX[0] + t2*CX[1] + t*CX[2] + CX[3]);
+    Y=Round(t3*CY[0] + t2*CY[1] + t*CY[2] + CY[3]);
     Tracer_ligne_General(Old_X,Old_Y,X,Y,Couleur);
     Old_X=X;
     Old_Y=Y;
@@ -2111,7 +2109,7 @@ POLYGON_EDGE * remove_edge(POLYGON_EDGE *list, POLYGON_EDGE *edge)
  *  number of vertices, then an array containing a series of x, y points
  *  (a total of vertices*2 values).
  */
-void Polyfill_General(int Vertices, short * Points, int Color)
+void Polyfill_General(int Vertices, short * Points, int color)
 {
   short c;
   short top = 0x7FFF;
@@ -2176,7 +2174,7 @@ void Polyfill_General(int Vertices, short * Points, int Color)
         if (Fin_X>Limite_Droite)
           Fin_X=Limite_Droite;
         for (; Pos_X<=Fin_X; Pos_X++)
-          Pixel_figure(Pos_X,c,Color);
+          Pixel_figure(Pos_X,c,color);
         edge = edge->next->next;
       }
     }
@@ -2216,12 +2214,12 @@ void Polyfill_General(int Vertices, short * Points, int Color)
 }
 
 
-void Polyfill(int Vertices, short * Points, int Color)
+void Polyfill(int Vertices, short * Points, int color)
 {
   int Indice;
   byte *FX_Feedback_Ecran_avant_remplissage;
 
-  Pixel_clippe(Points[0],Points[1],Color);
+  Pixel_clippe(Points[0],Points[1],color);
   if (Vertices==1)
   {
     Mettre_Ecran_A_Jour(Points[0],Points[1],1,1);
@@ -2234,7 +2232,7 @@ void Polyfill(int Vertices, short * Points, int Color)
   FX_Feedback_Ecran=Ecran_backup;
 
   Pixel_figure=Pixel_clippe;    
-  Polyfill_General(Vertices,Points,Color);
+  Polyfill_General(Vertices,Points,color);
 
   // Remarque: pour dessiner la bordure avec la brosse en cours au lieu
   // d'un pixel de couleur premier-plan, il suffit de mettre ici:
@@ -2242,8 +2240,8 @@ void Polyfill(int Vertices, short * Points, int Color)
 
   // Dessin du contour
   for (Indice=0; Indice<Vertices-1;Indice+=1)
-    Tracer_ligne_General(Points[Indice*2],Points[Indice*2+1],Points[Indice*2+2],Points[Indice*2+3],Color);
-  Tracer_ligne_General(Points[0],Points[1],Points[Indice*2],Points[Indice*2+1],Color);
+    Tracer_ligne_General(Points[Indice*2],Points[Indice*2+1],Points[Indice*2+2],Points[Indice*2+3],color);
+  Tracer_ligne_General(Points[0],Points[1],Points[Indice*2],Points[Indice*2+1],color);
 
   // restore de l'etat du FX Feedback  
   FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;
@@ -2383,7 +2381,7 @@ byte Effet_Shade(word X,word Y,__attribute__((unused)) byte Couleur)
 
 byte Effet_Quick_shade(word X,word Y,byte Couleur)
 {
-  int C=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
+  int color=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
   int Sens=(Fore_color<=Back_color);
   byte Debut,Fin;
   int Largeur;
@@ -2399,33 +2397,33 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
     Fin  =Fore_color;
   }
 
-  if ((C>=Debut) && (C<=Fin) && (Debut!=Fin))
+  if ((color>=Debut) && (color<=Fin) && (Debut!=Fin))
   {
     Largeur=1+Fin-Debut;
 
     if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
-      C-=Quick_shade_Step%Largeur;
+      color-=Quick_shade_Step%Largeur;
     else
-      C+=Quick_shade_Step%Largeur;
+      color+=Quick_shade_Step%Largeur;
 
-    if (C<Debut)
+    if (color<Debut)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return Debut;
-        case MODE_SHADE_BOUCLE : return (Largeur+C);
+        case MODE_SHADE_BOUCLE : return (Largeur+color);
         default : return Couleur;
       }
 
-    if (C>Fin)
+    if (color>Fin)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return Fin;
-        case MODE_SHADE_BOUCLE : return (C-Largeur);
+        case MODE_SHADE_BOUCLE : return (color-Largeur);
         default : return Couleur;
       }
   }
 
-  return C;
+  return color;
 }
 
   // -- Effet de Tiling --
@@ -2440,95 +2438,95 @@ byte Effet_Tiling(word X,word Y,__attribute__((unused)) byte Couleur)
 
 byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 {
-  int R,V,B;
-  byte C;
+  int r,g,b;
+  byte color;
   int Poids,Poids_total;
   byte X2=((X+1)<Principal_Largeur_image);
   byte Y2=((Y+1)<Principal_Hauteur_image);
 
   // On commence par le pixel central
-  C=Lit_pixel_dans_ecran_feedback(X,Y);
+  color=Lit_pixel_dans_ecran_feedback(X,Y);
   Poids_total=Smooth_Matrice[1][1];
-  R=Poids_total*Principal_Palette[C].R;
-  V=Poids_total*Principal_Palette[C].V;
-  B=Poids_total*Principal_Palette[C].B;
+  r=Poids_total*Principal_Palette[color].R;
+  g=Poids_total*Principal_Palette[color].V;
+  b=Poids_total*Principal_Palette[color].B;
 
   if (X)
   {
-    C=Lit_pixel_dans_ecran_feedback(X-1,Y);
+    color=Lit_pixel_dans_ecran_feedback(X-1,Y);
     Poids_total+=(Poids=Smooth_Matrice[0][1]);
-    R+=Poids*Principal_Palette[C].R;
-    V+=Poids*Principal_Palette[C].V;
-    B+=Poids*Principal_Palette[C].B;
+    r+=Poids*Principal_Palette[color].R;
+    g+=Poids*Principal_Palette[color].V;
+    b+=Poids*Principal_Palette[color].B;
 
     if (Y)
     {
-      C=Lit_pixel_dans_ecran_feedback(X-1,Y-1);
+      color=Lit_pixel_dans_ecran_feedback(X-1,Y-1);
       Poids_total+=(Poids=Smooth_Matrice[0][0]);
-      R+=Poids*Principal_Palette[C].R;
-      V+=Poids*Principal_Palette[C].V;
-      B+=Poids*Principal_Palette[C].B;
+      r+=Poids*Principal_Palette[color].R;
+      g+=Poids*Principal_Palette[color].V;
+      b+=Poids*Principal_Palette[color].B;
 
       if (Y2)
       {
-        C=Lit_pixel_dans_ecran_feedback(X-1,Y+1);
+        color=Lit_pixel_dans_ecran_feedback(X-1,Y+1);
         Poids_total+=(Poids=Smooth_Matrice[0][2]);
-        R+=Poids*Principal_Palette[C].R;
-        V+=Poids*Principal_Palette[C].V;
-        B+=Poids*Principal_Palette[C].B;
+        r+=Poids*Principal_Palette[color].R;
+        g+=Poids*Principal_Palette[color].V;
+        b+=Poids*Principal_Palette[color].B;
       }
     }
   }
 
   if (X2)
   {
-    C=Lit_pixel_dans_ecran_feedback(X+1,Y);
+    color=Lit_pixel_dans_ecran_feedback(X+1,Y);
     Poids_total+=(Poids=Smooth_Matrice[2][1]);
-    R+=Poids*Principal_Palette[C].R;
-    V+=Poids*Principal_Palette[C].V;
-    B+=Poids*Principal_Palette[C].B;
+    r+=Poids*Principal_Palette[color].R;
+    g+=Poids*Principal_Palette[color].V;
+    b+=Poids*Principal_Palette[color].B;
 
     if (Y)
     {
-      C=Lit_pixel_dans_ecran_feedback(X+1,Y-1);
+      color=Lit_pixel_dans_ecran_feedback(X+1,Y-1);
       Poids_total+=(Poids=Smooth_Matrice[2][0]);
-      R+=Poids*Principal_Palette[C].R;
-      V+=Poids*Principal_Palette[C].V;
-      B+=Poids*Principal_Palette[C].B;
+      r+=Poids*Principal_Palette[color].R;
+      g+=Poids*Principal_Palette[color].V;
+      b+=Poids*Principal_Palette[color].B;
 
       if (Y2)
       {
-        C=Lit_pixel_dans_ecran_feedback(X+1,Y+1);
+        color=Lit_pixel_dans_ecran_feedback(X+1,Y+1);
         Poids_total+=(Poids=Smooth_Matrice[2][2]);
-        R+=Poids*Principal_Palette[C].R;
-        V+=Poids*Principal_Palette[C].V;
-        B+=Poids*Principal_Palette[C].B;
+        r+=Poids*Principal_Palette[color].R;
+        g+=Poids*Principal_Palette[color].V;
+        b+=Poids*Principal_Palette[color].B;
       }
     }
   }
 
   if (Y)
   {
-    C=Lit_pixel_dans_ecran_feedback(X,Y-1);
+    color=Lit_pixel_dans_ecran_feedback(X,Y-1);
     Poids_total+=(Poids=Smooth_Matrice[1][0]);
-    R+=Poids*Principal_Palette[C].R;
-    V+=Poids*Principal_Palette[C].V;
-    B+=Poids*Principal_Palette[C].B;
+    r+=Poids*Principal_Palette[color].R;
+    g+=Poids*Principal_Palette[color].V;
+    b+=Poids*Principal_Palette[color].B;
   }
 
   if (Y2)
   {
-    C=Lit_pixel_dans_ecran_feedback(X,Y+1);
+    color=Lit_pixel_dans_ecran_feedback(X,Y+1);
     Poids_total+=(Poids=Smooth_Matrice[1][2]);
-    R+=Poids*Principal_Palette[C].R;
-    V+=Poids*Principal_Palette[C].V;
-    B+=Poids*Principal_Palette[C].B;
+    r+=Poids*Principal_Palette[color].R;
+    g+=Poids*Principal_Palette[color].V;
+    b+=Poids*Principal_Palette[color].B;
   }
 
   return (Poids_total)? // On regarde s'il faut éviter le 0/0.
-    Meilleure_couleur(Round_div(R,Poids_total),
-                      Round_div(V,Poids_total),
-                      Round_div(B,Poids_total)):
+    Meilleure_couleur(Round_div(r,Poids_total),
+                      Round_div(g,Poids_total),
+                      Round_div(b,Poids_total)):
     Lit_pixel_dans_ecran_courant(X,Y); // C'est bien l'écran courant et pas
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.

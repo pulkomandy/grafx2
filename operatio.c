@@ -3181,7 +3181,7 @@ void Etirer_brosse_1_7(void)
   short Largeur;
   short Hauteur;
   short Etat_prec;
-  short dX,dY,X,Y;
+  short dx,dy,X,Y;
 
   Operation_POP(&Etat_prec);
   Operation_POP(&Ancien_Y);
@@ -3221,10 +3221,10 @@ void Etirer_brosse_1_7(void)
     Y=Pinceau_Y;
     if (Snap_Mode && Config.Adjust_brush_pick)
     {
-      dX=Pinceau_X-Debut_X;
-      dY=Pinceau_Y-Debut_Y;
-      if (dX<0) X++; else {if (dX>0) X--;}
-      if (dY<0) Y++; else {if (dY>0) Y--;}
+      dx=Pinceau_X-Debut_X;
+      dy=Pinceau_Y-Debut_Y;
+      if (dx<0) X++; else {if (dx>0) X--;}
+      if (dy<0) Y++; else {if (dy>0) Y--;}
       Etirer_brosse_preview(Debut_X,Debut_Y,X,Y);
     }
     else
@@ -3474,8 +3474,8 @@ void Tourner_brosse_1_5(void)
   short Ancien_X;
   short Ancien_Y;
   short Etat_prec;
-  float Angle;
-  int dX,dY;
+  float angle;
+  int dx,dy;
 
   Operation_POP(&Etat_prec);
   Operation_POP(&Ancien_Y);
@@ -3485,20 +3485,20 @@ void Tourner_brosse_1_5(void)
   {
     if ( (Brosse_Centre_rotation_X==Pinceau_X)
       && (Brosse_Centre_rotation_Y==Pinceau_Y) )
-      Angle=0.0;
+      angle=0.0;
     else
     {
-      dX=Pinceau_X-Brosse_Centre_rotation_X;
-      dY=Pinceau_Y-Brosse_Centre_rotation_Y;
-      Angle=acos(((float)dX)/sqrt((dX*dX)+(dY*dY)));
-      if (dY>0) Angle=M_2PI-Angle;
+      dx=Pinceau_X-Brosse_Centre_rotation_X;
+      dy=Pinceau_Y-Brosse_Centre_rotation_Y;
+      angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
+      if (dy>0) angle=M_2PI-angle;
     }
 
     if (Menu_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str((int)(Angle*180.0/M_PI),Chaine,3);
+        Num2str((int)(angle*180.0/M_PI),Chaine,3);
         Print_dans_menu(Chaine,7);
       }
       else
@@ -3506,7 +3506,7 @@ void Tourner_brosse_1_5(void)
     }
 
     Afficher_ecran();
-    Tourner_brosse_preview(Angle);
+    Tourner_brosse_preview(angle);
     Afficher_curseur();
 
     Operation_Taille_pile-=2;
@@ -3537,8 +3537,8 @@ void Tourner_brosse_0_5(void)
   short Calcul_Y=0;
   byte  Changement_angle;
   short Etat_prec;
-  float Angle=0.0;
-  int dX,dY;
+  float angle=0.0;
+  int dx,dy;
 
   Operation_POP(&Etat_prec);
   Operation_POP(&Ancien_Y);
@@ -3548,20 +3548,20 @@ void Tourner_brosse_0_5(void)
   {
     if ( (Brosse_Centre_rotation_X==Pinceau_X)
       && (Brosse_Centre_rotation_Y==Pinceau_Y) )
-      Angle=0.0;
+      angle=0.0;
     else
     {
-      dX=Pinceau_X-Brosse_Centre_rotation_X;
-      dY=Pinceau_Y-Brosse_Centre_rotation_Y;
-      Angle=acos(((float)dX)/sqrt((dX*dX)+(dY*dY)));
-      if (dY>0) Angle=M_2PI-Angle;
+      dx=Pinceau_X-Brosse_Centre_rotation_X;
+      dy=Pinceau_Y-Brosse_Centre_rotation_Y;
+      angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
+      if (dy>0) angle=M_2PI-angle;
     }
 
     if (Menu_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str(Round(Angle*180.0/M_PI),Chaine,3);
+        Num2str(Round(angle*180.0/M_PI),Chaine,3);
         Print_dans_menu(Chaine,7);
       }
       else
@@ -3578,14 +3578,14 @@ void Tourner_brosse_0_5(void)
     Calcul_Y=Brosse_Centre_rotation_Y;
     switch (Touche_ANSI)
     {
-      case '6': Angle=     0.0 ; Calcul_X++;             break;
-      case '9': Angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
-      case '8': Angle=M_PI*0.5 ;             Calcul_Y--; break;
-      case '7': Angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
-      case '4': Angle=M_PI     ; Calcul_X--;             break;
-      case '1': Angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
-      case '2': Angle=M_PI*1.5 ;             Calcul_Y++; break;
-      case '3': Angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
+      case '6': angle=     0.0 ; Calcul_X++;             break;
+      case '9': angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
+      case '8': angle=M_PI*0.5 ;             Calcul_Y--; break;
+      case '7': angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
+      case '4': angle=M_PI     ; Calcul_X--;             break;
+      case '1': angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
+      case '2': angle=M_PI*1.5 ;             Calcul_Y++; break;
+      case '3': angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
       default :
         Changement_angle=0;
     }
@@ -3598,7 +3598,7 @@ void Tourner_brosse_0_5(void)
   {
     // On efface la preview de la brosse
     Afficher_ecran();
-    Tourner_brosse_preview(Angle);
+    Tourner_brosse_preview(angle);
     Afficher_curseur();
 
     Operation_Taille_pile-=2;
@@ -3623,8 +3623,8 @@ void Tourner_brosse_2_5(void)
 {
   short Calcul_X;
   short Calcul_Y;
-  int dX,dY;
-  float Angle;
+  int dx,dy;
+  float angle;
 
 
   // On efface la preview de la brosse
@@ -3637,17 +3637,17 @@ void Tourner_brosse_2_5(void)
   // Calcul de l'angle par rapport à la dernière position calculée
   if ( (Brosse_Centre_rotation_X==Calcul_X)
     && (Brosse_Centre_rotation_Y==Calcul_Y) )
-    Angle=0.0;
+    angle=0.0;
   else
   {
-    dX=Calcul_X-Brosse_Centre_rotation_X;
-    dY=Calcul_Y-Brosse_Centre_rotation_Y;
-    Angle=acos(((float)dX)/sqrt((dX*dX)+(dY*dY)));
-    if (dY>0) Angle=M_2PI-Angle;
+    dx=Calcul_X-Brosse_Centre_rotation_X;
+    dy=Calcul_Y-Brosse_Centre_rotation_Y;
+    angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
+    if (dy>0) angle=M_2PI-angle;
   }
 
   // Et enfin on stocke pour de bon la nouvelle brosse étirée
-  Tourner_brosse(Angle);
+  Tourner_brosse(angle);
 
   // Simuler l'appui du bouton "Dessin"
 
@@ -3878,7 +3878,7 @@ void Cercle_degrade_0_6(void)
   short Centre_X;
   short Centre_Y;
   short Couleur;
-  short Click;
+  short click;
   short Rayon;
 
   Operation_POP(&Tangente_Y);
@@ -3887,11 +3887,11 @@ void Cercle_degrade_0_6(void)
   Operation_POP(&Centre_X);
 
   Operation_POP(&Couleur);
-  Operation_POP(&Click);
+  Operation_POP(&click);
 
-  if (Click==A_GAUCHE)
+  if (click==A_GAUCHE)
   {
-    Operation_PUSH(Click);
+    Operation_PUSH(click);
     Operation_PUSH(Couleur);
 
     Operation_PUSH(Centre_X);
@@ -4129,7 +4129,7 @@ void Ellipse_degradee_0_6(void)
   short Centre_X;
   short Centre_Y;
   short Couleur;
-  short Click;
+  short click;
   //short Rayon;
   short Rayon_horizontal;
   short Rayon_vertical;
@@ -4140,11 +4140,11 @@ void Ellipse_degradee_0_6(void)
   Operation_POP(&Centre_X);
 
   Operation_POP(&Couleur);
-  Operation_POP(&Click);
+  Operation_POP(&click);
 
-  if (Click==A_GAUCHE)
+  if (click==A_GAUCHE)
   {
-    Operation_PUSH(Click);
+    Operation_PUSH(click);
     Operation_PUSH(Couleur);
 
     Operation_PUSH(Centre_X);

@@ -347,10 +347,10 @@ void Desenclencher_bouton(int Numero)
 
 
 //-Enclenchement d'un bouton (et désenclenchement de ceux de la même famille)-
-void Enclencher_bouton(int Numero,byte Click)
+void Enclencher_bouton(int Numero,byte click)
 {
   int Famille;
-  int Curseur;
+  int b;
   int Icone;
 
   Effacer_curseur();
@@ -371,7 +371,7 @@ void Enclencher_bouton(int Numero,byte Click)
       Icone=16;break;
   }
   if (Icone!=-1)
-    Afficher_sprite_dans_menu(Numero,Icone+(Click==A_DROITE));
+    Afficher_sprite_dans_menu(Numero,Icone+(click==A_DROITE));
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
   Famille=Bouton[Numero].Famille;
@@ -384,36 +384,36 @@ void Enclencher_bouton(int Numero,byte Click)
     case FAMILLE_INTERRUPTION: // Petit cas spécial dans la famille "Interruption":
       if ((Numero!=BOUTON_LOUPE) || (!Loupe_Mode))
       // Pour chaque bouton:
-      for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
+      for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la même famille
         if (
-             (Curseur!=Numero) &&
-             (Bouton[Curseur].Famille==FAMILLE_INTERRUPTION) &&
-             (  (Curseur!=BOUTON_LOUPE) ||
-               ((Curseur==BOUTON_LOUPE) && (!Loupe_Mode)) )
+             (b!=Numero) &&
+             (Bouton[b].Famille==FAMILLE_INTERRUPTION) &&
+             (  (b!=BOUTON_LOUPE) ||
+               ((b==BOUTON_LOUPE) && (!Loupe_Mode)) )
            )
           // Alors on désenclenche le bouton
-          Desenclencher_bouton(Curseur);
+          Desenclencher_bouton(b);
       break;
 
     default:
       // On désenclenche D'ABORD les interruptions
       // Pour chaque bouton:
-      for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
+      for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la famille interruption
-        if ( (Curseur!=Numero)
-          && (Bouton[Curseur].Famille==FAMILLE_INTERRUPTION)
+        if ( (b!=Numero)
+          && (Bouton[b].Famille==FAMILLE_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
-          && (!(Loupe_Mode && (Curseur==BOUTON_LOUPE))) )
+          && (!(Loupe_Mode && (b==BOUTON_LOUPE))) )
           // Alors on désenclenche le bouton
-          Desenclencher_bouton(Curseur);
+          Desenclencher_bouton(b);
       // Pour chaque bouton:
-      for (Curseur=0; Curseur<NB_BOUTONS; Curseur++)
+      for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la même famille
-        if ( (Curseur!=Numero)
-          && (Bouton[Curseur].Famille==Famille) )
+        if ( (b!=Numero)
+          && (Bouton[b].Famille==Famille) )
           // Alors on désenclenche le bouton
-          Desenclencher_bouton(Curseur);
+          Desenclencher_bouton(b);
   }
 
   // On affiche le cadre autour du bouton de façon à ce qu'il paraisse enfoncé
@@ -428,7 +428,7 @@ void Enclencher_bouton(int Numero,byte Click)
   Bouton[Numero].Enfonce=BOUTON_ENFONCE;
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
-  if (Click==1)
+  if (click==1)
     Bouton[Numero].Gauche();
   else
     Bouton[Numero].Droite();
@@ -1235,12 +1235,12 @@ void Fermer_fenetre(void)
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
 void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
-                                    char * Titre,byte Lettre_soulignee,byte Clickable)
+                                    char * Titre,byte Lettre_soulignee,byte clickable)
 {
   byte Couleur_titre;
   word Pos_texte_X,Pos_texte_Y;
 
-  if (Clickable)
+  if (clickable)
   {
     Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,Largeur,Hauteur);
     Fenetre_Afficher_cadre_general(Pos_X-1,Pos_Y-1,Largeur+2,Hauteur+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
@@ -1434,9 +1434,9 @@ void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caract
 
 //------------ Modifier le contenu (caption) d'une zone de saisie ------------
 
-void Fenetre_Contenu_bouton_saisie(T_Bouton_special * Enreg, char * Contenu)
+void Fenetre_Contenu_bouton_saisie(T_Bouton_special * Enreg, char * content)
 {
-  Print_dans_fenetre_limite(Enreg->Pos_X+2,Enreg->Pos_Y+2,Contenu,Enreg->Largeur/8,CM_Noir,CM_Clair);
+  Print_dans_fenetre_limite(Enreg->Pos_X+2,Enreg->Pos_Y+2,content,Enreg->Largeur/8,CM_Noir,CM_Clair);
 }
 
 //------------ Effacer le contenu (caption) d'une zone de saisie ------------
@@ -1453,13 +1453,13 @@ void Fenetre_Effacer_bouton_saisie(T_Bouton_special * Enreg)
 T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
-                                   byte Clickable, word Raccourci)
+                                   byte clickable, word Raccourci)
 {
   T_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
-  if (Clickable)
+  if (clickable)
   {
     Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
     Temp->Numero   =Nb_boutons_fenetre;
@@ -1474,7 +1474,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
+  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,clickable);
   return Temp;
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
@@ -1482,13 +1482,13 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
 T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
                                    word Largeur, word Hauteur,
                                    char * Titre, byte Lettre_soulignee,
-                                   byte Clickable, word Raccourci)
+                                   byte clickable, word Raccourci)
 {
   T_Bouton_normal * Temp=NULL;
 
   Nb_boutons_fenetre++;
 
-  if (Clickable)
+  if (clickable)
   {
     Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
     Temp->Numero   =Nb_boutons_fenetre;
@@ -1503,7 +1503,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,Clickable);
+  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,Titre,Lettre_soulignee,clickable);
   return Temp;
 }
 
@@ -1575,7 +1575,7 @@ T_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Larg
   return Temp;
 }
 
-T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte Affiche_choix,byte Affiche_centre,byte Affiche_fleche,byte Bouton_actif)
+T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word Largeur,word Hauteur,word Largeur_choix,char *Libelle,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
 {
   T_Bouton_dropdown *Temp;
   
@@ -1585,19 +1585,19 @@ T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word L
   Temp->Pos_Y        =Pos_Y;
   Temp->Largeur      =Largeur;
   Temp->Hauteur      =Hauteur;
-  Temp->Affiche_choix =Affiche_choix;
+  Temp->Affiche_choix =display_choice;
   Temp->Premier_choix=NULL;
   Temp->Largeur_choix=Largeur_choix?Largeur_choix:Largeur;
-  Temp->Affiche_centre=Affiche_centre;
-  Temp->Affiche_fleche=Affiche_fleche;
-  Temp->Bouton_actif=Bouton_actif;
+  Temp->Affiche_centre=display_centered;
+  Temp->Affiche_fleche=display_arrow;
+  Temp->Bouton_actif=active_button;
 
   Temp->Next=Fenetre_Liste_boutons_dropdown;
   Fenetre_Liste_boutons_dropdown=Temp;
   Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,Largeur,Hauteur,"",-1,1);
   if (Libelle && Libelle[0])
     Print_dans_fenetre(Temp->Pos_X+2,Temp->Pos_Y+(Temp->Hauteur-7)/2,Libelle,CM_Noir,CM_Clair);
-  if (Affiche_fleche)
+  if (display_arrow)
     Fenetre_Afficher_sprite_drive(Temp->Pos_X+Temp->Largeur-10,Temp->Pos_Y+(Temp->Hauteur-7)/2,6);
   
   return Temp;
@@ -1862,14 +1862,14 @@ short Attendre_click_dans_palette(T_Bouton_palette * Enreg)
 
 
 // -------------- Récupération d'une couleur derrière un menu ----------------
-void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
+void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * click)
 {
   short Largeur=Fenetre_Largeur*Menu_Facteur_X;
   short Hauteur=Fenetre_Hauteur*Menu_Facteur_Y;
   short Ancien_X=-1;
   short Ancien_Y=-1;
   short Indice;
-  short A,B,C,D; // Variables temporaires et multitâches...
+  short a,b,c,d; // Variables temporaires et multitâches...
   byte * Buffer;
   char Chaine[25];
   byte Cacher_curseur_avant_recuperation;
@@ -1884,19 +1884,19 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
 
     for (Indice=0; Indice<Hauteur; Indice++)
       Lire_ligne(Fenetre_Pos_X,Fenetre_Pos_Y+Indice,Largeur,Buffer+((int)Indice*Largeur*Pixel_width));
-    A=Menu_Ordonnee;
+    a=Menu_Ordonnee;
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-    B=Menu_visible;
+    b=Menu_visible;
     Menu_visible=Menu_visible_avant_fenetre;
     Afficher_ecran();
     Afficher_menu();
-    Menu_Ordonnee=A;
-    Menu_visible=B;
+    Menu_Ordonnee=a;
+    Menu_visible=b;
 
     Forme_curseur=FORME_CURSEUR_CIBLE_PIPETTE;
-    B=Cacher_pinceau;
+    b=Cacher_pinceau;
     Cacher_pinceau=1;
-    C=-1; // Couleur pointée: au début aucune, comme ça on initialise tout
+    c=-1; // Couleur pointée: au début aucune, comme ça on initialise tout
     if (Menu_visible_avant_fenetre)
       Print_dans_menu(TITRE_BOUTON[BOUTON_CHOIX_COL],0);
 
@@ -1909,29 +1909,29 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
       if ((Mouse_X!=Ancien_X) || (Mouse_Y!=Ancien_Y))
       {
         Effacer_curseur();
-        A=Lit_pixel(Mouse_X,Mouse_Y);
-        if (A!=C)
+        a=Lit_pixel(Mouse_X,Mouse_Y);
+        if (a!=c)
         {
-          C=A; // Mise à jour de la couleur pointée
+          c=a; // Mise à jour de la couleur pointée
           if (Menu_visible_avant_fenetre)
           {
-            sprintf(Chaine,"%d",A);
-            D=strlen(Chaine);
+            sprintf(Chaine,"%d",a);
+            d=strlen(Chaine);
             strcat(Chaine,"   (");
-            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[A].R);
+            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].R);
             strcat(Chaine,",");
-            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[A].V);
+            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].V);
             strcat(Chaine,",");
-            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[A].B);
+            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].B);
             strcat(Chaine,")");
-            A=24-D;
-            for (Indice=strlen(Chaine); Indice<A; Indice++)
+            a=24-d;
+            for (Indice=strlen(Chaine); Indice<a; Indice++)
               Chaine[Indice]=' ';
-            Chaine[A]=0;
+            Chaine[a]=0;
             Print_dans_menu(Chaine,strlen(TITRE_BOUTON[BOUTON_CHOIX_COL]));
 
-            Print_general((26+((D+strlen(TITRE_BOUTON[BOUTON_CHOIX_COL]))<<3))*Menu_Facteur_X,
-                          Menu_Ordonnee_Texte," ",0,C);
+            Print_general((26+((d+strlen(TITRE_BOUTON[BOUTON_CHOIX_COL]))<<3))*Menu_Facteur_X,
+                          Menu_Ordonnee_Texte," ",0,c);
           }
         }
         Afficher_curseur();
@@ -1944,12 +1944,12 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
     if (Mouse_K)
     {
       Effacer_curseur();
-      *Click=Mouse_K;
+      *click=Mouse_K;
       *Couleur=Lit_pixel(Mouse_X,Mouse_Y);
     }
     else
     {
-      *Click=0;
+      *click=0;
       Effacer_curseur();
     }
 
@@ -1957,7 +1957,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * Click)
       Afficher_ligne(Fenetre_Pos_X,Fenetre_Pos_Y+Indice,Largeur,Buffer+((int)Indice*Largeur));
     UpdateRect(Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur*Menu_Facteur_X, Fenetre_Hauteur*Menu_Facteur_Y);
     Forme_curseur=FORME_CURSEUR_FLECHE;
-    Cacher_pinceau=B;
+    Cacher_pinceau=b;
     Cacher_curseur=Cacher_curseur_avant_recuperation;
     Afficher_curseur();
 
@@ -1980,8 +1980,8 @@ void Deplacer_fenetre(short Dx, short Dy)
   short Ancien_Y;
   short Largeur=Fenetre_Largeur*Menu_Facteur_X;
   short Hauteur=Fenetre_Hauteur*Menu_Facteur_Y;
-  short A;
-  byte  B;
+  short a;
+  byte  b;
   byte  *Buffer=NULL;
 
   Effacer_curseur();
@@ -2056,14 +2056,14 @@ void Deplacer_fenetre(short Dx, short Dy)
   if ((Nouveau_X!=Fenetre_Pos_X)
    || (Nouveau_Y!=Fenetre_Pos_Y))
   {
-    A=Menu_Ordonnee;
+    a=Menu_Ordonnee;
     Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-    B=Menu_visible;
+    b=Menu_visible;
     Menu_visible=Menu_visible_avant_fenetre;
     //Afficher_ecran();
     //Afficher_menu();
-    Menu_Ordonnee=A;
-    Menu_visible=B;
+    Menu_Ordonnee=a;
+    Menu_visible=b;
 
     // Sauvegarde du contenu actuel de la fenêtre
     Sauve_fond(&Buffer, Fenetre_Pos_X, Fenetre_Pos_Y, Fenetre_Largeur, Fenetre_Hauteur);
@@ -2174,22 +2174,22 @@ short Fenetre_Dropdown_click(T_Bouton_dropdown *Bouton)
     // Affichage des items
     for(Choix=Bouton->Premier_choix,Indice_choix=0; Choix!=NULL; Choix=Choix->Next,Indice_choix++)
     {
-      byte C1;
-      byte C2;
+      byte color_1;
+      byte color_2;
       if (Indice_choix==Indice_selectionne)
       {
-        C1=CM_Blanc;
-        C2=CM_Fonce;
+        color_1=CM_Blanc;
+        color_2=CM_Fonce;
         Block(Fenetre_Pos_X+3*Menu_Facteur_X,
         Fenetre_Pos_Y+((2+Indice_choix*8)*Menu_Facteur_Y),
         (Bouton->Largeur_choix-5)*Menu_Facteur_X,(8)*Menu_Facteur_Y,CM_Fonce);
       }
       else
       {
-        C1=CM_Noir;
-        C2=CM_Clair;
+        color_1=CM_Noir;
+        color_2=CM_Clair;
       }
-      Print_dans_fenetre(3,2+Indice_choix*8,Choix->Libelle,C1,C2);
+      Print_dans_fenetre(3,2+Indice_choix*8,Choix->Libelle,color_1,color_2);
     }
     UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Fenetre_Largeur*Menu_Facteur_X,Fenetre_Hauteur*Menu_Facteur_Y);
     Afficher_curseur();

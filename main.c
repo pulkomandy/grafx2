@@ -94,13 +94,13 @@ void Afficher_syntaxe(void)
 
 
 // ---------------------------- Sortie impromptue ----------------------------
-void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const char *Nom_fonction)
+void Erreur_fonction(int error_code, const char *Nom_fichier, int Numero_ligne, const char *Nom_fonction)
 {
   T_Palette Palette_temporaire;
   int       Indice;
-  printf("Error number %d occured in file %s, line %d, function %s.\n", Code, Nom_fichier,Numero_ligne,Nom_fonction);
+  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, Nom_fichier,Numero_ligne,Nom_fonction);
 
-  if (Code==0)
+  if (error_code==0)
   {
     // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'écran pour dire qu'il y a un problème.
     // Toutes les autres erreurs déclenchent toujours une sortie en catastrophe du programme !
@@ -113,7 +113,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
   }
   else
   {
-    switch (Code)
+    switch (error_code)
     {
       case ERREUR_GUI_ABSENT         : printf("Error: File gfx2gui.gif is missing!\n");
                                        printf("This program cannot run without this file.\n");
@@ -164,7 +164,7 @@ void Erreur_fonction(int Code, const char *Nom_fichier, int Numero_ligne, const 
     }
 
     SDL_Quit();
-    exit(Code);
+    exit(error_code);
   }
 }
 

@@ -104,7 +104,7 @@ int Charger_INI_Seek_pattern(char * Buffer,char * Pattern)
 
 
 
-int Charger_INI_Reach_group(FILE * File,char * Buffer,char * Group)
+int Charger_INI_Reach_group(FILE * file,char * Buffer,char * Group)
 {
   int    Arret;
   char * Group_upper;
@@ -122,7 +122,7 @@ int Charger_INI_Reach_group(FILE * File,char * Buffer,char * Group)
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,File)==0)
+    if (fgets(Buffer,1024,file)==0)
     {
       free(Buffer_upper);
       free(Group_upper);
@@ -146,7 +146,7 @@ int Charger_INI_Reach_group(FILE * File,char * Buffer,char * Group)
   return 0;
 }
 
-int Charger_INI_Get_string(FILE * File,char * Buffer,char * Option,char * Retour)
+int Charger_INI_Get_string(FILE * file,char * Buffer,char * Option,char * Retour)
 {
   int    Arret;
   char * Option_upper;
@@ -165,7 +165,7 @@ int Charger_INI_Get_string(FILE * File,char * Buffer,char * Option,char * Retour
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,File)==0)
+    if (fgets(Buffer,1024,file)==0)
     {
       free(Buffer_upper);
       free(Option_upper);
@@ -317,7 +317,7 @@ int Charger_INI_Get_value(char * String,int * Index,int * Value)
 
 
 
-int Charger_INI_Get_values(FILE * File,char * Buffer,char * Option,int Nb_values_expected,int * Values)
+int Charger_INI_Get_values(FILE * file,char * Buffer,char * Option,int Nb_values_expected,int * Values)
 {
   int    Arret;
   char * Option_upper;
@@ -337,7 +337,7 @@ int Charger_INI_Get_values(FILE * File,char * Buffer,char * Option,int Nb_values
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,File)==0)
+    if (fgets(Buffer,1024,file)==0)
     {
       free(Buffer_upper);
       free(Option_upper);
@@ -397,7 +397,7 @@ int Charger_INI_Get_values(FILE * File,char * Buffer,char * Option,int Nb_values
 
 
 
-int Charger_INI(struct S_Config * Conf)
+int Charger_INI(T_Config * Conf)
 {
   FILE * Fichier;
   char * Buffer;

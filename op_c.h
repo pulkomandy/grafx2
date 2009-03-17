@@ -35,19 +35,19 @@ typedef byte * Bitmap256;
 typedef struct
 {
   int nbb_r; // Nb de bits de précision sur les rouges
-  int nbb_v; // Nb de bits de précision sur les verts
+  int nbb_g; // Nb de bits de précision sur les verts
   int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_v)
+  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_g)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
-  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_v+nbb_b)
+  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
   int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
   int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
   int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_v)
+  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
   int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   byte * table;
@@ -60,19 +60,19 @@ typedef struct
 typedef struct
 {
   int nbb_r; // Nb de bits de précision sur les rouges
-  int nbb_v; // Nb de bits de précision sur les verts
+  int nbb_g; // Nb de bits de précision sur les verts
   int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_v)
+  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_g)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
-  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_v+nbb_b)
+  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
   int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
   int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
   int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_v)
+  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
   int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   int * table;
@@ -109,7 +109,7 @@ typedef struct
 typedef struct
 {
   int       nb;
-  int       nbmax;
+  int       nb_max;
   Cluster * clusters;
 } ClusterSet;
 
@@ -119,7 +119,7 @@ typedef struct
 
 typedef struct
 {
-  int   nbcouleurs; // Nombre de couleurs dans le dégradé
+  int   nb_colors; // Nombre de couleurs dans le dégradé
   float min;        // Chrominance minimale du dégradé
   float max;        // Chrominance maximale du dégradé
   float hue;        // Chrominance moyenne du dégradé
@@ -132,8 +132,8 @@ typedef struct
 typedef struct
 {
   int nb;             // Nombre de dégradés dans l'ensemble
-  int nbmax;          // Nombre maximum de dégradés
-  Degrade * degrades; // Les dégradés
+  int nb_max;          // Nombre maximum de dégradés
+  Degrade * gradients; // Les dégradés
 } DegradeSet;
 
 
@@ -142,7 +142,7 @@ typedef struct
 ///////////////////////////// Méthodes de gestion des tables de conversion //
 /////////////////////////////////////////////////////////////////////////////
 
-Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b);
+Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b);
 void TC_Delete(Table_conversion * t);
 byte TC_Get(Table_conversion * t,int r,int v,int b);
 void TC_Set(Table_conversion * t,int r,int v,int b,byte i);
@@ -156,7 +156,7 @@ void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 /////////////////////////////////////////////////////////////////////////////
 
 void TO_Init(Table_occurence * t);
-Table_occurence * TO_New(int nbb_r,int nbb_v,int nbb_b);
+Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b);
 void TO_Delete(Table_occurence * t);
 int TO_Get(Table_occurence * t,int r,int v,int b);
 void TO_Set(Table_occurence * t,int r,int v,int b,int i);

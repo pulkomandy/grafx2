@@ -98,21 +98,21 @@ void RGBtoHSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
   *sr = (s*255.0);
 }
 
-void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
+void HSLtoRGB(byte h,byte s,byte l, byte* r, byte* g, byte* b)
 {
     float rf =0 ,gf = 0,bf = 0;
     float hf,lf,sf;
     float p,q;
 
-    if(S==0)
+    if(s==0)
     {
-        *R=*G=*B=L;
+        *r=*g=*b=l;
         return;
     }
 
-    hf = H / 255.0;
-    lf = L / 255.0;
-    sf = S / 255.0;
+    hf = h / 255.0;
+    lf = l / 255.0;
+    sf = s / 255.0;
 
     if (lf<=0.5)
         q = lf*(1+sf);
@@ -158,16 +158,16 @@ void HSLtoRGB(byte H,byte S,byte L, byte* R, byte* G, byte* B)
     else
         bf = p;
 
-    *R = rf * (255);
-    *G = gf * (255);
-    *B = bf * (255);
+    *r = rf * (255);
+    *g = gf * (255);
+    *b = bf * (255);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// Méthodes de gestion des tables de conversion //
 /////////////////////////////////////////////////////////////////////////////
 
-Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b)
+Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b)
 {
   Table_conversion * n;
   int Taille;
@@ -177,18 +177,18 @@ Table_conversion * TC_New(int nbb_r,int nbb_v,int nbb_b)
   {
     // On recopie les paramŠtres demand‚s
     n->nbb_r=nbb_r;
-    n->nbb_v=nbb_v;
+    n->nbb_g=nbb_g;
     n->nbb_b=nbb_b;
 
     // On calcule les autres
     n->rng_r=(1<<nbb_r);
-    n->rng_v=(1<<nbb_v);
+    n->rng_v=(1<<nbb_g);
     n->rng_b=(1<<nbb_b);
-    n->dec_r=nbb_v+nbb_b;
+    n->dec_r=nbb_g+nbb_b;
     n->dec_v=nbb_b;
     n->dec_b=0;
     n->red_r=8-nbb_r;
-    n->red_v=8-nbb_v;
+    n->red_v=8-nbb_g;
     n->red_b=8-nbb_b;
 
     // On tente d'allouer la table
@@ -251,7 +251,7 @@ void TO_Init(Table_occurence * t)
   memset(t->table,0,Taille); // On initialise … 0
 }
 
-Table_occurence * TO_New(int nbb_r,int nbb_v,int nbb_b)
+Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b)
 {
   Table_occurence * n;
   int Taille;
@@ -261,18 +261,18 @@ Table_occurence * TO_New(int nbb_r,int nbb_v,int nbb_b)
   {
     // On recopie les paramŠtres demand‚s
     n->nbb_r=nbb_r;
-    n->nbb_v=nbb_v;
+    n->nbb_g=nbb_g;
     n->nbb_b=nbb_b;
 
     // On calcule les autres
     n->rng_r=(1<<nbb_r);
-    n->rng_v=(1<<nbb_v);
+    n->rng_v=(1<<nbb_g);
     n->rng_b=(1<<nbb_b);
-    n->dec_r=nbb_v+nbb_b;
+    n->dec_r=nbb_g+nbb_b;
     n->dec_v=nbb_b;
     n->dec_b=0;
     n->red_r=8-nbb_r;
-    n->red_v=8-nbb_v;
+    n->red_v=8-nbb_g;
     n->red_b=8-nbb_b;
 
     // On tente d'allouer la table
@@ -691,12 +691,12 @@ ClusterSet * CS_New(int nbmax,Table_occurence * to)
   if (n!=0)
   {
     // On recopie les paramŠtres demand‚s
-    n->nbmax=TO_Compter_couleurs(to);
+    n->nb_max=TO_Compter_couleurs(to);
 
     // On vient de compter le nombre de couleurs existantes, s'il est plus grand que 256 on limit à 256 (nombre de couleurs voulu au final)
-    if (n->nbmax>nbmax)
+    if (n->nb_max>nbmax)
     {
-      n->nbmax=nbmax;
+      n->nb_max=nbmax;
     }
 
     // On tente d'allouer la table
@@ -793,7 +793,7 @@ void CS_Generer(ClusterSet * cs,Table_occurence * to)
   Cluster Nouveau2;
 
   // Tant qu'on a moins de 256 clusters
-  while (cs->nb<cs->nbmax)
+  while (cs->nb<cs->nb_max)
   {
     // On récupère le plus grand cluster
     CS_Get(cs,&Courant);
@@ -829,7 +829,7 @@ void CS_Trier_par_chrominance(ClusterSet * cs)
   int index;
   Cluster * nc;
 
-  nc=(Cluster *)malloc(cs->nbmax*sizeof(Cluster));
+  nc=(Cluster *)malloc(cs->nb_max*sizeof(Cluster));
 
   // Initialisation de la table d'occurence de chaque octet
   for (index=0;index<256;index++)
@@ -863,7 +863,7 @@ void CS_Trier_par_luminance(ClusterSet * cs)
   int index;
   Cluster * nc;
 
-  nc=(Cluster *)malloc(cs->nbmax*sizeof(Cluster));
+  nc=(Cluster *)malloc(cs->nb_max*sizeof(Cluster));
 
   // Initialisation de la table d'occurence de chaque octet
   for (index=0;index<256;index++)
@@ -914,10 +914,10 @@ void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,Composantes 
 
 void DS_Init(DegradeSet * ds,ClusterSet * cs)
 {
-    ds->degrades[0].nbcouleurs=1;
-    ds->degrades[0].min=cs->clusters[0].h;
-    ds->degrades[0].max=cs->clusters[0].h;
-    ds->degrades[0].hue=cs->clusters[0].h;
+    ds->gradients[0].nb_colors=1;
+    ds->gradients[0].min=cs->clusters[0].h;
+    ds->gradients[0].max=cs->clusters[0].h;
+    ds->gradients[0].hue=cs->clusters[0].h;
     // Et hop : le 1er ensemble de d‚grad‚s est initialis‚
     ds->nb=1;
 }
@@ -930,11 +930,11 @@ DegradeSet * DS_New(ClusterSet * cs)
     if (n!=NULL)
     {
         // On recopie les paramŠtres demand‚s
-        n->nbmax=cs->nbmax;
+        n->nb_max=cs->nb_max;
 
         // On tente d'allouer la table
-        n->degrades=(Degrade *)malloc((n->nbmax)*sizeof(Degrade));
-        if (n->degrades!=0)
+        n->gradients=(Degrade *)malloc((n->nb_max)*sizeof(Degrade));
+        if (n->gradients!=0)
             // C'est bon! On initialise
             DS_Init(n,cs);
         else
@@ -950,7 +950,7 @@ DegradeSet * DS_New(ClusterSet * cs)
 
 void DS_Delete(DegradeSet * ds)
 {
-    free(ds->degrades);
+    free(ds->gradients);
     free(ds);
 }
 
@@ -969,7 +969,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
         mdiff=99999999;
         for (id=0;id<ds->nb;id++)
         {
-            diff=abs(cs->clusters[ic].h - ds->degrades[id].hue);
+            diff=abs(cs->clusters[ic].h - ds->gradients[id].hue);
             if ((mdiff>diff) && (diff<16))
             {
                 mdegr=id;
@@ -981,24 +981,24 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
         if (mdegr!=-1)
     {
       // On met … jour le d‚grad‚
-      if (cs->clusters[ic].h < ds->degrades[mdegr].min)
-        ds->degrades[mdegr].min=cs->clusters[ic].h;
-      if (cs->clusters[ic].h > ds->degrades[mdegr].max)
-        ds->degrades[mdegr].max=cs->clusters[ic].h;
-      ds->degrades[mdegr].hue=((ds->degrades[mdegr].hue*
-                                ds->degrades[mdegr].nbcouleurs)
+      if (cs->clusters[ic].h < ds->gradients[mdegr].min)
+        ds->gradients[mdegr].min=cs->clusters[ic].h;
+      if (cs->clusters[ic].h > ds->gradients[mdegr].max)
+        ds->gradients[mdegr].max=cs->clusters[ic].h;
+      ds->gradients[mdegr].hue=((ds->gradients[mdegr].hue*
+                                ds->gradients[mdegr].nb_colors)
                                +cs->clusters[ic].h)
-                              /(ds->degrades[mdegr].nbcouleurs+1);
-      ds->degrades[mdegr].nbcouleurs++;
+                              /(ds->gradients[mdegr].nb_colors+1);
+      ds->gradients[mdegr].nb_colors++;
     }
     else
     {
       // On cr‚e un nouveau d‚grad‚
       mdegr=ds->nb;
-      ds->degrades[mdegr].nbcouleurs=1;
-      ds->degrades[mdegr].min=cs->clusters[ic].h;
-      ds->degrades[mdegr].max=cs->clusters[ic].h;
-      ds->degrades[mdegr].hue=cs->clusters[ic].h;
+      ds->gradients[mdegr].nb_colors=1;
+      ds->gradients[mdegr].min=cs->clusters[ic].h;
+      ds->gradients[mdegr].max=cs->clusters[ic].h;
+      ds->gradients[mdegr].hue=cs->clusters[ic].h;
       ds->nb++;
     }
     cs->clusters[ic].h=mdegr;
@@ -1006,7 +1006,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
 
   // On redistribue les valeurs dans les clusters
   for (ic=0;ic<cs->nb;ic++)
-    cs->clusters[ic].h=ds->degrades[cs->clusters[ic].h].hue;
+    cs->clusters[ic].h=ds->gradients[cs->clusters[ic].h].hue;
 }
 
 
@@ -1094,7 +1094,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   Bitmap24B S_moins1;
   Bitmap24B Suivant;
   Bitmap24B S_plus1;
-  Bitmap256 D;
+  Bitmap256 d;
   int Pos_X,Pos_Y;
   int Rouge,Vert,Bleu;
   float ERouge,EVert,EBleu;
@@ -1105,7 +1105,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   C_plus1 =Courant+1;   // Le pixel à droite
   S_moins1=Suivant-1;   // Le pixel en bas à gauche
   S_plus1 =Suivant+1;   // Le pixel en bas à droite
-  D       =Dest;
+  d       =Dest;
 
   // On parcours chaque pixel:
   for (Pos_Y=0;Pos_Y<Hauteur;Pos_Y++)
@@ -1118,12 +1118,12 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       Vert =Courant->V;
       Bleu =Courant->B;
       // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
-      *D=TC_Get(tc,Rouge,Vert,Bleu);
+      *d=TC_Get(tc,Rouge,Vert,Bleu);
 
       // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
-      Rouge-=palette[*D].R;
-      Vert -=palette[*D].V;
-      Bleu -=palette[*D].B;
+      Rouge-=palette[*d].R;
+      Vert -=palette[*d].V;
+      Bleu -=palette[*d].B;
 
       // Et dans chaque pixel voisin on propage l'erreur
       // A droite:
@@ -1174,7 +1174,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
       S_moins1++;
       Suivant++;
       S_plus1++;
-      D++;
+      d++;
     }
   }
 

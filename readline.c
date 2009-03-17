@@ -71,7 +71,7 @@ void Inserer_caractere(char * Chaine, char Lettre, byte Position)
   Chaine[Position]='\0';
 }
 
-int CaractereValide(int Caractere)
+int CaractereValide(int c)
 {
   // Sous Linux: Seul le / est strictement interdit, mais beaucoup
   // d'autres poseront des problèmes au shell, alors on évite.
@@ -86,11 +86,11 @@ int CaractereValide(int Caractere)
   #endif
   int Position;
   
-  if (Caractere < ' ' || Caractere > 255)
+  if (c < ' ' || c > 255)
     return 0;
   
   for (Position=0; Position<(long)sizeof(CaracteresInterdits); Position++)
-    if (Caractere == CaracteresInterdits[Position])
+    if (c == CaracteresInterdits[Position])
       return 0;
   return 1;
 }

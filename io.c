@@ -65,9 +65,9 @@ int read_byte(FILE *Fichier, byte *Dest)
 }
 // Ecrit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_byte(FILE *Fichier, byte Byte)
+int write_byte(FILE *Fichier, byte b)
 {
-  return fwrite(&Byte, 1, 1, Fichier) == 1;
+  return fwrite(&b, 1, 1, Fichier) == 1;
 }
 // Lit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -95,12 +95,12 @@ int read_word_le(FILE *Fichier, word *Dest)
 }
 // Ecrit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_le(FILE *Fichier, word Mot)
+int write_word_le(FILE *Fichier, word w)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    Mot = SDL_Swap16(Mot);
+    w = SDL_Swap16(w);
   #endif
-  return fwrite(&Mot, 1, sizeof(word), Fichier) == sizeof(word);
+  return fwrite(&w, 1, sizeof(word), Fichier) == sizeof(word);
 }
 // Lit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -115,12 +115,12 @@ int read_word_be(FILE *Fichier, word *Dest)
 }
 // Ecrit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_be(FILE *Fichier, word Mot)
+int write_word_be(FILE *Fichier, word w)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
-    Mot = SDL_Swap16(Mot);
+    w = SDL_Swap16(w);
   #endif
-  return fwrite(&Mot, 1, sizeof(word), Fichier) == sizeof(word);
+  return fwrite(&w, 1, sizeof(word), Fichier) == sizeof(word);
 }
 // Lit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -135,12 +135,12 @@ int read_dword_le(FILE *Fichier, dword *Dest)
 }
 // Ecrit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_le(FILE *Fichier, dword Mot)
+int write_dword_le(FILE *Fichier, dword dw)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    Mot = SDL_Swap32(Mot);
+    dw = SDL_Swap32(dw);
   #endif
-  return fwrite(&Mot, 1, sizeof(dword), Fichier) == sizeof(dword);
+  return fwrite(&dw, 1, sizeof(dword), Fichier) == sizeof(dword);
 }
 
 // Lit un dword (big-endian)
@@ -156,12 +156,12 @@ int read_dword_be(FILE *Fichier, dword *Dest)
 }
 // Ecrit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_be(FILE *Fichier, dword Mot)
+int write_dword_be(FILE *Fichier, dword dw)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
-    Mot = SDL_Swap32(Mot);
+    dw = SDL_Swap32(dw);
   #endif
-  return fwrite(&Mot, 1, sizeof(dword), Fichier) == sizeof(dword);
+  return fwrite(&dw, 1, sizeof(dword), Fichier) == sizeof(dword);
 }
 
 // Détermine la position du dernier '/' ou '\\' dans une chaine,

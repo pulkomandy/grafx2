@@ -368,7 +368,7 @@ int Support_TrueType()
 
   
 #ifndef NOTTF
-byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int Bold, int Italic, int *Largeur, int *Hauteur)
+byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int Italic, int *Largeur, int *Hauteur)
 {
  TTF_Font *Fonte;
   SDL_Surface * TexteColore;
@@ -390,11 +390,11 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
   Style=0;
   if (Italic)
     Style|=TTF_STYLE_ITALIC;
-  if (Bold)
+  if (bold)
     Style|=TTF_STYLE_BOLD;
   TTF_SetFontStyle(Fonte, Style);
   // Couleurs
-  if (AntiAlias)
+  if (antialias)
   {
     Couleur_Avant = Conversion_couleur_SDL(Fore_color);
     Couleur_Arriere = Conversion_couleur_SDL(Back_color);
@@ -407,7 +407,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
 
   
   // Rendu du texte: crée une surface SDL RGB 24bits
-  if (AntiAlias)
+  if (antialias)
     TexteColore=TTF_RenderText_Shaded(Fonte, Chaine, Couleur_Avant, Couleur_Arriere );
   else
     TexteColore=TTF_RenderText_Solid(Fonte, Chaine, Couleur_Avant);
@@ -429,7 +429,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int Anti
     TTF_CloseFont(Fonte);
     return NULL;
   }
-  if (!AntiAlias)
+  if (!antialias)
   {
     // Mappage des couleurs
     for (Indice=0; Indice < Texte8Bit->w * Texte8Bit->h; Indice++)
@@ -501,7 +501,7 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 
 // et retourne l'adresse du bloc d'octets.
-byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlias, int Bold, int Italic, int *Largeur, int *Hauteur)
+byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int Italic, int *Largeur, int *Hauteur)
 {
   T_FONTE *Fonte = Liste_fontes_debut;
   int Indice=Numero_fonte;
@@ -515,7 +515,7 @@ byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int AntiAlia
   if (Fonte->EstTrueType)
   {
   #ifndef NOTTF 
-    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, AntiAlias, Bold, Italic, Largeur, Hauteur);
+    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, antialias, bold, Italic, Largeur, Hauteur);
   #else
     return NULL;
   #endif

@@ -102,7 +102,7 @@ void Detruire_liste_du_fileselect(void)
 char * Nom_formate(char * Nom, int Type)
 {
   static char Resultat[13];
-  int         Curseur;
+  int         c;
   int         Autre_curseur;
   int         Pos_DernierPoint;
 
@@ -114,34 +114,34 @@ char * Nom_formate(char * Nom, int Type)
   {
     // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 12 caractères maximum.
     strcpy(Resultat,"            ");
-    for (Curseur=0;Nom[Curseur]!='\0' && Curseur < 12;Curseur++)
-      Resultat[Curseur]=Nom[Curseur];
+    for (c=0;Nom[c]!='\0' && c < 12;c++)
+      Resultat[c]=Nom[c];
     // Un caractère spécial pour indiquer que l'affichage est tronqué
-    if (Curseur >= 12)
+    if (c >= 12)
       Resultat[11]=CARACTERE_SUSPENSION;
   }
   else
   {
     strcpy(Resultat,"        .   ");
     // On commence par recopier la partie précédent le point:
-    for (Curseur=0;( (Nom[Curseur]!='.') && (Nom[Curseur]!='\0') );Curseur++)
+    for (c=0;( (Nom[c]!='.') && (Nom[c]!='\0') );c++)
     {
-      if (Curseur < 8)
-        Resultat[Curseur]=Nom[Curseur];
+      if (c < 8)
+        Resultat[c]=Nom[c];
     }
     // Un caractère spécial pour indiquer que l'affichage est tronqué
-    if (Curseur > 8)
+    if (c > 8)
       Resultat[7]=CARACTERE_SUSPENSION;
     // On recherche le dernier point dans le reste du nom
-    for (Pos_DernierPoint = Curseur; Nom[Curseur]!='\0'; Curseur++)
-      if (Nom[Curseur]=='.')
-        Pos_DernierPoint = Curseur;
+    for (Pos_DernierPoint = c; Nom[c]!='\0'; c++)
+      if (Nom[c]=='.')
+        Pos_DernierPoint = c;
 
     // Ensuite on recopie la partie qui suit le point (si nécessaire):
     if (Nom[Pos_DernierPoint])
     {
-      for (Curseur = Pos_DernierPoint+1,Autre_curseur=9;Nom[Curseur]!='\0' && Autre_curseur < 12;Curseur++,Autre_curseur++)
-        Resultat[Autre_curseur]=Nom[Curseur];
+      for (c = Pos_DernierPoint+1,Autre_curseur=9;Nom[c]!='\0' && Autre_curseur < 12;c++,Autre_curseur++)
+        Resultat[Autre_curseur]=Nom[c];
     }
   }
   return Resultat;
@@ -176,28 +176,28 @@ void Ajouter_element_a_la_liste(char * Nom, int Type)
 int VerifieExtension(const char *NomFichier, char * Filtre)
 {
   int Pos_DernierPoint = -1;
-  int Curseur = 0;
+  int c = 0;
 
   if (Filtre[0] == '*')
     return 1;
   // On recherche la position du dernier . dans le nom
-  for (Curseur = 0; NomFichier[Curseur]!='\0'; Curseur++)
-    if (NomFichier[Curseur]=='.')
-      Pos_DernierPoint = Curseur;
+  for (c = 0; NomFichier[c]!='\0'; c++)
+    if (NomFichier[c]=='.')
+      Pos_DernierPoint = c;
   // Fichier sans extension (ca arrive)
   if (Pos_DernierPoint == -1)
     return (Filtre[0] == '\0');
 
   // Vérification caractère par caractère, case-insensitive.
-  Curseur = 0;
+  c = 0;
   do
   {
-    if (Filtre[Curseur] != '?' &&
-      tolower(Filtre[Curseur]) != tolower(NomFichier[Pos_DernierPoint + 1 + Curseur]))
+    if (Filtre[c] != '?' &&
+      tolower(Filtre[c]) != tolower(NomFichier[Pos_DernierPoint + 1 + c]))
       return 0;
 
-     Curseur++;
-  } while (Filtre[Curseur++] != '\0');
+     c++;
+  } while (Filtre[c++] != '\0');
 
   return 1;
 }

@@ -66,9 +66,9 @@ void Set_Palette_RGB_Scale(int Grad)
     Graduations_RGB = Grad;
 }
 
-byte Palette_Scale_Component(byte Comp)
+byte Palette_Scale_Component(byte comp)
 {
-  return ((Comp+128/Graduations_RGB)*(Graduations_RGB-1)/255*255+(Graduations_RGB&1?1:0))/(Graduations_RGB-1);
+  return ((comp+128/Graduations_RGB)*(Graduations_RGB-1)/255*255+(Graduations_RGB&1?1:0))/(Graduations_RGB-1);
 }
 
 // Définir les unités pour les graduationss R G B ou H S V
@@ -81,10 +81,10 @@ void Unite_Composantes(int Count)
 
 void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Couleur, short Difference_H, short Difference_S, short Difference_L)
 {
-    byte H, S, L;
-    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].V,Palette_depart[Couleur].B,&H,&S,&L);
+    byte h, S, l;
+    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].V,Palette_depart[Couleur].B,&h,&S,&l);
     // La teinte (Hue) est cyclique
-    H=(Difference_H+256+H);
+    h=(Difference_H+256+h);
     // Pour les autres (Saturation, Lightness), au lieu d'additionner,
     // on va faire un ratio, cela utilise mieux la plage de valeurs 0-255
     if (Difference_S<0)
@@ -92,10 +92,10 @@ void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Coul
     else if (Difference_S>0)
       S=255-(255-Difference_S)*(255-S)/255;
     if (Difference_L<0)
-      L=(255+Difference_L)*L/255;
+      l=(255+Difference_L)*l/255;
     else if (Difference_L>0)
-      L=255-(255-Difference_L)*(255-L)/255;
-    HSLtoRGB(H,S,L,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].V,&Palette_arrivee[Couleur].B);
+      l=255-(255-Difference_L)*(255-l)/255;
+    HSLtoRGB(h,S,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].V,&Palette_arrivee[Couleur].B);
 }
 
 void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
@@ -748,7 +748,7 @@ void Bouton_Palette(void)
   static short Reduce_Nb_couleurs=256;
   short  Couleur_temporaire; // Variable pouvant reservir pour différents calculs intermédiaires
   dword  Temp;
-  byte   Couleur,Click; // Variables pouvant reservir pour différents calculs intermédiaires
+  byte   Couleur,click; // Variables pouvant reservir pour différents calculs intermédiaires
   short  Bouton_clicke;
   word   Ancien_Mouse_X;
   word   Ancien_Mouse_Y;
@@ -1959,11 +1959,11 @@ void Bouton_Palette(void)
 
         case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
         case SDLK_COMMA :
-          Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
-          if (Click)
+          Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+          if (click)
           {
             Effacer_curseur();
-            if (Click==A_DROITE)
+            if (click==A_DROITE)
             {
               if (Back_color!=Couleur)
               {

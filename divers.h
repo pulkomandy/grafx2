@@ -70,9 +70,6 @@ byte Pixel_dans_cercle(void);
 // Cercle_Curseur_Y<0 = en haut) du centre se trouve dans le cercle en
 // cours.
 
-byte Bit(byte Octet, byte Rang);
-// Extrait un bit d'un certain rang à partir d'un octet.
-
 // Gestion du chrono dans les fileselects
 void Initialiser_chrono(dword Delai);
 void Tester_chrono(void);
@@ -103,15 +100,15 @@ byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
 
 unsigned long Memoire_libre(void);
 
-void  Num2str(dword Nombre,char * Chaine,byte Taille);
+void  Num2str(dword number,char * Chaine,byte Taille);
 int   Str2num(char * Chaine);
 
 short Round(float Valeur);
 short Round_max(short Numerateur,short Diviseur);
 short Round_div_max(short Numerateur,short Diviseur);
 
-int Min(int A,int B);
-int Max(int A,int B);
+int Min(int a,int b);
+int Max(int a,int b);
 
 char* Libelle_mode(int Mode);
 int Conversion_argument_mode(const char *Argument);

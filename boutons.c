@@ -530,7 +530,7 @@ void Bouton_Clear_colore(void)
 }
  
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, const char *Section_aide)
+void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte can_cancel, const char *Section_aide)
 {
   short Bouton_clicke;
   byte Backup_table[256];
@@ -540,7 +540,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
   byte Ancien_Mouse_K;
   byte Couleur_taggee;
   byte Couleur;
-  byte Click;
+  byte click;
 
 
   Ouvrir_fenetre(176,150,En_tete);
@@ -548,7 +548,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
   Fenetre_Definir_bouton_palette(6,38);                            // 1
   Fenetre_Definir_bouton_normal( 7, 19,78,14,"Clear" ,1,1,SDLK_c); // 2
   Fenetre_Definir_bouton_normal(91, 19,78,14,"Invert",1,1,SDLK_i); // 3
-  if (Cancel)
+  if (can_cancel)
   {
     Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
     Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,TOUCHE_ESC);  // 5
@@ -610,13 +610,13 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte Cancel, c
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
-        if (Click)
+        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        if (click)
         {
           Effacer_curseur();
           Couleur_taggee=Couleur;
-          Table[Couleur_taggee]=(Click==A_GAUCHE);
-          Stencil_Tagger_couleur(Couleur_taggee,(Click==A_GAUCHE)?CM_Noir:CM_Clair);
+          Table[Couleur_taggee]=(click==A_GAUCHE);
+          Stencil_Tagger_couleur(Couleur_taggee,(click==A_GAUCHE)?CM_Noir:CM_Clair);
           Stencil_Actualiser_couleur(Couleur_taggee);
           Afficher_curseur();
           Attendre_fin_de_click();
@@ -687,7 +687,7 @@ void Bouton_Mask_Menu(void)
 
 //------------------------------- Paramètres ---------------------------------
 
-void Settings_Afficher_config(struct S_Config * Conf)
+void Settings_Afficher_config(T_Config * Conf)
 #define YES "YES"
 #define NO  " NO"
 {
@@ -749,7 +749,7 @@ void Settings_Afficher_config(struct S_Config * Conf)
   Afficher_curseur();
 }
 
-void Settings_Sauver_config(struct S_Config * Conf)
+void Settings_Sauver_config(T_Config * Conf)
 {
   if (Sauver_CFG())
     Erreur(0);
@@ -758,7 +758,7 @@ void Settings_Sauver_config(struct S_Config * Conf)
       Erreur(0);
 }
 
-void Settings_Charger_config(struct S_Config * Conf)
+void Settings_Charger_config(T_Config * Conf)
 {
   if (Charger_CFG(0))
     Erreur(0);
@@ -772,7 +772,7 @@ void Bouton_Settings(void)
   int Sensibilite_X;
   int Sensibilite_Y;
   short Bouton_clicke;
-  struct S_Config Config_choisie;
+  T_Config Config_choisie;
   char Chaine[3];
   byte On_a_recharge_la_config=0;
 
@@ -1888,7 +1888,7 @@ void Bouton_Degrades(void)
   byte  Premiere_couleur;
   byte  Derniere_couleur;
   byte  Couleur;
-  byte  Click;
+  byte  click;
 
 
   Traiter_pixel_de_degrade=Pixel;
@@ -2046,8 +2046,8 @@ void Bouton_Degrades(void)
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
-        if (Click)
+        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        if (click)
         {
           Effacer_curseur();
           Couleur_temporaire=Couleur;
@@ -2392,7 +2392,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
   char * Pointeur_Meilleur_nom;
   Element_de_liste_de_fileselect * Element_courant;
   byte   Lettres_identiques=0;
-  byte   Compteur;
+  byte   counter;
 
   strcpy(FFF_Meilleur_nom,Principal_Nom_fichier);
   Pointeur_Meilleur_nom=NULL;
@@ -2403,10 +2403,10 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
       || (Config.Find_file_fast==(Element_courant->Type+1)) )
     {
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (Compteur=0; Nom[Compteur]!='\0' && tolower(Element_courant->NomComplet[Compteur])==tolower(Nom[Compteur]); Compteur++);
-      if (Compteur>Lettres_identiques)
+      for (counter=0; Nom[counter]!='\0' && tolower(Element_courant->NomComplet[counter])==tolower(Nom[counter]); counter++);
+      if (counter>Lettres_identiques)
       {
-        Lettres_identiques=Compteur;
+        Lettres_identiques=counter;
         strcpy(FFF_Meilleur_nom,Element_courant->NomComplet);
         Pointeur_Meilleur_nom=Element_courant->NomComplet;
       }
@@ -2864,12 +2864,12 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
                 if (Config.Bookmark_directory[Bouton_clicke-10])
                 {
                   // On enlève les "..." avant l'édition
-                  char Bookmark_label[8+1];
-                  strcpy(Bookmark_label, Config.Bookmark_label[Bouton_clicke-10]);
-                  if (Bookmark_label[7]==CARACTERE_SUSPENSION)
-                    Bookmark_label[7]='\0';
-                  if (Readline_ex(Dropdown_bookmark[Bouton_clicke-10]->Pos_X+3+10,Dropdown_bookmark[Bouton_clicke-10]->Pos_Y+2,Bookmark_label,8,8,0))
-                    strcpy(Config.Bookmark_label[Bouton_clicke-10],Bookmark_label);
+                  char bookmark_label[8+1];
+                  strcpy(bookmark_label, Config.Bookmark_label[Bouton_clicke-10]);
+                  if (bookmark_label[7]==CARACTERE_SUSPENSION)
+                    bookmark_label[7]='\0';
+                  if (Readline_ex(Dropdown_bookmark[Bouton_clicke-10]->Pos_X+3+10,Dropdown_bookmark[Bouton_clicke-10]->Pos_Y+2,bookmark_label,8,8,0))
+                    strcpy(Config.Bookmark_label[Bouton_clicke-10],bookmark_label);
                   Afficher_bookmark(Dropdown_bookmark[Bouton_clicke-10],Bouton_clicke-10);
                   Afficher_curseur();
                 }
@@ -3517,11 +3517,11 @@ void Bouton_Reload(void)
 
 void Nom_fichier_backup(char * Nom, char * Nom_backup)
 {
-  short Curseur;
+  short i;
 
   strcpy(Nom_backup,Nom);
-  for (Curseur=strlen(Nom)-strlen(Principal_Nom_fichier); Nom_backup[Curseur]!='.'; Curseur++);
-  Nom_backup[Curseur+1]='\0';
+  for (i=strlen(Nom)-strlen(Principal_Nom_fichier); Nom_backup[i]!='.'; i++);
+  Nom_backup[i+1]='\0';
   strcat(Nom_backup,"BAK");
 }
 
@@ -4362,7 +4362,7 @@ byte Smooth_Matrice_defaut[4][3][3]=
 void Bouton_Smooth_Menu(void)
 {
   short Bouton_clicke;
-  short X,Y,I,J;
+  short X,Y,i,j;
   byte  Matrice_choisie[3][3];
   T_Bouton_special * Matrice_Zone_saisie[3][3];
   char  Chaine[3];
@@ -4376,18 +4376,18 @@ void Bouton_Smooth_Menu(void)
   for (X=11,Y=0; Y<4; X+=31,Y++)
   {
     Fenetre_Definir_bouton_normal(X,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
-    for (J=0; J<3; J++)
-      for (I=0; I<3; I++)
-        Print_char_dans_fenetre(X+2+(I<<3),24+(J<<3),'0'+Smooth_Matrice_defaut[Y][I][J],CM_Noir,CM_Clair);
+    for (j=0; j<3; j++)
+      for (i=0; i<3; i++)
+        Print_char_dans_fenetre(X+2+(i<<3),24+(j<<3),'0'+Smooth_Matrice_defaut[Y][i][j],CM_Noir,CM_Clair);
   }
 
   Fenetre_Afficher_cadre(6,58, 69,45);
-  for (J=0; J<3; J++)
-    for (I=0; I<3; I++)
+  for (j=0; j<3; j++)
+    for (i=0; i<3; i++)
     {
-      Matrice_Zone_saisie[I][J]=Fenetre_Definir_bouton_saisie(10+(I*21),62+(J*13),2); // 7..15
-      Num2str(Matrice_choisie[I][J]=Smooth_Matrice[I][J],Chaine,2);
-      Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[I][J],Chaine);
+      Matrice_Zone_saisie[i][j]=Fenetre_Definir_bouton_saisie(10+(i*21),62+(j*13),2); // 7..15
+      Num2str(Matrice_choisie[i][j]=Smooth_Matrice[i][j],Chaine,2);
+      Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[i][j],Chaine);
     }
   Display_Window(142,109);
 
@@ -4403,17 +4403,17 @@ void Bouton_Smooth_Menu(void)
       {
         memcpy(Matrice_choisie,Smooth_Matrice_defaut[Bouton_clicke-3],sizeof(Matrice_choisie));
         Effacer_curseur();
-        for (J=0; J<3; J++)
-          for (I=0; I<3; I++)
+        for (j=0; j<3; j++)
+          for (i=0; i<3; i++)
           {
-            Num2str(Matrice_choisie[I][J],Chaine,2);
-            Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[I][J],Chaine);
+            Num2str(Matrice_choisie[i][j],Chaine,2);
+            Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[i][j],Chaine);
           }
         Afficher_curseur();
       }
       else
       {
-        I=Bouton_clicke-7; X=I%3; Y=I/3;
+        i=Bouton_clicke-7; X=i%3; Y=i/3;
         Num2str(Matrice_choisie[X][Y],Chaine,2);
         Readline(Matrice_Zone_saisie[X][Y]->Pos_X+2,
                  Matrice_Zone_saisie[X][Y]->Pos_Y+2,
@@ -4776,7 +4776,7 @@ void Bouton_Spray_Menu(void)
   word Ancien_Mouse_Y;
   byte Ancien_Mouse_K;
   byte Couleur;
-  byte Click;
+  byte click;
 
 
   memcpy(Old_Spray_Multi_flow,Spray_Multi_flow,256);
@@ -5030,15 +5030,15 @@ void Bouton_Spray_Menu(void)
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
-        if (Click)
+        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        if (click)
         {
           Effacer_curseur();
           Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
           Stencil_Actualiser_couleur(Couleur_selectionnee);
           // Mettre la couleur sélectionnée à jour suivant le click
           Couleur_selectionnee=Couleur;
-          if (Click==2)
+          if (click==2)
             Spray_Multi_flow[Couleur_selectionnee]=0;
           else
             if (Spray_Multi_flow[Couleur_selectionnee]==0)
@@ -5669,7 +5669,7 @@ void Bouton_Effets(void)
   Afficher_sprite_effet(3,154,96);
   Afficher_etat_effets();
 
-  Print_dans_fenetre(12,117,"Click: Left:Switch / Right:Edit",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(12,117,"click: Left:Switch / Right:Edit",CM_Fonce,CM_Clair);
 
   Display_Window(270,152);
   Afficher_curseur();
@@ -5934,7 +5934,7 @@ void Bouton_Texte()
 {
   static char Chaine[256]="";
   static int Taille_police=32;
-  static int AntiAlias=1;
+  static int antialias=1;
   static short Debut_liste=0; // Indice de le premiere fonte dans le selector
   static short Position_curseur=0; // Indice de la ligne active dans le selector
   static short Style_Bold=0;
@@ -5964,7 +5964,7 @@ void Bouton_Texte()
   Fenetre_Afficher_cadre_creux(182,34,100,68);
   Print_dans_fenetre(199,31,"TrueType", CM_Fonce, CM_Clair);
   // AA
-  Fenetre_Definir_bouton_normal(188,58,13,11,AntiAlias?"X":" ",0,1,SDLK_a); // 2
+  Fenetre_Definir_bouton_normal(188,58,13,11,antialias?"X":" ",0,1,SDLK_a); // 2
   Print_dans_fenetre(206,60,"AntiAlias", CM_Fonce, CM_Clair);
   // Bold
   Fenetre_Definir_bouton_normal(188,72,13,11,Style_Bold?"X":" ",0,1,SDLK_b); // 3
@@ -6023,7 +6023,7 @@ void Bouton_Texte()
         Bouton_preview->Largeur*Menu_Facteur_X,
         Bouton_preview->Hauteur*Menu_Facteur_Y,
         CM_Clair);
-      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, AntiAlias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
+      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, antialias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (Nouvelle_Brosse)
       {
         Affiche_brosse(
@@ -6203,9 +6203,9 @@ void Bouton_Texte()
       break;
 
       case 2: // AA
-      AntiAlias = (AntiAlias==0);
+      antialias = (antialias==0);
       Effacer_curseur();
-      Print_dans_fenetre(191,60,AntiAlias?"X":" ", CM_Noir, CM_Clair);
+      Print_dans_fenetre(191,60,antialias?"X":" ", CM_Noir, CM_Clair);
       A_previsionner=1;
       break;
 
@@ -6308,7 +6308,7 @@ void Bouton_Texte()
       
       // On passe en brosse:
       Afficher_curseur();
-      if (AntiAlias || !TrueType_fonte(Position_curseur+Debut_liste))
+      if (antialias || !TrueType_fonte(Position_curseur+Debut_liste))
         Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
       else
         Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);

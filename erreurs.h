@@ -27,6 +27,6 @@
 
 #define UNTESTED printf("%s %d %s à tester !\n",__FILE__,__LINE__,__func__);
 
-void Erreur_fonction(int, const char *, int, const char *);
+void Erreur_fonction(int error_code, const char *Nom_fichier, int Numero_ligne, const char *Nom_fonction);
 #define Erreur(n) Erreur_fonction(n, __FILE__,__LINE__,__func__)
 

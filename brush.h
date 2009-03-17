@@ -51,13 +51,13 @@ void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2);
 /*!
     Rotates the brush to the right from the given angle.
 */
-void Tourner_brosse(float Angle);
+void Tourner_brosse(float angle);
 
 /*!
     Stretch the brush to fit the given rectangle.
     Uses fast approximation for the preview while changing the angle.
 */
-void Tourner_brosse_preview(float Angle);
+void Tourner_brosse_preview(float angle);
 
 /*!
     Remap the brush palette to the nearest color in the picture one.

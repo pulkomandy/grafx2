@@ -387,7 +387,7 @@ void Sauver_INI_Flush(FILE * Old_file,FILE * New_file,char * Buffer)
 
 
 
-int Sauver_INI(struct S_Config * Conf)
+int Sauver_INI(T_Config * Conf)
 {
   FILE * Ancien_fichier;
   FILE * Nouveau_fichier;

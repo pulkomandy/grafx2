@@ -67,7 +67,7 @@ void Bouton_Quick_shade_Mode(void)
 
 void Shade_Blocs_degrades(void)
 {
-  word  Curseur=0;
+  word  cursor=0;
   word  Nb_shades=0;
   short Shade_traite,Ancien_shade_traite;
   word  Taille_shade=0;
@@ -77,17 +77,17 @@ void Shade_Blocs_degrades(void)
   short Debut_X,Debut_Y,Fin_X,Fin_Y;
 
   // On commence par compter le nombre de shades
-  while (Curseur<512)
+  while (cursor<512)
   {
-    while ((Curseur<512) && (Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF00))
-      Curseur++;
+    while ((cursor<512) && (Shade_Liste[Shade_Actuel].Liste[cursor]&0xFF00))
+      cursor++;
 
-    if (Curseur<512)
+    if (cursor<512)
     {
       Nb_shades++;
-      while ( (Curseur<512)
-         && (!(Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF00)) )
-        Curseur++;
+      while ( (cursor<512)
+         && (!(Shade_Liste[Shade_Actuel].Liste[cursor]&0xFF00)) )
+        cursor++;
     }
   }
 
@@ -101,7 +101,7 @@ void Shade_Blocs_degrades(void)
     Fin_X=Debut_X+Taille_X;
     Fin_Y=Debut_Y+Taille_Y;
 
-    Curseur=0;
+    cursor=0;
     Ancien_shade_traite=-1;
 
     for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
@@ -112,13 +112,13 @@ void Shade_Blocs_degrades(void)
       if (Shade_traite>Ancien_shade_traite)
       {
         // On commence par sauter tous les vides jusqu'au prochain shade
-        while ((Curseur<512) && (Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF00))
-          Curseur++;
-        Debut_shade=Curseur;
+        while ((cursor<512) && (Shade_Liste[Shade_Actuel].Liste[cursor]&0xFF00))
+          cursor++;
+        Debut_shade=cursor;
         // puis regarde sa taille
-        while ((Curseur<512) && (!(Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF00)))
-          Curseur++;
-        Taille_shade=Curseur-Debut_shade;
+        while ((cursor<512) && (!(Shade_Liste[Shade_Actuel].Liste[cursor]&0xFF00)))
+          cursor++;
+        Taille_shade=cursor-Debut_shade;
         Ancien_shade_traite=Shade_traite;
       }
 
@@ -283,7 +283,7 @@ void Supprimer_shade(word Select_Debut,word Select_Fin)
 
 void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Debut)
 {
-  word Curseur,Limite;
+  word cursor,Limite;
   word Temp;
 
   if (Derniere_couleur<Premiere_couleur)
@@ -296,13 +296,13 @@ void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Deb
   // Avant d'insérer quoi que ce soit, on efface les éventuelles couleurs que
   // l'on va réinsérer:
   Limite=512-Select_Debut;
-  for (Curseur=0; Curseur<512; Curseur++)
+  for (cursor=0; cursor<512; cursor++)
   {
-    if (!(Shade_Liste[Shade_Actuel].Liste[Curseur]&0x0100))
+    if (!(Shade_Liste[Shade_Actuel].Liste[cursor]&0x0100))
       for (Temp=Premiere_couleur; Temp<=Derniere_couleur; Temp++)
         if ( (Temp-Premiere_couleur<Limite)
-          && ((Shade_Liste[Shade_Actuel].Liste[Curseur]&0xFF)==Temp) )
-          Shade_Liste[Shade_Actuel].Liste[Curseur]=(Shade_Liste[Shade_Actuel].Liste[Curseur]&0x8000)|0x0100;
+          && ((Shade_Liste[Shade_Actuel].Liste[cursor]&0xFF)==Temp) )
+          Shade_Liste[Shade_Actuel].Liste[cursor]=(Shade_Liste[Shade_Actuel].Liste[cursor]&0x8000)|0x0100;
   }
   // Voilà... Maintenant on peut y aller peinard.
 
@@ -311,22 +311,22 @@ void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Deb
   if (Limite>=512)
     Temp=512-Select_Debut;
 
-  for (Curseur=511;Curseur>=Limite;Curseur--)
-    Shade_Liste[Shade_Actuel].Liste[Curseur]=Shade_Liste[Shade_Actuel].Liste[Curseur-Temp];
+  for (cursor=511;cursor>=Limite;cursor--)
+    Shade_Liste[Shade_Actuel].Liste[cursor]=Shade_Liste[Shade_Actuel].Liste[cursor-Temp];
 
-  for (Curseur=Select_Debut+Temp;Select_Debut<Curseur;Select_Debut++,Premiere_couleur++)
+  for (cursor=Select_Debut+Temp;Select_Debut<cursor;Select_Debut++,Premiere_couleur++)
     Shade_Liste[Shade_Actuel].Liste[Select_Debut]=Premiere_couleur;
 }
 
 
 void Inserer_case_vide_dans_shade(word Position)
 {
-  word Curseur;
+  word cursor;
 
   if (Position>=512) return;
 
-  for (Curseur=511;Curseur>Position;Curseur--)
-    Shade_Liste[Shade_Actuel].Liste[Curseur]=Shade_Liste[Shade_Actuel].Liste[Curseur-1];
+  for (cursor=511;cursor>Position;cursor--)
+    Shade_Liste[Shade_Actuel].Liste[cursor]=Shade_Liste[Shade_Actuel].Liste[cursor-1];
 
   Shade_Liste[Shade_Actuel].Liste[Position]=0x0100;
 }
@@ -450,7 +450,7 @@ int Menu_Shade(void)
   word * Buffer_Undo;  // Buffer du Undo
   word * Pointeur_temp;
   byte Couleur;
-  byte Click;
+  byte click;
 
 
   Buffer       =(word *)malloc(512*sizeof(word));
@@ -952,8 +952,8 @@ int Menu_Shade(void)
 
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&Click);
-        if (Click)
+        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        if (click)
         {
           Effacer_curseur();
           Couleur_temporaire=Couleur;

@@ -386,7 +386,7 @@ void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte C
   word  Indice;
   int Pos_X;
   int Pos_Y;
-  byte *Caractere;
+  byte *font_pixel;
   short Reel_X;
   short Reel_Y;
   byte Repeat_Menu_Facteur_X;
@@ -399,10 +399,10 @@ void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte C
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
       // Pointeur sur le premier pixel du caractère
-      Caractere=Fonte+(((unsigned char)Chaine[Indice])<<6);
+      font_pixel=Fonte+(((unsigned char)Chaine[Indice])<<6);
       for (Pos_X=0;Pos_X<8;Pos_X+=1)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
-          Buffer_de_ligne_horizontale[Reel_X++]=*(Caractere+Pos_X+Pos_Y)?Couleur_texte:Couleur_fond;
+          Buffer_de_ligne_horizontale[Reel_X++]=*(font_pixel+Pos_X+Pos_Y)?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne_fast(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
@@ -411,37 +411,37 @@ void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte C
 
   // -- Afficher un caractère dans une fenêtre --
 
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char Caractere,byte Couleur_texte,byte Couleur_fond)
+void Print_char_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char c,byte Couleur_texte,byte Couleur_fond)
 {
   short X,Y;
-  byte *Carac;
+  byte *pixel;
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
   // Premier pixel du caractère
-  Carac=Fonte + (Caractere<<6);
+  pixel=Fonte + (c<<6);
   
   for (Y=0;Y<8;Y++)
     for (X=0;X<8;X++)
       Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
             Menu_Facteur_X, Menu_Facteur_Y,
-            (*(Carac++)?Couleur_texte:Couleur_fond));
+            (*(pixel++)?Couleur_texte:Couleur_fond));
 }
 
   // -- Afficher un caractère sans fond dans une fenêtre --
 
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char Caractere,byte Couleur)
+void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char c,byte Couleur)
 {
   short X,Y;
-  byte *Carac;
+  byte *pixel;
   Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
   Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
   // Premier pixel du caractère
-  Carac=Fonte + (Caractere<<6);
+  pixel=Fonte + (c<<6);
   
   for (Y=0;Y<8;Y++)
     for (X=0;X<8;X++)
     {
-      if (*(Carac++))
+      if (*(pixel++))
         Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
@@ -549,7 +549,7 @@ void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte 
   #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |                \
           (x >> 8 & 16) | (x >> 10 & 32) | (x >> 12 & 64) | (x >> 14 & 128))
 
-  byte Caractere[14][8] = {
+  byte thin_font[14][8] = {
    { // 0
     Ob(00011100),
     Ob(00110110),
@@ -729,7 +729,7 @@ void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte 
     {
       for (Pos_X=0;Pos_X<6;Pos_X++)
       {
-        byte Couleur = (Caractere[Numero_car][Pos_Y] & (1 << (6-Pos_X))) ? Couleur_texte:Couleur_fond;
+        byte Couleur = (thin_font[Numero_car][Pos_Y] & (1 << (6-Pos_X))) ? Couleur_texte:Couleur_fond;
         Pixel_dans_fenetre(X+(Indice*6+Pos_X),Y+Pos_Y,Couleur);
       }
     }
@@ -2138,7 +2138,7 @@ void Afficher_ecran(void)
 
 
 
-byte Meilleure_couleur(byte R,byte V,byte B)
+byte Meilleure_couleur(byte r,byte g,byte b)
 {
   short Coul;
   int   Delta_R,Delta_V,Delta_B;
@@ -2150,9 +2150,9 @@ byte Meilleure_couleur(byte R,byte V,byte B)
   {
     if (!Exclude_color[Coul])
     {
-      Delta_R=(int)Principal_Palette[Coul].R-R;
-      Delta_V=(int)Principal_Palette[Coul].V-V;
-      Delta_B=(int)Principal_Palette[Coul].B-B;
+      Delta_R=(int)Principal_Palette[Coul].R-r;
+      Delta_V=(int)Principal_Palette[Coul].V-g;
+      Delta_B=(int)Principal_Palette[Coul].B-b;
 
       if (!(Dist=(Delta_R*Delta_R*30)+(Delta_V*Delta_V*59)+(Delta_B*Delta_B*11)))
         return Coul;
@@ -2341,7 +2341,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
 void Calculer_couleurs_menu_optimales(Composantes * Palette)
 {
   byte Table[4];
-  short I,J,K;
+  short i,j,k;
 
 
   Old_Noir =CM_Noir;
@@ -2399,9 +2399,9 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
   if ( ((Palette[CM_Clair].R*30)+(Palette[CM_Clair].V*59)+(Palette[CM_Clair].B*11)) <
        ((Palette[CM_Fonce].R*30)+(Palette[CM_Fonce].V*59)+(Palette[CM_Fonce].B*11)) )
   {
-    I=CM_Clair;
+    i=CM_Clair;
     CM_Clair=CM_Fonce;
-    CM_Fonce=I;
+    CM_Fonce=i;
   }
 
   // On cherche une couleur de transparence différente des 4 autres.
@@ -2416,54 +2416,54 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
     || (CM_Trans!=Old_Trans) )
   {
     // Sprites du curseur
-    for (K=0; K<NB_SPRITES_CURSEUR; K++)
-      for (J=0; J<HAUTEUR_SPRITE_CURSEUR; J++)
-        for (I=0; I<LARGEUR_SPRITE_CURSEUR; I++)
-          Remap_pixel(&SPRITE_CURSEUR[K][J][I]);
+    for (k=0; k<NB_SPRITES_CURSEUR; k++)
+      for (j=0; j<HAUTEUR_SPRITE_CURSEUR; j++)
+        for (i=0; i<LARGEUR_SPRITE_CURSEUR; i++)
+          Remap_pixel(&SPRITE_CURSEUR[k][j][i]);
     // Le menu
-    for (J=0; J<HAUTEUR_MENU; J++)
-      for (I=0; I<LARGEUR_MENU; I++)
-        Remap_pixel(&BLOCK_MENU[J][I]);
+    for (j=0; j<HAUTEUR_MENU; j++)
+      for (i=0; i<LARGEUR_MENU; i++)
+        Remap_pixel(&BLOCK_MENU[j][i]);
     // Sprites du menu
-    for (K=0; K<NB_SPRITES_MENU; K++)
-      for (J=0; J<HAUTEUR_SPRITE_MENU; J++)
-        for (I=0; I<LARGEUR_SPRITE_MENU; I++)
-          Remap_pixel(&SPRITE_MENU[K][J][I]);
+    for (k=0; k<NB_SPRITES_MENU; k++)
+      for (j=0; j<HAUTEUR_SPRITE_MENU; j++)
+        for (i=0; i<LARGEUR_SPRITE_MENU; i++)
+          Remap_pixel(&SPRITE_MENU[k][j][i]);
     // Sprites d'effets
-    for (K=0; K<NB_SPRITES_EFFETS; K++)
-      for (J=0; J<HAUTEUR_SPRITE_MENU; J++)
-        for (I=0; I<LARGEUR_SPRITE_MENU; I++)
-          Remap_pixel(&SPRITE_EFFET[K][J][I]);
+    for (k=0; k<NB_SPRITES_EFFETS; k++)
+      for (j=0; j<HAUTEUR_SPRITE_MENU; j++)
+        for (i=0; i<LARGEUR_SPRITE_MENU; i++)
+          Remap_pixel(&SPRITE_EFFET[k][j][i]);
     // Fontes de l'aide
-    for (K=0; K<256; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_norm[K][I][J]);
-    for (K=0; K<256; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_bold[K][I][J]);
-    for (K=0; K<64; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_t1[K][I][J]);
-    for (K=0; K<64; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_t2[K][I][J]);
-    for (K=0; K<64; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_t3[K][I][J]);
-    for (K=0; K<64; K++)
-      for (J=0; J<8; J++)
-        for (I=0; I<6; I++)
-          Remap_pixel(&Fonte_help_t4[K][I][J]);
+    for (k=0; k<256; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_norm[k][i][j]);
+    for (k=0; k<256; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_bold[k][i][j]);
+    for (k=0; k<64; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_t1[k][i][j]);
+    for (k=0; k<64; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_t2[k][i][j]);
+    for (k=0; k<64; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_t3[k][i][j]);
+    for (k=0; k<64; k++)
+      for (j=0; j<8; j++)
+        for (i=0; i<6; i++)
+          Remap_pixel(&Fonte_help_t4[k][i][j]);
         
     // Sprites de lecteurs (drives)
-    for (K=0; K<NB_SPRITES_DRIVES; K++)
-      for (J=0; J<HAUTEUR_SPRITE_DRIVE; J++)
-        for (I=0; I<LARGEUR_SPRITE_DRIVE; I++)
-          Remap_pixel(&SPRITE_DRIVE[K][J][I]);
+    for (k=0; k<NB_SPRITES_DRIVES; k++)
+      for (j=0; j<HAUTEUR_SPRITE_DRIVE; j++)
+        for (i=0; i<LARGEUR_SPRITE_DRIVE; i++)
+          Remap_pixel(&SPRITE_DRIVE[k][j][i]);
   }
 }

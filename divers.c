@@ -343,7 +343,7 @@ void Set_mouse_position(void)
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 {
   int Ligne;
-  int Compteur;
+  int counter;
   byte* Adresse;
 
   byte Ancien;
@@ -352,9 +352,9 @@ void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
   for(Ligne = Limite_Haut;Ligne <= Limite_Bas; Ligne++)
   {
     // Pour chaque pixel sur la ligne :
-    for (Compteur = Limite_Gauche;Compteur <= Limite_Droite;Compteur ++)
+    for (counter = Limite_Gauche;counter <= Limite_Droite;counter ++)
     {
-      Adresse = Principal_Ecran+Ligne*Principal_Largeur_image+Compteur;
+      Adresse = Principal_Ecran+Ligne*Principal_Largeur_image+counter;
       Ancien=*Adresse;
       *Adresse = Table_de_remplacement[Ancien];
     }
@@ -599,14 +599,14 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
         word Facteur, word Largeur
 )
 {
-        byte Color;
+        byte color;
         word X;
 
         // Pour chaque pixel
         for(X=0;X<Largeur;X++){
-                Color = *Ligne_originale;
+                color = *Ligne_originale;
 
-                memset(Ligne_zoomee,Color,Facteur);
+                memset(Ligne_zoomee,color,Facteur);
                 Ligne_zoomee+=Facteur;
 
                 Ligne_originale++;
@@ -673,15 +673,15 @@ unsigned long Memoire_libre(void)
 
 
 // Transformer un nombre (entier naturel) en chaîne
-void Num2str(dword Nombre,char * Chaine,byte Taille)
+void Num2str(dword number,char * Chaine,byte Taille)
 {
   int Indice;
 
   for (Indice=Taille-1;Indice>=0;Indice--)
   {
-    Chaine[Indice]=(Nombre%10)+'0';
-    Nombre/=10;
-    if (Nombre==0)
+    Chaine[Indice]=(number%10)+'0';
+    number/=10;
+    if (number==0)
       for (Indice--;Indice>=0;Indice--)
         Chaine[Indice]=' ';
   }
@@ -727,15 +727,15 @@ short Round_div_max(short Numerateur,short Diviseur)
 }
 
 // Retourne le minimum entre deux nombres
-int Min(int A,int B)
+int Min(int a,int b)
 {
-  return (A<B)?A:B;
+  return (a<b)?a:b;
 }
 
 // Retourne le maximum entre deux nombres
-int Max(int A,int B)
+int Max(int a,int b)
 {
-  return (A>B)?A:B;
+  return (a>b)?a:b;
 }
 
 

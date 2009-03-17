@@ -26,5 +26,5 @@ void Set_Palette_RGB_Scale(int);
 
 // Scale a component (R, G or B) according to the current RGB graduations
 // The resulting range is [0-255]
-byte Palette_Scale_Component(byte Comp);
+byte Palette_Scale_Component(byte comp);
 

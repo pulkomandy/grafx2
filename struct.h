@@ -204,7 +204,50 @@ typedef struct
   word Touche2;
 } __attribute__((__packed__)) Config_Infos_touche;
 
-
+typedef struct
+{
+  byte Fonte;
+  int  Lire_les_fichiers_caches;
+  int  Lire_les_repertoires_caches;
+//  int  Lire_les_repertoires_systemes;
+  byte Afficher_limites_image;
+  byte Curseur;
+  byte Maximize_preview;
+  byte Auto_set_res;
+  byte Coords_rel;
+  byte Backup;
+  byte Adjust_brush_pick;
+  byte Auto_save;
+  byte Nb_pages_Undo;
+  byte Indice_Sensibilite_souris_X;
+  byte Indice_Sensibilite_souris_Y;
+  byte Mouse_Facteur_de_correction_X;
+  byte Mouse_Facteur_de_correction_Y;
+  byte Mouse_Merge_movement;
+  byte Valeur_tempo_jauge_gauche;
+  byte Valeur_tempo_jauge_droite;
+  long Chrono_delay;
+  Composantes Coul_menu_pref[4];
+  int  Nb_max_de_vertex_par_polygon;
+  byte Clear_palette;
+  byte Set_resolution_according_to;
+  byte Ratio;
+  byte Fast_zoom;
+  byte Find_file_fast;
+  byte Couleurs_separees;
+  word Palette_Cells_X;
+  word Palette_Cells_Y;
+  byte FX_Feedback;
+  byte Safety_colors;
+  byte Opening_message;
+  byte Clear_with_stencil;
+  byte Auto_discontinuous;
+  byte Taille_ecran_dans_GIF;
+  byte Auto_nb_used;
+  byte Resolution_par_defaut;
+  char *Bookmark_directory[NB_BOOKMARKS]; // independant malloc of adaptive size
+  char Bookmark_label[NB_BOOKMARKS][8+1];
+} T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
 // Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de

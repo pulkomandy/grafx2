@@ -89,8 +89,8 @@ void Tracer_cercle_degrade  (short Centre_X,short Centre_Y,short Rayon,short Ecl
 void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y);
 void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY);
 
-void Polyfill_General(int Vertices, short * Points, int Color);
-void Polyfill(int Vertices, short * Points, int Color);
+void Polyfill_General(int Vertices, short * Points, int color);
+void Polyfill(int Vertices, short * Points, int color);
 
 // Gestion des backups:
 void Download_infos_page_principal(S_Page * Page);

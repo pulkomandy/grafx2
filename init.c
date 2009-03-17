@@ -76,7 +76,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-void Chercher_bas(SDL_Surface *GUI, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * Section)
+void Chercher_bas(SDL_Surface *gui, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * Section)
 {
   byte Couleur;
   int Y;
@@ -84,21 +84,21 @@ void Chercher_bas(SDL_Surface *GUI, int *Debut_X, int *Debut_Y, byte Couleur_neu
   *Debut_X=0;
   do
   {
-    Couleur=Sdl_Get_pixel_8(GUI,*Debut_X,Y);
+    Couleur=Sdl_Get_pixel_8(gui,*Debut_X,Y);
     if (Couleur!=Couleur_neutre)
     {
       *Debut_Y=Y;
       return;
     }
     Y++;
-  } while (Y<GUI->h);
+  } while (Y<gui->h);
   
   printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
     *Debut_X, *Debut_Y, Section);
   Erreur(ERREUR_GUI_CORROMPU);
 }
 
-void Chercher_droite(SDL_Surface *GUI, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * Section)
+void Chercher_droite(SDL_Surface *gui, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * Section)
 {
   byte Couleur;
   int X;
@@ -106,21 +106,21 @@ void Chercher_droite(SDL_Surface *GUI, int *Debut_X, int Debut_Y, byte Couleur_n
   
   do
   {
-    Couleur=Sdl_Get_pixel_8(GUI,X,Debut_Y);
+    Couleur=Sdl_Get_pixel_8(gui,X,Debut_Y);
     if (Couleur!=Couleur_neutre)
     {
       *Debut_X=X;
       return;
     }
     X++;
-  } while (X<GUI->w);
+  } while (X<gui->w);
   
   printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
     *Debut_X, Debut_Y, Section);
   Erreur(ERREUR_GUI_CORROMPU);
 }
 
-void Lire_bloc(SDL_Surface *GUI, int Debut_X, int Debut_Y, void *Dest, int Largeur, int Hauteur, char * Section, int Type)
+void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int Largeur, int Hauteur, char * Section, int Type)
 {
   // Type: 0 = normal GUI element, only 4 colors allowed
   // Type: 1 = mouse cursor, 4 colors allowed + transparent
@@ -132,7 +132,7 @@ void Lire_bloc(SDL_Surface *GUI, int Debut_X, int Debut_Y, void *Dest, int Large
   byte Couleur;
 
   // Verification taille
-  if (Debut_Y+Hauteur>=GUI->h || Debut_X+Largeur>=GUI->w)
+  if (Debut_Y+Hauteur>=gui->h || Debut_X+Largeur>=gui->w)
   {
     printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
       Debut_X, Debut_Y, Hauteur, Largeur, Section);
@@ -143,7 +143,7 @@ void Lire_bloc(SDL_Surface *GUI, int Debut_X, int Debut_Y, void *Dest, int Large
   {
     for (X=Debut_X; X<Debut_X+Largeur; X++)
     {
-      Couleur=Sdl_Get_pixel_8(GUI,X,Y);
+      Couleur=Sdl_Get_pixel_8(gui,X,Y);
       if (Type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
@@ -173,12 +173,12 @@ void Lire_bloc(SDL_Surface *GUI, int Debut_X, int Debut_Y, void *Dest, int Large
   }
 }
 
-void Lire_trame(SDL_Surface *GUI, int Debut_X, int Debut_Y, word *Dest, char * Section)
+void Lire_trame(SDL_Surface *gui, int Debut_X, int Debut_Y, word *Dest, char * Section)
 {
   byte Buffer[256];
   int X,Y;
   
-  Lire_bloc(GUI, Debut_X, Debut_Y, Buffer, 16, 16, Section, 2);
+  Lire_bloc(gui, Debut_X, Debut_Y, Buffer, 16, 16, Section, 2);
 
   for (Y=0; Y<16; Y++)
   {
@@ -196,7 +196,7 @@ void Charger_DAT(void)
 {
   int  Indice;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  SDL_Surface * GUI;
+  SDL_Surface * gui;
   SDL_Palette * SDLPal;
   int i;
   int Curseur_X=0,Curseur_Y=0;
@@ -210,17 +210,17 @@ void Charger_DAT(void)
   // Lecture du fichier "skin"
   strcpy(Nom_du_fichier,Repertoire_des_donnees);
   strcat(Nom_du_fichier,"gfx2gui.gif");
-  GUI=IMG_Load(Nom_du_fichier);
-  if (!GUI)
+  gui=IMG_Load(Nom_du_fichier);
+  if (!gui)
   {
     Erreur(ERREUR_GUI_ABSENT);
   }
-  if (!GUI->format || GUI->format->BitsPerPixel != 8)
+  if (!gui->format || gui->format->BitsPerPixel != 8)
   {
     printf("Not a 8-bit image");
     Erreur(ERREUR_GUI_CORROMPU);
   }
-  SDLPal=GUI->format->palette;
+  SDLPal=gui->format->palette;
   if (!SDLPal || SDLPal->ncolors!=256)
   {
     printf("Not a 256-color palette");
@@ -235,59 +235,59 @@ void Charger_DAT(void)
   }
   
   // Carré "noir"
-  CM_Noir = Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+  CM_Noir = Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   do
   {
-    if (++Curseur_X>=GUI->w)
+    if (++Curseur_X>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
     }
-    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   } while(Couleur==CM_Noir);
   // Carré "foncé"
   CM_Fonce=Couleur;
   do
   {
-    if (++Curseur_X>=GUI->w)
+    if (++Curseur_X>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
     }
-    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   } while(Couleur==CM_Fonce);
   // Carré "clair"
   CM_Clair=Couleur;
   do
   {
-    if (++Curseur_X>GUI->w)
+    if (++Curseur_X>gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
     }
-    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   } while(Couleur==CM_Clair);
   // Carré "blanc"
   CM_Blanc=Couleur;
   do
   {
-    if (++Curseur_X>=GUI->w)
+    if (++Curseur_X>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
     }
-    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   } while(Couleur==CM_Blanc);
   // Carré "transparent"
   CM_Trans=Couleur;
   do
   {
-    if (++Curseur_X>=GUI->w)
+    if (++Curseur_X>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
     }
-    Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y);
+    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
   } while(Couleur==CM_Trans);
   // Reste : couleur neutre
   CM_Neutre=Couleur;
@@ -295,10 +295,10 @@ void Charger_DAT(void)
   
   Curseur_X=0;
   Curseur_Y=1;
-  while ((Couleur=Sdl_Get_pixel_8(GUI,Curseur_X,Curseur_Y))==CM_Noir)
+  while ((Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y))==CM_Noir)
   {
     Curseur_Y++;
-    if (Curseur_Y>=GUI->h)
+    if (Curseur_Y>=gui->h)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       Erreur(ERREUR_GUI_CORROMPU);
@@ -306,18 +306,18 @@ void Charger_DAT(void)
   }
   
   // Menu
-  Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "menu");
-  Lire_bloc(GUI, Curseur_X, Curseur_Y, BLOCK_MENU, LARGEUR_MENU, HAUTEUR_MENU,"menu",0);
+  Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "menu");
+  Lire_bloc(gui, Curseur_X, Curseur_Y, BLOCK_MENU, LARGEUR_MENU, HAUTEUR_MENU,"menu",0);
   Curseur_Y+=HAUTEUR_MENU;
 
   // Effets
   for (i=0; i<NB_SPRITES_EFFETS; i++)
   {
     if (i==0)
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "effect sprite");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "effect sprite");
     else
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "effect sprite");
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_EFFET[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "effect sprite",0);
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "effect sprite");
+    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_EFFET[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "effect sprite",0);
     Curseur_X+=LARGEUR_SPRITE_MENU;
   }
   Curseur_Y+=HAUTEUR_SPRITE_MENU;
@@ -326,10 +326,10 @@ void Charger_DAT(void)
   for (i=0; i<NB_SPRITES_CURSEUR; i++)
   {
     if (i==0)
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "mouse cursor");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "mouse cursor");
     else
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "mouse cursor");
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_CURSEUR[i], LARGEUR_SPRITE_CURSEUR, HAUTEUR_SPRITE_CURSEUR, "mouse cursor",1);
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "mouse cursor");
+    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_CURSEUR[i], LARGEUR_SPRITE_CURSEUR, HAUTEUR_SPRITE_CURSEUR, "mouse cursor",1);
     Curseur_X+=LARGEUR_SPRITE_CURSEUR;
   }
   Curseur_Y+=HAUTEUR_SPRITE_CURSEUR;
@@ -338,10 +338,10 @@ void Charger_DAT(void)
   for (i=0; i<NB_SPRITES_MENU; i++)
   {
     if (i==0)
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "menu sprite");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "menu sprite");
     else
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "menu sprite");
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_MENU[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "menu sprite",1);
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "menu sprite");
+    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_MENU[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "menu sprite",1);
     Curseur_X+=LARGEUR_SPRITE_MENU;
   }
   Curseur_Y+=HAUTEUR_SPRITE_MENU;
@@ -354,13 +354,13 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=HAUTEUR_PINCEAU;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "brush icon");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "brush icon");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "brush icon");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "brush icon");
     }
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_PINCEAU[i], LARGEUR_PINCEAU, HAUTEUR_PINCEAU, "brush icon",2);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_PINCEAU[i], LARGEUR_PINCEAU, HAUTEUR_PINCEAU, "brush icon",2);
     Curseur_X+=LARGEUR_PINCEAU;
   }
   Curseur_Y+=HAUTEUR_PINCEAU;
@@ -369,10 +369,10 @@ void Charger_DAT(void)
   for (i=0; i<NB_SPRITES_DRIVES; i++)
   {
     if (i==0)
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "sprite drive");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "sprite drive");
     else
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "sprite drive");
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, SPRITE_DRIVE[i], LARGEUR_SPRITE_DRIVE, HAUTEUR_SPRITE_DRIVE, "sprite drive",1);
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "sprite drive");
+    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_DRIVE[i], LARGEUR_SPRITE_DRIVE, HAUTEUR_SPRITE_DRIVE, "sprite drive",1);
     Curseur_X+=LARGEUR_SPRITE_DRIVE;
   }
   Curseur_Y+=HAUTEUR_SPRITE_DRIVE;
@@ -381,18 +381,18 @@ void Charger_DAT(void)
   if (!(Logo_GrafX2=(byte *)malloc(231*56)))
     Erreur(ERREUR_MEMOIRE);
 
-  Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "logo menu");
-  Lire_bloc(GUI, Curseur_X, Curseur_Y, Logo_GrafX2, 231, 56, "logo menu",3);
+  Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "logo menu");
+  Lire_bloc(gui, Curseur_X, Curseur_Y, Logo_GrafX2, 231, 56, "logo menu",3);
   Curseur_Y+=56;
   
   // Trames
   for (i=0; i<NB_TRAMES_PREDEFINIES; i++)
   {
     if (i==0)
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "sieve pattern");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "sieve pattern");
     else
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "sieve pattern");
-    Lire_trame(GUI, Curseur_X, Curseur_Y, TRAME_PREDEFINIE[i],"sieve pattern");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "sieve pattern");
+    Lire_trame(gui, Curseur_X, Curseur_Y, TRAME_PREDEFINIE[i],"sieve pattern");
     Curseur_X+=16;
   }
   Curseur_Y+=16;
@@ -405,13 +405,13 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=8;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "system font");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "system font");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "system font");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "system font");
     }
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, &Fonte_systeme[i*64], 8, 8, "system font",2);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, &Fonte_systeme[i*64], 8, 8, "system font",2);
     Curseur_X+=8;
   }
   Curseur_Y+=8;
@@ -425,13 +425,13 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=8;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "fun font");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "fun font");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "fun font");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "fun font");
     }
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, &Fonte_fun[i*64], 8, 8, "fun font",2);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, &Fonte_fun[i*64], 8, 8, "fun font",2);
     Curseur_X+=8;
   }
   Curseur_Y+=8;
@@ -444,13 +444,13 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=8;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (norm)");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (norm)");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (norm)");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (norm)");
     }
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, &(Fonte_help_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, &(Fonte_help_norm[i][0][0]), 6, 8, "help font (norm)",0);
     Curseur_X+=6;
   }
   Curseur_Y+=8;
@@ -463,13 +463,13 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=8;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (bold)");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (bold)");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (bold)");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (bold)");
     }
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, &(Fonte_help_bold[i][0][0]), 6, 8, "help font (bold)",0);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, &(Fonte_help_bold[i][0][0]), 6, 8, "help font (bold)",0);
     Curseur_X+=6;
   }
   Curseur_Y+=8;
@@ -483,11 +483,11 @@ void Charger_DAT(void)
     {
       if (i!=0)
         Curseur_Y+=8;
-      Chercher_bas(GUI, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (title)");
+      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (title)");
     }
     else
     {
-      Chercher_droite(GUI, &Curseur_X, Curseur_Y, CM_Neutre, "help font (title)");
+      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (title)");
     }
     
     if (i&1)
@@ -501,13 +501,13 @@ void Charger_DAT(void)
       else
         Dest=&(Fonte_help_t1[Car_1++][0][0]);
     
-    Lire_bloc(GUI, Curseur_X, Curseur_Y, Dest, 6, 8, "help font (title)",0);
+    Lire_bloc(gui, Curseur_X, Curseur_Y, Dest, 6, 8, "help font (title)",0);
     Curseur_X+=6;
   }
   Curseur_Y+=8;
   
   // Terminé: libération de l'image skin
-  SDL_FreeSurface(GUI);
+  SDL_FreeSurface(gui);
 
   Section_d_aide_en_cours=0;
   Position_d_aide_en_cours=0;
@@ -1523,7 +1523,7 @@ void Definir_mode_video(short  Largeur,
 
   if (Nb_modes_video >= MAX_MODES_VIDEO-1)
   {
-    DEBUG("Erreur! Tentative de créer un mode de trop! Limite:", MAX_MODES_VIDEO);
+    DEBUG("Error! Attempt to create too many videomodes. Maximum is:", MAX_MODES_VIDEO);
     return;
   }
   if (!Fullscreen)

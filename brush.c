@@ -1566,7 +1566,7 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
 
 
 
-void Tourner_brosse(float Angle)
+void Tourner_brosse(float angle)
 {
   byte * New_Brosse;
   int    New_Brosse_Largeur;  // Largeur de la nouvelle brosse
@@ -1575,8 +1575,8 @@ void Tourner_brosse(float Angle)
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
   int Debut_X,Fin_X,Debut_Y,Fin_Y;
   int Xmin,Xmax,Ymin,Ymax;
-  float cosA=cos(Angle);
-  float sinA=sin(Angle);
+  float cosA=cos(angle);
+  float sinA=sin(angle);
 
   // Calcul des coordonnées des 4 coins:
   // 1 2
@@ -1725,12 +1725,12 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
 }
 
 
-void Tourner_brosse_preview(float Angle)
+void Tourner_brosse_preview(float angle)
 {
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
   int Debut_X,Fin_X,Debut_Y,Fin_Y;
-  float cosA=cos(Angle);
-  float sinA=sin(Angle);
+  float cosA=cos(angle);
+  float sinA=sin(angle);
 
   // Calcul des coordonnées des 4 coins:
   // 1 2
