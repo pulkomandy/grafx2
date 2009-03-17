@@ -30,8 +30,6 @@
 #if defined(__amigaos4__)
     #include <proto/dos.h>
     #include <dirent.h>
-#elif defined(__WATCOMC__)
-    #include <direct.h>
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>

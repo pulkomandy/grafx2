@@ -52,13 +52,6 @@
 #include "brush.h"
 #include "input.h"
 
-
-#ifdef __WATCOMC__
-    #include <windows.h>
-    #define chdir(x) SetCurrentDirectory(x)
-    #define rmdir(x) DeleteFile(x)
-#endif
-
 #define FILENAMESPACE 13
 
 #define Display_Window(X,Y) UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,X*Menu_Facteur_X,Y*Menu_Facteur_Y);

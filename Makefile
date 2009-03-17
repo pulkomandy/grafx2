@@ -164,6 +164,7 @@ else
   
       # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
       # Linux and FreeBSD specific (default rules)
+      $(shell rm PIPE:gfx2ver)
       DELCOMMAND = rm -rf
       MKDIR = mkdir -p
       RMDIR = rmdir

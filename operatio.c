@@ -36,7 +36,7 @@
 #include "brush.h"
 #include "windows.h"
 
-#if defined(__WATCOMC__) || defined(__GP2X__)
+#if defined(__GP2X__)
     #define M_PI 3.14159265358979323846 
 #endif
 

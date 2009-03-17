@@ -638,7 +638,7 @@ void Bouton_Stats(void)
       GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
       Taille = tailleU.QuadPart;
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__)
     // Note: under MacOSX, both macros are defined anyway.
     {
       struct statfs Informations_Disque;

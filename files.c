@@ -33,9 +33,6 @@
     #include <proto/dos.h>
     #include <dirent.h>
     #define isHidden(Enreg) (0)
-#elif defined(__WATCOMC__)
-    #include <direct.h>
-    #define isHidden(Enreg) ((Enreg)->d_attr & _A_HIDDEN)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
