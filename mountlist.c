@@ -900,3 +900,6 @@ read_file_system_list (bool need_fs_type)
     return NULL;
   }
 }
+
+#endif
+
