@@ -49,7 +49,7 @@ ifdef COMSPEC
   OBJRES = $(OBJDIR)/winres.o
   CFGOBJRES = $(OBJDIR)/wincfgres.o
   PLATFORM = win32
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2cfg.ico gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
   ZIP = zip
 else
 
@@ -247,10 +247,10 @@ release : $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
-	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico gfx2cfg.ico
-	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini gfx2gui.gif gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico 
+	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini gfx2gui.gif gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini gfx2gui.gif gfx2.ico gfx2cfg.ico gfx2.gif gfx2cfg.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini gfx2gui.gif gfx2.ico gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
@@ -289,7 +289,6 @@ install : $(BIN)
 	$(CP) gfx2def.ini $(datadir)/grafx2/
 	$(CP) gfx2gui.gif $(datadir)/grafx2/
 	$(CP) gfx2.gif $(datadir)/grafx2/
-	$(CP) gfx2cfg.gif $(datadir)/grafx2/
 	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
 	cd fonts && $(CP) * $(datadir)/grafx2/fonts/
 	@echo Install complete
@@ -301,7 +300,6 @@ uninstall :
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2def.ini
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2gui.gif
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
-	$(DELCOMMAND) $(datadir)/grafx2/gfx2cfg.gif
 	$(DELCOMMAND) $(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
 	$(if $(wildcard $(datadir)/grafx2),,$(RMDIR) $(datadir)/grafx2)
