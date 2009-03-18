@@ -143,7 +143,7 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
 byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
 {
   byte *Src;
-  byte *Dst;
+  byte *dest_ptr;
   int Y;
   int Reste;
 
@@ -159,12 +159,12 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
   if (dest==NULL)
     dest=(byte *)malloc(Source->w*Source->h);
 
-  Dst=dest;
+  dest_ptr=dest;
   Src=(byte *)(Source->pixels);
   for(Y=0; Y < Source->h; Y++)
   {
-    memcpy(Dst, Src,Source->w);
-    Dst += Source->w;
+    memcpy(dest_ptr, Src,Source->w);
+    dest_ptr += Source->w;
     Src += Source->w + Reste;
   }
   return dest;

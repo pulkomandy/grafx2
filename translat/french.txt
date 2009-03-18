@@ -1405,8 +1405,6 @@ Beta2
 Bidon
 Bit
 BitPlanes
-Bitmap24B
-Bitmap256
 Blanc
 Bleu
 Bleu_dessous
@@ -2978,7 +2976,6 @@ Pos_Y_dest_Initiale
 Pos_Y_src
 Pos_Y_src_Initiale
 Pos_texte_Y
-S_Liste_de_pages
 T
 T2
 T3
@@ -3101,3 +3098,4 @@ T_TABLEAIDE
 Table_conversion
 Table_occurence
 word
+T_Config

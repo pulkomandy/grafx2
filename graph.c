@@ -2381,7 +2381,7 @@ byte Effet_Shade(word X,word Y,__attribute__((unused)) byte Couleur)
 
 byte Effet_Quick_shade(word X,word Y,byte Couleur)
 {
-  int color=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
+  int c=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
   int Sens=(Fore_color<=Back_color);
   byte start,end;
   int Largeur;
@@ -2397,33 +2397,33 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
     end  =Fore_color;
   }
 
-  if ((color>=start) && (color<=end) && (start!=end))
+  if ((c>=start) && (c<=end) && (start!=end))
   {
     Largeur=1+end-start;
 
     if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
-      color-=Quick_shade_Step%Largeur;
+      c-=Quick_shade_Step%Largeur;
     else
-      color+=Quick_shade_Step%Largeur;
+      c+=Quick_shade_Step%Largeur;
 
-    if (color<start)
+    if (c<start)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return start;
-        case MODE_SHADE_BOUCLE : return (Largeur+color);
+        case MODE_SHADE_BOUCLE : return (Largeur+c);
         default : return Couleur;
       }
 
-    if (color>end)
+    if (c>end)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return end;
-        case MODE_SHADE_BOUCLE : return (color-Largeur);
+        case MODE_SHADE_BOUCLE : return (c-Largeur);
         default : return Couleur;
       }
   }
 
-  return color;
+  return c;
 }
 
   // -- Effet de Tiling --
@@ -2439,88 +2439,88 @@ byte Effet_Tiling(word X,word Y,__attribute__((unused)) byte Couleur)
 byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 {
   int r,g,b;
-  byte color;
+  byte c;
   int Poids,Poids_total;
   byte X2=((X+1)<Principal_Largeur_image);
   byte Y2=((Y+1)<Principal_Hauteur_image);
 
   // On commence par le pixel central
-  color=Lit_pixel_dans_ecran_feedback(X,Y);
+  c=Lit_pixel_dans_ecran_feedback(X,Y);
   Poids_total=Smooth_Matrice[1][1];
-  r=Poids_total*Principal_Palette[color].R;
-  g=Poids_total*Principal_Palette[color].V;
-  b=Poids_total*Principal_Palette[color].B;
+  r=Poids_total*Principal_Palette[c].R;
+  g=Poids_total*Principal_Palette[c].V;
+  b=Poids_total*Principal_Palette[c].B;
 
   if (X)
   {
-    color=Lit_pixel_dans_ecran_feedback(X-1,Y);
+    c=Lit_pixel_dans_ecran_feedback(X-1,Y);
     Poids_total+=(Poids=Smooth_Matrice[0][1]);
-    r+=Poids*Principal_Palette[color].R;
-    g+=Poids*Principal_Palette[color].V;
-    b+=Poids*Principal_Palette[color].B;
+    r+=Poids*Principal_Palette[c].R;
+    g+=Poids*Principal_Palette[c].V;
+    b+=Poids*Principal_Palette[c].B;
 
     if (Y)
     {
-      color=Lit_pixel_dans_ecran_feedback(X-1,Y-1);
+      c=Lit_pixel_dans_ecran_feedback(X-1,Y-1);
       Poids_total+=(Poids=Smooth_Matrice[0][0]);
-      r+=Poids*Principal_Palette[color].R;
-      g+=Poids*Principal_Palette[color].V;
-      b+=Poids*Principal_Palette[color].B;
+      r+=Poids*Principal_Palette[c].R;
+      g+=Poids*Principal_Palette[c].V;
+      b+=Poids*Principal_Palette[c].B;
 
       if (Y2)
       {
-        color=Lit_pixel_dans_ecran_feedback(X-1,Y+1);
+        c=Lit_pixel_dans_ecran_feedback(X-1,Y+1);
         Poids_total+=(Poids=Smooth_Matrice[0][2]);
-        r+=Poids*Principal_Palette[color].R;
-        g+=Poids*Principal_Palette[color].V;
-        b+=Poids*Principal_Palette[color].B;
+        r+=Poids*Principal_Palette[c].R;
+        g+=Poids*Principal_Palette[c].V;
+        b+=Poids*Principal_Palette[c].B;
       }
     }
   }
 
   if (X2)
   {
-    color=Lit_pixel_dans_ecran_feedback(X+1,Y);
+    c=Lit_pixel_dans_ecran_feedback(X+1,Y);
     Poids_total+=(Poids=Smooth_Matrice[2][1]);
-    r+=Poids*Principal_Palette[color].R;
-    g+=Poids*Principal_Palette[color].V;
-    b+=Poids*Principal_Palette[color].B;
+    r+=Poids*Principal_Palette[c].R;
+    g+=Poids*Principal_Palette[c].V;
+    b+=Poids*Principal_Palette[c].B;
 
     if (Y)
     {
-      color=Lit_pixel_dans_ecran_feedback(X+1,Y-1);
+      c=Lit_pixel_dans_ecran_feedback(X+1,Y-1);
       Poids_total+=(Poids=Smooth_Matrice[2][0]);
-      r+=Poids*Principal_Palette[color].R;
-      g+=Poids*Principal_Palette[color].V;
-      b+=Poids*Principal_Palette[color].B;
+      r+=Poids*Principal_Palette[c].R;
+      g+=Poids*Principal_Palette[c].V;
+      b+=Poids*Principal_Palette[c].B;
 
       if (Y2)
       {
-        color=Lit_pixel_dans_ecran_feedback(X+1,Y+1);
+        c=Lit_pixel_dans_ecran_feedback(X+1,Y+1);
         Poids_total+=(Poids=Smooth_Matrice[2][2]);
-        r+=Poids*Principal_Palette[color].R;
-        g+=Poids*Principal_Palette[color].V;
-        b+=Poids*Principal_Palette[color].B;
+        r+=Poids*Principal_Palette[c].R;
+        g+=Poids*Principal_Palette[c].V;
+        b+=Poids*Principal_Palette[c].B;
       }
     }
   }
 
   if (Y)
   {
-    color=Lit_pixel_dans_ecran_feedback(X,Y-1);
+    c=Lit_pixel_dans_ecran_feedback(X,Y-1);
     Poids_total+=(Poids=Smooth_Matrice[1][0]);
-    r+=Poids*Principal_Palette[color].R;
-    g+=Poids*Principal_Palette[color].V;
-    b+=Poids*Principal_Palette[color].B;
+    r+=Poids*Principal_Palette[c].R;
+    g+=Poids*Principal_Palette[c].V;
+    b+=Poids*Principal_Palette[c].B;
   }
 
   if (Y2)
   {
-    color=Lit_pixel_dans_ecran_feedback(X,Y+1);
+    c=Lit_pixel_dans_ecran_feedback(X,Y+1);
     Poids_total+=(Poids=Smooth_Matrice[1][2]);
-    r+=Poids*Principal_Palette[color].R;
-    g+=Poids*Principal_Palette[color].V;
-    b+=Poids*Principal_Palette[color].B;
+    r+=Poids*Principal_Palette[c].R;
+    g+=Poids*Principal_Palette[c].V;
+    b+=Poids*Principal_Palette[c].B;
   }
 
   return (Poids_total)? // On regarde s'il faut éviter le 0/0.
