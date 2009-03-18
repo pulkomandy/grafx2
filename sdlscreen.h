@@ -32,7 +32,7 @@
 
   void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur);
   void Flush_update(void);
-  byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination);
+  byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest);
   SDL_Color Conversion_couleur_SDL(byte);
   byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int X, int Y);
   

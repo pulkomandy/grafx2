@@ -608,7 +608,7 @@ void Effacer_pinceau(short X,short Y)
 
 
 
-void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short Effacement)
+void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear)
 {
   short Temporaire;
   short Pos_X;
@@ -691,7 +691,7 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short E
     Copier_image_dans_brosse(Debut_X,Debut_Y,Brosse_Largeur,Brosse_Hauteur,Principal_Largeur_image);
 
     // On regarde s'il faut effacer quelque chose:
-    if (Effacement)
+    if (clear)
     {
       for (Pos_Y=Debut_Y;Pos_Y<Debut_Y+Brosse_Hauteur;Pos_Y++)
         for (Pos_X=Debut_X;Pos_X<Debut_X+Brosse_Largeur;Pos_X++)
@@ -791,7 +791,7 @@ void Remap_brosse(void)
 void Outline_brush(void)
 {
   long /*Pos,*/Pos_X,Pos_Y;
-  byte Etat;
+  byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
   word Largeur;
@@ -831,56 +831,56 @@ void Outline_brush(void)
       // 1er balayage (horizontal)
       for (Pos_Y=1; Pos_Y<Brosse_Hauteur-1; Pos_Y++)
       {
-        Etat=0;
+        state=0;
         for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
         {
           if (Temporaire[((Pos_Y-1)*Largeur)+Pos_X-1]==Back_color)
           {
-            if (Etat)
+            if (state)
             {
               Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
-              Etat=0;
+              state=0;
             }
           }
           else
           {
-            if (!Etat)
+            if (!state)
             {
               Pixel_dans_brosse(Pos_X-1,Pos_Y,Fore_color);
-              Etat=1;
+              state=1;
             }
           }
         }
         // Cas du dernier pixel à droite de la ligne
-        if (Etat)
+        if (state)
           Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
       }
 
       // 2ème balayage (vertical)
       for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
       {
-        Etat=0;
+        state=0;
         for (Pos_Y=1; Pos_Y<Brosse_Hauteur-1; Pos_Y++)
         {
           if (Temporaire[((Pos_Y-1)*Largeur)+Pos_X-1]==Back_color)
           {
-            if (Etat)
+            if (state)
             {
               Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
-              Etat=0;
+              state=0;
             }
           }
           else
           {
-            if (!Etat)
+            if (!state)
             {
               Pixel_dans_brosse(Pos_X,Pos_Y-1,Fore_color);
-              Etat=1;
+              state=1;
             }
           }
         }
         // Cas du dernier pixel en bas de la colonne
-        if (Etat)
+        if (state)
           Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
       }
     }
@@ -905,7 +905,7 @@ void Outline_brush(void)
 void Nibble_brush(void)
 {
   long /*Pos,*/Pos_X,Pos_Y;
-  byte Etat;
+  byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
   word Largeur;
@@ -942,24 +942,24 @@ void Nibble_brush(void)
       // 1er balayage (horizontal)
       for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
       {
-        Etat=(Temporaire[(Pos_Y+1)*Largeur]!=Back_color);
+        state=(Temporaire[(Pos_Y+1)*Largeur]!=Back_color);
         for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
         {
           if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
           {
-            if (Etat)
+            if (state)
             {
               if (Pos_X>0)
                 Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
-              Etat=0;
+              state=0;
             }
           }
           else
           {
-            if (!Etat)
+            if (!state)
             {
               Pixel_dans_brosse(Pos_X,Pos_Y,Back_color);
-              Etat=1;
+              state=1;
             }
           }
         }
@@ -971,24 +971,24 @@ void Nibble_brush(void)
       // 2ème balayage (vertical)
       for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
       {
-        Etat=(Temporaire[Largeur+Pos_X+1]!=Back_color);;
+        state=(Temporaire[Largeur+Pos_X+1]!=Back_color);;
         for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
         {
           if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
           {
-            if (Etat)
+            if (state)
             {
               if (Pos_Y>0)
                 Pixel_dans_brosse(Pos_X,Pos_Y-1,Back_color);
-              Etat=0;
+              state=0;
             }
           }
           else
           {
-            if (!Etat)
+            if (!state)
             {
               Pixel_dans_brosse(Pos_X,Pos_Y,Back_color);
-              Etat=1;
+              state=1;
             }
           }
         }
@@ -1016,7 +1016,7 @@ void Nibble_brush(void)
 
 
 
-void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
+void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
 {
   short Debut_X=Limite_Droite+1;
   short Debut_Y=Limite_Bas+1;
@@ -1132,7 +1132,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement)
         {
           Pixel_dans_brosse(Pos_X-Debut_X,Pos_Y-Debut_Y,Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y));
           // On regarde s'il faut effacer quelque chose:
-          if (Effacement)
+          if (clear)
             Pixel_dans_ecran_courant(Pos_X,Pos_Y,Back_color);
         }
 

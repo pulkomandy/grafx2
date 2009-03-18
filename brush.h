@@ -30,7 +30,7 @@
     @param Fin_Y bottom edge coordinate in the picture
     @param effacement If 1, the area is also cleared from the picture.
 */
-void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short Effacement);
+void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear);
 
 /*!
   Rotates the brush to the right.
@@ -86,8 +86,8 @@ void Nibble_brush(void);
     Get brush from picture according to a freehand form.
     @param Vertices number of points in the freehand form
     @param Points array of points coordinates
-    @param Effacement If set to 1, the captured area is also cleared from the picture.
+    @param clear If set to 1, the captured area is also cleared from the picture.
 */
-void Capturer_brosse_au_lasso(int Vertices, short * Points,short Effacement);
+void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear);
 
 #endif

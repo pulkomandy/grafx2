@@ -102,7 +102,7 @@ int Sauver_INI_char_in_value_alphabet(char Char)
 
 
 
-void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,int * Values,int Litteral)
+void Sauver_INI_Set_value(char * dest,char * Source,int Nb_values_to_set,int * Values,int Litteral)
 {
   int Indice_destination;
   int Indice_source;
@@ -110,15 +110,15 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
 
   // On commence par recopier tout jusqu'au symbole '=':
   for (Indice_source=0;Source[Indice_source]!='=';Indice_source++)
-    Destination[Indice_source]=Source[Indice_source];
+    dest[Indice_source]=Source[Indice_source];
 
   // Puis on recopie le symbole '=':
-  Destination[Indice_source]=Source[Indice_source];
+  dest[Indice_source]=Source[Indice_source];
   Indice_source++;
 
   // Puis on recopie tous les espaces qui suivent:
   for (;Source[Indice_source]==' ';Indice_source++)
-    Destination[Indice_source]=Source[Indice_source];
+    dest[Indice_source]=Source[Indice_source];
 
   // Pour l'instant, la source et la destination en sont au même point:
   Indice_destination=Indice_source;
@@ -135,14 +135,14 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
       {
         // La valeur <=> Yes  
 
-        memcpy(Destination+Indice_destination,"yes",3);
+        memcpy(dest+Indice_destination,"yes",3);
         Indice_destination+=3;
       }
       else
       {
         // La valeur <=> No
 
-        memcpy(Destination+Indice_destination,"no",2);
+        memcpy(dest+Indice_destination,"no",2);
         Indice_destination+=2;
       }
     }
@@ -155,18 +155,18 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
         // On va écrire la valeur sous forme hexadécimale:
 
         // On commence par inscrire le symbole '$':
-        Destination[Indice_destination]='$';
+        dest[Indice_destination]='$';
 
         // Puis on y concatène la valeur:
-        sprintf(Destination+Indice_destination+1,"%x",Values[Indice_valeur]);
-        Indice_destination+=strlen(Destination+Indice_destination);
+        sprintf(dest+Indice_destination+1,"%x",Values[Indice_valeur]);
+        Indice_destination+=strlen(dest+Indice_destination);
       }
       else
       {
         // On va écrire la valeur sous forme décimale:
 
-        sprintf(Destination+Indice_destination,"%d",Values[Indice_valeur]);
-        Indice_destination+=strlen(Destination+Indice_destination);
+        sprintf(dest+Indice_destination,"%d",Values[Indice_valeur]);
+        Indice_destination+=strlen(dest+Indice_destination);
       }
     }
 
@@ -180,7 +180,7 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
       // On recopie tous les caractères de la source jusqu'au suivant qui
       // désigne une valeur:
       for (;(!Sauver_INI_char_in_value_alphabet(Source[Indice_source])) && (Source[Indice_source]!='\0');Indice_source++,Indice_destination++)
-        Destination[Indice_destination]=Source[Indice_source];
+        dest[Indice_destination]=Source[Indice_source];
     }
     else
     {
@@ -188,36 +188,36 @@ void Sauver_INI_Set_value(char * Destination,char * Source,int Nb_values_to_set,
 
       // On recopie toute la fin de la ligne:
       for (;Source[Indice_source]!='\0';Indice_source++,Indice_destination++)
-        Destination[Indice_destination]=Source[Indice_source];
+        dest[Indice_destination]=Source[Indice_source];
 
       // Et on n'oublie pas d'y mettre l''\0':
-      Destination[Indice_destination]='\0';
+      dest[Indice_destination]='\0';
     }
   }
 }
 
-void Sauver_INI_Set_string(char * Destination,char * Source,char * Value)
+void Sauver_INI_Set_string(char * dest,char * Source,char * Value)
 {
   int Indice_destination;
   int Indice_source;
      
   // On commence par recopier tout jusqu'au symbole '=':
   for (Indice_source=0;Source[Indice_source]!='=';Indice_source++)
-    Destination[Indice_source]=Source[Indice_source];
+    dest[Indice_source]=Source[Indice_source];
 
   // Puis on recopie le symbole '=':
-  Destination[Indice_source]=Source[Indice_source];
+  dest[Indice_source]=Source[Indice_source];
   Indice_source++;
 
   // Puis on recopie tous les espaces qui suivent:
   for (;Source[Indice_source]==' ';Indice_source++)
-    Destination[Indice_source]=Source[Indice_source];
+    dest[Indice_source]=Source[Indice_source];
 
   // Pour l'instant, la source et la destination en sont au même point:
   Indice_destination=Indice_source;
 
   // Dans la destination, on écrit la valeur:
-  strcpy(Destination+Indice_destination,Value);
+  strcpy(dest+Indice_destination,Value);
   Indice_destination+=strlen(Value);
 
   // Dans la source, on saute la valeur:
@@ -225,10 +225,10 @@ void Sauver_INI_Set_string(char * Destination,char * Source,char * Value)
 
   // On recopie toute la fin de la ligne:
   for (;Source[Indice_source]!='\0';Indice_source++,Indice_destination++)
-    Destination[Indice_destination]=Source[Indice_source];
+    dest[Indice_destination]=Source[Indice_source];
 
   // Et on n'oublie pas d'y mettre l''\0':
-  Destination[Indice_destination]='\0';
+  dest[Indice_destination]='\0';
 }
 
 int Sauver_INI_Set_strings(FILE * Old_file,FILE * New_file,char * Buffer,char * Option,char * Value)

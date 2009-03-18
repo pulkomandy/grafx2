@@ -626,14 +626,14 @@ void K_Ligne_0_6(void)
   short Fin_X;
   short Fin_Y;
   short Couleur;
-  short Direction;
+  short direction;
 
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
-  Operation_POP(&Direction);
+  Operation_POP(&direction);
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
@@ -645,16 +645,16 @@ void K_Ligne_0_6(void)
   Tracer_ligne_Preview_xor (Debut_X,Debut_Y,Fin_X,Fin_Y,0);
   */
   Pinceau_Forme=Pinceau_Forme_avant_operation;
-  if (Direction & 0x80)
+  if (direction & 0x80)
   {
     Afficher_pinceau(Debut_X,Debut_Y,Couleur,0);
-    Direction=(Direction & 0x7F);
+    direction=(direction & 0x7F);
   }
   Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
   Pinceau_Forme=FORME_PINCEAU_POINT;
 
-  Operation_PUSH(Direction);
-  Operation_PUSH(Direction); // Valeur bidon servant de nouvel état de pile
+  Operation_PUSH(direction);
+  Operation_PUSH(direction); // Valeur bidon servant de nouvel état de pile
   Operation_PUSH(Couleur);
   Operation_PUSH(Pinceau_X);
   Operation_PUSH(Pinceau_Y);
@@ -676,19 +676,19 @@ void K_Ligne_12_7(void)
   short Fin_X;
   short Fin_Y;
   short Couleur;
-  short Direction;
+  short direction;
 
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
-  Operation_POP(&Direction);
-  Operation_POP(&Direction);
+  Operation_POP(&direction);
+  Operation_POP(&direction);
 
-  if (Direction==Mouse_K)
+  if (direction==Mouse_K)
   {
-    Operation_PUSH(Direction);
+    Operation_PUSH(direction);
     Operation_PUSH(Couleur);
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);
@@ -2165,19 +2165,19 @@ void Polygone_12_9(void)
   short Fin_X;
   short Fin_Y;
   short Couleur;
-  short Direction;
+  short direction;
 
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
-  Operation_POP(&Direction);
-  Operation_POP(&Direction);
+  Operation_POP(&direction);
+  Operation_POP(&direction);
 
-  if (Direction==Mouse_K)
+  if (direction==Mouse_K)
   {
-    Operation_PUSH(Direction);
+    Operation_PUSH(direction);
     Operation_PUSH(Couleur);
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);
@@ -2271,25 +2271,25 @@ void Polyfill_0_8(void)
   short Fin_X;
   short Fin_Y;
   short Couleur;
-  short Direction;
+  short direction;
 
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
-  Operation_POP(&Direction);
+  Operation_POP(&direction);
 
   if ((Config.Coords_rel) && (Menu_visible))
     Print_dans_menu("X:±   0   Y:±   0",0);
 
   Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
 
-  if (Direction & 0x80)
-    Direction=(Direction & 0x7F);
+  if (direction & 0x80)
+    direction=(direction & 0x7F);
 
-  Operation_PUSH(Direction); // Valeur bidon servant de nouvel état de pile
-  Operation_PUSH(Direction);
+  Operation_PUSH(direction); // Valeur bidon servant de nouvel état de pile
+  Operation_PUSH(direction);
   Operation_PUSH(Couleur);
 
   Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
@@ -2364,19 +2364,19 @@ void Polyfill_12_9(void)
   short Fin_X;
   short Fin_Y;
   short Couleur;
-  short Direction;
+  short direction;
 
   Operation_POP(&Fin_Y);
   Operation_POP(&Fin_X);
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
   Operation_POP(&Couleur);
-  Operation_POP(&Direction);
-  Operation_POP(&Direction);
+  Operation_POP(&direction);
+  Operation_POP(&direction);
 
-  if (Direction==Mouse_K)
+  if (direction==Mouse_K)
   {
-    Operation_PUSH(Direction);
+    Operation_PUSH(direction);
     Operation_PUSH(Couleur);
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);
@@ -2909,7 +2909,7 @@ void Brosse_0_5(void)
   short Debut_Y;
   short Ancien_Pinceau_X;
   short Ancien_Pinceau_Y;
-  short Effacement;
+  short clear;
 
   // Comme on a demandé l'effacement du curseur, il n'y a plus de croix en
   // (Pinceau_X,Pinceau_Y). C'est une bonne chose.
@@ -2917,7 +2917,7 @@ void Brosse_0_5(void)
   Operation_Taille_pile-=2;
   Operation_POP(&Debut_Y);
   Operation_POP(&Debut_X);
-  Operation_POP(&Effacement);
+  Operation_POP(&clear);
 
   // On efface l'ancienne croix:
   Ancien_Pinceau_X=Pinceau_X;
@@ -2947,7 +2947,7 @@ void Brosse_0_5(void)
     if (Ancien_Pinceau_Y!=Debut_Y)
       Ancien_Pinceau_Y--;
   }
-  Capturer_brosse(Debut_X,Debut_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,Effacement);
+  Capturer_brosse(Debut_X,Debut_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,clear);
   if ((Snap_Mode) && (Config.Adjust_brush_pick))
   {
     Brosse_Decalage_X=(Brosse_Decalage_X/Snap_Largeur)*Snap_Largeur;
@@ -3717,8 +3717,8 @@ void Scroll_12_4(void)
   short Centre_Y;
   short Pos_X;
   short Pos_Y;
-  short Decalage_X;
-  short Decalage_Y;
+  short x_offset;
+  short y_offset;
   //char  Chaine[5];
 
   Operation_POP(&Pos_Y);
@@ -3731,18 +3731,18 @@ void Scroll_12_4(void)
     // L'utilisateur a bougé, il faut scroller l'image
 
     if (Pinceau_X>=Centre_X)
-      Decalage_X=(Pinceau_X-Centre_X)%Principal_Largeur_image;
+      x_offset=(Pinceau_X-Centre_X)%Principal_Largeur_image;
     else
-      Decalage_X=Principal_Largeur_image-((Centre_X-Pinceau_X)%Principal_Largeur_image);
+      x_offset=Principal_Largeur_image-((Centre_X-Pinceau_X)%Principal_Largeur_image);
 
     if (Pinceau_Y>=Centre_Y)
-      Decalage_Y=(Pinceau_Y-Centre_Y)%Principal_Hauteur_image;
+      y_offset=(Pinceau_Y-Centre_Y)%Principal_Hauteur_image;
     else
-      Decalage_Y=Principal_Hauteur_image-((Centre_Y-Pinceau_Y)%Principal_Hauteur_image);
+      y_offset=Principal_Hauteur_image-((Centre_Y-Pinceau_Y)%Principal_Hauteur_image);
 
     Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
 
-    Scroll_picture(Decalage_X,Decalage_Y);
+    Scroll_picture(x_offset,y_offset);
 
     Afficher_ecran();
   }

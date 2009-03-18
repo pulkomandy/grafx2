@@ -3597,17 +3597,17 @@ void Test_PCX(void)
 // -- Lire un fichier au format PCX -----------------------------------------
 
   // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
-  void Draw_PCX_line(short Pos_Y, byte Depth)
+  void Draw_PCX_line(short Pos_Y, byte depth)
   {
     short Pos_X;
     byte  Couleur;
-    byte  Reduction=8/Depth;
-    byte  Masque=(1<<Depth)-1;
+    byte  Reduction=8/depth;
+    byte  Masque=(1<<depth)-1;
     byte  Reduction_moins_1=Reduction-1;
 
     for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
     {
-      Couleur=(LBM_Buffer[Pos_X/Reduction]>>((Reduction_moins_1-(Pos_X%Reduction))*Depth)) & Masque;
+      Couleur=(LBM_Buffer[Pos_X/Reduction]>>((Reduction_moins_1-(Pos_X%Reduction))*depth)) & Masque;
       Pixel_de_chargement(Pos_X,Pos_Y,Couleur);
     }
   }

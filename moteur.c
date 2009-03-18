@@ -213,7 +213,7 @@ int Numero_bouton_sous_souris(void)
 }
 
 
-void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
+void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
 {
   byte Couleur_Haut_gauche;
   byte Couleur_Bas_droite;
@@ -230,7 +230,7 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte Enfonce)
   Fin_X  =Debut_X+Bouton[Numero].Largeur;
   Fin_Y  =Debut_Y+Bouton[Numero].Hauteur;
 
-  if (!Enfonce)
+  if (!pressed)
   {
     Couleur_Haut_gauche=CM_Blanc;
     Couleur_Bas_droite=CM_Fonce;
@@ -442,7 +442,7 @@ void Deplacer_Split(void)
 {
   short Ancien_Split=Principal_Split;
   short Ancien_X_Zoom=Principal_X_Zoom;
-  short Decalage=Principal_X_Zoom-Mouse_X;
+  short offset=Principal_X_Zoom-Mouse_X;
   byte  Ancienne_forme_curseur=Forme_curseur;
   short Ancien_Mouse_X=-1;
 
@@ -460,7 +460,7 @@ void Deplacer_Split(void)
     if (Mouse_X!=Ancien_Mouse_X)
     {
       Ancien_Mouse_X=Mouse_X;
-      Principal_Proportion_split=(float)(Mouse_X+Decalage)/Largeur_ecran;
+      Principal_Proportion_split=(float)(Mouse_X+offset)/Largeur_ecran;
       Calculer_split();
   
       if (Principal_X_Zoom!=Ancien_X_Zoom)
@@ -1310,7 +1310,7 @@ void Fenetre_Effacer_tags(void)
 
 
 // ---- Tracer les TAGs sur les palettes du menu Palette ou du menu Shade ----
-void Tagger_intervalle_palette(byte Debut,byte Fin)
+void Tagger_intervalle_palette(byte start,byte end)
 {
   word Origine_X;
   word Origine_Y;
@@ -1321,33 +1321,33 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
   word Indice;
 
   // On efface les anciens TAGs
-  for (Indice=0;Indice<=Debut;Indice++)
+  for (Indice=0;Indice<=start;Indice++)
     Block(Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3+((Indice>>4)*10))*Menu_Facteur_X,
           Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3+((Indice&15)* 5))*Menu_Facteur_Y,
           Menu_Facteur_X*3,Menu_Facteur_Y*5,CM_Clair);
 
-  for (Indice=Fin;Indice<256;Indice++)
+  for (Indice=end;Indice<256;Indice++)
     Block(Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3+((Indice>>4)*10))*Menu_Facteur_X,
           Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3+((Indice&15)* 5))*Menu_Facteur_Y,
           Menu_Facteur_X*3,Menu_Facteur_Y*5,CM_Clair);
 
   // On affiche le 1er TAG
-  Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(Debut>>4)*10;
-  Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(Debut&15)* 5;
+  Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(start>>4)*10;
+  Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(start&15)* 5;
   for (Pos_Y=0,Pos_fenetre_Y=Origine_Y  ;Pos_Y<5;Pos_Y++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X  ,Pos_fenetre_Y,CM_Noir);
   for (Pos_Y=0,Pos_fenetre_Y=Origine_Y+1;Pos_Y<3;Pos_Y++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
   Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
-  if (Debut!=Fin)
+  if (start!=end)
   {
     // On complète le 1er TAG
     Pixel_dans_fenetre(Origine_X+1,Origine_Y+4,CM_Noir);
 
     // On affiche le 2ème TAG
-    Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(Fin>>4)*10;
-    Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(Fin&15)* 5;
+    Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(end>>4)*10;
+    Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(end&15)* 5;
     for (Pos_Y=0,Pos_fenetre_Y=Origine_Y; Pos_Y<5; Pos_Y++,Pos_fenetre_Y++)
       Pixel_dans_fenetre(Origine_X  ,Pos_fenetre_Y,CM_Noir);
     for (Pos_Y=0,Pos_fenetre_Y=Origine_Y; Pos_Y<4; Pos_Y++,Pos_fenetre_Y++)
@@ -1355,7 +1355,7 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
     Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
     // On TAG toutes les couleurs intermédiaires
-    for (Indice=Debut+1;Indice<Fin;Indice++)
+    for (Indice=start+1;Indice<end;Indice++)
     {
       Block(Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3+((Indice>>4)*10))*Menu_Facteur_X,
             Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3+((Indice&15)* 5))*Menu_Facteur_Y,
@@ -1376,51 +1376,51 @@ void Tagger_intervalle_palette(byte Debut,byte Fin)
 
 //------------------ Dessiner un scroller dans une fenêtre -------------------
 
-void Calculer_hauteur_curseur_jauge(T_Bouton_scroller * Enreg)
+void Calculer_hauteur_curseur_jauge(T_Bouton_scroller * button)
 {
-  if (Enreg->Nb_elements>Enreg->Nb_visibles)
+  if (button->Nb_elements>button->Nb_visibles)
   {
-    Enreg->Hauteur_curseur=(Enreg->Nb_visibles*(Enreg->Hauteur-24))/Enreg->Nb_elements;
-    if (!(Enreg->Hauteur_curseur))
-      Enreg->Hauteur_curseur=1;
+    button->Hauteur_curseur=(button->Nb_visibles*(button->Hauteur-24))/button->Nb_elements;
+    if (!(button->Hauteur_curseur))
+      button->Hauteur_curseur=1;
   }
   else
   {
-    Enreg->Hauteur_curseur=Enreg->Hauteur-24;
+    button->Hauteur_curseur=button->Hauteur-24;
   }
 }
 
-void Fenetre_Dessiner_jauge(T_Bouton_scroller * Enreg)
+void Fenetre_Dessiner_jauge(T_Bouton_scroller * button)
 {
   word Position_curseur_jauge;
 
-  Position_curseur_jauge=Enreg->Pos_Y+12;
+  Position_curseur_jauge=button->Pos_Y+12;
 
-  Block(Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
+  Block(Fenetre_Pos_X+(button->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+(Position_curseur_jauge*Menu_Facteur_Y),
-        11*Menu_Facteur_X,(Enreg->Hauteur-24)*Menu_Facteur_Y,CM_Noir/*CM_Fonce*/);
+        11*Menu_Facteur_X,(button->Hauteur-24)*Menu_Facteur_Y,CM_Noir/*CM_Fonce*/);
 
-  if (Enreg->Nb_elements>Enreg->Nb_visibles)
-    Position_curseur_jauge+=Round_div(Enreg->Position*(Enreg->Hauteur-24-Enreg->Hauteur_curseur),Enreg->Nb_elements-Enreg->Nb_visibles);
+  if (button->Nb_elements>button->Nb_visibles)
+    Position_curseur_jauge+=Round_div(button->Position*(button->Hauteur-24-button->Hauteur_curseur),button->Nb_elements-button->Nb_visibles);
 
-  Block(Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
+  Block(Fenetre_Pos_X+(button->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+(Position_curseur_jauge*Menu_Facteur_Y),
-        11*Menu_Facteur_X,Enreg->Hauteur_curseur*Menu_Facteur_Y,CM_Clair/*CM_Blanc*/);
+        11*Menu_Facteur_X,button->Hauteur_curseur*Menu_Facteur_Y,CM_Clair/*CM_Blanc*/);
 
-  UpdateRect(Fenetre_Pos_X+(Enreg->Pos_X*Menu_Facteur_X),
-        Fenetre_Pos_Y+Enreg->Pos_Y*Menu_Facteur_Y,
-        11*Menu_Facteur_X,(Enreg->Hauteur)*Menu_Facteur_Y);
+  UpdateRect(Fenetre_Pos_X+(button->Pos_X*Menu_Facteur_X),
+        Fenetre_Pos_Y+button->Pos_Y*Menu_Facteur_Y,
+        11*Menu_Facteur_X,(button->Hauteur)*Menu_Facteur_Y);
 }
 
-void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * Enreg)
+void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * button)
 {
-  Fenetre_Afficher_cadre_general(Enreg->Pos_X-1,Enreg->Pos_Y-1,13,Enreg->Hauteur+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
-  Fenetre_Afficher_cadre_mono(Enreg->Pos_X-1,Enreg->Pos_Y+11,13,Enreg->Hauteur-22,CM_Noir);
-  Fenetre_Afficher_cadre_bombe(Enreg->Pos_X,Enreg->Pos_Y,11,11);
-  Fenetre_Afficher_cadre_bombe(Enreg->Pos_X,Enreg->Pos_Y+Enreg->Hauteur-11,11,11);
-  Print_dans_fenetre(Enreg->Pos_X+2,Enreg->Pos_Y+2,"\030",CM_Noir,CM_Clair);
-  Print_dans_fenetre(Enreg->Pos_X+2,Enreg->Pos_Y+Enreg->Hauteur-9,"\031",CM_Noir,CM_Clair);
-  Fenetre_Dessiner_jauge(Enreg);
+  Fenetre_Afficher_cadre_general(button->Pos_X-1,button->Pos_Y-1,13,button->Hauteur+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
+  Fenetre_Afficher_cadre_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Hauteur-22,CM_Noir);
+  Fenetre_Afficher_cadre_bombe(button->Pos_X,button->Pos_Y,11,11);
+  Fenetre_Afficher_cadre_bombe(button->Pos_X,button->Pos_Y+button->Hauteur-11,11,11);
+  Print_dans_fenetre(button->Pos_X+2,button->Pos_Y+2,"\030",CM_Noir,CM_Clair);
+  Print_dans_fenetre(button->Pos_X+2,button->Pos_Y+button->Hauteur-9,"\031",CM_Noir,CM_Clair);
+  Fenetre_Dessiner_jauge(button);
 }
 
 
@@ -1434,17 +1434,17 @@ void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caract
 
 //------------ Modifier le contenu (caption) d'une zone de saisie ------------
 
-void Fenetre_Contenu_bouton_saisie(T_Bouton_special * Enreg, char * content)
+void Fenetre_Contenu_bouton_saisie(T_Bouton_special * button, char * content)
 {
-  Print_dans_fenetre_limite(Enreg->Pos_X+2,Enreg->Pos_Y+2,content,Enreg->Largeur/8,CM_Noir,CM_Clair);
+  Print_dans_fenetre_limite(button->Pos_X+2,button->Pos_Y+2,content,button->Largeur/8,CM_Noir,CM_Clair);
 }
 
 //------------ Effacer le contenu (caption) d'une zone de saisie ------------
 
-void Fenetre_Effacer_bouton_saisie(T_Bouton_special * Enreg)
+void Fenetre_Effacer_bouton_saisie(T_Bouton_special * button)
 {
-  Block((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,(Enreg->Largeur/8)*8*Menu_Facteur_X,8*Menu_Facteur_Y,CM_Clair);
-  UpdateRect((Enreg->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(Enreg->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,Enreg->Largeur/8*8*Menu_Facteur_X,8*Menu_Facteur_Y);
+  Block((button->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(button->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,(button->Largeur/8)*8*Menu_Facteur_X,8*Menu_Facteur_Y,CM_Clair);
+  UpdateRect((button->Pos_X+2)*Menu_Facteur_X+Fenetre_Pos_X,(button->Pos_Y+2)*Menu_Facteur_Y+Fenetre_Pos_Y,button->Largeur/8*8*Menu_Facteur_X,8*Menu_Facteur_Y);
 }
 
 
@@ -1606,39 +1606,39 @@ T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word L
 // Ajoute un choix à une dropdown. Le libellé est seulement référencé,
 // il doit pointer sur une zone qui doit être encore valide à la fermeture 
 // de la fenêtre (comprise).
-void Fenetre_Dropdown_choix(T_Bouton_dropdown * Dropdown, word Numero, const char *Libelle)
+void Fenetre_Dropdown_choix(T_Bouton_dropdown * dropdown, word Numero, const char *Libelle)
 {
   T_Dropdown_choix *Temp;
-  T_Dropdown_choix *Dernier;
+  T_Dropdown_choix *last;
   
   Temp=(T_Dropdown_choix *)malloc(sizeof(T_Dropdown_choix));
   Temp->Numero =Numero;
   Temp->Libelle=Libelle;
   Temp->Next=NULL;
 
-  Dernier=Dropdown->Premier_choix;
-  if (Dernier)
+  last=dropdown->Premier_choix;
+  if (last)
   {
     // On cherche le dernier élément
-    for (;Dernier->Next;Dernier=Dernier->Next)
+    for (;last->Next;last=last->Next)
       ;
-    Dernier->Next=Temp;
+    last->Next=Temp;
   }
   else
   {
-    Dropdown->Premier_choix=Temp;
+    dropdown->Premier_choix=Temp;
   }
 }
 
 // ------------- Suppression de tous les choix d'une dropdown ---------
-void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * Dropdown)
+void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * dropdown)
 {
   T_Dropdown_choix * Choix_suivant;
-    while (Dropdown->Premier_choix)
+    while (dropdown->Premier_choix)
     {
-      Choix_suivant=Dropdown->Premier_choix->Next;
-      free(Dropdown->Premier_choix);
-      Dropdown->Premier_choix=Choix_suivant;
+      Choix_suivant=dropdown->Premier_choix->Next;
+      free(dropdown->Premier_choix);
+      dropdown->Premier_choix=Choix_suivant;
     }
 }
 
@@ -1798,12 +1798,12 @@ byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y
 
 // --- Attend que l'on clique dans la palette pour renvoyer la couleur choisie
 // ou bien renvoie -1 si on a annulé l'action pas click-droit ou Escape ------
-short Attendre_click_dans_palette(T_Bouton_palette * Enreg)
+short Attendre_click_dans_palette(T_Bouton_palette * button)
 {
-  short Debut_X=Enreg->Pos_X+5;
-  short Debut_Y=Enreg->Pos_Y+3;
-  short Fin_X  =Enreg->Pos_X+160;
-  short Fin_Y  =Enreg->Pos_Y+82;
+  short Debut_X=button->Pos_X+5;
+  short Debut_Y=button->Pos_Y+3;
+  short Fin_X  =button->Pos_X+160;
+  short Fin_Y  =button->Pos_Y+82;
   byte  Couleur_choisie;
   byte  Ancien_Cacher_curseur;
   byte  Ancien_Loupe_Mode;
@@ -1825,8 +1825,8 @@ short Attendre_click_dans_palette(T_Bouton_palette * Enreg)
       if (Fenetre_click_dans_zone(Debut_X,Debut_Y,Fin_X,Fin_Y))
       {
         Effacer_curseur();
-        Couleur_choisie=(((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Enreg->Pos_X+2)) / 10 * 16 +
-        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(Enreg->Pos_Y+3)) / 5;
+        Couleur_choisie=(((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(button->Pos_X+2)) / 10 * 16 +
+        (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(button->Pos_Y+3)) / 5;
         Forme_curseur=FORME_CURSEUR_FLECHE;
         Cacher_curseur=Ancien_Cacher_curseur;
         Loupe_Mode=Ancien_Loupe_Mode;

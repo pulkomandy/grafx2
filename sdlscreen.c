@@ -140,7 +140,7 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
 // Convertit une SDL_Surface (couleurs indexées ou RGB) en tableau de bytes (couleurs indexées)
 // Si on passe NULL comme destination, elle est allouée par malloc(). Sinon,
 // attention aux dimensions!
-byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
+byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
 {
   byte *Src;
   byte *Dst;
@@ -156,10 +156,10 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
   else
     Reste=0;
 
-  if (Destination==NULL)
-    Destination=(byte *)malloc(Source->w*Source->h);
+  if (dest==NULL)
+    dest=(byte *)malloc(Source->w*Source->h);
 
-  Dst=Destination;
+  Dst=dest;
   Src=(byte *)(Source->pixels);
   for(Y=0; Y < Source->h; Y++)
   {
@@ -167,7 +167,7 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * Destination)
     Dst += Source->w;
     Src += Source->w + Reste;
   }
-  return Destination;
+  return dest;
 
 }
 

@@ -182,26 +182,26 @@ char * Position_dernier_slash(const char * Chaine)
   return (char *)Position;
 }
 // Récupère la partie "nom de fichier seul" d'un chemin
-void Extraire_nom_fichier(char *Destination, const char *Source)
+void Extraire_nom_fichier(char *dest, const char *Source)
 {
   const char * Position = Position_dernier_slash(Source);
 
   if (Position)
-    strcpy(Destination,Position+1);
+    strcpy(dest,Position+1);
   else
-    strcpy(Destination,Source);
+    strcpy(dest,Source);
 }
 // Récupère la partie "répertoire+/" d'un chemin.
-void Extraire_chemin(char *Destination, const char *Source)
+void Extraire_chemin(char *dest, const char *Source)
 {
   char * Position;
 
-  strcpy(Destination,Source);
-  Position = Position_dernier_slash(Destination);
+  strcpy(dest,Source);
+  Position = Position_dernier_slash(dest);
   if (Position)
     *(Position+1) = '\0';
   else
-    strcat(Destination, SEPARATEUR_CHEMIN);
+    strcat(dest, SEPARATEUR_CHEMIN);
 }
 
 int Fichier_existe(char * Fichier)
@@ -222,7 +222,7 @@ int Repertoire_existe(char * Repertoire)
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 {
-  DIR* Enreg;    // Structure de lecture des éléments
+  DIR* entry;    // Structure de lecture des éléments
 
   if (strcmp(Repertoire,PARENT_DIR)==0)
     return 1;
@@ -231,12 +231,12 @@ int Repertoire_existe(char * Repertoire)
     //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
     //  renvoie NULL c'est que le répertoire n'est pas accessible...
 
-    Enreg=opendir(Repertoire);
-    if (Enreg==NULL)
+    entry=opendir(Repertoire);
+    if (entry==NULL)
         return 0;
     else
     {
-        closedir(Enreg);
+        closedir(entry);
         return 1;
     }
   }

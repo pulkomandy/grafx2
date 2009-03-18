@@ -959,7 +959,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
     int ic,id; // Les indexs de parcours des ensembles
     int mdegr; // Meilleur d‚grad‚
     int mdiff; // Meilleure diff‚rence de chrominance
-    int diff;  // Diff‚rence de chrominance courante
+    int diff;  // Difference de chrominance courante
 
     // Pour chacun des clusters … traiter
     for (ic=1;ic<cs->nb;ic++)

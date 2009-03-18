@@ -266,9 +266,9 @@ void Liberer_une_page(S_Page * Page)
   // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
 }
 
-void Copier_S_page(S_Page * Destination,S_Page * Source)
+void Copier_S_page(S_Page * dest,S_Page * Source)
 {
-  *Destination=*Source;
+  *dest=*Source;
 }
 
 int Taille_d_une_page(S_Page * Page)

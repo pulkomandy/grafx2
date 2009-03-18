@@ -39,7 +39,7 @@ void Upload_infos_page_brouillon(S_Page * Page);
 void Download_infos_backup(S_Liste_de_pages * Liste);
 int Allouer_une_page(S_Page * Page,int Largeur,int Hauteur);
 void Liberer_une_page(S_Page * Page);
-void Copier_S_page(S_Page * Destination,S_Page * Source);
+void Copier_S_page(S_Page * dest,S_Page * Source);
 int Taille_d_une_page(S_Page * Page);
 
 

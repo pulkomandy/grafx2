@@ -1082,14 +1082,14 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
         // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
         short Pos_X;
         short Pos_Y;
-        short Deb_X; // besoin d'une variable signée
-        short Deb_Y; // besoin d'une variable signée
+        short relative_x; // besoin d'une variable signée
+        short relative_y; // besoin d'une variable signée
         // Attention aux unités
-        Deb_X = ((short)Debut_X - (short)Fenetre_Pos_X);
-        Deb_Y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
+        relative_x = ((short)Debut_X - (short)Fenetre_Pos_X);
+        relative_y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
 
-        for (Pos_Y=Deb_Y;Pos_Y<(Deb_Y+Hauteur)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
-          for (Pos_X=Deb_X;Pos_X<(Deb_X+Largeur)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
+        for (Pos_Y=relative_y;Pos_Y<(relative_y+Hauteur)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
+          for (Pos_X=relative_x;Pos_X<(relative_x+Largeur)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
             if (Pos_X>=0&&Pos_Y>=0)
               Pixel_fond(Pos_X,Pos_Y,Vraie_couleur);
       }
@@ -1185,9 +1185,9 @@ void Calculer_coordonnees_pinceau(void)
 // -- Affichage de la limite de l'image -------------------------------------
 void Afficher_limites_de_l_image(void)
 {
-  short Debut;
+  short start;
   short Pos;
-  short Fin;
+  short end;
   byte Droite_visible;
   byte Bas_visible;
   short Ancienne_Limite_Zoom;
@@ -1199,22 +1199,22 @@ void Afficher_limites_de_l_image(void)
   // On vérifie que la limite à droite est visible:
   if (Droite_visible)
   {
-    Debut=Limite_Haut;
-    Fin=(Limite_Bas<Principal_Hauteur_image)?
+    start=Limite_Haut;
+    end=(Limite_Bas<Principal_Hauteur_image)?
         Limite_Bas:Principal_Hauteur_image;
 
     if (Bas_visible)
-      Fin++;
+      end++;
 
     // Juste le temps d'afficher les limites, on étend les limites de la loupe
     // aux limites visibles, car sinon Pixel_Preview ne voudra pas afficher.
     Ancienne_Limite_Zoom=Limite_Droite_Zoom;
     Limite_Droite_Zoom=Limite_visible_Droite_Zoom;
 
-    for (Pos=Debut;Pos<=Fin;Pos++)
+    for (Pos=start;Pos<=end;Pos++)
       Pixel_Preview(Principal_Largeur_image,Pos,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
-    UpdateRect(Principal_Largeur_image,Debut,1,Fin-Debut + 1);
+    UpdateRect(Principal_Largeur_image,start,1,end-start + 1);
     // On restaure la bonne valeur des limites
     Limite_Droite_Zoom=Ancienne_Limite_Zoom;
   }
@@ -1222,18 +1222,18 @@ void Afficher_limites_de_l_image(void)
   // On vérifie que la limite en bas est visible:
   if (Bas_visible)
   {
-    Debut=Limite_Gauche;
-    Fin=(Limite_Droite<Principal_Largeur_image)?
+    start=Limite_Gauche;
+    end=(Limite_Droite<Principal_Largeur_image)?
         Limite_Droite:Principal_Largeur_image;
 
     // On étend également les limites en bas (comme pour la limite droit)
     Ancienne_Limite_Zoom=Limite_Bas_Zoom;
     Limite_Bas_Zoom=Limite_visible_Bas_Zoom;
 
-    for (Pos=Debut;Pos<=Fin;Pos++)
+    for (Pos=start;Pos<=end;Pos++)
       Pixel_Preview(Pos,Principal_Hauteur_image,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
-    UpdateRect(Debut,Principal_Hauteur_image,Fin-Debut + 1,1);
+    UpdateRect(start,Principal_Hauteur_image,end-start + 1,1);
 
     // On restaure la bonne valeur des limites
     Limite_Bas_Zoom=Ancienne_Limite_Zoom;

@@ -185,7 +185,7 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   int Sensibilite_X;
   int Sensibilite_Y;
   int Indice;
-  int Facteur;
+  int factor;
 
   // Pour la première entrée dans cette fonction
   if (Pixel_width<1)
@@ -322,20 +322,20 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
 
     // Taille des menus
     if (Largeur_ecran/320 > Hauteur_ecran/200)
-      Facteur=Hauteur_ecran/200;
+      factor=Hauteur_ecran/200;
     else
-      Facteur=Largeur_ecran/320;
+      factor=Largeur_ecran/320;
 
     switch (Config.Ratio)
     {
       case 1: // adapter tout
-        Menu_Facteur_X=Facteur;
-        Menu_Facteur_Y=Facteur;
+        Menu_Facteur_X=factor;
+        Menu_Facteur_Y=factor;
         break;
       case 2: // adapter légèrement
-        Menu_Facteur_X=Facteur-1;
+        Menu_Facteur_X=factor-1;
         if (Menu_Facteur_X<1) Menu_Facteur_X=1;
-        Menu_Facteur_Y=Facteur-1;
+        Menu_Facteur_Y=factor-1;
         if (Menu_Facteur_Y<1) Menu_Facteur_Y=1;
         break;
       default: // ne pas adapter
@@ -723,7 +723,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
   *Limite_atteinte_Haut=Limite_courante_Haut;
   *Limite_atteinte_Bas =Limite_courante_Bas;
   (*Limite_atteinte_Droite)--;
-} // Fin de la routine de remplissage "Fill"
+} // end de la routine de remplissage "Fill"
 
 
 void Remplir(byte Couleur_de_remplissage)
@@ -1467,7 +1467,7 @@ void Tracer_courbe_General(short X1, short Y1,
                            short X4, short Y4,
                            byte Couleur)
 {
-  float Delta,t,t2,t3;
+  float delta,t,t2,t3;
   short X,Y,Old_X,Old_Y;
   word  i;
   int   CX[4];
@@ -1487,11 +1487,11 @@ void Tracer_courbe_General(short X1, short Y1,
   Old_X=X1;
   Old_Y=Y1;
   Pixel_figure(Old_X,Old_Y,Couleur);
-  Delta=0.05; // 1.0/20
+  delta=0.05; // 1.0/20
   t=0;
   for (i=1; i<=20; i++)
   {
-    t=t+Delta; t2=t*t; t3=t2*t;
+    t=t+delta; t2=t*t; t3=t2*t;
     X=Round(t3*CX[0] + t2*CX[1] + t*CX[2] + CX[3]);
     Y=Round(t3*CY[0] + t2*CY[1] + t*CY[2] + CY[3]);
     Tracer_ligne_General(Old_X,Old_Y,X,Y,Couleur);
@@ -2279,7 +2279,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
 {
   int Indice;
   int Premier;
-  int Dernier;
+  int last;
   int Couleur;
   int Temp;
 
@@ -2302,7 +2302,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
     Premier=Indice;
 
     // On recherche la position de la dernière case de la séquence
-    for (Dernier=Premier;Liste[Dernier+1]<256;Dernier++);
+    for (last=Premier;Liste[last+1]<256;last++);
 
     // Pour toutes les cases non vides (et non inhibées) qui suivent
     switch (Mode)
@@ -2311,12 +2311,12 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
-          Table_inc[Couleur]=Liste[(Indice+Pas<=Dernier)?Indice+Pas:Dernier];
+          Table_inc[Couleur]=Liste[(Indice+Pas<=last)?Indice+Pas:last];
           Table_dec[Couleur]=Liste[(Indice-Pas>=Premier)?Indice-Pas:Premier];
         }
         break;
       case MODE_SHADE_BOUCLE :
-        Temp=1+Dernier-Premier;
+        Temp=1+last-Premier;
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
@@ -2328,7 +2328,7 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
         for (;(Indice<512) && (Liste[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
           Couleur=Liste[Indice];
-          if (Indice+Pas<=Dernier)
+          if (Indice+Pas<=last)
             Table_inc[Couleur]=Liste[Indice+Pas];
           if (Indice-Pas>=Premier)
             Table_dec[Couleur]=Liste[Indice-Pas];
@@ -2383,41 +2383,41 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
 {
   int color=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
   int Sens=(Fore_color<=Back_color);
-  byte Debut,Fin;
+  byte start,end;
   int Largeur;
 
   if (Sens)
   {
-    Debut=Fore_color;
-    Fin  =Back_color;
+    start=Fore_color;
+    end  =Back_color;
   }
   else
   {
-    Debut=Back_color;
-    Fin  =Fore_color;
+    start=Back_color;
+    end  =Fore_color;
   }
 
-  if ((color>=Debut) && (color<=Fin) && (Debut!=Fin))
+  if ((color>=start) && (color<=end) && (start!=end))
   {
-    Largeur=1+Fin-Debut;
+    Largeur=1+end-start;
 
     if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
       color-=Quick_shade_Step%Largeur;
     else
       color+=Quick_shade_Step%Largeur;
 
-    if (color<Debut)
+    if (color<start)
       switch (Quick_shade_Loop)
       {
-        case MODE_SHADE_NORMAL : return Debut;
+        case MODE_SHADE_NORMAL : return start;
         case MODE_SHADE_BOUCLE : return (Largeur+color);
         default : return Couleur;
       }
 
-    if (color>Fin)
+    if (color>end)
       switch (Quick_shade_Loop)
       {
-        case MODE_SHADE_NORMAL : return Fin;
+        case MODE_SHADE_NORMAL : return end;
         case MODE_SHADE_BOUCLE : return (color-Largeur);
         default : return Couleur;
       }

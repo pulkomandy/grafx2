@@ -746,15 +746,15 @@ void Rien_du_tout(void)
   // Initialiseur d'un bouton:
 
 void Initialiser_bouton(byte   Numero,
-                        word   Decalage_X      , word   Decalage_Y,
+                        word   x_offset      , word   y_offset,
                         word   Largeur         , word   Hauteur,
                         byte   Forme,
                         fonction_action Gauche , fonction_action Droite,
                         fonction_action Desenclencher,
                         byte   Famille)
 {
-  Bouton[Numero].Decalage_X      =Decalage_X;
-  Bouton[Numero].Decalage_Y      =Decalage_Y;
+  Bouton[Numero].Decalage_X      =x_offset;
+  Bouton[Numero].Decalage_Y      =y_offset;
   Bouton[Numero].Largeur         =Largeur-1;
   Bouton[Numero].Hauteur         =Hauteur-1;
   Bouton[Numero].Enfonce         =0;

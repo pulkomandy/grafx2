@@ -221,13 +221,13 @@ byte Pixel_dans_cercle(void)
         return 0;
 }
 
-void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * Destination,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
+void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
 {
         // ESI = adresse de la source en (S_Pox_X,S_Pos_Y)
         byte* esi = Source + S_Pos_Y * Largeur_source + S_Pos_X;
 
         // EDI = adresse de la destination (D_Pos_X,D_Pos_Y)
-        byte* edi = Destination + D_Pos_Y * Largeur_destination + D_Pos_X;
+        byte* edi = dest + D_Pos_Y * Largeur_destination + D_Pos_X;
 
         int Ligne;
 
@@ -249,7 +249,7 @@ byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
   return *(Brouillon_Ecran+Y*Brouillon_Largeur_image+X);
 }
 
-void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
+void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
 {
   byte* esi;
   byte* edi;
@@ -257,7 +257,7 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * Destination)
 
   //ESI = Point haut droit de la source
   byte* Debut_de_colonne = Source + Brosse_Largeur - 1;
-  edi = Destination;
+  edi = dest;
 
   // Largeur de la source = Hauteur de la destination
   dx = bx = Brosse_Largeur;
@@ -554,39 +554,39 @@ void Rotate_180_deg_LOWLEVEL(void)
 void Tempo_jauge(byte Vitesse)
 //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
 {
-  Uint32 Fin;
+  Uint32 end;
   byte MouseK_Original = Mouse_K;
-  Fin = SDL_GetTicks() + Vitesse*10;
+  end = SDL_GetTicks() + Vitesse*10;
   do
   {
     if (!Get_input()) Wait_VBL();
-  } while (Mouse_K == MouseK_Original && SDL_GetTicks()<Fin);
+  } while (Mouse_K == MouseK_Original && SDL_GetTicks()<end);
 }
 
-void Scroll_picture(short Decalage_X,short Decalage_Y)
+void Scroll_picture(short x_offset,short y_offset)
 {
   byte* esi = Ecran_backup; //Source de la copie
-  byte* edi = Principal_Ecran + Decalage_Y * Principal_Largeur_image + Decalage_X;
-  const word ax = Principal_Largeur_image - Decalage_X; // Nombre de pixels à copier à droite
+  byte* edi = Principal_Ecran + y_offset * Principal_Largeur_image + x_offset;
+  const word ax = Principal_Largeur_image - x_offset; // Nombre de pixels à copier à droite
   word dx;
-  for(dx = Principal_Hauteur_image - Decalage_Y;dx>0;dx--)
+  for(dx = Principal_Hauteur_image - y_offset;dx>0;dx--)
   {
   // Pour chaque ligne
     memcpy(edi,esi,ax);
-    memcpy(edi - Decalage_X,esi+ax,Decalage_X);
+    memcpy(edi - x_offset,esi+ax,x_offset);
 
     // On passe à la ligne suivante
     edi += Principal_Largeur_image;
     esi += Principal_Largeur_image;
   }
 
-  // On vient de faire le traitement pour otutes les lignes au-dessous de Decalage_Y
+  // On vient de faire le traitement pour otutes les lignes au-dessous de y_offset
   // Maintenant on traite celles au dessus
-  edi = Decalage_X + Principal_Ecran;
-  for(dx = Decalage_Y;dx>0;dx--)
+  edi = x_offset + Principal_Ecran;
+  for(dx = y_offset;dx>0;dx--)
   {
     memcpy(edi,esi,ax);
-    memcpy(edi - Decalage_X,esi+ax,Decalage_X);
+    memcpy(edi - x_offset,esi+ax,x_offset);
 
     edi += Principal_Largeur_image;
     esi += Principal_Largeur_image;
@@ -596,7 +596,7 @@ void Scroll_picture(short Decalage_X,short Decalage_Y)
 }
 
 void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
-        word Facteur, word Largeur
+        word factor, word Largeur
 )
 {
         byte color;
@@ -606,8 +606,8 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
         for(X=0;X<Largeur;X++){
                 color = *Ligne_originale;
 
-                memset(Ligne_zoomee,color,Facteur);
-                Ligne_zoomee+=Facteur;
+                memset(Ligne_zoomee,color,factor);
+                Ligne_zoomee+=factor;
 
                 Ligne_originale++;
         }

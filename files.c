@@ -32,14 +32,14 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
     #include <proto/dos.h>
     #include <dirent.h>
-    #define isHidden(Enreg) (0)
+    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
-    #define isHidden(Enreg) (GetFileAttributesA((Enreg)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(Enreg) ((Enreg)->d_name[0]=='.')
+    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #include "const.h"
@@ -209,7 +209,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
 // correspond au format demandé.
 {
   DIR*  Repertoire_Courant; //Répertoire courant
-  struct dirent* Enreg; // Structure de lecture des éléments
+  struct dirent* entry; // Structure de lecture des éléments
   char * Filtre = "*"; // Extension demandée
   struct stat Infos_enreg;
   char * Chemin_courant;
@@ -227,34 +227,34 @@ void Lire_liste_des_fichiers(byte Format_demande)
   // On lit tous les répertoires:
   Chemin_courant=getcwd(NULL,0);
   Repertoire_Courant=opendir(Chemin_courant);
-  while ((Enreg=readdir(Repertoire_Courant)))
+  while ((entry=readdir(Repertoire_Courant)))
   {
     // On ignore le répertoire courant
-    if ( !strcmp(Enreg->d_name, "."))
+    if ( !strcmp(entry->d_name, "."))
     {
       continue;
     }
-    stat(Enreg->d_name,&Infos_enreg);
+    stat(entry->d_name,&Infos_enreg);
     // et que l'élément trouvé est un répertoire
     if( S_ISDIR(Infos_enreg.st_mode) &&
       // et que c'est ".."
-      (!strcmp(Enreg->d_name, PARENT_DIR) ||
+      (!strcmp(entry->d_name, PARENT_DIR) ||
       // ou qu'il n'est pas caché
        Config.Lire_les_repertoires_caches ||
-     !isHidden(Enreg)))
+     !isHidden(entry)))
     {
       // On rajoute le répertoire à la liste
-      Ajouter_element_a_la_liste(Enreg->d_name, 1);
+      Ajouter_element_a_la_liste(entry->d_name, 1);
       Liste_Nb_repertoires++;
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
       (Config.Lire_les_fichiers_caches || //Il n'est pas caché
-      !isHidden(Enreg)))
+      !isHidden(entry)))
     {
-      if (VerifieExtension(Enreg->d_name, Filtre))
+      if (VerifieExtension(entry->d_name, Filtre))
       {
         // On rajoute le fichier à la liste
-        Ajouter_element_a_la_liste(Enreg->d_name, 0);
+        Ajouter_element_a_la_liste(entry->d_name, 0);
         Liste_Nb_fichiers++;
       }
     }
@@ -746,7 +746,7 @@ void for_each_file(const char * Nom_repertoire, void Callback(const char *))
 {
   // Pour scan de répertoire
   DIR*  Repertoire_Courant; //Répertoire courant
-  struct dirent* Enreg; // Structure de lecture des éléments
+  struct dirent* entry; // Structure de lecture des éléments
   char Nom_fichier_complet[TAILLE_CHEMIN_FICHIER];
   int Position_nom_fichier;
   strcpy(Nom_fichier_complet, Nom_repertoire);
@@ -754,10 +754,10 @@ void for_each_file(const char * Nom_repertoire, void Callback(const char *))
   if(Repertoire_Courant == NULL) return;        // Répertoire invalide ...
   strcat(Nom_fichier_complet, SEPARATEUR_CHEMIN);
   Position_nom_fichier = strlen(Nom_fichier_complet);
-  while ((Enreg=readdir(Repertoire_Courant)))
+  while ((entry=readdir(Repertoire_Courant)))
   {
     struct stat Infos_enreg;
-    strcpy(&Nom_fichier_complet[Position_nom_fichier], Enreg->d_name);
+    strcpy(&Nom_fichier_complet[Position_nom_fichier], entry->d_name);
     stat(Nom_fichier_complet,&Infos_enreg);
     if (S_ISREG(Infos_enreg.st_mode))
     {

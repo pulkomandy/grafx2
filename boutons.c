@@ -415,7 +415,6 @@ void Bouton_Cacher_menu(void)
 byte Bouton_Quitter_Routine_locale(void)
 {
   short Bouton_clicke;
-  //byte  Enregistrer;
   static char  Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   byte  Ancienne_forme_curseur;
 
@@ -1254,11 +1253,11 @@ void Bouton_Kill(void)
 
 //------------------------- Dimensions Image/Ecran ---------------------------
 
-void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte Etat)
+void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte state)
 {
   byte Couleur;
 
-  switch (Etat & 0x7F)
+  switch (state & 0x7F)
   {
     case 0 : Couleur=CM_Blanc; break;
     case 1 : Couleur=CM_Clair; break;
@@ -2291,22 +2290,22 @@ void Print_Nom_fichier_dans_selecteur(void)
 int   Type_selectionne; // Utilisé pour mémoriser le type d'entrée choisi
                         // dans le selecteur de fichier.
 
-void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
-                                         T_Bouton_scroller * Enreg)
+void Preparer_et_afficher_liste_fichiers(short Position, short offset,
+                                         T_Bouton_scroller * button)
 {
-  Enreg->Nb_elements=Liste_Nb_elements;
-  Enreg->Position=Position;
-  Calculer_hauteur_curseur_jauge(Enreg);
-  Fenetre_Dessiner_jauge(Enreg);
+  button->Nb_elements=Liste_Nb_elements;
+  button->Position=Position;
+  Calculer_hauteur_curseur_jauge(button);
+  Fenetre_Dessiner_jauge(button);
   // On efface les anciens noms de fichier:
   Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82,CM_Noir);
   // On affiche les nouveaux:
-  Afficher_la_liste_des_fichiers(Position,Decalage);
+  Afficher_la_liste_des_fichiers(Position,offset);
 
   UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82);
 
   // On récupère le nom du schmilblick à "accéder"
-  Determiner_element_de_la_liste(Position,Decalage,Principal_Nom_fichier,&Type_selectionne);
+  Determiner_element_de_la_liste(Position,offset,Principal_Nom_fichier,&Type_selectionne);
   // On affiche le nouveau nom de fichier
   Print_Nom_fichier_dans_selecteur();
   // On affiche le nom du répertoire courant
@@ -2314,12 +2313,12 @@ void Preparer_et_afficher_liste_fichiers(short Position, short Decalage,
 }
 
 
-void Relire_liste_fichiers(byte Filtre, short Position, short Decalage,
-                           T_Bouton_scroller * Enreg)
+void Relire_liste_fichiers(byte Filtre, short Position, short offset,
+                           T_Bouton_scroller * button)
 {
   Lire_liste_des_fichiers(Filtre);
   Trier_la_liste_des_fichiers();
-  Preparer_et_afficher_liste_fichiers(Position,Decalage,Enreg);
+  Preparer_et_afficher_liste_fichiers(Position,offset,button);
 }
 
 void On_vient_de_scroller_dans_le_fileselect(T_Bouton_scroller * Scroller_de_fichiers)
@@ -5603,13 +5602,13 @@ void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
 }
 
 
-void Afficher_etat_effet(short X, short Y, char * Libelle, byte Etat)
+void Afficher_etat_effet(short X, short Y, char * Libelle, byte state)
 {
   Block(Fenetre_Pos_X+(X*Menu_Facteur_X),Fenetre_Pos_Y+(Y*Menu_Facteur_Y),
         12*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
 
-  Print_dans_fenetre(X,Y,Libelle,(Etat)?CM_Blanc:CM_Noir,CM_Clair);
-  if (Etat)
+  Print_dans_fenetre(X,Y,Libelle,(state)?CM_Blanc:CM_Noir,CM_Clair);
+  if (state)
     Print_dans_fenetre(X+56,Y,":ON ",CM_Blanc,CM_Clair);
   else
     Print_dans_fenetre(X+56,Y,":OFF",CM_Noir,CM_Clair);

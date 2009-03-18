@@ -147,7 +147,7 @@ void Formate_composante(byte Valeur, char *Chaine)
   Chaine[4]='\0';
 }
 
-void Degrader_palette(short Debut,short Fin,T_Palette Palette)
+void Degrader_palette(short start,short end,T_Palette Palette)
 // Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
 // passées en paramètre
 {
@@ -161,21 +161,21 @@ void Degrader_palette(short Debut,short Fin,T_Palette Palette)
 
   // On vérifie qu'il y ait assez de couleurs entre le début et la fin pour
   // pouvoir faire un dégradé:
-  if ( (Debut!=Fin) && (Debut+1!=Fin) )
+  if ( (start!=end) && (start+1!=end) )
   {
-    Debut_Rouge=Palette[Debut].R;
-    Debut_Vert =Palette[Debut].V;
-    Debut_Bleu =Palette[Debut].B;
+    Debut_Rouge=Palette[start].R;
+    Debut_Vert =Palette[start].V;
+    Debut_Bleu =Palette[start].B;
 
-    Fin_Rouge  =Palette[Fin  ].R;
-    Fin_Vert   =Palette[Fin  ].V;
-    Fin_Bleu   =Palette[Fin  ].B;
+    Fin_Rouge  =Palette[end  ].R;
+    Fin_Vert   =Palette[end  ].V;
+    Fin_Bleu   =Palette[end  ].B;
 
-    for (Indice=Debut+1;Indice<Fin;Indice++)
+    for (Indice=start+1;Indice<end;Indice++)
     {
-      Modifier_Rouge(Indice, ((Fin_Rouge-Debut_Rouge) * (Indice-Debut))/(Fin-Debut) + Debut_Rouge,Palette);
-      Modifier_Vert (Indice, ((Fin_Vert -Debut_Vert ) * (Indice-Debut))/(Fin-Debut) + Debut_Vert ,Palette);
-      Modifier_Bleu (Indice, ((Fin_Bleu -Debut_Bleu ) * (Indice-Debut))/(Fin-Debut) + Debut_Bleu ,Palette);
+      Modifier_Rouge(Indice, ((Fin_Rouge-Debut_Rouge) * (Indice-start))/(end-start) + Debut_Rouge,Palette);
+      Modifier_Vert (Indice, ((Fin_Vert -Debut_Vert ) * (Indice-start))/(end-start) + Debut_Vert ,Palette);
+      Modifier_Bleu (Indice, ((Fin_Bleu -Debut_Bleu ) * (Indice-start))/(end-start) + Debut_Bleu ,Palette);
     }
   }
 }
@@ -691,13 +691,13 @@ void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
 void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
                                T_Bouton_scroller * Jauge_verte,
                                T_Bouton_scroller * Jauge_bleue,
-                               T_Palette Palette,byte Debut,byte Fin)
+                               T_Palette Palette,byte start,byte end)
 {
   char Chaine[5];
 
   Effacer_curseur();
   // Réaffichage des jauges:
-  if (Debut!=Fin)
+  if (start!=end)
   {
     // Dans le cas d'un bloc, tout à 0.
     Jauge_rouge->Position   =Color_Max;
@@ -716,9 +716,9 @@ void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
   {
     // Dans le cas d'une seule couleur, composantes.
     byte j1, j2, j3;
-    j1= Palette[Debut].R;
-    j2= Palette[Debut].V;
-    j3= Palette[Debut].B;
+    j1= Palette[start].R;
+    j2= Palette[start].V;
+    j3= Palette[start].B;
     if (!Palette_mode_RGB)
     {
       RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);

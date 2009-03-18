@@ -28,17 +28,17 @@
   void Pixel_Preview_Loupe_Double        (word X,word Y,byte Couleur);
   void Ligne_horizontale_XOR_Double      (word Pos_X,word Pos_Y,word Largeur);
   void Ligne_verticale_XOR_Double        (word Pos_X,word Pos_Y,word Hauteur);
-  void Display_brush_Color_Double        (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
-  void Display_brush_Mono_Double         (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
-  void Clear_brush_Double                (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image);
+  void Display_brush_Color_Double        (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
+  void Display_brush_Mono_Double         (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
+  void Clear_brush_Double                (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image);
   void Remap_screen_Double               (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion);
   void Afficher_partie_de_l_ecran_Double (word Largeur,word Hauteur,word Largeur_image);
   void Afficher_une_ligne_ecran_Double   (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
   void Lire_une_ligne_ecran_Double       (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
   void Afficher_partie_de_l_ecran_zoomee_Double(word Largeur,word Hauteur,word Largeur_image,byte * Buffer);
-  void Display_brush_Color_zoom_Double   (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
-  void Display_brush_Mono_zoom_Double    (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
-  void Clear_brush_zoom_Double           (word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer);
-  void Affiche_brosse_Double             (byte * brush, word Pos_X,word Pos_Y,word Decalage_X,word Decalage_Y,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
+  void Display_brush_Color_zoom_Double   (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
+  void Display_brush_Mono_zoom_Double    (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
+  void Clear_brush_zoom_Double           (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer);
+  void Affiche_brosse_Double             (byte * brush, word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
 
   void Afficher_une_ligne_ecran_fast_Double   (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
