@@ -182,19 +182,19 @@ void Bouton_Message_initial(void)
 
 
 
-void Changer_la_forme_du_pinceau(byte Forme)
+void Changer_la_forme_du_pinceau(byte shape)
 {
-  Pinceau_Forme=Forme;
+  Pinceau_Forme=shape;
   Afficher_pinceau_dans_menu();
 
   switch (Operation_en_cours)
   {
     case OPERATION_FILL :
-      Pinceau_Forme_avant_fill=Forme;
+      Pinceau_Forme_avant_fill=shape;
       Pinceau_Forme=FORME_PINCEAU_POINT;
       break;
     case OPERATION_PIPETTE :
-      Pinceau_Forme_avant_pipette=Forme;
+      Pinceau_Forme_avant_pipette=shape;
       Pinceau_Forme=FORME_PINCEAU_POINT;
       break;
     // Note: Il existe un Pinceau_Forme_avant_lasso, mais comme le lasso aura
@@ -529,7 +529,7 @@ void Bouton_Clear_colore(void)
 }
  
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte can_cancel, const char *Section_aide)
+void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cancel, const char *Section_aide)
 {
   short Bouton_clicke;
   byte Backup_table[256];
@@ -638,7 +638,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte can_cance
   if (Bouton_clicke==5) // Cancel
     memcpy(Table,Backup_table,256);
   else // OK
-    *Mode=1;
+    *mode=1;
 
   Afficher_curseur();
 }
@@ -690,19 +690,19 @@ void Settings_Afficher_config(T_Config * Conf)
 #define YES "YES"
 #define NO  " NO"
 {
-  T_Bouton_scroller * Jauge=Fenetre_Liste_boutons_scroller;
+  T_Bouton_scroller * slider=Fenetre_Liste_boutons_scroller;
   char Chaine[4];
 
   Effacer_curseur();
 
-  // Jauge = Jauge de sensibilité Y
-  Jauge->Position=Conf->Indice_Sensibilite_souris_Y-1;
-  Fenetre_Dessiner_jauge(Jauge);
+  // slider = Jauge de sensibilité Y
+  slider->Position=Conf->Indice_Sensibilite_souris_Y-1;
+  Fenetre_Dessiner_jauge(slider);
 
-  Jauge=Jauge->Next;
-  // Jauge = Jauge de sensibilité X
-  Jauge->Position=Conf->Indice_Sensibilite_souris_X-1;
-  Fenetre_Dessiner_jauge(Jauge);
+  slider=slider->Next;
+  // slider = Jauge de sensibilité X
+  slider->Position=Conf->Indice_Sensibilite_souris_X-1;
+  Fenetre_Dessiner_jauge(slider);
 
   Print_dans_fenetre(273, 31,(Conf->Lire_les_fichiers_caches)?YES:NO,CM_Noir,CM_Clair);
   Print_dans_fenetre(273, 46,(Conf->Lire_les_repertoires_caches)?YES:NO,CM_Noir,CM_Clair);
@@ -1301,30 +1301,30 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
       else
         Couleur_texte=CM_Clair;
     }
-    Num2str(Mode_video[Mode_courant].Largeur,Chaine,4);
+    Num2str(Mode_video[Mode_courant].Width,Chaine,4);
     Chaine[4]=' ';
-    Num2str(Mode_video[Mode_courant].Hauteur,Chaine+5,4);
+    Num2str(Mode_video[Mode_courant].Height,Chaine+5,4);
 
     if(Mode_video[Mode_courant].Fullscreen == 1)
       memcpy(Chaine+9," Fullscreen ",13);
     else
       memcpy(Chaine+9,"   Window   ",13);
 
-    if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*4)
+    if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*4)
       Ratio="    4:3";
-    else if (Mode_video[Mode_courant].Largeur*9 == Mode_video[Mode_courant].Hauteur*16)
+    else if (Mode_video[Mode_courant].Width*9 == Mode_video[Mode_courant].Height*16)
       Ratio="   16:9";
-    else if (Mode_video[Mode_courant].Largeur*10 == Mode_video[Mode_courant].Hauteur*16)
+    else if (Mode_video[Mode_courant].Width*10 == Mode_video[Mode_courant].Height*16)
       Ratio="  16:10";
-    else if (Mode_video[Mode_courant].Largeur*145 == Mode_video[Mode_courant].Hauteur*192)
+    else if (Mode_video[Mode_courant].Width*145 == Mode_video[Mode_courant].Height*192)
       Ratio="192:145";
-    else if (Mode_video[Mode_courant].Largeur*2 == Mode_video[Mode_courant].Hauteur*3)
+    else if (Mode_video[Mode_courant].Width*2 == Mode_video[Mode_courant].Height*3)
       Ratio="    3:2";
-    else if (Mode_video[Mode_courant].Largeur*3 == Mode_video[Mode_courant].Hauteur*5)
+    else if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*5)
       Ratio="    5:3";
-    else if (Mode_video[Mode_courant].Largeur*4 == Mode_video[Mode_courant].Hauteur*5)
+    else if (Mode_video[Mode_courant].Width*4 == Mode_video[Mode_courant].Height*5)
       Ratio="    5:4";
-    else if (Mode_video[Mode_courant].Largeur*16 == Mode_video[Mode_courant].Hauteur*25)
+    else if (Mode_video[Mode_courant].Width*16 == Mode_video[Mode_courant].Height*25)
       Ratio="  25:16";
     else
       Ratio="       ";
@@ -1465,7 +1465,7 @@ void Bouton_Resol(void)
         Afficher_curseur();
         break;
 
-      case 4 : // Hauteur
+      case 4 : // Height
         Num2str(Hauteur_choisie,Chaine,4);
         Readline(166,37,Chaine,4,1);
         Hauteur_choisie=atoi(Chaine);
@@ -1494,11 +1494,11 @@ void Bouton_Resol(void)
           if (Mouse_K==2)
           {
             // On affecte également les dimensions de l'image:
-            Largeur_choisie=Mode_video[Mode_choisi].Largeur/Pixel_width;
+            Largeur_choisie=Mode_video[Mode_choisi].Width/Pixel_width;
             Num2str(Largeur_choisie,Chaine,4);
             Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
 
-            Hauteur_choisie=Mode_video[Mode_choisi].Hauteur/Pixel_height;
+            Hauteur_choisie=Mode_video[Mode_choisi].Height/Pixel_height;
             Num2str(Hauteur_choisie,Chaine,4);
             Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
           }
@@ -1621,14 +1621,14 @@ void Bouton_Resol(void)
 
     if ((Mode_video[Mode_choisi].Etat & 3) == 3 ||
       Initialiser_mode_video(
-        Mode_video[Mode_choisi].Largeur,
-        Mode_video[Mode_choisi].Hauteur,
+        Mode_video[Mode_choisi].Width,
+        Mode_video[Mode_choisi].Height,
         Mode_video[Mode_choisi].Fullscreen))
     {
       Erreur(0); // On signale à l'utilisateur que c'est un mode invalide
       Initialiser_mode_video(
-        Mode_video[Resolution_actuelle].Largeur,
-        Mode_video[Resolution_actuelle].Hauteur,
+        Mode_video[Resolution_actuelle].Width,
+        Mode_video[Resolution_actuelle].Height,
         Mode_video[Resolution_actuelle].Fullscreen);
     }
 
@@ -1651,8 +1651,8 @@ void Bouton_Safety_resol(void)
   Desenclencher_bouton(BOUTON_LOUPE);
   Initialiser_mode_video(640, 400, 0);
   Resolution_actuelle=0;
-  Mode_video[0].Largeur = Largeur_ecran*Pixel_width;
-  Mode_video[0].Hauteur = Hauteur_ecran*Pixel_height;
+  Mode_video[0].Width = Largeur_ecran*Pixel_width;
+  Mode_video[0].Height = Hauteur_ecran*Pixel_height;
   Afficher_menu();
   Afficher_ecran();
 
@@ -1770,7 +1770,7 @@ void Bouton_Ellipse_pleine(void)
 // -- Gestion du menu des dégradés ------------------------------------------
 void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
 {
-  short Ligne;
+  short line;
 
   // On commence par afficher les 2 côtés qui constituent le dégradé de base:
     // Côté gauche (noir)
@@ -1788,36 +1788,36 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
   {
     case 1 : // Dégradé de trames simples
       // Au centre, on place 10 lignes tramées simplement
-      for (Ligne=2;Ligne<2+10;Ligne++)
-        if (Ligne&1)
+      for (line=2;line<2+10;line++)
+        if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(Pos_X+ 5,Pos_Y+Ligne,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+Ligne,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+Ligne,CM_Noir);
+          Pixel_dans_fenetre(Pos_X+ 5,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+line,CM_Noir);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+Ligne,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 9,Pos_Y+Ligne,CM_Noir);
+          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 9,Pos_Y+line,CM_Noir);
         }
       break;
     case 2 : // Dégradé de trames étendues
       // Au centre, on place 10 lignes tramées de façon compliquée
-      for (Ligne=2;Ligne<2+10;Ligne++)
-        if (Ligne&1)
+      for (line=2;line<2+10;line++)
+        if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+Ligne,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+Ligne,CM_Noir);
-          Pixel_dans_fenetre(Pos_X+10,Pos_Y+Ligne,CM_Noir);
+          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+line,CM_Noir);
+          Pixel_dans_fenetre(Pos_X+10,Pos_Y+line,CM_Noir);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(Pos_X+ 4,Pos_Y+Ligne,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+Ligne,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 4,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+line,CM_Blanc);
         }
   }
   
@@ -1850,7 +1850,7 @@ void Degrade_Charger_infos_du_tableau(int Indice)
   }
 }
 
-void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short Largeur,short Hauteur,int Indice)
+void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short width,short height,int Indice)
 {
   short Pos_X; // Variables de balayage du block en bas de l'écran.
   short Pos_Y;
@@ -1862,15 +1862,15 @@ void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short Largeur,short Ha
   Debut_X=Fenetre_Pos_X+(Debut_X*Menu_Facteur_X);
   Debut_Y=Fenetre_Pos_Y+(Debut_Y*Menu_Facteur_Y);
 
-  Degrade_Intervalle_total=Largeur*Menu_Facteur_X;
+  Degrade_Intervalle_total=width*Menu_Facteur_X;
 
   Fin_X=Debut_X+Degrade_Intervalle_total;
-  Fin_Y=Debut_Y+(Hauteur*Menu_Facteur_Y);
+  Fin_Y=Debut_Y+(height*Menu_Facteur_Y);
 
   for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
     for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
       Traiter_degrade(Pos_X-Debut_X,Pos_X,Pos_Y);
-  UpdateRect(Debut_X,Debut_Y,Largeur*Menu_Facteur_X,Hauteur*Menu_Facteur_Y);
+  UpdateRect(Debut_X,Debut_Y,width*Menu_Facteur_X,height*Menu_Facteur_Y);
 }
 
 void Bouton_Degrades(void)
@@ -2239,13 +2239,13 @@ void Print_repertoire_courant(void)
 //
 {
   char Nom_temporaire[TAILLE_MAXI_PATH+1]; // Nom tronqué
-  int  Longueur; // Longueur du répertoire courant
+  int  length; // length du répertoire courant
   int  Indice;   // Indice de parcours de la chaine complète
 
   Block(Fenetre_Pos_X+(Menu_Facteur_X*7),Fenetre_Pos_Y+(Menu_Facteur_Y*43),Menu_Facteur_X*37*8,Menu_Facteur_Y<<3,CM_Clair);
 
-  Longueur=strlen(Principal_Repertoire_courant);
-  if (Longueur>TAILLE_MAXI_PATH)
+  length=strlen(Principal_Repertoire_courant);
+  if (length>TAILLE_MAXI_PATH)
   { // Doh! il va falloir tronquer le répertoire (bouh !)
 
     // On commence par copier bêtement les 3 premiers caractères (e.g. "C:\")
@@ -2257,9 +2257,9 @@ void Print_repertoire_courant(void)
 
     //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
-    for (Indice++;Indice<Longueur;Indice++)
+    for (Indice++;Indice<length;Indice++)
       if ( (Principal_Repertoire_courant[Indice]==SEPARATEUR_CHEMIN[0]) &&
-           (Longueur-Indice<=TAILLE_MAXI_PATH-6) )
+           (length-Indice<=TAILLE_MAXI_PATH-6) )
       {
         // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
         // on peut faire la copie:
@@ -2345,24 +2345,24 @@ void On_vient_de_scroller_dans_le_fileselect(T_Bouton_scroller * Scroller_de_fic
 }
 
 
-short Position_fichier_dans_liste(char * Nom)
+short Position_fichier_dans_liste(char * fname)
 {
   Element_de_liste_de_fileselect * Element_courant;
   short  Indice;
 
   for (Indice=0, Element_courant=Liste_du_fileselect;
-       ((Element_courant!=NULL) && (strcmp(Element_courant->NomComplet,Nom)));
+       ((Element_courant!=NULL) && (strcmp(Element_courant->NomComplet,fname)));
        Indice++,Element_courant=Element_courant->Suivant);
 
   return (Element_courant!=NULL)?Indice:0;
 }
 
 
-void Placer_barre_de_selection_sur(char * Nom)
+void Placer_barre_de_selection_sur(char * fname)
 {
   short Indice;
 
-  Indice=Position_fichier_dans_liste(Nom);
+  Indice=Position_fichier_dans_liste(fname);
 
   if ((Liste_Nb_elements<=10) || (Indice<5))
   {
@@ -2386,7 +2386,7 @@ void Placer_barre_de_selection_sur(char * Nom)
 
 
 char FFF_Meilleur_nom[TAILLE_CHEMIN_FICHIER];
-char * Nom_correspondant_le_mieux_a(char * Nom)
+char * Nom_correspondant_le_mieux_a(char * fname)
 {
   char * Pointeur_Meilleur_nom;
   Element_de_liste_de_fileselect * Element_courant;
@@ -2402,7 +2402,7 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
       || (Config.Find_file_fast==(Element_courant->Type+1)) )
     {
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (counter=0; Nom[counter]!='\0' && tolower(Element_courant->NomComplet[counter])==tolower(Nom[counter]); counter++);
+      for (counter=0; fname[counter]!='\0' && tolower(Element_courant->NomComplet[counter])==tolower(fname[counter]); counter++);
       if (counter>Lettres_identiques)
       {
         Lettres_identiques=counter;
@@ -2415,9 +2415,9 @@ char * Nom_correspondant_le_mieux_a(char * Nom)
   return Pointeur_Meilleur_nom;
 }
 
-byte Bouton_Load_ou_Save(byte Load, byte Image)
-  // Load=1 => On affiche le menu du bouton LOAD
-  // Load=0 => On affiche le menu du bouton SAVE
+byte Bouton_Load_ou_Save(byte load, byte image)
+  // load=1 => On affiche le menu du bouton LOAD
+  // load=0 => On affiche le menu du bouton SAVE
 {
   short Bouton_clicke;
   T_Bouton_scroller * Scroller_de_fichiers;
@@ -2449,9 +2449,9 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   Hauteur_image_initiale=Principal_Hauteur_image;
   strcpy(Nom_fichier_initial,Principal_Nom_fichier);
   strcpy(Commentaire_initial,Principal_Commentaire);
-  if (Load)
+  if (load)
   {
-    if (Image)
+    if (image)
       Ouvrir_fenetre(310,187+FILENAMESPACE,"Load picture");
     else
       Ouvrir_fenetre(310,187+FILENAMESPACE,"Load brush");
@@ -2459,7 +2459,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   }
   else
   {
-    if (Image)
+    if (image)
       Ouvrir_fenetre(310,187+FILENAMESPACE,"Save picture");
     else
       Ouvrir_fenetre(310,187+FILENAMESPACE,"Save brush");
@@ -2504,12 +2504,12 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     Fenetre_Definir_bouton_dropdown(70,56,36,16,0,
       (Principal_Format==0)?"*.*":FormatFichier[Principal_Format-1].Extension,
       1,0,1,A_DROITE|A_GAUCHE); // 6
-  if (Load)
+  if (load)
     Fenetre_Dropdown_choix(Dropdown_des_formats,0,"*.*");
   for (Temp=0;Temp<NB_FORMATS_CONNUS;Temp++)
   {
-    if ((Load && FormatFichier[Temp].Load) || 
-      (!Load && FormatFichier[Temp].Save))
+    if ((load && FormatFichier[Temp].Load) || 
+      (!load && FormatFichier[Temp].Save))
         Fenetre_Dropdown_choix(Dropdown_des_formats,Temp+1,FormatFichier[Temp].Extension);
   }
   Print_dans_fenetre(12,61,"Format:",CM_Fonce,CM_Clair);
@@ -2540,7 +2540,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
     Afficher_bookmark(Dropdown_bookmark[Temp],Temp);
   }
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
-  if (Load)
+  if (load)
   {
     chdir(Principal_Repertoire_courant);
     Determiner_repertoire_courant();
@@ -2554,7 +2554,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   // Affichage des premiers fichiers visibles:
   Relire_liste_fichiers(Principal_Format,Principal_File_list_Position,Principal_File_list_Decalage,Scroller_de_fichiers);
 
-  if (!Load)
+  if (!load)
   {
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
@@ -2580,7 +2580,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         break;
 
       case  1 : // Load ou Save
-      if(Load)
+      if(load)
         {
           // Determine the type
           if(Fichier_existe(Principal_Nom_fichier)) 
@@ -2736,7 +2736,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         *Fichier_recherche=0;
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
-        if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
+        if ( (!load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
           Readline(46,175+FILENAMESPACE,Principal_Commentaire,32,0);
           Afficher_curseur();
@@ -2775,7 +2775,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
               }
             }
           }
-          if(Load)
+          if(load)
           {
             // Determine the type
             if(Fichier_existe(Principal_Nom_fichier)) 
@@ -2964,7 +2964,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         {
           if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
           {
-            Fenetre_aide(Load?BOUTON_CHARGER:BOUTON_SAUVER, NULL);
+            Fenetre_aide(load?BOUTON_CHARGER:BOUTON_SAUVER, NULL);
             break;
           }
           Temp=strlen(Fichier_recherche);
@@ -3032,7 +3032,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
       else  // Sinon on essaye de charger ou sauver le fichier
       {
         strcpy(Principal_Repertoire_fichier,Principal_Repertoire_courant);
-        if (!Load)
+        if (!load)
           Principal_Format_fichier=Principal_Format;
         Charger_ou_sauver_l_image=1;
       }
@@ -3062,7 +3062,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 72*Menu_Facteur_Y,
               Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
         // Affichage du commentaire
-        if ( (!Load) && (FormatFichier[Principal_Format-1].Commentaire) )
+        if ( (!load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
           Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
         }
@@ -3089,7 +3089,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
         strcpy(Principal_Repertoire_fichier,Principal_Repertoire_courant);
 
         Effacer_curseur();
-        Charger_image(Image);
+        Charger_image(image);
         UpdateRect(ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
         Afficher_curseur();
 
@@ -3128,7 +3128,7 @@ byte Bouton_Load_ou_Save(byte Load, byte Image)
   if (Temp)
     Afficher_menu();
 
-  Desenclencher_bouton((Load)?BOUTON_CHARGER:BOUTON_SAUVER);
+  Desenclencher_bouton((load)?BOUTON_CHARGER:BOUTON_SAUVER);
   Afficher_curseur();
   Detruire_liste_du_fileselect();
 
@@ -3148,7 +3148,7 @@ int Meilleur_mode_video(void)
   short Meilleure_largeur,Meilleure_hauteur;
   int Meilleur_mode;
   short Temp_X,Temp_Y;
-  int Mode;
+  int mode;
 
   // Si mode fenêtre, on reste dans ce mode.
   if (Resolution_actuelle == 0)
@@ -3179,16 +3179,16 @@ int Meilleur_mode_video(void)
   Meilleure_hauteur=0;
 
 
-  for (Mode=1; Mode<Nb_modes_video; Mode++)
+  for (mode=1; mode<Nb_modes_video; mode++)
   {
-    if (Mode_video[Mode].Fullscreen && (Mode_video[Mode].Etat&3)<2)
+    if (Mode_video[mode].Fullscreen && (Mode_video[mode].Etat&3)<2)
     {
-      Temp_X=Mode_video[Mode].Largeur;
-      Temp_Y=Mode_video[Mode].Hauteur;
+      Temp_X=Mode_video[mode].Width;
+      Temp_Y=Mode_video[mode].Height;
 
       if ( (Ecran_original_X-TOLERANCE_X<=Temp_X)
         && (Ecran_original_Y-TOLERANCE_Y<=Temp_Y) )
-        return Mode;
+        return mode;
       else
       {
         if ( (Meilleure_largeur<=Temp_X)
@@ -3198,7 +3198,7 @@ int Meilleur_mode_video(void)
         {
           Meilleure_largeur=Temp_X;
           Meilleure_hauteur=Temp_Y;
-          Meilleur_mode=Mode;
+          Meilleur_mode=mode;
         }
       }
     }
@@ -3249,7 +3249,7 @@ void Swapper_infos_selecteurs_image_et_brosse(void)
 }
 
 
-void Load_picture(byte Image)
+void Load_picture(byte image)
   // Image=1 => On charge/sauve une image
   // Image=0 => On charge/sauve une brosse
 {
@@ -3267,24 +3267,24 @@ void Load_picture(byte Image)
   int   Nouveau_mode;
 
 
-  if (!Image)
+  if (!image)
     Swapper_infos_selecteurs_image_et_brosse();
 
   strcpy(Repertoire_fichier_initial,Principal_Repertoire_fichier);
   strcpy(Nom_fichier_initial       ,Principal_Nom_fichier);
   Format_fichier_initial=Principal_Format_fichier;
 
-  if (!Image)
+  if (!image)
   {
     Palette_initiale=(Composantes *)malloc(sizeof(T_Palette));
     memcpy(Palette_initiale,Principal_Palette,sizeof(T_Palette));
   }
 
-  Ne_pas_restaurer=Bouton_Load_ou_Save(1,Image);
+  Ne_pas_restaurer=Bouton_Load_ou_Save(1,image);
 
   if (Ne_pas_restaurer)
   {
-    if (Image)
+    if (image)
     {
       if (Principal_Image_modifiee)
         Ne_pas_restaurer=Demande_de_confirmation("Discard unsaved changes?");
@@ -3300,7 +3300,7 @@ void Load_picture(byte Image)
     Forme_curseur=FORME_CURSEUR_SABLIER;
     Afficher_curseur();
 
-    if (Image)
+    if (image)
     {
       // Si c'est une image qu'on charge, on efface l'ancien commentaire
       // C'est loin d'être indispensable, m'enfin bon...
@@ -3313,9 +3313,9 @@ void Load_picture(byte Image)
     else
       Pixel_de_chargement=Pixel_Chargement_dans_brosse;
 
-    Charger_image(Image);
+    Charger_image(image);
 
-    if (!Image)
+    if (!image)
     {
       if (!Utiliser_palette_brosse)
         memcpy(Principal_Palette,Palette_initiale,sizeof(T_Palette));
@@ -3376,7 +3376,7 @@ void Load_picture(byte Image)
     }
     else
     {
-      if (Image)
+      if (image)
       {
         if (Loupe_Mode)
         {
@@ -3391,8 +3391,8 @@ void Load_picture(byte Image)
         if ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle))
         {
           Initialiser_mode_video(
-            Mode_video[Nouveau_mode].Largeur,
-            Mode_video[Nouveau_mode].Hauteur,
+            Mode_video[Nouveau_mode].Width,
+            Mode_video[Nouveau_mode].Height,
             Mode_video[Nouveau_mode].Fullscreen);
           Afficher_menu();
         }
@@ -3408,14 +3408,14 @@ void Load_picture(byte Image)
       Calculer_couleurs_menu_optimales(Principal_Palette);
       Afficher_ecran();
 
-      if (Image)
+      if (image)
         Principal_Image_modifiee=0;
     }
     Afficher_menu();
     Afficher_curseur();
   }
 
-  if (!Image)
+  if (!image)
     free(Palette_initiale);
 
   if (!Ne_pas_restaurer)
@@ -3425,7 +3425,7 @@ void Load_picture(byte Image)
     Principal_Format_fichier    =Format_fichier_initial;
   }
 
-  if (!Image)
+  if (!image)
     Swapper_infos_selecteurs_image_et_brosse();
 
   Print_nom_fichier();
@@ -3482,8 +3482,8 @@ void Bouton_Reload(void)
            (!Une_resolution_a_ete_passee_en_parametre) )
       {
         Initialiser_mode_video(
-        Mode_video[Nouveau_mode].Largeur,
-        Mode_video[Nouveau_mode].Hauteur,
+        Mode_video[Nouveau_mode].Width,
+        Mode_video[Nouveau_mode].Height,
         Mode_video[Nouveau_mode].Fullscreen);
         Afficher_menu();
       }
@@ -3514,12 +3514,12 @@ void Bouton_Reload(void)
 }
 
 
-void Nom_fichier_backup(char * Nom, char * Nom_backup)
+void Nom_fichier_backup(char * fname, char * Nom_backup)
 {
   short i;
 
-  strcpy(Nom_backup,Nom);
-  for (i=strlen(Nom)-strlen(Principal_Nom_fichier); Nom_backup[i]!='.'; i++);
+  strcpy(Nom_backup,fname);
+  for (i=strlen(fname)-strlen(Principal_Nom_fichier); Nom_backup[i]!='.'; i++);
   Nom_backup[i+1]='\0';
   strcat(Nom_backup,"BAK");
 }
@@ -3552,9 +3552,9 @@ void Backup_du_fichier_sauvegarde(void)
 }
 
 
-void Save_picture(byte Image)
-  // Image=1 => On charge/sauve une image
-  // Image=0 => On charge/sauve une brosse
+void Save_picture(byte image)
+  // image=1 => On charge/sauve une image
+  // image=0 => On charge/sauve une brosse
 {
   // Données initiales du fichier (au cas où on voudrait annuler)
   char  Repertoire_fichier_initial[TAILLE_CHEMIN_FICHIER];
@@ -3567,14 +3567,14 @@ void Save_picture(byte Image)
   //char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
 
 
-  if (!Image)
+  if (!image)
     Swapper_infos_selecteurs_image_et_brosse();
 
   strcpy(Repertoire_fichier_initial,Principal_Repertoire_fichier);
   strcpy(Nom_fichier_initial       ,Principal_Nom_fichier);
   Format_fichier_initial=Principal_Format_fichier;
 
-  Ne_pas_restaurer=Bouton_Load_ou_Save(0,Image);
+  Ne_pas_restaurer=Bouton_Load_ou_Save(0,image);
 
   if (Ne_pas_restaurer && Fichier_existe(Principal_Nom_fichier))
   {
@@ -3597,13 +3597,13 @@ void Save_picture(byte Image)
     Forme_curseur=FORME_CURSEUR_SABLIER;
     Afficher_curseur();
 
-    if (Image)
-      Sauver_image(Image);
+    if (image)
+      Sauver_image(image);
     else
     {
       Principal_Largeur_image=Brosse_Largeur;
       Principal_Hauteur_image=Brosse_Hauteur;
-      Sauver_image(Image);
+      Sauver_image(image);
       Principal_Largeur_image=Principal_Largeur_image_Backup;
       Principal_Hauteur_image=Principal_Hauteur_image_Backup;
     }
@@ -3624,7 +3624,7 @@ void Save_picture(byte Image)
            Principal_Format_fichier    =Format_fichier_initial;
   }
 
-  if (!Image)
+  if (!image)
     Swapper_infos_selecteurs_image_et_brosse();
 
   Print_nom_fichier();
@@ -5110,8 +5110,8 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
 
   // On efface de contenu précédent
   Block(Orig_X,Orig_Y,
-        Menu_Facteur_X*Fenetre_Liste_boutons_special->Largeur,
-        Menu_Facteur_Y*Fenetre_Liste_boutons_special->Hauteur,CM_Clair);
+        Menu_Facteur_X*Fenetre_Liste_boutons_special->Width,
+        Menu_Facteur_Y*Fenetre_Liste_boutons_special->Height,CM_Clair);
 
   for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
     for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
@@ -5602,12 +5602,12 @@ void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
 }
 
 
-void Afficher_etat_effet(short X, short Y, char * Libelle, byte state)
+void Afficher_etat_effet(short X, short Y, char * label, byte state)
 {
   Block(Fenetre_Pos_X+(X*Menu_Facteur_X),Fenetre_Pos_Y+(Y*Menu_Facteur_Y),
         12*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
 
-  Print_dans_fenetre(X,Y,Libelle,(state)?CM_Blanc:CM_Noir,CM_Clair);
+  Print_dans_fenetre(X,Y,label,(state)?CM_Blanc:CM_Noir,CM_Clair);
   if (state)
     Print_dans_fenetre(X+56,Y,":ON ",CM_Blanc,CM_Clair);
   else
@@ -6019,8 +6019,8 @@ void Bouton_Texte()
       Block(
         Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
         Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
-        Bouton_preview->Largeur*Menu_Facteur_X,
-        Bouton_preview->Hauteur*Menu_Facteur_Y,
+        Bouton_preview->Width*Menu_Facteur_X,
+        Bouton_preview->Height*Menu_Facteur_Y,
         CM_Clair);
       Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, antialias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
       if (Nouvelle_Brosse)
@@ -6031,16 +6031,16 @@ void Bouton_Texte()
           Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
           0,
           0,
-          Min(Bouton_preview->Largeur*Menu_Facteur_X, Nouvelle_Largeur),
-          Min(Bouton_preview->Hauteur*Menu_Facteur_Y, Nouvelle_Hauteur),
+          Min(Bouton_preview->Width*Menu_Facteur_X, Nouvelle_Largeur),
+          Min(Bouton_preview->Height*Menu_Facteur_Y, Nouvelle_Hauteur),
           Back_color,
           Nouvelle_Largeur);
       }
       UpdateRect(
         Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
         Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
-        Bouton_preview->Largeur*Menu_Facteur_X,
-        Bouton_preview->Hauteur*Menu_Facteur_Y);
+        Bouton_preview->Width*Menu_Facteur_X,
+        Bouton_preview->Height*Menu_Facteur_Y);
     }
     if (A_redessiner || A_previsionner)
     {    

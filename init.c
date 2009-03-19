@@ -120,7 +120,7 @@ void Chercher_droite(SDL_Surface *gui, int *Debut_X, int Debut_Y, byte Couleur_n
   Erreur(ERREUR_GUI_CORROMPU);
 }
 
-void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int Largeur, int Hauteur, char * Section, int Type)
+void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int width, int height, char * Section, int Type)
 {
   // Type: 0 = normal GUI element, only 4 colors allowed
   // Type: 1 = mouse cursor, 4 colors allowed + transparent
@@ -132,28 +132,28 @@ void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int Large
   byte Couleur;
 
   // Verification taille
-  if (Debut_Y+Hauteur>=gui->h || Debut_X+Largeur>=gui->w)
+  if (Debut_Y+height>=gui->h || Debut_X+width>=gui->w)
   {
     printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
-      Debut_X, Debut_Y, Hauteur, Largeur, Section);
+      Debut_X, Debut_Y, height, width, Section);
     Erreur(ERREUR_GUI_CORROMPU);
   }
 
-  for (Y=Debut_Y; Y<Debut_Y+Hauteur; Y++)
+  for (Y=Debut_Y; Y<Debut_Y+height; Y++)
   {
-    for (X=Debut_X; X<Debut_X+Largeur; X++)
+    for (X=Debut_X; X<Debut_X+width; X++)
     {
       Couleur=Sdl_Get_pixel_8(gui,X,Y);
       if (Type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
+          Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
         Erreur(ERREUR_GUI_CORROMPU);
       }
       if (Type==1 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc && Couleur != CM_Trans))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
+          Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
         Erreur(ERREUR_GUI_CORROMPU);
       }
       if (Type==2)
@@ -161,7 +161,7 @@ void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int Large
         if (Couleur != CM_Blanc && Couleur != CM_Trans)
         {
           printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            Debut_X, Debut_Y, Hauteur, Largeur, Section, X, Y, Couleur, CM_Blanc, CM_Trans);
+            Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Blanc, CM_Trans);
           Erreur(ERREUR_GUI_CORROMPU);
         }
         // Conversion en 0/1 pour les brosses monochromes internes
@@ -747,22 +747,22 @@ void Rien_du_tout(void)
 
 void Initialiser_bouton(byte   Numero,
                         word   x_offset      , word   y_offset,
-                        word   Largeur         , word   Hauteur,
-                        byte   Forme,
+                        word   width         , word   height,
+                        byte   shape,
                         fonction_action Gauche , fonction_action Droite,
                         fonction_action Desenclencher,
-                        byte   Famille)
+                        byte   family)
 {
   Bouton[Numero].Decalage_X      =x_offset;
   Bouton[Numero].Decalage_Y      =y_offset;
-  Bouton[Numero].Largeur         =Largeur-1;
-  Bouton[Numero].Hauteur         =Hauteur-1;
+  Bouton[Numero].Width         =width-1;
+  Bouton[Numero].Height         =height-1;
   Bouton[Numero].Enfonce         =0;
-  Bouton[Numero].Forme           =Forme;
+  Bouton[Numero].Shape           =shape;
   Bouton[Numero].Gauche          =Gauche;
   Bouton[Numero].Droite          =Droite;
   Bouton[Numero].Desenclencher   =Desenclencher;
-  Bouton[Numero].Famille         =Famille;
+  Bouton[Numero].Famille         =family;
 }
 
 
@@ -1514,10 +1514,10 @@ void Initialisation_des_operations(void)
 
   // Définition d'un mode:
 
-void Definir_mode_video(short  Largeur,
-                        short  Hauteur,
-                        byte   Mode,
-                        word   Fullscreen)
+void Definir_mode_video(short  width,
+                        short  height,
+                        byte   mode,
+                        word   fullscreen)
 {
   byte Supporte = 0;
 
@@ -1526,9 +1526,9 @@ void Definir_mode_video(short  Largeur,
     DEBUG("Error! Attempt to create too many videomodes. Maximum is:", MAX_MODES_VIDEO);
     return;
   }
-  if (!Fullscreen)
+  if (!fullscreen)
     Supporte = 128; // Prefere, non modifiable
-  else if (SDL_VideoModeOK(Largeur, Hauteur, 8, SDL_FULLSCREEN))
+  else if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
     Supporte = 1; // Supporte
   else
   {
@@ -1536,10 +1536,10 @@ void Definir_mode_video(short  Largeur,
     return;
   }
 
-  Mode_video[Nb_modes_video].Largeur          = Largeur;
-  Mode_video[Nb_modes_video].Hauteur          = Hauteur;
-  Mode_video[Nb_modes_video].Mode             = Mode;
-  Mode_video[Nb_modes_video].Fullscreen       = Fullscreen;
+  Mode_video[Nb_modes_video].Width          = width;
+  Mode_video[Nb_modes_video].Height          = height;
+  Mode_video[Nb_modes_video].Mode             = mode;
+  Mode_video[Nb_modes_video].Fullscreen       = fullscreen;
   Mode_video[Nb_modes_video].Etat                   = Supporte;
   Nb_modes_video ++;
 }
@@ -1551,11 +1551,11 @@ int Compare_modes_video(const void *p1, const void *p2)
   const struct S_Mode_video *Mode2 = (const struct S_Mode_video *)p2;
 
   // Tris par largeur
-  if(Mode1->Largeur - Mode2->Largeur)
-    return Mode1->Largeur - Mode2->Largeur;
+  if(Mode1->Width - Mode2->Width)
+    return Mode1->Width - Mode2->Width;
 
   // Tri par hauteur
-  return Mode1->Hauteur - Mode2->Hauteur;
+  return Mode1->Height - Mode2->Height;
 }
 
 
@@ -1636,8 +1636,8 @@ void Definition_des_modes_video(void)
     {
       int Indice2;
       for (Indice2=1; Indice2 < Nb_modes_video; Indice2++)
-        if (Modes[Indice]->w == Mode_video[Indice2].Largeur &&
-            Modes[Indice]->h == Mode_video[Indice2].Hauteur)
+        if (Modes[Indice]->w == Mode_video[Indice2].Width &&
+            Modes[Indice]->h == Mode_video[Indice2].Height)
         {
           // Mode déja prévu: ok
           break;
@@ -1774,14 +1774,14 @@ int Charger_CFG(int Tout_charger)
         for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Mode_video)); Indice++)
         {
           if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
-              !read_word_le(Handle, &CFG_Mode_video.Largeur) ||
-              !read_word_le(Handle, &CFG_Mode_video.Hauteur) )
+              !read_word_le(Handle, &CFG_Mode_video.Width) ||
+              !read_word_le(Handle, &CFG_Mode_video.Height) )
             goto Erreur_lecture_config;
 
           for (Indice2=1; Indice2<Nb_modes_video; Indice2++)
           {
-            if (Mode_video[Indice2].Largeur==CFG_Mode_video.Largeur &&
-                Mode_video[Indice2].Hauteur==CFG_Mode_video.Hauteur)
+            if (Mode_video[Indice2].Width==CFG_Mode_video.Width &&
+                Mode_video[Indice2].Height==CFG_Mode_video.Height)
             {
               // On ne prend le paramètre utilisateur que si la résolution
               // est effectivement supportée par SDL
@@ -1804,14 +1804,14 @@ int Charger_CFG(int Tout_charger)
           {
             for (Indice2=0; Indice2<512; Indice2++)
             {
-              if (! read_word_le(Handle, &Shade_Liste[Indice].Liste[Indice2]))
+              if (! read_word_le(Handle, &Shade_Liste[Indice].List[Indice2]))
                 goto Erreur_lecture_config;
             }
             if (! read_byte(Handle, &Shade_Liste[Indice].Pas) ||
               ! read_byte(Handle, &Shade_Liste[Indice].Mode) )
             goto Erreur_lecture_config;
           }
-          Liste2tables(Shade_Liste[Shade_Actuel].Liste,
+          Liste2tables(Shade_Liste[Shade_Actuel].List,
             Shade_Liste[Shade_Actuel].Pas,
             Shade_Liste[Shade_Actuel].Mode,
             Shade_Table_gauche,Shade_Table_droite);
@@ -2025,12 +2025,12 @@ int Sauver_CFG(void)
     if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
     {
       CFG_Mode_video.Etat   =Mode_video[Indice].Etat;
-      CFG_Mode_video.Largeur=Mode_video[Indice].Largeur;
-      CFG_Mode_video.Hauteur=Mode_video[Indice].Hauteur;
+      CFG_Mode_video.Width=Mode_video[Indice].Width;
+      CFG_Mode_video.Height=Mode_video[Indice].Height;
 
       if (!write_byte(Handle, CFG_Mode_video.Etat) ||
-        !write_word_le(Handle, CFG_Mode_video.Largeur) ||
-        !write_word_le(Handle, CFG_Mode_video.Hauteur) )
+        !write_word_le(Handle, CFG_Mode_video.Width) ||
+        !write_word_le(Handle, CFG_Mode_video.Height) )
         goto Erreur_sauvegarde_config;
     }
 
@@ -2046,7 +2046,7 @@ int Sauver_CFG(void)
   {
     for (Indice2=0; Indice2<512; Indice2++)
     {
-      if (! write_word_le(Handle, Shade_Liste[Indice].Liste[Indice2]))
+      if (! write_word_le(Handle, Shade_Liste[Indice].List[Indice2]))
         goto Erreur_sauvegarde_config;
     }
     if (! write_byte(Handle, Shade_Liste[Indice].Pas) ||
@@ -2196,14 +2196,14 @@ void Config_par_defaut(void)
     Shade_Liste[Indice].Pas=1;
     Shade_Liste[Indice].Mode=0;
     for (Indice2=0; Indice2<512; Indice2++)
-      Shade_Liste[Indice].Liste[Indice2]=256;
+      Shade_Liste[Indice].List[Indice2]=256;
   }
   // Shade par défaut pour la palette standard
   for (Indice=0; Indice<7; Indice++)
     for (Indice2=0; Indice2<16; Indice2++)
-      Shade_Liste[0].Liste[Indice*17+Indice2]=Indice*16+Indice2+16;
+      Shade_Liste[0].List[Indice*17+Indice2]=Indice*16+Indice2+16;
 
-  Liste2tables(Shade_Liste[Shade_Actuel].Liste,
+  Liste2tables(Shade_Liste[Shade_Actuel].List,
             Shade_Liste[Shade_Actuel].Pas,
             Shade_Liste[Shade_Actuel].Mode,
             Shade_Table_gauche,Shade_Table_droite);

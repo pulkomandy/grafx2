@@ -41,30 +41,30 @@ byte Lit_Pixel_Wide (word X,word Y)
   return *( Ecran + Y * 2 * Largeur_ecran + X * 2);
 }
 
-void Block_Wide (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur)
+void Block_Wide (word Debut_X,word Debut_Y,word width,word height,byte Couleur)
 /* On affiche un rectangle de la couleur donnée */
 {
   SDL_Rect rectangle;
   rectangle.x=Debut_X*2;
   rectangle.y=Debut_Y;
-  rectangle.w=Largeur*2;
-  rectangle.h=Hauteur;
+  rectangle.w=width*2;
+  rectangle.h=height;
   SDL_FillRect(Ecran_SDL,&rectangle,Couleur);
 }
 
-void Afficher_partie_de_l_ecran_Wide (word Largeur,word Hauteur,word Largeur_image)
+void Afficher_partie_de_l_ecran_Wide (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
   byte* Dest=Ecran; //On va se mettre en 0,0 dans l'écran (Dest)
-  byte* Src=Principal_Decalage_Y*Largeur_image+Principal_Decalage_X+Principal_Ecran; //Coords de départ ds la source (Src)
+  byte* Src=Principal_Decalage_Y*image_width+Principal_Decalage_X+Principal_Ecran; //Coords de départ ds la source (Src)
   int y;
   int dy;
 
-  for(y=Hauteur;y!=0;y--)
+  for(y=height;y!=0;y--)
   // Pour chaque ligne
   {
     // On fait une copie de la ligne
-    for (dy=Largeur;dy>0;dy--)
+    for (dy=width;dy>0;dy--)
     {
       *(Dest+1)=*Dest=*Src;
       Src++;
@@ -72,10 +72,10 @@ void Afficher_partie_de_l_ecran_Wide (word Largeur,word Hauteur,word Largeur_ima
     }
 
     // On passe à la ligne suivante
-    Src+=Largeur_image-Largeur;
-    Dest+=(Largeur_ecran - Largeur)*2;
+    Src+=image_width-width;
+    Dest+=(Largeur_ecran - width)*2;
   }
-  //UpdateRect(0,0,Largeur,Hauteur);
+  //UpdateRect(0,0,width,height);
 }
 
 void Pixel_Preview_Normal_Wide (word X,word Y,byte Couleur)
@@ -98,40 +98,40 @@ void Pixel_Preview_Loupe_Wide  (word X,word Y,byte Couleur)
           && X >= Limite_Gauche_Zoom && X <= Limite_visible_Droite_Zoom)
   {
     // On est dedans
-    int Hauteur;
+    int height;
     int Y_Zoom = Table_mul_facteur_zoom[Y-Loupe_Decalage_Y];
 
     if (Menu_Ordonnee - Y_Zoom < Loupe_Facteur)
       // On ne doit dessiner qu'un morceau du pixel
       // sinon on dépasse sur le menu
-      Hauteur = Menu_Ordonnee - Y_Zoom;
+      height = Menu_Ordonnee - Y_Zoom;
     else
-      Hauteur = Loupe_Facteur;
+      height = Loupe_Facteur;
 
     Block_Wide(
       Table_mul_facteur_zoom[X-Loupe_Decalage_X]+Principal_X_Zoom, 
-      Y_Zoom, Loupe_Facteur, Hauteur, Couleur
+      Y_Zoom, Loupe_Facteur, height, Couleur
       );
   }
 }
 
-void Ligne_horizontale_XOR_Wide(word Pos_X,word Pos_Y,word Largeur)
+void Ligne_horizontale_XOR_Wide(word Pos_X,word Pos_Y,word width)
 {
   //On calcule la valeur initiale de Dest:
   byte* Dest=Pos_Y*2*Largeur_ecran+Pos_X*2+Ecran;
 
   int X;
 
-  for (X=0;X<Largeur*2;X+=2)
+  for (X=0;X<width*2;X+=2)
     *(Dest+X+1)=*(Dest+X)=~*(Dest+X);
 }
 
-void Ligne_verticale_XOR_Wide(word Pos_X,word Pos_Y,word Hauteur)
+void Ligne_verticale_XOR_Wide(word Pos_X,word Pos_Y,word height)
 {
   int i;
   byte color;
   byte *Dest=Ecran+Pos_X*2+Pos_Y*Largeur_ecran*2;
-  for (i=Hauteur;i>0;i--)
+  for (i=height;i>0;i--)
   {
     color=~*Dest;
     *Dest=color;
@@ -140,7 +140,7 @@ void Ligne_verticale_XOR_Wide(word Pos_X,word Pos_Y,word Hauteur)
   }
 }
 
-void Display_brush_Color_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
+void Display_brush_Color_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse)
 {
   // Dest = Position à l'écran
   byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X * 2;
@@ -150,10 +150,10 @@ void Display_brush_Color_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,
   word x,y;
 
   // Pour chaque ligne
-  for(y = Hauteur;y > 0; y--)
+  for(y = height;y > 0; y--)
   {
     // Pour chaque pixel
-    for(x = Largeur;x > 0; x--)
+    for(x = width;x > 0; x--)
     {
       // On vérifie que ce n'est pas la transparence
       if(*Src != Couleur_de_transparence)
@@ -167,14 +167,14 @@ void Display_brush_Color_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,
     }
 
     // On passe à la ligne suivante
-    Dest = Dest + (Largeur_ecran - Largeur)*2;
-    Src = Src + Largeur_brosse - Largeur;
+    Dest = Dest + (Largeur_ecran - width)*2;
+    Src = Src + Largeur_brosse - width;
   }
-  UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
+  UpdateRect(Pos_X,Pos_Y,width,height);
 }
 
 void Display_brush_Mono_Wide(word Pos_X, word Pos_Y,
-        word x_offset, word y_offset, word Largeur, word Hauteur,
+        word x_offset, word y_offset, word width, word height,
         byte Couleur_de_transparence, byte Couleur, word Largeur_brosse)
 /* On affiche la brosse en monochrome */
 {
@@ -184,10 +184,10 @@ void Display_brush_Mono_Wide(word Pos_X, word Pos_Y,
       // la brosse
   int x,y;
 
-  for(y=Hauteur;y!=0;y--)
+  for(y=height;y!=0;y--)
   //Pour chaque ligne
   {
-    for(x=Largeur;x!=0;x--)
+    for(x=width;x!=0;x--)
     //Pour chaque pixel
     {
       if (*Src!=Couleur_de_transparence)
@@ -199,23 +199,23 @@ void Display_brush_Mono_Wide(word Pos_X, word Pos_Y,
     }
 
     // On passe à la ligne suivante
-    Src+=Largeur_brosse-Largeur;
-    Dest+=(Largeur_ecran-Largeur)*2;
+    Src+=Largeur_brosse-width;
+    Dest+=(Largeur_ecran-width)*2;
   }
-  UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
+  UpdateRect(Pos_X,Pos_Y,width,height);
 }
 
-void Clear_brush_Wide(word Pos_X,word Pos_Y,__attribute__((unused)) word x_offset,__attribute__((unused)) word y_offset,word Largeur,word Hauteur,__attribute__((unused))byte Couleur_de_transparence,word Largeur_image)
+void Clear_brush_Wide(word Pos_X,word Pos_Y,__attribute__((unused)) word x_offset,__attribute__((unused)) word y_offset,word width,word height,__attribute__((unused))byte Couleur_de_transparence,word image_width)
 {
   byte* Dest=Ecran+Pos_X*2+Pos_Y*2*Largeur_ecran; //On va se mettre en 0,0 dans l'écran (Dest)
-  byte* Src = ( Pos_Y + Principal_Decalage_Y ) * Largeur_image + Pos_X + Principal_Decalage_X + Principal_Ecran; //Coords de départ ds la source (Src)
+  byte* Src = ( Pos_Y + Principal_Decalage_Y ) * image_width + Pos_X + Principal_Decalage_X + Principal_Ecran; //Coords de départ ds la source (Src)
   int y;
   int x;
 
-  for(y=Hauteur;y!=0;y--)
+  for(y=height;y!=0;y--)
   // Pour chaque ligne
   {
-    for(x=Largeur;x!=0;x--)
+    for(x=width;x!=0;x--)
     //Pour chaque pixel
     {
       *(Dest+1)=*Dest=*Src;
@@ -226,14 +226,14 @@ void Clear_brush_Wide(word Pos_X,word Pos_Y,__attribute__((unused)) word x_offse
     }
 
     // On passe à la ligne suivante
-    Src+=Largeur_image-Largeur;
-    Dest+=(Largeur_ecran-Largeur)*2;
+    Src+=image_width-width;
+    Dest+=(Largeur_ecran-width)*2;
   }
-  UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
+  UpdateRect(Pos_X,Pos_Y,width,height);
 }
 
 // Affiche une brosse (arbitraire) à l'écran
-void Affiche_brosse_Wide(byte * brush, word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse)
+void Affiche_brosse_Wide(byte * brush, word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse)
 {
   // Dest = Position à l'écran
   byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X * 2;
@@ -243,10 +243,10 @@ void Affiche_brosse_Wide(byte * brush, word Pos_X,word Pos_Y,word x_offset,word 
   word x,y;
   
   // Pour chaque ligne
-  for(y = Hauteur;y > 0; y--)
+  for(y = height;y > 0; y--)
   {
     // Pour chaque pixel
-    for(x = Largeur;x > 0; x--)
+    for(x = width;x > 0; x--)
     {
       // On vérifie que ce n'est pas la transparence
       if(*Src != Couleur_de_transparence)
@@ -259,57 +259,57 @@ void Affiche_brosse_Wide(byte * brush, word Pos_X,word Pos_Y,word x_offset,word 
     }
 
     // On passe à la ligne suivante
-    Dest = Dest + (Largeur_ecran - Largeur)*2;
-    Src = Src + Largeur_brosse - Largeur;
+    Dest = Dest + (Largeur_ecran - width)*2;
+    Src = Src + Largeur_brosse - width;
   }
 }
 
-void Remap_screen_Wide(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion)
+void Remap_screen_Wide(word Pos_X,word Pos_Y,word width,word height,byte * Table_de_conversion)
 {
   // Dest = coords a l'écran
   byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X * 2;
   int x,y;
 
   // Pour chaque ligne
-  for(y=Hauteur;y>0;y--)
+  for(y=height;y>0;y--)
   {
     // Pour chaque pixel
-    for(x=Largeur;x>0;x--)
+    for(x=width;x>0;x--)
     {
       *(Dest+1) = *Dest = Table_de_conversion[*Dest];
       Dest +=2;
     }
 
-    Dest = Dest + (Largeur_ecran - Largeur)*2;
+    Dest = Dest + (Largeur_ecran - width)*2;
   }
 
-  UpdateRect(Pos_X,Pos_Y,Largeur,Hauteur);
+  UpdateRect(Pos_X,Pos_Y,width,height);
 }
 
-void Afficher_une_ligne_ecran_fast_Wide(word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
+void Afficher_une_ligne_ecran_fast_Wide(word Pos_X,word Pos_Y,word width,byte * line)
 /* On affiche toute une ligne de pixels telle quelle. */
 /* Utilisée si le buffer contient déja des pixel doublés. */
 {
-  memcpy(Ecran+Pos_X*2+Pos_Y*2*Largeur_ecran,Ligne,Largeur*2);
+  memcpy(Ecran+Pos_X*2+Pos_Y*2*Largeur_ecran,line,width*2);
 }
 
-void Afficher_une_ligne_ecran_Wide(word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
+void Afficher_une_ligne_ecran_Wide(word Pos_X,word Pos_Y,word width,byte * line)
 /* On affiche une ligne de pixels en les doublant. */
 {
   int x;
   byte *Dest;
   Dest=Ecran+Pos_X*2+Pos_Y*2*Largeur_ecran;
-  for(x=Largeur;x>0;x--)
+  for(x=width;x>0;x--)
   {
-    *Dest=*Ligne;
+    *Dest=*line;
     Dest++;
-    *Dest=*Ligne;
+    *Dest=*line;
     Dest++;
-    Ligne++;
+    line++;
   }
 }
 void Afficher_une_ligne_transparente_mono_a_l_ecran_Wide(
-        word Pos_X, word Pos_Y, word Largeur, byte* Ligne, 
+        word Pos_X, word Pos_Y, word width, byte* line, 
         byte Couleur_transparence, byte Couleur)
 // Affiche une ligne à l'écran avec une couleur + transparence.
 // Utilisé par les brosses en mode zoom
@@ -317,29 +317,29 @@ void Afficher_une_ligne_transparente_mono_a_l_ecran_Wide(
   byte* Dest = Ecran+ Pos_Y*2 * Largeur_ecran + Pos_X*2;
   int x;
   // Pour chaque pixel
-  for(x=0;x<Largeur;x++)
+  for(x=0;x<width;x++)
   {
-    if (Couleur_transparence!=*Ligne)
+    if (Couleur_transparence!=*line)
     {
       *Dest = Couleur;
       *(Dest+1) = Couleur;
     }
-    Ligne ++; // Pixel suivant
+    line ++; // Pixel suivant
     Dest+=2;
   }
 }
 
-void Lire_une_ligne_ecran_Wide(word Pos_X,word Pos_Y,word Largeur,byte * Ligne)
+void Lire_une_ligne_ecran_Wide(word Pos_X,word Pos_Y,word width,byte * line)
 {
-  memcpy(Ligne,Largeur_ecran * 2 * Pos_Y + Pos_X * 2 + Ecran,Largeur*2);
+  memcpy(line,Largeur_ecran * 2 * Pos_Y + Pos_X * 2 + Ecran,width*2);
 }
 
 void Afficher_partie_de_l_ecran_zoomee_Wide(
-        word Largeur, // Largeur non zoomée
-        word Hauteur, // Hauteur zoomée
-        word Largeur_image,byte * Buffer)
+        word width, // width non zoomée
+        word height, // height zoomée
+        word image_width,byte * Buffer)
 {
-  byte* Src = Principal_Ecran + Loupe_Decalage_Y * Largeur_image 
+  byte* Src = Principal_Ecran + Loupe_Decalage_Y * image_width 
                       + Loupe_Decalage_X;
   int y = 0; // Ligne en cours de traitement
 
@@ -349,40 +349,40 @@ void Afficher_partie_de_l_ecran_zoomee_Wide(
     int x;
     
     // On éclate la ligne
-    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur*2,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur*2,width);
     // On l'affiche Facteur fois, sur des lignes consécutives
     x = Loupe_Facteur;
     // Pour chaque ligne
     do{
       // On affiche la ligne zoomée
       Afficher_une_ligne_ecran_fast_Wide(
-        Principal_X_Zoom, y, Largeur*Loupe_Facteur,
+        Principal_X_Zoom, y, width*Loupe_Facteur,
         Buffer
       );
       // On passe à la suivante
       y++;
-      if(y==Hauteur)
+      if(y==height)
       {
         UpdateRect(Principal_X_Zoom,0,
-          Largeur*Loupe_Facteur,Hauteur);
+          width*Loupe_Facteur,height);
         return;
       }
       x--;
     }while (x > 0);
-    Src += Largeur_image;
+    Src += image_width;
   }
 // ATTENTION on n'arrive jamais ici !
 }
 
-void Afficher_une_ligne_transparente_a_l_ecran_Wide(word Pos_X,word Pos_Y,word Largeur,byte* Ligne,byte Couleur_transparence)
+void Afficher_une_ligne_transparente_a_l_ecran_Wide(word Pos_X,word Pos_Y,word width,byte* line,byte Couleur_transparence)
 {
-  byte* Src = Ligne;
+  byte* Src = line;
   byte* Dest = Ecran + Pos_Y * 2 * Largeur_ecran + Pos_X * 2;
 
   word x;
 
   // Pour chaque pixel de la ligne
-  for(x = Largeur;x > 0;x--)
+  for(x = width;x > 0;x--)
   {
     if(*Src!=Couleur_transparence)
     {
@@ -397,9 +397,9 @@ void Afficher_une_ligne_transparente_a_l_ecran_Wide(word Pos_X,word Pos_Y,word L
 // Affiche une partie de la brosse couleur zoomée
 void Display_brush_Color_zoom_Wide(word Pos_X,word Pos_Y,
         word x_offset,word y_offset,
-        word Largeur, // Largeur non zoomée
+        word width, // width non zoomée
         word Pos_Y_Fin,byte Couleur_de_transparence,
-        word Largeur_brosse, // Largeur réelle de la brosse
+        word Largeur_brosse, // width réelle de la brosse
         byte * Buffer)
 {
   byte* Src = Brosse+y_offset*Largeur_brosse + x_offset;
@@ -409,11 +409,11 @@ void Display_brush_Color_zoom_Wide(word Pos_X,word Pos_Y,
   // Pour chaque ligne
   while(1)
   {
-    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,width);
     // On affiche facteur fois la ligne zoomée
     for(bx=Loupe_Facteur;bx>0;bx--)
     {
-      Afficher_une_ligne_transparente_a_l_ecran_Wide(Pos_X,y,Largeur*Loupe_Facteur,Buffer,Couleur_de_transparence);
+      Afficher_une_ligne_transparente_a_l_ecran_Wide(Pos_X,y,width*Loupe_Facteur,Buffer,Couleur_de_transparence);
       y++;
       if(y==Pos_Y_Fin)
       {
@@ -427,10 +427,10 @@ void Display_brush_Color_zoom_Wide(word Pos_X,word Pos_Y,
 
 void Display_brush_Mono_zoom_Wide(word Pos_X, word Pos_Y,
         word x_offset, word y_offset, 
-        word Largeur, // Largeur non zoomée 
+        word width, // width non zoomée 
         word Pos_Y_Fin,
         byte Couleur_de_transparence, byte Couleur, 
-        word Largeur_brosse, // Largeur réelle de la brosse
+        word Largeur_brosse, // width réelle de la brosse
         byte * Buffer
 )
 
@@ -444,7 +444,7 @@ void Display_brush_Mono_zoom_Wide(word Pos_X, word Pos_Y,
     int BX;
     // Src = Ligne originale
     // On éclate la ligne
-    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur,width);
 
     // On affiche la ligne Facteur fois à l'écran (sur des
     // lignes consécutives)
@@ -455,7 +455,7 @@ void Display_brush_Mono_zoom_Wide(word Pos_X, word Pos_Y,
     {
       // On affiche la ligne zoomée
       Afficher_une_ligne_transparente_mono_a_l_ecran_Wide(
-        Pos_X, y, Largeur * Loupe_Facteur, 
+        Pos_X, y, width * Loupe_Facteur, 
         Buffer, Couleur_de_transparence, Couleur
       );
       // On passe à la ligne suivante
@@ -464,7 +464,7 @@ void Display_brush_Mono_zoom_Wide(word Pos_X, word Pos_Y,
       if(y == Pos_Y_Fin)
       {
         UpdateRect( Pos_X, Pos_Y,
-          Largeur * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
+          width * Loupe_Facteur, Pos_Y_Fin - Pos_Y );
         return;
       }
       BX --;
@@ -476,36 +476,36 @@ void Display_brush_Mono_zoom_Wide(word Pos_X, word Pos_Y,
   }
 }
 
-void Clear_brush_zoom_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,__attribute__((unused)) byte Couleur_de_transparence,word Largeur_image,byte * Buffer)
+void Clear_brush_zoom_Wide(word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word Pos_Y_Fin,__attribute__((unused)) byte Couleur_de_transparence,word image_width,byte * Buffer)
 {
   // En fait on va recopier l'image non zoomée dans la partie zoomée !
-  byte* Src = Principal_Ecran + y_offset * Largeur_image + x_offset;
+  byte* Src = Principal_Ecran + y_offset * image_width + x_offset;
   int y = Pos_Y;
   int bx;
 
   // Pour chaque ligne à zoomer
   while(1){
-    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur*2,Largeur);
+    Zoomer_une_ligne(Src,Buffer,Loupe_Facteur*2,width);
 
     bx=Loupe_Facteur;
 
     // Pour chaque ligne
     do{
       Afficher_une_ligne_ecran_fast_Wide(Pos_X,y,
-        Largeur * Loupe_Facteur,Buffer);
+        width * Loupe_Facteur,Buffer);
 
       // Ligne suivante
       y++;
       if(y==Pos_Y_Fin)
       {
         UpdateRect(Pos_X,Pos_Y,
-          Largeur*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
+          width*Loupe_Facteur,Pos_Y_Fin-Pos_Y);
         return;
       }
       bx--;
     }while(bx!=0);
 
-    Src+= Largeur_image;
+    Src+= image_width;
   }
 }
 

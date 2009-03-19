@@ -18,7 +18,7 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Modifier_pinceau(int Largeur, int Hauteur);
+void Modifier_pinceau(int width, int height);
 void Retrecir_pinceau(void);
 void Grossir_pinceau(void);
 

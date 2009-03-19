@@ -150,7 +150,7 @@ void Fenetre_controle(int NumeroControle)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*5),
         Fenetre_Pos_Y+(Menu_Facteur_Y*16),
         Menu_Facteur_X*292,Menu_Facteur_Y*11,CM_Noir);
-  Print_dans_fenetre(7,18,ConfigTouche[IndiceConfig].Libelle,CM_Blanc,CM_Noir);
+  Print_dans_fenetre(7,18,ConfigTouche[IndiceConfig].Label,CM_Blanc,CM_Noir);
 
   // Zone de description
   Fenetre_Afficher_cadre_creux(5,68,292,37);
@@ -244,10 +244,10 @@ void Afficher_aide(void)
   short  Pos_Reel_X;
   short  Pos_Reel_Y;
   byte * char_pixel;
-  short  Largeur;             // Largeur physique d'une ligne de texte
+  short  width;             // Largeur physique d'une ligne de texte
   char   TypeLigne;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
-  const char * Ligne;
+  const char * line;
   char   Buffer[45];          // Buffer texte utilisé pour formater les noms de 
                               // raccourcis clavier
   short  Position_lien=0;     // Position du premier caractère "variable"
@@ -271,64 +271,64 @@ void Afficher_aide(void)
       break;
     }
     // On affiche la ligne
-    Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Text;
+    line = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Text;
     TypeLigne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Line_type;
     // Si c'est une sous-ligne de titre, on utilise le texte de la ligne précédente
     if (TypeLigne == '-' && (Ligne_de_depart + Indice_de_ligne > 0))
-      Ligne = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1].Text;
+      line = Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne - 1].Text;
     else if (TypeLigne == 'K')
     {
       const char *Lien;
-      Position_lien = strstr(Ligne,"%s") - Ligne;
+      Position_lien = strstr(line,"%s") - line;
       Lien=Valeur_Raccourci_Clavier(Table_d_aide[Section_d_aide_en_cours].Table_aide[Ligne_de_depart + Indice_de_ligne].Line_parameter);
       Taille_lien=strlen(Lien);
-      snprintf(Buffer, 44, Ligne, Lien);
-      if (strlen(Ligne)+Taille_lien-2>44)
+      snprintf(Buffer, 44, line, Lien);
+      if (strlen(line)+Taille_lien-2>44)
       {
         Buffer[43]=CARACTERE_SUSPENSION;
         Buffer[44]='\0';
       }
-      Ligne = Buffer;
+      line = Buffer;
     }
     
     // Calcul de la taille
-    Largeur=strlen(Ligne);
+    width=strlen(line);
     // Les lignes de titres prennent plus de place
     if (TypeLigne == 'T' || TypeLigne == '-')
-      Largeur = Largeur*2;
+      width = width*2;
 
     // Pour chaque ligne dans la fenêtre:
     for (Y=0;Y<8;Y++)
     {
       Position_X=0;
       // On crée une nouvelle ligne à splotcher
-      for (Indice_de_caractere=0;Indice_de_caractere<Largeur;Indice_de_caractere++)
+      for (Indice_de_caractere=0;Indice_de_caractere<width;Indice_de_caractere++)
       {
         // Recherche du caractère dans les fontes de l'aide.
         // Ligne titre : Si l'indice est impair on dessine le quart de caractère
         // qui va a gauche, sinon celui qui va a droite.
         if (TypeLigne=='T')
         {
-          if (Ligne[Indice_de_caractere/2]>'_' || Ligne[Indice_de_caractere/2]<' ')
+          if (line[Indice_de_caractere/2]>'_' || line[Indice_de_caractere/2]<' ')
             char_pixel=&(Fonte_help_norm['!'][0][0]); // Caractère pas géré
           else if (Indice_de_caractere & 1)
-            char_pixel=&(Fonte_help_t2[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+            char_pixel=&(Fonte_help_t2[(unsigned char)(line[Indice_de_caractere/2])-' '][0][0]);
           else
-            char_pixel=&(Fonte_help_t1[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+            char_pixel=&(Fonte_help_t1[(unsigned char)(line[Indice_de_caractere/2])-' '][0][0]);
         }
         else if (TypeLigne=='-')
         {
-          if (Ligne[Indice_de_caractere/2]>'_' || Ligne[Indice_de_caractere/2]<' ')
+          if (line[Indice_de_caractere/2]>'_' || line[Indice_de_caractere/2]<' ')
             char_pixel=&(Fonte_help_norm['!'][0][0]); // Caractère pas géré
           else if (Indice_de_caractere & 1)
-            char_pixel=&(Fonte_help_t4[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+            char_pixel=&(Fonte_help_t4[(unsigned char)(line[Indice_de_caractere/2])-' '][0][0]);
           else
-            char_pixel=&(Fonte_help_t3[(unsigned char)(Ligne[Indice_de_caractere/2])-' '][0][0]);
+            char_pixel=&(Fonte_help_t3[(unsigned char)(line[Indice_de_caractere/2])-' '][0][0]);
         }
         else if (TypeLigne=='S')
-          char_pixel=&(Fonte_help_bold[(unsigned char)(Ligne[Indice_de_caractere])][0][0]);
+          char_pixel=&(Fonte_help_bold[(unsigned char)(line[Indice_de_caractere])][0][0]);
         else if (TypeLigne=='N' || TypeLigne=='K')
-          char_pixel=&(Fonte_help_norm[(unsigned char)(Ligne[Indice_de_caractere])][0][0]);
+          char_pixel=&(Fonte_help_norm[(unsigned char)(line[Indice_de_caractere])][0][0]);
         else
           char_pixel=&(Fonte_help_norm['!'][0][0]); // Un garde-fou en cas de probleme
           
@@ -355,13 +355,13 @@ void Afficher_aide(void)
       }
       // On la splotche
       for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
-        Afficher_ligne_fast(Pos_Reel_X,Pos_Reel_Y++,Largeur*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
+        Afficher_ligne_fast(Pos_Reel_X,Pos_Reel_Y++,width*Menu_Facteur_X*6,Buffer_de_ligne_horizontale);
     }
 
     // On efface la fin de la ligne:
-    Block (Pos_Reel_X+Largeur*Menu_Facteur_X*6,
+    Block (Pos_Reel_X+width*Menu_Facteur_X*6,
            Pos_Reel_Y-(8*Menu_Facteur_Y),
-           ((44*6*Menu_Facteur_X)-Largeur*Menu_Facteur_X*6)+1,
+           ((44*6*Menu_Facteur_X)-width*Menu_Facteur_X*6)+1,
            // 44 = Nb max de char (+1 pour éviter les plantages en mode X
            // causés par une largeur = 0)
            Menu_Facteur_Y<<3,
@@ -463,16 +463,16 @@ void Fenetre_aide(int Section, const char *Sous_section)
         break;
       case  7: // Zone de texte
         {
-          int Ligne = ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8;
+          int line = ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8;
           Attendre_fin_de_click();
-          if (Ligne == ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8)
+          if (line == ((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y - 18)/8)
           {
-            if (Position_d_aide_en_cours+Ligne<Nb_lignes)
+            if (Position_d_aide_en_cours+line<Nb_lignes)
             {
-              switch (Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].Line_type)
+              switch (Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+line].Line_type)
               {
                 case 'K':
-                  Fenetre_controle(Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+Ligne].Line_parameter);
+                  Fenetre_controle(Table_d_aide[Section_d_aide_en_cours].Table_aide[Position_d_aide_en_cours+line].Line_parameter);
                 break;
                 // Ici on peut gérer un cas 'lien hypertexte'
                 default:

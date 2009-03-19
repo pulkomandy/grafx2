@@ -37,56 +37,56 @@
 
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image
-void Calculer_dimensions_clipees(short * X,short * Y,short * Largeur,short * Hauteur)
+void Calculer_dimensions_clipees(short * X,short * Y,short * width,short * height)
 {
   if ((*X)<Limite_Gauche)
   {
-    (*Largeur)-=(Limite_Gauche-(*X));
+    (*width)-=(Limite_Gauche-(*X));
     (*X)=Limite_Gauche;
   }
 
-  if (((*X)+(*Largeur))>(Limite_Droite+1))
+  if (((*X)+(*width))>(Limite_Droite+1))
   {
-    (*Largeur)=(Limite_Droite-(*X))+1;
+    (*width)=(Limite_Droite-(*X))+1;
   }
 
   if ((*Y)<Limite_Haut)
   {
-    (*Hauteur)-=(Limite_Haut-(*Y));
+    (*height)-=(Limite_Haut-(*Y));
     (*Y)=Limite_Haut;
   }
 
-  if (((*Y)+(*Hauteur))>(Limite_Bas+1))
+  if (((*Y)+(*height))>(Limite_Bas+1))
   {
-    (*Hauteur)=(Limite_Bas-(*Y))+1;
+    (*height)=(Limite_Bas-(*Y))+1;
   }
 }
 
   // -- Calcul de redimensionnement du pinceau pour éviter les débordements
   //    de l'écran zoomé et de l'image --
 
-void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * Largeur,short * Hauteur)
+void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * width,short * height)
 {
   if ((*X)<Limite_Gauche_Zoom)
   {
-    (*Largeur)-=(Limite_Gauche_Zoom-(*X));
+    (*width)-=(Limite_Gauche_Zoom-(*X));
     (*X)=Limite_Gauche_Zoom;
   }
 
-  if (((*X)+(*Largeur))>(Limite_Droite_Zoom+1))
+  if (((*X)+(*width))>(Limite_Droite_Zoom+1))
   {
-    (*Largeur)=(Limite_Droite_Zoom-(*X))+1;
+    (*width)=(Limite_Droite_Zoom-(*X))+1;
   }
 
   if ((*Y)<Limite_Haut_Zoom)
   {
-    (*Hauteur)-=(Limite_Haut_Zoom-(*Y));
+    (*height)-=(Limite_Haut_Zoom-(*Y));
     (*Y)=Limite_Haut_Zoom;
   }
 
-  if (((*Y)+(*Hauteur))>(Limite_Bas_Zoom+1))
+  if (((*Y)+(*height))>(Limite_Bas_Zoom+1))
   {
-    (*Hauteur)=(Limite_Bas_Zoom-(*Y))+1;
+    (*height)=(Limite_Bas_Zoom-(*Y))+1;
   }
 }
 
@@ -102,9 +102,9 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         // affiche la brosse/pinceau
   short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'écran selon laquelle on affiche la
+  short width; // width dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la
+  short height; // height dans l'écran selon laquelle on affiche la
         // brosse/pinceau
   short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
@@ -142,51 +142,51 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
 
       Debut_X=X-Brosse_Decalage_X;
       Debut_Y=Y-Brosse_Decalage_Y;
-      Largeur=Brosse_Largeur;
-      Hauteur=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
-      if (Largeur<=0 || Hauteur<=0)
+      width=Brosse_Largeur;
+      height=Brosse_Hauteur;
+      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
+      if (width<=0 || height<=0)
         break;
       Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+Largeur;
-      Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+      Fin_Compteur_X=Debut_Compteur_X+width;
+      Fin_Compteur_Y=Debut_Compteur_Y+height;
 
       if (Preview)
       {
-        if ( (Largeur>0) && (Hauteur>0) )
+        if ( (width>0) && (height>0) )
           Display_brush_Color(
                 Debut_X-Principal_Decalage_X,
                 Debut_Y-Principal_Decalage_Y,
                 Debut_Compteur_X,
                 Debut_Compteur_Y,
-                Largeur,
-                Hauteur,
+                width,
+                height,
                 Back_color,
                 Brosse_Largeur
           );
 
         if (Loupe_Mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,
-                &Hauteur
+          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,
+                &height
           );
 
           Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
           Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
 
-          if ( (Largeur>0) && (Hauteur>0) )
+          if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
-            if (Hauteur>Menu_Ordonnee)
-              Hauteur=Menu_Ordonnee;
+            height=Debut_Y+(height*Loupe_Facteur);
+            if (height>Menu_Ordonnee)
+              height=Menu_Ordonnee;
 
             Display_brush_Color_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
                                      Debut_Compteur_X,Debut_Compteur_Y,
-                                     Largeur,Hauteur,Back_color,
+                                     width,height,Back_color,
                                      Brosse_Largeur,
                                      Buffer_de_ligne_horizontale);
           }
@@ -201,16 +201,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         {
           if (Smear_Debut)
           {
-            if ((Largeur>0) && (Hauteur>0))
+            if ((width>0) && (height>0))
             {
               Copier_une_partie_d_image_dans_une_autre(
-                Principal_Ecran, Debut_X, Debut_Y, Largeur, Hauteur,
+                Principal_Ecran, Debut_X, Debut_Y, width, height,
                 Principal_Largeur_image, Smear_Brosse,
                 Debut_Compteur_X, Debut_Compteur_Y,
                 Smear_Brosse_Largeur
               );
 
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
             }
             Smear_Debut=0;
           }
@@ -236,7 +236,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
           }
 
           Smear_Min_X=Debut_Compteur_X;
@@ -262,48 +262,48 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Couleur);
               }
         }
-        Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+        Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
 
       }
       break;
     case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
       Debut_X=X-Brosse_Decalage_X;
       Debut_Y=Y-Brosse_Decalage_Y;
-      Largeur=Brosse_Largeur;
-      Hauteur=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+      width=Brosse_Largeur;
+      height=Brosse_Hauteur;
+      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
       Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+Largeur;
-      Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+      Fin_Compteur_X=Debut_Compteur_X+width;
+      Fin_Compteur_Y=Debut_Compteur_Y+height;
       if (Preview)
       {
-        if ( (Largeur>0) && (Hauteur>0) )
+        if ( (width>0) && (height>0) )
           Display_brush_Mono(Debut_X-Principal_Decalage_X,
                              Debut_Y-Principal_Decalage_Y,
                              Debut_Compteur_X,Debut_Compteur_Y,
-                             Largeur,Hauteur,
+                             width,height,
                              Back_color,Fore_color,
                              Brosse_Largeur);
 
         if (Loupe_Mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
           Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
           Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
 
-          if ( (Largeur>0) && (Hauteur>0) )
+          if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
-            if (Hauteur>Menu_Ordonnee)
-              Hauteur=Menu_Ordonnee;
+            height=Debut_Y+(height*Loupe_Facteur);
+            if (height>Menu_Ordonnee)
+              height=Menu_Ordonnee;
 
             Display_brush_Mono_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
                                     Debut_Compteur_X,Debut_Compteur_Y,
-                                    Largeur,Hauteur,
+                                    width,height,
                                     Back_color,Fore_color,
                                     Brosse_Largeur,
                                     Buffer_de_ligne_horizontale);
@@ -319,17 +319,17 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         {
           if (Smear_Debut)
           {
-            if ((Largeur>0) && (Hauteur>0))
+            if ((width>0) && (height>0))
             {
               Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
                                                        Debut_X,Debut_Y,
-                                                       Largeur,Hauteur,
+                                                       width,height,
                                                        Principal_Largeur_image,
                                                        Smear_Brosse,
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
             }
             Smear_Debut=0;
           }
@@ -347,7 +347,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
 
-            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
 
           }
 
@@ -364,51 +364,51 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
         }
       }
       break;
     default : // Pinceau
       Debut_X=X-Pinceau_Decalage_X;
       Debut_Y=Y-Pinceau_Decalage_Y;
-      Largeur=Pinceau_Largeur;
-      Hauteur=Pinceau_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+      width=Pinceau_Largeur;
+      height=Pinceau_Hauteur;
+      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
       Debut_Compteur_X=Debut_X-(X-Pinceau_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Pinceau_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+Largeur;
-      Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+      Fin_Compteur_X=Debut_Compteur_X+width;
+      Fin_Compteur_Y=Debut_Compteur_Y+height;
       if (Preview)
       {
         Temp=Brosse;
         Brosse=Pinceau_Sprite;
 
-        if ( (Largeur>0) && (Hauteur>0) )
+        if ( (width>0) && (height>0) )
           Display_brush_Mono(Debut_X-Principal_Decalage_X,
                              Debut_Y-Principal_Decalage_Y,
                              Debut_Compteur_X,Debut_Compteur_Y,
-                             Largeur,Hauteur,
+                             width,height,
                              0,Fore_color,
                              TAILLE_MAXI_PINCEAU);
 
         if (Loupe_Mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
           Debut_Compteur_X=Debut_X-(X-Pinceau_Decalage_X);
           Debut_Compteur_Y=Debut_Y-(Y-Pinceau_Decalage_Y);
 
-          if ( (Largeur>0) && (Hauteur>0) )
+          if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
             Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
             Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
-            if (Hauteur>Menu_Ordonnee)
-              Hauteur=Menu_Ordonnee;
+            height=Debut_Y+(height*Loupe_Facteur);
+            if (height>Menu_Ordonnee)
+              height=Menu_Ordonnee;
 
             Display_brush_Mono_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
                                     Debut_Compteur_X,Debut_Compteur_Y,
-                                    Largeur,Hauteur,
+                                    width,height,
                                     0,Fore_color,
                                     TAILLE_MAXI_PINCEAU,
                                     Buffer_de_ligne_horizontale);
@@ -424,17 +424,17 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         {
           if (Smear_Debut)
           {
-            if ((Largeur>0) && (Hauteur>0))
+            if ((width>0) && (height>0))
             {
               Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
                                                        Debut_X,Debut_Y,
-                                                       Largeur,Hauteur,
+                                                       width,height,
                                                        Principal_Largeur_image,
                                                        Smear_Brosse,
                                                        Debut_Compteur_X,
                                                        Debut_Compteur_Y,
                                                        Smear_Brosse_Largeur);
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
             }
             Smear_Debut=0;
           }
@@ -451,7 +451,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
                   Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
                 Smear_Brosse[Position]=Couleur_temporaire;
               }
-              Mettre_Ecran_A_Jour(Debut_X, Debut_Y, Largeur, Hauteur);
+              Mettre_Ecran_A_Jour(Debut_X, Debut_Y, width, height);
           }
 
 
@@ -468,7 +468,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
                 Afficher_pixel(Pos_X,Pos_Y,Couleur);
             }
-          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Largeur,Hauteur);
+          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
         }
       }
   }
@@ -483,9 +483,9 @@ void Effacer_pinceau(short X,short Y)
         // affiche la brosse/pinceau
   short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Largeur; // Largeur dans l'écran selon laquelle on affiche la
+  short width; // width dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Hauteur; // Hauteur dans l'écran selon laquelle on affiche la
+  short height; // height dans l'écran selon laquelle on affiche la
         // brosse/pinceau
   short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
@@ -517,39 +517,39 @@ void Effacer_pinceau(short X,short Y)
     case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
       Debut_X=X-Brosse_Decalage_X;
       Debut_Y=Y-Brosse_Decalage_Y;
-      Largeur=Brosse_Largeur;
-      Hauteur=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+      width=Brosse_Largeur;
+      height=Brosse_Hauteur;
+      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
       Debut_Compteur_X=Debut_X-(X-Brosse_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+Largeur;
-      Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+      Fin_Compteur_X=Debut_Compteur_X+width;
+      Fin_Compteur_Y=Debut_Compteur_Y+height;
 
-      if ( (Largeur>0) && (Hauteur>0) )
+      if ( (width>0) && (height>0) )
         Clear_brush(Debut_X-Principal_Decalage_X,
                     Debut_Y-Principal_Decalage_Y,
                     Debut_Compteur_X,Debut_Compteur_Y,
-                    Largeur,Hauteur,Back_color,
+                    width,height,Back_color,
                     Principal_Largeur_image);
 
       if (Loupe_Mode)
       {
-        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
         Debut_Compteur_X=Debut_X;
         Debut_Compteur_Y=Debut_Y;
 
-        if ( (Largeur>0) && (Hauteur>0) )
+        if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
           Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
           Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-          Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
-          if (Hauteur>Menu_Ordonnee)
-            Hauteur=Menu_Ordonnee;
+          height=Debut_Y+(height*Loupe_Facteur);
+          if (height>Menu_Ordonnee)
+            height=Menu_Ordonnee;
 
           Clear_brush_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
                            Debut_Compteur_X,Debut_Compteur_Y,
-                           Largeur,Hauteur,Back_color,
+                           width,height,Back_color,
                            Principal_Largeur_image,
                            Buffer_de_ligne_horizontale);
         }
@@ -558,44 +558,44 @@ void Effacer_pinceau(short X,short Y)
     default: // Pinceau
       Debut_X=X-Pinceau_Decalage_X;
       Debut_Y=Y-Pinceau_Decalage_Y;
-      Largeur=Pinceau_Largeur;
-      Hauteur=Pinceau_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+      width=Pinceau_Largeur;
+      height=Pinceau_Hauteur;
+      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
       Debut_Compteur_X=Debut_X-(X-Pinceau_Decalage_X);
       Debut_Compteur_Y=Debut_Y-(Y-Pinceau_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+Largeur;
-      Fin_Compteur_Y=Debut_Compteur_Y+Hauteur;
+      Fin_Compteur_X=Debut_Compteur_X+width;
+      Fin_Compteur_Y=Debut_Compteur_Y+height;
 
       Temp=Brosse;
       Brosse=Pinceau_Sprite;
 
-      if ( (Largeur>0) && (Hauteur>0) )
+      if ( (width>0) && (height>0) )
       {
         Clear_brush(Debut_X-Principal_Decalage_X,
                     Debut_Y-Principal_Decalage_Y,
                     Debut_Compteur_X,Debut_Compteur_Y,
-                    Largeur,Hauteur,0,
+                    width,height,0,
                     Principal_Largeur_image);
       }
 
       if (Loupe_Mode)
       {
-        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&Largeur,&Hauteur);
+        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
         Debut_Compteur_X=Debut_X;
         Debut_Compteur_Y=Debut_Y;
 
-        if ( (Largeur>0) && (Hauteur>0) )
+        if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
           Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
           Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-          Hauteur=Debut_Y+(Hauteur*Loupe_Facteur);
-          if (Hauteur>Menu_Ordonnee)
-            Hauteur=Menu_Ordonnee;
+          height=Debut_Y+(height*Loupe_Facteur);
+          if (height>Menu_Ordonnee)
+            height=Menu_Ordonnee;
 
           Clear_brush_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
                            Debut_Compteur_X,Debut_Compteur_Y,
-                           Largeur,Hauteur,0,
+                           width,height,0,
                            Principal_Largeur_image,
                            Buffer_de_ligne_horizontale);
         }
@@ -794,18 +794,18 @@ void Outline_brush(void)
   byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
-  word Largeur;
-  word Hauteur;
+  word width;
+  word height;
 
 
-  Largeur=Brosse_Largeur+2;
-  Hauteur=Brosse_Hauteur+2;
-  Nouvelle_brosse=(byte *)malloc(((long)Largeur)*Hauteur);
+  width=Brosse_Largeur+2;
+  height=Brosse_Hauteur+2;
+  Nouvelle_brosse=(byte *)malloc(((long)width)*height);
 
   if (Nouvelle_brosse)
   {
     // On remplit la bordure ajoutée par la Backcolor
-    memset(Nouvelle_brosse,Back_color,((long)Largeur)*Hauteur);
+    memset(Nouvelle_brosse,Back_color,((long)width)*height);
 
     // On copie la brosse courante dans la nouvelle
     Copier_une_partie_d_image_dans_une_autre(Brosse, // Source
@@ -815,15 +815,15 @@ void Outline_brush(void)
                                              Brosse_Largeur,
                                              Nouvelle_brosse, // Destination
                                              1, 1,
-                                             Largeur);
+                                             width);
 
     // On intervertit la nouvelle et l'ancienne brosse:
     Temporaire=Brosse;
     Brosse=Nouvelle_brosse;
     Brosse_Largeur+=2;
     Brosse_Hauteur+=2;
-    Largeur-=2;
-    Hauteur-=2;
+    width-=2;
+    height-=2;
 
     // Si on "outline" avec une couleur différente de la Back_color on y va!
     if (Fore_color!=Back_color)
@@ -834,7 +834,7 @@ void Outline_brush(void)
         state=0;
         for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
         {
-          if (Temporaire[((Pos_Y-1)*Largeur)+Pos_X-1]==Back_color)
+          if (Temporaire[((Pos_Y-1)*width)+Pos_X-1]==Back_color)
           {
             if (state)
             {
@@ -862,7 +862,7 @@ void Outline_brush(void)
         state=0;
         for (Pos_Y=1; Pos_Y<Brosse_Hauteur-1; Pos_Y++)
         {
-          if (Temporaire[((Pos_Y-1)*Largeur)+Pos_X-1]==Back_color)
+          if (Temporaire[((Pos_Y-1)*width)+Pos_X-1]==Back_color)
           {
             if (state)
             {
@@ -908,14 +908,14 @@ void Nibble_brush(void)
   byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
-  word Largeur;
-  word Hauteur;
+  word width;
+  word height;
 
   if ( (Brosse_Largeur>2) && (Brosse_Hauteur>2) )
   {
-    Largeur=Brosse_Largeur-2;
-    Hauteur=Brosse_Hauteur-2;
-    Nouvelle_brosse=(byte *)malloc(((long)Largeur)*Hauteur);
+    width=Brosse_Largeur-2;
+    height=Brosse_Hauteur-2;
+    Nouvelle_brosse=(byte *)malloc(((long)width)*height);
 
     if (Nouvelle_brosse)
     {
@@ -923,29 +923,29 @@ void Nibble_brush(void)
       Copier_une_partie_d_image_dans_une_autre(Brosse, // Source
                                                1,
                                                1,
-                                               Largeur,
-                                               Hauteur,
+                                               width,
+                                               height,
                                                Brosse_Largeur,
                                                Nouvelle_brosse, // Destination
                                                0,
                                                0,
-                                               Largeur);
+                                               width);
 
       // On intervertit la nouvelle et l'ancienne brosse:
       Temporaire=Brosse;
       Brosse=Nouvelle_brosse;
       Brosse_Largeur-=2;
       Brosse_Hauteur-=2;
-      Largeur+=2;
-      Hauteur+=2;
+      width+=2;
+      height+=2;
 
       // 1er balayage (horizontal)
       for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
       {
-        state=(Temporaire[(Pos_Y+1)*Largeur]!=Back_color);
+        state=(Temporaire[(Pos_Y+1)*width]!=Back_color);
         for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
         {
-          if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
+          if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
           {
             if (state)
             {
@@ -964,17 +964,17 @@ void Nibble_brush(void)
           }
         }
         // Cas du dernier pixel à droite de la ligne
-        if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
+        if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
           Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
       }
 
       // 2ème balayage (vertical)
       for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
       {
-        state=(Temporaire[Largeur+Pos_X+1]!=Back_color);;
+        state=(Temporaire[width+Pos_X+1]!=Back_color);;
         for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
         {
-          if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
+          if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
           {
             if (state)
             {
@@ -993,7 +993,7 @@ void Nibble_brush(void)
           }
         }
         // Cas du dernier pixel en bas de la colonne
-        if (Temporaire[((Pos_Y+1)*Largeur)+Pos_X+1]==Back_color)
+        if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
           Pixel_dans_brosse(Pos_X,Pos_Y-1,Back_color);
       }
 
@@ -1148,11 +1148,11 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
 
 void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 {
-  int    Offset,Ligne,Colonne;
+  int    Offset,line,Colonne;
   byte * New_Brosse;
 
-  int    New_Brosse_Largeur;  // Largeur de la nouvelle brosse
-  int    New_Brosse_Hauteur;  // Hauteur de la nouvelle brosse
+  int    New_Brosse_Largeur;  // Width de la nouvelle brosse
+  int    New_Brosse_Hauteur;  // Height de la nouvelle brosse
 
   int    Pos_X_dans_brosse;   // Position courante dans l'ancienne brosse
   int    Pos_Y_dans_brosse;
@@ -1198,7 +1198,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
       Pos_Y_dans_brosse=(Brosse_Hauteur<<16)-1; // Inversion en Y de la brosse
 
     // Pour chaque ligne
-    for (Ligne=0;Ligne<New_Brosse_Hauteur;Ligne++)
+    for (line=0;line<New_Brosse_Hauteur;line++)
     {
       // On repart du début de la ligne:
       Pos_X_dans_brosse=Pos_X_initial;
@@ -1345,7 +1345,7 @@ float * ScanY_X[2];
 
 
 void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
-                        int Fin_X  ,int Fin_Y  ,int Xt2,int Yt2,int Hauteur)
+                        int Fin_X  ,int Fin_Y  ,int Xt2,int Yt2,int height)
 {
   int Pos_X,Pos_Y;
   int Incr_X,Incr_Y;
@@ -1394,7 +1394,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         Pos_Y+=Incr_Y;
       }
 
-      if ((Pos_Y>=0) && (Pos_Y<Hauteur))
+      if ((Pos_Y>=0) && (Pos_Y<height))
       {
         Xt=(((float)((Pos_X-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
         Yt=(((float)((Pos_X-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
@@ -1451,7 +1451,7 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
         Pos_X+=Incr_X;
       }
 
-      if ((Pos_Y>=0) && (Pos_Y<Hauteur))
+      if ((Pos_Y>=0) && (Pos_Y<height))
       {
         Xt=(((float)((Pos_Y-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
         Yt=(((float)((Pos_Y-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
@@ -1505,7 +1505,7 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
                            int X2,int Y2,int Xt2,int Yt2,
                            int X3,int Y3,int Xt3,int Yt3,
                            int X4,int Y4,int Xt4,int Yt4,
-                           byte * Buffer, int Largeur, int Hauteur)
+                           byte * Buffer, int width, int height)
 {
   int Xmin,/*Xmax,*/Ymin/*,Ymax*/;
   int X,Y,Xt,Yt;
@@ -1516,26 +1516,26 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
   Xmin=Min(Min(X1,X2),Min(X3,X4));
   Ymin=Min(Min(Y1,Y2),Min(Y3,Y4));
 
-  ScanY_Xt[0]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Xt[1]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Yt[0]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Yt[1]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
-  ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
+  ScanY_Xt[0]=(float *)malloc(height*sizeof(float));
+  ScanY_Xt[1]=(float *)malloc(height*sizeof(float));
+  ScanY_Yt[0]=(float *)malloc(height*sizeof(float));
+  ScanY_Yt[1]=(float *)malloc(height*sizeof(float));
+  ScanY_X[0] =(float *)malloc(height*sizeof(float));
+  ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
   // Remplir avec des valeurs égales à INDEFINI.
-  for (Y=0; Y<Hauteur; Y++)
+  for (Y=0; Y<height; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
     ScanY_X[1][Y]=INDEFINI;
   }
 
-  Interpoler_texture(X1-Xmin,Y1-Ymin,Xt1,Yt1,X3-Xmin,Y3-Ymin,Xt3,Yt3,Hauteur);
-  Interpoler_texture(X3-Xmin,Y3-Ymin,Xt3,Yt3,X4-Xmin,Y4-Ymin,Xt4,Yt4,Hauteur);
-  Interpoler_texture(X4-Xmin,Y4-Ymin,Xt4,Yt4,X2-Xmin,Y2-Ymin,Xt2,Yt2,Hauteur);
-  Interpoler_texture(X2-Xmin,Y2-Ymin,Xt2,Yt2,X1-Xmin,Y1-Ymin,Xt1,Yt1,Hauteur);
+  Interpoler_texture(X1-Xmin,Y1-Ymin,Xt1,Yt1,X3-Xmin,Y3-Ymin,Xt3,Yt3,height);
+  Interpoler_texture(X3-Xmin,Y3-Ymin,Xt3,Yt3,X4-Xmin,Y4-Ymin,Xt4,Yt4,height);
+  Interpoler_texture(X4-Xmin,Y4-Ymin,Xt4,Yt4,X2-Xmin,Y2-Ymin,Xt2,Yt2,height);
+  Interpoler_texture(X2-Xmin,Y2-Ymin,Xt2,Yt2,X1-Xmin,Y1-Ymin,Xt1,Yt1,height);
 
-  for (Y=0; Y<Hauteur; Y++)
+  for (Y=0; Y<height; Y++)
   {
     Debut_X=Round(ScanY_X[0][Y]);
     Fin_X  =Round(ScanY_X[1][Y]);
@@ -1543,17 +1543,17 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
     Largeur_ligne=1+Fin_X-Debut_X;
 
     for (X=0; X<Debut_X; X++)
-      Buffer[X+(Y*Largeur)]=Back_color;
+      Buffer[X+(Y*width)]=Back_color;
     for (; X<=Fin_X; X++)
     {
       Temp=(float)(0.5+(float)X-ScanY_X[0][Y])/(float)Largeur_ligne;
       Xt=Round((float)(ScanY_Xt[0][Y])+(Temp*(ScanY_Xt[1][Y]-ScanY_Xt[0][Y])));
       Yt=Round((float)(ScanY_Yt[0][Y])+(Temp*(ScanY_Yt[1][Y]-ScanY_Yt[0][Y])));
 
-      Buffer[X+(Y*Largeur)]=Lit_pixel_dans_brosse(Xt,Yt);
+      Buffer[X+(Y*width)]=Lit_pixel_dans_brosse(Xt,Yt);
     }
-    for (; X<Largeur; X++)
-      Buffer[X+(Y*Largeur)]=Back_color;
+    for (; X<width; X++)
+      Buffer[X+(Y*width)]=Back_color;
   }
 
   free(ScanY_Xt[0]);
@@ -1569,8 +1569,8 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
 void Tourner_brosse(float angle)
 {
   byte * New_Brosse;
-  int    New_Brosse_Largeur;  // Largeur de la nouvelle brosse
-  int    New_Brosse_Hauteur;  // Hauteur de la nouvelle brosse
+  int    New_Brosse_Largeur;  // Width de la nouvelle brosse
+  int    New_Brosse_Hauteur;  // Height de la nouvelle brosse
 
   short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
   int Debut_X,Fin_X,Debut_Y,Fin_Y;
@@ -1660,7 +1660,7 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
   int Xmin,Xmax,Ymin,Ymax;
   int X,Y,Xt,Yt;
   int Y_,Ymin_;
-  int Debut_X,Fin_X,Largeur,Hauteur;
+  int Debut_X,Fin_X,width,height;
   float Temp;
   byte Couleur;
 
@@ -1668,26 +1668,26 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
   Xmax=Max(Max(X1,X2),Max(X3,X4));
   Ymin=Min(Min(Y1,Y2),Min(Y3,Y4));
   Ymax=Max(Max(Y1,Y2),Max(Y3,Y4));
-  Hauteur=1+Ymax-Ymin;
+  height=1+Ymax-Ymin;
 
-  ScanY_Xt[0]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Xt[1]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Yt[0]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_Yt[1]=(float *)malloc(Hauteur*sizeof(float));
-  ScanY_X[0] =(float *)malloc(Hauteur*sizeof(float));
-  ScanY_X[1] =(float *)malloc(Hauteur*sizeof(float));
+  ScanY_Xt[0]=(float *)malloc(height*sizeof(float));
+  ScanY_Xt[1]=(float *)malloc(height*sizeof(float));
+  ScanY_Yt[0]=(float *)malloc(height*sizeof(float));
+  ScanY_Yt[1]=(float *)malloc(height*sizeof(float));
+  ScanY_X[0] =(float *)malloc(height*sizeof(float));
+  ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
   // Remplir avec des valeurs égales à INDEFINI.
-  for (Y=0; Y<Hauteur; Y++)
+  for (Y=0; Y<height; Y++)
   {
     ScanY_X[0][Y]=INDEFINI;
     ScanY_X[1][Y]=INDEFINI;
   }
 
-  Interpoler_texture(X1,Y1-Ymin,Xt1,Yt1,X3,Y3-Ymin,Xt3,Yt3,Hauteur);
-  Interpoler_texture(X3,Y3-Ymin,Xt3,Yt3,X4,Y4-Ymin,Xt4,Yt4,Hauteur);
-  Interpoler_texture(X4,Y4-Ymin,Xt4,Yt4,X2,Y2-Ymin,Xt2,Yt2,Hauteur);
-  Interpoler_texture(X2,Y2-Ymin,Xt2,Yt2,X1,Y1-Ymin,Xt1,Yt1,Hauteur);
+  Interpoler_texture(X1,Y1-Ymin,Xt1,Yt1,X3,Y3-Ymin,Xt3,Yt3,height);
+  Interpoler_texture(X3,Y3-Ymin,Xt3,Yt3,X4,Y4-Ymin,Xt4,Yt4,height);
+  Interpoler_texture(X4,Y4-Ymin,Xt4,Yt4,X2,Y2-Ymin,Xt2,Yt2,height);
+  Interpoler_texture(X2,Y2-Ymin,Xt2,Yt2,X1,Y1-Ymin,Xt1,Yt1,height);
 
   Ymin_=Ymin;
   if (Ymin<Limite_Haut) Ymin=Limite_Haut;
@@ -1699,14 +1699,14 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
     Debut_X=Round(ScanY_X[0][Y]);
     Fin_X  =Round(ScanY_X[1][Y]);
 
-    Largeur=1+Fin_X-Debut_X;
+    width=1+Fin_X-Debut_X;
 
     if (Debut_X<Limite_Gauche) Debut_X=Limite_Gauche;
     if (  Fin_X>Limite_Droite)   Fin_X=Limite_Droite;
 
     for (X=Debut_X; X<=Fin_X; X++)
     {
-      Temp=(float)(0.5+(float)X-ScanY_X[0][Y])/(float)Largeur;
+      Temp=(float)(0.5+(float)X-ScanY_X[0][Y])/(float)width;
       Xt=Round((float)(ScanY_Xt[0][Y])+(Temp*(ScanY_Xt[1][Y]-ScanY_Xt[0][Y])));
       Yt=Round((float)(ScanY_Yt[0][Y])+(Temp*(ScanY_Yt[1][Y]-ScanY_Yt[0][Y])));
 

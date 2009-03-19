@@ -20,9 +20,9 @@
 */
 void Effacer_ecran_courant(void);
 void Copier_ecran_sur_brouillon(void);
-void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image);
+void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word image_width);
 void Permuter_dans_l_image_les_couleurs(byte Couleur_1,byte Couleur_2);
-void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer);
+void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short width,short height,short Largeur_buffer);
 void Scroll_picture(short x_offset,short y_offset);
 void Set_mouse_video_mode_number(void);
 void Set_mouse_position(void);
@@ -86,8 +86,8 @@ void Flip_Y_LOWLEVEL(void);
 void Flip_X_LOWLEVEL(void);
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest);
 void Rotate_180_deg_LOWLEVEL(void);
-void Zoomer_une_ligne(byte * Ligne_originale,byte * Ligne_zoomee,word factor,word Largeur);
-void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination);
+void Zoomer_une_ligne(byte * Ligne_originale,byte * Ligne_zoomee,word factor,word width);
+void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word width,word height,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination);
 
 // -- Gestion du chrono --
 byte Etat_chrono; // Etat du chrono: 0=Attente d'un Xème de seconde
@@ -110,5 +110,5 @@ short Round_div_max(short Numerateur,short Diviseur);
 int Min(int a,int b);
 int Max(int a,int b);
 
-char* Libelle_mode(int Mode);
+char* Libelle_mode(int mode);
 int Conversion_argument_mode(const char *Argument);

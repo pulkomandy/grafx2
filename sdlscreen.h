@@ -30,7 +30,7 @@
   SDL_Rect ** Liste_Modes_Videos_SDL;
   byte* Ecran;
 
-  void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur);
+  void UpdateRect(short X, short Y, unsigned short width, unsigned short height);
   void Flush_update(void);
   byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest);
   SDL_Color Conversion_couleur_SDL(byte);

@@ -235,15 +235,15 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
       Indice++;
       if (Indice<argc)
       {
-        int Grad;
-        Grad = atoi(argv[Indice]);
-        if (Grad < 2 || Grad > 256)
+        int scale;
+        scale = atoi(argv[Indice]);
+        if (scale < 2 || scale > 256)
         {
           Erreur(ERREUR_LIGNE_COMMANDE);
           Afficher_syntaxe();
           exit(0);
         }
-        Set_Palette_RGB_Scale(Grad);
+        Set_Palette_RGB_Scale(scale);
       }
       else
       {
@@ -559,8 +559,8 @@ int Initialisation_du_programme(int argc,char * argv[])
   Resolution_actuelle=-1; // On n'était pas dans un mode graphique
   
   Initialiser_mode_video(
-    Mode_video[Mode_dans_lequel_on_demarre].Largeur,
-    Mode_video[Mode_dans_lequel_on_demarre].Hauteur,
+    Mode_video[Mode_dans_lequel_on_demarre].Width,
+    Mode_video[Mode_dans_lequel_on_demarre].Height,
     Mode_video[Mode_dans_lequel_on_demarre].Fullscreen);
 
   Principal_Largeur_image=Largeur_ecran/Pixel_width;

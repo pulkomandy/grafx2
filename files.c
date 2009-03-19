@@ -99,23 +99,23 @@ void Detruire_liste_du_fileselect(void)
 
 
 // -- Formatage graphique des noms de fichier / répertoire ------------------
-char * Nom_formate(char * Nom, int Type)
+char * Nom_formate(char * fname, int Type)
 {
   static char Resultat[13];
   int         c;
   int         Autre_curseur;
   int         Pos_DernierPoint;
 
-  if (strcmp(Nom,PARENT_DIR)==0)
+  if (strcmp(fname,PARENT_DIR)==0)
   {
     strcpy(Resultat,"<-PARENT DIR");
   }
-  else if (Nom[0]=='.' || Type==2)
+  else if (fname[0]=='.' || Type==2)
   {
     // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 12 caractères maximum.
     strcpy(Resultat,"            ");
-    for (c=0;Nom[c]!='\0' && c < 12;c++)
-      Resultat[c]=Nom[c];
+    for (c=0;fname[c]!='\0' && c < 12;c++)
+      Resultat[c]=fname[c];
     // Un caractère spécial pour indiquer que l'affichage est tronqué
     if (c >= 12)
       Resultat[11]=CARACTERE_SUSPENSION;
@@ -124,24 +124,24 @@ char * Nom_formate(char * Nom, int Type)
   {
     strcpy(Resultat,"        .   ");
     // On commence par recopier la partie précédent le point:
-    for (c=0;( (Nom[c]!='.') && (Nom[c]!='\0') );c++)
+    for (c=0;( (fname[c]!='.') && (fname[c]!='\0') );c++)
     {
       if (c < 8)
-        Resultat[c]=Nom[c];
+        Resultat[c]=fname[c];
     }
     // Un caractère spécial pour indiquer que l'affichage est tronqué
     if (c > 8)
       Resultat[7]=CARACTERE_SUSPENSION;
     // On recherche le dernier point dans le reste du nom
-    for (Pos_DernierPoint = c; Nom[c]!='\0'; c++)
-      if (Nom[c]=='.')
+    for (Pos_DernierPoint = c; fname[c]!='\0'; c++)
+      if (fname[c]=='.')
         Pos_DernierPoint = c;
 
     // Ensuite on recopie la partie qui suit le point (si nécessaire):
-    if (Nom[Pos_DernierPoint])
+    if (fname[Pos_DernierPoint])
     {
-      for (c = Pos_DernierPoint+1,Autre_curseur=9;Nom[c]!='\0' && Autre_curseur < 12;c++,Autre_curseur++)
-        Resultat[Autre_curseur]=Nom[c];
+      for (c = Pos_DernierPoint+1,Autre_curseur=9;fname[c]!='\0' && Autre_curseur < 12;c++,Autre_curseur++)
+        Resultat[Autre_curseur]=fname[c];
     }
   }
   return Resultat;
@@ -149,7 +149,7 @@ char * Nom_formate(char * Nom, int Type)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Ajouter_element_a_la_liste(char * Nom, int Type)
+void Ajouter_element_a_la_liste(char * fname, int Type)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
   // Pointeur temporaire d'insertion
@@ -159,8 +159,8 @@ void Ajouter_element_a_la_liste(char * Nom, int Type)
   Element_temporaire=(Element_de_liste_de_fileselect *)malloc(sizeof(Element_de_liste_de_fileselect));
 
   // On met a jour le nouvel emplacement:
-  strcpy(Element_temporaire->NomAbrege,Nom_formate(Nom, Type));
-  strcpy(Element_temporaire->NomComplet,Nom);
+  strcpy(Element_temporaire->NomAbrege,Nom_formate(fname, Type));
+  strcpy(Element_temporaire->NomComplet,fname);
   Element_temporaire->Type = Type;
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
@@ -369,15 +369,15 @@ void Lire_liste_des_lecteurs(void)
     struct mount_entry* next;
 
     #if defined(__BEOS__) || defined(__HAIKU__)
-        char * Home = getenv("$HOME");
+        char * home_dir = getenv("$HOME");
     #else
-        char * Home = getenv("HOME");
+        char * home_dir = getenv("HOME");
     #endif
     Ajouter_element_a_la_liste("/", 2);
     Liste_Nb_repertoires++;
-    if(Home)
+    if(home_dir)
     {
-        Ajouter_element_a_la_liste(Home, 2);
+        Ajouter_element_a_la_liste(home_dir, 2);
         Liste_Nb_repertoires++;
     }
 
@@ -415,7 +415,7 @@ void Trier_la_liste_des_fichiers(void)
 // * Les fichiers ensuite, dans l'ordre alphabétique de leur nom
 {
   byte   La_liste_est_triee; // Booléen "La liste est triée"
-  byte   Inversion;          // Booléen "Il faut inverser les éléments"
+  byte   need_swap;          // Booléen "Il faut inverser les éléments"
   Element_de_liste_de_fileselect * Element_precedent;
   Element_de_liste_de_fileselect * Element_courant;
   Element_de_liste_de_fileselect * Element_suivant;
@@ -436,23 +436,23 @@ void Trier_la_liste_des_fichiers(void)
       while ( (Element_courant!=NULL) && (Element_suivant!=NULL) )
       {
         // On commence par supposer qu'il n'y pas pas besoin d'inversion
-        Inversion=0;
+        need_swap=0;
 
         // Ensuite, on vérifie si les deux éléments sont bien dans l'ordre ou
         // non:
 
           // Si l'élément courant est un fichier est que le suivant est
-          // un répertoire -> Inversion
+          // un répertoire -> need_swap
         if ( Element_courant->Type < Element_suivant->Type )
-          Inversion=1;
+          need_swap=1;
           // Si les deux éléments sont de même type et que le nom du suivant
-          // est plus petit que celui du courant -> Inversion
+          // est plus petit que celui du courant -> need_swap
         else if ( (Element_courant->Type==Element_suivant->Type) &&
                   (strcmp(Element_courant->NomComplet,Element_suivant->NomComplet)>0) )
-          Inversion=1;
+          need_swap=1;
 
 
-        if (Inversion)
+        if (need_swap)
         {
           // Si les deux éléments nécessitent d'être inversé:
 
@@ -563,7 +563,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
 
 
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * Libelle,int *Type)
+void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * label,int *Type)
 //
 // Decalage_premier = Décalage entre le premier fichier visible dans le
 //                   sélecteur et le premier fichier de la liste
@@ -571,7 +571,7 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 // Decalage_select  = Décalage entre le premier fichier visible dans le
 //                   sélecteur et le fichier à récupérer
 //
-// Libelle          = Chaine de réception du libellé de l'élément
+// label          = Chaine de réception du libellé de l'élément
 //
 // Type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
 //                    Passer NULL si pas interessé.
@@ -591,7 +591,7 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
       Element_courant=Element_courant->Suivant;
 
     // On recopie la chaîne
-    strcpy(Libelle, Element_courant->NomComplet);
+    strcpy(label, Element_courant->NomComplet);
 
     if (Type != NULL)
       *Type=Element_courant->Type;
@@ -626,7 +626,7 @@ void Select_Scroll_Up(short * Decalage_premier,short * Decalage_select)
 }
 
 
-void Select_Page_Down(short * Decalage_premier,short * Decalage_select, short Lignes)
+void Select_Page_Down(short * Decalage_premier,short * Decalage_select, short lines)
 {
   if (Liste_Nb_elements-1>*Decalage_premier+*Decalage_select)
   {
@@ -642,7 +642,7 @@ void Select_Page_Down(short * Decalage_premier,short * Decalage_select, short Li
     else
     {
       if (Liste_Nb_elements>*Decalage_premier+18)
-        *Decalage_premier+=Lignes;
+        *Decalage_premier+=lines;
       else
       {
         *Decalage_premier=Liste_Nb_elements-10;
@@ -654,7 +654,7 @@ void Select_Page_Down(short * Decalage_premier,short * Decalage_select, short Li
 }
 
 
-void Select_Page_Up(short * Decalage_premier,short * Decalage_select, short Lignes)
+void Select_Page_Up(short * Decalage_premier,short * Decalage_select, short lines)
 {
   if (*Decalage_premier+*Decalage_select>0)
   {
@@ -662,8 +662,8 @@ void Select_Page_Up(short * Decalage_premier,short * Decalage_select, short Lign
       *Decalage_select=0;
     else
     {
-      if (*Decalage_premier>Lignes)
-        *Decalage_premier-=Lignes;
+      if (*Decalage_premier>lines)
+        *Decalage_premier-=lines;
       else
         *Decalage_premier=0;
     }

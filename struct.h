@@ -66,8 +66,8 @@ typedef struct T_Bouton_normal
   short Numero;
   word Pos_X;
   word Pos_Y;
-  word Largeur;
-  word Hauteur;
+  word Width;
+  word Height;
   byte Clickable;
   byte Repetable;
   word Raccourci;
@@ -87,7 +87,7 @@ typedef struct T_Bouton_scroller
   short Numero;
   word Pos_X;
   word Pos_Y;
-  word Hauteur;
+  word Height;
   word Nb_elements;
   word Nb_visibles;
   word Position;
@@ -100,15 +100,15 @@ typedef struct T_Bouton_special
   short Numero;
   word Pos_X;
   word Pos_Y;
-  word Largeur;
-  word Hauteur;
+  word Width;
+  word Height;
   struct T_Bouton_special * Next;
 } T_Bouton_special;
 
 typedef struct T_Dropdown_choix
 {
   short Numero;
-  const char * Libelle;
+  const char * Label;
   struct T_Dropdown_choix * Next;
 } T_Dropdown_choix;
 
@@ -117,8 +117,8 @@ typedef struct T_Bouton_dropdown
   short Numero;
   word Pos_X;
   word Pos_Y;
-  word Largeur;
-  word Hauteur;
+  word Width;
+  word Height;
   byte Affiche_choix;  // The selected item's label is printed in the dropdown area
   byte Affiche_centre; // Center labels (otherwise, align left)
   byte Affiche_fleche; // Display a "down" arrow box in top right
@@ -166,7 +166,7 @@ typedef struct
 // Déclaration d'une info de shade
 typedef struct
 {
-  word Liste[512]; // Liste de couleurs
+  word List[512]; // Liste de couleurs
   byte Pas;        // Pas d'incrémentation/décrémentation
   byte Mode;       // Mode d'utilisation (Normal/Boucle/Non-saturé)
 } T_Shade;
@@ -178,8 +178,8 @@ typedef struct
 typedef struct
 {
   byte Etat;
-  word Largeur;
-  word Hauteur;
+  word Width;
+  word Height;
 } __attribute__((__packed__)) Config_Mode_video;
 
 typedef struct
@@ -259,8 +259,8 @@ typedef struct
 typedef struct
 {
   byte *    Image;   // Bitmap de l'image
-  int       Largeur; // Largeur du bitmap
-  int       Hauteur; // Hauteur du bitmap
+  int       Width; // Largeur du bitmap
+  int       Height; // Hauteur du bitmap
   T_Palette Palette; // Palette de l'image
 
   char      Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image

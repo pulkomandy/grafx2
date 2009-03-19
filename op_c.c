@@ -1084,7 +1084,7 @@ int Valeur_modifiee(int Valeur,int modif)
   return Valeur;
 }
 
-void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Hauteur,Composantes * palette,Table_conversion * tc)
+void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int width,int height,Composantes * palette,Table_conversion * tc)
 // Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
 // s'en ressert pas, soit on passe à la fonction une copie de travail du
 // bitmap original.
@@ -1101,16 +1101,16 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
 
   // On initialise les variables de parcours:
   Courant =Source;      // Le pixel dont on s'occupe
-  Suivant =Courant+Largeur; // Le pixel en dessous
+  Suivant =Courant+width; // Le pixel en dessous
   C_plus1 =Courant+1;   // Le pixel à droite
   S_moins1=Suivant-1;   // Le pixel en bas à gauche
   S_plus1 =Suivant+1;   // Le pixel en bas à droite
   d       =Dest;
 
   // On parcours chaque pixel:
-  for (Pos_Y=0;Pos_Y<Hauteur;Pos_Y++)
+  for (Pos_Y=0;Pos_Y<height;Pos_Y++)
   {
-    for (Pos_X=0;Pos_X<Largeur;Pos_X++)
+    for (Pos_X=0;Pos_X<width;Pos_X++)
     {
       // On prends la meilleure couleur de la palette qui traduit la couleur
       // 24 bits de la source:
@@ -1130,7 +1130,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         ERouge=(Rouge*7)/16.0;
         EVert =(Vert *7)/16.0;
         EBleu =(Bleu *7)/16.0;
-        if (Pos_X+1<Largeur)
+        if (Pos_X+1<width)
         {
           // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
           C_plus1->R=Valeur_modifiee(C_plus1->R,ERouge);
@@ -1138,7 +1138,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
           C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );
         }
       // En bas à gauche:
-      if (Pos_Y+1<Hauteur)
+      if (Pos_Y+1<height)
       {
         ERouge=(Rouge*3)/16.0;
         EVert =(Vert *3)/16.0;
@@ -1157,7 +1157,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         Suivant->V=Valeur_modifiee(Suivant->V,EVert );
         Suivant->B=Valeur_modifiee(Suivant->B,EBleu );
       // En bas à droite:
-        if (Pos_X+1<Largeur)
+        if (Pos_X+1<width)
         {
         ERouge=(Rouge/16.0);
         EVert =(Vert /16.0);
@@ -1203,7 +1203,7 @@ static const byte precision_24b[]=
 
 // Cette fonction utilise l'algorithme "median cut" (Optimiser_palette) pour trouver la palette, et diffuse les erreurs avec floyd-steinberg.
 
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Hauteur,Composantes * palette)
+int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int width,int height,Composantes * palette)
 {
   Table_conversion * table; // table de conversion
   int                ip;    // index de précision pour la conversion
@@ -1212,7 +1212,7 @@ int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Ha
   // meilleure précision possible
   for (ip=0;ip<(10*3);ip+=3)
   {
-    table=Optimiser_palette(Source,Largeur*Hauteur,palette,precision_24b[ip+0],
+    table=Optimiser_palette(Source,width*height,palette,precision_24b[ip+0],
                             precision_24b[ip+1],precision_24b[ip+2]);
     if (table!=0)
       break;
@@ -1220,7 +1220,7 @@ int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Ha
 
   if (table!=0)
   {
-    Convert_bitmap_24B_to_256_Floyd_Steinberg(Dest,Source,Largeur,Hauteur,palette,table);
+    Convert_bitmap_24B_to_256_Floyd_Steinberg(Dest,Source,width,height,palette,table);
     TC_Delete(table);
     return 0;
   }

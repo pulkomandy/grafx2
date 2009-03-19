@@ -23,25 +23,25 @@
 
   void Pixel_Simple                      (word X,word Y,byte Couleur);
   byte Lit_Pixel_Simple                  (word X,word Y);
-  void Block_Simple                      (word Debut_X,word Debut_Y,word Largeur,word Hauteur,byte Couleur);
+  void Block_Simple                      (word Debut_X,word Debut_Y,word width,word height,byte Couleur);
   void Pixel_Preview_Normal_Simple       (word X,word Y,byte Couleur);
   void Pixel_Preview_Loupe_Simple        (word X,word Y,byte Couleur);
-  void Ligne_horizontale_XOR_Simple      (word Pos_X,word Pos_Y,word Largeur);
-  void Ligne_verticale_XOR_Simple        (word Pos_X,word Pos_Y,word Hauteur);
-  void Display_brush_Color_Simple        (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
-  void Display_brush_Mono_Simple         (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
-  void Clear_brush_Simple                (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_image);
-  void Remap_screen_Simple               (word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte * Table_de_conversion);
-  void Afficher_partie_de_l_ecran_Simple (word Largeur,word Hauteur,word Largeur_image);
-  void Afficher_une_ligne_ecran_Simple   (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
-  void Lire_une_ligne_ecran_Simple       (word Pos_X,word Pos_Y,word Largeur,byte * Ligne);
-  void Afficher_partie_de_l_ecran_zoomee_Simple(word Largeur,word Hauteur,word Largeur_image,byte * Buffer);
-  void Display_brush_Color_zoom_Simple   (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
-  void Display_brush_Mono_zoom_Simple    (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
-  void Clear_brush_zoom_Simple           (word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_image,byte * Buffer);
-  void Affiche_brosse_Simple             (byte * brush, word Pos_X,word Pos_Y,word x_offset,word y_offset,word Largeur,word Hauteur,byte Couleur_de_transparence,word Largeur_brosse);
+  void Ligne_horizontale_XOR_Simple      (word Pos_X,word Pos_Y,word width);
+  void Ligne_verticale_XOR_Simple        (word Pos_X,word Pos_Y,word height);
+  void Display_brush_Color_Simple        (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
+  void Display_brush_Mono_Simple         (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
+  void Clear_brush_Simple                (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word image_width);
+  void Remap_screen_Simple               (word Pos_X,word Pos_Y,word width,word height,byte * Table_de_conversion);
+  void Afficher_partie_de_l_ecran_Simple (word width,word height,word image_width);
+  void Afficher_une_ligne_ecran_Simple   (word Pos_X,word Pos_Y,word width,byte * line);
+  void Lire_une_ligne_ecran_Simple       (word Pos_X,word Pos_Y,word width,byte * line);
+  void Afficher_partie_de_l_ecran_zoomee_Simple(word width,word height,word image_width,byte * Buffer);
+  void Display_brush_Color_zoom_Simple   (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
+  void Display_brush_Mono_zoom_Simple    (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
+  void Clear_brush_zoom_Simple           (word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word image_width,byte * Buffer);
+  void Affiche_brosse_Simple             (byte * brush, word Pos_X,word Pos_Y,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
 
 void Afficher_une_ligne_transparente_mono_a_l_ecran_Simple(
-        word Pos_X, word Pos_Y, word Largeur, byte* Ligne, 
+        word Pos_X, word Pos_Y, word width, byte* line, 
         byte Couleur_transparence, byte Couleur);
-void Afficher_une_ligne_transparente_a_l_ecran_Simple(word Pos_X,word Pos_Y,word Largeur,byte* Ligne,byte Couleur_transparence);
+void Afficher_une_ligne_transparente_a_l_ecran_Simple(word Pos_X,word Pos_Y,word width,byte* line,byte Couleur_transparence);

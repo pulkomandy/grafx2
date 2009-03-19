@@ -44,18 +44,18 @@
   #endif
 #endif
 
-void Set_Mode_SDL(int *Largeur, int *Hauteur, int Fullscreen)
+void Set_Mode_SDL(int *width, int *height, int fullscreen)
 /* On règle la résolution de l'écran */
 {
-  Ecran_SDL=SDL_SetVideoMode(*Largeur,*Hauteur,8,(Fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
+  Ecran_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
   if(Ecran_SDL != NULL)
   {
     // Vérification du mode obtenu (ce n'est pas toujours celui demandé)
-    if (Ecran_SDL->w != *Largeur || Ecran_SDL->h != *Hauteur)
+    if (Ecran_SDL->w != *width || Ecran_SDL->h != *height)
     {
       DEBUG("Erreur mode video obtenu différent de celui demandé !!",0);
-      *Largeur = Ecran_SDL->w;
-      *Hauteur = Ecran_SDL->h;
+      *width = Ecran_SDL->w;
+      *height = Ecran_SDL->h;
     }
     Ecran=Ecran_SDL->pixels;
   }
@@ -106,14 +106,14 @@ void Flush_update(void)
 
 }
 
-void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur)
+void UpdateRect(short X, short Y, unsigned short width, unsigned short height)
 {
   #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
-    SDL_UpdateRect(Ecran_SDL, X*Pixel_width, Y*Pixel_height, Largeur*Pixel_width, Hauteur*Pixel_height);
+    SDL_UpdateRect(Ecran_SDL, X*Pixel_width, Y*Pixel_height, width*Pixel_width, height*Pixel_height);
   #endif
 
   #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
-  if (Largeur==0 || Hauteur==0)
+  if (width==0 || height==0)
   {
     Min_X=Min_Y=0;
     Max_X=Max_Y=10000;
@@ -124,10 +124,10 @@ void UpdateRect(short X, short Y, unsigned short Largeur, unsigned short Hauteur
       Min_X = X;
     if (Y < Min_Y)
       Min_Y = Y;
-    if (X+Largeur>Max_X)
-      Max_X=X+Largeur;
-    if (Y+Hauteur>Max_Y)
-      Max_Y=Y+Hauteur;
+    if (X+width>Max_X)
+      Max_X=X+width;
+    if (Y+height>Max_Y)
+      Max_Y=Y+height;
   }
   #endif
 
@@ -172,12 +172,12 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
 }
 
 // Convertit un index de palette en couleur RGB 24 bits
-SDL_Color Conversion_couleur_SDL(byte Index)
+SDL_Color Conversion_couleur_SDL(byte index)
 {
   SDL_Color Couleur;
-  Couleur.r = Principal_Palette[Index].R;
-  Couleur.g = Principal_Palette[Index].V;
-  Couleur.b = Principal_Palette[Index].B;
+  Couleur.r = Principal_Palette[index].R;
+  Couleur.g = Principal_Palette[index].V;
+  Couleur.b = Principal_Palette[index].B;
   Couleur.unused = 255;
   return Couleur;
 }

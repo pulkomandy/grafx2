@@ -2864,8 +2864,8 @@ void Brosse_12_5(void)
   short Debut_Y;
   short Ancien_X;
   short Ancien_Y;
-  short Largeur;
-  short Hauteur;
+  short width;
+  short height;
 
   Operation_POP(&Ancien_Y);
   Operation_POP(&Ancien_X);
@@ -2879,12 +2879,12 @@ void Brosse_12_5(void)
       Operation_PUSH(Debut_X);
       Operation_PUSH(Debut_Y);
 
-      Largeur=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-      Hauteur=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+      width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
+      height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
 
-      Num2str(Largeur,Chaine,4);
+      Num2str(width,Chaine,4);
       Print_dans_menu(Chaine,2);
-      Num2str(Hauteur,Chaine,4);
+      Num2str(height,Chaine,4);
       Print_dans_menu(Chaine,11);
     }
     else
@@ -3178,8 +3178,8 @@ void Etirer_brosse_1_7(void)
   short Debut_Y;
   short Ancien_X;
   short Ancien_Y;
-  short Largeur;
-  short Hauteur;
+  short width;
+  short height;
   short Etat_prec;
   short dx,dy,X,Y;
 
@@ -3197,18 +3197,18 @@ void Etirer_brosse_1_7(void)
     {
       if (Config.Coords_rel)
       {
-        Largeur=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-        Hauteur=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+        width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
+        height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
 
         if (Snap_Mode && Config.Adjust_brush_pick)
         {
-          if (Largeur>1) Largeur--;
-          if (Hauteur>1) Hauteur--;
+          if (width>1) width--;
+          if (height>1) height--;
         }
 
-        Num2str(Largeur,Chaine,4);
+        Num2str(width,Chaine,4);
         Print_dans_menu(Chaine,2);
-        Num2str(Hauteur,Chaine,4);
+        Num2str(height,Chaine,4);
         Print_dans_menu(Chaine,11);
       }
       else
@@ -3268,8 +3268,8 @@ void Etirer_brosse_0_7(void)
   short Debut_Y;
   short Ancien_X;
   short Ancien_Y;
-  short Largeur=0;
-  short Hauteur=0;
+  short width=0;
+  short height=0;
   byte  Changement_de_taille;
   short Etat_prec;
 
@@ -3285,12 +3285,12 @@ void Etirer_brosse_0_7(void)
     {
       if (Config.Coords_rel)
       {
-        Largeur=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-        Hauteur=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+        width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
+        height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
 
-        Num2str(Largeur,Chaine,4);
+        Num2str(width,Chaine,4);
         Print_dans_menu(Chaine,2);
-        Num2str(Hauteur,Chaine,4);
+        Num2str(height,Chaine,4);
         Print_dans_menu(Chaine,11);
       }
       else
@@ -3306,32 +3306,32 @@ void Etirer_brosse_0_7(void)
     switch (Touche_ANSI)
     {
       case 'd': // Double
-        Largeur=Debut_X+(Brosse_Largeur<<1)-1;
-        Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
+        width=Debut_X+(Brosse_Largeur<<1)-1;
+        height=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
       case 'x': // Double X
-        Largeur=Debut_X+(Brosse_Largeur<<1)-1;
-        Hauteur=Debut_Y+Brosse_Hauteur-1;
+        width=Debut_X+(Brosse_Largeur<<1)-1;
+        height=Debut_Y+Brosse_Hauteur-1;
         break;
       case 'y': // Double Y
-        Largeur=Debut_X+Brosse_Largeur-1;
-        Hauteur=Debut_Y+(Brosse_Hauteur<<1)-1;
+        width=Debut_X+Brosse_Largeur-1;
+        height=Debut_Y+(Brosse_Hauteur<<1)-1;
         break;
       case 'h': // Moitié
-        Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
-        Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
+        width=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
+        height=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
       case 'X': // Moitié X
-        Largeur=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
-        Hauteur=Debut_Y+Brosse_Hauteur-1;
+        width=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
+        height=Debut_Y+Brosse_Hauteur-1;
         break;
       case 'Y': // Moitié Y
-        Largeur=Debut_X+Brosse_Largeur-1;
-        Hauteur=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
+        width=Debut_X+Brosse_Largeur-1;
+        height=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
         break;
       case 'n': // Normal
-        Largeur=Debut_X+Brosse_Largeur-1;
-        Hauteur=Debut_Y+Brosse_Hauteur-1;
+        width=Debut_X+Brosse_Largeur-1;
+        height=Debut_Y+Brosse_Hauteur-1;
         break;
       default :
         Changement_de_taille=0;
@@ -3354,12 +3354,12 @@ void Etirer_brosse_0_7(void)
     Pinceau_X=Ancien_X;
     Pinceau_Y=Ancien_Y;
 
-    Etirer_brosse_preview(Debut_X,Debut_Y,Largeur,Hauteur);
+    Etirer_brosse_preview(Debut_X,Debut_Y,width,height);
     Afficher_curseur();
 
     Operation_Taille_pile-=2;
-    Operation_PUSH(Largeur);
-    Operation_PUSH(Hauteur);
+    Operation_PUSH(width);
+    Operation_PUSH(height);
   }
 
   Operation_PUSH(Debut_X);
@@ -4342,7 +4342,7 @@ void Rectangle_Degrade_0_5(void)
   short RAX;
   short RAY;
   short RBX;
-  short RBY, Largeur,Hauteur;
+  short RBY, width,height;
   short decalage_largeur = 0;
   short decalage_hauteur = 0;
   short decalage_gauche = 0;
@@ -4359,8 +4359,8 @@ void Rectangle_Degrade_0_5(void)
   Pinceau_Y = RAY;
   Effacer_curseur();
 
-  Largeur = abs(RBX-RAX);
-  Hauteur = abs(RBY-RAY);
+  width = abs(RBX-RAX);
+  height = abs(RBY-RAY);
 
   if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
     decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
@@ -4369,15 +4369,15 @@ void Rectangle_Degrade_0_5(void)
       decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
 
   // Dessin dans la zone de dessin normale
-  Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Largeur - decalage_largeur);
+  Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width - decalage_largeur);
   if(decalage_hauteur == 0)
-    Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,Largeur - decalage_largeur);
+    Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,width - decalage_largeur);
 
-  Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+  Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
   if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-    Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+    Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
 
-  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Largeur+1-decalage_largeur,Hauteur+1-decalage_hauteur);
+  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
 
   // Dessin dans la zone zoomée
   if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
@@ -4403,22 +4403,22 @@ void Rectangle_Degrade_0_5(void)
     if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
         decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
 
-    if(Largeur > decalage_largeur)
+    if(width > decalage_largeur)
     {
       if(decalage_haut==0) // La ligne du haut est visible
-        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),Largeur-decalage_largeur);
+        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),width-decalage_largeur);
 
       if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),Largeur-decalage_largeur);
+        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),width-decalage_largeur);
     }
 
-    if(Hauteur>decalage_hauteur)
+    if(height>decalage_hauteur)
     {
       if(decalage_gauche==0) // La ligne de gauche est visible
-        Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),Hauteur-decalage_hauteur);
+        Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
 
       if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-        Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),Hauteur-decalage_hauteur);
+        Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
     }
   }
 
@@ -4487,14 +4487,14 @@ void Rectangle_Degrade_12_7(void)
   {
       // Mauvais bouton > anulation de l'opération.
       // On a déjà vidé la pile, il reste à effacer le rectangle XOR
-      short Largeur, Hauteur;
+      short width, height;
       short decalage_largeur = 0;
       short decalage_hauteur = 0;
       short decalage_gauche = 0;
       short decalage_haut = 0;
 
-      Largeur = abs(RBX-RAX);
-      Hauteur = abs(RBY-RAY);
+      width = abs(RBX-RAX);
+      height = abs(RBY-RAY);
 
       if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
           decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
@@ -4503,15 +4503,15 @@ void Rectangle_Degrade_12_7(void)
           decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
 
       // Dessin dans la zone de dessin normale
-      Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Largeur - decalage_largeur);
+      Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width - decalage_largeur);
       if(decalage_hauteur == 0)
-          Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,Largeur - decalage_largeur);
+          Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,width - decalage_largeur);
 
-      Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+      Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
       if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-          Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+          Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
 
-      UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,Largeur+1-decalage_largeur,Hauteur+1-decalage_hauteur);
+      UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
 
       // Dessin dans la zone zoomée
       if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
@@ -4537,22 +4537,22 @@ void Rectangle_Degrade_12_7(void)
           if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
               decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
 
-          if(Largeur > decalage_largeur)
+          if(width > decalage_largeur)
           {
               if(decalage_haut==0) // La ligne du haut est visible
-                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),Largeur-decalage_largeur);
+                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),width-decalage_largeur);
 
               if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),Largeur-decalage_largeur);
+                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),width-decalage_largeur);
           }
 
-          if(Hauteur>decalage_hauteur)
+          if(height>decalage_hauteur)
           {
               if(decalage_gauche==0) // La ligne de gauche est visible
-                  Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),Hauteur-decalage_hauteur);
+                  Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
 
               if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-                  Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),Hauteur-decalage_hauteur);
+                  Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
           }
       }
   }
@@ -4635,14 +4635,14 @@ void Rectangle_Degrade_0_9(void)
     {
         // Vecteur nul > pas de rectangle tracé
         // Du coup on doit effacer la preview xor ...
-        short Largeur, Hauteur;
+        short width, height;
         short decalage_largeur = 0;
         short decalage_hauteur = 0;
         short decalage_gauche = 0;
         short decalage_haut = 0;
 
-        Largeur = abs(Rect_Fin_X-Rect_Debut_X);
-        Hauteur = abs(Rect_Fin_Y-Rect_Debut_Y);
+        width = abs(Rect_Fin_X-Rect_Debut_X);
+        height = abs(Rect_Fin_Y-Rect_Debut_Y);
 
         if (Max(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
             decalage_largeur = Max(Rect_Debut_X,Rect_Fin_X) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
@@ -4651,15 +4651,15 @@ void Rectangle_Degrade_0_9(void)
             decalage_hauteur = Max(Rect_Debut_Y,Rect_Fin_Y) - Min(Principal_Hauteur_image,Menu_Ordonnee);
 
         // Dessin dans la zone de dessin normale
-        Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,Largeur - decalage_largeur);
+        Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,width - decalage_largeur);
         if(decalage_hauteur == 0)
-            Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Max(Rect_Debut_Y,Rect_Fin_Y)-1-Principal_Decalage_Y,Largeur - decalage_largeur);
+            Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Max(Rect_Debut_Y,Rect_Fin_Y)-1-Principal_Decalage_Y,width - decalage_largeur);
 
-        Ligne_verticale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+        Ligne_verticale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,height-decalage_hauteur);
         if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-            Ligne_verticale_XOR(Max(Rect_Debut_X,Rect_Fin_X)-1-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,Hauteur-decalage_hauteur);
+            Ligne_verticale_XOR(Max(Rect_Debut_X,Rect_Fin_X)-1-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,height-decalage_hauteur);
 
-        UpdateRect(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,Largeur+1-decalage_largeur,Hauteur+1-decalage_hauteur);
+        UpdateRect(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
 
         // Dessin dans la zone zoomée
         if(Loupe_Mode && Min(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom && Max(Rect_Debut_X,Rect_Fin_X)>Limite_Gauche_Zoom && Min(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom && Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_Haut_Zoom )
@@ -4685,22 +4685,22 @@ void Rectangle_Degrade_0_9(void)
             if(Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
                 decalage_hauteur += Max(Rect_Debut_Y,Rect_Fin_Y) - Limite_visible_Bas_Zoom;
 
-            if(Largeur > decalage_largeur)
+            if(width > decalage_largeur)
             {
                 if(decalage_haut==0) // La ligne du haut est visible
-                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Min(Rect_Debut_Y,Rect_Fin_Y),Largeur-decalage_largeur);
+                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Min(Rect_Debut_Y,Rect_Fin_Y),width-decalage_largeur);
 
                 if(Max(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Max(Rect_Debut_Y,Rect_Fin_Y),Largeur-decalage_largeur);
+                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Max(Rect_Debut_Y,Rect_Fin_Y),width-decalage_largeur);
             }
 
-            if(Hauteur>decalage_hauteur)
+            if(height>decalage_hauteur)
             {
                 if(decalage_gauche==0) // La ligne de gauche est visible
-                    Ligne_verticale_XOR_Zoom(Min(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),Hauteur-decalage_hauteur);
+                    Ligne_verticale_XOR_Zoom(Min(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),height-decalage_hauteur);
 
                 if(Max(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-                    Ligne_verticale_XOR_Zoom(Max(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),Hauteur-decalage_hauteur);
+                    Ligne_verticale_XOR_Zoom(Max(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),height-decalage_hauteur);
             }
         }
     }

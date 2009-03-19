@@ -221,7 +221,7 @@ byte Pixel_dans_cercle(void)
         return 0;
 }
 
-void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word Largeur,word Hauteur,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
+void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word width,word height,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
 {
         // ESI = adresse de la source en (S_Pox_X,S_Pos_Y)
         byte* esi = Source + S_Pos_Y * Largeur_source + S_Pos_X;
@@ -229,12 +229,12 @@ void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_
         // EDI = adresse de la destination (D_Pos_X,D_Pos_Y)
         byte* edi = dest + D_Pos_Y * Largeur_destination + D_Pos_X;
 
-        int Ligne;
+        int line;
 
         // Pour chaque ligne
-        for (Ligne=0;Ligne < Hauteur; Ligne++)
+        for (line=0;line < height; line++)
         {
-                memcpy(edi,esi,Largeur);
+                memcpy(edi,esi,width);
 
                 // Passe à la ligne suivante
                 esi+=Largeur_source;
@@ -259,7 +259,7 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
   byte* Debut_de_colonne = Source + Brosse_Largeur - 1;
   edi = dest;
 
-  // Largeur de la source = Hauteur de la destination
+  // Largeur de la source = hauteur de la destination
   dx = bx = Brosse_Largeur;
 
   // Pour chaque ligne
@@ -280,26 +280,26 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
 
 // Remplacer une couleur par une autre dans un buffer
 
-void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short Largeur,short Hauteur,short Largeur_buffer)
+void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short width,short height,short Largeur_buffer)
 {
   int dx,cx;
 
   // Pour chaque ligne
-  for(dx=Hauteur;dx>0;dx--)
+  for(dx=height;dx>0;dx--)
   {
     // Pour chaque pixel
-    for(cx=Largeur;cx>0;cx--)
+    for(cx=width;cx>0;cx--)
     {
     *Buffer = Table_conv[*Buffer];
     Buffer++;
     }
-    Buffer += Largeur_buffer-Largeur;
+    Buffer += Largeur_buffer-width;
   }
 }
 
-void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word Largeur_image)
+void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word image_width)
 {
-    byte* Src=Debut_Y*Largeur_image+Debut_X+Principal_Ecran; //Adr départ image (ESI)
+    byte* Src=Debut_Y*image_width+Debut_X+Principal_Ecran; //Adr départ image (ESI)
     byte* Dest=Brosse; //Adr dest brosse (EDI)
     int dx;
 
@@ -311,7 +311,7 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
     memcpy(Dest,Src,Brosse_Largeur);
 
     // On passe à la ligne suivante
-    Src+=Largeur_image;
+    Src+=image_width;
     Dest+=Brosse_Largeur;
    }
 
@@ -342,19 +342,19 @@ void Set_mouse_position(void)
 
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
 {
-  int Ligne;
+  int line;
   int counter;
   byte* Adresse;
 
   byte Ancien;
 
   // Pour chaque ligne :
-  for(Ligne = Limite_Haut;Ligne <= Limite_Bas; Ligne++)
+  for(line = Limite_Haut;line <= Limite_Bas; line++)
   {
     // Pour chaque pixel sur la ligne :
     for (counter = Limite_Gauche;counter <= Limite_Droite;counter ++)
     {
-      Adresse = Principal_Ecran+Ligne*Principal_Largeur_image+counter;
+      Adresse = Principal_Ecran+line*Principal_Largeur_image+counter;
       Ancien=*Adresse;
       *Adresse = Table_de_remplacement[Ancien];
     }
@@ -596,14 +596,14 @@ void Scroll_picture(short x_offset,short y_offset)
 }
 
 void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
-        word factor, word Largeur
+        word factor, word width
 )
 {
         byte color;
         word X;
 
         // Pour chaque pixel
-        for(X=0;X<Largeur;X++){
+        for(X=0;X<width;X++){
                 color = *Ligne_originale;
 
                 memset(Ligne_zoomee,color,factor);
@@ -741,12 +741,12 @@ int Max(int a,int b)
 
 
 // Fonction retournant le libellé d'une mode (ex: " 320x200")
-char * Libelle_mode(int Mode)
+char * Libelle_mode(int mode)
 {
   static char Chaine[24];
-  if (! Mode_video[Mode].Fullscreen)
+  if (! Mode_video[mode].Fullscreen)
     return "window";
-  sprintf(Chaine, "%dx%d", Mode_video[Mode].Largeur, Mode_video[Mode].Hauteur);
+  sprintf(Chaine, "%dx%d", Mode_video[mode].Width, Mode_video[mode].Height);
 
   return Chaine;
 }

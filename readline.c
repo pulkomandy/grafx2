@@ -52,20 +52,20 @@ void Supprimer_caractere(char * Chaine, byte Position)
 }
 
 
-void Inserer_caractere(char * Chaine, char Lettre, byte Position)
+void Inserer_caractere(char * Chaine, char letter, byte Position)
 //  Insertion d'une LETTRE à une certaine POSITION
 //  dans une CHAINE d'une certaine TAILLE.
 {
   char Char_tempo;
 
-  for (;Lettre!='\0';Position++)
+  for (;letter!='\0';Position++)
   {
     // On mémorise le caractère qui se trouve en "Position"
     Char_tempo=Chaine[Position];
     // On splotch la lettre à insérer
-    Chaine[Position]=Lettre;
-    // On place le caractère mémorisé dans "Lettre" comme nouvelle lettre à insérer
-    Lettre=Char_tempo;
+    Chaine[Position]=letter;
+    // On place le caractère mémorisé dans "letter" comme nouvelle lettre à insérer
+    letter=Char_tempo;
   }
   // On termine la chaine
   Chaine[Position]='\0';

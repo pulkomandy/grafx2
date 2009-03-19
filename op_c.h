@@ -201,7 +201,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs);
 
 // Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int Largeur,int Hauteur,Composantes * palette);
+int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int width,int height,Composantes * palette);
 
 
 

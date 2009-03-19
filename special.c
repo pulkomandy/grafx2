@@ -31,18 +31,18 @@
 
 //---------------------- Modifier le pinceau spécial -------------------------
 
-void Modifier_pinceau(int Largeur, int Hauteur)
+void Modifier_pinceau(int width, int height)
 {
   int Pos_X,Pos_Y;
   int X,Y;
   float Rayon2;
 
-  if (Largeur<1) Largeur=1;
-  if (Hauteur<1) Hauteur=1;
-  if (Largeur>TAILLE_MAXI_PINCEAU) Largeur=TAILLE_MAXI_PINCEAU;
-  if (Hauteur>TAILLE_MAXI_PINCEAU) Hauteur=TAILLE_MAXI_PINCEAU;
-  Pinceau_Largeur=Largeur;
-  Pinceau_Hauteur=Hauteur;
+  if (width<1) width=1;
+  if (height<1) height=1;
+  if (width>TAILLE_MAXI_PINCEAU) width=TAILLE_MAXI_PINCEAU;
+  if (height>TAILLE_MAXI_PINCEAU) height=TAILLE_MAXI_PINCEAU;
+  Pinceau_Largeur=width;
+  Pinceau_Hauteur=height;
   Pinceau_Decalage_X=Pinceau_Largeur>>1;
   Pinceau_Decalage_Y=Pinceau_Hauteur>>1;
   switch (Pinceau_Forme)

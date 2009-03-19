@@ -611,18 +611,18 @@ void Bouton_Cacher_menu(void);
 /*!
     Load picture from file.
 */
-void Load_picture(byte Image);
+void Load_picture(byte image);
 
 /*!
     Save picture to file.
 */
-void Save_picture(byte Image);
+void Save_picture(byte image);
 
 
 /*!
     Generic color tagging menu, for various effects.
 */
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * Mode, byte can_cancel, const char *Section_aide);
+void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cancel, const char *Section_aide);
 
 
 /*!

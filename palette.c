@@ -60,10 +60,10 @@ int Color_Max=255;
 int Color_DemiPas=0;
 
 
-void Set_Palette_RGB_Scale(int Grad)
+void Set_Palette_RGB_Scale(int scale)
 {
-  if (Grad>= 2 && Grad <= 256)
-    Graduations_RGB = Grad;
+  if (scale>= 2 && scale <= 256)
+    Graduations_RGB = scale;
 }
 
 byte Palette_Scale_Component(byte comp)
@@ -640,14 +640,14 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
 
 
-void Palette_Modifier_jauge(T_Bouton_scroller * Jauge,
-                            word Nb_elements, word Position,
+void Palette_Modifier_jauge(T_Bouton_scroller * slider,
+                            word nb_elements, word Position,
                             char * Valeur, short Pos_X)
 {
-  Jauge->Nb_elements=Nb_elements;
-  Jauge->Position=Position;
-  Calculer_hauteur_curseur_jauge(Jauge);
-  Fenetre_Dessiner_jauge(Jauge);
+  slider->Nb_elements=nb_elements;
+  slider->Position=Position;
+  Calculer_hauteur_curseur_jauge(slider);
+  Fenetre_Dessiner_jauge(slider);
   Print_compteur(Pos_X,172,Valeur,CM_Noir,CM_Clair);
 }
 

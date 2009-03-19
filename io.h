@@ -22,21 +22,21 @@
 word  endian_magic16(word x);
 dword endian_magic32(dword x);
 
-int read_byte(FILE *Fichier, byte *Dest);
-int write_byte(FILE *Fichier, byte b);
+int read_byte(FILE *file, byte *Dest);
+int write_byte(FILE *file, byte b);
 
-int read_bytes(FILE *Fichier, void *Dest, size_t Taille);
-int write_bytes(FILE *Fichier, void *Dest, size_t Taille);
+int read_bytes(FILE *file, void *Dest, size_t Taille);
+int write_bytes(FILE *file, void *Dest, size_t Taille);
 
-int read_word_le(FILE *Fichier, word *Dest);
-int write_word_le(FILE *Fichier, word w);
-int read_dword_le(FILE *Fichier, dword *Dest);
-int write_dword_le(FILE *Fichier, dword dw);
+int read_word_le(FILE *file, word *Dest);
+int write_word_le(FILE *file, word w);
+int read_dword_le(FILE *file, dword *Dest);
+int write_dword_le(FILE *file, dword dw);
 
-int read_word_be(FILE *Fichier, word *Dest);
-int write_word_be(FILE *Fichier, word w);
-int read_dword_be(FILE *Fichier, dword *Dest);
-int write_dword_be(FILE *Fichier, dword dw);
+int read_word_be(FILE *file, word *Dest);
+int write_word_be(FILE *file, word w);
+int read_dword_be(FILE *file, dword *Dest);
+int write_dword_be(FILE *file, dword dw);
 
 void Extraire_nom_fichier(char *dest, const char *Source);
 void Extraire_chemin(char *dest, const char *Source);
@@ -49,9 +49,9 @@ char * Position_dernier_slash(const char * Chaine);
   #define SEPARATEUR_CHEMIN "/"
 #endif
 
-//   Détermine si un fichier passé en paramètre existe ou non dans le
+//   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
-int Fichier_existe(char * Fichier);
+int Fichier_existe(char * fname);
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 int  Repertoire_existe(char * Repertoire);

@@ -62,12 +62,12 @@ void Warning_message(char * Message);
 
 void Afficher_limites_de_l_image(void);
 void Afficher_ecran(void);
-void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
+void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word width,word height,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD);
-void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte Couleur);
-void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
-void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur);
+void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word width,word height,byte Couleur);
+void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word width,word height);
+void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word width,word height);
+void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word width,word height);
 
 void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite);
 void Afficher_pinceau_dans_menu(void);
@@ -80,7 +80,7 @@ void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type);
 byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);
 
-void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur);
-void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur);
+void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short width);
+void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short height);
 
 #endif

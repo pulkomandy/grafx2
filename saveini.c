@@ -603,8 +603,8 @@ int Sauver_INI(T_Config * Conf)
   if ((Retour=Sauver_INI_Set_strings (Ancien_fichier,Nouveau_fichier,Buffer,"Default_video_mode",Libelle_mode(Conf->Resolution_par_defaut))))
     goto Erreur_Retour;
 
-  Valeurs[0]=Mode_video[0].Largeur;
-  Valeurs[1]=Mode_video[0].Hauteur;
+  Valeurs[0]=Mode_video[0].Width;
+  Valeurs[1]=Mode_video[0].Height;
   if ((Retour=Sauver_INI_Set_values (Ancien_fichier,Nouveau_fichier,Buffer,"Default_window_size",2,Valeurs,0)))
     goto Erreur_Retour;
 

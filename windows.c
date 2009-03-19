@@ -67,7 +67,7 @@ void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 
   // -- Cadre général avec couleurs paramètrables --
 
-void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Hauteur,
+void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word width,word height,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD)
 // Paramètres de couleurs:
 // Couleur_HG =Bords Haut et Gauche
@@ -79,60 +79,60 @@ void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word Largeur,word Haut
   // Bord haut (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
         Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
-        (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_HG);
+        (width-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_HG);
 
   // Bord bas (sans les extrémités)
   Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+Hauteur-1)*Menu_Facteur_Y),
-        (Largeur-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_BD);
+        Fenetre_Pos_Y+((Pos_Y+height-1)*Menu_Facteur_Y),
+        (width-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_BD);
 
   // Bord gauche (sans les extrémités)
   Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
-        Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_HG);
+        Menu_Facteur_X,(height-2)*Menu_Facteur_Y,Couleur_HG);
 
   // Bord droite (sans les extrémités)
-  Block(Fenetre_Pos_X+((Pos_X+Largeur-1)*Menu_Facteur_X),
+  Block(Fenetre_Pos_X+((Pos_X+width-1)*Menu_Facteur_X),
         Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
-        Menu_Facteur_X,(Hauteur-2)*Menu_Facteur_Y,Couleur_BD);
+        Menu_Facteur_X,(height-2)*Menu_Facteur_Y,Couleur_BD);
 
   // Coin haut gauche
   Pixel_dans_fenetre(Pos_X,Pos_Y,Couleur_CHG);
   // Coin haut droite
-  Pixel_dans_fenetre(Pos_X+Largeur-1,Pos_Y,Couleur_S);
+  Pixel_dans_fenetre(Pos_X+width-1,Pos_Y,Couleur_S);
   // Coin bas droite
-  Pixel_dans_fenetre(Pos_X+Largeur-1,Pos_Y+Hauteur-1,Couleur_CBD);
+  Pixel_dans_fenetre(Pos_X+width-1,Pos_Y+height-1,Couleur_CBD);
   // Coin bas gauche
-  Pixel_dans_fenetre(Pos_X,Pos_Y+Hauteur-1,Couleur_S);
+  Pixel_dans_fenetre(Pos_X,Pos_Y+height-1,Couleur_S);
 }
 
   // -- Cadre dont tout le contour est d'une seule couleur --
 
-void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word Largeur,word Hauteur,byte Couleur)
+void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word width,word height,byte Couleur)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,Couleur,Couleur,Couleur,Couleur,Couleur);
+  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,Couleur,Couleur,Couleur,Couleur,Couleur);
 }
 
   // -- Cadre creux: foncé en haut-gauche et clair en bas-droite --
 
-void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
+void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word width,word height)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
+  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
 }
 
   // -- Cadre bombé: clair en haut-gauche et foncé en bas-droite --
 
-void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
+void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word width,word height)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,Largeur,Hauteur,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
+  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
 }
 
   // -- Cadre de séparation: un cadre bombé dans un cadre creux (3D!!!) --
 
-void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word Largeur,word Hauteur)
+void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word width,word height)
 {
-  Fenetre_Afficher_cadre_creux(Pos_X,Pos_Y,Largeur,Hauteur);
-  Fenetre_Afficher_cadre_bombe(Pos_X+1,Pos_Y+1,Largeur-2,Hauteur-2);
+  Fenetre_Afficher_cadre_creux(Pos_X,Pos_Y,width,height);
+  Fenetre_Afficher_cadre_bombe(Pos_X+1,Pos_Y+1,width-2,height-2);
 }
 
 
@@ -226,7 +226,7 @@ void Afficher_palette_du_menu(void)
 {
   int Couleur;
   byte Hauteur_cellule=32/Menu_Cellules_Y;
-  // Largeur: Menu_Taille_couleur
+  // width: Menu_Taille_couleur
   
   if (Menu_visible)
   {
@@ -305,8 +305,8 @@ void Changer_cellules_palette()
 
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
-  Bouton[BOUTON_CHOIX_COL].Largeur=(Menu_Taille_couleur*Menu_Cellules_X)-1;
-  Bouton[BOUTON_CHOIX_COL].Hauteur=32/Menu_Cellules_Y*Menu_Cellules_Y-1;
+  Bouton[BOUTON_CHOIX_COL].Width=(Menu_Taille_couleur*Menu_Cellules_X)-1;
+  Bouton[BOUTON_CHOIX_COL].Height=32/Menu_Cellules_Y*Menu_Cellules_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -318,10 +318,10 @@ void Changer_cellules_palette()
 int Couleur_palette()
 {
   int Col;
-  int Ligne;
-  Ligne=(((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)/(32/Menu_Cellules_Y);
+  int line;
+  line=(((Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y)-2)/(32/Menu_Cellules_Y);
   
-  Col=Couleur_debut_palette+Ligne+
+  Col=Couleur_debut_palette+line+
     ((((Mouse_X/Menu_Facteur_X)-(LARGEUR_MENU+1))/Menu_Taille_couleur)*Menu_Cellules_Y);
   if (Col<0 || Col>255)
     return -1;
@@ -818,7 +818,7 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
 
   Pos_menu_Y=Bouton[Numero_bouton].Decalage_Y;
   Pos_menu_X=Bouton[Numero_bouton].Decalage_X;
-  if (Bouton[Numero_bouton].Forme != FORME_BOUTON_TRIANGLE_BAS_DROITE)
+  if (Bouton[Numero_bouton].Shape != FORME_BOUTON_TRIANGLE_BAS_DROITE)
   {
     Pos_menu_Y+=1;
     Pos_menu_X+=1;
@@ -998,21 +998,21 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
   word Couleur,Vraie_couleur;
   word Debut_X,Debut_Y;
   word Fin_X,Fin_Y;
-  word Largeur;
-  word Hauteur;
+  word width;
+  word height;
   word Coin_X=Fenetre_Pos_X+Fenetre_Largeur*Menu_Facteur_X; // |_ Coin bas-droit
   word Coin_Y=Fenetre_Pos_Y+Fenetre_Hauteur*Menu_Facteur_Y; // |  de la fenêtre +1
 
 
   if (Config.Couleurs_separees)
   {
-    Largeur=(Menu_Taille_couleur-1)*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y*(32/Menu_Cellules_Y-1);
+    width=(Menu_Taille_couleur-1)*Menu_Facteur_X;
+    height=Menu_Facteur_Y*(32/Menu_Cellules_Y-1);
   }
   else
   {
-    Largeur=Menu_Taille_couleur*Menu_Facteur_X;
-    Hauteur=Menu_Facteur_Y*(32/Menu_Cellules_Y);
+    width=Menu_Taille_couleur*Menu_Facteur_X;
+    height=Menu_Facteur_Y*(32/Menu_Cellules_Y);
   }
 
   for (Couleur=0,Vraie_couleur=Couleur_debut_palette;Couleur<Menu_Cellules_X*Menu_Cellules_Y;Couleur++,Vraie_couleur++)
@@ -1021,13 +1021,13 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
     {
       Debut_X=(LARGEUR_MENU+1+(Couleur/Menu_Cellules_Y)*Menu_Taille_couleur)*Menu_Facteur_X;
       Debut_Y=Menu_Ordonnee_avant_fenetre+((2+((Couleur%Menu_Cellules_Y)*(32/Menu_Cellules_Y)))*Menu_Facteur_Y);
-      Fin_X=Debut_X+Largeur;
-      Fin_Y=Debut_Y+Hauteur;
+      Fin_X=Debut_X+width;
+      Fin_Y=Debut_Y+height;
 
       //   On affiche le bloc en entier si on peut, sinon on le découpe autour
       // de la fenêtre.
       if ( (Debut_Y>=Coin_Y) || (Fin_X<=Fenetre_Pos_X) || (Debut_X>=Coin_X) )
-        Block(Debut_X,Debut_Y,Largeur,Hauteur,Vraie_couleur);
+        Block(Debut_X,Debut_Y,width,height,Vraie_couleur);
       else
       {
 
@@ -1038,14 +1038,14 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
             if ( (Fin_X>Coin_X) && (Fin_Y>Coin_Y) )
             {
               Block(Coin_X,Debut_Y,Fin_X-Coin_X,Coin_Y-Debut_Y,Vraie_couleur);
-              Block(Debut_X,Coin_Y,Largeur,Fin_Y-Coin_Y,Vraie_couleur);
+              Block(Debut_X,Coin_Y,width,Fin_Y-Coin_Y,Vraie_couleur);
             }
             else
             {
               if (Fin_Y>Coin_Y)
-                Block(Debut_X,Coin_Y,Largeur,Fin_Y-Coin_Y,Vraie_couleur);
+                Block(Debut_X,Coin_Y,width,Fin_Y-Coin_Y,Vraie_couleur);
               else
-                Block(Coin_X,Debut_Y,Fin_X-Coin_X,Hauteur,Vraie_couleur);
+                Block(Coin_X,Debut_Y,Fin_X-Coin_X,height,Vraie_couleur);
             }
           }
         }
@@ -1056,10 +1056,10 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
             if (Fin_Y>Coin_Y)
             {
               Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,Coin_Y-Debut_Y,Vraie_couleur);
-              Block(Debut_X,Coin_Y,Largeur,Fin_Y-Coin_Y,Vraie_couleur);
+              Block(Debut_X,Coin_Y,width,Fin_Y-Coin_Y,Vraie_couleur);
             }
             else
-              Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,Hauteur,Vraie_couleur);
+              Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,height,Vraie_couleur);
           }
           else
           {
@@ -1067,12 +1067,12 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
             {
               Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,Coin_Y-Debut_Y,Vraie_couleur);
               Block(Coin_X,Debut_Y,Fin_X-Coin_X,Coin_Y-Debut_Y,Vraie_couleur);
-              Block(Debut_X,Coin_Y,Largeur,Fin_Y-Coin_Y,Vraie_couleur);
+              Block(Debut_X,Coin_Y,width,Fin_Y-Coin_Y,Vraie_couleur);
             }
             else
             {
-              Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,Hauteur,Vraie_couleur);
-              Block(Coin_X,Debut_Y,Fin_X-Coin_X,Hauteur,Vraie_couleur);
+              Block(Debut_X,Debut_Y,Fenetre_Pos_X-Debut_X,height,Vraie_couleur);
+              Block(Coin_X,Debut_Y,Fin_X-Coin_X,height,Vraie_couleur);
             }
           }
         }
@@ -1088,8 +1088,8 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
         relative_x = ((short)Debut_X - (short)Fenetre_Pos_X);
         relative_y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
 
-        for (Pos_Y=relative_y;Pos_Y<(relative_y+Hauteur)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
-          for (Pos_X=relative_x;Pos_X<(relative_x+Largeur)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
+        for (Pos_Y=relative_y;Pos_Y<(relative_y+height)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
+          for (Pos_X=relative_x;Pos_X<(relative_x+width)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
             if (Pos_X>=0&&Pos_Y>=0)
               Pixel_fond(Pos_X,Pos_Y,Vraie_couleur);
       }
@@ -1425,11 +1425,11 @@ void Afficher_barre_de_split(void)
 
   // -- Afficher une barre horizontale XOR zoomée
 
-void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
+void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short width)
 {
   short Pos_X_reelle=Principal_X_Zoom+(Pos_X-Loupe_Decalage_X)*Loupe_Facteur;
   short Pos_Y_reelle=(Pos_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-  short Largeur_reelle=Largeur*Loupe_Facteur;
+  short Largeur_reelle=width*Loupe_Facteur;
   short Pos_Y_Fin=(Pos_Y_reelle+Loupe_Facteur<Menu_Ordonnee)?Pos_Y_reelle+Loupe_Facteur:Menu_Ordonnee;
   short Indice;
 
@@ -1442,11 +1442,11 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short Largeur)
 
   // -- Afficher une barre verticale XOR zoomée
 
-void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
+void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short height)
 {
   short Pos_X_reelle=Principal_X_Zoom+(Pos_X-Loupe_Decalage_X)*Loupe_Facteur;
   short Pos_Y_reelle=(Pos_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-  short Pos_Y_Fin=(Pos_Y_reelle+(Hauteur*Loupe_Facteur<Menu_Ordonnee))?Pos_Y_reelle+(Hauteur*Loupe_Facteur):Menu_Ordonnee;
+  short Pos_Y_Fin=(Pos_Y_reelle+(height*Loupe_Facteur<Menu_Ordonnee))?Pos_Y_reelle+(height*Loupe_Facteur):Menu_Ordonnee;
   short Indice;
 
   for (Indice=Pos_Y_reelle; Indice<Pos_Y_Fin; Indice++)
@@ -1460,7 +1460,7 @@ void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short Hauteur)
 
 void Afficher_curseur(void)
 {
-  byte  Forme;
+  byte  shape;
   short Debut_X;
   short Debut_Y;
   short Fin_X;
@@ -1478,11 +1478,11 @@ void Afficher_curseur(void)
   if ( ( (Mouse_Y<Menu_Ordonnee)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
     || (Fenetre) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
-    Forme=Forme_curseur;
+    shape=Forme_curseur;
   else
-    Forme=FORME_CURSEUR_FLECHE;
+    shape=FORME_CURSEUR_FLECHE;
 
-  switch(Forme)
+  switch(shape)
   {
     case FORME_CURSEUR_CIBLE :
       if (!Cacher_pinceau)
@@ -1607,8 +1607,8 @@ void Afficher_curseur(void)
 
     case FORME_CURSEUR_FLECHE :
     case FORME_CURSEUR_SABLIER :
-      Debut_X=Mouse_X-Curseur_Decalage_X[Forme];
-      Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
+      Debut_X=Mouse_X-Curseur_Decalage_X[shape];
+      Debut_Y=Mouse_Y-Curseur_Decalage_Y[shape];
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
       {
         if(Pos_X<0) continue;
@@ -1617,7 +1617,7 @@ void Afficher_curseur(void)
         {
           if(Pos_Y<0) continue;
           if(Pos_Y>=Hauteur_ecran) break;
-          Couleur=SPRITE_CURSEUR[Forme][Compteur_Y][Compteur_X];
+          Couleur=SPRITE_CURSEUR[shape][Compteur_Y][Compteur_X];
           // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
           FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
           if (Couleur!=CM_Trans)
@@ -1631,7 +1631,7 @@ void Afficher_curseur(void)
       Pos_X=Pinceau_X-Principal_Decalage_X;
       Pos_Y=Pinceau_Y-Principal_Decalage_Y;
 
-      Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // Largeur de la barre XOR
+      Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // width de la barre XOR
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
@@ -1762,7 +1762,7 @@ void Afficher_curseur(void)
 
 void Effacer_curseur(void)
 {
-  byte  Forme;
+  byte  shape;
   int Debut_X; // int car sont parfois négatifs ! (quand on dessine sur un bord)
   int Debut_Y;
   short Fin_X;
@@ -1782,11 +1782,11 @@ void Effacer_curseur(void)
       && ( (!Loupe_Mode) || (Mouse_X<Principal_Split)
                          || (Mouse_X>=Principal_X_Zoom) ) )
     || (Fenetre) || (Forme_curseur==FORME_CURSEUR_SABLIER) )
-    Forme=Forme_curseur;
+    shape=Forme_curseur;
   else
-    Forme=FORME_CURSEUR_FLECHE;
+    shape=FORME_CURSEUR_FLECHE;
 
-  switch(Forme)
+  switch(shape)
   {
     case FORME_CURSEUR_CIBLE :
       if (!Cacher_curseur)
@@ -1904,8 +1904,8 @@ void Effacer_curseur(void)
 
     case FORME_CURSEUR_FLECHE :
     case FORME_CURSEUR_SABLIER :
-      Debut_X=Mouse_X-Curseur_Decalage_X[Forme];
-      Debut_Y=Mouse_Y-Curseur_Decalage_Y[Forme];
+      Debut_X=Mouse_X-Curseur_Decalage_X[shape];
+      Debut_Y=Mouse_Y-Curseur_Decalage_Y[shape];
 
       for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
       {
@@ -1925,7 +1925,7 @@ void Effacer_curseur(void)
       Pos_X=Pinceau_X-Principal_Decalage_X;
       Pos_Y=Pinceau_Y-Principal_Decalage_Y;
 
-      Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // Largeur de la barre XOR
+      Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // width de la barre XOR
       if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
@@ -2063,29 +2063,29 @@ void Effacer_curseur(void)
 
 void Afficher_ecran(void)
 {
-  word Largeur;
-  word Hauteur;
+  word width;
+  word height;
 
   // ---/\/\/\  Partie non zoomée: /\/\/\---
   if (Loupe_Mode)
   {
     if (Principal_Largeur_image<Principal_Split)
-      Largeur=Principal_Largeur_image;
+      width=Principal_Largeur_image;
     else
-      Largeur=Principal_Split;
+      width=Principal_Split;
   }
   else
   {
     if (Principal_Largeur_image<Largeur_ecran)
-      Largeur=Principal_Largeur_image;
+      width=Principal_Largeur_image;
     else
-      Largeur=Largeur_ecran;
+      width=Largeur_ecran;
   }
   if (Principal_Hauteur_image<Menu_Ordonnee)
-    Hauteur=Principal_Hauteur_image;
+    height=Principal_Hauteur_image;
   else
-    Hauteur=Menu_Ordonnee;
-  Display_screen(Largeur,Hauteur,Principal_Largeur_image);
+    height=Menu_Ordonnee;
+  Display_screen(width,height,Principal_Largeur_image);
 
   // Effacement de la partie non-image dans la partie non zoomée:
   if (Loupe_Mode)
@@ -2099,7 +2099,7 @@ void Afficher_ecran(void)
       Block(Principal_Largeur_image,0,(Largeur_ecran-Principal_Largeur_image),Menu_Ordonnee,0);
   }
   if (Principal_Hauteur_image<Menu_Ordonnee)
-    Block(0,Principal_Hauteur_image,Largeur,(Menu_Ordonnee-Hauteur),0);
+    Block(0,Principal_Hauteur_image,width,(Menu_Ordonnee-height),0);
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Loupe_Mode)
@@ -2109,17 +2109,17 @@ void Afficher_ecran(void)
 
     // Calcul de la largeur visible
     if (Principal_Largeur_image<Loupe_Largeur)
-      Largeur=Principal_Largeur_image;
+      width=Principal_Largeur_image;
     else
-      Largeur=Loupe_Largeur;
+      width=Loupe_Largeur;
 
     // Calcul du nombre de lignes visibles de l'image zoomée
     if (Principal_Hauteur_image<Loupe_Hauteur)
-      Hauteur=Principal_Hauteur_image*Loupe_Facteur;
+      height=Principal_Hauteur_image*Loupe_Facteur;
     else
-      Hauteur=Menu_Ordonnee;
+      height=Menu_Ordonnee;
 
-    Display_zoomed_screen(Largeur,Hauteur,Principal_Largeur_image,Buffer_de_ligne_horizontale);
+    Display_zoomed_screen(width,height,Principal_Largeur_image,Buffer_de_ligne_horizontale);
 
     // Effacement de la partie non-image dans la partie zoomée:
     if (Principal_Largeur_image<Loupe_Largeur)
@@ -2127,7 +2127,7 @@ void Afficher_ecran(void)
             (Loupe_Largeur-Principal_Largeur_image)*Loupe_Facteur,
             Menu_Ordonnee,0);
     if (Principal_Hauteur_image<Loupe_Hauteur)
-      Block(Principal_X_Zoom,Hauteur,Largeur*Loupe_Facteur,(Menu_Ordonnee-Hauteur),0);
+      Block(Principal_X_Zoom,height,width*Loupe_Facteur,(Menu_Ordonnee-height),0);
   }
 
   // ---/\/\/\ Affichage des limites /\/\/\---

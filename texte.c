@@ -59,10 +59,10 @@
 
 typedef struct T_FONTE
 {
-  char * Nom;
+  char * Name;
   int    EstTrueType;
   int    EstImage;
-  char   Libelle[22];
+  char   Label[22];
   
   // Liste chainée simple
   struct T_FONTE * Suivante;
@@ -82,15 +82,15 @@ int Compare_fontes(T_FONTE * Fonte1, T_FONTE * Fonte2)
     return -1;
   if (Fonte2->EstImage && !Fonte1->EstImage)
     return 1;
-  return strcmp(Fonte1->Libelle, Fonte2->Libelle);
+  return strcmp(Fonte1->Label, Fonte2->Label);
 }
 
 // Ajout d'une fonte à la liste.
-void Ajout_fonte(const char *Nom)
+void Ajout_fonte(const char *name)
 {
   char * Nom_fonte;
   T_FONTE * Fonte;
-  int Taille=strlen(Nom)+1;
+  int Taille=strlen(name)+1;
   int Indice;
   
   // Détermination du type:
@@ -100,24 +100,24 @@ void Ajout_fonte(const char *Nom)
   if (Taille < 6) return;
   
   char strFontName[512];
-  CFStringRef CFSFontName;// = CFSTR(Nom);
+  CFStringRef CFSFontName;// = CFSTR(name);
 
-  CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) Nom, Taille - 1, kCFStringEncodingASCII, false);
+  CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) name, Taille - 1, kCFStringEncodingASCII, false);
   // Fix some funny names
   CFStringGetCString(CFSFontName, strFontName, 512, kCFStringEncodingASCII);
 
   // Now we have a printable font name, use it
-  Nom = strFontName;
+  name = strFontName;
 
 #else
   if (Taille<5 ||
-      Nom[Taille-5]!='.')
+      name[Taille-5]!='.')
     return;
 #endif
 
   Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
 
-  switch (EXTID(tolower(Nom[Taille-4]), tolower(Nom[Taille-3]), tolower(Nom[Taille-2])))
+  switch (EXTID(tolower(name[Taille-4]), tolower(name[Taille-3]), tolower(name[Taille-2])))
   {
     case EXTID('t','t','f'):
     case EXTID('f','o','n'):
@@ -142,7 +142,7 @@ void Ajout_fonte(const char *Nom)
       break;
     default:
       #ifdef __macosx__
-         if(strcasecmp(&Nom[Taille-6], "dfont") == 0)
+         if(strcasecmp(&name[Taille-6], "dfont") == 0)
          {
            Fonte->EstTrueType = 1;
            Fonte->EstImage = 0;
@@ -158,19 +158,19 @@ void Ajout_fonte(const char *Nom)
       #endif
   }
 
-  Fonte->Nom = (char *)malloc(Taille);
-  strcpy(Fonte->Nom, Nom);
-  // Libelle
-  strcpy(Fonte->Libelle, "                   ");
+  Fonte->Name = (char *)malloc(Taille);
+  strcpy(Fonte->Name, name);
+  // Label
+  strcpy(Fonte->Label, "                   ");
   if (Fonte->EstTrueType)
-    Fonte->Libelle[17]=Fonte->Libelle[18]='T'; // Logo TT
-  Nom_fonte=Position_dernier_slash(Fonte->Nom);
+    Fonte->Label[17]=Fonte->Label[18]='T'; // Logo TT
+  Nom_fonte=Position_dernier_slash(Fonte->Name);
   if (Nom_fonte==NULL)
-    Nom_fonte=Fonte->Nom;
+    Nom_fonte=Fonte->Name;
   else
     Nom_fonte++;
   for (Indice=0; Indice < 17 && Nom_fonte[Indice]!='\0' && Nom_fonte[Indice]!='.'; Indice++)
-    Fonte->Libelle[Indice]=Nom_fonte[Indice];
+    Fonte->Label[Indice]=Nom_fonte[Indice];
 
   // Gestion Liste
   Fonte->Suivante = NULL;
@@ -187,10 +187,10 @@ void Ajout_fonte(const char *Nom)
     Compare = Compare_fontes(Fonte, Liste_fontes_debut);
     if (Compare<=0)
     {
-      if (Compare==0 && !strcmp(Fonte->Nom, Liste_fontes_debut->Nom))
+      if (Compare==0 && !strcmp(Fonte->Name, Liste_fontes_debut->Name))
       {
         // Doublon
-        free(Fonte->Nom);
+        free(Fonte->Name);
         free(Fonte);
         return;
       }
@@ -206,10 +206,10 @@ void Ajout_fonte(const char *Nom)
       while (Fonte_cherchee->Suivante && (Compare=Compare_fontes(Fonte, Fonte_cherchee->Suivante))>0)
         Fonte_cherchee=Fonte_cherchee->Suivante;
       // Après Fonte_cherchee
-      if (Compare==0 && strcmp(Fonte->Nom, Fonte_cherchee->Suivante->Nom)==0)
+      if (Compare==0 && strcmp(Fonte->Name, Fonte_cherchee->Suivante->Name)==0)
       {
         // Doublon
-        free(Fonte->Nom);
+        free(Fonte->Name);
         free(Fonte);
         return;
       }
@@ -229,7 +229,7 @@ char * Nom_fonte(int Indice)
     return "";
   while (Indice--)
     Fonte = Fonte->Suivante;
-  return Fonte->Nom;
+  return Fonte->Name;
 }
 
 
@@ -238,20 +238,20 @@ char * Nom_fonte(int Indice)
 char * Libelle_fonte(int Indice)
 {
   T_FONTE *Fonte;
-  static char Libelle[20];
+  static char label[20];
   
-  strcpy(Libelle, "                   ");
+  strcpy(label, "                   ");
   
   // Recherche de la fonte
   Fonte = Liste_fontes_debut;
   if (Indice<0 ||Indice>=Fonte_nombre)
-    return Libelle;
+    return label;
   while (Indice--)
     Fonte = Fonte->Suivante;
   
   // Libellé
-  strcpy(Libelle, Fonte->Libelle);
-  return Libelle;
+  strcpy(label, Fonte->Label);
+  return label;
 }
 
 
@@ -368,7 +368,7 @@ int Support_TrueType()
 
   
 #ifndef NOTTF
-byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int Italic, int *Largeur, int *Hauteur)
+byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int italic, int *width, int *height)
 {
  TTF_Font *Fonte;
   SDL_Surface * TexteColore;
@@ -388,7 +388,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int anti
   }
   // Style
   Style=0;
-  if (Italic)
+  if (italic)
     Style|=TTF_STYLE_ITALIC;
   if (bold)
     Style|=TTF_STYLE_BOLD;
@@ -440,8 +440,8 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int anti
       *(BrosseRetour+Indice)=Fore_color;
     }
   }
-  *Largeur=Texte8Bit->w;
-  *Hauteur=Texte8Bit->h;
+  *width=Texte8Bit->w;
+  *height=Texte8Bit->h;
   SDL_FreeSurface(Texte8Bit);
   TTF_CloseFont(Fonte);
   return BrosseRetour;
@@ -449,7 +449,7 @@ byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int anti
 #endif
 
 
-byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int *Hauteur)
+byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *width, int *height)
 {
   SFont_Font *Fonte;
   SDL_Surface * TexteColore;
@@ -468,10 +468,10 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int 
   }
   
   // Calcul des dimensions
-  *Hauteur=SFont_TextHeight(Fonte);
-  *Largeur=SFont_TextWidth(Fonte, Chaine);
+  *height=SFont_TextHeight(Fonte);
+  *width=SFont_TextWidth(Fonte, Chaine);
   // Allocation d'une surface SDL
-  TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *Largeur, *Hauteur, 24, 0, 0, 0, 0);
+  TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
   // Rendu du texte
   SFont_Write(TexteColore, Fonte, 0, 0, Chaine);
   if (!TexteColore)
@@ -499,9 +499,9 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *Largeur, int 
 
 
 // Crée une brosse à partir des paramètres de texte demandés.
-// Si cela réussit, la fonction place les dimensions dans Largeur et Hauteur, 
+// Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int Italic, int *Largeur, int *Hauteur)
+byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int italic, int *width, int *height)
 {
   T_FONTE *Fonte = Liste_fontes_debut;
   int Indice=Numero_fonte;
@@ -515,14 +515,14 @@ byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialia
   if (Fonte->EstTrueType)
   {
   #ifndef NOTTF 
-    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, antialias, bold, Italic, Largeur, Hauteur);
+    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, antialias, bold, italic, width, height);
   #else
     return NULL;
   #endif
   }
   else
   {
-    return Rendu_Texte_SFont(Chaine, Numero_fonte, Largeur, Hauteur);
+    return Rendu_Texte_SFont(Chaine, Numero_fonte, width, height);
   }
 }
 

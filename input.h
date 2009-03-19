@@ -21,4 +21,4 @@
 
 void Gere_Evenement_SDL(SDL_Event * event);
 int  Get_input(void);
-int Est_Raccourci(word Touche, word Fonction);
+int Est_Raccourci(word Touche, word function);

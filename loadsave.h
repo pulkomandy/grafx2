@@ -25,8 +25,8 @@ void Pixel_Chargement_dans_brosse       (word Pos_X,word Pos_Y,byte Couleur);
 
 void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix);
 
-void Charger_image(byte Image);
-void Sauver_image(byte Image);
+void Charger_image(byte image);
+void Sauver_image(byte image);
 
 typedef struct {
   char *Extension;

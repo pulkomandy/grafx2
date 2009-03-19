@@ -50,8 +50,8 @@ GFX2_GLOBAL word Config_Touche[NB_TOUCHES_SPECIALES][2];
 
 struct S_Mode_video
 {
-  short  Largeur;
-  short  Hauteur;
+  short  Width;
+  short  Height;
   byte   Mode;
   word   Fullscreen;
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
@@ -348,10 +348,10 @@ GFX2_GLOBAL struct
   // Informations sur l'aspect du bouton (graphisme):
   word            Decalage_X;        // Décalage par rapport à la gauche du menu
   word            Decalage_Y;        // Décalage par rapport au haut du menu
-  word            Largeur;           // Largeur du bouton
-  word            Hauteur;           // Hauteur du bouton
+  word            Width;           // Largeur du bouton
+  word            Height;           // Hauteur du bouton
   byte            Enfonce;           // Le bouton est enfoncé
-  byte            Forme;             // Forme du bouton
+  byte            Shape;             // Forme du bouton
 
   // Information sur les clicks de la souris:
   fonction_action Gauche;            // Action déclenchée par un click gauche sur le bouton

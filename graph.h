@@ -19,14 +19,14 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Liste2tables(word * Liste, short Pas, byte Mode, byte * Table_inc,
+void Liste2tables(word * list, short Pas, byte mode, byte * Table_inc,
         byte * Table_dec
 );
 
 void Transformer_point(short X, short Y,
                        float cosA, float sinA, short * Xr, short * Yr);
 
-int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen);
+int Initialiser_mode_video(int width, int height, int fullscreen);
 
 byte Aucun_effet(word X,word Y,byte Couleur);
 byte Effet_Shade(word X,word Y,byte Couleur);
@@ -95,11 +95,11 @@ void Polyfill(int Vertices, short * Points, int color);
 // Gestion des backups:
 void Download_infos_page_principal(S_Page * Page);
 void Download_infos_page_brouillon(S_Page * Page);
-void Download_infos_backup(S_Liste_de_pages * Liste);
+void Download_infos_backup(S_Liste_de_pages * list);
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
 void Nouveau_nombre_de_backups(int Nouveau);
-int  Backup_avec_nouvelles_dimensions(int Upload,int Largeur,int Hauteur);
-int  Backuper_et_redimensionner_brouillon(int Largeur,int Hauteur);
+int  Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
+int  Backuper_et_redimensionner_brouillon(int width,int height);
 void Undo(void);
 void Redo(void);
 void Detruire_la_page_courante(void);
@@ -116,4 +116,4 @@ void Remap_picture(void);
 
 // Définition d'une fonction générique de traçage de figures:
 fonction_afficheur Pixel_figure;
-void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur);
+void Mettre_Ecran_A_Jour(short X, short Y, short width, short height);

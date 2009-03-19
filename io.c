@@ -20,7 +20,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-// Fonctions de lecture/ecriture fichier, gèrent les systèmes big-endian et
+// Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
 // little-endian.
 
 #include <SDL_endian.h>
@@ -59,34 +59,34 @@ dword endian_magic32(dword x)
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_byte(FILE *Fichier, byte *Dest)
+int read_byte(FILE *file, byte *Dest)
 {
-  return fread(Dest, 1, 1, Fichier) == 1;
+  return fread(Dest, 1, 1, file) == 1;
 }
 // Ecrit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_byte(FILE *Fichier, byte b)
+int write_byte(FILE *file, byte b)
 {
-  return fwrite(&b, 1, 1, Fichier) == 1;
+  return fwrite(&b, 1, 1, file) == 1;
 }
 // Lit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_bytes(FILE *Fichier, void *Dest, size_t Taille)
+int read_bytes(FILE *file, void *Dest, size_t Taille)
 {
-  return fread(Dest, 1, Taille, Fichier) == Taille;
+  return fread(Dest, 1, Taille, file) == Taille;
 }
 // Ecrit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_bytes(FILE *Fichier, void *Src, size_t Taille)
+int write_bytes(FILE *file, void *Src, size_t Taille)
 {
-  return fwrite(Src, 1, Taille, Fichier) == Taille;
+  return fwrite(Src, 1, Taille, file) == Taille;
 }
 
 // Lit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_word_le(FILE *Fichier, word *Dest)
+int read_word_le(FILE *file, word *Dest)
 {
-  if (fread(Dest, 1, sizeof(word), Fichier) != sizeof(word))
+  if (fread(Dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     *Dest = SDL_Swap16(*Dest);
@@ -95,18 +95,18 @@ int read_word_le(FILE *Fichier, word *Dest)
 }
 // Ecrit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_le(FILE *Fichier, word w)
+int write_word_le(FILE *file, word w)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     w = SDL_Swap16(w);
   #endif
-  return fwrite(&w, 1, sizeof(word), Fichier) == sizeof(word);
+  return fwrite(&w, 1, sizeof(word), file) == sizeof(word);
 }
 // Lit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_word_be(FILE *Fichier, word *Dest)
+int read_word_be(FILE *file, word *Dest)
 {
-  if (fread(Dest, 1, sizeof(word), Fichier) != sizeof(word))
+  if (fread(Dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     *Dest = SDL_Swap16(*Dest);
@@ -115,18 +115,18 @@ int read_word_be(FILE *Fichier, word *Dest)
 }
 // Ecrit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_be(FILE *Fichier, word w)
+int write_word_be(FILE *file, word w)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     w = SDL_Swap16(w);
   #endif
-  return fwrite(&w, 1, sizeof(word), Fichier) == sizeof(word);
+  return fwrite(&w, 1, sizeof(word), file) == sizeof(word);
 }
 // Lit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_dword_le(FILE *Fichier, dword *Dest)
+int read_dword_le(FILE *file, dword *Dest)
 {
-  if (fread(Dest, 1, sizeof(dword), Fichier) != sizeof(dword))
+  if (fread(Dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     *Dest = SDL_Swap32(*Dest);
@@ -135,19 +135,19 @@ int read_dword_le(FILE *Fichier, dword *Dest)
 }
 // Ecrit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_le(FILE *Fichier, dword dw)
+int write_dword_le(FILE *file, dword dw)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     dw = SDL_Swap32(dw);
   #endif
-  return fwrite(&dw, 1, sizeof(dword), Fichier) == sizeof(dword);
+  return fwrite(&dw, 1, sizeof(dword), file) == sizeof(dword);
 }
 
 // Lit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_dword_be(FILE *Fichier, dword *Dest)
+int read_dword_be(FILE *file, dword *Dest)
 {
-  if (fread(Dest, 1, sizeof(dword), Fichier) != sizeof(dword))
+  if (fread(Dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     *Dest = SDL_Swap32(*Dest);
@@ -156,16 +156,16 @@ int read_dword_be(FILE *Fichier, dword *Dest)
 }
 // Ecrit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_be(FILE *Fichier, dword dw)
+int write_dword_be(FILE *file, dword dw)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     dw = SDL_Swap32(dw);
   #endif
-  return fwrite(&dw, 1, sizeof(dword), Fichier) == sizeof(dword);
+  return fwrite(&dw, 1, sizeof(dword), file) == sizeof(dword);
 }
 
 // Détermine la position du dernier '/' ou '\\' dans une chaine,
-// typiquement pour séparer le nom de fichier d'un chemin.
+// typiquement pour séparer le nom de file d'un chemin.
 // Attention, sous Windows, il faut s'attendre aux deux car 
 // par exemple un programme lancé sous GDB aura comme argv[0]:
 // d:\Data\C\GFX2\grafx2/grafx2.exe
@@ -181,7 +181,7 @@ char * Position_dernier_slash(const char * Chaine)
       Position = Chaine;
   return (char *)Position;
 }
-// Récupère la partie "nom de fichier seul" d'un chemin
+// Récupère la partie "nom de file seul" d'un chemin
 void Extraire_nom_fichier(char *dest, const char *Source)
 {
   const char * Position = Position_dernier_slash(Source);
@@ -204,14 +204,14 @@ void Extraire_chemin(char *dest, const char *Source)
     strcat(dest, SEPARATEUR_CHEMIN);
 }
 
-int Fichier_existe(char * Fichier)
-//   Détermine si un fichier passé en paramètre existe ou non dans le
+int Fichier_existe(char * fname)
+//   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
 {
     struct stat buf;
     int Resultat;
 
-    Resultat=stat(Fichier,&buf);
+    Resultat=stat(fname,&buf);
     if (Resultat!=0)
         return(errno!=ENOENT);
     else

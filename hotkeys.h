@@ -27,7 +27,7 @@
 typedef struct
 {
     word Numero;
-    char Libelle[36];
+    char Label[36];
     char Explic1[37];
     char Explic2[37];
     char Explic3[37];

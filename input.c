@@ -56,30 +56,30 @@ short Button_alt=-1; // Button number that serves as a "alt" modifier
 short Button_clic_gauche=0; // Button number that serves as left click
 short Button_clic_droit=0; // Button number that serves as right-click
 
-int Est_Raccourci(word Touche, word Fonction)
+int Est_Raccourci(word Touche, word function)
 {
   if (Touche == 0)
     return 0;
     
-  if (Fonction & 0x100)
+  if (function & 0x100)
   {
-    if (Bouton[Fonction&0xFF].Raccourci_gauche[0]==Touche)
+    if (Bouton[function&0xFF].Raccourci_gauche[0]==Touche)
       return 1;
-    if (Bouton[Fonction&0xFF].Raccourci_gauche[1]==Touche)
+    if (Bouton[function&0xFF].Raccourci_gauche[1]==Touche)
       return 1;
     return 0;
   }
-  if (Fonction & 0x200)
+  if (function & 0x200)
   {
-    if (Bouton[Fonction&0xFF].Raccourci_droite[0]==Touche)
+    if (Bouton[function&0xFF].Raccourci_droite[0]==Touche)
       return 1;
-    if (Bouton[Fonction&0xFF].Raccourci_droite[1]==Touche)
+    if (Bouton[function&0xFF].Raccourci_droite[1]==Touche)
       return 1;
     return 0;
   }
-  if(Touche == Config_Touche[Fonction][0])
+  if(Touche == Config_Touche[function][0])
     return 1;
-  if(Touche == Config_Touche[Fonction][1])
+  if(Touche == Config_Touche[function][1])
     return 1;
   return 0; 
 }
@@ -707,7 +707,7 @@ int Get_input(void)
       }
     }
     // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente.
-    // (c'est fait ici car on est sur que cette fonction est apellée partout ou on a besoin d'interragir avec l'utilisateur)
+    // (c'est fait ici car on est sur que cette function est apellée partout ou on a besoin d'interragir avec l'utilisateur)
     Flush_update();
 
     return User_Feedback_Required;

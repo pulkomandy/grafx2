@@ -46,7 +46,7 @@
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
-void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
+void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
 {
   short L_effectif, H_effectif;
   short X_effectif;
@@ -54,39 +54,39 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
   short Diff;
 
   // Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
-  if (Largeur < 0)
+  if (width < 0)
   {
-    X += Largeur;
-    Largeur = - Largeur;
+    X += width;
+    width = - width;
   }
 
-  if (Hauteur < 0)
+  if (height < 0)
   {
-    Y += Hauteur;
-    Hauteur = - Hauteur;
+    Y += height;
+    height = - height;
   }
 
   // D'abord on met à jour dans la zone écran normale
   Diff = X-Principal_Decalage_X;
   if (Diff<0)
   {
-    L_effectif = Largeur + Diff;
+    L_effectif = width + Diff;
     X_effectif = 0;
   }
   else
   {
-    L_effectif = Largeur;
+    L_effectif = width;
     X_effectif = Diff;
   }
   Diff = Y-Principal_Decalage_Y;
   if (Diff<0)
   {
-    H_effectif = Hauteur + Diff;
+    H_effectif = height + Diff;
     Y_effectif = 0;
   }
   else
   {
-    H_effectif = Hauteur;
+    H_effectif = height;
     Y_effectif = Diff;
   }
 
@@ -117,8 +117,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short Largeur, short Hauteur)
     // Clipping en X
     X_effectif = (X-Loupe_Decalage_X)*Loupe_Facteur;
     Y_effectif = (Y-Loupe_Decalage_Y)*Loupe_Facteur;
-    L_effectif = Largeur * Loupe_Facteur;
-    H_effectif = Hauteur * Loupe_Facteur;
+    L_effectif = width * Loupe_Facteur;
+    H_effectif = height * Loupe_Facteur;
 
     if (X_effectif < 0)
     {
@@ -180,7 +180,7 @@ void Transformer_point(short X, short Y, float cosA, float sinA,
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
-int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
+int Initialiser_mode_video(int width, int height, int fullscreen)
 {
   int Sensibilite_X;
   int Sensibilite_Y;
@@ -193,9 +193,9 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
   if (Pixel_height<1)
     Pixel_height=1;
   
-  if (Largeur_ecran!=Largeur/Pixel_width ||
-      Hauteur_ecran!=Hauteur/Pixel_height ||
-      Mode_video[Resolution_actuelle].Fullscreen != Fullscreen)
+  if (Largeur_ecran!=width/Pixel_width ||
+      Hauteur_ecran!=height/Pixel_height ||
+      Mode_video[Resolution_actuelle].Fullscreen != fullscreen)
   {
     switch (Pixel_ratio)
     {
@@ -297,28 +297,28 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
         break;
     }
     // Valeurs raisonnables: minimum 320x200
-    if (!Fullscreen)
+    if (!fullscreen)
     {
-      if (Largeur < 320*Pixel_width)
-          Largeur = 320*Pixel_width;
-      if (Hauteur < 200*Pixel_height)
-          Hauteur = 200*Pixel_height;
+      if (width < 320*Pixel_width)
+          width = 320*Pixel_width;
+      if (height < 200*Pixel_height)
+          height = 200*Pixel_height;
     }
     else
     {
-      if (Largeur < 320*Pixel_width || Hauteur < 200*Pixel_height)
+      if (width < 320*Pixel_width || height < 200*Pixel_height)
         return 1;
     }
     // La largeur doit être un multiple de 4
 #ifdef __amigaos4__
     // On AmigaOS the systems adds some more constraints on that ...
-    Largeur = (Largeur + 15) & 0xFFFFFFF0;
+    width = (width + 15) & 0xFFFFFFF0;
 #else
-    Largeur = (Largeur + 3 ) & 0xFFFFFFFC;
+    width = (width + 3 ) & 0xFFFFFFFC;
 #endif
-    Set_Mode_SDL(&Largeur, &Hauteur,Fullscreen);
-    Largeur_ecran = Largeur/Pixel_width;
-    Hauteur_ecran = Hauteur/Pixel_height;
+    Set_Mode_SDL(&width, &height,fullscreen);
+    Largeur_ecran = width/Pixel_width;
+    Hauteur_ecran = height/Pixel_height;
 
     // Taille des menus
     if (Largeur_ecran/320 > Hauteur_ecran/200)
@@ -354,12 +354,12 @@ int Initialiser_mode_video(int Largeur, int Hauteur, int Fullscreen)
     Set_palette(Principal_Palette);
 
     Resolution_actuelle=0;
-    if (Fullscreen)
+    if (fullscreen)
     {
       for (Indice=1; Indice<Nb_modes_video; Indice++)
       {
-        if (Mode_video[Indice].Largeur/Pixel_width==Largeur_ecran &&
-            Mode_video[Indice].Hauteur/Pixel_height==Hauteur_ecran)
+        if (Mode_video[Indice].Width/Pixel_width==Largeur_ecran &&
+            Mode_video[Indice].Height/Pixel_height==Hauteur_ecran)
         {
           Resolution_actuelle=Indice;
           break;
@@ -548,7 +548,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
 //
 {
   short Pos_X;   // Abscisse de balayage du segment, utilisée lors de l'"affichage"
-  short Ligne;   // Ordonnée de la ligne en cours de traitement
+  short line;   // Ordonnée de la ligne en cours de traitement
   short Debut_X; // Abscisse de départ du segment traité
   short Fin_X;   // Abscisse de fin du segment traité
   int   Modifs_effectuees;    // Booléen "On a fait une modif dans le dernier passage"
@@ -568,10 +568,10 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
   {
     Modifs_effectuees=0;
 
-    for (Ligne=Limite_courante_Haut;Ligne<=Limite_courante_Bas;Ligne++)
+    for (line=Limite_courante_Haut;line<=Limite_courante_Bas;line++)
     {
       Ligne_modifiee=0;
-      // On va traiter le cas de la ligne n° Ligne.
+      // On va traiter le cas de la ligne n° line.
 
       // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;
@@ -581,7 +581,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       {
         // On cherche son début
         while((Debut_X<=Limite_Droite) &&
-                (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1))
+                (Lit_pixel_dans_ecran_courant(Debut_X,line)!=1))
              Debut_X++;
 
         if (Debut_X<=Limite_Droite)
@@ -589,7 +589,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           // Un segment de couleur 1 existe et commence à la position Debut_X.
           // On va donc en chercher la fin.
           for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
-               (Lit_pixel_dans_ecran_courant(Fin_X,Ligne)==1);Fin_X++);
+               (Lit_pixel_dans_ecran_courant(Fin_X,line)==1);Fin_X++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // Debut_X et qui se termine en Fin_X-1.
@@ -600,16 +600,16 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           Propagation_possible=(
             // Test de la présence d'un point à gauche du segment
             ((Debut_X>Limite_Gauche) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X-1,Ligne)==2)) ||
+             (Lit_pixel_dans_ecran_courant(Debut_X-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((Fin_X-1<Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Fin_X    ,Ligne)==2))
+             (Lit_pixel_dans_ecran_courant(Fin_X    ,line)==2))
                                );
 
           // Test de la présence d'un point en haut du segment
-          if (!Propagation_possible && (Ligne>Limite_Haut))
+          if (!Propagation_possible && (line>Limite_Haut))
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
-              if (Lit_pixel_dans_ecran_courant(Pos_X,Ligne-1)==2)
+              if (Lit_pixel_dans_ecran_courant(Pos_X,line-1)==2)
               {
                 Propagation_possible=1;
                 break;
@@ -623,7 +623,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
               *Limite_atteinte_Droite=Fin_X;
             // On remplit le segment de Debut_X à Fin_X-1.
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
-              Pixel_dans_ecran_courant(Pos_X,Ligne,2);
+              Pixel_dans_ecran_courant(Pos_X,line,2);
             // On vient d'effectuer des modifications.
             Modifs_effectuees=1;
             Ligne_modifiee=1;
@@ -634,7 +634,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       }
 
       // Si on est en bas, et qu'on peut se propager vers le bas...
-      if ( (Ligne==Limite_courante_Bas) &&
+      if ( (line==Limite_courante_Bas) &&
            (Ligne_modifiee) &&
            (Limite_courante_Bas<Limite_Bas) )
         Limite_courante_Bas++; // On descend cette limite vers le bas
@@ -648,10 +648,10 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
     if (Limite_courante_Haut>Limite_Haut)
       Limite_courante_Haut--;
 
-    for (Ligne=Limite_courante_Bas;Ligne>=Limite_courante_Haut;Ligne--)
+    for (line=Limite_courante_Bas;line>=Limite_courante_Haut;line--)
     {
       Ligne_modifiee=0;
-      // On va traiter le cas de la ligne n° Ligne.
+      // On va traiter le cas de la ligne n° line.
 
       // On commence le traitement à la gauche de l'écran
       Debut_X=Limite_Gauche;
@@ -661,14 +661,14 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       {
         // On cherche son début
         for (;(Debut_X<=Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X,Ligne)!=1);Debut_X++);
+             (Lit_pixel_dans_ecran_courant(Debut_X,line)!=1);Debut_X++);
 
         if (Debut_X<=Limite_Droite)
         {
           // Un segment de couleur 1 existe et commence à la position Debut_X.
           // On va donc en chercher la fin.
           for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
-               (Lit_pixel_dans_ecran_courant(Fin_X,Ligne)==1);Fin_X++);
+               (Lit_pixel_dans_ecran_courant(Fin_X,line)==1);Fin_X++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // Debut_X et qui se termine en Fin_X-1.
@@ -679,16 +679,16 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
           Propagation_possible=(
             // Test de la présence d'un point à gauche du segment
             ((Debut_X>Limite_Gauche) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X-1,Ligne)==2)) ||
+             (Lit_pixel_dans_ecran_courant(Debut_X-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((Fin_X-1<Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Fin_X    ,Ligne)==2))
+             (Lit_pixel_dans_ecran_courant(Fin_X    ,line)==2))
                                );
 
           // Test de la présence d'un point en bas du segment
-          if (!Propagation_possible && (Ligne<Limite_Bas))
+          if (!Propagation_possible && (line<Limite_Bas))
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
-              if (Lit_pixel_dans_ecran_courant(Pos_X,Ligne+1)==2)
+              if (Lit_pixel_dans_ecran_courant(Pos_X,line+1)==2)
               {
                 Propagation_possible=1;
                 break;
@@ -702,7 +702,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
               *Limite_atteinte_Droite=Fin_X;
             // On remplit le segment de Debut_X à Fin_X-1.
             for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
-              Pixel_dans_ecran_courant(Pos_X,Ligne,2);
+              Pixel_dans_ecran_courant(Pos_X,line,2);
             // On vient d'effectuer des modifications.
             Modifs_effectuees=1;
             Ligne_modifiee=1;
@@ -713,7 +713,7 @@ void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
       }
 
       // Si on est en haut, et qu'on peut se propager vers le haut...
-      if ( (Ligne==Limite_courante_Haut) &&
+      if ( (line==Limite_courante_Haut) &&
            (Ligne_modifiee) &&
            (Limite_courante_Haut>Limite_Haut) )
         Limite_courante_Haut--; // On monte cette limite vers le haut
@@ -783,12 +783,12 @@ void Remplir(byte Couleur_de_remplissage)
     if (Limite_atteinte_Haut>Limite_Haut)
       Copier_une_partie_d_image_dans_une_autre(Ecran_backup,                    // Source
                                                Limite_Gauche,Limite_Haut,       // Pos X et Y dans source
-                                               (Limite_Droite-Limite_Gauche)+1, // Largeur copie
-                                               Limite_atteinte_Haut-Limite_Haut,// Hauteur copie
-                                               Principal_Largeur_image,         // Largeur de la source
+                                               (Limite_Droite-Limite_Gauche)+1, // width copie
+                                               Limite_atteinte_Haut-Limite_Haut,// height copie
+                                               Principal_Largeur_image,         // width de la source
                                                Principal_Ecran,                 // Destination
                                                Limite_Gauche,Limite_Haut,       // Pos X et Y destination
-                                               Principal_Largeur_image);        // Largeur destination
+                                               Principal_Largeur_image);        // width destination
     if (Limite_atteinte_Bas<Limite_Bas)
       Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
                                                Limite_Gauche,Limite_atteinte_Bas+1,
@@ -2275,7 +2275,7 @@ void Remplacer(byte Nouvelle_couleur)
 /********************************** SHADES ************************************/
 
 // Transformer une liste de shade en deux tables de conversion
-void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table_dec)
+void Liste2tables(word * list,short Pas,byte mode,byte * Table_inc,byte * Table_dec)
 {
   int Indice;
   int Premier;
@@ -2295,43 +2295,43 @@ void Liste2tables(word * Liste,short Pas,byte Mode,byte * Table_inc,byte * Table
   for (Indice=0;Indice<512;Indice++)
   {
     // On recherche la première case de la liste non vide (et non inhibée)
-    while ((Indice<512) && (Liste[Indice]>255))
+    while ((Indice<512) && (list[Indice]>255))
       Indice++;
 
     // On note la position de la première case de la séquence
     Premier=Indice;
 
     // On recherche la position de la dernière case de la séquence
-    for (last=Premier;Liste[last+1]<256;last++);
+    for (last=Premier;list[last+1]<256;last++);
 
     // Pour toutes les cases non vides (et non inhibées) qui suivent
-    switch (Mode)
+    switch (mode)
     {
       case MODE_SHADE_NORMAL :
-        for (;(Indice<512) && (Liste[Indice]<256);Indice++)
+        for (;(Indice<512) && (list[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
-          Couleur=Liste[Indice];
-          Table_inc[Couleur]=Liste[(Indice+Pas<=last)?Indice+Pas:last];
-          Table_dec[Couleur]=Liste[(Indice-Pas>=Premier)?Indice-Pas:Premier];
+          Couleur=list[Indice];
+          Table_inc[Couleur]=list[(Indice+Pas<=last)?Indice+Pas:last];
+          Table_dec[Couleur]=list[(Indice-Pas>=Premier)?Indice-Pas:Premier];
         }
         break;
       case MODE_SHADE_BOUCLE :
         Temp=1+last-Premier;
-        for (;(Indice<512) && (Liste[Indice]<256);Indice++)
+        for (;(Indice<512) && (list[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
-          Couleur=Liste[Indice];
-          Table_inc[Couleur]=Liste[Premier+((Pas+Indice-Premier)%Temp)];
-          Table_dec[Couleur]=Liste[Premier+(((Temp-Pas)+Indice-Premier)%Temp)];
+          Couleur=list[Indice];
+          Table_inc[Couleur]=list[Premier+((Pas+Indice-Premier)%Temp)];
+          Table_dec[Couleur]=list[Premier+(((Temp-Pas)+Indice-Premier)%Temp)];
         }
         break;
       default : // MODE_SHADE_NOSAT
-        for (;(Indice<512) && (Liste[Indice]<256);Indice++)
+        for (;(Indice<512) && (list[Indice]<256);Indice++)
         { // On met à jour les tables de conversion
-          Couleur=Liste[Indice];
+          Couleur=list[Indice];
           if (Indice+Pas<=last)
-            Table_inc[Couleur]=Liste[Indice+Pas];
+            Table_inc[Couleur]=list[Indice+Pas];
           if (Indice-Pas>=Premier)
-            Table_dec[Couleur]=Liste[Indice-Pas];
+            Table_dec[Couleur]=list[Indice-Pas];
         }
     }
   }
@@ -2384,7 +2384,7 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
   int c=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
   int Sens=(Fore_color<=Back_color);
   byte start,end;
-  int Largeur;
+  int width;
 
   if (Sens)
   {
@@ -2399,18 +2399,18 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
 
   if ((c>=start) && (c<=end) && (start!=end))
   {
-    Largeur=1+end-start;
+    width=1+end-start;
 
     if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
-      c-=Quick_shade_Step%Largeur;
+      c-=Quick_shade_Step%width;
     else
-      c+=Quick_shade_Step%Largeur;
+      c+=Quick_shade_Step%width;
 
     if (c<start)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return start;
-        case MODE_SHADE_BOUCLE : return (Largeur+c);
+        case MODE_SHADE_BOUCLE : return (width+c);
         default : return Couleur;
       }
 
@@ -2418,7 +2418,7 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
       switch (Quick_shade_Loop)
       {
         case MODE_SHADE_NORMAL : return end;
-        case MODE_SHADE_BOUCLE : return (c-Largeur);
+        case MODE_SHADE_BOUCLE : return (c-width);
         default : return Couleur;
       }
   }
