@@ -20,7 +20,7 @@
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
-#if defined(__macosx__)||defined(__FreeBSD__)			// MacOS X is POSIX compliant
+#if defined(__macosx__) || defined(__FreeBSD__)			// MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
 #elif defined(__BEOS__) || defined(__HAIKU__)
     #define MOUNTED_FS_STAT_DEV
@@ -191,7 +191,7 @@
 	     || strcmp (Fs_type, "cifs") == 0)))
 #endif
 
-#if MOUNTED_GETMNTINFO
+#ifdef MOUNTED_GETMNTINFO
 
 # if ! HAVE_STRUCT_STATFS_F_FSTYPENAME
 static char *
@@ -439,7 +439,11 @@ read_file_system_list (bool need_fs_type)
 	me = malloc (sizeof *me);
 	me->me_devname = strdup (fsp->f_mntfromname);
 	me->me_mountdir = strdup (fsp->f_mntonname);
+#if defined(__macosx__)
+	me->me_type = fsp->f_fstypename;
+#else
 	me->me_type = fsp->fs_typename;
+#endif 
 	me->me_type_malloced = 0;
 	me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
 	me->me_remote = ME_REMOTE (me->me_devname, me->me_type);

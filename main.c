@@ -377,9 +377,6 @@ int Initialisation_du_programme(int argc,char * argv[])
   Brouillon_Loupe_Decalage_X=0;
   Brouillon_Loupe_Decalage_Y=0;
 
-  SDL_putenv("SDL_VIDEO_WINDOW_POS=center");
-  SDL_putenv("SDL_VIDEO_CENTERED=1");
-
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
