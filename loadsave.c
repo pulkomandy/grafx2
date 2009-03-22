@@ -2226,23 +2226,23 @@ void Save_LBM(void)
 
 typedef struct
 {
-    word Signature;   // ='BM' = 0x4D42
-    uint32_t Taille_1;    // =Taille du fichier
-    word Reserv_1;    // =0
-    word Reserv_2;    // =0
-    uint32_t Decalage;    // Nb octets avant les données bitmap
+    word  Signature;   // ='BM' = 0x4D42
+    dword Taille_1;    // =Taille du fichier
+    word  Reserv_1;    // =0
+    word  Reserv_2;    // =0
+    dword Decalage;    // Nb octets avant les données bitmap
 
-    uint32_t Taille_2;    // =40 
-    uint32_t Width;
-    uint32_t Height;
-    word Plans;       // =1
-    word Nb_bits;     // =1,4,8 ou 24
-    uint32_t Compression;
-    uint32_t Taille_3;
-    uint32_t XPM;
-    uint32_t YPM;
-    uint32_t Nb_Clr;
-    uint32_t Clr_Imprt;
+    dword Taille_2;    // =40 
+    dword Width;
+    dword Height;
+    word  Plans;       // =1
+    word  Nb_bits;     // =1,4,8 ou 24
+    dword Compression;
+    dword Taille_3;
+    dword XPM;
+    dword YPM;
+    dword Nb_Clr;
+    dword Clr_Imprt;
 } __attribute__((__packed__)) T_BMP_Header;
 
 // -- Tester si un fichier est au format BMP --------------------------------

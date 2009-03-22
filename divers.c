@@ -206,7 +206,7 @@ void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
 
 byte Pixel_dans_ellipse(void)
 {
-  uint64_t ediesi = Ellipse_Curseur_X * Ellipse_Curseur_X * Ellipse_Rayon_vertical_au_carre +
+  qword ediesi = Ellipse_Curseur_X * Ellipse_Curseur_X * Ellipse_Rayon_vertical_au_carre +
         Ellipse_Curseur_Y * Ellipse_Curseur_Y * Ellipse_Rayon_horizontal_au_carre;
   if((ediesi) <= Ellipse_Limite) return 255;
 

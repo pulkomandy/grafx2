@@ -32,9 +32,10 @@
 
 // Déclaration des types de base /////////////////////////////////////////////
 
-typedef uint8_t  byte;
-typedef uint16_t word;
-typedef uint32_t  dword;
+#define byte  uint8_t
+#define word  uint16_t
+#define dword uint32_t
+#define qword uint64_t
 
 typedef void (* fonction_action)    (void);
 typedef void (* fonction_afficheur) (word,word,byte);

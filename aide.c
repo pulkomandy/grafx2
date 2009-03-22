@@ -591,7 +591,7 @@ void Bouton_Stats(void)
   char  Buffer[37];
   dword Utilisation_couleur[256];
   unsigned long long freeRam;
-  uint64_t Taille = 0;
+  qword Taille = 0;
 
   Ouvrir_fenetre(310,174,"Statistics");
 
@@ -643,7 +643,7 @@ void Bouton_Stats(void)
     {
       struct statfs Informations_Disque;
       statfs(Principal_Repertoire_courant,&Informations_Disque);
-      Taille=(uint64_t) Informations_Disque.f_bfree * (uint64_t) Informations_Disque.f_bsize;
+      Taille=(qword) Informations_Disque.f_bfree * (qword) Informations_Disque.f_bsize;
     }
 #else
     // Free disk space is only for shows. Other platforms can display 0.
@@ -652,13 +652,13 @@ void Bouton_Stats(void)
 #endif
   
     if(Taille > (100ULL*1024*1024*1024))
-        sprintf(Buffer,"%d Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
+        sprintf(Buffer,"%u Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
     else if(Taille > (100*1024*1024))
-        sprintf(Buffer,"%d Megabytes",(unsigned int)(Taille/(1024*1024)));
+        sprintf(Buffer,"%u Megabytes",(unsigned int)(Taille/(1024*1024)));
     else if(Taille > (100*1024))
-        sprintf(Buffer,"%d Kilobytes",(unsigned int)(Taille/1024));
+        sprintf(Buffer,"%u Kilobytes",(unsigned int)(Taille/1024));
     else 
-        sprintf(Buffer,"%d bytes",(unsigned int)Taille);
+        sprintf(Buffer,"%u bytes",(unsigned int)Taille);
     Print_dans_fenetre(146,67,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage des informations sur l'image

@@ -275,7 +275,7 @@ void Lire_liste_des_fichiers(byte Format_demande)
 void bstrtostr( BSTR in, STRPTR out, TEXT max )
 {
   STRPTR iptr;
-  uint32_t i;
+  dword i;
 
   iptr = BADDR( in );
 
