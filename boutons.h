@@ -622,7 +622,7 @@ void Save_picture(byte image);
 /*!
     Generic color tagging menu, for various effects.
 */
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cancel, const char *Section_aide);
+void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cancel, const char *Section_aide);
 
 
 /*!

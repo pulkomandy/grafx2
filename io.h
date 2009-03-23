@@ -25,8 +25,8 @@ dword endian_magic32(dword x);
 int read_byte(FILE *file, byte *Dest);
 int write_byte(FILE *file, byte b);
 
-int read_bytes(FILE *file, void *Dest, size_t Taille);
-int write_bytes(FILE *file, void *Dest, size_t Taille);
+int read_bytes(FILE *file, void *Dest, size_t size);
+int write_bytes(FILE *file, void *Dest, size_t size);
 
 int read_word_le(FILE *file, word *Dest);
 int write_word_le(FILE *file, word w);

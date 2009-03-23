@@ -21,11 +21,11 @@
 */
 #include "struct.h"
 
-  void Pixel_Wide                      (word X,word Y,byte Couleur);
-  byte Lit_Pixel_Wide                  (word X,word Y);
+  void Pixel_Wide                      (word x,word y,byte Couleur);
+  byte Lit_Pixel_Wide                  (word x,word y);
   void Block_Wide                      (word Debut_X,word Debut_Y,word width,word height,byte Couleur);
-  void Pixel_Preview_Normal_Wide       (word X,word Y,byte Couleur);
-  void Pixel_Preview_Loupe_Wide        (word X,word Y,byte Couleur);
+  void Pixel_Preview_Normal_Wide       (word x,word y,byte Couleur);
+  void Pixel_Preview_Loupe_Wide        (word x,word y,byte Couleur);
   void Ligne_horizontale_XOR_Wide      (word x_pos,word y_pos,word width);
   void Ligne_verticale_XOR_Wide        (word x_pos,word y_pos,word height);
   void Display_brush_Color_Wide        (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);

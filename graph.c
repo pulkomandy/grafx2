@@ -46,7 +46,7 @@
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
-void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
+void Mettre_Ecran_A_Jour(short x, short y, short width, short height)
 {
   short L_effectif, H_effectif;
   short X_effectif;
@@ -56,18 +56,18 @@ void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
   // Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
   if (width < 0)
   {
-    X += width;
+    x += width;
     width = - width;
   }
 
   if (height < 0)
   {
-    Y += height;
+    y += height;
     height = - height;
   }
 
   // D'abord on met à jour dans la zone écran normale
-  Diff = X-Principal_Decalage_X;
+  Diff = x-Principal_Decalage_X;
   if (Diff<0)
   {
     L_effectif = width + Diff;
@@ -78,7 +78,7 @@ void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
     L_effectif = width;
     X_effectif = Diff;
   }
-  Diff = Y-Principal_Decalage_Y;
+  Diff = y-Principal_Decalage_Y;
   if (Diff<0)
   {
     H_effectif = height + Diff;
@@ -115,8 +115,8 @@ void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
   if(Loupe_Mode)
   {
     // Clipping en X
-    X_effectif = (X-Loupe_Decalage_X)*Loupe_Facteur;
-    Y_effectif = (Y-Loupe_Decalage_Y)*Loupe_Facteur;
+    X_effectif = (x-Loupe_Decalage_X)*Loupe_Facteur;
+    Y_effectif = (y-Loupe_Decalage_Y)*Loupe_Facteur;
     L_effectif = width * Loupe_Facteur;
     H_effectif = height * Loupe_Facteur;
 
@@ -169,11 +169,11 @@ void Mettre_Ecran_A_Jour(short X, short Y, short width, short height)
 
 
 
-void Transformer_point(short X, short Y, float cosA, float sinA,
+void Transformer_point(short x, short y, float cosA, float sinA,
                        short * Xr, short * Yr)
 {
-  *Xr=Round(((float)X*cosA)+((float)Y*sinA));
-  *Yr=Round(((float)Y*cosA)-((float)X*sinA));
+  *Xr=Round(((float)x*cosA)+((float)y*sinA));
+  *Yr=Round(((float)y*cosA)-((float)x*sinA));
 }
 
 
@@ -1468,7 +1468,7 @@ void Tracer_courbe_General(short X1, short Y1,
                            byte Couleur)
 {
   float delta,t,t2,t3;
-  short X,Y,Old_X,Old_Y;
+  short x,y,Old_X,Old_Y;
   word  i;
   int   CX[4];
   int   CY[4];
@@ -1492,18 +1492,18 @@ void Tracer_courbe_General(short X1, short Y1,
   for (i=1; i<=20; i++)
   {
     t=t+delta; t2=t*t; t3=t2*t;
-    X=Round(t3*CX[0] + t2*CX[1] + t*CX[2] + CX[3]);
-    Y=Round(t3*CY[0] + t2*CY[1] + t*CY[2] + CY[3]);
-    Tracer_ligne_General(Old_X,Old_Y,X,Y,Couleur);
-    Old_X=X;
-    Old_Y=Y;
+    x=Round(t3*CX[0] + t2*CX[1] + t*CX[2] + CX[3]);
+    y=Round(t3*CY[0] + t2*CY[1] + t*CY[2] + CY[3]);
+    Tracer_ligne_General(Old_X,Old_Y,x,y,Couleur);
+    Old_X=x;
+    Old_Y=y;
   }
 
-  X = Min(Min(X1,X2),Min(X3,X4));
-  Y = Min(Min(Y1,Y2),Min(Y3,Y4));
-  Old_X = Max(Max(X1,X2),Max(X3,X4)) - X;
-  Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - Y;
-  Mettre_Ecran_A_Jour(X,Y,Old_X+1,Old_Y+1);
+  x = Min(Min(X1,X2),Min(X3,X4));
+  y = Min(Min(Y1,Y2),Min(Y3,Y4));
+  Old_X = Max(Max(X1,X2),Max(X3,X4)) - x;
+  Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - y;
+  Mettre_Ecran_A_Jour(x,y,Old_X+1,Old_Y+1);
 }
 
   // -- Tracer une courbe de Bézier définitivement --
@@ -1554,7 +1554,7 @@ void Aerographe(short Bouton_clicke)
   long  Rayon_au_carre=(long)Rayon*Rayon;
   short Indice,Count;
   byte  Indice_couleur;
-  byte  Sens;
+  byte  direction;
 
 
   Effacer_curseur();
@@ -1581,7 +1581,7 @@ void Aerographe(short Bouton_clicke)
     //   On essaye de se balader dans la table des flux de façon à ce que ce
     // ne soit pas toujours la dernière couleur qui soit affichée en dernier
     // Pour ça, on part d'une couleur au pif dans une direction aléatoire.
-    Sens=rand()&1;
+    direction=rand()&1;
     for (Indice=0,Indice_couleur=rand()/*%256*/; Indice<256; Indice++)
     {
       for (Count=1; Count<=Spray_Multi_flow[Indice_couleur]; Count++)
@@ -1598,7 +1598,7 @@ void Aerographe(short Bouton_clicke)
             Afficher_pinceau(x_pos,y_pos,Back_color,0);
         }
       }
-      if (Sens)
+      if (direction)
         Indice_couleur++;
       else
         Indice_couleur--;
@@ -2344,20 +2344,20 @@ void Liste2tables(word * list,short step,byte mode,byte * Table_inc,byte * Table
   // fonction d'affichage "Pixel" utilisée pour les opérations définitivement
   // Ne doit à aucune condition être appelée en dehors de la partie visible
   // de l'image dans l'écran (ça pourrait être grave)
-void Afficher_pixel(word X,word Y,byte Couleur)
-  // X & Y    sont la position d'un point dans l'IMAGE
+void Afficher_pixel(word x,word y,byte Couleur)
+  // x & y    sont la position d'un point dans l'IMAGE
   // Couleur  est la couleur du point
   // Le Stencil est géré.
   // Les effets sont gérés par appel à Fonction_effet().
   // La Loupe est gérée par appel à Pixel_Preview().
 {
-  if ( ( (!Trame_Mode)   || (Effet_Trame(X,Y)) )
-    && (!((Stencil_Mode) && (Stencil[Lit_pixel_dans_ecran_courant(X,Y)])))
-    && (!((Mask_Mode)    && (Mask_table[Lit_pixel_dans_ecran_brouillon(X,Y)]))) )
+  if ( ( (!Trame_Mode)   || (Effet_Trame(x,y)) )
+    && (!((Stencil_Mode) && (Stencil[Lit_pixel_dans_ecran_courant(x,y)])))
+    && (!((Mask_Mode)    && (Mask_table[Lit_pixel_dans_ecran_brouillon(x,y)]))) )
   {
-    Couleur=Fonction_effet(X,Y,Couleur);
-    Pixel_dans_ecran_courant(X,Y,Couleur);
-    Pixel_Preview(X,Y,Couleur);
+    Couleur=Fonction_effet(x,y,Couleur);
+    Pixel_dans_ecran_courant(x,y,Couleur);
+    Pixel_Preview(x,y,Couleur);
   }
 }
 
@@ -2367,26 +2367,26 @@ void Afficher_pixel(word X,word Y,byte Couleur)
 
   // -- Aucun effet en cours --
 
-byte Aucun_effet(__attribute__((unused)) word X,__attribute__((unused)) word Y,byte Couleur)
+byte Aucun_effet(__attribute__((unused)) word x,__attribute__((unused)) word y,byte Couleur)
 {
   return Couleur;
 }
 
   // -- Effet de Shading --
 
-byte Effet_Shade(word X,word Y,__attribute__((unused)) byte Couleur)
+byte Effet_Shade(word x,word y,__attribute__((unused)) byte Couleur)
 {
-  return Shade_Table[Lit_pixel_dans_ecran_feedback(X,Y)];
+  return Shade_Table[Lit_pixel_dans_ecran_feedback(x,y)];
 }
 
-byte Effet_Quick_shade(word X,word Y,byte Couleur)
+byte Effet_Quick_shade(word x,word y,byte Couleur)
 {
-  int c=Couleur=Lit_pixel_dans_ecran_feedback(X,Y);
-  int Sens=(Fore_color<=Back_color);
+  int c=Couleur=Lit_pixel_dans_ecran_feedback(x,y);
+  int direction=(Fore_color<=Back_color);
   byte start,end;
   int width;
 
-  if (Sens)
+  if (direction)
   {
     start=Fore_color;
     end  =Back_color;
@@ -2401,7 +2401,7 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
   {
     width=1+end-start;
 
-    if ( ((Shade_Table==Shade_Table_gauche) && Sens) || ((Shade_Table==Shade_Table_droite) && (!Sens)) )
+    if ( ((Shade_Table==Shade_Table_gauche) && direction) || ((Shade_Table==Shade_Table_droite) && (!direction)) )
       c-=Quick_shade_Step%width;
     else
       c+=Quick_shade_Step%width;
@@ -2428,40 +2428,40 @@ byte Effet_Quick_shade(word X,word Y,byte Couleur)
 
   // -- Effet de Tiling --
 
-byte Effet_Tiling(word X,word Y,__attribute__((unused)) byte Couleur)
+byte Effet_Tiling(word x,word y,__attribute__((unused)) byte Couleur)
 {
-  return Lit_pixel_dans_brosse((X+Brosse_Largeur-Tiling_Decalage_X)%Brosse_Largeur,
-                               (Y+Brosse_Hauteur-Tiling_Decalage_Y)%Brosse_Hauteur);
+  return Lit_pixel_dans_brosse((x+Brosse_Largeur-Tiling_Decalage_X)%Brosse_Largeur,
+                               (y+Brosse_Hauteur-Tiling_Decalage_Y)%Brosse_Hauteur);
 }
 
   // -- Effet de Smooth --
 
-byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
+byte Effet_Smooth(word x,word y,__attribute__((unused)) byte Couleur)
 {
   int r,g,b;
   byte c;
   int Poids,Poids_total;
-  byte X2=((X+1)<Principal_Largeur_image);
-  byte Y2=((Y+1)<Principal_Hauteur_image);
+  byte X2=((x+1)<Principal_Largeur_image);
+  byte Y2=((y+1)<Principal_Hauteur_image);
 
   // On commence par le pixel central
-  c=Lit_pixel_dans_ecran_feedback(X,Y);
+  c=Lit_pixel_dans_ecran_feedback(x,y);
   Poids_total=Smooth_Matrice[1][1];
   r=Poids_total*Principal_Palette[c].R;
   g=Poids_total*Principal_Palette[c].G;
   b=Poids_total*Principal_Palette[c].B;
 
-  if (X)
+  if (x)
   {
-    c=Lit_pixel_dans_ecran_feedback(X-1,Y);
+    c=Lit_pixel_dans_ecran_feedback(x-1,y);
     Poids_total+=(Poids=Smooth_Matrice[0][1]);
     r+=Poids*Principal_Palette[c].R;
     g+=Poids*Principal_Palette[c].G;
     b+=Poids*Principal_Palette[c].B;
 
-    if (Y)
+    if (y)
     {
-      c=Lit_pixel_dans_ecran_feedback(X-1,Y-1);
+      c=Lit_pixel_dans_ecran_feedback(x-1,y-1);
       Poids_total+=(Poids=Smooth_Matrice[0][0]);
       r+=Poids*Principal_Palette[c].R;
       g+=Poids*Principal_Palette[c].G;
@@ -2469,7 +2469,7 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 
       if (Y2)
       {
-        c=Lit_pixel_dans_ecran_feedback(X-1,Y+1);
+        c=Lit_pixel_dans_ecran_feedback(x-1,y+1);
         Poids_total+=(Poids=Smooth_Matrice[0][2]);
         r+=Poids*Principal_Palette[c].R;
         g+=Poids*Principal_Palette[c].G;
@@ -2480,15 +2480,15 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 
   if (X2)
   {
-    c=Lit_pixel_dans_ecran_feedback(X+1,Y);
+    c=Lit_pixel_dans_ecran_feedback(x+1,y);
     Poids_total+=(Poids=Smooth_Matrice[2][1]);
     r+=Poids*Principal_Palette[c].R;
     g+=Poids*Principal_Palette[c].G;
     b+=Poids*Principal_Palette[c].B;
 
-    if (Y)
+    if (y)
     {
-      c=Lit_pixel_dans_ecran_feedback(X+1,Y-1);
+      c=Lit_pixel_dans_ecran_feedback(x+1,y-1);
       Poids_total+=(Poids=Smooth_Matrice[2][0]);
       r+=Poids*Principal_Palette[c].R;
       g+=Poids*Principal_Palette[c].G;
@@ -2496,7 +2496,7 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 
       if (Y2)
       {
-        c=Lit_pixel_dans_ecran_feedback(X+1,Y+1);
+        c=Lit_pixel_dans_ecran_feedback(x+1,y+1);
         Poids_total+=(Poids=Smooth_Matrice[2][2]);
         r+=Poids*Principal_Palette[c].R;
         g+=Poids*Principal_Palette[c].G;
@@ -2505,9 +2505,9 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
     }
   }
 
-  if (Y)
+  if (y)
   {
-    c=Lit_pixel_dans_ecran_feedback(X,Y-1);
+    c=Lit_pixel_dans_ecran_feedback(x,y-1);
     Poids_total+=(Poids=Smooth_Matrice[1][0]);
     r+=Poids*Principal_Palette[c].R;
     g+=Poids*Principal_Palette[c].G;
@@ -2516,7 +2516,7 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
 
   if (Y2)
   {
-    c=Lit_pixel_dans_ecran_feedback(X,Y+1);
+    c=Lit_pixel_dans_ecran_feedback(x,y+1);
     Poids_total+=(Poids=Smooth_Matrice[1][2]);
     r+=Poids*Principal_Palette[c].R;
     g+=Poids*Principal_Palette[c].G;
@@ -2527,6 +2527,6 @@ byte Effet_Smooth(word X,word Y,__attribute__((unused)) byte Couleur)
     Meilleure_couleur(Round_div(r,Poids_total),
                       Round_div(g,Poids_total),
                       Round_div(b,Poids_total)):
-    Lit_pixel_dans_ecran_courant(X,Y); // C'est bien l'écran courant et pas
+    Lit_pixel_dans_ecran_courant(x,y); // C'est bien l'écran courant et pas
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.

@@ -146,7 +146,7 @@ int Charger_INI_Reach_group(FILE * file,char * Buffer,char * Group)
   return 0;
 }
 
-int Charger_INI_Get_string(FILE * file,char * Buffer,char * Option,char * Retour)
+int Charger_INI_Get_string(FILE * file,char * Buffer,char * Option,char * return_code)
 {
   int    Arret;
   char * Option_upper;
@@ -187,7 +187,7 @@ int Charger_INI_Get_string(FILE * file,char * Buffer,char * Option,char * Retour
       // On se positionne juste après la chaîne "="
       Indice_buffer=Charger_INI_Seek_pattern(Buffer_upper,"=");
 
-      strcpy(Retour, Buffer_upper + Indice_buffer);
+      strcpy(return_code, Buffer_upper + Indice_buffer);
     }
   }
   while (!Arret);
@@ -401,10 +401,10 @@ int Charger_INI(T_Config * Conf)
 {
   FILE * file;
   char * Buffer;
-  int    Valeurs[3];
+  int    values[3];
   int    Indice;
   char * Nom_du_fichier;
-  int    Retour;
+  int    return_code;
   char   Libelle_valeur[1024];
 
   Ligne_INI=0;
@@ -432,40 +432,40 @@ int Charger_INI(T_Config * Conf)
     }
   }
   
-  if ((Retour=Charger_INI_Reach_group(file,Buffer,"[MOUSE]")))
+  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MOUSE]")))
     goto Erreur_Retour;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"X_sensitivity",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"X_sensitivity",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>255))
+  if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Indice_Sensibilite_souris_X=Valeurs[0];
+  Conf->Indice_Sensibilite_souris_X=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Y_sensitivity",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Y_sensitivity",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>255))
+  if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Indice_Sensibilite_souris_Y=Valeurs[0];
+  Conf->Indice_Sensibilite_souris_Y=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"X_correction_factor",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"X_correction_factor",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>4))
+  if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Mouse_Facteur_de_correction_X=Mouse_Facteur_de_correction_X=Valeurs[0];
+  Conf->Mouse_Facteur_de_correction_X=Mouse_Facteur_de_correction_X=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Y_correction_factor",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Y_correction_factor",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>4))
+  if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Mouse_Facteur_de_correction_Y=Mouse_Facteur_de_correction_Y=Valeurs[0];
+  Conf->Mouse_Facteur_de_correction_Y=Mouse_Facteur_de_correction_Y=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Cursor_aspect",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Cursor_aspect",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>3))
+  if ((values[0]<1) || (values[0]>3))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Curseur=Valeurs[0]-1;
+  Conf->Curseur=values[0]-1;
 
-  if ((Retour=Charger_INI_Reach_group(file,Buffer,"[MENU]")))
+  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MENU]")))
     goto Erreur_Retour;
 
   Conf->Coul_menu_pref[0].R=0;
@@ -475,215 +475,215 @@ int Charger_INI(T_Config * Conf)
   Conf->Coul_menu_pref[3].G=255;
   Conf->Coul_menu_pref[3].B=255;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Light_color",3,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Light_color",3,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>63))
+  if ((values[0]<0) || (values[0]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  if ((Valeurs[1]<0) || (Valeurs[1]>63))
+  if ((values[1]<0) || (values[1]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  if ((Valeurs[2]<0) || (Valeurs[2]>63))
+  if ((values[2]<0) || (values[2]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[2].R=(Valeurs[0]<<2)|(Valeurs[0]>>4);
-  Conf->Coul_menu_pref[2].G=(Valeurs[1]<<2)|(Valeurs[1]>>4);
-  Conf->Coul_menu_pref[2].B=(Valeurs[2]<<2)|(Valeurs[2]>>4);
+  Conf->Coul_menu_pref[2].R=(values[0]<<2)|(values[0]>>4);
+  Conf->Coul_menu_pref[2].G=(values[1]<<2)|(values[1]>>4);
+  Conf->Coul_menu_pref[2].B=(values[2]<<2)|(values[2]>>4);
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Dark_color",3,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Dark_color",3,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>63))
+  if ((values[0]<0) || (values[0]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  if ((Valeurs[1]<0) || (Valeurs[1]>63))
+  if ((values[1]<0) || (values[1]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  if ((Valeurs[2]<0) || (Valeurs[2]>63))
+  if ((values[2]<0) || (values[2]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[1].R=(Valeurs[0]<<2)|(Valeurs[0]>>4);
-  Conf->Coul_menu_pref[1].G=(Valeurs[1]<<2)|(Valeurs[1]>>4);
-  Conf->Coul_menu_pref[1].B=(Valeurs[2]<<2)|(Valeurs[2]>>4);
+  Conf->Coul_menu_pref[1].R=(values[0]<<2)|(values[0]>>4);
+  Conf->Coul_menu_pref[1].G=(values[1]<<2)|(values[1]>>4);
+  Conf->Coul_menu_pref[1].B=(values[2]<<2)|(values[2]>>4);
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Menu_ratio",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Menu_ratio",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>2))
+  if ((values[0]<0) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Ratio=Valeurs[0];
+  Conf->Ratio=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Font",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Font",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>2))
+  if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Fonte=Valeurs[0]-1;
+  Conf->Fonte=values[0]-1;
 
 
-  if ((Retour=Charger_INI_Reach_group(file,Buffer,"[FILE_SELECTOR]")))
+  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Show_hidden_files",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_hidden_files",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_fichiers_caches=Valeurs[0]?-1:0;
+  Conf->Lire_les_fichiers_caches=values[0]?-1:0;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Show_hidden_directories",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_hidden_directories",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_repertoires_caches=Valeurs[0]?-1:0;
+  Conf->Lire_les_repertoires_caches=values[0]?-1:0;
 
-/*  if ((Retour=Charger_INI_Get_values (file,Buffer,"Show_system_directories",1,Valeurs)))
+/*  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_system_directories",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_repertoires_systemes=Valeurs[0]?-1:0;
+  Conf->Lire_les_repertoires_systemes=values[0]?-1:0;
 */
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Preview_delay",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Preview_delay",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>256))
+  if ((values[0]<1) || (values[0]>256))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Chrono_delay=Valeurs[0];
+  Conf->Chrono_delay=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Maximize_preview",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Maximize_preview",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Maximize_preview=Valeurs[0];
+  Conf->Maximize_preview=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Find_file_fast",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Find_file_fast",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>2))
+  if ((values[0]<0) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Find_file_fast=Valeurs[0];
+  Conf->Find_file_fast=values[0];
 
 
-  if ((Retour=Charger_INI_Reach_group(file,Buffer,"[LOADING]")))
+  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[LOADING]")))
     goto Erreur_Retour;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Auto_set_resolution",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_set_resolution",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_set_res=Valeurs[0];
+  Conf->Auto_set_res=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Set_resolution_according_to",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Set_resolution_according_to",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>2))
+  if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Set_resolution_according_to=Valeurs[0];
+  Conf->Set_resolution_according_to=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Clear_palette",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Clear_palette",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Clear_palette=Valeurs[0];
+  Conf->Clear_palette=values[0];
 
 
-  if ((Retour=Charger_INI_Reach_group(file,Buffer,"[MISCELLANEOUS]")))
+  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MISCELLANEOUS]")))
     goto Erreur_Retour;
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Draw_limits",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Draw_limits",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Afficher_limites_image=Valeurs[0];
+  Conf->Afficher_limites_image=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Adjust_brush_pick",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Adjust_brush_pick",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Adjust_brush_pick=Valeurs[0];
+  Conf->Adjust_brush_pick=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Coordinates",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Coordinates",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>2))
+  if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coords_rel=2-Valeurs[0];
+  Conf->Coords_rel=2-values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Backup",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Backup",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Backup=Valeurs[0];
+  Conf->Backup=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Undo_pages",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Undo_pages",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>99))
+  if ((values[0]<1) || (values[0]>99))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Nb_pages_Undo=Valeurs[0];
+  Conf->Nb_pages_Undo=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Left",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Left",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>255))
+  if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Valeur_tempo_jauge_gauche=Valeurs[0];
+  Conf->Valeur_tempo_jauge_gauche=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Right",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Right",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<1) || (Valeurs[0]>255))
+  if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Valeur_tempo_jauge_droite=Valeurs[0];
+  Conf->Valeur_tempo_jauge_droite=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Auto_save",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_save",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_save=Valeurs[0];
+  Conf->Auto_save=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Vertices_per_polygon",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Vertices_per_polygon",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<2) || (Valeurs[0]>16384))
+  if ((values[0]<2) || (values[0]>16384))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Nb_max_de_vertex_par_polygon=Valeurs[0];
+  Conf->Nb_max_de_vertex_par_polygon=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Fast_zoom",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Fast_zoom",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Fast_zoom=Valeurs[0];
+  Conf->Fast_zoom=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Separate_colors",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Separate_colors",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Couleurs_separees=Valeurs[0];
+  Conf->Couleurs_separees=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"FX_feedback",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"FX_feedback",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->FX_Feedback=Valeurs[0];
+  Conf->FX_Feedback=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Safety_colors",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Safety_colors",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Safety_colors=Valeurs[0];
+  Conf->Safety_colors=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Opening_message",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Opening_message",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Opening_message=Valeurs[0];
+  Conf->Opening_message=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Clear_with_stencil",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Clear_with_stencil",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Clear_with_stencil=Valeurs[0];
+  Conf->Clear_with_stencil=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Auto_discontinuous",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_discontinuous",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_discontinuous=Valeurs[0];
+  Conf->Auto_discontinuous=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Save_screen_size_in_GIF",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Save_screen_size_in_GIF",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Taille_ecran_dans_GIF=Valeurs[0];
+  Conf->Taille_ecran_dans_GIF=values[0];
 
-  if ((Retour=Charger_INI_Get_values (file,Buffer,"Auto_nb_colors_used",1,Valeurs)))
+  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_nb_colors_used",1,values)))
     goto Erreur_Retour;
-  if ((Valeurs[0]<0) || (Valeurs[0]>1))
+  if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_nb_used=Valeurs[0];
+  Conf->Auto_nb_used=values[0];
 
   // Optionnel, le mode video par défaut (à partir de beta 97.0%)
   Conf->Resolution_par_defaut=0;
@@ -697,38 +697,38 @@ int Charger_INI(T_Config * Conf)
   // Optionnel, les dimensions de la fenêtre (à partir de beta 97.0%)
   Mode_video[0].Width = 640;
   Mode_video[0].Height = 480;
-  if (!Charger_INI_Get_values (file,Buffer,"Default_window_size",2,Valeurs))
+  if (!Charger_INI_Get_values (file,Buffer,"Default_window_size",2,values))
   {
-    if ((Valeurs[0]>=320))
-      Mode_video[0].Width = Valeurs[0];
-    if ((Valeurs[1]>=200))
-      Mode_video[0].Height = Valeurs[1];
+    if ((values[0]>=320))
+      Mode_video[0].Width = values[0];
+    if ((values[1]>=200))
+      Mode_video[0].Height = values[1];
   }
 
   Conf->Mouse_Merge_movement=100;
   // Optionnel, paramètre pour grouper les mouvements souris (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Merge_movement",1,Valeurs))
+  if (!Charger_INI_Get_values (file,Buffer,"Merge_movement",1,values))
   {
-    if ((Valeurs[0]<0) || (Valeurs[0]>1000))
+    if ((values[0]<0) || (values[0]>1000))
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Mouse_Merge_movement=Valeurs[0];
+    Conf->Mouse_Merge_movement=values[0];
   }
 
   Conf->Palette_Cells_X=8;
   // Optionnel, nombre de colonnes dans la palette (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_X",1,Valeurs))
+  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_X",1,values))
   {
-    if ((Valeurs[0]<1) || (Valeurs[0]>256))
+    if ((values[0]<1) || (values[0]>256))
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Palette_Cells_X=Valeurs[0];
+    Conf->Palette_Cells_X=values[0];
   }
   Conf->Palette_Cells_Y=8;
   // Optionnel, nombre de lignes dans la palette (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_Y",1,Valeurs))
+  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_Y",1,values))
   {
-    if (Valeurs[0]<1 || Valeurs[0]>16)
+    if (values[0]<1 || values[0]>16)
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Palette_Cells_Y=Valeurs[0];
+    Conf->Palette_Cells_Y=values[0];
   }
   // Optionnel, bookmarks (>98.0%)
   for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
@@ -740,10 +740,10 @@ int Charger_INI(T_Config * Conf)
   {
     if (!Charger_INI_Get_string (file,Buffer,"Bookmark_label",Libelle_valeur))
     {
-      int Taille=strlen(Libelle_valeur);
-      if (Taille!=0)
+      int size=strlen(Libelle_valeur);
+      if (size!=0)
       {
-        if (Taille>8)
+        if (size>8)
         {
           Libelle_valeur[7]=CARACTERE_SUSPENSION;
           Libelle_valeur[8]='\0';
@@ -755,10 +755,10 @@ int Charger_INI(T_Config * Conf)
       break;
     if (!Charger_INI_Get_string (file,Buffer,"Bookmark_directory",Libelle_valeur))
     {
-      int Taille=strlen(Libelle_valeur);
-      if (Taille!=0)
+      int size=strlen(Libelle_valeur);
+      if (size!=0)
       {
-        Conf->Bookmark_directory[Indice]=(char *)malloc(Taille+1);
+        Conf->Bookmark_directory[Indice]=(char *)malloc(size+1);
         strcpy(Conf->Bookmark_directory[Indice],Libelle_valeur);
       }
     }
@@ -778,7 +778,7 @@ int Charger_INI(T_Config * Conf)
     fclose(file);
     free(Nom_du_fichier);
     free(Buffer);
-    return Retour;
+    return return_code;
 
   Erreur_ERREUR_INI_CORROMPU:
 

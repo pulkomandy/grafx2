@@ -324,7 +324,7 @@ word Modificateurs_Touche(SDLMod Mod)
 
 word Conversion_Touche(SDL_keysym Sym)
 {
-  word Retour = 0;
+  word key_code = 0;
   word Mod;
   
   // On ignore shift, alt et control isolés.
@@ -337,10 +337,10 @@ word Conversion_Touche(SDL_keysym Sym)
   // Les touches qui n'ont qu'une valeur unicode (très rares)
   // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
   if (Sym.sym != 0)
-    Retour = Sym.sym;
+    key_code = Sym.sym;
   else if (Sym.scancode != 0)
   {
-    Retour = (Sym.scancode & 0x07FF) | 0x0800;
+    key_code = (Sym.scancode & 0x07FF) | 0x0800;
   }
   
   // Normally I should test Sym.mod here, but on windows the implementation
@@ -348,8 +348,8 @@ word Conversion_Touche(SDL_keysym Sym)
   // still name the original modifiers.
   Mod=Modificateurs_Touche(SDL_GetModState());
   // SDL_GetModState() seems to get the right up-to-date info.
-  Retour |= Mod;
-  return Retour;
+  key_code |= Mod;
+  return key_code;
 }
 
 const char * Nom_touche(word Touche)

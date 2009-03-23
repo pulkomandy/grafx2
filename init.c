@@ -76,92 +76,92 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-void Chercher_bas(SDL_Surface *gui, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * Section)
+void Chercher_bas(SDL_Surface *gui, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * section)
 {
   byte Couleur;
-  int Y;
-  Y=*Debut_Y;
+  int y;
+  y=*Debut_Y;
   *Debut_X=0;
   do
   {
-    Couleur=Sdl_Get_pixel_8(gui,*Debut_X,Y);
+    Couleur=Sdl_Get_pixel_8(gui,*Debut_X,y);
     if (Couleur!=Couleur_neutre)
     {
-      *Debut_Y=Y;
+      *Debut_Y=y;
       return;
     }
-    Y++;
-  } while (Y<gui->h);
+    y++;
+  } while (y<gui->h);
   
   printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
-    *Debut_X, *Debut_Y, Section);
+    *Debut_X, *Debut_Y, section);
   Erreur(ERREUR_GUI_CORROMPU);
 }
 
-void Chercher_droite(SDL_Surface *gui, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * Section)
+void Chercher_droite(SDL_Surface *gui, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * section)
 {
   byte Couleur;
-  int X;
-  X=*Debut_X;
+  int x;
+  x=*Debut_X;
   
   do
   {
-    Couleur=Sdl_Get_pixel_8(gui,X,Debut_Y);
+    Couleur=Sdl_Get_pixel_8(gui,x,Debut_Y);
     if (Couleur!=Couleur_neutre)
     {
-      *Debut_X=X;
+      *Debut_X=x;
       return;
     }
-    X++;
-  } while (X<gui->w);
+    x++;
+  } while (x<gui->w);
   
   printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
-    *Debut_X, Debut_Y, Section);
+    *Debut_X, Debut_Y, section);
   Erreur(ERREUR_GUI_CORROMPU);
 }
 
-void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int width, int height, char * Section, int Type)
+void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int width, int height, char * section, int type)
 {
-  // Type: 0 = normal GUI element, only 4 colors allowed
-  // Type: 1 = mouse cursor, 4 colors allowed + transparent
-  // Type: 2 = brush icon or sieve pattern (only CM_Blanc and CM_Trans)
-  // Type: 3 = raw bitmap (splash screen)
+  // type: 0 = normal GUI element, only 4 colors allowed
+  // type: 1 = mouse cursor, 4 colors allowed + transparent
+  // type: 2 = brush icon or sieve pattern (only CM_Blanc and CM_Trans)
+  // type: 3 = raw bitmap (splash screen)
   
   byte * Ptr=Dest;
-  int X,Y;
+  int x,y;
   byte Couleur;
 
   // Verification taille
   if (Debut_Y+height>=gui->h || Debut_X+width>=gui->w)
   {
     printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
-      Debut_X, Debut_Y, height, width, Section);
+      Debut_X, Debut_Y, height, width, section);
     Erreur(ERREUR_GUI_CORROMPU);
   }
 
-  for (Y=Debut_Y; Y<Debut_Y+height; Y++)
+  for (y=Debut_Y; y<Debut_Y+height; y++)
   {
-    for (X=Debut_X; X<Debut_X+width; X++)
+    for (x=Debut_X; x<Debut_X+width; x++)
     {
-      Couleur=Sdl_Get_pixel_8(gui,X,Y);
-      if (Type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
+      Couleur=Sdl_Get_pixel_8(gui,x,y);
+      if (type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
+          Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
         Erreur(ERREUR_GUI_CORROMPU);
       }
-      if (Type==1 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc && Couleur != CM_Trans))
+      if (type==1 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc && Couleur != CM_Trans))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
+          Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
         Erreur(ERREUR_GUI_CORROMPU);
       }
-      if (Type==2)
+      if (type==2)
       {
         if (Couleur != CM_Blanc && Couleur != CM_Trans)
         {
           printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            Debut_X, Debut_Y, height, width, Section, X, Y, Couleur, CM_Blanc, CM_Trans);
+            Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Blanc, CM_Trans);
           Erreur(ERREUR_GUI_CORROMPU);
         }
         // Conversion en 0/1 pour les brosses monochromes internes
@@ -173,19 +173,19 @@ void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int width
   }
 }
 
-void Lire_trame(SDL_Surface *gui, int Debut_X, int Debut_Y, word *Dest, char * Section)
+void Lire_trame(SDL_Surface *gui, int Debut_X, int Debut_Y, word *Dest, char * section)
 {
   byte Buffer[256];
-  int X,Y;
+  int x,y;
   
-  Lire_bloc(gui, Debut_X, Debut_Y, Buffer, 16, 16, Section, 2);
+  Lire_bloc(gui, Debut_X, Debut_Y, Buffer, 16, 16, section, 2);
 
-  for (Y=0; Y<16; Y++)
+  for (y=0; y<16; y++)
   {
     *Dest=0;
-    for (X=0; X<16; X++)
+    for (x=0; x<16; x++)
     {
-      *Dest=*Dest | Buffer[Y*16+X]<<X;
+      *Dest=*Dest | Buffer[y*16+x]<<x;
     }
     Dest++;
   }
@@ -1120,14 +1120,14 @@ void Initialisation_des_operations(void)
 {
   byte number; // Numéro de l'option en cours d'auto-initialisation
   byte Bouton; // Bouton souris en cours d'auto-initialisation
-  byte Taille; // Taille de la pile en cours d'auto-initialisation
+  byte stack_index; // Taille de la pile en cours d'auto-initialisation
 
   // Auto-initialisation des opérations (vers des actions inoffensives)
 
   for (number=0;number<NB_OPERATIONS;number++)
     for (Bouton=0;Bouton<3;Bouton++)
-      for (Taille=0;Taille<TAILLE_PILE_OPERATIONS;Taille++)
-        Initialiser_operation(number,Bouton,Taille,Print_coordonnees,0);
+      for (stack_index=0;stack_index<TAILLE_PILE_OPERATIONS;stack_index++)
+        Initialiser_operation(number,Bouton,stack_index,Print_coordonnees,0);
 
 
   // Ici viennent les déclarations détaillées des opérations
@@ -1661,7 +1661,7 @@ int Charger_CFG(int Tout_charger)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   long Taille_fichier;
   int  Indice,Indice2;
-  Config_Header       CFG_Header;
+  Config_Header       cfg_header;
   Config_Chunk        Chunk;
   Config_Infos_touche CFG_Infos_touche;
   Config_Mode_video   CFG_Mode_video;
@@ -1677,48 +1677,48 @@ int Charger_CFG(int Tout_charger)
   if ((Handle=fopen(Nom_du_fichier,"rb"))==NULL)
     return ERREUR_CFG_ABSENT;
 
-  if ( (Taille_fichier<(long)sizeof(CFG_Header))
-    || (!read_bytes(Handle, &CFG_Header.Signature, 3))
-    || memcmp(CFG_Header.Signature,"CFG",3)
-    || (!read_byte(Handle, &CFG_Header.Version1))
-    || (!read_byte(Handle, &CFG_Header.Version2))
-    || (!read_byte(Handle, &CFG_Header.Beta1))
-    || (!read_byte(Handle, &CFG_Header.Beta2)) )
+  if ( (Taille_fichier<(long)sizeof(cfg_header))
+    || (!read_bytes(Handle, &cfg_header.Signature, 3))
+    || memcmp(cfg_header.Signature,"CFG",3)
+    || (!read_byte(Handle, &cfg_header.Version1))
+    || (!read_byte(Handle, &cfg_header.Version2))
+    || (!read_byte(Handle, &cfg_header.Beta1))
+    || (!read_byte(Handle, &cfg_header.Beta2)) )
       goto Erreur_lecture_config;
 
   // Version DOS de Robinson et X-Man
-  if ( (CFG_Header.Version1== 2)
-    && (CFG_Header.Version2== 0)
-    && (CFG_Header.Beta1== 96))
+  if ( (cfg_header.Version1== 2)
+    && (cfg_header.Version2== 0)
+    && (cfg_header.Beta1== 96))
   {
     // Les touches (scancodes) sont à convertir)
     Conversion_touches = 1;
   }
   // Version SDL jusqu'a 98%
-  else if ( (CFG_Header.Version1== 2)
-    && (CFG_Header.Version2== 0)
-    && (CFG_Header.Beta1== 97))
+  else if ( (cfg_header.Version1== 2)
+    && (cfg_header.Version2== 0)
+    && (cfg_header.Beta1== 97))
   {
     // Les touches 00FF (pas de touche) sont a comprendre comme 0x0000
     Conversion_touches = 2;
   }
   // Version SDL
-  else if ( (CFG_Header.Version1!=VERSION1)
-    || (CFG_Header.Version2!=VERSION2)
-    || (CFG_Header.Beta1!=BETA1)
-    || (CFG_Header.Beta2!=BETA2) )
+  else if ( (cfg_header.Version1!=VERSION1)
+    || (cfg_header.Version2!=VERSION2)
+    || (cfg_header.Beta1!=BETA1)
+    || (cfg_header.Beta2!=BETA2) )
     goto Erreur_config_ancienne;
 
   // - Lecture des infos contenues dans le fichier de config -
   while (read_byte(Handle, &Chunk.Number))
   {
-    read_word_le(Handle, &Chunk.Taille);
+    read_word_le(Handle, &Chunk.Size);
     switch (Chunk.Number)
     {
       case CHUNK_TOUCHES: // Touches
         if (Tout_charger)
         {
-          for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Infos_touche)); Indice++)
+          for (Indice=0; Indice<(long)(Chunk.Size/sizeof(CFG_Infos_touche)); Indice++)
           {
             if (!read_word_le(Handle, &CFG_Infos_touche.Number) ||
                 !read_word_le(Handle, &CFG_Infos_touche.Touche) ||
@@ -1766,12 +1766,12 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
       case CHUNK_MODES_VIDEO: // Modes vidéo
-        for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Mode_video)); Indice++)
+        for (Indice=0; Indice<(long)(Chunk.Size/sizeof(CFG_Mode_video)); Indice++)
         {
           if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
               !read_word_le(Handle, &CFG_Mode_video.Width) ||
@@ -1818,7 +1818,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1830,7 +1830,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1842,7 +1842,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1864,7 +1864,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1878,7 +1878,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1890,7 +1890,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1904,7 +1904,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1922,7 +1922,7 @@ int Charger_CFG(int Tout_charger)
         }
         else
         {
-          if (fseek(Handle,Chunk.Taille,SEEK_CUR)==-1)
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
         }
         break;
@@ -1952,7 +1952,7 @@ int Sauver_CFG(void)
   int  Indice2;
   int Modes_a_sauver;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  Config_Header CFG_Header;
+  Config_Header cfg_header;
   Config_Chunk Chunk;
   Config_Infos_touche CFG_Infos_touche;
   Config_Mode_video   CFG_Mode_video;
@@ -1964,24 +1964,24 @@ int Sauver_CFG(void)
     return ERREUR_SAUVEGARDE_CFG;
 
   // Ecriture du header
-  memcpy(CFG_Header.Signature,"CFG",3);
-  CFG_Header.Version1=VERSION1;
-  CFG_Header.Version2=VERSION2;
-  CFG_Header.Beta1   =BETA1;
-  CFG_Header.Beta2   =BETA2;
-  if (!write_bytes(Handle, &CFG_Header.Signature,3) ||
-      !write_byte(Handle, CFG_Header.Version1) ||
-      !write_byte(Handle, CFG_Header.Version2) ||
-      !write_byte(Handle, CFG_Header.Beta1) ||
-      !write_byte(Handle, CFG_Header.Beta2) )
+  memcpy(cfg_header.Signature,"CFG",3);
+  cfg_header.Version1=VERSION1;
+  cfg_header.Version2=VERSION2;
+  cfg_header.Beta1   =BETA1;
+  cfg_header.Beta2   =BETA2;
+  if (!write_bytes(Handle, &cfg_header.Signature,3) ||
+      !write_byte(Handle, cfg_header.Version1) ||
+      !write_byte(Handle, cfg_header.Version2) ||
+      !write_byte(Handle, cfg_header.Beta1) ||
+      !write_byte(Handle, cfg_header.Beta2) )
     goto Erreur_sauvegarde_config;
 
   // Enregistrement des touches
   Chunk.Number=CHUNK_TOUCHES;
-  Chunk.Taille=NB_TOUCHES*sizeof(CFG_Infos_touche);
+  Chunk.Size=NB_TOUCHES*sizeof(CFG_Infos_touche);
 
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
@@ -2015,10 +2015,10 @@ int Sauver_CFG(void)
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Number=CHUNK_MODES_VIDEO;
-  Chunk.Taille=Modes_a_sauver * sizeof(CFG_Mode_video);
+  Chunk.Size=Modes_a_sauver * sizeof(CFG_Mode_video);
 
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   for (Indice=1; Indice<Nb_modes_video; Indice++)
     if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
@@ -2035,9 +2035,9 @@ int Sauver_CFG(void)
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Number=CHUNK_SHADE;
-  Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
+  Chunk.Size=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Shade_Actuel))
     goto Erreur_sauvegarde_config;
@@ -2055,27 +2055,27 @@ int Sauver_CFG(void)
 
   // Sauvegarde des informations du Masque
   Chunk.Number=CHUNK_MASQUE;
-  Chunk.Taille=sizeof(Mask_table);
+  Chunk.Size=sizeof(Mask_table);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_bytes(Handle, Mask_table,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
   Chunk.Number=CHUNK_STENCIL;
-  Chunk.Taille=sizeof(Stencil);
+  Chunk.Size=sizeof(Stencil);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_bytes(Handle, Stencil,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
   Chunk.Number=CHUNK_DEGRADES;
-  Chunk.Taille=sizeof(Degrade_Tableau)+1;
+  Chunk.Size=sizeof(Degrade_Tableau)+1;
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Degrade_Courant))
     goto Erreur_sauvegarde_config;
@@ -2091,9 +2091,9 @@ int Sauver_CFG(void)
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
-  Chunk.Taille=sizeof(Smooth_Matrice);
+  Chunk.Size=sizeof(Smooth_Matrice);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<3; Indice++)
     for (Indice2=0; Indice2<3; Indice2++)
@@ -2102,18 +2102,18 @@ int Sauver_CFG(void)
 
   // Sauvegarde des couleurs à exclure
   Chunk.Number=CHUNK_EXCLUDE_COLORS;
-  Chunk.Taille=sizeof(Exclude_color);
+  Chunk.Size=sizeof(Exclude_color);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
  if (!write_bytes(Handle, Exclude_color, 256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Quick-shade
   Chunk.Number=CHUNK_QUICK_SHADE;
-  Chunk.Taille=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
+  Chunk.Size=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Quick_shade_Step))
     goto Erreur_sauvegarde_config;
@@ -2122,9 +2122,9 @@ int Sauver_CFG(void)
 
   // Sauvegarde des informations de la grille
   Chunk.Number=CHUNK_GRILLE;
-  Chunk.Taille=8;
+  Chunk.Size=8;
   if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Taille) )
+      !write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
   if (!write_word_le(Handle, Snap_Largeur))
     goto Erreur_sauvegarde_config;

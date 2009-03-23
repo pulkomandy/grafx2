@@ -36,8 +36,8 @@ void Calculer_donnees_loupe(void);
 void Calculer_limites(void);
 void Calculer_coordonnees_pinceau(void);
 
-void Pixel_dans_barre_d_outil(word X,word Y,byte Couleur);
-void Pixel_dans_fenetre(word X,word Y,byte Couleur);
+void Pixel_dans_barre_d_outil(word x,word y,byte Couleur);
+void Pixel_dans_fenetre(word x,word y,byte Couleur);
 void Encadrer_couleur_menu(byte Couleur);
 void Afficher_palette_du_menu(void);
 void Afficher_menu(void);
@@ -47,15 +47,15 @@ int Couleur_palette(void);
 word Palette_Cells_X(void);
 word Palette_Cells_Y(void);
 
-void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre_limite(short X,short Y,const char * Chaine,byte Taille,byte Couleur_texte,byte Couleur_fond);
+void Print_general(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
+void Print_dans_fenetre(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
+void Print_dans_fenetre_limite(short x,short y,const char * Chaine,byte size,byte Couleur_texte,byte Couleur_fond);
 void Print_char_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur_texte,byte Couleur_fond);
 void Print_char_transparent_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur);
 void Print_dans_menu(const char * Chaine, short position);
 void Print_coordonnees(void);
 void Print_nom_fichier(void);
-void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
+void Print_compteur(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
 
 byte Demande_de_confirmation(char * Message);
 void Warning_message(char * Message);
@@ -71,11 +71,11 @@ void Fenetre_Afficher_cadre(word x_pos,word y_pos,word width,word height);
 
 void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite);
 void Afficher_pinceau_dans_menu(void);
-void Afficher_pinceau_dans_fenetre(word X,word Y,int number);
+void Afficher_pinceau_dans_fenetre(word x,word y,int number);
 
-void Dessiner_zigouigoui(word X,word Y, byte Couleur, short Sens);
+void Dessiner_zigouigoui(word x,word y, byte Couleur, short direction);
 void Bloc_degrade_dans_fenetre(word x_pos,word y_pos,word Debut_block,word Fin_block);
-void Fenetre_Afficher_sprite_drive(word x_pos,word y_pos,byte Type);
+void Fenetre_Afficher_sprite_drive(word x_pos,word y_pos,byte type);
 
 byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
 byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);

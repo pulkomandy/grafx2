@@ -19,8 +19,8 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 void Demarrer_pile_operation(word Operation_demandee);
-void Operation_PUSH(short Valeur);
-void Operation_POP(short * Valeur);
+void Operation_PUSH(short value);
+void Operation_POP(short * value);
 
 //////////////////////////////////////////////////// OPERATION_DESSIN_CONTINU
 void Freehand_Mode1_1_0(void);

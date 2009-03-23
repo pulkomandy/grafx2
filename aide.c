@@ -233,8 +233,8 @@ void Fenetre_controle(int NumeroControle)
 
 void Afficher_aide(void)
 {
-  short  X;                   // Indices d'affichage d'un caractère
-  short  Y;
+  short  x;                   // Indices d'affichage d'un caractère
+  short  y;
   short  Position_X;          // Parcours de remplissage du buffer de ligne
   short  Indice_de_ligne;     // 0-15 (16 lignes de textes)
   short  Indice_de_caractere; // Parcours des caractères d'une ligne
@@ -298,7 +298,7 @@ void Afficher_aide(void)
       width = width*2;
 
     // Pour chaque ligne dans la fenêtre:
-    for (Y=0;Y<8;Y++)
+    for (y=0;y<8;y++)
     {
       Position_X=0;
       // On crée une nouvelle ligne à splotcher
@@ -332,10 +332,10 @@ void Afficher_aide(void)
         else
           char_pixel=&(Fonte_help_norm['!'][0][0]); // Un garde-fou en cas de probleme
           
-        for (X=0;X<6;X++)
+        for (x=0;x<6;x++)
           for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X;Repeat_Menu_Facteur_X++)
           {
-            byte Couleur = *(char_pixel+X+Y*6);
+            byte Couleur = *(char_pixel+x+y*6);
             byte Repetition = Pixel_width-1;
             // Surlignement pour liens
             if (TypeLigne=='K' && Indice_de_caractere>=Position_lien
@@ -345,7 +345,7 @@ void Afficher_aide(void)
                 Couleur=CM_Blanc;
               else if (Couleur == CM_Fonce)
                 Couleur=CM_Clair;
-              else if (Y<7)
+              else if (y<7)
                 Couleur=CM_Fonce;
             }
             Buffer_de_ligne_horizontale[Position_X++]=Couleur;
@@ -371,12 +371,12 @@ void Afficher_aide(void)
 }
 
 
-void Scroller_aide(T_Bouton_scroller * Scroller)
+void Scroller_aide(T_Bouton_scroller * scroller)
 {
   Effacer_curseur();
-  Scroller->Position=Position_d_aide_en_cours;
-  Calculer_hauteur_curseur_jauge(Scroller);
-  Fenetre_Dessiner_jauge(Scroller);
+  scroller->Position=Position_d_aide_en_cours;
+  Calculer_hauteur_curseur_jauge(scroller);
+  Fenetre_Dessiner_jauge(scroller);
   Afficher_aide();
   Afficher_curseur();
 }
@@ -400,19 +400,19 @@ void Bouton_Aide(void)
 }
 // Ouvre l'ecran d'aide. Passer -1 pour la section par défaut (ou derniere,)
 // Ou un nombre de l'enumération NUMEROS_DE_BOUTONS pour l'aide contextuelle.
-void Fenetre_aide(int Section, const char *Sous_section)
+void Fenetre_aide(int section, const char *Sous_section)
 {
   short Bouton_clicke;
   short Nb_lignes;
-  T_Bouton_scroller * Scroller;
+  T_Bouton_scroller * scroller;
 
-  if (Section!=-1)
+  if (section!=-1)
   {
-    Section_d_aide_en_cours = 4 + Section;
+    Section_d_aide_en_cours = 4 + section;
     Position_d_aide_en_cours = 0;
   }
   Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
-  if (Section!=-1 && Sous_section!=NULL)
+  if (section!=-1 && Sous_section!=NULL)
   {
     int Indice=0;
     for (Indice=0; Indice<Nb_lignes; Indice++)
@@ -434,7 +434,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
         Menu_Facteur_X*272,Menu_Facteur_Y*130,CM_Noir);
 
   Fenetre_Definir_bouton_normal(266,153,35,14,"Exit",0,1,TOUCHE_ESC); // 1
-  Scroller=Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
+  scroller=Fenetre_Definir_bouton_scroller(290,18,130,Nb_lignes,
                                   16,Position_d_aide_en_cours);   // 2
 
   Fenetre_Definir_bouton_normal(  9,154, 6*8,14,"About"  ,1,1,SDLK_a); // 3
@@ -492,10 +492,10 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Section_d_aide_en_cours=Bouton_clicke-3;
           Position_d_aide_en_cours=0;
           Nb_lignes=Table_d_aide[Section_d_aide_en_cours].Nombre_de_lignes;
-          Scroller->Position=0;
-          Scroller->Nb_elements=Nb_lignes;
-          Calculer_hauteur_curseur_jauge(Scroller);
-          Fenetre_Dessiner_jauge(Scroller);
+          scroller->Position=0;
+          scroller->Nb_elements=Nb_lignes;
+          Calculer_hauteur_curseur_jauge(scroller);
+          Fenetre_Dessiner_jauge(scroller);
         }
         else
           Position_d_aide_en_cours=Fenetre_Attribut2;
@@ -511,13 +511,13 @@ void Fenetre_aide(int Section, const char *Sous_section)
       case SDLK_UP : // Haut
         if (Position_d_aide_en_cours>0)
           Position_d_aide_en_cours--;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
         break;
       case SDLK_DOWN : // Bas
         if (Position_d_aide_en_cours<Nb_lignes-16)
           Position_d_aide_en_cours++;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
         break;
       case SDLK_PAGEUP : // PageUp
@@ -525,7 +525,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Position_d_aide_en_cours-=15;
         else
           Position_d_aide_en_cours=0;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
         break;
       case (TOUCHE_MOUSEWHEELUP) : // WheelUp
@@ -533,7 +533,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
           Position_d_aide_en_cours-=3;
         else
           Position_d_aide_en_cours=0;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
@@ -543,7 +543,7 @@ void Fenetre_aide(int Section, const char *Sous_section)
             Position_d_aide_en_cours+=15;
           else
             Position_d_aide_en_cours=Nb_lignes-16;
-          Scroller_aide(Scroller);
+          Scroller_aide(scroller);
           Touche=0;
         }
         break;
@@ -554,20 +554,20 @@ void Fenetre_aide(int Section, const char *Sous_section)
             Position_d_aide_en_cours+=3;
           else
             Position_d_aide_en_cours=Nb_lignes-16;
-          Scroller_aide(Scroller);
+          Scroller_aide(scroller);
           Touche=0;
         }
         break;
       case SDLK_HOME : // Home
         Position_d_aide_en_cours=0;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
         break;
       case SDLK_END : // End
       if (Nb_lignes>16)
       {
         Position_d_aide_en_cours=Nb_lignes-16;
-        Scroller_aide(Scroller);
+        Scroller_aide(scroller);
         Touche=0;
       }
         break;
@@ -591,7 +591,7 @@ void Bouton_Stats(void)
   char  Buffer[37];
   dword Utilisation_couleur[256];
   unsigned long long freeRam;
-  qword Taille = 0;
+  qword mem_size = 0;
 
   Ouvrir_fenetre(310,174,"Statistics");
 
@@ -636,29 +636,29 @@ void Bouton_Stats(void)
     {
       ULARGE_INTEGER tailleU;
       GetDiskFreeSpaceEx(Principal_Repertoire_courant,&tailleU,NULL,NULL);
-      Taille = tailleU.QuadPart;
+      mem_size = tailleU.QuadPart;
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__)
     // Note: under MacOSX, both macros are defined anyway.
     {
       struct statfs Informations_Disque;
       statfs(Principal_Repertoire_courant,&Informations_Disque);
-      Taille=(qword) Informations_Disque.f_bfree * (qword) Informations_Disque.f_bsize;
+      mem_size=(qword) Informations_Disque.f_bfree * (qword) Informations_Disque.f_bsize;
     }
 #else
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
-    Taille=0;
+    mem_size=0;
 #endif
   
-    if(Taille > (100ULL*1024*1024*1024))
-        sprintf(Buffer,"%u Gigabytes",(unsigned int)(Taille/(1024*1024*1024)));
-    else if(Taille > (100*1024*1024))
-        sprintf(Buffer,"%u Megabytes",(unsigned int)(Taille/(1024*1024)));
-    else if(Taille > (100*1024))
-        sprintf(Buffer,"%u Kilobytes",(unsigned int)(Taille/1024));
+    if(mem_size > (100ULL*1024*1024*1024))
+        sprintf(Buffer,"%u Gigabytes",(unsigned int)(mem_size/(1024*1024*1024)));
+    else if(mem_size > (100*1024*1024))
+        sprintf(Buffer,"%u Megabytes",(unsigned int)(mem_size/(1024*1024)));
+    else if(mem_size > (100*1024))
+        sprintf(Buffer,"%u Kilobytes",(unsigned int)(mem_size/1024));
     else 
-        sprintf(Buffer,"%u bytes",(unsigned int)Taille);
+        sprintf(Buffer,"%u bytes",(unsigned int)mem_size);
     Print_dans_fenetre(146,67,Buffer,STATS_COULEUR_DONNEES,CM_Noir);
 
   // Affichage des informations sur l'image

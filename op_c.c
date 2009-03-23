@@ -170,7 +170,7 @@ void HSLtoRGB(byte h,byte s,byte l, byte* r, byte* g, byte* b)
 Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b)
 {
   Table_conversion * n;
-  int Taille;
+  int size;
 
   n=(Table_conversion *)malloc(sizeof(Table_conversion));
   if (n!=NULL)
@@ -192,11 +192,11 @@ Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b)
     n->red_b=8-nbb_b;
 
     // On tente d'allouer la table
-    Taille=(n->rng_r)*(n->rng_v)*(n->rng_b);
-    n->table=(byte *)malloc(Taille);
+    size=(n->rng_r)*(n->rng_v)*(n->rng_b);
+    n->table=(byte *)malloc(size);
     if (n->table!=NULL)
       // C'est bon!
-      memset(n->table,0,Taille); // Inutile, mais plus propre
+      memset(n->table,0,size); // Inutile, mais plus propre
     else
     {
       // Table impossible … allouer
@@ -245,16 +245,16 @@ void TC_Set(Table_conversion * t,int r,int g,int b,byte i)
 
 void TO_Init(Table_occurence * t)
 {
-  int Taille;
+  int size;
 
-  Taille=(t->rng_r)*(t->rng_v)*(t->rng_b)*sizeof(int);
-  memset(t->table,0,Taille); // On initialise … 0
+  size=(t->rng_r)*(t->rng_v)*(t->rng_b)*sizeof(int);
+  memset(t->table,0,size); // On initialise … 0
 }
 
 Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b)
 {
   Table_occurence * n;
-  int Taille;
+  int size;
 
   n=(Table_occurence *)malloc(sizeof(Table_occurence));
   if (n!=0)
@@ -276,8 +276,8 @@ Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b)
     n->red_b=8-nbb_b;
 
     // On tente d'allouer la table
-    Taille=(n->rng_r)*(n->rng_v)*(n->rng_b)*sizeof(int);
-    n->table=(int *)malloc(Taille);
+    size=(n->rng_r)*(n->rng_v)*(n->rng_b)*sizeof(int);
+    n->table=(int *)malloc(size);
     if (n->table!=0)
       // C'est bon! On initialise … 0
       TO_Init(n);
@@ -328,12 +328,12 @@ void TO_Inc(Table_occurence * t,int r,int g,int b)
   t->table[index]++;
 }
 
-void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int Taille)
+void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int size)
 {
   Bitmap24B ptr;
   int index;
 
-  for (index=Taille,ptr=image;index>0;index--,ptr++)
+  for (index=size,ptr=image;index>0;index--,ptr++)
     TO_Inc(t,ptr->R,ptr->G,ptr->B);
 }
 
@@ -788,7 +788,7 @@ void CS_Set(ClusterSet * cs,Cluster * c)
 // 6) On s'arrête quand on a le nombre de couleurs voulu
 void CS_Generer(ClusterSet * cs,Table_occurence * to)
 {
-  Cluster Courant;
+  Cluster current;
   Cluster Nouveau1;
   Cluster Nouveau2;
 
@@ -796,10 +796,10 @@ void CS_Generer(ClusterSet * cs,Table_occurence * to)
   while (cs->nb<cs->nb_max)
   {
     // On récupère le plus grand cluster
-    CS_Get(cs,&Courant);
+    CS_Get(cs,&current);
 
     // On le coupe en deux
-    Cluster_Split(&Courant,&Nouveau1,&Nouveau2,Courant.plus_large,to);
+    Cluster_Split(&current,&Nouveau1,&Nouveau2,current.plus_large,to);
 
     // On compacte ces deux nouveaux (il peut y avoir un espace entre l'endroit de la coupure et les premiers pixels du cluster)
     Cluster_Analyser(&Nouveau1,to);
@@ -1012,7 +1012,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
 
 
 
-Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * palette,int r,int g,int b)
+Table_conversion * Optimiser_palette(Bitmap24B image,int size,Composantes * palette,int r,int g,int b)
 {
   Table_occurence  * to;
   Table_conversion * tc;
@@ -1030,7 +1030,7 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * pa
     {
 
       // Première étape : on compte les pixels de chaque couleur pour pouvoir trier là dessus
-      TO_Compter_occurences(to,image,Taille);
+      TO_Compter_occurences(to,image,size);
 
       cs=CS_New(256,to);
       if (cs!=0)
@@ -1070,18 +1070,18 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * pa
   return 0;
 }
 
-int Valeur_modifiee(int Valeur,int modif)
+int Valeur_modifiee(int value,int modif)
 {
-  Valeur+=modif;
-  if (Valeur<0)
+  value+=modif;
+  if (value<0)
   {
-    Valeur=0;
+    value=0;
   }
-  else if (Valeur>255)
+  else if (value>255)
   {
-    Valeur=255;
+    value=255;
   }
-  return Valeur;
+  return value;
 }
 
 void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,int width,int height,Composantes * palette,Table_conversion * tc)
@@ -1089,22 +1089,22 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
 // s'en ressert pas, soit on passe à la fonction une copie de travail du
 // bitmap original.
 {
-  Bitmap24B Courant;
-  Bitmap24B C_plus1;
-  Bitmap24B S_moins1;
-  Bitmap24B Suivant;
-  Bitmap24B S_plus1;
+  Bitmap24B current;
+  Bitmap24B c_plus1;
+  Bitmap24B u_minus1;
+  Bitmap24B next;
+  Bitmap24B u_plus1;
   Bitmap256 d;
   int x_pos,y_pos;
   int Rouge,Vert,Bleu;
   float ERouge,EVert,EBleu;
 
   // On initialise les variables de parcours:
-  Courant =Source;      // Le pixel dont on s'occupe
-  Suivant =Courant+width; // Le pixel en dessous
-  C_plus1 =Courant+1;   // Le pixel à droite
-  S_moins1=Suivant-1;   // Le pixel en bas à gauche
-  S_plus1 =Suivant+1;   // Le pixel en bas à droite
+  current =Source;      // Le pixel dont on s'occupe
+  next =current+width; // Le pixel en dessous
+  c_plus1 =current+1;   // Le pixel à droite
+  u_minus1=next-1;   // Le pixel en bas à gauche
+  u_plus1 =next+1;   // Le pixel en bas à droite
   d       =Dest;
 
   // On parcours chaque pixel:
@@ -1114,9 +1114,9 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
     {
       // On prends la meilleure couleur de la palette qui traduit la couleur
       // 24 bits de la source:
-      Rouge=Courant->R;
-      Vert =Courant->G;
-      Bleu =Courant->B;
+      Rouge=current->R;
+      Vert =current->G;
+      Bleu =current->B;
       // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
       *d=TC_Get(tc,Rouge,Vert,Bleu);
 
@@ -1133,9 +1133,9 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         if (x_pos+1<width)
         {
           // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
-          C_plus1->R=Valeur_modifiee(C_plus1->R,ERouge);
-          C_plus1->G=Valeur_modifiee(C_plus1->G,EVert );
-          C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );
+          c_plus1->R=Valeur_modifiee(c_plus1->R,ERouge);
+          c_plus1->G=Valeur_modifiee(c_plus1->G,EVert );
+          c_plus1->B=Valeur_modifiee(c_plus1->B,EBleu );
         }
       // En bas à gauche:
       if (y_pos+1<height)
@@ -1145,35 +1145,35 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         EBleu =(Bleu *3)/16.0;
         if (x_pos>0)
         {
-          S_moins1->R=Valeur_modifiee(S_moins1->R,ERouge);
-          S_moins1->G=Valeur_modifiee(S_moins1->G,EVert );
-          S_moins1->B=Valeur_modifiee(S_moins1->B,EBleu );
+          u_minus1->R=Valeur_modifiee(u_minus1->R,ERouge);
+          u_minus1->G=Valeur_modifiee(u_minus1->G,EVert );
+          u_minus1->B=Valeur_modifiee(u_minus1->B,EBleu );
         }
       // En bas:
         ERouge=(Rouge*5/16.0);
         EVert =(Vert*5 /16.0);
         EBleu =(Bleu*5 /16.0);
-        Suivant->R=Valeur_modifiee(Suivant->R,ERouge);
-        Suivant->G=Valeur_modifiee(Suivant->G,EVert );
-        Suivant->B=Valeur_modifiee(Suivant->B,EBleu );
+        next->R=Valeur_modifiee(next->R,ERouge);
+        next->G=Valeur_modifiee(next->G,EVert );
+        next->B=Valeur_modifiee(next->B,EBleu );
       // En bas à droite:
         if (x_pos+1<width)
         {
         ERouge=(Rouge/16.0);
         EVert =(Vert /16.0);
         EBleu =(Bleu /16.0);
-          S_plus1->R=Valeur_modifiee(S_plus1->R,ERouge);
-          S_plus1->G=Valeur_modifiee(S_plus1->G,EVert );
-          S_plus1->B=Valeur_modifiee(S_plus1->B,EBleu );
+          u_plus1->R=Valeur_modifiee(u_plus1->R,ERouge);
+          u_plus1->G=Valeur_modifiee(u_plus1->G,EVert );
+          u_plus1->B=Valeur_modifiee(u_plus1->B,EBleu );
         }
       }
 
       // On passe au pixel suivant :
-      Courant++;
-      C_plus1++;
-      S_moins1++;
-      Suivant++;
-      S_plus1++;
+      current++;
+      c_plus1++;
+      u_minus1++;
+      next++;
+      u_plus1++;
       d++;
     }
   }

@@ -161,7 +161,7 @@ void TO_Delete(Table_occurence * t);
 int TO_Get(Table_occurence * t,int r,int g,int b);
 void TO_Set(Table_occurence * t,int r,int g,int b,int i);
 void TO_Inc(Table_occurence * t,int r,int g,int b);
-void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int Taille);
+void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int size);
 
 
 

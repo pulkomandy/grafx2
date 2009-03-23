@@ -295,7 +295,7 @@ void Initialiser_S_Liste_de_pages(S_Liste_de_pages * list)
   list->Pages=NULL;
 }
 
-int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int Taille)
+int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int size)
 {
   // Important: la S_Liste_de_pages ne doit pas déjà désigner une liste de
   //            pages allouée auquel cas celle-ci serait perdue.
@@ -304,7 +304,7 @@ int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int Taille)
   /* Debug : if (list->Pages!=NULL) exit(666); */
 
   // On alloue la mémoire pour la liste
-  list->Pages=(S_Page *)malloc(Taille*sizeof(S_Page));
+  list->Pages=(S_Page *)malloc(size*sizeof(S_Page));
 
   // On vérifie que l'allocation se soit bien passée
   if (list->Pages==NULL)
@@ -312,9 +312,9 @@ int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int Taille)
   else
   {
     // On initialise chacune des nouvelles pages
-    for (Indice=0;Indice<Taille;Indice++)
+    for (Indice=0;Indice<size;Indice++)
       Initialiser_S_Page(list->Pages+Indice);
-    list->Taille_liste=Taille;
+    list->Taille_liste=size;
     list->Nb_pages_allouees=0;
 
     return 1; // Succès
@@ -659,17 +659,17 @@ void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list)
   /// GESTION DES BACKUPS
   ///
 
-int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width,int height)
+int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,int height)
 {
-  // Taille correspond au nombre de pages que l'on souhaite dans chaque liste
+  // size correspond au nombre de pages que l'on souhaite dans chaque liste
   // (1 pour la page courante, puis 1 pour chaque backup, soit 2 au minimum).
   // width et height correspondent à la dimension des images de départ.
 
   S_Page * Page;
-  int Retour=0;
+  int return_code=0;
 
-  if (Allouer_une_liste_de_pages(Principal_Backups,Taille) &&
-      Allouer_une_liste_de_pages(Brouillon_Backups,Taille))
+  if (Allouer_une_liste_de_pages(Principal_Backups,size) &&
+      Allouer_une_liste_de_pages(Brouillon_Backups,size))
   {
     // On a réussi à allouer deux listes de pages dont la taille correspond à
     // celle demandée par l'utilisateur.
@@ -702,14 +702,14 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width
         memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
         memset(Brouillon_Ecran,0,Brouillon_Largeur_image*Brouillon_Hauteur_image);
 
-        Retour=1;
+        return_code=1;
       }
       else
       {
         // Il n'est pas possible de démarrer le programme avec la page 
         // principale et la page de brouillon aux dimensions demandée par 
         // l'utilisateur. ==> On l'envoie ballader
-        Retour=0;
+        return_code=0;
       }
     }
     else
@@ -718,7 +718,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width
       // page de la dimension souhaitée, donc on laisse tout tomber et on
       // le renvoie chier.
       free(Page);
-      Retour=0;
+      return_code=0;
     }
   }
   else
@@ -726,10 +726,10 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width
     // On n'a même pas réussi à créer les listes. Donc c'est même pas la 
     // peine de continuer : l'utilisateur ne pourra jamais rien faire, 
     // autant avorter le chargement du programme.
-    Retour=0;
+    return_code=0;
   }
 
-  return Retour;
+  return return_code;
 }
 
 void Detruire_les_listes_de_backups_en_fin_de_programme(void)
@@ -765,7 +765,7 @@ int Backup_avec_nouvelles_dimensions(int Upload,int width,int height)
   // 0 sinon.
 
   S_Page * Nouvelle_page;
-  int Retour=0;
+  int return_code=0;
 
   if (Upload)
     // On remet à jour l'état des infos de la page courante (pour pouvoir les
@@ -786,13 +786,13 @@ int Backup_avec_nouvelles_dimensions(int Upload,int width,int height)
     Download_infos_backup(Principal_Backups);
     // On nettoie la nouvelle image:
     memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
-    Retour=1;
+    return_code=1;
   }
 
   // On détruit le descripteur de la page courante
   free(Nouvelle_page);
 
-  return Retour;
+  return return_code;
 }
 
 int Backuper_et_redimensionner_brouillon(int width,int height)
@@ -801,7 +801,7 @@ int Backuper_et_redimensionner_brouillon(int width,int height)
   // et 0 sinon.
 
   S_Page * Nouvelle_page;
-  int Retour=0;
+  int return_code=0;
 
   // On remet à jour l'état des infos de la page de brouillon (pour pouvoir
   // les retrouver plus tard)
@@ -818,13 +818,13 @@ int Backuper_et_redimensionner_brouillon(int width,int height)
   {
     Creer_nouvelle_page(Nouvelle_page,Brouillon_Backups,Principal_Backups);
     Download_infos_page_brouillon(Nouvelle_page);
-    Retour=1;
+    return_code=1;
   }
 
   // On détruit le descripteur de la page courante
   free(Nouvelle_page);
 
-  return Retour;
+  return return_code;
 }
 
 void Backup(void)
@@ -956,7 +956,7 @@ void Interchanger_image_principale_et_brouillon(void)
 }
 
 
-int Emprunt_memoire_de_page_possible(int Taille)
+int Emprunt_memoire_de_page_possible(int size)
 {
   int Taille_immediatement_disponible;
   int Taille_liste_courante;
@@ -976,30 +976,30 @@ int Emprunt_memoire_de_page_possible(int Taille)
       +Taille_liste_courante
       +Taille_liste_brouillon
       -Taille_page_courante
-      -Taille_page_brouillon)<Taille)
+      -Taille_page_brouillon)<size)
     return 0;
 
   return 1;
 }
 
-void * Emprunter_memoire_de_page(int Taille)
+void * Emprunter_memoire_de_page(int size)
 {
   int                Il_faut_liberer;
   S_Liste_de_pages * Liste_a_raboter;
   S_Page *           Page_a_supprimer;
   //int                Indice;
 
-  if (Emprunt_memoire_de_page_possible(Taille))
+  if (Emprunt_memoire_de_page_possible(size))
   {
     // On regarde s'il faut libérer des pages:
     Il_faut_liberer=
-      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)Taille;
+      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)size;
 
     if (!Il_faut_liberer)
     {
       // On a assez de place pour allouer une page. On n'a donc aucune page
       // à supprimer. On peut allouer de la mémoire directement.
-      return malloc(Taille);
+      return malloc(size);
     }
     else
     {
@@ -1042,12 +1042,12 @@ void * Emprunter_memoire_de_page(int Taille)
 
         // On regarde s'il faut continuer à libérer de la place
         Il_faut_liberer=
-          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)Taille;
+          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)size;
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
         // pour la Nouvelle_page
         if (!Il_faut_liberer)
-          return malloc(Taille);
+          return malloc(size);
       }
     }
   }

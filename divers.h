@@ -27,7 +27,7 @@ void Scroll_picture(short x_offset,short y_offset);
 void Set_mouse_video_mode_number(void);
 void Set_mouse_position(void);
 void Attendre_fin_de_click(void);
-void Sensibilite_souris(word X,word Y);
+void Sensibilite_souris(word x,word y);
 void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu);
 void Set_palette(T_Palette palette);
 void Palette_256_to_64(T_Palette palette);
@@ -39,13 +39,13 @@ void Tempo_jauge(byte Vitesse);
 dword Round_div(dword Numerateur,dword Diviseur);
 word Palette_Compter_nb_couleurs_utilisees(dword * Tableau);
 
-void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur);
-void Pixel_dans_brosse             (word X,word Y,byte Couleur);
-byte Lit_pixel_dans_ecran_courant  (word X,word Y);
-byte Lit_pixel_dans_ecran_brouillon(word X,word Y);
-byte Lit_pixel_dans_ecran_backup   (word X,word Y);
-byte Lit_pixel_dans_ecran_feedback (word X,word Y);
-byte Lit_pixel_dans_brosse         (word X,word Y);
+void Pixel_dans_ecran_courant      (word x,word y,byte Couleur);
+void Pixel_dans_brosse             (word x,word y,byte Couleur);
+byte Lit_pixel_dans_ecran_courant  (word x,word y);
+byte Lit_pixel_dans_ecran_brouillon(word x,word y);
+byte Lit_pixel_dans_ecran_backup   (word x,word y);
+byte Lit_pixel_dans_ecran_feedback (word x,word y);
+byte Lit_pixel_dans_brosse         (word x,word y);
 
 void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical);
 // Calcule les valeurs suivantes en fonction des deux paramètres:
@@ -77,10 +77,10 @@ void Tester_chrono(void);
 void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur);
 void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement);
 
-byte Effet_Colorize_interpole  (word X,word Y,byte Couleur);
-byte Effet_Colorize_additif    (word X,word Y,byte Couleur);
-byte Effet_Colorize_soustractif(word X,word Y,byte Couleur);
-byte Effet_Trame(word X,word Y);
+byte Effet_Colorize_interpole  (word x,word y,byte Couleur);
+byte Effet_Colorize_additif    (word x,word y,byte Couleur);
+byte Effet_Colorize_soustractif(word x,word y,byte Couleur);
+byte Effet_Trame(word x,word y);
 
 void Flip_Y_LOWLEVEL(void);
 void Flip_X_LOWLEVEL(void);
@@ -100,11 +100,10 @@ byte Nouvelle_preview; // Booléen "Il faut relancer le chrono de preview"
 
 unsigned long Memoire_libre(void);
 
-void  Num2str(dword number,char * Chaine,byte Taille);
+void  Num2str(dword number,char * Chaine,byte nb_char);
 int   Str2num(char * Chaine);
 
-short Round(float Valeur);
-short Round_max(short Numerateur,short Diviseur);
+short Round(float value);
 short Round_div_max(short Numerateur,short Diviseur);
 
 int Min(int a,int b);

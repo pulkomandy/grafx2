@@ -81,21 +81,21 @@ void Unite_Composantes(int Count)
 
 void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Couleur, short Difference_H, short Difference_S, short Difference_L)
 {
-    byte h, S, l;
-    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].G,Palette_depart[Couleur].B,&h,&S,&l);
+    byte h, s, l;
+    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].G,Palette_depart[Couleur].B,&h,&s,&l);
     // La teinte (Hue) est cyclique
     h=(Difference_H+256+h);
     // Pour les autres (Saturation, Lightness), au lieu d'additionner,
     // on va faire un ratio, cela utilise mieux la plage de valeurs 0-255
     if (Difference_S<0)
-      S=(255+Difference_S)*S/255;
+      s=(255+Difference_S)*s/255;
     else if (Difference_S>0)
-      S=255-(255-Difference_S)*(255-S)/255;
+      s=255-(255-Difference_S)*(255-s)/255;
     if (Difference_L<0)
       l=(255+Difference_L)*l/255;
     else if (Difference_L>0)
       l=255-(255-Difference_L)*(255-l)/255;
-    HSLtoRGB(h,S,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].G,&Palette_arrivee[Couleur].B);
+    HSLtoRGB(h,s,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].G,&Palette_arrivee[Couleur].B);
 }
 
 void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette palette)
@@ -139,10 +139,10 @@ void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette palette)
   Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
 }
 
-void Formate_composante(byte Valeur, char *Chaine)
+void Formate_composante(byte value, char *Chaine)
 // Formate une chaine de 4 caractères+\0 : "nnn "
 {
-  Num2str(Valeur,Chaine,3);
+  Num2str(value,Chaine,3);
   Chaine[3]=' ';
   Chaine[4]='\0';
 }
@@ -642,13 +642,13 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
 void Palette_Modifier_jauge(T_Bouton_scroller * slider,
                             word nb_elements, word position,
-                            char * Valeur, short x_pos)
+                            char * value, short x_pos)
 {
   slider->Nb_elements=nb_elements;
   slider->Position=position;
   Calculer_hauteur_curseur_jauge(slider);
   Fenetre_Dessiner_jauge(slider);
-  Print_compteur(x_pos,172,Valeur,CM_Noir,CM_Clair);
+  Print_compteur(x_pos,172,value,CM_Noir,CM_Clair);
 }
 
 

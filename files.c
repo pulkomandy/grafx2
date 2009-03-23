@@ -99,7 +99,7 @@ void Detruire_liste_du_fileselect(void)
 
 
 // -- Formatage graphique des noms de fichier / répertoire ------------------
-char * Nom_formate(char * fname, int Type)
+char * Nom_formate(char * fname, int type)
 {
   static char Resultat[13];
   int         c;
@@ -110,7 +110,7 @@ char * Nom_formate(char * fname, int Type)
   {
     strcpy(Resultat,"<-PARENT DIR");
   }
-  else if (fname[0]=='.' || Type==2)
+  else if (fname[0]=='.' || type==2)
   {
     // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 12 caractères maximum.
     strcpy(Resultat,"            ");
@@ -149,7 +149,7 @@ char * Nom_formate(char * fname, int Type)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Ajouter_element_a_la_liste(char * fname, int Type)
+void Ajouter_element_a_la_liste(char * fname, int type)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
   // Pointeur temporaire d'insertion
@@ -159,9 +159,9 @@ void Ajouter_element_a_la_liste(char * fname, int Type)
   Element_temporaire=(Element_de_liste_de_fileselect *)malloc(sizeof(Element_de_liste_de_fileselect));
 
   // On met a jour le nouvel emplacement:
-  strcpy(Element_temporaire->NomAbrege,Nom_formate(fname, Type));
+  strcpy(Element_temporaire->NomAbrege,Nom_formate(fname, type));
   strcpy(Element_temporaire->NomComplet,fname);
-  Element_temporaire->Type = Type;
+  Element_temporaire->Type = type;
 
   Element_temporaire->Suivant  =Liste_du_fileselect;
   Element_temporaire->Precedent=NULL;
@@ -563,7 +563,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
 
 
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * label,int *Type)
+void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * label,int *type)
 //
 // Decalage_premier = Décalage entre le premier fichier visible dans le
 //                   sélecteur et le premier fichier de la liste
@@ -573,7 +573,7 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
 //
 // label          = Chaine de réception du libellé de l'élément
 //
-// Type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
+// type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
 //                    Passer NULL si pas interessé.
 {
   Element_de_liste_de_fileselect * Element_courant;
@@ -593,8 +593,8 @@ void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select
     // On recopie la chaîne
     strcpy(label, Element_courant->NomComplet);
 
-    if (Type != NULL)
-      *Type=Element_courant->Type;
+    if (type != NULL)
+      *type=Element_courant->Type;
   } // Fin du test d'existence de fichiers
 }
 
@@ -715,12 +715,12 @@ void Afficher_bookmark(T_Bouton_dropdown * Bouton, int Numero_bookmark)
 {
   if (Config.Bookmark_directory[Numero_bookmark])
   {
-    int Taille;
+    int label_size;
     // Libellé
     Print_dans_fenetre_limite(Bouton->Pos_X+3+10,Bouton->Pos_Y+2,Config.Bookmark_label[Numero_bookmark],8,CM_Noir,CM_Clair);
-    Taille=strlen(Config.Bookmark_label[Numero_bookmark]);
-    if (Taille<8)
-      Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton->Pos_X+3+10+Taille*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton->Pos_Y+2)),Menu_Facteur_X*(8-Taille)*8,Menu_Facteur_Y*8,CM_Clair);
+    label_size=strlen(Config.Bookmark_label[Numero_bookmark]);
+    if (label_size<8)
+      Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton->Pos_X+3+10+label_size*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton->Pos_Y+2)),Menu_Facteur_X*(8-label_size)*8,Menu_Facteur_Y*8,CM_Clair);
     // Menu apparait sur clic droit
     Bouton->Bouton_actif=A_DROITE;
     // Choix actifs

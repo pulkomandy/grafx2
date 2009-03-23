@@ -49,7 +49,7 @@ int Taille_d_une_page(S_Page * Page);
   ///
 
 void Initialiser_S_Liste_de_pages(S_Liste_de_pages * list);
-int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int Taille);
+int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int size);
 void Liberer_une_liste_de_pages(S_Liste_de_pages * list);
 int Taille_d_une_liste_de_pages(S_Liste_de_pages * list);
 void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * list);
@@ -66,7 +66,7 @@ void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list);
   /// GESTION DES BACKUPS
   ///
 
-int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width,int height);
+int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,int height);
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
 void Nouveau_nombre_de_backups(int nb_backups);
 int Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
@@ -83,8 +83,8 @@ void Interchanger_image_principale_et_brouillon(void);
   /// GESTION DES EMPRUNTS DE MEMOIRE DE PAGE
   ///
 
-int Emprunt_memoire_de_page_possible(int Taille);
-void * Emprunter_memoire_de_page(int Taille);
+int Emprunt_memoire_de_page_possible(int size);
+void * Emprunter_memoire_de_page(int size);
 
 
 

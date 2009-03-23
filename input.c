@@ -87,7 +87,7 @@ int Est_Raccourci(word Touche, word function)
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
 int Move_cursor_with_constraints()
 {
-  int Retour=0;
+  int feedback=0;
   
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
@@ -136,7 +136,7 @@ int Move_cursor_with_constraints()
     (INPUT_Nouveau_Mouse_K != Mouse_K))
   {
     if ((INPUT_Nouveau_Mouse_K != Mouse_K))
-      Retour=1;        
+      feedback=1;        
     Effacer_curseur(); // On efface le curseur AVANT de le déplacer...
     Mouse_X=INPUT_Nouveau_Mouse_X;
     Mouse_Y=INPUT_Nouveau_Mouse_Y;
@@ -146,10 +146,10 @@ int Move_cursor_with_constraints()
     
     Mouse_count++;
     if (Mouse_count>Config.Mouse_Merge_movement)
-      Retour=1;
+      feedback=1;
   }
 
-  return Retour;
+  return feedback;
 }
 
 // Fonction qui filtre les evenements génériques.
@@ -549,32 +549,32 @@ void Handle_Joystick_Movement(SDL_JoyAxisEvent event)
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
 int Cursor_displace(short Delta_X, short Delta_Y)
 {
-  short X=INPUT_Nouveau_Mouse_X;
-  short Y=INPUT_Nouveau_Mouse_Y;
+  short x=INPUT_Nouveau_Mouse_X;
+  short y=INPUT_Nouveau_Mouse_Y;
   
   if(Loupe_Mode && INPUT_Nouveau_Mouse_Y < Menu_Ordonnee && INPUT_Nouveau_Mouse_X > Principal_Split)
   {
     // Cursor in zoomed area
     
     if (Delta_X<0)
-      INPUT_Nouveau_Mouse_X = Max(Principal_Split, X-Loupe_Facteur);
+      INPUT_Nouveau_Mouse_X = Max(Principal_Split, x-Loupe_Facteur);
     else if (Delta_X>0)
-      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, X+Loupe_Facteur);
+      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, x+Loupe_Facteur);
     if (Delta_Y<0)
-      INPUT_Nouveau_Mouse_Y = Max(0, Y-Loupe_Facteur);
+      INPUT_Nouveau_Mouse_Y = Max(0, y-Loupe_Facteur);
     else if (Delta_Y>0)
-      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, Y+Loupe_Facteur);
+      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, y+Loupe_Facteur);
   }
   else
   {
     if (Delta_X<0)
-      INPUT_Nouveau_Mouse_X = Max(0, X+Delta_X);
+      INPUT_Nouveau_Mouse_X = Max(0, x+Delta_X);
     else if (Delta_X>0)
-      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, X+Delta_X);
+      INPUT_Nouveau_Mouse_X = Min(Largeur_ecran-1, x+Delta_X);
     if (Delta_Y<0)
-      INPUT_Nouveau_Mouse_Y = Max(0, Y+Delta_Y);
+      INPUT_Nouveau_Mouse_Y = Max(0, y+Delta_Y);
     else if (Delta_Y>0)
-      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, Y+Delta_Y);
+      INPUT_Nouveau_Mouse_Y = Min(Hauteur_ecran-1, y+Delta_Y);
   }
   return Move_cursor_with_constraints();
 }

@@ -143,9 +143,9 @@ void Set_Config_Directory(const char * Program_Dir, char * Config_Dir)
       #endif
       if (Config_ParentDir && Config_ParentDir[0]!='\0')
       {
-        int Taille = strlen(Config_ParentDir);
+        int size = strlen(Config_ParentDir);
         strcpy(Config_Dir, Config_ParentDir);
-        if (Config_ParentDir[Taille-1] != '\\' && Config_ParentDir[Taille-1] != '/')
+        if (Config_ParentDir[size-1] != '\\' && Config_ParentDir[size-1] != '/')
         {
           strcat(Config_Dir,SEPARATEUR_CHEMIN);
         }

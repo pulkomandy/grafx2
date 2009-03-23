@@ -1093,7 +1093,7 @@ void Gestion_principale(void)
 
 //----------------------- Tracer une fenêtre d'options -----------------------
 
-void Ouvrir_fenetre(word width,word height, char * Titre)
+void Ouvrir_fenetre(word width,word height, char * title)
 // Lors de l'appel à cette procédure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 {
@@ -1127,7 +1127,7 @@ void Ouvrir_fenetre(word width,word height, char * Titre)
   Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(11*Menu_Facteur_Y),(width-16)*Menu_Facteur_X,Menu_Facteur_Y,CM_Fonce);
   Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(12*Menu_Facteur_Y),(width-16)*Menu_Facteur_X,Menu_Facteur_Y,CM_Blanc);
 
-  Print_dans_fenetre((width-(strlen(Titre)<<3))>>1,3,Titre,CM_Noir,CM_Clair);
+  Print_dans_fenetre((width-(strlen(title)<<3))>>1,3,title,CM_Noir,CM_Clair);
 
   if (Fenetre == 1)
   {
@@ -1235,7 +1235,7 @@ void Fermer_fenetre(void)
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
 void Fenetre_Dessiner_bouton_normal(word x_pos,word y_pos,word width,word height,
-                                    char * Titre,byte Lettre_soulignee,byte clickable)
+                                    char * title,byte Lettre_soulignee,byte clickable)
 {
   byte Couleur_titre;
   word Pos_texte_X,Pos_texte_Y;
@@ -1253,9 +1253,9 @@ void Fenetre_Dessiner_bouton_normal(word x_pos,word y_pos,word width,word height
     Couleur_titre=CM_Fonce;
   }
 
-  Pos_texte_X=x_pos+( (width-(strlen(Titre)<<3)+1) >>1 );
+  Pos_texte_X=x_pos+( (width-(strlen(title)<<3)+1) >>1 );
   Pos_texte_Y=y_pos+((height-7)>>1);
-  Print_dans_fenetre(Pos_texte_X,Pos_texte_Y,Titre,Couleur_titre,CM_Clair);
+  Print_dans_fenetre(Pos_texte_X,Pos_texte_Y,title,Couleur_titre,CM_Clair);
 
   if (Lettre_soulignee)
     Block(Fenetre_Pos_X+((Pos_texte_X+((Lettre_soulignee-1)<<3))*Menu_Facteur_X),
@@ -1452,7 +1452,7 @@ void Fenetre_Effacer_bouton_saisie(T_Bouton_special * button)
 
 T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * Titre, byte Lettre_soulignee,
+                                   char * title, byte Lettre_soulignee,
                                    byte clickable, word Raccourci)
 {
   T_Bouton_normal * Temp=NULL;
@@ -1474,14 +1474,14 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,Titre,Lettre_soulignee,clickable);
+  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,title,Lettre_soulignee,clickable);
   return Temp;
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
 T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * Titre, byte Lettre_soulignee,
+                                   char * title, byte Lettre_soulignee,
                                    byte clickable, word Raccourci)
 {
   T_Bouton_normal * Temp=NULL;
@@ -1503,7 +1503,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,Titre,Lettre_soulignee,clickable);
+  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,title,Lettre_soulignee,clickable);
   return Temp;
 }
 

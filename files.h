@@ -33,7 +33,7 @@ void Trier_la_liste_des_fichiers(void);
 // -- Affichage des éléments de la liste de fichier / répertoire ------------
 void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select);
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * label,int *Type);
+void Determiner_element_de_la_liste(short Decalage_premier,short Decalage_select,char * label,int *type);
 
 void Afficher_bookmark(T_Bouton_dropdown * Bouton, int Numero_bookmark);
 
@@ -48,7 +48,7 @@ void Select_Home       (short * Decalage_premier,short * Decalage_select);
 
 short Calculer_decalage_click_dans_fileselector(void);
 
-char * Nom_formate(char * fname, int Type);
+char * Nom_formate(char * fname, int type);
 
 // Scans a directory, calls Callback for each file in it,
 void for_each_file(const char * Nom_repertoire, void Callback(const char *));

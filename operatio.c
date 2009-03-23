@@ -89,15 +89,15 @@ void Initialiser_debut_operation(void)
 }
 
 
-void Operation_PUSH(short Valeur)
+void Operation_PUSH(short value)
 {
-  Operation_Pile[++Operation_Taille_pile]=Valeur;
+  Operation_Pile[++Operation_Taille_pile]=value;
 }
 
 
-void Operation_POP(short * Valeur)
+void Operation_POP(short * value)
 {
-  *Valeur=Operation_Pile[Operation_Taille_pile--];
+  *value=Operation_Pile[Operation_Taille_pile--];
 }
 
 
@@ -3181,7 +3181,7 @@ void Etirer_brosse_1_7(void)
   short width;
   short height;
   short Etat_prec;
-  short dx,dy,X,Y;
+  short dx,dy,x,y;
 
   Operation_POP(&Etat_prec);
   Operation_POP(&Ancien_Y);
@@ -3217,15 +3217,15 @@ void Etirer_brosse_1_7(void)
 
     Afficher_ecran();
 
-    X=Pinceau_X;
-    Y=Pinceau_Y;
+    x=Pinceau_X;
+    y=Pinceau_Y;
     if (Snap_Mode && Config.Adjust_brush_pick)
     {
       dx=Pinceau_X-Debut_X;
       dy=Pinceau_Y-Debut_Y;
-      if (dx<0) X++; else {if (dx>0) X--;}
-      if (dy<0) Y++; else {if (dy>0) Y--;}
-      Etirer_brosse_preview(Debut_X,Debut_Y,X,Y);
+      if (dx<0) x++; else {if (dx>0) x--;}
+      if (dy<0) y++; else {if (dy>0) y--;}
+      Etirer_brosse_preview(Debut_X,Debut_Y,x,y);
     }
     else
       Etirer_brosse_preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y);
@@ -3240,8 +3240,8 @@ void Etirer_brosse_1_7(void)
     Afficher_curseur();
 
     Operation_Taille_pile-=2;
-    Operation_PUSH(X);
-    Operation_PUSH(Y);
+    Operation_PUSH(x);
+    Operation_PUSH(y);
 
     Operation_PUSH(Debut_X);
     Operation_PUSH(Debut_Y);

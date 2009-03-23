@@ -90,19 +90,19 @@ void Ajout_fonte(const char *name)
 {
   char * Nom_fonte;
   T_FONTE * Fonte;
-  int Taille=strlen(name)+1;
+  int size=strlen(name)+1;
   int Indice;
   
   // Détermination du type:
 
 #ifdef __macosx__
 
-  if (Taille < 6) return;
+  if (size < 6) return;
   
   char strFontName[512];
   CFStringRef CFSFontName;// = CFSTR(name);
 
-  CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) name, Taille - 1, kCFStringEncodingASCII, false);
+  CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) name, size - 1, kCFStringEncodingASCII, false);
   // Fix some funny names
   CFStringGetCString(CFSFontName, strFontName, 512, kCFStringEncodingASCII);
 
@@ -110,14 +110,14 @@ void Ajout_fonte(const char *name)
   name = strFontName;
 
 #else
-  if (Taille<5 ||
-      name[Taille-5]!='.')
+  if (size<5 ||
+      name[size-5]!='.')
     return;
 #endif
 
   Fonte = (T_FONTE *)malloc(sizeof(T_FONTE));
 
-  switch (EXTID(tolower(name[Taille-4]), tolower(name[Taille-3]), tolower(name[Taille-2])))
+  switch (EXTID(tolower(name[size-4]), tolower(name[size-3]), tolower(name[size-2])))
   {
     case EXTID('t','t','f'):
     case EXTID('f','o','n'):
@@ -142,7 +142,7 @@ void Ajout_fonte(const char *name)
       break;
     default:
       #ifdef __macosx__
-         if(strcasecmp(&name[Taille-6], "dfont") == 0)
+         if(strcasecmp(&name[size-6], "dfont") == 0)
          {
            Fonte->EstTrueType = 1;
            Fonte->EstImage = 0;
@@ -158,7 +158,7 @@ void Ajout_fonte(const char *name)
       #endif
   }
 
-  Fonte->Name = (char *)malloc(Taille);
+  Fonte->Name = (char *)malloc(size);
   strcpy(Fonte->Name, name);
   // Label
   strcpy(Fonte->Label, "                   ");
@@ -368,31 +368,31 @@ int Support_TrueType()
 
   
 #ifndef NOTTF
-byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int italic, int *width, int *height)
+byte *Rendu_Texte_TTF(const char *Chaine, int Numero_fonte, int size, int antialias, int bold, int italic, int *width, int *height)
 {
  TTF_Font *Fonte;
   SDL_Surface * TexteColore;
   SDL_Surface * Texte8Bit;
   byte * BrosseRetour;
   int Indice;
-  int Style;
+  int style;
   
   SDL_Color Couleur_Avant;
   SDL_Color Couleur_Arriere;
 
   // Chargement de la fonte
-  Fonte=TTF_OpenFont(Nom_fonte(Numero_fonte), Taille);
+  Fonte=TTF_OpenFont(Nom_fonte(Numero_fonte), size);
   if (!Fonte)
   {
     return NULL;
   }
   // Style
-  Style=0;
+  style=0;
   if (italic)
-    Style|=TTF_STYLE_ITALIC;
+    style|=TTF_STYLE_ITALIC;
   if (bold)
-    Style|=TTF_STYLE_BOLD;
-  TTF_SetFontStyle(Fonte, Style);
+    style|=TTF_STYLE_BOLD;
+  TTF_SetFontStyle(Fonte, style);
   // Couleurs
   if (antialias)
   {
@@ -501,7 +501,7 @@ byte *Rendu_Texte_SFont(const char *Chaine, int Numero_fonte, int *width, int *h
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialias, int bold, int italic, int *width, int *height)
+byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int size, int antialias, int bold, int italic, int *width, int *height)
 {
   T_FONTE *Fonte = Liste_fontes_debut;
   int Indice=Numero_fonte;
@@ -515,7 +515,7 @@ byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int Taille, int antialia
   if (Fonte->EstTrueType)
   {
   #ifndef NOTTF 
-    return Rendu_Texte_TTF(Chaine, Numero_fonte, Taille, antialias, bold, italic, width, height);
+    return Rendu_Texte_TTF(Chaine, Numero_fonte, size, antialias, bold, italic, width, height);
   #else
     return NULL;
   #endif

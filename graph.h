@@ -23,24 +23,24 @@ void Liste2tables(word * list, short step, byte mode, byte * Table_inc,
         byte * Table_dec
 );
 
-void Transformer_point(short X, short Y,
+void Transformer_point(short x, short y,
                        float cosA, float sinA, short * Xr, short * Yr);
 
 int Initialiser_mode_video(int width, int height, int fullscreen);
 
-byte Aucun_effet(word X,word Y,byte Couleur);
-byte Effet_Shade(word X,word Y,byte Couleur);
-byte Effet_Quick_shade(word X,word Y,byte Couleur);
-byte Effet_Tiling(word X,word Y,byte Couleur);
-byte Effet_Smooth(word X,word Y,byte Couleur);
+byte Aucun_effet(word x,word y,byte Couleur);
+byte Effet_Shade(word x,word y,byte Couleur);
+byte Effet_Quick_shade(word x,word y,byte Couleur);
+byte Effet_Tiling(word x,word y,byte Couleur);
+byte Effet_Smooth(word x,word y,byte Couleur);
 
 void Afficher_foreback(void);
 
 
-void Afficher_pixel(word X,word Y,byte Couleur);
+void Afficher_pixel(word x,word y,byte Couleur);
 
-void Afficher_pinceau(short X,short Y,byte Couleur,byte is_preview);
-void Effacer_pinceau(short X,short Y);
+void Afficher_pinceau(short x,short y,byte Couleur,byte is_preview);
+void Effacer_pinceau(short x,short y);
 
 void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
 
@@ -115,4 +115,4 @@ void Remap_picture(void);
 
 // Définition d'une fonction générique de traçage de figures:
 fonction_afficheur Pixel_figure;
-void Mettre_Ecran_A_Jour(short X, short Y, short width, short height);
+void Mettre_Ecran_A_Jour(short x, short y, short width, short height);

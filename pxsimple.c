@@ -28,16 +28,16 @@
 #include "sdlscreen.h"
 #include "divers.h"
 
-void Pixel_Simple (word X,word Y,byte Couleur)
-/* Affiche un pixel de la Couleur aux coords X;Y à l'écran */
+void Pixel_Simple (word x,word y,byte Couleur)
+/* Affiche un pixel de la Couleur aux coords x;y à l'écran */
 {
-  *(Ecran + X + Y * Largeur_ecran)=Couleur;
+  *(Ecran + x + y * Largeur_ecran)=Couleur;
 }
 
-byte Lit_Pixel_Simple (word X,word Y)
+byte Lit_Pixel_Simple (word x,word y)
 /* On retourne la couleur du pixel aux coords données */
 {
-  return *( Ecran + Y * Largeur_ecran + X );
+  return *( Ecran + y * Largeur_ecran + x );
 }
 
 void Block_Simple (word Debut_X,word Debut_Y,word width,word height,byte Couleur)
@@ -71,28 +71,28 @@ void Afficher_partie_de_l_ecran_Simple (word width,word height,word image_width)
   //UpdateRect(0,0,width,height);
 }
 
-void Pixel_Preview_Normal_Simple (word X,word Y,byte Couleur)
+void Pixel_Preview_Normal_Simple (word x,word y,byte Couleur)
 /* Affichage d'un pixel dans l'écran, par rapport au décalage de l'image 
  * dans l'écran, en mode normal (pas en mode loupe)
  * Note: si on modifie cette procédure, il faudra penser à faire également 
  * la modif dans la procédure Pixel_Preview_Loupe_SDL. */
 {
-//  if(X-Principal_Decalage_X >= 0 && Y - Principal_Decalage_Y >= 0)
-  Pixel_Simple(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
+//  if(x-Principal_Decalage_X >= 0 && y - Principal_Decalage_Y >= 0)
+  Pixel_Simple(x-Principal_Decalage_X,y-Principal_Decalage_Y,Couleur);
 }
 
-void Pixel_Preview_Loupe_Simple  (word X,word Y,byte Couleur)
+void Pixel_Preview_Loupe_Simple  (word x,word y,byte Couleur)
 {
   // Affiche le pixel dans la partie non zoomée
-  Pixel_Simple(X-Principal_Decalage_X,Y-Principal_Decalage_Y,Couleur);
+  Pixel_Simple(x-Principal_Decalage_X,y-Principal_Decalage_Y,Couleur);
   
   // Regarde si on doit aussi l'afficher dans la partie zoomée
-  if (Y >= Limite_Haut_Zoom && Y <= Limite_visible_Bas_Zoom
-          && X >= Limite_Gauche_Zoom && X <= Limite_visible_Droite_Zoom)
+  if (y >= Limite_Haut_Zoom && y <= Limite_visible_Bas_Zoom
+          && x >= Limite_Gauche_Zoom && x <= Limite_visible_Droite_Zoom)
   {
     // On est dedans
     int height;
-    int Y_Zoom = Table_mul_facteur_zoom[Y-Loupe_Decalage_Y];
+    int Y_Zoom = Table_mul_facteur_zoom[y-Loupe_Decalage_Y];
 
     if (Menu_Ordonnee - Y_Zoom < Loupe_Facteur)
       // On ne doit dessiner qu'un morceau du pixel
@@ -102,7 +102,7 @@ void Pixel_Preview_Loupe_Simple  (word X,word Y,byte Couleur)
       height = Loupe_Facteur;
 
     Block_Simple(
-      Table_mul_facteur_zoom[X-Loupe_Decalage_X]+Principal_X_Zoom, 
+      Table_mul_facteur_zoom[x-Loupe_Decalage_X]+Principal_X_Zoom, 
       Y_Zoom, Loupe_Facteur, height, Couleur
       );
   }
@@ -113,10 +113,10 @@ void Ligne_horizontale_XOR_Simple(word x_pos,word y_pos,word width)
   //On calcule la valeur initiale de Dest:
   byte* Dest=y_pos*Largeur_ecran+x_pos+Ecran;
 
-  int X;
+  int x;
 
-  for (X=0;X<width;X++)
-    *(Dest+X)=~*(Dest+X);
+  for (x=0;x<width;x++)
+    *(Dest+x)=~*(Dest+x);
 }
 
 void Ligne_verticale_XOR_Simple(word x_pos,word y_pos,word height)

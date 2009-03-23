@@ -106,10 +106,10 @@ void Flush_update(void)
 
 }
 
-void UpdateRect(short X, short Y, unsigned short width, unsigned short height)
+void UpdateRect(short x, short y, unsigned short width, unsigned short height)
 {
   #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
-    SDL_UpdateRect(Ecran_SDL, X*Pixel_width, Y*Pixel_height, width*Pixel_width, height*Pixel_height);
+    SDL_UpdateRect(Ecran_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
   #endif
 
   #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
@@ -120,14 +120,14 @@ void UpdateRect(short X, short Y, unsigned short width, unsigned short height)
   }
   else
   {
-    if (X < Min_X)
-      Min_X = X;
-    if (Y < Min_Y)
-      Min_Y = Y;
-    if (X+width>Max_X)
-      Max_X=X+width;
-    if (Y+height>Max_Y)
-      Max_Y=Y+height;
+    if (x < Min_X)
+      Min_X = x;
+    if (y < Min_Y)
+      Min_Y = y;
+    if (x+width>Max_X)
+      Max_X=x+width;
+    if (y+height>Max_Y)
+      Max_Y=y+height;
   }
   #endif
 
@@ -144,28 +144,28 @@ byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
 {
   byte *Src;
   byte *dest_ptr;
-  int Y;
-  int Reste;
+  int y;
+  int remainder;
 
   // Support seulement des images 256 couleurs
   if (Source->format->BytesPerPixel != 1)
     return NULL;
 
   if (Source->w & 3)
-    Reste=4-(Source->w&3);
+    remainder=4-(Source->w&3);
   else
-    Reste=0;
+    remainder=0;
 
   if (dest==NULL)
     dest=(byte *)malloc(Source->w*Source->h);
 
   dest_ptr=dest;
   Src=(byte *)(Source->pixels);
-  for(Y=0; Y < Source->h; Y++)
+  for(y=0; y < Source->h; y++)
   {
     memcpy(dest_ptr, Src,Source->w);
     dest_ptr += Source->w;
-    Src += Source->w + Reste;
+    Src += Source->w + remainder;
   }
   return dest;
 
@@ -184,7 +184,7 @@ SDL_Color Conversion_couleur_SDL(byte index)
 
 // Lecture d'un pixel pour une surface SDL.
 // Attention, ne fonctionne que pour les surfaces 8-bit
-byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int X, int Y)
+byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int x, int y)
 {
-  return ((byte *)(Bmp->pixels))[(Y*Bmp->pitch+X)];
+  return ((byte *)(Bmp->pixels))[(y*Bmp->pitch+x)];
 }

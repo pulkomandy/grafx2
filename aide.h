@@ -36,10 +36,10 @@ void Bouton_Stats(void);
 
 /*!
     Displays and runs the "Help / About..." window
-    @param Section Number of the help section page to display (equals the button number the mouse was hovering for the contextual help), -1 for the main help page.
+    @param section Number of the help section page to display (equals the button number the mouse was hovering for the contextual help), -1 for the main help page.
     @param Sous_section Help sub-section title (the page will be scrolled so this title is at the top).
 */
-void Fenetre_aide(int Section, const char * Sous_section);
+void Fenetre_aide(int section, const char * Sous_section);
 
 #endif
 

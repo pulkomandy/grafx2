@@ -54,7 +54,7 @@
 
 #define FILENAMESPACE 13
 
-#define Display_Window(X,Y) UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,X*Menu_Facteur_X,Y*Menu_Facteur_Y);
+#define Display_Window(x,y) UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,(x)*Menu_Facteur_X,(y)*Menu_Facteur_Y);
 
 extern short Old_MX;
 extern short Old_MY;
@@ -148,7 +148,7 @@ void Message_Memoire_insuffisante(void)
 void Bouton_Message_initial(void)
 {
   char  Chaine[21];
-  int   x_pos,Offs_Y,X,Y;
+  int   x_pos,Offs_Y,x,y;
 
   sprintf(Chaine,"GrafX %d.%.2d%s%s",VERSION1, VERSION2, ALPHA_BETA,POURCENTAGE_VERSION);
   Ouvrir_fenetre(260,172,Chaine);
@@ -157,9 +157,9 @@ void Bouton_Message_initial(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*11),
         Fenetre_Pos_Y+(Menu_Facteur_Y*21),
         Menu_Facteur_X*237,Menu_Facteur_Y*60,CM_Noir);
-  for (Y=23,Offs_Y=0; Y<79; Offs_Y+=231,Y++)
-    for (X=14,x_pos=0; x_pos<231; x_pos++,X++)
-      Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+x_pos]);
+  for (y=23,Offs_Y=0; y<79; Offs_Y+=231,y++)
+    for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
+      Pixel_dans_fenetre(x,y,Logo_GrafX2[Offs_Y+x_pos]);
 
   Print_dans_fenetre(130-4*21,88,"Copyright (c) 2007 by",CM_Fonce,CM_Clair);
   Print_dans_fenetre(130-4*23,96,"the Grafx2 project team",CM_Noir,CM_Clair);
@@ -337,7 +337,7 @@ void Bouton_Choix_backcolor(void)
 
 
 //---------------------- Cacher ou réafficher le menu ------------------------
-void Pixel_dans_barre_d_outil_cachee(__attribute__((unused)) word X,__attribute__((unused)) word Y,__attribute__((unused)) byte Couleur)
+void Pixel_dans_barre_d_outil_cachee(__attribute__((unused)) word x,__attribute__((unused)) word y,__attribute__((unused)) byte Couleur)
 {
   // C'est fait exprès que ce soit vide...
   // C'est parce que y'a rien du tout à afficher vu que la barre d'outil est
@@ -529,7 +529,7 @@ void Bouton_Clear_colore(void)
 }
  
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cancel, const char *Section_aide)
+void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cancel, const char *Section_aide)
 {
   short Bouton_clicke;
   byte Backup_table[256];
@@ -552,14 +552,14 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cance
     Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
     Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,TOUCHE_ESC);  // 5
     // On enregistre la table dans un backup au cas où on ferait Cancel
-    memcpy(Backup_table,Table,256);
+    memcpy(Backup_table,table,256);
   }
   else
     Fenetre_Definir_bouton_normal(49,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
 
   // On affiche l'état actuel de la table
   for (Indice=0; Indice<=255; Indice++)
-    Stencil_Tagger_couleur(Indice, (Table[Indice])?CM_Noir:CM_Clair);
+    Stencil_Tagger_couleur(Indice, (table[Indice])?CM_Noir:CM_Clair);
 
   Display_Window(176,150);
   Afficher_curseur();
@@ -582,14 +582,14 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cance
         {
           Effacer_curseur();
           Couleur_taggee=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
-          Table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
+          table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(Mouse_K==A_GAUCHE)?CM_Noir:CM_Clair);
           Afficher_curseur();
           Stencil_Actualiser_couleur(Couleur_taggee);
         }
         break;
       case  2 : // Clear
-        memset(Table,0,256);
+        memset(table,0,256);
         Effacer_curseur();
         for (Indice=0; Indice<=255; Indice++)
           Stencil_Tagger_couleur(Indice,CM_Clair);
@@ -599,7 +599,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cance
       case  3 : // Invert
         Effacer_curseur();
         for (Indice=0; Indice<=255; Indice++)
-          Stencil_Tagger_couleur(Indice,(Table[Indice]^=1)?CM_Noir:CM_Clair);
+          Stencil_Tagger_couleur(Indice,(table[Indice]^=1)?CM_Noir:CM_Clair);
         Afficher_curseur();
         Display_Window(Fenetre_Largeur, Fenetre_Hauteur);
     }
@@ -614,7 +614,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cance
         {
           Effacer_curseur();
           Couleur_taggee=Couleur;
-          Table[Couleur_taggee]=(click==A_GAUCHE);
+          table[Couleur_taggee]=(click==A_GAUCHE);
           Stencil_Tagger_couleur(Couleur_taggee,(click==A_GAUCHE)?CM_Noir:CM_Clair);
           Stencil_Actualiser_couleur(Couleur_taggee);
           Afficher_curseur();
@@ -636,7 +636,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * Table, byte * mode, byte can_cance
   Fermer_fenetre();
 
   if (Bouton_clicke==5) // Cancel
-    memcpy(Table,Backup_table,256);
+    memcpy(table,Backup_table,256);
   else // OK
     *mode=1;
 
@@ -1278,7 +1278,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
   short y_pos;
   byte  Couleur_texte,Couleur_fond;
   char Chaine[29];
-  char *Ratio;
+  char *ratio;
 
   for (Mode_courant=Debut_liste,Indice=0; Indice<12 && Mode_courant < Nb_modes_video ; Indice++,Mode_courant++)
   {
@@ -1311,27 +1311,27 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
       memcpy(Chaine+9,"   Window   ",13);
 
     if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*4)
-      Ratio="    4:3";
+      ratio="    4:3";
     else if (Mode_video[Mode_courant].Width*9 == Mode_video[Mode_courant].Height*16)
-      Ratio="   16:9";
+      ratio="   16:9";
     else if (Mode_video[Mode_courant].Width*10 == Mode_video[Mode_courant].Height*16)
-      Ratio="  16:10";
+      ratio="  16:10";
     else if (Mode_video[Mode_courant].Width*145 == Mode_video[Mode_courant].Height*192)
-      Ratio="192:145";
+      ratio="192:145";
     else if (Mode_video[Mode_courant].Width*2 == Mode_video[Mode_courant].Height*3)
-      Ratio="    3:2";
+      ratio="    3:2";
     else if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*5)
-      Ratio="    5:3";
+      ratio="    5:3";
     else if (Mode_video[Mode_courant].Width*4 == Mode_video[Mode_courant].Height*5)
-      Ratio="    5:4";
+      ratio="    5:4";
     else if (Mode_video[Mode_courant].Width*16 == Mode_video[Mode_courant].Height*25)
-      Ratio="  25:16";
+      ratio="  25:16";
     else
-      Ratio="       ";
+      ratio="       ";
     if (Mode_courant == 0)
-      Ratio="       ";
+      ratio="       ";
 
-    strcat(Chaine,Ratio);
+    strcat(Chaine,ratio);
 
     Print_dans_fenetre(38,y_pos,Chaine,Couleur_texte,Couleur_fond);
   }
@@ -1768,7 +1768,7 @@ void Bouton_Ellipse_pleine(void)
 
 
 // -- Gestion du menu des dégradés ------------------------------------------
-void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int Technique)
+void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int technique)
 {
   short line;
 
@@ -1784,7 +1784,7 @@ void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int Technique)
         Menu_Facteur_X*5,
         Menu_Facteur_Y*10,CM_Blanc);
 
-  switch(Technique)
+  switch(technique)
   {
     case 1 : // Dégradé de trames simples
       // Au centre, on place 10 lignes tramées simplement
@@ -4361,7 +4361,7 @@ byte Smooth_Matrice_defaut[4][3][3]=
 void Bouton_Smooth_Menu(void)
 {
   short Bouton_clicke;
-  short X,Y,i,j;
+  short x,y,i,j;
   byte  Matrice_choisie[3][3];
   T_Bouton_special * Matrice_Zone_saisie[3][3];
   char  Chaine[3];
@@ -4372,12 +4372,12 @@ void Bouton_Smooth_Menu(void)
   Fenetre_Definir_bouton_normal(82,88,53,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Fenetre_Afficher_cadre(6,17,130,37);
-  for (X=11,Y=0; Y<4; X+=31,Y++)
+  for (x=11,y=0; y<4; x+=31,y++)
   {
-    Fenetre_Definir_bouton_normal(X,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
+    Fenetre_Definir_bouton_normal(x,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
     for (j=0; j<3; j++)
       for (i=0; i<3; i++)
-        Print_char_dans_fenetre(X+2+(i<<3),24+(j<<3),'0'+Smooth_Matrice_defaut[Y][i][j],CM_Noir,CM_Clair);
+        Print_char_dans_fenetre(x+2+(i<<3),24+(j<<3),'0'+Smooth_Matrice_defaut[y][i][j],CM_Noir,CM_Clair);
   }
 
   Fenetre_Afficher_cadre(6,58, 69,45);
@@ -4412,12 +4412,12 @@ void Bouton_Smooth_Menu(void)
       }
       else
       {
-        i=Bouton_clicke-7; X=i%3; Y=i/3;
-        Num2str(Matrice_choisie[X][Y],Chaine,2);
-        Readline(Matrice_Zone_saisie[X][Y]->Pos_X+2,
-                 Matrice_Zone_saisie[X][Y]->Pos_Y+2,
+        i=Bouton_clicke-7; x=i%3; y=i/3;
+        Num2str(Matrice_choisie[x][y],Chaine,2);
+        Readline(Matrice_Zone_saisie[x][y]->Pos_X+2,
+                 Matrice_Zone_saisie[x][y]->Pos_Y+2,
                  Chaine,2,1);
-        Matrice_choisie[X][Y]=atoi(Chaine);
+        Matrice_choisie[x][y]=atoi(Chaine);
         Afficher_curseur();
       }
     }
@@ -5184,9 +5184,9 @@ void Inverser_trame(void)
 }
 
 // Rafraichit toute la zone correspondant à la trame zoomee.
-void Mettre_a_jour_trame(short X, short Y)
+void Mettre_a_jour_trame(short x, short y)
 {
-  UpdateRect(X,Y,80*Menu_Facteur_X,80*Menu_Facteur_Y);
+  UpdateRect(x,y,80*Menu_Facteur_X,80*Menu_Facteur_Y);
 }
 
 
@@ -5592,26 +5592,26 @@ void Bouton_Ajuster(void)
 
 void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
 {
-  short X,Y,x_pos,y_pos;
+  short x,y,x_pos,y_pos;
 
-  for (Y=0,y_pos=Debut_Y;Y<HAUTEUR_SPRITE_MENU;Y++,y_pos++)
-    for (X=0,x_pos=Debut_X;X<LARGEUR_SPRITE_MENU;X++,x_pos++)
-      Pixel_dans_fenetre(x_pos,y_pos,SPRITE_EFFET[Numero_sprite][Y][X]);
+  for (y=0,y_pos=Debut_Y;y<HAUTEUR_SPRITE_MENU;y++,y_pos++)
+    for (x=0,x_pos=Debut_X;x<LARGEUR_SPRITE_MENU;x++,x_pos++)
+      Pixel_dans_fenetre(x_pos,y_pos,SPRITE_EFFET[Numero_sprite][y][x]);
 
   UpdateRect(ToWinX(Debut_X),ToWinY(Debut_Y),LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
 }
 
 
-void Afficher_etat_effet(short X, short Y, char * label, byte state)
+void Afficher_etat_effet(short x, short y, char * label, byte state)
 {
-  Block(Fenetre_Pos_X+(X*Menu_Facteur_X),Fenetre_Pos_Y+(Y*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+(x*Menu_Facteur_X),Fenetre_Pos_Y+(y*Menu_Facteur_Y),
         12*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
 
-  Print_dans_fenetre(X,Y,label,(state)?CM_Blanc:CM_Noir,CM_Clair);
+  Print_dans_fenetre(x,y,label,(state)?CM_Blanc:CM_Noir,CM_Clair);
   if (state)
-    Print_dans_fenetre(X+56,Y,":ON ",CM_Blanc,CM_Clair);
+    Print_dans_fenetre(x+56,y,":ON ",CM_Blanc,CM_Clair);
   else
-    Print_dans_fenetre(X+56,Y,":OFF",CM_Noir,CM_Clair);
+    Print_dans_fenetre(x+56,y,":OFF",CM_Noir,CM_Clair);
 }
 
 void Afficher_etat_effets(void)
@@ -5920,12 +5920,12 @@ void Bouton_Effets(void)
 }
 
 // Affiche tout le selecteur de fontes
-void Dessiner_selecteur_fontes(short X, short Y, short Debut_liste, short Position_curseur, short Nombre_visibles)
+void Dessiner_selecteur_fontes(short x, short y, short Debut_liste, short Position_curseur, short Nombre_visibles)
 {
   int Indice;
   for (Indice=0; Indice < Nombre_visibles; Indice++)
   {
-    Print_dans_fenetre(X,Y+Indice*8,Libelle_fonte(Indice+Debut_liste), CM_Noir, (Position_curseur==Indice)?CM_Fonce:CM_Clair);
+    Print_dans_fenetre(x,y+Indice*8,Libelle_fonte(Indice+Debut_liste), CM_Noir, (Position_curseur==Indice)?CM_Fonce:CM_Clair);
   }
 }
 

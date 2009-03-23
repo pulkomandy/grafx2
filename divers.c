@@ -129,7 +129,7 @@ void Effacer_image_courante(byte Couleur)
   );
 }
 
-void Sensibilite_souris(__attribute__((unused)) word X,__attribute__((unused)) word Y)
+void Sensibilite_souris(__attribute__((unused)) word x,__attribute__((unused)) word y)
 {
 
 }
@@ -161,25 +161,25 @@ void Wait_VBL(void)
   }
 }
 
-void Pixel_dans_brosse             (word X,word Y,byte Couleur)
+void Pixel_dans_brosse             (word x,word y,byte Couleur)
 {
-  *(Brosse+Y*Brosse_Largeur+X)=Couleur;
+  *(Brosse+y*Brosse_Largeur+x)=Couleur;
 }
 
-byte Lit_pixel_dans_brosse         (word X,word Y)
+byte Lit_pixel_dans_brosse         (word x,word y)
 {
-  return *(Brosse + Y * Brosse_Largeur + X);
+  return *(Brosse + y * Brosse_Largeur + x);
 }
 
 
-byte Lit_pixel_dans_ecran_courant  (word X,word Y)
+byte Lit_pixel_dans_ecran_courant  (word x,word y)
 {
-        return *(Principal_Ecran+Y*Principal_Largeur_image+X);
+        return *(Principal_Ecran+y*Principal_Largeur_image+x);
 }
 
-void Pixel_dans_ecran_courant      (word X,word Y,byte Couleur)
+void Pixel_dans_ecran_courant      (word x,word y,byte Couleur)
 {
-    byte* dest=(X+Y*Principal_Largeur_image+Principal_Ecran);
+    byte* dest=(x+y*Principal_Largeur_image+Principal_Ecran);
     *dest=Couleur;
 }
 
@@ -244,9 +244,9 @@ void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_
 
 }
 
-byte Lit_pixel_dans_ecran_brouillon(word X,word Y)
+byte Lit_pixel_dans_ecran_brouillon(word x,word y)
 {
-  return *(Brouillon_Ecran+Y*Brouillon_Largeur_image+X);
+  return *(Brouillon_Ecran+y*Brouillon_Largeur_image+x);
 }
 
 void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
@@ -317,9 +317,9 @@ void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,s
 
 }
 
-byte Lit_pixel_dans_ecran_feedback (word X,word Y)
+byte Lit_pixel_dans_ecran_feedback (word x,word y)
 {
-  return *(FX_Feedback_Ecran+Y*Principal_Largeur_image+X);
+  return *(FX_Feedback_Ecran+y*Principal_Largeur_image+x);
 }
 
 dword Round_div(dword Numerateur,dword Diviseur)
@@ -327,9 +327,9 @@ dword Round_div(dword Numerateur,dword Diviseur)
         return Numerateur/Diviseur;
 }
 
-byte Effet_Trame(word X,word Y)
+byte Effet_Trame(word x,word y)
 {
-  return Trame[X % Trame_Largeur][Y % Trame_Hauteur];
+  return Trame[x % Trame_Largeur][y % Trame_Hauteur];
 }
 
 void Set_mouse_position(void)
@@ -361,9 +361,9 @@ void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
   }
 }
 
-byte Lit_pixel_dans_ecran_backup (word X,word Y)
+byte Lit_pixel_dans_ecran_backup (word x,word y)
 {
-  return *(Ecran_backup + X + Principal_Largeur_image * Y);
+  return *(Ecran_backup + x + Principal_Largeur_image * y);
 }
 
 void Palette_256_to_64(T_Palette palette)
@@ -388,7 +388,7 @@ void Palette_64_to_256(T_Palette palette)
   }
 }
 
-byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
+byte Effet_Colorize_interpole  (word x,word y,byte Couleur)
 {
   // Facteur_A = 256*(100-Colorize_Opacite)/100
   // Facteur_B = 256*(    Colorize_Opacite)/100
@@ -398,11 +398,11 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 
   // On place dans ESI 3*Couleur_dessous ( = position de cette couleur dans la
   // palette des teintes) et dans EDI, 3*Couleur.
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
+  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
   byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
   byte Vert=Principal_Palette[Couleur].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
   byte Rouge=Principal_Palette[Couleur].R;
 
   // On récupère les 3 composantes RVB
@@ -418,11 +418,11 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 
 }
 
-byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
+byte Effet_Colorize_additif    (word x,word y,byte Couleur)
 {
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
+  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
   byte Bleu=Principal_Palette[Couleur].B;
   byte Vert=Principal_Palette[Couleur].G;
   byte Rouge=Principal_Palette[Couleur].R;
@@ -433,11 +433,11 @@ byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
     Bleu>Bleu_dessous?Bleu:Bleu_dessous);
 }
 
-byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
+byte Effet_Colorize_soustractif(word x,word y,byte Couleur)
 {
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
+  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
+  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
   byte Bleu=Principal_Palette[Couleur].B;
   byte Vert=Principal_Palette[Couleur].G;
   byte Rouge=Principal_Palette[Couleur].R;
@@ -600,10 +600,10 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
 )
 {
         byte color;
-        word X;
+        word x;
 
         // Pour chaque pixel
-        for(X=0;X<width;X++){
+        for(x=0;x<width;x++){
                 color = *Ligne_originale;
 
                 memset(Ligne_zoomee,color,factor);
@@ -673,11 +673,11 @@ unsigned long Memoire_libre(void)
 
 
 // Transformer un nombre (entier naturel) en chaîne
-void Num2str(dword number,char * Chaine,byte Taille)
+void Num2str(dword number,char * Chaine,byte nb_char)
 {
   int Indice;
 
-  for (Indice=Taille-1;Indice>=0;Indice--)
+  for (Indice=nb_char-1;Indice>=0;Indice--)
   {
     Chaine[Indice]=(number%10)+'0';
     number/=10;
@@ -685,34 +685,34 @@ void Num2str(dword number,char * Chaine,byte Taille)
       for (Indice--;Indice>=0;Indice--)
         Chaine[Indice]=' ';
   }
-  Chaine[Taille]='\0';
+  Chaine[nb_char]='\0';
 }
 
 // Transformer une chaîne en un entier naturel (renvoie -1 si ch. invalide)
 int Str2num(char * Chaine)
 {
-  int Valeur=0;
+  int value=0;
 
   for (;*Chaine;Chaine++)
   {
     if ( (*Chaine>='0') && (*Chaine<='9') )
-      Valeur=(Valeur*10)+(*Chaine-'0');
+      value=(value*10)+(*Chaine-'0');
     else
       return -1;
   }
-  return Valeur;
+  return value;
 }
 
 
 // Arrondir un nombre réel à la valeur entière la plus proche
-short Round(float Valeur)
+short Round(float value)
 {
-  short Temp=Valeur;
+  short Temp=value;
 
-  if (Valeur>=0)
-    { if ((Valeur-Temp)>= 0.5) Temp++; }
+  if (value>=0)
+    { if ((value-Temp)>= 0.5) Temp++; }
   else
-    { if ((Valeur-Temp)<=-0.5) Temp--; }
+    { if ((value-Temp)<=-0.5) Temp--; }
 
   return Temp;
 }

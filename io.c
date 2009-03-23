@@ -71,15 +71,15 @@ int write_byte(FILE *file, byte b)
 }
 // Lit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_bytes(FILE *file, void *Dest, size_t Taille)
+int read_bytes(FILE *file, void *Dest, size_t size)
 {
-  return fread(Dest, 1, Taille, file) == Taille;
+  return fread(Dest, 1, size, file) == size;
 }
 // Ecrit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_bytes(FILE *file, void *Src, size_t Taille)
+int write_bytes(FILE *file, void *Src, size_t size)
 {
-  return fwrite(Src, 1, Taille, file) == Taille;
+  return fwrite(Src, 1, size, file) == size;
 }
 
 // Lit un word (little-endian)

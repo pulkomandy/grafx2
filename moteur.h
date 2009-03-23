@@ -25,14 +25,14 @@ void Desenclencher_bouton          (int btn_number);
 void Enclencher_bouton             (int btn_number,byte click);
 void Annuler_les_effets            (void);
 void Restaurer_les_effets          (void);
-void Ouvrir_fenetre                (word width,word height, char * Titre);
+void Ouvrir_fenetre                (word width,word height, char * title);
 void Fermer_fenetre                (void);
 
 void Ouvrir_popup                  (word x_pos, word y_pos, word width, word height);
 void Fermer_popup                  (void);
 
 void Fenetre_Dessiner_bouton_normal(word x_pos,word y_pos,word width,word height,
-                                    char * Titre,byte Lettre_soulignee,byte clickable);
+                                    char * title,byte Lettre_soulignee,byte clickable);
 void Fenetre_Enfoncer_bouton_normal(word x_pos,word y_pos,word width,word height);
 void Fenetre_Desenfoncer_bouton_normal(word x_pos,word y_pos,word width,word height);
 void Fenetre_Dessiner_bouton_palette(word x_pos,word y_pos);
@@ -47,11 +47,11 @@ void Fenetre_Dessiner_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caract
 
 T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * Titre,byte Lettre_soulignee,
+                                   char * title,byte Lettre_soulignee,
                                    byte clickable, word Raccourci);
 T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * Titre,byte Lettre_soulignee,
+                                   char * title,byte Lettre_soulignee,
                                    byte clickable, word Raccourci);
 
 T_Bouton_palette * Fenetre_Definir_bouton_palette(word x_pos, word y_pos);

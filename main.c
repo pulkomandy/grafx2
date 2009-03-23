@@ -615,7 +615,7 @@ int Initialisation_du_programme(int argc,char * argv[])
 // ------------------------- Fermeture du programme --------------------------
 void Fermeture_du_programme(void)
 {
-  int      Retour;
+  int      return_code;
 
   // On libère le buffer de gestion de lignes
   free(Buffer_de_ligne_horizontale);
@@ -635,12 +635,12 @@ void Fermeture_du_programme(void)
     // On sauvegarde les données dans le .CFG et dans le .INI
     if (Config.Auto_save)
     {
-      Retour=Sauver_CFG();
-      if (Retour)
-        Erreur(Retour);
-      Retour=Sauver_INI(&Config);
-      if (Retour)
-        Erreur(Retour);
+      return_code=Sauver_CFG();
+      if (return_code)
+        Erreur(return_code);
+      return_code=Sauver_INI(&Config);
+      if (return_code)
+        Erreur(return_code);
     }
   }
   else

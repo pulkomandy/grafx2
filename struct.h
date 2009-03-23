@@ -195,7 +195,7 @@ typedef struct
 typedef struct
 {
   byte Number;
-  word Taille;
+  word Size;
 } __attribute__((__packed__)) Config_Chunk;
 
 typedef struct

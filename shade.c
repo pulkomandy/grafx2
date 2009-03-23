@@ -210,7 +210,7 @@ void Afficher_couleur_selectionnee(word Select_Debut,word Select_Fin)
 }
 
 
-void Afficher_mode_du_shade(short X,short Y,byte mode)
+void Afficher_mode_du_shade(short x,short y,byte mode)
 {
   char Chaine[7];
 
@@ -225,7 +225,7 @@ void Afficher_mode_du_shade(short X,short Y,byte mode)
     default : // MODE_SHADE_NOSAT
       strcpy(Chaine,"No sat");
   }
-  Print_dans_fenetre(X,Y,Chaine,CM_Noir,CM_Clair);
+  Print_dans_fenetre(x,y,Chaine,CM_Noir,CM_Clair);
 }
 
 

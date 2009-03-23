@@ -30,4 +30,4 @@ void Special_Previous_backcolor(void);
 void Scroller_ecran(short Decalage_en_X,short Decalage_en_Y);
 void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y);
 
-void Zoom(short Sens);
+void Zoom(short delta);

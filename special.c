@@ -34,7 +34,7 @@
 void Modifier_pinceau(int width, int height)
 {
   int x_pos,y_pos;
-  int X,Y;
+  int x,y;
   float Rayon2;
 
   if (width<1) width=1;
@@ -53,9 +53,9 @@ void Modifier_pinceau(int width, int height)
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=x_pos-Pinceau_Decalage_X;
-          Y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( ((X*X)+(Y*Y)) < Rayon2 );
+          x=x_pos-Pinceau_Decalage_X;
+          y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( ((x*x)+(y*y)) < Rayon2 );
         }
       break;
     case FORME_PINCEAU_CARRE :
@@ -68,9 +68,9 @@ void Modifier_pinceau(int width, int height)
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=x_pos-Pinceau_Decalage_X;
-          Y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (!((x_pos+y_pos)&1)) && (((X*X)+(Y*Y)) < Rayon2));
+          x=x_pos-Pinceau_Decalage_X;
+          y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (!((x_pos+y_pos)&1)) && (((x*x)+(y*y)) < Rayon2));
         }
       break;
     case FORME_PINCEAU_CARRE_TRAME:
@@ -79,19 +79,19 @@ void Modifier_pinceau(int width, int height)
           Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=!((x_pos+y_pos)&1);
       break;
     case FORME_PINCEAU_PLUS:
-      X=Pinceau_Largeur>>1;
+      x=Pinceau_Largeur>>1;
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=((x_pos==X) || (y_pos==X));
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=((x_pos==x) || (y_pos==x));
       break;
     case FORME_PINCEAU_SLASH:
-      X=Pinceau_Largeur>>1;
+      x=Pinceau_Largeur>>1;
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
           Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==(Pinceau_Largeur-(y_pos+1)));
       break;
     case FORME_PINCEAU_ANTISLASH:
-      X=Pinceau_Largeur>>1;
+      x=Pinceau_Largeur>>1;
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
           Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==y_pos);
@@ -104,25 +104,25 @@ void Modifier_pinceau(int width, int height)
         Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)]=1;
       break;
     case FORME_PINCEAU_X:
-      X=Pinceau_Largeur>>1;
+      x=Pinceau_Largeur>>1;
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
           Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (x_pos==y_pos) || (x_pos==(Pinceau_Hauteur-(y_pos+1))) );
       break;
     case FORME_PINCEAU_LOSANGE:
-      X=Pinceau_Largeur>>1;
+      x=Pinceau_Largeur>>1;
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          if (x_pos<=X)
-            Y=X-x_pos;
+          if (x_pos<=x)
+            y=x-x_pos;
           else
-            Y=x_pos-X;
-          if (y_pos<=X)
-            Y+=X-y_pos;
+            y=x_pos-x;
+          if (y_pos<=x)
+            y+=x-y_pos;
           else
-            Y+=y_pos-X;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(Y<=X);
+            y+=y_pos-x;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(y<=x);
         }
       break;
     case FORME_PINCEAU_ALEATOIRE:
@@ -131,9 +131,9 @@ void Modifier_pinceau(int width, int height)
       for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
         for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=x_pos-Pinceau_Decalage_X;
-          Y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (((X*X)+(Y*Y)) < Rayon2) && (!(rand()&7)) );
+          x=x_pos-Pinceau_Decalage_X;
+          y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (((x*x)+(y*y)) < Rayon2) && (!(rand()&7)) );
         }
   }
 }
@@ -333,11 +333,11 @@ void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y)
 
 
 // -------------- Changer le Zoom (grâce aux touches [+] et [-]) -------------
-void Zoom(short Sens)
+void Zoom(short delta)
 {
   short Indice;
   for (Indice=0; FACTEUR_ZOOM[Indice]!=Loupe_Facteur; Indice++);
-  Indice+=Sens;
+  Indice+=delta;
 
   if ( (Indice>=0) && (Indice<NB_FACTEURS_DE_ZOOM) )
   {
