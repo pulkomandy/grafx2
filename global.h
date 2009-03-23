@@ -48,14 +48,14 @@ GFX2_GLOBAL T_Config Config;
 GFX2_GLOBAL word Config_Touche[NB_TOUCHES_SPECIALES][2];
 
 
-typedef struct T_Video_mode
+typedef struct
 {
   short  Width;
   short  Height;
   byte   Mode;
   word   Fullscreen;
   byte   Etat; // 0:Cool 1:OK ; 2:Bof ; 3:Naze ; si on rajoute +128 => incompatible
-};
+} T_Video_mode;
 GFX2_GLOBAL T_Video_mode Mode_video[MAX_MODES_VIDEO];
 GFX2_GLOBAL int  Nb_modes_video; // Nombre de modes réellement recensés dans Mode_video[]
 
