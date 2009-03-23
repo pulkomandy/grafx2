@@ -963,7 +963,7 @@ Polyform_12_0
 Polyform_12_8
 Polygon_12_0
 Polygon_12_9
-Cursor_position
+cursor_position
 Help_position
 Find_last_slash
 Find_file_in_fileselector
@@ -1222,7 +1222,7 @@ OT_init
 OT_new
 OT_set
 GFX_sieve_pattern
-Help_table
+Help_section
 Facteur_A_table
 Facteur_B_table
 Zoom_factor_table
@@ -1514,6 +1514,7 @@ Compteur
 counter_x
 counter_y
 repetitions
+conf
 config_dir
 config_parent_dir
 confirmation
@@ -1681,7 +1682,7 @@ end_y_mag
 block_end
 Find_file_fast
 temp_float
-filename
+fname
 Fonction
 font_1
 font_2
@@ -1702,8 +1703,8 @@ Hauteur_Curseur_jauge
 box_height
 cell_height
 chosen_height
-Hauteur_curseur
-Hauteur_image
+Cursor_height
+Image_height
 initial_image_height
 max_slider_height
 Header
@@ -1835,6 +1836,7 @@ best_color_1
 best_color_2
 best_difference
 best_width
+Mix
 message
 MessageErreur
 Methode
@@ -2134,9 +2136,9 @@ Section
 help_section
 expected_section
 section_read
-seclection_start
-seclection_start1
-seclection_start2
+selection_start
+selection_start1
+selection_start2
 selection_end
 selection_end1
 selection_end2
@@ -2212,6 +2214,7 @@ helptable_spheres
 helptable_airbrush
 helptable_text
 helptable_undo
+Help_table
 conversion_table
 conversion_table
 replace_table
@@ -2219,6 +2222,9 @@ table_dec
 table_inc
 key_labels
 Taille
+Size_1
+Size_2
+Size_3
 dest_size
 source_size
 x_size
@@ -3065,7 +3071,7 @@ Func_read
 Func_line_XOR
 Func_procsline
 Func_remap
-T_polygon_edge
+T_Polygon_edge
 T_Key_config
 T_key_label
 T_List_of_pages

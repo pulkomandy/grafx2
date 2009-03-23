@@ -170,7 +170,7 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int size);
 /////////////////////////////////////////////////////////////////////////////
 
 void Cluster_Analyser(Cluster * c,Table_occurence * to);
-void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occurence * to);
+void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int hue,Table_occurence * to);
 void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to);
 
 

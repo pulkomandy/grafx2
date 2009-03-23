@@ -37,7 +37,7 @@
 #include "palette.h"
 #include "input.h"
 
-word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
+word Palette_Compter_nb_couleurs_utilisees(dword* usage)
 {
   int Nombre_De_Pixels=0;
   Uint8* Pixel_Courant=Principal_Ecran;
@@ -45,7 +45,7 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
   word Nombre_Couleurs=0;
   int i;
 
-  for (i=0;i<256;i++) Tableau[i]=0;
+  for (i=0;i<256;i++) usage[i]=0;
 
   //Calcul du nombre de pixels dans l'image
   Nombre_De_Pixels=Principal_Hauteur_image*Principal_Largeur_image;
@@ -55,7 +55,7 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
   {
     Couleur=*Pixel_Courant; //on lit la couleur dans l'écran
 
-    Tableau[Couleur]++; //Un point de plus pour cette couleur
+    usage[Couleur]++; //Un point de plus pour cette couleur
 
     // On passe au pixel suivant
     Pixel_Courant++;
@@ -64,7 +64,7 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
   //On va maintenant compter dans la table les couleurs utilisées:
   for(i=0;i<256;i++)
   {
-    if (Tableau[i]!=0)
+    if (usage[i]!=0)
         Nombre_Couleurs++;
   }
 

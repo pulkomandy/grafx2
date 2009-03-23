@@ -508,7 +508,7 @@ ENDCRUSH:
   }
 }
 
-void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occurence * to)
+void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int hue,Table_occurence * to)
 {
   int limit;
   int cumul;
@@ -516,7 +516,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
 
   limit=(c->occurences)/2;
   cumul=0;
-  if (Teinte==0)
+  if (hue==0)
   {
     for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     {
@@ -556,7 +556,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
     c2->bmin=c->bmin; c2->bmax=c->bmax;
   }
   else
-  if (Teinte==1)
+  if (hue==1)
   {
 
     for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)

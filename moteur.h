@@ -20,7 +20,7 @@
 */
 
 void Gestion_principale            (void);
-void Tracer_cadre_de_bouton_du_menu(byte btn_number,byte Enfonce);
+void Tracer_cadre_de_bouton_du_menu(byte btn_number,byte pressed);
 void Desenclencher_bouton          (int btn_number);
 void Enclencher_bouton             (int btn_number,byte click);
 void Annuler_les_effets            (void);
@@ -48,11 +48,11 @@ void Fenetre_Dessiner_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caract
 T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title,byte Lettre_soulignee,
-                                   byte clickable, word Raccourci);
+                                   byte clickable, word shortcut);
 T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title,byte Lettre_soulignee,
-                                   byte clickable, word Raccourci);
+                                   byte clickable, word shortcut);
 
 T_Bouton_palette * Fenetre_Definir_bouton_palette(word x_pos, word y_pos);
 void Fenetre_Effacer_tags(void);

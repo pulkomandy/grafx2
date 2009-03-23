@@ -1547,8 +1547,8 @@ void Definir_mode_video(short  width,
 // Utilisé pour trier les modes retournés par SDL
 int Compare_modes_video(const void *p1, const void *p2)
 {
-  const struct S_Mode_video *Mode1 = (const struct S_Mode_video *)p1;
-  const struct S_Mode_video *Mode2 = (const struct S_Mode_video *)p2;
+  const T_Video_mode *Mode1 = (const T_Video_mode *)p1;
+  const T_Video_mode *Mode2 = (const T_Video_mode *)p2;
 
   // Tris par largeur
   if(Mode1->Width - Mode2->Width)
@@ -1649,7 +1649,7 @@ void Definition_des_modes_video(void)
       }
     }
     // Tri des modes : ceux trouvés par SDL ont été listés à la fin.
-    qsort(&Mode_video[1], Nb_modes_video - 1, sizeof(struct S_Mode_video), Compare_modes_video);
+    qsort(&Mode_video[1], Nb_modes_video - 1, sizeof(T_Video_mode), Compare_modes_video);
   }
 }
 

@@ -83,7 +83,7 @@ const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
     return Noms_raccourcis;
   }
 }
-void Redefinir_controle(word *Raccourci, int x_pos, int y_pos)
+void Redefinir_controle(word *shortcut, int x_pos, int y_pos)
 {
   Effacer_curseur();
   Print_dans_fenetre(x_pos,y_pos,"*PRESS KEY OR BUTTON*",CM_Noir,CM_Clair);
@@ -95,7 +95,7 @@ void Redefinir_controle(word *Raccourci, int x_pos, int y_pos)
       return;
     if (Touche!=0)
     {
-      *Raccourci=Touche;
+      *shortcut=Touche;
       return;
     }
   }    

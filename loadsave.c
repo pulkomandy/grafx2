@@ -2693,7 +2693,7 @@ typedef struct
 typedef struct
 {
   word Pos_X;         // Abscisse où devrait être affichée l'image
-  word y_pos;         // Ordonnée où devrait être affichée l'image
+  word Pos_Y;         // Ordonnée où devrait être affichée l'image
   word Largeur_image; // width de l'image
   word Hauteur_image; // height de l'image
   byte Indicateur;    // Informations diverses sur l'image
@@ -2989,7 +2989,7 @@ void Load_GIF(void)
               
               // lecture de 10 derniers octets
               if ( read_word_le(GIF_Fichier,&(IDB.Pos_X))
-                && read_word_le(GIF_Fichier,&(IDB.y_pos))
+                && read_word_le(GIF_Fichier,&(IDB.Pos_Y))
                 && read_word_le(GIF_Fichier,&(IDB.Largeur_image))
                 && read_word_le(GIF_Fichier,&(IDB.Hauteur_image))
                 && read_byte(GIF_Fichier,&(IDB.Indicateur))
@@ -3312,7 +3312,7 @@ void Save_GIF(void)
 
           Block_indicateur=0x2C;
           IDB.Pos_X=0;
-          IDB.y_pos=0;
+          IDB.Pos_Y=0;
           IDB.Largeur_image=Principal_Largeur_image;
           IDB.Hauteur_image=Principal_Hauteur_image;
           IDB.Indicateur=0x07;    // Image non entrelacée, pas de palette locale.

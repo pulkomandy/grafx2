@@ -1453,7 +1453,7 @@ void Fenetre_Effacer_bouton_saisie(T_Bouton_special * button)
 T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title, byte Lettre_soulignee,
-                                   byte clickable, word Raccourci)
+                                   byte clickable, word shortcut)
 {
   T_Bouton_normal * Temp=NULL;
 
@@ -1467,7 +1467,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
     Temp->Pos_Y    =y_pos;
     Temp->Width  =width;
     Temp->Height  =height;
-    Temp->Raccourci=Raccourci;
+    Temp->Raccourci=shortcut;
     Temp->Repetable=0;
 
     Temp->Next=Fenetre_Liste_boutons_normal;
@@ -1482,7 +1482,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
 T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title, byte Lettre_soulignee,
-                                   byte clickable, word Raccourci)
+                                   byte clickable, word shortcut)
 {
   T_Bouton_normal * Temp=NULL;
 
@@ -1496,7 +1496,7 @@ T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
     Temp->Pos_Y    =y_pos;
     Temp->Width  =width;
     Temp->Height  =height;
-    Temp->Raccourci=Raccourci;
+    Temp->Raccourci=shortcut;
     Temp->Repetable=1;
 
     Temp->Next=Fenetre_Liste_boutons_normal;

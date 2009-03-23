@@ -28,7 +28,7 @@
     @param Debut_Y upper edge coordinate in the picture
     @param Fin_X right edge coordinate in the picture
     @param Fin_Y bottom edge coordinate in the picture
-    @param effacement If 1, the area is also cleared from the picture.
+    @param clear If 1, the area is also cleared from the picture.
 */
 void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear);
 
