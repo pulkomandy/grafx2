@@ -145,67 +145,67 @@ char * TITRE_BOUTON[NB_BOUTONS]=
   "Hide tool bar           "
 };
 // Sauvegarde un bloc (généralement l'arrière-plan d'une fenêtre)
-void Sauve_fond(byte **Buffer, int Pos_X, int Pos_Y, int width, int height)
+void Sauve_fond(byte **Buffer, int x_pos, int y_pos, int width, int height)
 {
   int Indice;
   if(*Buffer != NULL) DEBUG("WARNING : Buffer already allocated !!!",0);
   *Buffer=(byte *) malloc(width*Menu_Facteur_X*height*Menu_Facteur_Y*Pixel_width);
   for (Indice=0; Indice<(height*Menu_Facteur_Y); Indice++)
-    Lire_ligne(Pos_X,Pos_Y+Indice,width*Menu_Facteur_X,(*Buffer)+((int)Indice*width*Menu_Facteur_X*Pixel_width));
+    Lire_ligne(x_pos,y_pos+Indice,width*Menu_Facteur_X,(*Buffer)+((int)Indice*width*Menu_Facteur_X*Pixel_width));
 }
 // Restaure de ce que la fenêtre cachait
-void Restaure_fond(byte *Buffer, int Pos_X, int Pos_Y, int width, int height)
+void Restaure_fond(byte *Buffer, int x_pos, int y_pos, int width, int height)
 {
   int Indice;
   for (Indice=0; Indice<height*Menu_Facteur_Y; Indice++)
-    Afficher_ligne_fast(Pos_X,Pos_Y+Indice,width*Menu_Facteur_X,Buffer+((int)Indice*width*Menu_Facteur_X*Pixel_width));
+    Afficher_ligne_fast(x_pos,y_pos+Indice,width*Menu_Facteur_X,Buffer+((int)Indice*width*Menu_Facteur_X*Pixel_width));
   free(Buffer);
 }
 // Ecrit un pixel dans un fond de fenêtre
-void Pixel_fond(int Pos_X, int Pos_Y, byte Couleur)
+void Pixel_fond(int x_pos, int y_pos, byte Couleur)
 {
   int Repetitions_X=Pixel_width;
   while (Repetitions_X--)
-    (Fond_fenetre[0][Pos_X*Pixel_width+Repetitions_X+Pos_Y*Fenetre_Largeur*Pixel_width*Menu_Facteur_X])=Couleur;
+    (Fond_fenetre[0][x_pos*Pixel_width+Repetitions_X+y_pos*Fenetre_Largeur*Pixel_width*Menu_Facteur_X])=Couleur;
 }
 
 
 
 int Numero_bouton_sous_souris(void)
 {
-  int Numero;
-  short Pos_X;
-  short Pos_Y;
+  int btn_number;
+  short x_pos;
+  short y_pos;
 
-  Pos_X=(Mouse_X              )/Menu_Facteur_X;
-  Pos_Y=(Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y;
+  x_pos=(Mouse_X              )/Menu_Facteur_X;
+  y_pos=(Mouse_Y-Menu_Ordonnee)/Menu_Facteur_Y;
 
-  for (Numero=0;Numero<NB_BOUTONS;Numero++)
+  for (btn_number=0;btn_number<NB_BOUTONS;btn_number++)
   {
-    switch(Bouton[Numero].Shape)
+    switch(Bouton[btn_number].Shape)
     {
       case FORME_BOUTON_SANS_CADRE :
       case FORME_BOUTON_RECTANGLE  :
 
-        if ((Pos_X>=Bouton[Numero].Decalage_X) &&
-            (Pos_Y>=Bouton[Numero].Decalage_Y) &&
-            (Pos_X<=Bouton[Numero].Decalage_X+Bouton[Numero].Width) &&
-            (Pos_Y<=Bouton[Numero].Decalage_Y+Bouton[Numero].Height))
-          return Numero;
+        if ((x_pos>=Bouton[btn_number].Decalage_X) &&
+            (y_pos>=Bouton[btn_number].Decalage_Y) &&
+            (x_pos<=Bouton[btn_number].Decalage_X+Bouton[btn_number].Width) &&
+            (y_pos<=Bouton[btn_number].Decalage_Y+Bouton[btn_number].Height))
+          return btn_number;
         break;
 
       case FORME_BOUTON_TRIANGLE_HAUT_GAUCHE:
-        if ((Pos_X>=Bouton[Numero].Decalage_X) &&
-            (Pos_Y>=Bouton[Numero].Decalage_Y) &&
-            (Pos_X+Pos_Y-(short)Bouton[Numero].Decalage_Y-(short)Bouton[Numero].Decalage_X<=Bouton[Numero].Width))
-          return Numero;
+        if ((x_pos>=Bouton[btn_number].Decalage_X) &&
+            (y_pos>=Bouton[btn_number].Decalage_Y) &&
+            (x_pos+y_pos-(short)Bouton[btn_number].Decalage_Y-(short)Bouton[btn_number].Decalage_X<=Bouton[btn_number].Width))
+          return btn_number;
         break;
 
       case FORME_BOUTON_TRIANGLE_BAS_DROITE:
-        if ((Pos_X<=Bouton[Numero].Decalage_X+Bouton[Numero].Width) &&
-            (Pos_Y<=Bouton[Numero].Decalage_Y+Bouton[Numero].Height) &&
-            (Pos_X+Pos_Y-(short)Bouton[Numero].Decalage_Y-(short)Bouton[Numero].Decalage_X>=Bouton[Numero].Width))
-          return Numero;
+        if ((x_pos<=Bouton[btn_number].Decalage_X+Bouton[btn_number].Width) &&
+            (y_pos<=Bouton[btn_number].Decalage_Y+Bouton[btn_number].Height) &&
+            (x_pos+y_pos-(short)Bouton[btn_number].Decalage_Y-(short)Bouton[btn_number].Decalage_X>=Bouton[btn_number].Width))
+          return btn_number;
         break;
     }
   }
@@ -213,7 +213,7 @@ int Numero_bouton_sous_souris(void)
 }
 
 
-void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
+void Tracer_cadre_de_bouton_du_menu(byte btn_number,byte pressed)
 {
   byte Couleur_Haut_gauche;
   byte Couleur_Bas_droite;
@@ -222,13 +222,13 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
   word Debut_Y;
   word Fin_X;
   word Fin_Y;
-  word Pos_X;
-  word Pos_Y;
+  word x_pos;
+  word y_pos;
 
-  Debut_X=Bouton[Numero].Decalage_X;
-  Debut_Y=Bouton[Numero].Decalage_Y;
-  Fin_X  =Debut_X+Bouton[Numero].Width;
-  Fin_Y  =Debut_Y+Bouton[Numero].Height;
+  Debut_X=Bouton[btn_number].Decalage_X;
+  Debut_Y=Bouton[btn_number].Decalage_Y;
+  Fin_X  =Debut_X+Bouton[btn_number].Width;
+  Fin_Y  =Debut_Y+Bouton[btn_number].Height;
 
   if (!pressed)
   {
@@ -243,7 +243,7 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
     Couleur_Diagonale=CM_Fonce;
   }
 
-  switch(Bouton[Numero].Shape)
+  switch(Bouton[btn_number].Shape)
   {
     case FORME_BOUTON_SANS_CADRE :
       break;
@@ -255,25 +255,25 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
       Pixel_dans_menu(Debut_X,Fin_Y,Couleur_Diagonale);
       BLOCK_MENU[Fin_Y][Debut_X]=Couleur_Diagonale;
       // On colorie la partie haute
-      for (Pos_X=Debut_X;Pos_X<=Fin_X-1;Pos_X++)
+      for (x_pos=Debut_X;x_pos<=Fin_X-1;x_pos++)
       {
-        Pixel_dans_menu(Pos_X,Debut_Y,Couleur_Haut_gauche);
-        BLOCK_MENU[Debut_Y][Pos_X]=Couleur_Haut_gauche;
+        Pixel_dans_menu(x_pos,Debut_Y,Couleur_Haut_gauche);
+        BLOCK_MENU[Debut_Y][x_pos]=Couleur_Haut_gauche;
       }
-      for (Pos_Y=Debut_Y+1;Pos_Y<=Fin_Y-1;Pos_Y++)
+      for (y_pos=Debut_Y+1;y_pos<=Fin_Y-1;y_pos++)
       {
         // On colorie la partie gauche
-        Pixel_dans_menu(Debut_X,Pos_Y,Couleur_Haut_gauche);
-        BLOCK_MENU[Pos_Y][Debut_X]=Couleur_Haut_gauche;
+        Pixel_dans_menu(Debut_X,y_pos,Couleur_Haut_gauche);
+        BLOCK_MENU[y_pos][Debut_X]=Couleur_Haut_gauche;
         // On colorie la partie droite
-        Pixel_dans_menu(Fin_X,Pos_Y,Couleur_Bas_droite);
-        BLOCK_MENU[Pos_Y][Fin_X]=Couleur_Bas_droite;
+        Pixel_dans_menu(Fin_X,y_pos,Couleur_Bas_droite);
+        BLOCK_MENU[y_pos][Fin_X]=Couleur_Bas_droite;
       }
       // On colorie la partie basse
-      for (Pos_X=Debut_X+1;Pos_X<=Fin_X;Pos_X++)
+      for (x_pos=Debut_X+1;x_pos<=Fin_X;x_pos++)
       {
-        Pixel_dans_menu(Pos_X,Fin_Y,Couleur_Bas_droite);
-        BLOCK_MENU[Fin_Y][Pos_X]=Couleur_Bas_droite;
+        Pixel_dans_menu(x_pos,Fin_Y,Couleur_Bas_droite);
+        BLOCK_MENU[Fin_Y][x_pos]=Couleur_Bas_droite;
       }
       break;
     case FORME_BOUTON_TRIANGLE_HAUT_GAUCHE:
@@ -284,18 +284,18 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
       Pixel_dans_menu(Debut_X,Fin_Y,Couleur_Diagonale);
       BLOCK_MENU[Fin_Y][Debut_X]=Couleur_Diagonale;
       // On colorie le coin haut gauche
-      for (Pos_X=0;Pos_X<Bouton[Numero].Width;Pos_X++)
+      for (x_pos=0;x_pos<Bouton[btn_number].Width;x_pos++)
       {
-        Pixel_dans_menu(Debut_X+Pos_X,Debut_Y,Couleur_Haut_gauche);
-        BLOCK_MENU[Debut_Y][Debut_X+Pos_X]=Couleur_Haut_gauche;
-        Pixel_dans_menu(Debut_X,Debut_Y+Pos_X,Couleur_Haut_gauche);
-        BLOCK_MENU[Debut_Y+Pos_X][Debut_X]=Couleur_Haut_gauche;
+        Pixel_dans_menu(Debut_X+x_pos,Debut_Y,Couleur_Haut_gauche);
+        BLOCK_MENU[Debut_Y][Debut_X+x_pos]=Couleur_Haut_gauche;
+        Pixel_dans_menu(Debut_X,Debut_Y+x_pos,Couleur_Haut_gauche);
+        BLOCK_MENU[Debut_Y+x_pos][Debut_X]=Couleur_Haut_gauche;
       }
       // On colorie la diagonale
-      for (Pos_X=1;Pos_X<Bouton[Numero].Width;Pos_X++)
+      for (x_pos=1;x_pos<Bouton[btn_number].Width;x_pos++)
       {
-        Pixel_dans_menu(Debut_X+Pos_X,Fin_Y-Pos_X,Couleur_Bas_droite);
-        BLOCK_MENU[Fin_Y-Pos_X][Debut_X+Pos_X]=Couleur_Bas_droite;
+        Pixel_dans_menu(Debut_X+x_pos,Fin_Y-x_pos,Couleur_Bas_droite);
+        BLOCK_MENU[Fin_Y-x_pos][Debut_X+x_pos]=Couleur_Bas_droite;
       }
       break;
     case FORME_BOUTON_TRIANGLE_BAS_DROITE:
@@ -306,18 +306,18 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
       Pixel_dans_menu(Debut_X,Fin_Y,Couleur_Diagonale);
       BLOCK_MENU[Fin_Y][Debut_X]=Couleur_Diagonale;
       // On colorie la diagonale
-      for (Pos_X=1;Pos_X<Bouton[Numero].Width;Pos_X++)
+      for (x_pos=1;x_pos<Bouton[btn_number].Width;x_pos++)
       {
-        Pixel_dans_menu(Debut_X+Pos_X,Fin_Y-Pos_X,Couleur_Haut_gauche);
-        BLOCK_MENU[Fin_Y-Pos_X][Debut_X+Pos_X]=Couleur_Haut_gauche;
+        Pixel_dans_menu(Debut_X+x_pos,Fin_Y-x_pos,Couleur_Haut_gauche);
+        BLOCK_MENU[Fin_Y-x_pos][Debut_X+x_pos]=Couleur_Haut_gauche;
       }
       // On colorie le coin bas droite
-      for (Pos_X=0;Pos_X<Bouton[Numero].Width;Pos_X++)
+      for (x_pos=0;x_pos<Bouton[btn_number].Width;x_pos++)
       {
-        Pixel_dans_menu(Fin_X-Pos_X,Fin_Y,Couleur_Bas_droite);
-        BLOCK_MENU[Fin_Y][Fin_X-Pos_X]=Couleur_Bas_droite;
-        Pixel_dans_menu(Fin_X,Fin_Y-Pos_X,Couleur_Bas_droite);
-        BLOCK_MENU[Fin_Y-Pos_X][Fin_X]=Couleur_Bas_droite;
+        Pixel_dans_menu(Fin_X-x_pos,Fin_Y,Couleur_Bas_droite);
+        BLOCK_MENU[Fin_Y][Fin_X-x_pos]=Couleur_Bas_droite;
+        Pixel_dans_menu(Fin_X,Fin_Y-x_pos,Couleur_Bas_droite);
+        BLOCK_MENU[Fin_Y-x_pos][Fin_X]=Couleur_Bas_droite;
       }
   }
   if (Menu_visible)
@@ -332,22 +332,22 @@ void Tracer_cadre_de_bouton_du_menu(byte Numero,byte pressed)
 
 
 //---------------------- Désenclenchement d'un bouton ------------------------
-void Desenclencher_bouton(int Numero)
+void Desenclencher_bouton(int btn_number)
 {
-  if (Bouton[Numero].Enfonce)
+  if (Bouton[btn_number].Enfonce)
   {
     // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
-    Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_RELACHE);
+    Tracer_cadre_de_bouton_du_menu(btn_number,BOUTON_RELACHE);
     // On considère que le bouton est relâché
-    Bouton[Numero].Enfonce=BOUTON_RELACHE;
+    Bouton[btn_number].Enfonce=BOUTON_RELACHE;
     // On appelle le désenclenchement particulier au bouton:
-    Bouton[Numero].Desenclencher();
+    Bouton[btn_number].Desenclencher();
   }
 }
 
 
 //-Enclenchement d'un bouton (et désenclenchement de ceux de la même famille)-
-void Enclencher_bouton(int Numero,byte click)
+void Enclencher_bouton(int btn_number,byte click)
 {
   int family;
   int b;
@@ -357,7 +357,7 @@ void Enclencher_bouton(int Numero,byte click)
 
   // Certains boutons ont deux icones
   Icone=-1;
-  switch(Numero)
+  switch(btn_number)
   {
     case BOUTON_POLYGONES:
     case BOUTON_POLYFILL:
@@ -371,10 +371,10 @@ void Enclencher_bouton(int Numero,byte click)
       Icone=16;break;
   }
   if (Icone!=-1)
-    Afficher_sprite_dans_menu(Numero,Icone+(click==A_DROITE));
+    Afficher_sprite_dans_menu(btn_number,Icone+(click==A_DROITE));
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
-  family=Bouton[Numero].Famille;
+  family=Bouton[btn_number].Famille;
 
   switch (family)
   {
@@ -382,12 +382,12 @@ void Enclencher_bouton(int Numero,byte click)
       break;
 
     case FAMILLE_INTERRUPTION: // Petit cas spécial dans la famille "Interruption":
-      if ((Numero!=BOUTON_LOUPE) || (!Loupe_Mode))
+      if ((btn_number!=BOUTON_LOUPE) || (!Loupe_Mode))
       // Pour chaque bouton:
       for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la même famille
         if (
-             (b!=Numero) &&
+             (b!=btn_number) &&
              (Bouton[b].Famille==FAMILLE_INTERRUPTION) &&
              (  (b!=BOUTON_LOUPE) ||
                ((b==BOUTON_LOUPE) && (!Loupe_Mode)) )
@@ -401,7 +401,7 @@ void Enclencher_bouton(int Numero,byte click)
       // Pour chaque bouton:
       for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la famille interruption
-        if ( (b!=Numero)
+        if ( (b!=btn_number)
           && (Bouton[b].Famille==FAMILLE_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Loupe_Mode && (b==BOUTON_LOUPE))) )
@@ -410,14 +410,14 @@ void Enclencher_bouton(int Numero,byte click)
       // Pour chaque bouton:
       for (b=0; b<NB_BOUTONS; b++)
         // S'il est de la même famille
-        if ( (b!=Numero)
+        if ( (b!=btn_number)
           && (Bouton[b].Famille==family) )
           // Alors on désenclenche le bouton
           Desenclencher_bouton(b);
   }
 
   // On affiche le cadre autour du bouton de façon à ce qu'il paraisse enfoncé
-  Tracer_cadre_de_bouton_du_menu(Numero,BOUTON_ENFONCE);
+  Tracer_cadre_de_bouton_du_menu(btn_number,BOUTON_ENFONCE);
 
   Afficher_curseur();
 
@@ -425,13 +425,13 @@ void Enclencher_bouton(int Numero,byte click)
   Attendre_fin_de_click();
 
   // On considère que le bouton est enfoncé
-  Bouton[Numero].Enfonce=BOUTON_ENFONCE;
+  Bouton[btn_number].Enfonce=BOUTON_ENFONCE;
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
   if (click==1)
-    Bouton[Numero].Gauche();
+    Bouton[btn_number].Gauche();
   else
-    Bouton[Numero].Droite();
+    Bouton[btn_number].Droite();
 }
 
 
@@ -996,7 +996,7 @@ void Gestion_principale(void)
               {
                 Effacer_curseur();
                 strcpy(Chaine,TITRE_BOUTON[Indice_bouton]);
-                sprintf(Chaine+strlen(Chaine),"%d (%d,%d,%d)",Couleur,Principal_Palette[Couleur].R,Principal_Palette[Couleur].V,Principal_Palette[Couleur].B);
+                sprintf(Chaine+strlen(Chaine),"%d (%d,%d,%d)",Couleur,Principal_Palette[Couleur].R,Principal_Palette[Couleur].G,Principal_Palette[Couleur].B);
                 for (Temp=strlen(Chaine); Temp<24; Temp++)
                   Chaine[Temp]=' ';
                 Chaine[24]=0;
@@ -1234,7 +1234,7 @@ void Fermer_fenetre(void)
 
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
-void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word width,word height,
+void Fenetre_Dessiner_bouton_normal(word x_pos,word y_pos,word width,word height,
                                     char * Titre,byte Lettre_soulignee,byte clickable)
 {
   byte Couleur_titre;
@@ -1242,19 +1242,19 @@ void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word width,word height
 
   if (clickable)
   {
-    Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,width,height);
-    Fenetre_Afficher_cadre_general(Pos_X-1,Pos_Y-1,width+2,height+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
+    Fenetre_Afficher_cadre_bombe(x_pos,y_pos,width,height);
+    Fenetre_Afficher_cadre_general(x_pos-1,y_pos-1,width+2,height+2,CM_Noir,CM_Noir,CM_Fonce,CM_Fonce,CM_Fonce);
     Couleur_titre=CM_Noir;
   }
   else
   {
-    Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,width,height);
-    Fenetre_Afficher_cadre_mono(Pos_X-1,Pos_Y-1,width+2,height+2,CM_Clair);
+    Fenetre_Afficher_cadre_bombe(x_pos,y_pos,width,height);
+    Fenetre_Afficher_cadre_mono(x_pos-1,y_pos-1,width+2,height+2,CM_Clair);
     Couleur_titre=CM_Fonce;
   }
 
-  Pos_texte_X=Pos_X+( (width-(strlen(Titre)<<3)+1) >>1 );
-  Pos_texte_Y=Pos_Y+((height-7)>>1);
+  Pos_texte_X=x_pos+( (width-(strlen(Titre)<<3)+1) >>1 );
+  Pos_texte_Y=y_pos+((height-7)>>1);
   Print_dans_fenetre(Pos_texte_X,Pos_texte_Y,Titre,Couleur_titre,CM_Clair);
 
   if (Lettre_soulignee)
@@ -1265,29 +1265,29 @@ void Fenetre_Dessiner_bouton_normal(word Pos_X,word Pos_Y,word width,word height
 
 
 // -- Bouton normal enfoncé dans la fenêtre --
-void Fenetre_Enfoncer_bouton_normal(word Pos_X,word Pos_Y,word width,word height)
+void Fenetre_Enfoncer_bouton_normal(word x_pos,word y_pos,word width,word height)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,CM_Fonce,CM_Noir,CM_Fonce,CM_Fonce,CM_Noir);
-  UpdateRect(Fenetre_Pos_X+Pos_X*Menu_Facteur_X, Fenetre_Pos_Y+Pos_Y*Menu_Facteur_Y, width*Menu_Facteur_X, height*Menu_Facteur_Y);
+  Fenetre_Afficher_cadre_general(x_pos,y_pos,width,height,CM_Fonce,CM_Noir,CM_Fonce,CM_Fonce,CM_Noir);
+  UpdateRect(Fenetre_Pos_X+x_pos*Menu_Facteur_X, Fenetre_Pos_Y+y_pos*Menu_Facteur_Y, width*Menu_Facteur_X, height*Menu_Facteur_Y);
 }
 
 // -- Bouton normal désenfoncé dans la fenêtre --
-void Fenetre_Desenfoncer_bouton_normal(word Pos_X,word Pos_Y,word width,word height)
+void Fenetre_Desenfoncer_bouton_normal(word x_pos,word y_pos,word width,word height)
 {
-  Fenetre_Afficher_cadre_bombe(Pos_X,Pos_Y,width,height);
-  UpdateRect(Fenetre_Pos_X+Pos_X*Menu_Facteur_X, Fenetre_Pos_Y+Pos_Y*Menu_Facteur_Y, width*Menu_Facteur_X, height*Menu_Facteur_Y);
+  Fenetre_Afficher_cadre_bombe(x_pos,y_pos,width,height);
+  UpdateRect(Fenetre_Pos_X+x_pos*Menu_Facteur_X, Fenetre_Pos_Y+y_pos*Menu_Facteur_Y, width*Menu_Facteur_X, height*Menu_Facteur_Y);
 }
 
 
 //--------------- Dessiner un bouton palette dans une fenêtre ----------------
-void Fenetre_Dessiner_bouton_palette(word Pos_X,word Pos_Y)
+void Fenetre_Dessiner_bouton_palette(word x_pos,word y_pos)
 {
   word Couleur;
 
   for (Couleur=0; Couleur<=255; Couleur++)
-    Block( Fenetre_Pos_X+((((Couleur >> 4)*10)+Pos_X+6)*Menu_Facteur_X),Fenetre_Pos_Y+((((Couleur & 15)*5)+Pos_Y+3)*Menu_Facteur_Y),Menu_Facteur_X*5,Menu_Facteur_Y*5,Couleur);
+    Block( Fenetre_Pos_X+((((Couleur >> 4)*10)+x_pos+6)*Menu_Facteur_X),Fenetre_Pos_Y+((((Couleur & 15)*5)+y_pos+3)*Menu_Facteur_Y),Menu_Facteur_X*5,Menu_Facteur_Y*5,Couleur);
 
-  Fenetre_Afficher_cadre(Pos_X,Pos_Y,164,86);
+  Fenetre_Afficher_cadre(x_pos,y_pos,164,86);
 }
 
 
@@ -1297,13 +1297,13 @@ void Fenetre_Effacer_tags(void)
 {
   word Origine_X;
   word Origine_Y;
-  word Pos_X;
+  word x_pos;
   word Pos_fenetre_X;
   //word Pos_fenetre_Y;
 
   Origine_X=Fenetre_Pos_X+(Fenetre_Liste_boutons_palette->Pos_X+3)*Menu_Facteur_X;
   Origine_Y=Fenetre_Pos_Y+(Fenetre_Liste_boutons_palette->Pos_Y+3)*Menu_Facteur_Y;
-  for (Pos_X=0,Pos_fenetre_X=Origine_X;Pos_X<16;Pos_X++,Pos_fenetre_X+=(Menu_Facteur_X*10))
+  for (x_pos=0,Pos_fenetre_X=Origine_X;x_pos<16;x_pos++,Pos_fenetre_X+=(Menu_Facteur_X*10))
     Block(Pos_fenetre_X,Origine_Y,Menu_Facteur_X*3,Menu_Facteur_Y*80,CM_Clair);
   UpdateRect(Origine_X,Origine_Y,ToWinL(160),ToWinH(80));
 }
@@ -1314,8 +1314,8 @@ void Tagger_intervalle_palette(byte start,byte end)
 {
   word Origine_X;
   word Origine_Y;
-  //word Pos_X;
-  word Pos_Y;
+  //word x_pos;
+  word y_pos;
   //word Pos_fenetre_X;
   word Pos_fenetre_Y;
   word Indice;
@@ -1334,9 +1334,9 @@ void Tagger_intervalle_palette(byte start,byte end)
   // On affiche le 1er TAG
   Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(start>>4)*10;
   Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(start&15)* 5;
-  for (Pos_Y=0,Pos_fenetre_Y=Origine_Y  ;Pos_Y<5;Pos_Y++,Pos_fenetre_Y++)
+  for (y_pos=0,Pos_fenetre_Y=Origine_Y  ;y_pos<5;y_pos++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X  ,Pos_fenetre_Y,CM_Noir);
-  for (Pos_Y=0,Pos_fenetre_Y=Origine_Y+1;Pos_Y<3;Pos_Y++,Pos_fenetre_Y++)
+  for (y_pos=0,Pos_fenetre_Y=Origine_Y+1;y_pos<3;y_pos++,Pos_fenetre_Y++)
     Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
   Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
@@ -1348,9 +1348,9 @@ void Tagger_intervalle_palette(byte start,byte end)
     // On affiche le 2ème TAG
     Origine_X=(Fenetre_Liste_boutons_palette->Pos_X+3)+(end>>4)*10;
     Origine_Y=(Fenetre_Liste_boutons_palette->Pos_Y+3)+(end&15)* 5;
-    for (Pos_Y=0,Pos_fenetre_Y=Origine_Y; Pos_Y<5; Pos_Y++,Pos_fenetre_Y++)
+    for (y_pos=0,Pos_fenetre_Y=Origine_Y; y_pos<5; y_pos++,Pos_fenetre_Y++)
       Pixel_dans_fenetre(Origine_X  ,Pos_fenetre_Y,CM_Noir);
-    for (Pos_Y=0,Pos_fenetre_Y=Origine_Y; Pos_Y<4; Pos_Y++,Pos_fenetre_Y++)
+    for (y_pos=0,Pos_fenetre_Y=Origine_Y; y_pos<4; y_pos++,Pos_fenetre_Y++)
       Pixel_dans_fenetre(Origine_X+1,Pos_fenetre_Y,CM_Noir);
     Pixel_dans_fenetre(Origine_X+2,Origine_Y+2,CM_Noir);
 
@@ -1426,9 +1426,9 @@ void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * button)
 
 //--------------- Dessiner une zone de saisie dans une fenêtre ---------------
 
-void Fenetre_Dessiner_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
+void Fenetre_Dessiner_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caracteres)
 {
-  Fenetre_Afficher_cadre_creux(Pos_X,Pos_Y,(Largeur_en_caracteres<<3)+3,11);
+  Fenetre_Afficher_cadre_creux(x_pos,y_pos,(Largeur_en_caracteres<<3)+3,11);
 }
 
 
@@ -1450,7 +1450,7 @@ void Fenetre_Effacer_bouton_saisie(T_Bouton_special * button)
 
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
                                    word width, word height,
                                    char * Titre, byte Lettre_soulignee,
                                    byte clickable, word Raccourci)
@@ -1462,9 +1462,9 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
   if (clickable)
   {
     Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
-    Temp->Numero   =Nb_boutons_fenetre;
-    Temp->Pos_X    =Pos_X;
-    Temp->Pos_Y    =Pos_Y;
+    Temp->Number   =Nb_boutons_fenetre;
+    Temp->Pos_X    =x_pos;
+    Temp->Pos_Y    =y_pos;
     Temp->Width  =width;
     Temp->Height  =height;
     Temp->Raccourci=Raccourci;
@@ -1474,12 +1474,12 @@ T_Bouton_normal * Fenetre_Definir_bouton_normal(word Pos_X, word Pos_Y,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,width,height,Titre,Lettre_soulignee,clickable);
+  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,Titre,Lettre_soulignee,clickable);
   return Temp;
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
 
-T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
+T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
                                    word width, word height,
                                    char * Titre, byte Lettre_soulignee,
                                    byte clickable, word Raccourci)
@@ -1491,9 +1491,9 @@ T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
   if (clickable)
   {
     Temp=(T_Bouton_normal *)malloc(sizeof(T_Bouton_normal));
-    Temp->Numero   =Nb_boutons_fenetre;
-    Temp->Pos_X    =Pos_X;
-    Temp->Pos_Y    =Pos_Y;
+    Temp->Number   =Nb_boutons_fenetre;
+    Temp->Pos_X    =x_pos;
+    Temp->Pos_Y    =y_pos;
     Temp->Width  =width;
     Temp->Height  =height;
     Temp->Raccourci=Raccourci;
@@ -1503,28 +1503,28 @@ T_Bouton_normal * Fenetre_Definir_bouton_repetable(word Pos_X, word Pos_Y,
     Fenetre_Liste_boutons_normal=Temp;
   }
 
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,width,height,Titre,Lettre_soulignee,clickable);
+  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,Titre,Lettre_soulignee,clickable);
   return Temp;
 }
 
-T_Bouton_palette * Fenetre_Definir_bouton_palette(word Pos_X, word Pos_Y)
+T_Bouton_palette * Fenetre_Definir_bouton_palette(word x_pos, word y_pos)
 {
   T_Bouton_palette * Temp;
 
   Temp=(T_Bouton_palette *)malloc(sizeof(T_Bouton_palette));
-  Temp->Numero   =++Nb_boutons_fenetre;
-  Temp->Pos_X    =Pos_X;
-  Temp->Pos_Y    =Pos_Y;
+  Temp->Number   =++Nb_boutons_fenetre;
+  Temp->Pos_X    =x_pos;
+  Temp->Pos_Y    =y_pos;
 
   Temp->Next=Fenetre_Liste_boutons_palette;
   Fenetre_Liste_boutons_palette=Temp;
 
-  Fenetre_Dessiner_bouton_palette(Pos_X,Pos_Y);
+  Fenetre_Dessiner_bouton_palette(x_pos,y_pos);
   return Temp;
 }
 
 
-T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
+T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word x_pos, word y_pos,
                                      word height,
                                      word nb_elements,
                                      word nb_elements_visible,
@@ -1533,9 +1533,9 @@ T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
   T_Bouton_scroller * Temp;
 
   Temp=(T_Bouton_scroller *)malloc(sizeof(T_Bouton_scroller));
-  Temp->Numero        =++Nb_boutons_fenetre;
-  Temp->Pos_X         =Pos_X;
-  Temp->Pos_Y         =Pos_Y;
+  Temp->Number        =++Nb_boutons_fenetre;
+  Temp->Pos_X         =x_pos;
+  Temp->Pos_Y         =y_pos;
   Temp->Height       =height;
   Temp->Nb_elements   =nb_elements;
   Temp->Nb_visibles   =nb_elements_visible;
@@ -1550,14 +1550,14 @@ T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word Pos_X, word Pos_Y,
 }
 
 
-T_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word width,word height)
+T_Bouton_special * Fenetre_Definir_bouton_special(word x_pos,word y_pos,word width,word height)
 {
   T_Bouton_special * Temp;
 
   Temp=(T_Bouton_special *)malloc(sizeof(T_Bouton_special));
-  Temp->Numero   =++Nb_boutons_fenetre;
-  Temp->Pos_X    =Pos_X;
-  Temp->Pos_Y    =Pos_Y;
+  Temp->Number   =++Nb_boutons_fenetre;
+  Temp->Pos_X    =x_pos;
+  Temp->Pos_Y    =y_pos;
   Temp->Width  =width;
   Temp->Height  =height;
 
@@ -1567,22 +1567,22 @@ T_Bouton_special * Fenetre_Definir_bouton_special(word Pos_X,word Pos_Y,word wid
 }
 
 
-T_Bouton_special * Fenetre_Definir_bouton_saisie(word Pos_X,word Pos_Y,word Largeur_en_caracteres)
+T_Bouton_special * Fenetre_Definir_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caracteres)
 {
   T_Bouton_special *Temp;
-  Temp=Fenetre_Definir_bouton_special(Pos_X,Pos_Y,(Largeur_en_caracteres<<3)+3,11);
-  Fenetre_Dessiner_bouton_saisie(Pos_X,Pos_Y,Largeur_en_caracteres);
+  Temp=Fenetre_Definir_bouton_special(x_pos,y_pos,(Largeur_en_caracteres<<3)+3,11);
+  Fenetre_Dessiner_bouton_saisie(x_pos,y_pos,Largeur_en_caracteres);
   return Temp;
 }
 
-T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
+T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word x_pos,word y_pos,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
 {
   T_Bouton_dropdown *Temp;
   
   Temp=(T_Bouton_dropdown *)malloc(sizeof(T_Bouton_dropdown));
-  Temp->Numero       =++Nb_boutons_fenetre;
-  Temp->Pos_X        =Pos_X;
-  Temp->Pos_Y        =Pos_Y;
+  Temp->Number       =++Nb_boutons_fenetre;
+  Temp->Pos_X        =x_pos;
+  Temp->Pos_Y        =y_pos;
   Temp->Width      =width;
   Temp->Height      =height;
   Temp->Affiche_choix =display_choice;
@@ -1594,7 +1594,7 @@ T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word w
 
   Temp->Next=Fenetre_Liste_boutons_dropdown;
   Fenetre_Liste_boutons_dropdown=Temp;
-  Fenetre_Dessiner_bouton_normal(Pos_X,Pos_Y,width,height,"",-1,1);
+  Fenetre_Dessiner_bouton_normal(x_pos,y_pos,width,height,"",-1,1);
   if (label && label[0])
     Print_dans_fenetre(Temp->Pos_X+2,Temp->Pos_Y+(Temp->Height-7)/2,label,CM_Noir,CM_Clair);
   if (display_arrow)
@@ -1606,13 +1606,13 @@ T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word Pos_X,word Pos_Y,word w
 // Ajoute un choix à une dropdown. Le libellé est seulement référencé,
 // il doit pointer sur une zone qui doit être encore valide à la fermeture 
 // de la fenêtre (comprise).
-void Fenetre_Dropdown_choix(T_Bouton_dropdown * dropdown, word Numero, const char *label)
+void Fenetre_Dropdown_choix(T_Bouton_dropdown * dropdown, word btn_number, const char *label)
 {
   T_Dropdown_choix *Temp;
   T_Dropdown_choix *last;
   
   Temp=(T_Dropdown_choix *)malloc(sizeof(T_Dropdown_choix));
-  Temp->Numero =Numero;
+  Temp->Number =btn_number;
   Temp->Label=label;
   Temp->Next=NULL;
 
@@ -1644,7 +1644,7 @@ void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * dropdown)
 
 //----------------------- Ouverture d'un pop-up -----------------------
 
-void Ouvrir_popup(word Pos_X, word Pos_Y, word width,word height)
+void Ouvrir_popup(word x_pos, word y_pos, word width,word height)
 // Lors de l'appel à cette procédure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 
@@ -1658,8 +1658,8 @@ void Ouvrir_popup(word Pos_X, word Pos_Y, word width,word height)
 
   Fenetre_Largeur=width;
   Fenetre_Hauteur=height;
-  Fenetre_Pos_X=Pos_X;
-  Fenetre_Pos_Y=Pos_Y;
+  Fenetre_Pos_X=x_pos;
+  Fenetre_Pos_Y=y_pos;
 
   // Sauvegarde de ce que la fenêtre remplace
   Sauve_fond(&(Fond_fenetre[Fenetre-1]), Fenetre_Pos_X, Fenetre_Pos_Y, width, height);
@@ -1784,15 +1784,15 @@ void Fermer_popup(void)
 // -- Indique si on a cliqué dans une zone définie par deux points extremes --
 byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
 {
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
 
-  Pos_X=((short)Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X;
-  Pos_Y=((short)Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y;
+  x_pos=((short)Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X;
+  y_pos=((short)Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y;
 
-  return ((Pos_X>=Debut_X) &&
-          (Pos_Y>=Debut_Y) &&
-          (Pos_X<=Fin_X)   &&
-          (Pos_Y<=Fin_Y));
+  return ((x_pos>=Debut_X) &&
+          (y_pos>=Debut_Y) &&
+          (x_pos<=Fin_X)   &&
+          (y_pos<=Fin_Y));
 }
 
 
@@ -1920,7 +1920,7 @@ void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * click)
             strcat(Chaine,"   (");
             sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].R);
             strcat(Chaine,",");
-            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].V);
+            sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].G);
             strcat(Chaine,",");
             sprintf(Chaine+strlen(Chaine),"%d",Principal_Palette[a].B);
             strcat(Chaine,")");
@@ -2220,13 +2220,13 @@ short Fenetre_Dropdown_click(T_Bouton_dropdown *Bouton)
   {
     for(Choix=Bouton->Premier_choix; Indice_selectionne; Choix=Choix->Next,Indice_selectionne--)
       ;
-    Fenetre_Attribut2=Choix->Numero;
+    Fenetre_Attribut2=Choix->Number;
     if (Bouton->Affiche_choix)
     {
       // Mettre à jour automatiquement le libellé de la dropdown
       Print_dans_fenetre(Bouton->Pos_X+2,Bouton->Pos_Y+(Bouton->Height-7)/2,Choix->Label,CM_Noir,CM_Clair);
     }
-    return Bouton->Numero;
+    return Bouton->Number;
   }
   Fenetre_Attribut2=-1;
   return 0;
@@ -2235,29 +2235,29 @@ short Fenetre_Dropdown_click(T_Bouton_dropdown *Bouton)
 // --- Fonction de clic sur un bouton a peu près ordinaire:
 // Attend que l'on relache le bouton, et renvoie le numero du bouton si on
 // est resté dessus, 0 si on a annulé en sortant du bouton.
-short Fenetre_bouton_normal_click(word Pos_X, word Pos_Y, word width, word height, short Numero)
+short Fenetre_bouton_normal_click(word x_pos, word y_pos, word width, word height, short btn_number)
 {
   while(1)
   {
     Effacer_curseur();
-    Fenetre_Enfoncer_bouton_normal(Pos_X,Pos_Y,width,height);
+    Fenetre_Enfoncer_bouton_normal(x_pos,y_pos,width,height);
     Afficher_curseur();
-    while (Fenetre_click_dans_zone(Pos_X,Pos_Y,Pos_X+width-1,Pos_Y+height-1))
+    while (Fenetre_click_dans_zone(x_pos,y_pos,x_pos+width-1,y_pos+height-1))
     {
       if(!Get_input())
         Wait_VBL();
       if (!Mouse_K)
       {
         Effacer_curseur();
-        Fenetre_Desenfoncer_bouton_normal(Pos_X,Pos_Y,width,height);
+        Fenetre_Desenfoncer_bouton_normal(x_pos,y_pos,width,height);
         Afficher_curseur();
-        return Numero;
+        return btn_number;
       }
     }
     Effacer_curseur();
-    Fenetre_Desenfoncer_bouton_normal(Pos_X,Pos_Y,width,height);
+    Fenetre_Desenfoncer_bouton_normal(x_pos,y_pos,width,height);
     Afficher_curseur();
-    while (!(Fenetre_click_dans_zone(Pos_X,Pos_Y,Pos_X+width-1,Pos_Y+height-1)))
+    while (!(Fenetre_click_dans_zone(x_pos,y_pos,x_pos+width-1,y_pos+height-1)))
     {
       if(!Get_input())
         Wait_VBL();
@@ -2294,9 +2294,9 @@ short Fenetre_Numero_bouton_clicke(void)
         Effacer_curseur();
         Fenetre_Desenfoncer_bouton_normal(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Width,Temp1->Height);
         Afficher_curseur();        
-        return Temp1->Numero;
+        return Temp1->Number;
       }
-      return Fenetre_bouton_normal_click(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Width,Temp1->Height,Temp1->Numero);
+      return Fenetre_bouton_normal_click(Temp1->Pos_X,Temp1->Pos_Y,Temp1->Width,Temp1->Height,Temp1->Number);
     }
   }
 
@@ -2308,7 +2308,7 @@ short Fenetre_Numero_bouton_clicke(void)
       // On stocke dans Attribut2 le numero de couleur cliqué
       Fenetre_Attribut2 = (((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-(Temp2->Pos_X+2)) / 10 * 16 +
         (((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(Temp2->Pos_Y+3)) / 5;
-        return Temp2->Numero;
+        return Temp2->Number;
     }
   }
 
@@ -2413,7 +2413,7 @@ short Fenetre_Numero_bouton_clicke(void)
         // des 3 parties importantes de la jauge
         Fenetre_Attribut1=0;
 
-      return (Fenetre_Attribut1)? Temp3->Numero : 0;
+      return (Fenetre_Attribut1)? Temp3->Number : 0;
     }
   }
 
@@ -2421,7 +2421,7 @@ short Fenetre_Numero_bouton_clicke(void)
   for (Temp4=Fenetre_Liste_boutons_special; Temp4; Temp4=Temp4->Next)
   {
     if (Fenetre_click_dans_zone(Temp4->Pos_X,Temp4->Pos_Y,Temp4->Pos_X+Temp4->Width-1,Temp4->Pos_Y+Temp4->Height-1))
-      return Temp4->Numero;
+      return Temp4->Number;
   }
 
   // Test du click sur une dropdown
@@ -2434,7 +2434,7 @@ short Fenetre_Numero_bouton_clicke(void)
       else
       {
         Fenetre_Attribut2=-1;
-        return Fenetre_bouton_normal_click(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Width,Temp5->Height,Temp5->Numero);
+        return Fenetre_bouton_normal_click(Temp5->Pos_X,Temp5->Pos_Y,Temp5->Width,Temp5->Height,Temp5->Number);
       }
     }
   }
@@ -2468,7 +2468,7 @@ short Fenetre_Numero_bouton_touche(void)
       Fenetre_Desenfoncer_bouton_normal(Temp->Pos_X,Temp->Pos_Y,Temp->Width,Temp->Height);
       Afficher_curseur();
 
-      return Temp->Numero;
+      return Temp->Number;
     }
     Temp=Temp->Next;
   }
@@ -2482,7 +2482,7 @@ short Fenetre_Numero_bouton_touche(void)
     while (Temp!=NULL)
     {
       if (Temp->Raccourci==(Touche&0x0FFF))
-        return Temp->Numero;
+        return Temp->Number;
       Temp=Temp->Next;
     }
   }

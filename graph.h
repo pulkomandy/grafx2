@@ -19,7 +19,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Liste2tables(word * list, short Pas, byte mode, byte * Table_inc,
+void Liste2tables(word * list, short step, byte mode, byte * Table_inc,
         byte * Table_dec
 );
 
@@ -39,7 +39,7 @@ void Afficher_foreback(void);
 
 void Afficher_pixel(word X,word Y,byte Couleur);
 
-void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview);
+void Afficher_pinceau(short X,short Y,byte Couleur,byte is_preview);
 void Effacer_pinceau(short X,short Y);
 
 void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
@@ -47,11 +47,11 @@ void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
 void Remplir(byte Couleur_de_remplissage);
 void Remplacer(byte Nouvelle_couleur);
 
-void Pixel_figure_Preview    (word Pos_X,word Pos_Y,byte Couleur);
-void Pixel_figure_Preview_auto(word Pos_X,word Pos_Y);
-void Pixel_figure_Preview_xor(word Pos_X,word Pos_Y,byte Couleur);
-void Pixel_figure_Preview_xorback(word Pos_X,word Pos_Y,byte Couleur);
-void Pixel_figure_Dans_brosse(word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_figure_Preview    (word x_pos,word y_pos,byte Couleur);
+void Pixel_figure_Preview_auto(word x_pos,word y_pos);
+void Pixel_figure_Preview_xor(word x_pos,word y_pos,byte Couleur);
+void Pixel_figure_Preview_xorback(word x_pos,word y_pos,byte Couleur);
+void Pixel_figure_Dans_brosse(word x_pos,word y_pos,byte Couleur);
 
 void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur);
 void Tracer_cercle_vide_Preview  (short Centre_X,short Centre_Y,short Rayon,byte Couleur);
@@ -80,10 +80,10 @@ void Effacer_courbe_Preview (short X1, short Y1, short X2, short Y2, short X3, s
 
 void Aerographe(short Bouton_clicke);
 
-void Degrade_de_base           (long Indice,short Pos_X,short Pos_Y);
-void Degrade_de_trames_simples (long Indice,short Pos_X,short Pos_Y);
-void Degrade_de_trames_etendues(long Indice,short Pos_X,short Pos_Y);
-void Degrade_aleatoire         (long Indice,short Pos_X,short Pos_Y);
+void Degrade_de_base           (long Indice,short x_pos,short y_pos);
+void Degrade_de_trames_simples (long Indice,short x_pos,short y_pos);
+void Degrade_de_trames_etendues(long Indice,short x_pos,short y_pos);
+void Degrade_aleatoire         (long Indice,short x_pos,short y_pos);
 
 void Tracer_cercle_degrade  (short Centre_X,short Centre_Y,short Rayon,short Eclairage_X,short Eclairage_Y);
 void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y);
@@ -97,7 +97,6 @@ void Download_infos_page_principal(S_Page * Page);
 void Download_infos_page_brouillon(S_Page * Page);
 void Download_infos_backup(S_Liste_de_pages * list);
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
-void Nouveau_nombre_de_backups(int Nouveau);
 int  Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
 int  Backuper_et_redimensionner_brouillon(int width,int height);
 void Undo(void);

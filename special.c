@@ -33,7 +33,7 @@
 
 void Modifier_pinceau(int width, int height)
 {
-  int Pos_X,Pos_Y;
+  int x_pos,y_pos;
   int X,Y;
   float Rayon2;
 
@@ -50,90 +50,90 @@ void Modifier_pinceau(int width, int height)
     case FORME_PINCEAU_ROND :
       Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
       Rayon2*=Rayon2;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=Pos_X-Pinceau_Decalage_X;
-          Y=Pos_Y-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=( ((X*X)+(Y*Y)) < Rayon2 );
+          X=x_pos-Pinceau_Decalage_X;
+          Y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( ((X*X)+(Y*Y)) < Rayon2 );
         }
       break;
     case FORME_PINCEAU_CARRE :
-      for (Pos_X=0,Pos_Y=0; Pos_X<Pinceau_Hauteur; Pos_X++,Pos_Y+=TAILLE_MAXI_PINCEAU)
-        memset(Pinceau_Sprite+Pos_Y,1,Pinceau_Largeur);
+      for (x_pos=0,y_pos=0; x_pos<Pinceau_Hauteur; x_pos++,y_pos+=TAILLE_MAXI_PINCEAU)
+        memset(Pinceau_Sprite+y_pos,1,Pinceau_Largeur);
       break;
     case FORME_PINCEAU_ROND_TRAME :
       Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
       Rayon2*=Rayon2;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=Pos_X-Pinceau_Decalage_X;
-          Y=Pos_Y-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=( (!((Pos_X+Pos_Y)&1)) && (((X*X)+(Y*Y)) < Rayon2));
+          X=x_pos-Pinceau_Decalage_X;
+          Y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (!((x_pos+y_pos)&1)) && (((X*X)+(Y*Y)) < Rayon2));
         }
       break;
     case FORME_PINCEAU_CARRE_TRAME:
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=!((Pos_X+Pos_Y)&1);
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=!((x_pos+y_pos)&1);
       break;
     case FORME_PINCEAU_PLUS:
       X=Pinceau_Largeur>>1;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=((Pos_X==X) || (Pos_Y==X));
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=((x_pos==X) || (y_pos==X));
       break;
     case FORME_PINCEAU_SLASH:
       X=Pinceau_Largeur>>1;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=(Pos_X==(Pinceau_Largeur-(Pos_Y+1)));
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==(Pinceau_Largeur-(y_pos+1)));
       break;
     case FORME_PINCEAU_ANTISLASH:
       X=Pinceau_Largeur>>1;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=(Pos_X==Pos_Y);
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==y_pos);
       break;
     case FORME_PINCEAU_BARRE_HORIZONTALE:
       memset(Pinceau_Sprite,1,Pinceau_Largeur);
       break;
     case FORME_PINCEAU_BARRE_VERTICALE:
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)]=1;
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)]=1;
       break;
     case FORME_PINCEAU_X:
       X=Pinceau_Largeur>>1;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=( (Pos_X==Pos_Y) || (Pos_X==(Pinceau_Hauteur-(Pos_Y+1))) );
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (x_pos==y_pos) || (x_pos==(Pinceau_Hauteur-(y_pos+1))) );
       break;
     case FORME_PINCEAU_LOSANGE:
       X=Pinceau_Largeur>>1;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          if (Pos_X<=X)
-            Y=X-Pos_X;
+          if (x_pos<=X)
+            Y=X-x_pos;
           else
-            Y=Pos_X-X;
-          if (Pos_Y<=X)
-            Y+=X-Pos_Y;
+            Y=x_pos-X;
+          if (y_pos<=X)
+            Y+=X-y_pos;
           else
-            Y+=Pos_Y-X;
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=(Y<=X);
+            Y+=y_pos-X;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(Y<=X);
         }
       break;
     case FORME_PINCEAU_ALEATOIRE:
       Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
       Rayon2*=Rayon2;
-      for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-        for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
+      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
         {
-          X=Pos_X-Pinceau_Decalage_X;
-          Y=Pos_Y-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=( (((X*X)+(Y*Y)) < Rayon2) && (!(rand()&7)) );
+          X=x_pos-Pinceau_Decalage_X;
+          Y=y_pos-Pinceau_Decalage_Y;
+          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (((X*X)+(Y*Y)) < Rayon2) && (!(rand()&7)) );
         }
   }
 }

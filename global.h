@@ -205,7 +205,7 @@ GFX2_GLOBAL short Ancien_Principal_Decalage_X;
 GFX2_GLOBAL short Ancien_Principal_Decalage_Y;
 
 GFX2_GLOBAL char  Principal_Repertoire_fichier[1024]; // |_ Nom complet =
-GFX2_GLOBAL char  Principal_Nom_fichier[256];         // |  Repertoire_fichier+"\"+Nom_fichier
+GFX2_GLOBAL char  Principal_Nom_fichier[256];         // |  Repertoire_fichier+"\"+Filename
 GFX2_GLOBAL byte  Principal_Format_fichier;          // Format auquel il faut lire et écrire le fichier
 GFX2_GLOBAL byte  Principal_Format;               // Format du fileselect
 GFX2_GLOBAL short Principal_File_list_Position; // Début de la partie affichée dans la liste de fichiers
@@ -231,7 +231,7 @@ GFX2_GLOBAL short Ancien_Brouillon_Decalage_X;
 GFX2_GLOBAL short Ancien_Brouillon_Decalage_Y;
 
 GFX2_GLOBAL char  Brouillon_Repertoire_fichier[TAILLE_CHEMIN_FICHIER]; // |_ Nom complet =
-GFX2_GLOBAL char  Brouillon_Nom_fichier[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
+GFX2_GLOBAL char  Brouillon_Nom_fichier[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Filename
 GFX2_GLOBAL byte  Brouillon_Format_fichier;          // Format auquel il faut lire et écrire le fichier
 GFX2_GLOBAL byte  Brouillon_Format;               // Format du fileselect
 GFX2_GLOBAL short Brouillon_File_list_Position; // Début de la partie affichée dans la liste de fichiers

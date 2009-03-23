@@ -148,7 +148,7 @@ void Message_Memoire_insuffisante(void)
 void Bouton_Message_initial(void)
 {
   char  Chaine[21];
-  int   Pos_X,Offs_Y,X,Y;
+  int   x_pos,Offs_Y,X,Y;
 
   sprintf(Chaine,"GrafX %d.%.2d%s%s",VERSION1, VERSION2, ALPHA_BETA,POURCENTAGE_VERSION);
   Ouvrir_fenetre(260,172,Chaine);
@@ -158,8 +158,8 @@ void Bouton_Message_initial(void)
         Fenetre_Pos_Y+(Menu_Facteur_Y*21),
         Menu_Facteur_X*237,Menu_Facteur_Y*60,CM_Noir);
   for (Y=23,Offs_Y=0; Y<79; Offs_Y+=231,Y++)
-    for (X=14,Pos_X=0; Pos_X<231; Pos_X++,X++)
-      Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+Pos_X]);
+    for (X=14,x_pos=0; x_pos<231; x_pos++,X++)
+      Pixel_dans_fenetre(X,Y,Logo_GrafX2[Offs_Y+x_pos]);
 
   Print_dans_fenetre(130-4*21,88,"Copyright (c) 2007 by",CM_Fonce,CM_Clair);
   Print_dans_fenetre(130-4*23,96,"the Grafx2 project team",CM_Noir,CM_Clair);
@@ -1253,7 +1253,7 @@ void Bouton_Kill(void)
 
 //------------------------- Dimensions Image/Ecran ---------------------------
 
-void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte state)
+void Cocher_bouton_mode(short x_pos, short y_pos, byte state)
 {
   byte Couleur;
 
@@ -1264,10 +1264,10 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte state)
     case 2 : Couleur=CM_Fonce; break;
     default: Couleur=CM_Noir;
   }
-  Block(Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
+  Block(Fenetre_Pos_X+Menu_Facteur_X*x_pos,Fenetre_Pos_Y+Menu_Facteur_Y*y_pos,
         Menu_Facteur_X*9,Menu_Facteur_Y*3,Couleur);
         
-  UpdateRect(Fenetre_Pos_X+Menu_Facteur_X*Pos_X,Fenetre_Pos_Y+Menu_Facteur_Y*Pos_Y,
+  UpdateRect(Fenetre_Pos_X+Menu_Facteur_X*x_pos,Fenetre_Pos_Y+Menu_Facteur_Y*y_pos,
         Menu_Facteur_X*9,Menu_Facteur_Y*3);
 }
 
@@ -1275,15 +1275,15 @@ void Cocher_bouton_mode(short Pos_X, short Pos_Y, byte state)
 void Afficher_liste_modes(short Debut_liste, short Position_curseur)
 {
   short Indice,Mode_courant;
-  short Pos_Y;
+  short y_pos;
   byte  Couleur_texte,Couleur_fond;
   char Chaine[29];
   char *Ratio;
 
   for (Mode_courant=Debut_liste,Indice=0; Indice<12 && Mode_courant < Nb_modes_video ; Indice++,Mode_courant++)
   {
-    Pos_Y=70+(Indice<<3);
-    Cocher_bouton_mode(19,Pos_Y+2,Mode_video[Mode_courant].Etat);
+    y_pos=70+(Indice<<3);
+    Cocher_bouton_mode(19,y_pos+2,Mode_video[Mode_courant].Etat);
 
     if (Position_curseur!=Indice)
     {
@@ -1333,7 +1333,7 @@ void Afficher_liste_modes(short Debut_liste, short Position_curseur)
 
     strcat(Chaine,Ratio);
 
-    Print_dans_fenetre(38,Pos_Y,Chaine,Couleur_texte,Couleur_fond);
+    Print_dans_fenetre(38,y_pos,Chaine,Couleur_texte,Couleur_fond);
   }
 }
 
@@ -1768,19 +1768,19 @@ void Bouton_Ellipse_pleine(void)
 
 
 // -- Gestion du menu des dégradés ------------------------------------------
-void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
+void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int Technique)
 {
   short line;
 
   // On commence par afficher les 2 côtés qui constituent le dégradé de base:
     // Côté gauche (noir)
-  Block(Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+((x_pos+2)*Menu_Facteur_X),
+        Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
         Menu_Facteur_X*6,
         Menu_Facteur_Y*10,CM_Noir);
     // Côté droit (blanc)
-  Block(Fenetre_Pos_X+((Pos_X+8)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+((x_pos+8)*Menu_Facteur_X),
+        Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
         Menu_Facteur_X*5,
         Menu_Facteur_Y*10,CM_Blanc);
 
@@ -1792,15 +1792,15 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
         if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(Pos_X+ 5,Pos_Y+line,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+line,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+line,CM_Noir);
+          Pixel_dans_fenetre(x_pos+ 5,y_pos+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 7,y_pos+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 8,y_pos+line,CM_Noir);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+line,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 9,Pos_Y+line,CM_Noir);
+          Pixel_dans_fenetre(x_pos+ 6,y_pos+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 9,y_pos+line,CM_Noir);
         }
       break;
     case 2 : // Dégradé de trames étendues
@@ -1809,19 +1809,19 @@ void Degrade_Dessiner_bouton_de_technique(short Pos_X,short Pos_Y,int Technique)
         if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(Pos_X+ 7,Pos_Y+line,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 8,Pos_Y+line,CM_Noir);
-          Pixel_dans_fenetre(Pos_X+10,Pos_Y+line,CM_Noir);
+          Pixel_dans_fenetre(x_pos+ 7,y_pos+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 8,y_pos+line,CM_Noir);
+          Pixel_dans_fenetre(x_pos+10,y_pos+line,CM_Noir);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(Pos_X+ 4,Pos_Y+line,CM_Blanc);
-          Pixel_dans_fenetre(Pos_X+ 6,Pos_Y+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 4,y_pos+line,CM_Blanc);
+          Pixel_dans_fenetre(x_pos+ 6,y_pos+line,CM_Blanc);
         }
   }
   
-  UpdateRect(Fenetre_Pos_X+((Pos_X+2)*Menu_Facteur_X),Fenetre_Pos_Y+((Pos_Y+2)*Menu_Facteur_Y),
+  UpdateRect(Fenetre_Pos_X+((x_pos+2)*Menu_Facteur_X),Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
                     Menu_Facteur_X*10,Menu_Facteur_Y*10);  
 }
 
@@ -1852,8 +1852,8 @@ void Degrade_Charger_infos_du_tableau(int Indice)
 
 void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short width,short height,int Indice)
 {
-  short Pos_X; // Variables de balayage du block en bas de l'écran.
-  short Pos_Y;
+  short x_pos; // Variables de balayage du block en bas de l'écran.
+  short y_pos;
   short Fin_X;
   short Fin_Y;
 
@@ -1867,9 +1867,9 @@ void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short width,short heig
   Fin_X=Debut_X+Degrade_Intervalle_total;
   Fin_Y=Debut_Y+(height*Menu_Facteur_Y);
 
-  for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
-    for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
-      Traiter_degrade(Pos_X-Debut_X,Pos_X,Pos_Y);
+  for (y_pos=Debut_Y;y_pos<Fin_Y;y_pos++)
+    for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
+      Traiter_degrade(x_pos-Debut_X,x_pos,y_pos);
   UpdateRect(Debut_X,Debut_Y,width*Menu_Facteur_X,height*Menu_Facteur_Y);
 }
 
@@ -2171,7 +2171,7 @@ void Bouton_desenclencher_Fill(void)
 void Bouton_Menu_pinceaux(void)
 {
   short Bouton_clicke;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   byte Indice;
 
   Ouvrir_fenetre(310,155,"Paintbrush menu");
@@ -2182,10 +2182,10 @@ void Bouton_Menu_pinceaux(void)
 
   for (Indice=0; Indice<NB_SPRITES_PINCEAU; Indice++)
   {
-    Pos_X=13+((Indice%12)*24);
-    Pos_Y=27+((Indice/12)*25);
-    Fenetre_Definir_bouton_normal(Pos_X  ,Pos_Y  ,20,20,"",0,1,SDLK_LAST);
-    Afficher_pinceau_dans_fenetre(Pos_X+2,Pos_Y+2,Indice);
+    x_pos=13+((Indice%12)*24);
+    y_pos=27+((Indice/12)*25);
+    Fenetre_Definir_bouton_normal(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Afficher_pinceau_dans_fenetre(x_pos+2,y_pos+2,Indice);
   }
   Display_Window(310,155);
 
@@ -2209,9 +2209,9 @@ void Bouton_Menu_pinceaux(void)
     Pinceau_Hauteur=Pinceau_predefini_Hauteur[Indice];
     Pinceau_Decalage_X=Pinceau_predefini_Decalage_X[Indice];
     Pinceau_Decalage_Y=Pinceau_predefini_Decalage_Y[Indice];
-    for (Pos_Y=0; Pos_Y<Pinceau_Hauteur; Pos_Y++)
-      for (Pos_X=0; Pos_X<Pinceau_Largeur; Pos_X++)
-        Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X]=SPRITE_PINCEAU[Indice][Pos_Y][Pos_X];
+    for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
+      for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+        Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=SPRITE_PINCEAU[Indice][y_pos][x_pos];
     Changer_la_forme_du_pinceau(Pinceau_Type[Indice]);
   }
 
@@ -2905,14 +2905,14 @@ byte Bouton_Load_ou_Save(byte load, byte image)
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         Touche=0;
         break;
-      case SDLK_PAGEDOWN : // Page Down
+      case SDLK_PAGEDOWN : // PageDown
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Down(&Principal_File_list_Position,&Principal_File_list_Decalage,9);
         On_vient_de_scroller_dans_le_fileselect(Scroller_de_fichiers);
         Touche=0;
         break;
-      case SDLK_PAGEUP : // Page Up
+      case SDLK_PAGEUP : // PageUp
         *Fichier_recherche=0;
         Effacer_curseur();
         Select_Page_Up(&Principal_File_list_Position,&Principal_File_list_Decalage,9);
@@ -4499,9 +4499,9 @@ void Bouton_Colorize_Mode(void)
 }
 
 
-void Bouton_Colorize_Afficher_la_selection(int Numero)
+void Bouton_Colorize_Afficher_la_selection(int mode)
 {
-  short Pos_Y=0; // Ligne où afficher les flèches de sélection
+  short y_pos=0; // Ligne où afficher les flèches de sélection
 
   // On commence par effacer les anciennes sélections:
     // Partie gauche
@@ -4514,19 +4514,19 @@ void Bouton_Colorize_Afficher_la_selection(int Numero)
   Print_dans_fenetre(129,74," ",CM_Noir,CM_Clair);
 
   // Ensuite, on affiche la flèche là où il le faut:
-  switch(Numero)
+  switch(mode)
   {
     case 0 : // Méthode interpolée
-      Pos_Y=37;
+      y_pos=37;
       break;
     case 1 : // Méthode additive
-      Pos_Y=57;
+      y_pos=57;
       break;
     case 2 : // Méthode soustractive
-      Pos_Y=74;
+      y_pos=74;
   }
-  Print_dans_fenetre(4,Pos_Y,"\020",CM_Noir,CM_Clair);
-  Print_dans_fenetre(129,Pos_Y,"\021",CM_Noir,CM_Clair);
+  Print_dans_fenetre(4,y_pos,"\020",CM_Noir,CM_Clair);
+  Print_dans_fenetre(129,y_pos,"\021",CM_Noir,CM_Clair);
 }
 
 void Bouton_Colorize_Menu(void)
@@ -5098,8 +5098,8 @@ void Bouton_Trame_Mode(void)
 
 void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
 {
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   short Taille_X;
   short Taille_Y;
   short Debut_X=Fenetre_Pos_X+(Menu_Facteur_X*230);
@@ -5113,28 +5113,28 @@ void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
         Menu_Facteur_X*Fenetre_Liste_boutons_special->Width,
         Menu_Facteur_Y*Fenetre_Liste_boutons_special->Height,CM_Clair);
 
-  for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
-    for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
+  for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+    for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
     {
       // Bordures de la case
-      Block(Orig_X+(Pos_X*Taille_X),
-            Orig_Y+((Pos_Y+1)*Taille_Y)-Menu_Facteur_Y,
+      Block(Orig_X+(x_pos*Taille_X),
+            Orig_Y+((y_pos+1)*Taille_Y)-Menu_Facteur_Y,
             Taille_X, Menu_Facteur_Y,CM_Fonce);
-      Block(Orig_X+((Pos_X+1)*Taille_X)-Menu_Facteur_X,
-            Orig_Y+(Pos_Y*Taille_Y),
+      Block(Orig_X+((x_pos+1)*Taille_X)-Menu_Facteur_X,
+            Orig_Y+(y_pos*Taille_Y),
             Menu_Facteur_X, Taille_Y-1,CM_Fonce);
       // Contenu de la case
-      Block(Orig_X+(Pos_X*Taille_X), Orig_Y+(Pos_Y*Taille_Y),
+      Block(Orig_X+(x_pos*Taille_X), Orig_Y+(y_pos*Taille_Y),
             Taille_X-Menu_Facteur_X, Taille_Y-Menu_Facteur_Y,
-            (Trame[Pos_X][Pos_Y])?CM_Blanc:CM_Noir);
+            (Trame[x_pos][y_pos])?CM_Blanc:CM_Noir);
     }
 
   // Dessiner la preview de la trame
   Taille_X=Menu_Facteur_X*51; // |_ Taille de la fenêtre
   Taille_Y=Menu_Facteur_Y*71; // |  de la preview
-  for (Pos_Y=0; Pos_Y<Taille_Y; Pos_Y++)
-    for (Pos_X=0; Pos_X<Taille_X; Pos_X++)
-      Pixel(Debut_X+Pos_X,Debut_Y+Pos_Y,(Trame[Pos_X%Trame_Largeur][Pos_Y%Trame_Hauteur])?CM_Blanc:CM_Noir);
+  for (y_pos=0; y_pos<Taille_Y; y_pos++)
+    for (x_pos=0; x_pos<Taille_X; x_pos++)
+      Pixel(Debut_X+x_pos,Debut_Y+y_pos,(Trame[x_pos%Trame_Largeur][y_pos%Trame_Hauteur])?CM_Blanc:CM_Noir);
   UpdateRect(Debut_X,Debut_Y,Taille_X,Taille_Y);
 }
 
@@ -5176,11 +5176,11 @@ void Copier_trame_predefinie(byte Indice)
 
 void Inverser_trame(void)
 {
-  byte Pos_X,Pos_Y;
+  byte x_pos,y_pos;
 
-  for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
-    for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
-      Trame[Pos_X][Pos_Y]=!(Trame[Pos_X][Pos_Y]);
+  for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+    for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+      Trame[x_pos][y_pos]=!(Trame[x_pos][y_pos]);
 }
 
 // Rafraichit toute la zone correspondant à la trame zoomee.
@@ -5194,8 +5194,8 @@ void Bouton_Trame_Menu(void)
 {
   short Bouton_clicke;
   short Indice;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   short Old_Pos_X=0;
   short Old_Pos_Y=0;
   short Orig_X;
@@ -5290,41 +5290,41 @@ void Bouton_Trame_Menu(void)
 
       case  1 : // Zone de dessin de la trame
         /* // Version qui n'accepte pas les clicks sur la grille
-        Pos_X=(Mouse_X-Orig_X)/Menu_Facteur_X;
-        Pos_Y=(Mouse_Y-Orig_Y)/Menu_Facteur_Y;
-        if ( (Pos_X%5<4) && (Pos_Y%5<4) )
+        x_pos=(Mouse_X-Orig_X)/Menu_Facteur_X;
+        y_pos=(Mouse_Y-Orig_Y)/Menu_Facteur_Y;
+        if ( (x_pos%5<4) && (y_pos%5<4) )
         {
-          Pos_X/=5;
-          Pos_Y/=5;
-          if ( (Pos_X<Trame_Largeur) && (Pos_Y<Trame_Hauteur) )
+          x_pos/=5;
+          y_pos/=5;
+          if ( (x_pos<Trame_Largeur) && (y_pos<Trame_Hauteur) )
         }
         */
-        Pos_X=(Mouse_X-Orig_X)/(Menu_Facteur_X*5);
-        Pos_Y=(Mouse_Y-Orig_Y)/(Menu_Facteur_Y*5);
-        if ( (Pos_X<Trame_Largeur) && (Pos_Y<Trame_Hauteur) )
+        x_pos=(Mouse_X-Orig_X)/(Menu_Facteur_X*5);
+        y_pos=(Mouse_Y-Orig_Y)/(Menu_Facteur_Y*5);
+        if ( (x_pos<Trame_Largeur) && (y_pos<Trame_Hauteur) )
         {
           Temp=(Mouse_K==A_GAUCHE);
-          if ( (Pos_X!=Old_Pos_X) || (Pos_Y!=Old_Pos_Y)
-            || (Trame[Pos_X][Pos_Y]!=Temp) )
+          if ( (x_pos!=Old_Pos_X) || (y_pos!=Old_Pos_Y)
+            || (Trame[x_pos][y_pos]!=Temp) )
           {
-            Old_Pos_X=Pos_X;
-            Old_Pos_Y=Pos_Y;
-            Trame[Pos_X][Pos_Y]=Temp;
-            Pos_X=Menu_Facteur_X*5;
-            Pos_Y=Menu_Facteur_Y*5;
+            Old_Pos_X=x_pos;
+            Old_Pos_Y=y_pos;
+            Trame[x_pos][y_pos]=Temp;
+            x_pos=Menu_Facteur_X*5;
+            y_pos=Menu_Facteur_Y*5;
             Effacer_curseur();
             if (Temp)
               Temp=CM_Blanc;
             else
               Temp=CM_Noir;
             // Affichage du pixel dans la fenêtre zoomée
-            Block(Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),
-                  Pos_X-Menu_Facteur_X, Pos_Y-Menu_Facteur_Y, Temp);
+            Block(Orig_X+(Old_Pos_X*x_pos), Orig_Y+(Old_Pos_Y*y_pos),
+                  x_pos-Menu_Facteur_X, y_pos-Menu_Facteur_Y, Temp);
             // Mise à jour de la preview
             Dessiner_trame_zoomee(Orig_X,Orig_Y);
             Afficher_curseur();
             // Maj de la case seule
-            UpdateRect(Orig_X+(Old_Pos_X*Pos_X), Orig_Y+(Old_Pos_Y*Pos_Y),Menu_Facteur_X*5,Menu_Facteur_Y*5);
+            UpdateRect(Orig_X+(Old_Pos_X*x_pos), Orig_Y+(Old_Pos_Y*y_pos),Menu_Facteur_X*5,Menu_Facteur_Y*5);
           }
         }
         break;
@@ -5353,9 +5353,9 @@ void Bouton_Trame_Menu(void)
         Effacer_curseur();
         Trame_Largeur=(Brosse_Largeur>16)?16:Brosse_Largeur;
         Trame_Hauteur=(Brosse_Hauteur>16)?16:Brosse_Hauteur;
-        for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
-          for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
-            Trame[Pos_X][Pos_Y]=(Lit_pixel_dans_brosse(Pos_X,Pos_Y)!=Back_color);
+        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+          for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+            Trame[x_pos][y_pos]=(Lit_pixel_dans_brosse(x_pos,y_pos)!=Back_color);
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Num2str(Trame_Hauteur,Chaine,2);
         Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
@@ -5371,9 +5371,9 @@ void Bouton_Trame_Menu(void)
         Brosse_Largeur=Trame_Largeur;
         Brosse_Hauteur=Trame_Hauteur;
         Brosse=(byte *)malloc(((long)Brosse_Hauteur)*Brosse_Largeur);
-        for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
-          for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
-            Pixel_dans_brosse(Pos_X,Pos_Y,(Trame[Pos_X][Pos_Y])?Fore_color:Back_color);
+        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+          for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+            Pixel_dans_brosse(x_pos,y_pos,(Trame[x_pos][y_pos])?Fore_color:Back_color);
         Brosse_Decalage_X=(Brosse_Largeur>>1);
         Brosse_Decalage_Y=(Brosse_Hauteur>>1);
         Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
@@ -5452,12 +5452,12 @@ void Bouton_Trame_Menu(void)
 
       case 13 : // Scroll vers le haut
         Effacer_curseur();
-        for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
+        for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
         {
-          Temp=Trame[Pos_X][0]; // Octet temporaire
-          for (Pos_Y=1; Pos_Y<Trame_Hauteur; Pos_Y++)
-            Trame[Pos_X][Pos_Y-1]=Trame[Pos_X][Pos_Y];
-          Trame[Pos_X][Trame_Hauteur-1]=Temp;
+          Temp=Trame[x_pos][0]; // Octet temporaire
+          for (y_pos=1; y_pos<Trame_Hauteur; y_pos++)
+            Trame[x_pos][y_pos-1]=Trame[x_pos][y_pos];
+          Trame[x_pos][Trame_Hauteur-1]=Temp;
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
@@ -5466,12 +5466,12 @@ void Bouton_Trame_Menu(void)
 
       case 14 : // Scroll vers le bas
         Effacer_curseur();
-        for (Pos_X=0; Pos_X<Trame_Largeur; Pos_X++)
+        for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
         {
-          Temp=Trame[Pos_X][Trame_Hauteur-1]; // Octet temporaire
-          for (Pos_Y=Trame_Hauteur-1; Pos_Y>0; Pos_Y--)
-            Trame[Pos_X][Pos_Y]=Trame[Pos_X][Pos_Y-1];
-          Trame[Pos_X][0]=Temp;
+          Temp=Trame[x_pos][Trame_Hauteur-1]; // Octet temporaire
+          for (y_pos=Trame_Hauteur-1; y_pos>0; y_pos--)
+            Trame[x_pos][y_pos]=Trame[x_pos][y_pos-1];
+          Trame[x_pos][0]=Temp;
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
@@ -5480,12 +5480,12 @@ void Bouton_Trame_Menu(void)
 
       case 15 : // Scroll vers la gauche
         Effacer_curseur();
-        for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
+        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
         {
-          Temp=Trame[0][Pos_Y]; // Octet temporaire
-          for (Pos_X=1; Pos_X<Trame_Largeur; Pos_X++)
-            Trame[Pos_X-1][Pos_Y]=Trame[Pos_X][Pos_Y];
-          Trame[Trame_Largeur-1][Pos_Y]=Temp;
+          Temp=Trame[0][y_pos]; // Octet temporaire
+          for (x_pos=1; x_pos<Trame_Largeur; x_pos++)
+            Trame[x_pos-1][y_pos]=Trame[x_pos][y_pos];
+          Trame[Trame_Largeur-1][y_pos]=Temp;
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
@@ -5494,12 +5494,12 @@ void Bouton_Trame_Menu(void)
 
       case 16 : // Scroll vers la droite
         Effacer_curseur();
-        for (Pos_Y=0; Pos_Y<Trame_Hauteur; Pos_Y++)
+        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
         {
-          Temp=Trame[Trame_Largeur-1][Pos_Y]; // Octet temporaire
-          for (Pos_X=Trame_Largeur-1; Pos_X>0; Pos_X--)
-            Trame[Pos_X][Pos_Y]=Trame[Pos_X-1][Pos_Y];
-          Trame[0][Pos_Y]=Temp;
+          Temp=Trame[Trame_Largeur-1][y_pos]; // Octet temporaire
+          for (x_pos=Trame_Largeur-1; x_pos>0; x_pos--)
+            Trame[x_pos][y_pos]=Trame[x_pos-1][y_pos];
+          Trame[0][y_pos]=Temp;
         }
         Dessiner_trame_zoomee(Orig_X,Orig_Y);
         Afficher_curseur();
@@ -5592,11 +5592,11 @@ void Bouton_Ajuster(void)
 
 void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
 {
-  short X,Y,Pos_X,Pos_Y;
+  short X,Y,x_pos,y_pos;
 
-  for (Y=0,Pos_Y=Debut_Y;Y<HAUTEUR_SPRITE_MENU;Y++,Pos_Y++)
-    for (X=0,Pos_X=Debut_X;X<LARGEUR_SPRITE_MENU;X++,Pos_X++)
-      Pixel_dans_fenetre(Pos_X,Pos_Y,SPRITE_EFFET[Numero_sprite][Y][X]);
+  for (Y=0,y_pos=Debut_Y;Y<HAUTEUR_SPRITE_MENU;Y++,y_pos++)
+    for (X=0,x_pos=Debut_X;X<LARGEUR_SPRITE_MENU;X++,x_pos++)
+      Pixel_dans_fenetre(x_pos,y_pos,SPRITE_EFFET[Numero_sprite][Y][X]);
 
   UpdateRect(ToWinX(Debut_X),ToWinY(Debut_Y),LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
 }

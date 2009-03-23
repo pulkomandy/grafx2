@@ -71,15 +71,15 @@ word Palette_Compter_nb_couleurs_utilisees(dword* Tableau)
   return Nombre_Couleurs;
 }
 
-void Set_palette(T_Palette Palette)
+void Set_palette(T_Palette palette)
 {
   register int i;
   SDL_Color PaletteSDL[256];
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=(Palette[i].R=Palette_Scale_Component(Palette[i].R));
-    PaletteSDL[i].g=(Palette[i].V=Palette_Scale_Component(Palette[i].V));
-    PaletteSDL[i].b=(Palette[i].B=Palette_Scale_Component(Palette[i].B));
+    PaletteSDL[i].r=(palette[i].R=Palette_Scale_Component(palette[i].R));
+    PaletteSDL[i].g=(palette[i].G=Palette_Scale_Component(palette[i].G));
+    PaletteSDL[i].b=(palette[i].B=Palette_Scale_Component(palette[i].B));
   }
   SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
 }
@@ -366,25 +366,25 @@ byte Lit_pixel_dans_ecran_backup (word X,word Y)
   return *(Ecran_backup + X + Principal_Largeur_image * Y);
 }
 
-void Palette_256_to_64(T_Palette Palette)
+void Palette_256_to_64(T_Palette palette)
 {
   int i;
   for(i=0;i<256;i++)
   {
-    Palette[i].R = Palette[i].R >> 2;
-    Palette[i].V = Palette[i].V >> 2;
-    Palette[i].B = Palette[i].B >> 2;
+    palette[i].R = palette[i].R >> 2;
+    palette[i].G = palette[i].G >> 2;
+    palette[i].B = palette[i].B >> 2;
   }
 }
 
-void Palette_64_to_256(T_Palette Palette)
+void Palette_64_to_256(T_Palette palette)
 {
   int i;
   for(i=0;i<256;i++)
   {
-    Palette[i].R = (Palette[i].R << 2)|(Palette[i].R >> 4);
-    Palette[i].V = (Palette[i].V << 2)|(Palette[i].V >> 4);
-    Palette[i].B = (Palette[i].B << 2)|(Palette[i].B >> 4);
+    palette[i].R = (palette[i].R << 2)|(palette[i].R >> 4);
+    palette[i].G = (palette[i].G << 2)|(palette[i].G >> 4);
+    palette[i].B = (palette[i].B << 2)|(palette[i].B >> 4);
   }
 }
 
@@ -400,8 +400,8 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
   // palette des teintes) et dans EDI, 3*Couleur.
   byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
   byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
-  byte Vert=Principal_Palette[Couleur].V;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
+  byte Vert=Principal_Palette[Couleur].G;
   byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
   byte Rouge=Principal_Palette[Couleur].R;
 
@@ -421,10 +421,10 @@ byte Effet_Colorize_interpole  (word X,word Y,byte Couleur)
 byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
 {
   byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
   byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
   byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert=Principal_Palette[Couleur].V;
+  byte Vert=Principal_Palette[Couleur].G;
   byte Rouge=Principal_Palette[Couleur].R;
 
   return Meilleure_couleur(
@@ -436,10 +436,10 @@ byte Effet_Colorize_additif    (word X,word Y,byte Couleur)
 byte Effet_Colorize_soustractif(word X,word Y,byte Couleur)
 {
   byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].V;
+  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].G;
   byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + Y * Principal_Largeur_image + X)].R;
   byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert=Principal_Palette[Couleur].V;
+  byte Vert=Principal_Palette[Couleur].G;
   byte Rouge=Principal_Palette[Couleur].R;
 
   return Meilleure_couleur(

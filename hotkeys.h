@@ -26,7 +26,7 @@
 
 typedef struct
 {
-    word Numero;
+    word Number;
     char Label[36];
     char Explic1[37];
     char Explic2[37];

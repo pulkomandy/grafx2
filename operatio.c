@@ -1521,48 +1521,48 @@ void Pipette_0_1(void)
 /////////////////////////////////////////////////// OPERATION_COURBE_4_POINTS
 
 
-void Courbe_Tracer_croix(short Pos_X, short Pos_Y)
+void Courbe_Tracer_croix(short x_pos, short y_pos)
 {
   short Debut_X,Fin_X;
   short Debut_Y,Fin_Y;
   short i,Temp;
   //byte  Temp2;
 
-  if (Pos_X>=Limite_Gauche+3)
+  if (x_pos>=Limite_Gauche+3)
     Debut_X=0;
   else
-    Debut_X=3-(Pos_X-Limite_Gauche);
+    Debut_X=3-(x_pos-Limite_Gauche);
 
-  if (Pos_Y>=Limite_Haut+3)
+  if (y_pos>=Limite_Haut+3)
     Debut_Y=0;
   else
-    Debut_Y=3-(Pos_Y-Limite_Haut);
+    Debut_Y=3-(y_pos-Limite_Haut);
 
-  if (Pos_X<=Limite_visible_Droite-3)
+  if (x_pos<=Limite_visible_Droite-3)
     Fin_X=6;
   else
-    Fin_X=3+(Limite_visible_Droite-Pos_X);
+    Fin_X=3+(Limite_visible_Droite-x_pos);
 
-  if (Pos_Y<=Limite_visible_Bas-3)
+  if (y_pos<=Limite_visible_Bas-3)
     Fin_Y=6;
   else
-    Fin_Y=3+(Limite_visible_Bas-Pos_Y);
+    Fin_Y=3+(Limite_visible_Bas-y_pos);
 
   if (Debut_X<=Fin_X && Debut_Y<=Fin_Y)
   {    
     for (i=Debut_X; i<=Fin_X; i++)
     {
-      Temp=Pos_X+i-3;
-      Pixel_Preview(Temp,Pos_Y,~Lit_pixel(Temp -Principal_Decalage_X,
-                                          Pos_Y-Principal_Decalage_Y));
+      Temp=x_pos+i-3;
+      Pixel_Preview(Temp,y_pos,~Lit_pixel(Temp -Principal_Decalage_X,
+                                          y_pos-Principal_Decalage_Y));
     }
     for (i=Debut_Y; i<=Fin_Y; i++)
     {
-      Temp=Pos_Y+i-3;
-      Pixel_Preview(Pos_X,Temp,~Lit_pixel(Pos_X-Principal_Decalage_X,
+      Temp=y_pos+i-3;
+      Pixel_Preview(x_pos,Temp,~Lit_pixel(x_pos-Principal_Decalage_X,
                                           Temp -Principal_Decalage_Y));
     }
-    Mettre_Ecran_A_Jour(Pos_X+Debut_X-3,Pos_Y+Debut_Y-3,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+    Mettre_Ecran_A_Jour(x_pos+Debut_X-3,y_pos+Debut_Y-3,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
   }
 }
 
@@ -3715,18 +3715,18 @@ void Scroll_12_4(void)
 {
   short Centre_X;
   short Centre_Y;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   short x_offset;
   short y_offset;
   //char  Chaine[5];
 
-  Operation_POP(&Pos_Y);
-  Operation_POP(&Pos_X);
+  Operation_POP(&y_pos);
+  Operation_POP(&x_pos);
   Operation_POP(&Centre_Y);
   Operation_POP(&Centre_X);
 
-  if ( (Pinceau_X!=Pos_X) || (Pinceau_Y!=Pos_Y) )
+  if ( (Pinceau_X!=x_pos) || (Pinceau_Y!=y_pos) )
   {
     // L'utilisateur a bougé, il faut scroller l'image
 

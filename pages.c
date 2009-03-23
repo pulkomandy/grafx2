@@ -49,7 +49,7 @@ void Initialiser_S_Page(S_Page * Page)
     memset(Page->Palette,0,sizeof(T_Palette));
     Page->Commentaire[0]='\0';
     Page->Repertoire_fichier[0]='\0';
-    Page->Nom_fichier[0]='\0';
+    Page->Filename[0]='\0';
     Page->Format_fichier=FORMAT_PAR_DEFAUT;
 /*
     Page->Decalage_X=0;
@@ -86,7 +86,7 @@ void Download_infos_page_principal(S_Page * Page)
     memcpy(Principal_Palette,Page->Palette,sizeof(T_Palette));
     strcpy(Principal_Commentaire,Page->Commentaire);
     strcpy(Principal_Repertoire_fichier,Page->Repertoire_fichier);
-    strcpy(Principal_Nom_fichier,Page->Nom_fichier);
+    strcpy(Principal_Nom_fichier,Page->Filename);
     Principal_Format_fichier=Page->Format_fichier;
 /*
     Principal_Decalage_X=Page->Decalage_X;
@@ -140,7 +140,7 @@ void Upload_infos_page_principal(S_Page * Page)
     memcpy(Page->Palette,Principal_Palette,sizeof(T_Palette));
     strcpy(Page->Commentaire,Principal_Commentaire);
     strcpy(Page->Repertoire_fichier,Principal_Repertoire_fichier);
-    strcpy(Page->Nom_fichier,Principal_Nom_fichier);
+    strcpy(Page->Filename,Principal_Nom_fichier);
     Page->Format_fichier=Principal_Format_fichier;
 /*
     Page->Decalage_X=Principal_Decalage_X;
@@ -170,7 +170,7 @@ void Download_infos_page_brouillon(S_Page * Page)
     memcpy(Brouillon_Palette,Page->Palette,sizeof(T_Palette));
     strcpy(Brouillon_Commentaire,Page->Commentaire);
     strcpy(Brouillon_Repertoire_fichier,Page->Repertoire_fichier);
-    strcpy(Brouillon_Nom_fichier,Page->Nom_fichier);
+    strcpy(Brouillon_Nom_fichier,Page->Filename);
     Brouillon_Format_fichier=Page->Format_fichier;
 /*
     Brouillon_Decalage_X=Page->Decalage_X;
@@ -200,7 +200,7 @@ void Upload_infos_page_brouillon(S_Page * Page)
     memcpy(Page->Palette,Brouillon_Palette,sizeof(T_Palette));
     strcpy(Page->Commentaire,Brouillon_Commentaire);
     strcpy(Page->Repertoire_fichier,Brouillon_Repertoire_fichier);
-    strcpy(Page->Nom_fichier,Brouillon_Nom_fichier);
+    strcpy(Page->Filename,Brouillon_Nom_fichier);
     Page->Format_fichier=Brouillon_Format_fichier;
 /*
     Page->Decalage_X=Brouillon_Decalage_X;
@@ -749,14 +749,14 @@ void Detruire_les_listes_de_backups_en_fin_de_programme(void)
   free(Brouillon_Backups);
 }
 
-void Nouveau_nombre_de_backups(int Nouveau)
+void Nouveau_nombre_de_backups(int nb_backups)
 {
-  Changer_nombre_de_pages_d_une_liste(Principal_Backups,Nouveau+1);
-  Changer_nombre_de_pages_d_une_liste(Brouillon_Backups,Nouveau+1);
+  Changer_nombre_de_pages_d_une_liste(Principal_Backups,nb_backups+1);
+  Changer_nombre_de_pages_d_une_liste(Brouillon_Backups,nb_backups+1);
 
   // Le +1 vient du fait que dans chaque liste, en 1ère position on retrouve
   // les infos de la page courante sur le brouillon et la page principale.
-  // (Nouveau = Nombre de backups, sans compter les pages courantes)
+  // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
 
 int Backup_avec_nouvelles_dimensions(int Upload,int width,int height)

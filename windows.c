@@ -67,7 +67,7 @@ void Pixel_dans_fenetre(word X,word Y,byte Couleur)
 
   // -- Cadre général avec couleurs paramètrables --
 
-void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word width,word height,
+void Fenetre_Afficher_cadre_general(word x_pos,word y_pos,word width,word height,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD)
 // Paramètres de couleurs:
 // Couleur_HG =Bords Haut et Gauche
@@ -77,62 +77,62 @@ void Fenetre_Afficher_cadre_general(word Pos_X,word Pos_Y,word width,word height
 // Couleur_CBD=Coin Bas-Droite
 {
   // Bord haut (sans les extrémités)
-  Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
-        Fenetre_Pos_Y+(Pos_Y*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+((x_pos+1)*Menu_Facteur_X),
+        Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
         (width-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_HG);
 
   // Bord bas (sans les extrémités)
-  Block(Fenetre_Pos_X+((Pos_X+1)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+height-1)*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+((x_pos+1)*Menu_Facteur_X),
+        Fenetre_Pos_Y+((y_pos+height-1)*Menu_Facteur_Y),
         (width-2)*Menu_Facteur_X,Menu_Facteur_Y,Couleur_BD);
 
   // Bord gauche (sans les extrémités)
-  Block(Fenetre_Pos_X+(Pos_X*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),
+        Fenetre_Pos_Y+((y_pos+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(height-2)*Menu_Facteur_Y,Couleur_HG);
 
   // Bord droite (sans les extrémités)
-  Block(Fenetre_Pos_X+((Pos_X+width-1)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((Pos_Y+1)*Menu_Facteur_Y),
+  Block(Fenetre_Pos_X+((x_pos+width-1)*Menu_Facteur_X),
+        Fenetre_Pos_Y+((y_pos+1)*Menu_Facteur_Y),
         Menu_Facteur_X,(height-2)*Menu_Facteur_Y,Couleur_BD);
 
   // Coin haut gauche
-  Pixel_dans_fenetre(Pos_X,Pos_Y,Couleur_CHG);
+  Pixel_dans_fenetre(x_pos,y_pos,Couleur_CHG);
   // Coin haut droite
-  Pixel_dans_fenetre(Pos_X+width-1,Pos_Y,Couleur_S);
+  Pixel_dans_fenetre(x_pos+width-1,y_pos,Couleur_S);
   // Coin bas droite
-  Pixel_dans_fenetre(Pos_X+width-1,Pos_Y+height-1,Couleur_CBD);
+  Pixel_dans_fenetre(x_pos+width-1,y_pos+height-1,Couleur_CBD);
   // Coin bas gauche
-  Pixel_dans_fenetre(Pos_X,Pos_Y+height-1,Couleur_S);
+  Pixel_dans_fenetre(x_pos,y_pos+height-1,Couleur_S);
 }
 
   // -- Cadre dont tout le contour est d'une seule couleur --
 
-void Fenetre_Afficher_cadre_mono(word Pos_X,word Pos_Y,word width,word height,byte Couleur)
+void Fenetre_Afficher_cadre_mono(word x_pos,word y_pos,word width,word height,byte Couleur)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,Couleur,Couleur,Couleur,Couleur,Couleur);
+  Fenetre_Afficher_cadre_general(x_pos,y_pos,width,height,Couleur,Couleur,Couleur,Couleur,Couleur);
 }
 
   // -- Cadre creux: foncé en haut-gauche et clair en bas-droite --
 
-void Fenetre_Afficher_cadre_creux(word Pos_X,word Pos_Y,word width,word height)
+void Fenetre_Afficher_cadre_creux(word x_pos,word y_pos,word width,word height)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
+  Fenetre_Afficher_cadre_general(x_pos,y_pos,width,height,CM_Fonce,CM_Blanc,CM_Clair,CM_Fonce,CM_Blanc);
 }
 
   // -- Cadre bombé: clair en haut-gauche et foncé en bas-droite --
 
-void Fenetre_Afficher_cadre_bombe(word Pos_X,word Pos_Y,word width,word height)
+void Fenetre_Afficher_cadre_bombe(word x_pos,word y_pos,word width,word height)
 {
-  Fenetre_Afficher_cadre_general(Pos_X,Pos_Y,width,height,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
+  Fenetre_Afficher_cadre_general(x_pos,y_pos,width,height,CM_Blanc,CM_Fonce,CM_Clair,CM_Blanc,CM_Fonce);
 }
 
   // -- Cadre de séparation: un cadre bombé dans un cadre creux (3D!!!) --
 
-void Fenetre_Afficher_cadre(word Pos_X,word Pos_Y,word width,word height)
+void Fenetre_Afficher_cadre(word x_pos,word y_pos,word width,word height)
 {
-  Fenetre_Afficher_cadre_creux(Pos_X,Pos_Y,width,height);
-  Fenetre_Afficher_cadre_bombe(Pos_X+1,Pos_Y+1,width-2,height-2);
+  Fenetre_Afficher_cadre_creux(x_pos,y_pos,width,height);
+  Fenetre_Afficher_cadre_bombe(x_pos+1,y_pos+1,width-2,height-2);
 }
 
 
@@ -332,17 +332,17 @@ int Couleur_palette()
 
 void Afficher_menu(void)
 {
-  word Pos_X;
-  word Pos_Y;
+  word x_pos;
+  word y_pos;
   char Chaine[4];
 
 
   if (Menu_visible)
   {
     // Affichage du sprite du menu
-    for (Pos_Y=0;Pos_Y<HAUTEUR_MENU;Pos_Y++)
-      for (Pos_X=0;Pos_X<LARGEUR_MENU;Pos_X++)
-        Pixel_dans_menu(Pos_X,Pos_Y,BLOCK_MENU[Pos_Y][Pos_X]);
+    for (y_pos=0;y_pos<HAUTEUR_MENU;y_pos++)
+      for (x_pos=0;x_pos<LARGEUR_MENU;x_pos++)
+        Pixel_dans_menu(x_pos,y_pos,BLOCK_MENU[y_pos][x_pos]);
     // Affichage de la bande grise sous la palette
     Block(LARGEUR_MENU*Menu_Facteur_X,Menu_Ordonnee_Texte-Menu_Facteur_Y,Largeur_ecran-(LARGEUR_MENU*Menu_Facteur_X),9*Menu_Facteur_Y,CM_Clair);
 
@@ -384,8 +384,8 @@ void Afficher_menu(void)
 void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte Couleur_fond)
 {
   word  Indice;
-  int Pos_X;
-  int Pos_Y;
+  int x_pos;
+  int y_pos;
   byte *font_pixel;
   short Reel_X;
   short Reel_Y;
@@ -393,16 +393,16 @@ void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte C
   byte Repeat_Menu_Facteur_Y;
 
   Reel_Y=Y;
-  for (Pos_Y=0;Pos_Y<8<<3;Pos_Y+=1<<3)
+  for (y_pos=0;y_pos<8<<3;y_pos+=1<<3)
   {
     Reel_X=0; // Position dans le buffer
     for (Indice=0;Chaine[Indice]!='\0';Indice++)
     {
       // Pointeur sur le premier pixel du caractère
       font_pixel=Fonte+(((unsigned char)Chaine[Indice])<<6);
-      for (Pos_X=0;Pos_X<8;Pos_X+=1)
+      for (x_pos=0;x_pos<8;x_pos+=1)
         for (Repeat_Menu_Facteur_X=0;Repeat_Menu_Facteur_X<Menu_Facteur_X*Pixel_width;Repeat_Menu_Facteur_X++)
-          Buffer_de_ligne_horizontale[Reel_X++]=*(font_pixel+Pos_X+Pos_Y)?Couleur_texte:Couleur_fond;
+          Buffer_de_ligne_horizontale[Reel_X++]=*(font_pixel+x_pos+y_pos)?Couleur_texte:Couleur_fond;
     }
     for (Repeat_Menu_Facteur_Y=0;Repeat_Menu_Facteur_Y<Menu_Facteur_Y;Repeat_Menu_Facteur_Y++)
       Afficher_ligne_fast(X,Reel_Y++,Indice*Menu_Facteur_X*8,Buffer_de_ligne_horizontale);
@@ -411,30 +411,30 @@ void Print_general(short X,short Y,const char * Chaine,byte Couleur_texte,byte C
 
   // -- Afficher un caractère dans une fenêtre --
 
-void Print_char_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char c,byte Couleur_texte,byte Couleur_fond)
+void Print_char_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur_texte,byte Couleur_fond)
 {
   short X,Y;
   byte *pixel;
-  Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
-  Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
+  x_pos=(x_pos*Menu_Facteur_X)+Fenetre_Pos_X;
+  y_pos=(y_pos*Menu_Facteur_Y)+Fenetre_Pos_Y;
   // Premier pixel du caractère
   pixel=Fonte + (c<<6);
   
   for (Y=0;Y<8;Y++)
     for (X=0;X<8;X++)
-      Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
+      Block(x_pos+(X*Menu_Facteur_X), y_pos+(Y*Menu_Facteur_Y),
             Menu_Facteur_X, Menu_Facteur_Y,
             (*(pixel++)?Couleur_texte:Couleur_fond));
 }
 
   // -- Afficher un caractère sans fond dans une fenêtre --
 
-void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,const unsigned char c,byte Couleur)
+void Print_char_transparent_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur)
 {
   short X,Y;
   byte *pixel;
-  Pos_X=(Pos_X*Menu_Facteur_X)+Fenetre_Pos_X;
-  Pos_Y=(Pos_Y*Menu_Facteur_Y)+Fenetre_Pos_Y;
+  x_pos=(x_pos*Menu_Facteur_X)+Fenetre_Pos_X;
+  y_pos=(y_pos*Menu_Facteur_Y)+Fenetre_Pos_Y;
   // Premier pixel du caractère
   pixel=Fonte + (c<<6);
   
@@ -442,7 +442,7 @@ void Print_char_transparent_dans_fenetre(short Pos_X,short Pos_Y,const unsigned 
     for (X=0;X<8;X++)
     {
       if (*(pixel++))
-        Block(Pos_X+(X*Menu_Facteur_X), Pos_Y+(Y*Menu_Facteur_Y),
+        Block(x_pos+(X*Menu_Facteur_X), y_pos+(Y*Menu_Facteur_Y),
               Menu_Facteur_X, Menu_Facteur_Y, Couleur);
     }
 }
@@ -474,10 +474,10 @@ void Print_dans_fenetre(short X,short Y,const char * Chaine,byte Couleur_texte,b
 
   // -- Afficher une chaîne dans le menu --
 
-void Print_dans_menu(const char * Chaine, short Position)
+void Print_dans_menu(const char * Chaine, short position)
 {
-  Print_general((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,Chaine,CM_Noir,CM_Clair);
-  UpdateRect((18+(Position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,strlen(Chaine)*8*Menu_Facteur_X,8*Menu_Facteur_Y);
+  Print_general((18+(position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,Chaine,CM_Noir,CM_Clair);
+  UpdateRect((18+(position<<3))*Menu_Facteur_X,Menu_Ordonnee_Texte,strlen(Chaine)*8*Menu_Facteur_X,8*Menu_Facteur_Y);
 }
 
   // -- Afficher les coordonnées du pinceau dans le menu --
@@ -692,8 +692,8 @@ void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte 
    } };
 
   word  Indice;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   for (Indice=0;Chaine[Indice]!='\0';Indice++)
   {
     int Numero_car;
@@ -725,12 +725,12 @@ void Print_compteur(short X,short Y,const char * Chaine,byte Couleur_texte,byte 
         Numero_car=13;
         break;
     }
-    for (Pos_Y=0;Pos_Y<8;Pos_Y++)
+    for (y_pos=0;y_pos<8;y_pos++)
     {
-      for (Pos_X=0;Pos_X<6;Pos_X++)
+      for (x_pos=0;x_pos<6;x_pos++)
       {
-        byte Couleur = (thin_font[Numero_car][Pos_Y] & (1 << (6-Pos_X))) ? Couleur_texte:Couleur_fond;
-        Pixel_dans_fenetre(X+(Indice*6+Pos_X),Y+Pos_Y,Couleur);
+        byte Couleur = (thin_font[Numero_car][y_pos] & (1 << (6-x_pos))) ? Couleur_texte:Couleur_fond;
+        Pixel_dans_fenetre(X+(Indice*6+x_pos),Y+y_pos,Couleur);
       }
     }
   }
@@ -810,8 +810,8 @@ void Warning_message(char * Message)
 
 void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
 {
-  word Pos_X;
-  word Pos_Y;
+  word x_pos;
+  word y_pos;
   word Pos_menu_X;
   word Pos_menu_Y;
   byte Couleur;
@@ -824,12 +824,12 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
     Pos_menu_X+=1;
   }
   
-  for (Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_Y++)
-    for (Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_X++)
+  for (y_pos=0;y_pos<HAUTEUR_SPRITE_MENU;y_pos++)
+    for (x_pos=0;x_pos<LARGEUR_SPRITE_MENU;x_pos++)
     {
-      Couleur=SPRITE_MENU[Numero_sprite][Pos_Y][Pos_X];
-      Pixel_dans_menu(Pos_menu_X+Pos_X,Pos_menu_Y+Pos_Y,Couleur);
-      BLOCK_MENU[Pos_menu_Y+Pos_Y][Pos_menu_X+Pos_X]=Couleur;
+      Couleur=SPRITE_MENU[Numero_sprite][y_pos][x_pos];
+      Pixel_dans_menu(Pos_menu_X+x_pos,Pos_menu_Y+y_pos,Couleur);
+      BLOCK_MENU[Pos_menu_Y+y_pos][Pos_menu_X+x_pos]=Couleur;
     }
   UpdateRect(Menu_Facteur_X*(Bouton[Numero_bouton].Decalage_X+1),
     (Bouton[Numero_bouton].Decalage_Y+1)*Menu_Facteur_Y+Menu_Ordonnee,
@@ -840,7 +840,7 @@ void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite)
 
 void Afficher_pinceau_dans_menu(void)
 {
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   short Debut_X;
   short Pos_menu_X,Pos_menu_Y;
   short Debut_menu_X;
@@ -850,18 +850,18 @@ void Afficher_pinceau_dans_menu(void)
   {
     case FORME_PINCEAU_BROSSE_COULEUR    : // Brosse en couleur
     case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
-      for (Pos_menu_Y=2,Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,Pos_Y++)
-        for (Pos_menu_X=1,Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_menu_X++,Pos_X++)
+      for (Pos_menu_Y=2,y_pos=0;y_pos<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,y_pos++)
+        for (Pos_menu_X=1,x_pos=0;x_pos<LARGEUR_SPRITE_MENU;Pos_menu_X++,x_pos++)
         {
-          Couleur=SPRITE_MENU[4][Pos_Y][Pos_X];
+          Couleur=SPRITE_MENU[4][y_pos][x_pos];
           Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }
       break;
     default : // Pinceau
       // On efface le pinceau précédent
-      for (Pos_menu_Y=2,Pos_Y=0;Pos_Y<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,Pos_Y++)
-        for (Pos_menu_X=1,Pos_X=0;Pos_X<LARGEUR_SPRITE_MENU;Pos_menu_X++,Pos_X++)
+      for (Pos_menu_Y=2,y_pos=0;y_pos<HAUTEUR_SPRITE_MENU;Pos_menu_Y++,y_pos++)
+        for (Pos_menu_X=1,x_pos=0;x_pos<LARGEUR_SPRITE_MENU;Pos_menu_X++,x_pos++)
         {
           Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,CM_Clair);
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=CM_Clair;
@@ -879,16 +879,16 @@ void Afficher_pinceau_dans_menu(void)
       Pos_menu_Y=9-Pinceau_Decalage_Y;
       if (Pos_menu_Y<2)
       {
-        Pos_Y=Pinceau_Decalage_Y-7;
+        y_pos=Pinceau_Decalage_Y-7;
         Pos_menu_Y=2;
       }
       else
-        Pos_Y=0;
+        y_pos=0;
 
-      for (;((Pos_Y<Pinceau_Hauteur) && (Pos_menu_Y<16));Pos_menu_Y++,Pos_Y++)
-        for (Pos_menu_X=Debut_menu_X,Pos_X=Debut_X;((Pos_X<Pinceau_Largeur) && (Pos_menu_X<15));Pos_menu_X++,Pos_X++)
+      for (;((y_pos<Pinceau_Hauteur) && (Pos_menu_Y<16));Pos_menu_Y++,y_pos++)
+        for (Pos_menu_X=Debut_menu_X,x_pos=Debut_X;((x_pos<Pinceau_Largeur) && (Pos_menu_X<15));Pos_menu_X++,x_pos++)
         {
-          Couleur=(Pinceau_Sprite[(Pos_Y*TAILLE_MAXI_PINCEAU)+Pos_X])?CM_Noir:CM_Clair;
+          Couleur=(Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos])?CM_Noir:CM_Clair;
           Pixel_dans_menu(Pos_menu_X,Pos_menu_Y,Couleur);
           BLOCK_MENU[Pos_menu_Y][Pos_menu_X]=Couleur;
         }
@@ -898,11 +898,11 @@ void Afficher_pinceau_dans_menu(void)
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --
 
-void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
+void Afficher_pinceau_dans_fenetre(word X,word Y,int number)
   // Pinceau = 0..NB_SPRITES_PINCEAU-1 : Pinceau prédéfini
 {
-  word Pos_X;
-  word Pos_Y;
+  word x_pos;
+  word y_pos;
   word Pos_fenetre_X;
   word Pos_fenetre_Y;
   int Taille_X;
@@ -917,18 +917,18 @@ void Afficher_pinceau_dans_fenetre(word X,word Y,int Numero)
   if (Taille_Y<1)
     Taille_Y=1;
 
-  Orig_X = (X + 8)*Menu_Facteur_X - (Pinceau_predefini_Decalage_X[Numero])*Taille_X+Fenetre_Pos_X;
-  Orig_Y = (Y + 8)*Menu_Facteur_Y - (Pinceau_predefini_Decalage_Y[Numero])*Taille_Y+Fenetre_Pos_Y;
+  Orig_X = (X + 8)*Menu_Facteur_X - (Pinceau_predefini_Decalage_X[number])*Taille_X+Fenetre_Pos_X;
+  Orig_Y = (Y + 8)*Menu_Facteur_Y - (Pinceau_predefini_Decalage_Y[number])*Taille_Y+Fenetre_Pos_Y;
 
-  for (Pos_fenetre_Y=0,Pos_Y=0; Pos_Y<Pinceau_predefini_Hauteur[Numero]; Pos_fenetre_Y++,Pos_Y++)
-    for (Pos_fenetre_X=0,Pos_X=0; Pos_X<Pinceau_predefini_Largeur[Numero]; Pos_fenetre_X++,Pos_X++)
-      Block(Orig_X+Pos_fenetre_X*Taille_X,Orig_Y+Pos_fenetre_Y*Taille_Y,Taille_X,Taille_Y,(SPRITE_PINCEAU[Numero][Pos_Y][Pos_X])?CM_Noir:CM_Clair);
+  for (Pos_fenetre_Y=0,y_pos=0; y_pos<Pinceau_predefini_Hauteur[number]; Pos_fenetre_Y++,y_pos++)
+    for (Pos_fenetre_X=0,x_pos=0; x_pos<Pinceau_predefini_Largeur[number]; Pos_fenetre_X++,x_pos++)
+      Block(Orig_X+Pos_fenetre_X*Taille_X,Orig_Y+Pos_fenetre_Y*Taille_Y,Taille_X,Taille_Y,(SPRITE_PINCEAU[number][y_pos][x_pos])?CM_Noir:CM_Clair);
   // On n'utilise pas Pixel_dans_fenetre() car on ne dessine pas
   // forcément avec la même taille de pixel.
 
   UpdateRect( ToWinX(Orig_X), ToWinY(Orig_Y),
-        ToWinL(Pinceau_predefini_Largeur[Numero]),
-        ToWinH(Pinceau_predefini_Hauteur[Numero])
+        ToWinL(Pinceau_predefini_Largeur[number]),
+        ToWinH(Pinceau_predefini_Hauteur[number])
   );
 }
 
@@ -949,16 +949,16 @@ void Dessiner_zigouigoui(word X,word Y, byte Couleur, short Sens)
 
   // -- Dessiner un bloc de couleurs dégradé verticalement
 
-void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_block)
+void Bloc_degrade_dans_fenetre(word x_pos,word y_pos,word Debut_block,word Fin_block)
 {
   word Total_lignes  =Menu_Facteur_Y<<6; // <=> à 64 lignes fct(Menu_Facteur)
   word Nb_couleurs   =(Debut_block<=Fin_block)?Fin_block-Debut_block+1:Debut_block-Fin_block+1;
   word Ligne_en_cours=(Debut_block<=Fin_block)?0:Total_lignes-1;
 
-  word Debut_X       =Fenetre_Pos_X+(Menu_Facteur_X*Pos_X);
+  word Debut_X       =Fenetre_Pos_X+(Menu_Facteur_X*x_pos);
   word Largeur_ligne =Menu_Facteur_X<<4; // <=> à 16 pixels fct(Menu_Facteur)
 
-  word Debut_Y       =Fenetre_Pos_Y+(Menu_Facteur_Y*Pos_Y);
+  word Debut_Y       =Fenetre_Pos_Y+(Menu_Facteur_Y*y_pos);
   word Fin_Y         =Debut_Y+Total_lignes;
   word Indice;
 
@@ -972,21 +972,21 @@ void Bloc_degrade_dans_fenetre(word Pos_X,word Pos_Y,word Debut_block,word Fin_b
   for (Indice=Debut_Y;Indice<Fin_Y;Indice++,Ligne_en_cours++)
     Block(Debut_X,Indice,Largeur_ligne,1,Debut_block+(Nb_couleurs*Ligne_en_cours)/Total_lignes);
 
-  UpdateRect(ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(16),ToWinH(64));
+  UpdateRect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
 }
 
 
 
   // -- Dessiner un petit sprite représentant le type d'un drive --
 
-void Fenetre_Afficher_sprite_drive(word Pos_X,word Pos_Y,byte Type)
+void Fenetre_Afficher_sprite_drive(word x_pos,word y_pos,byte Type)
 {
   word i,j;
 
   for (j=0; j<HAUTEUR_SPRITE_DRIVE; j++)
     for (i=0; i<LARGEUR_SPRITE_DRIVE; i++)
-      Pixel_dans_fenetre(Pos_X+i,Pos_Y+j,SPRITE_DRIVE[Type][j][i]);
-  UpdateRect(ToWinX(Pos_X),ToWinY(Pos_Y),ToWinL(LARGEUR_SPRITE_DRIVE),ToWinH(HAUTEUR_SPRITE_DRIVE));
+      Pixel_dans_fenetre(x_pos+i,y_pos+j,SPRITE_DRIVE[Type][j][i]);
+  UpdateRect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(LARGEUR_SPRITE_DRIVE),ToWinH(HAUTEUR_SPRITE_DRIVE));
 }
 
 
@@ -1080,18 +1080,18 @@ void Afficher_palette_du_menu_en_evitant_la_fenetre(byte * Table)
       {
         // Affichage du bloc directement dans le "buffer de fond" de la fenetre.
         // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
-        short Pos_X;
-        short Pos_Y;
+        short x_pos;
+        short y_pos;
         short relative_x; // besoin d'une variable signée
         short relative_y; // besoin d'une variable signée
         // Attention aux unités
         relative_x = ((short)Debut_X - (short)Fenetre_Pos_X);
         relative_y = ((short)Debut_Y - (short)Fenetre_Pos_Y);
 
-        for (Pos_Y=relative_y;Pos_Y<(relative_y+height)&&Pos_Y<Fenetre_Hauteur*Menu_Facteur_Y;Pos_Y++)
-          for (Pos_X=relative_x;Pos_X<(relative_x+width)&&Pos_X<Fenetre_Largeur*Menu_Facteur_X;Pos_X++)
-            if (Pos_X>=0&&Pos_Y>=0)
-              Pixel_fond(Pos_X,Pos_Y,Vraie_couleur);
+        for (y_pos=relative_y;y_pos<(relative_y+height)&&y_pos<Fenetre_Hauteur*Menu_Facteur_Y;y_pos++)
+          for (x_pos=relative_x;x_pos<(relative_x+width)&&x_pos<Fenetre_Largeur*Menu_Facteur_X;x_pos++)
+            if (x_pos>=0&&y_pos>=0)
+              Pixel_fond(x_pos,y_pos,Vraie_couleur);
       }
     }
   }
@@ -1186,7 +1186,7 @@ void Calculer_coordonnees_pinceau(void)
 void Afficher_limites_de_l_image(void)
 {
   short start;
-  short Pos;
+  short pos;
   short end;
   byte Droite_visible;
   byte Bas_visible;
@@ -1211,8 +1211,8 @@ void Afficher_limites_de_l_image(void)
     Ancienne_Limite_Zoom=Limite_Droite_Zoom;
     Limite_Droite_Zoom=Limite_visible_Droite_Zoom;
 
-    for (Pos=start;Pos<=end;Pos++)
-      Pixel_Preview(Principal_Largeur_image,Pos,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
+    for (pos=start;pos<=end;pos++)
+      Pixel_Preview(Principal_Largeur_image,pos,((pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
     UpdateRect(Principal_Largeur_image,start,1,end-start + 1);
     // On restaure la bonne valeur des limites
@@ -1230,8 +1230,8 @@ void Afficher_limites_de_l_image(void)
     Ancienne_Limite_Zoom=Limite_Bas_Zoom;
     Limite_Bas_Zoom=Limite_visible_Bas_Zoom;
 
-    for (Pos=start;Pos<=end;Pos++)
-      Pixel_Preview(Pos,Principal_Hauteur_image,((Pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
+    for (pos=start;pos<=end;pos++)
+      Pixel_Preview(pos,Principal_Hauteur_image,((pos+Principal_Hauteur_image)&1)?CM_Blanc:CM_Noir);
 
     UpdateRect(start,Principal_Hauteur_image,end-start + 1,1);
 
@@ -1425,10 +1425,10 @@ void Afficher_barre_de_split(void)
 
   // -- Afficher une barre horizontale XOR zoomée
 
-void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short width)
+void Ligne_horizontale_XOR_Zoom(short x_pos, short y_pos, short width)
 {
-  short Pos_X_reelle=Principal_X_Zoom+(Pos_X-Loupe_Decalage_X)*Loupe_Facteur;
-  short Pos_Y_reelle=(Pos_Y-Loupe_Decalage_Y)*Loupe_Facteur;
+  short Pos_X_reelle=Principal_X_Zoom+(x_pos-Loupe_Decalage_X)*Loupe_Facteur;
+  short Pos_Y_reelle=(y_pos-Loupe_Decalage_Y)*Loupe_Facteur;
   short Largeur_reelle=width*Loupe_Facteur;
   short Pos_Y_Fin=(Pos_Y_reelle+Loupe_Facteur<Menu_Ordonnee)?Pos_Y_reelle+Loupe_Facteur:Menu_Ordonnee;
   short Indice;
@@ -1442,10 +1442,10 @@ void Ligne_horizontale_XOR_Zoom(short Pos_X, short Pos_Y, short width)
 
   // -- Afficher une barre verticale XOR zoomée
 
-void Ligne_verticale_XOR_Zoom(short Pos_X, short Pos_Y, short height)
+void Ligne_verticale_XOR_Zoom(short x_pos, short y_pos, short height)
 {
-  short Pos_X_reelle=Principal_X_Zoom+(Pos_X-Loupe_Decalage_X)*Loupe_Facteur;
-  short Pos_Y_reelle=(Pos_Y-Loupe_Decalage_Y)*Loupe_Facteur;
+  short Pos_X_reelle=Principal_X_Zoom+(x_pos-Loupe_Decalage_X)*Loupe_Facteur;
+  short Pos_Y_reelle=(y_pos-Loupe_Decalage_Y)*Loupe_Facteur;
   short Pos_Y_Fin=(Pos_Y_reelle+(height*Loupe_Facteur<Menu_Ordonnee))?Pos_Y_reelle+(height*Loupe_Facteur):Menu_Ordonnee;
   short Indice;
 
@@ -1465,8 +1465,8 @@ void Afficher_curseur(void)
   short Debut_Y;
   short Fin_X;
   short Fin_Y;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   short Compteur_X;
   short Compteur_Y;
   int   Temp;
@@ -1515,16 +1515,16 @@ void Afficher_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15 && Pos_X < Largeur_ecran;Pos_X++,Compteur_X++)
+          for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15 && x_pos < Largeur_ecran;x_pos++,Compteur_X++)
                 {
-                  if( Pos_X < 0 ) continue;
-            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15 && Pos_Y < Hauteur_ecran;Pos_Y++,Compteur_Y++)
+                  if( x_pos < 0 ) continue;
+            for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15 && y_pos < Hauteur_ecran;y_pos++,Compteur_Y++)
             {
-                    if( Pos_Y < 0 || Pos_Y >= Hauteur_ecran) continue;
+                    if( y_pos < 0 || y_pos >= Hauteur_ecran) continue;
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
-              FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+              FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(x_pos,y_pos);
               if (Couleur!=CM_Trans)
-                Pixel(Pos_X,Pos_Y,Couleur);
+                Pixel(x_pos,y_pos,Couleur);
             }
                 }
 
@@ -1583,16 +1583,16 @@ void Afficher_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
-            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+          for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15;x_pos++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15;y_pos++,Compteur_Y++)
             {
               Couleur=SPRITE_CURSEUR[Temp][Compteur_Y][Compteur_X];
-              if ( (Pos_X>=0) && (Pos_X<Largeur_ecran)
-                && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
+              if ( (x_pos>=0) && (x_pos<Largeur_ecran)
+                && (y_pos>=0) && (y_pos<Hauteur_ecran) )
               {
-                FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+                FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(x_pos,y_pos);
                 if (Couleur!=CM_Trans)
-                  Pixel(Pos_X,Pos_Y,Couleur);
+                  Pixel(x_pos,y_pos,Couleur);
               }
             }
           UpdateRect(Debut_X,Debut_Y,16,16);
@@ -1609,36 +1609,36 @@ void Afficher_curseur(void)
     case FORME_CURSEUR_SABLIER :
       Debut_X=Mouse_X-Curseur_Decalage_X[shape];
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[shape];
-      for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+      for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15;x_pos++,Compteur_X++)
       {
-        if(Pos_X<0) continue;
-        if(Pos_X>=Largeur_ecran) break;
-        for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+        if(x_pos<0) continue;
+        if(x_pos>=Largeur_ecran) break;
+        for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15;y_pos++,Compteur_Y++)
         {
-          if(Pos_Y<0) continue;
-          if(Pos_Y>=Hauteur_ecran) break;
+          if(y_pos<0) continue;
+          if(y_pos>=Hauteur_ecran) break;
           Couleur=SPRITE_CURSEUR[shape][Compteur_Y][Compteur_X];
           // On sauvegarde dans FOND_CURSEUR pour restaurer plus tard
-          FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(Pos_X,Pos_Y);
+          FOND_CURSEUR[Compteur_Y][Compteur_X]=Lit_pixel(x_pos,y_pos);
           if (Couleur!=CM_Trans)
-              Pixel(Pos_X,Pos_Y,Couleur);
+              Pixel(x_pos,y_pos,Couleur);
         }
       }
       UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;
 
     case FORME_CURSEUR_CIBLE_XOR :
-      Pos_X=Pinceau_X-Principal_Decalage_X;
-      Pos_Y=Pinceau_Y-Principal_Decalage_Y;
+      x_pos=Pinceau_X-Principal_Decalage_X;
+      y_pos=Pinceau_Y-Principal_Decalage_Y;
 
       Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // width de la barre XOR
-      if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
+      if ((y_pos<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
         UpdateRect(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
       }
 
-      if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
+      if ((x_pos<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
         UpdateRect(Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
@@ -1711,11 +1711,11 @@ void Afficher_curseur(void)
         }
         else
         {
-          Pos_X=Pinceau_X-Brosse_Centre_rotation_X;
-          Pos_Y=Pinceau_Y-Brosse_Centre_rotation_Y;
-          cosA=(float)Pos_X/sqrt((Pos_X*Pos_X)+(Pos_Y*Pos_Y));
+          x_pos=Pinceau_X-Brosse_Centre_rotation_X;
+          y_pos=Pinceau_Y-Brosse_Centre_rotation_Y;
+          cosA=(float)x_pos/sqrt((x_pos*x_pos)+(y_pos*y_pos));
           sinA=sin(acos(cosA));
-          if (Pos_Y>0) sinA=-sinA;
+          if (y_pos>0) sinA=-sinA;
         }
 
         Transformer_point(Debut_X,Debut_Y, cosA,sinA, &X1,&Y1);
@@ -1767,8 +1767,8 @@ void Effacer_curseur(void)
   int Debut_Y;
   short Fin_X;
   short Fin_Y;
-  int Pos_X;
-  int Pos_Y;
+  int x_pos;
+  int y_pos;
   short Compteur_X;
   short Compteur_Y;
   //short Fin_Compteur_X; // Position X ou s'arrête l'affichage de la brosse/pinceau
@@ -1817,18 +1817,18 @@ void Effacer_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+          for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15;y_pos++,Compteur_Y++)
           {
-            if(Pos_Y>=Hauteur_ecran) break;
-            for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+            if(y_pos>=Hauteur_ecran) break;
+            for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15;x_pos++,Compteur_X++)
             {
-              if ( (Pos_X<0) || (Pos_Y < 0)) continue;
-              else if (Pos_X>=Largeur_ecran) break;
-              Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+              if ( (x_pos<0) || (y_pos < 0)) continue;
+              else if (x_pos>=Largeur_ecran) break;
+              Pixel(x_pos,y_pos,FOND_CURSEUR[Compteur_Y][Compteur_X]);
             }
           }
 
-          UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Pos_X-Debut_X,Pos_Y-Debut_Y);
+          UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),x_pos-Debut_X,y_pos-Debut_Y);
         }
       }
       if (!Cacher_pinceau)
@@ -1885,10 +1885,10 @@ void Effacer_curseur(void)
           Debut_X=Mouse_X-Curseur_Decalage_X[Temp];
           Debut_Y=Mouse_Y-Curseur_Decalage_Y[Temp];
 
-          for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
-            for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
-              if ( (Pos_X>=0) && (Pos_X<Largeur_ecran) && (Pos_Y>=0) && (Pos_Y<Hauteur_ecran) )
-                Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+          for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15;x_pos++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15;y_pos++,Compteur_Y++)
+              if ( (x_pos>=0) && (x_pos<Largeur_ecran) && (y_pos>=0) && (y_pos<Hauteur_ecran) )
+                Pixel(x_pos,y_pos,FOND_CURSEUR[Compteur_Y][Compteur_X]);
 
           UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),16,16);
         }
@@ -1907,32 +1907,32 @@ void Effacer_curseur(void)
       Debut_X=Mouse_X-Curseur_Decalage_X[shape];
       Debut_Y=Mouse_Y-Curseur_Decalage_Y[shape];
 
-      for (Pos_X=Debut_X,Compteur_X=0;Compteur_X<15;Pos_X++,Compteur_X++)
+      for (x_pos=Debut_X,Compteur_X=0;Compteur_X<15;x_pos++,Compteur_X++)
       {
-        if(Pos_X<0) continue;
-        if(Pos_X>=Largeur_ecran) break;
-        for (Pos_Y=Debut_Y,Compteur_Y=0;Compteur_Y<15;Pos_Y++,Compteur_Y++)
+        if(x_pos<0) continue;
+        if(x_pos>=Largeur_ecran) break;
+        for (y_pos=Debut_Y,Compteur_Y=0;Compteur_Y<15;y_pos++,Compteur_Y++)
         {
-            if(Pos_Y<0) continue;
-            if(Pos_Y>=Hauteur_ecran) break;
-            Pixel(Pos_X,Pos_Y,FOND_CURSEUR[Compteur_Y][Compteur_X]);
+            if(y_pos<0) continue;
+            if(y_pos>=Hauteur_ecran) break;
+            Pixel(x_pos,y_pos,FOND_CURSEUR[Compteur_Y][Compteur_X]);
         }
       }
       UpdateRect(Max(Debut_X,0),Max(Debut_Y,0),Compteur_X,Compteur_Y);
       break;
 
     case FORME_CURSEUR_CIBLE_XOR :
-      Pos_X=Pinceau_X-Principal_Decalage_X;
-      Pos_Y=Pinceau_Y-Principal_Decalage_Y;
+      x_pos=Pinceau_X-Principal_Decalage_X;
+      y_pos=Pinceau_Y-Principal_Decalage_Y;
 
       Compteur_X=(Loupe_Mode)?Principal_Split:Largeur_ecran; // width de la barre XOR
-      if ((Pos_Y<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
+      if ((y_pos<Menu_Ordonnee) && (Pinceau_Y>=Limite_Haut))
       {
         Ligne_horizontale_XOR(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X);
         UpdateRect(0,Pinceau_Y-Principal_Decalage_Y,Compteur_X,1);
       }
 
-      if ((Pos_X<Compteur_X) && (Pinceau_X>=Limite_Gauche))
+      if ((x_pos<Compteur_X) && (Pinceau_X>=Limite_Gauche))
       {
         Ligne_verticale_XOR(Pinceau_X-Principal_Decalage_X,0,Menu_Ordonnee);
         UpdateRect(Pinceau_X-Principal_Decalage_X,0,1,Menu_Ordonnee);
@@ -2008,11 +2008,11 @@ void Effacer_curseur(void)
         }
         else
         {
-          Pos_X=Pinceau_X-Brosse_Centre_rotation_X;
-          Pos_Y=Pinceau_Y-Brosse_Centre_rotation_Y;
-          cosA=(float)Pos_X/sqrt((Pos_X*Pos_X)+(Pos_Y*Pos_Y));
+          x_pos=Pinceau_X-Brosse_Centre_rotation_X;
+          y_pos=Pinceau_Y-Brosse_Centre_rotation_Y;
+          cosA=(float)x_pos/sqrt((x_pos*x_pos)+(y_pos*y_pos));
           sinA=sin(acos(cosA));
-          if (Pos_Y>0) sinA=-sinA;
+          if (y_pos>0) sinA=-sinA;
         }
 
         Transformer_point(Debut_X,Debut_Y, cosA,sinA, &X1,&Y1);
@@ -2151,7 +2151,7 @@ byte Meilleure_couleur(byte r,byte g,byte b)
     if (!Exclude_color[Coul])
     {
       Delta_R=(int)Principal_Palette[Coul].R-r;
-      Delta_V=(int)Principal_Palette[Coul].V-g;
+      Delta_V=(int)Principal_Palette[Coul].G-g;
       Delta_B=(int)Principal_Palette[Coul].B-b;
 
       if (!(Dist=(Delta_R*Delta_R*30)+(Delta_V*Delta_V*59)+(Delta_B*Delta_B*11)))
@@ -2179,7 +2179,7 @@ byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
   for (Coul=0; Coul<256; Coul++)
   {
     Delta_R=(int)Principal_Palette[Coul].R-Rouge;
-    Delta_V=(int)Principal_Palette[Coul].V-Vert;
+    Delta_V=(int)Principal_Palette[Coul].G-Vert;
     Delta_B=(int)Principal_Palette[Coul].B-Bleu;
 
     if (!(Dist=(Delta_R*Delta_R*30)+(Delta_V*Delta_V*59)+(Delta_B*Delta_B*11)))
@@ -2195,7 +2195,7 @@ byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu)
 }
 
 void Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-     (byte Rouge, byte Vert, byte Bleu, Composantes * Palette, byte * Table)
+     (byte Rouge, byte Vert, byte Bleu, Composantes * palette, byte * Table)
 {
   short Coul;
   int   Delta_R,Delta_V,Delta_B;
@@ -2205,9 +2205,9 @@ void Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
 
   for (Coul=0; Coul<256; Coul++)
   {
-    Delta_R=(int)Palette[Coul].R-Rouge;
-    Delta_V=(int)Palette[Coul].V-Vert;
-    Delta_B=(int)Palette[Coul].B-Bleu;
+    Delta_R=(int)palette[Coul].R-Rouge;
+    Delta_V=(int)palette[Coul].G-Vert;
+    Delta_B=(int)palette[Coul].B-Bleu;
 
     Dist=(Delta_R*Delta_R*30)+(Delta_V*Delta_V*59)+(Delta_B*Delta_B*11);
 
@@ -2338,7 +2338,7 @@ void Remapper_ecran_apres_changement_couleurs_menu(void)
 
 
 
-void Calculer_couleurs_menu_optimales(Composantes * Palette)
+void Calculer_couleurs_menu_optimales(Composantes * palette)
 {
   byte Table[4];
   short i,j,k;
@@ -2352,12 +2352,12 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
 
   // Recherche du noir
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-    (Coul_menu_pref[0].R, Coul_menu_pref[0].V, Coul_menu_pref[0].B,Palette,Table);
+    (Coul_menu_pref[0].R, Coul_menu_pref[0].G, Coul_menu_pref[0].B,palette,Table);
   CM_Noir=Table[0];
 
   // Recherche du blanc
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-    (Coul_menu_pref[3].R, Coul_menu_pref[3].V, Coul_menu_pref[3].B,Palette,Table);
+    (Coul_menu_pref[3].R, Coul_menu_pref[3].G, Coul_menu_pref[3].B,palette,Table);
   if (CM_Noir!=Table[0])
     CM_Blanc=Table[0];
   else
@@ -2365,7 +2365,7 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
 
   // Recherche du gris clair
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-    (Coul_menu_pref[2].R, Coul_menu_pref[2].V, Coul_menu_pref[2].B,Palette,Table);
+    (Coul_menu_pref[2].R, Coul_menu_pref[2].G, Coul_menu_pref[2].B,palette,Table);
   if ( (CM_Noir!=Table[0]) && (CM_Blanc!=Table[0]) )
     CM_Clair=Table[0];
   else
@@ -2378,7 +2378,7 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
 
   // Recherche du gris foncé
   Calculer_les_4_meilleures_couleurs_pour_1_couleur_du_menu
-    (Coul_menu_pref[1].R, Coul_menu_pref[1].V, Coul_menu_pref[1].B,Palette,Table);
+    (Coul_menu_pref[1].R, Coul_menu_pref[1].G, Coul_menu_pref[1].B,palette,Table);
   if ( (CM_Noir!=Table[0]) && (CM_Blanc!=Table[0]) && (CM_Clair!=Table[0]) )
     CM_Fonce=Table[0];
   else
@@ -2396,8 +2396,8 @@ void Calculer_couleurs_menu_optimales(Composantes * Palette)
 
   // C'est peu probable mais il est possible que CM_Clair soit plus foncée que
   // CM_Fonce. Dans ce cas, on les inverse.
-  if ( ((Palette[CM_Clair].R*30)+(Palette[CM_Clair].V*59)+(Palette[CM_Clair].B*11)) <
-       ((Palette[CM_Fonce].R*30)+(Palette[CM_Fonce].V*59)+(Palette[CM_Fonce].B*11)) )
+  if ( ((palette[CM_Clair].R*30)+(palette[CM_Clair].G*59)+(palette[CM_Clair].B*11)) <
+       ((palette[CM_Fonce].R*30)+(palette[CM_Fonce].G*59)+(palette[CM_Fonce].B*11)) )
   {
     i=CM_Clair;
     CM_Clair=CM_Fonce;

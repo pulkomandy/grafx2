@@ -176,7 +176,7 @@ SDL_Color Conversion_couleur_SDL(byte index)
 {
   SDL_Color Couleur;
   Couleur.r = Principal_Palette[index].R;
-  Couleur.g = Principal_Palette[index].V;
+  Couleur.g = Principal_Palette[index].G;
   Couleur.b = Principal_Palette[index].B;
   Couleur.unused = 255;
   return Couleur;

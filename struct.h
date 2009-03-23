@@ -58,13 +58,13 @@ typedef void (* fonction_affiche_brosse) (byte *,word,word,word,word,word,word,b
 typedef struct
 {
   byte R;
-  byte V;
+  byte G;
   byte B;
 }__attribute__ ((__packed__)) Composantes, T_Palette[256];
 
 typedef struct T_Bouton_normal
 {
-  short Numero;
+  short Number;
   word Pos_X;
   word Pos_Y;
   word Width;
@@ -77,7 +77,7 @@ typedef struct T_Bouton_normal
 
 typedef struct T_Bouton_palette
 {
-  short Numero;
+  short Number;
   word Pos_X;
   word Pos_Y;
   struct T_Bouton_palette * Next;
@@ -85,7 +85,7 @@ typedef struct T_Bouton_palette
 
 typedef struct T_Bouton_scroller
 {
-  short Numero;
+  short Number;
   word Pos_X;
   word Pos_Y;
   word Height;
@@ -98,7 +98,7 @@ typedef struct T_Bouton_scroller
 
 typedef struct T_Bouton_special
 {
-  short Numero;
+  short Number;
   word Pos_X;
   word Pos_Y;
   word Width;
@@ -108,14 +108,14 @@ typedef struct T_Bouton_special
 
 typedef struct T_Dropdown_choix
 {
-  short Numero;
+  short Number;
   const char * Label;
   struct T_Dropdown_choix * Next;
 } T_Dropdown_choix;
 
 typedef struct T_Bouton_dropdown
 {
-  short Numero;
+  short Number;
   word Pos_X;
   word Pos_Y;
   word Width;
@@ -168,7 +168,7 @@ typedef struct
 typedef struct
 {
   word List[512]; // Liste de couleurs
-  byte Pas;        // Pas d'incrémentation/décrémentation
+  byte Step;        // Pas d'incrémentation/décrémentation
   byte Mode;       // Mode d'utilisation (Normal/Boucle/Non-saturé)
 } T_Shade;
 
@@ -194,13 +194,13 @@ typedef struct
 
 typedef struct
 {
-  byte Numero;
+  byte Number;
   word Taille;
 } __attribute__((__packed__)) Config_Chunk;
 
 typedef struct
 {
-  word Numero;
+  word Number;
   word Touche;
   word Touche2;
 } __attribute__((__packed__)) Config_Infos_touche;
@@ -267,7 +267,7 @@ typedef struct
   char      Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image
 
   char      Repertoire_fichier[TAILLE_CHEMIN_FICHIER]; // |_ Nom complet =
-  char      Nom_fichier[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
+  char      Filename[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
   byte      Format_fichier;          // Format auquel il faut lire et écrire le fichier
 
 /*

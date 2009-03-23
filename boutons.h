@@ -43,7 +43,7 @@ void Bouton_Message_initial(void);
     This function saves the current brush shape and swith to the default one (single pixel brush) for the filler and the color picker. 
     These functions don't need (and will not work with) a custom brush.
 */
-void Changer_la_forme_du_pinceau(byte Numero);
+void Changer_la_forme_du_pinceau(byte shape);
 
 // Boutons relatifs aux couleurs
 

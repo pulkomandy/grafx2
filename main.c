@@ -94,11 +94,11 @@ void Afficher_syntaxe(void)
 
 
 // ---------------------------- Sortie impromptue ----------------------------
-void Erreur_fonction(int error_code, const char *Nom_fichier, int Numero_ligne, const char *Nom_fonction)
+void Erreur_fonction(int error_code, const char *filename, int Numero_ligne, const char *Nom_fonction)
 {
   T_Palette Palette_temporaire;
   int       Indice;
-  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, Nom_fichier,Numero_ligne,Nom_fonction);
+  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,Numero_ligne,Nom_fonction);
 
   if (error_code==0)
   {

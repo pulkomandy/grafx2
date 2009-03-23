@@ -72,7 +72,7 @@ void Shade_Blocs_degrades(void)
   short Shade_traite,Ancien_shade_traite;
   word  Taille_shade=0;
   word  Debut_shade=0;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   short Taille_X,Taille_Y;
   short Debut_X,Debut_Y,Fin_X,Fin_Y;
 
@@ -104,10 +104,10 @@ void Shade_Blocs_degrades(void)
     cursor=0;
     Ancien_shade_traite=-1;
 
-    for (Pos_Y=Debut_Y;Pos_Y<Fin_Y;Pos_Y++)
+    for (y_pos=Debut_Y;y_pos<Fin_Y;y_pos++)
     {
       // On regarde quel shade on va afficher en preview
-      Shade_traite=((Pos_Y-Debut_Y)*Nb_shades)/Taille_Y;
+      Shade_traite=((y_pos-Debut_Y)*Nb_shades)/Taille_Y;
       // Si ce n'est pas le shade précédemment traité on calcule ses infos
       if (Shade_traite>Ancien_shade_traite)
       {
@@ -122,10 +122,10 @@ void Shade_Blocs_degrades(void)
         Ancien_shade_traite=Shade_traite;
       }
 
-      for (Pos_X=Debut_X;Pos_X<Fin_X;Pos_X++)
+      for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
       {
-        Pixel(Pos_X,Pos_Y,Shade_Liste[Shade_Actuel].List
-              [(((Pos_X-Debut_X)*Taille_shade)/Taille_X)+Debut_shade]);
+        Pixel(x_pos,y_pos,Shade_Liste[Shade_Actuel].List
+              [(((x_pos-Debut_X)*Taille_shade)/Taille_X)+Debut_shade]);
       }
     }
   }
@@ -142,41 +142,41 @@ void Shade_Blocs_degrades(void)
 void Tagger_shades(word Select_Debut,word Select_Fin)
 {
   word line, Colonne;
-  word Position;
-  word Pos_X, Pos_Y;
+  word position;
+  word x_pos, y_pos;
 
 
   if (Select_Fin<Select_Debut)
   {
-    Position    =Select_Fin;
+    position    =Select_Fin;
     Select_Fin  =Select_Debut;
-    Select_Debut=Position;
+    Select_Debut=position;
   }
 
   for (line=0; line<8; line++)
     for (Colonne=0; Colonne<64; Colonne++)
     {
-      Position=(line<<6)+Colonne;
-      Pos_X=Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8));
-      Pos_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+131));
+      position=(line<<6)+Colonne;
+      x_pos=Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8));
+      y_pos=Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+131));
 
       // On regarde si la case est "disablée"
-      if (Shade_Liste[Shade_Actuel].List[Position]&0x8000)
+      if (Shade_Liste[Shade_Actuel].List[position]&0x8000)
       {
-        if ((Position>=Select_Debut) && (Position<=Select_Fin))
+        if ((position>=Select_Debut) && (position<=Select_Fin))
         {
-          Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Blanc);
-          Block(Pos_X,Pos_Y+Menu_Facteur_Y,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Noir);
+          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Blanc);
+          Block(x_pos,y_pos+Menu_Facteur_Y,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Noir);
         }
         else
-          Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Blanc);
+          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Blanc);
       }
       else // "enablée"
       {
-        if ((Position>=Select_Debut) && (Position<=Select_Fin))
-          Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Noir);
+        if ((position>=Select_Debut) && (position<=Select_Fin))
+          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Noir);
         else
-          Block(Pos_X,Pos_Y,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Clair);
+          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Clair);
       }
     }
     UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+131*Menu_Facteur_Y,Menu_Facteur_X*64<<2,Menu_Facteur_Y*8<<3);
@@ -233,14 +233,14 @@ void Afficher_tout_le_shade(word Select_Debut1,word Select_Fin1,
                             word Select_Debut2,word Select_Fin2)
 {
   word line, Colonne;
-  word Position;
+  word position;
 
   for (line=0; line<8; line++)
     for (Colonne=0; Colonne<64; Colonne++)
     {
-      Position=(line<<6)+Colonne;
+      position=(line<<6)+Colonne;
       // On regarde si c'est une couleur ou un bloc vide
-      if (Shade_Liste[Shade_Actuel].List[Position]&0x0100) // Vide
+      if (Shade_Liste[Shade_Actuel].List[position]&0x0100) // Vide
       {
         Fenetre_Afficher_cadre_bombe((Colonne<<2)+8,(line*7)+127,4,4);
         Block(Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+9)),
@@ -251,7 +251,7 @@ void Afficher_tout_le_shade(word Select_Debut1,word Select_Fin1,
         Block(Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8)),
               Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+127)),
               Menu_Facteur_X<<2,Menu_Facteur_Y<<2,
-              Shade_Liste[Shade_Actuel].List[Position]&0xFF);
+              Shade_Liste[Shade_Actuel].List[position]&0xFF);
     }
   UpdateRect(Fenetre_Pos_X+7*Menu_Facteur_X,Fenetre_Pos_Y+126*Menu_Facteur_Y,Menu_Facteur_X*((64<<2)+2),Menu_Facteur_Y*((8<<2)+2));
   Tagger_shades(Select_Debut2,Select_Fin2);
@@ -319,16 +319,16 @@ void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Deb
 }
 
 
-void Inserer_case_vide_dans_shade(word Position)
+void Inserer_case_vide_dans_shade(word position)
 {
   word cursor;
 
-  if (Position>=512) return;
+  if (position>=512) return;
 
-  for (cursor=511;cursor>Position;cursor--)
+  for (cursor=511;cursor>position;cursor--)
     Shade_Liste[Shade_Actuel].List[cursor]=Shade_Liste[Shade_Actuel].List[cursor-1];
 
-  Shade_Liste[Shade_Actuel].List[Position]=0x0100;
+  Shade_Liste[Shade_Actuel].List[position]=0x0100;
 }
 
 
@@ -506,7 +506,7 @@ int Menu_Shade(void)
   // Déclaration & tracé de la zone de saisie du pas
   Print_dans_fenetre(272,165,"Step",CM_Fonce,CM_Clair);
   Bouton_saisie = Fenetre_Definir_bouton_saisie(274,174,3);          // 15
-  Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
+  Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
 
   // Bouton Undo
@@ -591,7 +591,7 @@ int Menu_Shade(void)
         Num2str(Shade_Actuel+1,Chaine,1);
         Print_dans_fenetre(210,55,Chaine,CM_Noir,CM_Clair);
         // Affichade du Pas
-        Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
+        Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
         Print_dans_fenetre(276,176,Chaine,CM_Noir,CM_Clair);
         // Tracé du bloc dégradé:
         Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
@@ -827,7 +827,7 @@ int Menu_Shade(void)
         break;
 
       case 15 : // Saisie du pas
-        Num2str(Shade_Liste[Shade_Actuel].Pas,Chaine,3);
+        Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
         Readline(276,176,Chaine,3,1);
         Temp=atoi(Chaine);
         // On corrige le pas
@@ -843,7 +843,7 @@ int Menu_Shade(void)
           Num2str(Temp,Chaine,3);
           Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
         }
-        Shade_Liste[Shade_Actuel].Pas=Temp;
+        Shade_Liste[Shade_Actuel].Step=Temp;
         Afficher_curseur();
         break;
 
@@ -1012,7 +1012,7 @@ void Bouton_Shade_Menu(void)
   else // OK
   {
     Liste2tables(Shade_Liste[Shade_Actuel].List,
-                 Shade_Liste[Shade_Actuel].Pas,
+                 Shade_Liste[Shade_Actuel].Step,
                  Shade_Liste[Shade_Actuel].Mode,
                  Shade_Table_gauche,Shade_Table_droite);
 

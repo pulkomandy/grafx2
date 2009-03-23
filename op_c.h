@@ -97,7 +97,7 @@ typedef struct
   byte bmin,bmax;
 
   byte plus_large; // Composante ayant la plus grande variation (0=Rouge,1=Vert,2=Bleu)
-  byte r,v,b;      // Couleur synthétisant l'ensemble
+  byte r,g,b;      // Couleur synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
 } Cluster;
@@ -144,10 +144,10 @@ typedef struct
 
 Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b);
 void TC_Delete(Table_conversion * t);
-byte TC_Get(Table_conversion * t,int r,int v,int b);
-void TC_Set(Table_conversion * t,int r,int v,int b,byte i);
+byte TC_Get(Table_conversion * t,int r,int g,int b);
+void TC_Set(Table_conversion * t,int r,int g,int b,byte i);
 
-void RGBtoHSL(int r, int v,int b, byte* h, byte*s, byte* l);
+void RGBtoHSL(int r, int g,int b, byte* h, byte*s, byte* l);
 void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
 
@@ -158,9 +158,9 @@ void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 void TO_Init(Table_occurence * t);
 Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b);
 void TO_Delete(Table_occurence * t);
-int TO_Get(Table_occurence * t,int r,int v,int b);
-void TO_Set(Table_occurence * t,int r,int v,int b,int i);
-void TO_Inc(Table_occurence * t,int r,int v,int b);
+int TO_Get(Table_occurence * t,int r,int g,int b);
+void TO_Set(Table_occurence * t,int r,int g,int b,int i);
+void TO_Inc(Table_occurence * t,int r,int g,int b);
 void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int Taille);
 
 

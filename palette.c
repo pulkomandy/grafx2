@@ -82,7 +82,7 @@ void Unite_Composantes(int Count)
 void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Couleur, short Difference_H, short Difference_S, short Difference_L)
 {
     byte h, S, l;
-    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].V,Palette_depart[Couleur].B,&h,&S,&l);
+    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].G,Palette_depart[Couleur].B,&h,&S,&l);
     // La teinte (Hue) est cyclique
     h=(Difference_H+256+h);
     // Pour les autres (Saturation, Lightness), au lieu d'additionner,
@@ -95,10 +95,10 @@ void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Coul
       l=(255+Difference_L)*l/255;
     else if (Difference_L>0)
       l=255-(255-Difference_L)*(255-l)/255;
-    HSLtoRGB(h,S,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].V,&Palette_arrivee[Couleur].B);
+    HSLtoRGB(h,S,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].G,&Palette_arrivee[Couleur].B);
 }
 
-void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -107,12 +107,12 @@ void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   // Arrondi
   Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
-  Palette[Couleur].R=Nouvelle_teinte;
-  Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
+  palette[Couleur].R=Nouvelle_teinte;
+  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
 }
 
 
-void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -121,12 +121,12 @@ void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   // Arrondi
   Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
-  Palette[Couleur].V=Nouvelle_teinte;
-  Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
+  palette[Couleur].G=Nouvelle_teinte;
+  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
 }
 
 
-void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
+void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette palette)
 {
   if (Nouvelle_teinte< 0)
     Nouvelle_teinte= 0;
@@ -135,8 +135,8 @@ void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette Palette)
   // Arrondi
   Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
 
-  Palette[Couleur].B=Nouvelle_teinte;
-  Set_color(Couleur,Palette[Couleur].R,Palette[Couleur].V,Palette[Couleur].B);
+  palette[Couleur].B=Nouvelle_teinte;
+  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
 }
 
 void Formate_composante(byte Valeur, char *Chaine)
@@ -147,7 +147,7 @@ void Formate_composante(byte Valeur, char *Chaine)
   Chaine[4]='\0';
 }
 
-void Degrader_palette(short start,short end,T_Palette Palette)
+void Degrader_palette(short start,short end,T_Palette palette)
 // Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
 // passées en paramètre
 {
@@ -163,19 +163,19 @@ void Degrader_palette(short start,short end,T_Palette Palette)
   // pouvoir faire un dégradé:
   if ( (start!=end) && (start+1!=end) )
   {
-    Debut_Rouge=Palette[start].R;
-    Debut_Vert =Palette[start].V;
-    Debut_Bleu =Palette[start].B;
+    Debut_Rouge=palette[start].R;
+    Debut_Vert =palette[start].G;
+    Debut_Bleu =palette[start].B;
 
-    Fin_Rouge  =Palette[end  ].R;
-    Fin_Vert   =Palette[end  ].V;
-    Fin_Bleu   =Palette[end  ].B;
+    Fin_Rouge  =palette[end  ].R;
+    Fin_Vert   =palette[end  ].G;
+    Fin_Bleu   =palette[end  ].B;
 
     for (Indice=start+1;Indice<end;Indice++)
     {
-      Modifier_Rouge(Indice, ((Fin_Rouge-Debut_Rouge) * (Indice-start))/(end-start) + Debut_Rouge,Palette);
-      Modifier_Vert (Indice, ((Fin_Vert -Debut_Vert ) * (Indice-start))/(end-start) + Debut_Vert ,Palette);
-      Modifier_Bleu (Indice, ((Fin_Bleu -Debut_Bleu ) * (Indice-start))/(end-start) + Debut_Bleu ,Palette);
+      Modifier_Rouge(Indice, ((Fin_Rouge-Debut_Rouge) * (Indice-start))/(end-start) + Debut_Rouge,palette);
+      Modifier_Vert (Indice, ((Fin_Vert -Debut_Vert ) * (Indice-start))/(end-start) + Debut_Vert ,palette);
+      Modifier_Bleu (Indice, ((Fin_Bleu -Debut_Bleu ) * (Indice-start))/(end-start) + Debut_Bleu ,palette);
     }
   }
 }
@@ -202,17 +202,17 @@ void Remap_zone_HIGH(short X1, short Y1, short X2, short Y2,
                      byte * Table_de_conversion)
 // Attention: Remappe une zone de coins X1,Y1 et X2-1,Y2-1 !!!
 {
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
 
-  for (Pos_Y=Y1;Pos_Y<Y2;Pos_Y++)
-    for (Pos_X=X1;Pos_X<X2;Pos_X++)
+  for (y_pos=Y1;y_pos<Y2;y_pos++)
+    for (x_pos=X1;x_pos<X2;x_pos++)
     {
-      if ((Pos_Y>=Fenetre_Pos_Y) && (Pos_Y<Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) &&
-          (Pos_X>=Fenetre_Pos_X) && (Pos_X<Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) )
-        Pos_X=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)-1;
+      if ((y_pos>=Fenetre_Pos_Y) && (y_pos<Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) &&
+          (x_pos>=Fenetre_Pos_X) && (x_pos<Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) )
+        x_pos=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)-1;
       else
-        Pixel(Pos_X,Pos_Y,Table_de_conversion[Lit_pixel(Pos_X,Pos_Y)]);
+        Pixel(x_pos,y_pos,Table_de_conversion[Lit_pixel(x_pos,y_pos)]);
     }
 }
 
@@ -276,7 +276,7 @@ void Remap_image_HIGH(byte * Table_de_conversion)
 }
 
 
-void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette Palette, dword * Utilisation_couleur)
+void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette palette, dword * Utilisation_couleur)
 {
   short Pos_1;
   short Pos_2;
@@ -289,7 +289,7 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
   dword Utilisation_temporaire[256];
 
   // On fait une copie de la palette
-  memcpy(Palette_temporaire, Palette, sizeof(T_Palette));
+  memcpy(Palette_temporaire, palette, sizeof(T_Palette));
 
   // On fait une copie de la table d'utilisation des couleurs
   memcpy(Utilisation_temporaire, Utilisation_couleur, sizeof(dword) * 256);
@@ -313,9 +313,9 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
 
       Table_de_conversion[Pos_2]=Pos_1;
       Utilisation_couleur[Pos_1]=Utilisation_temporaire[Pos_2];
-      Palette[Pos_1].R=Palette_temporaire[Pos_2].R;
-      Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
-      Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
+      palette[Pos_1].R=Palette_temporaire[Pos_2].R;
+      palette[Pos_1].G=Palette_temporaire[Pos_2].G;
+      palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
       // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_2)
@@ -335,9 +335,9 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
 
       Table_de_conversion[Pos_2]=Pos_1;
       Utilisation_couleur[Pos_1]=Utilisation_temporaire[Pos_2];
-      Palette[Pos_1].R=Palette_temporaire[Pos_2].R;
-      Palette[Pos_1].V=Palette_temporaire[Pos_2].V;
-      Palette[Pos_1].B=Palette_temporaire[Pos_2].B;
+      palette[Pos_1].R=Palette_temporaire[Pos_2].R;
+      palette[Pos_1].G=Palette_temporaire[Pos_2].G;
+      palette[Pos_1].B=Palette_temporaire[Pos_2].B;
 
       // On gère la mise à jour de Pos_2
       if (Pos_2==Fin_1)
@@ -363,17 +363,17 @@ void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,
       Utilisation_couleur[Pos_2]=Tempo;
 
       // On fait un changement de teinte:
-      Tempo           =Palette[Pos_1].R;
-      Palette[Pos_1].R=Palette[Pos_2].R;
-      Palette[Pos_2].R=Tempo;
+      Tempo           =palette[Pos_1].R;
+      palette[Pos_1].R=palette[Pos_2].R;
+      palette[Pos_2].R=Tempo;
 
-      Tempo           =Palette[Pos_1].V;
-      Palette[Pos_1].V=Palette[Pos_2].V;
-      Palette[Pos_2].V=Tempo;
+      Tempo           =palette[Pos_1].G;
+      palette[Pos_1].G=palette[Pos_2].G;
+      palette[Pos_2].G=Tempo;
 
-      Tempo           =Palette[Pos_1].B;
-      Palette[Pos_1].B=Palette[Pos_2].B;
-      Palette[Pos_2].B=Tempo;
+      Tempo           =palette[Pos_1].B;
+      palette[Pos_1].B=palette[Pos_2].B;
+      palette[Pos_2].B=Tempo;
     }
   }
 
@@ -390,7 +390,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
   short Indice,Indice2;
   byte Couleur;
   byte Table_de_remplacement[256];
-  Composantes RVB[4];
+  Composantes rgb[4];
   short Nouvelles[4]={255,254,253,252};
 
   // On initialise la table de remplacement
@@ -425,16 +425,16 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
     }
   } while (Couleur);
 
-  //   On sauvegarde dans RVB les teintes qu'on va remplacer et on met les
+  //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
   // couleurs du menu par défaut
   for (Indice=0; Indice<4; Indice++)
   {
     Couleur=Nouvelles[Indice];
-    RVB[Indice].R=Principal_Palette[Couleur].R;
-    RVB[Indice].V=Principal_Palette[Couleur].V;
-    RVB[Indice].B=Principal_Palette[Couleur].B;
+    rgb[Indice].R=Principal_Palette[Couleur].R;
+    rgb[Indice].G=Principal_Palette[Couleur].G;
+    rgb[Indice].B=Principal_Palette[Couleur].B;
     Principal_Palette[Couleur].R=Coul_menu_pref[Indice].R;
-    Principal_Palette[Couleur].V=Coul_menu_pref[Indice].V;
+    Principal_Palette[Couleur].G=Coul_menu_pref[Indice].G;
     Principal_Palette[Couleur].B=Coul_menu_pref[Indice].B;
   }
 
@@ -443,7 +443,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
   Effacer_curseur();
   for (Indice=0; Indice<4; Indice++)
     Table_de_remplacement[Nouvelles[Indice]]=Meilleure_couleur_sans_exclusion
-                                  (RVB[Indice].R,RVB[Indice].V,RVB[Indice].B);
+                                  (rgb[Indice].R,rgb[Indice].G,rgb[Indice].B);
 
   // On fait un changement des couleurs visibles à l'écran et dans l'image
   Remap_image_HIGH(Table_de_remplacement);
@@ -452,7 +452,7 @@ void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
 
 
 
-void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Palette Palette,dword * Utilisation_couleur)
+void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Palette palette,dword * Utilisation_couleur)
 {
   char  Chaine[5];                // Buffer d'affichage du compteur
   byte  Table_de_conversion[256]; // Table de conversion
@@ -487,9 +487,9 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     if (Utilisation_couleur[Couleur_1])
     {
       // On commence par s'occuper des teintes de la palette
-      Palette[Couleur_2].R=Palette[Couleur_1].R;
-      Palette[Couleur_2].V=Palette[Couleur_1].V;
-      Palette[Couleur_2].B=Palette[Couleur_1].B;
+      palette[Couleur_2].R=palette[Couleur_1].R;
+      palette[Couleur_2].G=palette[Couleur_1].G;
+      palette[Couleur_2].B=palette[Couleur_1].B;
 
       // Ensuite, on met à jour le tableau d'occupation des couleurs.
       Utilisation_couleur[Couleur_2]=Utilisation_couleur[Couleur_1];
@@ -506,9 +506,9 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
   // On met toutes les couleurs inutilisées en noir
   for (;Couleur_2<256;Couleur_2++)
   {
-    Palette[Couleur_2].R=0;
-    Palette[Couleur_2].V=0;
-    Palette[Couleur_2].B=0;
+    palette[Couleur_2].R=0;
+    palette[Couleur_2].G=0;
+    palette[Couleur_2].B=0;
     Utilisation_couleur[Couleur_2]=0;
   }
 
@@ -528,9 +528,9 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
       for (Couleur_2=Couleur_1+1;Couleur_2<(*Nb_couleurs_utilisees);Couleur_2++)
         if (Couleur_1!=Couleur_2)
         {
-          Difference =abs((short)Palette[Couleur_1].R-Palette[Couleur_2].R)+
-                      abs((short)Palette[Couleur_1].V-Palette[Couleur_2].V)+
-                      abs((short)Palette[Couleur_1].B-Palette[Couleur_2].B);
+          Difference =abs((short)palette[Couleur_1].R-palette[Couleur_2].R)+
+                      abs((short)palette[Couleur_1].G-palette[Couleur_2].G)+
+                      abs((short)palette[Couleur_1].B-palette[Couleur_2].B);
 
           if (Difference<=Meilleure_difference)
           {
@@ -553,14 +553,14 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     // Meilleure_couleur_2 !
 
     // On met à jour la palette.
-    Palette[Meilleure_couleur_1].R=Round_div((Utilisation_couleur[Meilleure_couleur_1]*Palette[Meilleure_couleur_1].R)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*Palette[Meilleure_couleur_2].R),
+    palette[Meilleure_couleur_1].R=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].R)+
+                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].R),
                                              Meilleure_utilisation);
-    Palette[Meilleure_couleur_1].V=Round_div((Utilisation_couleur[Meilleure_couleur_1]*Palette[Meilleure_couleur_1].V)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*Palette[Meilleure_couleur_2].V),
+    palette[Meilleure_couleur_1].G=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].G)+
+                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].G),
                                              Meilleure_utilisation);
-    Palette[Meilleure_couleur_1].B=Round_div((Utilisation_couleur[Meilleure_couleur_1]*Palette[Meilleure_couleur_1].B)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*Palette[Meilleure_couleur_2].B),
+    palette[Meilleure_couleur_1].B=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].B)+
+                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].B),
                                              Meilleure_utilisation);
 
     // On met à jour la table d'utilisation.
@@ -599,9 +599,9 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
         //   Et on transfère ses teintes dans les teintes de la couleur qui
         // la précède.
-        Palette[Couleur_1-1].R=Palette[Couleur_1].R;
-        Palette[Couleur_1-1].V=Palette[Couleur_1].V;
-        Palette[Couleur_1-1].B=Palette[Couleur_1].B;
+        palette[Couleur_1-1].R=palette[Couleur_1].R;
+        palette[Couleur_1-1].G=palette[Couleur_1].G;
+        palette[Couleur_1-1].B=palette[Couleur_1].B;
       }
 
       //   Une fois la palette et la table d'utilisation gérées, on peut
@@ -618,9 +618,9 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
     // A la fin, on doit passer (dans la palette) les teintes du dernier
     // élément de notre ensemble en noir.
-    Palette[*Nb_couleurs_utilisees].R=0;
-    Palette[*Nb_couleurs_utilisees].V=0;
-    Palette[*Nb_couleurs_utilisees].B=0;
+    palette[*Nb_couleurs_utilisees].R=0;
+    palette[*Nb_couleurs_utilisees].G=0;
+    palette[*Nb_couleurs_utilisees].B=0;
 
     // Au passage, on va s'assurer que l'on a pas oublié de la mettre à une
     // utilisation nulle.
@@ -641,14 +641,14 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
 
 
 void Palette_Modifier_jauge(T_Bouton_scroller * slider,
-                            word nb_elements, word Position,
-                            char * Valeur, short Pos_X)
+                            word nb_elements, word position,
+                            char * Valeur, short x_pos)
 {
   slider->Nb_elements=nb_elements;
-  slider->Position=Position;
+  slider->Position=position;
   Calculer_hauteur_curseur_jauge(slider);
   Fenetre_Dessiner_jauge(slider);
-  Print_compteur(Pos_X,172,Valeur,CM_Noir,CM_Clair);
+  Print_compteur(x_pos,172,Valeur,CM_Noir,CM_Clair);
 }
 
 
@@ -656,7 +656,7 @@ void Palette_Modifier_jauge(T_Bouton_scroller * slider,
 void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
                          T_Bouton_scroller * Jauge_verte,
                          T_Bouton_scroller * Jauge_bleue,
-                         byte Bloc_selectionne, Composantes * Palette)
+                         byte Bloc_selectionne, Composantes * palette)
 {
   char Chaine[5];
 
@@ -669,9 +669,9 @@ void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
   else
   {
     byte j1, j2, j3;
-    j1= Palette[Fore_color].R;
-    j2= Palette[Fore_color].V;
-    j3= Palette[Fore_color].B;
+    j1= palette[Fore_color].R;
+    j2= palette[Fore_color].G;
+    j3= palette[Fore_color].B;
     if (!Palette_mode_RGB)
     {
       RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
@@ -691,7 +691,7 @@ void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
 void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
                                T_Bouton_scroller * Jauge_verte,
                                T_Bouton_scroller * Jauge_bleue,
-                               T_Palette Palette,byte start,byte end)
+                               T_Palette palette,byte start,byte end)
 {
   char Chaine[5];
 
@@ -716,9 +716,9 @@ void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
   {
     // Dans le cas d'une seule couleur, composantes.
     byte j1, j2, j3;
-    j1= Palette[start].R;
-    j2= Palette[start].V;
-    j3= Palette[start].B;
+    j1= palette[start].R;
+    j2= palette[start].G;
+    j3= palette[start].B;
     if (!Palette_mode_RGB)
     {
       RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
@@ -759,7 +759,7 @@ void Bouton_Palette(void)
   byte   Derniere_couleur;
   char   Chaine[10];
   word   i;
-  //short  Pos_X,Pos_Y;
+  //short  x_pos,y_pos;
   T_Bouton_normal   * Bouton_Used;
   T_Bouton_scroller * Jauge_rouge;
   T_Bouton_scroller * Jauge_verte;
@@ -782,7 +782,7 @@ void Bouton_Palette(void)
 
   Unite_Composantes(Graduations_RGB);
 
-  Ouvrir_fenetre(299,188,"Palette");
+  Ouvrir_fenetre(299,188,"palette");
 
   memcpy(Palette_de_travail,Principal_Palette,sizeof(T_Palette));
   memcpy(Palette_backup    ,Principal_Palette,sizeof(T_Palette));
@@ -809,7 +809,7 @@ void Bouton_Palette(void)
   // Jauges de couleur
   Palette_mode_RGB=1;
   Jauge_rouge = Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
-  Jauge_verte = Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].V*Color_Max/255);// 3
+  Jauge_verte = Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].G*Color_Max/255);// 3
   Jauge_bleue = Fenetre_Definir_bouton_scroller(236, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].B*Color_Max/255);// 4
   Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
   Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
@@ -825,7 +825,7 @@ void Bouton_Palette(void)
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
   Formate_composante(Principal_Palette[Fore_color].R*Color_Max/255,Chaine);
   Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
-  Formate_composante(Principal_Palette[Fore_color].V*Color_Max/255,Chaine);
+  Formate_composante(Principal_Palette[Fore_color].G*Color_Max/255,Chaine);
   Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
   Formate_composante(Principal_Palette[Fore_color].B*Color_Max/255,Chaine);
   Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
@@ -895,7 +895,7 @@ void Bouton_Palette(void)
       case  0 : // Nulle part
         break;
       case -1 : // Hors de la fenêtre
-      case  1 : // Palette
+      case  1 : // palette
         if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
         {
           Effacer_curseur();
@@ -1029,7 +1029,7 @@ void Bouton_Palette(void)
               255-Jauge_verte->Position,
               255-Jauge_bleue->Position,
               &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].G,
               &Palette_de_travail[Fore_color].B);
             Formate_composante((int)255-Jauge_rouge->Position,Chaine);
           }
@@ -1088,7 +1088,7 @@ void Bouton_Palette(void)
           if(Palette_mode_RGB)
           {
             Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
           } 
           else
           {
@@ -1097,7 +1097,7 @@ void Bouton_Palette(void)
               255-Jauge_verte->Position,
               255-Jauge_bleue->Position,
               &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].G,
               &Palette_de_travail[Fore_color].B);
             Formate_composante((int)255-Jauge_verte->Position,Chaine);
           }
@@ -1108,7 +1108,7 @@ void Bouton_Palette(void)
           if(Palette_mode_RGB)
           {
             for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+              Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
           }
           else
           {
@@ -1165,7 +1165,7 @@ void Bouton_Palette(void)
               255-Jauge_verte->Position,
               255-Jauge_bleue->Position,
               &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].V,
+              &Palette_de_travail[Fore_color].G,
               &Palette_de_travail[Fore_color].B);
             Formate_composante((int)255-Jauge_bleue->Position,Chaine);
           }          
@@ -1235,7 +1235,7 @@ void Bouton_Palette(void)
         // Grey Scale
         for (i=Debut_block;i<=Fin_block;i++)
         {
-          Couleur_temporaire=(dword)( ((dword)Palette_de_travail[i].R*30) + ((dword)Palette_de_travail[i].V*59) + ((dword)Palette_de_travail[i].B*11) )/100;
+          Couleur_temporaire=(dword)( ((dword)Palette_de_travail[i].R*30) + ((dword)Palette_de_travail[i].G*59) + ((dword)Palette_de_travail[i].B*11) )/100;
           Modifier_Rouge(i,Couleur_temporaire,Palette_de_travail);
           Modifier_Vert (i,Couleur_temporaire,Palette_de_travail);
           Modifier_Bleu (i,Couleur_temporaire,Palette_de_travail);
@@ -1435,7 +1435,7 @@ void Bouton_Palette(void)
           {
             Couleur_temporaire=Debut_block+(i % (Fin_block+1-Debut_block));
             Palette_de_travail[i].R=Palette_backup[Couleur_temporaire].R;
-            Palette_de_travail[i].V=Palette_backup[Couleur_temporaire].V;
+            Palette_de_travail[i].G=Palette_backup[Couleur_temporaire].G;
             Palette_de_travail[i].B=Palette_backup[Couleur_temporaire].B;
           }
         }
@@ -1486,7 +1486,7 @@ void Bouton_Palette(void)
             (Jauge_verte->Position)--;
             Fenetre_Dessiner_jauge(Jauge_verte);
             Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
             Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
           }
           if (Jauge_bleue->Position)
@@ -1519,7 +1519,7 @@ void Bouton_Palette(void)
           for (i=Debut_block; i<=Fin_block; i++)
           {
             Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
             Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
           }
 
@@ -1611,7 +1611,7 @@ void Bouton_Palette(void)
             (Jauge_verte->Position)++;
             Fenetre_Dessiner_jauge(Jauge_verte);
             Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].V*Color_Max/255,Chaine);
+            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
             Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
           }
           if (Jauge_bleue->Position<Color_Max)
@@ -1644,7 +1644,7 @@ void Bouton_Palette(void)
           for (i=Debut_block; i<=Fin_block; i++)
           {
             Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].V+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
             Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
           }
 
@@ -1724,7 +1724,7 @@ void Bouton_Palette(void)
         for (i=Debut_block;i<=Fin_block;i++)
         {
           Modifier_Rouge(i,255-Palette_de_travail[i].R,Palette_de_travail);
-          Modifier_Vert (i,255-Palette_de_travail[i].V,Palette_de_travail);
+          Modifier_Vert (i,255-Palette_de_travail[i].G,Palette_de_travail);
           Modifier_Bleu (i,255-Palette_de_travail[i].B,Palette_de_travail);
         }
         Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
@@ -1747,7 +1747,7 @@ void Bouton_Palette(void)
         {
           Couleur_temporaire=Fin_block-(i-Debut_block);
           Modifier_Rouge(i,Palette_backup[Couleur_temporaire].R,Palette_de_travail);
-          Modifier_Vert (i,Palette_backup[Couleur_temporaire].V,Palette_de_travail);
+          Modifier_Vert (i,Palette_backup[Couleur_temporaire].G,Palette_de_travail);
           Modifier_Bleu (i,Palette_backup[Couleur_temporaire].B,Palette_de_travail);
           if (Bouton_clicke==22)
           {
@@ -1844,7 +1844,7 @@ void Bouton_Palette(void)
             oh=h; ol=l; os=s;
             // On trie par Chrominance (H) et Luminance (L)
             RGBtoHSL(Palette_de_travail[Couleur_temporaire].R,
-            Palette_de_travail[Couleur_temporaire].V,
+            Palette_de_travail[Couleur_temporaire].G,
             Palette_de_travail[Couleur_temporaire].B,&h,&s,&l);
 
             if(
@@ -2091,7 +2091,7 @@ void Bouton_Palette_secondaire(void)
   Fenetre_Definir_bouton_normal(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
   Fenetre_Definir_bouton_normal( 80,126,53,14,"Cancel"              , 0,1,TOUCHE_ESC); // 4
   Fenetre_Afficher_cadre(10,55,122,51);
-  Print_dans_fenetre(18,59,"Palette layout",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(18,59,"palette layout",CM_Fonce,CM_Clair);
   Print_dans_fenetre(35,77,"Cols",CM_Fonce,CM_Clair);
   Print_dans_fenetre(84,77,"Lines",CM_Fonce,CM_Clair);
   Print_dans_fenetre(157,66,"RGB",CM_Fonce,CM_Clair);

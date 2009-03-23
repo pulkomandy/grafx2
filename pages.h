@@ -68,7 +68,7 @@ void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list);
 
 int Initialiser_les_listes_de_backups_en_debut_de_programme(int Taille,int width,int height);
 void Detruire_les_listes_de_backups_en_fin_de_programme(void);
-void Nouveau_nombre_de_backups(int Nouveau);
+void Nouveau_nombre_de_backups(int nb_backups);
 int Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
 int Backuper_et_redimensionner_brouillon(int width,int height);
 void Backup(void);

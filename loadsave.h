@@ -19,9 +19,9 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur);
-void Pixel_Chargement_dans_preview      (word Pos_X,word Pos_Y,byte Couleur);
-void Pixel_Chargement_dans_brosse       (word Pos_X,word Pos_Y,byte Couleur);
+void Pixel_Chargement_dans_ecran_courant(word x_pos,word y_pos,byte Couleur);
+void Pixel_Chargement_dans_preview      (word x_pos,word y_pos,byte Couleur);
+void Pixel_Chargement_dans_brosse       (word x_pos,word y_pos,byte Couleur);
 
 void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix);
 

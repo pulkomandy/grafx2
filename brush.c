@@ -93,10 +93,10 @@ void Calculer_dimensions_clipees_zoom(short * X,short * Y,short * width,short * 
 
   // -- Afficher le pinceau (de façon définitive ou non) --
 
-void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
+void Afficher_pinceau(short X,short Y,byte Couleur,byte is_preview)
   // X,Y: position du centre du pinceau
   // Couleur: couleur à appliquer au pinceau
-  // Preview: "Il ne faut l'afficher qu'à l'écran"
+  // is_preview: "Il ne faut l'afficher qu'à l'écran"
 {
   short Debut_X; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
@@ -110,8 +110,8 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         // de laquelle on affiche la brosse/pinceau
   short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short Pos_X; // Position X (dans l'image) en cours d'affichage
-  short Pos_Y; // Position Y (dans l'image) en cours d'affichage
+  short x_pos; // Position X (dans l'image) en cours d'affichage
+  short y_pos; // Position Y (dans l'image) en cours d'affichage
   short Compteur_X; // Position X (dans la brosse/pinceau) en cours
         // d'affichage
   short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours
@@ -121,10 +121,10 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
   short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la
         // brosse/pinceau
   byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
-  int Position;
+  int position;
   byte * Temp;
 
-  if (!(Preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
+  if (!(is_preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
   switch (Pinceau_Forme)
   {
     case FORME_PINCEAU_POINT : // !!! TOUJOURS EN PREVIEW !!!
@@ -152,7 +152,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       Fin_Compteur_X=Debut_Compteur_X+width;
       Fin_Compteur_Y=Debut_Compteur_Y+height;
 
-      if (Preview)
+      if (is_preview)
       {
         if ( (width>0) && (height>0) )
           Display_brush_Color(
@@ -216,24 +216,24 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           }
           else
           {
-            for (Pos_Y = Debut_Y, Compteur_Y = Debut_Compteur_Y;
+            for (y_pos = Debut_Y, Compteur_Y = Debut_Compteur_Y;
                 Compteur_Y < Fin_Compteur_Y;
-                Pos_Y++, Compteur_Y++
+                y_pos++, Compteur_Y++
             )
-              for (Pos_X = Debut_X, Compteur_X = Debut_Compteur_X;
+              for (x_pos = Debut_X, Compteur_X = Debut_Compteur_X;
                 Compteur_X < Fin_Compteur_X;
-                Pos_X++, Compteur_X++
+                x_pos++, Compteur_X++
               )
               {
                 Couleur_temporaire = Lit_pixel_dans_ecran_courant(
-                        Pos_X,Pos_Y
+                        x_pos,y_pos
                 );
-                Position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
+                position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
                 if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y) != Back_color)
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                        Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
-                Smear_Brosse[Position]=Couleur_temporaire;
+                        Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
+                Smear_Brosse[position]=Couleur_temporaire;
               }
 
               Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
@@ -247,19 +247,19 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         else
         {
           if (Shade_Table==Shade_Table_gauche)
-            for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-              for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
               {
                 Couleur_temporaire=Lit_pixel_dans_brosse(Compteur_X,Compteur_Y);
                 if (Couleur_temporaire!=Back_color)
-                  Afficher_pixel(Pos_X,Pos_Y,Couleur_temporaire);
+                  Afficher_pixel(x_pos,y_pos,Couleur_temporaire);
               }
           else
-            for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-              for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
               {
                 if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
-                  Afficher_pixel(Pos_X,Pos_Y,Couleur);
+                  Afficher_pixel(x_pos,y_pos,Couleur);
               }
         }
         Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
@@ -276,7 +276,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       Debut_Compteur_Y=Debut_Y-(Y-Brosse_Decalage_Y);
       Fin_Compteur_X=Debut_Compteur_X+width;
       Fin_Compteur_Y=Debut_Compteur_Y+height;
-      if (Preview)
+      if (is_preview)
       {
         if ( (width>0) && (height>0) )
           Display_brush_Mono(Debut_X-Principal_Decalage_X,
@@ -335,16 +335,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           }
           else
           {
-            for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-              for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
               {
-                Couleur_temporaire=Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y);
-                Position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
+                Couleur_temporaire=Lit_pixel_dans_ecran_courant(x_pos,y_pos);
+                position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
                 if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
-                Smear_Brosse[Position]=Couleur_temporaire;
+                  Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
+                Smear_Brosse[position]=Couleur_temporaire;
               }
 
             Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
@@ -358,11 +358,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         }
         else
         {
-          for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-            for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+          for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+            for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
             {
               if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
-                Afficher_pixel(Pos_X,Pos_Y,Couleur);
+                Afficher_pixel(x_pos,y_pos,Couleur);
             }
           Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
         }
@@ -378,7 +378,7 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
       Debut_Compteur_Y=Debut_Y-(Y-Pinceau_Decalage_Y);
       Fin_Compteur_X=Debut_Compteur_X+width;
       Fin_Compteur_Y=Debut_Compteur_Y+height;
-      if (Preview)
+      if (is_preview)
       {
         Temp=Brosse;
         Brosse=Pinceau_Sprite;
@@ -440,16 +440,16 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
           }
           else
           {
-            for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-              for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
               {
-                Couleur_temporaire=Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y);
-                Position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
+                Couleur_temporaire=Lit_pixel_dans_ecran_courant(x_pos,y_pos);
+                position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
                 if ( (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X]) // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
                   && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)          // On clippe l'effet smear entre Smear_Min et Smear_Max
                   && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  Afficher_pixel(Pos_X,Pos_Y,Smear_Brosse[Position]);
-                Smear_Brosse[Position]=Couleur_temporaire;
+                  Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
+                Smear_Brosse[position]=Couleur_temporaire;
               }
               Mettre_Ecran_A_Jour(Debut_X, Debut_Y, width, height);
           }
@@ -462,11 +462,11 @@ void Afficher_pinceau(short X,short Y,byte Couleur,byte Preview)
         }
         else
         {
-          for (Pos_Y=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;Pos_Y++,Compteur_Y++)
-            for (Pos_X=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;Pos_X++,Compteur_X++)
+          for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
+            for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
             {
               if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
-                Afficher_pixel(Pos_X,Pos_Y,Couleur);
+                Afficher_pixel(x_pos,y_pos,Couleur);
             }
           Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
         }
@@ -491,8 +491,8 @@ void Effacer_pinceau(short X,short Y)
         // de laquelle on affiche la brosse/pinceau
   short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  //short Pos_X; // Position X (dans l'image) en cours d'affichage
-  //short Pos_Y; // Position Y (dans l'image) en cours d'affichage
+  //short x_pos; // Position X (dans l'image) en cours d'affichage
+  //short y_pos; // Position Y (dans l'image) en cours d'affichage
   //short Compteur_X; // Position X (dans la brosse/pinceau) en cours
         //d'affichage
   //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
@@ -611,8 +611,8 @@ void Effacer_pinceau(short X,short Y)
 void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear)
 {
   short Temporaire;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   word  Nouvelle_Brosse_Largeur;
   word  Nouvelle_Brosse_Hauteur;
 
@@ -693,11 +693,11 @@ void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short c
     // On regarde s'il faut effacer quelque chose:
     if (clear)
     {
-      for (Pos_Y=Debut_Y;Pos_Y<Debut_Y+Brosse_Hauteur;Pos_Y++)
-        for (Pos_X=Debut_X;Pos_X<Debut_X+Brosse_Largeur;Pos_X++)
+      for (y_pos=Debut_Y;y_pos<Debut_Y+Brosse_Hauteur;y_pos++)
+        for (x_pos=Debut_X;x_pos<Debut_X+Brosse_Largeur;x_pos++)
         {
-          Pixel_dans_ecran_courant(Pos_X,Pos_Y,Back_color);
-          Pixel_Preview           (Pos_X,Pos_Y,Back_color);
+          Pixel_dans_ecran_courant(x_pos,y_pos,Back_color);
+          Pixel_Preview           (x_pos,y_pos,Back_color);
         }
       Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Brosse_Largeur,Brosse_Hauteur);
     }
@@ -740,8 +740,8 @@ void Rotate_90_deg()
 
 void Remap_brosse(void)
 {
-  short Pos_X; // Variable de balayage de la brosse
-  short Pos_Y; // Variable de balayage de la brosse
+  short x_pos; // Variable de balayage de la brosse
+  short y_pos; // Variable de balayage de la brosse
   byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
   int   Couleur;
 
@@ -751,9 +751,9 @@ void Remap_brosse(void)
     Utilisee[Couleur]=0;
 
   // On calcule la table d'utilisation des couleurs
-  for (Pos_Y=0;Pos_Y<Brosse_Hauteur;Pos_Y++)
-    for (Pos_X=0;Pos_X<Brosse_Largeur;Pos_X++)
-      Utilisee[Lit_pixel_dans_brosse(Pos_X,Pos_Y)]=1;
+  for (y_pos=0;y_pos<Brosse_Hauteur;y_pos++)
+    for (x_pos=0;x_pos<Brosse_Largeur;x_pos++)
+      Utilisee[Lit_pixel_dans_brosse(x_pos,y_pos)]=1;
 
   //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
   // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
@@ -769,7 +769,7 @@ void Remap_brosse(void)
   //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
   for (Couleur=0;Couleur<=255;Couleur++)
     if (Utilisee[Couleur])
-      Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].V,Brouillon_Palette[Couleur].B);
+      Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].G,Brouillon_Palette[Couleur].B);
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
@@ -790,7 +790,7 @@ void Remap_brosse(void)
 
 void Outline_brush(void)
 {
-  long /*Pos,*/Pos_X,Pos_Y;
+  long /*Pos,*/x_pos,y_pos;
   byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
@@ -829,16 +829,16 @@ void Outline_brush(void)
     if (Fore_color!=Back_color)
     {
       // 1er balayage (horizontal)
-      for (Pos_Y=1; Pos_Y<Brosse_Hauteur-1; Pos_Y++)
+      for (y_pos=1; y_pos<Brosse_Hauteur-1; y_pos++)
       {
         state=0;
-        for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
+        for (x_pos=1; x_pos<Brosse_Largeur-1; x_pos++)
         {
-          if (Temporaire[((Pos_Y-1)*width)+Pos_X-1]==Back_color)
+          if (Temporaire[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
             if (state)
             {
-              Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
+              Pixel_dans_brosse(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
@@ -846,27 +846,27 @@ void Outline_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(Pos_X-1,Pos_Y,Fore_color);
+              Pixel_dans_brosse(x_pos-1,y_pos,Fore_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel à droite de la ligne
         if (state)
-          Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
+          Pixel_dans_brosse(x_pos,y_pos,Fore_color);
       }
 
       // 2ème balayage (vertical)
-      for (Pos_X=1; Pos_X<Brosse_Largeur-1; Pos_X++)
+      for (x_pos=1; x_pos<Brosse_Largeur-1; x_pos++)
       {
         state=0;
-        for (Pos_Y=1; Pos_Y<Brosse_Hauteur-1; Pos_Y++)
+        for (y_pos=1; y_pos<Brosse_Hauteur-1; y_pos++)
         {
-          if (Temporaire[((Pos_Y-1)*width)+Pos_X-1]==Back_color)
+          if (Temporaire[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
             if (state)
             {
-              Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
+              Pixel_dans_brosse(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
@@ -874,14 +874,14 @@ void Outline_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(Pos_X,Pos_Y-1,Fore_color);
+              Pixel_dans_brosse(x_pos,y_pos-1,Fore_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel en bas de la colonne
         if (state)
-          Pixel_dans_brosse(Pos_X,Pos_Y,Fore_color);
+          Pixel_dans_brosse(x_pos,y_pos,Fore_color);
       }
     }
 
@@ -904,7 +904,7 @@ void Outline_brush(void)
 
 void Nibble_brush(void)
 {
-  long /*Pos,*/Pos_X,Pos_Y;
+  long /*Pos,*/x_pos,y_pos;
   byte state;
   byte * Nouvelle_brosse;
   byte * Temporaire;
@@ -940,17 +940,17 @@ void Nibble_brush(void)
       height+=2;
 
       // 1er balayage (horizontal)
-      for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
+      for (y_pos=0; y_pos<Brosse_Hauteur; y_pos++)
       {
-        state=(Temporaire[(Pos_Y+1)*width]!=Back_color);
-        for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
+        state=(Temporaire[(y_pos+1)*width]!=Back_color);
+        for (x_pos=0; x_pos<Brosse_Largeur; x_pos++)
         {
-          if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
+          if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
           {
             if (state)
             {
-              if (Pos_X>0)
-                Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
+              if (x_pos>0)
+                Pixel_dans_brosse(x_pos-1,y_pos,Back_color);
               state=0;
             }
           }
@@ -958,28 +958,28 @@ void Nibble_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(Pos_X,Pos_Y,Back_color);
+              Pixel_dans_brosse(x_pos,y_pos,Back_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel à droite de la ligne
-        if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
-          Pixel_dans_brosse(Pos_X-1,Pos_Y,Back_color);
+        if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
+          Pixel_dans_brosse(x_pos-1,y_pos,Back_color);
       }
 
       // 2ème balayage (vertical)
-      for (Pos_X=0; Pos_X<Brosse_Largeur; Pos_X++)
+      for (x_pos=0; x_pos<Brosse_Largeur; x_pos++)
       {
-        state=(Temporaire[width+Pos_X+1]!=Back_color);;
-        for (Pos_Y=0; Pos_Y<Brosse_Hauteur; Pos_Y++)
+        state=(Temporaire[width+x_pos+1]!=Back_color);;
+        for (y_pos=0; y_pos<Brosse_Hauteur; y_pos++)
         {
-          if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
+          if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
           {
             if (state)
             {
-              if (Pos_Y>0)
-                Pixel_dans_brosse(Pos_X,Pos_Y-1,Back_color);
+              if (y_pos>0)
+                Pixel_dans_brosse(x_pos,y_pos-1,Back_color);
               state=0;
             }
           }
@@ -987,14 +987,14 @@ void Nibble_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(Pos_X,Pos_Y,Back_color);
+              Pixel_dans_brosse(x_pos,y_pos,Back_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel en bas de la colonne
-        if (Temporaire[((Pos_Y+1)*width)+Pos_X+1]==Back_color)
-          Pixel_dans_brosse(Pos_X,Pos_Y-1,Back_color);
+        if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
+          Pixel_dans_brosse(x_pos,y_pos-1,Back_color);
       }
 
       // On recentre la prise sur la brosse
@@ -1023,8 +1023,8 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
   short Fin_X=Limite_Gauche-1;
   short Fin_Y=Limite_Haut-1;
   short Temporaire;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   word  Nouvelle_Brosse_Largeur;
   word  Nouvelle_Brosse_Hauteur;
 
@@ -1032,16 +1032,16 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
   // On recherche les bornes de la brosse:
   for (Temporaire=0; Temporaire<Vertices; Temporaire++)
   {
-    Pos_X=Points[Temporaire<<1];
-    Pos_Y=Points[(Temporaire<<1)+1];
-    if (Pos_X<Debut_X)
-      Debut_X=Pos_X;
-    if (Pos_X>Fin_X)
-      Fin_X=Pos_X;
-    if (Pos_Y<Debut_Y)
-      Debut_Y=Pos_Y;
-    if (Pos_Y>Fin_Y)
-      Fin_Y=Pos_Y;
+    x_pos=Points[Temporaire<<1];
+    y_pos=Points[(Temporaire<<1)+1];
+    if (x_pos<Debut_X)
+      Debut_X=x_pos;
+    if (x_pos>Fin_X)
+      Fin_X=x_pos;
+    if (y_pos<Debut_Y)
+      Debut_Y=y_pos;
+    if (y_pos>Fin_Y)
+      Fin_Y=y_pos;
   }
 
   // On clippe ces bornes à l'écran:
@@ -1126,14 +1126,14 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
 
     // On scanne la brosse pour remplacer tous les pixels affectés par le
     // polyfill par ceux de l'image:
-    for (Pos_Y=Debut_Y;Pos_Y<=Fin_Y;Pos_Y++)
-      for (Pos_X=Debut_X;Pos_X<=Fin_X;Pos_X++)
-        if (Lit_pixel_dans_brosse(Pos_X-Debut_X,Pos_Y-Debut_Y)!=Back_color)
+    for (y_pos=Debut_Y;y_pos<=Fin_Y;y_pos++)
+      for (x_pos=Debut_X;x_pos<=Fin_X;x_pos++)
+        if (Lit_pixel_dans_brosse(x_pos-Debut_X,y_pos-Debut_Y)!=Back_color)
         {
-          Pixel_dans_brosse(Pos_X-Debut_X,Pos_Y-Debut_Y,Lit_pixel_dans_ecran_courant(Pos_X,Pos_Y));
+          Pixel_dans_brosse(x_pos-Debut_X,y_pos-Debut_Y,Lit_pixel_dans_ecran_courant(x_pos,y_pos));
           // On regarde s'il faut effacer quelque chose:
           if (clear)
-            Pixel_dans_ecran_courant(Pos_X,Pos_Y,Back_color);
+            Pixel_dans_ecran_courant(x_pos,y_pos,Back_color);
         }
 
     // On centre la prise sur la brosse
@@ -1148,7 +1148,7 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
 
 void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 {
-  int    Offset,line,Colonne;
+  int    offset,line,Colonne;
   byte * New_Brosse;
 
   int    New_Brosse_Largeur;  // Width de la nouvelle brosse
@@ -1179,7 +1179,7 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
   Delta_X_dans_brosse=(Brosse_Largeur<<16)/(X2-X1+Dx);
   Delta_Y_dans_brosse=(Brosse_Hauteur<<16)/(Y2-Y1+Dy);
 
-  // Calcul de la valeur initiale de Pos_X pour chaque ligne:
+  // Calcul de la valeur initiale de x_pos pour chaque ligne:
   if (Dx>=0)
     Pos_X_initial = 0;                // Pas d'inversion en X de la brosse
   else
@@ -1189,9 +1189,9 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
 
   if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
   {
-    Offset=0;
+    offset=0;
 
-    // Calcul de la valeur initiale de Pos_Y:
+    // Calcul de la valeur initiale de y_pos:
     if (Dy>=0)
       Pos_Y_dans_brosse=0;                // Pas d'inversion en Y de la brosse
     else
@@ -1207,11 +1207,11 @@ void Etirer_brosse(short X1, short Y1, short X2, short Y2)
       for (Colonne=0;Colonne<New_Brosse_Largeur;Colonne++)
       {
         // On copie le pixel:
-        New_Brosse[Offset]=Lit_pixel_dans_brosse(Pos_X_dans_brosse>>16,Pos_Y_dans_brosse>>16);
+        New_Brosse[offset]=Lit_pixel_dans_brosse(Pos_X_dans_brosse>>16,Pos_Y_dans_brosse>>16);
         // On passe à la colonne de brosse suivante:
         Pos_X_dans_brosse+=Delta_X_dans_brosse;
         // On passe au pixel suivant de la nouvelle brosse:
-        Offset++;
+        offset++;
       }
 
       // On passe à la ligne de brosse suivante:
@@ -1347,7 +1347,7 @@ float * ScanY_X[2];
 void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
                         int Fin_X  ,int Fin_Y  ,int Xt2,int Yt2,int height)
 {
-  int Pos_X,Pos_Y;
+  int x_pos,y_pos;
   int Incr_X,Incr_Y;
   int i,Cumul;
   int Delta_X,Delta_Y;
@@ -1358,8 +1358,8 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
   float Xt,Yt;
 
 
-  Pos_X=Debut_X;
-  Pos_Y=Debut_Y;
+  x_pos=Debut_X;
+  y_pos=Debut_Y;
 
   if (Debut_X<Fin_X)
   {
@@ -1391,52 +1391,52 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       if (Cumul>=Delta_X)
       {
         Cumul-=Delta_X;
-        Pos_Y+=Incr_Y;
+        y_pos+=Incr_Y;
       }
 
-      if ((Pos_Y>=0) && (Pos_Y<height))
+      if ((y_pos>=0) && (y_pos<height))
       {
-        Xt=(((float)((Pos_X-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
-        Yt=(((float)((Pos_X-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
+        Xt=(((float)((x_pos-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
+        Yt=(((float)((x_pos-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
+        if (ScanY_X[0][y_pos]==INDEFINI) // Gauche non défini
         {
-          ScanY_X[0][Pos_Y]=Pos_X;
-          ScanY_Xt[0][Pos_Y]=Xt;
-          ScanY_Yt[0][Pos_Y]=Yt;
+          ScanY_X[0][y_pos]=x_pos;
+          ScanY_Xt[0][y_pos]=Xt;
+          ScanY_Yt[0][y_pos]=Yt;
         }
         else
         {
-          if (Pos_X>=ScanY_X[0][Pos_Y])
+          if (x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
-             || (Pos_X>ScanY_X[1][Pos_Y]))
+            if ((ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+             || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][Pos_Y]=Pos_X;
-              ScanY_Xt[1][Pos_Y]=Xt;
-              ScanY_Yt[1][Pos_Y]=Yt;
+              ScanY_X[1][y_pos]=x_pos;
+              ScanY_Xt[1][y_pos]=Xt;
+              ScanY_Yt[1][y_pos]=Yt;
             }
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
+            if (ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
             {
-              ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
-              ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
-              ScanY_Yt[1][Pos_Y]=ScanY_Yt[0][Pos_Y];
-              ScanY_X[0][Pos_Y]=Pos_X;
-              ScanY_Xt[0][Pos_Y]=Xt;
-              ScanY_Yt[0][Pos_Y]=Yt;
+              ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
+              ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
+              ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
+              ScanY_X[0][y_pos]=x_pos;
+              ScanY_Xt[0][y_pos]=Xt;
+              ScanY_Yt[0][y_pos]=Yt;
             }
             else
             {
-              ScanY_X[0][Pos_Y]=Pos_X;
-              ScanY_Xt[0][Pos_Y]=Xt;
-              ScanY_Yt[0][Pos_Y]=Yt;
+              ScanY_X[0][y_pos]=x_pos;
+              ScanY_Xt[0][y_pos]=Xt;
+              ScanY_Yt[0][y_pos]=Yt;
             }
           }
         }
       }
-      Pos_X+=Incr_X;
+      x_pos+=Incr_X;
       Cumul+=Delta_Y;
     }
   }
@@ -1448,52 +1448,52 @@ void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
       if (Cumul>=Delta_Y)
       {
         Cumul-=Delta_Y;
-        Pos_X+=Incr_X;
+        x_pos+=Incr_X;
       }
 
-      if ((Pos_Y>=0) && (Pos_Y<height))
+      if ((y_pos>=0) && (y_pos<height))
       {
-        Xt=(((float)((Pos_Y-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
-        Yt=(((float)((Pos_Y-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
-        if (ScanY_X[0][Pos_Y]==INDEFINI) // Gauche non défini
+        Xt=(((float)((y_pos-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
+        Yt=(((float)((y_pos-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
+        if (ScanY_X[0][y_pos]==INDEFINI) // Gauche non défini
         {
-          ScanY_X[0][Pos_Y]=Pos_X;
-          ScanY_Xt[0][Pos_Y]=Xt;
-          ScanY_Yt[0][Pos_Y]=Yt;
+          ScanY_X[0][y_pos]=x_pos;
+          ScanY_Xt[0][y_pos]=Xt;
+          ScanY_Yt[0][y_pos]=Yt;
         }
         else
         {
-          if (Pos_X>=ScanY_X[0][Pos_Y])
+          if (x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
-             || (Pos_X>ScanY_X[1][Pos_Y]))
+            if ((ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+             || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][Pos_Y]=Pos_X;
-              ScanY_Xt[1][Pos_Y]=Xt;
-              ScanY_Yt[1][Pos_Y]=Yt;
+              ScanY_X[1][y_pos]=x_pos;
+              ScanY_Xt[1][y_pos]=Xt;
+              ScanY_Yt[1][y_pos]=Yt;
             }
           }
           else
           {
-            if (ScanY_X[1][Pos_Y]==INDEFINI) // Droit non défini
+            if (ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
             {
-              ScanY_X[1][Pos_Y]=ScanY_X[0][Pos_Y];
-              ScanY_Xt[1][Pos_Y]=ScanY_Xt[0][Pos_Y];
-              ScanY_Yt[1][Pos_Y]=ScanY_Yt[0][Pos_Y];
-              ScanY_X[0][Pos_Y]=Pos_X;
-              ScanY_Xt[0][Pos_Y]=Xt;
-              ScanY_Yt[0][Pos_Y]=Yt;
+              ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
+              ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
+              ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
+              ScanY_X[0][y_pos]=x_pos;
+              ScanY_Xt[0][y_pos]=Xt;
+              ScanY_Yt[0][y_pos]=Yt;
             }
             else
             {
-              ScanY_X[0][Pos_Y]=Pos_X;
-              ScanY_Xt[0][Pos_Y]=Xt;
-              ScanY_Yt[0][Pos_Y]=Yt;
+              ScanY_X[0][y_pos]=x_pos;
+              ScanY_Xt[0][y_pos]=Xt;
+              ScanY_Yt[0][y_pos]=Yt;
             }
           }
         }
       }
-      Pos_Y+=Incr_Y;
+      y_pos+=Incr_Y;
       Cumul+=Delta_X;
     }
   }

@@ -214,26 +214,26 @@ void TC_Delete(Table_conversion * t)
   free(t);
 }
 
-byte TC_Get(Table_conversion * t,int r,int v,int b)
+byte TC_Get(Table_conversion * t,int r,int g,int b)
 {
   int index;
 
   // On réduit le nombre de bits par couleur
   r=(r>>t->red_r);
-  v=(v>>t->red_v);
+  g=(g>>t->red_v);
   b=(b>>t->red_b);
   
   // On recherche la couleur la plus proche dans la table de conversion
-  index=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+  index=(r<<t->dec_r) | (g<<t->dec_v) | (b<<t->dec_b);
 
   return t->table[index];
 }
 
-void TC_Set(Table_conversion * t,int r,int v,int b,byte i)
+void TC_Set(Table_conversion * t,int r,int g,int b,byte i)
 {
   int index;
 
-  index=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+  index=(r<<t->dec_r) | (g<<t->dec_v) | (b<<t->dec_b);
   t->table[index]=i;
 }
 
@@ -298,33 +298,33 @@ void TO_Delete(Table_occurence * t)
   free(t);
 }
 
-int TO_Get(Table_occurence * t,int r,int v,int b)
+int TO_Get(Table_occurence * t,int r,int g,int b)
 {
   int index;
 
-  index=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+  index=(r<<t->dec_r) | (g<<t->dec_v) | (b<<t->dec_b);
   return t->table[index];
 }
 
-void TO_Set(Table_occurence * t,int r,int v,int b,int i)
+void TO_Set(Table_occurence * t,int r,int g,int b,int i)
 {
   int index;
 
   r=(r>>t->red_r);
-  v=(v>>t->red_v);
+  g=(g>>t->red_v);
   b=(b>>t->red_b);
-  index=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+  index=(r<<t->dec_r) | (g<<t->dec_v) | (b<<t->dec_b);
   t->table[index]=i;
 }
 
-void TO_Inc(Table_occurence * t,int r,int v,int b)
+void TO_Inc(Table_occurence * t,int r,int g,int b)
 {
   int index;
 
   r=(r>>t->red_r);
-  v=(v>>t->red_v);
+  g=(g>>t->red_v);
   b=(b>>t->red_b);
-  index=(r<<t->dec_r) | (v<<t->dec_v) | (b<<t->dec_b);
+  index=(r<<t->dec_r) | (g<<t->dec_v) | (b<<t->dec_b);
   t->table[index]++;
 }
 
@@ -334,7 +334,7 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int Taille)
   int index;
 
   for (index=Taille,ptr=image;index>0;index--,ptr++)
-    TO_Inc(t,ptr->R,ptr->V,ptr->B);
+    TO_Inc(t,ptr->R,ptr->G,ptr->B);
 }
 
 int TO_Compter_couleurs(Table_occurence * t)
@@ -361,7 +361,7 @@ int TO_Compter_couleurs(Table_occurence * t)
 void Cluster_Analyser(Cluster * c,Table_occurence * to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
-  int r,v,b;
+  int r,g,b;
 
   // On cherche les mins et les maxs de chaque composante sur la couverture
 
@@ -374,16 +374,16 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
   c->occurences=0;
   /*
   for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
-    for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+    for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       for (b=c->bmin;b<=c->bmax;b++)
       {
-        nbocc=to->table[r + v + b]; // TO_Get
+        nbocc=to->table[r + g + b]; // TO_Get
         if (nbocc)
         {
           if (r<rmin) rmin=r;
           else if (r>rmax) rmax=r;
-          if (v<vmin) vmin=v;
-          else if (v>vmax) vmax=v;
+          if (g<vmin) vmin=g;
+          else if (g>vmax) vmax=g;
           if (b<bmin) bmin=b;
           else if (b>bmax) bmax=b;
           c->occurences+=nbocc;
@@ -396,10 +396,10 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
   // précédente puisqu'on connait une borne supplémentaire
 
   for(r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
-      for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+      for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
           for(b=c->bmin;b<=c->bmax;b++)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
                 rmin=r;
                 goto RMAX;
@@ -407,43 +407,43 @@ void Cluster_Analyser(Cluster * c,Table_occurence * to)
           }
 RMAX:
   for(r=c->rmax<<16;r>=rmin;r-=1<<16)
-      for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+      for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
           for(b=c->bmin;b<=c->bmax;b++)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
                 rmax=r;
                 goto VMIN;
             }
           }
 VMIN:
-  for(v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+  for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
           for(b=c->bmin;b<=c->bmax;b++)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
-                vmin=v;
+                vmin=g;
                 goto VMAX;
             }
           }
 VMAX:
-  for(v=c->vmax<<8;v>=vmin;v-=1<<8)
+  for(g=c->vmax<<8;g>=vmin;g-=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
           for(b=c->bmin;b<=c->bmax;b++)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
-                vmax=v;
+                vmax=g;
                 goto BMIN;
             }
           }
 BMIN:
   for(b=c->bmin;b<=c->bmax;b++)
       for(r=rmin;r<=rmax;r+=1<<16)
-          for(v=vmin;v<=vmax;v+=1<<8)
+          for(g=vmin;g<=vmax;g+=1<<8)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
                 bmin=b;
                 goto BMAX;
@@ -452,9 +452,9 @@ BMIN:
 BMAX:
   for(b=c->bmax;b>=bmin;b--)
       for(r=rmin;r<=rmax;r+=1<<16)
-          for(v=vmin;v<=vmax;v+=1<<8)
+          for(g=vmin;g<=vmax;g+=1<<8)
           {
-            if(to->table[r + v + b]) // TO_Get
+            if(to->table[r + g + b]) // TO_Get
             {
                 bmax=b;
                 goto ENDCRUSH;
@@ -463,10 +463,10 @@ BMAX:
 ENDCRUSH:
   // Il faut quand même parcourir la partie utile du cluster, pour savoir combien il y a d'occurences
   for(r=rmin;r<=rmax;r+=1<<16)
-      for(v=vmin;v<=vmax;v+=1<<8)
+      for(g=vmin;g<=vmax;g+=1<<8)
           for(b=bmin;b<=bmax;b++)
           {
-            c->occurences+=to->table[r + v + b]; // TO_Get
+            c->occurences+=to->table[r + g + b]; // TO_Get
           }
 
   c->rmin=rmin>>16; c->rmax=rmax>>16;
@@ -475,34 +475,34 @@ ENDCRUSH:
 
   // On regarde la composante qui a la variation la plus grande
   r=(c->rmax-c->rmin)*299;
-  v=(c->vmax-c->vmin)*587;
+  g=(c->vmax-c->vmin)*587;
   b=(c->bmax-c->bmin)*114;
 
-  if (v>=r)
+  if (g>=r)
   {
-    // V>=R
-    if (v>=b)
+    // G>=R
+    if (g>=b)
     {
-      // V>=R et V>=B
+      // G>=R et G>=B
       c->plus_large=1;
     }
     else
     {
-      // V>=R et V<B
+      // G>=R et G<B
       c->plus_large=2;
     }
   }
   else
   {
-    // R>V
+    // R>G
     if (r>=b)
     {
-      // R>V et R>=B
+      // R>G et R>=B
       c->plus_large=0;
     }
     else
     {
-      // R>V et R<B
+      // R>G et R<B
       c->plus_large=2;
     }
   }
@@ -512,7 +512,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
 {
   int limit;
   int cumul;
-  int r,v,b;
+  int r,g,b;
 
   limit=(c->occurences)/2;
   cumul=0;
@@ -520,11 +520,11 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
   {
     for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     {
-      for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+      for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       {
         for (b=c->bmin;b<=c->bmax;b++)
         {
-          cumul+=to->table[r + v + b];
+          cumul+=to->table[r + g + b];
           if (cumul>=limit)
             break;
         }
@@ -536,7 +536,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
     }
 
     r>>=16;
-    v>>=8;
+    g>>=8;
 
     if (r==c->rmin)
       r++;
@@ -559,13 +559,13 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
   if (Teinte==1)
   {
 
-    for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+    for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
     {
       for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
       {
         for (b=c->bmin;b<=c->bmax;b++)
         {
-          cumul+=to->table[r + v + b];
+          cumul+=to->table[r + g + b];
           if (cumul>=limit)
             break;
         }
@@ -576,22 +576,22 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
         break;
     }
 
-    r>>=16; v>>=8;
+    r>>=16; g>>=8;
 
-    if (v==c->vmin)
-      v++;
-    // V est la valeur de d‚but du 2nd cluster
+    if (g==c->vmin)
+      g++;
+    // G est la valeur de d‚but du 2nd cluster
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
-    c1->Vmin=c->Vmin; c1->Vmax=v-1;
-    c1->vmin=c->vmin; c1->vmax=v-1;
+    c1->Vmin=c->Vmin; c1->Vmax=g-1;
+    c1->vmin=c->vmin; c1->vmax=g-1;
     c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
     c1->bmin=c->bmin; c1->bmax=c->bmax;
     c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
     c2->rmin=c->rmin; c2->rmax=c->rmax;
-    c2->Vmin=v;       c2->Vmax=c->Vmax;
-    c2->vmin=v;       c2->vmax=c->vmax;
+    c2->Vmin=g;       c2->Vmax=c->Vmax;
+    c2->vmin=g;       c2->vmax=c->vmax;
     c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
     c2->bmin=c->bmin; c2->bmax=c->bmax;
   }
@@ -600,11 +600,11 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
 
     for (b=c->bmin;b<=c->bmax;b++)
     {
-      for (v=c->vmin<<8;v<=c->vmax<<8;v+=1<<8)
+      for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       {
         for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
         {
-          cumul+=to->table[r + v + b];
+          cumul+=to->table[r + g + b];
           if (cumul>=limit)
             break;
         }
@@ -615,7 +615,7 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
         break;
     }
 
-    r>>=16; v>>=8;
+    r>>=16; g>>=8;
 
     if (b==c->bmin)
       b++;
@@ -639,29 +639,29 @@ void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int Teinte,Table_occure
 void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to)
 {
   int cumulR,cumulV,cumulB;
-  int r,v,b;
+  int r,g,b;
   int nbocc;
 
   byte s=0;
 
   cumulR=cumulV=cumulB=0;
   for (r=c->rmin;r<=c->rmax;r++)
-    for (v=c->vmin;v<=c->vmax;v++)
+    for (g=c->vmin;g<=c->vmax;g++)
       for (b=c->bmin;b<=c->bmax;b++)
       {
-        nbocc=TO_Get(to,r,v,b);
+        nbocc=TO_Get(to,r,g,b);
         if (nbocc)
         {
           cumulR+=r*nbocc;
-          cumulV+=v*nbocc;
+          cumulV+=g*nbocc;
           cumulB+=b*nbocc;
         }
       }
   
   c->r=(cumulR<<to->red_r)/c->occurences;
-  c->v=(cumulV<<to->red_v)/c->occurences;
+  c->g=(cumulV<<to->red_v)/c->occurences;
   c->b=(cumulB<<to->red_b)/c->occurences;
-  RGBtoHSL(c->r,c->v,c->b,&c->h,&s,&c->l);
+  RGBtoHSL(c->r,c->g,c->b,&c->h,&s,&c->l);
 }
 
 
@@ -780,9 +780,9 @@ void CS_Set(ClusterSet * cs,Cluster * c)
 }
 
 // Détermination de la meilleure palette en utilisant l'algo Median Cut :
-// 1) On considère l'espace (R,V,B) comme 1 boîte
-// 2) On cherche les extrêmes de la boîte en (R,V,B)
-// 3) On trie les pixels de l'image selon l'axe le plus long parmi (R,V,B)
+// 1) On considère l'espace (R,G,B) comme 1 boîte
+// 2) On cherche les extrêmes de la boîte en (R,G,B)
+// 3) On trie les pixels de l'image selon l'axe le plus long parmi (R,G,B)
 // 4) On coupe la boîte en deux au milieu, et on compacte pour que chaque bord corresponde bien à un pixel extreme
 // 5) On recommence à couper selon le plus grand axe toutes boîtes confondues
 // 6) On s'arrête quand on a le nombre de couleurs voulu
@@ -893,18 +893,18 @@ void CS_Trier_par_luminance(ClusterSet * cs)
 void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,Composantes * palette)
 {
   int index;
-  int r,v,b;
+  int r,g,b;
 
   for (index=0;index<cs->nb;index++)
   {
     palette[index].R=cs->clusters[index].r;
-    palette[index].V=cs->clusters[index].v;
+    palette[index].G=cs->clusters[index].g;
     palette[index].B=cs->clusters[index].b;
 
     for (r=cs->clusters[index].Rmin;r<=cs->clusters[index].Rmax;r++)
-      for (v=cs->clusters[index].Vmin;v<=cs->clusters[index].Vmax;v++)
+      for (g=cs->clusters[index].Vmin;g<=cs->clusters[index].Vmax;g++)
         for (b=cs->clusters[index].Bmin;b<=cs->clusters[index].Bmax;b++)
-          TC_Set(tc,r,v,b,index);
+          TC_Set(tc,r,g,b,index);
   }
 }
 
@@ -1012,7 +1012,7 @@ void DS_Generer(DegradeSet * ds,ClusterSet * cs)
 
 
 
-Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * palette,int r,int v,int b)
+Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * palette,int r,int g,int b)
 {
   Table_occurence  * to;
   Table_conversion * tc;
@@ -1022,10 +1022,10 @@ Table_conversion * Optimiser_palette(Bitmap24B image,int Taille,Composantes * pa
   // Création des éléments nécessaires au calcul de palette optimisée:
   to=0; tc=0; cs=0; ds=0;
 
-  to=TO_New(r,v,b);
+  to=TO_New(r,g,b);
   if (to!=0)
   {
-    tc=TC_New(r,v,b);
+    tc=TC_New(r,g,b);
     if (tc!=0)
     {
 
@@ -1095,7 +1095,7 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   Bitmap24B Suivant;
   Bitmap24B S_plus1;
   Bitmap256 d;
-  int Pos_X,Pos_Y;
+  int x_pos,y_pos;
   int Rouge,Vert,Bleu;
   float ERouge,EVert,EBleu;
 
@@ -1108,21 +1108,21 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
   d       =Dest;
 
   // On parcours chaque pixel:
-  for (Pos_Y=0;Pos_Y<height;Pos_Y++)
+  for (y_pos=0;y_pos<height;y_pos++)
   {
-    for (Pos_X=0;Pos_X<width;Pos_X++)
+    for (x_pos=0;x_pos<width;x_pos++)
     {
       // On prends la meilleure couleur de la palette qui traduit la couleur
       // 24 bits de la source:
       Rouge=Courant->R;
-      Vert =Courant->V;
+      Vert =Courant->G;
       Bleu =Courant->B;
       // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
       *d=TC_Get(tc,Rouge,Vert,Bleu);
 
       // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
       Rouge-=palette[*d].R;
-      Vert -=palette[*d].V;
+      Vert -=palette[*d].G;
       Bleu -=palette[*d].B;
 
       // Et dans chaque pixel voisin on propage l'erreur
@@ -1130,23 +1130,23 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         ERouge=(Rouge*7)/16.0;
         EVert =(Vert *7)/16.0;
         EBleu =(Bleu *7)/16.0;
-        if (Pos_X+1<width)
+        if (x_pos+1<width)
         {
           // Valeur_modifiee fait la somme des 2 params en bornant sur [0,255]
           C_plus1->R=Valeur_modifiee(C_plus1->R,ERouge);
-          C_plus1->V=Valeur_modifiee(C_plus1->V,EVert );
+          C_plus1->G=Valeur_modifiee(C_plus1->G,EVert );
           C_plus1->B=Valeur_modifiee(C_plus1->B,EBleu );
         }
       // En bas à gauche:
-      if (Pos_Y+1<height)
+      if (y_pos+1<height)
       {
         ERouge=(Rouge*3)/16.0;
         EVert =(Vert *3)/16.0;
         EBleu =(Bleu *3)/16.0;
-        if (Pos_X>0)
+        if (x_pos>0)
         {
           S_moins1->R=Valeur_modifiee(S_moins1->R,ERouge);
-          S_moins1->V=Valeur_modifiee(S_moins1->V,EVert );
+          S_moins1->G=Valeur_modifiee(S_moins1->G,EVert );
           S_moins1->B=Valeur_modifiee(S_moins1->B,EBleu );
         }
       // En bas:
@@ -1154,16 +1154,16 @@ void Convert_bitmap_24B_to_256_Floyd_Steinberg(Bitmap256 Dest,Bitmap24B Source,i
         EVert =(Vert*5 /16.0);
         EBleu =(Bleu*5 /16.0);
         Suivant->R=Valeur_modifiee(Suivant->R,ERouge);
-        Suivant->V=Valeur_modifiee(Suivant->V,EVert );
+        Suivant->G=Valeur_modifiee(Suivant->G,EVert );
         Suivant->B=Valeur_modifiee(Suivant->B,EBleu );
       // En bas à droite:
-        if (Pos_X+1<width)
+        if (x_pos+1<width)
         {
         ERouge=(Rouge/16.0);
         EVert =(Vert /16.0);
         EBleu =(Bleu /16.0);
           S_plus1->R=Valeur_modifiee(S_plus1->R,ERouge);
-          S_plus1->V=Valeur_modifiee(S_plus1->V,EVert );
+          S_plus1->G=Valeur_modifiee(S_plus1->G,EVert );
           S_plus1->B=Valeur_modifiee(S_plus1->B,EBleu );
         }
       }

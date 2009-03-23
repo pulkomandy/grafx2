@@ -171,35 +171,35 @@ int write_dword_be(FILE *file, dword dw)
 // d:\Data\C\GFX2\grafx2/grafx2.exe
 char * Position_dernier_slash(const char * Chaine)
 {
-  const char * Position = NULL;
+  const char * position = NULL;
   for (; *Chaine != '\0'; Chaine++)
     if (*Chaine == SEPARATEUR_CHEMIN[0]
 #ifdef __WIN32__    
      || *Chaine == '/'
 #endif
      )
-      Position = Chaine;
-  return (char *)Position;
+      position = Chaine;
+  return (char *)position;
 }
 // Récupère la partie "nom de file seul" d'un chemin
 void Extraire_nom_fichier(char *dest, const char *Source)
 {
-  const char * Position = Position_dernier_slash(Source);
+  const char * position = Position_dernier_slash(Source);
 
-  if (Position)
-    strcpy(dest,Position+1);
+  if (position)
+    strcpy(dest,position+1);
   else
     strcpy(dest,Source);
 }
 // Récupère la partie "répertoire+/" d'un chemin.
 void Extraire_chemin(char *dest, const char *Source)
 {
-  char * Position;
+  char * position;
 
   strcpy(dest,Source);
-  Position = Position_dernier_slash(dest);
-  if (Position)
-    *(Position+1) = '\0';
+  position = Position_dernier_slash(dest);
+  if (position)
+    *(position+1) = '\0';
   else
     strcat(dest, SEPARATEUR_CHEMIN);
 }

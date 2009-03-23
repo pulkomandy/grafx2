@@ -230,7 +230,7 @@ void Charger_DAT(void)
   for (i=0; i<256; i++)
   {
     Palette_defaut[i].R=SDLPal->colors[i].r;
-    Palette_defaut[i].V=SDLPal->colors[i].g;
+    Palette_defaut[i].G=SDLPal->colors[i].g;
     Palette_defaut[i].B=SDLPal->colors[i].b;
   }
   
@@ -745,7 +745,7 @@ void Rien_du_tout(void)
 
   // Initialiseur d'un bouton:
 
-void Initialiser_bouton(byte   Numero,
+void Initialiser_bouton(byte   btn_number,
                         word   x_offset      , word   y_offset,
                         word   width         , word   height,
                         byte   shape,
@@ -753,16 +753,16 @@ void Initialiser_bouton(byte   Numero,
                         fonction_action Desenclencher,
                         byte   family)
 {
-  Bouton[Numero].Decalage_X      =x_offset;
-  Bouton[Numero].Decalage_Y      =y_offset;
-  Bouton[Numero].Width         =width-1;
-  Bouton[Numero].Height         =height-1;
-  Bouton[Numero].Enfonce         =0;
-  Bouton[Numero].Shape           =shape;
-  Bouton[Numero].Gauche          =Gauche;
-  Bouton[Numero].Droite          =Droite;
-  Bouton[Numero].Desenclencher   =Desenclencher;
-  Bouton[Numero].Famille         =family;
+  Bouton[btn_number].Decalage_X      =x_offset;
+  Bouton[btn_number].Decalage_Y      =y_offset;
+  Bouton[btn_number].Width         =width-1;
+  Bouton[btn_number].Height         =height-1;
+  Bouton[btn_number].Enfonce         =0;
+  Bouton[btn_number].Shape           =shape;
+  Bouton[btn_number].Gauche          =Gauche;
+  Bouton[btn_number].Droite          =Droite;
+  Bouton[btn_number].Desenclencher   =Desenclencher;
+  Bouton[btn_number].Famille         =family;
 }
 
 
@@ -1118,16 +1118,16 @@ void Initialiser_operation(byte Numero_operation,
 
 void Initialisation_des_operations(void)
 {
-  byte Numero; // Numéro de l'option en cours d'auto-initialisation
+  byte number; // Numéro de l'option en cours d'auto-initialisation
   byte Bouton; // Bouton souris en cours d'auto-initialisation
   byte Taille; // Taille de la pile en cours d'auto-initialisation
 
   // Auto-initialisation des opérations (vers des actions inoffensives)
 
-  for (Numero=0;Numero<NB_OPERATIONS;Numero++)
+  for (number=0;number<NB_OPERATIONS;number++)
     for (Bouton=0;Bouton<3;Bouton++)
       for (Taille=0;Taille<TAILLE_PILE_OPERATIONS;Taille++)
-        Initialiser_operation(Numero,Bouton,Taille,Print_coordonnees,0);
+        Initialiser_operation(number,Bouton,Taille,Print_coordonnees,0);
 
 
   // Ici viennent les déclarations détaillées des opérations
@@ -1710,17 +1710,17 @@ int Charger_CFG(int Tout_charger)
     goto Erreur_config_ancienne;
 
   // - Lecture des infos contenues dans le fichier de config -
-  while (read_byte(Handle, &Chunk.Numero))
+  while (read_byte(Handle, &Chunk.Number))
   {
     read_word_le(Handle, &Chunk.Taille);
-    switch (Chunk.Numero)
+    switch (Chunk.Number)
     {
       case CHUNK_TOUCHES: // Touches
         if (Tout_charger)
         {
           for (Indice=0; Indice<(long)(Chunk.Taille/sizeof(CFG_Infos_touche)); Indice++)
           {
-            if (!read_word_le(Handle, &CFG_Infos_touche.Numero) ||
+            if (!read_word_le(Handle, &CFG_Infos_touche.Number) ||
                 !read_word_le(Handle, &CFG_Infos_touche.Touche) ||
                 !read_word_le(Handle, &CFG_Infos_touche.Touche2) )
               goto Erreur_lecture_config;
@@ -1739,7 +1739,7 @@ int Charger_CFG(int Tout_charger)
               }
               
               for (Indice2=0;
-                 ((Indice2<NB_TOUCHES) && (ConfigTouche[Indice2].Numero!=CFG_Infos_touche.Numero));
+                 ((Indice2<NB_TOUCHES) && (ConfigTouche[Indice2].Number!=CFG_Infos_touche.Number));
                  Indice2++);
               if (Indice2<NB_TOUCHES)
               {
@@ -1807,12 +1807,12 @@ int Charger_CFG(int Tout_charger)
               if (! read_word_le(Handle, &Shade_Liste[Indice].List[Indice2]))
                 goto Erreur_lecture_config;
             }
-            if (! read_byte(Handle, &Shade_Liste[Indice].Pas) ||
+            if (! read_byte(Handle, &Shade_Liste[Indice].Step) ||
               ! read_byte(Handle, &Shade_Liste[Indice].Mode) )
             goto Erreur_lecture_config;
           }
           Liste2tables(Shade_Liste[Shade_Actuel].List,
-            Shade_Liste[Shade_Actuel].Pas,
+            Shade_Liste[Shade_Actuel].Step,
             Shade_Liste[Shade_Actuel].Mode,
             Shade_Table_gauche,Shade_Table_droite);
         }
@@ -1951,7 +1951,6 @@ int Sauver_CFG(void)
   int  Indice;
   int  Indice2;
   int Modes_a_sauver;
-  //byte Octet;
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   Config_Header CFG_Header;
   Config_Chunk Chunk;
@@ -1978,15 +1977,15 @@ int Sauver_CFG(void)
     goto Erreur_sauvegarde_config;
 
   // Enregistrement des touches
-  Chunk.Numero=CHUNK_TOUCHES;
+  Chunk.Number=CHUNK_TOUCHES;
   Chunk.Taille=NB_TOUCHES*sizeof(CFG_Infos_touche);
 
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<NB_TOUCHES; Indice++)
   {
-    CFG_Infos_touche.Numero = ConfigTouche[Indice].Numero;
+    CFG_Infos_touche.Number = ConfigTouche[Indice].Number;
     switch(Ordonnancement[Indice]>>8)
     {
       case 0 :
@@ -2002,7 +2001,7 @@ int Sauver_CFG(void)
         CFG_Infos_touche.Touche2=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[1]; 
         break;
     }
-    if (!write_word_le(Handle, CFG_Infos_touche.Numero) ||
+    if (!write_word_le(Handle, CFG_Infos_touche.Number) ||
         !write_word_le(Handle, CFG_Infos_touche.Touche) ||
         !write_word_le(Handle, CFG_Infos_touche.Touche2) )
       goto Erreur_sauvegarde_config;
@@ -2015,10 +2014,10 @@ int Sauver_CFG(void)
       Modes_a_sauver++;
 
   // Sauvegarde de l'état de chaque mode vidéo
-  Chunk.Numero=CHUNK_MODES_VIDEO;
+  Chunk.Number=CHUNK_MODES_VIDEO;
   Chunk.Taille=Modes_a_sauver * sizeof(CFG_Mode_video);
 
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   for (Indice=1; Indice<Nb_modes_video; Indice++)
@@ -2035,9 +2034,9 @@ int Sauver_CFG(void)
     }
 
   // Ecriture des données du Shade (précédées du shade en cours)
-  Chunk.Numero=CHUNK_SHADE;
+  Chunk.Number=CHUNK_SHADE;
   Chunk.Taille=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Shade_Actuel))
@@ -2049,33 +2048,33 @@ int Sauver_CFG(void)
       if (! write_word_le(Handle, Shade_Liste[Indice].List[Indice2]))
         goto Erreur_sauvegarde_config;
     }
-    if (! write_byte(Handle, Shade_Liste[Indice].Pas) ||
+    if (! write_byte(Handle, Shade_Liste[Indice].Step) ||
       ! write_byte(Handle, Shade_Liste[Indice].Mode) )
     goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde des informations du Masque
-  Chunk.Numero=CHUNK_MASQUE;
+  Chunk.Number=CHUNK_MASQUE;
   Chunk.Taille=sizeof(Mask_table);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_bytes(Handle, Mask_table,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
-  Chunk.Numero=CHUNK_STENCIL;
+  Chunk.Number=CHUNK_STENCIL;
   Chunk.Taille=sizeof(Stencil);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_bytes(Handle, Stencil,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
-  Chunk.Numero=CHUNK_DEGRADES;
+  Chunk.Number=CHUNK_DEGRADES;
   Chunk.Taille=sizeof(Degrade_Tableau)+1;
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Degrade_Courant))
@@ -2091,9 +2090,9 @@ int Sauver_CFG(void)
   }
 
   // Sauvegarde de la matrice du Smooth
-  Chunk.Numero=CHUNK_SMOOTH;
+  Chunk.Number=CHUNK_SMOOTH;
   Chunk.Taille=sizeof(Smooth_Matrice);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   for (Indice=0; Indice<3; Indice++)
@@ -2102,18 +2101,18 @@ int Sauver_CFG(void)
         goto Erreur_sauvegarde_config;
 
   // Sauvegarde des couleurs à exclure
-  Chunk.Numero=CHUNK_EXCLUDE_COLORS;
+  Chunk.Number=CHUNK_EXCLUDE_COLORS;
   Chunk.Taille=sizeof(Exclude_color);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
  if (!write_bytes(Handle, Exclude_color, 256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Quick-shade
-  Chunk.Numero=CHUNK_QUICK_SHADE;
+  Chunk.Number=CHUNK_QUICK_SHADE;
   Chunk.Taille=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_byte(Handle, Quick_shade_Step))
@@ -2122,9 +2121,9 @@ int Sauver_CFG(void)
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations de la grille
-  Chunk.Numero=CHUNK_GRILLE;
+  Chunk.Number=CHUNK_GRILLE;
   Chunk.Taille=8;
-  if (!write_byte(Handle, Chunk.Numero) ||
+  if (!write_byte(Handle, Chunk.Number) ||
       !write_word_le(Handle, Chunk.Taille) )
     goto Erreur_sauvegarde_config;
   if (!write_word_le(Handle, Snap_Largeur))
@@ -2193,7 +2192,7 @@ void Config_par_defaut(void)
   Shade_Actuel=0;
   for (Indice=0; Indice<8; Indice++)
   {
-    Shade_Liste[Indice].Pas=1;
+    Shade_Liste[Indice].Step=1;
     Shade_Liste[Indice].Mode=0;
     for (Indice2=0; Indice2<512; Indice2++)
       Shade_Liste[Indice].List[Indice2]=256;
@@ -2204,7 +2203,7 @@ void Config_par_defaut(void)
       Shade_Liste[0].List[Indice*17+Indice2]=Indice*16+Indice2+16;
 
   Liste2tables(Shade_Liste[Shade_Actuel].List,
-            Shade_Liste[Shade_Actuel].Pas,
+            Shade_Liste[Shade_Actuel].Step,
             Shade_Liste[Shade_Actuel].Mode,
             Shade_Table_gauche,Shade_Table_droite);
 

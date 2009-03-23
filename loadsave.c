@@ -146,20 +146,20 @@ int FileLength(FILE * file)
 }
 
 // Chargement des pixels dans l'écran principal
-void Pixel_Chargement_dans_ecran_courant(word Pos_X,word Pos_Y,byte Couleur)
+void Pixel_Chargement_dans_ecran_courant(word x_pos,word y_pos,byte Couleur)
 {
-  //if ((Pos_X>=0) && (Pos_Y>=0)) //Toujours vrai ?
-  if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
-    Pixel_dans_ecran_courant(Pos_X,Pos_Y,Couleur);
+  //if ((x_pos>=0) && (y_pos>=0)) //Toujours vrai ?
+  if ((x_pos<Principal_Largeur_image) && (y_pos<Principal_Hauteur_image))
+    Pixel_dans_ecran_courant(x_pos,y_pos,Couleur);
 }
 
 
 // Chargement des pixels dans la brosse
-void Pixel_Chargement_dans_brosse(word Pos_X,word Pos_Y,byte Couleur)
+void Pixel_Chargement_dans_brosse(word x_pos,word y_pos,byte Couleur)
 {
-  //if ((Pos_X>=0) && (Pos_Y>=0))
-  if ((Pos_X<Brosse_Largeur) && (Pos_Y<Brosse_Hauteur))
-    Pixel_dans_brosse(Pos_X,Pos_Y,Couleur);
+  //if ((x_pos>=0) && (y_pos>=0))
+  if ((x_pos<Brosse_Largeur) && (y_pos<Brosse_Hauteur))
+    Pixel_dans_brosse(x_pos,y_pos,Couleur);
 }
 
 
@@ -172,12 +172,12 @@ byte HBPm1; // header.BitPlanes-1
 
 
 // Chargement des pixels dans la preview
-void Pixel_Chargement_dans_preview(word Pos_X,word Pos_Y,byte Couleur)
+void Pixel_Chargement_dans_preview(word x_pos,word y_pos,byte Couleur)
 {
-  if (((Pos_X % Preview_Facteur_X)==0) && ((Pos_Y % Preview_Facteur_Y)==0))
-  if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
-    Pixel(Preview_Pos_X+(Pos_X/Preview_Facteur_X),
-          Preview_Pos_Y+(Pos_Y/Preview_Facteur_Y),
+  if (((x_pos % Preview_Facteur_X)==0) && ((y_pos % Preview_Facteur_Y)==0))
+  if ((x_pos<Principal_Largeur_image) && (y_pos<Principal_Hauteur_image))
+    Pixel(Preview_Pos_X+(x_pos/Preview_Facteur_X),
+          Preview_Pos_Y+(y_pos/Preview_Facteur_Y),
           Couleur);
 }
 
@@ -191,17 +191,17 @@ void Remapper_fileselect(void)
     if(
             (
             Principal_Palette[CM_Noir].R==Principal_Palette[CM_Fonce].R &&
-            Principal_Palette[CM_Noir].V==Principal_Palette[CM_Fonce].V &&
+            Principal_Palette[CM_Noir].G==Principal_Palette[CM_Fonce].G &&
             Principal_Palette[CM_Noir].B==Principal_Palette[CM_Fonce].B
             ) ||
             (
             Principal_Palette[CM_Clair].R==Principal_Palette[CM_Fonce].R &&
-            Principal_Palette[CM_Clair].V==Principal_Palette[CM_Fonce].V &&
+            Principal_Palette[CM_Clair].G==Principal_Palette[CM_Fonce].G &&
             Principal_Palette[CM_Clair].B==Principal_Palette[CM_Fonce].B
             ) ||
             (
             Principal_Palette[CM_Blanc].R==Principal_Palette[CM_Clair].R &&
-            Principal_Palette[CM_Blanc].V==Principal_Palette[CM_Clair].V &&
+            Principal_Palette[CM_Blanc].G==Principal_Palette[CM_Clair].G &&
             Principal_Palette[CM_Blanc].B==Principal_Palette[CM_Clair].B
             )
       )
@@ -210,20 +210,20 @@ void Remapper_fileselect(void)
 
         int black =
             Principal_Palette[CM_Noir].R +
-            Principal_Palette[CM_Noir].V +
+            Principal_Palette[CM_Noir].G +
             Principal_Palette[CM_Noir].B;
         int Blanc =
             Principal_Palette[CM_Blanc].R +
-            Principal_Palette[CM_Blanc].V +
+            Principal_Palette[CM_Blanc].G +
             Principal_Palette[CM_Blanc].B;
 
         //Set_color(CM_Clair,(2*Blanc+black)/9,(2*Blanc+black)/9,(2*Blanc+black)/9);
         //Set_color(CM_Fonce,(2*black+Blanc)/9,(2*black+Blanc)/9,(2*black+Blanc)/9);
         Principal_Palette[CM_Fonce].R=(2*black+Blanc)/9;
-        Principal_Palette[CM_Fonce].V=(2*black+Blanc)/9;
+        Principal_Palette[CM_Fonce].G=(2*black+Blanc)/9;
         Principal_Palette[CM_Fonce].B=(2*black+Blanc)/9;
         Principal_Palette[CM_Clair].R=(2*Blanc+black)/9;
-        Principal_Palette[CM_Clair].V=(2*Blanc+black)/9;
+        Principal_Palette[CM_Clair].G=(2*Blanc+black)/9;
         Principal_Palette[CM_Clair].B=(2*Blanc+black)/9;
 
         Set_palette(Principal_Palette);
@@ -243,48 +243,48 @@ fonction_afficheur_24b Pixel_Chargement_24b;
 
 
 // Chargement des pixels dans le buffer 24b
-void Pixel_Chargement_dans_buffer_24b(short Pos_X,short Pos_Y,byte r,byte g,byte b)
+void Pixel_Chargement_dans_buffer_24b(short x_pos,short y_pos,byte r,byte g,byte b)
 {
   int index;
 
-  if ((Pos_X>=0) && (Pos_Y>=0))
-  if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
+  if ((x_pos>=0) && (y_pos>=0))
+  if ((x_pos<Principal_Largeur_image) && (y_pos<Principal_Hauteur_image))
   {
-    index=(Pos_Y*Principal_Largeur_image)+Pos_X;
+    index=(y_pos*Principal_Largeur_image)+x_pos;
     Buffer_image_24b[index].R=r;
-    Buffer_image_24b[index].V=g;
+    Buffer_image_24b[index].G=g;
     Buffer_image_24b[index].B=b;
   }
 }
 
 // Chargement des pixels dans la preview en 24b
-void Pixel_Chargement_dans_preview_24b(short Pos_X,short Pos_Y,byte r,byte g,byte b)
+void Pixel_Chargement_dans_preview_24b(short x_pos,short y_pos,byte r,byte g,byte b)
 {
   byte Couleur;
 
-  if (((Pos_X % Preview_Facteur_X)==0) && ((Pos_Y % Preview_Facteur_Y)==0))
-  if ((Pos_X<Principal_Largeur_image) && (Pos_Y<Principal_Hauteur_image))
+  if (((x_pos % Preview_Facteur_X)==0) && ((y_pos % Preview_Facteur_Y)==0))
+  if ((x_pos<Principal_Largeur_image) && (y_pos<Principal_Hauteur_image))
   {
     Couleur=((r >> 5) << 5) |
             ((g >> 5) << 2) |
             ((b >> 6));
-    Pixel(Preview_Pos_X+(Pos_X/Preview_Facteur_X),
-          Preview_Pos_Y+(Pos_Y/Preview_Facteur_Y),
+    Pixel(Preview_Pos_X+(x_pos/Preview_Facteur_X),
+          Preview_Pos_Y+(y_pos/Preview_Facteur_Y),
           Couleur);
   }
 }
 
 // Création d'une palette fake
-void Palette_fake_24b(T_Palette Palette)
+void Palette_fake_24b(T_Palette palette)
 {
   int Couleur;
 
   // Génération de la palette
   for (Couleur=0;Couleur<256;Couleur++)
   {
-    Palette[Couleur].R=((Couleur & 0xE0)>>5)<<5;
-    Palette[Couleur].V=((Couleur & 0x1C)>>2)<<5;
-    Palette[Couleur].B=((Couleur & 0x03)>>0)<<6;
+    palette[Couleur].R=((Couleur & 0xE0)>>5)<<5;
+    palette[Couleur].G=((Couleur & 0x1C)>>2)<<5;
+    palette[Couleur].B=((Couleur & 0x03)>>0)<<6;
   }
 }
 
@@ -485,7 +485,7 @@ void Dessiner_preview_palette(void)
 // Calcul du nom complet du fichier
 void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 {
-    byte Pos;
+    byte last_char;
 
     strcpy(Nom_du_fichier,Principal_Repertoire_fichier);
 
@@ -496,25 +496,25 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
   // Si on est en train de sauvegarder une image Colorix, on calcule son ext.
   if (Sauve_Colorix)
   {
-    Pos=strlen(Principal_Nom_fichier)-1;
-    if (Principal_Nom_fichier[Pos]=='?')
+    last_char=strlen(Principal_Nom_fichier)-1;
+    if (Principal_Nom_fichier[last_char]=='?')
     {
       if (Principal_Largeur_image<=320)
-        Principal_Nom_fichier[Pos]='I';
+        Principal_Nom_fichier[last_char]='I';
       else
       {
         if (Principal_Largeur_image<=360)
-          Principal_Nom_fichier[Pos]='Q';
+          Principal_Nom_fichier[last_char]='Q';
         else
         {
           if (Principal_Largeur_image<=640)
-            Principal_Nom_fichier[Pos]='F';
+            Principal_Nom_fichier[last_char]='F';
           else
           {
             if (Principal_Largeur_image<=800)
-              Principal_Nom_fichier[Pos]='N';
+              Principal_Nom_fichier[last_char]='N';
             else
-              Principal_Nom_fichier[Pos]='O';
+              Principal_Nom_fichier[last_char]='O';
           }
         }
       }
@@ -529,10 +529,10 @@ void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix)
 //                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
-void Lire_octet(FILE * file, byte *Octet)
+void Lire_octet(FILE * file, byte *b)
 {
   // FIXME : Remplacer les appelants par read_bytes(), et gérer les retours d'erreur.
-  read_byte(file, Octet);
+  read_byte(file, b);
 }
 
 // --------------------------------------------------------------------------
@@ -546,9 +546,9 @@ void Init_ecriture(void)
   Index_ecriture=0;
 }
 
-void Ecrire_octet(FILE *file, byte Octet)
+void Ecrire_octet(FILE *file, byte b)
 {
-  Tampon_ecriture[Index_ecriture++]=Octet;
+  Tampon_ecriture[Index_ecriture++]=b;
   if (Index_ecriture>=64000)
   {
     if (! write_bytes(file,Tampon_ecriture,64000))
@@ -880,7 +880,7 @@ void Load_IMG(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   byte * Buffer;
   FILE *file;
-  word Pos_X,Pos_Y;
+  word x_pos,y_pos;
   long Largeur_lue;
   long Taille_du_fichier;
   T_Header_IMG IMG_Header;
@@ -917,12 +917,12 @@ void Load_IMG(void)
         Principal_Hauteur_image=IMG_Header.Height;
         Largeur_lue=IMG_Header.Width;
 
-        for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
+        for (y_pos=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);y_pos++)
         {
           if (read_bytes(file,Buffer,Principal_Largeur_image))
           {
-            for (Pos_X=0; Pos_X<Principal_Largeur_image;Pos_X++)
-              Pixel_de_chargement(Pos_X,Pos_Y,Buffer[Pos_X]);
+            for (x_pos=0; x_pos<Principal_Largeur_image;x_pos++)
+              Pixel_de_chargement(x_pos,y_pos,Buffer[x_pos]);
           }
           else
             Erreur_fichier=2;
@@ -945,7 +945,7 @@ void Save_IMG(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   T_Header_IMG IMG_Header;
   byte Signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
@@ -978,9 +978,9 @@ void Save_IMG(void)
     {
       Init_ecriture();
 
-      for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
-        for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-          Ecrire_octet(file,Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
+      for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
+        for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+          Ecrire_octet(file,Lit_pixel_de_sauvegarde(x_pos,y_pos));
 
       Close_ecriture(file);
       fclose(file);
@@ -1060,7 +1060,7 @@ void Load_PKM(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   T_Header_PKM header;
   byte  Couleur;
-  byte  Octet;
+  byte  temp_byte;
   word  len;
   word  Indice;
   dword Compteur_de_pixels;
@@ -1095,27 +1095,27 @@ void Load_PKM(void)
         Indice=0;
         while ( (Indice<header.Jump) && (!Erreur_fichier) )
         {
-          if (read_byte(file,&Octet))
+          if (read_byte(file,&temp_byte))
           {
             Indice+=2; // On rajoute le "Field-id" et "le Field-size" pas encore lu
-            switch (Octet)
+            switch (temp_byte)
             {
               case 0 : // Commentaire
-                if (read_byte(file,&Octet))
+                if (read_byte(file,&temp_byte))
                 {
-                  if (Octet>TAILLE_COMMENTAIRE)
+                  if (temp_byte>TAILLE_COMMENTAIRE)
                   {
-                    Couleur=Octet;              // On se sert de Couleur comme
-                    Octet=TAILLE_COMMENTAIRE;   // variable temporaire
+                    Couleur=temp_byte;              // On se sert de Couleur comme
+                    temp_byte=TAILLE_COMMENTAIRE;   // variable temporaire
                     Couleur-=TAILLE_COMMENTAIRE;
                   }
                   else
                     Couleur=0;
 
-                  if (read_bytes(file,Principal_Commentaire,Octet))
+                  if (read_bytes(file,Principal_Commentaire,temp_byte))
                   {
-                    Indice+=Octet;
-                    Principal_Commentaire[Octet]='\0';
+                    Indice+=temp_byte;
+                    Principal_Commentaire[temp_byte]='\0';
                     if (Couleur)
                       if (fseek(file,Couleur,SEEK_CUR))
                         Erreur_fichier=2;
@@ -1128,9 +1128,9 @@ void Load_PKM(void)
                 break;
 
               case 1 : // Dimensions de l'écran d'origine
-                if (read_byte(file,&Octet))
+                if (read_byte(file,&temp_byte))
                 {
-                  if (Octet==4)
+                  if (temp_byte==4)
                   {
                     Indice+=4;
                     if ( ! read_word_le(file,(word *) &Ecran_original_X)
@@ -1145,9 +1145,9 @@ void Load_PKM(void)
                 break;
 
               case 2 : // Couleur de transparence
-                if (read_byte(file,&Octet))
+                if (read_byte(file,&temp_byte))
                 {
-                  if (Octet==1)
+                  if (temp_byte==1)
                   {
                     Indice++;
                     if (! read_byte(file,&Back_color))
@@ -1161,10 +1161,10 @@ void Load_PKM(void)
                 break;
 
               default:
-                if (read_byte(file,&Octet))
+                if (read_byte(file,&temp_byte))
                 {
-                  Indice+=Octet;
-                  if (fseek(file,Octet,SEEK_CUR))
+                  Indice+=temp_byte;
+                  if (fseek(file,temp_byte,SEEK_CUR))
                     Erreur_fichier=2;
                 }
                 else
@@ -1202,28 +1202,28 @@ void Load_PKM(void)
           // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
           {
-            Lire_octet(file, &Octet);
+            Lire_octet(file, &temp_byte);
 
             // Si ce n'est pas un octet de reconnaissance, c'est un pixel brut
-            if ( (Octet!=header.Recon1) && (Octet!=header.Recon2) )
+            if ( (temp_byte!=header.Recon1) && (temp_byte!=header.Recon2) )
             {
               Pixel_de_chargement(Compteur_de_pixels % Principal_Largeur_image,
                                   Compteur_de_pixels / Principal_Largeur_image,
-                                  Octet);
+                                  temp_byte);
               Compteur_de_donnees_packees++;
               Compteur_de_pixels++;
             }
             else // Sinon, On regarde si on va décompacter un...
             { // ... nombre de pixels tenant sur un byte
-              if (Octet==header.Recon1)
+              if (temp_byte==header.Recon1)
               {
                 Lire_octet(file, &Couleur);
-                Lire_octet(file, &Octet);
-                for (Indice=0; Indice<Octet; Indice++)
+                Lire_octet(file, &temp_byte);
+                for (Indice=0; Indice<temp_byte; Indice++)
                   Pixel_de_chargement((Compteur_de_pixels+Indice) % Principal_Largeur_image,
                                       (Compteur_de_pixels+Indice) / Principal_Largeur_image,
                                       Couleur);
-                Compteur_de_pixels+=Octet;
+                Compteur_de_pixels+=temp_byte;
                 Compteur_de_donnees_packees+=3;
               }
               else // ... nombre de pixels tenant sur un word
@@ -1544,8 +1544,8 @@ void Test_LBM(void)
             }
             if (i&2)
             {
-              Temp=Principal_Palette[j].V+16;
-              Principal_Palette[Couleur].V=(Temp<63)?Temp:63;
+              Temp=Principal_Palette[j].G+16;
+              Principal_Palette[Couleur].G=(Temp<63)?Temp:63;
             }
             if (i&4)
             {
@@ -1562,8 +1562,8 @@ void Test_LBM(void)
             }
             if ((i-7)&2)
             {
-              Temp=Principal_Palette[j].V-16;
-              Principal_Palette[Couleur].V=(Temp>=0)?Temp:0;
+              Temp=Principal_Palette[j].G-16;
+              Principal_Palette[Couleur].G=(Temp>=0)?Temp:0;
             }
             if ((i-7)&4)
             {
@@ -1578,8 +1578,8 @@ void Test_LBM(void)
       {
         Temp=Principal_Palette[j].R+8;
         Principal_Palette[i].R=(Temp<63)?Temp:63;
-        Temp=Principal_Palette[j].V+8;
-        Principal_Palette[i].V=(Temp<63)?Temp:63;
+        Temp=Principal_Palette[j].G+8;
+        Principal_Palette[i].G=(Temp<63)?Temp:63;
         Temp=Principal_Palette[j].B+8;
         Principal_Palette[i].B=(Temp<63)?Temp:63;
       }
@@ -1601,8 +1601,8 @@ void Test_LBM(void)
               Principal_Palette[Couleur].R=(Temp<63)?Temp:63;
               break;
             case 2 :
-              Temp=Principal_Palette[j].V+16;
-              Principal_Palette[Couleur].V=(Temp<63)?Temp:63;
+              Temp=Principal_Palette[j].G+16;
+              Principal_Palette[Couleur].G=(Temp<63)?Temp:63;
               break;
             default:
               Temp=Principal_Palette[j].B+16;
@@ -1617,7 +1617,7 @@ void Test_LBM(void)
       {
         j=i+32;
         Principal_Palette[j].R=Principal_Palette[i].R>>1;
-        Principal_Palette[j].V=Principal_Palette[i].V>>1;
+        Principal_Palette[j].G=Principal_Palette[i].G>>1;
         Principal_Palette[j].B=Principal_Palette[i].B>>1;
       }
     }
@@ -1649,18 +1649,18 @@ void Test_LBM(void)
 // Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
 // en faire du chunky
 
-byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
+byte Couleur_ILBM_line(word x_pos, word Vraie_taille_ligne, byte HBPm1)
 {
-  // Renvoie la couleur du pixel (ILBM) en Pos_X.
+  // Renvoie la couleur du pixel (ILBM) en x_pos.
   // CL sera le rang auquel on extrait les bits de la couleur
-  byte cl = 7 - (Pos_X & 7);
+  byte cl = 7 - (x_pos & 7);
   int ax,bh,dx;
   byte bl=0;
 
   for(dx=HBPm1;dx>=0;dx--)
   {
   //CIL_Loop
-    ax = (Vraie_taille_ligne * dx + Pos_X) >> 3;
+    ax = (Vraie_taille_ligne * dx + x_pos) >> 3;
     bh = (LBM_Buffer[ax] >> cl) & 1;
 
     bl = (bl << 1) + bh;
@@ -1670,30 +1670,30 @@ byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
 }
 
   // ----------------------- Afficher une ligne ILBM ------------------------
-  void Draw_ILBM_line(short Pos_Y, short Vraie_taille_ligne)
+  void Draw_ILBM_line(short y_pos, short Vraie_taille_ligne)
   {
     byte  Couleur;
     byte  Rouge,Vert,Bleu;
     byte  Temp;
-    short Pos_X;
+    short x_pos;
 
     if (Image_HAM<=1)                                               // ILBM
     {
-      for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
+      for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
       {
-        Pixel_de_chargement(Pos_X,Pos_Y,Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1));
+        Pixel_de_chargement(x_pos,y_pos,Couleur_ILBM_line(x_pos,Vraie_taille_ligne, HBPm1));
       }
     }
     else
     {
       Couleur=0;
       Rouge=Principal_Palette[0].R;
-      Vert =Principal_Palette[0].V;
+      Vert =Principal_Palette[0].G;
       Bleu =Principal_Palette[0].B;
       if (Image_HAM==6)
-      for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)         // HAM6
+      for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)         // HAM6
       {
-        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1);
+        Temp=Couleur_ILBM_line(x_pos,Vraie_taille_ligne, HBPm1);
         switch (Temp & 0xF0)
         {
           case 0x10: // Bleu
@@ -1711,15 +1711,15 @@ byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
           default:   // Nouvelle couleur
             Couleur=Temp;
             Rouge=Principal_Palette[Couleur].R;
-            Vert =Principal_Palette[Couleur].V;
+            Vert =Principal_Palette[Couleur].G;
             Bleu =Principal_Palette[Couleur].B;
         }
-        Pixel_de_chargement(Pos_X,Pos_Y,Couleur);
+        Pixel_de_chargement(x_pos,y_pos,Couleur);
       }
       else
-      for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)         // HAM8
+      for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)         // HAM8
       {
-        Temp=Couleur_ILBM_line(Pos_X,Vraie_taille_ligne, HBPm1);
+        Temp=Couleur_ILBM_line(x_pos,Vraie_taille_ligne, HBPm1);
         switch (Temp & 0x03)
         {
           case 0x01: // Bleu
@@ -1737,10 +1737,10 @@ byte Couleur_ILBM_line(word Pos_X, word Vraie_taille_ligne, byte HBPm1)
           default:   // Nouvelle couleur
             Couleur=Temp;
             Rouge=Principal_Palette[Couleur].R;
-            Vert =Principal_Palette[Couleur].V;
+            Vert =Principal_Palette[Couleur].G;
             Bleu =Principal_Palette[Couleur].B;
         }
-        Pixel_de_chargement(Pos_X,Pos_Y,Couleur);
+        Pixel_de_chargement(x_pos,y_pos,Couleur);
       }
     }
   }
@@ -1752,12 +1752,12 @@ void Load_LBM(void)
   T_Header_LBM header;
   char  format[4];
   char  Section[4];
-  byte  Octet;
+  byte  temp_byte;
   short B256;
   dword Nb_couleurs;
   dword Taille_image;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   short counter;
   short Taille_ligne;       // Taille d'une ligne en octets
   short Vraie_taille_ligne; // Taille d'une ligne en pixels
@@ -1850,7 +1850,7 @@ void Load_LBM(void)
 
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (Nb_couleurs&1)
-              if (read_byte(LBM_Fichier,&Octet))
+              if (read_byte(LBM_Fichier,&temp_byte))
                 Erreur_fichier=2;
 
             if ( (Wait_for((byte *)"BODY")) && (!Erreur_fichier) )
@@ -1886,10 +1886,10 @@ void Load_LBM(void)
                   if (!header.Compression)
                   {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
-                    for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+                    for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
                     {
                       if (read_bytes(LBM_Fichier,LBM_Buffer,Taille_ligne))
-                        Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
+                        Draw_ILBM_line(y_pos,Vraie_taille_ligne);
                       else
                         Erreur_fichier=2;
                     }
@@ -1901,32 +1901,32 @@ void Load_LBM(void)
 
                     LBM_Buffer=(byte *)malloc(Taille_ligne);
 
-                    for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+                    for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
                     {
-                      for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
+                      for (x_pos=0; ((x_pos<Taille_ligne) && (!Erreur_fichier)); )
                       {
-                        Lire_octet(LBM_Fichier, &Octet);
-                        // Si Octet > 127 alors il faut répéter 256-'Octet' fois la couleur de l'octet suivant
-                        // Si Octet <= 127 alors il faut afficher directement les 'Octet' octets suivants
-                        if (Octet>127)
+                        Lire_octet(LBM_Fichier, &temp_byte);
+                        // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
+                        // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
+                        if (temp_byte>127)
                         {
                           Lire_octet(LBM_Fichier, &Couleur);
-                          B256=(short)(256-Octet);
+                          B256=(short)(256-temp_byte);
                           for (counter=0; counter<=B256; counter++)
-                            if (Pos_X<Taille_ligne)
-                              LBM_Buffer[Pos_X++]=Couleur;
+                            if (x_pos<Taille_ligne)
+                              LBM_Buffer[x_pos++]=Couleur;
                             else
                               Erreur_fichier=2;
                         }
                         else
-                          for (counter=0; counter<=(short)(Octet); counter++)
-                            if (Pos_X<Taille_ligne)
-                              Lire_octet(LBM_Fichier, &(LBM_Buffer[Pos_X++]));
+                          for (counter=0; counter<=(short)(temp_byte); counter++)
+                            if (x_pos<Taille_ligne)
+                              Lire_octet(LBM_Fichier, &(LBM_Buffer[x_pos++]));
                             else
                               Erreur_fichier=2;
                       }
                       if (!Erreur_fichier)
-                        Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
+                        Draw_ILBM_line(y_pos,Vraie_taille_ligne);
                     }
 
                     free(LBM_Buffer);
@@ -1940,11 +1940,11 @@ void Load_LBM(void)
                   if (!header.Compression)
                   {                                           // non compressé
                     LBM_Buffer=(byte *)malloc(Vraie_taille_ligne);
-                    for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+                    for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
                     {
                       if (read_bytes(LBM_Fichier,LBM_Buffer,Vraie_taille_ligne))
-                        for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-                          Pixel_de_chargement(Pos_X,Pos_Y,LBM_Buffer[Pos_X]);
+                        for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+                          Pixel_de_chargement(x_pos,y_pos,LBM_Buffer[x_pos]);
                       else
                         Erreur_fichier=2;
                     }
@@ -1953,24 +1953,24 @@ void Load_LBM(void)
                   else
                   {                                               // compressé
                     /*Init_lecture();*/
-                    for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+                    for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
                     {
-                      for (Pos_X=0; ((Pos_X<Vraie_taille_ligne) && (!Erreur_fichier)); )
+                      for (x_pos=0; ((x_pos<Vraie_taille_ligne) && (!Erreur_fichier)); )
                       {
-                        Lire_octet(LBM_Fichier, &Octet);
-                        if (Octet>127)
+                        Lire_octet(LBM_Fichier, &temp_byte);
+                        if (temp_byte>127)
                         {
                           Lire_octet(LBM_Fichier, &Couleur);
-                          B256=256-Octet;
+                          B256=256-temp_byte;
                           for (counter=0; counter<=B256; counter++)
-                            Pixel_de_chargement(Pos_X++,Pos_Y,Couleur);
+                            Pixel_de_chargement(x_pos++,y_pos,Couleur);
                         }
                         else
-                          for (counter=0; counter<=Octet; counter++)
+                          for (counter=0; counter<=temp_byte; counter++)
                           {
                             byte Lu=0;
                             Lire_octet(LBM_Fichier, &Lu);
-                            Pixel_de_chargement(Pos_X++,Pos_Y,Lu);
+                            Pixel_de_chargement(x_pos++,y_pos,Lu);
                           }
                       }
                     }
@@ -2097,9 +2097,9 @@ void Save_LBM(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   T_Header_LBM header;
-  word Pos_X;
-  word Pos_Y;
-  byte Octet;
+  word x_pos;
+  word y_pos;
+  byte temp_byte;
   word Vraie_largeur;
   struct stat Informations_Fichier;
 
@@ -2160,10 +2160,10 @@ void Save_LBM(void)
 
     LBM_Taille_de_file=0;
 
-    for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+    for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
     {
-      for (Pos_X=0; ((Pos_X<Vraie_largeur) && (!Erreur_fichier)); Pos_X++)
-        Nouvelle_couleur(Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
+      for (x_pos=0; ((x_pos<Vraie_largeur) && (!Erreur_fichier)); x_pos++)
+        Nouvelle_couleur(Lit_pixel_de_sauvegarde(x_pos,y_pos));
 
       if (!Erreur_fichier)
         Transferer_couleurs();
@@ -2190,8 +2190,8 @@ void Save_LBM(void)
         {
           write_dword_be(LBM_Fichier,Informations_Fichier.st_size-7);
           fseek(LBM_Fichier,0,SEEK_END);
-          Octet=0;
-          if (! write_bytes(LBM_Fichier,&Octet,1))
+          temp_byte=0;
+          if (! write_bytes(LBM_Fichier,&temp_byte,1))
             Erreur_fichier=1;
         }
         else
@@ -2297,10 +2297,10 @@ void Load_BMP(void)
   T_BMP_Header header;
   byte * Buffer;
   word  Indice;
-  byte  Palette_locale[256][4]; // R,V,B,0
+  byte  Palette_locale[256][4]; // R,G,B,0
   word  Nb_Couleurs =  0;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   word  Taille_ligne;
   byte  a,b,c=0;
   long  Taille_du_fichier;
@@ -2364,7 +2364,7 @@ void Load_BMP(void)
             for (Indice=0; Indice<Nb_Couleurs; Indice++)
             {
               Principal_Palette[Indice].R=Palette_locale[Indice][2];
-              Principal_Palette[Indice].V=Palette_locale[Indice][1];
+              Principal_Palette[Indice].G=Palette_locale[Indice][1];
               Principal_Palette[Indice].B=Palette_locale[Indice][0];
             }
             Set_palette(Principal_Palette);
@@ -2377,32 +2377,32 @@ void Load_BMP(void)
             {
               case 0 : // Pas de compression
                 Taille_ligne=Principal_Largeur_image;
-                Pos_X=(32/header.Nb_bits); // Pos_X sert de variable temporaire
-                if (Taille_ligne % Pos_X)
-                  Taille_ligne=((Taille_ligne/Pos_X)*Pos_X)+Pos_X;
+                x_pos=(32/header.Nb_bits); // x_pos sert de variable temporaire
+                if (Taille_ligne % x_pos)
+                  Taille_ligne=((Taille_ligne/x_pos)*x_pos)+x_pos;
                 Taille_ligne=(Taille_ligne*header.Nb_bits)>>3;
 
                 Buffer=(byte *)malloc(Taille_ligne);
-                for (Pos_Y=Principal_Hauteur_image-1; ((Pos_Y>=0) && (!Erreur_fichier)); Pos_Y--)
+                for (y_pos=Principal_Hauteur_image-1; ((y_pos>=0) && (!Erreur_fichier)); y_pos--)
                 {
                   if (read_bytes(file,Buffer,Taille_ligne))
-                    for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
+                    for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
                       switch (header.Nb_bits)
                       {
                         case 8 :
-                          Pixel_de_chargement(Pos_X,Pos_Y,Buffer[Pos_X]);
+                          Pixel_de_chargement(x_pos,y_pos,Buffer[x_pos]);
                           break;
                         case 4 :
-                          if (Pos_X & 1)
-                            Pixel_de_chargement(Pos_X,Pos_Y,Buffer[Pos_X>>1] & 0xF);
+                          if (x_pos & 1)
+                            Pixel_de_chargement(x_pos,y_pos,Buffer[x_pos>>1] & 0xF);
                           else
-                            Pixel_de_chargement(Pos_X,Pos_Y,Buffer[Pos_X>>1] >> 4 );
+                            Pixel_de_chargement(x_pos,y_pos,Buffer[x_pos>>1] >> 4 );
                           break;
                         case 1 :
-                          if ( Buffer[Pos_X>>3] & (0x80>>(Pos_X&7)) )
-                            Pixel_de_chargement(Pos_X,Pos_Y,1);
+                          if ( Buffer[x_pos>>3] & (0x80>>(x_pos&7)) )
+                            Pixel_de_chargement(x_pos,y_pos,1);
                           else
-                            Pixel_de_chargement(Pos_X,Pos_Y,0);
+                            Pixel_de_chargement(x_pos,y_pos,0);
                       }
                   else
                     Erreur_fichier=2;
@@ -2411,8 +2411,8 @@ void Load_BMP(void)
                 break;
 
               case 1 : // Compression RLE 8 bits
-                Pos_X=0;
-                Pos_Y=Principal_Hauteur_image-1;
+                x_pos=0;
+                y_pos=Principal_Hauteur_image-1;
 
                 /*Init_lecture();*/
                 Lire_octet(file, &a);
@@ -2421,31 +2421,31 @@ void Load_BMP(void)
                 {
                   if (a) // Encoded mode
                     for (Indice=1; Indice<=a; Indice++)
-                      Pixel_de_chargement(Pos_X++,Pos_Y,b);
+                      Pixel_de_chargement(x_pos++,y_pos,b);
                   else   // Absolute mode
                     switch (b)
                     {
                       case 0 : // End of line
-                        Pos_X=0;
-                        Pos_Y--;
+                        x_pos=0;
+                        y_pos--;
                         break;
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
                         Lire_octet(file, &a);
                         Lire_octet(file, &b);
-                        Pos_X+=a;
-                        Pos_Y-=b;
+                        x_pos+=a;
+                        y_pos-=b;
                         break;
                       default: // Nouvelle série
                         while (b)
                         {
                           Lire_octet(file, &a);
                           Lire_octet(file, &c);
-                          Pixel_de_chargement(Pos_X++,Pos_Y,a);
+                          Pixel_de_chargement(x_pos++,y_pos,a);
                           if (--c)
                           {
-                            Pixel_de_chargement(Pos_X++,Pos_Y,c);
+                            Pixel_de_chargement(x_pos++,y_pos,c);
                             b--;
                           }
                         }
@@ -2457,8 +2457,8 @@ void Load_BMP(void)
                 break;
 
               case 2 : // Compression RLE 4 bits
-                Pos_X=0;
-                Pos_Y=Principal_Hauteur_image-1;
+                x_pos=0;
+                y_pos=Principal_Hauteur_image-1;
 
                 /*Init_lecture();*/
                 Lire_octet(file, &a);
@@ -2469,36 +2469,36 @@ void Load_BMP(void)
                     for (Indice=1; Indice<=a; Indice++)
                     {
                       if (Indice & 1)
-                        Pixel_de_chargement(Pos_X,Pos_Y,b>>4);
+                        Pixel_de_chargement(x_pos,y_pos,b>>4);
                       else
-                        Pixel_de_chargement(Pos_X,Pos_Y,b&0xF);
-                      Pos_X++;
+                        Pixel_de_chargement(x_pos,y_pos,b&0xF);
+                      x_pos++;
                     }
                   else   // Absolute mode
                     switch (b)
                     {
                       case 0 : //End of line
-                        Pos_X=0;
-                        Pos_Y--;
+                        x_pos=0;
+                        y_pos--;
                         break;
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
                         Lire_octet(file, &a);
                         Lire_octet(file, &b);
-                        Pos_X+=a;
-                        Pos_Y-=b;
+                        x_pos+=a;
+                        y_pos-=b;
                         break;
                       default: // Nouvelle série (B 1/2 pixels bruts)
-                        for (Indice=1; ((Indice<=b) && (!Erreur_fichier)); Indice++,Pos_X++)
+                        for (Indice=1; ((Indice<=b) && (!Erreur_fichier)); Indice++,x_pos++)
                         {
                           if (Indice&1)
                           {
                             Lire_octet(file, &c);
-                            Pixel_de_chargement(Pos_X,Pos_Y,c>>4);
+                            Pixel_de_chargement(x_pos,y_pos,c>>4);
                           }
                           else
-                            Pixel_de_chargement(Pos_X,Pos_Y,c&0xF);
+                            Pixel_de_chargement(x_pos,y_pos,c&0xF);
                         }
                         //   On lit l'octet rendant le nombre d'octets pair, si
                         // nécessaire. Encore un truc de crétin "made in MS".
@@ -2534,16 +2534,16 @@ void Load_BMP(void)
         if (Erreur_fichier==0)
         {
           Taille_ligne=Principal_Largeur_image*3;
-          Pos_X=(Taille_ligne % 4); // Pos_X sert de variable temporaire
-          if (Pos_X>0)
-            Taille_ligne+=(4-Pos_X);
+          x_pos=(Taille_ligne % 4); // x_pos sert de variable temporaire
+          if (x_pos>0)
+            Taille_ligne+=(4-x_pos);
 
           Buffer=(byte *)malloc(Taille_ligne);
-          for (Pos_Y=Principal_Hauteur_image-1; ((Pos_Y>=0) && (!Erreur_fichier)); Pos_Y--)
+          for (y_pos=Principal_Hauteur_image-1; ((y_pos>=0) && (!Erreur_fichier)); y_pos--)
           {
             if (read_bytes(file,Buffer,Taille_ligne))
-              for (Pos_X=0,Indice=0; Pos_X<Principal_Largeur_image; Pos_X++,Indice+=3)
-                Pixel_Chargement_24b(Pos_X,Pos_Y,Buffer[Indice+2],Buffer[Indice+1],Buffer[Indice+0]);
+              for (x_pos=0,Indice=0; x_pos<Principal_Largeur_image; x_pos++,Indice+=3)
+                Pixel_Chargement_24b(x_pos,y_pos,Buffer[Indice+2],Buffer[Indice+1],Buffer[Indice+0]);
             else
               Erreur_fichier=2;
           }
@@ -2569,11 +2569,11 @@ void Save_BMP(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   FILE *file;
   T_BMP_Header header;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   long Taille_ligne;
   word Indice;
-  byte Palette_locale[256][4]; // R,V,B,0
+  byte Palette_locale[256][4]; // R,G,B,0
 
 
   Erreur_fichier=0;
@@ -2631,7 +2631,7 @@ void Save_BMP(void)
       for (Indice=0; Indice<256; Indice++)
       {
         Palette_locale[Indice][0]=Principal_Palette[Indice].B;
-        Palette_locale[Indice][1]=Principal_Palette[Indice].V;
+        Palette_locale[Indice][1]=Principal_Palette[Indice].G;
         Palette_locale[Indice][2]=Principal_Palette[Indice].R;
         Palette_locale[Indice][3]=0;
       }
@@ -2643,9 +2643,9 @@ void Save_BMP(void)
         // ... Et Bill, il a dit: "OK les gars! Mais seulement si vous rangez
         // les pixels dans l'ordre inverse, mais que sur les Y quand-même
         // parce que faut pas pousser."
-        for (Pos_Y=Principal_Hauteur_image-1; ((Pos_Y>=0) && (!Erreur_fichier)); Pos_Y--)
-          for (Pos_X=0; Pos_X<Taille_ligne; Pos_X++)
-                Ecrire_octet(file,Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
+        for (y_pos=Principal_Hauteur_image-1; ((y_pos>=0) && (!Erreur_fichier)); y_pos--)
+          for (x_pos=0; x_pos<Taille_ligne; x_pos++)
+                Ecrire_octet(file,Lit_pixel_de_sauvegarde(x_pos,y_pos));
 
         Close_ecriture(file);
         fclose(file);
@@ -2693,7 +2693,7 @@ typedef struct
 typedef struct
 {
   word Pos_X;         // Abscisse où devrait être affichée l'image
-  word Pos_Y;         // Ordonnée où devrait être affichée l'image
+  word y_pos;         // Ordonnée où devrait être affichée l'image
   word Largeur_image; // width de l'image
   word Hauteur_image; // height de l'image
   byte Indicateur;    // Informations diverses sur l'image
@@ -2916,7 +2916,7 @@ void Load_GIF(void)
             for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
             {
               read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
-              read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+              read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].G);
               read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
             }
           else
@@ -2925,7 +2925,7 @@ void Load_GIF(void)
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
               read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-              read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+              read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].G);
             for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
               read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
           }
@@ -2989,7 +2989,7 @@ void Load_GIF(void)
               
               // lecture de 10 derniers octets
               if ( read_word_le(GIF_Fichier,&(IDB.Pos_X))
-                && read_word_le(GIF_Fichier,&(IDB.Pos_Y))
+                && read_word_le(GIF_Fichier,&(IDB.y_pos))
                 && read_word_le(GIF_Fichier,&(IDB.Largeur_image))
                 && read_word_le(GIF_Fichier,&(IDB.Hauteur_image))
                 && read_byte(GIF_Fichier,&(IDB.Indicateur))
@@ -3018,7 +3018,7 @@ void Load_GIF(void)
                     for(Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
                     {   
                       read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
-                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].G);
                       read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
                     }
                   else
@@ -3027,7 +3027,7 @@ void Load_GIF(void)
                     for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
                       read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].R);
                     for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
-                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].V);
+                      read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].G);
                     for (Indice_de_couleur=0;Indice_de_couleur<Nb_couleurs;Indice_de_couleur++)
                       read_byte(GIF_Fichier,&Principal_Palette[Indice_de_couleur].B);
                   }
@@ -3312,7 +3312,7 @@ void Save_GIF(void)
 
           Block_indicateur=0x2C;
           IDB.Pos_X=0;
-          IDB.Pos_Y=0;
+          IDB.y_pos=0;
           IDB.Largeur_image=Principal_Largeur_image;
           IDB.Hauteur_image=Principal_Hauteur_image;
           IDB.Indicateur=0x07;    // Image non entrelacée, pas de palette locale.
@@ -3596,18 +3596,18 @@ void Test_PCX(void)
 // -- Lire un fichier au format PCX -----------------------------------------
 
   // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
-  void Draw_PCX_line(short Pos_Y, byte depth)
+  void Draw_PCX_line(short y_pos, byte depth)
   {
-    short Pos_X;
+    short x_pos;
     byte  Couleur;
     byte  Reduction=8/depth;
     byte  byte_mask=(1<<depth)-1;
     byte  Reduction_moins_1=Reduction-1;
 
-    for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
+    for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
     {
-      Couleur=(LBM_Buffer[Pos_X/Reduction]>>((Reduction_moins_1-(Pos_X%Reduction))*depth)) & byte_mask;
-      Pixel_de_chargement(Pos_X,Pos_Y,Couleur);
+      Couleur=(LBM_Buffer[x_pos/Reduction]>>((Reduction_moins_1-(x_pos%Reduction))*depth)) & byte_mask;
+      Pixel_de_chargement(x_pos,y_pos,Couleur);
     }
   }
 
@@ -3619,16 +3619,16 @@ void Load_PCX(void)
   short Taille_ligne;
   short Vraie_taille_ligne; // width de l'image corrigée
   short Largeur_lue;
-  short Pos_X;
-  short Pos_Y;
-  byte  Octet1;
-  byte  Octet2;
+  short x_pos;
+  short y_pos;
+  byte  byte1;
+  byte  byte2;
   byte  Indice;
   dword Nb_couleurs;
   long  Taille_du_fichier;
   byte  Palette_CGA[9]={ 84,252,252,  252, 84,252,  252,252,252};
 
-  long  Position;
+  long  position;
   long  Taille_image;
   byte * Buffer;
   struct stat Informations_Fichier;
@@ -3686,13 +3686,13 @@ void Load_PCX(void)
           else
           {
             Principal_Palette[1].R=0;
-            Principal_Palette[1].V=0;
+            Principal_Palette[1].G=0;
             Principal_Palette[1].B=0;
-            Octet1=PCX_Header.Palette_16c[3]>>5;
+            byte1=PCX_Header.Palette_16c[3]>>5;
             if (Nb_couleurs==4)
             { // Pal. CGA "alakon" (du Turc Allahkoum qui signifie "à la con" :))
               memcpy(Principal_Palette+1,Palette_CGA,9);
-              if (!(Octet1&2))
+              if (!(byte1&2))
               {
                 Principal_Palette[1].B=84;
                 Principal_Palette[2].B=84;
@@ -3702,7 +3702,7 @@ void Load_PCX(void)
             else
             {
               Principal_Palette[1].R=252;
-              Principal_Palette[1].V=252;
+              Principal_Palette[1].G=252;
               Principal_Palette[1].B=252;
             }
           }
@@ -3713,14 +3713,14 @@ void Load_PCX(void)
           {
             fseek(file,Taille_du_fichier-((256*3)+1),SEEK_SET);
             // On regarde s'il y a une palette après les données de l'image
-            if (read_byte(file,&Octet1))
-              if (Octet1==12) // Lire la palette si c'est une image en 256 couleurs
+            if (read_byte(file,&byte1))
+              if (byte1==12) // Lire la palette si c'est une image en 256 couleurs
               {
                 int index;
                 // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
                 for(index=0;index<256;index++)
                   if ( ! read_byte(file,&Principal_Palette[index].R)
-                   || ! read_byte(file,&Principal_Palette[index].V)
+                   || ! read_byte(file,&Principal_Palette[index].G)
                    || ! read_byte(file,&Principal_Palette[index].B) )
                   {
                     Erreur_fichier=2;
@@ -3754,55 +3754,55 @@ void Load_PCX(void)
 
               if (PCX_Header.Depth==8) // 256 couleurs (1 plan)
               {
-                for (Position=0; ((Position<Taille_image) && (!Erreur_fichier));)
+                for (position=0; ((position<Taille_image) && (!Erreur_fichier));)
                 {
                   // Lecture et décompression de la ligne
-                  Lire_octet(file,&Octet1);
+                  Lire_octet(file,&byte1);
                   if (!Erreur_fichier)
                   {
-                    if ((Octet1&0xC0)==0xC0)
+                    if ((byte1&0xC0)==0xC0)
                     {
-                      Octet1-=0xC0;               // facteur de répétition
-                      Lire_octet(file,&Octet2); // octet à répéter
+                      byte1-=0xC0;               // facteur de répétition
+                      Lire_octet(file,&byte2); // octet à répéter
                       if (!Erreur_fichier)
                       {
-                        for (Indice=0; Indice<Octet1; Indice++,Position++)
-                          if (Position<Taille_image)
-                            Pixel_de_chargement(Position%Taille_ligne,
-                                                Position/Taille_ligne,
-                                                Octet2);
+                        for (Indice=0; Indice<byte1; Indice++,position++)
+                          if (position<Taille_image)
+                            Pixel_de_chargement(position%Taille_ligne,
+                                                position/Taille_ligne,
+                                                byte2);
                           else
                             Erreur_fichier=2;
                       }
                     }
                     else
                     {
-                      Pixel_de_chargement(Position%Taille_ligne,
-                                          Position/Taille_ligne,
-                                          Octet1);
-                      Position++;
+                      Pixel_de_chargement(position%Taille_ligne,
+                                          position/Taille_ligne,
+                                          byte1);
+                      position++;
                     }
                   }
                 }
               }
               else                 // couleurs rangées par plans
               {
-                for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+                for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
                 {
-                  for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
+                  for (x_pos=0; ((x_pos<Taille_ligne) && (!Erreur_fichier)); )
                   {
-                    Lire_octet(file,&Octet1);
+                    Lire_octet(file,&byte1);
                     if (!Erreur_fichier)
                     {
-                      if ((Octet1&0xC0)==0xC0)
+                      if ((byte1&0xC0)==0xC0)
                       {
-                        Octet1-=0xC0;               // facteur de répétition
-                        Lire_octet(file,&Octet2); // octet à répéter
+                        byte1-=0xC0;               // facteur de répétition
+                        Lire_octet(file,&byte2); // octet à répéter
                         if (!Erreur_fichier)
                         {
-                          for (Indice=0; Indice<Octet1; Indice++)
-                            if (Pos_X<Taille_ligne)
-                              LBM_Buffer[Pos_X++]=Octet2;
+                          for (Indice=0; Indice<byte1; Indice++)
+                            if (x_pos<Taille_ligne)
+                              LBM_Buffer[x_pos++]=byte2;
                             else
                               Erreur_fichier=2;
                         }
@@ -3810,14 +3810,14 @@ void Load_PCX(void)
                           Modif_Erreur_fichier(2);
                       }
                       else
-                        LBM_Buffer[Pos_X++]=Octet1;
+                        LBM_Buffer[x_pos++]=byte1;
                     }
                   }
                   // Affichage de la ligne par plan du buffer
                   if (PCX_Header.Depth==1)
-                    Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
+                    Draw_ILBM_line(y_pos,Vraie_taille_ligne);
                   else
-                    Draw_PCX_line(Pos_Y,PCX_Header.Depth);
+                    Draw_PCX_line(y_pos,PCX_Header.Depth);
                 }
               }
 
@@ -3825,19 +3825,19 @@ void Load_PCX(void)
             }
             else                     // Image non compressée
             {
-              for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
+              for (y_pos=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);y_pos++)
               {
                 if ((Largeur_lue=read_bytes(file,LBM_Buffer,Taille_ligne)))
                 {
                   if (PCX_Header.Plane==1)
-                    for (Pos_X=0; Pos_X<Principal_Largeur_image;Pos_X++)
-                      Pixel_de_chargement(Pos_X,Pos_Y,LBM_Buffer[Pos_X]);
+                    for (x_pos=0; x_pos<Principal_Largeur_image;x_pos++)
+                      Pixel_de_chargement(x_pos,y_pos,LBM_Buffer[x_pos]);
                   else
                   {
                     if (PCX_Header.Depth==1)
-                      Draw_ILBM_line(Pos_Y,Vraie_taille_ligne);
+                      Draw_ILBM_line(y_pos,Vraie_taille_ligne);
                     else
-                      Draw_PCX_line(Pos_Y,PCX_Header.Depth);
+                      Draw_PCX_line(y_pos,PCX_Header.Depth);
                   }
                 }
                 else
@@ -3862,12 +3862,12 @@ void Load_PCX(void)
 
           if (!PCX_Header.Compression)
           {
-            for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
+            for (y_pos=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);y_pos++)
             {
               if (read_bytes(file,Buffer,Taille_ligne))
               {
-                for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-                  Pixel_Chargement_24b(Pos_X,Pos_Y,Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*0)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*1)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*2)]);
+                for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+                  Pixel_Chargement_24b(x_pos,y_pos,Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*0)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*1)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*2)]);
               }
               else
                 Erreur_fichier=2;
@@ -3877,45 +3877,45 @@ void Load_PCX(void)
           {
             /*Init_lecture();*/
 
-            for (Pos_Y=0,Position=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);)
+            for (y_pos=0,position=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);)
             {
               // Lecture et décompression de la ligne
-              Lire_octet(file,&Octet1);
+              Lire_octet(file,&byte1);
               if (!Erreur_fichier)
               {
-                if ((Octet1 & 0xC0)==0xC0)
+                if ((byte1 & 0xC0)==0xC0)
                 {
-                  Octet1-=0xC0;               // facteur de répétition
-                  Lire_octet(file,&Octet2); // octet à répéter
+                  byte1-=0xC0;               // facteur de répétition
+                  Lire_octet(file,&byte2); // octet à répéter
                   if (!Erreur_fichier)
                   {
-                    for (Indice=0; (Indice<Octet1) && (!Erreur_fichier); Indice++)
+                    for (Indice=0; (Indice<byte1) && (!Erreur_fichier); Indice++)
                     {
-                      Buffer[Position++]=Octet2;
-                      if (Position>=Taille_ligne)
+                      Buffer[position++]=byte2;
+                      if (position>=Taille_ligne)
                       {
-                        for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-                          Pixel_Chargement_24b(Pos_X,Pos_Y,Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*0)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*1)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*2)]);
-                        Pos_Y++;
-                        Position=0;
+                        for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+                          Pixel_Chargement_24b(x_pos,y_pos,Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*0)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*1)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*2)]);
+                        y_pos++;
+                        position=0;
                       }
                     }
                   }
                 }
                 else
                 {
-                  Buffer[Position++]=Octet1;
-                  if (Position>=Taille_ligne)
+                  Buffer[position++]=byte1;
+                  if (position>=Taille_ligne)
                   {
-                    for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-                      Pixel_Chargement_24b(Pos_X,Pos_Y,Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*0)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*1)],Buffer[Pos_X+(PCX_Header.Bytes_per_plane_line*2)]);
-                    Pos_Y++;
-                    Position=0;
+                    for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+                      Pixel_Chargement_24b(x_pos,y_pos,Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*0)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*1)],Buffer[x_pos+(PCX_Header.Bytes_per_plane_line*2)]);
+                    y_pos++;
+                    position=0;
                   }
                 }
               }
             }
-            if (Position!=0)
+            if (position!=0)
               Erreur_fichier=2;
 
             /*Close_lecture();*/
@@ -3944,8 +3944,8 @@ void Save_PCX(void)
   FILE *file;
 
   short Taille_ligne;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   byte  counter;
   byte  Last_pixel;
   byte  Pixel_lu;
@@ -4001,22 +4001,22 @@ void Save_PCX(void)
      
       Init_ecriture();
      
-      for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
+      for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
       {
-        Pixel_lu=Lit_pixel_de_sauvegarde(0,Pos_Y);
+        Pixel_lu=Lit_pixel_de_sauvegarde(0,y_pos);
      
         // Compression et écriture de la ligne
-        for (Pos_X=0; ((Pos_X<Taille_ligne) && (!Erreur_fichier)); )
+        for (x_pos=0; ((x_pos<Taille_ligne) && (!Erreur_fichier)); )
         {
-          Pos_X++;
+          x_pos++;
           Last_pixel=Pixel_lu;
-          Pixel_lu=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
+          Pixel_lu=Lit_pixel_de_sauvegarde(x_pos,y_pos);
           counter=1;
-          while ( (counter<63) && (Pos_X<Taille_ligne) && (Pixel_lu==Last_pixel) )
+          while ( (counter<63) && (x_pos<Taille_ligne) && (Pixel_lu==Last_pixel) )
           {
             counter++;
-            Pos_X++;
-            Pixel_lu=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
+            x_pos++;
+            Pixel_lu=Lit_pixel_de_sauvegarde(x_pos,y_pos);
           }
       
           if ( (counter>1) || (Last_pixel>=0xC0) )
@@ -4148,8 +4148,8 @@ void Load_CEL(void)
   FILE *file;
   T_CEL_Header1 Header1;
   T_CEL_Header2 Header2;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   byte  Dernier_octet=0;
   long  Taille_du_fichier;
   struct stat Informations_Fichier;
@@ -4176,15 +4176,15 @@ void Load_CEL(void)
         {
           // Chargement de l'image
           /*Init_lecture();*/
-          for (Pos_Y=0;((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier));Pos_Y++)
-            for (Pos_X=0;((Pos_X<Principal_Largeur_image) && (!Erreur_fichier));Pos_X++)
-              if ((Pos_X & 1)==0)
+          for (y_pos=0;((y_pos<Principal_Hauteur_image) && (!Erreur_fichier));y_pos++)
+            for (x_pos=0;((x_pos<Principal_Largeur_image) && (!Erreur_fichier));x_pos++)
+              if ((x_pos & 1)==0)
               {
                 Lire_octet(file,&Dernier_octet);
-                Pixel_de_chargement(Pos_X,Pos_Y,(Dernier_octet >> 4));
+                Pixel_de_chargement(x_pos,y_pos,(Dernier_octet >> 4));
               }
               else
-                Pixel_de_chargement(Pos_X,Pos_Y,(Dernier_octet & 15));
+                Pixel_de_chargement(x_pos,y_pos,(Dernier_octet & 15));
           /*Close_lecture();*/
         }
       }
@@ -4210,34 +4210,34 @@ void Load_CEL(void)
             if (!Erreur_fichier)
             {
               // Effacement du décalage
-              for (Pos_Y=0;Pos_Y<Header2.Decalage_Y;Pos_Y++)
-                for (Pos_X=0;Pos_X<Principal_Largeur_image;Pos_X++)
-                  Pixel_de_chargement(Pos_X,Pos_Y,0);
-              for (Pos_Y=Header2.Decalage_Y;Pos_Y<Principal_Hauteur_image;Pos_Y++)
-                for (Pos_X=0;Pos_X<Header2.Decalage_X;Pos_X++)
-                  Pixel_de_chargement(Pos_X,Pos_Y,0);
+              for (y_pos=0;y_pos<Header2.Decalage_Y;y_pos++)
+                for (x_pos=0;x_pos<Principal_Largeur_image;x_pos++)
+                  Pixel_de_chargement(x_pos,y_pos,0);
+              for (y_pos=Header2.Decalage_Y;y_pos<Principal_Hauteur_image;y_pos++)
+                for (x_pos=0;x_pos<Header2.Decalage_X;x_pos++)
+                  Pixel_de_chargement(x_pos,y_pos,0);
 
               switch(Header2.Nbbits)
               {
                 case 4:
-                  for (Pos_Y=0;((Pos_Y<Header2.Height) && (!Erreur_fichier));Pos_Y++)
-                    for (Pos_X=0;((Pos_X<Header2.Width) && (!Erreur_fichier));Pos_X++)
-                      if ((Pos_X & 1)==0)
+                  for (y_pos=0;((y_pos<Header2.Height) && (!Erreur_fichier));y_pos++)
+                    for (x_pos=0;((x_pos<Header2.Width) && (!Erreur_fichier));x_pos++)
+                      if ((x_pos & 1)==0)
                       {
                         Lire_octet(file,&Dernier_octet);
-                        Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,(Dernier_octet >> 4));
+                        Pixel_de_chargement(x_pos+Header2.Decalage_X,y_pos+Header2.Decalage_Y,(Dernier_octet >> 4));
                       }
                       else
-                        Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,(Dernier_octet & 15));
+                        Pixel_de_chargement(x_pos+Header2.Decalage_X,y_pos+Header2.Decalage_Y,(Dernier_octet & 15));
                   break;
 
                 case 8:
-                  for (Pos_Y=0;((Pos_Y<Header2.Height) && (!Erreur_fichier));Pos_Y++)
-                    for (Pos_X=0;((Pos_X<Header2.Width) && (!Erreur_fichier));Pos_X++)
+                  for (y_pos=0;((y_pos<Header2.Height) && (!Erreur_fichier));y_pos++)
+                    for (x_pos=0;((x_pos<Header2.Width) && (!Erreur_fichier));x_pos++)
                     {
                       byte Lu;
                       Lire_octet(file,&Lu);
-                      Pixel_de_chargement(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y,Lu);
+                      Pixel_de_chargement(x_pos+Header2.Decalage_X,y_pos+Header2.Decalage_Y,Lu);
                       }
                   break;
 
@@ -4269,8 +4269,8 @@ void Save_CEL(void)
   FILE *file;
   T_CEL_Header1 Header1;
   T_CEL_Header2 Header2;
-  short Pos_X;
-  short Pos_Y;
+  short x_pos;
+  short y_pos;
   byte  Dernier_octet=0;
   dword Utilisation[256]; // Table d'utilisation de couleurs
 
@@ -4283,9 +4283,9 @@ void Save_CEL(void)
   if ((file=fopen(Nom_du_fichier,"wb")))
   {
     // On regarde si des couleurs >16 sont utilisées dans l'image
-    for (Pos_X=16;((Pos_X<256) && (!Utilisation[Pos_X]));Pos_X++);
+    for (x_pos=16;((x_pos<256) && (!Utilisation[x_pos]));x_pos++);
 
-    if (Pos_X==256)
+    if (x_pos==256)
     {
       // Cas d'une image 16 couleurs (écriture à l'ancien format)
 
@@ -4296,18 +4296,18 @@ void Save_CEL(void)
       {
         // Sauvegarde de l'image
         Init_ecriture();
-        for (Pos_Y=0;((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier));Pos_Y++)
+        for (y_pos=0;((y_pos<Principal_Hauteur_image) && (!Erreur_fichier));y_pos++)
         {
-          for (Pos_X=0;((Pos_X<Principal_Largeur_image) && (!Erreur_fichier));Pos_X++)
-            if ((Pos_X & 1)==0)
-              Dernier_octet=(Lit_pixel_de_sauvegarde(Pos_X,Pos_Y) << 4);
+          for (x_pos=0;((x_pos<Principal_Largeur_image) && (!Erreur_fichier));x_pos++)
+            if ((x_pos & 1)==0)
+              Dernier_octet=(Lit_pixel_de_sauvegarde(x_pos,y_pos) << 4);
             else
             {
-              Dernier_octet=Dernier_octet | (Lit_pixel_de_sauvegarde(Pos_X,Pos_Y) & 15);
+              Dernier_octet=Dernier_octet | (Lit_pixel_de_sauvegarde(x_pos,y_pos) & 15);
               Ecrire_octet(file,Dernier_octet);
             }
 
-          if ((Pos_X & 1)==1)
+          if ((x_pos & 1)==1)
             Ecrire_octet(file,Dernier_octet);
         }
         Close_ecriture(file);
@@ -4321,24 +4321,24 @@ void Save_CEL(void)
       // Cas d'une image 256 couleurs (écriture au nouveau format)
 
       // Recherche du décalage
-      for (Pos_Y=0;Pos_Y<Principal_Hauteur_image;Pos_Y++)
+      for (y_pos=0;y_pos<Principal_Hauteur_image;y_pos++)
       {
-        for (Pos_X=0;Pos_X<Principal_Largeur_image;Pos_X++)
-          if (Lit_pixel_de_sauvegarde(Pos_X,Pos_Y)!=0)
+        for (x_pos=0;x_pos<Principal_Largeur_image;x_pos++)
+          if (Lit_pixel_de_sauvegarde(x_pos,y_pos)!=0)
             break;
-        if (Lit_pixel_de_sauvegarde(Pos_X,Pos_Y)!=0)
+        if (Lit_pixel_de_sauvegarde(x_pos,y_pos)!=0)
           break;
       }
-      Header2.Decalage_Y=Pos_Y;
-      for (Pos_X=0;Pos_X<Principal_Largeur_image;Pos_X++)
+      Header2.Decalage_Y=y_pos;
+      for (x_pos=0;x_pos<Principal_Largeur_image;x_pos++)
       {
-        for (Pos_Y=0;Pos_Y<Principal_Hauteur_image;Pos_Y++)
-          if (Lit_pixel_de_sauvegarde(Pos_X,Pos_Y)!=0)
+        for (y_pos=0;y_pos<Principal_Hauteur_image;y_pos++)
+          if (Lit_pixel_de_sauvegarde(x_pos,y_pos)!=0)
             break;
-        if (Lit_pixel_de_sauvegarde(Pos_X,Pos_Y)!=0)
+        if (Lit_pixel_de_sauvegarde(x_pos,y_pos)!=0)
           break;
       }
-      Header2.Decalage_X=Pos_X;
+      Header2.Decalage_X=x_pos;
 
       memcpy(Header2.Signa,"KiSS",4); // Initialisation de la signature
       Header2.Kind=0x20;              // Initialisation du type (BitMaP)
@@ -4346,16 +4346,16 @@ void Save_CEL(void)
       Header2.Filler1=0;              // Initialisation du filler 1 (???)
       Header2.Width=Principal_Largeur_image-Header2.Decalage_X; // Initialisation de la largeur
       Header2.Height=Principal_Hauteur_image-Header2.Decalage_Y; // Initialisation de la hauteur
-      for (Pos_X=0;Pos_X<16;Pos_X++)  // Initialisation du filler 2 (???)
-        Header2.Filler2[Pos_X]=0;
+      for (x_pos=0;x_pos<16;x_pos++)  // Initialisation du filler 2 (???)
+        Header2.Filler2[x_pos]=0;
 
       if (write_bytes(file,&Header2,sizeof(T_CEL_Header2)))
       {
         // Sauvegarde de l'image
         Init_ecriture();
-        for (Pos_Y=0;((Pos_Y<Header2.Height) && (!Erreur_fichier));Pos_Y++)
-          for (Pos_X=0;((Pos_X<Header2.Width) && (!Erreur_fichier));Pos_X++)
-            Ecrire_octet(file,Lit_pixel_de_sauvegarde(Pos_X+Header2.Decalage_X,Pos_Y+Header2.Decalage_Y));
+        for (y_pos=0;((y_pos<Header2.Height) && (!Erreur_fichier));y_pos++)
+          for (x_pos=0;((x_pos<Header2.Width) && (!Erreur_fichier));x_pos++)
+            Ecrire_octet(file,Lit_pixel_de_sauvegarde(x_pos+Header2.Decalage_X,y_pos+Header2.Decalage_Y));
         Close_ecriture(file);
       }
       else
@@ -4382,8 +4382,8 @@ typedef struct
   {
     struct
     {
-      byte Octet1;
-      byte Octet2;
+      byte Byte1;
+      byte Byte2;
     } Couleur[16];
   } Palette[10];
 } __attribute__((__packed__)) T_KCF_Header;
@@ -4409,7 +4409,7 @@ void Test_KCF(void)
       // On vérifie une propriété de la structure de palette:
       for (Indice_palette=0;Indice_palette<10;Indice_palette++)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
-          if ((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2>>4)!=0)
+          if ((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte2>>4)!=0)
             Erreur_fichier=1;
     }
     else
@@ -4442,7 +4442,7 @@ void Load_KCF(void)
   FILE *file;
   T_KCF_Header Buffer;
   T_CEL_Header2 Header2;
-  byte Octet[3];
+  byte bytes[3];
   int Indice_palette;
   int Indice_couleur;
   int Indice;
@@ -4470,15 +4470,15 @@ void Load_KCF(void)
           for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
           {
             Indice=16+(Indice_palette*16)+Indice_couleur;
-            Principal_Palette[Indice].R=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 >> 4) << 4);
-            Principal_Palette[Indice].B=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1 & 15) << 4);
-            Principal_Palette[Indice].V=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2 & 15) << 4);
+            Principal_Palette[Indice].R=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte1 >> 4) << 4);
+            Principal_Palette[Indice].B=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte1 & 15) << 4);
+            Principal_Palette[Indice].G=((Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte2 & 15) << 4);
           }
 
         for (Indice=0;Indice<16;Indice++)
         {
           Principal_Palette[Indice].R=Principal_Palette[Indice+16].R;
-          Principal_Palette[Indice].V=Principal_Palette[Indice+16].V;
+          Principal_Palette[Indice].G=Principal_Palette[Indice+16].G;
           Principal_Palette[Indice].B=Principal_Palette[Indice+16].B;
         }
 
@@ -4508,17 +4508,17 @@ void Load_KCF(void)
              switch(Header2.Nbbits)
              {
                case 12: // RRRR BBBB | 0000 VVVV
-                 read_bytes(file,Octet,2);
-                 Principal_Palette[Indice].R=(Octet[0] >> 4) << 4;
-                 Principal_Palette[Indice].B=(Octet[0] & 15) << 4;
-                 Principal_Palette[Indice].V=(Octet[1] & 15) << 4;
+                 read_bytes(file,bytes,2);
+                 Principal_Palette[Indice].R=(bytes[0] >> 4) << 4;
+                 Principal_Palette[Indice].B=(bytes[0] & 15) << 4;
+                 Principal_Palette[Indice].G=(bytes[1] & 15) << 4;
                  break;
 
                case 24: // RRRR RRRR | VVVV VVVV | BBBB BBBB
-                 read_bytes(file,Octet,3);
-                 Principal_Palette[Indice].R=Octet[0];
-                 Principal_Palette[Indice].V=Octet[1];
-                 Principal_Palette[Indice].B=Octet[2];
+                 read_bytes(file,bytes,3);
+                 Principal_Palette[Indice].R=bytes[0];
+                 Principal_Palette[Indice].G=bytes[1];
+                 Principal_Palette[Indice].B=bytes[2];
              }
 
              Indice++;
@@ -4529,7 +4529,7 @@ void Load_KCF(void)
           for (Indice=0;Indice<16;Indice++)
           {
             Principal_Palette[Indice].R=Principal_Palette[Indice+16].R;
-            Principal_Palette[Indice].V=Principal_Palette[Indice+16].V;
+            Principal_Palette[Indice].G=Principal_Palette[Indice+16].G;
             Principal_Palette[Indice].B=Principal_Palette[Indice+16].B;
           }
 
@@ -4556,7 +4556,7 @@ void Save_KCF(void)
   FILE *file;
   T_KCF_Header Buffer;
   T_CEL_Header2 Header2;
-  byte Octet[3];
+  byte bytes[3];
   int Indice_palette;
   int Indice_couleur;
   int Indice;
@@ -4582,8 +4582,8 @@ void Save_KCF(void)
         for (Indice_couleur=0;Indice_couleur<16;Indice_couleur++)
         {
           Indice=16+(Indice_palette*16)+Indice_couleur;
-          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet1=((Principal_Palette[Indice].R>>4)<<4) | (Principal_Palette[Indice].B>>4);
-          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Octet2=Principal_Palette[Indice].V>>4;
+          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte1=((Principal_Palette[Indice].R>>4)<<4) | (Principal_Palette[Indice].B>>4);
+          Buffer.Palette[Indice_palette].Couleur[Indice_couleur].Byte2=Principal_Palette[Indice].G>>4;
         }
 
       if (! write_bytes(file,&Buffer,sizeof(T_KCF_Header)))
@@ -4609,10 +4609,10 @@ void Save_KCF(void)
 
       for (Indice=0;(Indice<256) && (!Erreur_fichier);Indice++)
       {
-        Octet[0]=Principal_Palette[Indice].R;
-        Octet[1]=Principal_Palette[Indice].V;
-        Octet[2]=Principal_Palette[Indice].B;
-        if (! write_bytes(file,Octet,3))
+        bytes[0]=Principal_Palette[Indice].R;
+        bytes[1]=Principal_Palette[Indice].G;
+        bytes[2]=Principal_Palette[Indice].B;
+        if (! write_bytes(file,bytes,3))
           Erreur_fichier=1;
       }
     }
@@ -4678,7 +4678,7 @@ void Load_SCx(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  word Pos_X,Pos_Y;
+  word x_pos,y_pos;
   long Taille,Vraie_taille;
   long Taille_du_fichier;
   T_SCx_Header SCx_Header;
@@ -4719,11 +4719,11 @@ void Load_SCx(void)
           { // 256 couleurs (raw)
             LBM_Buffer=(byte *)malloc(Principal_Largeur_image);
 
-            for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
+            for (y_pos=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);y_pos++)
             {
               if (read_bytes(file,LBM_Buffer,Principal_Largeur_image))
-                for (Pos_X=0; Pos_X<Principal_Largeur_image;Pos_X++)
-                  Pixel_de_chargement(Pos_X,Pos_Y,LBM_Buffer[Pos_X]);
+                for (x_pos=0; x_pos<Principal_Largeur_image;x_pos++)
+                  Pixel_de_chargement(x_pos,y_pos,LBM_Buffer[x_pos]);
               else
                 Erreur_fichier=2;
             }
@@ -4736,10 +4736,10 @@ void Load_SCx(void)
             HBPm1=SCx_Header.Plans-1;
             Image_HAM=0;
 
-            for (Pos_Y=0;(Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier);Pos_Y++)
+            for (y_pos=0;(y_pos<Principal_Hauteur_image) && (!Erreur_fichier);y_pos++)
             {
               if (read_bytes(file,LBM_Buffer,Taille))
-                Draw_ILBM_line(Pos_Y,Vraie_taille);
+                Draw_ILBM_line(y_pos,Vraie_taille);
               else
                 Erreur_fichier=2;
             }
@@ -4764,7 +4764,7 @@ void Save_SCx(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   T_SCx_Header SCx_Header;
 
   Nom_fichier_complet(Nom_du_fichier,1);
@@ -4789,9 +4789,9 @@ void Save_SCx(void)
     {
       Init_ecriture();
 
-      for (Pos_Y=0; ((Pos_Y<Principal_Hauteur_image) && (!Erreur_fichier)); Pos_Y++)
-        for (Pos_X=0; Pos_X<Principal_Largeur_image; Pos_X++)
-          Ecrire_octet(file,Lit_pixel_de_sauvegarde(Pos_X,Pos_Y));
+      for (y_pos=0; ((y_pos<Principal_Hauteur_image) && (!Erreur_fichier)); y_pos++)
+        for (x_pos=0; x_pos<Principal_Largeur_image; x_pos++)
+          Ecrire_octet(file,Lit_pixel_de_sauvegarde(x_pos,y_pos));
 
       Close_ecriture(file);
       fclose(file);
@@ -4884,7 +4884,7 @@ void PI1_16p_to_8b(byte * Src,byte * Dst)
 
 //// DECODAGE de la PALETTE ////
 
-void PI1_Decoder_palette(byte * Src,byte * Pal)
+void PI1_Decoder_palette(byte * Src,byte * palette)
 {
   int i;  // Numéro de la couleur traitée
   int ip; // Indice dans la palette
@@ -4902,15 +4902,15 @@ void PI1_Decoder_palette(byte * Src,byte * Pal)
     w=((word)Src[(i*2)+1]<<8) | Src[(i*2)+0];
 
     // Traitement des couleurs rouge, verte et bleue:
-    Pal[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
-    Pal[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
-    Pal[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
+    palette[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
+    palette[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
+    palette[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
   }
 }
 
 //// CODAGE de la PALETTE ////
 
-void PI1_Coder_palette(byte * Pal,byte * Dst)
+void PI1_Coder_palette(byte * palette,byte * Dst)
 {
   int i;  // Numéro de la couleur traitée
   int ip; // Indice dans la palette
@@ -4926,9 +4926,9 @@ void PI1_Coder_palette(byte * Pal,byte * Dst)
   for (i=0;i<16;i++)
   {
     // Traitement des couleurs rouge, verte et bleue:
-    w =(((word)(Pal[ip]>>2) & 0x38) >> 3) | (((word)(Pal[ip]>>2) & 0x04) <<  1); ip++;
-    w|=(((word)(Pal[ip]>>2) & 0x38) << 9) | (((word)(Pal[ip]>>2) & 0x04) << 13); ip++;
-    w|=(((word)(Pal[ip]>>2) & 0x38) << 5) | (((word)(Pal[ip]>>2) & 0x04) <<  9); ip++;
+    w =(((word)(palette[ip]>>2) & 0x38) >> 3) | (((word)(palette[ip]>>2) & 0x04) <<  1); ip++;
+    w|=(((word)(palette[ip]>>2) & 0x38) << 9) | (((word)(palette[ip]>>2) & 0x04) << 13); ip++;
+    w|=(((word)(palette[ip]>>2) & 0x38) << 5) | (((word)(palette[ip]>>2) & 0x04) <<  9); ip++;
 
     Dst[(i*2)+0]=w & 0x00FF;
     Dst[(i*2)+1]=(w>>8);
@@ -4974,7 +4974,7 @@ void Load_PI1(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  word Pos_X,Pos_Y;
+  word x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
@@ -5007,15 +5007,15 @@ void Load_PI1(void)
 
           // Chargement/décompression de l'image
           ptr=buffer+34;
-          for (Pos_Y=0;Pos_Y<200;Pos_Y++)
+          for (y_pos=0;y_pos<200;y_pos++)
           {
-            for (Pos_X=0;Pos_X<(320>>4);Pos_X++)
+            for (x_pos=0;x_pos<(320>>4);x_pos++)
             {
-              PI1_8b_to_16p(ptr,pixels+(Pos_X<<4));
+              PI1_8b_to_16p(ptr,pixels+(x_pos<<4));
               ptr+=8;
             }
-            for (Pos_X=0;Pos_X<320;Pos_X++)
-              Pixel_de_chargement(Pos_X,Pos_Y,pixels[Pos_X]);
+            for (x_pos=0;x_pos<320;x_pos++)
+              Pixel_de_chargement(x_pos,y_pos,pixels[x_pos]);
           }
         }
       }
@@ -5037,7 +5037,7 @@ void Save_PI1(void)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
@@ -5057,19 +5057,19 @@ void Save_PI1(void)
     PI1_Coder_palette((byte *)Principal_Palette,buffer+2);
     // Codage de l'image
     ptr=buffer+34;
-    for (Pos_Y=0;Pos_Y<200;Pos_Y++)
+    for (y_pos=0;y_pos<200;y_pos++)
     {
       // Codage de la ligne
       memset(pixels,0,320);
-      if (Pos_Y<Principal_Hauteur_image)
+      if (y_pos<Principal_Hauteur_image)
       {
-        for (Pos_X=0;(Pos_X<320) && (Pos_X<Principal_Largeur_image);Pos_X++)
-          pixels[Pos_X]=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
+        for (x_pos=0;(x_pos<320) && (x_pos<Principal_Largeur_image);x_pos++)
+          pixels[x_pos]=Lit_pixel_de_sauvegarde(x_pos,y_pos);
       }
 
-      for (Pos_X=0;Pos_X<(320>>4);Pos_X++)
+      for (x_pos=0;x_pos<(320>>4);x_pos++)
       {
-        PI1_16p_to_8b(pixels+(Pos_X<<4),ptr);
+        PI1_16p_to_8b(pixels+(x_pos<<4),ptr);
         ptr+=8;
       }
     }
@@ -5305,7 +5305,7 @@ void Load_PC1(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
   int  Taille;
-  word Pos_X,Pos_Y;
+  word x_pos,y_pos;
   byte * buffercomp;
   byte * bufferdecomp;
   byte * ptr;
@@ -5344,14 +5344,14 @@ void Load_PC1(void)
 
           // Décodage de l'image
           ptr=bufferdecomp;
-          for (Pos_Y=0;Pos_Y<200;Pos_Y++)
+          for (y_pos=0;y_pos<200;y_pos++)
           {
             // Décodage de la scanline
             PC1_4pb_to_1lp(ptr,ptr+40,ptr+80,ptr+120,pixels);
             ptr+=160;
             // Chargement de la ligne
-            for (Pos_X=0;Pos_X<320;Pos_X++)
-              Pixel_de_chargement(Pos_X,Pos_Y,pixels[Pos_X]);
+            for (x_pos=0;x_pos<320;x_pos++)
+              Pixel_de_chargement(x_pos,y_pos,pixels[x_pos]);
           }
         }
       }
@@ -5379,7 +5379,7 @@ void Save_PC1(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
   int   Taille;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   byte * buffercomp;
   byte * bufferdecomp;
   byte * ptr;
@@ -5401,14 +5401,14 @@ void Save_PC1(void)
     PI1_Coder_palette((byte *)Principal_Palette,buffercomp+2);
     // Codage de l'image
     ptr=bufferdecomp;
-    for (Pos_Y=0;Pos_Y<200;Pos_Y++)
+    for (y_pos=0;y_pos<200;y_pos++)
     {
       // Codage de la ligne
       memset(pixels,0,320);
-      if (Pos_Y<Principal_Hauteur_image)
+      if (y_pos<Principal_Hauteur_image)
       {
-        for (Pos_X=0;(Pos_X<320) && (Pos_X<Principal_Largeur_image);Pos_X++)
-          pixels[Pos_X]=Lit_pixel_de_sauvegarde(Pos_X,Pos_Y);
+        for (x_pos=0;(x_pos<320) && (x_pos<Principal_Largeur_image);x_pos++)
+          pixels[x_pos]=Lit_pixel_de_sauvegarde(x_pos,y_pos);
       }
 
       // Encodage de la scanline
@@ -5419,7 +5419,7 @@ void Save_PC1(void)
     // Compression du buffer
     PC1_Compresser_PackBits(bufferdecomp,buffercomp+34,32000,&Taille);
     Taille+=34;
-    for (Pos_X=0;Pos_X<16;Pos_X++)
+    for (x_pos=0;x_pos<16;x_pos++)
       buffercomp[Taille++]=0;
 
     if (write_bytes(file,buffercomp,Taille))
@@ -5683,7 +5683,7 @@ void Load_PNG(void)
                     for (x=0;x<num_palette;x++)
                     {
                       Principal_Palette[x].R=x;
-                      Principal_Palette[x].V=x;
+                      Principal_Palette[x].G=x;
                       Principal_Palette[x].B=x;
                     } 
                   }
@@ -5701,7 +5701,7 @@ void Load_PNG(void)
                     for (x=0;x<num_palette;x++)
                     {
                       Principal_Palette[x].R=palette[x].red;
-                      Principal_Palette[x].V=palette[x].green;
+                      Principal_Palette[x].G=palette[x].green;
                       Principal_Palette[x].B=palette[x].blue;
                     }
                     free(palette);
@@ -5877,11 +5877,11 @@ void Save_PNG(void)
 // It's the last chance to save anything, but the code has to be extremely careful,
 // anything could happen.
 // The chosen format is IMG since it's extremely simple, difficult to make it create an unusable image.
-void Emergency_backup(const char *Fname, byte *Source, int width, int height, T_Palette *Palette)
+void Emergency_backup(const char *Fname, byte *Source, int width, int height, T_Palette *palette)
 {
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   FILE *file;
-  short Pos_X,Pos_Y;
+  short x_pos,y_pos;
   T_Header_IMG IMG_Header;
 
   strcpy(Nom_du_fichier,Repertoire_de_configuration);
@@ -5903,15 +5903,15 @@ void Emergency_backup(const char *Fname, byte *Source, int width, int height, T_
       !write_word_le(file,width) ||
       !write_word_le(file,height) ||
       !write_bytes(file,IMG_Header.Filler2,118) ||
-      !write_bytes(file,Palette,sizeof(T_Palette)))
+      !write_bytes(file,palette,sizeof(T_Palette)))
     {
       fclose(file);
       return;
     }
 
-  for (Pos_Y=0; ((Pos_Y<height) && (!Erreur_fichier)); Pos_Y++)
-    for (Pos_X=0; Pos_X<width; Pos_X++)
-      if (!write_byte(file,*(Source+Pos_Y*width+Pos_X)))
+  for (y_pos=0; ((y_pos<height) && (!Erreur_fichier)); y_pos++)
+    for (x_pos=0; x_pos<width; x_pos++)
+      if (!write_byte(file,*(Source+y_pos*width+x_pos)))
       {
         fclose(file);
         return;

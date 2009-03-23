@@ -65,28 +65,28 @@ word * Raccourci(word NumeroRaccourci)
 const char * Valeur_Raccourci_Clavier(word NumeroRaccourci)
 {
   static char Noms_raccourcis[80];
-  word * Pointeur = Raccourci(NumeroRaccourci);
-  if (Pointeur == NULL)
+  word * pointer = Raccourci(NumeroRaccourci);
+  if (pointer == NULL)
     return "(Problem)";
   else
   {
-    if (Pointeur[0] == 0 && Pointeur[1] == 0)
+    if (pointer[0] == 0 && pointer[1] == 0)
       return "None";
-    if (Pointeur[0] != 0 && Pointeur[1] == 0)
-      return Nom_touche(Pointeur[0]);
-    if (Pointeur[0] == 0 && Pointeur[1] != 0)
-      return Nom_touche(Pointeur[1]);
+    if (pointer[0] != 0 && pointer[1] == 0)
+      return Nom_touche(pointer[0]);
+    if (pointer[0] == 0 && pointer[1] != 0)
+      return Nom_touche(pointer[1]);
       
-    strcpy(Noms_raccourcis, Nom_touche(Pointeur[0]));
+    strcpy(Noms_raccourcis, Nom_touche(pointer[0]));
     strcat(Noms_raccourcis, " or ");
-    strcat(Noms_raccourcis, Nom_touche(Pointeur[1]));
+    strcat(Noms_raccourcis, Nom_touche(pointer[1]));
     return Noms_raccourcis;
   }
 }
-void Redefinir_controle(word *Raccourci, int Pos_X, int Pos_Y)
+void Redefinir_controle(word *Raccourci, int x_pos, int y_pos)
 {
   Effacer_curseur();
-  Print_dans_fenetre(Pos_X,Pos_Y,"*PRESS KEY OR BUTTON*",CM_Noir,CM_Clair);
+  Print_dans_fenetre(x_pos,y_pos,"*PRESS KEY OR BUTTON*",CM_Noir,CM_Clair);
   Afficher_curseur();
   while (1)
   {
@@ -128,7 +128,7 @@ void Fenetre_controle(int NumeroControle)
   }
   /*
   IndiceConfig=0;
-  while (ConfigTouche[IndiceConfig].Numero!=IndiceOrdo)
+  while (ConfigTouche[IndiceConfig].Number!=IndiceOrdo)
   {
     IndiceConfig++;
     if (IndiceConfig>=134)
