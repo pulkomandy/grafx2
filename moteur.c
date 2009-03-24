@@ -1405,7 +1405,7 @@ void Fenetre_Dessiner_jauge(T_Bouton_scroller * button)
 
   Block(Fenetre_Pos_X+(button->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+(Position_curseur_jauge*Menu_Facteur_Y),
-        11*Menu_Facteur_X,button->Hauteur_curseur*Menu_Facteur_Y,CM_Clair/*CM_Blanc*/);
+        11*Menu_Facteur_X,button->Hauteur_curseur*Menu_Facteur_Y,CM_Fonce/*CM_Blanc*/);
 
   UpdateRect(Fenetre_Pos_X+(button->Pos_X*Menu_Facteur_X),
         Fenetre_Pos_Y+button->Pos_Y*Menu_Facteur_Y,

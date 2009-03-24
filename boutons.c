@@ -5975,7 +5975,7 @@ void Bouton_Texte()
   // Scroller des fontes
   Scroller_de_fontes = Fenetre_Definir_bouton_scroller(165,35,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 5
   // Liste des fontes disponibles
-  Fenetre_Definir_bouton_special(8,34,152,NB_FONTES*8); // 6
+  Fenetre_Definir_bouton_special(8,35,152,NB_FONTES*8); // 6
   Fenetre_Afficher_cadre_creux(7, 33, 154, NB_FONTES*8+4);
   
   // Taille texte
@@ -6235,7 +6235,7 @@ void Bouton_Texte()
       break;
       
       case 6: // Selecteur de fonte
-      Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-32)>>3;
+      Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-35)>>3;
       if (Temp!=Position_curseur && Temp < Fonte_nombre)
       {
         Position_curseur=Temp;
