@@ -29,8 +29,6 @@
 #endif
 #include <fcntl.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
@@ -62,7 +60,6 @@
 #include "clavier.h"
 #include "io.h"
 #include "hotkeys.h"
-#include "files.h"
 #include "setup.h"
 #include "windows.h"
 #include "sdlscreen.h"
@@ -1665,14 +1662,12 @@ int Charger_CFG(int Tout_charger)
   Config_Chunk        Chunk;
   Config_Infos_touche CFG_Infos_touche;
   Config_Mode_video   CFG_Mode_video;
-  struct stat Informations_Fichier;
   int Conversion_touches = 0;
 
   strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.cfg");
 
-  stat(Nom_du_fichier,&Informations_Fichier);
-  Taille_fichier=Informations_Fichier.st_size;
+  Taille_fichier=FileLength(Nom_du_fichier);
 
   if ((Handle=fopen(Nom_du_fichier,"rb"))==NULL)
     return ERREUR_CFG_ABSENT;
@@ -1954,8 +1949,8 @@ int Sauver_CFG(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
   Config_Header cfg_header;
   Config_Chunk Chunk;
-  Config_Infos_touche CFG_Infos_touche;
-  Config_Mode_video   CFG_Mode_video;
+  Config_Infos_touche CFG_Infos_touche={0,0,0};
+  Config_Mode_video   CFG_Mode_video={0,0,0};
 
   strcpy(Nom_du_fichier,Repertoire_de_configuration);
   strcat(Nom_du_fichier,"gfx2.cfg");

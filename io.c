@@ -241,3 +241,45 @@ int Repertoire_existe(char * Repertoire)
     }
   }
 }
+
+// Taille de fichier, en octets
+int FileLength(const char * fname)
+{
+    struct stat infos_fichier;
+    if (stat(fname,&infos_fichier))
+        return 0;
+    return infos_fichier.st_size;
+}
+int File_length_file(FILE * file)
+{
+    struct stat infos_fichier;
+    if (fstat(fileno(file),&infos_fichier))
+        return 0;
+    return infos_fichier.st_size;
+}
+
+void for_each_file(const char * Nom_repertoire, void Callback(const char *))
+{
+  // Pour scan de répertoire
+  DIR*  Repertoire_Courant; //Répertoire courant
+  struct dirent* entry; // Structure de lecture des éléments
+  char Nom_fichier_complet[TAILLE_CHEMIN_FICHIER];
+  int Position_nom_fichier;
+  strcpy(Nom_fichier_complet, Nom_repertoire);
+  Repertoire_Courant=opendir(Nom_repertoire);
+  if(Repertoire_Courant == NULL) return;        // Répertoire invalide ...
+  strcat(Nom_fichier_complet, SEPARATEUR_CHEMIN);
+  Position_nom_fichier = strlen(Nom_fichier_complet);
+  while ((entry=readdir(Repertoire_Courant)))
+  {
+    struct stat Infos_enreg;
+    strcpy(&Nom_fichier_complet[Position_nom_fichier], entry->d_name);
+    stat(Nom_fichier_complet,&Infos_enreg);
+    if (S_ISREG(Infos_enreg.st_mode))
+    {
+      Callback(Nom_fichier_complet);
+    }
+  }
+  closedir(Repertoire_Courant);
+}
+

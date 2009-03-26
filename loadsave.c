@@ -23,7 +23,6 @@
 #define _XOPEN_SOURCE
 
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,14 +135,6 @@ T_Format FormatFichier[NB_FORMATS_CONNUS] = {
 // Cette variable est alimentée après chargement réussi d'une image.
 // Actuellement seul le format PNG peut donner autre chose que PIXEL_SIMPLE.
 enum PIXEL_RATIO Ratio_image_chargee=PIXEL_SIMPLE;
-
-// Taille de fichier, en octets
-int FileLength(FILE * file)
-{
-        struct stat infos_fichier;
-        fstat(fileno(file),&infos_fichier);
-        return infos_fichier.st_size;
-}
 
 // Chargement des pixels dans l'écran principal
 void Pixel_Chargement_dans_ecran_courant(word x_pos,word y_pos,byte Couleur)
@@ -731,7 +722,6 @@ void Test_PAL(void)
   FILE *file;             // Fichier du fichier
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   long Taille_du_fichier;   // Taille du fichier
-  struct stat Informations_Fichier;
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -740,9 +730,8 @@ void Test_PAL(void)
   // Ouverture du fichier
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    stat(Nom_du_fichier,&Informations_Fichier);
     // Lecture de la taille du fichier
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(file);
     fclose(file);
     // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
     if (Taille_du_fichier==sizeof(T_Palette))
@@ -884,17 +873,13 @@ void Load_IMG(void)
   long Largeur_lue;
   long Taille_du_fichier;
   T_Header_IMG IMG_header;
-  struct stat Informations_Fichier;
 
-
-  stat(Nom_du_fichier,&Informations_Fichier);
-  
   Nom_fichier_complet(Nom_du_fichier,0);
   Erreur_fichier=0;
 
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(file);
 
     if (read_bytes(file,&IMG_header,sizeof(T_Header_IMG)))
     {
@@ -1068,8 +1053,6 @@ void Load_PKM(void)
   dword Taille_image;
   dword Taille_pack;
   long  Taille_du_fichier;
-  struct stat Informations_Fichier;
-
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -1077,8 +1060,7 @@ void Load_PKM(void)
   
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(file);
 
     if (read_bytes(file,&header,sizeof(T_Header_PKM)))
     {
@@ -1197,7 +1179,7 @@ void Load_PKM(void)
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
-          Taille_pack=(Informations_Fichier.st_size)-sizeof(T_Header_PKM)-header.Jump;
+          Taille_pack=(Taille_du_fichier)-sizeof(T_Header_PKM)-header.Jump;
 
           // Boucle de décompression:
           while ( (Compteur_de_pixels<Taille_image) && (Compteur_de_donnees_packees<Taille_pack) && (!Erreur_fichier) )
@@ -1763,7 +1745,6 @@ void Load_LBM(void)
   short Vraie_taille_ligne; // Taille d'une ligne en pixels
   byte  Couleur;
   long  Taille_du_fichier;
-  struct stat Informations_Fichier;
   dword Dummy;
 
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -1772,8 +1753,7 @@ void Load_LBM(void)
 
   if ((LBM_Fichier=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(LBM_Fichier);
 
     // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
     read_bytes(LBM_Fichier,section,4);
@@ -2101,8 +2081,7 @@ void Save_LBM(void)
   word y_pos;
   byte temp_byte;
   word Vraie_largeur;
-  struct stat Informations_Fichier;
-
+  int Taille_fichier;
 
   Erreur_fichier=0;
   Nom_fichier_complet(Nom_du_fichier,0);
@@ -2174,11 +2153,11 @@ void Save_LBM(void)
 
     if (!Erreur_fichier)
     {
-      stat(Nom_du_fichier,&Informations_Fichier);
-
+      Taille_fichier=FileLength(Nom_du_fichier);
+      
       LBM_Fichier=fopen(Nom_du_fichier,"rb+");
       fseek(LBM_Fichier,820,SEEK_SET);
-      write_dword_be(LBM_Fichier,Informations_Fichier.st_size-824);
+      write_dword_be(LBM_Fichier,Taille_fichier-824);
 
       if (!Erreur_fichier)
       {
@@ -2186,16 +2165,16 @@ void Save_LBM(void)
 
         //   Si la taille de la section de l'image (taille fichier-8) est
         // impaire, on rajoute un 0 (Padding) à la fin.
-        if ((Informations_Fichier.st_size) & 1)
+        if ((Taille_fichier) & 1)
         {
-          write_dword_be(LBM_Fichier,Informations_Fichier.st_size-7);
+          write_dword_be(LBM_Fichier,Taille_fichier-7);
           fseek(LBM_Fichier,0,SEEK_END);
           temp_byte=0;
           if (! write_bytes(LBM_Fichier,&temp_byte,1))
             Erreur_fichier=1;
         }
         else
-          write_dword_be(LBM_Fichier,Informations_Fichier.st_size-8);
+          write_dword_be(LBM_Fichier,Taille_fichier-8);
 
         fclose(LBM_Fichier);
 
@@ -2304,8 +2283,6 @@ void Load_BMP(void)
   word  Taille_ligne;
   byte  a,b,c=0;
   long  Taille_du_fichier;
-  struct stat Informations_Fichier;
-
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -2313,8 +2290,7 @@ void Load_BMP(void)
 
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(file);
 
     if (read_word_le(file,&(header.Signature))
      && read_dword_le(file,&(header.Taille_1))
@@ -2848,7 +2824,6 @@ void Load_GIF(void)
   word Valeur_Clr;        // Valeur <=> Clear tables
   word Valeur_Eof;        // Valeur <=> Fin d'image
   long Taille_du_fichier;
-  struct stat Informations_Fichier;
   int Nombre_LID; // Nombre d'images trouvées dans le fichier
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
@@ -2865,9 +2840,7 @@ void Load_GIF(void)
 
   if ((GIF_Fichier=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
-
+    Taille_du_fichier=File_length_file(GIF_Fichier);
     if ( (read_bytes(GIF_Fichier,signature,6)) &&
          ( (memcmp(signature,"GIF87a",6)==0) ||
            (memcmp(signature,"GIF89a",6)==0) ) )
@@ -3631,7 +3604,6 @@ void Load_PCX(void)
   long  position;
   long  Taille_image;
   byte * Buffer;
-  struct stat Informations_Fichier;
 
   Nom_fichier_complet(Nom_du_fichier,0);
 
@@ -3639,8 +3611,7 @@ void Load_PCX(void)
 
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-      stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
+    Taille_du_fichier=File_length_file(file);
     /*
     if (read_bytes(file,&PCX_header,sizeof(T_PCX_Header)))
     {*/
@@ -4086,15 +4057,17 @@ void Test_CEL(void)
   FILE *file;
   T_CEL_Header1 header1;
   T_CEL_Header2 header2;
-  struct stat Informations_Fichier;
+  int Taille_fichier;
 
   Erreur_fichier=0;
-  if (!stat(Nom_du_fichier,&Informations_Fichier))
+  Nom_fichier_complet(Nom_du_fichier,0);
+  Taille_fichier=FileLength(Nom_du_fichier);
+  if (Taille_fichier==0)
   {
     Erreur_fichier = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
     return;
   }
-  Nom_fichier_complet(Nom_du_fichier,0);
+  
   if (! (file=fopen(Nom_du_fichier, "rb")))
   {
     Erreur_fichier = 1;
@@ -4106,7 +4079,7 @@ void Test_CEL(void)
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
       
-      size=(Informations_Fichier.st_size)-sizeof(T_CEL_Header1);
+      size=Taille_fichier-sizeof(T_CEL_Header1);
       if ( (!size) || ( (((header1.Width+1)>>1)*header1.Height)!=size ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers
@@ -4152,17 +4125,14 @@ void Load_CEL(void)
   short y_pos;
   byte  Dernier_octet=0;
   long  Taille_du_fichier;
-  struct stat Informations_Fichier;
-
 
   Erreur_fichier=0;
-  stat(Nom_du_fichier,&Informations_Fichier);
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
     if (read_bytes(file,&header1,sizeof(T_CEL_Header1)))
     {
-      Taille_du_fichier=Informations_Fichier.st_size;
+      Taille_du_fichier=File_length_file(file);
       if ( (Taille_du_fichier>(long int)sizeof(T_CEL_Header1))
         && ( (((header1.Width+1)>>1)*header1.Height)==(Taille_du_fichier-(long int)sizeof(T_CEL_Header1)) ) )
       {
@@ -4403,7 +4373,7 @@ void Test_KCF(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    if (FileLength(file)==sizeof(T_KCF_Header))
+    if (File_length_file(file)==sizeof(T_KCF_Header))
     {
       read_bytes(file,&Buffer,sizeof(T_KCF_Header));
       // On vérifie une propriété de la structure de palette:
@@ -4453,7 +4423,7 @@ void Load_KCF(void)
   Nom_fichier_complet(Nom_du_fichier,0);
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    Taille_du_fichier=FileLength(file);
+    Taille_du_fichier=File_length_file(file);
     if (Taille_du_fichier==sizeof(T_KCF_Header))
     {
       // Fichier KCF à l'ancien format
@@ -4690,7 +4660,7 @@ void Load_SCx(void)
 
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    Taille_du_fichier=FileLength(file);
+    Taille_du_fichier=File_length_file(file);
 
     if ((read_bytes(file,&SCx_header,sizeof(T_SCx_Header))))
     {
@@ -4953,7 +4923,7 @@ void Test_PI1(void)
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
     // Vérification de la taille
-    size=FileLength(file);
+    size=File_length_file(file);
     if ((size==32034) || (size==32066))
     {
       // Lecture et vérification de la résolution
@@ -4992,7 +4962,7 @@ void Load_PI1(void)
       if (read_bytes(file,buffer,32034))
       {
         // Initialisation de la preview
-        Initialiser_preview(320,200,FileLength(file),FORMAT_PI1);
+        Initialiser_preview(320,200,File_length_file(file),FORMAT_PI1);
         if (Erreur_fichier==0)
         {
           // Initialisation de la palette
@@ -5283,7 +5253,7 @@ void Test_PC1(void)
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
     // Vérification de la taille
-    size=FileLength(file);
+    size=File_length_file(file);
     if ((size<=32066))
     {
       // Lecture et vérification de la résolution
@@ -5316,7 +5286,7 @@ void Load_PC1(void)
   Erreur_fichier=0;
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    size=FileLength(file);
+    size=File_length_file(file);
     // allocation des buffers mémoire
     buffercomp=(byte *)malloc(size);
     bufferdecomp=(byte *)malloc(32000);
@@ -5326,7 +5296,7 @@ void Load_PC1(void)
       if (read_bytes(file,buffercomp,size))
       {
         // Initialisation de la preview
-        Initialiser_preview(320,200,FileLength(file),FORMAT_PC1);
+        Initialiser_preview(320,200,File_length_file(file),FORMAT_PC1);
         if (Erreur_fichier==0)
         {
           // Initialisation de la palette
@@ -5588,8 +5558,6 @@ void Load_PNG(void)
   char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
   byte PNG_header[8];  
   dword Taille_image;
-  long  Taille_du_fichier;
-  struct stat Informations_Fichier;
  
   png_structp png_ptr;
   png_infop info_ptr;
@@ -5600,9 +5568,6 @@ void Load_PNG(void)
   
   if ((file=fopen(Nom_du_fichier, "rb")))
   {
-    stat(Nom_du_fichier,&Informations_Fichier);
-    Taille_du_fichier=Informations_Fichier.st_size;
-
     if (read_bytes(file,PNG_header,8))
     {
       if ( !png_sig_cmp(PNG_header, 0, 8))
@@ -5667,7 +5632,7 @@ void Load_PNG(void)
                     }
                   }
                 }
-                Initialiser_preview(info_ptr->width,info_ptr->height,Taille_du_fichier,FORMAT_PNG);
+                Initialiser_preview(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
 
                 if (Erreur_fichier==0)
                 {

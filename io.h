@@ -49,9 +49,18 @@ char * Position_dernier_slash(const char * Chaine);
   #define SEPARATEUR_CHEMIN "/"
 #endif
 
+// Taille de fichier, en octets
+int FileLength(const char *fname);
+
+// Taille de fichier, en octets
+int File_length_file(FILE * file);
+
 //   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
 int Fichier_existe(char * fname);
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 int  Repertoire_existe(char * Repertoire);
+
+// Scans a directory, calls Callback for each file in it,
+void for_each_file(const char * Nom_repertoire, void Callback(const char *));

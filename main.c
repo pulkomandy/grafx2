@@ -40,7 +40,6 @@
 #include "boutons.h"
 #include "moteur.h"
 #include "pages.h"
-#include "files.h"
 #include "loadsave.h"
 #include "sdlscreen.h"
 #include "erreurs.h"
@@ -313,7 +312,7 @@ int Initialisation_du_programme(int argc,char * argv[])
   Set_Config_Directory(Repertoire_du_programme,Repertoire_de_configuration);
 
   // On détermine le répertoire courant:
-  Determiner_repertoire_courant();
+  getcwd(Principal_Repertoire_courant,256);
 
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Repertoire_initial,Principal_Repertoire_courant);

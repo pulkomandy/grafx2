@@ -55,7 +55,6 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "io.h"
-#include "files.h"
 
 typedef struct T_FONTE
 {

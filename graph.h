@@ -108,11 +108,6 @@ void Changer_facteur_loupe(byte Indice_facteur);
 
 void Remap_picture(void);
 
-#define ToWinX(x) (((x)*Menu_Facteur_X)+Fenetre_Pos_X)
-#define ToWinY(y) (((y)*Menu_Facteur_Y)+Fenetre_Pos_Y)
-#define ToWinL(l) ((l)*Menu_Facteur_X)
-#define ToWinH(h) ((h)*Menu_Facteur_Y)
-
 // Définition d'une fonction générique de traçage de figures:
 fonction_afficheur Pixel_figure;
 void Mettre_Ecran_A_Jour(short x, short y, short width, short height);
