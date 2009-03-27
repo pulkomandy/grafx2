@@ -106,7 +106,7 @@ char * Format_filename(char * fname, int type)
   else if (fname[0]=='.' || type==2)
   {
     // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 18 caractères maximum.
-    strcpy(result,"            ");
+    strcpy(result,"                  ");
     for (c=0;fname[c]!='\0' && c < 18;c++)
       result[c]=fname[c];
     // Un caractère spécial pour indiquer que l'affichage est tronqué

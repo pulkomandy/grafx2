@@ -68,7 +68,7 @@ typedef struct T_Font
   struct T_Font * Previous;
 } T_Font;
 // Liste chainée des polices de texte
-T_Font * Font_list_start;
+T_Font * font_list_start;
 int Nb_fonts;
 
 // Inspiré par Allegro
@@ -87,8 +87,8 @@ int Compare_fonts(T_Font * font_1, T_Font * font_2)
 // Ajout d'une fonte à la liste.
 void Add_font(const char *name)
 {
-  char * Font_name;
-  T_Font * Font;
+  char * font_name;
+  T_Font * font;
   int size=strlen(name)+1;
   int index;
   
@@ -114,7 +114,7 @@ void Add_font(const char *name)
     return;
 #endif
 
-  Font = (T_Font *)malloc(sizeof(T_Font));
+  font = (T_Font *)malloc(sizeof(T_Font));
 
   switch (EXTID(tolower(name[size-4]), tolower(name[size-3]), tolower(name[size-2])))
   {
@@ -122,8 +122,8 @@ void Add_font(const char *name)
     case EXTID('f','o','n'):
     case EXTID('o','t','f'):
     case EXTID('p','f','b'):
-      Font->Is_truetype = 1;
-      Font->Is_bitmap = 0;
+      font->Is_truetype = 1;
+      font->Is_bitmap = 0;
       break;
     case EXTID('b','m','p'):
     case EXTID('g','i','f'):
@@ -136,84 +136,84 @@ void Add_font(const char *name)
     case EXTID('x','c','f'):
     case EXTID('x','p','m'):
     case EXTID('.','x','v'):
-      Font->Is_truetype = 0;
-      Font->Is_bitmap = 1;
+      font->Is_truetype = 0;
+      font->Is_bitmap = 1;
       break;
     default:
       #ifdef __macosx__
          if(strcasecmp(&name[size-6], "dfont") == 0)
          {
-           Font->Is_truetype = 1;
-           Font->Is_bitmap = 0;
+           font->Is_truetype = 1;
+           font->Is_bitmap = 0;
          }
          else
          {
-            free(Font);
+            free(font);
             return;
          }
       #else
-         free(Font);
+         free(font);
          return;
       #endif
   }
 
-  Font->Name = (char *)malloc(size);
-  strcpy(Font->Name, name);
+  font->Name = (char *)malloc(size);
+  strcpy(font->Name, name);
   // Label
-  strcpy(Font->Label, "                   ");
-  if (Font->Is_truetype)
-    Font->Label[17]=Font->Label[18]='T'; // Logo TT
-  Font_name=Find_last_slash(Font->Name);
-  if (Font_name==NULL)
-    Font_name=Font->Name;
+  strcpy(font->Label, "                   ");
+  if (font->Is_truetype)
+    font->Label[17]=font->Label[18]='T'; // Logo TT
+  font_name=Find_last_slash(font->Name);
+  if (font_name==NULL)
+    font_name=font->Name;
   else
-    Font_name++;
-  for (index=0; index < 17 && Font_name[index]!='\0' && Font_name[index]!='.'; index++)
-    Font->Label[index]=Font_name[index];
+    font_name++;
+  for (index=0; index < 17 && font_name[index]!='\0' && font_name[index]!='.'; index++)
+    font->Label[index]=font_name[index];
 
   // Gestion Liste
-  Font->Next = NULL;
-  Font->Previous = NULL;
-  if (Font_list_start==NULL)
+  font->Next = NULL;
+  font->Previous = NULL;
+  if (font_list_start==NULL)
   {
     // Premiere (liste vide)
-    Font_list_start = Font;
+    font_list_start = font;
     Nb_fonts++;
   }
   else
   {
     int compare;
-    compare = Compare_fonts(Font, Font_list_start);
+    compare = Compare_fonts(font, font_list_start);
     if (compare<=0)
     {
-      if (compare==0 && !strcmp(Font->Name, Font_list_start->Name))
+      if (compare==0 && !strcmp(font->Name, font_list_start->Name))
       {
         // Doublon
-        free(Font->Name);
-        free(Font);
+        free(font->Name);
+        free(font);
         return;
       }
       // Avant la premiere
-      Font->Next=Font_list_start;
-      Font_list_start=Font;
+      font->Next=font_list_start;
+      font_list_start=font;
       Nb_fonts++;
     }
     else
     {
       T_Font *searched_font;
-      searched_font=Font_list_start;
-      while (searched_font->Next && (compare=Compare_fonts(Font, searched_font->Next))>0)
+      searched_font=font_list_start;
+      while (searched_font->Next && (compare=Compare_fonts(font, searched_font->Next))>0)
         searched_font=searched_font->Next;
       // Après searched_font
-      if (compare==0 && strcmp(Font->Name, searched_font->Next->Name)==0)
+      if (compare==0 && strcmp(font->Name, searched_font->Next->Name)==0)
       {
         // Doublon
-        free(Font->Name);
-        free(Font);
+        free(font->Name);
+        free(font);
         return;
       }
-      Font->Next=searched_font->Next;
-      searched_font->Next=Font;
+      font->Next=searched_font->Next;
+      searched_font->Next=font;
       Nb_fonts++;
     }
   }
@@ -223,12 +223,12 @@ void Add_font(const char *name)
 // Trouve le nom d'une fonte par son numéro
 char * Font_name(int index)
 {
-  T_Font *Font = Font_list_start;
+  T_Font *font = font_list_start;
   if (index<0 ||index>=Nb_fonts)
     return "";
   while (index--)
-    Font = Font->Next;
-  return Font->Name;
+    font = font->Next;
+  return font->Name;
 }
 
 
@@ -236,20 +236,20 @@ char * Font_name(int index)
 // Renvoie un pointeur sur un buffer statique de 20 caracteres.
 char * Font_label(int index)
 {
-  T_Font *Font;
+  T_Font *font;
   static char label[20];
   
   strcpy(label, "                   ");
   
   // Recherche de la fonte
-  Font = Font_list_start;
+  font = font_list_start;
   if (index<0 ||index>=Nb_fonts)
     return label;
   while (index--)
-    Font = Font->Next;
+    font = font->Next;
   
   // Libellé
-  strcpy(label, Font->Label);
+  strcpy(label, font->Label);
   return label;
 }
 
@@ -257,12 +257,12 @@ char * Font_label(int index)
 // Vérifie si une fonte donnée est TrueType
 int TrueType_font(int index)
 {
-  T_Font *Font = Font_list_start;
+  T_Font *font = font_list_start;
   if (index<0 ||index>=Nb_fonts)
     return 0;
   while (index--)
-    Font = Font->Next;
-  return Font->Is_truetype;
+    font = font->Next;
+  return font->Is_truetype;
 }
 
 
@@ -277,7 +277,7 @@ void Init_text(void)
   #endif
   
   // Initialisation des fontes
-  Font_list_start = NULL;
+  font_list_start = NULL;
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
   strcpy(directory_name, Repertoire_des_donnees);
@@ -369,7 +369,7 @@ int TrueType_is_supported()
 #ifndef NOTTF
 byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height)
 {
- TTF_Font *Font;
+ TTF_Font *font;
   SDL_Surface * TexteColore;
   SDL_Surface * Texte8Bit;
   byte * new_brush;
@@ -380,8 +380,8 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   SDL_Color Couleur_Arriere;
 
   // Chargement de la fonte
-  Font=TTF_OpenFont(Font_name(font_number), size);
-  if (!Font)
+  font=TTF_OpenFont(Font_name(font_number), size);
+  if (!font)
   {
     return NULL;
   }
@@ -391,7 +391,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
     style|=TTF_STYLE_ITALIC;
   if (bold)
     style|=TTF_STYLE_BOLD;
-  TTF_SetFontStyle(Font, style);
+  TTF_SetFontStyle(font, style);
   // Couleurs
   if (antialias)
   {
@@ -407,12 +407,12 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   
   // Rendu du texte: crée une surface SDL RGB 24bits
   if (antialias)
-    TexteColore=TTF_RenderText_Shaded(Font, str, Couleur_Avant, Couleur_Arriere );
+    TexteColore=TTF_RenderText_Shaded(font, str, Couleur_Avant, Couleur_Arriere );
   else
-    TexteColore=TTF_RenderText_Solid(Font, str, Couleur_Avant);
+    TexteColore=TTF_RenderText_Solid(font, str, Couleur_Avant);
   if (!TexteColore)
   {
-    TTF_CloseFont(Font);
+    TTF_CloseFont(font);
     return NULL;
   }
   
@@ -425,7 +425,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   {
     SDL_FreeSurface(TexteColore);
     SDL_FreeSurface(Texte8Bit);
-    TTF_CloseFont(Font);
+    TTF_CloseFont(font);
     return NULL;
   }
   if (!antialias)
@@ -442,7 +442,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   *width=Texte8Bit->w;
   *height=Texte8Bit->h;
   SDL_FreeSurface(Texte8Bit);
-  TTF_CloseFont(Font);
+  TTF_CloseFont(font);
   return new_brush;
 }
 #endif
@@ -450,7 +450,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 
 byte *Render_text_SFont(const char *str, int font_number, int *width, int *height)
 {
-  SFont_Font *Font;
+  SFont_Font *font;
   SDL_Surface * TexteColore;
   SDL_Surface * Texte8Bit;
   SDL_Surface *Surface_fonte;
@@ -460,22 +460,22 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   Surface_fonte=IMG_Load(Font_name(font_number));
   if (!Surface_fonte)
     return NULL;
-  Font=SFont_InitFont(Surface_fonte);
-  if (!Font)
+  font=SFont_InitFont(Surface_fonte);
+  if (!font)
   {
     return NULL;
   }
   
   // Calcul des dimensions
-  *height=SFont_TextHeight(Font);
-  *width=SFont_TextWidth(Font, str);
+  *height=SFont_TextHeight(font);
+  *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
   TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
   // Rendu du texte
-  SFont_Write(TexteColore, Font, 0, 0, str);
+  SFont_Write(TexteColore, font, 0, 0, str);
   if (!TexteColore)
   {
-    SFont_FreeFont(Font);
+    SFont_FreeFont(font);
     return NULL;
   }
   
@@ -487,11 +487,11 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   {
     SDL_FreeSurface(TexteColore);
     SDL_FreeSurface(Texte8Bit);
-    SFont_FreeFont(Font);
+    SFont_FreeFont(font);
     return NULL;
   }
   SDL_FreeSurface(Texte8Bit);
-  SFont_FreeFont(Font);
+  SFont_FreeFont(font);
 
   return new_brush;
 }
@@ -502,7 +502,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
 // et retourne l'adresse du bloc d'octets.
 byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height)
 {
-  T_Font *Font = Font_list_start;
+  T_Font *font = font_list_start;
   int index=font_number;
   
   // Verification type de la fonte
@@ -510,8 +510,8 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
     return NULL;
     
   while (index--)
-    Font = Font->Next;
-  if (Font->Is_truetype)
+    font = font->Next;
+  if (font->Is_truetype)
   {
   #ifndef NOTTF 
     return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height);

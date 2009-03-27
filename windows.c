@@ -359,7 +359,7 @@ void Display_menu(void)
     Display_foreback();
 
 
-    if (!Window)
+    if (!Windows_open)
     {
       if ((Mouse_Y<Menu_Y) &&                                                    // Souris dans l'image
           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ))
@@ -405,7 +405,7 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
     for (index=0;str[index]!='\0';index++)
     {
       // Pointeur sur le premier pixel du caractère
-      font_pixel=Font+(((unsigned char)str[index])<<6);
+      font_pixel=Menu_font+(((unsigned char)str[index])<<6);
       for (x_pos=0;x_pos<8;x_pos+=1)
         for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
           Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
@@ -424,7 +424,7 @@ void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte tex
   x_pos=(x_pos*Menu_factor_X)+Window_pos_X;
   y_pos=(y_pos*Menu_factor_Y)+Window_pos_Y;
   // Premier pixel du caractère
-  pixel=Font + (c<<6);
+  pixel=Menu_font + (c<<6);
   
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
@@ -442,7 +442,7 @@ void Print_transparent_char_in_window(short x_pos,short y_pos,const unsigned cha
   x_pos=(x_pos*Menu_factor_X)+Window_pos_X;
   y_pos=(y_pos*Menu_factor_Y)+Window_pos_Y;
   // Premier pixel du caractère
-  pixel=Font + (c<<6);
+  pixel=Menu_font + (c<<6);
   
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
@@ -1483,7 +1483,7 @@ void Display_cursor(void)
   // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flèche.
   if ( ( (Mouse_Y<Menu_Y)
       && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
-    || (Window) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
+    || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
     shape=Cursor_shape;
   else
     shape=CURSOR_SHAPE_ARROW;
@@ -1787,7 +1787,7 @@ void Hide_cursor(void)
   if ( ( (Mouse_Y<Menu_Y)
       && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position)
                          || (Mouse_X>=Main_X_zoom) ) )
-    || (Window) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
+    || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
     shape=Cursor_shape;
   else
     shape=CURSOR_SHAPE_ARROW;

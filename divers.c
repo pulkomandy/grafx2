@@ -105,8 +105,8 @@ void Hide_current_image_with_stencil(byte color, byte * stencil)
 {
   int nb_pixels=0; //ECX
   //al=color
-  //edi=Screen
-  byte* Pixel_Courant=Screen; //dl
+  //edi=Screen_pixels
+  byte* Pixel_Courant=Screen_pixels; //dl
   int i;
 
   nb_pixels=Main_image_height*Main_image_width;

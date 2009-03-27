@@ -972,9 +972,9 @@ void Button_Settings(void)
                      y_sensitivity?y_sensitivity:1);
     // Gestion des fontes
   if (Config.Font)
-    Font=GFX_fun_font;
+    Menu_font=GFX_fun_font;
   else
-    Font=GFX_system_font;
+    Menu_font=GFX_system_font;
 
   if (config_is_reloaded)
     Compute_optimal_menu_colors(Main_palette);

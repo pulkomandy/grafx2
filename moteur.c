@@ -448,7 +448,7 @@ void Move_separator(void)
 
   // Afficher la barre en XOR
   Hide_cursor();
-  Window=1;
+  Windows_open=1;
   Cursor_shape=CURSOR_SHAPE_HORIZONTAL;
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
@@ -492,7 +492,7 @@ void Move_separator(void)
   Hide_cursor();
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
-  Window=0;
+  Windows_open=0;
   Cursor_shape=old_cursor_shape;
   Compute_magnifier_data();
   Position_screen_according_to_zoom();
@@ -961,7 +961,7 @@ void Main_handler(void)
       // Si le curseur vient de changer de zone
 
       if ( (button_index!=prev_button_number)
-        || (!Cursor_in_menu_precedent)
+        || (!Cursor_in_menu_previous)
         || (prev_button_number==BUTTON_CHOOSE_COL) )
       {
         // Si le curseur n'est pas sur un bouton
@@ -1048,24 +1048,24 @@ void Main_handler(void)
     {
        if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
        {
-          if(Cursor_in_menu_precedent)
+          if(Cursor_in_menu_previous)
           {
              Print_in_menu("X:       Y:             ",0);
           }
        }
        else
        {
-          if(Cursor_in_menu_precedent)
+          if(Cursor_in_menu_previous)
           {
              Print_in_menu("X:       Y:       (    )",0);
           }
        }
-       Cursor_in_menu_precedent = 0;
+       Cursor_in_menu_previous = 0;
     }
 
     if(Cursor_in_menu)
     {
-        Cursor_in_menu_precedent = 1;
+        Cursor_in_menu_previous = 1;
     }
     else
     {
@@ -1101,7 +1101,7 @@ void Open_window(word width,word height, char * title)
 
   Hide_cursor();
 
-  Window++;
+  Windows_open++;
 
   Window_width=width;
   Window_height=height;
@@ -1112,7 +1112,7 @@ void Open_window(word width,word height, char * title)
   Window_pos_Y=(Screen_height-(height*Menu_factor_Y))>>1;
 
   // Sauvegarde de ce que la fenêtre remplace
-  Save_background(&(Window_background[Window-1]), Window_pos_X, Window_pos_Y, width, height);
+  Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
   // Fenêtre grise
   Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Light);
@@ -1129,7 +1129,7 @@ void Open_window(word width,word height, char * title)
 
   Print_in_window((width-(strlen(title)<<3))>>1,3,title,MC_Black,MC_Light);
 
-  if (Window == 1)
+  if (Windows_open == 1)
   {
     Menu_is_visible_before_window=Menu_is_visible;
     Menu_is_visible=0;
@@ -1197,19 +1197,19 @@ void Close_window(void)
     Window_dropdown_button_list=temp5;
   }
 
-  if (Window != 1)
+  if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Window-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Window-1]=NULL;
+    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
+    Window_background[Windows_open-1]=NULL;
     Update_rect(Window_pos_X,Window_pos_Y,Window_width*Menu_factor_X,Window_height*Menu_factor_Y);
-    Window--;
+    Windows_open--;
   }
   else
   {
-    free(Window_background[Window-1]);
-    Window_background[Window-1]=NULL;
-    Window--;
+    free(Window_background[Windows_open-1]);
+    Window_background[Windows_open-1]=NULL;
+    Windows_open--;
   
     Paintbrush_hidden=Paintbrush_hidden_before_window;
   
@@ -1654,7 +1654,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
     // -Pas de titre
     // -Pas de cadre en relief mais seulement un plat, et il est blanc au lieu de noir.
 {
-  Window++;
+  Windows_open++;
 
   Window_width=width;
   Window_height=height;
@@ -1662,7 +1662,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_pos_Y=y_pos;
 
   // Sauvegarde de ce que la fenêtre remplace
-  Save_background(&(Window_background[Window-1]), Window_pos_X, Window_pos_Y, width, height);
+  Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
 /*
   // Fenêtre grise
@@ -1673,7 +1673,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   // Frame noir puis en relief
   Window_display_frame_mono(0,0,width,height,MC_White);
 */
-  if (Window == 1)
+  if (Windows_open == 1)
   {
     Menu_is_visible_before_window=Menu_is_visible;
     Menu_is_visible=0;
@@ -1741,18 +1741,18 @@ void Close_popup(void)
     Window_dropdown_button_list=temp5;
   }
 
-  if (Window != 1)
+  if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Window-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Window-1]=NULL;
+    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
+    Window_background[Windows_open-1]=NULL;
     Update_rect(Window_pos_X,Window_pos_Y,Window_width*Menu_factor_X,Window_height*Menu_factor_Y);
-    Window--;
+    Windows_open--;
   }
   else
   {
-    free(Window_background[Window-1]);
-    Window--;
+    free(Window_background[Windows_open-1]);
+    Windows_open--;
   
     Paintbrush_hidden=Paintbrush_hidden_before_window;
   
@@ -2069,11 +2069,11 @@ void Move_window(short dx, short dy)
     Save_background(&buffer, Window_pos_X, Window_pos_Y, Window_width, Window_height);
     
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Window-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Window-1] = NULL;
+    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
+    Window_background[Windows_open-1] = NULL;
 
     // Sauvegarde de ce que la fenêtre remplace
-    Save_background(&(Window_background[Window-1]), new_x, new_y, Window_width, Window_height);
+    Save_background(&(Window_background[Windows_open-1]), new_x, new_y, Window_width, Window_height);
 
     // Raffichage de la fenêtre
     Restore_background(buffer, new_x, new_y, Window_width, Window_height);
@@ -2536,7 +2536,7 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
         byte* EDI;
         int dx,cx;
 
-  for (window_index=0; window_index<Window; window_index++)
+  for (window_index=0; window_index<Windows_open; window_index++)
   {
     EDI = Window_background[window_index];
   

@@ -412,7 +412,7 @@ void Load_DAT(void)
     cursor_x+=8;
   }
   cursor_y+=8;
-  Font=GFX_system_font;
+  Menu_font=GFX_system_font;
 
   // Font Fun
   for (i=0; i<256; i++)

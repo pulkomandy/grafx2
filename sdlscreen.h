@@ -28,7 +28,7 @@
   void Set_mode_SDL(int *,int *,int);
 
   SDL_Rect ** List_SDL_video_modes;
-  byte* Screen;
+  byte* Screen_pixels;
 
   void Update_rect(short x, short y, unsigned short width, unsigned short height);
   void Flush_update(void);

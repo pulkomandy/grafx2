@@ -493,7 +493,7 @@ int Init_program(int argc,char * argv[])
   // Initialisation des opérations
   Init_operations();
 
-  Window=0;
+  Windows_open=0;
   
   // Charger les sprites et la palette
   Load_DAT();
@@ -535,9 +535,9 @@ int Init_program(int argc,char * argv[])
 
   // Prise en compte de la fonte
   if (Config.Font)
-    Font=GFX_fun_font;
+    Menu_font=GFX_fun_font;
   else
-    Font=GFX_system_font;
+    Menu_font=GFX_system_font;
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);

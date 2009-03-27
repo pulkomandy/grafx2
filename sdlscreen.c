@@ -57,7 +57,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
       *width = Screen_SDL->w;
       *height = Screen_SDL->h;
     }
-    Screen=Screen_SDL->pixels;
+    Screen_pixels=Screen_SDL->pixels;
   }
   else
     DEBUG("Error changement de mode video !!",0);

@@ -35,16 +35,16 @@
 void Pixel_double (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {
-  *(Screen + x * 2 + y * 4 * Screen_width)=color;
-  *(Screen + x * 2 + y * 4 * Screen_width + 1)=color;
-  *(Screen + x * 2 + (y * 4 + 2 )* Screen_width)=color;
-  *(Screen + x * 2 + (y * 4 + 2 )* Screen_width + 1)=color;
+  *(Screen_pixels + x * 2 + y * 4 * Screen_width)=color;
+  *(Screen_pixels + x * 2 + y * 4 * Screen_width + 1)=color;
+  *(Screen_pixels + x * 2 + (y * 4 + 2 )* Screen_width)=color;
+  *(Screen_pixels + x * 2 + (y * 4 + 2 )* Screen_width + 1)=color;
 }
 
 byte Read_pixel_double (word x,word y)
 /* On retourne la couleur du pixel aux coords données */
 {
-  return *( Screen + y * 4 * Screen_width + x * 2);
+  return *( Screen_pixels + y * 4 * Screen_width + x * 2);
 }
 
 void Block_double (word start_x,word start_y,word width,word height,byte color)
@@ -61,7 +61,7 @@ void Block_double (word start_x,word start_y,word width,word height,byte color)
 void Display_part_of_screen_double (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
-  byte* dest=Screen; //On va se mettre en 0,0 dans l'écran (dest)
+  byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'écran (dest)
   byte* src=Main_offset_Y*image_width+Main_offset_X+Main_screen; //Coords de départ ds la source (src)
   int y;
   int dy;
@@ -126,7 +126,7 @@ void Pixel_preview_magnifier_double  (word x,word y,byte color)
 void Horizontal_XOR_line_double(word x_pos,word y_pos,word width)
 {
   //On calcule la valeur initiale de dest:
-  byte* dest=y_pos*4*Screen_width+x_pos*2+Screen;
+  byte* dest=y_pos*4*Screen_width+x_pos*2+Screen_pixels;
 
   int x;
 
@@ -137,7 +137,7 @@ void Horizontal_XOR_line_double(word x_pos,word y_pos,word width)
 void Vertical_XOR_line_double(word x_pos,word y_pos,word height)
 {
   int i;
-  byte *dest=Screen+x_pos*2+y_pos*Screen_width*4;
+  byte *dest=Screen_pixels+x_pos*2+y_pos*Screen_width*4;
   for (i=height;i>0;i--)
   {
     *dest=*(dest+1)=*(dest+Screen_width*2)=*(dest+Screen_width*2+1)=~*dest;
@@ -148,7 +148,7 @@ void Vertical_XOR_line_double(word x_pos,word y_pos,word height)
 void Display_brush_color_double(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
-  byte* dest = Screen + y_pos * 4 * Screen_width + x_pos * 2;
+  byte* dest = Screen_pixels + y_pos * 4 * Screen_width + x_pos * 2;
   // src = Position dans la brosse
   byte* src = Brush + y_offset * brush_width + x_offset;
 
@@ -183,7 +183,7 @@ void Display_brush_mono_double(word x_pos, word y_pos,
         byte transp_color, byte color, word brush_width)
 /* On affiche la brosse en monochrome */
 {
-  byte* dest=y_pos*4*Screen_width+x_pos*2+Screen; // dest = adr destination à 
+  byte* dest=y_pos*4*Screen_width+x_pos*2+Screen_pixels; // dest = adr destination à 
       // l'écran
   byte* src=brush_width*y_offset+x_offset+Brush; // src = adr ds 
       // la brosse
@@ -212,7 +212,7 @@ void Display_brush_mono_double(word x_pos, word y_pos,
 
 void Clear_brush_double(word x_pos,word y_pos,__attribute__((unused)) word x_offset,__attribute__((unused)) word y_offset,word width,word height,__attribute__((unused))byte transp_color,word image_width)
 {
-  byte* dest=Screen+x_pos*2+y_pos*4*Screen_width; //On va se mettre en 0,0 dans l'écran (dest)
+  byte* dest=Screen_pixels+x_pos*2+y_pos*4*Screen_width; //On va se mettre en 0,0 dans l'écran (dest)
   byte* src = ( y_pos + Main_offset_Y ) * image_width + x_pos + Main_offset_X + Main_screen; //Coords de départ ds la source (src)
   int y;
   int x;
@@ -241,7 +241,7 @@ void Clear_brush_double(word x_pos,word y_pos,__attribute__((unused)) word x_off
 void Display_brush_double(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
-  byte* dest = Screen + y_pos * 4 * Screen_width + x_pos * 2;
+  byte* dest = Screen_pixels + y_pos * 4 * Screen_width + x_pos * 2;
   // src = Position dans la brosse
   byte* src = brush + y_offset * brush_width + x_offset;
   
@@ -272,7 +272,7 @@ void Display_brush_double(byte * brush, word x_pos,word y_pos,word x_offset,word
 void Remap_screen_double(word x_pos,word y_pos,word width,word height,byte * conversion_table)
 {
   // dest = coords a l'écran
-  byte* dest = Screen + y_pos * 4 * Screen_width + x_pos * 2;
+  byte* dest = Screen_pixels + y_pos * 4 * Screen_width + x_pos * 2;
   int x,y;
 
   // Pour chaque ligne
@@ -296,8 +296,8 @@ void Display_line_on_screen_fast_double(word x_pos,word y_pos,word width,byte * 
 /* On affiche toute une ligne de pixels telle quelle. */
 /* Utilisée si le buffer contient déja des pixel doublés. */
 {
-  memcpy(Screen+x_pos*2+y_pos*4*Screen_width,line,width*2);
-  memcpy(Screen+x_pos*2+(y_pos*4+2)*Screen_width,line,width*2);
+  memcpy(Screen_pixels+x_pos*2+y_pos*4*Screen_width,line,width*2);
+  memcpy(Screen_pixels+x_pos*2+(y_pos*4+2)*Screen_width,line,width*2);
 }
 
 void Display_line_on_screen_double(word x_pos,word y_pos,word width,byte * line)
@@ -305,7 +305,7 @@ void Display_line_on_screen_double(word x_pos,word y_pos,word width,byte * line)
 {
   int x;
   byte *dest;
-  dest=Screen+x_pos*2+y_pos*4*Screen_width;
+  dest=Screen_pixels+x_pos*2+y_pos*4*Screen_width;
   for(x=width;x>0;x--)
   {
     *(dest+Screen_width*2+1)=*(dest+Screen_width*2)=*(dest+1)=*dest=*line;
@@ -319,7 +319,7 @@ void Display_transparent_mono_line_on_screen_double(
 // Affiche une ligne à l'écran avec une couleur + transparence.
 // Utilisé par les brosses en mode zoom
 {
-  byte* dest = Screen+ y_pos*ZOOMX*Screen_width + x_pos*ZOOMX;
+  byte* dest = Screen_pixels+ y_pos*ZOOMX*Screen_width + x_pos*ZOOMX;
   int x;
   // Pour chaque pixel
   for(x=0;x<width;x++)
@@ -335,7 +335,7 @@ void Display_transparent_mono_line_on_screen_double(
 
 void Read_line_screen_double(word x_pos,word y_pos,word width,byte * line)
 {
-  memcpy(line,Screen_width * 4 * y_pos + x_pos * 2 + Screen,width*2);
+  memcpy(line,Screen_width * 4 * y_pos + x_pos * 2 + Screen_pixels,width*2);
 }
 
 void Display_part_of_screen_scaled_double(
@@ -399,7 +399,7 @@ void Display_brush_color_zoom_double(word x_pos,word y_pos,
     {
       Display_transparent_line_on_screen_wide(x_pos,y*ZOOMX,width*Main_magnifier_factor,buffer,transp_color);
       // TODO: pas clair ici
-      memcpy(Screen + (y*ZOOMY+1)*ZOOMX*Screen_width + x_pos*ZOOMX, Screen + y*ZOOMX*ZOOMY*Screen_width + x_pos*ZOOMX, width*ZOOMX*Main_magnifier_factor);
+      memcpy(Screen_pixels + (y*ZOOMY+1)*ZOOMX*Screen_width + x_pos*ZOOMX, Screen_pixels + y*ZOOMX*ZOOMY*Screen_width + x_pos*ZOOMX, width*ZOOMX*Main_magnifier_factor);
       y++;
       if(y==end_y_pos)
       {
