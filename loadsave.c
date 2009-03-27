@@ -45,8 +45,6 @@
 #include "windows.h"
 #include "loadsave.h"
 
-#define FILENAMESPACE 13
-
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(void);
 void Load_PKM(void);
@@ -330,7 +328,7 @@ void Initialiser_preview(short width,short height,long size,int format)
 // premier point.
 //
 {
-  char  Chaine[256];
+  char  Chaine[10];
   int   Image_en_24b;
 
   Image_en_24b=format & FORMAT_24B;
@@ -346,46 +344,44 @@ void Initialiser_preview(short width,short height,long size,int format)
       Num2str(width,Chaine,4);
       Num2str(height,Chaine+5,4);
       Chaine[4]='x';
-      Print_dans_fenetre(226,55,Chaine,CM_Noir,CM_Clair);
+      Print_dans_fenetre(143,59,Chaine,CM_Noir,CM_Clair);
     }
     else
     {
-      Print_dans_fenetre(226,55,"VERY BIG!",CM_Noir,CM_Clair);
+      Print_dans_fenetre(143,59,"VERY BIG!",CM_Noir,CM_Clair);
     }
 
     // Affichage de la taille du fichier
     if (size<1048576)
     {
       // Le fichier fait moins d'un Mega, on affiche sa taille direct
-      Num2str(size,Chaine,9);
-      Print_dans_fenetre(226,63,Chaine,CM_Noir,CM_Clair);
+      Num2str(size,Chaine,7);
+      Print_dans_fenetre(236,59,Chaine,CM_Noir,CM_Clair);
     }
-    else if ((size/1024)<10000000)
+    else if ((size/1024)<100000)
     {
       // Le fichier fait plus d'un Mega, on peut afficher sa taille en Ko
-      Num2str(size/1024,Chaine,7);
-      Chaine[7]='K';
-      Chaine[8]='b';
-      Print_dans_fenetre(226,63,Chaine,CM_Noir,CM_Clair);
+      Num2str(size/1024,Chaine,5);
+      strcpy(Chaine+5,"Kb");
+      Print_dans_fenetre(236,59,Chaine,CM_Noir,CM_Clair);
     }
     else
     {
-      // Le fichier fait plus de 10 Giga octets (cas très rare :))
-      Print_dans_fenetre(226,63,"TOO BIG!!",CM_Noir,CM_Clair);
+      // Le fichier fait plus de 100 Mega octets (cas très rare :))
+      Print_dans_fenetre(236,59,"LARGE!!",CM_Noir,CM_Clair);
     }
 
     // Affichage du vrai format
     if (format!=Principal_Format)
     {
-      Print_dans_fenetre( 274,72,FormatFichier[format-1].Extension,CM_Noir,CM_Clair);
+      Print_dans_fenetre( 59,59,FormatFichier[format-1].Extension,CM_Noir,CM_Clair);
     }
 
     // On efface le commentaire précédent
-    Block(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,
-          Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
+    Window_rectangle(45,70,32*8,8,CM_Clair);
     // Affichage du commentaire
     if (FormatFichier[format-1].Commentaire)
-      Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(45,70,Principal_Commentaire,CM_Noir,CM_Clair);
 
     // Calculs des données nécessaires à l'affichage de la preview:
     Preview_Facteur_X=Round_div_max(width,122*Menu_Facteur_X);
@@ -399,14 +395,16 @@ void Initialiser_preview(short width,short height,long size,int format)
         Preview_Facteur_X=Preview_Facteur_Y;
     }
 
-    Preview_Pos_X=Fenetre_Pos_X+180*Menu_Facteur_X;
-    Preview_Pos_Y=Fenetre_Pos_Y+ (89+FILENAMESPACE)*Menu_Facteur_Y;
+    Preview_Pos_X=Fenetre_Pos_X+183*Menu_Facteur_X;
+    Preview_Pos_Y=Fenetre_Pos_Y+ 95*Menu_Facteur_Y;
 
     // On nettoie la zone où va s'afficher la preview:
-    Block(Preview_Pos_X,Preview_Pos_Y,
-          Round_div_max(width,Preview_Facteur_X),
-          Round_div_max(height,Preview_Facteur_Y),
-          CM_Noir);
+    Window_rectangle(183,95,120,80,CM_Clair);
+    
+    // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
+    Display_Window(45,48,256,30);
+    // Zone de preview
+    Display_Window(183,95,120,80);
   }
   else
   {
@@ -456,19 +454,12 @@ void Initialiser_preview(short width,short height,long size,int format)
 void Dessiner_preview_palette(void)
 {
   short Indice;
-  short Preview_Pos_X=Fenetre_Pos_X+186*Menu_Facteur_X;
-  short Preview_Pos_Y=Fenetre_Pos_Y+ (90+FILENAMESPACE)*Menu_Facteur_Y;
 
   if (Pixel_de_chargement==Pixel_Chargement_dans_preview)
     for (Indice=0; Indice<256; Indice++)
-      Block(Preview_Pos_X+(((Indice>>4)*7)*Menu_Facteur_X),
-            Preview_Pos_Y+(((Indice&15)*5)*Menu_Facteur_Y),
-            5*Menu_Facteur_X,5*Menu_Facteur_Y,Indice);
+      Window_rectangle(183+(Indice/16)*7,95+(Indice&15)*5,5,5,Indice);
 
-  UpdateRect(
-    Preview_Pos_X*Menu_Facteur_X,
-  Preview_Pos_Y*Menu_Facteur_Y,
-  5*Menu_Facteur_X*256,5*Menu_Facteur_Y*256);
+  Display_Window(183,95,120,80);
 }
 
 

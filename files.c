@@ -64,8 +64,6 @@
 #define COULEUR_REPERTOIRE_SELECT CM_Clair // Couleur du texte pour une ligne de repértoire sélectionnée
 #define COULEUR_FOND_SELECT       CM_Fonce // Couleur du fond  pour une ligne sélectionnée
 
-#define FILENAMESPACE 13
-
 // Conventions:
 //
 // * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
@@ -96,37 +94,37 @@ void Detruire_liste_du_fileselect(void)
 // -- Formatage graphique des noms de fichier / répertoire ------------------
 char * Nom_formate(char * fname, int type)
 {
-  static char Resultat[13];
+  static char Resultat[19];
   int         c;
   int         Autre_curseur;
   int         Pos_DernierPoint;
 
   if (strcmp(fname,PARENT_DIR)==0)
   {
-    strcpy(Resultat,"<-PARENT DIR");
+    strcpy(Resultat,"<-PARENT DIRECTORY");
   }
   else if (fname[0]=='.' || type==2)
   {
-    // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 12 caractères maximum.
+    // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 18 caractères maximum.
     strcpy(Resultat,"            ");
-    for (c=0;fname[c]!='\0' && c < 12;c++)
+    for (c=0;fname[c]!='\0' && c < 18;c++)
       Resultat[c]=fname[c];
     // Un caractère spécial pour indiquer que l'affichage est tronqué
-    if (c >= 12)
-      Resultat[11]=CARACTERE_SUSPENSION;
+    if (c >= 18)
+      Resultat[17]=CARACTERE_SUSPENSION;
   }
   else
   {
-    strcpy(Resultat,"        .   ");
+    strcpy(Resultat,"              .   ");
     // On commence par recopier la partie précédent le point:
     for (c=0;( (fname[c]!='.') && (fname[c]!='\0') );c++)
     {
-      if (c < 8)
+      if (c < 14)
         Resultat[c]=fname[c];
     }
     // Un caractère spécial pour indiquer que l'affichage est tronqué
-    if (c > 8)
-      Resultat[7]=CARACTERE_SUSPENSION;
+    if (c > 14)
+      Resultat[13]=CARACTERE_SUSPENSION;
     // On recherche le dernier point dans le reste du nom
     for (Pos_DernierPoint = c; fname[c]!='\0'; c++)
       if (fname[c]=='.')
@@ -135,7 +133,7 @@ char * Nom_formate(char * fname, int type)
     // Ensuite on recopie la partie qui suit le point (si nécessaire):
     if (fname[Pos_DernierPoint])
     {
-      for (c = Pos_DernierPoint+1,Autre_curseur=9;fname[c]!='\0' && Autre_curseur < 12;c++,Autre_curseur++)
+      for (c = Pos_DernierPoint+1,Autre_curseur=15;fname[c]!='\0' && Autre_curseur < 18;c++,Autre_curseur++)
         Resultat[Autre_curseur]=fname[c];
     }
   }
@@ -544,7 +542,7 @@ void Afficher_la_liste_des_fichiers(short Decalage_premier,short Decalage_select
       }
 
       // On affiche l'élément
-      Print_dans_fenetre(9,90+FILENAMESPACE+(Indice<<3),Element_courant->NomAbrege,Couleur_texte,Couleur_fond);
+      Print_dans_fenetre(8,95+Indice*8,Element_courant->NomAbrege,Couleur_texte,Couleur_fond);
 
       // On passe à la ligne suivante
       Decalage_select--;
@@ -699,7 +697,7 @@ short Calculer_decalage_click_dans_fileselector(void)
 {
   short Decalage_calcule;
 
-  Decalage_calcule=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-(90+FILENAMESPACE))>>3;
+  Decalage_calcule=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-95)>>3;
   if (Decalage_calcule>=Liste_Nb_elements)
     Decalage_calcule=Liste_Nb_elements-1;
 
@@ -715,7 +713,7 @@ void Afficher_bookmark(T_Bouton_dropdown * Bouton, int Numero_bookmark)
     Print_dans_fenetre_limite(Bouton->Pos_X+3+10,Bouton->Pos_Y+2,Config.Bookmark_label[Numero_bookmark],8,CM_Noir,CM_Clair);
     label_size=strlen(Config.Bookmark_label[Numero_bookmark]);
     if (label_size<8)
-      Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton->Pos_X+3+10+label_size*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton->Pos_Y+2)),Menu_Facteur_X*(8-label_size)*8,Menu_Facteur_Y*8,CM_Clair);
+      Window_rectangle(Bouton->Pos_X+3+10+label_size*8,Bouton->Pos_Y+2,(8-label_size)*8,8,CM_Clair);
     // Menu apparait sur clic droit
     Bouton->Bouton_actif=A_DROITE;
     // Choix actifs
@@ -747,7 +745,7 @@ void Print_repertoire_courant(void)
   int  length; // length du répertoire courant
   int  Indice;   // Indice de parcours de la chaine complète
 
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*7),Fenetre_Pos_Y+(Menu_Facteur_Y*43),Menu_Facteur_X*37*8,Menu_Facteur_Y<<3,CM_Clair);
+  Window_rectangle(10,84,37*8,8,CM_Clair);
 
   length=strlen(Principal_Repertoire_courant);
   if (length>TAILLE_MAXI_PATH)
@@ -773,12 +771,12 @@ void Print_repertoire_courant(void)
       }
 
     // Enfin, on peut afficher la chaîne tronquée
-    Print_dans_fenetre(7,43,Nom_temporaire,CM_Noir,CM_Clair);
+    Print_dans_fenetre(10,84,Nom_temporaire,CM_Noir,CM_Clair);
   }
   else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
-    Print_dans_fenetre(7,43,Principal_Repertoire_courant,CM_Noir,CM_Clair);
+    Print_dans_fenetre(10,84,Principal_Repertoire_courant,CM_Noir,CM_Clair);
     
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*7),Fenetre_Pos_Y+(Menu_Facteur_Y*43),Menu_Facteur_X*37*8,Menu_Facteur_Y<<3);
+  Display_Window(10,84,37*8,8);
 }
 
 
@@ -787,9 +785,9 @@ void Print_Nom_fichier_dans_selecteur(void)
 // Affiche Principal_Nom_fichier dans le Fileselect
 //
 {
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3,CM_Clair);
-  Print_dans_fenetre_limite(13+9*8,90,Principal_Nom_fichier,27,CM_Noir,CM_Clair);
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(13+9*8)),Fenetre_Pos_Y+(Menu_Facteur_Y*90),Menu_Facteur_X*(27*8),Menu_Facteur_Y<<3);
+  Window_rectangle(82,48,27*8,8,CM_Clair);
+  Print_dans_fenetre_limite(82,48,Principal_Nom_fichier,27,CM_Noir,CM_Clair);
+  Display_Window(82,48,27*8,8);
 }
 
 int   Type_selectionne; // Utilisé pour mémoriser le type d'entrée choisi
@@ -803,11 +801,11 @@ void Preparer_et_afficher_liste_fichiers(short Position, short offset,
   Calculer_hauteur_curseur_jauge(button);
   Fenetre_Dessiner_jauge(button);
   // On efface les anciens noms de fichier:
-  Block(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82,CM_Noir);
+  Window_rectangle(8-1,95-1,144+2,80+2,CM_Noir);
   // On affiche les nouveaux:
   Afficher_la_liste_des_fichiers(Position,offset);
 
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X<<3),Fenetre_Pos_Y+(Menu_Facteur_Y*(89+FILENAMESPACE)),Menu_Facteur_X*98,Menu_Facteur_Y*82);
+  Display_Window(8-1,95-1,144+2,80+2);
 
   // On récupère le nom du schmilblick à "accéder"
   Determiner_element_de_la_liste(Position,offset,Principal_Nom_fichier,&Type_selectionne);
@@ -957,18 +955,18 @@ byte Bouton_Load_ou_Save(byte load, byte image)
   if (load)
   {
     if (image)
-      Ouvrir_fenetre(310,187+FILENAMESPACE,"Load picture");
+      Ouvrir_fenetre(310,200,"Load picture");
     else
-      Ouvrir_fenetre(310,187+FILENAMESPACE,"Load brush");
-    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Load",0,1,SDLK_RETURN); // 1
+      Ouvrir_fenetre(310,200,"Load brush");
+    Fenetre_Definir_bouton_normal(198,180,51,14,"Load",0,1,SDLK_RETURN); // 1
   }
   else
   {
     if (image)
-      Ouvrir_fenetre(310,187+FILENAMESPACE,"Save picture");
+      Ouvrir_fenetre(310,200,"Save picture");
     else
-      Ouvrir_fenetre(310,187+FILENAMESPACE,"Save brush");
-    Fenetre_Definir_bouton_normal(125,157+FILENAMESPACE,51,14,"Save",0,1,SDLK_RETURN); // 1
+      Ouvrir_fenetre(310,200,"Save brush");
+    Fenetre_Definir_bouton_normal(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
     if (Principal_Format==0) // Correction du *.*
     {
       Principal_Format=Principal_Format_fichier;
@@ -984,29 +982,28 @@ byte Bouton_Load_ou_Save(byte load, byte image)
     }
     // Affichage du commentaire
     if (FormatFichier[Principal_Format-1].Commentaire)
-      Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+      Print_dans_fenetre(47,70,Principal_Commentaire,CM_Noir,CM_Clair);
   }
 
-  Fenetre_Definir_bouton_normal(125,139+FILENAMESPACE,51,14,"Cancel",0,1,TOUCHE_ESC);  // 2
-  Fenetre_Definir_bouton_normal(125, 89+FILENAMESPACE,51,14,"Delete",0,1,SDLK_DELETE); // 3
+  Fenetre_Definir_bouton_normal(253,180,51,14,"Cancel",0,1,TOUCHE_ESC); // 2
+  Fenetre_Definir_bouton_normal(7,180,51,14,"Delete",0,1,SDLK_DELETE); // 3
 
-  // Cadre autour des formats
-  Fenetre_Afficher_cadre(  7, 51,104, 35);
   // Cadre autour des infos sur le fichier de dessin
-  Fenetre_Afficher_cadre(116, 51,187, 35);
+  Fenetre_Afficher_cadre_creux(6, 44,299, 37);
   // Cadre autour de la preview
-  Fenetre_Afficher_cadre_creux(179,88+FILENAMESPACE,124,84);
+  Fenetre_Afficher_cadre_creux(181,93,124,84);
   // Cadre autour du fileselector
-  Fenetre_Afficher_cadre_creux(  7,88+FILENAMESPACE,100,84);
+  Fenetre_Afficher_cadre_creux(6,93,148,84);
 
-  Fenetre_Definir_bouton_special(9,90+FILENAMESPACE,96,80);                      // 4
+  // Fileselector
+  Fenetre_Definir_bouton_special(9,95,144,80); // 4
 
   // Scroller du fileselector
-  Scroller_de_fichiers = Fenetre_Definir_bouton_scroller(110,89+FILENAMESPACE,82,1,10,0);               // 5
+  Scroller_de_fichiers = Fenetre_Definir_bouton_scroller(160,94,82,1,10,0);               // 5
 
   // Dropdown pour les formats de fichier
   Dropdown_des_formats=
-    Fenetre_Definir_bouton_dropdown(70,56,36,16,0,
+    Fenetre_Definir_bouton_dropdown(69,28,49,11,0,
       (Principal_Format==0)?"*.*":FormatFichier[Principal_Format-1].Extension,
       1,0,1,A_DROITE|A_GAUCHE); // 6
   if (load)
@@ -1017,30 +1014,31 @@ byte Bouton_Load_ou_Save(byte load, byte image)
       (!load && FormatFichier[Temp].Save))
         Fenetre_Dropdown_choix(Dropdown_des_formats,Temp+1,FormatFichier[Temp].Extension);
   }
-  Print_dans_fenetre(12,61,"Format:",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(70,18,"Format",CM_Fonce,CM_Clair);
   
   // Texte de commentaire des dessins
-  Print_dans_fenetre(7,174+FILENAMESPACE,"Txt:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(44,173+FILENAMESPACE,TAILLE_COMMENTAIRE); // 7
+  Print_dans_fenetre(9,70,"Txt:",CM_Fonce,CM_Clair);
+  Fenetre_Definir_bouton_saisie(43,68,TAILLE_COMMENTAIRE); // 7
 
-  // Cadre autour du nom de fichier
-  //Fenetre_Afficher_cadre_creux(  7,87,296,15);
-  Print_dans_fenetre(9,90,"Filename:",CM_Fonce,CM_Clair);
   // Saisie du nom de fichier
-  Fenetre_Definir_bouton_saisie(11+9*8,88,27); // 8
+  Fenetre_Definir_bouton_saisie(80,46,27); // 8
 
-  Print_dans_fenetre(120,55,"Image size :",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(120,63,"File size  :",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(120,72,"Format     :",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(9,47,"Filename",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(9,59,"Image:",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(101,59,"Size:",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(228,59,"(",CM_Fonce,CM_Clair);
+  Print_dans_fenetre(292,59,")",CM_Fonce,CM_Clair);
 
   // Selecteur de Lecteur / Volume
-  Fenetre_Definir_bouton_normal(8,17,117,23,"Select drive",0,1,SDLK_LAST); // 9
-
+  Fenetre_Definir_bouton_normal(7,18,53,23,"",0,1,SDLK_LAST); // 9
+  Print_dans_fenetre(10,22,"Select",CM_Noir,CM_Clair);
+  Print_dans_fenetre(14,30,"drive",CM_Noir,CM_Clair);
+ 
   // Bookmarks
   for (Temp=0;Temp<NB_BOOKMARKS;Temp++)
   {
     Dropdown_bookmark[Temp]=
-      Fenetre_Definir_bouton_dropdown(126+(88+1)*(Temp%2),17+(Temp/2)*12,88,11,56,"",0,0,1,A_DROITE); // 10-13
+      Fenetre_Definir_bouton_dropdown(127+(88+1)*(Temp%2),18+(Temp/2)*12,88,11,56,"",0,0,1,A_DROITE); // 10-13
     Fenetre_Afficher_sprite_drive(Dropdown_bookmark[Temp]->Pos_X+3,Dropdown_bookmark[Temp]->Pos_Y+2,5);
     Afficher_bookmark(Dropdown_bookmark[Temp],Temp);
   }
@@ -1070,7 +1068,7 @@ byte Bouton_Load_ou_Save(byte load, byte image)
 
   Pixel_de_chargement=Pixel_Chargement_dans_preview;
   Nouvelle_preview=1;
-  Display_Window(310,(187+FILENAMESPACE));
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -1243,7 +1241,7 @@ byte Bouton_Load_ou_Save(byte load, byte image)
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
-          Readline(46,175+FILENAMESPACE,Principal_Commentaire,32,0);
+          Readline(45,70,Principal_Commentaire,32,0);
           Afficher_curseur();
         }
         break;
@@ -1252,7 +1250,7 @@ byte Bouton_Load_ou_Save(byte load, byte image)
         // Save the filename
         strcpy(Nom_fichier_Save, Principal_Nom_fichier);
 
-        if (Readline(13+9*8,90,Principal_Nom_fichier,27,2))
+        if (Readline(82,48,Principal_Nom_fichier,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -1552,30 +1550,25 @@ byte Bouton_Load_ou_Save(byte load, byte image)
       {
         Effacer_curseur();
         // On efface le commentaire précédent
-        Block(Fenetre_Pos_X+ 46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,
-              Menu_Facteur_X<<8,Menu_Facteur_Y<<3,CM_Clair);
+        Window_rectangle(45,70,32*8,8,CM_Clair);
         // On nettoie la zone où va s'afficher la preview:
-        Block(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+ (89+FILENAMESPACE)*Menu_Facteur_Y,
-              Menu_Facteur_X*122,Menu_Facteur_Y*82,CM_Clair);
+        Window_rectangle(183,95,120,80,CM_Clair);
         // On efface les dimensions de l'image
-        Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 55*Menu_Facteur_Y,
-              Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
+        Window_rectangle(143,59,72,8,CM_Clair);
         // On efface la taille du fichier
-        Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 63*Menu_Facteur_Y,
-              Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
+        Window_rectangle(236,59,56,8,CM_Clair);
         // On efface le format du fichier
-        Block(Fenetre_Pos_X+226*Menu_Facteur_X,Fenetre_Pos_Y+ 72*Menu_Facteur_Y,
-              Menu_Facteur_X*72,Menu_Facteur_Y<<3,CM_Clair);
+        Window_rectangle(59,59,3*8,8,CM_Clair);
         // Affichage du commentaire
         if ( (!load) && (FormatFichier[Principal_Format-1].Commentaire) )
         {
-          Print_dans_fenetre(46,175+FILENAMESPACE,Principal_Commentaire,CM_Noir,CM_Clair);
+          Print_dans_fenetre(45,70,Principal_Commentaire,CM_Noir,CM_Clair);
         }
         Afficher_curseur();
-        // Un update pour couvrir les 4 zones: 3 libellés plus la zone de preview
-        UpdateRect(Fenetre_Pos_X+180*Menu_Facteur_X,Fenetre_Pos_Y+55*Menu_Facteur_Y,Menu_Facteur_X*122,Menu_Facteur_Y*(116+FILENAMESPACE));
-        // Zone de commentaire
-        UpdateRect(Fenetre_Pos_X+46*Menu_Facteur_X,Fenetre_Pos_Y+(175+FILENAMESPACE)*Menu_Facteur_Y,Menu_Facteur_X*32*8,Menu_Facteur_Y*8);
+        // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
+        Display_Window(45,48,256,30);
+        // Zone de preview
+        Display_Window(183,95,120,80);
       }
 
       Nouvelle_preview=0;
@@ -1595,7 +1588,8 @@ byte Bouton_Load_ou_Save(byte load, byte image)
 
         Effacer_curseur();
         Charger_image(image);
-        UpdateRect(ToWinX(179),ToWinY(88+FILENAMESPACE),ToWinL(124),ToWinH(84));
+        //Display_Window(183,95,120,80);
+        Display_Window(0,0,Fenetre_Largeur,Fenetre_Hauteur);
         Afficher_curseur();
 
         // Après le chargement de la preview, on restaure tout ce qui aurait

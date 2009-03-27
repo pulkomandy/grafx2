@@ -55,11 +55,17 @@ void Pixel_dans_barre_d_outil(word x,word y,byte Couleur)
   Block(x*Menu_Facteur_X,(y*Menu_Facteur_Y)+Menu_Ordonnee,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
 }
 
-  // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
+// Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
 
 void Pixel_dans_fenetre(word x,word y,byte Couleur)
 {
     Block((x*Menu_Facteur_X)+Fenetre_Pos_X,(y*Menu_Facteur_Y)+Fenetre_Pos_Y,Menu_Facteur_X,Menu_Facteur_Y,Couleur);
+}
+
+// Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
+void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
+{
+  Block((x_pos*Menu_Facteur_X)+Fenetre_Pos_X,(y_pos*Menu_Facteur_Y)+Fenetre_Pos_Y,width*Menu_Facteur_X,height*Menu_Facteur_Y,color);
 }
 
 

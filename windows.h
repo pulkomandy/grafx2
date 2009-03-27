@@ -29,7 +29,7 @@
 #define ToWinL(l) ((l)*Menu_Facteur_X)
 #define ToWinH(h) ((h)*Menu_Facteur_Y)
 
-#define Display_Window(x,y) UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,(x)*Menu_Facteur_X,(y)*Menu_Facteur_Y);
+#define Display_Window(x,y,w,h) UpdateRect(Fenetre_Pos_X+(x)*Menu_Facteur_X,Fenetre_Pos_Y+(y)*Menu_Facteur_Y,(w)*Menu_Facteur_X,(h)*Menu_Facteur_Y);
 
 void Afficher_curseur(void);
 void Effacer_curseur(void);
@@ -69,6 +69,7 @@ void Warning_message(char * Message);
 
 void Afficher_limites_de_l_image(void);
 void Afficher_ecran(void);
+void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color);
 void Fenetre_Afficher_cadre_general(word x_pos,word y_pos,word width,word height,
                                     byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD);
 void Fenetre_Afficher_cadre_mono(word x_pos,word y_pos,word width,word height,byte Couleur);

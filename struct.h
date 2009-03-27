@@ -132,7 +132,7 @@ typedef struct T_Bouton_dropdown
 // Déclaration du type d'élément qu'on va mémoriser dans la liste:
 typedef struct Element_de_liste_de_fileselect
 {
-  char NomAbrege[13]; // Le nom tel qu'affiché dans le fileselector
+  char NomAbrege[19]; // Le nom tel qu'affiché dans le fileselector
   char NomComplet[256]; // Le nom du fichier ou du répertoire
   byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire, 2 = Lecteur
 

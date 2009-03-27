@@ -152,22 +152,6 @@ int Move_cursor_with_constraints()
   return feedback;
 }
 
-// Fonction qui filtre les evenements génériques.
-void Gere_Evenement_SDL(SDL_Event * event)
-{
-    // Redimensionnement fenetre
-    if (event->type == SDL_VIDEORESIZE )
-    {
-        Handle_Window_Resize(event->resize);
-    }
-    // Fermeture
-    if (event->type == SDL_QUIT )
-    {
-        Handle_Window_Exit(event->quit);
-    }
-}
-
-
 // WM events management
 
 void Handle_Window_Resize(SDL_ResizeEvent event)

@@ -52,8 +52,6 @@
 #include "brush.h"
 #include "input.h"
 
-#define FILENAMESPACE 13
-
 extern short Old_MX;
 extern short Old_MY;
 
@@ -69,7 +67,7 @@ void Bouton_***(void)
   Fenetre_Definir_bouton_normal(103,137,80,14,"OK",0,1,SDLK_RETURN); // 1
   Fenetre_Definir_bouton_scroller(18,44,88,16,4,0);             // 2
 
-  Display_Window(310,190);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -98,7 +96,7 @@ void Message_Non_disponible(void)
   Print_dans_fenetre(12,28,"be implemented in",CM_Noir,CM_Clair);
   Print_dans_fenetre(16,36,"a later version.",CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Display_Window(160,76);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -130,7 +128,7 @@ void Message_Memoire_insuffisante(void)
   Print_dans_fenetre(24,28,"to know how to obtain",CM_Noir,CM_Clair);
   Print_dans_fenetre(36,36,"more memory space.",CM_Noir,CM_Clair);
   Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Display_Window(216,76);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -166,7 +164,7 @@ void Bouton_Message_initial(void)
   //Print_dans_fenetre( 120-4*13,128,"(placeholder)",CM_Fonce,CM_Clair);
   Print_dans_fenetre(130-4*28,136,"http://grafx2.googlecode.com",CM_Fonce,CM_Clair);
 
-  Display_Window(260,172);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -424,7 +422,7 @@ byte Bouton_Quitter_Routine_locale(void)
   Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,TOUCHE_ESC);          // 1
   Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
   Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
-  Display_Window(160,84);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -559,7 +557,7 @@ void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cance
   for (Indice=0; Indice<=255; Indice++)
     Stencil_Tagger_couleur(Indice, (table[Indice])?CM_Noir:CM_Clair);
 
-  Display_Window(176,150);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -592,14 +590,14 @@ void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cance
         for (Indice=0; Indice<=255; Indice++)
           Stencil_Tagger_couleur(Indice,CM_Clair);
         Afficher_curseur();
-        Display_Window(Fenetre_Largeur, Fenetre_Hauteur);
+        Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
         break;
       case  3 : // Invert
         Effacer_curseur();
         for (Indice=0; Indice<=255; Indice++)
           Stencil_Tagger_couleur(Indice,(table[Indice]^=1)?CM_Noir:CM_Clair);
         Afficher_curseur();
-        Display_Window(Fenetre_Largeur, Fenetre_Hauteur);
+        Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
     }
 
     if (!Mouse_K)
@@ -849,7 +847,7 @@ void Bouton_Settings(void)
   // Zone de saisie du nb de pages de Undo
   Fenetre_Definir_bouton_saisie(140,50,2);           // 22
 
-  Display_Window(307,182);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -1176,7 +1174,7 @@ void Bouton_Copy_page(void)
   Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
   Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
   Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,TOUCHE_ESC); // 6
-  Display_Window(168,137);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -1437,7 +1435,7 @@ void Bouton_Resol(void)
 
   Afficher_liste_modes(Debut_liste,Position_curseur);
 
-  Display_Window(299,190);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -1924,7 +1922,7 @@ void Bouton_Degrades(void)
   Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
 
   Premiere_couleur=Derniere_couleur=(Degrade_Tableau[Degrade_Courant].Inverse)?Degrade_Tableau[Degrade_Courant].Fin:Degrade_Tableau[Degrade_Courant].Debut;
-  Display_Window(237,133);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -2185,7 +2183,7 @@ void Bouton_Menu_pinceaux(void)
     Fenetre_Definir_bouton_normal(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
     Afficher_pinceau_dans_fenetre(x_pos+2,y_pos+2,Indice);
   }
-  Display_Window(310,155);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -3009,7 +3007,7 @@ void Bouton_Menu_Loupe(void)
   Fenetre_Definir_bouton_normal( 41,65,27,14,"x16",0,Loupe_Facteur!=16,SDLK_F10);    // 11
   Fenetre_Definir_bouton_normal( 73,65,27,14,"x18",0,Loupe_Facteur!=18,SDLK_F11);    // 12
   Fenetre_Definir_bouton_normal(105,65,27,14,"x20",0,Loupe_Facteur!=20,SDLK_F12);    // 13
-  Display_Window(141,114);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -3141,7 +3139,7 @@ void Bouton_Menu_Grille(void)
   Bouton_saisie_dY = Fenetre_Definir_bouton_saisie(95,45,2); // 6
   Num2str(dY_choisi,Chaine,2);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
-  Display_Window(133,98);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -3319,7 +3317,7 @@ void Bouton_Brush_FX(void)
   Block(Fenetre_Pos_X+(Menu_Facteur_X*105),Fenetre_Pos_Y+(Menu_Facteur_Y*126),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
   Block(Fenetre_Pos_X+(Menu_Facteur_X*111),Fenetre_Pos_Y+(Menu_Facteur_Y*120),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
   
-  Display_Window(310,162);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   
   Afficher_curseur();
 
@@ -3477,7 +3475,7 @@ void Bouton_Smooth_Menu(void)
       Num2str(Matrice_choisie[i][j]=Smooth_Matrice[i][j],Chaine,2);
       Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[i][j],Chaine);
     }
-  Display_Window(142,109);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -3646,7 +3644,7 @@ void Bouton_Colorize_Menu(void)
   Opacite_choisie=Colorize_Opacite;
   Mode_choisi    =Colorize_Mode_en_cours;
 
-  Display_Window(140,118);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -3737,7 +3735,7 @@ void Bouton_Tiling_Menu(void)
   Num2str(Tiling_Decalage_Y,Chaine,4);
   Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_Y,Chaine);
 
-  Display_Window(138,79);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -3923,7 +3921,7 @@ void Bouton_Spray_Menu(void)
   Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
   Spray_Rafficher_infos(Couleur_selectionnee,0);
 
-  Display_Window(226,170);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
   Stencil_Actualiser_couleur(Couleur_selectionnee);
 
@@ -4359,7 +4357,7 @@ void Bouton_Trame_Menu(void)
   Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
   Dessiner_trame_zoomee(Orig_X,Orig_Y);
 
-  Display_Window(290,179);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
 
   Afficher_curseur();
 
@@ -4759,7 +4757,7 @@ void Bouton_Effets(void)
 
   Print_dans_fenetre(12,117,"click: Left:Switch / Right:Edit",CM_Fonce,CM_Clair);
 
-  Display_Window(270,152);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   Afficher_curseur();
 
   do
@@ -5078,7 +5076,7 @@ void Bouton_Texte()
   
   Fenetre_Definir_bouton_normal(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
   Fenetre_Definir_bouton_normal(54,160,60,14,"Cancel",0,1,TOUCHE_ESC); // 12
-  Display_Window(288,180);
+  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
   
   // Chaine texte
   Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
