@@ -40,13 +40,13 @@
 #include "struct.h"
 #include "io.h"
 
-int Create_ConfigDirectory(char * Config_Dir)
+int Create_ConfigDirectory(char * config_dir)
 {
   #ifdef __WIN32__
     // Mingw's mkdir has a weird name and only one argument
-    return _mkdir(Config_Dir);
+    return _mkdir(config_dir);
   #else
-    return mkdir(Config_Dir,S_IRUSR|S_IWUSR|S_IXUSR);
+    return mkdir(config_dir,S_IRUSR|S_IWUSR|S_IXUSR);
   #endif
 }
 
@@ -57,23 +57,23 @@ int Create_ConfigDirectory(char * Config_Dir)
 #endif
 // Determine which directory contains the executable.
 // IN: Main's argv[0], some platforms need it, some don't.
-// OUT: Write into Program_Dir. Trailing / or \ is kept.
+// OUT: Write into program_dir. Trailing / or \ is kept.
 // Note : in fact this is only used to check for the datafiles and fonts in this same directory.
-void Set_Program_Directory(ARG_UNUSED const char * argv0,char * Program_Dir)
+void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
 {
   #undef ARG_UNUSED
 
   // MacOSX
   #if defined(__macosx__)
     CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFURLGetFileSystemRepresentation(url,true,(UInt8*)Program_Dir,MAXPATHLEN);
+    CFURLGetFileSystemRepresentation(url,true,(UInt8*)program_dir,MAXPATHLEN);
     CFRelease(url);
     // Append trailing slash
-    strcat(Program_Dir    ,"/");
+    strcat(program_dir    ,"/");
   
   // AmigaOS4: hard-coded volume name.
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
-    strcpy(Program_Dir,"PROGDIR:");
+    strcpy(program_dir,"PROGDIR:");
 
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
@@ -81,91 +81,91 @@ void Set_Program_Directory(ARG_UNUSED const char * argv0,char * Program_Dir)
   // sitting in /usr/local/bin/, this allows argv[0] to contain the full path.
   // On Windows, Mingw32 already provides the full path in all cases.
   #else
-    Extraire_chemin(Program_Dir, argv0);
+    Extract_path(program_dir, argv0);
   #endif
 }
 // Determine which directory contains the read-only data.
 // IN: The directory containing the executable
-// OUT: Write into Data_Dir. Trailing / or \ is kept.
-void Set_Data_Directory(const char * Program_Dir, char * Data_Dir)
+// OUT: Write into data_dir. Trailing / or \ is kept.
+void Set_data_directory(const char * program_dir, char * data_dir)
 {
   // On all platforms, data is in the executable's directory
-  strcpy(Data_Dir,Program_Dir);
+  strcpy(data_dir,program_dir);
   // Except MacOSX:
   #if defined(__macosx__)
-    strcat(Data_Dir,"Contents/Resources/");
+    strcat(data_dir,"Contents/Resources/");
   #endif
 }
 
 // Determine which directory should store the user's configuration.
 //
 // For most Unix and Windows platforms:
-// If a config file already exists in Program_Dir, it will return it in priority
+// If a config file already exists in program_dir, it will return it in priority
 // (Useful for development, and possibly for upgrading from DOS version)
 // If the standard directory doesn't exist yet, this function will attempt 
 // to create it ($(HOME)/.grafx2, or %APPDATA%\GrafX2)
 // If it cannot be created, this function will return the executable's
 // own directory.
 // IN: The directory containing the executable
-// OUT: Write into Config_Dir. Trailing / or \ is kept.
-void Set_Config_Directory(const char * Program_Dir, char * Config_Dir)
+// OUT: Write into config_dir. Trailing / or \ is kept.
+void Set_config_directory(const char * program_dir, char * config_dir)
 {
   // MacOSX
   #if defined(__macosx__)
-    strcpy(Config_Dir,Program_Dir);
-    strcat(Config_Dir,"Contents/Resources/");
+    strcpy(config_dir,program_dir);
+    strcat(config_dir,"Contents/Resources/");
   // AmigaOS4
   #elif defined(__amigaos4__) || defined(__AROS__)
-    strcpy(Config_Dir,"PROGDIR:");
+    strcpy(config_dir,"PROGDIR:");
   #else
-    char FileName[TAILLE_CHEMIN_FICHIER];
+    char filename[MAX_PATH_CHARACTERS];
 
     // In priority: check own directory
-    strcpy(Config_Dir, Program_Dir);
-    strcpy(FileName, Config_Dir);
-    strcat(FileName, "gfx2.cfg");
-    if (!Fichier_existe(FileName))
+    strcpy(config_dir, program_dir);
+    strcpy(filename, config_dir);
+    strcat(filename, "gfx2.cfg");
+    if (!File_exists(filename))
     {
-      char *Config_ParentDir;
+      char *config_parent_dir;
       #if defined(__WIN32__)
         // "%APPDATA%\GrafX2"
         const char* Config_SubDir = "GrafX2";
-        Config_ParentDir = getenv("APPDATA");
+        config_parent_dir = getenv("APPDATA");
       #elif defined(__BEOS__) || defined(__HAIKU__)
         // "~/.grafx2"
         const char* Config_SubDir = ".grafx2";
-        Config_ParentDir = getenv("$HOME");
+        config_parent_dir = getenv("$HOME");
       #else
         // "~/.grafx2"      
         const char* Config_SubDir = ".grafx2";
-        Config_ParentDir = getenv("HOME");
+        config_parent_dir = getenv("HOME");
       #endif
-      if (Config_ParentDir && Config_ParentDir[0]!='\0')
+      if (config_parent_dir && config_parent_dir[0]!='\0')
       {
-        int size = strlen(Config_ParentDir);
-        strcpy(Config_Dir, Config_ParentDir);
-        if (Config_ParentDir[size-1] != '\\' && Config_ParentDir[size-1] != '/')
+        int size = strlen(config_parent_dir);
+        strcpy(config_dir, config_parent_dir);
+        if (config_parent_dir[size-1] != '\\' && config_parent_dir[size-1] != '/')
         {
-          strcat(Config_Dir,SEPARATEUR_CHEMIN);
+          strcat(config_dir,PATH_SEPARATOR);
         }
-        strcat(Config_Dir,Config_SubDir);
-        if (Repertoire_existe(Config_Dir))
+        strcat(config_dir,Config_SubDir);
+        if (Directory_exists(config_dir))
         {
           // Répertoire trouvé, ok
-          strcat(Config_Dir,SEPARATEUR_CHEMIN);
+          strcat(config_dir,PATH_SEPARATOR);
         }
         else
         {
           // Tentative de création
-          if (!Create_ConfigDirectory(Config_Dir)) 
+          if (!Create_ConfigDirectory(config_dir)) 
           {
             // Réussi
-            strcat(Config_Dir,SEPARATEUR_CHEMIN);
+            strcat(config_dir,PATH_SEPARATOR);
           }
           else
           {
             // Echec: on se rabat sur le repertoire de l'executable.
-            strcpy(Config_Dir,Program_Dir);
+            strcpy(config_dir,program_dir);
           }
         }
       }

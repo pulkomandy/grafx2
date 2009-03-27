@@ -21,24 +21,24 @@
 */
 #include "struct.h"
 
-  void Pixel_Double                      (word x,word y,byte Couleur);
-  byte Lit_Pixel_Double                  (word x,word y);
-  void Block_Double                      (word Debut_X,word Debut_Y,word width,word height,byte Couleur);
-  void Pixel_Preview_Normal_Double       (word x,word y,byte Couleur);
-  void Pixel_Preview_Loupe_Double        (word x,word y,byte Couleur);
-  void Ligne_horizontale_XOR_Double      (word x_pos,word y_pos,word width);
-  void Ligne_verticale_XOR_Double        (word x_pos,word y_pos,word height);
-  void Display_brush_Color_Double        (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
-  void Display_brush_Mono_Double         (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
-  void Clear_brush_Double                (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word image_width);
-  void Remap_screen_Double               (word x_pos,word y_pos,word width,word height,byte * Table_de_conversion);
-  void Afficher_partie_de_l_ecran_Double (word width,word height,word image_width);
-  void Afficher_une_ligne_ecran_Double   (word x_pos,word y_pos,word width,byte * line);
-  void Lire_une_ligne_ecran_Double       (word x_pos,word y_pos,word width,byte * line);
-  void Afficher_partie_de_l_ecran_zoomee_Double(word width,word height,word image_width,byte * Buffer);
-  void Display_brush_Color_zoom_Double   (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
-  void Display_brush_Mono_zoom_Double    (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
-  void Clear_brush_zoom_Double           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word image_width,byte * Buffer);
-  void Affiche_brosse_Double             (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
+  void Pixel_double                      (word x,word y,byte color);
+  byte Read_pixel_double                  (word x,word y);
+  void Block_double                      (word start_x,word start_y,word width,word height,byte color);
+  void Pixel_preview_normal_double       (word x,word y,byte color);
+  void Pixel_preview_magnifier_double        (word x,word y,byte color);
+  void Horizontal_XOR_line_double      (word x_pos,word y_pos,word width);
+  void Vertical_XOR_line_double        (word x_pos,word y_pos,word height);
+  void Display_brush_color_double        (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
+  void Display_brush_mono_double         (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,byte color,word brush_width);
+  void Clear_brush_double                (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
+  void Remap_screen_double               (word x_pos,word y_pos,word width,word height,byte * conversion_table);
+  void Display_part_of_screen_double (word width,word height,word image_width);
+  void Display_line_on_screen_double   (word x_pos,word y_pos,word width,byte * line);
+  void Read_line_screen_double       (word x_pos,word y_pos,word width,byte * line);
+  void Display_part_of_screen_scaled_double(word width,word height,word image_width,byte * buffer);
+  void Display_brush_color_zoom_double   (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word brush_width,byte * buffer);
+  void Display_brush_mono_zoom_double    (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,byte color,word brush_width,byte * buffer);
+  void Clear_brush_scaled_double           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer);
+  void Display_brush_double             (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
 
-  void Afficher_une_ligne_ecran_fast_Double   (word x_pos,word y_pos,word width,byte * line);
+  void Display_line_on_screen_fast_double   (word x_pos,word y_pos,word width,byte * line);

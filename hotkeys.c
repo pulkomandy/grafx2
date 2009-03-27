@@ -23,7 +23,7 @@
 #include "global.h"
 #include "hotkeys.h"
 
-S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
+T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {0,
   "Scroll up",
   "Scrolls the picture up, both in",
@@ -710,7 +710,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   "pixel in the picture into the",
   "foreground or background color.",
   true,
-  SDLK_BACKQUOTE, // `~ (Touche sous le Esc - ² en AZERTY)
+  SDLK_BACKQUOTE, // `~ (Key sous le Esc - ² en AZERTY)
   0},
   {82,
   "Swap foreground/background colors",
@@ -727,7 +727,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   "",
   true,
   SDLK_m, // M (, ? sur AZERTY)
-  TOUCHE_MOUSEMIDDLE},
+  KEY_MOUSEMIDDLE},
   {84,
   "Zoom factor menu",
   "Opens a menu where you can choose a",
@@ -743,7 +743,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   "",
   true,
   SDLK_KP_PLUS, // Grey +
-  TOUCHE_MOUSEWHEELUP},
+  KEY_MOUSEWHEELUP},
   {86,
   "Zoom out",
   "Decrease magnifying factor.",
@@ -751,7 +751,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   "",
   true,
   SDLK_KP_MINUS, // Grey -
-  TOUCHE_MOUSEWHEELDOWN},
+  KEY_MOUSEWHEELDOWN},
   {87,
   "Brush effects menu",
   "Opens a menu which proposes",
@@ -1098,7 +1098,7 @@ S_ConfigTouche ConfigTouche[NB_TOUCHES] = {
   0},
 };
 
-word Ordonnancement[NB_TOUCHES]=
+word Ordering[NB_SHORTCUTS]=
 {
   SPECIAL_SCROLL_UP,                // Scroll up
   SPECIAL_SCROLL_DOWN,              // Scroll down
@@ -1118,39 +1118,39 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_MOUSE_RIGHT,              // Emulate mouse right
   SPECIAL_CLICK_LEFT,               // Emulate mouse click left
   SPECIAL_CLICK_RIGHT,              // Emulate mouse click right
-  0x100+BOUTON_CACHER,              // Show / Hide menu
+  0x100+BUTTON_HIDE,              // Show / Hide menu
   SPECIAL_SHOW_HIDE_CURSOR,         // Show / Hide cursor
-  SPECIAL_PINCEAU_POINT,            // Paintbrush = "."
-  0x100+BOUTON_PINCEAUX,            // Paintbrush choice
-  0x200+BOUTON_PINCEAUX,            // Monochrome brush
-  0x100+BOUTON_DESSIN,              // Freehand drawing
-  0x200+BOUTON_DESSIN,              // Switch freehand drawing mode
-  SPECIAL_DESSIN_CONTINU,           // Continuous freehand drawing
-  0x100+BOUTON_LIGNES,              // Line
-  0x200+BOUTON_LIGNES,              // Knotted lines
-  0x100+BOUTON_SPRAY,               // Spray
-  0x200+BOUTON_SPRAY,               // Spray menu
-  0x100+BOUTON_FLOODFILL,           // Floodfill
-  0x200+BOUTON_FLOODFILL,           // Replace color
-  0x100+BOUTON_COURBES,             // Bézier's curves
-  0x200+BOUTON_COURBES,             // Bézier's curve with 3 or 4 points
-  0x100+BOUTON_RECTANGLES,          // Empty rectangle
-  0x100+BOUTON_FILLRECT,            // Filled rectangle
-  0x100+BOUTON_CERCLES,             // Empty circle
-  0x200+BOUTON_CERCLES,             // Empty ellipse
-  0x100+BOUTON_FILLCERC,            // Filled circle
-  0x200+BOUTON_FILLCERC,            // Filled ellipse
-  0x100+BOUTON_POLYGONES,           // Empty polygon
-  0x200+BOUTON_POLYGONES,           // Empty polyform
-  0x100+BOUTON_POLYFILL,            // Polyfill
-  0x200+BOUTON_POLYFILL,            // Filled polyform
-  0x100+BOUTON_GRADRECT,            // Gradient rectangle
-  0x100+BOUTON_GRADMENU,            // Gradation menu
-  0x100+BOUTON_SPHERES,             // Spheres
-  0x200+BOUTON_SPHERES,             // Gradient ellipses
-  0x100+BOUTON_AJUSTER,             // Adjust picture
-  0x200+BOUTON_AJUSTER,             // Flip picture menu
-  0x100+BOUTON_EFFETS,              // Menu des effets
+  SPECIAL_DOT_PAINTBRUSH,            // Paintbrush = "."
+  0x100+BUTTON_PAINTBRUSHES,            // Paintbrush choice
+  0x200+BUTTON_PAINTBRUSHES,            // Monochrome brush
+  0x100+BUTTON_DRAW,              // Freehand drawing
+  0x200+BUTTON_DRAW,              // Switch freehand drawing mode
+  SPECIAL_CONTINUOUS_DRAW,           // Continuous freehand drawing
+  0x100+BUTTON_LINES,              // Line
+  0x200+BUTTON_LINES,              // Knotted lines
+  0x100+BUTTON_AIRBRUSH,               // Spray
+  0x200+BUTTON_AIRBRUSH,               // Spray menu
+  0x100+BUTTON_FLOODFILL,           // Floodfill
+  0x200+BUTTON_FLOODFILL,           // Replace color
+  0x100+BUTTON_CURVES,             // Bézier's curves
+  0x200+BUTTON_CURVES,             // Bézier's curve with 3 or 4 points
+  0x100+BUTTON_RECTANGLES,          // Empty rectangle
+  0x100+BUTTON_FILLRECT,            // Filled rectangle
+  0x100+BUTTON_CIRCLES,             // Empty circle
+  0x200+BUTTON_CIRCLES,             // Empty ellipse
+  0x100+BUTTON_FILLCIRC,            // Filled circle
+  0x200+BUTTON_FILLCIRC,            // Filled ellipse
+  0x100+BUTTON_POLYGONS,           // Empty polygon
+  0x200+BUTTON_POLYGONS,           // Empty polyform
+  0x100+BUTTON_POLYFILL,            // Polyfill
+  0x200+BUTTON_POLYFILL,            // Filled polyform
+  0x100+BUTTON_GRADRECT,            // Gradient rectangle
+  0x100+BUTTON_GRADMENU,            // Gradation menu
+  0x100+BUTTON_SPHERES,             // Spheres
+  0x200+BUTTON_SPHERES,             // Gradient ellipses
+  0x100+BUTTON_ADJUST,             // Adjust picture
+  0x200+BUTTON_ADJUST,             // Flip picture menu
+  0x100+BUTTON_EFFECTS,              // Menu des effets
   SPECIAL_SHADE_MODE,               // Shade mode
   SPECIAL_SHADE_MENU,               // Shade menu
   SPECIAL_QUICK_SHADE_MODE,         // Quick-shade mode
@@ -1171,9 +1171,9 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_SMEAR_MODE,               // Smear mode
   SPECIAL_TILING_MODE,              // Tiling mode
   SPECIAL_TILING_MENU,              // Tiling menu
-  0x100+BOUTON_BROSSE,              // Pick brush
-  0x100+BOUTON_POLYBROSSE,          // Pick polyform brush
-  0x200+BOUTON_BROSSE,              // Restore brush
+  0x100+BUTTON_BRUSH,              // Pick brush
+  0x100+BUTTON_POLYBRUSH,          // Pick polyform brush
+  0x200+BUTTON_BRUSH,              // Restore brush
   SPECIAL_FLIP_X,                   // Flip X
   SPECIAL_FLIP_Y,                   // Flip Y
   SPECIAL_ROTATE_90,                // 90° brush rotation
@@ -1185,40 +1185,40 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_GET_BRUSH_COLORS,         // Get colors from brush
   SPECIAL_RECOLORIZE_BRUSH,         // Recolorize brush
   SPECIAL_ROTATE_ANY_ANGLE,         // Rotate brush by any angle
-  0x100+BOUTON_PIPETTE,             // Pipette
-  0x200+BOUTON_PIPETTE,             // Swap fore/back color
-  0x100+BOUTON_LOUPE,               // Magnifier mode
-  0x200+BOUTON_LOUPE,               // Zoom factor menu
+  0x100+BUTTON_COLORPICKER,             // Pipette
+  0x200+BUTTON_COLORPICKER,             // Swap fore/back color
+  0x100+BUTTON_MAGNIFIER,               // Magnifier mode
+  0x200+BUTTON_MAGNIFIER,               // Zoom factor menu
   SPECIAL_ZOOM_IN,                  // Zoom in
   SPECIAL_ZOOM_OUT,                 // Zoom out
-  0x100+BOUTON_EFFETS_BROSSE,       // Brush effects menu
-  0x100+BOUTON_TEXTE,               // Text
-  0x100+BOUTON_RESOL,               // Resolution menu
-  0x200+BOUTON_RESOL,               // Safety resolution
-  0x100+BOUTON_AIDE,                // Help & credits
-  0x200+BOUTON_AIDE,                // Statistics
-  0x100+BOUTON_PAGE,                // Go to spare page
-  0x200+BOUTON_PAGE,                // Copy to spare page
-  0x100+BOUTON_SAUVER,              // Save as
-  0x200+BOUTON_SAUVER,              // Save
-  0x100+BOUTON_CHARGER,             // Load
-  0x200+BOUTON_CHARGER,             // Re-load
+  0x100+BUTTON_BRUSH_EFFECTS,       // Brush effects menu
+  0x100+BUTTON_TEXT,               // Text
+  0x100+BUTTON_RESOL,               // Resolution menu
+  0x200+BUTTON_RESOL,               // Safety resolution
+  0x100+BUTTON_HELP,                // Help & credits
+  0x200+BUTTON_HELP,                // Statistics
+  0x100+BUTTON_PAGE,                // Go to spare page
+  0x200+BUTTON_PAGE,                // Copy to spare page
+  0x100+BUTTON_SAVE,              // Save as
+  0x200+BUTTON_SAVE,              // Save
+  0x100+BUTTON_LOAD,             // Load
+  0x200+BUTTON_LOAD,             // Re-load
   SPECIAL_SAVE_BRUSH,               // Save brush
   SPECIAL_LOAD_BRUSH,               // Load brush
-  0x100+BOUTON_PARAMETRES,          // Settings
-  0x100+BOUTON_UNDO,                // Undo
-  0x200+BOUTON_UNDO,                // Redo
-  0x100+BOUTON_KILL,                // Kill
-  0x100+BOUTON_CLEAR,               // Clear
-  0x200+BOUTON_CLEAR,               // Clear with backcolor
-  0x100+BOUTON_QUIT,                // Quit
-  0x100+BOUTON_PALETTE,             // Palette menu
-  0x200+BOUTON_PALETTE,             // Palette menu secondaire
+  0x100+BUTTON_SETTINGS,          // Settings
+  0x100+BUTTON_UNDO,                // Undo
+  0x200+BUTTON_UNDO,                // Redo
+  0x100+BUTTON_KILL,                // Kill
+  0x100+BUTTON_CLEAR,               // Clear
+  0x200+BUTTON_CLEAR,               // Clear with backcolor
+  0x100+BUTTON_QUIT,                // Quit
+  0x100+BUTTON_PALETTE,             // Palette menu
+  0x200+BUTTON_PALETTE,             // Palette menu secondaire
   SPECIAL_EXCLUDE_COLORS_MENU,      // Exclude colors menu
-  0x100+BOUTON_PAL_LEFT,            // Scroll palette left
-  0x100+BOUTON_PAL_RIGHT,           // Scroll palette right
-  0x200+BOUTON_PAL_LEFT,            // Scroll palette left faster
-  0x200+BOUTON_PAL_RIGHT,           // Scroll palette right faster
+  0x100+BUTTON_PAL_LEFT,            // Scroll palette left
+  0x100+BUTTON_PAL_RIGHT,           // Scroll palette right
+  0x200+BUTTON_PAL_LEFT,            // Scroll palette left faster
+  0x200+BUTTON_PAL_RIGHT,           // Scroll palette right faster
   SPECIAL_CENTER_ATTACHMENT,        // Center brush attachement
   SPECIAL_TOP_LEFT_ATTACHMENT,      // Top-left brush attachement
   SPECIAL_TOP_RIGHT_ATTACHMENT,     // Top-right brush attachement
@@ -1232,6 +1232,6 @@ word Ordonnancement[NB_TOUCHES]=
   SPECIAL_PREVIOUS_USER_FORECOLOR,  // Previous user-defined foreground color
   SPECIAL_NEXT_USER_BACKCOLOR,      // Next user-defined background color
   SPECIAL_PREVIOUS_USER_BACKCOLOR,  // Previous user-defined background color
-  SPECIAL_RETRECIR_PINCEAU,         // Rétrécir le pinceau
-  SPECIAL_GROSSIR_PINCEAU           // Grossir le pinceau
+  SPECIAL_SMALLER_PAINTBRUSH,         // Rétrécir le pinceau
+  SPECIAL_BIGGER_PAINTBRUSH           // Grossir le pinceau
 };

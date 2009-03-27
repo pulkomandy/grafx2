@@ -40,366 +40,366 @@
     #define M_PI 3.14159265358979323846 
 #endif
 
-void Demarrer_pile_operation(word Operation_demandee)
+void Start_operation_stack(word new_operation)
 {
-  Brosse_Centre_rotation_defini=0;
+  Brush_rotation_center_is_defined=0;
 
   // On mémorise l'opération précédente si on démarre une interruption
-  switch(Operation_demandee)
+  switch(new_operation)
   {
-    case OPERATION_LOUPE         :
-    case OPERATION_PIPETTE       :
-    case OPERATION_PRISE_BROSSE  :
-    case OPERATION_POLYBROSSE    :
-    case OPERATION_ETIRER_BROSSE :
-    case OPERATION_TOURNER_BROSSE:
-      Operation_avant_interruption=Operation_en_cours;
+    case OPERATION_MAGNIFY         :
+    case OPERATION_COLORPICK       :
+    case OPERATION_GRAB_BRUSH  :
+    case OPERATION_POLYBRUSH    :
+    case OPERATION_STRETCH_BRUSH :
+    case OPERATION_ROTATE_BRUSH:
+      Operation_before_interrupt=Current_operation;
       // On passe à l'operation demandée
-      Operation_en_cours=Operation_demandee;
+      Current_operation=new_operation;
       break;
     default :
       // On passe à l'operation demandée
-      Operation_en_cours=Operation_demandee;
-      Operation_avant_interruption=Operation_en_cours;
+      Current_operation=new_operation;
+      Operation_before_interrupt=Current_operation;
   }
 
   // On spécifie si l'opération autorise le changement de couleur au clavier
-  switch(Operation_demandee)
+  switch(new_operation)
   {
-    case OPERATION_DESSIN_CONTINU:
-    case OPERATION_DESSIN_DISCONTINU:
-    case OPERATION_SPRAY:
-    case OPERATION_LIGNES_CENTREES:
-      Autoriser_changement_de_couleur_pendant_operation=1;
+    case OPERATION_CONTINUOUS_DRAW:
+    case OPERATION_DISCONTINUOUS_DRAW:
+    case OPERATION_AIRBRUSH:
+    case OPERATION_CENTERED_LINES:
+      Allow_color_change_during_operation=1;
       break;
     default :
-      Autoriser_changement_de_couleur_pendant_operation=0;
+      Allow_color_change_during_operation=0;
   }
 
   // Et on passe au curseur qui va avec
-  Forme_curseur=CURSEUR_D_OPERATION[Operation_demandee];
-  Operation_Taille_pile=0;
+  Cursor_shape=CURSOR_FOR_OPERATION[new_operation];
+  Operation_stack_size=0;
 }
 
 
-void Initialiser_debut_operation(void)
+void Init_start_operation(void)
 {
-  Operation_dans_loupe=(Mouse_X>=Principal_X_Zoom);
-  Smear_Debut=1;
+  Operation_in_magnifier=(Mouse_X>=Main_X_zoom);
+  Smear_start=1;
 }
 
 
-void Operation_PUSH(short value)
+void Operation_push(short value)
 {
-  Operation_Pile[++Operation_Taille_pile]=value;
+  Operation_stack[++Operation_stack_size]=value;
 }
 
 
-void Operation_POP(short * value)
+void Operation_pop(short * value)
 {
-  *value=Operation_Pile[Operation_Taille_pile--];
+  *value=Operation_stack[Operation_stack_size--];
 }
 
 
-byte Pinceau_Forme_avant_operation;
-byte Cacher_pinceau_avant_operation;
+byte Paintbrush_shape_before_operation;
+byte Paintbrush_hidden_before_scroll;
 
 
 
-short Distance(short X1, short Y1, short X2, short Y2)
+short Distance(short x1, short y1, short x2, short y2)
 {
-  short X2_moins_X1=X2-X1;
-  short Y2_moins_Y1=Y2-Y1;
+  short x2_moins_x1=x2-x1;
+  short y2_minus_y1=y2-y1;
 
-  return Round( sqrt( (X2_moins_X1*X2_moins_X1) + (Y2_moins_Y1*Y2_moins_Y1) ) );
+  return Round( sqrt( (x2_moins_x1*x2_moins_x1) + (y2_minus_y1*y2_minus_y1) ) );
 }
 
 
-void Aff_coords_rel_ou_abs(short Debut_X, short Debut_Y)
+void Display_coords_rel_or_abs(short start_x, short start_y)
 {
-  char Chaine[6];
+  char str[6];
 
   if (Config.Coords_rel)
   {
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
-      if (Pinceau_X>Debut_X)
+      if (Paintbrush_X>start_x)
       {
-        Num2str(Pinceau_X-Debut_X,Chaine,5);
-        Chaine[0]='+';
+        Num2str(Paintbrush_X-start_x,str,5);
+        str[0]='+';
       }
-      else if (Pinceau_X<Debut_X)
+      else if (Paintbrush_X<start_x)
       {
-        Num2str(Debut_X-Pinceau_X,Chaine,5);
-        Chaine[0]='-';
+        Num2str(start_x-Paintbrush_X,str,5);
+        str[0]='-';
       }
       else
-        strcpy(Chaine,"±   0");
-      Print_dans_menu(Chaine,2);
+        strcpy(str,"±   0");
+      Print_in_menu(str,2);
 
-      if (Pinceau_Y>Debut_Y)
+      if (Paintbrush_Y>start_y)
       {
-        Num2str(Pinceau_Y-Debut_Y,Chaine,5);
-        Chaine[0]='+';
+        Num2str(Paintbrush_Y-start_y,str,5);
+        str[0]='+';
       }
-      else if (Pinceau_Y<Debut_Y)
+      else if (Paintbrush_Y<start_y)
       {
-        Num2str(Debut_Y-Pinceau_Y,Chaine,5);
-        Chaine[0]='-';
+        Num2str(start_y-Paintbrush_Y,str,5);
+        str[0]='-';
       }
       else
-        strcpy(Chaine,"±   0");
-      Print_dans_menu(Chaine,12);
+        strcpy(str,"±   0");
+      Print_in_menu(str,12);
     }
   }
   else
-    Print_coordonnees();
+    Print_coordinates();
 }
 
-//////////////////////////////////////////////////// OPERATION_DESSIN_CONTINU
+//////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW
 
-void Freehand_Mode1_1_0(void)
-//  Opération   : OPERATION_DESSIN_CONTINU
+void Freehand_mode1_1_0(void)
+//  Opération   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_gauche;
+  Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Freehand_Mode1_1_2(void)
-//  Opération   : OPERATION_DESSIN_CONTINU
+void Freehand_mode1_1_2(void)
+//  Opération   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if ( (Debut_Y!=Pinceau_Y) || (Debut_X!=Pinceau_X) )
+  if ( (start_y!=Paintbrush_Y) || (start_x!=Paintbrush_X) )
   {
-    Effacer_curseur();
-    Print_coordonnees();
-    Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Fore_color);
-    Afficher_curseur();
+    Hide_cursor();
+    Print_coordinates();
+    Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,Fore_color);
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Freehand_Mode12_0_2(void)
+void Freehand_mode12_0_2(void)
 //  Opération   : OPERATION_DESSIN_[DIS]CONTINU
 //  Click Souris: 0
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 {
-  Operation_Taille_pile=0;
+  Operation_stack_size=0;
 }
 
 
-void Freehand_Mode1_2_0(void)
-//  Opération   : OPERATION_DESSIN_CONTINU
+void Freehand_mode1_2_0(void)
+//  Opération   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_droite;
+  Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Freehand_Mode1_2_2(void)
-//  Opération   : OPERATION_DESSIN_CONTINU
+void Freehand_mode1_2_2(void)
+//  Opération   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if ( (Debut_Y!=Pinceau_Y) || (Debut_X!=Pinceau_X) )
+  if ( (start_y!=Paintbrush_Y) || (start_x!=Paintbrush_X) )
   {
-    Print_coordonnees();
-    Effacer_curseur();
-    Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Back_color);
-    Afficher_curseur();
+    Print_coordinates();
+    Hide_cursor();
+    Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,Back_color);
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-///////////////////////////////////////////////// OPERATION_DESSIN_DISCONTINU
+///////////////////////////////////////////////// OPERATION_DISCONTINUOUS_DRAW
 
-void Freehand_Mode2_1_0(void)
-//  Opération   : OPERATION_DESSIN_DISCONTINU
+void Freehand_mode2_1_0(void)
+//  Opération   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_gauche;
+  Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Print_coordonnees();
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Print_coordinates();
   Wait_VBL();
 }
 
 
-void Freehand_Mode2_1_2(void)
-//  Opération   : OPERATION_DESSIN_DISCONTINU
+void Freehand_mode2_1_2(void)
+//  Opération   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if ( (Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y) )
+  if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
+    Hide_cursor();
     // On affiche définitivement le pinceau
-    Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
-    Afficher_curseur();
-    Print_coordonnees();
+    Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+    Display_cursor();
+    Print_coordinates();
     Wait_VBL();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Freehand_Mode2_2_0(void)
-//  Opération   : OPERATION_DESSIN_DISCONTINU
+void Freehand_mode2_2_0(void)
+//  Opération   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_droite;
+  Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Print_coordonnees();
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Print_coordinates();
   Wait_VBL();
 }
 
 
-void Freehand_Mode2_2_2(void)
-//  Opération   : OPERATION_DESSIN_DISCONTINU
+void Freehand_mode2_2_2(void)
+//  Opération   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
 
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if ( (Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y) )
+  if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
+    Hide_cursor();
     // On affiche définitivement le pinceau
-    Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
-    Afficher_curseur();
-    Print_coordonnees();
+    Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+    Display_cursor();
+    Print_coordinates();
     Wait_VBL();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-////////////////////////////////////////////////////// OPERATION_DESSIN_POINT
+////////////////////////////////////////////////////// OPERATION_POINT_DRAW
 
-void Freehand_Mode3_1_0(void)
-//  Opération   : OPERATION_DESSIN_POINT
+void Freehand_mode3_1_0(void)
+//  Opération   : OPERATION_POINT_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_gauche;
+  Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Fore_color,0);
-  Operation_PUSH(0);  // On change simplement l'état de la pile...
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Operation_push(0);  // On change simplement l'état de la pile...
 }
 
 
 void Freehand_Mode3_2_0(void)
-//  Opération   : OPERATION_DESSIN_POINT
+//  Opération   : OPERATION_POINT_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_droite;
+  Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Back_color,0);
-  Operation_PUSH(0);  // On change simplement l'état de la pile...
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Operation_push(0);  // On change simplement l'état de la pile...
 }
 
 
-void Freehand_Mode3_0_1(void)
-//  Opération   : OPERATION_DESSIN_POINT
+void Freehand_mode3_0_1(void)
+//  Opération   : OPERATION_POINT_DRAW
 //  Click Souris: 0
 //  Taille_Pile : 1
 //
 //  Souris effacée: Non
 {
-  Operation_Taille_pile--;
+  Operation_stack_size--;
 }
 
 
-///////////////////////////////////////////////////////////// OPERATION_LIGNE
+///////////////////////////////////////////////////////////// OPERATION_LINE
 
-void Ligne_12_0(void)
-// Opération   : OPERATION_LIGNE
+void Line_12_0(void)
+// Opération   : OPERATION_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
@@ -407,38 +407,38 @@ void Ligne_12_0(void)
 
 //  Début du tracé d'une ligne (premier clic)
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Paintbrush_shape_before_operation=Paintbrush_shape;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Shade_Table=Shade_Table_gauche;
-    Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Fore_color);
-    Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
-    Operation_PUSH(Fore_color);
+    Shade_table=Shade_table_left;
+    Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,Fore_color);
+    Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
+    Operation_push(Fore_color);
   }
   else
   {
-    Shade_Table=Shade_Table_droite;
-    Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Back_color);
-    Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
-    Operation_PUSH(Back_color);
+    Shade_table=Shade_table_right;
+    Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,Back_color);
+    Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
+    Operation_push(Back_color);
   }
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Ligne_12_5(void)
-// Opération   : OPERATION_LIGNE
+void Line_12_5(void)
+// Opération   : OPERATION_LINE
 // Click Souris: 1
 // Taille_Pile : 5
 //
@@ -446,94 +446,94 @@ void Ligne_12_5(void)
 
 // Poursuite du tracé d'une ligne (déplacement de la souris en gardant le curseur appuyé)
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   if(SDL_GetModState() & KMOD_SHIFT)
   {
-    Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
+    Clamp_coordinates_45_degrees(start_x,start_y,&Paintbrush_X,&Paintbrush_Y);
   }
 
   // On vient de bouger
-  if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+  if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
   {
-      Effacer_curseur();
+      Hide_cursor();
 
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+    Display_coords_rel_or_abs(start_x,start_y);
 
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
-    if (Mouse_K==A_GAUCHE)
+    Hide_line_preview(start_x,start_y,end_x,end_y);
+    if (Mouse_K==LEFT_SIDE)
     {
-      Pixel_figure_Preview (Debut_X,Debut_Y,Fore_color);
-      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Fore_color);
+      Pixel_figure_preview (start_x,start_y,Fore_color);
+      Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,Fore_color);
     }
     else
     {
-      Pixel_figure_Preview (Debut_X,Debut_Y,Back_color);
-      Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Back_color);
+      Pixel_figure_preview (start_x,start_y,Back_color);
+      Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,Back_color);
     }
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 
-    Afficher_curseur();
+    Display_cursor();
   }
   else
   {
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Fin_X);
-    Operation_PUSH(Fin_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(end_x);
+    Operation_push(end_y);
   }
 }
 
 
-void Ligne_0_5(void)
-// Opération   : OPERATION_LIGNE
+void Line_0_5(void)
+// Opération   : OPERATION_LINE
 // Click Souris: 0
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
 
-// Fin du tracé d'une ligne (relachage du bouton)
+// End du tracé d'une ligne (relachage du bouton)
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   if(SDL_GetModState() & KMOD_SHIFT)
-      Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Fin_X,&Fin_Y);
+      Clamp_coordinates_45_degrees(start_x,start_y,&end_x,&end_y);
 
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-  Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
-  Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
-  Tracer_ligne_Definitif(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
+  Pixel_figure_preview_auto  (start_x,start_y);
+  Hide_line_preview (start_x,start_y,end_x,end_y);
+  Display_paintbrush      (start_x,start_y,color,0);
+  Draw_line_permanet(start_x,start_y,end_x,end_y,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
@@ -541,188 +541,188 @@ void Ligne_0_5(void)
 /////////////////////////////////////////////////////////// OPERATION_K_LIGNE
 
 
-void K_Ligne_12_0(void)
+void K_line_12_0(void)
 // Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 //  Souris effacée: Oui
 {
-  byte Couleur;
+  byte color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  Paintbrush_shape_before_operation=Paintbrush_shape;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Mouse_K | 0x80);
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Mouse_K | 0x80);
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
   // Taille de pile 6 : phase d'appui, non interruptible
 }
 
 
-void K_Ligne_12_6(void)
+void K_line_12_6(void)
 // Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 6      | 7
 //
 // Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
 
-  if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+  if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
   {
-    Effacer_curseur();
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Operation_POP(&Couleur);
+    Hide_cursor();
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Operation_pop(&color);
 
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+    Display_coords_rel_or_abs(start_x,start_y);
 
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
-    Pixel_figure_Preview (Debut_X,Debut_Y,Couleur);
-    Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+    Hide_line_preview(start_x,start_y,end_x,end_y);
+    Pixel_figure_preview (start_x,start_y,color);
+    Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-    Operation_PUSH(Couleur);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Afficher_curseur();
+    Operation_push(color);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void K_Ligne_0_6(void)
+void K_line_0_6(void)
 // Opération   : OPERATION_K_LIGNE
 // Click Souris: 0
 // Taille_Pile : 6
 //
 // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
   short direction;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&direction);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&direction);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-  Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
+  Pixel_figure_preview_auto  (start_x,start_y);
+  Hide_line_preview (start_x,start_y,end_x,end_y);
   /* Doesn't work if fast moving
-  Pixel_figure_Preview_xor (Debut_X,Debut_Y, 0);
-  Tracer_ligne_Preview_xor (Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+  Pixel_figure_preview_xor (start_x,start_y, 0);
+  Draw_line_preview_xor (start_x,start_y,end_x,end_y,0);
   */
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
   if (direction & 0x80)
   {
-    Afficher_pinceau(Debut_X,Debut_Y,Couleur,0);
+    Display_paintbrush(start_x,start_y,color,0);
     direction=(direction & 0x7F);
   }
-  Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  Operation_PUSH(direction);
-  Operation_PUSH(direction); // Valeur bidon servant de nouvel état de pile
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(direction);
+  Operation_push(direction); // Valeur bidon servant de nouvel état de pile
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
   // Taille de pile 7 : phase de "repos", interruptible (comme Elliot Ness :))
 }
 
 
-void K_Ligne_12_7(void)
+void K_line_12_7(void)
 // Opération   : OPERATION_K_LIGNE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
 // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
   short direction;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&direction);
-  Operation_POP(&direction);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&direction);
+  Operation_pop(&direction);
 
   if (direction==Mouse_K)
   {
-    Operation_PUSH(direction);
-    Operation_PUSH(Couleur);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Fin_X);
-    Operation_PUSH(Fin_Y);
+    Operation_push(direction);
+    Operation_push(color);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(end_x);
+    Operation_push(end_y);
     // Taille de pile 6 : phase d'appui, non interruptible
   }
   else
   {
     // La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne
-    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-    Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
+    Pixel_figure_preview_auto  (start_x,start_y);
+    Hide_line_preview (start_x,start_y,end_x,end_y);
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
-    Effacer_curseur();
-    Pinceau_Forme=Pinceau_Forme_avant_operation;
+    Display_cursor();
+    Wait_end_of_click();
+    Hide_cursor();
+    Paintbrush_shape=Paintbrush_shape_before_operation;
 
-    if ( (Config.Coords_rel) && (Menu_visible) )
+    if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
     }
   }
 }
 
 
-// ---------------------------------------------------------- OPERATION_LOUPE
+// ---------------------------------------------------------- OPERATION_MAGNIFY
 
 
-void Loupe_12_0(void)
+void Magnifier_12_0(void)
 
-// Opération   : 4      (Choix d'une Loupe)
+// Opération   : 4      (item d'une Loupe)
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
@@ -731,207 +731,207 @@ void Loupe_12_0(void)
 {
 
   // On passe en mode loupe
-  Loupe_Mode=1;
+  Main_magnifier_mode=1;
 
   // La fonction d'affichage dans la partie image est désormais un affichage
   // spécial loupe.
-  Pixel_Preview=Pixel_Preview_Loupe;
+  Pixel_preview=Pixel_preview_magnifier;
 
   // On calcule l'origine de la loupe
-  Loupe_Decalage_X=Mouse_X-(Loupe_Largeur>>1);
-  Loupe_Decalage_Y=Mouse_Y-(Loupe_Hauteur>>1);
+  Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
+  Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
 
   // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
-  if (Loupe_Decalage_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
-    Loupe_Decalage_X=Limite_Droite-Loupe_Largeur-Principal_Decalage_X+1;
-  if (Loupe_Decalage_Y+Loupe_Hauteur>=Limite_Bas-Principal_Decalage_Y)
-    Loupe_Decalage_Y=Limite_Bas-Loupe_Hauteur-Principal_Decalage_Y+1;
+  if (Main_magnifier_offset_X+Main_magnifier_width>=Limit_right-Main_offset_X)
+    Main_magnifier_offset_X=Limit_right-Main_magnifier_width-Main_offset_X+1;
+  if (Main_magnifier_offset_Y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
+    Main_magnifier_offset_Y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
 
   // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
-  Loupe_Decalage_X+=Principal_Decalage_X;
-  Loupe_Decalage_Y+=Principal_Decalage_Y;
+  Main_magnifier_offset_X+=Main_offset_X;
+  Main_magnifier_offset_Y+=Main_offset_Y;
 
-  if (Loupe_Decalage_X<0)
-    Loupe_Decalage_X=0;
-  if (Loupe_Decalage_Y<0)
-    Loupe_Decalage_Y=0;
+  if (Main_magnifier_offset_X<0)
+    Main_magnifier_offset_X=0;
+  if (Main_magnifier_offset_Y<0)
+    Main_magnifier_offset_Y=0;
 
   // On calcule les bornes visibles dans l'écran
-  Recadrer_ecran_par_rapport_au_zoom();
-  Calculer_limites();
-  Afficher_ecran();
+  Position_screen_according_to_zoom();
+  Compute_limits();
+  Display_all_screen();
 
   // Repositionner le curseur en fonction des coordonnées visibles
-  Calculer_coordonnees_pinceau();
+  Compute_paintbrush_coordinates();
 
   // On fait de notre mieux pour restaurer l'ancienne opération:
-  Demarrer_pile_operation(Operation_avant_interruption);
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  Start_operation_stack(Operation_before_interrupt);
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????
 
 void Rectangle_12_0(void)
-// Opération   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
+// Opération   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("\035:   1   \022:   1",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("\035:   1   \022:   1",0);
   // On laisse une trace du curseur à l'écran
-  Afficher_curseur();
+  Display_cursor();
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Shade_Table=Shade_Table_gauche;
-    Operation_PUSH(Fore_color);
+    Shade_table=Shade_table_left;
+    Operation_push(Fore_color);
   }
   else
   {
-    Shade_Table=Shade_Table_droite;
-    Operation_PUSH(Back_color);
+    Shade_table=Shade_table_right;
+    Operation_push(Back_color);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
 void Rectangle_12_5(void)
-// Opération   : OPERATION_RECTANGLE_VIDE / OPERATION_RECTANGLE_PLEIN
+// Opération   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
 // Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_X;
-  short Ancien_Y;
-  char  Chaine[5];
+  short start_x;
+  short start_y;
+  short old_x;
+  short old_y;
+  char  str[5];
 
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y))
+  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y))
   {
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
-    if ((Config.Coords_rel) && (Menu_visible))
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Num2str(((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1,Chaine,4);
-      Print_dans_menu(Chaine,2);
-      Num2str(((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1,Chaine,4);
-      Print_dans_menu(Chaine,11);
+      Num2str(((start_x<Paintbrush_X)?Paintbrush_X-start_x:start_x-Paintbrush_X)+1,str,4);
+      Print_in_menu(str,2);
+      Num2str(((start_y<Paintbrush_Y)?Paintbrush_Y-start_y:start_y-Paintbrush_Y)+1,str,4);
+      Print_in_menu(str,11);
     }
     else
-      Print_coordonnees();
+      Print_coordinates();
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Rectangle_vide_0_5(void)
-// Opération   : OPERATION_RECTANGLE_VIDE
+void Empty_rectangle_0_5(void)
+// Opération   : OPERATION_EMPTY_RECTANGLE
 // Click Souris: 0
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
 {
-  short Ancien_Pinceau_X;
-  short Ancien_Pinceau_Y;
-  short Couleur;
+  short old_paintbrush_x;
+  short old_paintbrush_y;
+  short color;
 
   // On mémorise la position courante du pinceau:
 
-  Ancien_Pinceau_X=Pinceau_X;
-  Ancien_Pinceau_Y=Pinceau_Y;
+  old_paintbrush_x=Paintbrush_X;
+  old_paintbrush_y=Paintbrush_Y;
 
   // On lit l'ancienne position du pinceau:
 
-  Operation_POP(&Pinceau_Y);
-  Operation_POP(&Pinceau_X);
-  Operation_POP(&Pinceau_Y);
-  Operation_POP(&Pinceau_X);
+  Operation_pop(&Paintbrush_Y);
+  Operation_pop(&Paintbrush_X);
+  Operation_pop(&Paintbrush_Y);
+  Operation_pop(&Paintbrush_X);
 
   // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
-  Effacer_curseur();
+  Hide_cursor();
 
   // On lit la couleur du rectangle:
-  Operation_POP(&Couleur);
+  Operation_pop(&color);
 
   // On fait un petit backup de l'image:
   Backup();
 
   // Et on trace le rectangle:
-  Tracer_rectangle_vide(Pinceau_X,Pinceau_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,Couleur);
+  Draw_empty_rectangle(Paintbrush_X,Paintbrush_Y,old_paintbrush_x,old_paintbrush_y,color);
 
   // Enfin, on rétablit la position du pinceau:
-  Pinceau_X=Ancien_Pinceau_X;
-  Pinceau_Y=Ancien_Pinceau_Y;
+  Paintbrush_X=old_paintbrush_x;
+  Paintbrush_Y=old_paintbrush_y;
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:       Y:",0);
-  Print_coordonnees();
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:       Y:",0);
+  Print_coordinates();
 }
 
 
-void Rectangle_plein_0_5(void)
-// Opération   : OPERATION_RECTANGLE_PLEIN
+void Filled_rectangle_0_5(void)
+// Opération   : OPERATION_FILLED_RECTANGLE
 // Click Souris: 0
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
 {
-  short Ancien_Pinceau_X;
-  short Ancien_Pinceau_Y;
-  short Couleur;
+  short old_paintbrush_x;
+  short old_paintbrush_y;
+  short color;
 
   // On mémorise la position courante du pinceau:
 
-  Ancien_Pinceau_X=Pinceau_X;
-  Ancien_Pinceau_Y=Pinceau_Y;
+  old_paintbrush_x=Paintbrush_X;
+  old_paintbrush_y=Paintbrush_Y;
 
   // On lit l'ancienne position du pinceau:
 
-  Operation_POP(&Pinceau_Y);
-  Operation_POP(&Pinceau_X);
-  Operation_POP(&Pinceau_Y);
-  Operation_POP(&Pinceau_X);
+  Operation_pop(&Paintbrush_Y);
+  Operation_pop(&Paintbrush_X);
+  Operation_pop(&Paintbrush_Y);
+  Operation_pop(&Paintbrush_X);
 
   // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
-  Effacer_curseur();
+  Hide_cursor();
 
   // On lit la couleur du rectangle:
-  Operation_POP(&Couleur);
+  Operation_pop(&color);
 
   // On fait un petit backup de l'image:
   Backup();
 
   // Et on trace le rectangle:
-  Tracer_rectangle_plein(Pinceau_X,Pinceau_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,Couleur);
+  Draw_filled_rectangle(Paintbrush_X,Paintbrush_Y,old_paintbrush_x,old_paintbrush_y,color);
 
   // Enfin, on rétablit la position du pinceau:
-  Pinceau_X=Ancien_Pinceau_X;
-  Pinceau_Y=Ancien_Pinceau_Y;
+  Paintbrush_X=old_paintbrush_x;
+  Paintbrush_Y=old_paintbrush_y;
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:",0);
+    Print_coordinates();
   }
 }
 
@@ -939,170 +939,170 @@ void Rectangle_plein_0_5(void)
 ////////////////////////////////////////////////////// OPERATION_CERCLE_?????
 
 
-void Cercle_12_0(void)
+void Circle_12_0(void)
 //
-// Opération   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
 
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Paintbrush_shape_before_operation=Paintbrush_shape;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Shade_Table=Shade_Table_gauche;
-    Operation_PUSH(Fore_color);
+    Shade_table=Shade_table_left;
+    Operation_push(Fore_color);
   }
   else
   {
-    Shade_Table=Shade_Table_droite;
-    Operation_PUSH(Back_color);
+    Shade_table=Shade_table_right;
+    Operation_push(Back_color);
   }
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("Radius:   0    ",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("Radius:   0    ",0);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Cercle_12_5(void)
+void Circle_12_5(void)
 //
-// Opération   : OPERATION_CERCLE_VIDE / OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
 // Click Souris: 1 ou 2
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Non
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon;
-  char  Chaine[5];
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short radius;
+  char  str[5];
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  if ( (Tangente_X!=Pinceau_X) || (Tangente_Y!=Pinceau_Y) )
+  if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    if ((Config.Coords_rel) && (Menu_visible))
+    Hide_cursor();
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Num2str(Distance(Centre_X,Centre_Y,Pinceau_X,Pinceau_Y),Chaine,4);
-      Print_dans_menu(Chaine,7);
+      Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
+      Print_in_menu(str,7);
     }
     else
-      Print_coordonnees();
+      Print_coordinates();
 
-    Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                  ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-    Rayon=sqrt(Cercle_Limite);
-    Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                  ((tangent_y-center_y)*(tangent_y-center_y));
+    radius=sqrt(Circle_limit);
+    Hide_empty_circle_preview(center_x,center_y,radius);
 
-    Cercle_Limite=((Pinceau_X-Centre_X)*(Pinceau_X-Centre_X))+
-                  ((Pinceau_Y-Centre_Y)*(Pinceau_Y-Centre_Y));
-    Rayon=sqrt(Cercle_Limite);
-    Tracer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon,Couleur);
+    Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
+                  ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
+    radius=sqrt(Circle_limit);
+    Draw_empy_circle_preview(center_x,center_y,radius,color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Centre_X);
-  Operation_PUSH(Centre_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(color);
+  Operation_push(center_x);
+  Operation_push(center_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Cercle_vide_0_5(void)
+void Empty_circle_0_5(void)
 //
-// Opération   : OPERATION_CERCLE_VIDE
+// Opération   : OPERATION_EMPTY_CIRCLE
 // Click Souris: 0
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-  Rayon=sqrt(Cercle_Limite);
-  Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                ((tangent_y-center_y)*(tangent_y-center_y));
+  radius=sqrt(Circle_limit);
+  Hide_empty_circle_preview(center_x,center_y,radius);
 
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Tracer_cercle_vide_Definitif(Centre_X,Centre_Y,Rayon,Couleur);
+  Draw_empy_circle_permanent(center_x,center_y,radius,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:",0);
+    Print_coordinates();
   }
 }
 
 
-void Cercle_plein_0_5(void)
+void Filled_circle_0_5(void)
 //
-// Opération   : OPERATION_CERCLE_PLEIN
+// Opération   : OPERATION_FILLED_CIRCLE
 // Click Souris: 0
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-  Rayon=sqrt(Cercle_Limite);
-  Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                ((tangent_y-center_y)*(tangent_y-center_y));
+  radius=sqrt(Circle_limit);
+  Hide_empty_circle_preview(center_x,center_y,radius);
 
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Tracer_cercle_plein(Centre_X,Centre_Y,Rayon,Couleur);
+  Draw_filled_circle(center_x,center_y,radius,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:",0);
+    Print_coordinates();
   }
 }
 
@@ -1112,168 +1112,168 @@ void Cercle_plein_0_5(void)
 
 void Ellipse_12_0(void)
 //
-// Opération   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
 
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Paintbrush_shape_before_operation=Paintbrush_shape;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Shade_Table=Shade_Table_gauche;
-    Operation_PUSH(Fore_color);
+    Shade_table=Shade_table_left;
+    Operation_push(Fore_color);
   }
   else
   {
-    Shade_Table=Shade_Table_droite;
-    Operation_PUSH(Back_color);
+    Shade_table=Shade_table_right;
+    Operation_push(Back_color);
   }
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
 void Ellipse_12_5(void)
 //
-// Opération   : OPERATION_ELLIPSE_VIDE / OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
 // Click Souris: 1 ou 2
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Non
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon_horizontal;
-  short Rayon_vertical;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short horizontal_radius;
+  short vertical_radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  if ( (Tangente_X!=Pinceau_X) || (Tangente_Y!=Pinceau_Y) )
+  if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
+    Hide_cursor();
+    Display_coords_rel_or_abs(center_x,center_y);
 
-    Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                           :Centre_X-Tangente_X;
-    Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                           :Centre_Y-Tangente_Y;
-    Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-    Rayon_horizontal=(Pinceau_X>Centre_X)?Pinceau_X-Centre_X
-                                         :Centre_X-Pinceau_X;
-    Rayon_vertical  =(Pinceau_Y>Centre_Y)?Pinceau_Y-Centre_Y
-                                         :Centre_Y-Pinceau_Y;
-    Tracer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+    horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
+                                         :center_x-Paintbrush_X;
+    vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
+                                         :center_y-Paintbrush_Y;
+    Draw_empy_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Centre_X);
-  Operation_PUSH(Centre_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(color);
+  Operation_push(center_x);
+  Operation_push(center_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Ellipse_vide_0_5(void)
+void Empty_ellipse_0_5(void)
 //
-// Opération   : OPERATION_ELLIPSE_VIDE
+// Opération   : OPERATION_EMPTY_ELLIPSE
 // Click Souris: 0
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon_horizontal;
-  short Rayon_vertical;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short horizontal_radius;
+  short vertical_radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                         :Centre_X-Tangente_X;
-  Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                         :Centre_Y-Tangente_Y;
-  Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                         :center_x-tangent_x;
+  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                         :center_y-tangent_y;
+  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Tracer_ellipse_vide_Definitif(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+  Draw_empy_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
 
-void Ellipse_pleine_0_5(void)
+void Filled_ellipse_0_5(void)
 //
-// Opération   : OPERATION_ELLIPSE_PLEINE
+// Opération   : OPERATION_FILLED_ELLIPSE
 // Click Souris: 0
-// Taille_Pile : 5 (Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon_horizontal;
-  short Rayon_vertical;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short horizontal_radius;
+  short vertical_radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                         :Centre_X-Tangente_X;
-  Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                         :Centre_Y-Tangente_Y;
-  Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                         :center_x-tangent_x;
+  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                         :center_y-tangent_y;
+  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-  Pinceau_Forme=Pinceau_Forme_avant_operation;
+  Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Tracer_ellipse_pleine(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+  Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
@@ -1290,15 +1290,15 @@ void Fill_1_0(void)
 // Souris effacée: Oui
 //
 {
-  Effacer_curseur();
+  Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
-  // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
-  Shade_Table=Shade_Table_gauche;
-  Remplir(Fore_color);
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  // On ne s'occupe pas de faire un Backup: c'est "Fill_general" qui s'en charge.
+  Shade_table=Shade_table_left;
+  Fill_general(Fore_color);
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
@@ -1311,263 +1311,263 @@ void Fill_2_0(void)
 // Souris effacée: Oui
 //
 {
-  Effacer_curseur();
+  Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
-  // On ne s'occupe pas de faire un Backup: c'est "Remplir" qui s'en charge.
-  Shade_Table=Shade_Table_droite;
-  Remplir(Back_color);
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  // On ne s'occupe pas de faire un Backup: c'est "Fill_general" qui s'en charge.
+  Shade_table=Shade_table_right;
+  Fill_general(Back_color);
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
-///////////////////////////////////////////////////////// OPERATION_REMPLACER
+///////////////////////////////////////////////////////// OPERATION_REPLACE
 
 
-void Remplacer_1_0(void)
+void Replace_1_0(void)
 //
-// Opération   : OPERATION_REMPLACER
+// Opération   : OPERATION_REPLACE
 // Click Souris: 1
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Effacer_curseur();
+  Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
-//  Shade_Table=Shade_Table_gauche;
-  Remplacer(Fore_color);
-  Afficher_curseur();
-  Attendre_fin_de_click();
+//  Shade_table=Shade_table_left;
+  Replace(Fore_color);
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
-void Remplacer_2_0(void)
+void Replace_2_0(void)
 //
-// Opération   : OPERATION_REMPLACER
+// Opération   : OPERATION_REPLACE
 // Click Souris: 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Effacer_curseur();
+  Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   Backup();
-//  Shade_Table=Shade_Table_droite;
-  Remplacer(Back_color);
-  Afficher_curseur();
-  Attendre_fin_de_click();
+//  Shade_table=Shade_table_right;
+  Replace(Back_color);
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
-/////////////////////////////////////////////////////////// OPERATION_PIPETTE
+/////////////////////////////////////////////////////////// OPERATION_COLORPICK
 
 
-void Pipette_12_0(void)
+void Colorpicker_12_0(void)
 //
-// Opération   : OPERATION_PIPETTE
+// Opération   : OPERATION_COLORPICK
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Encadrer_couleur_menu(CM_Noir);
-    Fore_color=Pipette_Couleur;
-    Recadrer_palette();
-    Afficher_foreback();
-    Encadrer_couleur_menu(CM_Blanc);
+    Frame_menu_color(MC_Black);
+    Fore_color=Colorpicker_color;
+    Reposition_palette();
+    Display_foreback();
+    Frame_menu_color(MC_White);
   }
   else
   {
-    Back_color=Pipette_Couleur;
-    Afficher_foreback();
+    Back_color=Colorpicker_color;
+    Display_foreback();
   }
-  Operation_PUSH(Mouse_K);
+  Operation_push(Mouse_K);
 }
 
 
-void Pipette_1_1(void)
+void Colorpicker_1_1(void)
 //
-// Opération   : OPERATION_PIPETTE
+// Opération   : OPERATION_COLORPICK
 // Click Souris: 1
 // Taille_Pile : 1
 //
 // Souris effacée: Non
 //
 {
-  char Chaine[4];
+  char str[4];
 
-  if ( (Pinceau_X>=0) && (Pinceau_Y>=0)
-    && (Pinceau_X<Principal_Largeur_image)
-    && (Pinceau_Y<Principal_Hauteur_image) )
-    Pipette_Couleur=Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y);
+  if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
+    && (Paintbrush_X<Main_image_width)
+    && (Paintbrush_Y<Main_image_height) )
+    Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
   else
-    Pipette_Couleur=0;
+    Colorpicker_color=0;
 
-  if ( (Pipette_X!=Pinceau_X)
-    || (Pipette_Y!=Pinceau_Y) )
+  if ( (Colorpicker_X!=Paintbrush_X)
+    || (Colorpicker_Y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    Pipette_X=Pinceau_X;
-    Pipette_Y=Pinceau_Y;
+    Hide_cursor();
+    Colorpicker_X=Paintbrush_X;
+    Colorpicker_Y=Paintbrush_Y;
 
-    if (Pipette_Couleur!=Fore_color)
+    if (Colorpicker_color!=Fore_color)
     {
-      Encadrer_couleur_menu(CM_Noir);
-      Fore_color=Pipette_Couleur;
-      Recadrer_palette();
-      Afficher_foreback();
-      Encadrer_couleur_menu(CM_Blanc);
+      Frame_menu_color(MC_Black);
+      Fore_color=Colorpicker_color;
+      Reposition_palette();
+      Display_foreback();
+      Frame_menu_color(MC_White);
     }
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
-      Print_coordonnees();
-      Num2str(Pipette_Couleur,Chaine,3);
-      Print_dans_menu(Chaine,20);
-      Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
+      Print_coordinates();
+      Num2str(Colorpicker_color,str,3);
+      Print_in_menu(str,20);
+      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
     }
-    Afficher_curseur();
+    Display_cursor();
   }
 }
 
 
-void Pipette_2_1(void)
+void Colorpicker_2_1(void)
 //
-// Opération   : OPERATION_PIPETTE
+// Opération   : OPERATION_COLORPICK
 // Click Souris: 2
 // Taille_Pile : 1
 //
 // Souris effacée: Non
 //
 {
-  char Chaine[4];
+  char str[4];
 
-  if ( (Pinceau_X>=0) && (Pinceau_Y>=0)
-    && (Pinceau_X<Principal_Largeur_image)
-    && (Pinceau_Y<Principal_Hauteur_image) )
-    Pipette_Couleur=Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y);
+  if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
+    && (Paintbrush_X<Main_image_width)
+    && (Paintbrush_Y<Main_image_height) )
+    Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
   else
-    Pipette_Couleur=0;
+    Colorpicker_color=0;
 
-  if ( (Pipette_X!=Pinceau_X)
-    || (Pipette_Y!=Pinceau_Y) )
+  if ( (Colorpicker_X!=Paintbrush_X)
+    || (Colorpicker_Y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    Pipette_X=Pinceau_X;
-    Pipette_Y=Pinceau_Y;
+    Hide_cursor();
+    Colorpicker_X=Paintbrush_X;
+    Colorpicker_Y=Paintbrush_Y;
 
-    if (Pipette_Couleur!=Back_color)
+    if (Colorpicker_color!=Back_color)
     {
-      Back_color=Pipette_Couleur;
-      Afficher_foreback();
+      Back_color=Colorpicker_color;
+      Display_foreback();
     }
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
-      Print_coordonnees();
-      Num2str(Pipette_Couleur,Chaine,3);
-      Print_dans_menu(Chaine,20);
-      Print_general(170*Menu_Facteur_X,Menu_Ordonnee_Texte," ",0,Pipette_Couleur);
+      Print_coordinates();
+      Num2str(Colorpicker_color,str,3);
+      Print_in_menu(str,20);
+      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
     }
-    Afficher_curseur();
+    Display_cursor();
   }
 }
 
 
 
-void Pipette_0_1(void)
+void Colorpicker_0_1(void)
 //
-// Opération   : OPERATION_PIPETTE
+// Opération   : OPERATION_COLORPICK
 // Click Souris: 0
 // Taille_Pile : 1
 //
 // Souris effacée: Oui
 //
 {
-  short Clic;
+  short click;
 
-  Operation_POP(&Clic);
-  if (Clic==A_GAUCHE)
+  Operation_pop(&click);
+  if (click==LEFT_SIDE)
   {
-    Encadrer_couleur_menu(CM_Noir);
-    Fore_color=Pipette_Couleur;
-    Recadrer_palette();
-    Afficher_foreback();
-    Encadrer_couleur_menu(CM_Blanc);
+    Frame_menu_color(MC_Black);
+    Fore_color=Colorpicker_color;
+    Reposition_palette();
+    Display_foreback();
+    Frame_menu_color(MC_White);
   }
   else
   {
-    Back_color=Pipette_Couleur;
-    Afficher_foreback();
+    Back_color=Colorpicker_color;
+    Display_foreback();
   }
-  Desenclencher_bouton(BOUTON_PIPETTE);
+  Unselect_bouton(BUTTON_COLORPICKER);
 }
 
 
-/////////////////////////////////////////////////// OPERATION_COURBE_4_POINTS
+/////////////////////////////////////////////////// OPERATION_4_POINTS_CURVE
 
 
-void Courbe_Tracer_croix(short x_pos, short y_pos)
+void Draw_curve_cross(short x_pos, short y_pos)
 {
-  short Debut_X,Fin_X;
-  short Debut_Y,Fin_Y;
-  short i,Temp;
-  //byte  Temp2;
+  short start_x,end_x;
+  short start_y,end_y;
+  short i,temp;
+  //byte  temp2;
 
-  if (x_pos>=Limite_Gauche+3)
-    Debut_X=0;
+  if (x_pos>=Limit_left+3)
+    start_x=0;
   else
-    Debut_X=3-(x_pos-Limite_Gauche);
+    start_x=3-(x_pos-Limit_left);
 
-  if (y_pos>=Limite_Haut+3)
-    Debut_Y=0;
+  if (y_pos>=Limit_top+3)
+    start_y=0;
   else
-    Debut_Y=3-(y_pos-Limite_Haut);
+    start_y=3-(y_pos-Limit_top);
 
-  if (x_pos<=Limite_visible_Droite-3)
-    Fin_X=6;
+  if (x_pos<=Limit_visible_right-3)
+    end_x=6;
   else
-    Fin_X=3+(Limite_visible_Droite-x_pos);
+    end_x=3+(Limit_visible_right-x_pos);
 
-  if (y_pos<=Limite_visible_Bas-3)
-    Fin_Y=6;
+  if (y_pos<=Limit_visible_bottom-3)
+    end_y=6;
   else
-    Fin_Y=3+(Limite_visible_Bas-y_pos);
+    end_y=3+(Limit_visible_bottom-y_pos);
 
-  if (Debut_X<=Fin_X && Debut_Y<=Fin_Y)
+  if (start_x<=end_x && start_y<=end_y)
   {    
-    for (i=Debut_X; i<=Fin_X; i++)
+    for (i=start_x; i<=end_x; i++)
     {
-      Temp=x_pos+i-3;
-      Pixel_Preview(Temp,y_pos,~Lit_pixel(Temp -Principal_Decalage_X,
-                                          y_pos-Principal_Decalage_Y));
+      temp=x_pos+i-3;
+      Pixel_preview(temp,y_pos,~Read_pixel(temp -Main_offset_X,
+                                          y_pos-Main_offset_Y));
     }
-    for (i=Debut_Y; i<=Fin_Y; i++)
+    for (i=start_y; i<=end_y; i++)
     {
-      Temp=y_pos+i-3;
-      Pixel_Preview(x_pos,Temp,~Lit_pixel(x_pos-Principal_Decalage_X,
-                                          Temp -Principal_Decalage_Y));
+      temp=y_pos+i-3;
+      Pixel_preview(x_pos,temp,~Read_pixel(x_pos-Main_offset_X,
+                                          temp -Main_offset_Y));
     }
-    Mettre_Ecran_A_Jour(x_pos+Debut_X-3,y_pos+Debut_Y-3,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+    Update_part_of_screen(x_pos+start_x-3,y_pos+start_y-3,end_x-start_x+1,end_y-start_y+1);
   }
 }
 
 
-void Courbe_34_points_1_0(void)
+void Curve_34_points_1_0(void)
 //
 //  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
@@ -1576,26 +1576,26 @@ void Courbe_34_points_1_0(void)
 //  Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_gauche;
+  Shade_table=Shade_table_left;
 
-  Cacher_pinceau=1;
+  Paintbrush_hidden=1;
 
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Fore_color);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,Fore_color);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Fore_color);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Fore_color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Courbe_34_points_2_0(void)
+void Curve_34_points_2_0(void)
 //
 //  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
@@ -1604,27 +1604,27 @@ void Courbe_34_points_2_0(void)
 //  Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_droite;
+  Shade_table=Shade_table_right;
 
-  Cacher_pinceau=1;
+  Paintbrush_hidden=1;
 
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Back_color);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,Back_color);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Back_color);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Back_color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Courbe_34_points_1_5(void)
+void Curve_34_points_1_5(void)
 //
 //  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
@@ -1633,32 +1633,32 @@ void Courbe_34_points_1_5(void)
 //  Souris effacée: Non
 //
 {
-  short X1,X2,Y1,Y2;
+  short x1,x2,y1,y2;
 
-  Operation_POP(&Y2);
-  Operation_POP(&X2);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
+  Operation_pop(&y2);
+  Operation_pop(&x2);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
 
-  if ( (Y2!=Pinceau_Y) || (X2!=Pinceau_X) )
+  if ( (y2!=Paintbrush_Y) || (x2!=Paintbrush_X) )
   {
-    Effacer_curseur();
-    Aff_coords_rel_ou_abs(X1,Y1);
+    Hide_cursor();
+    Display_coords_rel_or_abs(x1,y1);
 
-    Effacer_ligne_Preview(X1,Y1,X2,Y2);
-    Pixel_figure_Preview (X1,Y1,Fore_color);
-    Tracer_ligne_Preview (X1,Y1,Pinceau_X,Pinceau_Y,Fore_color);
+    Hide_line_preview(x1,y1,x2,y2);
+    Pixel_figure_preview (x1,y1,Fore_color);
+    Draw_line_preview (x1,y1,Paintbrush_X,Paintbrush_Y,Fore_color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(X1);
-  Operation_PUSH(Y1);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(x1);
+  Operation_push(y1);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Courbe_34_points_2_5(void)
+void Curve_34_points_2_5(void)
 //
 //  Opération   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
@@ -1667,557 +1667,557 @@ void Courbe_34_points_2_5(void)
 //  Souris effacée: Non
 //
 {
-  short X1,X2,Y1,Y2;
+  short x1,x2,y1,y2;
 
-  Operation_POP(&Y2);
-  Operation_POP(&X2);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
+  Operation_pop(&y2);
+  Operation_pop(&x2);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
 
-  if ( (Y2!=Pinceau_Y) || (X2!=Pinceau_X) )
+  if ( (y2!=Paintbrush_Y) || (x2!=Paintbrush_X) )
   {
-    Effacer_curseur();
-    Aff_coords_rel_ou_abs(X1,Y1);
+    Hide_cursor();
+    Display_coords_rel_or_abs(x1,y1);
 
-    Effacer_ligne_Preview(X1,Y1,X2,Y2);
-    Pixel_figure_Preview (X1,Y1,Back_color);
-    Tracer_ligne_Preview (X1,Y1,Pinceau_X,Pinceau_Y,Back_color);
+    Hide_line_preview(x1,y1,x2,y2);
+    Pixel_figure_preview (x1,y1,Back_color);
+    Draw_line_preview (x1,y1,Paintbrush_X,Paintbrush_Y,Back_color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(X1);
-  Operation_PUSH(Y1);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(x1);
+  Operation_push(y1);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-byte Cacher_curseur_avant_courbe;
+byte Cursor_hidden_before_curve;
 
-void Courbe_4_points_0_5(void)
+void Curve_4_points_0_5(void)
 //
-//  Opération   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
 //  Souris effacée: Oui
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Tiers_X,Tiers_Y;
-  short Couleur;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short third_x,third_y;
+  short color;
 
-  Operation_POP(&Y4);
-  Operation_POP(&X4);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
-  Operation_POP(&Couleur);
+  Operation_pop(&y4);
+  Operation_pop(&x4);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
+  Operation_pop(&color);
 
-  Tiers_X=Round_div(abs(X4-X1),3);
-  Tiers_Y=Round_div(abs(Y4-Y1),3);
+  third_x=Round_div(abs(x4-x1),3);
+  third_y=Round_div(abs(y4-y1),3);
 
-  if (X1<X4)
+  if (x1<x4)
   {
-    X2=X1+Tiers_X;
-    X3=X4-Tiers_X;
+    x2=x1+third_x;
+    x3=x4-third_x;
   }
   else
   {
-    X3=X4+Tiers_X;
-    X2=X1-Tiers_X;
+    x3=x4+third_x;
+    x2=x1-third_x;
   }
 
-  if (Y1<Y4)
+  if (y1<y4)
   {
-    Y2=Y1+Tiers_Y;
-    Y3=Y4-Tiers_Y;
+    y2=y1+third_y;
+    y3=y4-third_y;
   }
   else
   {
-    Y3=Y4+Tiers_Y;
-    Y2=Y1-Tiers_Y;
+    y3=y4+third_y;
+    y2=y1-third_y;
   }
 
-  Effacer_ligne_Preview(X1,Y1,X4,Y4);
-  Tracer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Hide_line_preview(x1,y1,x4,y4);
+  Draw_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
   // On trace les petites croix montrant les 2 points intermédiares
-  Courbe_Tracer_croix(X2,Y2);
-  Courbe_Tracer_croix(X3,Y3);
+  Draw_curve_cross(x2,y2);
+  Draw_curve_cross(x3,y3);
 
-  Cacher_curseur_avant_courbe=Cacher_curseur;
-  Cacher_curseur=0;
+  Cursor_hidden_before_curve=Cursor_hidden;
+  Cursor_hidden=0;
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(X1);
-  Operation_PUSH(Y1);
-  Operation_PUSH(X2);
-  Operation_PUSH(Y2);
-  Operation_PUSH(X3);
-  Operation_PUSH(Y3);
-  Operation_PUSH(X4);
-  Operation_PUSH(Y4);
+  Operation_push(color);
+  Operation_push(x1);
+  Operation_push(y1);
+  Operation_push(x2);
+  Operation_push(y2);
+  Operation_push(x3);
+  Operation_push(y3);
+  Operation_push(x4);
+  Operation_push(y4);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
 
-void Courbe_4_points_1_9(void)
+void Curve_4_points_1_9(void)
 //
-//  Opération   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 1
 //  Taille_Pile : 9
 //
 //  Souris effacée: Non
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Couleur;
-  byte  C_est_X2;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short color;
+  byte  it_is_x2;
 
-  Operation_POP(&Y4);
-  Operation_POP(&X4);
-  Operation_POP(&Y3);
-  Operation_POP(&X3);
-  Operation_POP(&Y2);
-  Operation_POP(&X2);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
-  Operation_POP(&Couleur);
+  Operation_pop(&y4);
+  Operation_pop(&x4);
+  Operation_pop(&y3);
+  Operation_pop(&x3);
+  Operation_pop(&y2);
+  Operation_pop(&x2);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
+  Operation_pop(&color);
 
-  C_est_X2=(Distance(Pinceau_X,Pinceau_Y,X2,Y2) < Distance(Pinceau_X,Pinceau_Y,X3,Y3));
+  it_is_x2=(Distance(Paintbrush_X,Paintbrush_Y,x2,y2) < Distance(Paintbrush_X,Paintbrush_Y,x3,y3));
 
-  if ( (   C_est_X2  && ( (Pinceau_X!=X2) || (Pinceau_Y!=Y2) ) )
-    || ( (!C_est_X2) && ( (Pinceau_X!=X3) || (Pinceau_Y!=Y3) ) ) )
+  if ( (   it_is_x2  && ( (Paintbrush_X!=x2) || (Paintbrush_Y!=y2) ) )
+    || ( (!it_is_x2) && ( (Paintbrush_X!=x3) || (Paintbrush_Y!=y3) ) ) )
   {
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    Courbe_Tracer_croix(X2,Y2);
-    Courbe_Tracer_croix(X3,Y3);
+    Draw_curve_cross(x2,y2);
+    Draw_curve_cross(x3,y3);
 
-    Effacer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+    Hide_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-    if (C_est_X2)
+    if (it_is_x2)
     {
-      X2=Pinceau_X;
-      Y2=Pinceau_Y;
+      x2=Paintbrush_X;
+      y2=Paintbrush_Y;
     }
     else
     {
-      X3=Pinceau_X;
-      Y3=Pinceau_Y;
+      x3=Paintbrush_X;
+      y3=Paintbrush_Y;
     }
 
-    Tracer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+    Draw_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-    Courbe_Tracer_croix(X2,Y2);
-    Courbe_Tracer_croix(X3,Y3);
+    Draw_curve_cross(x2,y2);
+    Draw_curve_cross(x3,y3);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(X1);
-  Operation_PUSH(Y1);
-  Operation_PUSH(X2);
-  Operation_PUSH(Y2);
-  Operation_PUSH(X3);
-  Operation_PUSH(Y3);
-  Operation_PUSH(X4);
-  Operation_PUSH(Y4);
+  Operation_push(color);
+  Operation_push(x1);
+  Operation_push(y1);
+  Operation_push(x2);
+  Operation_push(y2);
+  Operation_push(x3);
+  Operation_push(y3);
+  Operation_push(x4);
+  Operation_push(y4);
 }
 
 
-void Courbe_4_points_2_9(void)
+void Curve_4_points_2_9(void)
 //
-//  Opération   : OPERATION_COURBE_4_POINTS
+//  Opération   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 2
 //  Taille_Pile : 9
 //
 //  Souris effacée: Oui
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Couleur;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short color;
 
-  Operation_POP(&Y4);
-  Operation_POP(&X4);
-  Operation_POP(&Y3);
-  Operation_POP(&X3);
-  Operation_POP(&Y2);
-  Operation_POP(&X2);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
-  Operation_POP(&Couleur);
+  Operation_pop(&y4);
+  Operation_pop(&x4);
+  Operation_pop(&y3);
+  Operation_pop(&x3);
+  Operation_pop(&y2);
+  Operation_pop(&x2);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
+  Operation_pop(&color);
 
-  Effacer_curseur();
+  Hide_cursor();
   
-  Courbe_Tracer_croix(X2,Y2);
-  Courbe_Tracer_croix(X3,Y3);
+  Draw_curve_cross(x2,y2);
+  Draw_curve_cross(x3,y3);
 
-  Cacher_pinceau=0;
-  Cacher_curseur=Cacher_curseur_avant_courbe;
+  Paintbrush_hidden=0;
+  Cursor_hidden=Cursor_hidden_before_curve;
 
-  Effacer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
-  Tracer_courbe_Definitif(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Hide_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
+  Draw_curve_permanent(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
-/////////////////////////////////////////////////// OPERATION_COURBE_3_POINTS
+/////////////////////////////////////////////////// OPERATION_3_POINTS_CURVE
 
 
-void Calculer_courbe_3_points(short X1, short Y1, short X4, short Y4,
-                              short * X2, short * Y2, short * X3, short * Y3)
+void Compute_3_point_curve(short x1, short y1, short x4, short y4,
+                              short * x2, short * y2, short * x3, short * y3)
 {
-  float CX,CY; // Centre de (X1,Y1) et (X4,Y4)
-  float BX,BY; // Intersect. des dtes ((X1,Y1),(X2,Y2)) et ((X3,Y3),(X4,Y4))
+  float cx,cy; // Centre de (x1,y1) et (x4,y4)
+  float bx,by; // Intersect. des dtes ((x1,y1),(x2,y2)) et ((x3,y3),(x4,y4))
 
-  CX=(float)(X1+X4)/2.0;           // P1*--_               Légende:
-  CY=(float)(Y1+Y4)/2.0;           //   ·   \·· P2         -_\|/ : courbe
+  cx=(float)(x1+x4)/2.0;           // P1*--_               Légende:
+  cy=(float)(y1+y4)/2.0;           //   ·   \·· P2         -_\|/ : courbe
                                    //   ·    \ ·*·         * : point important
-  BX=CX+((8.0/3.0)*(Pinceau_X-CX));//   ·     |   ··       · : pointillÚ
-  BY=CY+((8.0/3.0)*(Pinceau_Y-CY));//   ·     |P    ··  B
+  bx=cx+((8.0/3.0)*(Paintbrush_X-cx));//   ·     |   ··       · : pointillÚ
+  by=cy+((8.0/3.0)*(Paintbrush_Y-cy));//   ·     |P    ··  B
                                    // C *·····*·········*  P=Pos. du pinceau
-  *X2=Round((BX+X1)/2.0);          //   ·     |     ··     C=milieu de [P1,P4]
-  *Y2=Round((BY+Y1)/2.0);          //   ·     |   ··       B=point tel que
+  *x2=Round((bx+x1)/2.0);          //   ·     |     ··     C=milieu de [P1,P4]
+  *y2=Round((by+y1)/2.0);          //   ·     |   ··       B=point tel que
                                    //   ·    / ·*·         C->B=(8/3) * C->P
-  *X3=Round((BX+X4)/2.0);          //   ·  _/·· P3         P2=milieu de [P1,B]
-  *Y3=Round((BY+Y4)/2.0);          // P4*--                P3=milieu de [P4,B]
+  *x3=Round((bx+x4)/2.0);          //   ·  _/·· P3         P2=milieu de [P1,B]
+  *y3=Round((by+y4)/2.0);          // P4*--                P3=milieu de [P4,B]
 }
 
 
-void Courbe_3_points_0_5(void)
+void Curve_3_points_0_5(void)
 //
-//  Opération   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
 //  Souris effacée: Oui
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Couleur;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short color;
 
-  Operation_POP(&Y4);
-  Operation_POP(&X4);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
-  Operation_POP(&Couleur);
+  Operation_pop(&y4);
+  Operation_pop(&x4);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
+  Operation_pop(&color);
 
-  Calculer_courbe_3_points(X1,Y1,X4,Y4,&X2,&Y2,&X3,&Y3);
+  Compute_3_point_curve(x1,y1,x4,y4,&x2,&y2,&x3,&y3);
 
-  Effacer_ligne_Preview(X1,Y1,X4,Y4);
-  Tracer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Hide_line_preview(x1,y1,x4,y4);
+  Draw_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-  if ( (Config.Coords_rel) && (Menu_visible) )
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(X1);
-  Operation_PUSH(Y1);
-  Operation_PUSH(X2);
-  Operation_PUSH(Y2);
-  Operation_PUSH(X3);
-  Operation_PUSH(Y3);
-  Operation_PUSH(X4);
-  Operation_PUSH(Y4);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(color);
+  Operation_push(x1);
+  Operation_push(y1);
+  Operation_push(x2);
+  Operation_push(y2);
+  Operation_push(x3);
+  Operation_push(y3);
+  Operation_push(x4);
+  Operation_push(y4);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Courbe_3_points_0_11(void)
+void Curve_3_points_0_11(void)
 //
-//  Opération   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 11
 //
 //  Souris effacée: Non
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Old_X,Old_Y;
-  short Couleur;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short old_x,old_y;
+  short color;
 
-  Operation_POP(&Old_Y);
-  Operation_POP(&Old_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ( (Pinceau_X!=Old_X) || (Pinceau_Y!=Old_Y) )
+  if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) )
   {
-    Operation_POP(&Y4);
-    Operation_POP(&X4);
-    Operation_POP(&Y3);
-    Operation_POP(&X3);
-    Operation_POP(&Y2);
-    Operation_POP(&X2);
-    Operation_POP(&Y1);
-    Operation_POP(&X1);
-    Operation_POP(&Couleur);
+    Operation_pop(&y4);
+    Operation_pop(&x4);
+    Operation_pop(&y3);
+    Operation_pop(&x3);
+    Operation_pop(&y2);
+    Operation_pop(&x2);
+    Operation_pop(&y1);
+    Operation_pop(&x1);
+    Operation_pop(&color);
 
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    Effacer_courbe_Preview(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
-    Calculer_courbe_3_points(X1,Y1,X4,Y4,&X2,&Y2,&X3,&Y3);
-    Tracer_courbe_Preview (X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
-    Afficher_curseur();
+    Hide_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
+    Compute_3_point_curve(x1,y1,x4,y4,&x2,&y2,&x3,&y3);
+    Draw_curve_preview (x1,y1,x2,y2,x3,y3,x4,y4,color);
+    Display_cursor();
 
-    Operation_PUSH(Couleur);
-    Operation_PUSH(X1);
-    Operation_PUSH(Y1);
-    Operation_PUSH(X2);
-    Operation_PUSH(Y2);
-    Operation_PUSH(X3);
-    Operation_PUSH(Y3);
-    Operation_PUSH(X4);
-    Operation_PUSH(Y4);
+    Operation_push(color);
+    Operation_push(x1);
+    Operation_push(y1);
+    Operation_push(x2);
+    Operation_push(y2);
+    Operation_push(x3);
+    Operation_push(y3);
+    Operation_push(x4);
+    Operation_push(y4);
   }
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Courbe_3_points_12_11(void)
+void Curve_3_points_12_11(void)
 //
-//  Opération   : OPERATION_COURBE_3_POINTS
+//  Opération   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 11
 //
 //  Souris effacée: Oui
 //
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  short Old_X,Old_Y;
-  short Couleur;
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  short old_x,old_y;
+  short color;
 
-  Operation_POP(&Old_Y);
-  Operation_POP(&Old_X);
-  Operation_POP(&Y4);
-  Operation_POP(&X4);
-  Operation_POP(&Y3);
-  Operation_POP(&X3);
-  Operation_POP(&Y2);
-  Operation_POP(&X2);
-  Operation_POP(&Y1);
-  Operation_POP(&X1);
-  Operation_POP(&Couleur);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
+  Operation_pop(&y4);
+  Operation_pop(&x4);
+  Operation_pop(&y3);
+  Operation_pop(&x3);
+  Operation_pop(&y2);
+  Operation_pop(&x2);
+  Operation_pop(&y1);
+  Operation_pop(&x1);
+  Operation_pop(&color);
 
-  Cacher_pinceau=0;
+  Paintbrush_hidden=0;
   
-  Effacer_curseur();
+  Hide_cursor();
 
-  Effacer_courbe_Preview (X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
-  Calculer_courbe_3_points(X1,Y1,X4,Y4,&X2,&Y2,&X3,&Y3);
-  Tracer_courbe_Definitif(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Hide_curve_preview (x1,y1,x2,y2,x3,y3,x4,y4,color);
+  Compute_3_point_curve(x1,y1,x4,y4,&x2,&y2,&x3,&y3);
+  Draw_curve_permanent(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  Display_cursor();
+  Wait_end_of_click();
 }
 
 
-///////////////////////////////////////////////////////////// OPERATION_SPRAY
+///////////////////////////////////////////////////////////// OPERATION_AIRBRUSH
 
-Uint32 Spray_next_time;
-void Spray_1_0(void)
+Uint32 Airbrush_next_time;
+void Airbrush_1_0(void)
 //
-//  Opération   : OPERATION_SPRAY
+//  Opération   : OPERATION_AIRBRUSH
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
 //  Souris effacée: Non
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_gauche;
+  Shade_table=Shade_table_left;
 
-  Spray_next_time = SDL_GetTicks()+Spray_Delay*10;
-  Aerographe(A_GAUCHE);
+  Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  Airbrush(LEFT_SIDE);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Spray_2_0(void)
+void Airbrush_2_0(void)
 //
-//  Opération   : OPERATION_SPRAY
+//  Opération   : OPERATION_AIRBRUSH
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
 //  Souris effacée: Non
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=Shade_Table_droite;
-  Spray_next_time = SDL_GetTicks()+Spray_Delay*10;
-  Aerographe(A_DROITE);
+  Shade_table=Shade_table_right;
+  Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  Airbrush(RIGHT_SIDE);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Spray_12_2(void)
+void Airbrush_12_2(void)
 //
-//  Opération   : OPERATION_SPRAY
+//  Opération   : OPERATION_AIRBRUSH
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 //
 {
-  short Ancien_X,Ancien_Y;
+  short old_x,old_y;
 
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ( (Menu_visible) && ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y)) )
+  if ( (Menu_is_visible) && ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y)) )
   {
-    Effacer_curseur();
-    Print_coordonnees();
-    Afficher_curseur();
+    Hide_cursor();
+    Print_coordinates();
+    Display_cursor();
   }
 
-  if (SDL_GetTicks()>Spray_next_time)
+  if (SDL_GetTicks()>Airbrush_next_time)
   {
-    Spray_next_time+=Spray_Delay*10;
-    Aerographe(Mouse_K_Unique);
+    Airbrush_next_time+=Airbrush_delay*10;
+    Airbrush(Mouse_K_unique);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Spray_0_2(void)
+void Airbrush_0_2(void)
 //
-//  Opération   : OPERATION_SPRAY
+//  Opération   : OPERATION_AIRBRUSH
 //  Click Souris: 0
 //  Taille_Pile : 2
 //
 //  Souris effacée: Non
 //
 {
-  Operation_Taille_pile-=2;
+  Operation_stack_size-=2;
 }
 
 
-////////////////////////////////////////////////////////// OPERATION_POLYGONE
+////////////////////////////////////////////////////////// OPERATION_POLYGON
 
 
-void Polygone_12_0(void)
-// Opération   : OPERATION_POLYGONE
+void Polygon_12_0(void)
+// Opération   : OPERATION_POLYGON
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  byte Couleur;
+  byte color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Pinceau_Forme_avant_operation=Pinceau_Forme;
-  Pinceau_Forme=FORME_PINCEAU_POINT;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  Paintbrush_shape_before_operation=Paintbrush_shape;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Mouse_K | 0x80);
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Mouse_K | 0x80);
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
   // Taille de pile 8 : phase d'appui, non interruptible
 }
 
 
 
-void Polygone_12_9(void)
-// Opération   : OPERATION_POLYGONE
+void Polygon_12_9(void)
+// Opération   : OPERATION_POLYGON
 // Click Souris: 1 ou 2
 // Taille_Pile : 9
 //
 // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
   short direction;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&direction);
-  Operation_POP(&direction);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&direction);
+  Operation_pop(&direction);
 
   if (direction==Mouse_K)
   {
-    Operation_PUSH(direction);
-    Operation_PUSH(Couleur);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Fin_X);
-    Operation_PUSH(Fin_Y);
+    Operation_push(direction);
+    Operation_push(color);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(end_x);
+    Operation_push(end_y);
     // Taille de pile 8 : phase d'appui, non interruptible
   }
   else
   {
     //   La série de ligne est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
-    Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-    Effacer_ligne_Preview (Debut_X,Debut_Y,Fin_X,Fin_Y);
-    Operation_POP(&Fin_Y);
-    Operation_POP(&Fin_X);
-    Pinceau_Forme=Pinceau_Forme_avant_operation;
+    Pixel_figure_preview_auto  (start_x,start_y);
+    Hide_line_preview (start_x,start_y,end_x,end_y);
+    Operation_pop(&end_y);
+    Operation_pop(&end_x);
+    Paintbrush_shape=Paintbrush_shape_before_operation;
     // Le pied aurait été de ne pas repasser sur le 1er point de la 1ère ligne
     // mais c'est pas possible :(
-    Tracer_ligne_Definitif(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-    Pinceau_Forme=FORME_PINCEAU_POINT;
+    Draw_line_permanet(start_x,start_y,end_x,end_y,color);
+    Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
-    Effacer_curseur();
+    Display_cursor();
+    Wait_end_of_click();
+    Hide_cursor();
 
-    if ( (Config.Coords_rel) && (Menu_visible) )
+    if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
     }
 
-    Pinceau_Forme=Pinceau_Forme_avant_operation;
+    Paintbrush_shape=Paintbrush_shape_before_operation;
   }
 }
 
 
 ////////////////////////////////////////////////////////// OPERATION_POLYFILL
 
-short * Polyfill_Table_de_points;
-int Polyfill_Nombre_de_points;
+short * Polyfill_table_of_points;
+int Polyfill_number_of_points;
 
 void Polyfill_12_0(void)
 // Opération   : OPERATION_POLYFILL
@@ -2226,35 +2226,35 @@ void Polyfill_12_0(void)
 //
 // Souris effacée: Oui
 {
-  byte Couleur;
+  byte color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Cacher_pinceau=1;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  Paintbrush_hidden=1;
 
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  Polyfill_Table_de_points=(short *) malloc((Config.Nb_max_de_vertex_par_polygon<<1)*sizeof(short));
-  Polyfill_Table_de_points[0]=Pinceau_X;
-  Polyfill_Table_de_points[1]=Pinceau_Y;
-  Polyfill_Nombre_de_points=1;
+  Polyfill_table_of_points=(short *) malloc((Config.Nb_max_vertices_per_polygon<<1)*sizeof(short));
+  Polyfill_table_of_points[0]=Paintbrush_X;
+  Polyfill_table_of_points[1]=Paintbrush_Y;
+  Polyfill_number_of_points=1;
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
-  Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
   
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Mouse_K | 0x80);
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Mouse_K | 0x80);
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
   // Taille de pile 8 : phase d'appui, non interruptible
 }
 
@@ -2266,51 +2266,51 @@ void Polyfill_0_8(void)
 //
 // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
   short direction;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&direction);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&direction);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+  Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
 
   if (direction & 0x80)
     direction=(direction & 0x7F);
 
-  Operation_PUSH(direction); // Valeur bidon servant de nouvel état de pile
-  Operation_PUSH(direction);
-  Operation_PUSH(Couleur);
+  Operation_push(direction); // Valeur bidon servant de nouvel état de pile
+  Operation_push(direction);
+  Operation_push(color);
 
-  Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+  Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
-  if (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon)
+  if (Polyfill_number_of_points<Config.Nb_max_vertices_per_polygon)
   {
-    Polyfill_Table_de_points[Polyfill_Nombre_de_points<<1]    =Pinceau_X;
-    Polyfill_Table_de_points[(Polyfill_Nombre_de_points<<1)+1]=Pinceau_Y;
-    Polyfill_Nombre_de_points++;
+    Polyfill_table_of_points[Polyfill_number_of_points<<1]    =Paintbrush_X;
+    Polyfill_table_of_points[(Polyfill_number_of_points<<1)+1]=Paintbrush_Y;
+    Polyfill_number_of_points++;
 
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
   }
   else
   {
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
   }
   // Taille de pile 9 : phase de "repos", interruptible (comme Elliot Ness :))
 }
@@ -2323,32 +2323,32 @@ void Polyfill_12_8(void)
 //
 // Souris effacée: Non
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
 
-  if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+  if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
   {
-    Effacer_curseur();
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Hide_cursor();
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+    Display_coords_rel_or_abs(start_x,start_y);
 
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+    Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+    Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Afficher_curseur();
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
@@ -2359,55 +2359,55 @@ void Polyfill_12_9(void)
 //
 // Souris effacée: Oui
 {
-  short Debut_X;
-  short Debut_Y;
-  short Fin_X;
-  short Fin_Y;
-  short Couleur;
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short color;
   short direction;
 
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&direction);
-  Operation_POP(&direction);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&direction);
+  Operation_pop(&direction);
 
   if (direction==Mouse_K)
   {
-    Operation_PUSH(direction);
-    Operation_PUSH(Couleur);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Fin_X);
-    Operation_PUSH(Fin_Y);
+    Operation_push(direction);
+    Operation_push(color);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(end_x);
+    Operation_push(end_y);
     // Taille de pile 8 : phase d'appui, non interruptible
   }
   else
   {
     //   La série de lignes est terminée, il faut donc effacer la dernière
     // preview de ligne et relier le dernier point avec le premier
-    Effacer_curseur();
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-    Operation_POP(&Fin_Y);
-    Operation_POP(&Fin_X);
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
+    Hide_cursor();
+    Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+    Operation_pop(&end_y);
+    Operation_pop(&end_x);
+    Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
 
-    Afficher_ecran();
-    Polyfill(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Couleur);
-    free(Polyfill_Table_de_points);
+    Display_all_screen();
+    Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
+    free(Polyfill_table_of_points);
 
-    if ( (Config.Coords_rel) && (Menu_visible) )
+    if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
     }
 
-    Cacher_pinceau=0;
+    Paintbrush_hidden=0;
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
+    Display_cursor();
+    Wait_end_of_click();
   }
 }
 
@@ -2422,27 +2422,27 @@ void Polyform_12_0(void)
 //
 //  Souris effacée: Oui
 {
-  short Couleur;
+  short color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
 
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  // On place un premier pinceau en (Pinceau_X,Pinceau_Y):
-  Afficher_pinceau(Pinceau_X,Pinceau_Y,Couleur,0);
-  // Et on affiche un pixel de preview en (Pinceau_X,Pinceau_Y):
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+  // On place un premier pinceau en (Paintbrush_X,Paintbrush_Y):
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,color,0);
+  // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
-  Operation_PUSH(Pinceau_X); // X Initial
-  Operation_PUSH(Pinceau_Y); // X Initial
-  Operation_PUSH(Couleur);   // Couleur de remplissage
-  Operation_PUSH(Pinceau_X); // Debut X
-  Operation_PUSH(Pinceau_Y); // Debut Y
-  Operation_PUSH(Pinceau_X); // Fin X
-  Operation_PUSH(Pinceau_Y); // Fin Y
-  Operation_PUSH(Mouse_K);   // Clic
+  Operation_push(Paintbrush_X); // X Initial
+  Operation_push(Paintbrush_Y); // X Initial
+  Operation_push(color);   // color de remplissage
+  Operation_push(Paintbrush_X); // Start X
+  Operation_push(Paintbrush_Y); // Start Y
+  Operation_push(Paintbrush_X); // End X
+  Operation_push(Paintbrush_Y); // End Y
+  Operation_push(Mouse_K);   // click
 }
 
 
@@ -2453,74 +2453,74 @@ void Polyform_12_8(void)
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
-  short Couleur;
-  short Initial_Y;
-  short Initial_X;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
+  short color;
+  short initial_y;
+  short initial_x;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if (Clic==Mouse_K)
+  if (click==Mouse_K)
   {
     // L'utilisateur clic toujours avec le bon bouton de souris
 
-    if ((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y))
+    if ((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y))
     {
-      // Il existe un segment définit par (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
+      // Il existe un segment définit par (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
-      Effacer_curseur();
-      Print_coordonnees();
+      Hide_cursor();
+      Print_coordinates();
 
-      Operation_POP(&Couleur);
+      Operation_pop(&color);
 
       // On efface la preview du segment validé:
-      Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-      Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
+      Pixel_figure_preview_auto  (start_x,start_y);
+      Hide_line_preview(start_x,start_y,end_x,end_y);
 
       // On l'affiche de façon définitive:
-      Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+      Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-      // Et on affiche un pixel de preview en (Pinceau_X,Pinceau_Y):
-      Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
+      // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
+      Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
-      Operation_PUSH(Couleur);
+      Operation_push(color);
 
-      Afficher_curseur();
+      Display_cursor();
     }
 
-    Operation_PUSH(Pinceau_X); // Nouveau Debut_X
-    Operation_PUSH(Pinceau_Y); // Nouveau Debut_Y
-    Operation_PUSH(Pinceau_X); // Nouveau Fin_X
-    Operation_PUSH(Pinceau_Y); // Nouveau Fin_Y
-    Operation_PUSH(Clic);
+    Operation_push(Paintbrush_X); // Nouveau start_x
+    Operation_push(Paintbrush_Y); // Nouveau start_y
+    Operation_push(Paintbrush_X); // Nouveau end_x
+    Operation_push(Paintbrush_Y); // Nouveau end_y
+    Operation_push(click);
   }
   else
   {
     // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
-    Operation_POP(&Couleur);
-    Operation_POP(&Initial_Y);
-    Operation_POP(&Initial_X);
+    Operation_pop(&color);
+    Operation_pop(&initial_y);
+    Operation_pop(&initial_x);
 
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
     // On efface la preview du segment annulé:
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
+    Hide_line_preview(start_x,start_y,end_x,end_y);
 
     // On affiche de façon définitive le bouclage du polygone:
-    Tracer_ligne_Definitif(Debut_X,Debut_Y,Initial_X,Initial_Y,Couleur);
+    Draw_line_permanet(start_x,start_y,initial_x,initial_y,color);
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
+    Display_cursor();
+    Wait_end_of_click();
   }
 }
 
@@ -2532,40 +2532,40 @@ void Polyform_0_8(void)
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
-  short Couleur;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
+  short color;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
 
-  if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
+  if ((end_x!=Paintbrush_X) || (end_y!=Paintbrush_Y))
   {
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Operation_POP(&Couleur);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Operation_pop(&color);
 
     // On met à jour l'affichage de la preview du prochain segment:
-    Effacer_ligne_Preview(Debut_X,Debut_Y,Fin_X,Fin_Y);
-    Tracer_ligne_Preview (Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+    Hide_line_preview(start_x,start_y,end_x,end_y);
+    Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-    Operation_PUSH(Couleur);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
+    Operation_push(color);
+    Operation_push(start_x);
+    Operation_push(start_y);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Clic);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(click);
 }
 
 
@@ -2579,37 +2579,37 @@ void Filled_polyform_12_0(void)
 //
 //  Souris effacée: Oui
 {
-  short Couleur;
+  short color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
 
   // Cette opération étant également utilisée pour le lasso, on ne fait pas de
   // backup si on prend une brosse au lasso avec le bouton gauche.
-  if ((Operation_en_cours==OPERATION_FILLED_POLYFORM) || (Operation_en_cours==OPERATION_FILLED_CONTOUR) || (Mouse_K==A_DROITE))
+  if ((Current_operation==OPERATION_FILLED_POLYFORM) || (Current_operation==OPERATION_FILLED_CONTOUR) || (Mouse_K==RIGHT_SIDE))
     Backup();
 
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Cacher_pinceau=1;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  Paintbrush_hidden=1;
 
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  Polyfill_Table_de_points=(short *) malloc((Config.Nb_max_de_vertex_par_polygon<<1)*sizeof(short));
-  Polyfill_Table_de_points[0]=Pinceau_X;
-  Polyfill_Table_de_points[1]=Pinceau_Y;
-  Polyfill_Nombre_de_points=1;
+  Polyfill_table_of_points=(short *) malloc((Config.Nb_max_vertices_per_polygon<<1)*sizeof(short));
+  Polyfill_table_of_points[0]=Paintbrush_X;
+  Polyfill_table_of_points[1]=Paintbrush_Y;
+  Polyfill_number_of_points=1;
 
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
-  Pixel_figure_Preview_xor(Pinceau_X,Pinceau_Y,0);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
   
-  Operation_PUSH(Pinceau_X); // X Initial
-  Operation_PUSH(Pinceau_Y); // X Initial
-  Operation_PUSH(Couleur);   // Couleur de remplissage
-  Operation_PUSH(Pinceau_X); // Debut X
-  Operation_PUSH(Pinceau_Y); // Debut Y
-  Operation_PUSH(Pinceau_X); // Fin X
-  Operation_PUSH(Pinceau_Y); // Fin Y
-  Operation_PUSH(Mouse_K);   // Clic
+  Operation_push(Paintbrush_X); // X Initial
+  Operation_push(Paintbrush_Y); // X Initial
+  Operation_push(color);   // color de remplissage
+  Operation_push(Paintbrush_X); // Start X
+  Operation_push(Paintbrush_Y); // Start Y
+  Operation_push(Paintbrush_X); // End X
+  Operation_push(Paintbrush_Y); // End Y
+  Operation_push(Mouse_K);   // click
 }
 
 
@@ -2620,91 +2620,91 @@ void Filled_polyform_12_8(void)
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
-  short Couleur;
-  short Initial_Y;
-  short Initial_X;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
+  short color;
+  short initial_y;
+  short initial_x;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if (Clic==Mouse_K)
+  if (click==Mouse_K)
   {
     // L'utilisateur clique toujours avec le bon bouton de souris
 
-    if (((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y)) &&
-        (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon))
+    if (((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y)) &&
+        (Polyfill_number_of_points<Config.Nb_max_vertices_per_polygon))
     {
       // Il existe un nouveau segment défini par
-      // (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
+      // (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
-      Effacer_curseur();
-      Print_coordonnees();
+      Hide_cursor();
+      Print_coordinates();
 
       // On le place à l'écran
-      if (Operation_en_cours==OPERATION_FILLED_CONTOUR)
+      if (Current_operation==OPERATION_FILLED_CONTOUR)
       {
-        Tracer_ligne_Preview_xorback(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-        Tracer_ligne_Preview_xorback(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+        Draw_line_preview_xorback(start_x,start_y,end_x,end_y,0);
+        Draw_line_preview_xorback(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
       }
       else
       {
-        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+        Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+        Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
       }
 
       // On peut le rajouter au polygone
 
-      Polyfill_Table_de_points[Polyfill_Nombre_de_points<<1]    =Pinceau_X;
-      Polyfill_Table_de_points[(Polyfill_Nombre_de_points<<1)+1]=Pinceau_Y;
-      Polyfill_Nombre_de_points++;
+      Polyfill_table_of_points[Polyfill_number_of_points<<1]    =Paintbrush_X;
+      Polyfill_table_of_points[(Polyfill_number_of_points<<1)+1]=Paintbrush_Y;
+      Polyfill_number_of_points++;
 
-      Operation_PUSH(Pinceau_X); // Nouveau Debut_X
-      Operation_PUSH(Pinceau_Y); // Nouveau Debut_Y
-      Operation_PUSH(Pinceau_X); // Nouveau Fin_X
-      Operation_PUSH(Pinceau_Y); // Nouveau Fin_Y
-      Operation_PUSH(Clic);
+      Operation_push(Paintbrush_X); // Nouveau start_x
+      Operation_push(Paintbrush_Y); // Nouveau start_y
+      Operation_push(Paintbrush_X); // Nouveau end_x
+      Operation_push(Paintbrush_Y); // Nouveau end_y
+      Operation_push(click);
 
-      Afficher_curseur();
+      Display_cursor();
     }
     else
     {
-      if (Polyfill_Nombre_de_points==Config.Nb_max_de_vertex_par_polygon)
+      if (Polyfill_number_of_points==Config.Nb_max_vertices_per_polygon)
       {
         // Le curseur bouge alors qu'on ne peut plus stocker de segments ?
 
-        if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
+        if ((end_x!=Paintbrush_X) || (end_y!=Paintbrush_Y))
         {
-          Effacer_curseur();
-          Print_coordonnees();
+          Hide_cursor();
+          Print_coordinates();
 
           // On le place à l'écran
-          Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-          Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
-          Afficher_curseur();
+          Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+          Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
+          Display_cursor();
         }
 
         // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
-        Operation_PUSH(Debut_X);
-        Operation_PUSH(Debut_Y);
-        Operation_PUSH(Pinceau_X);
-        Operation_PUSH(Pinceau_Y);
-        Operation_PUSH(Clic);
+        Operation_push(start_x);
+        Operation_push(start_y);
+        Operation_push(Paintbrush_X);
+        Operation_push(Paintbrush_Y);
+        Operation_push(click);
       }
       else
       {
-        Operation_PUSH(Pinceau_X); // Nouveau Debut_X
-        Operation_PUSH(Pinceau_Y); // Nouveau Debut_Y
-        Operation_PUSH(Pinceau_X); // Nouveau Fin_X
-        Operation_PUSH(Pinceau_Y); // Nouveau Fin_Y
-        Operation_PUSH(Clic);
+        Operation_push(Paintbrush_X); // Nouveau start_x
+        Operation_push(Paintbrush_Y); // Nouveau start_y
+        Operation_push(Paintbrush_X); // Nouveau end_x
+        Operation_push(Paintbrush_Y); // Nouveau end_y
+        Operation_push(click);
       }
     }
   }
@@ -2712,24 +2712,24 @@ void Filled_polyform_12_8(void)
   {
     // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
-    Operation_POP(&Couleur);
-    Operation_POP(&Initial_Y);
-    Operation_POP(&Initial_X);
+    Operation_pop(&color);
+    Operation_pop(&initial_y);
+    Operation_pop(&initial_x);
 
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
+    // Pas besoin d'effacer la ligne (start_x,start_y)-(end_x,end_y)
     // puisque on les effaces toutes d'un coup.
 
-    Afficher_ecran();
-    Polyfill(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Couleur);
-    free(Polyfill_Table_de_points);
+    Display_all_screen();
+    Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
+    free(Polyfill_table_of_points);
 
-    Cacher_pinceau=0;
+    Paintbrush_hidden=0;
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
+    Display_cursor();
+    Wait_end_of_click();
   }
 }
 
@@ -2741,37 +2741,37 @@ void Filled_polyform_0_8(void)
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
 
-  if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
+  if ((end_x!=Paintbrush_X) || (end_y!=Paintbrush_Y))
   {
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
     // On met à jour l'affichage de la preview du prochain segment:
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-    Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+    Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+    Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Clic);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(click);
 }
 
 void Filled_contour_0_8(void)
@@ -2781,292 +2781,292 @@ void Filled_contour_0_8(void)
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
-  short Couleur;
-  short Initial_Y;
-  short Initial_X;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
+  short color;
+  short initial_y;
+  short initial_x;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&Initial_Y);
-  Operation_POP(&Initial_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&color);
+  Operation_pop(&initial_y);
+  Operation_pop(&initial_x);
 
-  Effacer_curseur();
-  Print_coordonnees();
+  Hide_cursor();
+  Print_coordinates();
 
-  // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
+  // Pas besoin d'effacer la ligne (start_x,start_y)-(end_x,end_y)
   // puisque on les effaces toutes d'un coup.
 
-  Afficher_ecran();
-  Polyfill(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Couleur);
-  free(Polyfill_Table_de_points);
+  Display_all_screen();
+  Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
+  free(Polyfill_table_of_points);
 
-  Cacher_pinceau=0;
+  Paintbrush_hidden=0;
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
-////////////////////////////////////////////////////// OPERATION_PRISE_BROSSE
+////////////////////////////////////////////////////// OPERATION_GRAB_BRUSH
 
 
-void Brosse_12_0(void)
+void Brush_12_0(void)
 //
-// Opération   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_GRAB_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
-  if (Mouse_K==A_DROITE) // Besoin d'effacer la brosse après ?
+  Init_start_operation();
+  if (Mouse_K==RIGHT_SIDE) // Besoin d'effacer la brosse après ?
   {
-    Operation_PUSH(1);
+    Operation_push(1);
     // Puisque la zone où on prend la brosse sera effacée, on fait un backup
     Backup();
   }
   else
-    Operation_PUSH(0);
+    Operation_push(0);
 
   // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
   // où demarre sa brosse:
-  Afficher_curseur();
+  Display_cursor();
 
-  Operation_PUSH(Pinceau_X); // Début X
-  Operation_PUSH(Pinceau_Y); // Début Y
-  Operation_PUSH(Pinceau_X); // Dernière position X
-  Operation_PUSH(Pinceau_Y); // Dernière position Y
+  Operation_push(Paintbrush_X); // Début X
+  Operation_push(Paintbrush_Y); // Début Y
+  Operation_push(Paintbrush_X); // Dernière position X
+  Operation_push(Paintbrush_Y); // Dernière position Y
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("\035:   1   \022:   1",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("\035:   1   \022:   1",0);
 }
 
 
-void Brosse_12_5(void)
+void Brush_12_5(void)
 //
-// Opération   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_GRAB_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
 // Souris effacée: Non
 //
 {
-  char  Chaine[5];
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_X;
-  short Ancien_Y;
+  char  str[5];
+  short start_x;
+  short start_y;
+  short old_x;
+  short old_y;
   short width;
   short height;
 
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ( (Menu_visible) && ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y)) )
+  if ( (Menu_is_visible) && ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y)) )
   {
     if (Config.Coords_rel)
     {
-      Operation_POP(&Debut_Y);
-      Operation_POP(&Debut_X);
-      Operation_PUSH(Debut_X);
-      Operation_PUSH(Debut_Y);
+      Operation_pop(&start_y);
+      Operation_pop(&start_x);
+      Operation_push(start_x);
+      Operation_push(start_y);
 
-      width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-      height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+      width=((start_x<Paintbrush_X)?Paintbrush_X-start_x:start_x-Paintbrush_X)+1;
+      height=((start_y<Paintbrush_Y)?Paintbrush_Y-start_y:start_y-Paintbrush_Y)+1;
 
-      Num2str(width,Chaine,4);
-      Print_dans_menu(Chaine,2);
-      Num2str(height,Chaine,4);
-      Print_dans_menu(Chaine,11);
+      Num2str(width,str,4);
+      Print_in_menu(str,2);
+      Num2str(height,str,4);
+      Print_in_menu(str,11);
     }
     else
-      Print_coordonnees();
+      Print_coordinates();
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Brosse_0_5(void)
+void Brush_0_5(void)
 //
-// Opération   : OPERATION_PRISE_BROSSE
+// Opération   : OPERATION_GRAB_BRUSH
 // Click Souris: 0
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
 //
 {
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_Pinceau_X;
-  short Ancien_Pinceau_Y;
+  short start_x;
+  short start_y;
+  short old_paintbrush_x;
+  short old_paintbrush_y;
   short clear;
 
   // Comme on a demandé l'effacement du curseur, il n'y a plus de croix en
-  // (Pinceau_X,Pinceau_Y). C'est une bonne chose.
+  // (Paintbrush_X,Paintbrush_Y). C'est une bonne chose.
 
-  Operation_Taille_pile-=2;
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&clear);
+  Operation_stack_size-=2;
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&clear);
 
   // On efface l'ancienne croix:
-  Ancien_Pinceau_X=Pinceau_X;
-  Ancien_Pinceau_Y=Pinceau_Y;
-  Pinceau_X=Debut_X;
-  Pinceau_Y=Debut_Y;
-  Effacer_curseur(); // Maintenant, il n'y a plus de croix à l'écran.
+  old_paintbrush_x=Paintbrush_X;
+  old_paintbrush_y=Paintbrush_Y;
+  Paintbrush_X=start_x;
+  Paintbrush_Y=start_y;
+  Hide_cursor(); // Maintenant, il n'y a plus de croix à l'écran.
 
-  Pinceau_X=Ancien_Pinceau_X;
-  Pinceau_Y=Ancien_Pinceau_Y;
+  Paintbrush_X=old_paintbrush_x;
+  Paintbrush_Y=old_paintbrush_y;
 
   // Prise de la brosse
-  if ((Snap_Mode) && (Config.Adjust_brush_pick))
+  if ((Snap_mode) && (Config.Adjust_brush_pick))
   {
-    if (Pinceau_X<Debut_X)
+    if (Paintbrush_X<start_x)
     {
-      Ancien_Pinceau_X=Debut_X;
-      Debut_X=Pinceau_X;
+      old_paintbrush_x=start_x;
+      start_x=Paintbrush_X;
     }
-    if (Pinceau_Y<Debut_Y)
+    if (Paintbrush_Y<start_y)
     {
-      Ancien_Pinceau_Y=Debut_Y;
-      Debut_Y=Pinceau_Y;
+      old_paintbrush_y=start_y;
+      start_y=Paintbrush_Y;
     }
-    if (Ancien_Pinceau_X!=Debut_X)
-      Ancien_Pinceau_X--;
-    if (Ancien_Pinceau_Y!=Debut_Y)
-      Ancien_Pinceau_Y--;
+    if (old_paintbrush_x!=start_x)
+      old_paintbrush_x--;
+    if (old_paintbrush_y!=start_y)
+      old_paintbrush_y--;
   }
-  Capturer_brosse(Debut_X,Debut_Y,Ancien_Pinceau_X,Ancien_Pinceau_Y,clear);
-  if ((Snap_Mode) && (Config.Adjust_brush_pick))
+  Capture_brush(start_x,start_y,old_paintbrush_x,old_paintbrush_y,clear);
+  if ((Snap_mode) && (Config.Adjust_brush_pick))
   {
-    Brosse_Decalage_X=(Brosse_Decalage_X/Snap_Largeur)*Snap_Largeur;
-    Brosse_Decalage_Y=(Brosse_Decalage_Y/Snap_Hauteur)*Snap_Hauteur;
+    Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
+    Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
 
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
   // préalable:
-  Afficher_curseur();
+  Display_cursor();
   // !!! Efface la croix puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
+  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu à la main
-    while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-      Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel à cette action:
-  Effacer_curseur();
+  Hide_cursor();
 
   // On passe en brosse couleur:
-  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:       Y:",0);
-  Print_coordonnees();
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:       Y:",0);
+  Print_coordinates();
 }
 
 
-//////////////////////////////////////////////////////// OPERATION_POLYBROSSE
+//////////////////////////////////////////////////////// OPERATION_POLYBRUSH
 
 
-void Polybrosse_12_8(void)
-//  Opération   : OPERATION_POLYBROSSE
+void Polybrush_12_8(void)
+//  Opération   : OPERATION_POLYBRUSH
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
 //  Souris effacée: Non
 {
-  short Clic;
-  short Fin_Y;
-  short Fin_X;
-  short Debut_Y;
-  short Debut_X;
-  short Couleur;
-  short Initial_Y;
-  short Initial_X;
+  short click;
+  short end_y;
+  short end_x;
+  short start_y;
+  short start_x;
+  short color;
+  short initial_y;
+  short initial_x;
 
-  Operation_POP(&Clic);
-  Operation_POP(&Fin_Y);
-  Operation_POP(&Fin_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&click);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if (Clic==Mouse_K)
+  if (click==Mouse_K)
   {
     // L'utilisateur clique toujours avec le bon bouton de souris
 
-    if (((Debut_X!=Pinceau_X) || (Debut_Y!=Pinceau_Y)) &&
-        (Polyfill_Nombre_de_points<Config.Nb_max_de_vertex_par_polygon))
+    if (((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y)) &&
+        (Polyfill_number_of_points<Config.Nb_max_vertices_per_polygon))
     {
       // Il existe un nouveau segment défini par
-      // (Debut_X,Debut_Y)-(Pinceau_X,Pinceau_Y)
+      // (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
-      Effacer_curseur();
-      Print_coordonnees();
+      Hide_cursor();
+      Print_coordinates();
 
       // On le place à l'écran
-      Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-      Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+      Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+      Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
       // On peut le rajouter au polygone
 
-      Polyfill_Table_de_points[Polyfill_Nombre_de_points<<1]    =Pinceau_X;
-      Polyfill_Table_de_points[(Polyfill_Nombre_de_points<<1)+1]=Pinceau_Y;
-      Polyfill_Nombre_de_points++;
+      Polyfill_table_of_points[Polyfill_number_of_points<<1]    =Paintbrush_X;
+      Polyfill_table_of_points[(Polyfill_number_of_points<<1)+1]=Paintbrush_Y;
+      Polyfill_number_of_points++;
 
-      Operation_PUSH(Pinceau_X); // Nouveau Debut_X
-      Operation_PUSH(Pinceau_Y); // Nouveau Debut_Y
-      Operation_PUSH(Pinceau_X); // Nouveau Fin_X
-      Operation_PUSH(Pinceau_Y); // Nouveau Fin_Y
-      Operation_PUSH(Clic);
+      Operation_push(Paintbrush_X); // Nouveau start_x
+      Operation_push(Paintbrush_Y); // Nouveau start_y
+      Operation_push(Paintbrush_X); // Nouveau end_x
+      Operation_push(Paintbrush_Y); // Nouveau end_y
+      Operation_push(click);
 
-      Afficher_curseur();
+      Display_cursor();
     }
     else
     {
-      if (Polyfill_Nombre_de_points==Config.Nb_max_de_vertex_par_polygon)
+      if (Polyfill_number_of_points==Config.Nb_max_vertices_per_polygon)
       {
         // Le curseur bouge alors qu'on ne peut plus stocker de segments ?
 
-        if ((Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y))
+        if ((end_x!=Paintbrush_X) || (end_y!=Paintbrush_Y))
         {
-          Effacer_curseur();
-          Print_coordonnees();
+          Hide_cursor();
+          Print_coordinates();
 
           // On le place à l'écran
-          Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-          Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
-          Afficher_curseur();
+          Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+          Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
+          Display_cursor();
         }
 
         // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
-        Operation_PUSH(Debut_X);
-        Operation_PUSH(Debut_Y);
-        Operation_PUSH(Pinceau_X);
-        Operation_PUSH(Pinceau_Y);
-        Operation_PUSH(Clic);
+        Operation_push(start_x);
+        Operation_push(start_y);
+        Operation_push(Paintbrush_X);
+        Operation_push(Paintbrush_Y);
+        Operation_push(click);
       }
       else
       {
-        Operation_PUSH(Pinceau_X); // Nouveau Debut_X
-        Operation_PUSH(Pinceau_Y); // Nouveau Debut_Y
-        Operation_PUSH(Pinceau_X); // Nouveau Fin_X
-        Operation_PUSH(Pinceau_Y); // Nouveau Fin_Y
-        Operation_PUSH(Clic);
+        Operation_push(Paintbrush_X); // Nouveau start_x
+        Operation_push(Paintbrush_Y); // Nouveau start_y
+        Operation_push(Paintbrush_X); // Nouveau end_x
+        Operation_push(Paintbrush_Y); // Nouveau end_y
+        Operation_push(click);
       }
     }
   }
@@ -3074,613 +3074,613 @@ void Polybrosse_12_8(void)
   {
     // L'utilisateur souhaite arrêter l'opération et refermer le polygone
 
-    Operation_POP(&Couleur);
-    Operation_POP(&Initial_Y);
-    Operation_POP(&Initial_X);
+    Operation_pop(&color);
+    Operation_pop(&initial_y);
+    Operation_pop(&initial_x);
 
-    Effacer_curseur();
-    Print_coordonnees();
+    Hide_cursor();
+    Print_coordinates();
 
-    // Pas besoin d'effacer la ligne (Debut_X,Debut_Y)-(Fin_X,Fin_Y)
+    // Pas besoin d'effacer la ligne (start_x,start_y)-(end_x,end_y)
     // puisqu'on les efface toutes d'un coup.
 
-    Capturer_brosse_au_lasso(Polyfill_Nombre_de_points,Polyfill_Table_de_points,Clic==A_DROITE);
-    free(Polyfill_Table_de_points);
+    Capture_brush_with_lasso(Polyfill_number_of_points,Polyfill_table_of_points,click==RIGHT_SIDE);
+    free(Polyfill_table_of_points);
 
     // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
     // l'écran si on a découpé une partie de l'image en prenant la brosse.
-    Afficher_ecran();
+    Display_all_screen();
 
-    Cacher_pinceau=0;
+    Paintbrush_hidden=0;
 
-    if ((Snap_Mode) && (Config.Adjust_brush_pick))
+    if ((Snap_mode) && (Config.Adjust_brush_pick))
     {
-      Brosse_Decalage_X=(Brosse_Decalage_X/Snap_Largeur)*Snap_Largeur;
-      Brosse_Decalage_Y=(Brosse_Decalage_Y/Snap_Hauteur)*Snap_Hauteur;
+      Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
+      Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
 
     // Simuler l'appui du bouton "Dessin"
 
     // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
     // préalable:
-    Afficher_curseur();
-    Attendre_fin_de_click();
+    Display_cursor();
+    Wait_end_of_click();
     // !!! Efface la croix puis affiche le viseur !!!
-    Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
+    Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
     if (Config.Auto_discontinuous)
     {
       // On se place en mode Dessin discontinu à la main
-      while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-        Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+      while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+        Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
     }
     // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
     // d'appel à cette action:
-    Effacer_curseur();
+    Hide_cursor();
 
     // On passe en brosse couleur:
-    Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 }
 
 
-///////////////////////////////////////////////////// OPERATION_ETIRER_BROSSE
+///////////////////////////////////////////////////// OPERATION_STRETCH_BRUSH
 
 
-void Etirer_brosse_12_0(void)
+void Stretch_brush_12_0(void)
 //
-// Opération   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_STRETCH_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
-  if (Mouse_K==A_GAUCHE)
+  Init_start_operation();
+  if (Mouse_K==LEFT_SIDE)
   {
     // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
     // où demarre sa brosse:
-    Afficher_curseur();
+    Display_cursor();
 
-    Operation_PUSH(Pinceau_X); // Dernier calcul X
-    Operation_PUSH(Pinceau_Y); // Dernier calcul Y
-    Operation_PUSH(Pinceau_X); // Début X
-    Operation_PUSH(Pinceau_Y); // Début Y
-    Operation_PUSH(Pinceau_X); // Dernière position X
-    Operation_PUSH(Pinceau_Y); // Dernière position Y
-    Operation_PUSH(1); // Etat précédent
+    Operation_push(Paintbrush_X); // Dernier calcul X
+    Operation_push(Paintbrush_Y); // Dernier calcul Y
+    Operation_push(Paintbrush_X); // Début X
+    Operation_push(Paintbrush_Y); // Début Y
+    Operation_push(Paintbrush_X); // Dernière position X
+    Operation_push(Paintbrush_Y); // Dernière position Y
+    Operation_push(1); // State précédent
 
-    if ((Config.Coords_rel) && (Menu_visible))
-      Print_dans_menu("\035:   1   \022:   1",0);
+    if ((Config.Coords_rel) && (Menu_is_visible))
+      Print_in_menu("\035:   1   \022:   1",0);
   }
   else
   {
-    Attendre_fin_de_click();
-    Demarrer_pile_operation(Operation_avant_interruption);
+    Wait_end_of_click();
+    Start_operation_stack(Operation_before_interrupt);
   }
 }
 
 
 
-void Etirer_brosse_1_7(void)
+void Stretch_brush_1_7(void)
 //
-// Opération   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_STRETCH_BRUSH
 // Click Souris: 1
 // Taille_Pile : 7
 //
 // Souris effacée: Non
 //
 {
-  char  Chaine[5];
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_X;
-  short Ancien_Y;
+  char  str[5];
+  short start_x;
+  short start_y;
+  short old_x;
+  short old_y;
   short width;
   short height;
-  short Etat_prec;
+  short prev_state;
   short dx,dy,x,y;
 
-  Operation_POP(&Etat_prec);
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&prev_state);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ( (Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y) || (Etat_prec!=2) )
+  if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=2) )
   {
-    Effacer_curseur();
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Hide_cursor();
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-        height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+        width=((start_x<Paintbrush_X)?Paintbrush_X-start_x:start_x-Paintbrush_X)+1;
+        height=((start_y<Paintbrush_Y)?Paintbrush_Y-start_y:start_y-Paintbrush_Y)+1;
 
-        if (Snap_Mode && Config.Adjust_brush_pick)
+        if (Snap_mode && Config.Adjust_brush_pick)
         {
           if (width>1) width--;
           if (height>1) height--;
         }
 
-        Num2str(width,Chaine,4);
-        Print_dans_menu(Chaine,2);
-        Num2str(height,Chaine,4);
-        Print_dans_menu(Chaine,11);
+        Num2str(width,str,4);
+        Print_in_menu(str,2);
+        Num2str(height,str,4);
+        Print_in_menu(str,11);
       }
       else
-        Print_coordonnees();
+        Print_coordinates();
     }
 
-    Afficher_ecran();
+    Display_all_screen();
 
-    x=Pinceau_X;
-    y=Pinceau_Y;
-    if (Snap_Mode && Config.Adjust_brush_pick)
+    x=Paintbrush_X;
+    y=Paintbrush_Y;
+    if (Snap_mode && Config.Adjust_brush_pick)
     {
-      dx=Pinceau_X-Debut_X;
-      dy=Pinceau_Y-Debut_Y;
+      dx=Paintbrush_X-start_x;
+      dy=Paintbrush_Y-start_y;
       if (dx<0) x++; else {if (dx>0) x--;}
       if (dy<0) y++; else {if (dy>0) y--;}
-      Etirer_brosse_preview(Debut_X,Debut_Y,x,y);
+      Stretch_brush_preview(start_x,start_y,x,y);
     }
     else
-      Etirer_brosse_preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y);
+      Stretch_brush_preview(start_x,start_y,Paintbrush_X,Paintbrush_Y);
 
-    Ancien_X=Pinceau_X;
-    Ancien_Y=Pinceau_Y;
-    Pinceau_X=Debut_X;
-    Pinceau_Y=Debut_Y;
-    Afficher_curseur();
-    Pinceau_X=Ancien_X;
-    Pinceau_Y=Ancien_Y;
-    Afficher_curseur();
+    old_x=Paintbrush_X;
+    old_y=Paintbrush_Y;
+    Paintbrush_X=start_x;
+    Paintbrush_Y=start_y;
+    Display_cursor();
+    Paintbrush_X=old_x;
+    Paintbrush_Y=old_y;
+    Display_cursor();
 
-    Operation_Taille_pile-=2;
-    Operation_PUSH(x);
-    Operation_PUSH(y);
+    Operation_stack_size-=2;
+    Operation_push(x);
+    Operation_push(y);
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(2);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(2);
 }
 
 
 
-void Etirer_brosse_0_7(void)
+void Stretch_brush_0_7(void)
 //
-// Opération   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_STRETCH_BRUSH
 // Click Souris: 0
 // Taille_Pile : 7
 //
 // Souris effacée: Non
 //
 {
-  char  Chaine[5];
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_X;
-  short Ancien_Y;
+  char  str[5];
+  short start_x;
+  short start_y;
+  short old_x;
+  short old_y;
   short width=0;
   short height=0;
-  byte  Changement_de_taille;
-  short Etat_prec;
+  byte  size_change;
+  short prev_state;
 
-  Operation_POP(&Etat_prec);
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
+  Operation_pop(&prev_state);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y) || (Etat_prec!=3))
+  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=3))
   {
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        width=((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1;
-        height=((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1;
+        width=((start_x<Paintbrush_X)?Paintbrush_X-start_x:start_x-Paintbrush_X)+1;
+        height=((start_y<Paintbrush_Y)?Paintbrush_Y-start_y:start_y-Paintbrush_Y)+1;
 
-        Num2str(width,Chaine,4);
-        Print_dans_menu(Chaine,2);
-        Num2str(height,Chaine,4);
-        Print_dans_menu(Chaine,11);
+        Num2str(width,str,4);
+        Print_in_menu(str,2);
+        Num2str(height,str,4);
+        Print_in_menu(str,11);
       }
       else
-        Print_coordonnees();
+        Print_coordinates();
     }
   }
 
-  // Utilise Touche_ANSI au lieu de Touche, car Get_input() met ce dernier
-  // à zero si une operation est en cours (Operation_Taille_pile!=0)
-  if (Touche_ANSI)
+  // Utilise Key_ANSI au lieu de Key, car Get_input() met ce dernier
+  // à zero si une operation est en cours (Operation_stack_size!=0)
+  if (Key_ANSI)
   {
-    Changement_de_taille=1;
-    switch (Touche_ANSI)
+    size_change=1;
+    switch (Key_ANSI)
     {
       case 'd': // Double
-        width=Debut_X+(Brosse_Largeur<<1)-1;
-        height=Debut_Y+(Brosse_Hauteur<<1)-1;
+        width=start_x+(Brush_width<<1)-1;
+        height=start_y+(Brush_height<<1)-1;
         break;
       case 'x': // Double X
-        width=Debut_X+(Brosse_Largeur<<1)-1;
-        height=Debut_Y+Brosse_Hauteur-1;
+        width=start_x+(Brush_width<<1)-1;
+        height=start_y+Brush_height-1;
         break;
       case 'y': // Double Y
-        width=Debut_X+Brosse_Largeur-1;
-        height=Debut_Y+(Brosse_Hauteur<<1)-1;
+        width=start_x+Brush_width-1;
+        height=start_y+(Brush_height<<1)-1;
         break;
       case 'h': // Moitié
-        width=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
-        height=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
+        width=(Brush_width>1)?start_x+(Brush_width>>1)-1:1;
+        height=(Brush_height>1)?start_y+(Brush_height>>1)-1:1;
         break;
       case 'X': // Moitié X
-        width=(Brosse_Largeur>1)?Debut_X+(Brosse_Largeur>>1)-1:1;
-        height=Debut_Y+Brosse_Hauteur-1;
+        width=(Brush_width>1)?start_x+(Brush_width>>1)-1:1;
+        height=start_y+Brush_height-1;
         break;
       case 'Y': // Moitié Y
-        width=Debut_X+Brosse_Largeur-1;
-        height=(Brosse_Hauteur>1)?Debut_Y+(Brosse_Hauteur>>1)-1:1;
+        width=start_x+Brush_width-1;
+        height=(Brush_height>1)?start_y+(Brush_height>>1)-1:1;
         break;
       case 'n': // Normal
-        width=Debut_X+Brosse_Largeur-1;
-        height=Debut_Y+Brosse_Hauteur-1;
+        width=start_x+Brush_width-1;
+        height=start_y+Brush_height-1;
         break;
       default :
-        Changement_de_taille=0;
+        size_change=0;
     }
-    Touche_ANSI=0;
+    Key_ANSI=0;
   }
   else
-    Changement_de_taille=0;
+    size_change=0;
 
-  if (Changement_de_taille)
+  if (size_change)
   {
     // On efface la preview de la brosse (et la croix)
-    Afficher_ecran();
+    Display_all_screen();
 
-    Ancien_X=Pinceau_X;
-    Ancien_Y=Pinceau_Y;
-    Pinceau_X=Debut_X;
-    Pinceau_Y=Debut_Y;
-    Afficher_curseur();
-    Pinceau_X=Ancien_X;
-    Pinceau_Y=Ancien_Y;
+    old_x=Paintbrush_X;
+    old_y=Paintbrush_Y;
+    Paintbrush_X=start_x;
+    Paintbrush_Y=start_y;
+    Display_cursor();
+    Paintbrush_X=old_x;
+    Paintbrush_Y=old_y;
 
-    Etirer_brosse_preview(Debut_X,Debut_Y,width,height);
-    Afficher_curseur();
+    Stretch_brush_preview(start_x,start_y,width,height);
+    Display_cursor();
 
-    Operation_Taille_pile-=2;
-    Operation_PUSH(width);
-    Operation_PUSH(height);
+    Operation_stack_size-=2;
+    Operation_push(width);
+    Operation_push(height);
   }
 
-  Operation_PUSH(Debut_X);
-  Operation_PUSH(Debut_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(3);
+  Operation_push(start_x);
+  Operation_push(start_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(3);
 }
 
 
-void Etirer_brosse_2_7(void)
+void Stretch_brush_2_7(void)
 //
-// Opération   : OPERATION_ETIRER_BROSSE
+// Opération   : OPERATION_STRETCH_BRUSH
 // Click Souris: 2
 // Taille_Pile : 7
 //
 // Souris effacée: Oui
 //
 {
-  short Calcul_X;
-  short Calcul_Y;
-  short Debut_X;
-  short Debut_Y;
+  short computed_x;
+  short computed_y;
+  short start_x;
+  short start_y;
 
 
-  Operation_Taille_pile-=3;
-  Operation_POP(&Debut_Y);
-  Operation_POP(&Debut_X);
-  Operation_POP(&Calcul_Y);
-  Operation_POP(&Calcul_X);
+  Operation_stack_size-=3;
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  Operation_pop(&computed_y);
+  Operation_pop(&computed_x);
 
   // On efface la preview de la brosse (et la croix)
-  Afficher_ecran();
+  Display_all_screen();
 
   // Et enfin on stocke pour de bon la nouvelle brosse étirée
-  Etirer_brosse(Debut_X,Debut_Y,Calcul_X,Calcul_Y);
+  Stretch_brush(start_x,start_y,computed_x,computed_y);
 
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
   // préalable:
-  Afficher_curseur();
+  Display_cursor();
   // !!! Efface la croix puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
+  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu à la main
-    while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-      Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel à cette action:
-  Effacer_curseur();
+  Hide_cursor();
 
   // On passe en brosse couleur:
-  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:       Y:",0);
-  Print_coordonnees();
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:       Y:",0);
+  Print_coordinates();
 
-  // Inutile de de faire un Attendre_fin_de_click car c'est fait dans Enclencher_bouton
+  // Inutile de de faire un Wait_end_of_click car c'est fait dans Unselect_button
 }
 
 
-//////////////////////////////////////////////////// OPERATION_TOURNER_BROSSE
+//////////////////////////////////////////////////// OPERATION_ROTATE_BRUSH
 
 
-void Tourner_brosse_12_0(void)
+void Rotate_brush_12_0(void)
 //
-// Opération   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_ROTATE_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
-  if (Mouse_K==A_GAUCHE)
+  Init_start_operation();
+  if (Mouse_K==LEFT_SIDE)
   {
-    Brosse_Centre_rotation_X=Pinceau_X+(Brosse_Largeur>>1)-Brosse_Largeur;
-    Brosse_Centre_rotation_Y=Pinceau_Y;
-    Brosse_Centre_rotation_defini=1;
-    Operation_PUSH(Pinceau_X); // Dernière position calculée X
-    Operation_PUSH(Pinceau_Y); // Dernière position calculée Y
-    Operation_PUSH(Pinceau_X); // Dernière position X
-    Operation_PUSH(Pinceau_Y); // Dernière position Y
-    Operation_PUSH(1); // Etat précédent
+    Brush_rotation_center_X=Paintbrush_X+(Brush_width>>1)-Brush_width;
+    Brush_rotation_center_Y=Paintbrush_Y;
+    Brush_rotation_center_is_defined=1;
+    Operation_push(Paintbrush_X); // Dernière position calculée X
+    Operation_push(Paintbrush_Y); // Dernière position calculée Y
+    Operation_push(Paintbrush_X); // Dernière position X
+    Operation_push(Paintbrush_Y); // Dernière position Y
+    Operation_push(1); // State précédent
 
-    if ((Config.Coords_rel) && (Menu_visible))
-      Print_dans_menu("Angle:   0°    ",0);
+    if ((Config.Coords_rel) && (Menu_is_visible))
+      Print_in_menu("Angle:   0°    ",0);
   }
   else
   {
-    Demarrer_pile_operation(Operation_avant_interruption);
-    Attendre_fin_de_click(); // FIXME: celui-la il donne un résultat pas très chouette en visuel
+    Start_operation_stack(Operation_before_interrupt);
+    Wait_end_of_click(); // FIXME: celui-la il donne un résultat pas très chouette en visuel
   }
 }
 
 
 
-void Tourner_brosse_1_5(void)
+void Rotate_brush_1_5(void)
 //
-// Opération   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_ROTATE_BRUSH
 // Click Souris: 1
 // Taille_Pile : 5
 //
 // Souris effacée: Non
 //
 {
-  char  Chaine[4];
-  short Ancien_X;
-  short Ancien_Y;
-  short Etat_prec;
+  char  str[4];
+  short old_x;
+  short old_y;
+  short prev_state;
   float angle;
   int dx,dy;
 
-  Operation_POP(&Etat_prec);
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&prev_state);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ( (Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y) || (Etat_prec!=2) )
+  if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=2) )
   {
-    if ( (Brosse_Centre_rotation_X==Pinceau_X)
-      && (Brosse_Centre_rotation_Y==Pinceau_Y) )
+    if ( (Brush_rotation_center_X==Paintbrush_X)
+      && (Brush_rotation_center_Y==Paintbrush_Y) )
       angle=0.0;
     else
     {
-      dx=Pinceau_X-Brosse_Centre_rotation_X;
-      dy=Pinceau_Y-Brosse_Centre_rotation_Y;
+      dx=Paintbrush_X-Brush_rotation_center_X;
+      dy=Paintbrush_Y-Brush_rotation_center_Y;
       angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
       if (dy>0) angle=M_2PI-angle;
     }
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str((int)(angle*180.0/M_PI),Chaine,3);
-        Print_dans_menu(Chaine,7);
+        Num2str((int)(angle*180.0/M_PI),str,3);
+        Print_in_menu(str,7);
       }
       else
-        Print_coordonnees();
+        Print_coordinates();
     }
 
-    Afficher_ecran();
-    Tourner_brosse_preview(angle);
-    Afficher_curseur();
+    Display_all_screen();
+    Rotate_brush_preview(angle);
+    Display_cursor();
 
-    Operation_Taille_pile-=2;
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_stack_size-=2;
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(2);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(2);
 }
 
 
 
-void Tourner_brosse_0_5(void)
+void Rotate_brush_0_5(void)
 //
-// Opération   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_ROTATE_BRUSH
 // Click Souris: 0
 // Taille_Pile : 5
 //
 // Souris effacée: Non
 //
 {
-  char  Chaine[4];
-  short Ancien_X;
-  short Ancien_Y;
-  short Calcul_X=0;
-  short Calcul_Y=0;
-  byte  Changement_angle;
-  short Etat_prec;
+  char  str[4];
+  short old_x;
+  short old_y;
+  short computed_x=0;
+  short computed_y=0;
+  byte  angle_change;
+  short prev_state;
   float angle=0.0;
   int dx,dy;
 
-  Operation_POP(&Etat_prec);
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&prev_state);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y) || (Etat_prec!=3))
+  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=3))
   {
-    if ( (Brosse_Centre_rotation_X==Pinceau_X)
-      && (Brosse_Centre_rotation_Y==Pinceau_Y) )
+    if ( (Brush_rotation_center_X==Paintbrush_X)
+      && (Brush_rotation_center_Y==Paintbrush_Y) )
       angle=0.0;
     else
     {
-      dx=Pinceau_X-Brosse_Centre_rotation_X;
-      dy=Pinceau_Y-Brosse_Centre_rotation_Y;
+      dx=Paintbrush_X-Brush_rotation_center_X;
+      dy=Paintbrush_Y-Brush_rotation_center_Y;
       angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
       if (dy>0) angle=M_2PI-angle;
     }
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str(Round(angle*180.0/M_PI),Chaine,3);
-        Print_dans_menu(Chaine,7);
+        Num2str(Round(angle*180.0/M_PI),str,3);
+        Print_in_menu(str,7);
       }
       else
-        Print_coordonnees();
+        Print_coordinates();
     }
   }
 
-  // Utilise Touche_ANSI au lieu de Touche, car Get_input() met ce dernier
-  // à zero si une operation est en cours (Operation_Taille_pile!=0)
-  if (Touche_ANSI)
+  // Utilise Key_ANSI au lieu de Key, car Get_input() met ce dernier
+  // à zero si une operation est en cours (Operation_stack_size!=0)
+  if (Key_ANSI)
   {
-    Changement_angle=1;
-    Calcul_X=Brosse_Centre_rotation_X;
-    Calcul_Y=Brosse_Centre_rotation_Y;
-    switch (Touche_ANSI)
+    angle_change=1;
+    computed_x=Brush_rotation_center_X;
+    computed_y=Brush_rotation_center_Y;
+    switch (Key_ANSI)
     {
-      case '6': angle=     0.0 ; Calcul_X++;             break;
-      case '9': angle=M_PI*0.25; Calcul_X++; Calcul_Y--; break;
-      case '8': angle=M_PI*0.5 ;             Calcul_Y--; break;
-      case '7': angle=M_PI*0.75; Calcul_X--; Calcul_Y--; break;
-      case '4': angle=M_PI     ; Calcul_X--;             break;
-      case '1': angle=M_PI*1.25; Calcul_X--; Calcul_Y++; break;
-      case '2': angle=M_PI*1.5 ;             Calcul_Y++; break;
-      case '3': angle=M_PI*1.75; Calcul_X++; Calcul_Y++; break;
+      case '6': angle=     0.0 ; computed_x++;             break;
+      case '9': angle=M_PI*0.25; computed_x++; computed_y--; break;
+      case '8': angle=M_PI*0.5 ;             computed_y--; break;
+      case '7': angle=M_PI*0.75; computed_x--; computed_y--; break;
+      case '4': angle=M_PI     ; computed_x--;             break;
+      case '1': angle=M_PI*1.25; computed_x--; computed_y++; break;
+      case '2': angle=M_PI*1.5 ;             computed_y++; break;
+      case '3': angle=M_PI*1.75; computed_x++; computed_y++; break;
       default :
-        Changement_angle=0;
+        angle_change=0;
     }
-    Touche_ANSI=0;
+    Key_ANSI=0;
   }
   else
-    Changement_angle=0;
+    angle_change=0;
 
-  if (Changement_angle)
+  if (angle_change)
   {
     // On efface la preview de la brosse
-    Afficher_ecran();
-    Tourner_brosse_preview(angle);
-    Afficher_curseur();
+    Display_all_screen();
+    Rotate_brush_preview(angle);
+    Display_cursor();
 
-    Operation_Taille_pile-=2;
-    Operation_PUSH(Calcul_X);
-    Operation_PUSH(Calcul_Y);
+    Operation_stack_size-=2;
+    Operation_push(computed_x);
+    Operation_push(computed_y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(3);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(3);
 }
 
 
-void Tourner_brosse_2_5(void)
+void Rotate_brush_2_5(void)
 //
-// Opération   : OPERATION_TOURNER_BROSSE
+// Opération   : OPERATION_ROTATE_BRUSH
 // Click Souris: 2
 // Taille_Pile : 5
 //
 // Souris effacée: Oui
 //
 {
-  short Calcul_X;
-  short Calcul_Y;
+  short computed_x;
+  short computed_y;
   int dx,dy;
   float angle;
 
 
   // On efface la preview de la brosse
-  Afficher_ecran();
+  Display_all_screen();
 
-  Operation_Taille_pile-=3;
-  Operation_POP(&Calcul_Y);
-  Operation_POP(&Calcul_X);
+  Operation_stack_size-=3;
+  Operation_pop(&computed_y);
+  Operation_pop(&computed_x);
 
   // Calcul de l'angle par rapport à la dernière position calculée
-  if ( (Brosse_Centre_rotation_X==Calcul_X)
-    && (Brosse_Centre_rotation_Y==Calcul_Y) )
+  if ( (Brush_rotation_center_X==computed_x)
+    && (Brush_rotation_center_Y==computed_y) )
     angle=0.0;
   else
   {
-    dx=Calcul_X-Brosse_Centre_rotation_X;
-    dy=Calcul_Y-Brosse_Centre_rotation_Y;
+    dx=computed_x-Brush_rotation_center_X;
+    dy=computed_y-Brush_rotation_center_Y;
     angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
     if (dy>0) angle=M_2PI-angle;
   }
 
   // Et enfin on stocke pour de bon la nouvelle brosse étirée
-  Tourner_brosse(angle);
+  Rotate_brush(angle);
 
   // Simuler l'appui du bouton "Dessin"
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
   // préalable:
-  Afficher_curseur();
+  Display_cursor();
   // !!! Efface le curseur de l'opération puis affiche le viseur !!!
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE); // Désenclenche au passage le bouton brosse
+  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu à la main
-    while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-      Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel à cette action:
-  Effacer_curseur();
+  Hide_cursor();
 
   // On passe en brosse couleur:
-  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:       Y:",0);
-  Print_coordonnees();
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:       Y:",0);
+  Print_coordinates();
 
-  // Inutile de de faire un Attendre_fin_de_click car c'est fait dans Enclencher_bouton
+  // Inutile de de faire un Wait_end_of_click car c'est fait dans Unselect_button
 }
 
 
 //////////////////////////////////////////////////////////// OPERATION_SCROLL
 
 
-byte Cacher_curseur_avant_scroll;
+byte Cursor_hidden_before_scroll;
 
 void Scroll_12_0(void)
 //
@@ -3691,16 +3691,16 @@ void Scroll_12_0(void)
 //  Souris effacée: Oui
 //
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Cacher_curseur_avant_scroll=Cacher_curseur;
-  Cacher_curseur=1;
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Cursor_hidden_before_scroll=Cursor_hidden;
+  Cursor_hidden=1;
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 }
 
 
@@ -3713,44 +3713,44 @@ void Scroll_12_4(void)
 //  Souris effacée: Non
 //
 {
-  short Centre_X;
-  short Centre_Y;
+  short center_x;
+  short center_y;
   short x_pos;
   short y_pos;
   short x_offset;
   short y_offset;
-  //char  Chaine[5];
+  //char  str[5];
 
-  Operation_POP(&y_pos);
-  Operation_POP(&x_pos);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
+  Operation_pop(&y_pos);
+  Operation_pop(&x_pos);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
 
-  if ( (Pinceau_X!=x_pos) || (Pinceau_Y!=y_pos) )
+  if ( (Paintbrush_X!=x_pos) || (Paintbrush_Y!=y_pos) )
   {
     // L'utilisateur a bougé, il faut scroller l'image
 
-    if (Pinceau_X>=Centre_X)
-      x_offset=(Pinceau_X-Centre_X)%Principal_Largeur_image;
+    if (Paintbrush_X>=center_x)
+      x_offset=(Paintbrush_X-center_x)%Main_image_width;
     else
-      x_offset=Principal_Largeur_image-((Centre_X-Pinceau_X)%Principal_Largeur_image);
+      x_offset=Main_image_width-((center_x-Paintbrush_X)%Main_image_width);
 
-    if (Pinceau_Y>=Centre_Y)
-      y_offset=(Pinceau_Y-Centre_Y)%Principal_Hauteur_image;
+    if (Paintbrush_Y>=center_y)
+      y_offset=(Paintbrush_Y-center_y)%Main_image_height;
     else
-      y_offset=Principal_Hauteur_image-((Centre_Y-Pinceau_Y)%Principal_Hauteur_image);
+      y_offset=Main_image_height-((center_y-Paintbrush_Y)%Main_image_height);
 
-    Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
+    Display_coords_rel_or_abs(center_x,center_y);
 
     Scroll_picture(x_offset,y_offset);
 
-    Afficher_ecran();
+    Display_all_screen();
   }
 
-  Operation_PUSH(Centre_X);
-  Operation_PUSH(Centre_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(center_x);
+  Operation_push(center_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 void Scroll_0_4(void)
@@ -3762,235 +3762,235 @@ void Scroll_0_4(void)
 //  Souris effacée: Oui
 //
 {
-  Operation_Taille_pile-=4;
-  Cacher_curseur=Cacher_curseur_avant_scroll;
-  if ((Config.Coords_rel) && (Menu_visible))
+  Operation_stack_size-=4;
+  Cursor_hidden=Cursor_hidden_before_scroll;
+  if ((Config.Coords_rel) && (Menu_is_visible))
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
 
-//////////////////////////////////////////////////// OPERATION_CERCLE_DEGRADE
+//////////////////////////////////////////////////// OPERATION_GRAD_CIRCLE
 
 
-void Cercle_degrade_12_0(void)
+void Grad_circle_12_0(void)
 //
-// Opération   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_GRAD_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  byte Couleur;
+  byte color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
 
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  Cacher_pinceau_avant_operation=Cacher_pinceau;
-  Cacher_pinceau=1;
+  Paintbrush_hidden_before_scroll=Paintbrush_hidden;
+  Paintbrush_hidden=1;
 
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
   
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("Radius:   0    ",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("Radius:   0    ",0);
 
-  Operation_PUSH(Mouse_K);
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Mouse_K);
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Cercle_degrade_12_6(void)
+void Grad_circle_12_6(void)
 //
-// Opération   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_GRAD_CIRCLE
 // Click Souris: 1 ou 2
-// Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Non
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon;
-  char  Chaine[5];
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short radius;
+  char  str[5];
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  if ( (Tangente_X!=Pinceau_X) || (Tangente_Y!=Pinceau_Y) )
+  if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    if ((Config.Coords_rel) && (Menu_visible))
+    Hide_cursor();
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Num2str(Distance(Centre_X,Centre_Y,Pinceau_X,Pinceau_Y),Chaine,4);
-      Print_dans_menu(Chaine,7);
+      Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
+      Print_in_menu(str,7);
     }
     else
-      Print_coordonnees();
+      Print_coordinates();
 
-    Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                  ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-    Rayon=sqrt(Cercle_Limite);
-    Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                  ((tangent_y-center_y)*(tangent_y-center_y));
+    radius=sqrt(Circle_limit);
+    Hide_empty_circle_preview(center_x,center_y,radius);
 
-    Cercle_Limite=((Pinceau_X-Centre_X)*(Pinceau_X-Centre_X))+
-                  ((Pinceau_Y-Centre_Y)*(Pinceau_Y-Centre_Y));
-    Rayon=sqrt(Cercle_Limite);
-    Tracer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon,Couleur);
+    Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
+                  ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
+    radius=sqrt(Circle_limit);
+    Draw_empy_circle_preview(center_x,center_y,radius,color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Centre_X);
-  Operation_PUSH(Centre_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(color);
+  Operation_push(center_x);
+  Operation_push(center_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Cercle_degrade_0_6(void)
+void Grad_circle_0_6(void)
 //
-// Opération   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_GRAD_CIRCLE
 // Click Souris: 0
-// Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
   short click;
-  short Rayon;
+  short radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
 
-  Operation_POP(&Couleur);
-  Operation_POP(&click);
+  Operation_pop(&color);
+  Operation_pop(&click);
 
-  if (click==A_GAUCHE)
+  if (click==LEFT_SIDE)
   {
-    Operation_PUSH(click);
-    Operation_PUSH(Couleur);
+    Operation_push(click);
+    Operation_push(color);
 
-    Operation_PUSH(Centre_X);
-    Operation_PUSH(Centre_Y);
-    Operation_PUSH(Tangente_X);
-    Operation_PUSH(Tangente_Y);
+    Operation_push(center_x);
+    Operation_push(center_y);
+    Operation_push(tangent_x);
+    Operation_push(tangent_y);
 
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 
     // On change la forme du curseur
-    Forme_curseur=FORME_CURSEUR_CIBLE_XOR;
+    Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
     // On affiche une croix XOR au centre du cercle
-    Courbe_Tracer_croix(Centre_X,Centre_Y);
+    Draw_curve_cross(center_x,center_y);
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
-        Print_dans_menu("X:        Y:",0);
+        Print_in_menu("X:        Y:",0);
       else
-        Print_dans_menu("X:       Y:             ",0);
-      Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
+        Print_in_menu("X:       Y:             ",0);
+      Display_coords_rel_or_abs(center_x,center_y);
     }
   }
   else
   {
-    Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                  ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-    Rayon=sqrt(Cercle_Limite);
-    Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                  ((tangent_y-center_y)*(tangent_y-center_y));
+    radius=sqrt(Circle_limit);
+    Hide_empty_circle_preview(center_x,center_y,radius);
 
-    Cacher_pinceau=Cacher_pinceau_avant_operation;
-    Forme_curseur=FORME_CURSEUR_CIBLE;
+    Paintbrush_hidden=Paintbrush_hidden_before_scroll;
+    Cursor_shape=CURSOR_SHAPE_TARGET;
 
-    Tracer_cercle_plein(Centre_X,Centre_Y,Rayon,Back_color);
+    Draw_filled_circle(center_x,center_y,radius,Back_color);
 
-    if ((Config.Coords_rel) && (Menu_visible))
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
     }
   }
 }
 
 
-void Cercle_degrade_12_8(void)
+void Grad_circle_12_8(void)
 //
-// Opération   : OPERATION_CERCLE_DEGRADE
+// Opération   : OPERATION_GRAD_CIRCLE
 // Click Souris: 0
-// Taille_Pile : 8 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente, Ancien_X, Ancien_Y)
+// Taille_Pile : 8 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente, old_x, old_y)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Ancien_Mouse_K;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short old_mouse_k;
 
-  short Rayon;
+  short radius;
 
-  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers élts de la pile
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&Ancien_Mouse_K);
+  Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
+  Operation_pop(&old_mouse_k);
   
-  Effacer_curseur();
+  Hide_cursor();
   // On efface la croix XOR au centre du cercle
-  Courbe_Tracer_croix(Centre_X,Centre_Y);
+  Draw_curve_cross(center_x,center_y);
 
-  Cercle_Limite=((Tangente_X-Centre_X)*(Tangente_X-Centre_X))+
-                ((Tangente_Y-Centre_Y)*(Tangente_Y-Centre_Y));
-  Rayon=sqrt(Cercle_Limite);
-  Effacer_cercle_vide_Preview(Centre_X,Centre_Y,Rayon);
+  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
+                ((tangent_y-center_y)*(tangent_y-center_y));
+  radius=sqrt(Circle_limit);
+  Hide_empty_circle_preview(center_x,center_y,radius);
 
-  Cacher_pinceau=Cacher_pinceau_avant_operation;
-  Forme_curseur=FORME_CURSEUR_CIBLE;
+  Paintbrush_hidden=Paintbrush_hidden_before_scroll;
+  Cursor_shape=CURSOR_SHAPE_TARGET;
 
-  if (Mouse_K==Ancien_Mouse_K)
-    Tracer_cercle_degrade(Centre_X,Centre_Y,Rayon,Pinceau_X,Pinceau_Y);
+  if (Mouse_K==old_mouse_k)
+    Draw_grad_circle(center_x,center_y,radius,Paintbrush_X,Paintbrush_Y);
 
-  Afficher_curseur();
-  Attendre_fin_de_click();
+  Display_cursor();
+  Wait_end_of_click();
 
-  if ((Config.Coords_rel) && (Menu_visible))
+  if ((Config.Coords_rel) && (Menu_is_visible))
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
 
-void Cercle_ou_ellipse_degrade_0_8(void)
+void Grad_circle_or_ellipse_0_8(void)
 //
 // Opération   : OPERATION_{CERCLE|ELLIPSE}_DEGRADE
 // Click Souris: 0
@@ -3999,246 +3999,246 @@ void Cercle_ou_ellipse_degrade_0_8(void)
 // Souris effacée: Non
 //
 {
-  short Debut_X;
-  short Debut_Y;
-  short Tangente_X;
-  short Tangente_Y;
-  short Ancien_X;
-  short Ancien_Y;
+  short start_x;
+  short start_y;
+  short tangent_x;
+  short tangent_y;
+  short old_x;
+  short old_y;
 
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y))
+  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y))
   {
-    Operation_POP(&Tangente_Y);
-    Operation_POP(&Tangente_X);
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Tangente_X);
-    Operation_PUSH(Tangente_Y);
+    Operation_pop(&tangent_y);
+    Operation_pop(&tangent_x);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Display_coords_rel_or_abs(start_x,start_y);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(tangent_x);
+    Operation_push(tangent_y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-////////////////////////////////////////////////// OPERATION_ELLIPSE_DEGRADEE
+////////////////////////////////////////////////// OPERATION_GRAD_ELLIPSE
 
 
-void Ellipse_degradee_12_0(void)
+void Grad_ellipse_12_0(void)
 //
-// Opération   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
 // Souris effacée: Oui
 {
-  byte Couleur;
+  byte color;
 
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
 
-  Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
-  Couleur=(Mouse_K==A_GAUCHE)?Fore_color:Back_color;
+  Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
+  color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  Cacher_pinceau_avant_operation=Cacher_pinceau;
-  Cacher_pinceau=1;
+  Paintbrush_hidden_before_scroll=Paintbrush_hidden;
+  Paintbrush_hidden=1;
 
-  Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-  Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+  Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
+  Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
   
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("X:±   0   Y:±   0",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:±   0   Y:±   0",0);
 
-  Operation_PUSH(Mouse_K);
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Mouse_K);
+  Operation_push(color);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Ellipse_degradee_12_6(void)
+void Grad_ellipse_12_6(void)
 //
-// Opération   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 1 ou 2
-// Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Non
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon_horizontal;
-  short Rayon_vertical;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short horizontal_radius;
+  short vertical_radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
 
-  if ( (Tangente_X!=Pinceau_X) || (Tangente_Y!=Pinceau_Y) )
+  if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
-    Effacer_curseur();
-    Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
+    Hide_cursor();
+    Display_coords_rel_or_abs(center_x,center_y);
 
-    Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                           :Centre_X-Tangente_X;
-    Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                           :Centre_Y-Tangente_Y;
-    Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-    Rayon_horizontal=(Pinceau_X>Centre_X)?Pinceau_X-Centre_X
-                                         :Centre_X-Pinceau_X;
-    Rayon_vertical  =(Pinceau_Y>Centre_Y)?Pinceau_Y-Centre_Y
-                                         :Centre_Y-Pinceau_Y;
-    Tracer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
+    horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
+                                         :center_x-Paintbrush_X;
+    vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
+                                         :center_y-Paintbrush_Y;
+    Draw_empy_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  Operation_PUSH(Couleur);
-  Operation_PUSH(Centre_X);
-  Operation_PUSH(Centre_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(color);
+  Operation_push(center_x);
+  Operation_push(center_y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Ellipse_degradee_0_6(void)
+void Grad_ellipse_0_6(void)
 //
-// Opération   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 0
-// Taille_Pile : 6 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
+// Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
   short click;
-  //short Rayon;
-  short Rayon_horizontal;
-  short Rayon_vertical;
+  //short radius;
+  short horizontal_radius;
+  short vertical_radius;
 
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
 
-  Operation_POP(&Couleur);
-  Operation_POP(&click);
+  Operation_pop(&color);
+  Operation_pop(&click);
 
-  if (click==A_GAUCHE)
+  if (click==LEFT_SIDE)
   {
-    Operation_PUSH(click);
-    Operation_PUSH(Couleur);
+    Operation_push(click);
+    Operation_push(color);
 
-    Operation_PUSH(Centre_X);
-    Operation_PUSH(Centre_Y);
-    Operation_PUSH(Tangente_X);
-    Operation_PUSH(Tangente_Y);
+    Operation_push(center_x);
+    Operation_push(center_y);
+    Operation_push(tangent_x);
+    Operation_push(tangent_y);
 
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 
     // On change la forme du curseur
-    Forme_curseur=FORME_CURSEUR_CIBLE_XOR;
+    Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
     // On affiche une croix XOR au centre du cercle
-    Courbe_Tracer_croix(Centre_X,Centre_Y);
+    Draw_curve_cross(center_x,center_y);
 
-    if (Menu_visible)
+    if (Menu_is_visible)
     {
       if (Config.Coords_rel)
-        Print_dans_menu("X:        Y:",0);
+        Print_in_menu("X:        Y:",0);
       else
-        Print_dans_menu("X:       Y:             ",0);
-      Aff_coords_rel_ou_abs(Centre_X,Centre_Y);
+        Print_in_menu("X:       Y:             ",0);
+      Display_coords_rel_or_abs(center_x,center_y);
     }
   }
   else
   {
-    Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                           :Centre_X-Tangente_X;
-    Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                           :Centre_Y-Tangente_Y;
-    Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-    Cacher_pinceau=Cacher_pinceau_avant_operation;
-    Forme_curseur=FORME_CURSEUR_CIBLE;
+    Paintbrush_hidden=Paintbrush_hidden_before_scroll;
+    Cursor_shape=CURSOR_SHAPE_TARGET;
 
-    Tracer_ellipse_pleine(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Back_color);
+    Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Back_color);
 
-    if ((Config.Coords_rel) && (Menu_visible))
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Print_dans_menu("X:       Y:             ",0);
-      Print_coordonnees();
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
     }
   }
 }
 
 
-void Ellipse_degradee_12_8(void)
+void Grad_ellipse_12_8(void)
 //
-// Opération   : OPERATION_ELLIPSE_DEGRADEE
+// Opération   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 0
-// Taille_Pile : 8 (Mouse_K, Couleur, X_Centre, Y_Centre, X_Tangente, Y_Tangente, Ancien_X, Ancien_Y)
+// Taille_Pile : 8 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente, old_x, old_y)
 //
 // Souris effacée: Oui
 //
 {
-  short Tangente_X;
-  short Tangente_Y;
-  short Centre_X;
-  short Centre_Y;
-  short Couleur;
-  short Rayon_horizontal;
-  short Rayon_vertical;
-  short Ancien_Mouse_K;
+  short tangent_x;
+  short tangent_y;
+  short center_x;
+  short center_y;
+  short color;
+  short horizontal_radius;
+  short vertical_radius;
+  short old_mouse_k;
 
-  Operation_Taille_pile-=2;   // On fait sauter les 2 derniers élts de la pile
-  Operation_POP(&Tangente_Y);
-  Operation_POP(&Tangente_X);
-  Operation_POP(&Centre_Y);
-  Operation_POP(&Centre_X);
-  Operation_POP(&Couleur);
-  Operation_POP(&Ancien_Mouse_K);
+  Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
+  Operation_pop(&tangent_y);
+  Operation_pop(&tangent_x);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  Operation_pop(&color);
+  Operation_pop(&old_mouse_k);
 
   // On efface la croix XOR au centre de l'ellipse
-  Courbe_Tracer_croix(Centre_X,Centre_Y);
+  Draw_curve_cross(center_x,center_y);
 
-  Rayon_horizontal=(Tangente_X>Centre_X)?Tangente_X-Centre_X
-                                         :Centre_X-Tangente_X;
-  Rayon_vertical  =(Tangente_Y>Centre_Y)?Tangente_Y-Centre_Y
-                                         :Centre_Y-Tangente_Y;
-  Effacer_ellipse_vide_Preview(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical);
+  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                         :center_x-tangent_x;
+  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                         :center_y-tangent_y;
+  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-  Cacher_pinceau=Cacher_pinceau_avant_operation;
-  Forme_curseur=FORME_CURSEUR_CIBLE;
+  Paintbrush_hidden=Paintbrush_hidden_before_scroll;
+  Cursor_shape=CURSOR_SHAPE_TARGET;
 
-  if (Mouse_K==Ancien_Mouse_K)
-    Tracer_ellipse_degradee(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Pinceau_X,Pinceau_Y);
+  if (Mouse_K==old_mouse_k)
+    Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
 
-  Attendre_fin_de_click();
+  Wait_end_of_click();
 
-  if ((Config.Coords_rel) && (Menu_visible))
+  if ((Config.Coords_rel) && (Menu_is_visible))
   {
-    Print_dans_menu("X:       Y:             ",0);
-    Print_coordonnees();
+    Print_in_menu("X:       Y:             ",0);
+    Print_coordinates();
   }
 }
 
@@ -4251,8 +4251,8 @@ void Ellipse_degradee_12_8(void)
 // 3) dessin du dégradé
 
 
-void Rectangle_Degrade_12_0(void)
-// Opération   : OPERATION_RECTANGLE_DEGRADE
+void Grad_rectangle_12_0(void)
+// Opération   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
@@ -4260,34 +4260,34 @@ void Rectangle_Degrade_12_0(void)
 
 // Initialisation de l'étape 1, on commence à dessiner le rectangle
 {
-  Initialiser_debut_operation();
+  Init_start_operation();
   Backup();
 
-  if ((Config.Coords_rel) && (Menu_visible))
-    Print_dans_menu("\035:   1   \022:   1",0);
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("\035:   1   \022:   1",0);
   // On laisse une trace du curseur à l'écran
-  Afficher_curseur();
+  Display_cursor();
 
-  if (Mouse_K==A_GAUCHE)
+  if (Mouse_K==LEFT_SIDE)
   {
-    Shade_Table=Shade_Table_gauche;
-    Operation_PUSH(Mouse_K);
+    Shade_table=Shade_table_left;
+    Operation_push(Mouse_K);
   }
   else
   {
-    Shade_Table=Shade_Table_droite;
-    Operation_PUSH(Mouse_K);
+    Shade_table=Shade_table_right;
+    Operation_push(Mouse_K);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
 
-void Rectangle_Degrade_12_5(void)
-// Opération   : OPERATION_RECTANGLE_DEGRADE
+void Grad_rectangle_12_5(void)
+// Opération   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
@@ -4295,41 +4295,41 @@ void Rectangle_Degrade_12_5(void)
 
 // Modification de la taille du rectangle
 {
-  short Debut_X;
-  short Debut_Y;
-  short Ancien_X;
-  short Ancien_Y;
-  char  Chaine[5];
+  short start_x;
+  short start_y;
+  short old_x;
+  short old_y;
+  char  str[5];
 
-  Operation_POP(&Ancien_Y);
-  Operation_POP(&Ancien_X);
+  Operation_pop(&old_y);
+  Operation_pop(&old_x);
 
-  if ((Pinceau_X!=Ancien_X) || (Pinceau_Y!=Ancien_Y))
+  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y))
   {
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
-    if ((Config.Coords_rel) && (Menu_visible))
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-      Num2str(((Debut_X<Pinceau_X)?Pinceau_X-Debut_X:Debut_X-Pinceau_X)+1,Chaine,4);
-      Print_dans_menu(Chaine,2);
-      Num2str(((Debut_Y<Pinceau_Y)?Pinceau_Y-Debut_Y:Debut_Y-Pinceau_Y)+1,Chaine,4);
-      Print_dans_menu(Chaine,11);
+      Num2str(((start_x<Paintbrush_X)?Paintbrush_X-start_x:start_x-Paintbrush_X)+1,str,4);
+      Print_in_menu(str,2);
+      Num2str(((start_y<Paintbrush_Y)?Paintbrush_Y-start_y:start_y-Paintbrush_Y)+1,str,4);
+      Print_in_menu(str,11);
     }
     else
-      Print_coordonnees();
+      Print_coordinates();
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
   }
 
-  Operation_PUSH(Pinceau_X);
-  Operation_PUSH(Pinceau_Y);
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
 }
 
-void Rectangle_Degrade_0_5(void)
-// OPERATION_RECTANGLE_DEGRADE
-// Clic souris 0
+void Grad_rectangle_0_5(void)
+// OPERATION_GRAD_RECTANGLE
+// click souris 0
 // Taile pile : 5
 //
 // Souris effacée : non
@@ -4338,117 +4338,117 @@ void Rectangle_Degrade_0_5(void)
 // on doit donc attendre que l'utilisateur clique quelque part
 // On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
 {
-  // !!! Cette fonction remet RAX RAY RBX RBY dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
-  short RAX;
-  short RAY;
-  short RBX;
-  short RBY, width,height;
-  short decalage_largeur = 0;
-  short decalage_hauteur = 0;
-  short decalage_gauche = 0;
-  short decalage_haut = 0;
+  // !!! Cette fonction remet rax ray rbx rby dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
+  short rax;
+  short ray;
+  short rbx;
+  short rby, width,height;
+  short offset_width = 0;
+  short offset_height = 0;
+  short offset_left = 0;
+  short offset_top = 0;
 
 
   // Tracé propre du rectangle
-  Operation_POP(&RBY);
-  Operation_POP(&RBX);
-  Operation_POP(&RAY);
-  Operation_POP(&RAX);
+  Operation_pop(&rby);
+  Operation_pop(&rbx);
+  Operation_pop(&ray);
+  Operation_pop(&rax);
 
-  Pinceau_X = RAX;
-  Pinceau_Y = RAY;
-  Effacer_curseur();
+  Paintbrush_X = rax;
+  Paintbrush_Y = ray;
+  Hide_cursor();
 
-  width = abs(RBX-RAX);
-  height = abs(RBY-RAY);
+  width = abs(rbx-rax);
+  height = abs(rby-ray);
 
-  if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
-    decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+  if (Max(rax,rbx)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
+    offset_width = Max(rax,rbx) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
 
-  if (Max(RAY,RBY)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
-      decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
+  if (Max(ray,rby)-Main_offset_Y > Min(Main_image_height,Menu_Y))
+      offset_height = Max(ray,rby) - Min(Main_image_height,Menu_Y);
 
   // Dessin dans la zone de dessin normale
-  Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width - decalage_largeur);
-  if(decalage_hauteur == 0)
-    Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,width - decalage_largeur);
+  Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width - offset_width);
+  if(offset_height == 0)
+    Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Max(ray,rby)-1-Main_offset_Y,width - offset_width);
 
-  Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
-  if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-    Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
+  Vertical_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
+  if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+    Vertical_XOR_line(Max(rax,rbx)-1-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
 
-  UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
+  Update_rect(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
 
   // Dessin dans la zone zoomée
-  if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
+  if(Main_magnifier_mode && Min(rax,rbx)<Limit_visible_right_zoom && Max(rax,rbx)>Limit_left_zoom && Min(ray,rby)<Limit_visible_bottom_zoom && Max(ray,rby)>Limit_top_zoom )
   {
-    decalage_largeur = 0;
-    decalage_hauteur=0;
+    offset_width = 0;
+    offset_height=0;
 
-    if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
+    if(Min(rax,rbx)<Limit_left_zoom) // On dépasse du zoom à gauche
     {
-        decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
-        decalage_gauche = Limite_Gauche_Zoom;
+        offset_width += Limit_left_zoom - Min(rax,rbx);
+        offset_left = Limit_left_zoom;
     }
 
-    if(Max(RAX,RBX)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
-        decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
+    if(Max(rax,rbx)>Limit_visible_right_zoom) // On dépasse du zoom à droite
+        offset_width += Max(rax,rbx) - Limit_visible_right_zoom;
 
-    if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
+    if(Min(ray,rby)<Limit_top_zoom) // On dépasse du zoom en haut
     {
-        decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
-        decalage_haut = Limite_Haut_Zoom;
+        offset_height += Limit_top_zoom - Min(ray,rby);
+        offset_top = Limit_top_zoom;
     }
 
-    if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
-        decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
+    if(Max(ray,rby)>Limit_visible_bottom_zoom) // On dépasse du zoom en bas
+        offset_height += Max(ray,rby) - Limit_visible_bottom_zoom;
 
-    if(width > decalage_largeur)
+    if(width > offset_width)
     {
-      if(decalage_haut==0) // La ligne du haut est visible
-        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),width-decalage_largeur);
+      if(offset_top==0) // La ligne du haut est visible
+        Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Min(ray,rby),width-offset_width);
 
-      if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-        Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),width-decalage_largeur);
+      if(Max(ray,rby)<Limit_visible_bottom_zoom) // La  ligne du bas est visible
+        Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Max(ray,rby),width-offset_width);
     }
 
-    if(height>decalage_hauteur)
+    if(height>offset_height)
     {
-      if(decalage_gauche==0) // La ligne de gauche est visible
-        Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
+      if(offset_left==0) // La ligne de gauche est visible
+        Vertical_XOR_line_zoom(Min(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
 
-      if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-        Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
+      if(Max(rax,rbx)<Limit_visible_right_zoom) // La ligne de droite est visible
+        Vertical_XOR_line_zoom(Max(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
     }
   }
 
-  Operation_PUSH(RAX);
-  Operation_PUSH(RAY);
-  Operation_PUSH(RBX);
-  Operation_PUSH(RBY);
+  Operation_push(rax);
+  Operation_push(ray);
+  Operation_push(rbx);
+  Operation_push(rby);
 
   // On ajoute des trucs dans la pile pour forcer le passage à l'étape suivante
-  Operation_PUSH(RBX);
-  Operation_PUSH(RBY);
+  Operation_push(rbx);
+  Operation_push(rby);
 }
 
-void Rectangle_Degrade_0_7(void)
-// OPERATION_RECTANGLE_DEGRADE
-// Clic souris 0
+void Grad_rectangle_0_7(void)
+// OPERATION_GRAD_RECTANGLE
+// click souris 0
 // Taile pile : 5
 //
 // Souris effacée : non
 
 // On continue à attendre que l'utilisateur clique en gardant les coords à jour
 {
-    Operation_Taille_pile -= 2;
-    Print_coordonnees();
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_stack_size -= 2;
+    Print_coordinates();
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 }
 
-void Rectangle_Degrade_12_7(void)
-// Opération   : OPERATION_RECTANGLE_DEGRADE
+void Grad_rectangle_12_7(void)
+// Opération   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
@@ -4459,28 +4459,28 @@ void Rectangle_Degrade_12_7(void)
 
 // Si l'utilisateur utilise le mauvais bouton, on annule le tracé. Mais ça nous oblige à vider toute la pile pour vérifier :(
 {
-  short RAX,RBX,RAY,RBY,VAX,VAY,Clic;
+  short rax,rbx,ray,rby,vax,vay,click;
 
-  Operation_POP(&VAY);
-  Operation_POP(&VAX);
-  Operation_POP(&RAY);
-  Operation_POP(&RAX);
-  Operation_POP(&RBY);
-  Operation_POP(&RBX);
-  Operation_POP(&Clic);
+  Operation_pop(&vay);
+  Operation_pop(&vax);
+  Operation_pop(&ray);
+  Operation_pop(&rax);
+  Operation_pop(&rby);
+  Operation_pop(&rbx);
+  Operation_pop(&click);
 
 
-  if(Clic==Mouse_K)
+  if(click==Mouse_K)
   {
-      Operation_PUSH(Clic);
-      Operation_PUSH(RBX);
-      Operation_PUSH(RBY);
-      Operation_PUSH(RAX);
-      Operation_PUSH(RAY);
-      Operation_PUSH(VAX);
-      Operation_PUSH(VAY);
-      Operation_PUSH(Pinceau_X);
-      Operation_PUSH(Pinceau_Y);
+      Operation_push(click);
+      Operation_push(rbx);
+      Operation_push(rby);
+      Operation_push(rax);
+      Operation_push(ray);
+      Operation_push(vax);
+      Operation_push(vay);
+      Operation_push(Paintbrush_X);
+      Operation_push(Paintbrush_Y);
 
   }
   else
@@ -4488,78 +4488,78 @@ void Rectangle_Degrade_12_7(void)
       // Mauvais bouton > anulation de l'opération.
       // On a déjà vidé la pile, il reste à effacer le rectangle XOR
       short width, height;
-      short decalage_largeur = 0;
-      short decalage_hauteur = 0;
-      short decalage_gauche = 0;
-      short decalage_haut = 0;
+      short offset_width = 0;
+      short offset_height = 0;
+      short offset_left = 0;
+      short offset_top = 0;
 
-      width = abs(RBX-RAX);
-      height = abs(RBY-RAY);
+      width = abs(rbx-rax);
+      height = abs(rby-ray);
 
-      if (Max(RAX,RBX)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
-          decalage_largeur = Max(RAX,RBX) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+      if (Max(rax,rbx)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
+          offset_width = Max(rax,rbx) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
 
-      if (Max(RAY,RBY)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
-          decalage_hauteur = Max(RAY,RBY) - Min(Principal_Hauteur_image,Menu_Ordonnee);
+      if (Max(ray,rby)-Main_offset_Y > Min(Main_image_height,Menu_Y))
+          offset_height = Max(ray,rby) - Min(Main_image_height,Menu_Y);
 
       // Dessin dans la zone de dessin normale
-      Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width - decalage_largeur);
-      if(decalage_hauteur == 0)
-          Ligne_horizontale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Max(RAY,RBY)-1-Principal_Decalage_Y,width - decalage_largeur);
+      Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width - offset_width);
+      if(offset_height == 0)
+          Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Max(ray,rby)-1-Main_offset_Y,width - offset_width);
 
-      Ligne_verticale_XOR(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
-      if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-          Ligne_verticale_XOR(Max(RAX,RBX)-1-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,height-decalage_hauteur);
+      Vertical_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
+      if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+          Vertical_XOR_line(Max(rax,rbx)-1-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
 
-      UpdateRect(Min(RAX,RBX)-Principal_Decalage_X,Min(RAY,RBY)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
+      Update_rect(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
 
       // Dessin dans la zone zoomée
-      if(Loupe_Mode && Min(RAX,RBX)<Limite_visible_Droite_Zoom && Max(RAX,RBX)>Limite_Gauche_Zoom && Min(RAY,RBY)<Limite_visible_Bas_Zoom && Max(RAY,RBY)>Limite_Haut_Zoom )
+      if(Main_magnifier_mode && Min(rax,rbx)<Limit_visible_right_zoom && Max(rax,rbx)>Limit_left_zoom && Min(ray,rby)<Limit_visible_bottom_zoom && Max(ray,rby)>Limit_top_zoom )
       {
-          decalage_largeur = 0;
-          decalage_hauteur=0;
+          offset_width = 0;
+          offset_height=0;
 
-          if(Min(RAX,RBX)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
+          if(Min(rax,rbx)<Limit_left_zoom) // On dépasse du zoom à gauche
           {
-              decalage_largeur += Limite_Gauche_Zoom - Min(RAX,RBX);
-              decalage_gauche = Limite_Gauche_Zoom;
+              offset_width += Limit_left_zoom - Min(rax,rbx);
+              offset_left = Limit_left_zoom;
           }
 
-          if(Max(RAX,RBX)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
-              decalage_largeur += Max(RAX,RBX) - Limite_visible_Droite_Zoom;
+          if(Max(rax,rbx)>Limit_visible_right_zoom) // On dépasse du zoom à droite
+              offset_width += Max(rax,rbx) - Limit_visible_right_zoom;
 
-          if(Min(RAY,RBY)<Limite_Haut_Zoom) // On dépasse du zoom en haut
+          if(Min(ray,rby)<Limit_top_zoom) // On dépasse du zoom en haut
           {
-              decalage_hauteur += Limite_Haut_Zoom - Min(RAY,RBY);
-              decalage_haut = Limite_Haut_Zoom;
+              offset_height += Limit_top_zoom - Min(ray,rby);
+              offset_top = Limit_top_zoom;
           }
 
-          if(Max(RAY,RBY)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
-              decalage_hauteur += Max(RAY,RBY) - Limite_visible_Bas_Zoom;
+          if(Max(ray,rby)>Limit_visible_bottom_zoom) // On dépasse du zoom en bas
+              offset_height += Max(ray,rby) - Limit_visible_bottom_zoom;
 
-          if(width > decalage_largeur)
+          if(width > offset_width)
           {
-              if(decalage_haut==0) // La ligne du haut est visible
-                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Min(RAY,RBY),width-decalage_largeur);
+              if(offset_top==0) // La ligne du haut est visible
+                  Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Min(ray,rby),width-offset_width);
 
-              if(Max(RAY,RBY)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-                  Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(RAX,RBX),Max(RAY,RBY),width-decalage_largeur);
+              if(Max(ray,rby)<Limit_visible_bottom_zoom) // La  ligne du bas est visible
+                  Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Max(ray,rby),width-offset_width);
           }
 
-          if(height>decalage_hauteur)
+          if(height>offset_height)
           {
-              if(decalage_gauche==0) // La ligne de gauche est visible
-                  Ligne_verticale_XOR_Zoom(Min(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
+              if(offset_left==0) // La ligne de gauche est visible
+                  Vertical_XOR_line_zoom(Min(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
 
-              if(Max(RAX,RBX)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-                  Ligne_verticale_XOR_Zoom(Max(RAX,RBX),decalage_haut>0?decalage_haut:Min(RAY,RBY),height-decalage_hauteur);
+              if(Max(rax,rbx)<Limit_visible_right_zoom) // La ligne de droite est visible
+                  Vertical_XOR_line_zoom(Max(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
           }
       }
   }
 }
 
-void Rectangle_Degrade_12_9(void)
-    // Opération   : OPERATION_RECTANGLE_DEGRADE
+void Grad_rectangle_12_9(void)
+    // Opération   : OPERATION_GRAD_RECTANGLE
     // Click Souris: 1
     // Taille_Pile : 5
     //
@@ -4567,38 +4567,38 @@ void Rectangle_Degrade_12_9(void)
 
     // Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
 {
-    short Debut_X;
-    short Debut_Y;
-    short Fin_X;
-    short Fin_Y;
+    short start_x;
+    short start_y;
+    short end_x;
+    short end_y;
 
-    Operation_POP(&Fin_Y);
-    Operation_POP(&Fin_X);
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
+    Operation_pop(&end_y);
+    Operation_pop(&end_x);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
 
-    if ((Pinceau_X!=Fin_X) || (Pinceau_Y!=Fin_Y))
+    if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
     {
         // On corrige les coordonnées de la ligne si la touche shift est appuyée...
         if(SDL_GetModState() & KMOD_SHIFT)
-            Rectifier_coordonnees_a_45_degres(Debut_X,Debut_Y,&Pinceau_X,&Pinceau_Y);
+            Clamp_coordinates_45_degrees(start_x,start_y,&Paintbrush_X,&Paintbrush_Y);
 
-        Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+        Display_coords_rel_or_abs(start_x,start_y);
 
-        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-        Tracer_ligne_Preview_xor(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,0);
+        Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
+        Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
     }
 
 
-    Operation_PUSH(Debut_X);
-    Operation_PUSH(Debut_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(start_x);
+    Operation_push(start_y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 }
 
-void Rectangle_Degrade_0_9(void)
-    // Opération   : OPERATION_RECTANGLE_DEGRADE
+void Grad_rectangle_0_9(void)
+    // Opération   : OPERATION_GRAD_RECTANGLE
     // Click Souris: 0
     // Taille_Pile : 9
     //
@@ -4606,313 +4606,313 @@ void Rectangle_Degrade_0_9(void)
 
     // Ouf, fini ! on dessine enfin le rectangle avec son dégradé
 {
-    short Rect_Debut_X;
-    short Rect_Debut_Y;
-    short Rect_Fin_X;
-    short Rect_Fin_Y;
+    short rect_start_x;
+    short rect_start_y;
+    short rect_end_x;
+    short rect_end_y;
 
-    short Vecteur_Debut_X;
-    short Vecteur_Debut_Y;
-    short Vecteur_Fin_X;
-    short Vecteur_Fin_Y;
+    short vector_start_x;
+    short vector_start_y;
+    short vector_end_x;
+    short vector_end_y;
 
-    Operation_POP(&Vecteur_Fin_Y);
-    Operation_POP(&Vecteur_Fin_X);
-    Operation_POP(&Vecteur_Debut_Y);
-    Operation_POP(&Vecteur_Debut_X);
-    Operation_POP(&Rect_Fin_Y);
-    Operation_POP(&Rect_Fin_X);
-    Operation_POP(&Rect_Debut_Y);
-    Operation_POP(&Rect_Debut_X);
-    Operation_Taille_pile--;
+    Operation_pop(&vector_end_y);
+    Operation_pop(&vector_end_x);
+    Operation_pop(&vector_start_y);
+    Operation_pop(&vector_start_x);
+    Operation_pop(&rect_end_y);
+    Operation_pop(&rect_end_x);
+    Operation_pop(&rect_start_y);
+    Operation_pop(&rect_start_x);
+    Operation_stack_size--;
 
-    Effacer_curseur();
+    Hide_cursor();
     // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
-    Effacer_ligne_Preview(Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
+    Hide_line_preview(vector_start_x,vector_start_y,vector_end_x,vector_end_y);
 
     // Et enfin on trace le rectangle avec le dégradé dedans !
-    if (Vecteur_Fin_X==Vecteur_Debut_X && Vecteur_Fin_Y==Vecteur_Debut_Y)
+    if (vector_end_x==vector_start_x && vector_end_y==vector_start_y)
     {
         // Vecteur nul > pas de rectangle tracé
         // Du coup on doit effacer la preview xor ...
         short width, height;
-        short decalage_largeur = 0;
-        short decalage_hauteur = 0;
-        short decalage_gauche = 0;
-        short decalage_haut = 0;
+        short offset_width = 0;
+        short offset_height = 0;
+        short offset_left = 0;
+        short offset_top = 0;
 
-        width = abs(Rect_Fin_X-Rect_Debut_X);
-        height = abs(Rect_Fin_Y-Rect_Debut_Y);
+        width = abs(rect_end_x-rect_start_x);
+        height = abs(rect_end_y-rect_start_y);
 
-        if (Max(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X > Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran)) // Tous les clippings à gérer sont là
-            decalage_largeur = Max(Rect_Debut_X,Rect_Fin_X) - Min(Principal_Largeur_image,Loupe_Mode?Principal_Split:Largeur_ecran);
+        if (Max(rect_start_x,rect_end_x)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
+            offset_width = Max(rect_start_x,rect_end_x) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
 
-        if (Max(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y > Min(Principal_Hauteur_image,Menu_Ordonnee))
-            decalage_hauteur = Max(Rect_Debut_Y,Rect_Fin_Y) - Min(Principal_Hauteur_image,Menu_Ordonnee);
+        if (Max(rect_start_y,rect_end_y)-Main_offset_Y > Min(Main_image_height,Menu_Y))
+            offset_height = Max(rect_start_y,rect_end_y) - Min(Main_image_height,Menu_Y);
 
         // Dessin dans la zone de dessin normale
-        Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,width - decalage_largeur);
-        if(decalage_hauteur == 0)
-            Ligne_horizontale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Max(Rect_Debut_Y,Rect_Fin_Y)-1-Principal_Decalage_Y,width - decalage_largeur);
+        Horizontal_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,width - offset_width);
+        if(offset_height == 0)
+            Horizontal_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Max(rect_start_y,rect_end_y)-1-Main_offset_Y,width - offset_width);
 
-        Ligne_verticale_XOR(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,height-decalage_hauteur);
-        if (decalage_largeur == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-            Ligne_verticale_XOR(Max(Rect_Debut_X,Rect_Fin_X)-1-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,height-decalage_hauteur);
+        Vertical_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,height-offset_height);
+        if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
+            Vertical_XOR_line(Max(rect_start_x,rect_end_x)-1-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,height-offset_height);
 
-        UpdateRect(Min(Rect_Debut_X,Rect_Fin_X)-Principal_Decalage_X,Min(Rect_Debut_Y,Rect_Fin_Y)-Principal_Decalage_Y,width+1-decalage_largeur,height+1-decalage_hauteur);
+        Update_rect(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
 
         // Dessin dans la zone zoomée
-        if(Loupe_Mode && Min(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom && Max(Rect_Debut_X,Rect_Fin_X)>Limite_Gauche_Zoom && Min(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom && Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_Haut_Zoom )
+        if(Main_magnifier_mode && Min(rect_start_x,rect_end_x)<Limit_visible_right_zoom && Max(rect_start_x,rect_end_x)>Limit_left_zoom && Min(rect_start_y,rect_end_y)<Limit_visible_bottom_zoom && Max(rect_start_y,rect_end_y)>Limit_top_zoom )
         {
-            decalage_largeur = 0;
-            decalage_hauteur=0;
+            offset_width = 0;
+            offset_height=0;
 
-            if(Min(Rect_Debut_X,Rect_Fin_X)<Limite_Gauche_Zoom) // On dépasse du zoom à gauche
+            if(Min(rect_start_x,rect_end_x)<Limit_left_zoom) // On dépasse du zoom à gauche
             {
-                decalage_largeur += Limite_Gauche_Zoom - Min(Rect_Debut_X,Rect_Fin_X);
-                decalage_gauche = Limite_Gauche_Zoom;
+                offset_width += Limit_left_zoom - Min(rect_start_x,rect_end_x);
+                offset_left = Limit_left_zoom;
             }
 
-            if(Max(Rect_Debut_X,Rect_Fin_X)>Limite_visible_Droite_Zoom) // On dépasse du zoom à droite
-                decalage_largeur += Max(Rect_Debut_X,Rect_Fin_X) - Limite_visible_Droite_Zoom;
+            if(Max(rect_start_x,rect_end_x)>Limit_visible_right_zoom) // On dépasse du zoom à droite
+                offset_width += Max(rect_start_x,rect_end_x) - Limit_visible_right_zoom;
 
-            if(Min(Rect_Debut_Y,Rect_Fin_Y)<Limite_Haut_Zoom) // On dépasse du zoom en haut
+            if(Min(rect_start_y,rect_end_y)<Limit_top_zoom) // On dépasse du zoom en haut
             {
-                decalage_hauteur += Limite_Haut_Zoom - Min(Rect_Debut_Y,Rect_Fin_Y);
-                decalage_haut = Limite_Haut_Zoom;
+                offset_height += Limit_top_zoom - Min(rect_start_y,rect_end_y);
+                offset_top = Limit_top_zoom;
             }
 
-            if(Max(Rect_Debut_Y,Rect_Fin_Y)>Limite_visible_Bas_Zoom) // On dépasse du zoom en bas
-                decalage_hauteur += Max(Rect_Debut_Y,Rect_Fin_Y) - Limite_visible_Bas_Zoom;
+            if(Max(rect_start_y,rect_end_y)>Limit_visible_bottom_zoom) // On dépasse du zoom en bas
+                offset_height += Max(rect_start_y,rect_end_y) - Limit_visible_bottom_zoom;
 
-            if(width > decalage_largeur)
+            if(width > offset_width)
             {
-                if(decalage_haut==0) // La ligne du haut est visible
-                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Min(Rect_Debut_Y,Rect_Fin_Y),width-decalage_largeur);
+                if(offset_top==0) // La ligne du haut est visible
+                    Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rect_start_x,rect_end_x),Min(rect_start_y,rect_end_y),width-offset_width);
 
-                if(Max(Rect_Debut_Y,Rect_Fin_Y)<Limite_visible_Bas_Zoom) // La  ligne du bas est visible
-                    Ligne_horizontale_XOR_Zoom(decalage_gauche>0?decalage_gauche:Min(Rect_Debut_X,Rect_Fin_X),Max(Rect_Debut_Y,Rect_Fin_Y),width-decalage_largeur);
+                if(Max(rect_start_y,rect_end_y)<Limit_visible_bottom_zoom) // La  ligne du bas est visible
+                    Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rect_start_x,rect_end_x),Max(rect_start_y,rect_end_y),width-offset_width);
             }
 
-            if(height>decalage_hauteur)
+            if(height>offset_height)
             {
-                if(decalage_gauche==0) // La ligne de gauche est visible
-                    Ligne_verticale_XOR_Zoom(Min(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),height-decalage_hauteur);
+                if(offset_left==0) // La ligne de gauche est visible
+                    Vertical_XOR_line_zoom(Min(rect_start_x,rect_end_x),offset_top>0?offset_top:Min(rect_start_y,rect_end_y),height-offset_height);
 
-                if(Max(Rect_Debut_X,Rect_Fin_X)<Limite_visible_Droite_Zoom) // La ligne de droite est visible
-                    Ligne_verticale_XOR_Zoom(Max(Rect_Debut_X,Rect_Fin_X),decalage_haut>0?decalage_haut:Min(Rect_Debut_Y,Rect_Fin_Y),height-decalage_hauteur);
+                if(Max(rect_start_x,rect_end_x)<Limit_visible_right_zoom) // La ligne de droite est visible
+                    Vertical_XOR_line_zoom(Max(rect_start_x,rect_end_x),offset_top>0?offset_top:Min(rect_start_y,rect_end_y),height-offset_height);
             }
         }
     }
     else
-        Tracer_rectangle_degrade(Rect_Debut_X,Rect_Debut_Y,Rect_Fin_X,Rect_Fin_Y,Vecteur_Debut_X,Vecteur_Debut_Y,Vecteur_Fin_X,Vecteur_Fin_Y);
+        Draw_grad_rectangle(rect_start_x,rect_start_y,rect_end_x,rect_end_y,vector_start_x,vector_start_y,vector_end_x,vector_end_y);
 
-    Afficher_curseur();
-    Attendre_fin_de_click();
+    Display_cursor();
+    Wait_end_of_click();
 
-    if ((Config.Coords_rel) && (Menu_visible))
+    if ((Config.Coords_rel) && (Menu_is_visible))
     {
-        Print_dans_menu("X:       Y:             ",0);
-        Print_coordonnees();
+        Print_in_menu("X:       Y:             ",0);
+        Print_coordinates();
     }
 }
-/////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
+/////////////////////////////////////////////////// OPERATION_CENTERED_LINES
 
 
-void Lignes_centrees_12_0(void)
-    // Opération   : OPERATION_LIGNES_CENTREES
+void Centered_lines_12_0(void)
+    // Opération   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 0
     //
     //  Souris effacée: Oui
 {
-    Initialiser_debut_operation();
+    Init_start_operation();
     Backup();
-    Shade_Table=(Mouse_K==A_GAUCHE)?Shade_Table_gauche:Shade_Table_droite;
+    Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
 
-    if ((Config.Coords_rel) && (Menu_visible))
-        Print_dans_menu("X:±   0   Y:±   0",0);
+    if ((Config.Coords_rel) && (Menu_is_visible))
+        Print_in_menu("X:±   0   Y:±   0",0);
 
-    Operation_PUSH(Mouse_K);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(Mouse_K);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 }
 
 
-void Lignes_centrees_12_3(void)
-    // Opération   : OPERATION_LIGNES_CENTREES
+void Centered_lines_12_3(void)
+    // Opération   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 3
     //
     // Souris effacée: Non
 {
-    short Debut_X;
-    short Debut_Y;
+    short start_x;
+    short start_y;
 
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 }
 
 
-void Lignes_centrees_0_3(void)
-    // Opération   : OPERATION_LIGNES_CENTREES
+void Centered_lines_0_3(void)
+    // Opération   : OPERATION_CENTERED_LINES
     // Click Souris: 0
     // Taille_Pile : 3
     //
     // Souris effacée: Oui
 {
-    short Debut_X;
-    short Debut_Y;
-    short Bouton;
-    short Couleur;
+    short start_x;
+    short start_y;
+    short Button;
+    short color;
 
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Operation_POP(&Bouton);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Operation_pop(&Button);
 
-    Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+    color=(Button==LEFT_SIDE)?Fore_color:Back_color;
 
-    Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-    Pinceau_Forme_avant_operation=Pinceau_Forme;
-    Pinceau_Forme=FORME_PINCEAU_POINT;
+    Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
+    Paintbrush_shape_before_operation=Paintbrush_shape;
+    Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
-    Operation_PUSH(Bouton);
-    Operation_PUSH(Pinceau_X); // Nouveau début X
-    Operation_PUSH(Pinceau_Y); // Nouveau début Y
-    Operation_PUSH(Pinceau_X); // Nouvelle dernière fin X
-    Operation_PUSH(Pinceau_Y); // Nouvelle dernière fin Y
-    Operation_PUSH(Pinceau_X); // Nouvelle dernière position X
-    Operation_PUSH(Pinceau_Y); // Nouvelle dernière position Y
+    Operation_push(Button);
+    Operation_push(Paintbrush_X); // Nouveau début X
+    Operation_push(Paintbrush_Y); // Nouveau début Y
+    Operation_push(Paintbrush_X); // Nouvelle dernière fin X
+    Operation_push(Paintbrush_Y); // Nouvelle dernière fin Y
+    Operation_push(Paintbrush_X); // Nouvelle dernière position X
+    Operation_push(Paintbrush_Y); // Nouvelle dernière position Y
 }
 
 
-void Lignes_centrees_12_7(void)
-    // Opération   : OPERATION_LIGNES_CENTREES
+void Centered_lines_12_7(void)
+    // Opération   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 7
     //
     // Souris effacée: Non
 {
-    short Bouton;
-    short Debut_X;
-    short Debut_Y;
-    short Fin_X;
-    short Fin_Y;
-    short Dernier_X;
-    short Dernier_Y;
-    short Couleur;
+    short Button;
+    short start_x;
+    short start_y;
+    short end_x;
+    short end_y;
+    short last_x;
+    short last_y;
+    short color;
 
-    Operation_POP(&Dernier_Y);
-    Operation_POP(&Dernier_X);
-    Operation_POP(&Fin_Y);
-    Operation_POP(&Fin_X);
-    Operation_POP(&Debut_Y);
-    Operation_POP(&Debut_X);
-    Operation_POP(&Bouton);
+    Operation_pop(&last_y);
+    Operation_pop(&last_x);
+    Operation_pop(&end_y);
+    Operation_pop(&end_x);
+    Operation_pop(&start_y);
+    Operation_pop(&start_x);
+    Operation_pop(&Button);
 
-    if (Mouse_K==Bouton)
+    if (Mouse_K==Button)
     {
-        if ( (Fin_X!=Pinceau_X) || (Fin_Y!=Pinceau_Y) ||
-                (Dernier_X!=Pinceau_X) || (Dernier_Y!=Pinceau_Y) )
+        if ( (end_x!=Paintbrush_X) || (end_y!=Paintbrush_Y) ||
+                (last_x!=Paintbrush_X) || (last_y!=Paintbrush_Y) )
         {
-            Effacer_curseur();
+            Hide_cursor();
 
-            Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+            color=(Button==LEFT_SIDE)?Fore_color:Back_color;
 
-            Pinceau_Forme=Pinceau_Forme_avant_operation;
+            Paintbrush_shape=Paintbrush_shape_before_operation;
 
-            Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-            Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+            Pixel_figure_preview_auto  (start_x,start_y);
+            Hide_line_preview (start_x,start_y,last_x,last_y);
 
-            Smear_Debut=1;
-            Afficher_pinceau      (Debut_X,Debut_Y,Couleur,0);
-            Tracer_ligne_Definitif(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+            Smear_start=1;
+            Display_paintbrush      (start_x,start_y,color,0);
+            Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-            Pinceau_Forme=FORME_PINCEAU_POINT;
-            Pixel_figure_Preview(Pinceau_X,Pinceau_Y,Couleur);
-            Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+            Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
+            Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
+            Draw_line_preview(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-            Afficher_curseur();
+            Display_cursor();
         }
 
-        Operation_PUSH(Bouton);
-        Operation_PUSH(Debut_X);
-        Operation_PUSH(Debut_Y);
-        Operation_PUSH(Pinceau_X);
-        Operation_PUSH(Pinceau_Y);
-        Operation_PUSH(Pinceau_X);
-        Operation_PUSH(Pinceau_Y);
+        Operation_push(Button);
+        Operation_push(start_x);
+        Operation_push(start_y);
+        Operation_push(Paintbrush_X);
+        Operation_push(Paintbrush_Y);
+        Operation_push(Paintbrush_X);
+        Operation_push(Paintbrush_Y);
     }
     else
     {
-        Effacer_curseur();
+        Hide_cursor();
 
-        Pinceau_Forme=Pinceau_Forme_avant_operation;
+        Paintbrush_shape=Paintbrush_shape_before_operation;
 
-        Pixel_figure_Preview_auto  (Debut_X,Debut_Y);
-        Effacer_ligne_Preview (Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+        Pixel_figure_preview_auto  (start_x,start_y);
+        Hide_line_preview (start_x,start_y,last_x,last_y);
 
-        if ( (Config.Coords_rel) && (Menu_visible) )
+        if ( (Config.Coords_rel) && (Menu_is_visible) )
         {
-            Print_dans_menu("X:       Y:             ",0);
-            Print_coordonnees();
+            Print_in_menu("X:       Y:             ",0);
+            Print_coordinates();
         }
 
-        Afficher_curseur();
-        Attendre_fin_de_click();
+        Display_cursor();
+        Wait_end_of_click();
     }
 }
 
 
-void Lignes_centrees_0_7(void)
-    // Opération   : OPERATION_LIGNES_CENTREES
+void Centered_lines_0_7(void)
+    // Opération   : OPERATION_CENTERED_LINES
     // Click Souris: 0
     // Taille_Pile : 7
     //
     // Souris effacée: Non
 {
-    short Bouton;
-    short Debut_X;
-    short Debut_Y;
-    short Fin_X;
-    short Fin_Y;
-    short Dernier_X;
-    short Dernier_Y;
-    short Couleur;
+    short Button;
+    short start_x;
+    short start_y;
+    short end_x;
+    short end_y;
+    short last_x;
+    short last_y;
+    short color;
 
-    Operation_POP(&Dernier_Y);
-    Operation_POP(&Dernier_X);
-    Operation_POP(&Fin_Y);
-    Operation_POP(&Fin_X);
+    Operation_pop(&last_y);
+    Operation_pop(&last_x);
+    Operation_pop(&end_y);
+    Operation_pop(&end_x);
 
-    if ((Pinceau_X!=Dernier_X) || (Pinceau_Y!=Dernier_Y))
+    if ((Paintbrush_X!=last_x) || (Paintbrush_Y!=last_y))
     {
-        Effacer_curseur();
-        Operation_POP(&Debut_Y);
-        Operation_POP(&Debut_X);
-        Operation_POP(&Bouton);
+        Hide_cursor();
+        Operation_pop(&start_y);
+        Operation_pop(&start_x);
+        Operation_pop(&Button);
 
-        Couleur=(Bouton==A_GAUCHE)?Fore_color:Back_color;
+        color=(Button==LEFT_SIDE)?Fore_color:Back_color;
 
-        Aff_coords_rel_ou_abs(Debut_X,Debut_Y);
+        Display_coords_rel_or_abs(start_x,start_y);
 
-        Effacer_ligne_Preview(Debut_X,Debut_Y,Dernier_X,Dernier_Y);
+        Hide_line_preview(start_x,start_y,last_x,last_y);
 
-        Pixel_figure_Preview(Debut_X,Debut_Y,Couleur);
-        Tracer_ligne_Preview(Debut_X,Debut_Y,Pinceau_X,Pinceau_Y,Couleur);
+        Pixel_figure_preview(start_x,start_y,color);
+        Draw_line_preview(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
-        Operation_PUSH(Bouton);
-        Operation_PUSH(Debut_X);
-        Operation_PUSH(Debut_Y);
-        Afficher_curseur();
+        Operation_push(Button);
+        Operation_push(start_x);
+        Operation_push(start_y);
+        Display_cursor();
     }
 
-    Operation_PUSH(Fin_X);
-    Operation_PUSH(Fin_Y);
-    Operation_PUSH(Pinceau_X);
-    Operation_PUSH(Pinceau_Y);
+    Operation_push(end_x);
+    Operation_push(end_y);
+    Operation_push(Paintbrush_X);
+    Operation_push(Paintbrush_Y);
 }
 
 

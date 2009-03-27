@@ -37,25 +37,25 @@
 #include "palette.h"
 #include "input.h"
 
-word Palette_Compter_nb_couleurs_utilisees(dword* usage)
+word Count_used_colors(dword* usage)
 {
-  int Nombre_De_Pixels=0;
-  Uint8* Pixel_Courant=Principal_Ecran;
-  Uint8 Couleur;
-  word Nombre_Couleurs=0;
+  int nb_pixels=0;
+  Uint8* Pixel_Courant=Main_screen;
+  Uint8 color;
+  word nb_colors=0;
   int i;
 
   for (i=0;i<256;i++) usage[i]=0;
 
   //Calcul du nombre de pixels dans l'image
-  Nombre_De_Pixels=Principal_Hauteur_image*Principal_Largeur_image;
+  nb_pixels=Main_image_height*Main_image_width;
 
   // On parcourt l'écran courant pour compter les utilisations des couleurs
-  for(i=0;i<Nombre_De_Pixels;i++)
+  for(i=0;i<nb_pixels;i++)
   {
-    Couleur=*Pixel_Courant; //on lit la couleur dans l'écran
+    color=*Pixel_Courant; //on lit la couleur dans l'écran
 
-    usage[Couleur]++; //Un point de plus pour cette couleur
+    usage[color]++; //Un point de plus pour cette couleur
 
     // On passe au pixel suivant
     Pixel_Courant++;
@@ -65,10 +65,10 @@ word Palette_Compter_nb_couleurs_utilisees(dword* usage)
   for(i=0;i<256;i++)
   {
     if (usage[i]!=0)
-        Nombre_Couleurs++;
+        nb_colors++;
   }
 
-  return Nombre_Couleurs;
+  return nb_colors;
 }
 
 void Set_palette(T_Palette palette)
@@ -77,68 +77,68 @@ void Set_palette(T_Palette palette)
   SDL_Color PaletteSDL[256];
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=(palette[i].R=Palette_Scale_Component(palette[i].R));
-    PaletteSDL[i].g=(palette[i].G=Palette_Scale_Component(palette[i].G));
-    PaletteSDL[i].b=(palette[i].B=Palette_Scale_Component(palette[i].B));
+    PaletteSDL[i].r=(palette[i].R=Round_palette_component(palette[i].R));
+    PaletteSDL[i].g=(palette[i].G=Round_palette_component(palette[i].G));
+    PaletteSDL[i].b=(palette[i].B=Round_palette_component(palette[i].B));
   }
-  SDL_SetPalette(Ecran_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+  SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
 }
 
-void Set_color(byte Couleur, byte Rouge, byte Vert, byte Bleu)
+void Set_color(byte color, byte red, byte green, byte blue)
 {
   SDL_Color comp;
-  comp.r=Rouge;
-  comp.g=Vert;
-  comp.b=Bleu;
-  SDL_SetPalette(Ecran_SDL, SDL_LOGPAL, &comp, Couleur, 1);
+  comp.r=red;
+  comp.g=green;
+  comp.b=blue;
+  SDL_SetPalette(Screen_SDL, SDL_LOGPAL, &comp, color, 1);
 }
 
-void Attendre_fin_de_click(void)
+void Wait_end_of_click(void)
 {
     // On désactive tous les raccourcis clavier
 
     while(Mouse_K) if(!Get_input()) Wait_VBL();
 }
 
-void Effacer_image_courante_Stencil(byte Couleur, byte * Pochoir)
+void Hide_current_image_with_stencil(byte color, byte * stencil)
 //Effacer l'image courante avec une certaine couleur en mode Stencil
 {
-  int Nombre_De_Pixels=0; //ECX
-  //al=Couleur
-  //edi=Ecran
-  byte* Pixel_Courant=Ecran; //dl
+  int nb_pixels=0; //ECX
+  //al=color
+  //edi=Screen
+  byte* Pixel_Courant=Screen; //dl
   int i;
 
-  Nombre_De_Pixels=Principal_Hauteur_image*Principal_Largeur_image;
+  nb_pixels=Main_image_height*Main_image_width;
 
-  for(i=0;i<Nombre_De_Pixels;i++)
+  for(i=0;i<nb_pixels;i++)
   {
-    if (Pochoir[*Pixel_Courant]==0)
-      *Pixel_Courant=Couleur;
+    if (stencil[*Pixel_Courant]==0)
+      *Pixel_Courant=color;
     Pixel_Courant++;
   }
 }
 
-void Effacer_image_courante(byte Couleur)
+void Hide_current_image(byte color)
 // Effacer l'image courante avec une certaine couleur
 {
   memset(
-    Principal_Ecran ,
-    Couleur ,
-    Principal_Largeur_image * Principal_Hauteur_image
+    Main_screen ,
+    color ,
+    Main_image_width * Main_image_height
   );
 }
 
-void Sensibilite_souris(__attribute__((unused)) word x,__attribute__((unused)) word y)
+void Mouse_sensitivity(__attribute__((unused)) word x,__attribute__((unused)) word y)
 {
 
 }
 
-void Initialiser_chrono(dword Delai)
+void Init_chrono(dword delay)
 // Démarrer le chrono
 {
-  Chrono_delay = Delai;
-  Chrono_cmp = SDL_GetTicks()/55;
+  Timer_delay = delay;
+  Timer_start = SDL_GetTicks()/55;
   return;
 }
 
@@ -147,87 +147,87 @@ void Wait_VBL(void)
 // SDL ne sait pas faire, alors on simule un timer qui a une fréquence de 100Hz,
 // sans charger inutilement le CPU par du busy-wait (on n'est pas à 10ms près)
 {
-  const int Delai = 10;
+  const int delay = 10;
 
   Uint32 debut;
   debut = SDL_GetTicks();
-  // Première attente : le complément de "Delai" millisecondes
-  SDL_Delay(Delai - (debut % Delai));
+  // Première attente : le complément de "delay" millisecondes
+  SDL_Delay(delay - (debut % delay));
   // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
   // (Remarque, Windows arrondit généralement aux 10ms supérieures)
-  while (SDL_GetTicks() / Delai <= debut / Delai)
+  while (SDL_GetTicks() / delay <= debut / delay)
   {
     SDL_Delay(1);
   }
 }
 
-void Pixel_dans_brosse             (word x,word y,byte Couleur)
+void Pixel_in_brush             (word x,word y,byte color)
 {
-  *(Brosse+y*Brosse_Largeur+x)=Couleur;
+  *(Brush+y*Brush_width+x)=color;
 }
 
-byte Lit_pixel_dans_brosse         (word x,word y)
+byte Read_pixel_from_brush         (word x,word y)
 {
-  return *(Brosse + y * Brosse_Largeur + x);
+  return *(Brush + y * Brush_width + x);
 }
 
 
-byte Lit_pixel_dans_ecran_courant  (word x,word y)
+byte Read_pixel_from_current_screen  (word x,word y)
 {
-        return *(Principal_Ecran+y*Principal_Largeur_image+x);
+        return *(Main_screen+y*Main_image_width+x);
 }
 
-void Pixel_dans_ecran_courant      (word x,word y,byte Couleur)
+void Pixel_in_current_screen      (word x,word y,byte color)
 {
-    byte* dest=(x+y*Principal_Largeur_image+Principal_Ecran);
-    *dest=Couleur;
+    byte* dest=(x+y*Main_image_width+Main_screen);
+    *dest=color;
 }
 
-void Remplacer_une_couleur(byte Ancienne_couleur, byte Nouvelle_couleur)
+void Replace_a_color(byte old_color, byte New_color)
 {
   byte* edi;
 
   // pour chaque pixel :
-  for(edi = Principal_Ecran;edi < Principal_Ecran + Principal_Hauteur_image * Principal_Largeur_image;edi++)
-    if (*edi == Ancienne_couleur)
-      *edi = Nouvelle_couleur;
-  UpdateRect(0,0,0,0); // On peut TOUT a jour
+  for(edi = Main_screen;edi < Main_screen + Main_image_height * Main_image_width;edi++)
+    if (*edi == old_color)
+      *edi = New_color;
+  Update_rect(0,0,0,0); // On peut TOUT a jour
   // C'est pas un problème car il n'y a pas de preview
 }
 
-void Ellipse_Calculer_limites(short Rayon_horizontal,short Rayon_vertical)
+void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
 {
-  Ellipse_Rayon_horizontal_au_carre =
-    Rayon_horizontal * Rayon_horizontal;
-  Ellipse_Rayon_vertical_au_carre =
-    Rayon_vertical * Rayon_vertical;
-  Ellipse_Limite = Ellipse_Rayon_horizontal_au_carre * Ellipse_Rayon_vertical_au_carre;
+  Ellipse_horizontal_radius_squared =
+    horizontal_radius * horizontal_radius;
+  Ellipse_vertical_radius_squared =
+    vertical_radius * vertical_radius;
+  Ellipse_limit = Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
 }
 
-byte Pixel_dans_ellipse(void)
+byte Pixel_in_ellipse(void)
 {
-  qword ediesi = Ellipse_Curseur_X * Ellipse_Curseur_X * Ellipse_Rayon_vertical_au_carre +
-        Ellipse_Curseur_Y * Ellipse_Curseur_Y * Ellipse_Rayon_horizontal_au_carre;
-  if((ediesi) <= Ellipse_Limite) return 255;
+  qword ediesi = Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
+        Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
+  if((ediesi) <= Ellipse_limit) return 255;
 
         return 0;
 }
 
-byte Pixel_dans_cercle(void)
+byte Pixel_in_circle(void)
 {
-        if(Cercle_Curseur_X * Cercle_Curseur_X +
-            Cercle_Curseur_Y * Cercle_Curseur_Y <= Cercle_Limite)
+        if(Circle_cursor_X * Circle_cursor_X +
+            Circle_cursor_Y * Circle_cursor_Y <= Circle_limit)
                 return 255;
         return 0;
 }
 
-void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_Pos_Y,word width,word height,word Largeur_source,byte * dest,word D_Pos_X,word D_Pos_Y,word Largeur_destination)
+void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,word width,word height,word source_width,byte * dest,word dest_x,word dest_y,word destination_width)
 {
-        // ESI = adresse de la source en (S_Pox_X,S_Pos_Y)
-        byte* esi = Source + S_Pos_Y * Largeur_source + S_Pos_X;
+        // ESI = adresse de la source en (S_Pox_X,source_y)
+        byte* esi = source + source_y * source_width + source_x;
 
-        // EDI = adresse de la destination (D_Pos_X,D_Pos_Y)
-        byte* edi = dest + D_Pos_Y * Largeur_destination + D_Pos_X;
+        // EDI = adresse de la destination (dest_x,dest_y)
+        byte* edi = dest + dest_y * destination_width + dest_x;
 
         int line;
 
@@ -237,40 +237,40 @@ void Copier_une_partie_d_image_dans_une_autre(byte * Source,word S_Pos_X,word S_
                 memcpy(edi,esi,width);
 
                 // Passe à la ligne suivante
-                esi+=Largeur_source;
-                edi+=Largeur_destination;
+                esi+=source_width;
+                edi+=destination_width;
         }
 
 
 }
 
-byte Lit_pixel_dans_ecran_brouillon(word x,word y)
+byte Read_pixel_from_spare_screen(word x,word y)
 {
-  return *(Brouillon_Ecran+y*Brouillon_Largeur_image+x);
+  return *(Spare_screen+y*Spare_image_width+x);
 }
 
-void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
+void Rotate_90_deg_lowlevel(byte * source,byte * dest)
 {
   byte* esi;
   byte* edi;
   word dx,bx,cx;
 
   //ESI = Point haut droit de la source
-  byte* Debut_de_colonne = Source + Brosse_Largeur - 1;
+  byte* Debut_de_colonne = source + Brush_width - 1;
   edi = dest;
 
   // Largeur de la source = hauteur de la destination
-  dx = bx = Brosse_Largeur;
+  dx = bx = Brush_width;
 
   // Pour chaque ligne
-  for(dx = Brosse_Largeur;dx>0;dx--)
+  for(dx = Brush_width;dx>0;dx--)
   {
     esi = Debut_de_colonne;
     // Pout chaque colonne
-    for(cx=Brosse_Hauteur;cx>0;cx--)
+    for(cx=Brush_height;cx>0;cx--)
     {
       *edi = *esi;
-      esi+=Brosse_Largeur;
+      esi+=Brush_width;
       edi++;
     }
 
@@ -278,9 +278,9 @@ void Rotate_90_deg_LOWLEVEL(byte * Source,byte * dest)
   }
 }
 
-// Remplacer une couleur par une autre dans un buffer
+// Replace une couleur par une autre dans un buffer
 
-void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short width,short height,short Largeur_buffer)
+void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width)
 {
   int dx,cx;
 
@@ -290,46 +290,46 @@ void Remap_general_LOWLEVEL(byte * Table_conv,byte * Buffer,short width,short he
     // Pour chaque pixel
     for(cx=width;cx>0;cx--)
     {
-    *Buffer = Table_conv[*Buffer];
-    Buffer++;
+    *buffer = conversion_table[*buffer];
+    buffer++;
     }
-    Buffer += Largeur_buffer-width;
+    buffer += buffer_width-width;
   }
 }
 
-void Copier_image_dans_brosse(short Debut_X,short Debut_Y,short Brosse_Largeur,short Brosse_Hauteur,word image_width)
+void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-    byte* Src=Debut_Y*image_width+Debut_X+Principal_Ecran; //Adr départ image (ESI)
-    byte* Dest=Brosse; //Adr dest brosse (EDI)
+    byte* src=start_y*image_width+start_x+Main_screen; //Adr départ image (ESI)
+    byte* dest=Brush; //Adr dest brosse (EDI)
     int dx;
 
-  for (dx=Brosse_Hauteur;dx!=0;dx--)
+  for (dx=Brush_height;dx!=0;dx--)
   //Pour chaque ligne
   {
 
     // On fait une copie de la ligne
-    memcpy(Dest,Src,Brosse_Largeur);
+    memcpy(dest,src,Brush_width);
 
     // On passe à la ligne suivante
-    Src+=image_width;
-    Dest+=Brosse_Largeur;
+    src+=image_width;
+    dest+=Brush_width;
    }
 
 }
 
-byte Lit_pixel_dans_ecran_feedback (word x,word y)
+byte Read_pixel_from_feedback_screen (word x,word y)
 {
-  return *(FX_Feedback_Ecran+y*Principal_Largeur_image+x);
+  return *(FX_feedback_screen+y*Main_image_width+x);
 }
 
-dword Round_div(dword Numerateur,dword Diviseur)
+dword Round_div(dword numerator,dword divisor)
 {
-        return Numerateur/Diviseur;
+        return numerator/divisor;
 }
 
-byte Effet_Trame(word x,word y)
+byte Effect_sieve(word x,word y)
 {
-  return Trame[x % Trame_Largeur][y % Trame_Hauteur];
+  return Sieve[x % Sieve_width][y % Sieve_height];
 }
 
 void Set_mouse_position(void)
@@ -340,30 +340,30 @@ void Set_mouse_position(void)
     );
 }
 
-void Remplacer_toutes_les_couleurs_dans_limites(byte * Table_de_remplacement)
+void Replace_colors_within_limits(byte * replace_table)
 {
   int line;
   int counter;
   byte* Adresse;
 
-  byte Ancien;
+  byte old;
 
   // Pour chaque ligne :
-  for(line = Limite_Haut;line <= Limite_Bas; line++)
+  for(line = Limit_top;line <= Limit_bottom; line++)
   {
     // Pour chaque pixel sur la ligne :
-    for (counter = Limite_Gauche;counter <= Limite_Droite;counter ++)
+    for (counter = Limit_left;counter <= Limit_right;counter ++)
     {
-      Adresse = Principal_Ecran+line*Principal_Largeur_image+counter;
-      Ancien=*Adresse;
-      *Adresse = Table_de_remplacement[Ancien];
+      Adresse = Main_screen+line*Main_image_width+counter;
+      old=*Adresse;
+      *Adresse = replace_table[old];
     }
   }
 }
 
-byte Lit_pixel_dans_ecran_backup (word x,word y)
+byte Read_pixel_from_backup_screen (word x,word y)
 {
-  return *(Ecran_backup + x + Principal_Largeur_image * y);
+  return *(Screen_backup + x + Main_image_width * y);
 }
 
 void Palette_256_to_64(T_Palette palette)
@@ -388,87 +388,87 @@ void Palette_64_to_256(T_Palette palette)
   }
 }
 
-byte Effet_Colorize_interpole  (word x,word y,byte Couleur)
+byte Effect_interpolated_colorize  (word x,word y,byte color)
 {
-  // Facteur_A = 256*(100-Colorize_Opacite)/100
-  // Facteur_B = 256*(    Colorize_Opacite)/100
+  // factor_a = 256*(100-Colorize_opacity)/100
+  // factor_b = 256*(    Colorize_opacity)/100
   //
-  // (Couleur_dessous*Facteur_A+Couleur*facteur_B)/256
+  // (Couleur_dessous*factor_a+color*facteur_B)/256
   //
 
   // On place dans ESI 3*Couleur_dessous ( = position de cette couleur dans la
-  // palette des teintes) et dans EDI, 3*Couleur.
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
-  byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
-  byte Vert=Principal_Palette[Couleur].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
-  byte Rouge=Principal_Palette[Couleur].R;
+  // palette des teintes) et dans EDI, 3*color.
+  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
+  byte blue=Main_palette[color].B;
+  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
+  byte green=Main_palette[color].G;
+  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte red=Main_palette[color].R;
 
   // On récupère les 3 composantes RVB
 
-  // Bleu
-  Bleu = (Table_de_multiplication_par_Facteur_B[Bleu]
-    + Table_de_multiplication_par_Facteur_A[Bleu_dessous]) / 256;
-  Vert = (Table_de_multiplication_par_Facteur_B[Vert]
-    + Table_de_multiplication_par_Facteur_A[Vert_dessous]) / 256;
-  Rouge = (Table_de_multiplication_par_Facteur_B[Rouge]
-    + Table_de_multiplication_par_Facteur_A[Rouge_dessous]) / 256;
-  return Meilleure_couleur(Rouge,Vert,Bleu);
+  // blue
+  blue = (Facteur_B_table[blue]
+    + Facteur_A_table[blue_under]) / 256;
+  green = (Facteur_B_table[green]
+    + Facteur_A_table[green_under]) / 256;
+  red = (Facteur_B_table[red]
+    + Facteur_A_table[red_under]) / 256;
+  return Best_color(red,green,blue);
 
 }
 
-byte Effet_Colorize_additif    (word x,word y,byte Couleur)
+byte Effect_additive_colorize    (word x,word y,byte color)
 {
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
-  byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert=Principal_Palette[Couleur].G;
-  byte Rouge=Principal_Palette[Couleur].R;
+  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
+  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
+  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte blue=Main_palette[color].B;
+  byte green=Main_palette[color].G;
+  byte red=Main_palette[color].R;
 
-  return Meilleure_couleur(
-    Rouge>Rouge_dessous?Rouge:Rouge_dessous,
-    Vert>Vert_dessous?Vert:Vert_dessous,
-    Bleu>Bleu_dessous?Bleu:Bleu_dessous);
+  return Best_color(
+    red>red_under?red:red_under,
+    green>green_under?green:green_under,
+    blue>blue_under?blue:blue_under);
 }
 
-byte Effet_Colorize_soustractif(word x,word y,byte Couleur)
+byte Effect_substractive_colorize(word x,word y,byte color)
 {
-  byte Bleu_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].B;
-  byte Vert_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].G;
-  byte Rouge_dessous=Principal_Palette[*(FX_Feedback_Ecran + y * Principal_Largeur_image + x)].R;
-  byte Bleu=Principal_Palette[Couleur].B;
-  byte Vert=Principal_Palette[Couleur].G;
-  byte Rouge=Principal_Palette[Couleur].R;
+  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
+  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
+  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte blue=Main_palette[color].B;
+  byte green=Main_palette[color].G;
+  byte red=Main_palette[color].R;
 
-  return Meilleure_couleur(
-    Rouge<Rouge_dessous?Rouge:Rouge_dessous,
-    Vert<Vert_dessous?Vert:Vert_dessous,
-    Bleu<Bleu_dessous?Bleu:Bleu_dessous);
+  return Best_color(
+    red<red_under?red:red_under,
+    green<green_under?green:green_under,
+    blue<blue_under?blue:blue_under);
 }
 
-void Tester_chrono(void)
+void Check_timer(void)
 {
-  if((SDL_GetTicks()/55)-Chrono_delay>Chrono_cmp) Etat_chrono=1;
+  if((SDL_GetTicks()/55)-Timer_delay>Timer_start) Timer_state=1;
 }
 
 // Effectue une inversion de la brosse selon une droite horizontale
-void Flip_Y_LOWLEVEL(void)
+void Flip_Y_lowlevel(void)
 {
   // ESI pointe sur la partie haute de la brosse
   // EDI sur la partie basse
-  byte* ESI = Brosse ;
-  byte* EDI = Brosse + (Brosse_Hauteur - 1) *Brosse_Largeur;
+  byte* ESI = Brush ;
+  byte* EDI = Brush + (Brush_height - 1) *Brush_width;
   byte tmp;
   word cx;
 
   while(ESI < EDI)
   {
     // Il faut inverser les lignes pointées par ESI et
-    // EDI ("Brosse_Largeur" octets en tout)
+    // EDI ("Brush_width" octets en tout)
 
-    for(cx = Brosse_Largeur;cx>0;cx--)
+    for(cx = Brush_width;cx>0;cx--)
     {
       tmp = *ESI;
       *ESI = *EDI;
@@ -481,17 +481,17 @@ void Flip_Y_LOWLEVEL(void)
     // ESI pointe déjà sur le début de la ligne suivante
     // EDI pointe sur la fin de la ligne en cours, il
     // doit pointer sur le début de la précédente...
-    EDI -= 2 * Brosse_Largeur; // On recule de 2 lignes
+    EDI -= 2 * Brush_width; // On recule de 2 lignes
   }
 }
 
 // Effectue une inversion de la brosse selon une droite verticale
-void Flip_X_LOWLEVEL(void)
+void Flip_X_lowlevel(void)
 {
   // ESI pointe sur la partie gauche et EDI sur la partie
   // droite
-  byte* ESI = Brosse;
-  byte* EDI = Brosse + Brosse_Largeur - 1;
+  byte* ESI = Brush;
+  byte* EDI = Brush + Brush_width - 1;
 
   byte* Debut_Ligne;
   byte* Fin_Ligne;
@@ -504,13 +504,13 @@ void Flip_X_LOWLEVEL(void)
     Fin_Ligne = EDI;
 
     // On échange par colonnes
-    for(cx=Brosse_Hauteur;cx>0;cx--)
+    for(cx=Brush_height;cx>0;cx--)
     {
       tmp=*ESI;
       *ESI=*EDI;
       *EDI=tmp;
-      EDI+=Brosse_Largeur;
-      ESI+=Brosse_Largeur;
+      EDI+=Brush_width;
+      ESI+=Brush_width;
     }
 
     // On change de colonne
@@ -522,12 +522,12 @@ void Flip_X_LOWLEVEL(void)
 }
 
 // Faire une rotation de 180º de la brosse
-void Rotate_180_deg_LOWLEVEL(void)
+void Rotate_180_deg_lowlevel(void)
 {
   // ESI pointe sur la partie supérieure de la brosse
   // EDI pointe sur la partie basse
-  byte* ESI = Brosse;
-  byte* EDI = Brosse + Brosse_Hauteur*Brosse_Largeur - 1;
+  byte* ESI = Brush;
+  byte* EDI = Brush + Brush_height*Brush_width - 1;
   // EDI pointe sur le dernier pixel de la derniere ligne
   byte tmp;
   word cx;
@@ -535,11 +535,11 @@ void Rotate_180_deg_LOWLEVEL(void)
   while(ESI < EDI)
   {
     // On échange les deux lignes pointées par EDI et
-    // ESI (Brosse_Largeur octets)
+    // ESI (Brush_width octets)
     // En même temps, on échange les pixels, donc EDI
     // pointe sur la FIN de sa ligne
 
-    for(cx=Brosse_Largeur;cx>0;cx--)
+    for(cx=Brush_width;cx>0;cx--)
     {
       tmp = *ESI;
       *ESI = *EDI;
@@ -551,51 +551,51 @@ void Rotate_180_deg_LOWLEVEL(void)
   }
 }
 
-void Tempo_jauge(byte Vitesse)
+void Slider_timer(byte speed)
 //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
 {
   Uint32 end;
-  byte MouseK_Original = Mouse_K;
-  end = SDL_GetTicks() + Vitesse*10;
+  byte original_mouse_k = Mouse_K;
+  end = SDL_GetTicks() + speed*10;
   do
   {
     if (!Get_input()) Wait_VBL();
-  } while (Mouse_K == MouseK_Original && SDL_GetTicks()<end);
+  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }
 
 void Scroll_picture(short x_offset,short y_offset)
 {
-  byte* esi = Ecran_backup; //Source de la copie
-  byte* edi = Principal_Ecran + y_offset * Principal_Largeur_image + x_offset;
-  const word ax = Principal_Largeur_image - x_offset; // Nombre de pixels à copier à droite
+  byte* esi = Screen_backup; //source de la copie
+  byte* edi = Main_screen + y_offset * Main_image_width + x_offset;
+  const word ax = Main_image_width - x_offset; // Nombre de pixels à copier à droite
   word dx;
-  for(dx = Principal_Hauteur_image - y_offset;dx>0;dx--)
+  for(dx = Main_image_height - y_offset;dx>0;dx--)
   {
   // Pour chaque ligne
     memcpy(edi,esi,ax);
     memcpy(edi - x_offset,esi+ax,x_offset);
 
     // On passe à la ligne suivante
-    edi += Principal_Largeur_image;
-    esi += Principal_Largeur_image;
+    edi += Main_image_width;
+    esi += Main_image_width;
   }
 
   // On vient de faire le traitement pour otutes les lignes au-dessous de y_offset
   // Maintenant on traite celles au dessus
-  edi = x_offset + Principal_Ecran;
+  edi = x_offset + Main_screen;
   for(dx = y_offset;dx>0;dx--)
   {
     memcpy(edi,esi,ax);
     memcpy(edi - x_offset,esi+ax,x_offset);
 
-    edi += Principal_Largeur_image;
-    esi += Principal_Largeur_image;
+    edi += Main_image_width;
+    esi += Main_image_width;
   }
 
-  UpdateRect(0,0,0,0);
+  Update_rect(0,0,0,0);
 }
 
-void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
+void Zoom_a_line(byte* original_line, byte* zoomed_line,
         word factor, word width
 )
 {
@@ -604,12 +604,12 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
 
         // Pour chaque pixel
         for(x=0;x<width;x++){
-                color = *Ligne_originale;
+                color = *original_line;
 
-                memset(Ligne_zoomee,color,factor);
-                Ligne_zoomee+=factor;
+                memset(zoomed_line,color,factor);
+                zoomed_line+=factor;
 
-                Ligne_originale++;
+                original_line++;
         }
 }
 
@@ -631,7 +631,7 @@ void Zoomer_une_ligne(byte* Ligne_originale, byte* Ligne_zoomee,
 #endif
 
 // Indique quelle est la mémoire disponible
-unsigned long Memoire_libre(void)
+unsigned long Memory_free(void)
 {
     // Memory is no longer relevant. If there is ANY problem or doubt here,
     // you can simply return 10*1024*1024 (10Mb), to make the "Pages"something
@@ -673,30 +673,30 @@ unsigned long Memoire_libre(void)
 
 
 // Transformer un nombre (entier naturel) en chaîne
-void Num2str(dword number,char * Chaine,byte nb_char)
+void Num2str(dword number,char * str,byte nb_char)
 {
-  int Indice;
+  int index;
 
-  for (Indice=nb_char-1;Indice>=0;Indice--)
+  for (index=nb_char-1;index>=0;index--)
   {
-    Chaine[Indice]=(number%10)+'0';
+    str[index]=(number%10)+'0';
     number/=10;
     if (number==0)
-      for (Indice--;Indice>=0;Indice--)
-        Chaine[Indice]=' ';
+      for (index--;index>=0;index--)
+        str[index]=' ';
   }
-  Chaine[nb_char]='\0';
+  str[nb_char]='\0';
 }
 
 // Transformer une chaîne en un entier naturel (renvoie -1 si ch. invalide)
-int Str2num(char * Chaine)
+int Str2num(char * str)
 {
   int value=0;
 
-  for (;*Chaine;Chaine++)
+  for (;*str;str++)
   {
-    if ( (*Chaine>='0') && (*Chaine<='9') )
-      value=(value*10)+(*Chaine-'0');
+    if ( (*str>='0') && (*str<='9') )
+      value=(value*10)+(*str-'0');
     else
       return -1;
   }
@@ -707,23 +707,23 @@ int Str2num(char * Chaine)
 // Arrondir un nombre réel à la valeur entière la plus proche
 short Round(float value)
 {
-  short Temp=value;
+  short temp=value;
 
   if (value>=0)
-    { if ((value-Temp)>= 0.5) Temp++; }
+    { if ((value-temp)>= 0.5) temp++; }
   else
-    { if ((value-Temp)<=-0.5) Temp--; }
+    { if ((value-temp)<=-0.5) temp--; }
 
-  return Temp;
+  return temp;
 }
 
 // Arrondir le résultat d'une division à la valeur entière supérieure
-short Round_div_max(short Numerateur,short Diviseur)
+short Round_div_max(short numerator,short divisor)
 {
-  if (!(Numerateur % Diviseur))
-    return (Numerateur/Diviseur);
+  if (!(numerator % divisor))
+    return (numerator/divisor);
   else
-    return (Numerateur/Diviseur)+1;
+    return (numerator/divisor)+1;
 }
 
 // Retourne le minimum entre deux nombres
@@ -741,27 +741,27 @@ int Max(int a,int b)
 
 
 // Fonction retournant le libellé d'une mode (ex: " 320x200")
-char * Libelle_mode(int mode)
+char * Mode_label(int mode)
 {
-  static char Chaine[24];
-  if (! Mode_video[mode].Fullscreen)
+  static char str[24];
+  if (! Video_mode[mode].Fullscreen)
     return "window";
-  sprintf(Chaine, "%dx%d", Mode_video[mode].Width, Mode_video[mode].Height);
+  sprintf(str, "%dx%d", Video_mode[mode].Width, Video_mode[mode].Height);
 
-  return Chaine;
+  return str;
 }
 
 // Trouve un mode video à partir d'une chaine: soit "window",
 // soit de la forme "320x200"
 // Renvoie -1 si la chaine n'est pas convertible
-int Conversion_argument_mode(const char *Argument)
+int Convert_videomode_arg(const char *argument)
 {
   // Je suis paresseux alors je vais juste tester les libellés
-  int Indice_mode;
-  for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
+  int mode_index;
+  for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
     // Attention les vieilles fonctions de lecture .ini mettent tout en MAJUSCULE.
-    if (!strcasecmp(Libelle_mode(Indice_mode), Argument))
-      return Indice_mode;
+    if (!strcasecmp(Mode_label(mode_index), argument))
+      return mode_index;
 
   return -1;
 }

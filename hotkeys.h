@@ -31,10 +31,10 @@ typedef struct
     char Explic1[37];
     char Explic2[37];
     char Explic3[37];
-    bool Suppr;       // Raccourci facultatif
-    word Touche;
-    word Touche2;
-} S_ConfigTouche;
+    bool Suppr;       // Shortcut facultatif
+    word Key;
+    word Key2;
+} T_Key_config;
 
-extern S_ConfigTouche ConfigTouche[NB_TOUCHES];
-extern word Ordonnancement[NB_TOUCHES];
+extern T_Key_config ConfigKey[NB_SHORTCUTS];
+extern word Ordering[NB_SHORTCUTS];

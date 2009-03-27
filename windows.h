@@ -24,71 +24,71 @@
 
 #include "struct.h"
 
-#define ToWinX(x) (((x)*Menu_Facteur_X)+Fenetre_Pos_X)
-#define ToWinY(y) (((y)*Menu_Facteur_Y)+Fenetre_Pos_Y)
-#define ToWinL(l) ((l)*Menu_Facteur_X)
-#define ToWinH(h) ((h)*Menu_Facteur_Y)
+#define ToWinX(x) (((x)*Menu_factor_X)+Window_pos_X)
+#define ToWinY(y) (((y)*Menu_factor_Y)+Window_pos_Y)
+#define ToWinL(l) ((l)*Menu_factor_X)
+#define ToWinH(h) ((h)*Menu_factor_Y)
 
-#define Display_Window(x,y,w,h) UpdateRect(Fenetre_Pos_X+(x)*Menu_Facteur_X,Fenetre_Pos_Y+(y)*Menu_Facteur_Y,(w)*Menu_Facteur_X,(h)*Menu_Facteur_Y);
+#define Update_window_area(x,y,w,h) Update_rect(Window_pos_X+(x)*Menu_factor_X,Window_pos_Y+(y)*Menu_factor_Y,(w)*Menu_factor_X,(h)*Menu_factor_Y);
 
-void Afficher_curseur(void);
-void Effacer_curseur(void);
+void Display_cursor(void);
+void Hide_cursor(void);
 
-void Remapper_ecran_apres_changement_couleurs_menu(void);
-void Calculer_couleurs_menu_optimales(Composantes * palette);
+void Remap_screen_after_menu_colors_change(void);
+void Compute_optimal_menu_colors(T_Components * palette);
 
-void Recadrer_ecran_par_rapport_au_zoom(void);
-void Calculer_split(void);
-void Calculer_donnees_loupe(void);
-void Calculer_limites(void);
-void Calculer_coordonnees_pinceau(void);
+void Position_screen_according_to_zoom(void);
+void Compute_separator_data(void);
+void Compute_magnifier_data(void);
+void Compute_limits(void);
+void Compute_paintbrush_coordinates(void);
 
-void Pixel_dans_barre_d_outil(word x,word y,byte Couleur);
-void Pixel_dans_fenetre(word x,word y,byte Couleur);
-void Encadrer_couleur_menu(byte Couleur);
-void Afficher_palette_du_menu(void);
-void Afficher_menu(void);
-void Recadrer_palette(void);
-void Changer_cellules_palette(void);
-int Couleur_palette(void);
-word Palette_Cells_X(void);
-word Palette_Cells_Y(void);
+void Pixel_in_toolbar(word x,word y,byte color);
+void Pixel_in_window(word x,word y,byte color);
+void Frame_menu_color(byte color);
+void Display_menu_palette(void);
+void Display_menu(void);
+void Reposition_palette(void);
+void Change_palette_cells(void);
+int Pick_color_in_palette(void);
+word Palette_cells_X(void);
+word Palette_cells_Y(void);
 
-void Print_general(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
-void Print_dans_fenetre_limite(short x,short y,const char * Chaine,byte size,byte Couleur_texte,byte Couleur_fond);
-void Print_char_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur_texte,byte Couleur_fond);
-void Print_char_transparent_dans_fenetre(short x_pos,short y_pos,const unsigned char c,byte Couleur);
-void Print_dans_menu(const char * Chaine, short position);
-void Print_coordonnees(void);
-void Print_nom_fichier(void);
-void Print_compteur(short x,short y,const char * Chaine,byte Couleur_texte,byte Couleur_fond);
+void Print_general(short x,short y,const char * str,byte text_color,byte background_color);
+void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
+void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
+void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color);
+void Print_transparent_char_in_window(short x_pos,short y_pos,const unsigned char c,byte color);
+void Print_in_menu(const char * str, short position);
+void Print_coordinates(void);
+void Print_filename(void);
+void Print_counter(short x,short y,const char * str,byte text_color,byte background_color);
 
-byte Demande_de_confirmation(char * Message);
-void Warning_message(char * Message);
+byte Confirmation_box(char * message);
+void Warning_message(char * message);
 
-void Afficher_limites_de_l_image(void);
-void Afficher_ecran(void);
+void Display_image_limits(void);
+void Display_all_screen(void);
 void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color);
-void Fenetre_Afficher_cadre_general(word x_pos,word y_pos,word width,word height,
-                                    byte Couleur_HG,byte Couleur_BD,byte Couleur_S,byte Couleur_CHG,byte Couleur_CBD);
-void Fenetre_Afficher_cadre_mono(word x_pos,word y_pos,word width,word height,byte Couleur);
-void Fenetre_Afficher_cadre_creux(word x_pos,word y_pos,word width,word height);
-void Fenetre_Afficher_cadre_bombe(word x_pos,word y_pos,word width,word height);
-void Fenetre_Afficher_cadre(word x_pos,word y_pos,word width,word height);
+void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
+                                    byte color_tl,byte color_br,byte color_s,byte color_tlc,byte color_brc);
+void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte color);
+void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
+void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
+void Window_display_frame(word x_pos,word y_pos,word width,word height);
 
-void Afficher_sprite_dans_menu(int Numero_bouton,int Numero_sprite);
-void Afficher_pinceau_dans_menu(void);
-void Afficher_pinceau_dans_fenetre(word x,word y,int number);
+void Display_sprite_in_menu(int btn_number,int sprite_number);
+void Display_paintbrush_in_menu(void);
+void Display_paintbrush_in_window(word x,word y,int number);
 
-void Dessiner_zigouigoui(word x,word y, byte Couleur, short direction);
-void Bloc_degrade_dans_fenetre(word x_pos,word y_pos,word Debut_block,word Fin_block);
-void Fenetre_Afficher_sprite_drive(word x_pos,word y_pos,byte type);
+void Draw_thingumajig(word x,word y, byte color, short direction);
+void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word block_end);
+void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
-byte Meilleure_couleur(byte Rouge,byte Vert,byte Bleu);
-byte Meilleure_couleur_sans_exclusion(byte Rouge,byte Vert,byte Bleu);
+byte Best_color(byte red,byte green,byte blue);
+byte Best_color_nonexcluded(byte red,byte green,byte blue);
 
-void Ligne_horizontale_XOR_Zoom(short x_pos, short y_pos, short width);
-void Ligne_verticale_XOR_Zoom(short x_pos, short y_pos, short height);
+void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
+void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
 
 #endif

@@ -40,7 +40,7 @@
 #include "struct.h"
 #include "io.h"
 
-word endian_magic16(word x)
+word Endian_magic16(word x)
 {
   #if SDL_BYTEORDER == SDL_LIL_ENDIAN
     return x;
@@ -48,7 +48,7 @@ word endian_magic16(word x)
     return SDL_Swap16(x);
   #endif
 }
-dword endian_magic32(dword x)
+dword Endian_magic32(dword x)
 {
   #if SDL_BYTEORDER == SDL_LIL_ENDIAN
     return x;
@@ -59,43 +59,43 @@ dword endian_magic32(dword x)
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_byte(FILE *file, byte *Dest)
+int Read_byte(FILE *file, byte *dest)
 {
-  return fread(Dest, 1, 1, file) == 1;
+  return fread(dest, 1, 1, file) == 1;
 }
 // Ecrit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_byte(FILE *file, byte b)
+int Write_byte(FILE *file, byte b)
 {
   return fwrite(&b, 1, 1, file) == 1;
 }
 // Lit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_bytes(FILE *file, void *Dest, size_t size)
+int Read_bytes(FILE *file, void *dest, size_t size)
 {
-  return fread(Dest, 1, size, file) == size;
+  return fread(dest, 1, size, file) == size;
 }
 // Ecrit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_bytes(FILE *file, void *Src, size_t size)
+int Write_bytes(FILE *file, void *src, size_t size)
 {
-  return fwrite(Src, 1, size, file) == size;
+  return fwrite(src, 1, size, file) == size;
 }
 
 // Lit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_word_le(FILE *file, word *Dest)
+int Read_word_le(FILE *file, word *dest)
 {
-  if (fread(Dest, 1, sizeof(word), file) != sizeof(word))
+  if (fread(dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    *Dest = SDL_Swap16(*Dest);
+    *dest = SDL_Swap16(*dest);
   #endif
   return -1;
 }
 // Ecrit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_le(FILE *file, word w)
+int Write_word_le(FILE *file, word w)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     w = SDL_Swap16(w);
@@ -104,18 +104,18 @@ int write_word_le(FILE *file, word w)
 }
 // Lit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_word_be(FILE *file, word *Dest)
+int Read_word_be(FILE *file, word *dest)
 {
-  if (fread(Dest, 1, sizeof(word), file) != sizeof(word))
+  if (fread(dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
-    *Dest = SDL_Swap16(*Dest);
+    *dest = SDL_Swap16(*dest);
   #endif
   return -1;
 }
 // Ecrit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_word_be(FILE *file, word w)
+int Write_word_be(FILE *file, word w)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     w = SDL_Swap16(w);
@@ -124,18 +124,18 @@ int write_word_be(FILE *file, word w)
 }
 // Lit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_dword_le(FILE *file, dword *Dest)
+int Read_dword_le(FILE *file, dword *dest)
 {
-  if (fread(Dest, 1, sizeof(dword), file) != sizeof(dword))
+  if (fread(dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
-    *Dest = SDL_Swap32(*Dest);
+    *dest = SDL_Swap32(*dest);
   #endif
   return -1;
 }
 // Ecrit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_le(FILE *file, dword dw)
+int Write_dword_le(FILE *file, dword dw)
 {
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     dw = SDL_Swap32(dw);
@@ -145,18 +145,18 @@ int write_dword_le(FILE *file, dword dw)
 
 // Lit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int read_dword_be(FILE *file, dword *Dest)
+int Read_dword_be(FILE *file, dword *dest)
 {
-  if (fread(Dest, 1, sizeof(dword), file) != sizeof(dword))
+  if (fread(dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
-    *Dest = SDL_Swap32(*Dest);
+    *dest = SDL_Swap32(*dest);
   #endif
   return -1;
 }
 // Ecrit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
-int write_dword_be(FILE *file, dword dw)
+int Write_dword_be(FILE *file, dword dw)
 {
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     dw = SDL_Swap32(dw);
@@ -169,69 +169,69 @@ int write_dword_be(FILE *file, dword dw)
 // Attention, sous Windows, il faut s'attendre aux deux car 
 // par exemple un programme lancé sous GDB aura comme argv[0]:
 // d:\Data\C\GFX2\grafx2/grafx2.exe
-char * Position_dernier_slash(const char * Chaine)
+char * Find_last_slash(const char * str)
 {
   const char * position = NULL;
-  for (; *Chaine != '\0'; Chaine++)
-    if (*Chaine == SEPARATEUR_CHEMIN[0]
+  for (; *str != '\0'; str++)
+    if (*str == PATH_SEPARATOR[0]
 #ifdef __WIN32__    
-     || *Chaine == '/'
+     || *str == '/'
 #endif
      )
-      position = Chaine;
+      position = str;
   return (char *)position;
 }
 // Récupère la partie "nom de file seul" d'un chemin
-void Extraire_nom_fichier(char *dest, const char *Source)
+void Extract_filename(char *dest, const char *source)
 {
-  const char * position = Position_dernier_slash(Source);
+  const char * position = Find_last_slash(source);
 
   if (position)
     strcpy(dest,position+1);
   else
-    strcpy(dest,Source);
+    strcpy(dest,source);
 }
 // Récupère la partie "répertoire+/" d'un chemin.
-void Extraire_chemin(char *dest, const char *Source)
+void Extract_path(char *dest, const char *source)
 {
   char * position;
 
-  strcpy(dest,Source);
-  position = Position_dernier_slash(dest);
+  strcpy(dest,source);
+  position = Find_last_slash(dest);
   if (position)
     *(position+1) = '\0';
   else
-    strcat(dest, SEPARATEUR_CHEMIN);
+    strcat(dest, PATH_SEPARATOR);
 }
 
-int Fichier_existe(char * fname)
+int File_exists(char * fname)
 //   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
 {
     struct stat buf;
-    int Resultat;
+    int result;
 
-    Resultat=stat(fname,&buf);
-    if (Resultat!=0)
+    result=stat(fname,&buf);
+    if (result!=0)
         return(errno!=ENOENT);
     else
         return 1;
 
 }
-int Repertoire_existe(char * Repertoire)
+int Directory_exists(char * directory)
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 {
   DIR* entry;    // Structure de lecture des éléments
 
-  if (strcmp(Repertoire,PARENT_DIR)==0)
+  if (strcmp(directory,PARENT_DIR)==0)
     return 1;
   else
   {
     //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
     //  renvoie NULL c'est que le répertoire n'est pas accessible...
 
-    entry=opendir(Repertoire);
+    entry=opendir(directory);
     if (entry==NULL)
         return 0;
     else
@@ -243,7 +243,7 @@ int Repertoire_existe(char * Repertoire)
 }
 
 // Taille de fichier, en octets
-int FileLength(const char * fname)
+int File_length(const char * fname)
 {
     struct stat infos_fichier;
     if (stat(fname,&infos_fichier))
@@ -258,26 +258,26 @@ int File_length_file(FILE * file)
     return infos_fichier.st_size;
 }
 
-void for_each_file(const char * Nom_repertoire, void Callback(const char *))
+void For_each_file(const char * directory_name, void Callback(const char *))
 {
   // Pour scan de répertoire
   DIR*  Repertoire_Courant; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
-  char Nom_fichier_complet[TAILLE_CHEMIN_FICHIER];
-  int Position_nom_fichier;
-  strcpy(Nom_fichier_complet, Nom_repertoire);
-  Repertoire_Courant=opendir(Nom_repertoire);
+  char filename_complet[MAX_PATH_CHARACTERS];
+  int filename_position;
+  strcpy(filename_complet, directory_name);
+  Repertoire_Courant=opendir(directory_name);
   if(Repertoire_Courant == NULL) return;        // Répertoire invalide ...
-  strcat(Nom_fichier_complet, SEPARATEUR_CHEMIN);
-  Position_nom_fichier = strlen(Nom_fichier_complet);
+  strcat(filename_complet, PATH_SEPARATOR);
+  filename_position = strlen(filename_complet);
   while ((entry=readdir(Repertoire_Courant)))
   {
     struct stat Infos_enreg;
-    strcpy(&Nom_fichier_complet[Position_nom_fichier], entry->d_name);
-    stat(Nom_fichier_complet,&Infos_enreg);
+    strcpy(&filename_complet[filename_position], entry->d_name);
+    stat(filename_complet,&Infos_enreg);
     if (S_ISREG(Infos_enreg.st_mode))
     {
-      Callback(Nom_fichier_complet);
+      Callback(filename_complet);
     }
   }
   closedir(Repertoire_Courant);

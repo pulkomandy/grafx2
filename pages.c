@@ -37,216 +37,216 @@
   /// GESTION DES PAGES
   ///
 
-void Initialiser_S_Page(S_Page * Page)
+void Init_page(T_Page * page)
 {
-  // Important: appeler cette fonction sur toute nouvelle structure S_Page!
+  // Important: appeler cette fonction sur toute nouvelle structure T_Page!
 
-  if (Page!=NULL)
+  if (page!=NULL)
   {
-    Page->Image=NULL;
-    Page->Width=0;
-    Page->Height=0;
-    memset(Page->Palette,0,sizeof(T_Palette));
-    Page->Commentaire[0]='\0';
-    Page->Repertoire_fichier[0]='\0';
-    Page->Filename[0]='\0';
-    Page->Format_fichier=FORMAT_PAR_DEFAUT;
+    page->Image=NULL;
+    page->Width=0;
+    page->Height=0;
+    memset(page->Palette,0,sizeof(T_Palette));
+    page->Comment[0]='\0';
+    page->File_directory[0]='\0';
+    page->Filename[0]='\0';
+    page->File_format=DEFAULT_FILEFORMAT;
 /*
-    Page->Decalage_X=0;
-    Page->Decalage_Y=0;
-    Page->Ancien_Decalage_X=0;
-    Page->Ancien_Decalage_Y=0;
-    Page->Split=0;
-    Page->X_Zoom=0;
-    Page->Proportion_split=PROPORTION_SPLIT;
-    Page->Loupe_Mode=0;
-    Page->Loupe_Facteur=FACTEUR_DE_ZOOM_PAR_DEFAUT;
-    Page->Loupe_Hauteur=0;
-    Page->Loupe_Largeur=0;
-    Page->Loupe_Decalage_X=0;
-    Page->Loupe_Decalage_Y=0;
+    page->X_offset=0;
+    page->Y_offset=0;
+    page->old_offset_x=0;
+    page->old_offset_y=0;
+    page->Split=0;
+    page->X_zoom=0;
+    page->Separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+    page->Main_magnifier_mode=0;
+    page->Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
+    page->Main_magnifier_height=0;
+    page->Main_magnifier_width=0;
+    page->Main_magnifier_offset_X=0;
+    page->Main_magnifier_offset_Y=0;
 */
   }
 }
 
-void Download_infos_page_principal(S_Page * Page)
+void Download_infos_page_main(T_Page * page)
 // Affiche la page à l'écran
 {
-  //int Indice_facteur;
-  int Dimensions_modifiees;
+  //int factor_index;
+  int size_is_modified;
 
-  if (Page!=NULL)
+  if (page!=NULL)
   {
-    Dimensions_modifiees=(Principal_Largeur_image!=Page->Width) ||
-                         (Principal_Hauteur_image!=Page->Height);
+    size_is_modified=(Main_image_width!=page->Width) ||
+                         (Main_image_height!=page->Height);
 
-    Principal_Ecran=Page->Image;
-    Principal_Largeur_image=Page->Width;
-    Principal_Hauteur_image=Page->Height;
-    memcpy(Principal_Palette,Page->Palette,sizeof(T_Palette));
-    strcpy(Principal_Commentaire,Page->Commentaire);
-    strcpy(Principal_Repertoire_fichier,Page->Repertoire_fichier);
-    strcpy(Principal_Nom_fichier,Page->Filename);
-    Principal_Format_fichier=Page->Format_fichier;
+    Main_screen=page->Image;
+    Main_image_width=page->Width;
+    Main_image_height=page->Height;
+    memcpy(Main_palette,page->Palette,sizeof(T_Palette));
+    strcpy(Main_comment,page->Comment);
+    strcpy(Main_file_directory,page->File_directory);
+    strcpy(Main_filename,page->Filename);
+    Main_fileformat=page->File_format;
 /*
-    Principal_Decalage_X=Page->Decalage_X;
-    Principal_Decalage_Y=Page->Decalage_Y;
+    Main_offset_X=page->X_offset;
+    Main_offset_Y=page->Y_offset;
 
     // On corrige les décalages en fonction de la dimension de l'écran
-    if ( (Principal_Decalage_X>0) &&
-         (Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image) )
-      Principal_Decalage_X=Max(0,Principal_Largeur_image-Largeur_ecran);
-    if ( (Principal_Decalage_Y>0) &&
-         (Principal_Decalage_Y+Menu_Ordonnee>Principal_Hauteur_image) )
-      Principal_Decalage_Y=Max(0,Principal_Hauteur_image-Menu_Ordonnee);
+    if ( (Main_offset_X>0) &&
+         (Main_offset_X+Screen_width>Main_image_width) )
+      Main_offset_X=Max(0,Main_image_width-Screen_width);
+    if ( (Main_offset_Y>0) &&
+         (Main_offset_Y+Menu_Y>Main_image_height) )
+      Main_offset_Y=Max(0,Main_image_height-Menu_Y);
 
-    Ancien_Principal_Decalage_X=Page->Ancien_Decalage_X;
-    Ancien_Principal_Decalage_Y=Page->Ancien_Decalage_Y;
-    Principal_Split=Page->Split;
-    Principal_X_Zoom=Page->X_Zoom;
-    Principal_Proportion_split=Page->Proportion_split;
-    Loupe_Mode=Page->Loupe_Mode;
-    Loupe_Facteur=Page->Loupe_Facteur;
-    Loupe_Hauteur=Page->Loupe_Hauteur;
-    Loupe_Largeur=Page->Loupe_Largeur;
-    Loupe_Decalage_X=Page->Loupe_Decalage_X;
-    Loupe_Decalage_Y=Page->Loupe_Decalage_Y;
+    Old_main_offset_X=page->old_offset_x;
+    Old_main_offset_Y=page->old_offset_y;
+    Main_separator_position=page->Split;
+    Main_X_zoom=page->X_zoom;
+    Main_separator_proportion=page->Separator_proportion;
+    Main_magnifier_mode=page->Main_magnifier_mode;
+    Main_magnifier_factor=page->Main_magnifier_factor;
+    Main_magnifier_height=page->Main_magnifier_height;
+    Main_magnifier_width=page->Main_magnifier_width;
+    Main_magnifier_offset_X=page->Main_magnifier_offset_X;
+    Main_magnifier_offset_Y=page->Main_magnifier_offset_Y;
 
     // Comme le facteur de zoom a des chances d'avoir changé, on appelle
-    // "Changer_facteur_loupe".
-    for (Indice_facteur=0; FACTEUR_ZOOM[Indice_facteur]!=Loupe_Facteur; Indice_facteur++);
-    Changer_facteur_loupe(Indice_facteur);
+    // "Change_magnifier_factor".
+    for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
+    Change_magnifier_factor(factor_index);
 */
-    if (Dimensions_modifiees)
+    if (size_is_modified)
     {
-      Loupe_Mode=0;
-      Principal_Decalage_X=0;
-      Principal_Decalage_Y=0;
-      Pixel_Preview=Pixel_Preview_Normal;
-      Calculer_limites();
-      Calculer_coordonnees_pinceau();
+      Main_magnifier_mode=0;
+      Main_offset_X=0;
+      Main_offset_Y=0;
+      Pixel_preview=Pixel_preview_normal;
+      Compute_limits();
+      Compute_paintbrush_coordinates();
     }
   }
 }
 
-void Upload_infos_page_principal(S_Page * Page)
+void Upload_infos_page_main(T_Page * page)
 // Sauve l'écran courant dans la page
 {
-  if (Page!=NULL)
+  if (page!=NULL)
   {
-    Page->Image=Principal_Ecran;
-    Page->Width=Principal_Largeur_image;
-    Page->Height=Principal_Hauteur_image;
-    memcpy(Page->Palette,Principal_Palette,sizeof(T_Palette));
-    strcpy(Page->Commentaire,Principal_Commentaire);
-    strcpy(Page->Repertoire_fichier,Principal_Repertoire_fichier);
-    strcpy(Page->Filename,Principal_Nom_fichier);
-    Page->Format_fichier=Principal_Format_fichier;
+    page->Image=Main_screen;
+    page->Width=Main_image_width;
+    page->Height=Main_image_height;
+    memcpy(page->Palette,Main_palette,sizeof(T_Palette));
+    strcpy(page->Comment,Main_comment);
+    strcpy(page->File_directory,Main_file_directory);
+    strcpy(page->Filename,Main_filename);
+    page->File_format=Main_fileformat;
 /*
-    Page->Decalage_X=Principal_Decalage_X;
-    Page->Decalage_Y=Principal_Decalage_Y;
-    Page->Ancien_Decalage_X=Ancien_Principal_Decalage_X;
-    Page->Ancien_Decalage_X=Ancien_Principal_Decalage_Y;
-    Page->Split=Principal_Split;
-    Page->X_Zoom=Principal_X_Zoom;
-    Page->Proportion_split=Principal_Proportion_split;
-    Page->Loupe_Mode=Loupe_Mode;
-    Page->Loupe_Facteur=Loupe_Facteur;
-    Page->Loupe_Hauteur=Loupe_Hauteur;
-    Page->Loupe_Largeur=Loupe_Largeur;
-    Page->Loupe_Decalage_X=Loupe_Decalage_X;
-    Page->Loupe_Decalage_Y=Loupe_Decalage_Y;
+    page->X_offset=Main_offset_X;
+    page->Y_offset=Main_offset_Y;
+    page->old_offset_x=Old_main_offset_X;
+    page->old_offset_x=Old_main_offset_Y;
+    page->Split=Main_separator_position;
+    page->X_zoom=Main_X_zoom;
+    page->Separator_proportion=Main_separator_proportion;
+    page->Main_magnifier_mode=Main_magnifier_mode;
+    page->Main_magnifier_factor=Main_magnifier_factor;
+    page->Main_magnifier_height=Main_magnifier_height;
+    page->Main_magnifier_width=Main_magnifier_width;
+    page->Main_magnifier_offset_X=Main_magnifier_offset_X;
+    page->Main_magnifier_offset_Y=Main_magnifier_offset_Y;
 */
   }
 }
 
-void Download_infos_page_brouillon(S_Page * Page)
+void Download_infos_page_spare(T_Page * page)
 {
-  if (Page!=NULL)
+  if (page!=NULL)
   {
-    Brouillon_Ecran=Page->Image;
-    Brouillon_Largeur_image=Page->Width;
-    Brouillon_Hauteur_image=Page->Height;
-    memcpy(Brouillon_Palette,Page->Palette,sizeof(T_Palette));
-    strcpy(Brouillon_Commentaire,Page->Commentaire);
-    strcpy(Brouillon_Repertoire_fichier,Page->Repertoire_fichier);
-    strcpy(Brouillon_Nom_fichier,Page->Filename);
-    Brouillon_Format_fichier=Page->Format_fichier;
+    Spare_screen=page->Image;
+    Spare_image_width=page->Width;
+    Spare_image_height=page->Height;
+    memcpy(Spare_palette,page->Palette,sizeof(T_Palette));
+    strcpy(Spare_comment,page->Comment);
+    strcpy(Spare_file_directory,page->File_directory);
+    strcpy(Spare_filename,page->Filename);
+    Spare_fileformat=page->File_format;
 /*
-    Brouillon_Decalage_X=Page->Decalage_X;
-    Brouillon_Decalage_Y=Page->Decalage_Y;
-    Ancien_Brouillon_Decalage_X=Page->Ancien_Decalage_X;
-    Ancien_Brouillon_Decalage_Y=Page->Ancien_Decalage_Y;
-    Brouillon_Split=Page->Split;
-    Brouillon_X_Zoom=Page->X_Zoom;
-    Brouillon_Proportion_split=Page->Proportion_split;
-    Brouillon_Loupe_Mode=Page->Loupe_Mode;
-    Brouillon_Loupe_Facteur=Page->Loupe_Facteur;
-    Brouillon_Loupe_Hauteur=Page->Loupe_Hauteur;
-    Brouillon_Loupe_Largeur=Page->Loupe_Largeur;
-    Brouillon_Loupe_Decalage_X=Page->Loupe_Decalage_X;
-    Brouillon_Loupe_Decalage_Y=Page->Loupe_Decalage_Y;
+    Spare_offset_X=page->X_offset;
+    Spare_offset_Y=page->Y_offset;
+    Old_spare_offset_X=page->old_offset_x;
+    Old_spare_offset_Y=page->old_offset_y;
+    Spare_separator_position=page->Split;
+    Spare_X_zoom=page->X_zoom;
+    Spare_separator_proportion=page->Separator_proportion;
+    Spare_magnifier_mode=page->Main_magnifier_mode;
+    Spare_magnifier_factor=page->Main_magnifier_factor;
+    Spare_magnifier_height=page->Main_magnifier_height;
+    Spare_magnifier_width=page->Main_magnifier_width;
+    Spare_magnifier_offset_X=page->Main_magnifier_offset_X;
+    Spare_magnifier_offset_Y=page->Main_magnifier_offset_Y;
 */
   }
 }
 
-void Upload_infos_page_brouillon(S_Page * Page)
+void Upload_infos_page_spare(T_Page * page)
 {
-  if (Page!=NULL)
+  if (page!=NULL)
   {
-    Page->Image=Brouillon_Ecran;
-    Page->Width=Brouillon_Largeur_image;
-    Page->Height=Brouillon_Hauteur_image;
-    memcpy(Page->Palette,Brouillon_Palette,sizeof(T_Palette));
-    strcpy(Page->Commentaire,Brouillon_Commentaire);
-    strcpy(Page->Repertoire_fichier,Brouillon_Repertoire_fichier);
-    strcpy(Page->Filename,Brouillon_Nom_fichier);
-    Page->Format_fichier=Brouillon_Format_fichier;
+    page->Image=Spare_screen;
+    page->Width=Spare_image_width;
+    page->Height=Spare_image_height;
+    memcpy(page->Palette,Spare_palette,sizeof(T_Palette));
+    strcpy(page->Comment,Spare_comment);
+    strcpy(page->File_directory,Spare_file_directory);
+    strcpy(page->Filename,Spare_filename);
+    page->File_format=Spare_fileformat;
 /*
-    Page->Decalage_X=Brouillon_Decalage_X;
-    Page->Decalage_Y=Brouillon_Decalage_Y;
-    Page->Ancien_Decalage_X=Ancien_Brouillon_Decalage_X;
-    Page->Ancien_Decalage_Y=Ancien_Brouillon_Decalage_Y;
-    Page->Split=Brouillon_Split;
-    Page->X_Zoom=Brouillon_X_Zoom;
-    Page->Proportion_split=Brouillon_Proportion_split;
-    Page->Loupe_Mode=Brouillon_Loupe_Mode;
-    Page->Loupe_Facteur=Brouillon_Loupe_Facteur;
-    Page->Loupe_Hauteur=Brouillon_Loupe_Hauteur;
-    Page->Loupe_Largeur=Brouillon_Loupe_Largeur;
-    Page->Loupe_Decalage_X=Brouillon_Loupe_Decalage_X;
-    Page->Loupe_Decalage_Y=Brouillon_Loupe_Decalage_Y;
+    page->X_offset=Spare_offset_X;
+    page->Y_offset=Spare_offset_Y;
+    page->old_offset_x=Old_spare_offset_X;
+    page->old_offset_y=Old_spare_offset_Y;
+    page->Split=Spare_separator_position;
+    page->X_zoom=Spare_X_zoom;
+    page->Separator_proportion=Spare_separator_proportion;
+    page->Main_magnifier_mode=Spare_magnifier_mode;
+    page->Main_magnifier_factor=Spare_magnifier_factor;
+    page->Main_magnifier_height=Spare_magnifier_height;
+    page->Main_magnifier_width=Spare_magnifier_width;
+    page->Main_magnifier_offset_X=Spare_magnifier_offset_X;
+    page->Main_magnifier_offset_Y=Spare_magnifier_offset_Y;
 */
   }
 }
 
-void Download_infos_backup(S_Liste_de_pages * list)
+void Download_infos_backup(T_List_of_pages * list)
 {
-  Ecran_backup=list->Pages[1].Image;
+  Screen_backup=list->Pages[1].Image;
 
   if (Config.FX_Feedback)
-    FX_Feedback_Ecran=list->Pages[0].Image;
+    FX_feedback_screen=list->Pages[0].Image;
   else
-    FX_Feedback_Ecran=list->Pages[1].Image;
+    FX_feedback_screen=list->Pages[1].Image;
 }
 
-int Allouer_une_page(S_Page * Page,int width,int height)
+int Allocate_page(T_Page * page,int width,int height)
 {
-  // Important: la S_Page ne doit pas déjà désigner une page allouée auquel
+  // Important: la T_Page ne doit pas déjà désigner une page allouée auquel
   //            cas celle-ci serait perdue.
 
-  /* Debug : if (Page->Image!=NULL) exit(666); */
+  /* Debug : if (page->Image!=NULL) exit(666); */
 
   // On alloue la mémoire pour le bitmap
-  Page->Image=(byte *)malloc(width*height);
+  page->Image=(byte *)malloc(width*height);
 
   // On vérifie que l'allocation se soit bien passée
-  if (Page->Image==NULL)
+  if (page->Image==NULL)
     return 0; // Echec
   else
   {
-    Page->Width=width;
-    Page->Height=height;
+    page->Width=width;
+    page->Height=height;
     // Important: La mise à jour des autres infos est du ressort de
     //            l'appelant.
 
@@ -254,30 +254,30 @@ int Allouer_une_page(S_Page * Page,int width,int height)
   }
 }
 
-void Liberer_une_page(S_Page * Page)
+void Free_a_page(T_Page * page)
 {
   // On peut appeler cette fonction sur une page non allouée.
 
-  if (Page->Image!=NULL)
-    free(Page->Image);
-  Page->Image=NULL;
-  Page->Width=0;
-  Page->Height=0;
+  if (page->Image!=NULL)
+    free(page->Image);
+  page->Image=NULL;
+  page->Width=0;
+  page->Height=0;
   // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
 }
 
-void Copier_S_page(S_Page * dest,S_Page * Source)
+void Copy_S_page(T_Page * dest,T_Page * source)
 {
-  *dest=*Source;
+  *dest=*source;
 }
 
-int Taille_d_une_page(S_Page * Page)
+int Size_of_a_page(T_Page * page)
 {
-  return sizeof(S_Page)+(Page->Width*Page->Height)+8;
+  return sizeof(T_Page)+(page->Width*page->Height)+8;
   // 8 = 4 + 4
   // (Toute zone allouée en mémoire est précédée d'un mot double indiquant sa
   // taille, or la taille d'un mot double est de 4 octets, et on utilise deux
-  // allocations de mémoires: une pour la S_Page et une pour l'image)
+  // allocations de mémoires: une pour la T_Page et une pour l'image)
 }
 
 
@@ -285,26 +285,26 @@ int Taille_d_une_page(S_Page * Page)
   /// GESTION DES LISTES DE PAGES
   ///
 
-void Initialiser_S_Liste_de_pages(S_Liste_de_pages * list)
+void Init_list_of_pages(T_List_of_pages * list)
 {
   // Important: appeler cette fonction sur toute nouvelle structure
-  //            S_Liste_de_pages!
+  //            T_List_of_pages!
 
-  list->Taille_liste=0;
-  list->Nb_pages_allouees=0;
+  list->List_size=0;
+  list->Nb_pages_allocated=0;
   list->Pages=NULL;
 }
 
-int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int size)
+int Allocate_list_of_pages(T_List_of_pages * list,int size)
 {
-  // Important: la S_Liste_de_pages ne doit pas déjà désigner une liste de
+  // Important: la T_List_of_pages ne doit pas déjà désigner une liste de
   //            pages allouée auquel cas celle-ci serait perdue.
-  int Indice;
+  int index;
 
   /* Debug : if (list->Pages!=NULL) exit(666); */
 
   // On alloue la mémoire pour la liste
-  list->Pages=(S_Page *)malloc(size*sizeof(S_Page));
+  list->Pages=(T_Page *)malloc(size*sizeof(T_Page));
 
   // On vérifie que l'allocation se soit bien passée
   if (list->Pages==NULL)
@@ -312,16 +312,16 @@ int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int size)
   else
   {
     // On initialise chacune des nouvelles pages
-    for (Indice=0;Indice<size;Indice++)
-      Initialiser_S_Page(list->Pages+Indice);
-    list->Taille_liste=size;
-    list->Nb_pages_allouees=0;
+    for (index=0;index<size;index++)
+      Init_page(list->Pages+index);
+    list->List_size=size;
+    list->Nb_pages_allocated=0;
 
     return 1; // Succès
   }
 }
 
-void Liberer_une_liste_de_pages(S_Liste_de_pages * list)
+void Free_a_list_of_pages(T_List_of_pages * list)
 {
   // On peut appeler cette fonction sur une liste de pages non allouée.
 
@@ -331,31 +331,31 @@ void Liberer_une_liste_de_pages(S_Liste_de_pages * list)
   if (list->Pages!=NULL)
     free(list->Pages);
   list->Pages=NULL;
-  list->Taille_liste=0;
-  list->Nb_pages_allouees=0;
+  list->List_size=0;
+  list->Nb_pages_allocated=0;
 }
 
-int Taille_d_une_liste_de_pages(S_Liste_de_pages * list)
+int Size_of_a_list_of_pages(T_List_of_pages * list)
 {
-  int Resultat=0;
-  int Indice;
+  int result=0;
+  int index;
 
-  for (Indice=0;Indice<list->Nb_pages_allouees;Indice++)
-    Resultat+=Taille_d_une_page(list->Pages+Indice);
+  for (index=0;index<list->Nb_pages_allocated;index++)
+    result+=Size_of_a_page(list->Pages+index);
 
-  return Resultat+sizeof(S_Liste_de_pages)+4;
+  return result+sizeof(T_List_of_pages)+4;
 
-  // C.F. la remarque à propos de Taille_d_une_page pour la valeur 4.
+  // C.F. la remarque à propos de Size_of_a_page pour la valeur 4.
 }
 
-void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * list)
+void Backward_in_list_of_pages(T_List_of_pages * list)
 {
   // Cette fonction fait l'équivalent d'un "Undo" dans la liste de pages.
   // Elle effectue une sorte de ROL (Rotation Left) sur la liste:
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // º0º1³2³3³4³5³6³7³8³9³Aº  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=Page courante
-  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=Page la plus ancienne
+  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=page courante
+  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=page la plus ancienne
   //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // º1º2³3³4³5³6³7³8³9³A³0º  |
@@ -366,39 +366,39 @@ void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * list)
   // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
 
-  int Indice;
-  S_Page * Page_tempo;
+  int index;
+  T_Page * temp_page;
 
-  if (list->Nb_pages_allouees>1)
+  if (list->Nb_pages_allocated>1)
   {
     // On crée la page tempo
-    Page_tempo=(S_Page *)malloc(sizeof(S_Page));
-    Initialiser_S_Page(Page_tempo);
+    temp_page=(T_Page *)malloc(sizeof(T_Page));
+    Init_page(temp_page);
 
-    // On copie la 1ère page (Page 0) dans la page temporaire
-    Copier_S_page(Page_tempo,list->Pages);
+    // On copie la 1ère page (page 0) dans la page temporaire
+    Copy_S_page(temp_page,list->Pages);
 
     // On copie toutes les pages 1-A à leur gauche
-    for (Indice=1;Indice<list->Nb_pages_allouees;Indice++)
-      Copier_S_page(list->Pages+Indice-1,list->Pages+Indice);
+    for (index=1;index<list->Nb_pages_allocated;index++)
+      Copy_S_page(list->Pages+index-1,list->Pages+index);
 
     // On copie la page 0 (dont la sauvegarde a été effectuée dans la page
     // temporaire) en dernière position
-    Copier_S_page(list->Pages+list->Nb_pages_allouees-1,Page_tempo);
+    Copy_S_page(list->Pages+list->Nb_pages_allocated-1,temp_page);
 
     // On détruit la page tempo
-    free(Page_tempo);
+    free(temp_page);
   }
 }
 
-void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * list)
+void Advance_in_list_of_pages(T_List_of_pages * list)
 {
   // Cette fonction fait l'équivalent d'un "Redo" dans la liste de pages.
   // Elle effectue une sorte de ROR (Rotation Right) sur la liste:
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // º0º1³2³3³4³5³6³7³8³9³Aº  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=Page courante
-  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=Page la plus ancienne
+  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=page courante
+  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=page la plus ancienne
   //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
   // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
   // ºAº0³1³2³3³4³5³6³7³8³9º  |
@@ -409,248 +409,248 @@ void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * list)
   // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
 
-  int Indice;
-  S_Page * Page_tempo;
+  int index;
+  T_Page * temp_page;
 
-  if (list->Nb_pages_allouees>1)
+  if (list->Nb_pages_allocated>1)
   {
     // On crée la page tempo
-    Page_tempo=(S_Page *)malloc(sizeof(S_Page));
-    Initialiser_S_Page(Page_tempo);
+    temp_page=(T_Page *)malloc(sizeof(T_Page));
+    Init_page(temp_page);
 
     // On copie la dernière page dans la page temporaire
-    Copier_S_page(Page_tempo,list->Pages+list->Nb_pages_allouees-1);
+    Copy_S_page(temp_page,list->Pages+list->Nb_pages_allocated-1);
 
     // On copie toutes les pages 0-9 à leur droite
-    for (Indice=list->Nb_pages_allouees-1;Indice>0;Indice--)
-      Copier_S_page(list->Pages+Indice,list->Pages+Indice-1);
+    for (index=list->Nb_pages_allocated-1;index>0;index--)
+      Copy_S_page(list->Pages+index,list->Pages+index-1);
 
     // On copie la page plus ancienne page (la "A", dont la sauvegarde a été
     // effectuée dans la page temporaire) en 1ère position
-    Copier_S_page(list->Pages,Page_tempo);
+    Copy_S_page(list->Pages,temp_page);
 
     // On détruit la page tempo
-    free(Page_tempo);
+    free(temp_page);
   }
 }
 
-int Nouvelle_page_possible(
-        S_Page           * Nouvelle_page,
-        S_Liste_de_pages * Liste_courante,
-        S_Liste_de_pages * Liste_secondaire
+int New_page_is_possible(
+        T_Page           * new_page,
+        T_List_of_pages * current_list,
+        T_List_of_pages * secondary_list
 )
 {
-  unsigned long Taille_immediatement_disponible;
-  unsigned long Taille_liste_courante;
-  unsigned long Taille_liste_brouillon;
-  unsigned long Taille_page_courante;
-  unsigned long Taille_page_brouillon;
-  unsigned long Taille_nouvelle_page;
+  unsigned long mem_available_now;
+  unsigned long current_list_size;
+  unsigned long spare_list_size;
+  unsigned long current_page_size;
+  unsigned long spare_page_size;
+  unsigned long new_page_size;
 
-  Taille_immediatement_disponible = Memoire_libre()
-        - QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
-  Taille_liste_courante =Taille_d_une_liste_de_pages(Liste_courante);
-  Taille_liste_brouillon=Taille_d_une_liste_de_pages(Liste_secondaire);
-  Taille_page_courante  =Taille_d_une_page(Liste_courante->Pages);
-  Taille_page_brouillon =Taille_d_une_page(Liste_secondaire->Pages);
-  Taille_nouvelle_page  =Taille_d_une_page(Nouvelle_page);
+  mem_available_now = Memory_free()
+        - MINIMAL_MEMORY_TO_RESERVE;
+  current_list_size =Size_of_a_list_of_pages(current_list);
+  spare_list_size=Size_of_a_list_of_pages(secondary_list);
+  current_page_size  =Size_of_a_page(current_list->Pages);
+  spare_page_size =Size_of_a_page(secondary_list->Pages);
+  new_page_size  =Size_of_a_page(new_page);
 
   // Il faut pouvoir loger la nouvelle page et son backup dans la page
   // courante, en conservant au pire la 1ère page de brouillon.
-  if ( (Taille_immediatement_disponible + Taille_liste_courante +
-       Taille_liste_brouillon - Taille_page_brouillon)
-       < (2*Taille_nouvelle_page) )
+  if ( (mem_available_now + current_list_size +
+       spare_list_size - spare_page_size)
+       < (2*new_page_size) )
     return 0;
 
   // Il faut pouvoir loger le brouillon et son backup dans la page de
   // brouillon, en conservant au pire un exemplaire de la nouvelle page dans
   // la page courante. (pour permettre à l'utilisateur de travailler sur son
   // brouillon)
-  if ((Taille_immediatement_disponible+Taille_liste_courante+
-       Taille_liste_brouillon-Taille_nouvelle_page)<(2*Taille_page_brouillon))
+  if ((mem_available_now+current_list_size+
+       spare_list_size-new_page_size)<(2*spare_page_size))
     return 0;
 
   return 1;
 }
 
-void Detruire_derniere_page_allouee_de_la_liste(S_Liste_de_pages * list)
+void Free_last_page_of_list(T_List_of_pages * list)
 {
   if (list!=NULL)
   {
-    if (list->Nb_pages_allouees>0)
+    if (list->Nb_pages_allocated>0)
     {
-      list->Nb_pages_allouees--;
-      Liberer_une_page(list->Pages+list->Nb_pages_allouees);
+      list->Nb_pages_allocated--;
+      Free_a_page(list->Pages+list->Nb_pages_allocated);
     }
   }
 }
 
-void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire)
+void Create_new_page(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list)
 {
 
 //   Cette fonction crée une nouvelle page dont les attributs correspondent à
-// ceux de Nouvelle_page (width,height,...) (le champ Image est invalide
+// ceux de new_page (width,height,...) (le champ Image est invalide
 // à l'appel, c'est la fonction qui le met à jour), et l'enfile dans
-// Liste_courante.
+// current_list.
 //   Il est impératif que la création de cette page soit possible,
 // éventuellement au détriment des backups de la page de brouillon
-// (Liste_secondaire). Afin de s'en assurer, il faut vérifier cette
+// (secondary_list). Afin de s'en assurer, il faut vérifier cette
 // possibilité à l'aide de
-// Nouvelle_page_possible(Nouvelle_page,Liste_courante,Liste_secondaire) avant
+// New_page_is_possible(new_page,current_list,secondary_list) avant
 // l'appel à cette fonction.
 //   De plus, il faut qu'il y ait au moins une page dans chacune des listes.
 
-  int                Il_faut_liberer;
-  S_Liste_de_pages * Liste_a_raboter=NULL;
-  S_Page *           Page_a_supprimer;
-  int                Indice;
+  int                need_to_free;
+  T_List_of_pages * list_to_reduce=NULL;
+  T_Page *           page_to_delete;
+  int                index;
 
   // On regarde s'il faut libérer des pages:
-  Il_faut_liberer=
-    // C'est le cas si la Liste_courante est pleine
-  (  (Liste_courante->Taille_liste==Liste_courante->Nb_pages_allouees)
-    // ou qu'il ne reste plus assez de place pour allouer la Nouvelle_page
-  || ( (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<
-       (unsigned long)(Nouvelle_page->Height*Nouvelle_page->Width) )  );
+  need_to_free=
+    // C'est le cas si la current_list est pleine
+  (  (current_list->List_size==current_list->Nb_pages_allocated)
+    // ou qu'il ne reste plus assez de place pour allouer la new_page
+  || ( (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<
+       (unsigned long)(new_page->Height*new_page->Width) )  );
 
-  if (!Il_faut_liberer)
+  if (!need_to_free)
   {
-    // On a assez de place pour allouer une page, et de plus la Liste_courante
+    // On a assez de place pour allouer une page, et de plus la current_list
     // n'est pas pleine. On n'a donc aucune page à supprimer. On peut en
     // allouer une directement.
-    Nouvelle_page->Image=(byte *)malloc(Nouvelle_page->Height*Nouvelle_page->Width);
+    new_page->Image=(byte *)malloc(new_page->Height*new_page->Width);
   }
   else
   {
-    // On manque de mémoire ou la Liste_courante est pleine. Dans tous les
+    // On manque de mémoire ou la current_list est pleine. Dans tous les
     // cas, il faut libérer une page... qui peut-être pourra re-servir.
 
     // Tant qu'il faut libérer
-    while (Il_faut_liberer)
+    while (need_to_free)
     {
       // On cherche sur quelle liste on va virer une page
 
-      // S'il reste des pages à libérer dans la Liste_courante
-      if (Liste_courante->Nb_pages_allouees>1)
-        // Alors on va détruire la dernière page allouée de la Liste_courante
-        Liste_a_raboter=Liste_courante;
+      // S'il reste des pages à libérer dans la current_list
+      if (current_list->Nb_pages_allocated>1)
+        // Alors on va détruire la dernière page allouée de la current_list
+        list_to_reduce=current_list;
       else
       {
-        if (Liste_secondaire->Nb_pages_allouees>1)
+        if (secondary_list->Nb_pages_allocated>1)
         {
           // Sinon on va détruire la dernière page allouée de la
-          // Liste_secondaire
-          Liste_a_raboter=Liste_secondaire;
+          // secondary_list
+          list_to_reduce=secondary_list;
         }
         else
         {
           // Bon, alors là, on vient de vider toutes les pages et on a toujours pas asez de mémoire... C'est donc qu'un vilain programmeur a oublié de vérifier avec Noiuvelle_page_possible avant de venir ici.
           // On sort méchament du programme sans sauvegarde ni rien. De toutes façons, ça ne devrait jamais se produire...
-          Erreur(ERREUR_SORRY_SORRY_SORRY);
+          Error(ERROR_SORRY_SORRY_SORRY);
         }
       }
 
       // Puis on détermine la page que l'on va supprimer (c'est la dernière de
       // la liste)
-      Page_a_supprimer=Liste_a_raboter->Pages+(Liste_a_raboter->Nb_pages_allouees)-1;
+      page_to_delete=list_to_reduce->Pages+(list_to_reduce->Nb_pages_allocated)-1;
 
       // On regarde si on peut recycler directement la page (cas où elle
-      // aurait la même surface que la Nouvelle_page)
-      if ((Page_a_supprimer->Height*Page_a_supprimer->Width)==
-          (Nouvelle_page->Height*Nouvelle_page->Width))
+      // aurait la même surface que la new_page)
+      if ((page_to_delete->Height*page_to_delete->Width)==
+          (new_page->Height*new_page->Width))
       {
         // Alors
         // On récupère le bitmap de la page à supprimer (évite de faire des
         // allocations/désallocations fastidieuses et inutiles)
-        Nouvelle_page->Image=Page_a_supprimer->Image;
+        new_page->Image=page_to_delete->Image;
 
         // On fait semblant que la dernière page allouée ne l'est pas
-        Liste_a_raboter->Nb_pages_allouees--;
+        list_to_reduce->Nb_pages_allocated--;
 
         // On n'a plus besoin de libérer de la mémoire puisqu'on a refilé à
-        // Nouvelle_page un bitmap valide
-        Il_faut_liberer=0;
+        // new_page un bitmap valide
+        need_to_free=0;
       }
       else
       {
         // Sinon
 
         // Détruire la dernière page allouée dans la Liste_à_raboter
-        Detruire_derniere_page_allouee_de_la_liste(Liste_a_raboter);
+        Free_last_page_of_list(list_to_reduce);
 
         // On regarde s'il faut continuer à libérer de la place
-        Il_faut_liberer=(Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)
-                       <(unsigned long)(Nouvelle_page->Height*Nouvelle_page->Width);
+        need_to_free=(Memory_free()-MINIMAL_MEMORY_TO_RESERVE)
+                       <(unsigned long)(new_page->Height*new_page->Width);
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
-        // pour la Nouvelle_page
-        if (!Il_faut_liberer)
-          Nouvelle_page->Image=(byte *)malloc(Nouvelle_page->Height*Nouvelle_page->Width);
+        // pour la new_page
+        if (!need_to_free)
+          new_page->Image=(byte *)malloc(new_page->Height*new_page->Width);
       }
     }
   }
 
   // D'après l'hypothèse de départ, la boucle ci-dessus doit s'arrêter car
   // on a assez de mémoire pour allouer la nouvelle page.
-  // Désormais Nouvelle_page contient un pointeur sur une zone bitmap valide.
+  // Désormais new_page contient un pointeur sur une zone bitmap valide.
 
-  // Décaler la Liste_courante d'un cran vers le passé.
-  for (Indice=Liste_courante->Taille_liste-1;Indice>0;Indice--)
-    Copier_S_page(Liste_courante->Pages+Indice,Liste_courante->Pages+Indice-1);
+  // Décaler la current_list d'un cran vers le passé.
+  for (index=current_list->List_size-1;index>0;index--)
+    Copy_S_page(current_list->Pages+index,current_list->Pages+index-1);
 
-  // Recopier la Nouvelle_page en 1ère position de la Liste_courante
-  Copier_S_page(Liste_courante->Pages,Nouvelle_page);
-  Liste_courante->Nb_pages_allouees++;
+  // Recopier la new_page en 1ère position de la current_list
+  Copy_S_page(current_list->Pages,new_page);
+  current_list->Nb_pages_allocated++;
 }
 
-void Changer_nombre_de_pages_d_une_liste(S_Liste_de_pages * list,int number)
+void Change_page_number_of_list(T_List_of_pages * list,int number)
 {
-  int Indice;
-  S_Page * Nouvelles_pages;
+  int index;
+  T_Page * new_pages;
 
   // Si la liste a déjà la taille demandée
-  if (list->Taille_liste==number)
+  if (list->List_size==number)
     // Alors il n'y a rien à faire
     return;
 
   // Si la liste contient plus de pages que souhaité
-  if (list->Taille_liste>number)
+  if (list->List_size>number)
     // Alors pour chaque page en excés
-    for (Indice=number;Indice<list->Taille_liste;Indice++)
+    for (index=number;index<list->List_size;index++)
       // On libère la page
-      Liberer_une_page(list->Pages+Indice);
+      Free_a_page(list->Pages+index);
 
   // On fait une nouvelle liste de pages:
-  Nouvelles_pages=(S_Page *)malloc(number*sizeof(S_Page));
-  for (Indice=0;Indice<number;Indice++)
-    Initialiser_S_Page(Nouvelles_pages+Indice);
+  new_pages=(T_Page *)malloc(number*sizeof(T_Page));
+  for (index=0;index<number;index++)
+    Init_page(new_pages+index);
 
   // On recopie les pages à conserver de l'ancienne liste
-  for (Indice=0;Indice<Min(number,list->Taille_liste);Indice++)
-    Copier_S_page(Nouvelles_pages+Indice,list->Pages+Indice);
+  for (index=0;index<Min(number,list->List_size);index++)
+    Copy_S_page(new_pages+index,list->Pages+index);
 
   // On libère l'ancienne liste
   free(list->Pages);
 
   // On met à jour les champs de la nouvelle liste
-  list->Pages=Nouvelles_pages;
-  list->Taille_liste=number;
-  if (list->Nb_pages_allouees>number)
-    list->Nb_pages_allouees=number;
+  list->Pages=new_pages;
+  list->List_size=number;
+  if (list->Nb_pages_allocated>number)
+    list->Nb_pages_allocated=number;
 }
 
-void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list)
+void Free_page_of_a_list(T_List_of_pages * list)
 {
   // On ne peut pas détruire la page courante de la liste si après
   // destruction il ne reste pas encore au moins une page.
-  if (list->Nb_pages_allouees>1)
+  if (list->Nb_pages_allocated>1)
   {
     // On fait faire un undo à la liste, comme ça, la nouvelle page courante
     // est la page précédente
-    Reculer_dans_une_liste_de_pages(Principal_Backups);
+    Backward_in_list_of_pages(Main_backups);
 
     // Puis on détruit la dernière page, qui est l'ancienne page courante
-    Detruire_derniere_page_allouee_de_la_liste(list);
+    Free_last_page_of_list(list);
   }
 }
 
@@ -659,48 +659,48 @@ void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list)
   /// GESTION DES BACKUPS
   ///
 
-int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,int height)
+int Init_all_backup_lists(int size,int width,int height)
 {
   // size correspond au nombre de pages que l'on souhaite dans chaque liste
   // (1 pour la page courante, puis 1 pour chaque backup, soit 2 au minimum).
   // width et height correspondent à la dimension des images de départ.
 
-  S_Page * Page;
+  T_Page * page;
   int return_code=0;
 
-  if (Allouer_une_liste_de_pages(Principal_Backups,size) &&
-      Allouer_une_liste_de_pages(Brouillon_Backups,size))
+  if (Allocate_list_of_pages(Main_backups,size) &&
+      Allocate_list_of_pages(Spare_backups,size))
   {
     // On a réussi à allouer deux listes de pages dont la taille correspond à
     // celle demandée par l'utilisateur.
 
     // On crée un descripteur de page correspondant à la page principale
-    Page=(S_Page *)malloc(sizeof(S_Page));
-    Initialiser_S_Page(Page);
-    Upload_infos_page_principal(Page);
+    page=(T_Page *)malloc(sizeof(T_Page));
+    Init_page(page);
+    Upload_infos_page_main(page);
     // On y met les infos sur la dimension de démarrage
-    Page->Width=width;
-    Page->Height=height;
+    page->Width=width;
+    page->Height=height;
 
     // On regarde si on peut ajouter cette page
-    if (Nouvelle_page_possible(Page,Principal_Backups,Brouillon_Backups))
+    if (New_page_is_possible(page,Main_backups,Spare_backups))
     {
       // On peut, donc on va la créer
-      Creer_nouvelle_page(Page,Principal_Backups,Brouillon_Backups);
-      Download_infos_page_principal(Page);
-      Download_infos_backup(Principal_Backups);
+      Create_new_page(page,Main_backups,Spare_backups);
+      Download_infos_page_main(page);
+      Download_infos_backup(Main_backups);
 
       // Maintenant, on regarde si on a le droit de créer la même page dans
       // la page de brouillon.
-      if (Nouvelle_page_possible(Page,Brouillon_Backups,Principal_Backups))
+      if (New_page_is_possible(page,Spare_backups,Main_backups))
       {
         // On peut donc on le fait
-        Creer_nouvelle_page(Page,Brouillon_Backups,Principal_Backups);
-        Download_infos_page_brouillon(Page);
+        Create_new_page(page,Spare_backups,Main_backups);
+        Download_infos_page_spare(page);
 
         // Et on efface les 2 images en les remplacant de "0"
-        memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
-        memset(Brouillon_Ecran,0,Brouillon_Largeur_image*Brouillon_Hauteur_image);
+        memset(Main_screen,0,Main_image_width*Main_image_height);
+        memset(Spare_screen,0,Spare_image_width*Spare_image_height);
 
         return_code=1;
       }
@@ -717,7 +717,7 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,i
       // On ne peut pas démarrer le programme avec ne serait-ce qu'une
       // page de la dimension souhaitée, donc on laisse tout tomber et on
       // le renvoie chier.
-      free(Page);
+      free(page);
       return_code=0;
     }
   }
@@ -732,97 +732,97 @@ int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,i
   return return_code;
 }
 
-void Detruire_les_listes_de_backups_en_fin_de_programme(void)
+void Free_all_backup_lists(void)
 {
   // On commence par supprimer les pages une à une dans chacune des listes
     // Liste de la page principale
-  while (Principal_Backups->Nb_pages_allouees>0)
-    Detruire_derniere_page_allouee_de_la_liste(Principal_Backups);
+  while (Main_backups->Nb_pages_allocated>0)
+    Free_last_page_of_list(Main_backups);
     // Liste de la page de brouillon
-  while (Brouillon_Backups->Nb_pages_allouees>0)
-    Detruire_derniere_page_allouee_de_la_liste(Brouillon_Backups);
+  while (Spare_backups->Nb_pages_allocated>0)
+    Free_last_page_of_list(Spare_backups);
 
   // Puis on peut détruire les structures de liste elles-mêmes
-  Liberer_une_liste_de_pages(Principal_Backups);
-  Liberer_une_liste_de_pages(Brouillon_Backups);
-  free(Principal_Backups);
-  free(Brouillon_Backups);
+  Free_a_list_of_pages(Main_backups);
+  Free_a_list_of_pages(Spare_backups);
+  free(Main_backups);
+  free(Spare_backups);
 }
 
-void Nouveau_nombre_de_backups(int nb_backups)
+void Set_number_of_backups(int nb_backups)
 {
-  Changer_nombre_de_pages_d_une_liste(Principal_Backups,nb_backups+1);
-  Changer_nombre_de_pages_d_une_liste(Brouillon_Backups,nb_backups+1);
+  Change_page_number_of_list(Main_backups,nb_backups+1);
+  Change_page_number_of_list(Spare_backups,nb_backups+1);
 
   // Le +1 vient du fait que dans chaque liste, en 1ère position on retrouve
   // les infos de la page courante sur le brouillon et la page principale.
   // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
 
-int Backup_avec_nouvelles_dimensions(int Upload,int width,int height)
+int Backup_with_new_dimensions(int upload,int width,int height)
 {
   // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
   // 0 sinon.
 
-  S_Page * Nouvelle_page;
+  T_Page * new_page;
   int return_code=0;
 
-  if (Upload)
+  if (upload)
     // On remet à jour l'état des infos de la page courante (pour pouvoir les
     // retrouver plus tard)
-    Upload_infos_page_principal(Principal_Backups->Pages);
+    Upload_infos_page_main(Main_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
-  Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
-  Initialiser_S_Page(Nouvelle_page);
+  new_page=(T_Page *)malloc(sizeof(T_Page));
+  Init_page(new_page);
 
-  Upload_infos_page_principal(Nouvelle_page);
-  Nouvelle_page->Width=width;
-  Nouvelle_page->Height=height;
-  if (Nouvelle_page_possible(Nouvelle_page,Principal_Backups,Brouillon_Backups))
+  Upload_infos_page_main(new_page);
+  new_page->Width=width;
+  new_page->Height=height;
+  if (New_page_is_possible(new_page,Main_backups,Spare_backups))
   {
-    Creer_nouvelle_page(Nouvelle_page,Principal_Backups,Brouillon_Backups);
-    Download_infos_page_principal(Nouvelle_page);
-    Download_infos_backup(Principal_Backups);
+    Create_new_page(new_page,Main_backups,Spare_backups);
+    Download_infos_page_main(new_page);
+    Download_infos_backup(Main_backups);
     // On nettoie la nouvelle image:
-    memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
+    memset(Main_screen,0,Main_image_width*Main_image_height);
     return_code=1;
   }
 
   // On détruit le descripteur de la page courante
-  free(Nouvelle_page);
+  free(new_page);
 
   return return_code;
 }
 
-int Backuper_et_redimensionner_brouillon(int width,int height)
+int Backup_and_resize_the_spare(int width,int height)
 {
   // Retourne 1 si la page de dimension souhaitee est disponible en brouillon
   // et 0 sinon.
 
-  S_Page * Nouvelle_page;
+  T_Page * new_page;
   int return_code=0;
 
   // On remet à jour l'état des infos de la page de brouillon (pour pouvoir
   // les retrouver plus tard)
-  Upload_infos_page_brouillon(Brouillon_Backups->Pages);
+  Upload_infos_page_spare(Spare_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page de brouillon
-  Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
-  Initialiser_S_Page(Nouvelle_page);
+  new_page=(T_Page *)malloc(sizeof(T_Page));
+  Init_page(new_page);
 
-  Upload_infos_page_brouillon(Nouvelle_page);
-  Nouvelle_page->Width=width;
-  Nouvelle_page->Height=height;
-  if (Nouvelle_page_possible(Nouvelle_page,Brouillon_Backups,Principal_Backups))
+  Upload_infos_page_spare(new_page);
+  new_page->Width=width;
+  new_page->Height=height;
+  if (New_page_is_possible(new_page,Spare_backups,Main_backups))
   {
-    Creer_nouvelle_page(Nouvelle_page,Brouillon_Backups,Principal_Backups);
-    Download_infos_page_brouillon(Nouvelle_page);
+    Create_new_page(new_page,Spare_backups,Main_backups);
+    Download_infos_page_spare(new_page);
     return_code=1;
   }
 
   // On détruit le descripteur de la page courante
-  free(Nouvelle_page);
+  free(new_page);
 
   return return_code;
 }
@@ -832,59 +832,59 @@ void Backup(void)
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
   #if defined(__macosx__) || defined(__FreeBSD__)
-    S_Page Nouvelle_page;
+    T_Page new_page;
   #else
-    S_Page *Nouvelle_page;
+    T_Page *new_page;
   #endif
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_principal(Principal_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
 #if defined(__macosx__) || defined(__FreeBSD__)
-  Initialiser_S_Page(&Nouvelle_page);
+  Init_page(&new_page);
 
   // Enrichissement de l'historique
-  Copier_S_page(&Nouvelle_page,Principal_Backups->Pages);
-  Creer_nouvelle_page(&Nouvelle_page,Principal_Backups,Brouillon_Backups);
-  Download_infos_page_principal(&Nouvelle_page);
+  Copy_S_page(&new_page,Main_backups->Pages);
+  Create_new_page(&new_page,Main_backups,Spare_backups);
+  Download_infos_page_main(&new_page);
 #else
-  Nouvelle_page=(S_Page *)malloc(sizeof(S_Page));
-  Initialiser_S_Page(Nouvelle_page);
+  new_page=(T_Page *)malloc(sizeof(T_Page));
+  Init_page(new_page);
 
   // Enrichissement de l'historique
-  Copier_S_page(Nouvelle_page,Principal_Backups->Pages);
-  Creer_nouvelle_page(Nouvelle_page,Principal_Backups,Brouillon_Backups);
-  Download_infos_page_principal(Nouvelle_page);
+  Copy_S_page(new_page,Main_backups->Pages);
+  Create_new_page(new_page,Main_backups,Spare_backups);
+  Download_infos_page_main(new_page);
 #endif
 
-  Download_infos_backup(Principal_Backups);
+  Download_infos_backup(Main_backups);
 
   // On copie l'image du backup vers la page courante:
-  memcpy(Principal_Ecran,Ecran_backup,Principal_Largeur_image*Principal_Hauteur_image);
+  memcpy(Main_screen,Screen_backup,Main_image_width*Main_image_height);
 
   // On détruit le descripteur de la page courante
 #if !(defined(__macosx__) || defined(__FreeBSD__))
-  free(Nouvelle_page);
+  free(new_page);
 #endif
 
   // On allume l'indicateur de modification de l'image
-  Principal_Image_modifiee=1;
+  Main_image_is_modified=1;
 }
 
 void Undo(void)
 {
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_principal(Principal_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
   // On fait faire un undo à la liste des backups de la page principale
-  Reculer_dans_une_liste_de_pages(Principal_Backups);
+  Backward_in_list_of_pages(Main_backups);
 
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_principal(Principal_Backups->Pages);
+  Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
-  Download_infos_backup(Principal_Backups);
+  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
@@ -895,48 +895,48 @@ void Redo(void)
 {
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_principal(Principal_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
   // On fait faire un redo à la liste des backups de la page principale
-  Avancer_dans_une_liste_de_pages(Principal_Backups);
+  Advance_in_list_of_pages(Main_backups);
 
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_principal(Principal_Backups->Pages);
+  Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
-  Download_infos_backup(Principal_Backups);
+  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
   //       poser de problèmes.
 }
 
-void Detruire_la_page_courante(void)
+void Free_current_page(void)
 {
   // On détruit la page courante de la liste principale
-  Detruire_la_page_courante_d_une_liste(Principal_Backups);
+  Free_page_of_a_list(Main_backups);
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_principal(Principal_Backups->Pages);
+  Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
-  Download_infos_backup(Principal_Backups);
+  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
   //       devrait pas poser de problèmes.
 }
 
-void Interchanger_image_principale_et_brouillon(void)
+void Exchange_main_and_spare(void)
 {
-  S_Liste_de_pages * Liste_tempo;
+  T_List_of_pages * temp_list;
 
   // On commence par mettre à jour dans les descripteurs les infos sur les
   // pages qu'on s'apprête à échanger, pour qu'on se retrouve pas avec de
   // vieilles valeurs qui datent de mathuzalem.
-  Upload_infos_page_principal(Principal_Backups->Pages);
-  Upload_infos_page_brouillon(Brouillon_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_spare(Spare_backups->Pages);
 
   // On inverse les listes de pages
-  Liste_tempo=Principal_Backups;
-  Principal_Backups=Brouillon_Backups;
-  Brouillon_Backups=Liste_tempo;
+  temp_list=Main_backups;
+  Main_backups=Spare_backups;
+  Spare_backups=temp_list;
 
   // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
   // et backup.
@@ -947,55 +947,55 @@ void Interchanger_image_principale_et_brouillon(void)
     // un changement de dimensions et va bêtement sortir du mode loupe, alors
     // que lors d'un changement de page, on veut bien conserver l'état du mode
     // loupe du brouillon.
-    Principal_Largeur_image=Principal_Backups->Pages->Width;
-    Principal_Hauteur_image=Principal_Backups->Pages->Height;
+    Main_image_width=Main_backups->Pages->Width;
+    Main_image_height=Main_backups->Pages->Height;
 
-  Download_infos_page_principal(Principal_Backups->Pages);
-  Download_infos_page_brouillon(Brouillon_Backups->Pages);
-  Download_infos_backup(Principal_Backups);
+  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_spare(Spare_backups->Pages);
+  Download_infos_backup(Main_backups);
 }
 
 
-int Emprunt_memoire_de_page_possible(int size)
+int Can_borrow_memory_from_page(int size)
 {
-  int Taille_immediatement_disponible;
-  int Taille_liste_courante;
-  int Taille_liste_brouillon;
-  int Taille_page_courante;
-  int Taille_page_brouillon;
+  int mem_available_now;
+  int current_list_size;
+  int spare_list_size;
+  int current_page_size;
+  int spare_page_size;
 
-  Taille_immediatement_disponible=Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER;
-  Taille_liste_courante =Taille_d_une_liste_de_pages(Principal_Backups);
-  Taille_liste_brouillon=Taille_d_une_liste_de_pages(Brouillon_Backups);
-  Taille_page_courante  =Taille_d_une_page(Principal_Backups->Pages);
-  Taille_page_brouillon =Taille_d_une_page(Brouillon_Backups->Pages);
+  mem_available_now=Memory_free()-MINIMAL_MEMORY_TO_RESERVE;
+  current_list_size =Size_of_a_list_of_pages(Main_backups);
+  spare_list_size=Size_of_a_list_of_pages(Spare_backups);
+  current_page_size  =Size_of_a_page(Main_backups->Pages);
+  spare_page_size =Size_of_a_page(Spare_backups->Pages);
 
   // Il faut pouvoir loger la zone mémoire ainsi qu'un exemplaire de la page
   // courante, en conservant au pire la 1ère page de brouillon.
-  if ((Taille_immediatement_disponible
-      +Taille_liste_courante
-      +Taille_liste_brouillon
-      -Taille_page_courante
-      -Taille_page_brouillon)<size)
+  if ((mem_available_now
+      +current_list_size
+      +spare_list_size
+      -current_page_size
+      -spare_page_size)<size)
     return 0;
 
   return 1;
 }
 
-void * Emprunter_memoire_de_page(int size)
+void * Borrow_memory_from_page(int size)
 {
-  int                Il_faut_liberer;
-  S_Liste_de_pages * Liste_a_raboter;
-  S_Page *           Page_a_supprimer;
-  //int                Indice;
+  int                need_to_free;
+  T_List_of_pages * list_to_reduce;
+  T_Page *           page_to_delete;
+  //int                index;
 
-  if (Emprunt_memoire_de_page_possible(size))
+  if (Can_borrow_memory_from_page(size))
   {
     // On regarde s'il faut libérer des pages:
-    Il_faut_liberer=
-      (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)size;
+    need_to_free=
+      (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<(unsigned long)size;
 
-    if (!Il_faut_liberer)
+    if (!need_to_free)
     {
       // On a assez de place pour allouer une page. On n'a donc aucune page
       // à supprimer. On peut allouer de la mémoire directement.
@@ -1006,22 +1006,22 @@ void * Emprunter_memoire_de_page(int size)
       // On manque de mémoire. Il faut libérer une page...
 
       // Tant qu'il faut libérer
-      while (Il_faut_liberer)
+      while (need_to_free)
       {
         // On cherche sur quelle liste on va virer une page
 
         // S'il reste des pages à libérer dans la liste des brouillons
-        if (Brouillon_Backups->Nb_pages_allouees>1)
+        if (Spare_backups->Nb_pages_allocated>1)
           // Alors on va détruire la dernière page allouée de la liste des
           // brouillons
-          Liste_a_raboter=Brouillon_Backups;
+          list_to_reduce=Spare_backups;
         else
         {
-          if (Principal_Backups->Nb_pages_allouees>1)
+          if (Main_backups->Nb_pages_allocated>1)
           {
             // Sinon on va détruire la dernière page allouée de la
             // liste principale
-            Liste_a_raboter=Principal_Backups;
+            list_to_reduce=Main_backups;
           }
           else
           {
@@ -1035,18 +1035,18 @@ void * Emprunter_memoire_de_page(int size)
 
         // Puis on détermine la page que l'on va supprimer (c'est la dernière
         // de la liste)
-        Page_a_supprimer=Liste_a_raboter->Pages+(Liste_a_raboter->Nb_pages_allouees)-1;
+        page_to_delete=list_to_reduce->Pages+(list_to_reduce->Nb_pages_allocated)-1;
 
         // Détruire la dernière page allouée dans la Liste_à_raboter
-        Detruire_derniere_page_allouee_de_la_liste(Liste_a_raboter);
+        Free_last_page_of_list(list_to_reduce);
 
         // On regarde s'il faut continuer à libérer de la place
-        Il_faut_liberer=
-          (Memoire_libre()-QUANTITE_MINIMALE_DE_MEMOIRE_A_CONSERVER)<(unsigned long)size;
+        need_to_free=
+          (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<(unsigned long)size;
 
         // S'il ne faut pas, c'est qu'on peut allouer un bitmap
-        // pour la Nouvelle_page
-        if (!Il_faut_liberer)
+        // pour la new_page
+        if (!need_to_free)
           return malloc(size);
       }
     }

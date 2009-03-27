@@ -19,21 +19,21 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-byte Readline(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte Type_saisie);
+byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type);
 // Paramètres:
 //   x_pos, y_pos    : Coordonnées de la saisie dans la fenêtre
-//   Chaine          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   Taille_affichee : Nombre de caractères logeant dans la zone de saisie
-//   Type_saisie     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
+//   str          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   visible_size : Nombre de caractères logeant dans la zone de saisie
+//   input_type     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 
-byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte Taille_maxi, byte Type_saisie);
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type);
 // Paramètres:
 //   x_pos, y_pos    : Coordonnées de la saisie dans la fenêtre
-//   Chaine          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   Taille_affichee : Nombre de caractères logeant dans la zone de saisie
-//   Taille_maxi     : Nombre de caractères logeant dans la zone de saisie
-//   Type_saisie     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
+//   str          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   visible_size : Nombre de caractères logeant dans la zone de saisie
+//   max_size     : Nombre de caractères logeant dans la zone de saisie
+//   input_type     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)

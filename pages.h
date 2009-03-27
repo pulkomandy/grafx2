@@ -31,16 +31,16 @@
   /// GESTION DES PAGES
   ///
 
-void Initialiser_S_Page(S_Page * Page);
-void Download_infos_page_principal(S_Page * Page);
-void Upload_infos_page_principal(S_Page * Page);
-void Download_infos_page_brouillon(S_Page * Page);
-void Upload_infos_page_brouillon(S_Page * Page);
-void Download_infos_backup(S_Liste_de_pages * list);
-int Allouer_une_page(S_Page * Page,int width,int height);
-void Liberer_une_page(S_Page * Page);
-void Copier_S_page(S_Page * dest,S_Page * Source);
-int Taille_d_une_page(S_Page * Page);
+void Init_page(T_Page * page);
+void Download_infos_page_main(T_Page * page);
+void Upload_infos_page_main(T_Page * page);
+void Download_infos_page_spare(T_Page * page);
+void Upload_infos_page_spare(T_Page * page);
+void Download_infos_backup(T_List_of_pages * list);
+int Allocate_page(T_Page * page,int width,int height);
+void Free_a_page(T_Page * page);
+void Copy_S_page(T_Page * dest,T_Page * source);
+int Size_of_a_page(T_Page * page);
 
 
 
@@ -48,17 +48,17 @@ int Taille_d_une_page(S_Page * Page);
   /// GESTION DES LISTES DE PAGES
   ///
 
-void Initialiser_S_Liste_de_pages(S_Liste_de_pages * list);
-int Allouer_une_liste_de_pages(S_Liste_de_pages * list,int size);
-void Liberer_une_liste_de_pages(S_Liste_de_pages * list);
-int Taille_d_une_liste_de_pages(S_Liste_de_pages * list);
-void Reculer_dans_une_liste_de_pages(S_Liste_de_pages * list);
-void Avancer_dans_une_liste_de_pages(S_Liste_de_pages * list);
-int Nouvelle_page_possible(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire);
-void Detruire_derniere_page_allouee_de_la_liste(S_Liste_de_pages * list);
-void Creer_nouvelle_page(S_Page * Nouvelle_page,S_Liste_de_pages * Liste_courante,S_Liste_de_pages * Liste_secondaire);
-void Changer_nombre_de_pages_d_une_liste(S_Liste_de_pages * list,int number);
-void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list);
+void Init_list_of_pages(T_List_of_pages * list);
+int Allocate_list_of_pages(T_List_of_pages * list,int size);
+void Free_a_list_of_pages(T_List_of_pages * list);
+int Size_of_a_list_of_pages(T_List_of_pages * list);
+void Backward_in_list_of_pages(T_List_of_pages * list);
+void Advance_in_list_of_pages(T_List_of_pages * list);
+int New_page_is_possible(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list);
+void Free_last_page_of_list(T_List_of_pages * list);
+void Create_new_page(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list);
+void Change_page_number_of_list(T_List_of_pages * list,int number);
+void Free_page_of_a_list(T_List_of_pages * list);
 
 
 
@@ -66,16 +66,16 @@ void Detruire_la_page_courante_d_une_liste(S_Liste_de_pages * list);
   /// GESTION DES BACKUPS
   ///
 
-int Initialiser_les_listes_de_backups_en_debut_de_programme(int size,int width,int height);
-void Detruire_les_listes_de_backups_en_fin_de_programme(void);
-void Nouveau_nombre_de_backups(int nb_backups);
-int Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
-int Backuper_et_redimensionner_brouillon(int width,int height);
+int Init_all_backup_lists(int size,int width,int height);
+void Free_all_backup_lists(void);
+void Set_number_of_backups(int nb_backups);
+int Backup_with_new_dimensions(int upload,int width,int height);
+int Backup_and_resize_the_spare(int width,int height);
 void Backup(void);
 void Undo(void);
 void Redo(void);
-void Detruire_la_page_courante(void);
-void Interchanger_image_principale_et_brouillon(void);
+void Free_current_page(void);
+void Exchange_main_and_spare(void);
 
 
 
@@ -83,8 +83,8 @@ void Interchanger_image_principale_et_brouillon(void);
   /// GESTION DES EMPRUNTS DE MEMOIRE DE PAGE
   ///
 
-int Emprunt_memoire_de_page_possible(int size);
-void * Emprunter_memoire_de_page(int size);
+int Can_borrow_memory_from_page(int size);
+void * Borrow_memory_from_page(int size);
 
 
 

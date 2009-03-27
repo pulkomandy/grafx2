@@ -18,134 +18,134 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Demarrer_pile_operation(word Operation_demandee);
-void Operation_PUSH(short value);
-void Operation_POP(short * value);
+void Start_operation_stack(word new_operation);
+void Operation_push(short value);
+void Operation_pop(short * value);
 
-//////////////////////////////////////////////////// OPERATION_DESSIN_CONTINU
-void Freehand_Mode1_1_0(void);
-void Freehand_Mode1_1_2(void);
-void Freehand_Mode12_0_2(void);
-void Freehand_Mode1_2_0(void);
-void Freehand_Mode1_2_2(void);
+//////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW
+void Freehand_mode1_1_0(void);
+void Freehand_mode1_1_2(void);
+void Freehand_mode12_0_2(void);
+void Freehand_mode1_2_0(void);
+void Freehand_mode1_2_2(void);
 
-///////////////////////////////////////////////// OPERATION_DESSIN_DISCONTINU
-void Freehand_Mode2_1_0(void);
-void Freehand_Mode2_1_2(void);
-void Freehand_Mode2_2_0(void);
-void Freehand_Mode2_2_2(void);
+///////////////////////////////////////////////// OPERATION_DISCONTINUOUS_DRAW
+void Freehand_mode2_1_0(void);
+void Freehand_mode2_1_2(void);
+void Freehand_mode2_2_0(void);
+void Freehand_mode2_2_2(void);
 
-////////////////////////////////////////////////////// OPERATION_DESSIN_POINT
-void Freehand_Mode3_1_0(void);
+////////////////////////////////////////////////////// OPERATION_POINT_DRAW
+void Freehand_mode3_1_0(void);
 void Freehand_Mode3_2_0(void);
-void Freehand_Mode3_0_1(void);
+void Freehand_mode3_0_1(void);
 
-///////////////////////////////////////////////////////////// OPERATION_LIGNE
+///////////////////////////////////////////////////////////// OPERATION_LINE
 
-void Ligne_12_0(void);
-void Ligne_12_5(void);
-void Ligne_0_5(void);
+void Line_12_0(void);
+void Line_12_5(void);
+void Line_0_5(void);
 
-///////////////////////////////////////////////////////////// OPERATION_LOUPE
+///////////////////////////////////////////////////////////// OPERATION_MAGNIFY
 
-void Loupe_12_0(void);
+void Magnifier_12_0(void);
 
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????
 
 void Rectangle_12_0(void);
 void Rectangle_12_5(void);
-void Rectangle_vide_0_5(void);
-void Rectangle_plein_0_5(void);
+void Empty_rectangle_0_5(void);
+void Filled_rectangle_0_5(void);
 
 ////////////////////////////////////////////////////// OPERATION_CERCLE_?????
 
-void Cercle_12_0(void);
-void Cercle_12_5(void);
-void Cercle_vide_0_5(void);
-void Cercle_plein_0_5(void);
+void Circle_12_0(void);
+void Circle_12_5(void);
+void Empty_circle_0_5(void);
+void Filled_circle_0_5(void);
 
 ///////////////////////////////////////////////////// OPERATION_ELLIPSE_?????
 
 void Ellipse_12_0(void);
 void Ellipse_12_5(void);
-void Ellipse_vide_0_5(void);
-void Ellipse_pleine_0_5(void);
+void Empty_ellipse_0_5(void);
+void Filled_ellipse_0_5(void);
 
-////////////////////////////////////////////////////// OPERATION_PRISE_BROSSE
+////////////////////////////////////////////////////// OPERATION_GRAB_BRUSH
 
-void Brosse_12_0(void);
-void Brosse_12_5(void);
-void Brosse_0_5(void);
+void Brush_12_0(void);
+void Brush_12_5(void);
+void Brush_0_5(void);
 
-///////////////////////////////////////////////////// OPERATION_ETIRER_BROSSE
+///////////////////////////////////////////////////// OPERATION_STRETCH_BRUSH
 
-void Etirer_brosse_12_0(void);
-void Etirer_brosse_1_7(void);
-void Etirer_brosse_0_7(void);
-void Etirer_brosse_2_7(void);
+void Stretch_brush_12_0(void);
+void Stretch_brush_1_7(void);
+void Stretch_brush_0_7(void);
+void Stretch_brush_2_7(void);
 
-//////////////////////////////////////////////////// OPERATION_TOURNER_BROSSE
+//////////////////////////////////////////////////// OPERATION_ROTATE_BRUSH
 
-void Tourner_brosse_12_0(void);
-void Tourner_brosse_1_5(void);
-void Tourner_brosse_0_5(void);
-void Tourner_brosse_2_5(void);
+void Rotate_brush_12_0(void);
+void Rotate_brush_1_5(void);
+void Rotate_brush_0_5(void);
+void Rotate_brush_2_5(void);
 
-//////////////////////////////////////////////////////// OPERATION_POLYBROSSE
+//////////////////////////////////////////////////////// OPERATION_POLYBRUSH
 
-void Polybrosse_12_8(void);
+void Polybrush_12_8(void);
 
 ////////////////////////////////////////////////////////////// OPERATION_FILL
 
 void Fill_1_0(void);
 void Fill_2_0(void);
 
-///////////////////////////////////////////////////////// OPERATION_REMPLACER
+///////////////////////////////////////////////////////// OPERATION_REPLACE
 
-void Remplacer_1_0(void);
-void Remplacer_2_0(void);
+void Replace_1_0(void);
+void Replace_2_0(void);
 
-/////////////////////////////////////////////////////////// OPERATION_PIPETTE
+/////////////////////////////////////////////////////////// OPERATION_COLORPICK
 
 void Pipette_0_0(void);
-void Pipette_12_0(void);
-void Pipette_1_1(void);
-void Pipette_2_1(void);
-void Pipette_0_1(void);
+void Colorpicker_12_0(void);
+void Colorpicker_1_1(void);
+void Colorpicker_2_1(void);
+void Colorpicker_0_1(void);
 
 /////////////////////////////////////////////////////////// OPERATION_K_LIGNE
 
-void K_Ligne_12_0(void);
-void K_Ligne_12_6(void);
-void K_Ligne_0_6(void);
-void K_Ligne_12_7(void);
+void K_line_12_0(void);
+void K_line_12_6(void);
+void K_line_0_6(void);
+void K_line_12_7(void);
 
 /////////////////////////////////////////////////// OPERATION_COURBE_?_POINTS
 
-void Courbe_34_points_1_0(void);
-void Courbe_34_points_2_0(void);
-void Courbe_34_points_1_5(void);
-void Courbe_34_points_2_5(void);
+void Curve_34_points_1_0(void);
+void Curve_34_points_2_0(void);
+void Curve_34_points_1_5(void);
+void Curve_34_points_2_5(void);
 
-void Courbe_4_points_0_5(void);
-void Courbe_4_points_1_9(void);
-void Courbe_4_points_2_9(void);
+void Curve_4_points_0_5(void);
+void Curve_4_points_1_9(void);
+void Curve_4_points_2_9(void);
 
-void Courbe_3_points_0_5(void);
-void Courbe_3_points_0_11(void);
-void Courbe_3_points_12_11(void);
+void Curve_3_points_0_5(void);
+void Curve_3_points_0_11(void);
+void Curve_3_points_12_11(void);
 
-///////////////////////////////////////////////////////////// OPERATION_SPRAY
+///////////////////////////////////////////////////////////// OPERATION_AIRBRUSH
 
-void Spray_1_0(void);
-void Spray_2_0(void);
-void Spray_12_2(void);
-void Spray_0_2(void);
+void Airbrush_1_0(void);
+void Airbrush_2_0(void);
+void Airbrush_12_2(void);
+void Airbrush_0_2(void);
 
 //////////////////////////////////////////////////////////// OPERATION_*POLY*
 
-void Polygone_12_0(void);
-void Polygone_12_9(void);
+void Polygon_12_0(void);
+void Polygon_12_9(void);
 
 void Polyfill_12_0(void);
 void Polyfill_0_8(void);
@@ -167,36 +167,36 @@ void Scroll_12_0(void);
 void Scroll_12_4(void);
 void Scroll_0_4(void);
 
-//////////////////////////////////////////////////// OPERATION_CERCLE_DEGRADE
+//////////////////////////////////////////////////// OPERATION_GRAD_CIRCLE
 
-void Cercle_degrade_12_0(void);
-void Cercle_degrade_12_6(void);
-void Cercle_degrade_0_6(void);
-void Cercle_degrade_12_8(void);
-void Cercle_ou_ellipse_degrade_0_8(void);
+void Grad_circle_12_0(void);
+void Grad_circle_12_6(void);
+void Grad_circle_0_6(void);
+void Grad_circle_12_8(void);
+void Grad_circle_or_ellipse_0_8(void);
 
-////////////////////////////////////////////////// OPERATION_ELLIPSE_DEGRADEE
+////////////////////////////////////////////////// OPERATION_GRAD_ELLIPSE
 
-void Ellipse_degradee_12_0(void);
-void Ellipse_degradee_12_6(void);
-void Ellipse_degradee_0_6(void);
-void Ellipse_degradee_12_8(void);
+void Grad_ellipse_12_0(void);
+void Grad_ellipse_12_6(void);
+void Grad_ellipse_0_6(void);
+void Grad_ellipse_12_8(void);
 
-///////////////////////////////////////////////// OPERATION_RECTANGLE_DEGRADE
+///////////////////////////////////////////////// OPERATION_GRAD_RECTANGLE
 
-void Rectangle_Degrade_12_0(void);
-void Rectangle_Degrade_12_5(void);
-void Rectangle_Degrade_0_5(void);
-void Rectangle_Degrade_0_7(void);
-void Rectangle_Degrade_12_7(void);
-void Rectangle_Degrade_12_9(void);
-void Rectangle_Degrade_0_9(void);
+void Grad_rectangle_12_0(void);
+void Grad_rectangle_12_5(void);
+void Grad_rectangle_0_5(void);
+void Grad_rectangle_0_7(void);
+void Grad_rectangle_12_7(void);
+void Grad_rectangle_12_9(void);
+void Grad_rectangle_0_9(void);
 
-/////////////////////////////////////////////////// OPERATION_LIGNES_CENTREES
+/////////////////////////////////////////////////// OPERATION_CENTERED_LINES
 
-void Lignes_centrees_12_0(void);
-void Lignes_centrees_12_3(void);
-void Lignes_centrees_0_3(void);
-void Lignes_centrees_12_7(void);
-void Lignes_centrees_0_7(void);
+void Centered_lines_12_0(void);
+void Centered_lines_12_3(void);
+void Centered_lines_0_3(void);
+void Centered_lines_12_7(void);
+void Centered_lines_0_7(void);
 

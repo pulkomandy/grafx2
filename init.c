@@ -73,663 +73,663 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-void Chercher_bas(SDL_Surface *gui, int *Debut_X, int *Debut_Y, byte Couleur_neutre,char * section)
+void GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
 {
-  byte Couleur;
+  byte color;
   int y;
-  y=*Debut_Y;
-  *Debut_X=0;
+  y=*start_y;
+  *start_x=0;
   do
   {
-    Couleur=Sdl_Get_pixel_8(gui,*Debut_X,y);
-    if (Couleur!=Couleur_neutre)
+    color=Get_SDL_pixel_8(gui,*start_x,y);
+    if (color!=neutral_color)
     {
-      *Debut_Y=y;
+      *start_y=y;
       return;
     }
     y++;
   } while (y<gui->h);
   
   printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
-    *Debut_X, *Debut_Y, section);
-  Erreur(ERREUR_GUI_CORROMPU);
+    *start_x, *start_y, section);
+  Error(ERROR_GUI_CORRUPTED);
 }
 
-void Chercher_droite(SDL_Surface *gui, int *Debut_X, int Debut_Y, byte Couleur_neutre, char * section)
+void GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
 {
-  byte Couleur;
+  byte color;
   int x;
-  x=*Debut_X;
+  x=*start_x;
   
   do
   {
-    Couleur=Sdl_Get_pixel_8(gui,x,Debut_Y);
-    if (Couleur!=Couleur_neutre)
+    color=Get_SDL_pixel_8(gui,x,start_y);
+    if (color!=neutral_color)
     {
-      *Debut_X=x;
+      *start_x=x;
       return;
     }
     x++;
   } while (x<gui->w);
   
   printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
-    *Debut_X, Debut_Y, section);
-  Erreur(ERREUR_GUI_CORROMPU);
+    *start_x, start_y, section);
+  Error(ERROR_GUI_CORRUPTED);
 }
 
-void Lire_bloc(SDL_Surface *gui, int Debut_X, int Debut_Y, void *Dest, int width, int height, char * section, int type)
+void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
-  // type: 2 = brush icon or sieve pattern (only CM_Blanc and CM_Trans)
+  // type: 2 = brush icon or sieve pattern (only MC_White and MC_Trans)
   // type: 3 = raw bitmap (splash screen)
   
-  byte * Ptr=Dest;
+  byte * dest_ptr=dest;
   int x,y;
-  byte Couleur;
+  byte color;
 
   // Verification taille
-  if (Debut_Y+height>=gui->h || Debut_X+width>=gui->w)
+  if (start_y+height>=gui->h || start_x+width>=gui->w)
   {
     printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
-      Debut_X, Debut_Y, height, width, section);
-    Erreur(ERREUR_GUI_CORROMPU);
+      start_x, start_y, height, width, section);
+    Error(ERROR_GUI_CORRUPTED);
   }
 
-  for (y=Debut_Y; y<Debut_Y+height; y++)
+  for (y=start_y; y<start_y+height; y++)
   {
-    for (x=Debut_X; x<Debut_X+width; x++)
+    for (x=start_x; x<start_x+width; x++)
     {
-      Couleur=Sdl_Get_pixel_8(gui,x,y);
-      if (type==0 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc))
+      color=Get_SDL_pixel_8(gui,x,y);
+      if (type==0 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc);
-        Erreur(ERREUR_GUI_CORROMPU);
+          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White);
+        Error(ERROR_GUI_CORRUPTED);
       }
-      if (type==1 && (Couleur != CM_Noir && Couleur != CM_Fonce && Couleur != CM_Clair && Couleur != CM_Blanc && Couleur != CM_Trans))
+      if (type==1 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White && color != MC_Trans))
       {
         printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Noir, CM_Fonce, CM_Clair, CM_Blanc, CM_Trans);
-        Erreur(ERREUR_GUI_CORROMPU);
+          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White, MC_Trans);
+        Error(ERROR_GUI_CORRUPTED);
       }
       if (type==2)
       {
-        if (Couleur != CM_Blanc && Couleur != CM_Trans)
+        if (color != MC_White && color != MC_Trans)
         {
           printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            Debut_X, Debut_Y, height, width, section, x, y, Couleur, CM_Blanc, CM_Trans);
-          Erreur(ERREUR_GUI_CORROMPU);
+            start_x, start_y, height, width, section, x, y, color, MC_White, MC_Trans);
+          Error(ERROR_GUI_CORRUPTED);
         }
         // Conversion en 0/1 pour les brosses monochromes internes
-        Couleur = (Couleur != CM_Trans);
+        color = (color != MC_Trans);
       }
-      *Ptr=Couleur;
-      Ptr++;
+      *dest_ptr=color;
+      dest_ptr++;
     }
   }
 }
 
-void Lire_trame(SDL_Surface *gui, int Debut_X, int Debut_Y, word *Dest, char * section)
+void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
-  byte Buffer[256];
+  byte buffer[256];
   int x,y;
   
-  Lire_bloc(gui, Debut_X, Debut_Y, Buffer, 16, 16, section, 2);
+  Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2);
 
   for (y=0; y<16; y++)
   {
-    *Dest=0;
+    *dest=0;
     for (x=0; x<16; x++)
     {
-      *Dest=*Dest | Buffer[y*16+x]<<x;
+      *dest=*dest | buffer[y*16+x]<<x;
     }
-    Dest++;
+    dest++;
   }
 }
 
 
-void Charger_DAT(void)
+void Load_DAT(void)
 {
-  int  Indice;
-  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
+  int  index;
+  char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * gui;
   SDL_Palette * SDLPal;
   int i;
-  int Curseur_X=0,Curseur_Y=0;
-  byte Couleur;
-  byte CM_Neutre; // Couleur neutre utilisée pour délimiter les éléments GUI
-  int Car_1=0;  // Indices utilisés pour les 4 "fontes" qui composent les
-  int Car_2=0;  // grands titres de l'aide. Chaque indice avance dans 
-  int Car_3=0;  // l'une des fontes dans l'ordre :  1 2
-  int Car_4=0;  //                                  3 4
+  int cursor_x=0,cursor_y=0;
+  byte color;
+  byte neutral_color; // color neutre utilisée pour délimiter les éléments GUI
+  int char_1=0;  // Indices utilisés pour les 4 "fontes" qui composent les
+  int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
+  int char_3=0;  // l'une des fontes dans l'ordre :  1 2
+  int char_4=0;  //                                  3 4
   
   // Lecture du fichier "skin"
-  strcpy(Nom_du_fichier,Repertoire_des_donnees);
-  strcat(Nom_du_fichier,"gfx2gui.gif");
-  gui=IMG_Load(Nom_du_fichier);
+  strcpy(filename,Repertoire_des_donnees);
+  strcat(filename,"gfx2gui.gif");
+  gui=IMG_Load(filename);
   if (!gui)
   {
-    Erreur(ERREUR_GUI_ABSENT);
+    Error(ERROR_GUI_MISSING);
   }
   if (!gui->format || gui->format->BitsPerPixel != 8)
   {
     printf("Not a 8-bit image");
-    Erreur(ERREUR_GUI_CORROMPU);
+    Error(ERROR_GUI_CORRUPTED);
   }
   SDLPal=gui->format->palette;
   if (!SDLPal || SDLPal->ncolors!=256)
   {
     printf("Not a 256-color palette");
-    Erreur(ERREUR_GUI_CORROMPU);
+    Error(ERROR_GUI_CORRUPTED);
   }
   // Lecture de la palette par défaut
   for (i=0; i<256; i++)
   {
-    Palette_defaut[i].R=SDLPal->colors[i].r;
-    Palette_defaut[i].G=SDLPal->colors[i].g;
-    Palette_defaut[i].B=SDLPal->colors[i].b;
+    Default_palette[i].R=SDLPal->colors[i].r;
+    Default_palette[i].G=SDLPal->colors[i].g;
+    Default_palette[i].B=SDLPal->colors[i].b;
   }
   
   // Carré "noir"
-  CM_Noir = Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
+  MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
-    if (++Curseur_X>=gui->w)
+    if (++cursor_x>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
-    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
-  } while(Couleur==CM_Noir);
+    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  } while(color==MC_Black);
   // Carré "foncé"
-  CM_Fonce=Couleur;
+  MC_Dark=color;
   do
   {
-    if (++Curseur_X>=gui->w)
+    if (++cursor_x>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
-    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
-  } while(Couleur==CM_Fonce);
+    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  } while(color==MC_Dark);
   // Carré "clair"
-  CM_Clair=Couleur;
+  MC_Light=color;
   do
   {
-    if (++Curseur_X>gui->w)
+    if (++cursor_x>gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
-    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
-  } while(Couleur==CM_Clair);
+    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  } while(color==MC_Light);
   // Carré "blanc"
-  CM_Blanc=Couleur;
+  MC_White=color;
   do
   {
-    if (++Curseur_X>=gui->w)
+    if (++cursor_x>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
-    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
-  } while(Couleur==CM_Blanc);
+    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  } while(color==MC_White);
   // Carré "transparent"
-  CM_Trans=Couleur;
+  MC_Trans=color;
   do
   {
-    if (++Curseur_X>=gui->w)
+    if (++cursor_x>=gui->w)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
-    Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y);
-  } while(Couleur==CM_Trans);
+    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  } while(color==MC_Trans);
   // Reste : couleur neutre
-  CM_Neutre=Couleur;
+  neutral_color=color;
 
   
-  Curseur_X=0;
-  Curseur_Y=1;
-  while ((Couleur=Sdl_Get_pixel_8(gui,Curseur_X,Curseur_Y))==CM_Noir)
+  cursor_x=0;
+  cursor_y=1;
+  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==MC_Black)
   {
-    Curseur_Y++;
-    if (Curseur_Y>=gui->h)
+    cursor_y++;
+    if (cursor_y>=gui->h)
     {
       printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Erreur(ERREUR_GUI_CORROMPU);
+      Error(ERROR_GUI_CORRUPTED);
     }
   }
   
   // Menu
-  Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "menu");
-  Lire_bloc(gui, Curseur_X, Curseur_Y, BLOCK_MENU, LARGEUR_MENU, HAUTEUR_MENU,"menu",0);
-  Curseur_Y+=HAUTEUR_MENU;
+  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu");
+  Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0);
+  cursor_y+=MENU_HEIGHT;
 
   // Effets
-  for (i=0; i<NB_SPRITES_EFFETS; i++)
+  for (i=0; i<NB_EFFECTS_SPRITES; i++)
   {
     if (i==0)
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "effect sprite");
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite");
     else
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "effect sprite");
-    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_EFFET[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "effect sprite",0);
-    Curseur_X+=LARGEUR_SPRITE_MENU;
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite");
+    Read_GUI_block(gui, cursor_x, cursor_y, GFX_effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0);
+    cursor_x+=MENU_SPRITE_WIDTH;
   }
-  Curseur_Y+=HAUTEUR_SPRITE_MENU;
+  cursor_y+=MENU_SPRITE_HEIGHT;
   
   // Curseurs souris
-  for (i=0; i<NB_SPRITES_CURSEUR; i++)
+  for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
     if (i==0)
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "mouse cursor");
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor");
     else
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "mouse cursor");
-    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_CURSEUR[i], LARGEUR_SPRITE_CURSEUR, HAUTEUR_SPRITE_CURSEUR, "mouse cursor",1);
-    Curseur_X+=LARGEUR_SPRITE_CURSEUR;
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
+    Read_GUI_block(gui, cursor_x, cursor_y, GFX_cursor_sprite[i], CURSOR_SPRITE_WIDTH, CURSOR_SPRITE_HEIGHT, "mouse cursor",1);
+    cursor_x+=CURSOR_SPRITE_WIDTH;
   }
-  Curseur_Y+=HAUTEUR_SPRITE_CURSEUR;
+  cursor_y+=CURSOR_SPRITE_HEIGHT;
   
   // Sprites menu
-  for (i=0; i<NB_SPRITES_MENU; i++)
+  for (i=0; i<NB_MENU_SPRITES; i++)
   {
     if (i==0)
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "menu sprite");
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite");
     else
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "menu sprite");
-    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_MENU[i], LARGEUR_SPRITE_MENU, HAUTEUR_SPRITE_MENU, "menu sprite",1);
-    Curseur_X+=LARGEUR_SPRITE_MENU;
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite");
+    Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1);
+    cursor_x+=MENU_SPRITE_WIDTH;
   }
-  Curseur_Y+=HAUTEUR_SPRITE_MENU;
+  cursor_y+=MENU_SPRITE_HEIGHT;
   
   // Icones des Pinceaux
-  for (i=0; i<NB_SPRITES_PINCEAU; i++)
+  for (i=0; i<NB_PAINTBRUSH_SPRITES; i++)
   {
     // Rangés par ligne de 12
     if ((i%12)==0)
     {
       if (i!=0)
-        Curseur_Y+=HAUTEUR_PINCEAU;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "brush icon");
+        cursor_y+=PAINTBRUSH_HEIGHT;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "brush icon");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon");
     }
-    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_PINCEAU[i], LARGEUR_PINCEAU, HAUTEUR_PINCEAU, "brush icon",2);
-    Curseur_X+=LARGEUR_PINCEAU;
+    Read_GUI_block(gui, cursor_x, cursor_y, GFX_paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2);
+    cursor_x+=PAINTBRUSH_WIDTH;
   }
-  Curseur_Y+=HAUTEUR_PINCEAU;
+  cursor_y+=PAINTBRUSH_HEIGHT;
 
   // Sprites drive
-  for (i=0; i<NB_SPRITES_DRIVES; i++)
+  for (i=0; i<NB_ICON_SPRITES; i++)
   {
     if (i==0)
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "sprite drive");
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive");
     else
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "sprite drive");
-    Lire_bloc(gui, Curseur_X, Curseur_Y, SPRITE_DRIVE[i], LARGEUR_SPRITE_DRIVE, HAUTEUR_SPRITE_DRIVE, "sprite drive",1);
-    Curseur_X+=LARGEUR_SPRITE_DRIVE;
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive");
+    Read_GUI_block(gui, cursor_x, cursor_y, GFX_icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1);
+    cursor_x+=ICON_SPRITE_WIDTH;
   }
-  Curseur_Y+=HAUTEUR_SPRITE_DRIVE;
+  cursor_y+=ICON_SPRITE_HEIGHT;
 
   // Logo splash screen
-  if (!(Logo_GrafX2=(byte *)malloc(231*56)))
-    Erreur(ERREUR_MEMOIRE);
+  if (!(GFX_logo_grafx2=(byte *)malloc(231*56)))
+    Error(ERROR_MEMORY);
 
-  Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "logo menu");
-  Lire_bloc(gui, Curseur_X, Curseur_Y, Logo_GrafX2, 231, 56, "logo menu",3);
-  Curseur_Y+=56;
+  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu");
+  Read_GUI_block(gui, cursor_x, cursor_y, GFX_logo_grafx2, 231, 56, "logo menu",3);
+  cursor_y+=56;
   
   // Trames
-  for (i=0; i<NB_TRAMES_PREDEFINIES; i++)
+  for (i=0; i<NB_PRESET_SIEVE; i++)
   {
     if (i==0)
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "sieve pattern");
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern");
     else
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "sieve pattern");
-    Lire_trame(gui, Curseur_X, Curseur_Y, TRAME_PREDEFINIE[i],"sieve pattern");
-    Curseur_X+=16;
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern");
+    Read_GUI_pattern(gui, cursor_x, cursor_y, GFX_sieve_pattern[i],"sieve pattern");
+    cursor_x+=16;
   }
-  Curseur_Y+=16;
+  cursor_y+=16;
   
-  // Fonte Système
+  // Font Système
   for (i=0; i<256; i++)
   {
     // Rangés par ligne de 32
     if ((i%32)==0)
     {
       if (i!=0)
-        Curseur_Y+=8;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "system font");
+        cursor_y+=8;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "system font");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "system font");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font");
     }
-    Lire_bloc(gui, Curseur_X, Curseur_Y, &Fonte_systeme[i*64], 8, 8, "system font",2);
-    Curseur_X+=8;
+    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_system_font[i*64], 8, 8, "system font",2);
+    cursor_x+=8;
   }
-  Curseur_Y+=8;
-  Fonte=Fonte_systeme;
+  cursor_y+=8;
+  Font=GFX_system_font;
 
-  // Fonte Fun
+  // Font Fun
   for (i=0; i<256; i++)
   {
     // Rangés par ligne de 32
     if ((i%32)==0)
     {
       if (i!=0)
-        Curseur_Y+=8;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "fun font");
+        cursor_y+=8;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "fun font");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "fun font");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font");
     }
-    Lire_bloc(gui, Curseur_X, Curseur_Y, &Fonte_fun[i*64], 8, 8, "fun font",2);
-    Curseur_X+=8;
+    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_fun_font[i*64], 8, 8, "fun font",2);
+    cursor_x+=8;
   }
-  Curseur_Y+=8;
+  cursor_y+=8;
 
-  // Fonte help normale
+  // Font help normale
   for (i=0; i<256; i++)
   {
     // Rangés par ligne de 32
     if ((i%32)==0)
     {
       if (i!=0)
-        Curseur_Y+=8;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (norm)");
+        cursor_y+=8;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (norm)");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)");
     }
-    Lire_bloc(gui, Curseur_X, Curseur_Y, &(Fonte_help_norm[i][0][0]), 6, 8, "help font (norm)",0);
-    Curseur_X+=6;
+    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_help_font_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    cursor_x+=6;
   }
-  Curseur_Y+=8;
+  cursor_y+=8;
   
-  // Fonte help bold
+  // Font help bold
   for (i=0; i<256; i++)
   {
     // Rangés par ligne de 32
     if ((i%32)==0)
     {
       if (i!=0)
-        Curseur_Y+=8;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (bold)");
+        cursor_y+=8;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (bold)");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)");
     }
-    Lire_bloc(gui, Curseur_X, Curseur_Y, &(Fonte_help_bold[i][0][0]), 6, 8, "help font (bold)",0);
-    Curseur_X+=6;
+    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_bold_font[i][0][0]), 6, 8, "help font (bold)",0);
+    cursor_x+=6;
   }
-  Curseur_Y+=8;
+  cursor_y+=8;
 
-  // Fonte help titre
+  // Font help titre
   for (i=0; i<256; i++)
   {
-    byte * Dest;
+    byte * dest;
     // Rangés par ligne de 64
     if ((i%64)==0)
     {
       if (i!=0)
-        Curseur_Y+=8;
-      Chercher_bas(gui, &Curseur_X, &Curseur_Y, CM_Neutre, "help font (title)");
+        cursor_y+=8;
+      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)");
     }
     else
     {
-      Chercher_droite(gui, &Curseur_X, Curseur_Y, CM_Neutre, "help font (title)");
+      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (title)");
     }
     
     if (i&1)
       if (i&64)
-        Dest=&(Fonte_help_t4[Car_4++][0][0]);
+        dest=&(GFX_help_font_t4[char_4++][0][0]);
       else
-        Dest=&(Fonte_help_t2[Car_2++][0][0]);
+        dest=&(GFX_help_font_t2[char_2++][0][0]);
     else
       if (i&64)
-        Dest=&(Fonte_help_t3[Car_3++][0][0]);
+        dest=&(GFX_help_font_t3[char_3++][0][0]);
       else
-        Dest=&(Fonte_help_t1[Car_1++][0][0]);
+        dest=&(GFX_help_font_t1[char_1++][0][0]);
     
-    Lire_bloc(gui, Curseur_X, Curseur_Y, Dest, 6, 8, "help font (title)",0);
-    Curseur_X+=6;
+    Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0);
+    cursor_x+=6;
   }
-  Curseur_Y+=8;
+  cursor_y+=8;
   
   // Terminé: libération de l'image skin
   SDL_FreeSurface(gui);
 
-  Section_d_aide_en_cours=0;
-  Position_d_aide_en_cours=0;
+  Current_help_section=0;
+  Help_position=0;
 
-  Pinceau_predefini_Largeur[ 0]= 1;
-  Pinceau_predefini_Hauteur[ 0]= 1;
-  Pinceau_Type             [ 0]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 0]= 1;
+  Preset_paintbrush_height[ 0]= 1;
+  Paintbrush_type             [ 0]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 1]= 2;
-  Pinceau_predefini_Hauteur[ 1]= 2;
-  Pinceau_Type             [ 1]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 1]= 2;
+  Preset_paintbrush_height[ 1]= 2;
+  Paintbrush_type             [ 1]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 2]= 3;
-  Pinceau_predefini_Hauteur[ 2]= 3;
-  Pinceau_Type             [ 2]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 2]= 3;
+  Preset_paintbrush_height[ 2]= 3;
+  Paintbrush_type             [ 2]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 3]= 4;
-  Pinceau_predefini_Hauteur[ 3]= 4;
-  Pinceau_Type             [ 3]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 3]= 4;
+  Preset_paintbrush_height[ 3]= 4;
+  Paintbrush_type             [ 3]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 4]= 5;
-  Pinceau_predefini_Hauteur[ 4]= 5;
-  Pinceau_Type             [ 4]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 4]= 5;
+  Preset_paintbrush_height[ 4]= 5;
+  Paintbrush_type             [ 4]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 5]= 7;
-  Pinceau_predefini_Hauteur[ 5]= 7;
-  Pinceau_Type             [ 5]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 5]= 7;
+  Preset_paintbrush_height[ 5]= 7;
+  Paintbrush_type             [ 5]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 6]= 8;
-  Pinceau_predefini_Hauteur[ 6]= 8;
-  Pinceau_Type             [ 6]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 6]= 8;
+  Preset_paintbrush_height[ 6]= 8;
+  Paintbrush_type             [ 6]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 7]=12;
-  Pinceau_predefini_Hauteur[ 7]=12;
-  Pinceau_Type             [ 7]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 7]=12;
+  Preset_paintbrush_height[ 7]=12;
+  Paintbrush_type             [ 7]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 8]=16;
-  Pinceau_predefini_Hauteur[ 8]=16;
-  Pinceau_Type             [ 8]=FORME_PINCEAU_CARRE;
+  Preset_paintbrush_width[ 8]=16;
+  Preset_paintbrush_height[ 8]=16;
+  Paintbrush_type             [ 8]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Pinceau_predefini_Largeur[ 9]=16;
-  Pinceau_predefini_Hauteur[ 9]=16;
-  Pinceau_Type             [ 9]=FORME_PINCEAU_CARRE_TRAME;
+  Preset_paintbrush_width[ 9]=16;
+  Preset_paintbrush_height[ 9]=16;
+  Paintbrush_type             [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
 
-  Pinceau_predefini_Largeur[10]=15;
-  Pinceau_predefini_Hauteur[10]=15;
-  Pinceau_Type             [10]=FORME_PINCEAU_LOSANGE;
+  Preset_paintbrush_width[10]=15;
+  Preset_paintbrush_height[10]=15;
+  Paintbrush_type             [10]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Pinceau_predefini_Largeur[11]= 5;
-  Pinceau_predefini_Hauteur[11]= 5;
-  Pinceau_Type             [11]=FORME_PINCEAU_LOSANGE;
+  Preset_paintbrush_width[11]= 5;
+  Preset_paintbrush_height[11]= 5;
+  Paintbrush_type             [11]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Pinceau_predefini_Largeur[12]= 3;
-  Pinceau_predefini_Hauteur[12]= 3;
-  Pinceau_Type             [12]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[12]= 3;
+  Preset_paintbrush_height[12]= 3;
+  Paintbrush_type             [12]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[13]= 4;
-  Pinceau_predefini_Hauteur[13]= 4;
-  Pinceau_Type             [13]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[13]= 4;
+  Preset_paintbrush_height[13]= 4;
+  Paintbrush_type             [13]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[14]= 5;
-  Pinceau_predefini_Hauteur[14]= 5;
-  Pinceau_Type             [14]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[14]= 5;
+  Preset_paintbrush_height[14]= 5;
+  Paintbrush_type             [14]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[15]= 6;
-  Pinceau_predefini_Hauteur[15]= 6;
-  Pinceau_Type             [15]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[15]= 6;
+  Preset_paintbrush_height[15]= 6;
+  Paintbrush_type             [15]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[16]= 8;
-  Pinceau_predefini_Hauteur[16]= 8;
-  Pinceau_Type             [16]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[16]= 8;
+  Preset_paintbrush_height[16]= 8;
+  Paintbrush_type             [16]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[17]=10;
-  Pinceau_predefini_Hauteur[17]=10;
-  Pinceau_Type             [17]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[17]=10;
+  Preset_paintbrush_height[17]=10;
+  Paintbrush_type             [17]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[18]=12;
-  Pinceau_predefini_Hauteur[18]=12;
-  Pinceau_Type             [18]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[18]=12;
+  Preset_paintbrush_height[18]=12;
+  Paintbrush_type             [18]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[19]=14;
-  Pinceau_predefini_Hauteur[19]=14;
-  Pinceau_Type             [19]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[19]=14;
+  Preset_paintbrush_height[19]=14;
+  Paintbrush_type             [19]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[20]=16;
-  Pinceau_predefini_Hauteur[20]=16;
-  Pinceau_Type             [20]=FORME_PINCEAU_ROND;
+  Preset_paintbrush_width[20]=16;
+  Preset_paintbrush_height[20]=16;
+  Paintbrush_type             [20]=PAINTBRUSH_SHAPE_ROUND;
 
-  Pinceau_predefini_Largeur[21]=15;
-  Pinceau_predefini_Hauteur[21]=15;
-  Pinceau_Type             [21]=FORME_PINCEAU_ROND_TRAME;
+  Preset_paintbrush_width[21]=15;
+  Preset_paintbrush_height[21]=15;
+  Paintbrush_type             [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Pinceau_predefini_Largeur[22]=11;
-  Pinceau_predefini_Hauteur[22]=11;
-  Pinceau_Type             [22]=FORME_PINCEAU_ROND_TRAME;
+  Preset_paintbrush_width[22]=11;
+  Preset_paintbrush_height[22]=11;
+  Paintbrush_type             [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Pinceau_predefini_Largeur[23]= 5;
-  Pinceau_predefini_Hauteur[23]= 5;
-  Pinceau_Type             [23]=FORME_PINCEAU_ROND_TRAME;
+  Preset_paintbrush_width[23]= 5;
+  Preset_paintbrush_height[23]= 5;
+  Paintbrush_type             [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Pinceau_predefini_Largeur[24]= 2;
-  Pinceau_predefini_Hauteur[24]= 1;
-  Pinceau_Type             [24]=FORME_PINCEAU_BARRE_HORIZONTALE;
+  Preset_paintbrush_width[24]= 2;
+  Preset_paintbrush_height[24]= 1;
+  Paintbrush_type             [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Pinceau_predefini_Largeur[25]= 3;
-  Pinceau_predefini_Hauteur[25]= 1;
-  Pinceau_Type             [25]=FORME_PINCEAU_BARRE_HORIZONTALE;
+  Preset_paintbrush_width[25]= 3;
+  Preset_paintbrush_height[25]= 1;
+  Paintbrush_type             [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Pinceau_predefini_Largeur[26]= 4;
-  Pinceau_predefini_Hauteur[26]= 1;
-  Pinceau_Type             [26]=FORME_PINCEAU_BARRE_HORIZONTALE;
+  Preset_paintbrush_width[26]= 4;
+  Preset_paintbrush_height[26]= 1;
+  Paintbrush_type             [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Pinceau_predefini_Largeur[27]= 8;
-  Pinceau_predefini_Hauteur[27]= 1;
-  Pinceau_Type             [27]=FORME_PINCEAU_BARRE_HORIZONTALE;
+  Preset_paintbrush_width[27]= 8;
+  Preset_paintbrush_height[27]= 1;
+  Paintbrush_type             [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Pinceau_predefini_Largeur[28]= 1;
-  Pinceau_predefini_Hauteur[28]= 2;
-  Pinceau_Type             [28]=FORME_PINCEAU_BARRE_VERTICALE;
+  Preset_paintbrush_width[28]= 1;
+  Preset_paintbrush_height[28]= 2;
+  Paintbrush_type             [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Pinceau_predefini_Largeur[29]= 1;
-  Pinceau_predefini_Hauteur[29]= 3;
-  Pinceau_Type             [29]=FORME_PINCEAU_BARRE_VERTICALE;
+  Preset_paintbrush_width[29]= 1;
+  Preset_paintbrush_height[29]= 3;
+  Paintbrush_type             [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Pinceau_predefini_Largeur[30]= 1;
-  Pinceau_predefini_Hauteur[30]= 4;
-  Pinceau_Type             [30]=FORME_PINCEAU_BARRE_VERTICALE;
+  Preset_paintbrush_width[30]= 1;
+  Preset_paintbrush_height[30]= 4;
+  Paintbrush_type             [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Pinceau_predefini_Largeur[31]= 1;
-  Pinceau_predefini_Hauteur[31]= 8;
-  Pinceau_Type             [31]=FORME_PINCEAU_BARRE_VERTICALE;
+  Preset_paintbrush_width[31]= 1;
+  Preset_paintbrush_height[31]= 8;
+  Paintbrush_type             [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Pinceau_predefini_Largeur[32]= 3;
-  Pinceau_predefini_Hauteur[32]= 3;
-  Pinceau_Type             [32]=FORME_PINCEAU_X;
+  Preset_paintbrush_width[32]= 3;
+  Preset_paintbrush_height[32]= 3;
+  Paintbrush_type             [32]=PAINTBRUSH_SHAPE_CROSS;
 
-  Pinceau_predefini_Largeur[33]= 5;
-  Pinceau_predefini_Hauteur[33]= 5;
-  Pinceau_Type             [33]=FORME_PINCEAU_X;
+  Preset_paintbrush_width[33]= 5;
+  Preset_paintbrush_height[33]= 5;
+  Paintbrush_type             [33]=PAINTBRUSH_SHAPE_CROSS;
 
-  Pinceau_predefini_Largeur[34]= 5;
-  Pinceau_predefini_Hauteur[34]= 5;
-  Pinceau_Type             [34]=FORME_PINCEAU_PLUS;
+  Preset_paintbrush_width[34]= 5;
+  Preset_paintbrush_height[34]= 5;
+  Paintbrush_type             [34]=PAINTBRUSH_SHAPE_PLUS;
 
-  Pinceau_predefini_Largeur[35]=15;
-  Pinceau_predefini_Hauteur[35]=15;
-  Pinceau_Type             [35]=FORME_PINCEAU_PLUS;
+  Preset_paintbrush_width[35]=15;
+  Preset_paintbrush_height[35]=15;
+  Paintbrush_type             [35]=PAINTBRUSH_SHAPE_PLUS;
 
-  Pinceau_predefini_Largeur[36]= 2;
-  Pinceau_predefini_Hauteur[36]= 2;
-  Pinceau_Type             [36]=FORME_PINCEAU_SLASH;
+  Preset_paintbrush_width[36]= 2;
+  Preset_paintbrush_height[36]= 2;
+  Paintbrush_type             [36]=PAINTBRUSH_SHAPE_SLASH;
 
-  Pinceau_predefini_Largeur[37]= 4;
-  Pinceau_predefini_Hauteur[37]= 4;
-  Pinceau_Type             [37]=FORME_PINCEAU_SLASH;
+  Preset_paintbrush_width[37]= 4;
+  Preset_paintbrush_height[37]= 4;
+  Paintbrush_type             [37]=PAINTBRUSH_SHAPE_SLASH;
 
-  Pinceau_predefini_Largeur[38]= 8;
-  Pinceau_predefini_Hauteur[38]= 8;
-  Pinceau_Type             [38]=FORME_PINCEAU_SLASH;
+  Preset_paintbrush_width[38]= 8;
+  Preset_paintbrush_height[38]= 8;
+  Paintbrush_type             [38]=PAINTBRUSH_SHAPE_SLASH;
 
-  Pinceau_predefini_Largeur[39]= 2;
-  Pinceau_predefini_Hauteur[39]= 2;
-  Pinceau_Type             [39]=FORME_PINCEAU_ANTISLASH;
+  Preset_paintbrush_width[39]= 2;
+  Preset_paintbrush_height[39]= 2;
+  Paintbrush_type             [39]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Pinceau_predefini_Largeur[40]= 4;
-  Pinceau_predefini_Hauteur[40]= 4;
-  Pinceau_Type             [40]=FORME_PINCEAU_ANTISLASH;
+  Preset_paintbrush_width[40]= 4;
+  Preset_paintbrush_height[40]= 4;
+  Paintbrush_type             [40]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Pinceau_predefini_Largeur[41]= 8;
-  Pinceau_predefini_Hauteur[41]= 8;
-  Pinceau_Type             [41]=FORME_PINCEAU_ANTISLASH;
+  Preset_paintbrush_width[41]= 8;
+  Preset_paintbrush_height[41]= 8;
+  Paintbrush_type             [41]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Pinceau_predefini_Largeur[42]= 4;
-  Pinceau_predefini_Hauteur[42]= 4;
-  Pinceau_Type             [42]=FORME_PINCEAU_ALEATOIRE;
+  Preset_paintbrush_width[42]= 4;
+  Preset_paintbrush_height[42]= 4;
+  Paintbrush_type             [42]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Pinceau_predefini_Largeur[43]= 8;
-  Pinceau_predefini_Hauteur[43]= 8;
-  Pinceau_Type             [43]=FORME_PINCEAU_ALEATOIRE;
+  Preset_paintbrush_width[43]= 8;
+  Preset_paintbrush_height[43]= 8;
+  Paintbrush_type             [43]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Pinceau_predefini_Largeur[44]=13;
-  Pinceau_predefini_Hauteur[44]=13;
-  Pinceau_Type             [44]=FORME_PINCEAU_ALEATOIRE;
+  Preset_paintbrush_width[44]=13;
+  Preset_paintbrush_height[44]=13;
+  Paintbrush_type             [44]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Pinceau_predefini_Largeur[45]= 3;
-  Pinceau_predefini_Hauteur[45]= 3;
-  Pinceau_Type             [45]=FORME_PINCEAU_DIVERS;
+  Preset_paintbrush_width[45]= 3;
+  Preset_paintbrush_height[45]= 3;
+  Paintbrush_type             [45]=PAINTBRUSH_SHAPE_MISC;
 
-  Pinceau_predefini_Largeur[46]= 3;
-  Pinceau_predefini_Hauteur[46]= 3;
-  Pinceau_Type             [46]=FORME_PINCEAU_DIVERS;
+  Preset_paintbrush_width[46]= 3;
+  Preset_paintbrush_height[46]= 3;
+  Paintbrush_type             [46]=PAINTBRUSH_SHAPE_MISC;
 
-  Pinceau_predefini_Largeur[47]= 7;
-  Pinceau_predefini_Hauteur[47]= 7;
-  Pinceau_Type             [47]=FORME_PINCEAU_DIVERS;
+  Preset_paintbrush_width[47]= 7;
+  Preset_paintbrush_height[47]= 7;
+  Paintbrush_type             [47]=PAINTBRUSH_SHAPE_MISC;
 
-  for (Indice=0;Indice<NB_SPRITES_PINCEAU;Indice++)
+  for (index=0;index<NB_PAINTBRUSH_SPRITES;index++)
   {
-    Pinceau_predefini_Decalage_X[Indice]=(Pinceau_predefini_Largeur[Indice]>>1);
-    Pinceau_predefini_Decalage_Y[Indice]=(Pinceau_predefini_Hauteur[Indice]>>1);
+    Preset_paintbrush_offset_X[index]=(Preset_paintbrush_width[index]>>1);
+    Preset_paintbrush_offset_Y[index]=(Preset_paintbrush_height[index]>>1);
   }
 
-  Curseur_Decalage_X[FORME_CURSEUR_FLECHE]=0;
-  Curseur_Decalage_Y[FORME_CURSEUR_FLECHE]=0;
+  Cursor_offset_X[CURSOR_SHAPE_ARROW]=0;
+  Cursor_offset_Y[CURSOR_SHAPE_ARROW]=0;
 
-  Curseur_Decalage_X[FORME_CURSEUR_CIBLE]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_CIBLE]=7;
+  Cursor_offset_X[CURSOR_SHAPE_TARGET]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_TARGET]=7;
 
-  Curseur_Decalage_X[FORME_CURSEUR_CIBLE_PIPETTE]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_CIBLE_PIPETTE]=7;
+  Cursor_offset_X[CURSOR_SHAPE_COLORPICKER]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_COLORPICKER]=7;
 
-  Curseur_Decalage_X[FORME_CURSEUR_SABLIER]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_SABLIER]=7;
+  Cursor_offset_X[CURSOR_SHAPE_HOURGLASS]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_HOURGLASS]=7;
 
-  Curseur_Decalage_X[FORME_CURSEUR_MULTIDIRECTIONNEL]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_MULTIDIRECTIONNEL]=7;
+  Cursor_offset_X[CURSOR_SHAPE_MULTIDIRECTIONNAL]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_MULTIDIRECTIONNAL]=7;
 
-  Curseur_Decalage_X[FORME_CURSEUR_HORIZONTAL]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_HORIZONTAL]=3;
+  Cursor_offset_X[CURSOR_SHAPE_HORIZONTAL]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_HORIZONTAL]=3;
 
-  Curseur_Decalage_X[FORME_CURSEUR_CIBLE_FINE]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_CIBLE_FINE]=7;
+  Cursor_offset_X[CURSOR_SHAPE_THIN_TARGET]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_THIN_TARGET]=7;
 
-  Curseur_Decalage_X[FORME_CURSEUR_CIBLE_PIPETTE_FINE]=7;
-  Curseur_Decalage_Y[FORME_CURSEUR_CIBLE_PIPETTE_FINE]=7;
+  Cursor_offset_X[CURSOR_SHAPE_THIN_COLORPICKER]=7;
+  Cursor_offset_Y[CURSOR_SHAPE_THIN_COLORPICKER]=7;
 }
 
 
@@ -737,359 +737,359 @@ void Charger_DAT(void)
 
   // Action factice:
 
-void Rien_du_tout(void)
+void Do_nothing(void)
 {}
 
   // Initialiseur d'un bouton:
 
-void Initialiser_bouton(byte   btn_number,
+void Init_button(byte   btn_number,
                         word   x_offset      , word   y_offset,
                         word   width         , word   height,
                         byte   shape,
-                        fonction_action Gauche , fonction_action Droite,
-                        fonction_action Desenclencher,
+                        Func_action Gauche , Func_action Droite,
+                        Func_action Desenclencher,
                         byte   family)
 {
-  Bouton[btn_number].Decalage_X      =x_offset;
-  Bouton[btn_number].Decalage_Y      =y_offset;
-  Bouton[btn_number].Width         =width-1;
-  Bouton[btn_number].Height         =height-1;
-  Bouton[btn_number].Enfonce         =0;
-  Bouton[btn_number].Shape           =shape;
-  Bouton[btn_number].Gauche          =Gauche;
-  Bouton[btn_number].Droite          =Droite;
-  Bouton[btn_number].Desenclencher   =Desenclencher;
-  Bouton[btn_number].Famille         =family;
+  Button[btn_number].X_offset      =x_offset;
+  Button[btn_number].Y_offset      =y_offset;
+  Button[btn_number].Width         =width-1;
+  Button[btn_number].Height         =height-1;
+  Button[btn_number].Pressed         =0;
+  Button[btn_number].Shape           =shape;
+  Button[btn_number].Gauche          =Gauche;
+  Button[btn_number].Droite          =Droite;
+  Button[btn_number].Desenclencher   =Desenclencher;
+  Button[btn_number].Famille         =family;
 }
 
 
   // Initiliseur de tous les boutons:
 
-void Initialisation_des_boutons(void)
+void Init_buttons(void)
 {
-  byte Indice_bouton;
+  byte button_index;
 
-  for (Indice_bouton=0;Indice_bouton<NB_BOUTONS;Indice_bouton++)
+  for (button_index=0;button_index<NB_BUTTONS;button_index++)
   {
-    Bouton[Indice_bouton].Raccourci_gauche[0]=0;
-    Bouton[Indice_bouton].Raccourci_gauche[1]=0;
-    Bouton[Indice_bouton].Raccourci_droite[0]=0;
-    Bouton[Indice_bouton].Raccourci_droite[1]=0;
-    Initialiser_bouton(Indice_bouton,
+    Button[button_index].Left_shortcut[0]=0;
+    Button[button_index].Left_shortcut[1]=0;
+    Button[button_index].Right_shortcut[0]=0;
+    Button[button_index].Right_shortcut[1]=0;
+    Init_button(button_index,
                        0,0,
                        1,1,
-                       FORME_BOUTON_RECTANGLE,
-                       Rien_du_tout,Rien_du_tout,
-                       Rien_du_tout,
+                       BUTTON_SHAPE_RECTANGLE,
+                       Do_nothing,Do_nothing,
+                       Do_nothing,
                        0);
   }
 
   // Ici viennent les déclarations des boutons que l'on sait gérer
 
-  Initialiser_bouton(BOUTON_PINCEAUX,
+  Init_button(BUTTON_PAINTBRUSHES,
                      0,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Menu_pinceaux,Bouton_Brosse_monochrome,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Paintbrush_menu,Button_Brush_monochrome,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
 // !!! TEMPORAIRE !!!
-  Initialiser_bouton(BOUTON_AJUSTER,
+  Init_button(BUTTON_ADJUST,
                      0,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Ajuster,Message_Non_disponible,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Adjust,Message_not_implemented,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_DESSIN,
+  Init_button(BUTTON_DRAW,
                      17,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Dessin,Bouton_Dessin_Switch_mode,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Draw,Button_Draw_switch_mode,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_COURBES,
+  Init_button(BUTTON_CURVES,
                      17,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Courbes,Bouton_Courbes_Switch_mode,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Curves,Button_Curves_switch_mode,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_LIGNES,
+  Init_button(BUTTON_LINES,
                      34,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Lignes,Bouton_Lignes_Switch_mode,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Lines,Button_Lines_switch_mode,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_SPRAY,
+  Init_button(BUTTON_AIRBRUSH,
                      34,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Spray,Bouton_Spray_Menu,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Airbrush,Button_Airbrush_menu,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_FLOODFILL,
+  Init_button(BUTTON_FLOODFILL,
                      51,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Fill,Bouton_Remplacer,
-                     Bouton_desenclencher_Fill,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Fill,Button_Replace,
+                     Button_Unselect_fill,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_POLYGONES,
+  Init_button(BUTTON_POLYGONS,
                      51,18,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Polygone,Bouton_Polyform,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_polygon,Button_Polyform,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_POLYFILL,
+  Init_button(BUTTON_POLYFILL,
                      52,19,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Polyfill,Bouton_Filled_polyform,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Polyfill,Button_Filled_polyform,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_RECTANGLES,
+  Init_button(BUTTON_RECTANGLES,
                      68,1,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Rectangle_vide,Bouton_Rectangle_vide,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Empty_rectangle,Button_Empty_rectangle,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_FILLRECT,
+  Init_button(BUTTON_FILLRECT,
                      69,2,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Rectangle_plein,Bouton_Rectangle_plein,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Filled_rectangle,Button_Filled_rectangle,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_CERCLES,
+  Init_button(BUTTON_CIRCLES,
                      68,18,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Cercle_vide,Bouton_Ellipse_vide,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Empty_circle,Button_Empty_ellipse,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_FILLCERC,
+  Init_button(BUTTON_FILLCIRC,
                      69,19,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Cercle_plein,Bouton_Ellipse_pleine,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Filled_circle,Button_Filled_ellipse,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_GRADRECT,
+  Init_button(BUTTON_GRADRECT,
                      85,1,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Rectangle_degrade,Bouton_Rectangle_degrade,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Grad_rectangle,Button_Grad_rectangle,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_GRADMENU,
+  Init_button(BUTTON_GRADMENU,
                      86,2,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Degrades,Bouton_Degrades,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Gradients,Button_Gradients,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_SPHERES,
+  Init_button(BUTTON_SPHERES,
                      85,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Cercle_degrade,Bouton_Ellipse_degrade,
-                     Rien_du_tout,
-                     FAMILLE_OUTIL);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Grad_circle,Button_Grad_ellipse,
+                     Do_nothing,
+                     FAMILY_TOOL);
 
-  Initialiser_bouton(BOUTON_BROSSE,
+  Init_button(BUTTON_BRUSH,
                      106,1,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Brosse,Bouton_Restaurer_brosse,
-                     Bouton_desenclencher_Brosse,
-                     FAMILLE_INTERRUPTION);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Brush,Button_Restore_brush,
+                     Button_Unselect_brush,
+                     FAMILY_INTERRUPTION);
 
-  Initialiser_bouton(BOUTON_POLYBROSSE,
+  Init_button(BUTTON_POLYBRUSH,
                      107,2,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Lasso,Bouton_Restaurer_brosse,
-                     Bouton_desenclencher_Lasso,
-                     FAMILLE_INTERRUPTION);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Lasso,Button_Restore_brush,
+                     Button_Unselect_lasso,
+                     FAMILY_INTERRUPTION);
 
-  Initialiser_bouton(BOUTON_EFFETS_BROSSE,
+  Init_button(BUTTON_BRUSH_EFFECTS,
                      106,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Brush_FX,Bouton_Brush_FX,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Brush_FX,Button_Brush_FX,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_EFFETS,
+  Init_button(BUTTON_EFFECTS,
                      123,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Effets,Bouton_Effets,
-                     Rien_du_tout,
-                     FAMILLE_EFFETS);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Effects,Button_Effects,
+                     Do_nothing,
+                     FAMILY_EFFECTS);
 
-  Initialiser_bouton(BOUTON_TEXTE,
+  Init_button(BUTTON_TEXT,
                      123,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Texte,Bouton_Texte,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Text,Button_Text,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_LOUPE,
+  Init_button(BUTTON_MAGNIFIER,
                      140,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Loupe,Bouton_Menu_Loupe,
-                     Bouton_desenclencher_Loupe,
-                     FAMILLE_INTERRUPTION);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Magnify,Button_Magnify_menu,
+                     Button_Unselect_magnifier,
+                     FAMILY_INTERRUPTION);
 
-  Initialiser_bouton(BOUTON_PIPETTE,
+  Init_button(BUTTON_COLORPICKER,
                      140,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Pipette,Bouton_Inverser_foreback,
-                     Bouton_desenclencher_Pipette,
-                     FAMILLE_INTERRUPTION);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Colorpicker,Button_Invert_foreback,
+                     Button_Unselect_colorpicker,
+                     FAMILY_INTERRUPTION);
 
-  Initialiser_bouton(BOUTON_RESOL,
+  Init_button(BUTTON_RESOL,
                      161,1,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Resol,Bouton_Safety_resol,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Resolution,Button_Safety_resolution,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_PAGE,
+  Init_button(BUTTON_PAGE,
                      161,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Page,Bouton_Copy_page,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Page,Button_Copy_page,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_SAUVER,
+  Init_button(BUTTON_SAVE,
                      178,1,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Save,Bouton_Autosave,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Save,Button_Autosave,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_CHARGER,
+  Init_button(BUTTON_LOAD,
                      179,2,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Load,Bouton_Reload,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Load,Button_Reload,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_PARAMETRES,
+  Init_button(BUTTON_SETTINGS,
                      178,18,
                      16,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Settings,Bouton_Settings,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Settings,Button_Settings,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_CLEAR,
+  Init_button(BUTTON_CLEAR,
                      195,1,
                      17,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Clear,Bouton_Clear_colore,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Clear,Button_Clear_with_backcolor,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_AIDE,
+  Init_button(BUTTON_HELP,
                      195,18,
                      17,16,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Aide,Bouton_Stats,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Help,Button_Stats,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_UNDO,
+  Init_button(BUTTON_UNDO,
                      213,1,
                      19,12,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Undo,Bouton_Redo,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Undo,Button_Redo,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_KILL,
+  Init_button(BUTTON_KILL,
                      213,14,
                      19,7,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Kill,Bouton_Kill,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Kill,Button_Kill,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_QUIT,
+  Init_button(BUTTON_QUIT,
                      213,22,
                      19,12,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Quit,Bouton_Quit,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Quit,Button_Quit,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_PALETTE,
+  Init_button(BUTTON_PALETTE,
                      237,9,
                      16,8,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Palette,Bouton_Palette_secondaire,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Palette,Button_Pecondary_palette,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_PAL_LEFT,
+  Init_button(BUTTON_PAL_LEFT,
                      237,18,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_HAUT_GAUCHE,
-                     Bouton_Pal_left,Bouton_Pal_left_fast,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Pal_left,Button_Pal_left_fast,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_PAL_RIGHT,
+  Init_button(BUTTON_PAL_RIGHT,
                      238,19,
                      15,15,
-                     FORME_BOUTON_TRIANGLE_BAS_DROITE,
-                     Bouton_Pal_right,Bouton_Pal_right_fast,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Pal_right,Button_Pal_right_fast,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_CHOIX_COL,
-                     LARGEUR_MENU+1,2,
+  Init_button(BUTTON_CHOOSE_COL,
+                     MENU_WIDTH+1,2,
                      1,32, // La largeur est mise à jour à chq chngmnt de mode
-                     FORME_BOUTON_SANS_CADRE,
-                     Bouton_Choix_forecolor,Bouton_Choix_backcolor,
-                     Rien_du_tout,
-                     FAMILLE_INSTANTANE);
+                     BUTTON_SHAPE_NO_FRAME,
+                     Button_Select_forecolor,Button_Select_backcolor,
+                     Do_nothing,
+                     FAMILY_INSTANT);
 
-  Initialiser_bouton(BOUTON_CACHER,
+  Init_button(BUTTON_HIDE,
                      0,35,
                      16,9,
-                     FORME_BOUTON_RECTANGLE,
-                     Bouton_Cacher_menu,Bouton_Cacher_menu,
-                     Rien_du_tout,
-                     FAMILLE_TOOLBAR);
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Hide_menu,Button_Hide_menu,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
 }
 
 
@@ -1098,411 +1098,411 @@ void Initialisation_des_boutons(void)
 
   // Initialiseur d'une opération:
 
-void Initialiser_operation(byte Numero_operation,
-                           byte Numero_bouton_souris,
-                           byte Taille_de_pile,
-                           fonction_action Action,
-                           byte Effacer_curseur)
+void Init_operation(byte operation_number,
+                           byte mouse_button,
+                           byte stack_index,
+                           Func_action Action,
+                           byte Hide_cursor)
 {
-  Operation[Numero_operation][Numero_bouton_souris]
-           [Taille_de_pile].Action=Action;
-  Operation[Numero_operation][Numero_bouton_souris]
-           [Taille_de_pile].Effacer_curseur=Effacer_curseur;
+  Operation[operation_number][mouse_button]
+           [stack_index].Action=Action;
+  Operation[operation_number][mouse_button]
+           [stack_index].Hide_cursor=Hide_cursor;
 }
 
 
   // Initiliseur de toutes les opérations:
 
-void Initialisation_des_operations(void)
+void Init_operations(void)
 {
   byte number; // Numéro de l'option en cours d'auto-initialisation
-  byte Bouton; // Bouton souris en cours d'auto-initialisation
+  byte Button; // Button souris en cours d'auto-initialisation
   byte stack_index; // Taille de la pile en cours d'auto-initialisation
 
   // Auto-initialisation des opérations (vers des actions inoffensives)
 
   for (number=0;number<NB_OPERATIONS;number++)
-    for (Bouton=0;Bouton<3;Bouton++)
-      for (stack_index=0;stack_index<TAILLE_PILE_OPERATIONS;stack_index++)
-        Initialiser_operation(number,Bouton,stack_index,Print_coordonnees,0);
+    for (Button=0;Button<3;Button++)
+      for (stack_index=0;stack_index<OPERATION_STACK_SIZE;stack_index++)
+        Init_operation(number,Button,stack_index,Print_coordinates,0);
 
 
   // Ici viennent les déclarations détaillées des opérations
-  Initialiser_operation(OPERATION_DESSIN_CONTINU,1,0,
-                        Freehand_Mode1_1_0,1);
-  Initialiser_operation(OPERATION_DESSIN_CONTINU,1,2,
-                        Freehand_Mode1_1_2,0);
-  Initialiser_operation(OPERATION_DESSIN_CONTINU,0,2,
-                        Freehand_Mode12_0_2,0);
-  Initialiser_operation(OPERATION_DESSIN_CONTINU,2,0,
-                        Freehand_Mode1_2_0,1);
-  Initialiser_operation(OPERATION_DESSIN_CONTINU,2,2,
-                        Freehand_Mode1_2_2,0);
+  Init_operation(OPERATION_CONTINUOUS_DRAW,1,0,
+                        Freehand_mode1_1_0,1);
+  Init_operation(OPERATION_CONTINUOUS_DRAW,1,2,
+                        Freehand_mode1_1_2,0);
+  Init_operation(OPERATION_CONTINUOUS_DRAW,0,2,
+                        Freehand_mode12_0_2,0);
+  Init_operation(OPERATION_CONTINUOUS_DRAW,2,0,
+                        Freehand_mode1_2_0,1);
+  Init_operation(OPERATION_CONTINUOUS_DRAW,2,2,
+                        Freehand_mode1_2_2,0);
 
-  Initialiser_operation(OPERATION_DESSIN_DISCONTINU,1,0,
-                        Freehand_Mode2_1_0,1);
-  Initialiser_operation(OPERATION_DESSIN_DISCONTINU,1,2,
-                        Freehand_Mode2_1_2,0);
-  Initialiser_operation(OPERATION_DESSIN_DISCONTINU,0,2,
-                        Freehand_Mode12_0_2,0);
-  Initialiser_operation(OPERATION_DESSIN_DISCONTINU,2,0,
-                        Freehand_Mode2_2_0,1);
-  Initialiser_operation(OPERATION_DESSIN_DISCONTINU,2,2,
-                        Freehand_Mode2_2_2,0);
+  Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,0,
+                        Freehand_mode2_1_0,1);
+  Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,2,
+                        Freehand_mode2_1_2,0);
+  Init_operation(OPERATION_DISCONTINUOUS_DRAW,0,2,
+                        Freehand_mode12_0_2,0);
+  Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,0,
+                        Freehand_mode2_2_0,1);
+  Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,2,
+                        Freehand_mode2_2_2,0);
 
-  Initialiser_operation(OPERATION_DESSIN_POINT,1,0,
-                        Freehand_Mode3_1_0,1);
-  Initialiser_operation(OPERATION_DESSIN_POINT,2,0,
+  Init_operation(OPERATION_POINT_DRAW,1,0,
+                        Freehand_mode3_1_0,1);
+  Init_operation(OPERATION_POINT_DRAW,2,0,
                         Freehand_Mode3_2_0,1);
-  Initialiser_operation(OPERATION_DESSIN_POINT,0,1,
-                        Freehand_Mode3_0_1,0);
+  Init_operation(OPERATION_POINT_DRAW,0,1,
+                        Freehand_mode3_0_1,0);
 
-  Initialiser_operation(OPERATION_LIGNE,1,0,
-                        Ligne_12_0,1);
-  Initialiser_operation(OPERATION_LIGNE,1,5,
-                        Ligne_12_5,0);
-  Initialiser_operation(OPERATION_LIGNE,0,5,
-                        Ligne_0_5,1);
-  Initialiser_operation(OPERATION_LIGNE,2,0,
-                        Ligne_12_0,1);
-  Initialiser_operation(OPERATION_LIGNE,2,5,
-                        Ligne_12_5,0);
+  Init_operation(OPERATION_LINE,1,0,
+                        Line_12_0,1);
+  Init_operation(OPERATION_LINE,1,5,
+                        Line_12_5,0);
+  Init_operation(OPERATION_LINE,0,5,
+                        Line_0_5,1);
+  Init_operation(OPERATION_LINE,2,0,
+                        Line_12_0,1);
+  Init_operation(OPERATION_LINE,2,5,
+                        Line_12_5,0);
 
-  Initialiser_operation(OPERATION_K_LIGNE,1,0,
-                        K_Ligne_12_0,1);
-  Initialiser_operation(OPERATION_K_LIGNE,1,6,
-                        K_Ligne_12_6,0);
-  Initialiser_operation(OPERATION_K_LIGNE,1,7,
-                        K_Ligne_12_7,1);
-  Initialiser_operation(OPERATION_K_LIGNE,2,0,
-                        K_Ligne_12_0,1);
-  Initialiser_operation(OPERATION_K_LIGNE,2,6,
-                        K_Ligne_12_6,0);
-  Initialiser_operation(OPERATION_K_LIGNE,2,7,
-                        K_Ligne_12_7,1);
-  Initialiser_operation(OPERATION_K_LIGNE,0,6,
-                        K_Ligne_0_6,1);
-  Initialiser_operation(OPERATION_K_LIGNE,0,7,
-                        K_Ligne_12_6,0);
+  Init_operation(OPERATION_K_LIGNE,1,0,
+                        K_line_12_0,1);
+  Init_operation(OPERATION_K_LIGNE,1,6,
+                        K_line_12_6,0);
+  Init_operation(OPERATION_K_LIGNE,1,7,
+                        K_line_12_7,1);
+  Init_operation(OPERATION_K_LIGNE,2,0,
+                        K_line_12_0,1);
+  Init_operation(OPERATION_K_LIGNE,2,6,
+                        K_line_12_6,0);
+  Init_operation(OPERATION_K_LIGNE,2,7,
+                        K_line_12_7,1);
+  Init_operation(OPERATION_K_LIGNE,0,6,
+                        K_line_0_6,1);
+  Init_operation(OPERATION_K_LIGNE,0,7,
+                        K_line_12_6,0);
 
-  Initialiser_operation(OPERATION_RECTANGLE_VIDE,1,0,
+  Init_operation(OPERATION_EMPTY_RECTANGLE,1,0,
                         Rectangle_12_0,1);
-  Initialiser_operation(OPERATION_RECTANGLE_VIDE,2,0,
+  Init_operation(OPERATION_EMPTY_RECTANGLE,2,0,
                         Rectangle_12_0,1);
-  Initialiser_operation(OPERATION_RECTANGLE_VIDE,1,5,
+  Init_operation(OPERATION_EMPTY_RECTANGLE,1,5,
                         Rectangle_12_5,0);
-  Initialiser_operation(OPERATION_RECTANGLE_VIDE,2,5,
+  Init_operation(OPERATION_EMPTY_RECTANGLE,2,5,
                         Rectangle_12_5,0);
-  Initialiser_operation(OPERATION_RECTANGLE_VIDE,0,5,
-                        Rectangle_vide_0_5,1);
+  Init_operation(OPERATION_EMPTY_RECTANGLE,0,5,
+                        Empty_rectangle_0_5,1);
 
-  Initialiser_operation(OPERATION_RECTANGLE_PLEIN,1,0,
+  Init_operation(OPERATION_FILLED_RECTANGLE,1,0,
                         Rectangle_12_0,1);
-  Initialiser_operation(OPERATION_RECTANGLE_PLEIN,2,0,
+  Init_operation(OPERATION_FILLED_RECTANGLE,2,0,
                         Rectangle_12_0,1);
-  Initialiser_operation(OPERATION_RECTANGLE_PLEIN,1,5,
+  Init_operation(OPERATION_FILLED_RECTANGLE,1,5,
                         Rectangle_12_5,0);
-  Initialiser_operation(OPERATION_RECTANGLE_PLEIN,2,5,
+  Init_operation(OPERATION_FILLED_RECTANGLE,2,5,
                         Rectangle_12_5,0);
-  Initialiser_operation(OPERATION_RECTANGLE_PLEIN,0,5,
-                        Rectangle_plein_0_5,1);
+  Init_operation(OPERATION_FILLED_RECTANGLE,0,5,
+                        Filled_rectangle_0_5,1);
 
-  Initialiser_operation(OPERATION_CERCLE_VIDE,1,0,
-                        Cercle_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_VIDE,2,0,
-                        Cercle_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_VIDE,1,5,
-                        Cercle_12_5,0);
-  Initialiser_operation(OPERATION_CERCLE_VIDE,2,5,
-                        Cercle_12_5,0);
-  Initialiser_operation(OPERATION_CERCLE_VIDE,0,5,
-                        Cercle_vide_0_5,1);
+  Init_operation(OPERATION_EMPTY_CIRCLE,1,0,
+                        Circle_12_0,1);
+  Init_operation(OPERATION_EMPTY_CIRCLE,2,0,
+                        Circle_12_0,1);
+  Init_operation(OPERATION_EMPTY_CIRCLE,1,5,
+                        Circle_12_5,0);
+  Init_operation(OPERATION_EMPTY_CIRCLE,2,5,
+                        Circle_12_5,0);
+  Init_operation(OPERATION_EMPTY_CIRCLE,0,5,
+                        Empty_circle_0_5,1);
 
-  Initialiser_operation(OPERATION_CERCLE_PLEIN,1,0,
-                        Cercle_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_PLEIN,2,0,
-                        Cercle_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_PLEIN,1,5,
-                        Cercle_12_5,0);
-  Initialiser_operation(OPERATION_CERCLE_PLEIN,2,5,
-                        Cercle_12_5,0);
-  Initialiser_operation(OPERATION_CERCLE_PLEIN,0,5,
-                        Cercle_plein_0_5,1);
+  Init_operation(OPERATION_FILLED_CIRCLE,1,0,
+                        Circle_12_0,1);
+  Init_operation(OPERATION_FILLED_CIRCLE,2,0,
+                        Circle_12_0,1);
+  Init_operation(OPERATION_FILLED_CIRCLE,1,5,
+                        Circle_12_5,0);
+  Init_operation(OPERATION_FILLED_CIRCLE,2,5,
+                        Circle_12_5,0);
+  Init_operation(OPERATION_FILLED_CIRCLE,0,5,
+                        Filled_circle_0_5,1);
 
-  Initialiser_operation(OPERATION_ELLIPSE_VIDE,1,0,
+  Init_operation(OPERATION_EMPTY_ELLIPSE,1,0,
                         Ellipse_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_VIDE,2,0,
+  Init_operation(OPERATION_EMPTY_ELLIPSE,2,0,
                         Ellipse_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_VIDE,1,5,
+  Init_operation(OPERATION_EMPTY_ELLIPSE,1,5,
                         Ellipse_12_5,0);
-  Initialiser_operation(OPERATION_ELLIPSE_VIDE,2,5,
+  Init_operation(OPERATION_EMPTY_ELLIPSE,2,5,
                         Ellipse_12_5,0);
-  Initialiser_operation(OPERATION_ELLIPSE_VIDE,0,5,
-                        Ellipse_vide_0_5,1);
+  Init_operation(OPERATION_EMPTY_ELLIPSE,0,5,
+                        Empty_ellipse_0_5,1);
 
-  Initialiser_operation(OPERATION_ELLIPSE_PLEINE,1,0,
+  Init_operation(OPERATION_FILLED_ELLIPSE,1,0,
                         Ellipse_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_PLEINE,2,0,
+  Init_operation(OPERATION_FILLED_ELLIPSE,2,0,
                         Ellipse_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_PLEINE,1,5,
+  Init_operation(OPERATION_FILLED_ELLIPSE,1,5,
                         Ellipse_12_5,0);
-  Initialiser_operation(OPERATION_ELLIPSE_PLEINE,2,5,
+  Init_operation(OPERATION_FILLED_ELLIPSE,2,5,
                         Ellipse_12_5,0);
-  Initialiser_operation(OPERATION_ELLIPSE_PLEINE,0,5,
-                        Ellipse_pleine_0_5,1);
+  Init_operation(OPERATION_FILLED_ELLIPSE,0,5,
+                        Filled_ellipse_0_5,1);
 
-  Initialiser_operation(OPERATION_FILL,1,0,
+  Init_operation(OPERATION_FILL,1,0,
                         Fill_1_0,0);
-  Initialiser_operation(OPERATION_FILL,2,0,
+  Init_operation(OPERATION_FILL,2,0,
                         Fill_2_0,0);
 
-  Initialiser_operation(OPERATION_REMPLACER,1,0,
-                        Remplacer_1_0,0);
-  Initialiser_operation(OPERATION_REMPLACER,2,0,
-                        Remplacer_2_0,0);
+  Init_operation(OPERATION_REPLACE,1,0,
+                        Replace_1_0,0);
+  Init_operation(OPERATION_REPLACE,2,0,
+                        Replace_2_0,0);
 
-  Initialiser_operation(OPERATION_PRISE_BROSSE,1,0,
-                        Brosse_12_0,1);
-  Initialiser_operation(OPERATION_PRISE_BROSSE,2,0,
-                        Brosse_12_0,1);
-  Initialiser_operation(OPERATION_PRISE_BROSSE,1,5,
-                        Brosse_12_5,0);
-  Initialiser_operation(OPERATION_PRISE_BROSSE,2,5,
-                        Brosse_12_5,0);
-  Initialiser_operation(OPERATION_PRISE_BROSSE,0,5,
-                        Brosse_0_5,1);
+  Init_operation(OPERATION_GRAB_BRUSH,1,0,
+                        Brush_12_0,1);
+  Init_operation(OPERATION_GRAB_BRUSH,2,0,
+                        Brush_12_0,1);
+  Init_operation(OPERATION_GRAB_BRUSH,1,5,
+                        Brush_12_5,0);
+  Init_operation(OPERATION_GRAB_BRUSH,2,5,
+                        Brush_12_5,0);
+  Init_operation(OPERATION_GRAB_BRUSH,0,5,
+                        Brush_0_5,1);
 
-  Initialiser_operation(OPERATION_ETIRER_BROSSE,1,0,
-                        Etirer_brosse_12_0,1);
-  Initialiser_operation(OPERATION_ETIRER_BROSSE,2,0,
-                        Etirer_brosse_12_0,1);
-  Initialiser_operation(OPERATION_ETIRER_BROSSE,1,7,
-                        Etirer_brosse_1_7,0);
-  Initialiser_operation(OPERATION_ETIRER_BROSSE,0,7,
-                        Etirer_brosse_0_7,0);
-  Initialiser_operation(OPERATION_ETIRER_BROSSE,2,7,
-                        Etirer_brosse_2_7,1);
+  Init_operation(OPERATION_STRETCH_BRUSH,1,0,
+                        Stretch_brush_12_0,1);
+  Init_operation(OPERATION_STRETCH_BRUSH,2,0,
+                        Stretch_brush_12_0,1);
+  Init_operation(OPERATION_STRETCH_BRUSH,1,7,
+                        Stretch_brush_1_7,0);
+  Init_operation(OPERATION_STRETCH_BRUSH,0,7,
+                        Stretch_brush_0_7,0);
+  Init_operation(OPERATION_STRETCH_BRUSH,2,7,
+                        Stretch_brush_2_7,1);
 
-  Initialiser_operation(OPERATION_TOURNER_BROSSE,1,0,
-                        Tourner_brosse_12_0,1);
-  Initialiser_operation(OPERATION_TOURNER_BROSSE,2,0,
-                        Tourner_brosse_12_0,1);
-  Initialiser_operation(OPERATION_TOURNER_BROSSE,1,5,
-                        Tourner_brosse_1_5,0);
-  Initialiser_operation(OPERATION_TOURNER_BROSSE,0,5,
-                        Tourner_brosse_0_5,0);
-  Initialiser_operation(OPERATION_TOURNER_BROSSE,2,5,
-                        Tourner_brosse_2_5,1);
+  Init_operation(OPERATION_ROTATE_BRUSH,1,0,
+                        Rotate_brush_12_0,1);
+  Init_operation(OPERATION_ROTATE_BRUSH,2,0,
+                        Rotate_brush_12_0,1);
+  Init_operation(OPERATION_ROTATE_BRUSH,1,5,
+                        Rotate_brush_1_5,0);
+  Init_operation(OPERATION_ROTATE_BRUSH,0,5,
+                        Rotate_brush_0_5,0);
+  Init_operation(OPERATION_ROTATE_BRUSH,2,5,
+                        Rotate_brush_2_5,1);
 
-  Initialiser_operation(OPERATION_POLYBROSSE,1,0,
+  Init_operation(OPERATION_POLYBRUSH,1,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_POLYBROSSE,2,0,
+  Init_operation(OPERATION_POLYBRUSH,2,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_POLYBROSSE,1,8,
-                        Polybrosse_12_8,0);
-  Initialiser_operation(OPERATION_POLYBROSSE,2,8,
-                        Polybrosse_12_8,0);
-  Initialiser_operation(OPERATION_POLYBROSSE,0,8,
+  Init_operation(OPERATION_POLYBRUSH,1,8,
+                        Polybrush_12_8,0);
+  Init_operation(OPERATION_POLYBRUSH,2,8,
+                        Polybrush_12_8,0);
+  Init_operation(OPERATION_POLYBRUSH,0,8,
                         Filled_polyform_0_8,0);
 
-  Pipette_Couleur=-1;
-  Initialiser_operation(OPERATION_PIPETTE,1,0,
-                        Pipette_12_0,1);
-  Initialiser_operation(OPERATION_PIPETTE,2,0,
-                        Pipette_12_0,0);
-  Initialiser_operation(OPERATION_PIPETTE,1,1,
-                        Pipette_1_1,0);
-  Initialiser_operation(OPERATION_PIPETTE,2,1,
-                        Pipette_2_1,0);
-  Initialiser_operation(OPERATION_PIPETTE,0,1,
-                        Pipette_0_1,1);
+  Colorpicker_color=-1;
+  Init_operation(OPERATION_COLORPICK,1,0,
+                        Colorpicker_12_0,1);
+  Init_operation(OPERATION_COLORPICK,2,0,
+                        Colorpicker_12_0,0);
+  Init_operation(OPERATION_COLORPICK,1,1,
+                        Colorpicker_1_1,0);
+  Init_operation(OPERATION_COLORPICK,2,1,
+                        Colorpicker_2_1,0);
+  Init_operation(OPERATION_COLORPICK,0,1,
+                        Colorpicker_0_1,1);
 
-  Initialiser_operation(OPERATION_LOUPE,1,0,
-                        Loupe_12_0,0);
-  Initialiser_operation(OPERATION_LOUPE,2,0,
-                        Loupe_12_0,0);
+  Init_operation(OPERATION_MAGNIFY,1,0,
+                        Magnifier_12_0,0);
+  Init_operation(OPERATION_MAGNIFY,2,0,
+                        Magnifier_12_0,0);
 
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,1,0,
-                        Courbe_34_points_1_0,1);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,2,0,
-                        Courbe_34_points_2_0,1);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,1,5,
-                        Courbe_34_points_1_5,0);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,2,5,
-                        Courbe_34_points_2_5,0);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,0,5,
-                        Courbe_4_points_0_5,1);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,1,9,
-                        Courbe_4_points_1_9,0);
-  Initialiser_operation(OPERATION_COURBE_4_POINTS,2,9,
-                        Courbe_4_points_2_9,0);
+  Init_operation(OPERATION_4_POINTS_CURVE,1,0,
+                        Curve_34_points_1_0,1);
+  Init_operation(OPERATION_4_POINTS_CURVE,2,0,
+                        Curve_34_points_2_0,1);
+  Init_operation(OPERATION_4_POINTS_CURVE,1,5,
+                        Curve_34_points_1_5,0);
+  Init_operation(OPERATION_4_POINTS_CURVE,2,5,
+                        Curve_34_points_2_5,0);
+  Init_operation(OPERATION_4_POINTS_CURVE,0,5,
+                        Curve_4_points_0_5,1);
+  Init_operation(OPERATION_4_POINTS_CURVE,1,9,
+                        Curve_4_points_1_9,0);
+  Init_operation(OPERATION_4_POINTS_CURVE,2,9,
+                        Curve_4_points_2_9,0);
 
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,1,0,
-                        Courbe_34_points_1_0,1);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,2,0,
-                        Courbe_34_points_2_0,1);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,1,5,
-                        Courbe_34_points_1_5,0);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,2,5,
-                        Courbe_34_points_2_5,0);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,0,5,
-                        Courbe_3_points_0_5,1);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,0,11,
-                        Courbe_3_points_0_11,0);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,1,11,
-                        Courbe_3_points_12_11,0);
-  Initialiser_operation(OPERATION_COURBE_3_POINTS,2,11,
-                        Courbe_3_points_12_11,0);
+  Init_operation(OPERATION_3_POINTS_CURVE,1,0,
+                        Curve_34_points_1_0,1);
+  Init_operation(OPERATION_3_POINTS_CURVE,2,0,
+                        Curve_34_points_2_0,1);
+  Init_operation(OPERATION_3_POINTS_CURVE,1,5,
+                        Curve_34_points_1_5,0);
+  Init_operation(OPERATION_3_POINTS_CURVE,2,5,
+                        Curve_34_points_2_5,0);
+  Init_operation(OPERATION_3_POINTS_CURVE,0,5,
+                        Curve_3_points_0_5,1);
+  Init_operation(OPERATION_3_POINTS_CURVE,0,11,
+                        Curve_3_points_0_11,0);
+  Init_operation(OPERATION_3_POINTS_CURVE,1,11,
+                        Curve_3_points_12_11,0);
+  Init_operation(OPERATION_3_POINTS_CURVE,2,11,
+                        Curve_3_points_12_11,0);
 
-  Initialiser_operation(OPERATION_SPRAY,1,0,
-                        Spray_1_0,0);
-  Initialiser_operation(OPERATION_SPRAY,2,0,
-                        Spray_2_0,0);
-  Initialiser_operation(OPERATION_SPRAY,1,2,
-                        Spray_12_2,0);
-  Initialiser_operation(OPERATION_SPRAY,2,2,
-                        Spray_12_2,0);
-  Initialiser_operation(OPERATION_SPRAY,0,2,
-                        Spray_0_2,0);
+  Init_operation(OPERATION_AIRBRUSH,1,0,
+                        Airbrush_1_0,0);
+  Init_operation(OPERATION_AIRBRUSH,2,0,
+                        Airbrush_2_0,0);
+  Init_operation(OPERATION_AIRBRUSH,1,2,
+                        Airbrush_12_2,0);
+  Init_operation(OPERATION_AIRBRUSH,2,2,
+                        Airbrush_12_2,0);
+  Init_operation(OPERATION_AIRBRUSH,0,2,
+                        Airbrush_0_2,0);
 
-  Initialiser_operation(OPERATION_POLYGONE,1,0,
-                        Polygone_12_0,1);
-  Initialiser_operation(OPERATION_POLYGONE,2,0,
-                        Polygone_12_0,1);
-  Initialiser_operation(OPERATION_POLYGONE,1,8,
-                        K_Ligne_12_6,0);
-  Initialiser_operation(OPERATION_POLYGONE,2,8,
-                        K_Ligne_12_6,0);
-  Initialiser_operation(OPERATION_POLYGONE,1,9,
-                        Polygone_12_9,1);
-  Initialiser_operation(OPERATION_POLYGONE,2,9,
-                        Polygone_12_9,1);
-  Initialiser_operation(OPERATION_POLYGONE,0,8,
-                        K_Ligne_0_6,1);
-  Initialiser_operation(OPERATION_POLYGONE,0,9,
-                        K_Ligne_12_6,0);
+  Init_operation(OPERATION_POLYGON,1,0,
+                        Polygon_12_0,1);
+  Init_operation(OPERATION_POLYGON,2,0,
+                        Polygon_12_0,1);
+  Init_operation(OPERATION_POLYGON,1,8,
+                        K_line_12_6,0);
+  Init_operation(OPERATION_POLYGON,2,8,
+                        K_line_12_6,0);
+  Init_operation(OPERATION_POLYGON,1,9,
+                        Polygon_12_9,1);
+  Init_operation(OPERATION_POLYGON,2,9,
+                        Polygon_12_9,1);
+  Init_operation(OPERATION_POLYGON,0,8,
+                        K_line_0_6,1);
+  Init_operation(OPERATION_POLYGON,0,9,
+                        K_line_12_6,0);
 
-  Initialiser_operation(OPERATION_POLYFILL,1,0,
+  Init_operation(OPERATION_POLYFILL,1,0,
                         Polyfill_12_0,1);
-  Initialiser_operation(OPERATION_POLYFILL,2,0,
+  Init_operation(OPERATION_POLYFILL,2,0,
                         Polyfill_12_0,1);
-  Initialiser_operation(OPERATION_POLYFILL,1,8,
+  Init_operation(OPERATION_POLYFILL,1,8,
                         Polyfill_12_8,0);
-  Initialiser_operation(OPERATION_POLYFILL,2,8,
+  Init_operation(OPERATION_POLYFILL,2,8,
                         Polyfill_12_8,0);
-  Initialiser_operation(OPERATION_POLYFILL,1,9,
+  Init_operation(OPERATION_POLYFILL,1,9,
                         Polyfill_12_9,0);
-  Initialiser_operation(OPERATION_POLYFILL,2,9,
+  Init_operation(OPERATION_POLYFILL,2,9,
                         Polyfill_12_9,0);
-  Initialiser_operation(OPERATION_POLYFILL,0,8,
+  Init_operation(OPERATION_POLYFILL,0,8,
                         Polyfill_0_8,1);
-  Initialiser_operation(OPERATION_POLYFILL,0,9,
+  Init_operation(OPERATION_POLYFILL,0,9,
                         Polyfill_12_8,0);
 
-  Initialiser_operation(OPERATION_POLYFORM,1,0,
+  Init_operation(OPERATION_POLYFORM,1,0,
                         Polyform_12_0,1);
-  Initialiser_operation(OPERATION_POLYFORM,2,0,
+  Init_operation(OPERATION_POLYFORM,2,0,
                         Polyform_12_0,1);
-  Initialiser_operation(OPERATION_POLYFORM,1,8,
+  Init_operation(OPERATION_POLYFORM,1,8,
                         Polyform_12_8,0);
-  Initialiser_operation(OPERATION_POLYFORM,2,8,
+  Init_operation(OPERATION_POLYFORM,2,8,
                         Polyform_12_8,0);
-  Initialiser_operation(OPERATION_POLYFORM,0,8,
+  Init_operation(OPERATION_POLYFORM,0,8,
                         Polyform_0_8,0);
 
-  Initialiser_operation(OPERATION_FILLED_POLYFORM,1,0,
+  Init_operation(OPERATION_FILLED_POLYFORM,1,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_FILLED_POLYFORM,2,0,
+  Init_operation(OPERATION_FILLED_POLYFORM,2,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_FILLED_POLYFORM,1,8,
+  Init_operation(OPERATION_FILLED_POLYFORM,1,8,
                         Filled_polyform_12_8,0);
-  Initialiser_operation(OPERATION_FILLED_POLYFORM,2,8,
+  Init_operation(OPERATION_FILLED_POLYFORM,2,8,
                         Filled_polyform_12_8,0);
-  Initialiser_operation(OPERATION_FILLED_POLYFORM,0,8,
+  Init_operation(OPERATION_FILLED_POLYFORM,0,8,
                         Filled_polyform_0_8,0);
 
-  Initialiser_operation(OPERATION_FILLED_CONTOUR,1,0,
+  Init_operation(OPERATION_FILLED_CONTOUR,1,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_FILLED_CONTOUR,2,0,
+  Init_operation(OPERATION_FILLED_CONTOUR,2,0,
                         Filled_polyform_12_0,1);
-  Initialiser_operation(OPERATION_FILLED_CONTOUR,1,8,
+  Init_operation(OPERATION_FILLED_CONTOUR,1,8,
                         Filled_polyform_12_8,0);
-  Initialiser_operation(OPERATION_FILLED_CONTOUR,2,8,
+  Init_operation(OPERATION_FILLED_CONTOUR,2,8,
                         Filled_polyform_12_8,0);
-  Initialiser_operation(OPERATION_FILLED_CONTOUR,0,8,
+  Init_operation(OPERATION_FILLED_CONTOUR,0,8,
                         Filled_contour_0_8,0);
 
-  Initialiser_operation(OPERATION_SCROLL,1,0,
+  Init_operation(OPERATION_SCROLL,1,0,
                         Scroll_12_0,1);
-  Initialiser_operation(OPERATION_SCROLL,2,0,
+  Init_operation(OPERATION_SCROLL,2,0,
                         Scroll_12_0,1);
-  Initialiser_operation(OPERATION_SCROLL,1,4,
+  Init_operation(OPERATION_SCROLL,1,4,
                         Scroll_12_4,0);
-  Initialiser_operation(OPERATION_SCROLL,2,4,
+  Init_operation(OPERATION_SCROLL,2,4,
                         Scroll_12_4,0);
-  Initialiser_operation(OPERATION_SCROLL,0,4,
+  Init_operation(OPERATION_SCROLL,0,4,
                         Scroll_0_4,1);
 
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,1,0,
-                        Cercle_degrade_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,2,0,
-                        Cercle_degrade_12_0,1);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,1,6,
-                        Cercle_degrade_12_6,0);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,2,6,
-                        Cercle_degrade_12_6,0);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,0,6,
-                        Cercle_degrade_0_6,1);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,1,8,
-                        Cercle_degrade_12_8,0);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,2,8,
-                        Cercle_degrade_12_8,0);
-  Initialiser_operation(OPERATION_CERCLE_DEGRADE,0,8,
-                        Cercle_ou_ellipse_degrade_0_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,0,
+                        Grad_circle_12_0,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,0,
+                        Grad_circle_12_0,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,6,
+                        Grad_circle_12_6,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,6,
+                        Grad_circle_12_6,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,6,
+                        Grad_circle_0_6,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,8,
+                        Grad_circle_12_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,8,
+                        Grad_circle_12_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,8,
+                        Grad_circle_or_ellipse_0_8,0);
 
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,0,8,
-                        Cercle_ou_ellipse_degrade_0_8,0);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,1,0,
-                        Ellipse_degradee_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,2,0,
-                        Ellipse_degradee_12_0,1);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,1,6,
-                        Ellipse_degradee_12_6,0);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,2,6,
-                        Ellipse_degradee_12_6,0);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,0,6,
-                        Ellipse_degradee_0_6,1);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,1,8,
-                        Ellipse_degradee_12_8,1);
-  Initialiser_operation(OPERATION_ELLIPSE_DEGRADEE,2,8,
-                        Ellipse_degradee_12_8,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,
+                        Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,
+                        Grad_ellipse_12_0,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,
+                        Grad_ellipse_12_0,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,
+                        Grad_ellipse_12_6,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,
+                        Grad_ellipse_12_6,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,
+                        Grad_ellipse_0_6,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,
+                        Grad_ellipse_12_8,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,
+                        Grad_ellipse_12_8,1);
 
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,0,Rectangle_Degrade_12_0,0);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,5,Rectangle_Degrade_12_5,0);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,5,Rectangle_Degrade_0_5,1);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,7,Rectangle_Degrade_0_7,0);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,7,Rectangle_Degrade_12_7,1);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,2,7,Rectangle_Degrade_12_7,1);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,1,9,Rectangle_Degrade_12_9,1);
-  Initialiser_operation(OPERATION_RECTANGLE_DEGRADE,0,9,Rectangle_Degrade_0_9,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,5,Grad_rectangle_0_5,1);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,7,Grad_rectangle_0_7,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,7,Grad_rectangle_12_7,1);
+  Init_operation(OPERATION_GRAD_RECTANGLE,2,7,Grad_rectangle_12_7,1);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,9,Grad_rectangle_12_9,1);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,9,Grad_rectangle_0_9,0);
 
 
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,1,0,
-                        Lignes_centrees_12_0,1);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,2,0,
-                        Lignes_centrees_12_0,1);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,1,3,
-                        Lignes_centrees_12_3,0);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,2,3,
-                        Lignes_centrees_12_3,0);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,0,3,
-                        Lignes_centrees_0_3,1);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,1,7,
-                        Lignes_centrees_12_7,0);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,2,7,
-                        Lignes_centrees_12_7,0);
-  Initialiser_operation(OPERATION_LIGNES_CENTREES,0,7,
-                        Lignes_centrees_0_7,0);
+  Init_operation(OPERATION_CENTERED_LINES,1,0,
+                        Centered_lines_12_0,1);
+  Init_operation(OPERATION_CENTERED_LINES,2,0,
+                        Centered_lines_12_0,1);
+  Init_operation(OPERATION_CENTERED_LINES,1,3,
+                        Centered_lines_12_3,0);
+  Init_operation(OPERATION_CENTERED_LINES,2,3,
+                        Centered_lines_12_3,0);
+  Init_operation(OPERATION_CENTERED_LINES,0,3,
+                        Centered_lines_0_3,1);
+  Init_operation(OPERATION_CENTERED_LINES,1,7,
+                        Centered_lines_12_7,0);
+  Init_operation(OPERATION_CENTERED_LINES,2,7,
+                        Centered_lines_12_7,0);
+  Init_operation(OPERATION_CENTERED_LINES,0,7,
+                        Centered_lines_0_7,0);
 }
 
 
@@ -1511,174 +1511,174 @@ void Initialisation_des_operations(void)
 
   // Définition d'un mode:
 
-void Definir_mode_video(short  width,
+void Set_video_mode(short  width,
                         short  height,
                         byte   mode,
                         word   fullscreen)
 {
-  byte Supporte = 0;
+  byte supported = 0;
 
-  if (Nb_modes_video >= MAX_MODES_VIDEO-1)
+  if (Nb_video_modes >= MAX_VIDEO_MODES-1)
   {
-    DEBUG("Error! Attempt to create too many videomodes. Maximum is:", MAX_MODES_VIDEO);
+    DEBUG("Error! Attempt to create too many videomodes. Maximum is:", MAX_VIDEO_MODES);
     return;
   }
   if (!fullscreen)
-    Supporte = 128; // Prefere, non modifiable
+    supported = 128; // Prefere, non modifiable
   else if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
-    Supporte = 1; // Supporte
+    supported = 1; // supported
   else
   {
     // Non supporte : on ne le prend pas
     return;
   }
 
-  Mode_video[Nb_modes_video].Width          = width;
-  Mode_video[Nb_modes_video].Height          = height;
-  Mode_video[Nb_modes_video].Mode             = mode;
-  Mode_video[Nb_modes_video].Fullscreen       = fullscreen;
-  Mode_video[Nb_modes_video].Etat                   = Supporte;
-  Nb_modes_video ++;
+  Video_mode[Nb_video_modes].Width          = width;
+  Video_mode[Nb_video_modes].Height          = height;
+  Video_mode[Nb_video_modes].Mode             = mode;
+  Video_mode[Nb_video_modes].Fullscreen       = fullscreen;
+  Video_mode[Nb_video_modes].State                   = supported;
+  Nb_video_modes ++;
 }
 
 // Utilisé pour trier les modes retournés par SDL
-int Compare_modes_video(const void *p1, const void *p2)
+int Compare_video_modes(const void *p1, const void *p2)
 {
-  const T_Video_mode *Mode1 = (const T_Video_mode *)p1;
-  const T_Video_mode *Mode2 = (const T_Video_mode *)p2;
+  const T_Video_mode *mode1 = (const T_Video_mode *)p1;
+  const T_Video_mode *mode2 = (const T_Video_mode *)p2;
 
   // Tris par largeur
-  if(Mode1->Width - Mode2->Width)
-    return Mode1->Width - Mode2->Width;
+  if(mode1->Width - mode2->Width)
+    return mode1->Width - mode2->Width;
 
   // Tri par hauteur
-  return Mode1->Height - Mode2->Height;
+  return mode1->Height - mode2->Height;
 }
 
 
 // Initiliseur de tous les modes video:
-void Definition_des_modes_video(void)
+void Set_all_video_modes(void)
 {                   // Numero       LargHaut Mode      FXFY Ratio Ref WinOnly Pointeur
   SDL_Rect** Modes;
-  Nb_modes_video=0;
+  Nb_video_modes=0;
   // Doit être en premier pour avoir le numéro 0:
-  Definir_mode_video( 640,480,0, 0);
+  Set_video_mode( 640,480,0, 0);
 
-  Definir_mode_video( 320,200,0, 1);
-  Definir_mode_video( 320,224,0, 1);
-  Definir_mode_video( 320,240,0, 1);
-  Definir_mode_video( 320,256,0, 1);
-  Definir_mode_video( 320,270,0, 1);
-  Definir_mode_video( 320,282,0, 1);
-  Definir_mode_video( 320,300,0, 1);
-  Definir_mode_video( 320,360,0, 1);
-  Definir_mode_video( 320,400,0, 1);
-  Definir_mode_video( 320,448,0, 1);
-  Definir_mode_video( 320,480,0, 1);
-  Definir_mode_video( 320,512,0, 1);
-  Definir_mode_video( 320,540,0, 1);
-  Definir_mode_video( 320,564,0, 1);
-  Definir_mode_video( 320,600,0, 1);
-  Definir_mode_video( 360,200,0, 1);
-  Definir_mode_video( 360,224,0, 1);
-  Definir_mode_video( 360,240,0, 1);
-  Definir_mode_video( 360,256,0, 1);
-  Definir_mode_video( 360,270,0, 1);
-  Definir_mode_video( 360,282,0, 1);
-  Definir_mode_video( 360,300,0, 1);
-  Definir_mode_video( 360,360,0, 1);
-  Definir_mode_video( 360,400,0, 1);
-  Definir_mode_video( 360,448,0, 1);
-  Definir_mode_video( 360,480,0, 1);
-  Definir_mode_video( 360,512,0, 1);
-  Definir_mode_video( 360,540,0, 1);
-  Definir_mode_video( 360,564,0, 1);
-  Definir_mode_video( 360,600,0, 1);
-  Definir_mode_video( 400,200,0, 1);
-  Definir_mode_video( 400,224,0, 1);
-  Definir_mode_video( 400,240,0, 1);
-  Definir_mode_video( 400,256,0, 1);
-  Definir_mode_video( 400,270,0, 1);
-  Definir_mode_video( 400,282,0, 1);
-  Definir_mode_video( 400,300,0, 1);
-  Definir_mode_video( 400,360,0, 1);
-  Definir_mode_video( 400,400,0, 1);
-  Definir_mode_video( 400,448,0, 1);
-  Definir_mode_video( 400,480,0, 1);
-  Definir_mode_video( 400,512,0, 1);
-  Definir_mode_video( 400,540,0, 1);
-  Definir_mode_video( 400,564,0, 1);
-  Definir_mode_video( 400,600,0, 1);
-  Definir_mode_video( 640,224,0, 1);
-  Definir_mode_video( 640,240,0, 1);
-  Definir_mode_video( 640,256,0, 1);
-  Definir_mode_video( 640,270,0, 1);
-  Definir_mode_video( 640,300,0, 1);
-  Definir_mode_video( 640,350,0, 1);
-  Definir_mode_video( 640,400,0, 1);
-  Definir_mode_video( 640,448,0, 1);
-  Definir_mode_video( 640,480,0, 1);
-  Definir_mode_video( 640,512,0, 1);
-  Definir_mode_video( 640,540,0, 1);
-  Definir_mode_video( 640,564,0, 1);
-  Definir_mode_video( 640,600,0, 1);
-  Definir_mode_video( 800,600,0, 1);
-  Definir_mode_video(1024,768,0, 1);
+  Set_video_mode( 320,200,0, 1);
+  Set_video_mode( 320,224,0, 1);
+  Set_video_mode( 320,240,0, 1);
+  Set_video_mode( 320,256,0, 1);
+  Set_video_mode( 320,270,0, 1);
+  Set_video_mode( 320,282,0, 1);
+  Set_video_mode( 320,300,0, 1);
+  Set_video_mode( 320,360,0, 1);
+  Set_video_mode( 320,400,0, 1);
+  Set_video_mode( 320,448,0, 1);
+  Set_video_mode( 320,480,0, 1);
+  Set_video_mode( 320,512,0, 1);
+  Set_video_mode( 320,540,0, 1);
+  Set_video_mode( 320,564,0, 1);
+  Set_video_mode( 320,600,0, 1);
+  Set_video_mode( 360,200,0, 1);
+  Set_video_mode( 360,224,0, 1);
+  Set_video_mode( 360,240,0, 1);
+  Set_video_mode( 360,256,0, 1);
+  Set_video_mode( 360,270,0, 1);
+  Set_video_mode( 360,282,0, 1);
+  Set_video_mode( 360,300,0, 1);
+  Set_video_mode( 360,360,0, 1);
+  Set_video_mode( 360,400,0, 1);
+  Set_video_mode( 360,448,0, 1);
+  Set_video_mode( 360,480,0, 1);
+  Set_video_mode( 360,512,0, 1);
+  Set_video_mode( 360,540,0, 1);
+  Set_video_mode( 360,564,0, 1);
+  Set_video_mode( 360,600,0, 1);
+  Set_video_mode( 400,200,0, 1);
+  Set_video_mode( 400,224,0, 1);
+  Set_video_mode( 400,240,0, 1);
+  Set_video_mode( 400,256,0, 1);
+  Set_video_mode( 400,270,0, 1);
+  Set_video_mode( 400,282,0, 1);
+  Set_video_mode( 400,300,0, 1);
+  Set_video_mode( 400,360,0, 1);
+  Set_video_mode( 400,400,0, 1);
+  Set_video_mode( 400,448,0, 1);
+  Set_video_mode( 400,480,0, 1);
+  Set_video_mode( 400,512,0, 1);
+  Set_video_mode( 400,540,0, 1);
+  Set_video_mode( 400,564,0, 1);
+  Set_video_mode( 400,600,0, 1);
+  Set_video_mode( 640,224,0, 1);
+  Set_video_mode( 640,240,0, 1);
+  Set_video_mode( 640,256,0, 1);
+  Set_video_mode( 640,270,0, 1);
+  Set_video_mode( 640,300,0, 1);
+  Set_video_mode( 640,350,0, 1);
+  Set_video_mode( 640,400,0, 1);
+  Set_video_mode( 640,448,0, 1);
+  Set_video_mode( 640,480,0, 1);
+  Set_video_mode( 640,512,0, 1);
+  Set_video_mode( 640,540,0, 1);
+  Set_video_mode( 640,564,0, 1);
+  Set_video_mode( 640,600,0, 1);
+  Set_video_mode( 800,600,0, 1);
+  Set_video_mode(1024,768,0, 1);
 
   Modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
   if ((Modes != (SDL_Rect**)0) && (Modes!=(SDL_Rect**)-1))
   {
-    int Indice;
-    for (Indice=0; Modes[Indice]; Indice++)
+    int index;
+    for (index=0; Modes[index]; index++)
     {
-      int Indice2;
-      for (Indice2=1; Indice2 < Nb_modes_video; Indice2++)
-        if (Modes[Indice]->w == Mode_video[Indice2].Width &&
-            Modes[Indice]->h == Mode_video[Indice2].Height)
+      int index2;
+      for (index2=1; index2 < Nb_video_modes; index2++)
+        if (Modes[index]->w == Video_mode[index2].Width &&
+            Modes[index]->h == Video_mode[index2].Height)
         {
           // Mode déja prévu: ok
           break;
         }
-      if (Indice2 >= Nb_modes_video && Modes[Indice]->w>=320 && Modes[Indice]->h>=200)
+      if (index2 >= Nb_video_modes && Modes[index]->w>=320 && Modes[index]->h>=200)
       {
         // Nouveau mode à ajouter à la liste
-        Definir_mode_video(Modes[Indice]->w,Modes[Indice]->h,0, 1);
+        Set_video_mode(Modes[index]->w,Modes[index]->h,0, 1);
       }
     }
     // Tri des modes : ceux trouvés par SDL ont été listés à la fin.
-    qsort(&Mode_video[1], Nb_modes_video - 1, sizeof(T_Video_mode), Compare_modes_video);
+    qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
 }
 
 //---------------------------------------------------------------------------
 
-int Charger_CFG(int Tout_charger)
+int Load_CFG(int reload_all)
 {
   FILE*  Handle;
-  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  long Taille_fichier;
-  int  Indice,Indice2;
-  Config_Header       cfg_header;
-  Config_Chunk        Chunk;
-  Config_Infos_touche CFG_Infos_touche;
-  Config_Mode_video   CFG_Mode_video;
-  int Conversion_touches = 0;
+  char filename[MAX_PATH_CHARACTERS];
+  long file_size;
+  int  index,index2;
+  T_Config_header       cfg_header;
+  T_Config_chunk        Chunk;
+  T_Config_shortcut_info cfg_shortcut_info;
+  T_Config_video_mode   cfg_video_mode;
+  int key_conversion = 0;
 
-  strcpy(Nom_du_fichier,Repertoire_de_configuration);
-  strcat(Nom_du_fichier,"gfx2.cfg");
+  strcpy(filename,Config_directory);
+  strcat(filename,"gfx2.cfg");
 
-  Taille_fichier=FileLength(Nom_du_fichier);
+  file_size=File_length(filename);
 
-  if ((Handle=fopen(Nom_du_fichier,"rb"))==NULL)
-    return ERREUR_CFG_ABSENT;
+  if ((Handle=fopen(filename,"rb"))==NULL)
+    return ERROR_CFG_MISSING;
 
-  if ( (Taille_fichier<(long)sizeof(cfg_header))
-    || (!read_bytes(Handle, &cfg_header.Signature, 3))
+  if ( (file_size<(long)sizeof(cfg_header))
+    || (!Read_bytes(Handle, &cfg_header.Signature, 3))
     || memcmp(cfg_header.Signature,"CFG",3)
-    || (!read_byte(Handle, &cfg_header.Version1))
-    || (!read_byte(Handle, &cfg_header.Version2))
-    || (!read_byte(Handle, &cfg_header.Beta1))
-    || (!read_byte(Handle, &cfg_header.Beta2)) )
+    || (!Read_byte(Handle, &cfg_header.Version1))
+    || (!Read_byte(Handle, &cfg_header.Version2))
+    || (!Read_byte(Handle, &cfg_header.Beta1))
+    || (!Read_byte(Handle, &cfg_header.Beta2)) )
       goto Erreur_lecture_config;
 
   // Version DOS de Robinson et X-Man
@@ -1687,7 +1687,7 @@ int Charger_CFG(int Tout_charger)
     && (cfg_header.Beta1== 96))
   {
     // Les touches (scancodes) sont à convertir)
-    Conversion_touches = 1;
+    key_conversion = 1;
   }
   // Version SDL jusqu'a 98%
   else if ( (cfg_header.Version1== 2)
@@ -1695,7 +1695,7 @@ int Charger_CFG(int Tout_charger)
     && (cfg_header.Beta1== 97))
   {
     // Les touches 00FF (pas de touche) sont a comprendre comme 0x0000
-    Conversion_touches = 2;
+    key_conversion = 2;
   }
   // Version SDL
   else if ( (cfg_header.Version1!=VERSION1)
@@ -1705,52 +1705,52 @@ int Charger_CFG(int Tout_charger)
     goto Erreur_config_ancienne;
 
   // - Lecture des infos contenues dans le fichier de config -
-  while (read_byte(Handle, &Chunk.Number))
+  while (Read_byte(Handle, &Chunk.Number))
   {
-    read_word_le(Handle, &Chunk.Size);
+    Read_word_le(Handle, &Chunk.Size);
     switch (Chunk.Number)
     {
-      case CHUNK_TOUCHES: // Touches
-        if (Tout_charger)
+      case CHUNK_KEYS: // Touches
+        if (reload_all)
         {
-          for (Indice=0; Indice<(long)(Chunk.Size/sizeof(CFG_Infos_touche)); Indice++)
+          for (index=0; index<(long)(Chunk.Size/sizeof(cfg_shortcut_info)); index++)
           {
-            if (!read_word_le(Handle, &CFG_Infos_touche.Number) ||
-                !read_word_le(Handle, &CFG_Infos_touche.Touche) ||
-                !read_word_le(Handle, &CFG_Infos_touche.Touche2) )
+            if (!Read_word_le(Handle, &cfg_shortcut_info.Number) ||
+                !Read_word_le(Handle, &cfg_shortcut_info.Key) ||
+                !Read_word_le(Handle, &cfg_shortcut_info.Key2) )
               goto Erreur_lecture_config;
             else
             {
-              if (Conversion_touches==1)
+              if (key_conversion==1)
               {
-                CFG_Infos_touche.Touche = Touche_pour_scancode(CFG_Infos_touche.Touche);
+                cfg_shortcut_info.Key = Key_for_scancode(cfg_shortcut_info.Key);
               }
-              else if (Conversion_touches==2)
+              else if (key_conversion==2)
               {
-                if (CFG_Infos_touche.Touche == 0x00FF)
-                  CFG_Infos_touche.Touche = 0x0000;
-                if (CFG_Infos_touche.Touche2 == 0x00FF)
-                  CFG_Infos_touche.Touche2 = 0x0000;
+                if (cfg_shortcut_info.Key == 0x00FF)
+                  cfg_shortcut_info.Key = 0x0000;
+                if (cfg_shortcut_info.Key2 == 0x00FF)
+                  cfg_shortcut_info.Key2 = 0x0000;
               }
               
-              for (Indice2=0;
-                 ((Indice2<NB_TOUCHES) && (ConfigTouche[Indice2].Number!=CFG_Infos_touche.Number));
-                 Indice2++);
-              if (Indice2<NB_TOUCHES)
+              for (index2=0;
+                 ((index2<NB_SHORTCUTS) && (ConfigKey[index2].Number!=cfg_shortcut_info.Number));
+                 index2++);
+              if (index2<NB_SHORTCUTS)
               {
-                switch(Ordonnancement[Indice2]>>8)
+                switch(Ordering[index2]>>8)
                 {
                   case 0 :
-                    Config_Touche[Ordonnancement[Indice2]&0xFF][0]=CFG_Infos_touche.Touche;
-                    Config_Touche[Ordonnancement[Indice2]&0xFF][1]=CFG_Infos_touche.Touche2;
+                    Config_Key[Ordering[index2]&0xFF][0]=cfg_shortcut_info.Key;
+                    Config_Key[Ordering[index2]&0xFF][1]=cfg_shortcut_info.Key2;
                     break;
                   case 1 :
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche[0] = CFG_Infos_touche.Touche;
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_gauche[1] = CFG_Infos_touche.Touche2;
+                    Button[Ordering[index2]&0xFF].Left_shortcut[0] = cfg_shortcut_info.Key;
+                    Button[Ordering[index2]&0xFF].Left_shortcut[1] = cfg_shortcut_info.Key2;
                     break;
                   case 2 :
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite[0] = CFG_Infos_touche.Touche;
-                    Bouton[Ordonnancement[Indice2]&0xFF].Raccourci_droite[1] = CFG_Infos_touche.Touche2;
+                    Button[Ordering[index2]&0xFF].Right_shortcut[0] = cfg_shortcut_info.Key;
+                    Button[Ordering[index2]&0xFF].Right_shortcut[1] = cfg_shortcut_info.Key2;
                     break;
                 }
               }
@@ -1765,51 +1765,51 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_MODES_VIDEO: // Modes vidéo
-        for (Indice=0; Indice<(long)(Chunk.Size/sizeof(CFG_Mode_video)); Indice++)
+      case CHUNK_VIDEO_MODES: // Modes vidéo
+        for (index=0; index<(long)(Chunk.Size/sizeof(cfg_video_mode)); index++)
         {
-          if (!read_byte(Handle, &CFG_Mode_video.Etat) ||
-              !read_word_le(Handle, &CFG_Mode_video.Width) ||
-              !read_word_le(Handle, &CFG_Mode_video.Height) )
+          if (!Read_byte(Handle, &cfg_video_mode.State) ||
+              !Read_word_le(Handle, &cfg_video_mode.Width) ||
+              !Read_word_le(Handle, &cfg_video_mode.Height) )
             goto Erreur_lecture_config;
 
-          for (Indice2=1; Indice2<Nb_modes_video; Indice2++)
+          for (index2=1; index2<Nb_video_modes; index2++)
           {
-            if (Mode_video[Indice2].Width==CFG_Mode_video.Width &&
-                Mode_video[Indice2].Height==CFG_Mode_video.Height)
+            if (Video_mode[index2].Width==cfg_video_mode.Width &&
+                Video_mode[index2].Height==cfg_video_mode.Height)
             {
               // On ne prend le paramètre utilisateur que si la résolution
               // est effectivement supportée par SDL
               // Seules les deux petits bits sont récupérés, car les anciens fichiers
               // de configuration (DOS 96.5%) utilisaient d'autres bits.
-              if (! (Mode_video[Indice2].Etat & 128))
-                Mode_video[Indice2].Etat=CFG_Mode_video.Etat&3;
+              if (! (Video_mode[index2].State & 128))
+                Video_mode[index2].State=cfg_video_mode.State&3;
               break;
             }
           }
         }
         break;
       case CHUNK_SHADE: // Shade
-        if (Tout_charger)
+        if (reload_all)
         {
-          if (! read_byte(Handle, &Shade_Actuel) )
+          if (! Read_byte(Handle, &Shade_current) )
             goto Erreur_lecture_config;
 
-          for (Indice=0; Indice<8; Indice++)
+          for (index=0; index<8; index++)
           {
-            for (Indice2=0; Indice2<512; Indice2++)
+            for (index2=0; index2<512; index2++)
             {
-              if (! read_word_le(Handle, &Shade_Liste[Indice].List[Indice2]))
+              if (! Read_word_le(Handle, &Shade_list[index].List[index2]))
                 goto Erreur_lecture_config;
             }
-            if (! read_byte(Handle, &Shade_Liste[Indice].Step) ||
-              ! read_byte(Handle, &Shade_Liste[Indice].Mode) )
+            if (! Read_byte(Handle, &Shade_list[index].Step) ||
+              ! Read_byte(Handle, &Shade_list[index].Mode) )
             goto Erreur_lecture_config;
           }
-          Liste2tables(Shade_Liste[Shade_Actuel].List,
-            Shade_Liste[Shade_Actuel].Step,
-            Shade_Liste[Shade_Actuel].Mode,
-            Shade_Table_gauche,Shade_Table_droite);
+          Shade_list_to_lookup_tables(Shade_list[Shade_current].List,
+            Shade_list[Shade_current].Step,
+            Shade_list[Shade_current].Mode,
+            Shade_table_left,Shade_table_right);
         }
         else
         {
@@ -1817,10 +1817,10 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_MASQUE: // Masque
-        if (Tout_charger)
+      case CHUNK_MASK: // Masque
+        if (reload_all)
         {
-          if (!read_bytes(Handle, Mask_table, 256))
+          if (!Read_bytes(Handle, Mask_table, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1830,9 +1830,9 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_STENCIL: // Stencil
-        if (Tout_charger)
+        if (reload_all)
         {
-          if (!read_bytes(Handle, Stencil, 256))
+          if (!Read_bytes(Handle, Stencil, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1841,21 +1841,21 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_DEGRADES: // Infos sur les dégradés
-        if (Tout_charger)
+      case CHUNK_GRADIENTS: // Infos sur les dégradés
+        if (reload_all)
         {
-          if (! read_byte(Handle, &Degrade_Courant))
+          if (! Read_byte(Handle, &Current_gradient))
             goto Erreur_lecture_config;
-          for(Indice=0;Indice<16;Indice++)
+          for(index=0;index<16;index++)
           {
-            if (!read_byte(Handle, &Degrade_Tableau[Indice].Debut) ||
-                !read_byte(Handle, &Degrade_Tableau[Indice].Fin) ||
-                !read_dword_le(Handle, &Degrade_Tableau[Indice].Inverse) ||
-                !read_dword_le(Handle, &Degrade_Tableau[Indice].Melange) ||
-                !read_dword_le(Handle, &Degrade_Tableau[Indice].Technique) )
+            if (!Read_byte(Handle, &Gradient_array[index].Start) ||
+                !Read_byte(Handle, &Gradient_array[index].End) ||
+                !Read_dword_le(Handle, &Gradient_array[index].Inverse) ||
+                !Read_dword_le(Handle, &Gradient_array[index].Mix) ||
+                !Read_dword_le(Handle, &Gradient_array[index].Technique) )
             goto Erreur_lecture_config;
           }
-          Degrade_Charger_infos_du_tableau(Degrade_Courant);
+          Load_gradient_data(Current_gradient);
         }
         else
         {
@@ -1864,11 +1864,11 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_SMOOTH: // Matrice du smooth
-        if (Tout_charger)
+        if (reload_all)
         {
-          for (Indice=0; Indice<3; Indice++)
-            for (Indice2=0; Indice2<3; Indice2++)
-              if (!read_byte(Handle, &(Smooth_Matrice[Indice][Indice2])))
+          for (index=0; index<3; index++)
+            for (index2=0; index2<3; index2++)
+              if (!Read_byte(Handle, &(Smooth_matrix[index][index2])))
                 goto Erreur_lecture_config;
         }
         else
@@ -1878,9 +1878,9 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_EXCLUDE_COLORS: // Exclude_color
-        if (Tout_charger)
+        if (reload_all)
         {
-          if (!read_bytes(Handle, Exclude_color, 256))
+          if (!Read_bytes(Handle, Exclude_color, 256))
             goto Erreur_lecture_config;
         }
         else
@@ -1890,11 +1890,11 @@ int Charger_CFG(int Tout_charger)
         }
         break;
       case CHUNK_QUICK_SHADE: // Quick-shade
-        if (Tout_charger)
+        if (reload_all)
         {
-          if (!read_byte(Handle, &Quick_shade_Step))
+          if (!Read_byte(Handle, &Quick_shade_step))
             goto Erreur_lecture_config;
-          if (!read_byte(Handle, &Quick_shade_Loop))
+          if (!Read_byte(Handle, &Quick_shade_loop))
             goto Erreur_lecture_config;
         }
         else
@@ -1903,16 +1903,16 @@ int Charger_CFG(int Tout_charger)
             goto Erreur_lecture_config;
         }
         break;
-        case CHUNK_GRILLE: // Grille
-        if (Tout_charger)
+        case CHUNK_GRID: // Grille
+        if (reload_all)
         {
-          if (!read_word_le(Handle, &Snap_Largeur))
+          if (!Read_word_le(Handle, &Snap_width))
             goto Erreur_lecture_config;
-          if (!read_word_le(Handle, &Snap_Hauteur))
+          if (!Read_word_le(Handle, &Snap_height))
             goto Erreur_lecture_config;
-          if (!read_word_le(Handle, &Snap_Decalage_X))
+          if (!Read_word_le(Handle, &Snap_offset_X))
             goto Erreur_lecture_config;
-          if (!read_word_le(Handle, &Snap_Decalage_Y))
+          if (!Read_word_le(Handle, &Snap_offset_Y))
             goto Erreur_lecture_config;
         }
         else
@@ -1927,36 +1927,36 @@ int Charger_CFG(int Tout_charger)
   }
 
   if (fclose(Handle))
-    return ERREUR_CFG_CORROMPU;
+    return ERROR_CFG_CORRUPTED;
 
   return 0;
 
 Erreur_lecture_config:
   fclose(Handle);
-  return ERREUR_CFG_CORROMPU;
+  return ERROR_CFG_CORRUPTED;
 Erreur_config_ancienne:
   fclose(Handle);
-  return ERREUR_CFG_ANCIEN;
+  return ERROR_CFG_OLD;
 }
 
 
-int Sauver_CFG(void)
+int Save_CFG(void)
 {
   FILE*  Handle;
-  int  Indice;
-  int  Indice2;
-  int Modes_a_sauver;
-  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  Config_Header cfg_header;
-  Config_Chunk Chunk;
-  Config_Infos_touche CFG_Infos_touche={0,0,0};
-  Config_Mode_video   CFG_Mode_video={0,0,0};
+  int  index;
+  int  index2;
+  int modes_to_save;
+  char filename[MAX_PATH_CHARACTERS];
+  T_Config_header cfg_header;
+  T_Config_chunk Chunk;
+  T_Config_shortcut_info cfg_shortcut_info={0,0,0};
+  T_Config_video_mode   cfg_video_mode={0,0,0};
 
-  strcpy(Nom_du_fichier,Repertoire_de_configuration);
-  strcat(Nom_du_fichier,"gfx2.cfg");
+  strcpy(filename,Config_directory);
+  strcat(filename,"gfx2.cfg");
 
-  if ((Handle=fopen(Nom_du_fichier,"wb"))==NULL)
-    return ERREUR_SAUVEGARDE_CFG;
+  if ((Handle=fopen(filename,"wb"))==NULL)
+    return ERROR_SAVING_CFG;
 
   // Ecriture du header
   memcpy(cfg_header.Signature,"CFG",3);
@@ -1964,286 +1964,286 @@ int Sauver_CFG(void)
   cfg_header.Version2=VERSION2;
   cfg_header.Beta1   =BETA1;
   cfg_header.Beta2   =BETA2;
-  if (!write_bytes(Handle, &cfg_header.Signature,3) ||
-      !write_byte(Handle, cfg_header.Version1) ||
-      !write_byte(Handle, cfg_header.Version2) ||
-      !write_byte(Handle, cfg_header.Beta1) ||
-      !write_byte(Handle, cfg_header.Beta2) )
+  if (!Write_bytes(Handle, &cfg_header.Signature,3) ||
+      !Write_byte(Handle, cfg_header.Version1) ||
+      !Write_byte(Handle, cfg_header.Version2) ||
+      !Write_byte(Handle, cfg_header.Beta1) ||
+      !Write_byte(Handle, cfg_header.Beta2) )
     goto Erreur_sauvegarde_config;
 
   // Enregistrement des touches
-  Chunk.Number=CHUNK_TOUCHES;
-  Chunk.Size=NB_TOUCHES*sizeof(CFG_Infos_touche);
+  Chunk.Number=CHUNK_KEYS;
+  Chunk.Size=NB_SHORTCUTS*sizeof(cfg_shortcut_info);
 
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  for (Indice=0; Indice<NB_TOUCHES; Indice++)
+  for (index=0; index<NB_SHORTCUTS; index++)
   {
-    CFG_Infos_touche.Number = ConfigTouche[Indice].Number;
-    switch(Ordonnancement[Indice]>>8)
+    cfg_shortcut_info.Number = ConfigKey[index].Number;
+    switch(Ordering[index]>>8)
     {
       case 0 :
-        CFG_Infos_touche.Touche =Config_Touche[Ordonnancement[Indice]&0xFF][0]; 
-        CFG_Infos_touche.Touche2=Config_Touche[Ordonnancement[Indice]&0xFF][1]; 
+        cfg_shortcut_info.Key =Config_Key[Ordering[index]&0xFF][0]; 
+        cfg_shortcut_info.Key2=Config_Key[Ordering[index]&0xFF][1]; 
         break;
       case 1 :
-        CFG_Infos_touche.Touche =Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[0]; 
-        CFG_Infos_touche.Touche2=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[1]; 
+        cfg_shortcut_info.Key =Button[Ordering[index]&0xFF].Left_shortcut[0]; 
+        cfg_shortcut_info.Key2=Button[Ordering[index]&0xFF].Left_shortcut[1]; 
         break;
       case 2 : 
-        CFG_Infos_touche.Touche =Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[0]; 
-        CFG_Infos_touche.Touche2=Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[1]; 
+        cfg_shortcut_info.Key =Button[Ordering[index]&0xFF].Right_shortcut[0]; 
+        cfg_shortcut_info.Key2=Button[Ordering[index]&0xFF].Right_shortcut[1]; 
         break;
     }
-    if (!write_word_le(Handle, CFG_Infos_touche.Number) ||
-        !write_word_le(Handle, CFG_Infos_touche.Touche) ||
-        !write_word_le(Handle, CFG_Infos_touche.Touche2) )
+    if (!Write_word_le(Handle, cfg_shortcut_info.Number) ||
+        !Write_word_le(Handle, cfg_shortcut_info.Key) ||
+        !Write_word_le(Handle, cfg_shortcut_info.Key2) )
       goto Erreur_sauvegarde_config;
   }
 
   // D'abord compter les modes pour lesquels l'utilisateur a mis une préférence
-  Modes_a_sauver=0;
-  for (Indice=1; Indice<Nb_modes_video; Indice++)
-    if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
-      Modes_a_sauver++;
+  modes_to_save=0;
+  for (index=1; index<Nb_video_modes; index++)
+    if (Video_mode[index].State==0 || Video_mode[index].State==2 || Video_mode[index].State==3)
+      modes_to_save++;
 
   // Sauvegarde de l'état de chaque mode vidéo
-  Chunk.Number=CHUNK_MODES_VIDEO;
-  Chunk.Size=Modes_a_sauver * sizeof(CFG_Mode_video);
+  Chunk.Number=CHUNK_VIDEO_MODES;
+  Chunk.Size=modes_to_save * sizeof(cfg_video_mode);
 
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  for (Indice=1; Indice<Nb_modes_video; Indice++)
-    if (Mode_video[Indice].Etat==0 || Mode_video[Indice].Etat==2 || Mode_video[Indice].Etat==3)
+  for (index=1; index<Nb_video_modes; index++)
+    if (Video_mode[index].State==0 || Video_mode[index].State==2 || Video_mode[index].State==3)
     {
-      CFG_Mode_video.Etat   =Mode_video[Indice].Etat;
-      CFG_Mode_video.Width=Mode_video[Indice].Width;
-      CFG_Mode_video.Height=Mode_video[Indice].Height;
+      cfg_video_mode.State   =Video_mode[index].State;
+      cfg_video_mode.Width=Video_mode[index].Width;
+      cfg_video_mode.Height=Video_mode[index].Height;
 
-      if (!write_byte(Handle, CFG_Mode_video.Etat) ||
-        !write_word_le(Handle, CFG_Mode_video.Width) ||
-        !write_word_le(Handle, CFG_Mode_video.Height) )
+      if (!Write_byte(Handle, cfg_video_mode.State) ||
+        !Write_word_le(Handle, cfg_video_mode.Width) ||
+        !Write_word_le(Handle, cfg_video_mode.Height) )
         goto Erreur_sauvegarde_config;
     }
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Number=CHUNK_SHADE;
-  Chunk.Size=sizeof(Shade_Liste)+sizeof(Shade_Actuel);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  Chunk.Size=sizeof(Shade_list)+sizeof(Shade_current);
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_byte(Handle, Shade_Actuel))
+  if (!Write_byte(Handle, Shade_current))
     goto Erreur_sauvegarde_config;
-  for (Indice=0; Indice<8; Indice++)
+  for (index=0; index<8; index++)
   {
-    for (Indice2=0; Indice2<512; Indice2++)
+    for (index2=0; index2<512; index2++)
     {
-      if (! write_word_le(Handle, Shade_Liste[Indice].List[Indice2]))
+      if (! Write_word_le(Handle, Shade_list[index].List[index2]))
         goto Erreur_sauvegarde_config;
     }
-    if (! write_byte(Handle, Shade_Liste[Indice].Step) ||
-      ! write_byte(Handle, Shade_Liste[Indice].Mode) )
+    if (! Write_byte(Handle, Shade_list[index].Step) ||
+      ! Write_byte(Handle, Shade_list[index].Mode) )
     goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde des informations du Masque
-  Chunk.Number=CHUNK_MASQUE;
+  Chunk.Number=CHUNK_MASK;
   Chunk.Size=sizeof(Mask_table);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_bytes(Handle, Mask_table,256))
+  if (!Write_bytes(Handle, Mask_table,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Stencil
   Chunk.Number=CHUNK_STENCIL;
   Chunk.Size=sizeof(Stencil);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_bytes(Handle, Stencil,256))
+  if (!Write_bytes(Handle, Stencil,256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
-  Chunk.Number=CHUNK_DEGRADES;
-  Chunk.Size=sizeof(Degrade_Tableau)+1;
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  Chunk.Number=CHUNK_GRADIENTS;
+  Chunk.Size=sizeof(Gradient_array)+1;
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_byte(Handle, Degrade_Courant))
+  if (!Write_byte(Handle, Current_gradient))
     goto Erreur_sauvegarde_config;
-  for(Indice=0;Indice<16;Indice++)
+  for(index=0;index<16;index++)
   {
-    if (!write_byte(Handle,Degrade_Tableau[Indice].Debut) ||
-        !write_byte(Handle,Degrade_Tableau[Indice].Fin) ||
-        !write_dword_le(Handle, Degrade_Tableau[Indice].Inverse) ||
-        !write_dword_le(Handle, Degrade_Tableau[Indice].Melange) ||
-        !write_dword_le(Handle, Degrade_Tableau[Indice].Technique) )
+    if (!Write_byte(Handle,Gradient_array[index].Start) ||
+        !Write_byte(Handle,Gradient_array[index].End) ||
+        !Write_dword_le(Handle, Gradient_array[index].Inverse) ||
+        !Write_dword_le(Handle, Gradient_array[index].Mix) ||
+        !Write_dword_le(Handle, Gradient_array[index].Technique) )
         goto Erreur_sauvegarde_config;
   }
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
-  Chunk.Size=sizeof(Smooth_Matrice);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  Chunk.Size=sizeof(Smooth_matrix);
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  for (Indice=0; Indice<3; Indice++)
-    for (Indice2=0; Indice2<3; Indice2++)
-      if (!write_byte(Handle, Smooth_Matrice[Indice][Indice2]))
+  for (index=0; index<3; index++)
+    for (index2=0; index2<3; index2++)
+      if (!Write_byte(Handle, Smooth_matrix[index][index2]))
         goto Erreur_sauvegarde_config;
 
   // Sauvegarde des couleurs à exclure
   Chunk.Number=CHUNK_EXCLUDE_COLORS;
   Chunk.Size=sizeof(Exclude_color);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
- if (!write_bytes(Handle, Exclude_color, 256))
+ if (!Write_bytes(Handle, Exclude_color, 256))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations du Quick-shade
   Chunk.Number=CHUNK_QUICK_SHADE;
-  Chunk.Size=sizeof(Quick_shade_Step)+sizeof(Quick_shade_Loop);
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  Chunk.Size=sizeof(Quick_shade_step)+sizeof(Quick_shade_loop);
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_byte(Handle, Quick_shade_Step))
+  if (!Write_byte(Handle, Quick_shade_step))
     goto Erreur_sauvegarde_config;
-  if (!write_byte(Handle, Quick_shade_Loop))
+  if (!Write_byte(Handle, Quick_shade_loop))
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations de la grille
-  Chunk.Number=CHUNK_GRILLE;
+  Chunk.Number=CHUNK_GRID;
   Chunk.Size=8;
-  if (!write_byte(Handle, Chunk.Number) ||
-      !write_word_le(Handle, Chunk.Size) )
+  if (!Write_byte(Handle, Chunk.Number) ||
+      !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  if (!write_word_le(Handle, Snap_Largeur))
+  if (!Write_word_le(Handle, Snap_width))
     goto Erreur_sauvegarde_config;
-  if (!write_word_le(Handle, Snap_Hauteur))
+  if (!Write_word_le(Handle, Snap_height))
     goto Erreur_sauvegarde_config;
-  if (!write_word_le(Handle, Snap_Decalage_X))
+  if (!Write_word_le(Handle, Snap_offset_X))
     goto Erreur_sauvegarde_config;
-  if (!write_word_le(Handle, Snap_Decalage_Y))
+  if (!Write_word_le(Handle, Snap_offset_Y))
     goto Erreur_sauvegarde_config;
 
 
   if (fclose(Handle))
-    return ERREUR_SAUVEGARDE_CFG;
+    return ERROR_SAVING_CFG;
 
   return 0;
 
 Erreur_sauvegarde_config:
   fclose(Handle);
-  return ERREUR_SAUVEGARDE_CFG;
+  return ERROR_SAVING_CFG;
 }
 
 
-void Initialiser_les_tables_de_multiplication(void)
+void Init_multiplication_tables(void)
 {
-  word Indice_de_facteur;
-  word Facteur_de_zoom;
-  word Indice_de_multiplication;
+  word factor_index;
+  word zoom_factor;
+  word mult_index;
 
-  for (Indice_de_facteur=0;Indice_de_facteur<NB_FACTEURS_DE_ZOOM;Indice_de_facteur++)
+  for (factor_index=0;factor_index<NB_ZOOM_FACTORS;factor_index++)
   {
-    Facteur_de_zoom=FACTEUR_ZOOM[Indice_de_facteur];
+    zoom_factor=ZOOM_FACTOR[factor_index];
 
-    for (Indice_de_multiplication=0;Indice_de_multiplication<512;Indice_de_multiplication++)
+    for (mult_index=0;mult_index<512;mult_index++)
     {
-      TABLE_ZOOM[Indice_de_facteur][Indice_de_multiplication]=Facteur_de_zoom*Indice_de_multiplication;
+      Magnify_table[factor_index][mult_index]=zoom_factor*mult_index;
     }
   }
 }
 
 // (Ré)assigne toutes les valeurs de configuration par défaut
-void Config_par_defaut(void)
+void Set_config_defaults(void)
 {
-  int Indice, Indice2;
+  int index, index2;
 
   // Raccourcis clavier
-  for (Indice=0; Indice<NB_TOUCHES; Indice++)
+  for (index=0; index<NB_SHORTCUTS; index++)
   {
-    switch(Ordonnancement[Indice]>>8)
+    switch(Ordering[index]>>8)
     {
       case 0 :
-        Config_Touche[Ordonnancement[Indice]&0xFF][0]=ConfigTouche[Indice].Touche;
-        Config_Touche[Ordonnancement[Indice]&0xFF][1]=ConfigTouche[Indice].Touche2;
+        Config_Key[Ordering[index]&0xFF][0]=ConfigKey[index].Key;
+        Config_Key[Ordering[index]&0xFF][1]=ConfigKey[index].Key2;
         break;
       case 1 :
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[0] = ConfigTouche[Indice].Touche;
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_gauche[1] = ConfigTouche[Indice].Touche2;
+        Button[Ordering[index]&0xFF].Left_shortcut[0] = ConfigKey[index].Key;
+        Button[Ordering[index]&0xFF].Left_shortcut[1] = ConfigKey[index].Key2;
         break;
       case 2 :
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[0] = ConfigTouche[Indice].Touche;
-        Bouton[Ordonnancement[Indice]&0xFF].Raccourci_droite[1] = ConfigTouche[Indice].Touche2;
+        Button[Ordering[index]&0xFF].Right_shortcut[0] = ConfigKey[index].Key;
+        Button[Ordering[index]&0xFF].Right_shortcut[1] = ConfigKey[index].Key2;
         break;
     }
   }
   // Shade
-  Shade_Actuel=0;
-  for (Indice=0; Indice<8; Indice++)
+  Shade_current=0;
+  for (index=0; index<8; index++)
   {
-    Shade_Liste[Indice].Step=1;
-    Shade_Liste[Indice].Mode=0;
-    for (Indice2=0; Indice2<512; Indice2++)
-      Shade_Liste[Indice].List[Indice2]=256;
+    Shade_list[index].Step=1;
+    Shade_list[index].Mode=0;
+    for (index2=0; index2<512; index2++)
+      Shade_list[index].List[index2]=256;
   }
   // Shade par défaut pour la palette standard
-  for (Indice=0; Indice<7; Indice++)
-    for (Indice2=0; Indice2<16; Indice2++)
-      Shade_Liste[0].List[Indice*17+Indice2]=Indice*16+Indice2+16;
+  for (index=0; index<7; index++)
+    for (index2=0; index2<16; index2++)
+      Shade_list[0].List[index*17+index2]=index*16+index2+16;
 
-  Liste2tables(Shade_Liste[Shade_Actuel].List,
-            Shade_Liste[Shade_Actuel].Step,
-            Shade_Liste[Shade_Actuel].Mode,
-            Shade_Table_gauche,Shade_Table_droite);
+  Shade_list_to_lookup_tables(Shade_list[Shade_current].List,
+            Shade_list[Shade_current].Step,
+            Shade_list[Shade_current].Mode,
+            Shade_table_left,Shade_table_right);
 
   // Masque
-  for (Indice=0; Indice<256; Indice++)
-    Mask_table[Indice]=0;
+  for (index=0; index<256; index++)
+    Mask_table[index]=0;
 
   // Stencil
-  for (Indice=0; Indice<256; Indice++)
-    Stencil[Indice]=1;
+  for (index=0; index<256; index++)
+    Stencil[index]=1;
 
   // Dégradés
-  Degrade_Courant=0;
-  for(Indice=0;Indice<16;Indice++)
+  Current_gradient=0;
+  for(index=0;index<16;index++)
   {
-    Degrade_Tableau[Indice].Debut=0;
-    Degrade_Tableau[Indice].Fin=0;
-    Degrade_Tableau[Indice].Inverse=0;
-    Degrade_Tableau[Indice].Melange=0;
-    Degrade_Tableau[Indice].Technique=0;
+    Gradient_array[index].Start=0;
+    Gradient_array[index].End=0;
+    Gradient_array[index].Inverse=0;
+    Gradient_array[index].Mix=0;
+    Gradient_array[index].Technique=0;
   }
-  Degrade_Charger_infos_du_tableau(Degrade_Courant);
+  Load_gradient_data(Current_gradient);
 
   // Smooth
-  Smooth_Matrice[0][0]=1;
-  Smooth_Matrice[0][1]=2;
-  Smooth_Matrice[0][2]=1;
-  Smooth_Matrice[1][0]=2;
-  Smooth_Matrice[1][1]=4;
-  Smooth_Matrice[1][2]=2;
-  Smooth_Matrice[2][0]=1;
-  Smooth_Matrice[2][1]=2;
-  Smooth_Matrice[2][2]=1;
+  Smooth_matrix[0][0]=1;
+  Smooth_matrix[0][1]=2;
+  Smooth_matrix[0][2]=1;
+  Smooth_matrix[1][0]=2;
+  Smooth_matrix[1][1]=4;
+  Smooth_matrix[1][2]=2;
+  Smooth_matrix[2][0]=1;
+  Smooth_matrix[2][1]=2;
+  Smooth_matrix[2][2]=1;
 
   // Exclude colors
-  for (Indice=0; Indice<256; Indice++)
-    Exclude_color[Indice]=0;
+  for (index=0; index<256; index++)
+    Exclude_color[index]=0;
 
   // Quick shade
-  Quick_shade_Step=1;
-  Quick_shade_Loop=0;
+  Quick_shade_step=1;
+  Quick_shade_loop=0;
 
   // Grille
-  Snap_Largeur=Snap_Hauteur=8;
-  Snap_Decalage_X=Snap_Decalage_Y=0;
+  Snap_width=Snap_height=8;
+  Snap_offset_X=Snap_offset_Y=0;
 
 }
 
@@ -2264,7 +2264,7 @@ SIGHANDLER_T Handler_ABRT=SIG_DFL;
 SIGHANDLER_T Handler_SEGV=SIG_DFL;
 SIGHANDLER_T Handler_FPE=SIG_DFL;
 
-void sig_handler(int sig)
+void Sig_handler(int sig)
 {
   // Restore default behaviour
   signal(SIGTERM, Handler_TERM);
@@ -2286,14 +2286,14 @@ void sig_handler(int sig)
 }
 #endif
 
-void Initialiser_sighandler(void)
+void Init_sighandler(void)
 {
 #ifdef GRAFX2_CATCHES_SIGNALS
-  Handler_TERM=signal(SIGTERM,sig_handler);
-  Handler_INT =signal(SIGINT,sig_handler);
-  Handler_ABRT=signal(SIGABRT,sig_handler);
-  Handler_SEGV=signal(SIGSEGV,sig_handler);
-  Handler_FPE =signal(SIGFPE,sig_handler);
+  Handler_TERM=signal(SIGTERM,Sig_handler);
+  Handler_INT =signal(SIGINT,Sig_handler);
+  Handler_ABRT=signal(SIGABRT,Sig_handler);
+  Handler_SEGV=signal(SIGSEGV,Sig_handler);
+  Handler_FPE =signal(SIGFPE,Sig_handler);
 #endif
 }
 

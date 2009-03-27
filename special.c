@@ -31,88 +31,88 @@
 
 //---------------------- Modifier le pinceau spécial -------------------------
 
-void Modifier_pinceau(int width, int height)
+void Set_paintbrush_size(int width, int height)
 {
   int x_pos,y_pos;
   int x,y;
-  float Rayon2;
+  float radius2;
 
   if (width<1) width=1;
   if (height<1) height=1;
-  if (width>TAILLE_MAXI_PINCEAU) width=TAILLE_MAXI_PINCEAU;
-  if (height>TAILLE_MAXI_PINCEAU) height=TAILLE_MAXI_PINCEAU;
-  Pinceau_Largeur=width;
-  Pinceau_Hauteur=height;
-  Pinceau_Decalage_X=Pinceau_Largeur>>1;
-  Pinceau_Decalage_Y=Pinceau_Hauteur>>1;
-  switch (Pinceau_Forme)
+  if (width>MAX_PAINTBRUSH_SIZE) width=MAX_PAINTBRUSH_SIZE;
+  if (height>MAX_PAINTBRUSH_SIZE) height=MAX_PAINTBRUSH_SIZE;
+  Paintbrush_width=width;
+  Paintbrush_height=height;
+  Paintbrush_offset_X=Paintbrush_width>>1;
+  Paintbrush_offset_Y=Paintbrush_height>>1;
+  switch (Paintbrush_shape)
   {
-    case FORME_PINCEAU_ROND :
-      Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
-      Rayon2*=Rayon2;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+    case PAINTBRUSH_SHAPE_ROUND :
+      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
+      radius2*=radius2;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
         {
-          x=x_pos-Pinceau_Decalage_X;
-          y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( ((x*x)+(y*y)) < Rayon2 );
+          x=x_pos-Paintbrush_offset_X;
+          y=y_pos-Paintbrush_offset_Y;
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( ((x*x)+(y*y)) < radius2 );
         }
       break;
-    case FORME_PINCEAU_CARRE :
-      for (x_pos=0,y_pos=0; x_pos<Pinceau_Hauteur; x_pos++,y_pos+=TAILLE_MAXI_PINCEAU)
-        memset(Pinceau_Sprite+y_pos,1,Pinceau_Largeur);
+    case PAINTBRUSH_SHAPE_SQUARE :
+      for (x_pos=0,y_pos=0; x_pos<Paintbrush_height; x_pos++,y_pos+=MAX_PAINTBRUSH_SIZE)
+        memset(Paintbrush_sprite+y_pos,1,Paintbrush_width);
       break;
-    case FORME_PINCEAU_ROND_TRAME :
-      Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
-      Rayon2*=Rayon2;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+    case PAINTBRUSH_SHAPE_SIEVE_ROUND :
+      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
+      radius2*=radius2;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
         {
-          x=x_pos-Pinceau_Decalage_X;
-          y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (!((x_pos+y_pos)&1)) && (((x*x)+(y*y)) < Rayon2));
+          x=x_pos-Paintbrush_offset_X;
+          y=y_pos-Paintbrush_offset_Y;
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( (!((x_pos+y_pos)&1)) && (((x*x)+(y*y)) < radius2));
         }
       break;
-    case FORME_PINCEAU_CARRE_TRAME:
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=!((x_pos+y_pos)&1);
+    case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=!((x_pos+y_pos)&1);
       break;
-    case FORME_PINCEAU_PLUS:
-      x=Pinceau_Largeur>>1;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=((x_pos==x) || (y_pos==x));
+    case PAINTBRUSH_SHAPE_PLUS:
+      x=Paintbrush_width>>1;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=((x_pos==x) || (y_pos==x));
       break;
-    case FORME_PINCEAU_SLASH:
-      x=Pinceau_Largeur>>1;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==(Pinceau_Largeur-(y_pos+1)));
+    case PAINTBRUSH_SHAPE_SLASH:
+      x=Paintbrush_width>>1;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=(x_pos==(Paintbrush_width-(y_pos+1)));
       break;
-    case FORME_PINCEAU_ANTISLASH:
-      x=Pinceau_Largeur>>1;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(x_pos==y_pos);
+    case PAINTBRUSH_SHAPE_ANTISLASH:
+      x=Paintbrush_width>>1;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=(x_pos==y_pos);
       break;
-    case FORME_PINCEAU_BARRE_HORIZONTALE:
-      memset(Pinceau_Sprite,1,Pinceau_Largeur);
+    case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
+      memset(Paintbrush_sprite,1,Paintbrush_width);
       break;
-    case FORME_PINCEAU_BARRE_VERTICALE:
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)]=1;
+    case PAINTBRUSH_SHAPE_VERTICAL_BAR:
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)]=1;
       break;
-    case FORME_PINCEAU_X:
-      x=Pinceau_Largeur>>1;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (x_pos==y_pos) || (x_pos==(Pinceau_Hauteur-(y_pos+1))) );
+    case PAINTBRUSH_SHAPE_CROSS:
+      x=Paintbrush_width>>1;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( (x_pos==y_pos) || (x_pos==(Paintbrush_height-(y_pos+1))) );
       break;
-    case FORME_PINCEAU_LOSANGE:
-      x=Pinceau_Largeur>>1;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+    case PAINTBRUSH_SHAPE_DIAMOND:
+      x=Paintbrush_width>>1;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
         {
           if (x_pos<=x)
             y=x-x_pos;
@@ -122,212 +122,212 @@ void Modifier_pinceau(int width, int height)
             y+=x-y_pos;
           else
             y+=y_pos-x;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=(y<=x);
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=(y<=x);
         }
       break;
-    case FORME_PINCEAU_ALEATOIRE:
-      Rayon2=Pinceau_Decalage_X+0.414213562; // [0.410..0.415[
-      Rayon2*=Rayon2;
-      for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-        for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
+    case PAINTBRUSH_SHAPE_RANDOM:
+      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
+      radius2*=radius2;
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
         {
-          x=x_pos-Pinceau_Decalage_X;
-          y=y_pos-Pinceau_Decalage_Y;
-          Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=( (((x*x)+(y*y)) < Rayon2) && (!(rand()&7)) );
+          x=x_pos-Paintbrush_offset_X;
+          y=y_pos-Paintbrush_offset_Y;
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( (((x*x)+(y*y)) < radius2) && (!(rand()&7)) );
         }
   }
 }
 
-void Retrecir_pinceau(void)
+void Smaller_paintbrush(void)
 {
-  if ( (Pinceau_Forme<FORME_PINCEAU_DIVERS)
-    && ( (Pinceau_Largeur>1)
-      || (Pinceau_Hauteur>1) ) )
+  if ( (Paintbrush_shape<PAINTBRUSH_SHAPE_MISC)
+    && ( (Paintbrush_width>1)
+      || (Paintbrush_height>1) ) )
   {
-    Effacer_curseur();
-    switch (Pinceau_Forme)
+    Hide_cursor();
+    switch (Paintbrush_shape)
     {
-      case FORME_PINCEAU_ROND:
-      case FORME_PINCEAU_ROND_TRAME:
-      case FORME_PINCEAU_X:
-      case FORME_PINCEAU_PLUS:
-      case FORME_PINCEAU_LOSANGE:
-      case FORME_PINCEAU_ALEATOIRE:
-        if (Pinceau_Largeur&1)
-          Modifier_pinceau(Pinceau_Largeur-2,Pinceau_Hauteur-2);
+      case PAINTBRUSH_SHAPE_ROUND:
+      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
+      case PAINTBRUSH_SHAPE_CROSS:
+      case PAINTBRUSH_SHAPE_PLUS:
+      case PAINTBRUSH_SHAPE_DIAMOND:
+      case PAINTBRUSH_SHAPE_RANDOM:
+        if (Paintbrush_width&1)
+          Set_paintbrush_size(Paintbrush_width-2,Paintbrush_height-2);
         else
-          Modifier_pinceau(Pinceau_Largeur-1,Pinceau_Hauteur-1);
+          Set_paintbrush_size(Paintbrush_width-1,Paintbrush_height-1);
         break;
-      case FORME_PINCEAU_CARRE:
-      case FORME_PINCEAU_SLASH:
-      case FORME_PINCEAU_ANTISLASH:
-      case FORME_PINCEAU_CARRE_TRAME:
-        Modifier_pinceau(Pinceau_Largeur-1,Pinceau_Hauteur-1);
+      case PAINTBRUSH_SHAPE_SQUARE:
+      case PAINTBRUSH_SHAPE_SLASH:
+      case PAINTBRUSH_SHAPE_ANTISLASH:
+      case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
+        Set_paintbrush_size(Paintbrush_width-1,Paintbrush_height-1);
         break;
-      case FORME_PINCEAU_BARRE_HORIZONTALE:
-        Modifier_pinceau(Pinceau_Largeur-1,1);
+      case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
+        Set_paintbrush_size(Paintbrush_width-1,1);
         break;
-      case FORME_PINCEAU_BARRE_VERTICALE:
-        Modifier_pinceau(1,Pinceau_Hauteur-1);
+      case PAINTBRUSH_SHAPE_VERTICAL_BAR:
+        Set_paintbrush_size(1,Paintbrush_height-1);
     }
-    Afficher_pinceau_dans_menu();
-    Afficher_curseur();
+    Display_paintbrush_in_menu();
+    Display_cursor();
   }
 }
 
-void Grossir_pinceau(void)
+void Bigger_paintbrush(void)
 {
-  if ( (Pinceau_Forme<FORME_PINCEAU_DIVERS)
-    && ( (Pinceau_Largeur<TAILLE_MAXI_PINCEAU)
-      || (Pinceau_Hauteur<TAILLE_MAXI_PINCEAU) ) )
+  if ( (Paintbrush_shape<PAINTBRUSH_SHAPE_MISC)
+    && ( (Paintbrush_width<MAX_PAINTBRUSH_SIZE)
+      || (Paintbrush_height<MAX_PAINTBRUSH_SIZE) ) )
   {
-    Effacer_curseur();
-    switch (Pinceau_Forme)
+    Hide_cursor();
+    switch (Paintbrush_shape)
     {
-      case FORME_PINCEAU_ROND:
-      case FORME_PINCEAU_ROND_TRAME:
-      case FORME_PINCEAU_ALEATOIRE:
-      case FORME_PINCEAU_X:
-      case FORME_PINCEAU_PLUS:
-      case FORME_PINCEAU_LOSANGE:
-        if (Pinceau_Largeur&1)
-          Modifier_pinceau(Pinceau_Largeur+2,Pinceau_Hauteur+2);
+      case PAINTBRUSH_SHAPE_ROUND:
+      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
+      case PAINTBRUSH_SHAPE_RANDOM:
+      case PAINTBRUSH_SHAPE_CROSS:
+      case PAINTBRUSH_SHAPE_PLUS:
+      case PAINTBRUSH_SHAPE_DIAMOND:
+        if (Paintbrush_width&1)
+          Set_paintbrush_size(Paintbrush_width+2,Paintbrush_height+2);
         else
-          Modifier_pinceau(Pinceau_Largeur+1,Pinceau_Hauteur+1);
+          Set_paintbrush_size(Paintbrush_width+1,Paintbrush_height+1);
         break;
-      case FORME_PINCEAU_CARRE:
-      case FORME_PINCEAU_SLASH:
-      case FORME_PINCEAU_ANTISLASH:
-      case FORME_PINCEAU_CARRE_TRAME:
-        Modifier_pinceau(Pinceau_Largeur+1,Pinceau_Hauteur+1);
+      case PAINTBRUSH_SHAPE_SQUARE:
+      case PAINTBRUSH_SHAPE_SLASH:
+      case PAINTBRUSH_SHAPE_ANTISLASH:
+      case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
+        Set_paintbrush_size(Paintbrush_width+1,Paintbrush_height+1);
         break;
-      case FORME_PINCEAU_BARRE_HORIZONTALE:
-        Modifier_pinceau(Pinceau_Largeur+1,1);
+      case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
+        Set_paintbrush_size(Paintbrush_width+1,1);
         break;
-      case FORME_PINCEAU_BARRE_VERTICALE:
-        Modifier_pinceau(1,Pinceau_Hauteur+1);
+      case PAINTBRUSH_SHAPE_VERTICAL_BAR:
+        Set_paintbrush_size(1,Paintbrush_height+1);
     }
-    Afficher_pinceau_dans_menu();
-    Afficher_curseur();
+    Display_paintbrush_in_menu();
+    Display_cursor();
   }
 }
 
 
 //--------------------- Passer à la ForeColor suivante -----------------------
-void Special_Next_forecolor(void)
+void Special_next_forecolor(void)
 {
-  Effacer_curseur();
-  Encadrer_couleur_menu(CM_Noir);
+  Hide_cursor();
+  Frame_menu_color(MC_Black);
 
   Fore_color++;
 
-  Recadrer_palette();
-  Afficher_foreback();
+  Reposition_palette();
+  Display_foreback();
 
-  Encadrer_couleur_menu(CM_Blanc);
-  Afficher_curseur();
+  Frame_menu_color(MC_White);
+  Display_cursor();
 }
 
 //-------------------- Passer à la ForeColor précédente ----------------------
-void Special_Previous_forecolor(void)
+void Special_previous_forecolor(void)
 {
-  Effacer_curseur();
-  Encadrer_couleur_menu(CM_Noir);
+  Hide_cursor();
+  Frame_menu_color(MC_Black);
 
   Fore_color--;
 
-  Recadrer_palette();
-  Afficher_foreback();
+  Reposition_palette();
+  Display_foreback();
 
-  Encadrer_couleur_menu(CM_Blanc);
-  Afficher_curseur();
+  Frame_menu_color(MC_White);
+  Display_cursor();
 }
 
 //--------------------- Passer à la BackColor suivante -----------------------
-void Special_Next_backcolor(void)
+void Special_next_backcolor(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Back_color++;
-  Afficher_foreback();
-  Afficher_curseur();
+  Display_foreback();
+  Display_cursor();
 }
 
 //-------------------- Passer à la BackColor précédente ----------------------
-void Special_Previous_backcolor(void)
+void Special_previous_backcolor(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Back_color--;
-  Afficher_foreback();
-  Afficher_curseur();
+  Display_foreback();
+  Display_cursor();
 }
 
 
 // ------------------- Scroller l'écran (pas en mode loupe) ------------------
-void Scroller_ecran(short Decalage_en_X,short Decalage_en_Y)
+void Scroll_screen(short delta_x,short delta_y)
 {
-  short Decalage_temporaire_X;
-  short Decalage_temporaire_Y;
+  short temp_x_offset;
+  short temp_y_offset;
 
-  Decalage_temporaire_X=Principal_Decalage_X+Decalage_en_X;
-  Decalage_temporaire_Y=Principal_Decalage_Y+Decalage_en_Y;
+  temp_x_offset=Main_offset_X+delta_x;
+  temp_y_offset=Main_offset_Y+delta_y;
 
-  if (Decalage_temporaire_X+Largeur_ecran>Principal_Largeur_image)
-    Decalage_temporaire_X=Principal_Largeur_image-Largeur_ecran;
-  if (Decalage_temporaire_Y+Menu_Ordonnee>Principal_Hauteur_image)
-    Decalage_temporaire_Y=Principal_Hauteur_image-Menu_Ordonnee;
-  if (Decalage_temporaire_X<0)
-    Decalage_temporaire_X=0;
-  if (Decalage_temporaire_Y<0)
-    Decalage_temporaire_Y=0;
+  if (temp_x_offset+Screen_width>Main_image_width)
+    temp_x_offset=Main_image_width-Screen_width;
+  if (temp_y_offset+Menu_Y>Main_image_height)
+    temp_y_offset=Main_image_height-Menu_Y;
+  if (temp_x_offset<0)
+    temp_x_offset=0;
+  if (temp_y_offset<0)
+    temp_y_offset=0;
 
-  if ( (Principal_Decalage_X!=Decalage_temporaire_X) ||
-       (Principal_Decalage_Y!=Decalage_temporaire_Y) )
+  if ( (Main_offset_X!=temp_x_offset) ||
+       (Main_offset_Y!=temp_y_offset) )
   {
-    Effacer_curseur();
-    Principal_Decalage_X=Decalage_temporaire_X;
-    Principal_Decalage_Y=Decalage_temporaire_Y;
+    Hide_cursor();
+    Main_offset_X=temp_x_offset;
+    Main_offset_Y=temp_y_offset;
 
-    Calculer_limites();
-    Calculer_coordonnees_pinceau();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
 
-    Afficher_ecran();  // <=> Display_screen + Afficher_limites_de_l_image
-    Afficher_curseur();
+    Display_all_screen();  // <=> Display_screen + Display_image_limits
+    Display_cursor();
   }
 }
 
 
 // ---------------------- Scroller la fenêtre de la loupe --------------------
-void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y)
+void Scroll_magnifier(short delta_x,short delta_y)
 {
-  short Decalage_temporaire_X;
-  short Decalage_temporaire_Y;
+  short temp_x_offset;
+  short temp_y_offset;
 
-  Decalage_temporaire_X=Loupe_Decalage_X+Decalage_en_X;
-  Decalage_temporaire_Y=Loupe_Decalage_Y+Decalage_en_Y;
+  temp_x_offset=Main_magnifier_offset_X+delta_x;
+  temp_y_offset=Main_magnifier_offset_Y+delta_y;
 
-  if (Decalage_temporaire_X+Loupe_Largeur>Principal_Largeur_image)
-    Decalage_temporaire_X=Principal_Largeur_image-Loupe_Largeur;
-  if (Decalage_temporaire_Y+Loupe_Hauteur>Principal_Hauteur_image)
-    Decalage_temporaire_Y=Principal_Hauteur_image-Loupe_Hauteur;
-  if (Decalage_temporaire_X<0)
-    Decalage_temporaire_X=0;
-  if (Decalage_temporaire_Y<0)
-    Decalage_temporaire_Y=0;
+  if (temp_x_offset+Main_magnifier_width>Main_image_width)
+    temp_x_offset=Main_image_width-Main_magnifier_width;
+  if (temp_y_offset+Main_magnifier_height>Main_image_height)
+    temp_y_offset=Main_image_height-Main_magnifier_height;
+  if (temp_x_offset<0)
+    temp_x_offset=0;
+  if (temp_y_offset<0)
+    temp_y_offset=0;
 
-  if ( (Loupe_Decalage_X!=Decalage_temporaire_X) ||
-       (Loupe_Decalage_Y!=Decalage_temporaire_Y) )
+  if ( (Main_magnifier_offset_X!=temp_x_offset) ||
+       (Main_magnifier_offset_Y!=temp_y_offset) )
   {
-    Effacer_curseur();
-    Loupe_Decalage_X=Decalage_temporaire_X;
-    Loupe_Decalage_Y=Decalage_temporaire_Y;
+    Hide_cursor();
+    Main_magnifier_offset_X=temp_x_offset;
+    Main_magnifier_offset_Y=temp_y_offset;
 
-    Recadrer_ecran_par_rapport_au_zoom();
+    Position_screen_according_to_zoom();
 
-    Calculer_limites();
-    Calculer_coordonnees_pinceau();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
 
-    Afficher_ecran();
-    Afficher_curseur();
+    Display_all_screen();
+    Display_cursor();
   }
 }
 
@@ -335,16 +335,16 @@ void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y)
 // -------------- Changer le Zoom (grâce aux touches [+] et [-]) -------------
 void Zoom(short delta)
 {
-  short Indice;
-  for (Indice=0; FACTEUR_ZOOM[Indice]!=Loupe_Facteur; Indice++);
-  Indice+=delta;
+  short index;
+  for (index=0; ZOOM_FACTOR[index]!=Main_magnifier_factor; index++);
+  index+=delta;
 
-  if ( (Indice>=0) && (Indice<NB_FACTEURS_DE_ZOOM) )
+  if ( (index>=0) && (index<NB_ZOOM_FACTORS) )
   {
-    Effacer_curseur();
-    Changer_facteur_loupe(Indice);
-    if (Loupe_Mode)
-      Afficher_ecran();
-    Afficher_curseur();
+    Hide_cursor();
+    Change_magnifier_factor(index);
+    if (Main_magnifier_mode)
+      Display_all_screen();
+    Display_cursor();
   }
 }

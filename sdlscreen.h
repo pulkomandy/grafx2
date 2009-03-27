@@ -25,15 +25,15 @@
 #include <SDL.h>
 #include "struct.h"
 
-  void Set_Mode_SDL(int *,int *,int);
+  void Set_mode_SDL(int *,int *,int);
 
-  SDL_Rect ** Liste_Modes_Videos_SDL;
-  byte* Ecran;
+  SDL_Rect ** List_SDL_video_modes;
+  byte* Screen;
 
-  void UpdateRect(short x, short y, unsigned short width, unsigned short height);
+  void Update_rect(short x, short y, unsigned short width, unsigned short height);
   void Flush_update(void);
-  byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest);
-  SDL_Color Conversion_couleur_SDL(byte);
-  byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int x, int y);
+  byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
+  SDL_Color Color_to_SDL_color(byte);
+  byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
   
 #endif // SDLSCREEN_H_INCLUDED

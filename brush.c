@@ -37,438 +37,438 @@
 
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image
-void Calculer_dimensions_clipees(short * x,short * y,short * width,short * height)
+void Compute_clipped_dimensions(short * x,short * y,short * width,short * height)
 {
-  if ((*x)<Limite_Gauche)
+  if ((*x)<Limit_left)
   {
-    (*width)-=(Limite_Gauche-(*x));
-    (*x)=Limite_Gauche;
+    (*width)-=(Limit_left-(*x));
+    (*x)=Limit_left;
   }
 
-  if (((*x)+(*width))>(Limite_Droite+1))
+  if (((*x)+(*width))>(Limit_right+1))
   {
-    (*width)=(Limite_Droite-(*x))+1;
+    (*width)=(Limit_right-(*x))+1;
   }
 
-  if ((*y)<Limite_Haut)
+  if ((*y)<Limit_top)
   {
-    (*height)-=(Limite_Haut-(*y));
-    (*y)=Limite_Haut;
+    (*height)-=(Limit_top-(*y));
+    (*y)=Limit_top;
   }
 
-  if (((*y)+(*height))>(Limite_Bas+1))
+  if (((*y)+(*height))>(Limit_bottom+1))
   {
-    (*height)=(Limite_Bas-(*y))+1;
+    (*height)=(Limit_bottom-(*y))+1;
   }
 }
 
   // -- Calcul de redimensionnement du pinceau pour éviter les débordements
   //    de l'écran zoomé et de l'image --
 
-void Calculer_dimensions_clipees_zoom(short * x,short * y,short * width,short * height)
+void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * height)
 {
-  if ((*x)<Limite_Gauche_Zoom)
+  if ((*x)<Limit_left_zoom)
   {
-    (*width)-=(Limite_Gauche_Zoom-(*x));
-    (*x)=Limite_Gauche_Zoom;
+    (*width)-=(Limit_left_zoom-(*x));
+    (*x)=Limit_left_zoom;
   }
 
-  if (((*x)+(*width))>(Limite_Droite_Zoom+1))
+  if (((*x)+(*width))>(Limit_right_zoom+1))
   {
-    (*width)=(Limite_Droite_Zoom-(*x))+1;
+    (*width)=(Limit_right_zoom-(*x))+1;
   }
 
-  if ((*y)<Limite_Haut_Zoom)
+  if ((*y)<Limit_top_zoom)
   {
-    (*height)-=(Limite_Haut_Zoom-(*y));
-    (*y)=Limite_Haut_Zoom;
+    (*height)-=(Limit_top_zoom-(*y));
+    (*y)=Limit_top_zoom;
   }
 
-  if (((*y)+(*height))>(Limite_Bas_Zoom+1))
+  if (((*y)+(*height))>(Limit_bottom_zoom+1))
   {
-    (*height)=(Limite_Bas_Zoom-(*y))+1;
+    (*height)=(Limit_bottom_zoom-(*y))+1;
   }
 }
 
 
   // -- Afficher le pinceau (de façon définitive ou non) --
 
-void Afficher_pinceau(short x,short y,byte Couleur,byte is_preview)
+void Display_paintbrush(short x,short y,byte color,byte is_preview)
   // x,y: position du centre du pinceau
-  // Couleur: couleur à appliquer au pinceau
+  // color: couleur à appliquer au pinceau
   // is_preview: "Il ne faut l'afficher qu'à l'écran"
 {
-  short Debut_X; // Position X (dans l'image) à partir de laquelle on
+  short start_x; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
+  short start_y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
   short width; // width dans l'écran selon laquelle on affiche la
         // brosse/pinceau
   short height; // height dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
+  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
+  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
   short x_pos; // Position X (dans l'image) en cours d'affichage
   short y_pos; // Position Y (dans l'image) en cours d'affichage
-  short Compteur_X; // Position X (dans la brosse/pinceau) en cours
+  short counter_x; // Position X (dans la brosse/pinceau) en cours
         // d'affichage
-  short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours
+  short counter_y; // Position Y (dans la brosse/pinceau) en cours
         // d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la
+  short end_counter_x; // Position X ou s'arrête l'affichade de la
         // brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la
+  short end_counter_y; // Position Y ou s'arrête l'affichade de la
         // brosse/pinceau
-  byte  Couleur_temporaire; // Couleur de la brosse en cours d'affichage
+  byte  temp_color; // color de la brosse en cours d'affichage
   int position;
-  byte * Temp;
+  byte * temp;
 
   if (!(is_preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
-  switch (Pinceau_Forme)
+  switch (Paintbrush_shape)
   {
-    case FORME_PINCEAU_POINT : // !!! TOUJOURS EN PREVIEW !!!
-      if ( (Pinceau_X>=Limite_Gauche)
-        && (Pinceau_X<=Limite_Droite)
-        && (Pinceau_Y>=Limite_Haut)
-        && (Pinceau_Y<=Limite_Bas) )
+    case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
+      if ( (Paintbrush_X>=Limit_left)
+        && (Paintbrush_X<=Limit_right)
+        && (Paintbrush_Y>=Limit_top)
+        && (Paintbrush_Y<=Limit_bottom) )
         {
-                Pixel_Preview(Pinceau_X,Pinceau_Y,Couleur);
-                Mettre_Ecran_A_Jour(x,y,1,1);
+                Pixel_preview(Paintbrush_X,Paintbrush_Y,color);
+                Update_part_of_screen(x,y,1,1);
         }
       break;
 
-    case FORME_PINCEAU_BROSSE_COULEUR : // Brosse en couleur
+    case PAINTBRUSH_SHAPE_COLOR_BRUSH : // Brush en couleur
 
-      Debut_X=x-Brosse_Decalage_X;
-      Debut_Y=y-Brosse_Decalage_Y;
-      width=Brosse_Largeur;
-      height=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
+      start_x=x-Brush_offset_X;
+      start_y=y-Brush_offset_Y;
+      width=Brush_width;
+      height=Brush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
       if (width<=0 || height<=0)
         break;
-      Debut_Compteur_X=Debut_X-(x-Brosse_Decalage_X);
-      Debut_Compteur_Y=Debut_Y-(y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+width;
-      Fin_Compteur_Y=Debut_Compteur_Y+height;
+      start_x_counter=start_x-(x-Brush_offset_X);
+      start_y_counter=start_y-(y-Brush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
 
       if (is_preview)
       {
         if ( (width>0) && (height>0) )
-          Display_brush_Color(
-                Debut_X-Principal_Decalage_X,
-                Debut_Y-Principal_Decalage_Y,
-                Debut_Compteur_X,
-                Debut_Compteur_Y,
+          Display_brush_color(
+                start_x-Main_offset_X,
+                start_y-Main_offset_Y,
+                start_x_counter,
+                start_y_counter,
                 width,
                 height,
                 Back_color,
-                Brosse_Largeur
+                Brush_width
           );
 
-        if (Loupe_Mode)
+        if (Main_magnifier_mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,
+          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,
                 &height
           );
 
-          Debut_Compteur_X=Debut_X-(x-Brosse_Decalage_X);
-          Debut_Compteur_Y=Debut_Y-(y-Brosse_Decalage_Y);
+          start_x_counter=start_x-(x-Brush_offset_X);
+          start_y_counter=start_y-(y-Brush_offset_Y);
 
           if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
-            Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
-            Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            height=Debut_Y+(height*Loupe_Facteur);
-            if (height>Menu_Ordonnee)
-              height=Menu_Ordonnee;
+            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+            height=start_y+(height*Main_magnifier_factor);
+            if (height>Menu_Y)
+              height=Menu_Y;
 
-            Display_brush_Color_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
-                                     Debut_Compteur_X,Debut_Compteur_Y,
+            Display_brush_color_zoom(Main_X_zoom+start_x,start_y,
+                                     start_x_counter,start_y_counter,
                                      width,height,Back_color,
-                                     Brosse_Largeur,
-                                     Buffer_de_ligne_horizontale);
+                                     Brush_width,
+                                     Horizontal_line_buffer);
           }
         }
 
-        Mettre_Ecran_A_Jour(x-Brosse_Decalage_X,y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+        Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
 
       }
       else
       {
-        if ((Smear_Mode) && (Shade_Table==Shade_Table_gauche))
+        if ((Smear_mode) && (Shade_table==Shade_table_left))
         {
-          if (Smear_Debut)
+          if (Smear_start)
           {
             if ((width>0) && (height>0))
             {
-              Copier_une_partie_d_image_dans_une_autre(
-                Principal_Ecran, Debut_X, Debut_Y, width, height,
-                Principal_Largeur_image, Smear_Brosse,
-                Debut_Compteur_X, Debut_Compteur_Y,
-                Smear_Brosse_Largeur
+              Copy_part_of_image_to_another(
+                Main_screen, start_x, start_y, width, height,
+                Main_image_width, Smear_brush,
+                start_x_counter, start_y_counter,
+                Smear_brush_width
               );
 
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+              Update_part_of_screen(start_x,start_y,width,height);
             }
-            Smear_Debut=0;
+            Smear_start=0;
           }
           else
           {
-            for (y_pos = Debut_Y, Compteur_Y = Debut_Compteur_Y;
-                Compteur_Y < Fin_Compteur_Y;
-                y_pos++, Compteur_Y++
+            for (y_pos = start_y, counter_y = start_y_counter;
+                counter_y < end_counter_y;
+                y_pos++, counter_y++
             )
-              for (x_pos = Debut_X, Compteur_X = Debut_Compteur_X;
-                Compteur_X < Fin_Compteur_X;
-                x_pos++, Compteur_X++
+              for (x_pos = start_x, counter_x = start_x_counter;
+                counter_x < end_counter_x;
+                x_pos++, counter_x++
               )
               {
-                Couleur_temporaire = Lit_pixel_dans_ecran_courant(
+                temp_color = Read_pixel_from_current_screen(
                         x_pos,y_pos
                 );
-                position = (Compteur_Y * Smear_Brosse_Largeur)+ Compteur_X;
-                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y) != Back_color)
-                  && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
-                  && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                        Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
-                Smear_Brosse[position]=Couleur_temporaire;
+                position = (counter_y * Smear_brush_width)+ counter_x;
+                if ( (Read_pixel_from_brush(counter_x,counter_y) != Back_color)
+                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
+                        Display_pixel(x_pos,y_pos,Smear_brush[position]);
+                Smear_brush[position]=temp_color;
               }
 
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+              Update_part_of_screen(start_x,start_y,width,height);
           }
 
-          Smear_Min_X=Debut_Compteur_X;
-          Smear_Min_Y=Debut_Compteur_Y;
-          Smear_Max_X=Fin_Compteur_X;
-          Smear_Max_Y=Fin_Compteur_Y;
+          Smear_min_X=start_x_counter;
+          Smear_min_Y=start_y_counter;
+          Smear_max_X=end_counter_x;
+          Smear_max_Y=end_counter_y;
         }
         else
         {
-          if (Shade_Table==Shade_Table_gauche)
-            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+          if (Shade_table==Shade_table_left)
+            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
               {
-                Couleur_temporaire=Lit_pixel_dans_brosse(Compteur_X,Compteur_Y);
-                if (Couleur_temporaire!=Back_color)
-                  Afficher_pixel(x_pos,y_pos,Couleur_temporaire);
+                temp_color=Read_pixel_from_brush(counter_x,counter_y);
+                if (temp_color!=Back_color)
+                  Display_pixel(x_pos,y_pos,temp_color);
               }
           else
-            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
               {
-                if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
-                  Afficher_pixel(x_pos,y_pos,Couleur);
+                if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+                  Display_pixel(x_pos,y_pos,color);
               }
         }
-        Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+        Update_part_of_screen(start_x,start_y,width,height);
 
       }
       break;
-    case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
-      Debut_X=x-Brosse_Decalage_X;
-      Debut_Y=y-Brosse_Decalage_Y;
-      width=Brosse_Largeur;
-      height=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
-      Debut_Compteur_X=Debut_X-(x-Brosse_Decalage_X);
-      Debut_Compteur_Y=Debut_Y-(y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+width;
-      Fin_Compteur_Y=Debut_Compteur_Y+height;
+    case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
+      start_x=x-Brush_offset_X;
+      start_y=y-Brush_offset_Y;
+      width=Brush_width;
+      height=Brush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      start_x_counter=start_x-(x-Brush_offset_X);
+      start_y_counter=start_y-(y-Brush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
       if (is_preview)
       {
         if ( (width>0) && (height>0) )
-          Display_brush_Mono(Debut_X-Principal_Decalage_X,
-                             Debut_Y-Principal_Decalage_Y,
-                             Debut_Compteur_X,Debut_Compteur_Y,
+          Display_brush_mono(start_x-Main_offset_X,
+                             start_y-Main_offset_Y,
+                             start_x_counter,start_y_counter,
                              width,height,
                              Back_color,Fore_color,
-                             Brosse_Largeur);
+                             Brush_width);
 
-        if (Loupe_Mode)
+        if (Main_magnifier_mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
-          Debut_Compteur_X=Debut_X-(x-Brosse_Decalage_X);
-          Debut_Compteur_Y=Debut_Y-(y-Brosse_Decalage_Y);
+          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+          start_x_counter=start_x-(x-Brush_offset_X);
+          start_y_counter=start_y-(y-Brush_offset_Y);
 
           if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
-            Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
-            Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            height=Debut_Y+(height*Loupe_Facteur);
-            if (height>Menu_Ordonnee)
-              height=Menu_Ordonnee;
+            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+            height=start_y+(height*Main_magnifier_factor);
+            if (height>Menu_Y)
+              height=Menu_Y;
 
-            Display_brush_Mono_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
-                                    Debut_Compteur_X,Debut_Compteur_Y,
+            Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+                                    start_x_counter,start_y_counter,
                                     width,height,
                                     Back_color,Fore_color,
-                                    Brosse_Largeur,
-                                    Buffer_de_ligne_horizontale);
+                                    Brush_width,
+                                    Horizontal_line_buffer);
 
           }
         }
 
-        Mettre_Ecran_A_Jour(x-Brosse_Decalage_X,y-Brosse_Decalage_Y,Brosse_Largeur,Brosse_Hauteur);
+        Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
       }
       else
       {
-        if ((Smear_Mode) && (Shade_Table==Shade_Table_gauche))
+        if ((Smear_mode) && (Shade_table==Shade_table_left))
         {
-          if (Smear_Debut)
+          if (Smear_start)
           {
             if ((width>0) && (height>0))
             {
-              Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
-                                                       Debut_X,Debut_Y,
+              Copy_part_of_image_to_another(Main_screen,
+                                                       start_x,start_y,
                                                        width,height,
-                                                       Principal_Largeur_image,
-                                                       Smear_Brosse,
-                                                       Debut_Compteur_X,
-                                                       Debut_Compteur_Y,
-                                                       Smear_Brosse_Largeur);
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+                                                       Main_image_width,
+                                                       Smear_brush,
+                                                       start_x_counter,
+                                                       start_y_counter,
+                                                       Smear_brush_width);
+              Update_part_of_screen(start_x,start_y,width,height);
             }
-            Smear_Debut=0;
+            Smear_start=0;
           }
           else
           {
-            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
               {
-                Couleur_temporaire=Lit_pixel_dans_ecran_courant(x_pos,y_pos);
-                position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
-                if ( (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
-                  && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)
-                  && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
-                Smear_Brosse[position]=Couleur_temporaire;
+                temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
+                position=(counter_y*Smear_brush_width)+counter_x;
+                if ( (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
+                  Display_pixel(x_pos,y_pos,Smear_brush[position]);
+                Smear_brush[position]=temp_color;
               }
 
-            Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+            Update_part_of_screen(start_x,start_y,width,height);
 
           }
 
-          Smear_Min_X=Debut_Compteur_X;
-          Smear_Min_Y=Debut_Compteur_Y;
-          Smear_Max_X=Fin_Compteur_X;
-          Smear_Max_Y=Fin_Compteur_Y;
+          Smear_min_X=start_x_counter;
+          Smear_min_Y=start_y_counter;
+          Smear_max_X=end_counter_x;
+          Smear_max_Y=end_counter_y;
         }
         else
         {
-          for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-            for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+          for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+            for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
             {
-              if (Lit_pixel_dans_brosse(Compteur_X,Compteur_Y)!=Back_color)
-                Afficher_pixel(x_pos,y_pos,Couleur);
+              if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+                Display_pixel(x_pos,y_pos,color);
             }
-          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+          Update_part_of_screen(start_x,start_y,width,height);
         }
       }
       break;
     default : // Pinceau
-      Debut_X=x-Pinceau_Decalage_X;
-      Debut_Y=y-Pinceau_Decalage_Y;
-      width=Pinceau_Largeur;
-      height=Pinceau_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
-      Debut_Compteur_X=Debut_X-(x-Pinceau_Decalage_X);
-      Debut_Compteur_Y=Debut_Y-(y-Pinceau_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+width;
-      Fin_Compteur_Y=Debut_Compteur_Y+height;
+      start_x=x-Paintbrush_offset_X;
+      start_y=y-Paintbrush_offset_Y;
+      width=Paintbrush_width;
+      height=Paintbrush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      start_x_counter=start_x-(x-Paintbrush_offset_X);
+      start_y_counter=start_y-(y-Paintbrush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
       if (is_preview)
       {
-        Temp=Brosse;
-        Brosse=Pinceau_Sprite;
+        temp=Brush;
+        Brush=Paintbrush_sprite;
 
         if ( (width>0) && (height>0) )
-          Display_brush_Mono(Debut_X-Principal_Decalage_X,
-                             Debut_Y-Principal_Decalage_Y,
-                             Debut_Compteur_X,Debut_Compteur_Y,
+          Display_brush_mono(start_x-Main_offset_X,
+                             start_y-Main_offset_Y,
+                             start_x_counter,start_y_counter,
                              width,height,
                              0,Fore_color,
-                             TAILLE_MAXI_PINCEAU);
+                             MAX_PAINTBRUSH_SIZE);
 
-        if (Loupe_Mode)
+        if (Main_magnifier_mode)
         {
-          Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
-          Debut_Compteur_X=Debut_X-(x-Pinceau_Decalage_X);
-          Debut_Compteur_Y=Debut_Y-(y-Pinceau_Decalage_Y);
+          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+          start_x_counter=start_x-(x-Paintbrush_offset_X);
+          start_y_counter=start_y-(y-Paintbrush_offset_Y);
 
           if ( (width>0) && (height>0) )
           {
             // Corrections dues au Zoom:
-            Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
-            Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-            height=Debut_Y+(height*Loupe_Facteur);
-            if (height>Menu_Ordonnee)
-              height=Menu_Ordonnee;
+            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+            height=start_y+(height*Main_magnifier_factor);
+            if (height>Menu_Y)
+              height=Menu_Y;
 
-            Display_brush_Mono_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
-                                    Debut_Compteur_X,Debut_Compteur_Y,
+            Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+                                    start_x_counter,start_y_counter,
                                     width,height,
                                     0,Fore_color,
-                                    TAILLE_MAXI_PINCEAU,
-                                    Buffer_de_ligne_horizontale);
+                                    MAX_PAINTBRUSH_SIZE,
+                                    Horizontal_line_buffer);
 
           }
         }
 
-        Brosse=Temp;
+        Brush=temp;
       }
       else
       {
-        if ((Smear_Mode) && (Shade_Table==Shade_Table_gauche))
+        if ((Smear_mode) && (Shade_table==Shade_table_left))
         {
-          if (Smear_Debut)
+          if (Smear_start)
           {
             if ((width>0) && (height>0))
             {
-              Copier_une_partie_d_image_dans_une_autre(Principal_Ecran,
-                                                       Debut_X,Debut_Y,
+              Copy_part_of_image_to_another(Main_screen,
+                                                       start_x,start_y,
                                                        width,height,
-                                                       Principal_Largeur_image,
-                                                       Smear_Brosse,
-                                                       Debut_Compteur_X,
-                                                       Debut_Compteur_Y,
-                                                       Smear_Brosse_Largeur);
-              Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+                                                       Main_image_width,
+                                                       Smear_brush,
+                                                       start_x_counter,
+                                                       start_y_counter,
+                                                       Smear_brush_width);
+              Update_part_of_screen(start_x,start_y,width,height);
             }
-            Smear_Debut=0;
+            Smear_start=0;
           }
           else
           {
-            for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-              for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
               {
-                Couleur_temporaire=Lit_pixel_dans_ecran_courant(x_pos,y_pos);
-                position=(Compteur_Y*Smear_Brosse_Largeur)+Compteur_X;
-                if ( (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X]) // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
-                  && (Compteur_Y<Smear_Max_Y) && (Compteur_X<Smear_Max_X)          // On clippe l'effet smear entre Smear_Min et Smear_Max
-                  && (Compteur_Y>=Smear_Min_Y) && (Compteur_X>=Smear_Min_X) )
-                  Afficher_pixel(x_pos,y_pos,Smear_Brosse[position]);
-                Smear_Brosse[position]=Couleur_temporaire;
+                temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
+                position=(counter_y*Smear_brush_width)+counter_x;
+                if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x]) // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
+                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)          // On clippe l'effet smear entre Smear_Min et Smear_Max
+                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
+                  Display_pixel(x_pos,y_pos,Smear_brush[position]);
+                Smear_brush[position]=temp_color;
               }
-              Mettre_Ecran_A_Jour(Debut_X, Debut_Y, width, height);
+              Update_part_of_screen(start_x, start_y, width, height);
           }
 
 
-          Smear_Min_X=Debut_Compteur_X;
-          Smear_Min_Y=Debut_Compteur_Y;
-          Smear_Max_X=Fin_Compteur_X;
-          Smear_Max_Y=Fin_Compteur_Y;
+          Smear_min_X=start_x_counter;
+          Smear_min_Y=start_y_counter;
+          Smear_max_X=end_counter_x;
+          Smear_max_Y=end_counter_y;
         }
         else
         {
-          for (y_pos=Debut_Y,Compteur_Y=Debut_Compteur_Y;Compteur_Y<Fin_Compteur_Y;y_pos++,Compteur_Y++)
-            for (x_pos=Debut_X,Compteur_X=Debut_Compteur_X;Compteur_X<Fin_Compteur_X;x_pos++,Compteur_X++)
+          for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+            for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
             {
-              if (Pinceau_Sprite[(TAILLE_MAXI_PINCEAU*Compteur_Y)+Compteur_X])
-                Afficher_pixel(x_pos,y_pos,Couleur);
+              if (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x])
+                Display_pixel(x_pos,y_pos,color);
             }
-          Mettre_Ecran_A_Jour(Debut_X,Debut_Y,width,height);
+          Update_part_of_screen(start_x,start_y,width,height);
         }
       }
   }
@@ -476,300 +476,300 @@ void Afficher_pinceau(short x,short y,byte Couleur,byte is_preview)
 
 // -- Effacer le pinceau -- //
 //
-void Effacer_pinceau(short x,short y)
+void Hide_paintbrush(short x,short y)
   // x,y: position du centre du pinceau
 {
-  short Debut_X; // Position X (dans l'image) à partir de laquelle on
+  short start_x; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
-  short Debut_Y; // Position Y (dans l'image) à partir de laquelle on
+  short start_y; // Position Y (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
   short width; // width dans l'écran selon laquelle on affiche la
         // brosse/pinceau
   short height; // height dans l'écran selon laquelle on affiche la
         // brosse/pinceau
-  short Debut_Compteur_X; // Position X (dans la brosse/pinceau) à partir
+  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short Debut_Compteur_Y; // Position Y (dans la brosse/pinceau) à partir
+  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
   //short x_pos; // Position X (dans l'image) en cours d'affichage
   //short y_pos; // Position Y (dans l'image) en cours d'affichage
-  //short Compteur_X; // Position X (dans la brosse/pinceau) en cours
+  //short counter_x; // Position X (dans la brosse/pinceau) en cours
         //d'affichage
-  //short Compteur_Y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short Fin_Compteur_X; // Position X ou s'arrête l'affichade de la brosse/pinceau
-  short Fin_Compteur_Y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
-  byte * Temp;
+  //short counter_y; // Position Y (dans la brosse/pinceau) en cours d'affichage
+  short end_counter_x; // Position X ou s'arrête l'affichade de la brosse/pinceau
+  short end_counter_y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
+  byte * temp;
 
   if (!Mouse_K)
-  switch (Pinceau_Forme)
+  switch (Paintbrush_shape)
   {
-    case FORME_PINCEAU_POINT :
-      if ( (Pinceau_X>=Limite_Gauche)
-        && (Pinceau_X<=Limite_Droite)
-        && (Pinceau_Y>=Limite_Haut)
-        && (Pinceau_Y<=Limite_Bas) )
+    case PAINTBRUSH_SHAPE_POINT :
+      if ( (Paintbrush_X>=Limit_left)
+        && (Paintbrush_X<=Limit_right)
+        && (Paintbrush_Y>=Limit_top)
+        && (Paintbrush_Y<=Limit_bottom) )
       {
-        Pixel_Preview(Pinceau_X,Pinceau_Y,Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y));
-        Mettre_Ecran_A_Jour(Pinceau_X,Pinceau_Y,1,1);
+        Pixel_preview(Paintbrush_X,Paintbrush_Y,Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y));
+        Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
       }
       break;
-    case FORME_PINCEAU_BROSSE_COULEUR :    // Brosse en couleur
-    case FORME_PINCEAU_BROSSE_MONOCHROME : // Brosse monochrome
-      Debut_X=x-Brosse_Decalage_X;
-      Debut_Y=y-Brosse_Decalage_Y;
-      width=Brosse_Largeur;
-      height=Brosse_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
-      Debut_Compteur_X=Debut_X-(x-Brosse_Decalage_X);
-      Debut_Compteur_Y=Debut_Y-(y-Brosse_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+width;
-      Fin_Compteur_Y=Debut_Compteur_Y+height;
+    case PAINTBRUSH_SHAPE_COLOR_BRUSH :    // Brush en couleur
+    case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
+      start_x=x-Brush_offset_X;
+      start_y=y-Brush_offset_Y;
+      width=Brush_width;
+      height=Brush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      start_x_counter=start_x-(x-Brush_offset_X);
+      start_y_counter=start_y-(y-Brush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
 
       if ( (width>0) && (height>0) )
-        Clear_brush(Debut_X-Principal_Decalage_X,
-                    Debut_Y-Principal_Decalage_Y,
-                    Debut_Compteur_X,Debut_Compteur_Y,
+        Clear_brush(start_x-Main_offset_X,
+                    start_y-Main_offset_Y,
+                    start_x_counter,start_y_counter,
                     width,height,Back_color,
-                    Principal_Largeur_image);
+                    Main_image_width);
 
-      if (Loupe_Mode)
+      if (Main_magnifier_mode)
       {
-        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
-        Debut_Compteur_X=Debut_X;
-        Debut_Compteur_Y=Debut_Y;
+        Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+        start_x_counter=start_x;
+        start_y_counter=start_y;
 
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
-          Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-          height=Debut_Y+(height*Loupe_Facteur);
-          if (height>Menu_Ordonnee)
-            height=Menu_Ordonnee;
+          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=start_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
 
-          Clear_brush_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
-                           Debut_Compteur_X,Debut_Compteur_Y,
+          Clear_brush_scaled(Main_X_zoom+start_x,start_y,
+                           start_x_counter,start_y_counter,
                            width,height,Back_color,
-                           Principal_Largeur_image,
-                           Buffer_de_ligne_horizontale);
+                           Main_image_width,
+                           Horizontal_line_buffer);
         }
       }
       break;
     default: // Pinceau
-      Debut_X=x-Pinceau_Decalage_X;
-      Debut_Y=y-Pinceau_Decalage_Y;
-      width=Pinceau_Largeur;
-      height=Pinceau_Hauteur;
-      Calculer_dimensions_clipees(&Debut_X,&Debut_Y,&width,&height);
-      Debut_Compteur_X=Debut_X-(x-Pinceau_Decalage_X);
-      Debut_Compteur_Y=Debut_Y-(y-Pinceau_Decalage_Y);
-      Fin_Compteur_X=Debut_Compteur_X+width;
-      Fin_Compteur_Y=Debut_Compteur_Y+height;
+      start_x=x-Paintbrush_offset_X;
+      start_y=y-Paintbrush_offset_Y;
+      width=Paintbrush_width;
+      height=Paintbrush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      start_x_counter=start_x-(x-Paintbrush_offset_X);
+      start_y_counter=start_y-(y-Paintbrush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
 
-      Temp=Brosse;
-      Brosse=Pinceau_Sprite;
+      temp=Brush;
+      Brush=Paintbrush_sprite;
 
       if ( (width>0) && (height>0) )
       {
-        Clear_brush(Debut_X-Principal_Decalage_X,
-                    Debut_Y-Principal_Decalage_Y,
-                    Debut_Compteur_X,Debut_Compteur_Y,
+        Clear_brush(start_x-Main_offset_X,
+                    start_y-Main_offset_Y,
+                    start_x_counter,start_y_counter,
                     width,height,0,
-                    Principal_Largeur_image);
+                    Main_image_width);
       }
 
-      if (Loupe_Mode)
+      if (Main_magnifier_mode)
       {
-        Calculer_dimensions_clipees_zoom(&Debut_X,&Debut_Y,&width,&height);
-        Debut_Compteur_X=Debut_X;
-        Debut_Compteur_Y=Debut_Y;
+        Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+        start_x_counter=start_x;
+        start_y_counter=start_y;
 
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          Debut_X=(Debut_X-Loupe_Decalage_X)*Loupe_Facteur;
-          Debut_Y=(Debut_Y-Loupe_Decalage_Y)*Loupe_Facteur;
-          height=Debut_Y+(height*Loupe_Facteur);
-          if (height>Menu_Ordonnee)
-            height=Menu_Ordonnee;
+          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=start_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
 
-          Clear_brush_zoom(Principal_X_Zoom+Debut_X,Debut_Y,
-                           Debut_Compteur_X,Debut_Compteur_Y,
+          Clear_brush_scaled(Main_X_zoom+start_x,start_y,
+                           start_x_counter,start_y_counter,
                            width,height,0,
-                           Principal_Largeur_image,
-                           Buffer_de_ligne_horizontale);
+                           Main_image_width,
+                           Horizontal_line_buffer);
         }
       }
 
-      Brosse=Temp;
+      Brush=temp;
       break;
   }
 }
 
 
 
-void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear)
+void Capture_brush(short start_x,short start_y,short end_x,short end_y,short clear)
 {
-  short Temporaire;
+  short temp;
   short x_pos;
   short y_pos;
-  word  Nouvelle_Brosse_Largeur;
-  word  Nouvelle_Brosse_Hauteur;
+  word  new_brush_width;
+  word  new_brush_height;
 
 
   // On commence par "redresser" les bornes:
-  if (Debut_X>Fin_X)
+  if (start_x>end_x)
   {
-    Temporaire=Debut_X;
-    Debut_X   =Fin_X;
-    Fin_X     =Temporaire;
+    temp=start_x;
+    start_x   =end_x;
+    end_x     =temp;
   }
-  if (Debut_Y>Fin_Y)
+  if (start_y>end_y)
   {
-    Temporaire=Debut_Y;
-    Debut_Y   =Fin_Y;
-    Fin_Y     =Temporaire;
+    temp=start_y;
+    start_y   =end_y;
+    end_y     =temp;
   }
 
   // On ne capture la nouvelle brosse que si elle est au moins partiellement
   // dans l'image:
 
-  if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
+  if ((start_x<Main_image_width) && (start_y<Main_image_height))
   {
     // On met les décalages du tiling à 0 pour eviter toute incohérence.
     // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
     // il faudrait penser à les initialiser à 0 dans "MAIN.C".
-    Tiling_Decalage_X=0;
-    Tiling_Decalage_Y=0;
+    Tiling_offset_X=0;
+    Tiling_offset_Y=0;
 
     // Ensuite, on calcule les dimensions de la brosse:
-    Nouvelle_Brosse_Largeur=(Fin_X-Debut_X)+1;
-    Nouvelle_Brosse_Hauteur=(Fin_Y-Debut_Y)+1;
+    new_brush_width=(end_x-start_x)+1;
+    new_brush_height=(end_y-start_y)+1;
 
-    if (Debut_X+Nouvelle_Brosse_Largeur>Principal_Largeur_image)
-      Nouvelle_Brosse_Largeur=Principal_Largeur_image-Debut_X;
-    if (Debut_Y+Nouvelle_Brosse_Hauteur>Principal_Hauteur_image)
-      Nouvelle_Brosse_Hauteur=Principal_Hauteur_image-Debut_Y;
+    if (start_x+new_brush_width>Main_image_width)
+      new_brush_width=Main_image_width-start_x;
+    if (start_y+new_brush_height>Main_image_height)
+      new_brush_height=Main_image_height-start_y;
 
-    if ( (((long)Brosse_Hauteur)*Brosse_Largeur) !=
-         (((long)Nouvelle_Brosse_Hauteur)*Nouvelle_Brosse_Largeur) )
+    if ( (((long)Brush_height)*Brush_width) !=
+         (((long)new_brush_height)*new_brush_width) )
     {
-      free(Brosse);
-      Brosse=(byte *)malloc(((long)Nouvelle_Brosse_Hauteur)*Nouvelle_Brosse_Largeur);
-      if (!Brosse)
+      free(Brush);
+      Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+      if (!Brush)
       {
-        Erreur(0);
+        Error(0);
 
-        Brosse=(byte *)malloc(1*1);
-        Nouvelle_Brosse_Hauteur=Nouvelle_Brosse_Largeur=1;
-        *Brosse=Fore_color;
+        Brush=(byte *)malloc(1*1);
+        new_brush_height=new_brush_width=1;
+        *Brush=Fore_color;
       }
     }
-    Brosse_Largeur=Nouvelle_Brosse_Largeur;
-    Brosse_Hauteur=Nouvelle_Brosse_Hauteur;
+    Brush_width=new_brush_width;
+    Brush_height=new_brush_height;
 
-    free(Smear_Brosse);
-    Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
+    free(Smear_brush);
+    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
 
-    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
+    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
     {
-      Erreur(0);
+      Error(0);
 
-      free(Brosse);
-      Brosse=(byte *)malloc(1*1);
-      Brosse_Hauteur=1;
-      Brosse_Largeur=1;
+      free(Brush);
+      Brush=(byte *)malloc(1*1);
+      Brush_height=1;
+      Brush_width=1;
 
-      Smear_Brosse=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU);
-      Smear_Brosse_Hauteur=TAILLE_MAXI_PINCEAU;
-      Smear_Brosse_Largeur=TAILLE_MAXI_PINCEAU;
+      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
     }
 
-    Copier_image_dans_brosse(Debut_X,Debut_Y,Brosse_Largeur,Brosse_Hauteur,Principal_Largeur_image);
+    Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
     // On regarde s'il faut effacer quelque chose:
     if (clear)
     {
-      for (y_pos=Debut_Y;y_pos<Debut_Y+Brosse_Hauteur;y_pos++)
-        for (x_pos=Debut_X;x_pos<Debut_X+Brosse_Largeur;x_pos++)
+      for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
+        for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
         {
-          Pixel_dans_ecran_courant(x_pos,y_pos,Back_color);
-          Pixel_Preview           (x_pos,y_pos,Back_color);
+          Pixel_in_current_screen(x_pos,y_pos,Back_color);
+          Pixel_preview           (x_pos,y_pos,Back_color);
         }
-      Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Brosse_Largeur,Brosse_Hauteur);
+      Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
 
     // On centre la prise sur la brosse
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
   }
 }
 
 
 void Rotate_90_deg()
 {
-  short Temporaire;
-  byte * Nouvelle_Brosse;
+  short temp;
+  byte * new_brush;
 
-  Nouvelle_Brosse=(byte *)malloc(((long)Brosse_Hauteur)*Brosse_Largeur);
-  if (Nouvelle_Brosse)
+  new_brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+  if (new_brush)
   {
-    Rotate_90_deg_LOWLEVEL(Brosse,Nouvelle_Brosse);
-    free(Brosse);
-    Brosse=Nouvelle_Brosse;
+    Rotate_90_deg_lowlevel(Brush,new_brush);
+    free(Brush);
+    Brush=new_brush;
 
-    Temporaire=Brosse_Largeur;
-    Brosse_Largeur=Brosse_Hauteur;
-    Brosse_Hauteur=Temporaire;
+    temp=Brush_width;
+    Brush_width=Brush_height;
+    Brush_height=temp;
 
-    Temporaire=Smear_Brosse_Largeur;
-    Smear_Brosse_Largeur=Smear_Brosse_Hauteur;
-    Smear_Brosse_Hauteur=Temporaire;
+    temp=Smear_brush_width;
+    Smear_brush_width=Smear_brush_height;
+    Smear_brush_height=temp;
 
     // On centre la prise sur la brosse
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
   }
   else
-    Erreur(0);
+    Error(0);
 }
 
 
-void Remap_brosse(void)
+void Remap_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
-  int   Couleur;
+  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
+  int   color;
 
 
   // On commence par initialiser le tableau de booléens à faux
-  for (Couleur=0;Couleur<=255;Couleur++)
-    Utilisee[Couleur]=0;
+  for (color=0;color<=255;color++)
+    used[color]=0;
 
   // On calcule la table d'utilisation des couleurs
-  for (y_pos=0;y_pos<Brosse_Hauteur;y_pos++)
-    for (x_pos=0;x_pos<Brosse_Largeur;x_pos++)
-      Utilisee[Lit_pixel_dans_brosse(x_pos,y_pos)]=1;
+  for (y_pos=0;y_pos<Brush_height;y_pos++)
+    for (x_pos=0;x_pos<Brush_width;x_pos++)
+      used[Read_pixel_from_brush(x_pos,y_pos)]=1;
 
   //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
   // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
   // ainsi on ne s'embêtera pas à la recalculer
-  Utilisee[Back_color]=0;
+  used[Back_color]=0;
 
-  //   On va maintenant se servir de la table "Utilisee" comme table de
+  //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
   // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
   //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
-  for (Couleur=0;Couleur<=255;Couleur++)
-    if (Utilisee[Couleur])
-      Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].G,Brouillon_Palette[Couleur].B);
+  for (color=0;color<=255;color++)
+    if (used[color])
+      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
@@ -777,13 +777,13 @@ void Remap_brosse(void)
   // la brosse, on va mettre dans la table une relation d'équivalence entre
   // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
   // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
-  Utilisee[Back_color]=Back_color;
+  used[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_LOWLEVEL(Utilisee,Brosse,Brosse_Largeur,Brosse_Hauteur,Brosse_Largeur);
-  //Remap_brush_LOWLEVEL(Utilisee);
+  Remap_general_lowlevel(used,Brush,Brush_width,Brush_height,Brush_width);
+  //Remap_brush_LOWLEVEL(used);
 }
 
 
@@ -792,36 +792,36 @@ void Outline_brush(void)
 {
   long /*Pos,*/x_pos,y_pos;
   byte state;
-  byte * Nouvelle_brosse;
-  byte * Temporaire;
+  byte * new_brush;
+  byte * temp;
   word width;
   word height;
 
 
-  width=Brosse_Largeur+2;
-  height=Brosse_Hauteur+2;
-  Nouvelle_brosse=(byte *)malloc(((long)width)*height);
+  width=Brush_width+2;
+  height=Brush_height+2;
+  new_brush=(byte *)malloc(((long)width)*height);
 
-  if (Nouvelle_brosse)
+  if (new_brush)
   {
     // On remplit la bordure ajoutée par la Backcolor
-    memset(Nouvelle_brosse,Back_color,((long)width)*height);
+    memset(new_brush,Back_color,((long)width)*height);
 
     // On copie la brosse courante dans la nouvelle
-    Copier_une_partie_d_image_dans_une_autre(Brosse, // Source
+    Copy_part_of_image_to_another(Brush, // source
                                              0, 0,
-                                             Brosse_Largeur,
-                                             Brosse_Hauteur,
-                                             Brosse_Largeur,
-                                             Nouvelle_brosse, // Destination
+                                             Brush_width,
+                                             Brush_height,
+                                             Brush_width,
+                                             new_brush, // Destination
                                              1, 1,
                                              width);
 
     // On intervertit la nouvelle et l'ancienne brosse:
-    Temporaire=Brosse;
-    Brosse=Nouvelle_brosse;
-    Brosse_Largeur+=2;
-    Brosse_Hauteur+=2;
+    temp=Brush;
+    Brush=new_brush;
+    Brush_width+=2;
+    Brush_height+=2;
     width-=2;
     height-=2;
 
@@ -829,16 +829,16 @@ void Outline_brush(void)
     if (Fore_color!=Back_color)
     {
       // 1er balayage (horizontal)
-      for (y_pos=1; y_pos<Brosse_Hauteur-1; y_pos++)
+      for (y_pos=1; y_pos<Brush_height-1; y_pos++)
       {
         state=0;
-        for (x_pos=1; x_pos<Brosse_Largeur-1; x_pos++)
+        for (x_pos=1; x_pos<Brush_width-1; x_pos++)
         {
-          if (Temporaire[((y_pos-1)*width)+x_pos-1]==Back_color)
+          if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
             if (state)
             {
-              Pixel_dans_brosse(x_pos,y_pos,Fore_color);
+              Pixel_in_brush(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
@@ -846,27 +846,27 @@ void Outline_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(x_pos-1,y_pos,Fore_color);
+              Pixel_in_brush(x_pos-1,y_pos,Fore_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel à droite de la ligne
         if (state)
-          Pixel_dans_brosse(x_pos,y_pos,Fore_color);
+          Pixel_in_brush(x_pos,y_pos,Fore_color);
       }
 
       // 2ème balayage (vertical)
-      for (x_pos=1; x_pos<Brosse_Largeur-1; x_pos++)
+      for (x_pos=1; x_pos<Brush_width-1; x_pos++)
       {
         state=0;
-        for (y_pos=1; y_pos<Brosse_Hauteur-1; y_pos++)
+        for (y_pos=1; y_pos<Brush_height-1; y_pos++)
         {
-          if (Temporaire[((y_pos-1)*width)+x_pos-1]==Back_color)
+          if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
             if (state)
             {
-              Pixel_dans_brosse(x_pos,y_pos,Fore_color);
+              Pixel_in_brush(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
@@ -874,31 +874,31 @@ void Outline_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(x_pos,y_pos-1,Fore_color);
+              Pixel_in_brush(x_pos,y_pos-1,Fore_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel en bas de la colonne
         if (state)
-          Pixel_dans_brosse(x_pos,y_pos,Fore_color);
+          Pixel_in_brush(x_pos,y_pos,Fore_color);
       }
     }
 
     // On recentre la prise sur la brosse
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
 
-    free(Temporaire); // Libération de l'ancienne brosse
+    free(temp); // Libération de l'ancienne brosse
 
     // Réallocation d'un buffer de Smear
-    free(Smear_Brosse);
-    Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
+    free(Smear_brush);
+    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+    Smear_brush=(byte *)malloc(((long)Smear_brush_width)*Smear_brush_height);
   }
   else
-    Erreur(0); // Pas assez de mémoire!
+    Error(0); // Pas assez de mémoire!
 }
 
 
@@ -906,51 +906,51 @@ void Nibble_brush(void)
 {
   long /*Pos,*/x_pos,y_pos;
   byte state;
-  byte * Nouvelle_brosse;
-  byte * Temporaire;
+  byte * new_brush;
+  byte * temp;
   word width;
   word height;
 
-  if ( (Brosse_Largeur>2) && (Brosse_Hauteur>2) )
+  if ( (Brush_width>2) && (Brush_height>2) )
   {
-    width=Brosse_Largeur-2;
-    height=Brosse_Hauteur-2;
-    Nouvelle_brosse=(byte *)malloc(((long)width)*height);
+    width=Brush_width-2;
+    height=Brush_height-2;
+    new_brush=(byte *)malloc(((long)width)*height);
 
-    if (Nouvelle_brosse)
+    if (new_brush)
     {
       // On copie la brosse courante dans la nouvelle
-      Copier_une_partie_d_image_dans_une_autre(Brosse, // Source
+      Copy_part_of_image_to_another(Brush, // source
                                                1,
                                                1,
                                                width,
                                                height,
-                                               Brosse_Largeur,
-                                               Nouvelle_brosse, // Destination
+                                               Brush_width,
+                                               new_brush, // Destination
                                                0,
                                                0,
                                                width);
 
       // On intervertit la nouvelle et l'ancienne brosse:
-      Temporaire=Brosse;
-      Brosse=Nouvelle_brosse;
-      Brosse_Largeur-=2;
-      Brosse_Hauteur-=2;
+      temp=Brush;
+      Brush=new_brush;
+      Brush_width-=2;
+      Brush_height-=2;
       width+=2;
       height+=2;
 
       // 1er balayage (horizontal)
-      for (y_pos=0; y_pos<Brosse_Hauteur; y_pos++)
+      for (y_pos=0; y_pos<Brush_height; y_pos++)
       {
-        state=(Temporaire[(y_pos+1)*width]!=Back_color);
-        for (x_pos=0; x_pos<Brosse_Largeur; x_pos++)
+        state=(temp[(y_pos+1)*width]!=Back_color);
+        for (x_pos=0; x_pos<Brush_width; x_pos++)
         {
-          if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
+          if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
           {
             if (state)
             {
               if (x_pos>0)
-                Pixel_dans_brosse(x_pos-1,y_pos,Back_color);
+                Pixel_in_brush(x_pos-1,y_pos,Back_color);
               state=0;
             }
           }
@@ -958,28 +958,28 @@ void Nibble_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(x_pos,y_pos,Back_color);
+              Pixel_in_brush(x_pos,y_pos,Back_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel à droite de la ligne
-        if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
-          Pixel_dans_brosse(x_pos-1,y_pos,Back_color);
+        if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
+          Pixel_in_brush(x_pos-1,y_pos,Back_color);
       }
 
       // 2ème balayage (vertical)
-      for (x_pos=0; x_pos<Brosse_Largeur; x_pos++)
+      for (x_pos=0; x_pos<Brush_width; x_pos++)
       {
-        state=(Temporaire[width+x_pos+1]!=Back_color);;
-        for (y_pos=0; y_pos<Brosse_Hauteur; y_pos++)
+        state=(temp[width+x_pos+1]!=Back_color);;
+        for (y_pos=0; y_pos<Brush_height; y_pos++)
         {
-          if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
+          if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
           {
             if (state)
             {
               if (y_pos>0)
-                Pixel_dans_brosse(x_pos,y_pos-1,Back_color);
+                Pixel_in_brush(x_pos,y_pos-1,Back_color);
               state=0;
             }
           }
@@ -987,158 +987,158 @@ void Nibble_brush(void)
           {
             if (!state)
             {
-              Pixel_dans_brosse(x_pos,y_pos,Back_color);
+              Pixel_in_brush(x_pos,y_pos,Back_color);
               state=1;
             }
           }
         }
         // Cas du dernier pixel en bas de la colonne
-        if (Temporaire[((y_pos+1)*width)+x_pos+1]==Back_color)
-          Pixel_dans_brosse(x_pos,y_pos-1,Back_color);
+        if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
+          Pixel_in_brush(x_pos,y_pos-1,Back_color);
       }
 
       // On recentre la prise sur la brosse
-      Brosse_Decalage_X=(Brosse_Largeur>>1);
-      Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+      Brush_offset_X=(Brush_width>>1);
+      Brush_offset_Y=(Brush_height>>1);
 
-      free(Temporaire); // Libération de l'ancienne brosse
+      free(temp); // Libération de l'ancienne brosse
 
       // Réallocation d'un buffer de Smear
-      free(Smear_Brosse);
-      Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-      Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-      Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Largeur)*Smear_Brosse_Hauteur);
+      free(Smear_brush);
+      Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+      Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+      Smear_brush=(byte *)malloc(((long)Smear_brush_width)*Smear_brush_height);
     }
     else
-      Erreur(0);  // Pas assez de mémoire!
+      Error(0);  // Pas assez de mémoire!
   }
 }
 
 
 
-void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
+void Capture_brush_with_lasso(int vertices, short * points,short clear)
 {
-  short Debut_X=Limite_Droite+1;
-  short Debut_Y=Limite_Bas+1;
-  short Fin_X=Limite_Gauche-1;
-  short Fin_Y=Limite_Haut-1;
-  short Temporaire;
+  short start_x=Limit_right+1;
+  short start_y=Limit_bottom+1;
+  short end_x=Limit_left-1;
+  short end_y=Limit_top-1;
+  short temp;
   short x_pos;
   short y_pos;
-  word  Nouvelle_Brosse_Largeur;
-  word  Nouvelle_Brosse_Hauteur;
+  word  new_brush_width;
+  word  new_brush_height;
 
 
   // On recherche les bornes de la brosse:
-  for (Temporaire=0; Temporaire<Vertices; Temporaire++)
+  for (temp=0; temp<vertices; temp++)
   {
-    x_pos=Points[Temporaire<<1];
-    y_pos=Points[(Temporaire<<1)+1];
-    if (x_pos<Debut_X)
-      Debut_X=x_pos;
-    if (x_pos>Fin_X)
-      Fin_X=x_pos;
-    if (y_pos<Debut_Y)
-      Debut_Y=y_pos;
-    if (y_pos>Fin_Y)
-      Fin_Y=y_pos;
+    x_pos=points[temp<<1];
+    y_pos=points[(temp<<1)+1];
+    if (x_pos<start_x)
+      start_x=x_pos;
+    if (x_pos>end_x)
+      end_x=x_pos;
+    if (y_pos<start_y)
+      start_y=y_pos;
+    if (y_pos>end_y)
+      end_y=y_pos;
   }
 
   // On clippe ces bornes à l'écran:
-  if (Debut_X<Limite_Gauche)
-    Debut_X=Limite_Gauche;
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
-  if (Debut_Y<Limite_Haut)
-    Debut_Y=Limite_Haut;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
 
   // On ne capture la nouvelle brosse que si elle est au moins partiellement
   // dans l'image:
 
-  if ((Debut_X<Principal_Largeur_image) && (Debut_Y<Principal_Hauteur_image))
+  if ((start_x<Main_image_width) && (start_y<Main_image_height))
   {
     // On met les décalages du tiling à 0 pour eviter toute incohérence.
     // Si par hasard on voulait les mettre à
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
     // il faudrait penser à les initialiser à 0 dans "MAIN.C".
-    Tiling_Decalage_X=0;
-    Tiling_Decalage_Y=0;
+    Tiling_offset_X=0;
+    Tiling_offset_Y=0;
 
     // Ensuite, on calcule les dimensions de la brosse:
-    Nouvelle_Brosse_Largeur=(Fin_X-Debut_X)+1;
-    Nouvelle_Brosse_Hauteur=(Fin_Y-Debut_Y)+1;
+    new_brush_width=(end_x-start_x)+1;
+    new_brush_height=(end_y-start_y)+1;
 
-    if ( (((long)Brosse_Hauteur)*Brosse_Largeur) !=
-         (((long)Nouvelle_Brosse_Hauteur)*Nouvelle_Brosse_Largeur) )
+    if ( (((long)Brush_height)*Brush_width) !=
+         (((long)new_brush_height)*new_brush_width) )
     {
-      free(Brosse);
-      Brosse=(byte *)malloc(((long)Nouvelle_Brosse_Hauteur)*Nouvelle_Brosse_Largeur);
-      if (!Brosse)
+      free(Brush);
+      Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+      if (!Brush)
       {
-        Erreur(0);
+        Error(0);
 
-        Brosse=(byte *)malloc(1*1);
-        Nouvelle_Brosse_Hauteur=Nouvelle_Brosse_Largeur=1;
-        *Brosse=Fore_color;
+        Brush=(byte *)malloc(1*1);
+        new_brush_height=new_brush_width=1;
+        *Brush=Fore_color;
       }
     }
-    Brosse_Largeur=Nouvelle_Brosse_Largeur;
-    Brosse_Hauteur=Nouvelle_Brosse_Hauteur;
+    Brush_width=new_brush_width;
+    Brush_height=new_brush_height;
 
-    free(Smear_Brosse);
-    Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
+    free(Smear_brush);
+    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
 
-    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
+    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
     {
-      Erreur(0);
+      Error(0);
 
-      free(Brosse);
-      Brosse=(byte *)malloc(1*1);
-      Brosse_Hauteur=1;
-      Brosse_Largeur=1;
+      free(Brush);
+      Brush=(byte *)malloc(1*1);
+      Brush_height=1;
+      Brush_width=1;
 
-      Smear_Brosse=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU);
-      Smear_Brosse_Hauteur=TAILLE_MAXI_PINCEAU;
-      Smear_Brosse_Largeur=TAILLE_MAXI_PINCEAU;
+      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
     }
 
-    Brosse_Decalage_X=Debut_X;
-    Brosse_Decalage_Y=Debut_Y;
-    Pixel_figure=Pixel_figure_Dans_brosse;
+    Brush_offset_X=start_x;
+    Brush_offset_Y=start_y;
+    Pixel_figure=Pixel_figure_in_brush;
 
-    memset(Brosse,Back_color,(long)Brosse_Largeur*Brosse_Hauteur);
-    Polyfill_General(Vertices,Points,~Back_color);
+    memset(Brush,Back_color,(long)Brush_width*Brush_height);
+    Polyfill_general(vertices,points,~Back_color);
 
     // On retrace les bordures du lasso:
-    for (Temporaire=1; Temporaire<Vertices; Temporaire++)
+    for (temp=1; temp<vertices; temp++)
     {
-      Tracer_ligne_General(Points[(Temporaire-1)<<1],Points[((Temporaire-1)<<1)+1],
-                           Points[Temporaire<<1],Points[(Temporaire<<1)+1],
+      Draw_line_general(points[(temp-1)<<1],points[((temp-1)<<1)+1],
+                           points[temp<<1],points[(temp<<1)+1],
                            ~Back_color);
     }
-    Tracer_ligne_General(Points[(Vertices-1)<<1],Points[((Vertices-1)<<1)+1],
-                         Points[0],Points[1],
+    Draw_line_general(points[(vertices-1)<<1],points[((vertices-1)<<1)+1],
+                         points[0],points[1],
                          ~Back_color);
 
     // On scanne la brosse pour remplacer tous les pixels affectés par le
     // polyfill par ceux de l'image:
-    for (y_pos=Debut_Y;y_pos<=Fin_Y;y_pos++)
-      for (x_pos=Debut_X;x_pos<=Fin_X;x_pos++)
-        if (Lit_pixel_dans_brosse(x_pos-Debut_X,y_pos-Debut_Y)!=Back_color)
+    for (y_pos=start_y;y_pos<=end_y;y_pos++)
+      for (x_pos=start_x;x_pos<=end_x;x_pos++)
+        if (Read_pixel_from_brush(x_pos-start_x,y_pos-start_y)!=Back_color)
         {
-          Pixel_dans_brosse(x_pos-Debut_X,y_pos-Debut_Y,Lit_pixel_dans_ecran_courant(x_pos,y_pos));
+          Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_screen(x_pos,y_pos));
           // On regarde s'il faut effacer quelque chose:
           if (clear)
-            Pixel_dans_ecran_courant(x_pos,y_pos,Back_color);
+            Pixel_in_current_screen(x_pos,y_pos,Back_color);
         }
 
     // On centre la prise sur la brosse
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
   }
 }
 
@@ -1146,375 +1146,375 @@ void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear)
 
 //------------------------- Etirement de la brosse ---------------------------
 
-void Etirer_brosse(short X1, short Y1, short X2, short Y2)
+void Stretch_brush(short x1, short y1, short x2, short y2)
 {
-  int    offset,line,Colonne;
-  byte * New_Brosse;
+  int    offset,line,column;
+  byte * new_brush;
 
-  int    New_Brosse_Largeur;  // Width de la nouvelle brosse
-  int    New_Brosse_Hauteur;  // Height de la nouvelle brosse
+  int    new_brush_width;  // Width de la nouvelle brosse
+  int    new_brush_height;  // Height de la nouvelle brosse
 
-  int    Pos_X_dans_brosse;   // Position courante dans l'ancienne brosse
-  int    Pos_Y_dans_brosse;
-  int    Delta_X_dans_brosse; // "Vecteur incrémental" du point précédent
-  int    Delta_Y_dans_brosse;
-  int    Pos_X_initial;       // Position X de début de parcours de ligne
-  int    Dx,Dy;
+  int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
+  int    y_pos_in_brush;
+  int    delta_x_in_brush; // "Vecteur incrémental" du point précédent
+  int    delta_y_in_brush;
+  int    initial_x_pos;       // Position X de début de parcours de ligne
+  int    dx,dy;
 
-  Dx=(X1<X2)?1:-1;
-  Dy=(Y1<Y2)?1:-1;
+  dx=(x1<x2)?1:-1;
+  dy=(y1<y2)?1:-1;
 
   // Calcul des nouvelles dimensions de la brosse:
-  if ((New_Brosse_Largeur=X1-X2)<0)
-    New_Brosse_Largeur=-New_Brosse_Largeur;
-  New_Brosse_Largeur++;
+  if ((new_brush_width=x1-x2)<0)
+    new_brush_width=-new_brush_width;
+  new_brush_width++;
 
-  if ((New_Brosse_Hauteur=Y1-Y2)<0)
-    New_Brosse_Hauteur=-New_Brosse_Hauteur;
-  New_Brosse_Hauteur++;
+  if ((new_brush_height=y1-y2)<0)
+    new_brush_height=-new_brush_height;
+  new_brush_height++;
 
   // Calcul des anciennes dimensions de la brosse:
 
   // Calcul du "vecteur incrémental":
-  Delta_X_dans_brosse=(Brosse_Largeur<<16)/(X2-X1+Dx);
-  Delta_Y_dans_brosse=(Brosse_Hauteur<<16)/(Y2-Y1+Dy);
+  delta_x_in_brush=(Brush_width<<16)/(x2-x1+dx);
+  delta_y_in_brush=(Brush_height<<16)/(y2-y1+dy);
 
   // Calcul de la valeur initiale de x_pos pour chaque ligne:
-  if (Dx>=0)
-    Pos_X_initial = 0;                // Pas d'inversion en X de la brosse
+  if (dx>=0)
+    initial_x_pos = 0;                // Pas d'inversion en X de la brosse
   else
-    Pos_X_initial = (Brosse_Largeur<<16)-1; // Inversion en X de la brosse
+    initial_x_pos = (Brush_width<<16)-1; // Inversion en X de la brosse
 
-  free(Smear_Brosse); // On libère un peu de mémoire
+  free(Smear_brush); // On libère un peu de mémoire
 
-  if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
+  if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
     offset=0;
 
     // Calcul de la valeur initiale de y_pos:
-    if (Dy>=0)
-      Pos_Y_dans_brosse=0;                // Pas d'inversion en Y de la brosse
+    if (dy>=0)
+      y_pos_in_brush=0;                // Pas d'inversion en Y de la brosse
     else
-      Pos_Y_dans_brosse=(Brosse_Hauteur<<16)-1; // Inversion en Y de la brosse
+      y_pos_in_brush=(Brush_height<<16)-1; // Inversion en Y de la brosse
 
     // Pour chaque ligne
-    for (line=0;line<New_Brosse_Hauteur;line++)
+    for (line=0;line<new_brush_height;line++)
     {
       // On repart du début de la ligne:
-      Pos_X_dans_brosse=Pos_X_initial;
+      x_pos_in_brush=initial_x_pos;
 
       // Pour chaque colonne:
-      for (Colonne=0;Colonne<New_Brosse_Largeur;Colonne++)
+      for (column=0;column<new_brush_width;column++)
       {
         // On copie le pixel:
-        New_Brosse[offset]=Lit_pixel_dans_brosse(Pos_X_dans_brosse>>16,Pos_Y_dans_brosse>>16);
+        new_brush[offset]=Read_pixel_from_brush(x_pos_in_brush>>16,y_pos_in_brush>>16);
         // On passe à la colonne de brosse suivante:
-        Pos_X_dans_brosse+=Delta_X_dans_brosse;
+        x_pos_in_brush+=delta_x_in_brush;
         // On passe au pixel suivant de la nouvelle brosse:
         offset++;
       }
 
       // On passe à la ligne de brosse suivante:
-      Pos_Y_dans_brosse+=Delta_Y_dans_brosse;
+      y_pos_in_brush+=delta_y_in_brush;
     }
 
-    free(Brosse);
-    Brosse=New_Brosse;
+    free(Brush);
+    Brush=new_brush;
 
-    Brosse_Largeur=New_Brosse_Largeur;
-    Brosse_Hauteur=New_Brosse_Hauteur;
+    Brush_width=new_brush_width;
+    Brush_height=new_brush_height;
 
-    Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
+    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
 
-    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
+    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
     {
-      Erreur(0);
+      Error(0);
 
-      free(Brosse);
-      Brosse=(byte *)malloc(1*1);
-      Brosse_Hauteur=1;
-      Brosse_Largeur=1;
+      free(Brush);
+      Brush=(byte *)malloc(1*1);
+      Brush_height=1;
+      Brush_width=1;
 
-      Smear_Brosse=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU);
-      Smear_Brosse_Hauteur=TAILLE_MAXI_PINCEAU;
-      Smear_Brosse_Largeur=TAILLE_MAXI_PINCEAU;
+      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
     }
 
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
   }
   else
   {
     // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
-    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // où c'etait avant. On a juste à réallouer la Smear_brush car il y a
     // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
-    Erreur(0);
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
+    Error(0);
   }
 }
 
 
 
-void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2)
+void Stretch_brush_preview(short x1, short y1, short x2, short y2)
 {
-  int    Pos_X_src,Pos_Y_src;
-  int    Pos_X_src_Initiale,Pos_Y_src_Initiale;
-  int    Delta_X,Delta_Y;
-  int    Pos_X_dest,Pos_Y_dest;
-  int    Pos_X_dest_Initiale,Pos_Y_dest_Initiale;
-  int    Pos_X_dest_Finale,Pos_Y_dest_Finale;
-  int    Largeur_dest,Hauteur_dest;
-  byte   Couleur;
+  int    src_x_pos,src_y_pos;
+  int    initial_src_x_pos,initial_src_y_pos;
+  int    delta_x,delta_y;
+  int    dest_x_pos,dest_y_pos;
+  int    initial_dest_x_pos,initial_dest_y_pos;
+  int    final_dest_x_pos,final_dest_y_pos;
+  int    dest_width,dest_height;
+  byte   color;
 
 
   // 1er calcul des positions destination extremes:
-  Pos_X_dest_Initiale=Min(X1,X2);
-  Pos_Y_dest_Initiale=Min(Y1,Y2);
-  Pos_X_dest_Finale  =Max(X1,X2);
-  Pos_Y_dest_Finale  =Max(Y1,Y2);
+  initial_dest_x_pos=Min(x1,x2);
+  initial_dest_y_pos=Min(y1,y2);
+  final_dest_x_pos  =Max(x1,x2);
+  final_dest_y_pos  =Max(y1,y2);
 
   // Calcul des dimensions de la destination:
-  Largeur_dest=Pos_X_dest_Finale-Pos_X_dest_Initiale+1;
-  Hauteur_dest=Pos_Y_dest_Finale-Pos_Y_dest_Initiale+1;
+  dest_width=final_dest_x_pos-initial_dest_x_pos+1;
+  dest_height=final_dest_y_pos-initial_dest_y_pos+1;
 
   // Calcul des vecteurs d'incrémentation :
-  Delta_X=(Brosse_Largeur<<16)/Largeur_dest;
-  Delta_Y=(Brosse_Hauteur<<16)/Hauteur_dest;
+  delta_x=(Brush_width<<16)/dest_width;
+  delta_y=(Brush_height<<16)/dest_height;
 
   // 1er calcul de la position X initiale dans la source:
-  Pos_X_src_Initiale=(Brosse_Largeur<<16)*
-                     (Max(Pos_X_dest_Initiale,Limite_Gauche)-
-                      Pos_X_dest_Initiale)/Largeur_dest;
+  initial_src_x_pos=(Brush_width<<16)*
+                     (Max(initial_dest_x_pos,Limit_left)-
+                      initial_dest_x_pos)/dest_width;
   // Calcul du clip de la destination:
-  Pos_X_dest_Initiale=Max(Pos_X_dest_Initiale,Limite_Gauche);
-  Pos_X_dest_Finale  =Min(Pos_X_dest_Finale  ,Limite_visible_Droite);
+  initial_dest_x_pos=Max(initial_dest_x_pos,Limit_left);
+  final_dest_x_pos  =Min(final_dest_x_pos  ,Limit_visible_right);
   // On discute selon l'inversion en X
-  if (X1>X2)
+  if (x1>x2)
   {
-    // Inversion -> Inversion du signe de Delta_X
-    Delta_X=-Delta_X;
-    Pos_X_src_Initiale=(Brosse_Largeur<<16)-1-Pos_X_src_Initiale;
+    // Inversion -> Inversion du signe de delta_x
+    delta_x=-delta_x;
+    initial_src_x_pos=(Brush_width<<16)-1-initial_src_x_pos;
   }
 
   // 1er calcul de la position Y initiale dans la source:
-  Pos_Y_src_Initiale=(Brosse_Hauteur<<16)*
-                     (Max(Pos_Y_dest_Initiale,Limite_Haut)-
-                      Pos_Y_dest_Initiale)/Hauteur_dest;
+  initial_src_y_pos=(Brush_height<<16)*
+                     (Max(initial_dest_y_pos,Limit_top)-
+                      initial_dest_y_pos)/dest_height;
   // Calcul du clip de la destination:
-  Pos_Y_dest_Initiale=Max(Pos_Y_dest_Initiale,Limite_Haut);
-  Pos_Y_dest_Finale  =Min(Pos_Y_dest_Finale  ,Limite_visible_Bas);
+  initial_dest_y_pos=Max(initial_dest_y_pos,Limit_top);
+  final_dest_y_pos  =Min(final_dest_y_pos  ,Limit_visible_bottom);
   // On discute selon l'inversion en Y
-  if (Y1>Y2)
+  if (y1>y2)
   {
-    // Inversion -> Inversion du signe de Delta_Y
-    Delta_Y=-Delta_Y;
-    Pos_Y_src_Initiale=(Brosse_Hauteur<<16)-1-Pos_Y_src_Initiale;
+    // Inversion -> Inversion du signe de delta_y
+    delta_y=-delta_y;
+    initial_src_y_pos=(Brush_height<<16)-1-initial_src_y_pos;
   }
 
   // Pour chaque ligne :
-  Pos_Y_src=Pos_Y_src_Initiale;
-  for (Pos_Y_dest=Pos_Y_dest_Initiale;Pos_Y_dest<=Pos_Y_dest_Finale;Pos_Y_dest++)
+  src_y_pos=initial_src_y_pos;
+  for (dest_y_pos=initial_dest_y_pos;dest_y_pos<=final_dest_y_pos;dest_y_pos++)
   {
     // Pour chaque colonne:
-    Pos_X_src=Pos_X_src_Initiale;
-    for (Pos_X_dest=Pos_X_dest_Initiale;Pos_X_dest<=Pos_X_dest_Finale;Pos_X_dest++)
+    src_x_pos=initial_src_x_pos;
+    for (dest_x_pos=initial_dest_x_pos;dest_x_pos<=final_dest_x_pos;dest_x_pos++)
     {
-      Couleur=Lit_pixel_dans_brosse(Pos_X_src>>16,Pos_Y_src>>16);
-      if (Couleur!=Back_color)
-        Pixel_Preview(Pos_X_dest,Pos_Y_dest,Couleur);
+      color=Read_pixel_from_brush(src_x_pos>>16,src_y_pos>>16);
+      if (color!=Back_color)
+        Pixel_preview(dest_x_pos,dest_y_pos,color);
 
-      Pos_X_src+=Delta_X;
+      src_x_pos+=delta_x;
     }
 
-    Pos_Y_src+=Delta_Y;
+    src_y_pos+=delta_y;
   }
-  Mettre_Ecran_A_Jour(Pos_X_dest_Initiale,Pos_Y_dest_Initiale,Largeur_dest,Hauteur_dest);
+  Update_part_of_screen(initial_dest_x_pos,initial_dest_y_pos,dest_width,dest_height);
 }
 
 
 
 //------------------------- Rotation de la brosse ---------------------------
 
-#define INDEFINI (-1.0e20F)
+#define UNDEFINED (-1.0e20F)
 float * ScanY_Xt[2];
 float * ScanY_Yt[2];
 float * ScanY_X[2];
 
 
-void Interpoler_texture(int Debut_X,int Debut_Y,int Xt1,int Yt1,
-                        int Fin_X  ,int Fin_Y  ,int Xt2,int Yt2,int height)
+void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
+                        int end_x  ,int end_y  ,int xt2,int yt2,int height)
 {
   int x_pos,y_pos;
-  int Incr_X,Incr_Y;
-  int i,Cumul;
-  int Delta_X,Delta_Y;
-  int Delta_Xt=Xt2-Xt1;
-  int Delta_Yt=Yt2-Yt1;
-  int Delta_X2=Fin_X-Debut_X;
-  int Delta_Y2=Fin_Y-Debut_Y;
-  float Xt,Yt;
+  int incr_x,incr_y;
+  int i,cumul;
+  int delta_x,delta_y;
+  int delta_xt=xt2-xt1;
+  int delta_yt=yt2-yt1;
+  int delta_x2=end_x-start_x;
+  int delta_y2=end_y-start_y;
+  float xt,yt;
 
 
-  x_pos=Debut_X;
-  y_pos=Debut_Y;
+  x_pos=start_x;
+  y_pos=start_y;
 
-  if (Debut_X<Fin_X)
+  if (start_x<end_x)
   {
-    Incr_X=+1;
-    Delta_X=Delta_X2;
+    incr_x=+1;
+    delta_x=delta_x2;
   }
   else
   {
-    Incr_X=-1;
-    Delta_X=-Delta_X2;
+    incr_x=-1;
+    delta_x=-delta_x2;
   }
 
-  if (Debut_Y<Fin_Y)
+  if (start_y<end_y)
   {
-    Incr_Y=+1;
-    Delta_Y=Delta_Y2;
+    incr_y=+1;
+    delta_y=delta_y2;
   }
   else
   {
-    Incr_Y=-1;
-    Delta_Y=-Delta_Y2;
+    incr_y=-1;
+    delta_y=-delta_y2;
   }
 
-  if (Delta_X>Delta_Y)
+  if (delta_x>delta_y)
   {
-    Cumul=Delta_X>>1;
-    for (i=0; i<=Delta_X; i++)
+    cumul=delta_x>>1;
+    for (i=0; i<=delta_x; i++)
     {
-      if (Cumul>=Delta_X)
+      if (cumul>=delta_x)
       {
-        Cumul-=Delta_X;
-        y_pos+=Incr_Y;
+        cumul-=delta_x;
+        y_pos+=incr_y;
       }
 
       if ((y_pos>=0) && (y_pos<height))
       {
-        Xt=(((float)((x_pos-Debut_X)*Delta_Xt))/(float)Delta_X2) + (float)Xt1;
-        Yt=(((float)((x_pos-Debut_X)*Delta_Yt))/(float)Delta_X2) + (float)Yt1;
-        if (ScanY_X[0][y_pos]==INDEFINI) // Gauche non défini
+        xt=(((float)((x_pos-start_x)*delta_xt))/(float)delta_x2) + (float)xt1;
+        yt=(((float)((x_pos-start_x)*delta_yt))/(float)delta_x2) + (float)yt1;
+        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
         {
           ScanY_X[0][y_pos]=x_pos;
-          ScanY_Xt[0][y_pos]=Xt;
-          ScanY_Yt[0][y_pos]=Yt;
+          ScanY_Xt[0][y_pos]=xt;
+          ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
           if (x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=x_pos;
-              ScanY_Xt[1][y_pos]=Xt;
-              ScanY_Yt[1][y_pos]=Yt;
+              ScanY_Xt[1][y_pos]=xt;
+              ScanY_Yt[1][y_pos]=yt;
             }
           }
           else
           {
-            if (ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
               ScanY_X[0][y_pos]=x_pos;
-              ScanY_Xt[0][y_pos]=Xt;
-              ScanY_Yt[0][y_pos]=Yt;
+              ScanY_Xt[0][y_pos]=xt;
+              ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
               ScanY_X[0][y_pos]=x_pos;
-              ScanY_Xt[0][y_pos]=Xt;
-              ScanY_Yt[0][y_pos]=Yt;
+              ScanY_Xt[0][y_pos]=xt;
+              ScanY_Yt[0][y_pos]=yt;
             }
           }
         }
       }
-      x_pos+=Incr_X;
-      Cumul+=Delta_Y;
+      x_pos+=incr_x;
+      cumul+=delta_y;
     }
   }
   else
   {
-    Cumul=Delta_Y>>1;
-    for (i=0; i<=Delta_Y; i++)
+    cumul=delta_y>>1;
+    for (i=0; i<=delta_y; i++)
     {
-      if (Cumul>=Delta_Y)
+      if (cumul>=delta_y)
       {
-        Cumul-=Delta_Y;
-        x_pos+=Incr_X;
+        cumul-=delta_y;
+        x_pos+=incr_x;
       }
 
       if ((y_pos>=0) && (y_pos<height))
       {
-        Xt=(((float)((y_pos-Debut_Y)*Delta_Xt))/(float)Delta_Y2) + (float)Xt1;
-        Yt=(((float)((y_pos-Debut_Y)*Delta_Yt))/(float)Delta_Y2) + (float)Yt1;
-        if (ScanY_X[0][y_pos]==INDEFINI) // Gauche non défini
+        xt=(((float)((y_pos-start_y)*delta_xt))/(float)delta_y2) + (float)xt1;
+        yt=(((float)((y_pos-start_y)*delta_yt))/(float)delta_y2) + (float)yt1;
+        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
         {
           ScanY_X[0][y_pos]=x_pos;
-          ScanY_Xt[0][y_pos]=Xt;
-          ScanY_Yt[0][y_pos]=Yt;
+          ScanY_Xt[0][y_pos]=xt;
+          ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
           if (x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=x_pos;
-              ScanY_Xt[1][y_pos]=Xt;
-              ScanY_Yt[1][y_pos]=Yt;
+              ScanY_Xt[1][y_pos]=xt;
+              ScanY_Yt[1][y_pos]=yt;
             }
           }
           else
           {
-            if (ScanY_X[1][y_pos]==INDEFINI) // Droit non défini
+            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
               ScanY_X[0][y_pos]=x_pos;
-              ScanY_Xt[0][y_pos]=Xt;
-              ScanY_Yt[0][y_pos]=Yt;
+              ScanY_Xt[0][y_pos]=xt;
+              ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
               ScanY_X[0][y_pos]=x_pos;
-              ScanY_Xt[0][y_pos]=Xt;
-              ScanY_Yt[0][y_pos]=Yt;
+              ScanY_Xt[0][y_pos]=xt;
+              ScanY_Yt[0][y_pos]=yt;
             }
           }
         }
       }
-      y_pos+=Incr_Y;
-      Cumul+=Delta_X;
+      y_pos+=incr_y;
+      cumul+=delta_x;
     }
   }
 }
 
 
 
-void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
-                           int X2,int Y2,int Xt2,int Yt2,
-                           int X3,int Y3,int Xt3,int Yt3,
-                           int X4,int Y4,int Xt4,int Yt4,
-                           byte * Buffer, int width, int height)
+void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
+                           int x2,int y2,int xt2,int yt2,
+                           int x3,int y3,int xt3,int yt3,
+                           int x4,int y4,int xt4,int yt4,
+                           byte * buffer, int width, int height)
 {
-  int Xmin,/*Xmax,*/Ymin/*,Ymax*/;
-  int x,y,Xt,Yt;
-  int Debut_X,Fin_X,Largeur_ligne;
-  float Temp;
-  //byte Couleur;
+  int x_min,/*x_max,*/y_min/*,y_max*/;
+  int x,y,xt,yt;
+  int start_x,end_x,line_width;
+  float temp;
+  //byte color;
 
-  Xmin=Min(Min(X1,X2),Min(X3,X4));
-  Ymin=Min(Min(Y1,Y2),Min(Y3,Y4));
+  x_min=Min(Min(x1,x2),Min(x3,x4));
+  y_min=Min(Min(y1,y2),Min(y3,y4));
 
   ScanY_Xt[0]=(float *)malloc(height*sizeof(float));
   ScanY_Xt[1]=(float *)malloc(height*sizeof(float));
@@ -1523,37 +1523,37 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Remplir avec des valeurs égales à INDEFINI.
+  // Fill_general avec des valeurs égales à UNDEFINED.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=INDEFINI;
-    ScanY_X[1][y]=INDEFINI;
+    ScanY_X[0][y]=UNDEFINED;
+    ScanY_X[1][y]=UNDEFINED;
   }
 
-  Interpoler_texture(X1-Xmin,Y1-Ymin,Xt1,Yt1,X3-Xmin,Y3-Ymin,Xt3,Yt3,height);
-  Interpoler_texture(X3-Xmin,Y3-Ymin,Xt3,Yt3,X4-Xmin,Y4-Ymin,Xt4,Yt4,height);
-  Interpoler_texture(X4-Xmin,Y4-Ymin,Xt4,Yt4,X2-Xmin,Y2-Ymin,Xt2,Yt2,height);
-  Interpoler_texture(X2-Xmin,Y2-Ymin,Xt2,Yt2,X1-Xmin,Y1-Ymin,Xt1,Yt1,height);
+  Interpolate_texture(x1-x_min,y1-y_min,xt1,yt1,x3-x_min,y3-y_min,xt3,yt3,height);
+  Interpolate_texture(x3-x_min,y3-y_min,xt3,yt3,x4-x_min,y4-y_min,xt4,yt4,height);
+  Interpolate_texture(x4-x_min,y4-y_min,xt4,yt4,x2-x_min,y2-y_min,xt2,yt2,height);
+  Interpolate_texture(x2-x_min,y2-y_min,xt2,yt2,x1-x_min,y1-y_min,xt1,yt1,height);
 
   for (y=0; y<height; y++)
   {
-    Debut_X=Round(ScanY_X[0][y]);
-    Fin_X  =Round(ScanY_X[1][y]);
+    start_x=Round(ScanY_X[0][y]);
+    end_x  =Round(ScanY_X[1][y]);
 
-    Largeur_ligne=1+Fin_X-Debut_X;
+    line_width=1+end_x-start_x;
 
-    for (x=0; x<Debut_X; x++)
-      Buffer[x+(y*width)]=Back_color;
-    for (; x<=Fin_X; x++)
+    for (x=0; x<start_x; x++)
+      buffer[x+(y*width)]=Back_color;
+    for (; x<=end_x; x++)
     {
-      Temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)Largeur_ligne;
-      Xt=Round((float)(ScanY_Xt[0][y])+(Temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
-      Yt=Round((float)(ScanY_Yt[0][y])+(Temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
+      temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)line_width;
+      xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
+      yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
 
-      Buffer[x+(y*width)]=Lit_pixel_dans_brosse(Xt,Yt);
+      buffer[x+(y*width)]=Read_pixel_from_brush(xt,yt);
     }
     for (; x<width; x++)
-      Buffer[x+(y*width)]=Back_color;
+      buffer[x+(y*width)]=Back_color;
   }
 
   free(ScanY_Xt[0]);
@@ -1566,109 +1566,109 @@ void Calculer_quad_texture(int X1,int Y1,int Xt1,int Yt1,
 
 
 
-void Tourner_brosse(float angle)
+void Rotate_brush(float angle)
 {
-  byte * New_Brosse;
-  int    New_Brosse_Largeur;  // Width de la nouvelle brosse
-  int    New_Brosse_Hauteur;  // Height de la nouvelle brosse
+  byte * new_brush;
+  int    new_brush_width;  // Width de la nouvelle brosse
+  int    new_brush_height;  // Height de la nouvelle brosse
 
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  int Debut_X,Fin_X,Debut_Y,Fin_Y;
-  int Xmin,Xmax,Ymin,Ymax;
-  float cosA=cos(angle);
-  float sinA=sin(angle);
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  int start_x,end_x,start_y,end_y;
+  int x_min,x_max,y_min,y_max;
+  float cos_a=cos(angle);
+  float sin_a=sin(angle);
 
   // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
-  Debut_X=1-(Brosse_Largeur>>1);
-  Debut_Y=1-(Brosse_Hauteur>>1);
-  Fin_X=Debut_X+Brosse_Largeur-1;
-  Fin_Y=Debut_Y+Brosse_Hauteur-1;
+  start_x=1-(Brush_width>>1);
+  start_y=1-(Brush_height>>1);
+  end_x=start_x+Brush_width-1;
+  end_y=start_y+Brush_height-1;
 
-  Transformer_point(Debut_X,Debut_Y, cosA,sinA, &X1,&Y1);
-  Transformer_point(Fin_X  ,Debut_Y, cosA,sinA, &X2,&Y2);
-  Transformer_point(Debut_X,Fin_Y  , cosA,sinA, &X3,&Y3);
-  Transformer_point(Fin_X  ,Fin_Y  , cosA,sinA, &X4,&Y4);
+  Transform_point(start_x,start_y, cos_a,sin_a, &x1,&y1);
+  Transform_point(end_x  ,start_y, cos_a,sin_a, &x2,&y2);
+  Transform_point(start_x,end_y  , cos_a,sin_a, &x3,&y3);
+  Transform_point(end_x  ,end_y  , cos_a,sin_a, &x4,&y4);
 
   // Calcul des nouvelles dimensions de la brosse:
-  Xmin=Min(Min((int)X1,(int)X2),Min((int)X3,(int)X4));
-  Xmax=Max(Max((int)X1,(int)X2),Max((int)X3,(int)X4));
-  Ymin=Min(Min((int)Y1,(int)Y2),Min((int)Y3,(int)Y4));
-  Ymax=Max(Max((int)Y1,(int)Y2),Max((int)Y3,(int)Y4));
+  x_min=Min(Min((int)x1,(int)x2),Min((int)x3,(int)x4));
+  x_max=Max(Max((int)x1,(int)x2),Max((int)x3,(int)x4));
+  y_min=Min(Min((int)y1,(int)y2),Min((int)y3,(int)y4));
+  y_max=Max(Max((int)y1,(int)y2),Max((int)y3,(int)y4));
 
-  New_Brosse_Largeur=Xmax+1-Xmin;
-  New_Brosse_Hauteur=Ymax+1-Ymin;
+  new_brush_width=x_max+1-x_min;
+  new_brush_height=y_max+1-y_min;
 
-  free(Smear_Brosse); // On libère un peu de mémoire
+  free(Smear_brush); // On libère un peu de mémoire
 
-  if ((New_Brosse=((byte *)malloc(New_Brosse_Largeur*New_Brosse_Hauteur))))
+  if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
     // Et maintenant on calcule la nouvelle brosse tournée.
-    Calculer_quad_texture(X1,Y1,               0,               0,
-                          X2,Y2,Brosse_Largeur-1,               0,
-                          X3,Y3,               0,Brosse_Hauteur-1,
-                          X4,Y4,Brosse_Largeur-1,Brosse_Hauteur-1,
-                          New_Brosse,New_Brosse_Largeur,New_Brosse_Hauteur);
+    Compute_quad_texture(x1,y1,               0,               0,
+                          x2,y2,Brush_width-1,               0,
+                          x3,y3,               0,Brush_height-1,
+                          x4,y4,Brush_width-1,Brush_height-1,
+                          new_brush,new_brush_width,new_brush_height);
 
-    free(Brosse);
-    Brosse=New_Brosse;
+    free(Brush);
+    Brush=new_brush;
 
-    Brosse_Largeur=New_Brosse_Largeur;
-    Brosse_Hauteur=New_Brosse_Hauteur;
+    Brush_width=new_brush_width;
+    Brush_height=new_brush_height;
 
-    Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
+    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
 
-    if (!Smear_Brosse) // On ne peut même pas allouer la brosse du smear!
+    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
     {
-      Erreur(0);
+      Error(0);
 
-      free(Brosse);
-      Brosse=(byte *)malloc(1*1);
-      Brosse_Hauteur=1;
-      Brosse_Largeur=1;
+      free(Brush);
+      Brush=(byte *)malloc(1*1);
+      Brush_height=1;
+      Brush_width=1;
 
-      Smear_Brosse=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU);
-      Smear_Brosse_Hauteur=TAILLE_MAXI_PINCEAU;
-      Smear_Brosse_Largeur=TAILLE_MAXI_PINCEAU;
+      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
     }
 
-    Brosse_Decalage_X=(Brosse_Largeur>>1);
-    Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
   }
   else
   {
     // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
-    // où c'etait avant. On a juste à réallouer la Smear_Brosse car il y a
+    // où c'etait avant. On a juste à réallouer la Smear_brush car il y a
     // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
-    Smear_Brosse=(byte *)malloc(((long)Smear_Brosse_Hauteur)*Smear_Brosse_Largeur);
-    Erreur(0);
+    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
+    Error(0);
   }
 }
 
 
 
-void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
-                                   int X2,int Y2,int Xt2,int Yt2,
-                                   int X3,int Y3,int Xt3,int Yt3,
-                                   int X4,int Y4,int Xt4,int Yt4)
+void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
+                                   int x2,int y2,int xt2,int yt2,
+                                   int x3,int y3,int xt3,int yt3,
+                                   int x4,int y4,int xt4,int yt4)
 {
-  int Xmin,Xmax,Ymin,Ymax;
-  int x,y,Xt,Yt;
-  int Y_,Ymin_;
-  int Debut_X,Fin_X,width,height;
-  float Temp;
-  byte Couleur;
+  int x_min,x_max,y_min,y_max;
+  int x,y,xt,yt;
+  int y_,y_min_;
+  int start_x,end_x,width,height;
+  float temp;
+  byte color;
 
-  Xmin=Min(Min(X1,X2),Min(X3,X4));
-  Xmax=Max(Max(X1,X2),Max(X3,X4));
-  Ymin=Min(Min(Y1,Y2),Min(Y3,Y4));
-  Ymax=Max(Max(Y1,Y2),Max(Y3,Y4));
-  height=1+Ymax-Ymin;
+  x_min=Min(Min(x1,x2),Min(x3,x4));
+  x_max=Max(Max(x1,x2),Max(x3,x4));
+  y_min=Min(Min(y1,y2),Min(y3,y4));
+  y_max=Max(Max(y1,y2),Max(y3,y4));
+  height=1+y_max-y_min;
 
   ScanY_Xt[0]=(float *)malloc(height*sizeof(float));
   ScanY_Xt[1]=(float *)malloc(height*sizeof(float));
@@ -1677,42 +1677,42 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Remplir avec des valeurs égales à INDEFINI.
+  // Fill_general avec des valeurs égales à UNDEFINED.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=INDEFINI;
-    ScanY_X[1][y]=INDEFINI;
+    ScanY_X[0][y]=UNDEFINED;
+    ScanY_X[1][y]=UNDEFINED;
   }
 
-  Interpoler_texture(X1,Y1-Ymin,Xt1,Yt1,X3,Y3-Ymin,Xt3,Yt3,height);
-  Interpoler_texture(X3,Y3-Ymin,Xt3,Yt3,X4,Y4-Ymin,Xt4,Yt4,height);
-  Interpoler_texture(X4,Y4-Ymin,Xt4,Yt4,X2,Y2-Ymin,Xt2,Yt2,height);
-  Interpoler_texture(X2,Y2-Ymin,Xt2,Yt2,X1,Y1-Ymin,Xt1,Yt1,height);
+  Interpolate_texture(x1,y1-y_min,xt1,yt1,x3,y3-y_min,xt3,yt3,height);
+  Interpolate_texture(x3,y3-y_min,xt3,yt3,x4,y4-y_min,xt4,yt4,height);
+  Interpolate_texture(x4,y4-y_min,xt4,yt4,x2,y2-y_min,xt2,yt2,height);
+  Interpolate_texture(x2,y2-y_min,xt2,yt2,x1,y1-y_min,xt1,yt1,height);
 
-  Ymin_=Ymin;
-  if (Ymin<Limite_Haut) Ymin=Limite_Haut;
-  if (Ymax>Limite_Bas)  Ymax=Limite_Bas;
+  y_min_=y_min;
+  if (y_min<Limit_top) y_min=Limit_top;
+  if (y_max>Limit_bottom)  y_max=Limit_bottom;
 
-  for (Y_=Ymin; Y_<=Ymax; Y_++)
+  for (y_=y_min; y_<=y_max; y_++)
   {
-    y=Y_-Ymin_;
-    Debut_X=Round(ScanY_X[0][y]);
-    Fin_X  =Round(ScanY_X[1][y]);
+    y=y_-y_min_;
+    start_x=Round(ScanY_X[0][y]);
+    end_x  =Round(ScanY_X[1][y]);
 
-    width=1+Fin_X-Debut_X;
+    width=1+end_x-start_x;
 
-    if (Debut_X<Limite_Gauche) Debut_X=Limite_Gauche;
-    if (  Fin_X>Limite_Droite)   Fin_X=Limite_Droite;
+    if (start_x<Limit_left) start_x=Limit_left;
+    if (  end_x>Limit_right)   end_x=Limit_right;
 
-    for (x=Debut_X; x<=Fin_X; x++)
+    for (x=start_x; x<=end_x; x++)
     {
-      Temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)width;
-      Xt=Round((float)(ScanY_Xt[0][y])+(Temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
-      Yt=Round((float)(ScanY_Yt[0][y])+(Temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
+      temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)width;
+      xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
+      yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
 
-      Couleur=Lit_pixel_dans_brosse(Xt,Yt);
-      if (Couleur!=Back_color)
-        Pixel_Preview(x,Y_,Couleur);
+      color=Read_pixel_from_brush(xt,yt);
+      if (color!=Back_color)
+        Pixel_preview(x,y_,color);
     }
   }
 
@@ -1725,44 +1725,44 @@ void Dessiner_quad_texture_preview(int X1,int Y1,int Xt1,int Yt1,
 }
 
 
-void Tourner_brosse_preview(float angle)
+void Rotate_brush_preview(float angle)
 {
-  short X1,Y1,X2,Y2,X3,Y3,X4,Y4;
-  int Debut_X,Fin_X,Debut_Y,Fin_Y;
-  float cosA=cos(angle);
-  float sinA=sin(angle);
+  short x1,y1,x2,y2,x3,y3,x4,y4;
+  int start_x,end_x,start_y,end_y;
+  float cos_a=cos(angle);
+  float sin_a=sin(angle);
 
   // Calcul des coordonnées des 4 coins:
   // 1 2
   // 3 4
 
-  Debut_X=1-(Brosse_Largeur>>1);
-  Debut_Y=1-(Brosse_Hauteur>>1);
-  Fin_X=Debut_X+Brosse_Largeur-1;
-  Fin_Y=Debut_Y+Brosse_Hauteur-1;
+  start_x=1-(Brush_width>>1);
+  start_y=1-(Brush_height>>1);
+  end_x=start_x+Brush_width-1;
+  end_y=start_y+Brush_height-1;
 
-  Transformer_point(Debut_X,Debut_Y, cosA,sinA, &X1,&Y1);
-  Transformer_point(Fin_X  ,Debut_Y, cosA,sinA, &X2,&Y2);
-  Transformer_point(Debut_X,Fin_Y  , cosA,sinA, &X3,&Y3);
-  Transformer_point(Fin_X  ,Fin_Y  , cosA,sinA, &X4,&Y4);
+  Transform_point(start_x,start_y, cos_a,sin_a, &x1,&y1);
+  Transform_point(end_x  ,start_y, cos_a,sin_a, &x2,&y2);
+  Transform_point(start_x,end_y  , cos_a,sin_a, &x3,&y3);
+  Transform_point(end_x  ,end_y  , cos_a,sin_a, &x4,&y4);
 
-  X1+=Brosse_Centre_rotation_X;
-  Y1+=Brosse_Centre_rotation_Y;
-  X2+=Brosse_Centre_rotation_X;
-  Y2+=Brosse_Centre_rotation_Y;
-  X3+=Brosse_Centre_rotation_X;
-  Y3+=Brosse_Centre_rotation_Y;
-  X4+=Brosse_Centre_rotation_X;
-  Y4+=Brosse_Centre_rotation_Y;
+  x1+=Brush_rotation_center_X;
+  y1+=Brush_rotation_center_Y;
+  x2+=Brush_rotation_center_X;
+  y2+=Brush_rotation_center_Y;
+  x3+=Brush_rotation_center_X;
+  y3+=Brush_rotation_center_Y;
+  x4+=Brush_rotation_center_X;
+  y4+=Brush_rotation_center_Y;
 
   // Et maintenant on dessine la brosse tournée.
-  Dessiner_quad_texture_preview(X1,Y1,               0,               0,
-                                X2,Y2,Brosse_Largeur-1,               0,
-                                X3,Y3,               0,Brosse_Hauteur-1,
-                                X4,Y4,Brosse_Largeur-1,Brosse_Hauteur-1);
-  Debut_X=Min(Min(X1,X2),Min(X3,X4));
-  Fin_X=Max(Max(X1,X2),Max(X3,X4));
-  Debut_Y=Min(Min(Y1,Y2),Min(Y3,Y4));
-  Fin_Y=Max(Max(Y1,Y2),Max(Y3,Y4));
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Draw_quad_texture_preview(x1,y1,               0,               0,
+                                x2,y2,Brush_width-1,               0,
+                                x3,y3,               0,Brush_height-1,
+                                x4,y4,Brush_width-1,Brush_height-1);
+  start_x=Min(Min(x1,x2),Min(x3,x4));
+  end_x=Max(Max(x1,x2),Max(x3,x4));
+  start_y=Min(Min(y1,y2),Min(y3,y4));
+  end_y=Max(Max(y1,y2),Max(y3,y4));
+  Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 }

@@ -26,24 +26,24 @@
     Displays an error message when calling an unavailable function.
     Only used in the beta versions for things we haven't coded yet.
 */
-void Message_Non_disponible(void);
+void Message_not_implemented(void);
 
 /*!
     Displays an error message when there is no more memory for the requested operation. 
 */
-void Message_Memoire_insuffisante(void);
+void Message_out_of_memory(void);
 
 /*!
     Displays the splash screen at program startup.
 */
-void Bouton_Message_initial(void);
+void Button_Message_initial(void);
 
 /*!
     Changes brush shape. 
     This function saves the current brush shape and swith to the default one (single pixel brush) for the filler and the color picker. 
     These functions don't need (and will not work with) a custom brush.
 */
-void Changer_la_forme_du_pinceau(byte shape);
+void Change_paintbrush_shape(byte shape);
 
 // Boutons relatifs aux couleurs
 
@@ -52,37 +52,37 @@ void Changer_la_forme_du_pinceau(byte shape);
     Callback for the palette scroller buttons left click.
     Scrolls the menubar palette one column to the left.
 */
-void Bouton_Pal_left(void);
+void Button_Pal_left(void);
 
 /*!
     Callback for the palette scroller buttons right click.
     Scrolls the menubar palette faster to the left.
 */
-void Bouton_Pal_left_fast(void);
+void Button_Pal_left_fast(void);
 
 /*!
     Callback for the palette scroller buttons left click.
     Scrolls the menubar palette one column to the right.
 */
-void Bouton_Pal_right(void);
+void Button_Pal_right(void);
 
 /*!
     Callback for the palette scroller buttons right click.
     Scrolls the menubar palette faster to the right.
 */
-void Bouton_Pal_right_fast(void);
+void Button_Pal_right_fast(void);
 
 /*!
     Callback for the palette color buttons left click.
     Selects the foreground drawing color when clicking on the menubar palette.
 */
-void Bouton_Choix_forecolor(void);
+void Button_Select_forecolor(void);
 
 /*!
     Callback for the palette color buttons right click.
     Selects the background drawing color when clicking on the menubar palette.
 */
-void Bouton_Choix_backcolor(void);
+void Button_Select_backcolor(void);
 
 // Boutons relatifs au pinceaux
 
@@ -90,13 +90,13 @@ void Bouton_Choix_backcolor(void);
     Callback for the brush button left click.
     Selects the monochrome brush mode when right clicking on the brush button.
 */
-void Bouton_Brosse_monochrome(void);
+void Button_Brush_monochrome(void);
 
 /*!
     Callback for the brush button right click.
     Displays the "Paintbrush menu".
 */
-void Bouton_Menu_pinceaux(void);
+void Button_Paintbrush_menu(void);
 
 // Boutons relatifs au mode de dessin à main levée
 
@@ -104,13 +104,13 @@ void Bouton_Menu_pinceaux(void);
     Callback for the freehand draw button left click.
     Selects freehand drawing mode, depending on the current state of the freehand button.
 */
-void Bouton_Dessin(void);
+void Button_Draw(void);
 
 /*!
     Callback for the freehand draw button right click.
     Cycles the drawing modes for the freehand tool.
 */
-void Bouton_Dessin_Switch_mode(void);
+void Button_Draw_switch_mode(void);
 
 // Dessin par ligne
 
@@ -118,34 +118,34 @@ void Bouton_Dessin_Switch_mode(void);
     Callback for the lines button left click.
     Selects lines drawing mode, depending on the current state of the lines button.
 */
-void Bouton_Lignes(void);
+void Button_Lines(void);
 
 /*!
     Callback for the lines button right click.
     Cycles the drawing modes for the lines tool.
 */
-void Bouton_Lignes_Switch_mode(void);
+void Button_Lines_switch_mode(void);
 
-// Bouton relatif au remplissage
+// Button relatif au remplissage
 
 /*!
     Callback for the fill button left click.
     Start the filling operation.
 */
-void Bouton_Fill(void);
+void Button_Fill(void);
 
 /*!
     Callback for the fill button right click.
     Start the color replace operation.
 */
-void Bouton_Remplacer(void);
+void Button_Replace(void);
 
 /*!
     Disable and release the fill button.
     Restores the cursor (custom brushes are disabled for the fill operation).
     Cleans the status bar if the color replacement tool put a preview color inside it.
 */
-void Bouton_desenclencher_Fill(void);
+void Button_Unselect_fill(void);
 
 // Spray
 
@@ -153,13 +153,13 @@ void Bouton_desenclencher_Fill(void);
     Callback for the spray button left click.
     Start the spray operation.
 */
-void Bouton_Spray(void);
+void Button_Airbrush(void);
 
 /*!
     Callback for the spray button right click.
     Opens the spray's setup menu.
 */
-void Bouton_Spray_Menu(void);
+void Button_Airbrush_menu(void);
 
 // Courbes de Bézier
 
@@ -167,13 +167,13 @@ void Bouton_Spray_Menu(void);
     Callback for the curves button left click.
     Start curve operation according to the selected mode.
 */
-void Bouton_Courbes(void);
+void Button_Curves(void);
 
 /*!
     Callback for the curves button right click.
     Select the curve mode (1-point, 2-point)
 */
-void Bouton_Courbes_Switch_mode(void);
+void Button_Curves_switch_mode(void);
 
 // Boutons relatifs aux rectangles pleins et vides
 
@@ -181,13 +181,13 @@ void Bouton_Courbes_Switch_mode(void);
     Callback for the empty rectangle button.
     Start the rectangle operation.
 */
-void Bouton_Rectangle_vide(void);
+void Button_Empty_rectangle(void);
 
 /*!
     Callback for the filled rectangle button.
     Start the filled rectangle operation.
 */
-void Bouton_Rectangle_plein(void);
+void Button_Filled_rectangle(void);
 
 // Boutons relatifs au texte
 
@@ -195,7 +195,7 @@ void Bouton_Rectangle_plein(void);
     Callback for the text button.
     Opens the text setup window.
 */
-void Bouton_Texte(void);
+void Button_Text(void);
 
 // Boutons relatifs aux dégradés
 
@@ -203,13 +203,13 @@ void Bouton_Texte(void);
     Callback for the gradation button.
     Opens the "Gradation menu". 
 */
-void Bouton_Degrades(void);
+void Button_Gradients(void);
 
 /*!
     Gets the informations from the gradations table and set the global vars for the current gradation.
-    @param Indice index of the selected gradation
+    @param index index of the selected gradation
 */
-void Degrade_Charger_infos_du_tableau(int Indice);
+void Load_gradient_data(int index);
 
 // Boutons relatifs aux cercles (ellipses) dégradé(e)s
 
@@ -217,19 +217,19 @@ void Degrade_Charger_infos_du_tableau(int Indice);
     Callback for the gradation circle button left click.
     Starts drawing a gradation circle.
 */
-void Bouton_Cercle_degrade(void);
+void Button_Grad_circle(void);
 
 /*!
     Callback for the gradation circle right click.
     Starts drawing a gradation ellipsis.
 */
-void Bouton_Ellipse_degrade(void);
+void Button_Grad_ellipse(void);
 
 /*!
    Callback for the gradation rectangle button.
    Starts the gradation rectangle drawing operation.
 */
-void Bouton_Rectangle_degrade(void);
+void Button_Grad_rectangle(void);
 
 // Boutons relatifs aux cercles (ellipses) plein(e)s et vides
 
@@ -237,25 +237,25 @@ void Bouton_Rectangle_degrade(void);
     Callback for the circle button left click.
     Starts drawing an empty circle
 */
-void Bouton_Cercle_vide(void);
+void Button_Empty_circle(void);
 
 /*!
     Callback for the circle button left click.
     Starts drawing an empty ellipsis
 */
-void Bouton_Ellipse_vide(void);
+void Button_Empty_ellipse(void);
 
 /*!
     Callback for the filled circle button ledt click.
     Starts drawing a filled circle.
 */
-void Bouton_Cercle_plein(void);
+void Button_Filled_circle(void);
 
 /*!
     Callback for the filled circle right click.
     Starts drawing a filled ellipsis.
 */
-void Bouton_Ellipse_pleine(void);
+void Button_Filled_ellipse(void);
 
 // Boutons relatifs aux polygones vides et pleins
 
@@ -263,25 +263,25 @@ void Bouton_Ellipse_pleine(void);
     Callback for the polyline button left click.
     Starts drawing a polygon.
 */
-void Bouton_Polygone(void);
+void Button_polygon(void);
 
 /*!
     Callback for the polyline right click.
     Starts drawing a polyform.
 */
-void Bouton_Polyform(void);
+void Button_Polyform(void);
 
 /*!
     Callback for the polyfill button left click.
     Starts drawing a filled polygon.
 */
-void Bouton_Polyfill(void);
+void Button_Polyfill(void);
 
 /*!
     Callback for the polyfill button right click.
     Starts drawing a filled polyform.
 */
-void Bouton_Filled_polyform(void);
+void Button_Filled_polyform(void);
 
 // Boutons d'ajustement de l'image
 
@@ -289,7 +289,7 @@ void Bouton_Filled_polyform(void);
     Callback for the adjust picture button.
     Start the adjust picture operation.
 */
-void Bouton_Ajuster(void);
+void Button_Adjust(void);
 
 // Gestion du mode Shade
 
@@ -297,19 +297,19 @@ void Bouton_Ajuster(void);
     Callback for the shade button (in the FX window).
     Toogle the shade mode.
 */
-void Bouton_Shade_Mode(void);
+void Button_Shade_mode(void);
 
 /*!
     Callback for the QSHade button (in the FX window).
     Toogle the Quick Shade effect.
 */
-void Bouton_Quick_shade_Mode(void);
+void Button_Quick_shade_mode(void);
 
 /*!
     Callback for the Shade button (in the FX window) right click.
     Displays the shade setup menu.
 */
-void Bouton_Shade_Menu(void);
+void Button_Shade_menu(void);
 
 // Gestion du Stencil
 
@@ -317,13 +317,13 @@ void Bouton_Shade_Menu(void);
     Callback for the Stencil button (in the FX window) left click.
     Toogle stencil mode.
 */
-void Bouton_Stencil_Mode(void);
+void Button_Stencil_mode(void);
 
 /*!
     Callback for the Stencil button (in the FX window) right click.
     Displays the stencil setup menu.
 */
-void Bouton_Menu_Stencil(void);
+void Button_Stencil_menu(void);
 
 // Gestion du Masque
 
@@ -331,13 +331,13 @@ void Bouton_Menu_Stencil(void);
     Callback for the Mask button (in the FX window) left click.
     Toogles the mask mode/
 */
-void Bouton_Mask_Mode(void);
+void Button_Mask_mode(void);
 
 /*!
     Callback for the Mask button (in the FX window) right click.
     Displays the mask setup menu.
 */
-void Bouton_Mask_Menu(void);
+void Button_Mask_menu(void);
 
 // Mode grille (Snap)
 
@@ -346,38 +346,38 @@ void Bouton_Mask_Menu(void);
     Toogle the grid.
 */
 
-void Bouton_Snap_Mode(void);
+void Button_Snap_mode(void);
 
 /*!
     Callback for the Grid button (in the FX window) right click.
     Displays the grid setup menu.
 */
-void Bouton_Menu_Grille(void);
+void Button_Grid_menu(void);
 
 // Mode trame (Sieve)
 
 /*!
     In the sieve window, copy one of the presets patterns to the current one.
-    @param Indice Index of the pattern to copy
+    @param index Index of the pattern to copy
 */
-void Copier_trame_predefinie(byte Indice);
+void Copy_preset_sieve(byte index);
 
 /*!
     In the sieve window, swaps black and white in the current pattern.
 */
-void Inverser_trame(void);
+void Invert_trame(void);
 
 /*!
     Callback for the Sieve button (in the FX window) left click.
     Toogle sieve mode.
 */
-void Bouton_Trame_Mode(void);
+void Button_Trame_mode(void);
 
 /*!
     Callback for the Sieve button (in the FX window) right click.
     Displays the sieve setup menu.
 */
-void Bouton_Trame_Menu(void);
+void Button_Trame_menu(void);
 
 // Mode Smooth
 
@@ -385,13 +385,13 @@ void Bouton_Trame_Menu(void);
     Callback for the smooth button (in the FX window) left click.
     Toogles smooth mode.
 */
-void Bouton_Smooth_Mode(void);
+void Button_Smooth_mode(void);
 
 /*!
     Callback for the Smooth button (in the FX window) right click.
     Displays the smooth setup menu.
 */
-void Bouton_Smooth_Mode(void);
+void Button_Smooth_mode(void);
 
 // Boutons relatifs au mode Colorize
 
@@ -399,19 +399,19 @@ void Bouton_Smooth_Mode(void);
     Computes the tables used by the transparency/colorize mode.
     These tables are used to match the drawing color*picture color to the color that is painted on screen.
 */
-void Calculer_les_tables_de_Colorize(void);
+void Compute_colorize_table(void);
 
 /*!
     Callback for the Tranparency button (in the FX window) left click.
     Toogles transparent drawing mode.
 */
-void Bouton_Colorize_Mode(void);
+void Button_Colorize_mode(void);
 
 /*!
     Callback for the Transparency button (in the FX window) right click.
     Displays the tranparency setup menu.
 */
-void Bouton_Colorize_Menu(void);
+void Button_Colorize_menu(void);
 
 // Boutons relatifs au mode Tiling
 
@@ -419,20 +419,20 @@ void Bouton_Colorize_Menu(void);
     Callback for the Tiling button (in the FX window) left click.
     Toogles tiling mode.
 */
-void Bouton_Tiling_Mode(void);
+void Button_Tiling_mode(void);
 
 /*!
     Callback for the Tiling button (in the FX window) right click.
     Displays the tiling setup menu.
 */
-void Bouton_Tiling_Menu(void);
+void Button_Tiling_menu(void);
 // Menu des effets
 
 /*!
     Callback for the effects button click.
     Displays the effect selection menu.
 */
-void Bouton_Effets(void);
+void Button_Effects(void);
 
 // Prise de brosse
 
@@ -440,172 +440,172 @@ void Bouton_Effets(void);
     Callback for the brush button left click.
     Start the brush picking operation.
 */
-void Bouton_Brosse(void);
+void Button_Brush(void);
 
 /*!
     Callback for the brush button right click.
     Activates the last captured custom brush.
 */
-void Bouton_Restaurer_brosse(void);
+void Button_Restore_brush(void);
 
 /*!
     Disables the custom brush and set back a regular one.
 */
-void Bouton_desenclencher_Brosse(void);
+void Button_Unselect_brush(void);
 // Prise de brosse au lasso
 
 /*!
     Callback for the freehand brush pick button left click.
     Starts freehand brush picking operation.
 */
-void Bouton_Lasso(void);
+void Button_Lasso(void);
 
 /*!
     Disables the custom freehand brush and set back a regular one.
 */
-void Bouton_desenclencher_Lasso(void);
+void Button_Unselect_lasso(void);
 
-// Bouton relatifs à la pipette
+// Button relatifs à la pipette
 
 /*!
     Starts the color picking operation.
 */
-void Bouton_Pipette(void);
+void Button_Colorpicker(void);
 
 /*!
     Disables the color picker button and get back to the previously selected drawing mode.
 */
-void Bouton_desenclencher_Pipette(void);
+void Button_Unselect_colorpicker(void);
 
 /*!
     Swap fore- and background colors.
 */
-void Bouton_Inverser_foreback(void);
+void Button_Invert_foreback(void);
 
 // Mode loupe
 
 /*!
     Enters magnify mode.
 */
-void Bouton_Loupe(void);
+void Button_Magnify(void);
 
 /*!
     Displays magnify menu.
 */
-void Bouton_Menu_Loupe(void);
+void Button_Magnify_menu(void);
 
 /*!
     Exit magnify mode.
 */
-void Bouton_desenclencher_Loupe(void);
+void Button_Unselect_magnifier(void);
 
 // Les différents effets sur la brosse
 
 /*!
     Display the Brush effects window.
 */
-void Bouton_Brush_FX(void);
+void Button_Brush_FX(void);
 
 // Boutons relatifs aux différentes pages
 
 /*!
     Swap main and spare drawing pages.
 */
-void Bouton_Page(void);
+void Button_Page(void);
 
 /*!
     Copy main page to spare page.
 */
-void Bouton_Copy_page(void);
+void Button_Copy_page(void);
 
 /*!
     Copy only pixel data from main page to spare page (no palette copy).
 */
-void Copier_image_seule(void);
+void Copy_image_only(void);
 
 /*!
     Kill (free from memory) the current page.
 */
-void Bouton_Kill(void);
+void Button_Kill(void);
 
 // Boutons relatifs aux changements de résolution et de taille d'image
 
 /*!
     Display the screenmode menu.
 */
-void Bouton_Resol(void);
+void Button_Resolution(void);
 
 /*!
     Set the screen to the "safe resolution" (320x200 pixel window).
 */
-void Bouton_Safety_resol(void);
+void Button_Safety_resolution(void);
 
 // Boutons relatifs aux chargements et sauvegardes
 
 /*!
     Opens the load file dialog.
 */
-void Bouton_Load(void);
+void Button_Load(void);
 
 /*!
     Reload current picture from disk.
 */
-void Bouton_Reload(void);
+void Button_Reload(void);
 
 /*!
     Open the save file dialog.
 */
-void Bouton_Save(void);
+void Button_Save(void);
 
 /*!
     Saves the current file without asking for a new name.
 */
-void Bouton_Autosave(void);
+void Button_Autosave(void);
 
 // Réglage des paramètres de l'utilisateur
 
 /*!
     Display the setting menu.
 */
-void Bouton_Settings(void);
+void Button_Settings(void);
 
 // Annulation de la dernière modification
 
 /*!
     Undo the last modification to the picture.
 */
-void Bouton_Undo(void);
+void Button_Undo(void);
 
 /*!
     Redo an operation that has been undone.
 */
-void Bouton_Redo(void);
+void Button_Redo(void);
 
 // Boutons relatifs aux effacements d'images
 
 /*!
     Clear the whole screen with black (color index 0).
 */
-void Bouton_Clear(void);
+void Button_Clear(void);
 
 /*!
     Clear the screen with the selected backcolor.
 */
-void Bouton_Clear_colore(void);
+void Button_Clear_with_backcolor(void);
 
 // Quitter le programme
 
 /*!
     Quits the program. Display a requester to save the changes to the picture before exiting if the pic was modified since last save.
 */
-void Bouton_Quit(void);
+void Button_Quit(void);
 
 // Cacher le menu
 
 /*!
     Hides the menubar.
 */
-void Bouton_Cacher_menu(void);
+void Button_Hide_menu(void);
 
 
 /*!
@@ -622,19 +622,19 @@ void Save_picture(byte image);
 /*!
     Generic color tagging menu, for various effects.
 */
-void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cancel, const char *Section_aide);
+void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section);
 
 
 /*!
     Display the menu for the smooth effect.
 */
-void Bouton_Smooth_Menu(void);
+void Button_Smooth_menu(void);
 
 
 /*!
     Toogles the smear mode.
 */
-void Bouton_Smear_Mode(void);
+void Button_Smear_mode(void);
 
 #endif
 

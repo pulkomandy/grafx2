@@ -25,8 +25,8 @@
 
 //////////////////////////////////////////////// Définition des types de base
 
-typedef Composantes * Bitmap24B;
-typedef byte * Bitmap256;
+typedef T_Components * T_Bitmap24B;
+typedef byte * T_Bitmap256;
 
 
 
@@ -39,19 +39,19 @@ typedef struct
   int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_g)
+  int rng_g; // Nb de valeurs sur les verts  (= 1<<nbb_g)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
   int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
-  int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
+  int dec_g; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
   int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
   int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
+  int red_g; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
   int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   byte * table;
-} Table_conversion;
+} T_Conversion_table;
 
 
 
@@ -64,19 +64,19 @@ typedef struct
   int nbb_b; // Nb de bits de précision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_v; // Nb de valeurs sur les verts  (= 1<<nbb_g)
+  int rng_g; // Nb de valeurs sur les verts  (= 1<<nbb_g)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
   int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
-  int dec_v; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
+  int dec_g; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
   int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
 
   int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_v; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
+  int red_g; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
   int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   int * table;
-} Table_occurence;
+} T_Occurrence_table;
 
 
 
@@ -88,7 +88,7 @@ typedef struct
 
   // Grande couverture
   byte Rmin,Rmax;
-  byte Vmin,Vmax;
+  byte Gmin,Vmax;
   byte Bmin,Bmax;
 
   // Couverture minimale
@@ -96,11 +96,11 @@ typedef struct
   byte vmin,vmax;
   byte bmin,bmax;
 
-  byte plus_large; // Composante ayant la plus grande variation (0=Rouge,1=Vert,2=Bleu)
-  byte r,g,b;      // Couleur synthétisant l'ensemble
+  byte plus_large; // Composante ayant la plus grande variation (0=red,1=green,2=blue)
+  byte r,g,b;      // color synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
-} Cluster;
+} T_Cluster;
 
 
 
@@ -110,8 +110,8 @@ typedef struct
 {
   int       nb;
   int       nb_max;
-  Cluster * clusters;
-} ClusterSet;
+  T_Cluster * clusters;
+} T_Cluster_set;
 
 
 
@@ -123,7 +123,7 @@ typedef struct
   float min;        // Chrominance minimale du dégradé
   float max;        // Chrominance maximale du dégradé
   float hue;        // Chrominance moyenne du dégradé
-} Degrade;
+} T_Gradient;
 
 
 
@@ -133,8 +133,8 @@ typedef struct
 {
   int nb;             // Nombre de dégradés dans l'ensemble
   int nb_max;          // Nombre maximum de dégradés
-  Degrade * gradients; // Les dégradés
-} DegradeSet;
+  T_Gradient * gradients; // Les dégradés
+} T_Gradient_set;
 
 
 
@@ -142,26 +142,26 @@ typedef struct
 ///////////////////////////// Méthodes de gestion des tables de conversion //
 /////////////////////////////////////////////////////////////////////////////
 
-Table_conversion * TC_New(int nbb_r,int nbb_g,int nbb_b);
-void TC_Delete(Table_conversion * t);
-byte TC_Get(Table_conversion * t,int r,int g,int b);
-void TC_Set(Table_conversion * t,int r,int g,int b,byte i);
+T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b);
+void CT_delete(T_Conversion_table * t);
+byte CT_get(T_Conversion_table * t,int r,int g,int b);
+void CT_set(T_Conversion_table * t,int r,int g,int b,byte i);
 
-void RGBtoHSL(int r, int g,int b, byte* h, byte*s, byte* l);
-void HSLtoRGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
+void RGB_to_HSL(int r, int g,int b, byte* h, byte*s, byte* l);
+void HSL_to_RGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Méthodes de gestion des tables d'occurence //
 /////////////////////////////////////////////////////////////////////////////
 
-void TO_Init(Table_occurence * t);
-Table_occurence * TO_New(int nbb_r,int nbb_g,int nbb_b);
-void TO_Delete(Table_occurence * t);
-int TO_Get(Table_occurence * t,int r,int g,int b);
-void TO_Set(Table_occurence * t,int r,int g,int b,int i);
-void TO_Inc(Table_occurence * t,int r,int g,int b);
-void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int size);
+void OT_init(T_Occurrence_table * t);
+T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b);
+void OT_delete(T_Occurrence_table * t);
+int OT_get(T_Occurrence_table * t,int r,int g,int b);
+void OT_set(T_Occurrence_table * t,int r,int g,int b,int i);
+void OT_inc(T_Occurrence_table * t,int r,int g,int b);
+void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 
 
 
@@ -169,9 +169,9 @@ void TO_Compter_occurences(Table_occurence * t,Bitmap24B image,int size);
 ///////////////////////////////////////// Méthodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void Cluster_Analyser(Cluster * c,Table_occurence * to);
-void Cluster_Split(Cluster * c,Cluster * c1,Cluster * c2,int hue,Table_occurence * to);
-void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to);
+void Cluster_analyser(T_Cluster * c,T_Occurrence_table * to);
+void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,T_Occurrence_table * to);
+void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 
 
 
@@ -179,29 +179,29 @@ void Cluster_Calculer_teinte(Cluster * c,Table_occurence * to);
 //////////////////////////// Méthodes de gestion des ensembles de clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void CS_Init(ClusterSet * cs,Table_occurence * to);
-ClusterSet * CS_New(int nbmax,Table_occurence * to);
-void CS_Delete(ClusterSet * cs);
-void CS_Get(ClusterSet * cs,Cluster * c);
-void CS_Set(ClusterSet * cs,Cluster * c);
-void CS_Generer(ClusterSet * cs,Table_occurence * to);
-void CS_Calculer_teintes(ClusterSet * cs,Table_occurence * to);
-void CS_Generer_TC_et_Palette(ClusterSet * cs,Table_conversion * tc,Composantes * palette);
+void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to);
+T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
+void CS_Delete(T_Cluster_set * cs);
+void CS_Get(T_Cluster_set * cs,T_Cluster * c);
+void CS_Set(T_Cluster_set * cs,T_Cluster * c);
+void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to);
+void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table * tc,T_Components * palette);
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Méthodes de gestion des ensembles de dégradés //
 /////////////////////////////////////////////////////////////////////////////
 
-void DS_Init(DegradeSet * ds,ClusterSet * cs);
-DegradeSet * DS_New(ClusterSet * cs);
-void DS_Delete(DegradeSet * ds);
-void DS_Generer(DegradeSet * ds,ClusterSet * cs);
+void GS_Init(T_Gradient_set * ds,T_Cluster_set * cs);
+T_Gradient_set * GS_New(T_Cluster_set * cs);
+void GS_Delete(T_Gradient_set * ds);
+void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs);
 
 
 
 // Convertie avec le plus de précision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
-int Convert_bitmap_24B_to_256(Bitmap256 Dest,Bitmap24B Source,int width,int height,Composantes * palette);
+int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 
 
 

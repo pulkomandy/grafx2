@@ -19,26 +19,26 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Pixel_Chargement_dans_ecran_courant(word x_pos,word y_pos,byte Couleur);
-void Pixel_Chargement_dans_preview      (word x_pos,word y_pos,byte Couleur);
-void Pixel_Chargement_dans_brosse       (word x_pos,word y_pos,byte Couleur);
+void Pixel_load_in_current_screen(word x_pos,word y_pos,byte color);
+void Pixel_load_in_preview      (word x_pos,word y_pos,byte color);
+void Pixel_load_in_brush       (word x_pos,word y_pos,byte color);
 
-void Nom_fichier_complet(char * Nom_du_fichier, byte Sauve_Colorix);
+void filename_complet(char * filename, byte is_colorix_format);
 
-void Charger_image(byte image);
-void Sauver_image(byte image);
+void Load_image(byte image);
+void Save_image(byte image);
 
 typedef struct {
   char *Extension;
-  fonction_action Test;
-  fonction_action Load;
-  fonction_action Save;
+  Func_action Test;
+  Func_action Load;
+  Func_action Save;
   byte Backup_done; // Le format enregistre toute l'image, on la considère à jour.
-  byte Commentaire; // Le format de fichier autorise un commentaire.
+  byte Comment; // Le format de fichier autorise un commentaire.
 } T_Format;
 
 // Tableau des formats connus
-extern T_Format FormatFichier[NB_FORMATS_CONNUS];
+extern T_Format File_formats[NB_KNOWN_FORMATS];
 
 // Fonction de sauvegarde en cas de probleme
 void Image_emergency_backup(void);

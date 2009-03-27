@@ -20,7 +20,7 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#define VARIABLES_GLOBALES
+#define GLOBAL_VARIABLES
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,13 +72,13 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-byte Ancien_nb_lignes;                // Ancien nombre de lignes de l'écran
+byte Old_lines_number;                // old nombre de lignes de l'écran
 
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
-void Afficher_syntaxe(void)
+void Display_syntax(void)
 {
-  int Indice_mode;
+  int mode_index;
   printf("Syntax: GFX2 [<arguments>] [<picture>]\n\n");
   printf("<arguments> can be:]\n");
   printf("\t/? /h /help        for this help screen\n");
@@ -87,78 +87,78 @@ void Afficher_syntaxe(void)
   printf("\t/double            to emulate a video mode with double pixels (2x2)\n");
   printf("\t/mode <videomode>  to set a video mode\n\n");
   printf("Available video modes:\n\n");
-  for (Indice_mode=0; Indice_mode<Nb_modes_video; Indice_mode++)
-    printf("\t%s\n",Libelle_mode(Indice_mode));
+  for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
+    printf("\t%s\n",Mode_label(mode_index));
 }
 
 
 // ---------------------------- Sortie impromptue ----------------------------
-void Erreur_fonction(int error_code, const char *filename, int Numero_ligne, const char *Nom_fonction)
+void Error_function(int error_code, const char *filename, int line_number, const char *function_name)
 {
-  T_Palette Palette_temporaire;
-  int       Indice;
-  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,Numero_ligne,Nom_fonction);
+  T_Palette temp_palette;
+  int       index;
+  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
 
   if (error_code==0)
   {
     // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'écran pour dire qu'il y a un problème.
     // Toutes les autres erreurs déclenchent toujours une sortie en catastrophe du programme !
-    memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
-    for (Indice=0;Indice<=255;Indice++)
-      Palette_temporaire[Indice].R=255;
-    Set_palette(Palette_temporaire);
+    memcpy(temp_palette,Main_palette,sizeof(T_Palette));
+    for (index=0;index<=255;index++)
+      temp_palette[index].R=255;
+    Set_palette(temp_palette);
     SDL_Delay(500);
-    Set_palette(Principal_Palette);
+    Set_palette(Main_palette);
   }
   else
   {
     switch (error_code)
     {
-      case ERREUR_GUI_ABSENT         : printf("Error: File gfx2gui.gif is missing!\n");
+      case ERROR_GUI_MISSING         : printf("Error: File gfx2gui.gif is missing!\n");
                                        printf("This program cannot run without this file.\n");
                                        break;
-      case ERREUR_GUI_CORROMPU       : printf("Error: File gfx2gui.gif is corrupt!\n");
+      case ERROR_GUI_CORRUPTED       : printf("Error: File gfx2gui.gif is corrupt!\n");
                                        printf("This program cannot run without a correct version of this file.\n");
                                        break;
-      case ERREUR_INI_ABSENT         : printf("Error: File gfx2def.ini is missing!\n");
+      case ERROR_INI_MISSING         : printf("Error: File gfx2def.ini is missing!\n");
                                        printf("This program cannot run without this file.\n");
                                        break;
-      case ERREUR_CFG_ABSENT         : printf("Error: File GFX2.CFG is missing!\n");
+      case ERROR_CFG_MISSING         : printf("Error: File GFX2.CFG is missing!\n");
                                        printf("Please run GFXCFG to create it.\n");
                                        break;
-      case ERREUR_CFG_CORROMPU       : printf("Error: File GFX2.CFG is corrupt!\n");
+      case ERROR_CFG_CORRUPTED       : printf("Error: File GFX2.CFG is corrupt!\n");
                                        printf("Please run GFXCFG to make a valid file.\n");
                                        break;
-      case ERREUR_CFG_ANCIEN         : printf("Error: File GFX2.CFG is from another version of GrafX2.\n");
+      case ERROR_CFG_OLD         : printf("Error: File GFX2.CFG is from another version of GrafX2.\n");
                                        printf("Please run GFXCFG to update this file.\n");
                                        break;
-      case ERREUR_MEMOIRE            : printf("Error: Not enough memory!\n\n");
+      case ERROR_MEMORY            : printf("Error: Not enough memory!\n\n");
                                        printf("You should try exiting other programs to free some bytes for Grafx2.\n\n");
                                        break;
-      case ERREUR_DRIVER_SOURIS      : printf("Error: No mouse detected!\n");
+      case ERROR_MOUSE_DRIVER      : printf("Error: No mouse detected!\n");
                                        printf("Check if a mouse driver is installed and if your mouse is correctly connected.\n");
                                        break;
-      case ERREUR_MODE_INTERDIT      : printf("Error: The requested video mode has been disabled from the resolution menu!\n");
+      case ERROR_FORBIDDEN_MODE      : printf("Error: The requested video mode has been disabled from the resolution menu!\n");
                                        printf("If you want to run the program in this mode, you'll have to start it with an\n");
                                        printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
                                        printf("Check also if the 'Default_video_mode' parameter in GFX2.INI is correct.\n");
                                        break;
-      case ERREUR_LIGNE_COMMANDE     : printf("Error: Invalid parameter or file not found.\n\n");
-                                       Afficher_syntaxe();
+      case ERROR_COMMAND_LINE     : printf("Error: Invalid parameter or file not found.\n\n");
+                                       Display_syntax();
                                        break;
-      case ERREUR_SAUVEGARDE_CFG     : printf("Error: Write error while saving settings!\n");
+      case ERROR_SAVING_CFG     : printf("Error: Write error while saving settings!\n");
                                        printf("Settings have not been saved correctly, and the GFX2.CFG file may have been\n");
                                        printf("corrupt. If so, please run GFXCFG to make a new valid file.\n");
                                        break;
-      case ERREUR_REPERTOIRE_DISPARU : printf("Error: Directory you ran the program from not found!\n");
+      case ERROR_MISSING_DIRECTORY : printf("Error: Directory you ran the program from not found!\n");
                                        break;
-      case ERREUR_INI_CORROMPU       : printf("Error: File GFX2.INI is corrupt!\n");
-                                       printf("It contains bad values at line %d.\n",Ligne_INI);
+      case ERROR_INI_CORRUPTED       : printf("Error: File GFX2.INI is corrupt!\n");
+                                       printf("It contains bad values at line %d.\n",Line_number_in_INI_file);
                                        printf("You can re-generate it by deleting the file and running GrafX2 again.\n");
                                        break;
-      case ERREUR_SAUVEGARDE_INI     : printf("Error: Cannot rewrite file GFX2.INI!\n");
+      case ERROR_SAVING_INI     : printf("Error: Cannot rewrite file GFX2.INI!\n");
                                        break;
-      case ERREUR_SORRY_SORRY_SORRY  : printf("Error: Sorry! Sorry! Sorry! Please forgive me!\n");
+      case ERROR_SORRY_SORRY_SORRY  : printf("Error: Sorry! Sorry! Sorry! Please forgive me!\n");
                                        break;
     }
 
@@ -168,119 +168,119 @@ void Erreur_fonction(int error_code, const char *filename, int Numero_ligne, con
 }
 
 // --------------------- Analyse de la ligne de commande ---------------------
-void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
+void Analyze_command_line(int argc,char * argv[])
 {
-  char *Buffer ;
-  int Indice;
+  char *buffer ;
+  int index;
 
 
-  Un_fichier_a_ete_passe_en_parametre=0;
-  Une_resolution_a_ete_passee_en_parametre=0;
+  File_in_command_line=0;
+  Resolution_in_command_line=0;
   
-  Resolution_actuelle=Config.Resolution_par_defaut;
+  Current_resolution=Config.Default_resolution;
   
-  for (Indice=1; Indice<argc; Indice++)
+  for (index=1; index<argc; index++)
   {
-    if ( !strcmp(argv[Indice],"/?") ||
-         !strcmp(argv[Indice],"/h") ||
-         !strcmp(argv[Indice],"/H") )
+    if ( !strcmp(argv[index],"/?") ||
+         !strcmp(argv[index],"/h") ||
+         !strcmp(argv[index],"/H") )
     {
       // help
-      Afficher_syntaxe();
+      Display_syntax();
       exit(0);
     }
-    else if ( !strcmp(argv[Indice],"/mode") )
+    else if ( !strcmp(argv[index],"/mode") )
     {
       // mode
-      Indice++;
-      if (Indice<argc)
+      index++;
+      if (index<argc)
       {    
-        Une_resolution_a_ete_passee_en_parametre = 1;
-        Resolution_actuelle=Conversion_argument_mode(argv[Indice]);
-        if (Resolution_actuelle == -1)
+        Resolution_in_command_line = 1;
+        Current_resolution=Convert_videomode_arg(argv[index]);
+        if (Current_resolution == -1)
         {
-          Erreur(ERREUR_LIGNE_COMMANDE);
-          Afficher_syntaxe();
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
           exit(0);
         }
-        if ((Mode_video[Resolution_actuelle].Etat & 0x7F) == 3)
+        if ((Video_mode[Current_resolution].State & 0x7F) == 3)
         {
-          Erreur(ERREUR_MODE_INTERDIT);
+          Error(ERROR_FORBIDDEN_MODE);
           exit(0);
         }
       }
       else
       {
-        Erreur(ERREUR_LIGNE_COMMANDE);
-        Afficher_syntaxe();
+        Error(ERROR_COMMAND_LINE);
+        Display_syntax();
         exit(0);
       }
     }
-    else if ( !strcmp(argv[Indice],"/tall") )
+    else if ( !strcmp(argv[index],"/tall") )
     {
       Pixel_ratio = PIXEL_TALL;
     }
-    else if ( !strcmp(argv[Indice],"/wide") )
+    else if ( !strcmp(argv[index],"/wide") )
     {
       Pixel_ratio = PIXEL_WIDE;
     }
-    else if ( !strcmp(argv[Indice],"/double") )
+    else if ( !strcmp(argv[index],"/double") )
     {
       Pixel_ratio = PIXEL_DOUBLE;
     }
-    else if ( !strcmp(argv[Indice],"/rgb") )
+    else if ( !strcmp(argv[index],"/rgb") )
     {
       // echelle des composants RGB
-      Indice++;
-      if (Indice<argc)
+      index++;
+      if (index<argc)
       {
         int scale;
-        scale = atoi(argv[Indice]);
+        scale = atoi(argv[index]);
         if (scale < 2 || scale > 256)
         {
-          Erreur(ERREUR_LIGNE_COMMANDE);
-          Afficher_syntaxe();
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
           exit(0);
         }
-        Set_Palette_RGB_Scale(scale);
+        Set_palette_RGB_scale(scale);
       }
       else
       {
-        Erreur(ERREUR_LIGNE_COMMANDE);
-        Afficher_syntaxe();
+        Error(ERROR_COMMAND_LINE);
+        Display_syntax();
         exit(0);
       }
     }
     else
     {
       // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-      if (Un_fichier_a_ete_passe_en_parametre)
+      if (File_in_command_line)
       {
         // plusieurs noms de fichier en argument
-        Erreur(ERREUR_LIGNE_COMMANDE);
-        Afficher_syntaxe();
+        Error(ERROR_COMMAND_LINE);
+        Display_syntax();
         exit(0);
       }
-      else if (Fichier_existe(argv[Indice]))
+      else if (File_exists(argv[index]))
       {
-        Un_fichier_a_ete_passe_en_parametre=1;
+        File_in_command_line=1;
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
         #if defined(__WIN32__)
-          Buffer=_fullpath(NULL,argv[Indice],TAILLE_CHEMIN_FICHIER);
+          buffer=_fullpath(NULL,argv[index],MAX_PATH_CHARACTERS);
         #else
-          Buffer=realpath(argv[Indice],NULL);
+          buffer=realpath(argv[index],NULL);
         #endif
-        Extraire_chemin(Principal_Repertoire_fichier, Buffer);
-        Extraire_nom_fichier(Principal_Nom_fichier, Buffer);
-        free(Buffer);
-        chdir(Principal_Repertoire_fichier);
+        Extract_path(Main_file_directory, buffer);
+        Extract_filename(Main_filename, buffer);
+        free(buffer);
+        chdir(Main_file_directory);
       }
       else
       {
-        Erreur(ERREUR_LIGNE_COMMANDE);
-        Afficher_syntaxe();
+        Error(ERROR_COMMAND_LINE);
+        Display_syntax();
         exit(0);
       }
     }
@@ -289,92 +289,92 @@ void Analyse_de_la_ligne_de_commande(int argc,char * argv[])
 
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
-int Initialisation_du_programme(int argc,char * argv[])
+int Init_program(int argc,char * argv[])
 {
-  int Temp;
-  int Mode_dans_lequel_on_demarre;
-  char Repertoire_du_programme[TAILLE_CHEMIN_FICHIER];
+  int temp;
+  int starting_videomode;
+  char program_directory[MAX_PATH_CHARACTERS];
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
   // l'initialisation du programme.
-  Principal_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
-  Brouillon_Backups=(S_Liste_de_pages *)malloc(sizeof(S_Liste_de_pages));
-  Initialiser_S_Liste_de_pages(Principal_Backups);
-  Initialiser_S_Liste_de_pages(Brouillon_Backups);
+  Main_backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
+  Spare_backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
+  Init_list_of_pages(Main_backups);
+  Init_list_of_pages(Spare_backups);
 
   // Determine the executable directory
-  Set_Program_Directory(argv[0],Repertoire_du_programme);
+  Set_program_directory(argv[0],program_directory);
   // Choose directory for data (read only)
-  Set_Data_Directory(Repertoire_du_programme,Repertoire_des_donnees);
+  Set_data_directory(program_directory,Repertoire_des_donnees);
   // Choose directory for settings (read/write)
-  Set_Config_Directory(Repertoire_du_programme,Repertoire_de_configuration);
+  Set_config_directory(program_directory,Config_directory);
 
   // On détermine le répertoire courant:
-  getcwd(Principal_Repertoire_courant,256);
+  getcwd(Main_current_directory,256);
 
   // On en profite pour le mémoriser dans le répertoire principal:
-  strcpy(Repertoire_initial,Principal_Repertoire_courant);
+  strcpy(Initial_directory,Main_current_directory);
 
   // On initialise les données sur le nom de fichier de l'image principale:
-  strcpy(Principal_Repertoire_fichier,Principal_Repertoire_courant);
-  strcpy(Principal_Nom_fichier,"NO_NAME.GIF");
-  Principal_Format_fichier=FORMAT_PAR_DEFAUT;
+  strcpy(Main_file_directory,Main_current_directory);
+  strcpy(Main_filename,"NO_NAME.GIF");
+  Main_fileformat=DEFAULT_FILEFORMAT;
   // On initialise les données sur le nom de fichier de l'image de brouillon:
-  strcpy(Brouillon_Repertoire_courant,Principal_Repertoire_courant);
-  strcpy(Brouillon_Repertoire_fichier,Principal_Repertoire_fichier);
-  strcpy(Brouillon_Nom_fichier       ,Principal_Nom_fichier);
-  Brouillon_Format_fichier    =Principal_Format_fichier;
-  strcpy(Brosse_Repertoire_courant,Principal_Repertoire_courant);
-  strcpy(Brosse_Repertoire_fichier,Principal_Repertoire_fichier);
-  strcpy(Brosse_Nom_fichier       ,Principal_Nom_fichier);
-  Brosse_Format_fichier    =Principal_Format_fichier;
+  strcpy(Spare_current_directory,Main_current_directory);
+  strcpy(Spare_file_directory,Main_file_directory);
+  strcpy(Spare_filename       ,Main_filename);
+  Spare_fileformat    =Main_fileformat;
+  strcpy(Brush_current_directory,Main_current_directory);
+  strcpy(Brush_file_directory,Main_file_directory);
+  strcpy(Brush_filename       ,Main_filename);
+  Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  Liste_du_fileselect=NULL;       // Au début, il n'y a pas de fichiers dans la liste
-  Principal_File_list_Position=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Principal_File_list_Decalage=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Principal_Format=0;
-  Brouillon_File_list_Position=0;
-  Brouillon_File_list_Decalage=0;
-  Brouillon_Format=0;
-  Brosse_File_list_Position=0;
-  Brosse_File_list_Decalage=0;
-  Brosse_Format=0;
+  Filelist=NULL;       // Au début, il n'y a pas de fichiers dans la liste
+  Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_format=0;
+  Spare_fileselector_position=0;
+  Spare_fileselector_offset=0;
+  Spare_format=0;
+  Brush_fileselector_position=0;
+  Brush_fileselector_offset=0;
+  Brush_format=0;
 
   // On initialise les commentaires des images à des chaînes vides
-  Principal_Commentaire[0]='\0';
-  Brouillon_Commentaire[0]='\0';
-  Brosse_Commentaire[0]='\0';
+  Main_comment[0]='\0';
+  Spare_comment[0]='\0';
+  Brush_comment[0]='\0';
 
   // On initialise d'ot' trucs
-  Principal_Decalage_X=0;
-  Principal_Decalage_Y=0;
-  Ancien_Principal_Decalage_X=0;
-  Ancien_Principal_Decalage_Y=0;
-  Principal_Split=0;
-  Principal_X_Zoom=0;
-  Principal_Proportion_split=PROPORTION_SPLIT;
-  Loupe_Mode=0;
-  Loupe_Facteur=FACTEUR_DE_ZOOM_PAR_DEFAUT;
-  Loupe_Hauteur=0;
-  Loupe_Largeur=0;
-  Loupe_Decalage_X=0;
-  Loupe_Decalage_Y=0;
-  Brouillon_Decalage_X=0;
-  Brouillon_Decalage_Y=0;
-  Ancien_Brouillon_Decalage_X=0;
-  Ancien_Brouillon_Decalage_Y=0;
-  Brouillon_Split=0;
-  Brouillon_X_Zoom=0;
-  Brouillon_Proportion_split=PROPORTION_SPLIT;
-  Brouillon_Loupe_Mode=0;
-  Brouillon_Loupe_Facteur=FACTEUR_DE_ZOOM_PAR_DEFAUT;
-  Brouillon_Loupe_Hauteur=0;
-  Brouillon_Loupe_Largeur=0;
-  Brouillon_Loupe_Decalage_X=0;
-  Brouillon_Loupe_Decalage_Y=0;
+  Main_offset_X=0;
+  Main_offset_Y=0;
+  Old_main_offset_X=0;
+  Old_main_offset_Y=0;
+  Main_separator_position=0;
+  Main_X_zoom=0;
+  Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Main_magnifier_mode=0;
+  Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Main_magnifier_height=0;
+  Main_magnifier_width=0;
+  Main_magnifier_offset_X=0;
+  Main_magnifier_offset_Y=0;
+  Spare_offset_X=0;
+  Spare_offset_Y=0;
+  Old_spare_offset_X=0;
+  Old_spare_offset_Y=0;
+  Spare_separator_position=0;
+  Spare_X_zoom=0;
+  Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Spare_magnifier_mode=0;
+  Spare_magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Spare_magnifier_height=0;
+  Spare_magnifier_width=0;
+  Spare_magnifier_offset_X=0;
+  Spare_magnifier_offset_Y=0;
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -383,267 +383,267 @@ int Initialisation_du_programme(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-  joystick = SDL_JoystickOpen(0);
+  Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   if(ALPHA_BETA[0]=='ß')
-    SDL_WM_SetCaption("GrafX2 beta "POURCENTAGE_VERSION""" - USE AT YOUR OWN RISK","GrafX2");
+    SDL_WM_SetCaption("GrafX2 beta "PERCENTAGE_VERSION""" - USE AT YOUR OWN RISK","GrafX2");
   else
     SDL_WM_SetCaption("GrafX2 v2.00 final","GrafX2");
   {
     // Routine pour définir l'icone.
-    char Chemin_icone[TAILLE_CHEMIN_FICHIER];
-    SDL_Surface * Icone;
-    sprintf(Chemin_icone, "%s%s", Repertoire_des_donnees, "gfx2.gif");
-    Icone = IMG_Load(Chemin_icone);
-    if (Icone)
+    char icon_path[MAX_PATH_CHARACTERS];
+    SDL_Surface * icon;
+    sprintf(icon_path, "%s%s", Repertoire_des_donnees, "gfx2.gif");
+    icon = IMG_Load(icon_path);
+    if (icon)
     {
-      byte *Masque_icone;
+      byte *icon_mask;
       int x,y;
-      Masque_icone=malloc(128);
-      memset(Masque_icone,0,128);
+      icon_mask=malloc(128);
+      memset(icon_mask,0,128);
       for (y=0;y<32;y++)
         for (x=0;x<32;x++)
-          if (((byte *)(Icone->pixels))[(y*32+x)] != 255)
-            Masque_icone[(y*32+x)/8] |=0x80>>(x&7);
-      SDL_WM_SetIcon(Icone,Masque_icone);
-      free(Masque_icone);
-      SDL_FreeSurface(Icone);
+          if (((byte *)(icon->pixels))[(y*32+x)] != 255)
+            icon_mask[(y*32+x)/8] |=0x80>>(x&7);
+      SDL_WM_SetIcon(icon,icon_mask);
+      free(icon_mask);
+      SDL_FreeSurface(icon);
     }
   }
   // Texte
-  Initialisation_Texte();
+  Init_text();
 
   // On initialise tous les modes vidéo
-  Definition_des_modes_video();
+  Set_all_video_modes();
   Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
     // Donnée sur la sortie du programme:
-  Quit_demande=0;
-  Sortir_du_programme=0;
+  Quit_is_required=0;
+  Quitting=0;
     // Données sur l'état du menu:
-  Pixel_dans_menu=Pixel_dans_barre_d_outil;
-  Menu_visible=1;
+  Pixel_in_menu=Pixel_in_toolbar;
+  Menu_is_visible=1;
     // Données sur les couleurs et la palette:
   Fore_color=15;
   Back_color=0;
-  Couleur_debut_palette=0;
+  First_color_in_palette=0;
     // Données sur le curseur:
-  Forme_curseur=FORME_CURSEUR_CIBLE;
-  Cacher_curseur=0;
+  Cursor_shape=CURSOR_SHAPE_TARGET;
+  Cursor_hidden=0;
     // Données sur le pinceau:
-  Pinceau_X=0;
-  Pinceau_Y=0;
-  Pinceau_Forme=FORME_PINCEAU_ROND;
-  Cacher_pinceau=0;
+  Paintbrush_X=0;
+  Paintbrush_Y=0;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
+  Paintbrush_hidden=0;
 
-  Pixel_de_chargement=Pixel_Chargement_dans_ecran_courant;
+  Pixel_load_function=Pixel_load_in_current_screen;
 
   // On initialise tout ce qui concerne les opérations et les effets
-  Operation_Taille_pile=0;
-  Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
-  Ligne_en_cours         =OPERATION_LIGNE;
-  Courbe_en_cours        =OPERATION_COURBE_3_POINTS;
-  Fonction_effet=Aucun_effet;
+  Operation_stack_size=0;
+  Selected_operation=OPERATION_CONTINUOUS_DRAW;
+  Selected_line_mode         =OPERATION_LINE;
+  Selected_curve_mode        =OPERATION_3_POINTS_CURVE;
+  Effect_function=No_effect;
     // On initialise les infos de la loupe:
-  Loupe_Mode=0;
-  Loupe_Facteur=FACTEUR_DE_ZOOM_PAR_DEFAUT;
-  Initialiser_les_tables_de_multiplication();
-  Table_mul_facteur_zoom=TABLE_ZOOM[2];
-  Principal_Proportion_split=PROPORTION_SPLIT;
-  Brouillon_Proportion_split=PROPORTION_SPLIT;
+  Main_magnifier_mode=0;
+  Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Init_multiplication_tables();
+  Zoom_factor_table=Magnify_table[2];
+  Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
     // On initialise les infos du mode smear:
-  Smear_Mode=0;
-  Smear_Brosse_Largeur=LARGEUR_PINCEAU;
-  Smear_Brosse_Hauteur=HAUTEUR_PINCEAU;
+  Smear_mode=0;
+  Smear_brush_width=PAINTBRUSH_WIDTH;
+  Smear_brush_height=PAINTBRUSH_HEIGHT;
     // On initialise les infos du mode smooth:
-  Smooth_Mode=0;
+  Smooth_mode=0;
     // On initialise les infos du mode shade:
-  Shade_Mode=0;     // Les autres infos du Shade sont chargées avec la config
-  Quick_shade_Mode=0; // idem
+  Shade_mode=0;     // Les autres infos du Shade sont chargées avec la config
+  Quick_shade_mode=0; // idem
     // On initialise les infos sur les dégradés:
-  Traiter_pixel_de_degrade =Afficher_pixel; // Les autres infos sont chargées avec la config
+  Gradient_pixel =Display_pixel; // Les autres infos sont chargées avec la config
     // On initialise les infos de la grille:
-  Snap_Mode=0;
-  Snap_Largeur=8;
-  Snap_Hauteur=8;
-  Snap_Decalage_X=0;
-  Snap_Decalage_Y=0;
+  Snap_mode=0;
+  Snap_width=8;
+  Snap_height=8;
+  Snap_offset_X=0;
+  Snap_offset_Y=0;
     // On initialise les infos du mode Colorize:
-  Colorize_Mode=0;          // Mode colorize inactif par défaut
-  Colorize_Opacite=50;      // Une interpolation de 50% par défaut
-  Colorize_Mode_en_cours=0; // Par défaut, la méthode par interpolation
-  Calculer_les_tables_de_Colorize();
+  Colorize_mode=0;          // Mode colorize inactif par défaut
+  Colorize_opacity=50;      // Une interpolation de 50% par défaut
+  Colorize_current_mode=0; // Par défaut, la méthode par interpolation
+  Compute_colorize_table();
     // On initialise les infos du mode Tiling:
-  Tiling_Mode=0;  //   Pas besoin d'initialiser les décalages car ça se fait
+  Tiling_mode=0;  //   Pas besoin d'initialiser les décalages car ça se fait
                   // en prenant une brosse (toujours mis à 0).
     // On initialise les infos du mode Mask:
-  Mask_Mode=0;
+  Mask_mode=0;
 
     // Infos du Spray
-  Spray_Mode=1; // Mode Mono
-  Spray_Size=31;
-  Spray_Delay=1;
-  Spray_Mono_flow=10;
-  memset(Spray_Multi_flow,0,256);
+  Airbrush_mode=1; // Mode Mono
+  Airbrush_size=31;
+  Airbrush_delay=1;
+  Airbrush_mono_flow=10;
+  memset(Airbrush_multi_flow,0,256);
   srand(time(NULL)); // On randomize un peu tout ça...
 
   // Initialisation des boutons
-  Initialisation_des_boutons();
+  Init_buttons();
   // Initialisation des opérations
-  Initialisation_des_operations();
+  Init_operations();
 
-  Fenetre=0;
+  Window=0;
   
   // Charger les sprites et la palette
-  Charger_DAT();
+  Load_DAT();
   // Charger la configuration des touches
-  Config_par_defaut();
-  switch(Charger_CFG(1))
+  Set_config_defaults();
+  switch(Load_CFG(1))
   {
-    case ERREUR_CFG_ABSENT:
+    case ERROR_CFG_MISSING:
       // Pas un problème, on a les valeurs par défaut.
       break;
-    case ERREUR_CFG_CORROMPU:
+    case ERROR_CFG_CORRUPTED:
       DEBUG("Corrupted CFG file.",0);
       break;
-    case ERREUR_CFG_ANCIEN:
+    case ERROR_CFG_OLD:
       DEBUG("Unknown CFG file version, not loaded.",0);
       break;
   }
   // Charger la configuration du .INI
-  Temp=Charger_INI(&Config);
-  if (Temp)
-    Erreur(Temp);
+  temp=Load_INI(&Config);
+  if (temp)
+    Error(temp);
 
   // Transfert des valeurs du .INI qui ne changent pas dans des variables
   // plus accessibles:
-  Palette_defaut[CM_Noir] =Coul_menu_pref[0]=Config.Coul_menu_pref[0];
-  Palette_defaut[CM_Fonce]=Coul_menu_pref[1]=Config.Coul_menu_pref[1];
-  Palette_defaut[CM_Clair]=Coul_menu_pref[2]=Config.Coul_menu_pref[2];
-  Palette_defaut[CM_Blanc]=Coul_menu_pref[3]=Config.Coul_menu_pref[3];
-  memcpy(Principal_Palette,Palette_defaut,sizeof(T_Palette));
+  Default_palette[MC_Black] =Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  Default_palette[MC_Dark]=Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  memcpy(Main_palette,Default_palette,sizeof(T_Palette));
 
-  Calculer_couleurs_menu_optimales(Palette_defaut);
+  Compute_optimal_menu_colors(Default_palette);
 
   // Infos sur les trames (Sieve)
-  Trame_Mode=0;
-  Copier_trame_predefinie(0);
+  Sieve_mode=0;
+  Copy_preset_sieve(0);
 
   // On sélectionne toutes les couleurs pour le masque de copie de couleurs vers le brouillon
-  memset(Masque_copie_couleurs,1,256);
+  memset(Mask_color_to_copy,1,256);
 
   // Prise en compte de la fonte
-  if (Config.Fonte)
-    Fonte=Fonte_fun;
+  if (Config.Font)
+    Font=GFX_fun_font;
   else
-    Fonte=Fonte_systeme;
+    Font=GFX_system_font;
 
   // Allocation de mémoire pour la brosse
-  if (!(Brosse         =(byte *)malloc(   1*   1))) Erreur(ERREUR_MEMOIRE);
-  if (!(Smear_Brosse   =(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU))) Erreur(ERREUR_MEMOIRE);
+  if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
+  if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
   // Pinceau
-  if (!(Pinceau_Sprite=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU))) Erreur(ERREUR_MEMOIRE);
-  *Pinceau_Sprite=1;
-  Pinceau_Largeur=1;
-  Pinceau_Hauteur=1;
+  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  *Paintbrush_sprite=1;
+  Paintbrush_width=1;
+  Paintbrush_height=1;
 
-  Analyse_de_la_ligne_de_commande(argc,argv);
-  Mode_dans_lequel_on_demarre=Resolution_actuelle;
-  Buffer_de_ligne_horizontale=NULL;
-  Resolution_actuelle=-1; // On n'était pas dans un mode graphique
+  Analyze_command_line(argc,argv);
+  starting_videomode=Current_resolution;
+  Horizontal_line_buffer=NULL;
+  Current_resolution=-1; // On n'était pas dans un mode graphique
   
-  Initialiser_mode_video(
-    Mode_video[Mode_dans_lequel_on_demarre].Width,
-    Mode_video[Mode_dans_lequel_on_demarre].Height,
-    Mode_video[Mode_dans_lequel_on_demarre].Fullscreen);
+  Init_mode_video(
+    Video_mode[starting_videomode].Width,
+    Video_mode[starting_videomode].Height,
+    Video_mode[starting_videomode].Fullscreen);
 
-  Principal_Largeur_image=Largeur_ecran/Pixel_width;
-  Principal_Hauteur_image=Hauteur_ecran/Pixel_height;
-  Brouillon_Largeur_image=Largeur_ecran/Pixel_width;
-  Brouillon_Hauteur_image=Hauteur_ecran/Pixel_height;
+  Main_image_width=Screen_width/Pixel_width;
+  Main_image_height=Screen_height/Pixel_height;
+  Spare_image_width=Screen_width/Pixel_width;
+  Spare_image_height=Screen_height/Pixel_height;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
-  if (Initialiser_les_listes_de_backups_en_debut_de_programme(Config.Nb_pages_Undo+1,Largeur_ecran,Hauteur_ecran)==0)
-    Erreur(ERREUR_MEMOIRE);
+  if (Init_all_backup_lists(Config.Max_undo_pages+1,Screen_width,Screen_height)==0)
+    Error(ERROR_MEMORY);
   // On remet le nom par défaut pour la page de brouillon car il été modifié
   // par le passage d'un fichier en paramètre lors du traitement précédent.
   // Note: le fait que l'on ne modifie que les variables globales 
   // Brouillon_* et pas les infos contenues dans la page de brouillon 
   // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
   // poser de problèmes, alors...
-  if (Un_fichier_a_ete_passe_en_parametre)
+  if (File_in_command_line)
   {
-    strcpy(Brouillon_Repertoire_fichier,Brouillon_Repertoire_courant);
-    strcpy(Brouillon_Nom_fichier,"NO_NAME.GIF");
-    Brouillon_Format_fichier=FORMAT_PAR_DEFAUT;
+    strcpy(Spare_file_directory,Spare_current_directory);
+    strcpy(Spare_filename,"NO_NAME.GIF");
+    Spare_fileformat=DEFAULT_FILEFORMAT;
   }
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
-  memset(Principal_Ecran,0,Principal_Largeur_image*Principal_Hauteur_image);
+  memset(Main_screen,0,Main_image_width*Main_image_height);
 
   // Initialisation de diverses variables par calcul:
-  Calculer_donnees_loupe();
-  Calculer_limites();
-  Calculer_coordonnees_pinceau();
+  Compute_magnifier_data();
+  Compute_limits();
+  Compute_paintbrush_coordinates();
 
   // On affiche le menu:
-  Afficher_menu();
-  Afficher_pinceau_dans_menu();
+  Display_menu();
+  Display_paintbrush_in_menu();
 
   // On affiche le curseur pour débutter correctement l'état du programme:
-  Afficher_curseur();
+  Display_cursor();
 
-  Brouillon_Image_modifiee=0;
-  Principal_Image_modifiee=0;
+  Spare_image_is_modified=0;
+  Main_image_is_modified=0;
 
   // Gestionnaire de signaux, quand il ne reste plus aucun espoir
-  Initialiser_sighandler();
+  Init_sighandler();
 
   // Le programme débute en mode de dessin à la main
-  Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
+  Unselect_button(BUTTON_DRAW,LEFT_SIDE);
 
   // On initialise la brosse initiale à 1 pixel blanc:
-  Brosse_Largeur=1;
-  Brosse_Hauteur=1;
-  Capturer_brosse(0,0,0,0,0);
-  *Brosse=CM_Blanc;
+  Brush_width=1;
+  Brush_height=1;
+  Capture_brush(0,0,0,0,0);
+  *Brush=MC_White;
   return(1);
 }
 
 // ------------------------- Fermeture du programme --------------------------
-void Fermeture_du_programme(void)
+void Program_shutdown(void)
 {
   int      return_code;
 
   // On libère le buffer de gestion de lignes
-  free(Buffer_de_ligne_horizontale);
+  free(Horizontal_line_buffer);
 
   // On libère le pinceau spécial
-  free(Pinceau_Sprite);
+  free(Paintbrush_sprite);
 
   // On libère les différents écrans virtuels et brosse:
-  free(Brosse);
-  Nouveau_nombre_de_backups(0);
-  free(Brouillon_Ecran);
-  free(Principal_Ecran);
+  free(Brush);
+  Set_number_of_backups(0);
+  free(Spare_screen);
+  free(Main_screen);
 
   // On prend bien soin de passer dans le répertoire initial:
-  if (chdir(Repertoire_initial)!=-1)
+  if (chdir(Initial_directory)!=-1)
   {
     // On sauvegarde les données dans le .CFG et dans le .INI
     if (Config.Auto_save)
     {
-      return_code=Sauver_CFG();
+      return_code=Save_CFG();
       if (return_code)
-        Erreur(return_code);
-      return_code=Sauver_INI(&Config);
+        Error(return_code);
+      return_code=Save_INI(&Config);
       if (return_code)
-        Erreur(return_code);
+        Error(return_code);
     }
   }
   else
-    Erreur(ERREUR_REPERTOIRE_DISPARU);
+    Error(ERROR_MISSING_DIRECTORY);
     
   SDL_Quit();
 }
@@ -652,65 +652,65 @@ void Fermeture_du_programme(void)
 // -------------------------- Procédure principale ---------------------------
 int main(int argc,char * argv[])
 {
-  int PhoenixTrouve=0;
-  int Phoenix2Trouve=0;
-  char Nom_du_fichier_Phoenix[TAILLE_CHEMIN_FICHIER];
-  char Nom_du_fichier_Phoenix2[TAILLE_CHEMIN_FICHIER];
+  int phoenix_found=0;
+  int phoenix2_found=0;
+  char phoenix_filename1[MAX_PATH_CHARACTERS];
+  char phoenix_filename2[MAX_PATH_CHARACTERS];
 
-  if(!Initialisation_du_programme(argc,argv))
+  if(!Init_program(argc,argv))
   {
     return 0;
   }
 
   // Test de recuperation de fichiers sauvés
-  strcpy(Nom_du_fichier_Phoenix,Repertoire_de_configuration);
-  strcat(Nom_du_fichier_Phoenix,"phoenix.img");
-  strcpy(Nom_du_fichier_Phoenix2,Repertoire_de_configuration);
-  strcat(Nom_du_fichier_Phoenix2,"phoenix2.img");
-  if (Fichier_existe(Nom_du_fichier_Phoenix))
-    PhoenixTrouve=1;
-  if (Fichier_existe(Nom_du_fichier_Phoenix2))
-    Phoenix2Trouve=1;
-  if (PhoenixTrouve || Phoenix2Trouve)
+  strcpy(phoenix_filename1,Config_directory);
+  strcat(phoenix_filename1,"phoenix.img");
+  strcpy(phoenix_filename2,Config_directory);
+  strcat(phoenix_filename2,"phoenix2.img");
+  if (File_exists(phoenix_filename1))
+    phoenix_found=1;
+  if (File_exists(phoenix_filename2))
+    phoenix2_found=1;
+  if (phoenix_found || phoenix2_found)
   {
-    if (Phoenix2Trouve)
+    if (phoenix2_found)
     {
-      strcpy(Principal_Repertoire_fichier,Repertoire_de_configuration);
-      strcpy(Principal_Nom_fichier,"phoenix2.img");
-      chdir(Principal_Repertoire_fichier);
-      Bouton_Reload();
-      Principal_Image_modifiee=1;
+      strcpy(Main_file_directory,Config_directory);
+      strcpy(Main_filename,"phoenix2.img");
+      chdir(Main_file_directory);
+      Button_Reload();
+      Main_image_is_modified=1;
       Warning_message("Spare page recovered");
       // I don't really like this, but...
-      remove(Nom_du_fichier_Phoenix2);
-      Bouton_Page();
+      remove(phoenix_filename2);
+      Button_Page();
     }
-    if (PhoenixTrouve)
+    if (phoenix_found)
     {
-      strcpy(Principal_Repertoire_fichier,Repertoire_de_configuration);
-      strcpy(Principal_Nom_fichier,"phoenix.img");
-      chdir(Principal_Repertoire_fichier);
-      Bouton_Reload();
-      Principal_Image_modifiee=1;
+      strcpy(Main_file_directory,Config_directory);
+      strcpy(Main_filename,"phoenix.img");
+      chdir(Main_file_directory);
+      Button_Reload();
+      Main_image_is_modified=1;
       Warning_message("Main page recovered");
       // I don't really like this, but...
-      remove(Nom_du_fichier_Phoenix);
+      remove(phoenix_filename1);
     }
   }
   else
   {
-    if (Config.Opening_message && (!Un_fichier_a_ete_passe_en_parametre))
-      Bouton_Message_initial();
-    free(Logo_GrafX2); // Pas encore utilisé dans le About
+    if (Config.Opening_message && (!File_in_command_line))
+      Button_Message_initial();
+    free(GFX_logo_grafx2); // Pas encore utilisé dans le About
   
-    if (Un_fichier_a_ete_passe_en_parametre)
+    if (File_in_command_line)
     {
-      Bouton_Reload();
-      Une_resolution_a_ete_passee_en_parametre=0;
+      Button_Reload();
+      Resolution_in_command_line=0;
     }
   }
-  Gestion_principale();
+  Main_handler();
 
-  Fermeture_du_programme();
+  Program_shutdown();
   return 0;
 }

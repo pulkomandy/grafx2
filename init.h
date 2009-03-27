@@ -18,12 +18,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Charger_DAT(void);
-void Initialisation_des_boutons(void);
-void Initialisation_des_operations(void);
-int  Charger_CFG(int Tout_charger);
-int  Sauver_CFG(void);
-void Initialiser_les_tables_de_multiplication(void);
-void Definition_des_modes_video(void);
-void Config_par_defaut(void);
-void Initialiser_sighandler(void);
+void Load_DAT(void);
+void Init_buttons(void);
+void Init_operations(void);
+int  Load_CFG(int reload_all);
+int  Save_CFG(void);
+void Init_multiplication_tables(void);
+void Set_all_video_modes(void);
+void Set_config_defaults(void);
+void Init_sighandler(void);

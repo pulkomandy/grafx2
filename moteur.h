@@ -19,61 +19,61 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Gestion_principale            (void);
-void Tracer_cadre_de_bouton_du_menu(byte btn_number,byte pressed);
-void Desenclencher_bouton          (int btn_number);
-void Enclencher_bouton             (int btn_number,byte click);
-void Annuler_les_effets            (void);
-void Restaurer_les_effets          (void);
-void Ouvrir_fenetre                (word width,word height, char * title);
-void Fermer_fenetre                (void);
+void Main_handler            (void);
+void Draw_menu_button_frame(byte btn_number,byte pressed);
+void Unselect_bouton          (int btn_number);
+void Unselect_button             (int btn_number,byte click);
+void Cancel_effects            (void);
+void Restore_effects          (void);
+void Open_window                (word width,word height, char * title);
+void Close_window                (void);
 
-void Ouvrir_popup                  (word x_pos, word y_pos, word width, word height);
-void Fermer_popup                  (void);
+void Open_popup                  (word x_pos, word y_pos, word width, word height);
+void Close_popup                  (void);
 
-void Fenetre_Dessiner_bouton_normal(word x_pos,word y_pos,word width,word height,
-                                    char * title,byte Lettre_soulignee,byte clickable);
-void Fenetre_Enfoncer_bouton_normal(word x_pos,word y_pos,word width,word height);
-void Fenetre_Desenfoncer_bouton_normal(word x_pos,word y_pos,word width,word height);
-void Fenetre_Dessiner_bouton_palette(word x_pos,word y_pos);
+void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
+                                    char * title,byte undersc_letter,byte clickable);
+void Window_select_normal_button(word x_pos,word y_pos,word width,word height);
+void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height);
+void Window_draw_palette_bouton(word x_pos,word y_pos);
 
-void Calculer_hauteur_curseur_jauge(T_Bouton_scroller * button);
-void Fenetre_Dessiner_jauge(T_Bouton_scroller * button);
-void Fenetre_Dessiner_bouton_scroller(T_Bouton_scroller * button);
+void Compute_slider_cursor_height(T_Scroller_button * button);
+void Window_draw_slider(T_Scroller_button * button);
+void Window_draw_scroller_bouton(T_Scroller_button * button);
 
-void Fenetre_Contenu_bouton_saisie(T_Bouton_special * button, char * content);
-void Fenetre_Effacer_bouton_saisie(T_Bouton_special * button);
-void Fenetre_Dessiner_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caracteres);
+void Window_input_content(T_Special_button * button, char * content);
+void Window_clear_input_button(T_Special_button * button);
+void Window_draw_input_bouton(word x_pos,word y_pos,word width_in_characters);
 
-T_Bouton_normal * Fenetre_Definir_bouton_normal(word x_pos, word y_pos,
+T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title,byte Lettre_soulignee,
+                                   char * title,byte undersc_letter,
                                    byte clickable, word shortcut);
-T_Bouton_normal * Fenetre_Definir_bouton_repetable(word x_pos, word y_pos,
+T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title,byte Lettre_soulignee,
+                                   char * title,byte undersc_letter,
                                    byte clickable, word shortcut);
 
-T_Bouton_palette * Fenetre_Definir_bouton_palette(word x_pos, word y_pos);
-void Fenetre_Effacer_tags(void);
-void Tagger_intervalle_palette(byte start,byte end);
+T_Palette_button * Window_set_palette_button(word x_pos, word y_pos);
+void Window_clear_tags(void);
+void Tag_color_range(byte start,byte end);
 
-T_Bouton_scroller * Fenetre_Definir_bouton_scroller(word x_pos, word y_pos,
+T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
                                      word height,
                                      word nb_elements,
                                      word nb_elements_visible,
-                                     word Position_initiale);
-T_Bouton_special * Fenetre_Definir_bouton_special(word x_pos,word y_pos,word width,word height);
-T_Bouton_special * Fenetre_Definir_bouton_saisie(word x_pos,word y_pos,word Largeur_en_caracteres);
-T_Bouton_dropdown * Fenetre_Definir_bouton_dropdown(word x_pos,word y_pos,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button);
-void Fenetre_Dropdown_choix(T_Bouton_dropdown * dropdown, word btn_number, const char *label);
-void Fenetre_Dropdown_vider_choix(T_Bouton_dropdown * dropdown);
-byte Fenetre_click_dans_zone(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
-short Attendre_click_dans_palette(T_Bouton_palette * button);
-void Recuperer_couleur_derriere_fenetre(byte * Couleur, byte * click);
+                                     word initial_position);
+T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,word height);
+T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_characters);
+T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button);
+void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number, const char *label);
+void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
+byte Window_click_in_rectangle(short start_x,short start_y,short end_x,short end_y);
+short Wait_click_in_palette(T_Palette_button * button);
+void Get_color_behind_window(byte * color, byte * click);
 
-short Fenetre_Bouton_clicke(void);
-int Numero_bouton_sous_souris(void);
-short Fenetre_Numero_bouton_clicke(void);
-void Remappe_fond_fenetres(byte * Table_de_conversion, int Min_Y, int Max_Y);
-void Pixel_fond(int x_pos, int y_pos, byte Couleur);
+short Window_clicked_button(void);
+int Button_under_mouse(void);
+short Window_get_clicked_button(void);
+void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y);
+void Pixel_background(int x_pos, int y_pos, byte color);

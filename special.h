@@ -18,16 +18,16 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Modifier_pinceau(int width, int height);
-void Retrecir_pinceau(void);
-void Grossir_pinceau(void);
+void Set_paintbrush_size(int width, int height);
+void Smaller_paintbrush(void);
+void Bigger_paintbrush(void);
 
-void Special_Next_forecolor(void);
-void Special_Previous_forecolor(void);
-void Special_Next_backcolor(void);
-void Special_Previous_backcolor(void);
+void Special_next_forecolor(void);
+void Special_previous_forecolor(void);
+void Special_next_backcolor(void);
+void Special_previous_backcolor(void);
 
-void Scroller_ecran(short Decalage_en_X,short Decalage_en_Y);
-void Scroller_loupe(short Decalage_en_X,short Decalage_en_Y);
+void Scroll_screen(short delta_x,short delta_y);
+void Scroll_magnifier(short delta_x,short delta_y);
 
 void Zoom(short delta);

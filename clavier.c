@@ -27,7 +27,7 @@
 // La correspondance est bonne si le clavier est QWERTY US, ou si
 // l'utilisateur est sous Windows.
 // Dans l'ordre des colonnes: Normal, +Shift, +Control, +Alt
-const word Scancode_to_Sym[256][4] =
+const word Scancode_to_sym[256][4] =
 {
 /* 00  ???   */ { SDLK_UNKNOWN     ,SDLK_UNKNOWN     ,SDLK_UNKNOWN     ,SDLK_UNKNOWN     },  
 /* 01  Esc   */ { SDLK_ESCAPE      ,SDLK_ESCAPE      ,SDLK_ESCAPE      ,SDLK_ESCAPE      },  
@@ -292,74 +292,74 @@ const word Scancode_to_Sym[256][4] =
 // 0x0100 shift          (maintenant 0x1000)
 // 0x0200 control        (maintenant 0x2000)
 // 0x0400 alt            (maintenant 0x4000)
-word Touche_pour_scancode(word scancode)
+word Key_for_scancode(word scancode)
 {
   if (scancode & 0x0400)
-    return Scancode_to_Sym[scancode & 0xFF][3] |
+    return Scancode_to_sym[scancode & 0xFF][3] |
      (scancode & 0x0700) << 4;
   else if (scancode & 0x0200)
-    return Scancode_to_Sym[scancode & 0xFF][2] |
+    return Scancode_to_sym[scancode & 0xFF][2] |
      (scancode & 0x0700) << 4;
   else if (scancode & 0x0100)
-    return Scancode_to_Sym[scancode & 0xFF][1] |
+    return Scancode_to_sym[scancode & 0xFF][1] |
      (scancode & 0x0700) << 4;
   else
-    return Scancode_to_Sym[scancode & 0xFF][0];
+    return Scancode_to_sym[scancode & 0xFF][0];
 }
 
 // Convertit des modificateurs de touches SDL en modificateurs GrafX2
-word Modificateurs_Touche(SDLMod Mod)
+word Key_modifiers(SDLMod mod)
 {
-  word Modificateur=0;
+  word modifiers=0;
   
-    if (Mod & KMOD_CTRL )
-      Modificateur|=MOD_CTRL;
-    if (Mod & KMOD_SHIFT )
-      Modificateur|=MOD_SHIFT;
-    if (Mod & (KMOD_ALT|KMOD_MODE))
-      Modificateur|=MOD_ALT;
+    if (mod & KMOD_CTRL )
+      modifiers|=MOD_CTRL;
+    if (mod & KMOD_SHIFT )
+      modifiers|=MOD_SHIFT;
+    if (mod & (KMOD_ALT|KMOD_MODE))
+      modifiers|=MOD_ALT;
 
-  return Modificateur;
+  return modifiers;
 }
 
-word Conversion_Touche(SDL_keysym Sym)
+word Keysym_to_keycode(SDL_keysym keysym)
 {
   word key_code = 0;
-  word Mod;
+  word mod;
   
   // On ignore shift, alt et control isolés.
-  if (Sym.sym == SDLK_RSHIFT || Sym.sym == SDLK_LSHIFT ||
-      Sym.sym == SDLK_RCTRL  || Sym.sym == SDLK_LCTRL ||
-      Sym.sym == SDLK_RALT   || Sym.sym == SDLK_LALT ||
-      Sym.sym == SDLK_MODE) // AltGr
+  if (keysym.sym == SDLK_RSHIFT || keysym.sym == SDLK_LSHIFT ||
+      keysym.sym == SDLK_RCTRL  || keysym.sym == SDLK_LCTRL ||
+      keysym.sym == SDLK_RALT   || keysym.sym == SDLK_LALT ||
+      keysym.sym == SDLK_MODE) // AltGr
   return 0;
   
   // Les touches qui n'ont qu'une valeur unicode (très rares)
   // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
-  if (Sym.sym != 0)
-    key_code = Sym.sym;
-  else if (Sym.scancode != 0)
+  if (keysym.sym != 0)
+    key_code = keysym.sym;
+  else if (keysym.scancode != 0)
   {
-    key_code = (Sym.scancode & 0x07FF) | 0x0800;
+    key_code = (keysym.scancode & 0x07FF) | 0x0800;
   }
   
-  // Normally I should test Sym.mod here, but on windows the implementation
+  // Normally I should test keysym.mod here, but on windows the implementation
   // is buggy: if you release a modifier key, the following keys (when they repeat)
   // still name the original modifiers.
-  Mod=Modificateurs_Touche(SDL_GetModState());
+  mod=Key_modifiers(SDL_GetModState());
   // SDL_GetModState() seems to get the right up-to-date info.
-  key_code |= Mod;
+  key_code |= mod;
   return key_code;
 }
 
-const char * Nom_touche(word Touche)
+const char * Key_name(word Key)
 {
   typedef struct
   {
-  word Sym;
-  char *Nom_touche;
-  } S_Libelle_touche;
-  S_Libelle_touche Table_touches[] =
+  word keysym;
+  char *Key_name;
+  } T_key_label;
+  T_key_label key_labels[] =
   {
     { SDLK_BACKSPACE   , "Backspace" },
     { SDLK_TAB         , "Tab" },
@@ -432,118 +432,118 @@ const char * Nom_touche(word Touche)
     { SDLK_POWER       , "Power" },
     { SDLK_EURO        , "Euro" },
     { SDLK_UNDO        , "Undo" },
-    { TOUCHE_MOUSEMIDDLE, "Mouse3" },
-    { TOUCHE_MOUSEWHEELUP, "WheelUp" },
-    { TOUCHE_MOUSEWHEELDOWN, "WheelDown" }
+    { KEY_MOUSEMIDDLE, "Mouse3" },
+    { KEY_MOUSEWHEELUP, "WheelUp" },
+    { KEY_MOUSEWHEELDOWN, "WheelDown" }
   };
 
-  int Indice;
-  static char Buffer[41];
-  Buffer[0] = '\0';
+  int index;
+  static char buffer[41];
+  buffer[0] = '\0';
 
-  if (Touche == SDLK_UNKNOWN)
+  if (Key == SDLK_UNKNOWN)
     return "None";
   
-  if (Touche & MOD_CTRL)
-    strcat(Buffer, "Ctrl+");
-  if (Touche & MOD_ALT)
-    strcat(Buffer, "Alt+");
-  if (Touche & MOD_SHIFT)
-    strcat(Buffer, "Shift+");
+  if (Key & MOD_CTRL)
+    strcat(buffer, "Ctrl+");
+  if (Key & MOD_ALT)
+    strcat(buffer, "Alt+");
+  if (Key & MOD_SHIFT)
+    strcat(buffer, "Shift+");
   
-  Touche=Touche & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
+  Key=Key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   
-  if (Touche>=TOUCHE_BUTTON && Touche<=TOUCHE_BUTTON+18)
+  if (Key>=KEY_JOYBUTTON && Key<=KEY_JOYBUTTON+18)
   {
 #ifdef __gp2x__
     
-    char *NomBouton;
-    switch(Touche)
+    char *button_name;
+    switch(Key)
     {    
-      case GP2X_BUTTON_UP: NomBouton="[UP]"; break;
-      case GP2X_BUTTON_DOWN: NomBouton="[DOWN]"; break;
-      case GP2X_BUTTON_LEFT: NomBouton="[LEFT]"; break;
-      case GP2X_BUTTON_RIGHT: NomBouton="[RIGHT]"; break;
-      case GP2X_BUTTON_UPLEFT: NomBouton="[UP-LEFT]"; break;
-      case GP2X_BUTTON_UPRIGHT: NomBouton="[UP-RIGHT]"; break;
-      case GP2X_BUTTON_DOWNLEFT: NomBouton="[DOWN-LEFT]"; break;
-      case GP2X_BUTTON_DOWNRIGHT: NomBouton="[DOWN-RIGHT]"; break;
-      case GP2X_BUTTON_CLICK: NomBouton="[CLICK]"; break;
-      case GP2X_BUTTON_A: NomBouton="[A]"; break;
-      case GP2X_BUTTON_B: NomBouton="[B]"; break;
-      case GP2X_BUTTON_X: NomBouton="[X]"; break;
-      case GP2X_BUTTON_Y: NomBouton="[Y]"; break;
-      case GP2X_BUTTON_L: NomBouton="[L]"; break;
-      case GP2X_BUTTON_R: NomBouton="[R]"; break;
-      case GP2X_BUTTON_START: NomBouton="[START]"; break;
-      case GP2X_BUTTON_SELECT: NomBouton="[SELECT]"; break;
-      case GP2X_BUTTON_VOLUP: NomBouton="[VOL UP]"; break;
-      case GP2X_BUTTON_VOLDOWN: NomBouton="[VOL DOWN]"; break;
-      default: sprintf(Buffer+strlen(Buffer), "[B%d]", Touche);return Buffer;
+      case GP2X_BUTTON_UP: button_name="[UP]"; break;
+      case GP2X_BUTTON_DOWN: button_name="[DOWN]"; break;
+      case GP2X_BUTTON_LEFT: button_name="[LEFT]"; break;
+      case GP2X_BUTTON_RIGHT: button_name="[RIGHT]"; break;
+      case GP2X_BUTTON_UPLEFT: button_name="[UP-LEFT]"; break;
+      case GP2X_BUTTON_UPRIGHT: button_name="[UP-RIGHT]"; break;
+      case GP2X_BUTTON_DOWNLEFT: button_name="[DOWN-LEFT]"; break;
+      case GP2X_BUTTON_DOWNRIGHT: button_name="[DOWN-RIGHT]"; break;
+      case GP2X_BUTTON_CLICK: button_name="[CLICK]"; break;
+      case GP2X_BUTTON_A: button_name="[A]"; break;
+      case GP2X_BUTTON_B: button_name="[B]"; break;
+      case GP2X_BUTTON_X: button_name="[X]"; break;
+      case GP2X_BUTTON_Y: button_name="[Y]"; break;
+      case GP2X_BUTTON_L: button_name="[L]"; break;
+      case GP2X_BUTTON_R: button_name="[R]"; break;
+      case GP2X_BUTTON_START: button_name="[START]"; break;
+      case GP2X_BUTTON_SELECT: button_name="[SELECT]"; break;
+      case GP2X_BUTTON_VOLUP: button_name="[VOL UP]"; break;
+      case GP2X_BUTTON_VOLDOWN: button_name="[VOL DOWN]"; break;
+      default: sprintf(buffer+strlen(buffer), "[B%d]", Key);return buffer;
     }
-    strcat(Buffer,NomBouton);
+    strcat(buffer,button_name);
 #else    
-    sprintf(Buffer+strlen(Buffer), "[B%d]", Touche-TOUCHE_BUTTON);
+    sprintf(buffer+strlen(buffer), "[B%d]", Key-KEY_JOYBUTTON);
 #endif
-    return Buffer;
+    return buffer;
   }
   
-  if (Touche & 0x8000)
+  if (Key & 0x8000)
   {
-    sprintf(Buffer+strlen(Buffer), "[%d]", Touche & 0xFFF);
-    return Buffer;
+    sprintf(buffer+strlen(buffer), "[%d]", Key & 0xFFF);
+    return buffer;
   }
-  Touche = Touche & 0xFFF;
+  Key = Key & 0xFFF;
   // Touches ASCII
-  if (Touche>=' ' && Touche < 127)
+  if (Key>=' ' && Key < 127)
   {
-    sprintf(Buffer+strlen(Buffer), "'%c'", toupper(Touche));
-    return Buffer;
+    sprintf(buffer+strlen(buffer), "'%c'", toupper(Key));
+    return buffer;
   }
   // Touches 'World'
-  if (Touche>=SDLK_WORLD_0 && Touche <= SDLK_WORLD_95)
+  if (Key>=SDLK_WORLD_0 && Key <= SDLK_WORLD_95)
   {
-    sprintf(Buffer+strlen(Buffer), "w%d", Touche - SDLK_WORLD_0);
-    return Buffer;
+    sprintf(buffer+strlen(buffer), "w%d", Key - SDLK_WORLD_0);
+    return buffer;
   }
                              
   // Touches au libellé connu
-  for (Indice=0; Indice < (long)sizeof(Table_touches)/(long)sizeof(S_Libelle_touche);Indice++)
+  for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
   {
-    if (Touche == Table_touches[Indice].Sym)
+    if (Key == key_labels[index].keysym)
     {
-      sprintf(Buffer+strlen(Buffer), "%s", Table_touches[Indice].Nom_touche);
-      return Buffer;
+      sprintf(buffer+strlen(buffer), "%s", key_labels[index].Key_name);
+      return buffer;
     }
   }
   // Autres touches inconnues
-  sprintf(Buffer+strlen(Buffer), "0x%X", Touche & 0x7FF);
-  return Buffer;
+  sprintf(buffer+strlen(buffer), "0x%X", Key & 0x7FF);
+  return buffer;
 
 }
 
 // Obtient le caractère ANSI tapé, à partir d'un keysym.
 // (Valeur 32 à 255)
 // Renvoie 0 s'il n'y a pas de caractère associé (shift, backspace, etc)
-word Conversion_ANSI(SDL_keysym Sym)
+word Keysym_to_ANSI(SDL_keysym keysym)
 {
   // This part was removed from the MacOSX port, but I put it back for others
   // as on Linux and Windows, it's what allows editing a text line with the keys
   // SDLK_LEFT, SDLK_RIGHT, SDLK_HOME, SDLK_END etc.
   #if !(defined(__macosx__) || defined(__FreeBSD__))
-  if ( Sym.unicode == 0)
+  if ( keysym.unicode == 0)
   {
-    return Sym.sym;
+    return keysym.sym;
   }
   #endif
   //
-  if ( Sym.unicode > 32 && Sym.unicode < 127)
+  if ( keysym.unicode > 32 && keysym.unicode < 127)
   {
-    return Sym.unicode; // Pas de souci, on est en ASCII standard
+    return keysym.unicode; // Pas de souci, on est en ASCII standard
   }
   
   // Quelques conversions Unicode-ANSI
-  switch(Sym.unicode)
+  switch(keysym.unicode)
   {
     case 0x8100:
       return 'ü'; // ü
@@ -603,25 +603,25 @@ word Conversion_ANSI(SDL_keysym Sym)
       return 'ã'; // ã
   }
   
-  // Touche entre 127 et 255
-  if (Sym.unicode<256)
+  // Key entre 127 et 255
+  if (keysym.unicode<256)
   {
 #if defined(__macosx__) || defined(__FreeBSD__)
     // fc: Looks like there's a mismatch with delete & backspace
     //     i don't why SDLK_DELETE was returned instead of SDLK_BACKSPACE
-    if(Sym.unicode == 127)
+    if(keysym.unicode == 127)
     {
         return(SDLK_BACKSPACE);
     }
     // We don't make any difference between return & enter in the app context.
-    if(Sym.unicode == 3)
+    if(keysym.unicode == 3)
     {
         return(SDLK_RETURN);
     }
 #endif
-    return Sym.unicode;
+    return keysym.unicode;
   }
 
  // Sinon c'est une touche spéciale, on retourne son scancode
-  return Sym.sym;
+  return keysym.sym;
 }

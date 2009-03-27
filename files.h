@@ -19,4 +19,4 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-byte Bouton_Load_ou_Save(byte load, byte image);
+byte Button_Load_or_Save(byte load, byte image);

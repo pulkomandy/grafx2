@@ -20,4 +20,4 @@
 */
 
 int  Get_input(void);
-int Est_Raccourci(word Touche, word function);
+int Is_shortcut(word Key, word function);

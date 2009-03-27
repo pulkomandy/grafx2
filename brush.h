@@ -24,13 +24,13 @@
 
 /*!
     Gets the brush from the picture.
-    @param Debut_X left edge coordinate in the picture
-    @param Debut_Y upper edge coordinate in the picture
-    @param Fin_X right edge coordinate in the picture
-    @param Fin_Y bottom edge coordinate in the picture
+    @param start_x left edge coordinate in the picture
+    @param start_y upper edge coordinate in the picture
+    @param end_x right edge coordinate in the picture
+    @param end_y bottom edge coordinate in the picture
     @param clear If 1, the area is also cleared from the picture.
 */
-void Capturer_brosse(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,short clear);
+void Capture_brush(short start_x,short start_y,short end_x,short end_y,short clear);
 
 /*!
   Rotates the brush to the right.
@@ -40,30 +40,30 @@ void Rotate_90_deg(void);
 /*!
     Stretch the brush to fit the given rectangle.
 */
-void Etirer_brosse(short X1, short Y1, short X2, short Y2);
+void Stretch_brush(short x1, short y1, short x2, short y2);
 
 /*!
     Stretch the brush to fit the given rectangle.
     Uses fast approximation for the preview while drawing the rectangle on screen.
 */
-void Etirer_brosse_preview(short X1, short Y1, short X2, short Y2);
+void Stretch_brush_preview(short x1, short y1, short x2, short y2);
 
 /*!
     Rotates the brush to the right from the given angle.
 */
-void Tourner_brosse(float angle);
+void Rotate_brush(float angle);
 
 /*!
     Stretch the brush to fit the given rectangle.
     Uses fast approximation for the preview while changing the angle.
 */
-void Tourner_brosse_preview(float angle);
+void Rotate_brush_preview(float angle);
 
 /*!
     Remap the brush palette to the nearest color in the picture one.
     Used when switching to the spare page.
 */
-void Remap_brosse(void);
+void Remap_brush(void);
 
 /*!
     Get color indexes used by the brush.
@@ -84,10 +84,10 @@ void Nibble_brush(void);
 
 /*!
     Get brush from picture according to a freehand form.
-    @param Vertices number of points in the freehand form
-    @param Points array of points coordinates
+    @param vertices number of points in the freehand form
+    @param points array of points coordinates
     @param clear If set to 1, the captured area is also cleared from the picture.
 */
-void Capturer_brosse_au_lasso(int Vertices, short * Points,short clear);
+void Capture_brush_with_lasso(int vertices, short * points,short clear);
 
 #endif

@@ -29,64 +29,64 @@
 #include "divers.h"
 
 // Mise à jour minimaliste en nombre de pixels
-#define METHODE_UPDATE_MULTI_RECTANGLE 1
+#define UPDATE_METHOD_MULTI_RECTANGLE 1
 // Mise à jour intermédiaire, par rectangle inclusif.
-#define METHODE_UPDATE_PAR_CUMUL       2
+#define UPDATE_METHOD_CUMULATED       2
 // Mise à jour totale, pour les plate-formes qui imposent un Vsync à chaque mise à jour écran.
-#define METHODE_UPDATE_PLEINE_PAGE     3
+#define UPDATE_METHOD_FULL_PAGE     3
 
-// METHODE_UPDATE peut être fixé depuis le makefile, sinon c'est ici:
-#ifndef METHODE_UPDATE
+// UPDATE_METHOD peut être fixé depuis le makefile, sinon c'est ici:
+#ifndef UPDATE_METHOD
   #if defined(__macosx__) || defined(__FreeBSD__)
-    #define METHODE_UPDATE     METHODE_UPDATE_PLEINE_PAGE
+    #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #else
-    #define METHODE_UPDATE     METHODE_UPDATE_PAR_CUMUL
+    #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
   #endif
 #endif
 
-void Set_Mode_SDL(int *width, int *height, int fullscreen)
+void Set_mode_SDL(int *width, int *height, int fullscreen)
 /* On règle la résolution de l'écran */
 {
-  Ecran_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
-  if(Ecran_SDL != NULL)
+  Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
+  if(Screen_SDL != NULL)
   {
     // Vérification du mode obtenu (ce n'est pas toujours celui demandé)
-    if (Ecran_SDL->w != *width || Ecran_SDL->h != *height)
+    if (Screen_SDL->w != *width || Screen_SDL->h != *height)
     {
-      DEBUG("Erreur mode video obtenu différent de celui demandé !!",0);
-      *width = Ecran_SDL->w;
-      *height = Ecran_SDL->h;
+      DEBUG("Error mode video obtenu différent de celui demandé !!",0);
+      *width = Screen_SDL->w;
+      *height = Screen_SDL->h;
     }
-    Ecran=Ecran_SDL->pixels;
+    Screen=Screen_SDL->pixels;
   }
   else
-    DEBUG("Erreur changement de mode video !!",0);
+    DEBUG("Error changement de mode video !!",0);
 
   SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }
 
-#if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+#if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
 short Min_X=0;
 short Min_Y=0;
 short Max_X=10000;
 short Max_Y=10000;
 #endif
 
-#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
-  int Update_necessaire=0;
+#if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
+  int update_is_required=0;
 #endif
 
 void Flush_update(void)
 {
-#if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
+#if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
   // Mise à jour de la totalité de l'écran
-  if (Update_necessaire)
+  if (update_is_required)
   {
-    SDL_UpdateRect(Ecran_SDL, 0, 0, 0, 0);
-    Update_necessaire=0;
+    SDL_UpdateRect(Screen_SDL, 0, 0, 0, 0);
+    update_is_required=0;
   }
 #endif
-  #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+  #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
   if (Min_X>=Max_X || Min_Y>=Max_Y)
   {
     ; // Rien a faire
@@ -97,7 +97,7 @@ void Flush_update(void)
       Min_X=0;
     if (Min_Y<0)
       Min_Y=0;
-    SDL_UpdateRect(Ecran_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Largeur_ecran-Min_X, Max_X-Min_X)*Pixel_width, Min(Hauteur_ecran-Min_Y, Max_Y-Min_Y)*Pixel_height);
+    SDL_UpdateRect(Screen_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
 
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
@@ -106,13 +106,13 @@ void Flush_update(void)
 
 }
 
-void UpdateRect(short x, short y, unsigned short width, unsigned short height)
+void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
-  #if (METHODE_UPDATE == METHODE_UPDATE_MULTI_RECTANGLE)
-    SDL_UpdateRect(Ecran_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
+  #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
+    SDL_UpdateRect(Screen_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
   #endif
 
-  #if (METHODE_UPDATE == METHODE_UPDATE_PAR_CUMUL)
+  #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
   if (width==0 || height==0)
   {
     Min_X=Min_Y=0;
@@ -131,8 +131,8 @@ void UpdateRect(short x, short y, unsigned short width, unsigned short height)
   }
   #endif
 
-  #if (METHODE_UPDATE == METHODE_UPDATE_PLEINE_PAGE)
-  Update_necessaire=1;
+  #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
+  update_is_required=1;
   #endif
 
 }
@@ -140,51 +140,51 @@ void UpdateRect(short x, short y, unsigned short width, unsigned short height)
 // Convertit une SDL_Surface (couleurs indexées ou RGB) en tableau de bytes (couleurs indexées)
 // Si on passe NULL comme destination, elle est allouée par malloc(). Sinon,
 // attention aux dimensions!
-byte * Surface_en_bytefield(SDL_Surface *Source, byte * dest)
+byte * Surface_to_bytefield(SDL_Surface *source, byte * dest)
 {
-  byte *Src;
+  byte *src;
   byte *dest_ptr;
   int y;
   int remainder;
 
   // Support seulement des images 256 couleurs
-  if (Source->format->BytesPerPixel != 1)
+  if (source->format->BytesPerPixel != 1)
     return NULL;
 
-  if (Source->w & 3)
-    remainder=4-(Source->w&3);
+  if (source->w & 3)
+    remainder=4-(source->w&3);
   else
     remainder=0;
 
   if (dest==NULL)
-    dest=(byte *)malloc(Source->w*Source->h);
+    dest=(byte *)malloc(source->w*source->h);
 
   dest_ptr=dest;
-  Src=(byte *)(Source->pixels);
-  for(y=0; y < Source->h; y++)
+  src=(byte *)(source->pixels);
+  for(y=0; y < source->h; y++)
   {
-    memcpy(dest_ptr, Src,Source->w);
-    dest_ptr += Source->w;
-    Src += Source->w + remainder;
+    memcpy(dest_ptr, src,source->w);
+    dest_ptr += source->w;
+    src += source->w + remainder;
   }
   return dest;
 
 }
 
 // Convertit un index de palette en couleur RGB 24 bits
-SDL_Color Conversion_couleur_SDL(byte index)
+SDL_Color Color_to_SDL_color(byte index)
 {
-  SDL_Color Couleur;
-  Couleur.r = Principal_Palette[index].R;
-  Couleur.g = Principal_Palette[index].G;
-  Couleur.b = Principal_Palette[index].B;
-  Couleur.unused = 255;
-  return Couleur;
+  SDL_Color color;
+  color.r = Main_palette[index].R;
+  color.g = Main_palette[index].G;
+  color.b = Main_palette[index].B;
+  color.unused = 255;
+  return color;
 }
 
 // Lecture d'un pixel pour une surface SDL.
 // Attention, ne fonctionne que pour les surfaces 8-bit
-byte Sdl_Get_pixel_8(SDL_Surface *Bmp, int x, int y)
+byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
 {
-  return ((byte *)(Bmp->pixels))[(y*Bmp->pitch+x)];
+  return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
 }

@@ -21,18 +21,18 @@
 */
 
 // Initialisation à faire une fois au début du programme
-void Initialisation_Texte(void);
+void Init_text(void);
 // Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
-int Support_TrueType(void);
+int TrueType_is_supported(void);
 // Ajout d'une fonte à la liste.
-void Ajout_fonte(char *name);
+void Add_font(char *name);
 // Crée une brosse à partir des paramètres de texte demandés.
-byte *Rendu_Texte(const char *Chaine, int Numero_fonte, int size, int antialias, int bold, int italic, int *width, int *height);
+byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height);
 // Trouve le libellé d'affichage d'une fonte par son numéro
-char * Libelle_fonte(int Indice);
+char * Font_label(int index);
 // Trouve le nom d'une fonte par son numéro
-char * Nom_fonte(int Indice);
+char * Font_name(int index);
 // Vérifie si une fonte donnée est TrueType
-char * TrueType_fonte(int Indice);
+char * TrueType_font(int index);
 // Nombre de fontes déclarées
-extern int Fonte_nombre;
+extern int Nb_fonts;

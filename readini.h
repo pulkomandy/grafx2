@@ -18,6 +18,6 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-int Charger_INI(T_Config * Conf);
-int Charger_INI_Seek_pattern(char * Buffer,char * Pattern);
-void Charger_INI_Clear_string(char * String);
+int Load_INI(T_Config * conf);
+int Load_INI_seek_pattern(char * buffer,char * pattern);
+void Load_INI_clear_string(char * str);

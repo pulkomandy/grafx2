@@ -18,13 +18,13 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Bouton_Palette(void);
-void Bouton_Palette_secondaire(void);
+void Button_Palette(void);
+void Button_Pecondary_palette(void);
 
 // Choose the number of graduations for RGB components, from 2 to 256.
-void Set_Palette_RGB_Scale(int);
+void Set_palette_RGB_scale(int);
 
 // Scale a component (R, G or B) according to the current RGB graduations
 // The resulting range is [0-255]
-byte Palette_Scale_Component(byte comp);
+byte Round_palette_component(byte comp);
 

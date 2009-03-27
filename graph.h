@@ -19,95 +19,95 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-void Liste2tables(word * list, short step, byte mode, byte * Table_inc,
-        byte * Table_dec
+void Shade_list_to_lookup_tables(word * list, short step, byte mode, byte * table_inc,
+        byte * table_dec
 );
 
-void Transformer_point(short x, short y,
-                       float cosA, float sinA, short * Xr, short * Yr);
+void Transform_point(short x, short y,
+                       float cos_a, float sin_a, short * rx, short * ry);
 
-int Initialiser_mode_video(int width, int height, int fullscreen);
+int Init_mode_video(int width, int height, int fullscreen);
 
-byte Aucun_effet(word x,word y,byte Couleur);
-byte Effet_Shade(word x,word y,byte Couleur);
-byte Effet_Quick_shade(word x,word y,byte Couleur);
-byte Effet_Tiling(word x,word y,byte Couleur);
-byte Effet_Smooth(word x,word y,byte Couleur);
+byte No_effect(word x,word y,byte color);
+byte Effect_shade(word x,word y,byte color);
+byte Effect_quick_shade(word x,word y,byte color);
+byte Effect_tiling(word x,word y,byte color);
+byte Effect_smooth(word x,word y,byte color);
 
-void Afficher_foreback(void);
+void Display_foreback(void);
 
 
-void Afficher_pixel(word x,word y,byte Couleur);
+void Display_pixel(word x,word y,byte color);
 
-void Afficher_pinceau(short x,short y,byte Couleur,byte is_preview);
-void Effacer_pinceau(short x,short y);
+void Display_paintbrush(short x,short y,byte color,byte is_preview);
+void Hide_paintbrush(short x,short y);
 
-void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie);
+void Resize_image(word chosen_width,word chosen_height);
 
-void Remplir(byte Couleur_de_remplissage);
-void Remplacer(byte Nouvelle_couleur);
+void Fill_general(byte fill_color);
+void Replace(byte New_color);
 
-void Pixel_figure_Preview    (word x_pos,word y_pos,byte Couleur);
-void Pixel_figure_Preview_auto(word x_pos,word y_pos);
-void Pixel_figure_Preview_xor(word x_pos,word y_pos,byte Couleur);
-void Pixel_figure_Preview_xorback(word x_pos,word y_pos,byte Couleur);
-void Pixel_figure_Dans_brosse(word x_pos,word y_pos,byte Couleur);
+void Pixel_figure_preview    (word x_pos,word y_pos,byte color);
+void Pixel_figure_preview_auto(word x_pos,word y_pos);
+void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color);
+void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color);
+void Pixel_figure_in_brush(word x_pos,word y_pos,byte color);
 
-void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur);
-void Tracer_cercle_vide_Preview  (short Centre_X,short Centre_Y,short Rayon,byte Couleur);
-void Effacer_cercle_vide_Preview (short Centre_X,short Centre_Y,short Rayon);
-void Tracer_cercle_plein         (short Centre_X,short Centre_Y,short Rayon,byte Couleur);
+void Draw_empy_circle_permanent(short center_x,short center_y,short radius,byte color);
+void Draw_empy_circle_preview  (short center_x,short center_y,short radius,byte color);
+void Hide_empty_circle_preview (short center_x,short center_y,short radius);
+void Draw_filled_circle         (short center_x,short center_y,short radius,byte color);
 
-void Tracer_ellipse_vide_Definitif(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur);
-void Tracer_ellipse_vide_Preview  (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur);
-void Effacer_ellipse_vide_Preview (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical);
-void Tracer_ellipse_pleine        (short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur);
+void Draw_empy_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
+void Draw_empy_ellipse_preview  (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
+void Hide_empty_ellipse_preview (short center_x,short center_y,short horizontal_radius,short vertical_radius);
+void Draw_filled_ellipse        (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 
-void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY);
-void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur);
-void Tracer_ligne_Definitif  (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
-void Tracer_ligne_Preview    (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
-void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
-void Tracer_ligne_Preview_xorback(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
-void Effacer_ligne_Preview   (short Debut_X,short Debut_Y,short Fin_X,short Fin_Y);
+void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by);
+void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color);
+void Draw_line_permanet  (short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_line_preview    (short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_line_preview_xorback(short start_x,short start_y,short end_x,short end_y,byte color);
+void Hide_line_preview   (short start_x,short start_y,short end_x,short end_y);
 
-void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
-void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur);
+void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,byte color);
 
-void Tracer_courbe_Definitif(short X1, short Y1, short X2, short Y2, short X3, short Y3, short X4, short Y4, byte Couleur);
-void Tracer_courbe_Preview  (short X1, short Y1, short X2, short Y2, short X3, short Y3, short X4, short Y4, byte Couleur);
-void Effacer_courbe_Preview (short X1, short Y1, short X2, short Y2, short X3, short Y3, short X4, short Y4, byte Couleur);
+void Draw_curve_permanent(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, byte color);
+void Draw_curve_preview  (short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, byte color);
+void Hide_curve_preview (short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, byte color);
 
-void Aerographe(short Bouton_clicke);
+void Airbrush(short clicked_button);
 
-void Degrade_de_base           (long Indice,short x_pos,short y_pos);
-void Degrade_de_trames_simples (long Indice,short x_pos,short y_pos);
-void Degrade_de_trames_etendues(long Indice,short x_pos,short y_pos);
-void Degrade_aleatoire         (long Indice,short x_pos,short y_pos);
+void Gradient_basic           (long index,short x_pos,short y_pos);
+void Gradient_dithered (long index,short x_pos,short y_pos);
+void Gradient_extra_dithered(long index,short x_pos,short y_pos);
+void Degrade_aleatoire         (long index,short x_pos,short y_pos);
 
-void Tracer_cercle_degrade  (short Centre_X,short Centre_Y,short Rayon,short Eclairage_X,short Eclairage_Y);
-void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y);
-void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY);
+void Draw_grad_circle  (short center_x,short center_y,short radius,short spot_x,short spot_y);
+void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,short spot_x,short spot_y);
+void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby);
 
-void Polyfill_General(int Vertices, short * Points, int color);
-void Polyfill(int Vertices, short * Points, int color);
+void Polyfill_general(int vertices, short * points, int color);
+void Polyfill(int vertices, short * points, int color);
 
 // Gestion des backups:
-void Download_infos_page_principal(S_Page * Page);
-void Download_infos_page_brouillon(S_Page * Page);
-void Download_infos_backup(S_Liste_de_pages * list);
-void Detruire_les_listes_de_backups_en_fin_de_programme(void);
-int  Backup_avec_nouvelles_dimensions(int Upload,int width,int height);
-int  Backuper_et_redimensionner_brouillon(int width,int height);
+void Download_infos_page_main(T_Page * page);
+void Download_infos_page_spare(T_Page * page);
+void Download_infos_backup(T_List_of_pages * list);
+void Free_all_backup_lists(void);
+int  Backup_with_new_dimensions(int upload,int width,int height);
+int  Backup_and_resize_the_spare(int width,int height);
 void Undo(void);
 void Redo(void);
-void Detruire_la_page_courante(void);
-void Interchanger_image_principale_et_brouillon(void);
+void Free_current_page(void);
+void Exchange_main_and_spare(void);
 
-void Changer_facteur_loupe(byte Indice_facteur);
+void Change_magnifier_factor(byte factor_index);
 
 void Remap_picture(void);
 
 // Définition d'une fonction générique de traçage de figures:
-fonction_afficheur Pixel_figure;
-void Mettre_Ecran_A_Jour(short x, short y, short width, short height);
+Func_pixel Pixel_figure;
+void Update_part_of_screen(short x, short y, short width, short height);

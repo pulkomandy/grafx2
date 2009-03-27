@@ -46,12 +46,12 @@
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
-void Mettre_Ecran_A_Jour(short x, short y, short width, short height)
+void Update_part_of_screen(short x, short y, short width, short height)
 {
-  short L_effectif, H_effectif;
-  short X_effectif;
-  short Y_effectif;
-  short Diff;
+  short effective_w, effective_h;
+  short effective_X;
+  short effective_Y;
+  short diff;
 
   // Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
   if (width < 0)
@@ -67,124 +67,124 @@ void Mettre_Ecran_A_Jour(short x, short y, short width, short height)
   }
 
   // D'abord on met à jour dans la zone écran normale
-  Diff = x-Principal_Decalage_X;
-  if (Diff<0)
+  diff = x-Main_offset_X;
+  if (diff<0)
   {
-    L_effectif = width + Diff;
-    X_effectif = 0;
+    effective_w = width + diff;
+    effective_X = 0;
   }
   else
   {
-    L_effectif = width;
-    X_effectif = Diff;
+    effective_w = width;
+    effective_X = diff;
   }
-  Diff = y-Principal_Decalage_Y;
-  if (Diff<0)
+  diff = y-Main_offset_Y;
+  if (diff<0)
   {
-    H_effectif = height + Diff;
-    Y_effectif = 0;
+    effective_h = height + diff;
+    effective_Y = 0;
   }
   else
   {
-    H_effectif = height;
-    Y_effectif = Diff;
+    effective_h = height;
+    effective_Y = diff;
   }
 
   // Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
   // mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
   // a rester dans la zone visible de l'image
   // ...Sauf l'affichage de brosse en preview - yr
-  if(Loupe_Mode && X_effectif + L_effectif > Principal_Split)
-    L_effectif = Principal_Split - X_effectif;
-  else if(X_effectif + L_effectif > Largeur_ecran)
-    L_effectif = Largeur_ecran - X_effectif;
+  if(Main_magnifier_mode && effective_X + effective_w > Main_separator_position)
+    effective_w = Main_separator_position - effective_X;
+  else if(effective_X + effective_w > Screen_width)
+    effective_w = Screen_width - effective_X;
 
-  if(Y_effectif + H_effectif > Menu_Ordonnee)
-    H_effectif = Menu_Ordonnee - Y_effectif;
+  if(effective_Y + effective_h > Menu_Y)
+    effective_h = Menu_Y - effective_Y;
   /*
   SDL_Rect r;
-  r.x=X_effectif;
-  r.y=Y_effectif;
-  r.h=H_effectif;
-  r.w=L_effectif;
-  SDL_FillRect(Ecran_SDL,&r,3);
+  r.x=effective_X;
+  r.y=effective_Y;
+  r.h=effective_h;
+  r.w=effective_w;
+  SDL_FillRect(Screen_SDL,&r,3);
   */
-  UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
+  Update_rect(effective_X,effective_Y,effective_w,effective_h);
 
   // Et ensuite dans la partie zoomée
-  if(Loupe_Mode)
+  if(Main_magnifier_mode)
   {
     // Clipping en X
-    X_effectif = (x-Loupe_Decalage_X)*Loupe_Facteur;
-    Y_effectif = (y-Loupe_Decalage_Y)*Loupe_Facteur;
-    L_effectif = width * Loupe_Facteur;
-    H_effectif = height * Loupe_Facteur;
+    effective_X = (x-Main_magnifier_offset_X)*Main_magnifier_factor;
+    effective_Y = (y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+    effective_w = width * Main_magnifier_factor;
+    effective_h = height * Main_magnifier_factor;
 
-    if (X_effectif < 0)
+    if (effective_X < 0)
     {
-      L_effectif+=X_effectif;
-      if (L_effectif<0)
+      effective_w+=effective_X;
+      if (effective_w<0)
         return;
 
-      X_effectif = Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
+      effective_X = Main_separator_position + SEPARATOR_WIDTH*Menu_factor_X;
     }
     else
-      X_effectif += Principal_Split + LARGEUR_BARRE_SPLIT*Menu_Facteur_X;
-    Diff = X_effectif+L_effectif-Largeur_ecran;
-    if (Diff>0)
+      effective_X += Main_separator_position + SEPARATOR_WIDTH*Menu_factor_X;
+    diff = effective_X+effective_w-Screen_width;
+    if (diff>0)
     {
-      L_effectif -=Diff;
-      if (L_effectif<0)
+      effective_w -=diff;
+      if (effective_w<0)
         return;
     }
 
 
     // Clipping en Y
-    if (Y_effectif < 0)
+    if (effective_Y < 0)
     {
-      H_effectif+=Y_effectif;
-      if (H_effectif<0)
+      effective_h+=effective_Y;
+      if (effective_h<0)
         return;
-      Y_effectif = 0;
+      effective_Y = 0;
     }
-    Diff = Y_effectif+H_effectif-Menu_Ordonnee;
-    if (Diff>0)
+    diff = effective_Y+effective_h-Menu_Y;
+    if (diff>0)
     {
-      H_effectif -=Diff;
-      if (H_effectif<0)
+      effective_h -=diff;
+      if (effective_h<0)
         return;
     }
 
  // Très utile pour le debug :)
     /*SDL_Rect r;
-    r.x=X_effectif;
-    r.y=Y_effectif;
-    r.h=H_effectif;
-    r.w=L_effectif;
-    SDL_FillRect(Ecran_SDL,&r,3);*/
+    r.x=effective_X;
+    r.y=effective_Y;
+    r.h=effective_h;
+    r.w=effective_w;
+    SDL_FillRect(Screen_SDL,&r,3);*/
 
-    UpdateRect(X_effectif,Y_effectif,L_effectif,H_effectif);
+    Update_rect(effective_X,effective_Y,effective_w,effective_h);
   }
 }
 
 
 
-void Transformer_point(short x, short y, float cosA, float sinA,
-                       short * Xr, short * Yr)
+void Transform_point(short x, short y, float cos_a, float sin_a,
+                       short * rx, short * ry)
 {
-  *Xr=Round(((float)x*cosA)+((float)y*sinA));
-  *Yr=Round(((float)y*cosA)-((float)x*sinA));
+  *rx=Round(((float)x*cos_a)+((float)y*sin_a));
+  *ry=Round(((float)y*cos_a)-((float)x*sin_a));
 }
 
 
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
-int Initialiser_mode_video(int width, int height, int fullscreen)
+int Init_mode_video(int width, int height, int fullscreen)
 {
-  int Sensibilite_X;
-  int Sensibilite_Y;
-  int Indice;
+  int x_sensitivity;
+  int y_sensitivity;
+  int index;
   int factor;
 
   // Pour la première entrée dans cette fonction
@@ -193,107 +193,107 @@ int Initialiser_mode_video(int width, int height, int fullscreen)
   if (Pixel_height<1)
     Pixel_height=1;
   
-  if (Largeur_ecran!=width/Pixel_width ||
-      Hauteur_ecran!=height/Pixel_height ||
-      Mode_video[Resolution_actuelle].Fullscreen != fullscreen)
+  if (Screen_width!=width/Pixel_width ||
+      Screen_height!=height/Pixel_height ||
+      Video_mode[Current_resolution].Fullscreen != fullscreen)
   {
     switch (Pixel_ratio)
     {
         case PIXEL_SIMPLE:
             Pixel_width=1;
             Pixel_height=1;
-            Pixel = Pixel_Simple ;
-            Lit_pixel= Lit_Pixel_Simple ;
-            Display_screen = Afficher_partie_de_l_ecran_Simple ;
-            Block = Block_Simple ;
-            Pixel_Preview_Normal = Pixel_Preview_Normal_Simple ;
-            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Simple ;
-            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Simple ;
-            Ligne_verticale_XOR = Ligne_verticale_XOR_Simple ;
-            Display_brush_Color = Display_brush_Color_Simple ;
-            Display_brush_Mono = Display_brush_Mono_Simple ;
-            Clear_brush = Clear_brush_Simple ;
-            Remap_screen = Remap_screen_Simple ;
-            Afficher_ligne = Afficher_une_ligne_ecran_Simple ;
-            Afficher_ligne_fast = Afficher_une_ligne_ecran_Simple ;
-            Lire_ligne = Lire_une_ligne_ecran_Simple ;
-            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Simple ;
-            Display_brush_Color_zoom = Display_brush_Color_zoom_Simple ;
-            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Simple ;
-            Clear_brush_zoom = Clear_brush_zoom_Simple ;
-            Affiche_brosse = Affiche_brosse_Simple ;
+            Pixel = Pixel_simple ;
+            Read_pixel= Read_pixel_simple ;
+            Display_screen = Display_part_of_screen_simple ;
+            Block = Block_simple ;
+            Pixel_preview_normal = Pixel_preview_normal_simple ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_simple ;
+            Horizontal_XOR_line = Horizontal_XOR_line_simple ;
+            Vertical_XOR_line = Vertical_XOR_line_simple ;
+            Display_brush_color = Display_brush_color_simple ;
+            Display_brush_mono = Display_brush_mono_simple ;
+            Clear_brush = Clear_brush_simple ;
+            Remap_screen = Remap_screen_simple ;
+            Display_line = Display_line_on_screen_simple ;
+            Display_line_fast = Display_line_on_screen_simple ;
+            Read_line = Read_line_screen_simple ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_simple ;
+            Display_brush_color_zoom = Display_brush_color_zoom_simple ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_simple ;
+            Clear_brush_scaled = Clear_brush_scaled_simple ;
+            Display_brush = Display_brush_simple ;
         break;
         case PIXEL_TALL:
             Pixel_width=1;
             Pixel_height=2;
-            Pixel = Pixel_Tall;
-            Lit_pixel= Lit_Pixel_Tall;
-            Display_screen = Afficher_partie_de_l_ecran_Tall;
-            Block = Block_Tall;
-            Pixel_Preview_Normal = Pixel_Preview_Normal_Tall;
-            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Tall;
-            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Tall;
-            Ligne_verticale_XOR = Ligne_verticale_XOR_Tall;
-            Display_brush_Color = Display_brush_Color_Tall;
-            Display_brush_Mono = Display_brush_Mono_Tall;
-            Clear_brush = Clear_brush_Tall;
-            Remap_screen = Remap_screen_Tall;
-            Afficher_ligne = Afficher_une_ligne_ecran_Tall;
-            Afficher_ligne_fast = Afficher_une_ligne_ecran_Tall;
-            Lire_ligne = Lire_une_ligne_ecran_Tall;
-            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Tall;
-            Display_brush_Color_zoom = Display_brush_Color_zoom_Tall;
-            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Tall;
-            Clear_brush_zoom = Clear_brush_zoom_Tall;
-            Affiche_brosse = Affiche_brosse_Tall;
+            Pixel = Pixel_tall;
+            Read_pixel= Read_pixel_tall;
+            Display_screen = Display_part_of_screen_tall;
+            Block = Block_tall;
+            Pixel_preview_normal = Pixel_preview_normal_tall;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_tall;
+            Horizontal_XOR_line = Horizontal_XOR_line_tall;
+            Vertical_XOR_line = Vertical_XOR_line_tall;
+            Display_brush_color = Display_brush_color_tall;
+            Display_brush_mono = Display_brush_mono_tall;
+            Clear_brush = Clear_brush_tall;
+            Remap_screen = Remap_screen_tall;
+            Display_line = Display_line_on_screen_tall;
+            Display_line_fast = Display_line_on_screen_tall;
+            Read_line = Read_line_screen_tall;
+            Display_zoomed_screen = Display_part_of_screen_scaled_tall;
+            Display_brush_color_zoom = Display_brush_color_zoom_tall;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_tall;
+            Clear_brush_scaled = Clear_brush_scaled_tall;
+            Display_brush = Display_brush_tall;
         break;
         case PIXEL_WIDE:
             Pixel_width=2;
             Pixel_height=1;
-            Pixel = Pixel_Wide ;
-            Lit_pixel= Lit_Pixel_Wide ;
-            Display_screen = Afficher_partie_de_l_ecran_Wide ;
-            Block = Block_Wide ;
-            Pixel_Preview_Normal = Pixel_Preview_Normal_Wide ;
-            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Wide ;
-            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Wide ;
-            Ligne_verticale_XOR = Ligne_verticale_XOR_Wide ;
-            Display_brush_Color = Display_brush_Color_Wide ;
-            Display_brush_Mono = Display_brush_Mono_Wide ;
-            Clear_brush = Clear_brush_Wide ;
-            Remap_screen = Remap_screen_Wide ;
-            Afficher_ligne = Afficher_une_ligne_ecran_Wide ;
-            Afficher_ligne_fast = Afficher_une_ligne_ecran_fast_Wide ;
-            Lire_ligne = Lire_une_ligne_ecran_Wide ;
-            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Wide ;
-            Display_brush_Color_zoom = Display_brush_Color_zoom_Wide ;
-            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Wide ;
-            Clear_brush_zoom = Clear_brush_zoom_Wide ;
-            Affiche_brosse = Affiche_brosse_Wide ;
+            Pixel = Pixel_wide ;
+            Read_pixel= Read_pixel_wide ;
+            Display_screen = Display_part_of_screen_wide ;
+            Block = Block_wide ;
+            Pixel_preview_normal = Pixel_preview_normal_wide ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_wide ;
+            Horizontal_XOR_line = Horizontal_XOR_line_wide ;
+            Vertical_XOR_line = Vertical_XOR_line_wide ;
+            Display_brush_color = Display_brush_color_wide ;
+            Display_brush_mono = Display_brush_mono_wide ;
+            Clear_brush = Clear_brush_wide ;
+            Remap_screen = Remap_screen_wide ;
+            Display_line = Display_line_on_screen_wide ;
+            Display_line_fast = Display_line_on_screen_fast_wide ;
+            Read_line = Read_line_screen_wide ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_wide ;
+            Display_brush_color_zoom = Display_brush_color_zoom_wide ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_wide ;
+            Clear_brush_scaled = Clear_brush_scaled_wide ;
+            Display_brush = Display_brush_wide ;
         break;
         case PIXEL_DOUBLE:
             Pixel_width=2;
             Pixel_height=2;
-            Pixel = Pixel_Double ;
-            Lit_pixel= Lit_Pixel_Double ;
-            Display_screen = Afficher_partie_de_l_ecran_Double ;
-            Block = Block_Double ;
-            Pixel_Preview_Normal = Pixel_Preview_Normal_Double ;
-            Pixel_Preview_Loupe = Pixel_Preview_Loupe_Double ;
-            Ligne_horizontale_XOR = Ligne_horizontale_XOR_Double ;
-            Ligne_verticale_XOR = Ligne_verticale_XOR_Double ;
-            Display_brush_Color = Display_brush_Color_Double ;
-            Display_brush_Mono = Display_brush_Mono_Double ;
-            Clear_brush = Clear_brush_Double ;
-            Remap_screen = Remap_screen_Double ;
-            Afficher_ligne = Afficher_une_ligne_ecran_Double ;
-            Afficher_ligne_fast = Afficher_une_ligne_ecran_fast_Double ;
-            Lire_ligne = Lire_une_ligne_ecran_Double ;
-            Display_zoomed_screen = Afficher_partie_de_l_ecran_zoomee_Double ;
-            Display_brush_Color_zoom = Display_brush_Color_zoom_Double ;
-            Display_brush_Mono_zoom = Display_brush_Mono_zoom_Double ;
-            Clear_brush_zoom = Clear_brush_zoom_Double ;
-            Affiche_brosse = Affiche_brosse_Double ;
+            Pixel = Pixel_double ;
+            Read_pixel= Read_pixel_double ;
+            Display_screen = Display_part_of_screen_double ;
+            Block = Block_double ;
+            Pixel_preview_normal = Pixel_preview_normal_double ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_double ;
+            Horizontal_XOR_line = Horizontal_XOR_line_double ;
+            Vertical_XOR_line = Vertical_XOR_line_double ;
+            Display_brush_color = Display_brush_color_double ;
+            Display_brush_mono = Display_brush_mono_double ;
+            Clear_brush = Clear_brush_double ;
+            Remap_screen = Remap_screen_double ;
+            Display_line = Display_line_on_screen_double ;
+            Display_line_fast = Display_line_on_screen_fast_double ;
+            Read_line = Read_line_screen_double ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_double ;
+            Display_brush_color_zoom = Display_brush_color_zoom_double ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_double ;
+            Clear_brush_scaled = Clear_brush_scaled_double ;
+            Display_brush = Display_brush_double ;
         break;
     }
     // Valeurs raisonnables: minimum 320x200
@@ -316,101 +316,101 @@ int Initialiser_mode_video(int width, int height, int fullscreen)
 #else
     width = (width + 3 ) & 0xFFFFFFFC;
 #endif
-    Set_Mode_SDL(&width, &height,fullscreen);
-    Largeur_ecran = width/Pixel_width;
-    Hauteur_ecran = height/Pixel_height;
+    Set_mode_SDL(&width, &height,fullscreen);
+    Screen_width = width/Pixel_width;
+    Screen_height = height/Pixel_height;
 
     // Taille des menus
-    if (Largeur_ecran/320 > Hauteur_ecran/200)
-      factor=Hauteur_ecran/200;
+    if (Screen_width/320 > Screen_height/200)
+      factor=Screen_height/200;
     else
-      factor=Largeur_ecran/320;
+      factor=Screen_width/320;
 
     switch (Config.Ratio)
     {
       case 1: // adapter tout
-        Menu_Facteur_X=factor;
-        Menu_Facteur_Y=factor;
+        Menu_factor_X=factor;
+        Menu_factor_Y=factor;
         break;
       case 2: // adapter légèrement
-        Menu_Facteur_X=factor-1;
-        if (Menu_Facteur_X<1) Menu_Facteur_X=1;
-        Menu_Facteur_Y=factor-1;
-        if (Menu_Facteur_Y<1) Menu_Facteur_Y=1;
+        Menu_factor_X=factor-1;
+        if (Menu_factor_X<1) Menu_factor_X=1;
+        Menu_factor_Y=factor-1;
+        if (Menu_factor_Y<1) Menu_factor_Y=1;
         break;
       default: // ne pas adapter
-        Menu_Facteur_X=1;
-        Menu_Facteur_Y=1;
+        Menu_factor_X=1;
+        Menu_factor_Y=1;
     }
-    if (Pixel_height>Pixel_width && Largeur_ecran>=Menu_Facteur_X*2*320)
-      Menu_Facteur_X*=2;
-    else if (Pixel_width>Pixel_height && Hauteur_ecran>=Menu_Facteur_Y*2*200)
-      Menu_Facteur_Y*=2;
+    if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
+      Menu_factor_X*=2;
+    else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
+      Menu_factor_Y*=2;
       
-    if (Buffer_de_ligne_horizontale)
-      free(Buffer_de_ligne_horizontale);
-    Buffer_de_ligne_horizontale=(byte *)malloc(Pixel_width*((Largeur_ecran>Principal_Largeur_image)?Largeur_ecran:Principal_Largeur_image));
+    if (Horizontal_line_buffer)
+      free(Horizontal_line_buffer);
+    Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
-    Set_palette(Principal_Palette);
+    Set_palette(Main_palette);
 
-    Resolution_actuelle=0;
+    Current_resolution=0;
     if (fullscreen)
     {
-      for (Indice=1; Indice<Nb_modes_video; Indice++)
+      for (index=1; index<Nb_video_modes; index++)
       {
-        if (Mode_video[Indice].Width/Pixel_width==Largeur_ecran &&
-            Mode_video[Indice].Height/Pixel_height==Hauteur_ecran)
+        if (Video_mode[index].Width/Pixel_width==Screen_width &&
+            Video_mode[index].Height/Pixel_height==Screen_height)
         {
-          Resolution_actuelle=Indice;
+          Current_resolution=index;
           break;
         }
       }
     }
 
-    Changer_cellules_palette();
+    Change_palette_cells();
     
-    Menu_Ordonnee = Hauteur_ecran;
-    if (Menu_visible)
-      Menu_Ordonnee -= HAUTEUR_MENU * Menu_Facteur_Y;
-    Menu_Ordonnee_Texte = Hauteur_ecran-(Menu_Facteur_Y<<3);
+    Menu_Y = Screen_height;
+    if (Menu_is_visible)
+      Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
+    Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
 
-    Sensibilite_X = Config.Indice_Sensibilite_souris_X;
-    Sensibilite_Y = Config.Indice_Sensibilite_souris_Y;
-    Sensibilite_X>>=Mouse_Facteur_de_correction_X;
-    Sensibilite_Y>>=Mouse_Facteur_de_correction_Y;
-    Sensibilite_souris(Sensibilite_X?Sensibilite_X:1,Sensibilite_Y?Sensibilite_Y:1);
+    x_sensitivity = Config.Mouse_sensitivity_index_x;
+    y_sensitivity = Config.Mouse_sensitivity_index_y;
+    x_sensitivity>>=Mouse_fix_factor_X;
+    y_sensitivity>>=Mouse_fix_factor_Y;
+    Mouse_sensitivity(x_sensitivity?x_sensitivity:1,y_sensitivity?y_sensitivity:1);
 
-    Brouillon_Decalage_X=0; // |  Il faut penser à éviter les incohérences
-    Brouillon_Decalage_Y=0; // |- de décalage du brouillon par rapport à
-    Brouillon_Loupe_Mode=0; // |  la résolution.
+    Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
+    Spare_offset_Y=0; // |- de décalage du brouillon par rapport à
+    Spare_magnifier_mode=0; // |  la résolution.
   }
-  if (Loupe_Mode)
+  if (Main_magnifier_mode)
   {
-    Pixel_Preview=Pixel_Preview_Loupe;
+    Pixel_preview=Pixel_preview_magnifier;
   }
   else
   {
-    Pixel_Preview=Pixel_Preview_Normal;
-    // Recaler la vue (meme clipping que dans Scroller_ecran())
-    if (Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image)
-      Principal_Decalage_X=Principal_Largeur_image-Largeur_ecran;
-    if (Principal_Decalage_X<0)
-      Principal_Decalage_X=0;
-    if (Principal_Decalage_Y+Menu_Ordonnee>Principal_Hauteur_image)
-      Principal_Decalage_Y=Principal_Hauteur_image-Menu_Ordonnee;
-    if (Principal_Decalage_Y<0)
-      Principal_Decalage_Y=0;
+    Pixel_preview=Pixel_preview_normal;
+    // Recaler la vue (meme clipping que dans Scroll_screen())
+    if (Main_offset_X+Screen_width>Main_image_width)
+      Main_offset_X=Main_image_width-Screen_width;
+    if (Main_offset_X<0)
+      Main_offset_X=0;
+    if (Main_offset_Y+Menu_Y>Main_image_height)
+      Main_offset_Y=Main_image_height-Menu_Y;
+    if (Main_offset_Y<0)
+      Main_offset_Y=0;
   }
 
-  Calculer_donnees_loupe();
-  if (Loupe_Mode)
-    Recadrer_ecran_par_rapport_au_zoom();
-  Calculer_limites();
-  Calculer_coordonnees_pinceau();
-  Afficher_ecran();
+  Compute_magnifier_data();
+  if (Main_magnifier_mode)
+    Position_screen_according_to_zoom();
+  Compute_limits();
+  Compute_paintbrush_coordinates();
+  Display_all_screen();
   
-  Resize_Largeur=0;
-  Resize_Hauteur=0;
+  Resize_width=0;
+  Resize_height=0;
   return 0;
 }
 
@@ -418,10 +418,10 @@ int Initialiser_mode_video(int width, int height, int fullscreen)
 
   // -- Redimentionner l'image (nettoie l'écran virtuel) --
 
-void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
+void Resize_image(word chosen_width,word chosen_height)
 {
-  word Ancienne_largeur=Principal_Largeur_image;
-  word Ancienne_hauteur=Principal_Hauteur_image;
+  word old_width=Main_image_width;
+  word old_height=Main_image_height;
 
   // +-+-+
   // |C| |  A+B+C = Ancienne image
@@ -429,23 +429,23 @@ void Redimentionner_image(word Largeur_choisie,word Hauteur_choisie)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  if (Backup_avec_nouvelles_dimensions(1,Largeur_choisie,Hauteur_choisie))
+  if (Backup_with_new_dimensions(1,chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
-    // 0s. Elle fait Principal_Largeur_image de large.
+    // 0s. Elle fait Main_image_width de large.
 
     // On copie donc maintenant la partie C dans la nouvelle image.
-    Copier_une_partie_d_image_dans_une_autre(
-      Ecran_backup,0,0,Min(Ancienne_largeur,Principal_Largeur_image),
-      Min(Ancienne_hauteur,Principal_Hauteur_image),Ancienne_largeur,
-      Principal_Ecran,0,0,Principal_Largeur_image);
+    Copy_part_of_image_to_another(
+      Screen_backup,0,0,Min(old_width,Main_image_width),
+      Min(old_height,Main_image_height),old_width,
+      Main_screen,0,0,Main_image_width);
   }
   else
   {
     // Afficher un message d'erreur
-    Afficher_curseur();
-    Message_Memoire_insuffisante();
-    Effacer_curseur();
+    Display_cursor();
+    Message_out_of_memory();
+    Hide_cursor();
   }
 }
 
@@ -455,33 +455,33 @@ void Remap_picture(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
-  int   Couleur;
+  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
+  int   color;
 
   // On commence par initialiser le tableau de booléens à faux
-  for (Couleur=0;Couleur<=255;Couleur++)
-    Utilisee[Couleur]=0;
+  for (color=0;color<=255;color++)
+    used[color]=0;
 
   // On calcule la table d'utilisation des couleurs
-  for (y_pos=0;y_pos<Brouillon_Hauteur_image;y_pos++)
-    for (x_pos=0;x_pos<Brouillon_Largeur_image;x_pos++)
-      Utilisee[Lit_pixel_dans_ecran_brouillon(x_pos,y_pos)]=1;
+  for (y_pos=0;y_pos<Spare_image_height;y_pos++)
+    for (x_pos=0;x_pos<Spare_image_width;x_pos++)
+      used[Read_pixel_from_spare_screen(x_pos,y_pos)]=1;
 
-  //   On va maintenant se servir de la table "Utilisee" comme table de
+  //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
   // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans l'image, donc elles
-  //       ne seront pas utilisées par Remap_general_LOWLEVEL.
-  for (Couleur=0;Couleur<=255;Couleur++)
-    if (Utilisee[Couleur])
-      Utilisee[Couleur]=Meilleure_couleur(Brouillon_Palette[Couleur].R,Brouillon_Palette[Couleur].G,Brouillon_Palette[Couleur].B);
+  //       ne seront pas utilisées par Remap_general_lowlevel.
+  for (color=0;color<=255;color++)
+    if (used[color])
+      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_LOWLEVEL(Utilisee,Brouillon_Ecran,Brouillon_Largeur_image,Brouillon_Hauteur_image,Brouillon_Largeur_image);
+  Remap_general_lowlevel(used,Spare_screen,Spare_image_width,Spare_image_height,Spare_image_width);
 }
 
 
@@ -490,40 +490,40 @@ void Get_colors_from_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  Utilisee[256]; // Tableau de booléens "La couleur est utilisée"
-  int   Couleur;
+  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
+  int   color;
 
-  if (Demande_de_confirmation("Modify current palette ?"))
+  if (Confirmation_box("Modify current palette ?"))
   {
     Backup();
 
     // On commence par initialiser le tableau de booléen à faux
-    for (Couleur=0;Couleur<=255;Couleur++)
-      Utilisee[Couleur]=0;
+    for (color=0;color<=255;color++)
+      used[color]=0;
 
     // On calcule la table d'utilisation des couleurs
-    for (y_pos=0;y_pos<Brosse_Hauteur;y_pos++)
-      for (x_pos=0;x_pos<Brosse_Largeur;x_pos++)
-        Utilisee[Lit_pixel_dans_brosse(x_pos,y_pos)]=1;
+    for (y_pos=0;y_pos<Brush_height;y_pos++)
+      for (x_pos=0;x_pos<Brush_width;x_pos++)
+        used[Read_pixel_from_brush(x_pos,y_pos)]=1;
 
     // On recopie dans la palette principale les teintes des couleurs utilisées
     // dans la palette du brouillon
-    for (Couleur=0;Couleur<=255;Couleur++)
-      if (Utilisee[Couleur])
+    for (color=0;color<=255;color++)
+      if (used[color])
       {
-        Principal_Palette[Couleur].R=Brouillon_Palette[Couleur].R;
-        Principal_Palette[Couleur].G=Brouillon_Palette[Couleur].G;
-        Principal_Palette[Couleur].B=Brouillon_Palette[Couleur].B;
+        Main_palette[color].R=Spare_palette[color].R;
+        Main_palette[color].G=Spare_palette[color].G;
+        Main_palette[color].B=Spare_palette[color].B;
       }
 
-    Set_palette(Principal_Palette);
-    Calculer_couleurs_menu_optimales(Principal_Palette);
-    Effacer_curseur();
-    Afficher_ecran();
-    Afficher_menu();
-    Afficher_curseur();
+    Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
+    Hide_cursor();
+    Display_all_screen();
+    Display_menu();
+    Display_cursor();
 
-    Principal_Image_modifiee=1;
+    Main_image_is_modified=1;
   }
 }
 
@@ -534,286 +534,286 @@ void Get_colors_from_brush(void)
 //////////////////////////////////////////////////////////////////////////////
 
 
-void Fill(short * Limite_atteinte_Haut  , short * Limite_atteinte_Bas,
-          short * Limite_atteinte_Gauche, short * Limite_atteinte_Droite)
+void Fill(short * top_reached  , short * bottom_reached,
+          short * left_reached, short * right_reached)
 //
 //   Cette fonction fait un remplissage classique d'une zone délimitée de
-// l'image. Les limites employées sont Limite_Haut, Limite_Bas, Limite_Gauche
-// et Limite_Droite. Le point de départ du remplissage est Pinceau_X,Pinceau_Y
+// l'image. Les limites employées sont Limit_top, Limit_bottom, Limit_left
+// et Limit_right. Le point de départ du remplissage est Paintbrush_X,Paintbrush_Y
 // et s'effectue en théorie sur la couleur 1 et emploie la couleur 2 pour le
 // remplissage. Ces restrictions sont dûes à l'utilisation qu'on en fait dans
-// la fonction principale "Remplir", qui se charge de faire une gestion de
+// la fonction principale "Fill_general", qui se charge de faire une gestion de
 // tous les effets.
 //   Cette fonction ne doit pas être directement appelée.
 //
 {
   short x_pos;   // Abscisse de balayage du segment, utilisée lors de l'"affichage"
   short line;   // Ordonnée de la ligne en cours de traitement
-  short Debut_X; // Abscisse de départ du segment traité
-  short Fin_X;   // Abscisse de fin du segment traité
-  int   Modifs_effectuees;    // Booléen "On a fait une modif dans le dernier passage"
-  int   Propagation_possible; // Booléen "On peut propager la couleur dans le segment"
-  short Limite_courante_Bas;  // Intervalle vertical restreint
-  short Limite_courante_Haut;
-  int   Ligne_modifiee;       // Booléen "On a fait une modif dans la ligne"
+  short start_x; // Abscisse de départ du segment traité
+  short end_x;   // Abscisse de fin du segment traité
+  int   changes_made;    // Booléen "On a fait une modif dans le dernier passage"
+  int   can_propagate; // Booléen "On peut propager la couleur dans le segment"
+  short current_limit_bottom;  // Intervalle vertical restreint
+  short current_limit_top;
+  int   line_is_modified;       // Booléen "On a fait une modif dans la ligne"
 
-  Modifs_effectuees=1;
-  Limite_courante_Haut=Pinceau_Y;
-  Limite_courante_Bas =Min(Pinceau_Y+1,Limite_Bas);
-  *Limite_atteinte_Gauche=Pinceau_X;
-  *Limite_atteinte_Droite=Pinceau_X+1;
-  Pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y,2);
+  changes_made=1;
+  current_limit_top=Paintbrush_Y;
+  current_limit_bottom =Min(Paintbrush_Y+1,Limit_bottom);
+  *left_reached=Paintbrush_X;
+  *right_reached=Paintbrush_X+1;
+  Pixel_in_current_screen(Paintbrush_X,Paintbrush_Y,2);
 
-  while (Modifs_effectuees)
+  while (changes_made)
   {
-    Modifs_effectuees=0;
+    changes_made=0;
 
-    for (line=Limite_courante_Haut;line<=Limite_courante_Bas;line++)
+    for (line=current_limit_top;line<=current_limit_bottom;line++)
     {
-      Ligne_modifiee=0;
+      line_is_modified=0;
       // On va traiter le cas de la ligne n° line.
 
       // On commence le traitement à la gauche de l'écran
-      Debut_X=Limite_Gauche;
+      start_x=Limit_left;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
-      while (Debut_X<=Limite_Droite)
+      while (start_x<=Limit_right)
       {
         // On cherche son début
-        while((Debut_X<=Limite_Droite) &&
-                (Lit_pixel_dans_ecran_courant(Debut_X,line)!=1))
-             Debut_X++;
+        while((start_x<=Limit_right) &&
+                (Read_pixel_from_current_screen(start_x,line)!=1))
+             start_x++;
 
-        if (Debut_X<=Limite_Droite)
+        if (start_x<=Limit_right)
         {
-          // Un segment de couleur 1 existe et commence à la position Debut_X.
+          // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
-          for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
-               (Lit_pixel_dans_ecran_courant(Fin_X,line)==1);Fin_X++);
+          for (end_x=start_x+1;(end_x<=Limit_right) &&
+               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
-          // Debut_X et qui se termine en Fin_X-1.
+          // start_x et qui se termine en end_x-1.
 
           //   On va maintenant regarder si une couleur sur la périphérie
           // permet de colorier ce segment avec la couleur 2.
 
-          Propagation_possible=(
+          can_propagate=(
             // Test de la présence d'un point à gauche du segment
-            ((Debut_X>Limite_Gauche) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X-1,line)==2)) ||
+            ((start_x>Limit_left) &&
+             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
-            ((Fin_X-1<Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Fin_X    ,line)==2))
+            ((end_x-1<Limit_right) &&
+             (Read_pixel_from_current_screen(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en haut du segment
-          if (!Propagation_possible && (line>Limite_Haut))
-            for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
-              if (Lit_pixel_dans_ecran_courant(x_pos,line-1)==2)
+          if (!can_propagate && (line>Limit_top))
+            for (x_pos=start_x;x_pos<end_x;x_pos++)
+              if (Read_pixel_from_current_screen(x_pos,line-1)==2)
               {
-                Propagation_possible=1;
+                can_propagate=1;
                 break;
               }
 
-          if (Propagation_possible)
+          if (can_propagate)
           {
-            if (Debut_X<*Limite_atteinte_Gauche)
-              *Limite_atteinte_Gauche=Debut_X;
-            if (Fin_X>*Limite_atteinte_Droite)
-              *Limite_atteinte_Droite=Fin_X;
-            // On remplit le segment de Debut_X à Fin_X-1.
-            for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
-              Pixel_dans_ecran_courant(x_pos,line,2);
+            if (start_x<*left_reached)
+              *left_reached=start_x;
+            if (end_x>*right_reached)
+              *right_reached=end_x;
+            // On remplit le segment de start_x à end_x-1.
+            for (x_pos=start_x;x_pos<end_x;x_pos++)
+              Pixel_in_current_screen(x_pos,line,2);
             // On vient d'effectuer des modifications.
-            Modifs_effectuees=1;
-            Ligne_modifiee=1;
+            changes_made=1;
+            line_is_modified=1;
           }
 
-          Debut_X=Fin_X+1;
+          start_x=end_x+1;
         }
       }
 
       // Si on est en bas, et qu'on peut se propager vers le bas...
-      if ( (line==Limite_courante_Bas) &&
-           (Ligne_modifiee) &&
-           (Limite_courante_Bas<Limite_Bas) )
-        Limite_courante_Bas++; // On descend cette limite vers le bas
+      if ( (line==current_limit_bottom) &&
+           (line_is_modified) &&
+           (current_limit_bottom<Limit_bottom) )
+        current_limit_bottom++; // On descend cette limite vers le bas
     }
 
     // Pour le prochain balayage vers le haut, on va se permettre d'aller
     // voir une ligne plus haut.
-    // Si on ne le fait pas, et que la première ligne (Limite_courante_Haut)
+    // Si on ne le fait pas, et que la première ligne (current_limit_top)
     // n'était pas modifiée, alors cette limite ne serait pas remontée, donc
     // le filler ne progresserait pas vers le haut.
-    if (Limite_courante_Haut>Limite_Haut)
-      Limite_courante_Haut--;
+    if (current_limit_top>Limit_top)
+      current_limit_top--;
 
-    for (line=Limite_courante_Bas;line>=Limite_courante_Haut;line--)
+    for (line=current_limit_bottom;line>=current_limit_top;line--)
     {
-      Ligne_modifiee=0;
+      line_is_modified=0;
       // On va traiter le cas de la ligne n° line.
 
       // On commence le traitement à la gauche de l'écran
-      Debut_X=Limite_Gauche;
+      start_x=Limit_left;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
-      while (Debut_X<=Limite_Droite)
+      while (start_x<=Limit_right)
       {
         // On cherche son début
-        for (;(Debut_X<=Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X,line)!=1);Debut_X++);
+        for (;(start_x<=Limit_right) &&
+             (Read_pixel_from_current_screen(start_x,line)!=1);start_x++);
 
-        if (Debut_X<=Limite_Droite)
+        if (start_x<=Limit_right)
         {
-          // Un segment de couleur 1 existe et commence à la position Debut_X.
+          // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
-          for (Fin_X=Debut_X+1;(Fin_X<=Limite_Droite) &&
-               (Lit_pixel_dans_ecran_courant(Fin_X,line)==1);Fin_X++);
+          for (end_x=start_x+1;(end_x<=Limit_right) &&
+               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
-          // Debut_X et qui se termine en Fin_X-1.
+          // start_x et qui se termine en end_x-1.
 
           //   On va maintenant regarder si une couleur sur la périphérie
           // permet de colorier ce segment avec la couleur 2.
 
-          Propagation_possible=(
+          can_propagate=(
             // Test de la présence d'un point à gauche du segment
-            ((Debut_X>Limite_Gauche) &&
-             (Lit_pixel_dans_ecran_courant(Debut_X-1,line)==2)) ||
+            ((start_x>Limit_left) &&
+             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
-            ((Fin_X-1<Limite_Droite) &&
-             (Lit_pixel_dans_ecran_courant(Fin_X    ,line)==2))
+            ((end_x-1<Limit_right) &&
+             (Read_pixel_from_current_screen(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en bas du segment
-          if (!Propagation_possible && (line<Limite_Bas))
-            for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
-              if (Lit_pixel_dans_ecran_courant(x_pos,line+1)==2)
+          if (!can_propagate && (line<Limit_bottom))
+            for (x_pos=start_x;x_pos<end_x;x_pos++)
+              if (Read_pixel_from_current_screen(x_pos,line+1)==2)
               {
-                Propagation_possible=1;
+                can_propagate=1;
                 break;
               }
 
-          if (Propagation_possible)
+          if (can_propagate)
           {
-            if (Debut_X<*Limite_atteinte_Gauche)
-              *Limite_atteinte_Gauche=Debut_X;
-            if (Fin_X>*Limite_atteinte_Droite)
-              *Limite_atteinte_Droite=Fin_X;
-            // On remplit le segment de Debut_X à Fin_X-1.
-            for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
-              Pixel_dans_ecran_courant(x_pos,line,2);
+            if (start_x<*left_reached)
+              *left_reached=start_x;
+            if (end_x>*right_reached)
+              *right_reached=end_x;
+            // On remplit le segment de start_x à end_x-1.
+            for (x_pos=start_x;x_pos<end_x;x_pos++)
+              Pixel_in_current_screen(x_pos,line,2);
             // On vient d'effectuer des modifications.
-            Modifs_effectuees=1;
-            Ligne_modifiee=1;
+            changes_made=1;
+            line_is_modified=1;
           }
 
-          Debut_X=Fin_X+1;
+          start_x=end_x+1;
         }
       }
 
       // Si on est en haut, et qu'on peut se propager vers le haut...
-      if ( (line==Limite_courante_Haut) &&
-           (Ligne_modifiee) &&
-           (Limite_courante_Haut>Limite_Haut) )
-        Limite_courante_Haut--; // On monte cette limite vers le haut
+      if ( (line==current_limit_top) &&
+           (line_is_modified) &&
+           (current_limit_top>Limit_top) )
+        current_limit_top--; // On monte cette limite vers le haut
     }
   }
 
-  *Limite_atteinte_Haut=Limite_courante_Haut;
-  *Limite_atteinte_Bas =Limite_courante_Bas;
-  (*Limite_atteinte_Droite)--;
+  *top_reached=current_limit_top;
+  *bottom_reached =current_limit_bottom;
+  (*right_reached)--;
 } // end de la routine de remplissage "Fill"
 
 
-void Remplir(byte Couleur_de_remplissage)
+void Fill_general(byte fill_color)
 //
 //  Cette fonction fait un remplissage qui gère tous les effets. Elle fait
 // appel à "Fill()".
 //
 {
-  byte   Forme_curseur_avant_remplissage;
-  byte * FX_Feedback_Ecran_avant_remplissage;
+  byte   cursor_shape_before_fill;
+  byte * old_fx_feedback_screen;
   short  x_pos,y_pos;
-  short  Limite_atteinte_Haut  ,Limite_atteinte_Bas;
-  short  Limite_atteinte_Gauche,Limite_atteinte_Droite;
-  byte   Table_de_remplacement[256];
+  short  top_reached  ,bottom_reached;
+  short  left_reached,right_reached;
+  byte   replace_table[256];
 
 
   // Avant toute chose, on vérifie que l'on n'est pas en train de remplir
   // en dehors de l'image:
 
-  if ( (Pinceau_X>=Limite_Gauche) &&
-       (Pinceau_X<=Limite_Droite) &&
-       (Pinceau_Y>=Limite_Haut)   &&
-       (Pinceau_Y<=Limite_Bas) )
+  if ( (Paintbrush_X>=Limit_left) &&
+       (Paintbrush_X<=Limit_right) &&
+       (Paintbrush_Y>=Limit_top)   &&
+       (Paintbrush_Y<=Limit_bottom) )
   {
     // On suppose que le curseur est déjà caché.
-    // Effacer_curseur();
+    // Hide_cursor();
 
     //   On va faire patienter l'utilisateur en lui affichant un joli petit
     // sablier:
-    Forme_curseur_avant_remplissage=Forme_curseur;
-    Forme_curseur=FORME_CURSEUR_SABLIER;
-    Afficher_curseur();
+    cursor_shape_before_fill=Cursor_shape;
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Display_cursor();
 
     // On commence par effectuer un backup de l'image.
     Backup();
 
     // On fait attention au Feedback qui DOIT se faire avec le backup.
-    FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
-    FX_Feedback_Ecran=Ecran_backup;
+    old_fx_feedback_screen=FX_feedback_screen;
+    FX_feedback_screen=Screen_backup;
 
     // On va maintenant "épurer" la zone visible de l'image:
-    memset(Table_de_remplacement,0,256);
-    Table_de_remplacement[Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y)]=1;
-    Remplacer_toutes_les_couleurs_dans_limites(Table_de_remplacement);
+    memset(replace_table,0,256);
+    replace_table[Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y)]=1;
+    Replace_colors_within_limits(replace_table);
 
     // On fait maintenant un remplissage classique de la couleur 1 avec la 2
-   Fill(&Limite_atteinte_Haut  ,&Limite_atteinte_Bas,
-         &Limite_atteinte_Gauche,&Limite_atteinte_Droite);
+   Fill(&top_reached  ,&bottom_reached,
+         &left_reached,&right_reached);
 
     //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
     // faut donc retirer de l'écran le curseur:
-    Effacer_curseur();
-    Forme_curseur=Forme_curseur_avant_remplissage;
+    Hide_cursor();
+    Cursor_shape=cursor_shape_before_fill;
 
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
-    if (Limite_atteinte_Haut>Limite_Haut)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,                    // Source
-                                               Limite_Gauche,Limite_Haut,       // Pos X et Y dans source
-                                               (Limite_Droite-Limite_Gauche)+1, // width copie
-                                               Limite_atteinte_Haut-Limite_Haut,// height copie
-                                               Principal_Largeur_image,         // width de la source
-                                               Principal_Ecran,                 // Destination
-                                               Limite_Gauche,Limite_Haut,       // Pos X et Y destination
-                                               Principal_Largeur_image);        // width destination
-    if (Limite_atteinte_Bas<Limite_Bas)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
-                                               Limite_Gauche,Limite_atteinte_Bas+1,
-                                               (Limite_Droite-Limite_Gauche)+1,
-                                               Limite_Bas-Limite_atteinte_Bas,
-                                               Principal_Largeur_image,Principal_Ecran,
-                                               Limite_Gauche,Limite_atteinte_Bas+1,Principal_Largeur_image);
-    if (Limite_atteinte_Gauche>Limite_Gauche)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
-                                               Limite_Gauche,Limite_atteinte_Haut,
-                                               Limite_atteinte_Gauche-Limite_Gauche,
-                                               (Limite_atteinte_Bas-Limite_atteinte_Haut)+1,
-                                               Principal_Largeur_image,Principal_Ecran,
-                                               Limite_Gauche,Limite_atteinte_Haut,Principal_Largeur_image);
-    if (Limite_atteinte_Droite<Limite_Droite)
-      Copier_une_partie_d_image_dans_une_autre(Ecran_backup,
-                                               Limite_atteinte_Droite+1,Limite_atteinte_Haut,
-                                               Limite_Droite-Limite_atteinte_Droite,
-                                               (Limite_atteinte_Bas-Limite_atteinte_Haut)+1,
-                                               Principal_Largeur_image,Principal_Ecran,
-                                               Limite_atteinte_Droite+1,Limite_atteinte_Haut,Principal_Largeur_image);
+    if (top_reached>Limit_top)
+      Copy_part_of_image_to_another(Screen_backup,                    // source
+                                               Limit_left,Limit_top,       // Pos X et Y dans source
+                                               (Limit_right-Limit_left)+1, // width copie
+                                               top_reached-Limit_top,// height copie
+                                               Main_image_width,         // width de la source
+                                               Main_screen,                 // Destination
+                                               Limit_left,Limit_top,       // Pos X et Y destination
+                                               Main_image_width);        // width destination
+    if (bottom_reached<Limit_bottom)
+      Copy_part_of_image_to_another(Screen_backup,
+                                               Limit_left,bottom_reached+1,
+                                               (Limit_right-Limit_left)+1,
+                                               Limit_bottom-bottom_reached,
+                                               Main_image_width,Main_screen,
+                                               Limit_left,bottom_reached+1,Main_image_width);
+    if (left_reached>Limit_left)
+      Copy_part_of_image_to_another(Screen_backup,
+                                               Limit_left,top_reached,
+                                               left_reached-Limit_left,
+                                               (bottom_reached-top_reached)+1,
+                                               Main_image_width,Main_screen,
+                                               Limit_left,top_reached,Main_image_width);
+    if (right_reached<Limit_right)
+      Copy_part_of_image_to_another(Screen_backup,
+                                               right_reached+1,top_reached,
+                                               Limit_right-right_reached,
+                                               (bottom_reached-top_reached)+1,
+                                               Main_image_width,Main_screen,
+                                               right_reached+1,top_reached,Main_image_width);
 
-    for (y_pos=Limite_atteinte_Haut;y_pos<=Limite_atteinte_Bas;y_pos++)
-      for (x_pos=Limite_atteinte_Gauche;x_pos<=Limite_atteinte_Droite;x_pos++)
-        if (Lit_pixel_dans_ecran_courant(x_pos,y_pos)==2)
+    for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
+      for (x_pos=left_reached;x_pos<=right_reached;x_pos++)
+        if (Read_pixel_from_current_screen(x_pos,y_pos)==2)
         {
           //   Si le pixel en cours de traitement a été touché par le Fill()
           // on se doit d'afficher le pixel modifié par la couleur de
@@ -822,24 +822,24 @@ void Remplir(byte Couleur_de_remplissage)
           //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
           // précédemment (c'est important pour que les effets ne s'emmèlent
           // pas le pinceaux)
-          Pixel_dans_ecran_courant(x_pos,y_pos,Lit_pixel_dans_ecran_backup(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
 
           //  Enfin, on peut afficher le pixel, en le soumettant aux effets en
           // cours:
-          Afficher_pixel(x_pos,y_pos,Couleur_de_remplissage);
+          Display_pixel(x_pos,y_pos,fill_color);
         }
         else
-          Pixel_dans_ecran_courant(x_pos,y_pos,Lit_pixel_dans_ecran_backup(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
 
-    FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;
+    FX_feedback_screen=old_fx_feedback_screen;
 
     //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
     // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
     // puisque les seuls points qui ont changé dans l'image ont été raffichés
-    // par l'utilisation de "Afficher_pixel()", et que les autres... eh bein
+    // par l'utilisation de "Display_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
 
-    UpdateRect(0,0,0,0);
+    Update_rect(0,0,0,0);
   }
 }
 
@@ -852,227 +852,227 @@ void Remplir(byte Couleur_de_remplissage)
 
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
-  void Pixel_figure_Definitif(word x_pos,word y_pos,byte Couleur)
+  void Pixel_figure_permanent(word x_pos,word y_pos,byte color)
   {
-    Afficher_pinceau(x_pos,y_pos,Couleur,0);
+    Display_paintbrush(x_pos,y_pos,color,0);
   }
 
   // Affichage d'un point de façon définitive
-  void Pixel_clippe(word x_pos,word y_pos,byte Couleur)
+  void Pixel_clipped(word x_pos,word y_pos,byte color)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-    Afficher_pixel(x_pos,y_pos,Couleur);
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+    Display_pixel(x_pos,y_pos,color);
   }
   
   // Affichage d'un point pour une preview
-  void Pixel_figure_Preview(word x_pos,word y_pos,byte Couleur)
+  void Pixel_figure_preview(word x_pos,word y_pos,byte color)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-      Pixel_Preview(x_pos,y_pos,Couleur);
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+      Pixel_preview(x_pos,y_pos,color);
   }
   // Affichage d'un point pour une preview, avec sa propre couleur
-  void Pixel_figure_Preview_auto(word x_pos,word y_pos)
+  void Pixel_figure_preview_auto(word x_pos,word y_pos)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-      Pixel_Preview(x_pos,y_pos,Lit_pixel_dans_ecran_courant(x_pos,y_pos));
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+      Pixel_preview(x_pos,y_pos,Read_pixel_from_current_screen(x_pos,y_pos));
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_Preview_xor(word x_pos,word y_pos,__attribute__((unused)) byte Couleur)
+  void Pixel_figure_preview_xor(word x_pos,word y_pos,__attribute__((unused)) byte color)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-      Pixel_Preview(x_pos,y_pos,~Lit_pixel(x_pos-Principal_Decalage_X,
-                                           y_pos-Principal_Decalage_Y));
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+      Pixel_preview(x_pos,y_pos,~Read_pixel(x_pos-Main_offset_X,
+                                           y_pos-Main_offset_Y));
   }
   
   // Affichage d'un point pour une preview en xor additif
   // (Il lit la couleur depuis la page backup)
-  void Pixel_figure_Preview_xorback(word x_pos,word y_pos,__attribute__((unused)) byte Couleur)
+  void Pixel_figure_preview_xorback(word x_pos,word y_pos,__attribute__((unused)) byte color)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-      Pixel_Preview(x_pos,y_pos,~Ecran_backup[x_pos+y_pos*Principal_Largeur_image]);
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+      Pixel_preview(x_pos,y_pos,~Screen_backup[x_pos+y_pos*Main_image_width]);
   }
   
 
   // Effacement d'un point de preview
-  void Pixel_figure_Effacer_preview(word x_pos,word y_pos,__attribute__((unused)) byte Couleur)
+  void Pixel_figure_clear_preview(word x_pos,word y_pos,__attribute__((unused)) byte color)
   {
-    if ( (x_pos>=Limite_Gauche) &&
-         (x_pos<=Limite_Droite) &&
-         (y_pos>=Limite_Haut)   &&
-         (y_pos<=Limite_Bas) )
-      Pixel_Preview(x_pos,y_pos,Lit_pixel_dans_ecran_courant(x_pos,y_pos));
+    if ( (x_pos>=Limit_left) &&
+         (x_pos<=Limit_right) &&
+         (y_pos>=Limit_top)   &&
+         (y_pos<=Limit_bottom) )
+      Pixel_preview(x_pos,y_pos,Read_pixel_from_current_screen(x_pos,y_pos));
   }
 
   // Affichage d'un point dans la brosse
-  void Pixel_figure_Dans_brosse(word x_pos,word y_pos,byte Couleur)
+  void Pixel_figure_in_brush(word x_pos,word y_pos,byte color)
   {
-    x_pos-=Brosse_Decalage_X;
-    y_pos-=Brosse_Decalage_Y;
-    if ( (x_pos<Brosse_Largeur) && // Les pos sont des word donc jamais < 0 ...
-         (y_pos<Brosse_Hauteur) )
-      Pixel_dans_brosse(x_pos,y_pos,Couleur);
+    x_pos-=Brush_offset_X;
+    y_pos-=Brush_offset_Y;
+    if ( (x_pos<Brush_width) && // Les pos sont des word donc jamais < 0 ...
+         (y_pos<Brush_height) )
+      Pixel_in_brush(x_pos,y_pos,color);
   }
 
 
   // -- Tracer général d'un cercle vide -------------------------------------
 
-void Tracer_cercle_vide_General(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
+void Draw_empy_circle_general(short center_x,short center_y,short radius,byte color)
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
   short x_pos;
   short y_pos;
 
   // Ensuite, on va parcourire le quart haut gauche du cercle
-  Debut_X=Centre_X-Rayon;
-  Debut_Y=Centre_Y-Rayon;
+  start_x=center_x-radius;
+  start_y=center_y-radius;
 
   // Affichage des extremitées du cercle sur chaque quart du cercle:
-  for (y_pos=Debut_Y,Cercle_Curseur_Y=-Rayon;y_pos<Centre_Y;y_pos++,Cercle_Curseur_Y++)
-    for (x_pos=Debut_X,Cercle_Curseur_X=-Rayon;x_pos<Centre_X;x_pos++,Cercle_Curseur_X++)
-      if (Pixel_dans_cercle())
+  for (y_pos=start_y,Circle_cursor_Y=-radius;y_pos<center_y;y_pos++,Circle_cursor_Y++)
+    for (x_pos=start_x,Circle_cursor_X=-radius;x_pos<center_x;x_pos++,Circle_cursor_X++)
+      if (Pixel_in_circle())
       {
         // On vient de tomber sur le premier point sur la ligne horizontale
         // qui fait partie du cercle.
         // Donc on peut l'afficher (lui et ses copains symétriques)
 
          // Quart Haut-gauche
-        Pixel_figure(x_pos,y_pos,Couleur);
+        Pixel_figure(x_pos,y_pos,color);
          // Quart Haut-droite
-        Pixel_figure((Centre_X<<1)-x_pos,y_pos,Couleur);
+        Pixel_figure((center_x<<1)-x_pos,y_pos,color);
          // Quart Bas-droite
-        Pixel_figure((Centre_X<<1)-x_pos,(Centre_Y<<1)-y_pos,Couleur);
+        Pixel_figure((center_x<<1)-x_pos,(center_y<<1)-y_pos,color);
          // Quart Bas-gauche
-        Pixel_figure(x_pos,(Centre_Y<<1)-y_pos,Couleur);
+        Pixel_figure(x_pos,(center_y<<1)-y_pos,color);
 
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas au cercle:
-        for (Cercle_Curseur_Y--,x_pos++,Cercle_Curseur_X++;x_pos<Centre_X;x_pos++,Cercle_Curseur_X++)
-          if (!Pixel_dans_cercle())
+        for (Circle_cursor_Y--,x_pos++,Circle_cursor_X++;x_pos<center_x;x_pos++,Circle_cursor_X++)
+          if (!Pixel_in_circle())
           {
              // Quart Haut-gauche
-            Pixel_figure(x_pos,y_pos,Couleur);
+            Pixel_figure(x_pos,y_pos,color);
              // Quart Haut-droite
-            Pixel_figure((Centre_X<<1)-x_pos,y_pos,Couleur);
+            Pixel_figure((center_x<<1)-x_pos,y_pos,color);
              // Quart Bas-gauche
-            Pixel_figure(x_pos,(Centre_Y<<1)-y_pos,Couleur);
+            Pixel_figure(x_pos,(center_y<<1)-y_pos,color);
              // Quart Bas-droite
-            Pixel_figure((Centre_X<<1)-x_pos,(Centre_Y<<1)-y_pos,Couleur);
+            Pixel_figure((center_x<<1)-x_pos,(center_y<<1)-y_pos,color);
           }
           else
             break;
 
-        Cercle_Curseur_Y++;
+        Circle_cursor_Y++;
         break;
       }
 
   // On affiche à la fin les points cardinaux:
-  Pixel_figure(Centre_X,Centre_Y-Rayon,Couleur); // Haut
-  Pixel_figure(Centre_X-Rayon,Centre_Y,Couleur); // Gauche
-  Pixel_figure(Centre_X+Rayon,Centre_Y,Couleur); // Droite
-  Pixel_figure(Centre_X,Centre_Y+Rayon,Couleur); // Bas
+  Pixel_figure(center_x,center_y-radius,color); // Haut
+  Pixel_figure(center_x-radius,center_y,color); // Gauche
+  Pixel_figure(center_x+radius,center_y,color); // Droite
+  Pixel_figure(center_x,center_y+radius,color); // Bas
 
-  if(Loupe_Mode) Mettre_Ecran_A_Jour(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
+  if(Main_magnifier_mode) Update_part_of_screen(center_x-radius,center_y-radius,2*radius+1,2*radius+1);
 }
 
   // -- Tracé définitif d'un cercle vide --
 
-void Tracer_cercle_vide_Definitif(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
+void Draw_empy_circle_permanent(short center_x,short center_y,short radius,byte color)
 {
-  Pixel_figure=Pixel_figure_Definitif;
-  Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,Couleur);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
+  Pixel_figure=Pixel_figure_permanent;
+  Draw_empy_circle_general(center_x,center_y,radius,color);
+  Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Tracer la preview d'un cercle vide --
 
-void Tracer_cercle_vide_Preview(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
+void Draw_empy_circle_preview(short center_x,short center_y,short radius,byte color)
 {
-  Pixel_figure=Pixel_figure_Preview;
-  Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,Couleur);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
+  Pixel_figure=Pixel_figure_preview;
+  Draw_empy_circle_general(center_x,center_y,radius,color);
+  Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Effacer la preview d'un cercle vide --
 
-void Effacer_cercle_vide_Preview(short Centre_X,short Centre_Y,short Rayon)
+void Hide_empty_circle_preview(short center_x,short center_y,short radius)
 {
-  Pixel_figure=Pixel_figure_Effacer_preview;
-  Tracer_cercle_vide_General(Centre_X,Centre_Y,Rayon,0);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon, Centre_Y - Rayon, 2* Rayon+1, 2*Rayon+1);
+  Pixel_figure=Pixel_figure_clear_preview;
+  Draw_empy_circle_general(center_x,center_y,radius,0);
+  Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Tracer un cercle plein --
 
-void Tracer_cercle_plein(short Centre_X,short Centre_Y,short Rayon,byte Couleur)
+void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
   short x_pos;
   short y_pos;
-  short Fin_X;
-  short Fin_Y;
+  short end_x;
+  short end_y;
 
-  Debut_X=Centre_X-Rayon;
-  Debut_Y=Centre_Y-Rayon;
-  Fin_X=Centre_X+Rayon;
-  Fin_Y=Centre_Y+Rayon;
+  start_x=center_x-radius;
+  start_y=center_y-radius;
+  end_x=center_x+radius;
+  end_y=center_y+radius;
 
   // Correction des bornes d'après les limites
-  if (Debut_Y<Limite_Haut)
-    Debut_Y=Limite_Haut;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
-  if (Debut_X<Limite_Gauche)
-    Debut_X=Limite_Gauche;
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
 
   // Affichage du cercle
-  for (y_pos=Debut_Y,Cercle_Curseur_Y=(long)Debut_Y-Centre_Y;y_pos<=Fin_Y;y_pos++,Cercle_Curseur_Y++)
-    for (x_pos=Debut_X,Cercle_Curseur_X=(long)Debut_X-Centre_X;x_pos<=Fin_X;x_pos++,Cercle_Curseur_X++)
-      if (Pixel_dans_cercle())
-        Afficher_pixel(x_pos,y_pos,Couleur);
+  for (y_pos=start_y,Circle_cursor_Y=(long)start_y-center_y;y_pos<=end_y;y_pos++,Circle_cursor_Y++)
+    for (x_pos=start_x,Circle_cursor_X=(long)start_x-center_x;x_pos<=end_x;x_pos++,Circle_cursor_X++)
+      if (Pixel_in_circle())
+        Display_pixel(x_pos,y_pos,color);
 
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X+1-Debut_X,Fin_Y+1-Debut_Y);
+  Update_part_of_screen(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 }
 
 
   // -- Tracer général d'une ellipse vide -----------------------------------
 
-void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
+void Draw_empy_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
   short x_pos;
   short y_pos;
 
-  Debut_X=Centre_X-Rayon_horizontal;
-  Debut_Y=Centre_Y-Rayon_vertical;
+  start_x=center_x-horizontal_radius;
+  start_y=center_y-vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_Calculer_limites(Rayon_horizontal+1,Rayon_vertical+1);
+  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
 
   // Affichage des extremitées de l'ellipse sur chaque quart de l'ellipse:
-  for (y_pos=Debut_Y,Ellipse_Curseur_Y=-Rayon_vertical;y_pos<Centre_Y;y_pos++,Ellipse_Curseur_Y++)
-    for (x_pos=Debut_X,Ellipse_Curseur_X=-Rayon_horizontal;x_pos<Centre_X;x_pos++,Ellipse_Curseur_X++)
-      if (Pixel_dans_ellipse())
+  for (y_pos=start_y,Ellipse_cursor_Y=-vertical_radius;y_pos<center_y;y_pos++,Ellipse_cursor_Y++)
+    for (x_pos=start_x,Ellipse_cursor_X=-horizontal_radius;x_pos<center_x;x_pos++,Ellipse_cursor_X++)
+      if (Pixel_in_ellipse())
       {
         // On vient de tomber sur le premier point qui sur la ligne
         // horizontale fait partie de l'ellipse.
@@ -1080,129 +1080,129 @@ void Tracer_ellipse_vide_General(short Centre_X,short Centre_Y,short Rayon_horiz
         // Donc on peut l'afficher (lui et ses copains symétriques)
 
          // Quart Haut-gauche
-        Pixel_figure(x_pos,y_pos,Couleur);
+        Pixel_figure(x_pos,y_pos,color);
          // Quart Haut-droite
-        Pixel_figure((Centre_X<<1)-x_pos,y_pos,Couleur);
+        Pixel_figure((center_x<<1)-x_pos,y_pos,color);
          // Quart Bas-gauche
-        Pixel_figure(x_pos,(Centre_Y<<1)-y_pos,Couleur);
+        Pixel_figure(x_pos,(center_y<<1)-y_pos,color);
          // Quart Bas-droite
-        Pixel_figure((Centre_X<<1)-x_pos,(Centre_Y<<1)-y_pos,Couleur);
+        Pixel_figure((center_x<<1)-x_pos,(center_y<<1)-y_pos,color);
 
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas à l'ellipse:
-        for (Ellipse_Curseur_Y--,x_pos++,Ellipse_Curseur_X++;x_pos<Centre_X;x_pos++,Ellipse_Curseur_X++)
-          if (!Pixel_dans_ellipse())
+        for (Ellipse_cursor_Y--,x_pos++,Ellipse_cursor_X++;x_pos<center_x;x_pos++,Ellipse_cursor_X++)
+          if (!Pixel_in_ellipse())
           {
              // Quart Haut-gauche
-            Pixel_figure(x_pos,y_pos,Couleur);
+            Pixel_figure(x_pos,y_pos,color);
              // Quart Haut-droite
-            Pixel_figure((Centre_X<<1)-x_pos,y_pos,Couleur);
+            Pixel_figure((center_x<<1)-x_pos,y_pos,color);
              // Quart Bas-gauche
-            Pixel_figure(x_pos,(Centre_Y<<1)-y_pos,Couleur);
+            Pixel_figure(x_pos,(center_y<<1)-y_pos,color);
              // Quart Bas-droite
-            Pixel_figure((Centre_X<<1)-x_pos,(Centre_Y<<1)-y_pos,Couleur);
+            Pixel_figure((center_x<<1)-x_pos,(center_y<<1)-y_pos,color);
           }
           else
             break;
 
-        Ellipse_Curseur_Y++;
+        Ellipse_cursor_Y++;
         break;
       }
 
   // On affiche à la fin les points cardinaux:
 
-  // Points verticaux:
-  x_pos=Centre_X;
-  Ellipse_Curseur_X=-1;
-  for (y_pos=Centre_Y+1-Rayon_vertical,Ellipse_Curseur_Y=-Rayon_vertical+1;y_pos<Centre_Y+Rayon_vertical;y_pos++,Ellipse_Curseur_Y++)
-    if (!Pixel_dans_ellipse())
-      Pixel_figure(x_pos,y_pos,Couleur);
+  // points verticaux:
+  x_pos=center_x;
+  Ellipse_cursor_X=-1;
+  for (y_pos=center_y+1-vertical_radius,Ellipse_cursor_Y=-vertical_radius+1;y_pos<center_y+vertical_radius;y_pos++,Ellipse_cursor_Y++)
+    if (!Pixel_in_ellipse())
+      Pixel_figure(x_pos,y_pos,color);
 
-  // Points horizontaux:
-  y_pos=Centre_Y;
-  Ellipse_Curseur_Y=-1;
-  for (x_pos=Centre_X+1-Rayon_horizontal,Ellipse_Curseur_X=-Rayon_horizontal+1;x_pos<Centre_X+Rayon_horizontal;x_pos++,Ellipse_Curseur_X++)
-    if (!Pixel_dans_ellipse())
-      Pixel_figure(x_pos,y_pos,Couleur);
+  // points horizontaux:
+  y_pos=center_y;
+  Ellipse_cursor_Y=-1;
+  for (x_pos=center_x+1-horizontal_radius,Ellipse_cursor_X=-horizontal_radius+1;x_pos<center_x+horizontal_radius;x_pos++,Ellipse_cursor_X++)
+    if (!Pixel_in_ellipse())
+      Pixel_figure(x_pos,y_pos,color);
 
-  Pixel_figure(Centre_X,Centre_Y-Rayon_vertical,Couleur);   // Haut
-  Pixel_figure(Centre_X-Rayon_horizontal,Centre_Y,Couleur); // Gauche
-  Pixel_figure(Centre_X+Rayon_horizontal,Centre_Y,Couleur); // Droite
-  Pixel_figure(Centre_X,Centre_Y+Rayon_vertical,Couleur);   // Bas
+  Pixel_figure(center_x,center_y-vertical_radius,color);   // Haut
+  Pixel_figure(center_x-horizontal_radius,center_y,color); // Gauche
+  Pixel_figure(center_x+horizontal_radius,center_y,color); // Droite
+  Pixel_figure(center_x,center_y+vertical_radius,color);   // Bas
 
-  Mettre_Ecran_A_Jour(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
 }
 
   // -- Tracé définitif d'une ellipse vide --
 
-void Tracer_ellipse_vide_Definitif(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
+void Draw_empy_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
-  Pixel_figure=Pixel_figure_Definitif;
-  Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical+1);
+  Pixel_figure=Pixel_figure_permanent;
+  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
+  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
 
   // -- Tracer la preview d'une ellipse vide --
 
-void Tracer_ellipse_vide_Preview(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
+void Draw_empy_ellipse_preview(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
-  Pixel_figure=Pixel_figure_Preview;
-  Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,Couleur);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical +1);
+  Pixel_figure=Pixel_figure_preview;
+  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
+  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius +1);
 }
 
   // -- Effacer la preview d'une ellipse vide --
 
-void Effacer_ellipse_vide_Preview(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical)
+void Hide_empty_ellipse_preview(short center_x,short center_y,short horizontal_radius,short vertical_radius)
 {
-  Pixel_figure=Pixel_figure_Effacer_preview;
-  Tracer_ellipse_vide_General(Centre_X,Centre_Y,Rayon_horizontal,Rayon_vertical,0);
-  Mettre_Ecran_A_Jour(Centre_X - Rayon_horizontal, Centre_Y - Rayon_vertical, 2* Rayon_horizontal+1, 2*Rayon_vertical+1);
+  Pixel_figure=Pixel_figure_clear_preview;
+  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,0);
+  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
 
   // -- Tracer une ellipse pleine --
 
-void Tracer_ellipse_pleine(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,byte Couleur)
+void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
-  short Debut_X;
-  short Debut_Y;
+  short start_x;
+  short start_y;
   short x_pos;
   short y_pos;
-  short Fin_X;
-  short Fin_Y;
+  short end_x;
+  short end_y;
 
-  Debut_X=Centre_X-Rayon_horizontal;
-  Debut_Y=Centre_Y-Rayon_vertical;
-  Fin_X=Centre_X+Rayon_horizontal;
-  Fin_Y=Centre_Y+Rayon_vertical;
+  start_x=center_x-horizontal_radius;
+  start_y=center_y-vertical_radius;
+  end_x=center_x+horizontal_radius;
+  end_y=center_y+vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_Calculer_limites(Rayon_horizontal+1,Rayon_vertical+1);
+  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
 
   // Correction des bornes d'après les limites
-  if (Debut_Y<Limite_Haut)
-    Debut_Y=Limite_Haut;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
-  if (Debut_X<Limite_Gauche)
-    Debut_X=Limite_Gauche;
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
 
   // Affichage de l'ellipse
-  for (y_pos=Debut_Y,Ellipse_Curseur_Y=Debut_Y-Centre_Y;y_pos<=Fin_Y;y_pos++,Ellipse_Curseur_Y++)
-    for (x_pos=Debut_X,Ellipse_Curseur_X=Debut_X-Centre_X;x_pos<=Fin_X;x_pos++,Ellipse_Curseur_X++)
-      if (Pixel_dans_ellipse())
-        Afficher_pixel(x_pos,y_pos,Couleur);
-  Mettre_Ecran_A_Jour(Centre_X-Rayon_horizontal,Centre_Y-Rayon_vertical,2*Rayon_horizontal+1,2*Rayon_vertical+1);
+  for (y_pos=start_y,Ellipse_cursor_Y=start_y-center_y;y_pos<=end_y;y_pos++,Ellipse_cursor_Y++)
+    for (x_pos=start_x,Ellipse_cursor_X=start_x-center_x;x_pos<=end_x;x_pos++,Ellipse_cursor_X++)
+      if (Pixel_in_ellipse())
+        Display_pixel(x_pos,y_pos,color);
+  Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
 }
 
 /******************
 * TRACÉ DE LIGNES *
 ******************/
 
-void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
-// Modifie BX et BY pour que la ligne AXAY - BXBY soit
+void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by)
+// Modifie bx et by pour que la ligne AXAY - BXBY soit
 //  - une droite horizontale
 //  - une droite verticale
 //  - une droite avec une pente de 45 degrés
@@ -1210,8 +1210,8 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
     int dx, dy;
     float tan;
 
-    dx = (*BX)-AX;
-    dy = AY- *BY; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
+    dx = (*bx)-ax;
+    dy = ay- *by; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
 
     if (dx==0) return; // On est en lockx et de toutes façons le X n'a pas bougé, on sort tout de suite pour éviter une méchante division par 0
 
@@ -1220,24 +1220,24 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
     if (tan <= 0.4142 && tan >= -0.4142)
     {
       // Cas 1 : Lock Y
-      *BY = AY;
+      *by = ay;
     }
     else if ( tan > 0.4142 && tan < 2.4142)
     {
       // Cas 2 : dy=dx
-      *BY = (*BY + AY - dx)/2;
-      *BX = AX  + AY - *BY;
+      *by = (*by + ay - dx)/2;
+      *bx = ax  + ay - *by;
     }
     else if (tan < -0.4142 && tan >= -2.4142)
     {
       // Cas 8 : dy = -dx
-      *BY = (*BY + AY + dx)/2;
-      *BX = AX  - AY + *BY;
+      *by = (*by + ay + dx)/2;
+      *bx = ax  - ay + *by;
     }
     else
     {
       // Cas 3 : Lock X
-      *BX = AX;
+      *bx = ax;
     }
 
     return;
@@ -1245,214 +1245,214 @@ void Rectifier_coordonnees_a_45_degres(short AX, short AY, short* BX, short* BY)
 
   // -- Tracer général d'une ligne ------------------------------------------
 
-void Tracer_ligne_General(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
+void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color)
 {
   short x_pos,y_pos;
-  short Incr_X,Incr_Y;
-  short i,Cumul;
-  short Delta_X,Delta_Y;
+  short incr_x,incr_y;
+  short i,cumul;
+  short delta_x,delta_y;
 
 
-  x_pos=Debut_X;
-  y_pos=Debut_Y;
+  x_pos=start_x;
+  y_pos=start_y;
 
-  if (Debut_X<Fin_X)
+  if (start_x<end_x)
   {
-    Incr_X=+1;
-    Delta_X=Fin_X-Debut_X;
+    incr_x=+1;
+    delta_x=end_x-start_x;
   }
   else
   {
-    Incr_X=-1;
-    Delta_X=Debut_X-Fin_X;
+    incr_x=-1;
+    delta_x=start_x-end_x;
   }
 
-  if (Debut_Y<Fin_Y)
+  if (start_y<end_y)
   {
-    Incr_Y=+1;
-    Delta_Y=Fin_Y-Debut_Y;
+    incr_y=+1;
+    delta_y=end_y-start_y;
   }
   else
   {
-    Incr_Y=-1;
-    Delta_Y=Debut_Y-Fin_Y;
+    incr_y=-1;
+    delta_y=start_y-end_y;
   }
 
-  if (Delta_Y>Delta_X)
+  if (delta_y>delta_x)
   {
-    Cumul=Delta_Y>>1;
-    for (i=1; i<Delta_Y; i++)
+    cumul=delta_y>>1;
+    for (i=1; i<delta_y; i++)
     {
-      y_pos+=Incr_Y;
-      Cumul+=Delta_X;
-      if (Cumul>=Delta_Y)
+      y_pos+=incr_y;
+      cumul+=delta_x;
+      if (cumul>=delta_y)
       {
-        Cumul-=Delta_Y;
-        x_pos+=Incr_X;
+        cumul-=delta_y;
+        x_pos+=incr_x;
       }
-      Pixel_figure(x_pos,y_pos,Couleur);
+      Pixel_figure(x_pos,y_pos,color);
     }
   }
   else
   {
-    Cumul=Delta_X>>1;
-    for (i=1; i<Delta_X; i++)
+    cumul=delta_x>>1;
+    for (i=1; i<delta_x; i++)
     {
-      x_pos+=Incr_X;
-      Cumul+=Delta_Y;
-      if (Cumul>=Delta_X)
+      x_pos+=incr_x;
+      cumul+=delta_y;
+      if (cumul>=delta_x)
       {
-        Cumul-=Delta_X;
-        y_pos+=Incr_Y;
+        cumul-=delta_x;
+        y_pos+=incr_y;
       }
-      Pixel_figure(x_pos,y_pos,Couleur);
+      Pixel_figure(x_pos,y_pos,color);
     }
   }
 
-  if ( (Debut_X!=Fin_X) || (Debut_Y!=Fin_Y) )
-    Pixel_figure(Fin_X,Fin_Y,Couleur);
+  if ( (start_x!=end_x) || (start_y!=end_y) )
+    Pixel_figure(end_x,end_y,color);
 
 }
 
   // -- Tracer définitif d'une ligne --
 
-void Tracer_ligne_Definitif(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y, byte Couleur)
+void Draw_line_permanet(short start_x,short start_y,short end_x,short end_y, byte color)
 {
 
-  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
-  Pixel_figure=Pixel_figure_Definitif;
-  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
+  int w = end_x-start_x, h = end_y - start_y;
+  Pixel_figure=Pixel_figure_permanent;
+  Draw_line_general(start_x,start_y,end_x,end_y,color);
+  Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne --
 
-void Tracer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+void Draw_line_preview(short start_x,short start_y,short end_x,short end_y,byte color)
 {
-  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
-  Pixel_figure=Pixel_figure_Preview;
-  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
+  int w = end_x-start_x, h = end_y - start_y;
+  Pixel_figure=Pixel_figure_preview;
+  Draw_line_general(start_x,start_y,end_x,end_y,color);
+  Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne en xor --
 
-void Tracer_ligne_Preview_xor(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color)
 {
   int w, h;
-  Pixel_figure=Pixel_figure_Preview_xor;
-  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  if (Debut_X<0)
-    Debut_X=0;
-  if (Debut_Y<0)
-    Debut_Y=0;
-  if (Fin_X<0)
-    Fin_X=0;
-  if (Fin_Y<0)
-    Fin_Y=0;
-  w = Fin_X-Debut_X;
-  h = Fin_Y-Debut_Y;
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
+  Pixel_figure=Pixel_figure_preview_xor;
+  Draw_line_general(start_x,start_y,end_x,end_y,color);
+  if (start_x<0)
+    start_x=0;
+  if (start_y<0)
+    start_y=0;
+  if (end_x<0)
+    end_x=0;
+  if (end_y<0)
+    end_y=0;
+  w = end_x-start_x;
+  h = end_y-start_y;
+  Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
 
   // -- Tracer la preview d'une ligne en xor additif --
 
-void Tracer_ligne_Preview_xorback(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+void Draw_line_preview_xorback(short start_x,short start_y,short end_x,short end_y,byte color)
 {
-  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
-  Pixel_figure=Pixel_figure_Preview_xorback;
-  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,Couleur);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
+  int w = end_x-start_x, h = end_y - start_y;
+  Pixel_figure=Pixel_figure_preview_xorback;
+  Draw_line_general(start_x,start_y,end_x,end_y,color);
+  Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
 
   // -- Effacer la preview d'une ligne --
 
-void Effacer_ligne_Preview(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y)
+void Hide_line_preview(short start_x,short start_y,short end_x,short end_y)
 {
-  int w = Fin_X-Debut_X, h = Fin_Y - Debut_Y;
-  Pixel_figure=Pixel_figure_Effacer_preview;
-  Tracer_ligne_General(Debut_X,Debut_Y,Fin_X,Fin_Y,0);
-  Mettre_Ecran_A_Jour((Debut_X<Fin_X)?Debut_X:Fin_X,(Debut_Y<Fin_Y)?Debut_Y:Fin_Y,abs(w)+1,abs(h)+1);
+  int w = end_x-start_x, h = end_y - start_y;
+  Pixel_figure=Pixel_figure_clear_preview;
+  Draw_line_general(start_x,start_y,end_x,end_y,0);
+  Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
 
 
   // -- Tracer un rectangle vide --
 
-void Tracer_rectangle_vide(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,byte color)
 {
-  short Tempo;
+  short temp;
   short x_pos;
   short y_pos;
 
 
   // On vérifie que les bornes soient dans le bon sens:
-  if (Debut_X>Fin_X)
+  if (start_x>end_x)
   {
-    Tempo=Debut_X;
-    Debut_X=Fin_X;
-    Fin_X=Tempo;
+    temp=start_x;
+    start_x=end_x;
+    end_x=temp;
   }
-  if (Debut_Y>Fin_Y)
+  if (start_y>end_y)
   {
-    Tempo=Debut_Y;
-    Debut_Y=Fin_Y;
-    Fin_Y=Tempo;
+    temp=start_y;
+    start_y=end_y;
+    end_y=temp;
   }
 
   // On trace le rectangle:
 
-  for (x_pos=Debut_X;x_pos<=Fin_X;x_pos++)
-    Afficher_pinceau(x_pos,Debut_Y,Couleur,0);
+  for (x_pos=start_x;x_pos<=end_x;x_pos++)
+    Display_paintbrush(x_pos,start_y,color,0);
 
-  for (y_pos=Debut_Y+1;y_pos<Fin_Y;y_pos++)
+  for (y_pos=start_y+1;y_pos<end_y;y_pos++)
   {
-    Afficher_pinceau(Debut_X,y_pos,Couleur,0);
-    Afficher_pinceau(  Fin_X,y_pos,Couleur,0);
+    Display_paintbrush(start_x,y_pos,color,0);
+    Display_paintbrush(  end_x,y_pos,color,0);
   }
 
-  for (x_pos=Debut_X;x_pos<=Fin_X;x_pos++)
-    Afficher_pinceau(x_pos,  Fin_Y,Couleur,0);
+  for (x_pos=start_x;x_pos<=end_x;x_pos++)
+    Display_paintbrush(x_pos,  end_y,color,0);
 #if defined(__macosx__) || defined(__FreeBSD__)
-  Mettre_Ecran_A_Jour(Debut_X,Fin_X,Fin_X-Debut_X,Fin_Y-Debut_Y);
+  Update_part_of_screen(start_x,end_x,end_x-start_x,end_y-start_y);
 #endif
 }
 
   // -- Tracer un rectangle plein --
 
-void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,byte Couleur)
+void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,byte color)
 {
-  short Tempo;
+  short temp;
   short x_pos;
   short y_pos;
 
 
   // On vérifie que les bornes sont dans le bon sens:
-  if (Debut_X>Fin_X)
+  if (start_x>end_x)
   {
-    Tempo=Debut_X;
-    Debut_X=Fin_X;
-    Fin_X=Tempo;
+    temp=start_x;
+    start_x=end_x;
+    end_x=temp;
   }
-  if (Debut_Y>Fin_Y)
+  if (start_y>end_y)
   {
-    Tempo=Debut_Y;
-    Debut_Y=Fin_Y;
-    Fin_Y=Tempo;
+    temp=start_y;
+    start_y=end_y;
+    end_y=temp;
   }
 
   // Correction en cas de dépassement des limites de l'image
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
 
   // On trace le rectangle:
-  for (y_pos=Debut_Y;y_pos<=Fin_Y;y_pos++)
-    for (x_pos=Debut_X;x_pos<=Fin_X;x_pos++)
-      // Afficher_pixel traite chaque pixel avec tous les effets ! (smear, ...)
+  for (y_pos=start_y;y_pos<=end_y;y_pos++)
+    for (x_pos=start_x;x_pos<=end_x;x_pos++)
+      // Display_pixel traite chaque pixel avec tous les effets ! (smear, ...)
       // Donc on ne peut pas otimiser en traçant ligne par ligne avec memset :(
-      Afficher_pixel(x_pos,y_pos,Couleur);
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X,Fin_Y-Debut_Y);
+      Display_pixel(x_pos,y_pos,color);
+  Update_part_of_screen(start_x,start_y,end_x-start_x,end_y-start_y);
 
 }
 
@@ -1461,85 +1461,85 @@ void Tracer_rectangle_plein(short Debut_X,short Debut_Y,short Fin_X,short Fin_Y,
 
   // -- Tracer une courbe de Bézier --
 
-void Tracer_courbe_General(short X1, short Y1,
-                           short X2, short Y2,
-                           short X3, short Y3,
-                           short X4, short Y4,
-                           byte Couleur)
+void Draw_curve_general(short x1, short y1,
+                           short x2, short y2,
+                           short x3, short y3,
+                           short x4, short y4,
+                           byte color)
 {
   float delta,t,t2,t3;
-  short x,y,Old_X,Old_Y;
+  short x,y,old_x,old_y;
   word  i;
-  int   CX[4];
-  int   CY[4];
+  int   cx[4];
+  int   cy[4];
 
   // Calcul des vecteurs de coefficients
-  CX[0]= -   X1 + 3*X2 - 3*X3 + X4;
-  CX[1]= + 3*X1 - 6*X2 + 3*X3;
-  CX[2]= - 3*X1 + 3*X2;
-  CX[3]= +   X1;
-  CY[0]= -   Y1 + 3*Y2 - 3*Y3 + Y4;
-  CY[1]= + 3*Y1 - 6*Y2 + 3*Y3;
-  CY[2]= - 3*Y1 + 3*Y2;
-  CY[3]= +   Y1;
+  cx[0]= -   x1 + 3*x2 - 3*x3 + x4;
+  cx[1]= + 3*x1 - 6*x2 + 3*x3;
+  cx[2]= - 3*x1 + 3*x2;
+  cx[3]= +   x1;
+  cy[0]= -   y1 + 3*y2 - 3*y3 + y4;
+  cy[1]= + 3*y1 - 6*y2 + 3*y3;
+  cy[2]= - 3*y1 + 3*y2;
+  cy[3]= +   y1;
 
   // Traçage de la courbe
-  Old_X=X1;
-  Old_Y=Y1;
-  Pixel_figure(Old_X,Old_Y,Couleur);
+  old_x=x1;
+  old_y=y1;
+  Pixel_figure(old_x,old_y,color);
   delta=0.05; // 1.0/20
   t=0;
   for (i=1; i<=20; i++)
   {
     t=t+delta; t2=t*t; t3=t2*t;
-    x=Round(t3*CX[0] + t2*CX[1] + t*CX[2] + CX[3]);
-    y=Round(t3*CY[0] + t2*CY[1] + t*CY[2] + CY[3]);
-    Tracer_ligne_General(Old_X,Old_Y,x,y,Couleur);
-    Old_X=x;
-    Old_Y=y;
+    x=Round(t3*cx[0] + t2*cx[1] + t*cx[2] + cx[3]);
+    y=Round(t3*cy[0] + t2*cy[1] + t*cy[2] + cy[3]);
+    Draw_line_general(old_x,old_y,x,y,color);
+    old_x=x;
+    old_y=y;
   }
 
-  x = Min(Min(X1,X2),Min(X3,X4));
-  y = Min(Min(Y1,Y2),Min(Y3,Y4));
-  Old_X = Max(Max(X1,X2),Max(X3,X4)) - x;
-  Old_Y = Max(Max(Y1,Y2),Max(Y3,Y4)) - y;
-  Mettre_Ecran_A_Jour(x,y,Old_X+1,Old_Y+1);
+  x = Min(Min(x1,x2),Min(x3,x4));
+  y = Min(Min(y1,y2),Min(y3,y4));
+  old_x = Max(Max(x1,x2),Max(x3,x4)) - x;
+  old_y = Max(Max(y1,y2),Max(y3,y4)) - y;
+  Update_part_of_screen(x,y,old_x+1,old_y+1);
 }
 
   // -- Tracer une courbe de Bézier définitivement --
 
-void Tracer_courbe_Definitif(short X1, short Y1,
-                             short X2, short Y2,
-                             short X3, short Y3,
-                             short X4, short Y4,
-                             byte Couleur)
+void Draw_curve_permanent(short x1, short y1,
+                             short x2, short y2,
+                             short x3, short y3,
+                             short x4, short y4,
+                             byte color)
 {
-  Pixel_figure=Pixel_figure_Definitif;
-  Tracer_courbe_General(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Pixel_figure=Pixel_figure_permanent;
+  Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
   // -- Tracer la preview d'une courbe de Bézier --
 
-void Tracer_courbe_Preview(short X1, short Y1,
-                           short X2, short Y2,
-                           short X3, short Y3,
-                           short X4, short Y4,
-                           byte Couleur)
+void Draw_curve_preview(short x1, short y1,
+                           short x2, short y2,
+                           short x3, short y3,
+                           short x4, short y4,
+                           byte color)
 {
-  Pixel_figure=Pixel_figure_Preview;
-  Tracer_courbe_General(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Pixel_figure=Pixel_figure_preview;
+  Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
   // -- Effacer la preview d'une courbe de Bézier --
 
-void Effacer_courbe_Preview(short X1, short Y1,
-                            short X2, short Y2,
-                            short X3, short Y3,
-                            short X4, short Y4,
-                            byte Couleur)
+void Hide_curve_preview(short x1, short y1,
+                            short x2, short y2,
+                            short x3, short y3,
+                            short x4, short y4,
+                            byte color)
 {
-  Pixel_figure=Pixel_figure_Effacer_preview;
-  Tracer_courbe_General(X1,Y1,X2,Y2,X3,Y3,X4,Y4,Couleur);
+  Pixel_figure=Pixel_figure_clear_preview;
+  Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
 
@@ -1547,32 +1547,32 @@ void Effacer_courbe_Preview(short X1, short Y1,
 
   // -- Spray : un petit coup de Pschiitt! --
 
-void Aerographe(short Bouton_clicke)
+void Airbrush(short clicked_button)
 {
   short x_pos,y_pos;
-  short Rayon=Spray_Size>>1;
-  long  Rayon_au_carre=(long)Rayon*Rayon;
-  short Indice,Count;
-  byte  Indice_couleur;
+  short radius=Airbrush_size>>1;
+  long  radius_squared=(long)radius*radius;
+  short index,count;
+  byte  color_index;
   byte  direction;
 
 
-  Effacer_curseur();
+  Hide_cursor();
 
-  if (Spray_Mode)
+  if (Airbrush_mode)
   {
-    for (Count=1; Count<=Spray_Mono_flow; Count++)
+    for (count=1; count<=Airbrush_mono_flow; count++)
     {
-      x_pos=(rand()%Spray_Size)-Rayon;
-      y_pos=(rand()%Spray_Size)-Rayon;
-      if ( (x_pos*x_pos)+(y_pos*y_pos) <= Rayon_au_carre )
+      x_pos=(rand()%Airbrush_size)-radius;
+      y_pos=(rand()%Airbrush_size)-radius;
+      if ( (x_pos*x_pos)+(y_pos*y_pos) <= radius_squared )
       {
-        x_pos+=Pinceau_X;
-        y_pos+=Pinceau_Y;
-        if (Bouton_clicke==1)
-          Afficher_pinceau(x_pos,y_pos,Fore_color,0);
+        x_pos+=Paintbrush_X;
+        y_pos+=Paintbrush_Y;
+        if (clicked_button==1)
+          Display_paintbrush(x_pos,y_pos,Fore_color,0);
         else
-          Afficher_pinceau(x_pos,y_pos,Back_color,0);
+          Display_paintbrush(x_pos,y_pos,Back_color,0);
       }
     }
   }
@@ -1582,30 +1582,30 @@ void Aerographe(short Bouton_clicke)
     // ne soit pas toujours la dernière couleur qui soit affichée en dernier
     // Pour ça, on part d'une couleur au pif dans une direction aléatoire.
     direction=rand()&1;
-    for (Indice=0,Indice_couleur=rand()/*%256*/; Indice<256; Indice++)
+    for (index=0,color_index=rand()/*%256*/; index<256; index++)
     {
-      for (Count=1; Count<=Spray_Multi_flow[Indice_couleur]; Count++)
+      for (count=1; count<=Airbrush_multi_flow[color_index]; count++)
       {
-        x_pos=(rand()%Spray_Size)-Rayon;
-        y_pos=(rand()%Spray_Size)-Rayon;
-        if ( (x_pos*x_pos)+(y_pos*y_pos) <= Rayon_au_carre )
+        x_pos=(rand()%Airbrush_size)-radius;
+        y_pos=(rand()%Airbrush_size)-radius;
+        if ( (x_pos*x_pos)+(y_pos*y_pos) <= radius_squared )
         {
-          x_pos+=Pinceau_X;
-          y_pos+=Pinceau_Y;
-          if (Bouton_clicke==A_GAUCHE)
-            Afficher_pinceau(x_pos,y_pos,Indice_couleur,0);
+          x_pos+=Paintbrush_X;
+          y_pos+=Paintbrush_Y;
+          if (clicked_button==LEFT_SIDE)
+            Display_paintbrush(x_pos,y_pos,color_index,0);
           else
-            Afficher_pinceau(x_pos,y_pos,Back_color,0);
+            Display_paintbrush(x_pos,y_pos,Back_color,0);
         }
       }
       if (direction)
-        Indice_couleur++;
+        color_index++;
       else
-        Indice_couleur--;
+        color_index--;
     }
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
@@ -1617,45 +1617,45 @@ void Aerographe(short Bouton_clicke)
 
   // -- Gestion d'un dégradé de base (le plus moche) --
 
-void Degrade_de_base(long Indice,short x_pos,short y_pos)
+void Gradient_basic(long index,short x_pos,short y_pos)
 {
   long position;
 
   // On fait un premier calcul partiel
-  position=(Indice*Degrade_Intervalle_bornes);
+  position=(index*Gradient_bounds_range);
 
   // On gère un déplacement au hasard
-  position+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
-  position-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
+  position+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
+  position-=(Gradient_total_range*Gradient_random_factor) >>7;
 
-  position/=Degrade_Intervalle_total;
+  position/=Gradient_total_range;
 
   //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
   // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
   if (position<0)
     position=0;
-  else if (position>=Degrade_Intervalle_bornes)
-    position=Degrade_Intervalle_bornes-1;
+  else if (position>=Gradient_bounds_range)
+    position=Gradient_bounds_range-1;
 
   // On ramène ensuite la position dans le dégradé vers un numéro de couleur
-  if (Degrade_Inverse)
-    Traiter_pixel_de_degrade(x_pos,y_pos,Degrade_Borne_Superieure-position);
+  if (Gradient_is_inverted)
+    Gradient_pixel(x_pos,y_pos,Gradient_upper_bound-position);
   else
-    Traiter_pixel_de_degrade(x_pos,y_pos,Degrade_Borne_Inferieure+position);
+    Gradient_pixel(x_pos,y_pos,Gradient_lower_bound+position);
 }
 
 
   // -- Gestion d'un dégradé par trames simples --
 
-void Degrade_de_trames_simples(long Indice,short x_pos,short y_pos)
+void Gradient_dithered(long index,short x_pos,short y_pos)
 {
-  long Position_dans_degrade;
-  long Position_dans_segment;
+  long position_in_gradient;
+  long position_in_segment;
 
   //
   //   But de l'opération: en plus de calculer la position de base (désignée
-  // dans cette procédure par "Position_dans_degrade", on calcule la position
+  // dans cette procédure par "position_in_gradient", on calcule la position
   // de l'indice dans le schéma suivant:
   //
   //         | Les indices qui traînent de ce côté du segment se voient subir
@@ -1667,29 +1667,29 @@ void Degrade_de_trames_simples(long Indice,short x_pos,short y_pos)
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
-  Position_dans_degrade=(Indice*Degrade_Intervalle_bornes);
+  position_in_gradient=(index*Gradient_bounds_range);
 
   // On gère un déplacement au hasard...
-  Position_dans_degrade+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
-  Position_dans_degrade-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
+  position_in_gradient+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
+  position_in_gradient-=(Gradient_total_range*Gradient_random_factor) >>7;
 
-  if (Position_dans_degrade<0)
-    Position_dans_degrade=0;
+  if (position_in_gradient<0)
+    position_in_gradient=0;
 
   // ... qui nous permet de calculer la position dans le segment
-  Position_dans_segment=((Position_dans_degrade<<2)/Degrade_Intervalle_total)&3;
+  position_in_segment=((position_in_gradient<<2)/Gradient_total_range)&3;
 
   // On peut ensuite terminer le calcul de l'indice dans le dégradé
-  Position_dans_degrade/=Degrade_Intervalle_total;
+  position_in_gradient/=Gradient_total_range;
 
-  // On va pouvoir discuter de la valeur de Position_dans_degrade en fonction
-  // de la position dans l'écran et de la Position_dans_segment.
+  // On va pouvoir discuter de la valeur de position_in_gradient en fonction
+  // de la position dans l'écran et de la position_in_segment.
 
-  switch (Position_dans_segment)
+  switch (position_in_segment)
   {
     case 0 : // On est sur la gauche du segment
       if (((x_pos+y_pos)&1)==0)
-        Position_dans_degrade--;
+        position_in_gradient--;
       break;
 
       // On n'a pas à traiter les cas 1 et 2 car ils représentent des valeurs
@@ -1697,37 +1697,37 @@ void Degrade_de_trames_simples(long Indice,short x_pos,short y_pos)
 
     case 3 : // On est sur la droite du segment
       if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
-        Position_dans_degrade++;
+        position_in_gradient++;
   }
 
   //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
   // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
-  if (Position_dans_degrade<0)
-    Position_dans_degrade=0;
-  else if (Position_dans_degrade>=Degrade_Intervalle_bornes)
-    Position_dans_degrade=Degrade_Intervalle_bornes-1;
+  if (position_in_gradient<0)
+    position_in_gradient=0;
+  else if (position_in_gradient>=Gradient_bounds_range)
+    position_in_gradient=Gradient_bounds_range-1;
 
   // On ramène ensuite la position dans le dégradé vers un numéro de couleur
-  if (Degrade_Inverse)
-    Position_dans_degrade=Degrade_Borne_Superieure-Position_dans_degrade;
+  if (Gradient_is_inverted)
+    position_in_gradient=Gradient_upper_bound-position_in_gradient;
   else
-    Position_dans_degrade=Degrade_Borne_Inferieure+Position_dans_degrade;
+    position_in_gradient=Gradient_lower_bound+position_in_gradient;
 
-  Traiter_pixel_de_degrade(x_pos,y_pos,Position_dans_degrade);
+  Gradient_pixel(x_pos,y_pos,position_in_gradient);
 }
 
 
   // -- Gestion d'un dégradé par trames étendues --
 
-void Degrade_de_trames_etendues(long Indice,short x_pos,short y_pos)
+void Gradient_extra_dithered(long index,short x_pos,short y_pos)
 {
-  long Position_dans_degrade;
-  long Position_dans_segment;
+  long position_in_gradient;
+  long position_in_segment;
 
 //
   //   But de l'opération: en plus de calculer la position de base (désignée
-  // dans cette procédure par "Position_dans_degrade", on calcule la position
+  // dans cette procédure par "position_in_gradient", on calcule la position
   // de l'indice dans le schéma suivant:
   //
   //         | Les indices qui traînent de ce côté du segment se voient subir
@@ -1739,35 +1739,35 @@ void Degrade_de_trames_etendues(long Indice,short x_pos,short y_pos)
   //      décrémentation conditionnelle à leur position dans l'écran.
 
   // On fait d'abord un premier calcul partiel
-  Position_dans_degrade=(Indice*Degrade_Intervalle_bornes);
+  position_in_gradient=(index*Gradient_bounds_range);
 
   // On gère un déplacement au hasard
-  Position_dans_degrade+=(Degrade_Intervalle_total*(rand()%Degrade_Melange_aleatoire)) >>6;
-  Position_dans_degrade-=(Degrade_Intervalle_total*Degrade_Melange_aleatoire) >>7;
+  position_in_gradient+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
+  position_in_gradient-=(Gradient_total_range*Gradient_random_factor) >>7;
 
-  if (Position_dans_degrade<0)
-    Position_dans_degrade=0;
+  if (position_in_gradient<0)
+    position_in_gradient=0;
 
   // Qui nous permet de calculer la position dans le segment
-  Position_dans_segment=((Position_dans_degrade<<3)/Degrade_Intervalle_total)&7;
+  position_in_segment=((position_in_gradient<<3)/Gradient_total_range)&7;
 
   // On peut ensuite terminer le calcul de l'indice dans le dégradé
-  Position_dans_degrade/=Degrade_Intervalle_total;
+  position_in_gradient/=Gradient_total_range;
 
-  // On va pouvoir discuter de la valeur de Position_dans_degrade en fonction
-  // de la position dans l'écran et de la Position_dans_segment.
+  // On va pouvoir discuter de la valeur de position_in_gradient en fonction
+  // de la position dans l'écran et de la position_in_segment.
 
-  switch (Position_dans_segment)
+  switch (position_in_segment)
   {
     case 0 : // On est sur l'extrême gauche du segment
       if (((x_pos+y_pos)&1)==0)
-        Position_dans_degrade--;
+        position_in_gradient--;
       break;
 
     case 1 : // On est sur la gauche du segment
     case 2 : // On est sur la gauche du segment
       if (((x_pos & 1)==0) && ((y_pos & 1)==0))
-        Position_dans_degrade--;
+        position_in_gradient--;
       break;
 
       // On n'a pas à traiter les cas 3 et 4 car ils représentent des valeurs
@@ -1776,216 +1776,216 @@ void Degrade_de_trames_etendues(long Indice,short x_pos,short y_pos)
     case 5 : // On est sur la droite du segment
     case 6 : // On est sur la droite du segment
       if (((x_pos & 1)==0) && ((y_pos & 1)!=0))
-        Position_dans_degrade++;
+        position_in_gradient++;
       break;
 
     case 7 : // On est sur l'extreme droite du segment
       if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
-        Position_dans_degrade++;
+        position_in_gradient++;
   }
 
   //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
   // des valeurs autorisées par le dégradé défini par l'utilisateur.
 
-  if (Position_dans_degrade<0)
-    Position_dans_degrade=0;
-  else if (Position_dans_degrade>=Degrade_Intervalle_bornes)
-    Position_dans_degrade=Degrade_Intervalle_bornes-1;
+  if (position_in_gradient<0)
+    position_in_gradient=0;
+  else if (position_in_gradient>=Gradient_bounds_range)
+    position_in_gradient=Gradient_bounds_range-1;
 
   // On ramène ensuite la position dans le dégradé vers un numéro de couleur
-  if (Degrade_Inverse)
-    Position_dans_degrade=Degrade_Borne_Superieure-Position_dans_degrade;
+  if (Gradient_is_inverted)
+    position_in_gradient=Gradient_upper_bound-position_in_gradient;
   else
-    Position_dans_degrade=Degrade_Borne_Inferieure+Position_dans_degrade;
+    position_in_gradient=Gradient_lower_bound+position_in_gradient;
 
-  Traiter_pixel_de_degrade(x_pos,y_pos,Position_dans_degrade);
+  Gradient_pixel(x_pos,y_pos,position_in_gradient);
 }
 
 
 
   // -- Tracer un cercle degradé (une sphère) --
 
-void Tracer_cercle_degrade(short Centre_X,short Centre_Y,short Rayon,short Eclairage_X,short Eclairage_Y)
+void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,short spot_y)
 {
-  long Debut_X;
-  long Debut_Y;
+  long start_x;
+  long start_y;
   long x_pos;
   long y_pos;
-  long Fin_X;
-  long Fin_Y;
-  long Distance_X; // Distance (au carré) sur les X du point en cours au centre d'éclairage
-  long Distance_Y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
+  long end_x;
+  long end_y;
+  long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
+  long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
 
-  Debut_X=Centre_X-Rayon;
-  Debut_Y=Centre_Y-Rayon;
-  Fin_X=Centre_X+Rayon;
-  Fin_Y=Centre_Y+Rayon;
+  start_x=center_x-radius;
+  start_y=center_y-radius;
+  end_x=center_x+radius;
+  end_y=center_y+radius;
 
   // Correction des bornes d'après les limites
-  if (Debut_Y<Limite_Haut)
-    Debut_Y=Limite_Haut;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
-  if (Debut_X<Limite_Gauche)
-    Debut_X=Limite_Gauche;
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
 
-  Degrade_Intervalle_total=Cercle_Limite+
-                           ((Centre_X-Eclairage_X)*(Centre_X-Eclairage_X))+
-                           ((Centre_Y-Eclairage_Y)*(Centre_Y-Eclairage_Y))+
-                           (2L*Rayon*sqrt(
-                           ((Centre_X-Eclairage_X)*(Centre_X-Eclairage_X))+
-                           ((Centre_Y-Eclairage_Y)*(Centre_Y-Eclairage_Y))));
+  Gradient_total_range=Circle_limit+
+                           ((center_x-spot_x)*(center_x-spot_x))+
+                           ((center_y-spot_y)*(center_y-spot_y))+
+                           (2L*radius*sqrt(
+                           ((center_x-spot_x)*(center_x-spot_x))+
+                           ((center_y-spot_y)*(center_y-spot_y))));
 
-  if (Degrade_Intervalle_total==0)
-    Degrade_Intervalle_total=1;
+  if (Gradient_total_range==0)
+    Gradient_total_range=1;
 
   // Affichage du cercle
-  for (y_pos=Debut_Y,Cercle_Curseur_Y=(long)Debut_Y-Centre_Y;y_pos<=Fin_Y;y_pos++,Cercle_Curseur_Y++)
+  for (y_pos=start_y,Circle_cursor_Y=(long)start_y-center_y;y_pos<=end_y;y_pos++,Circle_cursor_Y++)
   {
-    Distance_Y =(y_pos-Eclairage_Y);
-    Distance_Y*=Distance_Y;
-    for (x_pos=Debut_X,Cercle_Curseur_X=(long)Debut_X-Centre_X;x_pos<=Fin_X;x_pos++,Cercle_Curseur_X++)
-      if (Pixel_dans_cercle())
+    distance_y =(y_pos-spot_y);
+    distance_y*=distance_y;
+    for (x_pos=start_x,Circle_cursor_X=(long)start_x-center_x;x_pos<=end_x;x_pos++,Circle_cursor_X++)
+      if (Pixel_in_circle())
       {
-        Distance_X =(x_pos-Eclairage_X);
-        Distance_X*=Distance_X;
-        Traiter_degrade(Distance_X+Distance_Y,x_pos,y_pos);
+        distance_x =(x_pos-spot_x);
+        distance_x*=distance_x;
+        Gradient_function(distance_x+distance_y,x_pos,y_pos);
       }
   }
 
-  Mettre_Ecran_A_Jour(Centre_X-Rayon,Centre_Y-Rayon,2*Rayon+1,2*Rayon+1);
+  Update_part_of_screen(center_x-radius,center_y-radius,2*radius+1,2*radius+1);
 }
 
 
   // -- Tracer une ellipse degradée --
 
-void Tracer_ellipse_degradee(short Centre_X,short Centre_Y,short Rayon_horizontal,short Rayon_vertical,short Eclairage_X,short Eclairage_Y)
+void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,short spot_x,short spot_y)
 {
-  long Debut_X;
-  long Debut_Y;
+  long start_x;
+  long start_y;
   long x_pos;
   long y_pos;
-  long Fin_X;
-  long Fin_Y;
-  long Distance_X; // Distance (au carré) sur les X du point en cours au centre d'éclairage
-  long Distance_Y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
+  long end_x;
+  long end_y;
+  long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
+  long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
 
 
-  Debut_X=Centre_X-Rayon_horizontal;
-  Debut_Y=Centre_Y-Rayon_vertical;
-  Fin_X=Centre_X+Rayon_horizontal;
-  Fin_Y=Centre_Y+Rayon_vertical;
+  start_x=center_x-horizontal_radius;
+  start_y=center_y-vertical_radius;
+  end_x=center_x+horizontal_radius;
+  end_y=center_y+vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_Calculer_limites(Rayon_horizontal+1,Rayon_vertical+1);
+  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
 
   // On calcule la distance maximale:
-  Degrade_Intervalle_total=(Rayon_horizontal*Rayon_horizontal)+
-                           (Rayon_vertical*Rayon_vertical)+
-                           ((Centre_X-Eclairage_X)*(Centre_X-Eclairage_X))+
-                           ((Centre_Y-Eclairage_Y)*(Centre_Y-Eclairage_Y))+
+  Gradient_total_range=(horizontal_radius*horizontal_radius)+
+                           (vertical_radius*vertical_radius)+
+                           ((center_x-spot_x)*(center_x-spot_x))+
+                           ((center_y-spot_y)*(center_y-spot_y))+
                            (2L
                            *sqrt(
-                           (Rayon_horizontal*Rayon_horizontal)+
-                           (Rayon_vertical  *Rayon_vertical  ))
+                           (horizontal_radius*horizontal_radius)+
+                           (vertical_radius  *vertical_radius  ))
                            *sqrt(
-                           ((Centre_X-Eclairage_X)*(Centre_X-Eclairage_X))+
-                           ((Centre_Y-Eclairage_Y)*(Centre_Y-Eclairage_Y))));
+                           ((center_x-spot_x)*(center_x-spot_x))+
+                           ((center_y-spot_y)*(center_y-spot_y))));
 
-  if (Degrade_Intervalle_total==0)
-    Degrade_Intervalle_total=1;
+  if (Gradient_total_range==0)
+    Gradient_total_range=1;
 
   // Correction des bornes d'après les limites
-  if (Debut_Y<Limite_Haut)
-    Debut_Y=Limite_Haut;
-  if (Fin_Y>Limite_Bas)
-    Fin_Y=Limite_Bas;
-  if (Debut_X<Limite_Gauche)
-    Debut_X=Limite_Gauche;
-  if (Fin_X>Limite_Droite)
-    Fin_X=Limite_Droite;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_y>Limit_bottom)
+    end_y=Limit_bottom;
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (end_x>Limit_right)
+    end_x=Limit_right;
 
   // Affichage de l'ellipse
-  for (y_pos=Debut_Y,Ellipse_Curseur_Y=Debut_Y-Centre_Y;y_pos<=Fin_Y;y_pos++,Ellipse_Curseur_Y++)
+  for (y_pos=start_y,Ellipse_cursor_Y=start_y-center_y;y_pos<=end_y;y_pos++,Ellipse_cursor_Y++)
   {
-    Distance_Y =(y_pos-Eclairage_Y);
-    Distance_Y*=Distance_Y;
-    for (x_pos=Debut_X,Ellipse_Curseur_X=Debut_X-Centre_X;x_pos<=Fin_X;x_pos++,Ellipse_Curseur_X++)
-      if (Pixel_dans_ellipse())
+    distance_y =(y_pos-spot_y);
+    distance_y*=distance_y;
+    for (x_pos=start_x,Ellipse_cursor_X=start_x-center_x;x_pos<=end_x;x_pos++,Ellipse_cursor_X++)
+      if (Pixel_in_ellipse())
       {
-        Distance_X =(x_pos-Eclairage_X);
-        Distance_X*=Distance_X;
-        Traiter_degrade(Distance_X+Distance_Y,x_pos,y_pos);
+        distance_x =(x_pos-spot_x);
+        distance_x*=distance_x;
+        Gradient_function(distance_x+distance_y,x_pos,y_pos);
       }
   }
 
-  Mettre_Ecran_A_Jour(Debut_X,Debut_Y,Fin_X-Debut_X+1,Fin_Y-Debut_Y+1);
+  Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 }
 
 
-// Tracé d'un rectangle (RAX RAY - RBX RBY) dégradé selon le vecteur (VAX VAY - VBX - VBY)
-void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,short VAY, short VBX, short VBY)
+// Tracé d'un rectangle (rax ray - rbx rby) dégradé selon le vecteur (vax vay - vbx - vby)
+void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby)
 {
     short y_pos, x_pos;
 
     // On commence par s'assurer que le rectangle est à l'endroit
-    if(RBX < RAX)
+    if(rbx < rax)
     {
-      x_pos = RBX;
-      RBX = RAX;
-      RAX = x_pos;
+      x_pos = rbx;
+      rbx = rax;
+      rax = x_pos;
     }
 
-    if(RBY < RAY)
+    if(rby < ray)
     {
-      y_pos = RBY;
-      RBY = RAY;
-      RAY = y_pos;
+      y_pos = rby;
+      rby = ray;
+      ray = y_pos;
     }
 
     // Correction des bornes d'après les limites
-    if (RAY<Limite_Haut)
-      RAY=Limite_Haut;
-    if (RBY>Limite_Bas)
-      RBY=Limite_Bas;
-    if (RAX<Limite_Gauche)
-      RAX=Limite_Gauche;
-    if (RBX>Limite_Droite)
-      RBX=Limite_Droite;
+    if (ray<Limit_top)
+      ray=Limit_top;
+    if (rby>Limit_bottom)
+      rby=Limit_bottom;
+    if (rax<Limit_left)
+      rax=Limit_left;
+    if (rbx>Limit_right)
+      rbx=Limit_right;
 
-    if(VBX == VAX)
+    if(vbx == vax)
     {
       // Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...
-      if (VBY == VAY) return;  // L'utilisateur fait n'importe quoi
-      Degrade_Intervalle_total = abs(VBY - VAY);
-      for(y_pos=RAY;y_pos<=RBY;y_pos++)
-        for(x_pos=RAX;x_pos<=RBX;x_pos++)
-          Traiter_degrade(abs(VBY - y_pos),x_pos,y_pos);
+      if (vby == vay) return;  // L'utilisateur fait n'importe quoi
+      Gradient_total_range = abs(vby - vay);
+      for(y_pos=ray;y_pos<=rby;y_pos++)
+        for(x_pos=rax;x_pos<=rbx;x_pos++)
+          Gradient_function(abs(vby - y_pos),x_pos,y_pos);
 
     }
     else
     {
       float a;
       float b;
-      float Distance_X, Distance_Y;
+      float distance_x, distance_y;
 
-      Degrade_Intervalle_total = sqrt(pow(VBY - VAY,2)+pow(VBX - VAX,2));
-      a = (float)(VBY - VAY)/(float)(VBX - VAX);
-      b = VAY - a*VAX;
+      Gradient_total_range = sqrt(pow(vby - vay,2)+pow(vbx - vax,2));
+      a = (float)(vby - vay)/(float)(vbx - vax);
+      b = vay - a*vax;
       
-      for (y_pos=RAY;y_pos<=RBY;y_pos++)
-        for (x_pos = RAX;x_pos<=RBX;x_pos++)
+      for (y_pos=ray;y_pos<=rby;y_pos++)
+        for (x_pos = rax;x_pos<=rbx;x_pos++)
         {
           // On calcule ou on en est dans le dégradé
-          Distance_X = pow((y_pos - VAY),2)+pow((x_pos - VAX),2);
-          Distance_Y = pow((-a * x_pos + y_pos - b),2)/(a*a+1);
+          distance_x = pow((y_pos - vay),2)+pow((x_pos - vax),2);
+          distance_y = pow((-a * x_pos + y_pos - b),2)/(a*a+1);
       
-          Traiter_degrade((int)sqrt(Distance_X - Distance_Y),x_pos,y_pos);
+          Gradient_function((int)sqrt(distance_x - distance_y),x_pos,y_pos);
         }
     }
-    Mettre_Ecran_A_Jour(RAX,RAY,RBX,RBY);
+    Update_part_of_screen(rax,ray,rbx,rby);
 }
 
 
@@ -1993,23 +1993,23 @@ void Tracer_rectangle_degrade(short RAX,short RAY,short RBX,short RBY,short VAX,
 
 // -- Tracer un polygône plein --
 
-typedef struct POLYGON_EDGE      /* an active edge */
+typedef struct T_Polygon_edge      /* an active edge */
 {
     short top;                     /* top y position */
     short bottom;                  /* bottom y position */
     float x, dx;                   /* floating point x position and gradient */
     float w;                       /* width of line segment */
-    struct POLYGON_EDGE *prev;     /* doubly linked list */
-    struct POLYGON_EDGE *next;
-} POLYGON_EDGE;
+    struct T_Polygon_edge *prev;     /* doubly linked list */
+    struct T_Polygon_edge *next;
+} T_Polygon_edge;
 
 
 
-/* fill_edge_structure:
+/* Fill_edge_structure:
  *  Polygon helper function: initialises an edge structure for the 2d
  *  rasteriser.
  */
-void fill_edge_structure(POLYGON_EDGE *edge, short *i1, short *i2)
+void Fill_edge_structure(T_Polygon_edge *edge, short *i1, short *i2)
 {
   short *it;
 
@@ -2043,13 +2043,13 @@ void fill_edge_structure(POLYGON_EDGE *edge, short *i1, short *i2)
 
 
 
-/* add_edge:
+/* Add_edge:
  *  Adds an edge structure to a linked list, returning the new head pointer.
  */
-POLYGON_EDGE * add_edge(POLYGON_EDGE *list, POLYGON_EDGE *edge, int sort_by_x)
+T_Polygon_edge * Add_edge(T_Polygon_edge *list, T_Polygon_edge *edge, int sort_by_x)
 {
-  POLYGON_EDGE *pos = list;
-  POLYGON_EDGE *prev = NULL;
+  T_Polygon_edge *pos = list;
+  T_Polygon_edge *prev = NULL;
 
   if (sort_by_x)
   {
@@ -2085,10 +2085,10 @@ POLYGON_EDGE * add_edge(POLYGON_EDGE *list, POLYGON_EDGE *edge, int sort_by_x)
 
 
 
-/* remove_edge:
+/* Remove_edge:
  *  Removes an edge structure from a list, returning the new head pointer.
  */
-POLYGON_EDGE * remove_edge(POLYGON_EDGE *list, POLYGON_EDGE *edge)
+T_Polygon_edge * Remove_edge(T_Polygon_edge *list, T_Polygon_edge *edge)
 {
   if (edge->next)
     edge->next->prev = edge->prev;
@@ -2109,28 +2109,28 @@ POLYGON_EDGE * remove_edge(POLYGON_EDGE *list, POLYGON_EDGE *edge)
  *  number of vertices, then an array containing a series of x, y points
  *  (a total of vertices*2 values).
  */
-void Polyfill_General(int Vertices, short * Points, int color)
+void Polyfill_general(int vertices, short * points, int color)
 {
   short c;
   short top = 0x7FFF;
   short bottom = 0;
   short *i1, *i2;
-  short x_pos,Fin_X;
-  POLYGON_EDGE *edge, *next_edge, *initial_edge;
-  POLYGON_EDGE *active_edges = NULL;
-  POLYGON_EDGE *inactive_edges = NULL;
+  short x_pos,end_x;
+  T_Polygon_edge *edge, *next_edge, *initial_edge;
+  T_Polygon_edge *active_edges = NULL;
+  T_Polygon_edge *inactive_edges = NULL;
 
   /* allocate some space and fill the edge table */
-  initial_edge=edge=(POLYGON_EDGE *) malloc(sizeof(POLYGON_EDGE) * Vertices);
+  initial_edge=edge=(T_Polygon_edge *) malloc(sizeof(T_Polygon_edge) * vertices);
 
-  i1 = Points;
-  i2 = Points + ((Vertices-1)<<1);
+  i1 = points;
+  i2 = points + ((vertices-1)<<1);
 
-  for (c=0; c<Vertices; c++)
+  for (c=0; c<vertices; c++)
   {
     if (i1[1] != i2[1])
     {
-      fill_edge_structure(edge, i1, i2);
+      Fill_edge_structure(edge, i1, i2);
 
       if (edge->bottom >= edge->top)
       {
@@ -2140,7 +2140,7 @@ void Polyfill_General(int Vertices, short * Points, int color)
         if (edge->bottom > bottom)
           bottom = edge->bottom;
 
-        inactive_edges = add_edge(inactive_edges, edge, 0);
+        inactive_edges = Add_edge(inactive_edges, edge, 0);
         edge++;
       }
     }
@@ -2156,24 +2156,24 @@ void Polyfill_General(int Vertices, short * Points, int color)
     while ((edge) && (edge->top == c))
     {
       next_edge = edge->next;
-      inactive_edges = remove_edge(inactive_edges, edge);
-      active_edges = add_edge(active_edges, edge, 1);
+      inactive_edges = Remove_edge(inactive_edges, edge);
+      active_edges = Add_edge(active_edges, edge, 1);
       edge = next_edge;
     }
 
     /* draw horizontal line segments */
-    if ((c>=Limite_Haut) && (c<=Limite_Bas))
+    if ((c>=Limit_top) && (c<=Limit_bottom))
     {
       edge = active_edges;
       while ((edge) && (edge->next))
       {
         x_pos=/*Round*/(edge->x);
-        Fin_X=/*Round*/(edge->next->x+edge->next->w);
-        if (x_pos<Limite_Gauche)
-          x_pos=Limite_Gauche;
-        if (Fin_X>Limite_Droite)
-          Fin_X=Limite_Droite;
-        for (; x_pos<=Fin_X; x_pos++)
+        end_x=/*Round*/(edge->next->x+edge->next->w);
+        if (x_pos<Limit_left)
+          x_pos=Limit_left;
+        if (end_x>Limit_right)
+          end_x=Limit_right;
+        for (; x_pos<=end_x; x_pos++)
           Pixel_figure(x_pos,c,color);
         edge = edge->next->next;
       }
@@ -2185,7 +2185,7 @@ void Polyfill_General(int Vertices, short * Points, int color)
     {
       next_edge = edge->next;
       if (c >= edge->bottom)
-        active_edges = remove_edge(active_edges, edge);
+        active_edges = Remove_edge(active_edges, edge);
       else
       {
         edge->x += edge->dx;
@@ -2210,41 +2210,41 @@ void Polyfill_General(int Vertices, short * Points, int color)
   free(initial_edge);
 
   // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
-  Mettre_Ecran_A_Jour(0,top,Principal_Largeur_image,bottom-top+1);
+  Update_part_of_screen(0,top,Main_image_width,bottom-top+1);
 }
 
 
-void Polyfill(int Vertices, short * Points, int color)
+void Polyfill(int vertices, short * points, int color)
 {
-  int Indice;
-  byte *FX_Feedback_Ecran_avant_remplissage;
+  int index;
+  byte *old_fx_feedback_screen;
 
-  Pixel_clippe(Points[0],Points[1],color);
-  if (Vertices==1)
+  Pixel_clipped(points[0],points[1],color);
+  if (vertices==1)
   {
-    Mettre_Ecran_A_Jour(Points[0],Points[1],1,1);
+    Update_part_of_screen(points[0],points[1],1,1);
     return;
   }
 
   // Comme pour le Fill, cette operation fait un peu d'"overdraw"
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
-  FX_Feedback_Ecran_avant_remplissage=FX_Feedback_Ecran;
-  FX_Feedback_Ecran=Ecran_backup;
+  old_fx_feedback_screen=FX_feedback_screen;
+  FX_feedback_screen=Screen_backup;
 
-  Pixel_figure=Pixel_clippe;    
-  Polyfill_General(Vertices,Points,color);
+  Pixel_figure=Pixel_clipped;    
+  Polyfill_general(vertices,points,color);
 
   // Remarque: pour dessiner la bordure avec la brosse en cours au lieu
   // d'un pixel de couleur premier-plan, il suffit de mettre ici:
-  // Pixel_figure=Pixel_figure_Definitif;
+  // Pixel_figure=Pixel_figure_permanent;
 
   // Dessin du contour
-  for (Indice=0; Indice<Vertices-1;Indice+=1)
-    Tracer_ligne_General(Points[Indice*2],Points[Indice*2+1],Points[Indice*2+2],Points[Indice*2+3],color);
-  Tracer_ligne_General(Points[0],Points[1],Points[Indice*2],Points[Indice*2+1],color);
+  for (index=0; index<vertices-1;index+=1)
+    Draw_line_general(points[index*2],points[index*2+1],points[index*2+2],points[index*2+3],color);
+  Draw_line_general(points[0],points[1],points[index*2],points[index*2+1],color);
 
   // restore de l'etat du FX Feedback  
-  FX_Feedback_Ecran=FX_Feedback_Ecran_avant_remplissage;
+  FX_feedback_screen=old_fx_feedback_screen;
 
 }
 
@@ -2252,19 +2252,19 @@ void Polyfill(int Vertices, short * Points, int color)
 
 //------------ Remplacement de la couleur pointée par une autre --------------
 
-void Remplacer(byte Nouvelle_couleur)
+void Replace(byte New_color)
 {
-  byte Ancienne_couleur;
+  byte old_color;
 
-  if ((Pinceau_X<Principal_Largeur_image)
-   && (Pinceau_Y<Principal_Hauteur_image))
+  if ((Paintbrush_X<Main_image_width)
+   && (Paintbrush_Y<Main_image_height))
   {
-    Ancienne_couleur=Lit_pixel_dans_ecran_courant(Pinceau_X,Pinceau_Y);
-    if ( (Ancienne_couleur!=Nouvelle_couleur)
-      && ((!Stencil_Mode) || (!Stencil[Ancienne_couleur])) )
+    old_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
+    if ( (old_color!=New_color)
+      && ((!Stencil_mode) || (!Stencil[old_color])) )
     {
-      Remplacer_une_couleur(Ancienne_couleur,Nouvelle_couleur);
-      Afficher_ecran();
+      Replace_a_color(old_color,New_color);
+      Display_all_screen();
     }
   }
 }
@@ -2275,31 +2275,31 @@ void Remplacer(byte Nouvelle_couleur)
 /********************************** SHADES ************************************/
 
 // Transformer une liste de shade en deux tables de conversion
-void Liste2tables(word * list,short step,byte mode,byte * Table_inc,byte * Table_dec)
+void Shade_list_to_lookup_tables(word * list,short step,byte mode,byte * table_inc,byte * table_dec)
 {
-  int Indice;
+  int index;
   int first;
   int last;
-  int Couleur;
-  int Temp;
+  int color;
+  int temp;
 
 
   // On initialise les deux tables de conversion en Identité
-  for (Indice=0;Indice<256;Indice++)
+  for (index=0;index<256;index++)
   {
-    Table_inc[Indice]=Indice;
-    Table_dec[Indice]=Indice;
+    table_inc[index]=index;
+    table_dec[index]=index;
   }
 
   // On s'apprête à examiner l'ensemble de la liste
-  for (Indice=0;Indice<512;Indice++)
+  for (index=0;index<512;index++)
   {
     // On recherche la première case de la liste non vide (et non inhibée)
-    while ((Indice<512) && (list[Indice]>255))
-      Indice++;
+    while ((index<512) && (list[index]>255))
+      index++;
 
     // On note la position de la première case de la séquence
-    first=Indice;
+    first=index;
 
     // On recherche la position de la dernière case de la séquence
     for (last=first;list[last+1]<256;last++);
@@ -2307,31 +2307,31 @@ void Liste2tables(word * list,short step,byte mode,byte * Table_inc,byte * Table
     // Pour toutes les cases non vides (et non inhibées) qui suivent
     switch (mode)
     {
-      case MODE_SHADE_NORMAL :
-        for (;(Indice<512) && (list[Indice]<256);Indice++)
+      case SHADE_MODE_NORMAL :
+        for (;(index<512) && (list[index]<256);index++)
         { // On met à jour les tables de conversion
-          Couleur=list[Indice];
-          Table_inc[Couleur]=list[(Indice+step<=last)?Indice+step:last];
-          Table_dec[Couleur]=list[(Indice-step>=first)?Indice-step:first];
+          color=list[index];
+          table_inc[color]=list[(index+step<=last)?index+step:last];
+          table_dec[color]=list[(index-step>=first)?index-step:first];
         }
         break;
-      case MODE_SHADE_BOUCLE :
-        Temp=1+last-first;
-        for (;(Indice<512) && (list[Indice]<256);Indice++)
+      case SHADE_MODE_LOOP :
+        temp=1+last-first;
+        for (;(index<512) && (list[index]<256);index++)
         { // On met à jour les tables de conversion
-          Couleur=list[Indice];
-          Table_inc[Couleur]=list[first+((step+Indice-first)%Temp)];
-          Table_dec[Couleur]=list[first+(((Temp-step)+Indice-first)%Temp)];
+          color=list[index];
+          table_inc[color]=list[first+((step+index-first)%temp)];
+          table_dec[color]=list[first+(((temp-step)+index-first)%temp)];
         }
         break;
-      default : // MODE_SHADE_NOSAT
-        for (;(Indice<512) && (list[Indice]<256);Indice++)
+      default : // SHADE_MODE_NOSAT
+        for (;(index<512) && (list[index]<256);index++)
         { // On met à jour les tables de conversion
-          Couleur=list[Indice];
-          if (Indice+step<=last)
-            Table_inc[Couleur]=list[Indice+step];
-          if (Indice-step>=first)
-            Table_dec[Couleur]=list[Indice-step];
+          color=list[index];
+          if (index+step<=last)
+            table_inc[color]=list[index+step];
+          if (index-step>=first)
+            table_dec[color]=list[index-step];
         }
     }
   }
@@ -2344,20 +2344,20 @@ void Liste2tables(word * list,short step,byte mode,byte * Table_inc,byte * Table
   // fonction d'affichage "Pixel" utilisée pour les opérations définitivement
   // Ne doit à aucune condition être appelée en dehors de la partie visible
   // de l'image dans l'écran (ça pourrait être grave)
-void Afficher_pixel(word x,word y,byte Couleur)
+void Display_pixel(word x,word y,byte color)
   // x & y    sont la position d'un point dans l'IMAGE
-  // Couleur  est la couleur du point
+  // color  est la couleur du point
   // Le Stencil est géré.
-  // Les effets sont gérés par appel à Fonction_effet().
-  // La Loupe est gérée par appel à Pixel_Preview().
+  // Les effets sont gérés par appel à Effect_function().
+  // La Loupe est gérée par appel à Pixel_preview().
 {
-  if ( ( (!Trame_Mode)   || (Effet_Trame(x,y)) )
-    && (!((Stencil_Mode) && (Stencil[Lit_pixel_dans_ecran_courant(x,y)])))
-    && (!((Mask_Mode)    && (Mask_table[Lit_pixel_dans_ecran_brouillon(x,y)]))) )
+  if ( ( (!Sieve_mode)   || (Effect_sieve(x,y)) )
+    && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_screen(x,y)])))
+    && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
-    Couleur=Fonction_effet(x,y,Couleur);
-    Pixel_dans_ecran_courant(x,y,Couleur);
-    Pixel_Preview(x,y,Couleur);
+    color=Effect_function(x,y,color);
+    Pixel_in_current_screen(x,y,color);
+    Pixel_preview(x,y,color);
   }
 }
 
@@ -2367,21 +2367,21 @@ void Afficher_pixel(word x,word y,byte Couleur)
 
   // -- Aucun effet en cours --
 
-byte Aucun_effet(__attribute__((unused)) word x,__attribute__((unused)) word y,byte Couleur)
+byte No_effect(__attribute__((unused)) word x,__attribute__((unused)) word y,byte color)
 {
-  return Couleur;
+  return color;
 }
 
   // -- Effet de Shading --
 
-byte Effet_Shade(word x,word y,__attribute__((unused)) byte Couleur)
+byte Effect_shade(word x,word y,__attribute__((unused)) byte color)
 {
-  return Shade_Table[Lit_pixel_dans_ecran_feedback(x,y)];
+  return Shade_table[Read_pixel_from_feedback_screen(x,y)];
 }
 
-byte Effet_Quick_shade(word x,word y,byte Couleur)
+byte Effect_quick_shade(word x,word y,byte color)
 {
-  int c=Couleur=Lit_pixel_dans_ecran_feedback(x,y);
+  int c=color=Read_pixel_from_feedback_screen(x,y);
   int direction=(Fore_color<=Back_color);
   byte start,end;
   int width;
@@ -2401,25 +2401,25 @@ byte Effet_Quick_shade(word x,word y,byte Couleur)
   {
     width=1+end-start;
 
-    if ( ((Shade_Table==Shade_Table_gauche) && direction) || ((Shade_Table==Shade_Table_droite) && (!direction)) )
-      c-=Quick_shade_Step%width;
+    if ( ((Shade_table==Shade_table_left) && direction) || ((Shade_table==Shade_table_right) && (!direction)) )
+      c-=Quick_shade_step%width;
     else
-      c+=Quick_shade_Step%width;
+      c+=Quick_shade_step%width;
 
     if (c<start)
-      switch (Quick_shade_Loop)
+      switch (Quick_shade_loop)
       {
-        case MODE_SHADE_NORMAL : return start;
-        case MODE_SHADE_BOUCLE : return (width+c);
-        default : return Couleur;
+        case SHADE_MODE_NORMAL : return start;
+        case SHADE_MODE_LOOP : return (width+c);
+        default : return color;
       }
 
     if (c>end)
-      switch (Quick_shade_Loop)
+      switch (Quick_shade_loop)
       {
-        case MODE_SHADE_NORMAL : return end;
-        case MODE_SHADE_BOUCLE : return (c-width);
-        default : return Couleur;
+        case SHADE_MODE_NORMAL : return end;
+        case SHADE_MODE_LOOP : return (c-width);
+        default : return color;
       }
   }
 
@@ -2428,105 +2428,105 @@ byte Effet_Quick_shade(word x,word y,byte Couleur)
 
   // -- Effet de Tiling --
 
-byte Effet_Tiling(word x,word y,__attribute__((unused)) byte Couleur)
+byte Effect_tiling(word x,word y,__attribute__((unused)) byte color)
 {
-  return Lit_pixel_dans_brosse((x+Brosse_Largeur-Tiling_Decalage_X)%Brosse_Largeur,
-                               (y+Brosse_Hauteur-Tiling_Decalage_Y)%Brosse_Hauteur);
+  return Read_pixel_from_brush((x+Brush_width-Tiling_offset_X)%Brush_width,
+                               (y+Brush_height-Tiling_offset_Y)%Brush_height);
 }
 
   // -- Effet de Smooth --
 
-byte Effet_Smooth(word x,word y,__attribute__((unused)) byte Couleur)
+byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
 {
   int r,g,b;
   byte c;
-  int Poids,Poids_total;
-  byte X2=((x+1)<Principal_Largeur_image);
-  byte Y2=((y+1)<Principal_Hauteur_image);
+  int weight,total_weight;
+  byte x2=((x+1)<Main_image_width);
+  byte y2=((y+1)<Main_image_height);
 
   // On commence par le pixel central
-  c=Lit_pixel_dans_ecran_feedback(x,y);
-  Poids_total=Smooth_Matrice[1][1];
-  r=Poids_total*Principal_Palette[c].R;
-  g=Poids_total*Principal_Palette[c].G;
-  b=Poids_total*Principal_Palette[c].B;
+  c=Read_pixel_from_feedback_screen(x,y);
+  total_weight=Smooth_matrix[1][1];
+  r=total_weight*Main_palette[c].R;
+  g=total_weight*Main_palette[c].G;
+  b=total_weight*Main_palette[c].B;
 
   if (x)
   {
-    c=Lit_pixel_dans_ecran_feedback(x-1,y);
-    Poids_total+=(Poids=Smooth_Matrice[0][1]);
-    r+=Poids*Principal_Palette[c].R;
-    g+=Poids*Principal_Palette[c].G;
-    b+=Poids*Principal_Palette[c].B;
+    c=Read_pixel_from_feedback_screen(x-1,y);
+    total_weight+=(weight=Smooth_matrix[0][1]);
+    r+=weight*Main_palette[c].R;
+    g+=weight*Main_palette[c].G;
+    b+=weight*Main_palette[c].B;
 
     if (y)
     {
-      c=Lit_pixel_dans_ecran_feedback(x-1,y-1);
-      Poids_total+=(Poids=Smooth_Matrice[0][0]);
-      r+=Poids*Principal_Palette[c].R;
-      g+=Poids*Principal_Palette[c].G;
-      b+=Poids*Principal_Palette[c].B;
+      c=Read_pixel_from_feedback_screen(x-1,y-1);
+      total_weight+=(weight=Smooth_matrix[0][0]);
+      r+=weight*Main_palette[c].R;
+      g+=weight*Main_palette[c].G;
+      b+=weight*Main_palette[c].B;
 
-      if (Y2)
+      if (y2)
       {
-        c=Lit_pixel_dans_ecran_feedback(x-1,y+1);
-        Poids_total+=(Poids=Smooth_Matrice[0][2]);
-        r+=Poids*Principal_Palette[c].R;
-        g+=Poids*Principal_Palette[c].G;
-        b+=Poids*Principal_Palette[c].B;
+        c=Read_pixel_from_feedback_screen(x-1,y+1);
+        total_weight+=(weight=Smooth_matrix[0][2]);
+        r+=weight*Main_palette[c].R;
+        g+=weight*Main_palette[c].G;
+        b+=weight*Main_palette[c].B;
       }
     }
   }
 
-  if (X2)
+  if (x2)
   {
-    c=Lit_pixel_dans_ecran_feedback(x+1,y);
-    Poids_total+=(Poids=Smooth_Matrice[2][1]);
-    r+=Poids*Principal_Palette[c].R;
-    g+=Poids*Principal_Palette[c].G;
-    b+=Poids*Principal_Palette[c].B;
+    c=Read_pixel_from_feedback_screen(x+1,y);
+    total_weight+=(weight=Smooth_matrix[2][1]);
+    r+=weight*Main_palette[c].R;
+    g+=weight*Main_palette[c].G;
+    b+=weight*Main_palette[c].B;
 
     if (y)
     {
-      c=Lit_pixel_dans_ecran_feedback(x+1,y-1);
-      Poids_total+=(Poids=Smooth_Matrice[2][0]);
-      r+=Poids*Principal_Palette[c].R;
-      g+=Poids*Principal_Palette[c].G;
-      b+=Poids*Principal_Palette[c].B;
+      c=Read_pixel_from_feedback_screen(x+1,y-1);
+      total_weight+=(weight=Smooth_matrix[2][0]);
+      r+=weight*Main_palette[c].R;
+      g+=weight*Main_palette[c].G;
+      b+=weight*Main_palette[c].B;
 
-      if (Y2)
+      if (y2)
       {
-        c=Lit_pixel_dans_ecran_feedback(x+1,y+1);
-        Poids_total+=(Poids=Smooth_Matrice[2][2]);
-        r+=Poids*Principal_Palette[c].R;
-        g+=Poids*Principal_Palette[c].G;
-        b+=Poids*Principal_Palette[c].B;
+        c=Read_pixel_from_feedback_screen(x+1,y+1);
+        total_weight+=(weight=Smooth_matrix[2][2]);
+        r+=weight*Main_palette[c].R;
+        g+=weight*Main_palette[c].G;
+        b+=weight*Main_palette[c].B;
       }
     }
   }
 
   if (y)
   {
-    c=Lit_pixel_dans_ecran_feedback(x,y-1);
-    Poids_total+=(Poids=Smooth_Matrice[1][0]);
-    r+=Poids*Principal_Palette[c].R;
-    g+=Poids*Principal_Palette[c].G;
-    b+=Poids*Principal_Palette[c].B;
+    c=Read_pixel_from_feedback_screen(x,y-1);
+    total_weight+=(weight=Smooth_matrix[1][0]);
+    r+=weight*Main_palette[c].R;
+    g+=weight*Main_palette[c].G;
+    b+=weight*Main_palette[c].B;
   }
 
-  if (Y2)
+  if (y2)
   {
-    c=Lit_pixel_dans_ecran_feedback(x,y+1);
-    Poids_total+=(Poids=Smooth_Matrice[1][2]);
-    r+=Poids*Principal_Palette[c].R;
-    g+=Poids*Principal_Palette[c].G;
-    b+=Poids*Principal_Palette[c].B;
+    c=Read_pixel_from_feedback_screen(x,y+1);
+    total_weight+=(weight=Smooth_matrix[1][2]);
+    r+=weight*Main_palette[c].R;
+    g+=weight*Main_palette[c].G;
+    b+=weight*Main_palette[c].B;
   }
 
-  return (Poids_total)? // On regarde s'il faut éviter le 0/0.
-    Meilleure_couleur(Round_div(r,Poids_total),
-                      Round_div(g,Poids_total),
-                      Round_div(b,Poids_total)):
-    Lit_pixel_dans_ecran_courant(x,y); // C'est bien l'écran courant et pas
+  return (total_weight)? // On regarde s'il faut éviter le 0/0.
+    Best_color(Round_div(r,total_weight),
+                      Round_div(g,total_weight),
+                      Round_div(b,total_weight)):
+    Read_pixel_from_current_screen(x,y); // C'est bien l'écran courant et pas
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.

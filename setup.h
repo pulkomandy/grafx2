@@ -21,7 +21,7 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Set_Program_Directory(const char * argv0,char * Program_Dir);
-void Set_Data_Directory(const char * Program_Dir, char * Data_Dir);
-void Set_Config_Directory(const char * Program_Dir, char * Config_Dir);
+void Set_program_directory(const char * argv0,char * program_dir);
+void Set_data_directory(const char * program_dir, char * data_dir);
+void Set_config_directory(const char * program_dir, char * config_dir);
   

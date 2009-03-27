@@ -36,511 +36,511 @@
 #include "windows.h"
 #include "input.h"
 
-byte Palette_mode_RGB = 1; // Indique si on est en HSL ou en RGB
+byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 
 // --------------------------- Menu des palettes -----------------------------
-char * Libelle_reduction_palette[7]=
+char * Palette_reduce_label[7]=
 {
   "128"," 64"," 32"," 16","  8","  4","  2"
 };
 
 // Nombre de graduations pour une composante RGB
-int Graduations_RGB = 256; // 24bit
-//int Graduations_RGB = 64; // VGA
-//int Graduations_RGB = 16; // Amiga
-//int Graduations_RGB =  4; // MSX2
-//int Graduations_RGB =  3; // Amstrad CPC
+int RGB_scale = 256; // 24bit
+//int RGB_scale = 64; // VGA
+//int RGB_scale = 16; // Amiga
+//int RGB_scale =  4; // MSX2
+//int RGB_scale =  3; // Amstrad CPC
 
 // Nombre de graduations pour une composante dans le mode actuel
-int Color_Count=256;
-// Les composantes vont de 0 à (Color_Count-1)
-int Color_Max=255;
+int Color_count=256;
+// Les composantes vont de 0 à (Color_count-1)
+int Color_max=255;
 // Le demi-pas est une quantité que l'on ajoute à une composante
 // avant de faire un arrondi par division.
-int Color_DemiPas=0;
+int Color_halfstep=0;
 
 
-void Set_Palette_RGB_Scale(int scale)
+void Set_palette_RGB_scale(int scale)
 {
   if (scale>= 2 && scale <= 256)
-    Graduations_RGB = scale;
+    RGB_scale = scale;
 }
 
-byte Palette_Scale_Component(byte comp)
+byte Round_palette_component(byte comp)
 {
-  return ((comp+128/Graduations_RGB)*(Graduations_RGB-1)/255*255+(Graduations_RGB&1?1:0))/(Graduations_RGB-1);
+  return ((comp+128/RGB_scale)*(RGB_scale-1)/255*255+(RGB_scale&1?1:0))/(RGB_scale-1);
 }
 
 // Définir les unités pour les graduationss R G B ou H S V
-void Unite_Composantes(int Count)
+void Componant_unit(int count)
 {
-  Color_Count = Count;
-  Color_Max = Count-1;
-  Color_DemiPas = 256/Count/2;
+  Color_count = count;
+  Color_max = count-1;
+  Color_halfstep = 256/count/2;
 }
 
-void Modifier_HSL(T_Palette Palette_depart, T_Palette Palette_arrivee, byte Couleur, short Difference_H, short Difference_S, short Difference_L)
+void Set_HSL(T_Palette start_palette, T_Palette end_palette, byte color, short diff_h, short diff_s, short diff_l)
 {
     byte h, s, l;
-    RGBtoHSL(Palette_depart[Couleur].R,Palette_depart[Couleur].G,Palette_depart[Couleur].B,&h,&s,&l);
+    RGB_to_HSL(start_palette[color].R,start_palette[color].G,start_palette[color].B,&h,&s,&l);
     // La teinte (Hue) est cyclique
-    h=(Difference_H+256+h);
+    h=(diff_h+256+h);
     // Pour les autres (Saturation, Lightness), au lieu d'additionner,
     // on va faire un ratio, cela utilise mieux la plage de valeurs 0-255
-    if (Difference_S<0)
-      s=(255+Difference_S)*s/255;
-    else if (Difference_S>0)
-      s=255-(255-Difference_S)*(255-s)/255;
-    if (Difference_L<0)
-      l=(255+Difference_L)*l/255;
-    else if (Difference_L>0)
-      l=255-(255-Difference_L)*(255-l)/255;
-    HSLtoRGB(h,s,l,&Palette_arrivee[Couleur].R,&Palette_arrivee[Couleur].G,&Palette_arrivee[Couleur].B);
+    if (diff_s<0)
+      s=(255+diff_s)*s/255;
+    else if (diff_s>0)
+      s=255-(255-diff_s)*(255-s)/255;
+    if (diff_l<0)
+      l=(255+diff_l)*l/255;
+    else if (diff_l>0)
+      l=255-(255-diff_l)*(255-l)/255;
+    HSL_to_RGB(h,s,l,&end_palette[color].R,&end_palette[color].G,&end_palette[color].B);
 }
 
-void Modifier_Rouge(byte Couleur, short Nouvelle_teinte, T_Palette palette)
+void Set_red(byte color, short new_color, T_Palette palette)
 {
-  if (Nouvelle_teinte< 0)
-    Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>255)
-    Nouvelle_teinte=255;
+  if (new_color< 0)
+    new_color= 0;
+  if (new_color>255)
+    new_color=255;
   // Arrondi
-  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
+  new_color=Round_palette_component(new_color);
 
-  palette[Couleur].R=Nouvelle_teinte;
-  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
+  palette[color].R=new_color;
+  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
 
-void Modifier_Vert(byte Couleur, short Nouvelle_teinte, T_Palette palette)
+void Set_green(byte color, short new_color, T_Palette palette)
 {
-  if (Nouvelle_teinte< 0)
-    Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>255)
-    Nouvelle_teinte=255;
+  if (new_color< 0)
+    new_color= 0;
+  if (new_color>255)
+    new_color=255;
   // Arrondi
-  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
+  new_color=Round_palette_component(new_color);
 
-  palette[Couleur].G=Nouvelle_teinte;
-  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
+  palette[color].G=new_color;
+  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
 
-void Modifier_Bleu(byte Couleur, short Nouvelle_teinte, T_Palette palette)
+void Set_blue(byte color, short new_color, T_Palette palette)
 {
-  if (Nouvelle_teinte< 0)
-    Nouvelle_teinte= 0;
-  if (Nouvelle_teinte>255)
-    Nouvelle_teinte=255;
+  if (new_color< 0)
+    new_color= 0;
+  if (new_color>255)
+    new_color=255;
   // Arrondi
-  Nouvelle_teinte=Palette_Scale_Component(Nouvelle_teinte);
+  new_color=Round_palette_component(new_color);
 
-  palette[Couleur].B=Nouvelle_teinte;
-  Set_color(Couleur,palette[Couleur].R,palette[Couleur].G,palette[Couleur].B);
+  palette[color].B=new_color;
+  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
-void Formate_composante(byte value, char *Chaine)
+void Format_componant(byte value, char *str)
 // Formate une chaine de 4 caractères+\0 : "nnn "
 {
-  Num2str(value,Chaine,3);
-  Chaine[3]=' ';
-  Chaine[4]='\0';
+  Num2str(value,str,3);
+  str[3]=' ';
+  str[4]='\0';
 }
 
-void Degrader_palette(short start,short end,T_Palette palette)
+void Spread_colors(short start,short end,T_Palette palette)
 // Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
 // passées en paramètre
 {
-  short Debut_Rouge;
-  short Debut_Vert;
-  short Debut_Bleu;
-  short Fin_Rouge;
-  short Fin_Vert;
-  short Fin_Bleu;
-  short Indice;
+  short start_red;
+  short start_green;
+  short start_blue;
+  short end_red;
+  short end_green;
+  short end_blue;
+  short index;
 
   // On vérifie qu'il y ait assez de couleurs entre le début et la fin pour
   // pouvoir faire un dégradé:
   if ( (start!=end) && (start+1!=end) )
   {
-    Debut_Rouge=palette[start].R;
-    Debut_Vert =palette[start].G;
-    Debut_Bleu =palette[start].B;
+    start_red=palette[start].R;
+    start_green =palette[start].G;
+    start_blue =palette[start].B;
 
-    Fin_Rouge  =palette[end  ].R;
-    Fin_Vert   =palette[end  ].G;
-    Fin_Bleu   =palette[end  ].B;
+    end_red  =palette[end  ].R;
+    end_green   =palette[end  ].G;
+    end_blue   =palette[end  ].B;
 
-    for (Indice=start+1;Indice<end;Indice++)
+    for (index=start+1;index<end;index++)
     {
-      Modifier_Rouge(Indice, ((Fin_Rouge-Debut_Rouge) * (Indice-start))/(end-start) + Debut_Rouge,palette);
-      Modifier_Vert (Indice, ((Fin_Vert -Debut_Vert ) * (Indice-start))/(end-start) + Debut_Vert ,palette);
-      Modifier_Bleu (Indice, ((Fin_Bleu -Debut_Bleu ) * (Indice-start))/(end-start) + Debut_Bleu ,palette);
+      Set_red(index, ((end_red-start_red) * (index-start))/(end-start) + start_red,palette);
+      Set_green (index, ((end_green -start_green ) * (index-start))/(end-start) + start_green ,palette);
+      Set_blue (index, ((end_blue -start_blue ) * (index-start))/(end-start) + start_blue ,palette);
     }
   }
 }
 
 
-void Compter_nb_couleurs_utilisees(short * Nb_couleurs_utilisees, dword * Utilisation_couleur)
+void Update_color_count(short * used_colors, dword * color_usage)
 {
-  char   Chaine[10];
+  char   str[10];
 
-  Effacer_curseur();
-  Forme_curseur=FORME_CURSEUR_SABLIER;
-  Afficher_curseur();
-  *Nb_couleurs_utilisees=Palette_Compter_nb_couleurs_utilisees(Utilisation_couleur);
-  strcpy(Chaine,"Used: ");
-  Num2str(*Nb_couleurs_utilisees,Chaine+6,3);
-  Effacer_curseur();
-  Fenetre_Dessiner_bouton_normal(132,20,83,14,Chaine,4,1);
-  Forme_curseur=FORME_CURSEUR_FLECHE;
-  Afficher_curseur();
+  Hide_cursor();
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+  *used_colors=Count_used_colors(color_usage);
+  strcpy(str,"Used: ");
+  Num2str(*used_colors,str+6,3);
+  Hide_cursor();
+  Window_draw_normal_bouton(132,20,83,14,str,4,1);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Display_cursor();
 }
 
 
-void Remap_zone_HIGH(short X1, short Y1, short X2, short Y2,
-                     byte * Table_de_conversion)
-// Attention: Remappe une zone de coins X1,Y1 et X2-1,Y2-1 !!!
+void Remap_zone_highlevel(short x1, short y1, short x2, short y2,
+                     byte * conversion_table)
+// Attention: Remappe une zone de coins x1,y1 et x2-1,y2-1 !!!
 {
   short x_pos;
   short y_pos;
 
-  for (y_pos=Y1;y_pos<Y2;y_pos++)
-    for (x_pos=X1;x_pos<X2;x_pos++)
+  for (y_pos=y1;y_pos<y2;y_pos++)
+    for (x_pos=x1;x_pos<x2;x_pos++)
     {
-      if ((y_pos>=Fenetre_Pos_Y) && (y_pos<Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) &&
-          (x_pos>=Fenetre_Pos_X) && (x_pos<Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)) )
-        x_pos=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X)-1;
+      if ((y_pos>=Window_pos_Y) && (y_pos<Window_pos_Y+(Window_height*Menu_factor_Y)) &&
+          (x_pos>=Window_pos_X) && (x_pos<Window_pos_X+(Window_width*Menu_factor_X)) )
+        x_pos=Window_pos_X+(Window_width*Menu_factor_X)-1;
       else
-        Pixel(x_pos,y_pos,Table_de_conversion[Lit_pixel(x_pos,y_pos)]);
+        Pixel(x_pos,y_pos,conversion_table[Read_pixel(x_pos,y_pos)]);
     }
 }
 
-void Remap_image_HIGH(byte * Table_de_conversion)
+void Remap_image_highlevel(byte * conversion_table)
 {
-  short Fin_X;
-  short Fin_Y;
-  short Fin_X_Loupe=0;
-  short Fin_Y_Loupe=0;
+  short end_x;
+  short end_y;
+  short end_x_mag=0;
+  short end_y_mag=0;
 
   // On s'occupe de faire la traduction dans l'image
-  Remap_general_LOWLEVEL(Table_de_conversion,Principal_Ecran,
-                         Principal_Largeur_image,Principal_Hauteur_image,Principal_Largeur_image);
+  Remap_general_lowlevel(conversion_table,Main_screen,
+                         Main_image_width,Main_image_height,Main_image_width);
 
   // On calcule les limites à l'écran de l'image
-  if (Principal_Hauteur_image>=Menu_Ordonnee_avant_fenetre)
-    Fin_Y=Menu_Ordonnee_avant_fenetre;
+  if (Main_image_height>=Menu_Y_before_window)
+    end_y=Menu_Y_before_window;
   else
-    Fin_Y=Principal_Hauteur_image;
+    end_y=Main_image_height;
 
-  if (!Loupe_Mode)
+  if (!Main_magnifier_mode)
   {
-    if (Principal_Largeur_image>=Largeur_ecran)
-      Fin_X=Largeur_ecran;
+    if (Main_image_width>=Screen_width)
+      end_x=Screen_width;
     else
-      Fin_X=Principal_Largeur_image;
+      end_x=Main_image_width;
 
   }
   else
   {
-    if (Principal_Largeur_image>=Principal_Split)
-      Fin_X=Principal_Split;
+    if (Main_image_width>=Main_separator_position)
+      end_x=Main_separator_position;
     else
-      Fin_X=Principal_Largeur_image;
+      end_x=Main_image_width;
 
-    if ((Principal_X_Zoom+(Principal_Largeur_image*Loupe_Facteur))>=Largeur_ecran)
-      Fin_X_Loupe=Largeur_ecran;
+    if ((Main_X_zoom+(Main_image_width*Main_magnifier_factor))>=Screen_width)
+      end_x_mag=Screen_width;
     else
-      Fin_X_Loupe=(Principal_X_Zoom+(Principal_Largeur_image*Loupe_Facteur));
+      end_x_mag=(Main_X_zoom+(Main_image_width*Main_magnifier_factor));
 
-    if (Principal_Hauteur_image*Loupe_Facteur>=Menu_Ordonnee_avant_fenetre)
-      Fin_Y_Loupe=Menu_Ordonnee_avant_fenetre;
+    if (Main_image_height*Main_magnifier_factor>=Menu_Y_before_window)
+      end_y_mag=Menu_Y_before_window;
     else
-      Fin_Y_Loupe=Principal_Hauteur_image*Loupe_Facteur;
+      end_y_mag=Main_image_height*Main_magnifier_factor;
   }
 
   // On doit maintenant faire la traduction à l'écran
-  Remap_zone_HIGH(0,0,Fin_X,Fin_Y,Table_de_conversion);
+  Remap_zone_highlevel(0,0,end_x,end_y,conversion_table);
 
-  if (Loupe_Mode)
+  if (Main_magnifier_mode)
   {
-    Remap_zone_HIGH(Principal_Split,0,Fin_X_Loupe,Fin_Y_Loupe,Table_de_conversion);
+    Remap_zone_highlevel(Main_separator_position,0,end_x_mag,end_y_mag,conversion_table);
     // Il peut encore rester le bas de la barre de split à remapper si la
     // partie zoomée ne descend pas jusqu'en bas...
-    Remap_zone_HIGH(Principal_Split,Fin_Y_Loupe,
-                    (Principal_Split+(LARGEUR_BARRE_SPLIT*Menu_Facteur_X)),
-                    Menu_Ordonnee_avant_fenetre,Table_de_conversion);
+    Remap_zone_highlevel(Main_separator_position,end_y_mag,
+                    (Main_separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
+                    Menu_Y_before_window,conversion_table);
   }
   // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
-  Remappe_fond_fenetres(Table_de_conversion, 0, Menu_Ordonnee_avant_fenetre);
+  Remap_window_backgrounds(conversion_table, 0, Menu_Y_before_window);
 }
 
 
-void Swap(int X_Swap,short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc,T_Palette palette, dword * Utilisation_couleur)
+void Swap(int with_remap,short block_1_start,short block_2_start,short block_size,T_Palette palette, dword * color_usage)
 {
-  short Pos_1;
-  short Pos_2;
-  short Fin_1;
-  short Fin_2;
-  dword Tempo;
-  byte  Table_de_conversion[256];
+  short pos_1;
+  short pos_2;
+  short end_1;
+  short end_2;
+  dword temp;
+  byte  conversion_table[256];
 
-  Composantes Palette_temporaire[256];
+  T_Components temp_palette[256];
   dword Utilisation_temporaire[256];
 
   // On fait une copie de la palette
-  memcpy(Palette_temporaire, palette, sizeof(T_Palette));
+  memcpy(temp_palette, palette, sizeof(T_Palette));
 
   // On fait une copie de la table d'utilisation des couleurs
-  memcpy(Utilisation_temporaire, Utilisation_couleur, sizeof(dword) * 256);
+  memcpy(Utilisation_temporaire, color_usage, sizeof(dword) * 256);
 
   // On commence à initialiser la table de conversion à un état où elle ne
   // fera aucune conversion.
-  for (Pos_1=0;Pos_1<=255;Pos_1++)
-    Table_de_conversion[Pos_1]=Pos_1;
+  for (pos_1=0;pos_1<=255;pos_1++)
+    conversion_table[pos_1]=pos_1;
 
   // On calcul les dernières couleurs de chaque bloc.
-  Fin_1=Debut_Bloc_1+Taille_du_bloc-1;
-  Fin_2=Debut_Bloc_2+Taille_du_bloc-1;
+  end_1=block_1_start+block_size-1;
+  end_2=block_2_start+block_size-1;
 
-  if ((Debut_Bloc_2>=Debut_Bloc_1) && (Debut_Bloc_2<=Fin_1))
+  if ((block_2_start>=block_1_start) && (block_2_start<=end_1))
   {
     // Le bloc destination commence dans le bloc source.
 
-    for (Pos_1=Debut_Bloc_1,Pos_2=Fin_1+1;Pos_1<=Fin_2;Pos_1++)
+    for (pos_1=block_1_start,pos_2=end_1+1;pos_1<=end_2;pos_1++)
     {
-      // Il faut transformer la couleur Pos_1 en Pos_2:
+      // Il faut transformer la couleur pos_1 en pos_2:
 
-      Table_de_conversion[Pos_2]=Pos_1;
-      Utilisation_couleur[Pos_1]=Utilisation_temporaire[Pos_2];
-      palette[Pos_1].R=Palette_temporaire[Pos_2].R;
-      palette[Pos_1].G=Palette_temporaire[Pos_2].G;
-      palette[Pos_1].B=Palette_temporaire[Pos_2].B;
+      conversion_table[pos_2]=pos_1;
+      color_usage[pos_1]=Utilisation_temporaire[pos_2];
+      palette[pos_1].R=temp_palette[pos_2].R;
+      palette[pos_1].G=temp_palette[pos_2].G;
+      palette[pos_1].B=temp_palette[pos_2].B;
 
-      // On gère la mise à jour de Pos_2
-      if (Pos_2==Fin_2)
-        Pos_2=Debut_Bloc_1;
+      // On gère la mise à jour de pos_2
+      if (pos_2==end_2)
+        pos_2=block_1_start;
       else
-        Pos_2++;
+        pos_2++;
     }
   }
   else
-  if ((Debut_Bloc_2<Debut_Bloc_1) && (Fin_2>=Debut_Bloc_1))
+  if ((block_2_start<block_1_start) && (end_2>=block_1_start))
   {
     // Le bloc destination déborde dans le bloc source.
 
-    for (Pos_1=Debut_Bloc_2,Pos_2=Debut_Bloc_1;Pos_1<=Fin_1;Pos_1++)
+    for (pos_1=block_2_start,pos_2=block_1_start;pos_1<=end_1;pos_1++)
     {
-      // Il faut transformer la couleur Pos_1 en Pos_2:
+      // Il faut transformer la couleur pos_1 en pos_2:
 
-      Table_de_conversion[Pos_2]=Pos_1;
-      Utilisation_couleur[Pos_1]=Utilisation_temporaire[Pos_2];
-      palette[Pos_1].R=Palette_temporaire[Pos_2].R;
-      palette[Pos_1].G=Palette_temporaire[Pos_2].G;
-      palette[Pos_1].B=Palette_temporaire[Pos_2].B;
+      conversion_table[pos_2]=pos_1;
+      color_usage[pos_1]=Utilisation_temporaire[pos_2];
+      palette[pos_1].R=temp_palette[pos_2].R;
+      palette[pos_1].G=temp_palette[pos_2].G;
+      palette[pos_1].B=temp_palette[pos_2].B;
 
-      // On gère la mise à jour de Pos_2
-      if (Pos_2==Fin_1)
-        Pos_2=Debut_Bloc_2;
+      // On gère la mise à jour de pos_2
+      if (pos_2==end_1)
+        pos_2=block_2_start;
       else
-        Pos_2++;
+        pos_2++;
     }
   }
   else
   {
     // Le bloc source et le bloc destination sont distincts.
 
-    for (Pos_1=Debut_Bloc_1,Pos_2=Debut_Bloc_2;Pos_1<=Fin_1;Pos_1++,Pos_2++)
+    for (pos_1=block_1_start,pos_2=block_2_start;pos_1<=end_1;pos_1++,pos_2++)
     {
-      // Il va falloir permutter la couleur Pos_1 avec la couleur Pos_2
-      Table_de_conversion[Pos_1]=Pos_2;
-      Table_de_conversion[Pos_2]=Pos_1;
+      // Il va falloir permutter la couleur pos_1 avec la couleur pos_2
+      conversion_table[pos_1]=pos_2;
+      conversion_table[pos_2]=pos_1;
 
       //   On intervertit le nombre d'utilisation des couleurs pour garder une
       // cohérence lors d'un éventuel "Zap unused".
-      Tempo                     =Utilisation_couleur[Pos_1];
-      Utilisation_couleur[Pos_1]=Utilisation_couleur[Pos_2];
-      Utilisation_couleur[Pos_2]=Tempo;
+      temp                     =color_usage[pos_1];
+      color_usage[pos_1]=color_usage[pos_2];
+      color_usage[pos_2]=temp;
 
       // On fait un changement de teinte:
-      Tempo           =palette[Pos_1].R;
-      palette[Pos_1].R=palette[Pos_2].R;
-      palette[Pos_2].R=Tempo;
+      temp           =palette[pos_1].R;
+      palette[pos_1].R=palette[pos_2].R;
+      palette[pos_2].R=temp;
 
-      Tempo           =palette[Pos_1].G;
-      palette[Pos_1].G=palette[Pos_2].G;
-      palette[Pos_2].G=Tempo;
+      temp           =palette[pos_1].G;
+      palette[pos_1].G=palette[pos_2].G;
+      palette[pos_2].G=temp;
 
-      Tempo           =palette[Pos_1].B;
-      palette[Pos_1].B=palette[Pos_2].B;
-      palette[Pos_2].B=Tempo;
+      temp           =palette[pos_1].B;
+      palette[pos_1].B=palette[pos_2].B;
+      palette[pos_2].B=temp;
     }
   }
 
-  if (X_Swap)
+  if (with_remap)
   {
-    Remap_image_HIGH(Table_de_conversion);
+    Remap_image_highlevel(conversion_table);
   }
 }
 
 
 
-void Remettre_proprement_les_couleurs_du_menu(dword * Utilisation_couleur)
+void Set_nice_menu_colors(dword * color_usage)
 {
-  short Indice,Indice2;
-  byte Couleur;
-  byte Table_de_remplacement[256];
-  Composantes rgb[4];
-  short Nouvelles[4]={255,254,253,252};
+  short index,index2;
+  byte color;
+  byte replace_table[256];
+  T_Components rgb[4];
+  short new_colors[4]={255,254,253,252};
 
   // On initialise la table de remplacement
-  for (Indice=0; Indice<256; Indice++)
-    Table_de_remplacement[Indice]=Indice;
+  for (index=0; index<256; index++)
+    replace_table[index]=index;
 
   // On recherche les 4 couleurs les moins utilisées dans l'image pour pouvoir
   // les remplacer par les nouvelles couleurs.
-  for (Indice2=0; Indice2<4; Indice2++)
-    for (Indice=255; Indice>=0; Indice--)
+  for (index2=0; index2<4; index2++)
+    for (index=255; index>=0; index--)
     {
-      if ((Indice!=Nouvelles[0]) && (Indice!=Nouvelles[1])
-       && (Indice!=Nouvelles[2]) && (Indice!=Nouvelles[3])
-       && (Utilisation_couleur[Indice]<Utilisation_couleur[Nouvelles[Indice2]]))
-        Nouvelles[Indice2]=Indice;
+      if ((index!=new_colors[0]) && (index!=new_colors[1])
+       && (index!=new_colors[2]) && (index!=new_colors[3])
+       && (color_usage[index]<color_usage[new_colors[index2]]))
+        new_colors[index2]=index;
     }
 
   // On trie maintenant la table dans le sens décroissant.
   // (Ce n'est pas indispensable, mais ça fera plus joli dans la palette).
   do
   {
-    Couleur=0; // Booléen qui dit si le tri n'est pas terminé.
-    for (Indice=0; Indice<3; Indice++)
+    color=0; // Booléen qui dit si le tri n'est pas terminé.
+    for (index=0; index<3; index++)
     {
-      if (Nouvelles[Indice]>Nouvelles[Indice+1])
+      if (new_colors[index]>new_colors[index+1])
       {
-        Indice2            =Nouvelles[Indice];
-        Nouvelles[Indice]  =Nouvelles[Indice+1];
-        Nouvelles[Indice+1]=Indice2;
-        Couleur=1;
+        index2            =new_colors[index];
+        new_colors[index]  =new_colors[index+1];
+        new_colors[index+1]=index2;
+        color=1;
       }
     }
-  } while (Couleur);
+  } while (color);
 
   //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
   // couleurs du menu par défaut
-  for (Indice=0; Indice<4; Indice++)
+  for (index=0; index<4; index++)
   {
-    Couleur=Nouvelles[Indice];
-    rgb[Indice].R=Principal_Palette[Couleur].R;
-    rgb[Indice].G=Principal_Palette[Couleur].G;
-    rgb[Indice].B=Principal_Palette[Couleur].B;
-    Principal_Palette[Couleur].R=Coul_menu_pref[Indice].R;
-    Principal_Palette[Couleur].G=Coul_menu_pref[Indice].G;
-    Principal_Palette[Couleur].B=Coul_menu_pref[Indice].B;
+    color=new_colors[index];
+    rgb[index].R=Main_palette[color].R;
+    rgb[index].G=Main_palette[color].G;
+    rgb[index].B=Main_palette[color].B;
+    Main_palette[color].R=Fav_menu_colors[index].R;
+    Main_palette[color].G=Fav_menu_colors[index].G;
+    Main_palette[color].B=Fav_menu_colors[index].B;
   }
 
   //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
   // sont les couleurs qui peuvent remplacer les anciennes
-  Effacer_curseur();
-  for (Indice=0; Indice<4; Indice++)
-    Table_de_remplacement[Nouvelles[Indice]]=Meilleure_couleur_sans_exclusion
-                                  (rgb[Indice].R,rgb[Indice].G,rgb[Indice].B);
+  Hide_cursor();
+  for (index=0; index<4; index++)
+    replace_table[new_colors[index]]=Best_color_nonexcluded
+                                  (rgb[index].R,rgb[index].G,rgb[index].B);
 
   // On fait un changement des couleurs visibles à l'écran et dans l'image
-  Remap_image_HIGH(Table_de_remplacement);
-  Afficher_curseur();
+  Remap_image_highlevel(replace_table);
+  Display_cursor();
 }
 
 
 
-void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Palette palette,dword * Utilisation_couleur)
+void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dword * color_usage)
 {
-  char  Chaine[5];                // Buffer d'affichage du compteur
-  byte  Table_de_conversion[256]; // Table de conversion
-  int   Couleur_1;                // |_ Variables de balayages
-  int   Couleur_2;                // |  de la palette
-  int   Meilleure_couleur_1=0;
-  int   Meilleure_couleur_2=0;
-  int   Difference;
-  int   Meilleure_difference;
+  char  str[5];                // buffer d'affichage du compteur
+  byte  conversion_table[256]; // Table de conversion
+  int   color_1;                // |_ Variables de balayages
+  int   color_2;                // |  de la palette
+  int   best_color_1=0;
+  int   best_color_2=0;
+  int   difference;
+  int   best_difference;
   dword Utilisation;
   dword Meilleure_utilisation;
 
   //   On commence par initialiser la table de conversion dans un état où
   // aucune conversion ne sera effectuée.
-  for (Couleur_1=0; Couleur_1<=255; Couleur_1++)
-    Table_de_conversion[Couleur_1]=Couleur_1;
+  for (color_1=0; color_1<=255; color_1++)
+    conversion_table[color_1]=color_1;
 
   //   Si on ne connait pas encore le nombre de couleurs utilisées, on le
   // calcule! (!!! La fonction appelée Efface puis Affiche le curseur !!!)
-  if ((*Nb_couleurs_utilisees)<0)
-    Compter_nb_couleurs_utilisees(Nb_couleurs_utilisees,Utilisation_couleur);
+  if ((*used_colors)<0)
+    Update_color_count(used_colors,color_usage);
 
-  Effacer_curseur();
+  Hide_cursor();
 
   //   On tasse la palette vers le début parce qu'elle doit ressembler à
   // du Gruyère (et comme Papouille il aime pas le fromage...)
 
-  // Pour cela, on va scruter la couleur Couleur_1 et se servir de l'indice
-  // Couleur_2 comme position de destination.
-  for (Couleur_1=Couleur_2=0;Couleur_1<=255;Couleur_1++)
+  // Pour cela, on va scruter la couleur color_1 et se servir de l'indice
+  // color_2 comme position de destination.
+  for (color_1=color_2=0;color_1<=255;color_1++)
   {
-    if (Utilisation_couleur[Couleur_1])
+    if (color_usage[color_1])
     {
       // On commence par s'occuper des teintes de la palette
-      palette[Couleur_2].R=palette[Couleur_1].R;
-      palette[Couleur_2].G=palette[Couleur_1].G;
-      palette[Couleur_2].B=palette[Couleur_1].B;
+      palette[color_2].R=palette[color_1].R;
+      palette[color_2].G=palette[color_1].G;
+      palette[color_2].B=palette[color_1].B;
 
       // Ensuite, on met à jour le tableau d'occupation des couleurs.
-      Utilisation_couleur[Couleur_2]=Utilisation_couleur[Couleur_1];
+      color_usage[color_2]=color_usage[color_1];
 
       // On va maintenant s'occuper de la table de conversion:
-      Table_de_conversion[Couleur_1]=Couleur_2;
+      conversion_table[color_1]=color_2;
 
-      // Maintenant, la place désignée par Couleur_2 est occupée, alors on
+      // Maintenant, la place désignée par color_2 est occupée, alors on
       // doit passer à un indice de destination suivant.
-      Couleur_2++;
+      color_2++;
     }
   }
 
   // On met toutes les couleurs inutilisées en noir
-  for (;Couleur_2<256;Couleur_2++)
+  for (;color_2<256;color_2++)
   {
-    palette[Couleur_2].R=0;
-    palette[Couleur_2].G=0;
-    palette[Couleur_2].B=0;
-    Utilisation_couleur[Couleur_2]=0;
+    palette[color_2].R=0;
+    palette[color_2].G=0;
+    palette[color_2].B=0;
+    color_usage[color_2]=0;
   }
 
   //   Maintenant qu'on a une palette clean, on va boucler en réduisant
   // le nombre de couleurs jusqu'à ce qu'on atteigne le nombre désiré.
-  while ((*Nb_couleurs_utilisees)>Nb_couleurs_demandees)
+  while ((*used_colors)>nb_colors_asked)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
     // parmis celles qui sont utilisées (bien sûr) et de les remplacer par
     // une seule couleur qui est la moyenne pondérée de ces 2 couleurs
     // en fonction de leur utilisation dans l'image.
 
-    Meilleure_difference =0x7FFF;
+    best_difference =0x7FFF;
     Meilleure_utilisation=0x7FFFFFFF;
 
-    for (Couleur_1=0;Couleur_1<(*Nb_couleurs_utilisees);Couleur_1++)
-      for (Couleur_2=Couleur_1+1;Couleur_2<(*Nb_couleurs_utilisees);Couleur_2++)
-        if (Couleur_1!=Couleur_2)
+    for (color_1=0;color_1<(*used_colors);color_1++)
+      for (color_2=color_1+1;color_2<(*used_colors);color_2++)
+        if (color_1!=color_2)
         {
-          Difference =abs((short)palette[Couleur_1].R-palette[Couleur_2].R)+
-                      abs((short)palette[Couleur_1].G-palette[Couleur_2].G)+
-                      abs((short)palette[Couleur_1].B-palette[Couleur_2].B);
+          difference =abs((short)palette[color_1].R-palette[color_2].R)+
+                      abs((short)palette[color_1].G-palette[color_2].G)+
+                      abs((short)palette[color_1].B-palette[color_2].B);
 
-          if (Difference<=Meilleure_difference)
+          if (difference<=best_difference)
           {
-            Utilisation=Utilisation_couleur[Couleur_1]+Utilisation_couleur[Couleur_2];
-            if ((Difference<Meilleure_difference) || (Utilisation<Meilleure_utilisation))
+            Utilisation=color_usage[color_1]+color_usage[color_2];
+            if ((difference<best_difference) || (Utilisation<Meilleure_utilisation))
             {
-              Meilleure_difference =Difference;
+              best_difference =difference;
               Meilleure_utilisation=Utilisation;
-              Meilleure_couleur_1  =Couleur_1;
-              Meilleure_couleur_2  =Couleur_2;
+              best_color_1  =color_1;
+              best_color_2  =color_2;
             }
           }
         }
@@ -548,35 +548,35 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     //   Maintenant qu'on les a trouvées, on va pouvoir mettre à jour nos
     // données pour que le remplacement se fasse sans encombres.
 
-    // En somme, on va remplacer Meilleure_couleur_2 par Meilleure_couleur_1,
-    // mais attention, on ne remplace pas Meilleure_couleur_1 par
-    // Meilleure_couleur_2 !
+    // En somme, on va remplacer best_color_2 par best_color_1,
+    // mais attention, on ne remplace pas best_color_1 par
+    // best_color_2 !
 
     // On met à jour la palette.
-    palette[Meilleure_couleur_1].R=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].R)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].R),
+    palette[best_color_1].R=Round_div((color_usage[best_color_1]*palette[best_color_1].R)+
+                                             (color_usage[best_color_2]*palette[best_color_2].R),
                                              Meilleure_utilisation);
-    palette[Meilleure_couleur_1].G=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].G)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].G),
+    palette[best_color_1].G=Round_div((color_usage[best_color_1]*palette[best_color_1].G)+
+                                             (color_usage[best_color_2]*palette[best_color_2].G),
                                              Meilleure_utilisation);
-    palette[Meilleure_couleur_1].B=Round_div((Utilisation_couleur[Meilleure_couleur_1]*palette[Meilleure_couleur_1].B)+
-                                             (Utilisation_couleur[Meilleure_couleur_2]*palette[Meilleure_couleur_2].B),
+    palette[best_color_1].B=Round_div((color_usage[best_color_1]*palette[best_color_1].B)+
+                                             (color_usage[best_color_2]*palette[best_color_2].B),
                                              Meilleure_utilisation);
 
     // On met à jour la table d'utilisation.
-    Utilisation_couleur[Meilleure_couleur_1]+=Utilisation_couleur[Meilleure_couleur_2];
-    Utilisation_couleur[Meilleure_couleur_2]=0;
+    color_usage[best_color_1]+=color_usage[best_color_2];
+    color_usage[best_color_2]=0;
 
     // On met à jour la table de conversion.
-    for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
+    for (color_1=0;color_1<=255;color_1++)
     {
-      if (Table_de_conversion[Couleur_1]==Meilleure_couleur_2)
+      if (conversion_table[color_1]==best_color_2)
       {
-        //   La Couleur_1 avait déjà prévue de se faire remplacer par la
+        //   La color_1 avait déjà prévue de se faire remplacer par la
         // couleur que l'on veut maintenant éliminer. On va maintenant
-        // demander à ce que la Couleur_1 se fasse remplacer par la
-        // Meilleure_couleur_1.
-        Table_de_conversion[Couleur_1]=Meilleure_couleur_1;
+        // demander à ce que la color_1 se fasse remplacer par la
+        // best_color_1.
+        conversion_table[color_1]=best_color_1;
       }
     }
 
@@ -584,87 +584,87 @@ void Reduce_palette(short * Nb_couleurs_utilisees,int Nb_couleurs_demandees,T_Pa
     // la couleur à éliminer, on va s'occuper de faire bouger les couleurs
     // situées après la couleur à éliminer pour qu'elles se déplaçent d'une
     // couleur en arrière.
-    for (Couleur_1=0;Couleur_1<=255;Couleur_1++)
+    for (color_1=0;color_1<=255;color_1++)
     {
       //   Commençons par nous occuper des tables d'utilisation et de la
       // palette.
 
-      if (Couleur_1>Meilleure_couleur_2)
+      if (color_1>best_color_2)
       {
-        // La Couleur_1 va scroller en arrière.
+        // La color_1 va scroller en arrière.
 
         //   Donc on transfère son utilisation dans l'utilisation de la
         // couleur qui la précède.
-        Utilisation_couleur[Couleur_1-1]=Utilisation_couleur[Couleur_1];
+        color_usage[color_1-1]=color_usage[color_1];
 
         //   Et on transfère ses teintes dans les teintes de la couleur qui
         // la précède.
-        palette[Couleur_1-1].R=palette[Couleur_1].R;
-        palette[Couleur_1-1].G=palette[Couleur_1].G;
-        palette[Couleur_1-1].B=palette[Couleur_1].B;
+        palette[color_1-1].R=palette[color_1].R;
+        palette[color_1-1].G=palette[color_1].G;
+        palette[color_1-1].B=palette[color_1].B;
       }
 
       //   Une fois la palette et la table d'utilisation gérées, on peut
       // s'occuper de notre table de conversion.
-      if (Table_de_conversion[Couleur_1]>Meilleure_couleur_2)
-        //   La Couleur_1 avait l'intention de se faire remplacer par une
+      if (conversion_table[color_1]>best_color_2)
+        //   La color_1 avait l'intention de se faire remplacer par une
         // couleur que l'on va (ou que l'on a déjà) bouger en arrière.
-        Table_de_conversion[Couleur_1]--;
+        conversion_table[color_1]--;
     }
 
     //   On vient d'éjecter une couleur, donc on peut mettre à jour le nombre
     // de couleurs utilisées.
-    (*Nb_couleurs_utilisees)--;
+    (*used_colors)--;
 
     // A la fin, on doit passer (dans la palette) les teintes du dernier
     // élément de notre ensemble en noir.
-    palette[*Nb_couleurs_utilisees].R=0;
-    palette[*Nb_couleurs_utilisees].G=0;
-    palette[*Nb_couleurs_utilisees].B=0;
+    palette[*used_colors].R=0;
+    palette[*used_colors].G=0;
+    palette[*used_colors].B=0;
 
     // Au passage, on va s'assurer que l'on a pas oublié de la mettre à une
     // utilisation nulle.
-    Utilisation_couleur[*Nb_couleurs_utilisees]=0;
+    color_usage[*used_colors]=0;
 
     // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
-    Num2str(*Nb_couleurs_utilisees,Chaine,3);
-    Print_dans_fenetre(186,23,Chaine,CM_Noir,CM_Clair);
+    Num2str(*used_colors,str,3);
+    Print_in_window(186,23,str,MC_Black,MC_Light);
   }
 
   //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
   // palette, l'image et à l'écran.
-  Remap_image_HIGH(Table_de_conversion); // Et voila pour l'image et l'écran
-  Afficher_curseur();
+  Remap_image_highlevel(conversion_table); // Et voila pour l'image et l'écran
+  Display_cursor();
 }
 
 
 
-void Palette_Modifier_jauge(T_Bouton_scroller * slider,
+void Set_palette_slider(T_Scroller_button * slider,
                             word nb_elements, word position,
                             char * value, short x_pos)
 {
   slider->Nb_elements=nb_elements;
   slider->Position=position;
-  Calculer_hauteur_curseur_jauge(slider);
-  Fenetre_Dessiner_jauge(slider);
-  Print_compteur(x_pos,172,value,CM_Noir,CM_Clair);
+  Compute_slider_cursor_height(slider);
+  Window_draw_slider(slider);
+  Print_counter(x_pos,172,value,MC_Black,MC_Light);
 }
 
 
 
-void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
-                         T_Bouton_scroller * Jauge_verte,
-                         T_Bouton_scroller * Jauge_bleue,
-                         byte Bloc_selectionne, Composantes * palette)
+void Display_sliders(T_Scroller_button * red_slider,
+                         T_Scroller_button * green_slider,
+                         T_Scroller_button * blue_slider,
+                         byte block_is_selected, T_Components * palette)
 {
-  char Chaine[5];
+  char str[5];
 
-  if (Bloc_selectionne)
+  if (block_is_selected)
   {
-    Palette_Modifier_jauge(Jauge_rouge,Color_Max*2+1,Color_Max,"±  0",176);
-    Palette_Modifier_jauge(Jauge_verte,Color_Max*2+1,Color_Max,"±  0",203);
-    Palette_Modifier_jauge(Jauge_bleue,Color_Max*2+1,Color_Max,"±  0",230);
+    Set_palette_slider(red_slider,Color_max*2+1,Color_max,"±  0",176);
+    Set_palette_slider(green_slider,Color_max*2+1,Color_max,"±  0",203);
+    Set_palette_slider(blue_slider,Color_max*2+1,Color_max,"±  0",230);
   }
   else
   {
@@ -672,45 +672,45 @@ void Afficher_les_jauges(T_Bouton_scroller * Jauge_rouge,
     j1= palette[Fore_color].R;
     j2= palette[Fore_color].G;
     j3= palette[Fore_color].B;
-    if (!Palette_mode_RGB)
+    if (!Palette_view_is_RGB)
     {
-      RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
+      RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
 
-    Formate_composante(j1*Color_Max/255,Chaine);
-    Palette_Modifier_jauge(Jauge_rouge,Color_Count,Color_Max-j1*Color_Max/255,Chaine,176);
-    Formate_composante(j2*Color_Max/255,Chaine);
-    Palette_Modifier_jauge(Jauge_verte,Color_Count,Color_Max-j2*Color_Max/255,Chaine,203);
-    Formate_composante(j3*Color_Max/255,Chaine);
-    Palette_Modifier_jauge(Jauge_bleue,Color_Count,Color_Max-j3*Color_Max/255,Chaine,230);
+    Format_componant(j1*Color_max/255,str);
+    Set_palette_slider(red_slider,Color_count,Color_max-j1*Color_max/255,str,176);
+    Format_componant(j2*Color_max/255,str);
+    Set_palette_slider(green_slider,Color_count,Color_max-j2*Color_max/255,str,203);
+    Format_componant(j3*Color_max/255,str);
+    Set_palette_slider(blue_slider,Color_count,Color_max-j3*Color_max/255,str,230);
   }
 }
 
 
 
-void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
-                               T_Bouton_scroller * Jauge_verte,
-                               T_Bouton_scroller * Jauge_bleue,
+void Draw_all_palette_sliders(T_Scroller_button * red_slider,
+                               T_Scroller_button * green_slider,
+                               T_Scroller_button * blue_slider,
                                T_Palette palette,byte start,byte end)
 {
-  char Chaine[5];
+  char str[5];
 
-  Effacer_curseur();
+  Hide_cursor();
   // Réaffichage des jauges:
   if (start!=end)
   {
     // Dans le cas d'un bloc, tout à 0.
-    Jauge_rouge->Position   =Color_Max;
-    Fenetre_Dessiner_jauge(Jauge_rouge);
-    Print_compteur(176,172,"±  0",CM_Noir,CM_Clair);
+    red_slider->Position   =Color_max;
+    Window_draw_slider(red_slider);
+    Print_counter(176,172,"±  0",MC_Black,MC_Light);
 
-    Jauge_verte->Position   =Color_Max;
-    Fenetre_Dessiner_jauge(Jauge_verte);
-    Print_compteur(203,172,"±  0",CM_Noir,CM_Clair);
+    green_slider->Position   =Color_max;
+    Window_draw_slider(green_slider);
+    Print_counter(203,172,"±  0",MC_Black,MC_Light);
 
-    Jauge_bleue->Position   =Color_Max;
-    Fenetre_Dessiner_jauge(Jauge_bleue);
-    Print_compteur(230,172,"±  0",CM_Noir,CM_Clair);
+    blue_slider->Position   =Color_max;
+    Window_draw_slider(blue_slider);
+    Print_counter(230,172,"±  0",MC_Black,MC_Light);
   }
   else
   {
@@ -719,1114 +719,1114 @@ void Palette_Reafficher_jauges(T_Bouton_scroller * Jauge_rouge,
     j1= palette[start].R;
     j2= palette[start].G;
     j3= palette[start].B;
-    if (!Palette_mode_RGB)
+    if (!Palette_view_is_RGB)
     {
-      RGBtoHSL(j1,j2,j3,&j1,&j2,&j3);
+      RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
-    Formate_composante(j1*Color_Max/255,Chaine);
-    Jauge_rouge->Position=Color_Max-j1*Color_Max/255;
-    Fenetre_Dessiner_jauge(Jauge_rouge);
-    Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+    Format_componant(j1*Color_max/255,str);
+    red_slider->Position=Color_max-j1*Color_max/255;
+    Window_draw_slider(red_slider);
+    Print_counter(176,172,str,MC_Black,MC_Light);
 
-    Formate_composante(j2*Color_Max/255,Chaine);
-    Jauge_verte->Position=Color_Max-j2*Color_Max/255;
-    Fenetre_Dessiner_jauge(Jauge_verte);
-    Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+    Format_componant(j2*Color_max/255,str);
+    green_slider->Position=Color_max-j2*Color_max/255;
+    Window_draw_slider(green_slider);
+    Print_counter(203,172,str,MC_Black,MC_Light);
 
-    Formate_composante(j3*Color_Max/255,Chaine);
-    Jauge_bleue->Position=Color_Max-j3*Color_Max/255;
-    Fenetre_Dessiner_jauge(Jauge_bleue);
-    Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+    Format_componant(j3*Color_max/255,str);
+    blue_slider->Position=Color_max-j3*Color_max/255;
+    Window_draw_slider(blue_slider);
+    Print_counter(230,172,str,MC_Black,MC_Light);
   }
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Bouton_Palette(void)
+void Button_Palette(void)
 {
-  static short Indice_Reduction_palette=0;
-  static short Reduce_Nb_couleurs=256;
-  short  Couleur_temporaire; // Variable pouvant reservir pour différents calculs intermédiaires
-  dword  Temp;
-  byte   Couleur,click; // Variables pouvant reservir pour différents calculs intermédiaires
-  short  Bouton_clicke;
-  word   Ancien_Mouse_X;
-  word   Ancien_Mouse_Y;
-  byte   Ancien_Mouse_K;
-  byte   Debut_block;
-  byte   Fin_block;
-  byte   Premiere_couleur;
-  byte   Derniere_couleur;
-  char   Chaine[10];
+  static short reducer_index=0;
+  static short reduce_colors_number=256;
+  short  temp_color; // Variable pouvant reservir pour différents calculs intermédiaires
+  dword  temp;
+  byte   color,click; // Variables pouvant reservir pour différents calculs intermédiaires
+  short  clicked_button;
+  word   old_mouse_x;
+  word   old_mouse_y;
+  byte   old_mouse_k;
+  byte   block_start;
+  byte   block_end;
+  byte   first_color;
+  byte   last_color;
+  char   str[10];
   word   i;
   //short  x_pos,y_pos;
-  T_Bouton_normal   * Bouton_Used;
-  T_Bouton_scroller * Jauge_rouge;
-  T_Bouton_scroller * Jauge_verte;
-  T_Bouton_scroller * Jauge_bleue;
-  T_Bouton_scroller * Jauge_Reduction;
-  byte   Backup_de_l_image_effectue=0;
-  byte   Il_faut_remapper=0;
+  T_Normal_button   * button_used;
+  T_Scroller_button * red_slider;
+  T_Scroller_button * green_slider;
+  T_Scroller_button * blue_slider;
+  T_Scroller_button * reduce_slider;
+  byte   image_is_backed_up=0;
+  byte   need_to_remp=0;
 
-  dword  Utilisation_couleur[256];
-  short  Nb_couleurs_utilisees=-1; // -1 <=> Inconnu
-  byte   Table_de_conversion[256];
+  dword  color_usage[256];
+  short  used_colors=-1; // -1 <=> Inconnu
+  byte   conversion_table[256];
 
-  Composantes * Palette_backup;
-  Composantes * Palette_temporaire;
-  Composantes * Palette_de_travail;
+  T_Components * backup_palette;
+  T_Components * temp_palette;
+  T_Components * working_palette;
 
-  Palette_backup    =(Composantes *)malloc(sizeof(T_Palette));
-  Palette_temporaire=(Composantes *)malloc(sizeof(T_Palette));
-  Palette_de_travail=(Composantes *)malloc(sizeof(T_Palette));
+  backup_palette    =(T_Components *)malloc(sizeof(T_Palette));
+  temp_palette=(T_Components *)malloc(sizeof(T_Palette));
+  working_palette=(T_Components *)malloc(sizeof(T_Palette));
 
-  Unite_Composantes(Graduations_RGB);
+  Componant_unit(RGB_scale);
 
-  Ouvrir_fenetre(299,188,"palette");
+  Open_window(299,188,"palette");
 
-  memcpy(Palette_de_travail,Principal_Palette,sizeof(T_Palette));
-  memcpy(Palette_backup    ,Principal_Palette,sizeof(T_Palette));
-  memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
+  memcpy(working_palette,Main_palette,sizeof(T_Palette));
+  memcpy(backup_palette    ,Main_palette,sizeof(T_Palette));
+  memcpy(temp_palette,Main_palette,sizeof(T_Palette));
 
-  Fenetre_Definir_bouton_palette(5,79);                              // 1
+  Window_set_palette_button(5,79);                              // 1
 
-  Fenetre_Afficher_cadre      (173, 67,121,116);
-  Fenetre_Afficher_cadre      (128, 16, 91, 39);
-  Fenetre_Afficher_cadre      (221, 16, 73, 39);
-  // Cadre creux destiné à l'affichage de la(les) couleur(s) sélectionnée(s)
-  Fenetre_Afficher_cadre_creux(259, 88, 26, 74);
+  Window_display_frame      (173, 67,121,116);
+  Window_display_frame      (128, 16, 91, 39);
+  Window_display_frame      (221, 16, 73, 39);
+  // Frame creux destiné à l'affichage de la(les) couleur(s) sélectionnée(s)
+  Window_display_frame_in(259, 88, 26, 74);
 
   // Graduation des jauges de couleur
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*179),Fenetre_Pos_Y+(Menu_Facteur_Y*109),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*206),Fenetre_Pos_Y+(Menu_Facteur_Y*109),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*109),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*179),Fenetre_Pos_Y+(Menu_Facteur_Y*125),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*206),Fenetre_Pos_Y+(Menu_Facteur_Y*125),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*125),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*179),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*206),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*233),Fenetre_Pos_Y+(Menu_Facteur_Y*141),Menu_Facteur_X*17,Menu_Facteur_Y,CM_Fonce);
+  Block(Window_pos_X+(Menu_factor_X*179),Window_pos_Y+(Menu_factor_Y*109),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*206),Window_pos_Y+(Menu_factor_Y*109),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*233),Window_pos_Y+(Menu_factor_Y*109),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*179),Window_pos_Y+(Menu_factor_Y*125),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*206),Window_pos_Y+(Menu_factor_Y*125),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*233),Window_pos_Y+(Menu_factor_Y*125),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*179),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*206),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
+  Block(Window_pos_X+(Menu_factor_X*233),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
   // Jauges de couleur
-  Palette_mode_RGB=1;
-  Jauge_rouge = Fenetre_Definir_bouton_scroller(182, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].R*Color_Max/255);// 2
-  Jauge_verte = Fenetre_Definir_bouton_scroller(209, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].G*Color_Max/255);// 3
-  Jauge_bleue = Fenetre_Definir_bouton_scroller(236, 81, 88,Color_Count,1,Color_Max-Palette_de_travail[Fore_color].B*Color_Max/255);// 4
-  Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
+  Palette_view_is_RGB=1;
+  red_slider = Window_set_scroller_button(182, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].R*Color_max/255);// 2
+  green_slider = Window_set_scroller_button(209, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].G*Color_max/255);// 3
+  blue_slider = Window_set_scroller_button(236, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].B*Color_max/255);// 4
+  Print_in_window(184,71,"R",MC_Dark,MC_Light);
+  Print_in_window(211,71,"G",MC_Dark,MC_Light);
+  Print_in_window(238,71,"B",MC_Dark,MC_Light);
 
-  Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Fore_color;
-  Tagger_intervalle_palette(Debut_block,Fin_block);
+  first_color=last_color=block_start=block_end=Fore_color;
+  Tag_color_range(block_start,block_end);
 
   // Affichage dans le block de visu de la couleur en cours
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*24,Menu_Facteur_Y*72,Back_color);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+  Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*89),Menu_factor_X*24,Menu_factor_Y*72,Back_color);
+  Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
-  Formate_composante(Principal_Palette[Fore_color].R*Color_Max/255,Chaine);
-  Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
-  Formate_composante(Principal_Palette[Fore_color].G*Color_Max/255,Chaine);
-  Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
-  Formate_composante(Principal_Palette[Fore_color].B*Color_Max/255,Chaine);
-  Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+  Format_componant(Main_palette[Fore_color].R*Color_max/255,str);
+  Print_counter(176,172,str,MC_Black,MC_Light);
+  Format_componant(Main_palette[Fore_color].G*Color_max/255,str);
+  Print_counter(203,172,str,MC_Black,MC_Light);
+  Format_componant(Main_palette[Fore_color].B*Color_max/255,str);
+  Print_counter(230,172,str,MC_Black,MC_Light);
 
-  Print_dans_fenetre(129,58,"Color number:",CM_Fonce,CM_Clair);
-  Num2str(Fore_color,Chaine,3);
-  Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+  Print_in_window(129,58,"Color number:",MC_Dark,MC_Light);
+  Num2str(Fore_color,str,3);
+  Print_in_window(237,58,str,MC_Black,MC_Light);
 
 
-  Fenetre_Definir_bouton_normal( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
-  Fenetre_Definir_bouton_normal(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
-  Fenetre_Definir_bouton_normal(66,47,29,14,"Swp"    ,0,1,TOUCHE_AUCUNE);   // 7
-  Fenetre_Definir_bouton_normal( 6,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
-  Fenetre_Definir_bouton_normal(66,32,29,14,"Cpy"    ,1,1,SDLK_c);   // 9
-  Fenetre_Definir_bouton_normal( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
+  Window_set_normal_button( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
+  Window_set_normal_button(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
+  Window_set_normal_button(66,47,29,14,"Swp"    ,0,1,KEY_NONE);   // 7
+  Window_set_normal_button( 6,47,59,14,"X-Swap" ,1,1,SDLK_x);   // 8
+  Window_set_normal_button(66,32,29,14,"Cpy"    ,1,1,SDLK_c);   // 9
+  Window_set_normal_button( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
-  Fenetre_Definir_bouton_normal(239,20,51,14,"Reduce" ,1,1,SDLK_r);  // 11
-  Print_dans_fenetre(241,41,"to",CM_Fonce,CM_Clair);
+  Window_set_normal_button(239,20,51,14,"Reduce" ,1,1,SDLK_r);  // 11
+  Print_in_window(241,41,"to",MC_Dark,MC_Light);
 
-  Fenetre_Definir_bouton_normal(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
-  Fenetre_Definir_bouton_normal( 62,168,51,14,"Cancel",0,1,TOUCHE_ESC);  // 13
-  Fenetre_Definir_bouton_normal(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
+  Window_set_normal_button(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
+  Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
+  Window_set_normal_button(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Bouton_Used = Fenetre_Definir_bouton_normal(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
-  Fenetre_Definir_bouton_normal(132,37,83,14,"Zap unused",0,1,SDLK_DELETE);//16
+  button_used = Window_set_normal_button(132,20,83,14,"Used: ???",4,1,SDLK_d);// 15
+  Window_set_normal_button(132,37,83,14,"Zap unused",0,1,SDLK_DELETE);//16
 
   // Jauge de réduction de palette
-  Jauge_Reduction = Fenetre_Definir_bouton_scroller(225,20,31,7,1,Indice_Reduction_palette);// 17
+  reduce_slider = Window_set_scroller_button(225,20,31,7,1,reducer_index);// 17
 
-  Fenetre_Definir_bouton_repetable(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
-  Fenetre_Definir_bouton_repetable(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
+  Window_set_repeatable_button(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 18
+  Window_set_repeatable_button(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 19
 
-  Fenetre_Definir_bouton_normal(96,17,29,14,"Neg"    ,1,1,SDLK_n);   // 20
-  Fenetre_Definir_bouton_normal(66,62,29,14,"Inv"    ,1,1,SDLK_i);   // 21
-  Fenetre_Definir_bouton_normal( 6,62,59,14,"X-Inv." ,5,1,SDLK_v);   // 22
+  Window_set_normal_button(96,17,29,14,"Neg"    ,1,1,SDLK_n);   // 20
+  Window_set_normal_button(66,62,29,14,"Inv"    ,1,1,SDLK_i);   // 21
+  Window_set_normal_button( 6,62,59,14,"X-Inv." ,5,1,SDLK_v);   // 22
 
-  Fenetre_Definir_bouton_saisie(263,39,3);                           // 23
+  Window_set_input_button(263,39,3);                           // 23
 
-  Fenetre_Definir_bouton_normal(96,32,29,14,"HSL"    ,1,1,SDLK_h);   // 24
-  Fenetre_Definir_bouton_normal(96,47,29,14,"Srt"    ,1,1,SDLK_s);   // 25
+  Window_set_normal_button(96,32,29,14,"HSL"    ,1,1,SDLK_h);   // 24
+  Window_set_normal_button(96,47,29,14,"Srt"    ,1,1,SDLK_s);   // 25
   // Affichage du facteur de réduction de la palette
-  Num2str(Reduce_Nb_couleurs,Chaine,3);
-  Print_dans_fenetre(265,41,Chaine,CM_Noir,CM_Clair);
+  Num2str(reduce_colors_number,str,3);
+  Print_in_window(265,41,str,MC_Black,MC_Light);
 
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
-  Dessiner_zigouigoui(263, 74,CM_Blanc,-1);
-  Dessiner_zigouigoui(280, 74,CM_Blanc,+1);
-  Dessiner_zigouigoui(263,165,CM_Fonce,-1);
-  Dessiner_zigouigoui(280,165,CM_Fonce,+1);
+  Draw_thingumajig(263, 74,MC_White,-1);
+  Draw_thingumajig(280, 74,MC_White,+1);
+  Draw_thingumajig(263,165,MC_Dark,-1);
+  Draw_thingumajig(280,165,MC_Dark,+1);
 
-  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,299*Menu_Facteur_X,188*Menu_Facteur_Y);
+  Update_rect(Window_pos_X,Window_pos_Y,299*Menu_factor_X,188*Menu_factor_Y);
 
-  Afficher_curseur();
+  Display_cursor();
 
   if (Config.Auto_nb_used)
-    Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
+    Update_color_count(&used_colors,color_usage);
 
   do
   {
-    Ancien_Mouse_X=Mouse_X;
-    Ancien_Mouse_Y=Mouse_Y;
-    Ancien_Mouse_K=Mouse_K;
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    old_mouse_x=Mouse_X;
+    old_mouse_y=Mouse_Y;
+    old_mouse_k=Mouse_K;
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case  0 : // Nulle part
         break;
       case -1 : // Hors de la fenêtre
       case  1 : // palette
-        if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
+        if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
-          Effacer_curseur();
-          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
-          if (Mouse_K==A_DROITE)
+          Hide_cursor();
+          temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
+          if (Mouse_K==RIGHT_SIDE)
           {
-            if (Back_color!=Couleur_temporaire)
+            if (Back_color!=temp_color)
             {
-              Back_color=Couleur_temporaire;
+              Back_color=temp_color;
               // 4 blocks de back_color entourant la fore_color
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*157),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-              UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
+              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+              Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+              Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
             }
           }
           else
           {
-            if (!Ancien_Mouse_K)
+            if (!old_mouse_k)
             {
               // On vient de clicker sur une couleur (et une seule)
-              if ( (Fore_color!=Couleur_temporaire) || (Debut_block!=Fin_block) )
+              if ( (Fore_color!=temp_color) || (block_start!=block_end) )
               {
                 // La couleur en question est nouvelle ou elle annule un
                 // ancien bloc. Il faut donc sélectionner cette couleur comme
                 // unique couleur choisie.
 
-                Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur_temporaire;
-                Tagger_intervalle_palette(Debut_block,Fin_block);
+                Fore_color=first_color=last_color=block_start=block_end=temp_color;
+                Tag_color_range(block_start,block_end);
 
                 // Affichage du n° de la couleur sélectionnée
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y*7,CM_Clair);
-                Num2str(Fore_color,Chaine,3);
-                Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
-                UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y*7);
+                Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7,MC_Light);
+                Num2str(Fore_color,str,3);
+                Print_in_window(237,58,str,MC_Black,MC_Light);
+                Update_rect(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7);
 
                 // Affichage des jauges
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
-                Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,0,Palette_de_travail);
+                Block(Window_pos_X+(Menu_factor_X*176),Window_pos_Y+(Menu_factor_Y*172),Menu_factor_X*84,Menu_factor_Y*7,MC_Light);
+                Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                 // Affichage dans le block de visu de la couleur en cours
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-                UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
+                Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+                Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
 
-                memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
-                memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+                memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+                memcpy(temp_palette,working_palette,sizeof(T_Palette));
               }
             }
             else
             {
               // On maintient le click, on va donc tester si le curseur bouge
-              if (Couleur_temporaire!=Derniere_couleur)
+              if (temp_color!=last_color)
               {
                 // On commence par ordonner la 1ère et dernière couleur du bloc
-                if (Premiere_couleur<Couleur_temporaire)
+                if (first_color<temp_color)
                 {
-                  Debut_block=Premiere_couleur;
-                  Fin_block=Couleur_temporaire;
+                  block_start=first_color;
+                  block_end=temp_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  Num2str(Debut_block,Chaine  ,3);
-                  Num2str(Fin_block  ,Chaine+4,3);
-                  Chaine[3]=26; // Flèche vers la droite
-                  Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+                  Num2str(block_start,str  ,3);
+                  Num2str(block_end  ,str+4,3);
+                  str[3]=26; // Flèche vers la droite
+                  Print_in_window(237,58,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
-                  Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,1,NULL);
+                  Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
                   // Affichage dans le block de visu du bloc (dégradé) en cours
-                  Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
+                  Display_grad_block_in_window(264,93,block_start,block_end);
                 }
-                else if (Premiere_couleur>Couleur_temporaire)
+                else if (first_color>temp_color)
                 {
-                  Debut_block=Couleur_temporaire;
-                  Fin_block=Premiere_couleur;
+                  block_start=temp_color;
+                  block_end=first_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  Num2str(Debut_block,Chaine  ,3);
-                  Num2str(Fin_block  ,Chaine+4,3);
-                  Chaine[3]=26; // Flèche vers la droite
-                  Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+                  Num2str(block_start,str  ,3);
+                  Num2str(block_end  ,str+4,3);
+                  str[3]=26; // Flèche vers la droite
+                  Print_in_window(237,58,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
-                  Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,1,NULL);
+                  Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
                   // Affichage dans le block de visu du bloc (dégradé) en cours
-                  Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
+                  Display_grad_block_in_window(264,93,block_start,block_end);
                 }
                 else
                 {
-                  Debut_block=Fin_block=Premiere_couleur;
-                  Block(Fenetre_Pos_X+(Menu_Facteur_X*176),Fenetre_Pos_Y+(Menu_Facteur_Y*172),Menu_Facteur_X*84,Menu_Facteur_Y*7,CM_Clair);
+                  block_start=block_end=first_color;
+                  Block(Window_pos_X+(Menu_factor_X*176),Window_pos_Y+(Menu_factor_Y*172),Menu_factor_X*84,Menu_factor_Y*7,MC_Light);
 
                   // Affichage du n° de la couleur sélectionnée
-                  Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
-                  Num2str(Fore_color,Chaine,3);
-                  Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+                  Block(Window_pos_X+(Menu_factor_X*261),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*32,Menu_factor_Y*7,MC_Light);
+                  Num2str(Fore_color,str,3);
+                  Print_in_window(237,58,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
-                  Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,0,Palette_de_travail);
+                  Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                   // Affichage dans le block de visu de la couleur en cours
-                  Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-                  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
+                  Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+                  Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
                 }
 
                 // On tagge le bloc (ou la couleur)
-                Tagger_intervalle_palette(Debut_block,Fin_block);
+                Tag_color_range(block_start,block_end);
               }
 
-              Derniere_couleur=Couleur_temporaire;
+              last_color=temp_color;
             }
           }
-          Afficher_curseur();
+          Display_cursor();
         }
         break;
       case  2 : // Jauge rouge
-        Effacer_curseur();
-        if (Debut_block==Fin_block)
+        Hide_cursor();
+        if (block_start==block_end)
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
+            Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
           } 
           else
           {
-            HSLtoRGB(
-              255-Jauge_rouge->Position,
-              255-Jauge_verte->Position,
-              255-Jauge_bleue->Position,
-              &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].G,
-              &Palette_de_travail[Fore_color].B);
-            Formate_composante((int)255-Jauge_rouge->Position,Chaine);
+            HSL_to_RGB(
+              255-red_slider->Position,
+              255-green_slider->Position,
+              255-blue_slider->Position,
+              &working_palette[Fore_color].R,
+              &working_palette[Fore_color].G,
+              &working_palette[Fore_color].B);
+            Format_componant((int)255-red_slider->Position,str);
           }
-          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(176,172,str,MC_Black,MC_Light);
         }
         else
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-          for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
+          for (i=block_start; i<=block_end; i++)
+              Set_red(i,temp_palette[i].R+(Color_max-red_slider->Position)*255/Color_max,working_palette);
           }
           else
           {
-            for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_HSL(
-                Palette_temporaire,
-                Palette_de_travail,
+            for (i=block_start; i<=block_end; i++)
+              Set_HSL(
+                temp_palette,
+                working_palette,
                 i,
-                Color_Max-Jauge_rouge->Position,
-                Color_Max-Jauge_verte->Position,
-                Color_Max-Jauge_bleue->Position
+                Color_max-red_slider->Position,
+                Color_max-green_slider->Position,
+                Color_max-blue_slider->Position
                 );
           }
 
-          if (Jauge_rouge->Position>Color_Max)
+          if (red_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-red_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_rouge->Position<Color_Max)
+          else if (red_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-red_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(176,172,str,MC_Black,MC_Light);
 
         }
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
 
-        Afficher_curseur();
-        Set_palette(Palette_de_travail);
+        Display_cursor();
+        Set_palette(working_palette);
         break;
       case  3 : // Jauge verte
-        Effacer_curseur();
-        if (Debut_block==Fin_block)
+        Hide_cursor();
+        if (block_start==block_end)
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
+            Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
           } 
           else
           {
-            HSLtoRGB(
-              255-Jauge_rouge->Position,
-              255-Jauge_verte->Position,
-              255-Jauge_bleue->Position,
-              &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].G,
-              &Palette_de_travail[Fore_color].B);
-            Formate_composante((int)255-Jauge_verte->Position,Chaine);
+            HSL_to_RGB(
+              255-red_slider->Position,
+              255-green_slider->Position,
+              255-blue_slider->Position,
+              &working_palette[Fore_color].R,
+              &working_palette[Fore_color].G,
+              &working_palette[Fore_color].B);
+            Format_componant((int)255-green_slider->Position,str);
           }
-          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(203,172,str,MC_Black,MC_Light);
         }
         else
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-            for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
+            for (i=block_start; i<=block_end; i++)
+              Set_green (i,temp_palette[i].G+(Color_max-green_slider->Position)*255/Color_max,working_palette);
           }
           else
           {
-          for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_HSL(
-                Palette_temporaire,
-                Palette_de_travail,
+          for (i=block_start; i<=block_end; i++)
+              Set_HSL(
+                temp_palette,
+                working_palette,
                 i,
-                Color_Max-Jauge_rouge->Position,
-                Color_Max-Jauge_verte->Position,
-                Color_Max-Jauge_bleue->Position
+                Color_max-red_slider->Position,
+                Color_max-green_slider->Position,
+                Color_max-blue_slider->Position
                 );
           }
 
-          if (Jauge_verte->Position>Color_Max)
+          if (green_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-green_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_verte->Position<Color_Max)
+          else if (green_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-green_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(203,172,str,MC_Black,MC_Light);
         }
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
 
-        Afficher_curseur();
-        Set_palette(Palette_de_travail);
+        Display_cursor();
+        Set_palette(working_palette);
         break;
 
       case  4 : // Jauge bleue
-        Effacer_curseur();
-        if (Debut_block==Fin_block)
+        Hide_cursor();
+        if (block_start==block_end)
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
+            Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
           } 
           else
           {
-            HSLtoRGB(
-              255-Jauge_rouge->Position,
-              255-Jauge_verte->Position,
-              255-Jauge_bleue->Position,
-              &Palette_de_travail[Fore_color].R,
-              &Palette_de_travail[Fore_color].G,
-              &Palette_de_travail[Fore_color].B);
-            Formate_composante((int)255-Jauge_bleue->Position,Chaine);
+            HSL_to_RGB(
+              255-red_slider->Position,
+              255-green_slider->Position,
+              255-blue_slider->Position,
+              &working_palette[Fore_color].R,
+              &working_palette[Fore_color].G,
+              &working_palette[Fore_color].B);
+            Format_componant((int)255-blue_slider->Position,str);
           }          
-          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(230,172,str,MC_Black,MC_Light);
         }
         else
         {
-          if(Palette_mode_RGB)
+          if(Palette_view_is_RGB)
           {
-          for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_Bleu(i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+          for (i=block_start; i<=block_end; i++)
+              Set_blue(i,temp_palette[i].B+(Color_max-blue_slider->Position)*255/Color_max,working_palette);
           }
           else
           {
-            for (i=Debut_block; i<=Fin_block; i++)
-              Modifier_HSL(
-                Palette_temporaire,
-                Palette_de_travail,
+            for (i=block_start; i<=block_end; i++)
+              Set_HSL(
+                temp_palette,
+                working_palette,
                 i,
-                Color_Max-Jauge_rouge->Position,
-                Color_Max-Jauge_verte->Position,
-                Color_Max-Jauge_bleue->Position
+                Color_max-red_slider->Position,
+                Color_max-green_slider->Position,
+                Color_max-blue_slider->Position
                 );
           }
 
-          if (Jauge_bleue->Position>Color_Max)
+          if (blue_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-blue_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_bleue->Position<Color_Max)
+          else if (blue_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-blue_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
 
-        Afficher_curseur();
-        Set_palette(Palette_de_travail);
+        Display_cursor();
+        Set_palette(working_palette);
         break;
 
       case 5 : // Default
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-        memcpy(Palette_de_travail,Palette_defaut,sizeof(T_Palette));
-        memcpy(Palette_temporaire,Palette_defaut,sizeof(T_Palette));
-        Set_palette(Palette_defaut);
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        memcpy(working_palette,Default_palette,sizeof(T_Palette));
+        memcpy(temp_palette,Default_palette,sizeof(T_Palette));
+        Set_palette(Default_palette);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 6 : // Grey scale
         // Backup
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
         // Grey Scale
-        for (i=Debut_block;i<=Fin_block;i++)
+        for (i=block_start;i<=block_end;i++)
         {
-          Couleur_temporaire=(dword)( ((dword)Palette_de_travail[i].R*30) + ((dword)Palette_de_travail[i].G*59) + ((dword)Palette_de_travail[i].B*11) )/100;
-          Modifier_Rouge(i,Couleur_temporaire,Palette_de_travail);
-          Modifier_Vert (i,Couleur_temporaire,Palette_de_travail);
-          Modifier_Bleu (i,Couleur_temporaire,Palette_de_travail);
+          temp_color=(dword)( ((dword)working_palette[i].R*30) + ((dword)working_palette[i].G*59) + ((dword)working_palette[i].B*11) )/100;
+          Set_red(i,temp_color,working_palette);
+          Set_green (i,temp_color,working_palette);
+          Set_blue (i,temp_color,working_palette);
         }
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
-        Set_palette(Palette_de_travail);
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        Set_palette(working_palette);
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case  7 : // Swap
       case  8 : // X-Swap
-        Couleur_temporaire=Attendre_click_dans_palette(Fenetre_Liste_boutons_palette);
-        if ((Couleur_temporaire>=0)
-         && (Couleur_temporaire!=Debut_block))
+        temp_color=Wait_click_in_palette(Window_palette_button_list);
+        if ((temp_color>=0)
+         && (temp_color!=block_start))
         {
-          Effacer_curseur();
-          memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
+          Hide_cursor();
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
 
           // On calcule le nombre de couleurs a swapper sans risquer de sortir
-          // de la palette (La var. Premiere_couleur est utilisée pour économiser 1 var; c'est tout)
-          Premiere_couleur=(Couleur_temporaire+Fin_block-Debut_block<=255)?Fin_block+1-Debut_block:256-Couleur_temporaire;
+          // de la palette (La var. first_color est utilisée pour économiser 1 var; c'est tout)
+          first_color=(temp_color+block_end-block_start<=255)?block_end+1-block_start:256-temp_color;
 
-          if (Bouton_clicke==8) // On ne fait de backup de l'image que si on
+          if (clicked_button==8) // On ne fait de backup de l'image que si on
                                 // est en mode X-SWAP.
-            if (!Backup_de_l_image_effectue)
+            if (!image_is_backed_up)
             {
               Backup();
-              Backup_de_l_image_effectue=1;
+              image_is_backed_up=1;
             }
 
-          Swap(Bouton_clicke==8,Debut_block,Couleur_temporaire,Premiere_couleur,Palette_de_travail,Utilisation_couleur);
+          Swap(clicked_button==8,block_start,temp_color,first_color,working_palette,color_usage);
 
-          memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+          memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
           // On déplace le bloc vers les modifs:
-          Derniere_couleur=Fin_block=Couleur_temporaire+Premiere_couleur-1;
-          Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
+          last_color=block_end=temp_color+first_color-1;
+          Fore_color=first_color=block_start=temp_color;
           // On raffiche le n° des bornes du bloc:
-          if (Debut_block!=Fin_block)
+          if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            Num2str(Debut_block,Chaine  ,3);
-            Num2str(Fin_block  ,Chaine+4,3);
-            Chaine[3]=26; // Flèche vers la droite
+            Num2str(block_start,str  ,3);
+            Num2str(block_end  ,str+4,3);
+            str[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
-            Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
+            Display_grad_block_in_window(264,93,block_start,block_end);
           }
           else
           {
             // Cas d'une seule couleur
-            Num2str(Fore_color,Chaine,3);
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y* 7,CM_Clair);
+            Num2str(Fore_color,str,3);
+            Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y* 7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
           }
-          Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+          Print_in_window(237,58,str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
-          Tagger_intervalle_palette(Debut_block,Fin_block);
+          Tag_color_range(block_start,block_end);
 
-          Il_faut_remapper=1;
+          need_to_remp=1;
 
-          Set_palette(Palette_de_travail);
+          Set_palette(working_palette);
 
-          Afficher_curseur();
-          Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+          Display_cursor();
+          Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
           
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
-          if (Bouton_clicke==8)
-            UpdateRect(0, 0, Largeur_ecran, Menu_Ordonnee_avant_fenetre);
-          Attendre_fin_de_click();
+          if (clicked_button==8)
+            Update_rect(0, 0, Screen_width, Menu_Y_before_window);
+          Wait_end_of_click();
         }
         break;
 
       case  9 : // Copy
-        Couleur_temporaire=Attendre_click_dans_palette(Fenetre_Liste_boutons_palette);
-        if ((Couleur_temporaire>=0) && (Couleur_temporaire!=Debut_block))
+        temp_color=Wait_click_in_palette(Window_palette_button_list);
+        if ((temp_color>=0) && (temp_color!=block_start))
         {
-          Effacer_curseur();
-          memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-          memcpy(Palette_de_travail+Couleur_temporaire,Palette_backup+Debut_block,
-                 ((Couleur_temporaire+Fin_block-Debut_block<=255)?Fin_block+1-Debut_block:256-Couleur_temporaire)*3);
-          memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
-          Set_palette(Palette_de_travail);
+          Hide_cursor();
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          memcpy(working_palette+temp_color,backup_palette+block_start,
+                 ((temp_color+block_end-block_start<=255)?block_end+1-block_start:256-temp_color)*3);
+          memcpy(temp_palette,working_palette,sizeof(T_Palette));
+          Set_palette(working_palette);
           // On déplace le bloc vers les modifs:
-          Derniere_couleur=Fin_block=((Couleur_temporaire+Fin_block-Debut_block<=255)?(Couleur_temporaire+Fin_block-Debut_block):255);
-          Fore_color=Premiere_couleur=Debut_block=Couleur_temporaire;
+          last_color=block_end=((temp_color+block_end-block_start<=255)?(temp_color+block_end-block_start):255);
+          Fore_color=first_color=block_start=temp_color;
           // On raffiche le n° des bornes du bloc:
-          if (Debut_block!=Fin_block)
+          if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            Num2str(Debut_block,Chaine  ,3);
-            Num2str(Fin_block  ,Chaine+4,3);
-            Chaine[3]=26; // Flèche vers la droite
+            Num2str(block_start,str  ,3);
+            Num2str(block_end  ,str+4,3);
+            str[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
-            Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
+            Display_grad_block_in_window(264,93,block_start,block_end);
           }
           else
           {
             // Cas d'une seule couleur
-            Num2str(Fore_color,Chaine,3);
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*237),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*56,Menu_Facteur_Y* 7,CM_Clair);
+            Num2str(Fore_color,str,3);
+            Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y* 7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
+            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
           }
-          Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+          Print_in_window(237,58,str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
-          Tagger_intervalle_palette(Debut_block,Fin_block);
+          Tag_color_range(block_start,block_end);
 
-          Il_faut_remapper=1;
+          need_to_remp=1;
 
-          Afficher_curseur();
-          Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-          Attendre_fin_de_click();
+          Display_cursor();
+          Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+          Wait_end_of_click();
         }
         break;
 
       case 10 : // Spread
-        if (Debut_block!=Fin_block)
+        if (block_start!=block_end)
         {
-          memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-          Degrader_palette(Debut_block,Fin_block,Palette_de_travail);
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Spread_colors(block_start,block_end,working_palette);
         }
         else
         {
-          Couleur_temporaire=Attendre_click_dans_palette(Fenetre_Liste_boutons_palette);
-          if (Couleur_temporaire>=0)
+          temp_color=Wait_click_in_palette(Window_palette_button_list);
+          if (temp_color>=0)
           {
-            memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-            if (Couleur_temporaire<Fore_color)
-              Degrader_palette(Couleur_temporaire,Fore_color,Palette_de_travail);
+            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            if (temp_color<Fore_color)
+              Spread_colors(temp_color,Fore_color,working_palette);
             else
-              Degrader_palette(Fore_color,Couleur_temporaire,Palette_de_travail);
-            Attendre_fin_de_click();
+              Spread_colors(Fore_color,temp_color,working_palette);
+            Wait_end_of_click();
           }
         }
 
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
 
-        Set_palette(Palette_de_travail);
+        Set_palette(working_palette);
 
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 11: // Reduce
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-        if (!Backup_de_l_image_effectue)
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        if (!image_is_backed_up)
         {
           Backup();
-          Backup_de_l_image_effectue=1;
+          image_is_backed_up=1;
         }
-        Reduce_palette(&Nb_couleurs_utilisees,Reduce_Nb_couleurs,Palette_de_travail,Utilisation_couleur);
+        Reduce_palette(&used_colors,reduce_colors_number,working_palette,color_usage);
 
-        if ((Config.Safety_colors) && (Nb_couleurs_utilisees<4))
+        if ((Config.Safety_colors) && (used_colors<4))
         {
-          memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_de_travail,sizeof(T_Palette));
-          Remettre_proprement_les_couleurs_du_menu(Utilisation_couleur);
-          memcpy(Palette_de_travail,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_temporaire,sizeof(T_Palette));
+          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,working_palette,sizeof(T_Palette));
+          Set_nice_menu_colors(color_usage);
+          memcpy(working_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
         }
 
-        Set_palette(Palette_de_travail);     // On définit la nouvelle palette
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        Set_palette(working_palette);     // On définit la nouvelle palette
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 12: // Undo
-        memcpy(Palette_temporaire,Palette_backup    ,sizeof(T_Palette));
-        memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
-        memcpy(Palette_de_travail,Palette_temporaire,sizeof(T_Palette));
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        Set_palette(Palette_de_travail);
+        memcpy(temp_palette,backup_palette    ,sizeof(T_Palette));
+        memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+        memcpy(working_palette,temp_palette,sizeof(T_Palette));
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+        Set_palette(working_palette);
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 15 : // Used
-        if (Nb_couleurs_utilisees==-1)
-          Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
+        if (used_colors==-1)
+          Update_color_count(&used_colors,color_usage);
         break;
 
       case 16 : // Zap unused
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-        if (Nb_couleurs_utilisees==-1)
-          Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        if (used_colors==-1)
+          Update_color_count(&used_colors,color_usage);
         for (i=0; i<256; i++)
         {
-          if (!Utilisation_couleur[i])
+          if (!color_usage[i])
           {
-            Couleur_temporaire=Debut_block+(i % (Fin_block+1-Debut_block));
-            Palette_de_travail[i].R=Palette_backup[Couleur_temporaire].R;
-            Palette_de_travail[i].G=Palette_backup[Couleur_temporaire].G;
-            Palette_de_travail[i].B=Palette_backup[Couleur_temporaire].B;
+            temp_color=block_start+(i % (block_end+1-block_start));
+            working_palette[i].R=backup_palette[temp_color].R;
+            working_palette[i].G=backup_palette[temp_color].G;
+            working_palette[i].B=backup_palette[temp_color].B;
           }
         }
 
-        if ((Config.Safety_colors) && (Nb_couleurs_utilisees<4) && (Fin_block==Debut_block))
+        if ((Config.Safety_colors) && (used_colors<4) && (block_end==block_start))
         {
-          memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_de_travail,sizeof(T_Palette));
-          Remettre_proprement_les_couleurs_du_menu(Utilisation_couleur);
-          memcpy(Palette_de_travail,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_temporaire,sizeof(T_Palette));
+          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,working_palette,sizeof(T_Palette));
+          Set_nice_menu_colors(color_usage);
+          memcpy(working_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
         }
 
-        Set_palette(Palette_de_travail);
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+        Set_palette(working_palette);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 17 : // Jauge de réduction de palette
-        if (Indice_Reduction_palette!=Jauge_Reduction->Position)
+        if (reducer_index!=reduce_slider->Position)
         {
-          Indice_Reduction_palette=Jauge_Reduction->Position;
+          reducer_index=reduce_slider->Position;
           // Affichage du facteur de réduction de la palette
-          Effacer_curseur();
-          Print_dans_fenetre(265,41,Libelle_reduction_palette[Indice_Reduction_palette],CM_Noir,CM_Clair);
-          Afficher_curseur();
-          Reduce_Nb_couleurs=atoi(Libelle_reduction_palette[Indice_Reduction_palette]);
+          Hide_cursor();
+          Print_in_window(265,41,Palette_reduce_label[reducer_index],MC_Black,MC_Light);
+          Display_cursor();
+          reduce_colors_number=atoi(Palette_reduce_label[reducer_index]);
         }
         break;
 
       case 18 : // [+]
-       if (!Palette_mode_RGB)
+       if (!Palette_view_is_RGB)
           break;
-        Effacer_curseur();
-        if (Debut_block==Fin_block)
+        Hide_cursor();
+        if (block_start==block_end)
         {
-          if (Jauge_rouge->Position)
+          if (red_slider->Position)
           {
-            (Jauge_rouge->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_rouge);
-            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
-            Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+            (red_slider->Position)--;
+            Window_draw_slider(red_slider);
+            Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
+            Print_counter(176,172,str,MC_Black,MC_Light);
           }
-          if (Jauge_verte->Position)
+          if (green_slider->Position)
           {
-            (Jauge_verte->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_verte);
-            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
-            Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+            (green_slider->Position)--;
+            Window_draw_slider(green_slider);
+            Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
+            Print_counter(203,172,str,MC_Black,MC_Light);
           }
-          if (Jauge_bleue->Position)
+          if (blue_slider->Position)
           {
-            (Jauge_bleue->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_bleue);
-            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
-            Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+            (blue_slider->Position)--;
+            Window_draw_slider(blue_slider);
+            Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
+            Print_counter(230,172,str,MC_Black,MC_Light);
           }
         }
         else
         {
-          if (Jauge_rouge->Position)
+          if (red_slider->Position)
           {
-            (Jauge_rouge->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_rouge);
+            (red_slider->Position)--;
+            Window_draw_slider(red_slider);
           }
-          if (Jauge_verte->Position)
+          if (green_slider->Position)
           {
-            (Jauge_verte->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_verte);
+            (green_slider->Position)--;
+            Window_draw_slider(green_slider);
           }
-          if (Jauge_bleue->Position)
+          if (blue_slider->Position)
           {
-            (Jauge_bleue->Position)--;
-            Fenetre_Dessiner_jauge(Jauge_bleue);
-          }
-
-          for (i=Debut_block; i<=Fin_block; i++)
-          {
-            Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+            (blue_slider->Position)--;
+            Window_draw_slider(blue_slider);
           }
 
-          // -- Rouge --
-          if (Jauge_rouge->Position>Color_Max)
+          for (i=block_start; i<=block_end; i++)
+          {
+            Set_red(i,temp_palette[i].R+(Color_max-red_slider->Position)*255/Color_max,working_palette);
+            Set_green (i,temp_palette[i].G+(Color_max-green_slider->Position)*255/Color_max,working_palette);
+            Set_blue (i,temp_palette[i].B+(Color_max-blue_slider->Position)*255/Color_max,working_palette);
+          }
+
+          // -- red --
+          if (red_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-red_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_rouge->Position<Color_Max)
+          else if (red_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-red_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(176,172,str,MC_Black,MC_Light);
 
 
-          // -- Vert --
-          if (Jauge_verte->Position>Color_Max)
+          // -- green --
+          if (green_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-green_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_verte->Position<Color_Max)
+          else if (green_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-green_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(203,172,str,MC_Black,MC_Light);
 
 
-          // -- Bleu --
-          if (Jauge_bleue->Position>Color_Max)
+          // -- blue --
+          if (blue_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-blue_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_bleue->Position<Color_Max)
+          else if (blue_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-blue_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
 
-        Afficher_curseur();
-        Set_palette(Palette_de_travail);
+        Display_cursor();
+        Set_palette(working_palette);
         break;
 
       case 19 : // [-]
-        if (!Palette_mode_RGB)
+        if (!Palette_view_is_RGB)
           break;
-        Effacer_curseur();
-        if (Debut_block==Fin_block)
+        Hide_cursor();
+        if (block_start==block_end)
         {
-          if (Jauge_rouge->Position<Color_Max)
+          if (red_slider->Position<Color_max)
           {
-            (Jauge_rouge->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_rouge);
-            Modifier_Rouge(Fore_color,(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].R*Color_Max/255,Chaine);
-            Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+            (red_slider->Position)++;
+            Window_draw_slider(red_slider);
+            Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
+            Print_counter(176,172,str,MC_Black,MC_Light);
           }
-          if (Jauge_verte->Position<Color_Max)
+          if (green_slider->Position<Color_max)
           {
-            (Jauge_verte->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_verte);
-            Modifier_Vert (Fore_color,(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].G*Color_Max/255,Chaine);
-            Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+            (green_slider->Position)++;
+            Window_draw_slider(green_slider);
+            Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
+            Print_counter(203,172,str,MC_Black,MC_Light);
           }
-          if (Jauge_bleue->Position<Color_Max)
+          if (blue_slider->Position<Color_max)
           {
-            (Jauge_bleue->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_bleue);
-            Modifier_Bleu (Fore_color,(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
-            Formate_composante(Palette_de_travail[Fore_color].B*Color_Max/255,Chaine);
-            Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+            (blue_slider->Position)++;
+            Window_draw_slider(blue_slider);
+            Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
+            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
+            Print_counter(230,172,str,MC_Black,MC_Light);
           }
         }
         else
         {
-          if (Jauge_rouge->Position<(Color_Max*2))
+          if (red_slider->Position<(Color_max*2))
           {
-            (Jauge_rouge->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_rouge);
+            (red_slider->Position)++;
+            Window_draw_slider(red_slider);
           }
-          if (Jauge_verte->Position<(Color_Max*2))
+          if (green_slider->Position<(Color_max*2))
           {
-            (Jauge_verte->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_verte);
+            (green_slider->Position)++;
+            Window_draw_slider(green_slider);
           }
-          if (Jauge_bleue->Position<(Color_Max*2))
+          if (blue_slider->Position<(Color_max*2))
           {
-            (Jauge_bleue->Position)++;
-            Fenetre_Dessiner_jauge(Jauge_bleue);
-          }
-
-          for (i=Debut_block; i<=Fin_block; i++)
-          {
-            Modifier_Rouge(i,Palette_temporaire[i].R+(Color_Max-Jauge_rouge->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Vert (i,Palette_temporaire[i].G+(Color_Max-Jauge_verte->Position)*255/Color_Max,Palette_de_travail);
-            Modifier_Bleu (i,Palette_temporaire[i].B+(Color_Max-Jauge_bleue->Position)*255/Color_Max,Palette_de_travail);
+            (blue_slider->Position)++;
+            Window_draw_slider(blue_slider);
           }
 
-          // -- Rouge --
-          if (Jauge_rouge->Position>Color_Max)
+          for (i=block_start; i<=block_end; i++)
+          {
+            Set_red(i,temp_palette[i].R+(Color_max-red_slider->Position)*255/Color_max,working_palette);
+            Set_green (i,temp_palette[i].G+(Color_max-green_slider->Position)*255/Color_max,working_palette);
+            Set_blue (i,temp_palette[i].B+(Color_max-blue_slider->Position)*255/Color_max,working_palette);
+          }
+
+          // -- red --
+          if (red_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_rouge->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-red_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_rouge->Position<Color_Max)
+          else if (red_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_rouge->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-red_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(176,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(176,172,str,MC_Black,MC_Light);
 
 
-          // -- Vert --
-          if (Jauge_verte->Position>Color_Max)
+          // -- green --
+          if (green_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_verte->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-green_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_verte->Position<Color_Max)
+          else if (green_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_verte->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-green_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(203,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(203,172,str,MC_Black,MC_Light);
 
 
-          // -- Bleu --
-          if (Jauge_bleue->Position>Color_Max)
+          // -- blue --
+          if (blue_slider->Position>Color_max)
           {
             // Jauge dans les négatifs:
-            Num2str(-(Color_Max-Jauge_bleue->Position),Chaine,4);
-            Chaine[0]='-';
+            Num2str(-(Color_max-blue_slider->Position),str,4);
+            str[0]='-';
           }
-          else if (Jauge_bleue->Position<Color_Max)
+          else if (blue_slider->Position<Color_max)
           {
             // Jauge dans les positifs:
-            Num2str(  Color_Max-Jauge_bleue->Position ,Chaine,4);
-            Chaine[0]='+';
+            Num2str(  Color_max-blue_slider->Position ,str,4);
+            str[0]='+';
           }
           else
           {
             // Jauge nulle:
-            strcpy(Chaine,"±  0");
+            strcpy(str,"±  0");
           }
-          Print_compteur(230,172,Chaine,CM_Noir,CM_Clair);
+          Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
 
-        Afficher_curseur();
-        Set_palette(Palette_de_travail);
+        Display_cursor();
+        Set_palette(working_palette);
         break;
 
       case 20 : // Negative
         // Backup
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
         // Negative
-        for (i=Debut_block;i<=Fin_block;i++)
+        for (i=block_start;i<=block_end;i++)
         {
-          Modifier_Rouge(i,255-Palette_de_travail[i].R,Palette_de_travail);
-          Modifier_Vert (i,255-Palette_de_travail[i].G,Palette_de_travail);
-          Modifier_Bleu (i,255-Palette_de_travail[i].B,Palette_de_travail);
+          Set_red(i,255-working_palette[i].R,working_palette);
+          Set_green (i,255-working_palette[i].G,working_palette);
+          Set_blue (i,255-working_palette[i].B,working_palette);
         }
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-        Set_palette(Palette_de_travail);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+        Set_palette(working_palette);
         // On prépare la "modifiabilité" des nouvelles couleurs
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 21 : // Inversion
       case 22 : // X-Inversion
         // Backup
-        memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
+        memcpy(backup_palette,working_palette,sizeof(T_Palette));
         //   On initialise la table de conversion
         for (i=0; i<=255; i++)
-          Table_de_conversion[i]=i;
+          conversion_table[i]=i;
         // Inversion
-        for (i=Debut_block;i<=Fin_block;i++)
+        for (i=block_start;i<=block_end;i++)
         {
-          Couleur_temporaire=Fin_block-(i-Debut_block);
-          Modifier_Rouge(i,Palette_backup[Couleur_temporaire].R,Palette_de_travail);
-          Modifier_Vert (i,Palette_backup[Couleur_temporaire].G,Palette_de_travail);
-          Modifier_Bleu (i,Palette_backup[Couleur_temporaire].B,Palette_de_travail);
-          if (Bouton_clicke==22)
+          temp_color=block_end-(i-block_start);
+          Set_red(i,backup_palette[temp_color].R,working_palette);
+          Set_green (i,backup_palette[temp_color].G,working_palette);
+          Set_blue (i,backup_palette[temp_color].B,working_palette);
+          if (clicked_button==22)
           {
-            Table_de_conversion[i]=Couleur_temporaire;
-            Table_de_conversion[Couleur_temporaire]=i;
+            conversion_table[i]=temp_color;
+            conversion_table[temp_color]=i;
 
-            Temp=Utilisation_couleur[i];
-            Utilisation_couleur[i]=Utilisation_couleur[Couleur_temporaire];
-            Utilisation_couleur[Couleur_temporaire]=Temp;
+            temp=color_usage[i];
+            color_usage[i]=color_usage[temp_color];
+            color_usage[temp_color]=temp;
           }
         }
-        Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // Si on est en X-Invert, on remap l'image (=> on fait aussi 1 backup)
-        if (Bouton_clicke==22)
+        if (clicked_button==22)
         {
-          if (!Backup_de_l_image_effectue)
+          if (!image_is_backed_up)
           {
             Backup();
-            Backup_de_l_image_effectue=1;
+            image_is_backed_up=1;
           }
-          Effacer_curseur();
-          Remap_image_HIGH(Table_de_conversion);
-          Afficher_curseur();
+          Hide_cursor();
+          Remap_image_highlevel(conversion_table);
+          Display_cursor();
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
-        Set_palette(Palette_de_travail);
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+        Set_palette(working_palette);
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        Il_faut_remapper=1;
+        need_to_remp=1;
         break;
 
       case 23 : // Saisie du nombre de couleurs pour la réduction de palette
-        Num2str(Reduce_Nb_couleurs,Chaine,3);
+        Num2str(reduce_colors_number,str,3);
 
-        if (Readline(265,41,Chaine,3,1))
+        if (Readline(265,41,str,3,1))
         {
-          Couleur_temporaire=atoi(Chaine);
+          temp_color=atoi(str);
           // Correction de la valeur lue
-          if ( (Couleur_temporaire>256) || (Couleur_temporaire<2) )
+          if ( (temp_color>256) || (temp_color<2) )
           {
-            if (Couleur_temporaire>256)
-              Couleur_temporaire=256;
+            if (temp_color>256)
+              temp_color=256;
             else
-              Couleur_temporaire=2;
+              temp_color=2;
 
-            Num2str(Couleur_temporaire,Chaine,3);
-            Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+            Num2str(temp_color,str,3);
+            Window_input_content(Window_special_button_list,str);
           }
 
-          Reduce_Nb_couleurs=Couleur_temporaire;
+          reduce_colors_number=temp_color;
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 24 : // HSL <> RGB
         
         // Acte les changements en cours sur une ou plusieurs couleurs
-        memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
-        memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
+        memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
 
-        Palette_mode_RGB = !Palette_mode_RGB;
+        Palette_view_is_RGB = !Palette_view_is_RGB;
 
-        if(! Palette_mode_RGB)
+        if(! Palette_view_is_RGB)
         {
           // On passe en HSL
-          Print_dans_fenetre(184,71,"H",CM_Fonce,CM_Clair);
-          Print_dans_fenetre(211,71,"S",CM_Fonce,CM_Clair);
-          Print_dans_fenetre(238,71,"L",CM_Fonce,CM_Clair);
-          Unite_Composantes(256);
+          Print_in_window(184,71,"H",MC_Dark,MC_Light);
+          Print_in_window(211,71,"S",MC_Dark,MC_Light);
+          Print_in_window(238,71,"L",MC_Dark,MC_Light);
+          Componant_unit(256);
         }
         else
         {
           // On passe en RGB
-          Print_dans_fenetre(184,71,"R",CM_Fonce,CM_Clair);
-          Print_dans_fenetre(211,71,"G",CM_Fonce,CM_Clair);
-          Print_dans_fenetre(238,71,"B",CM_Fonce,CM_Clair);
-          Unite_Composantes(Graduations_RGB);
+          Print_in_window(184,71,"R",MC_Dark,MC_Light);
+          Print_in_window(211,71,"G",MC_Dark,MC_Light);
+          Print_in_window(238,71,"B",MC_Dark,MC_Light);
+          Componant_unit(RGB_scale);
         }
-        Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,(Debut_block!=Fin_block),Palette_de_travail);
+        Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
       break;
 
       case 25 : // Sort palette
@@ -1839,13 +1839,13 @@ void Bouton_Palette(void)
         {
           swap=0;
           h=0;l=0;s=0;
-          for(Couleur_temporaire=0;Couleur_temporaire<256;Couleur_temporaire++)
+          for(temp_color=0;temp_color<256;temp_color++)
           {
             oh=h; ol=l; os=s;
             // On trie par Chrominance (H) et Luminance (L)
-            RGBtoHSL(Palette_de_travail[Couleur_temporaire].R,
-            Palette_de_travail[Couleur_temporaire].G,
-            Palette_de_travail[Couleur_temporaire].B,&h,&s,&l);
+            RGB_to_HSL(working_palette[temp_color].R,
+            working_palette[temp_color].G,
+            working_palette[temp_color].B,&h,&s,&l);
 
             if(
               ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
@@ -1853,7 +1853,7 @@ void Bouton_Palette(void)
               && (h<oh || (h==oh && l<ol))))  // Dans ce cas on décide avec chroma puis lumi
             {
               // On échange la couleur avec la précédente
-              Swap(0,Couleur_temporaire,Couleur_temporaire-1,1,Palette_de_travail,Utilisation_couleur);
+              Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
               swap=1;
             }
           }
@@ -1861,9 +1861,9 @@ void Bouton_Palette(void)
         
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
-        Set_palette(Palette_de_travail);
+        Set_palette(working_palette);
       
-        Il_faut_remapper=1;
+        need_to_remp=1;
       }
       break;
     }
@@ -1871,202 +1871,202 @@ void Bouton_Palette(void)
 
     if (!Mouse_K)
     {
-      switch (Touche)
+      switch (Key)
       {
         case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
-          if (Debut_block==Fin_block)
+          if (block_start==block_end)
           {
             Fore_color--;
-            Premiere_couleur--;
-            Derniere_couleur--;
-            Debut_block--;
-            Fin_block--;
-            Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-            Effacer_curseur();
-            Tagger_intervalle_palette(Debut_block,Fin_block);
+            first_color--;
+            last_color--;
+            block_start--;
+            block_end--;
+            Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+            Hide_cursor();
+            Tag_color_range(block_start,block_end);
             // Affichage du n° de la couleur sélectionnée
-            Num2str(Fore_color,Chaine,3);
-            Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+            Num2str(Fore_color,str,3);
+            Print_in_window(237,58,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-            UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
-            Afficher_curseur();
+            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+            Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+            Display_cursor();
           }
-          Touche=0;
+          Key=0;
           break;
 
         case SDLK_RIGHTBRACKET : // Décaler Forecolor vers la droite
-          if (Debut_block==Fin_block)
+          if (block_start==block_end)
           {
             Fore_color++;
-            Premiere_couleur++;
-            Derniere_couleur++;
-            Debut_block++;
-            Fin_block++;
-            Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-            Effacer_curseur();
-            Tagger_intervalle_palette(Debut_block,Fin_block);
+            first_color++;
+            last_color++;
+            block_start++;
+            block_end++;
+            Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+            Hide_cursor();
+            Tag_color_range(block_start,block_end);
             // Affichage du n° de la couleur sélectionnée
-            Num2str(Fore_color,Chaine,3);
-            Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+            Num2str(Fore_color,str,3);
+            Print_in_window(237,58,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-            UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
-            Afficher_curseur();
+            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+            Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+            Display_cursor();
           }
-          Touche=0;
+          Key=0;
           break;
 
         case (SDLK_LEFTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la gauche
           Back_color--;
         case (SDLK_RIGHTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la droite
           // attention: pas de break ci-dessus
-          if (Touche==(SDLK_RIGHTBRACKET|MOD_SHIFT))
+          if (Key==(SDLK_RIGHTBRACKET|MOD_SHIFT))
             Back_color++;
-          Effacer_curseur();
-          Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-          Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*157),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-          Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-          Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-          UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
-          Afficher_curseur();
-          Touche=0;
+          Hide_cursor();
+          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+          Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+          Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
+          Display_cursor();
+          Key=0;
           break;
 
         case SDLK_BACKSPACE : // Remise des couleurs du menu à l'état normal en essayant
                       // de ne pas trop modifier l'image.
-          if (!Backup_de_l_image_effectue)
+          if (!image_is_backed_up)
           {
             Backup();
-            Backup_de_l_image_effectue=1;
+            image_is_backed_up=1;
           }
-          if (Nb_couleurs_utilisees==-1)
-            Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
+          if (used_colors==-1)
+            Update_color_count(&used_colors,color_usage);
 
-          memcpy(Palette_backup,Palette_de_travail,sizeof(T_Palette));
-          memcpy(Palette_temporaire,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_de_travail,sizeof(T_Palette));
-          Remettre_proprement_les_couleurs_du_menu(Utilisation_couleur);
-          memcpy(Palette_de_travail,Principal_Palette,sizeof(T_Palette));
-          memcpy(Principal_Palette,Palette_temporaire,sizeof(T_Palette));
-          Set_palette(Palette_de_travail);
-          memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
-          Palette_Reafficher_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,Palette_de_travail,Debut_block,Fin_block);
-          Compter_nb_couleurs_utilisees(&Nb_couleurs_utilisees,Utilisation_couleur);
-          Il_faut_remapper=1;
-          Touche=0;
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,working_palette,sizeof(T_Palette));
+          Set_nice_menu_colors(color_usage);
+          memcpy(working_palette,Main_palette,sizeof(T_Palette));
+          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
+          Set_palette(working_palette);
+          memcpy(temp_palette,working_palette,sizeof(T_Palette));
+          Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+          Update_color_count(&used_colors,color_usage);
+          need_to_remp=1;
+          Key=0;
           break;
 
         case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
         case SDLK_COMMA :
-          Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+          Get_color_behind_window(&color,&click);
           if (click)
           {
-            Effacer_curseur();
-            if (click==A_DROITE)
+            Hide_cursor();
+            if (click==RIGHT_SIDE)
             {
-              if (Back_color!=Couleur)
+              if (Back_color!=color)
               {
-                Back_color=Couleur;
+                Back_color=color;
                 // 4 blocks de back_color entourant la fore_color
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*157),Menu_Facteur_X*24,Menu_Facteur_Y<<2,Back_color);
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-                Block(Fenetre_Pos_X+(Menu_Facteur_X*280),Fenetre_Pos_Y+(Menu_Facteur_Y* 93),Menu_Facteur_X<<2,Menu_Facteur_Y<<6,Back_color);
-                UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y* 89),Menu_Facteur_X*32,Menu_Facteur_Y*72);
+                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
+                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+                Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
+                Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
               }
             }
             else
             {
-              Fore_color=Premiere_couleur=Derniere_couleur=Debut_block=Fin_block=Couleur;
-              Tagger_intervalle_palette(Debut_block,Fin_block);
+              Fore_color=first_color=last_color=block_start=block_end=color;
+              Tag_color_range(block_start,block_end);
 
               // Affichage du n° de la couleur sélectionnée
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*261),Fenetre_Pos_Y+(Menu_Facteur_Y*58),Menu_Facteur_X*32,Menu_Facteur_Y*7,CM_Clair);
-              Num2str(Fore_color,Chaine,3);
-              Print_dans_fenetre(237,58,Chaine,CM_Noir,CM_Clair);
+              Block(Window_pos_X+(Menu_factor_X*261),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*32,Menu_factor_Y*7,MC_Light);
+              Num2str(Fore_color,str,3);
+              Print_in_window(237,58,str,MC_Black,MC_Light);
 
               // Affichage des jauges
-              Afficher_les_jauges(Jauge_rouge,Jauge_verte,Jauge_bleue,0,Palette_de_travail);
+              Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
               // Affichage dans le block de visu de la couleur en cours
-              Block(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64,Fore_color);
-              UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*264),Fenetre_Pos_Y+(Menu_Facteur_Y*93),Menu_Facteur_X<<4,Menu_Facteur_Y*64);
+              Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+              Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
               
-              memcpy(Palette_backup    ,Palette_de_travail,sizeof(T_Palette));
-              memcpy(Palette_temporaire,Palette_de_travail,sizeof(T_Palette));
+              memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+              memcpy(temp_palette,working_palette,sizeof(T_Palette));
             }
-            Afficher_curseur();
-            Attendre_fin_de_click();
+            Display_cursor();
+            Wait_end_of_click();
           }
-          Touche=0;
+          Key=0;
           break;
         default:
-          if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+          if (Is_shortcut(Key,0x100+BUTTON_HELP))
           {
-            Touche=0;
-            Fenetre_aide(BOUTON_PALETTE, NULL);
+            Key=0;
+            Window_help(BUTTON_PALETTE, NULL);
             break;
           }
       }
 
-      if (Il_faut_remapper)
+      if (need_to_remp)
       {
-        Effacer_curseur();
-        Calculer_couleurs_menu_optimales(Palette_de_travail);
+        Hide_cursor();
+        Compute_optimal_menu_colors(working_palette);
 
         // On remappe brutalement
-        Remapper_ecran_apres_changement_couleurs_menu();
+        Remap_screen_after_menu_colors_change();
         // Puis on remet les trucs qui ne devaient pas changer
-        Fenetre_Dessiner_bouton_palette(5,79);
-        Block(Fenetre_Pos_X+(Menu_Facteur_X*260),Fenetre_Pos_Y+(Menu_Facteur_Y*89),Menu_Facteur_X*24,Menu_Facteur_Y*72,Back_color);
-        Bloc_degrade_dans_fenetre(264,93,Debut_block,Fin_block);
+        Window_draw_palette_bouton(5,79);
+        Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*89),Menu_factor_X*24,Menu_factor_Y*72,Back_color);
+        Display_grad_block_in_window(264,93,block_start,block_end);
 
-        UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+82*Menu_Facteur_Y,Menu_Facteur_X*16*10,Menu_Facteur_Y*5*16);
+        Update_rect(Window_pos_X+8*Menu_factor_X,Window_pos_Y+82*Menu_factor_Y,Menu_factor_X*16*10,Menu_factor_Y*5*16);
 
-        Afficher_curseur();
-        Il_faut_remapper=0;
+        Display_cursor();
+        need_to_remp=0;
       }
     }
   }
-  while ((Bouton_clicke!=13) && (Bouton_clicke!=14));
+  while ((clicked_button!=13) && (clicked_button!=14));
 
-  if (Bouton_clicke==14)         // Sortie par OK
+  if (clicked_button==14)         // Sortie par OK
   {
-    if ( (!Backup_de_l_image_effectue)
-      && memcmp(Principal_Palette,Palette_de_travail,sizeof(T_Palette)) )
+    if ( (!image_is_backed_up)
+      && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
       Backup();
-    memcpy(Principal_Palette,Palette_de_travail,sizeof(T_Palette));
+    memcpy(Main_palette,working_palette,sizeof(T_Palette));
   }
 
-  Calculer_couleurs_menu_optimales(Principal_Palette);
+  Compute_optimal_menu_colors(Main_palette);
 
   // La variable employée ici n'a pas vraiment de rapport avec son nom...
-  Il_faut_remapper=(Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)<Menu_Ordonnee_avant_fenetre);
+  need_to_remp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_PALETTE);
+  Close_window();
+  Unselect_bouton(BUTTON_PALETTE);
 
-  Recadrer_palette();
+  Reposition_palette();
 
   //   On affiche les "ForeBack" car le menu n'est raffiché que si la fenêtre
   // empiétait sur le menu. Mais si les couleurs on été modifiées, il faut
   // rafficher tout le menu remappé.
-  if (Il_faut_remapper)
-    Afficher_menu();
+  if (need_to_remp)
+    Display_menu();
 
-  Afficher_curseur();
+  Display_cursor();
 
-  if (Bouton_clicke==13)                         // Sortie par CANCEL
+  if (clicked_button==13)                         // Sortie par CANCEL
   {
-    Set_palette(Principal_Palette);
-    if (Backup_de_l_image_effectue)
-      Enclencher_bouton(BOUTON_UNDO,A_GAUCHE);
+    Set_palette(Main_palette);
+    if (image_is_backed_up)
+      Unselect_button(BUTTON_UNDO,LEFT_SIDE);
   }
 
-  free(Palette_backup);
-  free(Palette_temporaire);
-  free(Palette_de_travail);
+  free(backup_palette);
+  free(temp_palette);
+  free(working_palette);
 }
 
 
@@ -2074,96 +2074,96 @@ void Bouton_Palette(void)
 
 //---------------------- Menu de palettes secondaires ------------------------
 
-void Bouton_Palette_secondaire(void)
+void Button_Pecondary_palette(void)
 {
-  short Bouton_clicke;
-  byte Dummy;
-  T_Bouton_scroller * Jauge_Colonnes;
-  T_Bouton_scroller * Jauge_Lignes;
-  T_Bouton_scroller * Jauge_RGBScale;
-  char Chaine[4];
-  byte Palette_a_redessiner=0;
+  short clicked_button;
+  byte dummy;
+  T_Scroller_button * columns_slider;
+  T_Scroller_button * lines_slider;
+  T_Scroller_button * rgb_scale_slider;
+  char str[4];
+  byte palette_needs_redraw=0;
   
-  Ouvrir_fenetre(200,146,"Palettes");
+  Open_window(200,146,"Palettes");
 
-  Fenetre_Definir_bouton_normal(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
-  Fenetre_Definir_bouton_normal(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
-  Fenetre_Definir_bouton_normal(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
-  Fenetre_Definir_bouton_normal( 80,126,53,14,"Cancel"              , 0,1,TOUCHE_ESC); // 4
-  Fenetre_Afficher_cadre(10,55,122,51);
-  Print_dans_fenetre(18,59,"palette layout",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(35,77,"Cols",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(84,77,"Lines",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(157,66,"RGB",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(152,76,"Scale",CM_Fonce,CM_Clair);
+  Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
+  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
+  Window_set_normal_button(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
+  Window_set_normal_button( 80,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
+  Window_display_frame(10,55,122,51);
+  Print_in_window(18,59,"palette layout",MC_Dark,MC_Light);
+  Print_in_window(35,77,"Cols",MC_Dark,MC_Light);
+  Print_in_window(84,77,"Lines",MC_Dark,MC_Light);
+  Print_in_window(157,66,"RGB",MC_Dark,MC_Light);
+  Print_in_window(152,76,"Scale",MC_Dark,MC_Light);
   
-  Jauge_Colonnes = Fenetre_Definir_bouton_scroller(19,72,29,255,1,256-Config.Palette_Cells_X);// 5
-  Num2str(Config.Palette_Cells_X,Chaine,3);
-  Print_dans_fenetre(38,89,Chaine,CM_Noir,CM_Clair);
+  columns_slider = Window_set_scroller_button(19,72,29,255,1,256-Config.Palette_cells_X);// 5
+  Num2str(Config.Palette_cells_X,str,3);
+  Print_in_window(38,89,str,MC_Black,MC_Light);
   
-  Jauge_Lignes = Fenetre_Definir_bouton_scroller(70,72,29,15,1,16-Config.Palette_Cells_Y);// 6
-  Num2str(Config.Palette_Cells_Y,Chaine,3);
-  Print_dans_fenetre(94,89,Chaine,CM_Noir,CM_Clair);
+  lines_slider = Window_set_scroller_button(70,72,29,15,1,16-Config.Palette_cells_Y);// 6
+  Num2str(Config.Palette_cells_Y,str,3);
+  Print_in_window(94,89,str,MC_Black,MC_Light);
   
-  Jauge_RGBScale = Fenetre_Definir_bouton_scroller(137,73,29,254,1,256-Graduations_RGB);// 7
-  Num2str(Graduations_RGB,Chaine,3);
-  Print_dans_fenetre(157,89,Chaine,CM_Noir,CM_Clair);
+  rgb_scale_slider = Window_set_scroller_button(137,73,29,254,1,256-RGB_scale);// 7
+  Num2str(RGB_scale,str,3);
+  Print_in_window(157,89,str,MC_Black,MC_Light);
 
-  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*200,Menu_Facteur_Y*80);
+  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*200,Menu_factor_Y*80);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
-      Touche=0;
-      Fenetre_aide(BOUTON_PALETTE, NULL);
+      Key=0;
+      Window_help(BUTTON_PALETTE, NULL);
     }
-    switch(Bouton_clicke)
+    switch(clicked_button)
     {
       case 5:
-        Num2str(256-Fenetre_Attribut2,Chaine,3);
-        Print_dans_fenetre(38,89,Chaine,CM_Noir,CM_Clair);
+        Num2str(256-Window_attribute2,str,3);
+        Print_in_window(38,89,str,MC_Black,MC_Light);
         break;    
       case 6:
-        Num2str(16-Fenetre_Attribut2,Chaine,3);
-        Print_dans_fenetre(94,89,Chaine,CM_Noir,CM_Clair);
+        Num2str(16-Window_attribute2,str,3);
+        Print_in_window(94,89,str,MC_Black,MC_Light);
         break;
       case 7:
-        Num2str(256-Fenetre_Attribut2,Chaine,3);
-        Print_dans_fenetre(157,89,Chaine,CM_Noir,CM_Clair);
+        Num2str(256-Window_attribute2,str,3);
+        Print_in_window(157,89,str,MC_Black,MC_Light);
         break;            
     }
   }
-  while (Bouton_clicke!=1 && Bouton_clicke!=3 && Bouton_clicke!=4);
+  while (clicked_button!=1 && clicked_button!=3 && clicked_button!=4);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_PALETTE);
-  Afficher_curseur();
+  Close_window();
+  Unselect_bouton(BUTTON_PALETTE);
+  Display_cursor();
   
-  if (Bouton_clicke==4) // Cancel
+  if (clicked_button==4) // Cancel
     return;
 
-  if (Jauge_Colonnes->Position!=256-Config.Palette_Cells_X ||
-    Jauge_Lignes->Position!=16-Config.Palette_Cells_Y)
+  if (columns_slider->Position!=256-Config.Palette_cells_X ||
+    lines_slider->Position!=16-Config.Palette_cells_Y)
   {
-    Config.Palette_Cells_X = 256-Jauge_Colonnes->Position;
-    Config.Palette_Cells_Y = 16-Jauge_Lignes->Position;
-    Changer_cellules_palette();
-    Palette_a_redessiner=1;
+    Config.Palette_cells_X = 256-columns_slider->Position;
+    Config.Palette_cells_Y = 16-lines_slider->Position;
+    Change_palette_cells();
+    palette_needs_redraw=1;
   }
-  if (Jauge_RGBScale->Position!=256-Graduations_RGB)
+  if (rgb_scale_slider->Position!=256-RGB_scale)
   {
-    Set_Palette_RGB_Scale(256-Jauge_RGBScale->Position);
-    Set_palette(Principal_Palette);
+    Set_palette_RGB_scale(256-rgb_scale_slider->Position);
+    Set_palette(Main_palette);
   }
 
-  if (Bouton_clicke==1)
+  if (clicked_button==1)
   {
-    Menu_Tag_couleurs("Tag colors to exclude",Exclude_color,&Dummy,1, NULL);
+    Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL);
   }
-  if (Palette_a_redessiner)
-    Afficher_menu();
+  if (palette_needs_redraw)
+    Display_menu();
 }

@@ -21,22 +21,22 @@
 */
 #include "struct.h"
 
-  void Pixel_Tall                        (word x,word y,byte Couleur);
-  byte Lit_Pixel_Tall                    (word x,word y);
-  void Block_Tall                        (word Debut_X,word Debut_Y,word width,word height,byte Couleur);
-  void Pixel_Preview_Normal_Tall         (word x,word y,byte Couleur);
-  void Pixel_Preview_Loupe_Tall          (word x,word y,byte Couleur);
-  void Ligne_horizontale_XOR_Tall        (word x_pos,word y_pos,word width);
-  void Ligne_verticale_XOR_Tall          (word x_pos,word y_pos,word height);
-  void Display_brush_Color_Tall          (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
-  void Display_brush_Mono_Tall           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse);
-  void Clear_brush_Tall                  (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word image_width);
-  void Remap_screen_Tall                 (word x_pos,word y_pos,word width,word height,byte * Table_de_conversion);
-  void Afficher_partie_de_l_ecran_Tall   (word width,word height,word image_width);
-  void Afficher_une_ligne_ecran_Tall     (word x_pos,word y_pos,word width,byte * line);
-  void Lire_une_ligne_ecran_Tall         (word x_pos,word y_pos,word width,byte * line);
-  void Afficher_partie_de_l_ecran_zoomee_Tall(word width,word height,word image_width,byte * Buffer);
-  void Display_brush_Color_zoom_Tall     (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word Largeur_brosse,byte * Buffer);
-  void Display_brush_Mono_zoom_Tall      (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,byte Couleur,word Largeur_brosse,byte * Buffer);
-  void Clear_brush_zoom_Tall             (word x_pos,word y_pos,word x_offset,word y_offset,word width,word Pos_Y_Fin,byte Couleur_de_transparence,word image_width,byte * Buffer);
-  void Affiche_brosse_Tall               (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte Couleur_de_transparence,word Largeur_brosse);
+  void Pixel_tall                        (word x,word y,byte color);
+  byte Read_pixel_tall                    (word x,word y);
+  void Block_tall                        (word start_x,word start_y,word width,word height,byte color);
+  void Pixel_preview_normal_tall         (word x,word y,byte color);
+  void Pixel_preview_magnifier_tall          (word x,word y,byte color);
+  void Horizontal_XOR_line_tall        (word x_pos,word y_pos,word width);
+  void Vertical_XOR_line_tall          (word x_pos,word y_pos,word height);
+  void Display_brush_color_tall          (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
+  void Display_brush_mono_tall           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,byte color,word brush_width);
+  void Clear_brush_tall                  (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
+  void Remap_screen_tall                 (word x_pos,word y_pos,word width,word height,byte * conversion_table);
+  void Display_part_of_screen_tall   (word width,word height,word image_width);
+  void Display_line_on_screen_tall     (word x_pos,word y_pos,word width,byte * line);
+  void Read_line_screen_tall         (word x_pos,word y_pos,word width,byte * line);
+  void Display_part_of_screen_scaled_tall(word width,word height,word image_width,byte * buffer);
+  void Display_brush_color_zoom_tall     (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word brush_width,byte * buffer);
+  void Display_brush_mono_zoom_tall      (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,byte color,word brush_width,byte * buffer);
+  void Clear_brush_scaled_tall             (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer);
+  void Display_brush_tall               (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);

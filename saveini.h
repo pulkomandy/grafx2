@@ -18,4 +18,4 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-int Sauver_INI(T_Config * Conf);
+int Save_INI(T_Config * conf);

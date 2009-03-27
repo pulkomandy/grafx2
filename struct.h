@@ -37,32 +37,32 @@
 #define dword uint32_t
 #define qword uint64_t
 
-typedef void (* fonction_action)    (void);
-typedef void (* fonction_afficheur) (word,word,byte);
-typedef byte (* fonction_lecteur)   (word,word);
-typedef void (* fonction_effaceur)  (byte);
-typedef void (* fonction_display)   (word,word,word);
-typedef byte (* fonction_effet)     (word,word,byte);
-typedef void (* fonction_block)     (word,word,word,word,byte);
-typedef void (* fonction_Ligne_XOR) (word,word,word);
-typedef void (* fonction_display_brush_Color) (word,word,word,word,word,word,byte,word);
-typedef void (* fonction_display_brush_Mono)  (word,word,word,word,word,word,byte,byte,word);
-typedef void (* fonction_degrade)   (long,short,short);
-typedef void (* fonction_remap)     (word,word,word,word,byte *);
-typedef void (* fonction_procsline) (word,word,word,byte *);
-typedef void (* fonction_display_zoom) (word,word,word,byte *);
-typedef void (* fonction_display_brush_Color_zoom) (word,word,word,word,word,word,byte,word,byte *);
-typedef void (* fonction_display_brush_Mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
-typedef void (* fonction_affiche_brosse) (byte *,word,word,word,word,word,word,byte,word);
+typedef void (* Func_action)    (void);
+typedef void (* Func_pixel) (word,word,byte);
+typedef byte (* Func_read)   (word,word);
+typedef void (* Func_clear)  (byte);
+typedef void (* Func_display)   (word,word,word);
+typedef byte (* Func_effect)     (word,word,byte);
+typedef void (* Func_block)     (word,word,word,word,byte);
+typedef void (* Func_line_XOR) (word,word,word);
+typedef void (* Func_display_brush_color) (word,word,word,word,word,word,byte,word);
+typedef void (* Func_display_brush_mono)  (word,word,word,word,word,word,byte,byte,word);
+typedef void (* Func_gradient)   (long,short,short);
+typedef void (* Func_remap)     (word,word,word,word,byte *);
+typedef void (* Func_procsline) (word,word,word,byte *);
+typedef void (* Func_display_zoom) (word,word,word,byte *);
+typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,byte,word,byte *);
+typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
+typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
 
 typedef struct
 {
   byte R;
   byte G;
   byte B;
-}__attribute__ ((__packed__)) Composantes, T_Palette[256];
+}__attribute__ ((__packed__)) T_Components, T_Palette[256];
 
-typedef struct T_Bouton_normal
+typedef struct T_Normal_button
 {
   short Number;
   word Pos_X;
@@ -70,20 +70,20 @@ typedef struct T_Bouton_normal
   word Width;
   word Height;
   byte Clickable;
-  byte Repetable;
-  word Raccourci;
-  struct T_Bouton_normal * Next;
-} T_Bouton_normal;
+  byte Repeatable;
+  word Shortcut;
+  struct T_Normal_button * Next;
+} T_Normal_button;
 
-typedef struct T_Bouton_palette
+typedef struct T_Palette_button
 {
   short Number;
   word Pos_X;
   word Pos_Y;
-  struct T_Bouton_palette * Next;
-} T_Bouton_palette;
+  struct T_Palette_button * Next;
+} T_Palette_button;
 
-typedef struct T_Bouton_scroller
+typedef struct T_Scroller_button
 {
   short Number;
   word Pos_X;
@@ -92,77 +92,77 @@ typedef struct T_Bouton_scroller
   word Nb_elements;
   word Nb_visibles;
   word Position;
-  word Hauteur_curseur;
-  struct T_Bouton_scroller * Next;
-} T_Bouton_scroller;
+  word Cursor_height;
+  struct T_Scroller_button * Next;
+} T_Scroller_button;
 
-typedef struct T_Bouton_special
+typedef struct T_Special_button
 {
   short Number;
   word Pos_X;
   word Pos_Y;
   word Width;
   word Height;
-  struct T_Bouton_special * Next;
-} T_Bouton_special;
+  struct T_Special_button * Next;
+} T_Special_button;
 
-typedef struct T_Dropdown_choix
+typedef struct T_Dropdown_choice
 {
   short Number;
   const char * Label;
-  struct T_Dropdown_choix * Next;
-} T_Dropdown_choix;
+  struct T_Dropdown_choice * Next;
+} T_Dropdown_choice;
 
-typedef struct T_Bouton_dropdown
+typedef struct T_Dropdown_button
 {
   short Number;
   word Pos_X;
   word Pos_Y;
   word Width;
   word Height;
-  byte Affiche_choix;  // The selected item's label is printed in the dropdown area
-  byte Affiche_centre; // Center labels (otherwise, align left)
-  byte Affiche_fleche; // Display a "down" arrow box in top right
-  byte Bouton_actif; // Mouse button: A_GAUCHE || A_DROITE || (A_GAUCHE|A_DROITE)
-  word Largeur_choix; // 0 for "same as control"
-  T_Dropdown_choix * Premier_choix;
-  struct T_Bouton_dropdown * Next;
-} T_Bouton_dropdown;
+  byte Display_choice;  // The selected item's label is printed in the dropdown area
+  byte Display_centered; // Center labels (otherwise, align left)
+  byte Display_arrow; // Display a "down" arrow box in top right
+  byte Active_button; // Mouse button: LEFT_SIDE || RIGHT_SIDE || (LEFT_SIDE|RIGHT_SIDE)
+  word Dropdown_width; // 0 for "same as control"
+  T_Dropdown_choice * First_item;
+  struct T_Dropdown_button * Next;
+} T_Dropdown_button;
 
 // Déclaration du type d'élément qu'on va mémoriser dans la liste:
-typedef struct Element_de_liste_de_fileselect
+typedef struct T_Fileselector_item
 {
-  char NomAbrege[19]; // Le nom tel qu'affiché dans le fileselector
-  char NomComplet[256]; // Le nom du fichier ou du répertoire
+  char Short_name[19]; // Le nom tel qu'affiché dans le fileselector
+  char Full_name[256]; // Le nom du fichier ou du répertoire
   byte Type;    // Type d'élément : 0 = Fichier, 1 = Répertoire, 2 = Lecteur
 
   // données de chaînage de la liste
-  struct Element_de_liste_de_fileselect * Suivant;
-  struct Element_de_liste_de_fileselect * Precedent;
-} Element_de_liste_de_fileselect;
+  struct T_Fileselector_item * Next;
+  struct T_Fileselector_item * Previous;
+} T_Fileselector_item;
 
 typedef struct {
   char Line_type;
   char * Text;
   int Line_parameter;
-} T_TABLEAIDE;
+} T_Help_table;
 
 // Déclaration d'une section d'aide:
 typedef struct
 {
-  const T_TABLEAIDE* Table_aide; // Pointeur sur le début de la table d'aide
-  word Nombre_de_lignes;
-} Section_d_aide;
+  const T_Help_table* Help_table; // Pointeur sur le début de la table d'aide
+  word Length;
+} T_Help_section;
 
 // Déclaration d'une info sur un dégradé
 typedef struct
 {
-  byte Debut;     // Première couleur du dégradé
-  byte Fin;       // Dernière couleur du dégradé
-  dword Inverse;   // "Le dégradé va de Fin à Debut" //INT
-  dword Melange;   // Valeur de mélange du dégradé (0-255) //LONG
+  byte Start;     // Première couleur du dégradé
+  byte End;       // Dernière couleur du dégradé
+  dword Inverse;   // "Le dégradé va de End à Start" //INT
+  dword Mix;   // Valeur de mélange du dégradé (0-255) //LONG
   dword Technique; // Technique à utiliser (0-2) //INT
-} __attribute__((__packed__)) T_Degrade_Tableau;
+} __attribute__((__packed__)) T_Gradient_array;
 
 // Déclaration d'une info de shade
 typedef struct
@@ -178,10 +178,10 @@ typedef struct
 
 typedef struct
 {
-  byte Etat;
+  byte State;
   word Width;
   word Height;
-} __attribute__((__packed__)) Config_Mode_video;
+} __attribute__((__packed__)) T_Config_video_mode;
 
 typedef struct
 {
@@ -190,62 +190,62 @@ typedef struct
   byte Version2;
   byte Beta1;
   byte Beta2;
-} __attribute__((__packed__)) Config_Header;
+} __attribute__((__packed__)) T_Config_header;
 
 typedef struct
 {
   byte Number;
   word Size;
-} __attribute__((__packed__)) Config_Chunk;
+} __attribute__((__packed__)) T_Config_chunk;
 
 typedef struct
 {
   word Number;
-  word Touche;
-  word Touche2;
-} __attribute__((__packed__)) Config_Infos_touche;
+  word Key;
+  word Key2;
+} __attribute__((__packed__)) T_Config_shortcut_info;
 
 typedef struct
 {
-  byte Fonte;
-  int  Lire_les_fichiers_caches;
-  int  Lire_les_repertoires_caches;
-//  int  Lire_les_repertoires_systemes;
-  byte Afficher_limites_image;
-  byte Curseur;
+  byte Font;
+  int  Show_hidden_files;
+  int  Show_hidden_directories;
+//  int  Show_system_directories;
+  byte Display_image_limits;
+  byte Cursor;
   byte Maximize_preview;
   byte Auto_set_res;
   byte Coords_rel;
   byte Backup;
   byte Adjust_brush_pick;
   byte Auto_save;
-  byte Nb_pages_Undo;
-  byte Indice_Sensibilite_souris_X;
-  byte Indice_Sensibilite_souris_Y;
-  byte Mouse_Facteur_de_correction_X;
-  byte Mouse_Facteur_de_correction_Y;
-  byte Mouse_Merge_movement;
-  byte Valeur_tempo_jauge_gauche;
-  byte Valeur_tempo_jauge_droite;
-  long Chrono_delay;
-  Composantes Coul_menu_pref[4];
-  int  Nb_max_de_vertex_par_polygon;
+  byte Max_undo_pages;
+  byte Mouse_sensitivity_index_x;
+  byte Mouse_sensitivity_index_y;
+  byte Mouse_fix_factor_X;
+  byte Mouse_fix_factor_Y;
+  byte Mouse_merge_movement;
+  byte Delay_left_click_on_slider;
+  byte Delay_right_click_on_slider;
+  long Timer_delay;
+  T_Components Fav_menu_colors[4];
+  int  Nb_max_vertices_per_polygon;
   byte Clear_palette;
   byte Set_resolution_according_to;
   byte Ratio;
   byte Fast_zoom;
   byte Find_file_fast;
   byte Couleurs_separees;
-  word Palette_Cells_X;
-  word Palette_Cells_Y;
+  word Palette_cells_X;
+  word Palette_cells_Y;
   byte FX_Feedback;
   byte Safety_colors;
   byte Opening_message;
   byte Clear_with_stencil;
   byte Auto_discontinuous;
-  byte Taille_ecran_dans_GIF;
+  byte Screen_size_in_GIF;
   byte Auto_nb_used;
-  byte Resolution_par_defaut;
+  byte Default_resolution;
   char *Bookmark_directory[NB_BOOKMARKS]; // independant malloc of adaptive size
   char Bookmark_label[NB_BOOKMARKS][8+1];
 } T_Config;
@@ -264,37 +264,37 @@ typedef struct
   int       Height; // Hauteur du bitmap
   T_Palette Palette; // Palette de l'image
 
-  char      Commentaire[TAILLE_COMMENTAIRE+1]; // Commentaire de l'image
+  char      Comment[COMMENT_SIZE+1]; // Commentaire de l'image
 
-  char      Repertoire_fichier[TAILLE_CHEMIN_FICHIER]; // |_ Nom complet =
-  char      Filename[TAILLE_CHEMIN_FICHIER];        // |  Repertoire_fichier+"\"+Nom_fichier
-  byte      Format_fichier;          // Format auquel il faut lire et écrire le fichier
+  char      File_directory[MAX_PATH_CHARACTERS]; // |_ Nom complet =
+  char      Filename[MAX_PATH_CHARACTERS];        // |  File_directory+"\"+Nom_fichier
+  byte      File_format;          // Format auquel il faut lire et écrire le fichier
 
 /*
-  short     Decalage_X; // Décalage en X de l'écran par rapport au début de l'image
-  short     Decalage_Y; // Décalage en Y de l'écran par rapport au début de l'image
-  short     Ancien_Decalage_X; // Le même avant le passage en mode loupe
-  short     Ancien_Decalage_Y; // Le même avant le passage en mode loupe
+  short     X_offset; // Décalage en X de l'écran par rapport au début de l'image
+  short     Y_offset; // Décalage en Y de l'écran par rapport au début de l'image
+  short     old_offset_x; // Le même avant le passage en mode loupe
+  short     old_offset_y; // Le même avant le passage en mode loupe
 
   short     Split; // Position en X du bord gauche du split de la loupe
-  short     X_Zoom; // (Menu_Facteur_X) + Position en X du bord droit du split de la loupe
-  float     Proportion_split; // Proportion de la zone non-zoomée par rapport à l'écran
+  short     X_zoom; // (Menu_factor_X) + Position en X du bord droit du split de la loupe
+  float     Separator_proportion; // Proportion de la zone non-zoomée par rapport à l'écran
 
-  byte      Loupe_Mode;       // On est en mode loupe
-  word      Loupe_Facteur;    // Facteur de zoom
-  word      Loupe_Hauteur;    // Largeur de la fenêtre de zoom
-  word      Loupe_Largeur;    // Hauteur de la fenêtre de zoom
-  short     Loupe_Decalage_X; // Decalage horizontal de la fenêtre de zoom
-  short     Loupe_Decalage_Y; // Decalage vertical   de la fenêtre de zoom
+  byte      Main_magnifier_mode;       // On est en mode loupe
+  word      Main_magnifier_factor;    // Facteur de zoom
+  word      Main_magnifier_height;    // Largeur de la fenêtre de zoom
+  word      Main_magnifier_width;    // Hauteur de la fenêtre de zoom
+  short     Main_magnifier_offset_X; // Offset horizontal de la fenêtre de zoom
+  short     Main_magnifier_offset_Y; // Offset vertical   de la fenêtre de zoom
 */
-} S_Page;
+} T_Page;
 
 typedef struct
 {
-  int      Taille_liste;      // Nb de S_Page dans le vecteur "Pages"
-  int      Nb_pages_allouees; // Nb de S_Page désignant des pages allouées
-  S_Page * Pages;             // Liste de pages (Taille_liste éléments)
-} S_Liste_de_pages;
+  int      List_size;      // Nb de T_Page dans le vecteur "Pages"
+  int      Nb_pages_allocated; // Nb de T_Page désignant des pages allouées
+  T_Page * Pages;             // Liste de pages (List_size éléments)
+} T_List_of_pages;
 
 
 

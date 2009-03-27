@@ -60,280 +60,280 @@ extern short Old_MY;
 /*
 void Bouton_***(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
 
-  Ouvrir_fenetre(310,190,"***");
+  Open_window(310,190,"***");
 
-  Fenetre_Definir_bouton_normal(103,137,80,14,"OK",0,1,SDLK_RETURN); // 1
-  Fenetre_Definir_bouton_scroller(18,44,88,16,4,0);             // 2
+  Window_set_normal_button(103,137,80,14,"OK",0,1,SDLK_RETURN); // 1
+  Window_set_scroller_button(18,44,88,16,4,0);             // 2
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
   }
-  while (Bouton_clicke!=1);
+  while (clicked_button!=1);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_***);
-  Afficher_curseur();
+  Close_window();
+  Unselect_bouton(BOUTON_***);
+  Display_cursor();
 }
 */
 
-void Stencil_Actualiser_couleur(byte Couleur);
-void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage);
+void Stencil_update_color(byte color);
+void Stencil_tag_color(byte color, byte tag_color);
 
-void Message_Non_disponible(void)
+void Message_not_implemented(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
 
-  Ouvrir_fenetre(160,76,"Not available yet!");
+  Open_window(160,76,"Not available yet!");
 
-  Print_dans_fenetre(8,20,"This function will",CM_Noir,CM_Clair);
-  Print_dans_fenetre(12,28,"be implemented in",CM_Noir,CM_Clair);
-  Print_dans_fenetre(16,36,"a later version.",CM_Noir,CM_Clair);
-  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Print_in_window(8,20,"This function will",MC_Black,MC_Light);
+  Print_in_window(12,28,"be implemented in",MC_Black,MC_Light);
+  Print_in_window(16,36,"a later version.",MC_Black,MC_Light);
+  Window_set_normal_button(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
-    Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=TOUCHE_ESC) && (Touche!=SDLK_o));
+    clicked_button=Window_clicked_button();
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
 
-  if(Bouton_clicke<=0) Touche=0;
+  if(clicked_button<=0) Key=0;
 
-  Fermer_fenetre();
+  Close_window();
 
   //   Puisque cette fonction peut être appelée par plusieurs boutons et qu'on
   // ne sait pas lequel c'est, on les désenclenche tous. De toutes façons, ça
   // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
   // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
-//  Desenclencher_bouton(BOUTON_GRADRECT);
-//  Desenclencher_bouton(BOUTON_TEXTE);
+//  Unselect_bouton(BUTTON_GRADRECT);
+//  Unselect_bouton(BUTTON_TEXT);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Message_Memoire_insuffisante(void)
+void Message_out_of_memory(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
 
-  Ouvrir_fenetre(216,76,"Not enough memory!");
+  Open_window(216,76,"Not enough memory!");
 
-  Print_dans_fenetre(8,20,"Please consult the manual",CM_Noir,CM_Clair);
-  Print_dans_fenetre(24,28,"to know how to obtain",CM_Noir,CM_Clair);
-  Print_dans_fenetre(36,36,"more memory space.",CM_Noir,CM_Clair);
-  Fenetre_Definir_bouton_normal(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Print_in_window(8,20,"Please consult the manual",MC_Black,MC_Light);
+  Print_in_window(24,28,"to know how to obtain",MC_Black,MC_Light);
+  Print_in_window(36,36,"more memory space.",MC_Black,MC_Light);
+  Window_set_normal_button(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
-    Bouton_clicke=Fenetre_Bouton_clicke();
-  while ((Bouton_clicke<=0) && (Touche!=TOUCHE_ESC) && (Touche!=SDLK_o));
+    clicked_button=Window_clicked_button();
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
 
-  if(Bouton_clicke<=0) Touche=0;
-  Fermer_fenetre();
-  Afficher_curseur();
+  if(clicked_button<=0) Key=0;
+  Close_window();
+  Display_cursor();
 }
 
 
-void Bouton_Message_initial(void)
+void Button_Message_initial(void)
 {
-  char  Chaine[21];
-  int   x_pos,Offs_Y,x,y;
+  char  str[21];
+  int   x_pos,offs_y,x,y;
 
-  sprintf(Chaine,"GrafX %d.%.2d%s%s",VERSION1, VERSION2, ALPHA_BETA,POURCENTAGE_VERSION);
-  Ouvrir_fenetre(260,172,Chaine);
+  sprintf(str,"GrafX %d.%.2d%s%s",VERSION1, VERSION2, ALPHA_BETA,PERCENTAGE_VERSION);
+  Open_window(260,172,str);
 
-  Fenetre_Afficher_cadre_creux(10,20,239,62);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*11),
-        Fenetre_Pos_Y+(Menu_Facteur_Y*21),
-        Menu_Facteur_X*237,Menu_Facteur_Y*60,CM_Noir);
-  for (y=23,Offs_Y=0; y<79; Offs_Y+=231,y++)
+  Window_display_frame_in(10,20,239,62);
+  Block(Window_pos_X+(Menu_factor_X*11),
+        Window_pos_Y+(Menu_factor_Y*21),
+        Menu_factor_X*237,Menu_factor_Y*60,MC_Black);
+  for (y=23,offs_y=0; y<79; offs_y+=231,y++)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
-      Pixel_dans_fenetre(x,y,Logo_GrafX2[Offs_Y+x_pos]);
+      Pixel_in_window(x,y,GFX_logo_grafx2[offs_y+x_pos]);
 
-  Print_dans_fenetre(130-4*21,88,"Copyright (c) 2007 by",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(130-4*23,96,"the Grafx2 project team",CM_Noir,CM_Clair);
-  Print_dans_fenetre(130-4*26,112,"Copyright (c) 1996-1999 by",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(130-4*13,120,"Sunset Design",CM_Noir,CM_Clair);
-  //Print_dans_fenetre( 120-4*13,128,"(placeholder)",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(130-4*28,136,"http://grafx2.googlecode.com",CM_Fonce,CM_Clair);
+  Print_in_window(130-4*21,88,"Copyright (c) 2007 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
+  Print_in_window(130-4*26,112,"Copyright (c) 1996-1999 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*13,120,"Sunset Design",MC_Black,MC_Light);
+  //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
+  Print_in_window(130-4*28,136,"http://grafx2.googlecode.com",MC_Dark,MC_Light);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
-  while(!Mouse_K && !Touche) if(!Get_input()) Wait_VBL();
+  while(!Mouse_K && !Key) if(!Get_input()) Wait_VBL();
   if (Mouse_K)
-    Attendre_fin_de_click();
+    Wait_end_of_click();
 
-  Fermer_fenetre();
-  Afficher_curseur();
+  Close_window();
+  Display_cursor();
 }
 
 
 
-void Changer_la_forme_du_pinceau(byte shape)
+void Change_paintbrush_shape(byte shape)
 {
-  Pinceau_Forme=shape;
-  Afficher_pinceau_dans_menu();
+  Paintbrush_shape=shape;
+  Display_paintbrush_in_menu();
 
-  switch (Operation_en_cours)
+  switch (Current_operation)
   {
     case OPERATION_FILL :
-      Pinceau_Forme_avant_fill=shape;
-      Pinceau_Forme=FORME_PINCEAU_POINT;
+      Paintbrush_shape_before_fill=shape;
+      Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
       break;
-    case OPERATION_PIPETTE :
-      Pinceau_Forme_avant_pipette=shape;
-      Pinceau_Forme=FORME_PINCEAU_POINT;
+    case OPERATION_COLORPICK :
+      Paintbrush_shape_before_colorpicker=shape;
+      Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
       break;
-    // Note: Il existe un Pinceau_Forme_avant_lasso, mais comme le lasso aura
+    // Note: Il existe un Paintbrush_shape_before_lasso, mais comme le lasso aura
     // été automatiquement désactivé avant d'arriver ici, y'a pas de problème.
   }
 }
 
 
 //-------------------------------- UNDO/REDO ---------------------------------
-void Bouton_Undo(void)
+void Button_Undo(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Undo();
 
-  Set_palette(Principal_Palette);
-  Calculer_couleurs_menu_optimales(Principal_Palette);
+  Set_palette(Main_palette);
+  Compute_optimal_menu_colors(Main_palette);
 
-  Afficher_ecran();
-  Desenclencher_bouton(BOUTON_UNDO);
-  Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,Loupe_Mode);
-  Afficher_menu();
-  Afficher_curseur();
+  Display_all_screen();
+  Unselect_bouton(BUTTON_UNDO);
+  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Display_menu();
+  Display_cursor();
 }
 
-void Bouton_Redo(void)
+void Button_Redo(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Redo();
 
-  Set_palette(Principal_Palette);
-  Calculer_couleurs_menu_optimales(Principal_Palette);
+  Set_palette(Main_palette);
+  Compute_optimal_menu_colors(Main_palette);
 
-  Afficher_ecran();
-  Desenclencher_bouton(BOUTON_UNDO);
-  Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,Loupe_Mode);
-  Afficher_menu();
-  Afficher_curseur();
+  Display_all_screen();
+  Unselect_bouton(BUTTON_UNDO);
+  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Display_menu();
+  Display_cursor();
 }
 
 
 //---------------------------- SCROLL PALETTE LEFT ---------------------------
-void Bouton_Pal_left(void)
+void Button_Pal_left(void)
 {
-  short Cells_Y = Palette_Cells_Y();
+  short cells_y = Palette_cells_Y();
 
-  Effacer_curseur();
-  if (Couleur_debut_palette)
+  Hide_cursor();
+  if (First_color_in_palette)
   {
-    if (Couleur_debut_palette>=Cells_Y)
-      Couleur_debut_palette-=Cells_Y;
+    if (First_color_in_palette>=cells_y)
+      First_color_in_palette-=cells_y;
     else
-      Couleur_debut_palette=0;
-    Afficher_palette_du_menu();
+      First_color_in_palette=0;
+    Display_menu_palette();
   }
-  Desenclencher_bouton(BOUTON_PAL_LEFT);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_PAL_LEFT);
+  Display_cursor();
 }
 
-void Bouton_Pal_left_fast(void)
+void Button_Pal_left_fast(void)
 {
-  short Cells_X = Palette_Cells_X();
-  short Cells_Y = Palette_Cells_Y();
+  short cells_X = Palette_cells_X();
+  short cells_y = Palette_cells_Y();
 
-  Effacer_curseur();
-  if (Couleur_debut_palette)
+  Hide_cursor();
+  if (First_color_in_palette)
   {
-    if (Couleur_debut_palette>=Cells_Y*Cells_X)
-      Couleur_debut_palette-=Cells_Y*Cells_X;
+    if (First_color_in_palette>=cells_y*cells_X)
+      First_color_in_palette-=cells_y*cells_X;
     else
-      Couleur_debut_palette=0;
-    Afficher_palette_du_menu();
+      First_color_in_palette=0;
+    Display_menu_palette();
   }
-  Desenclencher_bouton(BOUTON_PAL_LEFT);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_PAL_LEFT);
+  Display_cursor();
 }
 
 
 //--------------------------- SCROLL PALETTE RIGHT ---------------------------
-void Bouton_Pal_right(void)
+void Button_Pal_right(void)
 {
-  short Cells_Y = Palette_Cells_Y();
+  short cells_y = Palette_cells_Y();
 
-  Effacer_curseur();
-  if ((int)Couleur_debut_palette+Cells_Y*Palette_Cells_X()<256)
+  Hide_cursor();
+  if ((int)First_color_in_palette+cells_y*Palette_cells_X()<256)
   {
-    Couleur_debut_palette+=Cells_Y;
-    Afficher_palette_du_menu();
+    First_color_in_palette+=cells_y;
+    Display_menu_palette();
   }
-  Desenclencher_bouton(BOUTON_PAL_RIGHT);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_PAL_RIGHT);
+  Display_cursor();
 }
 
-void Bouton_Pal_right_fast(void)
+void Button_Pal_right_fast(void)
 {
-  short Cells_X = Palette_Cells_X();
-  short Cells_Y = Palette_Cells_Y();
+  short cells_X = Palette_cells_X();
+  short cells_y = Palette_cells_Y();
 
-  Effacer_curseur();
-  if ((int)Couleur_debut_palette+Cells_Y*Cells_X<256)
+  Hide_cursor();
+  if ((int)First_color_in_palette+cells_y*cells_X<256)
   {
-    if ((int)Couleur_debut_palette+(Cells_Y)*Cells_X*2<256)
-      Couleur_debut_palette+=Cells_X*Cells_Y;
+    if ((int)First_color_in_palette+(cells_y)*cells_X*2<256)
+      First_color_in_palette+=cells_X*cells_y;
     else
-      Couleur_debut_palette=255/Cells_Y*Cells_Y-(Cells_X-1)*Cells_Y;
-    Afficher_palette_du_menu();
+      First_color_in_palette=255/cells_y*cells_y-(cells_X-1)*cells_y;
+    Display_menu_palette();
   }
-  Desenclencher_bouton(BOUTON_PAL_RIGHT);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_PAL_RIGHT);
+  Display_cursor();
 }
 
-//-------------------- Choix de la forecolor dans le menu --------------------
-void Bouton_Choix_forecolor(void)
+//-------------------- item de la forecolor dans le menu --------------------
+void Button_Select_forecolor(void)
 {
-  int Couleur=Couleur_palette();
+  int color=Pick_color_in_palette();
 
-  if (Couleur!=-1)
+  if (color!=-1)
   {
-    Effacer_curseur();
-    Encadrer_couleur_menu(CM_Noir);
-    Fore_color=Couleur;
-    Encadrer_couleur_menu(CM_Blanc);
-    Afficher_foreback();
-    Afficher_curseur();
+    Hide_cursor();
+    Frame_menu_color(MC_Black);
+    Fore_color=color;
+    Frame_menu_color(MC_White);
+    Display_foreback();
+    Display_cursor();
   }
 }
 
-//-------------------- Choix de la backcolor dans le menu --------------------
-void Bouton_Choix_backcolor(void)
+//-------------------- item de la backcolor dans le menu --------------------
+void Button_Select_backcolor(void)
 {
-  int Couleur=Couleur_palette();
+  int color=Pick_color_in_palette();
 
-  if (Couleur!=-1)
+  if (color!=-1)
   {
-    Effacer_curseur();
-    Back_color=Couleur;
-    Afficher_foreback();
-    Afficher_curseur();
+    Hide_cursor();
+    Back_color=color;
+    Display_foreback();
+    Display_cursor();
   }
 }
 
 
 //---------------------- Cacher ou réafficher le menu ------------------------
-void Pixel_dans_barre_d_outil_cachee(__attribute__((unused)) word x,__attribute__((unused)) word y,__attribute__((unused)) byte Couleur)
+void Pixel_in_hidden_toolbar(__attribute__((unused)) word x,__attribute__((unused)) word y,__attribute__((unused)) byte color)
 {
   // C'est fait exprès que ce soit vide...
   // C'est parce que y'a rien du tout à afficher vu que la barre d'outil est
@@ -341,120 +341,120 @@ void Pixel_dans_barre_d_outil_cachee(__attribute__((unused)) word x,__attribute_
 }
 
 
-void Bouton_Cacher_menu(void)
+void Button_Hide_menu(void)
 {
-  Effacer_curseur();
-  if (Menu_visible)
+  Hide_cursor();
+  if (Menu_is_visible)
   {
-    Menu_visible=0;
-    Pixel_dans_menu=Pixel_dans_barre_d_outil_cachee;
-    Menu_Ordonnee=Hauteur_ecran;
+    Menu_is_visible=0;
+    Pixel_in_menu=Pixel_in_hidden_toolbar;
+    Menu_Y=Screen_height;
 
-    if (Loupe_Mode)
+    if (Main_magnifier_mode)
     {
-      Calculer_donnees_loupe();
-      if (Loupe_Decalage_Y+Loupe_Hauteur>Principal_Hauteur_image)
+      Compute_magnifier_data();
+      if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
       {
-        if (Loupe_Hauteur>Principal_Hauteur_image)
-          Loupe_Decalage_Y=0;
+        if (Main_magnifier_height>Main_image_height)
+          Main_magnifier_offset_Y=0;
         else
-          Loupe_Decalage_Y=Principal_Hauteur_image-Loupe_Hauteur;
+          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
       }
     }
 
     //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
     // -cohérences lorsqu'on sortira du mode Loupe.
-    if (Principal_Decalage_Y+Hauteur_ecran>Principal_Hauteur_image)
+    if (Main_offset_Y+Screen_height>Main_image_height)
     {
-      if (Hauteur_ecran>Principal_Hauteur_image)
-        Principal_Decalage_Y=0;
+      if (Screen_height>Main_image_height)
+        Main_offset_Y=0;
       else
-        Principal_Decalage_Y=Principal_Hauteur_image-Hauteur_ecran;
+        Main_offset_Y=Main_image_height-Screen_height;
     }
     // On fait pareil pour le brouillon
-    if (Brouillon_Decalage_Y+Hauteur_ecran>Brouillon_Hauteur_image)
+    if (Spare_offset_Y+Screen_height>Spare_image_height)
     {
-      if (Hauteur_ecran>Brouillon_Hauteur_image)
-        Brouillon_Decalage_Y=0;
+      if (Screen_height>Spare_image_height)
+        Spare_offset_Y=0;
       else
-        Brouillon_Decalage_Y=Brouillon_Hauteur_image-Hauteur_ecran;
+        Spare_offset_Y=Spare_image_height-Screen_height;
     }
 
-    Calculer_donnees_loupe();
-    if (Loupe_Mode)
-      Recadrer_ecran_par_rapport_au_zoom();
-    Calculer_limites();
-    Calculer_coordonnees_pinceau();
-    Afficher_ecran();
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    Display_all_screen();
   }
   else
   {
-    Menu_visible=1;
-    Pixel_dans_menu=Pixel_dans_barre_d_outil;
-    Menu_Ordonnee=Hauteur_ecran-(HAUTEUR_MENU*Menu_Facteur_Y);
+    Menu_is_visible=1;
+    Pixel_in_menu=Pixel_in_toolbar;
+    Menu_Y=Screen_height-(MENU_HEIGHT*Menu_factor_Y);
 
-    Calculer_donnees_loupe();
-    if (Loupe_Mode)
-      Recadrer_ecran_par_rapport_au_zoom();
-    Calculer_limites();
-    Calculer_coordonnees_pinceau();
-    Afficher_menu();
-    if (Loupe_Mode)
-      Afficher_ecran();
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    Display_menu();
+    if (Main_magnifier_mode)
+      Display_all_screen();
   }
-  Desenclencher_bouton(BOUTON_CACHER);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_HIDE);
+  Display_cursor();
 }
 
 
 //--------------------------- Quitter le programme ---------------------------
-byte Bouton_Quitter_Routine_locale(void)
+byte Button_Quit_local_function(void)
 {
-  short Bouton_clicke;
-  static char  Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  byte  Ancienne_forme_curseur;
+  short clicked_button;
+  static char  filename[MAX_PATH_CHARACTERS];
+  byte  old_cursor_shape;
 
-  if (!Principal_Image_modifiee)
+  if (!Main_image_is_modified)
     return 1;
 
   // On commence par afficher la fenêtre de QUIT
-  Ouvrir_fenetre(160,84,"Quit ?");
-  Fenetre_Definir_bouton_normal(20,20,120,14,"Stay",0,1,TOUCHE_ESC);          // 1
-  Fenetre_Definir_bouton_normal(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
-  Fenetre_Definir_bouton_normal(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Open_window(160,84,"Quit ?");
+  Window_set_normal_button(20,20,120,14,"Stay",0,1,KEY_ESC);          // 1
+  Window_set_normal_button(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
+  Window_set_normal_button(20,60,120,14,"Discard (Quit)",1,1,SDLK_d);// 3
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_QUIT, NULL);
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_QUIT, NULL);
   }
-  while (Bouton_clicke<=0);
+  while (clicked_button<=0);
 
-  Fermer_fenetre();
-  Afficher_curseur();
+  Close_window();
+  Display_cursor();
 
-  switch(Bouton_clicke)
+  switch(clicked_button)
   {
     case 1 : return 0; // Rester
     case 2 : // Sauver et enregistrer
-             Nom_fichier_complet(Nom_du_fichier,0);
-             if ( (!Fichier_existe(Nom_du_fichier)) || Demande_de_confirmation("Erase old file ?") )
+             filename_complet(filename,0);
+             if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
              {
-               Effacer_curseur();
-               Ancienne_forme_curseur=Forme_curseur;
-               Forme_curseur=FORME_CURSEUR_SABLIER;
-               Afficher_curseur();
+               Hide_cursor();
+               old_cursor_shape=Cursor_shape;
+               Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+               Display_cursor();
 
-               Sauver_image(1);
+               Save_image(1);
 
-               Effacer_curseur();
-               Forme_curseur=Ancienne_forme_curseur;
-               Afficher_curseur();
+               Hide_cursor();
+               Cursor_shape=old_cursor_shape;
+               Display_cursor();
 
-               if (!Erreur_fichier)
+               if (!File_error)
                  // L'ayant sauvée avec succès,
                  return 1; // On peut quitter
                else
@@ -470,413 +470,413 @@ byte Bouton_Quitter_Routine_locale(void)
 }
 
 
-void Bouton_Quit(void)
+void Button_Quit(void)
 {
-  //short Bouton_clicke;
+  //short clicked_button;
 
-  if (Bouton_Quitter_Routine_locale())
+  if (Button_Quit_local_function())
   {
-    if (Brouillon_Image_modifiee)
+    if (Spare_image_is_modified)
     {
-      Bouton_Page(); // On passe sur le brouillon
+      Button_Page(); // On passe sur le brouillon
       // Si l'utilisateur présente les derniers symptomes de l'abandon
-      if (Bouton_Quitter_Routine_locale())
-        Sortir_du_programme=1;
+      if (Button_Quit_local_function())
+        Quitting=1;
     }
     else
-      Sortir_du_programme=1;
+      Quitting=1;
   }
 
-  if ( (Menu_visible) && (Mouse_Y+8>Menu_Ordonnee) )
-    Effacer_curseur();
+  if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
+    Hide_cursor();
 
-  Desenclencher_bouton(BOUTON_QUIT);
+  Unselect_bouton(BUTTON_QUIT);
 
-  if ( (Menu_visible) && (Mouse_Y+8>Menu_Ordonnee) )
-    Afficher_curseur();
+  if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
+    Display_cursor();
 }
 
 
 //---------------------------- Effacer l'écran -------------------------------
-void Bouton_Clear(void)
+void Button_Clear(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Backup();
-  if (Stencil_Mode && Config.Clear_with_stencil)
-    Effacer_image_courante_Stencil(0,Stencil);
+  if (Stencil_mode && Config.Clear_with_stencil)
+    Hide_current_image_with_stencil(0,Stencil);
   else
-    Effacer_image_courante(0);
-  Afficher_ecran();
-  Desenclencher_bouton(BOUTON_CLEAR);
-  Afficher_curseur();
+    Hide_current_image(0);
+  Display_all_screen();
+  Unselect_bouton(BUTTON_CLEAR);
+  Display_cursor();
 }
 
-void Bouton_Clear_colore(void)
+void Button_Clear_with_backcolor(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   Backup();
-  if (Stencil_Mode && Config.Clear_with_stencil)
-    Effacer_image_courante_Stencil(Back_color,Stencil);
+  if (Stencil_mode && Config.Clear_with_stencil)
+    Hide_current_image_with_stencil(Back_color,Stencil);
   else
-    Effacer_image_courante(Back_color);
-  Afficher_ecran();
-  Desenclencher_bouton(BOUTON_CLEAR);
-  Afficher_curseur();
+    Hide_current_image(Back_color);
+  Display_all_screen();
+  Unselect_bouton(BUTTON_CLEAR);
+  Display_cursor();
 }
  
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_Tag_couleurs(char * En_tete, byte * table, byte * mode, byte can_cancel, const char *Section_aide)
+void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section)
 {
-  short Bouton_clicke;
-  byte Backup_table[256];
-  word Indice;
-  word Ancien_Mouse_X;
-  word Ancien_Mouse_Y;
-  byte Ancien_Mouse_K;
-  byte Couleur_taggee;
-  byte Couleur;
+  short clicked_button;
+  byte backup_table[256];
+  word index;
+  word old_mouse_x;
+  word old_mouse_y;
+  byte old_mouse_k;
+  byte tagged_color;
+  byte color;
   byte click;
 
 
-  Ouvrir_fenetre(176,150,En_tete);
+  Open_window(176,150,window_title);
 
-  Fenetre_Definir_bouton_palette(6,38);                            // 1
-  Fenetre_Definir_bouton_normal( 7, 19,78,14,"Clear" ,1,1,SDLK_c); // 2
-  Fenetre_Definir_bouton_normal(91, 19,78,14,"Invert",1,1,SDLK_i); // 3
+  Window_set_palette_button(6,38);                            // 1
+  Window_set_normal_button( 7, 19,78,14,"Clear" ,1,1,SDLK_c); // 2
+  Window_set_normal_button(91, 19,78,14,"Invert",1,1,SDLK_i); // 3
   if (can_cancel)
   {
-    Fenetre_Definir_bouton_normal(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
-    Fenetre_Definir_bouton_normal( 7,129,78,14,"Cancel",0,1,TOUCHE_ESC);  // 5
+    Window_set_normal_button(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
+    Window_set_normal_button( 7,129,78,14,"Cancel",0,1,KEY_ESC);  // 5
     // On enregistre la table dans un backup au cas où on ferait Cancel
-    memcpy(Backup_table,table,256);
+    memcpy(backup_table,table,256);
   }
   else
-    Fenetre_Definir_bouton_normal(49,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
+    Window_set_normal_button(49,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
 
   // On affiche l'état actuel de la table
-  for (Indice=0; Indice<=255; Indice++)
-    Stencil_Tagger_couleur(Indice, (table[Indice])?CM_Noir:CM_Clair);
+  for (index=0; index<=255; index++)
+    Stencil_tag_color(index, (table[index])?MC_Black:MC_Light);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
   {
-    Ancien_Mouse_X=Mouse_X;
-    Ancien_Mouse_Y=Mouse_Y;
-    Ancien_Mouse_K=Mouse_K;
+    old_mouse_x=Mouse_X;
+    old_mouse_y=Mouse_Y;
+    old_mouse_k=Mouse_K;
 
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case  0 :
         break;
       case -1 :
       case  1 : // Palette
-        if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
+        if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
-          Effacer_curseur();
-          Couleur_taggee=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
-          table[Couleur_taggee]=(Mouse_K==A_GAUCHE);
-          Stencil_Tagger_couleur(Couleur_taggee,(Mouse_K==A_GAUCHE)?CM_Noir:CM_Clair);
-          Afficher_curseur();
-          Stencil_Actualiser_couleur(Couleur_taggee);
+          Hide_cursor();
+          tagged_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
+          table[tagged_color]=(Mouse_K==LEFT_SIDE);
+          Stencil_tag_color(tagged_color,(Mouse_K==LEFT_SIDE)?MC_Black:MC_Light);
+          Display_cursor();
+          Stencil_update_color(tagged_color);
         }
         break;
       case  2 : // Clear
         memset(table,0,256);
-        Effacer_curseur();
-        for (Indice=0; Indice<=255; Indice++)
-          Stencil_Tagger_couleur(Indice,CM_Clair);
-        Afficher_curseur();
-        Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+        Hide_cursor();
+        for (index=0; index<=255; index++)
+          Stencil_tag_color(index,MC_Light);
+        Display_cursor();
+        Update_window_area(0,0,Window_width, Window_height);
         break;
       case  3 : // Invert
-        Effacer_curseur();
-        for (Indice=0; Indice<=255; Indice++)
-          Stencil_Tagger_couleur(Indice,(table[Indice]^=1)?CM_Noir:CM_Clair);
-        Afficher_curseur();
-        Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+        Hide_cursor();
+        for (index=0; index<=255; index++)
+          Stencil_tag_color(index,(table[index]^=1)?MC_Black:MC_Light);
+        Display_cursor();
+        Update_window_area(0,0,Window_width, Window_height);
     }
 
     if (!Mouse_K)
-    switch (Touche)
+    switch (Key)
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        Get_color_behind_window(&color,&click);
         if (click)
         {
-          Effacer_curseur();
-          Couleur_taggee=Couleur;
-          table[Couleur_taggee]=(click==A_GAUCHE);
-          Stencil_Tagger_couleur(Couleur_taggee,(click==A_GAUCHE)?CM_Noir:CM_Clair);
-          Stencil_Actualiser_couleur(Couleur_taggee);
-          Afficher_curseur();
-          Attendre_fin_de_click();
+          Hide_cursor();
+          tagged_color=color;
+          table[tagged_color]=(click==LEFT_SIDE);
+          Stencil_tag_color(tagged_color,(click==LEFT_SIDE)?MC_Black:MC_Light);
+          Stencil_update_color(tagged_color);
+          Display_cursor();
+          Wait_end_of_click();
         }
-        Touche=0;
+        Key=0;
         break;
       default:
-      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+      if (Is_shortcut(Key,0x100+BUTTON_HELP))
       {
-        Fenetre_aide(BOUTON_EFFETS, Section_aide);
-        Touche=0;
+        Window_help(BUTTON_EFFECTS, help_section);
+        Key=0;
         break;
       }
     }
   }
-  while (Bouton_clicke<4);
+  while (clicked_button<4);
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==5) // Cancel
-    memcpy(table,Backup_table,256);
+  if (clicked_button==5) // Cancel
+    memcpy(table,backup_table,256);
   else // OK
     *mode=1;
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 //--------------------------------- Stencil ----------------------------------
-void Bouton_Stencil_Mode(void)
+void Button_Stencil_mode(void)
 {
-  Stencil_Mode=!Stencil_Mode;
+  Stencil_mode=!Stencil_mode;
 }
 
 
-void Stencil_Tagger_couleur(byte Couleur, byte Couleur_de_taggage)
+void Stencil_tag_color(byte color, byte tag_color)
 {
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur >> 4)*10)),
-        Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur & 15)* 5)),
-        Menu_Facteur_X<<1,Menu_Facteur_Y*5,Couleur_de_taggage);
+  Block(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(color >> 4)*10)),
+        Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(color & 15)* 5)),
+        Menu_factor_X<<1,Menu_factor_Y*5,tag_color);
 }
 
-void Stencil_Actualiser_couleur(byte Couleur)
+void Stencil_update_color(byte color)
 {
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur >> 4)*10)),
-      Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur & 15)* 5)),
-      Menu_Facteur_X<<1,Menu_Facteur_Y*5);
+  Update_rect(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(color >> 4)*10)),
+      Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(color & 15)* 5)),
+      Menu_factor_X<<1,Menu_factor_Y*5);
 }
 
-void Bouton_Menu_Stencil(void)
+void Button_Stencil_menu(void)
 {
-  Menu_Tag_couleurs("Stencil",Stencil,&Stencil_Mode,1, "STENCIL");
+  Menu_tag_colors("Stencil",Stencil,&Stencil_mode,1, "STENCIL");
 }
 
 
 //--------------------------------- Masque -----------------------------------
-void Bouton_Mask_Mode(void)
+void Button_Mask_mode(void)
 {
-  Mask_Mode=!Mask_Mode;
+  Mask_mode=!Mask_mode;
 }
 
 
-void Bouton_Mask_Menu(void)
+void Button_Mask_menu(void)
 {
-  Menu_Tag_couleurs("Mask",Mask_table,&Mask_Mode,1, "MASK");
+  Menu_tag_colors("Mask",Mask_table,&Mask_mode,1, "MASK");
 }
 
 
 //------------------------------- Paramètres ---------------------------------
 
-void Settings_Afficher_config(T_Config * Conf)
+void Settings_display_config(T_Config * conf)
 #define YES "YES"
 #define NO  " NO"
 {
-  T_Bouton_scroller * slider=Fenetre_Liste_boutons_scroller;
-  char Chaine[4];
+  T_Scroller_button * slider=Window_scroller_button_list;
+  char str[4];
 
-  Effacer_curseur();
+  Hide_cursor();
 
   // slider = Jauge de sensibilité Y
-  slider->Position=Conf->Indice_Sensibilite_souris_Y-1;
-  Fenetre_Dessiner_jauge(slider);
+  slider->Position=conf->Mouse_sensitivity_index_y-1;
+  Window_draw_slider(slider);
 
   slider=slider->Next;
   // slider = Jauge de sensibilité X
-  slider->Position=Conf->Indice_Sensibilite_souris_X-1;
-  Fenetre_Dessiner_jauge(slider);
+  slider->Position=conf->Mouse_sensitivity_index_x-1;
+  Window_draw_slider(slider);
 
-  Print_dans_fenetre(273, 31,(Conf->Lire_les_fichiers_caches)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(273, 46,(Conf->Lire_les_repertoires_caches)?YES:NO,CM_Noir,CM_Clair);
-//  Print_dans_fenetre(273, 61,(Conf->Lire_les_repertoires_systemes)?YES:NO,CM_Noir,CM_Clair);
+  Print_in_window(273, 31,(conf->Show_hidden_files)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(273, 46,(conf->Show_hidden_directories)?YES:NO,MC_Black,MC_Light);
+//  Print_in_window(273, 61,(conf->Show_system_directories)?YES:NO,MC_Black,MC_Light);
 
-  Print_dans_fenetre(223, 84,(Conf->Safety_colors)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(223, 99,(Conf->Adjust_brush_pick)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(223,114,(Conf->Couleurs_separees)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(223,129,(Conf->Auto_set_res)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre(183,144,(Conf->Coords_rel)?"Relative":"Absolute",CM_Noir,CM_Clair);
+  Print_in_window(223, 84,(conf->Safety_colors)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(223, 99,(conf->Adjust_brush_pick)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(223,114,(conf->Couleurs_separees)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(223,129,(conf->Auto_set_res)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(183,144,(conf->Coords_rel)?"Relative":"Absolute",MC_Black,MC_Light);
 
-  Print_dans_fenetre( 91, 84,(Conf->Afficher_limites_image)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre( 91, 99,(Conf->Clear_palette)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre( 91,114,(Conf->Maximize_preview)?YES:NO,CM_Noir,CM_Clair);
-  Print_dans_fenetre( 91,129,(Conf->Backup)?YES:NO,CM_Noir,CM_Clair);
-  switch (Conf->Curseur)
+  Print_in_window( 91, 84,(conf->Display_image_limits)?YES:NO,MC_Black,MC_Light);
+  Print_in_window( 91, 99,(conf->Clear_palette)?YES:NO,MC_Black,MC_Light);
+  Print_in_window( 91,114,(conf->Maximize_preview)?YES:NO,MC_Black,MC_Light);
+  Print_in_window( 91,129,(conf->Backup)?YES:NO,MC_Black,MC_Light);
+  switch (conf->Cursor)
   {
-    case 0 : Print_dans_fenetre(67,144," Solid",CM_Noir,CM_Clair); break;
-    case 1 : Print_dans_fenetre(67,144,"Transp",CM_Noir,CM_Clair); break;
-    default: Print_dans_fenetre(67,144,"  Thin",CM_Noir,CM_Clair);
+    case 0 : Print_in_window(67,144," Solid",MC_Black,MC_Light); break;
+    case 1 : Print_in_window(67,144,"Transp",MC_Black,MC_Light); break;
+    default: Print_in_window(67,144,"  Thin",MC_Black,MC_Light);
   }
 
-  if (Conf->Fonte)
+  if (conf->Font)
   { // Fun
-    Print_dans_fenetre(  8,31," ",CM_Noir,CM_Clair);
-    Print_dans_fenetre( 78,31," ",CM_Noir,CM_Clair);
-    Print_dans_fenetre( 82,31,"\020",CM_Noir,CM_Clair);
-    Print_dans_fenetre(152,31,"\021",CM_Noir,CM_Clair);
+    Print_in_window(  8,31," ",MC_Black,MC_Light);
+    Print_in_window( 78,31," ",MC_Black,MC_Light);
+    Print_in_window( 82,31,"\020",MC_Black,MC_Light);
+    Print_in_window(152,31,"\021",MC_Black,MC_Light);
   }
   else
   { // Classic
-    Print_dans_fenetre( 82,31," ",CM_Noir,CM_Clair);
-    Print_dans_fenetre(152,31," ",CM_Noir,CM_Clair);
-    Print_dans_fenetre(  8,31,"\020",CM_Noir,CM_Clair);
-    Print_dans_fenetre( 78,31,"\021",CM_Noir,CM_Clair);
+    Print_in_window( 82,31," ",MC_Black,MC_Light);
+    Print_in_window(152,31," ",MC_Black,MC_Light);
+    Print_in_window(  8,31,"\020",MC_Black,MC_Light);
+    Print_in_window( 78,31,"\021",MC_Black,MC_Light);
   }
 
-  Print_dans_fenetre(155,166,(Conf->Auto_save)?YES:NO,CM_Noir,CM_Clair);
+  Print_in_window(155,166,(conf->Auto_save)?YES:NO,MC_Black,MC_Light);
 
-  Num2str(Conf->Nb_pages_Undo,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+  Num2str(conf->Max_undo_pages,str,2);
+  Window_input_content(Window_special_button_list,str);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
-void Settings_Sauver_config(T_Config * Conf)
+void Settings_save_config(T_Config * conf)
 {
-  if (Sauver_CFG())
-    Erreur(0);
+  if (Save_CFG())
+    Error(0);
   else
-    if (Sauver_INI(Conf))
-      Erreur(0);
+    if (Save_INI(conf))
+      Error(0);
 }
 
-void Settings_Charger_config(T_Config * Conf)
+void Settings_load_config(T_Config * conf)
 {
-  if (Charger_CFG(0))
-    Erreur(0);
+  if (Load_CFG(0))
+    Error(0);
   else
-    if (Charger_INI(Conf))
-      Erreur(0);
+    if (Load_INI(conf))
+      Error(0);
 }
 
-void Bouton_Settings(void)
+void Button_Settings(void)
 {
-  int Sensibilite_X;
-  int Sensibilite_Y;
-  short Bouton_clicke;
+  int x_sensitivity;
+  int y_sensitivity;
+  short clicked_button;
   T_Config Config_choisie;
-  char Chaine[3];
-  byte On_a_recharge_la_config=0;
+  char str[3];
+  byte config_is_reloaded=0;
 
   Config_choisie=Config;
 
-  Ouvrir_fenetre(307,182,"Settings");
+  Open_window(307,182,"Settings");
 
   // On commence par dessiner tous les Cadres
-  Fenetre_Afficher_cadre(  5, 16,157,30); // Font
-  Fenetre_Afficher_cadre(  5, 47,157,17); // Nb UNDO
-  Fenetre_Afficher_cadre(163, 16,139,48); // Show in filelist
-  Fenetre_Afficher_cadre(253, 77, 49,82); // Mouse sens.
-  Fenetre_Afficher_cadre(  5, 65,247,96); // |_ Misc.
-/*  Fenetre_Afficher_cadre(  5, 65,157,14); // |
-  // On découpe le Cadre bizarre des "Miscellaneous"
-  Pixel_dans_fenetre(6,77,CM_Blanc);
-  Pixel_dans_fenetre(5,78,CM_Fonce);
-  Block(Fenetre_Pos_X+(7*Menu_Facteur_X),Fenetre_Pos_Y+(77*Menu_Facteur_Y),
-        Menu_Facteur_X*154,Menu_Facteur_Y<<1,CM_Clair);
-  Pixel_dans_fenetre(161,77,CM_Clair);
-  Pixel_dans_fenetre(160,77,CM_Fonce);
+  Window_display_frame(  5, 16,157,30); // Font
+  Window_display_frame(  5, 47,157,17); // Nb UNDO
+  Window_display_frame(163, 16,139,48); // Show in filelist
+  Window_display_frame(253, 77, 49,82); // Mouse sens.
+  Window_display_frame(  5, 65,247,96); // |_ Misc.
+/*  Window_display_frame(  5, 65,157,14); // |
+  // On découpe le Frame bizarre des "Miscellaneous"
+  Pixel_in_window(6,77,MC_White);
+  Pixel_in_window(5,78,MC_Dark);
+  Block(Window_pos_X+(7*Menu_factor_X),Window_pos_Y+(77*Menu_factor_Y),
+        Menu_factor_X*154,Menu_factor_Y<<1,MC_Light);
+  Pixel_in_window(161,77,MC_Light);
+  Pixel_in_window(160,77,MC_Dark);
 */
   // On affiche maintenant tout le blabla
-  Print_dans_fenetre( 69, 19,"Font"            ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(169, 19,"Show in filelist",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(  9, 52,"Nb of UNDO pages",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 80, 70,"Miscellaneous"   ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(258, 80,"Mouse"           ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(258, 88,"Sens."           ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(256,123,"X"               ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(292,123,"Y"               ,CM_Fonce,CM_Clair);
+  Print_in_window( 69, 19,"Font"            ,MC_Dark,MC_Light);
+  Print_in_window(169, 19,"Show in filelist",MC_Dark,MC_Light);
+  Print_in_window(  9, 52,"Nb of UNDO pages",MC_Dark,MC_Light);
+  Print_in_window( 80, 70,"Miscellaneous"   ,MC_Dark,MC_Light);
+  Print_in_window(258, 80,"Mouse"           ,MC_Dark,MC_Light);
+  Print_in_window(258, 88,"Sens."           ,MC_Dark,MC_Light);
+  Print_in_window(256,123,"X"               ,MC_Dark,MC_Light);
+  Print_in_window(292,123,"Y"               ,MC_Dark,MC_Light);
 
   // Boutons de fontes
-  Fenetre_Definir_bouton_normal(17,28,59,14,"Classic",0,1,SDLK_LAST); // 1
-  Fenetre_Definir_bouton_normal(91,28,59,14,"Fun"    ,0,1,SDLK_LAST); // 2
+  Window_set_normal_button(17,28,59,14,"Classic",0,1,SDLK_LAST); // 1
+  Window_set_normal_button(91,28,59,14,"Fun"    ,0,1,SDLK_LAST); // 2
 
-  // Bouton Show/Hide dans le fileselect
-  Fenetre_Definir_bouton_normal(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 3
-  Fenetre_Definir_bouton_normal(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 4
-//  Fenetre_Definir_bouton_normal(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
+  // Button Show/Hide dans le fileselect
+  Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 3
+  Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 4
+//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
 
-  // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 6
-  // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9, 96,107,14,"Clear pal:   ",0,1,SDLK_LAST); // 7
-  // Bouton Show/Hide Picture limits
-  Fenetre_Definir_bouton_normal(  9,111,107,14,"Max prev.:   ",0,1,SDLK_LAST); // 8
-  // Bouton Effectuer des backups à chaque sauvegarde
-  Fenetre_Definir_bouton_normal(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 9
-  // Bouton Choix du curseur
-  Fenetre_Definir_bouton_normal(  9,141,107,14,"Cursor:      ",0,1,SDLK_LAST); // 10
+  // Button Show/Hide Picture limits
+  Window_set_normal_button(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 6
+  // Button Show/Hide Picture limits
+  Window_set_normal_button(  9, 96,107,14,"Clear pal:   ",0,1,SDLK_LAST); // 7
+  // Button Show/Hide Picture limits
+  Window_set_normal_button(  9,111,107,14,"Max prev.:   ",0,1,SDLK_LAST); // 8
+  // Button Effectuer des backups à chaque sauvegarde
+  Window_set_normal_button(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 9
+  // Button item du curseur
+  Window_set_normal_button(  9,141,107,14,"Cursor:      ",0,1,SDLK_LAST); // 10
 
-  // Bouton Safety colors
-  Fenetre_Definir_bouton_normal(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 11
-  // Bouton Adjust Brush Pick
-  Fenetre_Definir_bouton_normal(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 12
-  // Bouton Separate colors
-  Fenetre_Definir_bouton_normal(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 13
-  // Bouton Passer dans la résolution appropriée après un chargement
-  Fenetre_Definir_bouton_normal(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 14
-  // Bouton Adapter la palette après un chargement (<=> Shift+BkSpc)
-  Fenetre_Definir_bouton_normal(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 15
+  // Button Safety colors
+  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 11
+  // Button Adjust Brush Pick
+  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 12
+  // Button Separate colors
+  Window_set_normal_button(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 13
+  // Button Passer dans la résolution appropriée après un chargement
+  Window_set_normal_button(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 14
+  // Button Adapter la palette après un chargement (<=> Shift+BkSpc)
+  Window_set_normal_button(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 15
 
-    // Bouton Reload
-  Fenetre_Definir_bouton_normal(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 16
-    // Bouton Auto-save
-  Fenetre_Definir_bouton_normal( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 17
-    // Bouton Save
-  Fenetre_Definir_bouton_normal(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 18
-    // Bouton Close
-  Fenetre_Definir_bouton_normal(250,163, 51,14,"Close"        ,0,1,TOUCHE_ESC); // 19
+    // Button Reload
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 16
+    // Button Auto-save
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 17
+    // Button Save
+  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 18
+    // Button Close
+  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 19
 
   // Jauges de sensibilité de la souris (X puis Y)
-  Fenetre_Definir_bouton_scroller(265,99,56,255,1,0); // 20
-  Fenetre_Definir_bouton_scroller(279,99,56,255,1,0); // 21
+  Window_set_scroller_button(265,99,56,255,1,0); // 20
+  Window_set_scroller_button(279,99,56,255,1,0); // 21
 
   // Zone de saisie du nb de pages de Undo
-  Fenetre_Definir_bouton_saisie(140,50,2);           // 22
+  Window_set_input_button(140,50,2);           // 22
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
-  Settings_Afficher_config(&Config_choisie);
+  Settings_display_config(&Config_choisie);
 
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch(Bouton_clicke)
+    switch(clicked_button)
     {
       case  1 : // Classic
-        Config_choisie.Fonte=0;
+        Config_choisie.Font=0;
         break;
       case  2 : // Fun
-        Config_choisie.Fonte=1;
+        Config_choisie.Font=1;
         break;
       case  3 : // Hidden files
-        Config_choisie.Lire_les_fichiers_caches=(Config_choisie.Lire_les_fichiers_caches)?0:-1;
+        Config_choisie.Show_hidden_files=(Config_choisie.Show_hidden_files)?0:-1;
         break;
       case  4 : // Hidden dir.
-        Config_choisie.Lire_les_repertoires_caches=(Config_choisie.Lire_les_repertoires_caches)?0:-1;
+        Config_choisie.Show_hidden_directories=(Config_choisie.Show_hidden_directories)?0:-1;
         break;
 //      case  5 : // System dir.
-//        Config_choisie.Lire_les_repertoires_systemes=(Config_choisie.Lire_les_repertoires_systemes)?0:-1;
+//        Config_choisie.Show_system_directories=(Config_choisie.Show_system_directories)?0:-1;
 //        break;
       case  5 : // Draw limits
-        Config_choisie.Afficher_limites_image=!Config_choisie.Afficher_limites_image;
+        Config_choisie.Display_image_limits=!Config_choisie.Display_image_limits;
         break;
       case  6 : // Clear palette
         Config_choisie.Clear_palette=!Config_choisie.Clear_palette;
@@ -887,8 +887,8 @@ void Bouton_Settings(void)
       case  8 : // Backup
         Config_choisie.Backup=!Config_choisie.Backup;
         break;
-      case 9 : // Curseur
-        Config_choisie.Curseur=(Config_choisie.Curseur+1)%3;
+      case 9 : // Cursor
+        Config_choisie.Cursor=(Config_choisie.Cursor+1)%3;
         break;
       case 10 : // Safety colors
         Config_choisie.Safety_colors=!Config_choisie.Safety_colors;
@@ -906,879 +906,879 @@ void Bouton_Settings(void)
         Config_choisie.Coords_rel=!Config_choisie.Coords_rel;
         break;
       case 15 : // Reload
-        Settings_Charger_config(&Config_choisie);
-        On_a_recharge_la_config=1;
+        Settings_load_config(&Config_choisie);
+        config_is_reloaded=1;
         break;
       case 16 : // Auto-save
         Config_choisie.Auto_save=!Config_choisie.Auto_save;
         break;
       case 17 : // Save
-        Settings_Sauver_config(&Config_choisie);
+        Settings_save_config(&Config_choisie);
         break;
       // 18 : OK
       case 19 : // X Sensib.
-        Config_choisie.Indice_Sensibilite_souris_X=Fenetre_Attribut2+1;
+        Config_choisie.Mouse_sensitivity_index_x=Window_attribute2+1;
         break;
       case 20 : // Y Sensib.
-        Config_choisie.Indice_Sensibilite_souris_Y=Fenetre_Attribut2+1;
+        Config_choisie.Mouse_sensitivity_index_y=Window_attribute2+1;
         break;
       case 21 : // Nb pages Undo
-        Attendre_fin_de_click();
-        Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
-        Readline(142,52,Chaine,2,1);
-        Config_choisie.Nb_pages_Undo=atoi(Chaine);
+        Wait_end_of_click();
+        Num2str(Config_choisie.Max_undo_pages,str,2);
+        Readline(142,52,str,2,1);
+        Config_choisie.Max_undo_pages=atoi(str);
         // On corrige la valeur
-        if (Config_choisie.Nb_pages_Undo>NB_PAGES_UNDO_MAX)
+        if (Config_choisie.Max_undo_pages>NB_MAX_PAGES_UNDO)
         {
-          Config_choisie.Nb_pages_Undo=NB_PAGES_UNDO_MAX;
-          Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+          Config_choisie.Max_undo_pages=NB_MAX_PAGES_UNDO;
+          Num2str(Config_choisie.Max_undo_pages,str,2);
+          Window_input_content(Window_special_button_list,str);
         }
-        else if (!Config_choisie.Nb_pages_Undo)
+        else if (!Config_choisie.Max_undo_pages)
         {
-          Config_choisie.Nb_pages_Undo=1;
-          Num2str(Config_choisie.Nb_pages_Undo,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+          Config_choisie.Max_undo_pages=1;
+          Num2str(Config_choisie.Max_undo_pages,str,2);
+          Window_input_content(Window_special_button_list,str);
         }
-        Afficher_curseur();
+        Display_cursor();
     }
 
-    if ((Bouton_clicke>=3) && (Bouton_clicke<=4))
+    if ((clicked_button>=3) && (clicked_button<=4))
     {
-      Principal_File_list_Position=0;
-      Principal_File_list_Decalage=0;
-      Brouillon_File_list_Position=0;
-      Brouillon_File_list_Decalage=0;
+      Main_fileselector_position=0;
+      Main_fileselector_offset=0;
+      Spare_fileselector_position=0;
+      Spare_fileselector_offset=0;
     }
 
-    if ((Bouton_clicke>=1) && (Bouton_clicke<=18))
-      Settings_Afficher_config(&Config_choisie);
+    if ((clicked_button>=1) && (clicked_button<=18))
+      Settings_display_config(&Config_choisie);
       
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_PARAMETRES, NULL);
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_SETTINGS, NULL);
   }
-  while ( (Bouton_clicke!=18) && (Touche!=SDLK_RETURN) );
+  while ( (clicked_button!=18) && (Key!=SDLK_RETURN) );
 
   Config=Config_choisie;
 
   // Prise en compte de la nouvelle config
     // Gestion de la sensibilité
-  Sensibilite_X=(Config.Indice_Sensibilite_souris_X/Menu_Facteur_X);
-  Sensibilite_Y=(Config.Indice_Sensibilite_souris_Y/Menu_Facteur_Y);
-  Sensibilite_X>>=Mouse_Facteur_de_correction_X;
-  Sensibilite_Y>>=Mouse_Facteur_de_correction_Y;
+  x_sensitivity=(Config.Mouse_sensitivity_index_x/Menu_factor_X);
+  y_sensitivity=(Config.Mouse_sensitivity_index_y/Menu_factor_Y);
+  x_sensitivity>>=Mouse_fix_factor_X;
+  y_sensitivity>>=Mouse_fix_factor_Y;
 
-  Sensibilite_souris(Sensibilite_X?Sensibilite_X:1,
-                     Sensibilite_Y?Sensibilite_Y:1);
+  Mouse_sensitivity(x_sensitivity?x_sensitivity:1,
+                     y_sensitivity?y_sensitivity:1);
     // Gestion des fontes
-  if (Config.Fonte)
-    Fonte=Fonte_fun;
+  if (Config.Font)
+    Font=GFX_fun_font;
   else
-    Fonte=Fonte_systeme;
+    Font=GFX_system_font;
 
-  if (On_a_recharge_la_config)
-    Calculer_couleurs_menu_optimales(Principal_Palette);
+  if (config_is_reloaded)
+    Compute_optimal_menu_colors(Main_palette);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_PARAMETRES);
+  Close_window();
+  Unselect_bouton(BUTTON_SETTINGS);
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
-  Afficher_menu();
-  Afficher_curseur();
+  Display_menu();
+  Display_cursor();
 
   // On vérifie qu'on peut bien allouer le nombre de pages Undo.
-  Nouveau_nombre_de_backups(Config.Nb_pages_Undo);
+  Set_number_of_backups(Config.Max_undo_pages);
 }
 
 
 //---------------------------- Changement de page ----------------------------
-void Bouton_Page(void)
+void Button_Page(void)
 {
-  byte   Octet_temporaire;
-  word   Mot_temporaire;
-  short  Short_temporaire;
-  float  Float_temporaire;
-  char   Zone_temporaire[256];
+  byte   temp_byte;
+  word   temp_word;
+  short  temp_short;
+  float  temp_float;
+  char   Temp_buffer[256];
 
-  Effacer_curseur();
+  Hide_cursor();
 
   // On dégrossit le travail avec les infos des listes de pages
-  Interchanger_image_principale_et_brouillon();
+  Exchange_main_and_spare();
 
   // On fait le reste du travail "à la main":
-  Short_temporaire=Brouillon_Decalage_X;
-  Brouillon_Decalage_X=Principal_Decalage_X;
-  Principal_Decalage_X=Short_temporaire;
+  temp_short=Spare_offset_X;
+  Spare_offset_X=Main_offset_X;
+  Main_offset_X=temp_short;
 
-  Short_temporaire=Brouillon_Decalage_Y;
-  Brouillon_Decalage_Y=Principal_Decalage_Y;
-  Principal_Decalage_Y=Short_temporaire;
+  temp_short=Spare_offset_Y;
+  Spare_offset_Y=Main_offset_Y;
+  Main_offset_Y=temp_short;
 
-  Short_temporaire=Ancien_Brouillon_Decalage_X;
-  Ancien_Brouillon_Decalage_X=Ancien_Principal_Decalage_X;
-  Ancien_Principal_Decalage_X=Short_temporaire;
+  temp_short=Old_spare_offset_X;
+  Old_spare_offset_X=Old_main_offset_X;
+  Old_main_offset_X=temp_short;
 
-  Short_temporaire=Ancien_Brouillon_Decalage_Y;
-  Ancien_Brouillon_Decalage_Y=Ancien_Principal_Decalage_Y;
-  Ancien_Principal_Decalage_Y=Short_temporaire;
+  temp_short=Old_spare_offset_Y;
+  Old_spare_offset_Y=Old_main_offset_Y;
+  Old_main_offset_Y=temp_short;
 
-  Short_temporaire=Brouillon_Split;
-  Brouillon_Split=Principal_Split;
-  Principal_Split=Short_temporaire;
+  temp_short=Spare_separator_position;
+  Spare_separator_position=Main_separator_position;
+  Main_separator_position=temp_short;
 
-  Short_temporaire=Brouillon_X_Zoom;
-  Brouillon_X_Zoom=Principal_X_Zoom;
-  Principal_X_Zoom=Short_temporaire;
+  temp_short=Spare_X_zoom;
+  Spare_X_zoom=Main_X_zoom;
+  Main_X_zoom=temp_short;
 
-  Float_temporaire=Brouillon_Proportion_split;
-  Brouillon_Proportion_split=Principal_Proportion_split;
-  Principal_Proportion_split=Float_temporaire;
+  temp_float=Spare_separator_proportion;
+  Spare_separator_proportion=Main_separator_proportion;
+  Main_separator_proportion=temp_float;
 
-  Octet_temporaire=Brouillon_Loupe_Mode;
-  Brouillon_Loupe_Mode=Loupe_Mode;
-  Loupe_Mode=Octet_temporaire;
+  temp_byte=Spare_magnifier_mode;
+  Spare_magnifier_mode=Main_magnifier_mode;
+  Main_magnifier_mode=temp_byte;
 
-  Pixel_Preview=(Loupe_Mode)?Pixel_Preview_Loupe:Pixel_Preview_Normal;
+  Pixel_preview=(Main_magnifier_mode)?Pixel_preview_magnifier:Pixel_preview_normal;
 
-  Mot_temporaire=Brouillon_Loupe_Facteur;
-  Brouillon_Loupe_Facteur=Loupe_Facteur;
-  Loupe_Facteur=Mot_temporaire;
+  temp_word=Spare_magnifier_factor;
+  Spare_magnifier_factor=Main_magnifier_factor;
+  Main_magnifier_factor=temp_word;
 
-  Mot_temporaire=Brouillon_Loupe_Hauteur;
-  Brouillon_Loupe_Hauteur=Loupe_Hauteur;
-  Loupe_Hauteur=Mot_temporaire;
+  temp_word=Spare_magnifier_height;
+  Spare_magnifier_height=Main_magnifier_height;
+  Main_magnifier_height=temp_word;
 
-  Mot_temporaire=Brouillon_Loupe_Largeur;
-  Brouillon_Loupe_Largeur=Loupe_Largeur;
-  Loupe_Largeur=Mot_temporaire;
+  temp_word=Spare_magnifier_width;
+  Spare_magnifier_width=Main_magnifier_width;
+  Main_magnifier_width=temp_word;
 
-  Short_temporaire=Brouillon_Loupe_Decalage_X;
-  Brouillon_Loupe_Decalage_X=Loupe_Decalage_X;
-  Loupe_Decalage_X=Short_temporaire;
+  temp_short=Spare_magnifier_offset_X;
+  Spare_magnifier_offset_X=Main_magnifier_offset_X;
+  Main_magnifier_offset_X=temp_short;
 
-  Short_temporaire=Brouillon_Loupe_Decalage_Y;
-  Brouillon_Loupe_Decalage_Y=Loupe_Decalage_Y;
-  Loupe_Decalage_Y=Short_temporaire;
+  temp_short=Spare_magnifier_offset_Y;
+  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
+  Main_magnifier_offset_Y=temp_short;
 
   // Swap du booléen "Image modifiée"
-  Octet_temporaire        =Brouillon_Image_modifiee;
-  Brouillon_Image_modifiee=Principal_Image_modifiee;
-  Principal_Image_modifiee=Octet_temporaire;
+  temp_byte        =Spare_image_is_modified;
+  Spare_image_is_modified=Main_image_is_modified;
+  Main_image_is_modified=temp_byte;
 
   // Swap des infos sur les fileselects
-  strcpy(Zone_temporaire             ,Brouillon_Repertoire_courant);
-  strcpy(Brouillon_Repertoire_courant,Principal_Repertoire_courant);
-  strcpy(Principal_Repertoire_courant,Zone_temporaire             );
+  strcpy(Temp_buffer             ,Spare_current_directory);
+  strcpy(Spare_current_directory,Main_current_directory);
+  strcpy(Main_current_directory,Temp_buffer             );
 
-  Octet_temporaire=Brouillon_Format;
-  Brouillon_Format=Principal_Format;
-  Principal_Format=Octet_temporaire;
+  temp_byte=Spare_format;
+  Spare_format=Main_format;
+  Main_format=temp_byte;
 
-  Mot_temporaire              =Brouillon_File_list_Position;
-  Brouillon_File_list_Position=Principal_File_list_Position;
-  Principal_File_list_Position=Mot_temporaire;
+  temp_word              =Spare_fileselector_position;
+  Spare_fileselector_position=Main_fileselector_position;
+  Main_fileselector_position=temp_word;
 
-  Mot_temporaire              =Brouillon_File_list_Decalage;
-  Brouillon_File_list_Decalage=Principal_File_list_Decalage;
-  Principal_File_list_Decalage=Mot_temporaire;
+  temp_word              =Spare_fileselector_offset;
+  Spare_fileselector_offset=Main_fileselector_offset;
+  Main_fileselector_offset=temp_word;
 
   // A la fin, on affiche l'écran
-  for (Octet_temporaire=0; FACTEUR_ZOOM[Octet_temporaire]!=Loupe_Facteur; Octet_temporaire++);
-  Changer_facteur_loupe(Octet_temporaire);
+  for (temp_byte=0; ZOOM_FACTOR[temp_byte]!=Main_magnifier_factor; temp_byte++);
+  Change_magnifier_factor(temp_byte);
 
-  Set_palette(Principal_Palette);
-  Calculer_couleurs_menu_optimales(Principal_Palette);
-  Afficher_ecran();
-  Desenclencher_bouton(BOUTON_PAGE);
-  Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,Loupe_Mode);
-  Afficher_menu();
+  Set_palette(Main_palette);
+  Compute_optimal_menu_colors(Main_palette);
+  Display_all_screen();
+  Unselect_bouton(BUTTON_PAGE);
+  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Display_menu();
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Copie de page ---------------------------------------------------------
 
-void Copier_image_seule(void)
+void Copy_image_only(void)
 {
-  if (Backuper_et_redimensionner_brouillon(Principal_Largeur_image,Principal_Hauteur_image))
+  if (Backup_and_resize_the_spare(Main_image_width,Main_image_height))
   {
     // copie de l'image
-    memcpy(Brouillon_Ecran,Principal_Ecran,Principal_Largeur_image*Principal_Hauteur_image);
+    memcpy(Spare_screen,Main_screen,Main_image_width*Main_image_height);
 
     // Copie des dimensions de l'image
     /*
       C'est inutile, le "Backuper et redimensionner brouillon" a déjà modifié
       ces valeurs pour qu'elles soient correctes.
     */
-    Brouillon_Largeur_image=Principal_Largeur_image;
-    Brouillon_Hauteur_image=Principal_Hauteur_image;
+    Spare_image_width=Main_image_width;
+    Spare_image_height=Main_image_height;
 
     // Copie des décalages de la fenêtre principale (non zoomée) de l'image
-    Brouillon_Decalage_X=Principal_Decalage_X;
-    Brouillon_Decalage_Y=Principal_Decalage_Y;
+    Spare_offset_X=Main_offset_X;
+    Spare_offset_Y=Main_offset_Y;
 
     // Copie du booléen "Mode loupe" de l'image
-    Brouillon_Loupe_Mode=Loupe_Mode;
+    Spare_magnifier_mode=Main_magnifier_mode;
 
     // Copie du facteur de zoom du brouillon
-    Brouillon_Loupe_Facteur=Loupe_Facteur;
+    Spare_magnifier_factor=Main_magnifier_factor;
 
     // Copie des dimensions de la fenêtre de zoom
-    Brouillon_Loupe_Largeur=Loupe_Largeur;
-    Brouillon_Loupe_Hauteur=Loupe_Hauteur;
+    Spare_magnifier_width=Main_magnifier_width;
+    Spare_magnifier_height=Main_magnifier_height;
 
     // Copie des décalages de la fenêtre de zoom
-    Brouillon_Loupe_Decalage_X=Loupe_Decalage_X;
-    Brouillon_Loupe_Decalage_Y=Loupe_Decalage_Y;
+    Spare_magnifier_offset_X=Main_magnifier_offset_X;
+    Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
 
     // Copie des données du split du zoom
-    Brouillon_Split=Principal_Split;
-    Brouillon_X_Zoom=Principal_X_Zoom;
-    Brouillon_Proportion_split=Principal_Proportion_split;
+    Spare_separator_position=Main_separator_position;
+    Spare_X_zoom=Main_X_zoom;
+    Spare_separator_proportion=Main_separator_proportion;
   }
   else
-    Message_Memoire_insuffisante();
+    Message_out_of_memory();
 }
 
 
-void Copier_certaines_couleurs(void)
+void Copy_some_colors(void)
 {
-  short Indice;
-  byte Confirme=0;
+  short index;
+  byte confirmation=0;
 
-  Menu_Tag_couleurs("Tag colors to copy",Masque_copie_couleurs,&Confirme,0, NULL);
+  Menu_tag_colors("Tag colors to copy",Mask_color_to_copy,&confirmation,0, NULL);
 
-  if (Confirme &&
-    (!Brouillon_Image_modifiee || Demande_de_confirmation("Spare page was modified. Proceed?")))
+  if (confirmation &&
+    (!Spare_image_is_modified || Confirmation_box("Spare page was modified. Proceed?")))
   {
-    for (Indice=0; Indice<256; Indice++)
+    for (index=0; index<256; index++)
     {
-      if (Masque_copie_couleurs[Indice])
-        memcpy(Brouillon_Palette+Indice,Principal_Palette+Indice,
-               sizeof(Composantes));
+      if (Mask_color_to_copy[index])
+        memcpy(Spare_palette+index,Main_palette+index,
+               sizeof(T_Components));
     }
   }
 }
 
 
-void Bouton_Copy_page(void)
+void Button_Copy_page(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
 
 
-  Ouvrir_fenetre(168,137,"Copy to spare page");
+  Open_window(168,137,"Copy to spare page");
 
-  Fenetre_Definir_bouton_normal(10, 20,148,14,"Pixels + palette" , 0,1,SDLK_RETURN); // 1
-  Fenetre_Definir_bouton_normal(10, 37,148,14,"Pixels only"      , 3,1,SDLK_x); // 2
-  Fenetre_Definir_bouton_normal(10, 54,148,14,"Palette only"     , 1,1,SDLK_p); // 3
-  Fenetre_Definir_bouton_normal(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
-  Fenetre_Definir_bouton_normal(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
-  Fenetre_Definir_bouton_normal(44,114, 80,14,"Cancel"           , 0,1,TOUCHE_ESC); // 6
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Window_set_normal_button(10, 20,148,14,"Pixels + palette" , 0,1,SDLK_RETURN); // 1
+  Window_set_normal_button(10, 37,148,14,"Pixels only"      , 3,1,SDLK_x); // 2
+  Window_set_normal_button(10, 54,148,14,"Palette only"     , 1,1,SDLK_p); // 3
+  Window_set_normal_button(10, 71,148,14,"Some colors only" , 6,1,SDLK_c); // 4
+  Window_set_normal_button(10, 88,148,14,"Palette and remap",13,1,SDLK_r); // 5
+  Window_set_normal_button(44,114, 80,14,"Cancel"           , 0,1,KEY_ESC); // 6
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_PAGE, NULL);
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_PAGE, NULL);
   }
-  while (Bouton_clicke<=0);
+  while (clicked_button<=0);
 
-  Fermer_fenetre();
-  Afficher_curseur();
+  Close_window();
+  Display_cursor();
 
-  if (Bouton_clicke!=6)
+  if (clicked_button!=6)
   {
-    if (Bouton_clicke==4)
-      Copier_certaines_couleurs();
+    if (clicked_button==4)
+      Copy_some_colors();
     else
     {
-      if ( (!Brouillon_Image_modifiee)
-        || (Demande_de_confirmation("Spare page was modified. Proceed?")) )
+      if ( (!Spare_image_is_modified)
+        || (Confirmation_box("Spare page was modified. Proceed?")) )
       {
-        if (Bouton_clicke<=2)
-          Copier_image_seule();
+        if (clicked_button<=2)
+          Copy_image_only();
 
-        if (Bouton_clicke==5)
+        if (clicked_button==5)
           Remap_picture();
 
-        if (Bouton_clicke!=2) // copie de la palette
-          memcpy(Brouillon_Palette,Principal_Palette,sizeof(T_Palette));
+        if (clicked_button!=2) // copie de la palette
+          memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
 
-        Brouillon_Image_modifiee=1;
+        Spare_image_is_modified=1;
       }
     }
   }
 
-  Effacer_curseur();
-  Desenclencher_bouton(BOUTON_PAGE);
-  Afficher_curseur();
+  Hide_cursor();
+  Unselect_bouton(BUTTON_PAGE);
+  Display_cursor();
 }
 
 
 // -- Suppression d'une page -------------------------------------------------
-void Bouton_Kill(void)
+void Button_Kill(void)
 {
-  if ( (Principal_Backups->Nb_pages_allouees==1)
-    || (!Demande_de_confirmation("Delete the current page?")) )
+  if ( (Main_backups->Nb_pages_allocated==1)
+    || (!Confirmation_box("Delete the current page?")) )
   {
-    if (Principal_Backups->Nb_pages_allouees==1)
+    if (Main_backups->Nb_pages_allocated==1)
       Warning_message("You can't delete the last page.");
-    Effacer_curseur();
-    Desenclencher_bouton(BOUTON_KILL);
-    Afficher_curseur();
+    Hide_cursor();
+    Unselect_bouton(BUTTON_KILL);
+    Display_cursor();
   }
   else
   {
-    Effacer_curseur();
-    Detruire_la_page_courante();
+    Hide_cursor();
+    Free_current_page();
 
-    Set_palette(Principal_Palette);
-    Calculer_couleurs_menu_optimales(Principal_Palette);
+    Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
 
-    Afficher_ecran();
-    Desenclencher_bouton(BOUTON_KILL);
-    Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,Loupe_Mode);
-    Afficher_menu();
-    Afficher_curseur();
+    Display_all_screen();
+    Unselect_bouton(BUTTON_KILL);
+    Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+    Display_menu();
+    Display_cursor();
   }
 }
 
 
-//------------------------- Dimensions Image/Ecran ---------------------------
+//------------------------- Dimensions Image/Screen ---------------------------
 
-void Cocher_bouton_mode(short x_pos, short y_pos, byte state)
+void Check_mode_button(short x_pos, short y_pos, byte state)
 {
-  byte Couleur;
+  byte color;
 
   switch (state & 0x7F)
   {
-    case 0 : Couleur=CM_Blanc; break;
-    case 1 : Couleur=CM_Clair; break;
-    case 2 : Couleur=CM_Fonce; break;
-    default: Couleur=CM_Noir;
+    case 0 : color=MC_White; break;
+    case 1 : color=MC_Light; break;
+    case 2 : color=MC_Dark; break;
+    default: color=MC_Black;
   }
-  Block(Fenetre_Pos_X+Menu_Facteur_X*x_pos,Fenetre_Pos_Y+Menu_Facteur_Y*y_pos,
-        Menu_Facteur_X*9,Menu_Facteur_Y*3,Couleur);
+  Block(Window_pos_X+Menu_factor_X*x_pos,Window_pos_Y+Menu_factor_Y*y_pos,
+        Menu_factor_X*9,Menu_factor_Y*3,color);
         
-  UpdateRect(Fenetre_Pos_X+Menu_Facteur_X*x_pos,Fenetre_Pos_Y+Menu_Facteur_Y*y_pos,
-        Menu_Facteur_X*9,Menu_Facteur_Y*3);
+  Update_rect(Window_pos_X+Menu_factor_X*x_pos,Window_pos_Y+Menu_factor_Y*y_pos,
+        Menu_factor_X*9,Menu_factor_Y*3);
 }
 
 
-void Afficher_liste_modes(short Debut_liste, short Position_curseur)
+void Display_modes_list(short list_start, short cursor_position)
 {
-  short Indice,Mode_courant;
+  short index,current_mode;
   short y_pos;
-  byte  Couleur_texte,Couleur_fond;
-  char Chaine[29];
+  byte  text_color,background_color;
+  char str[29];
   char *ratio;
 
-  for (Mode_courant=Debut_liste,Indice=0; Indice<12 && Mode_courant < Nb_modes_video ; Indice++,Mode_courant++)
+  for (current_mode=list_start,index=0; index<12 && current_mode < Nb_video_modes ; index++,current_mode++)
   {
-    y_pos=70+(Indice<<3);
-    Cocher_bouton_mode(19,y_pos+2,Mode_video[Mode_courant].Etat);
+    y_pos=70+(index<<3);
+    Check_mode_button(19,y_pos+2,Video_mode[current_mode].State);
 
-    if (Position_curseur!=Indice)
+    if (cursor_position!=index)
     {
-      Couleur_fond =CM_Noir;
-      if ((Mode_video[Mode_courant].Etat & 3) != 3)
-        Couleur_texte=CM_Clair;
+      background_color =MC_Black;
+      if ((Video_mode[current_mode].State & 3) != 3)
+        text_color=MC_Light;
       else
-        Couleur_texte=CM_Fonce;
+        text_color=MC_Dark;
     }
     else
     {
-      Couleur_fond =CM_Fonce;
-      if ((Mode_video[Mode_courant].Etat & 3) != 3)
-        Couleur_texte=CM_Blanc;
+      background_color =MC_Dark;
+      if ((Video_mode[current_mode].State & 3) != 3)
+        text_color=MC_White;
       else
-        Couleur_texte=CM_Clair;
+        text_color=MC_Light;
     }
-    Num2str(Mode_video[Mode_courant].Width,Chaine,4);
-    Chaine[4]=' ';
-    Num2str(Mode_video[Mode_courant].Height,Chaine+5,4);
+    Num2str(Video_mode[current_mode].Width,str,4);
+    str[4]=' ';
+    Num2str(Video_mode[current_mode].Height,str+5,4);
 
-    if(Mode_video[Mode_courant].Fullscreen == 1)
-      memcpy(Chaine+9," Fullscreen ",13);
+    if(Video_mode[current_mode].Fullscreen == 1)
+      memcpy(str+9," Fullscreen ",13);
     else
-      memcpy(Chaine+9,"   Window   ",13);
+      memcpy(str+9,"   Window   ",13);
 
-    if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*4)
+    if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*4)
       ratio="    4:3";
-    else if (Mode_video[Mode_courant].Width*9 == Mode_video[Mode_courant].Height*16)
+    else if (Video_mode[current_mode].Width*9 == Video_mode[current_mode].Height*16)
       ratio="   16:9";
-    else if (Mode_video[Mode_courant].Width*10 == Mode_video[Mode_courant].Height*16)
+    else if (Video_mode[current_mode].Width*10 == Video_mode[current_mode].Height*16)
       ratio="  16:10";
-    else if (Mode_video[Mode_courant].Width*145 == Mode_video[Mode_courant].Height*192)
+    else if (Video_mode[current_mode].Width*145 == Video_mode[current_mode].Height*192)
       ratio="192:145";
-    else if (Mode_video[Mode_courant].Width*2 == Mode_video[Mode_courant].Height*3)
+    else if (Video_mode[current_mode].Width*2 == Video_mode[current_mode].Height*3)
       ratio="    3:2";
-    else if (Mode_video[Mode_courant].Width*3 == Mode_video[Mode_courant].Height*5)
+    else if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*5)
       ratio="    5:3";
-    else if (Mode_video[Mode_courant].Width*4 == Mode_video[Mode_courant].Height*5)
+    else if (Video_mode[current_mode].Width*4 == Video_mode[current_mode].Height*5)
       ratio="    5:4";
-    else if (Mode_video[Mode_courant].Width*16 == Mode_video[Mode_courant].Height*25)
+    else if (Video_mode[current_mode].Width*16 == Video_mode[current_mode].Height*25)
       ratio="  25:16";
     else
       ratio="       ";
-    if (Mode_courant == 0)
+    if (current_mode == 0)
       ratio="       ";
 
-    strcat(Chaine,ratio);
+    strcat(str,ratio);
 
-    Print_dans_fenetre(38,y_pos,Chaine,Couleur_texte,Couleur_fond);
+    Print_in_window(38,y_pos,str,text_color,background_color);
   }
 }
 
 
-void Scroller_la_liste_des_modes(short Debut_liste, short Position_curseur, int * Mode_choisi)
+void Scroll_list_of_modes(short list_start, short cursor_position, int * selected_mode)
 {
-  Effacer_curseur();
-  *Mode_choisi=Debut_liste+Position_curseur;
-  if (Fenetre_Liste_boutons_scroller->Position!=Debut_liste)
+  Hide_cursor();
+  *selected_mode=list_start+cursor_position;
+  if (Window_scroller_button_list->Position!=list_start)
   {
-    Fenetre_Liste_boutons_scroller->Position=Debut_liste;
-    Fenetre_Dessiner_jauge(Fenetre_Liste_boutons_scroller);
+    Window_scroller_button_list->Position=list_start;
+    Window_draw_slider(Window_scroller_button_list);
   }
-  Afficher_liste_modes(Debut_liste,Position_curseur);
-  Afficher_curseur();
+  Display_modes_list(list_start,cursor_position);
+  Display_cursor();
 }
 
 
-void Bouton_Resol(void)
+void Button_Resolution(void)
 {
-  short Bouton_clicke;
-  int   Mode_choisi;
-  word  Largeur_choisie;
-  word  Hauteur_choisie;
-  short Debut_liste;
-  short Position_curseur;
-  short Temp;
-  char  Chaine[5];
-  T_Bouton_special * Bouton_saisie_Width, * Bouton_saisie_Height;
+  short clicked_button;
+  int   selected_mode;
+  word  chosen_width;
+  word  chosen_height;
+  short list_start;
+  short cursor_position;
+  short temp;
+  char  str[5];
+  T_Special_button * input_width_button, * input_button_height;
 
-  Ouvrir_fenetre(299,190,"Picture & screen sizes");
+  Open_window(299,190,"Picture & screen sizes");
 
-  Fenetre_Afficher_cadre      ( 8,17,195, 33);
-  Fenetre_Afficher_cadre      ( 8,56,283,126);
-  Fenetre_Afficher_cadre_creux(37,68,228,100);
-  Block(Fenetre_Pos_X+Menu_Facteur_X*38,Fenetre_Pos_Y+Menu_Facteur_Y*69,
-        Menu_Facteur_X*226,Menu_Facteur_Y*98,CM_Noir);
+  Window_display_frame      ( 8,17,195, 33);
+  Window_display_frame      ( 8,56,283,126);
+  Window_display_frame_in(37,68,228,100);
+  Block(Window_pos_X+Menu_factor_X*38,Window_pos_Y+Menu_factor_Y*69,
+        Menu_factor_X*226,Menu_factor_Y*98,MC_Black);
 
-  Print_dans_fenetre( 12, 21,"Picture size:"   ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 12, 37,"Width:"          ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(108, 37,"Height:"         ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 16, 60,"OK"              ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 55, 60,"X    Y"          ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(120, 60,"Win / Full"      ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(219, 60,"Ratio"           ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 30,170,"\03"             ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 62,170,"OK"              ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(102,170,"Imperfect"       ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre(196,170,"Unsupported"     ,CM_Fonce,CM_Clair);
+  Print_in_window( 12, 21,"Picture size:"   ,MC_Dark,MC_Light);
+  Print_in_window( 12, 37,"Width:"          ,MC_Dark,MC_Light);
+  Print_in_window(108, 37,"Height:"         ,MC_Dark,MC_Light);
+  Print_in_window( 16, 60,"OK"              ,MC_Dark,MC_Light);
+  Print_in_window( 55, 60,"X    Y"          ,MC_Dark,MC_Light);
+  Print_in_window(120, 60,"Win / Full"      ,MC_Dark,MC_Light);
+  Print_in_window(219, 60,"Ratio"           ,MC_Dark,MC_Light);
+  Print_in_window( 30,170,"\03"             ,MC_Dark,MC_Light);
+  Print_in_window( 62,170,"OK"              ,MC_Dark,MC_Light);
+  Print_in_window(102,170,"Imperfect"       ,MC_Dark,MC_Light);
+  Print_in_window(196,170,"Unsupported"     ,MC_Dark,MC_Light);
 
-  Fenetre_Definir_bouton_normal(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
-  Fenetre_Definir_bouton_normal(223, 35,67,14,"Cancel"  ,0,1,TOUCHE_ESC);  // 2
+  Window_set_normal_button(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
+  Window_set_normal_button(223, 35,67,14,"Cancel"  ,0,1,KEY_ESC);  // 2
 
-  Bouton_saisie_Width=Fenetre_Definir_bouton_saisie( 60, 35,4);            // 3
+  input_width_button=Window_set_input_button( 60, 35,4);            // 3
   
-  Bouton_saisie_Height=Fenetre_Definir_bouton_saisie(164, 35,4);           // 4
+  input_button_height=Window_set_input_button(164, 35,4);           // 4
 
-  Fenetre_Definir_bouton_special(38,70,225,96);                       // 5
+  Window_set_special_button(38,70,225,96);                       // 5
 
-  Mode_choisi=Resolution_actuelle;
+  selected_mode=Current_resolution;
 
-  if (Mode_choisi>=6)
+  if (selected_mode>=6)
   {
-    if (Mode_choisi<Nb_modes_video-6)
+    if (selected_mode<Nb_video_modes-6)
     {
-      Debut_liste=Mode_choisi-5;
-      Position_curseur=5;
+      list_start=selected_mode-5;
+      cursor_position=5;
     }
     else
     {
-      Debut_liste=Nb_modes_video-12;
-      Position_curseur=Mode_choisi-Debut_liste;
+      list_start=Nb_video_modes-12;
+      cursor_position=selected_mode-list_start;
     }
   }
   else
   {
-    Debut_liste=0;
-    Position_curseur=Mode_choisi;
+    list_start=0;
+    cursor_position=selected_mode;
   }
 
-  Fenetre_Definir_bouton_scroller(271,69,97,Nb_modes_video,12,Debut_liste); // 6
+  Window_set_scroller_button(271,69,97,Nb_video_modes,12,list_start); // 6
 
   // Les 12 petits boutons indiquant l'état des modes
-  for (Temp=0; Temp<12 && Temp < Nb_modes_video; Temp++)
-    Fenetre_Definir_bouton_normal(17,70+(Temp<<3),13,7,"",0,1,SDLK_LAST);// 7..18
+  for (temp=0; temp<12 && temp < Nb_video_modes; temp++)
+    Window_set_normal_button(17,70+(temp<<3),13,7,"",0,1,SDLK_LAST);// 7..18
 
-  Fenetre_Dessiner_bouton_normal( 16,170,13,7,"",0,0);
-  Cocher_bouton_mode( 18,172,0);
-  Fenetre_Dessiner_bouton_normal( 48,170,13,7,"",0,0);
-  Cocher_bouton_mode( 50,172,1);
-  Fenetre_Dessiner_bouton_normal( 88,170,13,7,"",0,0);
-  Cocher_bouton_mode( 90,172,2);
-  Fenetre_Dessiner_bouton_normal(182,170,13,7,"",0,0);
-  Cocher_bouton_mode(184,172,3);
+  Window_draw_normal_bouton( 16,170,13,7,"",0,0);
+  Check_mode_button( 18,172,0);
+  Window_draw_normal_bouton( 48,170,13,7,"",0,0);
+  Check_mode_button( 50,172,1);
+  Window_draw_normal_bouton( 88,170,13,7,"",0,0);
+  Check_mode_button( 90,172,2);
+  Window_draw_normal_bouton(182,170,13,7,"",0,0);
+  Check_mode_button(184,172,3);
 
-  Largeur_choisie=Principal_Largeur_image;
-  Num2str(Largeur_choisie,Chaine,4);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
+  chosen_width=Main_image_width;
+  Num2str(chosen_width,str,4);
+  Window_input_content(input_width_button,str);
 
-  Hauteur_choisie=Principal_Hauteur_image;
-  Num2str(Hauteur_choisie,Chaine,4);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
+  chosen_height=Main_image_height;
+  Num2str(chosen_height,str,4);
+  Window_input_content(input_button_height,str);
 
-  Afficher_liste_modes(Debut_liste,Position_curseur);
+  Display_modes_list(list_start,cursor_position);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     { case -1: case 0: case 1: case 2:
         break;
 
       case 3 : // Largeur
-        Num2str(Largeur_choisie,Chaine,4);
-        Readline(62,37,Chaine,4,1);
-        Largeur_choisie=atoi(Chaine);
+        Num2str(chosen_width,str,4);
+        Readline(62,37,str,4,1);
+        chosen_width=atoi(str);
         // On corrige les dimensions
-        if (Largeur_choisie==0)
+        if (chosen_width==0)
         {
-          Largeur_choisie=1;
-          Num2str(Largeur_choisie,Chaine,4);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
+          chosen_width=1;
+          Num2str(chosen_width,str,4);
+          Window_input_content(input_width_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 4 : // Height
-        Num2str(Hauteur_choisie,Chaine,4);
-        Readline(166,37,Chaine,4,1);
-        Hauteur_choisie=atoi(Chaine);
+        Num2str(chosen_height,str,4);
+        Readline(166,37,str,4,1);
+        chosen_height=atoi(str);
         // On corrige les dimensions
-        if (Hauteur_choisie==0)
+        if (chosen_height==0)
         {
-          Hauteur_choisie=1;
-          Num2str(Hauteur_choisie,Chaine,4);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
+          chosen_height=1;
+          Num2str(chosen_height,str,4);
+          Window_input_content(input_button_height,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 5: // Liste des modes
-        Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-70)>>3;
-        if (Temp<Nb_modes_video && ((Mouse_K==2) || (Temp!=Position_curseur)))
+        temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-70)>>3;
+        if (temp<Nb_video_modes && ((Mouse_K==2) || (temp!=cursor_position)))
         {
-          Effacer_curseur();
-          if (Temp!=Position_curseur)
+          Hide_cursor();
+          if (temp!=cursor_position)
           {
-            Position_curseur=Temp;
-            Afficher_liste_modes(Debut_liste,Position_curseur);
+            cursor_position=temp;
+            Display_modes_list(list_start,cursor_position);
           }
-          Mode_choisi=Debut_liste+Position_curseur;
+          selected_mode=list_start+cursor_position;
           // Si l'utilisateur s'est servi du bouton droit de la souris:
           if (Mouse_K==2)
           {
             // On affecte également les dimensions de l'image:
-            Largeur_choisie=Mode_video[Mode_choisi].Width/Pixel_width;
-            Num2str(Largeur_choisie,Chaine,4);
-            Fenetre_Contenu_bouton_saisie(Bouton_saisie_Width,Chaine);
+            chosen_width=Video_mode[selected_mode].Width/Pixel_width;
+            Num2str(chosen_width,str,4);
+            Window_input_content(input_width_button,str);
 
-            Hauteur_choisie=Mode_video[Mode_choisi].Height/Pixel_height;
-            Num2str(Hauteur_choisie,Chaine,4);
-            Fenetre_Contenu_bouton_saisie(Bouton_saisie_Height,Chaine);
+            chosen_height=Video_mode[selected_mode].Height/Pixel_height;
+            Num2str(chosen_height,str,4);
+            Window_input_content(input_button_height,str);
           }
-          Afficher_curseur();
+          Display_cursor();
         }
-        Attendre_fin_de_click();
+        Wait_end_of_click();
         break;
 
       case 6: // Scroller
-        Debut_liste=Fenetre_Attribut2;
-        Mode_choisi=Debut_liste+Position_curseur;
-        Afficher_liste_modes(Debut_liste,Position_curseur);
+        list_start=Window_attribute2;
+        selected_mode=list_start+cursor_position;
+        Display_modes_list(list_start,cursor_position);
         break;
 
       default: // Boutons de tag des états des modes
-        Temp=Debut_liste+Bouton_clicke-7;
-        if (Temp && // On n'a pas le droit de cocher le mode fenêtré
-            !(Mode_video[Temp].Etat & 128)) // Ni ceux non détectés par SDL
+        temp=list_start+clicked_button-7;
+        if (temp && // On n'a pas le droit de cocher le mode fenêtré
+            !(Video_mode[temp].State & 128)) // Ni ceux non détectés par SDL
         {
-          if (Fenetre_Attribut1==A_GAUCHE)
-            Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+1)&3;
+          if (Window_attribute1==LEFT_SIDE)
+            Video_mode[temp].State=((Video_mode[temp].State&0x7F)+1)&3;
           else
-            Mode_video[Temp].Etat=((Mode_video[Temp].Etat&0x7F)+3)&3;
+            Video_mode[temp].State=((Video_mode[temp].State&0x7F)+3)&3;
             
-          Effacer_curseur();
-          Cocher_bouton_mode(19,16+(Bouton_clicke<<3),Mode_video[Temp].Etat);
-          Afficher_liste_modes(Debut_liste,Position_curseur);
-          Afficher_curseur();
+          Hide_cursor();
+          Check_mode_button(19,16+(clicked_button<<3),Video_mode[temp].State);
+          Display_modes_list(list_start,cursor_position);
+          Display_cursor();
         }
     }
 
     // Gestion des touches de déplacement dans la liste
-    switch (Touche)
+    switch (Key)
     {
       case SDLK_UP : // Haut
-        if (Position_curseur>0)
-          Position_curseur--;
+        if (cursor_position>0)
+          cursor_position--;
         else
-          if (Debut_liste>0)
-            Debut_liste--;
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+          if (list_start>0)
+            list_start--;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       case SDLK_DOWN : // Bas
-        if (Position_curseur<11 && Position_curseur<(Nb_modes_video-1))
-          Position_curseur++;
+        if (cursor_position<11 && cursor_position<(Nb_video_modes-1))
+          cursor_position++;
         else
-          if (Debut_liste<Nb_modes_video-12)
-            Debut_liste++;
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+          if (list_start<Nb_video_modes-12)
+            list_start++;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       case SDLK_PAGEUP : // PageUp
-        if (Position_curseur>0)
-          Position_curseur=0;
+        if (cursor_position>0)
+          cursor_position=0;
         else
         {
-          if (Debut_liste>11)
-            Debut_liste-=11;
+          if (list_start>11)
+            list_start-=11;
           else
-            Debut_liste=0;
+            list_start=0;
         }
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
-        if (Nb_modes_video<12)
-          Position_curseur=Nb_modes_video-1;
-        else if (Position_curseur<11)
-          Position_curseur=11;
+        if (Nb_video_modes<12)
+          cursor_position=Nb_video_modes-1;
+        else if (cursor_position<11)
+          cursor_position=11;
         else
         {
-          if (Debut_liste<Nb_modes_video-23)
-            Debut_liste+=11;
+          if (list_start<Nb_video_modes-23)
+            list_start+=11;
           else
-            Debut_liste=Nb_modes_video-12;
+            list_start=Nb_video_modes-12;
         }
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       case SDLK_HOME : // Home
-        Debut_liste=0;
-        Position_curseur=0;
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+        list_start=0;
+        cursor_position=0;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       case SDLK_END : // End
-        if (Nb_modes_video<12)
-          Position_curseur=Nb_modes_video-1;
+        if (Nb_video_modes<12)
+          cursor_position=Nb_video_modes-1;
         else
         {        
-          Debut_liste=Nb_modes_video-12;
-          Position_curseur=11;
+          list_start=Nb_video_modes-12;
+          cursor_position=11;
         }
-        Scroller_la_liste_des_modes(Debut_liste,Position_curseur,&Mode_choisi);
-        Touche=0;
+        Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
+        Key=0;
         break;
       default:
-        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+        if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
-          Fenetre_aide(BOUTON_RESOL, NULL);
-          Touche=0;
+          Window_help(BUTTON_RESOL, NULL);
+          Key=0;
           break;
         }
     }
 
   }
-  while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
+  while ((clicked_button!=1) && (clicked_button!=2));
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==1) // OK
+  if (clicked_button==1) // OK
   {
-    if (Loupe_Mode)
-      Desenclencher_bouton(BOUTON_LOUPE);
+    if (Main_magnifier_mode)
+      Unselect_bouton(BUTTON_MAGNIFIER);
 
-    if ( (Largeur_choisie!=Principal_Largeur_image)
-      || (Hauteur_choisie!=Principal_Hauteur_image) )
-      Redimentionner_image(Largeur_choisie,Hauteur_choisie);
+    if ( (chosen_width!=Main_image_width)
+      || (chosen_height!=Main_image_height) )
+      Resize_image(chosen_width,chosen_height);
 
-    if ((Mode_video[Mode_choisi].Etat & 3) == 3 ||
-      Initialiser_mode_video(
-        Mode_video[Mode_choisi].Width,
-        Mode_video[Mode_choisi].Height,
-        Mode_video[Mode_choisi].Fullscreen))
+    if ((Video_mode[selected_mode].State & 3) == 3 ||
+      Init_mode_video(
+        Video_mode[selected_mode].Width,
+        Video_mode[selected_mode].Height,
+        Video_mode[selected_mode].Fullscreen))
     {
-      Erreur(0); // On signale à l'utilisateur que c'est un mode invalide
-      Initialiser_mode_video(
-        Mode_video[Resolution_actuelle].Width,
-        Mode_video[Resolution_actuelle].Height,
-        Mode_video[Resolution_actuelle].Fullscreen);
+      Error(0); // On signale à l'utilisateur que c'est un mode invalide
+      Init_mode_video(
+        Video_mode[Current_resolution].Width,
+        Video_mode[Current_resolution].Height,
+        Video_mode[Current_resolution].Fullscreen);
     }
 
-    Afficher_menu();
-    Afficher_ecran();
+    Display_menu();
+    Display_all_screen();
   }
-  Pinceau_X = Mouse_X;
-  Pinceau_Y = Mouse_Y;
+  Paintbrush_X = Mouse_X;
+  Paintbrush_Y = Mouse_Y;
 
 
-  Desenclencher_bouton(BOUTON_RESOL);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_RESOL);
+  Display_cursor();
 }
 
 
-void Bouton_Safety_resol(void)
+void Button_Safety_resolution(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
 
-  Desenclencher_bouton(BOUTON_LOUPE);
-  Initialiser_mode_video(640, 400, 0);
-  Resolution_actuelle=0;
-  Mode_video[0].Width = Largeur_ecran*Pixel_width;
-  Mode_video[0].Height = Hauteur_ecran*Pixel_height;
-  Afficher_menu();
-  Afficher_ecran();
+  Unselect_bouton(BUTTON_MAGNIFIER);
+  Init_mode_video(640, 400, 0);
+  Current_resolution=0;
+  Video_mode[0].Width = Screen_width*Pixel_width;
+  Video_mode[0].Height = Screen_height*Pixel_height;
+  Display_menu();
+  Display_all_screen();
 
-  Desenclencher_bouton(BOUTON_RESOL);
+  Unselect_bouton(BUTTON_RESOL);
   // Le pinceau est affiché à la position du clic et pas 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 //------------------ Gestion des boutons de dessin à la main -----------------
 
-void Bouton_Dessin(void)
+void Button_Draw(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(Mode_de_dessin_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(Selected_operation);
+  Display_cursor();
 }
 
 
-void Bouton_Dessin_Switch_mode(void)
+void Button_Draw_switch_mode(void)
 {
 /* ANCIEN CODE SANS POPUPS */
-  Mode_de_dessin_en_cours++;
-  if (Mode_de_dessin_en_cours>OPERATION_FILLED_CONTOUR)
-    Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
+  Selected_operation++;
+  if (Selected_operation>OPERATION_FILLED_CONTOUR)
+    Selected_operation=OPERATION_CONTINUOUS_DRAW;
 
-  Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_DESSIN,Mode_de_dessin_en_cours);
-  Demarrer_pile_operation(Mode_de_dessin_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Display_sprite_in_menu(BUTTON_DRAW,Selected_operation);
+  Start_operation_stack(Selected_operation);
+  Display_cursor();
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
-    short Bouton_clicke;
-    Ouvrir_popup(16,Menu_Ordonnee/Menu_Facteur_X-32,18,50);
-    Fenetre_Definir_bouton_normal(1,1,16,16,"A",0,1,TOUCHE_ESC); // 1
-    Afficher_curseur();
+    short clicked_button;
+    Open_popup(16,Menu_Y/Menu_factor_X-32,18,50);
+    Window_set_normal_button(1,1,16,16,"A",0,1,KEY_ESC); // 1
+    Display_cursor();
 
-    UpdateRect(16*Menu_Facteur_X,Menu_Ordonnee-32*Menu_Facteur_X,18*Menu_Facteur_X,50*Menu_Facteur_X);
+    Update_rect(16*Menu_factor_X,Menu_Y-32*Menu_factor_X,18*Menu_factor_X,50*Menu_factor_X);
 
     do
     {
         while(!Get_input())Wait_VBL();
-        Bouton_clicke = Fenetre_Numero_bouton_clicke();
+        clicked_button = Window_get_clicked_button();
 
-        switch(Bouton_clicke)
+        switch(clicked_button)
         {
             case 1:
-                Mode_de_dessin_en_cours++;
-                if (Mode_de_dessin_en_cours>OPERATION_FILLED_CONTOUR)
-                    Mode_de_dessin_en_cours=OPERATION_DESSIN_CONTINU;
+                Selected_operation++;
+                if (Selected_operation>OPERATION_FILLED_CONTOUR)
+                    Selected_operation=OPERATION_CONTINUOUS_DRAW;
                 break;
         }
     }
     while (Mouse_K);
 
-    Fermer_popup();
-    Afficher_sprite_dans_menu(BOUTON_DESSIN,Mode_de_dessin_en_cours);
-    Demarrer_pile_operation(Mode_de_dessin_en_cours);
-    Afficher_curseur();
+    Close_popup();
+    Display_sprite_in_menu(BUTTON_DRAW,Selected_operation);
+    Start_operation_stack(Selected_operation);
+    Display_cursor();
 */
 }
 
 
 // -- Gestion des boutons de rectangle vide et plein ------------------------
 
-void Bouton_Rectangle_vide(void)
+void Button_Empty_rectangle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_RECTANGLE_VIDE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_EMPTY_RECTANGLE);
+  Display_cursor();
 }
 
 
-void Bouton_Rectangle_plein(void)
+void Button_Filled_rectangle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_RECTANGLE_PLEIN);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_FILLED_RECTANGLE);
+  Display_cursor();
 }
 
 
 // -- Gestion des boutons de cercle (ellipse) vide et plein(e) --------------
 
-void Bouton_Cercle_vide(void)
+void Button_Empty_circle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_CERCLE_VIDE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_EMPTY_CIRCLE);
+  Display_cursor();
 }
 
 
-void Bouton_Ellipse_vide(void)
+void Button_Empty_ellipse(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_ELLIPSE_VIDE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_EMPTY_ELLIPSE);
+  Display_cursor();
 }
 
 
-void Bouton_Cercle_plein(void)
+void Button_Filled_circle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_CERCLE_PLEIN);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_FILLED_CIRCLE);
+  Display_cursor();
 }
 
 
-void Bouton_Ellipse_pleine(void)
+void Button_Filled_ellipse(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_ELLIPSE_PLEINE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_FILLED_ELLIPSE);
+  Display_cursor();
 }
 
 
 // -- Gestion du menu des dégradés ------------------------------------------
-void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int technique)
+void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 {
   short line;
 
   // On commence par afficher les 2 côtés qui constituent le dégradé de base:
     // Côté gauche (noir)
-  Block(Fenetre_Pos_X+((x_pos+2)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
-        Menu_Facteur_X*6,
-        Menu_Facteur_Y*10,CM_Noir);
+  Block(Window_pos_X+((x_pos+2)*Menu_factor_X),
+        Window_pos_Y+((y_pos+2)*Menu_factor_Y),
+        Menu_factor_X*6,
+        Menu_factor_Y*10,MC_Black);
     // Côté droit (blanc)
-  Block(Fenetre_Pos_X+((x_pos+8)*Menu_Facteur_X),
-        Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
-        Menu_Facteur_X*5,
-        Menu_Facteur_Y*10,CM_Blanc);
+  Block(Window_pos_X+((x_pos+8)*Menu_factor_X),
+        Window_pos_Y+((y_pos+2)*Menu_factor_Y),
+        Menu_factor_X*5,
+        Menu_factor_Y*10,MC_White);
 
   switch(technique)
   {
@@ -1788,15 +1788,15 @@ void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int technique)
         if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(x_pos+ 5,y_pos+line,CM_Blanc);
-          Pixel_dans_fenetre(x_pos+ 7,y_pos+line,CM_Blanc);
-          Pixel_dans_fenetre(x_pos+ 8,y_pos+line,CM_Noir);
+          Pixel_in_window(x_pos+ 5,y_pos+line,MC_White);
+          Pixel_in_window(x_pos+ 7,y_pos+line,MC_White);
+          Pixel_in_window(x_pos+ 8,y_pos+line,MC_Black);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(x_pos+ 6,y_pos+line,CM_Blanc);
-          Pixel_dans_fenetre(x_pos+ 9,y_pos+line,CM_Noir);
+          Pixel_in_window(x_pos+ 6,y_pos+line,MC_White);
+          Pixel_in_window(x_pos+ 9,y_pos+line,MC_Black);
         }
       break;
     case 2 : // Dégradé de trames étendues
@@ -1805,534 +1805,534 @@ void Degrade_Dessiner_bouton_de_technique(short x_pos,short y_pos,int technique)
         if (line&1)
         {
           // Lignes impaires
-          Pixel_dans_fenetre(x_pos+ 7,y_pos+line,CM_Blanc);
-          Pixel_dans_fenetre(x_pos+ 8,y_pos+line,CM_Noir);
-          Pixel_dans_fenetre(x_pos+10,y_pos+line,CM_Noir);
+          Pixel_in_window(x_pos+ 7,y_pos+line,MC_White);
+          Pixel_in_window(x_pos+ 8,y_pos+line,MC_Black);
+          Pixel_in_window(x_pos+10,y_pos+line,MC_Black);
         }
         else
         {
           // Lignes paires
-          Pixel_dans_fenetre(x_pos+ 4,y_pos+line,CM_Blanc);
-          Pixel_dans_fenetre(x_pos+ 6,y_pos+line,CM_Blanc);
+          Pixel_in_window(x_pos+ 4,y_pos+line,MC_White);
+          Pixel_in_window(x_pos+ 6,y_pos+line,MC_White);
         }
   }
   
-  UpdateRect(Fenetre_Pos_X+((x_pos+2)*Menu_Facteur_X),Fenetre_Pos_Y+((y_pos+2)*Menu_Facteur_Y),
-                    Menu_Facteur_X*10,Menu_Facteur_Y*10);  
+  Update_rect(Window_pos_X+((x_pos+2)*Menu_factor_X),Window_pos_Y+((y_pos+2)*Menu_factor_Y),
+                    Menu_factor_X*10,Menu_factor_Y*10);  
 }
 
-void Degrade_Charger_infos_du_tableau(int Indice)
+void Load_gradient_data(int index)
 {
-  Degrade_Borne_Inferieure =Degrade_Tableau[Indice].Debut;
-  Degrade_Borne_Superieure =Degrade_Tableau[Indice].Fin;
-  Degrade_Inverse          =Degrade_Tableau[Indice].Inverse;
-  Degrade_Melange_aleatoire=Degrade_Tableau[Indice].Melange+1;
+  Gradient_lower_bound =Gradient_array[index].Start;
+  Gradient_upper_bound =Gradient_array[index].End;
+  Gradient_is_inverted          =Gradient_array[index].Inverse;
+  Gradient_random_factor=Gradient_array[index].Mix+1;
 
-  Degrade_Intervalle_bornes=(Degrade_Borne_Inferieure<Degrade_Borne_Superieure)?
-                            Degrade_Borne_Superieure-Degrade_Borne_Inferieure:
-                            Degrade_Borne_Inferieure-Degrade_Borne_Superieure;
-  Degrade_Intervalle_bornes++;
+  Gradient_bounds_range=(Gradient_lower_bound<Gradient_upper_bound)?
+                            Gradient_upper_bound-Gradient_lower_bound:
+                            Gradient_lower_bound-Gradient_upper_bound;
+  Gradient_bounds_range++;
 
-  switch(Degrade_Tableau[Indice].Technique)
+  switch(Gradient_array[index].Technique)
   {
     case 0 : // Degradé de base
-      Traiter_degrade=Degrade_de_base;
+      Gradient_function=Gradient_basic;
       break;
     case 1 : // Dégradé de trames simples
-      Traiter_degrade=Degrade_de_trames_simples;
+      Gradient_function=Gradient_dithered;
       break;
     case 2 : // Dégradé de trames étendues
-      Traiter_degrade=Degrade_de_trames_etendues;
+      Gradient_function=Gradient_extra_dithered;
   }
 }
 
-void Degrade_Dessiner_preview(short Debut_X,short Debut_Y,short width,short height,int Indice)
+void Draw_gradient_preview(short start_x,short start_y,short width,short height,int index)
 {
   short x_pos; // Variables de balayage du block en bas de l'écran.
   short y_pos;
-  short Fin_X;
-  short Fin_Y;
+  short end_x;
+  short end_y;
 
-  Degrade_Charger_infos_du_tableau(Indice);
+  Load_gradient_data(index);
 
-  Debut_X=Fenetre_Pos_X+(Debut_X*Menu_Facteur_X);
-  Debut_Y=Fenetre_Pos_Y+(Debut_Y*Menu_Facteur_Y);
+  start_x=Window_pos_X+(start_x*Menu_factor_X);
+  start_y=Window_pos_Y+(start_y*Menu_factor_Y);
 
-  Degrade_Intervalle_total=width*Menu_Facteur_X;
+  Gradient_total_range=width*Menu_factor_X;
 
-  Fin_X=Debut_X+Degrade_Intervalle_total;
-  Fin_Y=Debut_Y+(height*Menu_Facteur_Y);
+  end_x=start_x+Gradient_total_range;
+  end_y=start_y+(height*Menu_factor_Y);
 
-  for (y_pos=Debut_Y;y_pos<Fin_Y;y_pos++)
-    for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
-      Traiter_degrade(x_pos-Debut_X,x_pos,y_pos);
-  UpdateRect(Debut_X,Debut_Y,width*Menu_Facteur_X,height*Menu_Facteur_Y);
+  for (y_pos=start_y;y_pos<end_y;y_pos++)
+    for (x_pos=start_x;x_pos<end_x;x_pos++)
+      Gradient_function(x_pos-start_x,x_pos,y_pos);
+  Update_rect(start_x,start_y,width*Menu_factor_X,height*Menu_factor_Y);
 }
 
-void Bouton_Degrades(void)
+void Button_Gradients(void)
 {
-  short Bouton_clicke;
-  char  Chaine[3];
-  T_Degrade_Tableau Backup_Degrade_Tableau[16];
-  int   Ancien_Degrade_Courant;
-  T_Bouton_scroller * Scroller_de_melange;
-  short Ancien_Mouse_X;
-  short Ancien_Mouse_Y;
-  byte  Ancien_Mouse_K;
-  byte  Couleur_temporaire;
-  byte  Premiere_couleur;
-  byte  Derniere_couleur;
-  byte  Couleur;
+  short clicked_button;
+  char  str[3];
+  T_Gradient_array backup_gradients[16];
+  int   old_current_gradient;
+  T_Scroller_button * mix_scroller;
+  short old_mouse_x;
+  short old_mouse_y;
+  byte  old_mouse_k;
+  byte  temp_color;
+  byte  first_color;
+  byte  last_color;
+  byte  color;
   byte  click;
 
 
-  Traiter_pixel_de_degrade=Pixel;
-  Ancien_Degrade_Courant=Degrade_Courant;
-  memcpy(Backup_Degrade_Tableau,Degrade_Tableau,sizeof(T_Degrade_Tableau)*16);
+  Gradient_pixel=Pixel;
+  old_current_gradient=Current_gradient;
+  memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
 
-  Ouvrir_fenetre(237,133,"Gradation menu");
+  Open_window(237,133,"Gradation menu");
 
-  Fenetre_Definir_bouton_palette(48,21);                            // 1
+  Window_set_palette_button(48,21);                            // 1
     // Définition du scrolleur <=> indice du dégradé dans le tableau
-  Fenetre_Definir_bouton_scroller(218,22,75,16,1,Degrade_Courant);  // 2
+  Window_set_scroller_button(218,22,75,16,1,Current_gradient);  // 2
     // Définition du scrolleur de mélange du dégradé
-  Scroller_de_melange = Fenetre_Definir_bouton_scroller(31,22,84,256,1,
-    Degrade_Tableau[Degrade_Courant].Melange);                      // 3
+  mix_scroller = Window_set_scroller_button(31,22,84,256,1,
+    Gradient_array[Current_gradient].Mix);                      // 3
     // Définition du bouton de sens
-  Fenetre_Definir_bouton_normal(8,22,15,14,
-    (Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
+  Window_set_normal_button(8,22,15,14,
+    (Gradient_array[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
     // Définition du bouton de technique
-  Fenetre_Definir_bouton_normal(8,92,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
-  Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
+  Window_set_normal_button(8,92,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
+  Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
 
-  Fenetre_Definir_bouton_normal(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
-  Fenetre_Definir_bouton_normal(123,112,51,14,"Cancel",0,1,TOUCHE_ESC);  // 7
+  Window_set_normal_button(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
+  Window_set_normal_button(123,112,51,14,"Cancel",0,1,KEY_ESC);  // 7
 
-  Print_dans_fenetre(5,60,"MIX",CM_Fonce,CM_Clair);
+  Print_in_window(5,60,"MIX",MC_Dark,MC_Light);
 
   // On tagge les couleurs qui vont avec
-  Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
+  Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
 
-  Num2str(Degrade_Courant+1,Chaine,2);
-  Print_dans_fenetre(215,100,Chaine,CM_Noir,CM_Clair);
+  Num2str(Current_gradient+1,str,2);
+  Print_in_window(215,100,str,MC_Black,MC_Light);
 
     // On affiche le cadre autour de la préview
-  Fenetre_Afficher_cadre_creux(7,111,110,16);
+  Window_display_frame_in(7,111,110,16);
     // On affiche la preview
-  Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
+  Draw_gradient_preview(8,112,108,14,Current_gradient);
 
-  Premiere_couleur=Derniere_couleur=(Degrade_Tableau[Degrade_Courant].Inverse)?Degrade_Tableau[Degrade_Courant].Fin:Degrade_Tableau[Degrade_Courant].Debut;
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  first_color=last_color=(Gradient_array[Current_gradient].Inverse)?Gradient_array[Current_gradient].End:Gradient_array[Current_gradient].Start;
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Ancien_Mouse_X=Mouse_X;
-    Ancien_Mouse_Y=Mouse_Y;
-    Ancien_Mouse_K=Mouse_K;
+    old_mouse_x=Mouse_X;
+    old_mouse_y=Mouse_Y;
+    old_mouse_k=Mouse_K;
 
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch(Bouton_clicke)
+    switch(clicked_button)
     {
       case -1 :
       case  1 : // Palette
-        if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
+        if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
-          Effacer_curseur();
-          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
+          Hide_cursor();
+          temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
 
-          if (!Ancien_Mouse_K)
+          if (!old_mouse_k)
           {
             // On vient de clicker
 
             // On met à jour l'intervalle du dégradé
-            Premiere_couleur=Derniere_couleur=Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Couleur_temporaire;
+            first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
             // On tagge le bloc
-            Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
+            Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
             // Tracé de la preview:
-            Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
+            Draw_gradient_preview(8,112,108,14,Current_gradient);
           }
           else
           {
             // On maintient le click, on va donc tester si le curseur bouge
-            if (Couleur_temporaire!=Derniere_couleur)
+            if (temp_color!=last_color)
             {
               // On commence par ordonner la 1ère et dernière couleur du bloc
-              if (Premiere_couleur<Couleur_temporaire)
+              if (first_color<temp_color)
               {
-                Degrade_Tableau[Degrade_Courant].Debut=Premiere_couleur;
-                Degrade_Tableau[Degrade_Courant].Fin  =Couleur_temporaire;
+                Gradient_array[Current_gradient].Start=first_color;
+                Gradient_array[Current_gradient].End  =temp_color;
               }
-              else if (Premiere_couleur>Couleur_temporaire)
+              else if (first_color>temp_color)
               {
-                Degrade_Tableau[Degrade_Courant].Debut=Couleur_temporaire;
-                Degrade_Tableau[Degrade_Courant].Fin  =Premiere_couleur;
+                Gradient_array[Current_gradient].Start=temp_color;
+                Gradient_array[Current_gradient].End  =first_color;
               }
               else
-                Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Premiere_couleur;
+                Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=first_color;
               // On tagge le bloc
-              Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
+              Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
               // Tracé de la preview:
-              Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-              Derniere_couleur=Couleur_temporaire;
+              Draw_gradient_preview(8,112,108,14,Current_gradient);
+              last_color=temp_color;
             }
           }
-          Afficher_curseur();
+          Display_cursor();
         }
         break;
       case  2 : // Nouvel indice de dégradé
-        Effacer_curseur();
-        // Nouvel indice dans Fenetre_Attribut2
-        Degrade_Courant=Fenetre_Attribut2;
+        Hide_cursor();
+        // Nouvel indice dans Window_attribute2
+        Current_gradient=Window_attribute2;
 
         // On affiche la valeur sous la jauge
-        Num2str(Degrade_Courant+1,Chaine,2);
-        Print_dans_fenetre(215,100,Chaine,CM_Noir,CM_Clair);
+        Num2str(Current_gradient+1,str,2);
+        Print_in_window(215,100,str,MC_Black,MC_Light);
 
         // On tagge les couleurs qui vont avec
-        Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
+        Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
 
         // On affiche le sens qui va avec
-        Print_dans_fenetre(12,25,(Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",CM_Noir,CM_Clair);
+        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
 
         // On raffiche le mélange (jauge) qui va avec
-        Scroller_de_melange->Position=Degrade_Tableau[Degrade_Courant].Melange;
-        Fenetre_Dessiner_jauge(Scroller_de_melange);
+        mix_scroller->Position=Gradient_array[Current_gradient].Mix;
+        Window_draw_slider(mix_scroller);
 
         // On raffiche la technique qui va avec
-        Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
+        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
 
         // On affiche la nouvelle preview
-        Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
+        Draw_gradient_preview(8,112,108,14,Current_gradient);
 
-        Afficher_curseur();
+        Display_cursor();
         break;
       case  3 : // Nouveau mélange de dégradé
-        Effacer_curseur();
-        // Nouvel mélange dans Fenetre_Attribut2
-        Degrade_Tableau[Degrade_Courant].Melange=Fenetre_Attribut2;
+        Hide_cursor();
+        // Nouvel mélange dans Window_attribute2
+        Gradient_array[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
-        Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-        Afficher_curseur();
+        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Display_cursor();
         break;
       case  4 : // Changement de sens
-        Effacer_curseur();
+        Hide_cursor();
         // On inverse le sens (par un XOR de 1)
-        Degrade_Tableau[Degrade_Courant].Inverse^=1;
-        Print_dans_fenetre(12,25,(Degrade_Tableau[Degrade_Courant].Inverse)?"\033":"\032",CM_Noir,CM_Clair);
+        Gradient_array[Current_gradient].Inverse^=1;
+        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
-        Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-        Afficher_curseur();
+        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Display_cursor();
         break;
       case  5 : // Changement de technique
-        Effacer_curseur();
+        Hide_cursor();
         // On change la technique par (+1)%3
-        Degrade_Tableau[Degrade_Courant].Technique=(Degrade_Tableau[Degrade_Courant].Technique+1)%3;
-        Degrade_Dessiner_bouton_de_technique(8,92,Degrade_Tableau[Degrade_Courant].Technique);
+        Gradient_array[Current_gradient].Technique=(Gradient_array[Current_gradient].Technique+1)%3;
+        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
         // On affiche la nouvelle preview
-        Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-        Afficher_curseur();
+        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Display_cursor();
     }
 
     if (!Mouse_K)
-    switch (Touche)
+    switch (Key)
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        Get_color_behind_window(&color,&click);
         if (click)
         {
-          Effacer_curseur();
-          Couleur_temporaire=Couleur;
+          Hide_cursor();
+          temp_color=color;
 
           // On met à jour l'intervalle du dégradé
-          Premiere_couleur=Derniere_couleur=Degrade_Tableau[Degrade_Courant].Debut=Degrade_Tableau[Degrade_Courant].Fin=Couleur_temporaire;
+          first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
           // On tagge le bloc
-          Tagger_intervalle_palette(Degrade_Tableau[Degrade_Courant].Debut,Degrade_Tableau[Degrade_Courant].Fin);
+          Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
           // Tracé de la preview:
-          Degrade_Dessiner_preview(8,112,108,14,Degrade_Courant);
-          Afficher_curseur();
-          Attendre_fin_de_click();
+          Draw_gradient_preview(8,112,108,14,Current_gradient);
+          Display_cursor();
+          Wait_end_of_click();
         }
-        Touche=0;
+        Key=0;
         break;
       default:
-        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+        if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
-          Fenetre_aide(BOUTON_GRADMENU, NULL);
-          Touche=0;
+          Window_help(BUTTON_GRADMENU, NULL);
+          Key=0;
           break;
         }
     }
   }
-  while (Bouton_clicke<6);
+  while (clicked_button<6);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_GRADMENU);
-  Afficher_curseur();
+  Close_window();
+  Unselect_bouton(BUTTON_GRADMENU);
+  Display_cursor();
 
-  Traiter_pixel_de_degrade=Afficher_pixel;
-  if (Bouton_clicke==7) // Cancel
+  Gradient_pixel=Display_pixel;
+  if (clicked_button==7) // Cancel
   {
-    Degrade_Courant=Ancien_Degrade_Courant;
-    memcpy(Degrade_Tableau,Backup_Degrade_Tableau,sizeof(T_Degrade_Tableau)*16);
-    Degrade_Charger_infos_du_tableau(Degrade_Courant);
+    Current_gradient=old_current_gradient;
+    memcpy(Gradient_array,backup_gradients,sizeof(T_Gradient_array)*16);
+    Load_gradient_data(Current_gradient);
   }
 }
 
 
 // -- Gestion des boutons de cercle / ellipse / rectangle dégradés --------------------
 
-void Bouton_Cercle_degrade(void)
+void Button_Grad_circle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_CERCLE_DEGRADE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_GRAD_CIRCLE);
+  Display_cursor();
 }
 
 
-void Bouton_Ellipse_degrade(void)
+void Button_Grad_ellipse(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_ELLIPSE_DEGRADEE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_GRAD_ELLIPSE);
+  Display_cursor();
 }
 
 
-void Bouton_Rectangle_degrade(void)
+void Button_Grad_rectangle(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_RECTANGLE_DEGRADE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_GRAD_RECTANGLE);
+  Display_cursor();
 }
 
 
 // -- Gestion du bouton de remplissage ---------------------------------------
 
-void Bouton_Fill(void)
+void Button_Fill(void)
 {
-  if (Operation_en_cours!=OPERATION_FILL)
+  if (Current_operation!=OPERATION_FILL)
   {
-    Effacer_curseur();
+    Hide_cursor();
 
-    if (Operation_en_cours!=OPERATION_REMPLACER)
+    if (Current_operation!=OPERATION_REPLACE)
     {
-      Pinceau_Forme_avant_fill=Pinceau_Forme;
-      Pinceau_Forme=FORME_PINCEAU_POINT;
+      Paintbrush_shape_before_fill=Paintbrush_shape;
+      Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
     }
     else
-      if ( (Mouse_Y<Menu_Ordonnee) && (Menu_visible) &&
-           ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-        Print_dans_menu("X:       Y:             ",0);
-    Demarrer_pile_operation(OPERATION_FILL);
-    Afficher_curseur();
+      if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+        Print_in_menu("X:       Y:             ",0);
+    Start_operation_stack(OPERATION_FILL);
+    Display_cursor();
   }
 }
 
 
-void Bouton_Remplacer(void)
+void Button_Replace(void)
 {
-  if (Operation_en_cours!=OPERATION_REMPLACER)
+  if (Current_operation!=OPERATION_REPLACE)
   {
-    Effacer_curseur();
-    if (Operation_en_cours!=OPERATION_FILL)
+    Hide_cursor();
+    if (Current_operation!=OPERATION_FILL)
     {
-      Pinceau_Forme_avant_fill=Pinceau_Forme;
-      Pinceau_Forme=FORME_PINCEAU_POINT;
+      Paintbrush_shape_before_fill=Paintbrush_shape;
+      Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
     }
-    if ( (Mouse_Y<Menu_Ordonnee) && (Menu_visible) &&
-         ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-      Print_dans_menu("X:       Y:       (    )",0);
-    Demarrer_pile_operation(OPERATION_REMPLACER);
-    Afficher_curseur();
+    if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      Print_in_menu("X:       Y:       (    )",0);
+    Start_operation_stack(OPERATION_REPLACE);
+    Display_cursor();
   }
 }
 
 
-void Bouton_desenclencher_Fill(void)
+void Button_Unselect_fill(void)
 {
-  Pinceau_Forme=Pinceau_Forme_avant_fill;
+  Paintbrush_shape=Paintbrush_shape_before_fill;
 
-  if (Operation_en_cours==OPERATION_REMPLACER)
-    if ( (Mouse_Y<Menu_Ordonnee) && (Menu_visible) &&
-         ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-      Print_dans_menu("X:       Y:             ",0);
+  if (Current_operation==OPERATION_REPLACE)
+    if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      Print_in_menu("X:       Y:             ",0);
 }
 
 
 //---------------------------- Menu des pinceaux -----------------------------
 
-void Bouton_Menu_pinceaux(void)
+void Button_Paintbrush_menu(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
   short x_pos,y_pos;
-  byte Indice;
+  byte index;
 
-  Ouvrir_fenetre(310,155,"Paintbrush menu");
+  Open_window(310,155,"Paintbrush menu");
 
-  Fenetre_Afficher_cadre(8,21,294,107);
+  Window_display_frame(8,21,294,107);
 
-  Fenetre_Definir_bouton_normal(122,133,67,14,"Cancel",0,1,TOUCHE_ESC); // 1
+  Window_set_normal_button(122,133,67,14,"Cancel",0,1,KEY_ESC); // 1
 
-  for (Indice=0; Indice<NB_SPRITES_PINCEAU; Indice++)
+  for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
   {
-    x_pos=13+((Indice%12)*24);
-    y_pos=27+((Indice/12)*25);
-    Fenetre_Definir_bouton_normal(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
-    Afficher_pinceau_dans_fenetre(x_pos+2,y_pos+2,Indice);
+    x_pos=13+((index%12)*24);
+    y_pos=27+((index/12)*25);
+    Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
   }
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_PINCEAUX, NULL);
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_PAINTBRUSHES, NULL);
   }
-  while (Bouton_clicke<=0);
+  while (clicked_button<=0);
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke!=1) // pas Cancel
+  if (clicked_button!=1) // pas Cancel
   {
-    Indice=Bouton_clicke-2;
-    Pinceau_Forme=Pinceau_Type[Indice];
-    Pinceau_Largeur=Pinceau_predefini_Largeur[Indice];
-    Pinceau_Hauteur=Pinceau_predefini_Hauteur[Indice];
-    Pinceau_Decalage_X=Pinceau_predefini_Decalage_X[Indice];
-    Pinceau_Decalage_Y=Pinceau_predefini_Decalage_Y[Indice];
-    for (y_pos=0; y_pos<Pinceau_Hauteur; y_pos++)
-      for (x_pos=0; x_pos<Pinceau_Largeur; x_pos++)
-        Pinceau_Sprite[(y_pos*TAILLE_MAXI_PINCEAU)+x_pos]=SPRITE_PINCEAU[Indice][y_pos][x_pos];
-    Changer_la_forme_du_pinceau(Pinceau_Type[Indice]);
+    index=clicked_button-2;
+    Paintbrush_shape=Paintbrush_type[index];
+    Paintbrush_width=Preset_paintbrush_width[index];
+    Paintbrush_height=Preset_paintbrush_height[index];
+    Paintbrush_offset_X=Preset_paintbrush_offset_X[index];
+    Paintbrush_offset_Y=Preset_paintbrush_offset_Y[index];
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=GFX_paintbrush_sprite[index][y_pos][x_pos];
+    Change_paintbrush_shape(Paintbrush_type[index]);
   }
 
-  Desenclencher_bouton(BOUTON_PINCEAUX);
-  Afficher_curseur();
+  Unselect_bouton(BUTTON_PAINTBRUSHES);
+  Display_cursor();
 }
 
 
-void Bouton_Brosse_monochrome(void)
+void Button_Brush_monochrome(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   // On passe en brosse monochrome:
-  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
 
-  Desenclencher_bouton(BOUTON_PINCEAUX);
+  Unselect_bouton(BUTTON_PAINTBRUSHES);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 // -- Fonction renvoyant le mode vidéo le plus adapté à l'image chargée -----
 #define TOLERANCE_X 8
 #define TOLERANCE_Y 4
-int Meilleur_mode_video(void)
+int Best_video_mode(void)
 {
-  short Meilleure_largeur,Meilleure_hauteur;
-  int Meilleur_mode;
-  short Temp_X,Temp_Y;
+  short best_width,best_height;
+  int best_mode;
+  short temp_x,temp_y;
   int mode;
 
   // Si mode fenêtre, on reste dans ce mode.
-  if (Resolution_actuelle == 0)
+  if (Current_resolution == 0)
     return 0;
     
   // On commence par borner les dimensions, ou du moins les rendre cohérentes
-  if ((Ecran_original_X<=0) || (Config.Set_resolution_according_to==2))
-    Ecran_original_X=Principal_Largeur_image;
+  if ((Original_screen_X<=0) || (Config.Set_resolution_according_to==2))
+    Original_screen_X=Main_image_width;
   else
-    if (Ecran_original_X<320)
-      Ecran_original_X=320;
+    if (Original_screen_X<320)
+      Original_screen_X=320;
 
-  if ((Ecran_original_Y<=0) || (Config.Set_resolution_according_to==2))
-    Ecran_original_Y=Principal_Hauteur_image;
+  if ((Original_screen_Y<=0) || (Config.Set_resolution_according_to==2))
+    Original_screen_Y=Main_image_height;
   else
-    if (Ecran_original_Y<200)
-      Ecran_original_Y=200;
+    if (Original_screen_Y<200)
+      Original_screen_Y=200;
 
-  if ((Ecran_original_X>1024) || (Ecran_original_Y>768))
+  if ((Original_screen_X>1024) || (Original_screen_Y>768))
   {
-    Ecran_original_X=1024;
-    Ecran_original_Y=768;
+    Original_screen_X=1024;
+    Original_screen_Y=768;
   }
 
   // Maintenant on peut chercher le mode qui correspond le mieux
-  Meilleur_mode=Resolution_actuelle;
-  Meilleure_largeur=0;
-  Meilleure_hauteur=0;
+  best_mode=Current_resolution;
+  best_width=0;
+  best_height=0;
 
 
-  for (mode=1; mode<Nb_modes_video; mode++)
+  for (mode=1; mode<Nb_video_modes; mode++)
   {
-    if (Mode_video[mode].Fullscreen && (Mode_video[mode].Etat&3)<2)
+    if (Video_mode[mode].Fullscreen && (Video_mode[mode].State&3)<2)
     {
-      Temp_X=Mode_video[mode].Width;
-      Temp_Y=Mode_video[mode].Height;
+      temp_x=Video_mode[mode].Width;
+      temp_y=Video_mode[mode].Height;
 
-      if ( (Ecran_original_X-TOLERANCE_X<=Temp_X)
-        && (Ecran_original_Y-TOLERANCE_Y<=Temp_Y) )
+      if ( (Original_screen_X-TOLERANCE_X<=temp_x)
+        && (Original_screen_Y-TOLERANCE_Y<=temp_y) )
         return mode;
       else
       {
-        if ( (Meilleure_largeur<=Temp_X)
-          && (Meilleure_hauteur<=Temp_Y)
-          && (Temp_X-TOLERANCE_X<=Ecran_original_X)
-          && (Temp_Y-TOLERANCE_Y<=Ecran_original_Y) )
+        if ( (best_width<=temp_x)
+          && (best_height<=temp_y)
+          && (temp_x-TOLERANCE_X<=Original_screen_X)
+          && (temp_y-TOLERANCE_Y<=Original_screen_Y) )
         {
-          Meilleure_largeur=Temp_X;
-          Meilleure_hauteur=Temp_Y;
-          Meilleur_mode=mode;
+          best_width=temp_x;
+          best_height=temp_y;
+          best_mode=mode;
         }
       }
     }
   }
 
-  return Meilleur_mode;
+  return best_mode;
 }
 
 
-void Swapper_infos_selecteurs_image_et_brosse(void)
+void Swap_data_of_image_and_brush(void)
 {
-  char  Chaine_temporaire[TAILLE_CHEMIN_FICHIER];
-  byte  Octet_temporaire;
-  short Entier_temporaire;
+  char  temp_string[MAX_PATH_CHARACTERS];
+  byte  temp_byte;
+  short temp_int;
 
 
-  strcpy(Chaine_temporaire           ,Brosse_Repertoire_fichier);
-  strcpy(Brosse_Repertoire_fichier   ,Principal_Repertoire_fichier);
-  strcpy(Principal_Repertoire_fichier,Chaine_temporaire);
+  strcpy(temp_string           ,Brush_file_directory);
+  strcpy(Brush_file_directory   ,Main_file_directory);
+  strcpy(Main_file_directory,temp_string);
 
-  strcpy(Chaine_temporaire    ,Brosse_Nom_fichier);
-  strcpy(Brosse_Nom_fichier   ,Principal_Nom_fichier);
-  strcpy(Principal_Nom_fichier,Chaine_temporaire);
+  strcpy(temp_string    ,Brush_filename);
+  strcpy(Brush_filename   ,Main_filename);
+  strcpy(Main_filename,temp_string);
 
-  Octet_temporaire        =Brosse_Format_fichier;
-  Brosse_Format_fichier   =Principal_Format_fichier;
-  Principal_Format_fichier=Octet_temporaire;
+  temp_byte        =Brush_fileformat;
+  Brush_fileformat   =Main_fileformat;
+  Main_fileformat=temp_byte;
 
-  Octet_temporaire=Brosse_Format;
-  Brosse_Format   =Principal_Format;
-  Principal_Format=Octet_temporaire;
+  temp_byte=Brush_format;
+  Brush_format   =Main_format;
+  Main_format=temp_byte;
 
-  Entier_temporaire            =Brosse_File_list_Position;
-  Brosse_File_list_Position    =Principal_File_list_Position;
-  Principal_File_list_Position=Entier_temporaire;
+  temp_int            =Brush_fileselector_position;
+  Brush_fileselector_position    =Main_fileselector_position;
+  Main_fileselector_position=temp_int;
 
-  Entier_temporaire            =Brosse_File_list_Decalage;
-  Brosse_File_list_Decalage    =Principal_File_list_Decalage;
-  Principal_File_list_Decalage=Entier_temporaire;
+  temp_int            =Brush_fileselector_offset;
+  Brush_fileselector_offset    =Main_fileselector_offset;
+  Main_fileselector_offset=temp_int;
 
-  strcpy(Chaine_temporaire           ,Brosse_Repertoire_courant);
-  strcpy(Brosse_Repertoire_courant   ,Principal_Repertoire_courant);
-  strcpy(Principal_Repertoire_courant,Chaine_temporaire);
+  strcpy(temp_string           ,Brush_current_directory);
+  strcpy(Brush_current_directory   ,Main_current_directory);
+  strcpy(Main_current_directory,temp_string);
 
-  strcpy(Chaine_temporaire    ,Brosse_Commentaire);
-  strcpy(Brosse_Commentaire   ,Principal_Commentaire);
-  strcpy(Principal_Commentaire,Chaine_temporaire);
+  strcpy(temp_string    ,Brush_comment);
+  strcpy(Brush_comment   ,Main_comment);
+  strcpy(Main_comment,temp_string);
 }
 
 
@@ -2341,300 +2341,300 @@ void Load_picture(byte image)
   // Image=0 => On charge/sauve une brosse
 {
   // Données initiales du fichier (au cas où on voudrait annuler)
-  char  Repertoire_fichier_initial[TAILLE_CHEMIN_FICHIER];
-  char  Nom_fichier_initial[TAILLE_CHEMIN_FICHIER];
-  byte  Format_fichier_initial;
-  byte  Ne_pas_restaurer;
-  byte  Utiliser_palette_brosse = 0;
-  Composantes * Palette_initiale=NULL;
-  byte  Ancienne_forme_curseur;
-  short Principal_Largeur_image_initiale=Principal_Largeur_image;
-  short Principal_Hauteur_image_initiale=Principal_Hauteur_image;
-  //char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
-  int   Nouveau_mode;
+  char  initial_file_directory[MAX_PATH_CHARACTERS];
+  char  initial_filename[MAX_PATH_CHARACTERS];
+  byte  initial_file_format;
+  byte  do_not_restore;
+  byte  use_brush_palette = 0;
+  T_Components * initial_palette=NULL;
+  byte  old_cursor_shape;
+  short initial_main_image_width=Main_image_width;
+  short initial_main_image_height=Main_image_height;
+  //char  initial_comment[COMMENT_SIZE+1];
+  int   new_mode;
 
 
   if (!image)
-    Swapper_infos_selecteurs_image_et_brosse();
+    Swap_data_of_image_and_brush();
 
-  strcpy(Repertoire_fichier_initial,Principal_Repertoire_fichier);
-  strcpy(Nom_fichier_initial       ,Principal_Nom_fichier);
-  Format_fichier_initial=Principal_Format_fichier;
+  strcpy(initial_file_directory,Main_file_directory);
+  strcpy(initial_filename       ,Main_filename);
+  initial_file_format=Main_fileformat;
 
   if (!image)
   {
-    Palette_initiale=(Composantes *)malloc(sizeof(T_Palette));
-    memcpy(Palette_initiale,Principal_Palette,sizeof(T_Palette));
+    initial_palette=(T_Components *)malloc(sizeof(T_Palette));
+    memcpy(initial_palette,Main_palette,sizeof(T_Palette));
   }
 
-  Ne_pas_restaurer=Bouton_Load_ou_Save(1,image);
+  do_not_restore=Button_Load_or_Save(1,image);
 
-  if (Ne_pas_restaurer)
+  if (do_not_restore)
   {
     if (image)
     {
-      if (Principal_Image_modifiee)
-        Ne_pas_restaurer=Demande_de_confirmation("Discard unsaved changes?");
+      if (Main_image_is_modified)
+        do_not_restore=Confirmation_box("Discard unsaved changes?");
     }
     else
-      Utiliser_palette_brosse=Demande_de_confirmation("Use the palette of the brush?");
+      use_brush_palette=Confirmation_box("Use the palette of the brush?");
   }
 
-  if (Ne_pas_restaurer)
+  if (do_not_restore)
   {
-    Ancienne_forme_curseur=Forme_curseur;
-    Effacer_curseur();
-    Forme_curseur=FORME_CURSEUR_SABLIER;
-    Afficher_curseur();
+    old_cursor_shape=Cursor_shape;
+    Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Display_cursor();
 
     if (image)
     {
       // Si c'est une image qu'on charge, on efface l'ancien commentaire
       // C'est loin d'être indispensable, m'enfin bon...
-      if (FormatFichier[Principal_Format_fichier-1].Backup_done)
-        Principal_Commentaire[0]='\0';
+      if (File_formats[Main_fileformat-1].Backup_done)
+        Main_comment[0]='\0';
 
-      Ecran_original_X=0;
-      Ecran_original_Y=0;
+      Original_screen_X=0;
+      Original_screen_Y=0;
     }
     else
-      Pixel_de_chargement=Pixel_Chargement_dans_brosse;
+      Pixel_load_function=Pixel_load_in_brush;
 
-    Charger_image(image);
+    Load_image(image);
 
     if (!image)
     {
-      if (!Utiliser_palette_brosse)
-        memcpy(Principal_Palette,Palette_initiale,sizeof(T_Palette));
+      if (!use_brush_palette)
+        memcpy(Main_palette,initial_palette,sizeof(T_Palette));
 
-      if (Erreur_fichier==3) // On ne peut pas allouer la brosse
+      if (File_error==3) // On ne peut pas allouer la brosse
       {
-        if (Brosse) free(Brosse);
-        Brosse=(byte *)malloc(1*1);
-        Brosse_Hauteur=1;
-        Brosse_Largeur=1;
-        *Brosse=Fore_color;
+        if (Brush) free(Brush);
+        Brush=(byte *)malloc(1*1);
+        Brush_height=1;
+        Brush_width=1;
+        *Brush=Fore_color;
 
-        if (Smear_Brosse) free(Smear_Brosse);
-        Smear_Brosse=(byte *)malloc(TAILLE_MAXI_PINCEAU*TAILLE_MAXI_PINCEAU);
-        Smear_Brosse_Hauteur=TAILLE_MAXI_PINCEAU;
-        Smear_Brosse_Largeur=TAILLE_MAXI_PINCEAU;
+        if (Smear_brush) free(Smear_brush);
+        Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+        Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+        Smear_brush_width=MAX_PAINTBRUSH_SIZE;
       }
       else
       {
-        Brosse_Largeur=Principal_Largeur_image;
-        Brosse_Hauteur=Principal_Hauteur_image;
-        Smear_Brosse_Largeur=(Brosse_Largeur>TAILLE_MAXI_PINCEAU)?Brosse_Largeur:TAILLE_MAXI_PINCEAU;
-        Smear_Brosse_Hauteur=(Brosse_Hauteur>TAILLE_MAXI_PINCEAU)?Brosse_Hauteur:TAILLE_MAXI_PINCEAU;
+        Brush_width=Main_image_width;
+        Brush_height=Main_image_height;
+        Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+        Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
       }
 
-      Tiling_Decalage_X=0;
-      Tiling_Decalage_Y=0;
+      Tiling_offset_X=0;
+      Tiling_offset_Y=0;
 
-      Brosse_Decalage_X=(Brosse_Largeur>>1);
-      Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+      Brush_offset_X=(Brush_width>>1);
+      Brush_offset_Y=(Brush_height>>1);
 
-      Principal_Largeur_image=Principal_Largeur_image_initiale;
-      Principal_Hauteur_image=Principal_Hauteur_image_initiale;
-      Pixel_de_chargement=Pixel_Chargement_dans_ecran_courant;
+      Main_image_width=initial_main_image_width;
+      Main_image_height=initial_main_image_height;
+      Pixel_load_function=Pixel_load_in_current_screen;
 
-      Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
+      Unselect_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
         // On se place en mode Dessin discontinu à la main
-        while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-          Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+        while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+          Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
       }
-      Effacer_curseur();
+      Hide_cursor();
       // On passe en brosse couleur:
-      Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
     }
     else
     {
-      Effacer_curseur();
-      Forme_curseur=Ancienne_forme_curseur;
+      Hide_cursor();
+      Cursor_shape=old_cursor_shape;
     }
 
-    if ( (Erreur_fichier==1) || (!FormatFichier[Principal_Format_fichier-1].Backup_done) )
+    if ( (File_error==1) || (!File_formats[Main_fileformat-1].Backup_done) )
     {
-      Ne_pas_restaurer=0;
-      if (Erreur_fichier!=1)
-        Calculer_couleurs_menu_optimales(Principal_Palette);
+      do_not_restore=0;
+      if (File_error!=1)
+        Compute_optimal_menu_colors(Main_palette);
     }
     else
     {
       if (image)
       {
-        if (Loupe_Mode)
+        if (Main_magnifier_mode)
         {
-          Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,0);
-          Pixel_Preview=Pixel_Preview_Normal;
-          Loupe_Mode=0;
+          Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
+          Pixel_preview=Pixel_preview_normal;
+          Main_magnifier_mode=0;
         }
 
-        Nouveau_mode=Meilleur_mode_video();
-        // TODO : Utiliser içi Ratio_image_chargee pour passer dans la
+        new_mode=Best_video_mode();
+        // TODO : Utiliser içi Ratio_of_loaded_image pour passer dans la
         // bonne taille de pixels.
-        if ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle))
+        if ((Config.Auto_set_res) && (new_mode!=Current_resolution))
         {
-          Initialiser_mode_video(
-            Mode_video[Nouveau_mode].Width,
-            Mode_video[Nouveau_mode].Height,
-            Mode_video[Nouveau_mode].Fullscreen);
-          Afficher_menu();
+          Init_mode_video(
+            Video_mode[new_mode].Width,
+            Video_mode[new_mode].Height,
+            Video_mode[new_mode].Fullscreen);
+          Display_menu();
         }
         else
         {
-          Principal_Decalage_X=0;
-          Principal_Decalage_Y=0;
-          Calculer_limites();
-          Calculer_coordonnees_pinceau();
+          Main_offset_X=0;
+          Main_offset_Y=0;
+          Compute_limits();
+          Compute_paintbrush_coordinates();
         }
       }
 
-      Calculer_couleurs_menu_optimales(Principal_Palette);
-      Afficher_ecran();
+      Compute_optimal_menu_colors(Main_palette);
+      Display_all_screen();
 
       if (image)
-        Principal_Image_modifiee=0;
+        Main_image_is_modified=0;
     }
-    Afficher_menu();
-    Afficher_curseur();
+    Display_menu();
+    Display_cursor();
   }
 
   if (!image)
-    free(Palette_initiale);
+    free(initial_palette);
 
-  if (!Ne_pas_restaurer)
+  if (!do_not_restore)
   {
-    strcpy(Principal_Nom_fichier       ,Nom_fichier_initial);
-    strcpy(Principal_Repertoire_fichier,Repertoire_fichier_initial);
-    Principal_Format_fichier    =Format_fichier_initial;
+    strcpy(Main_filename       ,initial_filename);
+    strcpy(Main_file_directory,initial_file_directory);
+    Main_fileformat    =initial_file_format;
   }
 
   if (!image)
-    Swapper_infos_selecteurs_image_et_brosse();
+    Swap_data_of_image_and_brush();
 
-  Print_nom_fichier();
-  Set_palette(Principal_Palette);
+  Print_filename();
+  Set_palette(Main_palette);
 }
 
 
-void Bouton_Load(void)
+void Button_Load(void)
 {
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_principal(Principal_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
 
   Load_picture(1);
 }
 
 
-void Bouton_Reload(void)
+void Button_Reload(void)
 {
-  byte Ancienne_forme_curseur;
-  int  Nouveau_mode;
+  byte old_cursor_shape;
+  int  new_mode;
 
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_principal(Principal_Backups->Pages);
+  Upload_infos_page_main(Main_backups->Pages);
 
-  if ( (!Principal_Image_modifiee) || Demande_de_confirmation("Discard unsaved changes ?") )
+  if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
   {
-    Effacer_curseur();
-    Ancienne_forme_curseur=Forme_curseur;
-    Forme_curseur=FORME_CURSEUR_SABLIER;
-    Afficher_curseur();
+    Hide_cursor();
+    old_cursor_shape=Cursor_shape;
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Display_cursor();
 
-    Ecran_original_X=0;
-    Ecran_original_Y=0;
-    Charger_image(1);
+    Original_screen_X=0;
+    Original_screen_Y=0;
+    Load_image(1);
 
-    Effacer_curseur();
-    Forme_curseur=Ancienne_forme_curseur;
+    Hide_cursor();
+    Cursor_shape=old_cursor_shape;
 
-    if (Erreur_fichier!=1)
+    if (File_error!=1)
     {
-      if (Loupe_Mode)
+      if (Main_magnifier_mode)
       {
-        Tracer_cadre_de_bouton_du_menu(BOUTON_LOUPE,0);
-        Pixel_Preview=Pixel_Preview_Normal;
-        Loupe_Mode=0;
+        Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
+        Pixel_preview=Pixel_preview_normal;
+        Main_magnifier_mode=0;
       }
 
-      Nouveau_mode=Meilleur_mode_video();
-      // TODO : Utiliser içi Ratio_image_chargee pour passer dans la
+      new_mode=Best_video_mode();
+      // TODO : Utiliser içi Ratio_of_loaded_image pour passer dans la
       // bonne taille de pixels.      
-      if ( ((Config.Auto_set_res) && (Nouveau_mode!=Resolution_actuelle)) &&
-           (!Une_resolution_a_ete_passee_en_parametre) )
+      if ( ((Config.Auto_set_res) && (new_mode!=Current_resolution)) &&
+           (!Resolution_in_command_line) )
       {
-        Initialiser_mode_video(
-        Mode_video[Nouveau_mode].Width,
-        Mode_video[Nouveau_mode].Height,
-        Mode_video[Nouveau_mode].Fullscreen);
-        Afficher_menu();
+        Init_mode_video(
+        Video_mode[new_mode].Width,
+        Video_mode[new_mode].Height,
+        Video_mode[new_mode].Fullscreen);
+        Display_menu();
       }
       else
       {
-        Principal_Decalage_X=0;
-        Principal_Decalage_Y=0;
-        Calculer_limites();
-        Calculer_coordonnees_pinceau();
+        Main_offset_X=0;
+        Main_offset_Y=0;
+        Compute_limits();
+        Compute_paintbrush_coordinates();
       }
 
-      Afficher_ecran();
+      Display_all_screen();
 
-      Principal_Image_modifiee=0;
+      Main_image_is_modified=0;
     }
   }
   else
-    Effacer_curseur();
+    Hide_cursor();
 
-  Calculer_couleurs_menu_optimales(Principal_Palette);
-  Afficher_menu();
-  if (Config.Afficher_limites_image)
-    Afficher_limites_de_l_image();
+  Compute_optimal_menu_colors(Main_palette);
+  Display_menu();
+  if (Config.Display_image_limits)
+    Display_image_limits();
 
-  Desenclencher_bouton(BOUTON_CHARGER);
+  Unselect_bouton(BUTTON_LOAD);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Nom_fichier_backup(char * fname, char * Nom_backup)
+void Backup_filename(char * fname, char * backup_name)
 {
   short i;
 
-  strcpy(Nom_backup,fname);
-  for (i=strlen(fname)-strlen(Principal_Nom_fichier); Nom_backup[i]!='.'; i++);
-  Nom_backup[i+1]='\0';
-  strcat(Nom_backup,"BAK");
+  strcpy(backup_name,fname);
+  for (i=strlen(fname)-strlen(Main_filename); backup_name[i]!='.'; i++);
+  backup_name[i+1]='\0';
+  strcat(backup_name,"BAK");
 }
 
 
-void Backup_du_fichier_sauvegarde(void)
+void Backup_existing_file(void)
 {
-  char Nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier
-  char Nouveau_nom_du_fichier[TAILLE_CHEMIN_FICHIER]; // Nom complet du fichier backup
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup
 
-  Nom_fichier_complet(Nom_du_fichier,0);
+  filename_complet(filename,0);
   // Calcul du nom complet du fichier backup
-  Nom_fichier_backup(Nom_du_fichier,Nouveau_nom_du_fichier);
+  Backup_filename(filename,new_filename);
 
-  Erreur_fichier=0;
+  File_error=0;
 
   // On fait un backup si le nom du fichier n'est pas celui qu'on a choisi
   // pour nommer les backups (c'est évident!).
-  if (strcmp(Nouveau_nom_du_fichier,Nom_du_fichier))
+  if (strcmp(new_filename,filename))
   {
     // S'il y avait déjà un fichier Backup, on l'efface
-    if ((Fichier_existe(Nouveau_nom_du_fichier))
-     && (remove(Nouveau_nom_du_fichier)!=0))
-      Erreur_fichier=1;
+    if ((File_exists(new_filename))
+     && (remove(new_filename)!=0))
+      File_error=1;
 
-    if ((!Erreur_fichier)
-     && (rename(Nom_du_fichier,Nouveau_nom_du_fichier)!=0))
-      Erreur_fichier=1;
+    if ((!File_error)
+     && (rename(filename,new_filename)!=0))
+      File_error=1;
   }
 }
 
@@ -2644,758 +2644,758 @@ void Save_picture(byte image)
   // image=0 => On charge/sauve une brosse
 {
   // Données initiales du fichier (au cas où on voudrait annuler)
-  char  Repertoire_fichier_initial[TAILLE_CHEMIN_FICHIER];
-  char  Nom_fichier_initial[TAILLE_CHEMIN_FICHIER];
-  byte  Format_fichier_initial;
-  byte  Ne_pas_restaurer;
-  byte  Ancienne_forme_curseur;
-  short Principal_Largeur_image_Backup=Principal_Largeur_image;
-  short Principal_Hauteur_image_Backup=Principal_Hauteur_image;
-  //char  Commentaire_initial[TAILLE_COMMENTAIRE+1];
+  char  initial_file_directory[MAX_PATH_CHARACTERS];
+  char  initial_filename[MAX_PATH_CHARACTERS];
+  byte  initial_file_format;
+  byte  do_not_restore;
+  byte  old_cursor_shape;
+  short initial_main_image_width=Main_image_width;
+  short initial_main_image_height=Main_image_height;
+  //char  initial_comment[COMMENT_SIZE+1];
 
 
   if (!image)
-    Swapper_infos_selecteurs_image_et_brosse();
+    Swap_data_of_image_and_brush();
 
-  strcpy(Repertoire_fichier_initial,Principal_Repertoire_fichier);
-  strcpy(Nom_fichier_initial       ,Principal_Nom_fichier);
-  Format_fichier_initial=Principal_Format_fichier;
+  strcpy(initial_file_directory,Main_file_directory);
+  strcpy(initial_filename       ,Main_filename);
+  initial_file_format=Main_fileformat;
 
-  Ne_pas_restaurer=Bouton_Load_ou_Save(0,image);
+  do_not_restore=Button_Load_or_Save(0,image);
 
-  if (Ne_pas_restaurer && Fichier_existe(Principal_Nom_fichier))
+  if (do_not_restore && File_exists(Main_filename))
   {
-    Ne_pas_restaurer=Demande_de_confirmation("Erase old file ?");
-    if ((Ne_pas_restaurer) && (Config.Backup))
+    do_not_restore=Confirmation_box("Erase old file ?");
+    if ((do_not_restore) && (Config.Backup))
     {
-      Backup_du_fichier_sauvegarde();
-      if (Erreur_fichier)
+      Backup_existing_file();
+      if (File_error)
       {
-        Ne_pas_restaurer=0;
-        Erreur(0);
+        do_not_restore=0;
+        Error(0);
       }
     }
   }
 
-  if (Ne_pas_restaurer)
+  if (do_not_restore)
   {
-    Ancienne_forme_curseur=Forme_curseur;
-    Effacer_curseur();
-    Forme_curseur=FORME_CURSEUR_SABLIER;
-    Afficher_curseur();
+    old_cursor_shape=Cursor_shape;
+    Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Display_cursor();
 
     if (image)
-      Sauver_image(image);
+      Save_image(image);
     else
     {
-      Principal_Largeur_image=Brosse_Largeur;
-      Principal_Hauteur_image=Brosse_Hauteur;
-      Sauver_image(image);
-      Principal_Largeur_image=Principal_Largeur_image_Backup;
-      Principal_Hauteur_image=Principal_Hauteur_image_Backup;
+      Main_image_width=Brush_width;
+      Main_image_height=Brush_height;
+      Save_image(image);
+      Main_image_width=initial_main_image_width;
+      Main_image_height=initial_main_image_height;
     }
 
-    Effacer_curseur();
-    Forme_curseur=Ancienne_forme_curseur;
+    Hide_cursor();
+    Cursor_shape=old_cursor_shape;
 
-    if ((Erreur_fichier==1) || (!FormatFichier[Principal_Format_fichier-1].Backup_done))
-      Ne_pas_restaurer=0;
+    if ((File_error==1) || (!File_formats[Main_fileformat-1].Backup_done))
+      do_not_restore=0;
 
-    Afficher_curseur();
+    Display_cursor();
   }
 
-  if (!Ne_pas_restaurer)
+  if (!do_not_restore)
   {
-    strcpy(Principal_Nom_fichier       ,Nom_fichier_initial);
-    strcpy(Principal_Repertoire_fichier,Repertoire_fichier_initial);
-           Principal_Format_fichier    =Format_fichier_initial;
+    strcpy(Main_filename       ,initial_filename);
+    strcpy(Main_file_directory,initial_file_directory);
+           Main_fileformat    =initial_file_format;
   }
 
   if (!image)
-    Swapper_infos_selecteurs_image_et_brosse();
+    Swap_data_of_image_and_brush();
 
-  Print_nom_fichier();
-  Set_palette(Principal_Palette);
+  Print_filename();
+  Set_palette(Main_palette);
 }
 
 
-void Bouton_Save(void)
+void Button_Save(void)
 {
   Save_picture(1);
 }
 
 
-void Bouton_Autosave(void)
+void Button_Autosave(void)
 {
-  byte Ancienne_forme_curseur;
-  static char Nom_du_fichier[TAILLE_CHEMIN_FICHIER];
-  byte Le_fichier_existe;
+  byte old_cursor_shape;
+  static char filename[MAX_PATH_CHARACTERS];
+  byte file_already_exists;
 
 
-  Nom_fichier_complet(Nom_du_fichier,0);
-  Le_fichier_existe=Fichier_existe(Nom_du_fichier);
+  filename_complet(filename,0);
+  file_already_exists=File_exists(filename);
 
-  if ( (!Le_fichier_existe) || Demande_de_confirmation("Erase old file ?") )
+  if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
   {
-    if ((Le_fichier_existe) && (Config.Backup))
-      Backup_du_fichier_sauvegarde();
+    if ((file_already_exists) && (Config.Backup))
+      Backup_existing_file();
     else
-      Erreur_fichier=0;
+      File_error=0;
 
-    Effacer_curseur();
+    Hide_cursor();
 
-    if (!Erreur_fichier)
+    if (!File_error)
     {
-      Ancienne_forme_curseur=Forme_curseur;
-      Forme_curseur=FORME_CURSEUR_SABLIER;
-      Afficher_curseur();
+      old_cursor_shape=Cursor_shape;
+      Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+      Display_cursor();
 
-      Sauver_image(1);
+      Save_image(1);
 
-      Effacer_curseur();
-      Forme_curseur=Ancienne_forme_curseur;
+      Hide_cursor();
+      Cursor_shape=old_cursor_shape;
     }
     else
-      Erreur(0);
+      Error(0);
   }
   else
-    Effacer_curseur();
+    Hide_cursor();
 
-  Desenclencher_bouton(BOUTON_SAUVER);
+  Unselect_bouton(BUTTON_SAVE);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Gestion des boutons de ligne ------------------------------------------
 
-void Bouton_Lignes(void)
+void Button_Lines(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(Ligne_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(Selected_line_mode);
+  Display_cursor();
 }
 
 
-void Bouton_Lignes_Switch_mode(void)
+void Button_Lines_switch_mode(void)
 {
-  if (Ligne_en_cours==OPERATION_LIGNE)
-    Ligne_en_cours=OPERATION_K_LIGNE;
+  if (Selected_line_mode==OPERATION_LINE)
+    Selected_line_mode=OPERATION_K_LIGNE;
   else
   {
-    if (Ligne_en_cours==OPERATION_K_LIGNE)
-      Ligne_en_cours=OPERATION_LIGNES_CENTREES;
+    if (Selected_line_mode==OPERATION_K_LIGNE)
+      Selected_line_mode=OPERATION_CENTERED_LINES;
     else
-      Ligne_en_cours=OPERATION_LIGNE;
+      Selected_line_mode=OPERATION_LINE;
   }
 
-  Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_LIGNES,Ligne_en_cours-OPERATION_LIGNE+7);
-  Demarrer_pile_operation(Ligne_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Display_sprite_in_menu(BUTTON_LINES,Selected_line_mode-OPERATION_LINE+7);
+  Start_operation_stack(Selected_line_mode);
+  Display_cursor();
 }
 
 
-// -- Bouton de brosse ------------------------------------------------------
+// -- Button de brosse ------------------------------------------------------
 
-void Bouton_Brosse(void)
+void Button_Brush(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
 
-  if (Operation_en_cours!=OPERATION_PRISE_BROSSE)
-    Demarrer_pile_operation(OPERATION_PRISE_BROSSE);
+  if (Current_operation!=OPERATION_GRAB_BRUSH)
+    Start_operation_stack(OPERATION_GRAB_BRUSH);
   else
-    Desenclencher_bouton(BOUTON_BROSSE);
+    Unselect_bouton(BUTTON_BRUSH);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Bouton_desenclencher_Brosse(void)
+void Button_Unselect_brush(void)
 {
   // On fait de notre mieux pour restaurer l'ancienne opération:
-  Demarrer_pile_operation(Operation_avant_interruption);
+  Start_operation_stack(Operation_before_interrupt);
 }
 
 
-void Bouton_Restaurer_brosse(void)
+void Button_Restore_brush(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
   // On passe en brosse couleur:
-  Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  Desenclencher_bouton(BOUTON_BROSSE);
-  Desenclencher_bouton(BOUTON_POLYBROSSE);
+  Unselect_bouton(BUTTON_BRUSH);
+  Unselect_bouton(BUTTON_POLYBRUSH);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-// -- Bouton de prise de brosse au lasso ------------------------------------
+// -- Button de prise de brosse au lasso ------------------------------------
 
-void Bouton_Lasso(void)
+void Button_Lasso(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
 
-  if (Operation_en_cours!=OPERATION_POLYBROSSE)
+  if (Current_operation!=OPERATION_POLYBRUSH)
   {
-    Pinceau_Forme_avant_lasso=Pinceau_Forme;
-    Pinceau_Forme=FORME_PINCEAU_POINT;
-    Demarrer_pile_operation(OPERATION_POLYBROSSE);
+    Paintbrush_shape_before_lasso=Paintbrush_shape;
+    Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
+    Start_operation_stack(OPERATION_POLYBRUSH);
   }
   else
-    Desenclencher_bouton(BOUTON_POLYBROSSE);
+    Unselect_bouton(BUTTON_POLYBRUSH);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Bouton_desenclencher_Lasso(void)
+void Button_Unselect_lasso(void)
 {
   // On fait de notre mieux pour restaurer l'ancienne opération:
-  Demarrer_pile_operation(Operation_avant_interruption);
-  Pinceau_Forme=Pinceau_Forme_avant_lasso;
+  Start_operation_stack(Operation_before_interrupt);
+  Paintbrush_shape=Paintbrush_shape_before_lasso;
 }
 
 
-// -- Bouton de pipette -----------------------------------------------------
+// -- Button de pipette -----------------------------------------------------
 
-void Bouton_Pipette(void)
+void Button_Colorpicker(void)
 {
-  Effacer_curseur();
+  Hide_cursor();
 
-  if (Operation_en_cours!=OPERATION_PIPETTE)
+  if (Current_operation!=OPERATION_COLORPICK)
   {
-    Pipette_Couleur=-1;
-    Demarrer_pile_operation(OPERATION_PIPETTE);
-    Pinceau_Forme_avant_pipette=Pinceau_Forme;
-    Pinceau_Forme=FORME_PINCEAU_POINT;
-    if (Operation_avant_interruption!=OPERATION_REMPLACER)
-      if ( (Mouse_Y<Menu_Ordonnee) && (Menu_visible) &&
-           ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-        Print_dans_menu("X:       Y:       (    )",0);
+    Colorpicker_color=-1;
+    Start_operation_stack(OPERATION_COLORPICK);
+    Paintbrush_shape_before_colorpicker=Paintbrush_shape;
+    Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
+    if (Operation_before_interrupt!=OPERATION_REPLACE)
+      if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+        Print_in_menu("X:       Y:       (    )",0);
   }
   else
-    Desenclencher_bouton(BOUTON_PIPETTE);
+    Unselect_bouton(BUTTON_COLORPICKER);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
-void Bouton_desenclencher_Pipette(void)
+void Button_Unselect_colorpicker(void)
 {
-  if (Operation_avant_interruption!=OPERATION_REMPLACER)
-    if ( (Mouse_Y<Menu_Ordonnee) && (Menu_visible) &&
-         ( (!Loupe_Mode) || (Mouse_X<Principal_Split) || (Mouse_X>=Principal_X_Zoom) ) )
-      Print_dans_menu("X:       Y:             ",0);
+  if (Operation_before_interrupt!=OPERATION_REPLACE)
+    if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      Print_in_menu("X:       Y:             ",0);
 
   // On fait de notre mieux pour restaurer l'ancienne opération:
-  if (Operation_en_cours==OPERATION_PIPETTE)
+  if (Current_operation==OPERATION_COLORPICK)
   {
-    Demarrer_pile_operation(Operation_avant_interruption);
-    Pinceau_Forme=Pinceau_Forme_avant_pipette;
+    Start_operation_stack(Operation_before_interrupt);
+    Paintbrush_shape=Paintbrush_shape_before_colorpicker;
   }
 }
 
 
   // -- Inversion de la couleur Fore et de la couleur Back --
-void Bouton_Inverser_foreback(void)
+void Button_Invert_foreback(void)
 {
-  byte Couleur_temporaire;
+  byte temp_color;
 
-  Effacer_curseur();
+  Hide_cursor();
 
-  Encadrer_couleur_menu(CM_Noir);
+  Frame_menu_color(MC_Black);
 
-  Couleur_temporaire=Fore_color;
+  temp_color=Fore_color;
   Fore_color        =Back_color;
-  Back_color        =Couleur_temporaire;
+  Back_color        =temp_color;
 
-  Recadrer_palette();
+  Reposition_palette();
 
-  Encadrer_couleur_menu(CM_Blanc);
+  Frame_menu_color(MC_White);
 
-  Afficher_foreback();
-  Desenclencher_bouton(BOUTON_PIPETTE);
+  Display_foreback();
+  Unselect_bouton(BUTTON_COLORPICKER);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Gestion du bouton Loupe -----------------------------------------------
 
-byte On_vient_du_menu_de_facteurs_de_zoom=0;
+byte Coming_from_zoom_factor_menu=0;
 
-void Bouton_Loupe(void)
+void Button_Magnify(void)
 {
-  Effacer_curseur();
-  if ( (Operation_en_cours==OPERATION_LOUPE) || (Loupe_Mode) )
+  Hide_cursor();
+  if ( (Current_operation==OPERATION_MAGNIFY) || (Main_magnifier_mode) )
   {
-    Desenclencher_bouton(BOUTON_LOUPE);
+    Unselect_bouton(BUTTON_MAGNIFIER);
   }
   else
   {
-    Ancien_Principal_Decalage_X=Principal_Decalage_X;
-    Ancien_Principal_Decalage_Y=Principal_Decalage_Y;
-    Calculer_donnees_loupe();
-    if ((!Config.Fast_zoom) || (Mouse_Y>=Menu_Ordonnee) || On_vient_du_menu_de_facteurs_de_zoom)
+    Old_main_offset_X=Main_offset_X;
+    Old_main_offset_Y=Main_offset_Y;
+    Compute_magnifier_data();
+    if ((!Config.Fast_zoom) || (Mouse_Y>=Menu_Y) || Coming_from_zoom_factor_menu)
     {
-      On_vient_du_menu_de_facteurs_de_zoom=0;
-      Demarrer_pile_operation(OPERATION_LOUPE);
+      Coming_from_zoom_factor_menu=0;
+      Start_operation_stack(OPERATION_MAGNIFY);
     }
     else
     { /* Ceci est de la duplication de code de presque toute l'opération de */
       /* la loupe... Il serait peut-être plus propre de faire une procédure */
       /* qui s'en charge... */
       // On passe en mode loupe
-      Loupe_Mode=1;
+      Main_magnifier_mode=1;
 
       // La fonction d'affichage dans la partie image est désormais un affichage
       // spécial loupe.
-      Pixel_Preview=Pixel_Preview_Loupe;
+      Pixel_preview=Pixel_preview_magnifier;
 
       // On calcule l'origine de la loupe
-      Loupe_Decalage_X=Mouse_X-(Loupe_Largeur>>1);
-      Loupe_Decalage_Y=Mouse_Y-(Loupe_Hauteur>>1);
+      Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
+      Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
 
       // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
-      if (Loupe_Decalage_X+Loupe_Largeur>=Limite_Droite-Principal_Decalage_X)
-        Loupe_Decalage_X=Limite_Droite-Loupe_Largeur-Principal_Decalage_X+1;
-      if (Loupe_Decalage_Y+Loupe_Hauteur>=Limite_Bas-Principal_Decalage_Y)
-        Loupe_Decalage_Y=Limite_Bas-Loupe_Hauteur-Principal_Decalage_Y+1;
+      if (Main_magnifier_offset_X+Main_magnifier_width>=Limit_right-Main_offset_X)
+        Main_magnifier_offset_X=Limit_right-Main_magnifier_width-Main_offset_X+1;
+      if (Main_magnifier_offset_Y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
+        Main_magnifier_offset_Y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
 
       // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
-      Loupe_Decalage_X+=Principal_Decalage_X;
-      Loupe_Decalage_Y+=Principal_Decalage_Y;
+      Main_magnifier_offset_X+=Main_offset_X;
+      Main_magnifier_offset_Y+=Main_offset_Y;
 
-      if (Loupe_Decalage_X<0)
-        Loupe_Decalage_X=0;
-      if (Loupe_Decalage_Y<0)
-        Loupe_Decalage_Y=0;
+      if (Main_magnifier_offset_X<0)
+        Main_magnifier_offset_X=0;
+      if (Main_magnifier_offset_Y<0)
+        Main_magnifier_offset_Y=0;
 
       // On calcule les bornes visibles dans l'écran
-      Recadrer_ecran_par_rapport_au_zoom();
-      Calculer_limites();
-      Afficher_ecran();
+      Position_screen_according_to_zoom();
+      Compute_limits();
+      Display_all_screen();
 
       // Repositionner le curseur en fonction des coordonnées visibles
-      Calculer_coordonnees_pinceau();
+      Compute_paintbrush_coordinates();
     }
   }
-  Afficher_curseur();
-  UpdateRect(0,0,0,0);
+  Display_cursor();
+  Update_rect(0,0,0,0);
 }
 
 
-void Bouton_Menu_Loupe(void)
+void Button_Magnify_menu(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
 
-  Ouvrir_fenetre(141,114,"Zoom factors");
+  Open_window(141,114,"Zoom factors");
 
-  Fenetre_Definir_bouton_normal(45,88,51,14,"Cancel",0,1,TOUCHE_ESC); // 1
+  Window_set_normal_button(45,88,51,14,"Cancel",0,1,KEY_ESC); // 1
 
-  Fenetre_Definir_bouton_normal(  9,25,27,14, "x2",0,Loupe_Facteur!= 2,SDLK_F1);    // 2
-  Fenetre_Definir_bouton_normal( 41,25,27,14, "x3",0,Loupe_Facteur!= 3,SDLK_F2);    // 3
-  Fenetre_Definir_bouton_normal( 73,25,27,14, "x4",0,Loupe_Facteur!= 4,SDLK_F3);    // 4
-  Fenetre_Definir_bouton_normal(105,25,27,14, "x5",0,Loupe_Facteur!= 5,SDLK_F4);    // 5
-  Fenetre_Definir_bouton_normal(  9,45,27,14, "x6",0,Loupe_Facteur!= 6,SDLK_F5);    // 6
-  Fenetre_Definir_bouton_normal( 41,45,27,14, "x8",0,Loupe_Facteur!= 8,SDLK_F6);    // 7
-  Fenetre_Definir_bouton_normal( 73,45,27,14,"x10",0,Loupe_Facteur!=10,SDLK_F7);    // 8
-  Fenetre_Definir_bouton_normal(105,45,27,14,"x12",0,Loupe_Facteur!=12,SDLK_F8);    // 9
-  Fenetre_Definir_bouton_normal(  9,65,27,14,"x14",0,Loupe_Facteur!=14,SDLK_F9);    // 10
-  Fenetre_Definir_bouton_normal( 41,65,27,14,"x16",0,Loupe_Facteur!=16,SDLK_F10);    // 11
-  Fenetre_Definir_bouton_normal( 73,65,27,14,"x18",0,Loupe_Facteur!=18,SDLK_F11);    // 12
-  Fenetre_Definir_bouton_normal(105,65,27,14,"x20",0,Loupe_Facteur!=20,SDLK_F12);    // 13
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Window_set_normal_button(  9,25,27,14, "x2",0,Main_magnifier_factor!= 2,SDLK_F1);    // 2
+  Window_set_normal_button( 41,25,27,14, "x3",0,Main_magnifier_factor!= 3,SDLK_F2);    // 3
+  Window_set_normal_button( 73,25,27,14, "x4",0,Main_magnifier_factor!= 4,SDLK_F3);    // 4
+  Window_set_normal_button(105,25,27,14, "x5",0,Main_magnifier_factor!= 5,SDLK_F4);    // 5
+  Window_set_normal_button(  9,45,27,14, "x6",0,Main_magnifier_factor!= 6,SDLK_F5);    // 6
+  Window_set_normal_button( 41,45,27,14, "x8",0,Main_magnifier_factor!= 8,SDLK_F6);    // 7
+  Window_set_normal_button( 73,45,27,14,"x10",0,Main_magnifier_factor!=10,SDLK_F7);    // 8
+  Window_set_normal_button(105,45,27,14,"x12",0,Main_magnifier_factor!=12,SDLK_F8);    // 9
+  Window_set_normal_button(  9,65,27,14,"x14",0,Main_magnifier_factor!=14,SDLK_F9);    // 10
+  Window_set_normal_button( 41,65,27,14,"x16",0,Main_magnifier_factor!=16,SDLK_F10);    // 11
+  Window_set_normal_button( 73,65,27,14,"x18",0,Main_magnifier_factor!=18,SDLK_F11);    // 12
+  Window_set_normal_button(105,65,27,14,"x20",0,Main_magnifier_factor!=20,SDLK_F12);    // 13
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_LOUPE, NULL);
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_MAGNIFIER, NULL);
   }
-  while (Bouton_clicke<=0);
+  while (clicked_button<=0);
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke>1)
+  if (clicked_button>1)
   {
-    Menu_Ordonnee=Menu_Ordonnee_avant_fenetre;
-    Changer_facteur_loupe(Bouton_clicke-2);
+    Menu_Y=Menu_Y_before_window;
+    Change_magnifier_factor(clicked_button-2);
   }
 
-  if ( (Bouton_clicke==1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Cancel
-    Desenclencher_bouton(BOUTON_LOUPE);
+  if ( (clicked_button==1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
+    Unselect_bouton(BUTTON_MAGNIFIER);
 
-  Afficher_ecran();
-  Afficher_curseur();
-  UpdateRect(Principal_Split,0,Largeur_ecran-Principal_Split,Menu_Ordonnee);
+  Display_all_screen();
+  Display_cursor();
+  Update_rect(Main_separator_position,0,Screen_width-Main_separator_position,Menu_Y);
 
-  if ( (Bouton_clicke>1) && (!Loupe_Mode) && (Operation_en_cours!=OPERATION_LOUPE) ) // Passage en mode zoom
+  if ( (clicked_button>1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
   {
-    On_vient_du_menu_de_facteurs_de_zoom=1;
-    Enclencher_bouton(BOUTON_LOUPE,A_GAUCHE);
+    Coming_from_zoom_factor_menu=1;
+    Unselect_button(BUTTON_MAGNIFIER,LEFT_SIDE);
   }
 
 }
 
 
-void Bouton_desenclencher_Loupe(void)
+void Button_Unselect_magnifier(void)
 {
-  if (Loupe_Mode)
+  if (Main_magnifier_mode)
   {
     // On sort du mode loupe
-    Loupe_Mode=0;
+    Main_magnifier_mode=0;
 
     /*
     // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
     // Centrage "brut" de lécran par rapport à la loupe
-    Principal_Decalage_X=Loupe_Decalage_X-((Largeur_ecran-Loupe_Largeur)>>1);
-    Principal_Decalage_Y=Loupe_Decalage_Y-((Menu_Ordonnee-Loupe_Hauteur)>>1);
+    Main_offset_X=Main_magnifier_offset_X-((Screen_width-Main_magnifier_width)>>1);
+    Main_offset_Y=Main_magnifier_offset_Y-((Menu_Y-Main_magnifier_height)>>1);
     */
     // Correction en cas de débordement de l'image
-    if (Ancien_Principal_Decalage_X+Largeur_ecran>Principal_Largeur_image)
-      Principal_Decalage_X=Principal_Largeur_image-Largeur_ecran;
+    if (Old_main_offset_X+Screen_width>Main_image_width)
+      Main_offset_X=Main_image_width-Screen_width;
     else
-      Principal_Decalage_X=Ancien_Principal_Decalage_X;
-    if (Principal_Decalage_X<0)
-      Principal_Decalage_X=0;
+      Main_offset_X=Old_main_offset_X;
+    if (Main_offset_X<0)
+      Main_offset_X=0;
 
-    if (Ancien_Principal_Decalage_Y+Menu_Ordonnee>Principal_Hauteur_image)
-      Principal_Decalage_Y=Principal_Hauteur_image-Menu_Ordonnee;
+    if (Old_main_offset_Y+Menu_Y>Main_image_height)
+      Main_offset_Y=Main_image_height-Menu_Y;
     else
-      Principal_Decalage_Y=Ancien_Principal_Decalage_Y;
-    if (Principal_Decalage_Y<0)
-      Principal_Decalage_Y=0;
+      Main_offset_Y=Old_main_offset_Y;
+    if (Main_offset_Y<0)
+      Main_offset_Y=0;
 
     // La fonction d'affichage dans l'image est désormais un affichage normal.
-    Pixel_Preview=Pixel_Preview_Normal;
+    Pixel_preview=Pixel_preview_normal;
 
     // Calculer les bornes visibles dans l'écran
-    Calculer_limites();
-    Afficher_ecran();  // <=> Display_screen();
+    Compute_limits();
+    Display_all_screen();  // <=> Display_screen();
     // Repositionner le curseur en fonction des coordonnées visibles
-    Calculer_coordonnees_pinceau();
+    Compute_paintbrush_coordinates();
     
     Old_MX = -1;
     Old_MY = -1;
   }
   else // On fait de notre mieux pour restaurer l'ancienne opération:
-    Demarrer_pile_operation(Operation_avant_interruption);
+    Start_operation_stack(Operation_before_interrupt);
 }
 
 
 // -------------------------------- Grille -----------------------------------
 
-void Bouton_Snap_Mode(void)
+void Button_Snap_mode(void)
 {
-  Effacer_curseur();
-  Snap_Mode=!Snap_Mode;
-  Calculer_coordonnees_pinceau();
-  Afficher_curseur();
+  Hide_cursor();
+  Snap_mode=!Snap_mode;
+  Compute_paintbrush_coordinates();
+  Display_cursor();
 }
 
 
-void Bouton_Menu_Grille(void)
+void Button_Grid_menu(void)
 {
-  short Bouton_clicke;
-  word  X_choisi =Snap_Largeur;
-  word  Y_choisi =Snap_Hauteur;
-  short dX_choisi=Snap_Decalage_X;
-  short dY_choisi=Snap_Decalage_Y;
+  short clicked_button;
+  word  chosen_X =Snap_width;
+  word  chosen_Y =Snap_height;
+  short dx_selected=Snap_offset_X;
+  short dy_selected=Snap_offset_Y;
 
-  T_Bouton_special * Bouton_saisie_X;
-  T_Bouton_special * Bouton_saisie_Y;
-  T_Bouton_special * Bouton_saisie_dX;
-  T_Bouton_special * Bouton_saisie_dY;
+  T_Special_button * input_x_button;
+  T_Special_button * input_y_button;
+  T_Special_button * input_dx_button;
+  T_Special_button * input_dy_button;
 
-  char Chaine[3];
+  char str[3];
 
 
-  Ouvrir_fenetre(133,98,"Grid");
+  Open_window(133,98,"Grid");
 
-  Fenetre_Definir_bouton_normal(12,72,51,14,"Cancel",0,1,TOUCHE_ESC);  // 1
-  Fenetre_Definir_bouton_normal(70,72,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(12,72,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(70,72,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
-  Print_dans_fenetre(19,26, "X:",CM_Fonce,CM_Clair);
-  Bouton_saisie_X = Fenetre_Definir_bouton_saisie(37,24,2); // 3
-  Num2str(X_choisi,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_X,Chaine);
+  Print_in_window(19,26, "X:",MC_Dark,MC_Light);
+  input_x_button = Window_set_input_button(37,24,2); // 3
+  Num2str(chosen_X,str,2);
+  Window_input_content(input_x_button,str);
 
-  Print_dans_fenetre(19,47, "Y:",CM_Fonce,CM_Clair);
-  Bouton_saisie_Y = Fenetre_Definir_bouton_saisie(37,45,2); // 4
-  Num2str(Y_choisi,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_Y,Chaine);
+  Print_in_window(19,47, "Y:",MC_Dark,MC_Light);
+  input_y_button = Window_set_input_button(37,45,2); // 4
+  Num2str(chosen_Y,str,2);
+  Window_input_content(input_y_button,str);
 
-  Print_dans_fenetre(69,26,"dX:",CM_Fonce,CM_Clair);
-  Bouton_saisie_dX = Fenetre_Definir_bouton_saisie(95,24,2); // 5
-  Num2str(dX_choisi,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_dX,Chaine);
+  Print_in_window(69,26,"dX:",MC_Dark,MC_Light);
+  input_dx_button = Window_set_input_button(95,24,2); // 5
+  Num2str(dx_selected,str,2);
+  Window_input_content(input_dx_button,str);
 
-  Print_dans_fenetre(69,47,"dY:",CM_Fonce,CM_Clair);
-  Bouton_saisie_dY = Fenetre_Definir_bouton_saisie(95,45,2); // 6
-  Num2str(dY_choisi,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Print_in_window(69,47,"dY:",MC_Dark,MC_Light);
+  input_dy_button = Window_set_input_button(95,45,2); // 6
+  Num2str(dy_selected,str,2);
+  Window_input_content(input_dy_button,str);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case 3 :
-        Num2str(X_choisi,Chaine,2);
-        Readline(39,26,Chaine,2,1);
-        X_choisi=atoi(Chaine);
+        Num2str(chosen_X,str,2);
+        Readline(39,26,str,2,1);
+        chosen_X=atoi(str);
         // On corrige les dimensions
-        if ((!X_choisi) || (X_choisi>80))
+        if ((!chosen_X) || (chosen_X>80))
         {
-          if (!X_choisi)
-            X_choisi=1;
+          if (!chosen_X)
+            chosen_X=1;
           else
-            X_choisi=80;
-          Num2str(X_choisi,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_X,Chaine);
+            chosen_X=80;
+          Num2str(chosen_X,str,2);
+          Window_input_content(input_x_button,str);
         }
-        if (dX_choisi>=X_choisi)
+        if (dx_selected>=chosen_X)
         {
-          dX_choisi=X_choisi-1;
-          Num2str(dX_choisi,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_dX,Chaine);
+          dx_selected=chosen_X-1;
+          Num2str(dx_selected,str,2);
+          Window_input_content(input_dx_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
       case 4 :
-        Num2str(Y_choisi,Chaine,2);
-        Readline(39,47,Chaine,2,1);
-        Y_choisi=atoi(Chaine);
+        Num2str(chosen_Y,str,2);
+        Readline(39,47,str,2,1);
+        chosen_Y=atoi(str);
         // On corrige les dimensions
-        if ((!Y_choisi) || (Y_choisi>80))
+        if ((!chosen_Y) || (chosen_Y>80))
         {
-          if (!Y_choisi)
-            Y_choisi=1;
+          if (!chosen_Y)
+            chosen_Y=1;
           else
-            Y_choisi=80;
-          Num2str(Y_choisi,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_Y,Chaine);
+            chosen_Y=80;
+          Num2str(chosen_Y,str,2);
+          Window_input_content(input_y_button,str);
         }
-        if (dY_choisi>=Y_choisi)
+        if (dy_selected>=chosen_Y)
         {
-          dY_choisi=Y_choisi-1;
-          Num2str(dY_choisi,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
+          dy_selected=chosen_Y-1;
+          Num2str(dy_selected,str,2);
+          Window_input_content(input_dy_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
       case 5 :
-        Num2str(dX_choisi,Chaine,2);
-        Readline(97,26,Chaine,2,1);
-        dX_choisi=atoi(Chaine);
+        Num2str(dx_selected,str,2);
+        Readline(97,26,str,2,1);
+        dx_selected=atoi(str);
         // On corrige les dimensions
-        if (dX_choisi>79)
-          dX_choisi=79;
-        if (dX_choisi>=X_choisi)
-          dX_choisi=X_choisi-1;
+        if (dx_selected>79)
+          dx_selected=79;
+        if (dx_selected>=chosen_X)
+          dx_selected=chosen_X-1;
 
-        Num2str(dX_choisi,Chaine,2);
-        Fenetre_Contenu_bouton_saisie(Bouton_saisie_dX,Chaine);
+        Num2str(dx_selected,str,2);
+        Window_input_content(input_dx_button,str);
 
-        Afficher_curseur();
+        Display_cursor();
         break;
       case 6 :
-        Num2str(dY_choisi,Chaine,2);
-        Readline(97,47,Chaine,2,1);
-        dY_choisi=atoi(Chaine);
+        Num2str(dy_selected,str,2);
+        Readline(97,47,str,2,1);
+        dy_selected=atoi(str);
         // On corrige les dimensions
-        if (dY_choisi>79)
-          dY_choisi=79;
-        if (dY_choisi>=Y_choisi)
-          dY_choisi=Y_choisi-1;
+        if (dy_selected>79)
+          dy_selected=79;
+        if (dy_selected>=chosen_Y)
+          dy_selected=chosen_Y-1;
 
-        Num2str(dY_choisi,Chaine,2);
-        Fenetre_Contenu_bouton_saisie(Bouton_saisie_dY,Chaine);
+        Num2str(dy_selected,str,2);
+        Window_input_content(input_dy_button,str);
 
-        Afficher_curseur();
+        Display_cursor();
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_EFFETS, "GRID");
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "GRID");
   }
-  while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
+  while ( (clicked_button!=1) && (clicked_button!=2) );
 
-  if (Bouton_clicke==2) // OK
+  if (clicked_button==2) // OK
   {
-    Snap_Largeur=X_choisi;
-    Snap_Hauteur=Y_choisi;
-    Snap_Decalage_X=dX_choisi;
-    Snap_Decalage_Y=dY_choisi;
-    Snap_Mode=1;
+    Snap_width=chosen_X;
+    Snap_height=chosen_Y;
+    Snap_offset_X=dx_selected;
+    Snap_offset_Y=dy_selected;
+    Snap_mode=1;
   }
 
-  Fermer_fenetre();
+  Close_window();
 
-  if ( (Bouton_clicke==2) && (!Snap_Mode) )
-    Bouton_Snap_Mode();
+  if ( (clicked_button==2) && (!Snap_mode) )
+    Button_Snap_mode();
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // ----------------------- Modifications de brosse ---------------------------
 
-void Bouton_Brush_FX(void)
+void Button_Brush_FX(void)
 {
-  short Bouton_clicke;
-  short Indice;
+  short clicked_button;
+  short index;
 
-  Ouvrir_fenetre(310,162,"Brush effects");
+  Open_window(310,162,"Brush effects");
 
-  Fenetre_Afficher_cadre(  6,19,298,61);
-  Fenetre_Afficher_cadre(  6,83,122,53);
-  Fenetre_Afficher_cadre(137,83,167,53);
+  Window_display_frame(  6,19,298,61);
+  Window_display_frame(  6,83,122,53);
+  Window_display_frame(137,83,167,53);
 
-  Fenetre_Definir_bouton_normal(236,141, 67,14,"Cancel"          ,0,1,TOUCHE_ESC); // 1
-  Fenetre_Definir_bouton_normal( 19, 46, 27,14,"X\035"           ,0,1,Config_Touche[SPECIAL_FLIP_X][0]); // 2
-  Fenetre_Definir_bouton_normal( 19, 61, 27,14,"Y\022"           ,0,1,Config_Touche[SPECIAL_FLIP_Y][0]); // 3
-  Fenetre_Definir_bouton_normal( 58, 46, 37,14,"90°"             ,0,1,Config_Touche[SPECIAL_ROTATE_90][0]); // 4
-  Fenetre_Definir_bouton_normal( 96, 46, 37,14,"180°"            ,0,1,Config_Touche[SPECIAL_ROTATE_180][0]); // 5
-  Fenetre_Definir_bouton_normal( 58, 61, 75,14,"any angle"       ,0,1,Config_Touche[SPECIAL_ROTATE_ANY_ANGLE][0]); // 6
-  Fenetre_Definir_bouton_normal(145, 46, 67,14,"Stretch"         ,0,1,Config_Touche[SPECIAL_STRETCH][0]); // 7
-  Fenetre_Definir_bouton_normal(145, 61, 67,14,"Distort"         ,0,1,Config_Touche[SPECIAL_DISTORT][0]); // 8
-  Fenetre_Definir_bouton_normal(155, 99,131,14,"Recolorize"      ,0,1,Config_Touche[SPECIAL_RECOLORIZE_BRUSH][0]); // 9
-  Fenetre_Definir_bouton_normal(155,117,131,14,"Get brush colors",0,1,Config_Touche[SPECIAL_GET_BRUSH_COLORS][0]); // 10
+  Window_set_normal_button(236,141, 67,14,"Cancel"          ,0,1,KEY_ESC); // 1
+  Window_set_normal_button( 19, 46, 27,14,"X\035"           ,0,1,Config_Key[SPECIAL_FLIP_X][0]); // 2
+  Window_set_normal_button( 19, 61, 27,14,"Y\022"           ,0,1,Config_Key[SPECIAL_FLIP_Y][0]); // 3
+  Window_set_normal_button( 58, 46, 37,14,"90°"             ,0,1,Config_Key[SPECIAL_ROTATE_90][0]); // 4
+  Window_set_normal_button( 96, 46, 37,14,"180°"            ,0,1,Config_Key[SPECIAL_ROTATE_180][0]); // 5
+  Window_set_normal_button( 58, 61, 75,14,"any angle"       ,0,1,Config_Key[SPECIAL_ROTATE_ANY_ANGLE][0]); // 6
+  Window_set_normal_button(145, 46, 67,14,"Stretch"         ,0,1,Config_Key[SPECIAL_STRETCH][0]); // 7
+  Window_set_normal_button(145, 61, 67,14,"Distort"         ,0,1,Config_Key[SPECIAL_DISTORT][0]); // 8
+  Window_set_normal_button(155, 99,131,14,"Recolorize"      ,0,1,Config_Key[SPECIAL_RECOLORIZE_BRUSH][0]); // 9
+  Window_set_normal_button(155,117,131,14,"Get brush colors",0,1,Config_Key[SPECIAL_GET_BRUSH_COLORS][0]); // 10
 
   // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
-  Fenetre_Definir_bouton_normal( 75, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_LEFT_ATTACHMENT][0]); // 11
-  Fenetre_Definir_bouton_normal(103, 90,11,11,"",0,1,Config_Touche[SPECIAL_TOP_RIGHT_ATTACHMENT][0]); // 12
-  Fenetre_Definir_bouton_normal( 89,104,11,11,"",0,1,Config_Touche[SPECIAL_CENTER_ATTACHMENT][0]); // 13
-  Fenetre_Definir_bouton_normal( 75,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_LEFT_ATTACHMENT][0]); // 14
-  Fenetre_Definir_bouton_normal(103,118,11,11,"",0,1,Config_Touche[SPECIAL_BOTTOM_RIGHT_ATTACHMENT][0]); // 15
+  Window_set_normal_button( 75, 90,11,11,"",0,1,Config_Key[SPECIAL_TOP_LEFT_ATTACHMENT][0]); // 11
+  Window_set_normal_button(103, 90,11,11,"",0,1,Config_Key[SPECIAL_TOP_RIGHT_ATTACHMENT][0]); // 12
+  Window_set_normal_button( 89,104,11,11,"",0,1,Config_Key[SPECIAL_CENTER_ATTACHMENT][0]); // 13
+  Window_set_normal_button( 75,118,11,11,"",0,1,Config_Key[SPECIAL_BOTTOM_LEFT_ATTACHMENT][0]); // 14
+  Window_set_normal_button(103,118,11,11,"",0,1,Config_Key[SPECIAL_BOTTOM_RIGHT_ATTACHMENT][0]); // 15
 
-  Fenetre_Definir_bouton_normal(224,46,67,14,"Outline",0,1,Config_Touche[SPECIAL_OUTLINE][0]); // 16
-  Fenetre_Definir_bouton_normal(224,61,67,14,"Nibble" ,0,1,Config_Touche[SPECIAL_NIBBLE][0]); // 17
+  Window_set_normal_button(224,46,67,14,"Outline",0,1,Config_Key[SPECIAL_OUTLINE][0]); // 16
+  Window_set_normal_button(224,61,67,14,"Nibble" ,0,1,Config_Key[SPECIAL_NIBBLE][0]); // 17
 
-  Fenetre_Definir_bouton_normal(  7,141, 60,14,"Load",0,1,Config_Touche[SPECIAL_LOAD_BRUSH][0]); // 18
-  Fenetre_Definir_bouton_normal( 70,141, 60,14,"Save",0,1,Config_Touche[SPECIAL_SAVE_BRUSH][0]); // 19
+  Window_set_normal_button(  7,141, 60,14,"Load",0,1,Config_Key[SPECIAL_LOAD_BRUSH][0]); // 18
+  Window_set_normal_button( 70,141, 60,14,"Save",0,1,Config_Key[SPECIAL_SAVE_BRUSH][0]); // 19
 
-  Print_dans_fenetre( 80, 24,"Shape modifications",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 10, 36,"Mirror",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 72, 36,"Rotate",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(155, 36,"Deform",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(230, 36,"Borders",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(141, 88,"Colors modifications",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 20,102,"Brush",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 16,110,"handle",CM_Fonce,CM_Clair);
+  Print_in_window( 80, 24,"Shape modifications",MC_Dark,MC_Light);
+  Print_in_window( 10, 36,"Mirror",MC_Dark,MC_Light);
+  Print_in_window( 72, 36,"Rotate",MC_Dark,MC_Light);
+  Print_in_window(155, 36,"Deform",MC_Dark,MC_Light);
+  Print_in_window(230, 36,"Borders",MC_Dark,MC_Light);
+  Print_in_window(141, 88,"Colors modifications",MC_Dark,MC_Light);
+  Print_in_window( 20,102,"Brush",MC_Dark,MC_Light);
+  Print_in_window( 16,110,"handle",MC_Dark,MC_Light);
 
   // Dessin des pointillés pour le "brush handle"
-  for (Indice=0; Indice<13; Indice+=2)
+  for (index=0; index<13; index+=2)
   {
-    Pixel_dans_fenetre( 88+Indice, 92,CM_Fonce);
-    Pixel_dans_fenetre( 88+Indice,126,CM_Fonce);
-    Pixel_dans_fenetre( 77,103+Indice,CM_Fonce);
-    Pixel_dans_fenetre(111,103+Indice,CM_Fonce);
+    Pixel_in_window( 88+index, 92,MC_Dark);
+    Pixel_in_window( 88+index,126,MC_Dark);
+    Pixel_in_window( 77,103+index,MC_Dark);
+    Pixel_in_window(111,103+index,MC_Dark);
   }
   // Dessin des coins et du centre pour les boutons du "brush handle"
     // Coin HG
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 77),Fenetre_Pos_Y+(Menu_Facteur_Y* 92),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 77),Fenetre_Pos_Y+(Menu_Facteur_Y* 92),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
+  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X*7,Menu_factor_Y,MC_Black);
+  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X,Menu_factor_Y*7,MC_Black);
     // Coin HD
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*105),Fenetre_Pos_Y+(Menu_Facteur_Y* 92),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*111),Fenetre_Pos_Y+(Menu_Facteur_Y* 92),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
+  Block(Window_pos_X+(Menu_factor_X*105),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X*7,Menu_factor_Y,MC_Black);
+  Block(Window_pos_X+(Menu_factor_X*111),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X,Menu_factor_Y*7,MC_Black);
     // Centre
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 91),Fenetre_Pos_Y+(Menu_Facteur_Y*109),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 94),Fenetre_Pos_Y+(Menu_Facteur_Y*106),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
+  Block(Window_pos_X+(Menu_factor_X* 91),Window_pos_Y+(Menu_factor_Y*109),Menu_factor_X*7,Menu_factor_Y,MC_Black);
+  Block(Window_pos_X+(Menu_factor_X* 94),Window_pos_Y+(Menu_factor_Y*106),Menu_factor_X,Menu_factor_Y*7,MC_Black);
     // Coin BG
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 77),Fenetre_Pos_Y+(Menu_Facteur_Y*126),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X* 77),Fenetre_Pos_Y+(Menu_Facteur_Y*120),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
+  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y*126),Menu_factor_X*7,Menu_factor_Y,MC_Black);
+  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y*120),Menu_factor_X,Menu_factor_Y*7,MC_Black);
     // Coin BD
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*105),Fenetre_Pos_Y+(Menu_Facteur_Y*126),Menu_Facteur_X*7,Menu_Facteur_Y,CM_Noir);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*111),Fenetre_Pos_Y+(Menu_Facteur_Y*120),Menu_Facteur_X,Menu_Facteur_Y*7,CM_Noir);
+  Block(Window_pos_X+(Menu_factor_X*105),Window_pos_Y+(Menu_factor_Y*126),Menu_factor_X*7,Menu_factor_Y,MC_Black);
+  Block(Window_pos_X+(Menu_factor_X*111),Window_pos_Y+(Menu_factor_Y*120),Menu_factor_X,Menu_factor_Y*7,MC_Black);
   
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
   
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+    clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
-      Touche=0;
-      Fenetre_aide(BOUTON_EFFETS_BROSSE, NULL);
+      Key=0;
+      Window_help(BUTTON_BRUSH_EFFECTS, NULL);
     }
   }
-  while (Bouton_clicke<=0);
+  while (clicked_button<=0);
 
-  Fermer_fenetre();
-  Desenclencher_bouton(BOUTON_EFFETS_BROSSE);
+  Close_window();
+  Unselect_bouton(BUTTON_BRUSH_EFFECTS);
 
   // Gestion du bouton clické
-  switch (Bouton_clicke)
+  switch (clicked_button)
   {
     case  2 : // Flip X
-      Flip_X_LOWLEVEL();
+      Flip_X_lowlevel();
       break;
     case  3 : // Flip Y
-      Flip_Y_LOWLEVEL();
+      Flip_Y_lowlevel();
       break;
     case  4 : // 90° Rotation
       Rotate_90_deg();
       break;
     case  5 : // 180° Rotation
-      if (Brosse_Hauteur&1)
-      { // Brosse de hauteur impaire
-        Flip_X_LOWLEVEL();
-        Flip_Y_LOWLEVEL();
+      if (Brush_height&1)
+      { // Brush de hauteur impaire
+        Flip_X_lowlevel();
+        Flip_Y_lowlevel();
       }
       else
-        Rotate_180_deg_LOWLEVEL();
-      Brosse_Decalage_X=(Brosse_Largeur>>1);
-      Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+        Rotate_180_deg_lowlevel();
+      Brush_offset_X=(Brush_width>>1);
+      Brush_offset_Y=(Brush_height>>1);
       break;
     case  6 : // Any angle rotation
-      Demarrer_pile_operation(OPERATION_TOURNER_BROSSE);
+      Start_operation_stack(OPERATION_ROTATE_BRUSH);
       break;
     case  7 : // Stretch
-      Demarrer_pile_operation(OPERATION_ETIRER_BROSSE);
+      Start_operation_stack(OPERATION_STRETCH_BRUSH);
       break;
     case  8 : // Distort
-      Afficher_curseur();
-      Message_Non_disponible(); // !!! TEMPORAIRE !!!
-      Effacer_curseur();
+      Display_cursor();
+      Message_not_implemented(); // !!! TEMPORAIRE !!!
+      Hide_cursor();
       break;
     case  9 : // Recolorize
-      Remap_brosse();
+      Remap_brush();
       break;
     case 10 : // Get brush colors
-      Afficher_curseur();
+      Display_cursor();
       Get_colors_from_brush();
-      Effacer_curseur();
+      Hide_cursor();
       break;
     case 11 : // Brush Attachment: Top-Left
-      Brosse_Decalage_X=0;
-      Brosse_Decalage_Y=0;
+      Brush_offset_X=0;
+      Brush_offset_Y=0;
       break;
     case 12 : // Brush Attachment: Top-Right
-      Brosse_Decalage_X=(Brosse_Largeur-1);
-      Brosse_Decalage_Y=0;
+      Brush_offset_X=(Brush_width-1);
+      Brush_offset_Y=0;
       break;
     case 13 : // Brush Attachment: Center
-      Brosse_Decalage_X=(Brosse_Largeur>>1);
-      Brosse_Decalage_Y=(Brosse_Hauteur>>1);
+      Brush_offset_X=(Brush_width>>1);
+      Brush_offset_Y=(Brush_height>>1);
       break;
     case 14 : // Brush Attachment: Bottom-Left
-      Brosse_Decalage_X=0;
-      Brosse_Decalage_Y=(Brosse_Hauteur-1);
+      Brush_offset_X=0;
+      Brush_offset_Y=(Brush_height-1);
       break;
     case 15 : // Brush Attachment: Bottom-Right
-      Brosse_Decalage_X=(Brosse_Largeur-1);
-      Brosse_Decalage_Y=(Brosse_Hauteur-1);
+      Brush_offset_X=(Brush_width-1);
+      Brush_offset_Y=(Brush_height-1);
       break;
     case 16 : // Outline
       Outline_brush();
@@ -3404,40 +3404,40 @@ void Bouton_Brush_FX(void)
       Nibble_brush();
       break;
     case 18 : // Load
-      Afficher_curseur();
+      Display_cursor();
       Load_picture(0);
-      Effacer_curseur();
+      Hide_cursor();
       break;
     case 19 : // Save
-      Afficher_curseur();
+      Display_cursor();
       Save_picture(0);
-      Effacer_curseur();
+      Hide_cursor();
       break;
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Mode Smooth -----------------------------------------------------------
-void Bouton_Smooth_Mode(void)
+void Button_Smooth_mode(void)
 {
-  if (Smooth_Mode)
-    Fonction_effet=Aucun_effet;
+  if (Smooth_mode)
+    Effect_function=No_effect;
   else
   {
-    Fonction_effet=Effet_Smooth;
-    Shade_Mode=0;
-    Quick_shade_Mode=0;
-    Colorize_Mode=0;
-    Tiling_Mode=0;
-    Smear_Mode=0;
+    Effect_function=Effect_smooth;
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Colorize_mode=0;
+    Tiling_mode=0;
+    Smear_mode=0;
   }
-  Smooth_Mode=!Smooth_Mode;
+  Smooth_mode=!Smooth_mode;
 }
 
 
-byte Smooth_Matrice_defaut[4][3][3]=
+byte Smooth_default_matrices[4][3][3]=
 {
  { {1,2,1}, {2,4,2}, {1,2,1} },
  { {1,3,1}, {3,9,3}, {1,3,1} },
@@ -3445,160 +3445,160 @@ byte Smooth_Matrice_defaut[4][3][3]=
  { {2,3,2}, {3,1,3}, {2,3,2} }
 };
 
-void Bouton_Smooth_Menu(void)
+void Button_Smooth_menu(void)
 {
-  short Bouton_clicke;
+  short clicked_button;
   short x,y,i,j;
-  byte  Matrice_choisie[3][3];
-  T_Bouton_special * Matrice_Zone_saisie[3][3];
-  char  Chaine[3];
+  byte  chosen_matrix[3][3];
+  T_Special_button * matrix_input[3][3];
+  char  str[3];
 
-  Ouvrir_fenetre(142,109,"Smooth");
+  Open_window(142,109,"Smooth");
 
-  Fenetre_Definir_bouton_normal(82,59,53,14,"Cancel",0,1,TOUCHE_ESC); // 1
-  Fenetre_Definir_bouton_normal(82,88,53,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(82,59,53,14,"Cancel",0,1,KEY_ESC); // 1
+  Window_set_normal_button(82,88,53,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
-  Fenetre_Afficher_cadre(6,17,130,37);
+  Window_display_frame(6,17,130,37);
   for (x=11,y=0; y<4; x+=31,y++)
   {
-    Fenetre_Definir_bouton_normal(x,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
+    Window_set_normal_button(x,22,27,27,"",0,1,SDLK_LAST);      // 3,4,5,6
     for (j=0; j<3; j++)
       for (i=0; i<3; i++)
-        Print_char_dans_fenetre(x+2+(i<<3),24+(j<<3),'0'+Smooth_Matrice_defaut[y][i][j],CM_Noir,CM_Clair);
+        Print_char_in_window(x+2+(i<<3),24+(j<<3),'0'+Smooth_default_matrices[y][i][j],MC_Black,MC_Light);
   }
 
-  Fenetre_Afficher_cadre(6,58, 69,45);
+  Window_display_frame(6,58, 69,45);
   for (j=0; j<3; j++)
     for (i=0; i<3; i++)
     {
-      Matrice_Zone_saisie[i][j]=Fenetre_Definir_bouton_saisie(10+(i*21),62+(j*13),2); // 7..15
-      Num2str(Matrice_choisie[i][j]=Smooth_Matrice[i][j],Chaine,2);
-      Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[i][j],Chaine);
+      matrix_input[i][j]=Window_set_input_button(10+(i*21),62+(j*13),2); // 7..15
+      Num2str(chosen_matrix[i][j]=Smooth_matrix[i][j],str,2);
+      Window_input_content(matrix_input[i][j],str);
     }
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    if (Bouton_clicke>2)
+    if (clicked_button>2)
     {
-      if (Bouton_clicke<=6)
+      if (clicked_button<=6)
       {
-        memcpy(Matrice_choisie,Smooth_Matrice_defaut[Bouton_clicke-3],sizeof(Matrice_choisie));
-        Effacer_curseur();
+        memcpy(chosen_matrix,Smooth_default_matrices[clicked_button-3],sizeof(chosen_matrix));
+        Hide_cursor();
         for (j=0; j<3; j++)
           for (i=0; i<3; i++)
           {
-            Num2str(Matrice_choisie[i][j],Chaine,2);
-            Fenetre_Contenu_bouton_saisie(Matrice_Zone_saisie[i][j],Chaine);
+            Num2str(chosen_matrix[i][j],str,2);
+            Window_input_content(matrix_input[i][j],str);
           }
-        Afficher_curseur();
+        Display_cursor();
       }
       else
       {
-        i=Bouton_clicke-7; x=i%3; y=i/3;
-        Num2str(Matrice_choisie[x][y],Chaine,2);
-        Readline(Matrice_Zone_saisie[x][y]->Pos_X+2,
-                 Matrice_Zone_saisie[x][y]->Pos_Y+2,
-                 Chaine,2,1);
-        Matrice_choisie[x][y]=atoi(Chaine);
-        Afficher_curseur();
+        i=clicked_button-7; x=i%3; y=i/3;
+        Num2str(chosen_matrix[x][y],str,2);
+        Readline(matrix_input[x][y]->Pos_X+2,
+                 matrix_input[x][y]->Pos_Y+2,
+                 str,2,1);
+        chosen_matrix[x][y]=atoi(str);
+        Display_cursor();
       }
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_EFFETS, "SMOOTH");
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "SMOOTH");
   }
-  while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
+  while ((clicked_button!=1) && (clicked_button!=2));
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==2) // OK
+  if (clicked_button==2) // OK
   {
-    memcpy(Smooth_Matrice,Matrice_choisie,sizeof(Smooth_Matrice));
-    Smooth_Mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
-    Bouton_Smooth_Mode();
+    memcpy(Smooth_matrix,chosen_matrix,sizeof(Smooth_matrix));
+    Smooth_mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
+    Button_Smooth_mode();
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Mode Smear ------------------------------------------------------------
-void Bouton_Smear_Mode(void)
+void Button_Smear_mode(void)
 {
-  if (!Smear_Mode)
+  if (!Smear_mode)
   {
-    if (!Colorize_Mode)
-      Fonction_effet=Aucun_effet;
-    Shade_Mode=0;
-    Quick_shade_Mode=0;
-    Smooth_Mode=0;
-    Tiling_Mode=0;
+    if (!Colorize_mode)
+      Effect_function=No_effect;
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
   }
-  Smear_Mode=!Smear_Mode;
+  Smear_mode=!Smear_mode;
 }
 
 
 // -- Mode Colorize ---------------------------------------------------------
-void Calculer_les_tables_de_Colorize(void)
+void Compute_colorize_table(void)
 {
-  word  Indice;
-  word  Facteur_A;
-  word  Facteur_B;
+  word  index;
+  word  factor_a;
+  word  factor_b;
 
-  Facteur_A=256*(100-Colorize_Opacite)/100;
-  Facteur_B=256*(    Colorize_Opacite)/100;
+  factor_a=256*(100-Colorize_opacity)/100;
+  factor_b=256*(    Colorize_opacity)/100;
 
-  for (Indice=0;Indice<256;Indice++)
+  for (index=0;index<256;index++)
   {
-    Table_de_multiplication_par_Facteur_A[Indice]=Indice*Facteur_A;
-    Table_de_multiplication_par_Facteur_B[Indice]=Indice*Facteur_B;
+    Facteur_A_table[index]=index*factor_a;
+    Facteur_B_table[index]=index*factor_b;
   }
 }
 
 
-void Bouton_Colorize_Mode(void)
+void Button_Colorize_mode(void)
 {
-  if (Colorize_Mode)
-    Fonction_effet=Aucun_effet;
+  if (Colorize_mode)
+    Effect_function=No_effect;
   else
   {
-    switch(Colorize_Mode_en_cours)
+    switch(Colorize_current_mode)
     {
       case 0 :
-        Fonction_effet=Effet_Colorize_interpole;
+        Effect_function=Effect_interpolated_colorize;
         break;
       case 1 :
-        Fonction_effet=Effet_Colorize_additif;
+        Effect_function=Effect_additive_colorize;
         break;
       case 2 :
-        Fonction_effet=Effet_Colorize_soustractif;
+        Effect_function=Effect_substractive_colorize;
     }
-    Shade_Mode=0;
-    Quick_shade_Mode=0;
-    Smooth_Mode=0;
-    Tiling_Mode=0;
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
   }
-  Colorize_Mode=!Colorize_Mode;
+  Colorize_mode=!Colorize_mode;
 }
 
 
-void Bouton_Colorize_Afficher_la_selection(int mode)
+void Button_Colorize_display_selection(int mode)
 {
   short y_pos=0; // Ligne où afficher les flèches de sélection
 
   // On commence par effacer les anciennes sélections:
     // Partie gauche
-  Print_dans_fenetre(4,37," ",CM_Noir,CM_Clair);
-  Print_dans_fenetre(4,57," ",CM_Noir,CM_Clair);
-  Print_dans_fenetre(4,74," ",CM_Noir,CM_Clair);
+  Print_in_window(4,37," ",MC_Black,MC_Light);
+  Print_in_window(4,57," ",MC_Black,MC_Light);
+  Print_in_window(4,74," ",MC_Black,MC_Light);
     // Partie droite
-  Print_dans_fenetre(129,37," ",CM_Noir,CM_Clair);
-  Print_dans_fenetre(129,57," ",CM_Noir,CM_Clair);
-  Print_dans_fenetre(129,74," ",CM_Noir,CM_Clair);
+  Print_in_window(129,37," ",MC_Black,MC_Light);
+  Print_in_window(129,57," ",MC_Black,MC_Light);
+  Print_in_window(129,74," ",MC_Black,MC_Light);
 
   // Ensuite, on affiche la flèche là où il le faut:
   switch(mode)
@@ -3612,764 +3612,764 @@ void Bouton_Colorize_Afficher_la_selection(int mode)
     case 2 : // Méthode soustractive
       y_pos=74;
   }
-  Print_dans_fenetre(4,y_pos,"\020",CM_Noir,CM_Clair);
-  Print_dans_fenetre(129,y_pos,"\021",CM_Noir,CM_Clair);
+  Print_in_window(4,y_pos,"\020",MC_Black,MC_Light);
+  Print_in_window(129,y_pos,"\021",MC_Black,MC_Light);
 }
 
-void Bouton_Colorize_Menu(void)
+void Button_Colorize_menu(void)
 {
-  short Opacite_choisie;
-  short Mode_choisi;
-  short Bouton_clicke;
-  char  Chaine[4];
+  short chosen_opacity;
+  short selected_mode;
+  short clicked_button;
+  char  str[4];
 
-  Ouvrir_fenetre(140,118,"Transparency");
+  Open_window(140,118,"Transparency");
 
-  Print_dans_fenetre(16,23,"Opacity:",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_saisie(87,21,3);                               // 1
-  Print_dans_fenetre(117,23,"%",CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_normal(16,34,108,14,"Interpolate",1,1,SDLK_i); // 2
-  Fenetre_Afficher_cadre(12,18,116,34);
+  Print_in_window(16,23,"Opacity:",MC_Dark,MC_Light);
+  Window_set_input_button(87,21,3);                               // 1
+  Print_in_window(117,23,"%",MC_Dark,MC_Light);
+  Window_set_normal_button(16,34,108,14,"Interpolate",1,1,SDLK_i); // 2
+  Window_display_frame(12,18,116,34);
 
-  Fenetre_Definir_bouton_normal(16,54,108,14,"Additive"   ,2,1,SDLK_d); // 3
-  Fenetre_Definir_bouton_normal(16,71,108,14,"Subtractive",1,1,SDLK_s); // 4
+  Window_set_normal_button(16,54,108,14,"Additive"   ,2,1,SDLK_d); // 3
+  Window_set_normal_button(16,71,108,14,"Subtractive",1,1,SDLK_s); // 4
 
-  Fenetre_Definir_bouton_normal(16,94, 51,14,"Cancel"     ,0,1,TOUCHE_ESC); // 5
-  Fenetre_Definir_bouton_normal(73,94, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
+  Window_set_normal_button(16,94, 51,14,"Cancel"     ,0,1,KEY_ESC); // 5
+  Window_set_normal_button(73,94, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
 
-  Num2str(Colorize_Opacite,Chaine,3);
-  Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
-  Bouton_Colorize_Afficher_la_selection(Colorize_Mode_en_cours);
+  Num2str(Colorize_opacity,str,3);
+  Window_input_content(Window_special_button_list,str);
+  Button_Colorize_display_selection(Colorize_current_mode);
 
-  Opacite_choisie=Colorize_Opacite;
-  Mode_choisi    =Colorize_Mode_en_cours;
+  chosen_opacity=Colorize_opacity;
+  selected_mode    =Colorize_current_mode;
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch(Bouton_clicke)
+    switch(clicked_button)
     {
       case 1: // Zone de saisie de l'opacité
-        Num2str(Opacite_choisie,Chaine,3);
-        Readline(89,23,Chaine,3,1);
-        Opacite_choisie=atoi(Chaine);
+        Num2str(chosen_opacity,str,3);
+        Readline(89,23,str,3,1);
+        chosen_opacity=atoi(str);
         // On corrige le pourcentage
-        if (Opacite_choisie>100)
+        if (chosen_opacity>100)
         {
-          Opacite_choisie=100;
-          Num2str(Opacite_choisie,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Fenetre_Liste_boutons_special,Chaine);
+          chosen_opacity=100;
+          Num2str(chosen_opacity,str,3);
+          Window_input_content(Window_special_button_list,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
       case 2: // Méthode interpolée
       case 3: // Méthode additive
       case 4: // Méthode soustractive
-        Mode_choisi=Bouton_clicke-2;
-        Effacer_curseur();
-        Bouton_Colorize_Afficher_la_selection(Mode_choisi);
-        Afficher_curseur();
+        selected_mode=clicked_button-2;
+        Hide_cursor();
+        Button_Colorize_display_selection(selected_mode);
+        Display_cursor();
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_EFFETS, "TRANSPARENCY");
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "TRANSPARENCY");
   }
-  while (Bouton_clicke<5);
+  while (clicked_button<5);
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==6) // OK
+  if (clicked_button==6) // OK
   {
-    Colorize_Opacite      =Opacite_choisie;
-    Colorize_Mode_en_cours=Mode_choisi;
-    Calculer_les_tables_de_Colorize();
-    Colorize_Mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
-    Bouton_Colorize_Mode();
+    Colorize_opacity      =chosen_opacity;
+    Colorize_current_mode=selected_mode;
+    Compute_colorize_table();
+    Colorize_mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
+    Button_Colorize_mode();
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Mode Tiling -----------------------------------------------------------
-void Bouton_Tiling_Mode(void)
+void Button_Tiling_mode(void)
 {
-  if (Tiling_Mode)
-    Fonction_effet=Aucun_effet;
+  if (Tiling_mode)
+    Effect_function=No_effect;
   else
   {
-    Fonction_effet=Effet_Tiling;
-    Shade_Mode=0;
-    Quick_shade_Mode=0;
-    Colorize_Mode=0;
-    Smooth_Mode=0;
-    Smear_Mode=0;
+    Effect_function=Effect_tiling;
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Colorize_mode=0;
+    Smooth_mode=0;
+    Smear_mode=0;
   }
-  Tiling_Mode=!Tiling_Mode;
+  Tiling_mode=!Tiling_mode;
 }
 
 
-void Bouton_Tiling_Menu(void)
+void Button_Tiling_menu(void)
 {
-  short Bouton_clicke;
-  short Offset_X_choisi=Tiling_Decalage_X;
-  short Offset_Y_choisi=Tiling_Decalage_Y;
-  char  Chaine[5];
-  T_Bouton_special * Bouton_saisie_Decalage_X;
-  T_Bouton_special * Bouton_saisie_Decalage_Y;
+  short clicked_button;
+  short chosen_offset_x=Tiling_offset_X;
+  short chosen_offset_y=Tiling_offset_Y;
+  char  str[5];
+  T_Special_button * input_offset_x_button;
+  T_Special_button * input_offset_y_button;
 
-  Ouvrir_fenetre(138,79,"Tiling");
+  Open_window(138,79,"Tiling");
 
-  Fenetre_Definir_bouton_normal(13,55,51,14,"Cancel",0,1,TOUCHE_ESC);  // 1
-  Fenetre_Definir_bouton_normal(74,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
-  Bouton_saisie_Decalage_X = Fenetre_Definir_bouton_saisie(91,21,4);   // 3
-  Bouton_saisie_Decalage_Y = Fenetre_Definir_bouton_saisie(91,35,4);   // 4
-  Print_dans_fenetre(12,23,"Offset X:",CM_Fonce,CM_Clair);
-  Print_dans_fenetre(12,37,"Offset Y:",CM_Fonce,CM_Clair);
+  Window_set_normal_button(13,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(74,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  input_offset_x_button = Window_set_input_button(91,21,4);   // 3
+  input_offset_y_button = Window_set_input_button(91,35,4);   // 4
+  Print_in_window(12,23,"Offset X:",MC_Dark,MC_Light);
+  Print_in_window(12,37,"Offset Y:",MC_Dark,MC_Light);
 
-  Num2str(Tiling_Decalage_X,Chaine,4);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_X,Chaine);
-  Num2str(Tiling_Decalage_Y,Chaine,4);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_Y,Chaine);
+  Num2str(Tiling_offset_X,str,4);
+  Window_input_content(input_offset_x_button,str);
+  Num2str(Tiling_offset_Y,str,4);
+  Window_input_content(input_offset_y_button,str);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    if (Bouton_clicke==3)  // Zone de saisie du décalage X
+    if (clicked_button==3)  // Zone de saisie du décalage X
     {
-      Num2str(Offset_X_choisi,Chaine,4);
-      Readline(93,23,Chaine,4,1);
-      Offset_X_choisi=atoi(Chaine);
+      Num2str(chosen_offset_x,str,4);
+      Readline(93,23,str,4,1);
+      chosen_offset_x=atoi(str);
       // On corrige le décalage en X
-      if (Offset_X_choisi>=Brosse_Largeur)
+      if (chosen_offset_x>=Brush_width)
       {
-        Offset_X_choisi=Brosse_Largeur-1;
-        Num2str(Offset_X_choisi,Chaine,4);
-        Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_X,Chaine);
+        chosen_offset_x=Brush_width-1;
+        Num2str(chosen_offset_x,str,4);
+        Window_input_content(input_offset_x_button,str);
       }
-      Afficher_curseur();
+      Display_cursor();
     }
     else
-    if (Bouton_clicke==4)  // Zone de saisie du décalage Y
+    if (clicked_button==4)  // Zone de saisie du décalage Y
     {
-      Num2str(Offset_Y_choisi,Chaine,4);
-      Readline(93,37,Chaine,4,1);
-      Offset_Y_choisi=atoi(Chaine);
+      Num2str(chosen_offset_y,str,4);
+      Readline(93,37,str,4,1);
+      chosen_offset_y=atoi(str);
       // On corrige le décalage en Y
-      if (Offset_Y_choisi>=Brosse_Hauteur)
+      if (chosen_offset_y>=Brush_height)
       {
-        Offset_Y_choisi=Brosse_Hauteur-1;
-        Num2str(Offset_Y_choisi,Chaine,4);
-        Fenetre_Contenu_bouton_saisie(Bouton_saisie_Decalage_Y,Chaine);
+        chosen_offset_y=Brush_height-1;
+        Num2str(chosen_offset_y,str,4);
+        Window_input_content(input_offset_y_button,str);
       }
-      Afficher_curseur();
+      Display_cursor();
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_EFFETS, "TILING");
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "TILING");
   }
-  while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
+  while ( (clicked_button!=1) && (clicked_button!=2) );
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==2) // OK
+  if (clicked_button==2) // OK
   {
-    Tiling_Decalage_X=Offset_X_choisi;
-    Tiling_Decalage_Y=Offset_Y_choisi;
-    if (!Tiling_Mode)
-      Bouton_Tiling_Mode();
+    Tiling_offset_X=chosen_offset_x;
+    Tiling_offset_Y=chosen_offset_y;
+    if (!Tiling_mode)
+      Button_Tiling_mode();
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 //---------------------------- Courbes de Bézier ----------------------------
 
-void Bouton_Courbes(void)
+void Button_Curves(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(Courbe_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(Selected_curve_mode);
+  Display_cursor();
 }
 
 
-void Bouton_Courbes_Switch_mode(void)
+void Button_Curves_switch_mode(void)
 {
-  if (Courbe_en_cours==OPERATION_COURBE_4_POINTS)
-    Courbe_en_cours=OPERATION_COURBE_3_POINTS;
+  if (Selected_curve_mode==OPERATION_4_POINTS_CURVE)
+    Selected_curve_mode=OPERATION_3_POINTS_CURVE;
   else
-    Courbe_en_cours=OPERATION_COURBE_4_POINTS;
+    Selected_curve_mode=OPERATION_4_POINTS_CURVE;
 
-  Effacer_curseur();
-  Afficher_sprite_dans_menu(BOUTON_COURBES,Courbe_en_cours-OPERATION_COURBE_3_POINTS+5);
-  Demarrer_pile_operation(Courbe_en_cours);
-  Afficher_curseur();
+  Hide_cursor();
+  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode-OPERATION_3_POINTS_CURVE+5);
+  Start_operation_stack(Selected_curve_mode);
+  Display_cursor();
 }
 
 
 //--------------------------------- Spray -----------------------------------
 
-void Bouton_Spray(void)
+void Button_Airbrush(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_SPRAY);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_AIRBRUSH);
+  Display_cursor();
 }
 
 
-void Spray_Rafficher_infos(byte Couleur_selectionnee, byte Rafficher_jauge)
+void Refresh_airbrush_settings(byte selected_color, byte update_slider)
 {
-  char  Chaine[3];
+  char  str[3];
 
-  if (Rafficher_jauge)
+  if (update_slider)
   {
-    Fenetre_Liste_boutons_scroller->Position=49-Spray_Multi_flow[Couleur_selectionnee];
-    Fenetre_Dessiner_jauge(Fenetre_Liste_boutons_scroller);
+    Window_scroller_button_list->Position=49-Airbrush_multi_flow[selected_color];
+    Window_draw_slider(Window_scroller_button_list);
   }
-  Num2str(Spray_Multi_flow[Couleur_selectionnee],Chaine,2);
-  Print_dans_fenetre(196,130,Chaine,CM_Noir,CM_Clair);
+  Num2str(Airbrush_multi_flow[selected_color],str,2);
+  Print_in_window(196,130,str,MC_Black,MC_Light);
   
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*(Fenetre_Liste_boutons_palette->Pos_X+4+(Couleur_selectionnee >> 4)*10)),
-      Fenetre_Pos_Y+(Menu_Facteur_Y*(Fenetre_Liste_boutons_palette->Pos_Y+3+(Couleur_selectionnee & 15)* 5)),
-      Menu_Facteur_X<<1,Menu_Facteur_Y*5);
+  Update_rect(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(selected_color >> 4)*10)),
+      Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(selected_color & 15)* 5)),
+      Menu_factor_X<<1,Menu_factor_Y*5);
 }
 
 
-void Bouton_Spray_Menu(void)
+void Button_Airbrush_menu(void)
 {
-  static byte Spray_Init=0;
-  short  Bouton_clicke;
-  char   Chaine[4];
-  word   Indice;
-  byte   Couleur_selectionnee=Fore_color;
-  byte   Old_Spray_Mode     =Spray_Mode;
-  short  Old_Spray_Size     =Spray_Size;
-  byte   Old_Spray_Delay    =Spray_Delay;
-  byte   Old_Spray_Mono_flow=Spray_Mono_flow;
-  byte   Old_Spray_Multi_flow[256];
-  T_Bouton_special * Saisie_Size;
-  T_Bouton_special * Saisie_Delay;
-  T_Bouton_special * Saisie_Mono_flow;
-  T_Bouton_special * Saisie_Init;
-  word Ancien_Mouse_X;
-  word Ancien_Mouse_Y;
-  byte Ancien_Mouse_K;
-  byte Couleur;
+  static byte spray_init=0;
+  short  clicked_button;
+  char   str[4];
+  word   index;
+  byte   selected_color=Fore_color;
+  byte   old_airbrush_mode     =Airbrush_mode;
+  short  old_airbrush_size     =Airbrush_size;
+  byte   old_airbrush_delay    =Airbrush_delay;
+  byte   old_airbrush_mono_flow=Airbrush_mono_flow;
+  byte   old_airbrush_multi_flow[256];
+  T_Special_button * input_size_button;
+  T_Special_button * input_delay_button;
+  T_Special_button * input_flow_button;
+  T_Special_button * input_init_button;
+  word old_mouse_x;
+  word old_mouse_y;
+  byte old_mouse_k;
+  byte color;
   byte click;
 
 
-  memcpy(Old_Spray_Multi_flow,Spray_Multi_flow,256);
+  memcpy(old_airbrush_multi_flow,Airbrush_multi_flow,256);
 
 
-  Ouvrir_fenetre(226,170,"Spray");
+  Open_window(226,170,"Spray");
 
-  Fenetre_Definir_bouton_normal(110,148,51,14,"Cancel"    ,0,1,TOUCHE_ESC); // 1
-  Fenetre_Definir_bouton_normal(166,148,51,14,"OK"        ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(110,148,51,14,"Cancel"    ,0,1,KEY_ESC); // 1
+  Window_set_normal_button(166,148,51,14,"OK"        ,0,1,SDLK_RETURN); // 2
 
-  Fenetre_Definir_bouton_scroller(178,62,74,50,1,49-Spray_Multi_flow[Couleur_selectionnee]); // 3
+  Window_set_scroller_button(178,62,74,50,1,49-Airbrush_multi_flow[selected_color]); // 3
 
-  Fenetre_Definir_bouton_palette(7,56);                                 // 4
+  Window_set_palette_button(7,56);                                 // 4
 
-  Fenetre_Definir_bouton_normal(  8,148,83,14,"Mode:     ",0,1,SDLK_TAB); // 5
-  if (Spray_Mode)
-    Print_dans_fenetre(50,151," Mono",CM_Noir,CM_Clair);
+  Window_set_normal_button(  8,148,83,14,"Mode:     ",0,1,SDLK_TAB); // 5
+  if (Airbrush_mode)
+    Print_in_window(50,151," Mono",MC_Black,MC_Light);
   else
-    Print_dans_fenetre(50,151,"Multi",CM_Noir,CM_Clair);
+    Print_in_window(50,151,"Multi",MC_Black,MC_Light);
 
-  Fenetre_Definir_bouton_normal(194, 62,19,14,"+1"        ,0,1,SDLK_KP_PLUS); // 6
-  Fenetre_Definir_bouton_normal(194, 79,19,14,"-1"        ,0,1,SDLK_KP_MINUS); // 7
-  Fenetre_Definir_bouton_normal(194, 96,19,14,"x2"        ,0,1,SDLK_KP_MULTIPLY); // 8
-  Fenetre_Definir_bouton_normal(194,113,19,14,"÷2"        ,0,1,SDLK_KP_ENTER); // 9
+  Window_set_normal_button(194, 62,19,14,"+1"        ,0,1,SDLK_KP_PLUS); // 6
+  Window_set_normal_button(194, 79,19,14,"-1"        ,0,1,SDLK_KP_MINUS); // 7
+  Window_set_normal_button(194, 96,19,14,"x2"        ,0,1,SDLK_KP_MULTIPLY); // 8
+  Window_set_normal_button(194,113,19,14,"÷2"        ,0,1,SDLK_KP_ENTER); // 9
 
-  Fenetre_Definir_bouton_normal(  8, 37,43,14,"Clear"     ,1,1,SDLK_c); // 10
+  Window_set_normal_button(  8, 37,43,14,"Clear"     ,1,1,SDLK_c); // 10
 
-  Print_dans_fenetre(142,25,"Size:"     ,CM_Fonce,CM_Clair);
-  Saisie_Size = Fenetre_Definir_bouton_saisie(186,23,3);                // 11
-  Num2str(Spray_Size,Chaine,3);
-  Fenetre_Contenu_bouton_saisie(Saisie_Size,Chaine);
+  Print_in_window(142,25,"Size:"     ,MC_Dark,MC_Light);
+  input_size_button = Window_set_input_button(186,23,3);                // 11
+  Num2str(Airbrush_size,str,3);
+  Window_input_content(input_size_button,str);
 
-  Print_dans_fenetre(142,39,"Delay:"    ,CM_Fonce,CM_Clair);
-  Saisie_Delay = Fenetre_Definir_bouton_saisie(194,37,2);               // 12
-  Num2str(Spray_Delay,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Saisie_Delay,Chaine);
+  Print_in_window(142,39,"Delay:"    ,MC_Dark,MC_Light);
+  input_delay_button = Window_set_input_button(194,37,2);               // 12
+  Num2str(Airbrush_delay,str,2);
+  Window_input_content(input_delay_button,str);
 
-  Print_dans_fenetre( 27,24,"Mono-Flow:",CM_Fonce,CM_Clair);
-  Saisie_Mono_flow = Fenetre_Definir_bouton_saisie(111,22,2);           // 13
-  Num2str(Spray_Mono_flow,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Saisie_Mono_flow,Chaine);
+  Print_in_window( 27,24,"Mono-Flow:",MC_Dark,MC_Light);
+  input_flow_button = Window_set_input_button(111,22,2);           // 13
+  Num2str(Airbrush_mono_flow,str,2);
+  Window_input_content(input_flow_button,str);
 
-  Print_dans_fenetre( 67,40,"Init:",CM_Fonce,CM_Clair);
-  Saisie_Init = Fenetre_Definir_bouton_saisie(111,38,2);                // 14
-  Num2str(Spray_Init,Chaine,2);
-  Fenetre_Contenu_bouton_saisie(Saisie_Init,Chaine);
+  Print_in_window( 67,40,"Init:",MC_Dark,MC_Light);
+  input_init_button = Window_set_input_button(111,38,2);                // 14
+  Num2str(spray_init,str,2);
+  Window_input_content(input_init_button,str);
 
-  Fenetre_Afficher_cadre(173,56,45,86);
-  Fenetre_Afficher_cadre(137,19,81,33);
+  Window_display_frame(173,56,45,86);
+  Window_display_frame(137,19,81,33);
 
   // On tagge toutes les couleurs utilisées
-  for (Indice=0; Indice<256; Indice++)
-    if (Spray_Multi_flow[Indice])
-      Stencil_Tagger_couleur(Indice,CM_Noir);
+  for (index=0; index<256; index++)
+    if (Airbrush_multi_flow[index])
+      Stencil_tag_color(index,MC_Black);
   // Et enfin, on tagge la couleur sélectionnée
-  Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
-  Spray_Rafficher_infos(Couleur_selectionnee,0);
+  Stencil_tag_color(selected_color,MC_White);
+  Refresh_airbrush_settings(selected_color,0);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
-  Stencil_Actualiser_couleur(Couleur_selectionnee);
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
+  Stencil_update_color(selected_color);
 
 
   do
   {
-    Ancien_Mouse_X=Mouse_X;
-    Ancien_Mouse_Y=Mouse_Y;
-    Ancien_Mouse_K=Mouse_K;
+    old_mouse_x=Mouse_X;
+    old_mouse_y=Mouse_Y;
+    old_mouse_k=Mouse_K;
 
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case  0 :
       case  2 : // OK
         break;
 
       case  1 : // Cancel
-        Spray_Mode     =Old_Spray_Mode;
-        Spray_Size     =Old_Spray_Size;
-        Spray_Delay    =Old_Spray_Delay;
-        Spray_Mono_flow=Old_Spray_Mono_flow;
-        memcpy(Spray_Multi_flow,Old_Spray_Multi_flow,256);
+        Airbrush_mode     =old_airbrush_mode;
+        Airbrush_size     =old_airbrush_size;
+        Airbrush_delay    =old_airbrush_delay;
+        Airbrush_mono_flow=old_airbrush_mono_flow;
+        memcpy(Airbrush_multi_flow,old_airbrush_multi_flow,256);
         break;
 
       case  3 : // Scroller
-        Effacer_curseur();
-        Spray_Multi_flow[Couleur_selectionnee]=49-Fenetre_Attribut2;
-        Spray_Rafficher_infos(Couleur_selectionnee,0);
-        Afficher_curseur();
+        Hide_cursor();
+        Airbrush_multi_flow[selected_color]=49-Window_attribute2;
+        Refresh_airbrush_settings(selected_color,0);
+        Display_cursor();
         break;
 
       case -1 :
       case  4 : // Palette
-        if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
+        if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
-          Effacer_curseur();
-          Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
-          Stencil_Actualiser_couleur(Couleur_selectionnee);
+          Hide_cursor();
+          Stencil_tag_color(selected_color,(Airbrush_multi_flow[selected_color])?MC_Black:MC_Light);
+          Stencil_update_color(selected_color);
           // Mettre la couleur sélectionnée à jour suivant le click
-          Couleur_selectionnee=(Bouton_clicke==4) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
+          selected_color=(clicked_button==4) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==2)
-            Spray_Multi_flow[Couleur_selectionnee]=0;
+            Airbrush_multi_flow[selected_color]=0;
           else
-            if (Spray_Multi_flow[Couleur_selectionnee]==0)
-              Spray_Multi_flow[Couleur_selectionnee]=Spray_Init;
+            if (Airbrush_multi_flow[selected_color]==0)
+              Airbrush_multi_flow[selected_color]=spray_init;
 
           // Tagger la couleur sélectionnée en blanc
-          Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
-          Spray_Rafficher_infos(Couleur_selectionnee,1);
-          Afficher_curseur();
-          Stencil_Actualiser_couleur(Couleur_selectionnee);
+          Stencil_tag_color(selected_color,MC_White);
+          Refresh_airbrush_settings(selected_color,1);
+          Display_cursor();
+          Stencil_update_color(selected_color);
         }
         break;
 
       case  5 : // Toggle Mode
-        Spray_Mode=(Spray_Mode+1)&1;
-        Effacer_curseur();
-        if (Spray_Mode)
-          Print_dans_fenetre(50,151," Mono",CM_Noir,CM_Clair);
+        Airbrush_mode=(Airbrush_mode+1)&1;
+        Hide_cursor();
+        if (Airbrush_mode)
+          Print_in_window(50,151," Mono",MC_Black,MC_Light);
         else
-          Print_dans_fenetre(50,151,"Multi",CM_Noir,CM_Clair);
-        UpdateRect(Fenetre_Pos_X+50*Menu_Facteur_X,Fenetre_Pos_Y+151*Menu_Facteur_Y,5*8*Menu_Facteur_X,8*Menu_Facteur_Y);
-        Afficher_curseur();
+          Print_in_window(50,151,"Multi",MC_Black,MC_Light);
+        Update_rect(Window_pos_X+50*Menu_factor_X,Window_pos_Y+151*Menu_factor_Y,5*8*Menu_factor_X,8*Menu_factor_Y);
+        Display_cursor();
         break;
 
       case  6 : // +1
-        for (Indice=0; Indice<256; Indice++)
+        for (index=0; index<256; index++)
         {
-          if ( (Spray_Multi_flow[Indice]) && (Spray_Multi_flow[Indice]<49) )
-            Spray_Multi_flow[Indice]++;
+          if ( (Airbrush_multi_flow[index]) && (Airbrush_multi_flow[index]<49) )
+            Airbrush_multi_flow[index]++;
         }
-        Effacer_curseur();
-        Spray_Rafficher_infos(Couleur_selectionnee,1);
-        Afficher_curseur();
+        Hide_cursor();
+        Refresh_airbrush_settings(selected_color,1);
+        Display_cursor();
         break;
 
       case  7 : // -1
-        for (Indice=0; Indice<256; Indice++)
+        for (index=0; index<256; index++)
         {
-          if (Spray_Multi_flow[Indice]>1)
-            Spray_Multi_flow[Indice]--;
+          if (Airbrush_multi_flow[index]>1)
+            Airbrush_multi_flow[index]--;
         }
-        Effacer_curseur();
-        Spray_Rafficher_infos(Couleur_selectionnee,1);
-        Afficher_curseur();
+        Hide_cursor();
+        Refresh_airbrush_settings(selected_color,1);
+        Display_cursor();
         break;
 
       case  8 : // x2
-        for (Indice=0; Indice<256; Indice++)
+        for (index=0; index<256; index++)
         {
-          if (Spray_Multi_flow[Indice])
+          if (Airbrush_multi_flow[index])
           {
-            Spray_Multi_flow[Indice]<<=1;
-            if (Spray_Multi_flow[Indice]>49)
-              Spray_Multi_flow[Indice]=49;
+            Airbrush_multi_flow[index]<<=1;
+            if (Airbrush_multi_flow[index]>49)
+              Airbrush_multi_flow[index]=49;
           }
         }
-        Effacer_curseur();
-        Spray_Rafficher_infos(Couleur_selectionnee,1);
-        Afficher_curseur();
+        Hide_cursor();
+        Refresh_airbrush_settings(selected_color,1);
+        Display_cursor();
         break;
 
       case  9 : // ÷2
-        for (Indice=0; Indice<256; Indice++)
+        for (index=0; index<256; index++)
         {
-          if (Spray_Multi_flow[Indice]>1)
-            Spray_Multi_flow[Indice]>>=1;
+          if (Airbrush_multi_flow[index]>1)
+            Airbrush_multi_flow[index]>>=1;
         }
-        Effacer_curseur();
-        Spray_Rafficher_infos(Couleur_selectionnee,1);
-        Afficher_curseur();
+        Hide_cursor();
+        Refresh_airbrush_settings(selected_color,1);
+        Display_cursor();
         break;
 
       case 10 : // Clear
-        memset(Spray_Multi_flow,0,256);
+        memset(Airbrush_multi_flow,0,256);
         // On raffiche les infos de la couleur sélectionnée
-        Spray_Rafficher_infos(Couleur_selectionnee,1);
+        Refresh_airbrush_settings(selected_color,1);
         // On efface les anciens TAGs
-        Fenetre_Effacer_tags();
+        Window_clear_tags();
         // Tagger la couleur sélectionnée en blanc
-        Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
-        Stencil_Actualiser_couleur(Couleur_selectionnee);
+        Stencil_tag_color(selected_color,MC_White);
+        Stencil_update_color(selected_color);
         break;
 
       case 11 : // Size
-        Num2str(Spray_Size,Chaine,3);
-        Readline(188,25,Chaine,3,1);
-        Spray_Size=atoi(Chaine);
+        Num2str(Airbrush_size,str,3);
+        Readline(188,25,str,3,1);
+        Airbrush_size=atoi(str);
         // On corrige les dimensions
-        if (Spray_Size>256)
+        if (Airbrush_size>256)
         {
-          Spray_Size=256;
-          Num2str(Spray_Size,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Saisie_Size,Chaine);
+          Airbrush_size=256;
+          Num2str(Airbrush_size,str,3);
+          Window_input_content(input_size_button,str);
         }
-        else if (!Spray_Size)
+        else if (!Airbrush_size)
         {
-          Spray_Size=1;
-          Num2str(Spray_Size,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Saisie_Size,Chaine);
+          Airbrush_size=1;
+          Num2str(Airbrush_size,str,3);
+          Window_input_content(input_size_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 12 : // Delay
-        Num2str(Spray_Delay,Chaine,2);
-        Readline(196,39,Chaine,2,1);
-        Spray_Delay=atoi(Chaine);
+        Num2str(Airbrush_delay,str,2);
+        Readline(196,39,str,2,1);
+        Airbrush_delay=atoi(str);
         // On corrige le delai
-        if (Spray_Delay>99)
+        if (Airbrush_delay>99)
         {
-          Spray_Delay=99;
-          Num2str(Spray_Delay,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Saisie_Delay,Chaine);
+          Airbrush_delay=99;
+          Num2str(Airbrush_delay,str,2);
+          Window_input_content(input_delay_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 13 : // Mono-Flow
-        Num2str(Spray_Mono_flow,Chaine,2);
-        Readline(113,24,Chaine,2,1);
-        Spray_Mono_flow=atoi(Chaine);
+        Num2str(Airbrush_mono_flow,str,2);
+        Readline(113,24,str,2,1);
+        Airbrush_mono_flow=atoi(str);
         // On corrige le flux
-        if (!Spray_Mono_flow)
+        if (!Airbrush_mono_flow)
         {
-          Spray_Mono_flow=1;
-          Num2str(Spray_Mono_flow,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Saisie_Mono_flow,Chaine);
+          Airbrush_mono_flow=1;
+          Num2str(Airbrush_mono_flow,str,2);
+          Window_input_content(input_flow_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
 
       case 14 : // Init
-        Num2str(Spray_Init,Chaine,2);
-        Readline(113,40,Chaine,2,1);
-        Spray_Init=atoi(Chaine);
+        Num2str(spray_init,str,2);
+        Readline(113,40,str,2,1);
+        spray_init=atoi(str);
         // On corrige la valeur
-        if (Spray_Init>=50)
+        if (spray_init>=50)
         {
-          Spray_Init=49;
-          Num2str(Spray_Init,Chaine,2);
-          Fenetre_Contenu_bouton_saisie(Saisie_Init,Chaine);
+          spray_init=49;
+          Num2str(spray_init,str,2);
+          Window_input_content(input_init_button,str);
         }
-        Afficher_curseur();
+        Display_cursor();
         break;
     }
 
     if (!Mouse_K)
-    switch (Touche)
+    switch (Key)
     {
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        Get_color_behind_window(&color,&click);
         if (click)
         {
-          Effacer_curseur();
-          Stencil_Tagger_couleur(Couleur_selectionnee,(Spray_Multi_flow[Couleur_selectionnee])?CM_Noir:CM_Clair);
-          Stencil_Actualiser_couleur(Couleur_selectionnee);
+          Hide_cursor();
+          Stencil_tag_color(selected_color,(Airbrush_multi_flow[selected_color])?MC_Black:MC_Light);
+          Stencil_update_color(selected_color);
           // Mettre la couleur sélectionnée à jour suivant le click
-          Couleur_selectionnee=Couleur;
+          selected_color=color;
           if (click==2)
-            Spray_Multi_flow[Couleur_selectionnee]=0;
+            Airbrush_multi_flow[selected_color]=0;
           else
-            if (Spray_Multi_flow[Couleur_selectionnee]==0)
-              Spray_Multi_flow[Couleur_selectionnee]=Spray_Init;
+            if (Airbrush_multi_flow[selected_color]==0)
+              Airbrush_multi_flow[selected_color]=spray_init;
 
           // Tagger la couleur sélectionnée en blanc
-          Stencil_Tagger_couleur(Couleur_selectionnee,CM_Blanc);
-          Spray_Rafficher_infos(Couleur_selectionnee,1);
-          Afficher_curseur();
-          Stencil_Actualiser_couleur(Couleur_selectionnee);
-          Attendre_fin_de_click();
+          Stencil_tag_color(selected_color,MC_White);
+          Refresh_airbrush_settings(selected_color,1);
+          Display_cursor();
+          Stencil_update_color(selected_color);
+          Wait_end_of_click();
         }
-        Touche=0;
+        Key=0;
         break;
       default:
-      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+      if (Is_shortcut(Key,0x100+BUTTON_HELP))
       {
-        Fenetre_aide(BOUTON_SPRAY, NULL);
-        Touche=0;
+        Window_help(BUTTON_AIRBRUSH, NULL);
+        Key=0;
         break;
       }
         
     }
   }
-  while ( (Bouton_clicke!=1) && (Bouton_clicke!=2) );
+  while ( (clicked_button!=1) && (clicked_button!=2) );
 
-  Fermer_fenetre();
+  Close_window();
 
 /*
   //   Tant que l'on aura pas résolu le problème du désenclenchement du mode
   // de dessin précedent, il faudra laisser ça en remarque et donc passer en
   // spray même si on a clické sur Cancel (idem pour OK (un peu plus bas)).
-  if (Bouton_clicke==1) // Cancel
+  if (clicked_button==1) // Cancel
   {
-    if (Operation_en_cours!=OPERATION_SPRAY)
-      Desenclencher_bouton(BOUTON_SPRAY);
+    if (Current_operation!=OPERATION_AIRBRUSH)
+      Unselect_bouton(BUTTON_AIRBRUSH);
   }
 */
 
-  Afficher_curseur();
+  Display_cursor();
 
 /*
-  if (Bouton_clicke==2) // OK
+  if (clicked_button==2) // OK
 */
-    if (Operation_en_cours!=OPERATION_SPRAY)
-      Enclencher_bouton(BOUTON_SPRAY,A_GAUCHE);
+    if (Current_operation!=OPERATION_AIRBRUSH)
+      Unselect_button(BUTTON_AIRBRUSH,LEFT_SIDE);
 }
 
 
 
-// -- Mode Trame (Sieve) ----------------------------------------------------
+// -- Mode Sieve (Sieve) ----------------------------------------------------
 
-void Bouton_Trame_Mode(void)
+void Button_Trame_mode(void)
 {
-  Trame_Mode=!Trame_Mode;
+  Sieve_mode=!Sieve_mode;
 }
 
 
-void Dessiner_trame_zoomee(short Orig_X, short Orig_Y)
+void Draw_sieve_scaled(short origin_x, short origin_y)
 {
   short x_pos;
   short y_pos;
-  short Taille_X;
-  short Taille_Y;
-  short Debut_X=Fenetre_Pos_X+(Menu_Facteur_X*230);
-  short Debut_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*78);
+  short x_size;
+  short y_size;
+  short start_x=Window_pos_X+(Menu_factor_X*230);
+  short start_y=Window_pos_Y+(Menu_factor_Y*78);
 
-  Taille_X=Menu_Facteur_X*5; // |_ Taille d'une case
-  Taille_Y=Menu_Facteur_Y*5; // |  de la trame zoomée
+  x_size=Menu_factor_X*5; // |_ Taille d'une case
+  y_size=Menu_factor_Y*5; // |  de la trame zoomée
 
   // On efface de contenu précédent
-  Block(Orig_X,Orig_Y,
-        Menu_Facteur_X*Fenetre_Liste_boutons_special->Width,
-        Menu_Facteur_Y*Fenetre_Liste_boutons_special->Height,CM_Clair);
+  Block(origin_x,origin_y,
+        Menu_factor_X*Window_special_button_list->Width,
+        Menu_factor_Y*Window_special_button_list->Height,MC_Light);
 
-  for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
-    for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+  for (y_pos=0; y_pos<Sieve_height; y_pos++)
+    for (x_pos=0; x_pos<Sieve_width; x_pos++)
     {
       // Bordures de la case
-      Block(Orig_X+(x_pos*Taille_X),
-            Orig_Y+((y_pos+1)*Taille_Y)-Menu_Facteur_Y,
-            Taille_X, Menu_Facteur_Y,CM_Fonce);
-      Block(Orig_X+((x_pos+1)*Taille_X)-Menu_Facteur_X,
-            Orig_Y+(y_pos*Taille_Y),
-            Menu_Facteur_X, Taille_Y-1,CM_Fonce);
+      Block(origin_x+(x_pos*x_size),
+            origin_y+((y_pos+1)*y_size)-Menu_factor_Y,
+            x_size, Menu_factor_Y,MC_Dark);
+      Block(origin_x+((x_pos+1)*x_size)-Menu_factor_X,
+            origin_y+(y_pos*y_size),
+            Menu_factor_X, y_size-1,MC_Dark);
       // Contenu de la case
-      Block(Orig_X+(x_pos*Taille_X), Orig_Y+(y_pos*Taille_Y),
-            Taille_X-Menu_Facteur_X, Taille_Y-Menu_Facteur_Y,
-            (Trame[x_pos][y_pos])?CM_Blanc:CM_Noir);
+      Block(origin_x+(x_pos*x_size), origin_y+(y_pos*y_size),
+            x_size-Menu_factor_X, y_size-Menu_factor_Y,
+            (Sieve[x_pos][y_pos])?MC_White:MC_Black);
     }
 
   // Dessiner la preview de la trame
-  Taille_X=Menu_Facteur_X*51; // |_ Taille de la fenêtre
-  Taille_Y=Menu_Facteur_Y*71; // |  de la preview
-  for (y_pos=0; y_pos<Taille_Y; y_pos++)
-    for (x_pos=0; x_pos<Taille_X; x_pos++)
-      Pixel(Debut_X+x_pos,Debut_Y+y_pos,(Trame[x_pos%Trame_Largeur][y_pos%Trame_Hauteur])?CM_Blanc:CM_Noir);
-  UpdateRect(Debut_X,Debut_Y,Taille_X,Taille_Y);
+  x_size=Menu_factor_X*51; // |_ Taille de la fenêtre
+  y_size=Menu_factor_Y*71; // |  de la preview
+  for (y_pos=0; y_pos<y_size; y_pos++)
+    for (x_pos=0; x_pos<x_size; x_pos++)
+      Pixel(start_x+x_pos,start_y+y_pos,(Sieve[x_pos%Sieve_width][y_pos%Sieve_height])?MC_White:MC_Black);
+  Update_rect(start_x,start_y,x_size,y_size);
 }
 
 
-void Dessiner_trames_predefinies(void)
+void Draw_preset_sieve_patterns(void)
 {
-  short Indice;
+  short index;
   short i,j;
-  //short Taille_X,Taille_Y;
+  //short x_size,y_size;
   short Zoom;
   
-  Zoom=Min(Menu_Facteur_X,Menu_Facteur_Y);
+  Zoom=Min(Menu_factor_X,Menu_factor_Y);
   
-  //Taille_X=1;//Menu_Facteur_X/Pixel_height;
-  //Taille_Y=1;//Menu_Facteur_Y/Pixel_width;
+  //x_size=1;//Menu_factor_X/Pixel_height;
+  //y_size=1;//Menu_factor_Y/Pixel_width;
 
-  for (Indice=0; Indice<12; Indice++)
-    for (j=0; j<16*Menu_Facteur_Y/Zoom; j++)
-      for (i=0; i<16*Menu_Facteur_X/Zoom; i++)
-        Block(((Indice*23+10)*Menu_Facteur_X)+i*Zoom+Fenetre_Pos_X,
-          (22*Menu_Facteur_Y)+j*Zoom+Fenetre_Pos_Y,Zoom,Zoom,
-          ((TRAME_PREDEFINIE[Indice][j&0xF]>>(15-(i&0xF)))&1)?CM_Blanc:CM_Noir);
+  for (index=0; index<12; index++)
+    for (j=0; j<16*Menu_factor_Y/Zoom; j++)
+      for (i=0; i<16*Menu_factor_X/Zoom; i++)
+        Block(((index*23+10)*Menu_factor_X)+i*Zoom+Window_pos_X,
+          (22*Menu_factor_Y)+j*Zoom+Window_pos_Y,Zoom,Zoom,
+          ((GFX_sieve_pattern[index][j&0xF]>>(15-(i&0xF)))&1)?MC_White:MC_Black);
 
-  UpdateRect(ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
+  Update_rect(ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
 }
 
 
-void Copier_trame_predefinie(byte Indice)
+void Copy_preset_sieve(byte index)
 {
   short i,j;
 
   for (j=0; j<16; j++)
     for (i=0; i<16; i++)
-      Trame[i][j]=(TRAME_PREDEFINIE[Indice][j]>>(15-i))&1;
-  Trame_Largeur=16;
-  Trame_Hauteur=16;
+      Sieve[i][j]=(GFX_sieve_pattern[index][j]>>(15-i))&1;
+  Sieve_width=16;
+  Sieve_height=16;
 }
 
 
-void Inverser_trame(void)
+void Invert_trame(void)
 {
   byte x_pos,y_pos;
 
-  for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
-    for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
-      Trame[x_pos][y_pos]=!(Trame[x_pos][y_pos]);
+  for (y_pos=0; y_pos<Sieve_height; y_pos++)
+    for (x_pos=0; x_pos<Sieve_width; x_pos++)
+      Sieve[x_pos][y_pos]=!(Sieve[x_pos][y_pos]);
 }
 
 // Rafraichit toute la zone correspondant à la trame zoomee.
-void Mettre_a_jour_trame(short x, short y)
+void Update_sieve_area(short x, short y)
 {
-  UpdateRect(x,y,80*Menu_Facteur_X,80*Menu_Facteur_Y);
+  Update_rect(x,y,80*Menu_factor_X,80*Menu_factor_Y);
 }
 
 
-void Bouton_Trame_Menu(void)
+void Button_Trame_menu(void)
 {
-  short Bouton_clicke;
-  short Indice;
+  short clicked_button;
+  short index;
   short x_pos;
   short y_pos;
-  short Old_Pos_X=0;
-  short Old_Pos_Y=0;
-  short Orig_X;
-  short Orig_Y;
-  static byte Octet_insere=0;
-  T_Bouton_normal * Bouton_Octet_insere;
-  char  Chaine[3];
-  byte  Temp; // Octet temporaire servant à n'importe quoi
-  short Old_Trame_Largeur=Trame_Largeur;
-  short Old_Trame_Hauteur=Trame_Hauteur;
-  byte  Old_Trame[16][16];
-  short Preview_Debut_X; // |  Données précalculées
-  short Preview_Debut_Y; // |_ pour la preview
-  short Preview_Fin_X;   // |  => plus grande
-  short Preview_Fin_Y;   // |  rapidité.
+  short old_x_pos=0;
+  short old_y_pos=0;
+  short origin_x;
+  short origin_y;
+  static byte default_bg_color=0;
+  T_Normal_button * button_bg_color;
+  char  str[3];
+  byte  temp; // Octet temporaire servant à n'importe quoi
+  short old_sieve_width=Sieve_width;
+  short old_sieve_height=Sieve_height;
+  byte  old_sieve[16][16];
+  short preview_x_start; // |  Données précalculées
+  short preview_y_start; // |_ pour la preview
+  short preview_x_end;   // |  => plus grande
+  short preview_y_end;   // |  rapidité.
 
 
-  memcpy(Old_Trame,Trame,256);
+  memcpy(old_sieve,Sieve,256);
 
-  Ouvrir_fenetre(290,179,"Sieve");
+  Open_window(290,179,"Sieve");
 
-  Preview_Debut_X=Fenetre_Pos_X+(Menu_Facteur_X*230);
-  Preview_Debut_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*78);
-  Preview_Fin_X=Preview_Debut_X+(Menu_Facteur_X*51);
-  Preview_Fin_Y=Preview_Debut_Y+(Menu_Facteur_Y*71);
+  preview_x_start=Window_pos_X+(Menu_factor_X*230);
+  preview_y_start=Window_pos_Y+(Menu_factor_Y*78);
+  preview_x_end=preview_x_start+(Menu_factor_X*51);
+  preview_y_end=preview_y_start+(Menu_factor_Y*71);
 
-  Fenetre_Afficher_cadre      (  7, 65,130,43);
-  Fenetre_Afficher_cadre      (  7,110,130,43);
-  Fenetre_Afficher_cadre_creux(142, 68, 82,82);
-  Fenetre_Afficher_cadre_creux(229, 77, 53,73);
+  Window_display_frame      (  7, 65,130,43);
+  Window_display_frame      (  7,110,130,43);
+  Window_display_frame_in(142, 68, 82,82);
+  Window_display_frame_in(229, 77, 53,73);
 
-  Print_dans_fenetre(228, 68,"Preview",CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 27, 83,"Scroll" ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 23,120,"Width:" ,CM_Fonce,CM_Clair);
-  Print_dans_fenetre( 15,136,"Height:",CM_Fonce,CM_Clair);
+  Print_in_window(228, 68,"Preview",MC_Dark,MC_Light);
+  Print_in_window( 27, 83,"Scroll" ,MC_Dark,MC_Light);
+  Print_in_window( 23,120,"Width:" ,MC_Dark,MC_Light);
+  Print_in_window( 15,136,"Height:",MC_Dark,MC_Light);
 
-  Fenetre_Definir_bouton_special(143,69,80,80);                     // 1
+  Window_set_special_button(143,69,80,80);                     // 1
 
-  Fenetre_Definir_bouton_normal(175,157,51,14,"Cancel",0,1,TOUCHE_ESC); // 2
-  Fenetre_Definir_bouton_normal(230,157,51,14,"OK"    ,0,1,SDLK_RETURN); // 3
+  Window_set_normal_button(175,157,51,14,"Cancel",0,1,KEY_ESC); // 2
+  Window_set_normal_button(230,157,51,14,"OK"    ,0,1,SDLK_RETURN); // 3
 
-  Fenetre_Definir_bouton_normal(  8,157,51,14,"Clear" ,1,1,SDLK_c); // 4
-  Fenetre_Definir_bouton_normal( 63,157,51,14,"Invert",1,1,SDLK_i); // 5
+  Window_set_normal_button(  8,157,51,14,"Clear" ,1,1,SDLK_c); // 4
+  Window_set_normal_button( 63,157,51,14,"Invert",1,1,SDLK_i); // 5
 
-  Fenetre_Definir_bouton_normal(  8,46,131,14,"Get from brush"   ,1,1,SDLK_g); // 6
-  Fenetre_Definir_bouton_normal(142,46,139,14,"Transfer to brush",1,1,SDLK_t); // 7
+  Window_set_normal_button(  8,46,131,14,"Get from brush"   ,1,1,SDLK_g); // 6
+  Window_set_normal_button(142,46,139,14,"Transfer to brush",1,1,SDLK_t); // 7
 
-  Fenetre_Definir_bouton_normal(109,114,11,11,"\030",0,1,SDLK_UP|MOD_SHIFT); // 8
-  Fenetre_Definir_bouton_normal(109,138,11,11,"\031",0,1,SDLK_DOWN|MOD_SHIFT); // 9
-  Fenetre_Definir_bouton_normal( 97,126,11,11,"\033",0,1,SDLK_LEFT|MOD_SHIFT); // 10
-  Fenetre_Definir_bouton_normal(121,126,11,11,"\032",0,1,SDLK_RIGHT|MOD_SHIFT); // 11
-  Bouton_Octet_insere = Fenetre_Definir_bouton_normal(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
-        Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
-        Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
+  Window_set_normal_button(109,114,11,11,"\030",0,1,SDLK_UP|MOD_SHIFT); // 8
+  Window_set_normal_button(109,138,11,11,"\031",0,1,SDLK_DOWN|MOD_SHIFT); // 9
+  Window_set_normal_button( 97,126,11,11,"\033",0,1,SDLK_LEFT|MOD_SHIFT); // 10
+  Window_set_normal_button(121,126,11,11,"\032",0,1,SDLK_RIGHT|MOD_SHIFT); // 11
+  button_bg_color = Window_set_normal_button(109,126,11,11,""    ,0,1,SDLK_INSERT); // 12
+  Block(Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
+        Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
+        Menu_factor_X*7, Menu_factor_Y*7, (default_bg_color)?MC_White:MC_Black);
 
-  Fenetre_Definir_bouton_repetable(109, 69,11,11,"\030",0,1,SDLK_UP); // 13
-  Fenetre_Definir_bouton_repetable(109, 93,11,11,"\031",0,1,SDLK_DOWN); // 14
-  Fenetre_Definir_bouton_repetable( 97, 81,11,11,"\033",0,1,SDLK_LEFT); // 15
-  Fenetre_Definir_bouton_repetable(121, 81,11,11,"\032",0,1,SDLK_RIGHT); // 16
+  Window_set_repeatable_button(109, 69,11,11,"\030",0,1,SDLK_UP); // 13
+  Window_set_repeatable_button(109, 93,11,11,"\031",0,1,SDLK_DOWN); // 14
+  Window_set_repeatable_button( 97, 81,11,11,"\033",0,1,SDLK_LEFT); // 15
+  Window_set_repeatable_button(121, 81,11,11,"\032",0,1,SDLK_RIGHT); // 16
 
-  for (Indice=0; Indice<12; Indice++)
-    Fenetre_Definir_bouton_normal((Indice*23)+8,20,20,20,"",0,1,SDLK_F1+Indice); // 17 -> 28
-  Dessiner_trames_predefinies();
+  for (index=0; index<12; index++)
+    Window_set_normal_button((index*23)+8,20,20,20,"",0,1,SDLK_F1+index); // 17 -> 28
+  Draw_preset_sieve_patterns();
 
-  Orig_X=Fenetre_Pos_X+(Menu_Facteur_X*Fenetre_Liste_boutons_special->Pos_X);
-  Orig_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*Fenetre_Liste_boutons_special->Pos_Y);
+  origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
+  origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
 
-  Num2str(Trame_Largeur,Chaine,2);
-  Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
-  Num2str(Trame_Hauteur,Chaine,2);
-  Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
-  Dessiner_trame_zoomee(Orig_X,Orig_Y);
+  Num2str(Sieve_width,str,2);
+  Print_in_window(71,120,str,MC_Black,MC_Light);
+  Num2str(Sieve_height,str,2);
+  Print_in_window(71,136,str,MC_Black,MC_Light);
+  Draw_sieve_scaled(origin_x,origin_y);
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Update_window_area(0,0,Window_width, Window_height);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-  Orig_X=Fenetre_Pos_X+(Menu_Facteur_X*Fenetre_Liste_boutons_special->Pos_X);
-  Orig_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*Fenetre_Liste_boutons_special->Pos_Y);
+  origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
+  origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
 
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case -1 :
       case  0 :
@@ -4377,41 +4377,41 @@ void Bouton_Trame_Menu(void)
 
       case  1 : // Zone de dessin de la trame
         /* // Version qui n'accepte pas les clicks sur la grille
-        x_pos=(Mouse_X-Orig_X)/Menu_Facteur_X;
-        y_pos=(Mouse_Y-Orig_Y)/Menu_Facteur_Y;
+        x_pos=(Mouse_X-origin_x)/Menu_factor_X;
+        y_pos=(Mouse_Y-origin_y)/Menu_factor_Y;
         if ( (x_pos%5<4) && (y_pos%5<4) )
         {
           x_pos/=5;
           y_pos/=5;
-          if ( (x_pos<Trame_Largeur) && (y_pos<Trame_Hauteur) )
+          if ( (x_pos<Sieve_width) && (y_pos<Sieve_height) )
         }
         */
-        x_pos=(Mouse_X-Orig_X)/(Menu_Facteur_X*5);
-        y_pos=(Mouse_Y-Orig_Y)/(Menu_Facteur_Y*5);
-        if ( (x_pos<Trame_Largeur) && (y_pos<Trame_Hauteur) )
+        x_pos=(Mouse_X-origin_x)/(Menu_factor_X*5);
+        y_pos=(Mouse_Y-origin_y)/(Menu_factor_Y*5);
+        if ( (x_pos<Sieve_width) && (y_pos<Sieve_height) )
         {
-          Temp=(Mouse_K==A_GAUCHE);
-          if ( (x_pos!=Old_Pos_X) || (y_pos!=Old_Pos_Y)
-            || (Trame[x_pos][y_pos]!=Temp) )
+          temp=(Mouse_K==LEFT_SIDE);
+          if ( (x_pos!=old_x_pos) || (y_pos!=old_y_pos)
+            || (Sieve[x_pos][y_pos]!=temp) )
           {
-            Old_Pos_X=x_pos;
-            Old_Pos_Y=y_pos;
-            Trame[x_pos][y_pos]=Temp;
-            x_pos=Menu_Facteur_X*5;
-            y_pos=Menu_Facteur_Y*5;
-            Effacer_curseur();
-            if (Temp)
-              Temp=CM_Blanc;
+            old_x_pos=x_pos;
+            old_y_pos=y_pos;
+            Sieve[x_pos][y_pos]=temp;
+            x_pos=Menu_factor_X*5;
+            y_pos=Menu_factor_Y*5;
+            Hide_cursor();
+            if (temp)
+              temp=MC_White;
             else
-              Temp=CM_Noir;
+              temp=MC_Black;
             // Affichage du pixel dans la fenêtre zoomée
-            Block(Orig_X+(Old_Pos_X*x_pos), Orig_Y+(Old_Pos_Y*y_pos),
-                  x_pos-Menu_Facteur_X, y_pos-Menu_Facteur_Y, Temp);
+            Block(origin_x+(old_x_pos*x_pos), origin_y+(old_y_pos*y_pos),
+                  x_pos-Menu_factor_X, y_pos-Menu_factor_Y, temp);
             // Mise à jour de la preview
-            Dessiner_trame_zoomee(Orig_X,Orig_Y);
-            Afficher_curseur();
+            Draw_sieve_scaled(origin_x,origin_y);
+            Display_cursor();
             // Maj de la case seule
-            UpdateRect(Orig_X+(Old_Pos_X*x_pos), Orig_Y+(Old_Pos_Y*y_pos),Menu_Facteur_X*5,Menu_Facteur_Y*5);
+            Update_rect(origin_x+(old_x_pos*x_pos), origin_y+(old_y_pos*y_pos),Menu_factor_X*5,Menu_factor_Y*5);
           }
         }
         break;
@@ -4421,1000 +4421,1000 @@ void Bouton_Trame_Menu(void)
         break;
 
       case  4 : // Clear
-        Effacer_curseur();
-        memset(Trame,Octet_insere,256);
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Hide_cursor();
+        memset(Sieve,default_bg_color,256);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case  5 : // Invert
-        Effacer_curseur();
-        Inverser_trame();
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Hide_cursor();
+        Invert_trame();
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case  6 : // Get from brush
-        Effacer_curseur();
-        Trame_Largeur=(Brosse_Largeur>16)?16:Brosse_Largeur;
-        Trame_Hauteur=(Brosse_Hauteur>16)?16:Brosse_Hauteur;
-        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
-          for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
-            Trame[x_pos][y_pos]=(Lit_pixel_dans_brosse(x_pos,y_pos)!=Back_color);
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Num2str(Trame_Hauteur,Chaine,2);
-        Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
-        Num2str(Trame_Largeur,Chaine,2);
-        Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Hide_cursor();
+        Sieve_width=(Brush_width>16)?16:Brush_width;
+        Sieve_height=(Brush_height>16)?16:Brush_height;
+        for (y_pos=0; y_pos<Sieve_height; y_pos++)
+          for (x_pos=0; x_pos<Sieve_width; x_pos++)
+            Sieve[x_pos][y_pos]=(Read_pixel_from_brush(x_pos,y_pos)!=Back_color);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Num2str(Sieve_height,str,2);
+        Print_in_window(71,136,str,MC_Black,MC_Light);
+        Num2str(Sieve_width,str,2);
+        Print_in_window(71,120,str,MC_Black,MC_Light);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case  7 : // Transfer to brush
-        if (Brosse)
-          free(Brosse);
-        Brosse_Largeur=Trame_Largeur;
-        Brosse_Hauteur=Trame_Hauteur;
-        Brosse=(byte *)malloc(((long)Brosse_Hauteur)*Brosse_Largeur);
-        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
-          for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
-            Pixel_dans_brosse(x_pos,y_pos,(Trame[x_pos][y_pos])?Fore_color:Back_color);
-        Brosse_Decalage_X=(Brosse_Largeur>>1);
-        Brosse_Decalage_Y=(Brosse_Hauteur>>1);
-        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+        if (Brush)
+          free(Brush);
+        Brush_width=Sieve_width;
+        Brush_height=Sieve_height;
+        Brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+        for (y_pos=0; y_pos<Sieve_height; y_pos++)
+          for (x_pos=0; x_pos<Sieve_width; x_pos++)
+            Pixel_in_brush(x_pos,y_pos,(Sieve[x_pos][y_pos])?Fore_color:Back_color);
+        Brush_offset_X=(Brush_width>>1);
+        Brush_offset_Y=(Brush_height>>1);
+        Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
         break;
 
       case  8 : // Réduire hauteur
-        if (Trame_Hauteur>1)
+        if (Sieve_height>1)
         {
-          Effacer_curseur();
-          Trame_Hauteur--;
-          Num2str(Trame_Hauteur,Chaine,2);
-          Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
-          Dessiner_trame_zoomee(Orig_X,Orig_Y);
-          Afficher_curseur();
-          Mettre_a_jour_trame(Orig_X, Orig_Y);
+          Hide_cursor();
+          Sieve_height--;
+          Num2str(Sieve_height,str,2);
+          Print_in_window(71,136,str,MC_Black,MC_Light);
+          Draw_sieve_scaled(origin_x,origin_y);
+          Display_cursor();
+          Update_sieve_area(origin_x, origin_y);
         }
         break;
 
       case  9 : // Agrandir hauteur
-        if (Trame_Hauteur<16)
+        if (Sieve_height<16)
         {
-          Effacer_curseur();
-          for (Indice=0; Indice<Trame_Largeur; Indice++)
-            Trame[Indice][Trame_Hauteur]=Octet_insere;
-          Trame_Hauteur++;
-          Num2str(Trame_Hauteur,Chaine,2);
-          Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
-          Dessiner_trame_zoomee(Orig_X,Orig_Y);
-          Afficher_curseur();
-          Mettre_a_jour_trame(Orig_X, Orig_Y);
+          Hide_cursor();
+          for (index=0; index<Sieve_width; index++)
+            Sieve[index][Sieve_height]=default_bg_color;
+          Sieve_height++;
+          Num2str(Sieve_height,str,2);
+          Print_in_window(71,136,str,MC_Black,MC_Light);
+          Draw_sieve_scaled(origin_x,origin_y);
+          Display_cursor();
+          Update_sieve_area(origin_x, origin_y);
         }
         break;
 
       case 10 : // Réduire largeur
-        if (Trame_Largeur>1)
+        if (Sieve_width>1)
         {
-          Effacer_curseur();
-          Trame_Largeur--;
-          Num2str(Trame_Largeur,Chaine,2);
-          Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
-          Dessiner_trame_zoomee(Orig_X,Orig_Y);
-          Afficher_curseur();
-          Mettre_a_jour_trame(Orig_X, Orig_Y);
+          Hide_cursor();
+          Sieve_width--;
+          Num2str(Sieve_width,str,2);
+          Print_in_window(71,120,str,MC_Black,MC_Light);
+          Draw_sieve_scaled(origin_x,origin_y);
+          Display_cursor();
+          Update_sieve_area(origin_x, origin_y);
         }
         break;
 
       case 11 : // Agrandir largeur
-        if (Trame_Largeur<16)
+        if (Sieve_width<16)
         {
-          Effacer_curseur();
-          for (Indice=0; Indice<Trame_Hauteur; Indice++)
-            Trame[Trame_Largeur][Indice]=Octet_insere;
-          Trame_Largeur++;
-          Num2str(Trame_Largeur,Chaine,2);
-          Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
-          Dessiner_trame_zoomee(Orig_X,Orig_Y);
-          Afficher_curseur();
-          Mettre_a_jour_trame(Orig_X, Orig_Y);
+          Hide_cursor();
+          for (index=0; index<Sieve_height; index++)
+            Sieve[Sieve_width][index]=default_bg_color;
+          Sieve_width++;
+          Num2str(Sieve_width,str,2);
+          Print_in_window(71,120,str,MC_Black,MC_Light);
+          Draw_sieve_scaled(origin_x,origin_y);
+          Display_cursor();
+          Update_sieve_area(origin_x, origin_y);
         }
         break;
 
       case 12 : // Toggle octets insérés
-        Effacer_curseur();
-        Octet_insere=!Octet_insere;
-        Block(Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
-              Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
-              Menu_Facteur_X*7, Menu_Facteur_Y*7, (Octet_insere)?CM_Blanc:CM_Noir);
-        Afficher_curseur();
-        UpdateRect(
-          Fenetre_Pos_X+(Menu_Facteur_X*(Bouton_Octet_insere->Pos_X+2)),
-          Fenetre_Pos_Y+(Menu_Facteur_Y*(Bouton_Octet_insere->Pos_Y+2)),
-          Menu_Facteur_X*7,
-          Menu_Facteur_Y*7);
+        Hide_cursor();
+        default_bg_color=!default_bg_color;
+        Block(Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
+              Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
+              Menu_factor_X*7, Menu_factor_Y*7, (default_bg_color)?MC_White:MC_Black);
+        Display_cursor();
+        Update_rect(
+          Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
+          Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
+          Menu_factor_X*7,
+          Menu_factor_Y*7);
 
         break;
 
       case 13 : // Scroll vers le haut
-        Effacer_curseur();
-        for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+        Hide_cursor();
+        for (x_pos=0; x_pos<Sieve_width; x_pos++)
         {
-          Temp=Trame[x_pos][0]; // Octet temporaire
-          for (y_pos=1; y_pos<Trame_Hauteur; y_pos++)
-            Trame[x_pos][y_pos-1]=Trame[x_pos][y_pos];
-          Trame[x_pos][Trame_Hauteur-1]=Temp;
+          temp=Sieve[x_pos][0]; // Octet temporaire
+          for (y_pos=1; y_pos<Sieve_height; y_pos++)
+            Sieve[x_pos][y_pos-1]=Sieve[x_pos][y_pos];
+          Sieve[x_pos][Sieve_height-1]=temp;
         }
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case 14 : // Scroll vers le bas
-        Effacer_curseur();
-        for (x_pos=0; x_pos<Trame_Largeur; x_pos++)
+        Hide_cursor();
+        for (x_pos=0; x_pos<Sieve_width; x_pos++)
         {
-          Temp=Trame[x_pos][Trame_Hauteur-1]; // Octet temporaire
-          for (y_pos=Trame_Hauteur-1; y_pos>0; y_pos--)
-            Trame[x_pos][y_pos]=Trame[x_pos][y_pos-1];
-          Trame[x_pos][0]=Temp;
+          temp=Sieve[x_pos][Sieve_height-1]; // Octet temporaire
+          for (y_pos=Sieve_height-1; y_pos>0; y_pos--)
+            Sieve[x_pos][y_pos]=Sieve[x_pos][y_pos-1];
+          Sieve[x_pos][0]=temp;
         }
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case 15 : // Scroll vers la gauche
-        Effacer_curseur();
-        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+        Hide_cursor();
+        for (y_pos=0; y_pos<Sieve_height; y_pos++)
         {
-          Temp=Trame[0][y_pos]; // Octet temporaire
-          for (x_pos=1; x_pos<Trame_Largeur; x_pos++)
-            Trame[x_pos-1][y_pos]=Trame[x_pos][y_pos];
-          Trame[Trame_Largeur-1][y_pos]=Temp;
+          temp=Sieve[0][y_pos]; // Octet temporaire
+          for (x_pos=1; x_pos<Sieve_width; x_pos++)
+            Sieve[x_pos-1][y_pos]=Sieve[x_pos][y_pos];
+          Sieve[Sieve_width-1][y_pos]=temp;
         }
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       case 16 : // Scroll vers la droite
-        Effacer_curseur();
-        for (y_pos=0; y_pos<Trame_Hauteur; y_pos++)
+        Hide_cursor();
+        for (y_pos=0; y_pos<Sieve_height; y_pos++)
         {
-          Temp=Trame[Trame_Largeur-1][y_pos]; // Octet temporaire
-          for (x_pos=Trame_Largeur-1; x_pos>0; x_pos--)
-            Trame[x_pos][y_pos]=Trame[x_pos-1][y_pos];
-          Trame[0][y_pos]=Temp;
+          temp=Sieve[Sieve_width-1][y_pos]; // Octet temporaire
+          for (x_pos=Sieve_width-1; x_pos>0; x_pos--)
+            Sieve[x_pos][y_pos]=Sieve[x_pos-1][y_pos];
+          Sieve[0][y_pos]=temp;
         }
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
         break;
 
       default : // Boutons de trames prédéfinies
-        Effacer_curseur();
-        Copier_trame_predefinie(Bouton_clicke-17);
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Num2str(Trame_Largeur,Chaine,2);
-        Print_dans_fenetre(71,120,Chaine,CM_Noir,CM_Clair);
-        Num2str(Trame_Hauteur,Chaine,2);
-        Print_dans_fenetre(71,136,Chaine,CM_Noir,CM_Clair);
-        Dessiner_trame_zoomee(Orig_X,Orig_Y);
-        Afficher_curseur();
-        Mettre_a_jour_trame(Orig_X, Orig_Y);
+        Hide_cursor();
+        Copy_preset_sieve(clicked_button-17);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Num2str(Sieve_width,str,2);
+        Print_in_window(71,120,str,MC_Black,MC_Light);
+        Num2str(Sieve_height,str,2);
+        Print_in_window(71,136,str,MC_Black,MC_Light);
+        Draw_sieve_scaled(origin_x,origin_y);
+        Display_cursor();
+        Update_sieve_area(origin_x, origin_y);
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
-      Touche=0;
-      Fenetre_aide(BOUTON_EFFETS, "SIEVE");
+      Key=0;
+      Window_help(BUTTON_EFFECTS, "SIEVE");
     }
   }
-  while ( (Bouton_clicke!=2) && (Bouton_clicke!=3) );
+  while ( (clicked_button!=2) && (clicked_button!=3) );
 
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==2) // Cancel
+  if (clicked_button==2) // Cancel
   {
-    Trame_Largeur=Old_Trame_Largeur;
-    Trame_Hauteur=Old_Trame_Hauteur;
-    memcpy(Trame,Old_Trame,256);
+    Sieve_width=old_sieve_width;
+    Sieve_height=old_sieve_height;
+    memcpy(Sieve,old_sieve,256);
   }
 
-  if ( (Bouton_clicke==3) && (!Trame_Mode) ) // OK
-    Bouton_Trame_Mode();
+  if ( (clicked_button==3) && (!Sieve_mode) ) // OK
+    Button_Trame_mode();
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 // -- Gestion des boutons de polygone vide et plein -------------------------
 
-void Bouton_Polygone(void)
+void Button_polygon(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_POLYGONE);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_POLYGON);
+  Display_cursor();
 }
 
 
-void Bouton_Polyform(void)
+void Button_Polyform(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_POLYFORM);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_POLYFORM);
+  Display_cursor();
 }
 
 
-void Bouton_Polyfill(void)
+void Button_Polyfill(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_POLYFILL);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_POLYFILL);
+  Display_cursor();
 }
 
 
-void Bouton_Filled_polyform(void)
+void Button_Filled_polyform(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_FILLED_POLYFORM);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_FILLED_POLYFORM);
+  Display_cursor();
 }
 
 
 // -- Boutons d'ajustement de l'image ---------------------------------------
 
-void Bouton_Ajuster(void)
+void Button_Adjust(void)
 {
-  Effacer_curseur();
-  Demarrer_pile_operation(OPERATION_SCROLL);
-  Afficher_curseur();
+  Hide_cursor();
+  Start_operation_stack(OPERATION_SCROLL);
+  Display_cursor();
 }
 
 
 
 // -- Menu des effets (Shade, Stencil, etc...) ------------------------------
 
-void Afficher_sprite_effet(short Numero_sprite, short Debut_X, short Debut_Y)
+void Display_effect_sprite(short sprite_number, short start_x, short start_y)
 {
   short x,y,x_pos,y_pos;
 
-  for (y=0,y_pos=Debut_Y;y<HAUTEUR_SPRITE_MENU;y++,y_pos++)
-    for (x=0,x_pos=Debut_X;x<LARGEUR_SPRITE_MENU;x++,x_pos++)
-      Pixel_dans_fenetre(x_pos,y_pos,SPRITE_EFFET[Numero_sprite][y][x]);
+  for (y=0,y_pos=start_y;y<MENU_SPRITE_HEIGHT;y++,y_pos++)
+    for (x=0,x_pos=start_x;x<MENU_SPRITE_WIDTH;x++,x_pos++)
+      Pixel_in_window(x_pos,y_pos,GFX_effect_sprite[sprite_number][y][x]);
 
-  UpdateRect(ToWinX(Debut_X),ToWinY(Debut_Y),LARGEUR_SPRITE_MENU*Menu_Facteur_X,HAUTEUR_SPRITE_MENU*Menu_Facteur_Y);
+  Update_rect(ToWinX(start_x),ToWinY(start_y),MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
 }
 
 
-void Afficher_etat_effet(short x, short y, char * label, byte state)
+void Display_effect_state(short x, short y, char * label, byte state)
 {
-  Block(Fenetre_Pos_X+(x*Menu_Facteur_X),Fenetre_Pos_Y+(y*Menu_Facteur_Y),
-        12*Menu_Facteur_X,Menu_Facteur_Y<<3,CM_Clair);
+  Block(Window_pos_X+(x*Menu_factor_X),Window_pos_Y+(y*Menu_factor_Y),
+        12*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
 
-  Print_dans_fenetre(x,y,label,(state)?CM_Blanc:CM_Noir,CM_Clair);
+  Print_in_window(x,y,label,(state)?MC_White:MC_Black,MC_Light);
   if (state)
-    Print_dans_fenetre(x+56,y,":ON ",CM_Blanc,CM_Clair);
+    Print_in_window(x+56,y,":ON ",MC_White,MC_Light);
   else
-    Print_dans_fenetre(x+56,y,":OFF",CM_Noir,CM_Clair);
+    Print_in_window(x+56,y,":OFF",MC_Black,MC_Light);
 }
 
-void Afficher_etat_effets(void)
+void Display_effect_states(void)
 {
-  Afficher_etat_effet( 30, 24,"Shade"  ,Shade_Mode);
-  Afficher_etat_effet( 30, 43,"Q-shade",Quick_shade_Mode);
-  Afficher_etat_effet( 30, 62,"Transp.",Colorize_Mode);
-  Afficher_etat_effet( 30, 81,"Smooth" ,Smooth_Mode);
-  Afficher_etat_effet( 30,100,"Smear"  ,Smear_Mode);
-  Afficher_etat_effet(176, 24,"Stencil",Stencil_Mode);
-  Afficher_etat_effet(176, 43,"Mask"   ,Mask_Mode);
-  Afficher_etat_effet(176, 62,"Sieve"  ,Trame_Mode);
-  Afficher_etat_effet(176, 81,"Grid"   ,Snap_Mode);
-  Afficher_etat_effet(176,100,"Tiling" ,Tiling_Mode);
-}
-
-
-void Afficher_etat_feedback(void)
-{
-  Print_dans_fenetre(159,134,(Config.FX_Feedback)?"YES":" NO",CM_Noir,CM_Clair);
+  Display_effect_state( 30, 24,"Shade"  ,Shade_mode);
+  Display_effect_state( 30, 43,"Q-shade",Quick_shade_mode);
+  Display_effect_state( 30, 62,"Transp.",Colorize_mode);
+  Display_effect_state( 30, 81,"Smooth" ,Smooth_mode);
+  Display_effect_state( 30,100,"Smear"  ,Smear_mode);
+  Display_effect_state(176, 24,"Stencil",Stencil_mode);
+  Display_effect_state(176, 43,"Mask"   ,Mask_mode);
+  Display_effect_state(176, 62,"Sieve"  ,Sieve_mode);
+  Display_effect_state(176, 81,"Grid"   ,Snap_mode);
+  Display_effect_state(176,100,"Tiling" ,Tiling_mode);
 }
 
 
-void Bouton_Effets(void)
+void Display_feedback_state(void)
 {
-  short Bouton_clicke;
-  byte Sortie_par_close=0;
+  Print_in_window(159,134,(Config.FX_Feedback)?"YES":" NO",MC_Black,MC_Light);
+}
 
-  Ouvrir_fenetre(270,152,"Drawing modes (effects)");
 
-  Fenetre_Definir_bouton_normal(  7, 19, 16,16,"",0,1,Config_Touche[SPECIAL_SHADE_MODE][0]); // 1
-  Fenetre_Definir_bouton_normal(  7, 38, 16,16,"",0,1,Config_Touche[SPECIAL_QUICK_SHADE_MODE][0]); // 2
-  Fenetre_Definir_bouton_normal(  7, 57, 16,16,"",0,1,Config_Touche[SPECIAL_COLORIZE_MODE][0]); // 3
-  Fenetre_Definir_bouton_normal(  7, 76, 16,16,"",0,1,Config_Touche[SPECIAL_SMOOTH_MODE][0]); // 4
-  Fenetre_Definir_bouton_normal(  7, 95, 16,16,"",0,1,Config_Touche[SPECIAL_SMEAR_MODE][0]); // 5
-  Fenetre_Definir_bouton_normal(153, 19, 16,16,"",0,1,Config_Touche[SPECIAL_MASK_MODE][0]); // 6
-  Fenetre_Definir_bouton_normal(153, 38, 16,16,"",0,1,Config_Touche[SPECIAL_STENCIL_MODE][0]); // 7
-  Fenetre_Definir_bouton_normal(153, 57, 16,16,"",0,1,Config_Touche[SPECIAL_SIEVE_MODE][0]); // 8
-  Fenetre_Definir_bouton_normal(153, 76, 16,16,"",0,1,Config_Touche[SPECIAL_GRID_MODE][0]); // 9
-  Fenetre_Definir_bouton_normal(153, 95, 16,16,"",0,1,Config_Touche[SPECIAL_TILING_MODE][0]); // 10
-  Fenetre_Definir_bouton_normal(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
-  Fenetre_Definir_bouton_normal(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
-  Fenetre_Definir_bouton_normal( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
-  Afficher_etat_feedback();
-  Afficher_sprite_effet(0,  8,20);
-  Afficher_sprite_effet(0,  8,39);
-  Afficher_sprite_effet(1,  8,58);
-  Afficher_sprite_effet(2,  8,77);
-  Afficher_sprite_effet(8,  8,96);
-  Afficher_sprite_effet(4,154,20);
-  Afficher_sprite_effet(7,154,39);
-  Afficher_sprite_effet(5,154,58);
-  Afficher_sprite_effet(6,154,77);
-  Afficher_sprite_effet(3,154,96);
-  Afficher_etat_effets();
+void Button_Effects(void)
+{
+  short clicked_button;
+  byte exit_by_close_button=0;
 
-  Print_dans_fenetre(12,117,"click: Left:Switch / Right:Edit",CM_Fonce,CM_Clair);
+  Open_window(270,152,"Drawing modes (effects)");
 
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
-  Afficher_curseur();
+  Window_set_normal_button(  7, 19, 16,16,"",0,1,Config_Key[SPECIAL_SHADE_MODE][0]); // 1
+  Window_set_normal_button(  7, 38, 16,16,"",0,1,Config_Key[SPECIAL_QUICK_SHADE_MODE][0]); // 2
+  Window_set_normal_button(  7, 57, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
+  Window_set_normal_button(  7, 76, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
+  Window_set_normal_button(  7, 95, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
+  Window_set_normal_button(153, 19, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 6
+  Window_set_normal_button(153, 38, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 7
+  Window_set_normal_button(153, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
+  Window_set_normal_button(153, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
+  Window_set_normal_button(153, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+  Window_set_normal_button(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
+  Window_set_normal_button(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
+  Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
+  Display_feedback_state();
+  Display_effect_sprite(0,  8,20);
+  Display_effect_sprite(0,  8,39);
+  Display_effect_sprite(1,  8,58);
+  Display_effect_sprite(2,  8,77);
+  Display_effect_sprite(8,  8,96);
+  Display_effect_sprite(4,154,20);
+  Display_effect_sprite(7,154,39);
+  Display_effect_sprite(5,154,58);
+  Display_effect_sprite(6,154,77);
+  Display_effect_sprite(3,154,96);
+  Display_effect_states();
+
+  Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
+
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    if (Touche==TOUCHE_ESC)
+    if (Key==KEY_ESC)
     {
-      Bouton_clicke=11;
-      Touche=0;
+      clicked_button=11;
+      Key=0;
     }
-    else if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+    else if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
-      Touche=0;
+      Key=0;
       // Aide contextuelle
-      switch(Fenetre_Numero_bouton_clicke())
+      switch(Window_get_clicked_button())
       {
         case 1:
-          Fenetre_aide(BOUTON_EFFETS, "SHADE");
+          Window_help(BUTTON_EFFECTS, "SHADE");
           break;
         case 2:
-          Fenetre_aide(BOUTON_EFFETS, "QUICK SHADE");
+          Window_help(BUTTON_EFFECTS, "QUICK SHADE");
           break;
         case 3:
-          Fenetre_aide(BOUTON_EFFETS, "TRANSPARENCY");
+          Window_help(BUTTON_EFFECTS, "TRANSPARENCY");
           break;
         case 4:
-          Fenetre_aide(BOUTON_EFFETS, "SMOOTH");
+          Window_help(BUTTON_EFFECTS, "SMOOTH");
           break;
         case 5:
-          Fenetre_aide(BOUTON_EFFETS, "SMEAR");
+          Window_help(BUTTON_EFFECTS, "SMEAR");
           break;
         case 6:
-          Fenetre_aide(BOUTON_EFFETS, "STENCIL");
+          Window_help(BUTTON_EFFECTS, "STENCIL");
           break;
         case 7:
-          Fenetre_aide(BOUTON_EFFETS, "MASK");
+          Window_help(BUTTON_EFFECTS, "MASK");
           break;
         case 8:
-          Fenetre_aide(BOUTON_EFFETS, "SIEVE");
+          Window_help(BUTTON_EFFECTS, "SIEVE");
           break;
         case 9:
-          Fenetre_aide(BOUTON_EFFETS, "GRID");
+          Window_help(BUTTON_EFFECTS, "GRID");
           break;
         case 10:
-          Fenetre_aide(BOUTON_EFFETS, "TILING");
+          Window_help(BUTTON_EFFECTS, "TILING");
           break;
         default:
-          Fenetre_aide(BOUTON_EFFETS, NULL);
+          Window_help(BUTTON_EFFECTS, NULL);
       }
       continue;  
     }
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case 1 : // Shade
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Shade_Mode();
-          Effacer_curseur();
-          Afficher_etat_effets();
-          Afficher_curseur();
+          Button_Shade_mode();
+          Hide_cursor();
+          Display_effect_states();
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Shade_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Shade_menu();
+          clicked_button=11;
         }
         break;
       case 2 : // Quick-shade
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Quick_shade_Mode();
-          Effacer_curseur();
-          Afficher_etat_effets();
-          Afficher_curseur();
+          Button_Quick_shade_mode();
+          Hide_cursor();
+          Display_effect_states();
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Quick_shade_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Quick_shade_menu();
+          clicked_button=11;
         }
         break;
       case 3 : // Colorize / Transparency
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Colorize_Mode();
-          Effacer_curseur();
-          Afficher_etat_effets();
-          Afficher_curseur();
+          Button_Colorize_mode();
+          Hide_cursor();
+          Display_effect_states();
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Colorize_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Colorize_menu();
+          clicked_button=11;
         }
         break;
       case 4 : // Smooth
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Smooth_Mode();
-          Effacer_curseur();
-          Afficher_etat_effets();
-          Afficher_curseur();
+          Button_Smooth_mode();
+          Hide_cursor();
+          Display_effect_states();
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Smooth_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Smooth_menu();
+          clicked_button=11;
         }
         break;
       case 5 : // Smear
-        Bouton_Smear_Mode();
-        Effacer_curseur();
-        Afficher_etat_effets();
-        Afficher_curseur();
+        Button_Smear_mode();
+        Hide_cursor();
+        Display_effect_states();
+        Display_cursor();
         break;
       case 6 : // Stencil
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Stencil_Mode();
-          Effacer_curseur();
-          Afficher_etat_effet(176,24,"Stencil",Stencil_Mode);
-          Afficher_curseur();
+          Button_Stencil_mode();
+          Hide_cursor();
+          Display_effect_state(176,24,"Stencil",Stencil_mode);
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Menu_Stencil();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Stencil_menu();
+          clicked_button=11;
         }
         break;
       case 7 : // Mask
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Mask_Mode();
-          Effacer_curseur();
-          Afficher_etat_effet(176,43,"Mask",Mask_Mode);
-          Afficher_curseur();
+          Button_Mask_mode();
+          Hide_cursor();
+          Display_effect_state(176,43,"Mask",Mask_mode);
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Mask_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Mask_menu();
+          clicked_button=11;
         }
         break;
       case 8 : // Sieve
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Trame_Mode();
-          Effacer_curseur();
-          Afficher_etat_effet(176,62,"Sieve",Trame_Mode);
-          Afficher_curseur();
+          Button_Trame_mode();
+          Hide_cursor();
+          Display_effect_state(176,62,"Sieve",Sieve_mode);
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Trame_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Trame_menu();
+          clicked_button=11;
         }
         break;
       case 9 : // Grid
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Snap_Mode();
-          Effacer_curseur();
-          Afficher_etat_effet(176,81,"Grid",Snap_Mode);
-          Afficher_curseur();
+          Button_Snap_mode();
+          Hide_cursor();
+          Display_effect_state(176,81,"Grid",Snap_mode);
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Menu_Grille();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Grid_menu();
+          clicked_button=11;
         }
         break;
       case 10 : // Tiling
-        if (Fenetre_Attribut1==A_GAUCHE)
+        if (Window_attribute1==LEFT_SIDE)
         {
-          Bouton_Tiling_Mode();
-          Effacer_curseur();
-          Afficher_etat_effets();
-          Afficher_curseur();
+          Button_Tiling_mode();
+          Hide_cursor();
+          Display_effect_states();
+          Display_cursor();
         }
         else
         {
-          Fermer_fenetre();
-          Afficher_curseur();
-          Bouton_Tiling_Menu();
-          Bouton_clicke=11;
+          Close_window();
+          Display_cursor();
+          Button_Tiling_menu();
+          clicked_button=11;
         }
         break;
       case 11 : // Close
-        Sortie_par_close=1;
+        exit_by_close_button=1;
         break;
       case 12 : // All off
-        Fonction_effet=Aucun_effet;
-        Shade_Mode=0;
-        Quick_shade_Mode=0;
-        Colorize_Mode=0;
-        Smooth_Mode=0;
-        Tiling_Mode=0;
-        Smear_Mode=0;
-        Stencil_Mode=0;
-        Mask_Mode=0;
-        Trame_Mode=0;
-        Snap_Mode=0;
-        Effacer_curseur();
-        Afficher_etat_effets();
-        Afficher_curseur();
+        Effect_function=No_effect;
+        Shade_mode=0;
+        Quick_shade_mode=0;
+        Colorize_mode=0;
+        Smooth_mode=0;
+        Tiling_mode=0;
+        Smear_mode=0;
+        Stencil_mode=0;
+        Mask_mode=0;
+        Sieve_mode=0;
+        Snap_mode=0;
+        Hide_cursor();
+        Display_effect_states();
+        Display_cursor();
         break;
       case 13 : // Feedback (pour Colorize et Shade)
         if ((Config.FX_Feedback=!Config.FX_Feedback)) //!!!
-          FX_Feedback_Ecran=Principal_Ecran;
+          FX_feedback_screen=Main_screen;
         else
-          FX_Feedback_Ecran=Ecran_backup;
-        Effacer_curseur();
-        Afficher_etat_feedback();
-        Afficher_curseur();
+          FX_feedback_screen=Screen_backup;
+        Hide_cursor();
+        Display_feedback_state();
+        Display_cursor();
         break;
     }
   }
-  while (Bouton_clicke!=11);
+  while (clicked_button!=11);
 
-  if (Sortie_par_close)
-    Fermer_fenetre();
+  if (exit_by_close_button)
+    Close_window();
   else
-    Effacer_curseur();
+    Hide_cursor();
 
-  if (!(Shade_Mode||Quick_shade_Mode||Colorize_Mode||Smooth_Mode||Tiling_Mode||Smear_Mode||Stencil_Mode||Mask_Mode||Trame_Mode||Snap_Mode))
-    Desenclencher_bouton(BOUTON_EFFETS);
+  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode))
+    Unselect_bouton(BUTTON_EFFECTS);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 // Affiche tout le selecteur de fontes
-void Dessiner_selecteur_fontes(short x, short y, short Debut_liste, short Position_curseur, short Nombre_visibles)
+void Draw_font_selector(short x, short y, short list_start, short cursor_position, short nb_visibles)
 {
-  int Indice;
-  for (Indice=0; Indice < Nombre_visibles; Indice++)
+  int index;
+  for (index=0; index < nb_visibles; index++)
   {
-    Print_dans_fenetre(x,y+Indice*8,Libelle_fonte(Indice+Debut_liste), CM_Noir, (Position_curseur==Indice)?CM_Fonce:CM_Clair);
+    Print_in_window(x,y+index*8,Font_label(index+list_start), MC_Black, (cursor_position==index)?MC_Dark:MC_Light);
   }
 }
 
-void Bouton_Texte()
+void Button_Text()
 {
-  static char Chaine[256]="";
-  static int Taille_police=32;
+  static char str[256]="";
+  static int font_size=32;
   static int antialias=1;
-  static short Debut_liste=0; // Indice de le premiere fonte dans le selector
-  static short Position_curseur=0; // Indice de la ligne active dans le selector
-  static short Style_Bold=0;
-  static short Style_Italic=0;
+  static short list_start=0; // index de le premiere fonte dans le selector
+  static short cursor_position=0; // index de la ligne active dans le selector
+  static short is_bold=0;
+  static short is_italic=0;
 
-  byte * Nouvelle_Brosse=NULL;
-  int Nouvelle_Largeur;
-  int Nouvelle_Hauteur;
-  int Bouton_clicke;  
-  const int NB_FONTES=8;
-  char Buffer_taille[3];
-  T_Bouton_special * Bouton_taille_texte;
-  T_Bouton_special * Bouton_texte;
-  T_Bouton_special * Bouton_preview;
-  T_Bouton_scroller * Scroller_de_fontes;
-  byte A_redessiner=1;
-  byte A_previsionner=1;
-  short Temp;
+  byte * new_brush=NULL;
+  int new_width;
+  int new_height;
+  int clicked_button;  
+  const int NB_FONTS=8;
+  char size_buffer[3];
+  T_Special_button * input_size_button;
+  T_Special_button * input_text_button;
+  T_Special_button * preview_button;
+  T_Scroller_button * font_scroller;
+  byte redraw_is_needed=1;
+  byte preview_is_needed=1;
+  short temp;
   
-  Ouvrir_fenetre(288,180,"Text");
+  Open_window(288,180,"Text");
 
   // Texte saisi
-  Print_dans_fenetre(6,20,"Text:",CM_Fonce,CM_Clair);
-  Bouton_texte = Fenetre_Definir_bouton_saisie(48,18,29); // 1
+  Print_in_window(6,20,"Text:",MC_Dark,MC_Light);
+  input_text_button = Window_set_input_button(48,18,29); // 1
   
   // TrueType options
-  Fenetre_Afficher_cadre_creux(182,34,100,68);
-  Print_dans_fenetre(199,31,"TrueType", CM_Fonce, CM_Clair);
+  Window_display_frame_in(182,34,100,68);
+  Print_in_window(199,31,"TrueType", MC_Dark, MC_Light);
   // AA
-  Fenetre_Definir_bouton_normal(188,58,13,11,antialias?"X":" ",0,1,SDLK_a); // 2
-  Print_dans_fenetre(206,60,"AntiAlias", CM_Fonce, CM_Clair);
+  Window_set_normal_button(188,58,13,11,antialias?"X":" ",0,1,SDLK_a); // 2
+  Print_in_window(206,60,"AntiAlias", MC_Dark, MC_Light);
   // Bold
-  Fenetre_Definir_bouton_normal(188,72,13,11,Style_Bold?"X":" ",0,1,SDLK_b); // 3
-  Print_dans_fenetre(206,75,"Bold", CM_Fonce, CM_Clair);
+  Window_set_normal_button(188,72,13,11,is_bold?"X":" ",0,1,SDLK_b); // 3
+  Print_in_window(206,75,"Bold", MC_Dark, MC_Light);
   // Italic
-  Fenetre_Definir_bouton_normal(188,86,13,11,Style_Italic?"X":" ",0,1,SDLK_i); // 4
-  Print_dans_fenetre(206,89,"Italic", CM_Fonce, CM_Clair);
+  Window_set_normal_button(188,86,13,11,is_italic?"X":" ",0,1,SDLK_i); // 4
+  Print_in_window(206,89,"Italic", MC_Dark, MC_Light);
   
   // Scroller des fontes
-  Scroller_de_fontes = Fenetre_Definir_bouton_scroller(165,35,NB_FONTES*8,Fonte_nombre,NB_FONTES,Debut_liste); // 5
+  font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Nb_fonts,NB_FONTS,list_start); // 5
   // Liste des fontes disponibles
-  Fenetre_Definir_bouton_special(8,35,152,NB_FONTES*8); // 6
-  Fenetre_Afficher_cadre_creux(7, 33, 154, NB_FONTES*8+4);
+  Window_set_special_button(8,35,152,NB_FONTS*8); // 6
+  Window_display_frame_in(7, 33, 154, NB_FONTS*8+4);
   
   // Taille texte
-  Bouton_taille_texte = Fenetre_Definir_bouton_saisie(220,43,3); // 7
-  Fenetre_Definir_bouton_repetable(202,43,13,11,"-",0,1,SDLK_LAST); // 8
-  Fenetre_Definir_bouton_repetable(251,43,13,11,"+",0,1,SDLK_LAST); // 9
+  input_size_button = Window_set_input_button(220,43,3); // 7
+  Window_set_repeatable_button(202,43,13,11,"-",0,1,SDLK_LAST); // 8
+  Window_set_repeatable_button(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
   // Preview
-  Bouton_preview = Fenetre_Definir_bouton_special(8,106,273,50); // 10
-  Fenetre_Afficher_cadre_creux(7, 105, 275, 52);
+  preview_button = Window_set_special_button(8,106,273,50); // 10
+  Window_display_frame_in(7, 105, 275, 52);
   
-  Fenetre_Definir_bouton_normal(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
-  Fenetre_Definir_bouton_normal(54,160,60,14,"Cancel",0,1,TOUCHE_ESC); // 12
-  Display_Window(0,0,Fenetre_Largeur, Fenetre_Hauteur);
+  Window_set_normal_button(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
+  Window_set_normal_button(54,160,60,14,"Cancel",0,1,KEY_ESC); // 12
+  Update_window_area(0,0,Window_width, Window_height);
   
-  // Chaine texte
-  Fenetre_Contenu_bouton_saisie(Bouton_texte,Chaine);
+  // str texte
+  Window_input_content(input_text_button,str);
   // Taille police
-  A_redessiner=1;
+  redraw_is_needed=1;
   // --
 
   while (1)
   {
-    if (A_redessiner)
+    if (redraw_is_needed)
     {
       // Taille
-      Num2str(Taille_police,Buffer_taille,3);
-      Fenetre_Contenu_bouton_saisie(Bouton_taille_texte,Buffer_taille);
+      Num2str(font_size,size_buffer,3);
+      Window_input_content(input_size_button,size_buffer);
       // Selecteur de fonte
-      Dessiner_selecteur_fontes(8, 35, Debut_liste, Position_curseur, NB_FONTES);
+      Draw_font_selector(8, 35, list_start, cursor_position, NB_FONTS);
     }
-    if (A_previsionner)
+    if (preview_is_needed)
     {
-      const char * Chaine_preview = "AaBbCcDdEeFf012345";
-      if (Chaine[0])
-        Chaine_preview=Chaine;
-      if (Nouvelle_Brosse)
+      const char * preview_string = "AaBbCcDdEeFf012345";
+      if (str[0])
+        preview_string=str;
+      if (new_brush)
       {
-        free(Nouvelle_Brosse);
+        free(new_brush);
       }
       Block(
-        Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
-        Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
-        Bouton_preview->Width*Menu_Facteur_X,
-        Bouton_preview->Height*Menu_Facteur_Y,
-        CM_Clair);
-      Nouvelle_Brosse = Rendu_Texte(Chaine_preview, Position_curseur+Debut_liste, Taille_police, antialias, Style_Bold, Style_Italic, &Nouvelle_Largeur, &Nouvelle_Hauteur);
-      if (Nouvelle_Brosse)
+        Window_pos_X+preview_button->Pos_X*Menu_factor_X,
+        Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+        preview_button->Width*Menu_factor_X,
+        preview_button->Height*Menu_factor_Y,
+        MC_Light);
+      new_brush = Render_text(preview_string, cursor_position+list_start, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
+      if (new_brush)
       {
-        Affiche_brosse(
-          Nouvelle_Brosse,
-          Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
-          Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
+        Display_brush(
+          new_brush,
+          Window_pos_X+preview_button->Pos_X*Menu_factor_X,
+          Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
           0,
           0,
-          Min(Bouton_preview->Width*Menu_Facteur_X, Nouvelle_Largeur),
-          Min(Bouton_preview->Height*Menu_Facteur_Y, Nouvelle_Hauteur),
+          Min(preview_button->Width*Menu_factor_X, new_width),
+          Min(preview_button->Height*Menu_factor_Y, new_height),
           Back_color,
-          Nouvelle_Largeur);
+          new_width);
       }
-      UpdateRect(
-        Fenetre_Pos_X+Bouton_preview->Pos_X*Menu_Facteur_X,
-        Fenetre_Pos_Y+Bouton_preview->Pos_Y*Menu_Facteur_Y,
-        Bouton_preview->Width*Menu_Facteur_X,
-        Bouton_preview->Height*Menu_Facteur_Y);
+      Update_rect(
+        Window_pos_X+preview_button->Pos_X*Menu_factor_X,
+        Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+        preview_button->Width*Menu_factor_X,
+        preview_button->Height*Menu_factor_Y);
     }
-    if (A_redessiner || A_previsionner)
+    if (redraw_is_needed || preview_is_needed)
     {    
-      A_redessiner=0;
-      A_previsionner=0;
-      Afficher_curseur();
+      redraw_is_needed=0;
+      preview_is_needed=0;
+      Display_cursor();
     }
   
-    Bouton_clicke=Fenetre_Bouton_clicke();
-    if (Bouton_clicke==0)
+    clicked_button=Window_clicked_button();
+    if (clicked_button==0)
     {
-      if (Touche==SDLK_UP && (Position_curseur+Debut_liste)>0)
+      if (Key==SDLK_UP && (cursor_position+list_start)>0)
       {
-        Touche=0;
-        Effacer_curseur();
-        Position_curseur--;
-        if (Position_curseur<0)
+        Key=0;
+        Hide_cursor();
+        cursor_position--;
+        if (cursor_position<0)
         {
-          Debut_liste=Debut_liste+Position_curseur;
-          Position_curseur=0;
+          list_start=list_start+cursor_position;
+          cursor_position=0;
           // Mise à jour du scroller
-          Scroller_de_fontes->Position=Debut_liste;
-          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+          font_scroller->Position=list_start;
+          Window_draw_slider(font_scroller);
         }
-        A_redessiner=1;
-        A_previsionner=1;
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche==SDLK_DOWN && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
+      if (Key==SDLK_DOWN && (cursor_position+list_start)<(Nb_fonts-1))
       {
-        Touche=0;
-        Effacer_curseur();
-        Position_curseur++;
-        if (Position_curseur>(NB_FONTES-1))
+        Key=0;
+        Hide_cursor();
+        cursor_position++;
+        if (cursor_position>(NB_FONTS-1))
         {
-          Debut_liste=Debut_liste+Position_curseur-(NB_FONTES-1);
-          Position_curseur=(NB_FONTES-1);
+          list_start=list_start+cursor_position-(NB_FONTS-1);
+          cursor_position=(NB_FONTS-1);
           // Mise à jour du scroller
-          Scroller_de_fontes->Position=Debut_liste;
-          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+          font_scroller->Position=list_start;
+          Window_draw_slider(font_scroller);
         }
-        A_redessiner=1;
-        A_previsionner=1;
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche==SDLK_HOME && (Position_curseur!=0 || Debut_liste!=0))
+      if (Key==SDLK_HOME && (cursor_position!=0 || list_start!=0))
       {
-        Touche=0;
-        Effacer_curseur();
-        Position_curseur=0;
-        Debut_liste=0;
+        Key=0;
+        Hide_cursor();
+        cursor_position=0;
+        list_start=0;
         // Mise à jour du scroller
-        Scroller_de_fontes->Position=Debut_liste;
-        Fenetre_Dessiner_jauge(Scroller_de_fontes);
-        A_redessiner=1;
-        A_previsionner=1;
+        font_scroller->Position=list_start;
+        Window_draw_slider(font_scroller);
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche==SDLK_END && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
+      if (Key==SDLK_END && (cursor_position+list_start)<(Nb_fonts-1))
       {
-        Touche=0;
-        Effacer_curseur();
-        Position_curseur=(Fonte_nombre-1)-Debut_liste;
-        if (Position_curseur>(NB_FONTES-1))
+        Key=0;
+        Hide_cursor();
+        cursor_position=(Nb_fonts-1)-list_start;
+        if (cursor_position>(NB_FONTS-1))
         {
-          Debut_liste=Debut_liste+Position_curseur-(NB_FONTES-1);
-          Position_curseur=(NB_FONTES-1);
+          list_start=list_start+cursor_position-(NB_FONTS-1);
+          cursor_position=(NB_FONTS-1);
           // Mise à jour du scroller
-          Scroller_de_fontes->Position=Debut_liste;
-          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+          font_scroller->Position=list_start;
+          Window_draw_slider(font_scroller);
         }
-        A_redessiner=1;
-        A_previsionner=1;
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche==SDLK_PAGEDOWN && (Position_curseur+Debut_liste)<(Fonte_nombre-1))
+      if (Key==SDLK_PAGEDOWN && (cursor_position+list_start)<(Nb_fonts-1))
       {
-        Touche=0;
-        Effacer_curseur();
-        if (Fonte_nombre<NB_FONTES)
+        Key=0;
+        Hide_cursor();
+        if (Nb_fonts<NB_FONTS)
         {
-          Position_curseur=Fonte_nombre-1;
+          cursor_position=Nb_fonts-1;
         }
-        else if(Position_curseur!=NB_FONTES-1)
+        else if(cursor_position!=NB_FONTS-1)
         {
-          Position_curseur=NB_FONTES-1;
+          cursor_position=NB_FONTS-1;
         }
         else
         {
-          Debut_liste+=NB_FONTES;
-          if (Debut_liste+NB_FONTES>Fonte_nombre)
+          list_start+=NB_FONTS;
+          if (list_start+NB_FONTS>Nb_fonts)
           {
-            Debut_liste=Fonte_nombre-NB_FONTES;
+            list_start=Nb_fonts-NB_FONTS;
           }
           // Mise à jour du scroller
-          Scroller_de_fontes->Position=Debut_liste;
-          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+          font_scroller->Position=list_start;
+          Window_draw_slider(font_scroller);
         }
-        A_redessiner=1;
-        A_previsionner=1;
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche==SDLK_PAGEUP && (Position_curseur+Debut_liste)>0)
+      if (Key==SDLK_PAGEUP && (cursor_position+list_start)>0)
       {
-        Touche=0;
-        Effacer_curseur();
-        if(Position_curseur!=0)
+        Key=0;
+        Hide_cursor();
+        if(cursor_position!=0)
         {
-          Position_curseur=0;
+          cursor_position=0;
         }
         else
         {
-          Debut_liste-=NB_FONTES;
-          if (Debut_liste<0)
+          list_start-=NB_FONTS;
+          if (list_start<0)
           {
-            Debut_liste=0;
+            list_start=0;
           }
           // Mise à jour du scroller
-          Scroller_de_fontes->Position=Debut_liste;
-          Fenetre_Dessiner_jauge(Scroller_de_fontes);
+          font_scroller->Position=list_start;
+          Window_draw_slider(font_scroller);
         }
-        A_redessiner=1;
-        A_previsionner=1;
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
-      if (Touche == TOUCHE_MOUSEWHEELUP && Debut_liste>0)
+      if (Key == KEY_MOUSEWHEELUP && list_start>0)
       {
-        Position_curseur+=Debut_liste;
-        if (Debut_liste>=3)
-          Debut_liste-=3;
+        cursor_position+=list_start;
+        if (list_start>=3)
+          list_start-=3;
         else
-          Debut_liste=0;
-        Position_curseur-=Debut_liste;
+          list_start=0;
+        cursor_position-=list_start;
         // On affiche à nouveau la liste
-        Effacer_curseur();
-        A_redessiner=1;
+        Hide_cursor();
+        redraw_is_needed=1;
         // Mise à jour du scroller
-        Scroller_de_fontes->Position=Debut_liste;
-        Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        font_scroller->Position=list_start;
+        Window_draw_slider(font_scroller);
       }
-      if (Touche==TOUCHE_MOUSEWHEELDOWN && Debut_liste<Fonte_nombre-NB_FONTES)
+      if (Key==KEY_MOUSEWHEELDOWN && list_start<Nb_fonts-NB_FONTS)
       {
-        Position_curseur+=Debut_liste;
-        Debut_liste+=3;
-        if (Debut_liste+NB_FONTES>Fonte_nombre)
+        cursor_position+=list_start;
+        list_start+=3;
+        if (list_start+NB_FONTS>Nb_fonts)
         {
-          Debut_liste=Fonte_nombre-NB_FONTES;
+          list_start=Nb_fonts-NB_FONTS;
         }          
-        Position_curseur-=Debut_liste;
+        cursor_position-=list_start;
         // On affiche à nouveau la liste
-        Effacer_curseur();
-        A_redessiner=1;
+        Hide_cursor();
+        redraw_is_needed=1;
         // Mise à jour du scroller
-        Scroller_de_fontes->Position=Debut_liste;
-        Fenetre_Dessiner_jauge(Scroller_de_fontes);
+        font_scroller->Position=list_start;
+        Window_draw_slider(font_scroller);
       }
-      if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-        Fenetre_aide(BOUTON_TEXTE, NULL);
+      if (Is_shortcut(Key,0x100+BUTTON_HELP))
+        Window_help(BUTTON_TEXT, NULL);
     }
-    switch(Bouton_clicke)
+    switch(clicked_button)
     {
       case 1: // Texte saisi
-      Readline_ex(50,20,Chaine,29,250,0);
-      A_previsionner=1;
+      Readline_ex(50,20,str,29,250,0);
+      preview_is_needed=1;
       break;
 
       case 2: // AA
       antialias = (antialias==0);
-      Effacer_curseur();
-      Print_dans_fenetre(191,60,antialias?"X":" ", CM_Noir, CM_Clair);
-      A_previsionner=1;
+      Hide_cursor();
+      Print_in_window(191,60,antialias?"X":" ", MC_Black, MC_Light);
+      preview_is_needed=1;
       break;
 
       case 3: // Bold
-      Style_Bold = (Style_Bold==0);
-      Effacer_curseur();
-      Print_dans_fenetre(191,74,Style_Bold?"X":" ", CM_Noir, CM_Clair);
-      A_previsionner=1;
+      is_bold = (is_bold==0);
+      Hide_cursor();
+      Print_in_window(191,74,is_bold?"X":" ", MC_Black, MC_Light);
+      preview_is_needed=1;
       break;
 
       case 4: // Italic
-      Style_Italic = (Style_Italic==0);
-      Effacer_curseur();
-      Print_dans_fenetre(191,88,Style_Italic?"X":" ", CM_Noir, CM_Clair);
-      A_previsionner=1;
+      is_italic = (is_italic==0);
+      Hide_cursor();
+      Print_in_window(191,88,is_italic?"X":" ", MC_Black, MC_Light);
+      preview_is_needed=1;
       break;
       
       case 5: // Scroller des fontes
-      if (Debut_liste!=Fenetre_Attribut2)
+      if (list_start!=Window_attribute2)
       {
-        Position_curseur+=Debut_liste;
-        Debut_liste=Fenetre_Attribut2;
-        Position_curseur-=Debut_liste;
+        cursor_position+=list_start;
+        list_start=Window_attribute2;
+        cursor_position-=list_start;
         // On affiche à nouveau la liste
-        Effacer_curseur();
-        A_redessiner=1;
+        Hide_cursor();
+        redraw_is_needed=1;
       }
       break;
       
       case 6: // Selecteur de fonte
-      Temp=(((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-35)>>3;
-      if (Temp!=Position_curseur && Temp < Fonte_nombre)
+      temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-35)>>3;
+      if (temp!=cursor_position && temp < Nb_fonts)
       {
-        Position_curseur=Temp;
+        cursor_position=temp;
         // On affiche à nouveau la liste
-        Effacer_curseur();
-        A_redessiner=1;
-        A_previsionner=1;
+        Hide_cursor();
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
       break;
             
       case 7: // Taille du texte (nombre)
-      Readline(222,45,Buffer_taille,3,1);
-      Taille_police=atoi(Buffer_taille);
+      Readline(222,45,size_buffer,3,1);
+      font_size=atoi(size_buffer);
       // On corrige les dimensions
-      if (Taille_police < 1)
+      if (font_size < 1)
       {
-        Taille_police = 1;
+        font_size = 1;
       }
-      else if (Taille_police>500)
+      else if (font_size>500)
       {
-        Taille_police = 500;
+        font_size = 500;
       }
-      A_redessiner=1;
-      A_previsionner=1;
+      redraw_is_needed=1;
+      preview_is_needed=1;
       break;
       
       case 8: // Taille -
-      if (Taille_police > 1)
+      if (font_size > 1)
       {
-        Taille_police--;
-        Effacer_curseur();
-        A_redessiner=1;
-        A_previsionner=1;
+        font_size--;
+        Hide_cursor();
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
       break;
       
       case 9: // Taille +
-      if (Taille_police < 255)
+      if (font_size < 255)
       {
-        Taille_police++;
-        Effacer_curseur();
-        A_redessiner=1;
-        A_previsionner=1;
+        font_size++;
+        Hide_cursor();
+        redraw_is_needed=1;
+        preview_is_needed=1;
       }
       break;
       
     
       case 11: // OK
-      if (!Nouvelle_Brosse)
+      if (!new_brush)
       {
         // Si echec de rendu
-        Fermer_fenetre();
-        Desenclencher_bouton(BOUTON_TEXTE);
-        Afficher_curseur();
-        Erreur(0);
+        Close_window();
+        Unselect_bouton(BUTTON_TEXT);
+        Display_cursor();
+        Error(0);
         return;
       }
-      if (Brosse) free(Brosse);
+      if (Brush) free(Brush);
     
-      Brosse=Nouvelle_Brosse;
-      Brosse_Largeur=Nouvelle_Largeur;
-      Brosse_Hauteur=Nouvelle_Hauteur;
-      Brosse_Decalage_X=Brosse_Largeur>>1;
-      Brosse_Decalage_Y=Brosse_Hauteur>>1;
+      Brush=new_brush;
+      Brush_width=new_width;
+      Brush_height=new_height;
+      Brush_offset_X=Brush_width>>1;
+      Brush_offset_Y=Brush_height>>1;
  
       // Fermeture
-      Fermer_fenetre();
-      Desenclencher_bouton(BOUTON_TEXTE);
+      Close_window();
+      Unselect_bouton(BUTTON_TEXT);
       
       // On passe en brosse:
-      Afficher_curseur();
-      if (antialias || !TrueType_fonte(Position_curseur+Debut_liste))
-        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_COULEUR);
+      Display_cursor();
+      if (antialias || !TrueType_font(cursor_position+list_start))
+        Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
       else
-        Changer_la_forme_du_pinceau(FORME_PINCEAU_BROSSE_MONOCHROME);
+        Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
 
-      Enclencher_bouton(BOUTON_DESSIN,A_GAUCHE);
+      Unselect_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
         // On se place en mode Dessin discontinu à la main
-        while (Operation_en_cours!=OPERATION_DESSIN_DISCONTINU)
-          Enclencher_bouton(BOUTON_DESSIN,A_DROITE);
+        while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+          Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
       }
-      //Afficher_curseur();
+      //Display_cursor();
       return;
       
       case 12: // Cancel
-      if (Nouvelle_Brosse)
-        free(Nouvelle_Brosse);
-      Fermer_fenetre();
-      Desenclencher_bouton(BOUTON_TEXTE);
-      Afficher_curseur();
+      if (new_brush)
+        free(new_brush);
+      Close_window();
+      Unselect_bouton(BUTTON_TEXT);
+      Display_cursor();
       return;
     }
   }
@@ -5423,9 +5423,9 @@ void Bouton_Texte()
 
 
 /*
-BOUTON_GRADRECT
--BOUTON_SPHERES       (Ellipses dégradées à améliorer)
-BOUTON_TEXTE
--BOUTON_AJUSTER       (Effets sur l'image)
--BOUTON_EFFETS_BROSSE (Distort, Rot. any angle)
+BUTTON_GRADRECT
+-BUTTON_SPHERES       (Ellipses dégradées à améliorer)
+BUTTON_TEXT
+-BUTTON_ADJUST       (Effets sur l'image)
+-BUTTON_BRUSH_EFFECTS (Distort, Rot. any angle)
 */

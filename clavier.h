@@ -22,33 +22,33 @@
 
 /*!
   Convert an SDL keysym to an ANSI/ASCII character.
-  @param Sym SDL symbol to convert
+  @param keysym SDL symbol to convert
 */
-word Conversion_ANSI(SDL_keysym Sym);
+word Keysym_to_ANSI(SDL_keysym keysym);
 
 /*!
   Convert an SDL keysym to an internal keycode number.
   This is needed because SDL tends to split the information across the unicode sym, the regular sym, and the raw keycode.
   We also need to differenciate 1 (keypad) and 1 (regular keyboard), and some other things.
-  @param Sym SDL symbol to convert
+  @param keysym SDL symbol to convert
 */
-word Conversion_Touche(SDL_keysym Sym);
+word Keysym_to_keycode(SDL_keysym keysym);
 
 /*!
     Helper function to convert between SDL system and old coding for keycodes. This is needed because some SDL keycode are actually unicode and won't fit in 8 bits.
   @param scancode Scancode to convert
 */
-word Touche_pour_scancode(word scancode);
+word Key_for_scancode(word scancode);
 
 /*!
     Returns key name in a string. Used to display them in the helpscreens and in the keymapper window.
-  @param Touche keycode of the key to translate, including modifiers
+  @param Key keycode of the key to translate, including modifiers
 */
-const char * Nom_touche(word Touche);
+const char * Key_name(word Key);
 
 /*!
   Gets the modifiers in our format from the SDL_Mod information.
-  @param Mod SDL modifiers state
+  @param mod SDL modifiers state
 */
-word Modificateurs_Touche(SDLMod Mod);
+word Key_modifiers(SDLMod mod);
 

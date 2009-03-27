@@ -39,165 +39,165 @@
 #include "windows.h"
 #include "input.h"
 
-#define COULEUR_TEXTE         CM_Noir
-#define COULEUR_FOND          CM_Clair
-#define COULEUR_TEXTE_CURSEUR CM_Noir
-#define COULEUR_FOND_CURSEUR  CM_Fonce
+#define TEXT_COLOR         MC_Black
+#define BACKGROUND_COLOR          MC_Light
+#define CURSOR_COLOR MC_Black
+#define CURSOR_BACKGROUND_COLOR  MC_Dark
 
 // Suppresion d'un caractère à une certaine POSITION dans une CHAINE.
-void Supprimer_caractere(char * Chaine, byte position)
+void Remove_character(char * str, byte position)
 {
-  for (;Chaine[position]!='\0';position++)
-    Chaine[position]=Chaine[position+1];
+  for (;str[position]!='\0';position++)
+    str[position]=str[position+1];
 }
 
 
-void Inserer_caractere(char * Chaine, char letter, byte position)
+void Insert_character(char * str, char letter, byte position)
 //  Insertion d'une LETTRE à une certaine POSITION
 //  dans une CHAINE d'une certaine TAILLE.
 {
-  char Char_tempo;
+  char temp_char;
 
   for (;letter!='\0';position++)
   {
     // On mémorise le caractère qui se trouve en "position"
-    Char_tempo=Chaine[position];
+    temp_char=str[position];
     // On splotch la lettre à insérer
-    Chaine[position]=letter;
+    str[position]=letter;
     // On place le caractère mémorisé dans "letter" comme nouvelle lettre à insérer
-    letter=Char_tempo;
+    letter=temp_char;
   }
   // On termine la chaine
-  Chaine[position]='\0';
+  str[position]='\0';
 }
 
-int CaractereValide(int c)
+int Valid_character(int c)
 {
   // Sous Linux: Seul le / est strictement interdit, mais beaucoup
   // d'autres poseront des problèmes au shell, alors on évite.
   // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
   // AmigaOS4: Pas de ':' car utilisé pour les volumes.
   #if defined(__WIN32__)
-  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
   #elif defined (__amigaos4__)
-  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>', ':'};
+  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
   #else
-  char CaracteresInterdits[] = {'/', '|', '?', '*', '<', '>'};
+  char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
   #endif
   int position;
   
   if (c < ' ' || c > 255)
     return 0;
   
-  for (position=0; position<(long)sizeof(CaracteresInterdits); position++)
-    if (c == CaracteresInterdits[position])
+  for (position=0; position<(long)sizeof(forbidden_char); position++)
+    if (c == forbidden_char[position])
       return 0;
   return 1;
 }
 
-void Rafficher_toute_la_chaine(word x_pos,word y_pos,char * Chaine,byte position)
+void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
 {
-  Print_dans_fenetre(x_pos,y_pos,Chaine,COULEUR_TEXTE,COULEUR_FOND);
-  Print_char_dans_fenetre(x_pos+(position<<3),y_pos,Chaine[position],COULEUR_TEXTE_CURSEUR,COULEUR_FOND_CURSEUR);
+  Print_in_window(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+  Print_char_in_window(x_pos+(position<<3),y_pos,str[position],CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
-byte Readline(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte Type_saisie)
+byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
-//   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   Taille_maxi  : Nombre de caractères logeant dans la zone de saisie
-//   Type_saisie  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+//   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   max_size  : Nombre de caractères logeant dans la zone de saisie
+//   input_type  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
-  byte Taille_maxi;
+  byte max_size;
   // Grosse astuce pour les noms de fichiers: La taille affichée est différente
   // de la taille maximum gérée.
-  if (Type_saisie == 2)
-    Taille_maxi = 255;
+  if (input_type == 2)
+    max_size = 255;
   else
-    Taille_maxi = Taille_affichee;
-  return Readline_ex(x_pos,y_pos,Chaine,Taille_affichee,Taille_maxi,Type_saisie);
+    max_size = visible_size;
+  return Readline_ex(x_pos,y_pos,str,visible_size,max_size,input_type);
 }
 
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
-byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte Taille_maxi, byte Type_saisie)
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
-//   Chaine       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   Taille_maxi  : Nombre de caractères logeant dans la zone de saisie
-//   Type_saisie  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+//   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
+//   max_size  : Nombre de caractères logeant dans la zone de saisie
+//   input_type  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
-  char Chaine_initiale[256];
-  char Chaine_affichee[256];
+  char initial_string[256];
+  char display_string[256];
   byte position;
   byte size;
-  word Touche_lue=0;
-  byte Touche_autorisee;
+  word input_key=0;
+  byte is_authorized;
 
-  byte offset=0; // Indice du premier caractère affiché
+  byte offset=0; // index du premier caractère affiché
 
-  Effacer_curseur();
+  Hide_cursor();
   // Effacement de la chaîne
-  Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
-  UpdateRect(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
+  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
-  strcpy(Chaine_initiale,Chaine);
+  strcpy(initial_string,str);
 
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
-  if (Mouse_K==A_DROITE)
-    Chaine[0]='\0';
-  else if (Type_saisie==1)
-    snprintf(Chaine,10,"%d",atoi(Chaine)); // On tasse la chaine à gauche
+  if (Mouse_K==RIGHT_SIDE)
+    str[0]='\0';
+  else if (input_type==1)
+    snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
 
 
-  size=strlen(Chaine);
-  position=(size<Taille_maxi)? size:size-1;
-  if (position-offset>Taille_affichee)
-    offset=position-Taille_affichee+1;
+  size=strlen(str);
+  position=(size<max_size)? size:size-1;
+  if (position-offset>visible_size)
+    offset=position-visible_size+1;
   // Formatage d'une partie de la chaine (si trop longue pour tenir)
-  strncpy(Chaine_affichee, Chaine + offset, Taille_affichee);
-  Chaine_affichee[Taille_affichee]='\0';
+  strncpy(display_string, str + offset, visible_size);
+  display_string[visible_size]='\0';
   if (offset>0)
-    Chaine_affichee[0]=CARACTERE_TRIANGLE_GAUCHE;
-  if (Taille_affichee + offset + 1 < size )
-    Chaine_affichee[Taille_affichee-1]=CARACTERE_TRIANGLE_DROIT;
+    display_string[0]=LEFT_TRIANGLE_CHARACTER;
+  if (visible_size + offset + 1 < size )
+    display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
-  Rafficher_toute_la_chaine(x_pos,y_pos,Chaine_affichee,position - offset);
-  UpdateRect(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
+  Display_whole_string(x_pos,y_pos,display_string,position - offset);
+  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
   Flush_update();
 
-  while ((Touche_lue!=SDLK_RETURN) && (Touche_lue!=TOUCHE_ESC))
+  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
   {
-    Afficher_curseur();
+    Display_cursor();
     do
     {
       if(!Get_input()) Wait_VBL();
-      Touche_lue=Touche_ANSI;
-    } while(Touche_lue==0);
-    Effacer_curseur();
-    switch (Touche_lue)
+      input_key=Key_ANSI;
+    } while(input_key==0);
+    Hide_cursor();
+    switch (input_key)
     {
       case SDLK_DELETE : // Suppr.
             if (position<size)
             {
-              Supprimer_caractere(Chaine,position);
+              Remove_character(str,position);
               size--;
               
               // Effacement de la chaîne
-              Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-                    Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+              Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                    visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               goto affichage;
             }
       break;
@@ -206,8 +206,8 @@ byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte T
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-                      Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+                Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                      visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               position--;
               if (offset > 0 && (position == 0 || position < (offset + 1)))
                 offset--;
@@ -215,12 +215,12 @@ byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte T
             }
       break;
       case SDLK_RIGHT : // Droite
-            if ((position<size) && (position<Taille_maxi-1))
+            if ((position<size) && (position<max_size-1))
             {
               position++;
-              //if (position > Taille_affichee + offset - 2)
-              //if (offset + Taille_affichee < Taille_maxi && (position == size || (position > Taille_affichee + offset - 2)))
-              if (Chaine_affichee[position-offset]==CARACTERE_TRIANGLE_DROIT || position-offset>=Taille_affichee)
+              //if (position > visible_size + offset - 2)
+              //if (offset + visible_size < max_size && (position == size || (position > visible_size + offset - 2)))
+              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
                 offset++;
               goto affichage;
             }
@@ -230,19 +230,19 @@ byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte T
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-                      Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+                Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                      visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               position = 0;
               offset = 0;
               goto affichage;
             }
       break;
       case SDLK_END : // End
-            if ((position<size) && (position<Taille_maxi-1))
+            if ((position<size) && (position<max_size-1))
             {
-              position=(size<Taille_maxi)?size:size-1;
-              if (position-offset>Taille_affichee)
-                offset=position-Taille_affichee+1;
+              position=(size<max_size)?size:size-1;
+              if (position-offset>visible_size)
+                offset=position-visible_size+1;
               goto affichage;
             }
       break;
@@ -253,100 +253,100 @@ byte Readline_ex(word x_pos,word y_pos,char * Chaine,byte Taille_affichee,byte T
           position--;
           if (offset > 0 && (position == 0 || position < (offset + 1)))
             offset--;
-          Supprimer_caractere(Chaine,position);
+          Remove_character(str,position);
           size--;
           // Effacement de la chaîne
-          Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-                Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+          Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
           goto affichage;
         }
         break;
       case SDLK_RETURN :
         break;
         
-      case TOUCHE_ESC :
+      case KEY_ESC :
         // On restaure la chaine initiale
-        strcpy(Chaine,Chaine_initiale);
-        size=strlen(Chaine);
+        strcpy(str,initial_string);
+        size=strlen(str);
         break;
       default :
-        if (size<Taille_maxi)
+        if (size<max_size)
         {
           // On va regarder si l'utilisateur le droit de se servir de cette touche
-          Touche_autorisee=0; // On commence par supposer qu'elle est interdite
-          switch(Type_saisie)
+          is_authorized=0; // On commence par supposer qu'elle est interdite
+          switch(input_type)
           {
             case 0 : // N'importe quelle chaîne:
-              if (Touche_lue>=' ' && Touche_lue<= 255)
-                Touche_autorisee=1;
+              if (input_key>=' ' && input_key<= 255)
+                is_authorized=1;
               break;
             case 1 : // Nombre
-              if ( (Touche_lue>='0') && (Touche_lue<='9') )
-                Touche_autorisee=1;
+              if ( (input_key>='0') && (input_key<='9') )
+                is_authorized=1;
               break;
             default : // Nom de fichier
               // On regarde si la touche est autorisée
-              if ( CaractereValide(Touche_lue))
-                Touche_autorisee=1;
-          } // Fin du "switch(Type_saisie)"
+              if ( Valid_character(input_key))
+                is_authorized=1;
+          } // End du "switch(input_type)"
 
           // Si la touche était autorisée...
-          if (Touche_autorisee)
+          if (is_authorized)
           {
             // ... alors on l'insère ...
-            Inserer_caractere(Chaine,Touche_lue,position/*,size*/);
+            Insert_character(str,input_key,position/*,size*/);
             // ce qui augmente la taille de la chaine
             size++;
             // et qui risque de déplacer le curseur vers la droite
-            if (size<Taille_maxi)
+            if (size<max_size)
             {
               position++;
-              if (Chaine_affichee[position-offset]==CARACTERE_TRIANGLE_DROIT || position-offset>=Taille_affichee)
+              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
                 offset++;
             }
             // Enfin, on raffiche la chaine
             goto affichage;
-          } // Fin du test d'autorisation de touche
-        } // Fin du test de place libre
+          } // End du test d'autorisation de touche
+        } // End du test de place libre
         break;
       
 affichage:
-        size=strlen(Chaine);
+        size=strlen(str);
         // Formatage d'une partie de la chaine (si trop longue pour tenir)
-        strncpy(Chaine_affichee, Chaine + offset, Taille_affichee);
-        Chaine_affichee[Taille_affichee]='\0';
+        strncpy(display_string, str + offset, visible_size);
+        display_string[visible_size]='\0';
         if (offset>0)
-          Chaine_affichee[0]=CARACTERE_TRIANGLE_GAUCHE;
-        if (Taille_affichee + offset + 0 < size )
-          Chaine_affichee[Taille_affichee-1]=CARACTERE_TRIANGLE_DROIT;
+          display_string[0]=LEFT_TRIANGLE_CHARACTER;
+        if (visible_size + offset + 0 < size )
+          display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
         
-        Rafficher_toute_la_chaine(x_pos,y_pos,Chaine_affichee,position - offset);
-        UpdateRect(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
-    } // Fin du "switch(Touche_lue)"
+        Display_whole_string(x_pos,y_pos,display_string,position - offset);
+        Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+    } // End du "switch(input_key)"
     Flush_update();
 
-  } // Fin du "while"
+  } // End du "while"
 
   // Effacement de la chaîne
-  Block(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3),COULEUR_FOND);
+  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
   // On raffiche la chaine correctement
-  if (Type_saisie==1)
+  if (input_type==1)
   {
-    if (Chaine[0]=='\0')
+    if (str[0]=='\0')
     {
-      strcpy(Chaine,"0");
+      strcpy(str,"0");
       size=1;
     }
-    Print_dans_fenetre(x_pos+((Taille_maxi-size)<<3),y_pos,Chaine,COULEUR_TEXTE,COULEUR_FOND);
+    Print_in_window(x_pos+((max_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
   }
   else
   {
-    Print_dans_fenetre_limite(x_pos,y_pos,Chaine,Taille_affichee,COULEUR_TEXTE,COULEUR_FOND);
+    Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
-  UpdateRect(Fenetre_Pos_X+(x_pos*Menu_Facteur_X),Fenetre_Pos_Y+(y_pos*Menu_Facteur_Y),
-        Taille_affichee*(Menu_Facteur_X<<3),(Menu_Facteur_Y<<3));
+  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
-  return (Touche_lue==SDLK_RETURN);
+  return (input_key==SDLK_RETURN);
 }

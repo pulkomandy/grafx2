@@ -27,19 +27,19 @@
     If the mouse is over a button, its contextual help will be displayed.
     Else, the default helpscreen will be shown.
 */
-void Bouton_Aide(void);
+void Button_Help(void);
 
 /*!
     Displays and runs the "Statistics" window
 */
-void Bouton_Stats(void);
+void Button_Stats(void);
 
 /*!
     Displays and runs the "Help / About..." window
     @param section Number of the help section page to display (equals the button number the mouse was hovering for the contextual help), -1 for the main help page.
-    @param Sous_section Help sub-section title (the page will be scrolled so this title is at the top).
+    @param sub_section Help sub-section title (the page will be scrolled so this title is at the top).
 */
-void Fenetre_aide(int section, const char * Sous_section);
+void Window_help(int section, const char * sub_section);
 
 #endif
 

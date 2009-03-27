@@ -28,74 +28,74 @@
 #include "global.h"
 #include "divers.h"
 
-void Charger_INI_Clear_string(char * String)
+void Load_INI_clear_string(char * str)
 {
-  int Indice;
-  int Egal_trouve=0;
+  int index;
+  int equal_found=0;
 
-  for (Indice=0;String[Indice]!='\0';)
+  for (index=0;str[index]!='\0';)
   {
-    if ((String[Indice]=='='))
+    if ((str[index]=='='))
     {
-      Egal_trouve=1;
-      Indice++;
+      equal_found=1;
+      index++;
       // On enleve les espaces après le '='
-      while (String[Indice]==' ' || String[Indice]=='\t')
-        memmove(String+Indice,String+Indice+1,strlen(String+Indice));
+      while (str[index]==' ' || str[index]=='\t')
+        memmove(str+index,str+index+1,strlen(str+index));
     }
-    else if ((String[Indice]==' ' && !Egal_trouve) || (String[Indice]=='\t'))
+    else if ((str[index]==' ' && !equal_found) || (str[index]=='\t'))
     {
       // Suppression d'un espace ou d'un tab:
-      memmove(String+Indice,String+Indice+1,strlen(String+Indice));
+      memmove(str+index,str+index+1,strlen(str+index));
     }
     else
-    if ((String[Indice]==';') ||
-        (String[Indice]=='#') ||
-        (String[Indice]=='\r') ||
-        (String[Indice]=='\n'))
+    if ((str[index]==';') ||
+        (str[index]=='#') ||
+        (str[index]=='\r') ||
+        (str[index]=='\n'))
     {
       // Rencontre d'un commentaire ou d'un saut de ligne:
-      String[Indice]='\0';
+      str[index]='\0';
     }
     else
     {
-      if (!Egal_trouve)
+      if (!equal_found)
       {
         // Passage en majuscule d'un caractère:
   
-        String[Indice]=toupper((int)String[Indice]);
+        str[index]=toupper((int)str[index]);
       }
-      Indice++;
+      index++;
     }
   }
   // On enlève les espaces avant la fin de chaine
-  while (Indice>0 && (String[Indice-1]==' ' || String[Indice-1]=='\t'))
+  while (index>0 && (str[index-1]==' ' || str[index-1]=='\t'))
   {
-    Indice--;
-    String[Indice]='\0';
+    index--;
+    str[index]='\0';
   }
 }
 
 
 
-int Charger_INI_Seek_pattern(char * Buffer,char * Pattern)
+int Load_INI_seek_pattern(char * buffer,char * pattern)
 {
-  int Indice_buffer;
-  int Indice_pattern;
+  int buffer_index;
+  int pattern_index;
 
-  // A partir de chaque lettre de la chaîne Buffer
-  for (Indice_buffer=0;Buffer[Indice_buffer]!='\0';Indice_buffer++)
+  // A partir de chaque lettre de la chaîne buffer
+  for (buffer_index=0;buffer[buffer_index]!='\0';buffer_index++)
   {
-    // On regarde si la chaîne Pattern est équivalente à la position courante
-    // de la chaîne Buffer:
-    for (Indice_pattern=0;(Pattern[Indice_pattern]!='\0') && (Buffer[Indice_buffer+Indice_pattern]==Pattern[Indice_pattern]);Indice_pattern++);
+    // On regarde si la chaîne pattern est équivalente à la position courante
+    // de la chaîne buffer:
+    for (pattern_index=0;(pattern[pattern_index]!='\0') && (buffer[buffer_index+pattern_index]==pattern[pattern_index]);pattern_index++);
 
-    // Si on a trouvé la chaîne Pattern dans la chaîne Buffer, on renvoie la
+    // Si on a trouvé la chaîne pattern dans la chaîne buffer, on renvoie la
     // position à laquelle on l'a trouvée (+1 pour que si on la trouve au
     // début ça ne renvoie pas la même chose que si on ne l'avait pas
     // trouvée):
-    if (Pattern[Indice_pattern]=='\0')
-      return (Indice_buffer+1);
+    if (pattern[pattern_index]=='\0')
+      return (buffer_index+1);
   }
 
   // Si on ne l'a pas trouvée, on renvoie 0:
@@ -104,128 +104,128 @@ int Charger_INI_Seek_pattern(char * Buffer,char * Pattern)
 
 
 
-int Charger_INI_Reach_group(FILE * file,char * Buffer,char * Group)
+int Load_INI_reach_group(FILE * file,char * buffer,char * group)
 {
-  int    Arret;
-  char * Group_upper;
-  char * Buffer_upper;
+  int    stop_seek;
+  char * group_upper;
+  char * upper_buffer;
 
   // On alloue les zones de mémoire:
-  Group_upper=(char *)malloc(1024);
-  Buffer_upper=(char *)malloc(1024);
+  group_upper=(char *)malloc(1024);
+  upper_buffer=(char *)malloc(1024);
 
   // On commence par se faire une version majuscule du groupe à rechercher:
-  strcpy(Group_upper,Group);
-  Charger_INI_Clear_string(Group_upper);
+  strcpy(group_upper,group);
+  Load_INI_clear_string(group_upper);
 
-  Arret=0;
+  stop_seek=0;
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,file)==0)
+    if (fgets(buffer,1024,file)==0)
     {
-      free(Buffer_upper);
-      free(Group_upper);
-      return ERREUR_INI_CORROMPU;
+      free(upper_buffer);
+      free(group_upper);
+      return ERROR_INI_CORRUPTED;
     }
 
-    Ligne_INI++;
+    Line_number_in_INI_file++;
 
     // On s'en fait une version en majuscule:
-    strcpy(Buffer_upper,Buffer);
-    Charger_INI_Clear_string(Buffer_upper);
+    strcpy(upper_buffer,buffer);
+    Load_INI_clear_string(upper_buffer);
 
     // On compare la chaîne avec le groupe recherché:
-    Arret=Charger_INI_Seek_pattern(Buffer_upper,Group_upper);
+    stop_seek=Load_INI_seek_pattern(upper_buffer,group_upper);
   }
-  while (!Arret);
+  while (!stop_seek);
 
-  free(Buffer_upper);
-  free(Group_upper);
+  free(upper_buffer);
+  free(group_upper);
 
   return 0;
 }
 
-int Charger_INI_Get_string(FILE * file,char * Buffer,char * Option,char * return_code)
+int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * return_code)
 {
-  int    Arret;
-  char * Option_upper;
-  char * Buffer_upper;
-  int    Indice_buffer;
+  int    stop_seek;
+  char * option_upper;
+  char * upper_buffer;
+  int    buffer_index;
 
   // On alloue les zones de mémoire:
-  Option_upper=(char *)malloc(1024);
-  Buffer_upper=(char *)malloc(1024);
+  option_upper=(char *)malloc(1024);
+  upper_buffer=(char *)malloc(1024);
 
   // On commence par se faire une version majuscule de l'option à rechercher:
-  strcpy(Option_upper,Option);
-  Charger_INI_Clear_string(Option_upper);
+  strcpy(option_upper,option_name);
+  Load_INI_clear_string(option_upper);
 
-  Arret=0;
+  stop_seek=0;
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,file)==0)
+    if (fgets(buffer,1024,file)==0)
     {
-      free(Buffer_upper);
-      free(Option_upper);
-      return ERREUR_INI_CORROMPU;
+      free(upper_buffer);
+      free(option_upper);
+      return ERROR_INI_CORRUPTED;
     }
 
-    Ligne_INI++;
+    Line_number_in_INI_file++;
 
     // On s'en fait une version en majuscule:
-    strcpy(Buffer_upper,Buffer);
-    Charger_INI_Clear_string(Buffer_upper);
+    strcpy(upper_buffer,buffer);
+    Load_INI_clear_string(upper_buffer);
 
     // On compare la chaîne avec l'option recherchée:
-    Arret=Charger_INI_Seek_pattern(Buffer_upper,Option_upper);
+    stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
     // Si on l'a trouvée:
-    if (Arret)
+    if (stop_seek)
     {
       // On se positionne juste après la chaîne "="
-      Indice_buffer=Charger_INI_Seek_pattern(Buffer_upper,"=");
+      buffer_index=Load_INI_seek_pattern(upper_buffer,"=");
 
-      strcpy(return_code, Buffer_upper + Indice_buffer);
+      strcpy(return_code, upper_buffer + buffer_index);
     }
   }
-  while (!Arret);
+  while (!stop_seek);
 
-  free(Buffer_upper);
-  free(Option_upper);
+  free(upper_buffer);
+  free(option_upper);
 
   return 0;
 }
 
-int Charger_INI_Get_value(char * String,int * index,int * Value)
+int Load_INI_get_value(char * str,int * index,int * value)
 {
   // On teste si la valeur actuelle est YES (ou Y):
 
-  if (Charger_INI_Seek_pattern(String+(*index),"yes,")==1)
+  if (Load_INI_seek_pattern(str+(*index),"yes,")==1)
   {
-    (*Value)=1;
+    (*value)=1;
     (*index)+=4;
     return 0;
   }
   else
-  if (strcmp(String+(*index),"yes")==0)
+  if (strcmp(str+(*index),"yes")==0)
   {
-    (*Value)=1;
+    (*value)=1;
     (*index)+=3;
     return 0;
   }
   else
-  if (Charger_INI_Seek_pattern(String+(*index),"y,")==1)
+  if (Load_INI_seek_pattern(str+(*index),"y,")==1)
   {
-    (*Value)=1;
+    (*value)=1;
     (*index)+=2;
     return 0;
   }
   else
-  if (strcmp(String+(*index),"y")==0)
+  if (strcmp(str+(*index),"y")==0)
   {
-    (*Value)=1;
+    (*value)=1;
     (*index)+=1;
     return 0;
   }
@@ -233,261 +233,249 @@ int Charger_INI_Get_value(char * String,int * index,int * Value)
 
   // On teste si la valeur actuelle est NO (ou N):
 
-  if (Charger_INI_Seek_pattern(String+(*index),"no,")==1)
+  if (Load_INI_seek_pattern(str+(*index),"no,")==1)
   {
-    (*Value)=0;
+    (*value)=0;
     (*index)+=3;
     return 0;
   }
   else
-  if (strcmp(String+(*index),"no")==0)
+  if (strcmp(str+(*index),"no")==0)
   {
-    (*Value)=0;
+    (*value)=0;
     (*index)+=2;
     return 0;
   }
   else
-  if (Charger_INI_Seek_pattern(String+(*index),"n,")==1)
+  if (Load_INI_seek_pattern(str+(*index),"n,")==1)
   {
-    (*Value)=0;
+    (*value)=0;
     (*index)+=2;
     return 0;
   }
   else
-  if (strcmp(String+(*index),"n")==0)
+  if (strcmp(str+(*index),"n")==0)
   {
-    (*Value)=0;
+    (*value)=0;
     (*index)+=1;
     return 0;
   }
   else
-  if (String[*index]=='$')
+  if (str[*index]=='$')
   {
-    (*Value)=0;
+    (*value)=0;
 
     for (;;)
     {
       (*index)++;
 
-      if ((String[*index]>='0') && (String[*index]<='9'))
-        (*Value)=((*Value)*16)+String[*index]-'0';
+      if ((str[*index]>='0') && (str[*index]<='9'))
+        (*value)=((*value)*16)+str[*index]-'0';
       else
-      if ((String[*index]>='A') && (String[*index]<='F'))
-        (*Value)=((*Value)*16)+String[*index]-'A'+10;
+      if ((str[*index]>='A') && (str[*index]<='F'))
+        (*value)=((*value)*16)+str[*index]-'A'+10;
       else
-      if (String[*index]==',')
+      if (str[*index]==',')
       {
         (*index)++;
         return 0;
       }
       else
-      if (String[*index]=='\0')
+      if (str[*index]=='\0')
         return 0;
       else
-        return ERREUR_INI_CORROMPU;
+        return ERROR_INI_CORRUPTED;
     }
   }
   else
-  if ((String[*index]>='0') && (String[*index]<='9'))
+  if ((str[*index]>='0') && (str[*index]<='9'))
   {
-    (*Value)=0;
+    (*value)=0;
 
     for (;;)
     {
-      if ((String[*index]>='0') && (String[*index]<='9'))
-        (*Value)=((*Value)*10)+String[*index]-'0';
+      if ((str[*index]>='0') && (str[*index]<='9'))
+        (*value)=((*value)*10)+str[*index]-'0';
       else
-      if (String[*index]==',')
+      if (str[*index]==',')
       {
         (*index)++;
         return 0;
       }
       else
-      if (String[*index]=='\0')
+      if (str[*index]=='\0')
         return 0;
       else
-        return ERREUR_INI_CORROMPU;
+        return ERROR_INI_CORRUPTED;
 
       (*index)++;
     }
   }
   else
-    return ERREUR_INI_CORROMPU;
+    return ERROR_INI_CORRUPTED;
 }
 
 
 
-int Charger_INI_Get_values(FILE * file,char * Buffer,char * Option,int Nb_values_expected,int * Values)
+int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expected_values,int * values)
 {
-  int    Arret;
-  char * Option_upper;
-  char * Buffer_upper;
-  int    Indice_buffer;
-  int    Nb_valeurs;
+  int    stop_seek;
+  char * option_upper;
+  char * upper_buffer;
+  int    buffer_index;
+  int    nb_values;
 
   // On alloue les zones de mémoire:
-  Option_upper=(char *)malloc(1024);
-  Buffer_upper=(char *)malloc(1024);
+  option_upper=(char *)malloc(1024);
+  upper_buffer=(char *)malloc(1024);
 
   // On commence par se faire une version majuscule de l'option à rechercher:
-  strcpy(Option_upper,Option);
-  Charger_INI_Clear_string(Option_upper);
+  strcpy(option_upper,option_name);
+  Load_INI_clear_string(option_upper);
 
-  Arret=0;
+  stop_seek=0;
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(Buffer,1024,file)==0)
+    if (fgets(buffer,1024,file)==0)
     {
-      free(Buffer_upper);
-      free(Option_upper);
-      return ERREUR_INI_CORROMPU;
+      free(upper_buffer);
+      free(option_upper);
+      return ERROR_INI_CORRUPTED;
     }
 
-    Ligne_INI++;
+    Line_number_in_INI_file++;
 
     // On s'en fait une version en majuscule:
-    strcpy(Buffer_upper,Buffer);
-    Charger_INI_Clear_string(Buffer_upper);
+    strcpy(upper_buffer,buffer);
+    Load_INI_clear_string(upper_buffer);
 
     // On compare la chaîne avec l'option recherchée:
-    Arret=Charger_INI_Seek_pattern(Buffer_upper,Option_upper);
+    stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
     // Si on l'a trouvée:
-    if (Arret)
+    if (stop_seek)
     {
-      Nb_valeurs=0;
+      nb_values=0;
 
       // On se positionne juste après la chaîne "="
-      Indice_buffer=Charger_INI_Seek_pattern(Buffer_upper,"=");
+      buffer_index=Load_INI_seek_pattern(upper_buffer,"=");
 
       // Tant qu'on a pas atteint la fin de la ligne
-      while (Buffer_upper[Indice_buffer]!='\0')
+      while (upper_buffer[buffer_index]!='\0')
       {
-        if (Charger_INI_Get_value(Buffer_upper,&Indice_buffer,Values+Nb_valeurs))
+        if (Load_INI_get_value(upper_buffer,&buffer_index,values+nb_values))
         {
-          free(Buffer_upper);
-          free(Option_upper);
-          return ERREUR_INI_CORROMPU;
+          free(upper_buffer);
+          free(option_upper);
+          return ERROR_INI_CORRUPTED;
         }
 
-        if ( ((++Nb_valeurs) == Nb_values_expected) &&
-             (Buffer_upper[Indice_buffer]!='\0') )
+        if ( ((++nb_values) == nb_expected_values) &&
+             (upper_buffer[buffer_index]!='\0') )
         {
-          free(Buffer_upper);
-          free(Option_upper);
-          return ERREUR_INI_CORROMPU;
+          free(upper_buffer);
+          free(option_upper);
+          return ERROR_INI_CORRUPTED;
         }
       }
-      if (Nb_valeurs<Nb_values_expected)
+      if (nb_values<nb_expected_values)
       {
-        free(Buffer_upper);
-        free(Option_upper);
-        return ERREUR_INI_CORROMPU;
+        free(upper_buffer);
+        free(option_upper);
+        return ERROR_INI_CORRUPTED;
       }
     }
   }
-  while (!Arret);
+  while (!stop_seek);
 
-  free(Buffer_upper);
-  free(Option_upper);
+  free(upper_buffer);
+  free(option_upper);
 
   return 0;
 }
 
 
 
-int Charger_INI(T_Config * Conf)
+int Load_INI(T_Config * conf)
 {
   FILE * file;
-  char * Buffer;
+  char * buffer;
   int    values[3];
-  int    Indice;
-  char * Nom_du_fichier;
+  int    index;
+  char * filename;
   int    return_code;
-  char   Libelle_valeur[1024];
+  char   value_label[1024];
 
-  Ligne_INI=0;
+  Line_number_in_INI_file=0;
 
   // On alloue les zones de mémoire:
-  Buffer=(char *)malloc(1024);
-  Nom_du_fichier=(char *)malloc(256);
+  buffer=(char *)malloc(1024);
+  filename=(char *)malloc(256);
 
   // On calcule le nom du fichier qu'on manipule:
-  strcpy(Nom_du_fichier,Repertoire_de_configuration);
-  strcat(Nom_du_fichier,"gfx2.ini");
+  strcpy(filename,Config_directory);
+  strcat(filename,"gfx2.ini");
 
-  file=fopen(Nom_du_fichier,"rb");
+  file=fopen(filename,"rb");
   if (file==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
-    strcpy(Nom_du_fichier,Repertoire_des_donnees);
-    strcat(Nom_du_fichier,"gfx2def.ini");
-    file=fopen(Nom_du_fichier,"rb");
+    strcpy(filename,Repertoire_des_donnees);
+    strcat(filename,"gfx2def.ini");
+    file=fopen(filename,"rb");
     if (file == 0)
     {
-      free(Nom_du_fichier);
-      free(Buffer);
-      return ERREUR_INI_ABSENT;
+      free(filename);
+      free(buffer);
+      return ERROR_INI_MISSING;
     }
   }
   
-  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MOUSE]")))
+  if ((return_code=Load_INI_reach_group(file,buffer,"[MOUSE]")))
     goto Erreur_Retour;
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"X_sensitivity",1,values)))
-    goto Erreur_Retour;
-  if ((values[0]<1) || (values[0]>255))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Indice_Sensibilite_souris_X=values[0];
-
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Y_sensitivity",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"X_sensitivity",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Indice_Sensibilite_souris_Y=values[0];
+  conf->Mouse_sensitivity_index_x=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"X_correction_factor",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Y_sensitivity",1,values)))
+    goto Erreur_Retour;
+  if ((values[0]<1) || (values[0]>255))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  conf->Mouse_sensitivity_index_y=values[0];
+
+  if ((return_code=Load_INI_get_values (file,buffer,"X_correction_factor",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Mouse_Facteur_de_correction_X=Mouse_Facteur_de_correction_X=values[0];
+  conf->Mouse_fix_factor_X=Mouse_fix_factor_X=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Y_correction_factor",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Y_correction_factor",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Mouse_Facteur_de_correction_Y=Mouse_Facteur_de_correction_Y=values[0];
+  conf->Mouse_fix_factor_Y=Mouse_fix_factor_Y=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Cursor_aspect",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Cursor_aspect",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>3))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Curseur=values[0]-1;
+  conf->Cursor=values[0]-1;
 
-  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MENU]")))
+  if ((return_code=Load_INI_reach_group(file,buffer,"[MENU]")))
     goto Erreur_Retour;
 
-  Conf->Coul_menu_pref[0].R=0;
-  Conf->Coul_menu_pref[0].G=0;
-  Conf->Coul_menu_pref[0].B=0;
-  Conf->Coul_menu_pref[3].R=255;
-  Conf->Coul_menu_pref[3].G=255;
-  Conf->Coul_menu_pref[3].B=255;
+  conf->Fav_menu_colors[0].R=0;
+  conf->Fav_menu_colors[0].G=0;
+  conf->Fav_menu_colors[0].B=0;
+  conf->Fav_menu_colors[3].R=255;
+  conf->Fav_menu_colors[3].G=255;
+  conf->Fav_menu_colors[3].B=255;
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Light_color",3,values)))
-    goto Erreur_Retour;
-  if ((values[0]<0) || (values[0]>63))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  if ((values[1]<0) || (values[1]>63))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  if ((values[2]<0) || (values[2]>63))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[2].R=(values[0]<<2)|(values[0]>>4);
-  Conf->Coul_menu_pref[2].G=(values[1]<<2)|(values[1]>>4);
-  Conf->Coul_menu_pref[2].B=(values[2]<<2)|(values[2]>>4);
-
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Dark_color",3,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Light_color",3,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
@@ -495,271 +483,283 @@ int Charger_INI(T_Config * Conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   if ((values[2]<0) || (values[2]>63))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coul_menu_pref[1].R=(values[0]<<2)|(values[0]>>4);
-  Conf->Coul_menu_pref[1].G=(values[1]<<2)|(values[1]>>4);
-  Conf->Coul_menu_pref[1].B=(values[2]<<2)|(values[2]>>4);
+  conf->Fav_menu_colors[2].R=(values[0]<<2)|(values[0]>>4);
+  conf->Fav_menu_colors[2].G=(values[1]<<2)|(values[1]>>4);
+  conf->Fav_menu_colors[2].B=(values[2]<<2)|(values[2]>>4);
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Menu_ratio",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Dark_color",3,values)))
+    goto Erreur_Retour;
+  if ((values[0]<0) || (values[0]>63))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  if ((values[1]<0) || (values[1]>63))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  if ((values[2]<0) || (values[2]>63))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  conf->Fav_menu_colors[1].R=(values[0]<<2)|(values[0]>>4);
+  conf->Fav_menu_colors[1].G=(values[1]<<2)|(values[1]>>4);
+  conf->Fav_menu_colors[1].B=(values[2]<<2)|(values[2]>>4);
+
+  if ((return_code=Load_INI_get_values (file,buffer,"Menu_ratio",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Ratio=values[0];
+  conf->Ratio=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Font",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Font",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Fonte=values[0]-1;
+  conf->Font=values[0]-1;
 
 
-  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[FILE_SELECTOR]")))
+  if ((return_code=Load_INI_reach_group(file,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_hidden_files",1,values)))
-    goto Erreur_Retour;
-  if ((values[0]<0) || (values[0]>1))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_fichiers_caches=values[0]?-1:0;
-
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_hidden_directories",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Show_hidden_files",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_repertoires_caches=values[0]?-1:0;
+  conf->Show_hidden_files=values[0]?-1:0;
 
-/*  if ((return_code=Charger_INI_Get_values (file,Buffer,"Show_system_directories",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Show_hidden_directories",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Lire_les_repertoires_systemes=values[0]?-1:0;
+  conf->Show_hidden_directories=values[0]?-1:0;
+
+/*  if ((return_code=Load_INI_get_values (file,buffer,"Show_system_directories",1,values)))
+    goto Erreur_Retour;
+  if ((values[0]<0) || (values[0]>1))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  conf->Show_system_directories=values[0]?-1:0;
 */
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Preview_delay",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Preview_delay",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>256))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Chrono_delay=values[0];
+  conf->Timer_delay=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Maximize_preview",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Maximize_preview",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Maximize_preview=values[0];
+  conf->Maximize_preview=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Find_file_fast",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Find_file_fast",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Find_file_fast=values[0];
+  conf->Find_file_fast=values[0];
 
 
-  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[LOADING]")))
+  if ((return_code=Load_INI_reach_group(file,buffer,"[LOADING]")))
     goto Erreur_Retour;
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_set_resolution",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Auto_set_resolution",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_set_res=values[0];
+  conf->Auto_set_res=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Set_resolution_according_to",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Set_resolution_according_to",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Set_resolution_according_to=values[0];
+  conf->Set_resolution_according_to=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Clear_palette",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Clear_palette",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Clear_palette=values[0];
+  conf->Clear_palette=values[0];
 
 
-  if ((return_code=Charger_INI_Reach_group(file,Buffer,"[MISCELLANEOUS]")))
+  if ((return_code=Load_INI_reach_group(file,buffer,"[MISCELLANEOUS]")))
     goto Erreur_Retour;
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Draw_limits",1,values)))
-    goto Erreur_Retour;
-  if ((values[0]<0) || (values[0]>1))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Afficher_limites_image=values[0];
-
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Adjust_brush_pick",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Draw_limits",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Adjust_brush_pick=values[0];
+  conf->Display_image_limits=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Coordinates",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Adjust_brush_pick",1,values)))
+    goto Erreur_Retour;
+  if ((values[0]<0) || (values[0]>1))
+    goto Erreur_ERREUR_INI_CORROMPU;
+  conf->Adjust_brush_pick=values[0];
+
+  if ((return_code=Load_INI_get_values (file,buffer,"Coordinates",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Coords_rel=2-values[0];
+  conf->Coords_rel=2-values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Backup",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Backup",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Backup=values[0];
+  conf->Backup=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Undo_pages",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Undo_pages",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>99))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Nb_pages_Undo=values[0];
+  conf->Max_undo_pages=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Left",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Gauges_scrolling_speed_Left",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Valeur_tempo_jauge_gauche=values[0];
+  conf->Delay_left_click_on_slider=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Gauges_scrolling_speed_Right",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Gauges_scrolling_speed_Right",1,values)))
     goto Erreur_Retour;
   if ((values[0]<1) || (values[0]>255))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Valeur_tempo_jauge_droite=values[0];
+  conf->Delay_right_click_on_slider=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_save",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Auto_save",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_save=values[0];
+  conf->Auto_save=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Vertices_per_polygon",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Vertices_per_polygon",1,values)))
     goto Erreur_Retour;
   if ((values[0]<2) || (values[0]>16384))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Nb_max_de_vertex_par_polygon=values[0];
+  conf->Nb_max_vertices_per_polygon=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Fast_zoom",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Fast_zoom",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Fast_zoom=values[0];
+  conf->Fast_zoom=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Separate_colors",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Separate_colors",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Couleurs_separees=values[0];
+  conf->Couleurs_separees=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"FX_feedback",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"FX_feedback",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->FX_Feedback=values[0];
+  conf->FX_Feedback=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Safety_colors",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Safety_colors",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Safety_colors=values[0];
+  conf->Safety_colors=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Opening_message",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Opening_message",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Opening_message=values[0];
+  conf->Opening_message=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Clear_with_stencil",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Clear_with_stencil",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Clear_with_stencil=values[0];
+  conf->Clear_with_stencil=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_discontinuous",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Auto_discontinuous",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_discontinuous=values[0];
+  conf->Auto_discontinuous=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Save_screen_size_in_GIF",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Save_screen_size_in_GIF",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Taille_ecran_dans_GIF=values[0];
+  conf->Screen_size_in_GIF=values[0];
 
-  if ((return_code=Charger_INI_Get_values (file,Buffer,"Auto_nb_colors_used",1,values)))
+  if ((return_code=Load_INI_get_values (file,buffer,"Auto_nb_colors_used",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  Conf->Auto_nb_used=values[0];
+  conf->Auto_nb_used=values[0];
 
   // Optionnel, le mode video par défaut (à partir de beta 97.0%)
-  Conf->Resolution_par_defaut=0;
-  if (!Charger_INI_Get_string (file,Buffer,"Default_video_mode",Libelle_valeur))
+  conf->Default_resolution=0;
+  if (!Load_INI_get_string (file,buffer,"Default_video_mode",value_label))
   {
-    int mode = Conversion_argument_mode(Libelle_valeur);
+    int mode = Convert_videomode_arg(value_label);
     if (mode>=0)
-      Conf->Resolution_par_defaut=mode;
+      conf->Default_resolution=mode;
   }
   
   // Optionnel, les dimensions de la fenêtre (à partir de beta 97.0%)
-  Mode_video[0].Width = 640;
-  Mode_video[0].Height = 480;
-  if (!Charger_INI_Get_values (file,Buffer,"Default_window_size",2,values))
+  Video_mode[0].Width = 640;
+  Video_mode[0].Height = 480;
+  if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
   {
     if ((values[0]>=320))
-      Mode_video[0].Width = values[0];
+      Video_mode[0].Width = values[0];
     if ((values[1]>=200))
-      Mode_video[0].Height = values[1];
+      Video_mode[0].Height = values[1];
   }
 
-  Conf->Mouse_Merge_movement=100;
+  conf->Mouse_merge_movement=100;
   // Optionnel, paramètre pour grouper les mouvements souris (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Merge_movement",1,values))
+  if (!Load_INI_get_values (file,buffer,"Merge_movement",1,values))
   {
     if ((values[0]<0) || (values[0]>1000))
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Mouse_Merge_movement=values[0];
+    conf->Mouse_merge_movement=values[0];
   }
 
-  Conf->Palette_Cells_X=8;
+  conf->Palette_cells_X=8;
   // Optionnel, nombre de colonnes dans la palette (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_X",1,values))
+  if (!Load_INI_get_values (file,buffer,"Palette_cells_X",1,values))
   {
     if ((values[0]<1) || (values[0]>256))
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Palette_Cells_X=values[0];
+    conf->Palette_cells_X=values[0];
   }
-  Conf->Palette_Cells_Y=8;
+  conf->Palette_cells_Y=8;
   // Optionnel, nombre de lignes dans la palette (>98.0%)
-  if (!Charger_INI_Get_values (file,Buffer,"Palette_Cells_Y",1,values))
+  if (!Load_INI_get_values (file,buffer,"Palette_cells_Y",1,values))
   {
     if (values[0]<1 || values[0]>16)
       goto Erreur_ERREUR_INI_CORROMPU;
-    Conf->Palette_Cells_Y=values[0];
+    conf->Palette_cells_Y=values[0];
   }
   // Optionnel, bookmarks (>98.0%)
-  for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
+  for (index=0;index<NB_BOOKMARKS;index++)
   {
-    Conf->Bookmark_directory[Indice]=NULL;
-    Conf->Bookmark_label[Indice][0]='\0';  
+    conf->Bookmark_directory[index]=NULL;
+    conf->Bookmark_label[index][0]='\0';  
   }
-  for (Indice=0;Indice<NB_BOOKMARKS;Indice++)
+  for (index=0;index<NB_BOOKMARKS;index++)
   {
-    if (!Charger_INI_Get_string (file,Buffer,"Bookmark_label",Libelle_valeur))
+    if (!Load_INI_get_string (file,buffer,"Bookmark_label",value_label))
     {
-      int size=strlen(Libelle_valeur);
+      int size=strlen(value_label);
       if (size!=0)
       {
         if (size>8)
         {
-          Libelle_valeur[7]=CARACTERE_SUSPENSION;
-          Libelle_valeur[8]='\0';
+          value_label[7]=ELLIPSIS_CHARACTER;
+          value_label[8]='\0';
         }
-        strcpy(Conf->Bookmark_label[Indice],Libelle_valeur);
+        strcpy(conf->Bookmark_label[index],value_label);
       }
     }
     else
       break;
-    if (!Charger_INI_Get_string (file,Buffer,"Bookmark_directory",Libelle_valeur))
+    if (!Load_INI_get_string (file,buffer,"Bookmark_directory",value_label))
     {
-      int size=strlen(Libelle_valeur);
+      int size=strlen(value_label);
       if (size!=0)
       {
-        Conf->Bookmark_directory[Indice]=(char *)malloc(size+1);
-        strcpy(Conf->Bookmark_directory[Indice],Libelle_valeur);
+        conf->Bookmark_directory[index]=(char *)malloc(size+1);
+        strcpy(conf->Bookmark_directory[index],value_label);
       }
     }
     else
@@ -768,22 +768,22 @@ int Charger_INI(T_Config * Conf)
   
   fclose(file);
 
-  free(Nom_du_fichier);
-  free(Buffer);
+  free(filename);
+  free(buffer);
   return 0;
 
   // Gestion des erreurs:
 
   Erreur_Retour:
     fclose(file);
-    free(Nom_du_fichier);
-    free(Buffer);
+    free(filename);
+    free(buffer);
     return return_code;
 
   Erreur_ERREUR_INI_CORROMPU:
 
     fclose(file);
-    free(Nom_du_fichier);
-    free(Buffer);
-    return ERREUR_INI_CORROMPU;
+    free(filename);
+    free(buffer);
+    return ERROR_INI_CORRUPTED;
 }

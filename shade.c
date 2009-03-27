@@ -31,1081 +31,1081 @@
 #include "windows.h"
 #include "input.h"
 
-void Bouton_Shade_Mode(void)
+void Button_Shade_mode(void)
 {
-  if (Shade_Mode)
-    Fonction_effet=Aucun_effet;
+  if (Shade_mode)
+    Effect_function=No_effect;
   else
   {
-    Fonction_effet=Effet_Shade;
-    Quick_shade_Mode=0;
-    Colorize_Mode=0;
-    Smooth_Mode=0;
-    Tiling_Mode=0;
-    Smear_Mode=0;
+    Effect_function=Effect_shade;
+    Quick_shade_mode=0;
+    Colorize_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
+    Smear_mode=0;
   }
-  Shade_Mode=!Shade_Mode;
+  Shade_mode=!Shade_mode;
 }
 
 
-void Bouton_Quick_shade_Mode(void)
+void Button_Quick_shade_mode(void)
 {
-  if (Quick_shade_Mode)
-    Fonction_effet=Aucun_effet;
+  if (Quick_shade_mode)
+    Effect_function=No_effect;
   else
   {
-    Fonction_effet=Effet_Quick_shade;
-    Shade_Mode=0;
-    Colorize_Mode=0;
-    Smooth_Mode=0;
-    Tiling_Mode=0;
-    Smear_Mode=0;
+    Effect_function=Effect_quick_shade;
+    Shade_mode=0;
+    Colorize_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
+    Smear_mode=0;
   }
-  Quick_shade_Mode=!Quick_shade_Mode;
+  Quick_shade_mode=!Quick_shade_mode;
 }
 
 
-void Shade_Blocs_degrades(void)
+void Shade_draw_grad_ranges(void)
 {
   word  cursor=0;
-  word  Nb_shades=0;
-  short Shade_traite,Ancien_shade_traite;
-  word  Taille_shade=0;
-  word  Debut_shade=0;
+  word  nb_shades=0;
+  short shade_processed,shade_processed_old;
+  word  shade_size=0;
+  word  start_shade=0;
   short x_pos,y_pos;
-  short Taille_X,Taille_Y;
-  short Debut_X,Debut_Y,Fin_X,Fin_Y;
+  short x_size,y_size;
+  short start_x,start_y,end_x,end_y;
 
   // On commence par compter le nombre de shades
   while (cursor<512)
   {
-    while ((cursor<512) && (Shade_Liste[Shade_Actuel].List[cursor]&0xFF00))
+    while ((cursor<512) && (Shade_list[Shade_current].List[cursor]&0xFF00))
       cursor++;
 
     if (cursor<512)
     {
-      Nb_shades++;
+      nb_shades++;
       while ( (cursor<512)
-         && (!(Shade_Liste[Shade_Actuel].List[cursor]&0xFF00)) )
+         && (!(Shade_list[Shade_current].List[cursor]&0xFF00)) )
         cursor++;
     }
   }
 
   // Maintenant qu'on sait combien il y en a, on les affiche:
-  if (Nb_shades)
+  if (nb_shades)
   {
-    Taille_X=Menu_Facteur_X<<6;
-    Taille_Y=Menu_Facteur_Y*48;
-    Debut_X=Fenetre_Pos_X+(Menu_Facteur_X*224);
-    Debut_Y=Fenetre_Pos_Y+(Menu_Facteur_Y*35);
-    Fin_X=Debut_X+Taille_X;
-    Fin_Y=Debut_Y+Taille_Y;
+    x_size=Menu_factor_X<<6;
+    y_size=Menu_factor_Y*48;
+    start_x=Window_pos_X+(Menu_factor_X*224);
+    start_y=Window_pos_Y+(Menu_factor_Y*35);
+    end_x=start_x+x_size;
+    end_y=start_y+y_size;
 
     cursor=0;
-    Ancien_shade_traite=-1;
+    shade_processed_old=-1;
 
-    for (y_pos=Debut_Y;y_pos<Fin_Y;y_pos++)
+    for (y_pos=start_y;y_pos<end_y;y_pos++)
     {
       // On regarde quel shade on va afficher en preview
-      Shade_traite=((y_pos-Debut_Y)*Nb_shades)/Taille_Y;
+      shade_processed=((y_pos-start_y)*nb_shades)/y_size;
       // Si ce n'est pas le shade précédemment traité on calcule ses infos
-      if (Shade_traite>Ancien_shade_traite)
+      if (shade_processed>shade_processed_old)
       {
         // On commence par sauter tous les vides jusqu'au prochain shade
-        while ((cursor<512) && (Shade_Liste[Shade_Actuel].List[cursor]&0xFF00))
+        while ((cursor<512) && (Shade_list[Shade_current].List[cursor]&0xFF00))
           cursor++;
-        Debut_shade=cursor;
+        start_shade=cursor;
         // puis regarde sa taille
-        while ((cursor<512) && (!(Shade_Liste[Shade_Actuel].List[cursor]&0xFF00)))
+        while ((cursor<512) && (!(Shade_list[Shade_current].List[cursor]&0xFF00)))
           cursor++;
-        Taille_shade=cursor-Debut_shade;
-        Ancien_shade_traite=Shade_traite;
+        shade_size=cursor-start_shade;
+        shade_processed_old=shade_processed;
       }
 
-      for (x_pos=Debut_X;x_pos<Fin_X;x_pos++)
+      for (x_pos=start_x;x_pos<end_x;x_pos++)
       {
-        Pixel(x_pos,y_pos,Shade_Liste[Shade_Actuel].List
-              [(((x_pos-Debut_X)*Taille_shade)/Taille_X)+Debut_shade]);
+        Pixel(x_pos,y_pos,Shade_list[Shade_current].List
+              [(((x_pos-start_x)*shade_size)/x_size)+start_shade]);
       }
     }
   }
   else
   {
-    Fenetre_Afficher_cadre_bombe(224,35,64,48);
-    Block(Fenetre_Pos_X+(Menu_Facteur_X*225),Fenetre_Pos_Y+(Menu_Facteur_Y*36),
-          Menu_Facteur_X*62,Menu_Facteur_Y*46,CM_Clair);
+    Window_display_frame_out(224,35,64,48);
+    Block(Window_pos_X+(Menu_factor_X*225),Window_pos_Y+(Menu_factor_Y*36),
+          Menu_factor_X*62,Menu_factor_Y*46,MC_Light);
   }
-  UpdateRect(Fenetre_Pos_X+(Menu_Facteur_X*224),Fenetre_Pos_Y+(Menu_Facteur_Y*35),Menu_Facteur_X*64,Menu_Facteur_Y*48);
+  Update_rect(Window_pos_X+(Menu_factor_X*224),Window_pos_Y+(Menu_factor_Y*35),Menu_factor_X*64,Menu_factor_Y*48);
 }
 
 
-void Tagger_shades(word Select_Debut,word Select_Fin)
+void Tag_shades(word selection_start,word selection_end)
 {
-  word line, Colonne;
+  word line, column;
   word position;
   word x_pos, y_pos;
 
 
-  if (Select_Fin<Select_Debut)
+  if (selection_end<selection_start)
   {
-    position    =Select_Fin;
-    Select_Fin  =Select_Debut;
-    Select_Debut=position;
+    position    =selection_end;
+    selection_end  =selection_start;
+    selection_start=position;
   }
 
   for (line=0; line<8; line++)
-    for (Colonne=0; Colonne<64; Colonne++)
+    for (column=0; column<64; column++)
     {
-      position=(line<<6)+Colonne;
-      x_pos=Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8));
-      y_pos=Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+131));
+      position=(line<<6)+column;
+      x_pos=Window_pos_X+(Menu_factor_X*((column<<2)+8));
+      y_pos=Window_pos_Y+(Menu_factor_Y*((line*7)+131));
 
       // On regarde si la case est "disablée"
-      if (Shade_Liste[Shade_Actuel].List[position]&0x8000)
+      if (Shade_list[Shade_current].List[position]&0x8000)
       {
-        if ((position>=Select_Debut) && (position<=Select_Fin))
+        if ((position>=selection_start) && (position<=selection_end))
         {
-          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Blanc);
-          Block(x_pos,y_pos+Menu_Facteur_Y,Menu_Facteur_X<<2,Menu_Facteur_Y,CM_Noir);
+          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y,MC_White);
+          Block(x_pos,y_pos+Menu_factor_Y,Menu_factor_X<<2,Menu_factor_Y,MC_Black);
         }
         else
-          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Blanc);
+          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_White);
       }
       else // "enablée"
       {
-        if ((position>=Select_Debut) && (position<=Select_Fin))
-          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Noir);
+        if ((position>=selection_start) && (position<=selection_end))
+          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Black);
         else
-          Block(x_pos,y_pos,Menu_Facteur_X<<2,Menu_Facteur_Y<<1,CM_Clair);
+          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Light);
       }
     }
-    UpdateRect(Fenetre_Pos_X+8*Menu_Facteur_X,Fenetre_Pos_Y+131*Menu_Facteur_Y,Menu_Facteur_X*64<<2,Menu_Facteur_Y*8<<3);
+    Update_rect(Window_pos_X+8*Menu_factor_X,Window_pos_Y+131*Menu_factor_Y,Menu_factor_X*64<<2,Menu_factor_Y*8<<3);
 }
 
 
-void Afficher_couleur_case_selectionnee(word Select_Debut,word Select_Fin)
+void Display_selected_cell_color(word selection_start,word selection_end)
 {
-  char Chaine[4];
+  char str[4];
 
-  if ((Select_Debut!=Select_Fin)
-   || (Shade_Liste[Shade_Actuel].List[Select_Debut]&0x0100))
-    strcpy(Chaine,"   ");
+  if ((selection_start!=selection_end)
+   || (Shade_list[Shade_current].List[selection_start]&0x0100))
+    strcpy(str,"   ");
   else
-    Num2str(Shade_Liste[Shade_Actuel].List[Select_Debut]&0xFF,Chaine,3);
+    Num2str(Shade_list[Shade_current].List[selection_start]&0xFF,str,3);
 
-  Print_dans_fenetre(213,115,Chaine,CM_Noir,CM_Clair);
+  Print_in_window(213,115,str,MC_Black,MC_Light);
 }
 
 
-void Afficher_couleur_selectionnee(word Select_Debut,word Select_Fin)
+void Display_selected_color(word selection_start,word selection_end)
 {
-  char Chaine[4];
+  char str[4];
 
-  if (Select_Debut!=Select_Fin)
-    strcpy(Chaine,"   ");
+  if (selection_start!=selection_end)
+    strcpy(str,"   ");
   else
-    Num2str(Select_Debut,Chaine,3);
+    Num2str(selection_start,str,3);
 
-  Print_dans_fenetre(213,106,Chaine,CM_Noir,CM_Clair);
+  Print_in_window(213,106,str,MC_Black,MC_Light);
 }
 
 
-void Afficher_mode_du_shade(short x,short y,byte mode)
+void Display_shade_mode(short x,short y,byte mode)
 {
-  char Chaine[7];
+  char str[7];
 
   switch (mode)
   {
-    case MODE_SHADE_NORMAL :
-      strcpy(Chaine,"Normal");
+    case SHADE_MODE_NORMAL :
+      strcpy(str,"Normal");
       break;
-    case MODE_SHADE_BOUCLE :
-      strcpy(Chaine," Loop ");
+    case SHADE_MODE_LOOP :
+      strcpy(str," Loop ");
       break;
-    default : // MODE_SHADE_NOSAT
-      strcpy(Chaine,"No sat");
+    default : // SHADE_MODE_NOSAT
+      strcpy(str,"No sat");
   }
-  Print_dans_fenetre(x,y,Chaine,CM_Noir,CM_Clair);
+  Print_in_window(x,y,str,MC_Black,MC_Light);
 }
 
 
-void Afficher_tout_le_shade(word Select_Debut1,word Select_Fin1,
-                            word Select_Debut2,word Select_Fin2)
+void Display_all_shade(word selection_start1,word selection_end1,
+                            word selection_start2,word selection_end2)
 {
-  word line, Colonne;
+  word line, column;
   word position;
 
   for (line=0; line<8; line++)
-    for (Colonne=0; Colonne<64; Colonne++)
+    for (column=0; column<64; column++)
     {
-      position=(line<<6)+Colonne;
+      position=(line<<6)+column;
       // On regarde si c'est une couleur ou un bloc vide
-      if (Shade_Liste[Shade_Actuel].List[position]&0x0100) // Vide
+      if (Shade_list[Shade_current].List[position]&0x0100) // Vide
       {
-        Fenetre_Afficher_cadre_bombe((Colonne<<2)+8,(line*7)+127,4,4);
-        Block(Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+9)),
-              Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+128)),
-              Menu_Facteur_X<<1,Menu_Facteur_Y<<1,CM_Clair);
+        Window_display_frame_out((column<<2)+8,(line*7)+127,4,4);
+        Block(Window_pos_X+(Menu_factor_X*((column<<2)+9)),
+              Window_pos_Y+(Menu_factor_Y*((line*7)+128)),
+              Menu_factor_X<<1,Menu_factor_Y<<1,MC_Light);
       }
-      else // Couleur
-        Block(Fenetre_Pos_X+(Menu_Facteur_X*((Colonne<<2)+8)),
-              Fenetre_Pos_Y+(Menu_Facteur_Y*((line*7)+127)),
-              Menu_Facteur_X<<2,Menu_Facteur_Y<<2,
-              Shade_Liste[Shade_Actuel].List[position]&0xFF);
+      else // color
+        Block(Window_pos_X+(Menu_factor_X*((column<<2)+8)),
+              Window_pos_Y+(Menu_factor_Y*((line*7)+127)),
+              Menu_factor_X<<2,Menu_factor_Y<<2,
+              Shade_list[Shade_current].List[position]&0xFF);
     }
-  UpdateRect(Fenetre_Pos_X+7*Menu_Facteur_X,Fenetre_Pos_Y+126*Menu_Facteur_Y,Menu_Facteur_X*((64<<2)+2),Menu_Facteur_Y*((8<<2)+2));
-  Tagger_shades(Select_Debut2,Select_Fin2);
-  Shade_Blocs_degrades();
-  Afficher_couleur_case_selectionnee(Select_Debut2,Select_Fin2);
-  Afficher_couleur_selectionnee(Select_Debut1,Select_Fin1);
-  Afficher_mode_du_shade(250,110,Shade_Liste[Shade_Actuel].Mode);
+  Update_rect(Window_pos_X+7*Menu_factor_X,Window_pos_Y+126*Menu_factor_Y,Menu_factor_X*((64<<2)+2),Menu_factor_Y*((8<<2)+2));
+  Tag_shades(selection_start2,selection_end2);
+  Shade_draw_grad_ranges();
+  Display_selected_cell_color(selection_start2,selection_end2);
+  Display_selected_color(selection_start1,selection_end1);
+  Display_shade_mode(250,110,Shade_list[Shade_current].Mode);
 }
 
 
-void Supprimer_shade(word Select_Debut,word Select_Fin)
+void Remove_shade(word selection_start,word selection_end)
 {
-  word Temp;
+  word temp;
 
-  if (Select_Fin<Select_Debut)
+  if (selection_end<selection_start)
   {
-    Temp        =Select_Fin;
-    Select_Fin  =Select_Debut;
-    Select_Debut=Temp;
+    temp        =selection_end;
+    selection_end  =selection_start;
+    selection_start=temp;
   }
 
-  for (Select_Fin++;Select_Fin<512;Select_Debut++,Select_Fin++)
-    Shade_Liste[Shade_Actuel].List[Select_Debut]=Shade_Liste[Shade_Actuel].List[Select_Fin];
+  for (selection_end++;selection_end<512;selection_start++,selection_end++)
+    Shade_list[Shade_current].List[selection_start]=Shade_list[Shade_current].List[selection_end];
 
-  for (;Select_Debut<512;Select_Debut++)
-    Shade_Liste[Shade_Actuel].List[Select_Debut]=0x0100;
+  for (;selection_start<512;selection_start++)
+    Shade_list[Shade_current].List[selection_start]=0x0100;
 }
 
 
-void Inserer_shade(byte Premiere_couleur, byte Derniere_couleur, word Select_Debut)
+void Insert_shade(byte first_color, byte last_color, word selection_start)
 {
-  word cursor,Limite;
-  word Temp;
+  word cursor,limit;
+  word temp;
 
-  if (Derniere_couleur<Premiere_couleur)
+  if (last_color<first_color)
   {
-    Temp            =Derniere_couleur;
-    Derniere_couleur=Premiere_couleur;
-    Premiere_couleur=Temp;
+    temp            =last_color;
+    last_color=first_color;
+    first_color=temp;
   }
 
   // Avant d'insérer quoi que ce soit, on efface les éventuelles couleurs que
   // l'on va réinsérer:
-  Limite=512-Select_Debut;
+  limit=512-selection_start;
   for (cursor=0; cursor<512; cursor++)
   {
-    if (!(Shade_Liste[Shade_Actuel].List[cursor]&0x0100))
-      for (Temp=Premiere_couleur; Temp<=Derniere_couleur; Temp++)
-        if ( (Temp-Premiere_couleur<Limite)
-          && ((Shade_Liste[Shade_Actuel].List[cursor]&0xFF)==Temp) )
-          Shade_Liste[Shade_Actuel].List[cursor]=(Shade_Liste[Shade_Actuel].List[cursor]&0x8000)|0x0100;
+    if (!(Shade_list[Shade_current].List[cursor]&0x0100))
+      for (temp=first_color; temp<=last_color; temp++)
+        if ( (temp-first_color<limit)
+          && ((Shade_list[Shade_current].List[cursor]&0xFF)==temp) )
+          Shade_list[Shade_current].List[cursor]=(Shade_list[Shade_current].List[cursor]&0x8000)|0x0100;
   }
   // Voilà... Maintenant on peut y aller peinard.
 
-  Temp=1+Derniere_couleur-Premiere_couleur;
-  Limite=Select_Debut+Temp;
-  if (Limite>=512)
-    Temp=512-Select_Debut;
+  temp=1+last_color-first_color;
+  limit=selection_start+temp;
+  if (limit>=512)
+    temp=512-selection_start;
 
-  for (cursor=511;cursor>=Limite;cursor--)
-    Shade_Liste[Shade_Actuel].List[cursor]=Shade_Liste[Shade_Actuel].List[cursor-Temp];
+  for (cursor=511;cursor>=limit;cursor--)
+    Shade_list[Shade_current].List[cursor]=Shade_list[Shade_current].List[cursor-temp];
 
-  for (cursor=Select_Debut+Temp;Select_Debut<cursor;Select_Debut++,Premiere_couleur++)
-    Shade_Liste[Shade_Actuel].List[Select_Debut]=Premiere_couleur;
+  for (cursor=selection_start+temp;selection_start<cursor;selection_start++,first_color++)
+    Shade_list[Shade_current].List[selection_start]=first_color;
 }
 
 
-void Inserer_case_vide_dans_shade(word position)
+void Insert_empty_cell_in_shade(word position)
 {
   word cursor;
 
   if (position>=512) return;
 
   for (cursor=511;cursor>position;cursor--)
-    Shade_Liste[Shade_Actuel].List[cursor]=Shade_Liste[Shade_Actuel].List[cursor-1];
+    Shade_list[Shade_current].List[cursor]=Shade_list[Shade_current].List[cursor-1];
 
-  Shade_Liste[Shade_Actuel].List[position]=0x0100;
+  Shade_list[Shade_current].List[position]=0x0100;
 }
 
 
-short Attendre_click_dans_shade()
+short Wait_click_in_shade_table()
 {
-  short Case_choisie=-1;
-  byte  Ancien_Cacher_curseur;
+  short selected_cell=-1;
+  byte  old_hide_cursor;
 
 
-  Effacer_curseur();
-  Ancien_Cacher_curseur=Cacher_curseur;
-  Cacher_curseur=0;
-  Forme_curseur=FORME_CURSEUR_CIBLE;
-  Afficher_curseur();
+  Hide_cursor();
+  old_hide_cursor=Cursor_hidden;
+  Cursor_hidden=0;
+  Cursor_shape=CURSOR_SHAPE_TARGET;
+  Display_cursor();
 
-  while (Case_choisie<0)
+  while (selected_cell<0)
   {
     Get_input();
 
-    if ( (Mouse_K==A_GAUCHE)
-      && ( ( (Fenetre_click_dans_zone(8,127,263,179)) && (((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)%7)<4) )
-           || ( (Mouse_X<Fenetre_Pos_X) || (Mouse_Y<Fenetre_Pos_Y)
-             || (Mouse_X>=Fenetre_Pos_X+(Fenetre_Largeur*Menu_Facteur_X))
-             || (Mouse_Y>=Fenetre_Pos_Y+(Fenetre_Hauteur*Menu_Facteur_Y)) ) )
+    if ( (Mouse_K==LEFT_SIDE)
+      && ( ( (Window_click_in_rectangle(8,127,263,179)) && (((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)%7)<4) )
+           || ( (Mouse_X<Window_pos_X) || (Mouse_Y<Window_pos_Y)
+             || (Mouse_X>=Window_pos_X+(Window_width*Menu_factor_X))
+             || (Mouse_Y>=Window_pos_Y+(Window_height*Menu_factor_Y)) ) )
        )
-      Case_choisie=(((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)/7)<<6)+
-                    ((((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-8 )>>2);
+      selected_cell=(((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)/7)<<6)+
+                    ((((Mouse_X-Window_pos_X)/Menu_factor_X)-8 )>>2);
 
-    if ((Mouse_K==A_DROITE) || (Touche==TOUCHE_ESC))
-      Case_choisie=512; // valeur indiquant que l'on n'a rien choisi
+    if ((Mouse_K==RIGHT_SIDE) || (Key==KEY_ESC))
+      selected_cell=512; // valeur indiquant que l'on n'a rien choisi
   }
 
-  Effacer_curseur();
-  Forme_curseur=FORME_CURSEUR_FLECHE;
-  Cacher_curseur=Ancien_Cacher_curseur;
-  Afficher_curseur();
-  return Case_choisie;
+  Hide_cursor();
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Cursor_hidden=old_hide_cursor;
+  Display_cursor();
+  return selected_cell;
 }
 
 
-void Swap_shade(short Debut_Bloc_1,short Debut_Bloc_2,short Taille_du_bloc)
+void Swap_shade(short block_1_start,short block_2_start,short block_size)
 {
-  short  Pos_1;
-  short  Pos_2;
-  short  Fin_1;
-  short  Fin_2;
-  word   Temp;
-  word * Shade_temporaire;
+  short  pos_1;
+  short  pos_2;
+  short  end_1;
+  short  end_2;
+  word   temp;
+  word * temp_shade;
 
   // On fait une copie de la liste
-  Shade_temporaire=(word *)malloc(512*sizeof(word));
-  memcpy(Shade_temporaire,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+  temp_shade=(word *)malloc(512*sizeof(word));
+  memcpy(temp_shade,Shade_list[Shade_current].List,512*sizeof(word));
 
   // On calcul les dernières couleurs de chaque bloc.
-  Fin_1=Debut_Bloc_1+Taille_du_bloc-1;
-  Fin_2=Debut_Bloc_2+Taille_du_bloc-1;
+  end_1=block_1_start+block_size-1;
+  end_2=block_2_start+block_size-1;
 
-  if ((Debut_Bloc_2>=Debut_Bloc_1) && (Debut_Bloc_2<=Fin_1))
+  if ((block_2_start>=block_1_start) && (block_2_start<=end_1))
   {
     // Le bloc destination commence dans le bloc source.
-    for (Pos_1=Debut_Bloc_1,Pos_2=Fin_1+1;Pos_1<=Fin_2;Pos_1++)
+    for (pos_1=block_1_start,pos_2=end_1+1;pos_1<=end_2;pos_1++)
     {
-      // Il faut transformer la case Pos_1 en Pos_2:
-      Shade_Liste[Shade_Actuel].List[Pos_1]=Shade_temporaire[Pos_2];
-      // On gère la mise à jour de Pos_2
-      if (Pos_2==Fin_2)
-        Pos_2=Debut_Bloc_1;
+      // Il faut transformer la case pos_1 en pos_2:
+      Shade_list[Shade_current].List[pos_1]=temp_shade[pos_2];
+      // On gère la mise à jour de pos_2
+      if (pos_2==end_2)
+        pos_2=block_1_start;
       else
-        Pos_2++;
+        pos_2++;
     }
   }
   else
-  if ((Debut_Bloc_2<Debut_Bloc_1) && (Fin_2>=Debut_Bloc_1))
+  if ((block_2_start<block_1_start) && (end_2>=block_1_start))
   {
     // Le bloc destination déborde dans le bloc source.
-    for (Pos_1=Debut_Bloc_2,Pos_2=Debut_Bloc_1;Pos_1<=Fin_1;Pos_1++)
+    for (pos_1=block_2_start,pos_2=block_1_start;pos_1<=end_1;pos_1++)
     {
-      // Il faut transformer la couleur Pos_1 en Pos_2:
-      Shade_Liste[Shade_Actuel].List[Pos_1]=Shade_temporaire[Pos_2];
-      // On gère la mise à jour de Pos_2
-      if (Pos_2==Fin_1)
-        Pos_2=Debut_Bloc_2;
+      // Il faut transformer la couleur pos_1 en pos_2:
+      Shade_list[Shade_current].List[pos_1]=temp_shade[pos_2];
+      // On gère la mise à jour de pos_2
+      if (pos_2==end_1)
+        pos_2=block_2_start;
       else
-        Pos_2++;
+        pos_2++;
     }
   }
   else
   {
     // Le bloc source et le bloc destination sont distincts.
-    for (Pos_1=Debut_Bloc_1,Pos_2=Debut_Bloc_2;Pos_1<=Fin_1;Pos_1++,Pos_2++)
+    for (pos_1=block_1_start,pos_2=block_2_start;pos_1<=end_1;pos_1++,pos_2++)
     {
       // On échange les cases
-      Temp                                  =Shade_Liste[Shade_Actuel].List[Pos_1];
-      Shade_Liste[Shade_Actuel].List[Pos_1]=Shade_Liste[Shade_Actuel].List[Pos_2];
-      Shade_Liste[Shade_Actuel].List[Pos_2]=Temp;
+      temp                                  =Shade_list[Shade_current].List[pos_1];
+      Shade_list[Shade_current].List[pos_1]=Shade_list[Shade_current].List[pos_2];
+      Shade_list[Shade_current].List[pos_2]=temp;
     }
   }
 
-  free(Shade_temporaire);
+  free(temp_shade);
 }
 
 
-int Menu_Shade(void)
+int Menu_shade(void)
 {
-  short Bouton_clicke;  // Numéro du bouton sur lequel l'utilisateur a clické
-  char Chaine[4];        // Chaine d'affichage du n° de shade actif et du Pas
-  word Ancien_Mouse_X,Ancien_Mouse_X2; // Mémo. de l'ancienne pos. du curseur
-  word Ancien_Mouse_Y,Ancien_Mouse_Y2;
-  byte Ancien_Mouse_K,Ancien_Mouse_K2;
-  byte Couleur_temporaire; // Variables de gestion des clicks dans la palette
-  byte Premiere_couleur=0;
-  byte Derniere_couleur=0;
-  word Select_Debut=0;
-  word Select_Fin=0;
-  T_Bouton_special * Bouton_saisie;
-  short Temp,Temp2;
-  word Case_temporaire;
-  word * Buffer;       // Buffer du Copy/Paste
-  word * Buffer_Undo;  // Buffer du Undo
-  word * Pointeur_temp;
-  byte Couleur;
+  short clicked_button;  // Numéro du bouton sur lequel l'utilisateur a clické
+  char str[4];        // str d'affichage du n° de shade actif et du Pas
+  word old_mouse_x,old_mouse_x2; // Mémo. de l'ancienne pos. du curseur
+  word old_mouse_y,old_mouse_y2;
+  byte old_mouse_k,old_mouse_k2;
+  byte temp_color; // Variables de gestion des clicks dans la palette
+  byte first_color=0;
+  byte last_color=0;
+  word selection_start=0;
+  word selection_end=0;
+  T_Special_button * input_button;
+  short temp,temp2;
+  word temp_cell;
+  word * buffer;       // buffer du Copy/Paste
+  word * undo_buffer;  // buffer du Undo
+  word * temp_ptr;
+  byte color;
   byte click;
 
 
-  Buffer       =(word *)malloc(512*sizeof(word));
-  Buffer_Undo  =(word *)malloc(512*sizeof(word));
-  Pointeur_temp=(word *)malloc(512*sizeof(word));
+  buffer       =(word *)malloc(512*sizeof(word));
+  undo_buffer  =(word *)malloc(512*sizeof(word));
+  temp_ptr=(word *)malloc(512*sizeof(word));
 
   // Ouverture de la fenêtre du menu
-  Ouvrir_fenetre(310,190,"Shade");
+  Open_window(310,190,"Shade");
 
   // Déclaration & tracé du bouton de palette
-  Fenetre_Definir_bouton_palette(5,16);                             // 1
+  Window_set_palette_button(5,16);                             // 1
 
   // Déclaration & tracé du scroller de sélection du n° de dégradé
-  Fenetre_Definir_bouton_scroller(192,17,84,8,1,Shade_Actuel);      // 2
+  Window_set_scroller_button(192,17,84,8,1,Shade_current);      // 2
 
   // Déclaration & tracé de la zone de définition des dégradés
-  Fenetre_Definir_bouton_special(8,127,256,53);                     // 3
+  Window_set_special_button(8,127,256,53);                     // 3
 
   // Déclaration & tracé des boutons de sortie
-  Fenetre_Definir_bouton_normal(207,17,51,14,"Cancel",0,1,TOUCHE_ESC);   // 4
-  Fenetre_Definir_bouton_normal(261,17,43,14,"OK"    ,0,1,SDLK_RETURN);  // 5
+  Window_set_normal_button(207,17,51,14,"Cancel",0,1,KEY_ESC);   // 4
+  Window_set_normal_button(261,17,43,14,"OK"    ,0,1,SDLK_RETURN);  // 5
 
   // Déclaration & tracé des boutons de copie de shade
-  Fenetre_Definir_bouton_normal(206,87,27,14,"Cpy"   ,1,1,SDLK_c);  // 6
-  Fenetre_Definir_bouton_normal(234,87,43,14,"Paste" ,1,1,SDLK_p);  // 7
+  Window_set_normal_button(206,87,27,14,"Cpy"   ,1,1,SDLK_c);  // 6
+  Window_set_normal_button(234,87,43,14,"Paste" ,1,1,SDLK_p);  // 7
 
   // On tagge le bloc
-  Tagger_intervalle_palette(0,0);
+  Tag_color_range(0,0);
 
   // Tracé d'un cadre creux autour du bloc dégradé
-  Fenetre_Afficher_cadre_creux(171,26,18,66);
-  Block(Fenetre_Pos_X+(Menu_Facteur_X*172),Fenetre_Pos_Y+(Menu_Facteur_Y*27),
-        Menu_Facteur_X<<4,Menu_Facteur_Y<<6,CM_Noir);
+  Window_display_frame_in(171,26,18,66);
+  Block(Window_pos_X+(Menu_factor_X*172),Window_pos_Y+(Menu_factor_Y*27),
+        Menu_factor_X<<4,Menu_factor_Y<<6,MC_Black);
   // Tracé d'un cadre creux autour de tous les dégradés
-  Fenetre_Afficher_cadre_creux(223,34,66,50);
-  Shade_Blocs_degrades();
+  Window_display_frame_in(223,34,66,50);
+  Shade_draw_grad_ranges();
   // Tracé d'un cadre autour de la zone de définition de dégradés
-  Fenetre_Afficher_cadre(5,124,262,61);
-  Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
+  Window_display_frame(5,124,262,61);
+  Display_all_shade(first_color,last_color,selection_start,selection_end);
 
   // Déclaration & tracé des boutons d'édition de shade
-  Fenetre_Definir_bouton_normal(  6,107,27,14,"Ins"  ,0,1,SDLK_INSERT);  // 8
-  Fenetre_Definir_bouton_normal( 38,107,27,14,"Del"  ,0,1,SDLK_DELETE);  // 9
-  Fenetre_Definir_bouton_normal( 66,107,43,14,"Blank",1,1,SDLK_b);  // 10
-  Fenetre_Definir_bouton_normal(110,107,27,14,"Inv"  ,1,1,SDLK_i);  // 11
-  Fenetre_Definir_bouton_normal(138,107,27,14,"Swp"  ,1,1,SDLK_s);  // 12
+  Window_set_normal_button(  6,107,27,14,"Ins"  ,0,1,SDLK_INSERT);  // 8
+  Window_set_normal_button( 38,107,27,14,"Del"  ,0,1,SDLK_DELETE);  // 9
+  Window_set_normal_button( 66,107,43,14,"Blank",1,1,SDLK_b);  // 10
+  Window_set_normal_button(110,107,27,14,"Inv"  ,1,1,SDLK_i);  // 11
+  Window_set_normal_button(138,107,27,14,"Swp"  ,1,1,SDLK_s);  // 12
 
   // Déclaration & tracé des boutons de taggage
-  Print_dans_fenetre(268,123,"Disbl"/*"Dsabl"*/,CM_Fonce,CM_Clair);
-  Fenetre_Definir_bouton_normal(274,133,27,14,"Set"   ,0,1,SDLK_F1); // 13
-  Fenetre_Definir_bouton_normal(274,148,27,14,"Clr"   ,0,1,SDLK_F2); // 14
+  Print_in_window(268,123,"Disbl"/*"Dsabl"*/,MC_Dark,MC_Light);
+  Window_set_normal_button(274,133,27,14,"Set"   ,0,1,SDLK_F1); // 13
+  Window_set_normal_button(274,148,27,14,"Clr"   ,0,1,SDLK_F2); // 14
 
   // Déclaration & tracé de la zone de saisie du pas
-  Print_dans_fenetre(272,165,"Step",CM_Fonce,CM_Clair);
-  Bouton_saisie = Fenetre_Definir_bouton_saisie(274,174,3);          // 15
-  Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
-  Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
+  Print_in_window(272,165,"Step",MC_Dark,MC_Light);
+  input_button = Window_set_input_button(274,174,3);          // 15
+  Num2str(Shade_list[Shade_current].Step,str,3);
+  Window_input_content(input_button,str);
 
-  // Bouton Undo
-  Fenetre_Definir_bouton_normal(170,107,35,14,"Undo",1,1,SDLK_u);   // 16
-  // Bouton Clear
-  Fenetre_Definir_bouton_normal(278,87,27,14,"Clr",0,1,SDLK_BACKSPACE);     // 17
+  // Button Undo
+  Window_set_normal_button(170,107,35,14,"Undo",1,1,SDLK_u);   // 16
+  // Button Clear
+  Window_set_normal_button(278,87,27,14,"Clr",0,1,SDLK_BACKSPACE);     // 17
 
-  // Bouton Mode
-  Fenetre_Definir_bouton_normal(244,107,60,14,"",0,1,SDLK_TAB);       // 18
+  // Button Mode
+  Window_set_normal_button(244,107,60,14,"",0,1,SDLK_TAB);       // 18
 
   // Affichage du n° de shade actif
-  Num2str(Shade_Actuel+1,Chaine,1);
-  Print_dans_fenetre(210,55,Chaine,CM_Noir,CM_Clair);
+  Num2str(Shade_current+1,str,1);
+  Print_in_window(210,55,str,MC_Black,MC_Light);
 
-  memcpy(Buffer     ,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
-  memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+  memcpy(buffer     ,Shade_list[Shade_current].List,512*sizeof(word));
+  memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
 
-  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*310,Menu_Facteur_Y*190);
+  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*310,Menu_factor_Y*190);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Ancien_Mouse_X=Ancien_Mouse_X2=Mouse_X;
-    Ancien_Mouse_Y=Ancien_Mouse_Y2=Mouse_Y;
-    Ancien_Mouse_K=Ancien_Mouse_K2=Mouse_K;
+    old_mouse_x=old_mouse_x2=Mouse_X;
+    old_mouse_y=old_mouse_y2=Mouse_Y;
+    old_mouse_k=old_mouse_k2=Mouse_K;
 
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case  0 :
         break;
       case -1 :
       case  1 : // Gestion de la palette
-        if ( (Mouse_X!=Ancien_Mouse_X) || (Mouse_Y!=Ancien_Mouse_Y) || (Mouse_K!=Ancien_Mouse_K) )
+        if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
-          Effacer_curseur();
-          Couleur_temporaire=(Bouton_clicke==1) ? Fenetre_Attribut2 : Lit_pixel(Mouse_X,Mouse_Y);
+          Hide_cursor();
+          temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
 
-          if (!Ancien_Mouse_K)
+          if (!old_mouse_k)
           { // On vient de clicker
 
             // On met à jour l'intervalle du Shade
-            Premiere_couleur=Derniere_couleur=Couleur_temporaire;
+            first_color=last_color=temp_color;
             // On tagge le bloc
-            Tagger_intervalle_palette(Premiere_couleur,Derniere_couleur);
+            Tag_color_range(first_color,last_color);
             // Tracé du bloc dégradé:
-            Bloc_degrade_dans_fenetre(172,27,Premiere_couleur,Derniere_couleur);
+            Display_grad_block_in_window(172,27,first_color,last_color);
           }
           else
           { // On maintient le click, on va donc tester si le curseur bouge
-            if (Couleur_temporaire!=Derniere_couleur)
+            if (temp_color!=last_color)
             {
-              Derniere_couleur=Couleur_temporaire;
+              last_color=temp_color;
 
               // On tagge le bloc
-              if (Premiere_couleur<=Couleur_temporaire)
+              if (first_color<=temp_color)
               {
-                Tagger_intervalle_palette(Premiere_couleur,Derniere_couleur);
-                Bloc_degrade_dans_fenetre(172,27,Premiere_couleur,Derniere_couleur);
+                Tag_color_range(first_color,last_color);
+                Display_grad_block_in_window(172,27,first_color,last_color);
               }
               else
               {
-                Tagger_intervalle_palette(Derniere_couleur,Premiere_couleur);
-                Bloc_degrade_dans_fenetre(172,27,Derniere_couleur,Premiere_couleur);
+                Tag_color_range(last_color,first_color);
+                Display_grad_block_in_window(172,27,last_color,first_color);
               }
             }
           }
 
           // On affiche le numéro de la couleur sélectionnée
-          Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
+          Display_selected_color(first_color,last_color);
 
-          Afficher_curseur();
+          Display_cursor();
         }
         break;
 
       case  2 : // Gestion du changement de Shade (scroller)
-        Effacer_curseur();
-        Shade_Actuel=Fenetre_Attribut2;
+        Hide_cursor();
+        Shade_current=Window_attribute2;
         // Affichade du n° de shade actif
-        Num2str(Shade_Actuel+1,Chaine,1);
-        Print_dans_fenetre(210,55,Chaine,CM_Noir,CM_Clair);
+        Num2str(Shade_current+1,str,1);
+        Print_in_window(210,55,str,MC_Black,MC_Light);
         // Affichade du Pas
-        Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
-        Print_dans_fenetre(276,176,Chaine,CM_Noir,CM_Clair);
+        Num2str(Shade_list[Shade_current].Step,str,3);
+        Print_in_window(276,176,str,MC_Black,MC_Light);
         // Tracé du bloc dégradé:
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         // On place le nouveau shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         break;
 
       case  3 : // Gestion de la zone de définition de shades
-        if (((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)%7)<4)
-        if ( (Mouse_X!=Ancien_Mouse_X2) || (Mouse_Y!=Ancien_Mouse_Y2) || (Mouse_K!=Ancien_Mouse_K2) )
+        if (((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)%7)<4)
+        if ( (Mouse_X!=old_mouse_x2) || (Mouse_Y!=old_mouse_y2) || (Mouse_K!=old_mouse_k2) )
         {
-          Effacer_curseur();
-          Select_Fin=(((((Mouse_Y-Fenetre_Pos_Y)/Menu_Facteur_Y)-127)/7)<<6)+
-                      ((((Mouse_X-Fenetre_Pos_X)/Menu_Facteur_X)-8 )>>2);
-          if (!Ancien_Mouse_K2) // On vient de clicker
-            Select_Debut=Select_Fin;
-          Tagger_shades(Select_Debut,Select_Fin);
-          Afficher_couleur_case_selectionnee(Select_Debut,Select_Fin);
-          Afficher_curseur();
+          Hide_cursor();
+          selection_end=(((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)/7)<<6)+
+                      ((((Mouse_X-Window_pos_X)/Menu_factor_X)-8 )>>2);
+          if (!old_mouse_k2) // On vient de clicker
+            selection_start=selection_end;
+          Tag_shades(selection_start,selection_end);
+          Display_selected_cell_color(selection_start,selection_end);
+          Display_cursor();
         }
         break;
 
       case  6 : // Copy
-        memcpy(Buffer,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(buffer,Shade_list[Shade_current].List,512*sizeof(word));
         break;
 
       case  7 : // Paste
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        memcpy(Shade_Liste[Shade_Actuel].List,Buffer,512*sizeof(word));
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        memcpy(Shade_list[Shade_current].List,buffer,512*sizeof(word));
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case  8 : // Insert
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        if (Premiere_couleur<=Derniere_couleur)
-          Temp=Derniere_couleur-Premiere_couleur;
+        if (first_color<=last_color)
+          temp=last_color-first_color;
         else
-          Temp=Premiere_couleur-Derniere_couleur;
+          temp=first_color-last_color;
 
-        if (Select_Debut==Select_Fin) // Une couleur sélectionnée
+        if (selection_start==selection_end) // Une couleur sélectionnée
         {
-          if (Fenetre_Attribut1==2)
-            Supprimer_shade(Select_Debut,Select_Debut+Temp);
+          if (Window_attribute1==2)
+            Remove_shade(selection_start,selection_start+temp);
         }
         else                          // Un bloc sélectionné
         {
-          Supprimer_shade(Select_Debut,Select_Fin);
+          Remove_shade(selection_start,selection_end);
 
-          if (Premiere_couleur<=Derniere_couleur)
-            Temp=Derniere_couleur-Premiere_couleur;
+          if (first_color<=last_color)
+            temp=last_color-first_color;
           else
-            Temp=Premiere_couleur-Derniere_couleur;
+            temp=first_color-last_color;
 
-          if (Select_Debut<Select_Fin)
-            Select_Fin=Select_Debut+Temp;
+          if (selection_start<selection_end)
+            selection_end=selection_start+temp;
           else
           {
-            Select_Debut=Select_Fin;
-            Select_Fin+=Temp;
+            selection_start=selection_end;
+            selection_end+=temp;
           }
         }
 
-        if (Select_Debut<Select_Fin)
-          Select_Fin=Select_Debut+Temp;
+        if (selection_start<selection_end)
+          selection_end=selection_start+temp;
         else
         {
-          Select_Debut=Select_Fin;
-          Select_Fin+=Temp;
+          selection_start=selection_end;
+          selection_end+=temp;
         }
-        Inserer_shade(Premiere_couleur,Derniere_couleur,Select_Debut);
+        Insert_shade(first_color,last_color,selection_start);
 
         // On sélectionne la position juste après ce qu'on vient d'insérer
-        Select_Debut+=Temp+1;
-        if (Select_Debut>=512)
-          Select_Debut=511;
-        Select_Fin=Select_Debut;
+        selection_start+=temp+1;
+        if (selection_start>=512)
+          selection_start=511;
+        selection_end=selection_start;
 
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case  9 : // Delete
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        Supprimer_shade(Select_Debut,Select_Fin);
-        if (Select_Debut<=Select_Fin)
-          Select_Fin=Select_Debut;
+        Remove_shade(selection_start,selection_end);
+        if (selection_start<=selection_end)
+          selection_end=selection_start;
         else
-          Select_Debut=Select_Fin;
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+          selection_start=selection_end;
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case 10 : // Blank
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        if (Fenetre_Attribut1==A_DROITE)  // Click droit
+        if (Window_attribute1==RIGHT_SIDE)  // Click droit
         {
-          if (Select_Debut!=Select_Fin)
+          if (selection_start!=selection_end)
           {
-            if (Select_Debut<=Select_Fin)
+            if (selection_start<=selection_end)
             {
-              Inserer_case_vide_dans_shade(Select_Debut);
-              Inserer_case_vide_dans_shade(Select_Fin+2);
+              Insert_empty_cell_in_shade(selection_start);
+              Insert_empty_cell_in_shade(selection_end+2);
             }
             else
             {
-              Inserer_case_vide_dans_shade(Select_Fin);
-              Inserer_case_vide_dans_shade(Select_Debut+2);
+              Insert_empty_cell_in_shade(selection_end);
+              Insert_empty_cell_in_shade(selection_start+2);
             }
           }
           else
-            Inserer_case_vide_dans_shade(Select_Debut);
+            Insert_empty_cell_in_shade(selection_start);
 
-          if (Select_Debut<511) Select_Debut++;
-          if (Select_Fin<511) Select_Fin++;
+          if (selection_start<511) selection_start++;
+          if (selection_end<511) selection_end++;
         }
         else                              // Click gauche
         {
-          if (Select_Debut<=Select_Fin)
+          if (selection_start<=selection_end)
           {
-            Temp=Select_Debut;
-            Temp2=Select_Fin;
+            temp=selection_start;
+            temp2=selection_end;
           }
           else
           {
-            Temp=Select_Fin;
-            Temp2=Select_Debut;
+            temp=selection_end;
+            temp2=selection_start;
           }
-          while (Temp<=Temp2)
-            Shade_Liste[Shade_Actuel].List[Temp++]=0x0100;
+          while (temp<=temp2)
+            Shade_list[Shade_current].List[temp++]=0x0100;
         }
 
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case 11 : // Invert
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        if (Select_Debut<=Select_Fin)
+        if (selection_start<=selection_end)
         {
-          Temp=Select_Debut;
-          Temp2=Select_Fin;
+          temp=selection_start;
+          temp2=selection_end;
         }
         else
         {
-          Temp=Select_Fin;
-          Temp2=Select_Debut;
+          temp=selection_end;
+          temp2=selection_start;
         }
 
-        for (;Temp<Temp2;Temp++,Temp2--)
+        for (;temp<temp2;temp++,temp2--)
         {
-          Case_temporaire=Shade_Liste[Shade_Actuel].List[Temp];
-          Shade_Liste[Shade_Actuel].List[Temp]=Shade_Liste[Shade_Actuel].List[Temp2];
-          Shade_Liste[Shade_Actuel].List[Temp2]=Case_temporaire;
+          temp_cell=Shade_list[Shade_current].List[temp];
+          Shade_list[Shade_current].List[temp]=Shade_list[Shade_current].List[temp2];
+          Shade_list[Shade_current].List[temp2]=temp_cell;
         }
 
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case 12 : // Swap
-        Case_temporaire=Attendre_click_dans_shade();
-        if (Case_temporaire<512)
+        temp_cell=Wait_click_in_shade_table();
+        if (temp_cell<512)
         {
           // On place le shade dans le buffer du Undo
-          memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+          memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
           // Et on le modifie
           // On échange le bloc avec sa destination
-          if (Select_Debut<=Select_Fin)
+          if (selection_start<=selection_end)
           {
-            Temp=(Case_temporaire+Select_Fin-Select_Debut<512)?Select_Fin+1-Select_Debut:512-Case_temporaire;
-            Swap_shade(Select_Debut,Case_temporaire,Temp);
+            temp=(temp_cell+selection_end-selection_start<512)?selection_end+1-selection_start:512-temp_cell;
+            Swap_shade(selection_start,temp_cell,temp);
           }
           else
           {
-            Temp=(Case_temporaire+Select_Debut-Select_Fin<512)?Select_Debut+1-Select_Fin:512-Case_temporaire;
-            Swap_shade(Select_Fin,Case_temporaire,Temp);
+            temp=(temp_cell+selection_start-selection_end<512)?selection_start+1-selection_end:512-temp_cell;
+            Swap_shade(selection_end,temp_cell,temp);
           }
           // On place la sélection sur la nouvelle position du bloc
-          Select_Debut=Case_temporaire;
-          Select_Fin=Select_Debut+Temp-1;
+          selection_start=temp_cell;
+          selection_end=selection_start+temp-1;
           // Et on raffiche tout
-          Effacer_curseur();
-          Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-          Afficher_curseur();
+          Hide_cursor();
+          Display_all_shade(first_color,last_color,selection_start,selection_end);
+          Display_cursor();
         }
-        Attendre_fin_de_click();
+        Wait_end_of_click();
         break;
 
       case 13 : // Set (disable)
       case 14 : // Clear (enable)
         // On place le shade dans le buffer du Undo
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         // Et on le modifie
-        if (Select_Debut<Select_Fin)
+        if (selection_start<selection_end)
         {
-          Temp=Select_Debut;
-          Temp2=Select_Fin;
+          temp=selection_start;
+          temp2=selection_end;
         }
         else
         {
-          Temp=Select_Fin;
-          Temp2=Select_Debut;
+          temp=selection_end;
+          temp2=selection_start;
         }
 
-        if (Bouton_clicke==13)
-          for (;Temp<=Temp2;Temp++)
-            Shade_Liste[Shade_Actuel].List[Temp]|=0x8000;
+        if (clicked_button==13)
+          for (;temp<=temp2;temp++)
+            Shade_list[Shade_current].List[temp]|=0x8000;
         else
-          for (;Temp<=Temp2;Temp++)
-            Shade_Liste[Shade_Actuel].List[Temp]&=0x7FFF;
+          for (;temp<=temp2;temp++)
+            Shade_list[Shade_current].List[temp]&=0x7FFF;
 
-        Effacer_curseur();
-        Tagger_shades(Select_Debut,Select_Fin);
-        Shade_Blocs_degrades();
-        Afficher_curseur();
+        Hide_cursor();
+        Tag_shades(selection_start,selection_end);
+        Shade_draw_grad_ranges();
+        Display_cursor();
         break;
 
       case 15 : // Saisie du pas
-        Num2str(Shade_Liste[Shade_Actuel].Step,Chaine,3);
-        Readline(276,176,Chaine,3,1);
-        Temp=atoi(Chaine);
+        Num2str(Shade_list[Shade_current].Step,str,3);
+        Readline(276,176,str,3,1);
+        temp=atoi(str);
         // On corrige le pas
-        if (!Temp)
+        if (!temp)
         {
-          Temp=1;
-          Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
+          temp=1;
+          Num2str(temp,str,3);
+          Window_input_content(input_button,str);
         }
-        else if (Temp>255)
+        else if (temp>255)
         {
-          Temp=255;
-          Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(Bouton_saisie,Chaine);
+          temp=255;
+          Num2str(temp,str,3);
+          Window_input_content(input_button,str);
         }
-        Shade_Liste[Shade_Actuel].Step=Temp;
-        Afficher_curseur();
+        Shade_list[Shade_current].Step=temp;
+        Display_cursor();
         break;
 
       case 16 : // Undo
-        memcpy(Pointeur_temp,Buffer_Undo,512*sizeof(word));
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
-        memcpy(Shade_Liste[Shade_Actuel].List,Pointeur_temp,512*sizeof(word));
+        memcpy(temp_ptr,undo_buffer,512*sizeof(word));
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
+        memcpy(Shade_list[Shade_current].List,temp_ptr,512*sizeof(word));
 
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case 17 : // Clear
-        memcpy(Buffer_Undo,Shade_Liste[Shade_Actuel].List,512*sizeof(word));
-        for (Temp=0;Temp<512;Temp++)
-          Shade_Liste[Shade_Actuel].List[Temp]=0x0100;
-        Effacer_curseur();
-        Afficher_tout_le_shade(Premiere_couleur,Derniere_couleur,Select_Debut,Select_Fin);
-        Afficher_curseur();
+        memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
+        for (temp=0;temp<512;temp++)
+          Shade_list[Shade_current].List[temp]=0x0100;
+        Hide_cursor();
+        Display_all_shade(first_color,last_color,selection_start,selection_end);
+        Display_cursor();
         break;
 
       case 18 : // Mode
-        Shade_Liste[Shade_Actuel].Mode=(Shade_Liste[Shade_Actuel].Mode+1)%3;
-        Effacer_curseur();
-        Afficher_mode_du_shade(250,110,Shade_Liste[Shade_Actuel].Mode);
-        Afficher_curseur();
+        Shade_list[Shade_current].Mode=(Shade_list[Shade_current].Mode+1)%3;
+        Hide_cursor();
+        Display_shade_mode(250,110,Shade_list[Shade_current].Mode);
+        Display_cursor();
     }
 
     if (!Mouse_K)
-    switch (Touche)
+    switch (Key)
     {
       case SDLK_LEFTBRACKET : // Décaler couleur dans palette vers la gauche
       case SDLK_RIGHTBRACKET : // Décaler couleur dans palette vers la droite
-        if (Premiere_couleur==Derniere_couleur)
+        if (first_color==last_color)
         {
-          if (Touche==SDLK_LEFTBRACKET)
+          if (Key==SDLK_LEFTBRACKET)
           {
-            Premiere_couleur--;
-            Derniere_couleur--;
+            first_color--;
+            last_color--;
           }
           else
           {
-            Premiere_couleur++;
-            Derniere_couleur++;
+            first_color++;
+            last_color++;
           }
-          Effacer_curseur();
-          Tagger_intervalle_palette(Premiere_couleur,Premiere_couleur);
-          Block(Fenetre_Pos_X+(Menu_Facteur_X*172),
-                Fenetre_Pos_Y+(Menu_Facteur_Y*27),
-                Menu_Facteur_X<<4,Menu_Facteur_Y*64,Premiere_couleur);
+          Hide_cursor();
+          Tag_color_range(first_color,first_color);
+          Block(Window_pos_X+(Menu_factor_X*172),
+                Window_pos_Y+(Menu_factor_Y*27),
+                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
           // On affiche le numéro de la couleur sélectionnée
-          Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
-          Afficher_curseur();
+          Display_selected_color(first_color,last_color);
+          Display_cursor();
         }
-        Touche=0;
+        Key=0;
         break;
 
       case SDLK_UP    : // Select Haut
       case SDLK_DOWN  : // Select Bas
       case SDLK_LEFT  : // Select Gauche
       case SDLK_RIGHT : // Select Droite
-        if (Select_Debut==Select_Fin)
+        if (selection_start==selection_end)
         {
-          switch (Touche)
+          switch (Key)
           {
             case SDLK_UP : // Select Haut
-              if (Select_Debut>=64)
+              if (selection_start>=64)
               {
-                Select_Debut-=64;
-                Select_Fin-=64;
+                selection_start-=64;
+                selection_end-=64;
               }
               else
-                Select_Debut=Select_Fin=0;
+                selection_start=selection_end=0;
               break;
             case SDLK_DOWN : // Select Bas
-              if (Select_Debut<448)
+              if (selection_start<448)
               {
-                Select_Debut+=64;
-                Select_Fin+=64;
+                selection_start+=64;
+                selection_end+=64;
               }
               else
-                Select_Debut=Select_Fin=511;
+                selection_start=selection_end=511;
               break;
             case SDLK_LEFT : // Select Gauche
-              if (Select_Debut>0)
+              if (selection_start>0)
               {
-                Select_Debut--;
-                Select_Fin--;
+                selection_start--;
+                selection_end--;
               }
               break;
             default :     // Select Droite
-              if (Select_Debut<511)
+              if (selection_start<511)
               {
-                Select_Debut++;
-                Select_Fin++;
+                selection_start++;
+                selection_end++;
               }
           }
-          Effacer_curseur();
-          Tagger_shades(Select_Debut,Select_Debut);
-          Afficher_couleur_case_selectionnee(Select_Debut,Select_Debut);
-          Afficher_curseur();
+          Hide_cursor();
+          Tag_shades(selection_start,selection_start);
+          Display_selected_cell_color(selection_start,selection_start);
+          Display_cursor();
         }
-        Touche=0;
+        Key=0;
         break;
 
       case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
       case SDLK_COMMA :
-        Recuperer_couleur_derriere_fenetre(&Couleur,&click);
+        Get_color_behind_window(&color,&click);
         if (click)
         {
-          Effacer_curseur();
-          Couleur_temporaire=Couleur;
+          Hide_cursor();
+          temp_color=color;
 
           // On met à jour l'intervalle du Shade
-          Premiere_couleur=Derniere_couleur=Couleur_temporaire;
+          first_color=last_color=temp_color;
           // On tagge le bloc
-          Tagger_intervalle_palette(Premiere_couleur,Derniere_couleur);
+          Tag_color_range(first_color,last_color);
           // Tracé du bloc dégradé:
-          Bloc_degrade_dans_fenetre(172,27,Premiere_couleur,Derniere_couleur);
+          Display_grad_block_in_window(172,27,first_color,last_color);
 
           // On affiche le numéro de la couleur sélectionnée
-          Afficher_couleur_selectionnee(Premiere_couleur,Derniere_couleur);
+          Display_selected_color(first_color,last_color);
 
-          Afficher_curseur();
-          Attendre_fin_de_click();
+          Display_cursor();
+          Wait_end_of_click();
         }
-        Touche=0;
+        Key=0;
         break;
       default:
-        if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
+        if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
-          Touche=0;
-          Fenetre_aide(BOUTON_EFFETS, "SHADE");
+          Key=0;
+          Window_help(BUTTON_EFFECTS, "SHADE");
         }
     }
   }
-  while ((Bouton_clicke!=4) && (Bouton_clicke!=5));
+  while ((clicked_button!=4) && (clicked_button!=5));
 
-  Fermer_fenetre();
-  free(Buffer_Undo);
-  free(Buffer);
-  free(Pointeur_temp);
+  Close_window();
+  free(undo_buffer);
+  free(buffer);
+  free(temp_ptr);
 
-  return (Bouton_clicke==5);
+  return (clicked_button==5);
 }
 
 
 
-void Bouton_Shade_Menu(void)
+void Button_Shade_menu(void)
 {
-  T_Shade * Shade_Liste_Backup; // Anciennes données des shades
-  byte Ancien_shade; // Ancien n° de shade actif
+  T_Shade * initial_shade_list; // Anciennes données des shades
+  byte old_shade; // old n° de shade actif
 
 
   // Backup des anciennes données
-  Shade_Liste_Backup=(T_Shade *)malloc(sizeof(Shade_Liste));
-  memcpy(Shade_Liste_Backup,Shade_Liste,sizeof(Shade_Liste));
-  Ancien_shade=Shade_Actuel;
+  initial_shade_list=(T_Shade *)malloc(sizeof(Shade_list));
+  memcpy(initial_shade_list,Shade_list,sizeof(Shade_list));
+  old_shade=Shade_current;
 
-  if (!Menu_Shade()) // Cancel
+  if (!Menu_shade()) // Cancel
   {
-    memcpy(Shade_Liste,Shade_Liste_Backup,sizeof(Shade_Liste));
-    Shade_Actuel=Ancien_shade;
+    memcpy(Shade_list,initial_shade_list,sizeof(Shade_list));
+    Shade_current=old_shade;
   }
   else // OK
   {
-    Liste2tables(Shade_Liste[Shade_Actuel].List,
-                 Shade_Liste[Shade_Actuel].Step,
-                 Shade_Liste[Shade_Actuel].Mode,
-                 Shade_Table_gauche,Shade_Table_droite);
+    Shade_list_to_lookup_tables(Shade_list[Shade_current].List,
+                 Shade_list[Shade_current].Step,
+                 Shade_list[Shade_current].Mode,
+                 Shade_table_left,Shade_table_right);
 
     // Si avant de rentrer dans le menu on n'était pas en mode Shade
-    if (!Shade_Mode)
-      Bouton_Shade_Mode(); // => On y passe (cool!)
+    if (!Shade_mode)
+      Button_Shade_mode(); // => On y passe (cool!)
   }
 
-  free(Shade_Liste_Backup);
+  free(initial_shade_list);
 
-  Afficher_curseur();
+  Display_cursor();
 }
 
 
 
 
-void Bouton_Quick_shade_Menu(void)
+void Button_Quick_shade_menu(void)
 {
-  short Bouton_clicke;
-  int Temp;
-  char Chaine[4];
-  byte Step_Backup=Quick_shade_Step; // Backup des
-  byte Loop_Backup=Quick_shade_Loop; // anciennes données
-  T_Bouton_special * BoutonPas;
+  short clicked_button;
+  int temp;
+  char str[4];
+  byte step_backup=Quick_shade_step; // Backup des
+  byte loop_backup=Quick_shade_loop; // anciennes données
+  T_Special_button * step_button;
 
-  Ouvrir_fenetre(142,56,"Quick-shade");
+  Open_window(142,56,"Quick-shade");
 
-  Fenetre_Definir_bouton_normal(76,36,60,14,"OK",0,1,SDLK_RETURN);     // 1
-  Fenetre_Definir_bouton_normal( 6,36,60,14,"Cancel",0,1,TOUCHE_ESC);  // 2
-  Fenetre_Definir_bouton_normal(76,18,60,14,"",0,1,SDLK_TAB);          // 3
-  Afficher_mode_du_shade(83,21,Quick_shade_Loop);
+  Window_set_normal_button(76,36,60,14,"OK",0,1,SDLK_RETURN);     // 1
+  Window_set_normal_button( 6,36,60,14,"Cancel",0,1,KEY_ESC);  // 2
+  Window_set_normal_button(76,18,60,14,"",0,1,SDLK_TAB);          // 3
+  Display_shade_mode(83,21,Quick_shade_loop);
 
   // Déclaration & tracé de la zone de saisie du pas
-  Print_dans_fenetre(5,21,"Step",CM_Fonce,CM_Clair);
-  BoutonPas = Fenetre_Definir_bouton_saisie(40,19,3);                  // 4
-  Num2str(Quick_shade_Step,Chaine,3);
-  Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
+  Print_in_window(5,21,"Step",MC_Dark,MC_Light);
+  step_button = Window_set_input_button(40,19,3);                  // 4
+  Num2str(Quick_shade_step,str,3);
+  Window_input_content(step_button,str);
 
-  UpdateRect(Fenetre_Pos_X,Fenetre_Pos_Y,Menu_Facteur_X*142,Menu_Facteur_Y*56);
+  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*142,Menu_factor_Y*56);
 
-  Afficher_curseur();
+  Display_cursor();
 
   do
   {
-    Bouton_clicke=Fenetre_Bouton_clicke();
+    clicked_button=Window_clicked_button();
 
-    switch (Bouton_clicke)
+    switch (clicked_button)
     {
       case 3 : // Mode
-        Quick_shade_Loop=(Quick_shade_Loop+1)%3;
-        Effacer_curseur();
-        Afficher_mode_du_shade(83,21,Quick_shade_Loop);
-        Afficher_curseur();
+        Quick_shade_loop=(Quick_shade_loop+1)%3;
+        Hide_cursor();
+        Display_shade_mode(83,21,Quick_shade_loop);
+        Display_cursor();
         break;
 
       case 4 : // Saisie du pas
-        Num2str(Quick_shade_Step,Chaine,3);
-        Readline(42,21,Chaine,3,1);
-        Temp=atoi(Chaine);
+        Num2str(Quick_shade_step,str,3);
+        Readline(42,21,str,3,1);
+        temp=atoi(str);
         // On corrige le pas
-        if (!Temp)
+        if (!temp)
         {
-          Temp=1;
-          Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
+          temp=1;
+          Num2str(temp,str,3);
+          Window_input_content(step_button,str);
         }
-        else if (Temp>255)
+        else if (temp>255)
         {
-          Temp=255;
-          Num2str(Temp,Chaine,3);
-          Fenetre_Contenu_bouton_saisie(BoutonPas,Chaine);
+          temp=255;
+          Num2str(temp,str,3);
+          Window_input_content(step_button,str);
         }
-        Quick_shade_Step=Temp;
-        Afficher_curseur();
+        Quick_shade_step=temp;
+        Display_cursor();
     }
-    if (Est_Raccourci(Touche,0x100+BOUTON_AIDE))
-      Fenetre_aide(BOUTON_EFFETS, "QUICK SHADE");
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "QUICK SHADE");
   }
-  while ((Bouton_clicke!=1) && (Bouton_clicke!=2));
+  while ((clicked_button!=1) && (clicked_button!=2));
 
-  Fermer_fenetre();
+  Close_window();
 
-  if (Bouton_clicke==2) // Cancel
+  if (clicked_button==2) // Cancel
   {
-    Quick_shade_Step=Step_Backup;
-    Quick_shade_Loop=Loop_Backup;
+    Quick_shade_step=step_backup;
+    Quick_shade_loop=loop_backup;
   }
   else // OK
   {
     // Si avant de rentrer dans le menu on n'était pas en mode Quick-Shade
-    if (!Quick_shade_Mode)
-      Bouton_Quick_shade_Mode(); // => On y passe (cool!)
+    if (!Quick_shade_mode)
+      Button_Quick_shade_mode(); // => On y passe (cool!)
   }
 
-  Afficher_curseur();
+  Display_cursor();
 }
