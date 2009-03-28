@@ -19,7 +19,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 ///@file global.h
 /// This file contains all global variables.
 /// They are prefixed by ::GFX2_GLOBAL so they are extern when needed.
@@ -54,7 +54,7 @@ typedef struct
   short  Height; ///< Screen height
   byte   Mode; ///< Unused (used to be Mode-X, SVGA, etc)
   word   Fullscreen; ///< 0 for window, 1 for fullscreen
-  byte   State; /// How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
+  byte   State; ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
 } T_Video_mode;
 
 /// Array of all video modes supported by your platform. Actually filled up to ::Nb_video_modes, excluded.
@@ -68,22 +68,22 @@ GFX2_GLOBAL T_Palette Default_palette;
 
 // Menu colors
 
-GFX2_GLOBAL byte MC_Black; /// Index of color to use as "black" in the GUI menus.
-GFX2_GLOBAL byte MC_Dark; /// Index of color to use as "dark grey" in the GUI menus.
-GFX2_GLOBAL byte MC_Light; /// Index of color to use as "light grey" in the GUI menus.
-GFX2_GLOBAL byte MC_White; /// Index of color to use as "white" in the GUI menus.
-GFX2_GLOBAL byte MC_Trans; /// Index of color to use as "transparent" while loading the GUI file.
+GFX2_GLOBAL byte MC_Black; ///< Index of color to use as "black" in the GUI menus.
+GFX2_GLOBAL byte MC_Dark; ///< Index of color to use as "dark grey" in the GUI menus.
+GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI menus.
+GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
+GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
 
 /// Favorite menu colors (RGB values).
 GFX2_GLOBAL T_Components Fav_menu_colors[4];
 
 // Input state
-GFX2_GLOBAL word Mouse_X; /// Current mouse cursor position.
-GFX2_GLOBAL word Mouse_Y; /// Current mouse cursor position.
-GFX2_GLOBAL byte Mouse_K; /// Current mouse buttons state. Bitfield: 1 for RMB, 2 for LMB.
+GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
+GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.
+GFX2_GLOBAL byte Mouse_K; ///< Current mouse buttons state. Bitfield: 1 for RMB, 2 for LMB.
 
 /// Helper macro to take only one button when both are pressed (LMB has priority)
-#define Mouse_K_unique (Mouse_K==0?0:(Mouse_K&1?1:(Mouse_K&2?2:0))) // State des boutons de la souris (un seul bouton à la fois, on regarde d'abord le 1, puis le 2, ...)
+#define Mouse_K_unique (Mouse_K==0?0:(Mouse_K&1?1:(Mouse_K&2?2:0)))
 
 /// Last key pressed, 0 if none. Set by the latest call to ::Get_input()
 GFX2_GLOBAL dword Key;
@@ -184,13 +184,6 @@ GFX2_GLOBAL short Paintbrush_offset_X;
 /// Position of current paintbrush's handle
 GFX2_GLOBAL short Paintbrush_offset_Y;
 
-/// Current pixel ratio. Index in enum ::PIXEL_RATIO
-GFX2_GLOBAL int Pixel_ratio;
-/// Current width of pixels, according to ::Pixel_ratio
-GFX2_GLOBAL int Pixel_width;
-/// Current height of pixels, according to ::Pixel_ratio
-GFX2_GLOBAL int Pixel_height;
-
 // Graphic commands
 
 /// On the screen, draw a point.
@@ -240,100 +233,209 @@ GFX2_GLOBAL Func_draw_brush Display_brush;
 
 // Screen data
 
-GFX2_GLOBAL int   Resize_width;      // \__ Positionnées lorsque l'utilisateur tire
-GFX2_GLOBAL int   Resize_height;      // /      un bord de la fenêtre.
-GFX2_GLOBAL int   Current_resolution; // Résolution graphique courante
-GFX2_GLOBAL short Original_screen_X;    // |_ Dimensions de l'écran d'origine de
-GFX2_GLOBAL short Original_screen_Y;    // |  l'image qui vient d'être chargée.
-GFX2_GLOBAL short Screen_width;       // Largeur de l'écran
-GFX2_GLOBAL short Screen_height;       // Hauteur de l'écran
-GFX2_GLOBAL short Limit_top;         // |
-GFX2_GLOBAL short Limit_bottom;          // |_ Limites dans lesquelles
-GFX2_GLOBAL short Limit_left;       // |  on peut écrire
-GFX2_GLOBAL short Limit_right;       // |
-GFX2_GLOBAL short Limit_visible_bottom;    // |_ Derniers points visibles
-GFX2_GLOBAL short Limit_visible_right; // |  "à l'image"
+/// Requested window width. This is set when the user resizes the window.
+GFX2_GLOBAL int   Resize_width;
+/// Requested window height. This is set when the user resizes the window.
+GFX2_GLOBAL int   Resize_height;
+/// Current video mode. Index in ::Video_mode
+GFX2_GLOBAL int   Current_resolution;
+/// After loading an image, this holds the "original screen width", if the file format supported it.
+GFX2_GLOBAL short Original_screen_X;
+/// After loading an image, this holds the "original screen height", if the file format supported it.
+GFX2_GLOBAL short Original_screen_Y;
+///
+/// Current screen (or window) width, in pixels.
+/// Note that this takes ::Pixel_ratio into account.
+GFX2_GLOBAL short Screen_width;
+///
+/// Current screen (or window) height, in pixels.
+/// Note that this takes ::Pixel_ratio into account.
+GFX2_GLOBAL short Screen_height;
+/// Coordinate (in image space) of the topmost visible pixel.
+GFX2_GLOBAL short Limit_top;
+///
+/// Coordinate (in image space) of the lowest visible pixel.
+/// This can be larger than the image height, if the screen is bigger than image.
+GFX2_GLOBAL short Limit_bottom;
+/// Coordinate (in image space) of the leftmost visible pixel.
+GFX2_GLOBAL short Limit_left;
+///
+/// Coordinate (in image space) of the rightmost visible pixel.
+/// This can be larger than the image width, if the screen is bigger than image.
+GFX2_GLOBAL short Limit_right;
+///
+/// Coordinate (in image space) of the lowest visible pixel, limited by the
+/// image height. Compare with ::Limit_bottom, which is not clipped.
+GFX2_GLOBAL short Limit_visible_bottom;
+///
+/// Coordinate (in image space) of the rightmost visible pixel, limited by the
+/// image width. Compare with ::Limit_right, which is not clipped.
+GFX2_GLOBAL short Limit_visible_right;
 
-GFX2_GLOBAL short Limit_top_zoom;         // |
-GFX2_GLOBAL short Limit_bottom_zoom;          // |_ Limites dans lesquelles on peut
-GFX2_GLOBAL short Limit_left_zoom;       // |  écrire dans la partie zoomée
-GFX2_GLOBAL short Limit_right_zoom;       // |
-GFX2_GLOBAL short Limit_visible_bottom_zoom;    // |_ Derniers points visibles "à
-GFX2_GLOBAL short Limit_visible_right_zoom; // |  l'image" dans la partie zoomée
+/// Coordinate (in image space) of the pixel at the top of the magnified view.
+GFX2_GLOBAL short Limit_top_zoom;
+///
+/// Coordinate (in image space) of the pixel at the bottom of the magnified view.
+/// This can be larger than the image height, if the screen is bigger than image.
+GFX2_GLOBAL short Limit_bottom_zoom;
+/// Coordinate (in image space) of the pixel at the left of the magnified view.
+GFX2_GLOBAL short Limit_left_zoom;
+///
+/// Coordinate (in image space) of the pixel at the right of the magnified view.
+/// This can be larger than the image width, if the screen is bigger than image.
+GFX2_GLOBAL short Limit_right_zoom;
+///
+/// Coordinate (in image space) of the lowest visible pixel, limited by the
+/// image height. Compare with ::Limit_bottom, which is not clipped.
+GFX2_GLOBAL short Limit_visible_bottom_zoom;
+/// Coordinate (in image space) of the rightmost visible pixel.
+/// This can be larger than the image width, if the screen is bigger than image.
+GFX2_GLOBAL short Limit_visible_right_zoom;
 
-GFX2_GLOBAL byte * Horizontal_line_buffer; // buffer d'affichage de lignes
+/// Buffer of pixels, used when drawing something to screen.
+GFX2_GLOBAL byte * Horizontal_line_buffer;
 
-  // Données sur l'image actuelle:
+/// Current pixel ratio. Index in enum ::PIXEL_RATIO
+GFX2_GLOBAL int Pixel_ratio;
+/// Current width of pixels, according to ::Pixel_ratio
+GFX2_GLOBAL int Pixel_width;
+/// Current height of pixels, according to ::Pixel_ratio
+GFX2_GLOBAL int Pixel_height;
 
-GFX2_GLOBAL byte *    Main_screen;   // Screen virtuel courant
-GFX2_GLOBAL T_Palette Main_palette; // Palette de l'écran en cours
 
-GFX2_GLOBAL byte  Main_image_is_modified; // L'image courante a été modifiée
-GFX2_GLOBAL short Main_image_width;  // Largeur de l'image dans laquelle l'utilisateur désire travailler
-GFX2_GLOBAL short Main_image_height;  // Hauteur de l'image dans laquelle l'utilisateur désire travailler
-GFX2_GLOBAL short Main_offset_X;     // Décalage en X de l'écran par rapport au début de l'image
-GFX2_GLOBAL short Main_offset_Y;     // Décalage en Y de l'écran par rapport au début de l'image
+// Current image data
+
+/// Pointer to the pixel data of the main image
+GFX2_GLOBAL byte *    Main_screen;
+/// Palette of the main image
+GFX2_GLOBAL T_Palette Main_palette;
+/// Boolean, means the image has been modified since last save.
+GFX2_GLOBAL byte  Main_image_is_modified;
+/// Width in pixels of the main image.
+GFX2_GLOBAL short Main_image_width;
+/// Height in pixels of the main image.
+GFX2_GLOBAL short Main_image_height;
+/// X position (in image space) of the pixel to display in the top left corner of screen.
+GFX2_GLOBAL short Main_offset_X;
+/// Y position (in image space) of the pixel to display in the top left corner of screen.
+GFX2_GLOBAL short Main_offset_Y;
+/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
 GFX2_GLOBAL short Old_main_offset_X;
+/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
 GFX2_GLOBAL short Old_main_offset_Y;
+/// Name of the directory that holds the image currently edited.
+GFX2_GLOBAL char  Main_file_directory[1024];
+/// Filename (without directory) of the image currently edited.
+GFX2_GLOBAL char  Main_filename[256];
+/// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
+GFX2_GLOBAL byte  Main_fileformat;
+///
+/// Fileselector "filter" format, for the current image.
+/// (The spare page has its own separate settings)
+/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
+GFX2_GLOBAL byte  Main_format;
+/// Index of the first file/entry to display in the fileselector.
+GFX2_GLOBAL short Main_fileselector_position;
+///
+/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
+/// So it's a number in the [0-9] range.
+GFX2_GLOBAL short Main_fileselector_offset;
+/// Current directory for the fileselector.
+GFX2_GLOBAL char  Main_current_directory[1024];
+/// Main image's file comment (some image formats support text strings).
+GFX2_GLOBAL char  Main_comment[COMMENT_SIZE+1];
+/// X position (in screen coordinates) of the separator between normal and magnified views.
+GFX2_GLOBAL short Main_separator_position;
+/// X position (in screen coordinates) of the first pixel of the magnified view.
+GFX2_GLOBAL short Main_X_zoom;
+/// Proportion of the non-magnified part of the screen. 
+GFX2_GLOBAL float Main_separator_proportion;
+/// Boolean, true if the main image has the magnifier active.
+GFX2_GLOBAL byte  Main_magnifier_mode;
+/// Zoom factor used in the magnifier (main image).
+GFX2_GLOBAL word  Main_magnifier_factor;
+/// Height of the magnified view for the main image.
+GFX2_GLOBAL word  Main_magnifier_height;
+/// Width of the magnified view for the main image.
+GFX2_GLOBAL word  Main_magnifier_width;
+/// X position (in image space) of the pixel to display in the top left corner of the magnified view.
+GFX2_GLOBAL short Main_magnifier_offset_X;
+/// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
+GFX2_GLOBAL short Main_magnifier_offset_Y;
 
-GFX2_GLOBAL char  Main_file_directory[1024]; // |_ Nom complet =
-GFX2_GLOBAL char  Main_filename[256];         // |  File_directory+"\"+Filename
-GFX2_GLOBAL byte  Main_fileformat;          // Format auquel il faut lire et écrire le fichier
-GFX2_GLOBAL byte  Main_format;               // Format du fileselect
-GFX2_GLOBAL short Main_fileselector_position; // Début de la partie affichée dans la liste de fichiers
-GFX2_GLOBAL short Main_fileselector_offset; // Décalage de la barre de sélection dans le fileselector
-GFX2_GLOBAL char  Main_current_directory[1024]; // Répertoire actuel sur disque
-GFX2_GLOBAL char  Main_comment[COMMENT_SIZE+1]; // Commentaire de l'image
+// Spare page data
 
-GFX2_GLOBAL short Main_separator_position; // Position en X du bord gauche du split de la loupe
-GFX2_GLOBAL short Main_X_zoom; // (Menu_factor_X) + Position en X du bord droit du split de la loupe
-GFX2_GLOBAL float Main_separator_proportion; // Proportion de la zone non-zoomée par rapport à l'écran
-
-  // Données sur le brouillon:
-
-GFX2_GLOBAL byte *    Spare_screen;   // Screen virtuel brouillon
-GFX2_GLOBAL T_Palette Spare_palette; // Palette de l'écran de brouillon
-
-GFX2_GLOBAL byte  Spare_image_is_modified; // Le brouillon a été modifié
-GFX2_GLOBAL short Spare_image_width;  // Largeur du brouillon dans laquelle l'utilisateur désire travailler
-GFX2_GLOBAL short Spare_image_height;  // Hauteur du brouillon dans laquelle l'utilisateur désire travailler
-GFX2_GLOBAL short Spare_offset_X;     // Décalage en X du brouillon par rapport au début de l'image
-GFX2_GLOBAL short Spare_offset_Y;     // Décalage en Y du brouillon par rapport au début de l'image
+/// Pointer to the pixel data of the spare page
+GFX2_GLOBAL byte *    Spare_screen;
+/// Palette of the spare page
+GFX2_GLOBAL T_Palette Spare_palette;
+/// Boolean, means the spare page has been modified since last save.
+GFX2_GLOBAL byte  Spare_image_is_modified;
+/// Width in pixels of the spare image.
+GFX2_GLOBAL short Spare_image_width;
+/// Height in pixels of the spare image.
+GFX2_GLOBAL short Spare_image_height;
+/// X position (in image space) of the pixel to display in the top left corner of screen.
+GFX2_GLOBAL short Spare_offset_X;
+/// Y position (in image space) of the pixel to display in the top left corner of screen.
+GFX2_GLOBAL short Spare_offset_Y;
+/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
 GFX2_GLOBAL short Old_spare_offset_X;
+/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
 GFX2_GLOBAL short Old_spare_offset_Y;
+/// Name of the directory that holds the image currently edited as spare page.
+GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
+/// Filename (without directory) of the image currently edited as spare page.
+GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];
+/// File format of the image currently edited as spare page. It's a value of enum ::FILE_FORMATS
+GFX2_GLOBAL byte  Spare_fileformat;
+///
+/// Fileselector "filter" format, for the spare page.
+/// (The main image has its own separate settings)
+/// It's 0 for "*.*", or a value of enum ::FILE_FORMAT
+GFX2_GLOBAL byte  Spare_format;
+/// Index of the first file/entry to display in the fileselector.
+GFX2_GLOBAL short Spare_fileselector_position;
+///
+/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
+/// So it's a number in the [0-9] range.
+GFX2_GLOBAL short Spare_fileselector_offset;
+/// Current directory for the fileselector.
+GFX2_GLOBAL char  Spare_current_directory[MAX_PATH_CHARACTERS];
+/// Spare page's file comment  (some image formats support text strings).
+GFX2_GLOBAL char  Spare_comment[COMMENT_SIZE+1];
+/// X position (in screen coordinates) of the separator between normal and magnified views.
+GFX2_GLOBAL short Spare_separator_position;
+/// X position (in screen coordinates) of the first pixel of the magnified view.
+GFX2_GLOBAL short Spare_X_zoom;
+/// Proportion of the non-magnified part of the screen. 
+GFX2_GLOBAL float Spare_separator_proportion;
+/// Boolean, true if the main image has the magnifier active.
+GFX2_GLOBAL byte  Spare_magnifier_mode;
+/// Zoom factor used in the magnifier (spare page).
+GFX2_GLOBAL word  Spare_magnifier_factor;
+/// Width of the magnified view for the spare page.
+GFX2_GLOBAL word  Spare_magnifier_height;
+/// Height of the magnified view for the spare page.
+GFX2_GLOBAL word  Spare_magnifier_width;
+/// X position (in image space) of the pixel to display in the top left corner of the magnified view.
+GFX2_GLOBAL short Spare_magnifier_offset_X;
+/// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
+GFX2_GLOBAL short Spare_magnifier_offset_Y;
 
-GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS]; // |_ Nom complet =
-GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];        // |  File_directory+"\"+Filename
-GFX2_GLOBAL byte  Spare_fileformat;          // Format auquel il faut lire et écrire le fichier
-GFX2_GLOBAL byte  Spare_format;               // Format du fileselect
-GFX2_GLOBAL short Spare_fileselector_position; // Début de la partie affichée dans la liste de fichiers
-GFX2_GLOBAL short Spare_fileselector_offset; // Décalage de la barre de sélection dans le fileselector
-GFX2_GLOBAL char  Spare_current_directory[MAX_PATH_CHARACTERS]; // Répertoire actuel sur disque
-GFX2_GLOBAL char  Spare_comment[COMMENT_SIZE+1]; // Commentaire de l'image
+// Image backups
 
-GFX2_GLOBAL short Spare_separator_position; // Position en X du bord gauche du split de la loupe
-GFX2_GLOBAL short Spare_X_zoom; // (Menu_factor_X) + Position en X du bord droit du split de la loupe
-GFX2_GLOBAL float Spare_separator_proportion; // Proportion de la zone non-zoomée par rapport à l'écran
+/// Backup of the current screen, used during drawing when FX feedback is OFF.
+GFX2_GLOBAL byte * Screen_backup;
+/// List of backup pages for the main image.
+GFX2_GLOBAL T_List_of_pages * Main_backups;
+/// List of backup pages for the spare page.
+GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
-GFX2_GLOBAL byte  Spare_magnifier_mode;      // On est en mode loupe dans le brouillon
-GFX2_GLOBAL word  Spare_magnifier_factor;   // Facteur de zoom dans le brouillon
-GFX2_GLOBAL word  Spare_magnifier_height;   // Largeur de la fenêtre de zoom dans le brouillon
-GFX2_GLOBAL word  Spare_magnifier_width;   // Hauteur de la fenêtre de zoom dans le brouillon
-GFX2_GLOBAL short Spare_magnifier_offset_X;// Offset horizontal de la fenêtre de zoom dans le brouillon
-GFX2_GLOBAL short Spare_magnifier_offset_Y;// Offset vertical   de la fenêtre de zoom dans le brouillon
+// Brush data
 
-GFX2_GLOBAL byte Mask_color_to_copy[256]; // Tableau des couleurs à copier vers le brouillon
-
-  // Sauvegarde de l'image:
-
-GFX2_GLOBAL byte * Screen_backup;     // Sauvegarde de l'écran virtuel courant
-GFX2_GLOBAL T_List_of_pages * Main_backups; // Liste des pages de backup de la page principale
-GFX2_GLOBAL T_List_of_pages * Spare_backups; // Liste des pages de backup de la page de brouillon
-
-
-  // Données sur la brosse:
-
-GFX2_GLOBAL byte * Brush;          // Sprite de la brosse
+/// Pixel data of the current brush.
+GFX2_GLOBAL byte * Brush;
 GFX2_GLOBAL word Brush_offset_X; // Centre horizontal de la brosse
 GFX2_GLOBAL word Brush_offset_Y; // Centre vertical de la brosse
 GFX2_GLOBAL word Brush_width;    // Largeur de la brosse
@@ -516,12 +618,6 @@ GFX2_GLOBAL byte Mask_table[256];  // Tableau des couleurs constituant le masque
 
   // Mode loupe:
 
-GFX2_GLOBAL byte  Main_magnifier_mode;
-GFX2_GLOBAL word  Main_magnifier_factor;
-GFX2_GLOBAL word  Main_magnifier_height;
-GFX2_GLOBAL word  Main_magnifier_width;
-GFX2_GLOBAL short Main_magnifier_offset_X;
-GFX2_GLOBAL short Main_magnifier_offset_Y;
 GFX2_GLOBAL word  * Zoom_factor_table;
 GFX2_GLOBAL word  Magnify_table[NB_ZOOM_FACTORS][512];
 

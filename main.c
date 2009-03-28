@@ -530,9 +530,6 @@ int Init_program(int argc,char * argv[])
   Sieve_mode=0;
   Copy_preset_sieve(0);
 
-  // On sélectionne toutes les couleurs pour le masque de copie de couleurs vers le brouillon
-  memset(Mask_color_to_copy,1,256);
-
   // Prise en compte de la fonte
   if (Config.Font)
     Menu_font=GFX_fun_font;

@@ -1145,15 +1145,17 @@ void Copy_some_colors(void)
 {
   short index;
   byte confirmation=0;
+  static byte mask_color_to_copy[256]; // static to use less stack
 
-  Menu_tag_colors("Tag colors to copy",Mask_color_to_copy,&confirmation,0, NULL);
+  memset(mask_color_to_copy,1,256);
+  Menu_tag_colors("Tag colors to copy",mask_color_to_copy,&confirmation,0, NULL);
 
   if (confirmation &&
     (!Spare_image_is_modified || Confirmation_box("Spare page was modified. Proceed?")))
   {
     for (index=0; index<256; index++)
     {
-      if (Mask_color_to_copy[index])
+      if (mask_color_to_copy[index])
         memcpy(Spare_palette+index,Main_palette+index,
                sizeof(T_Components));
     }
