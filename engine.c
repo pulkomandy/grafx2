@@ -139,8 +139,8 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Kill current page       ",
   "Quit                    ",
   "Palette editor          ",
-  "Scroll pal. left / Fast ",
-  "Scroll pal. right / Fast",
+  "Scroll pal. bkwd / Fast ",
+  "Scroll pal. fwd / Fast  ",
   "Color #"                 ,
   "Hide tool bar           "
 };

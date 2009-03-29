@@ -234,13 +234,14 @@ void Button_Redo(void)
 //---------------------------- SCROLL PALETTE LEFT ---------------------------
 void Button_Pal_left(void)
 {
-  short cells_y = Palette_cells_Y();
+  short cells;
+  cells = (Config.Palette_vertical)?Palette_cells_X():Palette_cells_Y();
 
   Hide_cursor();
   if (First_color_in_palette)
   {
-    if (First_color_in_palette>=cells_y)
-      First_color_in_palette-=cells_y;
+    if (First_color_in_palette>=cells)
+      First_color_in_palette-=cells;
     else
       First_color_in_palette=0;
     Display_menu_palette();
@@ -251,14 +252,14 @@ void Button_Pal_left(void)
 
 void Button_Pal_left_fast(void)
 {
-  short cells_X = Palette_cells_X();
+  short cells_x = Palette_cells_X();
   short cells_y = Palette_cells_Y();
 
   Hide_cursor();
   if (First_color_in_palette)
   {
-    if (First_color_in_palette>=cells_y*cells_X)
-      First_color_in_palette-=cells_y*cells_X;
+    if (First_color_in_palette>=cells_y*cells_x)
+      First_color_in_palette-=cells_y*cells_x;
     else
       First_color_in_palette=0;
     Display_menu_palette();
@@ -271,30 +272,32 @@ void Button_Pal_left_fast(void)
 //--------------------------- SCROLL PALETTE RIGHT ---------------------------
 void Button_Pal_right(void)
 {
-  short cells_y = Palette_cells_Y();
+  short cells;
+  cells = (Config.Palette_vertical)?Palette_cells_X():Palette_cells_Y();
 
   Hide_cursor();
-  if ((int)First_color_in_palette+cells_y*Palette_cells_X()<256)
+  if ((int)First_color_in_palette+Palette_cells_X()*Palette_cells_Y()<256)
   {
-    First_color_in_palette+=cells_y;
+    First_color_in_palette+=cells;
     Display_menu_palette();
   }
+  
   Unselect_bouton(BUTTON_PAL_RIGHT);
   Display_cursor();
 }
 
 void Button_Pal_right_fast(void)
 {
-  short cells_X = Palette_cells_X();
+  short cells_x = Palette_cells_X();
   short cells_y = Palette_cells_Y();
 
   Hide_cursor();
-  if ((int)First_color_in_palette+cells_y*cells_X<256)
+  if ((int)First_color_in_palette+cells_y*cells_x<256)
   {
-    if ((int)First_color_in_palette+(cells_y)*cells_X*2<256)
-      First_color_in_palette+=cells_X*cells_y;
+    if ((int)First_color_in_palette+(cells_y)*cells_x*2<256)
+      First_color_in_palette+=cells_x*cells_y;
     else
-      First_color_in_palette=255/cells_y*cells_y-(cells_X-1)*cells_y;
+      First_color_in_palette=255/cells_y*cells_y-(cells_x-1)*cells_y;
     Display_menu_palette();
   }
   Unselect_bouton(BUTTON_PAL_RIGHT);

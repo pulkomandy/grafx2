@@ -238,6 +238,7 @@ typedef struct
   byte Couleurs_separees;
   word Palette_cells_X;
   word Palette_cells_Y;
+  byte Palette_vertical;
   byte FX_Feedback;
   byte Safety_colors;
   byte Opening_message;

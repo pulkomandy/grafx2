@@ -36,50 +36,50 @@
 #define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
 #define MAX_VIDEO_MODES           100   // Nombre de modes vidéo maxi
 #define NB_BUTTONS                38    // Nombre de boutons à gérer
-#define NB_SHORTCUTS                134   // Nombre de combinaisons de touches
+#define NB_SHORTCUTS              134   // Nombre de combinaisons de touches
 #define NB_SPECIAL_SHORTCUTS      72    // Nombre de touches spéciales
 #define NB_OPERATIONS             33    // Nombre d'opérations gérées par le moteur
-#define NB_ZOOM_FACTORS       12    // Nombre de facteurs de zoom
-#define MENU_WIDTH              254   // Largeur du menu en taille réelle
-#define MENU_HEIGHT              44    // Hauteur du menu en taille réelle
-#define NB_CURSOR_SPRITES        8     // Nombre de sprites de curseur
-#define CURSOR_SPRITE_WIDTH    15    // Largeur d'un sprite de curseur en pixels
-#define CURSOR_SPRITE_HEIGHT    15    // Hauteur d'un sprite de curseur en pixels
-#define NB_EFFECTS_SPRITES         9     // Nombre de sprites d'effets
-#define NB_MENU_SPRITES           18    // Nombre de sprites de menu
-#define MENU_SPRITE_WIDTH       14    // Largeur d'un sprite de menu en pixels
-#define MENU_SPRITE_HEIGHT       14    // Hauteur d'un sprite de menu en pixels
-#define PAINTBRUSH_WIDTH           16    // Largeur d'un sprite de pinceau prédéfini
-#define PAINTBRUSH_HEIGHT           16    // Hauteur d'un sprite de pinceau prédéfini
+#define NB_ZOOM_FACTORS           12    // Nombre de facteurs de zoom
+#define MENU_WIDTH                254   // Largeur du menu en taille réelle
+#define MENU_HEIGHT               44    // Hauteur du menu en taille réelle
+#define NB_CURSOR_SPRITES         8     // Nombre de sprites de curseur
+#define CURSOR_SPRITE_WIDTH       15    // Largeur d'un sprite de curseur en pixels
+#define CURSOR_SPRITE_HEIGHT      15    // Hauteur d'un sprite de curseur en pixels
+#define NB_EFFECTS_SPRITES        9     // Nombre de sprites d'effets
+#define NB_MENU_SPRITES           20    // Nombre de sprites de menu
+#define MENU_SPRITE_WIDTH         14    // Largeur d'un sprite de menu en pixels
+#define MENU_SPRITE_HEIGHT        14    // Hauteur d'un sprite de menu en pixels
+#define PAINTBRUSH_WIDTH          16    // Largeur d'un sprite de pinceau prédéfini
+#define PAINTBRUSH_HEIGHT         16    // Hauteur d'un sprite de pinceau prédéfini
 #define MAX_PAINTBRUSH_SIZE       127   // Taille maxi des pinceaux
-#define NB_ICON_SPRITES         7     // Nombre de sprites de drives
-#define ICON_SPRITE_WIDTH      8     // Largeur d'un sprite de drive en pixels
-#define ICON_SPRITE_HEIGHT      8     // Hauteur d'un sprite de drive en pixels
-#define NB_PAINTBRUSH_SPRITES        48    // Nombre de sprites de pinceau
-#define NB_PRESET_SIEVE     12    // Nombre de trames prédéfinies
-#define OPERATION_STACK_SIZE    16    // Nombre maximum d'éléments utilisés par les opérations
-#define MAX_DISPLAYABLE_PATH          37    // Taille maximum affichable du répertoire courant dans les fenêtres du fileselect
-#define COMMENT_SIZE        32    // Taille maxi des commentaires pour le PKM
+#define NB_ICON_SPRITES           7     // Nombre de sprites de drives
+#define ICON_SPRITE_WIDTH         8     // Largeur d'un sprite de drive en pixels
+#define ICON_SPRITE_HEIGHT        8     // Hauteur d'un sprite de drive en pixels
+#define NB_PAINTBRUSH_SPRITES     48    // Nombre de sprites de pinceau
+#define NB_PRESET_SIEVE           12    // Nombre de trames prédéfinies
+#define OPERATION_STACK_SIZE      16    // Nombre maximum d'éléments utilisés par les opérations
+#define MAX_DISPLAYABLE_PATH      37    // Taille maximum affichable du répertoire courant dans les fenêtres du fileselect
+#define COMMENT_SIZE              32    // Taille maxi des commentaires pour le PKM
 #define NB_MAX_PAGES_UNDO         99    // Nombre maximal de pages d'undo
-#define DEFAULT_ZOOM_FACTOR 4    // Facteur de zoom initial
-#define MAX_PATH_CHARACTERS     260   // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
+#define DEFAULT_ZOOM_FACTOR        4    // Facteur de zoom initial
+#define MAX_PATH_CHARACTERS      260    // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
 #define NB_BOOKMARKS               4    // Nombre de boutons "signet" dans l'ecran Save/Load
 // Caractères présents dans les deux fontes
 #define RIGHT_TRIANGLE_CHARACTER  16
-#define LEFT_TRIANGLE_CHARACTER 17
-#define ELLIPSIS_CHARACTER      '…'
+#define LEFT_TRIANGLE_CHARACTER   17
+#define ELLIPSIS_CHARACTER       '…'
 
 // On impose à l'allocation dynamique des pages de backups de conserver un
 // minimum de 256 Ko pour que le reste du programme puisse continuer à
 // fonctionner.
 #define MINIMAL_MEMORY_TO_RESERVE (256*1024)
 
-#define LEFT_SIDE                  1     // Indique une direction (ou click) à gauche
-#define RIGHT_SIDE                  2     // Indique une direction (ou click) à droite
+#define LEFT_SIDE                    1     // Indique une direction (ou click) à gauche
+#define RIGHT_SIDE                   2     // Indique une direction (ou click) à droite
 
-#define SEPARATOR_WIDTH       6     // [ Û±±° ]
-#define INITIAL_SEPARATOR_PROPORTION          0.3   // proportion de la zone non-zoomée en largeur par rapport à l'écran
-#define NB_ZOOMED_PIXELS_MIN      4     // Nombre minimal de pixels zoomés en largeur (Note: En dessous de 4, on ne peut plus scroller!)
+#define SEPARATOR_WIDTH              6     // [ Û±±° ]
+#define INITIAL_SEPARATOR_PROPORTION 0.3   // proportion de la zone non-zoomée en largeur par rapport à l'écran
+#define NB_ZOOMED_PIXELS_MIN         4     // Nombre minimal de pixels zoomés en largeur (Note: En dessous de 4, on ne peut plus scroller!)
 
 #if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__)
    #define PARENT_DIR "/"
@@ -91,13 +91,13 @@
 
 #ifndef __no_pnglib__
 #define NB_KNOWN_FORMATS         13    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
-#define NB_FORMATS_LOAD           13    // Nombre de formats que l'on sait charger
-#define NB_FORMATS_SAVE           13    // Nombre de formats que l'on sait sauver
+#define NB_FORMATS_LOAD          13    // Nombre de formats que l'on sait charger
+#define NB_FORMATS_SAVE          13    // Nombre de formats que l'on sait sauver
 #else
 // Without pnglib
 #define NB_KNOWN_FORMATS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
-#define NB_FORMATS_LOAD           12    // Nombre de formats que l'on sait charger
-#define NB_FORMATS_SAVE           12    // Nombre de formats que l'on sait sauver
+#define NB_FORMATS_LOAD          12    // Nombre de formats que l'on sait charger
+#define NB_FORMATS_SAVE          12    // Nombre de formats que l'on sait sauver
 #endif
 
 enum FILE_FORMATS

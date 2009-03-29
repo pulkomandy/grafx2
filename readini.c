@@ -765,7 +765,14 @@ int Load_INI(T_Config * conf)
     else
       break;
   }
-  
+  conf->Palette_vertical=0;
+  // Optionnel, vertical palette option (>98.0%)
+  if (!Load_INI_get_values (file,buffer,"Palette_vertical",1,values))
+  {
+    if ((values[0]<0) || (values[0]>1))
+      goto Erreur_ERREUR_INI_CORROMPU;
+    conf->Palette_vertical=values[0];
+  }
   fclose(file);
 
   free(filename);

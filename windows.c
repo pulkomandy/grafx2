@@ -157,8 +157,40 @@ void Display_foreback(void)
   }
 }
 
-  // -- Tracer un cadre de couleur autour de la Fore_color dans le menu --
+/*! Get the top left corner for the palette cell of a color
+    @param index Index of the color, starting at 0 for the top left one. Limited to Menu_cells_X/Menu_cells_Y.
+*/
+word Palette_cell_X(byte index)
+{
+  if (Config.Palette_vertical)
+  {
+    return (MENU_WIDTH+1+((index-First_color_in_palette)%Menu_cells_X)*Menu_palette_cell_width)*Menu_factor_X;
+  }
+  else
+  {
+    return (MENU_WIDTH+1+((index-First_color_in_palette)/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X;
+  }
+}
 
+/*! Get the top left corner for the palette cell of a color
+    @param index Index of the color, starting at 0 for the top left one. Limited to Menu_cells_X/Menu_cells_Y.
+*/
+word Palette_cell_Y(byte index)
+{
+  if (Config.Palette_vertical)
+  {
+    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(32/Menu_cells_Y)))*Menu_factor_Y);
+  }
+  else
+  {
+    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(32/Menu_cells_Y)))*Menu_factor_Y);
+  }
+}
+
+///
+/// Redraw the cell in the menu palette for ::Fore_color.
+/// This function checks bounds, it won't draw anything if Fore_color is not visible.
+/// @param color: Pass MC_White to mark the color with a frame, MC_Black to unmark it.
 void Frame_menu_color(byte color)
 {
   word start_x,start_y,end_x,end_y;
@@ -169,8 +201,8 @@ void Frame_menu_color(byte color)
   {
     if (Config.Couleurs_separees)
     {
-      start_x=(MENU_WIDTH+((Fore_color-First_color_in_palette)/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X;
-      start_y=Menu_Y+((1+(((Fore_color-First_color_in_palette)%Menu_cells_Y)*cell_height))*Menu_factor_Y);
+      start_x=Palette_cell_X(Fore_color)-1*Menu_factor_X;
+      start_y=Palette_cell_Y(Fore_color)-1*Menu_factor_Y;
 
       Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
       Block(start_x,start_y+(Menu_factor_Y*cell_height),(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
@@ -184,39 +216,40 @@ void Frame_menu_color(byte color)
     {
       if (color==MC_Black)
       {
-        start_x=(MENU_WIDTH+1+((Fore_color-First_color_in_palette)/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X;
-        start_y=Menu_Y+((2+(((Fore_color-First_color_in_palette)%Menu_cells_Y)*cell_height))*Menu_factor_Y);
+        start_x=Palette_cell_X(Fore_color);
+        start_y=Palette_cell_Y(Fore_color);
 
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              Menu_factor_Y*cell_height,Fore_color);
+              cell_height*Menu_factor_Y,Fore_color);
 
-        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,Menu_factor_Y*cell_height);
+        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
       }
       else
       {
-        start_x=MENU_WIDTH+1+((Fore_color-First_color_in_palette)/Menu_cells_Y)*Menu_palette_cell_width;
-        start_y=2+(((Fore_color-First_color_in_palette)%Menu_cells_Y)*cell_height);
+        start_x=Palette_cell_X(Fore_color);
+        start_y=Palette_cell_Y(Fore_color);
 
-        end_x=start_x+Menu_palette_cell_width-1;
-        end_y=start_y+cell_height-1;
+        end_x=Menu_palette_cell_width-1;
+        end_y=cell_height-1;
 
-        for (index=start_x; index<=end_x; index++)
-          Block(index*Menu_factor_X,Menu_Y+(start_y*Menu_factor_Y),
+        // Top line
+        for (index=0; index<=end_x; index++)
+          Block(start_x+index*Menu_factor_X,start_y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index+start_y)&1)?MC_White:MC_Black);
-
-        for (index=start_y+1; index<end_y; index++)
-          Block(start_x*Menu_factor_X,Menu_Y+(index*Menu_factor_Y),
+                ((index)&1)?MC_White:MC_Black);
+        // Left line
+        for (index=1; index<end_y; index++)
+          Block(start_x,start_y+index*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index+start_x)&1)?MC_White:MC_Black);
-
-        for (index=start_y+1; index<end_y; index++)
-          Block(end_x*Menu_factor_X,Menu_Y+(index*Menu_factor_Y),
+                ((index)&1)?MC_White:MC_Black);
+        // Right line
+        for (index=1; index<end_y; index++)
+          Block(start_x+end_x*Menu_factor_Y,start_y+index*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_x)&1)?MC_White:MC_Black);
-
-        for (index=start_x; index<=end_x; index++)
-          Block(index*Menu_factor_X,Menu_Y+(end_y*Menu_factor_Y),
+        // Bottom line
+        for (index=0; index<=end_x; index++)
+          Block(start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_y)&1)?MC_White:MC_Black);
 
@@ -239,19 +272,19 @@ void Display_menu_palette(void)
     Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y,MC_Black);
 
     if (Config.Couleurs_separees)
-      for (color=0;First_color_in_palette+color<256&&color<Menu_cells_X*Menu_cells_Y;color++)
-        Block((MENU_WIDTH+1+(color/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X,
-              Menu_Y+((2+((color%Menu_cells_Y)*cell_height))*Menu_factor_Y),
+      for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
+        Block(Palette_cell_X(color),
+              Palette_cell_Y(color),
               (Menu_palette_cell_width-1)*Menu_factor_X,
-              Menu_factor_Y*(cell_height-1),
-              First_color_in_palette+color);
+              (cell_height-1)*Menu_factor_Y,
+              color);
     else
-      for (color=0;First_color_in_palette+color<256&&color<Menu_cells_X*Menu_cells_Y;color++)
-        Block((MENU_WIDTH+1+(color/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X,
-              Menu_Y+((2+((color%Menu_cells_Y)*cell_height))*Menu_factor_Y),
+      for (color=First_color_in_palette;color<256&&color-First_color_in_palette<Menu_cells_X*Menu_cells_Y;color++)
+        Block(Palette_cell_X(color),
+              Palette_cell_Y(color),
               Menu_palette_cell_width*Menu_factor_X,
-              Menu_factor_Y*cell_height,
-              First_color_in_palette+color);
+              cell_height*Menu_factor_Y,
+              color);
 
     Frame_menu_color(MC_White);
     Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
@@ -264,16 +297,22 @@ void Display_menu_palette(void)
 void Reposition_palette(void)
 {
   byte old_color=First_color_in_palette;
+  short cells;
+  if (Config.Palette_vertical)
+    cells=Menu_cells_X;
+  else
+    cells=Menu_cells_Y;
+    
 
   if (Fore_color<First_color_in_palette)
   {
     while (Fore_color<First_color_in_palette)
-      First_color_in_palette-=Menu_cells_Y;
+      First_color_in_palette-=cells;
   }
   else
   {
     while (Fore_color>=First_color_in_palette+Menu_cells_X*Menu_cells_Y)
-      First_color_in_palette+=Menu_cells_Y;
+      First_color_in_palette+=cells;
   }
   if (old_color!=First_color_in_palette)
     Display_menu_palette();
@@ -300,8 +339,11 @@ void Change_palette_cells()
     Menu_cells_X--;
   }
   
-  // Cale First_color_in_palette sur un multiple de cells_y (arrondi inférieur)
-  First_color_in_palette=First_color_in_palette/Menu_cells_Y*Menu_cells_Y;
+  // Cale First_color_in_palette sur un multiple du nombre de cellules (arrondi inférieur)
+  if (Config.Palette_vertical)
+    First_color_in_palette=First_color_in_palette/Menu_cells_X*Menu_cells_X;
+  else
+    First_color_in_palette=First_color_in_palette/Menu_cells_Y*Menu_cells_Y;
 
   // Si le nombre de cellules a beaucoup augmenté et qu'on était près de
   // la fin, il faut reculer First_color_in_palette pour montrer plein
@@ -325,10 +367,18 @@ int Pick_color_in_palette()
 {
   int color;
   int line;
+  int column;
+
   line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/(32/Menu_cells_Y);
-  
-  color=First_color_in_palette+line+
-    ((((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width)*Menu_cells_Y);
+  column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
+  if (Config.Palette_vertical)
+  {
+    color=First_color_in_palette+line*Menu_cells_X+column;
+  }
+  else
+  {
+    color=First_color_in_palette+line+column*Menu_cells_Y;
+  }
   if (color<0 || color>255)
     return -1;
   return color;
@@ -1025,8 +1075,8 @@ void Display_menu_palette_avoiding_window(byte * table)
   {
     if (table[real_color]!=real_color)
     {
-      start_x=(MENU_WIDTH+1+(color/Menu_cells_Y)*Menu_palette_cell_width)*Menu_factor_X;
-      start_y=Menu_Y_before_window+((2+((color%Menu_cells_Y)*(32/Menu_cells_Y)))*Menu_factor_Y);
+      start_x=Palette_cell_X(real_color);
+      start_y=Palette_cell_Y(real_color); //Menu_Y_before_window ??!
       end_x=start_x+width;
       end_y=start_y+height;
 

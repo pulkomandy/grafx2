@@ -1055,7 +1055,7 @@ void Init_buttons(void)
                      237,9,
                      16,8,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Palette,Button_Pecondary_palette,
+                     Button_Palette,Button_Secondary_palette,
                      Do_nothing,
                      FAMILY_INSTANT);
 

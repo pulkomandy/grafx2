@@ -627,6 +627,10 @@ int Save_INI(T_Config * conf)
     if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Bookmark_directory",conf->Bookmark_directory[index])))
       goto Erreur_Retour;
   }
+  values[0]=(conf->Palette_vertical);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Palette_vertical",1,values,1)))
+    goto Erreur_Retour;
+
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 

@@ -19,7 +19,7 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 void Button_Palette(void);
-void Button_Pecondary_palette(void);
+void Button_Secondary_palette(void);
 
 // Choose the number of graduations for RGB components, from 2 to 256.
 void Set_palette_RGB_scale(int);
