@@ -26,7 +26,7 @@
 #include <SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
-#include "divers.h"
+#include "misc.h"
 #include "pxwide.h" // for Display_transparent_line_on_screen_wide()
 
 #define ZOOMX 2

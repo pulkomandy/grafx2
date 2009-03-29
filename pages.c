@@ -29,8 +29,8 @@
 
 #include "global.h"
 #include "pages.h"
-#include "erreurs.h"
-#include "divers.h"
+#include "errors.h"
+#include "misc.h"
 #include "windows.h"
 
   ///

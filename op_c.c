@@ -27,7 +27,7 @@
 #include <math.h>
 
 #include "op_c.h"
-#include "erreurs.h"
+#include "errors.h"
 
 void RGB_to_HSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
 {

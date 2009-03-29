@@ -30,8 +30,8 @@
 
 #include "global.h"
 #include "graph.h"
-#include "divers.h"
-#include "erreurs.h"
+#include "misc.h"
+#include "errors.h"
 #include "windows.h"
 #include "sdlscreen.h"
 

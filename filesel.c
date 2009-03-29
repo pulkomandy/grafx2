@@ -45,17 +45,17 @@
 #include "const.h"
 #include "struct.h"
 #include "global.h"
-#include "divers.h"
-#include "erreurs.h"
+#include "misc.h"
+#include "errors.h"
 #include "io.h"
 #include "windows.h"
 #include "sdlscreen.h"
 #include "loadsave.h"
 #include "mountlist.h"
-#include "moteur.h"
+#include "engine.h"
 #include "readline.h"
 #include "input.h"
-#include "aide.h"
+#include "help.h"
 
 #define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de fichier non sélectionné
 #define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de répertoire non sélectionné

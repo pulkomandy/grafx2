@@ -29,17 +29,17 @@
 #include "struct.h"
 #include "global.h"
 #include "graph.h"
-#include "divers.h"
+#include "misc.h"
 #include "special.h"
-#include "boutons.h"
+#include "buttons.h"
 #include "operatio.h"
 #include "shade.h"
-#include "erreurs.h"
+#include "errors.h"
 #include "sdlscreen.h"
 #include "windows.h"
 #include "brush.h"
 #include "input.h"
-#include "moteur.h"
+#include "engine.h"
 
 
 // we need this as global

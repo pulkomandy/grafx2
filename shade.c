@@ -23,10 +23,10 @@
 
 #include "global.h"
 #include "graph.h"
-#include "moteur.h"
-#include "divers.h"
+#include "engine.h"
+#include "misc.h"
 #include "readline.h"
-#include "aide.h"
+#include "help.h"
 #include "sdlscreen.h"
 #include "windows.h"
 #include "input.h"

@@ -25,8 +25,8 @@
 #include <SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
-#include "erreurs.h"
-#include "divers.h"
+#include "errors.h"
+#include "misc.h"
 
 // Mise à jour minimaliste en nombre de pixels
 #define UPDATE_METHOD_MULTI_RECTANGLE 1

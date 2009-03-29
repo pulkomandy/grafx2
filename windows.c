@@ -30,10 +30,10 @@
 #include "windows.h"
 #include "global.h"
 #include "graph.h"
-#include "moteur.h"
-#include "divers.h"
+#include "engine.h"
+#include "misc.h"
 #include "sdlscreen.h"
-#include "erreurs.h"
+#include "errors.h"
 
 // L'encapsulation tente une percée...ou un dernier combat.
 

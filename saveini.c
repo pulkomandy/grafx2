@@ -27,8 +27,8 @@
 #include "global.h"
 #include "readini.h"
 #include "io.h"
-#include "erreurs.h"
-#include "divers.h"
+#include "errors.h"
+#include "misc.h"
 
 int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * group)
 {

@@ -47,7 +47,7 @@ appelée.</p>
 insctructions à exécuter. Chacune de ces parties atomiques est
 écrite sous la forme d'une fonction contenant tout le code qui
 lui est nécessaire. Ces fonctions sont ce que l'on a appelé des
-&quot;fonction_action&quot; (définition dans STRUCT.H), c'est à
+&quot;Func_action&quot; (définition dans STRUCT.H), c'est à
 dire une simple fonction qui ne reçoit pas de paramètres et qui
 n'en renvoie pas. Un simple void Ma_fonction(void)...</p>
 
@@ -130,9 +130,9 @@ s'achever! ;-)</p>
             <li>Elle contient des mots 16-bits (type word,
                 définit dans STRUCT.H)</li>
             <li>Pour y poser une valeur&nbsp;:
-                Operation_PUSH(val)</li>
+                Operation_push(val)</li>
             <li>Pour en retirer une valeur&nbsp;:
-                Operation_POP(&amp;var)</li>
+                Operation_pop(&amp;var)</li>
             <li>Exemples de valeurs à y mettre&nbsp;:
                 coordonnées de souris, de pinceau... des
                 couleurs... des valeurs bidons pour changer
@@ -143,7 +143,7 @@ s'achever! ;-)</p>
     <li>A l'intérieur d'une fonction atomique&nbsp;:<ul>
             <li>Si la fonction correspond à la première étape
                 d'une opération, appeler
-                Initialiser_debut_operation()</li>
+                Init_start_operation()</li>
             <li>Si la fonction correspond à la première étape
                 d'une opération qui peut modifier l'image,
                 appeler Backup() avant modification de l'image ;
@@ -151,12 +151,12 @@ s'achever! ;-)</p>
                 modification avec &quot;undo&quot; s'il le
                 souhaite.</li>
             <li>Pour afficher les coordonnées de la souris,
-                appeler Print_coordonnees() sans vous soucier de
+                appeler Print_coordinates() sans vous soucier de
                 savoir si la barre d'outils est visible. Si vous
                 avez besoin d'afficher une coordonnée qui doit
                 s'adapter au mode relatif ou absolu (selon le
                 paramétrage effectué par l'utilisateur),
-                utilisez Aff_coords_rel_ou_abs(RefX,RefY). Si les
+                utilisez Display_coords_rel_or_abs(RefX,RefY). Si les
                 coordonnées sont configurées pour être
                 relatives, cette fonction affichera la
                 différence entre les coordonnées actuelles du
@@ -164,27 +164,27 @@ s'achever! ;-)</p>
                 passées en paramètres. Dans le cas d'infos
                 spéciales à afficher dans la barre de menu, on
                 pourra se servir de la fonction
-                Print_dans_menu(texte,position en caractères).</li>
+                Print_in_menu(texte,position en caractères).</li>
             <li>Si vous avez besoin de vous assurer que les
                 boutons de la souris sont relâchés à un moment
-                de la fonction, utilisez Attendre_fin_de_click()</li>
+                de la fonction, utilisez Wait_end_of_click()</li>
             <li>Etudiez OPERATIO.C pour avoir des exemples.<br>
                 </li>
         </ul>
     </li>
     <li>Pour démarrer une opération (après avoir cliqué sur
         un bouton de la barre d'outils par exemple), appeler
-        Demarrer_pile_operation(ID_OP). Note: il faut que le
+        Start_operation_stack(ID_OP). Note: il faut que le
         curseur soit caché avant l'appel (et son état n'est pas
         changé après). (voir exemples dans BOUTONS.C)<br>
         </li>
     <li>On peut connaître l'ID_OP de l'opération en cours
-        grâce à la variable globale Operation_en_cours<br>
+        grâce à la variable globale Current_operation<br>
         </li>
-    <li>La variable globale Operation_Taille_pile correspond à
+    <li>La variable globale Operation_stack_size correspond à
         la taille de la pile d'opérations. Elle peut être
         consultée et éventuellement modifiée (même s'il est
-        préférable d'utiliser Operation_PUSH et Operation_POP
+        préférable d'utiliser Operation_push et Operation_pop
         dans ce dernier cas).</li>
 </ul>
 
@@ -205,7 +205,7 @@ s'achever! ;-)</p>
         <td width="100%">Dans GLOBAL.H&nbsp;:<ul>
             <li>rajouter l'identifiant de la forme de curseur à
                 utiliser pour cette opération dans la table
-                CURSEUR_D_OPERATION[]. Faites bien attention à
+                CURSOR_FOR_OPERATION[]. Faites bien attention à
                 l'insérer au bon endroit (place correspondant à
                 ID_OP).</li>
         </ul>
@@ -225,15 +225,15 @@ s'achever! ;-)</p>
                 // Click Souris: 1<br>
                 // Taille_Pile : 0<br>
                 // Souris effacée: Oui (précisé grâce à
-                Initialiser_operation() dans INIT.C)<br>
+                Init_operation() dans INIT.C)<br>
                 {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initialiser_debut_operation();<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Init_start_operation();<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Backup();<br>
                 <br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// ACTIONS...<br>
                 <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Operation_PUSH(une_valeur_nécessaire_pour_les_prochaines_étapes);<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Operation_PUSH(une_autre_valeur_nécessaire_plus_tard);<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Operation_push(une_valeur_nécessaire_pour_les_prochaines_étapes);<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Operation_push(une_autre_valeur_nécessaire_plus_tard);<br>
                 }</p>
             </blockquote>
         </blockquote>
@@ -256,14 +256,14 @@ s'achever! ;-)</p>
                 qu'elle est terminée (cas de la loupe, de la
                 pipette, des prises de brosse, ...), rajouter
                 l'ID_OP dans la section correspondante de la
-                fonction Demarrer_pile_operation(), en début de
+                fonction Start_operation_stack(), en début de
                 fichier.</li>
             <li>Si l'opération voit un intérêt à accepter que
                 l'utilisateur change de couleur de pinceau en
                 cours d'opération (cas du dessin continu,
                 discontinu, le spray, et les lignes centrées),
                 rajouter l'ID_OP dans la section correspondante
-                de la fonction Demarrer_pile_operation(), en
+                de la fonction Start_operation_stack(), en
                 début de fichier.</li>
         </ul>
         </td>
@@ -276,9 +276,9 @@ s'achever! ;-)</p>
     </tr>
     <tr>
         <td width="100%">Dans INIT.C&nbsp;:<ul>
-            <li>Dans Initialisation_des_operations(), pour chaque
+            <li>Dans Init_operations(), pour chaque
                 fonction atomique de l'opération, écrire un
-                appel à Initialiser_operation(ID_OP, Etat
+                appel à Init_operation(ID_OP, Etat
                 souris, Taille pile, Callback, Effacer souris);<ul>
                     <li>ID_OP&nbsp;: identifiant de l'opération
                         dont dépend la fonction atomique
@@ -311,7 +311,7 @@ s'achever! ;-)</p>
         </blockquote>
         <blockquote>
             <blockquote>
-                <p>Initialiser_operation(OPERATION_DUMMY, 1, 0,
+                <p>Init_operation(OPERATION_DUMMY, 1, 0,
                 Dummy_1_0, 1);</p>
             </blockquote>
         </blockquote>

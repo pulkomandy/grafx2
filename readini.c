@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include "const.h"
 #include "global.h"
-#include "divers.h"
+#include "misc.h"
 
 void Load_INI_clear_string(char * str)
 {

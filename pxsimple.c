@@ -26,7 +26,7 @@
 #include <SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
-#include "divers.h"
+#include "misc.h"
 
 void Pixel_simple (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */

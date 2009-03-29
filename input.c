@@ -22,11 +22,11 @@
 #include <SDL.h>
 
 #include "global.h"
-#include "clavier.h"
+#include "keyboard.h"
 #include "sdlscreen.h"
 #include "windows.h"
-#include "erreurs.h"
-#include "divers.h"
+#include "errors.h"
+#include "misc.h"
 #include "input.h"
 
 void Handle_window_resize(SDL_ResizeEvent event);
