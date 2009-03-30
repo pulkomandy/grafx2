@@ -1272,6 +1272,8 @@ void Check_mode_button(short x_pos, short y_pos, byte state)
         Menu_factor_X*9,Menu_factor_Y*3);
 }
 
+/// Number of video modes to display in the resolution menu
+#define MODELIST_LINES 10
 
 void Display_modes_list(short list_start, short cursor_position)
 {
@@ -1281,9 +1283,9 @@ void Display_modes_list(short list_start, short cursor_position)
   char str[29];
   char *ratio;
 
-  for (current_mode=list_start,index=0; index<12 && current_mode < Nb_video_modes ; index++,current_mode++)
+  for (current_mode=list_start,index=0; index<MODELIST_LINES && current_mode < Nb_video_modes ; index++,current_mode++)
   {
-    y_pos=70+(index<<3);
+    y_pos=86+(index<<3);
     Check_mode_button(19,y_pos+2,Video_mode[current_mode].State);
 
     if (cursor_position!=index)
@@ -1352,60 +1354,63 @@ void Scroll_list_of_modes(short list_start, short cursor_position, int * selecte
   Display_cursor();
 }
 
-
 void Button_Resolution(void)
 {
   short clicked_button;
   int   selected_mode;
   word  chosen_width;
   word  chosen_height;
+  byte  chosen_pixel;
   short list_start;
   short cursor_position;
   short temp;
   char  str[5];
   T_Special_button * input_width_button, * input_button_height;
+  T_Dropdown_button * pixel_button;
+  static const char *pixel_ratio_labels[] ={
+    "Normal (1x1)",
+    "Wide   (2x1)",
+    "Tall   (1x2)",
+    "Double (2x2)"};
 
   Open_window(299,190,"Picture & screen sizes");
 
-  Window_display_frame      ( 8,17,195, 33);
-  Window_display_frame      ( 8,56,283,126);
-  Window_display_frame_in(37,68,228,100);
-  Block(Window_pos_X+Menu_factor_X*38,Window_pos_Y+Menu_factor_Y*69,
-        Menu_factor_X*226,Menu_factor_Y*98,MC_Black);
-
   Print_in_window( 12, 21,"Picture size:"   ,MC_Dark,MC_Light);
-  Print_in_window( 12, 37,"Width:"          ,MC_Dark,MC_Light);
-  Print_in_window(108, 37,"Height:"         ,MC_Dark,MC_Light);
-  Print_in_window( 16, 60,"OK"              ,MC_Dark,MC_Light);
-  Print_in_window( 55, 60,"X    Y"          ,MC_Dark,MC_Light);
-  Print_in_window(120, 60,"Win / Full"      ,MC_Dark,MC_Light);
-  Print_in_window(219, 60,"Ratio"           ,MC_Dark,MC_Light);
-  Print_in_window( 30,170,"\03"             ,MC_Dark,MC_Light);
-  Print_in_window( 62,170,"OK"              ,MC_Dark,MC_Light);
-  Print_in_window(102,170,"Imperfect"       ,MC_Dark,MC_Light);
-  Print_in_window(196,170,"Unsupported"     ,MC_Dark,MC_Light);
+  Window_display_frame      ( 8,17,195, 33);
 
   Window_set_normal_button(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
   Window_set_normal_button(223, 35,67,14,"Cancel"  ,0,1,KEY_ESC);  // 2
 
+  Print_in_window( 12, 37,"Width:"          ,MC_Dark,MC_Light);
   input_width_button=Window_set_input_button( 60, 35,4);            // 3
   
+  Print_in_window(108, 37,"Height:"         ,MC_Dark,MC_Light);
   input_button_height=Window_set_input_button(164, 35,4);           // 4
 
-  Window_set_special_button(38,70,225,96);                       // 5
+  Window_display_frame      ( 8,72,283,110);
+  Window_display_frame_in   (37,84,228,84);
+  Window_rectangle          (38,85,226,82,MC_Black);  
+  Print_in_window( 16, 76,"OK"              ,MC_Dark,MC_Light);
+  Print_in_window( 55, 76,"X    Y"          ,MC_Dark,MC_Light);
+  Print_in_window(120, 76,"Win / Full"      ,MC_Dark,MC_Light);
+  Print_in_window(219, 76,"Ratio"           ,MC_Dark,MC_Light);
+  Print_in_window( 30,170,"\03"             ,MC_Dark,MC_Light);
+  Print_in_window( 62,170,"OK"              ,MC_Dark,MC_Light);
+  Print_in_window(102,170,"Imperfect"       ,MC_Dark,MC_Light);
+  Print_in_window(196,170,"Unsupported"     ,MC_Dark,MC_Light);
+  Window_set_special_button(38,86,225,80);                       // 5
 
   selected_mode=Current_resolution;
-
-  if (selected_mode>=6)
+  if (selected_mode>=MODELIST_LINES/2)
   {
-    if (selected_mode<Nb_video_modes-6)
+    if (selected_mode<Nb_video_modes-MODELIST_LINES/2)
     {
-      list_start=selected_mode-5;
-      cursor_position=5;
+      list_start=selected_mode-(MODELIST_LINES/2-1);
+      cursor_position=(MODELIST_LINES/2-1);
     }
     else
     {
-      list_start=Nb_video_modes-12;
+      list_start=Nb_video_modes-MODELIST_LINES;
       cursor_position=selected_mode-list_start;
     }
   }
@@ -1414,13 +1419,21 @@ void Button_Resolution(void)
     list_start=0;
     cursor_position=selected_mode;
   }
+  Window_set_scroller_button(271,85,81,Nb_video_modes,MODELIST_LINES,list_start); // 6
 
-  Window_set_scroller_button(271,69,97,Nb_video_modes,12,list_start); // 6
+  chosen_pixel=Pixel_ratio;
+  Print_in_window( 12, 57,"Pixel size:"    ,MC_Dark,MC_Light);
+  pixel_button=Window_set_dropdown_button(108,55,14*8,11,14*8,pixel_ratio_labels[Pixel_ratio],1,0,1,LEFT_SIDE|RIGHT_SIDE);    // 7
+  Window_dropdown_add_item(pixel_button,PIXEL_SIMPLE,pixel_ratio_labels[PIXEL_SIMPLE]);
+  Window_dropdown_add_item(pixel_button,PIXEL_WIDE,pixel_ratio_labels[PIXEL_WIDE]);
+  Window_dropdown_add_item(pixel_button,PIXEL_TALL,pixel_ratio_labels[PIXEL_TALL]);
+  Window_dropdown_add_item(pixel_button,PIXEL_DOUBLE,pixel_ratio_labels[PIXEL_DOUBLE]);
 
-  // Les 12 petits boutons indiquant l'état des modes
-  for (temp=0; temp<12 && temp < Nb_video_modes; temp++)
-    Window_set_normal_button(17,70+(temp<<3),13,7,"",0,1,SDLK_LAST);// 7..18
+  // 10 little buttons for the state of each visible mode
+  for (temp=0; temp<MODELIST_LINES && temp < Nb_video_modes; temp++)
+    Window_set_normal_button(17,86+(temp<<3),13,7,"",0,1,SDLK_LAST);// 8..17
 
+  // Dummy buttons as explainations of colors
   Window_draw_normal_bouton( 16,170,13,7,"",0,0);
   Check_mode_button( 18,172,0);
   Window_draw_normal_bouton( 48,170,13,7,"",0,0);
@@ -1429,6 +1442,7 @@ void Button_Resolution(void)
   Check_mode_button( 90,172,2);
   Window_draw_normal_bouton(182,170,13,7,"",0,0);
   Check_mode_button(184,172,3);
+ 
 
   chosen_width=Main_image_width;
   Num2str(chosen_width,str,4);
@@ -1481,7 +1495,7 @@ void Button_Resolution(void)
         break;
 
       case 5: // Liste des modes
-        temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-70)>>3;
+        temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-86)>>3;
         if (temp<Nb_video_modes && ((Mouse_K==2) || (temp!=cursor_position)))
         {
           Hide_cursor();
@@ -1514,8 +1528,12 @@ void Button_Resolution(void)
         Display_modes_list(list_start,cursor_position);
         break;
 
+      case 7: // Pixel size
+        chosen_pixel=Window_attribute2;
+        break;
+        
       default: // Boutons de tag des états des modes
-        temp=list_start+clicked_button-7;
+        temp=list_start+clicked_button-8;
         if (temp && // On n'a pas le droit de cocher le mode fenêtré
             !(Video_mode[temp].State & 128)) // Ni ceux non détectés par SDL
         {
@@ -1525,7 +1543,7 @@ void Button_Resolution(void)
             Video_mode[temp].State=((Video_mode[temp].State&0x7F)+3)&3;
             
           Hide_cursor();
-          Check_mode_button(19,16+(clicked_button<<3),Video_mode[temp].State);
+          //Check_mode_button(19,16+(clicked_button<<3),Video_mode[temp].State);
           Display_modes_list(list_start,cursor_position);
           Display_cursor();
         }
@@ -1544,10 +1562,10 @@ void Button_Resolution(void)
         Key=0;
         break;
       case SDLK_DOWN : // Bas
-        if (cursor_position<11 && cursor_position<(Nb_video_modes-1))
+        if (cursor_position<(MODELIST_LINES-1) && cursor_position<(Nb_video_modes-1))
           cursor_position++;
         else
-          if (list_start<Nb_video_modes-12)
+          if (list_start<Nb_video_modes-MODELIST_LINES)
             list_start++;
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
@@ -1557,8 +1575,8 @@ void Button_Resolution(void)
           cursor_position=0;
         else
         {
-          if (list_start>11)
-            list_start-=11;
+          if (list_start>(MODELIST_LINES-1))
+            list_start-=(MODELIST_LINES-1);
           else
             list_start=0;
         }
@@ -1566,16 +1584,16 @@ void Button_Resolution(void)
         Key=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
-        if (Nb_video_modes<12)
+        if (Nb_video_modes<MODELIST_LINES)
           cursor_position=Nb_video_modes-1;
-        else if (cursor_position<11)
-          cursor_position=11;
+        else if (cursor_position<(MODELIST_LINES-1))
+          cursor_position=(MODELIST_LINES-1);
         else
         {
-          if (list_start<Nb_video_modes-23)
-            list_start+=11;
+          if (list_start<Nb_video_modes-(MODELIST_LINES*2-1))
+            list_start+=(MODELIST_LINES-1);
           else
-            list_start=Nb_video_modes-12;
+            list_start=Nb_video_modes-MODELIST_LINES;
         }
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
@@ -1587,12 +1605,12 @@ void Button_Resolution(void)
         Key=0;
         break;
       case SDLK_END : // End
-        if (Nb_video_modes<12)
+        if (Nb_video_modes<MODELIST_LINES)
           cursor_position=Nb_video_modes-1;
         else
         {        
-          list_start=Nb_video_modes-12;
-          cursor_position=11;
+          list_start=Nb_video_modes-MODELIST_LINES;
+          cursor_position=(MODELIST_LINES-1);
         }
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
@@ -1619,18 +1637,21 @@ void Button_Resolution(void)
     if ( (chosen_width!=Main_image_width)
       || (chosen_height!=Main_image_height) )
       Resize_image(chosen_width,chosen_height);
-
+    
     if ((Video_mode[selected_mode].State & 3) == 3 ||
       Init_mode_video(
         Video_mode[selected_mode].Width,
         Video_mode[selected_mode].Height,
-        Video_mode[selected_mode].Fullscreen))
+        Video_mode[selected_mode].Fullscreen,
+        chosen_pixel))
     {
       Error(0); // On signale à l'utilisateur que c'est un mode invalide
+      Pixel_ratio=PIXEL_SIMPLE;
       Init_mode_video(
         Video_mode[Current_resolution].Width,
         Video_mode[Current_resolution].Height,
-        Video_mode[Current_resolution].Fullscreen);
+        Video_mode[Current_resolution].Fullscreen,
+        Pixel_ratio);
     }
 
     Display_menu();
@@ -1650,7 +1671,7 @@ void Button_Safety_resolution(void)
   Hide_cursor();
 
   Unselect_bouton(BUTTON_MAGNIFIER);
-  Init_mode_video(640, 400, 0);
+  Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
   Current_resolution=0;
   Video_mode[0].Width = Screen_width*Pixel_width;
   Video_mode[0].Height = Screen_height*Pixel_height;
@@ -2485,7 +2506,8 @@ void Load_picture(byte image)
           Init_mode_video(
             Video_mode[new_mode].Width,
             Video_mode[new_mode].Height,
-            Video_mode[new_mode].Fullscreen);
+            Video_mode[new_mode].Fullscreen,
+            Pixel_ratio);
           Display_menu();
         }
         else
@@ -2576,7 +2598,8 @@ void Button_Reload(void)
         Init_mode_video(
         Video_mode[new_mode].Width,
         Video_mode[new_mode].Height,
-        Video_mode[new_mode].Fullscreen);
+        Video_mode[new_mode].Fullscreen,
+        Pixel_ratio);
         Display_menu();
       }
       else

@@ -180,28 +180,79 @@ void Transform_point(short x, short y, float cos_a, float sin_a,
 
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
-int Init_mode_video(int width, int height, int fullscreen)
+int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 {
   int x_sensitivity;
   int y_sensitivity;
   int index;
   int factor;
-
-  // Pour la première entrée dans cette fonction
-  if (Pixel_width<1)
-    Pixel_width=1;
-  if (Pixel_height<1)
-    Pixel_height=1;
+  int pix_width;
+  int pix_height;
+  byte screen_changed;
+  byte pixels_changed;
   
-  if (Screen_width!=width/Pixel_width ||
-      Screen_height!=height/Pixel_height ||
-      Video_mode[Current_resolution].Fullscreen != fullscreen)
+  switch (pix_ratio)
   {
+      default:
+      case PIXEL_SIMPLE:
+          pix_width=1;
+          pix_height=1;
+      break;
+      case PIXEL_TALL:
+          pix_width=1;
+          pix_height=2;
+      break;
+      case PIXEL_WIDE:
+          pix_width=2;
+          pix_height=1;
+      break;
+      case PIXEL_DOUBLE:
+          pix_width=2;
+          pix_height=2;
+      break;
+  }
+
+  // Valeurs raisonnables: minimum 320x200
+  if (!fullscreen)
+  {
+    if (width < 320*pix_width)
+        width = 320*pix_width;
+    if (height < 200*pix_height)
+        height = 200*pix_height;
+  }
+  else
+  {
+    if (width < 320*pix_width || height < 200*pix_height)
+      return 1;
+  }
+  // La largeur doit être un multiple de 4
+  #ifdef __amigaos4__
+      // On AmigaOS the systems adds some more constraints on that ...
+      width = (width + 15) & 0xFFFFFFF0;
+  #else
+      width = (width + 3 ) & 0xFFFFFFFC;
+  #endif  
+
+  screen_changed = (Screen_width*Pixel_width!=width ||
+                    Screen_height*Pixel_height!=height ||
+                    Video_mode[Current_resolution].Fullscreen != fullscreen);
+  pixels_changed = (Pixel_ratio!=pix_ratio);
+  
+  if (!screen_changed && !pixels_changed)
+    return 0;
+  if (screen_changed)
+  {
+    Set_mode_SDL(&width, &height,fullscreen);
+  }
+  if (screen_changed || pixels_changed)
+  {
+    Pixel_ratio=pix_ratio;
+    Pixel_width=pix_width;
+    Pixel_height=pix_height;
     switch (Pixel_ratio)
     {
+        default:
         case PIXEL_SIMPLE:
-            Pixel_width=1;
-            Pixel_height=1;
             Pixel = Pixel_simple ;
             Read_pixel= Read_pixel_simple ;
             Display_screen = Display_part_of_screen_simple ;
@@ -224,8 +275,6 @@ int Init_mode_video(int width, int height, int fullscreen)
             Display_brush = Display_brush_simple ;
         break;
         case PIXEL_TALL:
-            Pixel_width=1;
-            Pixel_height=2;
             Pixel = Pixel_tall;
             Read_pixel= Read_pixel_tall;
             Display_screen = Display_part_of_screen_tall;
@@ -248,8 +297,6 @@ int Init_mode_video(int width, int height, int fullscreen)
             Display_brush = Display_brush_tall;
         break;
         case PIXEL_WIDE:
-            Pixel_width=2;
-            Pixel_height=1;
             Pixel = Pixel_wide ;
             Read_pixel= Read_pixel_wide ;
             Display_screen = Display_part_of_screen_wide ;
@@ -272,8 +319,6 @@ int Init_mode_video(int width, int height, int fullscreen)
             Display_brush = Display_brush_wide ;
         break;
         case PIXEL_DOUBLE:
-            Pixel_width=2;
-            Pixel_height=2;
             Pixel = Pixel_double ;
             Read_pixel= Read_pixel_double ;
             Display_screen = Display_part_of_screen_double ;
@@ -296,94 +341,74 @@ int Init_mode_video(int width, int height, int fullscreen)
             Display_brush = Display_brush_double ;
         break;
     }
-    // Valeurs raisonnables: minimum 320x200
-    if (!fullscreen)
-    {
-      if (width < 320*Pixel_width)
-          width = 320*Pixel_width;
-      if (height < 200*Pixel_height)
-          height = 200*Pixel_height;
-    }
-    else
-    {
-      if (width < 320*Pixel_width || height < 200*Pixel_height)
-        return 1;
-    }
-    // La largeur doit être un multiple de 4
-#ifdef __amigaos4__
-    // On AmigaOS the systems adds some more constraints on that ...
-    width = (width + 15) & 0xFFFFFFF0;
-#else
-    width = (width + 3 ) & 0xFFFFFFFC;
-#endif
-    Set_mode_SDL(&width, &height,fullscreen);
-    Screen_width = width/Pixel_width;
-    Screen_height = height/Pixel_height;
+  }
+  Screen_width = width/Pixel_width;
+  Screen_height = height/Pixel_height;
 
-    // Taille des menus
-    if (Screen_width/320 > Screen_height/200)
-      factor=Screen_height/200;
-    else
-      factor=Screen_width/320;
+  // Taille des menus
+  if (Screen_width/320 > Screen_height/200)
+    factor=Screen_height/200;
+  else
+    factor=Screen_width/320;
 
-    switch (Config.Ratio)
+  switch (Config.Ratio)
+  {
+    case 1: // adapter tout
+      Menu_factor_X=factor;
+      Menu_factor_Y=factor;
+      break;
+    case 2: // adapter légèrement
+      Menu_factor_X=factor-1;
+      if (Menu_factor_X<1) Menu_factor_X=1;
+      Menu_factor_Y=factor-1;
+      if (Menu_factor_Y<1) Menu_factor_Y=1;
+      break;
+    default: // ne pas adapter
+      Menu_factor_X=1;
+      Menu_factor_Y=1;
+  }
+  if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
+    Menu_factor_X*=2;
+  else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
+    Menu_factor_Y*=2;
+    
+  if (Horizontal_line_buffer)
+    free(Horizontal_line_buffer);
+  Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+
+  Set_palette(Main_palette);
+
+  Current_resolution=0;
+  if (fullscreen)
+  {
+    for (index=1; index<Nb_video_modes; index++)
     {
-      case 1: // adapter tout
-        Menu_factor_X=factor;
-        Menu_factor_Y=factor;
-        break;
-      case 2: // adapter légèrement
-        Menu_factor_X=factor-1;
-        if (Menu_factor_X<1) Menu_factor_X=1;
-        Menu_factor_Y=factor-1;
-        if (Menu_factor_Y<1) Menu_factor_Y=1;
-        break;
-      default: // ne pas adapter
-        Menu_factor_X=1;
-        Menu_factor_Y=1;
-    }
-    if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
-      Menu_factor_X*=2;
-    else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
-      Menu_factor_Y*=2;
-      
-    if (Horizontal_line_buffer)
-      free(Horizontal_line_buffer);
-    Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
-
-    Set_palette(Main_palette);
-
-    Current_resolution=0;
-    if (fullscreen)
-    {
-      for (index=1; index<Nb_video_modes; index++)
+      if (Video_mode[index].Width/Pixel_width==Screen_width &&
+          Video_mode[index].Height/Pixel_height==Screen_height)
       {
-        if (Video_mode[index].Width/Pixel_width==Screen_width &&
-            Video_mode[index].Height/Pixel_height==Screen_height)
-        {
-          Current_resolution=index;
-          break;
-        }
+        Current_resolution=index;
+        break;
       }
     }
-
-    Change_palette_cells();
-    
-    Menu_Y = Screen_height;
-    if (Menu_is_visible)
-      Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
-    Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
-
-    x_sensitivity = Config.Mouse_sensitivity_index_x;
-    y_sensitivity = Config.Mouse_sensitivity_index_y;
-    x_sensitivity>>=Mouse_fix_factor_X;
-    y_sensitivity>>=Mouse_fix_factor_Y;
-    Mouse_sensitivity(x_sensitivity?x_sensitivity:1,y_sensitivity?y_sensitivity:1);
-
-    Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
-    Spare_offset_Y=0; // |- de décalage du brouillon par rapport à
-    Spare_magnifier_mode=0; // |  la résolution.
   }
+
+  Change_palette_cells();
+  
+  Menu_Y = Screen_height;
+  if (Menu_is_visible)
+    Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
+  Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
+
+  x_sensitivity = Config.Mouse_sensitivity_index_x;
+  y_sensitivity = Config.Mouse_sensitivity_index_y;
+  x_sensitivity>>=Mouse_fix_factor_X;
+  y_sensitivity>>=Mouse_fix_factor_Y;
+  Mouse_sensitivity(x_sensitivity?x_sensitivity:1,y_sensitivity?y_sensitivity:1);
+
+  Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
+  Spare_offset_Y=0; // |- de décalage du brouillon par rapport à
+  Spare_magnifier_mode=0; // |  la résolution.
+
   if (Main_magnifier_mode)
   {
     Pixel_preview=Pixel_preview_magnifier;

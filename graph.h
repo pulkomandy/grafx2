@@ -26,7 +26,7 @@ void Shade_list_to_lookup_tables(word * list, short step, byte mode, byte * tabl
 void Transform_point(short x, short y,
                        float cos_a, float sin_a, short * rx, short * ry);
 
-int Init_mode_video(int width, int height, int fullscreen);
+int Init_mode_video(int width, int height, int fullscreen,int pixel_ratio);
 
 byte No_effect(word x,word y,byte color);
 byte Effect_shade(word x,word y,byte color);

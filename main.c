@@ -549,12 +549,13 @@ int Init_program(int argc,char * argv[])
   Analyze_command_line(argc,argv);
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
-  Current_resolution=-1; // On n'était pas dans un mode graphique
+  Screen_width=Screen_height=Current_resolution=0;
   
   Init_mode_video(
     Video_mode[starting_videomode].Width,
     Video_mode[starting_videomode].Height,
-    Video_mode[starting_videomode].Fullscreen);
+    Video_mode[starting_videomode].Fullscreen,
+    Pixel_ratio);
 
   Main_image_width=Screen_width/Pixel_width;
   Main_image_height=Screen_height/Pixel_height;

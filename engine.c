@@ -523,7 +523,7 @@ void Main_handler(void)
     if (Resize_width || Resize_height)
     {
       Hide_cursor();
-      Init_mode_video(Resize_width, Resize_height, 0);
+      Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
       Video_mode[0].Width = Screen_width*Pixel_width;
       Video_mode[0].Height = Screen_height*Pixel_height;
       // Remise à zero des variables indiquant le Redimensionnement demandé
@@ -1575,7 +1575,7 @@ T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_c
   return temp;
 }
 
-T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
+T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,const char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
 {
   T_Dropdown_button *temp;
   

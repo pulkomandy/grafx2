@@ -244,7 +244,7 @@ void Frame_menu_color(byte color)
                 ((index)&1)?MC_White:MC_Black);
         // Right line
         for (index=1; index<end_y; index++)
-          Block(start_x+end_x*Menu_factor_Y,start_y+index*Menu_factor_Y,
+          Block(start_x+end_x*Menu_factor_X,start_y+index*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_x)&1)?MC_White:MC_Black);
         // Bottom line

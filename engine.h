@@ -65,7 +65,7 @@ T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
                                      word initial_position);
 T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,word height);
 T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_characters);
-T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button);
+T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,const char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button);
 void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number, const char *label);
 void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
 byte Window_click_in_rectangle(short start_x,short start_y,short end_x,short end_y);
