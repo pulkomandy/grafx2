@@ -782,7 +782,7 @@ void Button_Palette(void)
 
   Componant_unit(RGB_scale);
 
-  Open_window(299,188,"palette");
+  Open_window(299,188,"Palette");
 
   memcpy(working_palette,Main_palette,sizeof(T_Palette));
   memcpy(backup_palette    ,Main_palette,sizeof(T_Palette));
