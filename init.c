@@ -188,6 +188,52 @@ void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, ch
   }
 }
 
+void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
+{
+  // GFX_cursor_sprite[i]
+  //Cursor_offset_X[CURSOR_SHAPE_ARROW]=0;
+  //Cursor_offset_Y[CURSOR_SHAPE_ARROW]=0;
+  int x,y;
+  int start_x, start_y;
+  byte found;
+
+  // Locate first non-empty column
+  found=0;
+  for (start_x=0;start_x<14;start_x++)
+  {
+    for (y=0;y<29;y++)
+    {
+      if (cursor_buffer[y*29+start_x]!=MC_Trans)
+      {
+        found=1;
+        break;
+      }
+    }
+    if (found)
+      break;
+  }
+  // Locate first non-empty line
+  found=0;
+  for (start_y=0;start_y<14;start_y++)
+  {
+    for (x=0;x<29;x++)
+    {
+      if (cursor_buffer[start_y*29+x]!=MC_Trans)
+      {
+        found=1;
+        break;
+      }
+    }
+    if (found)
+      break;
+  }
+  Cursor_offset_X[cursor_number]=14-start_x;
+  Cursor_offset_Y[cursor_number]=14-start_y;
+
+  for (y=0;y<29;y++)
+    for (x=0;x<29;x++)
+      GFX_cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
+}
 
 void Load_DAT(void)
 {
@@ -203,6 +249,7 @@ void Load_DAT(void)
   int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
+  byte mouse_cursor_area[29][29];
   
   // Lecture du fichier "skin"
   strcpy(filename,Repertoire_des_donnees);
@@ -326,11 +373,12 @@ void Load_DAT(void)
       GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor");
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_cursor_sprite[i], CURSOR_SPRITE_WIDTH, CURSOR_SPRITE_HEIGHT, "mouse cursor",1);
-    cursor_x+=CURSOR_SPRITE_WIDTH;
+    Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1);
+    Center_GUI_cursor(mouse_cursor_area,i);
+    cursor_x+=29;
   }
-  cursor_y+=CURSOR_SPRITE_HEIGHT;
-  
+  cursor_y+=29;
+
   // Sprites menu
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
@@ -707,29 +755,6 @@ void Load_DAT(void)
     Preset_paintbrush_offset_Y[index]=(Preset_paintbrush_height[index]>>1);
   }
 
-  Cursor_offset_X[CURSOR_SHAPE_ARROW]=0;
-  Cursor_offset_Y[CURSOR_SHAPE_ARROW]=0;
-
-  Cursor_offset_X[CURSOR_SHAPE_TARGET]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_TARGET]=7;
-
-  Cursor_offset_X[CURSOR_SHAPE_COLORPICKER]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_COLORPICKER]=7;
-
-  Cursor_offset_X[CURSOR_SHAPE_HOURGLASS]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_HOURGLASS]=7;
-
-  Cursor_offset_X[CURSOR_SHAPE_MULTIDIRECTIONNAL]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_MULTIDIRECTIONNAL]=7;
-
-  Cursor_offset_X[CURSOR_SHAPE_HORIZONTAL]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_HORIZONTAL]=3;
-
-  Cursor_offset_X[CURSOR_SHAPE_THIN_TARGET]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_THIN_TARGET]=7;
-
-  Cursor_offset_X[CURSOR_SHAPE_THIN_COLORPICKER]=7;
-  Cursor_offset_Y[CURSOR_SHAPE_THIN_COLORPICKER]=7;
 }
 
 
