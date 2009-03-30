@@ -72,8 +72,8 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-byte Old_lines_number;                // old nombre de lignes de l'écran
-
+// filename for the current GUI skin file.
+static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "base.gif";
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -85,6 +85,7 @@ void Display_syntax(void)
   printf("\t/wide              to emulate a video mode with wide pixels (2x1)\n");
   printf("\t/tall              to emulate a video mode with tall pixels (1x2)\n");
   printf("\t/double            to emulate a video mode with double pixels (2x2)\n");
+  printf("\t/skin <filename>   use an alternate file with the menu graphics\n");
   printf("\t/mode <videomode>  to set a video mode\n\n");
   printf("Available video modes:\n\n");
   for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
@@ -243,6 +244,21 @@ void Analyze_command_line(int argc,char * argv[])
           exit(0);
         }
         Set_palette_RGB_scale(scale);
+      }
+      else
+      {
+        Error(ERROR_COMMAND_LINE);
+        Display_syntax();
+        exit(0);
+      }
+    }
+    else if ( !strcmp(argv[index],"/skin") )
+    {
+      // GUI skin file
+      index++;
+      if (index<argc)
+      {
+        strcpy(Gui_skin_file,argv[index]);
       }
       else
       {
@@ -425,8 +441,6 @@ int Init_program(int argc,char * argv[])
   Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
     // Données sur les couleurs et la palette:
-  Fore_color=15;
-  Back_color=0;
   First_color_in_palette=0;
     // Données sur le curseur:
   Cursor_shape=CURSOR_SHAPE_TARGET;
@@ -495,8 +509,6 @@ int Init_program(int argc,char * argv[])
 
   Windows_open=0;
   
-  // Charger les sprites et la palette
-  Load_DAT();
   // Charger la configuration des touches
   Set_config_defaults();
   switch(Load_CFG(1))
@@ -516,25 +528,32 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  // Transfert des valeurs du .INI qui ne changent pas dans des variables
-  // plus accessibles:
-  Default_palette[MC_Black] =Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  Default_palette[MC_Dark]=Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  memcpy(Main_palette,Default_palette,sizeof(T_Palette));
-
-  Compute_optimal_menu_colors(Default_palette);
-
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
+
+  Analyze_command_line(argc,argv);
+
+  // Charger les sprites et la palette
+  Load_graphics(Gui_skin_file);
+
+  // Transfert des valeurs du .INI qui ne changent pas dans des variables
+  // plus accessibles:
+  Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  Compute_optimal_menu_colors(Default_palette);
+  Fore_color=MC_White;
+  Back_color=MC_Black;
 
   // Prise en compte de la fonte
   if (Config.Font)
     Menu_font=GFX_fun_font;
   else
     Menu_font=GFX_system_font;
+
+  memcpy(Main_palette,Default_palette,sizeof(T_Palette));
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -546,7 +565,6 @@ int Init_program(int argc,char * argv[])
   Paintbrush_width=1;
   Paintbrush_height=1;
 
-  Analyze_command_line(argc,argv);
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
   Screen_width=Screen_height=Current_resolution=0;

@@ -235,7 +235,7 @@ void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
       GFX_cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 
-void Load_DAT(void)
+void Load_graphics(const char * skin_file)
 {
   int  index;
   char filename[MAX_PATH_CHARACTERS];
@@ -253,7 +253,8 @@ void Load_DAT(void)
   
   // Lecture du fichier "skin"
   strcpy(filename,Repertoire_des_donnees);
-  strcat(filename,"gfx2gui.gif");
+  strcat(filename,skin_file);
+  
   gui=IMG_Load(filename);
   if (!gui)
   {
@@ -374,7 +375,7 @@ void Load_DAT(void)
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
     Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1);
-    Center_GUI_cursor(mouse_cursor_area,i);
+    Center_GUI_cursor((byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
   cursor_y+=29;

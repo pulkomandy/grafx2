@@ -248,9 +248,9 @@ release : $(BIN)
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini gfx2gui.gif gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini gfx2gui.gif gfx2.ico gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
@@ -287,10 +287,11 @@ install : $(BIN)
 	$(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
 	$(CP) $(BIN) $(datadir)/grafx2/
 	$(CP) gfx2def.ini $(datadir)/grafx2/
-	$(CP) gfx2gui.gif $(datadir)/grafx2/
 	$(CP) gfx2.gif $(datadir)/grafx2/
 	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
-	cd fonts && $(CP) * $(datadir)/grafx2/fonts/
+	cd fonts && $(CP) * $(datadir)/grafx2/fonts/ && cd ..
+	$(if $(wildcard $(datadir)/grafx2/skins),,$(MKDIR) $(datadir)/grafx2/skins)
+	$(CP) skins/base.gif $(datadir)/grafx2/skins/
 	@echo Install complete
   
 # Linux uninstallation of the program
@@ -298,11 +299,11 @@ uninstall :
 	$(DELCOMMAND) $(bindir)/grafx2
 	$(DELCOMMAND) $(datadir)/grafx2/$(BIN)
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2def.ini
-	$(DELCOMMAND) $(datadir)/grafx2/gfx2gui.gif
 	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
-	$(if $(wildcard $(datadir)/grafx2),,$(RMDIR) $(datadir)/grafx2)
+	$(DELCOMMAND) $(datadir)/grafx2/skins/base.gif
+	$(if $(wildcard $(datadir)/grafx2/skins),,$(RMDIR) $(datadir)/grafx2/skins)
 	@echo Uninstall complete
 
 -include Makefile.dep
