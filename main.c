@@ -528,14 +528,14 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  // Infos sur les trames (Sieve)
-  Sieve_mode=0;
-  Copy_preset_sieve(0);
-
   Analyze_command_line(argc,argv);
 
   // Charger les sprites et la palette
   Load_graphics(Gui_skin_file);
+
+  // Infos sur les trames (Sieve)
+  Sieve_mode=0;
+  Copy_preset_sieve(0);
 
   // Transfert des valeurs du .INI qui ne changent pas dans des variables
   // plus accessibles:
