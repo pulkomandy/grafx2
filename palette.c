@@ -385,7 +385,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
 
 
 
-void Set_nice_menu_colors(dword * color_usage)
+void Set_nice_menu_colors(dword * color_usage,int not_picture)
 {
   short index,index2;
   byte color;
@@ -445,8 +445,16 @@ void Set_nice_menu_colors(dword * color_usage)
     replace_table[new_colors[index]]=Best_color_nonexcluded
                                   (rgb[index].R,rgb[index].G,rgb[index].B);
 
-  // On fait un changement des couleurs visibles à l'écran et dans l'image
-  Remap_image_highlevel(replace_table);
+  if (not_picture)
+  {
+    // Remap caused by preview. Only remap screen
+    Remap_zone_highlevel(0,0,Screen_width,Screen_height,replace_table);
+  }
+  else
+  {
+    // On fait un changement des couleurs visibles à l'écran et dans l'image
+    Remap_image_highlevel(replace_table);
+  }
   Display_cursor();
 }
 
@@ -1398,7 +1406,7 @@ void Button_Palette(void)
         {
           memcpy(temp_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,working_palette,sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage);
+          Set_nice_menu_colors(color_usage,0);
           memcpy(working_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,temp_palette,sizeof(T_Palette));
         }
@@ -1444,7 +1452,7 @@ void Button_Palette(void)
         {
           memcpy(temp_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,working_palette,sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage);
+          Set_nice_menu_colors(color_usage,0);
           memcpy(working_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,temp_palette,sizeof(T_Palette));
         }
@@ -1946,7 +1954,7 @@ void Button_Palette(void)
           memcpy(backup_palette,working_palette,sizeof(T_Palette));
           memcpy(temp_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,working_palette,sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage);
+          Set_nice_menu_colors(color_usage,0);
           memcpy(working_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,temp_palette,sizeof(T_Palette));
           Set_palette(working_palette);

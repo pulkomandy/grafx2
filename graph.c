@@ -190,6 +190,9 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   int pix_height;
   byte screen_changed;
   byte pixels_changed;
+  int absolute_mouse_x=Mouse_X*Pixel_width;
+  int absolute_mouse_y=Mouse_Y*Pixel_height;
+  
   
   switch (pix_ratio)
   {
@@ -212,13 +215,26 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
       break;
   }
 
+  screen_changed = (Screen_width*Pixel_width!=width ||
+                    Screen_height*Pixel_height!=height ||
+                    Video_mode[Current_resolution].Fullscreen != fullscreen);
+
   // Valeurs raisonnables: minimum 320x200
   if (!fullscreen)
   {
     if (width < 320*pix_width)
+    {
         width = 320*pix_width;
+        screen_changed=1;
+    }
     if (height < 200*pix_height)
+    {
         height = 200*pix_height;
+        screen_changed=1;
+    }
+    Video_mode[0].Width = width;
+    Video_mode[0].Height = height;
+
   }
   else
   {
@@ -233,9 +249,6 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
       width = (width + 3 ) & 0xFFFFFFFC;
   #endif  
 
-  screen_changed = (Screen_width*Pixel_width!=width ||
-                    Screen_height*Pixel_height!=height ||
-                    Video_mode[Current_resolution].Fullscreen != fullscreen);
   pixels_changed = (Pixel_ratio!=pix_ratio);
   
   if (!screen_changed && !pixels_changed)
@@ -405,6 +418,14 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   y_sensitivity>>=Mouse_fix_factor_Y;
   Mouse_sensitivity(x_sensitivity?x_sensitivity:1,y_sensitivity?y_sensitivity:1);
 
+  Mouse_X=absolute_mouse_x/Pixel_width;
+  if (Mouse_X>=Screen_width)
+    Mouse_X=Screen_width-1;
+  Mouse_Y=absolute_mouse_y/Pixel_height;
+  if (Mouse_Y>=Screen_height)
+    Mouse_Y=Screen_height-1;
+  Set_mouse_position();
+  
   Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
   Spare_offset_Y=0; // |- de décalage du brouillon par rapport à
   Spare_magnifier_mode=0; // |  la résolution.

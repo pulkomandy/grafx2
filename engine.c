@@ -524,8 +524,6 @@ void Main_handler(void)
     {
       Hide_cursor();
       Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
-      Video_mode[0].Width = Screen_width*Pixel_width;
-      Video_mode[0].Height = Screen_height*Pixel_height;
       // Remise à zero des variables indiquant le Redimensionnement demandé
       Display_menu();
       Display_all_screen();

@@ -40,7 +40,7 @@
 word Count_used_colors(dword* usage)
 {
   int nb_pixels=0;
-  Uint8* Pixel_Courant=Main_screen;
+  Uint8* current_pixel=Main_screen;
   Uint8 color;
   word nb_colors=0;
   int i;
@@ -53,12 +53,12 @@ word Count_used_colors(dword* usage)
   // On parcourt l'écran courant pour compter les utilisations des couleurs
   for(i=0;i<nb_pixels;i++)
   {
-    color=*Pixel_Courant; //on lit la couleur dans l'écran
+    color=*current_pixel; //on lit la couleur dans l'écran
 
     usage[color]++; //Un point de plus pour cette couleur
 
     // On passe au pixel suivant
-    Pixel_Courant++;
+    current_pixel++;
   }
 
   //On va maintenant compter dans la table les couleurs utilisées:
@@ -70,6 +70,36 @@ word Count_used_colors(dword* usage)
 
   return nb_colors;
 }
+
+/// Same as ::Count_used_colors, but for a given rectangle.
+word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height)
+{
+  Uint8 color;
+  word x,y;
+  word nb_colors=0;
+  int i;
+
+  // Init usage table
+  for (i=0;i<256;i++) usage[i]=0;
+
+  // On parcourt l'écran courant pour compter les utilisations des couleurs
+  for(y=0;y<height;y++)
+  {
+    for(x=0;x<width;x++)
+    {
+      color=*(Screen_pixels+((start_x+x)+(start_y+y)*Screen_width*Pixel_height)*Pixel_width); //on lit la couleur dans l'écran
+      usage[color]++; //Un point de plus pour cette couleur
+    }
+  }
+  //On va maintenant compter dans la table les couleurs utilisées:
+  for(i=0;i<256;i++)
+  {
+    if (usage[i]!=0)
+        nb_colors++;
+  }
+  return nb_colors;
+}
+
 
 void Set_palette(T_Palette palette)
 {

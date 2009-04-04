@@ -28,3 +28,9 @@ void Set_palette_RGB_scale(int);
 // The resulting range is [0-255]
 byte Round_palette_component(byte comp);
 
+/*!
+  Adds 4 menu colors in the current palette.
+  @param color_usage An up-to-date color usage table (byte[256]) (read only)
+  @param not_picture 0 if the caller is the palette screen, 1 if it's a preview in the file selector.
+*/
+void Set_nice_menu_colors(dword * color_usage,int not_picture);

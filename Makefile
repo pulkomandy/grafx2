@@ -27,6 +27,7 @@
   datarootdir = $(prefix)/share
   datadir = $(datarootdir)
 
+# Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
 
 
@@ -40,7 +41,7 @@ ifdef COMSPEC
   RMDIR = rmdir
   CP = cp
   BIN = grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
   CC = gcc
   OBJDIR = obj/win32
@@ -177,7 +178,7 @@ else
         #cross compile a Win32 executable
         CC = i586-mingw32msvc-gcc
         BIN = grafx2.exe
-        COPT = -W -Wall -Wdeclaration-after-statement -O -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
         LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
         OBJDIR = obj/win32
         PLATFORM = win32
@@ -197,7 +198,7 @@ else
         # Compiles a regular linux exectutable for the native platform
         BIN = grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT)
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
         CC = gcc
         OBJDIR = obj/unix
         X11LOPT = -lX11

@@ -1673,8 +1673,6 @@ void Button_Safety_resolution(void)
   Unselect_bouton(BUTTON_MAGNIFIER);
   Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
   Current_resolution=0;
-  Video_mode[0].Width = Screen_width*Pixel_width;
-  Video_mode[0].Height = Screen_height*Pixel_height;
   Display_menu();
   Display_all_screen();
 

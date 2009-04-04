@@ -514,7 +514,8 @@ void filename_complet(char * filename, byte is_colorix_format)
 void Read_one_byte(FILE * file, byte *b)
 {
   // FIXME : Replace les appelants par Read_bytes(), et gérer les retours d'erreur.
-  Read_byte(file, b);
+  if (!Read_byte(file, b))
+    File_error=2;
 }
 
 // --------------------------------------------------------------------------
@@ -645,6 +646,16 @@ void Load_image(byte image)
     {
       if ( (File_error!=1) && (File_formats[format].Backup_done) )
       {
+        if (Pixel_load_function==Pixel_load_in_preview)
+        {
+          dword  color_usage[256];
+          Count_used_colors_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
+          //Count_used_colors(color_usage);
+          Display_cursor();
+          Set_nice_menu_colors(color_usage,1);
+          Hide_cursor();
+        }
+      
         // On considère que l'image chargée n'est plus modifiée
         Main_image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
