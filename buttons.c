@@ -1655,6 +1655,7 @@ void Button_Resolution(void)
     }
 
     Display_menu();
+    Reposition_palette();
     Display_all_screen();
   }
   Paintbrush_X = Mouse_X;
@@ -1674,6 +1675,7 @@ void Button_Safety_resolution(void)
   Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
   Current_resolution=0;
   Display_menu();
+  Reposition_palette();
   Display_all_screen();
 
   Unselect_bouton(BUTTON_RESOL);

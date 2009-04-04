@@ -526,6 +526,7 @@ void Main_handler(void)
       Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
       // Remise à zero des variables indiquant le Redimensionnement demandé
       Display_menu();
+      Reposition_palette();
       Display_all_screen();
       Display_cursor();
     }
