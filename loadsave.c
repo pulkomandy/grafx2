@@ -32,18 +32,19 @@
 #include <png.h>
 #endif
 
-#include "const.h"
-#include "struct.h"
-#include "global.h"
-#include "misc.h"
-#include "pages.h"
-#include "op_c.h"
 #include "buttons.h"
+#include "const.h"
 #include "errors.h"
+#include "global.h"
 #include "io.h"
-#include "sdlscreen.h"
-#include "windows.h"
 #include "loadsave.h"
+#include "misc.h"
+#include "op_c.h"
+#include "pages.h"
+#include "palette.h"
+#include "sdlscreen.h"
+#include "struct.h"
+#include "windows.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(void);

@@ -646,6 +646,7 @@ void Program_shutdown(void)
   free(Main_screen);
 
   // On prend bien soin de passer dans le répertoire initial:
+  DEBUG(Initial_directory,1);
   if (chdir(Initial_directory)!=-1)
   {
     // On sauvegarde les données dans le .CFG et dans le .INI

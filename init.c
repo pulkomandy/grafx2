@@ -230,8 +230,8 @@ void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
   Cursor_offset_X[cursor_number]=14-start_x;
   Cursor_offset_Y[cursor_number]=14-start_y;
 
-  for (y=0;y<29;y++)
-    for (x=0;x<29;x++)
+  for (y=0;y<CURSOR_SPRITE_HEIGHT;y++)
+    for (x=0;x<CURSOR_SPRITE_WIDTH;x++)
       GFX_cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 

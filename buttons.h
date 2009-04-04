@@ -22,6 +22,8 @@
 #ifndef __BOUTONS_H_
 #define __BOUTONS_H_
 
+#include "struct.h"
+
 /*!
     Displays an error message when calling an unavailable function.
     Only used in the beta versions for things we haven't coded yet.
