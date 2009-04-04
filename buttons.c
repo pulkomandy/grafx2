@@ -2539,8 +2539,9 @@ void Load_picture(byte image)
 
   if (!image)
     Swap_data_of_image_and_brush();
-
+  Hide_cursor();
   Print_filename();
+  Display_cursor();
   Set_palette(Main_palette);
 }
 
