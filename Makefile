@@ -222,7 +222,7 @@ else
   TTFLABEL = 
 endif
 
-#To disable Joystick emulation of cursor, make NOTTF=1 (for input.o)
+#To disable Joystick emulation of cursor, make NOJOY=1 (for input.o)
 #This can be necessary to test keyboard cursor code, because an existing
 #joystick will keep reporting a contradicting position.
 ifeq ($(NOJOY),1)
@@ -249,9 +249,9 @@ release : $(BIN)
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
 	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)

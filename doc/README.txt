@@ -3,6 +3,8 @@ Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
 Copyright (C)2007-2009 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 -------------------------------------
 
+=== ABOUT ===
+
 GrafX2 is a drawing program dedicated to pixelart and low-color graphics.
 This program is dedicated to everybody who knows what a single pixel is.
 Its layout is not very different from the famous Deluxe Paint or Brilliance, so
@@ -17,10 +19,14 @@ then released the sourcecode and we've modified it to run on your favorite
 platform (if we missed it, please tell us !). Check the homepage at
 http://code.google.com/p/grafx2 for latest news and bugfixed versions.
 
+=== HELP ===
+
 If you are in trouble when using the program, don't forget you can always press
 the <F1> key inside it to get some help. You can also check the wiki at
 http://code.google.com/p/grafx2/wiki for some more information.
 If you've hidden the menu and you're stuck, press <F10> to show it again.
+
+=== LICENSE ===
 
 GrafX2 is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -33,6 +39,12 @@ own licenses:
 - zlib: (on Windows) see doc/README-zlib1.txt
 The font Tuffy.ttf included as a sample in the fonts/ directory is public domain.
 
+=== COMPILING ===
+
+http://code.google.com/p/grafx2/wiki/Compiling
+
+=== AUTHORS AND SUPPORT ===
+
 To watch the full credits list, in the program, click '?' then 'Credits'.
 
 Send bugs and feature requests to our bugtracker :
@@ -40,7 +52,10 @@ http://code.google.com/p/grafx2/issues/list
 
 Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 
+=== HISTORY ===
+
 Short revision history :
+  * 04/2009 99.0% Many new features and critical fixes
   * 01/2009 98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
                   AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
   * 10/2008 97.0% Our first public beta release

@@ -115,49 +115,37 @@ void Error_function(int error_code, const char *filename, int line_number, const
   {
     switch (error_code)
     {
-      case ERROR_GUI_MISSING         : printf("Error: File gfx2gui.gif is missing!\n");
+      case ERROR_GUI_MISSING         : printf("Error: File containing the GUI graphics is missing!\n");
                                        printf("This program cannot run without this file.\n");
                                        break;
-      case ERROR_GUI_CORRUPTED       : printf("Error: File gfx2gui.gif is corrupt!\n");
+      case ERROR_GUI_CORRUPTED       : printf("Error: File containing the GUI graphics couldn't be parsed!\n");
                                        printf("This program cannot run without a correct version of this file.\n");
                                        break;
       case ERROR_INI_MISSING         : printf("Error: File gfx2def.ini is missing!\n");
                                        printf("This program cannot run without this file.\n");
                                        break;
-      case ERROR_CFG_MISSING         : printf("Error: File GFX2.CFG is missing!\n");
-                                       printf("Please run GFXCFG to create it.\n");
-                                       break;
-      case ERROR_CFG_CORRUPTED       : printf("Error: File GFX2.CFG is corrupt!\n");
-                                       printf("Please run GFXCFG to make a valid file.\n");
-                                       break;
-      case ERROR_CFG_OLD         : printf("Error: File GFX2.CFG is from another version of GrafX2.\n");
-                                       printf("Please run GFXCFG to update this file.\n");
-                                       break;
-      case ERROR_MEMORY            : printf("Error: Not enough memory!\n\n");
+      case ERROR_MEMORY              : printf("Error: Not enough memory!\n\n");
                                        printf("You should try exiting other programs to free some bytes for Grafx2.\n\n");
-                                       break;
-      case ERROR_MOUSE_DRIVER      : printf("Error: No mouse detected!\n");
-                                       printf("Check if a mouse driver is installed and if your mouse is correctly connected.\n");
                                        break;
       case ERROR_FORBIDDEN_MODE      : printf("Error: The requested video mode has been disabled from the resolution menu!\n");
                                        printf("If you want to run the program in this mode, you'll have to start it with an\n");
                                        printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
-                                       printf("Check also if the 'Default_video_mode' parameter in GFX2.INI is correct.\n");
+                                       printf("Check also if the 'Default_video_mode' parameter in gfx2.ini is correct.\n");
                                        break;
       case ERROR_COMMAND_LINE     : printf("Error: Invalid parameter or file not found.\n\n");
                                        Display_syntax();
                                        break;
       case ERROR_SAVING_CFG     : printf("Error: Write error while saving settings!\n");
-                                       printf("Settings have not been saved correctly, and the GFX2.CFG file may have been\n");
-                                       printf("corrupt. If so, please run GFXCFG to make a new valid file.\n");
+                                       printf("Settings have not been saved correctly, and the gfx2.cfg file may have been\n");
+                                       printf("corrupt. If so, please delete it and Grafx2 will restore default settings.\n");
                                        break;
       case ERROR_MISSING_DIRECTORY : printf("Error: Directory you ran the program from not found!\n");
                                        break;
-      case ERROR_INI_CORRUPTED       : printf("Error: File GFX2.INI is corrupt!\n");
+      case ERROR_INI_CORRUPTED       : printf("Error: File gfx2.ini is corrupt!\n");
                                        printf("It contains bad values at line %d.\n",Line_number_in_INI_file);
                                        printf("You can re-generate it by deleting the file and running GrafX2 again.\n");
                                        break;
-      case ERROR_SAVING_INI     : printf("Error: Cannot rewrite file GFX2.INI!\n");
+      case ERROR_SAVING_INI     : printf("Error: Cannot rewrite file gfx2.ini!\n");
                                        break;
       case ERROR_SORRY_SORRY_SORRY  : printf("Error: Sorry! Sorry! Sorry! Please forgive me!\n");
                                        break;
@@ -646,7 +634,6 @@ void Program_shutdown(void)
   free(Main_screen);
 
   // On prend bien soin de passer dans le répertoire initial:
-  DEBUG(Initial_directory,1);
   if (chdir(Initial_directory)!=-1)
   {
     // On sauvegarde les données dans le .CFG et dans le .INI

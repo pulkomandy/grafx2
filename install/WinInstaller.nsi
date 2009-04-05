@@ -11,7 +11,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-2.00b99.0-svn722-win32.exe"
+  OutFile "grafx2-2.00b99.0-svn724-win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -60,17 +60,20 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\grafx2.exe
-  File ..\src-svn722.tgz
-  File ..\skins\base.gif
+  File ..\src-svn724.tgz
   File ..\gfx2.gif
+  File ..\gfx2def.ini
   File ..\SDL_image.dll
   File ..\SDL.dll
   File ..\libfreetype-6.dll
   File ..\SDL_ttf.dll
   File ..\zlib1.dll
   File ..\libpng13.dll
+  SetOutPath "$INSTDIR\skins"
+  File ..\skins\base.gif
   SetOutPath "$INSTDIR\doc"
   File ..\doc\README.txt
+  File ..\doc\COMPILING.txt
   File ..\doc\README-SDL_ttf.txt
   File ..\doc\README-SDL.txt
   File ..\doc\README-SDL_image.txt
@@ -94,7 +97,7 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "URLInfoAbout" "http://grafx2.googlecode.com"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "DisplayVersion" "98%"
+                 "DisplayVersion" "99%"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "NoModify" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
@@ -136,8 +139,9 @@ Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\grafx2.exe"
-  Delete "$INSTDIR\src-svn722.tgz"
+  Delete "$INSTDIR\src-svn724.tgz"
   Delete "$INSTDIR\gfx2.gif"
+  Delete "$INSTDIR\gfx2def.ini"
   Delete "$INSTDIR\SDL_image.dll"
   Delete "$INSTDIR\SDL.dll"
   Delete "$INSTDIR\libfreetype-6.dll"
@@ -145,6 +149,7 @@ Section "un.SecProgram"
   Delete "$INSTDIR\zlib1.dll"
   Delete "$INSTDIR\libpng13.dll"
   Delete "$INSTDIR\doc\README.txt"
+  Delete "$INSTDIR\doc\COMPILING.txt"
   Delete "$INSTDIR\doc\README-SDL_ttf.txt"
   Delete "$INSTDIR\doc\README-SDL.txt"
   Delete "$INSTDIR\doc\README-SDL_image.txt"
@@ -155,7 +160,7 @@ Section "un.SecProgram"
   Delete "$INSTDIR\fonts\Tuffy.ttf"
   RMDir  "$INSTDIR\fonts"
   Delete "$INSTDIR\skins\base.gif"
-  RMDir  "$INSTDIR\skins
+  RMDir  "$INSTDIR\skins"
   
   Delete "$INSTDIR\Uninstall.exe"
   MessageBox MB_YESNO|MB_DEFBUTTON2|MB_ICONQUESTION "Do you wish to keep your configuration settings ?" IDYES keepconfig IDNO deleteconfig

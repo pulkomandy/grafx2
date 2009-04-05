@@ -1,0 +1,112 @@
+Grafx2 compilation and installation
+===================================
+
+=== Requirements ===
+
+* gcc C compiler
+* GNU make
+* SDL library v1.2
+* SDL_image library
+* libpng (not on MacOSX)
+* FreeType library (optional)
+* SDL_ttf library (optional)
+
+Extra requirements for Windows:
+* a POSIX environment: MSYS is fine, maybe Cygwin would work as well.
+* use Mingw C compiler instead of gcc
+
+=== Instructions ===
+
+Open a shell/Terminal, cd to the directory where you have the source code, and
+type:
+  make
+If all goes well, it should build grafx2 (the main program) in the current
+directory. Voilà.
+
+If you don't have FreeType and SDL_ttf, compile with NOTTF=1, it will
+build a version without TrueType support : the Text tool will be limited to
+bitmap fonts, proportional fonts with .ttf extension won't be available.
+
+=== Build variants ===
+
+The default compilation is optimized ( -O ), with debugging symbols for GDB.
+Compile with OPTIM=0 to disable optimizations, if you have some real debugging
+to do.
+Compile with OPTIM=3 to use maximum optimizations.
+
+Compile with NOJOY=1 to disable joystick support.
+
+=== Other compilation targets ===
+  make clean
+Erases the generated files
+
+  make depend
+Re-compute the dependencies (makefile.dep). 
+
+Other compilation targets (make version, make ziprelease) require Subversion
+and are only useful to contributors to the svn repository of Grafx2.
+
+=== System specifics ===
+
+== Unix/Linux ==
+  sudo make install
+This copies the executable and data files in your system, in the /usr/local/
+and /usr/share directories. You then no longer need the compilation directory.
+
+  sudo make uninstall
+Removes the copied files from your system, keeps your configuration.
+
+== Windows ==
+Here are the resources used to build the Windows version:
+
+4DOS
+  with an alias make=mingw32-make
+
+MSYS
+  installed in C:\MSYS
+
+Mingw
+  installed in C:\MSYS\mingw
+
+SDL:
+  SDL-devel-1.2.13-mingw32.tar.gz
+  Uncompress in temporary directory
+  make
+  make install (no effect?)
+  Headers are in /usr/mingw/include/SDL, copy them to /usr/include/SDL
+
+Zlib:
+  http://gnuwin32.sourceforge.net/downlinks/zlib.php
+  zlib-1.2.3.exe
+  Install in c:\msys\mingw
+Libpng
+  Requires: Zlib
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libpng/
+  libpng-1.0.23.tar.gz
+  Uncompress in temporary directory
+  ./configure
+  make
+  make install (long)
+  Files created in /usr/local/include and /usr/local/lib ....
+  
+SDL_image:
+  Requires: Libpng
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libsdl/
+  SDL_image-1.2.6.zip
+  Uncompress in temporary directory
+  ./configure
+  Check that png worked
+  make
+  make install
+  
+FreeType:
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/m/mi/mingw-cross/
+  mingw-freetype-2.3.7-2
+  Uncompress in c:/mwsys/mingw
+  
+SDL_ttf:
+  No mingw package
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libsdl/
+  SDL_ttf-2.0.9-win32.zip for DLLs: libfreetype-6.dll, SDL_ttf.dll, zlib1.dll
+  SDL_ttf-2.0.9.tar.gz
+

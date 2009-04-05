@@ -53,14 +53,14 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
     // Vérification du mode obtenu (ce n'est pas toujours celui demandé)
     if (Screen_SDL->w != *width || Screen_SDL->h != *height)
     {
-      DEBUG("Error mode video obtenu différent de celui demandé !!",0);
+      DEBUG("Error: Got a different video mode than the requested one!",0);
       *width = Screen_SDL->w;
       *height = Screen_SDL->h;
     }
     Screen_pixels=Screen_SDL->pixels;
   }
   else
-    DEBUG("Error changement de mode video !!",0);
+    DEBUG("Error: Unable to change video mode!",0);
 
   SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
 }

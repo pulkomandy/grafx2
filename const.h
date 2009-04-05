@@ -28,7 +28,7 @@
 
 #define M_2PI 6.28318530717958647692528676656
 
-#define PERCENTAGE_VERSION     "98.0%" // Libellé du pourcentage de la version ß
+#define PERCENTAGE_VERSION     "99.0%" // Libellé du pourcentage de la version ß
 #define VERSION1                  2     // |
 #define VERSION2                  0     // |_ Numéro de version découpé en
 #define BETA1                     98    // |  plusieurs parties => 2.0 ß95.5%
@@ -123,22 +123,21 @@ enum FILE_FORMATS
 
 enum ERROR_CODES
 {
-  // 0 = Flash rouge de l'écran, erreur non critique
-  ERROR_GUI_MISSING=1,          // Le fichier gfx2gui.gif est absent
-  ERROR_GUI_CORRUPTED,          // Mauvais fichier gfx2gui.gif
-  ERROR_INI_MISSING,            // Le fichier gfx2def.ini est absent
-  ERROR_CFG_MISSING,            // Le fichier GFX2.CFG est absent
-  ERROR_CFG_CORRUPTED,          // Mauvais fichier GFX2.CFG
-  ERROR_CFG_OLD,            // Ancienne version du fichier GFX2.CFG
-  ERROR_MEMORY,               // Plus de mémoire
-  ERROR_COMMAND_LINE,        // Error sur la ligne de commande
-  ERROR_MOUSE_DRIVER,         // Pas de driver souris installé
-  ERROR_FORBIDDEN_MODE,         // Mode demandé sur la ligne de commande interdit (coché en noir)
-  ERROR_SAVING_CFG,        // Error en écriture pour GFX2.CFG
-  ERROR_MISSING_DIRECTORY,    // Le répertoire de lancement n'existe plus
-  ERROR_INI_CORRUPTED,          // Le fichier GFX2.INI est corrompu
-  ERROR_SAVING_INI,        // Le fichier GFX2.INI n'est pas inscriptible
-  ERROR_SORRY_SORRY_SORRY      // On le refera plus, promis (erreur d'allocation de page qui ne devrait JAMAIS se produire)
+  // 0 = Red flash on screen, non-fatal error
+  ERROR_GUI_MISSING=1,     // The graphics file is missing
+  ERROR_GUI_CORRUPTED,     // The graphics file cannot be parsed for GUI elements
+  ERROR_INI_MISSING,       // File gfx2def.ini is missing
+  ERROR_CFG_MISSING,       // File gfx2.cfg is missing (non-fatal)
+  ERROR_CFG_CORRUPTED,     // File gfx2.cfg couldn't be parsed (non-fatal)
+  ERROR_CFG_OLD,           // Unknown version of gfx2.cfg : either VERY old or wrong file (non-fatal)
+  ERROR_MEMORY,            // Out of memory
+  ERROR_COMMAND_LINE,      // Error in command-line arguments (syntax, or couldn't find the file to open)
+  ERROR_FORBIDDEN_MODE,    // Graphics mode requested is not supported
+  ERROR_SAVING_CFG,        // Error while writing gfx2.cfg
+  ERROR_MISSING_DIRECTORY, // Unable to return to the original "current directory" on program exit
+  ERROR_INI_CORRUPTED,     // File gfx2.ini couldn't be parsed
+  ERROR_SAVING_INI,        // Error while writing gfx2.ini
+  ERROR_SORRY_SORRY_SORRY  // (Page allocation error that shouldn't ever happen, now)
 };
 
   // Les différents types de pixels
