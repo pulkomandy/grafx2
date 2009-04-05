@@ -2270,6 +2270,46 @@ void Test_BMP(void)
   }
 }
 
+// Find the 8 important bits in a dword
+byte Bitmap_mask(dword pixel, dword mask)
+{
+  byte result;
+  int i;
+  int bits_found;
+
+  switch(mask)
+  {
+    // Shortcuts to quickly handle the common 24/32bit cases
+    case 0x000000FF:
+      return (pixel & 0x000000FF);
+    case 0x0000FF00:
+      return (pixel & 0x0000FF00)>>8;
+    case 0x00FF0000:
+      return (pixel & 0x00FF0000)>>16;
+    case 0xFF000000:
+      return (pixel & 0xFF000000)>>24;
+  }
+  // Uncommon : do it bit by bit.
+  bits_found=0;
+  result=0;
+  // Process the mask from low to high bit
+  for (i=0;i<32;i++)
+  {
+    // Found a bit in the mask
+    if (mask & (1<<i))
+    {
+      if (pixel & 1<<i)
+        result |= 1<<bits_found;
+        
+      bits_found++;
+      
+      if (bits_found>=8)
+        return result;
+    }
+  }
+  // Less than 8 bits in the mask: scale the result to 8 bits
+  return result << (8-bits_found);
+}
 
 // -- Charger un fichier au format BMP --------------------------------------
 void Load_BMP(void)
@@ -2334,9 +2374,6 @@ void Load_BMP(void)
         {
           if (Read_bytes(file,local_palette,nb_colors<<2))
           {
-            //   On commence par passer la palette en 256 comme ça, si la nouvelle
-            // palette a moins de 256 coul, la précédente ne souffrira pas d'un
-            // assombrissement préjudiciable.
             if (Config.Clear_palette)
               memset(Main_palette,0,sizeof(T_Palette));
             //   On peut maintenant transférer la nouvelle palette
@@ -2396,7 +2433,7 @@ void Load_BMP(void)
                 /*Init_lecture();*/
                 Read_one_byte(file, &a);
                 Read_one_byte(file, &b);
-                while ( (!File_error) && ((a)||(b!=1)) )
+                while (!File_error)
                 {
                   if (a) // Encoded mode
                     for (index=1; index<=a; index++)
@@ -2420,15 +2457,19 @@ void Load_BMP(void)
                         while (b)
                         {
                           Read_one_byte(file, &a);
-                          Read_one_byte(file, &c);
+                          //Read_one_byte(file, &c);
                           Pixel_load_function(x_pos++,y_pos,a);
-                          if (--c)
-                          {
-                            Pixel_load_function(x_pos++,y_pos,c);
-                            b--;
-                          }
+                          //if (--c)
+                          //{
+                          //  Pixel_load_function(x_pos++,y_pos,c);
+                          //  b--;
+                          //}
+                          b--;
                         }
+                        if (ftell(file) & 1) fseek(file, 1, SEEK_CUR);
                     }
+                  if (a==0 && b==1)
+                    break;
                   Read_one_byte(file, &a);
                   Read_one_byte(file, &b);
                 }
@@ -2503,28 +2544,100 @@ void Load_BMP(void)
       }
       else
       {
-        // Image 24 bits!!!
+        // Image 16/24/32 bits
+        dword red_mask;
+        dword green_mask;
+        dword blue_mask;
+        if (header.Nb_bits == 16)
+        {
+          red_mask =   0x00007C00;
+          green_mask = 0x000003E0;
+          blue_mask =  0x0000001F;
+        }
+        else
+        {
+          red_mask = 0x00FF0000;
+          green_mask = 0x0000FF00;
+          blue_mask = 0x000000FF;
+        }
         File_error=0;
 
         Main_image_width=header.Width;
         Main_image_height=header.Height;
         Init_preview(header.Width,header.Height,file_size,FORMAT_BMP | FORMAT_24B);
-
         if (File_error==0)
         {
-          line_size=Main_image_width*3;
-          x_pos=(line_size % 4); // x_pos sert de variable temporaire
-          if (x_pos>0)
-            line_size+=(4-x_pos);
-
-          buffer=(byte *)malloc(line_size);
-          for (y_pos=Main_image_height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+          switch (header.Compression)
           {
-            if (Read_bytes(file,buffer,line_size))
-              for (x_pos=0,index=0; x_pos<Main_image_width; x_pos++,index+=3)
-                Pixel_load_24b(x_pos,y_pos,buffer[index+2],buffer[index+1],buffer[index+0]);
-            else
-              File_error=2;
+            case 3: // BI_BITFIELDS
+              if (!Read_dword_le(file,&red_mask) ||
+                  !Read_dword_le(file,&green_mask) ||
+                  !Read_dword_le(file,&blue_mask))
+                File_error=2;
+              break;
+            default:
+              break;
+          }
+          if (fseek(file, header.Offset, SEEK_SET))
+            File_error=2;
+        }
+        if (File_error==0)
+        {
+          switch (header.Nb_bits)
+          {
+            // 24bit bitmap
+            default:
+            case 24:
+              line_size=Main_image_width*3;
+              x_pos=(line_size % 4); // x_pos sert de variable temporaire
+              if (x_pos>0)
+                line_size+=(4-x_pos);
+    
+              buffer=(byte *)malloc(line_size);
+              for (y_pos=Main_image_height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              {
+                if (Read_bytes(file,buffer,line_size))
+                  for (x_pos=0,index=0; x_pos<Main_image_width; x_pos++,index+=3)
+                    Pixel_load_24b(x_pos,y_pos,buffer[index+2],buffer[index+1],buffer[index+0]);
+                else
+                  File_error=2;
+              }
+              break;
+
+            // 32bit bitmap
+            case 32:
+              line_size=Main_image_width*4;
+              buffer=(byte *)malloc(line_size);
+              for (y_pos=Main_image_height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              {
+                if (Read_bytes(file,buffer,line_size))
+                  for (x_pos=0; x_pos<Main_image_width; x_pos++)
+                  {
+                    dword pixel=*(((dword *)buffer)+x_pos);
+                    Pixel_load_24b(x_pos,y_pos,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
+                  }
+                else
+                  File_error=2;
+              }
+              break;
+
+            // 16bit bitmap
+            case 16:
+              line_size=(Main_image_width*2) + (Main_image_width&1)*2;
+              buffer=(byte *)malloc(line_size);
+              for (y_pos=Main_image_height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              {
+                if (Read_bytes(file,buffer,line_size))
+                  for (x_pos=0; x_pos<Main_image_width; x_pos++)
+                  {
+                    word pixel=*(((word *)buffer)+x_pos);
+                    Pixel_load_24b(x_pos,y_pos,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
+                  }
+                else
+                  File_error=2;
+              }
+              break;
+            
           }
           free(buffer);
           fclose(file);

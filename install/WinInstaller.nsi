@@ -11,7 +11,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-2.00b98.0-svn482-win32.exe"
+  OutFile "grafx2-2.00b99.0-svn722-win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -60,11 +60,9 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\grafx2.exe
-  File ..\gfxcfg.exe
-  File ..\src-svn482.tgz
-  File ..\gfx2.dat
+  File ..\src-svn722.tgz
+  File ..\skins\base.gif
   File ..\gfx2.gif
-  File ..\gfx2cfg.gif
   File ..\SDL_image.dll
   File ..\SDL.dll
   File ..\libfreetype-6.dll
@@ -138,11 +136,8 @@ Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\grafx2.exe"
-  Delete "$INSTDIR\gfxcfg.exe"
-  Delete "$INSTDIR\src-svn482.tgz"
-  Delete "$INSTDIR\gfx2.dat"
+  Delete "$INSTDIR\src-svn722.tgz"
   Delete "$INSTDIR\gfx2.gif"
-  Delete "$INSTDIR\gfx2cfg.gif"
   Delete "$INSTDIR\SDL_image.dll"
   Delete "$INSTDIR\SDL.dll"
   Delete "$INSTDIR\libfreetype-6.dll"
@@ -159,6 +154,8 @@ Section "un.SecProgram"
   Delete "$INSTDIR\fonts\8pxfont.png"
   Delete "$INSTDIR\fonts\Tuffy.ttf"
   RMDir  "$INSTDIR\fonts"
+  Delete "$INSTDIR\skins\base.gif"
+  RMDir  "$INSTDIR\skins
   
   Delete "$INSTDIR\Uninstall.exe"
   MessageBox MB_YESNO|MB_DEFBUTTON2|MB_ICONQUESTION "Do you wish to keep your configuration settings ?" IDYES keepconfig IDNO deleteconfig
