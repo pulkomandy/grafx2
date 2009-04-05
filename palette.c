@@ -1842,7 +1842,18 @@ void Button_Palette(void)
         byte h = 0, l = 0, s=0;
         byte oh=0,ol=0,os=0; // Valeur pour la couleur précédente
         int swap=1;
-
+        byte remap_table[256];
+        byte inverted_table[256];
+        
+        // Init remap table
+        for (i=0;i<256;i++)
+          remap_table[i]=i;
+        // Make a backup because remapping is an undoable modification
+        if (!image_is_backed_up)
+        {
+          Backup();
+          image_is_backed_up=1;
+        }
         while(swap==1)
         {
           swap=0;
@@ -1861,16 +1872,24 @@ void Button_Palette(void)
               && (h<oh || (h==oh && l<ol))))  // Dans ce cas on décide avec chroma puis lumi
             {
               // On échange la couleur avec la précédente
+              byte swap_color;
               Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
+              
+              swap_color=remap_table[temp_color];
+              remap_table[temp_color]=remap_table[temp_color-1];
+              remap_table[temp_color-1]=swap_color;
+              
               swap=1;
+              
             }
           }
         }
-        
+        for (i=0;i<256;i++)
+          inverted_table[remap_table[i]]=i;
+        Remap_image_highlevel(inverted_table);
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
-      
         need_to_remp=1;
       }
       break;
