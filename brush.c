@@ -1549,8 +1549,8 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
       temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)line_width;
       xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
-
-      buffer[x+(y*width)]=Read_pixel_from_brush(xt,yt);
+      if (xt>=0 && yt>=0)
+        buffer[x+(y*width)]=Read_pixel_from_brush(xt,yt);
     }
     for (; x<width; x++)
       buffer[x+(y*width)]=Back_color;
@@ -1709,10 +1709,12 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
       temp=(float)(0.5+(float)x-ScanY_X[0][y])/(float)width;
       xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
-
-      color=Read_pixel_from_brush(xt,yt);
-      if (color!=Back_color)
-        Pixel_preview(x,y_,color);
+      if (xt>=0 && yt>=0)
+      {
+        color=Read_pixel_from_brush(xt,yt);
+        if (color!=Back_color)
+          Pixel_preview(x,y_,color);
+      }
     }
   }
 
