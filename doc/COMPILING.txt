@@ -3,8 +3,8 @@ Grafx2 compilation and installation
 
 === Requirements ===
 
-* gcc C compiler
-* GNU make
+* gcc C compiler (other compilers may work, but are not officially supported)
+* GNU make (other similar "make" tools may work, but are not supported)
 * SDL library v1.2
 * SDL_image library
 * libpng (not on MacOSX)
@@ -14,6 +14,9 @@ Grafx2 compilation and installation
 Extra requirements for Windows:
 * a POSIX environment: MSYS is fine, maybe Cygwin would work as well.
 * use Mingw C compiler instead of gcc
+
+Extra requirements for UNIX/X11 (Linux, FreeBSD, ...):
+* X11 headers (optional, for truetype fonts)
 
 === Instructions ===
 
@@ -33,6 +36,7 @@ The default compilation is optimized ( -O ), with debugging symbols for GDB.
 Compile with OPTIM=0 to disable optimizations, if you have some real debugging
 to do.
 Compile with OPTIM=3 to use maximum optimizations.
+Type "make release" if you don't want the debugging symbols.
 
 Compile with NOJOY=1 to disable joystick support.
 
@@ -55,6 +59,13 @@ and /usr/share directories. You then no longer need the compilation directory.
 
   sudo make uninstall
 Removes the copied files from your system, keeps your configuration.
+
+== gp2x ==
+The gp2x build is very similar to the Linux one. TTF is always disabled because 
+there is no X11 support on the gp2x.
+To compile a gp2x executable, type
+	make GP2XCROSS=1
+This will only work on an UNIXsystem (Linux or FreeBSD).
 
 == Windows ==
 Here are the resources used to build the Windows version:
@@ -110,3 +121,6 @@ SDL_ttf:
   SDL_ttf-2.0.9-win32.zip for DLLs: libfreetype-6.dll, SDL_ttf.dll, zlib1.dll
   SDL_ttf-2.0.9.tar.gz
 
+It is also possible to compile from linux, with this command :
+	make WIN32CROSS=1
+You will need the mingw cross-compiler, and all the librairies listed above.

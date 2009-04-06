@@ -47,7 +47,7 @@ http://code.google.com/p/grafx2/wiki/Compiling
 
 To watch the full credits list, in the program, click '?' then 'Credits'.
 
-Send bugs and feature requests to our bugtracker :
+Send bugs and feature requests to our bugtracker:
 http://code.google.com/p/grafx2/issues/list
 
 Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
@@ -66,4 +66,19 @@ Short revision history :
   * 11/1996 90%   First public release, at the Wired'96
   * 09/1995       Project starts.
 
-Check http://code.google.com/p/grafx2/source/list for detailed changelog.
+Check http://code.google.com/p/grafx2/source/list for (very) detailed changelog.
+Check http://code.google.com/p/grafx2/wiki/History for an overview of the new 
+features and bugfixes in each beta version.
+
+=== FINAL WORDS ===
+
+We enjoy programming GrafX2, we hope you will enjoy drawing with it. If you like
+the program, here is a list of things you can do:
+* Register as an user at www.ohloh.net/p/grafx2 to improve our Karma
+* Port GrafX2 to your favourite platform
+* Report bugs or ask for features you miss (you'll get credited in the helpscreen !)
+* Make all your friends use GrafX2
+* Send us your nice drawings, we'll put them in our online gallery
+
+Enjoy Pixelling with GrafX2,
+PulkoMandy & Yves the great GrafX2 Project Team.- 
