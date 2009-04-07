@@ -883,7 +883,7 @@ static const T_Help_table helptable_grad_rect[] =
   HELP_TEXT ("starting color, drag to a point where you")
   HELP_TEXT ("want the ending color, and release the")
   HELP_TEXT ("button. You can press SHIFT to enforce your")
-  HELP_TEXT ("line to be vertical, horizontal, or
+  HELP_TEXT ("line to be vertical, horizontal, or")
   HELP_TEXT ("diagonal.")
 };
 static const T_Help_table helptable_grad_menu[] =

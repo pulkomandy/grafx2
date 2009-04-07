@@ -2200,6 +2200,7 @@ byte Best_color(byte r,byte g,byte b)
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
+  int   rmean;
   byte  best_color=0;
 
   for (col=0; col<256; col++)
@@ -2210,7 +2211,10 @@ byte Best_color(byte r,byte g,byte b)
       delta_g=(int)Main_palette[col].G-g;
       delta_b=(int)Main_palette[col].B-b;
 
-      if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
+	  rmean = ( Main_palette[col].R + r ) / 2;
+
+	  if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
+      //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
         return col;
 
       if (dist<best_dist)
@@ -2230,6 +2234,7 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
+  int   rmean;
   byte  best_color=0;
 
   for (col=0; col<256; col++)
@@ -2237,8 +2242,10 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
+	rmean = ( Main_palette[col].R + red ) / 2;
 
-    if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
+	if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
+    //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
       return col;
 
     if (dist<best_dist)
