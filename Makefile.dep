@@ -23,13 +23,13 @@ $(OBJDIR)/init.o: init.c const.h struct.h global.h graph.h buttons.h palette.h \
   windows.h sdlscreen.h mountlist.h loadsave.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
   windows.h errors.h misc.h input.h
-$(OBJDIR)/io.o: io.c struct.h const.h io.h
+$(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
 $(OBJDIR)/keyboard.o: keyboard.c global.h struct.h const.h
-$(OBJDIR)/loadsave.o: loadsave.c const.h struct.h global.h misc.h pages.h op_c.h \
-  buttons.h errors.h io.h sdlscreen.h windows.h loadsave.h
+$(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io.h \
+  loadsave.h misc.h op_c.h pages.h palette.h sdlscreen.h windows.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
   engine.h pages.h loadsave.h sdlscreen.h errors.h readini.h saveini.h \
-  io.h text.h setup.h windows.h brush.h palette.h
+  io.h text.h setup.h windows.h brush.h palette.h realpath.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.h \
   engine.h misc.h keyboard.h windows.h palette.h input.h
 $(OBJDIR)/mountlist.o: mountlist.c
@@ -58,7 +58,8 @@ $(OBJDIR)/setup.o: setup.c struct.h const.h io.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h engine.h misc.h \
   readline.h help.h sdlscreen.h windows.h input.h
 $(OBJDIR)/special.o: special.c const.h struct.h global.h graph.h engine.h windows.h
-$(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h
+$(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h \
+  errors.h
 $(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h global.h graph.h engine.h \
   misc.h sdlscreen.h errors.h

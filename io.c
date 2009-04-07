@@ -39,6 +39,7 @@
 
 #include "struct.h"
 #include "io.h"
+#include "realpath.h"
 
 word Endian_magic16(word x)
 {
@@ -196,7 +197,7 @@ void Extract_path(char *dest, const char *source)
 {
   char * position=NULL;
 
-  realpath(source,dest);
+  Realpath(source,dest);
   position = Find_last_slash(dest);
   if (position)
     *(position+1) = '\0';

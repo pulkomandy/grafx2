@@ -51,6 +51,7 @@
 #include "windows.h"
 #include "brush.h"
 #include "palette.h"
+#include "realpath.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -61,9 +62,8 @@
     #import <sys/param.h>
 #elif defined(__FreeBSD__)
     #import <sys/param.h>
-#elif defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__)
-    #include "realpath.h"
 #endif
+
 
 #if defined (__WIN32__)
   // On Windows, SDL_putenv is not present in any compilable header.
@@ -271,11 +271,7 @@ void Analyze_command_line(int argc,char * argv[])
 
         // On récupère le chemin complet du paramètre
         // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        #if defined(__WIN32__)
-          buffer=_fullpath(NULL,argv[index],MAX_PATH_CHARACTERS);
-        #else
-          buffer=realpath(argv[index],NULL);
-        #endif
+        buffer=Realpath(argv[index],NULL);
         Extract_path(Main_file_directory, buffer);
         Extract_filename(Main_filename, buffer);
         free(buffer);
