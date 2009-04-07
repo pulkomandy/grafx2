@@ -55,6 +55,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "io.h"
+#include "errors.h"
 
 typedef struct T_Font
 {
@@ -459,10 +460,14 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   // Chargement de la fonte
   Surface_fonte=IMG_Load(Font_name(font_number));
   if (!Surface_fonte)
+  {
+	DEBUG("Font loading failed",0);
     return NULL;
+  }
   font=SFont_InitFont(Surface_fonte);
   if (!font)
   {
+	DEBUG("Font init failed",1);
     return NULL;
   }
   
@@ -475,6 +480,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   SFont_Write(TexteColore, font, 0, 0, str);
   if (!TexteColore)
   {
+	DEBUG("Rendering failed",2);
     SFont_FreeFont(font);
     return NULL;
   }
@@ -485,6 +491,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   new_brush=Surface_to_bytefield(Texte8Bit, NULL);
   if (!new_brush)
   {
+	DEBUG("Converting failed",3);
     SDL_FreeSurface(TexteColore);
     SDL_FreeSurface(Texte8Bit);
     SFont_FreeFont(font);

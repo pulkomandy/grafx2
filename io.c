@@ -194,9 +194,9 @@ void Extract_filename(char *dest, const char *source)
 // Récupère la partie "répertoire+/" d'un chemin.
 void Extract_path(char *dest, const char *source)
 {
-  char * position;
+  char * position=NULL;
 
-  strcpy(dest,source);
+  realpath(source,dest);
   position = Find_last_slash(dest);
   if (position)
     *(position+1) = '\0';
