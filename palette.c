@@ -2110,6 +2110,7 @@ void Button_Secondary_palette(void)
   T_Scroller_button * rgb_scale_slider;
   char str[4];
   byte palette_vertical = Config.Palette_vertical;
+  byte palette_cols, palette_lines, rgb_scale;
   byte palette_needs_redraw=0;
   
   Open_window(200,146,"Palettes");
@@ -2156,18 +2157,22 @@ void Button_Secondary_palette(void)
     switch(clicked_button)
     {
       case 5:
+		// Column slider
         Num2str(256-Window_attribute2,str,3);
         Print_in_window(38,89,str,MC_Black,MC_Light);
         break;    
       case 6:
+		// Line slider
         Num2str(16-Window_attribute2,str,3);
         Print_in_window(94,89,str,MC_Black,MC_Light);
         break;
       case 7:
+		// RGB scale slider
         Num2str(256-Window_attribute2,str,3);
         Print_in_window(157,89,str,MC_Black,MC_Light);
         break;
       case 8:
+		// Vertical switch
         palette_vertical = !palette_vertical;
         Hide_cursor();
         Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
@@ -2176,6 +2181,11 @@ void Button_Secondary_palette(void)
     }
   }
   while (clicked_button!=1 && clicked_button!=3 && clicked_button!=4);
+
+  // We need to get the sliders positions before closing the window, because they will be freed.
+  palette_cols=256-columns_slider->Position;
+  palette_lines=16-lines_slider->Position;
+  rgb_scale=256-rgb_scale_slider->Position;
 
   Close_window();
   Unselect_bouton(BUTTON_PALETTE);
@@ -2189,16 +2199,16 @@ void Button_Secondary_palette(void)
     Config.Palette_vertical=palette_vertical;
     palette_needs_redraw=1;
   }
-  if (columns_slider->Position!=256-Config.Palette_cells_X ||
-    lines_slider->Position!=16-Config.Palette_cells_Y)
+  if (palette_cols!=Config.Palette_cells_X ||
+    palette_lines!=Config.Palette_cells_Y)
   {
-    Config.Palette_cells_X = 256-columns_slider->Position;
-    Config.Palette_cells_Y = 16-lines_slider->Position;
+    Config.Palette_cells_X = palette_cols;
+    Config.Palette_cells_Y = palette_lines;
     palette_needs_redraw=1;
   }
-  if (rgb_scale_slider->Position!=256-RGB_scale)
+  if (rgb_scale!=RGB_scale)
   {
-    Set_palette_RGB_scale(256-rgb_scale_slider->Position);
+    Set_palette_RGB_scale(rgb_scale);
     Set_palette(Main_palette);
   }
 
