@@ -63,17 +63,17 @@ int Is_shortcut(word Key, word function)
     
   if (function & 0x100)
   {
-    if (Button[function&0xFF].Left_shortcut[0]==Key)
+    if (Buttons_Pool[function&0xFF].Left_shortcut[0]==Key)
       return 1;
-    if (Button[function&0xFF].Left_shortcut[1]==Key)
+    if (Buttons_Pool[function&0xFF].Left_shortcut[1]==Key)
       return 1;
     return 0;
   }
   if (function & 0x200)
   {
-    if (Button[function&0xFF].Right_shortcut[0]==Key)
+    if (Buttons_Pool[function&0xFF].Right_shortcut[0]==Key)
       return 1;
-    if (Button[function&0xFF].Right_shortcut[1]==Key)
+    if (Buttons_Pool[function&0xFF].Right_shortcut[1]==Key)
       return 1;
     return 0;
   }

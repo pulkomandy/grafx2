@@ -54,9 +54,9 @@ extern char SVN_revision[]; // generated in version.c
 word * Shortcut(word shortcut_number)
 {
   if (shortcut_number & 0x100)
-    return &(Button[shortcut_number & 0xFF].Left_shortcut[0]);
+    return &(Buttons_Pool[shortcut_number & 0xFF].Left_shortcut[0]);
   if (shortcut_number & 0x200)
-    return &(Button[shortcut_number & 0xFF].Right_shortcut[0]);
+    return &(Buttons_Pool[shortcut_number & 0xFF].Right_shortcut[0]);
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 

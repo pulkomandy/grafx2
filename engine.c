@@ -182,29 +182,29 @@ int Button_under_mouse(void)
 
   for (btn_number=0;btn_number<NB_BUTTONS;btn_number++)
   {
-    switch(Button[btn_number].Shape)
+    switch(Buttons_Pool[btn_number].Shape)
     {
       case BUTTON_SHAPE_NO_FRAME :
       case BUTTON_SHAPE_RECTANGLE  :
 
-        if ((x_pos>=Button[btn_number].X_offset) &&
-            (y_pos>=Button[btn_number].Y_offset) &&
-            (x_pos<=Button[btn_number].X_offset+Button[btn_number].Width) &&
-            (y_pos<=Button[btn_number].Y_offset+Button[btn_number].Height))
+        if ((x_pos>=Buttons_Pool[btn_number].X_offset) &&
+            (y_pos>=Buttons_Pool[btn_number].Y_offset) &&
+            (x_pos<=Buttons_Pool[btn_number].X_offset+Buttons_Pool[btn_number].Width) &&
+            (y_pos<=Buttons_Pool[btn_number].Y_offset+Buttons_Pool[btn_number].Height))
           return btn_number;
         break;
 
       case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
-        if ((x_pos>=Button[btn_number].X_offset) &&
-            (y_pos>=Button[btn_number].Y_offset) &&
-            (x_pos+y_pos-(short)Button[btn_number].Y_offset-(short)Button[btn_number].X_offset<=Button[btn_number].Width))
+        if ((x_pos>=Buttons_Pool[btn_number].X_offset) &&
+            (y_pos>=Buttons_Pool[btn_number].Y_offset) &&
+            (x_pos+y_pos-(short)Buttons_Pool[btn_number].Y_offset-(short)Buttons_Pool[btn_number].X_offset<=Buttons_Pool[btn_number].Width))
           return btn_number;
         break;
 
       case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
-        if ((x_pos<=Button[btn_number].X_offset+Button[btn_number].Width) &&
-            (y_pos<=Button[btn_number].Y_offset+Button[btn_number].Height) &&
-            (x_pos+y_pos-(short)Button[btn_number].Y_offset-(short)Button[btn_number].X_offset>=Button[btn_number].Width))
+        if ((x_pos<=Buttons_Pool[btn_number].X_offset+Buttons_Pool[btn_number].Width) &&
+            (y_pos<=Buttons_Pool[btn_number].Y_offset+Buttons_Pool[btn_number].Height) &&
+            (x_pos+y_pos-(short)Buttons_Pool[btn_number].Y_offset-(short)Buttons_Pool[btn_number].X_offset>=Buttons_Pool[btn_number].Width))
           return btn_number;
         break;
     }
@@ -225,10 +225,10 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word x_pos;
   word y_pos;
 
-  start_x=Button[btn_number].X_offset;
-  start_y=Button[btn_number].Y_offset;
-  end_x  =start_x+Button[btn_number].Width;
-  end_y  =start_y+Button[btn_number].Height;
+  start_x=Buttons_Pool[btn_number].X_offset;
+  start_y=Buttons_Pool[btn_number].Y_offset;
+  end_x  =start_x+Buttons_Pool[btn_number].Width;
+  end_y  =start_y+Buttons_Pool[btn_number].Height;
 
   if (!pressed)
   {
@@ -243,7 +243,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
     color_diagonal=MC_Dark;
   }
 
-  switch(Button[btn_number].Shape)
+  switch(Buttons_Pool[btn_number].Shape)
   {
     case BUTTON_SHAPE_NO_FRAME :
       break;
@@ -284,7 +284,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       Pixel_in_menu(start_x,end_y,color_diagonal);
       GFX_menu_block[end_y][start_x]=color_diagonal;
       // On colorie le coin haut gauche
-      for (x_pos=0;x_pos<Button[btn_number].Width;x_pos++)
+      for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,start_y,color_top_left);
         GFX_menu_block[start_y][start_x+x_pos]=color_top_left;
@@ -292,7 +292,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
         GFX_menu_block[start_y+x_pos][start_x]=color_top_left;
       }
       // On colorie la diagonale
-      for (x_pos=1;x_pos<Button[btn_number].Width;x_pos++)
+      for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_bottom_right);
         GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_bottom_right;
@@ -306,13 +306,13 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       Pixel_in_menu(start_x,end_y,color_diagonal);
       GFX_menu_block[end_y][start_x]=color_diagonal;
       // On colorie la diagonale
-      for (x_pos=1;x_pos<Button[btn_number].Width;x_pos++)
+      for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_top_left);
         GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_top_left;
       }
       // On colorie le coin bas droite
-      for (x_pos=0;x_pos<Button[btn_number].Width;x_pos++)
+      for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(end_x-x_pos,end_y,color_bottom_right);
         GFX_menu_block[end_y][end_x-x_pos]=color_bottom_right;
@@ -334,14 +334,14 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
 //---------------------- Désenclenchement d'un bouton ------------------------
 void Unselect_bouton(int btn_number)
 {
-  if (Button[btn_number].Pressed)
+  if (Buttons_Pool[btn_number].Pressed)
   {
     // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
     Draw_menu_button_frame(btn_number,BUTTON_RELEASED);
     // On considère que le bouton est relâché
-    Button[btn_number].Pressed=BUTTON_RELEASED;
+    Buttons_Pool[btn_number].Pressed=BUTTON_RELEASED;
     // On appelle le désenclenchement particulier au bouton:
-    Button[btn_number].Desenclencher();
+    Buttons_Pool[btn_number].Desenclencher();
   }
 }
 
@@ -374,7 +374,7 @@ void Unselect_button(int btn_number,byte click)
     Display_sprite_in_menu(btn_number,icon+(click==RIGHT_SIDE));
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
-  family=Button[btn_number].Famille;
+  family=Buttons_Pool[btn_number].Famille;
 
   switch (family)
   {
@@ -388,7 +388,7 @@ void Unselect_button(int btn_number,byte click)
         // S'il est de la même famille
         if (
              (b!=btn_number) &&
-             (Button[b].Famille==FAMILY_INTERRUPTION) &&
+             (Buttons_Pool[b].Famille==FAMILY_INTERRUPTION) &&
              (  (b!=BUTTON_MAGNIFIER) ||
                ((b==BUTTON_MAGNIFIER) && (!Main_magnifier_mode)) )
            )
@@ -402,7 +402,7 @@ void Unselect_button(int btn_number,byte click)
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la famille interruption
         if ( (b!=btn_number)
-          && (Button[b].Famille==FAMILY_INTERRUPTION)
+          && (Buttons_Pool[b].Famille==FAMILY_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Main_magnifier_mode && (b==BUTTON_MAGNIFIER))) )
           // Alors on désenclenche le bouton
@@ -411,7 +411,7 @@ void Unselect_button(int btn_number,byte click)
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la même famille
         if ( (b!=btn_number)
-          && (Button[b].Famille==family) )
+          && (Buttons_Pool[b].Famille==family) )
           // Alors on désenclenche le bouton
           Unselect_bouton(b);
   }
@@ -425,13 +425,13 @@ void Unselect_button(int btn_number,byte click)
   Wait_end_of_click();
 
   // On considère que le bouton est enfoncé
-  Button[btn_number].Pressed=BUTTON_PRESSED;
+  Buttons_Pool[btn_number].Pressed=BUTTON_PRESSED;
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
   if (click==1)
-    Button[btn_number].Gauche();
+    Buttons_Pool[btn_number].Gauche();
   else
-    Button[btn_number].Droite();
+    Buttons_Pool[btn_number].Droite();
 }
 
 

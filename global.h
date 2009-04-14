@@ -516,7 +516,6 @@ GFX2_GLOBAL int Window_stack_attribute2[8];
 
 
 // Définition des boutons ////////////////////////////////////////////////////
-
 GFX2_GLOBAL struct
 {
   // Informations sur l'aspect du bouton (graphisme):
@@ -537,7 +536,7 @@ GFX2_GLOBAL struct
   Func_action Desenclencher;     // Action appelée lors du désenclenchement du bouton
   byte            Famille;           // Ensemble de boutons auquel celui-ci appartient
 
-} Button[NB_BUTTONS];
+} Buttons_Pool[NB_BUTTONS];
 
 
 

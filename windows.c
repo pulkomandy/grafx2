@@ -353,8 +353,8 @@ void Change_palette_cells()
 
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
-  Button[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
-  Button[BUTTON_CHOOSE_COL].Height=32/Menu_cells_Y*Menu_cells_Y-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Height=32/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -872,9 +872,9 @@ void Display_sprite_in_menu(int btn_number,int sprite_number)
   word menu_y_pos;
   byte color;
 
-  menu_y_pos=Button[btn_number].Y_offset;
-  menu_x_pos=Button[btn_number].X_offset;
-  if (Button[btn_number].Shape != BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
+  menu_y_pos=Buttons_Pool[btn_number].Y_offset;
+  menu_x_pos=Buttons_Pool[btn_number].X_offset;
+  if (Buttons_Pool[btn_number].Shape != BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
   {
     menu_y_pos+=1;
     menu_x_pos+=1;
@@ -887,8 +887,8 @@ void Display_sprite_in_menu(int btn_number,int sprite_number)
       Pixel_in_menu(menu_x_pos+x_pos,menu_y_pos+y_pos,color);
       GFX_menu_block[menu_y_pos+y_pos][menu_x_pos+x_pos]=color;
     }
-  Update_rect(Menu_factor_X*(Button[btn_number].X_offset+1),
-    (Button[btn_number].Y_offset+1)*Menu_factor_Y+Menu_Y,
+  Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
+    (Buttons_Pool[btn_number].Y_offset+1)*Menu_factor_Y+Menu_Y,
     MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
 }
 

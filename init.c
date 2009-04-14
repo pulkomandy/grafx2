@@ -776,16 +776,16 @@ void Init_button(byte   btn_number,
                         Func_action Desenclencher,
                         byte   family)
 {
-  Button[btn_number].X_offset      =x_offset;
-  Button[btn_number].Y_offset      =y_offset;
-  Button[btn_number].Width         =width-1;
-  Button[btn_number].Height         =height-1;
-  Button[btn_number].Pressed         =0;
-  Button[btn_number].Shape           =shape;
-  Button[btn_number].Gauche          =Gauche;
-  Button[btn_number].Droite          =Droite;
-  Button[btn_number].Desenclencher   =Desenclencher;
-  Button[btn_number].Famille         =family;
+  Buttons_Pool[btn_number].X_offset      =x_offset;
+  Buttons_Pool[btn_number].Y_offset      =y_offset;
+  Buttons_Pool[btn_number].Width         =width-1;
+  Buttons_Pool[btn_number].Height         =height-1;
+  Buttons_Pool[btn_number].Pressed         =0;
+  Buttons_Pool[btn_number].Shape           =shape;
+  Buttons_Pool[btn_number].Gauche          =Gauche;
+  Buttons_Pool[btn_number].Droite          =Droite;
+  Buttons_Pool[btn_number].Desenclencher   =Desenclencher;
+  Buttons_Pool[btn_number].Famille         =family;
 }
 
 
@@ -797,10 +797,10 @@ void Init_buttons(void)
 
   for (button_index=0;button_index<NB_BUTTONS;button_index++)
   {
-    Button[button_index].Left_shortcut[0]=0;
-    Button[button_index].Left_shortcut[1]=0;
-    Button[button_index].Right_shortcut[0]=0;
-    Button[button_index].Right_shortcut[1]=0;
+    Buttons_Pool[button_index].Left_shortcut[0]=0;
+    Buttons_Pool[button_index].Left_shortcut[1]=0;
+    Buttons_Pool[button_index].Right_shortcut[0]=0;
+    Buttons_Pool[button_index].Right_shortcut[1]=0;
     Init_button(button_index,
                        0,0,
                        1,1,
@@ -1771,12 +1771,12 @@ int Load_CFG(int reload_all)
                     Config_Key[Ordering[index2]&0xFF][1]=cfg_shortcut_info.Key2;
                     break;
                   case 1 :
-                    Button[Ordering[index2]&0xFF].Left_shortcut[0] = cfg_shortcut_info.Key;
-                    Button[Ordering[index2]&0xFF].Left_shortcut[1] = cfg_shortcut_info.Key2;
+                    Buttons_Pool[Ordering[index2]&0xFF].Left_shortcut[0] = cfg_shortcut_info.Key;
+                    Buttons_Pool[Ordering[index2]&0xFF].Left_shortcut[1] = cfg_shortcut_info.Key2;
                     break;
                   case 2 :
-                    Button[Ordering[index2]&0xFF].Right_shortcut[0] = cfg_shortcut_info.Key;
-                    Button[Ordering[index2]&0xFF].Right_shortcut[1] = cfg_shortcut_info.Key2;
+                    Buttons_Pool[Ordering[index2]&0xFF].Right_shortcut[0] = cfg_shortcut_info.Key;
+                    Buttons_Pool[Ordering[index2]&0xFF].Right_shortcut[1] = cfg_shortcut_info.Key2;
                     break;
                 }
               }
@@ -2014,12 +2014,12 @@ int Save_CFG(void)
         cfg_shortcut_info.Key2=Config_Key[Ordering[index]&0xFF][1]; 
         break;
       case 1 :
-        cfg_shortcut_info.Key =Button[Ordering[index]&0xFF].Left_shortcut[0]; 
-        cfg_shortcut_info.Key2=Button[Ordering[index]&0xFF].Left_shortcut[1]; 
+        cfg_shortcut_info.Key =Buttons_Pool[Ordering[index]&0xFF].Left_shortcut[0]; 
+        cfg_shortcut_info.Key2=Buttons_Pool[Ordering[index]&0xFF].Left_shortcut[1]; 
         break;
       case 2 : 
-        cfg_shortcut_info.Key =Button[Ordering[index]&0xFF].Right_shortcut[0]; 
-        cfg_shortcut_info.Key2=Button[Ordering[index]&0xFF].Right_shortcut[1]; 
+        cfg_shortcut_info.Key =Buttons_Pool[Ordering[index]&0xFF].Right_shortcut[0]; 
+        cfg_shortcut_info.Key2=Buttons_Pool[Ordering[index]&0xFF].Right_shortcut[1]; 
         break;
     }
     if (!Write_word_le(Handle, cfg_shortcut_info.Number) ||
@@ -2200,12 +2200,12 @@ void Set_config_defaults(void)
         Config_Key[Ordering[index]&0xFF][1]=ConfigKey[index].Key2;
         break;
       case 1 :
-        Button[Ordering[index]&0xFF].Left_shortcut[0] = ConfigKey[index].Key;
-        Button[Ordering[index]&0xFF].Left_shortcut[1] = ConfigKey[index].Key2;
+        Buttons_Pool[Ordering[index]&0xFF].Left_shortcut[0] = ConfigKey[index].Key;
+        Buttons_Pool[Ordering[index]&0xFF].Left_shortcut[1] = ConfigKey[index].Key2;
         break;
       case 2 :
-        Button[Ordering[index]&0xFF].Right_shortcut[0] = ConfigKey[index].Key;
-        Button[Ordering[index]&0xFF].Right_shortcut[1] = ConfigKey[index].Key2;
+        Buttons_Pool[Ordering[index]&0xFF].Right_shortcut[0] = ConfigKey[index].Key;
+        Buttons_Pool[Ordering[index]&0xFF].Right_shortcut[1] = ConfigKey[index].Key2;
         break;
     }
   }
