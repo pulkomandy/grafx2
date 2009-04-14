@@ -282,29 +282,33 @@ clean :
 
 # Linux installation of the program
 install : $(BIN)
-	echo "#!/bin/sh" > $(bindir)/grafx2
-	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(bindir)/grafx2
-	chmod 755 $(bindir)/grafx2
-	$(if $(wildcard $(datadir)/grafx2),,$(MKDIR) $(datadir)/grafx2)
-	$(CP) $(BIN) $(datadir)/grafx2/
-	$(CP) gfx2def.ini $(datadir)/grafx2/
-	$(CP) gfx2.gif $(datadir)/grafx2/
-	$(if $(wildcard $(datadir)/grafx2/fonts),,$(MKDIR) $(datadir)/grafx2/fonts)
-	cd fonts && $(CP) * $(datadir)/grafx2/fonts/ && cd ..
-	$(if $(wildcard $(datadir)/grafx2/skins),,$(MKDIR) $(datadir)/grafx2/skins)
-	$(CP) skins/base.gif $(datadir)/grafx2/skins/
+	# Create dirs
+	test -d $(DESTDIR)$(bindir) || $(MKDIR) $(DESTDIR)$(bindir)
+	test -d $(DESTDIR)$(datadir)/grafx2 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2
+	test -d $(DESTDIR)$(datadir)/grafx2/fonts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/fonts
+	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
+	# Generate launcher script
+	echo "#!/bin/sh" > $(DESTDIR)$(bindir)/grafx2
+	echo $(DESTDIR)$(datadir)/grafx2/$(BIN) '$$*' >> $(DESTDIR)$(bindir)/grafx2
+	chmod 755 $(DESTDIR)$(bindir)/grafx2
+	# Copy files
+	$(CP) $(BIN) $(DESTDIR)$(datadir)/grafx2/
+	$(CP) gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
+	$(CP) gfx2.gif $(DESTDIR)$(datadir)/grafx2/
+	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
+	$(CP) skins/base.gif $(DESTDIR)$(datadir)/grafx2/skins/
 	@echo Install complete
   
 # Linux uninstallation of the program
 uninstall :
-	$(DELCOMMAND) $(bindir)/grafx2
-	$(DELCOMMAND) $(datadir)/grafx2/$(BIN)
-	$(DELCOMMAND) $(datadir)/grafx2/gfx2def.ini
-	$(DELCOMMAND) $(datadir)/grafx2/gfx2.gif
-	$(DELCOMMAND) $(datadir)/grafx2/fonts/*
-	$(if $(wildcard $(datadir)/grafx2/fonts),,$(RMDIR) $(datadir)/grafx2/fonts)
-	$(DELCOMMAND) $(datadir)/grafx2/skins/base.gif
-	$(if $(wildcard $(datadir)/grafx2/skins),,$(RMDIR) $(datadir)/grafx2/skins)
+	$(DELCOMMAND) $(DESTDIR)$(bindir)/grafx2
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/$(BIN)
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2def.ini
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/base.gif
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
 	@echo Uninstall complete
 
 -include Makefile.dep
