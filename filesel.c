@@ -967,7 +967,7 @@ byte Button_Load_or_Save(byte load, byte image)
     else
       Open_window(310,200,"Save brush");
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
-    if (Main_format==0) // Correction du *.*
+    if (Main_format==FORMAT_ANY) // Correction du *.*
     {
       Main_format=Main_fileformat;
       Main_fileselector_position=0;
@@ -1004,7 +1004,7 @@ byte Button_Load_or_Save(byte load, byte image)
   // Dropdown pour les formats de fichier
   formats_dropdown=
     Window_set_dropdown_button(69,28,49,11,0,
-      (Main_format==0)?"*.*":File_formats[Main_format-1].Extension,
+      (Main_format==FORMAT_ANY)?"*.*":File_formats[Main_format-1].Extension,
       1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
   if (load)
     Window_dropdown_add_item(formats_dropdown,0,"*.*");
@@ -1259,7 +1259,7 @@ byte Button_Load_or_Save(byte load, byte image)
               dummy=1;
           if (!dummy)
           {
-            if (Main_format)
+            if (Main_format != FORMAT_ANY)
             {
               if(!Directory_exists(Main_filename))
               {

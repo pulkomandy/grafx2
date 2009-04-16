@@ -50,11 +50,11 @@ GFX2_GLOBAL word Config_Key[NB_SPECIAL_SHORTCUTS][2];
 /// A video mode (resolution) usable by Grafx2.
 typedef struct
 {
-  short  Width; ///< Screen width
-  short  Height; ///< Screen height
-  byte   Mode; ///< Unused (used to be Mode-X, SVGA, etc)
+  short  Width;      ///< Screen width
+  short  Height;     ///< Screen height
+  byte   Mode;       ///< Unused (used to be Mode-X, SVGA, etc)
   word   Fullscreen; ///< 0 for window, 1 for fullscreen
-  byte   State; ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
+  byte   State;      ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
 } T_Video_mode;
 
 /// Array of all video modes supported by your platform. Actually filled up to ::Nb_video_modes, excluded.
@@ -66,10 +66,10 @@ GFX2_GLOBAL int  Nb_video_modes;
 /// A default 256-color palette.
 GFX2_GLOBAL T_Palette Default_palette;
 
-// Menu colors
+// -- Menu colors
 
 GFX2_GLOBAL byte MC_Black; ///< Index of color to use as "black" in the GUI menus.
-GFX2_GLOBAL byte MC_Dark; ///< Index of color to use as "dark grey" in the GUI menus.
+GFX2_GLOBAL byte MC_Dark;  ///< Index of color to use as "dark grey" in the GUI menus.
 GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI menus.
 GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
 GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
@@ -119,12 +119,12 @@ GFX2_GLOBAL byte Mouse_fix_factor_X;
 /// Divisor for the mouse coordinates recieved. No target currently needs it, should be left at 1.
 GFX2_GLOBAL byte Mouse_fix_factor_Y;
 
-/// 
+///
 /// This boolean is true when the current operation allows changing the
 /// foreground or background color.
 GFX2_GLOBAL byte Allow_color_change_during_operation;
 
-// Mouse cursor data
+// -- Mouse cursor data
 
 /// Current mouse cursor. Value is in enum ::CURSOR_SHAPES
 GFX2_GLOBAL byte Cursor_shape;
@@ -145,7 +145,7 @@ GFX2_GLOBAL byte GFX_cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURS
 /// Storage for the graphics under the mouse cursor. Used by ::Hide_cursor and ::Display_cursor
 GFX2_GLOBAL byte CURSOR_BACKGROUND[CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
-// Paintbrush data
+// -- Paintbrush data
 
 /// Active paintbrush. It's an index in enum ::PAINTBRUSH_SHAPES
 GFX2_GLOBAL byte  Paintbrush_shape;
@@ -184,7 +184,7 @@ GFX2_GLOBAL short Paintbrush_offset_X;
 /// Position of current paintbrush's handle
 GFX2_GLOBAL short Paintbrush_offset_Y;
 
-// Graphic commands
+// -- Graphic commands
 
 /// On the screen, draw a point.
 GFX2_GLOBAL Func_pixel Pixel;
@@ -231,7 +231,7 @@ GFX2_GLOBAL Func_display_brush_color_zoom Clear_brush_scaled;
 /// Draw an arbitrary brush on screen (not the current brush)
 GFX2_GLOBAL Func_draw_brush Display_brush;
 
-// Screen data
+// -- Screen data
 
 /// Requested window width. This is set when the user resizes the window.
 GFX2_GLOBAL int   Resize_width;
@@ -303,7 +303,7 @@ GFX2_GLOBAL int Pixel_width;
 GFX2_GLOBAL int Pixel_height;
 
 
-// Current image data
+// -- Current image data
 
 /// Pointer to the pixel data of the main image
 GFX2_GLOBAL byte *    Main_screen;
@@ -348,7 +348,7 @@ GFX2_GLOBAL char  Main_comment[COMMENT_SIZE+1];
 GFX2_GLOBAL short Main_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
 GFX2_GLOBAL short Main_X_zoom;
-/// Proportion of the non-magnified part of the screen. 
+/// Proportion of the non-magnified part of the screen.
 GFX2_GLOBAL float Main_separator_proportion;
 /// Boolean, true if the main image has the magnifier active.
 GFX2_GLOBAL byte  Main_magnifier_mode;
@@ -363,7 +363,7 @@ GFX2_GLOBAL short Main_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Main_magnifier_offset_Y;
 
-// Spare page data
+// -- Spare page data
 
 /// Pointer to the pixel data of the spare page
 GFX2_GLOBAL byte *    Spare_screen;
@@ -408,7 +408,7 @@ GFX2_GLOBAL char  Spare_comment[COMMENT_SIZE+1];
 GFX2_GLOBAL short Spare_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
 GFX2_GLOBAL short Spare_X_zoom;
-/// Proportion of the non-magnified part of the screen. 
+/// Proportion of the non-magnified part of the screen.
 GFX2_GLOBAL float Spare_separator_proportion;
 /// Boolean, true if the main image has the magnifier active.
 GFX2_GLOBAL byte  Spare_magnifier_mode;
@@ -423,7 +423,7 @@ GFX2_GLOBAL short Spare_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Spare_magnifier_offset_Y;
 
-// Image backups
+// -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
 GFX2_GLOBAL byte * Screen_backup;
@@ -432,202 +432,313 @@ GFX2_GLOBAL T_List_of_pages * Main_backups;
 /// List of backup pages for the spare page.
 GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
-// Brush data
+// -- Brush data
 
 /// Pixel data of the current brush.
 GFX2_GLOBAL byte * Brush;
-GFX2_GLOBAL word Brush_offset_X; // Centre horizontal de la brosse
-GFX2_GLOBAL word Brush_offset_Y; // Centre vertical de la brosse
-GFX2_GLOBAL word Brush_width;    // Largeur de la brosse
-GFX2_GLOBAL word Brush_height;    // Hauteur de la brosse
+/// X coordinate of the brush's "hot spot". It is < ::Brush_width
+GFX2_GLOBAL word Brush_offset_X;
+/// Y coordinate of the brush's "hot spot". It is < ::Brush_height
+GFX2_GLOBAL word Brush_offset_Y;
+/// Width of the current brush.
+GFX2_GLOBAL word Brush_width;
+/// Height of the current brush.
+GFX2_GLOBAL word Brush_height;
+/// Name of the directory that holds the brush fil (after loading or saving it).
+GFX2_GLOBAL char  Brush_file_directory[MAX_PATH_CHARACTERS];
+/// Filename (without directory) of the brush (after loading or saving it).
+GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];
+/// File format of the brush. It's a value of enum ::FILE_FORMATS
+GFX2_GLOBAL byte  Brush_fileformat;
+///
+/// Fileselector "filter" format, for the brush.
+/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
+GFX2_GLOBAL byte  Brush_format;
+/// Index of the first file/entry to display in the brush's fileselector.
+GFX2_GLOBAL short Brush_fileselector_position;
+///
+/// Position of the "highlight" bar in the brush's fileselector. 10 Files can
+/// be visible, so it's a number in the [0-9] range.
+GFX2_GLOBAL short Brush_fileselector_offset;
+/// Current directory for the brush's fileselector.
+GFX2_GLOBAL char  Brush_current_directory[256];
+/// File comment in the brush's fileselector (some image formats support text strings).
+GFX2_GLOBAL char  Brush_comment[COMMENT_SIZE+1];
+/// Indicator used for the "Rotate brush" operation.
+GFX2_GLOBAL byte  Brush_rotation_center_is_defined;
+/// Position of the brush's rotation center, in screen coordinates.
+GFX2_GLOBAL short Brush_rotation_center_X;
+/// Position of the brush's rotation center, in screen coordinates.
+GFX2_GLOBAL short Brush_rotation_center_Y;
 
-GFX2_GLOBAL char  Brush_file_directory[MAX_PATH_CHARACTERS];// |
-GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];       // |
-GFX2_GLOBAL byte  Brush_fileformat;                           // |  Infos sur le
-GFX2_GLOBAL byte  Brush_format;                                   // |_ sélecteur de
-GFX2_GLOBAL short Brush_fileselector_position;                       // |  fichiers de la
-GFX2_GLOBAL short Brush_fileselector_offset;                       // |  brosse.
-GFX2_GLOBAL char  Brush_current_directory[256];                  // |
-GFX2_GLOBAL char  Brush_comment[COMMENT_SIZE+1];        // |
+// -- Menu data (toolbox)
 
-GFX2_GLOBAL byte  Brush_rotation_center_is_defined; // |  Infos sur le
-GFX2_GLOBAL short Brush_rotation_center_X;      // |- centre de rotation
-GFX2_GLOBAL short Brush_rotation_center_Y;      // |  de la brosse
-
-  // Données sur le menu
-
-GFX2_GLOBAL byte  Menu_is_visible;        // Le menu est actif à l'écran
-GFX2_GLOBAL word  Menu_Y;       // Ordonnée où commence le menu
-GFX2_GLOBAL word  Menu_status_Y; // Ordonnée où commence le texte dans le menu
-GFX2_GLOBAL byte  Menu_factor_X;      // Facteur de grossissement du menu en X
-GFX2_GLOBAL byte  Menu_factor_Y;      // Facteur de grossissement du menu en Y
-GFX2_GLOBAL word  Menu_palette_cell_width; // Taille d'une couleur de la palette du menu
+/// Boolean, true if the menu has to be displayed.
+GFX2_GLOBAL byte  Menu_is_visible;
+///
+/// Y position (in screen coordinates) where the menu begins.
+/// This is always either ::Screen_height (when menu is hidden) or (::Screen_height - ::MENU_HEIGHT)
+/// As a result, the drawing algoritm always draws the image from 0 to ::Menu_Y-1
+GFX2_GLOBAL word  Menu_Y;
+/// Y position of the status bar (in screen coordinates)
+GFX2_GLOBAL word  Menu_status_Y;
+/// Scaling factor for the menu and all GUI elements
+GFX2_GLOBAL byte  Menu_factor_X;
+/// Scaling factor for the menu and all GUI elements
+GFX2_GLOBAL byte  Menu_factor_Y;
+/// Size of a color cell in the menu's palette.
+GFX2_GLOBAL word  Menu_palette_cell_width;
 
 
-  // Données sur la fenêtre de menu
+// -- Window data
 
-GFX2_GLOBAL byte Windows_open; // Nombre de fenetres empilées. 0 si pas de fenetre ouverte.
+/// Number of stacked windows currently displayed. 0 when no window is present.
+GFX2_GLOBAL byte Windows_open;
+/// Backup of ::Menu_is_visible, used to store it while a window is open.
+GFX2_GLOBAL byte Menu_is_visible_before_window;
+/// Backup of ::Menu_Y, used to store it while a window is open.
+GFX2_GLOBAL word Menu_Y_before_window;
+/// Backup of ::Paintbrush_hidden, used to store it while a window is open.
+GFX2_GLOBAL byte Paintbrush_hidden_before_window;
 
-GFX2_GLOBAL byte Menu_is_visible_before_window;  // Le menu était visible avant d'ouvir une fenêtre
-GFX2_GLOBAL word Menu_Y_before_window; // Ordonnée du menu avant d'ouvrir une fenêtre
-GFX2_GLOBAL byte Paintbrush_hidden_before_window;// Le pinceau étatit déjà caché avant l'ouverture de la fenetre?
-
-GFX2_GLOBAL word Window_stack_pos_X[8];   // Position du bord gauche de la fenêtre dans l'écran
+GFX2_GLOBAL word Window_stack_pos_X[8];
+/// Position of the left border of the topmost window (in screen coordinates)
 #define Window_pos_X Window_stack_pos_X[Windows_open-1]
 
-GFX2_GLOBAL word Window_stack_pos_Y[8];   // Position du bord haut   de la fenêtre dans l'écran
+GFX2_GLOBAL word Window_stack_pos_Y[8];
+/// Position of the top border of the topmost window (in screen coordinates)
 #define Window_pos_Y Window_stack_pos_Y[Windows_open-1]
 
-GFX2_GLOBAL word Window_stack_width[8]; // Largeur de la fenêtre
+GFX2_GLOBAL word Window_stack_width[8];
+///
+/// Width of the topmost window, in "window pixels"
+/// (multiply by ::Menu_factor_X to get screen pixels)
 #define Window_width Window_stack_width[Windows_open-1]
 
-GFX2_GLOBAL word Window_stack_height[8]; // Hauteur de la fenêtre
+GFX2_GLOBAL word Window_stack_height[8];
+///
+/// Height of the topmost window, in "window pixels"
+/// (multiply by ::Menu_factor_Y to get screen pixels)
 #define Window_height Window_stack_height[Windows_open-1]
 
 GFX2_GLOBAL word Window_stack_nb_buttons[8];
+/// Total number of buttons/controls in the topmost window.
 #define Window_nb_buttons Window_stack_nb_buttons[Windows_open-1]
 
 GFX2_GLOBAL T_Normal_button   * Window_stack_normal_button_list[8];
+/// List of normal buttons in the topmost window.
 #define Window_normal_button_list Window_stack_normal_button_list[Windows_open-1]
 
 GFX2_GLOBAL T_Palette_button  * Window_stack_palette_button_list[8];
+/// List of "palette" buttons in the topmost window.
 #define Window_palette_button_list Window_stack_palette_button_list[Windows_open-1]
 
 GFX2_GLOBAL T_Scroller_button * Window_stack_scroller_button_list[8];
+/// List of sliders (scrollers) in the topmost window.
 #define Window_scroller_button_list Window_stack_scroller_button_list[Windows_open-1]
 
 GFX2_GLOBAL T_Special_button  * Window_stack_special_button_list[8];
+/// List of special buttons in the topmost window.
 #define Window_special_button_list Window_stack_special_button_list[Windows_open-1]
 
 GFX2_GLOBAL T_Dropdown_button  * Window_stack_dropdown_button_list[8];
+/// List of dropdown buttons in the topmost window.
 #define Window_dropdown_button_list Window_stack_dropdown_button_list[Windows_open-1]
 
 
 GFX2_GLOBAL int Window_stack_attribute1[8];
+///
+/// The function ::Window_clicked_button() set this to ::LEFT_SIDE or ::RIGHT_SIDE
+/// after a button is activated through left or right mouse click.
 #define Window_attribute1 Window_stack_attribute1[Windows_open-1]
 
-// Cette variable sert à stocker 2 informations:
-// - Sur le click d'un scroller, la position active (0-n)
-// - Sur le click d'une palette, le numero de couleur (0-255).
 GFX2_GLOBAL int Window_stack_attribute2[8];
+///
+/// The function ::Window_clicked_button() set this to return extra information:
+/// - When a scroller was clicked: the scroller position (0-n)
+/// - When a palette was clicked: the color index (0-255)
+/// - When a dropdown was used: the selected item's number T_Dropdown_choice::Number
 #define Window_attribute2 Window_stack_attribute2[Windows_open-1]
 
 
 
 
-// Définition des boutons ////////////////////////////////////////////////////
+/// Definition of the menu (toolbox)
 GFX2_GLOBAL struct
 {
-  // Informations sur l'aspect du bouton (graphisme):
-  word            X_offset;        // Décalage par rapport à la gauche du menu
-  word            Y_offset;        // Décalage par rapport au haut du menu
-  word            Width;           // Largeur du bouton
-  word            Height;           // Hauteur du bouton
-  byte            Pressed;           // Le bouton est enfoncé
-  byte            Shape;             // Forme du bouton
+  // Button aspect
+  word            X_offset;         ///< Position relative to menu's left
+  word            Y_offset;         ///< Position relative to menu's top
+  word            Width;            ///< Button's active width
+  word            Height;           ///< Button's active heigth
+  byte            Pressed;          ///< Button is currently pressed
+  byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
 
-  // Information sur les clicks de la souris:
-  Func_action Gauche;            // Action déclenchée par un click gauche sur le bouton
-  Func_action Droite;            // Action déclenchée par un click droit  sur le bouton
-  word            Left_shortcut[2];  // Shortcut clavier équivalent à un click gauche sur le bouton
-  word            Right_shortcut[2];  // Shortcut clavier équivalent à un click droit  sur le bouton
+  // Triggers on mouse/keyboard
+  Func_action     Gauche;           ///< Action triggered by a left mouseclick on the button
+  Func_action     Droite;           ///< Action triggered by a right mouseclick on the button
+  word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
+  word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
 
-  // Informations sur le désenclenchement du bouton géré par le moteur:
-  Func_action Desenclencher;     // Action appelée lors du désenclenchement du bouton
-  byte            Famille;           // Ensemble de boutons auquel celui-ci appartient
+  // Data used when the button is unselected
+  Func_action     Desenclencher;    ///< Action triggered by unselecting the button
+  byte            Famille;          ///< enum ::FAMILY_OF_BUTTONS.
 
 } Buttons_Pool[NB_BUTTONS];
 
 
 
-// Informations sur les différents modes de dessin
+// -- Information about the different drawing modes (effects)
 
+/// Current effecting function. When no effect is selected this is ::No_effect()
 GFX2_GLOBAL Func_effect Effect_function;
 
+///
+/// Pointer to the image to read, while drawing. It's either ::Main_screen
+/// (the image you draw) when FX feedback is ON, or ::Screen_backup (a backup
+/// copy) when FX feedback is off.
 GFX2_GLOBAL byte * FX_feedback_screen;
 
-GFX2_GLOBAL byte Exclude_color[256]; // Couleurs à exclure pour Best_color
+///
+/// Array of booleans, indicates which colors should never be picked by
+/// ::Best_color()
+GFX2_GLOBAL byte Exclude_color[256];
 
-  // Mode smear:
+// -- Smear mode
 
-GFX2_GLOBAL byte  Smear_mode;    // Le mode smear est enclenché
-GFX2_GLOBAL byte  Smear_start;   // On vient juste de commencer une opération en Smear
-GFX2_GLOBAL byte * Smear_brush; // Sprite de la brosse de Smear
-GFX2_GLOBAL word  Smear_brush_width; // Largeur de la brosse de Smear
-GFX2_GLOBAL word  Smear_brush_height; // Hauteur de la brosse de Smear
-GFX2_GLOBAL short Smear_min_X,Smear_max_X,Smear_min_Y,Smear_max_Y; // Bornes de la Brush du smear
+/// Smear mode is activated
+GFX2_GLOBAL byte  Smear_mode;
+/// Boolean, indicates that a smear is in progress.
+GFX2_GLOBAL byte  Smear_start;
+/// Pointer to the sprite to use for smear; it contains pixels from the image.
+GFX2_GLOBAL byte * Smear_brush;
+/// Width of the ::Smear_brush
+GFX2_GLOBAL word  Smear_brush_width;
+/// Height of the ::Smear_brush
+GFX2_GLOBAL word  Smear_brush_height;
+/// Limits of the smear.
+GFX2_GLOBAL short Smear_min_X;
+/// Limits of the smear.
+GFX2_GLOBAL short Smear_max_X;
+/// Limits of the smear.
+GFX2_GLOBAL short Smear_min_Y;
+/// Limits of the smear.
+GFX2_GLOBAL short Smear_max_Y;
 
-  // Mode shade:
+// -- Shade mode
+/// List of the shade tables
+GFX2_GLOBAL T_Shade        Shade_list[8];
+/// Shade currently selected (index in ::Shade_list)
+GFX2_GLOBAL byte           Shade_current;
+/// Conversion table in use
+GFX2_GLOBAL byte *         Shade_table;
+/// Conversion table for a left click
+GFX2_GLOBAL byte           Shade_table_left[256];
+/// Conversion table for a right click
+GFX2_GLOBAL byte           Shade_table_right[256];
+/// Boolean, true when the shade mode is active.
+GFX2_GLOBAL byte           Shade_mode;
 
-GFX2_GLOBAL T_Shade        Shade_list[8]; // Listes de shade
-GFX2_GLOBAL byte           Shade_current;   // Numéro du shade en cours
-GFX2_GLOBAL byte *         Shade_table;    // Table de conversion de shade en cours
-GFX2_GLOBAL byte           Shade_table_left[256]; // Table de conversion de shade pour un clic gauche
-GFX2_GLOBAL byte           Shade_table_right[256]; // Table de conversion de shade pour un clic droit
-GFX2_GLOBAL byte           Shade_mode;     // Le mode shade est enclenché
+/// Boolean, true when the quick-shade mode is active.
+GFX2_GLOBAL byte           Quick_shade_mode;
+/// Size of the step, in Quick-shade mode. It's the number of colors to "jump".
+GFX2_GLOBAL byte           Quick_shade_step;
+/// Determines how colors should loop in Quick-shade more. Value in enum ::SHADE_MODES
+GFX2_GLOBAL byte           Quick_shade_loop;
 
-GFX2_GLOBAL byte           Quick_shade_mode; // Le mode quick-shade est enclenché
-GFX2_GLOBAL byte           Quick_shade_step; // Pas du mode quick-shade
-GFX2_GLOBAL byte           Quick_shade_loop; // Normal / Loop / No sat.
+// -- Stencil mode
 
-  // Mode stencil:
+/// Boolean, true when stencil mode is active.
+GFX2_GLOBAL byte Stencil_mode;
+/// Array of the protected colors by Stencil mode.
+GFX2_GLOBAL byte Stencil[256];
 
-GFX2_GLOBAL byte Stencil_mode;  // Le mode stencil est enclenché
-GFX2_GLOBAL byte Stencil[256];  // Tableau des couleurs protégées
+// -- Grid mode
 
-  // Mode grille:
+/// Boolean, true when the Grid mode is active.
+GFX2_GLOBAL byte  Snap_mode;
+/// Width of the grid in Grid mode.
+GFX2_GLOBAL word Snap_width;
+/// Height of the grid in Grid mode.
+GFX2_GLOBAL word Snap_height;
+/// Position of the starting pixel, in Grid mode.
+GFX2_GLOBAL word Snap_offset_X;
+/// Position of the starting pixel, in Grid mode.
+GFX2_GLOBAL word Snap_offset_Y;
 
-GFX2_GLOBAL byte  Snap_mode;       // Le mode grille est enclenché
-GFX2_GLOBAL word Snap_width;    // Largeur entre 2 points de la grille
-GFX2_GLOBAL word Snap_height;    // Hauteur entre 2 points de la grille
-GFX2_GLOBAL word Snap_offset_X; // Position en X du point le + à gauche
-GFX2_GLOBAL word Snap_offset_Y; // Position en Y du point le + en haut
+// -- Sieve mode
 
-  // Mode trame:
+/// Boolean, true when the Sieve mode is active
+GFX2_GLOBAL byte  Sieve_mode;
+/// Sprite of the sieve pattern. It's actually an array of booleans.
+GFX2_GLOBAL byte  Sieve[16][16];
+/// Preset sieve patterns, stored as binary (one word per line)
+GFX2_GLOBAL word  GFX_sieve_pattern[12][16];
+/// Width of the sieve pattern, in Sieve mode.
+GFX2_GLOBAL short Sieve_width;
+/// Height of the sieve pattern, in Sieve mode.
+GFX2_GLOBAL short Sieve_height;
 
-GFX2_GLOBAL byte  Sieve_mode;    // Le mode Sieve est enclenché
-GFX2_GLOBAL byte  Sieve[16][16]; // Sprite de la trame
-GFX2_GLOBAL word  GFX_sieve_pattern[12][16]; // Trames préséfinies (compactées sur 16*16 bits)
-GFX2_GLOBAL short Sieve_width; // Largeur de la trame
-GFX2_GLOBAL short Sieve_height; // Hauteur de la trame
+// -- Colorize mode
 
-  // Mode colorize:
-
-GFX2_GLOBAL byte Colorize_mode;          // Le mode Colorize est enclenché
-GFX2_GLOBAL byte Colorize_opacity;       // Intensité du Colorize
-GFX2_GLOBAL byte Colorize_current_mode; // Le type de Colorize en cours (0-2)
+/// Boolean, true when the Colorize mode is active.
+GFX2_GLOBAL byte Colorize_mode;
+/// % of opacity of Colorize mode (for translucency)
+GFX2_GLOBAL byte Colorize_opacity;
+/// Sets the colorization mode: 0 transparency, 1 additive, 2 substractive
+GFX2_GLOBAL byte Colorize_current_mode;
+///
+/// Table of precomputed factors used by Colorize mode. It hold 0 to 255 when
+/// opacity is 100%, 0 to 128 when opacity is 50%, etc.
+// FIXME: This only caches a multiplication and a division. Maybe we should scrap it
 GFX2_GLOBAL word Facteur_A_table[256];
+///
+/// Table of precomputed factors used by Colorize mode. It hold 255 to 0 when
+/// opacity is 100%, 128 to 0 when opacity is 50%, etc.
+// FIXME: This only caches a multiplication, a division, a substraction. Maybe we should scrap it
 GFX2_GLOBAL word Facteur_B_table[256];
 
-  // Mode smooth:
+// -- Smooth mode
 
-GFX2_GLOBAL byte Smooth_mode;          // Le mode Smooth est enclenché
-GFX2_GLOBAL byte Smooth_matrix[3][3]; // La matrice du Smooth actuel
+/// Boolean, true when the Smooth mode is active
+GFX2_GLOBAL byte Smooth_mode;
+/// Matrix of "weights" used by the Smooth mode.
+GFX2_GLOBAL byte Smooth_matrix[3][3];
 
-  // Mode Tiling:
+// -- Tiling mode
 
-GFX2_GLOBAL byte  Tiling_mode;       // Le mode Tiling est enclenché
-GFX2_GLOBAL short Tiling_offset_X; // Décalage du tiling en X
-GFX2_GLOBAL short Tiling_offset_Y; // Décalage du tiling en Y
+/// Boolean, true when the Tiling mode is active
+GFX2_GLOBAL byte  Tiling_mode;
+/// Position of the starting pixel in Tiling mode.
+GFX2_GLOBAL short Tiling_offset_X;
+/// Position of the starting pixel in Tiling mode.
+GFX2_GLOBAL short Tiling_offset_Y;
 
-  // Mode Mask
+// -- Mask mode
 
-GFX2_GLOBAL byte Mask_mode;  // Le mode Masque est enclenché
-GFX2_GLOBAL byte Mask_table[256];  // Tableau des couleurs constituant le masque
+/// Boolean, true when the Tiling mode is active
+GFX2_GLOBAL byte Mask_mode;
+/// Array of booleans. True if the indexed color is protected by the mask.
+GFX2_GLOBAL byte Mask_table[256];
 
-  // Mode loupe:
+// -- Magnifier data
 
+/// Pointer to ::Magnify_table[n] : table of multipliers used by the Magnifier.
+// FIXME: This only caches a multiplication. Maybe we should scrap it
 GFX2_GLOBAL word  * Zoom_factor_table;
+/// Precomputed tables of multipliers used by the Magnifier.
+// FIXME: This only caches a multiplication. Maybe we should scrap it
 GFX2_GLOBAL word  Magnify_table[NB_ZOOM_FACTORS][512];
 
 #ifdef GLOBAL_VARIABLES
   word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20};
 #else
+/// Successive zoom factors, used by the Magnifier.
   extern word ZOOM_FACTOR[NB_ZOOM_FACTORS];
 #endif
 
-  // Données sur les ellipses et les cercles:
-
+// -- Data for ellipses and circles
+// FIXME: move most of these to graph.c
 GFX2_GLOBAL long  Ellipse_cursor_X;
 GFX2_GLOBAL long  Ellipse_cursor_Y;
 GFX2_GLOBAL long  Ellipse_vertical_radius_squared;
@@ -637,178 +748,253 @@ GFX2_GLOBAL long  Circle_cursor_X;
 GFX2_GLOBAL long  Circle_cursor_Y;
 GFX2_GLOBAL long  Circle_limit;
 
-  // Données sur les dégradés:
+// -- Data for gradients
 
-GFX2_GLOBAL short Gradient_lower_bound;   // Plus petite couleur englobée par le dégradé
-GFX2_GLOBAL short Gradient_upper_bound;   // Plus grande couleur englobée par le dégradé
-GFX2_GLOBAL int   Gradient_is_inverted;            // Booléen "Le dégradé est en réalité inversé"
-GFX2_GLOBAL long  Gradient_bounds_range;  // = Abs(Gradient_lower_bound-Gradient_upper_bound)+1
-GFX2_GLOBAL long  Gradient_total_range;   // Valeur maximum des indices passés à la fonction de dégradé (!!! >0 !!!)
-GFX2_GLOBAL long  Gradient_random_factor;  // Facteur de mélange (1-256+) du dégradé
-GFX2_GLOBAL Func_gradient Gradient_function; // Fonction de traitement du dégradé, varie selon la méthode choisie par l'utilisateur.
-GFX2_GLOBAL Func_pixel Gradient_pixel; // Redirection de l'affichage
+/// First color of the gradient.
+GFX2_GLOBAL short Gradient_lower_bound;
+/// Last color of the gradient
+GFX2_GLOBAL short Gradient_upper_bound;
+/// Boolean, true if the gradient should use colors in descending order
+GFX2_GLOBAL int   Gradient_is_inverted;
+/// Number of colors in the range ::Gradient_lower_bound to ::Gradient_upper_bound (included)
+GFX2_GLOBAL long  Gradient_bounds_range;
+/// Maximum value passed to the gradient function. The pixels assigned this value should use last gradient color.
+GFX2_GLOBAL long  Gradient_total_range;
+/// Amount of randomness to use in gradient (1-256+)
+GFX2_GLOBAL long  Gradient_random_factor;
+/// Pointer to a gradient function, depending on the selected method.
+GFX2_GLOBAL Func_gradient Gradient_function;
+///
+/// Pointer to the pixel-drawing function that gradients should use:
+/// either ::Pixel (if the gradient must be drawn on menus only)
+/// or ::Display_pixel (if the gradient must be drawn on the image)
+GFX2_GLOBAL Func_pixel Gradient_pixel;
+/// Settings for all gradients
+GFX2_GLOBAL T_Gradient_array Gradient_array[16];
+/// Index in ::Gradient_array of the currently selected gradient.
+GFX2_GLOBAL byte Current_gradient;
 
-GFX2_GLOBAL T_Gradient_array Gradient_array[16]; // Données de tous les dégradés
-GFX2_GLOBAL byte Current_gradient;             // index du tableau correspondant au dégradé courant
+// -- Airbrush data
 
+/// Mode to use in airbrush: 0 for multicolor, 1 for mono.
+GFX2_GLOBAL byte  Airbrush_mode;
+/// Diameter of the airbrush, in pixels.
+GFX2_GLOBAL short Airbrush_size;
+/// Delay between two airbrush "shots", in 1/100s
+GFX2_GLOBAL byte  Airbrush_delay;
+/// Number of pixels that are emitted by the airbrush, in mono mode.
+GFX2_GLOBAL byte  Airbrush_mono_flow;
+/// Number of pixels that are emitted by the airbrush for each color (multi mode)
+GFX2_GLOBAL byte  Airbrush_multi_flow[256];
 
+/// -- Misc data about the program
 
-  // Données sur le Spray:
-
-GFX2_GLOBAL byte  Airbrush_mode;            // Mode Mono(1) ou Multicolore(0)
-GFX2_GLOBAL short Airbrush_size;            // Diamètre du spray en pixels
-GFX2_GLOBAL byte  Airbrush_delay;           // Délai en VBLs entre 2 "pschiitt"
-GFX2_GLOBAL byte  Airbrush_mono_flow;       // Nombre de pixels qui sortent en même temps en mono
-GFX2_GLOBAL byte  Airbrush_multi_flow[256]; // Idem pour chaque couleur
-
-
-  // Données diverses sur le programme:
-
+/// Boolean, set to true to exit the program.
 GFX2_GLOBAL byte Quitting;
-GFX2_GLOBAL char Initial_directory[256];          // Répertoire à partir duquel à été lancé le programme
-GFX2_GLOBAL char Repertoire_des_donnees[256];      // Répertoire contenant les fichiers lus (interface graphique, etc)
-GFX2_GLOBAL char Config_directory[256]; // Répertoire contenant les fichiers .ini et .cfg
+/// Name of the directory that was current when the program was run.
+GFX2_GLOBAL char Initial_directory[256];
+/// Name of the directory that holds the program's (read-only) data: skins, icon, etc.
+GFX2_GLOBAL char Repertoire_des_donnees[256];
+/// Name of the directory where grafx2 reads and writes configuration (gfx2.ini, gfx2.cfg)
+GFX2_GLOBAL char Config_directory[256];
+/// Current foreground color for drawing.
 GFX2_GLOBAL byte Fore_color;
+/// Current background color for drawing.
 GFX2_GLOBAL byte Back_color;
+/// For the "Freehand draw" tool, this determines which variant is selected, from ::OPERATION_CONTINUOUS_DRAW to ::OPERATION_FILLED_CONTOUR
 GFX2_GLOBAL byte Selected_operation;
+/// For the Curve tool, this determines which variant is selected, either ::OPERATION_3_POINTS_CURVE or ::OPERATION_4_POINTS_CURVE
 GFX2_GLOBAL byte Selected_curve_mode;
+/// For the Line tool, this determines which variant is selected, either ::OPERATION_LINE, ::OPERATION_K_LIGNE or ::OPERATION_CENTERED_LINES
 GFX2_GLOBAL byte Selected_line_mode;
+/// Determines which color appears in the first cell of the menu palette. Change this value to "scroll" the palette.
 GFX2_GLOBAL byte First_color_in_palette;
+/// Boolean, true if Grafx2 was run with a file as command-line argument, which must be open immediately.
 GFX2_GLOBAL byte File_in_command_line;
-GFX2_GLOBAL byte Resolution_in_command_line; // utilisée uniquement si la variable précédente est à 1
+/// Boolean, true if Grafx2 was run with a command-line argument to set a resolution on startup (overrides config)
+GFX2_GLOBAL byte Resolution_in_command_line;
 
-// Les différents sprites:
+// - Graphic skin data
 
+/// Bitmap data for the menu, a single rectangle.
 GFX2_GLOBAL byte GFX_menu_block[MENU_HEIGHT][MENU_WIDTH];
+/// Bitmap data for the icons that are displayed over the menu.
 GFX2_GLOBAL byte GFX_menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+/// Bitmap data for the different "effects" icons.
 GFX2_GLOBAL byte GFX_effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
-
+/// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
 GFX2_GLOBAL byte * GFX_logo_grafx2;
-
+/// Bitmap data for the classic 8x8 font used in menus etc.
 GFX2_GLOBAL byte GFX_system_font[256*8*8];
+/// Bitmap data for the "fun" 8x8 font used in menus etc.
 GFX2_GLOBAL byte GFX_fun_font    [256*8*8];
+/// Bitmap data for the 6x8 font used in help screens.
 GFX2_GLOBAL byte GFX_help_font_norm [256][6][8];
+/// Bitmap data for the 6x8 font used in help screens ("bold" verstion).
 GFX2_GLOBAL byte GFX_bold_font [256][6][8];
 // 12
 // 34
+/// Bitmap data for the title font used in help screens. Top-left quarter.
 GFX2_GLOBAL byte GFX_help_font_t1 [64][6][8];
+/// Bitmap data for the title font used in help screens. Top-right quarter.
 GFX2_GLOBAL byte GFX_help_font_t2 [64][6][8];
+/// Bitmap data for the title font used in help screens. Bottom-left quarter.
 GFX2_GLOBAL byte GFX_help_font_t3 [64][6][8];
+/// Bitmap data for the title font used in help screens. Bottom-right quarter.
 GFX2_GLOBAL byte GFX_help_font_t4 [64][6][8];
+/// Bitmap data for the small 8x8 icons.
+GFX2_GLOBAL byte GFX_icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
+
+/// Pointer to the font selected for menus. It's either ::GFX_system_font or ::GFX_fun_font
 GFX2_GLOBAL byte * Menu_font;
 
-  // Les données de l'aide:
+// -- Help data
 
-GFX2_GLOBAL byte Current_help_section;  // index de la table d'aide en cours de consultation
-GFX2_GLOBAL word Help_position; // Numéro de la ligne d'aide en cours de consultation
+/// Index of the ::Help_section shown by the Help screen.
+GFX2_GLOBAL byte Current_help_section;
+/// Line number of the help viewer, in current ::Help_section. 0 for top, increase value to scroll down.
+GFX2_GLOBAL word Help_position;
 
-  // Données sur les opérations
+// -- Operation data
 
-GFX2_GLOBAL word Operation_before_interrupt; // N° de l'opération en cours avant l'utilisation d'une interruption
-GFX2_GLOBAL word Current_operation;           // N° de l'opération en cours
-GFX2_GLOBAL word Operation_stack[OPERATION_STACK_SIZE]; // Pile simplifiée
-GFX2_GLOBAL byte Operation_stack_size;    // Taille effective de la pile (0=vide)
-GFX2_GLOBAL byte Operation_in_magnifier;     // Indique si l'opération a commencé dans la partie Zoomée ou non
-
+/// Index of the operation which was selected (ex: drawing rectangle) before the current interruption (ex: colorpicking).
+GFX2_GLOBAL word Operation_before_interrupt;
+/// Index of the current operation. This is the active "tool".
+GFX2_GLOBAL word Current_operation;
+///
+/// This stack is used to memorize all parameters needed during the course of
+/// an operation. For example when drawing a rectangle: color, starting
+/// coordinates, ending coordinates.
+GFX2_GLOBAL word Operation_stack[OPERATION_STACK_SIZE];
+/// Number of parameters stored in ::Operation_stack (0=empty)
+GFX2_GLOBAL byte Operation_stack_size;
+/// Boolean, true if the operation (drawing) started in the magnified area.
+GFX2_GLOBAL byte Operation_in_magnifier;
+/// Last color hovered by the colorpicker. -1 if it wasn't over the image.
 GFX2_GLOBAL short Colorpicker_color;
+/// Position of the colorpicker tool, in image coordinates.
 GFX2_GLOBAL short Colorpicker_X;
+/// Position of the colorpicker tool, in image coordinates.
 GFX2_GLOBAL short Colorpicker_Y;
 
 
 #ifdef GLOBAL_VARIABLES
   byte CURSOR_FOR_OPERATION[NB_OPERATIONS]=
   {
-    CURSOR_SHAPE_TARGET            , // Dessin à la main continu
-    CURSOR_SHAPE_TARGET            , // Dessin à la main discontinu
-    CURSOR_SHAPE_TARGET            , // Dessin à la main point par point
-    CURSOR_SHAPE_TARGET            , // Contour fill
-    CURSOR_SHAPE_TARGET            , // Lignes
-    CURSOR_SHAPE_TARGET            , // Lignes reliées
-    CURSOR_SHAPE_TARGET            , // Lignes centrées
-    CURSOR_SHAPE_XOR_TARGET        , // Rectangle vide
-    CURSOR_SHAPE_XOR_TARGET        , // Rectangle plein
-    CURSOR_SHAPE_TARGET            , // Cercles vides
-    CURSOR_SHAPE_TARGET            , // Cercles pleins
-    CURSOR_SHAPE_TARGET            , // Ellipses vides
-    CURSOR_SHAPE_TARGET            , // Ellipses pleines
+    CURSOR_SHAPE_TARGET            , // Freehand continuous draw
+    CURSOR_SHAPE_TARGET            , // Freehand discontinuous draw
+    CURSOR_SHAPE_TARGET            , // Freehand point-by-point draw
+    CURSOR_SHAPE_TARGET            , // Filled contour
+    CURSOR_SHAPE_TARGET            , // Lines
+    CURSOR_SHAPE_TARGET            , // Linked lines
+    CURSOR_SHAPE_TARGET            , // Centered lines
+    CURSOR_SHAPE_XOR_TARGET        , // Empty rectangle
+    CURSOR_SHAPE_XOR_TARGET        , // Filled rectangle
+    CURSOR_SHAPE_TARGET            , // Empty circle
+    CURSOR_SHAPE_TARGET            , // Filled circle
+    CURSOR_SHAPE_TARGET            , // Empty ellipse
+    CURSOR_SHAPE_TARGET            , // Filled ellipse
     CURSOR_SHAPE_TARGET            , // Fill
-    CURSOR_SHAPE_TARGET            , // Replace
-    CURSOR_SHAPE_XOR_TARGET        , // Prise de brosse rectangulaire
-    CURSOR_SHAPE_TARGET            , // Prise d'une brosse multiforme
-    CURSOR_SHAPE_COLORPICKER    , // Récupération d'une couleur
-    CURSOR_SHAPE_XOR_RECTANGLE    , // Positionnement de la fenêtre de loupe
-    CURSOR_SHAPE_TARGET            , // Courbe à 3 points
-    CURSOR_SHAPE_TARGET            , // Courbe à 4 points
-    CURSOR_SHAPE_TARGET            , // Spray
-    CURSOR_SHAPE_TARGET            , // Polygone
-    CURSOR_SHAPE_TARGET            , // Polyforme
-    CURSOR_SHAPE_TARGET            , // Polyfill
-    CURSOR_SHAPE_TARGET            , // Polyforme rempli
-    CURSOR_SHAPE_MULTIDIRECTIONNAL, // Scroll
-    CURSOR_SHAPE_TARGET            , // Cercles dégradés
-    CURSOR_SHAPE_TARGET            , // Ellipses dégradées
-    CURSOR_SHAPE_XOR_ROTATION       , // Faire tourner brosse
-    CURSOR_SHAPE_XOR_TARGET        , // Etirer brosse
-    CURSOR_SHAPE_TARGET            , // Deformer brosse
-    CURSOR_SHAPE_XOR_TARGET        , // Rectangle degrade
+    CURSOR_SHAPE_TARGET            , // Color replacer
+    CURSOR_SHAPE_XOR_TARGET        , // Rectangular brush grabbing
+    CURSOR_SHAPE_TARGET            , // Polygonal brush grabbing
+    CURSOR_SHAPE_COLORPICKER       , // Colorpicker
+    CURSOR_SHAPE_XOR_RECTANGLE     , // Position the magnify window
+    CURSOR_SHAPE_TARGET            , // Curve with 3 control points
+    CURSOR_SHAPE_TARGET            , // Curve with 4 control points
+    CURSOR_SHAPE_TARGET            , // Airbrush
+    CURSOR_SHAPE_TARGET            , // Polygon
+    CURSOR_SHAPE_TARGET            , // Polyform
+    CURSOR_SHAPE_TARGET            , // Filled polygon
+    CURSOR_SHAPE_TARGET            , // Filled polyform
+    CURSOR_SHAPE_MULTIDIRECTIONNAL , // Scroll (pan)
+    CURSOR_SHAPE_TARGET            , // Gradient-filled circle
+    CURSOR_SHAPE_TARGET            , // Gradient-filled ellipse
+    CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
+    CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
+    CURSOR_SHAPE_TARGET            , // Distort brush
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled rectangle
   };
 #else
+  /// ::Cursor_shape to use for each operation.
   extern byte CURSOR_FOR_OPERATION[NB_OPERATIONS];
 #endif
 
-
-  // Procédures à appeler: Opération,Mouse_K,State de la pile
-
+///
+/// Procedures to call for each state (determined by ::Operation_stack_size) of
+/// each operation, and for each mouse state (no button,left button,right button)
 GFX2_GLOBAL struct
 {
-  byte Hide_cursor; // Booléen "il faut effacer le curseur pour l'opéra."
-  Func_action Action;                                   // Action appelée
+  byte Hide_cursor;   ///< Boolean: Need to hide/unhide cursor during this step
+  Func_action Action; ///< Function to call
 } Operation[NB_OPERATIONS][3][OPERATION_STACK_SIZE];
 
+// -- Fileselector data
 
-
-// Informations sur les lecteurs et autres images
-GFX2_GLOBAL byte GFX_icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
-
-
-// -- Section des informations sur les formats de fichiers ------------------
-
-  // Comptage du nb d'éléments dans la liste:
+/// Number of elements in the current fileselector's ::Filelist
 GFX2_GLOBAL short Filelist_nb_elements;
+/// Number of files in the current fileselector's ::Filelist
 GFX2_GLOBAL short Filelist_nb_files;
+/// Number of directories in the current fileselector's ::Filelist
 GFX2_GLOBAL short Filelist_nb_directories;
-  // Tête de la liste chaînée:
+/// Head of the linked list for the fileselector.
 GFX2_GLOBAL T_Fileselector_item * Filelist;
 
-// ------------------- Inititialisation des formats connus -------------------
+// -- misc
 
-void Do_nothing(void);
-
-GFX2_GLOBAL signed char File_error; // 0: opération I/O OK
-                                   // 1: Error dès le début de l'opération
-                                   // 2: Error durant l'opération => données modifiées
-                                   //-1: Interruption du chargement d'une preview
-
+///
+/// Indicator of error in previous file operations.
+/// -  0: OK
+/// -  1: Error when beginning operation. Existing data should be ok.
+/// -  2: Error while operation was in progress. Data is modified.
+/// - -1: Interruption of a preview.
+GFX2_GLOBAL signed char File_error;
+/// Current line number when reading/writing gfx2.ini
 GFX2_GLOBAL int Line_number_in_INI_file;
-
+///
+/// Pointer to a pixel-loading function. This is used by the generic loading
+/// function to load a preview, a brush or an image.
 GFX2_GLOBAL Func_pixel Pixel_load_function;
+///
+/// Pointer to a pixel-reading function. This is used by the generic saving
+/// function to save a brush or an image.
 GFX2_GLOBAL Func_read   Read_pixel_old;
 
-/********************
- * Spécifique à SDL *
- ********************/
+// -- Specific to SDL
+
+/// Pointer to the program's screen.
 GFX2_GLOBAL SDL_Surface * Screen_SDL;
+/// Pointer to the current joystick controller.
 GFX2_GLOBAL SDL_Joystick* Joystick;
 
-#define KEY_NONE          0
+/// Indicates "no keyboard shortcut".
+#define KEY_NONE            0
+///
+/// This is the "key identifier" for the mouse 3rd button.
+/// It was chosen to not conflict with any SDL key number.
 #define KEY_MOUSEMIDDLE     (SDLK_LAST+1)
+///
+/// This is the "key identifier" for the mouse wheelup.
+/// It was chosen to not conflict with any SDL key number.
 #define KEY_MOUSEWHEELUP    (SDLK_LAST+2)
+///
+/// This is the "key identifier" for the mouse wheeldown.
+/// It was chosen to not conflict with any SDL key number.
 #define KEY_MOUSEWHEELDOWN  (SDLK_LAST+3)
-#define KEY_JOYBUTTON          (SDLK_LAST+4)
+///
+/// This is the "key identifier" for joystick button number 0.
+/// All numbers starting with this one are reserved for joystick buttons
+/// (since their is an unknown number of them, and for example 18 on GP2X)
+/// It was chosen to not conflict with any SDL key number.
+#define KEY_JOYBUTTON       (SDLK_LAST+4)
 
 #ifdef __gp2x__
   #define KEY_ESC (KEY_JOYBUTTON+GP2X_BUTTON_X)
 #else
+  ///
+  /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
+  /// for buttons, etc. we use this instead of SDLK_ESCAPE,
+  /// so the GP2X port can get a joybutton equivalent of it.
   #define KEY_ESC SDLK_ESCAPE
 #endif
 

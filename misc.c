@@ -224,6 +224,7 @@ void Replace_a_color(byte old_color, byte New_color)
   Update_rect(0,0,0,0); // On peut TOUT a jour
   // C'est pas un problème car il n'y a pas de preview
 }
+// FIXME: move to graph.c, it's the only caller
 
 void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
 {
@@ -234,6 +235,7 @@ void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
   Ellipse_limit = Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
 }
 
+// FIXME: move to graph.c, it's the only caller
 byte Pixel_in_ellipse(void)
 {
   qword ediesi = Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
@@ -243,6 +245,7 @@ byte Pixel_in_ellipse(void)
         return 0;
 }
 
+// FIXME: move to graph.c, it's the only caller
 byte Pixel_in_circle(void)
 {
         if(Circle_cursor_X * Circle_cursor_X +

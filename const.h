@@ -26,170 +26,170 @@
 
 // Déclaration des constantes ////////////////////////////////////////////////
 
-#define M_2PI 6.28318530717958647692528676656
+#define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
 
-#define PERCENTAGE_VERSION     "99.0%" // Libellé du pourcentage de la version ß
-#define VERSION1                  2     // |
-#define VERSION2                  0     // |_ Numéro de version découpé en
-#define BETA1                     98    // |  plusieurs parties => 2.0 ß95.5%
-#define BETA2                     0     // |  (utilisé pour le fichier de config)
-#define ALPHA_BETA                "ß"   // Type de la version "Þ" ou "ß"
-#define MAX_VIDEO_MODES           100   // Nombre de modes vidéo maxi
-#define NB_BUTTONS                38    // Nombre de boutons à gérer
-#define NB_SHORTCUTS              134   // Nombre de combinaisons de touches
-#define NB_SPECIAL_SHORTCUTS      72    // Nombre de touches spéciales
-#define NB_OPERATIONS             33    // Nombre d'opérations gérées par le moteur
-#define NB_ZOOM_FACTORS           12    // Nombre de facteurs de zoom
-#define MENU_WIDTH                254   // Largeur du menu en taille réelle
-#define MENU_HEIGHT               44    // Hauteur du menu en taille réelle
-#define NB_CURSOR_SPRITES         8     // Nombre de sprites de curseur
-#define CURSOR_SPRITE_WIDTH       15    // Largeur d'un sprite de curseur en pixels
-#define CURSOR_SPRITE_HEIGHT      15    // Hauteur d'un sprite de curseur en pixels
-#define NB_EFFECTS_SPRITES        9     // Nombre de sprites d'effets
-#define NB_MENU_SPRITES           20    // Nombre de sprites de menu
-#define MENU_SPRITE_WIDTH         14    // Largeur d'un sprite de menu en pixels
-#define MENU_SPRITE_HEIGHT        14    // Hauteur d'un sprite de menu en pixels
-#define PAINTBRUSH_WIDTH          16    // Largeur d'un sprite de pinceau prédéfini
-#define PAINTBRUSH_HEIGHT         16    // Hauteur d'un sprite de pinceau prédéfini
-#define MAX_PAINTBRUSH_SIZE       127   // Taille maxi des pinceaux
-#define NB_ICON_SPRITES           7     // Nombre de sprites de drives
-#define ICON_SPRITE_WIDTH         8     // Largeur d'un sprite de drive en pixels
-#define ICON_SPRITE_HEIGHT        8     // Hauteur d'un sprite de drive en pixels
-#define NB_PAINTBRUSH_SPRITES     48    // Nombre de sprites de pinceau
-#define NB_PRESET_SIEVE           12    // Nombre de trames prédéfinies
-#define OPERATION_STACK_SIZE      16    // Nombre maximum d'éléments utilisés par les opérations
-#define MAX_DISPLAYABLE_PATH      37    // Taille maximum affichable du répertoire courant dans les fenêtres du fileselect
-#define COMMENT_SIZE              32    // Taille maxi des commentaires pour le PKM
-#define NB_MAX_PAGES_UNDO         99    // Nombre maximal de pages d'undo
-#define DEFAULT_ZOOM_FACTOR        4    // Facteur de zoom initial
-#define MAX_PATH_CHARACTERS      260    // Le nombre de caractères maxi pour un nom de fichier avec chemin complet
-#define NB_BOOKMARKS               4    // Nombre de boutons "signet" dans l'ecran Save/Load
-// Caractères présents dans les deux fontes
+#define PERCENTAGE_VERSION     "99.0%"  ///< Version label, for display purpose
+#define VERSION1                  2     ///< Version number for gfx2.cfg (1/4)
+#define VERSION2                  0     ///< Version number for gfx2.cfg (2/4)
+#define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
+#define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
+#define ALPHA_BETA                "ß"   ///< Status of Grafx2...
+#define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
+#define NB_SHORTCUTS              134   ///< Number of actions that can have a key combination associated to it.
+#define NB_ZOOM_FACTORS           12    ///< Number of zoom levels available in the magnifier.
+#define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
+#define MENU_HEIGHT               44    ///< Height of the menu.
+#define NB_CURSOR_SPRITES         8     ///< Number of available mouse cursor sprites.
+#define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
+#define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
+#define NB_EFFECTS_SPRITES        9     ///< Number of effect sprites.
+#define NB_MENU_SPRITES           20    ///< Number of menu sprites.
+#define MENU_SPRITE_WIDTH         14    ///< Width of a menu sprite in pixels
+#define MENU_SPRITE_HEIGHT        14    ///< Height of a menu sprite in pixels
+#define PAINTBRUSH_WIDTH          16    ///< Width of a preset paintbrush sprite
+#define PAINTBRUSH_HEIGHT         16    ///< Height of a preset paintbrush sprite
+#define MAX_PAINTBRUSH_SIZE       127   ///< Max size for a resizable paintbrush
+#define ICON_SPRITE_WIDTH         8     ///< Width of an icon in pixels
+#define ICON_SPRITE_HEIGHT        8     ///< Height of an icon in pixels
+#define NB_PAINTBRUSH_SPRITES     48    ///< Number of preset paintbrushes
+#define NB_PRESET_SIEVE           12    ///< Number of preset sieve patterns
+#define OPERATION_STACK_SIZE      16    ///< Max number of parameters in the operation stack.
+#define MAX_DISPLAYABLE_PATH      37    ///< Max number of characters to display directory name, in Save/Load screens.
+#define COMMENT_SIZE              32    ///< Max number of characters for a comment in PKM or PNG file.
+#define NB_MAX_PAGES_UNDO         99    ///< Max number of undo pages
+#define DEFAULT_ZOOM_FACTOR        4    ///< Initial zoom factor for the magnifier.
+#define MAX_PATH_CHARACTERS      260    ///< Number of characters for a file+complete path. Adapt to your OS...
+#define NB_BOOKMARKS               4    ///< Number of bookmark buttons in Save/Load screen.
+// Character to show a right arrow, used when editing long strings. It's present in ::GFX_system_font 
 #define RIGHT_TRIANGLE_CHARACTER  16
+// Character to show a left arrow, used when editing long strings. It's present in ::GFX_system_font 
 #define LEFT_TRIANGLE_CHARACTER   17
+/// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
 
-// On impose à l'allocation dynamique des pages de backups de conserver un
-// minimum de 256 Ko pour que le reste du programme puisse continuer à
-// fonctionner.
+///
+/// We force the dynamic backup page allocation to leave a minimum of 
+/// 256Kb of free memory, to allow the rest of the program to work safely.
+/// Note: This is a remainder of the DOS version. This system might not work
+/// so well on other OSes, where the "available memory" changes due to external
+/// factors.
 #define MINIMAL_MEMORY_TO_RESERVE (256*1024)
 
-#define LEFT_SIDE                    1     // Indique une direction (ou click) à gauche
-#define RIGHT_SIDE                   2     // Indique une direction (ou click) à droite
+#define LEFT_SIDE                    1     ///< Indicates a left side or left-click
+#define RIGHT_SIDE                   2     ///< Indicates a right side or right-click
 
-#define SEPARATOR_WIDTH              6     // [ Û±±° ]
-#define INITIAL_SEPARATOR_PROPORTION 0.3   // proportion de la zone non-zoomée en largeur par rapport à l'écran
-#define NB_ZOOMED_PIXELS_MIN         4     // Nombre minimal de pixels zoomés en largeur (Note: En dessous de 4, on ne peut plus scroller!)
+#define SEPARATOR_WIDTH              6     ///< Width of the separator between the normal and the zoomed view
+#define INITIAL_SEPARATOR_PROPORTION 0.3   ///< Proportion of the normal view width, relative to the whole screen width.
+#define NB_ZOOMED_PIXELS_MIN         4     ///< Minimal number of pixel shown (in width) by the zoomed view. (Note: below 4, you can't scroll!)
 
 #if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__)
    #define PARENT_DIR "/"
 #else
+   /// Filename that means "parent directory" for your operating system.
    #define PARENT_DIR ".."
 #endif
 
-  // Les différents formats de fichiers:
+// -- File formats
 
 #ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS         13    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
-#define NB_FORMATS_LOAD          13    // Nombre de formats que l'on sait charger
-#define NB_FORMATS_SAVE          13    // Nombre de formats que l'on sait sauver
+#define NB_KNOWN_FORMATS         13    ///< Total number of known file formats.
+#define NB_FORMATS_LOAD          13    ///< Number of file formats that grafx2 can load.
+#define NB_FORMATS_SAVE          13    ///< Number of file formats that grafx2 can save.
 #else
 // Without pnglib
-#define NB_KNOWN_FORMATS         12    // Nombre de formats connus (devrait être la valeur maximale de NB_FORMATS_LOAD et NB_FORMATS_SAVE, mais plus généralement: Card({NB_FORMATS_LOAD} UNION {NB_FORMATS_SAVE}))
-#define NB_FORMATS_LOAD          12    // Nombre de formats que l'on sait charger
-#define NB_FORMATS_SAVE          12    // Nombre de formats que l'on sait sauver
+#define NB_KNOWN_FORMATS         12    ///< Total number of known file formats.
+#define NB_FORMATS_LOAD          12    ///< Number of file formats that grafx2 can load.
+#define NB_FORMATS_SAVE          12    ///< Number of file formats that grafx2 can save.
 #endif
 
+/// List of file formats recognized by grafx2
 enum FILE_FORMATS
 {
-  FORMAT_PKM=1,      // |
-  FORMAT_LBM,        // |
-  FORMAT_GIF,        // |    Il faudra penser à réordonner
-  FORMAT_BMP,        // |  les données sur les formats dans
-  FORMAT_PCX,        // |  GLOBAL.H si on modifie ces cons-
-  FORMAT_IMG,        // |_ tantes.
-  FORMAT_SCx,        // |
-  FORMAT_PI1,        // |    Elles représentent l'indice où
-  FORMAT_PC1,        // |  l'on doit aller piocher ces
-  FORMAT_CEL,        // |  données.
-  FORMAT_KCF,        // |
-  FORMAT_PAL,        // |
-  FORMAT_PNG         // |
+  FORMAT_ANY=0, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
+  FORMAT_PKM=1,
+  FORMAT_LBM,
+  FORMAT_GIF,
+  FORMAT_BMP,
+  FORMAT_PCX,
+  FORMAT_IMG,
+  FORMAT_SCx,
+  FORMAT_PI1,
+  FORMAT_PC1,
+  FORMAT_CEL,
+  FORMAT_KCF,
+  FORMAT_PAL,
+  FORMAT_PNG
 };
 
-#define DEFAULT_FILEFORMAT    FORMAT_GIF // Format par défaut (ah bon? oh!)
+/// Default format for 'save as'
+#define DEFAULT_FILEFORMAT    FORMAT_GIF
 
-  // Les différentes erreurs:
-
+/// Error codes for ::Error()
 enum ERROR_CODES
 {
-  // 0 = Red flash on screen, non-fatal error
-  ERROR_GUI_MISSING=1,     // The graphics file is missing
-  ERROR_GUI_CORRUPTED,     // The graphics file cannot be parsed for GUI elements
-  ERROR_INI_MISSING,       // File gfx2def.ini is missing
-  ERROR_CFG_MISSING,       // File gfx2.cfg is missing (non-fatal)
-  ERROR_CFG_CORRUPTED,     // File gfx2.cfg couldn't be parsed (non-fatal)
-  ERROR_CFG_OLD,           // Unknown version of gfx2.cfg : either VERY old or wrong file (non-fatal)
-  ERROR_MEMORY,            // Out of memory
-  ERROR_COMMAND_LINE,      // Error in command-line arguments (syntax, or couldn't find the file to open)
-  ERROR_FORBIDDEN_MODE,    // Graphics mode requested is not supported
-  ERROR_SAVING_CFG,        // Error while writing gfx2.cfg
-  ERROR_MISSING_DIRECTORY, // Unable to return to the original "current directory" on program exit
-  ERROR_INI_CORRUPTED,     // File gfx2.ini couldn't be parsed
-  ERROR_SAVING_INI,        // Error while writing gfx2.ini
-  ERROR_SORRY_SORRY_SORRY  // (Page allocation error that shouldn't ever happen, now)
+  ERROR_WARNING=0,         ///< Red flash on screen, non-fatal error
+  ERROR_GUI_MISSING,       ///< The graphics file is missing
+  ERROR_GUI_CORRUPTED,     ///< The graphics file cannot be parsed for GUI elements
+  ERROR_INI_MISSING,       ///< File gfx2def.ini is missing
+  ERROR_CFG_MISSING,       ///< File gfx2.cfg is missing (non-fatal)
+  ERROR_CFG_CORRUPTED,     ///< File gfx2.cfg couldn't be parsed (non-fatal)
+  ERROR_CFG_OLD,           ///< Unknown version of gfx2.cfg : either VERY old or wrong file (non-fatal)
+  ERROR_MEMORY,            ///< Out of memory
+  ERROR_COMMAND_LINE,      ///< Error in command-line arguments (syntax, or couldn't find the file to open)
+  ERROR_FORBIDDEN_MODE,    ///< Graphics mode requested is not supported
+  ERROR_SAVING_CFG,        ///< Error while writing gfx2.cfg
+  ERROR_MISSING_DIRECTORY, ///< Unable to return to the original "current directory" on program exit
+  ERROR_INI_CORRUPTED,     ///< File gfx2.ini couldn't be parsed
+  ERROR_SAVING_INI,        ///< Error while writing gfx2.ini
+  ERROR_SORRY_SORRY_SORRY  ///< (Page allocation error that shouldn't ever happen, now)
 };
 
-  // Les différents types de pixels
-
+// Available pixel scalers
 enum PIXEL_RATIO
 {
-    PIXEL_SIMPLE,
+    PIXEL_SIMPLE=0,
     PIXEL_WIDE,
     PIXEL_TALL,
-    PIXEL_DOUBLE
+    PIXEL_DOUBLE,
+    PIXEL_MAX ///< Number of elements in enum
 };
 
-  // Les différentes catégories de bouton:
-
+/// Different kinds of menu button behavior.
 enum FAMILY_OF_BUTTONS
 {
-  FAMILY_TOOL=1,          // Outils de dessin (exemple : Freehand draw)
-  FAMILY_INTERRUPTION,     // Opération éphémère (exemple : changement de brosse) > Interruption de l'opération courante pour faire autre chose, puis on revient
-  FAMILY_INSTANT,       // Pif paf (exemple : changement de couleur) > ça sera fini dès qu'on lache le bouton, pas d'utilisation de la pile d'opérations
-  FAMILY_TOOLBAR,          // Cache/Montre la barre d'outils
-  FAMILY_EFFECTS            // Effets
+  FAMILY_TOOL=1,       ///< Drawing tools (example : Freehand draw)
+  FAMILY_INTERRUPTION, ///< Temporary operation (example : choosing paintbrush) > Interrupts the current operation to do something, then come back.
+  FAMILY_INSTANT,      ///< Single-click action (example : choose a color in palette) > It will be over as soon as we exit the called function.
+  FAMILY_TOOLBAR,      ///< Hide/show the menu
+  FAMILY_EFFECTS       ///< Effects
 };
 
-  // Les différentes formes de bouton:
-
+// The different kinds of buttons in menus or windows.
 enum BUTTON_SHAPES
 {
-  BUTTON_SHAPE_NO_FRAME,            // Ex: la palette
-  BUTTON_SHAPE_RECTANGLE,             // Ex: la plupart
-  BUTTON_SHAPE_TRIANGLE_TOP_LEFT,  // Ex: Rectangles vides
-  BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT    // Ex: Rectangles pleins
+  BUTTON_SHAPE_NO_FRAME,             ///< Ex: the palette
+  BUTTON_SHAPE_RECTANGLE,            ///< Ex: Most buttons.
+  BUTTON_SHAPE_TRIANGLE_TOP_LEFT,    ///< Ex: Empty rectangles.
+  BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT ///< Ex: Filled rectangles.
 };
 
-  // Les différentes formes de curseur:
-
+/// The different "mouse cursor" shapes
 enum CURSOR_SHAPES
 {
   CURSOR_SHAPE_ARROW,
-  CURSOR_SHAPE_TARGET,              // Utilise le pinceau
-  CURSOR_SHAPE_COLORPICKER,      // Utilise le pinceau
+  CURSOR_SHAPE_TARGET,           ///< This one uses the paintbrush
+  CURSOR_SHAPE_COLORPICKER,      ///< This one uses the paintbrush
   CURSOR_SHAPE_HOURGLASS,
   CURSOR_SHAPE_MULTIDIRECTIONNAL,
   CURSOR_SHAPE_HORIZONTAL,
-  CURSOR_SHAPE_THIN_TARGET,         // Utilise le pinceau
-  CURSOR_SHAPE_THIN_COLORPICKER, // Utilise le pinceau
+  CURSOR_SHAPE_THIN_TARGET,      ///< This one uses the paintbrush
+  CURSOR_SHAPE_THIN_COLORPICKER, ///< This one uses the paintbrush
   CURSOR_SHAPE_XOR_TARGET,
   CURSOR_SHAPE_XOR_RECTANGLE,
   CURSOR_SHAPE_XOR_ROTATION
 };
 
-  // Les différentes formes de pinceaux (les types de pinceaux doivent être au début)
-
+/// The different shapes that can be used as a paintbrush (paintbrush types go in the beginning)
 enum PAINTBRUSH_SHAPES
 {
   PAINTBRUSH_SHAPE_ROUND,
@@ -198,25 +198,24 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_VERTICAL_BAR,
   PAINTBRUSH_SHAPE_SLASH,
   PAINTBRUSH_SHAPE_ANTISLASH,
-  PAINTBRUSH_SHAPE_RANDOM,
+  PAINTBRUSH_SHAPE_RANDOM,     ///< Random pixels in a circle shape, like an airbrush.
   PAINTBRUSH_SHAPE_CROSS,
   PAINTBRUSH_SHAPE_PLUS,
   PAINTBRUSH_SHAPE_DIAMOND,
   PAINTBRUSH_SHAPE_SIEVE_ROUND,
   PAINTBRUSH_SHAPE_SIEVE_SQUARE,
-  PAINTBRUSH_SHAPE_MISC,// Ce doit être le dernier des types de pinceaux, comme ça il indique le nombre de types de pinceaux (-1)
-  PAINTBRUSH_SHAPE_POINT, // Utilisé pour réduire de pinceau à 1 point dans certaines opérations
-  PAINTBRUSH_SHAPE_COLOR_BRUSH,
-  PAINTBRUSH_SHAPE_MONO_BRUSH
+  PAINTBRUSH_SHAPE_MISC,        ///< A raw monochrome bitmap, can't be resized. This must be the last of the preset paintbrush types.
+  PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like colorpicker.
+  PAINTBRUSH_SHAPE_COLOR_BRUSH, ///< User's brush, in color mode
+  PAINTBRUSH_SHAPE_MONO_BRUSH   ///< User's brush, in mono mode
 };
 
-  // Les différents états de bouton:
-
+/// Normal resting state for a menu button.
 #define BUTTON_RELEASED 0
-#define BUTTON_PRESSED 1
+/// State of a menu button that is being pressed.
+#define BUTTON_PRESSED  1
 
-  // Les différents modes de Shade
-
+/// The different modes of the Shade
 enum SHADE_MODES
 {
   SHADE_MODE_NORMAL,
@@ -224,39 +223,39 @@ enum SHADE_MODES
   SHADE_MODE_NOSAT
 };
 
-  // Les différents chunks du fichier .CFG
-
+/// Identifiers for the chunks (data blocks) of gfx2.cfg
 enum CHUNKS_CFG
 {
   CHUNK_KEYS            = 0,
-  CHUNK_VIDEO_MODES        = 1,
-  CHUNK_SHADE              = 2,
-  CHUNK_MASK             = 3,
-  CHUNK_STENCIL            = 4,
-  CHUNK_GRADIENTS           = 5,
-  CHUNK_SMOOTH             = 6,
-  CHUNK_EXCLUDE_COLORS     = 7,
-  CHUNK_QUICK_SHADE        = 8,
-  CHUNK_GRID             = 9,
-  CHUNK_MAX 
+  CHUNK_VIDEO_MODES     = 1,
+  CHUNK_SHADE           = 2,
+  CHUNK_MASK            = 3,
+  CHUNK_STENCIL         = 4,
+  CHUNK_GRADIENTS       = 5,
+  CHUNK_SMOOTH          = 6,
+  CHUNK_EXCLUDE_COLORS  = 7,
+  CHUNK_QUICK_SHADE     = 8,
+  CHUNK_GRID            = 9,
+  CHUNK_MAX
 };
 
-  // Les différents types de lecteurs:
-
+/// Identifiers for the 8x8 icons of ::GFX_icon_sprite
 enum ICON_TYPES
 {
-  ICON_FLOPPY_3_5,   // 0: Diskette 3"«
-  ICON_FLOPPY_5_25,  // 1: Diskette 5"¬
-  ICON_HDD,          // 2: HDD
-  ICON_CDROM,        // 3: CD-ROM
-  ICON_NETWORK,      // 4: Logique (réseau?)
+  ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk
+  ICON_FLOPPY_5_25,  ///< 5¼" Floppy disk
+  ICON_HDD,          ///< Hard disk drive
+  ICON_CDROM,        ///< CD-ROM
+  ICON_NETWORK,      ///< "Network" drive
+  ICON_STAR,         ///< Star (favorite)
+  ICON_DROPDOWN,     ///< Dropdown arrow
+  NB_ICON_SPRITES    ///< Number of 8x8 icons
 };
 
-  // Les différents boutons:
-
+/// Identifiers for the buttons in the menu.
 enum BUTTON_NUMBERS
 {
-  BUTTON_PAINTBRUSHES,
+  BUTTON_PAINTBRUSHES=0,
   BUTTON_ADJUST,
   BUTTON_DRAW,
   BUTTON_CURVES,
@@ -293,29 +292,32 @@ enum BUTTON_NUMBERS
   BUTTON_PAL_LEFT,
   BUTTON_PAL_RIGHT,
   BUTTON_CHOOSE_COL,
-  BUTTON_HIDE
+  BUTTON_HIDE,
+  NB_BUTTONS            ///< Number of buttons in the menu bar.
 };
 
-  // Les actions des touches spéciales
-
+///
+/// Identifiers of special actions that can have a keyboard shortcut.
+/// They are special in the sense that there's no button in the menu for them,
+/// so it requires a specific handling.
 enum SPECIAL_ACTIONS
 {
-  SPECIAL_MOUSE_UP,                
-  SPECIAL_MOUSE_DOWN,              
-  SPECIAL_MOUSE_LEFT,              
-  SPECIAL_MOUSE_RIGHT,             
-  SPECIAL_CLICK_LEFT,               
-  SPECIAL_CLICK_RIGHT,             
-  SPECIAL_NEXT_FORECOLOR,         
-  SPECIAL_PREVIOUS_FORECOLOR,      
-  SPECIAL_NEXT_BACKCOLOR,          
-  SPECIAL_PREVIOUS_BACKCOLOR,      
-  SPECIAL_SMALLER_PAINTBRUSH,         
-  SPECIAL_BIGGER_PAINTBRUSH,          
-  SPECIAL_NEXT_USER_FORECOLOR,     
-  SPECIAL_PREVIOUS_USER_FORECOLOR, 
-  SPECIAL_NEXT_USER_BACKCOLOR,     
-  SPECIAL_PREVIOUS_USER_BACKCOLOR, 
+  SPECIAL_MOUSE_UP=0,
+  SPECIAL_MOUSE_DOWN,
+  SPECIAL_MOUSE_LEFT,
+  SPECIAL_MOUSE_RIGHT,
+  SPECIAL_CLICK_LEFT,
+  SPECIAL_CLICK_RIGHT,
+  SPECIAL_NEXT_FORECOLOR,
+  SPECIAL_PREVIOUS_FORECOLOR,
+  SPECIAL_NEXT_BACKCOLOR,
+  SPECIAL_PREVIOUS_BACKCOLOR,
+  SPECIAL_SMALLER_PAINTBRUSH,
+  SPECIAL_BIGGER_PAINTBRUSH,
+  SPECIAL_NEXT_USER_FORECOLOR,
+  SPECIAL_PREVIOUS_USER_FORECOLOR,
+  SPECIAL_NEXT_USER_BACKCOLOR,
+  SPECIAL_PREVIOUS_USER_BACKCOLOR,
   SPECIAL_SCROLL_UP,
   SPECIAL_SCROLL_DOWN,
   SPECIAL_SCROLL_LEFT,
@@ -353,68 +355,65 @@ enum SPECIAL_ACTIONS
   SPECIAL_BOTTOM_LEFT_ATTACHMENT,
   SPECIAL_BOTTOM_RIGHT_ATTACHMENT,
   SPECIAL_EXCLUDE_COLORS_MENU,
-  SPECIAL_SHADE_MODE,       // |
-  SPECIAL_SHADE_MENU,       // |
-  SPECIAL_QUICK_SHADE_MODE, // |
-  SPECIAL_QUICK_SHADE_MENU, // |
-  SPECIAL_STENCIL_MODE,     // |
-  SPECIAL_STENCIL_MENU,     // |
-  SPECIAL_MASK_MODE,        // |  Il faut que le premier effet soit
-  SPECIAL_MASK_MENU,        // |  SPECIAL_SHADE_MODE, et que le
-  SPECIAL_GRID_MODE,        // |  dernier soit SPECIAL_TILING_MENU,
-  SPECIAL_GRID_MENU,        // |_ et que seuls des effets soient
-  SPECIAL_SIEVE_MODE,       // |  définis entre ces deux là car
-  SPECIAL_SIEVE_MENU,       // |  des tests sur cet intervalle sont
-  SPECIAL_COLORIZE_MODE,    // |  faits dans le moteur.
-  SPECIAL_COLORIZE_MENU,    // |
-  SPECIAL_SMOOTH_MODE,      // |
-  SPECIAL_SMOOTH_MENU,      // |
-  SPECIAL_SMEAR_MODE,       // |
-  SPECIAL_TILING_MODE,      // |
-  SPECIAL_TILING_MENU       // |
+  SPECIAL_SHADE_MODE,
+  SPECIAL_SHADE_MENU,
+  SPECIAL_QUICK_SHADE_MODE,       ///< This must be the first of the "effects" family
+  SPECIAL_QUICK_SHADE_MENU,
+  SPECIAL_STENCIL_MODE,
+  SPECIAL_STENCIL_MENU,
+  SPECIAL_MASK_MODE,
+  SPECIAL_MASK_MENU,
+  SPECIAL_GRID_MODE,
+  SPECIAL_GRID_MENU,
+  SPECIAL_SIEVE_MODE,
+  SPECIAL_SIEVE_MENU,
+  SPECIAL_COLORIZE_MODE,
+  SPECIAL_COLORIZE_MENU,
+  SPECIAL_SMOOTH_MODE,
+  SPECIAL_SMOOTH_MENU,
+  SPECIAL_SMEAR_MODE,
+  SPECIAL_TILING_MODE,
+  SPECIAL_TILING_MENU,            ///< This must be the last of the "effects" family
+  NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 
-  // Définition des opérations:
-
+/// Identifiers of the operations, ie tools you use on the image.
 enum OPERATIONS
 {
-  OPERATION_CONTINUOUS_DRAW,     // Dessin à la main continu
-  OPERATION_DISCONTINUOUS_DRAW,  // Dessin à la main discontinu
-  OPERATION_POINT_DRAW,       // Dessin à la main point par point
-  OPERATION_FILLED_CONTOUR,     // Contour rempli
-  OPERATION_LINE,              // Lignes
-  OPERATION_K_LIGNE,            // Lignes reliées
-  OPERATION_CENTERED_LINES,    // Lignes concentriques
-  OPERATION_EMPTY_RECTANGLE,     // Rectangle vide
-  OPERATION_FILLED_RECTANGLE,    // Rectangle plein
-  OPERATION_EMPTY_CIRCLE,        // Cercle vide
-  OPERATION_FILLED_CIRCLE,       // Cercle plein
-  OPERATION_EMPTY_ELLIPSE,       // Ellipse vide
-  OPERATION_FILLED_ELLIPSE,     // Ellipse pleine
-  OPERATION_FILL,               // Fill
-  OPERATION_REPLACE,          // Replace couleur
-  OPERATION_GRAB_BRUSH,       // Prise de brosse rectangulaire
-  OPERATION_POLYBRUSH,         // Prise d'une brosse multiforme
-  OPERATION_COLORPICK,            // Récupération d'une couleur
-  OPERATION_MAGNIFY,              // Positionnement de la fenêtre de loupe
-  OPERATION_3_POINTS_CURVE,    // Courbe à 3 points
-  OPERATION_4_POINTS_CURVE,    // Courbe à 4 points
-  OPERATION_AIRBRUSH,              // Spray
-  OPERATION_POLYGON,           // Polygone
-  OPERATION_POLYFORM,           // Polyforme
-  OPERATION_POLYFILL,           // Polyfill
-  OPERATION_FILLED_POLYFORM,    // Polyforme rempli
-  OPERATION_SCROLL,             // Scroll
-  OPERATION_GRAD_CIRCLE,     // Cercles dégradés
-  OPERATION_GRAD_ELLIPSE,   // Ellipses dégradées
-  OPERATION_ROTATE_BRUSH,     // Faire tourner brosse
-  OPERATION_STRETCH_BRUSH,      // Etirer brosse
-  OPERATION_DISTORT_BRUSH,    // Deformer brosse
-  OPERATION_GRAD_RECTANGLE,  // Rectangle dégradé
-
-  OPERATION_NONE
+  OPERATION_CONTINUOUS_DRAW=0, ///< Freehand continuous draw
+  OPERATION_DISCONTINUOUS_DRAW,///< Freehand discontinuous draw
+  OPERATION_POINT_DRAW,        ///< Freehand point-by-point draw
+  OPERATION_FILLED_CONTOUR,    ///< Filled contour
+  OPERATION_LINE,              ///< Lines
+  OPERATION_K_LIGNE,           ///< Linked lines
+  OPERATION_CENTERED_LINES,    ///< Centered lines
+  OPERATION_EMPTY_RECTANGLE,   ///< Empty rectangle
+  OPERATION_FILLED_RECTANGLE,  ///< Filled rectangle
+  OPERATION_EMPTY_CIRCLE,      ///< Empty circle
+  OPERATION_FILLED_CIRCLE,     ///< Filled circle
+  OPERATION_EMPTY_ELLIPSE,     ///< Empty ellipse
+  OPERATION_FILLED_ELLIPSE,    ///< Filled ellipse
+  OPERATION_FILL,              ///< Fill
+  OPERATION_REPLACE,           ///< Color replacer
+  OPERATION_GRAB_BRUSH,        ///< Rectangular brush grabbing
+  OPERATION_POLYBRUSH,         ///< Polygonal brush grabbing
+  OPERATION_COLORPICK,         ///< Colorpicker
+  OPERATION_MAGNIFY,           ///< Position the magnify window
+  OPERATION_3_POINTS_CURVE,    ///< Curve with 3 control points
+  OPERATION_4_POINTS_CURVE,    ///< Curve with 4 control points
+  OPERATION_AIRBRUSH,          ///< Airbrush
+  OPERATION_POLYGON,           ///< Polygon
+  OPERATION_POLYFORM,          ///< Polyform
+  OPERATION_POLYFILL,          ///< Filled polygon
+  OPERATION_FILLED_POLYFORM,   ///< Filled polyform
+  OPERATION_SCROLL,            ///< Scroll (pan)
+  OPERATION_GRAD_CIRCLE,       ///< Gradient-filled circle
+  OPERATION_GRAD_ELLIPSE,      ///< Gradient-filled ellipse
+  OPERATION_ROTATE_BRUSH,      ///< Rotate brush
+  OPERATION_STRETCH_BRUSH,     ///< Stretch brush
+  OPERATION_DISTORT_BRUSH,     ///< Distort brush
+  OPERATION_GRAD_RECTANGLE,    ///< Gradient-filled rectangle
+  NB_OPERATIONS                ///< Number of operations handled by the engine
 };
-
-
 
 #endif

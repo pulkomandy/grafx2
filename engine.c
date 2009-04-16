@@ -1597,7 +1597,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
   if (label && label[0])
     Print_in_window(temp->Pos_X+2,temp->Pos_Y+(temp->Height-7)/2,label,MC_Black,MC_Light);
   if (display_arrow)
-    Window_display_icon_sprite(temp->Pos_X+temp->Width-10,temp->Pos_Y+(temp->Height-7)/2,6);
+    Window_display_icon_sprite(temp->Pos_X+temp->Width-10,temp->Pos_Y+(temp->Height-7)/2,ICON_DROPDOWN);
   
   return temp;
 }
