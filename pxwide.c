@@ -27,6 +27,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "misc.h"
+#include "pxwide.h"
 
 void Pixel_wide (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */

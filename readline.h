@@ -19,21 +19,28 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type);
-// Paramètres:
-//   x_pos, y_pos    : Coordonnées de la saisie dans la fenêtre
-//   str          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   visible_size : Nombre de caractères logeant dans la zone de saisie
-//   input_type     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
-// Sortie:
-//   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
+//////////////////////////////////////////////////////////////////////////////
+///@file readline.h
+/// Text input functions.
+//////////////////////////////////////////////////////////////////////////////
 
+///
+/// Lets the user input a line of text, exit by Esc or Return.
+/// @param x_pos        Coordinates of input, in window coordinates before scaling.
+/// @param y_pos        Coordinates of input, in window coordinates before scaling.
+/// @param str          The original string value (will be modified, unless user cancels.
+/// @param visible_size Number of characters visible and editable.
+/// @param input_type   0=string, 1=number, 2=filename (255 editable characters)
+/// @return             0 if user cancelled (esc), 1 if accepted (return)
+byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type);
+
+///
+/// Lets the user input a line of text, exit by Esc or Return.
+/// @param x_pos        Coordinates of input, in window coordinates before scaling.
+/// @param y_pos        Coordinates of input, in window coordinates before scaling.
+/// @param str          The original string value (will be modified, unless user cancels.
+/// @param visible_size Number of characters visible.
+/// @param max_size     Number of characters editable.
+/// @param input_type   0=string, 1=number, 2=filename (255 editable characters)
+/// @return             0 if user cancelled (esc), 1 if accepted (return)
 byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type);
-// Paramètres:
-//   x_pos, y_pos    : Coordonnées de la saisie dans la fenêtre
-//   str          : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   visible_size : Nombre de caractères logeant dans la zone de saisie
-//   max_size     : Nombre de caractères logeant dans la zone de saisie
-//   input_type     : 0=Chaîne, 1=Nombre, 2=Nom de fichier (255 caractères réels)
-// Sortie:
-//   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)

@@ -19,5 +19,21 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+//////////////////////////////////////////////////////////////////////////////
+///@file input.h
+/// Functions for mouse, keyboard and joystick input.
+/// Joystick input is used to emulate mouse on platforms that don't have a
+/// pointing device, ie: the GP2X.
+//////////////////////////////////////////////////////////////////////////////
+
+///
+/// This is the keyboard/mouse/joystick input polling function.
+/// Returns 1 if a significant changed occurred, such as a mouse button pressed
+/// or depressed, or a new keypress was in the keyboard buffer.
+/// The latest input variables are held in ::Key, ::Key_ANSI, ::Mouse_X, ::Mouse_Y, ::Mouse_K.
+/// Note that ::Key and ::Key_ANSI are not persistent, they will be reset to 0
+/// on subsequent calls to ::Get_input().
 int  Get_input(void);
+
+/// Returns true if the keycode has been set as a keyboard shortcut for the function.
 int Is_shortcut(word Key, word function);

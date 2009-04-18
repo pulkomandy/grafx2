@@ -21,6 +21,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "global.h"
+#include "keyboard.h"
 
 // Table de correspondance des scancode de clavier IBM PC AT vers
 // les symboles de touches SDL (sym).

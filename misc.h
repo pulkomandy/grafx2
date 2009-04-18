@@ -18,10 +18,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-void Effacer_ecran_courant(void);
-void Copier_ecran_sur_brouillon(void);
+//////////////////////////////////////////////////////////////////////////////
+///@file misc.h
+/// Miscellanous unsorted functions.
+//////////////////////////////////////////////////////////////////////////////
+
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
-void Permuter_dans_l_image_les_couleurs(byte color_1,byte color_2);
 void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
 void Scroll_picture(short x_offset,short y_offset);
 void Set_mouse_video_mode_number(void);

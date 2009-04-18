@@ -26,6 +26,7 @@
 #include "graph.h"
 #include "engine.h"
 #include "windows.h"
+#include "special.h"
 
 
 

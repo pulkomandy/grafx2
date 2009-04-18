@@ -19,6 +19,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file pxsimple.h
+/// Renderer for simple pixels (1x1). This is the normal one.
+//////////////////////////////////////////////////////////////////////////////
+
 #include "struct.h"
 
   void Pixel_simple                      (word x,word y,byte color);

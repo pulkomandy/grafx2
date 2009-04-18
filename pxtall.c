@@ -27,6 +27,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "misc.h"
+#include "pxtall.h"
 #include "pxsimple.h"
 
 void Pixel_tall (word x,word y,byte color)

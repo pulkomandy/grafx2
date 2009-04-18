@@ -19,6 +19,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file sdlscreen.h
+/// Screen update (refresh) system, and some SDL-specific graphic functions.
+//////////////////////////////////////////////////////////////////////////////
+
 #ifndef SDLSCREEN_H_INCLUDED
 #define SDLSCREEN_H_INCLUDED
 

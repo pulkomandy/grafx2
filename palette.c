@@ -35,6 +35,7 @@
 #include "op_c.h"
 #include "windows.h"
 #include "input.h"
+#include "palette.h"
 
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 

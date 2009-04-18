@@ -20,19 +20,37 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-// Initialisation à faire une fois au début du programme
+//////////////////////////////////////////////////////////////////////////////
+///@file text.h
+/// Functions related to rendering text as a brush, using TrueType or SFont.
+//////////////////////////////////////////////////////////////////////////////
+
+/// Initialization of text settings, needs to be called once on program startup.
 void Init_text(void);
-// Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
+/// Returns true if text.c was compiled with TrueType support.
 int TrueType_is_supported(void);
-// Ajout d'une fonte à la liste.
-void Add_font(char *name);
-// Crée une brosse à partir des paramètres de texte demandés.
+/// Add a new font to the list to propose to the user.
+void Add_font(const char *name);
+///
+/// Creates a brush, from the parameters given:
+/// @param str         The text to render
+/// @param font_number The index of the font to use. Pass 0 for the first font you declared with ::Add_font(), 1 for the second etc.
+/// @param size        The size in points (unused for bitmap fonts)
+/// @param antialias   Boolean, true to use antialiasing in TrueType
+/// @param bold        Boolean, true to use bold rendering in TrueType
+/// @param italic      Boolean, true to use italic rendering in TrueType
+/// @param width       Returns the width of the created brush, in pixels.
+/// @param height      Returns the height of the created brush, in pixels.
+/// Returns true on success.
 byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height);
-// Trouve le libellé d'affichage d'une fonte par son numéro
+
+/// Finds a label to display for a font declared with ::Add_font().
 char * Font_label(int index);
-// Trouve le nom d'une fonte par son numéro
+/// Finds the filename of a font declared with ::Add_font().
 char * Font_name(int index);
-// Vérifie si une fonte donnée est TrueType
+/// Returns true if the font of this number is TrueType, false if it's a SFont bitmap.
 char * TrueType_font(int index);
-// Nombre de fontes déclarées
+///
+/// Number of fonts declared with a series of ::Add_font(). This is public for
+/// convenience, but functionaly it is read-only.
 extern int Nb_fonts;

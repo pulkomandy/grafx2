@@ -18,8 +18,17 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file operatio.h
+/// Code for the operations, ie all drawing tools.
+//////////////////////////////////////////////////////////////////////////////
+
+/// Do some housekeeping before starting work on a operation.
 void Start_operation_stack(word new_operation);
+/// Put a value on ::Operation_stack
 void Operation_push(short value);
+/// Take a value off ::Operation_stack
 void Operation_pop(short * value);
 
 //////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW

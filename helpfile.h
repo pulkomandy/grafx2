@@ -19,26 +19,38 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "const.h" // Utilise les enumerations BOUTON_ et SPECIAL_
+//////////////////////////////////////////////////////////////////////////////
+///@file helpfile.h
+/// This is all the text that appears in contextual help and credits.
+///
+/// Note: The source code is kept on a public website, so keep this in mind
+/// if you're thinking of putting an e-mail address in there. At least, use
+/// "\100" instead of @, to help against the most basic email address harversters.
+//////////////////////////////////////////////////////////////////////////////
 
-// Quelques formules magiques:
+#include "const.h" // Uses enumerations BUTTON_NUMBERS and SPECIAL_ACTIONS
+
+// Some magic formulas:
+
 #define HELP_TEXT(x) {'N', x, 0},
-// Génère une ligne 'N' (Normale)
+// Generates a 'N' line (Normal)
 
 #define HELP_LINK(x,y) {'K', x, y},
-// Génère une ligne 'K' (Key)
+// Generates a 'K' line (Key)
 
 #define HELP_BOLD(x) {'S', x, 0},
-// Génère une ligne 'S' (BOLD)
+// Generates a 'S' line (BOLD)
 
 #define HELP_TITLE(x) {'T', x, 0}, {'-', x, 0},
-// Génère une ligne 'T' (Titre partie haute)
-// et une deuxième  '-' (Titre partie basse)
-// (pour gérer les gros titres qui occupent deux lignes)
+// Generates a 'T' line (Title, upper half)
+// and a second '-' line (Title, lower half),  with the same text.
 
 static const T_Help_table helptable_about[] =
 /*
+  Do not exceed 44 characters for normal lines:
   HELP_TEXT ("--------------------------------------------")
+  Do not exceed 22 characters for title lines:
+  HELP_TITLE("======================")
 */
 {
   HELP_TEXT ("") // Laisse de la place pour le logo
@@ -2215,43 +2227,43 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_help)
   HELP_TABLE_DECLARATION(helptable_credits)
 
-  // Attention, dans l'ordre de BUTTON_NUMBERS
-  HELP_TABLE_DECLARATION(helptable_paintbrush     )
-  HELP_TABLE_DECLARATION(helptable_adjust      )
-  HELP_TABLE_DECLARATION(helptable_draw       )
-  HELP_TABLE_DECLARATION(helptable_curves      )
-  HELP_TABLE_DECLARATION(helptable_lines       )
-  HELP_TABLE_DECLARATION(helptable_airbrush        )
-  HELP_TABLE_DECLARATION(helptable_floodfill    )
-  HELP_TABLE_DECLARATION(helptable_polygons    )
-  HELP_TABLE_DECLARATION(helptable_polyfill     )
-  HELP_TABLE_DECLARATION(helptable_rectangles   )
-  HELP_TABLE_DECLARATION(helptable_filled_rectangles     )
-  HELP_TABLE_DECLARATION(helptable_circles      )
-  HELP_TABLE_DECLARATION(helptable_filled_circles     )
-  HELP_TABLE_DECLARATION(helptable_grad_rect     )
-  HELP_TABLE_DECLARATION(helptable_grad_menu     )
-  HELP_TABLE_DECLARATION(helptable_spheres      )
-  HELP_TABLE_DECLARATION(helptable_brush       )
-  HELP_TABLE_DECLARATION(helptable_polybrush   )
-  HELP_TABLE_DECLARATION(helptable_brush_fx )
-  HELP_TABLE_DECLARATION(helptable_effects       )
-  HELP_TABLE_DECLARATION(helptable_text        )
-  HELP_TABLE_DECLARATION(helptable_magnifier        )
-  HELP_TABLE_DECLARATION(helptable_colorpicker      )
-  HELP_TABLE_DECLARATION(helptable_resolution        )
-  HELP_TABLE_DECLARATION(helptable_page         )
-  HELP_TABLE_DECLARATION(helptable_save       )
-  HELP_TABLE_DECLARATION(helptable_load      )
-  HELP_TABLE_DECLARATION(helptable_settings   )
-  HELP_TABLE_DECLARATION(helptable_clear        )
-  HELP_TABLE_DECLARATION(helptable_general         )
-  HELP_TABLE_DECLARATION(helptable_undo         )
-  HELP_TABLE_DECLARATION(helptable_kill         )
-  HELP_TABLE_DECLARATION(helptable_quit         )
-  HELP_TABLE_DECLARATION(helptable_palette      )
-  HELP_TABLE_DECLARATION(helptable_pal_scroll    )
-  HELP_TABLE_DECLARATION(helptable_pal_scroll    )
-  HELP_TABLE_DECLARATION(helptable_color_select     )
-  HELP_TABLE_DECLARATION(helptable_hide       )
+  // Attention, keep the same order as BUTTON_NUMBERS:
+  HELP_TABLE_DECLARATION(helptable_paintbrush)
+  HELP_TABLE_DECLARATION(helptable_adjust)
+  HELP_TABLE_DECLARATION(helptable_draw)
+  HELP_TABLE_DECLARATION(helptable_curves)
+  HELP_TABLE_DECLARATION(helptable_lines)
+  HELP_TABLE_DECLARATION(helptable_airbrush)
+  HELP_TABLE_DECLARATION(helptable_floodfill)
+  HELP_TABLE_DECLARATION(helptable_polygons)
+  HELP_TABLE_DECLARATION(helptable_polyfill)
+  HELP_TABLE_DECLARATION(helptable_rectangles)
+  HELP_TABLE_DECLARATION(helptable_filled_rectangles)
+  HELP_TABLE_DECLARATION(helptable_circles)
+  HELP_TABLE_DECLARATION(helptable_filled_circles)
+  HELP_TABLE_DECLARATION(helptable_grad_rect)
+  HELP_TABLE_DECLARATION(helptable_grad_menu)
+  HELP_TABLE_DECLARATION(helptable_spheres)
+  HELP_TABLE_DECLARATION(helptable_brush)
+  HELP_TABLE_DECLARATION(helptable_polybrush)
+  HELP_TABLE_DECLARATION(helptable_brush_fx)
+  HELP_TABLE_DECLARATION(helptable_effects)
+  HELP_TABLE_DECLARATION(helptable_text)
+  HELP_TABLE_DECLARATION(helptable_magnifier)
+  HELP_TABLE_DECLARATION(helptable_colorpicker)
+  HELP_TABLE_DECLARATION(helptable_resolution)
+  HELP_TABLE_DECLARATION(helptable_page)
+  HELP_TABLE_DECLARATION(helptable_save)
+  HELP_TABLE_DECLARATION(helptable_load)
+  HELP_TABLE_DECLARATION(helptable_settings)
+  HELP_TABLE_DECLARATION(helptable_clear)
+  HELP_TABLE_DECLARATION(helptable_general)
+  HELP_TABLE_DECLARATION(helptable_undo)
+  HELP_TABLE_DECLARATION(helptable_kill)
+  HELP_TABLE_DECLARATION(helptable_quit)
+  HELP_TABLE_DECLARATION(helptable_palette)
+  HELP_TABLE_DECLARATION(helptable_pal_scroll)
+  HELP_TABLE_DECLARATION(helptable_pal_scroll)
+  HELP_TABLE_DECLARATION(helptable_color_select)
+  HELP_TABLE_DECLARATION(helptable_hide)
 };

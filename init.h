@@ -18,6 +18,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file init.h
+/// Initialization (and some de-initialization) functions.
+//////////////////////////////////////////////////////////////////////////////
+
 void Load_graphics(const char * skin_file);
 void Init_buttons(void);
 void Init_operations(void);

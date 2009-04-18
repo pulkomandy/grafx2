@@ -19,6 +19,11 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+//////////////////////////////////////////////////////////////////////////////
+///@file engine.h
+/// Utility functions for the menu and all windows.
+//////////////////////////////////////////////////////////////////////////////
+
 void Main_handler            (void);
 void Draw_menu_button_frame(byte btn_number,byte pressed);
 void Unselect_bouton          (int btn_number);

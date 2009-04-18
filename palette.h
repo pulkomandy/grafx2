@@ -18,14 +18,22 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+//////////////////////////////////////////////////////////////////////////////
+///@file palette.h
+/// Palette screen, and some palette-related high-level functions.
+//////////////////////////////////////////////////////////////////////////////
+
+/// Open the palette menu and handles everything inside it.
 void Button_Palette(void);
+/// Open the secondary palette menu and handles it.
 void Button_Secondary_palette(void);
 
-// Choose the number of graduations for RGB components, from 2 to 256.
+/// Choose the number of graduations for RGB components, from 2 to 256.
 void Set_palette_RGB_scale(int);
 
-// Scale a component (R, G or B) according to the current RGB graduations
-// The resulting range is [0-255]
+///
+/// Scale a component (R, G or B) according to the current RGB graduations.
+/// Returns the resulting value, in the [0-255] range.
 byte Round_palette_component(byte comp);
 
 /*!

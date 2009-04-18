@@ -29,6 +29,7 @@
 #include "io.h"
 #include "errors.h"
 #include "misc.h"
+#include "saveini.h"
 
 int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * group)
 {

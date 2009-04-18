@@ -18,29 +18,60 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+//////////////////////////////////////////////////////////////////////////////
+///@file io.h
+/// Low-level endian-neutral file operations, and also some filesystem operations.
+/// Many of these may seem trivial, but the wrappers eliminate the need for a
+/// forest of preprocessor defines in each file.
+/// You MUST use the functions in this file instead of:
+/// - fread() and fwrite()
+/// - stat()
+/// - fstat()
+/// - opendir()
+/// - readdir()
+/// - Also, don't assume "/" or "\\", use PATH_SEPARATOR
+/// If you don't, you break another platform.
+//////////////////////////////////////////////////////////////////////////////
 
+/// Returns x, swapped if the current target is low-endian. Deprecated, please don't use it.
 word  Endian_magic16(word x);
+/// Returns x, swapped if the current target is low-endian. Deprecated, please don't use it.
 dword Endian_magic32(dword x);
 
+/// Reads a single byte from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_byte(FILE *file, byte *dest);
+/// Writes a single byte to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_byte(FILE *file, byte b);
 
+/// Reads several bytes from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_bytes(FILE *file, void *dest, size_t size);
+/// Writes several bytes to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_bytes(FILE *file, void *dest, size_t size);
 
+/// Reads a 16-bit Low-Endian word from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_word_le(FILE *file, word *dest);
+/// Writes a 16-bit Low-Endian word to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_word_le(FILE *file, word w);
+/// Reads a 32-bit Low-Endian dword from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_dword_le(FILE *file, dword *dest);
+/// Writes a 32-bit Low-Endian dword to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_dword_le(FILE *file, dword dw);
 
+/// Reads a 16-bit Big-Endian word from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_word_be(FILE *file, word *dest);
+/// Writes a 16-bit Big-Endian word to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_word_be(FILE *file, word w);
+/// Reads a 32-bit Big-Endian dword from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_dword_be(FILE *file, dword *dest);
+/// Writes a 32-bit Big-Endian dword to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_dword_be(FILE *file, dword dw);
 
+/// Extracts the filename part from a full file name.
 void Extract_filename(char *dest, const char *source);
+/// Extracts the directory from a full file name.
 void Extract_path(char *dest, const char *source);
 
+/// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_slash(const char * str);
 
 #if defined(__WIN32__)
@@ -49,18 +80,17 @@ char * Find_last_slash(const char * str);
   #define PATH_SEPARATOR "/"
 #endif
 
-// Taille de fichier, en octets
+/// Size of a file, in bytes. Returns 0 in case of error.
 int File_length(const char *fname);
 
-// Taille de fichier, en octets
+/// Size of a file, in bytes. Takes an open file as argument, returns 0 in case of error.
 int File_length_file(FILE * file);
 
-//   Détermine si un file passé en paramètre existe ou non dans le
-// répertoire courant.
+/// Returns true if a file passed as a parameter exists in the current directory.
 int File_exists(char * fname);
-//   Détermine si un répertoire passé en paramètre existe ou non dans le
-// répertoire courant.
+
+/// Returns true if a directory passed as a parameter exists in the current directory.
 int  Directory_exists(char * directory);
 
-// Scans a directory, calls Callback for each file in it,
+/// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));

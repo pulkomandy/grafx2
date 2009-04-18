@@ -17,16 +17,30 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-// Affiche nom fichier, n° ligne, nom fonction, une chaine et un entier.
+
+//////////////////////////////////////////////////////////////////////////////
+///@file errors.h
+/// Functions and macros for tracing and error reporting.
+//////////////////////////////////////////////////////////////////////////////
+
+/// Prints the source filename, line number, function name, a string and an integer.
 #define DEBUG(y,z) printf("%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
-// DEBUG en hexadécimal
+/// Same as ::DEBUG but in hexadecimal
 #define DEBUGX(y,z) printf("%s %d %s | %s : %X###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
+/// Macro to report unimplemented functions.
 #define UNIMPLEMENTED printf("%s %d %s non implémenté !\n",__FILE__,__LINE__,__func__);
 
+/// Macro to report untested functions.
 #define UNTESTED printf("%s %d %s à tester !\n",__FILE__,__LINE__,__func__);
 
+/// Helper function used by the macro ::Error
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name);
-#define Error(n) Error_function(n, __FILE__,__LINE__,__func__)
 
+///
+/// Report a run-time error: It will print to standard output some information
+/// about the calling function, and then:
+/// - If the error code is 0, just do a red screen flash and resume.
+/// - If the error code is non-zero, abort the program.
+#define Error(n) Error_function(n, __FILE__,__LINE__,__func__)

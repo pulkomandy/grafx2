@@ -19,8 +19,13 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __AIDE_H_
-#define __AIDE_H_
+//////////////////////////////////////////////////////////////////////////////
+///@file help.h
+/// Functions related to the help browser. The help data is in helpfile.h
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __HELP_H_
+#define __HELP_H_
 
 /*!
     Called to open the help window with the keyboard shortcut.

@@ -24,6 +24,7 @@
 ///@file const.h
 /// Constants (preprocessor defines) and enumerations used anywhere.
 //////////////////////////////////////////////////////////////////////////////
+
 #ifndef _CONST_H_
 #define _CONST_H_
 

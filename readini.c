@@ -27,6 +27,7 @@
 #include "const.h"
 #include "global.h"
 #include "misc.h"
+#include "readini.h"
 
 void Load_INI_clear_string(char * str)
 {

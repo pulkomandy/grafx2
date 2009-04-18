@@ -18,6 +18,13 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file special.h
+/// Editor functions that can be hooked to a keyboard shortcut, but don't have
+/// a menu button associated to them.
+//////////////////////////////////////////////////////////////////////////////
+
 void Set_paintbrush_size(int width, int height);
 void Smaller_paintbrush(void);
 void Bigger_paintbrush(void);

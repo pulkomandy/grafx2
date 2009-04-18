@@ -19,6 +19,11 @@
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+//////////////////////////////////////////////////////////////////////////////
+///@file graph.h
+/// Graphic functions that target the screen and/or image.
+//////////////////////////////////////////////////////////////////////////////
+
 void Shade_list_to_lookup_tables(word * list, short step, byte mode, byte * table_inc,
         byte * table_dec
 );

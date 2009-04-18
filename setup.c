@@ -39,6 +39,7 @@
 
 #include "struct.h"
 #include "io.h"
+#include "setup.h"
 
 int Create_ConfigDirectory(char * config_dir)
 {

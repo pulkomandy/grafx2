@@ -34,6 +34,7 @@
 #include "errors.h"
 #include "windows.h"
 #include "sdlscreen.h"
+#include "brush.h"
 
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image

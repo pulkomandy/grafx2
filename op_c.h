@@ -18,6 +18,14 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file op_c.h
+/// Color reduction and color conversion (24b->8b, RGB<->HSL).
+/// This is called op_c because half of the process was originally 
+/// coded in op_asm, in assembler.
+//////////////////////////////////////////////////////////////////////////////
+
 #ifndef _OP_C_H_
 #define _OP_C_H_
 

@@ -18,6 +18,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+//////////////////////////////////////////////////////////////////////////////
+///@file shade.h
+/// Screens for Shade and Quick-shade settings.
+//////////////////////////////////////////////////////////////////////////////
+
+
 #ifndef SHADE_H_INCLUDED
 #define SHADE_H_INCLUDED
 

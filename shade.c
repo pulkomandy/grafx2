@@ -30,6 +30,7 @@
 #include "sdlscreen.h"
 #include "windows.h"
 #include "input.h"
+#include "shade.h"
 
 void Button_Shade_mode(void)
 {

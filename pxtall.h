@@ -19,6 +19,12 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file pxtall.h
+/// Renderer for tall pixels (1x2).
+//////////////////////////////////////////////////////////////////////////////
+
 #include "struct.h"
 
   void Pixel_tall                        (word x,word y,byte color);

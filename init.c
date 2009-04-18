@@ -65,6 +65,7 @@
 #include "sdlscreen.h"
 #include "mountlist.h" // read_file_system_list
 #include "loadsave.h" // Image_emergency_backup
+#include "init.h"
 
 // Rechercher la liste et le type des lecteurs de la machine
 

@@ -56,6 +56,7 @@
 #include "readline.h"
 #include "input.h"
 #include "help.h"
+#include "filesel.h"
 
 #define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de fichier non sélectionné
 #define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de répertoire non sélectionné
