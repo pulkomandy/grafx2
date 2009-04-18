@@ -19,12 +19,13 @@
     write to the Free Software Foundation, Inc.,
     59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+//////////////////////////////////////////////////////////////////////////////
+///@file const.h
+/// Constants (preprocessor defines) and enumerations used anywhere.
+//////////////////////////////////////////////////////////////////////////////
 #ifndef _CONST_H_
 #define _CONST_H_
-
-
-
-// Déclaration des constantes ////////////////////////////////////////////////
 
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
 
