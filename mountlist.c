@@ -159,6 +159,7 @@
 #undef opendir
 #undef closedir
 
+#if !defined(__HAIKU__) && !defined(__BEOS__)
 #ifndef ME_DUMMY
 # define ME_DUMMY(Fs_name, Fs_type)		\
     (strcmp (Fs_type, "autofs") == 0            \
@@ -178,6 +179,7 @@
      || strcmp (Fs_type, "fdesc") == 0          \
      || strcmp (Fs_type, "nfs") == 0            \
      || strcmp (Fs_type, "volfs") == 0)
+#endif
 #endif
 
 #ifndef ME_REMOTE
