@@ -575,14 +575,14 @@ GFX2_GLOBAL struct
   byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
 
   // Triggers on mouse/keyboard
-  Func_action     Gauche;           ///< Action triggered by a left mouseclick on the button
-  Func_action     Droite;           ///< Action triggered by a right mouseclick on the button
+  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
+  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
   word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
   word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
 
   // Data used when the button is unselected
-  Func_action     Desenclencher;    ///< Action triggered by unselecting the button
-  byte            Famille;          ///< enum ::FAMILY_OF_BUTTONS.
+  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
+  byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
 
 } Buttons_Pool[NB_BUTTONS];
 
@@ -691,12 +691,12 @@ GFX2_GLOBAL byte Colorize_current_mode;
 /// Table of precomputed factors used by Colorize mode. It hold 0 to 255 when
 /// opacity is 100%, 0 to 128 when opacity is 50%, etc.
 // FIXME: This only caches a multiplication and a division. Maybe we should scrap it
-GFX2_GLOBAL word Facteur_A_table[256];
+GFX2_GLOBAL word Factors_table[256];
 ///
 /// Table of precomputed factors used by Colorize mode. It hold 255 to 0 when
 /// opacity is 100%, 128 to 0 when opacity is 50%, etc.
 // FIXME: This only caches a multiplication, a division, a substraction. Maybe we should scrap it
-GFX2_GLOBAL word Facteur_B_table[256];
+GFX2_GLOBAL word Factors_inv_table[256];
 
 // -- Smooth mode
 
@@ -794,7 +794,7 @@ GFX2_GLOBAL byte Quitting;
 /// Name of the directory that was current when the program was run.
 GFX2_GLOBAL char Initial_directory[256];
 /// Name of the directory that holds the program's (read-only) data: skins, icon, etc.
-GFX2_GLOBAL char Repertoire_des_donnees[256];
+GFX2_GLOBAL char Data_directory[256];
 /// Name of the directory where grafx2 reads and writes configuration (gfx2.ini, gfx2.cfg)
 GFX2_GLOBAL char Config_directory[256];
 /// Current foreground color for drawing.
@@ -802,7 +802,7 @@ GFX2_GLOBAL byte Fore_color;
 /// Current background color for drawing.
 GFX2_GLOBAL byte Back_color;
 /// For the "Freehand draw" tool, this determines which variant is selected, from ::OPERATION_CONTINUOUS_DRAW to ::OPERATION_FILLED_CONTOUR
-GFX2_GLOBAL byte Selected_operation;
+GFX2_GLOBAL byte Selected_freehand_mode;
 /// For the Curve tool, this determines which variant is selected, either ::OPERATION_3_POINTS_CURVE or ::OPERATION_4_POINTS_CURVE
 GFX2_GLOBAL byte Selected_curve_mode;
 /// For the Line tool, this determines which variant is selected, either ::OPERATION_LINE, ::OPERATION_K_LIGNE or ::OPERATION_CENTERED_LINES
@@ -907,7 +907,7 @@ GFX2_GLOBAL short Colorpicker_Y;
     CURSOR_SHAPE_TARGET            , // Polyform
     CURSOR_SHAPE_TARGET            , // Filled polygon
     CURSOR_SHAPE_TARGET            , // Filled polyform
-    CURSOR_SHAPE_MULTIDIRECTIONNAL , // Scroll (pan)
+    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll (pan)
     CURSOR_SHAPE_TARGET            , // Gradient-filled circle
     CURSOR_SHAPE_TARGET            , // Gradient-filled ellipse
     CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
@@ -958,7 +958,7 @@ GFX2_GLOBAL Func_pixel Pixel_load_function;
 ///
 /// Pointer to a pixel-reading function. This is used by the generic saving
 /// function to save a brush or an image.
-GFX2_GLOBAL Func_read   Read_pixel_old;
+GFX2_GLOBAL Func_read   Read_pixel_function;
 
 // -- Specific to SDL
 

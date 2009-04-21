@@ -341,7 +341,7 @@ void Unselect_bouton(int btn_number)
     // On considère que le bouton est relâché
     Buttons_Pool[btn_number].Pressed=BUTTON_RELEASED;
     // On appelle le désenclenchement particulier au bouton:
-    Buttons_Pool[btn_number].Desenclencher();
+    Buttons_Pool[btn_number].Unselect_action();
   }
 }
 
@@ -374,7 +374,7 @@ void Unselect_button(int btn_number,byte click)
     Display_sprite_in_menu(btn_number,icon+(click==RIGHT_SIDE));
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
-  family=Buttons_Pool[btn_number].Famille;
+  family=Buttons_Pool[btn_number].Family;
 
   switch (family)
   {
@@ -388,7 +388,7 @@ void Unselect_button(int btn_number,byte click)
         // S'il est de la même famille
         if (
              (b!=btn_number) &&
-             (Buttons_Pool[b].Famille==FAMILY_INTERRUPTION) &&
+             (Buttons_Pool[b].Family==FAMILY_INTERRUPTION) &&
              (  (b!=BUTTON_MAGNIFIER) ||
                ((b==BUTTON_MAGNIFIER) && (!Main_magnifier_mode)) )
            )
@@ -402,7 +402,7 @@ void Unselect_button(int btn_number,byte click)
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la famille interruption
         if ( (b!=btn_number)
-          && (Buttons_Pool[b].Famille==FAMILY_INTERRUPTION)
+          && (Buttons_Pool[b].Family==FAMILY_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Main_magnifier_mode && (b==BUTTON_MAGNIFIER))) )
           // Alors on désenclenche le bouton
@@ -411,7 +411,7 @@ void Unselect_button(int btn_number,byte click)
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la même famille
         if ( (b!=btn_number)
-          && (Buttons_Pool[b].Famille==family) )
+          && (Buttons_Pool[b].Family==family) )
           // Alors on désenclenche le bouton
           Unselect_bouton(b);
   }
@@ -429,9 +429,9 @@ void Unselect_button(int btn_number,byte click)
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
   if (click==1)
-    Buttons_Pool[btn_number].Gauche();
+    Buttons_Pool[btn_number].Left_action();
   else
-    Buttons_Pool[btn_number].Droite();
+    Buttons_Pool[btn_number].Right_action();
 }
 
 
@@ -867,11 +867,11 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_SIEVE_MODE :
-          Button_Trame_mode();
+          Button_Sieve_mode();
           Key=0;
           break;
         case SPECIAL_SIEVE_MENU :
-          Button_Trame_menu();
+          Button_Sieve_menu();
           Key=0;
           break;
         case SPECIAL_COLORIZE_MODE :
@@ -1990,7 +1990,7 @@ void Move_window(short dx, short dy)
   Vertical_XOR_line(new_x+width-1,new_y+1,height-2);
   Horizontal_XOR_line(new_x,new_y+height-1,width);
   Update_rect(new_x,new_y,width,height);
-  Cursor_shape=CURSOR_SHAPE_MULTIDIRECTIONNAL;
+  Cursor_shape=CURSOR_SHAPE_MULTIDIRECTIONAL;
   Display_cursor();
 
   while (Mouse_K)

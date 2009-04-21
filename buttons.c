@@ -443,7 +443,7 @@ byte Button_Quit_local_function(void)
   {
     case 1 : return 0; // Rester
     case 2 : // Sauver et enregistrer
-             filename_complet(filename,0);
+             Get_full_filename(filename,0);
              if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
              {
                Hide_cursor();
@@ -709,7 +709,7 @@ void Settings_display_config(T_Config * conf)
 
   Print_in_window(223, 84,(conf->Safety_colors)?YES:NO,MC_Black,MC_Light);
   Print_in_window(223, 99,(conf->Adjust_brush_pick)?YES:NO,MC_Black,MC_Light);
-  Print_in_window(223,114,(conf->Couleurs_separees)?YES:NO,MC_Black,MC_Light);
+  Print_in_window(223,114,(conf->Separate_colors)?YES:NO,MC_Black,MC_Light);
   Print_in_window(223,129,(conf->Auto_set_res)?YES:NO,MC_Black,MC_Light);
   Print_in_window(183,144,(conf->Coords_rel)?"Relative":"Absolute",MC_Black,MC_Light);
 
@@ -900,7 +900,7 @@ void Button_Settings(void)
         Config_choisie.Adjust_brush_pick=!Config_choisie.Adjust_brush_pick;
         break;
       case 12 : // Separate colors
-        Config_choisie.Couleurs_separees=!Config_choisie.Couleurs_separees;
+        Config_choisie.Separate_colors=!Config_choisie.Separate_colors;
         break;
       case 13 : // Auto-set resolution
         Config_choisie.Auto_set_res=!Config_choisie.Auto_set_res;
@@ -1689,7 +1689,7 @@ void Button_Safety_resolution(void)
 void Button_Draw(void)
 {
   Hide_cursor();
-  Start_operation_stack(Selected_operation);
+  Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 }
 
@@ -1697,13 +1697,13 @@ void Button_Draw(void)
 void Button_Draw_switch_mode(void)
 {
 /* ANCIEN CODE SANS POPUPS */
-  Selected_operation++;
-  if (Selected_operation>OPERATION_FILLED_CONTOUR)
-    Selected_operation=OPERATION_CONTINUOUS_DRAW;
+  Selected_freehand_mode++;
+  if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
+    Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_DRAW,Selected_operation);
-  Start_operation_stack(Selected_operation);
+  Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+  Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
     short clicked_button;
@@ -1721,17 +1721,17 @@ void Button_Draw_switch_mode(void)
         switch(clicked_button)
         {
             case 1:
-                Selected_operation++;
-                if (Selected_operation>OPERATION_FILLED_CONTOUR)
-                    Selected_operation=OPERATION_CONTINUOUS_DRAW;
+                Selected_freehand_mode++;
+                if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
+                    Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
                 break;
         }
     }
     while (Mouse_K);
 
     Close_popup();
-    Display_sprite_in_menu(BUTTON_DRAW,Selected_operation);
-    Start_operation_stack(Selected_operation);
+    Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+    Start_operation_stack(Selected_freehand_mode);
     Display_cursor();
 */
 }
@@ -2646,7 +2646,7 @@ void Backup_existing_file(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   // Calcul du nom complet du fichier backup
   Backup_filename(filename,new_filename);
 
@@ -2761,7 +2761,7 @@ void Button_Autosave(void)
   byte file_already_exists;
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   file_already_exists=File_exists(filename);
 
   if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
@@ -3583,8 +3583,8 @@ void Compute_colorize_table(void)
 
   for (index=0;index<256;index++)
   {
-    Facteur_A_table[index]=index*factor_a;
-    Facteur_B_table[index]=index*factor_b;
+    Factors_table[index]=index*factor_a;
+    Factors_inv_table[index]=index*factor_b;
   }
 }
 
@@ -4206,7 +4206,7 @@ void Button_Airbrush_menu(void)
 
 // -- Mode Sieve (Sieve) ----------------------------------------------------
 
-void Button_Trame_mode(void)
+void Button_Sieve_mode(void)
 {
   Sieve_mode=!Sieve_mode;
 }
@@ -4306,7 +4306,7 @@ void Update_sieve_area(short x, short y)
 }
 
 
-void Button_Trame_menu(void)
+void Button_Sieve_menu(void)
 {
   short clicked_button;
   short index;
@@ -4653,7 +4653,7 @@ void Button_Trame_menu(void)
   }
 
   if ( (clicked_button==3) && (!Sieve_mode) ) // OK
-    Button_Trame_mode();
+    Button_Sieve_mode();
 
   Display_cursor();
 }
@@ -4947,7 +4947,7 @@ void Button_Effects(void)
       case 8 : // Sieve
         if (Window_attribute1==LEFT_SIDE)
         {
-          Button_Trame_mode();
+          Button_Sieve_mode();
           Hide_cursor();
           Display_effect_state(176,62,"Sieve",Sieve_mode);
           Display_cursor();
@@ -4956,7 +4956,7 @@ void Button_Effects(void)
         {
           Close_window();
           Display_cursor();
-          Button_Trame_menu();
+          Button_Sieve_menu();
           clicked_button=11;
         }
         break;

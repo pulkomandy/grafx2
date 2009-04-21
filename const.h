@@ -182,7 +182,7 @@ enum CURSOR_SHAPES
   CURSOR_SHAPE_TARGET,           ///< This one uses the paintbrush
   CURSOR_SHAPE_COLORPICKER,      ///< This one uses the paintbrush
   CURSOR_SHAPE_HOURGLASS,
-  CURSOR_SHAPE_MULTIDIRECTIONNAL,
+  CURSOR_SHAPE_MULTIDIRECTIONAL,
   CURSOR_SHAPE_HORIZONTAL,
   CURSOR_SHAPE_THIN_TARGET,      ///< This one uses the paintbrush
   CURSOR_SHAPE_THIN_COLORPICKER, ///< This one uses the paintbrush

@@ -307,7 +307,7 @@ int Init_program(int argc,char * argv[])
   // Determine the executable directory
   Set_program_directory(argv[0],program_directory);
   // Choose directory for data (read only)
-  Set_data_directory(program_directory,Repertoire_des_donnees);
+  Set_data_directory(program_directory,Data_directory);
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
 
@@ -394,7 +394,7 @@ int Init_program(int argc,char * argv[])
     // Routine pour définir l'icone.
     char icon_path[MAX_PATH_CHARACTERS];
     SDL_Surface * icon;
-    sprintf(icon_path, "%s%s", Repertoire_des_donnees, "gfx2.gif");
+    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
     icon = IMG_Load(icon_path);
     if (icon)
     {
@@ -439,7 +439,7 @@ int Init_program(int argc,char * argv[])
 
   // On initialise tout ce qui concerne les opérations et les effets
   Operation_stack_size=0;
-  Selected_operation=OPERATION_CONTINUOUS_DRAW;
+  Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
   Selected_line_mode         =OPERATION_LINE;
   Selected_curve_mode        =OPERATION_3_POINTS_CURVE;
   Effect_function=No_effect;

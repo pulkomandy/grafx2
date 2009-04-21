@@ -422,7 +422,7 @@ int Load_INI(T_Config * conf)
   if (file==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
-    strcpy(filename,Repertoire_des_donnees);
+    strcpy(filename,Data_directory);
     strcat(filename,"gfx2def.ini");
     file=fopen(filename,"rb");
     if (file == 0)
@@ -642,7 +642,7 @@ int Load_INI(T_Config * conf)
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Couleurs_separees=values[0];
+  conf->Separate_colors=values[0];
 
   if ((return_code=Load_INI_get_values (file,buffer,"FX_feedback",1,values)))
     goto Erreur_Retour;

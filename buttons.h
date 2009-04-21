@@ -378,13 +378,13 @@ void Invert_trame(void);
     Callback for the Sieve button (in the FX window) left click.
     Toogle sieve mode.
 */
-void Button_Trame_mode(void);
+void Button_Sieve_mode(void);
 
 /*!
     Callback for the Sieve button (in the FX window) right click.
     Displays the sieve setup menu.
 */
-void Button_Trame_menu(void);
+void Button_Sieve_menu(void);
 
 // Mode Smooth
 

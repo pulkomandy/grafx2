@@ -253,7 +253,7 @@ void Load_graphics(const char * skin_file)
   byte mouse_cursor_area[29][29];
   
   // Lecture du fichier "skin"
-  strcpy(filename,Repertoire_des_donnees);
+  strcpy(filename,Data_directory);
   strcat(filename,skin_file);
   
   gui=IMG_Load(filename);
@@ -773,20 +773,21 @@ void Init_button(byte   btn_number,
                         word   x_offset      , word   y_offset,
                         word   width         , word   height,
                         byte   shape,
-                        Func_action Gauche , Func_action Droite,
-                        Func_action Desenclencher,
+                        Func_action left_action,
+                        Func_action right_action,
+                        Func_action unselect_action,
                         byte   family)
 {
-  Buttons_Pool[btn_number].X_offset      =x_offset;
-  Buttons_Pool[btn_number].Y_offset      =y_offset;
-  Buttons_Pool[btn_number].Width         =width-1;
-  Buttons_Pool[btn_number].Height         =height-1;
+  Buttons_Pool[btn_number].X_offset        =x_offset;
+  Buttons_Pool[btn_number].Y_offset        =y_offset;
+  Buttons_Pool[btn_number].Width           =width-1;
+  Buttons_Pool[btn_number].Height          =height-1;
   Buttons_Pool[btn_number].Pressed         =0;
   Buttons_Pool[btn_number].Shape           =shape;
-  Buttons_Pool[btn_number].Gauche          =Gauche;
-  Buttons_Pool[btn_number].Droite          =Droite;
-  Buttons_Pool[btn_number].Desenclencher   =Desenclencher;
-  Buttons_Pool[btn_number].Famille         =family;
+  Buttons_Pool[btn_number].Left_action     =left_action;
+  Buttons_Pool[btn_number].Right_action    =right_action;
+  Buttons_Pool[btn_number].Unselect_action =unselect_action;
+  Buttons_Pool[btn_number].Family          =family;
 }
 
 

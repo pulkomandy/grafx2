@@ -281,7 +281,7 @@ void Init_text(void)
   font_list_start = NULL;
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
-  strcpy(directory_name, Repertoire_des_donnees);
+  strcpy(directory_name, Data_directory);
   strcat(directory_name, "fonts");
   For_each_file(directory_name, Add_font);
   

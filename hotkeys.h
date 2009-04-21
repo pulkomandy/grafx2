@@ -33,14 +33,14 @@
 
 typedef struct
 {
-    word Number;      ///< Identifier for shortcut. This is a number starting from 0, which matches ::T_Config_shortcut_info.Number
-    char Label[36];   ///< Text to show in the screen where you can edit the shortcut.
-    char Explic1[37]; ///< Explanation text (1/3) to show in the screen where you can edit the shortcut.
-    char Explic2[37]; ///< Explanation text (2/3) to show in the screen where you can edit the shortcut.
-    char Explic3[37]; ///< Explanation text (3/3) to show in the screen where you can edit the shortcut.
-    bool Suppr;       ///< Boolean, true if the shortcut can be removed.
-    word Key;         ///< Primary shortcut. Value is a keycode, see keyboard.h
-    word Key2;        ///< Secondary shortcut. Value is a keycode, see keyboard.h
+    word Number;           ///< Identifier for shortcut. This is a number starting from 0, which matches ::T_Config_shortcut_info.Number
+    char Label[36];        ///< Text to show in the screen where you can edit the shortcut.
+    char Explanation1[37]; ///< Explanation text (1/3) to show in the screen where you can edit the shortcut.
+    char Explanation2[37]; ///< Explanation text (2/3) to show in the screen where you can edit the shortcut.
+    char Explanation3[37]; ///< Explanation text (3/3) to show in the screen where you can edit the shortcut.
+    bool Suppr;            ///< Boolean, true if the shortcut can be removed.
+    word Key;              ///< Primary shortcut. Value is a keycode, see keyboard.h
+    word Key2;             ///< Secondary shortcut. Value is a keycode, see keyboard.h
 } T_Key_config;
 
 /// Table with all the configurable shortcuts, whether they are for a menu button or a special action.

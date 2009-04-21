@@ -199,7 +199,7 @@ void Frame_menu_color(byte color)
 
   if ((Fore_color>=First_color_in_palette) && (Fore_color<First_color_in_palette+Menu_cells_X*Menu_cells_Y) && (Menu_is_visible))
   {
-    if (Config.Couleurs_separees)
+    if (Config.Separate_colors)
     {
       start_x=Palette_cell_X(Fore_color)-1*Menu_factor_X;
       start_y=Palette_cell_Y(Fore_color)-1*Menu_factor_Y;
@@ -271,7 +271,7 @@ void Display_menu_palette(void)
   {
     Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y,MC_Black);
 
-    if (Config.Couleurs_separees)
+    if (Config.Separate_colors)
       for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
@@ -1060,7 +1060,7 @@ void Display_menu_palette_avoiding_window(byte * table)
   word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenêtre +1
 
 
-  if (Config.Couleurs_separees)
+  if (Config.Separate_colors)
   {
     width=(Menu_palette_cell_width-1)*Menu_factor_X;
     height=Menu_factor_Y*(32/Menu_cells_Y-1);
@@ -1656,7 +1656,7 @@ void Display_cursor(void)
       }
       break;
 
-    case CURSOR_SHAPE_MULTIDIRECTIONNAL :
+    case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
       if (Cursor_hidden)
         break;
@@ -1953,7 +1953,7 @@ void Hide_cursor(void)
         Hide_paintbrush(Paintbrush_X,Paintbrush_Y);
       break;
 
-    case CURSOR_SHAPE_MULTIDIRECTIONNAL :
+    case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
       if (Cursor_hidden)
         break;

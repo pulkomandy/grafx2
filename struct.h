@@ -255,7 +255,7 @@ typedef struct
   byte Ratio;                            ///< Determines the scaling of menu and windows: 0 no scaling, 1 scaling, 2 slight scaling.
   byte Fast_zoom;                        ///< Boolean, true if the magnifier shortcut should automatically view the mouse area.
   byte Find_file_fast;                   ///< In fileselectors, this determines which entries should be sought when typing letters: 0 all, 1 files only, 2 directories only.
-  byte Couleurs_separees;                ///< Boolean, true if the menu palette should separate color cells with a black outline.
+  byte Separate_colors;                  ///< Boolean, true if the menu palette should separate color cells with a black outline.
   word Palette_cells_X;                  ///< Number of colors to show in a row of the menu palette.
   word Palette_cells_Y;                  ///< Number of colors to show in a column of the menu palette.
   byte Palette_vertical;                 ///< Boolean, true if the menu palette should go top to bottom instead of left to right

@@ -466,7 +466,7 @@ void Draw_palette_preview(void)
 
 
 // Calcul du nom complet du fichier
-void filename_complet(char * filename, byte is_colorix_format)
+void Get_full_filename(char * filename, byte is_colorix_format)
 {
     byte last_char;
 
@@ -699,7 +699,7 @@ void Save_image(byte image)
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
 
-  Read_pixel_old=(image)?Read_pixel_from_current_screen:Read_pixel_from_brush;
+  Read_pixel_function=(image)?Read_pixel_from_current_screen:Read_pixel_from_brush;
 
   File_formats[Main_fileformat-1].Save();
 
@@ -726,7 +726,7 @@ void Test_PAL(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   long file_size;   // Taille du fichier
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=1;
 
@@ -751,7 +751,7 @@ void Load_PAL(void)
   //long  file_size;   // Taille du fichier
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   File_error=0;
 
   // Ouverture du fichier
@@ -790,7 +790,7 @@ void Save_PAL(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   //long file_size;   // Taille du fichier
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -846,7 +846,7 @@ void Test_IMG(void)
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=1;
 
@@ -877,7 +877,7 @@ void Load_IMG(void)
   long file_size;
   T_IMG_Header IMG_header;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   File_error=0;
 
   if ((file=fopen(filename, "rb")))
@@ -937,7 +937,7 @@ void Save_IMG(void)
   T_IMG_Header IMG_header;
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -968,7 +968,7 @@ void Save_IMG(void)
 
       for (y_pos=0; ((y_pos<Main_image_height) && (!File_error)); y_pos++)
         for (x_pos=0; x_pos<Main_image_width; x_pos++)
-          Write_one_byte(file,Read_pixel_old(x_pos,y_pos));
+          Write_one_byte(file,Read_pixel_function(x_pos,y_pos));
 
       End_write(file);
       fclose(file);
@@ -1020,7 +1020,7 @@ void Test_PKM(void)
   T_PKM_Header header;
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   
   File_error=1;
 
@@ -1057,7 +1057,7 @@ void Load_PKM(void)
   dword Taille_pack;
   long  file_size;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   
@@ -1308,7 +1308,7 @@ void Save_PKM(void)
     header.Jump+=comment_size+2;
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -1351,7 +1351,7 @@ void Save_PKM(void)
       // Routine de compression PKM de l'image
       image_size=(dword)(Main_image_width*Main_image_height);
       Compteur_de_pixels=0;
-      pixel_value=Read_pixel_old(0,0);
+      pixel_value=Read_pixel_function(0,0);
 
       while ( (Compteur_de_pixels<image_size) && (!File_error) )
       {
@@ -1360,7 +1360,7 @@ void Save_PKM(void)
         last_color=pixel_value;
         if(Compteur_de_pixels<image_size)
         {
-          pixel_value=Read_pixel_old(Compteur_de_pixels % Main_image_width,Compteur_de_pixels / Main_image_width);
+          pixel_value=Read_pixel_function(Compteur_de_pixels % Main_image_width,Compteur_de_pixels / Main_image_width);
         }
         while ( (pixel_value==last_color)
              && (Compteur_de_pixels<image_size)
@@ -1369,7 +1369,7 @@ void Save_PKM(void)
           Compteur_de_pixels++;
           repetitions++;
           if(Compteur_de_pixels>=image_size) break;
-          pixel_value=Read_pixel_old(Compteur_de_pixels % Main_image_width,Compteur_de_pixels / Main_image_width);
+          pixel_value=Read_pixel_function(Compteur_de_pixels % Main_image_width,Compteur_de_pixels / Main_image_width);
         }
 
         if ( (last_color!=header.recog1) && (last_color!=header.recog2) )
@@ -1468,7 +1468,7 @@ void Test_LBM(void)
   char  section[4];
   dword dummy;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -1750,7 +1750,7 @@ void Load_LBM(void)
   long  file_size;
   dword dummy;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -2087,7 +2087,7 @@ void Save_LBM(void)
   int file_size;
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   // Ouverture du fichier
   if ((LBM_file=fopen(filename,"wb")))
@@ -2145,7 +2145,7 @@ void Save_LBM(void)
     for (y_pos=0; ((y_pos<Main_image_height) && (!File_error)); y_pos++)
     {
       for (x_pos=0; ((x_pos<real_width) && (!File_error)); x_pos++)
-        New_color(Read_pixel_old(x_pos,y_pos));
+        New_color(Read_pixel_function(x_pos,y_pos));
 
       if (!File_error)
         Transfer_colors();
@@ -2235,7 +2235,7 @@ void Test_BMP(void)
   T_BMP_Header header;
 
   File_error=1;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   if ((file=fopen(filename, "rb")))
   {
@@ -2327,7 +2327,7 @@ void Load_BMP(void)
   byte  a,b,c=0;
   long  file_size;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -2669,7 +2669,7 @@ void Save_BMP(void)
 
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
@@ -2737,7 +2737,7 @@ void Save_BMP(void)
         // parce que faut pas pousser."
         for (y_pos=Main_image_height-1; ((y_pos>=0) && (!File_error)); y_pos--)
           for (x_pos=0; x_pos<line_size; x_pos++)
-                Write_one_byte(file,Read_pixel_old(x_pos,y_pos));
+                Write_one_byte(file,Read_pixel_function(x_pos,y_pos));
 
         End_write(file);
         fclose(file);
@@ -2802,7 +2802,7 @@ void Test_GIF(void)
 
 
   File_error=1;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   if ((file=fopen(filename, "rb")))
   {
@@ -2952,7 +2952,7 @@ void Load_GIF(void)
   GIF_remainder_byte=0;
   number_LID=0;
   
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   if ((GIF_file=fopen(filename, "rb")))
   {
@@ -3289,7 +3289,7 @@ void Load_GIF(void)
   {
     byte temp;
 
-    temp=Read_pixel_old(GIF_pos_X,GIF_pos_Y);
+    temp=Read_pixel_function(GIF_pos_X,GIF_pos_Y);
 
     if (++GIF_pos_X>=Main_image_width)
     {
@@ -3335,7 +3335,7 @@ void Save_GIF(void)
   GIF_remainder_bits=0;
   GIF_remainder_byte=0;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   if ((GIF_file=fopen(filename,"wb")))
   {
@@ -3638,7 +3638,7 @@ void Test_PCX(void)
   FILE *file;
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   if ((file=fopen(filename, "rb")))
   {
@@ -3721,7 +3721,7 @@ void Load_PCX(void)
   long  image_size;
   byte * buffer;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -4039,7 +4039,7 @@ void Save_PCX(void)
 
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -4090,20 +4090,20 @@ void Save_PCX(void)
      
       for (y_pos=0; ((y_pos<Main_image_height) && (!File_error)); y_pos++)
       {
-        pixel_read=Read_pixel_old(0,y_pos);
+        pixel_read=Read_pixel_function(0,y_pos);
      
         // Compression et écriture de la ligne
         for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
         {
           x_pos++;
           last_pixel=pixel_read;
-          pixel_read=Read_pixel_old(x_pos,y_pos);
+          pixel_read=Read_pixel_function(x_pos,y_pos);
           counter=1;
           while ( (counter<63) && (x_pos<line_size) && (pixel_read==last_pixel) )
           {
             counter++;
             x_pos++;
-            pixel_read=Read_pixel_old(x_pos,y_pos);
+            pixel_read=Read_pixel_function(x_pos,y_pos);
           }
       
           if ( (counter>1) || (last_pixel>=0xC0) )
@@ -4176,7 +4176,7 @@ void Test_CEL(void)
   int file_size;
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   file_size=File_length(filename);
   if (file_size==0)
   {
@@ -4243,7 +4243,7 @@ void Load_CEL(void)
   long  file_size;
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   if ((file=fopen(filename, "rb")))
   {
     if (Read_bytes(file,&header1,sizeof(T_CEL_Header1)))
@@ -4365,7 +4365,7 @@ void Save_CEL(void)
   Count_used_colors(Utilisation);
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   if ((file=fopen(filename,"wb")))
   {
     // On regarde si des couleurs >16 sont utilisées dans l'image
@@ -4386,10 +4386,10 @@ void Save_CEL(void)
         {
           for (x_pos=0;((x_pos<Main_image_width) && (!File_error));x_pos++)
             if ((x_pos & 1)==0)
-              last_byte=(Read_pixel_old(x_pos,y_pos) << 4);
+              last_byte=(Read_pixel_function(x_pos,y_pos) << 4);
             else
             {
-              last_byte=last_byte | (Read_pixel_old(x_pos,y_pos) & 15);
+              last_byte=last_byte | (Read_pixel_function(x_pos,y_pos) & 15);
               Write_one_byte(file,last_byte);
             }
 
@@ -4410,18 +4410,18 @@ void Save_CEL(void)
       for (y_pos=0;y_pos<Main_image_height;y_pos++)
       {
         for (x_pos=0;x_pos<Main_image_width;x_pos++)
-          if (Read_pixel_old(x_pos,y_pos)!=0)
+          if (Read_pixel_function(x_pos,y_pos)!=0)
             break;
-        if (Read_pixel_old(x_pos,y_pos)!=0)
+        if (Read_pixel_function(x_pos,y_pos)!=0)
           break;
       }
       header2.Y_offset=y_pos;
       for (x_pos=0;x_pos<Main_image_width;x_pos++)
       {
         for (y_pos=0;y_pos<Main_image_height;y_pos++)
-          if (Read_pixel_old(x_pos,y_pos)!=0)
+          if (Read_pixel_function(x_pos,y_pos)!=0)
             break;
-        if (Read_pixel_old(x_pos,y_pos)!=0)
+        if (Read_pixel_function(x_pos,y_pos)!=0)
           break;
       }
       header2.X_offset=x_pos;
@@ -4441,7 +4441,7 @@ void Save_CEL(void)
         Init_write_buffer();
         for (y_pos=0;((y_pos<header2.Height) && (!File_error));y_pos++)
           for (x_pos=0;((x_pos<header2.Width) && (!File_error));x_pos++)
-            Write_one_byte(file,Read_pixel_old(x_pos+header2.X_offset,y_pos+header2.Y_offset));
+            Write_one_byte(file,Read_pixel_function(x_pos+header2.X_offset,y_pos+header2.Y_offset));
         End_write(file);
       }
       else
@@ -4486,7 +4486,7 @@ void Test_KCF(void)
   int color_index;
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   if ((file=fopen(filename, "rb")))
   {
     if (File_length_file(file)==sizeof(T_KCF_Header))
@@ -4536,7 +4536,7 @@ void Load_KCF(void)
 
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   if ((file=fopen(filename, "rb")))
   {
     file_size=File_length_file(file);
@@ -4652,7 +4652,7 @@ void Save_KCF(void)
   Count_used_colors(Utilisation);
 
   File_error=0;
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   if ((file=fopen(filename,"wb")))
   {
     // Sauvegarde de la palette
@@ -4739,7 +4739,7 @@ void Test_SCx(void)
   T_SCx_Header SCx_header;
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=1;
 
@@ -4770,7 +4770,7 @@ void Load_SCx(void)
   T_SCx_Header SCx_header;
   T_Palette SCx_Palette;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
 
@@ -4853,7 +4853,7 @@ void Save_SCx(void)
   short x_pos,y_pos;
   T_SCx_Header SCx_header;
 
-  filename_complet(filename,1);
+  Get_full_filename(filename,1);
 
   File_error=0;
 
@@ -4877,7 +4877,7 @@ void Save_SCx(void)
 
       for (y_pos=0; ((y_pos<Main_image_height) && (!File_error)); y_pos++)
         for (x_pos=0; x_pos<Main_image_width; x_pos++)
-          Write_one_byte(file,Read_pixel_old(x_pos,y_pos));
+          Write_one_byte(file,Read_pixel_function(x_pos,y_pos));
 
       End_write(file);
       fclose(file);
@@ -5031,7 +5031,7 @@ void Test_PI1(void)
   word resolution;                 // Résolution de l'image
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=1;
 
@@ -5065,7 +5065,7 @@ void Load_PI1(void)
   byte * ptr;
   byte pixels[320];
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   if ((file=fopen(filename, "rb")))
@@ -5128,7 +5128,7 @@ void Save_PI1(void)
   byte * ptr;
   byte pixels[320];
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   // Ouverture du fichier
@@ -5150,7 +5150,7 @@ void Save_PI1(void)
       if (y_pos<Main_image_height)
       {
         for (x_pos=0;(x_pos<320) && (x_pos<Main_image_width);x_pos++)
-          pixels[x_pos]=Read_pixel_old(x_pos,y_pos);
+          pixels[x_pos]=Read_pixel_function(x_pos,y_pos);
       }
 
       for (x_pos=0;x_pos<(320>>4);x_pos++)
@@ -5361,7 +5361,7 @@ void Test_PC1(void)
   word resolution;                 // Résolution de l'image
 
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=1;
 
@@ -5397,7 +5397,7 @@ void Load_PC1(void)
   byte * ptr;
   byte pixels[320];
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   if ((file=fopen(filename, "rb")))
@@ -5471,7 +5471,7 @@ void Save_PC1(void)
   byte * ptr;
   byte pixels[320];
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   // Ouverture du fichier
@@ -5494,7 +5494,7 @@ void Save_PC1(void)
       if (y_pos<Main_image_height)
       {
         for (x_pos=0;(x_pos<320) && (x_pos<Main_image_width);x_pos++)
-          pixels[x_pos]=Read_pixel_old(x_pos,y_pos);
+          pixels[x_pos]=Read_pixel_function(x_pos,y_pos);
       }
 
       // Encodage de la scanline
@@ -5649,7 +5649,7 @@ void Test_PNG(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];
   
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   
   File_error=1;
 
@@ -5678,7 +5678,7 @@ void Load_PNG(void)
   png_structp png_ptr;
   png_infop info_ptr;
 
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
 
   File_error=0;
   
@@ -5851,7 +5851,7 @@ void Save_PNG(void)
   png_structp png_ptr;
   png_infop info_ptr;
   
-  filename_complet(filename,0);
+  Get_full_filename(filename,0);
   File_error=0;
   Row_pointers = NULL;
   
@@ -5906,7 +5906,7 @@ void Save_PNG(void)
 
           /* ecriture des pixels de l'image */
           Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
-          pixel_ptr = (Read_pixel_old==Read_pixel_from_current_screen)?Main_screen:Brush;
+          pixel_ptr = (Read_pixel_function==Read_pixel_from_current_screen)?Main_screen:Brush;
           for (y=0; y<Main_image_height; y++)
             Row_pointers[y] = (png_byte*)(pixel_ptr+y*Main_image_width);
 

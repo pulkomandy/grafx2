@@ -441,12 +441,12 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
   // On récupère les 3 composantes RVB
 
   // blue
-  blue = (Facteur_B_table[blue]
-    + Facteur_A_table[blue_under]) / 256;
-  green = (Facteur_B_table[green]
-    + Facteur_A_table[green_under]) / 256;
-  red = (Facteur_B_table[red]
-    + Facteur_A_table[red_under]) / 256;
+  blue = (Factors_inv_table[blue]
+    + Factors_table[blue_under]) / 256;
+  green = (Factors_inv_table[green]
+    + Factors_table[green_under]) / 256;
+  red = (Factors_inv_table[red]
+    + Factors_table[red_under]) / 256;
   return Best_color(red,green,blue);
 
 }

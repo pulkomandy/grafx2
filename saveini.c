@@ -421,7 +421,7 @@ int Save_INI(T_Config * conf)
     }
   }
   // On récupère un fichier INI "propre" à partir de gfx2def.ini
-  strcpy(ref_ini_file,Repertoire_des_donnees);
+  strcpy(ref_ini_file,Data_directory);
   strcat(ref_ini_file,"gfx2def.ini");
   Ancien_fichier=fopen(ref_ini_file,"rb");
   if (Ancien_fichier==0)
@@ -569,7 +569,7 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Fast_zoom",1,values,1)))
     goto Erreur_Retour;
 
-  values[0]=conf->Couleurs_separees;
+  values[0]=conf->Separate_colors;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Separate_colors",1,values,1)))
     goto Erreur_Retour;
 

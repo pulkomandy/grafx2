@@ -264,21 +264,21 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   // Pour scan de répertoire
   DIR*  Repertoire_Courant; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
-  char filename_complet[MAX_PATH_CHARACTERS];
+  char full_filename[MAX_PATH_CHARACTERS];
   int filename_position;
-  strcpy(filename_complet, directory_name);
+  strcpy(full_filename, directory_name);
   Repertoire_Courant=opendir(directory_name);
   if(Repertoire_Courant == NULL) return;        // Répertoire invalide ...
-  strcat(filename_complet, PATH_SEPARATOR);
-  filename_position = strlen(filename_complet);
+  strcat(full_filename, PATH_SEPARATOR);
+  filename_position = strlen(full_filename);
   while ((entry=readdir(Repertoire_Courant)))
   {
     struct stat Infos_enreg;
-    strcpy(&filename_complet[filename_position], entry->d_name);
-    stat(filename_complet,&Infos_enreg);
+    strcpy(&full_filename[filename_position], entry->d_name);
+    stat(full_filename,&Infos_enreg);
     if (S_ISREG(Infos_enreg.st_mode))
     {
-      Callback(filename_complet);
+      Callback(full_filename);
     }
   }
   closedir(Repertoire_Courant);

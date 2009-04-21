@@ -28,7 +28,7 @@ void Pixel_load_in_current_screen(word x_pos,word y_pos,byte color);
 void Pixel_load_in_preview      (word x_pos,word y_pos,byte color);
 void Pixel_load_in_brush       (word x_pos,word y_pos,byte color);
 
-void filename_complet(char * filename, byte is_colorix_format);
+void Get_full_filename(char * filename, byte is_colorix_format);
 
 ///
 /// High-level picture loading function.
