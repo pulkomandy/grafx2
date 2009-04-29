@@ -85,16 +85,18 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
     Extract_path(program_dir, argv0);
   #endif
 }
+
 // Determine which directory contains the read-only data.
 // IN: The directory containing the executable
 // OUT: Write into data_dir. Trailing / or \ is kept.
 void Set_data_directory(const char * program_dir, char * data_dir)
 {
   // On all platforms, data is in the executable's directory
-  strcpy(data_dir,program_dir);
   // Except MacOSX:
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
+  #else
+  	strcpy(data_dir,program_dir);
   #endif
 }
 

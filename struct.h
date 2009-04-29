@@ -181,7 +181,7 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
-} __attribute__((__packed__)) T_Gradient_array;
+} T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -214,7 +214,7 @@ typedef struct
 {
   byte Number; ///< Section identfier. Possible values are in enum ::CHUNKS_CFG
   word Size;   ///< Size of the configuration block that follows, in bytes.
-} __attribute__((__packed__)) T_Config_chunk;
+} T_Config_chunk;
 
 /// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct

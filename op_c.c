@@ -962,7 +962,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
     int diff;  // difference de chrominance courante
 
     // Pour chacun des clusters … traiter
-    for (ic=1;ic<cs->nb;ic++)
+    for (ic=0;ic<cs->nb;ic++)
     {
         // On recherche le d‚grad‚ le plus proche de la chrominance du cluster
         best_gradient=-1;

@@ -159,6 +159,8 @@
 #undef opendir
 #undef closedir
 
+// gcc2 under haiku and beos don't like these macros for some reason.
+// As they are not used there anyways, we remove them and everyone is happy.
 #if !defined(__HAIKU__) && !defined(__BEOS__)
 #ifndef ME_DUMMY
 # define ME_DUMMY(Fs_name, Fs_type)		\
@@ -180,7 +182,6 @@
      || strcmp (Fs_type, "nfs") == 0            \
      || strcmp (Fs_type, "volfs") == 0)
 #endif
-#endif
 
 #ifndef ME_REMOTE
 /* A file system is `remote' if its Fs_name contains a `:'
@@ -192,6 +193,7 @@
 	 && (strcmp (Fs_type, "smbfs") == 0	\
 	     || strcmp (Fs_type, "cifs") == 0)))
 #endif
+#endif // HAIKU / BEOS
 
 #ifdef MOUNTED_GETMNTINFO
 
