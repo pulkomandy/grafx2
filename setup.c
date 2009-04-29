@@ -92,11 +92,10 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
 void Set_data_directory(const char * program_dir, char * data_dir)
 {
   // On all platforms, data is in the executable's directory
-  // Except MacOSX:
+  strcpy(data_dir,program_dir);
+  // Except MacOSX, here it is stored in a special folder:
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
-  #else
-  	strcpy(data_dir,program_dir);
   #endif
 }
 
