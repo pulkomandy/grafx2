@@ -2,7 +2,7 @@
 
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
-    Copyright 2008 Franck Charlet
+    Copyright 2009 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -1471,39 +1471,23 @@ void Init_operations(void)
   Init_operation(OPERATION_SCROLL,0,4,
                         Scroll_0_4,1);
 
-  Init_operation(OPERATION_GRAD_CIRCLE,1,0,
-                        Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,0,
-                        Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,6,
-                        Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,6,
-                        Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,6,
-                        Grad_circle_0_6,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,8,
-                        Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,8,
-                        Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,8,
-                        Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,1);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0);
 
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,
-                        Grad_circle_or_ellipse_0_8,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,
-                        Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,
-                        Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,
-                        Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,
-                        Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,
-                        Grad_ellipse_0_6,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,
-                        Grad_ellipse_12_8,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,
-                        Grad_ellipse_12_8,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,1);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0);
 
   Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0);
   Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0);

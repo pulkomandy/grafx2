@@ -1,6 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
+    Copyright 2009 Franck Charlet
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -1016,7 +1017,7 @@ void Circle_12_5(void)
     Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
                   ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
     radius=sqrt(Circle_limit);
-    Draw_empy_circle_preview(center_x,center_y,radius,color);
+    Draw_empty_circle_preview(center_x,center_y,radius,color);
 
     Display_cursor();
   }
@@ -1058,7 +1059,7 @@ void Empty_circle_0_5(void)
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Draw_empy_circle_permanent(center_x,center_y,radius,color);
+  Draw_empty_circle_permanent(center_x,center_y,radius,color);
 
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
@@ -1183,7 +1184,7 @@ void Ellipse_12_5(void)
                                          :center_x-Paintbrush_X;
     vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
                                          :center_y-Paintbrush_Y;
-    Draw_empy_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+    Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
 
     Display_cursor();
   }
@@ -1227,7 +1228,7 @@ void Empty_ellipse_0_5(void)
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Draw_empy_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
+  Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
 
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
@@ -3851,7 +3852,7 @@ void Grad_circle_12_6(void)
     Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
                   ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
     radius=sqrt(Circle_limit);
-    Draw_empy_circle_preview(center_x,center_y,radius,color);
+    Draw_empty_circle_preview(center_x,center_y,radius,color);
 
     Display_cursor();
   }
@@ -4102,7 +4103,7 @@ void Grad_ellipse_12_6(void)
                                          :center_x-Paintbrush_X;
     vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
                                          :center_y-Paintbrush_Y;
-    Draw_empy_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+    Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
 
     Display_cursor();
   }
@@ -4218,6 +4219,7 @@ void Grad_ellipse_12_8(void)
   Operation_pop(&color);
   Operation_pop(&old_mouse_k);
 
+  Hide_cursor();
   // On efface la croix XOR au centre de l'ellipse
   Draw_curve_cross(center_x,center_y);
 
@@ -4232,6 +4234,8 @@ void Grad_ellipse_12_8(void)
 
   if (Mouse_K==old_mouse_k)
     Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
+
+  Display_cursor();
 
   Wait_end_of_click();
 

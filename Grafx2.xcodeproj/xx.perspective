@@ -498,7 +498,7 @@
 							<real>418</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>52 -468 1092 651 0 0 1024 746 </string>
+						<string>225 -383 1092 651 0 0 1024 746 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -537,7 +537,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {652, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>52 -468 1092 651 0 0 1024 746 </string>
+								<string>225 -383 1092 651 0 0 1024 746 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -568,7 +568,7 @@
 										<key>Frame</key>
 										<string>{{10, 27}, {652, 578}}</string>
 										<key>RubberWindowFrame</key>
-										<string>52 -468 1092 651 0 0 1024 746 </string>
+										<string>225 -383 1092 651 0 0 1024 746 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
@@ -829,7 +829,7 @@
 		<string>/Users/xx/Grafx2/Grafx2.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>52 -468 1092 651 0 0 1024 746 </string>
+	<string>225 -383 1092 651 0 0 1024 746 </string>
 	<key>WindowTools</key>
 	<array>
 		<dict>

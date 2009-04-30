@@ -978,7 +978,7 @@ void Fill_general(byte fill_color)
 
   // -- Tracer général d'un cercle vide -------------------------------------
 
-void Draw_empy_circle_general(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color)
 {
   short start_x;
   short start_y;
@@ -1039,19 +1039,19 @@ void Draw_empy_circle_general(short center_x,short center_y,short radius,byte co
 
   // -- Tracé définitif d'un cercle vide --
 
-void Draw_empy_circle_permanent(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
-  Draw_empy_circle_general(center_x,center_y,radius,color);
+  Draw_empty_circle_general(center_x,center_y,radius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Tracer la preview d'un cercle vide --
 
-void Draw_empy_circle_preview(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_preview(short center_x,short center_y,short radius,byte color)
 {
   Pixel_figure=Pixel_figure_preview;
-  Draw_empy_circle_general(center_x,center_y,radius,color);
+  Draw_empty_circle_general(center_x,center_y,radius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
@@ -1060,7 +1060,7 @@ void Draw_empy_circle_preview(short center_x,short center_y,short radius,byte co
 void Hide_empty_circle_preview(short center_x,short center_y,short radius)
 {
   Pixel_figure=Pixel_figure_clear_preview;
-  Draw_empy_circle_general(center_x,center_y,radius,0);
+  Draw_empty_circle_general(center_x,center_y,radius,0);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
@@ -1102,7 +1102,7 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
 
   // -- Tracer général d'une ellipse vide -----------------------------------
 
-void Draw_empy_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
+void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   short start_x;
   short start_y;
@@ -1181,19 +1181,19 @@ void Draw_empy_ellipse_general(short center_x,short center_y,short horizontal_ra
 
   // -- Tracé définitif d'une ellipse vide --
 
-void Draw_empy_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
+void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
-  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
+  Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
   Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
 
   // -- Tracer la preview d'une ellipse vide --
 
-void Draw_empy_ellipse_preview(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
+void Draw_empty_ellipse_preview(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   Pixel_figure=Pixel_figure_preview;
-  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
+  Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
   Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius +1);
 }
 
@@ -1202,7 +1202,7 @@ void Draw_empy_ellipse_preview(short center_x,short center_y,short horizontal_ra
 void Hide_empty_ellipse_preview(short center_x,short center_y,short horizontal_radius,short vertical_radius)
 {
   Pixel_figure=Pixel_figure_clear_preview;
-  Draw_empy_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,0);
+  Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,0);
   Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
 
