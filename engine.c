@@ -332,7 +332,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
 
 
 //---------------------- Désenclenchement d'un bouton ------------------------
-void Unselect_bouton(int btn_number)
+void Unselect_button(int btn_number)
 {
   if (Buttons_Pool[btn_number].Pressed)
   {
@@ -347,7 +347,7 @@ void Unselect_bouton(int btn_number)
 
 
 //-Enclenchement d'un bouton (et désenclenchement de ceux de la même famille)-
-void Unselect_button(int btn_number,byte click)
+void Select_button(int btn_number,byte click)
 {
   int family;
   int b;
@@ -393,7 +393,7 @@ void Unselect_button(int btn_number,byte click)
                ((b==BUTTON_MAGNIFIER) && (!Main_magnifier_mode)) )
            )
           // Alors on désenclenche le bouton
-          Unselect_bouton(b);
+          Unselect_button(b);
       break;
 
     default:
@@ -406,7 +406,7 @@ void Unselect_button(int btn_number,byte click)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Main_magnifier_mode && (b==BUTTON_MAGNIFIER))) )
           // Alors on désenclenche le bouton
-          Unselect_bouton(b);
+          Unselect_button(b);
       // Right-clicking on Adjust opens a menu, so in this case we skip
       // the unselection of all "Tool" buttons.
       if (btn_number==BUTTON_ADJUST && click==RIGHT_SIDE)
@@ -417,7 +417,7 @@ void Unselect_button(int btn_number,byte click)
         if ( (b!=btn_number)
           && (Buttons_Pool[b].Family==family) )
           // Alors on désenclenche le bouton
-          Unselect_bouton(b);
+          Unselect_button(b);
   }
 
   // On affiche le cadre autour du bouton de façon à ce qu'il paraisse enfoncé
@@ -694,10 +694,10 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_CONTINUOUS_DRAW : // Continuous freehand drawing
-          Unselect_button(BUTTON_DRAW,LEFT_SIDE);
+          Select_button(BUTTON_DRAW,LEFT_SIDE);
           // ATTENTION CE TRUC EST MOCHE ET VA MERDER SI ON SE MET A UTILISER DES BOUTONS POPUPS
           while (Current_operation!=OPERATION_CONTINUOUS_DRAW)
-            Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
+            Select_button(BUTTON_DRAW,RIGHT_SIDE);
           Key=0;
           break;
         case SPECIAL_FLIP_X : // Flip X
@@ -923,7 +923,7 @@ void Main_handler(void)
           // on lance le bouton.
           if (shortcut_button!=-1)
           {
-            Unselect_button(shortcut_button,clicked_button);
+            Select_button(shortcut_button,clicked_button);
             prev_button_number=-1;
           }
       }
@@ -1025,7 +1025,7 @@ void Main_handler(void)
         {
           if (button_index>=0)
           {
-            Unselect_button(button_index,Mouse_K);
+            Select_button(button_index,Mouse_K);
             prev_button_number=-1;
           }
         }

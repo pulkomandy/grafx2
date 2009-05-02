@@ -1628,7 +1628,7 @@ byte Button_Load_or_Save(byte load, byte image)
   if (temp)
     Display_menu();
 
-  Unselect_bouton((load)?BUTTON_LOAD:BUTTON_SAVE);
+  Unselect_button((load)?BUTTON_LOAD:BUTTON_SAVE);
   Display_cursor();
   Free_fileselector_list();
 

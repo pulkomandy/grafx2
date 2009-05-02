@@ -78,7 +78,7 @@ void Bouton_***(void)
   while (clicked_button!=1);
 
   Close_window();
-  Unselect_bouton(BOUTON_***);
+  Unselect_button(BOUTON_***);
   Display_cursor();
 }
 */
@@ -111,8 +111,8 @@ void Message_not_implemented(void)
   // ne sait pas lequel c'est, on les désenclenche tous. De toutes façons, ça
   // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
   // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
-//  Unselect_bouton(BUTTON_GRADRECT);
-//  Unselect_bouton(BUTTON_TEXT);
+//  Unselect_button(BUTTON_GRADRECT);
+//  Unselect_button(BUTTON_TEXT);
 
   Display_cursor();
 }
@@ -209,7 +209,7 @@ void Button_Undo(void)
   Compute_optimal_menu_colors(Main_palette);
 
   Display_all_screen();
-  Unselect_bouton(BUTTON_UNDO);
+  Unselect_button(BUTTON_UNDO);
   Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
@@ -224,7 +224,7 @@ void Button_Redo(void)
   Compute_optimal_menu_colors(Main_palette);
 
   Display_all_screen();
-  Unselect_bouton(BUTTON_UNDO);
+  Unselect_button(BUTTON_UNDO);
   Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
@@ -246,7 +246,7 @@ void Button_Pal_left(void)
       First_color_in_palette=0;
     Display_menu_palette();
   }
-  Unselect_bouton(BUTTON_PAL_LEFT);
+  Unselect_button(BUTTON_PAL_LEFT);
   Display_cursor();
 }
 
@@ -264,7 +264,7 @@ void Button_Pal_left_fast(void)
       First_color_in_palette=0;
     Display_menu_palette();
   }
-  Unselect_bouton(BUTTON_PAL_LEFT);
+  Unselect_button(BUTTON_PAL_LEFT);
   Display_cursor();
 }
 
@@ -282,7 +282,7 @@ void Button_Pal_right(void)
     Display_menu_palette();
   }
   
-  Unselect_bouton(BUTTON_PAL_RIGHT);
+  Unselect_button(BUTTON_PAL_RIGHT);
   Display_cursor();
 }
 
@@ -300,7 +300,7 @@ void Button_Pal_right_fast(void)
       First_color_in_palette=255/cells_y*cells_y-(cells_x-1)*cells_y;
     Display_menu_palette();
   }
-  Unselect_bouton(BUTTON_PAL_RIGHT);
+  Unselect_button(BUTTON_PAL_RIGHT);
   Display_cursor();
 }
 
@@ -405,7 +405,7 @@ void Button_Hide_menu(void)
     if (Main_magnifier_mode)
       Display_all_screen();
   }
-  Unselect_bouton(BUTTON_HIDE);
+  Unselect_button(BUTTON_HIDE);
   Display_cursor();
 }
 
@@ -493,7 +493,7 @@ void Button_Quit(void)
   if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
     Hide_cursor();
 
-  Unselect_bouton(BUTTON_QUIT);
+  Unselect_button(BUTTON_QUIT);
 
   if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
     Display_cursor();
@@ -510,7 +510,7 @@ void Button_Clear(void)
   else
     Hide_current_image(0);
   Display_all_screen();
-  Unselect_bouton(BUTTON_CLEAR);
+  Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
 
@@ -523,7 +523,7 @@ void Button_Clear_with_backcolor(void)
   else
     Hide_current_image(Back_color);
   Display_all_screen();
-  Unselect_bouton(BUTTON_CLEAR);
+  Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
  
@@ -983,7 +983,7 @@ void Button_Settings(void)
     Compute_optimal_menu_colors(Main_palette);
 
   Close_window();
-  Unselect_bouton(BUTTON_SETTINGS);
+  Unselect_button(BUTTON_SETTINGS);
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Display_menu();
   Display_cursor();
@@ -1091,7 +1091,7 @@ void Button_Page(void)
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
   Display_all_screen();
-  Unselect_bouton(BUTTON_PAGE);
+  Unselect_button(BUTTON_PAGE);
   Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
 
@@ -1218,7 +1218,7 @@ void Button_Copy_page(void)
   }
 
   Hide_cursor();
-  Unselect_bouton(BUTTON_PAGE);
+  Unselect_button(BUTTON_PAGE);
   Display_cursor();
 }
 
@@ -1232,7 +1232,7 @@ void Button_Kill(void)
     if (Main_backups->Nb_pages_allocated==1)
       Warning_message("You can't delete the last page.");
     Hide_cursor();
-    Unselect_bouton(BUTTON_KILL);
+    Unselect_button(BUTTON_KILL);
     Display_cursor();
   }
   else
@@ -1244,7 +1244,7 @@ void Button_Kill(void)
     Compute_optimal_menu_colors(Main_palette);
 
     Display_all_screen();
-    Unselect_bouton(BUTTON_KILL);
+    Unselect_button(BUTTON_KILL);
     Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
     Display_menu();
     Display_cursor();
@@ -1634,7 +1634,7 @@ void Button_Resolution(void)
   if (clicked_button==1) // OK
   {
     if (Main_magnifier_mode)
-      Unselect_bouton(BUTTON_MAGNIFIER);
+      Unselect_button(BUTTON_MAGNIFIER);
 
     if ( (chosen_width!=Main_image_width)
       || (chosen_height!=Main_image_height) )
@@ -1664,7 +1664,7 @@ void Button_Resolution(void)
   Paintbrush_Y = Mouse_Y;
 
 
-  Unselect_bouton(BUTTON_RESOL);
+  Unselect_button(BUTTON_RESOL);
   Display_cursor();
 }
 
@@ -1673,14 +1673,14 @@ void Button_Safety_resolution(void)
 {
   Hide_cursor();
 
-  Unselect_bouton(BUTTON_MAGNIFIER);
+  Unselect_button(BUTTON_MAGNIFIER);
   Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
   Current_resolution=0;
   Display_menu();
   Reposition_palette();
   Display_all_screen();
 
-  Unselect_bouton(BUTTON_RESOL);
+  Unselect_button(BUTTON_RESOL);
   // Le pinceau est affiché à la position du clic et pas 
   Display_cursor();
 }
@@ -2098,7 +2098,7 @@ void Button_Gradients(void)
   while (clicked_button<6);
 
   Close_window();
-  Unselect_bouton(BUTTON_GRADMENU);
+  Unselect_button(BUTTON_GRADMENU);
   Display_cursor();
 
   Gradient_pixel=Display_pixel;
@@ -2239,7 +2239,7 @@ void Button_Paintbrush_menu(void)
     Change_paintbrush_shape(Paintbrush_type[index]);
   }
 
-  Unselect_bouton(BUTTON_PAINTBRUSHES);
+  Unselect_button(BUTTON_PAINTBRUSHES);
   Display_cursor();
 }
 
@@ -2250,7 +2250,7 @@ void Button_Brush_monochrome(void)
   // On passe en brosse monochrome:
   Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
 
-  Unselect_bouton(BUTTON_PAINTBRUSHES);
+  Unselect_button(BUTTON_PAINTBRUSHES);
 
   Display_cursor();
 }
@@ -2466,12 +2466,12 @@ void Load_picture(byte image)
       Main_image_height=initial_main_image_height;
       Pixel_load_function=Pixel_load_in_current_screen;
 
-      Unselect_button(BUTTON_DRAW,LEFT_SIDE);
+      Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
         // On se place en mode Dessin discontinu à la main
         while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-          Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
+          Select_button(BUTTON_DRAW,RIGHT_SIDE);
       }
       Hide_cursor();
       // On passe en brosse couleur:
@@ -2626,7 +2626,7 @@ void Button_Reload(void)
   if (Config.Display_image_limits)
     Display_image_limits();
 
-  Unselect_bouton(BUTTON_LOAD);
+  Unselect_button(BUTTON_LOAD);
 
   Display_cursor();
 }
@@ -2792,7 +2792,7 @@ void Button_Autosave(void)
   else
     Hide_cursor();
 
-  Unselect_bouton(BUTTON_SAVE);
+  Unselect_button(BUTTON_SAVE);
 
   Display_cursor();
 }
@@ -2836,7 +2836,7 @@ void Button_Brush(void)
   if (Current_operation!=OPERATION_GRAB_BRUSH)
     Start_operation_stack(OPERATION_GRAB_BRUSH);
   else
-    Unselect_bouton(BUTTON_BRUSH);
+    Unselect_button(BUTTON_BRUSH);
 
   Display_cursor();
 }
@@ -2855,8 +2855,8 @@ void Button_Restore_brush(void)
   // On passe en brosse couleur:
   Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  Unselect_bouton(BUTTON_BRUSH);
-  Unselect_bouton(BUTTON_POLYBRUSH);
+  Unselect_button(BUTTON_BRUSH);
+  Unselect_button(BUTTON_POLYBRUSH);
 
   Display_cursor();
 }
@@ -2875,7 +2875,7 @@ void Button_Lasso(void)
     Start_operation_stack(OPERATION_POLYBRUSH);
   }
   else
-    Unselect_bouton(BUTTON_POLYBRUSH);
+    Unselect_button(BUTTON_POLYBRUSH);
 
   Display_cursor();
 }
@@ -2907,7 +2907,7 @@ void Button_Colorpicker(void)
         Print_in_menu("X:       Y:       (    )",0);
   }
   else
-    Unselect_bouton(BUTTON_COLORPICKER);
+    Unselect_button(BUTTON_COLORPICKER);
 
   Display_cursor();
 }
@@ -2947,7 +2947,7 @@ void Button_Invert_foreback(void)
   Frame_menu_color(MC_White);
 
   Display_foreback();
-  Unselect_bouton(BUTTON_COLORPICKER);
+  Unselect_button(BUTTON_COLORPICKER);
 
   Display_cursor();
 }
@@ -2962,7 +2962,7 @@ void Button_Magnify(void)
   Hide_cursor();
   if ( (Current_operation==OPERATION_MAGNIFY) || (Main_magnifier_mode) )
   {
-    Unselect_bouton(BUTTON_MAGNIFIER);
+    Unselect_button(BUTTON_MAGNIFIER);
   }
   else
   {
@@ -3059,7 +3059,7 @@ void Button_Magnify_menu(void)
   }
 
   if ( (clicked_button==1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
-    Unselect_bouton(BUTTON_MAGNIFIER);
+    Unselect_button(BUTTON_MAGNIFIER);
 
   Display_all_screen();
   Display_cursor();
@@ -3068,7 +3068,7 @@ void Button_Magnify_menu(void)
   if ( (clicked_button>1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
   {
     Coming_from_zoom_factor_menu=1;
-    Unselect_button(BUTTON_MAGNIFIER,LEFT_SIDE);
+    Select_button(BUTTON_MAGNIFIER,LEFT_SIDE);
   }
 
 }
@@ -3364,7 +3364,7 @@ void Button_Brush_FX(void)
   while (clicked_button<=0);
 
   Close_window();
-  Unselect_bouton(BUTTON_BRUSH_EFFECTS);
+  Unselect_button(BUTTON_BRUSH_EFFECTS);
 
   // Gestion du bouton clické
   switch (clicked_button)
@@ -4184,7 +4184,7 @@ void Button_Airbrush_menu(void)
   if (clicked_button==1) // Cancel
   {
     if (Current_operation!=OPERATION_AIRBRUSH)
-      Unselect_bouton(BUTTON_AIRBRUSH);
+      Unselect_button(BUTTON_AIRBRUSH);
   }
 */
 
@@ -4194,7 +4194,7 @@ void Button_Airbrush_menu(void)
   if (clicked_button==2) // OK
 */
     if (Current_operation!=OPERATION_AIRBRUSH)
-      Unselect_button(BUTTON_AIRBRUSH,LEFT_SIDE);
+      Select_button(BUTTON_AIRBRUSH,LEFT_SIDE);
 }
 
 
@@ -5025,7 +5025,7 @@ void Button_Effects(void)
     Hide_cursor();
 
   if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode))
-    Unselect_bouton(BUTTON_EFFECTS);
+    Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();
 }
@@ -5399,7 +5399,7 @@ void Button_Text()
       {
         // Si echec de rendu
         Close_window();
-        Unselect_bouton(BUTTON_TEXT);
+        Unselect_button(BUTTON_TEXT);
         Display_cursor();
         Error(0);
         return;
@@ -5414,7 +5414,7 @@ void Button_Text()
  
       // Fermeture
       Close_window();
-      Unselect_bouton(BUTTON_TEXT);
+      Unselect_button(BUTTON_TEXT);
       
       // On passe en brosse:
       Display_cursor();
@@ -5423,12 +5423,12 @@ void Button_Text()
       else
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
 
-      Unselect_button(BUTTON_DRAW,LEFT_SIDE);
+      Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
         // On se place en mode Dessin discontinu à la main
         while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-          Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
+          Select_button(BUTTON_DRAW,RIGHT_SIDE);
       }
       //Display_cursor();
       return;
@@ -5437,7 +5437,7 @@ void Button_Text()
       if (new_brush)
         free(new_brush);
       Close_window();
-      Unselect_bouton(BUTTON_TEXT);
+      Unselect_button(BUTTON_TEXT);
       Display_cursor();
       return;
     }

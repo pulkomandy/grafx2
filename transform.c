@@ -335,7 +335,7 @@ void Button_Transform_menu(void)
   
   // The Scroll operation uses the same button as transformation menu.
   if (Current_operation != OPERATION_SCROLL)
-    Unselect_bouton(BUTTON_ADJUST);
+    Unselect_button(BUTTON_ADJUST);
 
   if (clicked_button != 1) // 1 is Cancel
   {

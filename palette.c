@@ -2073,7 +2073,7 @@ void Button_Palette(void)
   need_to_remp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();
-  Unselect_bouton(BUTTON_PALETTE);
+  Unselect_button(BUTTON_PALETTE);
 
   Reposition_palette();
 
@@ -2089,7 +2089,7 @@ void Button_Palette(void)
   {
     Set_palette(Main_palette);
     if (image_is_backed_up)
-      Unselect_button(BUTTON_UNDO,LEFT_SIDE);
+      Select_button(BUTTON_UNDO,LEFT_SIDE);
   }
 
   free(backup_palette);
@@ -2189,7 +2189,7 @@ void Button_Secondary_palette(void)
   rgb_scale=256-rgb_scale_slider->Position;
 
   Close_window();
-  Unselect_bouton(BUTTON_PALETTE);
+  Unselect_button(BUTTON_PALETTE);
   Display_cursor();
   
   if (clicked_button==4) // Cancel

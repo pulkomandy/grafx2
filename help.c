@@ -578,7 +578,7 @@ void Window_help(int section, const char *sub_section)
 
   if(Key==SDLK_RETURN) Key=0;
   Close_window();
-  Unselect_bouton(BUTTON_HELP);
+  Unselect_button(BUTTON_HELP);
   Display_cursor();
 }
 
@@ -693,7 +693,7 @@ void Button_Stats(void)
   if(Key==SDLK_RETURN)Key=0;
 
   Close_window();
-  Unselect_bouton(BUTTON_HELP);
+  Unselect_button(BUTTON_HELP);
   Display_cursor();
 }
 

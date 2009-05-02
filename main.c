@@ -622,7 +622,7 @@ int Init_program(int argc,char * argv[])
   Init_sighandler();
 
   // Le programme débute en mode de dessin à la main
-  Unselect_button(BUTTON_DRAW,LEFT_SIDE);
+  Select_button(BUTTON_DRAW,LEFT_SIDE);
 
   // On initialise la brosse initiale à 1 pixel blanc:
   Brush_width=1;

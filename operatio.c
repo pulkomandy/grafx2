@@ -167,12 +167,12 @@ void Return_to_draw_mode(void)
   if (Mouse_K)
     Wait_end_of_click();
   // !!! Efface la croix puis affiche le viseur !!!
-  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
+  Select_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
     // On se place en mode Dessin discontinu à la main
     while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
+      Select_button(BUTTON_DRAW,RIGHT_SIDE);
   }
   // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
   // d'appel à cette action:
@@ -1544,7 +1544,7 @@ void Colorpicker_0_1(void)
     Back_color=Colorpicker_color;
     Display_foreback();
   }
-  Unselect_bouton(BUTTON_COLORPICKER);
+  Unselect_button(BUTTON_COLORPICKER);
 }
 
 

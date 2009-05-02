@@ -26,8 +26,8 @@
 
 void Main_handler            (void);
 void Draw_menu_button_frame(byte btn_number,byte pressed);
-void Unselect_bouton          (int btn_number);
-void Unselect_button             (int btn_number,byte click);
+void Unselect_button          (int btn_number);
+void Select_button             (int btn_number,byte click);
 void Cancel_effects            (void);
 void Restore_effects          (void);
 void Open_window                (word width,word height, char * title);
