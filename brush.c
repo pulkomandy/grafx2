@@ -1293,7 +1293,7 @@ void Stretch_brush_preview(short x1, short y1, short x2, short y2)
 }
 
 /// Returns the minimum of 4 integers.
-inline int Min4(int a,int b,int c,int d)
+int Min4(int a,int b,int c,int d)
 {
   if (a<b)
     if (c<d)
@@ -1321,7 +1321,7 @@ void Pixel_in_distort_buffer(word x_pos,word y_pos,byte color)
 }
 
 /// Returns the maximum of 4 integers.
-inline int Max4(int a,int b,int c,int d)
+int Max4(int a,int b,int c,int d)
 {
   if (a>b)
     if (c>d)
