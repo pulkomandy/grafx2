@@ -1367,11 +1367,15 @@ void Button_Resolution(void)
   char  str[5];
   T_Special_button * input_width_button, * input_button_height;
   T_Dropdown_button * pixel_button;
-  static const char *pixel_ratio_labels[] ={
-    "Normal (1x1)",
-    "Wide   (2x1)",
-    "Tall   (1x2)",
-    "Double (2x2)"};
+  static const char *pixel_ratio_labels[PIXEL_MAX] ={
+    "Normal    (1x1)",
+    "Wide      (2x1)",
+    "Tall      (1x2)",
+    "Double    (2x2)",
+    "Triple    (3x3)",
+    "Wide2     (4x2)",
+    "Tall2     (2x4)",
+    "Quadruple (4x4)"};
 
   Open_window(299,190,"Picture & screen sizes");
 
@@ -1423,11 +1427,9 @@ void Button_Resolution(void)
 
   chosen_pixel=Pixel_ratio;
   Print_in_window( 12, 57,"Pixel size:"    ,MC_Dark,MC_Light);
-  pixel_button=Window_set_dropdown_button(108,55,14*8,11,14*8,pixel_ratio_labels[Pixel_ratio],1,0,1,LEFT_SIDE|RIGHT_SIDE);    // 7
-  Window_dropdown_add_item(pixel_button,PIXEL_SIMPLE,pixel_ratio_labels[PIXEL_SIMPLE]);
-  Window_dropdown_add_item(pixel_button,PIXEL_WIDE,pixel_ratio_labels[PIXEL_WIDE]);
-  Window_dropdown_add_item(pixel_button,PIXEL_TALL,pixel_ratio_labels[PIXEL_TALL]);
-  Window_dropdown_add_item(pixel_button,PIXEL_DOUBLE,pixel_ratio_labels[PIXEL_DOUBLE]);
+  pixel_button=Window_set_dropdown_button(108,55,17*8,11,17*8,pixel_ratio_labels[Pixel_ratio],1,0,1,LEFT_SIDE|RIGHT_SIDE);    // 7
+  for (temp=0;temp<PIXEL_MAX;temp++)
+    Window_dropdown_add_item(pixel_button,temp,pixel_ratio_labels[temp]);
 
   // 10 little buttons for the state of each visible mode
   for (temp=0; temp<MODELIST_LINES && temp < Nb_video_modes; temp++)
@@ -3368,22 +3370,17 @@ void Button_Brush_FX(void)
   switch (clicked_button)
   {
     case  2 : // Flip X
-      Flip_X_lowlevel();
+      Flip_X_lowlevel(Brush, Brush_width, Brush_height);
       break;
     case  3 : // Flip Y
-      Flip_Y_lowlevel();
+      Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
       break;
     case  4 : // 90° Rotation
       Rotate_90_deg();
       break;
     case  5 : // 180° Rotation
       if (Brush_height&1)
-      { // Brush de hauteur impaire
-        Flip_X_lowlevel();
-        Flip_Y_lowlevel();
-      }
-      else
-        Rotate_180_deg_lowlevel();
+      Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
       Brush_offset_X=(Brush_width>>1);
       Brush_offset_Y=(Brush_height>>1);
       break;
@@ -3394,9 +3391,7 @@ void Button_Brush_FX(void)
       Start_operation_stack(OPERATION_STRETCH_BRUSH);
       break;
     case  8 : // Distort
-      Display_cursor();
-      Message_not_implemented(); // !!! TEMPORAIRE !!!
-      Hide_cursor();
+      Start_operation_stack(OPERATION_DISTORT_BRUSH);
       break;
     case  9 : // Recolorize
       Remap_brush();

@@ -66,6 +66,8 @@
 #include "mountlist.h" // read_file_system_list
 #include "loadsave.h" // Image_emergency_backup
 #include "init.h"
+#include "transform.h"
+
 
 // Rechercher la liste et le type des lecteurs de la machine
 
@@ -822,12 +824,11 @@ void Init_buttons(void)
                      Do_nothing,
                      FAMILY_INSTANT);
 
-// !!! TEMPORAIRE !!!
   Init_button(BUTTON_ADJUST,
                      0,18,
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Adjust,Message_not_implemented,
+                     Button_Adjust,Button_Transform_menu,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1321,6 +1322,22 @@ void Init_operations(void)
                         Rotate_brush_0_5,0);
   Init_operation(OPERATION_ROTATE_BRUSH,2,5,
                         Rotate_brush_2_5,1);
+
+  Init_operation(OPERATION_DISTORT_BRUSH,0,0,
+                        Distort_brush_0_0,0);
+  Init_operation(OPERATION_DISTORT_BRUSH,1,0,
+                        Distort_brush_1_0,0);
+  Init_operation(OPERATION_DISTORT_BRUSH,1,8,
+                        Distort_brush_1_8,0);
+  Init_operation(OPERATION_DISTORT_BRUSH,2,8,
+                        Distort_brush_2_8,1);
+  Init_operation(OPERATION_DISTORT_BRUSH,2,0,
+                        Distort_brush_2_0,1);
+  Init_operation(OPERATION_DISTORT_BRUSH,1,9,
+                        Distort_brush_1_9,0);
+  Init_operation(OPERATION_DISTORT_BRUSH,0,9,
+                        Distort_brush_0_9,0);
+
 
   Init_operation(OPERATION_POLYBRUSH,1,0,
                         Filled_polyform_12_0,1);

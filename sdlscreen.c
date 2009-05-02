@@ -28,14 +28,17 @@
 #include "errors.h"
 #include "misc.h"
 
-// Mise à jour minimaliste en nombre de pixels
+// Update method that does a large number of small rectangles, aiming
+// for a minimum number of total pixels updated.
 #define UPDATE_METHOD_MULTI_RECTANGLE 1
-// Mise à jour intermédiaire, par rectangle inclusif.
+// Intermediate update method, does only one update with the smallest
+// rectangle that includes all modified pixels.
 #define UPDATE_METHOD_CUMULATED       2
-// Mise à jour totale, pour les plate-formes qui imposent un Vsync à chaque mise à jour écran.
-#define UPDATE_METHOD_FULL_PAGE     3
+// Total screen update, for platforms that impose a Vsync on each SDL update.
+#define UPDATE_METHOD_FULL_PAGE       3
 
-// UPDATE_METHOD peut être fixé depuis le makefile, sinon c'est ici:
+// UPDATE_METHOD can be set from makefile, otherwise it's selected here
+// depending on the platform :
 #ifndef UPDATE_METHOD
   #if defined(__macosx__) || defined(__FreeBSD__)
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
@@ -44,13 +47,13 @@
   #endif
 #endif
 
+/// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
-/* On règle la résolution de l'écran */
 {
   Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
   if(Screen_SDL != NULL)
   {
-    // Vérification du mode obtenu (ce n'est pas toujours celui demandé)
+    // Check the mode we got, in case it was different from the one we requested.
     if (Screen_SDL->w != *width || Screen_SDL->h != *height)
     {
       DEBUG("Error: Got a different video mode than the requested one!",0);
@@ -62,7 +65,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   else
     DEBUG("Error: Unable to change video mode!",0);
 
-  SDL_ShowCursor(0); // Cache le curseur SDL, on le gère en soft
+  SDL_ShowCursor(0); // Hide the SDL mouse cursor, we use our own
 }
 
 #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -79,7 +82,7 @@ short Max_Y=10000;
 void Flush_update(void)
 {
 #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
-  // Mise à jour de la totalité de l'écran
+  // Do a full screen update
   if (update_is_required)
   {
     SDL_UpdateRect(Screen_SDL, 0, 0, 0, 0);
@@ -89,7 +92,7 @@ void Flush_update(void)
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
   if (Min_X>=Max_X || Min_Y>=Max_Y)
   {
-    ; // Rien a faire
+    ; // Nothing to do
   }
   else
   {
@@ -137,9 +140,10 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 
 }
 
-// Convertit une SDL_Surface (couleurs indexées ou RGB) en tableau de bytes (couleurs indexées)
-// Si on passe NULL comme destination, elle est allouée par malloc(). Sinon,
-// attention aux dimensions!
+// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
+// (indexed colors).
+// If dest is NULL, it's allocated by malloc(). Otherwise, be sure to
+// pass a buffer of the right dimensions.
 byte * Surface_to_bytefield(SDL_Surface *source, byte * dest)
 {
   byte *src;
@@ -171,7 +175,7 @@ byte * Surface_to_bytefield(SDL_Surface *source, byte * dest)
 
 }
 
-// Convertit un index de palette en couleur RGB 24 bits
+/// Gets the RGB 24-bit color currently associated with a palette index.
 SDL_Color Color_to_SDL_color(byte index)
 {
   SDL_Color color;
@@ -182,9 +186,50 @@ SDL_Color Color_to_SDL_color(byte index)
   return color;
 }
 
-// Lecture d'un pixel pour une surface SDL.
-// Attention, ne fonctionne que pour les surfaces 8-bit
+// Reads a pixel in a SDL surface.
+// Warning, this is only suitable for 8-bit surfaces.
 byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
 {
   return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
 }
+
+void Clear_screen(byte color)
+{
+  memset(Screen_SDL->pixels,color,Screen_SDL->pitch*Screen_SDL->h);
+  Update_rect(0,0,0,0);
+}
+
+void Clear_border(byte color)
+{
+  int width;
+  int height;
+  
+  // This function can be called before the graphics mode is set.
+  // Nothing to do then.
+  if (!Screen_SDL)
+    return;
+  
+  width = Screen_SDL->w - Screen_width*Pixel_width;
+  height = Screen_SDL->h - Screen_height*Pixel_height;
+  if (width)
+  {
+    SDL_Rect r;
+    r.x=Screen_SDL->w - width;
+    r.y=0;
+    r.h=Screen_SDL->h;
+    r.w=width;
+    SDL_FillRect(Screen_SDL,&r,color);
+    SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+  }
+  if (height)
+  {
+    SDL_Rect r;
+    r.x=0;
+    r.y=Screen_SDL->h - height;
+    r.h=height;
+    r.w=Screen_SDL->w - height;
+    SDL_FillRect(Screen_SDL,&r,color);
+    SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+  }  
+}
+

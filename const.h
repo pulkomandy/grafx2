@@ -153,6 +153,10 @@ enum PIXEL_RATIO
     PIXEL_WIDE,
     PIXEL_TALL,
     PIXEL_DOUBLE,
+    PIXEL_TRIPLE,
+    PIXEL_WIDE2,
+    PIXEL_TALL2,
+    PIXEL_QUAD,
     PIXEL_MAX ///< Number of elements in enum
 };
 

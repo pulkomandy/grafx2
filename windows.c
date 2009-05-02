@@ -2394,6 +2394,7 @@ void Remap_screen_after_menu_colors_change(void)
       // On passe la table juste pour ne rafficher que les couleurs modifiées
       Display_menu_palette_avoiding_window(conversion_table);
     }
+    Clear_border(MC_Black);
   }
 
 }
@@ -2529,4 +2530,5 @@ void Compute_optimal_menu_colors(T_Components * palette)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
           Remap_pixel(&GFX_icon_sprite[k][j][i]);
   }
+  Clear_border(MC_Black);
 }

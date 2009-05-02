@@ -84,10 +84,52 @@ byte Effect_additive_colorize    (word x,word y,byte color);
 byte Effect_substractive_colorize(word x,word y,byte color);
 byte Effect_sieve(word x,word y);
 
-void Flip_Y_lowlevel(void);
-void Flip_X_lowlevel(void);
-void Rotate_90_deg_lowlevel(byte * source,byte * dest);
-void Rotate_180_deg_lowlevel(void);
+///
+/// Inverts a pixel buffer, according to a horizontal axis.
+/// @param src    Pointer to the pixel buffer to process.
+/// @param width  Width of the buffer.
+/// @param height Height of the buffer.
+void Flip_Y_lowlevel(byte *src, short width, short height);
+
+///
+/// Inverts a pixel buffer, according to a vertical axis.
+/// @param src    Pointer to the pixel buffer to process.
+/// @param width  Width of the buffer.
+/// @param height Height of the buffer.
+void Flip_X_lowlevel(byte *src, short width, short height);
+///
+/// Rotate a pixel buffer by 90 degrees, clockwise.
+/// @param source Source pixel buffer.
+/// @param dest Destination pixel buffer.
+/// @param width Width of the original buffer (height of the destination one).
+/// @param height Height of the original buffer (width of the destination one).
+void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height);
+///
+/// Rotate a pixel buffer by 90 degrees, counter-clockwise.
+/// @param source Source pixel buffer.
+/// @param dest Destination pixel buffer.
+/// @param width Width of the original buffer (height of the destination one).
+/// @param height Height of the original buffer (width of the destination one).
+void Rotate_270_deg_lowlevel(byte * source, byte * dest, short width, short height);
+///
+/// Rotate a pixel buffer by 180 degrees.
+/// @param src The pixel buffer (source and destination).
+/// @param width Width of the buffer.
+/// @param height Height of the buffer.
+void Rotate_180_deg_lowlevel(byte *src, short width, short height);
+
+///
+/// Copies an image to another, rescaling it and optionally flipping it.
+/// @param src_buffer Original image (address of first byte)
+/// @param src_width  Original image's width in pixels
+/// @param src_height Original image's height in pixels
+/// @param dst_buffer Destination image (address of first byte)
+/// @param dst_width  Destination image's width in pixels
+/// @param dst_height Destination image's height in pixels
+/// @param x_flipped  Boolean, true to flip the image horizontally
+/// @param y_flipped  Boolean, true to flip the image vertically
+void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buffer, short dst_width, short dst_height, short x_flipped, short y_flipped);
+
 void Zoom_a_line(byte * original_line,byte * zoomed_line,word factor,word width);
 void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,word width,word height,word source_width,byte * dest,word dest_x,word dest_y,word destination_width);
 

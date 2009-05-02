@@ -79,14 +79,18 @@ static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "base.gif
 void Display_syntax(void)
 {
   int mode_index;
-  printf("Syntax: GFX2 [<arguments>] [<picture>]\n\n");
+  printf("Syntax: grafx2 [<arguments>] [<picture>]\n\n");
   printf("<arguments> can be:]\n");
-  printf("\t/? /h /help        for this help screen\n");
-  printf("\t/wide              to emulate a video mode with wide pixels (2x1)\n");
-  printf("\t/tall              to emulate a video mode with tall pixels (1x2)\n");
-  printf("\t/double            to emulate a video mode with double pixels (2x2)\n");
-  printf("\t/skin <filename>   use an alternate file with the menu graphics\n");
-  printf("\t/mode <videomode>  to set a video mode\n\n");
+  printf("\t/? /h /help       for this help screen\n");
+  printf("\t/wide             to emulate a video mode with wide pixels (2x1)\n");
+  printf("\t/tall             to emulate a video mode with tall pixels (1x2)\n");
+  printf("\t/double           to emulate a video mode with double pixels (2x2)\n");
+  printf("\t/wide2            to emulate a video mode with double wide pixels (4x2)\n");
+  printf("\t/tall2            to emulate a video mode with double tall pixels (2x4)\n");
+  printf("\t/triple           to emulate a video mode with triple pixels (3x3)\n");
+  printf("\t/quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
+  printf("\t/skin <filename>  use an alternate file with the menu graphics\n");
+  printf("\t/mode <videomode> to set a video mode\n\n");
   printf("Available video modes:\n\n");
   for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
     printf("\t%s\n",Mode_label(mode_index));
@@ -216,6 +220,22 @@ void Analyze_command_line(int argc,char * argv[])
     else if ( !strcmp(argv[index],"/double") )
     {
       Pixel_ratio = PIXEL_DOUBLE;
+    }
+    else if ( !strcmp(argv[index],"/triple") )
+    {
+      Pixel_ratio = PIXEL_DOUBLE;
+    }
+    else if ( !strcmp(argv[index],"/quadruple") )
+    {
+      Pixel_ratio = PIXEL_QUAD;
+    }
+    else if ( !strcmp(argv[index],"/tall2") )
+    {
+      Pixel_ratio = PIXEL_TALL2;
+    }
+    else if ( !strcmp(argv[index],"/wide2") )
+    {
+      Pixel_ratio = PIXEL_WIDE2;
     }
     else if ( !strcmp(argv[index],"/rgb") )
     {

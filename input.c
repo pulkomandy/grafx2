@@ -88,12 +88,25 @@ int Is_shortcut(word Key, word function)
 int Move_cursor_with_constraints()
 {
   int feedback=0;
+  byte bl=0;//BL va indiquer si on doit corriger la position du curseur
   
+  // Clip mouse to the editing area. There can be a border when using big 
+  // pixels, if the SDL screen dimensions are not factors of the pixel size.
+  if (Input_new_mouse_Y>=Screen_height)
+  {
+      Input_new_mouse_Y=Screen_height-1;
+      bl=1;
+  }
+  if (Input_new_mouse_X>=Screen_width)
+  {
+      Input_new_mouse_X=Screen_width-1;
+      bl=1;
+  }
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
   if (Operation_stack_size != 0)
   {
-        byte bl=0;//BL va indiquer si on doit corriger la position du curseur
+        
 
         //Si le curseur ne se trouve plus dans l'image
         if(Menu_Y<=Input_new_mouse_Y)
@@ -122,14 +135,13 @@ int Move_cursor_with_constraints()
                 }
             }
         }
-
-        if (bl)
-        {
-            SDL_WarpMouse(
-                    Input_new_mouse_X*Pixel_width,
-                    Input_new_mouse_Y*Pixel_height
-                    );
-        }
+  }
+  if (bl)
+  {
+      SDL_WarpMouse(
+              Input_new_mouse_X*Pixel_width,
+              Input_new_mouse_Y*Pixel_height
+              );
   }
   if ((Input_new_mouse_X != Mouse_X) ||
     (Input_new_mouse_Y != Mouse_Y) ||

@@ -31,15 +31,30 @@
 #include <SDL.h>
 #include "struct.h"
 
-  void Set_mode_SDL(int *,int *,int);
+///
+/// This is the number of bytes in a video line for the current mode.
+/// On many platforms it will be the video mode's width (in pixels), rounded up
+/// to be a multiple of 4.
+#define VIDEO_LINE_WIDTH (Screen_SDL->pitch)
 
-  SDL_Rect ** List_SDL_video_modes;
-  byte* Screen_pixels;
+void Set_mode_SDL(int *,int *,int);
 
-  void Update_rect(short x, short y, unsigned short width, unsigned short height);
-  void Flush_update(void);
-  byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
-  SDL_Color Color_to_SDL_color(byte);
-  byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
+SDL_Rect ** List_SDL_video_modes;
+byte* Screen_pixels;
+
+void Update_rect(short x, short y, unsigned short width, unsigned short height);
+void Flush_update(void);
+byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
+SDL_Color Color_to_SDL_color(byte);
+byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
+
+/// Fills the SDL screen with a given color
+void Clear_screen(byte color);
+
+///
+/// Clears the parts of screen that are outside of the editing area.
+/// There is such area only if the screen mode is not a multiple of the pixel
+/// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
+void Clear_border(byte color);
   
 #endif // SDLSCREEN_H_INCLUDED

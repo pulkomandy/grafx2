@@ -97,22 +97,16 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
 void Polyfill_general(int vertices, short * points, int color);
 void Polyfill(int vertices, short * points, int color);
 
-// Gestion des backups:
-void Download_infos_page_main(T_Page * page);
-void Download_infos_page_spare(T_Page * page);
-void Download_infos_backup(T_List_of_pages * list);
-void Free_all_backup_lists(void);
-int  Backup_with_new_dimensions(int upload,int width,int height);
-int  Backup_and_resize_the_spare(int width,int height);
-void Undo(void);
-void Redo(void);
-void Free_current_page(void);
-void Exchange_main_and_spare(void);
-
-void Change_magnifier_factor(byte factor_index);
-
 void Remap_picture(void);
 
-// Définition d'une fonction générique de traçage de figures:
-Func_pixel Pixel_figure;
+///
+/// All the figure-drawing functions work by calling this function for each
+/// pixel to draw. Before calling these functions, you should assign
+/// ::Pixel_figure depending on what you where you want to draw:
+/// - ::Pixel_figure_preview : On screen.
+/// - ::Pixel_figure_preview_xor : On screen, XORing the color.
+/// - ::Pixel_figure_permanent : On screen and in the image.
+/// - ::Pixel_figure_clear_preview : On screen, reverting to the image's pixels.
+extern Func_pixel Pixel_figure;
+
 void Update_part_of_screen(short x, short y, short width, short height);

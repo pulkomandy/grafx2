@@ -106,7 +106,7 @@ void Restore_effects(void)
 char * Menu_tooltip[NB_BUTTONS]=
 {
   "Paintbrush choice       ",
-  "Adjust picture / Effects",
+  "Adjust / Transform menu ",
   "Freehand draw. / Toggle ",
   "Splines / Toggle        ",
   "Lines / Toggle          ",
@@ -407,6 +407,10 @@ void Unselect_button(int btn_number,byte click)
           && (!(Main_magnifier_mode && (b==BUTTON_MAGNIFIER))) )
           // Alors on désenclenche le bouton
           Unselect_bouton(b);
+      // Right-clicking on Adjust opens a menu, so in this case we skip
+      // the unselection of all "Tool" buttons.
+      if (btn_number==BUTTON_ADJUST && click==RIGHT_SIDE)
+        break;
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la même famille
@@ -698,13 +702,13 @@ void Main_handler(void)
           break;
         case SPECIAL_FLIP_X : // Flip X
           Hide_cursor();
-          Flip_X_lowlevel();
+          Flip_X_lowlevel(Brush, Brush_width, Brush_height);
           Display_cursor();
           Key=0;
           break;
         case SPECIAL_FLIP_Y : // Flip Y
           Hide_cursor();
-          Flip_Y_lowlevel();
+          Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
           Display_cursor();
           Key=0;
           break;
@@ -716,14 +720,7 @@ void Main_handler(void)
           break;
         case SPECIAL_ROTATE_180 : // 180° brush rotation
           Hide_cursor();
-          if (Brush_height&1)
-          {
-            // Brush de hauteur impaire
-            Flip_X_lowlevel();
-            Flip_Y_lowlevel();
-          }
-          else
-            Rotate_180_deg_lowlevel();
+          Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
           Brush_offset_X=(Brush_width>>1);
           Brush_offset_Y=(Brush_height>>1);
           Display_cursor();
@@ -736,7 +733,9 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_DISTORT : // Distort brush
-          Message_not_implemented(); // !!! TEMPORAIRE !!!
+          Hide_cursor();
+          Start_operation_stack(OPERATION_DISTORT_BRUSH);
+          Display_cursor();
           Key=0;
           break;
         case SPECIAL_ROTATE_ANY_ANGLE : // Rotate brush by any angle

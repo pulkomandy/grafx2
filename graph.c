@@ -42,7 +42,14 @@
 #include "pxtall.h"
 #include "pxwide.h"
 #include "pxdouble.h"
+#include "pxtriple.h"
+#include "pxwide2.h"
+#include "pxtall2.h"
+#include "pxquad.h"
 #include "windows.h"
+
+// Generic pixel-drawing function.
+Func_pixel Pixel_figure;
 
 // Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
 // Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
@@ -177,7 +184,6 @@ void Transform_point(short x, short y, float cos_a, float sin_a,
 }
 
 
-
 //--------------------- Initialisation d'un mode vidéo -----------------------
 
 int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
@@ -213,6 +219,22 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
           pix_width=2;
           pix_height=2;
       break;
+      case PIXEL_TRIPLE:
+          pix_width=3;
+          pix_height=3;
+      break;
+      case PIXEL_WIDE2:
+          pix_width=4;
+          pix_height=2;
+      break;
+      case PIXEL_TALL2:
+          pix_width=2;
+          pix_height=4;
+      break;
+      case PIXEL_QUAD:
+          pix_width=4;
+          pix_height=4;
+      break;
   }
 
   screen_changed = (Screen_width*Pixel_width!=width ||
@@ -246,7 +268,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
       // On AmigaOS the systems adds some more constraints on that ...
       width = (width + 15) & 0xFFFFFFF0;
   #else
-      width = (width + 3 ) & 0xFFFFFFFC;
+      //width = (width + 3 ) & 0xFFFFFFFC;
   #endif  
 
   pixels_changed = (Pixel_ratio!=pix_ratio);
@@ -257,6 +279,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   {
     Set_mode_SDL(&width, &height,fullscreen);
   }
+  Clear_border(MC_Black);
   if (screen_changed || pixels_changed)
   {
     Pixel_ratio=pix_ratio;
@@ -352,6 +375,94 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
             Display_brush_mono_zoom = Display_brush_mono_zoom_double ;
             Clear_brush_scaled = Clear_brush_scaled_double ;
             Display_brush = Display_brush_double ;
+        break;
+        case PIXEL_TRIPLE:
+            Pixel = Pixel_triple ;
+            Read_pixel= Read_pixel_triple ;
+            Display_screen = Display_part_of_screen_triple ;
+            Block = Block_triple ;
+            Pixel_preview_normal = Pixel_preview_normal_triple ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_triple ;
+            Horizontal_XOR_line = Horizontal_XOR_line_triple ;
+            Vertical_XOR_line = Vertical_XOR_line_triple ;
+            Display_brush_color = Display_brush_color_triple ;
+            Display_brush_mono = Display_brush_mono_triple ;
+            Clear_brush = Clear_brush_triple ;
+            Remap_screen = Remap_screen_triple ;
+            Display_line = Display_line_on_screen_triple ;
+            Display_line_fast = Display_line_on_screen_fast_triple ;
+            Read_line = Read_line_screen_triple ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_triple ;
+            Display_brush_color_zoom = Display_brush_color_zoom_triple ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_triple ;
+            Clear_brush_scaled = Clear_brush_scaled_triple ;
+            Display_brush = Display_brush_triple ;
+        break;
+        case PIXEL_WIDE2:
+            Pixel = Pixel_wide2 ;
+            Read_pixel= Read_pixel_wide2 ;
+            Display_screen = Display_part_of_screen_wide2 ;
+            Block = Block_wide2 ;
+            Pixel_preview_normal = Pixel_preview_normal_wide2 ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_wide2 ;
+            Horizontal_XOR_line = Horizontal_XOR_line_wide2 ;
+            Vertical_XOR_line = Vertical_XOR_line_wide2 ;
+            Display_brush_color = Display_brush_color_wide2 ;
+            Display_brush_mono = Display_brush_mono_wide2 ;
+            Clear_brush = Clear_brush_wide2 ;
+            Remap_screen = Remap_screen_wide2 ;
+            Display_line = Display_line_on_screen_wide2 ;
+            Display_line_fast = Display_line_on_screen_fast_wide2 ;
+            Read_line = Read_line_screen_wide2 ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_wide2 ;
+            Display_brush_color_zoom = Display_brush_color_zoom_wide2 ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_wide2 ;
+            Clear_brush_scaled = Clear_brush_scaled_wide2 ;
+            Display_brush = Display_brush_wide2 ;
+        break;
+        case PIXEL_TALL2:
+            Pixel = Pixel_tall2 ;
+            Read_pixel= Read_pixel_tall2 ;
+            Display_screen = Display_part_of_screen_tall2 ;
+            Block = Block_tall2 ;
+            Pixel_preview_normal = Pixel_preview_normal_tall2 ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_tall2 ;
+            Horizontal_XOR_line = Horizontal_XOR_line_tall2 ;
+            Vertical_XOR_line = Vertical_XOR_line_tall2 ;
+            Display_brush_color = Display_brush_color_tall2 ;
+            Display_brush_mono = Display_brush_mono_tall2 ;
+            Clear_brush = Clear_brush_tall2 ;
+            Remap_screen = Remap_screen_tall2 ;
+            Display_line = Display_line_on_screen_tall2 ;
+            Display_line_fast = Display_line_on_screen_fast_tall2 ;
+            Read_line = Read_line_screen_tall2 ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_tall2 ;
+            Display_brush_color_zoom = Display_brush_color_zoom_tall2 ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_tall2 ;
+            Clear_brush_scaled = Clear_brush_scaled_tall2 ;
+            Display_brush = Display_brush_tall2 ;
+        break;
+        case PIXEL_QUAD:
+            Pixel = Pixel_quad ;
+            Read_pixel= Read_pixel_quad ;
+            Display_screen = Display_part_of_screen_quad ;
+            Block = Block_quad ;
+            Pixel_preview_normal = Pixel_preview_normal_quad ;
+            Pixel_preview_magnifier = Pixel_preview_magnifier_quad ;
+            Horizontal_XOR_line = Horizontal_XOR_line_quad ;
+            Vertical_XOR_line = Vertical_XOR_line_quad ;
+            Display_brush_color = Display_brush_color_quad ;
+            Display_brush_mono = Display_brush_mono_quad ;
+            Clear_brush = Clear_brush_quad ;
+            Remap_screen = Remap_screen_quad ;
+            Display_line = Display_line_on_screen_quad ;
+            Display_line_fast = Display_line_on_screen_fast_quad ;
+            Read_line = Read_line_screen_quad ;
+            Display_zoomed_screen = Display_part_of_screen_scaled_quad ;
+            Display_brush_color_zoom = Display_brush_color_zoom_quad ;
+            Display_brush_mono_zoom = Display_brush_mono_zoom_quad ;
+            Clear_brush_scaled = Clear_brush_scaled_quad ;
+            Display_brush = Display_brush_quad ;
         break;
     }
   }
@@ -479,6 +590,8 @@ void Resize_image(word chosen_width,word chosen_height)
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Main_image_width de large.
+
+    Main_image_is_modified=1;
 
     // On copie donc maintenant la partie C dans la nouvelle image.
     Copy_part_of_image_to_another(

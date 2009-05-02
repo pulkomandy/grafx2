@@ -54,7 +54,7 @@ static const T_Help_table helptable_about[] =
   HELP_TITLE("======================")
 */
 {
-  HELP_TEXT ("") // Laisse de la place pour le logo
+  HELP_TEXT ("") // Leave enough room for a hard-coded logo, eventually.
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("")
@@ -539,7 +539,8 @@ static const T_Help_table helptable_paintbrush[] =
 };
 static const T_Help_table helptable_adjust[] =
 {
-  HELP_TITLE("ADJUST PICTURE")
+  HELP_TITLE("ADJUST OR TRANSFORM")
+  HELP_TITLE("    PICTURE")
   HELP_TEXT ("")
   HELP_BOLD ("    LEFT CLICK")
   HELP_LINK ("(Key:%s)",0x100+BUTTON_ADJUST)
@@ -558,8 +559,24 @@ static const T_Help_table helptable_adjust[] =
   HELP_BOLD ("    RIGHT CLICK")
   HELP_LINK ("(Key:%s)",0x200+BUTTON_ADJUST)
   HELP_TEXT ("")
-  HELP_TEXT ("        *** Not implemented yet ***")
-
+  HELP_TEXT ("Opens the Picture Transform menu.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TITLE("PICTURE TRANSFORM")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_draw[] =
 {
@@ -1079,7 +1096,15 @@ static const T_Help_table helptable_brush_fx[] =
   HELP_TEXT ("because it's the only way for cancelling)")
   HELP_TEXT ("")
   HELP_LINK ("- Distort: (Key:%s)",SPECIAL_DISTORT)
-  HELP_TEXT ("*** Not implemented yet ***")
+  HELP_TEXT ("Triggers an interactive operation")
+  HELP_TEXT ("that allows you to distort your brush.")
+  HELP_TEXT ("Start by placing the brush somewhere on the")
+  HELP_TEXT ("screen and left-click. The brush will")
+  HELP_TEXT ("appear, with a little peg at each corner.")
+  HELP_TEXT ("Use the left mouse button to displace the")
+  HELP_TEXT ("corners, which will deform the brush.")
+  HELP_TEXT ("When you're done, click the right mouse")
+  HELP_TEXT ("button.")
   HELP_TEXT ("")
   HELP_LINK ("- Outline: (Key:%s)",SPECIAL_OUTLINE)
   HELP_TEXT ("This option permits to draw the")

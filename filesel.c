@@ -1040,7 +1040,7 @@ byte Button_Load_or_Save(byte load, byte image)
   {
     bookmark_dropdown[temp]=
       Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE); // 10-13
-    Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,5);
+    Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)

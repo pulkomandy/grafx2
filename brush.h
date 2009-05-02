@@ -68,6 +68,18 @@ void Rotate_brush_preview(float angle);
     Remap the brush palette to the nearest color in the picture one.
     Used when switching to the spare page.
 */
+
+/*!
+    Distort the brush on the screen.
+*/
+void Distort_brush_preview(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4);
+
+/*!
+    Replace the brush by a distorted version of itself.
+*/
+void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4);
+
+
 void Remap_brush(void);
 
 /*!

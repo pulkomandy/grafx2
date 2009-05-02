@@ -282,32 +282,31 @@ byte Read_pixel_from_spare_screen(word x,word y)
   return *(Spare_screen+y*Spare_image_width+x);
 }
 
-void Rotate_90_deg_lowlevel(byte * source,byte * dest)
+void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height)
 {
-  byte* esi;
-  byte* edi;
-  word dx,bx,cx;
+  word x,y;
 
-  //ESI = Point haut droit de la source
-  byte* Debut_de_colonne = source + Brush_width - 1;
-  edi = dest;
-
-  // Largeur de la source = hauteur de la destination
-  dx = bx = Brush_width;
-
-  // Pour chaque ligne
-  for(dx = Brush_width;dx>0;dx--)
+  for(y=0;y<height;y++)
   {
-    esi = Debut_de_colonne;
-    // Pout chaque colonne
-    for(cx=Brush_height;cx>0;cx--)
+    for(x=0;x<width;x++)
     {
-      *edi = *esi;
-      esi+=Brush_width;
-      edi++;
+      *(dest+height*(width-1-x)+y)=*source;
+      source++;  
     }
+  }
+}
 
-    Debut_de_colonne--;
+void Rotate_270_deg_lowlevel(byte * source, byte * dest, short width, short height)
+{
+  word x,y;
+
+  for(y=0;y<height;y++)
+  {
+    for(x=0;x<width;x++)
+    {
+      *(dest+(height-1-y)+x*height)=*source;
+      source++;  
+    }
   }
 }
 
@@ -486,13 +485,12 @@ void Check_timer(void)
   if((SDL_GetTicks()/55)-Timer_delay>Timer_start) Timer_state=1;
 }
 
-// Effectue une inversion de la brosse selon une droite horizontale
-void Flip_Y_lowlevel(void)
+void Flip_Y_lowlevel(byte *src, short width, short height)
 {
   // ESI pointe sur la partie haute de la brosse
   // EDI sur la partie basse
-  byte* ESI = Brush ;
-  byte* EDI = Brush + (Brush_height - 1) *Brush_width;
+  byte* ESI = src ;
+  byte* EDI = src + (height - 1) *width;
   byte tmp;
   word cx;
 
@@ -501,7 +499,7 @@ void Flip_Y_lowlevel(void)
     // Il faut inverser les lignes pointées par ESI et
     // EDI ("Brush_width" octets en tout)
 
-    for(cx = Brush_width;cx>0;cx--)
+    for(cx = width;cx>0;cx--)
     {
       tmp = *ESI;
       *ESI = *EDI;
@@ -514,56 +512,64 @@ void Flip_Y_lowlevel(void)
     // ESI pointe déjà sur le début de la ligne suivante
     // EDI pointe sur la fin de la ligne en cours, il
     // doit pointer sur le début de la précédente...
-    EDI -= 2 * Brush_width; // On recule de 2 lignes
+    EDI -= 2 * width; // On recule de 2 lignes
   }
 }
 
-// Effectue une inversion de la brosse selon une droite verticale
-void Flip_X_lowlevel(void)
+void Flip_X_lowlevel(byte *src, short width, short height)
 {
   // ESI pointe sur la partie gauche et EDI sur la partie
   // droite
-  byte* ESI = Brush;
-  byte* EDI = Brush + Brush_width - 1;
+  byte* ESI = src;
+  byte* EDI = src + width - 1;
 
-  byte* Debut_Ligne;
-  byte* Fin_Ligne;
+  byte* line_start;
+  byte* line_end;
   byte tmp;
   word cx;
 
   while(ESI<EDI)
   {
-    Debut_Ligne = ESI;
-    Fin_Ligne = EDI;
+    line_start = ESI;
+    line_end = EDI;
 
     // On échange par colonnes
-    for(cx=Brush_height;cx>0;cx--)
+    for(cx=height;cx>0;cx--)
     {
       tmp=*ESI;
       *ESI=*EDI;
       *EDI=tmp;
-      EDI+=Brush_width;
-      ESI+=Brush_width;
+      EDI+=width;
+      ESI+=width;
     }
 
     // On change de colonne
     // ESI > colonne suivante
     // EDI > colonne précédente
-    ESI = Debut_Ligne + 1;
-    EDI = Fin_Ligne - 1;
+    ESI = line_start + 1;
+    EDI = line_end - 1;
   }
 }
 
-// Faire une rotation de 180º de la brosse
-void Rotate_180_deg_lowlevel(void)
+// Rotate a pixel buffer 180º on itself.
+void Rotate_180_deg_lowlevel(byte *src, short width, short height)
 {
   // ESI pointe sur la partie supérieure de la brosse
   // EDI pointe sur la partie basse
-  byte* ESI = Brush;
-  byte* EDI = Brush + Brush_height*Brush_width - 1;
+  byte* ESI = src;
+  byte* EDI = src + height*width - 1;
   // EDI pointe sur le dernier pixel de la derniere ligne
   byte tmp;
   word cx;
+
+  // In case of odd height, the algorithm in this function would
+  // miss the middle line, so we do it this way:
+  if (height & 1)
+  {
+    Flip_X_lowlevel(src, width, height);
+    Flip_Y_lowlevel(src, width, height);
+    return;
+  }
 
   while(ESI < EDI)
   {
@@ -572,7 +578,7 @@ void Rotate_180_deg_lowlevel(void)
     // En même temps, on échange les pixels, donc EDI
     // pointe sur la FIN de sa ligne
 
-    for(cx=Brush_width;cx>0;cx--)
+    for(cx=width;cx>0;cx--)
     {
       tmp = *ESI;
       *ESI = *EDI;
@@ -581,6 +587,55 @@ void Rotate_180_deg_lowlevel(void)
       EDI--; // Attention ici on recule !
       ESI++;
     }
+  }
+}
+
+void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buffer, short dst_width, short dst_height, short x_flipped, short y_flipped)
+{
+  int    offset,line,column;
+
+  int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
+  int    y_pos_in_brush;
+  int    delta_x_in_brush; // "Vecteur incrémental" du point précédent
+  int    delta_y_in_brush;
+  int    initial_x_pos;       // Position X de début de parcours de ligne
+  
+  // Calcul du "vecteur incrémental":
+  delta_x_in_brush=(src_width<<16) * (x_flipped?-1:1) / (dst_width);
+  delta_y_in_brush=(src_height<<16) * (y_flipped?-1:1) / (dst_height);
+
+  offset=0;
+
+  // Calcul de la valeur initiale de y_pos:
+  if (y_flipped)
+    y_pos_in_brush=(src_height<<16)-1; // Inversion en Y de la brosse
+  else
+    y_pos_in_brush=0;                // Pas d'inversion en Y de la brosse
+
+  // Calcul de la valeur initiale de x_pos pour chaque ligne:
+  if (x_flipped)
+    initial_x_pos = (src_width<<16)-1; // Inversion en X de la brosse
+  else
+    initial_x_pos = 0;                // Pas d'inversion en X de la brosse
+  
+  // Pour chaque ligne
+  for (line=0;line<dst_height;line++)
+  {
+    // On repart du début de la ligne:
+    x_pos_in_brush=initial_x_pos;
+
+    // Pour chaque colonne:
+    for (column=0;column<dst_width;column++)
+    {
+      // On copie le pixel:
+      dst_buffer[offset]=*(src_buffer + (x_pos_in_brush>>16) + (y_pos_in_brush>>16)*src_width);
+      // On passe à la colonne de brosse suivante:
+      x_pos_in_brush+=delta_x_in_brush;
+      // On passe au pixel suivant de la nouvelle brosse:
+      offset++;
+    }
+    // On passe à la ligne de brosse suivante:
+    y_pos_in_brush+=delta_y_in_brush;
   }
 }
 

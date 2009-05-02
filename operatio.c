@@ -157,6 +157,35 @@ void Display_coords_rel_or_abs(short start_x, short start_y)
     Print_coordinates();
 }
 
+/// Simulates clicking the "Draw" button.
+void Return_to_draw_mode(void)
+{
+
+  // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
+  // préalable:
+  Display_cursor();
+  if (Mouse_K)
+    Wait_end_of_click();
+  // !!! Efface la croix puis affiche le viseur !!!
+  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
+  if (Config.Auto_discontinuous)
+  {
+    // On se place en mode Dessin discontinu à la main
+    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
+  }
+  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
+  // d'appel à cette action:
+  Hide_cursor();
+
+  // On passe en brosse couleur:
+  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+
+  if ((Config.Coords_rel) && (Menu_is_visible))
+    Print_in_menu("X:       Y:",0);
+  Print_coordinates();
+}
+
 //////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW
 
 void Freehand_mode1_1_0(void)
@@ -2955,29 +2984,7 @@ void Brush_0_5(void)
     Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
 
-  // Simuler l'appui du bouton "Dessin"
-
-  // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // préalable:
-  Display_cursor();
-  // !!! Efface la croix puis affiche le viseur !!!
-  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
-  if (Config.Auto_discontinuous)
-  {
-    // On se place en mode Dessin discontinu à la main
-    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
-  }
-  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel à cette action:
-  Hide_cursor();
-
-  // On passe en brosse couleur:
-  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-
-  if ((Config.Coords_rel) && (Menu_is_visible))
-    Print_in_menu("X:       Y:",0);
-  Print_coordinates();
+  Return_to_draw_mode();
 }
 
 
@@ -3099,28 +3106,8 @@ void Polybrush_12_8(void)
       Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
       Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
-
-    // Simuler l'appui du bouton "Dessin"
-
-    // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-    // préalable:
-    Display_cursor();
-    Wait_end_of_click();
-    // !!! Efface la croix puis affiche le viseur !!!
-    Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
-    if (Config.Auto_discontinuous)
-    {
-      // On se place en mode Dessin discontinu à la main
-      while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-        Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
-    }
-    // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-    // d'appel à cette action:
-    Hide_cursor();
-
-    // On passe en brosse couleur:
-    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-
+    
+    Return_to_draw_mode();
     Display_cursor();
   }
 }
@@ -3398,31 +3385,7 @@ void Stretch_brush_2_7(void)
   // Et enfin on stocke pour de bon la nouvelle brosse étirée
   Stretch_brush(start_x,start_y,computed_x,computed_y);
 
-  // Simuler l'appui du bouton "Dessin"
-
-  // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // préalable:
-  Display_cursor();
-  // !!! Efface la croix puis affiche le viseur !!!
-  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
-  if (Config.Auto_discontinuous)
-  {
-    // On se place en mode Dessin discontinu à la main
-    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
-  }
-  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel à cette action:
-  Hide_cursor();
-
-  // On passe en brosse couleur:
-  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-
-  if ((Config.Coords_rel) && (Menu_is_visible))
-    Print_in_menu("X:       Y:",0);
-  Print_coordinates();
-
-  // Inutile de de faire un Wait_end_of_click car c'est fait dans Unselect_button
+  Return_to_draw_mode();
 }
 
 
@@ -3650,33 +3613,261 @@ void Rotate_brush_2_5(void)
   // Et enfin on stocke pour de bon la nouvelle brosse étirée
   Rotate_brush(angle);
 
-  // Simuler l'appui du bouton "Dessin"
-
-  // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // préalable:
-  Display_cursor();
-  // !!! Efface le curseur de l'opération puis affiche le viseur !!!
-  Unselect_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
-  if (Config.Auto_discontinuous)
-  {
-    // On se place en mode Dessin discontinu à la main
-    while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
-      Unselect_button(BUTTON_DRAW,RIGHT_SIDE);
-  }
-  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel à cette action:
-  Hide_cursor();
-
-  // On passe en brosse couleur:
-  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-
-  if ((Config.Coords_rel) && (Menu_is_visible))
-    Print_in_menu("X:       Y:",0);
-  Print_coordinates();
-
-  // Inutile de de faire un Wait_end_of_click car c'est fait dans Unselect_button
+  Return_to_draw_mode();
 }
 
+///////////////////////////////////////////////////// OPERATION_DISTORT_BRUSH
+
+/// Draws a 2x2 XOR square at the specified picture coordinates, on the screen.
+void Draw_stretch_spot(short x_pos, short y_pos)
+{
+  short x,y;
+
+  for (y=y_pos-1;y<y_pos+1;y++)
+    if (y>=Limit_top && y<=Limit_visible_bottom)
+      for (x=x_pos-1;x<x_pos+1;x++)
+        if (x>=Limit_left && x<=Limit_visible_right)
+          Pixel_preview(x,y,~Read_pixel(x-Main_offset_X,y-Main_offset_Y));
+  Update_part_of_screen(x_pos-1, y_pos-1, 2, 2);
+}
+
+void Distort_brush_0_0(void)
+//
+// Opération   : OPERATION_DISTORT_BRUSH
+// Click Souris: 0
+// Taille_Pile : 0
+//
+// Souris effacée: Non
+//
+{
+  if ( Menu_is_visible )
+  {
+      Print_in_menu("POSITION BRUSH TO START ",0);
+  }
+}
+
+void Distort_brush_1_0(void)
+//
+// Opération   : OPERATION_DISTORT_BRUSH
+// Click Souris: 1
+// Taille_Pile : 0
+//
+// Souris effacée: Non
+//
+{
+  short x_pos, y_pos;
+
+  Init_start_operation();
+  Paintbrush_hidden=1;
+  Hide_cursor();
+  
+  // Top left angle
+  x_pos=Paintbrush_X-Brush_offset_X;
+  y_pos=Paintbrush_Y-Brush_offset_Y;
+  Draw_stretch_spot(x_pos,y_pos);
+  Operation_push(x_pos);
+  Operation_push(y_pos);
+  
+  // Top right angle
+  x_pos+=Brush_width;
+  Draw_stretch_spot(x_pos,y_pos);
+  Operation_push(x_pos);
+  Operation_push(y_pos);
+  
+  // Bottom right angle
+  y_pos+=Brush_height;
+  Draw_stretch_spot(x_pos,y_pos);
+  Operation_push(x_pos);
+  Operation_push(y_pos);
+  
+  // Bottom left angle
+  x_pos-=Brush_width;
+  Draw_stretch_spot(x_pos,y_pos);
+  Operation_push(x_pos);
+  Operation_push(y_pos);
+  
+  Distort_brush_preview(
+    Operation_stack[1],
+    Operation_stack[2],
+    Operation_stack[3],
+    Operation_stack[4],
+    Operation_stack[5],
+    Operation_stack[6],
+    Operation_stack[7],
+    Operation_stack[8]);
+  Display_cursor();
+  Update_part_of_screen(Paintbrush_X-Brush_offset_X, Paintbrush_Y-Brush_offset_Y, Brush_width, Brush_height);
+  Wait_end_of_click();
+  // Erase the message in status bar
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
+  {
+      Print_in_menu("X:       Y:             ",0);
+  }
+}
+
+void Distort_brush_1_8(void)
+//
+//  Opération   : OPERATION_DISTORT_BRUSH
+//  Click Souris: 1
+//  Taille_Pile : 8
+//
+//  Souris effacée: No
+//
+{
+  // How far (in pixels) you can catch a handle
+  #define REACH_DISTANCE 100
+  short i;
+  short x[4];
+  short y[4];
+  long best_distance=REACH_DISTANCE;
+  short best_spot=-1;
+
+  for (i=3;i>=0;i--)
+  {
+    long distance;
+    Operation_pop(&y[i]);
+    Operation_pop(&x[i]);
+    distance=Distance(Paintbrush_X,Paintbrush_Y,x[i],y[i]);
+    if (distance<best_distance)
+    {
+      best_spot=i;
+      best_distance=distance;
+    }
+  }
+  
+  for (i=0;i<4;i++)
+  {
+    Operation_push(x[i]);
+    Operation_push(y[i]);
+  }
+  
+  if (best_spot>-1)
+  {
+    Operation_push(best_spot);
+  }
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
+  {
+      Print_in_menu("X:       Y:             ",0);
+      Print_coordinates();
+  }
+}
+
+void Distort_brush_1_9(void)
+//
+//  Opération   : OPERATION_DISTORT_BRUSH
+//  Click Souris: 1
+//  Taille_Pile : 9
+//
+//  Souris effacée: No
+//
+{
+  short i;
+  short x[4];
+  short y[4];
+  short selected_corner;
+
+  // Pop all arguments
+  Operation_pop(&selected_corner);
+  for (i=3;i>=0;i--)
+  {
+    Operation_pop(&y[i]);
+    Operation_pop(&x[i]);
+  }
+  
+  if (Paintbrush_X!=x[selected_corner] || Paintbrush_Y!=y[selected_corner])
+  {  
+    Hide_cursor();
+    
+    // Easiest refresh mode: make no assumptions on how the brush was
+    // displayed before.
+    Display_all_screen();
+
+    x[selected_corner]=Paintbrush_X;
+    y[selected_corner]=Paintbrush_Y;
+
+    for (i=0;i<4;i++)
+      Draw_stretch_spot(x[i],y[i]);
+
+    Distort_brush_preview(x[0],y[0],x[1],y[1],x[2],y[2],x[3],y[3]);
+
+    Display_cursor();
+    
+    if ( (Config.Coords_rel) && (Menu_is_visible) )
+    {
+        Print_in_menu("X:       Y:             ",0);
+        Print_coordinates();
+    }
+    Update_rect(0,0,Screen_width,Menu_Y);
+  }
+  
+  // Push back all arguments
+  for (i=0;i<4;i++)
+  {
+    Operation_push(x[i]);
+    Operation_push(y[i]);
+  }
+  Operation_push(selected_corner);
+
+}
+void Distort_brush_0_9(void)
+//
+//  Opération   : OPERATION_DISTORT_BRUSH
+//  Click Souris: 0
+//  Taille_Pile : 9
+//
+//  Souris effacée: No
+//
+{
+  short selected_corner;
+  Operation_pop(&selected_corner);
+  
+}
+
+void Distort_brush_2_0(void)
+//
+// Opération   : OPERATION_DISTORT_BRUSH
+// Click Souris: 2
+// Taille_Pile : 0
+//
+// Souris effacée: Oui
+//
+{
+  Paintbrush_hidden=0;
+  Display_all_screen();
+  // Erase the message in status bar
+  if ( (Config.Coords_rel) && (Menu_is_visible) )
+  {
+      Print_in_menu("X:       Y:             ",0);
+  }
+  Return_to_draw_mode();
+}
+
+void Distort_brush_2_8(void)
+//
+// Opération   : OPERATION_DISTORT_BRUSH
+// Click Souris: 2
+// Taille_Pile : 8
+//
+// Souris effacée: Oui
+//
+{
+  short i;
+  short x[4];
+  short y[4];
+
+  // Pop all arguments
+  for (i=3;i>=0;i--)
+  {
+    Operation_pop(&y[i]);
+    Operation_pop(&x[i]);
+  }
+  Distort_brush(x[0],y[0],x[1],y[1],x[2],y[2],x[3],y[3]);
+  
+  Paintbrush_hidden=0;
+  Display_all_screen();
+  
+  Return_to_draw_mode();
+}
 
 //////////////////////////////////////////////////////////// OPERATION_SCROLL
 

@@ -100,6 +100,16 @@ void Rotate_brush_1_5(void);
 void Rotate_brush_0_5(void);
 void Rotate_brush_2_5(void);
 
+///////////////////////////////////////////////////// OPERATION_DISTORT_BRUSH
+
+void Distort_brush_0_0(void);
+void Distort_brush_1_0(void);
+void Distort_brush_2_0(void);
+void Distort_brush_1_8(void);
+void Distort_brush_2_8(void);
+void Distort_brush_1_9(void);
+void Distort_brush_0_9(void);
+
 //////////////////////////////////////////////////////// OPERATION_POLYBRUSH
 
 void Polybrush_12_8(void);

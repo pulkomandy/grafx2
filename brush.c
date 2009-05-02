@@ -718,7 +718,7 @@ void Rotate_90_deg()
   new_brush=(byte *)malloc(((long)Brush_height)*Brush_width);
   if (new_brush)
   {
-    Rotate_90_deg_lowlevel(Brush,new_brush);
+    Rotate_90_deg_lowlevel(Brush,new_brush,Brush_width,Brush_height);
     free(Brush);
     Brush=new_brush;
 
@@ -1149,75 +1149,32 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
 
 void Stretch_brush(short x1, short y1, short x2, short y2)
 {
-  int    offset,line,column;
   byte * new_brush;
-
   int    new_brush_width;  // Width de la nouvelle brosse
   int    new_brush_height;  // Height de la nouvelle brosse
-
-  int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
-  int    y_pos_in_brush;
-  int    delta_x_in_brush; // "Vecteur incrémental" du point précédent
-  int    delta_y_in_brush;
-  int    initial_x_pos;       // Position X de début de parcours de ligne
-  int    dx,dy;
-
-  dx=(x1<x2)?1:-1;
-  dy=(y1<y2)?1:-1;
-
-  // Calcul des nouvelles dimensions de la brosse:
+  int    x_flipped, y_flipped;
+  
+  // Compute new brush dimensions
   if ((new_brush_width=x1-x2)<0)
+  {
+    x_flipped=1;
     new_brush_width=-new_brush_width;
+  }
   new_brush_width++;
 
   if ((new_brush_height=y1-y2)<0)
+  {
+    y_flipped=1;
     new_brush_height=-new_brush_height;
+  }
   new_brush_height++;
 
-  // Calcul des anciennes dimensions de la brosse:
-
-  // Calcul du "vecteur incrémental":
-  delta_x_in_brush=(Brush_width<<16)/(x2-x1+dx);
-  delta_y_in_brush=(Brush_height<<16)/(y2-y1+dy);
-
-  // Calcul de la valeur initiale de x_pos pour chaque ligne:
-  if (dx>=0)
-    initial_x_pos = 0;                // Pas d'inversion en X de la brosse
-  else
-    initial_x_pos = (Brush_width<<16)-1; // Inversion en X de la brosse
-
-  free(Smear_brush); // On libère un peu de mémoire
+  // Free some memory
+  free(Smear_brush);
 
   if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
-    offset=0;
-
-    // Calcul de la valeur initiale de y_pos:
-    if (dy>=0)
-      y_pos_in_brush=0;                // Pas d'inversion en Y de la brosse
-    else
-      y_pos_in_brush=(Brush_height<<16)-1; // Inversion en Y de la brosse
-
-    // Pour chaque ligne
-    for (line=0;line<new_brush_height;line++)
-    {
-      // On repart du début de la ligne:
-      x_pos_in_brush=initial_x_pos;
-
-      // Pour chaque colonne:
-      for (column=0;column<new_brush_width;column++)
-      {
-        // On copie le pixel:
-        new_brush[offset]=Read_pixel_from_brush(x_pos_in_brush>>16,y_pos_in_brush>>16);
-        // On passe à la colonne de brosse suivante:
-        x_pos_in_brush+=delta_x_in_brush;
-        // On passe au pixel suivant de la nouvelle brosse:
-        offset++;
-      }
-
-      // On passe à la ligne de brosse suivante:
-      y_pos_in_brush+=delta_y_in_brush;
-    }
+    Rescale(Brush, Brush_width, Brush_height, new_brush, new_brush_width, new_brush_height, x2<x1, y2<y1);
 
     free(Brush);
     Brush=new_brush;
@@ -1248,7 +1205,7 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
   }
   else
   {
-    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
+    // Ici la libération de mémoire n'a pas suffi donc on remet dans l'état
     // où c'etait avant. On a juste à réallouer la Smear_brush car il y a
     // normalement la place pour elle puisque rien d'autre n'a pu être alloué
     // entre temps.
@@ -1335,7 +1292,221 @@ void Stretch_brush_preview(short x1, short y1, short x2, short y2)
   Update_part_of_screen(initial_dest_x_pos,initial_dest_y_pos,dest_width,dest_height);
 }
 
+/// Returns the minimum of 4 integers.
+inline int Min4(int a,int b,int c,int d)
+{
+  if (a<b)
+    if (c<d)
+      return a<c?a:c;
+    else
+      return a<d?a:d;
+  else
+    if (c<d)
+      return b<c?b:c;
+    else
+      return b<d?b:d;
+}
 
+//-------------------- Brush distort -------------------------------
+
+// That's a lot of globals, but it saves stack space in the recursive calls.
+static Func_pixel Pixel_for_distort;
+static byte *     Distort_buffer;
+static short      Distort_buffer_width;
+
+/// Draw a pixel in the target buffer. No clipping.
+void Pixel_in_distort_buffer(word x_pos,word y_pos,byte color)
+{
+  *(Distort_buffer+y_pos*Distort_buffer_width+x_pos)=color;
+}
+
+/// Returns the maximum of 4 integers.
+inline int Max4(int a,int b,int c,int d)
+{
+  if (a>b)
+    if (c>d)
+      return a>c?a:c;
+    else
+      return a>d?a:d;
+  else
+    if (c>d)
+      return b>c?b:c;
+    else
+      return b>d?b:d;
+}
+
+// Recursive function for linear distortion.
+void Draw_brush_linear_distort(long int tex_min_x,
+                               long int tex_min_y,
+                               long int tex_max_x,
+                               long int tex_max_y,
+                               long int x1,
+                               long int y1,
+                               long int x2,
+                               long int y2,
+                               long int x3,
+                               long int y3,
+                               long int x4,
+                               long int y4)
+{
+  static byte color;
+  // bounding rectangle
+  static long int min_x, max_x, min_y, max_y;
+  
+  min_x=Min4(x1,x2,x3,x4);
+  max_x=Max4(x1,x2,x3,x4);
+  min_y=Min4(y1,y2,y3,y4);
+  max_y=Max4(y1,y2,y3,y4);
+   
+  if ((max_x>>16) - (min_x>>16) <= 1 && (max_y>>16) - (min_y>>16) <= 1)
+  //if (max_x - min_x <= 1<<16 && max_y - min_y <= 1<<16)
+  {
+    if ((min_x<(max_x&0x7FFF0000)) && (min_y<(max_y&0x7FFF0000)))  
+    {
+      color=Read_pixel_from_brush((tex_min_x)>>16,(tex_min_y)>>16);
+      if (color!=Back_color)
+        Pixel_for_distort(min_x>>16,min_y>>16,color);
+    }
+    return;
+  }
+  // Cut in 4 quarters and repeat
+  // "top left"
+  Draw_brush_linear_distort(tex_min_x,
+                            tex_min_y,
+                            (tex_min_x+tex_max_x)>>1,
+                            (tex_min_y+tex_max_y)>>1,
+                            x1,
+                            y1,
+                            (x1+x2)>>1,
+                            (y1+y2)>>1,
+                            (x1+x2+x3+x4)>>2,
+                            (y1+y2+y3+y4)>>2,
+                            (x1+x4)>>1,
+                            (y1+y4)>>1);
+
+  // "top right"
+  Draw_brush_linear_distort((tex_min_x+tex_max_x)>>1,
+                            tex_min_y,
+                            tex_max_x,
+                            (tex_min_y+tex_max_y)>>1,
+                            (x1+x2)>>1,
+                            (y1+y2)>>1,
+                            x2,
+                            y2,
+                            (x2+x3)>>1,
+                            (y2+y3)>>1,
+                            (x1+x2+x3+x4)>>2,
+                            (y1+y2+y3+y4)>>2);
+
+  // "bottom right"
+  Draw_brush_linear_distort((tex_min_x+tex_max_x)>>1,
+                            (tex_min_y+tex_max_y)>>1,
+                            tex_max_x,
+                            tex_max_y,
+                            (x1+x2+x3+x4)>>2,
+                            (y1+y2+y3+y4)>>2,
+                            (x2+x3)>>1,
+                            (y2+y3)>>1,
+                            x3,
+                            y3,
+                            (x3+x4)>>1,
+                            (y3+y4)>>1);
+  
+  // "bottom left"
+  Draw_brush_linear_distort(tex_min_x,
+                            (tex_min_y+tex_max_y)>>1,
+                            (tex_min_x+tex_max_x)>>1,
+                            tex_max_y,
+                            (x1+x4)>>1,
+                            (y1+y4)>>1,
+                            (x1+x2+x3+x4)>>2,
+                            (y1+y2+y3+y4)>>2,
+                            (x3+x4)>>1,
+                            (y3+y4)>>1,
+                            x4,
+                            y4);
+
+  return;
+}
+
+/// Draws a distorted version of the brush, mapped over the given quad (picture coordinates).
+void Distort_brush_preview(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4)
+{
+  Pixel_for_distort=Pixel_figure_preview;
+  Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
+}
+
+/// Modifies the current brush, mapping it over the given quad.
+void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4)
+{
+  short min_x, max_x, min_y, max_y;
+  short width, height;
+  byte * new_brush;
+  byte * new_smear_brush;
+  short new_smear_brush_width;
+  short new_smear_brush_height;
+  
+  // Move all coordinates to start on (0,0)
+  min_x=Min4(x1,x2,x3,x4);
+  max_x=Max4(x1,x2,x3,x4);
+  min_y=Min4(y1,y2,y3,y4);
+  max_y=Max4(y1,y2,y3,y4);
+
+  x1-=min_x;
+  x2-=min_x;
+  x3-=min_x;
+  x4-=min_x;
+
+  y1-=min_y;
+  y2-=min_y;
+  y3-=min_y;
+  y4-=min_y;
+  
+  width=Max(max_x-min_x, 1);
+  height=Max(max_y-min_y, 1);
+    
+  new_smear_brush_width=(width>MAX_PAINTBRUSH_SIZE)?width:MAX_PAINTBRUSH_SIZE;
+  new_smear_brush_height=(height>MAX_PAINTBRUSH_SIZE)?height:MAX_PAINTBRUSH_SIZE;
+
+  new_smear_brush=(byte *)malloc(((long)new_smear_brush_height)*new_smear_brush_width);
+  if (! new_smear_brush)
+  {
+    // Out of memory while allocating new smear brush
+    Error(0);
+    return;
+  }
+  
+  new_brush=((byte *)malloc((long)width*height));
+  if (!new_brush)
+  {
+    // Out of memory while allocating new brush
+    Error(0);
+    free(new_smear_brush);
+    return;
+  }
+
+  // Fill the new brush with backcolor, originally.
+  memset(new_brush,Back_color,((long)width)*height);
+  
+  // Call distort routine
+  Pixel_for_distort=Pixel_in_distort_buffer;
+  Distort_buffer=new_brush;
+  Distort_buffer_width=width;
+  Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
+
+  // Free old brushes
+  free(Smear_brush);
+  free(Brush);
+
+  // Point to the new ones
+  Brush=new_brush;
+  Brush_width=width;
+  Brush_height=height;
+
+  Smear_brush=new_smear_brush;
+  Smear_brush_width=new_smear_brush_width;
+  Smear_brush_height=new_smear_brush_height;
+}
 
 //------------------------- Rotation de la brosse ---------------------------
 
