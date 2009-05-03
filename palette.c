@@ -72,7 +72,7 @@ byte Round_palette_component(byte comp)
   return ((comp+128/RGB_scale)*(RGB_scale-1)/255*255+(RGB_scale&1?1:0))/(RGB_scale-1);
 }
 
-// Définir les unités pour les graduationss R G B ou H S V
+// Définir les unités pour les graduations R G B ou H S V
 void Componant_unit(int count)
 {
   Color_count = count;
@@ -775,7 +775,7 @@ void Button_Palette(void)
   T_Scroller_button * blue_slider;
   T_Scroller_button * reduce_slider;
   byte   image_is_backed_up=0;
-  byte   need_to_remp=0;
+  byte   need_to_remap=0;
 
   dword  color_usage[256];
   short  used_colors=-1; // -1 <=> Inconnu
@@ -1085,7 +1085,7 @@ void Button_Palette(void)
 
         }
 
-        need_to_remp=1;
+        need_to_remap=1;
 
         Display_cursor();
         Set_palette(working_palette);
@@ -1152,7 +1152,7 @@ void Button_Palette(void)
           Print_counter(203,172,str,MC_Black,MC_Light);
         }
 
-        need_to_remp=1;
+        need_to_remap=1;
 
         Display_cursor();
         Set_palette(working_palette);
@@ -1220,7 +1220,7 @@ void Button_Palette(void)
           Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        need_to_remp=1;
+        need_to_remap=1;
 
         Display_cursor();
         Set_palette(working_palette);
@@ -1235,7 +1235,7 @@ void Button_Palette(void)
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 6 : // Grey scale
@@ -1254,7 +1254,7 @@ void Button_Palette(void)
         Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case  7 : // Swap
@@ -1307,7 +1307,7 @@ void Button_Palette(void)
           // On tag le bloc (ou la couleur)
           Tag_color_range(block_start,block_end);
 
-          need_to_remp=1;
+          need_to_remap=1;
 
           Set_palette(working_palette);
 
@@ -1356,7 +1356,7 @@ void Button_Palette(void)
           // On tag le bloc (ou la couleur)
           Tag_color_range(block_start,block_end);
 
-          need_to_remp=1;
+          need_to_remap=1;
 
           Display_cursor();
           Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
@@ -1391,7 +1391,7 @@ void Button_Palette(void)
 
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 11: // Reduce
@@ -1416,7 +1416,7 @@ void Button_Palette(void)
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 12: // Undo
@@ -1426,7 +1426,7 @@ void Button_Palette(void)
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         Set_palette(working_palette);
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 15 : // Used
@@ -1461,7 +1461,7 @@ void Button_Palette(void)
         Set_palette(working_palette);
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 17 : // Jauge de réduction de palette
@@ -1595,7 +1595,7 @@ void Button_Palette(void)
           Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        need_to_remp=1;
+        need_to_remap=1;
 
         Display_cursor();
         Set_palette(working_palette);
@@ -1720,7 +1720,7 @@ void Button_Palette(void)
           Print_counter(230,172,str,MC_Black,MC_Light);
         }
 
-        need_to_remp=1;
+        need_to_remap=1;
 
         Display_cursor();
         Set_palette(working_palette);
@@ -1741,7 +1741,7 @@ void Button_Palette(void)
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 21 : // Inversion
@@ -1785,7 +1785,7 @@ void Button_Palette(void)
         Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-        need_to_remp=1;
+        need_to_remap=1;
         break;
 
       case 23 : // Saisie du nombre de couleurs pour la réduction de palette
@@ -1845,6 +1845,18 @@ void Button_Palette(void)
         int swap=1;
         byte remap_table[256];
         byte inverted_table[256];
+		byte begin, end;
+
+		if(block_start==block_end)
+		{
+			begin = 0;
+			end = 255;
+		}
+		else
+		{
+			begin = block_start;
+			end = block_end;
+		}
         
         // Init remap table
         for (i=0;i<256;i++)
@@ -1858,8 +1870,8 @@ void Button_Palette(void)
         while(swap==1)
         {
           swap=0;
-          h=0;l=0;s=0;
-          for(temp_color=0;temp_color<256;temp_color++)
+          h=0;l=255;s=0;
+          for(temp_color=begin;temp_color<=end;temp_color++)
           {
             oh=h; ol=l; os=s;
             // On trie par Chrominance (H) et Luminance (L)
@@ -1868,9 +1880,9 @@ void Button_Palette(void)
             working_palette[temp_color].B,&h,&s,&l);
 
             if(
-              ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
-              || (((s>0 && os > 0) || (s==os && s==0)) // Deux couleurs saturées ou deux gris...
-              && (h<oh || (h==oh && l<ol))))  // Dans ce cas on décide avec chroma puis lumi
+              	 ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
+              || ((s>0 && os > 0) && (h<oh || (h==oh && l>ol))) // 2 couleurs saturées : on trie par H, si les H sont égaux on trie par L
+			  || ((os==0 && s==0) && l>ol))  // Deux gris : on trie par L uniquement
             {
               // On échange la couleur avec la précédente
               byte swap_color;
@@ -1881,7 +1893,6 @@ void Button_Palette(void)
               remap_table[temp_color-1]=swap_color;
               
               swap=1;
-              
             }
           }
         }
@@ -1891,7 +1902,7 @@ void Button_Palette(void)
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
-        need_to_remp=1;
+        need_to_remap=1;
       }
       break;
     }
@@ -1981,7 +1992,7 @@ void Button_Palette(void)
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
           Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
           Update_color_count(&used_colors,color_usage);
-          need_to_remp=1;
+          need_to_remap=1;
           Key=0;
           break;
 
@@ -2038,7 +2049,7 @@ void Button_Palette(void)
           }
       }
 
-      if (need_to_remp)
+      if (need_to_remap)
       {
         Hide_cursor();
         Compute_optimal_menu_colors(working_palette);
@@ -2053,7 +2064,7 @@ void Button_Palette(void)
         Update_rect(Window_pos_X+8*Menu_factor_X,Window_pos_Y+82*Menu_factor_Y,Menu_factor_X*16*10,Menu_factor_Y*5*16);
 
         Display_cursor();
-        need_to_remp=0;
+        need_to_remap=0;
       }
     }
   }
@@ -2070,7 +2081,7 @@ void Button_Palette(void)
   Compute_optimal_menu_colors(Main_palette);
 
   // La variable employée ici n'a pas vraiment de rapport avec son nom...
-  need_to_remp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
+  need_to_remap=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();
   Unselect_button(BUTTON_PALETTE);
@@ -2080,7 +2091,7 @@ void Button_Palette(void)
   //   On affiche les "ForeBack" car le menu n'est raffiché que si la fenêtre
   // empiétait sur le menu. Mais si les couleurs on été modifiées, il faut
   // rafficher tout le menu remappé.
-  if (need_to_remp)
+  if (need_to_remap)
     Display_menu();
 
   Display_cursor();
