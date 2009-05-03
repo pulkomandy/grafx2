@@ -5127,12 +5127,7 @@ void Button_Text()
       {
         free(new_brush);
       }
-      Block(
-        Window_pos_X+preview_button->Pos_X*Menu_factor_X,
-        Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
-        preview_button->Width*Menu_factor_X,
-        preview_button->Height*Menu_factor_Y,
-        MC_Light);
+  	  Window_rectangle(8, 106, 273, 50,Back_color);
       new_brush = Render_text(preview_string, cursor_position+list_start, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
       if (new_brush)
       {
