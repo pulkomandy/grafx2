@@ -51,7 +51,7 @@ int Create_ConfigDirectory(char * config_dir)
   #endif
 }
 
-#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   #define ARG_UNUSED __attribute__((unused))
 #else
   #define ARG_UNUSED
@@ -72,8 +72,8 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
     // Append trailing slash
     strcat(program_dir    ,"/");
   
-  // AmigaOS4: hard-coded volume name.
-  #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+  // AmigaOS and alike: hard-coded volume name.
+  #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     strcpy(program_dir,"PROGDIR:");
 
   // Others: The part of argv[0] before the executable name.    

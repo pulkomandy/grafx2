@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <dirent.h>
     #define isHidden(x) (0)
@@ -254,7 +254,7 @@ void Read_list_of_files(byte selected_format)
     }
   }
 
-#if defined(__MORPHOS__) || defined (__amigaos4__) || defined(__amigaos__)
+#if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
   Add_element_to_list("/",1); // on amiga systems, / means parent. And there is no ..
   Filelist_nb_directories ++;
 #endif
@@ -265,7 +265,7 @@ void Read_list_of_files(byte selected_format)
   Filelist_nb_elements=Filelist_nb_directories+Filelist_nb_files;
 }
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
 void bstrtostr( BSTR in, STRPTR out, TEXT max )
 {
   STRPTR iptr;
@@ -290,7 +290,7 @@ void Read_list_of_drives(void)
   Filelist_nb_files=0;
   Filelist_nb_directories=0;
 
-  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   {
     struct DosList *dl;
     char tmp[256];

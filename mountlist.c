@@ -17,7 +17,8 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))
+// This file is not used on some platforms, so don't do anything for them
+#if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))&&(!defined(__amigaos__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #if defined(__macosx__) || defined(__FreeBSD__)			// MacOS X is POSIX compliant

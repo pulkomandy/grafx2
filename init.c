@@ -39,7 +39,7 @@
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   #include <proto/exec.h>
   #include <proto/dos.h>
 #endif
@@ -71,7 +71,7 @@
 
 // Rechercher la liste et le type des lecteurs de la machine
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
 void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 

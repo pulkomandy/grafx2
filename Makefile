@@ -70,8 +70,8 @@ else
     OBJDIR = obj/amiga
     ZIP = lha
     ZIPOPT = a
-  else ifeq ($(PLATFORM),AROS)
 
+  else ifeq ($(PLATFORM),AROS)
   #AROS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -84,8 +84,8 @@ else
     OBJDIR = obj/aros
     ZIP = lha
     ZIPOPT = a
-  else ifeq ($(PLATFORM),MorphOS) 
 
+  else ifeq ($(PLATFORM),MorphOS) 
   #MorphOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -98,8 +98,22 @@ else
     OBJDIR = obj/morphos
     ZIP = lha
     ZIPOPT = a
-  else ifeq ($(PLATFORM),BeOS)
 
+  else ifeq ($(PLATFORM),AMIGA)
+  # AmigaOS 3.x specific (building with gcc)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    BIN = grafx2
+    COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
+    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
+    CC = gcc
+    OBJDIR = obj/amiga
+    ZIP = lha
+    ZIPOPT = a
+
+  else ifeq ($(PLATFORM),BeOS)
   #BeOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -111,8 +125,8 @@ else
     CC = gcc
     OBJDIR = obj/beos
     ZIP = zip
-  else ifeq ($(PLATFORM),Haiku)
 
+  else ifeq ($(PLATFORM),Haiku)
   #Haiku specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -124,8 +138,8 @@ else
     CC = gcc
     OBJDIR = obj/haiku
     ZIP = zip
-  else ifeq ($(PLATFORM),skyos)
 
+  else ifeq ($(PLATFORM),skyos)
   #SkyOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -139,33 +153,8 @@ else
     ZIP = zip
   else
   
-# If we got here, we haven't found any specific system for uname. There is a little problem : Amiga 68k does not have uname !
-
-    # The trick here is to use the "version" command and see if the answer starts with Kickstart. This is the typical footprint of an amiga system.
-    # Te problem is these commands are also launched for other platforms where the "version" command is not available, so sh gives an error under linux/freebsd...
-    $(shell version >PIPE:gfx2ver)
-    AMIGA=$(shell sed -e s/\(Kickstart\).*/\1/g <PIPE:gfx2ver)
-    
-    # Amiga classic
-    ifeq ($(AMIGA),Kickstart)
-      DELCOMMAND = Delete -r
-      MKDIR = Makedir
-      RMDIR = Delete
-      CP = copy
-      ZIP = zip
-      PLATFORMFILS = gfx2.png
-      BIN = grafx2
-      COPT = -c99
-      LOPT =
-      CC = Logiciels:vbcc/bin/vc
-      OBJDIR = obj/Amiga68k
-      # No strip command with vbcc, do some dummy thing to make Make happy
-      STRIP = echo
-    else
-  
       # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
       # Linux and FreeBSD specific (default rules)
-      $(shell rm PIPE:gfx2ver)
       DELCOMMAND = rm -rf
       MKDIR = mkdir -p
       RMDIR = rmdir
@@ -203,7 +192,6 @@ else
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
-    endif
   endif
 endif
 

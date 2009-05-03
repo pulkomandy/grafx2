@@ -339,7 +339,7 @@ void Init_text(void)
        }
        #endif
     #endif
-  #elif defined(__amigaos4__)
+  #elif defined(__amigaos4__) || defined(__amigaos__)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif

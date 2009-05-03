@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__)
+#if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__amigaos__)
 // These platforms don't have realpath().
 // We use the following implementation, found in:
 // http://amiga.sourceforge.net/amigadevhelp/FUNCTIONS/GeekGadgets/realpath/ex02_realpath.c
@@ -52,7 +52,7 @@
         
         if (chdir(path)) {
             if (errno == ENOTDIR) {
-                #if defined(__WIN32__) || defined(__MORPHOS__)
+                #if defined(__WIN32__) || defined(__MORPHOS__) || defined(__amigaos__)
                     // No symbolic links and no readlink()
                     l = -1;
                 #else
