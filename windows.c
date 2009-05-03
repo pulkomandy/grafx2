@@ -1635,24 +1635,28 @@ void Display_cursor(void)
         }
         else
         {
+		  DEBUG("B",0);
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
           start_x=Mouse_X-Cursor_offset_X[temp];
           start_y=Mouse_Y-Cursor_offset_Y[temp];
 
-          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-            {
-              color=GFX_cursor_sprite[temp][counter_y][counter_x];
-              if ( (x_pos>=0) && (x_pos<Screen_width)
-                && (y_pos>=0) && (y_pos<Screen_height) )
-              {
-                CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-                if (color!=MC_Trans)
-                  Pixel(x_pos,y_pos,color);
-              }
-            }
-          Update_rect(start_x,start_y,16,16);
-        }
+		  for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+		  {
+			  if(x_pos<0) continue;
+			  if(x_pos>=Screen_width) break;
+			  for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+			  {
+				  if(y_pos<0) continue;
+				  if(y_pos>=Screen_height) break;
+				  color=GFX_cursor_sprite[temp][counter_y][counter_x];
+				  // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
+				  CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+				  if (color!=MC_Trans)
+					  Pixel(x_pos,y_pos,color);
+			  }
+		  }
+		  Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
+		}
       }
       break;
 
@@ -1941,12 +1945,18 @@ void Hide_cursor(void)
           start_x=Mouse_X-Cursor_offset_X[temp];
           start_y=Mouse_Y-Cursor_offset_Y[temp];
 
-          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-              if ( (x_pos>=0) && (x_pos<Screen_width) && (y_pos>=0) && (y_pos<Screen_height) )
-                Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
-
-          Update_rect(Max(start_x,0),Max(start_y,0),16,16);
+		  for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+		  {
+			  if(x_pos<0) continue;
+			  if(x_pos>=Screen_width) break;
+			  for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+			  {
+				  if(y_pos<0) continue;
+				  if(y_pos>=Screen_height) break;
+				  Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
+        	  }
+      	  }
+      	  Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
       }
       if (!Paintbrush_hidden)

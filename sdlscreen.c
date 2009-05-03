@@ -40,7 +40,7 @@
 // UPDATE_METHOD can be set from makefile, otherwise it's selected here
 // depending on the platform :
 #ifndef UPDATE_METHOD
-  #if defined(__macosx__) || defined(__FreeBSD__)
+  #if defined(__macosx__)
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #else
     #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
