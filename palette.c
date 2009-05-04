@@ -1867,6 +1867,8 @@ void Button_Palette(void)
           Backup();
           image_is_backed_up=1;
         }
+
+		if(Mouse_K==LEFT_SIDE)
         while(swap==1)
         {
           swap=0;
@@ -1896,6 +1898,35 @@ void Button_Palette(void)
             }
           }
         }
+
+		else // Right click > Sort only on L
+		while(swap==1)
+		{
+          swap=0;
+          l=255;
+          for(temp_color=begin;temp_color<=end;temp_color++)
+          {
+            ol=l; 
+            // On trie par Chrominance (H) et Luminance (L)
+            RGB_to_HSL(working_palette[temp_color].R,
+            working_palette[temp_color].G,
+            working_palette[temp_color].B,&h,&s,&l);
+
+            if(l>ol)
+            {
+              // On échange la couleur avec la précédente
+              byte swap_color;
+              Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
+              
+              swap_color=remap_table[temp_color];
+              remap_table[temp_color]=remap_table[temp_color-1];
+              remap_table[temp_color-1]=swap_color;
+              
+              swap=1;
+            }
+          }
+		}
+
         for (i=0;i<256;i++)
           inverted_table[remap_table[i]]=i;
         Remap_image_highlevel(inverted_table);
