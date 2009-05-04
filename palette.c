@@ -2135,8 +2135,8 @@ void Button_Secondary_palette(void)
   Print_in_window(18,59,"Palette layout",MC_Dark,MC_Light);
   Print_in_window(35,77,"Cols",MC_Dark,MC_Light);
   Print_in_window(84,77,"Lines",MC_Dark,MC_Light);
-  Print_in_window(157,66,"RGB",MC_Dark,MC_Light);
-  Print_in_window(152,76,"Scale",MC_Dark,MC_Light);
+  Print_in_window(157,58,"RGB",MC_Dark,MC_Light);
+  Print_in_window(152,68,"Scale",MC_Dark,MC_Light);
   
   columns_slider = Window_set_scroller_button(19,72,29,255,1,256-Config.Palette_cells_X);// 5
   Num2str(Config.Palette_cells_X,str,3);
@@ -2146,13 +2146,16 @@ void Button_Secondary_palette(void)
   Num2str(Config.Palette_cells_Y,str,3);
   Print_in_window(94,89,str,MC_Black,MC_Light);
   
-  rgb_scale_slider = Window_set_scroller_button(137,58,60,254,1,256-RGB_scale);// 7
+  rgb_scale_slider = Window_set_scroller_button(137,58,60,255,1,256-RGB_scale);// 7
   Num2str(RGB_scale,str,3);
-  Print_in_window(157,89,str,MC_Black,MC_Light);
+  Print_in_window(157,78,str,MC_Black,MC_Light);
 
   Window_set_normal_button(35,106,13,11,"",-1,1,SDLK_LAST); // 8
   Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
+
+  Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,SDLK_x); // 9
+  Window_set_normal_button(172,88,18,14,"/2"                  , 0,1,SDLK_w); // 10
   
   Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*200,Menu_factor_Y*80);
 
@@ -2181,7 +2184,7 @@ void Button_Secondary_palette(void)
       case 7:
 		// RGB scale slider
         Num2str(256-Window_attribute2,str,3);
-        Print_in_window(157,89,str,MC_Black,MC_Light);
+        Print_in_window(157,78,str,MC_Black,MC_Light);
         break;
       case 8:
 		// Vertical switch
@@ -2190,6 +2193,21 @@ void Button_Secondary_palette(void)
         Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
         Display_cursor();
         break;
+
+	  case 9:
+		// x2 RGB scale
+		rgb_scale_slider->Position = rgb_scale_slider->Position>128?rgb_scale_slider->Position*2-256:0;
+        Num2str(256-rgb_scale_slider->Position,str,3);
+        Print_in_window(157,78,str,MC_Black,MC_Light);
+		Window_draw_slider(rgb_scale_slider);
+		break;
+
+	  case 10:
+		// /2 RGB scale
+		rgb_scale_slider->Position = rgb_scale_slider->Position>253?254:(rgb_scale_slider->Position)/2+128;
+        Num2str(256-rgb_scale_slider->Position,str,3);
+        Print_in_window(157,78,str,MC_Black,MC_Light);
+		Window_draw_slider(rgb_scale_slider);
     }
   }
   while (clicked_button!=1 && clicked_button!=3 && clicked_button!=4);
