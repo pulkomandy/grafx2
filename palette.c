@@ -2146,7 +2146,7 @@ void Button_Secondary_palette(void)
   Num2str(Config.Palette_cells_Y,str,3);
   Print_in_window(94,89,str,MC_Black,MC_Light);
   
-  rgb_scale_slider = Window_set_scroller_button(137,73,29,254,1,256-RGB_scale);// 7
+  rgb_scale_slider = Window_set_scroller_button(137,58,60,254,1,256-RGB_scale);// 7
   Num2str(RGB_scale,str,3);
   Print_in_window(157,89,str,MC_Black,MC_Light);
 

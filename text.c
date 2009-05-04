@@ -30,14 +30,14 @@
 
 // TrueType
 #ifndef NOTTF
-#ifdef __macosx__
+#if defined(__macosx__)
   #include <SDL_ttf/SDL_ttf.h>
 #else
   #include <SDL_ttf.h>
 #endif
 
-#ifdef __linux__
-#ifdef __macosx__
+#if defined(__linux__)
+#if defined(__macosx__)
   #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
@@ -95,7 +95,7 @@ void Add_font(const char *name)
   
   // Détermination du type:
 
-#ifdef __macosx__
+#if defined(__macosx__)
 
   if (size < 6) return;
   
@@ -141,7 +141,7 @@ void Add_font(const char *name)
       font->Is_bitmap = 1;
       break;
     default:
-      #ifdef __macosx__
+      #if defined(__macosx__)
          if(strcasecmp(&name[size-6], "dfont") == 0)
          {
            font->Is_truetype = 1;
@@ -285,7 +285,7 @@ void Init_text(void)
   strcat(directory_name, "fonts");
   For_each_file(directory_name, Add_font);
   
-  #ifdef __WIN32__
+  #if defined(__WIN32__)
     // Parcours du répertoire systeme windows "fonts"
     #ifndef NOTTF
     {
