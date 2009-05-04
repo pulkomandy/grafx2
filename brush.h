@@ -72,7 +72,7 @@ void Rotate_brush_preview(float angle);
 /*!
     Distort the brush on the screen.
 */
-void Distort_brush_preview(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4);
+void Distort_brush_preview(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2, unsigned short x3, unsigned short y3, unsigned short x4, unsigned short y4);
 
 /*!
     Replace the brush by a distorted version of itself.
