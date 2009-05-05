@@ -301,8 +301,8 @@ uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/base.gif
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
 	# Icon and desktop file for debian
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.xpm
 	@echo Uninstall complete
 
 -include Makefile.dep
