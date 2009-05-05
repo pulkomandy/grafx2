@@ -14,8 +14,8 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+   along with this program; if not, see <http://www.gnu.org/licenses/>.
+*/
 
 // This file is not used on some platforms, so don't do anything for them
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))&&(!defined(__amigaos__))
