@@ -285,6 +285,9 @@ install : $(BIN)
 	$(CP) gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) skins/base.gif $(DESTDIR)$(datadir)/grafx2/skins/
+	# Icon and desktop file for debian
+	$(CP) misc/grafx2.desktop $(DESTDIR)$(datadir)/applications/
+	$(CP) misc/grafx2.xpm $(DESTDIR)$(datadir)/icons/
 	@echo Install complete
   
 # Linux uninstallation of the program
@@ -297,6 +300,9 @@ uninstall :
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/base.gif
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
+	# Icon and desktop file for debian
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/
 	@echo Uninstall complete
 
 -include Makefile.dep

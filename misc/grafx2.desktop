@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=GrafX2
+Comment=Deluxe Paint Clone
+Exec=grafx2
+Terminal=false
+Type=Application
+Icon=grafx2.xpm
+Categories=Application;Graphics;
