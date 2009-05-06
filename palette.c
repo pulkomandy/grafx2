@@ -883,7 +883,7 @@ void Button_Palette(void)
   Draw_thingumajig(263,165,MC_Dark,-1);
   Draw_thingumajig(280,165,MC_Dark,+1);
 
-  Update_rect(Window_pos_X,Window_pos_Y,299*Menu_factor_X,188*Menu_factor_Y);
+  Update_window_area(0,0,299,188);
 
   Display_cursor();
 
@@ -1842,7 +1842,7 @@ void Button_Palette(void)
   		  Window_draw_normal_bouton(266,165,12,11,"-",0,1);
         }
         Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
-		Update_window_area(266,74,103,11);
+		Update_window_area(265,73,14,103);
       break;
 
       case 25 : // Sort palette
@@ -2193,9 +2193,9 @@ void Button_Secondary_palette(void)
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
 
   Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,SDLK_x); // 9
-  Window_set_normal_button(172,88,18,14,"/2"                  , 0,1,SDLK_w); // 10
+  Window_set_normal_button(172,88,18,14,"÷2"                  , 0,1,SDLK_w); // 10
   
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*200,Menu_factor_Y*80);
+  Update_window_area(0,0,200,146);
 
   Display_cursor();
 
@@ -2221,7 +2221,9 @@ void Button_Secondary_palette(void)
         break;
       case 7:
 		// RGB scale slider
+        Hide_cursor();
         Num2str(256-Window_attribute2,str,3);
+        Display_cursor();
         Print_in_window(157,78,str,MC_Black,MC_Light);
         break;
       case 8:
