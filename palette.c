@@ -2221,10 +2221,10 @@ void Button_Secondary_palette(void)
         break;
       case 7:
 		// RGB scale slider
-        Hide_cursor();
         Num2str(256-Window_attribute2,str,3);
-        Display_cursor();
+        Hide_cursor();
         Print_in_window(157,78,str,MC_Black,MC_Light);
+        Display_cursor();
         break;
       case 8:
 		// Vertical switch
