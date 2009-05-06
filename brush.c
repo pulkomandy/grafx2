@@ -1291,7 +1291,7 @@ void Stretch_brush_preview(short x1, short y1, short x2, short y2)
 }
 
 /// Returns the minimum of 4 integers.
-int Min4(unsigned long int a,unsigned long int b,unsigned long int c,unsigned long int d)
+int Min4(long int a, long int b, long int c, long int d)
 {
   if (a<b)
     if (c<d)
@@ -1319,7 +1319,7 @@ void Pixel_in_distort_buffer(word x_pos,word y_pos,byte color)
 }
 
 /// Returns the maximum of 4 integers.
-int Max4(unsigned long int a,unsigned long int b,unsigned long int c,unsigned long int d)
+int Max4( long int a, long int b, long int c, long int d)
 {
   if (a>b)
     if (c>d)
@@ -1338,18 +1338,18 @@ void Draw_brush_linear_distort(unsigned long int tex_min_x,
                                unsigned long int tex_min_y,
                                unsigned long int tex_max_x,
                                unsigned long int tex_max_y,
-                               unsigned long int x1,
-                               unsigned long int y1,
-                               unsigned long int x2,
-                               unsigned long int y2,
-                               unsigned long int x3,
-                               unsigned long int y3,
-                               unsigned long int x4,
-                               unsigned long int y4)
+                               long int x1,
+                               long int y1,
+                               long int x2,
+                               long int y2,
+                               long int x3,
+                               long int y3,
+                               long int x4,
+                               long int y4)
 {
   static byte color;
   // bounding rectangle
-  static unsigned long int min_x, max_x, min_y, max_y;
+  static long int min_x, max_x, min_y, max_y;
   
   min_x=Min4(x1,x2,x3,x4);
   max_x=Max4(x1,x2,x3,x4);
@@ -1428,7 +1428,7 @@ void Draw_brush_linear_distort(unsigned long int tex_min_x,
 }
 
 /// Draws a distorted version of the brush, mapped over the given quad (picture coordinates).
-void Distort_brush_preview(unsigned short x1, unsigned short y1, unsigned short x2, unsigned short y2, unsigned short x3, unsigned short y3, unsigned short x4, unsigned short y4)
+void Distort_brush_preview(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4)
 {
   Pixel_for_distort=Pixel_figure_preview;
   Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
@@ -1504,6 +1504,11 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
   Smear_brush=new_smear_brush;
   Smear_brush_width=new_smear_brush_width;
   Smear_brush_height=new_smear_brush_height;
+
+  // Re-center brush handle  
+  Brush_offset_X=(Brush_width>>1);
+  Brush_offset_Y=(Brush_height>>1);
+  
 }
 
 //------------------------- Rotation de la brosse ---------------------------
