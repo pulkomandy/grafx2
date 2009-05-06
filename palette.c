@@ -1824,6 +1824,10 @@ void Button_Palette(void)
           Print_in_window(211,71,"S",MC_Dark,MC_Light);
           Print_in_window(238,71,"L",MC_Dark,MC_Light);
           Componant_unit(256);
+
+		  // Display the + and - button as disabled
+  		  Window_draw_normal_bouton(266, 74,12,11,"+",0,0);
+  		  Window_draw_normal_bouton(266,165,12,11,"-",0,0);
         }
         else
         {
@@ -1832,8 +1836,13 @@ void Button_Palette(void)
           Print_in_window(211,71,"G",MC_Dark,MC_Light);
           Print_in_window(238,71,"B",MC_Dark,MC_Light);
           Componant_unit(RGB_scale);
+
+		  // Display the + and - button as enabled
+  		  Window_draw_normal_bouton(266, 74,12,11,"+",0,1);
+  		  Window_draw_normal_bouton(266,165,12,11,"-",0,1);
         }
         Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
+		Update_rect(266,74,103,11);
       break;
 
       case 25 : // Sort palette

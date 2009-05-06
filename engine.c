@@ -16,9 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-//
-//  Ce fichier contient la gestion du moteur
-//
+/// @file Window engine and interface management
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,8 +55,10 @@ byte Smooth_mode_before_cancel;
 byte Tiling_mode_before_cancel;
 Func_effect Effect_function_before_cancel;
 
+///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
 byte* Window_background[8];
 
+///Disables all the effects
 void Cancel_effects(void)
 {
   Shade_mode_before_cancel=Shade_mode;
@@ -87,7 +87,7 @@ void Cancel_effects(void)
 }
 
 
-//----------------- Restaurer les effets des modes de dessin -----------------
+///Get the effects and drawing modes back
 void Restore_effects(void)
 {
   Shade_mode      =Shade_mode_before_cancel;
@@ -101,6 +101,7 @@ void Restore_effects(void)
 }
 
 
+///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=
 {
   "Paintbrush choice       ",
@@ -142,7 +143,8 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Color #"                 ,
   "Hide tool bar           "
 };
-// Sauvegarde un bloc (généralement l'arrière-plan d'une fenêtre)
+
+///Save a screen block (usually before erasing it with a new window or a dropdown menu)
 void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
@@ -151,7 +153,8 @@ void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
   for (index=0; index<(height*Menu_factor_Y); index++)
     Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X*Pixel_width));
 }
-// Restaure de ce que la fenêtre cachait
+
+///Restores a screen block
 void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
@@ -159,7 +162,8 @@ void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int heigh
     Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X*Pixel_width));
   free(buffer);
 }
-// Ecrit un pixel dans un fond de fenêtre
+
+///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
 void Pixel_background(int x_pos, int y_pos, byte color)
 {
   int x_repetition=Pixel_width;
@@ -168,7 +172,7 @@ void Pixel_background(int x_pos, int y_pos, byte color)
 }
 
 
-
+///Guess the number of the button that was just clicked
 int Button_under_mouse(void)
 {
   int btn_number;
@@ -211,6 +215,7 @@ int Button_under_mouse(void)
 }
 
 
+///Draw the frame for a menu button
 void Draw_menu_button_frame(byte btn_number,byte pressed)
 {
   byte color_top_left;
@@ -329,7 +334,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
 }
 
 
-//---------------------- Désenclenchement d'un bouton ------------------------
+///Deselect a button
 void Unselect_button(int btn_number)
 {
   if (Buttons_Pool[btn_number].Pressed)
@@ -344,7 +349,7 @@ void Unselect_button(int btn_number)
 }
 
 
-//-Enclenchement d'un bouton (et désenclenchement de ceux de la même famille)-
+///Select a button and disable all his family (for example, selecting "freehand" unselect "curves", "lines", ...)
 void Select_button(int btn_number,byte click)
 {
   int family;
@@ -437,9 +442,7 @@ void Select_button(int btn_number,byte click)
 }
 
 
-
-//--- Déplacer la barre de séparation entre la partie zoomée et la partie ----
-//------------------ non-zoomée lorsqu'on est en mode loupe ------------------
+///Moves the splitbar between zoom and standard views
 void Move_separator(void)
 {
   short old_main_separator_position=Main_separator_position;
@@ -504,7 +507,7 @@ void Move_separator(void)
 }
 
 
-//======================= Gestion principale du moteur =======================
+///Main handler for everything. This is the main loop of the program
 void Main_handler(void)
 {
   static byte temp_color;
@@ -1461,9 +1464,10 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
     temp->Number   =Window_nb_buttons;
     temp->Pos_X    =x_pos;
     temp->Pos_Y    =y_pos;
-    temp->Width  =width;
-    temp->Height  =height;
-    temp->Shortcut=shortcut;
+    temp->Width    =width;
+    temp->Height   =height;
+    temp->Clickable=clickable;
+    temp->Shortcut =shortcut;
     temp->Repeatable=0;
 
     temp->Next=Window_normal_button_list;
