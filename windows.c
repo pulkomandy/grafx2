@@ -1633,28 +1633,28 @@ void Display_cursor(void)
         }
         else
         {
-		  DEBUG("B",0);
+          DEBUG("B",0);
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
           start_x=Mouse_X-Cursor_offset_X[temp];
           start_y=Mouse_Y-Cursor_offset_Y[temp];
 
-		  for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-		  {
-			  if(x_pos<0) continue;
-			  if(x_pos>=Screen_width) break;
-			  for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-			  {
-				  if(y_pos<0) continue;
-				  if(y_pos>=Screen_height) break;
-				  color=GFX_cursor_sprite[temp][counter_y][counter_x];
-				  // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
-				  CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-				  if (color!=MC_Trans)
-					  Pixel(x_pos,y_pos,color);
-			  }
-		  }
-		  Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
-		}
+          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          {
+              if(x_pos<0) continue;
+              if(x_pos>=Screen_width) break;
+              for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+              {
+                  if(y_pos<0) continue;
+                  if(y_pos>=Screen_height) break;
+                  color=GFX_cursor_sprite[temp][counter_y][counter_x];
+                  // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
+                  CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+                  if (color!=MC_Trans)
+                      Pixel(x_pos,y_pos,color);
+              }
+          }
+          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
+        }
       }
       break;
 
@@ -1943,18 +1943,18 @@ void Hide_cursor(void)
           start_x=Mouse_X-Cursor_offset_X[temp];
           start_y=Mouse_Y-Cursor_offset_Y[temp];
 
-		  for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-		  {
-			  if(x_pos<0) continue;
-			  if(x_pos>=Screen_width) break;
-			  for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-			  {
-				  if(y_pos<0) continue;
-				  if(y_pos>=Screen_height) break;
-				  Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
-        	  }
-      	  }
-      	  Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
+          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          {
+              if(x_pos<0) continue;
+              if(x_pos>=Screen_width) break;
+              for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+              {
+                  if(y_pos<0) continue;
+                  if(y_pos>=Screen_height) break;
+                  Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
+              }
+            }
+            Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
       }
       if (!Paintbrush_hidden)
@@ -2219,9 +2219,9 @@ byte Best_color(byte r,byte g,byte b)
       delta_g=(int)Main_palette[col].G-g;
       delta_b=(int)Main_palette[col].B-b;
 
-	  rmean = ( Main_palette[col].R + r ) / 2;
+      rmean = ( Main_palette[col].R + r ) / 2;
 
-	  if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
+      if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
       //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
         return col;
 
@@ -2250,9 +2250,9 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
-	rmean = ( Main_palette[col].R + red ) / 2;
+    rmean = ( Main_palette[col].R + red ) / 2;
 
-	if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
+    if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
     //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
       return col;
 

@@ -1825,9 +1825,9 @@ void Button_Palette(void)
           Print_in_window(238,71,"L",MC_Dark,MC_Light);
           Componant_unit(256);
 
-		  // Display the + and - button as disabled
-  		  Window_draw_normal_bouton(266, 74,12,11,"+",0,0);
-  		  Window_draw_normal_bouton(266,165,12,11,"-",0,0);
+          // Display the + and - button as disabled
+            Window_draw_normal_bouton(266, 74,12,11,"+",0,0);
+            Window_draw_normal_bouton(266,165,12,11,"-",0,0);
         }
         else
         {
@@ -1837,12 +1837,12 @@ void Button_Palette(void)
           Print_in_window(238,71,"B",MC_Dark,MC_Light);
           Componant_unit(RGB_scale);
 
-		  // Display the + and - button as enabled
-  		  Window_draw_normal_bouton(266, 74,12,11,"+",0,1);
-  		  Window_draw_normal_bouton(266,165,12,11,"-",0,1);
+          // Display the + and - button as enabled
+            Window_draw_normal_bouton(266, 74,12,11,"+",0,1);
+            Window_draw_normal_bouton(266,165,12,11,"-",0,1);
         }
         Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
-		Update_window_area(265,73,14,103);
+        Update_window_area(265,73,14,103);
       break;
 
       case 25 : // Sort palette
@@ -1852,18 +1852,18 @@ void Button_Palette(void)
         int swap=1;
         byte remap_table[256];
         byte inverted_table[256];
-		byte begin, end;
+        byte begin, end;
 
-		if(block_start==block_end)
-		{
-			begin = 0;
-			end = 255;
-		}
-		else
-		{
-			begin = block_start;
-			end = block_end;
-		}
+        if(block_start==block_end)
+        {
+            begin = 0;
+            end = 255;
+        }
+        else
+        {
+            begin = block_start;
+            end = block_end;
+        }
         
         // Init remap table
         for (i=0;i<256;i++)
@@ -1875,7 +1875,7 @@ void Button_Palette(void)
           image_is_backed_up=1;
         }
 
-		if(Mouse_K==LEFT_SIDE)
+        if(Mouse_K==LEFT_SIDE)
         while(swap==1)
         {
           swap=0;
@@ -1889,9 +1889,9 @@ void Button_Palette(void)
             working_palette[temp_color].B,&h,&s,&l);
 
             if(
-              	 ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
+                   ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
               || ((s>0 && os > 0) && (h<oh || (h==oh && l>ol))) // 2 couleurs saturées : on trie par H, si les H sont égaux on trie par L
-			  || ((os==0 && s==0) && l>ol))  // Deux gris : on trie par L uniquement
+              || ((os==0 && s==0) && l>ol))  // Deux gris : on trie par L uniquement
             {
               // On échange la couleur avec la précédente
               byte swap_color;
@@ -1906,9 +1906,9 @@ void Button_Palette(void)
           }
         }
 
-		else // Right click > Sort only on L
-		while(swap==1)
-		{
+        else // Right click > Sort only on L
+        while(swap==1)
+        {
           swap=0;
           l=255;
           for(temp_color=begin;temp_color<=end;temp_color++)
@@ -1932,7 +1932,7 @@ void Button_Palette(void)
               swap=1;
             }
           }
-		}
+        }
 
         for (i=0;i<256;i++)
           inverted_table[remap_table[i]]=i;
@@ -2210,44 +2210,44 @@ void Button_Secondary_palette(void)
     switch(clicked_button)
     {
       case 5:
-		// Column slider
+        // Column slider
         Num2str(256-Window_attribute2,str,3);
         Print_in_window(38,89,str,MC_Black,MC_Light);
         break;    
       case 6:
-		// Line slider
+        // Line slider
         Num2str(16-Window_attribute2,str,3);
         Print_in_window(94,89,str,MC_Black,MC_Light);
         break;
       case 7:
-		// RGB scale slider
+        // RGB scale slider
         Num2str(256-Window_attribute2,str,3);
         Hide_cursor();
         Print_in_window(157,78,str,MC_Black,MC_Light);
         Display_cursor();
         break;
       case 8:
-		// Vertical switch
+        // Vertical switch
         palette_vertical = !palette_vertical;
         Hide_cursor();
         Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
         Display_cursor();
         break;
 
-	  case 9:
-		// x2 RGB scale
-		rgb_scale_slider->Position = rgb_scale_slider->Position>128?rgb_scale_slider->Position*2-256:0;
+      case 9:
+        // x2 RGB scale
+        rgb_scale_slider->Position = rgb_scale_slider->Position>128?rgb_scale_slider->Position*2-256:0;
         Num2str(256-rgb_scale_slider->Position,str,3);
         Print_in_window(157,78,str,MC_Black,MC_Light);
-		Window_draw_slider(rgb_scale_slider);
-		break;
+        Window_draw_slider(rgb_scale_slider);
+        break;
 
-	  case 10:
-		// /2 RGB scale
-		rgb_scale_slider->Position = rgb_scale_slider->Position>253?254:(rgb_scale_slider->Position)/2+128;
+      case 10:
+        // /2 RGB scale
+        rgb_scale_slider->Position = rgb_scale_slider->Position>253?254:(rgb_scale_slider->Position)/2+128;
         Num2str(256-rgb_scale_slider->Position,str,3);
         Print_in_window(157,78,str,MC_Black,MC_Light);
-		Window_draw_slider(rgb_scale_slider);
+        Window_draw_slider(rgb_scale_slider);
     }
   }
   while (clicked_button!=1 && clicked_button!=3 && clicked_button!=4);
