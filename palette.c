@@ -1875,7 +1875,8 @@ void Button_Palette(void)
           image_is_backed_up=1;
         }
 
-        if(Mouse_K==LEFT_SIDE)
+        if(Window_attribute1==LEFT_SIDE)
+        // Laft click on button: Sort by Hue (H) and Lightness (L)
         while(swap==1)
         {
           swap=0;
@@ -1883,17 +1884,16 @@ void Button_Palette(void)
           for(temp_color=begin;temp_color<=end;temp_color++)
           {
             oh=h; ol=l; os=s;
-            // On trie par Chrominance (H) et Luminance (L)
             RGB_to_HSL(working_palette[temp_color].R,
             working_palette[temp_color].G,
             working_palette[temp_color].B,&h,&s,&l);
 
             if(
-                   ((s==0) && (os>0)) // Un gris passe devant une couleur saturée
-              || ((s>0 && os > 0) && (h<oh || (h==oh && l>ol))) // 2 couleurs saturées : on trie par H, si les H sont égaux on trie par L
-              || ((os==0 && s==0) && l>ol))  // Deux gris : on trie par L uniquement
+                   ((s==0) && (os>0)) // A grey is before a saturated color
+              || ((s>0 && os > 0) && (h<oh || (h==oh && l>ol))) // 2 saturated colors: sort by H, then by L
+              || ((os==0 && s==0) && l>ol))  // Two greys: sort by L only
             {
-              // On échange la couleur avec la précédente
+              // Swap color with the previous one
               byte swap_color;
               Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
               
@@ -1914,14 +1914,13 @@ void Button_Palette(void)
           for(temp_color=begin;temp_color<=end;temp_color++)
           {
             ol=l; 
-            // On trie par Chrominance (H) et Luminance (L)
             RGB_to_HSL(working_palette[temp_color].R,
             working_palette[temp_color].G,
             working_palette[temp_color].B,&h,&s,&l);
 
             if(l>ol)
             {
-              // On échange la couleur avec la précédente
+              // Swap color with the previous one
               byte swap_color;
               Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
               
