@@ -1,0 +1,62 @@
+.TH GRAFX2 1 "February 23, 2009"
+.SH NAME
+grafx2 \- Ultimate 256-color bitmap paint program
+.SH SYNOPSIS
+.B grafx2
+.RI [ options ] " files" ...
+.br
+.SH DESCRIPTION
+This manual page documents briefly the
+.B grafx2
+command.
+.PP
+\fBgrafx2\fP is a bitmap paint program that allows you to draw in more than
+60 video resolutions, including most of the standard
+Amiga resolutions : 320x200, 320x256, 320x512, 640x256, 640x512, etc... provided your
+videocard knows how to handle them.
+
+This program is dedicated to everybody who knows what a single pixel is. Its
+layout is not very different from the famous Deluxe Paint or Brilliance, so it
+will be quite easy to handle it if you know at least one of these programs.
+If you aren't used to the art of drawing with up to 256 colors, it will be a
+little more difficult for you, but you should give it a try (or more, because
+most of the power of this program won't show up on the first try).
+.SH OPTIONS
+A summary of options is included below.
+.TP
+.B /?, /h, /help
+Show summary of options.
+.TP
+.B /wide
+To emulate a video mode with wide pixels (2 x 1).
+.TP
+.B /tall
+To emulate a video mode with tall pixels (1 x 2).
+.TP
+.B /double
+To emulate a video mode with double pixels (2 x 2).
+.TP
+.B /skin <filename>
+Use an alternate file for the menu graphics.
+.TP
+.B /mode <videomode>
+To set a video mode listed with the /help parameter.
+.SH FILES
+User settings are stored in ~/.grafx2/gfx2.ini. This file is really meant to
+be edited by the user and allows to tweak many aspects of the program.
+.SH ENVIRONMENT
+Since grafx2 uses the SDL library for graphics and user input you can
+use control some of that parts using the SDL environment variables
+described at
+http://www.libsdl.org/cgi/docwiki.cgi/Environment_variables
+.SH SEE ALSO
+.BR gimp (1),
+.BR imagemagick (1).
+.br
+.SH AUTHOR
+grafx2 was written by Adrien Destugues, Yves Rizoud, Peter Gordon, Markus
+Weiss, Rusback, Franck Charlet, Luc Schrijvers, Karl Maritaud, Guillaume
+Dorme, and Karl Bartel.
+.PP
+This manual page was written by G\[:u]rkan Seng\[:u]n <gurkan@phys.ethz.ch>,
+for the Debian project (and may be used by others).
