@@ -275,7 +275,7 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	# Generate launcher script
 	echo "#!/bin/sh" > $(DESTDIR)$(bindir)/grafx2
-	echo $(DESTDIR)$(datadir)/grafx2/$(BIN) '$$*' >> $(DESTDIR)$(bindir)/grafx2
+	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(DESTDIR)$(bindir)/grafx2
 	chmod 755 $(DESTDIR)$(bindir)/grafx2
 	# Copy files
 	$(CP) $(BIN) $(DESTDIR)$(datadir)/grafx2/
