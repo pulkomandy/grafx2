@@ -221,7 +221,7 @@ void Analyze_command_line(int argc,char * argv[])
     }
     else if ( !strcmp(argv[index],"/triple") )
     {
-      Pixel_ratio = PIXEL_DOUBLE;
+      Pixel_ratio = PIXEL_TRIPLE;
     }
     else if ( !strcmp(argv[index],"/quadruple") )
     {
