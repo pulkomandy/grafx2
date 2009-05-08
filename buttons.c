@@ -38,6 +38,7 @@
 #include "buttons.h"
 #include "operatio.h"
 #include "pages.h"
+#include "palette.h"
 #include "errors.h"
 #include "readini.h"
 #include "saveini.h"
@@ -275,7 +276,12 @@ void Button_Select_forecolor(void)
 {
   int color=Pick_color_in_palette();
 
-  if (color!=-1)
+  if (color == Fore_color)
+  {
+	// Open palette window
+	Button_Palette();
+  }	  
+  else if (color!=-1)
   {
     Hide_cursor();
     Frame_menu_color(MC_Black);

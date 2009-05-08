@@ -144,17 +144,17 @@ enum ERROR_CODES
   ERROR_SORRY_SORRY_SORRY  ///< (Page allocation error that shouldn't ever happen, now)
 };
 
-// Available pixel scalers
+/// Available pixel scalers
 enum PIXEL_RATIO
 {
-    PIXEL_SIMPLE=0,
-    PIXEL_WIDE,
-    PIXEL_TALL,
-    PIXEL_DOUBLE,
-    PIXEL_TRIPLE,
-    PIXEL_WIDE2,
-    PIXEL_TALL2,
-    PIXEL_QUAD,
+    PIXEL_SIMPLE=0, ///< Use real pixels
+    PIXEL_WIDE,		///< Use wide pixels (2x1) like on Amstrad CPC mode 0
+    PIXEL_TALL,		///< Use tall pixels (1x2) like on Amstrad CPC mode 2
+    PIXEL_DOUBLE,	///< Use big pixels (2x2) if your LCD screen can't do lowres by itself
+    PIXEL_TRIPLE,	///< Use really big pixels (3x3)
+    PIXEL_WIDE2,	///< Use big wide pixels (4x2)
+    PIXEL_TALL2,	///< Use big tall pixels (2x4)
+    PIXEL_QUAD,		///< Use really giant pixels (4x4). You need to have a screen resolution at least 1280x800 to use this one
     PIXEL_MAX ///< Number of elements in enum
 };
 
@@ -168,7 +168,7 @@ enum FAMILY_OF_BUTTONS
   FAMILY_EFFECTS       ///< Effects
 };
 
-// The different kinds of buttons in menus or windows.
+/// The different kinds of buttons in menus or windows.
 enum BUTTON_SHAPES
 {
   BUTTON_SHAPE_NO_FRAME,             ///< Ex: the palette
@@ -230,20 +230,20 @@ enum SHADE_MODES
 /// Identifiers for the chunks (data blocks) of gfx2.cfg
 enum CHUNKS_CFG
 {
-  CHUNK_KEYS            = 0,
-  CHUNK_VIDEO_MODES     = 1,
-  CHUNK_SHADE           = 2,
-  CHUNK_MASK            = 3,
-  CHUNK_STENCIL         = 4,
-  CHUNK_GRADIENTS       = 5,
-  CHUNK_SMOOTH          = 6,
-  CHUNK_EXCLUDE_COLORS  = 7,
-  CHUNK_QUICK_SHADE     = 8,
+  CHUNK_KEYS            = 0, ///< Shortcut keys definitions
+  CHUNK_VIDEO_MODES     = 1, ///< List of video modes
+  CHUNK_SHADE           = 2, ///< Shade settings
+  CHUNK_MASK            = 3, ///< Mask settings
+  CHUNK_STENCIL         = 4, ///< Stencil settings
+  CHUNK_GRADIENTS       = 5, ///< Gradients
+  CHUNK_SMOOTH          = 6, ///< Smooth effect settings
+  CHUNK_EXCLUDE_COLORS  = 7, ///< List of excluded colors
+  CHUNK_QUICK_SHADE     = 8, ///< QShade effect settings
   CHUNK_GRID            = 9,
   CHUNK_MAX
 };
 
-/// Identifiers for the 8x8 icons of ::GFX_icon_sprite
+/// Identifiers for the 8x8 icons of ::GFX_icon_sprite (these are unused now)
 enum ICON_TYPES
 {
   ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk
