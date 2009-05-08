@@ -661,23 +661,19 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
-          Message_not_implemented(); // !!! TEMPORAIRE !!!
-          //Special_Next_user_forecolor();
+          Special_next_user_forecolor();
           Key=0;
           break;
         case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
-          Message_not_implemented(); // !!! TEMPORAIRE !!!
-          //Special_Previous_user_forecolor();
+          Special_previous_user_forecolor();
           Key=0;
           break;
         case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
-          Message_not_implemented(); // !!! TEMPORAIRE !!!
-          //Special_Next_user_backcolor();
+          Special_next_user_backcolor();
           Key=0;
           break;
         case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
-          Message_not_implemented(); // !!! TEMPORAIRE !!!
-          //Special_Previous_user_backcolor();
+          Special_previous_user_backcolor();
           Key=0;
           break;
         case SPECIAL_SHOW_HIDE_CURSOR : // Show / Hide cursor

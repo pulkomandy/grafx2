@@ -27,4 +27,6 @@
 
 void Button_Quick_shade_menu(void);
 
+int Shade_settings_menu(void);
+
 #endif // SHADE_H_INCLUDED

@@ -34,6 +34,7 @@
 #include "windows.h"
 #include "input.h"
 #include "palette.h"
+#include "shade.h"
 
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 
@@ -2165,7 +2166,7 @@ void Button_Secondary_palette(void)
   Open_window(200,146,"Palettes");
 
   Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
-  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,0,SDLK_s); // 2
+  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,SDLK_s); // 2
   Window_set_normal_button(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
   Window_set_normal_button( 80,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
   Window_display_frame(10,55,122,66);
@@ -2249,7 +2250,7 @@ void Button_Secondary_palette(void)
         Window_draw_slider(rgb_scale_slider);
     }
   }
-  while (clicked_button!=1 && clicked_button!=3 && clicked_button!=4);
+  while (clicked_button!=1 && clicked_button!=2 && clicked_button!=3 && clicked_button!=4);
 
   // We need to get the sliders positions before closing the window, because they will be freed.
   palette_cols=256-columns_slider->Position;
@@ -2285,6 +2286,13 @@ void Button_Secondary_palette(void)
   {
     Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL);
   }
+  else if (clicked_button==2)
+  {
+    // Open the menu with Shade settings. Same as the shortcut, except
+    // that this will not activate shade mode on exit.
+    Shade_settings_menu();
+  }
+  
   if (palette_needs_redraw)
   {
     Change_palette_cells();

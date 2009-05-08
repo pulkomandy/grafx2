@@ -40,7 +40,7 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h errors.h misc.h \
   windows.h
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h misc.h engine.h readline.h \
   buttons.h pages.h help.h sdlscreen.h errors.h op_c.h windows.h input.h \
-  palette.h
+  palette.h shade.h
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h misc.h \
   pxdouble.h pxwide.h
 $(OBJDIR)/pxquad.o: pxquad.c global.h struct.h const.h sdlscreen.h misc.h pxquad.h

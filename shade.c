@@ -990,20 +990,21 @@ int Menu_shade(void)
   return (clicked_button==5);
 }
 
-
-
-void Button_Shade_menu(void)
+/// Handles the screen with Shade settings.
+/// @return true if user clicked ok, false if he cancelled
+int Shade_settings_menu(void)
 {
   T_Shade * initial_shade_list; // Anciennes données des shades
   byte old_shade; // old n° de shade actif
-
+  int return_code;
 
   // Backup des anciennes données
   initial_shade_list=(T_Shade *)malloc(sizeof(Shade_list));
   memcpy(initial_shade_list,Shade_list,sizeof(Shade_list));
   old_shade=Shade_current;
 
-  if (!Menu_shade()) // Cancel
+  return_code = Menu_shade();
+  if (!return_code) // Cancel
   {
     memcpy(Shade_list,initial_shade_list,sizeof(Shade_list));
     Shade_current=old_shade;
@@ -1014,18 +1015,25 @@ void Button_Shade_menu(void)
                  Shade_list[Shade_current].Step,
                  Shade_list[Shade_current].Mode,
                  Shade_table_left,Shade_table_right);
-
-    // Si avant de rentrer dans le menu on n'était pas en mode Shade
-    if (!Shade_mode)
-      Button_Shade_mode(); // => On y passe (cool!)
   }
 
   free(initial_shade_list);
 
   Display_cursor();
+
+  return return_code;
 }
 
 
+void Button_Shade_menu(void)
+{
+  if (Shade_settings_menu())
+  {
+    // If user clicked OK while in the menu, activate Shade mode.
+    if (!Shade_mode)
+      Button_Shade_mode();
+  }
+}
 
 
 void Button_Quick_shade_menu(void)

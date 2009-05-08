@@ -32,6 +32,11 @@ void Special_previous_forecolor(void);
 void Special_next_backcolor(void);
 void Special_previous_backcolor(void);
 
+void Special_next_user_forecolor(void);
+void Special_previous_user_forecolor(void);
+void Special_next_user_backcolor(void);
+void Special_previous_user_backcolor(void);
+
 void Scroll_screen(short delta_x,short delta_y);
 void Scroll_magnifier(short delta_x,short delta_y);
 

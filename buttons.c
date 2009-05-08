@@ -84,38 +84,6 @@ void Bouton_***(void)
 void Stencil_update_color(byte color);
 void Stencil_tag_color(byte color, byte tag_color);
 
-void Message_not_implemented(void)
-{
-  short clicked_button;
-
-  Open_window(160,76,"Not available yet!");
-
-  Print_in_window(8,20,"This function will",MC_Black,MC_Light);
-  Print_in_window(12,28,"be implemented in",MC_Black,MC_Light);
-  Print_in_window(16,36,"a later version.",MC_Black,MC_Light);
-  Window_set_normal_button(60,53,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Update_window_area(0,0,Window_width, Window_height);
-  Display_cursor();
-
-  do
-    clicked_button=Window_clicked_button();
-  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
-
-  if(clicked_button<=0) Key=0;
-
-  Close_window();
-
-  //   Puisque cette fonction peut être appelée par plusieurs boutons et qu'on
-  // ne sait pas lequel c'est, on les désenclenche tous. De toutes façons, ça
-  // ne sert à rien d'essayer d'optimiser ça puisque l'utilisateur ne devrait
-  // pas souvent l'appeler, et en plus y'en a pas beaucoup à désenclencher. ;)
-//  Unselect_button(BUTTON_GRADRECT);
-//  Unselect_button(BUTTON_TEXT);
-
-  Display_cursor();
-}
-
-
 void Message_out_of_memory(void)
 {
   short clicked_button;

@@ -152,9 +152,9 @@ void Window_set_shortcut(int action_id)
 
   // Zone de description
   Window_display_frame_in(5,68,292,37);
-  Print_in_window(9,70,ConfigKey[config_index].Explanation1,MC_Black,MC_Light);
-  Print_in_window(9,78,ConfigKey[config_index].Explanation2,MC_Black,MC_Light);
-  Print_in_window(9,86,ConfigKey[config_index].Explanation3,MC_Black,MC_Light);
+  Print_in_window(8,70,ConfigKey[config_index].Explanation1,MC_Black,MC_Light);
+  Print_in_window(8,78,ConfigKey[config_index].Explanation2,MC_Black,MC_Light);
+  Print_in_window(8,86,ConfigKey[config_index].Explanation3,MC_Black,MC_Light);
 
   // Shortcut 0
   Window_set_normal_button(27,30,177,14,"",0,1,KEY_NONE); // 4

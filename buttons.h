@@ -28,12 +28,6 @@
 #include "struct.h"
 
 /*!
-    Displays an error message when calling an unavailable function.
-    Only used in the beta versions for things we haven't coded yet.
-*/
-void Message_not_implemented(void);
-
-/*!
     Displays an error message when there is no more memory for the requested operation. 
 */
 void Message_out_of_memory(void);

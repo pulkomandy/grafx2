@@ -212,7 +212,7 @@ void Bigger_paintbrush(void)
 }
 
 
-//--------------------- Passer à la ForeColor suivante -----------------------
+//--------------------- Increase the ForeColor -----------------------
 void Special_next_forecolor(void)
 {
   Hide_cursor();
@@ -227,7 +227,7 @@ void Special_next_forecolor(void)
   Display_cursor();
 }
 
-//-------------------- Passer à la ForeColor précédente ----------------------
+//--------------------- Decrease the ForeColor -----------------------
 void Special_previous_forecolor(void)
 {
   Hide_cursor();
@@ -242,7 +242,7 @@ void Special_previous_forecolor(void)
   Display_cursor();
 }
 
-//--------------------- Passer à la BackColor suivante -----------------------
+//--------------------- Increase the BackColor -----------------------
 void Special_next_backcolor(void)
 {
   Hide_cursor();
@@ -251,7 +251,7 @@ void Special_next_backcolor(void)
   Display_cursor();
 }
 
-//-------------------- Passer à la BackColor précédente ----------------------
+//--------------------- Decrease the BackColor -----------------------
 void Special_previous_backcolor(void)
 {
   Hide_cursor();
@@ -260,6 +260,53 @@ void Special_previous_backcolor(void)
   Display_cursor();
 }
 
+/// Picks the next foreground color, according to current shade table
+void Special_next_user_forecolor(void)
+{
+  Hide_cursor();
+  Frame_menu_color(MC_Black);
+
+  Fore_color=Shade_table_left[Fore_color];
+
+  Reposition_palette();
+  Display_foreback();
+
+  Frame_menu_color(MC_White);
+  Display_cursor();
+}
+
+/// Picks the previous foreground color, according to current shade table
+void Special_previous_user_forecolor(void)
+{
+  Hide_cursor();
+  Frame_menu_color(MC_Black);
+
+  Fore_color=Shade_table_right[Fore_color];
+
+  Reposition_palette();
+  Display_foreback();
+
+  Frame_menu_color(MC_White);
+  Display_cursor();
+}
+
+/// Picks the next background color, according to current shade table
+void Special_next_user_backcolor(void)
+{
+  Hide_cursor();
+  Back_color=Shade_table_left[Back_color];
+  Display_foreback();
+  Display_cursor();
+}
+
+/// Picks the previous background color, according to current shade table
+void Special_previous_user_backcolor(void)
+{
+  Hide_cursor();
+  Back_color=Shade_table_right[Back_color];
+  Display_foreback();
+  Display_cursor();
+}
 
 // ------------------- Scroller l'écran (pas en mode loupe) ------------------
 void Scroll_screen(short delta_x,short delta_y)
