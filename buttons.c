@@ -1637,9 +1637,19 @@ void Button_Resolution(void)
 
 void Button_Safety_resolution(void)
 {
+  // In windowed mode, do nothing
+  if (Current_resolution==0)
+  {
+    Hide_cursor();
+    Unselect_button(BUTTON_RESOL);
+    Display_cursor();
+    return;
+  }
+  
   Hide_cursor();
 
   Unselect_button(BUTTON_MAGNIFIER);
+  
   Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
   Current_resolution=0;
   Display_menu();
