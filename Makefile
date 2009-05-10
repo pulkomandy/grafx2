@@ -80,6 +80,7 @@ else
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = obj/aros
+	STRIP = strip --strip-unneeded --remove-section .comment
     ZIP = lha
     ZIPOPT = a
 
@@ -186,7 +187,9 @@ else
         BIN = grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
-        CC = gcc
+		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+		CC = gcc
+		#CC = nccgen -ncgcc -ncld -ncfabs
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif

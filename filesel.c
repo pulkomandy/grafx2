@@ -273,7 +273,11 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 
   if( max > iptr[0] ) max = iptr[0];
 
+#if defined(__AROS__)
+  for ( i=0 ; i<max ; i++ ) out[i] = *(AROS_BSTR_ADDR(iptr+i));
+#else
   for( i=0; i<max; i++ ) out[i] = iptr[i+1];
+#endif
   out[i] = 0;
 }
 #endif
