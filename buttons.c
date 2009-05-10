@@ -284,9 +284,9 @@ void Button_Select_forecolor(void)
   else if (color!=-1)
   {
     Hide_cursor();
-    Frame_menu_color(MC_Black);
+    Frame_menu_color(Fore_color, MC_Black);
     Fore_color=color;
-    Frame_menu_color(MC_White);
+    Frame_menu_color(Fore_color, MC_White);
     Display_foreback();
     Display_cursor();
   }
@@ -300,7 +300,9 @@ void Button_Select_backcolor(void)
   if (color!=-1)
   {
     Hide_cursor();
+    Frame_menu_color(Back_color, MC_Black);
     Back_color=color;
+    Frame_menu_color(Back_color, MC_Dark);
     Display_foreback();
     Display_cursor();
   }
@@ -2918,7 +2920,8 @@ void Button_Invert_foreback(void)
 
   Hide_cursor();
 
-  Frame_menu_color(MC_Black);
+  Frame_menu_color(Fore_color, MC_Dark);
+  Frame_menu_color(Back_color, MC_White);
 
   temp_color=Fore_color;
   Fore_color        =Back_color;
@@ -2926,7 +2929,7 @@ void Button_Invert_foreback(void)
 
   Reposition_palette();
 
-  Frame_menu_color(MC_White);
+  //Frame_menu_color(MC_Black);
 
   Display_foreback();
   Unselect_button(BUTTON_COLORPICKER);

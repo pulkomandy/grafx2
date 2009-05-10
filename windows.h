@@ -48,7 +48,7 @@ void Compute_paintbrush_coordinates(void);
 
 void Pixel_in_toolbar(word x,word y,byte color);
 void Pixel_in_window(word x,word y,byte color);
-void Frame_menu_color(byte color);
+void Frame_menu_color(byte id, byte color);
 void Display_menu_palette(void);
 void Display_menu(void);
 void Reposition_palette(void);

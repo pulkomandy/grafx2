@@ -216,14 +216,14 @@ void Bigger_paintbrush(void)
 void Special_next_forecolor(void)
 {
   Hide_cursor();
-  Frame_menu_color(MC_Black);
+  Frame_menu_color(Fore_color, MC_Black);
 
   Fore_color++;
 
   Reposition_palette();
   Display_foreback();
 
-  Frame_menu_color(MC_White);
+  Frame_menu_color(Fore_color, MC_White);
   Display_cursor();
 }
 
@@ -231,14 +231,14 @@ void Special_next_forecolor(void)
 void Special_previous_forecolor(void)
 {
   Hide_cursor();
-  Frame_menu_color(MC_Black);
+  Frame_menu_color(Fore_color, MC_Black);
 
   Fore_color--;
 
   Reposition_palette();
   Display_foreback();
 
-  Frame_menu_color(MC_White);
+  Frame_menu_color(Fore_color, MC_White);
   Display_cursor();
 }
 
@@ -246,7 +246,9 @@ void Special_previous_forecolor(void)
 void Special_next_backcolor(void)
 {
   Hide_cursor();
+  Frame_menu_color(Back_color, MC_Black);
   Back_color++;
+  Frame_menu_color(Back_color, MC_Dark);
   Display_foreback();
   Display_cursor();
 }
@@ -255,7 +257,9 @@ void Special_next_backcolor(void)
 void Special_previous_backcolor(void)
 {
   Hide_cursor();
+  Frame_menu_color(Back_color, MC_Black);
   Back_color--;
+  Frame_menu_color(Back_color, MC_Dark);
   Display_foreback();
   Display_cursor();
 }
@@ -264,14 +268,14 @@ void Special_previous_backcolor(void)
 void Special_next_user_forecolor(void)
 {
   Hide_cursor();
-  Frame_menu_color(MC_Black);
+  Frame_menu_color(Fore_color, MC_Black);
 
   Fore_color=Shade_table_left[Fore_color];
 
   Reposition_palette();
   Display_foreback();
 
-  Frame_menu_color(MC_White);
+  Frame_menu_color(Fore_color, MC_White);
   Display_cursor();
 }
 
@@ -279,14 +283,14 @@ void Special_next_user_forecolor(void)
 void Special_previous_user_forecolor(void)
 {
   Hide_cursor();
-  Frame_menu_color(MC_Black);
+  Frame_menu_color(Fore_color, MC_Black);
 
   Fore_color=Shade_table_right[Fore_color];
 
   Reposition_palette();
   Display_foreback();
 
-  Frame_menu_color(MC_White);
+  Frame_menu_color(Fore_color, MC_White);
   Display_cursor();
 }
 
@@ -294,8 +298,10 @@ void Special_previous_user_forecolor(void)
 void Special_next_user_backcolor(void)
 {
   Hide_cursor();
+  Frame_menu_color(Back_color, MC_Black);
   Back_color=Shade_table_left[Back_color];
   Display_foreback();
+  Frame_menu_color(Back_color, MC_Dark);
   Display_cursor();
 }
 
@@ -303,8 +309,10 @@ void Special_next_user_backcolor(void)
 void Special_previous_user_backcolor(void)
 {
   Hide_cursor();
+  Frame_menu_color(Back_color, MC_Black);
   Back_color=Shade_table_right[Back_color];
   Display_foreback();
+  Frame_menu_color(Back_color, MC_Dark);
   Display_cursor();
 }
 

@@ -189,18 +189,19 @@ word Palette_cell_Y(byte index)
 /// Redraw the cell in the menu palette for ::Fore_color.
 /// This function checks bounds, it won't draw anything if Fore_color is not visible.
 /// @param color: Pass MC_White to mark the color with a frame, MC_Black to unmark it.
-void Frame_menu_color(byte color)
+/// @param id:Color number to frame
+void Frame_menu_color(byte id, byte color)
 {
   word start_x,start_y,end_x,end_y;
   word index;
   word cell_height=32/Menu_cells_Y;
 
-  if ((Fore_color>=First_color_in_palette) && (Fore_color<First_color_in_palette+Menu_cells_X*Menu_cells_Y) && (Menu_is_visible))
+  if ((id>=First_color_in_palette) && (id<First_color_in_palette+Menu_cells_X*Menu_cells_Y) && (Menu_is_visible))
   {
     if (Config.Separate_colors)
     {
-      start_x=Palette_cell_X(Fore_color)-1*Menu_factor_X;
-      start_y=Palette_cell_Y(Fore_color)-1*Menu_factor_Y;
+      start_x=Palette_cell_X(id)-1*Menu_factor_X;
+      start_y=Palette_cell_Y(id)-1*Menu_factor_Y;
 
       Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
       Block(start_x,start_y+(Menu_factor_Y*cell_height),(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
@@ -212,21 +213,18 @@ void Frame_menu_color(byte color)
     }
     else
     {
+      start_x=Palette_cell_X(id);
+      start_y=Palette_cell_Y(id);
+
       if (color==MC_Black)
       {
-        start_x=Palette_cell_X(Fore_color);
-        start_y=Palette_cell_Y(Fore_color);
-
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,Fore_color);
+              cell_height*Menu_factor_Y,id);
 
         Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
       }
       else
       {
-        start_x=Palette_cell_X(Fore_color);
-        start_y=Palette_cell_Y(Fore_color);
-
         end_x=Menu_palette_cell_width-1;
         end_y=cell_height-1;
 
@@ -234,22 +232,22 @@ void Frame_menu_color(byte color)
         for (index=0; index<=end_x; index++)
           Block(start_x+index*Menu_factor_X,start_y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index)&1)?MC_White:MC_Black);
+                ((index)&1)?color:MC_Black);
         // Left line
         for (index=1; index<end_y; index++)
           Block(start_x,start_y+index*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index)&1)?MC_White:MC_Black);
+                ((index)&1)?color:MC_Black);
         // Right line
         for (index=1; index<end_y; index++)
           Block(start_x+end_x*Menu_factor_X,start_y+index*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index+end_x)&1)?MC_White:MC_Black);
+                ((index+end_x)&1)?color:MC_Black);
         // Bottom line
         for (index=0; index<=end_x; index++)
           Block(start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
-                ((index+end_y)&1)?MC_White:MC_Black);
+                ((index+end_y)&1)?color:MC_Black);
 
         Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+Menu_factor_Y*cell_height);
       }
@@ -284,7 +282,8 @@ void Display_menu_palette(void)
               cell_height*Menu_factor_Y,
               color);
 
-    Frame_menu_color(MC_White);
+    Frame_menu_color(Fore_color, MC_White);
+    Frame_menu_color(Back_color, MC_Dark);
     Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
   }
 }
