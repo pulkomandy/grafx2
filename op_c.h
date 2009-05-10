@@ -165,7 +165,6 @@ void OT_init(T_Occurrence_table * t);
 T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b);
 void OT_delete(T_Occurrence_table * t);
 int OT_get(T_Occurrence_table * t,int r,int g,int b);
-void OT_set(T_Occurrence_table * t,int r,int g,int b,int i);
 void OT_inc(T_Occurrence_table * t,int r,int g,int b);
 void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 

@@ -143,7 +143,6 @@ byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 unsigned long Memory_free(void);
 
 void  Num2str(dword number,char * str,byte nb_char);
-int   Str2num(char * str);
 
 short Round(float value);
 short Round_div_max(short numerator,short divisor);

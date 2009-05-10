@@ -304,17 +304,6 @@ int OT_get(T_Occurrence_table * t,int r,int g,int b)
   return t->table[index];
 }
 
-void OT_set(T_Occurrence_table * t,int r,int g,int b,int i)
-{
-  int index;
-
-  r=(r>>t->red_r);
-  g=(g>>t->red_g);
-  b=(b>>t->red_b);
-  index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
-  t->table[index]=i;
-}
-
 void OT_inc(T_Occurrence_table * t,int r,int g,int b)
 {
   int index;

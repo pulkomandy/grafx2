@@ -46,9 +46,6 @@ byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
 SDL_Color Color_to_SDL_color(byte);
 byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
 
-/// Fills the SDL screen with a given color
-void Clear_screen(byte color);
-
 ///
 /// Clears the parts of screen that are outside of the editing area.
 /// There is such area only if the screen mode is not a multiple of the pixel

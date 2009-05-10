@@ -61,7 +61,6 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
 void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color);
-void Print_transparent_char_in_window(short x_pos,short y_pos,const unsigned char c,byte color);
 void Print_in_menu(const char * str, short position);
 void Print_coordinates(void);
 void Print_filename(void);

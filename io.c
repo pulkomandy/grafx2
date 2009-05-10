@@ -39,23 +39,6 @@
 #include "io.h"
 #include "realpath.h"
 
-word Endian_magic16(word x)
-{
-  #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-    return x;
-  #else
-    return SDL_Swap16(x);
-  #endif
-}
-dword Endian_magic32(dword x)
-{
-  #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-    return x;
-  #else
-    return SDL_Swap32(x);
-  #endif
-}
-
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Read_byte(FILE *file, byte *dest)

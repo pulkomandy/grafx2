@@ -5528,20 +5528,8 @@ void Save_PC1(void)
   }
 }
 
-/******************************************************************************************
-  Functions from op_c.c : load raw 24B (for testing) and load_tga (broken ? incomplete ?)
-  Saving would be nice as well.
-******************************************************************************************/
-void Load_RAW_24b(int width,int height,T_Bitmap24B source)
-{
-  FILE* file;
 
-  file=fopen("TEST.RAW","rb");
-  if (Read_bytes(file,source,width*height*sizeof(T_Components)))
-    exit(3);
-  fclose(file);
-}
-
+/// UNUSED and UNTESTED function to load a TGA file.
 void Load_TGA(char * fname,T_Bitmap24B * dest,int * width,int * height)
 {
   FILE* fichier;

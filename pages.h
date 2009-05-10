@@ -41,7 +41,6 @@ void Upload_infos_page_main(T_Page * page);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Download_infos_backup(T_List_of_pages * list);
-int Allocate_page(T_Page * page,int width,int height);
 void Free_a_page(T_Page * page);
 void Copy_S_page(T_Page * dest,T_Page * source);
 int Size_of_a_page(T_Page * page);
@@ -71,7 +70,6 @@ void Free_page_of_a_list(T_List_of_pages * list);
   ///
 
 int Init_all_backup_lists(int size,int width,int height);
-void Free_all_backup_lists(void);
 void Set_number_of_backups(int nb_backups);
 int Backup_with_new_dimensions(int upload,int width,int height);
 int Backup_and_resize_the_spare(int width,int height);

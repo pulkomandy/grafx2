@@ -191,12 +191,6 @@ byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
   return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
 }
 
-void Clear_screen(byte color)
-{
-  memset(Screen_SDL->pixels,color,Screen_SDL->pitch*Screen_SDL->h);
-  Update_rect(0,0,0,0);
-}
-
 void Clear_border(byte color)
 {
   int width;

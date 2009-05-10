@@ -31,11 +31,6 @@
 /// If you don't, you break another platform.
 //////////////////////////////////////////////////////////////////////////////
 
-/// Returns x, swapped if the current target is low-endian. Deprecated, please don't use it.
-word  Endian_magic16(word x);
-/// Returns x, swapped if the current target is low-endian. Deprecated, please don't use it.
-dword Endian_magic32(dword x);
-
 /// Reads a single byte from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_byte(FILE *file, byte *dest);
 /// Writes a single byte to an open file. Returns true if OK, false if a file i/o error occurred.

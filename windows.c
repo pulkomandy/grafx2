@@ -462,8 +462,7 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
   }
 }
 
-  // -- Afficher un caractère dans une fenêtre --
-
+/// Draws a char in a window
 void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color)
 {
   short x,y;
@@ -480,28 +479,7 @@ void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte tex
             (*(pixel++)?text_color:background_color));
 }
 
-  // -- Afficher un caractère sans fond dans une fenêtre --
-
-void Print_transparent_char_in_window(short x_pos,short y_pos,const unsigned char c,byte color)
-{
-  short x,y;
-  byte *pixel;
-  x_pos=(x_pos*Menu_factor_X)+Window_pos_X;
-  y_pos=(y_pos*Menu_factor_Y)+Window_pos_Y;
-  // Premier pixel du caractère
-  pixel=Menu_font + (c<<6);
-  
-  for (y=0;y<8;y++)
-    for (x=0;x<8;x++)
-    {
-      if (*(pixel++))
-        Block(x_pos+(x*Menu_factor_X), y_pos+(y*Menu_factor_Y),
-              Menu_factor_X, Menu_factor_Y, color);
-    }
-}
-
-  // -- Afficher une chaîne dans une fenêtre, avec taille maxi --
-
+///Draws a char in a window, checking for bounds
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color)
 {
   char display_string[256];
@@ -515,8 +493,7 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
   Print_in_window(x, y, display_string, text_color, background_color);
 }
 
-  // -- Afficher une chaîne dans une fenêtre --
-
+/// Draws a string in a window
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
 {
   Print_general((x*Menu_factor_X)+Window_pos_X,
@@ -525,17 +502,15 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
   Update_rect(x*Menu_factor_X+Window_pos_X,y*Menu_factor_Y+Window_pos_Y,8*Menu_factor_X*strlen(str),8*Menu_factor_Y);
 }
 
-  // -- Afficher une chaîne dans le menu --
-
+// Draws a string in the menu's status bar
 void Print_in_menu(const char * str, short position)
 {
   Print_general((18+(position<<3))*Menu_factor_X,Menu_status_Y,str,MC_Black,MC_Light);
   Update_rect((18+(position<<3))*Menu_factor_X,Menu_status_Y,strlen(str)*8*Menu_factor_X,8*Menu_factor_Y);
 }
 
-  // -- Afficher les coordonnées du pinceau dans le menu --
-
-// Note : cette fonction n'affiche que les chiffres, pas les X: Y: qui sont dans la gestion principale, car elle est apellée très souvent.
+/// Draws the mouse coordinates on the menu
+/// Only update the digits and doesn't refresh the "X: Y:" labels. This function needs to be fast as it is called each time the mouse moves.
 void Print_coordinates(void)
 {
   char temp[5];

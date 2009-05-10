@@ -774,22 +774,6 @@ void Num2str(dword number,char * str,byte nb_char)
   str[nb_char]='\0';
 }
 
-// Transformer une chaîne en un entier naturel (renvoie -1 si ch. invalide)
-int Str2num(char * str)
-{
-  int value=0;
-
-  for (;*str;str++)
-  {
-    if ( (*str>='0') && (*str<='9') )
-      value=(value*10)+(*str-'0');
-    else
-      return -1;
-  }
-  return value;
-}
-
-
 // Arrondir un nombre réel à la valeur entière la plus proche
 short Round(float value)
 {

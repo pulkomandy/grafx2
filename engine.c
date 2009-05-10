@@ -58,48 +58,6 @@ Func_effect Effect_function_before_cancel;
 ///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
 byte* Window_background[8];
 
-///Disables all the effects
-void Cancel_effects(void)
-{
-  Shade_mode_before_cancel=Shade_mode;
-  Shade_mode=0;
-
-  Quick_shade_mode_before_cancel=Quick_shade_mode;
-  Quick_shade_mode=0;
-
-  Stencil_mode_before_cancel=Stencil_mode;
-  Stencil_mode=0;
-
-  Sieve_mode_before_cancel=Sieve_mode;
-  Sieve_mode=0;
-
-  Colorize_mode_before_cancel=Colorize_mode;
-  Colorize_mode=0;
-
-  Smooth_mode_before_cancel=Smooth_mode;
-  Smooth_mode=0;
-
-  Tiling_mode_before_cancel=Tiling_mode;
-  Tiling_mode=0;
-
-  Effect_function_before_cancel=Effect_function;
-  Effect_function=No_effect;
-}
-
-
-///Get the effects and drawing modes back
-void Restore_effects(void)
-{
-  Shade_mode      =Shade_mode_before_cancel;
-  Quick_shade_mode=Quick_shade_mode_before_cancel;
-  Stencil_mode    =Stencil_mode_before_cancel;
-  Sieve_mode      =Sieve_mode_before_cancel;
-  Colorize_mode   =Colorize_mode_before_cancel;
-  Smooth_mode     =Smooth_mode_before_cancel;
-  Tiling_mode     =Tiling_mode_before_cancel;
-  Effect_function  =Effect_function_before_cancel;
-}
-
 
 ///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=

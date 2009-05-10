@@ -228,30 +228,6 @@ void Download_infos_backup(T_List_of_pages * list)
     FX_feedback_screen=list->Pages[1].Image;
 }
 
-int Allocate_page(T_Page * page,int width,int height)
-{
-  // Important: la T_Page ne doit pas déjà désigner une page allouée auquel
-  //            cas celle-ci serait perdue.
-
-  /* Debug : if (page->Image!=NULL) exit(666); */
-
-  // On alloue la mémoire pour le bitmap
-  page->Image=(byte *)malloc(width*height);
-
-  // On vérifie que l'allocation se soit bien passée
-  if (page->Image==NULL)
-    return 0; // Echec
-  else
-  {
-    page->Width=width;
-    page->Height=height;
-    // Important: La mise à jour des autres infos est du ressort de
-    //            l'appelant.
-
-    return 1; // Succès
-  }
-}
-
 void Free_a_page(T_Page * page)
 {
   // On peut appeler cette fonction sur une page non allouée.
@@ -728,23 +704,6 @@ int Init_all_backup_lists(int size,int width,int height)
   }
 
   return return_code;
-}
-
-void Free_all_backup_lists(void)
-{
-  // On commence par supprimer les pages une à une dans chacune des listes
-    // Liste de la page principale
-  while (Main_backups->Nb_pages_allocated>0)
-    Free_last_page_of_list(Main_backups);
-    // Liste de la page de brouillon
-  while (Spare_backups->Nb_pages_allocated>0)
-    Free_last_page_of_list(Spare_backups);
-
-  // Puis on peut détruire les structures de liste elles-mêmes
-  Free_a_list_of_pages(Main_backups);
-  Free_a_list_of_pages(Spare_backups);
-  free(Main_backups);
-  free(Spare_backups);
 }
 
 void Set_number_of_backups(int nb_backups)
