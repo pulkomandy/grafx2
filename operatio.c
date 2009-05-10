@@ -1412,18 +1412,11 @@ void Colorpicker_12_0(void)
 
   if (Mouse_K==LEFT_SIDE)
   {
-    Frame_menu_color(Fore_color, MC_Black);
-    Fore_color=Colorpicker_color;
-    Reposition_palette();
-    Display_foreback();
-    Frame_menu_color(Fore_color, MC_White);
+    Set_fore_color(Colorpicker_color);
   }
   else
   {
-    Frame_menu_color(Back_color, MC_Black);
-    Back_color=Colorpicker_color;
-    Display_foreback();
-    Frame_menu_color(Back_color, MC_Dark);
+    Set_back_color(Colorpicker_color);
   }
   Operation_push(Mouse_K);
 }
@@ -1456,11 +1449,7 @@ void Colorpicker_1_1(void)
 
     if (Colorpicker_color!=Fore_color)
     {
-      Frame_menu_color(Fore_color, MC_Black);
-      Fore_color=Colorpicker_color;
-      Reposition_palette();
-      Display_foreback();
-      Frame_menu_color(Fore_color, MC_White);
+      Set_fore_color(Colorpicker_color);
     }
 
     if (Menu_is_visible)
@@ -1502,10 +1491,7 @@ void Colorpicker_2_1(void)
 
     if (Colorpicker_color!=Back_color)
     {
-      Frame_menu_color(Back_color, MC_Black);
-      Back_color=Colorpicker_color;
-      Display_foreback();
-      Frame_menu_color(Back_color, MC_Dark);
+      Set_back_color(Colorpicker_color);
     }
 
     if (Menu_is_visible)
@@ -1535,18 +1521,11 @@ void Colorpicker_0_1(void)
   Operation_pop(&click);
   if (click==LEFT_SIDE)
   {
-    Frame_menu_color(Fore_color, MC_Black);
-    Fore_color=Colorpicker_color;
-    Reposition_palette();
-    Display_foreback();
-    Frame_menu_color(Fore_color, MC_White);
+    Set_fore_color(Colorpicker_color);
   }
   else
   {
-    Frame_menu_color(Back_color, MC_Black);
-    Back_color=Colorpicker_color;
-    Display_foreback();
-    Frame_menu_color(Back_color, MC_Dark);
+    Set_back_color(Colorpicker_color);
   }
   Unselect_button(BUTTON_COLORPICKER);
 }

@@ -284,10 +284,7 @@ void Button_Select_forecolor(void)
   else if (color!=-1)
   {
     Hide_cursor();
-    Frame_menu_color(Fore_color, MC_Black);
-    Fore_color=color;
-    Frame_menu_color(Fore_color, MC_White);
-    Display_foreback();
+    Set_fore_color(color);
     Display_cursor();
   }
 }
@@ -300,10 +297,7 @@ void Button_Select_backcolor(void)
   if (color!=-1)
   {
     Hide_cursor();
-    Frame_menu_color(Back_color, MC_Black);
-    Back_color=color;
-    Frame_menu_color(Back_color, MC_Dark);
-    Display_foreback();
+    Set_back_color(color);
     Display_cursor();
   }
 }
@@ -2918,23 +2912,17 @@ void Button_Invert_foreback(void)
 {
   byte temp_color;
 
-  Hide_cursor();
-
-  Frame_menu_color(Fore_color, MC_Dark);
-  Frame_menu_color(Back_color, MC_White);
-
   temp_color=Fore_color;
   Fore_color        =Back_color;
   Back_color        =temp_color;
 
+  Hide_cursor();
+  Frame_menu_color(Back_color);
+  Frame_menu_color(Fore_color);
   Reposition_palette();
-
-  //Frame_menu_color(MC_Black);
-
   Display_foreback();
   Unselect_button(BUTTON_COLORPICKER);
-
-  Display_cursor();
+  Display_cursor();  
 }
 
 

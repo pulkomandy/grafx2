@@ -185,16 +185,44 @@ word Palette_cell_Y(byte index)
   }
 }
 
+void Set_fore_color(byte color)
+{
+  byte old_fore_color = Fore_color;
+  
+  Fore_color=color;
+  Reposition_palette();
+  Display_foreback();
+  Frame_menu_color(old_fore_color);
+  Frame_menu_color(Fore_color);
+}
+
+void Set_back_color(byte color)
+{
+  byte old_back_color = Back_color;
+  
+  Back_color=color;
+  Display_foreback();
+  Frame_menu_color(old_back_color);
+  Frame_menu_color(Back_color);
+}
+
 ///
 /// Redraw the cell in the menu palette for ::Fore_color.
 /// This function checks bounds, it won't draw anything if Fore_color is not visible.
-/// @param color: Pass MC_White to mark the color with a frame, MC_Black to unmark it.
 /// @param id:Color number to frame
-void Frame_menu_color(byte id, byte color)
+void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
   word cell_height=32/Menu_cells_Y;
+  byte color;
+
+  if (id==Fore_color)
+    color = MC_White;
+  else if (id==Back_color)
+    color = MC_Dark;
+  else
+    color = MC_Black;
 
   if ((id>=First_color_in_palette) && (id<First_color_in_palette+Menu_cells_X*Menu_cells_Y) && (Menu_is_visible))
   {
@@ -282,8 +310,8 @@ void Display_menu_palette(void)
               cell_height*Menu_factor_Y,
               color);
 
-    Frame_menu_color(Fore_color, MC_White);
-    Frame_menu_color(Back_color, MC_Dark);
+    Frame_menu_color(Back_color);
+    Frame_menu_color(Fore_color);
     Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
   }
 }
