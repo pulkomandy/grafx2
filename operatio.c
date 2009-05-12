@@ -39,6 +39,9 @@
     #define M_PI 3.14159265358979323846 
 #endif
 
+/// Time (in SDL ticks) when the next airbrush drawing should be done. Also used for discontinuous freehand drawing.
+Uint32 Airbrush_next_time;
+
 void Start_operation_stack(word new_operation)
 {
   Brush_rotation_center_is_defined=0;
@@ -300,7 +303,7 @@ void Freehand_mode2_1_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  SDL_Delay(20);
+  Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
 }
 
 
@@ -319,18 +322,22 @@ void Freehand_mode2_1_2(void)
 
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
-    Hide_cursor();
-    // On affiche définitivement le pinceau
-    Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
-    Display_cursor();
     Print_coordinates();
-    SDL_Delay(20);
+	if (SDL_GetTicks()>Airbrush_next_time)
+	{
+		Airbrush_next_time+=Airbrush_delay*10;
+    	Hide_cursor();
+    	// On affiche définitivement le pinceau
+    	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+    	Display_cursor();
+	}
   }
 
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
 
+// ----------
 
 void Freehand_mode2_2_0(void)
 //  Opération   : OPERATION_DISCONTINUOUS_DRAW
@@ -342,12 +349,12 @@ void Freehand_mode2_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  SDL_Delay(20);
+	Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
+  	// On affiche définitivement le pinceau
+ 	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
 }
 
 
@@ -366,12 +373,15 @@ void Freehand_mode2_2_2(void)
 
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
-    Hide_cursor();
-    // On affiche définitivement le pinceau
-    Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
-    Display_cursor();
     Print_coordinates();
-    SDL_Delay(20);
+	if (SDL_GetTicks()>Airbrush_next_time)
+	{
+		Airbrush_next_time+=Airbrush_delay*10;
+    	Hide_cursor();
+    	// On affiche définitivement le pinceau
+    	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+    	Display_cursor();
+	}
   }
 
   Operation_push(Paintbrush_X);
@@ -2042,7 +2052,6 @@ void Curve_3_points_12_11(void)
 
 ///////////////////////////////////////////////////////////// OPERATION_AIRBRUSH
 
-Uint32 Airbrush_next_time;
 void Airbrush_1_0(void)
 //
 //  Opération   : OPERATION_AIRBRUSH

@@ -895,8 +895,24 @@ void Main_handler(void)
       }
     }
     }
-    else SDL_Delay(20); // S'il n'y a pas d'évènement, on ne gère pas tout ça et on attend un peu. La partie en dessous doit être exécutée quand
-                     // même pour les trucs asynchrones, par exemple le spray.
+    else
+	{
+		// No event : we go asleep for a while, but we try to get waked up at constant intervals of time
+		// no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
+		// This allows nice smooth mouse movement.
+    	const int delay = 10;
+
+		Uint32 debut;
+		debut = SDL_GetTicks();
+		// Première attente : le complément de "delay" millisecondes
+		SDL_Delay(delay - (debut % delay));
+		// Si ça ne suffit pas, on complète par des attentes successives de "1ms".
+		// (Remarque, Windows arrondit généralement aux 10ms supérieures)
+		while ( SDL_GetTicks()/delay <= debut/delay)
+		{
+			SDL_Delay(1);
+		}
+	}
 
     // Gestion de la souris
 

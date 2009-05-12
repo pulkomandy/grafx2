@@ -135,7 +135,7 @@ void Button_Message_initial(void)
 
   Display_cursor();
 
-  while(!Get_input() && !Mouse_K && !Key) SDL_Delay(20);
+  while(!Mouse_K && !Key) if(!Get_input()) SDL_Delay(20);
   if (Mouse_K)
     Wait_end_of_click();
 
