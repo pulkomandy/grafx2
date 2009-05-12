@@ -1,3 +1,9 @@
+   __/_/_/                         __/_/  _/      _/   __/_/    
+ _/        _/ __/_/   __/_/_/    _/        _/  _/    _/    _/   
+_/  _/_/  _/_/      _/    _/  _/_/_/_/      _/          _/      
+_/    _/  _/        _/    _/    _/        _/  _/      _/         
+ _/_/_/  _/          _/_/_/    _/      _/      _/  _/_/_/_/  
+
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
 Copyright (C)2007-2009 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
@@ -5,32 +11,32 @@ Copyright (C)2007-2009 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 
 === ABOUT ===
 
-GrafX2 is a drawing program dedicated to pixelart and low-color graphics.
-This program is dedicated to everybody who knows what a single pixel is.
-Its layout is not very different from the famous Deluxe Paint or Brilliance, so
-it will be quite easy to handle it if you know at least one of these programs.
-If you aren't used to the art of drawing with up to 256 colors, it will be a
-little more difficult for you, but you should give it a try (or more, because
-most of the power of this program won't show up on the first try). Then, you
-might eventually like to draw the oldskool way !
+GrafX2 is a drawing program dedicated to pixelart and low-color graphics. This 
+program is dedicated to everybody who knows what a single pixel is. Its layout 
+is not very different from the famous Deluxe Paint or Brilliance, so it will be 
+quite easy to handle it if you know at least one of these programs. If you 
+aren't used to the art of drawing with up to 256 colors, it will be a little 
+more difficult for you, but you should give it a try (or more, because most of 
+the power of this program won't show up on the first try). Then, you might 
+eventually like to draw the oldskool way !
 
-Grafx2 was originally written for the MS-DOS operating system. The authors
-then released the sourcecode and we've modified it to run on your favorite
-platform (if we missed it, please tell us !). Check the homepage at
+Grafx2 was originally written for the MS-DOS operating system. The authors then 
+released the sourcecode and we've modified it to run on your favorite platform 
+(if we missed it, please tell us !). Check the homepage at
 http://code.google.com/p/grafx2 for latest news and bugfixed versions.
 
 === HELP ===
 
 If you are in trouble when using the program, don't forget you can always press
 the <F1> key inside it to get some help. You can also check the wiki at
-http://code.google.com/p/grafx2/wiki for some more information.
-If you've hidden the menu and you're stuck, press <F10> to show it again.
+http://code.google.com/p/grafx2/wiki for some more information. If you've hidden
+the menu and you're stuck, press <F10> to show it again.
 
 === LICENSE ===
 
 GrafX2 is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; version 2 of the License. See doc/gpl-v2.txt for details.
+foundation; version 2 of the License. See doc/gpl-v2.txt for details.
 GrafX2 uses the following libraries that are distributed according to their
 own licenses:
 - SDL: see doc/README-SDL.txt
@@ -76,9 +82,10 @@ We enjoy programming GrafX2, we hope you will enjoy drawing with it. If you like
 the program, here is a list of things you can do:
 * Register as an user at www.ohloh.net/p/grafx2 to improve our Karma
 * Port GrafX2 to your favourite platform
-* Report bugs or ask for features you miss (you'll get credited in the helpscreen !)
+* Report bugs or ask for features you miss (you'll get credited in the 
+		helpscreen !)
 * Make all your friends use GrafX2
 * Send us your nice drawings, we'll put them in our online gallery
 
 Enjoy Pixelling with GrafX2,
-PulkoMandy & Yves the great GrafX2 Project Team.- 
+PulkoMandy & Yves, the great GrafX2 Project Team.- 
