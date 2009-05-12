@@ -300,7 +300,7 @@ void Freehand_mode2_1_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  Wait_VBL();
+  SDL_Delay(20);
 }
 
 
@@ -324,7 +324,7 @@ void Freehand_mode2_1_2(void)
     Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
     Display_cursor();
     Print_coordinates();
-    Wait_VBL();
+    SDL_Delay(20);
   }
 
   Operation_push(Paintbrush_X);
@@ -347,7 +347,7 @@ void Freehand_mode2_2_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  Wait_VBL();
+  SDL_Delay(20);
 }
 
 
@@ -371,7 +371,7 @@ void Freehand_mode2_2_2(void)
     Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
     Display_cursor();
     Print_coordinates();
-    Wait_VBL();
+    SDL_Delay(20);
   }
 
   Operation_push(Paintbrush_X);

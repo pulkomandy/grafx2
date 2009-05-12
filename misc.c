@@ -125,7 +125,7 @@ void Wait_end_of_click(void)
 {
     // On désactive tous les raccourcis clavier
 
-    while(Mouse_K) if(!Get_input()) Wait_VBL();
+    while(Mouse_K) if(!Get_input()) SDL_Delay(1);
 }
 
 void Hide_current_image_with_stencil(byte color, byte * stencil)
@@ -168,25 +168,6 @@ void Init_chrono(dword delay)
   Timer_delay = delay;
   Timer_start = SDL_GetTicks()/55;
   return;
-}
-
-void Wait_VBL(void)
-// Attente de VBL. Pour avoir des scrollbars qui ont une vitesse raisonnable par exemple.
-// SDL ne sait pas faire, alors on simule un timer qui a une fréquence de 100Hz,
-// sans charger inutilement le CPU par du busy-wait (on n'est pas à 10ms près)
-{
-  const int delay = 10;
-
-  Uint32 debut;
-  debut = SDL_GetTicks();
-  // Première attente : le complément de "delay" millisecondes
-  SDL_Delay(delay - (debut % delay));
-  // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
-  // (Remarque, Windows arrondit généralement aux 10ms supérieures)
-  while (SDL_GetTicks() / delay <= debut / delay)
-  {
-    SDL_Delay(1);
-  }
 }
 
 void Pixel_in_brush             (word x,word y,byte color)
@@ -645,7 +626,7 @@ void Slider_timer(byte speed)
   end = SDL_GetTicks() + speed*10;
   do
   {
-    if (!Get_input()) Wait_VBL();
+    if (!Get_input()) SDL_Delay(1);
   } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }
 

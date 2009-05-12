@@ -88,7 +88,7 @@ void Redefine_control(word *shortcut, int x_pos, int y_pos)
   Display_cursor();
   while (1)
   {
-    while(!Get_input())Wait_VBL();
+    while(!Get_input())SDL_Delay(1);
     if (Key==KEY_ESC)
       return;
     if (Key!=0)
