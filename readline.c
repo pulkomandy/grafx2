@@ -181,7 +181,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     Display_cursor();
     do
     {
-      if(!Get_input()) SDL_Delay(1);
+      if(!Get_input()) SDL_Delay(20);
       input_key=Key_ANSI;
     } while(input_key==0);
     Hide_cursor();

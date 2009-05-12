@@ -125,7 +125,7 @@ void Wait_end_of_click(void)
 {
     // On désactive tous les raccourcis clavier
 
-    while(Mouse_K) if(!Get_input()) SDL_Delay(1);
+    while(Mouse_K) if(!Get_input()) SDL_Delay(20);
 }
 
 void Hide_current_image_with_stencil(byte color, byte * stencil)
@@ -626,7 +626,7 @@ void Slider_timer(byte speed)
   end = SDL_GetTicks() + speed*10;
   do
   {
-    if (!Get_input()) SDL_Delay(1);
+    if (!Get_input()) SDL_Delay(20);
   } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }
 

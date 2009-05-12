@@ -448,7 +448,7 @@ void Move_separator(void)
         Display_cursor();
       }
     }
-    if(!Get_input())SDL_Delay(1);
+    if(!Get_input())SDL_Delay(20);
   }
 
   // Effacer la barre en XOR
@@ -895,7 +895,7 @@ void Main_handler(void)
       }
     }
     }
-    else SDL_Delay(1); // S'il n'y a pas d'évènement, on ne gère pas tout ça et on attend un peu. La partie en dessous doit être exécutée quand
+    else SDL_Delay(20); // S'il n'y a pas d'évènement, on ne gère pas tout ça et on attend un peu. La partie en dessous doit être exécutée quand
                      // même pour les trucs asynchrones, par exemple le spray.
 
     // Gestion de la souris
@@ -1772,7 +1772,7 @@ short Wait_click_in_palette(T_Palette_button * button)
 
   for (;;)
   {
-    while(!Get_input())SDL_Delay(1);
+    while(!Get_input())SDL_Delay(20);
 
     if (Mouse_K==LEFT_SIDE)
     {
@@ -1858,7 +1858,7 @@ void Get_color_behind_window(byte * color, byte * click)
 
     do
     {
-      if(!Get_input())SDL_Delay(1);
+      if(!Get_input())SDL_Delay(20);
 
       if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
       {
@@ -1953,7 +1953,7 @@ void Move_window(short dx, short dy)
     old_x=new_x;
     old_y=new_y;
 
-    while(!Get_input() && new_x==Mouse_X-dx && new_y==Mouse_Y-dy) SDL_Delay(1);
+    while(!Get_input() && new_x==Mouse_X-dx && new_y==Mouse_Y-dy) SDL_Delay(20);
 
     new_x=Mouse_X-dx;
 
@@ -2151,7 +2151,7 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
     do 
     {
       // Attente
-      if(!Get_input()) SDL_Delay(1);
+      if(!Get_input()) SDL_Delay(20);
       // Mise à jour du survol
       selected_index=Window_click_in_rectangle(2,2,Button->Dropdown_width-2,box_height-1)?
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
@@ -2197,7 +2197,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1))
     {
-      if(!Get_input()) SDL_Delay(1);
+      if(!Get_input()) SDL_Delay(20);
       if (!Mouse_K)
       {
         Hide_cursor();
@@ -2211,7 +2211,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (!(Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1)))
     {
-      if(!Get_input()) SDL_Delay(1);
+      if(!Get_input()) SDL_Delay(20);
       if (!Mouse_K)
         return 0;
     }
@@ -2445,7 +2445,7 @@ short Window_clicked_button(void)
 {
   short Button;
 
-  if(!Get_input())SDL_Delay(1);
+  if(!Get_input())SDL_Delay(20);
 
   // Gestion des clicks
   if (Mouse_K)
