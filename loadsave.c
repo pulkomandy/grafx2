@@ -510,15 +510,6 @@ void Get_full_filename(char * filename, byte is_colorix_format)
 //                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
-void Read_one_byte(FILE * file, byte *b)
-{
-  // FIXME : Replace les appelants par Read_bytes(), et gérer les retours d'erreur.
-  if (!Read_byte(file, b))
-    File_error=2;
-}
-
-// --------------------------------------------------------------------------
-
 byte * Write_buffer;
 word   Write_buffer_index;
 
@@ -1185,7 +1176,11 @@ void Load_PKM(void)
           // Boucle de décompression:
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
           {
-            Read_one_byte(file, &temp_byte);
+            if(Read_byte(file, &temp_byte)!=1) 
+			{
+				File_error=2;
+				break;
+			}
 
             // Si ce n'est pas un octet de reconnaissance, c'est un pixel brut
             if ( (temp_byte!=header.recog1) && (temp_byte!=header.recog2) )
@@ -1200,8 +1195,16 @@ void Load_PKM(void)
             { // ... nombre de pixels tenant sur un byte
               if (temp_byte==header.recog1)
               {
-                Read_one_byte(file, &color);
-                Read_one_byte(file, &temp_byte);
+                if(Read_byte(file, &color)!=1)
+				{
+					File_error=2;
+					break;
+				}
+                if(Read_byte(file, &temp_byte)!=1)
+				{
+					File_error=2;
+					break;
+				}
                 for (index=0; index<temp_byte; index++)
                   Pixel_load_function((Compteur_de_pixels+index) % Main_image_width,
                                       (Compteur_de_pixels+index) / Main_image_width,
@@ -1211,7 +1214,11 @@ void Load_PKM(void)
               }
               else // ... nombre de pixels tenant sur un word
               {
-                Read_one_byte(file, &color);
+                if(Read_byte(file, &color)!=1)
+				{
+					File_error=2;
+					break;
+				}
                 Read_word_be(file, &len);
                 for (index=0; index<len; index++)
                   Pixel_load_function((Compteur_de_pixels+index) % Main_image_width,
@@ -1886,12 +1893,20 @@ void Load_LBM(void)
                     {
                       for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
                       {
-                        Read_one_byte(LBM_file, &temp_byte);
+                        if(Read_byte(LBM_file, &temp_byte)!=1)
+						{
+							File_error=2;
+							break;
+						}
                         // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
                         // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
                         if (temp_byte>127)
                         {
-                          Read_one_byte(LBM_file, &color);
+							if(Read_byte(LBM_file, &color)!=1)
+							{
+								File_error=2;
+								break;
+							}
                           b256=(short)(256-temp_byte);
                           for (counter=0; counter<=b256; counter++)
                             if (x_pos<line_size)
@@ -1901,10 +1916,8 @@ void Load_LBM(void)
                         }
                         else
                           for (counter=0; counter<=(short)(temp_byte); counter++)
-                            if (x_pos<line_size)
-                              Read_one_byte(LBM_file, &(LBM_buffer[x_pos++]));
-                            else
-                              File_error=2;
+                            if (x_pos>=line_size || Read_byte(LBM_file, &(LBM_buffer[x_pos++]))!=1)
+								File_error=2;
                       }
                       if (!File_error)
                         Draw_ILBM_line(y_pos,real_line_size);
@@ -1938,10 +1951,18 @@ void Load_LBM(void)
                     {
                       for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
                       {
-                        Read_one_byte(LBM_file, &temp_byte);
+                        if(Read_byte(LBM_file, &temp_byte)!=1)
+						{
+							File_error=2;
+							break;
+						}
                         if (temp_byte>127)
                         {
-                          Read_one_byte(LBM_file, &color);
+                          if(Read_byte(LBM_file, &color)!=1)
+						  {
+							File_error=2;
+							break;
+						  }
                           b256=256-temp_byte;
                           for (counter=0; counter<=b256; counter++)
                             Pixel_load_function(x_pos++,y_pos,color);
@@ -1950,7 +1971,11 @@ void Load_LBM(void)
                           for (counter=0; counter<=temp_byte; counter++)
                           {
                             byte byte_read=0;
-                            Read_one_byte(LBM_file, &byte_read);
+                            if(Read_byte(LBM_file, &byte_read)!=1)
+							{
+								File_error=2;
+								break;
+							}
                             Pixel_load_function(x_pos++,y_pos,byte_read);
                           }
                       }
@@ -2429,8 +2454,8 @@ void Load_BMP(void)
                 y_pos=Main_image_height-1;
 
                 /*Init_lecture();*/
-                Read_one_byte(file, &a);
-                Read_one_byte(file, &b);
+                if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
+					File_error=2;
                 while (!File_error)
                 {
                   if (a) // Encoded mode
@@ -2446,15 +2471,16 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        Read_one_byte(file, &a);
-                        Read_one_byte(file, &b);
+                		if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
+							File_error=2;
                         x_pos+=a;
                         y_pos-=b;
                         break;
                       default: // Nouvelle série
                         while (b)
                         {
-                          Read_one_byte(file, &a);
+                          if(Read_byte(file, &a)!=1)
+							  File_error=2;
                           //Read_one_byte(file, &c);
                           Pixel_load_function(x_pos++,y_pos,a);
                           //if (--c)
@@ -2468,8 +2494,10 @@ void Load_BMP(void)
                     }
                   if (a==0 && b==1)
                     break;
-                  Read_one_byte(file, &a);
-                  Read_one_byte(file, &b);
+                  if(Read_byte(file, &a) !=1 || Read_byte(file, &b)!=1)
+				  {
+					File_error=2;
+				  }
                 }
                 /*Close_lecture();*/
                 break;
@@ -2479,8 +2507,8 @@ void Load_BMP(void)
                 y_pos=Main_image_height-1;
 
                 /*Init_lecture();*/
-                Read_one_byte(file, &a);
-                Read_one_byte(file, &b);
+                if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b) != 1)
+					File_error =2;
                 while ( (!File_error) && ((a)||(b!=1)) )
                 {
                   if (a) // Encoded mode (A fois les 1/2 pixels de B)
@@ -2502,8 +2530,8 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                        Read_one_byte(file, &a);
-                        Read_one_byte(file, &b);
+                       if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b)!=1)
+						   File_error=2;
                         x_pos+=a;
                         y_pos-=b;
                         break;
@@ -2512,7 +2540,7 @@ void Load_BMP(void)
                         {
                           if (index&1)
                           {
-                            Read_one_byte(file, &c);
+                            if(Read_byte(file, &c)!=1) File_error=2;
                             Pixel_load_function(x_pos,y_pos,c>>4);
                           }
                           else
@@ -2523,11 +2551,10 @@ void Load_BMP(void)
                         if ( ((b&3)==1) || ((b&3)==2) )
                         {
                           byte dummy;
-                          Read_one_byte(file, &dummy);
+                          if(Read_byte(file, &dummy)!=1) File_error=2;
                         }
                     }
-                  Read_one_byte(file, &a);
-                  Read_one_byte(file, &b);
+                  if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1) File_error=2;
                 }
                 /*Close_lecture();*/
             }
@@ -2849,8 +2876,11 @@ void Test_GIF(void)
         // Si on a atteint la fin du bloc de Raster Data
         if (GIF_remainder_byte==0)
           // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
-          Read_one_byte(GIF_file, &GIF_remainder_byte);
-        Read_one_byte(GIF_file,&GIF_last_byte);
+          if(Read_byte(GIF_file, &GIF_remainder_byte)!=1)
+			  File_error=2;
+
+		if(Read_byte(GIF_file,&GIF_last_byte)!=1)
+			File_error = 2;
         GIF_remainder_byte--;
         GIF_remainder_bits=8;
       }
@@ -3842,13 +3872,13 @@ void Load_PCX(void)
                 for (position=0; ((position<image_size) && (!File_error));)
                 {
                   // Lecture et décompression de la ligne
-                  Read_one_byte(file,&byte1);
+                  if(Read_byte(file,&byte1) !=1) File_error=2;
                   if (!File_error)
                   {
                     if ((byte1&0xC0)==0xC0)
                     {
                       byte1-=0xC0;               // facteur de répétition
-                      Read_one_byte(file,&byte2); // octet à répéter
+                      if(Read_byte(file,&byte2)!=1) File_error = 2; // octet à répéter
                       if (!File_error)
                       {
                         for (index=0; index<byte1; index++,position++)
@@ -3876,13 +3906,13 @@ void Load_PCX(void)
                 {
                   for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
                   {
-                    Read_one_byte(file,&byte1);
+                    if(Read_byte(file,&byte1)!=1) File_error = 2;
                     if (!File_error)
                     {
                       if ((byte1&0xC0)==0xC0)
                       {
                         byte1-=0xC0;               // facteur de répétition
-                        Read_one_byte(file,&byte2); // octet à répéter
+                        if(Read_byte(file,&byte2)!=1) File_error=2; // octet à répéter
                         if (!File_error)
                         {
                           for (index=0; index<byte1; index++)
@@ -3965,13 +3995,13 @@ void Load_PCX(void)
             for (y_pos=0,position=0;(y_pos<Main_image_height) && (!File_error);)
             {
               // Lecture et décompression de la ligne
-              Read_one_byte(file,&byte1);
+              if(Read_byte(file,&byte1)!=1) File_error=2;
               if (!File_error)
               {
                 if ((byte1 & 0xC0)==0xC0)
                 {
                   byte1-=0xC0;               // facteur de répétition
-                  Read_one_byte(file,&byte2); // octet à répéter
+                  if(Read_byte(file,&byte2)!=1) File_error=2; // octet à répéter
                   if (!File_error)
                   {
                     for (index=0; (index<byte1) && (!File_error); index++)
@@ -4264,7 +4294,7 @@ void Load_CEL(void)
             for (x_pos=0;((x_pos<Main_image_width) && (!File_error));x_pos++)
               if ((x_pos & 1)==0)
               {
-                Read_one_byte(file,&last_byte);
+                if(Read_byte(file,&last_byte)!=1) File_error = 2;
                 Pixel_load_function(x_pos,y_pos,(last_byte >> 4));
               }
               else
@@ -4308,7 +4338,7 @@ void Load_CEL(void)
                     for (x_pos=0;((x_pos<header2.Width) && (!File_error));x_pos++)
                       if ((x_pos & 1)==0)
                       {
-                        Read_one_byte(file,&last_byte);
+                        if(Read_byte(file,&last_byte)!=1) File_error=2;
                         Pixel_load_function(x_pos+header2.X_offset,y_pos+header2.Y_offset,(last_byte >> 4));
                       }
                       else
@@ -4320,7 +4350,7 @@ void Load_CEL(void)
                     for (x_pos=0;((x_pos<header2.Width) && (!File_error));x_pos++)
                     {
                       byte byte_read;
-                      Read_one_byte(file,&byte_read);
+                      if(Read_byte(file,&byte_read)!=1) File_error = 2;
                       Pixel_load_function(x_pos+header2.X_offset,y_pos+header2.Y_offset,byte_read);
                       }
                   break;
