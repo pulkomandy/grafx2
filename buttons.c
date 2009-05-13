@@ -274,12 +274,22 @@ void Button_Pal_right_fast(void)
 //-------------------- item de la forecolor dans le menu --------------------
 void Button_Select_forecolor(void)
 {
+  static long time_click = 0;
+  long time_previous;
+
   int color=Pick_color_in_palette();
+
+  time_previous = time_click;
+  time_click = SDL_GetTicks();
 
   if (color == Fore_color)
   {
-	// Open palette window
-	Button_Palette();
+    // Check if it's a double-click    
+    if (time_click - time_previous < 500)
+    {
+    	// Open palette window
+    	Button_Palette();
+    }
   }	  
   else if (color!=-1)
   {
