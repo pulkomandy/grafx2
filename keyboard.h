@@ -33,6 +33,7 @@
 /// Add 0x1000 for the Shift modifier MOD_SHIFT
 /// Add 0x2000 for the Control modifier ::MOD_CONTROL
 /// Add 0x4000 for the Alt modifier ::MOD_ALT
+/// Add 0x8000 for the "Meta" modifier ::MOD_META (On MacOS X it's the CMD key)
 //////////////////////////////////////////////////////////////////////////////
 
 /*!
