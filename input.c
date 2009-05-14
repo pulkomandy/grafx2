@@ -356,22 +356,22 @@ int Handle_key_release(SDL_KeyboardEvent event)
       case SDLK_LSHIFT:
         modifier=MOD_SHIFT;
         break;
+
       case SDLK_RCTRL:
       case SDLK_LCTRL:
         modifier=MOD_CTRL;
         break;
+
       case SDLK_RALT:
       case SDLK_LALT:
       case SDLK_MODE:
         modifier=MOD_ALT;
         break;
 
-#if defined(__macosx__)
       case SDLK_RMETA:
       case SDLK_LMETA:
         modifier=MOD_META;
         break;
-#endif
 
       default:
         modifier=0;

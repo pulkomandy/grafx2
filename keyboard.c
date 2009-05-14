@@ -318,11 +318,8 @@ word Key_modifiers(SDLMod mod)
       modifiers|=MOD_SHIFT;
     if (mod & (KMOD_ALT|KMOD_MODE))
       modifiers|=MOD_ALT;
-
-#if defined(__macosx__)
     if (mod & (KMOD_META))
       modifiers|=MOD_META;
-#endif
 
   return modifiers;
 }
@@ -457,6 +454,12 @@ const char * Key_name(word Key)
     strcat(buffer, "Alt+");
   if (Key & MOD_SHIFT)
     strcat(buffer, "Shift+");
+  if (Key & MOD_META)
+    strcat(buffer, "\201");
+  // Note: Apple's "command" character is not present in the ANSI table, so we
+  // recycled an ANSI value that doesn't have any displayable character
+  // associated.
+  
   
   Key=Key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   
@@ -495,12 +498,12 @@ const char * Key_name(word Key)
     return buffer;
   }
   
-  if (Key & 0x8000)
+  if (Key & 0x800)
   {
-    sprintf(buffer+strlen(buffer), "[%d]", Key & 0xFFF);
+    sprintf(buffer+strlen(buffer), "[%d]", Key & 0x7FF);
     return buffer;
   }
-  Key = Key & 0xFFF;
+  Key = Key & 0x7FF;
   // Touches ASCII
   if (Key>=' ' && Key < 127)
   {

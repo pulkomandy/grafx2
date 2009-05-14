@@ -1,5 +1,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Franck Charlet
+    Copyright 2009 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -103,21 +105,14 @@ GFX2_GLOBAL dword Key_ANSI;
   #undef MOD_ALT
 #endif
 
-#if defined(__macosx__)
-#ifdef MOD_META
-  #undef MOD_META
-#endif
-#endif
-
 /// Key modifier for SHIFT key. Used as mask in ::Key, for example.
 #define MOD_SHIFT 0x1000
 /// Key modifier for CONTROL key. Used as mask in ::Key, for example.
 #define MOD_CTRL  0x2000
 /// Key modifier for ALT key. Used as mask in ::Key, for example.
 #define MOD_ALT   0x4000
-#if defined(__macosx__)
+/// Key modifier for META key. Used as mask in ::Key, for example.
 #define MOD_META  0x8000
-#endif
 
 /// Boolean set to true when the OS/window manager requests the application to close. ie: [X] button
 GFX2_GLOBAL byte Quit_is_required;
