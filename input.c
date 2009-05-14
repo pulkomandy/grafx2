@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -364,6 +365,14 @@ int Handle_key_release(SDL_KeyboardEvent event)
       case SDLK_MODE:
         modifier=MOD_ALT;
         break;
+
+#if defined(__macosx__)
+      case SDLK_RMETA:
+      case SDLK_LMETA:
+        modifier=MOD_META;
+        break;
+#endif
+
       default:
         modifier=0;
     }

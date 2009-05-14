@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Franck Charlet
     Copyright 2008 Yves Rizoud
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -318,6 +319,11 @@ word Key_modifiers(SDLMod mod)
     if (mod & (KMOD_ALT|KMOD_MODE))
       modifiers|=MOD_ALT;
 
+#if defined(__macosx__)
+    if (mod & (KMOD_META))
+      modifiers|=MOD_META;
+#endif
+
   return modifiers;
 }
 
@@ -325,11 +331,12 @@ word Keysym_to_keycode(SDL_keysym keysym)
 {
   word key_code = 0;
   word mod;
-  
+
   // On ignore shift, alt et control isolés.
   if (keysym.sym == SDLK_RSHIFT || keysym.sym == SDLK_LSHIFT ||
       keysym.sym == SDLK_RCTRL  || keysym.sym == SDLK_LCTRL ||
       keysym.sym == SDLK_RALT   || keysym.sym == SDLK_LALT ||
+      keysym.sym == SDLK_RMETA  || keysym.sym == SDLK_LMETA ||
       keysym.sym == SDLK_MODE) // AltGr
   return 0;
   
@@ -346,6 +353,7 @@ word Keysym_to_keycode(SDL_keysym keysym)
   // is buggy: if you release a modifier key, the following keys (when they repeat)
   // still name the original modifiers.
   mod=Key_modifiers(SDL_GetModState());
+
   // SDL_GetModState() seems to get the right up-to-date info.
   key_code |= mod;
   return key_code;

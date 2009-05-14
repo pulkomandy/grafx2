@@ -16,6 +16,11 @@
 		F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */; };
 		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
 		F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5A33E690EC893F800F8052D /* 8pxfont.png */; };
+		F5AA405F0FBC406D00B7577C /* pxquad.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405A0FBC406D00B7577C /* pxquad.c */; };
+		F5AA40600FBC406D00B7577C /* pxtall2.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405B0FBC406D00B7577C /* pxtall2.c */; };
+		F5AA40610FBC406D00B7577C /* pxtriple.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405C0FBC406D00B7577C /* pxtriple.c */; };
+		F5AA40620FBC406D00B7577C /* pxwide2.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405D0FBC406D00B7577C /* pxwide2.c */; };
+		F5AA40630FBC406D00B7577C /* transform.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405E0FBC406D00B7577C /* transform.c */; };
 		F5AC28BC0F4873C700455509 /* hotkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28B90F4873C700455509 /* hotkeys.c */; };
 		F5AC28BD0F4873C700455509 /* input.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28BA0F4873C700455509 /* input.c */; };
 		F5AC28BE0F4873C700455509 /* realpath.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC28BB0F4873C700455509 /* realpath.c */; };
@@ -143,6 +148,11 @@
 		F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */ = {isa = PBXFileReference; lastKnownFileType = file; name = colorfont.pcx; path = fonts/colorfont.pcx; sourceTree = "<group>"; };
 		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
 		F5A33E690EC893F800F8052D /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 8pxfont.png; path = fonts/8pxfont.png; sourceTree = "<group>"; };
+		F5AA405A0FBC406D00B7577C /* pxquad.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxquad.c; sourceTree = "<group>"; };
+		F5AA405B0FBC406D00B7577C /* pxtall2.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxtall2.c; sourceTree = "<group>"; };
+		F5AA405C0FBC406D00B7577C /* pxtriple.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxtriple.c; sourceTree = "<group>"; };
+		F5AA405D0FBC406D00B7577C /* pxwide2.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxwide2.c; sourceTree = "<group>"; };
+		F5AA405E0FBC406D00B7577C /* transform.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = transform.c; sourceTree = "<group>"; };
 		F5AC28B90F4873C700455509 /* hotkeys.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = hotkeys.c; sourceTree = "<group>"; };
 		F5AC28BA0F4873C700455509 /* input.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = input.c; sourceTree = "<group>"; };
 		F5AC28BB0F4873C700455509 /* realpath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = realpath.c; sourceTree = "<group>"; };
@@ -313,6 +323,11 @@
 			children = (
 				32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */,
 				002F3A3E09D088BA00EBEB88 /* main.c */,
+				F5AA405A0FBC406D00B7577C /* pxquad.c */,
+				F5AA405B0FBC406D00B7577C /* pxtall2.c */,
+				F5AA405C0FBC406D00B7577C /* pxtriple.c */,
+				F5AA405D0FBC406D00B7577C /* pxwide2.c */,
+				F5AA405E0FBC406D00B7577C /* transform.c */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -429,6 +444,11 @@
 				F5B310B80F949A9C008197E2 /* keyboard.c in Sources */,
 				F5B310B90F949A9C008197E2 /* misc.c in Sources */,
 				F5B310BA0F949A9C008197E2 /* text.c in Sources */,
+				F5AA405F0FBC406D00B7577C /* pxquad.c in Sources */,
+				F5AA40600FBC406D00B7577C /* pxtall2.c in Sources */,
+				F5AA40610FBC406D00B7577C /* pxtriple.c in Sources */,
+				F5AA40620FBC406D00B7577C /* pxwide2.c in Sources */,
+				F5AA40630FBC406D00B7577C /* transform.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
