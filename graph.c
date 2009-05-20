@@ -533,7 +533,8 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   Mouse_Y=absolute_mouse_y/Pixel_height;
   if (Mouse_Y>=Screen_height)
     Mouse_Y=Screen_height-1;
-  Set_mouse_position();
+  if (fullscreen)
+    Set_mouse_position();
   
   Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
   Spare_offset_Y=0; // |- de décalage du brouillon par rapport à

@@ -199,6 +199,8 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
 
 int Load_INI_get_value(char * str,int * index,int * value)
 {
+  int negative = 0;
+  
   // On teste si la valeur actuelle est YES (ou Y):
 
   if (Load_INI_seek_pattern(str+(*index),"yes,")==1)
@@ -207,59 +209,51 @@ int Load_INI_get_value(char * str,int * index,int * value)
     (*index)+=4;
     return 0;
   }
-  else
   if (strcmp(str+(*index),"yes")==0)
   {
     (*value)=1;
     (*index)+=3;
     return 0;
   }
-  else
   if (Load_INI_seek_pattern(str+(*index),"y,")==1)
   {
     (*value)=1;
     (*index)+=2;
     return 0;
   }
-  else
   if (strcmp(str+(*index),"y")==0)
   {
     (*value)=1;
     (*index)+=1;
     return 0;
   }
-  else
-
+  
   // On teste si la valeur actuelle est NO (ou N):
-
+  
   if (Load_INI_seek_pattern(str+(*index),"no,")==1)
   {
     (*value)=0;
     (*index)+=3;
     return 0;
   }
-  else
   if (strcmp(str+(*index),"no")==0)
   {
     (*value)=0;
     (*index)+=2;
     return 0;
   }
-  else
   if (Load_INI_seek_pattern(str+(*index),"n,")==1)
   {
     (*value)=0;
     (*index)+=2;
     return 0;
   }
-  else
   if (strcmp(str+(*index),"n")==0)
   {
     (*value)=0;
     (*index)+=1;
     return 0;
   }
-  else
   if (str[*index]=='$')
   {
     (*value)=0;
@@ -286,7 +280,13 @@ int Load_INI_get_value(char * str,int * index,int * value)
         return ERROR_INI_CORRUPTED;
     }
   }
-  else
+  if (str[*index]=='-')
+  {
+    negative = 1;
+    // next character
+    (*index)++;
+    // Fall thru
+  }
   if ((str[*index]>='0') && (str[*index]<='9'))
   {
     (*value)=0;
@@ -294,7 +294,15 @@ int Load_INI_get_value(char * str,int * index,int * value)
     for (;;)
     {
       if ((str[*index]>='0') && (str[*index]<='9'))
+      {
         (*value)=((*value)*10)+str[*index]-'0';
+        if (negative)
+        {
+          (*value)*= -1;
+          // This is to do it once per number.
+          negative = 0;
+        }
+      }
       else
       if (str[*index]==',')
       {
@@ -772,6 +780,17 @@ int Load_INI(T_Config * conf)
       goto Erreur_ERREUR_INI_CORROMPU;
     conf->Palette_vertical=values[0];
   }
+  
+  // Optional, the window position (>98.0%)
+  conf->Window_pos_x=9999;
+  conf->Window_pos_y=9999;
+  if (!Load_INI_get_values (file,buffer,"Window_position",2,values))
+  {
+    conf->Window_pos_x = values[0];
+    conf->Window_pos_y = values[1];
+  }
+
+
   fclose(file);
 
   free(filename);

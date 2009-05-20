@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_syswm.h>
 
 #include "const.h"
 #include "struct.h"
@@ -577,6 +578,22 @@ int Init_program(int argc,char * argv[])
     Video_mode[starting_videomode].Fullscreen,
     Pixel_ratio);
 
+  // Windows only: move back the window to its original position.
+  #if defined(__WIN32__)
+  if (!Video_mode[starting_videomode].Fullscreen)
+  {
+    if (Config.Window_pos_x != 9999 && Config.Window_pos_y != 9999)
+    {
+      //RECT r;
+      static SDL_SysWMinfo pInfo;
+      SDL_VERSION(&pInfo.version);
+      SDL_GetWMInfo(&pInfo);
+      //GetWindowRect(pInfo.window, &r);
+      SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
+    }
+  }
+  #endif
+  
   Main_image_width=Screen_width/Pixel_width;
   Main_image_height=Screen_height/Pixel_height;
   Spare_image_width=Screen_width/Pixel_width;
@@ -634,6 +651,25 @@ int Init_program(int argc,char * argv[])
 void Program_shutdown(void)
 {
   int      return_code;
+
+  // Windows only: Recover the window position.
+  #if defined(__WIN32__)
+  {
+    RECT r;
+    static SDL_SysWMinfo pInfo;
+    
+    SDL_GetWMInfo(&pInfo);
+    GetWindowRect(pInfo.window, &r);
+
+    Config.Window_pos_x = r.left;
+    Config.Window_pos_y = r.top;
+  }
+  #else
+  // All other targets: irrelevant dimensions.
+  // Do not attempt to force them back on next program run.
+    Config.Window_pos_x = 9999;
+    Config.Window_pos_y = 9999;
+  #endif
 
   // On libère le buffer de gestion de lignes
   free(Horizontal_line_buffer);

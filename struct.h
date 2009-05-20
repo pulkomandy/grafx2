@@ -267,6 +267,8 @@ typedef struct
   byte Default_resolution;               ///< Default video mode to use on startup. Index in ::Video_mode.
   char *Bookmark_directory[NB_BOOKMARKS];///< Bookmarked directories in fileselectors: This is the full dierctory name.
   char Bookmark_label[NB_BOOKMARKS][8+1];///< Bookmarked directories in fileselectors: This is the displayed name.
+  int  Window_pos_x;                     ///< Last window x position (9999 if unsupportd/irrelevant for the platform)
+  int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
