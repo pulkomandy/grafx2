@@ -798,7 +798,12 @@ int Load_INI(T_Config * conf)
     conf->Window_pos_x = values[0];
     conf->Window_pos_y = values[1];
   }
-
+  // Optional, Unicode support on/off (>98.0%)
+  conf->Use_unicode=1;
+  if (!Load_INI_get_values (file,buffer,"Use_unicode",1,values))
+  {
+    conf->Use_unicode = (values[0]!=0);
+  }
 
   fclose(file);
 
