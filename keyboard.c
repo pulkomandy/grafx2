@@ -543,21 +543,57 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   #if !(defined(__macosx__) || defined(__FreeBSD__))
   if ( keysym.unicode == 0)
   {
-    // Converty lowercase to uppercase if SHIFT is on.
-    if (keysym.sym >= 'a' && keysym.sym <= 'z' && (SDL_GetModState() & (KMOD_SHIFT|KMOD_CAPS)))
-      return ('A' - 'a') + keysym.sym;
+    byte shift;
+    
+    shift = (SDL_GetModState() & (KMOD_SHIFT|KMOD_CAPS)) != 0;
     // Convert keypad to numbers
     if (keysym.sym >= SDLK_KP0 && keysym.sym <= SDLK_KP9)
       return ('0' - SDLK_KP0) + keysym.sym;
+    
+    // Conversion with shift on
+    if (shift)
+    {
+      // Lowercase to uppercase.
+      if (keysym.sym >= 'a' && keysym.sym <= 'z' && shift)
+        return ('A' - 'a') + keysym.sym;
+      // Some shifts of QWERTY-US keys
+      switch (keysym.sym)
+      {
+        case '`': return '~';
+        case '1': return '!';
+        case '2': return '@';
+        case '3': return '#';
+        case '4': return '$';
+        case '5': return '%';
+        case '6': return '^';
+        case '7': return '&';
+        case '8': return '*';
+        case '9': return '(';
+        case '0': return ')';
+        case '-': return '_';
+        case '=': return '+';
+        case '\\': return '|';
+        case '[': return '{';
+        case ']': return '}';
+        case ';': return ':';
+        case '\'': return '"';
+        case ',': return '<';
+        case '.': return '>';
+        case '/': return '?';
+        default:
+          return keysym.sym;
+      }
+    }
     // More conversions
     switch (keysym.sym)
     {
-      case SDLK_KP_PERIOD: return '.';
-      case SDLK_KP_DIVIDE: return '/';
-      case SDLK_KP_MINUS:  return '-';
-      case SDLK_KP_PLUS:   return '+';
-      case SDLK_KP_ENTER:  return '\r';
-      case SDLK_KP_EQUALS: return '=';
+      case SDLK_KP_PERIOD:   return '.';
+      case SDLK_KP_DIVIDE:   return '/';
+      case SDLK_KP_MINUS:    return '-';
+      case SDLK_KP_MULTIPLY: return '*';
+      case SDLK_KP_PLUS:     return '+';
+      case SDLK_KP_ENTER:    return '\r';
+      case SDLK_KP_EQUALS:   return '=';
       default:
         return keysym.sym;
     }
