@@ -24,4 +24,4 @@
 
 int Load_INI(T_Config * conf);
 int Load_INI_seek_pattern(char * buffer,char * pattern);
-void Load_INI_clear_string(char * str);
+void Load_INI_clear_string(char * str, byte keep_comments);

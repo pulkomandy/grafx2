@@ -41,7 +41,7 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
 
   // On commence par se faire une version majuscule du groupe à rechercher:
   strcpy(group_upper,group);
-  Load_INI_clear_string(group_upper);
+  Load_INI_clear_string(group_upper, 0);
 
   stop_seek=0;
   do
@@ -56,7 +56,7 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, 0);
 
     // On compare la chaîne avec le groupe recherché:
     stop_seek=Load_INI_seek_pattern(upper_buffer,group_upper);
@@ -249,7 +249,7 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
 
   // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(option_upper,option_name);
-  Load_INI_clear_string(option_upper);
+  Load_INI_clear_string(option_upper, 0);
 
   stop_seek=0;
   do
@@ -265,7 +265,7 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, 0);
 
     // On compare la chaîne avec l'option recherchée:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
@@ -320,7 +320,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
 
   // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(option_upper,option_name);
-  Load_INI_clear_string(option_upper);
+  Load_INI_clear_string(option_upper, 0);
 
   stop_seek=0;
   do
@@ -336,7 +336,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, 0);
 
     // On compare la chaîne avec l'option recherchée:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);

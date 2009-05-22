@@ -27,7 +27,7 @@
 #include "misc.h"
 #include "readini.h"
 
-void Load_INI_clear_string(char * str)
+void Load_INI_clear_string(char * str, byte keep_comments)
 {
   int index;
   int equal_found=0;
@@ -48,12 +48,14 @@ void Load_INI_clear_string(char * str)
       memmove(str+index,str+index+1,strlen(str+index));
     }
     else
-    if ((str[index]==';') ||
-        (str[index]=='#') ||
-        (str[index]=='\r') ||
-        (str[index]=='\n'))
+    if (!keep_comments && ((str[index]==';') || (str[index]=='#')))
     {
-      // Rencontre d'un commentaire ou d'un saut de ligne:
+      // Comment
+      str[index]='\0';
+    }
+    else if ((str[index]=='\r') || (str[index]=='\n'))
+    {
+      // Line break
       str[index]='\0';
     }
     else
@@ -115,7 +117,7 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
 
   // On commence par se faire une version majuscule du groupe à rechercher:
   strcpy(group_upper,group);
-  Load_INI_clear_string(group_upper);
+  Load_INI_clear_string(group_upper, 0);
 
   stop_seek=0;
   do
@@ -132,7 +134,7 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, 0);
 
     // On compare la chaîne avec le groupe recherché:
     stop_seek=Load_INI_seek_pattern(upper_buffer,group_upper);
@@ -145,7 +147,14 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
   return 0;
 }
 
-int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * return_code)
+///
+/// Find the next string in the .INI file.
+/// @param file INI file currently opened
+/// @param buffer Current text buffer, preserved from one call to the next
+/// @param option_name string to search
+/// @param return_code the found value will be copied there. (must be allocaed)
+/// @param raw_text Boolean: true to return the raw value (up to end-of-line), false to strip comments.
+int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * return_code, byte raw_text)
 {
   int    stop_seek;
   char * option_upper;
@@ -158,7 +167,7 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
 
   // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(option_upper,option_name);
-  Load_INI_clear_string(option_upper);
+  Load_INI_clear_string(option_upper, 0);
 
   stop_seek=0;
   do
@@ -175,7 +184,7 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, raw_text);
 
     // On compare la chaîne avec l'option recherchée:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
@@ -338,7 +347,7 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
 
   // On commence par se faire une version majuscule de l'option à rechercher:
   strcpy(option_upper,option_name);
-  Load_INI_clear_string(option_upper);
+  Load_INI_clear_string(option_upper, 0);
 
   stop_seek=0;
   do
@@ -355,7 +364,7 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
 
     // On s'en fait une version en majuscule:
     strcpy(upper_buffer,buffer);
-    Load_INI_clear_string(upper_buffer);
+    Load_INI_clear_string(upper_buffer, 0);
 
     // On compare la chaîne avec l'option recherchée:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
@@ -694,7 +703,7 @@ int Load_INI(T_Config * conf)
 
   // Optionnel, le mode video par défaut (à partir de beta 97.0%)
   conf->Default_resolution=0;
-  if (!Load_INI_get_string (file,buffer,"Default_video_mode",value_label))
+  if (!Load_INI_get_string (file,buffer,"Default_video_mode",value_label, 0))
   {
     int mode = Convert_videomode_arg(value_label);
     if (mode>=0)
@@ -745,7 +754,7 @@ int Load_INI(T_Config * conf)
   }
   for (index=0;index<NB_BOOKMARKS;index++)
   {
-    if (!Load_INI_get_string (file,buffer,"Bookmark_label",value_label))
+    if (!Load_INI_get_string (file,buffer,"Bookmark_label",value_label, 1))
     {
       int size=strlen(value_label);
       if (size!=0)
@@ -760,7 +769,7 @@ int Load_INI(T_Config * conf)
     }
     else
       break;
-    if (!Load_INI_get_string (file,buffer,"Bookmark_directory",value_label))
+    if (!Load_INI_get_string (file,buffer,"Bookmark_directory",value_label, 1))
     {
       int size=strlen(value_label);
       if (size!=0)
