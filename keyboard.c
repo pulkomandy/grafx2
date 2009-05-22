@@ -546,7 +546,21 @@ word Keysym_to_ANSI(SDL_keysym keysym)
     // Converty lowercase to uppercase if SHIFT is on.
     if (keysym.sym >= 'a' && keysym.sym <= 'z' && (SDL_GetModState() & (KMOD_SHIFT|KMOD_CAPS)))
       return ('A' - 'a') + keysym.sym;
-    return keysym.sym;
+    // Convert keypad to numbers
+    if (keysym.sym >= SDLK_KP0 && keysym.sym <= SDLK_KP9)
+      return ('0' - SDLK_KP0) + keysym.sym;
+    // More conversions
+    switch (keysym.sym)
+    {
+      case SDLK_KP_PERIOD: return '.';
+      case SDLK_KP_DIVIDE: return '/';
+      case SDLK_KP_MINUS:  return '-';
+      case SDLK_KP_PLUS:   return '+';
+      case SDLK_KP_ENTER:  return '\r';
+      case SDLK_KP_EQUALS: return '=';
+      default:
+        return keysym.sym;
+    }
   }
   #endif
   //
