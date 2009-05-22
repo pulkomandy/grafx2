@@ -142,6 +142,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   byte offset=0; // index du premier caractère affiché
 
+  SDL_EnableUNICODE(SDL_ENABLE);
+
   Hide_cursor();
   // Effacement de la chaîne
   Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
@@ -345,6 +347,8 @@ affichage:
   }
   Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+
+  SDL_EnableUNICODE(SDL_DISABLE);
 
   return (input_key==SDLK_RETURN);
 }

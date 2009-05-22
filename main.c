@@ -404,7 +404,6 @@ int Init_program(int argc,char * argv[])
   }
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
-  SDL_EnableUNICODE(SDL_ENABLE);
   if(ALPHA_BETA[0]=='ß')
     SDL_WM_SetCaption("GrafX2 beta "PERCENTAGE_VERSION,"GrafX2");
   else

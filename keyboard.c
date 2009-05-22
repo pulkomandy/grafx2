@@ -543,6 +543,9 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   #if !(defined(__macosx__) || defined(__FreeBSD__))
   if ( keysym.unicode == 0)
   {
+    // Converty lowercase to uppercase if SHIFT is on.
+    if (keysym.sym >= 'a' && keysym.sym <= 'z' && (SDL_GetModState() & (KMOD_SHIFT|KMOD_CAPS)))
+      return ('A' - 'a') + keysym.sym;
     return keysym.sym;
   }
   #endif
