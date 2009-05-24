@@ -24,9 +24,7 @@
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
 void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
 void Scroll_picture(short x_offset,short y_offset);
-void Set_mouse_position(void);
 void Wait_end_of_click(void);
-void Mouse_sensitivity(word x,word y);
 void Set_color(byte color, byte red, byte green, byte blue);
 void Set_palette(T_Palette palette);
 void Palette_256_to_64(T_Palette palette);

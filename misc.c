@@ -157,11 +157,6 @@ void Hide_current_image(byte color)
   );
 }
 
-void Mouse_sensitivity(__attribute__((unused)) word x,__attribute__((unused)) word y)
-{
-
-}
-
 void Init_chrono(dword delay)
 // Démarrer le chrono
 {
@@ -341,14 +336,6 @@ dword Round_div(dword numerator,dword divisor)
 byte Effect_sieve(word x,word y)
 {
   return Sieve[x % Sieve_width][y % Sieve_height];
-}
-
-void Set_mouse_position(void)
-{
-    SDL_WarpMouse(
-        Mouse_X*Pixel_width,
-        Mouse_Y*Pixel_height
-    );
 }
 
 void Replace_colors_within_limits(byte * replace_table)

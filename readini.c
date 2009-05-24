@@ -453,15 +453,17 @@ int Load_INI(T_Config * conf)
 
   if ((return_code=Load_INI_get_values (file,buffer,"X_sensitivity",1,values)))
     goto Erreur_Retour;
-  if ((values[0]<1) || (values[0]>255))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_sensitivity_index_x=values[0];
+  if ((values[0]<1) || (values[0]>4))
+    conf->Mouse_sensitivity_index_x=1;
+  else
+    conf->Mouse_sensitivity_index_x=values[0];
 
   if ((return_code=Load_INI_get_values (file,buffer,"Y_sensitivity",1,values)))
     goto Erreur_Retour;
-  if ((values[0]<1) || (values[0]>255))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_sensitivity_index_y=values[0];
+  if ((values[0]<1) || (values[0]>4))
+    conf->Mouse_sensitivity_index_y=1;
+  else
+    conf->Mouse_sensitivity_index_y=values[0];
 
   if ((return_code=Load_INI_get_values (file,buffer,"X_correction_factor",1,values)))
     goto Erreur_Retour;

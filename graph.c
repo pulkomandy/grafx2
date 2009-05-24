@@ -45,6 +45,7 @@
 #include "pxtall2.h"
 #include "pxquad.h"
 #include "windows.h"
+#include "input.h"
 
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
@@ -186,8 +187,6 @@ void Transform_point(short x, short y, float cos_a, float sin_a,
 
 int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 {
-  int x_sensitivity;
-  int y_sensitivity;
   int index;
   int factor;
   int pix_width;
@@ -277,7 +276,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   {
     Set_mode_SDL(&width, &height,fullscreen);
   }
-  Clear_border(MC_Black);
+  
   if (screen_changed || pixels_changed)
   {
     Pixel_ratio=pix_ratio;
@@ -467,6 +466,8 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   Screen_width = width/Pixel_width;
   Screen_height = height/Pixel_height;
 
+  Clear_border(MC_Black); // Requires up-to-date Screen_* and Pixel_*
+
   // Taille des menus
   if (Screen_width/320 > Screen_height/200)
     factor=Screen_height/200;
@@ -521,11 +522,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
     Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
   Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
 
-  x_sensitivity = Config.Mouse_sensitivity_index_x;
-  y_sensitivity = Config.Mouse_sensitivity_index_y;
-  x_sensitivity>>=Mouse_fix_factor_X;
-  y_sensitivity>>=Mouse_fix_factor_Y;
-  Mouse_sensitivity(x_sensitivity?x_sensitivity:1,y_sensitivity?y_sensitivity:1);
+  Adjust_mouse_sensitivity(fullscreen);
 
   Mouse_X=absolute_mouse_x/Pixel_width;
   if (Mouse_X>=Screen_width)

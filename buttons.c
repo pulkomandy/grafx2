@@ -672,12 +672,12 @@ void Settings_display_config(T_Config * conf)
 
   Hide_cursor();
 
-  // slider = Jauge de sensibilité Y
+  // slider = sensitivity slider for Y
   slider->Position=conf->Mouse_sensitivity_index_y-1;
   Window_draw_slider(slider);
 
   slider=slider->Next;
-  // slider = Jauge de sensibilité X
+  // slider = sensitivity slider for X
   slider->Position=conf->Mouse_sensitivity_index_x-1;
   Window_draw_slider(slider);
 
@@ -745,8 +745,6 @@ void Settings_load_config(T_Config * conf)
 
 void Button_Settings(void)
 {
-  int x_sensitivity;
-  int y_sensitivity;
   short clicked_button;
   T_Config Config_choisie;
   char str[3];
@@ -822,8 +820,8 @@ void Button_Settings(void)
   Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 19
 
   // Jauges de sensibilité de la souris (X puis Y)
-  Window_set_scroller_button(265,99,56,255,1,0); // 20
-  Window_set_scroller_button(279,99,56,255,1,0); // 21
+  Window_set_scroller_button(265,99,56,4,1,0); // 20
+  Window_set_scroller_button(279,99,56,4,1,0); // 21
 
   // Zone de saisie du nb de pages de Undo
   Window_set_input_button(140,50,2);           // 22
@@ -942,16 +940,7 @@ void Button_Settings(void)
 
   Config=Config_choisie;
 
-  // Prise en compte de la nouvelle config
-    // Gestion de la sensibilité
-  x_sensitivity=(Config.Mouse_sensitivity_index_x/Menu_factor_X);
-  y_sensitivity=(Config.Mouse_sensitivity_index_y/Menu_factor_Y);
-  x_sensitivity>>=Mouse_fix_factor_X;
-  y_sensitivity>>=Mouse_fix_factor_Y;
-
-  Mouse_sensitivity(x_sensitivity?x_sensitivity:1,
-                     y_sensitivity?y_sensitivity:1);
-    // Gestion des fontes
+  // Font selection
   if (Config.Font)
     Menu_font=GFX_fun_font;
   else

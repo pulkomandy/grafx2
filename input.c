@@ -48,6 +48,12 @@ word Input_new_mouse_X;
 word Input_new_mouse_Y;
 byte Input_new_mouse_K;
 
+byte Mouse_mode = 0; ///< Mouse mode = 0:normal, 1:emulated with custom sensitivity.
+short Mouse_virtual_x_position;
+short Mouse_virtual_y_position;
+short Mouse_virtual_width;
+short Mouse_virtual_height;
+
 // TODO: move to config
 short Joybutton_shift=-1; // Button number that serves as a "shift" modifier
 short Joybutton_control=-1; // Button number that serves as a "ctrl" modifier
@@ -135,13 +141,6 @@ int Move_cursor_with_constraints()
             }
         }
   }
-  if (bl)
-  {
-      SDL_WarpMouse(
-              Input_new_mouse_X*Pixel_width,
-              Input_new_mouse_Y*Pixel_height
-              );
-  }
   if ((Input_new_mouse_X != Mouse_X) ||
     (Input_new_mouse_Y != Mouse_Y) ||
     (Input_new_mouse_K != Mouse_K))
@@ -149,8 +148,13 @@ int Move_cursor_with_constraints()
     if ((Input_new_mouse_K != Mouse_K))
       feedback=1;        
     Hide_cursor(); // On efface le curseur AVANT de le déplacer...
-    Mouse_X=Input_new_mouse_X;
-    Mouse_Y=Input_new_mouse_Y;
+    if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
+    {
+      Mouse_X=Input_new_mouse_X;
+      Mouse_Y=Input_new_mouse_Y;
+      if (bl)
+        Set_mouse_position();
+    }
     Mouse_K=Input_new_mouse_K;
     Compute_paintbrush_coordinates();
     Display_cursor();
@@ -180,8 +184,30 @@ void Handle_window_exit(__attribute__((unused)) SDL_QuitEvent event)
 
 int Handle_mouse_move(SDL_MouseMotionEvent event)
 {
-    Input_new_mouse_X = event.x/Pixel_width;
-    Input_new_mouse_Y = event.y/Pixel_height;
+    if (Mouse_mode == 0)
+    {
+      Input_new_mouse_X = event.x/Pixel_width;
+      Input_new_mouse_Y = event.y/Pixel_height;
+    }
+    else
+    {
+      Mouse_virtual_x_position += event.xrel * 12 / Config.Mouse_sensitivity_index_x;
+      // Clip
+      if (Mouse_virtual_x_position > Mouse_virtual_width)
+        Mouse_virtual_x_position = Mouse_virtual_width;
+      else if (Mouse_virtual_x_position < 0)
+        Mouse_virtual_x_position = 0;
+        
+      Mouse_virtual_y_position += event.yrel * 12 / Config.Mouse_sensitivity_index_y;
+      // Clip
+      if (Mouse_virtual_y_position > Mouse_virtual_height)
+        Mouse_virtual_y_position = Mouse_virtual_height;
+      else if (Mouse_virtual_y_position < 0)
+        Mouse_virtual_y_position = 0;
+        
+      Input_new_mouse_X = Mouse_virtual_x_position / 12 / Pixel_width;
+      Input_new_mouse_Y = Mouse_virtual_y_position / 12 / Pixel_height;
+    }
 
     return Move_cursor_with_constraints();
 }
@@ -714,4 +740,34 @@ int Get_input(void)
     Flush_update();
 
     return user_feedback_required;
+}
+
+void Adjust_mouse_sensitivity(word fullscreen)
+{
+  if (fullscreen == 0)
+  {
+    Mouse_mode = 0;
+    return;
+  }
+  Mouse_mode = 1;
+  Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
+  Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
+  Mouse_virtual_width = 12*(Screen_width-1)*Pixel_width;
+  Mouse_virtual_height = 12*(Screen_height-1)*Pixel_height;
+}
+
+void Set_mouse_position(void)
+{
+    if (Mouse_mode == 0)
+    {
+      SDL_WarpMouse(
+          Mouse_X*Pixel_width,
+          Mouse_Y*Pixel_height
+      );
+    }
+    else
+    {
+      Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
+      Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
+    }
 }
