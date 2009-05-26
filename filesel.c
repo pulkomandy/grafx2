@@ -91,7 +91,10 @@ void Free_fileselector_list(void)
 }
 
 
-// -- Formatage graphique des noms de fichier / répertoire ------------------
+///
+/// Formats a display name for a file, directory, or similar name (drive, volume).
+/// The returned value is a pointer to a single static buffer of 19 characters
+/// including the '\0'.
 char * Format_filename(char * fname, int type)
 {
   static char result[19];
@@ -103,35 +106,38 @@ char * Format_filename(char * fname, int type)
   {
     strcpy(result,"<-PARENT DIRECTORY");
   }
-  else if (fname[0]=='.' || type==2)
+  else if (fname[0]=='.' || type==1 || type==2)
   {
-    // Fichiers ".quelquechose" ou lecteurs: Calé à gauche sur 18 caractères maximum.
+    // Files ".something" or drives or directories: Aligned left on 18 chars max
     strcpy(result,"                  ");
     for (c=0;fname[c]!='\0' && c < 18;c++)
       result[c]=fname[c];
-    // Un caractère spécial pour indiquer que l'affichage est tronqué
+    // A special character indicates the filename is truncated
     if (c >= 18)
       result[17]=ELLIPSIS_CHARACTER;
   }
   else
   {
     strcpy(result,"              .   ");
-    // On commence par recopier la partie précédent le point:
-    for (c=0;( (fname[c]!='.') && (fname[c]!='\0') );c++)
-    {
-      if (c < 14)
-        result[c]=fname[c];
-    }
-    // Un caractère spécial pour indiquer que l'affichage est tronqué
-    if (c > 14)
-      result[13]=ELLIPSIS_CHARACTER;
-    // On recherche le dernier point dans le reste du nom
-    for (pos_last_dot = c; fname[c]!='\0'; c++)
+    // Look for the last dot in filename
+    pos_last_dot = -1;
+    for (c = 0; fname[c]!='\0'; c++)
       if (fname[c]=='.')
         pos_last_dot = c;
 
+    // Copy the part before the dot
+    for (c=0; c!=pos_last_dot && fname[c]!='\0'; c++)
+    {
+      if (c > 13)
+      {
+        result[13]=ELLIPSIS_CHARACTER;
+        break;
+      }
+      result[c]=fname[c];
+    }
+
     // Ensuite on recopie la partie qui suit le point (si nécessaire):
-    if (fname[pos_last_dot])
+    if (pos_last_dot != -1)
     {
       for (c = pos_last_dot+1,other_cursor=15;fname[c]!='\0' && other_cursor < 18;c++,other_cursor++)
         result[other_cursor]=fname[c];
