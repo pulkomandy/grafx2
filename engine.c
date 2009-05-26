@@ -480,19 +480,20 @@ void Main_handler(void)
 
   do
   {
-    if(Get_input())
-    {
-    // Redimensionnement demandé
+    // Resize requested
     if (Resize_width || Resize_height)
     {
       Hide_cursor();
       Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
-      // Remise à zero des variables indiquant le Redimensionnement demandé
+      // Reset the variables that indicate a resize was requested.
       Display_menu();
       Reposition_palette();
       Display_all_screen();
       Display_cursor();
     }
+    
+    if(Get_input())
+    {
     
     // Evenement de fermeture
     if (Quit_is_required)
