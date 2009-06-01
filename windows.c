@@ -1399,7 +1399,6 @@ void Change_magnifier_factor(byte factor_index)
   center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
-  Zoom_factor_table=Magnify_table[factor_index];
   Compute_magnifier_data();
 
   if (Main_magnifier_mode)

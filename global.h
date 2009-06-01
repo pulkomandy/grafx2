@@ -726,13 +726,6 @@ GFX2_GLOBAL byte Mask_table[256];
 
 // -- Magnifier data
 
-/// Pointer to ::Magnify_table[n] : table of multipliers used by the Magnifier.
-// FIXME: This only caches a multiplication. Maybe we should scrap it
-GFX2_GLOBAL word  * Zoom_factor_table;
-/// Precomputed tables of multipliers used by the Magnifier.
-// FIXME: This only caches a multiplication. Maybe we should scrap it
-GFX2_GLOBAL word  Magnify_table[NB_ZOOM_FACTORS][512];
-
 #ifdef GLOBAL_VARIABLES
   word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20};
 #else

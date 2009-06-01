@@ -2168,24 +2168,6 @@ Erreur_sauvegarde_config:
   return ERROR_SAVING_CFG;
 }
 
-
-void Init_multiplication_tables(void)
-{
-  word factor_index;
-  word zoom_factor;
-  word mult_index;
-
-  for (factor_index=0;factor_index<NB_ZOOM_FACTORS;factor_index++)
-  {
-    zoom_factor=ZOOM_FACTOR[factor_index];
-
-    for (mult_index=0;mult_index<512;mult_index++)
-    {
-      Magnify_table[factor_index][mult_index]=zoom_factor*mult_index;
-    }
-  }
-}
-
 // (Ré)assigne toutes les valeurs de configuration par défaut
 void Set_config_defaults(void)
 {

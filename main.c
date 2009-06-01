@@ -464,8 +464,6 @@ int Init_program(int argc,char * argv[])
     // On initialise les infos de la loupe:
   Main_magnifier_mode=0;
   Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
-  Init_multiplication_tables();
-  Zoom_factor_table=Magnify_table[2];
   Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
   Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
     // On initialise les infos du mode smear:

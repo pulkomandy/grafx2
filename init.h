@@ -27,7 +27,6 @@ void Init_buttons(void);
 void Init_operations(void);
 int  Load_CFG(int reload_all);
 int  Save_CFG(void);
-void Init_multiplication_tables(void);
 void Set_all_video_modes(void);
 void Set_config_defaults(void);
 void Init_sighandler(void);

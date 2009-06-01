@@ -112,7 +112,7 @@ void Pixel_preview_magnifier_triple  (word x,word y,byte color)
   {
     // On est dedans
     int height;
-    int y_zoom = Zoom_factor_table[y-Main_magnifier_offset_Y];
+    int y_zoom = Main_magnifier_factor * (y-Main_magnifier_offset_Y);
 
     if (Menu_Y - y_zoom < Main_magnifier_factor)
       // On ne doit dessiner qu'un morceau du pixel
@@ -122,7 +122,7 @@ void Pixel_preview_magnifier_triple  (word x,word y,byte color)
       height = Main_magnifier_factor;
 
     Block_triple(
-      Zoom_factor_table[x-Main_magnifier_offset_X]+Main_X_zoom, 
+      Main_magnifier_factor * (x-Main_magnifier_offset_X) + Main_X_zoom, 
       y_zoom, Main_magnifier_factor, height, color
       );
   }
