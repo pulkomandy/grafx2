@@ -203,17 +203,17 @@ void Replace_a_color(byte old_color, byte New_color)
 void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
 {
   Ellipse_horizontal_radius_squared =
-    horizontal_radius * horizontal_radius;
+    (long)horizontal_radius * horizontal_radius;
   Ellipse_vertical_radius_squared =
-    vertical_radius * vertical_radius;
-  Ellipse_limit = Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
+    (long)vertical_radius * vertical_radius;
+  Ellipse_limit = (qword)Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
 }
 
 // FIXME: move to graph.c, it's the only caller
 byte Pixel_in_ellipse(void)
 {
-  qword ediesi = Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
-        Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
+  qword ediesi = (qword)Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
+        (qword)Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
   if((ediesi) <= Ellipse_limit) return 255;
 
         return 0;
