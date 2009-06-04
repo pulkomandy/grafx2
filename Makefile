@@ -276,6 +276,8 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2
 	test -d $(DESTDIR)$(datadir)/grafx2/fonts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/fonts
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
+	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
+	test -d $(DESTDIR)$(datadir)/icons || $(MKDIR) $(DESTDIR)$(datadir)/icons
 	# Generate launcher script
 	echo "#!/bin/sh" > $(DESTDIR)$(bindir)/grafx2
 	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(DESTDIR)$(bindir)/grafx2
