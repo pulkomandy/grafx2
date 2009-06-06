@@ -902,7 +902,6 @@ void Button_Settings(void)
         Config_choisie.Mouse_sensitivity_index_y=Window_attribute2+1;
         break;
       case 21 : // Nb pages Undo
-        Wait_end_of_click();
         Num2str(Config_choisie.Max_undo_pages,str,2);
         Readline(142,52,str,2,1);
         Config_choisie.Max_undo_pages=atoi(str);
@@ -920,6 +919,8 @@ void Button_Settings(void)
           Window_input_content(Window_special_button_list,str);
         }
         Display_cursor();
+        Key=0;
+        Wait_end_of_click();
     }
 
     if ((clicked_button>=3) && (clicked_button<=4))
