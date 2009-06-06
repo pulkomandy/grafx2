@@ -55,11 +55,19 @@ short Mouse_virtual_width;
 short Mouse_virtual_height;
 
 // TODO: move to config
+#ifdef __GP2X__
+short Joybutton_shift=GP2X_BUTTON_L; // Button number that serves as a "shift" modifier
+short Joybutton_control=GP2X_BUTTON_R; // Button number that serves as a "ctrl" modifier
+short Joybutton_alt=GP2X_BUTTON_CLICK; // Button number that serves as a "alt" modifier
+short Joybutton_left_click=GP2X_BUTTON_B; // Button number that serves as left click
+short Joybutton_right_click=GP2X_BUTTON_Y; // Button number that serves as right-click
+#else
 short Joybutton_shift=-1; // Button number that serves as a "shift" modifier
 short Joybutton_control=-1; // Button number that serves as a "ctrl" modifier
 short Joybutton_alt=-1; // Button number that serves as a "alt" modifier
 short Joybutton_left_click=0; // Button number that serves as left click
 short Joybutton_right_click=0; // Button number that serves as right-click
+#endif
 
 int Is_shortcut(word Key, word function)
 {
@@ -416,8 +424,6 @@ int Handle_key_release(SDL_KeyboardEvent event)
 
 int Handle_joystick_press(SDL_JoyButtonEvent event)
 {
-  if (event.which==0) // Joystick number 0
-  {
     if (event.button == Joybutton_shift)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_SHIFT);
@@ -473,20 +479,17 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
         break;
       #endif
       default:
+		break;
     }
     #endif
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
     // TODO: systeme de répétition
     
     return Move_cursor_with_constraints();
-  }
-  return 0;
 }
 
 int Handle_joystick_release(SDL_JoyButtonEvent event)
 {
-  if (event.which==0) // Joystick number 0
-  {
     if (event.button == Joybutton_shift)
     {
       SDL_SetModState(SDL_GetModState() & ~KMOD_SHIFT);
@@ -502,6 +505,16 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_META));
       return Release_control(0,MOD_ALT);
     }
+    if (event.button == Joybutton_left_click)
+	{
+        Input_new_mouse_K &= ~1;
+  		return Move_cursor_with_constraints();
+	}
+    if (event.button == Joybutton_right_click)
+	{
+        Input_new_mouse_K &= ~2;
+  		return Move_cursor_with_constraints();
+	}
   
     #ifdef __GP2X__
     switch(event.button)
@@ -530,32 +543,13 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       case GP2X_BUTTON_UPLEFT:
         Directional_up_left=0;
         break;
-      case GP2X_BUTTON_A: // A
-        Input_new_mouse_K &= ~1;
-        break;
-      case GP2X_BUTTON_B: // B
-        Input_new_mouse_K &= ~2;
-        break;
-    }
-    #else
-    switch(event.button)
-    {
-      case 0: // A
-        Input_new_mouse_K &= ~1;
-        break;
-      case 1: // B
-        Input_new_mouse_K &= ~2;
-        break;
     }
     #endif
-  }
   return Move_cursor_with_constraints();
 }
 
 void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
-  if (event.which==0) // Joystick number 0
-  {
     #ifndef NO_JOYCURSOR
     if (event.axis==0) // X
     {
@@ -578,7 +572,6 @@ void Handle_joystick_movement(SDL_JoyAxisEvent event)
         Directional_down=1;
     }
     #endif
-  }
 }
 
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)

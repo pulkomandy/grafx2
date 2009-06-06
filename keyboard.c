@@ -468,7 +468,7 @@ const char * Key_name(word Key)
 #ifdef __GP2X__
     
     char *button_name;
-    switch(Key)
+    switch(Key-KEY_JOYBUTTON)
     {    
       case GP2X_BUTTON_UP: button_name="[UP]"; break;
       case GP2X_BUTTON_DOWN: button_name="[DOWN]"; break;
