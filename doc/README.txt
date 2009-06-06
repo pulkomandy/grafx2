@@ -27,10 +27,11 @@ http://code.google.com/p/grafx2 for latest news and bugfixed versions.
 
 === HELP ===
 
-If you are in trouble when using the program, don't forget you can always press
-the <F1> key inside it to get some help. You can also check the wiki at
-http://code.google.com/p/grafx2/wiki for some more information. If you've hidden
-the menu and you're stuck, press <F10> to show it again.
+Remember that right-clicking and left-clicking often have different functions,
+even on menu buttons. If you are in trouble when using the program, press <F1>
+to get contextual help. You can also check the wiki at
+http://code.google.com/p/grafx2/wiki for some more information.
+If you've hidden the menu and you're stuck, press <F10> to show it again.
 
 === LICENSE ===
 
@@ -45,36 +46,51 @@ own licenses:
 - zlib: (on Windows) see doc/README-zlib1.txt
 The font Tuffy.ttf included as a sample in the fonts/ directory is public domain.
 
+The source code of Grafx2 should always be distributed along with the
+executable; You can normally find it in a packed archive whose name begins by
+"src". The source code is also available on the web site, either by accessing
+the Subversion repository:
+http://grafx2.googlecode.com/svn/trunk/
+or you can find the latest versions as packed archives:
+http://code.google.com/p/grafx2/downloads/list
+
 === COMPILING ===
 
+See the file COMPILING.txt for compiling instructions.
+There's also a page on the wiki:
 http://code.google.com/p/grafx2/wiki/Compiling
 
 === AUTHORS AND SUPPORT ===
 
 To watch the full credits list, in the program, click '?' then 'Credits'.
 
-Send bugs and feature requests to our bugtracker:
+Please report bugs and request features on the bugtracker:
 http://code.google.com/p/grafx2/issues/list
+
+E-mail: grafx2@googlegroups.com
+It's a public mailing-list, so be aware that your message will be visible at:
+http://groups.google.com/group/grafx2
 
 Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 
 === HISTORY ===
 
 Short revision history :
-  * 04/2009 99.0% Many new features and critical fixes
-  * 01/2009 98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
-                  AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
-  * 10/2008 97.0% Our first public beta release
-  * 07/2008       Our first public alpha release, Windows and Linux only
-  * 04/2007       Start of this project and port to SDL
-  *    2001       Sunset Design releases the source under the GNU GPL
-  * 12/1999 96.5% Last release from Sunset Design.
-  * 11/1996 90%   First public release, at the Wired'96
-  * 09/1995       Project starts.
+  * 06/2009 2.0       Completed the features planned by Sunset Design.
+  * 04/2009 2.0b99.0% Many new features and critical fixes.
+  * 01/2009 2.0b98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
+                      AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
+  * 10/2008 2.0b97.0% Our first public beta release.
+  * 07/2008           Our first public alpha release, Windows and Linux only
+  * 04/2007           Start of this project and port to SDL.
+  *    2001           Sunset Design releases the source under the GNU GPL.
+  * 12/1999 2.0b96.5% Last release from Sunset Design.
+  * 11/1996 2.0b90%   First public release, at the Wired'96.
+  * 09/1995           Project starts.
 
 Check http://code.google.com/p/grafx2/source/list for (very) detailed changelog.
 Check http://code.google.com/p/grafx2/wiki/History for an overview of the new 
-features and bugfixes in each beta version.
+features and bugfixes in each numbered version.
 
 === FINAL WORDS ===
 

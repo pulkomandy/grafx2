@@ -28,12 +28,10 @@
 
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
 
-#define PERCENTAGE_VERSION     "99.0%"  ///< Version label, for display purpose
 #define VERSION1                  2     ///< Version number for gfx2.cfg (1/4)
 #define VERSION2                  0     ///< Version number for gfx2.cfg (2/4)
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
-#define ALPHA_BETA                "ß"   ///< Status of Grafx2...
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
 #define NB_SHORTCUTS              134   ///< Number of actions that can have a key combination associated to it.
 #define NB_ZOOM_FACTORS           12    ///< Number of zoom levels available in the magnifier.

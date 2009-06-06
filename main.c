@@ -404,10 +404,8 @@ int Init_program(int argc,char * argv[])
   }
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
-  if(ALPHA_BETA[0]=='ß')
-    SDL_WM_SetCaption("GrafX2 beta "PERCENTAGE_VERSION,"GrafX2");
-  else
-    SDL_WM_SetCaption("GrafX2 v2.00 final","GrafX2");
+  SDL_WM_SetCaption("GrafX2","GrafX2");
+
   {
     // Routine pour définir l'icone.
     char icon_path[MAX_PATH_CHARACTERS];

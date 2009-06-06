@@ -58,7 +58,7 @@ static const T_Help_table helptable_about[] =
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("")
-  HELP_TITLE("      GRAFX 2.00")
+  HELP_TITLE("        GRAFX 2   ")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
   HELP_TEXT ("       http://grafx2.googlecode.com")
   HELP_TEXT ("")

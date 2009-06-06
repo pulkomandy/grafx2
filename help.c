@@ -47,6 +47,7 @@
 #include "errors.h"
 
 extern char SVN_revision[]; // generated in version.c
+extern char Program_version[]; // generated in pversion.c
 
 // Recherche un raccourci clavier:
 word * Shortcut(word shortcut_number)
@@ -603,10 +604,8 @@ void Button_Stats(void)
 
   // Affichage du numéro de version
   Print_in_window(10,19,"Program version:",STATS_TITLE_COLOR,MC_Black);
-  sprintf(buffer,"GrafX 2.00 %s%s",ALPHA_BETA,PERCENTAGE_VERSION);
+  sprintf(buffer,"%s.%s",Program_version, SVN_revision);
   Print_in_window(146,19,buffer,STATS_DATA_COLOR,MC_Black);
-  Print_in_window(10,27,"SVN revision #:",STATS_TITLE_COLOR,MC_Black);
-  Print_in_window(146,27,SVN_revision,STATS_DATA_COLOR,MC_Black);
   Print_in_window(10,35,"Build options:",STATS_TITLE_COLOR,MC_Black);
   Print_in_window(146,35,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
 
