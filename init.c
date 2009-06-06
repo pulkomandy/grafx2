@@ -1583,13 +1583,19 @@ int Compare_video_modes(const void *p1, const void *p2)
 }
 
 
-// Initiliseur de tous les modes video:
+// Initializes the list of available video modes
 void Set_all_video_modes(void)
-{                   // Numero       LargHaut Mode      FXFY Ratio Ref WinOnly Pointeur
+{
   SDL_Rect** Modes;
   Nb_video_modes=0;
-  // Doit être en premier pour avoir le numéro 0:
+  
+  // The first mode will have index number 0.
+  // It will be the default mode if an unsupported one
+  // is requested in gfx2.ini
+  #if !defined(__GP2X__)
+  // Window mode, with default size of 640x480
   Set_video_mode( 640,480,0, 0);
+  #endif
 
   Set_video_mode( 320,200,0, 1);
   Set_video_mode( 320,224,0, 1);
@@ -1663,16 +1669,17 @@ void Set_all_video_modes(void)
         if (Modes[index]->w == Video_mode[index2].Width &&
             Modes[index]->h == Video_mode[index2].Height)
         {
-          // Mode déja prévu: ok
+          // Was already in the hard-coded list: ok, don't add.
           break;
         }
       if (index2 >= Nb_video_modes && Modes[index]->w>=320 && Modes[index]->h>=200)
       {
-        // Nouveau mode à ajouter à la liste
+        // New mode to add to the list
         Set_video_mode(Modes[index]->w,Modes[index]->h,0, 1);
       }
     }
-    // Tri des modes : ceux trouvés par SDL ont été listés à la fin.
+    // Sort the modes : those found by SDL were listed at the end.
+    // Note that we voluntarily omit the first entry: the default mode.
     qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
 }
