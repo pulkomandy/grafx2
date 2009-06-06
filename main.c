@@ -28,7 +28,11 @@
 #include <unistd.h>
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_syswm.h>
+
+// There is no WM on the GP2X...
+#ifndef __GP2X__
+	#include <SDL_syswm.h>
+#endif
 
 #include "const.h"
 #include "struct.h"
