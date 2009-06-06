@@ -984,6 +984,27 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 /// It was chosen to not conflict with any SDL key number.
 #define KEY_JOYBUTTON       (SDLK_LAST+4)
 
+/// Button definitions for the gp2x
+#define GP2X_BUTTON_UP              (0)
+#define GP2X_BUTTON_DOWN            (4)
+#define GP2X_BUTTON_LEFT            (2)
+#define GP2X_BUTTON_RIGHT           (6)
+#define GP2X_BUTTON_UPLEFT          (1)
+#define GP2X_BUTTON_UPRIGHT         (7)
+#define GP2X_BUTTON_DOWNLEFT        (3)
+#define GP2X_BUTTON_DOWNRIGHT       (5)
+#define GP2X_BUTTON_CLICK           (18)
+#define GP2X_BUTTON_A               (12)
+#define GP2X_BUTTON_B               (13)
+#define GP2X_BUTTON_Y               (14)
+#define GP2X_BUTTON_X               (15)
+#define GP2X_BUTTON_L               (10)
+#define GP2X_BUTTON_R               (11)
+#define GP2X_BUTTON_START           (8)
+#define GP2X_BUTTON_SELECT          (9)
+#define GP2X_BUTTON_VOLUP           (16)
+#define GP2X_BUTTON_VOLDOWN         (17)
+
 #ifdef __gp2x__
   #define KEY_ESC (KEY_JOYBUTTON+GP2X_BUTTON_X)
 #else

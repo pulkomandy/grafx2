@@ -443,7 +443,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       Input_new_mouse_K=2;
       return Move_cursor_with_constraints();
     }
-    #ifdef __gp2x__
+    #ifdef __GP2X__
     switch(event.button)
     {
       #ifndef NO_JOYCURSOR
@@ -503,7 +503,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Release_control(0,MOD_ALT);
     }
   
-    #ifdef __gp2x__
+    #ifdef __GP2X__
     switch(event.button)
     {
       case GP2X_BUTTON_UP:

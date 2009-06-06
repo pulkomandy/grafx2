@@ -465,7 +465,7 @@ const char * Key_name(word Key)
   
   if (Key>=KEY_JOYBUTTON && Key<=KEY_JOYBUTTON+18)
   {
-#ifdef __gp2x__
+#ifdef __GP2X__
     
     char *button_name;
     switch(Key)
