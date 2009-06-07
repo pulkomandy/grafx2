@@ -51,7 +51,6 @@
 #include "brush.h"
 #include "input.h"
 
-extern char SVN_revision[]; // generated in version.c
 extern char Program_version[]; // generated in pversion.c
 
 extern short Old_MX;
@@ -116,7 +115,7 @@ void Button_Message_initial(void)
   char  str[21];
   int   x_pos,offs_y,x,y;
 
-  sprintf(str,"GrafX2 version %s.%s",Program_version,SVN_revision);
+  sprintf(str,"GrafX2 version %s",Program_version);
   Open_window(260,172,str);
 
   Window_display_frame_in(10,20,239,62);
