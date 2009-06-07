@@ -1654,7 +1654,11 @@ void Button_Safety_resolution(void)
 
   Unselect_button(BUTTON_MAGNIFIER);
   
-  Init_mode_video(640, 400, 0,PIXEL_SIMPLE);
+  Init_mode_video(
+    Video_mode[0].Width, 
+    Video_mode[0].Height, 
+    Video_mode[0].Fullscreen,
+    PIXEL_SIMPLE);
   Current_resolution=0;
   Display_menu();
   Reposition_palette();

@@ -1592,14 +1592,20 @@ void Set_all_video_modes(void)
   // The first mode will have index number 0.
   // It will be the default mode if an unsupported one
   // is requested in gfx2.ini
-  #if !defined(__GP2X__)
+  #if defined(__GP2X__)
+  // Native GP2X resolution
+  Set_video_mode( 320,240,0, 1);
+  #else
   // Window mode, with default size of 640x480
   Set_video_mode( 640,480,0, 0);
   #endif
 
   Set_video_mode( 320,200,0, 1);
   Set_video_mode( 320,224,0, 1);
+  #if !defined(__GP2X__)
+  // For the GP2X, this one is already declared above.
   Set_video_mode( 320,240,0, 1);
+  #endif
   Set_video_mode( 320,256,0, 1);
   Set_video_mode( 320,270,0, 1);
   Set_video_mode( 320,282,0, 1);
