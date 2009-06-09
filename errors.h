@@ -27,12 +27,6 @@
 /// Same as ::DEBUG but in hexadecimal
 #define DEBUGX(y,z) printf("%s %d %s | %s : %X###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
-/// Macro to report unimplemented functions.
-#define UNIMPLEMENTED printf("%s %d %s non implémenté !\n",__FILE__,__LINE__,__func__);
-
-/// Macro to report untested functions.
-#define UNTESTED printf("%s %d %s à tester !\n",__FILE__,__LINE__,__func__);
-
 /// Helper function used by the macro ::Error
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name);
 
