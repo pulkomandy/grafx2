@@ -11,7 +11,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-2.00b99.0-svn724-win32.exe"
+  OutFile "grafx2-2.0-svn853-win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -60,7 +60,7 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\grafx2.exe
-  File ..\src-svn724.tgz
+  File ..\src-svn853.tgz
   File ..\gfx2.gif
   File ..\gfx2def.ini
   File ..\SDL_image.dll
@@ -97,7 +97,7 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "URLInfoAbout" "http://grafx2.googlecode.com"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "DisplayVersion" "99%"
+                 "DisplayVersion" "2.0 final"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "NoModify" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
@@ -139,7 +139,7 @@ Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\grafx2.exe"
-  Delete "$INSTDIR\src-svn724.tgz"
+  Delete "$INSTDIR\src-svn853.tgz"
   Delete "$INSTDIR\gfx2.gif"
   Delete "$INSTDIR\gfx2def.ini"
   Delete "$INSTDIR\SDL_image.dll"
