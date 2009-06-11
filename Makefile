@@ -232,15 +232,15 @@ all : $(BIN)
 debug : $(BIN)
 
 # Make release will strip the executable to make it smaller but non-debugable
-release : $(BIN)
+release : version $(BIN)
 	$(STRIP) $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
-	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz *.c *.h Makefile Makefile.dep gfx2.ico 
+	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
 	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
 
 $(BIN) : $(OBJ) $(OBJRES)
 	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
