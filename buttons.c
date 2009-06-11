@@ -1261,18 +1261,18 @@ void Display_modes_list(short list_start, short cursor_position)
     if (cursor_position!=index)
     {
       background_color =MC_Black;
-      if ((Video_mode[current_mode].State & 3) != 3)
-        text_color=MC_Light;
-      else
+      if ((Video_mode[current_mode].State & 3) == 3)
         text_color=MC_Dark;
+      else
+        text_color=MC_Light;
     }
     else
     {
       background_color =MC_Dark;
-      if ((Video_mode[current_mode].State & 3) != 3)
-        text_color=MC_White;
-      else
+      if ((Video_mode[current_mode].State & 3) == 3)
         text_color=MC_Light;
+      else
+        text_color=MC_White;
     }
     Num2str(Video_mode[current_mode].Width,str,4);
     str[4]=' ';
@@ -1375,7 +1375,7 @@ void Button_Resolution(void)
   Window_set_special_button(38,86,225,80);                       // 5
 
   selected_mode=Current_resolution;
-  if (selected_mode>=MODELIST_LINES/2)
+  if (selected_mode>=MODELIST_LINES/2 && Nb_video_modes > MODELIST_LINES)
   {
     if (selected_mode<Nb_video_modes-MODELIST_LINES/2)
     {
