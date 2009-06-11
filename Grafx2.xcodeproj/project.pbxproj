@@ -15,6 +15,7 @@
 		F51CBD2E0EC8A3E1005C06AC /* 5pxtinyfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */; };
 		F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */; };
 		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
+		F539315E0FE171C3003CB103 /* pversion.c in Sources */ = {isa = PBXBuildFile; fileRef = F539315D0FE171C3003CB103 /* pversion.c */; };
 		F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F5A33E690EC893F800F8052D /* 8pxfont.png */; };
 		F5AA405F0FBC406D00B7577C /* pxquad.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405A0FBC406D00B7577C /* pxquad.c */; };
 		F5AA40600FBC406D00B7577C /* pxtall2.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AA405B0FBC406D00B7577C /* pxtall2.c */; };
@@ -147,6 +148,7 @@
 		F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 5pxtinyfont.png; path = fonts/5pxtinyfont.png; sourceTree = "<group>"; };
 		F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */ = {isa = PBXFileReference; lastKnownFileType = file; name = colorfont.pcx; path = fonts/colorfont.pcx; sourceTree = "<group>"; };
 		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
+		F539315D0FE171C3003CB103 /* pversion.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pversion.c; sourceTree = "<group>"; };
 		F5A33E690EC893F800F8052D /* 8pxfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 8pxfont.png; path = fonts/8pxfont.png; sourceTree = "<group>"; };
 		F5AA405A0FBC406D00B7577C /* pxquad.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxquad.c; sourceTree = "<group>"; };
 		F5AA405B0FBC406D00B7577C /* pxtall2.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pxtall2.c; sourceTree = "<group>"; };
@@ -258,6 +260,7 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F539315D0FE171C3003CB103 /* pversion.c */,
 				F5CDCE310F6EA6D600B31F63 /* pxdouble.c */,
 				F5AC28B90F4873C700455509 /* hotkeys.c */,
 				F5AC28BA0F4873C700455509 /* input.c */,
@@ -449,6 +452,7 @@
 				F5AA40610FBC406D00B7577C /* pxtriple.c in Sources */,
 				F5AA40620FBC406D00B7577C /* pxwide2.c in Sources */,
 				F5AA40630FBC406D00B7577C /* transform.c in Sources */,
+				F539315E0FE171C3003CB103 /* pversion.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

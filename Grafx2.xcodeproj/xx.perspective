@@ -475,8 +475,6 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>57</integer>
-									<integer>55</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -498,7 +496,7 @@
 							<real>275</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>2 -15 944 642 0 0 1024 746 </string>
+						<string>65 75 944 642 0 0 1024 746 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -537,7 +535,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {647, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>2 -15 944 642 0 0 1024 746 </string>
+								<string>65 75 944 642 0 0 1024 746 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -568,7 +566,7 @@
 										<key>Frame</key>
 										<string>{{10, 27}, {647, 569}}</string>
 										<key>RubberWindowFrame</key>
-										<string>2 -15 944 642 0 0 1024 746 </string>
+										<string>65 75 944 642 0 0 1024 746 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
@@ -648,14 +646,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F5AA406F0FBC418100B7577C</string>
+				<string>F53931560FE170BC003CB103</string>
 				<string>1CA23EE50692099D00951B8B</string>
-				<string>F5AA40700FBC418100B7577C</string>
+				<string>F53931570FE170BC003CB103</string>
 				<string>F5A33EC20EC89C3000F8052D</string>
-				<string>F5AA40710FBC418100B7577C</string>
+				<string>F53931580FE170BC003CB103</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 				<string>1CA23EE80692099D00951B8B</string>
-				<string>F5AA40720FBC418100B7577C</string>
+				<string>F53931590FE170BC003CB103</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.buildAndRun</string>
@@ -803,7 +801,7 @@
 	<key>PerspectivesBarVisible</key>
 	<true/>
 	<key>PinnedNavigatorIdentifier</key>
-	<string>F5543CFC0F487AC10054D4F9</string>
+	<string>F539315B0FE170D5003CB103</string>
 	<key>ShelfIsVisible</key>
 	<false/>
 	<key>SourceDescription</key>
@@ -829,7 +827,7 @@
 		<string>/Users/xx/Grafx2/Grafx2.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>2 -15 944 642 0 0 1024 746 </string>
+	<string>65 75 944 642 0 0 1024 746 </string>
 	<key>WindowTools</key>
 	<array>
 		<dict>
