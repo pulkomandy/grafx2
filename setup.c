@@ -117,6 +117,11 @@ void Set_config_directory(const char * program_dir, char * config_dir)
   // AmigaOS4
   #elif defined(__amigaos4__) || defined(__AROS__)
     strcpy(config_dir,"PROGDIR:");
+  // GP2X
+  #elif defined(__GP2X__)
+	// On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
+	// on an internal flash chip. So, keep these settings locals.
+    strcpy(config_dir,program_dir);
   #else
     char filename[MAX_PATH_CHARACTERS];
 
@@ -124,6 +129,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     strcpy(config_dir, program_dir);
     strcpy(filename, config_dir);
     strcat(filename, "gfx2.cfg");
+
     if (!File_exists(filename))
     {
       char *config_parent_dir;
@@ -132,7 +138,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         const char* Config_SubDir = "GrafX2";
         config_parent_dir = getenv("APPDATA");
       #elif defined(__BEOS__) || defined(__HAIKU__)
-        // "~/.grafx2"
+        // "~/.grafx2", the BeOS way
         const char* Config_SubDir = ".grafx2";
         config_parent_dir = getenv("$HOME");
       #else
@@ -140,6 +146,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         const char* Config_SubDir = ".grafx2";
         config_parent_dir = getenv("HOME");
       #endif
+
       if (config_parent_dir && config_parent_dir[0]!='\0')
       {
         int size = strlen(config_parent_dir);
