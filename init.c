@@ -1671,7 +1671,13 @@ void Set_all_video_modes(void)
     for (index=0; Modes[index]; index++)
     {
       int index2;
-      for (index2=1; index2 < Nb_video_modes; index2++)
+#if defined(__GP2X__)
+	  // On the GP2X the first mode is not windowed, so include it in the search.
+	  index2=0;
+#else
+	  index2=1;
+#endif
+      for (/**/; index2 < Nb_video_modes; index2++)
         if (Modes[index]->w == Video_mode[index2].Width &&
             Modes[index]->h == Video_mode[index2].Height)
         {
@@ -1813,7 +1819,12 @@ int Load_CFG(int reload_all)
               !Read_word_le(Handle, &cfg_video_mode.Height) )
             goto Erreur_lecture_config;
 
-          for (index2=1; index2<Nb_video_modes; index2++)
+#if defined(__GP2X__)
+		  index2=0;
+#else
+		  index2=1;
+#endif
+          for (/**/; index2<Nb_video_modes; index2++)
           {
             if (Video_mode[index2].Width==cfg_video_mode.Width &&
                 Video_mode[index2].Height==cfg_video_mode.Height)
@@ -2044,7 +2055,12 @@ int Save_CFG(void)
 
   // D'abord compter les modes pour lesquels l'utilisateur a mis une préférence
   modes_to_save=0;
-  for (index=1; index<Nb_video_modes; index++)
+#if defined(__GP2X__)
+  index = 0;
+#else
+  index = 1;
+#endif
+  for (/**/; index<Nb_video_modes; index++)
     if (Video_mode[index].State==0 || Video_mode[index].State==2 || Video_mode[index].State==3)
       modes_to_save++;
 
@@ -2055,7 +2071,12 @@ int Save_CFG(void)
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-  for (index=1; index<Nb_video_modes; index++)
+#if defined(__GP2X__)
+  index = 0;
+#else
+  index = 1;
+#endif
+  for (/**/; index<Nb_video_modes; index++)
     if (Video_mode[index].State==0 || Video_mode[index].State==2 || Video_mode[index].State==3)
     {
       cfg_video_mode.State   =Video_mode[index].State;

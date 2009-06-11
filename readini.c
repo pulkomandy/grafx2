@@ -713,14 +713,18 @@ int Load_INI(T_Config * conf)
   }
   
   // Optionnel, les dimensions de la fenêtre (à partir de beta 97.0%)
-  Video_mode[0].Width = 640;
-  Video_mode[0].Height = 480;
-  if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
+  // Do that only if the first mode is actually windowed (not the case on gp2x for example)
+  if(Video_mode[0].Fullscreen==0)
   {
-    if ((values[0]>=320))
-      Video_mode[0].Width = values[0];
-    if ((values[1]>=200))
-      Video_mode[0].Height = values[1];
+	  Video_mode[0].Width = 640;
+	  Video_mode[0].Height = 480;
+	  if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
+	  {
+		  if ((values[0]>=320))
+			  Video_mode[0].Width = values[0];
+		  if ((values[1]>=200))
+			  Video_mode[0].Height = values[1];
+	  }
   }
 
   conf->Mouse_merge_movement=100;

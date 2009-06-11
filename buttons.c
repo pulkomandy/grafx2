@@ -1506,7 +1506,7 @@ void Button_Resolution(void)
         
       default: // Boutons de tag des états des modes
         temp=list_start+clicked_button-8;
-        if (temp && // On n'a pas le droit de cocher le mode fenêtré
+        if (Video_mode[temp].Fullscreen==1 && // On n'a pas le droit de cocher le mode fenêtré
             !(Video_mode[temp].State & 128)) // Ni ceux non détectés par SDL
         {
           if (Window_attribute1==LEFT_SIDE)

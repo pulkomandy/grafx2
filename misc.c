@@ -798,7 +798,7 @@ int Convert_videomode_arg(const char *argument)
   int mode_index;
   for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
     // Attention les vieilles fonctions de lecture .ini mettent tout en MAJUSCULE.
-    if (!strcasecmp(Mode_label(mode_index), argument))
+    if (!strcasecmp(Mode_label(mode_index), argument) && (Video_mode[mode_index].State &128) ==0)
       return mode_index;
 
   return -1;
