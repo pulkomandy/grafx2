@@ -1278,33 +1278,33 @@ void Display_modes_list(short list_start, short cursor_position)
     str[4]=' ';
     Num2str(Video_mode[current_mode].Height,str+5,4);
 
-    if(Video_mode[current_mode].Fullscreen == 1)
+    if(Video_mode[current_mode].Fullscreen == 0)
+      memcpy(str+9,"   Window          ",20);
+    else
+	{
       memcpy(str+9," Fullscreen ",13);
-    else
-      memcpy(str+9,"   Window   ",13);
 
-    if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*4)
-      ratio="    4:3";
-    else if (Video_mode[current_mode].Width*9 == Video_mode[current_mode].Height*16)
-      ratio="   16:9";
-    else if (Video_mode[current_mode].Width*10 == Video_mode[current_mode].Height*16)
-      ratio="  16:10";
-    else if (Video_mode[current_mode].Width*145 == Video_mode[current_mode].Height*192)
-      ratio="192:145";
-    else if (Video_mode[current_mode].Width*2 == Video_mode[current_mode].Height*3)
-      ratio="    3:2";
-    else if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*5)
-      ratio="    5:3";
-    else if (Video_mode[current_mode].Width*4 == Video_mode[current_mode].Height*5)
-      ratio="    5:4";
-    else if (Video_mode[current_mode].Width*16 == Video_mode[current_mode].Height*25)
-      ratio="  25:16";
-    else
-      ratio="       ";
-    if (current_mode == 0)
-      ratio="       ";
+	  if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*4)
+		  ratio="    4:3";
+	  else if (Video_mode[current_mode].Width*9 == Video_mode[current_mode].Height*16)
+		  ratio="   16:9";
+	  else if (Video_mode[current_mode].Width*10 == Video_mode[current_mode].Height*16)
+		  ratio="  16:10";
+	  else if (Video_mode[current_mode].Width*145 == Video_mode[current_mode].Height*192)
+		  ratio="192:145";
+	  else if (Video_mode[current_mode].Width*2 == Video_mode[current_mode].Height*3)
+		  ratio="    3:2";
+	  else if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*5)
+		  ratio="    5:3";
+	  else if (Video_mode[current_mode].Width*4 == Video_mode[current_mode].Height*5)
+		  ratio="    5:4";
+	  else if (Video_mode[current_mode].Width*16 == Video_mode[current_mode].Height*25)
+		  ratio="  25:16";
+	  else
+		  ratio="       ";
 
-    strcat(str,ratio);
+	  strcpy(str+21,ratio);
+	}
 
     Print_in_window(38,y_pos,str,text_color,background_color);
   }
