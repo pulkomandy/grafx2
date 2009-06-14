@@ -287,7 +287,7 @@ void Button_Select_forecolor(void)
   if (color == Fore_color)
   {
     // Check if it's a double-click    
-    if (time_click - time_previous < 500)
+    if (time_click - time_previous < Config.Double_click_speed)
     {
     	// Open palette window
     	Button_Palette();
@@ -3814,7 +3814,7 @@ void Effects_off(void)
 
 void Transparency_set(byte amount)
 {
-  const int doubleclick_delay = 500;
+  const int doubleclick_delay = Config.Double_key_speed;
   static long time_click = 0;
   long time_previous;
   

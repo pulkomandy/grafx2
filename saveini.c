@@ -635,6 +635,13 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Window_position",2,values,0)))
     goto Erreur_Retour;
 
+  values[0]=(conf->Double_click_speed);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_click_speed",1,values,0)))
+    goto Erreur_Retour;
+    
+  values[0]=(conf->Double_key_speed);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_key_speed",1,values,0)))
+    goto Erreur_Retour;
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 

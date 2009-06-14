@@ -788,7 +788,7 @@ int Load_INI(T_Config * conf)
       break;
   }
   conf->Palette_vertical=0;
-  // Optionnel, vertical palette option (>98.0%)
+  // Optional, vertical palette option (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_vertical",1,values))
   {
     if ((values[0]<0) || (values[0]>1))
@@ -803,6 +803,22 @@ int Load_INI(T_Config * conf)
   {
     conf->Window_pos_x = values[0];
     conf->Window_pos_y = values[1];
+  }
+  
+  conf->Double_click_speed=500;
+  // Optional, speed of double-click (>98.0%)
+  if (!Load_INI_get_values (file,buffer,"Double_click_speed",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=2000))
+      conf->Double_click_speed=values[0];
+  }
+
+  conf->Double_key_speed=500;
+  // Optional, speed of double-keypress (>98.0%)
+  if (!Load_INI_get_values (file,buffer,"Double_key_speed",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=2000))
+      conf->Double_key_speed=values[0];
   }
 
 

@@ -1116,7 +1116,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 20%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_2, // 2
   0},
   {137,
   "Transparency 30%",
@@ -1124,7 +1124,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 30%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_3, // 3
   0},
   {138,
   "Transparency 40%",
@@ -1132,7 +1132,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 40%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_4, // 4
   0},
   {139,
   "Transparency 50%",
@@ -1140,7 +1140,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 50%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_5, // 5
   0},
   {140,
   "Transparency 60%",
@@ -1148,7 +1148,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 60%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_6, // 6
   0},
   {141,
   "Transparency 70%",
@@ -1156,7 +1156,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 70%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_7, // 7
   0},
   {142,
   "Transparency 80%",
@@ -1164,7 +1164,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 80%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_8, // 8
   0},
   {143,
   "Transparency 90%",
@@ -1172,7 +1172,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 90%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_9, // 9
   0},
   {144,
   "Transparency 0%",
@@ -1180,7 +1180,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 0%.",
   "",
   true,
-  SDLK_1, // 1
+  SDLK_0, // 0
   0},
 };
 
