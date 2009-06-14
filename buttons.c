@@ -3544,7 +3544,6 @@ void Button_Smear_mode(void)
   Smear_mode=!Smear_mode;
 }
 
-
 // -- Mode Colorize ---------------------------------------------------------
 void Compute_colorize_table(void)
 {
@@ -3792,6 +3791,76 @@ void Button_Tiling_menu(void)
   Display_cursor();
 }
 
+// -- All modes off ---------------------------------------------------------
+void Effects_off(void)
+{
+  Effect_function=No_effect;
+  Shade_mode=0;
+  Quick_shade_mode=0;
+  Colorize_mode=0;
+  Smooth_mode=0;
+  Tiling_mode=0;
+  Smear_mode=0;
+  Stencil_mode=0;
+  Mask_mode=0;
+  Sieve_mode=0;
+  Snap_mode=0;
+  
+  if (! Windows_open)
+  {
+    
+  }
+}
+
+void Transparency_set(byte amount)
+{
+  const int doubleclick_delay = 500;
+  static long time_click = 0;
+  long time_previous;
+  
+  if (!Colorize_mode)
+  {
+    // Activate mode
+    switch(Colorize_current_mode)
+    {
+      case 0 :
+        Effect_function=Effect_interpolated_colorize;
+        break;
+      case 1 :
+        Effect_function=Effect_additive_colorize;
+        break;
+      case 2 :
+        Effect_function=Effect_substractive_colorize;
+    }
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
+
+    Colorize_mode=1;
+  }
+
+  time_previous = time_click;
+  time_click = SDL_GetTicks();
+
+  // Check if it's a quick re-press
+  if (time_click - time_previous < doubleclick_delay)
+  {
+    // Use the typed amount as units, keep the tens.
+    Colorize_opacity = ((Colorize_opacity%100) /10 *10) + amount;
+    if (Colorize_opacity == 0)
+      Colorize_opacity = 100;
+  }
+  else
+  {
+    // Use 10% units: "1"=10%, ... "0"=100%
+    if (amount == 0)
+      Colorize_opacity = 100;
+    else
+      Colorize_opacity = amount*10;
+  }
+  Compute_colorize_table();
+}
 
 //---------------------------- Courbes de Bézier ----------------------------
 
@@ -4970,17 +5039,7 @@ void Button_Effects(void)
         exit_by_close_button=1;
         break;
       case 12 : // All off
-        Effect_function=No_effect;
-        Shade_mode=0;
-        Quick_shade_mode=0;
-        Colorize_mode=0;
-        Smooth_mode=0;
-        Tiling_mode=0;
-        Smear_mode=0;
-        Stencil_mode=0;
-        Mask_mode=0;
-        Sieve_mode=0;
-        Snap_mode=0;
+        Effects_off();
         Hide_cursor();
         Display_effect_states();
         Display_cursor();

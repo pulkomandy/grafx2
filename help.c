@@ -119,7 +119,7 @@ void Window_set_shortcut(int action_id)
   while (Ordering[order_index]!=action_id)
   {
     order_index++;
-    if (order_index>=134)
+    if (order_index>=NB_SHORTCUTS)
     {
       Error(0);
       return;
@@ -130,7 +130,7 @@ void Window_set_shortcut(int action_id)
   while (ConfigKey[config_index].Number!=order_index)
   {
     config_index++;
-    if (config_index>=134)
+    if (config_index>=NB_SHORTCUTS)
     {
       Error(0);
       return;

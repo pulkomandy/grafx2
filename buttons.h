@@ -425,6 +425,17 @@ void Button_Tiling_mode(void);
     Displays the tiling setup menu.
 */
 void Button_Tiling_menu(void);
+
+/*!
+    Callback for the command that turns off all drawaing effects.
+*/
+void Effects_off(void);
+
+/*!
+    Command that sets the transparency level.
+*/
+void Transparency_set(byte amount);
+
 // Menu des effets
 
 /*!
