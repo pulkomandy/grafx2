@@ -278,7 +278,21 @@ void Display_help(void)
     else if (line_type == 'K')
     {
       const char *hyperlink;
+      const char * escaped_percent_pos;
+      // Determine link position:
       link_position = strstr(line,"%s") - line;
+      // Adjust for any escaped %% that would precede it.
+      escaped_percent_pos = line;
+      do
+      {
+        escaped_percent_pos = strstr(escaped_percent_pos,"%%");
+        if (escaped_percent_pos && escaped_percent_pos - line < link_position)
+        {
+          link_position--;
+          escaped_percent_pos+=2;
+        }
+      } while (escaped_percent_pos);
+      //
       hyperlink=Keyboard_shortcut_value(Help_section[Current_help_section].Help_table[start_line + line_index].Line_parameter);
       link_size=strlen(hyperlink);
       snprintf(buffer, 44, line, hyperlink);
