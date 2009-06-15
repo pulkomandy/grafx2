@@ -1551,7 +1551,7 @@ static const T_Help_table helptable_effects[] =
   HELP_LINK ("    100%% : %s", SPECIAL_TRANSPARENCY_0)
   HELP_TEXT ("If you use two of these shortcuts quickly,")
   HELP_TEXT ("the second will set the units for finer")
-  HELP_TEXT ("control. Ie: 4 6 makes 45%, 0 9 makes 9%.")
+  HELP_TEXT ("control. Ie: 4 5 makes 45%, 0 9 makes 9%.")
   HELP_TEXT ("")
   HELP_BOLD ("LEFT CLICK")
   HELP_LINK ("(Key: %s)",   SPECIAL_COLORIZE_MODE)
