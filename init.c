@@ -920,19 +920,11 @@ void Init_buttons(void)
 
   Init_button(BUTTON_GRADRECT,
                      85,1,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Grad_rectangle,Button_Grad_rectangle,
+                     16,16,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Grad_rectangle,Button_Gradients,
                      Do_nothing,
                      FAMILY_TOOL);
-
-  Init_button(BUTTON_GRADMENU,
-                     86,2,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Gradients,Button_Gradients,
-                     Do_nothing,
-                     FAMILY_INSTANT);
 
   Init_button(BUTTON_SPHERES,
                      85,18,

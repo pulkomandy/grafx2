@@ -2073,7 +2073,7 @@ void Button_Gradients(void)
       default:
         if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
-          Window_help(BUTTON_GRADMENU, NULL);
+          Window_help(BUTTON_GRADRECT, NULL);
           Key=0;
           break;
         }
@@ -2082,7 +2082,10 @@ void Button_Gradients(void)
   while (clicked_button<6);
 
   Close_window();
-  Unselect_button(BUTTON_GRADMENU);
+  // The Grad rect operation uses the same button as Grad menu.
+  if (Current_operation != OPERATION_GRAD_RECTANGLE)
+    Unselect_button(BUTTON_GRADRECT);
+    
   Display_cursor();
 
   Gradient_pixel=Display_pixel;
@@ -3804,12 +3807,7 @@ void Effects_off(void)
   Stencil_mode=0;
   Mask_mode=0;
   Sieve_mode=0;
-  Snap_mode=0;
-  
-  if (! Windows_open)
-  {
-    
-  }
+  Snap_mode=0;  
 }
 
 void Transparency_set(byte amount)

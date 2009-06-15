@@ -1231,7 +1231,7 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_POLYFILL,            // Polyfill
   0x200+BUTTON_POLYFILL,            // Filled polyform
   0x100+BUTTON_GRADRECT,            // Gradient rectangle
-  0x100+BUTTON_GRADMENU,            // Gradation menu
+  0x200+BUTTON_GRADRECT,            // Gradation menu
   0x100+BUTTON_SPHERES,             // Spheres
   0x200+BUTTON_SPHERES,             // Gradient ellipses
   0x100+BUTTON_ADJUST,              // Adjust picture

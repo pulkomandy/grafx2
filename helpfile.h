@@ -153,7 +153,7 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("Polyfill:            %s",   0x100+BUTTON_POLYFILL)
   HELP_LINK ("Filled polyform:     %s",   0x200+BUTTON_POLYFILL)
   HELP_LINK ("Gradient rectangle:  %s",   0x100+BUTTON_GRADRECT)
-  HELP_LINK ("Gradation menu:      %s",   0x100+BUTTON_GRADMENU)
+  HELP_LINK ("Gradation menu:      %s",   0x200+BUTTON_GRADRECT)
   HELP_LINK ("Spheres:             %s",   0x100+BUTTON_SPHERES)
   HELP_LINK ("Gradient ellipses:   %s",   0x200+BUTTON_SPHERES)
   HELP_LINK ("Adjust picture:      %s",   0x100+BUTTON_ADJUST)
@@ -958,6 +958,7 @@ static const T_Help_table helptable_grad_rect[] =
 {
   HELP_TITLE("GRAD RECTANGLE")
   HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
   HELP_LINK ("(Key:%s)",0x100+BUTTON_GRADRECT)
   HELP_TEXT ("")
   HELP_TEXT ("Selects the rectangle with gradations as")
@@ -978,12 +979,10 @@ static const T_Help_table helptable_grad_rect[] =
   HELP_TEXT ("button. You can press SHIFT to enforce your")
   HELP_TEXT ("line to be vertical, horizontal, or")
   HELP_TEXT ("diagonal.")
-};
-static const T_Help_table helptable_grad_menu[] =
-{
-  HELP_TITLE("GRAD MENU")
   HELP_TEXT ("")
-  HELP_LINK ("(Key:%s)",0x100+BUTTON_GRADMENU)
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_LINK ("(Key:%s)",0x200+BUTTON_GRADRECT)
   HELP_TEXT ("")
   HELP_TEXT ("Opens a window where you can define the way")
   HELP_TEXT ("gradations are processed. The different")
@@ -2391,7 +2390,6 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_circles)
   HELP_TABLE_DECLARATION(helptable_filled_circles)
   HELP_TABLE_DECLARATION(helptable_grad_rect)
-  HELP_TABLE_DECLARATION(helptable_grad_menu)
   HELP_TABLE_DECLARATION(helptable_spheres)
   HELP_TABLE_DECLARATION(helptable_brush)
   HELP_TABLE_DECLARATION(helptable_polybrush)

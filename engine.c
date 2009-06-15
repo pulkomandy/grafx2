@@ -75,8 +75,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Filled rectangles       ",
   "Empty circles / ellipses",
   "Filled circles / ellips.",
-  "Grad. rectangles        ",
-  "Gradation menu          ",
+  "Grad. rect / Grad. menu ",
   "Grad. spheres / ellipses",
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
@@ -371,6 +370,9 @@ void Select_button(int btn_number,byte click)
       // Right-clicking on Adjust opens a menu, so in this case we skip
       // the unselection of all "Tool" buttons.
       if (btn_number==BUTTON_ADJUST && click==RIGHT_SIDE)
+        break;
+      // Same case with the Grad. Rectangle button.
+      if (btn_number==BUTTON_GRADRECT && click==RIGHT_SIDE)
         break;
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
