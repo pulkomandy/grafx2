@@ -240,9 +240,9 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e s/\\(wip\\)\\\\./\\1/I > $(OBJDIR)/versiontag
 
 	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini skins/modern.png skins/classic.png gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) "src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini skins/modern.png skins/classic.png gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
@@ -303,7 +303,8 @@ install : $(BIN)
 	$(CP) gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
 	$(CP) gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
-	$(CP) skins/base.gif $(DESTDIR)$(datadir)/grafx2/skins/
+	$(CP) skins/modern.png $(DESTDIR)$(datadir)/grafx2/skins/
+	$(CP) skins/classic.png $(DESTDIR)$(datadir)/grafx2/skins/
 	# Icon and desktop file for debian
 	$(CP) misc/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) misc/grafx2.xpm $(DESTDIR)$(datadir)/icons/
@@ -317,7 +318,8 @@ uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/base.gif
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/modern.png
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/classic.png
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop

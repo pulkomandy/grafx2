@@ -126,9 +126,9 @@ void Button_Message_initial(void)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
       Pixel_in_window(x,y,GFX_logo_grafx2[offs_y+x_pos]);
 
-  Print_in_window(130-4*21,88,"Copyright (c) 2007 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*26,88,"Copyright (c) 2007-2009 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
-  Print_in_window(130-4*26,112,"Copyright (c) 1996-1999 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*26,112,"Copyright (c) 1996-2001 by",MC_Dark,MC_Light);
   Print_in_window(130-4*13,120,"Sunset Design",MC_Black,MC_Light);
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
   Print_in_window(130-4*28,136,"http://grafx2.googlecode.com",MC_Dark,MC_Light);

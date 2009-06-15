@@ -76,7 +76,7 @@
 #endif
 
 // filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "base.gif";
+static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "modern.png";
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
