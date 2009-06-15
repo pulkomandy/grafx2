@@ -579,6 +579,11 @@ void Button_Autosave(void);
 */
 void Button_Settings(void);
 
+/*!
+ 	Display the skin selector window.
+*/
+void Button_Skins(void);
+
 // Annulation de la dernière modification
 
 /*!

@@ -1026,7 +1026,7 @@ void Init_buttons(void)
                      178,18,
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Settings,Button_Settings,
+                     Button_Settings,Button_Skins,
                      Do_nothing,
                      FAMILY_INSTANT);
 

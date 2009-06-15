@@ -88,7 +88,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Go / Copy to other page ",
   "Save as / Save          ",
   "Load / Re-load          ",
-  "Settings                ",
+  "Settings / Skins        ",
   "Clear / with backcolor  ",
   "Help / Statistics       ",
   "Undo / Redo             ",

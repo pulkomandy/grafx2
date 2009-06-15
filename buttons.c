@@ -51,6 +51,19 @@
 #include "brush.h"
 #include "input.h"
 
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+    #include <proto/dos.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
+#elif defined(__WIN32__)
+    #include <dirent.h>
+    #include <windows.h>
+    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#else
+    #include <dirent.h>
+    #define isHidden(x) ((x)->d_name[0]=='.')
+#endif
+
 extern char Program_version[]; // generated in pversion.c
 
 extern short Old_MX;
@@ -960,6 +973,297 @@ void Button_Settings(void)
 
   // On vérifie qu'on peut bien allouer le nombre de pages Undo.
   Set_number_of_backups(Config.Max_undo_pages);
+}
+
+
+void Display_skins_list(short offset_first, short selector_offset)
+//
+// offset_first = Décalage entre le premier fichier visible dans le
+//                   sélecteur et le premier fichier de la liste
+//
+// selector_offset  = Décalage entre le premier fichier visible dans le
+//                   sélecteur et le fichier sélectionné dans la liste
+//
+{
+  T_Fileselector_item * current_item;
+  byte   index;  // index du fichier qu'on affiche (0 -> 9)
+  byte   text_color;
+  byte   background_color;
+
+
+  // On vérifie s'il y a au moins 1 fichier dans la liste:
+  if (Filelist_nb_elements>0)
+  {
+    // On commence par chercher à pointer sur le premier fichier visible:
+    current_item=Filelist;
+    for (;offset_first>0;offset_first--)
+      current_item=current_item->Next;
+
+    // Pour chacun des 10 éléments inscriptibles à l'écran
+    for (index=0;index<10;index++)
+    {
+      // S'il est sélectionné:
+      if (!selector_offset)
+      {
+          text_color=MC_White;
+        background_color=MC_Light;
+      }
+      else
+      {
+          text_color=MC_Light;
+        background_color=MC_Black;
+      }
+
+      // On affiche l'élément
+      Print_in_window(8,17+index*8,current_item->Short_name,text_color,background_color);
+
+      // On passe à la ligne suivante
+      selector_offset--;
+      current_item=current_item->Next;
+      if (!current_item)
+        break;
+    } // End de la boucle d'affichage
+
+  } // End du test d'existence de fichiers
+}
+	
+
+
+/// Skin selector window
+void Button_Skins(void)
+{
+  short clicked_button;
+  short temp;
+  char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
+  char * most_matching_filename;
+  char skinsdir[MAX_PATH_CHARACTERS];
+  DIR*  Repertoire_Courant; //Répertoire courant
+  struct dirent* entry; // Structure de lecture des éléments
+  struct stat Infos_enreg;
+  char * current_path;
+
+  T_Scroller_button * file_scroller;
+
+  Open_window(178,120,"Skins");
+
+  // Ok button
+  Window_set_normal_button(6,102, 51,14,"OK"         ,0,1,SDLK_RETURN); // 1
+
+  // Frame autour du fileselector
+  Window_display_frame_in(6,15,148,84);
+
+  // Fileselector
+  Window_set_special_button(9,17,144,80); // 2
+
+  // Scroller du fileselector
+  file_scroller = Window_set_scroller_button(160,16,82,1,10,0); // 3
+
+  strcpy(skinsdir,Data_directory);
+  strcat(skinsdir,"skins");
+  chdir(skinsdir);
+  getcwd(skinsdir,256);
+
+  // Affichage des premiers fichiers visibles:
+  // Ensuite, on vide la liste actuelle:
+  Free_fileselector_list();
+  // Après effacement, il ne reste ni fichier ni répertoire dans la liste
+  Filelist_nb_elements=0;
+
+  // On lit tous les répertoires:
+  current_path=getcwd(NULL,0);
+  Repertoire_Courant=opendir(current_path);
+  while ((entry=readdir(Repertoire_Courant)))
+  {
+    stat(entry->d_name,&Infos_enreg);
+    if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
+      (Config.Show_hidden_files || //Il n'est pas caché
+      !isHidden(entry)))
+    {
+        // On rajoute le fichier à la liste
+        Add_element_to_list(entry->d_name, 0);
+        Filelist_nb_elements++;
+    }
+  }
+
+  closedir(Repertoire_Courant);
+  free(current_path);
+
+  Sort_list_of_files();
+
+  file_scroller->Nb_elements=Filelist_nb_elements;
+  file_scroller->Position=Main_fileselector_position;
+  Compute_slider_cursor_height(file_scroller);
+  Window_draw_slider(file_scroller);
+  // On efface les anciens noms de fichier:
+  Window_rectangle(8-1,15-1,144+2,80+2,MC_Black);
+  // On affiche les nouveaux:
+  Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
+
+  Update_window_area(0,0,Window_width, Window_height);
+
+  Display_cursor();
+
+  do
+  {
+    clicked_button=Window_clicked_button();
+
+    switch(clicked_button)
+    {
+      case 2 : // Zone d'affichage de la liste de fichiers
+        Hide_cursor();
+
+  		temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-95)>>3;
+  		if (temp>=Filelist_nb_elements)
+    	temp=Filelist_nb_elements-1;
+        if (temp>=0)
+        {
+            // On met à jour le décalage
+            Main_fileselector_offset=temp;
+
+            // On affiche à nouveau la liste
+            Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
+
+            // On vient de changer de nom de fichier, donc on doit s'appreter
+            // a rafficher une preview
+            *quicksearch_filename=0;
+        }
+        Display_cursor();
+        Wait_end_of_click();
+        break;
+
+      case 3 : // Scroller de fichiers
+        Hide_cursor();
+        Main_fileselector_position=Window_attribute2;
+        // On affiche à nouveau la liste
+        Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
+        Display_cursor();
+        *quicksearch_filename=0;
+        break;
+    }
+
+    switch (Key)
+    {
+      case SDLK_UNKNOWN : break;
+						  /*
+      case SDLK_DOWN : // Bas
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_scroll_down(&Main_fileselector_position,&Main_fileselector_offset);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+      case SDLK_UP : // Haut
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_scroll_up(&Main_fileselector_position,&Main_fileselector_offset);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+      case SDLK_PAGEDOWN : // PageDown
+      case KEY_MOUSEWHEELDOWN :
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_page_down(&Main_fileselector_position,&Main_fileselector_offset,9);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+      case SDLK_PAGEUP : // PageUp
+      case KEY_MOUSEWHEELUP :
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_page_up(&Main_fileselector_position,&Main_fileselector_offset,9);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+      case SDLK_END : // End
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_end(&Main_fileselector_position,&Main_fileselector_offset);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+      case SDLK_HOME : // Home
+        *quicksearch_filename=0;
+        Hide_cursor();
+        Selector_home(&Main_fileselector_position,&Main_fileselector_offset);
+  		if (file_scroller->Position!=Main_fileselector_position)
+  		{
+    	  // Si c'est le cas, il faut mettre à jour la jauge
+    	  file_scroller->Position=Main_fileselector_position;
+    	  Window_draw_slider(file_scroller);
+  		}
+        Key=0;
+        break;
+		*/
+      default: // Autre => On se place sur le nom de fichier qui correspond
+        if (clicked_button<=0)
+        {
+          if (Is_shortcut(Key,0x100+BUTTON_HELP))
+          {
+            Window_help(BUTTON_SETTINGS, NULL);
+            break;
+          }
+          temp=strlen(quicksearch_filename);
+          if (Key_ANSI>= ' ' && Key_ANSI < 255 && temp<50)
+          {
+            quicksearch_filename[temp]=Key_ANSI;
+            quicksearch_filename[temp+1]='\0';
+            most_matching_filename=Find_filename_match(quicksearch_filename);
+            if ( (most_matching_filename) )
+            {
+              temp=Main_fileselector_position+Main_fileselector_offset;
+              Hide_cursor();
+              Highlight_file(most_matching_filename);
+              Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+              Display_cursor();
+              if (temp!=Main_fileselector_position+Main_fileselector_offset)
+                New_preview_is_needed=1;
+            }
+            else
+              *quicksearch_filename=0;
+            Key=0;
+          }
+        }
+        else
+          *quicksearch_filename=0;
+    }
+  }
+  while ( (clicked_button!=1) && (Key!=SDLK_RETURN) );
+
+  strcpy(skinsdir,"skins/");
+  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
+  Load_graphics(skinsdir);
+
+  Close_window();
+  Unselect_button(BUTTON_SETTINGS);
+  // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
+  Display_menu();
+  Display_cursor();
 }
 
 
