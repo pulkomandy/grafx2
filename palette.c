@@ -1227,9 +1227,9 @@ void Button_Palette(void)
 
       case 5 : // Default
         memcpy(backup_palette,working_palette,sizeof(T_Palette));
-        memcpy(working_palette,Default_palette,sizeof(T_Palette));
-        memcpy(temp_palette,Default_palette,sizeof(T_Palette));
-        Set_palette(Default_palette);
+        memcpy(working_palette,Gfx->Default_palette,sizeof(T_Palette));
+        memcpy(temp_palette,Gfx->Default_palette,sizeof(T_Palette));
+        Set_palette(Gfx->Default_palette);
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));

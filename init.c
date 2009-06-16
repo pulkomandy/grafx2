@@ -189,11 +189,8 @@ void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, ch
   }
 }
 
-void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
+void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
 {
-  // GFX_cursor_sprite[i]
-  //Cursor_offset_X[CURSOR_SHAPE_ARROW]=0;
-  //Cursor_offset_Y[CURSOR_SHAPE_ARROW]=0;
   int x,y;
   int start_x, start_y;
   byte found;
@@ -228,15 +225,15 @@ void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
     if (found)
       break;
   }
-  Cursor_offset_X[cursor_number]=14-start_x;
-  Cursor_offset_Y[cursor_number]=14-start_y;
+  gfx->Cursor_offset_X[cursor_number]=14-start_x;
+  gfx->Cursor_offset_Y[cursor_number]=14-start_y;
 
   for (y=0;y<CURSOR_SPRITE_HEIGHT;y++)
     for (x=0;x<CURSOR_SPRITE_WIDTH;x++)
-      GFX_cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
+      gfx->Cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 
-void Load_graphics(const char * skin_file)
+void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
 {
   int  index;
   char filename[MAX_PATH_CHARACTERS];
@@ -275,9 +272,9 @@ void Load_graphics(const char * skin_file)
   // Lecture de la palette par défaut
   for (i=0; i<256; i++)
   {
-    Default_palette[i].R=SDLPal->colors[i].r;
-    Default_palette[i].G=SDLPal->colors[i].g;
-    Default_palette[i].B=SDLPal->colors[i].b;
+    gfx->Default_palette[i].R=SDLPal->colors[i].r;
+    gfx->Default_palette[i].G=SDLPal->colors[i].g;
+    gfx->Default_palette[i].B=SDLPal->colors[i].b;
   }
   
   // Carré "noir"
@@ -353,7 +350,7 @@ void Load_graphics(const char * skin_file)
   
   // Menu
   GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0);
+  Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0);
   cursor_y+=MENU_HEIGHT;
 
   // Effets
@@ -363,7 +360,7 @@ void Load_graphics(const char * skin_file)
       GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite");
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0);
+    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0);
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -376,7 +373,7 @@ void Load_graphics(const char * skin_file)
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
     Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1);
-    Center_GUI_cursor((byte *)mouse_cursor_area,i);
+    Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
   cursor_y+=29;
@@ -388,7 +385,7 @@ void Load_graphics(const char * skin_file)
       GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite");
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1);
+    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1);
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -407,7 +404,7 @@ void Load_graphics(const char * skin_file)
     {
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon");
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2);
+    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2);
     cursor_x+=PAINTBRUSH_WIDTH;
   }
   cursor_y+=PAINTBRUSH_HEIGHT;
@@ -419,17 +416,17 @@ void Load_graphics(const char * skin_file)
       GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive");
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1);
+    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1);
     cursor_x+=ICON_SPRITE_WIDTH;
   }
   cursor_y+=ICON_SPRITE_HEIGHT;
 
   // Logo splash screen
-  if (!(GFX_logo_grafx2=(byte *)malloc(231*56)))
+  if (!(gfx->Logo_grafx2=(byte *)malloc(231*56)))
     Error(ERROR_MEMORY);
 
   GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, GFX_logo_grafx2, 231, 56, "logo menu",3);
+  Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3);
   cursor_y+=56;
   
   // Trames
@@ -439,7 +436,7 @@ void Load_graphics(const char * skin_file)
       GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern");
     else
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern");
-    Read_GUI_pattern(gui, cursor_x, cursor_y, GFX_sieve_pattern[i],"sieve pattern");
+    Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern");
     cursor_x+=16;
   }
   cursor_y+=16;
@@ -458,11 +455,11 @@ void Load_graphics(const char * skin_file)
     {
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font");
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_system_font[i*64], 8, 8, "system font",2);
+    Read_GUI_block(gui, cursor_x, cursor_y, &gfx->System_font[i*64], 8, 8, "system font",2);
     cursor_x+=8;
   }
   cursor_y+=8;
-  Menu_font=GFX_system_font;
+  Menu_font=gfx->System_font;
 
   // Font Fun
   for (i=0; i<256; i++)
@@ -478,7 +475,7 @@ void Load_graphics(const char * skin_file)
     {
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font");
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_fun_font[i*64], 8, 8, "fun font",2);
+    Read_GUI_block(gui, cursor_x, cursor_y, &gfx->Fun_font[i*64], 8, 8, "fun font",2);
     cursor_x+=8;
   }
   cursor_y+=8;
@@ -497,7 +494,7 @@ void Load_graphics(const char * skin_file)
     {
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)");
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_help_font_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0);
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -516,7 +513,7 @@ void Load_graphics(const char * skin_file)
     {
       GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)");
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_bold_font[i][0][0]), 6, 8, "help font (bold)",0);
+    Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0);
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -539,14 +536,14 @@ void Load_graphics(const char * skin_file)
     
     if (i&1)
       if (i&64)
-        dest=&(GFX_help_font_t4[char_4++][0][0]);
+        dest=&(gfx->Help_font_t4[char_4++][0][0]);
       else
-        dest=&(GFX_help_font_t2[char_2++][0][0]);
+        dest=&(gfx->Help_font_t2[char_2++][0][0]);
     else
       if (i&64)
-        dest=&(GFX_help_font_t3[char_3++][0][0]);
+        dest=&(gfx->Help_font_t3[char_3++][0][0]);
       else
-        dest=&(GFX_help_font_t1[char_1++][0][0]);
+        dest=&(gfx->Help_font_t1[char_1++][0][0]);
     
     Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0);
     cursor_x+=6;
@@ -559,202 +556,202 @@ void Load_graphics(const char * skin_file)
   Current_help_section=0;
   Help_position=0;
 
-  Preset_paintbrush_width[ 0]= 1;
-  Preset_paintbrush_height[ 0]= 1;
-  Paintbrush_type             [ 0]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 0]= 1;
+  gfx->Preset_paintbrush_height[ 0]= 1;
+  gfx->Paintbrush_type         [ 0]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 1]= 2;
-  Preset_paintbrush_height[ 1]= 2;
-  Paintbrush_type             [ 1]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 1]= 2;
+  gfx->Preset_paintbrush_height[ 1]= 2;
+  gfx->Paintbrush_type         [ 1]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 2]= 3;
-  Preset_paintbrush_height[ 2]= 3;
-  Paintbrush_type             [ 2]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 2]= 3;
+  gfx->Preset_paintbrush_height[ 2]= 3;
+  gfx->Paintbrush_type         [ 2]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 3]= 4;
-  Preset_paintbrush_height[ 3]= 4;
-  Paintbrush_type             [ 3]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 3]= 4;
+  gfx->Preset_paintbrush_height[ 3]= 4;
+  gfx->Paintbrush_type         [ 3]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 4]= 5;
-  Preset_paintbrush_height[ 4]= 5;
-  Paintbrush_type             [ 4]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 4]= 5;
+  gfx->Preset_paintbrush_height[ 4]= 5;
+  gfx->Paintbrush_type         [ 4]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 5]= 7;
-  Preset_paintbrush_height[ 5]= 7;
-  Paintbrush_type             [ 5]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 5]= 7;
+  gfx->Preset_paintbrush_height[ 5]= 7;
+  gfx->Paintbrush_type         [ 5]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 6]= 8;
-  Preset_paintbrush_height[ 6]= 8;
-  Paintbrush_type             [ 6]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 6]= 8;
+  gfx->Preset_paintbrush_height[ 6]= 8;
+  gfx->Paintbrush_type         [ 6]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 7]=12;
-  Preset_paintbrush_height[ 7]=12;
-  Paintbrush_type             [ 7]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 7]=12;
+  gfx->Preset_paintbrush_height[ 7]=12;
+  gfx->Paintbrush_type         [ 7]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 8]=16;
-  Preset_paintbrush_height[ 8]=16;
-  Paintbrush_type             [ 8]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 8]=16;
+  gfx->Preset_paintbrush_height[ 8]=16;
+  gfx->Paintbrush_type         [ 8]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 9]=16;
-  Preset_paintbrush_height[ 9]=16;
-  Paintbrush_type             [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
+  gfx->Preset_paintbrush_width [ 9]=16;
+  gfx->Preset_paintbrush_height[ 9]=16;
+  gfx->Paintbrush_type         [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
 
-  Preset_paintbrush_width[10]=15;
-  Preset_paintbrush_height[10]=15;
-  Paintbrush_type             [10]=PAINTBRUSH_SHAPE_DIAMOND;
+  gfx->Preset_paintbrush_width [10]=15;
+  gfx->Preset_paintbrush_height[10]=15;
+  gfx->Paintbrush_type         [10]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Preset_paintbrush_width[11]= 5;
-  Preset_paintbrush_height[11]= 5;
-  Paintbrush_type             [11]=PAINTBRUSH_SHAPE_DIAMOND;
+  gfx->Preset_paintbrush_width [11]= 5;
+  gfx->Preset_paintbrush_height[11]= 5;
+  gfx->Paintbrush_type         [11]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Preset_paintbrush_width[12]= 3;
-  Preset_paintbrush_height[12]= 3;
-  Paintbrush_type             [12]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [12]= 3;
+  gfx->Preset_paintbrush_height[12]= 3;
+  gfx->Paintbrush_type         [12]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[13]= 4;
-  Preset_paintbrush_height[13]= 4;
-  Paintbrush_type             [13]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [13]= 4;
+  gfx->Preset_paintbrush_height[13]= 4;
+  gfx->Paintbrush_type         [13]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[14]= 5;
-  Preset_paintbrush_height[14]= 5;
-  Paintbrush_type             [14]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [14]= 5;
+  gfx->Preset_paintbrush_height[14]= 5;
+  gfx->Paintbrush_type         [14]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[15]= 6;
-  Preset_paintbrush_height[15]= 6;
-  Paintbrush_type             [15]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [15]= 6;
+  gfx->Preset_paintbrush_height[15]= 6;
+  gfx->Paintbrush_type         [15]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[16]= 8;
-  Preset_paintbrush_height[16]= 8;
-  Paintbrush_type             [16]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [16]= 8;
+  gfx->Preset_paintbrush_height[16]= 8;
+  gfx->Paintbrush_type         [16]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[17]=10;
-  Preset_paintbrush_height[17]=10;
-  Paintbrush_type             [17]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [17]=10;
+  gfx->Preset_paintbrush_height[17]=10;
+  gfx->Paintbrush_type         [17]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[18]=12;
-  Preset_paintbrush_height[18]=12;
-  Paintbrush_type             [18]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [18]=12;
+  gfx->Preset_paintbrush_height[18]=12;
+  gfx->Paintbrush_type         [18]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[19]=14;
-  Preset_paintbrush_height[19]=14;
-  Paintbrush_type             [19]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [19]=14;
+  gfx->Preset_paintbrush_height[19]=14;
+  gfx->Paintbrush_type         [19]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[20]=16;
-  Preset_paintbrush_height[20]=16;
-  Paintbrush_type             [20]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [20]=16;
+  gfx->Preset_paintbrush_height[20]=16;
+  gfx->Paintbrush_type         [20]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[21]=15;
-  Preset_paintbrush_height[21]=15;
-  Paintbrush_type             [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [21]=15;
+  gfx->Preset_paintbrush_height[21]=15;
+  gfx->Paintbrush_type         [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[22]=11;
-  Preset_paintbrush_height[22]=11;
-  Paintbrush_type             [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [22]=11;
+  gfx->Preset_paintbrush_height[22]=11;
+  gfx->Paintbrush_type         [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[23]= 5;
-  Preset_paintbrush_height[23]= 5;
-  Paintbrush_type             [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [23]= 5;
+  gfx->Preset_paintbrush_height[23]= 5;
+  gfx->Paintbrush_type         [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[24]= 2;
-  Preset_paintbrush_height[24]= 1;
-  Paintbrush_type             [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [24]= 2;
+  gfx->Preset_paintbrush_height[24]= 1;
+  gfx->Paintbrush_type         [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[25]= 3;
-  Preset_paintbrush_height[25]= 1;
-  Paintbrush_type             [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [25]= 3;
+  gfx->Preset_paintbrush_height[25]= 1;
+  gfx->Paintbrush_type         [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[26]= 4;
-  Preset_paintbrush_height[26]= 1;
-  Paintbrush_type             [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [26]= 4;
+  gfx->Preset_paintbrush_height[26]= 1;
+  gfx->Paintbrush_type         [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[27]= 8;
-  Preset_paintbrush_height[27]= 1;
-  Paintbrush_type             [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [27]= 8;
+  gfx->Preset_paintbrush_height[27]= 1;
+  gfx->Paintbrush_type         [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[28]= 1;
-  Preset_paintbrush_height[28]= 2;
-  Paintbrush_type             [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [28]= 1;
+  gfx->Preset_paintbrush_height[28]= 2;
+  gfx->Paintbrush_type         [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[29]= 1;
-  Preset_paintbrush_height[29]= 3;
-  Paintbrush_type             [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [29]= 1;
+  gfx->Preset_paintbrush_height[29]= 3;
+  gfx->Paintbrush_type         [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[30]= 1;
-  Preset_paintbrush_height[30]= 4;
-  Paintbrush_type             [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [30]= 1;
+  gfx->Preset_paintbrush_height[30]= 4;
+  gfx->Paintbrush_type         [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[31]= 1;
-  Preset_paintbrush_height[31]= 8;
-  Paintbrush_type             [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [31]= 1;
+  gfx->Preset_paintbrush_height[31]= 8;
+  gfx->Paintbrush_type         [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[32]= 3;
-  Preset_paintbrush_height[32]= 3;
-  Paintbrush_type             [32]=PAINTBRUSH_SHAPE_CROSS;
+  gfx->Preset_paintbrush_width [32]= 3;
+  gfx->Preset_paintbrush_height[32]= 3;
+  gfx->Paintbrush_type         [32]=PAINTBRUSH_SHAPE_CROSS;
 
-  Preset_paintbrush_width[33]= 5;
-  Preset_paintbrush_height[33]= 5;
-  Paintbrush_type             [33]=PAINTBRUSH_SHAPE_CROSS;
+  gfx->Preset_paintbrush_width [33]= 5;
+  gfx->Preset_paintbrush_height[33]= 5;
+  gfx->Paintbrush_type         [33]=PAINTBRUSH_SHAPE_CROSS;
 
-  Preset_paintbrush_width[34]= 5;
-  Preset_paintbrush_height[34]= 5;
-  Paintbrush_type             [34]=PAINTBRUSH_SHAPE_PLUS;
+  gfx->Preset_paintbrush_width [34]= 5;
+  gfx->Preset_paintbrush_height[34]= 5;
+  gfx->Paintbrush_type         [34]=PAINTBRUSH_SHAPE_PLUS;
 
-  Preset_paintbrush_width[35]=15;
-  Preset_paintbrush_height[35]=15;
-  Paintbrush_type             [35]=PAINTBRUSH_SHAPE_PLUS;
+  gfx->Preset_paintbrush_width [35]=15;
+  gfx->Preset_paintbrush_height[35]=15;
+  gfx->Paintbrush_type         [35]=PAINTBRUSH_SHAPE_PLUS;
 
-  Preset_paintbrush_width[36]= 2;
-  Preset_paintbrush_height[36]= 2;
-  Paintbrush_type             [36]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [36]= 2;
+  gfx->Preset_paintbrush_height[36]= 2;
+  gfx->Paintbrush_type         [36]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[37]= 4;
-  Preset_paintbrush_height[37]= 4;
-  Paintbrush_type             [37]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [37]= 4;
+  gfx->Preset_paintbrush_height[37]= 4;
+  gfx->Paintbrush_type         [37]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[38]= 8;
-  Preset_paintbrush_height[38]= 8;
-  Paintbrush_type             [38]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [38]= 8;
+  gfx->Preset_paintbrush_height[38]= 8;
+  gfx->Paintbrush_type         [38]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[39]= 2;
-  Preset_paintbrush_height[39]= 2;
-  Paintbrush_type             [39]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [39]= 2;
+  gfx->Preset_paintbrush_height[39]= 2;
+  gfx->Paintbrush_type         [39]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[40]= 4;
-  Preset_paintbrush_height[40]= 4;
-  Paintbrush_type             [40]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [40]= 4;
+  gfx->Preset_paintbrush_height[40]= 4;
+  gfx->Paintbrush_type         [40]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[41]= 8;
-  Preset_paintbrush_height[41]= 8;
-  Paintbrush_type             [41]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [41]= 8;
+  gfx->Preset_paintbrush_height[41]= 8;
+  gfx->Paintbrush_type         [41]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[42]= 4;
-  Preset_paintbrush_height[42]= 4;
-  Paintbrush_type             [42]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [42]= 4;
+  gfx->Preset_paintbrush_height[42]= 4;
+  gfx->Paintbrush_type         [42]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[43]= 8;
-  Preset_paintbrush_height[43]= 8;
-  Paintbrush_type             [43]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [43]= 8;
+  gfx->Preset_paintbrush_height[43]= 8;
+  gfx->Paintbrush_type         [43]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[44]=13;
-  Preset_paintbrush_height[44]=13;
-  Paintbrush_type             [44]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [44]=13;
+  gfx->Preset_paintbrush_height[44]=13;
+  gfx->Paintbrush_type         [44]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[45]= 3;
-  Preset_paintbrush_height[45]= 3;
-  Paintbrush_type             [45]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [45]= 3;
+  gfx->Preset_paintbrush_height[45]= 3;
+  gfx->Paintbrush_type         [45]=PAINTBRUSH_SHAPE_MISC;
 
-  Preset_paintbrush_width[46]= 3;
-  Preset_paintbrush_height[46]= 3;
-  Paintbrush_type             [46]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [46]= 3;
+  gfx->Preset_paintbrush_height[46]= 3;
+  gfx->Paintbrush_type         [46]=PAINTBRUSH_SHAPE_MISC;
 
-  Preset_paintbrush_width[47]= 7;
-  Preset_paintbrush_height[47]= 7;
-  Paintbrush_type             [47]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [47]= 7;
+  gfx->Preset_paintbrush_height[47]= 7;
+  gfx->Paintbrush_type         [47]=PAINTBRUSH_SHAPE_MISC;
 
   for (index=0;index<NB_PAINTBRUSH_SPRITES;index++)
   {
-    Preset_paintbrush_offset_X[index]=(Preset_paintbrush_width[index]>>1);
-    Preset_paintbrush_offset_Y[index]=(Preset_paintbrush_height[index]>>1);
+    gfx->Preset_paintbrush_offset_X[index]=(gfx->Preset_paintbrush_width [index]>>1);
+    gfx->Preset_paintbrush_offset_Y[index]=(gfx->Preset_paintbrush_height[index]>>1);
   }
 
 }

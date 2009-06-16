@@ -58,9 +58,9 @@
 #define DEFAULT_ZOOM_FACTOR        4    ///< Initial zoom factor for the magnifier.
 #define MAX_PATH_CHARACTERS      260    ///< Number of characters for a file+complete path. Adapt to your OS...
 #define NB_BOOKMARKS               4    ///< Number of bookmark buttons in Save/Load screen.
-// Character to show a right arrow, used when editing long strings. It's present in ::GFX_system_font 
+// Character to show a right arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define RIGHT_TRIANGLE_CHARACTER  16
-// Character to show a left arrow, used when editing long strings. It's present in ::GFX_system_font 
+// Character to show a left arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
@@ -241,7 +241,7 @@ enum CHUNKS_CFG
   CHUNK_MAX
 };
 
-/// Identifiers for the 8x8 icons of ::GFX_icon_sprite (these are unused now)
+/// Identifiers for the 8x8 icons of ::Gfx->Icon_sprite (most are unused now)
 enum ICON_TYPES
 {
   ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk

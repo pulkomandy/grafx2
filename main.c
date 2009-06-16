@@ -532,8 +532,11 @@ int Init_program(int argc,char * argv[])
 
   Analyze_command_line(argc,argv);
 
-  // Charger les sprites et la palette
-  Load_graphics(Gui_skin_file);
+  // Load sprites, palette etc.
+  Gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
+  if (Gfx == NULL)
+    Error(ERROR_MEMORY);
+  Load_graphics(Gfx, Gui_skin_file);
 
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -541,21 +544,21 @@ int Init_program(int argc,char * argv[])
 
   // Transfert des valeurs du .INI qui ne changent pas dans des variables
   // plus accessibles:
-  Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  Compute_optimal_menu_colors(Default_palette);
+  Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  Compute_optimal_menu_colors(Gfx->Default_palette);
   Fore_color=MC_White;
   Back_color=MC_Black;
 
   // Prise en compte de la fonte
   if (Config.Font)
-    Menu_font=GFX_fun_font;
+    Menu_font=Gfx->Fun_font;
   else
-    Menu_font=GFX_system_font;
+    Menu_font=Gfx->System_font;
 
-  memcpy(Main_palette,Default_palette,sizeof(T_Palette));
+  memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -755,7 +758,7 @@ int main(int argc,char * argv[])
   {
     if (Config.Opening_message && (!File_in_command_line))
       Button_Message_initial();
-    free(GFX_logo_grafx2); // Pas encore utilisé dans le About
+    free(Gfx->Logo_grafx2); // Not yet used in the About screen
   
     if (File_in_command_line)
     {

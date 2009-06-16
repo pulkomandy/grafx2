@@ -210,74 +210,74 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
     case BUTTON_SHAPE_RECTANGLE  :
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie la partie haute
       for (x_pos=start_x;x_pos<=end_x-1;x_pos++)
       {
         Pixel_in_menu(x_pos,start_y,color_top_left);
-        GFX_menu_block[start_y][x_pos]=color_top_left;
+        Gfx->Menu_block[start_y][x_pos]=color_top_left;
       }
       for (y_pos=start_y+1;y_pos<=end_y-1;y_pos++)
       {
         // On colorie la partie gauche
         Pixel_in_menu(start_x,y_pos,color_top_left);
-        GFX_menu_block[y_pos][start_x]=color_top_left;
+        Gfx->Menu_block[y_pos][start_x]=color_top_left;
         // On colorie la partie droite
         Pixel_in_menu(end_x,y_pos,color_bottom_right);
-        GFX_menu_block[y_pos][end_x]=color_bottom_right;
+        Gfx->Menu_block[y_pos][end_x]=color_bottom_right;
       }
       // On colorie la partie basse
       for (x_pos=start_x+1;x_pos<=end_x;x_pos++)
       {
         Pixel_in_menu(x_pos,end_y,color_bottom_right);
-        GFX_menu_block[end_y][x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y][x_pos]=color_bottom_right;
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie le coin haut gauche
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,start_y,color_top_left);
-        GFX_menu_block[start_y][start_x+x_pos]=color_top_left;
+        Gfx->Menu_block[start_y][start_x+x_pos]=color_top_left;
         Pixel_in_menu(start_x,start_y+x_pos,color_top_left);
-        GFX_menu_block[start_y+x_pos][start_x]=color_top_left;
+        Gfx->Menu_block[start_y+x_pos][start_x]=color_top_left;
       }
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_bottom_right);
-        GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y-x_pos][start_x+x_pos]=color_bottom_right;
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_top_left);
-        GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_top_left;
+        Gfx->Menu_block[end_y-x_pos][start_x+x_pos]=color_top_left;
       }
       // On colorie le coin bas droite
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(end_x-x_pos,end_y,color_bottom_right);
-        GFX_menu_block[end_y][end_x-x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y][end_x-x_pos]=color_bottom_right;
         Pixel_in_menu(end_x,end_y-x_pos,color_bottom_right);
-        GFX_menu_block[end_y-x_pos][end_x]=color_bottom_right;
+        Gfx->Menu_block[end_y-x_pos][end_x]=color_bottom_right;
       }
   }
   if (Menu_is_visible)

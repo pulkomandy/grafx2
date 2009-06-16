@@ -22,7 +22,7 @@
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
 
-void Load_graphics(const char * skin_file);
+void Load_graphics(T_Gui_skin *gfx, const char * skin_file);
 void Init_buttons(void);
 void Init_operations(void);
 int  Load_CFG(int reload_all);

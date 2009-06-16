@@ -305,5 +305,76 @@ typedef struct
 } T_List_of_pages;
 
 
+/// GUI skin data
+typedef struct
+{
+  // Mouse
+  
+  /// X coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_WIDTH
+  word Cursor_offset_X[NB_CURSOR_SPRITES];
+  /// Y coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_HEIGHT
+  word Cursor_offset_Y[NB_CURSOR_SPRITES];
+  /// Graphic resources for the mouse cursor.
+  byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
+
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
+  /// Height of the preset paintbrushes.
+  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
+  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
+  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
+  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
+  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
+
+  // Sieve patterns
+  
+  /// Preset sieve patterns, stored as binary (one word per line)
+  word  Sieve_pattern[12][16];
+  
+  // Menu and other graphics
+  
+  /// Bitmap data for the menu, a single rectangle.
+  byte Menu_block[MENU_HEIGHT][MENU_WIDTH];
+  /// Bitmap data for the icons that are displayed over the menu.
+  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  /// Bitmap data for the different "effects" icons.
+  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
+  byte * Logo_grafx2;
+  /// Bitmap data for the 6x8 font used in help screens.
+  byte Help_font_norm [256][6][8];
+  /// Bitmap data for the 6x8 font used in help screens ("bold" verstion).
+  byte Bold_font [256][6][8];
+  // 12
+  // 34
+  /// Bitmap data for the title font used in help screens. Top-left quarter.
+  byte Help_font_t1 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Top-right quarter.
+  byte Help_font_t2 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Bottom-left quarter.
+  byte Help_font_t3 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Bottom-right quarter.
+  byte Help_font_t4 [64][6][8];
+  /// Bitmap data for the small 8x8 icons.
+  byte Icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
+
+  // 8x8 fonts
+  
+  /// Bitmap data for the classic 8x8 font used in menus etc.
+  byte System_font[256*8*8];
+  /// Bitmap data for the "fun" 8x8 font used in menus etc.
+  byte Fun_font    [256*8*8];
+  
+  /// A default 256-color palette.
+  T_Palette Default_palette;
+
+
+} T_Gui_skin;
 
 #endif

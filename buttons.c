@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/stat.h>
 #include <SDL.h>
 
 #include "const.h"
@@ -137,7 +138,7 @@ void Button_Message_initial(void)
         Menu_factor_X*237,Menu_factor_Y*60,MC_Black);
   for (y=23,offs_y=0; y<79; offs_y+=231,y++)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
-      Pixel_in_window(x,y,GFX_logo_grafx2[offs_y+x_pos]);
+      Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
 
   Print_in_window(130-4*26,88,"Copyright (c) 2007-2009 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
@@ -958,9 +959,9 @@ void Button_Settings(void)
 
   // Font selection
   if (Config.Font)
-    Menu_font=GFX_fun_font;
+    Menu_font=Gfx->Fun_font;
   else
-    Menu_font=GFX_system_font;
+    Menu_font=Gfx->System_font;
 
   if (config_is_reloaded)
     Compute_optimal_menu_colors(Main_palette);
@@ -1257,7 +1258,7 @@ void Button_Skins(void)
 
   strcpy(skinsdir,"skins/");
   Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
-  Load_graphics(skinsdir);
+  Load_graphics(Gfx, skinsdir);
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
@@ -2519,15 +2520,15 @@ void Button_Paintbrush_menu(void)
   if (clicked_button!=1) // pas Cancel
   {
     index=clicked_button-2;
-    Paintbrush_shape=Paintbrush_type[index];
-    Paintbrush_width=Preset_paintbrush_width[index];
-    Paintbrush_height=Preset_paintbrush_height[index];
-    Paintbrush_offset_X=Preset_paintbrush_offset_X[index];
-    Paintbrush_offset_Y=Preset_paintbrush_offset_Y[index];
+    Paintbrush_shape=Gfx->Paintbrush_type[index];
+    Paintbrush_width=Gfx->Preset_paintbrush_width[index];
+    Paintbrush_height=Gfx->Preset_paintbrush_height[index];
+    Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
+    Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
     for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
       for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=GFX_paintbrush_sprite[index][y_pos][x_pos];
-    Change_paintbrush_shape(Paintbrush_type[index]);
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
+    Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
   }
 
   Unselect_button(BUTTON_PAINTBRUSHES);
@@ -4617,7 +4618,7 @@ void Draw_preset_sieve_patterns(void)
       for (i=0; i<16*Menu_factor_X/Zoom; i++)
         Block(((index*23+10)*Menu_factor_X)+i*Zoom+Window_pos_X,
           (22*Menu_factor_Y)+j*Zoom+Window_pos_Y,Zoom,Zoom,
-          ((GFX_sieve_pattern[index][j&0xF]>>(15-(i&0xF)))&1)?MC_White:MC_Black);
+          ((Gfx->Sieve_pattern[index][j&0xF]>>(15-(i&0xF)))&1)?MC_White:MC_Black);
 
   Update_rect(ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
 }
@@ -4629,7 +4630,7 @@ void Copy_preset_sieve(byte index)
 
   for (j=0; j<16; j++)
     for (i=0; i<16; i++)
-      Sieve[i][j]=(GFX_sieve_pattern[index][j]>>(15-i))&1;
+      Sieve[i][j]=(Gfx->Sieve_pattern[index][j]>>(15-i))&1;
   Sieve_width=16;
   Sieve_height=16;
 }
@@ -5057,7 +5058,7 @@ void Display_effect_sprite(short sprite_number, short start_x, short start_y)
 
   for (y=0,y_pos=start_y;y<MENU_SPRITE_HEIGHT;y++,y_pos++)
     for (x=0,x_pos=start_x;x<MENU_SPRITE_WIDTH;x++,x_pos++)
-      Pixel_in_window(x_pos,y_pos,GFX_effect_sprite[sprite_number][y][x]);
+      Pixel_in_window(x_pos,y_pos,Gfx->Effect_sprite[sprite_number][y][x]);
 
   Update_rect(ToWinX(start_x),ToWinY(start_y),MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
 }

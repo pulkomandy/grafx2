@@ -423,7 +423,7 @@ void Display_menu(void)
     // Affichage du sprite du menu
     for (y_pos=0;y_pos<MENU_HEIGHT;y_pos++)
       for (x_pos=0;x_pos<MENU_WIDTH;x_pos++)
-        Pixel_in_menu(x_pos,y_pos,GFX_menu_block[y_pos][x_pos]);
+        Pixel_in_menu(x_pos,y_pos,Gfx->Menu_block[y_pos][x_pos]);
     // Affichage de la bande grise sous la palette
     Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
 
@@ -883,9 +883,9 @@ void Display_sprite_in_menu(int btn_number,int sprite_number)
   for (y_pos=0;y_pos<MENU_SPRITE_HEIGHT;y_pos++)
     for (x_pos=0;x_pos<MENU_SPRITE_WIDTH;x_pos++)
     {
-      color=GFX_menu_sprite[sprite_number][y_pos][x_pos];
+      color=Gfx->Menu_sprite[sprite_number][y_pos][x_pos];
       Pixel_in_menu(menu_x_pos+x_pos,menu_y_pos+y_pos,color);
-      GFX_menu_block[menu_y_pos+y_pos][menu_x_pos+x_pos]=color;
+      Gfx->Menu_block[menu_y_pos+y_pos][menu_x_pos+x_pos]=color;
     }
   Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
     (Buttons_Pool[btn_number].Y_offset+1)*Menu_factor_Y+Menu_Y,
@@ -909,9 +909,9 @@ void Display_paintbrush_in_menu(void)
       for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
-          color=GFX_menu_sprite[4][y_pos][x_pos];
+          color=Gfx->Menu_sprite[4][y_pos][x_pos];
           Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          GFX_menu_block[menu_y_pos][menu_x_pos]=color;
+          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
         }
       break;
     default : // Pinceau
@@ -920,7 +920,7 @@ void Display_paintbrush_in_menu(void)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
           Pixel_in_menu(menu_x_pos,menu_y_pos,MC_Light);
-          GFX_menu_block[menu_y_pos][menu_x_pos]=MC_Light;
+          Gfx->Menu_block[menu_y_pos][menu_x_pos]=MC_Light;
         }
       // On affiche le nouveau
       menu_start_x=8-Paintbrush_offset_X;
@@ -946,7 +946,7 @@ void Display_paintbrush_in_menu(void)
         {
           color=(Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])?MC_Black:MC_Light;
           Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          GFX_menu_block[menu_y_pos][menu_x_pos]=color;
+          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
         }
   }
   Update_rect(0,Menu_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
@@ -973,18 +973,18 @@ void Display_paintbrush_in_window(word x,word y,int number)
   if (y_size<1)
     y_size=1;
 
-  origin_x = (x + 8)*Menu_factor_X - (Preset_paintbrush_offset_X[number])*x_size+Window_pos_X;
-  origin_y = (y + 8)*Menu_factor_Y - (Preset_paintbrush_offset_Y[number])*y_size+Window_pos_Y;
+  origin_x = (x + 8)*Menu_factor_X - (Gfx->Preset_paintbrush_offset_X[number])*x_size+Window_pos_X;
+  origin_y = (y + 8)*Menu_factor_Y - (Gfx->Preset_paintbrush_offset_Y[number])*y_size+Window_pos_Y;
 
-  for (window_y_pos=0,y_pos=0; y_pos<Preset_paintbrush_height[number]; window_y_pos++,y_pos++)
-    for (window_x_pos=0,x_pos=0; x_pos<Preset_paintbrush_width[number]; window_x_pos++,x_pos++)
-      Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,(GFX_paintbrush_sprite[number][y_pos][x_pos])?MC_Black:MC_Light);
+  for (window_y_pos=0,y_pos=0; y_pos<Gfx->Preset_paintbrush_height[number]; window_y_pos++,y_pos++)
+    for (window_x_pos=0,x_pos=0; x_pos<Gfx->Preset_paintbrush_width[number]; window_x_pos++,x_pos++)
+      Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,(Gfx->Paintbrush_sprite[number][y_pos][x_pos])?MC_Black:MC_Light);
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
   // forcément avec la même taille de pixel.
 
   Update_rect( ToWinX(origin_x), ToWinY(origin_y),
-        ToWinL(Preset_paintbrush_width[number]),
-        ToWinH(Preset_paintbrush_height[number])
+        ToWinL(Gfx->Preset_paintbrush_width[number]),
+        ToWinH(Gfx->Preset_paintbrush_height[number])
   );
 }
 
@@ -1041,7 +1041,7 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type)
 
   for (j=0; j<ICON_SPRITE_HEIGHT; j++)
     for (i=0; i<ICON_SPRITE_WIDTH; i++)
-      Pixel_in_window(x_pos+i,y_pos+j,GFX_icon_sprite[type][j][i]);
+      Pixel_in_window(x_pos+i,y_pos+j,Gfx->Icon_sprite[type][j][i]);
   Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(ICON_SPRITE_WIDTH),ToWinH(ICON_SPRITE_HEIGHT));
 }
 
@@ -1567,8 +1567,8 @@ void Display_cursor(void)
         else
         {
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_TARGET:CURSOR_SHAPE_TARGET;
-          start_x=Mouse_X-Cursor_offset_X[temp];
-          start_y=Mouse_Y-Cursor_offset_Y[temp];
+          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (x_pos=start_x,counter_x=0;counter_x<15 && x_pos < Screen_width;x_pos++,counter_x++)
                 {
@@ -1576,7 +1576,7 @@ void Display_cursor(void)
             for (y_pos=start_y,counter_y=0;counter_y<15 && y_pos < Screen_height;y_pos++,counter_y++)
             {
                     if( y_pos < 0 || y_pos >= Screen_height) continue;
-              color=GFX_cursor_sprite[temp][counter_y][counter_x];
+              color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
               CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
               if (color!=MC_Trans)
                 Pixel(x_pos,y_pos,color);
@@ -1636,8 +1636,8 @@ void Display_cursor(void)
         {
           DEBUG("B",0);
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-          start_x=Mouse_X-Cursor_offset_X[temp];
-          start_y=Mouse_Y-Cursor_offset_Y[temp];
+          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
           {
@@ -1647,7 +1647,7 @@ void Display_cursor(void)
               {
                   if(y_pos<0) continue;
                   if(y_pos>=Screen_height) break;
-                  color=GFX_cursor_sprite[temp][counter_y][counter_x];
+                  color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
                   // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
                   CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
                   if (color!=MC_Trans)
@@ -1666,8 +1666,8 @@ void Display_cursor(void)
 
     case CURSOR_SHAPE_ARROW :
     case CURSOR_SHAPE_HOURGLASS :
-      start_x=Mouse_X-Cursor_offset_X[shape];
-      start_y=Mouse_Y-Cursor_offset_Y[shape];
+      start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
+      start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
       for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
       {
         if(x_pos<0) continue;
@@ -1676,7 +1676,7 @@ void Display_cursor(void)
         {
           if(y_pos<0) continue;
           if(y_pos>=Screen_height) break;
-          color=GFX_cursor_sprite[shape][counter_y][counter_x];
+          color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
           // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
           CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
           if (color!=MC_Trans)
@@ -1873,8 +1873,8 @@ void Hide_cursor(void)
         else
         {
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_TARGET:CURSOR_SHAPE_TARGET;
-          start_x=Mouse_X-Cursor_offset_X[temp];
-          start_y=Mouse_Y-Cursor_offset_Y[temp];
+          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
@@ -1941,8 +1941,8 @@ void Hide_cursor(void)
         else
         {
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-          start_x=Mouse_X-Cursor_offset_X[temp];
-          start_y=Mouse_Y-Cursor_offset_Y[temp];
+          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
           {
@@ -1969,8 +1969,8 @@ void Hide_cursor(void)
 
     case CURSOR_SHAPE_ARROW :
     case CURSOR_SHAPE_HOURGLASS :
-      start_x=Mouse_X-Cursor_offset_X[shape];
-      start_y=Mouse_Y-Cursor_offset_Y[shape];
+      start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
+      start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
 
       for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
       {
@@ -2492,52 +2492,52 @@ void Compute_optimal_menu_colors(T_Components * palette)
     for (k=0; k<NB_CURSOR_SPRITES; k++)
       for (j=0; j<CURSOR_SPRITE_HEIGHT; j++)
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
-          Remap_pixel(&GFX_cursor_sprite[k][j][i]);
+          Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
     // Le menu
     for (j=0; j<MENU_HEIGHT; j++)
       for (i=0; i<MENU_WIDTH; i++)
-        Remap_pixel(&GFX_menu_block[j][i]);
+        Remap_pixel(&Gfx->Menu_block[j][i]);
     // Sprites du menu
     for (k=0; k<NB_MENU_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
-          Remap_pixel(&GFX_menu_sprite[k][j][i]);
+          Remap_pixel(&Gfx->Menu_sprite[k][j][i]);
     // Sprites d'effets
     for (k=0; k<NB_EFFECTS_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
-          Remap_pixel(&GFX_effect_sprite[k][j][i]);
+          Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
     // Fontes de l'aide
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_help_font_norm[k][i][j]);
+          Remap_pixel(&Gfx->Help_font_norm[k][i][j]);
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_bold_font[k][i][j]);
+          Remap_pixel(&Gfx->Bold_font[k][i][j]);
     for (k=0; k<64; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_help_font_t1[k][i][j]);
+          Remap_pixel(&Gfx->Help_font_t1[k][i][j]);
     for (k=0; k<64; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_help_font_t2[k][i][j]);
+          Remap_pixel(&Gfx->Help_font_t2[k][i][j]);
     for (k=0; k<64; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_help_font_t3[k][i][j]);
+          Remap_pixel(&Gfx->Help_font_t3[k][i][j]);
     for (k=0; k<64; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
-          Remap_pixel(&GFX_help_font_t4[k][i][j]);
+          Remap_pixel(&Gfx->Help_font_t4[k][i][j]);
         
     // Sprites de lecteurs (drives)
     for (k=0; k<NB_ICON_SPRITES; k++)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
-          Remap_pixel(&GFX_icon_sprite[k][j][i]);
+          Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
   }
   Clear_border(MC_Black);
 }

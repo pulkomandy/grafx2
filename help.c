@@ -323,27 +323,27 @@ void Display_help(void)
         if (line_type=='T')
         {
           if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(GFX_help_font_norm['!'][0][0]); // Caractère pas géré
+            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
           else if (char_index & 1)
-            char_pixel=&(GFX_help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
           else
-            char_pixel=&(GFX_help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
         }
         else if (line_type=='-')
         {
           if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(GFX_help_font_norm['!'][0][0]); // Caractère pas géré
+            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
           else if (char_index & 1)
-            char_pixel=&(GFX_help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
           else
-            char_pixel=&(GFX_help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
         }
         else if (line_type=='S')
-          char_pixel=&(GFX_bold_font[(unsigned char)(line[char_index])][0][0]);
+          char_pixel=&(Gfx->Bold_font[(unsigned char)(line[char_index])][0][0]);
         else if (line_type=='N' || line_type=='K')
-          char_pixel=&(GFX_help_font_norm[(unsigned char)(line[char_index])][0][0]);
+          char_pixel=&(Gfx->Help_font_norm[(unsigned char)(line[char_index])][0][0]);
         else
-          char_pixel=&(GFX_help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
           
         for (x=0;x<6;x++)
           for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
