@@ -61,6 +61,7 @@ typedef void (* Func_display_zoom) (word,word,word,byte *);
 typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,byte,word,byte *);
 typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
 typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
+typedef void (* Func_draw_list_item) (word,word,word,byte);
 
 /// A set of RGB values.
 typedef struct
@@ -156,6 +157,20 @@ typedef struct T_Fileselector_item
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
 } T_Fileselector_item;
+
+typedef struct T_List_button
+{
+  short Number;                     ///< Unique identifier for all controls
+  short List_start;                 ///< Index of the font to appear as first line
+  short Cursor_position;            ///< Index of the selected line (0=top)
+
+  T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
+  T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
+  
+  Func_draw_list_item   Draw_list_item; ///< 
+
+  struct T_List_button * Next;    ///< Pointer to the next list button of current window.
+} T_List_button;
 
 /// Data for one line of the "Help" screens.
 typedef struct {

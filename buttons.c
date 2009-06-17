@@ -5420,14 +5420,10 @@ void Button_Effects(void)
   Display_cursor();
 }
 
-// Affiche tout le selecteur de fontes
-void Draw_font_selector(short x, short y, short list_start, short cursor_position, short nb_visibles)
+// Callback to display a font name in the list
+void Draw_one_font_name(word x, word y, word index, byte highlighted)
 {
-  int index;
-  for (index=0; index < nb_visibles; index++)
-  {
-    Print_in_window(x,y+index*8,Font_label(index+list_start), MC_Black, (cursor_position==index)?MC_Dark:MC_Light);
-  }
+  Print_in_window(x,y,Font_label(index), MC_Black, (highlighted)?MC_Dark:MC_Light);
 }
 
 void Button_Text()
@@ -5437,6 +5433,7 @@ void Button_Text()
   static int antialias=1;
   static short list_start=0; // index de le premiere fonte dans le selector
   static short cursor_position=0; // index de la ligne active dans le selector
+  static short selected_font_index=0;
   static short is_bold=0;
   static short is_italic=0;
 
@@ -5449,10 +5446,12 @@ void Button_Text()
   T_Special_button * input_size_button;
   T_Special_button * input_text_button;
   T_Special_button * preview_button;
+  T_Special_button * font_list_button;
   T_Scroller_button * font_scroller;
+  T_List_button * font_list;
+  
   byte redraw_is_needed=1;
   byte preview_is_needed=1;
-  short temp;
   
   Open_window(288,180,"Text");
 
@@ -5476,7 +5475,7 @@ void Button_Text()
   // Scroller des fontes
   font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Nb_fonts,NB_FONTS,list_start); // 5
   // Liste des fontes disponibles
-  Window_set_special_button(8,35,152,NB_FONTS*8); // 6
+  font_list_button = Window_set_special_button(8,35,152,NB_FONTS*8); // 6
   Window_display_frame_in(7, 33, 154, NB_FONTS*8+4);
   
   // Taille texte
@@ -5490,6 +5489,13 @@ void Button_Text()
   
   Window_set_normal_button(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11
   Window_set_normal_button(54,160,60,14,"Cancel",0,1,KEY_ESC); // 12
+  
+  // List of fonts
+  font_list = Window_set_list_button(font_list_button, font_scroller, Draw_one_font_name); // 13
+  // Restore its settings from last passage in screen
+  font_list->List_start = list_start;
+  font_list->Cursor_position = cursor_position;
+  
   Update_window_area(0,0,Window_width, Window_height);
   
   // str texte
@@ -5505,8 +5511,6 @@ void Button_Text()
       // Taille
       Num2str(font_size,size_buffer,3);
       Window_input_content(input_size_button,size_buffer);
-      // Selecteur de fonte
-      Draw_font_selector(8, 35, list_start, cursor_position, NB_FONTS);
     }
     if (preview_is_needed)
     {
@@ -5518,7 +5522,7 @@ void Button_Text()
         free(new_brush);
       }
       Window_rectangle(8, 106, 273, 50,Back_color);
-      new_brush = Render_text(preview_string, cursor_position+list_start, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
+      new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
       if (new_brush)
       {
         Display_brush(
@@ -5547,7 +5551,7 @@ void Button_Text()
   
     clicked_button=Window_clicked_button();
     if (clicked_button==0)
-    {
+    {/*
       if (Key==SDLK_UP && (cursor_position+list_start)>0)
       {
         Key=0;
@@ -5687,6 +5691,7 @@ void Button_Text()
         font_scroller->Position=list_start;
         Window_draw_slider(font_scroller);
       }
+      */
       if (Is_shortcut(Key,0x100+BUTTON_HELP))
         Window_help(BUTTON_TEXT, NULL);
     }
@@ -5719,29 +5724,19 @@ void Button_Text()
       break;
       
       case 5: // Scroller des fontes
-      if (list_start!=Window_attribute2)
-      {
-        cursor_position+=list_start;
-        list_start=Window_attribute2;
-        cursor_position-=list_start;
-        // On affiche à nouveau la liste
-        Hide_cursor();
-        redraw_is_needed=1;
-      }
+      /* Cannot happen, event is catched by the list control */
       break;
       
       case 6: // Selecteur de fonte
-      temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-35)>>3;
-      if (temp!=cursor_position && temp < Nb_fonts)
-      {
-        cursor_position=temp;
-        // On affiche à nouveau la liste
-        Hide_cursor();
-        redraw_is_needed=1;
-        preview_is_needed=1;
-      }
+      /* Cannot happen, event is catched by the list control */
       break;
-            
+      
+      case 13: // Font selection
+        selected_font_index = Window_attribute2;
+        Hide_cursor();
+        preview_is_needed=1;
+      break;
+                  
       case 7: // Taille du texte (nombre)
       Readline(222,45,size_buffer,3,1);
       font_size=atoi(size_buffer);
@@ -5780,6 +5775,10 @@ void Button_Text()
       
     
       case 11: // OK
+      // Save the selector settings
+      list_start = font_list->List_start;
+      cursor_position = font_list->Cursor_position;
+      
       if (!new_brush)
       {
         // Si echec de rendu
@@ -5803,7 +5802,7 @@ void Button_Text()
       
       // On passe en brosse:
       Display_cursor();
-      if (antialias || !TrueType_font(cursor_position+list_start))
+      if (antialias || !TrueType_font(selected_font_index))
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
       else
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
@@ -5819,6 +5818,10 @@ void Button_Text()
       return;
       
       case 12: // Cancel
+      // Save the selector settings
+      list_start = font_list->List_start;
+      cursor_position = font_list->Cursor_position;
+      
       if (new_brush)
         free(new_brush);
       Close_window();

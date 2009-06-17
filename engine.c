@@ -1178,6 +1178,7 @@ void Close_window(void)
   T_Scroller_button * temp3;
   T_Special_button  * temp4;
   T_Dropdown_button * temp5;
+  T_List_button     * temp6;
 
   Hide_cursor();
 
@@ -1211,6 +1212,12 @@ void Close_window(void)
     Window_dropdown_clear_items(Window_dropdown_button_list);
     free(Window_dropdown_button_list);
     Window_dropdown_button_list=temp5;
+  }
+  while (Window_list_button_list)
+  {
+    temp6=Window_list_button_list->Next;
+    free(Window_list_button_list);
+    Window_list_button_list=temp6;
   }
 
   if (Windows_open != 1)
@@ -1659,6 +1666,29 @@ void Window_dropdown_clear_items(T_Dropdown_button * dropdown)
     }
 }
 
+//----------------------- Create a List control -----------------------
+// These controls are special. They work over two controls previously created:
+// - entry_button is the textual area where the list values will be printed.
+// - scroller is a scroller button attached to it
+
+T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item)
+{
+  T_List_button *temp;
+
+  temp=(T_List_button *)malloc(sizeof(T_List_button));
+  temp->Number          =++Window_nb_buttons;
+  temp->List_start      = 0;
+  temp->Cursor_position = 0;
+  temp->Entry_button    = entry_button;
+  temp->Scroller        = scroller;
+  temp->Draw_list_item  = draw_list_item;
+
+  temp->Next=Window_list_button_list;
+  Window_list_button_list=temp;
+  return temp;
+}
+
+
 //----------------------- Ouverture d'un pop-up -----------------------
 
 void Open_popup(word x_pos, word y_pos, word width,word height)
@@ -1722,7 +1752,8 @@ void Close_popup(void)
   T_Palette_button  * temp2;
   T_Scroller_button * temp3;
   T_Special_button  * temp4;
-  T_Dropdown_button  * temp5;
+  T_Dropdown_button * temp5;
+  T_List_button     * temp6;
 
   Hide_cursor();
 
@@ -1757,7 +1788,13 @@ void Close_popup(void)
     free(Window_dropdown_button_list);
     Window_dropdown_button_list=temp5;
   }
-
+  while (Window_list_button_list)
+  {
+    temp6=Window_list_button_list->Next;
+    free(Window_list_button_list);
+    Window_list_button_list=temp6;
+  }
+  
   if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
@@ -2500,7 +2537,25 @@ short Window_get_button_shortcut(void)
       temp=temp->Next;
     }
   }
-
+  
+  // Handle arrow keys, end/home, and mouse wheel that have
+  // a certain behavior if a list control is present.
+  if (Window_list_button_list)
+  {
+    T_List_button *list = Window_list_button_list;
+    // If there's more than one of such control, only capture
+    // events if the mouse cursor is over it.
+    if (list->Next)
+    {
+      // to do
+    }
+  
+  
+  
+  
+  
+  
+  }
   return 0;
 }
 
@@ -2510,7 +2565,7 @@ short Window_clicked_button(void)
 
   if(!Get_input())SDL_Delay(20);
 
-  // Gestion des clicks
+  // Handle clicks
   if (Mouse_K)
   {
     if ((Mouse_X<Window_pos_X) || (Mouse_Y<Window_pos_Y)
@@ -2522,11 +2577,77 @@ short Window_clicked_button(void)
       if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
         Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
       else
-        return Window_get_clicked_button();
+      {
+        short clicked_button;
+        T_List_button * list;
+        // Check which controls was clicked (by rectangular area)
+        clicked_button = Window_get_clicked_button();
+        
+        // Check if it's part of a list control
+        for (list=Window_list_button_list; list!=NULL; list=list->Next)
+        {
+          if (list->Entry_button->Number == clicked_button)
+          {
+            // Click in the textual part of a list.
+            short clicked_line;            
+            clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
+            if (clicked_line == list->Cursor_position ||   // Same as before
+              clicked_line >= list->Scroller->Nb_elements) // Below last line              
+              return 0;
+            
+            Hide_cursor();
+            // Redraw one item as disabled
+            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+              list->Draw_list_item(
+                list->Entry_button->Pos_X,
+                list->Entry_button->Pos_Y + list->Cursor_position * 8,
+                list->List_start + list->Cursor_position,
+                0);
+            list->Cursor_position = clicked_line;
+            // Redraw one item as enabled
+            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+              list->Draw_list_item(
+                list->Entry_button->Pos_X,
+                list->Entry_button->Pos_Y + list->Cursor_position * 8,
+                list->List_start + list->Cursor_position,
+                1);
+            Display_cursor();
+
+            // Store the selected value as attribute2
+            Window_attribute2=list->List_start + list->Cursor_position;
+            // Return the control ID of the list.
+            return list->Number;
+          }
+          else if (list->Scroller->Number == clicked_button)
+          {
+            short i;
+            
+            // Click in the scroller part of a list
+            if (list->List_start == list->Scroller->Position)
+              return 0; // Didn't actually move
+            // Update scroller indices
+            list->Cursor_position += list->List_start;
+            list->List_start = list->Scroller->Position;
+            list->Cursor_position -= list->List_start;
+            // Need to redraw all
+            Hide_cursor();
+            for (i=Min(list->Scroller->Nb_visibles-1, list->Scroller->Nb_elements-1); i>=0; i--)
+            {
+              list->Draw_list_item(
+                list->Entry_button->Pos_X,
+                list->Entry_button->Pos_Y + i * 8,
+                list->List_start + i,
+                i == list->Cursor_position);
+            }
+            Display_cursor();
+          }
+        }
+        return clicked_button;
+      }
     }
   }
 
-  // Gestion des touches
+  // Intercept keys
   if (Key)
   {
     Button=Window_get_button_shortcut();

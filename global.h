@@ -527,6 +527,11 @@ GFX2_GLOBAL T_Dropdown_button  * Window_stack_dropdown_button_list[8];
 /// List of dropdown buttons in the topmost window.
 #define Window_dropdown_button_list Window_stack_dropdown_button_list[Windows_open-1]
 
+GFX2_GLOBAL T_List_button  * Window_stack_list_button_list[8];
+/// List of list buttons in the topmost window.
+#define Window_list_button_list Window_stack_list_button_list[Windows_open-1]
+
+
 
 GFX2_GLOBAL int Window_stack_attribute1[8];
 ///
