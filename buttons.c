@@ -1279,12 +1279,27 @@ void Button_Skins(void)
 
   if(clicked_button == 1 || Key == SDLK_RETURN)
   {
-	  strcpy(skinsdir,"skins/");
-	  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
-	  Load_graphics(Gfx, skinsdir);
-
-	  strcpy(Config_choisie.SkinFile,skinsdir+6);
-
+    T_Gui_skin * gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
+    if (gfx == NULL)
+    {
+      Error(0);
+    }
+    else
+    {
+  	  strcpy(skinsdir,"skins/");
+  	  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
+  	  Load_graphics(gfx, skinsdir);
+  	  if (0) // Error
+      {
+        free(gfx);
+  	  }
+  	  else
+  	  {
+        free(Gfx);
+        Gfx = gfx;
+  	    strcpy(Config_choisie.SkinFile,skinsdir+6);
+  	  }
+    }
 	  // Font selection
 	  if (Config_choisie.Font)
 		  Menu_font=Gfx->Fun_font;

@@ -687,6 +687,13 @@ void Program_shutdown(void)
   free(Spare_screen);
   free(Main_screen);
 
+  // Free the skin (Gui graphics) data
+  if (Gfx)
+  {
+    free(Gfx);
+    Gfx=NULL;
+  }
+  
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)
   {
