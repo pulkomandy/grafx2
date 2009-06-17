@@ -226,6 +226,7 @@ typedef struct
 typedef struct
 {
   byte Font;                             ///< Boolean, true to use the "fun" font in menus, false to use the classic one.
+  char SkinFile[64];					 ///< String, name of the file where all the graphic data is stored
   int  Show_hidden_files;                ///< Boolean, true to show hidden files in fileselectors.
   int  Show_hidden_directories;          ///< Boolean, true to show hidden directories in fileselectors.
 //  int  Show_system_directories;        ///< (removed when converted from DOS)

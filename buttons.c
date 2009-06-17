@@ -711,13 +711,16 @@ void Settings_display_config(T_Config * conf)
   Print_in_window( 91, 99,(conf->Clear_palette)?YES:NO,MC_Black,MC_Light);
   Print_in_window( 91,114,(conf->Maximize_preview)?YES:NO,MC_Black,MC_Light);
   Print_in_window( 91,129,(conf->Backup)?YES:NO,MC_Black,MC_Light);
+  /*
   switch (conf->Cursor)
   {
     case 0 : Print_in_window(67,144," Solid",MC_Black,MC_Light); break;
     case 1 : Print_in_window(67,144,"Transp",MC_Black,MC_Light); break;
     default: Print_in_window(67,144,"  Thin",MC_Black,MC_Light);
   }
+  */
 
+  /*
   if (conf->Font)
   { // Fun
     Print_in_window(  8,31," ",MC_Black,MC_Light);
@@ -732,6 +735,7 @@ void Settings_display_config(T_Config * conf)
     Print_in_window(  8,31,"\020",MC_Black,MC_Light);
     Print_in_window( 78,31,"\021",MC_Black,MC_Light);
   }
+  */
 
   Print_in_window(155,166,(conf->Auto_save)?YES:NO,MC_Black,MC_Light);
 
@@ -771,7 +775,6 @@ void Button_Settings(void)
   Open_window(307,182,"Settings");
 
   // On commence par dessiner tous les Cadres
-  Window_display_frame(  5, 16,157,30); // Font
   Window_display_frame(  5, 47,157,17); // Nb UNDO
   Window_display_frame(163, 16,139,48); // Show in filelist
   Window_display_frame(253, 77, 49,82); // Mouse sens.
@@ -786,7 +789,6 @@ void Button_Settings(void)
   Pixel_in_window(160,77,MC_Dark);
 */
   // On affiche maintenant tout le blabla
-  Print_in_window( 69, 19,"Font"            ,MC_Dark,MC_Light);
   Print_in_window(169, 19,"Show in filelist",MC_Dark,MC_Light);
   Print_in_window(  9, 52,"Nb of UNDO pages",MC_Dark,MC_Light);
   Print_in_window( 80, 70,"Miscellaneous"   ,MC_Dark,MC_Light);
@@ -795,52 +797,47 @@ void Button_Settings(void)
   Print_in_window(256,123,"X"               ,MC_Dark,MC_Light);
   Print_in_window(292,123,"Y"               ,MC_Dark,MC_Light);
 
-  // Boutons de fontes
-  Window_set_normal_button(17,28,59,14,"Classic",0,1,SDLK_LAST); // 1
-  Window_set_normal_button(91,28,59,14,"Fun"    ,0,1,SDLK_LAST); // 2
 
   // Button Show/Hide dans le fileselect
-  Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 3
-  Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 4
-//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 5
+  Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 1
+  Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 2
+//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 3
 
   // Button Show/Hide Picture limits
-  Window_set_normal_button(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 6
+  Window_set_normal_button(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 3
   // Button Show/Hide Picture limits
-  Window_set_normal_button(  9, 96,107,14,"Clear pal:   ",0,1,SDLK_LAST); // 7
+  Window_set_normal_button(  9, 96,107,14,"Clear pal:   ",0,1,SDLK_LAST); // 4
   // Button Show/Hide Picture limits
-  Window_set_normal_button(  9,111,107,14,"Max prev.:   ",0,1,SDLK_LAST); // 8
+  Window_set_normal_button(  9,111,107,14,"Max prev.:   ",0,1,SDLK_LAST); // 5
   // Button Effectuer des backups à chaque sauvegarde
-  Window_set_normal_button(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 9
-  // Button item du curseur
-  Window_set_normal_button(  9,141,107,14,"Cursor:      ",0,1,SDLK_LAST); // 10
+  Window_set_normal_button(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 6
 
   // Button Safety colors
-  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 11
+  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 8
   // Button Adjust Brush Pick
-  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 12
+  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 9
   // Button Separate colors
-  Window_set_normal_button(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 13
+  Window_set_normal_button(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 10
   // Button Passer dans la résolution appropriée après un chargement
-  Window_set_normal_button(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 14
+  Window_set_normal_button(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 11
   // Button Adapter la palette après un chargement (<=> Shift+BkSpc)
-  Window_set_normal_button(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 15
+  Window_set_normal_button(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 12
 
     // Button Reload
-  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 16
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 13
     // Button Auto-save
-  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 17
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 14
     // Button Save
-  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 18
+  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 15
     // Button Close
-  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 19
+  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 16
 
   // Jauges de sensibilité de la souris (X puis Y)
-  Window_set_scroller_button(265,99,56,4,1,0); // 20
-  Window_set_scroller_button(279,99,56,4,1,0); // 21
+  Window_set_scroller_button(265,99,56,4,1,0); // 17
+  Window_set_scroller_button(279,99,56,4,1,0); // 18
 
   // Zone de saisie du nb de pages de Undo
-  Window_set_input_button(140,50,2);           // 22
+  Window_set_input_button(140,50,2);           // 19
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -855,69 +852,60 @@ void Button_Settings(void)
 
     switch(clicked_button)
     {
-      case  1 : // Classic
-        Config_choisie.Font=0;
-        break;
-      case  2 : // Fun
-        Config_choisie.Font=1;
-        break;
-      case  3 : // Hidden files
+      case  1 : // Hidden files
         Config_choisie.Show_hidden_files=(Config_choisie.Show_hidden_files)?0:-1;
         break;
-      case  4 : // Hidden dir.
+      case  2 : // Hidden dir.
         Config_choisie.Show_hidden_directories=(Config_choisie.Show_hidden_directories)?0:-1;
         break;
 //      case  5 : // System dir.
 //        Config_choisie.Show_system_directories=(Config_choisie.Show_system_directories)?0:-1;
 //        break;
-      case  5 : // Draw limits
+      case  3 : // Draw limits
         Config_choisie.Display_image_limits=!Config_choisie.Display_image_limits;
         break;
-      case  6 : // Clear palette
+      case  4 : // Clear palette
         Config_choisie.Clear_palette=!Config_choisie.Clear_palette;
         break;
-      case  7 : // Maximize preview
+      case  5 : // Maximize preview
         Config_choisie.Maximize_preview=!Config_choisie.Maximize_preview;
         break;
-      case  8 : // Backup
+      case  6 : // Backup
         Config_choisie.Backup=!Config_choisie.Backup;
         break;
-      case 9 : // Cursor
-        Config_choisie.Cursor=(Config_choisie.Cursor+1)%3;
-        break;
-      case 10 : // Safety colors
+      case 7 : // Safety colors
         Config_choisie.Safety_colors=!Config_choisie.Safety_colors;
         break;
-      case 11 : // Adjust brush pick
+      case 8 : // Adjust brush pick
         Config_choisie.Adjust_brush_pick=!Config_choisie.Adjust_brush_pick;
         break;
-      case 12 : // Separate colors
+      case 9 : // Separate colors
         Config_choisie.Separate_colors=!Config_choisie.Separate_colors;
         break;
-      case 13 : // Auto-set resolution
+      case 10 : // Auto-set resolution
         Config_choisie.Auto_set_res=!Config_choisie.Auto_set_res;
         break;
-      case 14 : // Coordonnées
+      case 11 : // Coordonnées
         Config_choisie.Coords_rel=!Config_choisie.Coords_rel;
         break;
-      case 15 : // Reload
+      case 12 : // Reload
         Settings_load_config(&Config_choisie);
         config_is_reloaded=1;
         break;
-      case 16 : // Auto-save
+      case 13 : // Auto-save
         Config_choisie.Auto_save=!Config_choisie.Auto_save;
         break;
-      case 17 : // Save
+      case 14 : // Save
         Settings_save_config(&Config_choisie);
         break;
-      // 18 : OK
-      case 19 : // X Sensib.
+      // 15 : OK
+      case 16 : // X Sensib.
         Config_choisie.Mouse_sensitivity_index_x=Window_attribute2+1;
         break;
-      case 20 : // Y Sensib.
+      case 17 : // Y Sensib.
         Config_choisie.Mouse_sensitivity_index_y=Window_attribute2+1;
         break;
-      case 21 : // Nb pages Undo
+      case 18 : // Nb pages Undo
         Num2str(Config_choisie.Max_undo_pages,str,2);
         Readline(142,52,str,2,1);
         Config_choisie.Max_undo_pages=atoi(str);
@@ -947,21 +935,15 @@ void Button_Settings(void)
       Spare_fileselector_offset=0;
     }
 
-    if ((clicked_button>=1) && (clicked_button<=18))
+    if ((clicked_button>=1) && (clicked_button<15))
       Settings_display_config(&Config_choisie);
       
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_SETTINGS, NULL);
   }
-  while ( (clicked_button!=18) && (Key!=SDLK_RETURN) );
+  while ( (clicked_button!=15) && (Key!=SDLK_RETURN) );
 
   Config=Config_choisie;
-
-  // Font selection
-  if (Config.Font)
-    Menu_font=Gfx->Fun_font;
-  else
-    Menu_font=Gfx->System_font;
 
   if (config_is_reloaded)
     Compute_optimal_menu_colors(Main_palette);
@@ -977,6 +959,7 @@ void Button_Settings(void)
 }
 
 
+#define FILESEL_Y 52
 void Display_skins_list(short offset_first, short selector_offset)
 //
 // offset_first = Décalage entre le premier fichier visible dans le
@@ -1016,7 +999,7 @@ void Display_skins_list(short offset_first, short selector_offset)
       }
 
       // On affiche l'élément
-      Print_in_window(8,17+index*8,current_item->Short_name,text_color,background_color);
+      Print_in_window(8,FILESEL_Y+2+index*8,current_item->Short_name,text_color,background_color);
 
       // On passe à la ligne suivante
       selector_offset--;
@@ -1042,22 +1025,48 @@ void Button_Skins(void)
   struct dirent* entry; // Structure de lecture des éléments
   struct stat Infos_enreg;
   char * current_path;
+  T_Config Config_choisie = Config;
+  T_Dropdown_button* font_dropdown;
+  T_Dropdown_button* cursor_dropdown;
 
   T_Scroller_button * file_scroller;
 
-  Open_window(178,120,"Skins");
+  Open_window(178,155,"Skins");
+
+  // Frames
+  Window_display_frame_in(6,FILESEL_Y-2,148,84); // File selector
+
+  // Texts
+  Print_in_window( 6, 21,"Font"            ,MC_Black,MC_Light);
+  Print_in_window( 6, 36,"Cursor"          ,MC_Black,MC_Light);
 
   // Ok button
-  Window_set_normal_button(6,102, 51,14,"OK"         ,0,1,SDLK_RETURN); // 1
-
-  // Frame autour du fileselector
-  Window_display_frame_in(6,15,148,84);
+  Window_set_normal_button(6,136, 51,14,"OK"         ,0,1,SDLK_RETURN); // 1
 
   // Fileselector
-  Window_set_special_button(9,17,144,80); // 2
+  Window_set_special_button(9,FILESEL_Y+2,144,80); // 2
 
   // Scroller du fileselector
-  file_scroller = Window_set_scroller_button(160,16,82,1,10,0); // 3
+  file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,1,10,0); // 3
+
+  // Boutons de fontes
+  font_dropdown = Window_set_dropdown_button(60,19,70,11,0,(Config_choisie.Font==0)?"Classic":"Fun    ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 4
+  Window_dropdown_add_item(font_dropdown,0,"Classic");
+  Window_dropdown_add_item(font_dropdown,1,"Fun    ");
+
+  // Cancel
+  Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 5
+
+  // Button item du curseur
+  if(Config_choisie.Cursor==0)
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Solid      ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  else if(Config_choisie.Cursor==1)
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Transparent",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  else
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Thin       ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  Window_dropdown_add_item(cursor_dropdown,0,"Solid      ");
+  Window_dropdown_add_item(cursor_dropdown,1,"Transparent");
+  Window_dropdown_add_item(cursor_dropdown,2,"Thin       ");
 
   strcpy(skinsdir,Data_directory);
   strcat(skinsdir,"skins");
@@ -1095,8 +1104,12 @@ void Button_Skins(void)
   file_scroller->Position=Main_fileselector_position;
   Compute_slider_cursor_height(file_scroller);
   Window_draw_slider(file_scroller);
+
+  // Select the current skin (we know it does exist, so no need to do a 
+  // nearest match search)
+  Highlight_file(Config_choisie.SkinFile);
   // On efface les anciens noms de fichier:
-  Window_rectangle(8-1,15-1,144+2,80+2,MC_Black);
+  Window_rectangle(8-1,FILESEL_Y-1,144+2,80+2,MC_Black);
   // On affiche les nouveaux:
   Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
 
@@ -1110,10 +1123,11 @@ void Button_Skins(void)
 
     switch(clicked_button)
     {
+	  // 1: OK
       case 2 : // Zone d'affichage de la liste de fichiers
         Hide_cursor();
 
-  		temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-95)>>3;
+  		temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-FILESEL_Y)>>3;
   		if (temp>=Filelist_nb_elements)
     	temp=Filelist_nb_elements-1;
         if (temp>=0)
@@ -1139,6 +1153,13 @@ void Button_Skins(void)
         Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
         Display_cursor();
         *quicksearch_filename=0;
+        break;
+      case  4 : // Font dropdown
+        Config_choisie.Font=Window_attribute2; // récupère le numéro de l'item selectionné
+        break;
+	  // 5: Cancel
+       case 6 : // Cursor
+        Config_choisie.Cursor=Window_attribute2;
         break;
     }
 
@@ -1254,11 +1275,24 @@ void Button_Skins(void)
           *quicksearch_filename=0;
     }
   }
-  while ( (clicked_button!=1) && (Key!=SDLK_RETURN) );
+  while ( (clicked_button!=1) && (Key!=SDLK_RETURN) && (clicked_button !=5) && (Key != SDLK_ESCAPE));
 
-  strcpy(skinsdir,"skins/");
-  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
-  Load_graphics(Gfx, skinsdir);
+  if(clicked_button == 1 || Key == SDLK_RETURN)
+  {
+	  strcpy(skinsdir,"skins/");
+	  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
+	  Load_graphics(Gfx, skinsdir);
+
+	  strcpy(Config_choisie.SkinFile,skinsdir+6);
+
+	  // Font selection
+	  if (Config_choisie.Font)
+		  Menu_font=Gfx->Fun_font;
+	  else
+		  Menu_font=Gfx->System_font;
+
+	  Config = Config_choisie ;
+  }
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
@@ -1271,8 +1305,8 @@ void Button_Skins(void)
 //---------------------------- Changement de page ----------------------------
 void Button_Page(void)
 {
-  byte   temp_byte;
-  word   temp_word;
+	byte   temp_byte;
+	word   temp_word;
   short  temp_short;
   float  temp_float;
   char   Temp_buffer[256];

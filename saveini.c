@@ -93,6 +93,7 @@ int Save_INI_char_in_value_alphabet(char c)
          (c<='z')
        ) ||
        (c == '$')        // Symbole d'hexadécimal
+	   || (c== '.')		// Point (dans les noms de fichiers)
      )
     return 1;
   else
@@ -478,6 +479,11 @@ int Save_INI(T_Config * conf)
   values[0]=(conf->Font)+1;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Font",1,values,0)))
     goto Erreur_Retour;
+
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->SkinFile)))
+    goto Erreur_Retour;
+
+puts(conf->SkinFile);
 
 
   if ((return_code=Save_INI_reach_group(Ancien_fichier,Nouveau_fichier,buffer,"[FILE_SELECTOR]")))

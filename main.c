@@ -76,7 +76,7 @@
 #endif
 
 // filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "modern.png";
+static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR ;
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -536,6 +536,7 @@ int Init_program(int argc,char * argv[])
   Gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
   if (Gfx == NULL)
     Error(ERROR_MEMORY);
+  strcpy(Gui_skin_file+6,Config.SkinFile);
   Load_graphics(Gfx, Gui_skin_file);
 
   // Infos sur les trames (Sieve)

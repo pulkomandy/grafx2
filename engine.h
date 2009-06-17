@@ -50,6 +50,8 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title,byte undersc_letter,
                                    byte clickable, word shortcut);
+#define GGUI_set_normal_button(x_pos,y_pos,width,height,title,undersc_letter,clickable,shortcut,NAME) \
+	const short NAME = Window_set_normal_button((x_pos),(y_pos),(width),(height),(title),(undersc_letter),(clickable),(shortcut))->Number;
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
                                    char * title,byte undersc_letter,

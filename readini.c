@@ -529,6 +529,10 @@ int Load_INI(T_Config * conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Font=values[0]-1;
 
+  if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
+	strcpy(conf->SkinFile,value_label);
+  else
+    strcpy(conf->SkinFile,"modern.png");
 
   if ((return_code=Load_INI_reach_group(file,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
