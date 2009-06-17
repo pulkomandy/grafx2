@@ -2071,7 +2071,7 @@ static const T_Help_table helptable_settings[] =
   HELP_TEXT ("\"skin\" directory if you want to create your")
   HELP_TEXT ("own. There are two skins available, the")
   HELP_TEXT ("default for 2.1 is called modern. Classic is")
-  HELP_TEXT ("for nostalgics who wush to remember the old")
+  HELP_TEXT ("for nostalgics who wish to remember the old")
   HELP_TEXT ("days of Sunset Design. If you create a good")
   HELP_TEXT ("skin, feel free to share it with us! We may")
   HELP_TEXT ("include it in a future release...")
