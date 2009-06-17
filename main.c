@@ -408,6 +408,7 @@ int Init_program(int argc,char * argv[])
   }
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
+  SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
 
   {
