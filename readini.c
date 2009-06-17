@@ -529,11 +529,6 @@ int Load_INI(T_Config * conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Font=values[0]-1;
 
-  if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
-	strcpy(conf->SkinFile,value_label);
-  else
-    strcpy(conf->SkinFile,"modern.png");
-
   if ((return_code=Load_INI_reach_group(file,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 
@@ -810,7 +805,7 @@ int Load_INI(T_Config * conf)
   }
   
   conf->Double_click_speed=500;
-  // Optional, speed of double-click (>98.0%)
+  // Optional, speed of double-click (>2.0)
   if (!Load_INI_get_values (file,buffer,"Double_click_speed",1,values))
   {
     if ((values[0]>0) || (values[0]<=2000))
@@ -818,12 +813,18 @@ int Load_INI(T_Config * conf)
   }
 
   conf->Double_key_speed=500;
-  // Optional, speed of double-keypress (>98.0%)
+  // Optional, speed of double-keypress (>2.0)
   if (!Load_INI_get_values (file,buffer,"Double_key_speed",1,values))
   {
     if ((values[0]>0) || (values[0]<=2000))
       conf->Double_key_speed=values[0];
   }
+
+  // Optional, name of skin file. (>2.0)
+  if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
+	  strcpy(conf->SkinFile,value_label);
+  else
+    strcpy(conf->SkinFile,"modern.png");
 
 
   fclose(file);

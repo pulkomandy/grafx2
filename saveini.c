@@ -480,12 +480,6 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Font",1,values,0)))
     goto Erreur_Retour;
 
-  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->SkinFile)))
-    goto Erreur_Retour;
-
-puts(conf->SkinFile);
-
-
   if ((return_code=Save_INI_reach_group(Ancien_fichier,Nouveau_fichier,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 
@@ -647,6 +641,9 @@ puts(conf->SkinFile);
     
   values[0]=(conf->Double_key_speed);
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_key_speed",1,values,0)))
+    goto Erreur_Retour;
+
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->SkinFile)))
     goto Erreur_Retour;
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
