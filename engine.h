@@ -72,6 +72,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
 void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number, const char *label);
 void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
 T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item);
+void Window_redraw_list(T_List_button * list);
 byte Window_click_in_rectangle(short start_x,short start_y,short end_x,short end_y);
 short Wait_click_in_palette(T_Palette_button * button);
 void Get_color_behind_window(byte * color, byte * click);

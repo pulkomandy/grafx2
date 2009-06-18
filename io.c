@@ -243,16 +243,16 @@ int File_length_file(FILE * file)
 void For_each_file(const char * directory_name, void Callback(const char *))
 {
   // Pour scan de répertoire
-  DIR*  Repertoire_Courant; //Répertoire courant
+  DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
   char full_filename[MAX_PATH_CHARACTERS];
   int filename_position;
   strcpy(full_filename, directory_name);
-  Repertoire_Courant=opendir(directory_name);
-  if(Repertoire_Courant == NULL) return;        // Répertoire invalide ...
+  current_directory=opendir(directory_name);
+  if(current_directory == NULL) return;        // Répertoire invalide ...
   strcat(full_filename, PATH_SEPARATOR);
   filename_position = strlen(full_filename);
-  while ((entry=readdir(Repertoire_Courant)))
+  while ((entry=readdir(current_directory)))
   {
     struct stat Infos_enreg;
     strcpy(&full_filename[filename_position], entry->d_name);
@@ -262,6 +262,6 @@ void For_each_file(const char * directory_name, void Callback(const char *))
       Callback(full_filename);
     }
   }
-  closedir(Repertoire_Courant);
+  closedir(current_directory);
 }
 

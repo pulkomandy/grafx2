@@ -958,60 +958,50 @@ void Button_Settings(void)
   Set_number_of_backups(Config.Max_undo_pages);
 }
 
+// Add a skin to the list
+void Add_skin(const char *name)
+{
+  char * fname;
 
-#define FILESEL_Y 52
-void Display_skins_list(short offset_first, short selector_offset)
-//
-// offset_first = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le premier fichier de la liste
-//
-// selector_offset  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier sélectionné dans la liste
-//
+  Add_element_to_list(name, 0);  
+  Filelist_nb_elements++;
+  
+  // Cut the long name to keep only filename (no directory)
+  fname = Find_last_slash(Filelist->Full_name);
+  if (fname[0]=='\0')
+    return;
+
+  strcpy(Filelist->Full_name, fname+1);
+  
+  // Reformat the short name
+  strcpy(Filelist->Short_name,Format_filename(Filelist->Full_name, 0));
+    
+}
+
+T_Fileselector_item * Get_selected_skin(word index)
 {
   T_Fileselector_item * current_item;
-  byte   index;  // index du fichier qu'on affiche (0 -> 9)
-  byte   text_color;
-  byte   background_color;
+  // Fast-forward to the requested item.
+  current_item=Filelist;
+  for (;index>0;index--)
+    current_item=current_item->Next;
+  // I know it's highly inefficient (O(n²)) but there shouldn't be dozens
+  // of skins in the directory...
+  
+  return current_item;
+}
 
+// Callback to display a skin name in the list
+void Draw_one_skin_name(word x, word y, word index, byte highlighted)
+{
+  T_Fileselector_item * current_item;
 
-  // On vérifie s'il y a au moins 1 fichier dans la liste:
   if (Filelist_nb_elements>0)
   {
-    // On commence par chercher à pointer sur le premier fichier visible:
-    current_item=Filelist;
-    for (;offset_first>0;offset_first--)
-      current_item=current_item->Next;
-
-    // Pour chacun des 10 éléments inscriptibles à l'écran
-    for (index=0;index<10;index++)
-    {
-      // S'il est sélectionné:
-      if (!selector_offset)
-      {
-          text_color=MC_White;
-        background_color=MC_Light;
-      }
-      else
-      {
-          text_color=MC_Light;
-        background_color=MC_Black;
-      }
-
-      // On affiche l'élément
-      Print_in_window(8,FILESEL_Y+2+index*8,current_item->Short_name,text_color,background_color);
-
-      // On passe à la ligne suivante
-      selector_offset--;
-      current_item=current_item->Next;
-      if (!current_item)
-        break;
-    } // End de la boucle d'affichage
-
-  } // End du test d'existence de fichiers
+    current_item = Get_selected_skin(index);    
+    Print_in_window(x,y,current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
+  }
 }
-	
-
 
 /// Skin selector window
 void Button_Skins(void)
@@ -1021,15 +1011,34 @@ void Button_Skins(void)
   char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
   char * most_matching_filename;
   char skinsdir[MAX_PATH_CHARACTERS];
-  DIR*  Repertoire_Courant; //Répertoire courant
+  DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
   struct stat Infos_enreg;
   char * current_path;
+  static int selector_position=0;
   T_Config Config_choisie = Config;
-  T_Dropdown_button* font_dropdown;
-  T_Dropdown_button* cursor_dropdown;
-
+  T_Dropdown_button * font_dropdown;
+  T_Dropdown_button * cursor_dropdown;
+  T_List_button * skin_list;
   T_Scroller_button * file_scroller;
+
+  #define FILESEL_Y 52
+
+  // --- Read the contents of skins/ directory ------------------
+  
+  // Here we use the same data container as the fileselectors.
+  // Reinitialize the list
+  Free_fileselector_list();
+  Filelist_nb_elements=0;
+  // Browse the "skins" directory
+  strcpy(skinsdir,Data_directory);
+  strcat(skinsdir,"skins");
+  // Add each found file to the list
+  For_each_file(skinsdir, Add_skin);
+  // Sort it
+  Sort_list_of_files();
+  
+  // --------------------------------------------------------------
 
   Open_window(178,155,"Skins");
 
@@ -1043,75 +1052,41 @@ void Button_Skins(void)
   // Ok button
   Window_set_normal_button(6,136, 51,14,"OK"         ,0,1,SDLK_RETURN); // 1
 
-  // Fileselector
-  Window_set_special_button(9,FILESEL_Y+2,144,80); // 2
-
-  // Scroller du fileselector
-  file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,1,10,0); // 3
+  // List of skins
+  skin_list = Window_set_list_button(
+    // Fileselector
+    Window_set_special_button(9,FILESEL_Y+2,144,80), // 2
+    // Scroller du fileselector
+    (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,Filelist_nb_elements,10,selector_position)), // 3
+    Draw_one_skin_name); // 4
 
   // Boutons de fontes
-  font_dropdown = Window_set_dropdown_button(60,19,70,11,0,(Config_choisie.Font==0)?"Classic":"Fun    ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 4
+  font_dropdown = Window_set_dropdown_button(60,19,70,11,0,(Config_choisie.Font==0)?"Classic":"Fun    ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
   Window_dropdown_add_item(font_dropdown,0,"Classic");
   Window_dropdown_add_item(font_dropdown,1,"Fun    ");
 
   // Cancel
-  Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 5
+  Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
 
   // Button item du curseur
   if(Config_choisie.Cursor==0)
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Solid      ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Solid      ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
   else if(Config_choisie.Cursor==1)
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Transparent",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Transparent",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
   else
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Thin       ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Thin       ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
   Window_dropdown_add_item(cursor_dropdown,0,"Solid      ");
   Window_dropdown_add_item(cursor_dropdown,1,"Transparent");
   Window_dropdown_add_item(cursor_dropdown,2,"Thin       ");
 
-  strcpy(skinsdir,Data_directory);
-  strcat(skinsdir,"skins");
-  chdir(skinsdir);
-  getcwd(skinsdir,256);
-
-  // Affichage des premiers fichiers visibles:
-  // Ensuite, on vide la liste actuelle:
-  Free_fileselector_list();
-  // Après effacement, il ne reste ni fichier ni répertoire dans la liste
-  Filelist_nb_elements=0;
-
-  // On lit tous les répertoires:
-  current_path=getcwd(NULL,0);
-  Repertoire_Courant=opendir(current_path);
-  while ((entry=readdir(Repertoire_Courant)))
-  {
-    stat(entry->d_name,&Infos_enreg);
-    if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
-      (Config.Show_hidden_files || //Il n'est pas caché
-      !isHidden(entry)))
-    {
-        // On rajoute le fichier à la liste
-        Add_element_to_list(entry->d_name, 0);
-        Filelist_nb_elements++;
-    }
-  }
-
-  closedir(Repertoire_Courant);
-  free(current_path);
-
-  Sort_list_of_files();
-
-  file_scroller->Nb_elements=Filelist_nb_elements;
-  file_scroller->Position=Main_fileselector_position;
-  Compute_slider_cursor_height(file_scroller);
-  Window_draw_slider(file_scroller);
-
   // Select the current skin (we know it does exist, so no need to do a 
   // nearest match search)
-  Highlight_file(Config_choisie.SkinFile);
+  //Highlight_file(Config_choisie.SkinFile);
   // On efface les anciens noms de fichier:
-  Window_rectangle(8-1,FILESEL_Y-1,144+2,80+2,MC_Black);
+  //Window_rectangle(8-1,FILESEL_Y-1,144+2,80+2,MC_Black);
   // On affiche les nouveaux:
-  Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
+  //Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
+  Window_redraw_list(skin_list);
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -1123,42 +1098,19 @@ void Button_Skins(void)
 
     switch(clicked_button)
     {
-	  // 1: OK
-      case 2 : // Zone d'affichage de la liste de fichiers
-        Hide_cursor();
-
-  		temp=(((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-FILESEL_Y)>>3;
-  		if (temp>=Filelist_nb_elements)
-    	temp=Filelist_nb_elements-1;
-        if (temp>=0)
-        {
-            // On met à jour le décalage
-            Main_fileselector_offset=temp;
-
-            // On affiche à nouveau la liste
-            Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
-
-            // On vient de changer de nom de fichier, donc on doit s'appreter
-            // a rafficher une preview
-            *quicksearch_filename=0;
-        }
-        Display_cursor();
-        Wait_end_of_click();
+	    case 1 : // OK
+	      break;
+      case 2 : // doesn't happen
         break;
-
-      case 3 : // Scroller de fichiers
-        Hide_cursor();
-        Main_fileselector_position=Window_attribute2;
-        // On affiche à nouveau la liste
-        Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
-        Display_cursor();
-        *quicksearch_filename=0;
+      case 3 : // doesn't happen
         break;
-      case  4 : // Font dropdown
+      case 4 : // a file is selected
+        break;
+      case  5 : // Font dropdown
         Config_choisie.Font=Window_attribute2; // récupère le numéro de l'item selectionné
         break;
 	  // 5: Cancel
-       case 6 : // Cursor
+       case 7 : // Cursor
         Config_choisie.Cursor=Window_attribute2;
         break;
     }
@@ -1241,7 +1193,6 @@ void Button_Skins(void)
   		}
         Key=0;
         break;
-		*/
       default: // Autre => On se place sur le nom de fichier qui correspond
         if (clicked_button<=0)
         {
@@ -1273,11 +1224,12 @@ void Button_Skins(void)
         }
         else
           *quicksearch_filename=0;
+    		*/
     }
   }
-  while ( (clicked_button!=1) && (Key!=SDLK_RETURN) && (clicked_button !=5) && (Key != SDLK_ESCAPE));
+  while ( (clicked_button!=1) && (clicked_button !=6) && (Key != SDLK_ESCAPE));
 
-  if(clicked_button == 1 || Key == SDLK_RETURN)
+  if(clicked_button == 1)
   {
     T_Gui_skin * gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
     if (gfx == NULL)
@@ -1286,8 +1238,10 @@ void Button_Skins(void)
     }
     else
     {
-  	  strcpy(skinsdir,"skins/");
-  	  Get_selected_item(Main_fileselector_position,Main_fileselector_offset,skinsdir+6,NULL);
+   	  strcpy(skinsdir,"skins/");
+      strcat(   	  
+   	    skinsdir,
+   	    Get_selected_skin(skin_list->List_start+skin_list->Cursor_position)->Full_name);
   	  Load_graphics(gfx, skinsdir);
   	  if (0) // Error
       {
@@ -5495,6 +5449,8 @@ void Button_Text()
   // Restore its settings from last passage in screen
   font_list->List_start = list_start;
   font_list->Cursor_position = cursor_position;
+  
+  Window_redraw_list(font_list);
   
   Update_window_area(0,0,Window_width, Window_height);
   

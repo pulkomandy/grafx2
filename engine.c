@@ -1688,6 +1688,19 @@ T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroll
   return temp;
 }
 
+void Window_redraw_list(T_List_button * list)
+{
+  int i;
+
+  for (i=Min(list->Scroller->Nb_visibles-1, list->Scroller->Nb_elements-1); i>=0; i--)
+  {
+    list->Draw_list_item(
+      list->Entry_button->Pos_X,
+      list->Entry_button->Pos_Y + i * 8,
+      list->List_start + i,
+      i == list->Cursor_position);
+  }
+}
 
 //----------------------- Ouverture d'un pop-up -----------------------
 
@@ -2620,8 +2633,6 @@ short Window_clicked_button(void)
           }
           else if (list->Scroller->Number == clicked_button)
           {
-            short i;
-            
             // Click in the scroller part of a list
             if (list->List_start == list->Scroller->Position)
               return 0; // Didn't actually move
@@ -2631,14 +2642,7 @@ short Window_clicked_button(void)
             list->Cursor_position -= list->List_start;
             // Need to redraw all
             Hide_cursor();
-            for (i=Min(list->Scroller->Nb_visibles-1, list->Scroller->Nb_elements-1); i>=0; i--)
-            {
-              list->Draw_list_item(
-                list->Entry_button->Pos_X,
-                list->Entry_button->Pos_Y + i * 8,
-                list->List_start + i,
-                i == list->Cursor_position);
-            }
+            Window_redraw_list(list);
             Display_cursor();
           }
         }

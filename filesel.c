@@ -207,7 +207,7 @@ void Read_list_of_files(byte selected_format)
 //  Cette procédure charge dans la liste chainée les fichiers dont l'extension
 // correspond au format demandé.
 {
-  DIR*  Repertoire_Courant; //Répertoire courant
+  DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
   char * filter = "*"; // Extension demandée
   struct stat Infos_enreg;
@@ -225,8 +225,8 @@ void Read_list_of_files(byte selected_format)
 
   // On lit tous les répertoires:
   current_path=getcwd(NULL,0);
-  Repertoire_Courant=opendir(current_path);
-  while ((entry=readdir(Repertoire_Courant)))
+  current_directory=opendir(current_path);
+  while ((entry=readdir(current_directory)))
   {
     // On ignore le répertoire courant
     if ( !strcmp(entry->d_name, "."))
@@ -264,7 +264,7 @@ void Read_list_of_files(byte selected_format)
   Filelist_nb_directories ++;
 #endif
 
-  closedir(Repertoire_Courant);
+  closedir(current_directory);
   free(current_path);
 
   Filelist_nb_elements=Filelist_nb_directories+Filelist_nb_files;
