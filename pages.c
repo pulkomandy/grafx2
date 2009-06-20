@@ -414,7 +414,7 @@ int New_page_is_possible(
         T_List_of_pages * secondary_list
 )
 {
-  unsigned long mem_available_now;
+  long long mem_available_now;
   unsigned long current_list_size;
   unsigned long spare_list_size;
   unsigned long current_page_size;
