@@ -1231,34 +1231,28 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
-    T_Gui_skin * gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
-    if (gfx == NULL)
+    T_Gui_skin * gfx;
+ 	  strcpy(skinsdir,"skins/");
+    strcat(   	  
+ 	    skinsdir,
+ 	    Get_selected_skin(skin_list->List_start+skin_list->Cursor_position)->Full_name);
+	  gfx=Load_graphics(skinsdir);
+	  if (gfx == NULL) // Error
     {
-      Error(0);
-    }
-    else
-    {
-   	  strcpy(skinsdir,"skins/");
-      strcat(   	  
-   	    skinsdir,
-   	    Get_selected_skin(skin_list->List_start+skin_list->Cursor_position)->Full_name);
-  	  Load_graphics(gfx, skinsdir);
-  	  if (0) // Error
-      {
-        free(gfx);
-  	  }
-  	  else
-  	  {
-        free(Gfx);
-        Gfx = gfx;
-  	    strcpy(Config_choisie.SkinFile,skinsdir+6);
-  	  }
-    }
-	  // Font selection
-	  if (Config_choisie.Font)
-		  Menu_font=Gfx->Fun_font;
+      Verbose_error_message(Gui_loading_error_message);
+	  }
 	  else
-		  Menu_font=Gfx->System_font;
+	  {
+      free(Gfx);
+      Gfx = gfx;
+  	  // Font selection
+  	  if (Config_choisie.Font)
+  		  Menu_font=Gfx->Fun_font;
+  	  else
+  		  Menu_font=Gfx->System_font;
+      
+	    strcpy(Config_choisie.SkinFile,skinsdir+6);
+	  }
 
 	  Config = Config_choisie ;
   }

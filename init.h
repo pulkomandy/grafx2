@@ -22,7 +22,7 @@
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
 
-void Load_graphics(T_Gui_skin *gfx, const char * skin_file);
+T_Gui_skin *Load_graphics(const char * skin_file);
 void Init_buttons(void);
 void Init_operations(void);
 int  Load_CFG(int reload_all);
@@ -30,3 +30,5 @@ int  Save_CFG(void);
 void Set_all_video_modes(void);
 void Set_config_defaults(void);
 void Init_sighandler(void);
+
+extern char Gui_loading_error_message[512];

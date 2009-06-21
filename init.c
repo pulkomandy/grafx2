@@ -66,6 +66,7 @@
 #include "init.h"
 #include "transform.h"
 
+char Gui_loading_error_message[512];
 
 // Rechercher la liste et le type des lecteurs de la machine
 
@@ -74,7 +75,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-void GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
+byte GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
 {
   byte color;
   int y;
@@ -86,17 +87,17 @@ void GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_co
     if (color!=neutral_color)
     {
       *start_y=y;
-      return;
+      return 0;
     }
     y++;
   } while (y<gui->h);
   
-  printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
+  sprintf(Gui_loading_error_message, "Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
     *start_x, *start_y, section);
-  Error(ERROR_GUI_CORRUPTED);
+  return 1;
 }
 
-void GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
+byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
 {
   byte color;
   int x;
@@ -108,17 +109,17 @@ void GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
     if (color!=neutral_color)
     {
       *start_x=x;
-      return;
+      return 0;
     }
     x++;
   } while (x<gui->w);
   
-  printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
+  sprintf(Gui_loading_error_message, "Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
     *start_x, start_y, section);
-  Error(ERROR_GUI_CORRUPTED);
+  return 1;
 }
 
-void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
+byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
@@ -132,9 +133,9 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
   // Verification taille
   if (start_y+height>=gui->h || start_x+width>=gui->w)
   {
-    printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
+    sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
       start_x, start_y, height, width, section);
-    Error(ERROR_GUI_CORRUPTED);
+    return 1;
   }
 
   for (y=start_y; y<start_y+height; y++)
@@ -144,23 +145,23 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
       color=Get_SDL_pixel_8(gui,x,y);
       if (type==0 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White))
       {
-        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
+        sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
           start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White);
-        Error(ERROR_GUI_CORRUPTED);
+        return 1;
       }
       if (type==1 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White && color != MC_Trans))
       {
-        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
+        sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
           start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White, MC_Trans);
-        Error(ERROR_GUI_CORRUPTED);
+        return 1;
       }
       if (type==2)
       {
         if (color != MC_White && color != MC_Trans)
         {
-          printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
+          sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
             start_x, start_y, height, width, section, x, y, color, MC_White, MC_Trans);
-          Error(ERROR_GUI_CORRUPTED);
+          return 1;
         }
         // Conversion en 0/1 pour les brosses monochromes internes
         color = (color != MC_Trans);
@@ -169,14 +170,16 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
       dest_ptr++;
     }
   }
+  return 0;
 }
 
-void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
+byte Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
   byte buffer[256];
   int x,y;
   
-  Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2);
+  if (Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2))
+    return 1;
 
   for (y=0; y<16; y++)
   {
@@ -187,6 +190,7 @@ void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, ch
     }
     dest++;
   }
+  return 0;
 }
 
 void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
@@ -233,12 +237,9 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
       gfx->Cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 
-void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
+byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int  index;
-  char filename[MAX_PATH_CHARACTERS];
-  SDL_Surface * gui;
-  SDL_Palette * SDLPal;
   int i;
   int cursor_x=0,cursor_y=0;
   byte color;
@@ -248,43 +249,36 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
   byte mouse_cursor_area[29][29];
+  SDL_Palette * SDLPal;
   
-  // Lecture du fichier "skin"
-  strcpy(filename,Data_directory);
-  strcat(filename,skin_file);
-  
-  gui=IMG_Load(filename);
-  if (!gui)
-  {
-    Error(ERROR_GUI_MISSING);
-  }
+  // Default palette
   if (!gui->format || gui->format->BitsPerPixel != 8)
   {
-    printf("Not a 8-bit image");
-    Error(ERROR_GUI_CORRUPTED);
+    sprintf(Gui_loading_error_message, "Not a 8-bit image");
+    return 1;
   }
   SDLPal=gui->format->palette;
   if (!SDLPal || SDLPal->ncolors!=256)
   {
-    printf("Not a 256-color palette");
-    Error(ERROR_GUI_CORRUPTED);
+    sprintf(Gui_loading_error_message, "Not a 256-color palette");
+    return 1;
   }
-  // Lecture de la palette par défaut
+  // Read the default palette
   for (i=0; i<256; i++)
   {
     gfx->Default_palette[i].R=SDLPal->colors[i].r;
     gfx->Default_palette[i].G=SDLPal->colors[i].g;
     gfx->Default_palette[i].B=SDLPal->colors[i].b;
   }
-  
+
   // Carré "noir"
   MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Black);
@@ -294,8 +288,8 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Dark);
@@ -305,8 +299,8 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   {
     if (++cursor_x>gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Light);
@@ -316,8 +310,8 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_White);
@@ -327,8 +321,8 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Trans);
@@ -343,24 +337,33 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     cursor_y++;
     if (cursor_y>=gui->h)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
   }
   
   // Menu
-  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0);
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
+    return 1;
+  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
+    return 1;
   cursor_y+=MENU_HEIGHT;
 
   // Effets
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+      return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -369,10 +372,17 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
-    Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+      return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
@@ -382,10 +392,17 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+      return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -398,13 +415,16 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=PAINTBRUSH_HEIGHT;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
+      return 1;
     cursor_x+=PAINTBRUSH_WIDTH;
   }
   cursor_y+=PAINTBRUSH_HEIGHT;
@@ -413,30 +433,44 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive");
-    Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
+      return 1;
     cursor_x+=ICON_SPRITE_WIDTH;
   }
   cursor_y+=ICON_SPRITE_HEIGHT;
 
   // Logo splash screen
-  if (!(gfx->Logo_grafx2=(byte *)malloc(231*56)))
-    Error(ERROR_MEMORY);
 
-  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3);
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
+    return 1;
+  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
+    return 1;
   cursor_y+=56;
   
   // Trames
   for (i=0; i<NB_PRESET_SIEVE; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern");
-    Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern");
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern"))
+        return 1;
+    }
+    if (Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
+      return 1;
     cursor_x+=16;
   }
   cursor_y+=16;
@@ -449,17 +483,19 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "system font");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "system font"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &gfx->System_font[i*64], 8, 8, "system font",2);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &gfx->System_font[i*64], 8, 8, "system font",2))
+      return 1;
     cursor_x+=8;
   }
   cursor_y+=8;
-  Menu_font=gfx->System_font;
 
   // Font Fun
   for (i=0; i<256; i++)
@@ -469,13 +505,16 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "fun font");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "fun font"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &gfx->Fun_font[i*64], 8, 8, "fun font",2);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &gfx->Fun_font[i*64], 8, 8, "fun font",2))
+      return 1;
     cursor_x+=8;
   }
   cursor_y+=8;
@@ -488,13 +527,16 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -507,13 +549,16 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -527,11 +572,13 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (title)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (title)"))
+        return 1;
     }
     
     if (i&1)
@@ -545,14 +592,12 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
       else
         dest=&(gfx->Help_font_t1[char_1++][0][0]);
     
-    Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
   
-  // Terminé: libération de l'image skin
-  SDL_FreeSurface(gui);
-
   Current_help_section=0;
   Help_position=0;
 
@@ -753,7 +798,41 @@ void Load_graphics(T_Gui_skin *gfx, const char * skin_file)
     gfx->Preset_paintbrush_offset_X[index]=(gfx->Preset_paintbrush_width [index]>>1);
     gfx->Preset_paintbrush_offset_Y[index]=(gfx->Preset_paintbrush_height[index]>>1);
   }
+  return 0;
+}
 
+T_Gui_skin * Load_graphics(const char * skin_file)
+{
+  T_Gui_skin * gfx;
+  char filename[MAX_PATH_CHARACTERS];
+  SDL_Surface * gui;
+
+  gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
+  if (gfx == NULL)
+  {
+    sprintf(Gui_loading_error_message, "Not enough memory to read skin file\n");
+    return NULL;
+  }
+  
+  // Read the "skin" file
+  strcpy(filename,Data_directory);
+  strcat(filename,skin_file);
+  
+  gui=IMG_Load(filename);
+  if (!gui)
+  {
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    free(gfx);
+    return NULL;
+  }
+  if (Parse_skin(gui, gfx))
+  {
+    SDL_FreeSurface(gui);
+    free(gfx);
+    return NULL;
+  }
+  SDL_FreeSurface(gui);
+  return gfx;
 }
 
 

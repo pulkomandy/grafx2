@@ -534,12 +534,13 @@ int Init_program(int argc,char * argv[])
   Analyze_command_line(argc,argv);
 
   // Load sprites, palette etc.
-  Gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
-  if (Gfx == NULL)
-    Error(ERROR_MEMORY);
   strcpy(Gui_skin_file+6,Config.SkinFile);
-  Load_graphics(Gfx, Gui_skin_file);
-
+  Gfx = Load_graphics(Gui_skin_file);
+  if (Gfx == NULL)
+  {
+    printf("%s", Gui_loading_error_message);
+    Error(ERROR_GUI_MISSING);
+  }
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);

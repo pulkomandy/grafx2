@@ -860,6 +860,47 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
+//---- Window that shows a big message, and waits for a click on OK -----
+void Verbose_error_message(char * message)
+{
+  short clicked_button;
+  int line;
+  int i;
+  char buffer[36]; // 35 characters + \0
+
+  Open_window(300,160,"Error!");
+  
+  // Word-wrap the message
+  for (line=0; line < 10; line++)
+  {
+    for (i=0;i<35 && *message!='\0';i++)
+    {
+      if (*message == '\n')
+      {
+        message++;
+        break;
+      }
+      buffer[i]=*message;
+      message++;
+    }
+    buffer[i]='\0';
+    Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
+    if (*message=='\0')
+      break;
+  }
+
+  Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Update_window_area(0,0,Window_width,Window_height);
+  Display_cursor();
+
+  do
+    clicked_button=Window_clicked_button();
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
+  Key=0;
+
+  Close_window();
+  Display_cursor();
+}
 
 
   // -- Redessiner le sprite d'un bouton dans le menu --
