@@ -2681,7 +2681,8 @@ short Window_clicked_button(void)
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2700,7 +2701,8 @@ short Window_clicked_button(void)
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2715,7 +2717,8 @@ short Window_clicked_button(void)
           // Mise à jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2734,7 +2737,8 @@ short Window_clicked_button(void)
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2763,7 +2767,8 @@ short Window_clicked_button(void)
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2788,7 +2793,8 @@ short Window_clicked_button(void)
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
+          Display_cursor();
           // Store the selected value as attribute2
           Window_attribute2=list->List_start + list->Cursor_position;
           // Return the control ID of the list.
@@ -2804,10 +2810,11 @@ short Window_clicked_button(void)
           list->Cursor_position-=list->List_start;
           // On affiche à nouveau la liste
           Hide_cursor();
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
           // Mise à jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
+          Display_cursor();
         }
         if (Key==KEY_MOUSEWHEELDOWN && list->List_start<list->Scroller->Nb_elements-list->Scroller->Nb_visibles)
         {
@@ -2820,10 +2827,11 @@ short Window_clicked_button(void)
           list->Cursor_position-=list->List_start;
           // On affiche à nouveau la liste
           Hide_cursor();
-          Window_redraw_list(list);// reduce redraw?
+          Window_redraw_list(list);
           // Mise à jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
+          Display_cursor();
         }
       
       }

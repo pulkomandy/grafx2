@@ -962,19 +962,28 @@ void Button_Settings(void)
 void Add_skin(const char *name)
 {
   char * fname;
-
-  Add_element_to_list(name, 0);  
-  Filelist_nb_elements++;
+  int namelength;
   
   // Cut the long name to keep only filename (no directory)
-  fname = Find_last_slash(Filelist->Full_name);
-  if (fname[0]=='\0')
-    return;
-
-  strcpy(Filelist->Full_name, fname+1);
+  fname = Find_last_slash(name);
+  if (fname)
+    fname++;
+  else
+    fname=name;
+  namelength = strlen(fname);
+  if (namelength>=5 && fname[0]!='_' && (!stricmp(fname+namelength-4,".png") || !stricmp(fname+namelength-4,".gif")))
+  {
+    Add_element_to_list(name, 0);  
+    Filelist_nb_elements++;
+    
+    if (fname[0]=='\0')
+      return;
   
-  // Reformat the short name
-  strcpy(Filelist->Short_name,Format_filename(Filelist->Full_name, 0));
+    strcpy(Filelist->Full_name, fname);
+    
+    // Reformat the short name
+    strcpy(Filelist->Short_name,Format_filename(Filelist->Full_name, 0));
+  }
     
 }
 
@@ -1055,7 +1064,7 @@ void Button_Skins(void)
   // List of skins
   skin_list = Window_set_list_button(
     // Fileselector
-    Window_set_special_button(9,FILESEL_Y+2,144,80), // 2
+    Window_set_special_button(8,FILESEL_Y+1,144,80), // 2
     // Scroller du fileselector
     (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,Filelist_nb_elements,10,selector_position)), // 3
     Draw_one_skin_name); // 4
