@@ -2654,11 +2654,179 @@ short Window_clicked_button(void)
   // Intercept keys
   if (Key)
   {
+    T_List_button * list;
+
     Button=Window_get_button_shortcut();
     if (Button)
     {
       Key=0;
       return Button;
+    }
+    // Check if there's a list control and the keys can control it
+    for (list=Window_list_button_list; list!=NULL; list=list->Next)
+    {
+      // FIXME: Make only one list have the keyboard focus.
+      if (1)
+      {
+        if (Key==SDLK_UP && (list->Cursor_position+list->List_start)>0)
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position--;
+          if (list->Cursor_position<0)
+          {
+            list->List_start=list->List_start+list->Cursor_position;
+            list->Cursor_position=0;
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_DOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position++;
+          if (list->Cursor_position>(list->Scroller->Nb_visibles-1))
+          {
+            list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
+            list->Cursor_position=(list->Scroller->Nb_visibles-1);
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_HOME && (list->Cursor_position!=0 || list->List_start!=0))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position=0;
+          list->List_start=0;
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_END && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position=(list->Scroller->Nb_elements-1)-list->List_start;
+          if (list->Cursor_position>(list->Scroller->Nb_visibles-1))
+          {
+            list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
+            list->Cursor_position=(list->Scroller->Nb_visibles-1);
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_PAGEDOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          if (list->Scroller->Nb_elements<list->Scroller->Nb_visibles)
+          {
+            list->Cursor_position=list->Scroller->Nb_elements-1;
+          }
+          else if(list->Cursor_position!=list->Scroller->Nb_visibles-1)
+          {
+            list->Cursor_position=list->Scroller->Nb_visibles-1;
+          }
+          else
+          {
+            list->List_start+=list->Scroller->Nb_visibles;
+            if (list->List_start+list->Scroller->Nb_visibles>list->Scroller->Nb_elements)
+            {
+              list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+            }
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_PAGEUP && (list->Cursor_position+list->List_start)>0)
+        {
+          Key=0;
+          Hide_cursor();
+          if(list->Cursor_position!=0)
+          {
+            list->Cursor_position=0;
+          }
+          else
+          {
+            list->List_start-=list->Scroller->Nb_visibles;
+            if (list->List_start<0)
+            {
+              list->List_start=0;
+            }
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);// reduce redraw?
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key == KEY_MOUSEWHEELUP && list->List_start>0)
+        {
+          list->Cursor_position+=list->List_start;
+          if (list->List_start>=3)
+            list->List_start-=3;
+          else
+            list->List_start=0;
+          list->Cursor_position-=list->List_start;
+          // On affiche à nouveau la liste
+          Hide_cursor();
+          Window_redraw_list(list);// reduce redraw?
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+        }
+        if (Key==KEY_MOUSEWHEELDOWN && list->List_start<list->Scroller->Nb_elements-list->Scroller->Nb_visibles)
+        {
+          list->Cursor_position+=list->List_start;
+          list->List_start+=3;
+          if (list->List_start+list->Scroller->Nb_visibles>list->Scroller->Nb_elements)
+          {
+            list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+          }          
+          list->Cursor_position-=list->List_start;
+          // On affiche à nouveau la liste
+          Hide_cursor();
+          Window_redraw_list(list);// reduce redraw?
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+        }
+      
+      }
     }
   }
 
