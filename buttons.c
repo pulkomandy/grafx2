@@ -958,6 +958,11 @@ void Button_Settings(void)
   Set_number_of_backups(Config.Max_undo_pages);
 }
 
+// POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
+#ifdef __linux__
+	#define stricmp strcasecmp
+#endif
+
 // Add a skin to the list
 void Add_skin(const char *name)
 {
