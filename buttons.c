@@ -1035,6 +1035,10 @@ void Button_Skins(void)
   T_Dropdown_button * cursor_dropdown;
   T_List_button * skin_list;
   T_Scroller_button * file_scroller;
+  int selected_font=0;
+  
+  char * fonts[] = {"Classic", "Fun", "Melon", "Fairlight"};
+  int nb_fonts = 4;
 
   #define FILESEL_Y 52
 
@@ -1075,9 +1079,11 @@ void Button_Skins(void)
     Draw_one_skin_name); // 4
 
   // Boutons de fontes
-  font_dropdown = Window_set_dropdown_button(60,19,70,11,0,(Config_choisie.Font==0)?"Classic":"Fun    ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
-  Window_dropdown_add_item(font_dropdown,0,"Classic");
-  Window_dropdown_add_item(font_dropdown,1,"Fun    ");
+  font_dropdown = Window_set_dropdown_button(60,19,70,11,0, fonts[selected_font],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
+  for (temp=0; temp<nb_fonts; temp++)
+    Window_dropdown_add_item(font_dropdown,temp,fonts[temp]);
+
+
 
   // Cancel
   Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
@@ -1092,7 +1098,7 @@ void Button_Skins(void)
   Window_dropdown_add_item(cursor_dropdown,0,"Solid      ");
   Window_dropdown_add_item(cursor_dropdown,1,"Transparent");
   Window_dropdown_add_item(cursor_dropdown,2,"Thin       ");
-
+  
   // Select the current skin (we know it does exist, so no need to do a 
   // nearest match search)
   //Highlight_file(Config_choisie.SkinFile);
@@ -1121,7 +1127,7 @@ void Button_Skins(void)
       case 4 : // a file is selected
         break;
       case  5 : // Font dropdown
-        Config_choisie.Font=Window_attribute2; // récupère le numéro de l'item selectionné
+        selected_font=Window_attribute2; // Get the index of the chosen font.
         break;
 	  // 5: Cancel
        case 7 : // Cursor
@@ -1257,13 +1263,27 @@ void Button_Skins(void)
 	  }
 	  else
 	  {
+	    byte * new_font;
+	    
       free(Gfx);
       Gfx = gfx;
   	  // Font selection
-  	  if (Config_choisie.Font)
-  		  Menu_font=Gfx->Fun_font;
-  	  else
-  		  Menu_font=Gfx->System_font;
+  	  new_font = Load_font(fonts[selected_font]);
+  	  if (new_font)
+  	  {
+  	    free(Menu_font);
+  	    Menu_font = new_font;
+  	    if (Config_choisie.Font_name)
+  	    {
+  	      free (Config_choisie.Font_name);
+  	      Config_choisie.Font_name = NULL;
+  	    }
+  	    Config_choisie.Font_name = (char *)malloc(strlen(fonts[selected_font])+1);
+  	    if (Config_choisie.Font_name)
+  	    {
+  	      strcpy(Config_choisie.Font_name,fonts[selected_font]);
+  	    }
+  	  }
       
 	    strcpy(Config_choisie.SkinFile,skinsdir+6);
 	  }

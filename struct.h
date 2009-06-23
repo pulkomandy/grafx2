@@ -240,8 +240,8 @@ typedef struct
 /// This structure holds all the settings which are saved and loaded as gfx2.ini.
 typedef struct
 {
-  byte Font;                             ///< Boolean, true to use the "fun" font in menus, false to use the classic one.
-  char SkinFile[64];					 ///< String, name of the file where all the graphic data is stored
+  char *Font_name;                       ///< Name of the font used in the menus. Matches file skins/font_*.png (Case-sensitive on some filesystems)
+  char SkinFile[64];                     ///< String, name of the file where all the graphic data is stored
   int  Show_hidden_files;                ///< Boolean, true to show hidden files in fileselectors.
   int  Show_hidden_directories;          ///< Boolean, true to show hidden directories in fileselectors.
 //  int  Show_system_directories;        ///< (removed when converted from DOS)
@@ -380,13 +380,6 @@ typedef struct
   /// Bitmap data for the small 8x8 icons.
   byte Icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
 
-  // 8x8 fonts
-  
-  /// Bitmap data for the classic 8x8 font used in menus etc.
-  byte System_font[256*8*8];
-  /// Bitmap data for the "fun" 8x8 font used in menus etc.
-  byte Fun_font    [256*8*8];
-  
   /// A default 256-color palette.
   T_Palette Default_palette;
 

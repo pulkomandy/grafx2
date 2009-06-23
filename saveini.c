@@ -476,10 +476,6 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menu_ratio",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=(conf->Font)+1;
-  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Font",1,values,0)))
-    goto Erreur_Retour;
-
   if ((return_code=Save_INI_reach_group(Ancien_fichier,Nouveau_fichier,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 

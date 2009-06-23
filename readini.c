@@ -523,12 +523,6 @@ int Load_INI(T_Config * conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Ratio=values[0];
 
-  if ((return_code=Load_INI_get_values (file,buffer,"Font",1,values)))
-    goto Erreur_Retour;
-  if ((values[0]<1) || (values[0]>2))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Font=values[0]-1;
-
   if ((return_code=Load_INI_reach_group(file,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 

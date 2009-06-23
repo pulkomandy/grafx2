@@ -32,3 +32,11 @@ void Set_config_defaults(void);
 void Init_sighandler(void);
 
 extern char Gui_loading_error_message[512];
+
+///
+/// Loads a 8x8 monochrome font, the kind used in all menus and screens.
+/// This function allocates the memory, and returns a pointer to it when
+/// successful.
+/// If an error is encountered, it frees what needs it, prints an error message
+/// in ::Gui_loading_error_message, and returns NULL.
+byte * Load_font(const char * font_name);

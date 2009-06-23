@@ -555,11 +555,14 @@ int Init_program(int argc,char * argv[])
   Fore_color=MC_White;
   Back_color=MC_Black;
 
-  // Prise en compte de la fonte
-  if (Config.Font)
-    Menu_font=Gfx->Fun_font;
-  else
-    Menu_font=Gfx->System_font;
+  // Font
+  {
+    byte *font;
+    font = Load_font("Classic");
+    if (font)
+      Menu_font=font;
+  }
+
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 

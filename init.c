@@ -474,50 +474,6 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     cursor_x+=16;
   }
   cursor_y+=16;
-  
-  // Font Système
-  for (i=0; i<256; i++)
-  {
-    // Rangés par ligne de 32
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "system font"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font"))
-        return 1;
-    }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &gfx->System_font[i*64], 8, 8, "system font",2))
-      return 1;
-    cursor_x+=8;
-  }
-  cursor_y+=8;
-
-  // Font Fun
-  for (i=0; i<256; i++)
-  {
-    // Rangés par ligne de 32
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "fun font"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font"))
-        return 1;
-    }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &gfx->Fun_font[i*64], 8, 8, "fun font",2))
-      return 1;
-    cursor_x+=8;
-  }
-  cursor_y+=8;
 
   // Font help normale
   for (i=0; i<256; i++)
@@ -833,6 +789,82 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   }
   SDL_FreeSurface(gui);
   return gfx;
+}
+
+// ---- font loading -----
+
+byte Parse_font(SDL_Surface * image, byte * font)
+{
+  int character;
+  byte color;
+  int x, y;
+  int chars_per_line;
+  
+  // Check image size
+  if (image->w % 8)
+  {
+    sprintf(Gui_loading_error_message, "Error in font file: Image width is not a multiple of 8.\n");
+    return 1;
+  }
+  if (image->w * image->h < 8*8*256)
+  {
+    sprintf(Gui_loading_error_message, "Error in font file: Image is too small to be a 256-character 8x8 font.\n");
+    return 1;
+  }
+  chars_per_line = image->w/8;
+
+  for (character=0; character < 256; character++)
+  {
+    for (y=0; y<8; y++)
+    {
+      for (x=0;x<8; x++)
+      {
+        // Pick pixel
+        color = Get_SDL_pixel_8(image, (character % chars_per_line)*8+x, (character / chars_per_line)*8+y);
+        if (color > 1)
+        {
+          sprintf(Gui_loading_error_message, "Error in font file: Only colors 0 and 1 can be used for the font.\n");
+          return 1;
+        }
+        // Put it in font. 0 = BG, 1 = FG.
+        font[character*64 + y*8 + x]=color;
+      }
+    }
+  }
+  return 0;
+}
+
+byte * Load_font(const char * font_name)
+{
+  byte * font;
+  char filename[MAX_PATH_CHARACTERS];
+  SDL_Surface * image;
+
+  font = (byte *)malloc(8*8*256);
+  if (font == NULL)
+  {
+    sprintf(Gui_loading_error_message, "Not enough memory to read font file\n");
+    return NULL;
+  }
+  
+  // Read the file containing the image
+  sprintf(filename,"%sskins%sfont_%s.png", Data_directory, PATH_SEPARATOR, font_name);
+  
+  image=IMG_Load(filename);
+  if (!image)
+  {
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    free(font);
+    return NULL;
+  }
+  if (Parse_font(image, font))
+  {
+    SDL_FreeSurface(image);
+    free(font);
+    return NULL;
+  }
+  SDL_FreeSurface(image);
+  return font;
 }
 
 

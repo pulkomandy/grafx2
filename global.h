@@ -794,7 +794,7 @@ GFX2_GLOBAL byte Resolution_in_command_line;
 
 // - Graphic
 
-/// Pointer to the font selected for menus. It's either ::Gfx->System_font or ::Gfx->Fun_font
+/// Pointer to the font selected for menus.
 GFX2_GLOBAL byte * Menu_font;
 
 /// Pointer to the current active skin.
