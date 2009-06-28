@@ -950,7 +950,8 @@ void Button_Settings(void)
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
-  // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
+  // Raffichage du menu pour que les inscriptions qui y figurent soient 
+  // retracées avec la nouvelle fonte
   Display_menu();
   Display_cursor();
 
@@ -960,6 +961,14 @@ void Button_Settings(void)
 
 // Data for skin selector
 T_Fileselector Skin_files_list;
+
+/// Checks if the filename is a skin or a font. We avoid adding fonts to the
+/// skin selector, and vice versa
+char is_font(const char* name)
+{
+	return name[0]=='f' && name[1]=='o' && name[2]=='n' && name[3]=='t' 
+		&& name[4]=='_';
+}
 
 // Add a skin to the list
 void Add_skin(const char *name)
@@ -974,7 +983,9 @@ void Add_skin(const char *name)
   else
     fname=name;
   namelength = strlen(fname);
-  if (namelength>=5 && fname[0]!='_' && (!strcasecmp(fname+namelength-4,".png") || !strcasecmp(fname+namelength-4,".gif")))
+  if (namelength>=5 && fname[0]!='_' && !is_font(fname) 
+	&& (!strcasecmp(fname+namelength-4,".png") 
+		|| !strcasecmp(fname+namelength-4,".gif")))
   {
     Add_element_to_list(&Skin_files_list, name, 0);  
     
@@ -983,7 +994,9 @@ void Add_skin(const char *name)
 
     strcpy(Skin_files_list.First->Full_name, fname);
     // Reformat the short name differently
-    strcpy(Skin_files_list.First->Short_name,Format_filename(Skin_files_list.First->Full_name, 0));
+    strcpy(Skin_files_list.First->Short_name,
+		Format_filename(Skin_files_list.First->Full_name, 0)
+	);
   }
    
 }
@@ -1020,7 +1033,7 @@ void Button_Skins(void)
   T_Scroller_button * file_scroller;
   int selected_font=0;
   
-  char * fonts[] = {"Classic", "Fun", "Melon", "Fairlight"};
+  char * fonts[] = {"Classic  ", "Fun      ", "Melon    ", "Fairlight"};
   int nb_fonts = 4;
 
   #define FILESEL_Y 52
@@ -1057,11 +1070,13 @@ void Button_Skins(void)
     // Fileselector
     Window_set_special_button(8,FILESEL_Y+1,144,80), // 2
     // Scroller du fileselector
-    (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,Skin_files_list.Nb_elements,10,selector_position)), // 3
+    (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,
+		Skin_files_list.Nb_elements,10,selector_position)), // 3
     Draw_one_skin_name); // 4
 
-  // Boutons de fontes
-  font_dropdown = Window_set_dropdown_button(60,19,70,11,0, fonts[selected_font],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
+  // Font dropdown
+  font_dropdown = Window_set_dropdown_button(60,19,86,11,0, 
+		fonts[selected_font],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
   for (temp=0; temp<nb_fonts; temp++)
     Window_dropdown_add_item(font_dropdown,temp,fonts[temp]);
 
