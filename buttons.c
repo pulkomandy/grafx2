@@ -962,16 +962,33 @@ void Button_Settings(void)
 // Data for skin selector
 T_Fileselector Skin_files_list;
 
-/// Checks if the filename is a skin or a font. We avoid adding fonts to the
-/// skin selector, and vice versa
-char is_font(const char* name)
+
+// Data for font selector
+T_Fileselector Font_files_list;
+
+//
+char * Format_font_filename(const char * fname)
 {
-	return name[0]=='f' && name[1]=='o' && name[2]=='n' && name[3]=='t' 
-		&& name[4]=='_';
+  static char result[12];
+  int c;
+  int length;
+  
+  fname+=5; // Assume "font_" prefix
+  length=strlen(fname) - 4; // assume .png extension
+  
+  for (c=0;c<11 && c<length ;c++)
+  {
+    result[c]=fname[c];
+  }
+  result[c]='\0';
+  if (length>11)
+    result[10] = ELLIPSIS_CHARACTER;
+
+  return result;
 }
 
 // Add a skin to the list
-void Add_skin(const char *name)
+void Add_font_or_skin(const char *name)
 {
   const char * fname;
   int namelength;
@@ -983,7 +1000,7 @@ void Add_skin(const char *name)
   else
     fname=name;
   namelength = strlen(fname);
-  if (namelength>=5 && fname[0]!='_' && !is_font(fname) 
+  if (namelength>=10 && fname[0]!='_' && !strncmp(fname, "skin_", 5)
 	&& (!strcasecmp(fname+namelength-4,".png") 
 		|| !strcasecmp(fname+namelength-4,".gif")))
   {
@@ -992,11 +1009,24 @@ void Add_skin(const char *name)
     if (fname[0]=='\0')
       return;
 
+    // Remove directory from full name
     strcpy(Skin_files_list.First->Full_name, fname);
     // Reformat the short name differently
     strcpy(Skin_files_list.First->Short_name,
 		Format_filename(Skin_files_list.First->Full_name, 0)
 	);
+  }
+  else if (namelength>=10 && !strncmp(fname, "font_", 5) && (!strcasecmp(fname+namelength-4,".png")))
+  {
+    Add_element_to_list(&Font_files_list, name, 0);  
+    
+    if (fname[0]=='\0')
+      return;
+
+    // Remove directory from full name
+    strcpy(Font_files_list.First->Full_name, fname);
+    // Reformat the short name differently
+    strcpy(Font_files_list.First->Short_name,Format_font_filename(Font_files_list.First->Full_name));
   }
    
 }
@@ -1027,8 +1057,7 @@ void Button_Skins(void)
   T_Scroller_button * file_scroller;
   int selected_font=0;
   
-  char * fonts[] = {"Classic  ", "Fun      ", "Melon    ", "Fairlight"};
-  int nb_fonts = 4;
+  char * cursors[] = { "Solid", "Transparent", "Thin" };
 
   #define FILESEL_Y 52
 
@@ -1037,13 +1066,17 @@ void Button_Skins(void)
   // Here we use the same data container as the fileselectors.
   // Reinitialize the list
   Free_fileselector_list(&Skin_files_list);
+  Free_fileselector_list(&Font_files_list);
   // Browse the "skins" directory
   strcpy(skinsdir,Data_directory);
   strcat(skinsdir,"skins");
   // Add each found file to the list
-  For_each_file(skinsdir, Add_skin);
+  For_each_file(skinsdir, Add_font_or_skin);
   // Sort it
   Sort_list_of_files(&Skin_files_list);
+  Sort_list_of_files(&Font_files_list);
+  
+  //selected_font = Find_file_in_fileselector(&Font_files_list, Config_choisie.Font_name);
   
   // --------------------------------------------------------------
 
@@ -1068,35 +1101,19 @@ void Button_Skins(void)
 		Skin_files_list.Nb_elements,10,selector_position)), // 3
     Draw_one_skin_name); // 4
 
-  // Font dropdown
-  font_dropdown = Window_set_dropdown_button(60,19,86,11,0, 
-		fonts[selected_font],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
-  for (temp=0; temp<nb_fonts; temp++)
-    Window_dropdown_add_item(font_dropdown,temp,fonts[temp]);
-
-
+  // Buttons to choose a font
+  font_dropdown = Window_set_dropdown_button(60,19,104,11,0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
+  for (temp=0; temp<Font_files_list.Nb_files; temp++)
+    Window_dropdown_add_item(font_dropdown,temp,Get_item_by_index(&Font_files_list,temp)->Short_name);
 
   // Cancel
   Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
 
-  // Button item du curseur
-  if(Config_choisie.Cursor==0)
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Solid      ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
-  else if(Config_choisie.Cursor==1)
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Transparent",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
-  else
-  	cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,"Thin       ",1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
-  Window_dropdown_add_item(cursor_dropdown,0,"Solid      ");
-  Window_dropdown_add_item(cursor_dropdown,1,"Transparent");
-  Window_dropdown_add_item(cursor_dropdown,2,"Thin       ");
+  // Dropdown list to choose cursor type
+  cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,cursors[Config_choisie.Cursor],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
+  for (temp=0; temp<3; temp++)
+    Window_dropdown_add_item(cursor_dropdown,temp,cursors[temp]);
   
-  // Select the current skin (we know it does exist, so no need to do a 
-  // nearest match search)
-  //Highlight_file(Config_choisie.SkinFile);
-  // On efface les anciens noms de fichier:
-  //Window_rectangle(8-1,FILESEL_Y-1,144+2,80+2,MC_Black);
-  // On affiche les nouveaux:
-  //Display_skins_list(Main_fileselector_position,Main_fileselector_offset);
   Window_redraw_list(skin_list);
 
   Update_window_area(0,0,Window_width, Window_height);
@@ -1242,13 +1259,8 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
-	char* tmp_font;
-	char* tmp_ptr;
     T_Gui_skin * gfx;
- 	  strcpy(skinsdir,"skins/");
-    strcat(   	  
- 	    skinsdir,
- 	    Get_item_by_index(&Skin_files_list, skin_list->List_start+skin_list->Cursor_position)->Full_name);
+    strcpy(skinsdir, Get_item_by_index(&Skin_files_list, skin_list->List_start+skin_list->Cursor_position)->Full_name);
 	  gfx=Load_graphics(skinsdir);
 	  if (gfx == NULL) // Error
     {
@@ -1257,30 +1269,21 @@ void Button_Skins(void)
 	  else
 	  {
 	    byte * new_font;
-	    
       free(Gfx);
       Gfx = gfx;
   	  // Font selection
-	  tmp_font = strdup(fonts[selected_font]);
-	  tmp_ptr=tmp_font;
-	  while(*tmp_ptr!=' ' && *tmp_ptr!='\0')
-		  tmp_ptr++;
-	  *tmp_ptr='\0';
-  	  new_font = Load_font(tmp_font);
-	  free(tmp_font);
+  	  new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
   	  if (new_font)
   	  {
+  	    const char * fname;
   	    free(Menu_font);
   	    Menu_font = new_font;
   	    free (Config_choisie.Font_name);
-  	    Config_choisie.Font_name = (char *)malloc(strlen(fonts[selected_font])+1);
-  	    if (Config_choisie.Font_name)
-  	    {
-  	      strcpy(Config_choisie.Font_name,fonts[selected_font]);
-  	    }
+  	    fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
+  	    Config_choisie.Font_name = strdup(fname);
   	  }
       
-	    strcpy(Config_choisie.SkinFile,skinsdir+6);
+	    strcpy(Config_choisie.SkinFile,skinsdir);
 	  }
 
 	  Config = Config_choisie ;

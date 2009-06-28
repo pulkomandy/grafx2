@@ -76,7 +76,7 @@
 #endif
 
 // filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR ;
+static char Gui_skin_file[MAX_PATH_CHARACTERS];
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -534,12 +534,16 @@ int Init_program(int argc,char * argv[])
   Analyze_command_line(argc,argv);
 
   // Load sprites, palette etc.
-  strcpy(Gui_skin_file+6,Config.SkinFile);
+  strcpy(Gui_skin_file,Config.SkinFile);
   Gfx = Load_graphics(Gui_skin_file);
   if (Gfx == NULL)
   {
-    printf("%s", Gui_loading_error_message);
-    Error(ERROR_GUI_MISSING);
+    Gfx = Load_graphics("skin_modern.png");
+    if (Gfx == NULL)
+    {
+      printf("%s", Gui_loading_error_message);
+      Error(ERROR_GUI_MISSING);
+    }
   }
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -558,7 +562,7 @@ int Init_program(int argc,char * argv[])
   // Font
   {
     byte *font;
-    font = Load_font("Classic");
+    font = Load_font("font_Classic.png");
     if (font)
       Menu_font=font;
   }

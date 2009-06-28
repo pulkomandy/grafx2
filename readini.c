@@ -818,7 +818,7 @@ int Load_INI(T_Config * conf)
   if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
 	  strcpy(conf->SkinFile,value_label);
   else
-    strcpy(conf->SkinFile,"modern.png");
+    strcpy(conf->SkinFile,"skin_modern.png");
 
 
   fclose(file);

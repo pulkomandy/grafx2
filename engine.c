@@ -2289,8 +2289,11 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
     Window_attribute2=item->Number;
     if (Button->Display_choice)
     {
-      // Mettre à jour automatiquement le libellé de la dropdown
-      Print_in_window(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,item->Label,MC_Black,MC_Light);
+      // Automatically update the label of the dropdown list.
+      int text_length = (Button->Width-4-(Button->Display_arrow?8:0))/8;
+      // Clear original label area
+      Window_rectangle(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,text_length*8,8,MC_Light);
+      Print_in_window_limited(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,item->Label,text_length ,MC_Black,MC_Light);
     }
     return Button->Number;
   }

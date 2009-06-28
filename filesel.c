@@ -462,9 +462,8 @@ void Sort_list_of_files(T_Fileselector *list)
   T_Fileselector_item * next_item;
   T_Fileselector_item * next_to_next_item;
 
-  // Avant de trier quoi que ce soit, on vérifie qu'il y ait suffisamment
-  // d'éléments pour qu'il soit possibles qu'ils soient en désordre:
-  if (list->Nb_elements>1)
+  // Check there are at least two elements before sorting
+  if (list->First && list->First->Next)
   {
     do
     {

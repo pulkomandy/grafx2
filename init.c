@@ -772,6 +772,7 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   
   // Read the "skin" file
   strcpy(filename,Data_directory);
+  strcat(filename,"skins" PATH_SEPARATOR);
   strcat(filename,skin_file);
   
   gui=IMG_Load(filename);
@@ -848,7 +849,7 @@ byte * Load_font(const char * font_name)
   }
   
   // Read the file containing the image
-  sprintf(filename,"%sskins%sfont_%s.png", Data_directory, PATH_SEPARATOR, font_name);
+  sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
   image=IMG_Load(filename);
   if (!image)
