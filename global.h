@@ -881,17 +881,6 @@ GFX2_GLOBAL struct
   Func_action Action; ///< Function to call
 } Operation[NB_OPERATIONS][3][OPERATION_STACK_SIZE];
 
-// -- Fileselector data
-
-/// Number of elements in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_elements;
-/// Number of files in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_files;
-/// Number of directories in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_directories;
-/// Head of the linked list for the fileselector.
-GFX2_GLOBAL T_Fileselector_item * Filelist;
-
 // -- misc
 
 ///

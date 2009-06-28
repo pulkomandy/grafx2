@@ -355,7 +355,7 @@ int Init_program(int argc,char * argv[])
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  Filelist=NULL;       // Au début, il n'y a pas de fichiers dans la liste
+  
   Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_format=0;

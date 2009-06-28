@@ -33,6 +33,12 @@
 
 #include "const.h"
 
+
+// POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
+#ifdef WIN32
+	#define strcasecmp stricmp
+#endif
+
 // Definition of the base data types
 ///  8bit unsigned integer
 #define byte  uint8_t  
@@ -157,6 +163,21 @@ typedef struct T_Fileselector_item
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
 } T_Fileselector_item;
+
+/// Data for a fileselector
+typedef struct T_Fileselector
+{
+  /// Number of elements in the current fileselector's ::Filelist
+  short Nb_elements;
+  /// Number of files in the current fileselector's ::Filelist
+  short Nb_files;
+  /// Number of directories in the current fileselector's ::Filelist
+  short Nb_directories;
+  /// Head of the linked list for the fileselector.
+  T_Fileselector_item * First;
+  /// Index for direct access to element number N
+  T_Fileselector_item ** Index;
+} T_Fileselector;
 
 typedef struct T_List_button
 {

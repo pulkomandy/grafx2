@@ -958,15 +958,13 @@ void Button_Settings(void)
   Set_number_of_backups(Config.Max_undo_pages);
 }
 
-// POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
-#ifdef __linux__
-	#define stricmp strcasecmp
-#endif
+// Data for skin selector
+T_Fileselector Skin_files_list;
 
 // Add a skin to the list
 void Add_skin(const char *name)
 {
-  char * fname;
+  const char * fname;
   int namelength;
   
   // Cut the long name to keep only filename (no directory)
@@ -976,33 +974,18 @@ void Add_skin(const char *name)
   else
     fname=name;
   namelength = strlen(fname);
-  if (namelength>=5 && fname[0]!='_' && (!stricmp(fname+namelength-4,".png") || !stricmp(fname+namelength-4,".gif")))
+  if (namelength>=5 && fname[0]!='_' && (!strcasecmp(fname+namelength-4,".png") || !strcasecmp(fname+namelength-4,".gif")))
   {
-    Add_element_to_list(name, 0);  
-    Filelist_nb_elements++;
+    Add_element_to_list(&Skin_files_list, name, 0);  
     
     if (fname[0]=='\0')
       return;
-  
-    strcpy(Filelist->Full_name, fname);
-    
-    // Reformat the short name
-    strcpy(Filelist->Short_name,Format_filename(Filelist->Full_name, 0));
-  }
-    
-}
 
-T_Fileselector_item * Get_selected_skin(word index)
-{
-  T_Fileselector_item * current_item;
-  // Fast-forward to the requested item.
-  current_item=Filelist;
-  for (;index>0;index--)
-    current_item=current_item->Next;
-  // I know it's highly inefficient (O(n²)) but there shouldn't be dozens
-  // of skins in the directory...
-  
-  return current_item;
+    strcpy(Skin_files_list.First->Full_name, fname);
+    // Reformat the short name differently
+    strcpy(Skin_files_list.First->Short_name,Format_filename(Skin_files_list.First->Full_name, 0));
+  }
+   
 }
 
 // Callback to display a skin name in the list
@@ -1010,9 +993,9 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 {
   T_Fileselector_item * current_item;
 
-  if (Filelist_nb_elements>0)
+  if (Skin_files_list.Nb_elements)
   {
-    current_item = Get_selected_skin(index);    
+    current_item = Get_item_by_index(&Skin_files_list, index);    
     Print_in_window(x,y,current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
   }
 }
@@ -1046,15 +1029,14 @@ void Button_Skins(void)
   
   // Here we use the same data container as the fileselectors.
   // Reinitialize the list
-  Free_fileselector_list();
-  Filelist_nb_elements=0;
+  Free_fileselector_list(&Skin_files_list);
   // Browse the "skins" directory
   strcpy(skinsdir,Data_directory);
   strcat(skinsdir,"skins");
   // Add each found file to the list
   For_each_file(skinsdir, Add_skin);
   // Sort it
-  Sort_list_of_files();
+  Sort_list_of_files(&Skin_files_list);
   
   // --------------------------------------------------------------
 
@@ -1075,7 +1057,7 @@ void Button_Skins(void)
     // Fileselector
     Window_set_special_button(8,FILESEL_Y+1,144,80), // 2
     // Scroller du fileselector
-    (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,Filelist_nb_elements,10,selector_position)), // 3
+    (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,Skin_files_list.Nb_elements,10,selector_position)), // 3
     Draw_one_skin_name); // 4
 
   // Boutons de fontes
@@ -1226,7 +1208,7 @@ void Button_Skins(void)
           {
             quicksearch_filename[temp]=Key_ANSI;
             quicksearch_filename[temp+1]='\0';
-            most_matching_filename=Find_filename_match(quicksearch_filename);
+            most_matching_filename=Find_filename_match(Skin_files_list, quicksearch_filename);
             if ( (most_matching_filename) )
             {
               temp=Main_fileselector_position+Main_fileselector_offset;
@@ -1255,7 +1237,7 @@ void Button_Skins(void)
  	  strcpy(skinsdir,"skins/");
     strcat(   	  
  	    skinsdir,
- 	    Get_selected_skin(skin_list->List_start+skin_list->Cursor_position)->Full_name);
+ 	    Get_item_by_index(&Skin_files_list, skin_list->List_start+skin_list->Cursor_position)->Full_name);
 	  gfx=Load_graphics(skinsdir);
 	  if (gfx == NULL) // Error
     {
