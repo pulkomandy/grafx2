@@ -1018,13 +1018,7 @@ void Button_Skins(void)
 {
   short clicked_button;
   short temp;
-  char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
-  char * most_matching_filename;
   char skinsdir[MAX_PATH_CHARACTERS];
-  DIR*  current_directory; //Répertoire courant
-  struct dirent* entry; // Structure de lecture des éléments
-  struct stat Infos_enreg;
-  char * current_path;
   static int selector_position=0;
   T_Config Config_choisie = Config;
   T_Dropdown_button * font_dropdown;
@@ -1248,6 +1242,8 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
+	char* tmp_font;
+	char* tmp_ptr;
     T_Gui_skin * gfx;
  	  strcpy(skinsdir,"skins/");
     strcat(   	  
@@ -1265,16 +1261,18 @@ void Button_Skins(void)
       free(Gfx);
       Gfx = gfx;
   	  // Font selection
-  	  new_font = Load_font(fonts[selected_font]);
+	  tmp_font = strdup(fonts[selected_font]);
+	  tmp_ptr=tmp_font;
+	  while(*tmp_ptr!=' ' && *tmp_ptr!='\0')
+		  tmp_ptr++;
+	  *tmp_ptr='\0';
+  	  new_font = Load_font(tmp_font);
+	  free(tmp_font);
   	  if (new_font)
   	  {
   	    free(Menu_font);
   	    Menu_font = new_font;
-  	    if (Config_choisie.Font_name)
-  	    {
-  	      free (Config_choisie.Font_name);
-  	      Config_choisie.Font_name = NULL;
-  	    }
+  	    free (Config_choisie.Font_name);
   	    Config_choisie.Font_name = (char *)malloc(strlen(fonts[selected_font])+1);
   	    if (Config_choisie.Font_name)
   	    {
