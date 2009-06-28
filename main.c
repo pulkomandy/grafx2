@@ -771,7 +771,6 @@ int main(int argc,char * argv[])
   {
     if (Config.Opening_message && (!File_in_command_line))
       Button_Message_initial();
-    free(Gfx->Logo_grafx2); // Not yet used in the About screen
   
     if (File_in_command_line)
     {
