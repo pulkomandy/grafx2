@@ -261,8 +261,8 @@ typedef struct
 /// This structure holds all the settings which are saved and loaded as gfx2.ini.
 typedef struct
 {
-  char *Font_name;                       ///< Name of the font used in the menus. Matches file skins/font_*.png (Case-sensitive on some filesystems)
-  char SkinFile[64];                     ///< String, name of the file where all the graphic data is stored
+  char *Font_file;                       ///< Name of the font used in the menus. Matches file skins/font_*.png (Case-sensitive on some filesystems)
+  char *Skin_file;                        ///< String, name of the file where all the graphic data is stored
   int  Show_hidden_files;                ///< Boolean, true to show hidden files in fileselectors.
   int  Show_hidden_directories;          ///< Boolean, true to show hidden directories in fileselectors.
 //  int  Show_system_directories;        ///< (removed when converted from DOS)

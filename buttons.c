@@ -1049,13 +1049,12 @@ void Button_Skins(void)
   short clicked_button;
   short temp;
   char skinsdir[MAX_PATH_CHARACTERS];
-  static int selector_position=0;
-  T_Config Config_choisie = Config;
   T_Dropdown_button * font_dropdown;
   T_Dropdown_button * cursor_dropdown;
   T_List_button * skin_list;
   T_Scroller_button * file_scroller;
   int selected_font=0;
+  int selected_cursor=Config.Cursor;
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
 
@@ -1076,7 +1075,7 @@ void Button_Skins(void)
   Sort_list_of_files(&Skin_files_list);
   Sort_list_of_files(&Font_files_list);
   
-  //selected_font = Find_file_in_fileselector(&Font_files_list, Config_choisie.Font_name);
+  selected_font = Find_file_in_fileselector(&Font_files_list, Config.Font_file);
   
   // --------------------------------------------------------------
 
@@ -1096,10 +1095,12 @@ void Button_Skins(void)
   skin_list = Window_set_list_button(
     // Fileselector
     Window_set_special_button(8,FILESEL_Y+1,144,80), // 2
-    // Scroller du fileselector
+    // Scroller for the fileselector
     (file_scroller = Window_set_scroller_button(160,FILESEL_Y+1,82,
-		Skin_files_list.Nb_elements,10,selector_position)), // 3
+		Skin_files_list.Nb_elements,10,0)), // 3
     Draw_one_skin_name); // 4
+  
+  skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
 
   // Buttons to choose a font
   font_dropdown = Window_set_dropdown_button(60,19,104,11,0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
@@ -1110,7 +1111,7 @@ void Button_Skins(void)
   Window_set_normal_button(62,136, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
 
   // Dropdown list to choose cursor type
-  cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,cursors[Config_choisie.Cursor],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
+  cursor_dropdown = Window_set_dropdown_button(60,34,104,11,0,cursors[selected_cursor],1,0,1,RIGHT_SIDE|LEFT_SIDE); // 7
   for (temp=0; temp<3; temp++)
     Window_dropdown_add_item(cursor_dropdown,temp,cursors[temp]);
   
@@ -1139,7 +1140,7 @@ void Button_Skins(void)
         break;
 	  // 5: Cancel
        case 7 : // Cursor
-        Config_choisie.Cursor=Window_attribute2;
+       selected_cursor = Window_attribute2;
         break;
     }
 
@@ -1260,6 +1261,9 @@ void Button_Skins(void)
   if(clicked_button == 1)
   {
     T_Gui_skin * gfx;
+    byte * new_font;
+
+    // (Re-)load GUI graphics from selected skins
     strcpy(skinsdir, Get_item_by_index(&Skin_files_list, skin_list->List_start+skin_list->Cursor_position)->Full_name);
 	  gfx=Load_graphics(skinsdir);
 	  if (gfx == NULL) // Error
@@ -1268,25 +1272,26 @@ void Button_Skins(void)
 	  }
 	  else
 	  {
-	    byte * new_font;
       free(Gfx);
       Gfx = gfx;
-  	  // Font selection
-  	  new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
-  	  if (new_font)
-  	  {
-  	    const char * fname;
-  	    free(Menu_font);
-  	    Menu_font = new_font;
-  	    free (Config_choisie.Font_name);
-  	    fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
-  	    Config_choisie.Font_name = strdup(fname);
-  	  }
       
-	    strcpy(Config_choisie.SkinFile,skinsdir);
+      free(Config.Skin_file);
+	    Config.Skin_file = strdup(skinsdir);
+    }
+	  // (Re-)load the selected font
+	  new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
+	  if (new_font)
+	  {
+	    const char * fname;
+	    
+	    free(Menu_font);
+	    Menu_font = new_font;
+	    fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
+	    free(Config.Font_file);
+	    Config.Font_file = strdup(fname);
 	  }
-
-	  Config = Config_choisie ;
+    // Confirm the change of cursor shape
+	  Config.Cursor = selected_cursor;
   }
 
   Close_window();

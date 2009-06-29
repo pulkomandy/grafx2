@@ -534,7 +534,7 @@ int Init_program(int argc,char * argv[])
   Analyze_command_line(argc,argv);
 
   // Load sprites, palette etc.
-  strcpy(Gui_skin_file,Config.SkinFile);
+  strcpy(Gui_skin_file,Config.Skin_file);
   Gfx = Load_graphics(Gui_skin_file);
   if (Gfx == NULL)
   {
@@ -560,13 +560,12 @@ int Init_program(int argc,char * argv[])
   Back_color=MC_Black;
 
   // Font
-  {
-    byte *font;
-    font = Load_font("font_Classic.png");
-    if (font)
-      Menu_font=font;
-  }
-
+  if (!(Menu_font=Load_font(Config.Font_file)))
+    if (!(Menu_font=Load_font("font_Classic.png")))
+      {
+        printf("Unable to open the default font file: %s\n", "font_Classic.png");
+        Error(ERROR_GUI_MISSING);
+      }
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 

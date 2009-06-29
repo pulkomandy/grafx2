@@ -639,7 +639,10 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_key_speed",1,values,0)))
     goto Erreur_Retour;
 
-  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->SkinFile)))
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->Skin_file)))
+    goto Erreur_Retour;
+    
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Font_file",conf->Font_file)))
     goto Erreur_Retour;
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);

@@ -816,10 +816,15 @@ int Load_INI(T_Config * conf)
 
   // Optional, name of skin file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
-	  strcpy(conf->SkinFile,value_label);
+	  conf->Skin_file = strdup(value_label);
   else
-    strcpy(conf->SkinFile,"skin_modern.png");
+    conf->Skin_file = strdup("skin_modern.png");
 
+  // Optional, name of font file. (>2.0)
+  if(!Load_INI_get_string(file,buffer,"Font_file",value_label,1))
+	  conf->Font_file = strdup(value_label);
+  else
+    conf->Font_file = strdup("font_Classic.png");
 
   fclose(file);
 
