@@ -1356,42 +1356,65 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
 * TRACÉ DE LIGNES *
 ******************/
 
+/// Alters bx and by so the (AX,AY)-(BX,BY) segment becomes either horizontal,
+/// vertical, 45degrees, or isometrical for pixelart (ie 2:1 ratio)
 void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by)
-// Modifie bx et by pour que la ligne AXAY - BXBY soit
-//  - une droite horizontale
-//  - une droite verticale
-//  - une droite avec une pente de 45 degrés
 {
     int dx, dy;
     float tan;
 
     dx = (*bx)-ax;
-    dy = ay- *by; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
+    dy = ay- *by; 
+		// On prend l'opposée car à l'écran les Y sont positifs en bas, et en 
+		// maths, positifs en haut
 
-    if (dx==0) return; // On est en lockx et de toutes façons le X n'a pas bougé, on sort tout de suite pour éviter une méchante division par 0
+    if (dx==0) return; 
+		// On est en lockx et de toutes façons le X n'a pas bougé, on sort tout
+		// de suite pour éviter une méchante division par 0
 
     tan = (float)dy/(float)dx;
 
-    if (tan <= 0.4142 && tan >= -0.4142)
+	// These equation look a bit more complex than they should, but that's
+	// because we have to balance the line length to make it end near the
+	// cursor
+    if (tan <= 0.25 && tan >= -0.25)
     {
-      // Cas 1 : Lock Y
+      // horizontal (OK)
       *by = ay;
     }
-    else if ( tan > 0.4142 && tan < 2.4142)
+    else if ( tan > 0.25 && tan < 0.75)
     {
-      // Cas 2 : dy=dx
+      // dx=2dy, iso (ok)
+	  *bx = (2* *bx + ax + 2*dy)/3;
+	  *by = ay - (*bx-ax)/2;
+    }
+	else if ( tan >=0.75 && tan <= 1.5 )
+	{
+      // dy=-dx, diagonal upright (ok)
       *by = (*by + ay - dx)/2;
       *bx = ax  + ay - *by;
-    }
-    else if (tan < -0.4142 && tan >= -2.4142)
+	}
+	else if ( tan > 1.5 && tan <= 3 )
+	{
+	  // "vertical iso"
+	}
+    else if (tan < -0.25 && tan >= -0.75)
     {
-      // Cas 8 : dy = -dx
+		// iso to bottom
+    }
+	else if ( tan <-0.75 && tan > -1.5 )
+	{
+      // dy=dx, downright diagonal (ok)
       *by = (*by + ay + dx)/2;
       *bx = ax  - ay + *by;
-    }
+	}
+	else if ( tan < -1.5 && tan >= -3 )
+	{
+		// vertical iso to bottom
+	}
     else
     {
-      // Cas 3 : Lock X
+      // vertical (ok)
       *bx = ax;
     }
 

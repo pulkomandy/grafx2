@@ -39,7 +39,8 @@
     #define M_PI 3.14159265358979323846 
 #endif
 
-/// Time (in SDL ticks) when the next airbrush drawing should be done. Also used for discontinuous freehand drawing.
+/// Time (in SDL ticks) when the next airbrush drawing should be done. Also used
+/// for discontinuous freehand drawing.
 Uint32 Airbrush_next_time;
 
 void Start_operation_stack(word new_operation)
@@ -482,7 +483,8 @@ void Line_12_5(void)
 //
 // Souris effacée: Non
 
-// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le curseur appuyé)
+// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le 
+// curseur appuyé)
 {
   short start_x;
   short start_y;
