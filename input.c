@@ -39,6 +39,8 @@ byte Directional_down;
 byte Directional_down_left;
 byte Directional_left;
 byte Directional_up_left;
+byte Directional_click;
+
 long Directional_delay;
 long Directional_last_move;
 long Directional_step;
@@ -330,11 +332,13 @@ int Handle_key_press(SDL_KeyboardEvent event)
     else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT))
     {
         Input_new_mouse_K=1;
+        Directional_click=1;
         return Move_cursor_with_constraints();
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT))
     {
         Input_new_mouse_K=2;
+        Directional_click=2;
         return Move_cursor_with_constraints();
     }
 
@@ -368,14 +372,22 @@ int Release_control(int key_code, int modifier)
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
     {
-        Input_new_mouse_K &= ~1;
-        return Move_cursor_with_constraints();
+        if (Directional_click & 1)
+        {
+            Directional_click &= ~1;
+            Input_new_mouse_K &= ~1;
+            return Move_cursor_with_constraints();
+        }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][1]&modifier))
     {
-        Input_new_mouse_K &= ~2;
-        return Move_cursor_with_constraints();
+        if (Directional_click & 2)
+        {
+            Directional_click &= ~2;
+            Input_new_mouse_K &= ~2;
+            return Move_cursor_with_constraints();
+        }
     }
   
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
