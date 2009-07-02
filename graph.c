@@ -1358,66 +1358,58 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
 
 /// Alters bx and by so the (AX,AY)-(BX,BY) segment becomes either horizontal,
 /// vertical, 45degrees, or isometrical for pixelart (ie 2:1 ratio)
-void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by)
+void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
 {
     int dx, dy;
-    float tan;
+    float angle;
+    float length;
 
-    dx = (*bx)-ax;
-    dy = ay- *by; 
-		// On prend l'opposée car à l'écran les Y sont positifs en bas, et en 
-		// maths, positifs en haut
+    dx = *bx-ax;
+    dy = *by-ay; 
 
-    if (dx==0) return; 
+    if (dx==0 || dy == 0) return; 
 		// On est en lockx et de toutes façons le X n'a pas bougé, on sort tout
 		// de suite pour éviter une méchante division par 0
 
-    tan = (float)dy/(float)dx;
+    angle = atan2(dx, dy);
+    
+    if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
+      angle = M_PI*(16.0/16.0);
+    else if (angle < M_PI*(-13.0/16.0))
+      angle = -2.677945045;
+    else if (angle < M_PI*(-11.0/16.0))
+      angle = M_PI*(-12.0/16.0);
+    else if (angle < M_PI*(-9.0/16.0))
+      angle = -2.034443936;
+    else if (angle < M_PI*(-7.0/16.0))
+      angle = M_PI*(-8.0/16.0);
+    else if (angle < M_PI*(-5.0/16.0))
+      angle = -1.107148718;
+    else if (angle < M_PI*(-3.0/16.0))
+      angle = M_PI*(-4.0/16.0);
+    else if (angle < M_PI*(-1.0/16.0))
+      angle = -0.463647609;
+    else if (angle < M_PI*(1.0/16.0))
+      angle = M_PI*(0.0/16.0);
+    else if (angle < M_PI*(3.0/16.0))
+      angle = 0.463647609;
+    else if (angle < M_PI*(5.0/16.0))
+      angle = M_PI*(4.0/16.0);
+    else if (angle < M_PI*(7.0/16.0))
+      angle = 1.107148718;
+    else if (angle < M_PI*(9.0/16.0))
+      angle = M_PI*(8.0/16.0);
+    else if (angle < M_PI*(11.0/16.0))
+      angle = 2.034443936;
+    else if (angle < M_PI*(13.0/16.0))
+      angle = M_PI*(12.0/16.0);
+    else //if (angle < M_PI*(15.0/16.0))
+      angle = 2.677945045;
 
-	// These equation look a bit more complex than they should, but that's
-	// because we have to balance the line length to make it end near the
-	// cursor
-    if (tan <= 0.25 && tan >= -0.25)
-    {
-      // horizontal (OK)
-      *by = ay;
-    }
-    else if ( tan > 0.25 && tan < 0.75)
-    {
-      // dx=2dy, iso (ok)
-	  *bx = (2* *bx + ax + 2*dy)/3;
-	  *by = ay - (*bx-ax)/2;
-    }
-	else if ( tan >=0.75 && tan <= 1.5 )
-	{
-      // dy=-dx, diagonal upright (ok)
-      *by = (*by + ay - dx)/2;
-      *bx = ax  + ay - *by;
-	}
-	else if ( tan > 1.5 && tan <= 3 )
-	{
-	  // "vertical iso"
-	}
-    else if (tan < -0.25 && tan >= -0.75)
-    {
-		// iso to bottom
-    }
-	else if ( tan <-0.75 && tan > -1.5 )
-	{
-      // dy=dx, downright diagonal (ok)
-      *by = (*by + ay + dx)/2;
-      *bx = ax  - ay + *by;
-	}
-	else if ( tan < -1.5 && tan >= -3 )
-	{
-		// vertical iso to bottom
-	}
-    else
-    {
-      // vertical (ok)
-      *bx = ax;
-    }
-
+    length = sqrt((float)(dx)*(float)(dx)+(float)(dy)*(float)(dy));
+    *bx=ax + lrintf(sin(angle)*length);
+    *by=ay + lrintf(cos(angle)*length);
+    
     return;
 }
 

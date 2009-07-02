@@ -345,34 +345,34 @@ int Handle_key_press(SDL_KeyboardEvent event)
 int Release_control(int key_code, int modifier)
 {
 
-    if(key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
     {
       Directional_up=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
     {
       Directional_down=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
     {
       Directional_left=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
     {
       Directional_right=0;
     }
-    if(key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
     {
         Input_new_mouse_K &= ~1;
         return Move_cursor_with_constraints();
     }
-    if(key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_CLICK_RIGHT][1]&0x0FFF) || (Config_Key[SPECIAL_CLICK_RIGHT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][1]&modifier))
     {
         Input_new_mouse_K &= ~2;
         return Move_cursor_with_constraints();

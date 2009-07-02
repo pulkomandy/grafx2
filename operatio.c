@@ -490,20 +490,26 @@ void Line_12_5(void)
   short start_y;
   short end_x;
   short end_y;
+  
+  short cursor_x;
+  short cursor_y;
 
   Operation_pop(&end_y);
   Operation_pop(&end_x);
   Operation_pop(&start_y);
   Operation_pop(&start_x);
 
+  cursor_x = Paintbrush_X;
+  cursor_y = Paintbrush_Y;
+
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   if(SDL_GetModState() & KMOD_SHIFT)
   {
-    Clamp_coordinates_45_degrees(start_x,start_y,&Paintbrush_X,&Paintbrush_Y);
+    Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
   }
 
   // On vient de bouger
-  if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
+  if ((cursor_x!=end_x) || (cursor_y!=end_y))
   {
       Hide_cursor();
 
@@ -513,18 +519,18 @@ void Line_12_5(void)
     if (Mouse_K==LEFT_SIDE)
     {
       Pixel_figure_preview (start_x,start_y,Fore_color);
-      Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,Fore_color);
+      Draw_line_preview (start_x,start_y,cursor_x,cursor_y,Fore_color);
     }
     else
     {
       Pixel_figure_preview (start_x,start_y,Back_color);
-      Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,Back_color);
+      Draw_line_preview (start_x,start_y,cursor_x,cursor_y,Back_color);
     }
 
     Operation_push(start_x);
     Operation_push(start_y);
-    Operation_push(Paintbrush_X);
-    Operation_push(Paintbrush_Y);
+    Operation_push(cursor_x);
+    Operation_push(cursor_y);
 
     Display_cursor();
   }
@@ -558,10 +564,6 @@ void Line_0_5(void)
   Operation_pop(&start_y);
   Operation_pop(&start_x);
   Operation_pop(&color);
-
-  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-  if(SDL_GetModState() & KMOD_SHIFT)
-      Clamp_coordinates_45_degrees(start_x,start_y,&end_x,&end_y);
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
@@ -4760,22 +4762,26 @@ void Grad_rectangle_12_9(void)
     short start_y;
     short end_x;
     short end_y;
+    short cursor_x;
+    short cursor_y;
 
     Operation_pop(&end_y);
     Operation_pop(&end_x);
     Operation_pop(&start_y);
     Operation_pop(&start_x);
 
-    if ((Paintbrush_X!=end_x) || (Paintbrush_Y!=end_y))
+    cursor_x = Paintbrush_X;
+    cursor_y = Paintbrush_Y;
+    // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+    if(SDL_GetModState() & KMOD_SHIFT)
+        Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
+        
+    if ((cursor_x!=end_x) || (cursor_y!=end_y))
     {
-        // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-        if(SDL_GetModState() & KMOD_SHIFT)
-            Clamp_coordinates_45_degrees(start_x,start_y,&Paintbrush_X,&Paintbrush_Y);
-
         Display_coords_rel_or_abs(start_x,start_y);
 
         Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
-        Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
+        Draw_line_preview_xor(start_x,start_y,cursor_x,cursor_y,0);
 
     }
 
