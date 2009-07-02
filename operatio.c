@@ -4788,8 +4788,8 @@ void Grad_rectangle_12_9(void)
 
     Operation_push(start_x);
     Operation_push(start_y);
-    Operation_push(Paintbrush_X);
-    Operation_push(Paintbrush_Y);
+    Operation_push(cursor_x);
+    Operation_push(cursor_y);
 }
 
 void Grad_rectangle_0_9(void)
