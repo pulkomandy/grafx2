@@ -62,7 +62,7 @@ else
     RMDIR = rmdir
     CP = cp
     BIN = grafx2
-    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -D__USE_INLINE__ $(TTFCOPT)
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -I/SDK/Local/common/include/SDL -D__USE_INLINE__ $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = obj/amiga
@@ -254,7 +254,7 @@ $(BIN) : $(OBJ) $(OBJRES)
 
 # SVN revision number
 version.c :
-	echo "char SVN_revision[]=\"`svnversion`\";" > version.c
+	echo "char SVN_revision[]=\"`svnversion .`\";" > version.c
 ifeq ($(LABEL),)
 else
 	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
