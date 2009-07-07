@@ -126,10 +126,11 @@ void Message_out_of_memory(void)
 
 void Button_Message_initial(void)
 {
-  char  str[21];
+  char  str[30];
   int   x_pos,offs_y,x,y;
 
-  sprintf(str,"GrafX2 version %s",Program_version);
+  strcpy(str,"GrafX2 version ");
+  strcat(str,Program_version);
   Open_window(260,172,str);
 
   Window_display_frame_in(10,20,239,62);
