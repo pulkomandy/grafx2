@@ -1367,20 +1367,24 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dx = *bx-ax;
     dy = *by-ay; 
 
+	// No mouse move: no need to clamp anything
     if (dx==0 || dy == 0) return; 
-		// On est en lockx et de toutes façons le X n'a pas bougé, on sort tout
-		// de suite pour éviter une méchante division par 0
 
     angle = atan2(dx, dy);
     
+	// Horizontal < 15/16
     if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
       angle = M_PI*(16.0/16.0);
+	// 15/16 < Iso < 13/16
     else if (angle < M_PI*(-13.0/16.0))
       angle = -2.677945045;
+	// 13/16 < 45deg (3pi/4) < 11/16
     else if (angle < M_PI*(-11.0/16.0))
       angle = M_PI*(-12.0/16.0);
+	// 11/16 < "vertical iso" < 9/19
     else if (angle < M_PI*(-9.0/16.0))
       angle = -2.034443936;
+	// 9/16 < vertical < 7/16
     else if (angle < M_PI*(-7.0/16.0))
       angle = M_PI*(-8.0/16.0);
     else if (angle < M_PI*(-5.0/16.0))

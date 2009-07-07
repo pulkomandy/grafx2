@@ -31,6 +31,8 @@
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
+PLATFORMOBJ =
+
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
 ifdef COMSPEC
@@ -68,6 +70,25 @@ else
     OBJDIR = obj/amiga
     ZIP = lha
     ZIPOPT = a
+
+  else ifeq ($(PLATFORM),Darwin)
+  #Mac OS X specific
+  DELCOMMAND = rm -rf
+  MKDIR = mkdir -p
+  RMDIR = rmdir
+  CP = cp
+  ZIP = zip
+  PLATFORMFILES = gfx2.png
+  BIN = grafx2
+  COPT = -D__macosx__ -D__linux__-W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) -I/usr/X11/include
+  LOPT = `sdl-config --libs` -framework SDL_image -framework SDL_ttf -L/usr/X11/lib -R/usr/X11/lib -lpng
+  	# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+  	CC = gcc
+  	#CC = nccgen -ncgcc -ncld -ncfabs
+  OBJDIR = obj/macosx
+  PLATFORMOBJ = $(OBJDIR)/SDLMain.o
+  X11LOPT = 
+  MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
 
   else ifeq ($(PLATFORM),AROS)
   #AROS specific
@@ -185,7 +206,7 @@ else
 
         # Compiles a regular linux exectutable for the native platform
         BIN = grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
 		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
 		CC = gcc
@@ -225,11 +246,30 @@ endif
 .PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o 
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(PLATFORMOBJ)
 
 SKIN_FILES = skins/skin_classic.png skins/skin_modern.png skins/font_Classic.png skins/font_Fun.png
 
+ifeq ($(PLATFORM),Darwin)
+all : $(MACAPPEXE)
+$(MACAPPEXE) : $(BIN)
+	rm -rf Grafx2.app
+	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources
+	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
+	cp Info.plist Grafx2.app/Contents
+	cp -r English.lproj Grafx2.app/Contents/Resources
+	cp -r fonts Grafx2.app/Contents/Resources
+	cp -r skins Grafx2.app/Contents/Resources
+	cp -r gfx2.cfg Grafx2.app/Contents/Resources
+	cp -r gfx2def.ini Grafx2.app/Contents/Resources
+	cp -Rp /Library/Frameworks/SDL.framework Grafx2.app/Contents/Frameworks
+	cp -Rp /Library/Frameworks/SDL_image.framework Grafx2.app/Contents/Frameworks
+	cp -Rp /Library/Frameworks/SDL_ttf.framework Grafx2.app/Contents/Frameworks
+	cp $(BIN) $(MACAPPEXE)
+else
 all : $(BIN)
+endif
+
 
 debug : $(BIN)
 
@@ -272,9 +312,13 @@ else
 	$(DELCOMMAND) pversion.c
 endif
 
-$(OBJDIR)/%.o :
+$(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
+
+$(OBJDIR)/%.o : %.m
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	$(CC) $(COPT) -c $*.m -o $(OBJDIR)/$*.o
 
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
