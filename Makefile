@@ -47,8 +47,7 @@ ifdef COMSPEC
   OBJDIR = obj/win32
   # Resources (icon)
   WINDRES = windres.exe
-  OBJRES = $(OBJDIR)/winres.o
-  CFGOBJRES = $(OBJDIR)/wincfgres.o
+  PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
   ZIP = zip
@@ -80,8 +79,12 @@ else
   ZIP = zip
   PLATFORMFILES = gfx2.png
   BIN = grafx2
-  COPT = -D__macosx__ -D__linux__-W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) -I/usr/X11/include
-  LOPT = `sdl-config --libs` -framework SDL_image -framework SDL_ttf -L/usr/X11/lib -R/usr/X11/lib -lpng
+  # Where the SDL frameworks are located
+  FWDIR = /Library/Frameworks
+  SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+  SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
+  COPT = -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+  LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
   	# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
   	CC = gcc
   	#CC = nccgen -ncgcc -ncld -ncfabs
@@ -262,9 +265,9 @@ $(MACAPPEXE) : $(BIN)
 	cp -r skins Grafx2.app/Contents/Resources
 	cp -r gfx2.cfg Grafx2.app/Contents/Resources
 	cp -r gfx2def.ini Grafx2.app/Contents/Resources
-	cp -Rp /Library/Frameworks/SDL.framework Grafx2.app/Contents/Frameworks
-	cp -Rp /Library/Frameworks/SDL_image.framework Grafx2.app/Contents/Frameworks
-	cp -Rp /Library/Frameworks/SDL_ttf.framework Grafx2.app/Contents/Frameworks
+	cp -Rp $(FWDIR)/SDL.framework Grafx2.app/Contents/Frameworks
+	cp -Rp $(FWDIR)/SDL_image.framework Grafx2.app/Contents/Frameworks
+	cp -Rp $(FWDIR)/SDL_ttf.framework Grafx2.app/Contents/Frameworks
 	cp $(BIN) $(MACAPPEXE)
 else
 all : $(BIN)
@@ -289,8 +292,8 @@ ziprelease: version $(BIN) release
 
 testsed :
 
-$(BIN) : $(OBJ) $(OBJRES)
-	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
+$(BIN) : $(OBJ)
+	$(CC) $(OBJ) -o $(BIN) $(LOPT)
 
 # SVN revision number
 version.c :
@@ -328,7 +331,7 @@ $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
 
 clean :
-	$(DELCOMMAND) $(OBJ) $(OBJDIR)/version.o $(OBJRES)
+	$(DELCOMMAND) $(OBJ)
 	$(DELCOMMAND) $(BIN)
 
 # Linux installation of the program
