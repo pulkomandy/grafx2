@@ -110,12 +110,8 @@ void Set_data_directory(const char * program_dir, char * data_dir)
 // OUT: Write into config_dir. Trailing / or \ is kept.
 void Set_config_directory(const char * program_dir, char * config_dir)
 {
-  // MacOSX
-  #if defined(__macosx__)
-    strcpy(config_dir,program_dir);
-    strcat(config_dir,"Contents/Resources/");
   // AmigaOS4
-  #elif defined(__amigaos4__) || defined(__AROS__)
+  #if defined(__amigaos4__) || defined(__AROS__)
     strcpy(config_dir,"PROGDIR:");
   // GP2X
   #elif defined(__GP2X__)
@@ -141,6 +137,10 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         // "~/.grafx2", the BeOS way
         const char* Config_SubDir = ".grafx2";
         config_parent_dir = getenv("$HOME");
+      #elif defined(__macosx__)
+        // "~/Library/Preferences/com.googlecode.grafx2"
+        const char* Config_SubDir = "Library/Preferences/com.googlecode.grafx2";
+        config_parent_dir = getenv("HOME");
       #else
         // "~/.grafx2"      
         const char* Config_SubDir = ".grafx2";
