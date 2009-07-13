@@ -306,7 +306,6 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
             Input_new_mouse_K &= ~2;
             break;
     }
-    Input_sticky_control = -1;
     
     return Move_cursor_with_constraints();
 }

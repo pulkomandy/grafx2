@@ -2661,68 +2661,77 @@ short Window_clicked_button(void)
       }
     }
 
-    if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
+    if (Input_sticky_control != 0 && !Window_click_in_control(Input_sticky_control))
     {
-      Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
+      // do nothing
     }
     else
     {
-      short clicked_button;
-      T_List_button * list;
-      // Check which controls was clicked (by rectangular area)
-      clicked_button = Window_get_clicked_button();
-      
-      // Check if it's part of a list control
-      for (list=Window_list_button_list; list!=NULL; list=list->Next)
+       
+      if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
       {
-        if (list->Entry_button->Number == clicked_button)
-        {
-          // Click in the textual part of a list.
-          short clicked_line;            
-          clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
-          if (clicked_line == list->Cursor_position ||   // Same as before
-            clicked_line >= list->Scroller->Nb_elements) // Below last line              
-            return 0;
-          
-          Hide_cursor();
-          // Redraw one item as disabled
-          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
-            list->Draw_list_item(
-              list->Entry_button->Pos_X,
-              list->Entry_button->Pos_Y + list->Cursor_position * 8,
-              list->List_start + list->Cursor_position,
-              0);
-          list->Cursor_position = clicked_line;
-          // Redraw one item as enabled
-          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
-            list->Draw_list_item(
-              list->Entry_button->Pos_X,
-              list->Entry_button->Pos_Y + list->Cursor_position * 8,
-              list->List_start + list->Cursor_position,
-              1);
-          Display_cursor();
-
-          // Store the selected value as attribute2
-          Window_attribute2=list->List_start + list->Cursor_position;
-          // Return the control ID of the list.
-          return ((Input_sticky_control = list->Number));
-        }
-        else if (list->Scroller->Number == clicked_button)
-        {
-          // Click in the scroller part of a list
-          if (list->List_start == list->Scroller->Position)
-            return 0; // Didn't actually move
-          // Update scroller indices
-          list->Cursor_position += list->List_start;
-          list->List_start = list->Scroller->Position;
-          list->Cursor_position -= list->List_start;
-          // Need to redraw all
-          Hide_cursor();
-          Window_redraw_list(list);
-          Display_cursor();
-        }
+        Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
       }
-      return clicked_button;
+      else
+      {
+        short clicked_button;
+        T_List_button * list;
+        
+        // Check which controls was clicked (by rectangular area)
+        clicked_button = Window_get_clicked_button();
+        
+        // Check if it's part of a list control
+        for (list=Window_list_button_list; list!=NULL; list=list->Next)
+        {
+          if (list->Entry_button->Number == clicked_button)
+          {
+            // Click in the textual part of a list.
+            short clicked_line;            
+            clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
+            if (clicked_line == list->Cursor_position ||   // Same as before
+              clicked_line >= list->Scroller->Nb_elements) // Below last line              
+              return 0;
+            
+            Hide_cursor();
+            // Redraw one item as disabled
+            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+              list->Draw_list_item(
+                list->Entry_button->Pos_X,
+                list->Entry_button->Pos_Y + list->Cursor_position * 8,
+                list->List_start + list->Cursor_position,
+                0);
+            list->Cursor_position = clicked_line;
+            // Redraw one item as enabled
+            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+              list->Draw_list_item(
+                list->Entry_button->Pos_X,
+                list->Entry_button->Pos_Y + list->Cursor_position * 8,
+                list->List_start + list->Cursor_position,
+                1);
+            Display_cursor();
+  
+            // Store the selected value as attribute2
+            Window_attribute2=list->List_start + list->Cursor_position;
+            // Return the control ID of the list.
+            return ((Input_sticky_control = list->Number));
+          }
+          else if (list->Scroller->Number == clicked_button)
+          {
+            // Click in the scroller part of a list
+            if (list->List_start == list->Scroller->Position)
+              return 0; // Didn't actually move
+            // Update scroller indices
+            list->Cursor_position += list->List_start;
+            list->List_start = list->Scroller->Position;
+            list->Cursor_position -= list->List_start;
+            // Need to redraw all
+            Hide_cursor();
+            Window_redraw_list(list);
+            Display_cursor();
+          }
+        }
+        return clicked_button;
+      }
     }
   }
 
