@@ -90,14 +90,14 @@
 // -- File formats
 
 #ifndef __no_pnglib__
+#define NB_KNOWN_FORMATS         14    ///< Total number of known file formats.
+#define NB_FORMATS_LOAD          14    ///< Number of file formats that grafx2 can load.
+#define NB_FORMATS_SAVE          14    ///< Number of file formats that grafx2 can save.
+#else
+// Without pnglib
 #define NB_KNOWN_FORMATS         13    ///< Total number of known file formats.
 #define NB_FORMATS_LOAD          13    ///< Number of file formats that grafx2 can load.
 #define NB_FORMATS_SAVE          13    ///< Number of file formats that grafx2 can save.
-#else
-// Without pnglib
-#define NB_KNOWN_FORMATS         12    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          12    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          12    ///< Number of file formats that grafx2 can save.
 #endif
 
 /// List of file formats recognized by grafx2
@@ -114,6 +114,7 @@ enum FILE_FORMATS
   FORMAT_PI1,
   FORMAT_PC1,
   FORMAT_CEL,
+  FORMAT_NEO,
   FORMAT_KCF,
   FORMAT_PAL,
   FORMAT_PNG

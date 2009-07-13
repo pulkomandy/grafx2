@@ -104,6 +104,11 @@ void Test_PC1(void);
 void Load_PC1(void);
 void Save_PC1(void);
 
+// -- NEO -------------------------------------------------------------------
+void Test_NEO(void);
+void Load_NEO(void);
+void Save_NEO(void);
+
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
 void Test_PNG(void);
@@ -122,6 +127,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0},
   {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0},
   {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
+  {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
 #ifndef __no_pnglib__
@@ -5648,6 +5654,177 @@ void Load_TGA(char * fname,T_Bitmap24B * dest,int * width,int * height)
     free(buffer);
   }
   fclose(fichier);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// NEO ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+void Test_NEO(void)
+{
+  FILE *file;              // Fichier du fichier
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  int  size;              // Taille du fichier
+  word resolution;                 // Résolution de l'image
+
+
+  Get_full_filename(filename,0);
+
+  File_error=1;
+
+  // Ouverture du fichier
+  if ((file=fopen(filename, "rb")))
+  {
+    // Vérification de la taille
+    size=File_length_file(file);
+    if ((size==32128))
+    {
+	  // Flag word : toujours 0
+	  if (Read_word_le(file,&resolution))
+	  {
+		  if (resolution == 0)
+			  File_error = 0;
+	  }
+
+      // Lecture et vérification de la résolution
+      if (Read_word_le(file,&resolution))
+      {
+        if (resolution==0 || resolution==1 || resolution==2)
+          File_error |= 0;
+      }
+    }
+    // Fermeture du fichier
+    fclose(file);
+  }
+
+}
+
+void Load_NEO(void)
+{
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  FILE *file;
+  word x_pos,y_pos;
+  byte * buffer;
+  byte * ptr;
+  byte pixels[320];
+
+  Get_full_filename(filename,0);
+
+  File_error=0;
+  if ((file=fopen(filename, "rb")))
+  {
+    // allocation d'un buffer mémoire
+    buffer=(byte *)malloc(32128);
+    if (buffer!=NULL)
+    {
+      // Lecture du fichier dans le buffer
+      if (Read_bytes(file,buffer,32128))
+      {
+        // Initialisation de la preview
+        Init_preview(320,200,File_length_file(file),FORMAT_NEO);
+        if (File_error==0)
+        {
+          // Initialisation de la palette
+          if (Config.Clear_palette)
+            memset(Main_palette,0,sizeof(T_Palette));
+		  // on saute la résolution et le flag, chacun 2 bits
+          PI1_decode_palette(buffer+4,(byte *)Main_palette);
+          Set_palette(Main_palette);
+          Remap_fileselector();
+
+          Main_image_width=320;
+          Main_image_height=200;
+
+          // Chargement/décompression de l'image
+          ptr=buffer+128;
+          for (y_pos=0;y_pos<200;y_pos++)
+          {
+            for (x_pos=0;x_pos<(320>>4);x_pos++)
+            {
+              PI1_8b_to_16p(ptr,pixels+(x_pos<<4));
+              ptr+=8;
+            }
+            for (x_pos=0;x_pos<320;x_pos++)
+              Pixel_load_function(x_pos,y_pos,pixels[x_pos]);
+          }
+        }
+      }
+      else
+        File_error=1;
+      free(buffer);
+    }
+    else
+      File_error=1;
+    fclose(file);
+  }
+  else
+    File_error=1;
+}
+
+void Save_NEO(void)
+{
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  FILE *file;
+  short x_pos,y_pos;
+  byte * buffer;
+  byte * ptr;
+  byte pixels[320];
+
+  Get_full_filename(filename,0);
+
+  File_error=0;
+  // Ouverture du fichier
+  if ((file=fopen(filename,"wb")))
+  {
+    // allocation d'un buffer mémoire
+    buffer=(byte *)malloc(32128);
+    // Codage de la résolution
+    buffer[0]=0x00;
+    buffer[1]=0x00;
+    buffer[2]=0x00;
+    buffer[3]=0x00;
+    // Codage de la palette
+    PI1_code_palette((byte *)Main_palette,buffer+4);
+    // Codage de l'image
+    ptr=buffer+128;
+    for (y_pos=0;y_pos<200;y_pos++)
+    {
+      // Codage de la ligne
+      memset(pixels,0,320);
+      if (y_pos<Main_image_height)
+      {
+        for (x_pos=0;(x_pos<320) && (x_pos<Main_image_width);x_pos++)
+          pixels[x_pos]=Read_pixel_function(x_pos,y_pos);
+      }
+
+      for (x_pos=0;x_pos<(320>>4);x_pos++)
+      {
+        PI1_16p_to_8b(pixels+(x_pos<<4),ptr);
+        ptr+=8;
+      }
+    }
+
+    if (Write_bytes(file,buffer,32128))
+    {
+      fclose(file);
+    }
+    else // Error d'écriture (disque plein ou protégé)
+    {
+      fclose(file);
+      remove(filename);
+      File_error=1;
+    }
+    // Libération du buffer mémoire
+    free(buffer);
+  }
+  else
+  {
+    fclose(file);
+    remove(filename);
+    File_error=1;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
