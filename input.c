@@ -31,6 +31,8 @@
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 
+int Input_sticky_control = 0;
+
 byte Directional_up;
 byte Directional_up_right;
 byte Directional_right;
@@ -155,8 +157,14 @@ int Move_cursor_with_constraints()
     (Input_new_mouse_Y != Mouse_Y) ||
     (Input_new_mouse_K != Mouse_K))
   {
+    // On every change of mouse state
     if ((Input_new_mouse_K != Mouse_K))
-      feedback=1;        
+    {
+      feedback=1;
+      
+      if (Input_new_mouse_K == 0)
+        Input_sticky_control = 0;
+    }
     Hide_cursor(); // On efface le curseur AVANT de le déplacer...
     if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
     {
@@ -298,6 +306,8 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
             Input_new_mouse_K &= ~2;
             break;
     }
+    Input_sticky_control = -1;
+    
     return Move_cursor_with_constraints();
 }
 

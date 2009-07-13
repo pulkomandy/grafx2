@@ -2334,6 +2334,59 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
   }
 }
 
+// Returns true if the mouse cursor sits inside the boundary of control.
+short Window_click_in_control(short control)
+{
+  T_Normal_button   * temp1;
+  T_Palette_button  * temp2;
+  T_Scroller_button * temp3;
+  T_Special_button  * temp4;
+  T_Dropdown_button * temp5;
+  
+  for (temp1=Window_normal_button_list; temp1; temp1=temp1->Next)
+  {
+    if (temp1->Number == control)
+      return Window_click_in_rectangle(temp1->Pos_X,temp1->Pos_Y,temp1->Pos_X+temp1->Width-1,temp1->Pos_Y+temp1->Height-1);
+  }
+
+  for (temp2=Window_palette_button_list; temp2; temp2=temp2->Next)
+  {
+    if (temp2->Number == control)
+      return Window_click_in_rectangle(temp2->Pos_X+5,temp2->Pos_Y+3,temp2->Pos_X+160,temp2->Pos_Y+82);
+  }
+
+  for (temp3=Window_scroller_button_list; temp3; temp3=temp3->Next)
+  {
+    if (temp3->Number == (control & 1023))
+    {
+      // top scroller arrow
+      if (control & 1024)
+        return Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y,temp3->Pos_X+10,temp3->Pos_Y+10);
+      // bottom scroller arrow
+      if (control & 2048)
+        return Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1);
+      // middle slider
+      return Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-13);
+    }
+  }
+
+  // Test du click sur une zone spéciale
+  for (temp4=Window_special_button_list; temp4; temp4=temp4->Next)
+  {
+    if (temp4->Number == control)
+      return Window_click_in_rectangle(temp4->Pos_X,temp4->Pos_Y,temp4->Pos_X+temp4->Width-1,temp4->Pos_Y+temp4->Height-1);
+  }
+
+  // Test du click sur une dropdown
+  for (temp5=Window_dropdown_button_list; temp5; temp5=temp5->Next)
+  {
+    if (temp5->Number == control)
+      return Window_click_in_rectangle(temp5->Pos_X,temp5->Pos_Y,temp5->Pos_X+temp5->Width-1,temp5->Pos_Y+temp5->Height-1);
+  }
+
+  return 0;
+}
+
 // --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
 short Window_get_clicked_button(void)
 {
@@ -2352,6 +2405,7 @@ short Window_get_clicked_button(void)
   {
     if (Window_click_in_rectangle(temp1->Pos_X,temp1->Pos_Y,temp1->Pos_X+temp1->Width-1,temp1->Pos_Y+temp1->Height-1))
     {
+      Input_sticky_control = temp1->Number;
       if (temp1->Repeatable)
       {
         Hide_cursor();
@@ -2372,6 +2426,7 @@ short Window_get_clicked_button(void)
   {
     if (Window_click_in_rectangle(temp2->Pos_X+5,temp2->Pos_Y+3,temp2->Pos_X+160,temp2->Pos_Y+82))
     {
+      Input_sticky_control = temp2->Number;
       // On stocke dans Attribut2 le numero de couleur cliqué
       Window_attribute2 = (((Mouse_X-Window_pos_X)/Menu_factor_X)-(temp2->Pos_X+2)) / 10 * 16 +
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-(temp2->Pos_Y+3)) / 5;
@@ -2387,6 +2442,7 @@ short Window_get_clicked_button(void)
       // Button flèche Haut
       if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y,temp3->Pos_X+10,temp3->Pos_Y+10))
       {
+        Input_sticky_control = temp3->Number | 1024;
         Hide_cursor();
         Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
 
@@ -2412,6 +2468,7 @@ short Window_get_clicked_button(void)
       // Button flèche Bas
       if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1))
       {
+        Input_sticky_control = temp3->Number | 2048;
         Hide_cursor();
         Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
 
@@ -2437,6 +2494,7 @@ short Window_get_clicked_button(void)
       // Jauge
       if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-13))
       {
+        Input_sticky_control = temp3->Number;
         if (temp3->Nb_elements>temp3->Nb_visibles)
         {
           // S'il y a la place de faire scroller le curseur:
@@ -2488,7 +2546,10 @@ short Window_get_clicked_button(void)
   for (temp4=Window_special_button_list; temp4; temp4=temp4->Next)
   {
     if (Window_click_in_rectangle(temp4->Pos_X,temp4->Pos_Y,temp4->Pos_X+temp4->Width-1,temp4->Pos_Y+temp4->Height-1))
-      return temp4->Number;
+    {
+       Input_sticky_control = temp4->Number;
+       return temp4->Number;
+    }
   }
 
   // Test du click sur une dropdown
@@ -2496,6 +2557,7 @@ short Window_get_clicked_button(void)
   {
     if (Window_click_in_rectangle(temp5->Pos_X,temp5->Pos_Y,temp5->Pos_X+temp5->Width-1,temp5->Pos_Y+temp5->Height-1))
     {
+      Input_sticky_control = temp5->Number;
       if (Mouse_K & temp5->Active_button)
         return Window_dropdown_on_click(temp5);
       else
@@ -2587,70 +2649,80 @@ short Window_clicked_button(void)
     if ((Mouse_X<Window_pos_X) || (Mouse_Y<Window_pos_Y)
      || (Mouse_X>=Window_pos_X+(Window_width*Menu_factor_X))
      || (Mouse_Y>=Window_pos_Y+(Window_height*Menu_factor_Y)))
-      return -1;
-    else
     {
-      if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
-        Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
+      if (Input_sticky_control == 0 || Input_sticky_control == -1)
+      {
+        Input_sticky_control = -1;
+        return -1;
+      }
       else
       {
-        short clicked_button;
-        T_List_button * list;
-        // Check which controls was clicked (by rectangular area)
-        clicked_button = Window_get_clicked_button();
-        
-        // Check if it's part of a list control
-        for (list=Window_list_button_list; list!=NULL; list=list->Next)
-        {
-          if (list->Entry_button->Number == clicked_button)
-          {
-            // Click in the textual part of a list.
-            short clicked_line;            
-            clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
-            if (clicked_line == list->Cursor_position ||   // Same as before
-              clicked_line >= list->Scroller->Nb_elements) // Below last line              
-              return 0;
-            
-            Hide_cursor();
-            // Redraw one item as disabled
-            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
-              list->Draw_list_item(
-                list->Entry_button->Pos_X,
-                list->Entry_button->Pos_Y + list->Cursor_position * 8,
-                list->List_start + list->Cursor_position,
-                0);
-            list->Cursor_position = clicked_line;
-            // Redraw one item as enabled
-            if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
-              list->Draw_list_item(
-                list->Entry_button->Pos_X,
-                list->Entry_button->Pos_Y + list->Cursor_position * 8,
-                list->List_start + list->Cursor_position,
-                1);
-            Display_cursor();
-
-            // Store the selected value as attribute2
-            Window_attribute2=list->List_start + list->Cursor_position;
-            // Return the control ID of the list.
-            return list->Number;
-          }
-          else if (list->Scroller->Number == clicked_button)
-          {
-            // Click in the scroller part of a list
-            if (list->List_start == list->Scroller->Position)
-              return 0; // Didn't actually move
-            // Update scroller indices
-            list->Cursor_position += list->List_start;
-            list->List_start = list->Scroller->Position;
-            list->Cursor_position -= list->List_start;
-            // Need to redraw all
-            Hide_cursor();
-            Window_redraw_list(list);
-            Display_cursor();
-          }
-        }
-        return clicked_button;
+        return 0;
       }
+    }
+
+    if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
+    {
+      Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
+    }
+    else
+    {
+      short clicked_button;
+      T_List_button * list;
+      // Check which controls was clicked (by rectangular area)
+      clicked_button = Window_get_clicked_button();
+      
+      // Check if it's part of a list control
+      for (list=Window_list_button_list; list!=NULL; list=list->Next)
+      {
+        if (list->Entry_button->Number == clicked_button)
+        {
+          // Click in the textual part of a list.
+          short clicked_line;            
+          clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
+          if (clicked_line == list->Cursor_position ||   // Same as before
+            clicked_line >= list->Scroller->Nb_elements) // Below last line              
+            return 0;
+          
+          Hide_cursor();
+          // Redraw one item as disabled
+          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+            list->Draw_list_item(
+              list->Entry_button->Pos_X,
+              list->Entry_button->Pos_Y + list->Cursor_position * 8,
+              list->List_start + list->Cursor_position,
+              0);
+          list->Cursor_position = clicked_line;
+          // Redraw one item as enabled
+          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+            list->Draw_list_item(
+              list->Entry_button->Pos_X,
+              list->Entry_button->Pos_Y + list->Cursor_position * 8,
+              list->List_start + list->Cursor_position,
+              1);
+          Display_cursor();
+
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return ((Input_sticky_control = list->Number));
+        }
+        else if (list->Scroller->Number == clicked_button)
+        {
+          // Click in the scroller part of a list
+          if (list->List_start == list->Scroller->Position)
+            return 0; // Didn't actually move
+          // Update scroller indices
+          list->Cursor_position += list->List_start;
+          list->List_start = list->Scroller->Position;
+          list->Cursor_position -= list->List_start;
+          // Need to redraw all
+          Hide_cursor();
+          Window_redraw_list(list);
+          Display_cursor();
+        }
+      }
+      return clicked_button;
     }
   }
 

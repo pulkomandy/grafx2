@@ -40,3 +40,10 @@ int Is_shortcut(word Key, word function);
 void Adjust_mouse_sensitivity(word fullscreen);
 
 void Set_mouse_position(void);
+
+///
+/// This holds the ID of the GUI control that the mouse
+/// is manipulating. The input system will reset it to zero 
+/// when mouse button is released, but it's the engine
+/// that will record and retrieve a real control ID.
+extern int Input_sticky_control;
