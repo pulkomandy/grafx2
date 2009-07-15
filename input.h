@@ -47,3 +47,10 @@ void Set_mouse_position(void);
 /// when mouse button is released, but it's the engine
 /// that will record and retrieve a real control ID.
 extern int Input_sticky_control;
+
+/// Allows locking movement to X or Y axis: 0=normal, 1=lock on next move, 2=locked horizontally, 3=locked vertically.
+extern int Snap_axis;
+/// For the :Snap_axis mode, sets the origin's point (in image coordinates)
+extern int Snap_axis_origin_X;
+/// For the :Snap_axis mode, sets the origin's point (in image coordinates)
+extern int Snap_axis_origin_Y;

@@ -31,7 +31,14 @@
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 
+// public Globals (available as extern)
+
 int Input_sticky_control = 0;
+int Snap_axis = 0;
+int Snap_axis_origin_X;
+int Snap_axis_origin_Y;
+
+// --
 
 byte Directional_up;
 byte Directional_up_right;
@@ -357,6 +364,14 @@ int Handle_key_press(SDL_KeyboardEvent event)
 
 int Release_control(int key_code, int modifier)
 {
+    int need_feedback = 0;
+
+    if (modifier == MOD_SHIFT)
+    {
+      // Disable "snap axis" mode
+      Snap_axis = 0;
+      need_feedback = 1;
+    }
 
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
@@ -385,7 +400,7 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~1;
             Input_new_mouse_K &= ~1;
-            return Move_cursor_with_constraints();
+            return Move_cursor_with_constraints() || need_feedback;
         }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
@@ -395,14 +410,14 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~2;
             Input_new_mouse_K &= ~2;
-            return Move_cursor_with_constraints();
+            return Move_cursor_with_constraints() || need_feedback;
         }
     }
   
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.
-    return 0;
+    return need_feedback;
 }
 
 

@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "sdlscreen.h"
 #include "errors.h"
+#include "input.h"
 
 // L'encapsulation tente une percée...ou un dernier combat.
 
@@ -1274,6 +1275,46 @@ void Compute_paintbrush_coordinates(void)
   {
     Paintbrush_X=(((Paintbrush_X+(Snap_width>>1)-Snap_offset_X)/Snap_width)*Snap_width)+Snap_offset_X;
     Paintbrush_Y=(((Paintbrush_Y+(Snap_height>>1)-Snap_offset_Y)/Snap_height)*Snap_height)+Snap_offset_Y;
+  }
+  
+  // Handling the snap axis mode, when shift is pressed.
+  switch (Current_operation)
+  {
+    // Operations that don't implement it
+    case OPERATION_LINE:
+      Snap_axis=0;
+      break;
+    // Operations that implement it
+    default:
+      if (Snap_axis==0 && (SDL_GetModState() & KMOD_SHIFT))
+      {
+        // Start "Snap axis" mode
+        Snap_axis=1;
+        Snap_axis_origin_X=Paintbrush_X;
+        Snap_axis_origin_Y=Paintbrush_Y;
+      } 
+  }
+
+  if (Snap_axis==1)
+  {
+    // Cursor moved
+    if (Paintbrush_X != Snap_axis_origin_X || Paintbrush_Y != Snap_axis_origin_Y)
+    {
+      if ((Paintbrush_X-Snap_axis_origin_X)*(Paintbrush_X-Snap_axis_origin_X) >
+          (Paintbrush_Y-Snap_axis_origin_Y)*(Paintbrush_Y-Snap_axis_origin_Y))
+      // Displacement was bigger on X axis: lock Y
+        Snap_axis=2;
+      else
+        Snap_axis=3;
+    }
+  }
+  if (Snap_axis==2)
+  {
+    Paintbrush_Y = Snap_axis_origin_Y;
+  }
+  else if (Snap_axis==3)
+  {
+    Paintbrush_X = Snap_axis_origin_X;
   }
 }
 
