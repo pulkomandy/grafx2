@@ -1360,61 +1360,128 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
 /// vertical, 45degrees, or isometrical for pixelart (ie 2:1 ratio)
 void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
 {
-    int dx, dy;
-    float angle;
-    float length;
+  int dx, dy;
+  float angle;
 
-    dx = *bx-ax;
-    dy = *by-ay; 
+  dx = *bx-ax;
+  dy = *by-ay; 
 
 	// No mouse move: no need to clamp anything
-    if (dx==0 || dy == 0) return; 
+  if (dx==0 || dy == 0) return; 
 
-    angle = atan2(dx, dy);
+  // Determine angle (heading)
+  angle = atan2(dx, dy);
     
-	// Horizontal < 15/16
-    if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
-      angle = M_PI*(16.0/16.0);
-	// 15/16 < Iso < 13/16
-    else if (angle < M_PI*(-13.0/16.0))
-      angle = -2.677945045;
-	// 13/16 < 45deg (3pi/4) < 11/16
-    else if (angle < M_PI*(-11.0/16.0))
-      angle = M_PI*(-12.0/16.0);
-	// 11/16 < "vertical iso" < 9/19
-    else if (angle < M_PI*(-9.0/16.0))
-      angle = -2.034443936;
-	// 9/16 < vertical < 7/16
-    else if (angle < M_PI*(-7.0/16.0))
-      angle = M_PI*(-8.0/16.0);
-    else if (angle < M_PI*(-5.0/16.0))
-      angle = -1.107148718;
-    else if (angle < M_PI*(-3.0/16.0))
-      angle = M_PI*(-4.0/16.0);
-    else if (angle < M_PI*(-1.0/16.0))
-      angle = -0.463647609;
-    else if (angle < M_PI*(1.0/16.0))
-      angle = M_PI*(0.0/16.0);
-    else if (angle < M_PI*(3.0/16.0))
-      angle = 0.463647609;
-    else if (angle < M_PI*(5.0/16.0))
-      angle = M_PI*(4.0/16.0);
-    else if (angle < M_PI*(7.0/16.0))
-      angle = 1.107148718;
-    else if (angle < M_PI*(9.0/16.0))
-      angle = M_PI*(8.0/16.0);
-    else if (angle < M_PI*(11.0/16.0))
-      angle = 2.034443936;
-    else if (angle < M_PI*(13.0/16.0))
-      angle = M_PI*(12.0/16.0);
-    else //if (angle < M_PI*(15.0/16.0))
-      angle = 2.677945045;
+  // Get absolute values, useful from now on:
+  //dx=abs(dx);
+  //dy=abs(dy);
+    
+	// Negative Y
+  if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
+  {
+    *bx=ax;
+    *by=ay + dy;
+	}
+	// Iso close to negative Y
+  else if (angle < M_PI*(-13.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax + dy/2;
+    *by=ay + dy;
+	}
+	// 45deg
+  else if (angle < M_PI*(-11.0/16.0))
+  {
+    *by = (*by + ay + dx)/2;
+    *bx = ax  - ay + *by;
+	}
+	// Iso close to negative X
+  else if (angle < M_PI*(-9.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay + dx/2;
+	}
+	// Negative X
+  else if (angle < M_PI*(-7.0/16.0))
+  {
+    *bx=ax + dx;
+    *by=ay;
+	}
+	// Iso close to negative X
+  else if (angle < M_PI*(-5.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay - dx/2;
+  }
+  // 45 degrees
+  else if (angle < M_PI*(-3.0/16.0))
+  {
+    *by = (*by + ay - dx)/2;
+    *bx = ax  + ay - *by;
+  }
+  // Iso close to positive Y
+  else if (angle < M_PI*(-1.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax - dy/2;
+    *by=ay + dy;
+	}
+  // Positive Y
+  else if (angle < M_PI*(1.0/16.0))
+  {
+    *bx=ax;
+    *by=ay + dy;
+  }
+  // Iso close to positive Y
+  else if (angle < M_PI*(3.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax + dy/2;
+    *by=ay + dy;
+	}
+  // 45 degrees
+  else if (angle < M_PI*(5.0/16.0))
+  {
+    *by = (*by + ay + dx)/2;
+    *bx = ax  - ay + *by;
+  }
+  // Iso close to positive X
+  else if (angle < M_PI*(7.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay + dx/2;
+	}
+  // Positive X
+  else if (angle < M_PI*(9.0/16.0))
+  {
+    *bx=ax + dx;
+    *by=ay;
+	}
+  // Iso close to positive X
+  else if (angle < M_PI*(11.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay - dx/2;
+  }
+  // 45 degrees
+  else if (angle < M_PI*(13.0/16.0))
+  {
+    *by = (*by + ay - dx)/2;
+    *bx = ax  + ay - *by;
+  }
+  // Iso close to negative Y
+  else //if (angle < M_PI*(15.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax - dy/2;
+    *by=ay + dy;
+	}
 
-    length = sqrt((float)(dx)*(float)(dx)+(float)(dy)*(float)(dy));
-    *bx=ax + lrintf(sin(angle)*length);
-    *by=ay + lrintf(cos(angle)*length);
-    
-    return;
+  return;
 }
 
   // -- Tracer général d'une ligne ------------------------------------------
