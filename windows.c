@@ -1604,7 +1604,7 @@ void Display_cursor(void)
   short end_y;
   short x_pos;
   short y_pos;
-  short counter_x;
+  short counter_x = 0;
   short counter_y;
   int   temp;
   byte  color;
@@ -1652,18 +1652,20 @@ void Display_cursor(void)
           start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
-          for (x_pos=start_x,counter_x=0;counter_x<15 && x_pos < Screen_width;x_pos++,counter_x++)
-                {
-                  if( x_pos < 0 ) continue;
-            for (y_pos=start_y,counter_y=0;counter_y<15 && y_pos < Screen_height;y_pos++,counter_y++)
-            {
-                    if( y_pos < 0 || y_pos >= Screen_height) continue;
-              color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-              if (color!=MC_Trans)
-                Pixel(x_pos,y_pos,color);
+          for (y_pos=start_y,counter_y=0; counter_y<15 && y_pos < Screen_height;
+			y_pos++,counter_y++)
+          {
+        	if( y_pos < 0 ) continue;
+          	for (x_pos=start_x,counter_x=0;
+				counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
+          	{
+            	if( x_pos < 0 ) continue;
+              	color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+              	CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+              	if (color!=MC_Trans)
+                	Pixel(x_pos,y_pos,color);
             }
-                }
+          }
 
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
@@ -1721,20 +1723,20 @@ void Display_cursor(void)
           start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
-          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
+        	if(y_pos<0) continue;
+        	if(y_pos>=Screen_height) break;
+          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          	{
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
-              for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-              {
-                  if(y_pos<0) continue;
-                  if(y_pos>=Screen_height) break;
-                  color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-                  // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
-                  CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-                  if (color!=MC_Trans)
-                      Pixel(x_pos,y_pos,color);
-              }
+              color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+              // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
+              CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+              if (color!=MC_Trans)
+            	Pixel(x_pos,y_pos,color);
+            }
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
@@ -1750,18 +1752,18 @@ void Display_cursor(void)
     case CURSOR_SHAPE_HOURGLASS :
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
-      for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
       {
-        if(x_pos<0) continue;
-        if(x_pos>=Screen_width) break;
-        for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-        {
-          if(y_pos<0) continue;
-          if(y_pos>=Screen_height) break;
-          color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
-          // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
-          CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-          if (color!=MC_Trans)
+    	if(y_pos<0) continue;
+        if(y_pos>=Screen_height) break;
+    	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+		{
+        	if(x_pos<0) continue;
+        	if(x_pos>=Screen_width) break;
+          	color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
+          	// On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
+          	CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+          	if (color!=MC_Trans)
               Pixel(x_pos,y_pos,color);
         }
       }
@@ -1908,14 +1910,11 @@ void Hide_cursor(void)
   int start_y;
   short end_x;
   short end_y;
-  int x_pos;
+  int x_pos = 0;
   int y_pos;
-  short counter_x;
+  short counter_x = 0;
   short counter_y;
-  //short end_counter_x; // Position X ou s'arrête l'affichage de la brosse/pinceau
-  //short end_counter_y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   int   temp;
-  //byte  color;
   float cos_a,sin_a;
   short x1,y1,x2,y2,x3,y3,x4,y4;
 
@@ -1960,10 +1959,11 @@ void Hide_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
+			if(y_pos < 0) continue;
             if(y_pos>=Screen_height) break;
             for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
             {
-              if ( (x_pos<0) || (y_pos < 0)) continue;
+              if(x_pos < 0) continue;
               else if (x_pos>=Screen_width) break;
               Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
             }
@@ -2026,18 +2026,18 @@ void Hide_cursor(void)
           start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
-          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
+        	if(y_pos<0) continue;
+            if(y_pos>=Screen_height) break;
+          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+          	{
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
-              for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-              {
-                  if(y_pos<0) continue;
-                  if(y_pos>=Screen_height) break;
                   Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
-              }
             }
-            Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
+          }
+          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
       }
       if (!Paintbrush_hidden)
@@ -2054,14 +2054,14 @@ void Hide_cursor(void)
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
 
-      for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
       {
-        if(x_pos<0) continue;
-        if(x_pos>=Screen_width) break;
-        for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-        {
-            if(y_pos<0) continue;
-            if(y_pos>=Screen_height) break;
+        if(y_pos<0) continue;
+        if(y_pos>=Screen_height) break;
+      	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+      	{
+        	if(x_pos<0) continue;
+        	if(x_pos>=Screen_width) break;
             Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
         }
       }
