@@ -495,8 +495,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
     Menu_factor_Y*=2;
     
-  if (Horizontal_line_buffer)
-    free(Horizontal_line_buffer);
+  free(Horizontal_line_buffer);
   Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);

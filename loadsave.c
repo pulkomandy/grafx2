@@ -5483,8 +5483,8 @@ void Load_PC1(void)
     else
     {
       File_error=1;
-      if (bufferdecomp) free(bufferdecomp);
-      if (buffercomp)   free(buffercomp);
+      free(bufferdecomp);
+      free(buffercomp);
     }
     fclose(file);
   }

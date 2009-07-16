@@ -2735,6 +2735,8 @@ void Load_picture(byte image)
       use_brush_palette=Confirmation_box("Use the palette of the brush?");
   }
 
+  // do_not_restore is modified inside the first if, that's why we check it
+  // again here
   if (do_not_restore)
   {
     old_cursor_shape=Cursor_shape;
@@ -2764,13 +2766,13 @@ void Load_picture(byte image)
 
       if (File_error==3) // On ne peut pas allouer la brosse
       {
-        if (Brush) free(Brush);
+        free(Brush);
         Brush=(byte *)malloc(1*1);
         Brush_height=1;
         Brush_width=1;
         *Brush=Fore_color;
 
-        if (Smear_brush) free(Smear_brush);
+    	free(Smear_brush);
         Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
         Smear_brush_height=MAX_PAINTBRUSH_SIZE;
         Smear_brush_width=MAX_PAINTBRUSH_SIZE;
@@ -2828,7 +2830,7 @@ void Load_picture(byte image)
         }
 
         new_mode=Best_video_mode();
-        // TODO : Utiliser içi Ratio_of_loaded_image pour passer dans la
+        // TODO : Utiliser ici Ratio_of_loaded_image pour passer dans la
         // bonne taille de pixels.
         if ((Config.Auto_set_res) && (new_mode!=Current_resolution))
         {
@@ -2858,8 +2860,7 @@ void Load_picture(byte image)
     Display_cursor();
   }
 
-  if (!image)
-    free(initial_palette);
+  free(initial_palette);
 
   if (!do_not_restore)
   {
@@ -4863,10 +4864,9 @@ void Button_Sieve_menu(void)
         break;
 
       case  7 : // Transfer to brush
-        if (Brush)
-          free(Brush);
         Brush_width=Sieve_width;
         Brush_height=Sieve_height;
+        free(Brush);
         Brush=(byte *)malloc(((long)Brush_height)*Brush_width);
         for (y_pos=0; y_pos<Sieve_height; y_pos++)
           for (x_pos=0; x_pos<Sieve_width; x_pos++)
@@ -5505,11 +5505,8 @@ void Button_Text()
       const char * preview_string = "AaBbCcDdEeFf012345";
       if (str[0])
         preview_string=str;
-      if (new_brush)
-      {
-        free(new_brush);
-      }
       Window_rectangle(8, 106, 273, 50,Back_color);
+      free(new_brush);
       new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
       if (new_brush)
       {
@@ -5636,7 +5633,7 @@ void Button_Text()
         Error(0);
         return;
       }
-      if (Brush) free(Brush);
+      free(Brush);
     
       Brush=new_brush;
       Brush_width=new_width;
@@ -5670,8 +5667,8 @@ void Button_Text()
       list_start = font_list->List_start;
       cursor_position = font_list->Cursor_position;
       
-      if (new_brush)
-        free(new_brush);
+      free(new_brush);
+	  new_brush = NULL;
       Close_window();
       Unselect_button(BUTTON_TEXT);
       Display_cursor();
