@@ -21,6 +21,10 @@
 ///@file filesel.h
 /// Fileselector window, used for loading and saving images and brushes.
 //////////////////////////////////////////////////////////////////////////////
+#ifndef __FILESEL_H__
+#define __FILESEL_H__
+
+#include "struct.h"
 
 byte Button_Load_or_Save(byte load, byte image);
 
@@ -40,3 +44,5 @@ void Recount_files(T_Fileselector *list);
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
 short Find_file_in_fileselector(T_Fileselector *list, char * fname);
+
+#endif
