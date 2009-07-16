@@ -57,7 +57,8 @@ int Create_ConfigDirectory(char * config_dir)
 // Determine which directory contains the executable.
 // IN: Main's argv[0], some platforms need it, some don't.
 // OUT: Write into program_dir. Trailing / or \ is kept.
-// Note : in fact this is only used to check for the datafiles and fonts in this same directory.
+// Note : in fact this is only used to check for the datafiles and fonts in 
+// this same directory.
 void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
 {
   #undef ARG_UNUSED
@@ -76,9 +77,9 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
 
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
-  // Note that on Unix, once installed, the executable is called from a shell script
-  // sitting in /usr/local/bin/, this allows argv[0] to contain the full path.
-  // On Windows, Mingw32 already provides the full path in all cases.
+  // Note that on Unix, once installed, the executable is called from a shell
+  // script sitting in /usr/local/bin/, this allows argv[0] to contain the full
+  // path. On Windows, Mingw32 already provides the full path in all cases.
   #else
     Extract_path(program_dir, argv0);
   #endif

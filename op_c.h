@@ -88,7 +88,7 @@ typedef struct
 
 ///////////////////////////////////////// Définition d'un ensemble de couleur
 
-typedef struct
+typedef struct S_Cluster
 {
   int occurences; // Nb total d'occurences des couleurs de l'ensemble
 
@@ -106,6 +106,8 @@ typedef struct
   byte r,g,b;      // color synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
+
+  struct S_Cluster* next;
 } T_Cluster;
 
 
