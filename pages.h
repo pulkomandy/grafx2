@@ -27,17 +27,19 @@
 
 
 //////////////////////////////////////////////////////////////////////////
-/////////////////////////// GESTION DU BACKUP ////////////////////////////
+/////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
 
-  ///
-  /// GESTION DES PAGES
-  ///
+///
+/// INDIVIDUAL PAGES
+///
 
-void Init_page(T_Page * page);
 void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
+
+// private
+void Init_page(T_Page * page);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Download_infos_backup(T_List_of_pages * list);
@@ -47,11 +49,12 @@ int Size_of_a_page(T_Page * page);
 
 
 
-  ///
-  /// GESTION DES LISTES DE PAGES
-  ///
+///
+/// LISTS OF PAGES
+///
 
 void Init_list_of_pages(T_List_of_pages * list);
+// private
 int Allocate_list_of_pages(T_List_of_pages * list,int size);
 void Free_a_list_of_pages(T_List_of_pages * list);
 int Size_of_a_list_of_pages(T_List_of_pages * list);
@@ -65,9 +68,9 @@ void Free_page_of_a_list(T_List_of_pages * list);
 
 
 
-  ///
-  /// GESTION DES BACKUPS
-  ///
+///
+/// BACKUP HIGH-LEVEL FUNCTIONS
+///
 
 int Init_all_backup_lists(int size,int width,int height);
 void Set_number_of_backups(int nb_backups);
@@ -76,18 +79,18 @@ int Backup_and_resize_the_spare(int width,int height);
 void Backup(void);
 void Undo(void);
 void Redo(void);
-void Free_current_page(void);
+void Free_current_page(void); // 'Kill' button
 void Exchange_main_and_spare(void);
 
 
 
-  ///
-  /// GESTION DES EMPRUNTS DE MEMOIRE DE PAGE
-  ///
+///
+/// BORROWING MEMORY FROM PAGE
+///
 
-int Can_borrow_memory_from_page(int size);
 void * Borrow_memory_from_page(int size);
-
+// private
+int Can_borrow_memory_from_page(int size);
 
 
 #endif
