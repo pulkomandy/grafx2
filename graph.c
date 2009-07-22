@@ -468,7 +468,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 
   Clear_border(MC_Black); // Requires up-to-date Screen_* and Pixel_*
 
-  // Taille des menus
+  // Set menu size (software zoom)
   if (Screen_width/320 > Screen_height/200)
     factor=Screen_height/200;
   else
@@ -476,19 +476,23 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 
   switch (Config.Ratio)
   {
-    case 1: // adapter tout
+    case 1: // Always the biggest possible
       Menu_factor_X=factor;
       Menu_factor_Y=factor;
       break;
-    case 2: // adapter légèrement
+    case 2: // Only keep the aspect ratio
       Menu_factor_X=factor-1;
       if (Menu_factor_X<1) Menu_factor_X=1;
       Menu_factor_Y=factor-1;
       if (Menu_factor_Y<1) Menu_factor_Y=1;
       break;
-    default: // ne pas adapter
+    case 0: // Always smallest possible
       Menu_factor_X=1;
       Menu_factor_Y=1;
+	  break;
+	default: // Stay below some reasonable size
+	  Menu_factor_X=Min(factor,abs(Config.Ratio));
+	  Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
   if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
     Menu_factor_X*=2;
@@ -496,7 +500,8 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
     Menu_factor_Y*=2;
     
   free(Horizontal_line_buffer);
-  Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+  Horizontal_line_buffer=(byte *)malloc(Pixel_width * 
+	((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);
 

@@ -258,11 +258,11 @@ typedef struct
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } __attribute__((__packed__)) T_Config_shortcut_info;
 
-/// This structure holds all the settings which are saved and loaded as gfx2.ini.
+/// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
 {
   char *Font_file;                       ///< Name of the font used in the menus. Matches file skins/font_*.png (Case-sensitive on some filesystems)
-  char *Skin_file;                        ///< String, name of the file where all the graphic data is stored
+  char *Skin_file;                       ///< String, name of the file where all the graphic data is stored
   int  Show_hidden_files;                ///< Boolean, true to show hidden files in fileselectors.
   int  Show_hidden_directories;          ///< Boolean, true to show hidden directories in fileselectors.
 //  int  Show_system_directories;        ///< (removed when converted from DOS)
@@ -287,7 +287,7 @@ typedef struct
   int  Nb_max_vertices_per_polygon;      ///< Limit for the number of vertices in polygon tools.
   byte Clear_palette;                    ///< Boolean, true to reset the palette (to black) before loading an image.
   byte Set_resolution_according_to;      ///< When Auto_set_res is on, this determines if the mode should be chosen according to the "original screen" information in the file (1) or the picture dimensons (2)
-  byte Ratio;                            ///< Determines the scaling of menu and windows: 0 no scaling, 1 scaling, 2 slight scaling.
+  int8_t Ratio;                          ///< Determines the scaling of menu and windows: 0 no scaling, 1 scaling, 2 slight scaling, negative= opposite of max scaling
   byte Fast_zoom;                        ///< Boolean, true if the magnifier shortcut should automatically view the mouse area.
   byte Find_file_fast;                   ///< In fileselectors, this determines which entries should be sought when typing letters: 0 all, 1 files only, 2 directories only.
   byte Separate_colors;                  ///< Boolean, true if the menu palette should separate color cells with a black outline.
