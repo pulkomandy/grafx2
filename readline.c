@@ -142,16 +142,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   byte offset=0; // index du premier caractère affiché
 
-  Hide_cursor();
-  // Effacement de la chaîne
-  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
-  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
-
-  // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
-  strcpy(initial_string,str);
-
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
     str[0]='\0';
@@ -160,7 +150,16 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   Wait_end_of_click();
   Keyboard_click_allowed = 0;
+  Hide_cursor();
 
+  // Effacement de la chaîne
+  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+
+  // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
+  strcpy(initial_string,str);
 
   size=strlen(str);
   position=(size<max_size)? size:size-1;
