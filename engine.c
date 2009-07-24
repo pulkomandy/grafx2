@@ -107,6 +107,7 @@ void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
   int index;
   if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
   *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y*Pixel_width);
+  if(*buffer==NULL) Error(0);
   for (index=0; index<(height*Menu_factor_Y); index++)
     Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X*Pixel_width));
 }
@@ -118,6 +119,7 @@ void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int heigh
   for (index=0; index<height*Menu_factor_Y; index++)
     Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X*Pixel_width));
   free(buffer);
+  buffer = NULL;
 }
 
 ///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
@@ -1931,109 +1933,96 @@ short Wait_click_in_palette(T_Palette_button * button)
 // -------------- Récupération d'une couleur derrière un menu ----------------
 void Get_color_behind_window(byte * color, byte * click)
 {
-  short width=Window_width*Menu_factor_X;
-  short height=Window_height*Menu_factor_Y;
   short old_x=-1;
   short old_y=-1;
   short index;
   short a,b,c,d; // Variables temporaires et multitâches...
-  byte * buffer;
+  byte * buffer = NULL;
   char str[25];
   byte cursor_was_hidden;
 
 
-  if ((buffer=(byte *) malloc(width*height)))
+  Hide_cursor();
+
+  cursor_was_hidden=Cursor_hidden;
+  Cursor_hidden=0;
+
+  Save_background(&buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
+  a=Menu_Y;
+  Menu_Y=Menu_Y_before_window;
+  b=Menu_is_visible;
+  Menu_is_visible=Menu_is_visible_before_window;
+  Display_all_screen();
+  Display_menu();
+  Menu_Y=a;
+  Menu_is_visible=b;
+
+  Cursor_shape=CURSOR_SHAPE_COLORPICKER;
+  b=Paintbrush_hidden;
+  Paintbrush_hidden=1;
+  c=-1; // color pointée: au début aucune, comme ça on initialise tout
+  if (Menu_is_visible_before_window)
+	  Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
+
+  Display_cursor();
+
+  do
   {
-    Hide_cursor();
+	  if(!Get_input())SDL_Delay(20);
 
-    cursor_was_hidden=Cursor_hidden;
-    Cursor_hidden=0;
+	  if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
+	  {
+		  Hide_cursor();
+		  a=Read_pixel(Mouse_X,Mouse_Y);
+		  if (a!=c)
+		  {
+			  c=a; // Mise à jour de la couleur pointée
+			  if (Menu_is_visible_before_window)
+			  {
+				  sprintf(str,"%d",a);
+				  d=strlen(str);
+				  strcat(str,"   (");
+				  sprintf(str+strlen(str),"%d",Main_palette[a].R);
+				  strcat(str,",");
+				  sprintf(str+strlen(str),"%d",Main_palette[a].G);
+				  strcat(str,",");
+				  sprintf(str+strlen(str),"%d",Main_palette[a].B);
+				  strcat(str,")");
+				  a=24-d;
+				  for (index=strlen(str); index<a; index++)
+					  str[index]=' ';
+				  str[a]=0;
+				  Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
 
-    for (index=0; index<height; index++)
-      Read_line(Window_pos_X,Window_pos_Y+index,width,buffer+((int)index*width*Pixel_width));
-    a=Menu_Y;
-    Menu_Y=Menu_Y_before_window;
-    b=Menu_is_visible;
-    Menu_is_visible=Menu_is_visible_before_window;
-    Display_all_screen();
-    Display_menu();
-    Menu_Y=a;
-    Menu_is_visible=b;
+				  Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
+						  Menu_status_Y," ",0,c);
+			  }
+		  }
+		  Display_cursor();
+	  }
 
-    Cursor_shape=CURSOR_SHAPE_COLORPICKER;
-    b=Paintbrush_hidden;
-    Paintbrush_hidden=1;
-    c=-1; // color pointée: au début aucune, comme ça on initialise tout
-    if (Menu_is_visible_before_window)
-      Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
+	  old_x=Mouse_X;
+	  old_y=Mouse_Y;
+  } while (!(Mouse_K || (Key==KEY_ESC)));
 
-    Display_cursor();
-
-    do
-    {
-      if(!Get_input())SDL_Delay(20);
-
-      if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
-      {
-        Hide_cursor();
-        a=Read_pixel(Mouse_X,Mouse_Y);
-        if (a!=c)
-        {
-          c=a; // Mise à jour de la couleur pointée
-          if (Menu_is_visible_before_window)
-          {
-            sprintf(str,"%d",a);
-            d=strlen(str);
-            strcat(str,"   (");
-            sprintf(str+strlen(str),"%d",Main_palette[a].R);
-            strcat(str,",");
-            sprintf(str+strlen(str),"%d",Main_palette[a].G);
-            strcat(str,",");
-            sprintf(str+strlen(str),"%d",Main_palette[a].B);
-            strcat(str,")");
-            a=24-d;
-            for (index=strlen(str); index<a; index++)
-              str[index]=' ';
-            str[a]=0;
-            Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
-
-            Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
-                          Menu_status_Y," ",0,c);
-          }
-        }
-        Display_cursor();
-      }
-
-      old_x=Mouse_X;
-      old_y=Mouse_Y;
-    } while (!(Mouse_K || (Key==KEY_ESC)));
-
-    if (Mouse_K)
-    {
-      Hide_cursor();
-      *click=Mouse_K;
-      *color=Read_pixel(Mouse_X,Mouse_Y);
-    }
-    else
-    {
-      *click=0;
-      Hide_cursor();
-    }
-
-    for (index=0; index<height; index++)
-      Display_line(Window_pos_X,Window_pos_Y+index,width,buffer+((int)index*width));
-    Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
-    Cursor_shape=CURSOR_SHAPE_ARROW;
-    Paintbrush_hidden=b;
-    Cursor_hidden=cursor_was_hidden;
-    Display_cursor();
-
-    free(buffer);
+  if (Mouse_K)
+  {
+	  Hide_cursor();
+	  *click=Mouse_K;
+	  *color=Read_pixel(Mouse_X,Mouse_Y);
   }
   else
   {
-    Error(0);
+	  *click=0;
+	  Hide_cursor();
   }
+
+  Restore_background(buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
+  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Paintbrush_hidden=b;
+  Cursor_hidden=cursor_was_hidden;
+  Display_cursor();
 }
 
 
@@ -2041,8 +2030,8 @@ void Get_color_behind_window(byte * color, byte * click)
 // ------------ Opération de déplacement de la fenêtre à l'écran -------------
 void Move_window(short dx, short dy)
 {
-  short new_x=Mouse_X-dx;
-  short new_y=Mouse_Y-dy;
+	short new_x=Mouse_X-dx;
+	short new_y=Mouse_Y-dy;
   short old_x;
   short old_y;
   short width=Window_width*Menu_factor_X;
