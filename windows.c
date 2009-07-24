@@ -410,8 +410,7 @@ int Pick_color_in_palette()
   return color;
 }
 
-  // -- Afficher tout le menu --
-
+/// Display the whole menu
 void Display_menu(void)
 {
   word x_pos;
@@ -421,17 +420,17 @@ void Display_menu(void)
 
   if (Menu_is_visible)
   {
-    // Affichage du sprite du menu
+    // display menu sprite
     for (y_pos=0;y_pos<MENU_HEIGHT;y_pos++)
       for (x_pos=0;x_pos<MENU_WIDTH;x_pos++)
         Pixel_in_menu(x_pos,y_pos,Gfx->Menu_block[y_pos][x_pos]);
-    // Affichage de la bande grise sous la palette
+    // Grey area for filename below palette
     Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
 
-    // Affichage de la palette
+    // Display palette
     Display_menu_palette();
 
-    // Affichage des couleurs de travail
+    // Display selected colors
     Display_foreback();
 
 
@@ -440,12 +439,14 @@ void Display_menu(void)
       if ((Mouse_Y<Menu_Y) &&                                                    // Souris dans l'image
           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ))
       {
-        // Dans ces deux cas, on met dans la barre les XY courant, même s'il y a des chances que ça soit recouvert si la souris est sur un bouton (trop chiant à vérifier)
+		// Prepare display of XY coordinates even if in some cases they will be
+		// erased with some other text
         if ( (Current_operation!=OPERATION_COLORPICK)
           && (Current_operation!=OPERATION_REPLACE) )
           Print_in_menu("X:       Y:             ",0);
         else
         {
+		  // The colorpicker display the color id between the parentheses
           Print_in_menu("X:       Y:       (    )",0);
           Num2str(Colorpicker_color,str,3);
           Print_in_menu(str,20);
@@ -455,7 +456,8 @@ void Display_menu(void)
       }
       Print_filename();
     }
-    Update_rect(0,Menu_Y,Screen_width,MENU_HEIGHT*Menu_factor_Y); // on met toute la largur à jour, ça inclut la palette et la zone d'état avec le nom du fichier
+	// Now update the area: menu height and whole screen width (including palette)
+    Update_rect(0,Menu_Y,Screen_width,MENU_HEIGHT*Menu_factor_Y);
   }
 }
 
@@ -1718,7 +1720,6 @@ void Display_cursor(void)
         }
         else
         {
-          DEBUG("B",0);
           temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
           start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
