@@ -345,13 +345,13 @@ int Handle_key_press(SDL_KeyboardEvent event)
       Directional_right=1;
       return 0;
     }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT))
+    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=1;
         Directional_click=1;
         return Move_cursor_with_constraints();
     }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT))
+    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=2;
         Directional_click=2;

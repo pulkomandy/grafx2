@@ -158,6 +158,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   else if (input_type==1)
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
 
+  Wait_end_of_click();
+  Keyboard_click_allowed = 0;
+
 
   size=strlen(str);
   position=(size<max_size)? size:size-1;
@@ -176,14 +179,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
   Flush_update();
 
-  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
+  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC) && Mouse_K == 0)
   {
     Display_cursor();
     do
     {
       if(!Get_input()) SDL_Delay(20);
       input_key=Key_ANSI;
-    } while(input_key==0);
+    } while(input_key==0 && Mouse_K == 0);
     Hide_cursor();
     switch (input_key)
     {
@@ -325,6 +328,7 @@ affichage:
     Flush_update();
 
   } // End du "while"
+  Keyboard_click_allowed = 1;
 
   // Effacement de la chaîne
   Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
@@ -346,5 +350,5 @@ affichage:
   Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
-  return (input_key==SDLK_RETURN);
+  return (input_key==SDLK_RETURN || Mouse_K != 0);
 }

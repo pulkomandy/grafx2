@@ -78,6 +78,7 @@ GFX2_GLOBAL T_Components Fav_menu_colors[4];
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
 GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.
 GFX2_GLOBAL byte Mouse_K; ///< Current mouse buttons state. Bitfield: 1 for RMB, 2 for LMB.
+GFX2_GLOBAL byte Keyboard_click_allowed; ///< Set to 0 when you edit a textfield so you can use space without exiting it
 
 /// Helper macro to take only one button when both are pressed (LMB has priority)
 #define Mouse_K_unique (Mouse_K==0?0:(Mouse_K&1?1:(Mouse_K&2?2:0)))

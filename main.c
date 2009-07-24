@@ -398,6 +398,7 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
+  Keyboard_click_allowed = 0;
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
