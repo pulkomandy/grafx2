@@ -541,7 +541,11 @@ void Sort_list_of_files(T_Fileselector *list)
 }
 
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index)
-{ 
+{
+  // Safety
+  if (index >= list->Nb_elements)
+    index=list->Nb_elements-1;
+
   if (list->Index)
   {
     return list->Index[index];
@@ -878,11 +882,37 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 }
 
 
-void Reload_list_of_files(byte filter, short Position, short offset, T_Scroller_button * button)
+void Reload_list_of_files(byte filter, T_Scroller_button * button)
 {
   Read_list_of_files(&Filelist, filter);
   Sort_list_of_files(&Filelist);
-  Prepare_and_display_filelist(Position,offset,button);
+  //
+  // Check and fix the fileselector positions, because 
+  // the directory content may have changed.
+  //
+  // Make the offset absolute
+  Main_fileselector_offset += Main_fileselector_position;
+  // Ensure it's within limits
+  if (Main_fileselector_offset >= Filelist.Nb_elements)
+  {
+    Main_fileselector_offset = Filelist.Nb_elements-1;
+  }
+  // Ensure the position doesn't show "too many files"
+  if (Main_fileselector_position!=0 && Main_fileselector_position>(Filelist.Nb_elements-10))
+  {
+    if (Filelist.Nb_elements<10)
+    {
+      Main_fileselector_position=0;
+    }
+    else
+    {
+      Main_fileselector_position=Filelist.Nb_elements-10;
+    }
+  }
+  // Restore the offset as relative to the position.
+  Main_fileselector_offset -= Main_fileselector_position;
+
+  Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,button);
 }
 
 void Scroll_fileselector(T_Scroller_button * file_scroller)
@@ -1113,7 +1143,7 @@ byte Button_Load_or_Save(byte load, byte image)
   }
   
   // Affichage des premiers fichiers visibles:
-  Reload_list_of_files(Main_format,Main_fileselector_position,Main_fileselector_offset,file_scroller);
+  Reload_list_of_files(Main_format,file_scroller);
 
   if (!load)
   {
@@ -1210,7 +1240,7 @@ byte Button_Load_or_Save(byte load, byte image)
                   }
               }
               // On relit les informations
-              Reload_list_of_files(Main_format,Main_fileselector_position,Main_fileselector_offset,file_scroller);
+              Reload_list_of_files(Main_format,file_scroller);
               // On demande la preview du nouveau fichier sur lequel on se trouve
               New_preview_is_needed=1;
             }
@@ -1291,7 +1321,7 @@ byte Button_Load_or_Save(byte load, byte image)
         Main_fileselector_position=0;
         Main_fileselector_offset=0;
         // Affichage des premiers fichiers visibles:
-        Reload_list_of_files(Main_format,Main_fileselector_position,Main_fileselector_offset,file_scroller);
+        Reload_list_of_files(Main_format,file_scroller);
         Display_cursor();
         New_preview_is_needed=1;
         *quicksearch_filename=0;
