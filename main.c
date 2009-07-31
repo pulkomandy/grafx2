@@ -344,6 +344,7 @@ int Init_program(int argc,char * argv[])
   strcpy(Main_file_directory,Main_current_directory);
   strcpy(Main_filename,"NO_NAME.GIF");
   Main_fileformat=DEFAULT_FILEFORMAT;
+
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare_current_directory,Main_current_directory);
   strcpy(Spare_file_directory,Main_file_directory);
@@ -407,6 +408,7 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
+
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
@@ -440,18 +442,18 @@ int Init_program(int argc,char * argv[])
   Set_all_video_modes();
   Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
-    // Donnée sur la sortie du programme:
+  // Donnée sur la sortie du programme:
   Quit_is_required=0;
   Quitting=0;
-    // Données sur l'état du menu:
+  // Données sur l'état du menu:
   Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
-    // Données sur les couleurs et la palette:
+  // Données sur les couleurs et la palette:
   First_color_in_palette=0;
-    // Données sur le curseur:
+  // Données sur le curseur:
   Cursor_shape=CURSOR_SHAPE_TARGET;
   Cursor_hidden=0;
-    // Données sur le pinceau:
+  // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
@@ -515,6 +517,7 @@ int Init_program(int argc,char * argv[])
   
   // Charger la configuration des touches
   Set_config_defaults();
+
   switch(Load_CFG(1))
   {
     case ERROR_CFG_MISSING:
@@ -583,7 +586,7 @@ int Init_program(int argc,char * argv[])
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
   Screen_width=Screen_height=Current_resolution=0;
-  
+
   Init_mode_video(
     Video_mode[starting_videomode].Width,
     Video_mode[starting_videomode].Height,
@@ -684,16 +687,16 @@ void Program_shutdown(void)
   #endif
 
   // On libère le buffer de gestion de lignes
-  free(Horizontal_line_buffer);
+  if(Horizontal_line_buffer) free(Horizontal_line_buffer);
 
   // On libère le pinceau spécial
-  free(Paintbrush_sprite);
+  if (Paintbrush_sprite) free(Paintbrush_sprite);
 
   // On libère les différents écrans virtuels et brosse:
-  free(Brush);
+  if(Brush) free(Brush);
   Set_number_of_backups(0);
-  free(Spare_screen);
-  free(Main_screen);
+  if(Spare_screen) free(Spare_screen);
+  if(Main_screen) free(Main_screen);
 
   // Free the skin (Gui graphics) data
   if (Gfx)
@@ -730,9 +733,9 @@ int main(int argc,char * argv[])
   int phoenix2_found=0;
   char phoenix_filename1[MAX_PATH_CHARACTERS];
   char phoenix_filename2[MAX_PATH_CHARACTERS];
-
   if(!Init_program(argc,argv))
   {
+	Program_shutdown();
     return 0;
   }
 
@@ -752,6 +755,7 @@ int main(int argc,char * argv[])
       strcpy(Main_file_directory,Config_directory);
       strcpy(Main_filename,"phoenix2.img");
       chdir(Main_file_directory);
+
       Button_Reload();
       Main_image_is_modified=1;
       Warning_message("Spare page recovered");
