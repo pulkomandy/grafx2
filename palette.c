@@ -815,13 +815,21 @@ void Button_Palette(void)
   Block(Window_pos_X+(Menu_factor_X*206),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
   Block(Window_pos_X+(Menu_factor_X*233),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
   // Jauges de couleur
-  Palette_view_is_RGB=1;
   red_slider = Window_set_scroller_button(182, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].R*Color_max/255);// 2
   green_slider = Window_set_scroller_button(209, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].G*Color_max/255);// 3
   blue_slider = Window_set_scroller_button(236, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].B*Color_max/255);// 4
-  Print_in_window(184,71,"R",MC_Dark,MC_Light);
-  Print_in_window(211,71,"G",MC_Dark,MC_Light);
-  Print_in_window(238,71,"B",MC_Dark,MC_Light);
+
+  if(Palette_view_is_RGB==1) {
+	  Print_in_window(184,71,"R",MC_Dark,MC_Light);
+	  Print_in_window(211,71,"G",MC_Dark,MC_Light);
+	  Print_in_window(238,71,"B",MC_Dark,MC_Light);
+      Componant_unit(RGB_scale);
+  } else {
+	  Print_in_window(184,71,"H",MC_Dark,MC_Light);
+	  Print_in_window(211,71,"S",MC_Dark,MC_Light);
+	  Print_in_window(238,71,"L",MC_Dark,MC_Light);
+      Componant_unit(256);
+  }
 
   first_color=last_color=block_start=block_end=Fore_color;
   Tag_color_range(block_start,block_end);
@@ -831,12 +839,7 @@ void Button_Palette(void)
   Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
-  Format_componant(Main_palette[Fore_color].R*Color_max/255,str);
-  Print_counter(176,172,str,MC_Black,MC_Light);
-  Format_componant(Main_palette[Fore_color].G*Color_max/255,str);
-  Print_counter(203,172,str,MC_Black,MC_Light);
-  Format_componant(Main_palette[Fore_color].B*Color_max/255,str);
-  Print_counter(230,172,str,MC_Black,MC_Light);
+  Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
 
   Print_in_window(129,58,"Color number:",MC_Dark,MC_Light);
   Num2str(Fore_color,str,3);
@@ -1814,7 +1817,7 @@ void Button_Palette(void)
         
         // Acte les changements en cours sur une ou plusieurs couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
-        memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+        memcpy(backup_palette, working_palette,sizeof(T_Palette));
 
         Palette_view_is_RGB = !Palette_view_is_RGB;
 
