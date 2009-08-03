@@ -905,6 +905,58 @@ void Main_handler(void)
           Transparency_set(0);
           Key=0;
           break;
+	case SPECIAL_ZOOM_1 :
+	  Zoom_set(-1);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_2 :
+	  Zoom_set(0);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_3 :
+	  Zoom_set(1);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_4 :
+	  Zoom_set(2);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_5 :
+	  Zoom_set(3);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_6 :
+	  Zoom_set(4);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_8 :
+	  Zoom_set(5);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_10 :
+	  Zoom_set(6);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_12 :
+	  Zoom_set(7);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_14 :
+	  Zoom_set(8);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_16 :
+	  Zoom_set(9);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_18 :
+	  Zoom_set(10);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_20 :
+	  Zoom_set(11);
+	  Key=0;
+	  break;
         default   : // Gestion des touches de raccourci de bouton:
           // Pour chaque bouton
           shortcut_button=-1;

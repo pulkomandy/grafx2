@@ -41,3 +41,4 @@ void Scroll_screen(short delta_x,short delta_y);
 void Scroll_magnifier(short delta_x,short delta_y);
 
 void Zoom(short delta);
+void Zoom_set(int index);

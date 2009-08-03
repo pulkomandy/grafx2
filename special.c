@@ -362,3 +362,25 @@ void Zoom(short delta)
     Display_cursor();
   }
 }
+
+/**
+  Set zoom value. Negative value means no zoom.
+*/
+void Zoom_set(int index)
+{
+  Hide_cursor();
+  if (index<0)
+  {
+    /* Zoom 1:1 */
+    if (Main_magnifier_mode)
+      Unselect_button(BUTTON_MAGNIFIER);
+  }
+  else
+  {
+    Change_magnifier_factor(index);
+    if (!Main_magnifier_mode)
+      Select_button(BUTTON_MAGNIFIER,1);
+    Display_all_screen();
+  }
+  Display_cursor();
+}

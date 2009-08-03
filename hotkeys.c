@@ -1182,6 +1182,110 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_0, // 0
   0},
+  {145,
+  "Zoom 1:1",
+  "Turs magnifier mode off.",
+  "",
+  "",
+  true,
+  SDLK_1|MOD_CTRL, /* Ctrl + 1 */
+  0},
+  {146,
+  "Zoom 2:1",
+  "Turs magnifier mode on and set its",
+  "factor to 2:1",
+  "",
+  true,
+  SDLK_2|MOD_CTRL, /* Ctrl + 2 */
+  0},
+  {147,
+  "Zoom 3:1",
+  "Turs magnifier mode on and set its",
+  "factor to 3:1",
+  "",
+  true,
+  SDLK_3|MOD_CTRL, /* Ctrl + 3 */
+  0},
+  {148,
+  "Zoom 4:1",
+  "Turs magnifier mode on and set its",
+  "factor to 4:1",
+  "",
+  true,
+  SDLK_4|MOD_CTRL, /* Ctrl + 4 */
+  0},
+  {149,
+  "Zoom 5:1",
+  "Turs magnifier mode on and set its",
+  "factor to 5:1",
+  "",
+  true,
+  SDLK_5|MOD_CTRL, /* Ctrl + 5 */
+  0},
+  {150,
+  "Zoom 6:1",
+  "Turs magnifier mode on and set its",
+  "factor to 6:1",
+  "",
+  true,
+  SDLK_6|MOD_CTRL, /* Ctrl + 6 */
+  0},
+  {151,
+  "Zoom 8:1",
+  "Turs magnifier mode on and set its",
+  "factor to 8:1",
+  "",
+  true,
+  SDLK_7|MOD_CTRL, /* Ctrl + 7 */
+  0},
+  {152,
+  "Zoom 10:1",
+  "Turs magnifier mode on and set its",
+  "factor to 10:1",
+  "",
+  true,
+  SDLK_8|MOD_CTRL, /* Ctrl + 8 */
+  0},
+  {153,
+  "Zoom 12:1",
+  "Turs magnifier mode on and set its",
+  "factor to 12:1",
+  "",
+  true,
+  0,
+  0},
+  {154,
+  "Zoom 14:1",
+  "Turs magnifier mode on and set its",
+  "factor to 14:1",
+  "",
+  true,
+  0,
+  0},
+  {155,
+  "Zoom 16:1",
+  "Turs magnifier mode on and set its",
+  "factor to 16:1",
+  "",
+  true,
+  0,
+  0},
+  {156,
+  "Zoom 18:1",
+  "Turs magnifier mode on and set its",
+  "factor to 18:1",
+  "",
+  true,
+  0,
+  0},
+  {157,
+  "Zoom 20:1",
+  "Turs magnifier mode on and set its",
+  "factor to 20:1",
+  "",
+  true,
+  0,
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1331,4 +1435,17 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_TRANSPARENCY_8,           // Sets transparency level 80%
   SPECIAL_TRANSPARENCY_9,           // Sets transparency level 90%
   SPECIAL_TRANSPARENCY_0,           // Sets transparency level 00%
+  SPECIAL_ZOOM_1,                   /**< Sets zoom factor to 1:1 (no magnification) */
+  SPECIAL_ZOOM_2,                   /**< Sets zoom factor to 2:1 */
+  SPECIAL_ZOOM_3,                   /**< Sets zoom factor to 3:1 */
+  SPECIAL_ZOOM_4,                   /**< Sets zoom factor to 4:1 */
+  SPECIAL_ZOOM_5,                   /**< Sets zoom factor to 5:1 */
+  SPECIAL_ZOOM_6,                   /**< Sets zoom factor to 6:1 */
+  SPECIAL_ZOOM_8,                   /**< Sets zoom factor to 8:1 */
+  SPECIAL_ZOOM_10,                  /**< Sets zoom factor to 10:1 */
+  SPECIAL_ZOOM_12,                  /**< Sets zoom factor to 12:1 */
+  SPECIAL_ZOOM_14,                  /**< Sets zoom factor to 14:1 */
+  SPECIAL_ZOOM_16,                  /**< Sets zoom factor to 16:1 */
+  SPECIAL_ZOOM_18,                  /**< Sets zoom factor to 18:1 */
+  SPECIAL_ZOOM_20,                  /**< Sets zoom factor to 20:1 */
 };
