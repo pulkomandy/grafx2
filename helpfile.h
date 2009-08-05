@@ -303,7 +303,7 @@ static const T_Help_table helptable_credits[] =
 //HELP_TEXT ("0----5----0----5----0----5----0----5----0--X")
   HELP_TEXT ("")
   HELP_TEXT ("  Re-licensed GrafX2 under the GPL in 2001")
-  HELP_TEXT ("  Huge thaks to them for their work !")
+  HELP_TEXT ("  Huge thanks to them for their work !")
   HELP_TEXT ("")
   HELP_BOLD ("                    ART")
   HELP_TEXT ("")
