@@ -94,7 +94,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Undo / Redo             ",
   "Kill current page       ",
   "Quit                    ",
-  "Palette editor          ",
+  "Palette editor / setup  ",
   "Scroll pal. bkwd / Fast ",
   "Scroll pal. fwd / Fast  ",
   "Color #"                 ,
