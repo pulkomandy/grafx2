@@ -241,6 +241,7 @@ void Freehand_mode12_0_2(void)
 //  Souris effacée: Non
 {
   Operation_stack_size=0;
+  End_of_modification();
 }
 
 
@@ -431,6 +432,7 @@ void Freehand_mode3_0_1(void)
 //
 //  Souris effacée: Non
 {
+  End_of_modification();
   Operation_stack_size--;
 }
 
@@ -572,6 +574,7 @@ void Line_0_5(void)
   Display_paintbrush      (start_x,start_y,color,0);
   Draw_line_permanet(start_x,start_y,end_x,end_y,color);
 
+  End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:             ",0);
@@ -750,6 +753,7 @@ void K_line_12_7(void)
     Hide_cursor();
     Paintbrush_shape=Paintbrush_shape_before_operation;
 
+    End_of_modification();
     if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
       Print_in_menu("X:       Y:             ",0);
@@ -925,6 +929,8 @@ void Empty_rectangle_0_5(void)
   Paintbrush_X=old_paintbrush_x;
   Paintbrush_Y=old_paintbrush_y;
 
+  End_of_modification();
+
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("X:       Y:",0);
   Print_coordinates();
@@ -970,6 +976,7 @@ void Filled_rectangle_0_5(void)
   Paintbrush_X=old_paintbrush_x;
   Paintbrush_Y=old_paintbrush_y;
 
+  End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:",0);
@@ -1102,6 +1109,8 @@ void Empty_circle_0_5(void)
 
   Draw_empty_circle_permanent(center_x,center_y,radius,color);
 
+  End_of_modification();
+  
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:",0);
@@ -1141,6 +1150,7 @@ void Filled_circle_0_5(void)
 
   Draw_filled_circle(center_x,center_y,radius,color);
 
+  End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:",0);
@@ -1271,6 +1281,8 @@ void Empty_ellipse_0_5(void)
 
   Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
 
+  End_of_modification();
+  
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:             ",0);
@@ -1312,6 +1324,7 @@ void Filled_ellipse_0_5(void)
 
   Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,color);
 
+  End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:             ",0);
@@ -1340,6 +1353,7 @@ void Fill_1_0(void)
   Shade_table=Shade_table_left;
   Fill_general(Fore_color);
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 }
 
@@ -1361,6 +1375,7 @@ void Fill_2_0(void)
   Shade_table=Shade_table_right;
   Fill_general(Back_color);
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 }
 
@@ -1385,6 +1400,7 @@ void Replace_1_0(void)
 //  Shade_table=Shade_table_left;
   Replace(Fore_color);
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 }
 
@@ -1406,6 +1422,7 @@ void Replace_2_0(void)
 //  Shade_table=Shade_table_right;
   Replace(Back_color);
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 }
 
@@ -1895,6 +1912,7 @@ void Curve_4_points_2_9(void)
   Draw_curve_permanent(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 }
 
@@ -2049,6 +2067,7 @@ void Curve_3_points_12_11(void)
   Compute_3_point_curve(x1,y1,x4,y4,&x2,&y2,&x3,&y3);
   Draw_curve_permanent(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
+  End_of_modification();
   Display_cursor();
   Wait_end_of_click();
 }
@@ -2136,6 +2155,7 @@ void Airbrush_0_2(void)
 //
 {
   Operation_stack_size-=2;
+  End_of_modification();
 }
 
 
@@ -2226,6 +2246,7 @@ void Polygon_12_9(void)
     Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
     Display_cursor();
+    End_of_modification();
     Wait_end_of_click();
     Hide_cursor();
 
@@ -2424,6 +2445,7 @@ void Polyfill_12_9(void)
     Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
     free(Polyfill_table_of_points);
 
+    End_of_modification();
     if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
       Print_in_menu("X:       Y:             ",0);
@@ -2546,6 +2568,7 @@ void Polyform_12_8(void)
     Draw_line_permanet(start_x,start_y,initial_x,initial_y,color);
 
     Display_cursor();
+    End_of_modification();
     Wait_end_of_click();
   }
 }
@@ -2755,6 +2778,7 @@ void Filled_polyform_12_8(void)
     Paintbrush_hidden=0;
 
     Display_cursor();
+    End_of_modification();
     Wait_end_of_click();
   }
 }
@@ -2838,6 +2862,7 @@ void Filled_contour_0_8(void)
   Paintbrush_hidden=0;
 
   Display_cursor();
+  End_of_modification();
 }
 
 ////////////////////////////////////////////////////// OPERATION_GRAB_BRUSH
@@ -2980,6 +3005,7 @@ void Brush_0_5(void)
     Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
 
+  End_of_modification();
   Return_to_draw_mode();
 }
 
@@ -3103,6 +3129,8 @@ void Polybrush_12_8(void)
       Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
     
+    if (click==RIGHT_SIDE)
+      End_of_modification();
     Return_to_draw_mode();
     Display_cursor();
   }
@@ -3952,6 +3980,7 @@ void Scroll_0_4(void)
 {
   Operation_stack_size-=4;
   Cursor_hidden=Cursor_hidden_before_scroll;
+  End_of_modification();
   if ((Config.Coords_rel) && (Menu_is_visible))
   {
     Print_in_menu("X:       Y:             ",0);
@@ -4117,6 +4146,7 @@ void Grad_circle_0_6(void)
 
     Draw_filled_circle(center_x,center_y,radius,Back_color);
 
+    End_of_modification();
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Print_in_menu("X:       Y:             ",0);
@@ -4168,6 +4198,7 @@ void Grad_circle_12_8(void)
     Draw_grad_circle(center_x,center_y,radius,Paintbrush_X,Paintbrush_Y);
 
   Display_cursor();
+  End_of_modification();
   Wait_end_of_click();
 
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -4371,6 +4402,7 @@ void Grad_ellipse_0_6(void)
 
     Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Back_color);
 
+    End_of_modification();
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Print_in_menu("X:       Y:             ",0);
@@ -4423,7 +4455,7 @@ void Grad_ellipse_12_8(void)
     Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
 
   Display_cursor();
-
+  End_of_modification();
   Wait_end_of_click();
 
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -4903,6 +4935,7 @@ void Grad_rectangle_0_9(void)
         Draw_grad_rectangle(rect_start_x,rect_start_y,rect_end_x,rect_end_y,vector_start_x,vector_start_y,vector_end_x,vector_end_y);
 
     Display_cursor();
+    End_of_modification();
     Wait_end_of_click();
 
     if ((Config.Coords_rel) && (Menu_is_visible))
@@ -5056,6 +5089,7 @@ void Centered_lines_12_7(void)
         }
 
         Display_cursor();
+        End_of_modification();
         Wait_end_of_click();
     }
 }

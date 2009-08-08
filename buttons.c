@@ -505,6 +505,7 @@ void Button_Clear(void)
   else
     Hide_current_image(0);
   Display_all_screen();
+  End_of_modification();
   Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
@@ -518,6 +519,7 @@ void Button_Clear_with_backcolor(void)
   else
     Hide_current_image(Back_color);
   Display_all_screen();
+  End_of_modification();
   Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
@@ -1306,97 +1308,51 @@ void Button_Skins(void)
 //---------------------------- Changement de page ----------------------------
 void Button_Page(void)
 {
-	byte   temp_byte;
-	word   temp_word;
-  short  temp_short;
-  float  temp_float;
+	byte   factor_index;
   char   Temp_buffer[256];
 
+  #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
+  #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+  #define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
+  #define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
+  
   Hide_cursor();
 
   // On dégrossit le travail avec les infos des listes de pages
   Exchange_main_and_spare();
 
   // On fait le reste du travail "à la main":
-  temp_short=Spare_offset_X;
-  Spare_offset_X=Main_offset_X;
-  Main_offset_X=temp_short;
-
-  temp_short=Spare_offset_Y;
-  Spare_offset_Y=Main_offset_Y;
-  Main_offset_Y=temp_short;
-
-  temp_short=Old_spare_offset_X;
-  Old_spare_offset_X=Old_main_offset_X;
-  Old_main_offset_X=temp_short;
-
-  temp_short=Old_spare_offset_Y;
-  Old_spare_offset_Y=Old_main_offset_Y;
-  Old_main_offset_Y=temp_short;
-
-  temp_short=Spare_separator_position;
-  Spare_separator_position=Main_separator_position;
-  Main_separator_position=temp_short;
-
-  temp_short=Spare_X_zoom;
-  Spare_X_zoom=Main_X_zoom;
-  Main_X_zoom=temp_short;
-
-  temp_float=Spare_separator_proportion;
-  Spare_separator_proportion=Main_separator_proportion;
-  Main_separator_proportion=temp_float;
-
-  temp_byte=Spare_magnifier_mode;
-  Spare_magnifier_mode=Main_magnifier_mode;
-  Main_magnifier_mode=temp_byte;
+  SWAP_SHORTS(Main_offset_X,Spare_offset_X)
+  SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
+  SWAP_SHORTS(Old_main_offset_X,Old_spare_offset_X)
+  SWAP_SHORTS(Old_main_offset_Y,Old_spare_offset_Y)
+  SWAP_SHORTS(Main_separator_position,Spare_separator_position)
+  SWAP_SHORTS(Main_X_zoom,Spare_X_zoom)
+  SWAP_FLOATS(Main_separator_proportion,Spare_separator_proportion)
+  SWAP_BYTES (Main_magnifier_mode,Spare_magnifier_mode)
 
   Pixel_preview=(Main_magnifier_mode)?Pixel_preview_magnifier:Pixel_preview_normal;
 
-  temp_word=Spare_magnifier_factor;
-  Spare_magnifier_factor=Main_magnifier_factor;
-  Main_magnifier_factor=temp_word;
-
-  temp_word=Spare_magnifier_height;
-  Spare_magnifier_height=Main_magnifier_height;
-  Main_magnifier_height=temp_word;
-
-  temp_word=Spare_magnifier_width;
-  Spare_magnifier_width=Main_magnifier_width;
-  Main_magnifier_width=temp_word;
-
-  temp_short=Spare_magnifier_offset_X;
-  Spare_magnifier_offset_X=Main_magnifier_offset_X;
-  Main_magnifier_offset_X=temp_short;
-
-  temp_short=Spare_magnifier_offset_Y;
-  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
-  Main_magnifier_offset_Y=temp_short;
-
+  SWAP_WORDS (Main_magnifier_factor,Spare_magnifier_factor)
+  SWAP_WORDS (Main_magnifier_height,Spare_magnifier_height)
+  SWAP_WORDS (Main_magnifier_width,Spare_magnifier_width)
+  SWAP_SHORTS(Main_magnifier_offset_X,Spare_magnifier_offset_X)
+  SWAP_SHORTS(Main_magnifier_offset_Y,Spare_magnifier_offset_Y)
   // Swap du booléen "Image modifiée"
-  temp_byte        =Spare_image_is_modified;
-  Spare_image_is_modified=Main_image_is_modified;
-  Main_image_is_modified=temp_byte;
+  SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
 
   // Swap des infos sur les fileselects
   strcpy(Temp_buffer             ,Spare_current_directory);
   strcpy(Spare_current_directory,Main_current_directory);
   strcpy(Main_current_directory,Temp_buffer             );
 
-  temp_byte=Spare_format;
-  Spare_format=Main_format;
-  Main_format=temp_byte;
-
-  temp_word              =Spare_fileselector_position;
-  Spare_fileselector_position=Main_fileselector_position;
-  Main_fileselector_position=temp_word;
-
-  temp_word              =Spare_fileselector_offset;
-  Spare_fileselector_offset=Main_fileselector_offset;
-  Main_fileselector_offset=temp_word;
-
+  SWAP_BYTES (Main_format,Spare_format)
+  SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
+  SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
+  
   // A la fin, on affiche l'écran
-  for (temp_byte=0; ZOOM_FACTOR[temp_byte]!=Main_magnifier_factor; temp_byte++);
-  Change_magnifier_factor(temp_byte);
+  for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
+  Change_magnifier_factor(factor_index);
 
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);

@@ -930,3 +930,7 @@ void * Borrow_memory_from_page(int size)
   // Pour que le compilateur ne dise pas qu'il manque une valeur de sortie:
   return 0;
 }
+
+void End_of_modification(void)
+{
+}

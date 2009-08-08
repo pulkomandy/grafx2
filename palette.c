@@ -1318,7 +1318,10 @@ void Button_Palette(void)
           
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
           if (clicked_button==8)
+          {
             Update_rect(0, 0, Screen_width, Menu_Y_before_window);
+            End_of_modification();
+          }
           Wait_end_of_click();
         }
         break;
@@ -1418,6 +1421,7 @@ void Button_Palette(void)
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
+        End_of_modification();
         need_to_remap=1;
         break;
 
@@ -1782,6 +1786,7 @@ void Button_Palette(void)
           Hide_cursor();
           Remap_image_highlevel(conversion_table);
           Display_cursor();
+          End_of_modification();
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
         Set_palette(working_palette);
@@ -1943,6 +1948,8 @@ void Button_Palette(void)
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
+        
+        End_of_modification();
         need_to_remap=1;
       }
       break;
@@ -2033,6 +2040,8 @@ void Button_Palette(void)
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
           Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
           Update_color_count(&used_colors,color_usage);
+          // End_of_modification();
+          // Not really needed, the change was in palette entries
           need_to_remap=1;
           Key=0;
           break;
@@ -2117,6 +2126,8 @@ void Button_Palette(void)
       && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
       Backup();
     memcpy(Main_palette,working_palette,sizeof(T_Palette));
+    // End_of_modification();
+    // Not really needed, the change was in palette entries
   }
 
   Compute_optimal_menu_colors(Main_palette);

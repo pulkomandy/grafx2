@@ -681,6 +681,7 @@ void Get_colors_from_brush(void)
     Display_all_screen();
     Display_menu();
     Display_cursor();
+    End_of_modification();
 
     Main_image_is_modified=1;
   }
@@ -999,6 +1000,7 @@ void Fill_general(byte fill_color)
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
 
     Update_rect(0,0,0,0);
+    End_of_modification();
   }
 }
 

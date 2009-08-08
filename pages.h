@@ -81,7 +81,7 @@ void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button
 void Exchange_main_and_spare(void);
-
+void End_of_modification(void);
 
 
 ///

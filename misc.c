@@ -396,11 +396,12 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
 
   // On place dans ESI 3*Couleur_dessous ( = position de cette couleur dans la
   // palette des teintes) et dans EDI, 3*color.
-  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
+  byte color_under = Read_pixel_from_feedback_screen(x,y);
+  byte blue_under=Main_palette[color_under].B;
   byte blue=Main_palette[color].B;
-  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
+  byte green_under=Main_palette[color_under].G;
   byte green=Main_palette[color].G;
-  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte red_under=Main_palette[color_under].R;
   byte red=Main_palette[color].R;
 
   // On récupère les 3 composantes RVB
@@ -418,9 +419,10 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
 
 byte Effect_additive_colorize    (word x,word y,byte color)
 {
-  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
-  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
-  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte color_under = Read_pixel_from_feedback_screen(x,y);
+  byte blue_under=Main_palette[color_under].B;
+  byte green_under=Main_palette[color_under].G;
+  byte red_under=Main_palette[color_under].R;
   byte blue=Main_palette[color].B;
   byte green=Main_palette[color].G;
   byte red=Main_palette[color].R;
@@ -433,9 +435,10 @@ byte Effect_additive_colorize    (word x,word y,byte color)
 
 byte Effect_substractive_colorize(word x,word y,byte color)
 {
-  byte blue_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].B;
-  byte green_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].G;
-  byte red_under=Main_palette[*(FX_feedback_screen + y * Main_image_width + x)].R;
+  byte color_under = Read_pixel_from_feedback_screen(x,y);
+  byte blue_under=Main_palette[color_under].B;
+  byte green_under=Main_palette[color_under].G;
+  byte red_under=Main_palette[color_under].R;
   byte blue=Main_palette[color].B;
   byte green=Main_palette[color].G;
   byte red=Main_palette[color].R;
