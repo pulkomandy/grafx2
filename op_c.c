@@ -855,13 +855,13 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 	T_Cluster* place;
 	T_Cluster* newlist = NULL;
 
-	while((nc = cs->clusters))
+	while(cs->clusters)
 	{
 		// Remove the first cluster from the original list
 		nc = cs->clusters;
 		cs->clusters = cs->clusters->next;
 
-		// Find his position in the new list
+		// Find its position in the new list
 		for(place = newlist;place != NULL; place = place->next)
 		{
 			if(place->l > nc->l) break;
@@ -873,9 +873,12 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 		if(prev) prev->next = nc;
 		else newlist = nc;
 
+		// reset prev pointer
+		prev = NULL;
+
 	}
 
-	// Put the new list bavk in place
+	// Put the new list back in place
 	cs->clusters = newlist;
 }
 
