@@ -1043,7 +1043,6 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image,int size,T_Components * 
           GS_Generate(ds,cs);
           GS_Delete(ds);
         }
-
         // Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
         CS_Sort_by_luminance(cs);
         CS_Sort_by_chrominance(cs);
@@ -1174,6 +1173,37 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
 
 }
 
+void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,T_Conversion_table * tc)
+{
+  T_Bitmap24B current;
+  T_Bitmap256 d;
+  int x_pos,y_pos;
+  int red,green,blue;
+
+  // On initialise les variables de parcours:
+  current =source;      // Le pixel dont on s'occupe
+
+  d       =dest;
+
+  // On parcours chaque pixel:
+  for (y_pos=0;y_pos<height;y_pos++)
+  {
+    for (x_pos=0;x_pos<width;x_pos++)
+    {
+      // On prends la meilleure couleur de la palette qui traduit la couleur
+      // 24 bits de la source:
+      red=current->R;
+      green =current->G;
+      blue =current->B;
+      // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
+      *d=CT_get(tc,red,green,blue);
+
+      // On passe au pixel suivant :
+      current++;
+      d++;
+    }
+  }
+}
 
 
 static const byte precision_24b[]=

@@ -116,6 +116,8 @@ void Load_PNG(void);
 void Save_PNG(void);
 #endif
 
+void Init_preview(short width,short height,long size,int format);
+
 T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
   {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0},
@@ -282,33 +284,38 @@ void Set_palette_fake_24b(T_Palette palette)
   }
 }
 
-// Supplément à faire lors de l'initialisation d'une preview dans le cas
-// d'une image 24b
-void Init_preview_24b(int width,int height)
+// Initialization for a 24bit image
+void Init_preview_24b(short width,short height,long size,int format)
 {
+  // Call common processing
+  Init_preview(width,height,size,format);
+
+  if (File_error)
+    return;
+
   if (Pixel_load_function==Pixel_load_in_preview)
   {
-    // Aiguillage du chargement 24b
+    // Choose 24bit pixel "writer"
     Pixel_load_24b=Pixel_load_in_24b_preview;
 
-    // Changement de palette
+    // Load palette
     Set_palette_fake_24b(Main_palette);
     Set_palette(Main_palette);
     Remap_fileselector();
   }
   else
   {
-    // Aiguillage du chargement 24b
+    // Choose 24bit pixel "writer"
     Pixel_load_24b=Pixel_load_in_24b_buffer;
 
-    // Allocation du buffer 24b
+    // Allocate 24bit buffer
     Buffer_image_24b=
       (T_Components *)Borrow_memory_from_page(width*height*sizeof(T_Components));
     if (!Buffer_image_24b)
     {
-      // Afficher un message d'erreur
+      // Print an error message
 
-      // Pour être sûr que ce soit lisible.
+      // The following is to be sure the messagfe is readable
       Compute_optimal_menu_colors(Main_palette);
       Message_out_of_memory();
       if (Pixel_load_function==Pixel_load_in_current_screen)
@@ -334,10 +341,6 @@ void Init_preview(short width,short height,long size,int format)
 //
 {
   char  str[10];
-  int   image_is_24b;
-
-  image_is_24b=format & FORMAT_24B;
-  format      =format & (~FORMAT_24B);
 
   if (Pixel_load_function==Pixel_load_in_preview)
   {
@@ -448,10 +451,6 @@ void Init_preview(short width,short height,long size,int format)
         File_error=3;
     }
   }
-
-  if (!File_error)
-    if (image_is_24b)
-      Init_preview_24b(width,height);
 }
 
 
@@ -622,6 +621,10 @@ void Load_image(byte image)
           // Cas d'un chargement dans l'image
           if (Convert_24b_bitmap_to_256(Main_screen,Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
             File_error=2;
+          else
+          {
+            Set_palette(Main_palette);
+          }
         }
         else
         {
@@ -2595,7 +2598,7 @@ void Load_BMP(void)
 
         Main_image_width=header.Width;
         Main_image_height=header.Height;
-        Init_preview(header.Width,header.Height,file_size,FORMAT_BMP | FORMAT_24B);
+        Init_preview_24b(header.Width,header.Height,file_size,FORMAT_BMP);
         if (File_error==0)
         {
           switch (header.Compression)
@@ -3974,7 +3977,7 @@ void Load_PCX(void)
       {
         // Image 24 bits!!!
 
-        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_PCX | FORMAT_24B);
+        Init_preview_24b(Main_image_width,Main_image_height,file_size,FORMAT_PCX);
 
         if (File_error==0)
         {
@@ -5866,7 +5869,7 @@ void Load_PNG(void)
   FILE *file;             // Fichier du fichier
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];  
-  dword image_size;
+  byte row_pointers_allocated;
  
   png_structp png_ptr;
   png_infop info_ptr;
@@ -5877,29 +5880,45 @@ void Load_PNG(void)
   
   if ((file=fopen(filename, "rb")))
   {
+    // Load header (8 first bytes)
     if (Read_bytes(file,png_header,8))
     {
+      // Do we recognize a png file signature ?
       if ( !png_sig_cmp(png_header, 0, 8))
       {
+        // Prepare internal PNG loader
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         if (png_ptr)
         {
+          // Prepare internal PNG loader
           info_ptr = png_create_info_struct(png_ptr);
           if (info_ptr)
           {
             png_byte color_type;
             png_byte bit_depth;
             
+            // Setup a return point. If a pnglib loading error occurs
+            // in this if(), the else will be executed.
             if (!setjmp(png_jmpbuf(png_ptr)))
             {
               png_init_io(png_ptr, file);
+              // Inform pnglib we already loaded the header.
               png_set_sig_bytes(png_ptr, 8);
             
+              // Load file information
               png_read_info(png_ptr, info_ptr);
               color_type = info_ptr->color_type;
               bit_depth = info_ptr->bit_depth;
               
-              if (bit_depth <= 8 && (color_type == PNG_COLOR_TYPE_PALETTE || PNG_COLOR_TYPE_GRAY))
+              // If it's any supported file
+              // (Note: As of writing this, this test covers every possible 
+              // image format of libpng)
+              if (color_type == PNG_COLOR_TYPE_PALETTE
+               || color_type == PNG_COLOR_TYPE_GRAY
+               || color_type == PNG_COLOR_TYPE_GRAY_ALPHA
+               || color_type == PNG_COLOR_TYPE_RGB
+               || color_type == PNG_COLOR_TYPE_RGB_ALPHA
+              )
               {
                 int num_text;
                 png_text *text_ptr;
@@ -5908,8 +5927,8 @@ void Load_PNG(void)
                 png_uint_32 res_x;
                 png_uint_32 res_y;
 
-                // Commentaire (tEXt)
-                Main_comment[0]='\0'; // On efface le commentaire
+                // Comment (tEXt)
+                Main_comment[0]='\0'; // Clear the previous comment
                 if ((num_text=png_get_text(png_ptr, info_ptr, &text_ptr, NULL)))
                 {
                   while (num_text--)
@@ -5920,7 +5939,7 @@ void Load_PNG(void)
                       size = Min(text_ptr[num_text].text_length, COMMENT_SIZE);
                       strncpy(Main_comment, text_ptr[num_text].text, size);
                       Main_comment[size]='\0';
-                      break; // Pas besoin de vérifier les suivants
+                      break; // Skip all others tEXt chunks
                     }
                   }
                 }
@@ -5941,35 +5960,62 @@ void Load_PNG(void)
                     }
                   }
                 }
-                Init_preview(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
+                if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+                  Init_preview_24b(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
+                else
+                  Init_preview(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
 
                 if (File_error==0)
                 {
                   int x,y;
                   png_colorp palette;
                   int num_palette;
-                                    
-                  if (color_type == PNG_COLOR_TYPE_GRAY)
+
+                  // 16-bit images
+                  if (bit_depth == 16)
                   {
+                    // Reduce to 8-bit
+                    png_set_strip_16(png_ptr);
+                  }
+                  else if (bit_depth < 8)
+                  {
+                    // Inform libpng we want one byte per pixel,
+                    // even though the file was less than 8bpp
+                    png_set_packing(png_ptr);
+                  }
+                    
+                  // Images with alpha channel
+                  if (color_type & PNG_COLOR_MASK_ALPHA)
+                  {
+                    // Tell libpng to ignore it
+                    png_set_strip_alpha(png_ptr);
+                  }
+
+                  // Greyscale images : 
+                  if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+                  {
+                    // Map low bpp greyscales to full 8bit (0-255 range)
                     if (bit_depth < 8)
                       png_set_gray_1_2_4_to_8(png_ptr);
-                    // palette de niveaux de gris
-                    for (x=0;x<num_palette;x++)
+                    
+                    // Create greyscale palette
+                    for (x=0;x<256;x++)
                     {
                       Main_palette[x].R=x;
                       Main_palette[x].G=x;
                       Main_palette[x].B=x;
                     } 
                   }
-                  else
+                  else if (color_type == PNG_COLOR_TYPE_PALETTE) // Palette images
                   {
-                    // image couleurs
+                    
                     if (bit_depth < 8)
                     {
-                      png_set_packing(png_ptr);
+                      // Clear unused colors
                       if (Config.Clear_palette)
                         memset(Main_palette,0,sizeof(T_Palette));
                     }
+                    // Load the palette
                     png_get_PLTE(png_ptr, info_ptr, &palette,
                        &num_palette);
                     for (x=0;x<num_palette;x++)
@@ -5980,41 +6026,87 @@ void Load_PNG(void)
                     }
                     free(palette);
                   }
-                  Set_palette(Main_palette);
-                  Remap_fileselector();
-                  //
+                  if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
+                  {
+                    Set_palette(Main_palette);
+                    Remap_fileselector();
+                  }
                   
                   Main_image_width=info_ptr->width;
                   Main_image_height=info_ptr->height;
-                  image_size=(dword)(Main_image_width*Main_image_height);
-                
+                  
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
+
+                  // Allocate row pointers
+                  Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
+                  row_pointers_allocated = 0;
+
                   /* read file */
                   if (!setjmp(png_jmpbuf(png_ptr)))
                   {
-                    Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
-                    for (y=0; y<Main_image_height; y++)
-                      Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
-                    png_read_image(png_ptr, Row_pointers);
-                    
-                    for (y=0; y<Main_image_height; y++)
-                      for (x=0; x<Main_image_width; x++)
-                        Pixel_load_function(x, y, Row_pointers[y][x]);
-                    
+                    if (color_type == PNG_COLOR_TYPE_GRAY
+                    ||  color_type == PNG_COLOR_TYPE_GRAY_ALPHA
+                    ||  color_type == PNG_COLOR_TYPE_PALETTE
+                    )
+                    {
+                      // 8bpp
+                      
+                      for (y=0; y<Main_image_height; y++)
+                        Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                      row_pointers_allocated = 1;
+                      
+                      png_read_image(png_ptr, Row_pointers);
+                      
+                      for (y=0; y<Main_image_height; y++)
+                        for (x=0; x<Main_image_width; x++)
+                          Pixel_load_function(x, y, Row_pointers[y][x]);
+                    }
+                    else
+                    {
+                      // 24bpp
+                      
+                      if (Pixel_load_24b==Pixel_load_in_24b_preview)
+                      {
+                        // It's a preview
+                        // Unfortunately we need to allocate loads of memory
+                        for (y=0; y<Main_image_height; y++)
+                          Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                        row_pointers_allocated = 1;
+                        
+                        png_read_image(png_ptr, Row_pointers);
+                        
+                        for (y=0; y<Main_image_height; y++)
+                          for (x=0; x<Main_image_width; x++)
+                            Pixel_load_24b(x, y, Row_pointers[y][x*3],Row_pointers[y][x*3+1],Row_pointers[y][x*3+2]);
+                      }
+                      else
+                      {
+                        // It's loading an actual image
+                        // We'll save memory and time by writing directly into
+                        // our pre-allocated 24bit buffer
+                        for (y=0; y<Main_image_height; y++)
+                          Row_pointers[y] = (png_byte*) (&Buffer_image_24b[y * Main_image_width]);
+                        png_read_image(png_ptr, Row_pointers);
+                      }
+                    }
                   }
                   else
                     File_error=2;
                     
                   /* cleanup heap allocation */
-                  for (y=0; y<Main_image_height; y++)
-                    free(Row_pointers[y]);
+                  if (row_pointers_allocated)
+                  {
+                    for (y=0; y<Main_image_height; y++)
+                      free(Row_pointers[y]);
+                  }
                   free(Row_pointers);
                 }
                 else
                   File_error=2;
               }
               else
+               // Unsupported image type
                File_error=1;
             }
             else
