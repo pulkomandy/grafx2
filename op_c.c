@@ -345,7 +345,7 @@ int OT_count_colors(T_Occurrence_table * t)
 ///////////////////////////////////////// M‚thodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void Cluster_analyser(T_Cluster * c,T_Occurrence_table * to)
+void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
   int r,g,b;
@@ -667,7 +667,7 @@ void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to)
   cs->clusters->Vmax = cs->clusters->vmax = to->rng_g-1;
   cs->clusters->Bmax = cs->clusters->bmax = to->rng_b-1;
   cs->clusters->next = NULL;
-  Cluster_analyser(cs->clusters,to);
+  Cluster_pack(cs->clusters,to);
   cs->nb=1;
 }
 
@@ -798,14 +798,12 @@ void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to)
     Cluster_split(&current,&Nouveau1,&Nouveau2,current.plus_large,to);
 
     // On compacte ces deux nouveaux (il peut y avoir un espace entre l'endroit de la coupure et les premiers pixels du cluster)
-    Cluster_analyser(&Nouveau1,to);
-    Cluster_analyser(&Nouveau2,to);
+    Cluster_pack(&Nouveau1,to);
+    Cluster_pack(&Nouveau2,to);
 
-    // On met ces deux nouveaux clusters dans le clusterSet... sauf s'ils sont vides
-    if(Nouveau1.occurences>0)
-        CS_Set(cs,&Nouveau1);
-    if(Nouveau2.occurences>0)
-        CS_Set(cs,&Nouveau2);
+	// On les remet dans le set
+    CS_Set(cs,&Nouveau1);
+    CS_Set(cs,&Nouveau2);
   }
 }
 
@@ -1020,50 +1018,50 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image,int size,T_Components * 
   to=0; tc=0; cs=0; ds=0;
 
   to=OT_new(r,g,b);
-  if (to!=0)
+  if (to == NULL)
+	return 0;
+
+  tc=CT_new(r,g,b);
+  if (tc == NULL)
   {
-    tc=CT_new(r,g,b);
-    if (tc!=0)
-    {
-
-      // Première étape : on compte les pixels de chaque couleur pour pouvoir trier là dessus
-      OT_count_occurrences(to,image,size);
-
-      cs=CS_New(256,to);
-      if (cs!=0)
-      {
-        // C'est bon, on a pu tout allouer
-
-        // On génère les clusters (avec l'algo du median cut)
-        CS_Generate(cs,to);
-
-        // On calcule la teinte de chaque pixel (Luminance et chrominance)
-        CS_Compute_colors(cs,to);
-
-        ds=GS_New(cs);
-        if (ds!=0)
-        {
-          GS_Generate(ds,cs);
-          GS_Delete(ds);
-        }
-        // Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
-        CS_Sort_by_luminance(cs);
-        CS_Sort_by_chrominance(cs);
-
-        // Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
-        CS_Generate_color_table_and_palette(cs,tc,palette);
-
-        CS_Delete(cs);
-        OT_delete(to);
-        return tc;
-      }
-      CT_delete(tc);
-    }
-    OT_delete(to);
+	OT_delete(to);
+	return 0;
   }
-  // Si on arrive ici c'est que l'allocation n'a pas réussi,
-  // l'appelant devra recommencer avec une précision plus faible (3 derniers paramètres)
-  return 0;
+
+  // Première étape : on compte les pixels de chaque couleur pour pouvoir trier là dessus
+  OT_count_occurrences(to,image,size);
+
+  cs=CS_New(256,to);
+  if (cs == NULL)
+  {
+    CT_delete(tc);
+    OT_delete(to);
+	return 0;
+  }
+  // C'est bon, on a pu tout allouer
+
+  // On génère les clusters (avec l'algo du median cut)
+  CS_Generate(cs,to);
+
+  // On calcule la teinte de chaque pixel (Luminance et chrominance)
+  CS_Compute_colors(cs,to);
+
+  ds=GS_New(cs);
+  if (ds!=0)
+  {
+	  GS_Generate(ds,cs);
+	  GS_Delete(ds);
+  }
+  // Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre sympa : par couleur, et par luminosité pour chaque couleur
+  CS_Sort_by_luminance(cs);
+  CS_Sort_by_chrominance(cs);
+
+  // Enfin on génère la palette et la table de correspondance entre chaque couleur 24b et sa couleur palette associée.
+  CS_Generate_color_table_and_palette(cs,tc,palette);
+
+  CS_Delete(cs);
+  OT_delete(to);
+  return tc;
 }
 
 int Modified_value(int value,int modif)
@@ -1173,7 +1171,6 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
       d++;
     }
   }
-
 }
 
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,T_Conversion_table * tc)
@@ -1247,7 +1244,8 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
 
   if (table!=0)
   {
-    Convert_24b_bitmap_to_256_Floyd_Steinberg(dest,source,width,height,palette,table);
+    //Convert_24b_bitmap_to_256_Floyd_Steinberg(dest,source,width,height,palette,table);
+    Convert_24b_bitmap_to_256_nearest_neighbor(dest,source,width,height,palette,table);
     CT_delete(table);
     return 0;
   }
