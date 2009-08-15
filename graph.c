@@ -1670,18 +1670,20 @@ void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,by
   }
 
   // On trace le rectangle:
-
+  Init_permanent_draw();
+  
   for (x_pos=start_x;x_pos<=end_x;x_pos++)
-    Display_paintbrush(x_pos,start_y,color,0);
+  {
+    Pixel_figure_permanent(x_pos,start_y,color);
+    Pixel_figure_permanent(x_pos,  end_y,color);
+  }
 
   for (y_pos=start_y+1;y_pos<end_y;y_pos++)
   {
-    Display_paintbrush(start_x,y_pos,color,0);
-    Display_paintbrush(  end_x,y_pos,color,0);
+    Pixel_figure_permanent(start_x,y_pos,color);
+    Pixel_figure_permanent(  end_x,y_pos,color);
   }
-
-  for (x_pos=start_x;x_pos<=end_x;x_pos++)
-    Display_paintbrush(x_pos,  end_y,color,0);
+    
 #if defined(__macosx__) || defined(__FreeBSD__)
   Update_part_of_screen(start_x,end_x,end_x-start_x,end_y-start_y);
 #endif

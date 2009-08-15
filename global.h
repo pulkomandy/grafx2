@@ -878,8 +878,9 @@ GFX2_GLOBAL short Colorpicker_Y;
 /// each operation, and for each mouse state (no button,left button,right button)
 GFX2_GLOBAL struct
 {
-  byte Hide_cursor;   ///< Boolean: Need to hide/unhide cursor during this step
   Func_action Action; ///< Function to call
+  byte Hide_cursor;   ///< Boolean: Need to hide/unhide cursor during this step
+  byte Fast_mouse;    ///< Operation should take shortcuts with mouse movements
 } Operation[NB_OPERATIONS][3][OPERATION_STACK_SIZE];
 
 // -- misc

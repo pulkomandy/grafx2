@@ -1229,13 +1229,16 @@ void Init_buttons(void)
 void Init_operation(byte operation_number,
                            byte mouse_button,
                            byte stack_index,
-                           Func_action Action,
-                           byte Hide_cursor)
+                           Func_action action,
+                           byte hide_cursor,
+                           byte fast_mouse)
 {
   Operation[operation_number][mouse_button]
-           [stack_index].Action=Action;
+           [stack_index].Action=action;
   Operation[operation_number][mouse_button]
-           [stack_index].Hide_cursor=Hide_cursor;
+           [stack_index].Hide_cursor=hide_cursor;
+  Operation[operation_number][mouse_button]
+           [stack_index].Fast_mouse=fast_mouse;
 }
 
 
@@ -1246,391 +1249,393 @@ void Init_operations(void)
   byte number; // Numéro de l'option en cours d'auto-initialisation
   byte Button; // Button souris en cours d'auto-initialisation
   byte stack_index; // Taille de la pile en cours d'auto-initialisation
+  #define HIDE_CURSOR 1
+  #define FAST_MOUSE 1
 
   // Auto-initialisation des opérations (vers des actions inoffensives)
 
   for (number=0;number<NB_OPERATIONS;number++)
     for (Button=0;Button<3;Button++)
       for (stack_index=0;stack_index<OPERATION_STACK_SIZE;stack_index++)
-        Init_operation(number,Button,stack_index,Print_coordinates,0);
+        Init_operation(number,Button,stack_index,Print_coordinates,HIDE_CURSOR,FAST_MOUSE);
 
 
   // Ici viennent les déclarations détaillées des opérations
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,0,
-                        Freehand_mode1_1_0,1);
+                        Freehand_mode1_1_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,2,
-                        Freehand_mode1_1_2,0);
+                        Freehand_mode1_1_2,0,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,0,2,
-                        Freehand_mode12_0_2,0);
+                        Freehand_mode12_0_2,0,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,2,0,
-                        Freehand_mode1_2_0,1);
+                        Freehand_mode1_2_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,2,2,
-                        Freehand_mode1_2_2,0);
+                        Freehand_mode1_2_2,0,0);
 
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,0,
-                        Freehand_mode2_1_0,1);
+                        Freehand_mode2_1_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,2,
-                        Freehand_mode2_1_2,0);
+                        Freehand_mode2_1_2,0,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,0,2,
-                        Freehand_mode12_0_2,0);
+                        Freehand_mode12_0_2,0,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,0,
-                        Freehand_mode2_2_0,1);
+                        Freehand_mode2_2_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,2,
-                        Freehand_mode2_2_2,0);
+                        Freehand_mode2_2_2,0,0);
 
   Init_operation(OPERATION_POINT_DRAW,1,0,
-                        Freehand_mode3_1_0,1);
+                        Freehand_mode3_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POINT_DRAW,2,0,
-                        Freehand_Mode3_2_0,1);
+                        Freehand_Mode3_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POINT_DRAW,0,1,
-                        Freehand_mode3_0_1,0);
+                        Freehand_mode3_0_1,0,FAST_MOUSE);
 
   Init_operation(OPERATION_LINE,1,0,
-                        Line_12_0,1);
+                        Line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,1,5,
-                        Line_12_5,0);
+                        Line_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_LINE,0,5,
-                        Line_0_5,1);
+                        Line_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,2,0,
-                        Line_12_0,1);
+                        Line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,2,5,
-                        Line_12_5,0);
+                        Line_12_5,0,FAST_MOUSE);
 
   Init_operation(OPERATION_K_LIGNE,1,0,
-                        K_line_12_0,1);
+                        K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,1,6,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,1,7,
-                        K_line_12_7,1);
-  Init_operation(OPERATION_K_LIGNE,2,0,
-                        K_line_12_0,1);
+                        K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_K_LIGNE,2,FAST_MOUSE,
+                        K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,2,6,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,2,7,
-                        K_line_12_7,1);
+                        K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,0,6,
-                        K_line_0_6,1);
+                        K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,0,7,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,2,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,2,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,0,5,
-                        Empty_rectangle_0_5,1);
+                        Empty_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_RECTANGLE,1,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,2,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,1,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,2,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,0,5,
-                        Filled_rectangle_0_5,1);
+                        Filled_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_CIRCLE,1,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,2,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,1,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,2,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,0,5,
-                        Empty_circle_0_5,1);
+                        Empty_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_CIRCLE,1,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,2,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,1,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,2,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,0,5,
-                        Filled_circle_0_5,1);
+                        Filled_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_ELLIPSE,1,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,2,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,1,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,2,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,0,5,
-                        Empty_ellipse_0_5,1);
+                        Empty_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_ELLIPSE,1,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,2,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,1,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,2,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,0,5,
-                        Filled_ellipse_0_5,1);
+                        Filled_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILL,1,0,
-                        Fill_1_0,0);
+                        Fill_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_FILL,2,0,
-                        Fill_2_0,0);
+                        Fill_2_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_REPLACE,1,0,
-                        Replace_1_0,0);
+                        Replace_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_REPLACE,2,0,
-                        Replace_2_0,0);
+                        Replace_2_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_GRAB_BRUSH,1,0,
-                        Brush_12_0,1);
+                        Brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,2,0,
-                        Brush_12_0,1);
+                        Brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,1,5,
-                        Brush_12_5,0);
+                        Brush_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,2,5,
-                        Brush_12_5,0);
+                        Brush_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,0,5,
-                        Brush_0_5,1);
+                        Brush_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_STRETCH_BRUSH,1,0,
-                        Stretch_brush_12_0,1);
+                        Stretch_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,2,0,
-                        Stretch_brush_12_0,1);
+                        Stretch_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,1,7,
-                        Stretch_brush_1_7,0);
+                        Stretch_brush_1_7,0,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,0,7,
-                        Stretch_brush_0_7,0);
+                        Stretch_brush_0_7,0,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,2,7,
-                        Stretch_brush_2_7,1);
+                        Stretch_brush_2_7,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_ROTATE_BRUSH,1,0,
-                        Rotate_brush_12_0,1);
+                        Rotate_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,2,0,
-                        Rotate_brush_12_0,1);
+                        Rotate_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,1,5,
-                        Rotate_brush_1_5,0);
+                        Rotate_brush_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,0,5,
-                        Rotate_brush_0_5,0);
+                        Rotate_brush_0_5,0,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,2,5,
-                        Rotate_brush_2_5,1);
+                        Rotate_brush_2_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_DISTORT_BRUSH,0,0,
-                        Distort_brush_0_0,0);
+                        Distort_brush_0_0,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,0,
-                        Distort_brush_1_0,0);
+                        Distort_brush_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,8,
-                        Distort_brush_1_8,0);
+                        Distort_brush_1_8,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,2,8,
-                        Distort_brush_2_8,1);
+                        Distort_brush_2_8,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,2,0,
-                        Distort_brush_2_0,1);
+                        Distort_brush_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,9,
-                        Distort_brush_1_9,0);
+                        Distort_brush_1_9,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,0,9,
-                        Distort_brush_0_9,0);
+                        Distort_brush_0_9,0,FAST_MOUSE);
 
 
   Init_operation(OPERATION_POLYBRUSH,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYBRUSH,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYBRUSH,1,8,
-                        Polybrush_12_8,0);
+                        Polybrush_12_8,0,0);
   Init_operation(OPERATION_POLYBRUSH,2,8,
-                        Polybrush_12_8,0);
+                        Polybrush_12_8,0,0);
   Init_operation(OPERATION_POLYBRUSH,0,8,
-                        Filled_polyform_0_8,0);
+                        Filled_polyform_0_8,0,FAST_MOUSE);
 
   Colorpicker_color=-1;
   Init_operation(OPERATION_COLORPICK,1,0,
-                        Colorpicker_12_0,1);
+                        Colorpicker_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,2,0,
-                        Colorpicker_12_0,0);
+                        Colorpicker_12_0,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,1,1,
-                        Colorpicker_1_1,0);
+                        Colorpicker_1_1,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,2,1,
-                        Colorpicker_2_1,0);
+                        Colorpicker_2_1,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,0,1,
-                        Colorpicker_0_1,1);
+                        Colorpicker_0_1,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_MAGNIFY,1,0,
-                        Magnifier_12_0,0);
+                        Magnifier_12_0,0,FAST_MOUSE);
   Init_operation(OPERATION_MAGNIFY,2,0,
-                        Magnifier_12_0,0);
+                        Magnifier_12_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_4_POINTS_CURVE,1,0,
-                        Curve_34_points_1_0,1);
+                        Curve_34_points_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,0,
-                        Curve_34_points_2_0,1);
+                        Curve_34_points_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,1,5,
-                        Curve_34_points_1_5,0);
+                        Curve_34_points_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,5,
-                        Curve_34_points_2_5,0);
+                        Curve_34_points_2_5,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,0,5,
-                        Curve_4_points_0_5,1);
+                        Curve_4_points_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,1,9,
-                        Curve_4_points_1_9,0);
+                        Curve_4_points_1_9,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,9,
-                        Curve_4_points_2_9,0);
+                        Curve_4_points_2_9,0,FAST_MOUSE);
 
   Init_operation(OPERATION_3_POINTS_CURVE,1,0,
-                        Curve_34_points_1_0,1);
+                        Curve_34_points_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,0,
-                        Curve_34_points_2_0,1);
+                        Curve_34_points_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,1,5,
-                        Curve_34_points_1_5,0);
+                        Curve_34_points_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,5,
-                        Curve_34_points_2_5,0);
+                        Curve_34_points_2_5,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,0,5,
-                        Curve_3_points_0_5,1);
+                        Curve_3_points_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,0,11,
-                        Curve_3_points_0_11,0);
+                        Curve_3_points_0_11,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,1,11,
-                        Curve_3_points_12_11,0);
+                        Curve_3_points_12_11,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,11,
-                        Curve_3_points_12_11,0);
+                        Curve_3_points_12_11,0,FAST_MOUSE);
 
   Init_operation(OPERATION_AIRBRUSH,1,0,
-                        Airbrush_1_0,0);
+                        Airbrush_1_0,0,0);
   Init_operation(OPERATION_AIRBRUSH,2,0,
-                        Airbrush_2_0,0);
+                        Airbrush_2_0,0,0);
   Init_operation(OPERATION_AIRBRUSH,1,2,
-                        Airbrush_12_2,0);
+                        Airbrush_12_2,0,0);
   Init_operation(OPERATION_AIRBRUSH,2,2,
-                        Airbrush_12_2,0);
+                        Airbrush_12_2,0,0);
   Init_operation(OPERATION_AIRBRUSH,0,2,
-                        Airbrush_0_2,0);
+                        Airbrush_0_2,0,0);
 
   Init_operation(OPERATION_POLYGON,1,0,
-                        Polygon_12_0,1);
+                        Polygon_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,0,
-                        Polygon_12_0,1);
+                        Polygon_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,1,8,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,8,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,1,9,
-                        Polygon_12_9,1);
+                        Polygon_12_9,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,9,
-                        Polygon_12_9,1);
+                        Polygon_12_9,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,0,8,
-                        K_line_0_6,1);
+                        K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,0,9,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_POLYFILL,1,0,
-                        Polyfill_12_0,1);
+                        Polyfill_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,0,
-                        Polyfill_12_0,1);
+                        Polyfill_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,1,8,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,8,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,1,9,
-                        Polyfill_12_9,0);
+                        Polyfill_12_9,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,9,
-                        Polyfill_12_9,0);
+                        Polyfill_12_9,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,0,8,
-                        Polyfill_0_8,1);
+                        Polyfill_0_8,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,0,9,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_POLYFORM,1,0,
-                        Polyform_12_0,1);
+                        Polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFORM,2,0,
-                        Polyform_12_0,1);
+                        Polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFORM,1,8,
-                        Polyform_12_8,0);
+                        Polyform_12_8,0,0);
   Init_operation(OPERATION_POLYFORM,2,8,
-                        Polyform_12_8,0);
+                        Polyform_12_8,0,0);
   Init_operation(OPERATION_POLYFORM,0,8,
-                        Polyform_0_8,0);
+                        Polyform_0_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_POLYFORM,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_POLYFORM,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_POLYFORM,1,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_POLYFORM,2,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_POLYFORM,0,8,
-                        Filled_polyform_0_8,0);
+                        Filled_polyform_0_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_CONTOUR,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_FILLED_CONTOUR,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_FILLED_CONTOUR,1,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_CONTOUR,2,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_CONTOUR,0,8,
-                        Filled_contour_0_8,0);
+                        Filled_contour_0_8,0,0);
 
   Init_operation(OPERATION_SCROLL,1,0,
-                        Scroll_12_0,1);
+                        Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,0,
-                        Scroll_12_0,1);
+                        Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,1,4,
-                        Scroll_12_4,0);
+                        Scroll_12_4,0,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,4,
-                        Scroll_12_4,0);
+                        Scroll_12_4,0,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,0,4,
-                        Scroll_0_4,1);
+                        Scroll_0_4,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,5,Grad_rectangle_0_5,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,7,Grad_rectangle_0_7,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,7,Grad_rectangle_12_7,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,2,7,Grad_rectangle_12_7,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,9,Grad_rectangle_12_9,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,9,Grad_rectangle_0_9,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,5,Grad_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,7,Grad_rectangle_0_7,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,7,Grad_rectangle_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,2,7,Grad_rectangle_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,9,Grad_rectangle_12_9,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,9,Grad_rectangle_0_9,0,FAST_MOUSE);
 
 
   Init_operation(OPERATION_CENTERED_LINES,1,0,
-                        Centered_lines_12_0,1);
+                        Centered_lines_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,0,
-                        Centered_lines_12_0,1);
+                        Centered_lines_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,1,3,
-                        Centered_lines_12_3,0);
+                        Centered_lines_12_3,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,3,
-                        Centered_lines_12_3,0);
+                        Centered_lines_12_3,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,3,
-                        Centered_lines_0_3,1);
+                        Centered_lines_0_3,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,1,7,
-                        Centered_lines_12_7,0);
+                        Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,7,
-                        Centered_lines_12_7,0);
+                        Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
-                        Centered_lines_0_7,0);
+                        Centered_lines_0_7,0,FAST_MOUSE);
 }
 
 

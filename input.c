@@ -54,7 +54,6 @@ long Directional_delay;
 long Directional_last_move;
 long Directional_step;
 int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
-int  Mouse_blocked; ///< Boolean, Set to true if mouse movement was clipped.
 
 word Input_new_mouse_X;
 word Input_new_mouse_Y;
@@ -113,18 +112,20 @@ int Is_shortcut(word Key, word function)
 int Move_cursor_with_constraints()
 {
   int feedback=0;
+  int  mouse_blocked=0; ///< Boolean, Set to true if mouse movement was clipped.
+
   
   // Clip mouse to the editing area. There can be a border when using big 
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
   if (Input_new_mouse_Y>=Screen_height)
   {
       Input_new_mouse_Y=Screen_height-1;
-      Mouse_blocked=1;
+      mouse_blocked=1;
   }
   if (Input_new_mouse_X>=Screen_width)
   {
       Input_new_mouse_X=Screen_width-1;
-      Mouse_blocked=1;
+      mouse_blocked=1;
   }
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
@@ -136,7 +137,7 @@ int Move_cursor_with_constraints()
         if(Menu_Y<=Input_new_mouse_Y)
         {
             //On bloque le curseur en fin d'image
-            Mouse_blocked=1;
+            mouse_blocked=1;
             Input_new_mouse_Y=Menu_Y-1; //La ligne !!au-dessus!! du menu
         }
 
@@ -146,7 +147,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X>=Main_separator_position)
                 {
-                    Mouse_blocked=1;
+                    mouse_blocked=1;
                     Input_new_mouse_X=Main_separator_position-1;
                 }
             }
@@ -154,7 +155,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X<Main_X_zoom)
                 {
-                    Mouse_blocked=1;
+                    mouse_blocked=1;
                     Input_new_mouse_X=Main_X_zoom;
                 }
             }
@@ -175,7 +176,7 @@ int Move_cursor_with_constraints()
     // Hide cursor, because even just a click change needs it
     if (!Mouse_moved)
     {
-      Mouse_moved=1;
+      Mouse_moved++;
       // Hide cursor (erasing icon and brush on screen
       // before changing the coordinates.
       Hide_cursor();
@@ -184,15 +185,16 @@ int Move_cursor_with_constraints()
     {
       Mouse_X=Input_new_mouse_X;
       Mouse_Y=Input_new_mouse_Y;
-      if (Mouse_blocked)
-        Set_mouse_position();
     }
     Mouse_K=Input_new_mouse_K;
     
-    if (Operation_stack_size != 0)
-      feedback=1;
+    if (Mouse_moved > Config.Mouse_merge_movement)
+      if (! Operation[Current_operation][Mouse_K_unique]
+          [Operation_stack_size].Fast_mouse)
+        feedback=1;
   }
-
+  if (mouse_blocked)
+    Set_mouse_position();
   return feedback;
 }
 
@@ -654,11 +656,10 @@ int Get_input(void)
 {
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
-
+                
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
-    Mouse_blocked=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
 
@@ -790,7 +791,7 @@ int Get_input(void)
     Flush_update();
 
     
-    return Mouse_moved || user_feedback_required;
+    return (Mouse_moved!=0) || user_feedback_required;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)
