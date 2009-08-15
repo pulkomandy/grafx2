@@ -53,7 +53,8 @@ byte Directional_click;
 long Directional_delay;
 long Directional_last_move;
 long Directional_step;
-short Mouse_count; // Number of mouse movements received in the current Get_input()
+int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
+int  Mouse_blocked; ///< Boolean, Set to true if mouse movement was clipped.
 
 word Input_new_mouse_X;
 word Input_new_mouse_Y;
@@ -112,19 +113,18 @@ int Is_shortcut(word Key, word function)
 int Move_cursor_with_constraints()
 {
   int feedback=0;
-  byte bl=0;//BL va indiquer si on doit corriger la position du curseur
   
   // Clip mouse to the editing area. There can be a border when using big 
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
   if (Input_new_mouse_Y>=Screen_height)
   {
       Input_new_mouse_Y=Screen_height-1;
-      bl=1;
+      Mouse_blocked=1;
   }
   if (Input_new_mouse_X>=Screen_width)
   {
       Input_new_mouse_X=Screen_width-1;
-      bl=1;
+      Mouse_blocked=1;
   }
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
@@ -136,7 +136,7 @@ int Move_cursor_with_constraints()
         if(Menu_Y<=Input_new_mouse_Y)
         {
             //On bloque le curseur en fin d'image
-            bl++;
+            Mouse_blocked=1;
             Input_new_mouse_Y=Menu_Y-1; //La ligne !!au-dessus!! du menu
         }
 
@@ -146,7 +146,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X>=Main_separator_position)
                 {
-                    bl++;
+                    Mouse_blocked=1;
                     Input_new_mouse_X=Main_separator_position-1;
                 }
             }
@@ -154,7 +154,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X<Main_X_zoom)
                 {
-                    bl++;
+                    Mouse_blocked=1;
                     Input_new_mouse_X=Main_X_zoom;
                 }
             }
@@ -172,20 +172,24 @@ int Move_cursor_with_constraints()
       if (Input_new_mouse_K == 0)
         Input_sticky_control = 0;
     }
-    Hide_cursor(); // On efface le curseur AVANT de le déplacer...
+    // Hide cursor, because even just a click change needs it
+    if (!Mouse_moved)
+    {
+      Mouse_moved=1;
+      // Hide cursor (erasing icon and brush on screen
+      // before changing the coordinates.
+      Hide_cursor();
+    }
     if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
     {
       Mouse_X=Input_new_mouse_X;
       Mouse_Y=Input_new_mouse_Y;
-      if (bl)
+      if (Mouse_blocked)
         Set_mouse_position();
     }
     Mouse_K=Input_new_mouse_K;
-    Compute_paintbrush_coordinates();
-    Display_cursor();
     
-    Mouse_count++;
-    if (Mouse_count>Config.Mouse_merge_movement)
+    if (Operation_stack_size != 0)
       feedback=1;
   }
 
@@ -653,7 +657,10 @@ int Get_input(void)
 
     Key_ANSI = 0;
     Key = 0;
-    Mouse_count=0;
+    Mouse_moved=0;
+    Mouse_blocked=0;
+    Input_new_mouse_X = Mouse_X;
+    Input_new_mouse_Y = Mouse_Y;
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
@@ -770,11 +777,20 @@ int Get_input(void)
         }
       }
     }
-    // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente.
-    // (c'est fait ici car on est sur que cette function est apellée partout ou on a besoin d'interragir avec l'utilisateur)
+    // If the cursor was moved since last update,
+    // it was erased, so we need to redraw it (with the preview brush)
+    if (Mouse_moved)
+    {
+      Compute_paintbrush_coordinates();
+      Display_cursor();
+    }
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading 
+    // some user input.
     Flush_update();
 
-    return user_feedback_required;
+    
+    return Mouse_moved || user_feedback_required;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)

@@ -1011,11 +1011,32 @@ void Fill_general(byte fill_color)
 ////////////////////////// avec gestion de previews //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+  // Data used by ::Init_permanent_draw() and ::Pixel_figure_permanent()
+  static Uint32 Permanent_draw_next_refresh=0;
+  static int Permanent_draw_count=0;
+
+  void Init_permanent_draw(void)
+  {
+    Permanent_draw_count = 0;
+    Permanent_draw_next_refresh = SDL_GetTicks() + 100;
+  }
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
   void Pixel_figure_permanent(word x_pos,word y_pos,byte color)
   {
     Display_paintbrush(x_pos,y_pos,color,0);
+    Permanent_draw_count ++;
+    
+    // Check every 8 pixels
+    if (! (Permanent_draw_count&7))
+    {
+      Uint32 now = SDL_GetTicks();
+      if (now>= Permanent_draw_next_refresh)
+      {
+        Permanent_draw_next_refresh = now+100;
+        Flush_update();
+      }
+    }
   }
 
   // Affichage d'un point de façon définitive
@@ -1157,6 +1178,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
 void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_empty_circle_general(center_x,center_y,radius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
@@ -1299,6 +1321,7 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
   Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
@@ -1498,8 +1521,7 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
   short incr_x,incr_y;
   short i,cumul;
   short delta_x,delta_y;
-
-
+  
   x_pos=start_x;
   y_pos=start_y;
 
@@ -1563,11 +1585,12 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
 
   // -- Tracer définitif d'une ligne --
 
-void Draw_line_permanet(short start_x,short start_y,short end_x,short end_y, byte color)
+void Draw_line_permanent(short start_x,short start_y,short end_x,short end_y, byte color)
 {
 
   int w = end_x-start_x, h = end_y - start_y;
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_line_general(start_x,start_y,end_x,end_y,color);
   Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
@@ -1762,6 +1785,7 @@ void Draw_curve_permanent(short x1, short y1,
                              byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 

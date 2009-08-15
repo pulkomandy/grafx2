@@ -224,7 +224,7 @@ void Freehand_mode1_1_2(void)
   {
     Hide_cursor();
     Print_coordinates();
-    Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,Fore_color);
+    Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,Fore_color);
     Display_cursor();
   }
 
@@ -279,7 +279,7 @@ void Freehand_mode1_2_2(void)
   {
     Print_coordinates();
     Hide_cursor();
-    Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,Back_color);
+    Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,Back_color);
     Display_cursor();
   }
 
@@ -572,7 +572,7 @@ void Line_0_5(void)
   Pixel_figure_preview_auto  (start_x,start_y);
   Hide_line_preview (start_x,start_y,end_x,end_y);
   Display_paintbrush      (start_x,start_y,color,0);
-  Draw_line_permanet(start_x,start_y,end_x,end_y,color);
+  Draw_line_permanent(start_x,start_y,end_x,end_y,color);
 
   End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
@@ -695,7 +695,7 @@ void K_line_0_6(void)
     Display_paintbrush(start_x,start_y,color,0);
     direction=(direction & 0x7F);
   }
-  Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
+  Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
   Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
   Operation_push(direction);
@@ -2242,7 +2242,7 @@ void Polygon_12_9(void)
     Paintbrush_shape=Paintbrush_shape_before_operation;
     // Le pied aurait été de ne pas repasser sur le 1er point de la 1ère ligne
     // mais c'est pas possible :(
-    Draw_line_permanet(start_x,start_y,end_x,end_y,color);
+    Draw_line_permanent(start_x,start_y,end_x,end_y,color);
     Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
     Display_cursor();
@@ -2534,7 +2534,7 @@ void Polyform_12_8(void)
       Hide_line_preview(start_x,start_y,end_x,end_y);
 
       // On l'affiche de façon définitive:
-      Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
+      Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
       // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
       Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
@@ -2565,7 +2565,7 @@ void Polyform_12_8(void)
     Hide_line_preview(start_x,start_y,end_x,end_y);
 
     // On affiche de façon définitive le bouclage du polygone:
-    Draw_line_permanet(start_x,start_y,initial_x,initial_y,color);
+    Draw_line_permanent(start_x,start_y,initial_x,initial_y,color);
 
     Display_cursor();
     End_of_modification();
@@ -5056,7 +5056,7 @@ void Centered_lines_12_7(void)
 
             Smear_start=1;
             Display_paintbrush      (start_x,start_y,color,0);
-            Draw_line_permanet(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
+            Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
             Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
             Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);

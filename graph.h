@@ -68,7 +68,7 @@ void Draw_filled_ellipse        (short center_x,short center_y,short horizontal_
 
 void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by);
 void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color);
-void Draw_line_permanet  (short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_line_permanent  (short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview    (short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview_xorback(short start_x,short start_y,short end_x,short end_y,byte color);
