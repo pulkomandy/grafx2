@@ -51,6 +51,7 @@
 #include "windows.h"
 #include "brush.h"
 #include "input.h"
+#include "special.h"
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -5633,12 +5634,184 @@ void Button_Text()
   }
 }
 
+void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
+{
+  if (Brush_container[index].Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+  {
+    int x,y;
+    int offset_x=0, offset_y=0;
+    //int brush_offset_x=0, brush_offset_y=0;
+    
+    // Determine draw offset (small brushes are stacked on corner of their preview)
+    if (Brush_container[index].Width<BRUSH_CONTAINER_PREVIEW_WIDTH)
+      offset_x = (BRUSH_CONTAINER_PREVIEW_WIDTH-Brush_container[index].Width)/2;
+    if (Brush_container[index].Height<BRUSH_CONTAINER_PREVIEW_HEIGHT)
+      offset_y = (BRUSH_CONTAINER_PREVIEW_HEIGHT-Brush_container[index].Height)/2;
+    // Determine corner pixel of paintbrush to draw (if bigger than preview area) 
+    //
+    
+    // Clear
+    Window_rectangle(x_pos,y_pos,BRUSH_CONTAINER_PREVIEW_WIDTH,BRUSH_CONTAINER_PREVIEW_HEIGHT,MC_Light);
+    
+    // Draw up to 16x16
+    for (y=0; y<Brush_container[index].Height && y<BRUSH_CONTAINER_PREVIEW_HEIGHT; y++)
+      for (x=0; x<Brush_container[index].Width && x<BRUSH_CONTAINER_PREVIEW_WIDTH; x++)
+        Pixel_in_window(x_pos+x+offset_x,y_pos+y+offset_y,Brush_container[index].Thumbnail[y][x]?MC_Black:MC_Light);
+    Update_window_area(x_pos,y_pos,BRUSH_CONTAINER_PREVIEW_WIDTH,BRUSH_CONTAINER_PREVIEW_HEIGHT);
+    
+  }
+  if (Brush_container[index].Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH)
+  {
+  
+  }
+}
 
+void Store_brush(int index)
+{
+  if (Brush_container[index].Paintbrush_shape < PAINTBRUSH_SHAPE_MAX)
+  {
+    // Free previous stored brush
+    Brush_container[index].Paintbrush_shape = PAINTBRUSH_SHAPE_MAX;
+    free(Brush_container[index].Brush);
+    Brush_container[index].Brush = NULL;
+  }
 
-/*
-BUTTON_GRADRECT
--BUTTON_SPHERES       (Ellipses dégradées à améliorer)
-BUTTON_TEXT
--BUTTON_ADJUST       (Effets sur l'image)
--BUTTON_BRUSH_EFFECTS (Distort, Rot. any angle)
-*/
+  // Store a mono brush
+  if (Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+  {
+    int x,y;
+    int brush_offset_x=0, brush_offset_y=0;
+    
+    Brush_container[index].Paintbrush_shape=Paintbrush_shape;
+    Brush_container[index].Width=Paintbrush_width;
+    Brush_container[index].Height=Paintbrush_height;
+    memcpy(Brush_container[index].Palette,Main_palette,sizeof(T_Palette));
+    // Preview: pick center for big mono brush
+    if (Paintbrush_width>BRUSH_CONTAINER_PREVIEW_WIDTH)
+      brush_offset_x = (Paintbrush_width-BRUSH_CONTAINER_PREVIEW_WIDTH)/2;
+    if (Paintbrush_height>BRUSH_CONTAINER_PREVIEW_HEIGHT)
+      brush_offset_y = (Paintbrush_height-BRUSH_CONTAINER_PREVIEW_HEIGHT)/2;
+
+    for (y=0; y<BRUSH_CONTAINER_PREVIEW_HEIGHT && y<Paintbrush_height; y++)
+      for (x=0; x<BRUSH_CONTAINER_PREVIEW_WIDTH && x<Paintbrush_width; x++)
+        Brush_container[index].Thumbnail[y][x]=Paintbrush_sprite[((y+brush_offset_y)*MAX_PAINTBRUSH_SIZE)+x+brush_offset_x];
+    // Re-init the rest
+    Brush_container[index].Transp_color=0;
+  }
+}
+
+byte Restore_brush(int index)
+{
+  byte shape;
+  word x_pos;
+  word y_pos;
+  
+  shape = Brush_container[index].Paintbrush_shape;
+  
+  if (shape == PAINTBRUSH_SHAPE_MAX)
+    return 0;
+  // Mono brushes
+  if (shape <= PAINTBRUSH_SHAPE_MISC)
+  {
+    Paintbrush_shape=shape;
+    Paintbrush_width=Brush_container[index].Width;
+    Paintbrush_height=Brush_container[index].Height;
+    if (shape == PAINTBRUSH_SHAPE_HORIZONTAL_BAR)
+      Paintbrush_height=1;
+    else if (shape == PAINTBRUSH_SHAPE_VERTICAL_BAR)
+      Paintbrush_width=1;
+    
+    if (Paintbrush_width <= BRUSH_CONTAINER_PREVIEW_WIDTH &&
+        Paintbrush_height <= BRUSH_CONTAINER_PREVIEW_HEIGHT)
+    {
+      // Manually copy the "pixels"
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Brush_container[index].Thumbnail[y_pos][x_pos];
+          
+      Paintbrush_offset_X=Paintbrush_width>>1;
+      Paintbrush_offset_Y=Paintbrush_height>>1;
+    }
+    else
+    {
+      // Recreate the brush pixels from its shape and dimensions
+      Set_paintbrush_size(Paintbrush_width,Paintbrush_height);
+    }
+  }
+  
+  Change_paintbrush_shape(shape);
+  return 1;
+}
+
+void Button_Brush_container(void)
+{
+  short clicked_button;
+  short x_pos,y_pos;
+  byte index;
+
+  Open_window(BRUSH_CONTAINER_COLUMNS*(BRUSH_CONTAINER_PREVIEW_WIDTH+8)+8,
+    BRUSH_CONTAINER_ROWS*(BRUSH_CONTAINER_PREVIEW_HEIGHT+8)+40,
+    "Brushes");
+
+  Window_set_normal_button(
+    (BRUSH_CONTAINER_COLUMNS*(BRUSH_CONTAINER_PREVIEW_WIDTH+8)-59)/2,
+    (BRUSH_CONTAINER_ROWS)*(BRUSH_CONTAINER_PREVIEW_HEIGHT+8)+18,
+    67,14,"Cancel",0,1,KEY_ESC); // 1
+
+  index=0;
+  for (index=0; index < BRUSH_CONTAINER_ROWS*BRUSH_CONTAINER_COLUMNS; index++)
+  {
+    x_pos = (index % BRUSH_CONTAINER_COLUMNS)*(BRUSH_CONTAINER_PREVIEW_WIDTH+8)+7;
+    y_pos = (index / BRUSH_CONTAINER_COLUMNS)*(BRUSH_CONTAINER_PREVIEW_HEIGHT+8)+18;
+    Window_set_normal_button(
+      x_pos,
+      y_pos,
+      BRUSH_CONTAINER_PREVIEW_WIDTH+2,
+      BRUSH_CONTAINER_PREVIEW_HEIGHT+2,
+      "",0,1,SDLK_LAST);
+    Display_stored_brush_in_window(x_pos+1, y_pos+1, index);
+  }
+  Update_window_area(0,0,Window_width, Window_height);
+
+  Display_cursor();
+
+  do
+  {
+    clicked_button=Window_clicked_button();
+    //if (Is_shortcut(Key,0x100+BUTTON_HELP))
+    //  Window_help(BUTTON_PAINTBRUSHES, NULL);
+    
+    if (clicked_button == 1)
+      break;
+      
+    if (clicked_button>1)
+    {
+      index = clicked_button-2;
+      
+      if (Window_attribute1==RIGHT_SIDE)
+      {
+        // Store
+        
+        x_pos = (index % BRUSH_CONTAINER_COLUMNS)*(BRUSH_CONTAINER_PREVIEW_WIDTH+8)+7;
+        y_pos = (index / BRUSH_CONTAINER_COLUMNS)*(BRUSH_CONTAINER_PREVIEW_HEIGHT+8)+18;
+      
+        Store_brush(index);
+        Hide_cursor();
+        Display_stored_brush_in_window(x_pos+1, y_pos+1, index);
+        Display_cursor();
+      }
+      else
+      {
+        // Restore and exit
+      
+        if (Restore_brush(index))
+          break;
+      }
+    }
+  }
+  while (1);
+  Close_window();
+
+  //Unselect_button(BUTTON_PAINTBRUSHES);
+  Display_cursor();
+}

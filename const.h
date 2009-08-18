@@ -65,6 +65,11 @@
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
 
+#define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
+#define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
+#define BRUSH_CONTAINER_COLUMNS          4  ///< Number of columns in the Brush container
+#define BRUSH_CONTAINER_ROWS             3  ///< Number of rows in the Brush container
+
 ///
 /// We force the dynamic backup page allocation to leave a minimum of 
 /// 256Kb of free memory, to allow the rest of the program to work safely.
@@ -210,7 +215,8 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_MISC,        ///< A raw monochrome bitmap, can't be resized. This must be the last of the preset paintbrush types.
   PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like colorpicker.
   PAINTBRUSH_SHAPE_COLOR_BRUSH, ///< User's brush, in color mode
-  PAINTBRUSH_SHAPE_MONO_BRUSH   ///< User's brush, in mono mode
+  PAINTBRUSH_SHAPE_MONO_BRUSH,  ///< User's brush, in mono mode
+  PAINTBRUSH_SHAPE_MAX          ///< Upper limit.
 };
 
 /// Normal resting state for a menu button.

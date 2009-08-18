@@ -651,5 +651,7 @@ void Button_Smooth_menu(void);
 */
 void Button_Smear_mode(void);
 
+void Button_Brush_container(void);
+
 #endif
 

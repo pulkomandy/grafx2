@@ -25,6 +25,7 @@
 T_Gui_skin *Load_graphics(const char * skin_file);
 void Init_buttons(void);
 void Init_operations(void);
+void Init_brush_container(void);
 int  Load_CFG(int reload_all);
 int  Save_CFG(void);
 void Set_all_video_modes(void);

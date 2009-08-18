@@ -336,10 +336,23 @@ typedef struct
 /// Collection of undo/redo steps.
 typedef struct
 {
-  int      List_size;         /// Number of ::T_Page in the vector "Pages".
-  int      Nb_pages_allocated;/// Number of ::T_Page used so far in the vector "Pages".
-  T_Page * Pages;             /// Vector of Pages, each one being a undo/redo step.
+  int      List_size;         ///< Number of ::T_Page in the vector "Pages".
+  int      Nb_pages_allocated;///< Number of ::T_Page used so far in the vector "Pages".
+  T_Page * Pages;             ///< Vector of Pages, each one being a undo/redo step.
 } T_List_of_pages;
+
+/// A single memorized brush from the Brush Container
+typedef struct
+{
+  byte Paintbrush_shape; ///< Kind of brush
+  byte Thumbnail[BRUSH_CONTAINER_PREVIEW_WIDTH][BRUSH_CONTAINER_PREVIEW_HEIGHT]; 
+  // Data for color brush
+  word Width;
+  word Height;
+  byte * Brush; /// < Color brush (if any)
+  T_Palette Palette;
+  byte Transp_color;
+} T_Brush_template;
 
 
 /// GUI skin data

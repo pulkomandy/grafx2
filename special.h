@@ -42,3 +42,7 @@ void Scroll_magnifier(short delta_x,short delta_y);
 
 void Zoom(short delta);
 void Zoom_set(int index);
+
+void Display_stored_brush_in_window(word x,word y,int number);
+void Store_brush(int index);
+byte Restore_brush(int index);

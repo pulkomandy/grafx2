@@ -513,6 +513,9 @@ int Init_program(int argc,char * argv[])
   // Initialisation des opérations
   Init_operations();
 
+  // Initialize the brush container
+  Init_brush_container();
+
   Windows_open=0;
   
   // Charger la configuration des touches

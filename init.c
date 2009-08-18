@@ -1063,7 +1063,7 @@ void Init_buttons(void)
                      106,18,
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Brush_FX,Button_Brush_FX,
+                     Button_Brush_FX,Button_Brush_container,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -2446,3 +2446,23 @@ void Init_sighandler(void)
 #endif
 }
 
+void Init_brush_container(void)
+{
+  int i;
+  
+  for (i=0; i<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; i++)
+  {
+    int x,y;
+    
+    Brush_container[i].Paintbrush_shape=PAINTBRUSH_SHAPE_MAX;
+    Brush_container[i].Width=0;
+    Brush_container[i].Height=0;
+    memset(Brush_container[i].Palette,sizeof(T_Palette),0);
+    Brush_container[i].Transp_color=0;  
+    for (y=0; y<BRUSH_CONTAINER_PREVIEW_WIDTH; y++)
+      for (x=0; x<BRUSH_CONTAINER_PREVIEW_HEIGHT; x++)
+        Brush_container[i].Thumbnail[y][x]=0;
+        
+    Brush_container[i].Brush = NULL;
+  }
+}
