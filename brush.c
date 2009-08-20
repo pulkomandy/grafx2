@@ -124,7 +124,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
   byte * temp;
 
   if (is_preview==0 || Mouse_K==0) // pas de curseur si on est en preview et 
-	  							   // en train de cliquer
+                                     // en train de cliquer
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
@@ -446,12 +446,12 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
                 temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
                 position=(counter_y*Smear_brush_width)+counter_x;
                 if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0) 
-					// Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
-                	&& (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
-                	&& (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X)
-					// On clippe l'effet smear entre Smear_Min et Smear_Max
-				)
-                	Display_pixel(x_pos,y_pos,Smear_brush[position]);
+                    // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
+                    && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                    && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X)
+                    // On clippe l'effet smear entre Smear_Min et Smear_Max
+                )
+                    Display_pixel(x_pos,y_pos,Smear_brush[position]);
                 Smear_brush[position]=temp_color;
               }
               Update_part_of_screen(start_x, start_y, width, height);
@@ -476,6 +476,69 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       }
   }
 }
+
+///
+/// Changes the Brush size, discarding its previous content.
+/// @return 0 OK, 1 Failed
+byte Realloc_brush(word new_brush_width, word new_brush_height)
+{
+  byte return_code=0;
+  
+  if ( (((long)Brush_height)*Brush_width) !=
+       (((long)new_brush_height)*new_brush_width) )
+  {
+    free(Brush);
+    Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+    if (Brush == NULL)
+    {
+      Error(0);
+      return_code=1;
+  
+      Brush=(byte *)malloc(1*1);
+      if(Brush == NULL)
+      {
+          Error(ERROR_MEMORY);
+          exit(ERROR_MEMORY);
+      }
+      new_brush_height=new_brush_width=1;
+      *Brush=Fore_color;
+    }
+  }
+  Brush_width=new_brush_width;
+  Brush_height=new_brush_height;
+  
+  free(Smear_brush);
+  Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+  Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+  Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
+  
+  if (Smear_brush == NULL) // Failed to allocate the smear brush
+  {
+    Error(0);
+    return_code=1;
+  
+    free(Brush);
+    Brush=(byte *)malloc(1*1);
+    if(Brush == NULL)
+    {
+      Error(ERROR_MEMORY);
+      exit(ERROR_MEMORY);
+    }
+    Brush_height=1;
+    Brush_width=1;
+  
+    Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+    if(Smear_brush == NULL)
+    {
+      Error(ERROR_MEMORY);
+      exit(ERROR_MEMORY);
+    }
+    Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+    Smear_brush_width=MAX_PAINTBRUSH_SIZE;
+  }
+  return return_code;
+}
+
 
 // -- Effacer le pinceau -- //
 //
@@ -655,56 +718,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     if (start_y+new_brush_height>Main_image_height)
       new_brush_height=Main_image_height-start_y;
 
-    if ( (((long)Brush_height)*Brush_width) !=
-         (((long)new_brush_height)*new_brush_width) )
-    {
-      free(Brush);
-      Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
-      if (Brush == NULL)
-      {
-        Error(0);
-
-        Brush=(byte *)malloc(1*1);
-		if(Brush == NULL)
-		{
-			Error(ERROR_MEMORY);
-			exit(ERROR_MEMORY);
-		}
-        new_brush_height=new_brush_width=1;
-        *Brush=Fore_color;
-      }
-    }
-    Brush_width=new_brush_width;
-    Brush_height=new_brush_height;
-
-    free(Smear_brush);
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-
-    if (Smear_brush == NULL) // On ne peut même pas allouer la brosse du smear!
-    {
-      Error(0);
-
-      free(Brush);
-      Brush=(byte *)malloc(1*1);
-	  if(Brush == NULL)
-	  {
-		Error(ERROR_MEMORY);
-		exit(ERROR_MEMORY);
-	  }
-      Brush_height=1;
-      Brush_width=1;
-
-      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-	  if(Smear_brush == NULL)
-	  {
-		Error(ERROR_MEMORY);
-		exit(ERROR_MEMORY);
-	  }
-      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
-    }
+    Realloc_brush(new_brush_width, new_brush_height);
 
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
@@ -827,7 +841,7 @@ void Outline_brush(void)
 
     // On copie la brosse courante dans la nouvelle
     Copy_part_of_image_to_another(Brush, // source
-    	0, 0, Brush_width, Brush_height, Brush_width,
+        0, 0, Brush_width, Brush_height, Brush_width,
         new_brush, // Destination
         1, 1, width);
 
@@ -858,8 +872,8 @@ void Outline_brush(void)
           }
           else if (state == 0)
           {
-        	Pixel_in_brush(x_pos-1,y_pos,Fore_color);
-        	state=1;
+            Pixel_in_brush(x_pos-1,y_pos,Fore_color);
+            state=1;
           }
         }
         // Cas du dernier pixel à droite de la ligne
@@ -1088,7 +1102,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
         Error(0);
 
         Brush=(byte *)malloc(1*1);
-		if(Brush==NULL) Error(ERROR_MEMORY);
+        if(Brush==NULL) Error(ERROR_MEMORY);
         new_brush_height=new_brush_width=1;
         *Brush=Fore_color;
       }
@@ -1107,7 +1121,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
 
       free(Brush);
       Brush=(byte *)malloc(1*1);
-	  if(Brush==NULL) Error(ERROR_MEMORY);
+      if(Brush==NULL) Error(ERROR_MEMORY);
       Brush_height=1;
       Brush_width=1;
 

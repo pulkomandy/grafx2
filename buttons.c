@@ -5636,7 +5636,7 @@ void Button_Text()
 
 void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
 {
-  if (Brush_container[index].Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+  if (Brush_container[index].Paintbrush_shape < PAINTBRUSH_SHAPE_MAX)
   {
     int x,y;
     int offset_x=0, offset_y=0;
@@ -5655,14 +5655,19 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
     
     // Draw up to 16x16
     for (y=0; y<Brush_container[index].Height && y<BRUSH_CONTAINER_PREVIEW_HEIGHT; y++)
+    {
       for (x=0; x<Brush_container[index].Width && x<BRUSH_CONTAINER_PREVIEW_WIDTH; x++)
-        Pixel_in_window(x_pos+x+offset_x,y_pos+y+offset_y,Brush_container[index].Thumbnail[y][x]?MC_Black:MC_Light);
+      {
+        byte color;
+        if (Brush_container[index].Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+          color = Brush_container[index].Thumbnail[y][x]?MC_Black:MC_Light;
+        else
+          color = Brush_container[index].Thumbnail[y][x];
+        Pixel_in_window(x_pos+x+offset_x,y_pos+y+offset_y,color);
+      }
+    }
     Update_window_area(x_pos,y_pos,BRUSH_CONTAINER_PREVIEW_WIDTH,BRUSH_CONTAINER_PREVIEW_HEIGHT);
     
-  }
-  if (Brush_container[index].Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH)
-  {
-  
   }
 }
 
@@ -5685,7 +5690,7 @@ void Store_brush(int index)
     Brush_container[index].Paintbrush_shape=Paintbrush_shape;
     Brush_container[index].Width=Paintbrush_width;
     Brush_container[index].Height=Paintbrush_height;
-    memcpy(Brush_container[index].Palette,Main_palette,sizeof(T_Palette));
+    //memcpy(Brush_container[index].Palette,Main_palette,sizeof(T_Palette));
     // Preview: pick center for big mono brush
     if (Paintbrush_width>BRUSH_CONTAINER_PREVIEW_WIDTH)
       brush_offset_x = (Paintbrush_width-BRUSH_CONTAINER_PREVIEW_WIDTH)/2;
@@ -5697,6 +5702,36 @@ void Store_brush(int index)
         Brush_container[index].Thumbnail[y][x]=Paintbrush_sprite[((y+brush_offset_y)*MAX_PAINTBRUSH_SIZE)+x+brush_offset_x];
     // Re-init the rest
     Brush_container[index].Transp_color=0;
+  }
+  if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
+     Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
+  {
+    Brush_container[index].Brush=(byte *)malloc(Brush_width*Brush_height);
+    if (Brush_container[index].Brush)
+    {
+      Brush_container[index].Paintbrush_shape=Paintbrush_shape;
+      Brush_container[index].Width=Brush_width;
+      Brush_container[index].Height=Brush_height;
+
+      memcpy(Brush_container[index].Brush, Brush,Brush_height*Brush_width);
+
+      // Scale for preview
+      if (Brush_width>BRUSH_CONTAINER_PREVIEW_WIDTH ||
+          Brush_height>BRUSH_CONTAINER_PREVIEW_HEIGHT)
+      {
+        // Scale
+        Rescale(Brush, Brush_width, Brush_height, (byte *)(Brush_container[index].Thumbnail), BRUSH_CONTAINER_PREVIEW_WIDTH, BRUSH_CONTAINER_PREVIEW_HEIGHT, 0, 0);
+      }
+      else
+      {
+        // Direct copy
+        Copy_part_of_image_to_another(Brush, 0,0,Brush_width, Brush_height,Brush_width,(byte *)(Brush_container[index].Thumbnail),0,0,BRUSH_CONTAINER_PREVIEW_WIDTH);
+      }
+    }
+    else
+    {
+      Error(0);
+    }
   }
 }
 
@@ -5738,8 +5773,21 @@ byte Restore_brush(int index)
       Set_paintbrush_size(Paintbrush_width,Paintbrush_height);
     }
   }
-  
+  // Color brushes
+  if (shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
+     shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
+  {
+    Paintbrush_shape=shape;
+    Realloc_brush(Brush_container[index].Width,Brush_container[index].Height);
+    // Realloc sets Brush_width and Brush_height to new size.
+    memcpy(Brush, Brush_container[index].Brush, Brush_height*Brush_width);
+    
+    Brush_offset_X=Brush_width>>1;
+    Brush_offset_Y=Brush_height>>1;
+
+  }
   Change_paintbrush_shape(shape);
+
   return 1;
 }
 
