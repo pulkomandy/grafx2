@@ -1063,7 +1063,7 @@ void Init_buttons(void)
                      106,18,
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Brush_FX,Button_Brush_container,
+                     Button_Brush_FX,Button_Brush_FX,
                      Do_nothing,
                      FAMILY_INSTANT);
 
