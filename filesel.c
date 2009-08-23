@@ -1030,6 +1030,12 @@ byte Button_Load_or_Save(byte load, byte image)
   char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
   char  save_filename[MAX_PATH_CHARACTERS];
   char * most_matching_filename;
+  short window_shortcut;
+  
+  if (image)
+    window_shortcut = load?(0x100+BUTTON_LOAD):(0x100+BUTTON_SAVE);
+  else
+    window_shortcut = load?SPECIAL_LOAD_BRUSH:SPECIAL_SAVE_BRUSH;
 
   initial_palette=(T_Components *)malloc(sizeof(T_Palette));
   memcpy(initial_palette,Main_palette,sizeof(T_Palette));
@@ -1550,7 +1556,7 @@ byte Button_Load_or_Save(byte load, byte image)
         }
         Key=0;
         break;
-      default: // Autre => On se place sur le nom de fichier qui correspond
+      default:
         if (clicked_button<=0)
         {
           if (Is_shortcut(Key,0x100+BUTTON_HELP))
@@ -1558,6 +1564,12 @@ byte Button_Load_or_Save(byte load, byte image)
             Window_help(load?BUTTON_LOAD:BUTTON_SAVE, NULL);
             break;
           }
+          if (Is_shortcut(Key,window_shortcut))
+          {
+            clicked_button=2;
+            break;
+          }
+          // Autre => On se place sur le nom de fichier qui correspond
           temp=strlen(quicksearch_filename);
           if (Key_ANSI>= ' ' && Key_ANSI < 255 && temp<50)
           {

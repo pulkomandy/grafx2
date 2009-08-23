@@ -778,7 +778,7 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
-          Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL);
+          Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
           Key=0;
           break;
         case SPECIAL_INVERT_SIEVE :

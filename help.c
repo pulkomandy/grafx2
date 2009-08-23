@@ -585,11 +585,12 @@ void Window_help(int section, const char *sub_section)
       }
         break;
     }
-
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      clicked_button=1;
   }
   while ((clicked_button!=1) && (Key!=SDLK_RETURN));
 
-  if(Key==SDLK_RETURN) Key=0;
+  Key=0;
   Close_window();
   Unselect_button(BUTTON_HELP);
   Display_cursor();
@@ -698,6 +699,8 @@ void Button_Stats(void)
   do
   {
     clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x200+BUTTON_HELP))
+      clicked_button=1;
   }
   while ( (clicked_button!=1) && (Key!=SDLK_RETURN) );
 

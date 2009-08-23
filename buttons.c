@@ -429,6 +429,8 @@ byte Button_Quit_local_function(void)
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_QUIT, NULL);
+    else if (Is_shortcut(Key,0x100+BUTTON_QUIT))
+      clicked_button=1;
   }
   while (clicked_button<=0);
 
@@ -526,7 +528,7 @@ void Button_Clear_with_backcolor(void)
 }
  
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
-void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section)
+void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
 {
   short clicked_button;
   byte backup_table[256];
@@ -626,6 +628,10 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
         Key=0;
         break;
       }
+      else if (Is_shortcut(Key,close_shortcut))
+      {
+        clicked_button=4;
+      }
     }
   }
   while (clicked_button<4);
@@ -664,7 +670,7 @@ void Stencil_update_color(byte color)
 
 void Button_Stencil_menu(void)
 {
-  Menu_tag_colors("Stencil",Stencil,&Stencil_mode,1, "STENCIL");
+  Menu_tag_colors("Stencil",Stencil,&Stencil_mode,1, "STENCIL", SPECIAL_STENCIL_MENU);
 }
 
 
@@ -677,7 +683,7 @@ void Button_Mask_mode(void)
 
 void Button_Mask_menu(void)
 {
-  Menu_tag_colors("Mask",Mask_table,&Mask_mode,1, "MASK");
+  Menu_tag_colors("Mask",Mask_table,&Mask_mode,1, "MASK", SPECIAL_MASK_MENU);
 }
 
 
@@ -805,7 +811,7 @@ void Button_Settings(void)
   // Button Show/Hide dans le fileselect
   Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 1
   Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 2
-//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST); // 3
+//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST);
 
   // Button Show/Hide Picture limits
   Window_set_normal_button(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 3
@@ -817,31 +823,31 @@ void Button_Settings(void)
   Window_set_normal_button(  9,126,107,14,"Backup   :   ",0,1,SDLK_LAST); // 6
 
   // Button Safety colors
-  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 8
+  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 7
   // Button Adjust Brush Pick
-  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 9
+  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 8
   // Button Separate colors
-  Window_set_normal_button(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 10
+  Window_set_normal_button(117,111,131,14,"Separate col:   ",0,1,SDLK_LAST); // 9
   // Button Passer dans la résolution appropriée après un chargement
-  Window_set_normal_button(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 11
+  Window_set_normal_button(117,126,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 10
   // Button Adapter la palette après un chargement (<=> Shift+BkSpc)
-  Window_set_normal_button(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 12
+  Window_set_normal_button(117,141,131,14,"Coords:         ",0,1,SDLK_LAST); // 11
 
     // Button Reload
-  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 13
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 12
     // Button Auto-save
-  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 14
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 13
     // Button Save
-  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 15
+  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 14
     // Button Close
-  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 16
+  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 15
 
   // Jauges de sensibilité de la souris (X puis Y)
-  Window_set_scroller_button(265,99,56,4,1,0); // 17
-  Window_set_scroller_button(279,99,56,4,1,0); // 18
+  Window_set_scroller_button(265,99,56,4,1,0); // 16
+  Window_set_scroller_button(279,99,56,4,1,0); // 17
 
   // Zone de saisie du nb de pages de Undo
-  Window_set_input_button(140,50,2);           // 19
+  Window_set_input_button(140,50,2);           // 18
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -944,6 +950,8 @@ void Button_Settings(void)
       
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_SETTINGS, NULL);
+    else if (Is_shortcut(Key,0x100+BUTTON_SETTINGS))
+      clicked_button=15;
   }
   while ( (clicked_button!=15) && (Key!=SDLK_RETURN) );
 
@@ -1418,7 +1426,7 @@ void Copy_some_colors(void)
   static byte mask_color_to_copy[256]; // static to use less stack
 
   memset(mask_color_to_copy,1,256);
-  Menu_tag_colors("Tag colors to copy",mask_color_to_copy,&confirmation,0, NULL);
+  Menu_tag_colors("Tag colors to copy",mask_color_to_copy,&confirmation,0, NULL, 0xFFFF);
 
   if (confirmation &&
     (!Spare_image_is_modified || Confirmation_box("Spare page was modified. Proceed?")))
@@ -1455,6 +1463,8 @@ void Button_Copy_page(void)
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_PAGE, NULL);
+    else if (Is_shortcut(Key,0x200+BUTTON_PAGE))
+      clicked_button=6;
   }
   while (clicked_button<=0);
 
@@ -2374,6 +2384,8 @@ void Button_Gradients(void)
           Key=0;
           break;
         }
+        if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
+          clicked_button=6;
     }
   }
   while (clicked_button<6);
@@ -2512,7 +2524,6 @@ void Button_Paintbrush_menu(void)
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_PAINTBRUSHES, NULL);
-    
     // Brush container
     if (clicked_button>(NB_PAINTBRUSH_SPRITES+1))
     {
@@ -2559,7 +2570,7 @@ void Button_Paintbrush_menu(void)
       
       break;
     }
-    else if (clicked_button==1)
+    else if (clicked_button==1 || Is_shortcut(Key,0x100+BUTTON_PAINTBRUSHES))
     {
       Close_window();
       break;
@@ -3371,6 +3382,8 @@ void Button_Magnify_menu(void)
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_MAGNIFIER, NULL);
+    else if (Is_shortcut(Key,0x200+BUTTON_MAGNIFIER))
+      clicked_button=1;
   }
   while (clicked_button<=0);
 
@@ -3684,6 +3697,10 @@ void Button_Brush_FX(void)
       Key=0;
       Window_help(BUTTON_BRUSH_EFFECTS, NULL);
     }
+    else if (Is_shortcut(Key,0x100+BUTTON_BRUSH_EFFECTS))
+    {
+      clicked_button=1;
+    }
   }
   while (clicked_button<=0);
 
@@ -3858,6 +3875,8 @@ void Button_Smooth_menu(void)
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "SMOOTH");
+    else if (Is_shortcut(Key,SPECIAL_SMOOTH_MENU))
+      clicked_button=2;
   }
   while ((clicked_button!=1) && (clicked_button!=2));
 
@@ -4023,6 +4042,8 @@ void Button_Colorize_menu(void)
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "TRANSPARENCY");
+      else if (Is_shortcut(Key,SPECIAL_COLORIZE_MENU))
+        clicked_button=6;
   }
   while (clicked_button<5);
 
@@ -4558,7 +4579,11 @@ void Button_Airbrush_menu(void)
         Key=0;
         break;
       }
-        
+      if (Is_shortcut(Key,0x200+BUTTON_AIRBRUSH))
+      {
+        clicked_button=2;
+        break;
+      }
     }
   }
   while ( (clicked_button!=1) && (clicked_button!=2) );
@@ -5175,14 +5200,13 @@ void Button_Effects(void)
   {
     clicked_button=Window_clicked_button();
 
-    if (Key==KEY_ESC)
+    if (Key==KEY_ESC || Is_shortcut(Key,0x100+BUTTON_EFFECTS))
     {
       clicked_button=11;
       Key=0;
     }
     else if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
-      Key=0;
       // Aide contextuelle
       switch(Window_get_clicked_button())
       {
@@ -5219,7 +5243,9 @@ void Button_Effects(void)
         default:
           Window_help(BUTTON_EFFECTS, NULL);
       }
-      continue;  
+      // Hack because we have used Window_get_clicked_button()
+      Input_sticky_control=0;
+      //
     }
 
     switch (clicked_button)
@@ -5540,6 +5566,8 @@ void Button_Text()
     {
       if (Is_shortcut(Key,0x100+BUTTON_HELP))
         Window_help(BUTTON_TEXT, NULL);
+      else if (Is_shortcut(Key,0x100+BUTTON_TEXT))
+        clicked_button=12;
     }
     switch(clicked_button)
     {

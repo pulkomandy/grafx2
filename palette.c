@@ -2097,6 +2097,8 @@ void Button_Palette(void)
             Window_help(BUTTON_PALETTE, NULL);
             break;
           }
+          else if (Is_shortcut(Key,0x100+BUTTON_PALETTE))
+            clicked_button=14;
       }
 
       if (need_to_remap)
@@ -2221,6 +2223,9 @@ void Button_Secondary_palette(void)
       Key=0;
       Window_help(BUTTON_PALETTE, "PALETTE OPTIONS");
     }
+    else if (Is_shortcut(Key,0x200+BUTTON_PALETTE))
+      clicked_button=3;
+
     switch(clicked_button)
     {
       case 5:
@@ -2298,7 +2303,7 @@ void Button_Secondary_palette(void)
 
   if (clicked_button==1)
   {
-    Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL);
+    Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
   }
   else if (clicked_button==2)
   {

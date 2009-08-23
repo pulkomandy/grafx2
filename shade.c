@@ -978,6 +978,8 @@ int Menu_shade(void)
           Key=0;
           Window_help(BUTTON_EFFECTS, "SHADE");
         }
+        else if (Is_shortcut(Key,SPECIAL_SHADE_MENU))
+          clicked_button=5;
     }
   }
   while ((clicked_button!=4) && (clicked_button!=5));
@@ -1097,6 +1099,8 @@ void Button_Quick_shade_menu(void)
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "QUICK SHADE");
+    else if (Is_shortcut(Key,SPECIAL_QUICK_SHADE_MENU))
+      clicked_button=1;
   }
   while ((clicked_button!=1) && (clicked_button!=2));
 

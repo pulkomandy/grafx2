@@ -82,7 +82,7 @@ short Joybutton_right_click=0; // Button number that serves as right-click
 
 int Is_shortcut(word Key, word function)
 {
-  if (Key == 0)
+  if (Key == 0 || function == 0xFFFF)
     return 0;
     
   if (function & 0x100)
