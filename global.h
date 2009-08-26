@@ -138,7 +138,7 @@ GFX2_GLOBAL byte Cursor_in_menu;
 /// Boolean, means the cursor was hovering over a menu GUI element.
 GFX2_GLOBAL byte Cursor_in_menu_previous;
 /// Storage for the graphics under the mouse cursor. Used by ::Hide_cursor and ::Display_cursor
-GFX2_GLOBAL byte CURSOR_BACKGROUND[CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
+GFX2_GLOBAL byte Cursor_background[CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
 // -- Paintbrush data
 
@@ -645,6 +645,8 @@ GFX2_GLOBAL byte Stencil[256];
 
 /// Boolean, true when the Grid mode is active.
 GFX2_GLOBAL byte  Snap_mode;
+/// Boolean, true when the Grid is displayed in zoomed view.
+GFX2_GLOBAL byte  Show_grid;
 /// Width of the grid in Grid mode.
 GFX2_GLOBAL word Snap_width;
 /// Height of the grid in Grid mode.

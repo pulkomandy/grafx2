@@ -325,6 +325,8 @@ void Display_part_of_screen_scaled_tall(
       y++;
       if(y==height*ZOOMY)
       {
+        Redraw_grid(Main_X_zoom,0,
+          width*Main_magnifier_factor,height);
         Update_rect(Main_X_zoom,0,
           width*Main_magnifier_factor,height);
         return;
@@ -406,6 +408,8 @@ void Display_brush_mono_zoom_tall(word x_pos, word y_pos,
       // On vérifie qu'on est pas à la ligne finale
       if(y == end_y_pos*ZOOMY)
       {
+        Redraw_grid( x_pos, y_pos,
+          width * Main_magnifier_factor, end_y_pos - y_pos );
         Update_rect( x_pos, y_pos,
           width * Main_magnifier_factor, end_y_pos - y_pos );
         return;
@@ -441,6 +445,8 @@ void Clear_brush_scaled_tall(word x_pos,word y_pos,word x_offset,word y_offset,w
       y++;
       if(y==end_y_pos)
       {
+        Redraw_grid(x_pos,y_pos,
+          width*Main_magnifier_factor,end_y_pos-y_pos);
         Update_rect(x_pos,y_pos,
           width*Main_magnifier_factor,end_y_pos-y_pos);
         return;

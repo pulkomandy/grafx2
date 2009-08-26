@@ -353,6 +353,11 @@ void Button_Snap_mode(void);
 */
 void Button_Grid_menu(void);
 
+/*!
+    Callback to toggle the grid visible in the magnified view.
+*/
+void Button_Show_grid(void);
+
 // Mode trame (Sieve)
 
 /*!

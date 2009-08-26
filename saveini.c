@@ -644,6 +644,10 @@ int Save_INI(T_Config * conf)
     
   if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Font_file",conf->Font_file)))
     goto Erreur_Retour;
+
+  values[0]=(conf->Grid_XOR_color);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Grid_XOR_color",1,values,0)))
+    goto Erreur_Retour;
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 

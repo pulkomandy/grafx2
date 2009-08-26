@@ -826,6 +826,14 @@ int Load_INI(T_Config * conf)
   else
     conf->Font_file = strdup("font_Classic.png");
 
+  conf->Grid_XOR_color=255;
+  // Optional, XOR color for grid overlay (>2.0)
+  if (!Load_INI_get_values (file,buffer,"Grid_XOR_color",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=255))
+      conf->Grid_XOR_color=values[0];
+  }
+
   fclose(file);
 
   free(filename);

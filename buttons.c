@@ -3613,6 +3613,13 @@ void Button_Grid_menu(void)
   Display_cursor();
 }
 
+void Button_Show_grid(void)
+{
+  Show_grid = !Show_grid;
+  Hide_cursor();
+  Display_all_screen();
+  Display_cursor();
+} 
 
 // ----------------------- Modifications de brosse ---------------------------
 

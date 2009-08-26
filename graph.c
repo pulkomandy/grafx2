@@ -107,6 +107,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
 
   if(effective_Y + effective_h > Menu_Y)
     effective_h = Menu_Y - effective_Y;
+    
   /*
   SDL_Rect r;
   r.x=effective_X;
@@ -136,7 +137,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     }
     else
       effective_X += Main_separator_position + SEPARATOR_WIDTH*Menu_factor_X;
-    diff = effective_X+effective_w-Screen_width;
+    diff = effective_X+effective_w-Min(Screen_width, Main_X_zoom+(Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
     if (diff>0)
     {
       effective_w -=diff;
@@ -153,13 +154,14 @@ void Update_part_of_screen(short x, short y, short width, short height)
         return;
       effective_Y = 0;
     }
-    diff = effective_Y+effective_h-Menu_Y;
+    diff = effective_Y+effective_h-Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
     if (diff>0)
     {
       effective_h -=diff;
       if (effective_h<0)
         return;
     }
+
 
  // Très utile pour le debug :)
     /*SDL_Rect r;
@@ -169,6 +171,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     r.w=effective_w;
     SDL_FillRect(Screen_SDL,&r,3);*/
 
+    Redraw_grid(effective_X,effective_Y,effective_w,effective_h);
     Update_rect(effective_X,effective_Y,effective_w,effective_h);
   }
 }
@@ -998,6 +1001,16 @@ void Fill_general(byte fill_color)
     // puisque les seuls points qui ont changé dans l'image ont été raffichés
     // par l'utilisation de "Display_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
+
+    if(Main_magnifier_mode)
+    {
+      short w,h;
+      
+      w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
+      h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
+
+      Redraw_grid(Main_X_zoom,0,w,h);
+    }
 
     Update_rect(0,0,0,0);
     End_of_modification();
@@ -2803,3 +2816,41 @@ byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
     Read_pixel_from_current_screen(x,y); // C'est bien l'écran courant et pas
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.
+
+void Horizontal_grid_line(word x_pos,word y_pos,word width)
+{
+  int x;
+
+  for (x=!(x_pos&1);x<width;x+=2)
+    Pixel(x_pos+x, y_pos, *((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)^Config.Grid_XOR_color);
+}
+
+void Vertical_grid_line(word x_pos,word y_pos,word height)
+{
+  int y;
+  
+  for (y=!(y_pos&1);y<height;y+=2)
+    Pixel(x_pos, y_pos+y, *(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)^Config.Grid_XOR_color);
+}
+
+// Tile Grid
+void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
+{
+  int row, col;
+  if (!Show_grid)
+    return;
+    
+  row=y+((Snap_height*1000-(y-0)/Main_magnifier_factor-Main_magnifier_offset_Y+Snap_offset_Y-1)%Snap_height)*Main_magnifier_factor+Main_magnifier_factor-1;
+  while (row < y+h)
+  {
+    Horizontal_grid_line(x, row, w);
+    row+= Snap_height*Main_magnifier_factor;
+  }
+  
+  col=x+((Snap_width*1000-(x-Main_X_zoom)/Main_magnifier_factor-Main_magnifier_offset_X+Snap_offset_X-1)%Snap_width)*Main_magnifier_factor+Main_magnifier_factor-1;
+  while (col < x+w)
+  {
+    Vertical_grid_line(col, y, h);
+    col+= Snap_width*Main_magnifier_factor;
+  }
+}

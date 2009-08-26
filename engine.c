@@ -825,6 +825,10 @@ void Main_handler(void)
           Button_Grid_menu();
           Key=0;
           break;
+        case SPECIAL_SHOW_GRID :
+          Button_Show_grid();
+          Key=0;
+          break;
         case SPECIAL_SIEVE_MODE :
           Button_Sieve_mode();
           Key=0;

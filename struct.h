@@ -308,6 +308,7 @@ typedef struct
   int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
   word Double_click_speed;               ///< Maximum delay for double-click, in ms.
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
+  byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.

@@ -1663,7 +1663,7 @@ void Display_cursor(void)
           	{
             	if( x_pos < 0 ) continue;
               	color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              	CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+              	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
               	if (color!=MC_Trans)
                 	Pixel(x_pos,y_pos,color);
             }
@@ -1733,8 +1733,8 @@ void Display_cursor(void)
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
               color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              // On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
-              CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+              // On sauvegarde dans Cursor_background pour restaurer plus tard
+              Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
               if (color!=MC_Trans)
             	Pixel(x_pos,y_pos,color);
             }
@@ -1762,8 +1762,8 @@ void Display_cursor(void)
         	if(x_pos<0) continue;
         	if(x_pos>=Screen_width) break;
           	color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
-          	// On sauvegarde dans CURSOR_BACKGROUND pour restaurer plus tard
-          	CURSOR_BACKGROUND[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+          	// On sauvegarde dans Cursor_background pour restaurer plus tard
+          	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
           	if (color!=MC_Trans)
               Pixel(x_pos,y_pos,color);
         }
@@ -1966,7 +1966,7 @@ void Hide_cursor(void)
             {
               if(x_pos < 0) continue;
               else if (x_pos>=Screen_width) break;
-              Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
+              Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
             }
           }
 
@@ -2035,7 +2035,7 @@ void Hide_cursor(void)
           	{
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
-                  Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
+                  Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
             }
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
@@ -2063,7 +2063,7 @@ void Hide_cursor(void)
       	{
         	if(x_pos<0) continue;
         	if(x_pos>=Screen_width) break;
-            Pixel(x_pos,y_pos,CURSOR_BACKGROUND[counter_y][counter_x]);
+            Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
         }
       }
       Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);

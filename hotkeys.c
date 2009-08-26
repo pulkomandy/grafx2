@@ -1286,6 +1286,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   0,
   0},
+  {158,
+  "Show/Hide Grid",
+  "Turns on or off the visible grid in ",
+  "the magnified view. Grid cells match",
+  "the size ",
+  true,
+  SDLK_g|MOD_SHIFT|MOD_ALT, // Shift + Alt + G,
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1448,4 +1456,5 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_ZOOM_16,                  /**< Sets zoom factor to 16:1 */
   SPECIAL_ZOOM_18,                  /**< Sets zoom factor to 18:1 */
   SPECIAL_ZOOM_20,                  /**< Sets zoom factor to 20:1 */
+  SPECIAL_SHOW_GRID,
 };

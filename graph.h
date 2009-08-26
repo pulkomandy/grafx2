@@ -108,3 +108,5 @@ void Remap_picture(void);
 extern Func_pixel Pixel_figure;
 
 void Update_part_of_screen(short x, short y, short width, short height);
+
+void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
