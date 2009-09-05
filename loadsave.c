@@ -44,6 +44,7 @@
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
+#include "engine.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(void);
@@ -138,7 +139,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
-  {"c64", Test_C64, Load_C64, Save_C64, 1, 0},
+  {"c64", Test_C64, Load_C64, Save_C64, 1, 1},
 #ifndef __no_pnglib__
   {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
 #endif
@@ -5891,6 +5892,8 @@ void Test_C64(void)
         file_size = File_length_file(file);
         switch (file_size)
         {
+            case 1000: // screen or color
+            case 1002: // (screen or color) + loadaddr
             case 8000: // raw bitmap
             case 8002: // raw bitmap with loadaddr
             case 9000: // bitmap + screen
@@ -5964,7 +5967,11 @@ void Load_C64(void)
     FILE* file;
     char filename[MAX_PATH_CHARACTERS];
     long file_size;
-    byte background;
+    int i;
+    byte background,hasLoadAddr=0;
+    int loadFormat=0;
+    enum c64_format {F_hires,F_multi,F_bitmap,F_screen,F_color};
+    const char *c64_format_names[]={"hires","multicolor","bitmap","screen","color"};
     
     // Palette from http://www.pepto.de/projects/colorvic/
     byte pal[48]={
@@ -5991,34 +5998,99 @@ void Load_C64(void)
     Get_full_filename(filename,0);
     file = fopen(filename,"rb");
   
-    if(file)
+    if (file)
     {
+    File_error=0;
+    file_size = File_length_file(file);
+
+    switch (file_size)
+        {
+            case 1000: // screen or color
+                hasLoadAddr=0;
+                loadFormat=F_screen;
+                break;
+                
+            case 1002: // (screen or color) + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_screen;
+                break;
+                    
+            case 8000: // raw bitmap
+                hasLoadAddr=0;
+                loadFormat=F_bitmap;
+                    
+            case 8002: // raw bitmap with loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_bitmap;
+                break;
+                    
+            case 9000: // bitmap + screen
+                hasLoadAddr=0;
+                loadFormat=F_hires;
+                break;
+                    
+            case 9002: // bitmap + screen + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_hires;
+                break;
+                    
+            case 10001: // multicolor
+                hasLoadAddr=0;
+                loadFormat=F_multi;
+                break;
+                    
+            case 10003: // multicolor + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                break;
+                    
+            default: // then we don't know what it is.
+                File_error = 1;
+
+        }
         
         memcpy(Main_palette,pal,48); // this set the software palette for grafx2
         Set_palette(Main_palette); // this set the hardware palette for SDL
         Remap_fileselector(); // Always call it if you change the palette
                 
-        file_size = File_length_file(file);
+    if (file_size>9002)
+        width=160;
                 
+    if (hasLoadAddr)
+    {
+        // get load address
+        Read_byte(file,&background);
+        Read_byte(file,&background);
+        sprintf(filename,"load at $%02x00",background);
+    }
+    else
+    {
+        sprintf(filename,"no addr");
+    }
+       
         if(file_size>9002)
         {
-            width=160;
             Ratio_of_loaded_image = PIXEL_WIDE;
         }
-        else
-        {
-           Ratio_of_loaded_image = PIXEL_SIMPLE;
-        }
-        
+        sprintf(Main_comment,"C64 %s, %s",
+            c64_format_names[loadFormat],filename);
         Init_preview(width, height, file_size, FORMAT_C64, Ratio_of_loaded_image); // Do this as soon as you can
                      
         Main_image_width = width ;                
         Main_image_height = height;
                 
         Read_bytes(file,bitmap,8000);
-        if(file_size>8002)
+
+        if (file_size>8002) 
             Read_bytes(file,colors,1000);
-                        
+        else
+        {
+            for(i=0;i<1000;i++)
+            {
+                colors[i]=1;
+            }
+        }
+
         if(width==160)
         {
             Read_bytes(file,nybble,1000);
@@ -6037,7 +6109,61 @@ void Load_C64(void)
         File_error = 1;
 }
 
-int Save_C64_hires(char *filename)
+int Save_C64_window(byte *saveWhat, byte *loadAddr)
+{
+    int b;
+    T_Dropdown_button *what, *addr;
+    
+    Open_window(200,120,"c64 settings");
+    Window_set_normal_button(110,100,80,15,"Save",1,1,SDLK_RETURN);
+    Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE);
+    
+    what=Window_set_dropdown_button(10,20,90,15,70,"Save what",1, 0, 1, LEFT_SIDE);
+    Window_dropdown_clear_items(what);
+    Window_dropdown_add_item(what,0,"All");
+    Window_dropdown_add_item(what,1,"Bitmap");
+    Window_dropdown_add_item(what,2,"Screen");    
+    Window_dropdown_add_item(what,3,"Color");    
+    
+    addr=Window_set_dropdown_button(110,20,70,15,70,"Addr",1, 0, 1, LEFT_SIDE);
+    Window_dropdown_clear_items(addr);
+    Window_dropdown_add_item(addr,0,"None");
+    Window_dropdown_add_item(addr,1,"$2000");
+    Window_dropdown_add_item(addr,2,"$4000");    
+    Window_dropdown_add_item(addr,3,"$6000");    
+    Window_dropdown_add_item(addr,4,"$8000");    
+    Window_dropdown_add_item(addr,5,"$A000");    
+    Window_dropdown_add_item(addr,6,"$C000");    
+    Window_dropdown_add_item(addr,7,"$E000");    
+    
+    Update_window_area(0,0,Window_width,Window_height); 
+    Display_cursor();
+
+    do
+    {
+        b = Window_clicked_button();
+        switch(b)
+        {
+            case 3: // Save what
+                *saveWhat=Window_attribute2;
+                //printf("what=%d\n",Window_attribute2);
+                break;
+            
+            case 4: // Load addr
+                *loadAddr=Window_attribute2*32;
+                //printf("addr=$%02x00 (%d)\n",loadAddr,Window_attribute2);
+                break;
+            
+            case 0: break;
+        }
+    }while(b!=1 && b!=2);
+    
+    Close_window();
+    Display_cursor();
+    return b==1;
+}
+
+int Save_C64_hires(char *filename, byte saveWhat, byte loadAddr)
 {
     int cx,cy,x,y,c1,c2,i,pixel,bits,pos=0;
     word numcolors;
@@ -6045,16 +6171,16 @@ int Save_C64_hires(char *filename)
     byte colors[1000],bitmap[8000];
     FILE *file;
     
-    for(x=0;x<1000;x++)
-        colors[x]=1; // init colormem to black/white
+    for(x=0;x<1000;x++)colors[x]=1; // init colormem to black/white
   
     for(cy=0; cy<25; cy++) // Character line, 25 lines
     {
         for(cx=0; cx<40; cx++) // Character column, 40 columns
         {
-            for(i=0;i<256;i++) cusage[i]=0;
+            for(i=0;i<256;i++)
+                cusage[i]=0;
             
-            numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
+            numcolors=Count_used_colors_screen_area(cusage,cx*8,cy*8,8,8);
             if (numcolors>2)
             {
                 Warning_message("More than 2 colors in 8x8 pixels");
@@ -6112,15 +6238,21 @@ int Save_C64_hires(char *filename)
         return 1;
     }
     
-    if (!Write_bytes(file,bitmap,8000) ||
-        !Write_bytes(file,colors,1000))
-      File_error = 1;
+    if (loadAddr)
+    {
+        Write_byte(file,0);
+        Write_byte(file,loadAddr);
+    }
+    if (saveWhat==0 || saveWhat==1)
+        Write_bytes(file,bitmap,8000);
+    if (saveWhat==0 || saveWhat==2)
+        Write_bytes(file,colors,1000);
     
     fclose(file);
     return 0;
 }
 
-int Save_C64_multi(char *filename)
+int Save_C64_multi(char *filename, byte saveWhat, byte loadAddr)
 {
     /* 
     BITS     COLOR INFORMATION COMES FROM
@@ -6155,7 +6287,7 @@ int Save_C64_multi(char *filename)
         //printf("\ny:%2d ",cy);
         for(cx=0; cx<40; cx++)
         {
-            numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+            numcolors=Count_used_colors_screen_area(cusage,cx*4,cy*8,4,8);
             if(numcolors>4)
             {
                 Warning_message("More than 4 colors in 4x8");
@@ -6216,11 +6348,24 @@ int Save_C64_multi(char *filename)
         File_error = 1;
         return 1;
     }
-    if (!Write_bytes(file,bitmap,8000) ||
-        !Write_bytes(file,screen,1000) ||
-        !Write_bytes(file,nybble,1000) ||
-        !Write_byte(file,background))
-        File_error = 1;
+
+    if (loadAddr)
+    {
+        Write_byte(file,0);
+        Write_byte(file,loadAddr);
+    }
+
+    if (saveWhat==0 || saveWhat==1)
+        Write_bytes(file,bitmap,8000);
+        
+    if (saveWhat==0 || saveWhat==2)
+        Write_bytes(file,screen,1000);
+        
+    if (saveWhat==0 || saveWhat==3)
+        Write_bytes(file,nybble,1000);
+        
+    if (saveWhat==0)
+        Write_byte(file,background);
     
     fclose(file);
     //printf("\nbg:%d\n",background);
@@ -6230,7 +6375,8 @@ int Save_C64_multi(char *filename)
 void Save_C64(void)
 {
     char filename[MAX_PATH_CHARACTERS];
-    dword numcolors, cusage[256];
+    byte saveWhat=0,loadAddr=0;
+    dword numcolors,cusage[256];
     numcolors=Count_used_colors(cusage);
   
     Get_full_filename(filename,0);
@@ -6248,11 +6394,17 @@ void Save_C64(void)
         return;
     } 
     
-    if (Main_image_width==320)
-        File_error = Save_C64_hires(filename); 
-    else
-        File_error = Save_C64_multi(filename);
+    if(!Save_C64_window(&saveWhat,&loadAddr))
+    {
+        File_error = 1;
+        return;
+    }
+    //printf("saveWhat=%d, loadAddr=%d\n",saveWhat,loadAddr);
     
+    if (Main_image_width==320)
+        File_error = Save_C64_hires(filename,saveWhat,loadAddr);
+    else
+        File_error = Save_C64_multi(filename,saveWhat,loadAddr);
 }
 
 /////////////////////////////////////////////////////////////////////////////
