@@ -634,53 +634,50 @@ void Load_image(byte image)
         }
         else
         {
-			// Cas d'un chargement dans la brosse
-			if (Convert_24b_bitmap_to_256(Brush, Buffer_image_24b, Brush_width,
-				Brush_height, Main_palette))
-				File_error = 2;
+          // Cas d'un chargement dans la brosse
+          if (Convert_24b_bitmap_to_256(Brush,Buffer_image_24b,Brush_width,Brush_height,Main_palette))
+            File_error=2;
         }
         //if (!File_error)
-        // Palette_256_to_64(Main_palette);
+        //  Palette_256_to_64(Main_palette);
         // Normalement plus besoin car 256 color natif, et c'etait probablement
         // un bug - yr
       }
 
-	  free(Buffer_image_24b);
-	}
+      free(Buffer_image_24b);
+    }
 
-	if (image)
-	{
+    if (image)
+    {
       if ( (File_error!=1) && (File_formats[format].Backup_done) )
       {
         if (Pixel_load_function==Pixel_load_in_preview)
         {
-          dword color_usage[256];
-          Count_used_colors_screen_area(color_usage, Preview_pos_X,
-			Preview_pos_Y, Main_image_width / Preview_factor_X,
-			Main_image_height / Preview_factor_Y);
+          dword  color_usage[256];
+          Count_used_colors_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
           //Count_used_colors(color_usage);
           Display_cursor();
-          Set_nice_menu_colors(color_usage, 1);
+          Set_nice_menu_colors(color_usage,1);
           Hide_cursor();
         }
       
         // On considère que l'image chargée n'est plus modifiée
-        Main_image_is_modified = 0;
+        Main_image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat = format + 1;
+        Main_fileformat=format+1;
 
         // Correction des dimensions
         if (Main_image_width<1)
-          Main_image_width = 1;
+          Main_image_width=1;
         if (Main_image_height<1)
-          Main_image_height = 1;
+          Main_image_height=1;
       }
       else if (File_error!=1)
       {
         // On considère que l'image chargée est encore modifiée
-        Main_image_is_modified = 1;
+        Main_image_is_modified=1;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat = format + 1;
+        Main_fileformat=format+1;
       }
       else
       {
@@ -5854,10 +5851,10 @@ void Test_C64(void)
 
         file = fopen(filename,"rb");
 
-        if(file)
+        if (file)
         {
 			file_size = File_length_file(file);
-			switch(file_size)
+			switch (file_size)
 			{
 				case 8000: // raw bitmap
 				case 8002: // raw bitmap with loadaddr
@@ -5871,7 +5868,7 @@ void Test_C64(void)
 					File_error = 1;
 				
 			}
-            fclose(file);
+            fclose (file);
         }
         else
         {
@@ -6003,12 +6000,13 @@ void Load_C64(void)
     File_error = 1;
 }
 
-int Save_C64_hires(FILE *file)
+int Save_C64_hires(char *filename)
 {
-	int cx,cy,x,y,c1,c2,i,pixel,bits;
+	int cx,cy,x,y,c1,c2,i,pixel,bits,pos=0;
 	word numcolors;
 	dword cusage[256];
-	byte colors[1000];
+	byte colors[1000],bitmap[8000];
+	FILE *file;
 	
 	for(x=0;x<1000;x++)colors[x]=1; // init colormem to black/white
 	
@@ -6018,8 +6016,8 @@ int Save_C64_hires(FILE *file)
 		{
 			for(i=0;i<256;i++) cusage[i]=0;
 			
-			numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
-			if(numcolors>2)
+			numcolors=Count_used_colors_screen_area(cusage,cx*8,cy*8,8,8);
+			if (numcolors>2)
 			{
 				Warning_message("More than 2 colors in 8x8 pixels");
 				// TODO here we should hilite the offending block
@@ -6040,7 +6038,6 @@ int Save_C64_hires(FILE *file)
 				if(cusage[i])
 				{
 					c1=i;
-					
 				}
 			}			
 			colors[cx+cy*40]=(c2<<4)|c1;
@@ -6060,17 +6057,31 @@ int Save_C64_hires(FILE *file)
 						return 1;
 					}
 					bits=bits<<1;
-					if(pixel==c1) bits|=1;					
+					if (pixel==c1) bits|=1;					
 				}
-				Write_byte(file,bits&255);
+				bitmap[pos++]=bits;
+				//Write_byte(file,bits&255);
 			}
 		}
 	}
+	
+	file = fopen(filename,"wb");
+	
+	if(!file)
+	{
+		Warning_message("File open failed");
+		File_error = 1;
+		return 1;
+	}
+	
+	Write_bytes(file,bitmap,8000);
 	Write_bytes(file,colors,1000);
+	
+	fclose(file);
 	return 0;
 }
 
-int Save_C64_multi(FILE *file)
+int Save_C64_multi(char *filename)
 {
 /* 
 BITS 	COLOR INFORMATION COMES FROM
@@ -6080,11 +6091,13 @@ BITS 	COLOR INFORMATION COMES FROM
 11 	Color nybble (nybble = 1/2 byte = 4 bits)
 */
 
-	int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel;
-	byte screen[1000],nybble[1000];
+	int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel,pos=0;
+	byte bitmap[8000],screen[1000],nybble[1000];
 	word numcolors,count;
 	dword cusage[256];
 	byte i,background=0;
+	FILE *file;
+	
 	numcolors=Count_used_colors(cusage);
 	
 	count=0;
@@ -6104,7 +6117,7 @@ BITS 	COLOR INFORMATION COMES FROM
 		//printf("\ny:%2d ",cy);
 		for(cx=0; cx<40; cx++)
 		{
-			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+			numcolors=Count_used_colors_screen_area(cusage,cx*4,cy*8,4,8);
 			if(numcolors>4)
 			{
 				Warning_message("More than 4 colors in 4x8");
@@ -6151,53 +6164,57 @@ BITS 	COLOR INFORMATION COMES FROM
 					bits|=lut[pixel];
 
 				}
-				Write_byte(file,bits&255);
+				//Write_byte(file,bits&255);
+				bitmap[pos++]=bits;
 			}
 		}
 	}
-	Write_bytes(file,screen,1000);
-	Write_bytes(file,nybble,1000);
-	Write_byte(file,background);
-	//printf("\nbg:%d\n",background);
-	return 0;
-}
-
-void Save_C64(void)
-{
-	FILE* file;
-	char filename[MAX_PATH_CHARACTERS];
-	dword numcolors,cusage[256];
-	numcolors=Count_used_colors(cusage);
-
-	if(numcolors>16)
-	{
-		Warning_message("Error: Max 16 colors");
-		File_error = 1;
-		return;
-	}
-	if(((Main_image_width!=320) && (Main_image_width!=160)) || Main_image_height!=200)
-	{
-		Warning_message("must be 320x200 or 160x200");
-		File_error = 1;
-		return;
-	} 
 	
-   	Get_full_filename(filename,0);
 	file = fopen(filename,"wb");
 	
 	if(!file)
 	{
 		Warning_message("File open failed");
 		File_error = 1;
-		return;
+		return 1;
 	}
-	
-	if(Main_image_width==320)
-		File_error = Save_C64_hires(file); 
-	else
-	   	File_error = Save_C64_multi(file);
+	Write_bytes(file,bitmap,8000);
+	Write_bytes(file,screen,1000);
+	Write_bytes(file,nybble,1000);
+	Write_byte(file,background);
 	
 	fclose(file);
+	//printf("\nbg:%d\n",background);
+	return 0;
+}
+
+void Save_C64(void)
+{
+	char filename[MAX_PATH_CHARACTERS];
+	dword numcolors,cusage[256];
+	numcolors=Count_used_colors(cusage);
+
+	Get_full_filename(filename,0);
+
+	if (numcolors>16)
+	{
+		Warning_message("Error: Max 16 colors");
+		File_error = 1;
+		return;
+	}
+	if (((Main_image_width!=320) && (Main_image_width!=160)) || Main_image_height!=200)
+	{
+		Warning_message("must be 320x200 or 160x200");
+		File_error = 1;
+		return;
+	} 
+	
+	if (Main_image_width==320)
+		File_error = Save_C64_hires(filename); 
+	else
+	   	File_error = Save_C64_multi(filename);
+	
+	//fclose(file);
 	
 }
 
