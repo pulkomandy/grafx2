@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
