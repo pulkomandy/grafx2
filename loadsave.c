@@ -654,7 +654,7 @@ void Load_image(byte image)
         if (Pixel_load_function==Pixel_load_in_preview)
         {
           dword  color_usage[256];
-          Count_used_colors_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
+          Count_used_colors_screen_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
           //Count_used_colors(color_usage);
           Display_cursor();
           Set_nice_menu_colors(color_usage,1);
@@ -6016,7 +6016,7 @@ int Save_C64_hires(char *filename)
 		{
 			for(i=0;i<256;i++) cusage[i]=0;
 			
-			numcolors=Count_used_colors_screen_area(cusage,cx*8,cy*8,8,8);
+			numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
 			if (numcolors>2)
 			{
 				Warning_message("More than 2 colors in 8x8 pixels");
@@ -6117,7 +6117,7 @@ BITS 	COLOR INFORMATION COMES FROM
 		//printf("\ny:%2d ",cy);
 		for(cx=0; cx<40; cx++)
 		{
-			numcolors=Count_used_colors_screen_area(cusage,cx*4,cy*8,4,8);
+			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
 			if(numcolors>4)
 			{
 				Warning_message("More than 4 colors in 4x8");
