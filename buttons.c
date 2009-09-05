@@ -2842,8 +2842,6 @@ void Load_picture(byte image)
         }
 
         new_mode=Best_video_mode();
-        // TODO : Utiliser ici Ratio_of_loaded_image pour passer dans la
-        // bonne taille de pixels.
         if ((Config.Auto_set_res) && (new_mode!=Current_resolution))
         {
           Init_mode_video(
@@ -2852,6 +2850,20 @@ void Load_picture(byte image)
             Video_mode[new_mode].Fullscreen,
             Pixel_ratio);
           Display_menu();
+        }
+        // In window mode, activate wide or tall pixels if the image says so.
+        else if (!Video_mode[Current_resolution].Fullscreen &&
+          ((Ratio_of_loaded_image == PIXEL_WIDE &&
+            Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
+            (Ratio_of_loaded_image == PIXEL_TALL &&
+            Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
+        {
+          Init_mode_video(
+            Video_mode[Current_resolution].Width,
+            Video_mode[Current_resolution].Height,
+            Video_mode[Current_resolution].Fullscreen,
+            Ratio_of_loaded_image);
+            Display_menu();
         }
         else
         {
@@ -2932,9 +2944,7 @@ void Button_Reload(void)
         Main_magnifier_mode=0;
       }
 
-      new_mode=Best_video_mode();
-      // TODO : Utiliser içi Ratio_of_loaded_image pour passer dans la
-      // bonne taille de pixels.      
+      new_mode=Best_video_mode();     
       if ( ((Config.Auto_set_res) && (new_mode!=Current_resolution)) &&
            (!Resolution_in_command_line) )
       {
@@ -2944,6 +2954,20 @@ void Button_Reload(void)
         Video_mode[new_mode].Fullscreen,
         Pixel_ratio);
         Display_menu();
+      }
+      // In window mode, activate wide or tall pixels if the image says so.
+      else if (!Video_mode[Current_resolution].Fullscreen &&
+        ((Ratio_of_loaded_image == PIXEL_WIDE &&
+          Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
+          (Ratio_of_loaded_image == PIXEL_TALL &&
+          Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
+      {
+        Init_mode_video(
+          Video_mode[Current_resolution].Width,
+          Video_mode[Current_resolution].Height,
+          Video_mode[Current_resolution].Fullscreen,
+          Ratio_of_loaded_image);
+          Display_menu();
       }
       else
       {

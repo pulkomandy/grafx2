@@ -55,3 +55,6 @@ extern T_Format File_formats[NB_KNOWN_FORMATS];
 /// Function which attempts to save backups of the images (main and spare),
 /// called in case of SIGSEGV. 
 void Image_emergency_backup(void);
+
+/// Pixel ratio of last loaded image: one of :PIXEL_SIMPLE, :PIXEL_WIDE or :PIXEL_TALL
+extern enum PIXEL_RATIO Ratio_of_loaded_image;
