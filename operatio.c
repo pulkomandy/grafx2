@@ -4582,25 +4582,49 @@ void Grad_rectangle_0_5(void)
   Paintbrush_Y = ray;
   Hide_cursor();
 
-  width = abs(rbx-rax);
-  height = abs(rby-ray);
+  width = abs(rbx - rax);
+  height = abs(rby - ray);
 
-  if (Max(rax,rbx)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
-    offset_width = Max(rax,rbx) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
+  // Check if the rectangle is not fully outside the picture
+  if (Min(rax, rbx) > Main_image_width || Min(ray, rby) > Main_image_height)
+  {
+	Operation_pop(&rby); // reset the stack
+	return; // cancel the operation
+  }
 
-  if (Max(ray,rby)-Main_offset_Y > Min(Main_image_height,Menu_Y))
-      offset_height = Max(ray,rby) - Min(Main_image_height,Menu_Y);
+	// Handle clipping
+	if (Max(rax, rbx)-Main_offset_X > Min(Main_image_width,
+			Main_magnifier_mode?Main_separator_position:Screen_width))
+	{
+		offset_width = Max(rax, rbx) - Min(Main_image_width,
+			Main_magnifier_mode?Main_separator_position:Screen_width);
+	}
 
-  // Dessin dans la zone de dessin normale
-  Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width - offset_width);
-  if(offset_height == 0)
-    Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Max(ray,rby)-1-Main_offset_Y,width - offset_width);
+	if (Max(ray, rby)-Main_offset_Y > Min(Main_image_height, Menu_Y))
+		offset_height = Max(ray, rby) - Min(Main_image_height, Menu_Y);
 
-  Vertical_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
-  if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-    Vertical_XOR_line(Max(rax,rbx)-1-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
+	// Dessin dans la zone de dessin normale
+	Horizontal_XOR_line(Min(rax, rbx)-Main_offset_X,
+		Min(ray, rby) - Main_offset_Y, width - offset_width);
 
-  Update_rect(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
+	// If not, this line is out of the picture so there is no need to draw it
+	if (offset_height == 0)
+	{
+		Horizontal_XOR_line(Min(rax, rbx) - Main_offset_X, Max(ray, rby) - 1
+			- Main_offset_Y, width - offset_width);
+	}
+
+	Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
+		- Main_offset_Y, height - offset_height);
+
+	if (offset_width == 0)
+	{
+		Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
+			- Main_offset_Y,height-offset_height);
+	}
+
+	Update_rect(Min(rax, rbx) - Main_offset_X, Min(ray, rby) - Main_offset_Y,
+		width + 1 - offset_width, height + 1 - offset_height);
 
   // Dessin dans la zone zoomée
   if(Main_magnifier_mode && Min(rax,rbx)<Limit_visible_right_zoom && Max(rax,rbx)>Limit_left_zoom && Min(ray,rby)<Limit_visible_bottom_zoom && Max(ray,rby)>Limit_top_zoom )
