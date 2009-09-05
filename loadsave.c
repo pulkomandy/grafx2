@@ -109,6 +109,11 @@ void Test_NEO(void);
 void Load_NEO(void);
 void Save_NEO(void);
 
+// -- C64 -------------------------------------------------------------------
+void Test_C64(void);
+void Load_C64(void);
+void Save_C64(void);
+
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
 void Test_PNG(void);
@@ -132,6 +137,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
+  {"c64", Test_C64, Load_C64, Save_C64, 1, 0},
 #ifndef __no_pnglib__
   {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
 #endif
@@ -628,50 +634,53 @@ void Load_image(byte image)
         }
         else
         {
-          // Cas d'un chargement dans la brosse
-          if (Convert_24b_bitmap_to_256(Brush,Buffer_image_24b,Brush_width,Brush_height,Main_palette))
-            File_error=2;
+			// Cas d'un chargement dans la brosse
+			if (Convert_24b_bitmap_to_256(Brush, Buffer_image_24b, Brush_width,
+				Brush_height, Main_palette))
+				File_error = 2;
         }
         //if (!File_error)
-        //  Palette_256_to_64(Main_palette);
+        // Palette_256_to_64(Main_palette);
         // Normalement plus besoin car 256 color natif, et c'etait probablement
         // un bug - yr
       }
 
-      free(Buffer_image_24b);
-    }
+	  free(Buffer_image_24b);
+	}
 
-    if (image)
-    {
+	if (image)
+	{
       if ( (File_error!=1) && (File_formats[format].Backup_done) )
       {
         if (Pixel_load_function==Pixel_load_in_preview)
         {
-          dword  color_usage[256];
-          Count_used_colors_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
+          dword color_usage[256];
+          Count_used_colors_screen_area(color_usage, Preview_pos_X,
+			Preview_pos_Y, Main_image_width / Preview_factor_X,
+			Main_image_height / Preview_factor_Y);
           //Count_used_colors(color_usage);
           Display_cursor();
-          Set_nice_menu_colors(color_usage,1);
+          Set_nice_menu_colors(color_usage, 1);
           Hide_cursor();
         }
       
         // On considère que l'image chargée n'est plus modifiée
-        Main_image_is_modified=0;
+        Main_image_is_modified = 0;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format+1;
+        Main_fileformat = format + 1;
 
         // Correction des dimensions
         if (Main_image_width<1)
-          Main_image_width=1;
+          Main_image_width = 1;
         if (Main_image_height<1)
-          Main_image_height=1;
+          Main_image_height = 1;
       }
       else if (File_error!=1)
       {
         // On considère que l'image chargée est encore modifiée
-        Main_image_is_modified=1;
+        Main_image_is_modified = 1;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format+1;
+        Main_fileformat = format + 1;
       }
       else
       {
@@ -5828,6 +5837,368 @@ void Save_NEO(void)
     remove(filename);
     File_error=1;
   }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// C64 ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+void Test_C64(void)
+{  
+	FILE* file;
+        char filename[MAX_PATH_CHARACTERS];
+        long file_size;
+
+        Get_full_filename(filename,0);
+
+        file = fopen(filename,"rb");
+
+        if(file)
+        {
+			file_size = File_length_file(file);
+			switch(file_size)
+			{
+				case 8000: // raw bitmap
+				case 8002: // raw bitmap with loadaddr
+				case 9000: // bitmap + screen
+				case 9002: // bitmap + screen + loadaddr
+				case 10001: // multicolor
+				case 10003: // multicolor + loadaddr
+					File_error = 0;
+					break;
+				default: // then we don't know for now.
+					File_error = 1;
+				
+			}
+            fclose(file);
+        }
+        else
+        {
+            File_error = 1;
+        }
+}
+
+void Load_C64_hires(byte *bitmap, byte *colors)
+{	
+	int cx,cy,x,y,c[4],pixel,color;
+ 
+    for(cy=0; cy<25; cy++)
+    {
+    	for(cx=0; cx<40; cx++)
+    	{
+    		c[1]=colors[cy*40+cx]&15;
+    		c[0]=colors[cy*40+cx]>>4;
+    		for(y=0; y<8; y++)
+    		{
+    			pixel=bitmap[cy*320+cx*8+y];
+    			for(x=0; x<8; x++)
+    			{
+    				color=c[pixel&(1<<(7-x))?1:0];
+    				Pixel_load_function(cx*8+x,cy*8+y,color);
+    			}
+    		}
+    	}
+    }
+}
+
+void Load_C64_multi(byte *bitmap, byte *colors, byte *nybble, byte background)
+{
+	int cx,cy,x,y,c[4],pixel,color;
+	c[0]=background;
+	for(cy=0; cy<25; cy++)
+    {
+    	for(cx=0; cx<40; cx++)
+    	{                		
+    		c[1]=colors[cy*40+cx]>>4;
+    		c[2]=colors[cy*40+cx]&15;
+    		c[3]=nybble[cy*40+cx];
+                		
+    		for(y=0; y<8; y++)
+    		{
+    			pixel=bitmap[cy*320+cx*8+y];
+    			for(x=0; x<4; x++)
+    			{
+                				
+    				color=c[(pixel&3)];
+    				pixel>>=2;
+    				Pixel_load_function(cx*4+(3-x),cy*8+y,color);
+    			}
+    		}
+    	}
+    }
+}
+
+void Load_C64(void)
+{    
+	FILE* file;
+   	char filename[MAX_PATH_CHARACTERS];
+   	long file_size;
+   	int newPixel_ratio;
+   	byte background;
+   	
+   	// Palette from http://www.pepto.de/projects/colorvic/
+   	byte pal[48]={
+        0x00, 0x00, 0x00, 
+        0xFF, 0xFF, 0xFF, 
+        0x68, 0x37, 0x2B, 
+        0x70, 0xA4, 0xB2, 
+        0x6F, 0x3D, 0x86, 
+        0x58, 0x8D, 0x43, 
+        0x35, 0x28, 0x79, 
+        0xB8, 0xC7, 0x6F, 
+        0x6F, 0x4F, 0x25, 
+        0x43, 0x39, 0x00, 
+        0x9A, 0x67, 0x59, 
+        0x44, 0x44, 0x44, 
+        0x6C, 0x6C, 0x6C, 
+        0x9A, 0xD2, 0x84, 
+        0x6C, 0x5E, 0xB5, 
+        0x95, 0x95, 0x95};
+
+	byte bitmap[8000],colors[1000],nybble[1000];
+	word width=320, height=200;
+    
+    Get_full_filename(filename,0);
+    file = fopen(filename,"rb");
+
+    if(file)
+    {
+        
+        memcpy(Main_palette,pal,48); // this set the software palette for grafx2
+        Set_palette(Main_palette); // this set the hardware palette for SDL
+        Remap_fileselector(); // Always call it if you change the palette
+				
+        file_size = File_length_file(file);
+                
+        if(file_size>9002)width=160;
+                
+        Init_preview(width, height, file_size, FORMAT_C64); // Do this as soon as you can
+					 
+        Main_image_width = width ;                
+        Main_image_height = height;
+                
+        Read_bytes(file,bitmap,8000);
+        if(file_size>8002)Read_bytes(file,colors,1000);
+						
+        if(width==160)
+        {
+        	Read_bytes(file,nybble,1000);
+        	Read_byte(file,&background);
+        	Load_C64_multi(bitmap,colors,nybble,background);
+        	newPixel_ratio = PIXEL_WIDE;
+        }
+        else
+        {
+        	Load_C64_hires(bitmap,colors);
+        	newPixel_ratio = PIXEL_SIMPLE;
+        }
+                
+        //Pixel_ratio = newPixel_ratio;
+        
+        File_error = 0;
+        fclose(file);
+    }
+    else
+    File_error = 1;
+}
+
+int Save_C64_hires(FILE *file)
+{
+	int cx,cy,x,y,c1,c2,i,pixel,bits;
+	word numcolors;
+	dword cusage[256];
+	byte colors[1000];
+	
+	for(x=0;x<1000;x++)colors[x]=1; // init colormem to black/white
+	
+	for(cy=0; cy<25; cy++) // Character line, 25 lines
+	{
+		for(cx=0; cx<40; cx++) // Character column, 40 columns
+		{
+			for(i=0;i<256;i++) cusage[i]=0;
+			
+			numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
+			if(numcolors>2)
+			{
+				Warning_message("More than 2 colors in 8x8 pixels");
+				// TODO here we should hilite the offending block
+				printf("\nerror at %dx%d (%d colors)\n",cx*8,cy*8,numcolors);
+				return 1;
+			}
+			for(i=0;i<16;i++)
+			{
+				if(cusage[i])
+				{
+					c2=i;
+					break;
+				}
+			}
+			c1=c2;
+			for(i=c2+1;i<16;i++)
+			{
+				if(cusage[i])
+				{
+					c1=i;
+					
+				}
+			}			
+			colors[cx+cy*40]=(c2<<4)|c1;
+
+			for(y=0; y<8; y++)
+			{
+				bits=0;
+				for(x=0; x<8; x++)
+				{
+					pixel=Read_pixel_function(x+cx*8,y+cy*8);
+					if(pixel>15) 
+					{ 
+						Warning_message("Color above 15 used"); 
+						// TODO hilite offending block here too?
+						// or make it smarter with color allocation?
+						// However, the palette is fixed to the 16 first colors
+						return 1;
+					}
+					bits=bits<<1;
+					if(pixel==c1) bits|=1;					
+				}
+				Write_byte(file,bits&255);
+			}
+		}
+	}
+	Write_bytes(file,colors,1000);
+	return 0;
+}
+
+int Save_C64_multi(FILE *file)
+{
+/* 
+BITS 	COLOR INFORMATION COMES FROM
+00 	Background color #0 (screen color)
+01 	Upper 4 bits of screen memory
+10 	Lower 4 bits of screen memory
+11 	Color nybble (nybble = 1/2 byte = 4 bits)
+*/
+
+	int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel;
+	byte screen[1000],nybble[1000];
+	word numcolors,count;
+	dword cusage[256];
+	byte i,background=0;
+	numcolors=Count_used_colors(cusage);
+	
+	count=0;
+	for(x=0;x<16;x++)
+	{
+		//printf("color %d, pixels %d\n",x,cusage[x]);
+		if(cusage[x]>count)
+		{
+			count=cusage[x];
+			background=x;
+			
+		}
+	}
+	
+	for(cy=0; cy<25; cy++)
+	{
+		//printf("\ny:%2d ",cy);
+		for(cx=0; cx<40; cx++)
+		{
+			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+			if(numcolors>4)
+			{
+				Warning_message("More than 4 colors in 4x8");
+				// TODO hilite offending block
+				return 1;
+			}
+			color=1;
+			c[0]=background;
+			for(i=0; i<16; i++)
+			{
+				lut[i]=0;
+				if(cusage[i])
+				{
+					if(i!=background)
+					{
+						lut[i]=color;
+						c[color]=i;
+						color++;
+					}
+					else
+					{
+						lut[i]=0;
+					}
+				}
+			}
+			// add to screen and nybble
+			screen[cx+cy*40]=c[1]<<4|c[2];
+			nybble[cx+cy*40]=c[3];
+			//printf("%x%x%x ",c[1],c[2],c[3]);
+			for(y=0;y<8;y++)
+			{
+				bits=0;
+				for(x=0;x<4;x++)
+				{					
+					pixel=Read_pixel_function(cx*4+x,cy*8+y);
+					if(pixel>15) 
+					{ 
+						Warning_message("Color above 15 used"); 
+						// TODO hilite as in hires, you should stay to 
+						// the fixed 16 color palette
+						return 1;
+					}
+					bits=bits<<2;
+					bits|=lut[pixel];
+
+				}
+				Write_byte(file,bits&255);
+			}
+		}
+	}
+	Write_bytes(file,screen,1000);
+	Write_bytes(file,nybble,1000);
+	Write_byte(file,background);
+	//printf("\nbg:%d\n",background);
+	return 0;
+}
+
+void Save_C64(void)
+{
+	FILE* file;
+	char filename[MAX_PATH_CHARACTERS];
+	dword numcolors,cusage[256];
+	numcolors=Count_used_colors(cusage);
+
+	if(numcolors>16)
+	{
+		Warning_message("Error: Max 16 colors");
+		File_error = 1;
+		return;
+	}
+	if(((Main_image_width!=320) && (Main_image_width!=160)) || Main_image_height!=200)
+	{
+		Warning_message("must be 320x200 or 160x200");
+		File_error = 1;
+		return;
+	} 
+	
+   	Get_full_filename(filename,0);
+	file = fopen(filename,"wb");
+	
+	if(!file)
+	{
+		Warning_message("File open failed");
+		File_error = 1;
+		return;
+	}
+	
+	if(Main_image_width==320)
+		File_error = Save_C64_hires(file); 
+	else
+	   	File_error = Save_C64_multi(file);
+	
+	fclose(file);
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////

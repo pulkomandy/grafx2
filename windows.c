@@ -837,7 +837,7 @@ byte Confirmation_box(char * message)
 
 
 
-//---- Fenêtre avertissant de quelque chose et attendant un click sur OK -----
+/// Window that show a warning message and wait for a click on the OK button
 void Warning_message(char * message)
 {
   short clicked_button;
@@ -863,7 +863,7 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-//---- Window that shows a big message, and waits for a click on OK -----
+/// Window that shows a big message, and waits for a click on OK
 void Verbose_error_message(char * message)
 {
   short clicked_button;
