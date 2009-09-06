@@ -6111,38 +6111,49 @@ void Load_C64(void)
 
 int Save_C64_window(byte *saveWhat, byte *loadAddr)
 {
-    int b;
+    int button;
+    unsigned int i;
     T_Dropdown_button *what, *addr;
-    
+    char * what_label[] = {
+        "All",
+        "Bitmap",
+        "Screen",
+        "Color"
+    };
+    char * address_label[] = {
+        "None",
+        "$2000",
+        "$4000",
+        "$6000",
+        "$8000",
+        "$A000",
+        "$C000",
+        "$E000"
+    };
+       
     Open_window(200,120,"c64 settings");
     Window_set_normal_button(110,100,80,15,"Save",1,1,SDLK_RETURN);
     Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE);
     
-    what=Window_set_dropdown_button(10,20,90,15,70,"Save what",1, 0, 1, LEFT_SIDE);
+    Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
+    what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE);
     Window_dropdown_clear_items(what);
-    Window_dropdown_add_item(what,0,"All");
-    Window_dropdown_add_item(what,1,"Bitmap");
-    Window_dropdown_add_item(what,2,"Screen");    
-    Window_dropdown_add_item(what,3,"Color");    
+    for (i=0; i<sizeof(what_label)/sizeof(char *); i++)
+        Window_dropdown_add_item(what,i,what_label[i]);
     
-    addr=Window_set_dropdown_button(110,20,70,15,70,"Addr",1, 0, 1, LEFT_SIDE);
+    Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
+    addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE);
     Window_dropdown_clear_items(addr);
-    Window_dropdown_add_item(addr,0,"None");
-    Window_dropdown_add_item(addr,1,"$2000");
-    Window_dropdown_add_item(addr,2,"$4000");    
-    Window_dropdown_add_item(addr,3,"$6000");    
-    Window_dropdown_add_item(addr,4,"$8000");    
-    Window_dropdown_add_item(addr,5,"$A000");    
-    Window_dropdown_add_item(addr,6,"$C000");    
-    Window_dropdown_add_item(addr,7,"$E000");    
+    for (i=0; i<sizeof(address_label)/sizeof(char *); i++)
+        Window_dropdown_add_item(addr,i,address_label[i]); 
     
     Update_window_area(0,0,Window_width,Window_height); 
     Display_cursor();
 
     do
     {
-        b = Window_clicked_button();
-        switch(b)
+        button = Window_clicked_button();
+        switch(button)
         {
             case 3: // Save what
                 *saveWhat=Window_attribute2;
@@ -6156,11 +6167,11 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
             
             case 0: break;
         }
-    }while(b!=1 && b!=2);
+    }while(button!=1 && button!=2);
     
     Close_window();
     Display_cursor();
-    return b==1;
+    return button==1;
 }
 
 int Save_C64_hires(char *filename, byte saveWhat, byte loadAddr)
@@ -6180,7 +6191,7 @@ int Save_C64_hires(char *filename, byte saveWhat, byte loadAddr)
             for(i=0;i<256;i++)
                 cusage[i]=0;
             
-            numcolors=Count_used_colors_screen_area(cusage,cx*8,cy*8,8,8);
+            numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
             if (numcolors>2)
             {
                 Warning_message("More than 2 colors in 8x8 pixels");
@@ -6287,7 +6298,7 @@ int Save_C64_multi(char *filename, byte saveWhat, byte loadAddr)
         //printf("\ny:%2d ",cy);
         for(cx=0; cx<40; cx++)
         {
-            numcolors=Count_used_colors_screen_area(cusage,cx*4,cy*8,4,8);
+            numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
             if(numcolors>4)
             {
                 Warning_message("More than 4 colors in 4x8");
@@ -6375,7 +6386,7 @@ int Save_C64_multi(char *filename, byte saveWhat, byte loadAddr)
 void Save_C64(void)
 {
     char filename[MAX_PATH_CHARACTERS];
-    byte saveWhat=0,loadAddr=0;
+    static byte saveWhat=0, loadAddr=0;
     dword numcolors,cusage[256];
     numcolors=Count_used_colors(cusage);
   
