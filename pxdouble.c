@@ -25,6 +25,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "misc.h"
+#include "graph.h"
 #include "pxdouble.h"
 #include "pxwide.h" // for Display_transparent_line_on_screen_wide()
 

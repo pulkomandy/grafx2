@@ -25,6 +25,7 @@
 #include "global.h"
 #include "sdlscreen.h"
 #include "misc.h"
+#include "graph.h"
 #include "pxtriple.h"
 
 #define ZOOMX 3
