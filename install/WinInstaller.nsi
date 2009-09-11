@@ -11,7 +11,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-2.0-svn853-win32.exe"
+  OutFile "grafx2-2.1.1026.win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -60,7 +60,7 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\grafx2.exe
-  File ..\src-svn853.tgz
+  File ..\src-2.1.1026.tgz
   File ..\gfx2.gif
   File ..\gfx2def.ini
   File ..\SDL_image.dll
@@ -70,7 +70,10 @@ Section "Grafx2" SecProgram
   File ..\zlib1.dll
   File ..\libpng13.dll
   SetOutPath "$INSTDIR\skins"
-  File ..\skins\base.gif
+  File ..\skins\font_Classic.png
+  File ..\skins\font_Fun.png
+  File ..\skins\skin_classic.png
+  File ..\skins\skin_modern.png
   SetOutPath "$INSTDIR\doc"
   File ..\doc\README.txt
   File ..\doc\COMPILING.txt
@@ -97,7 +100,7 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "URLInfoAbout" "http://grafx2.googlecode.com"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "DisplayVersion" "2.0 final"
+                 "DisplayVersion" "2.1.1026"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "NoModify" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
@@ -139,7 +142,7 @@ Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\grafx2.exe"
-  Delete "$INSTDIR\src-svn853.tgz"
+  Delete "$INSTDIR\src-2.1.1026.tgz"
   Delete "$INSTDIR\gfx2.gif"
   Delete "$INSTDIR\gfx2def.ini"
   Delete "$INSTDIR\SDL_image.dll"
@@ -159,7 +162,10 @@ Section "un.SecProgram"
   Delete "$INSTDIR\fonts\8pxfont.png"
   Delete "$INSTDIR\fonts\Tuffy.ttf"
   RMDir  "$INSTDIR\fonts"
-  Delete "$INSTDIR\skins\base.gif"
+  Delete "$INSTDIR\skins\font_Classic.png"
+  Delete "$INSTDIR\skins\font_Fun.png"
+  Delete "$INSTDIR\skins\skin_classic.png"
+  Delete "$INSTDIR\skins\skin_modern.png"
   RMDir  "$INSTDIR\skins"
   
   Delete "$INSTDIR\Uninstall.exe"

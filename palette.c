@@ -2176,7 +2176,8 @@ void Button_Secondary_palette(void)
   T_Scroller_button * rgb_scale_slider;
   char str[4];
   byte palette_vertical = Config.Palette_vertical;
-  byte palette_cols, palette_lines, rgb_scale;
+  byte palette_cols, palette_lines;
+  word rgb_scale;
   byte palette_needs_redraw=0;
   
   Open_window(200,146,"Palettes");
