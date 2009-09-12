@@ -1,5 +1,6 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -43,6 +44,7 @@
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
+#include "engine.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(void);
@@ -104,12 +106,24 @@ void Test_PC1(void);
 void Load_PC1(void);
 void Save_PC1(void);
 
+// -- NEO -------------------------------------------------------------------
+void Test_NEO(void);
+void Load_NEO(void);
+void Save_NEO(void);
+
+// -- C64 -------------------------------------------------------------------
+void Test_C64(void);
+void Load_C64(void);
+void Save_C64(void);
+
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
 void Test_PNG(void);
 void Load_PNG(void);
 void Save_PNG(void);
 #endif
+
+void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
 T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
@@ -122,8 +136,10 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0},
   {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0},
   {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
+  {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
   {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
   {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
+  {"c64", Test_C64, Load_C64, Save_C64, 1, 1},
 #ifndef __no_pnglib__
   {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
 #endif
@@ -163,10 +179,35 @@ byte HBPm1; // header.BitPlanes-1
 void Pixel_load_in_preview(word x_pos,word y_pos,byte color)
 {
   if (((x_pos % Preview_factor_X)==0) && ((y_pos % Preview_factor_Y)==0))
-  if ((x_pos<Main_image_width) && (y_pos<Main_image_height))
-    Pixel(Preview_pos_X+(x_pos/Preview_factor_X),
-          Preview_pos_Y+(y_pos/Preview_factor_Y),
-          color);
+    if ((x_pos<Main_image_width) && (y_pos<Main_image_height))
+    {
+      if (Ratio_of_loaded_image == PIXEL_WIDE && 
+        Pixel_ratio != PIXEL_WIDE &&
+        Pixel_ratio != PIXEL_WIDE2)
+      {
+         Pixel(Preview_pos_X+(x_pos/Preview_factor_X*2),
+               Preview_pos_Y+(y_pos/Preview_factor_Y),
+               color);
+         Pixel(Preview_pos_X+(x_pos/Preview_factor_X*2)+1,
+               Preview_pos_Y+(y_pos/Preview_factor_Y),
+               color);
+      }
+      else if (Ratio_of_loaded_image == PIXEL_TALL && 
+        Pixel_ratio != PIXEL_TALL &&
+        Pixel_ratio != PIXEL_TALL2)
+      {
+         Pixel(Preview_pos_X+(x_pos/Preview_factor_X),
+               Preview_pos_Y+(y_pos/Preview_factor_Y*2),
+               color);
+         Pixel(Preview_pos_X+(x_pos/Preview_factor_X),
+               Preview_pos_Y+(y_pos/Preview_factor_Y*2)+1,
+               color);
+      }
+      else
+        Pixel(Preview_pos_X+(x_pos/Preview_factor_X),
+              Preview_pos_Y+(y_pos/Preview_factor_Y),
+              color);
+    }
 }
 
 
@@ -276,33 +317,38 @@ void Set_palette_fake_24b(T_Palette palette)
   }
 }
 
-// Supplément à faire lors de l'initialisation d'une preview dans le cas
-// d'une image 24b
-void Init_preview_24b(int width,int height)
+// Initialization for a 24bit image
+void Init_preview_24b(short width,short height,long size,int format)
 {
+  // Call common processing
+  Init_preview(width,height,size,format, PIXEL_SIMPLE);
+
+  if (File_error)
+    return;
+
   if (Pixel_load_function==Pixel_load_in_preview)
   {
-    // Aiguillage du chargement 24b
+    // Choose 24bit pixel "writer"
     Pixel_load_24b=Pixel_load_in_24b_preview;
 
-    // Changement de palette
+    // Load palette
     Set_palette_fake_24b(Main_palette);
     Set_palette(Main_palette);
     Remap_fileselector();
   }
   else
   {
-    // Aiguillage du chargement 24b
+    // Choose 24bit pixel "writer"
     Pixel_load_24b=Pixel_load_in_24b_buffer;
 
-    // Allocation du buffer 24b
+    // Allocate 24bit buffer
     Buffer_image_24b=
       (T_Components *)Borrow_memory_from_page(width*height*sizeof(T_Components));
     if (!Buffer_image_24b)
     {
-      // Afficher un message d'erreur
+      // Print an error message
 
-      // Pour être sûr que ce soit lisible.
+      // The following is to be sure the messagfe is readable
       Compute_optimal_menu_colors(Main_palette);
       Message_out_of_memory();
       if (Pixel_load_function==Pixel_load_in_current_screen)
@@ -318,7 +364,7 @@ void Init_preview_24b(int width,int height)
 
 
 
-void Init_preview(short width,short height,long size,int format)
+void Init_preview(short width,short height,long size,int format, enum PIXEL_RATIO ratio)
 //
 //   Cette procédure doit être appelée par les routines de chargement
 // d'images.
@@ -328,10 +374,6 @@ void Init_preview(short width,short height,long size,int format)
 //
 {
   char  str[10];
-  int   image_is_24b;
-
-  image_is_24b=format & FORMAT_24B;
-  format      =format & (~FORMAT_24B);
 
   if (Pixel_load_function==Pixel_load_in_preview)
   {
@@ -383,6 +425,15 @@ void Init_preview(short width,short height,long size,int format)
       Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
 
     // Calculs des données nécessaires à l'affichage de la preview:
+    if (ratio == PIXEL_WIDE && 
+        Pixel_ratio != PIXEL_WIDE &&
+        Pixel_ratio != PIXEL_WIDE2)
+      width*=2;
+    else if (ratio == PIXEL_TALL && 
+        Pixel_ratio != PIXEL_TALL &&
+        Pixel_ratio != PIXEL_TALL2)
+      height*=2;
+    
     Preview_factor_X=Round_div_max(width,122*Menu_factor_X);
     Preview_factor_Y=Round_div_max(height, 82*Menu_factor_Y);
 
@@ -442,10 +493,6 @@ void Init_preview(short width,short height,long size,int format)
         File_error=3;
     }
   }
-
-  if (!File_error)
-    if (image_is_24b)
-      Init_preview_24b(width,height);
 }
 
 
@@ -616,6 +663,10 @@ void Load_image(byte image)
           // Cas d'un chargement dans l'image
           if (Convert_24b_bitmap_to_256(Main_screen,Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
             File_error=2;
+          else
+          {
+            Set_palette(Main_palette);
+          }
         }
         else
         {
@@ -639,7 +690,7 @@ void Load_image(byte image)
         if (Pixel_load_function==Pixel_load_in_preview)
         {
           dword  color_usage[256];
-          Count_used_colors_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
+          Count_used_colors_screen_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
           //Count_used_colors(color_usage);
           Display_cursor();
           Set_nice_menu_colors(color_usage,1);
@@ -883,7 +934,7 @@ void Load_IMG(void)
 
       buffer=(byte *)malloc(IMG_header.Width);
 
-      Init_preview(IMG_header.Width,IMG_header.Height,file_size,FORMAT_IMG);
+      Init_preview(IMG_header.Width,IMG_header.Height,file_size,FORMAT_IMG,PIXEL_SIMPLE);
       if (File_error==0)
       {
         memcpy(Main_palette,IMG_header.Palette,sizeof(T_Palette));
@@ -1156,7 +1207,7 @@ void Load_PKM(void)
 
       if (!File_error)
       {
-        Init_preview(header.Width,header.Height,file_size,FORMAT_PKM);
+        Init_preview(header.Width,header.Height,file_size,FORMAT_PKM,PIXEL_SIMPLE);
         if (File_error==0)
         {
           
@@ -1177,10 +1228,10 @@ void Load_PKM(void)
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
           {
             if(Read_byte(file, &temp_byte)!=1) 
-			{
-				File_error=2;
-				break;
-			}
+            {
+              File_error=2;
+              break;
+            }
 
             // Si ce n'est pas un octet de reconnaissance, c'est un pixel brut
             if ( (temp_byte!=header.recog1) && (temp_byte!=header.recog2) )
@@ -1193,18 +1244,18 @@ void Load_PKM(void)
             }
             else // Sinon, On regarde si on va décompacter un...
             { // ... nombre de pixels tenant sur un byte
-              if (temp_byte==header.recog1)
-              {
-                if(Read_byte(file, &color)!=1)
-				{
-					File_error=2;
-					break;
-				}
+                if (temp_byte==header.recog1)
+                {
+                  if(Read_byte(file, &color)!=1)
+                {
+                    File_error=2;
+                    break;
+                }
                 if(Read_byte(file, &temp_byte)!=1)
-				{
-					File_error=2;
-					break;
-				}
+                {
+                    File_error=2;
+                    break;
+                }
                 for (index=0; index<temp_byte; index++)
                   Pixel_load_function((Compteur_de_pixels+index) % Main_image_width,
                                       (Compteur_de_pixels+index) / Main_image_width,
@@ -1215,10 +1266,10 @@ void Load_PKM(void)
               else // ... nombre de pixels tenant sur un word
               {
                 if(Read_byte(file, &color)!=1)
-				{
-					File_error=2;
-					break;
-				}
+                {
+                    File_error=2;
+                    break;
+        }
                 Read_word_be(file, &len);
                 for (index=0; index<len; index++)
                   Pixel_load_function((Compteur_de_pixels+index) % Main_image_width,
@@ -1854,7 +1905,7 @@ void Load_LBM(void)
               Original_screen_X = header.X_screen;
               Original_screen_Y = header.Y_screen;
 
-              Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_LBM);
+              Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_LBM,PIXEL_SIMPLE);
               if (File_error==0)
               {
                 if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
@@ -1894,19 +1945,19 @@ void Load_LBM(void)
                       for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
                       {
                         if(Read_byte(LBM_file, &temp_byte)!=1)
-						{
-							File_error=2;
-							break;
-						}
+                        {
+                          File_error=2;
+                          break;
+                        }
                         // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
                         // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
                         if (temp_byte>127)
                         {
-							if(Read_byte(LBM_file, &color)!=1)
-							{
-								File_error=2;
-								break;
-							}
+                          if(Read_byte(LBM_file, &color)!=1)
+                          {
+                            File_error=2;
+                            break;
+                          }
                           b256=(short)(256-temp_byte);
                           for (counter=0; counter<=b256; counter++)
                             if (x_pos<line_size)
@@ -1917,7 +1968,7 @@ void Load_LBM(void)
                         else
                           for (counter=0; counter<=(short)(temp_byte); counter++)
                             if (x_pos>=line_size || Read_byte(LBM_file, &(LBM_buffer[x_pos++]))!=1)
-								File_error=2;
+                              File_error=2;
                       }
                       if (!File_error)
                         Draw_ILBM_line(y_pos,real_line_size);
@@ -1952,17 +2003,17 @@ void Load_LBM(void)
                       for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
                       {
                         if(Read_byte(LBM_file, &temp_byte)!=1)
-						{
-							File_error=2;
-							break;
-						}
+                        {
+                          File_error=2;
+                          break;
+                        }
                         if (temp_byte>127)
                         {
                           if(Read_byte(LBM_file, &color)!=1)
-						  {
-							File_error=2;
-							break;
-						  }
+                          {
+                            File_error=2;
+                            break;
+                          }
                           b256=256-temp_byte;
                           for (counter=0; counter<=b256; counter++)
                             Pixel_load_function(x_pos++,y_pos,color);
@@ -1972,10 +2023,10 @@ void Load_LBM(void)
                           {
                             byte byte_read=0;
                             if(Read_byte(LBM_file, &byte_read)!=1)
-							{
-								File_error=2;
-								break;
-							}
+                            {
+                              File_error=2;
+                              break;
+                            }
                             Pixel_load_function(x_pos++,y_pos,byte_read);
                           }
                       }
@@ -2392,7 +2443,7 @@ void Load_BMP(void)
 
       if (!File_error)
       {
-        Init_preview(header.Width,header.Height,file_size,FORMAT_BMP);
+        Init_preview(header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE);
         if (File_error==0)
         {
           if (Read_bytes(file,local_palette,nb_colors<<2))
@@ -2455,7 +2506,7 @@ void Load_BMP(void)
 
                 /*Init_lecture();*/
                 if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
-					File_error=2;
+                  File_error=2;
                 while (!File_error)
                 {
                   if (a) // Encoded mode
@@ -2471,8 +2522,8 @@ void Load_BMP(void)
                       case 1 : // End of bitmap
                         break;
                       case 2 : // Delta
-                		if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
-							File_error=2;
+                        if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
+                          File_error=2;
                         x_pos+=a;
                         y_pos-=b;
                         break;
@@ -2480,7 +2531,7 @@ void Load_BMP(void)
                         while (b)
                         {
                           if(Read_byte(file, &a)!=1)
-							  File_error=2;
+                            File_error=2;
                           //Read_one_byte(file, &c);
                           Pixel_load_function(x_pos++,y_pos,a);
                           //if (--c)
@@ -2495,9 +2546,9 @@ void Load_BMP(void)
                   if (a==0 && b==1)
                     break;
                   if(Read_byte(file, &a) !=1 || Read_byte(file, &b)!=1)
-				  {
-					File_error=2;
-				  }
+                  {
+                    File_error=2;
+                  }
                 }
                 /*Close_lecture();*/
                 break;
@@ -2508,7 +2559,7 @@ void Load_BMP(void)
 
                 /*Init_lecture();*/
                 if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b) != 1)
-					File_error =2;
+                  File_error =2;
                 while ( (!File_error) && ((a)||(b!=1)) )
                 {
                   if (a) // Encoded mode (A fois les 1/2 pixels de B)
@@ -2531,7 +2582,7 @@ void Load_BMP(void)
                         break;
                       case 2 : // Delta
                        if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b)!=1)
-						   File_error=2;
+                         File_error=2;
                         x_pos+=a;
                         y_pos-=b;
                         break;
@@ -2589,7 +2640,7 @@ void Load_BMP(void)
 
         Main_image_width=header.Width;
         Main_image_height=header.Height;
-        Init_preview(header.Width,header.Height,file_size,FORMAT_BMP | FORMAT_24B);
+        Init_preview_24b(header.Width,header.Height,file_size,FORMAT_BMP);
         if (File_error==0)
         {
           switch (header.Compression)
@@ -2877,10 +2928,10 @@ void Test_GIF(void)
         if (GIF_remainder_byte==0)
           // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
           if(Read_byte(GIF_file, &GIF_remainder_byte)!=1)
-			  File_error=2;
+            File_error=2;
 
-		if(Read_byte(GIF_file,&GIF_last_byte)!=1)
-			File_error = 2;
+        if(Read_byte(GIF_file,&GIF_last_byte)!=1)
+          File_error = 2;
         GIF_remainder_byte--;
         GIF_remainder_bits=8;
       }
@@ -3116,7 +3167,7 @@ void Load_GIF(void)
                 Main_image_width=IDB.Image_width;
                 Main_image_height=IDB.Image_height;
     
-                Init_preview(IDB.Image_width,IDB.Image_height,file_size,FORMAT_GIF);
+                Init_preview(IDB.Image_width,IDB.Image_height,file_size,FORMAT_GIF,PIXEL_SIMPLE);
     
                 // Palette locale dispo = (IDB.Indicator and $80)
                 // Image entrelacée     = (IDB.Indicator and $40)
@@ -3788,7 +3839,7 @@ void Load_PCX(void)
 
       if (PCX_header.Plane!=3)
       {
-        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_PCX);
+        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_PCX,PIXEL_SIMPLE);
         if (File_error==0)
         {
           // On prépare la palette à accueillir les valeurs du fichier PCX
@@ -3968,7 +4019,7 @@ void Load_PCX(void)
       {
         // Image 24 bits!!!
 
-        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_PCX | FORMAT_24B);
+        Init_preview_24b(Main_image_width,Main_image_height,file_size,FORMAT_PCX);
 
         if (File_error==0)
         {
@@ -4285,7 +4336,7 @@ void Load_CEL(void)
         Main_image_height=header1.Height;
         Original_screen_X=Main_image_width;
         Original_screen_Y=Main_image_height;
-        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_CEL);
+        Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_CEL,PIXEL_SIMPLE);
         if (File_error==0)
         {
           // Chargement de l'image
@@ -4315,7 +4366,7 @@ void Load_CEL(void)
           Main_image_height=header2.Height+header2.Y_offset;
           Original_screen_X=Main_image_width;
           Original_screen_Y=Main_image_height;
-          Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_CEL);
+          Init_preview(Main_image_width,Main_image_height,file_size,FORMAT_CEL,PIXEL_SIMPLE);
           if (File_error==0)
           {
             // Chargement de l'image
@@ -4808,7 +4859,7 @@ void Load_SCx(void)
 
     if ((Read_bytes(file,&SCx_header,sizeof(T_SCx_Header))))
     {
-      Init_preview(SCx_header.Width,SCx_header.Height,file_size,FORMAT_SCx);
+      Init_preview(SCx_header.Width,SCx_header.Height,file_size,FORMAT_SCx,PIXEL_SIMPLE);
       if (File_error==0)
       {
         if (!SCx_header.Planes)
@@ -5106,7 +5157,7 @@ void Load_PI1(void)
       if (Read_bytes(file,buffer,32034))
       {
         // Initialisation de la preview
-        Init_preview(320,200,File_length_file(file),FORMAT_PI1);
+        Init_preview(320,200,File_length_file(file),FORMAT_PI1,PIXEL_SIMPLE);
         if (File_error==0)
         {
           // Initialisation de la palette
@@ -5440,7 +5491,7 @@ void Load_PC1(void)
       if (Read_bytes(file,buffercomp,size))
       {
         // Initialisation de la preview
-        Init_preview(320,200,File_length_file(file),FORMAT_PC1);
+        Init_preview(320,200,File_length_file(file),FORMAT_PC1,PIXEL_SIMPLE);
         if (File_error==0)
         {
           // Initialisation de la palette
@@ -5477,8 +5528,8 @@ void Load_PC1(void)
     else
     {
       File_error=1;
-      if (bufferdecomp) free(bufferdecomp);
-      if (buffercomp)   free(buffercomp);
+      free(bufferdecomp);
+      free(buffercomp);
     }
     fclose(file);
   }
@@ -5652,6 +5703,723 @@ void Load_TGA(char * fname,T_Bitmap24B * dest,int * width,int * height)
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// NEO ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+void Test_NEO(void)
+{
+  FILE *file;              // Fichier du fichier
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  int  size;              // Taille du fichier
+  word resolution;                 // Résolution de l'image
+
+
+  Get_full_filename(filename,0);
+
+  File_error=1;
+
+  // Ouverture du fichier
+  if ((file=fopen(filename, "rb")))
+  {
+    // Vérification de la taille
+    size=File_length_file(file);
+    if ((size==32128))
+    {
+      // Flag word : toujours 0
+      if (Read_word_le(file,&resolution))
+      {
+        if (resolution == 0)
+          File_error = 0;
+      }
+
+      // Lecture et vérification de la résolution
+      if (Read_word_le(file,&resolution))
+      {
+        if (resolution==0 || resolution==1 || resolution==2)
+          File_error |= 0;
+      }
+    }
+    // Fermeture du fichier
+    fclose(file);
+  }
+
+}
+
+void Load_NEO(void)
+{
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  FILE *file;
+  word x_pos,y_pos;
+  byte * buffer;
+  byte * ptr;
+  byte pixels[320];
+
+  Get_full_filename(filename,0);
+
+  File_error=0;
+  if ((file=fopen(filename, "rb")))
+  {
+    // allocation d'un buffer mémoire
+    buffer=(byte *)malloc(32128);
+    if (buffer!=NULL)
+    {
+      // Lecture du fichier dans le buffer
+      if (Read_bytes(file,buffer,32128))
+      {
+        // Initialisation de la preview
+        Init_preview(320,200,File_length_file(file),FORMAT_NEO,PIXEL_SIMPLE);
+        if (File_error==0)
+        {
+          // Initialisation de la palette
+          if (Config.Clear_palette)
+            memset(Main_palette,0,sizeof(T_Palette));
+          // on saute la résolution et le flag, chacun 2 bits
+          PI1_decode_palette(buffer+4,(byte *)Main_palette);
+          Set_palette(Main_palette);
+          Remap_fileselector();
+
+          Main_image_width=320;
+          Main_image_height=200;
+
+          // Chargement/décompression de l'image
+          ptr=buffer+128;
+          for (y_pos=0;y_pos<200;y_pos++)
+          {
+            for (x_pos=0;x_pos<(320>>4);x_pos++)
+            {
+              PI1_8b_to_16p(ptr,pixels+(x_pos<<4));
+              ptr+=8;
+            }
+            for (x_pos=0;x_pos<320;x_pos++)
+              Pixel_load_function(x_pos,y_pos,pixels[x_pos]);
+          }
+        }
+      }
+      else
+        File_error=1;
+      free(buffer);
+    }
+    else
+      File_error=1;
+    fclose(file);
+  }
+  else
+    File_error=1;
+}
+
+void Save_NEO(void)
+{
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  FILE *file;
+  short x_pos,y_pos;
+  byte * buffer;
+  byte * ptr;
+  byte pixels[320];
+
+  Get_full_filename(filename,0);
+
+  File_error=0;
+  // Ouverture du fichier
+  if ((file=fopen(filename,"wb")))
+  {
+    // allocation d'un buffer mémoire
+    buffer=(byte *)malloc(32128);
+    // Codage de la résolution
+    buffer[0]=0x00;
+    buffer[1]=0x00;
+    buffer[2]=0x00;
+    buffer[3]=0x00;
+    // Codage de la palette
+    PI1_code_palette((byte *)Main_palette,buffer+4);
+    // Codage de l'image
+    ptr=buffer+128;
+    for (y_pos=0;y_pos<200;y_pos++)
+    {
+      // Codage de la ligne
+      memset(pixels,0,320);
+      if (y_pos<Main_image_height)
+      {
+        for (x_pos=0;(x_pos<320) && (x_pos<Main_image_width);x_pos++)
+          pixels[x_pos]=Read_pixel_function(x_pos,y_pos);
+      }
+
+      for (x_pos=0;x_pos<(320>>4);x_pos++)
+      {
+        PI1_16p_to_8b(pixels+(x_pos<<4),ptr);
+        ptr+=8;
+      }
+    }
+
+    if (Write_bytes(file,buffer,32128))
+    {
+      fclose(file);
+    }
+    else // Error d'écriture (disque plein ou protégé)
+    {
+      fclose(file);
+      remove(filename);
+      File_error=1;
+    }
+    // Libération du buffer mémoire
+    free(buffer);
+  }
+  else
+  {
+    fclose(file);
+    remove(filename);
+    File_error=1;
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// C64 ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+void Test_C64(void)
+{  
+    FILE* file;
+    char filename[MAX_PATH_CHARACTERS];
+    long file_size;
+  
+    Get_full_filename(filename,0);
+  
+    file = fopen(filename,"rb");
+  
+    if (file)
+    {
+        file_size = File_length_file(file);
+        switch (file_size)
+        {
+            case 1000: // screen or color
+            case 1002: // (screen or color) + loadaddr
+            case 8000: // raw bitmap
+            case 8002: // raw bitmap with loadaddr
+            case 9000: // bitmap + screen
+            case 9002: // bitmap + screen + loadaddr
+            case 10001: // multicolor
+            case 10003: // multicolor + loadaddr
+                File_error = 0;
+                break;
+            default: // then we don't know for now.
+            File_error = 1;
+        }
+        fclose (file);
+    }
+    else
+    {
+        File_error = 1;
+    }
+}
+
+void Load_C64_hires(byte *bitmap, byte *colors)
+{
+    int cx,cy,x,y,c[4],pixel,color;
+  
+    for(cy=0; cy<25; cy++)
+    {
+        for(cx=0; cx<40; cx++)
+        {
+            c[1]=colors[cy*40+cx]&15;
+            c[0]=colors[cy*40+cx]>>4;
+            for(y=0; y<8; y++)
+            {
+                pixel=bitmap[cy*320+cx*8+y];
+                for(x=0; x<8; x++)
+                {
+                    color=c[pixel&(1<<(7-x))?1:0];
+                    Pixel_load_function(cx*8+x,cy*8+y,color);
+                }
+            }
+        }
+    }
+}
+
+void Load_C64_multi(byte *bitmap, byte *colors, byte *nybble, byte background)
+{
+    int cx,cy,x,y,c[4],pixel,color;
+    c[0]=background;
+    for(cy=0; cy<25; cy++)
+    {
+        for(cx=0; cx<40; cx++)
+        {
+            c[1]=colors[cy*40+cx]>>4;
+            c[2]=colors[cy*40+cx]&15;
+            c[3]=nybble[cy*40+cx];
+                
+            for(y=0; y<8; y++)
+            {
+                pixel=bitmap[cy*320+cx*8+y];
+                for(x=0; x<4; x++)
+                {
+                    color=c[(pixel&3)];
+                    pixel>>=2;
+                    Pixel_load_function(cx*4+(3-x),cy*8+y,color);
+                }
+            }
+        }
+    }
+}
+
+void Load_C64(void)
+{    
+    FILE* file;
+    char filename[MAX_PATH_CHARACTERS];
+    long file_size;
+    int i;
+    byte background,hasLoadAddr=0;
+    int loadFormat=0;
+    enum c64_format {F_hires,F_multi,F_bitmap,F_screen,F_color};
+    const char *c64_format_names[]={"hires","multicolor","bitmap","screen","color"};
+    
+    // Palette from http://www.pepto.de/projects/colorvic/
+    byte pal[48]={
+      0x00, 0x00, 0x00, 
+      0xFF, 0xFF, 0xFF, 
+      0x68, 0x37, 0x2B, 
+      0x70, 0xA4, 0xB2, 
+      0x6F, 0x3D, 0x86, 
+      0x58, 0x8D, 0x43, 
+      0x35, 0x28, 0x79, 
+      0xB8, 0xC7, 0x6F, 
+      0x6F, 0x4F, 0x25, 
+      0x43, 0x39, 0x00, 
+      0x9A, 0x67, 0x59, 
+      0x44, 0x44, 0x44, 
+      0x6C, 0x6C, 0x6C, 
+      0x9A, 0xD2, 0x84, 
+      0x6C, 0x5E, 0xB5, 
+      0x95, 0x95, 0x95};
+  
+    byte bitmap[8000],colors[1000],nybble[1000];
+    word width=320, height=200;
+    
+    Get_full_filename(filename,0);
+    file = fopen(filename,"rb");
+  
+    if (file)
+    {
+    File_error=0;
+    file_size = File_length_file(file);
+
+    switch (file_size)
+        {
+            case 1000: // screen or color
+                hasLoadAddr=0;
+                loadFormat=F_screen;
+                break;
+                
+            case 1002: // (screen or color) + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_screen;
+                break;
+                    
+            case 8000: // raw bitmap
+                hasLoadAddr=0;
+                loadFormat=F_bitmap;
+                    
+            case 8002: // raw bitmap with loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_bitmap;
+                break;
+                    
+            case 9000: // bitmap + screen
+                hasLoadAddr=0;
+                loadFormat=F_hires;
+                break;
+                    
+            case 9002: // bitmap + screen + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_hires;
+                break;
+                    
+            case 10001: // multicolor
+                hasLoadAddr=0;
+                loadFormat=F_multi;
+                break;
+                    
+            case 10003: // multicolor + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                break;
+                    
+            default: // then we don't know what it is.
+                File_error = 1;
+
+        }
+        
+        memcpy(Main_palette,pal,48); // this set the software palette for grafx2
+        Set_palette(Main_palette); // this set the hardware palette for SDL
+        Remap_fileselector(); // Always call it if you change the palette
+                
+    if (file_size>9002)
+        width=160;
+                
+    if (hasLoadAddr)
+    {
+        // get load address
+        Read_byte(file,&background);
+        Read_byte(file,&background);
+        sprintf(filename,"load at $%02x00",background);
+    }
+    else
+    {
+        sprintf(filename,"no addr");
+    }
+       
+        if(file_size>9002)
+        {
+            Ratio_of_loaded_image = PIXEL_WIDE;
+        }
+        sprintf(Main_comment,"C64 %s, %s",
+            c64_format_names[loadFormat],filename);
+        Init_preview(width, height, file_size, FORMAT_C64, Ratio_of_loaded_image); // Do this as soon as you can
+                     
+        Main_image_width = width ;                
+        Main_image_height = height;
+                
+        Read_bytes(file,bitmap,8000);
+
+        if (file_size>8002) 
+            Read_bytes(file,colors,1000);
+        else
+        {
+            for(i=0;i<1000;i++)
+            {
+                colors[i]=1;
+            }
+        }
+
+        if(width==160)
+        {
+            Read_bytes(file,nybble,1000);
+            Read_byte(file,&background);
+            Load_C64_multi(bitmap,colors,nybble,background);
+        }
+        else
+        {
+            Load_C64_hires(bitmap,colors);
+        }
+        
+        File_error = 0;
+        fclose(file);
+    }
+    else
+        File_error = 1;
+}
+
+int Save_C64_window(byte *saveWhat, byte *loadAddr)
+{
+    int button;
+    unsigned int i;
+    T_Dropdown_button *what, *addr;
+    char * what_label[] = {
+        "All",
+        "Bitmap",
+        "Screen",
+        "Color"
+    };
+    char * address_label[] = {
+        "None",
+        "$2000",
+        "$4000",
+        "$6000",
+        "$8000",
+        "$A000",
+        "$C000",
+        "$E000"
+    };
+       
+    Open_window(200,120,"c64 settings");
+    Window_set_normal_button(110,100,80,15,"Save",1,1,SDLK_RETURN);
+    Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE);
+    
+    Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
+    what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE);
+    Window_dropdown_clear_items(what);
+    for (i=0; i<sizeof(what_label)/sizeof(char *); i++)
+        Window_dropdown_add_item(what,i,what_label[i]);
+    
+    Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
+    addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE);
+    Window_dropdown_clear_items(addr);
+    for (i=0; i<sizeof(address_label)/sizeof(char *); i++)
+        Window_dropdown_add_item(addr,i,address_label[i]); 
+    
+    Update_window_area(0,0,Window_width,Window_height); 
+    Display_cursor();
+
+    do
+    {
+        button = Window_clicked_button();
+        switch(button)
+        {
+            case 3: // Save what
+                *saveWhat=Window_attribute2;
+                //printf("what=%d\n",Window_attribute2);
+                break;
+            
+            case 4: // Load addr
+                *loadAddr=Window_attribute2*32;
+                //printf("addr=$%02x00 (%d)\n",loadAddr,Window_attribute2);
+                break;
+            
+            case 0: break;
+        }
+    }while(button!=1 && button!=2);
+    
+    Close_window();
+    Display_cursor();
+    return button==1;
+}
+
+int Save_C64_hires(char *filename, byte saveWhat, byte loadAddr)
+{
+    int cx,cy,x,y,c1,c2,i,pixel,bits,pos=0;
+    word numcolors;
+    dword cusage[256];
+    byte colors[1000],bitmap[8000];
+    FILE *file;
+    
+    for(x=0;x<1000;x++)colors[x]=1; // init colormem to black/white
+  
+    for(cy=0; cy<25; cy++) // Character line, 25 lines
+    {
+        for(cx=0; cx<40; cx++) // Character column, 40 columns
+        {
+            for(i=0;i<256;i++)
+                cusage[i]=0;
+            
+            numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
+            if (numcolors>2)
+            {
+                Warning_message("More than 2 colors in 8x8 pixels");
+                // TODO here we should hilite the offending block
+                printf("\nerror at %dx%d (%d colors)\n",cx*8,cy*8,numcolors);
+                return 1;
+            }
+            for(i=0;i<16;i++)
+            {
+                if(cusage[i])
+                {
+                    c2=i;
+                    break;
+                }
+            }
+            c1=c2;
+            for(i=c2+1;i<16;i++)
+            {
+                if(cusage[i])
+                {
+                  c1=i;
+                }
+            }            
+            colors[cx+cy*40]=(c2<<4)|c1;
+      
+            for(y=0; y<8; y++)
+            {
+                bits=0;
+                for(x=0; x<8; x++)
+                {
+                    pixel=Read_pixel_function(x+cx*8,y+cy*8);
+                    if(pixel>15) 
+                    { 
+                        Warning_message("Color above 15 used"); 
+                        // TODO hilite offending block here too?
+                        // or make it smarter with color allocation?
+                        // However, the palette is fixed to the 16 first colors
+                        return 1;
+                    }
+                    bits=bits<<1;
+                    if (pixel==c1) bits|=1;
+                }
+                bitmap[pos++]=bits;
+                //Write_byte(file,bits&255);
+            }
+        }
+    }
+  
+    file = fopen(filename,"wb");
+  
+    if(!file)
+    {
+        Warning_message("File open failed");
+        File_error = 1;
+        return 1;
+    }
+    
+    if (loadAddr)
+    {
+        Write_byte(file,0);
+        Write_byte(file,loadAddr);
+    }
+    if (saveWhat==0 || saveWhat==1)
+        Write_bytes(file,bitmap,8000);
+    if (saveWhat==0 || saveWhat==2)
+        Write_bytes(file,colors,1000);
+    
+    fclose(file);
+    return 0;
+}
+
+int Save_C64_multi(char *filename, byte saveWhat, byte loadAddr)
+{
+    /* 
+    BITS     COLOR INFORMATION COMES FROM
+    00     Background color #0 (screen color)
+    01     Upper 4 bits of screen memory
+    10     Lower 4 bits of screen memory
+    11     Color nybble (nybble = 1/2 byte = 4 bits)
+    */
+
+    int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel,pos=0;
+    byte bitmap[8000],screen[1000],nybble[1000];
+    word numcolors,count;
+    dword cusage[256];
+    byte i,background=0;
+    FILE *file;
+    
+    numcolors=Count_used_colors(cusage);
+  
+    count=0;
+    for(x=0;x<16;x++)
+    {
+        //printf("color %d, pixels %d\n",x,cusage[x]);
+        if(cusage[x]>count)
+        {
+            count=cusage[x];
+            background=x;
+        }
+    }
+  
+    for(cy=0; cy<25; cy++)
+    {
+        //printf("\ny:%2d ",cy);
+        for(cx=0; cx<40; cx++)
+        {
+            numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+            if(numcolors>4)
+            {
+                Warning_message("More than 4 colors in 4x8");
+                // TODO hilite offending block
+                return 1;
+            }
+            color=1;
+            c[0]=background;
+            for(i=0; i<16; i++)
+            {
+                lut[i]=0;
+                if(cusage[i])
+                {
+                    if(i!=background)
+                    {
+                        lut[i]=color;
+                        c[color]=i;
+                        color++;
+                    }
+                    else
+                    {
+                        lut[i]=0;
+                    }
+                }
+            }
+            // add to screen and nybble
+            screen[cx+cy*40]=c[1]<<4|c[2];
+            nybble[cx+cy*40]=c[3];
+            //printf("%x%x%x ",c[1],c[2],c[3]);
+            for(y=0;y<8;y++)
+            {
+                bits=0;
+                for(x=0;x<4;x++)
+                {                    
+                    pixel=Read_pixel_function(cx*4+x,cy*8+y);
+                    if(pixel>15) 
+                    { 
+                        Warning_message("Color above 15 used"); 
+                        // TODO hilite as in hires, you should stay to 
+                        // the fixed 16 color palette
+                        return 1;
+                    }
+                    bits=bits<<2;
+                    bits|=lut[pixel];
+        
+                }
+                //Write_byte(file,bits&255);
+                bitmap[pos++]=bits;
+            }
+        }
+    }
+  
+    file = fopen(filename,"wb");
+    
+    if(!file)
+    {
+        Warning_message("File open failed");
+        File_error = 1;
+        return 1;
+    }
+
+    if (loadAddr)
+    {
+        Write_byte(file,0);
+        Write_byte(file,loadAddr);
+    }
+
+    if (saveWhat==0 || saveWhat==1)
+        Write_bytes(file,bitmap,8000);
+        
+    if (saveWhat==0 || saveWhat==2)
+        Write_bytes(file,screen,1000);
+        
+    if (saveWhat==0 || saveWhat==3)
+        Write_bytes(file,nybble,1000);
+        
+    if (saveWhat==0)
+        Write_byte(file,background);
+    
+    fclose(file);
+    //printf("\nbg:%d\n",background);
+    return 0;
+}
+
+void Save_C64(void)
+{
+    char filename[MAX_PATH_CHARACTERS];
+    static byte saveWhat=0, loadAddr=0;
+    dword numcolors,cusage[256];
+    numcolors=Count_used_colors(cusage);
+  
+    Get_full_filename(filename,0);
+  
+    if (numcolors>16)
+    {
+        Warning_message("Error: Max 16 colors");
+        File_error = 1;
+        return;
+    }
+    if (((Main_image_width!=320) && (Main_image_width!=160)) || Main_image_height!=200)
+    {
+        Warning_message("must be 320x200 or 160x200");
+        File_error = 1;
+        return;
+    } 
+    
+    if(!Save_C64_window(&saveWhat,&loadAddr))
+    {
+        File_error = 1;
+        return;
+    }
+    //printf("saveWhat=%d, loadAddr=%d\n",saveWhat,loadAddr);
+    
+    if (Main_image_width==320)
+        File_error = Save_C64_hires(filename,saveWhat,loadAddr);
+    else
+        File_error = Save_C64_multi(filename,saveWhat,loadAddr);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// PNG ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -5689,7 +6457,7 @@ void Load_PNG(void)
   FILE *file;             // Fichier du fichier
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];  
-  dword image_size;
+  byte row_pointers_allocated;
  
   png_structp png_ptr;
   png_infop info_ptr;
@@ -5700,29 +6468,45 @@ void Load_PNG(void)
   
   if ((file=fopen(filename, "rb")))
   {
+    // Load header (8 first bytes)
     if (Read_bytes(file,png_header,8))
     {
+      // Do we recognize a png file signature ?
       if ( !png_sig_cmp(png_header, 0, 8))
       {
+        // Prepare internal PNG loader
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         if (png_ptr)
         {
+          // Prepare internal PNG loader
           info_ptr = png_create_info_struct(png_ptr);
           if (info_ptr)
           {
             png_byte color_type;
             png_byte bit_depth;
             
+            // Setup a return point. If a pnglib loading error occurs
+            // in this if(), the else will be executed.
             if (!setjmp(png_jmpbuf(png_ptr)))
             {
               png_init_io(png_ptr, file);
+              // Inform pnglib we already loaded the header.
               png_set_sig_bytes(png_ptr, 8);
             
+              // Load file information
               png_read_info(png_ptr, info_ptr);
               color_type = info_ptr->color_type;
               bit_depth = info_ptr->bit_depth;
               
-              if (bit_depth <= 8 && (color_type == PNG_COLOR_TYPE_PALETTE || PNG_COLOR_TYPE_GRAY))
+              // If it's any supported file
+              // (Note: As of writing this, this test covers every possible 
+              // image format of libpng)
+              if (color_type == PNG_COLOR_TYPE_PALETTE
+               || color_type == PNG_COLOR_TYPE_GRAY
+               || color_type == PNG_COLOR_TYPE_GRAY_ALPHA
+               || color_type == PNG_COLOR_TYPE_RGB
+               || color_type == PNG_COLOR_TYPE_RGB_ALPHA
+              )
               {
                 int num_text;
                 png_text *text_ptr;
@@ -5731,8 +6515,8 @@ void Load_PNG(void)
                 png_uint_32 res_x;
                 png_uint_32 res_y;
 
-                // Commentaire (tEXt)
-                Main_comment[0]='\0'; // On efface le commentaire
+                // Comment (tEXt)
+                Main_comment[0]='\0'; // Clear the previous comment
                 if ((num_text=png_get_text(png_ptr, info_ptr, &text_ptr, NULL)))
                 {
                   while (num_text--)
@@ -5743,7 +6527,7 @@ void Load_PNG(void)
                       size = Min(text_ptr[num_text].text_length, COMMENT_SIZE);
                       strncpy(Main_comment, text_ptr[num_text].text, size);
                       Main_comment[size]='\0';
-                      break; // Pas besoin de vérifier les suivants
+                      break; // Skip all others tEXt chunks
                     }
                   }
                 }
@@ -5764,35 +6548,62 @@ void Load_PNG(void)
                     }
                   }
                 }
-                Init_preview(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
+                if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+                  Init_preview_24b(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG);
+                else
+                  Init_preview(info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG,Ratio_of_loaded_image);
 
                 if (File_error==0)
                 {
                   int x,y;
                   png_colorp palette;
                   int num_palette;
-                                    
-                  if (color_type == PNG_COLOR_TYPE_GRAY)
+
+                  // 16-bit images
+                  if (bit_depth == 16)
                   {
+                    // Reduce to 8-bit
+                    png_set_strip_16(png_ptr);
+                  }
+                  else if (bit_depth < 8)
+                  {
+                    // Inform libpng we want one byte per pixel,
+                    // even though the file was less than 8bpp
+                    png_set_packing(png_ptr);
+                  }
+                    
+                  // Images with alpha channel
+                  if (color_type & PNG_COLOR_MASK_ALPHA)
+                  {
+                    // Tell libpng to ignore it
+                    png_set_strip_alpha(png_ptr);
+                  }
+
+                  // Greyscale images : 
+                  if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+                  {
+                    // Map low bpp greyscales to full 8bit (0-255 range)
                     if (bit_depth < 8)
                       png_set_gray_1_2_4_to_8(png_ptr);
-                    // palette de niveaux de gris
-                    for (x=0;x<num_palette;x++)
+                    
+                    // Create greyscale palette
+                    for (x=0;x<256;x++)
                     {
                       Main_palette[x].R=x;
                       Main_palette[x].G=x;
                       Main_palette[x].B=x;
                     } 
                   }
-                  else
+                  else if (color_type == PNG_COLOR_TYPE_PALETTE) // Palette images
                   {
-                    // image couleurs
+                    
                     if (bit_depth < 8)
                     {
-                      png_set_packing(png_ptr);
+                      // Clear unused colors
                       if (Config.Clear_palette)
                         memset(Main_palette,0,sizeof(T_Palette));
                     }
+                    // Load the palette
                     png_get_PLTE(png_ptr, info_ptr, &palette,
                        &num_palette);
                     for (x=0;x<num_palette;x++)
@@ -5803,41 +6614,87 @@ void Load_PNG(void)
                     }
                     free(palette);
                   }
-                  Set_palette(Main_palette);
-                  Remap_fileselector();
-                  //
+                  if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
+                  {
+                    Set_palette(Main_palette);
+                    Remap_fileselector();
+                  }
                   
                   Main_image_width=info_ptr->width;
                   Main_image_height=info_ptr->height;
-                  image_size=(dword)(Main_image_width*Main_image_height);
-                
+                  
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
+
+                  // Allocate row pointers
+                  Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
+                  row_pointers_allocated = 0;
+
                   /* read file */
                   if (!setjmp(png_jmpbuf(png_ptr)))
                   {
-                    Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
-                    for (y=0; y<Main_image_height; y++)
-                      Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
-                    png_read_image(png_ptr, Row_pointers);
-                    
-                    for (y=0; y<Main_image_height; y++)
-                      for (x=0; x<Main_image_width; x++)
-                        Pixel_load_function(x, y, Row_pointers[y][x]);
-                    
+                    if (color_type == PNG_COLOR_TYPE_GRAY
+                    ||  color_type == PNG_COLOR_TYPE_GRAY_ALPHA
+                    ||  color_type == PNG_COLOR_TYPE_PALETTE
+                    )
+                    {
+                      // 8bpp
+                      
+                      for (y=0; y<Main_image_height; y++)
+                        Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                      row_pointers_allocated = 1;
+                      
+                      png_read_image(png_ptr, Row_pointers);
+                      
+                      for (y=0; y<Main_image_height; y++)
+                        for (x=0; x<Main_image_width; x++)
+                          Pixel_load_function(x, y, Row_pointers[y][x]);
+                    }
+                    else
+                    {
+                      // 24bpp
+                      
+                      if (Pixel_load_24b==Pixel_load_in_24b_preview)
+                      {
+                        // It's a preview
+                        // Unfortunately we need to allocate loads of memory
+                        for (y=0; y<Main_image_height; y++)
+                          Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                        row_pointers_allocated = 1;
+                        
+                        png_read_image(png_ptr, Row_pointers);
+                        
+                        for (y=0; y<Main_image_height; y++)
+                          for (x=0; x<Main_image_width; x++)
+                            Pixel_load_24b(x, y, Row_pointers[y][x*3],Row_pointers[y][x*3+1],Row_pointers[y][x*3+2]);
+                      }
+                      else
+                      {
+                        // It's loading an actual image
+                        // We'll save memory and time by writing directly into
+                        // our pre-allocated 24bit buffer
+                        for (y=0; y<Main_image_height; y++)
+                          Row_pointers[y] = (png_byte*) (&Buffer_image_24b[y * Main_image_width]);
+                        png_read_image(png_ptr, Row_pointers);
+                      }
+                    }
                   }
                   else
                     File_error=2;
                     
                   /* cleanup heap allocation */
-                  for (y=0; y<Main_image_height; y++)
-                    free(Row_pointers[y]);
+                  if (row_pointers_allocated)
+                  {
+                    for (y=0; y<Main_image_height; y++)
+                      free(Row_pointers[y]);
+                  }
                   free(Row_pointers);
                 }
                 else
                   File_error=2;
               }
               else
+               // Unsupported image type
                File_error=1;
             }
             else
@@ -5910,9 +6767,11 @@ void Save_PNG(void)
           switch(Pixel_ratio)
           {
             case PIXEL_WIDE:
+            case PIXEL_WIDE2:
               png_set_pHYs(png_ptr, info_ptr, 3000, 6000, PNG_RESOLUTION_METER);
               break;
             case PIXEL_TALL:
+            case PIXEL_TALL2:
               png_set_pHYs(png_ptr, info_ptr, 6000, 3000, PNG_RESOLUTION_METER);
               break;
             default:

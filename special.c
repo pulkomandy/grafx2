@@ -30,11 +30,26 @@
 
 //---------------------- Modifier le pinceau spécial -------------------------
 
+int Circle_squared_diameter(int diameter)
+{
+  int result = diameter*diameter;
+  // Trick to make some circles rounder, even though
+  // mathematically incorrect.
+  if (diameter==3 || diameter==9)
+    return result-2;
+  if (diameter==11)
+    return result-6;
+  if (diameter==14)
+    return result-4;
+  
+  return result;
+}
+
 void Set_paintbrush_size(int width, int height)
 {
   int x_pos,y_pos;
   int x,y;
-  float radius2;
+  int radius2;
 
   if (width<1) width=1;
   if (height<1) height=1;
@@ -47,14 +62,12 @@ void Set_paintbrush_size(int width, int height)
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_ROUND :
-      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
-      radius2*=radius2;
-      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+      radius2=Circle_squared_diameter(Paintbrush_width);
+   
+      for (y_pos=0, y=1-Paintbrush_height; y_pos<Paintbrush_height; y_pos++,y+=2)
+        for (x_pos=0, x=1-Paintbrush_width; x_pos<Paintbrush_width; x_pos++,x+=2)
         {
-          x=x_pos-Paintbrush_offset_X;
-          y=y_pos-Paintbrush_offset_Y;
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( ((x*x)+(y*y)) < radius2 );
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( ((x*x)+(y*y)) <= radius2 );
         }
       break;
     case PAINTBRUSH_SHAPE_SQUARE :
@@ -62,16 +75,20 @@ void Set_paintbrush_size(int width, int height)
         memset(Paintbrush_sprite+y_pos,1,Paintbrush_width);
       break;
     case PAINTBRUSH_SHAPE_SIEVE_ROUND :
-      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
-      radius2*=radius2;
-      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+    {
+      int reminder=0;
+      if (Paintbrush_width==1)
+        reminder = 1;
+      
+      radius2=Circle_squared_diameter(Paintbrush_width);
+   
+      for (y_pos=0, y=1-Paintbrush_height; y_pos<Paintbrush_height; y_pos++,y+=2)
+        for (x_pos=0, x=1-Paintbrush_width; x_pos<Paintbrush_width; x_pos++,x+=2)
         {
-          x=x_pos-Paintbrush_offset_X;
-          y=y_pos-Paintbrush_offset_Y;
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( (!((x_pos+y_pos)&1)) && (((x*x)+(y*y)) < radius2));
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( ((x_pos+y_pos+reminder)&1) && (((x*x)+(y*y)) < radius2));
         }
       break;
+    }
     case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
       for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
         for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
@@ -125,14 +142,24 @@ void Set_paintbrush_size(int width, int height)
         }
       break;
     case PAINTBRUSH_SHAPE_RANDOM:
-      radius2=Paintbrush_offset_X+0.414213562; // [0.410..0.415[
-      radius2*=radius2;
+      // Init with blank
       for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        memset(Paintbrush_sprite+y_pos*MAX_PAINTBRUSH_SIZE,0,Paintbrush_width);
+
+      radius2=Circle_squared_diameter(Paintbrush_width);
+   
+      for (y_pos=0, y=1-Paintbrush_height; y_pos<Paintbrush_height; y_pos++,y+=2)
+        for (x_pos=0, x=1-Paintbrush_width; x_pos<Paintbrush_width; x_pos++,x+=2)
         {
-          x=x_pos-Paintbrush_offset_X;
-          y=y_pos-Paintbrush_offset_Y;
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=( (((x*x)+(y*y)) < radius2) && (!(rand()&7)) );
+          if ((x*x)+(y*y) < radius2 && !(rand()&7))
+          {
+              Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=1;
+              // This prevents having a pixels that touch each other.
+              if (x_pos>0)
+                Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos-1]=0;
+              if (y_pos>0)
+                Paintbrush_sprite[((y_pos-1)*MAX_PAINTBRUSH_SIZE)+x_pos]=0;
+          }
         }
   }
 }
@@ -146,12 +173,9 @@ void Smaller_paintbrush(void)
     Hide_cursor();
     switch (Paintbrush_shape)
     {
-      case PAINTBRUSH_SHAPE_ROUND:
-      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
       case PAINTBRUSH_SHAPE_CROSS:
       case PAINTBRUSH_SHAPE_PLUS:
       case PAINTBRUSH_SHAPE_DIAMOND:
-      case PAINTBRUSH_SHAPE_RANDOM:
         if (Paintbrush_width&1)
           Set_paintbrush_size(Paintbrush_width-2,Paintbrush_height-2);
         else
@@ -161,6 +185,9 @@ void Smaller_paintbrush(void)
       case PAINTBRUSH_SHAPE_SLASH:
       case PAINTBRUSH_SHAPE_ANTISLASH:
       case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
+      case PAINTBRUSH_SHAPE_ROUND:
+      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
+      case PAINTBRUSH_SHAPE_RANDOM:
         Set_paintbrush_size(Paintbrush_width-1,Paintbrush_height-1);
         break;
       case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
@@ -183,9 +210,6 @@ void Bigger_paintbrush(void)
     Hide_cursor();
     switch (Paintbrush_shape)
     {
-      case PAINTBRUSH_SHAPE_ROUND:
-      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
-      case PAINTBRUSH_SHAPE_RANDOM:
       case PAINTBRUSH_SHAPE_CROSS:
       case PAINTBRUSH_SHAPE_PLUS:
       case PAINTBRUSH_SHAPE_DIAMOND:
@@ -198,6 +222,9 @@ void Bigger_paintbrush(void)
       case PAINTBRUSH_SHAPE_SLASH:
       case PAINTBRUSH_SHAPE_ANTISLASH:
       case PAINTBRUSH_SHAPE_SIEVE_SQUARE:
+      case PAINTBRUSH_SHAPE_ROUND:
+      case PAINTBRUSH_SHAPE_SIEVE_ROUND:
+      case PAINTBRUSH_SHAPE_RANDOM:
         Set_paintbrush_size(Paintbrush_width+1,Paintbrush_height+1);
         break;
       case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
@@ -361,4 +388,26 @@ void Zoom(short delta)
       Display_all_screen();
     Display_cursor();
   }
+}
+
+/**
+  Set zoom value. Negative value means no zoom.
+*/
+void Zoom_set(int index)
+{
+  Hide_cursor();
+  if (index<0)
+  {
+    /* Zoom 1:1 */
+    if (Main_magnifier_mode)
+      Unselect_button(BUTTON_MAGNIFIER);
+  }
+  else
+  {
+    Change_magnifier_factor(index);
+    if (!Main_magnifier_mode)
+      Select_button(BUTTON_MAGNIFIER,1);
+    Display_all_screen();
+  }
+  Display_cursor();
 }

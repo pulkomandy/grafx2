@@ -105,4 +105,12 @@ void Nibble_brush(void);
 */
 void Capture_brush_with_lasso(int vertices, short * points,short clear);
 
+
+///
+/// Changes the Brush size, discarding its previous content.
+/// @return 0 OK, 1 Failed
+byte Realloc_brush(word new_brush_width, word new_brush_height);
+
+
+
 #endif

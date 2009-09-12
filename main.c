@@ -76,7 +76,7 @@
 #endif
 
 // filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS]= "skins" PATH_SEPARATOR "base.gif";
+static char Gui_skin_file[MAX_PATH_CHARACTERS];
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -344,6 +344,7 @@ int Init_program(int argc,char * argv[])
   strcpy(Main_file_directory,Main_current_directory);
   strcpy(Main_filename,"NO_NAME.GIF");
   Main_fileformat=DEFAULT_FILEFORMAT;
+
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare_current_directory,Main_current_directory);
   strcpy(Spare_file_directory,Main_file_directory);
@@ -355,7 +356,7 @@ int Init_program(int argc,char * argv[])
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  Filelist=NULL;       // Au début, il n'y a pas de fichiers dans la liste
+  
   Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_format=0;
@@ -398,6 +399,7 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
+  Keyboard_click_allowed = 0;
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -406,6 +408,7 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
+
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
@@ -439,18 +442,18 @@ int Init_program(int argc,char * argv[])
   Set_all_video_modes();
   Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
-    // Donnée sur la sortie du programme:
+  // Donnée sur la sortie du programme:
   Quit_is_required=0;
   Quitting=0;
-    // Données sur l'état du menu:
+  // Données sur l'état du menu:
   Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
-    // Données sur les couleurs et la palette:
+  // Données sur les couleurs et la palette:
   First_color_in_palette=0;
-    // Données sur le curseur:
+  // Données sur le curseur:
   Cursor_shape=CURSOR_SHAPE_TARGET;
   Cursor_hidden=0;
-    // Données sur le pinceau:
+  // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
@@ -510,10 +513,14 @@ int Init_program(int argc,char * argv[])
   // Initialisation des opérations
   Init_operations();
 
+  // Initialize the brush container
+  Init_brush_container();
+
   Windows_open=0;
   
   // Charger la configuration des touches
   Set_config_defaults();
+
   switch(Load_CFG(1))
   {
     case ERROR_CFG_MISSING:
@@ -533,30 +540,41 @@ int Init_program(int argc,char * argv[])
 
   Analyze_command_line(argc,argv);
 
-  // Charger les sprites et la palette
-  Load_graphics(Gui_skin_file);
-
+  // Load sprites, palette etc.
+  strcpy(Gui_skin_file,Config.Skin_file);
+  Gfx = Load_graphics(Gui_skin_file);
+  if (Gfx == NULL)
+  {
+    Gfx = Load_graphics("skin_modern.png");
+    if (Gfx == NULL)
+    {
+      printf("%s", Gui_loading_error_message);
+      Error(ERROR_GUI_MISSING);
+    }
+  }
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
 
   // Transfert des valeurs du .INI qui ne changent pas dans des variables
   // plus accessibles:
-  Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  Compute_optimal_menu_colors(Default_palette);
+  Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  Compute_optimal_menu_colors(Gfx->Default_palette);
   Fore_color=MC_White;
   Back_color=MC_Black;
 
-  // Prise en compte de la fonte
-  if (Config.Font)
-    Menu_font=GFX_fun_font;
-  else
-    Menu_font=GFX_system_font;
+  // Font
+  if (!(Menu_font=Load_font(Config.Font_file)))
+    if (!(Menu_font=Load_font("font_Classic.png")))
+      {
+        printf("Unable to open the default font file: %s\n", "font_Classic.png");
+        Error(ERROR_GUI_MISSING);
+      }
 
-  memcpy(Main_palette,Default_palette,sizeof(T_Palette));
+  memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -571,7 +589,7 @@ int Init_program(int argc,char * argv[])
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
   Screen_width=Screen_height=Current_resolution=0;
-  
+
   Init_mode_video(
     Video_mode[starting_videomode].Width,
     Video_mode[starting_videomode].Height,
@@ -672,17 +690,24 @@ void Program_shutdown(void)
   #endif
 
   // On libère le buffer de gestion de lignes
-  free(Horizontal_line_buffer);
+  if(Horizontal_line_buffer) free(Horizontal_line_buffer);
 
   // On libère le pinceau spécial
-  free(Paintbrush_sprite);
+  if (Paintbrush_sprite) free(Paintbrush_sprite);
 
   // On libère les différents écrans virtuels et brosse:
-  free(Brush);
+  if(Brush) free(Brush);
   Set_number_of_backups(0);
-  free(Spare_screen);
-  free(Main_screen);
+  if(Spare_screen) free(Spare_screen);
+  if(Main_screen) free(Main_screen);
 
+  // Free the skin (Gui graphics) data
+  if (Gfx)
+  {
+    free(Gfx);
+    Gfx=NULL;
+  }
+  
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)
   {
@@ -711,9 +736,9 @@ int main(int argc,char * argv[])
   int phoenix2_found=0;
   char phoenix_filename1[MAX_PATH_CHARACTERS];
   char phoenix_filename2[MAX_PATH_CHARACTERS];
-
   if(!Init_program(argc,argv))
   {
+	Program_shutdown();
     return 0;
   }
 
@@ -733,6 +758,7 @@ int main(int argc,char * argv[])
       strcpy(Main_file_directory,Config_directory);
       strcpy(Main_filename,"phoenix2.img");
       chdir(Main_file_directory);
+
       Button_Reload();
       Main_image_is_modified=1;
       Warning_message("Spare page recovered");
@@ -756,7 +782,6 @@ int main(int argc,char * argv[])
   {
     if (Config.Opening_message && (!File_in_command_line))
       Button_Message_initial();
-    free(GFX_logo_grafx2); // Pas encore utilisé dans le About
   
     if (File_in_command_line)
     {

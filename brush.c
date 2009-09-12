@@ -123,7 +123,8 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
   int position;
   byte * temp;
 
-  if (!(is_preview && Mouse_K)) // Si bouton enfoncé & preview > pas de dessin
+  if (is_preview==0 || Mouse_K==0) // pas de curseur si on est en preview et 
+                                     // en train de cliquer
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
@@ -151,7 +152,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
 
-      if (is_preview)
+      if (is_preview != 0)
       {
         if ( (width>0) && (height>0) )
           Display_brush_color(
@@ -165,7 +166,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
                 Brush_width
           );
 
-        if (Main_magnifier_mode)
+        if (Main_magnifier_mode != 0)
         {
           Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,
                 &height
@@ -196,9 +197,9 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       }
       else
       {
-        if ((Smear_mode) && (Shade_table==Shade_table_left))
+        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
         {
-          if (Smear_start)
+          if (Smear_start != 0)
           {
             if ((width>0) && (height>0))
             {
@@ -275,7 +276,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       start_y_counter=start_y-(y-Brush_offset_Y);
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
-      if (is_preview)
+      if (is_preview != 0)
       {
         if ( (width>0) && (height>0) )
           Display_brush_mono(start_x-Main_offset_X,
@@ -285,7 +286,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
                              Back_color,Fore_color,
                              Brush_width);
 
-        if (Main_magnifier_mode)
+        if (Main_magnifier_mode != 0)
         {
           Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
           start_x_counter=start_x-(x-Brush_offset_X);
@@ -314,9 +315,9 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       }
       else
       {
-        if ((Smear_mode) && (Shade_table==Shade_table_left))
+        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
         {
-          if (Smear_start)
+          if (Smear_start != 0)
           {
             if ((width>0) && (height>0))
             {
@@ -377,7 +378,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       start_y_counter=start_y-(y-Paintbrush_offset_Y);
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
-      if (is_preview)
+      if (is_preview != 0)
       {
         temp=Brush;
         Brush=Paintbrush_sprite;
@@ -390,7 +391,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
                              0,Fore_color,
                              MAX_PAINTBRUSH_SIZE);
 
-        if (Main_magnifier_mode)
+        if (Main_magnifier_mode != 0)
         {
           Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
           start_x_counter=start_x-(x-Paintbrush_offset_X);
@@ -419,9 +420,9 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       }
       else
       {
-        if ((Smear_mode) && (Shade_table==Shade_table_left))
+        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
         {
-          if (Smear_start)
+          if (Smear_start != 0)
           {
             if ((width>0) && (height>0))
             {
@@ -444,10 +445,13 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
               {
                 temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
                 position=(counter_y*Smear_brush_width)+counter_x;
-                if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x]) // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
-                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)          // On clippe l'effet smear entre Smear_Min et Smear_Max
-                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
-                  Display_pixel(x_pos,y_pos,Smear_brush[position]);
+                if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0) 
+                    // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
+                    && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                    && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X)
+                    // On clippe l'effet smear entre Smear_Min et Smear_Max
+                )
+                    Display_pixel(x_pos,y_pos,Smear_brush[position]);
                 Smear_brush[position]=temp_color;
               }
               Update_part_of_screen(start_x, start_y, width, height);
@@ -464,7 +468,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
           for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
             for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
             {
-              if (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x])
+              if (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0)
                 Display_pixel(x_pos,y_pos,color);
             }
           Update_part_of_screen(start_x,start_y,width,height);
@@ -472,6 +476,69 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       }
   }
 }
+
+///
+/// Changes the Brush size, discarding its previous content.
+/// @return 0 OK, 1 Failed
+byte Realloc_brush(word new_brush_width, word new_brush_height)
+{
+  byte return_code=0;
+  
+  if ( (((long)Brush_height)*Brush_width) !=
+       (((long)new_brush_height)*new_brush_width) )
+  {
+    free(Brush);
+    Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+    if (Brush == NULL)
+    {
+      Error(0);
+      return_code=1;
+  
+      Brush=(byte *)malloc(1*1);
+      if(Brush == NULL)
+      {
+          Error(ERROR_MEMORY);
+          exit(ERROR_MEMORY);
+      }
+      new_brush_height=new_brush_width=1;
+      *Brush=Fore_color;
+    }
+  }
+  Brush_width=new_brush_width;
+  Brush_height=new_brush_height;
+  
+  free(Smear_brush);
+  Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
+  Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
+  Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
+  
+  if (Smear_brush == NULL) // Failed to allocate the smear brush
+  {
+    Error(0);
+    return_code=1;
+  
+    free(Brush);
+    Brush=(byte *)malloc(1*1);
+    if(Brush == NULL)
+    {
+      Error(ERROR_MEMORY);
+      exit(ERROR_MEMORY);
+    }
+    Brush_height=1;
+    Brush_width=1;
+  
+    Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+    if(Smear_brush == NULL)
+    {
+      Error(ERROR_MEMORY);
+      exit(ERROR_MEMORY);
+    }
+    Smear_brush_height=MAX_PAINTBRUSH_SIZE;
+    Smear_brush_width=MAX_PAINTBRUSH_SIZE;
+  }
+  return return_code;
+}
+
 
 // -- Effacer le pinceau -- //
 //
@@ -495,11 +562,11 @@ void Hide_paintbrush(short x,short y)
   //short counter_x; // Position X (dans la brosse/pinceau) en cours
         //d'affichage
   //short counter_y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short end_counter_x; // Position X ou s'arrête l'affichade de la brosse/pinceau
-  short end_counter_y; // Position Y ou s'arrête l'affichade de la brosse/pinceau
+  short end_counter_x; // Position X ou s'arrête l'affichage de la brosse/pinceau
+  short end_counter_y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   byte * temp;
 
-  if (!Mouse_K)
+  if (Mouse_K == 0)
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_POINT :
@@ -531,7 +598,7 @@ void Hide_paintbrush(short x,short y)
                     width,height,Back_color,
                     Main_image_width);
 
-      if (Main_magnifier_mode)
+      if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x;
@@ -577,7 +644,7 @@ void Hide_paintbrush(short x,short y)
                     Main_image_width);
       }
 
-      if (Main_magnifier_mode)
+      if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x;
@@ -651,46 +718,12 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     if (start_y+new_brush_height>Main_image_height)
       new_brush_height=Main_image_height-start_y;
 
-    if ( (((long)Brush_height)*Brush_width) !=
-         (((long)new_brush_height)*new_brush_width) )
-    {
-      free(Brush);
-      Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
-      if (!Brush)
-      {
-        Error(0);
-
-        Brush=(byte *)malloc(1*1);
-        new_brush_height=new_brush_width=1;
-        *Brush=Fore_color;
-      }
-    }
-    Brush_width=new_brush_width;
-    Brush_height=new_brush_height;
-
-    free(Smear_brush);
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-
-    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
-    {
-      Error(0);
-
-      free(Brush);
-      Brush=(byte *)malloc(1*1);
-      Brush_height=1;
-      Brush_width=1;
-
-      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
-    }
+    Realloc_brush(new_brush_width, new_brush_height);
 
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
     // On regarde s'il faut effacer quelque chose:
-    if (clear)
+    if (clear != 0)
     {
       for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
         for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
@@ -716,7 +749,7 @@ void Rotate_90_deg()
   new_brush=(byte *)malloc(((long)Brush_height)*Brush_width);
   if (new_brush)
   {
-    Rotate_90_deg_lowlevel(Brush,new_brush,Brush_width,Brush_height);
+    Rotate_90_deg_lowlevel(Brush,/*@out@*/ new_brush,Brush_width,Brush_height);
     free(Brush);
     Brush=new_brush;
 
@@ -767,7 +800,7 @@ void Remap_brush(void)
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
   //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
   for (color=0;color<=255;color++)
-    if (used[color])
+    if (used[color] != 0)
       used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
@@ -808,13 +841,9 @@ void Outline_brush(void)
 
     // On copie la brosse courante dans la nouvelle
     Copy_part_of_image_to_another(Brush, // source
-                                             0, 0,
-                                             Brush_width,
-                                             Brush_height,
-                                             Brush_width,
-                                             new_brush, // Destination
-                                             1, 1,
-                                             width);
+        0, 0, Brush_width, Brush_height, Brush_width,
+        new_brush, // Destination
+        1, 1, width);
 
     // On intervertit la nouvelle et l'ancienne brosse:
     temp=Brush;
@@ -835,23 +864,20 @@ void Outline_brush(void)
         {
           if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
-            if (state)
+            if (state != 0)
             {
               Pixel_in_brush(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
-          else
+          else if (state == 0)
           {
-            if (!state)
-            {
-              Pixel_in_brush(x_pos-1,y_pos,Fore_color);
-              state=1;
-            }
+            Pixel_in_brush(x_pos-1,y_pos,Fore_color);
+            state=1;
           }
         }
         // Cas du dernier pixel à droite de la ligne
-        if (state)
+        if (state != 0)
           Pixel_in_brush(x_pos,y_pos,Fore_color);
       }
 
@@ -863,23 +889,20 @@ void Outline_brush(void)
         {
           if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
           {
-            if (state)
+            if (state != 0)
             {
               Pixel_in_brush(x_pos,y_pos,Fore_color);
               state=0;
             }
           }
-          else
+          else if (state == 0)
           {
-            if (!state)
-            {
               Pixel_in_brush(x_pos,y_pos-1,Fore_color);
               state=1;
-            }
           }
         }
         // Cas du dernier pixel en bas de la colonne
-        if (state)
+        if (state != 0)
           Pixel_in_brush(x_pos,y_pos,Fore_color);
       }
     }
@@ -903,7 +926,7 @@ void Outline_brush(void)
 
 void Nibble_brush(void)
 {
-  long /*Pos,*/x_pos,y_pos;
+  long x_pos,y_pos;
   byte state;
   byte * new_brush;
   byte * temp;
@@ -946,7 +969,7 @@ void Nibble_brush(void)
         {
           if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
           {
-            if (state)
+            if (state != 0)
             {
               if (x_pos>0)
                 Pixel_in_brush(x_pos-1,y_pos,Back_color);
@@ -955,7 +978,7 @@ void Nibble_brush(void)
           }
           else
           {
-            if (!state)
+            if (state == 0)
             {
               Pixel_in_brush(x_pos,y_pos,Back_color);
               state=1;
@@ -984,7 +1007,7 @@ void Nibble_brush(void)
           }
           else
           {
-            if (!state)
+            if (state == 0)
             {
               Pixel_in_brush(x_pos,y_pos,Back_color);
               state=1;
@@ -1021,7 +1044,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
   short start_y=Limit_bottom+1;
   short end_x=Limit_left-1;
   short end_y=Limit_top-1;
-  short temp;
+  unsigned short temp;
   short x_pos;
   short y_pos;
   word  new_brush_width;
@@ -1029,10 +1052,10 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
 
 
   // On recherche les bornes de la brosse:
-  for (temp=0; temp<vertices; temp++)
+  for (temp=0; temp<2*vertices; temp+=2)
   {
-    x_pos=points[temp<<1];
-    y_pos=points[(temp<<1)+1];
+    x_pos=points[temp];
+    y_pos=points[temp+1];
     if (x_pos<start_x)
       start_x=x_pos;
     if (x_pos>end_x)
@@ -1079,6 +1102,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
         Error(0);
 
         Brush=(byte *)malloc(1*1);
+        if(Brush==NULL) Error(ERROR_MEMORY);
         new_brush_height=new_brush_width=1;
         *Brush=Fore_color;
       }
@@ -1097,6 +1121,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
 
       free(Brush);
       Brush=(byte *)malloc(1*1);
+      if(Brush==NULL) Error(ERROR_MEMORY);
       Brush_height=1;
       Brush_width=1;
 

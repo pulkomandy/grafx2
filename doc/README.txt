@@ -52,7 +52,7 @@ executable; You can normally find it in a packed archive whose name begins by
 the Subversion repository:
 http://grafx2.googlecode.com/svn/trunk/
 or you can find the latest versions as packed archives:
-http://code.google.com/p/grafx2/downloads/list
+http://code.google.com/p/grafx2/wiki/Downloads
 
 === COMPILING ===
 
@@ -76,17 +76,18 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
-  * 06/2009 2.0       Completed the features planned by Sunset Design.
-  * 04/2009 2.0b99.0% Many new features and critical fixes.
-  * 01/2009 2.0b98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
-                      AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
-  * 10/2008 2.0b97.0% Our first public beta release.
-  * 07/2008           Our first public alpha release, Windows and Linux only
-  * 04/2007           Start of this project and port to SDL.
-  *    2001           Sunset Design releases the source under the GNU GPL.
-  * 12/1999 2.0b96.5% Last release from Sunset Design.
-  * 11/1996 2.0b90%   First public release, at the Wired'96.
-  * 09/1995           Project starts.
+  * 09/2009  2.1       GUI improvements and some new features.
+  * 06/2009  2.0       Completed the features planned by Sunset Design.
+  * 04/2009  2.0b99.0% Many new features and critical fixes.
+  * 01/2009  2.0b98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
+                       AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
+  * 10/2008  2.0b97.0% Our first public beta release.
+  * 07/2008            Our first public alpha release, Windows and Linux only
+  * 04/2007            Start of this project and port to SDL.
+  *    2001            Sunset Design releases the source under the GNU GPL.
+  * 12/1999  2.0b96.5% Last release from Sunset Design.
+  * 11/1996  2.0b90%   First public release, at the Wired'96.
+  * 09/1995            Project starts.
 
 Check http://code.google.com/p/grafx2/source/list for (very) detailed changelog.
 Check http://code.google.com/p/grafx2/wiki/History for an overview of the new 

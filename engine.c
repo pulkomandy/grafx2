@@ -75,8 +75,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Filled rectangles       ",
   "Empty circles / ellipses",
   "Filled circles / ellips.",
-  "Grad. rectangles        ",
-  "Gradation menu          ",
+  "Grad. rect / Grad. menu ",
   "Grad. spheres / ellipses",
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
@@ -89,13 +88,13 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Go / Copy to other page ",
   "Save as / Save          ",
   "Load / Re-load          ",
-  "Settings                ",
+  "Settings / Skins        ",
   "Clear / with backcolor  ",
   "Help / Statistics       ",
   "Undo / Redo             ",
   "Kill current page       ",
   "Quit                    ",
-  "Palette editor          ",
+  "Palette editor / setup  ",
   "Scroll pal. bkwd / Fast ",
   "Scroll pal. fwd / Fast  ",
   "Color #"                 ,
@@ -108,6 +107,7 @@ void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
   int index;
   if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
   *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y*Pixel_width);
+  if(*buffer==NULL) Error(0);
   for (index=0; index<(height*Menu_factor_Y); index++)
     Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X*Pixel_width));
 }
@@ -119,6 +119,7 @@ void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int heigh
   for (index=0; index<height*Menu_factor_Y; index++)
     Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X*Pixel_width));
   free(buffer);
+  buffer = NULL;
 }
 
 ///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
@@ -211,74 +212,74 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
     case BUTTON_SHAPE_RECTANGLE  :
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie la partie haute
       for (x_pos=start_x;x_pos<=end_x-1;x_pos++)
       {
         Pixel_in_menu(x_pos,start_y,color_top_left);
-        GFX_menu_block[start_y][x_pos]=color_top_left;
+        Gfx->Menu_block[start_y][x_pos]=color_top_left;
       }
       for (y_pos=start_y+1;y_pos<=end_y-1;y_pos++)
       {
         // On colorie la partie gauche
         Pixel_in_menu(start_x,y_pos,color_top_left);
-        GFX_menu_block[y_pos][start_x]=color_top_left;
+        Gfx->Menu_block[y_pos][start_x]=color_top_left;
         // On colorie la partie droite
         Pixel_in_menu(end_x,y_pos,color_bottom_right);
-        GFX_menu_block[y_pos][end_x]=color_bottom_right;
+        Gfx->Menu_block[y_pos][end_x]=color_bottom_right;
       }
       // On colorie la partie basse
       for (x_pos=start_x+1;x_pos<=end_x;x_pos++)
       {
         Pixel_in_menu(x_pos,end_y,color_bottom_right);
-        GFX_menu_block[end_y][x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y][x_pos]=color_bottom_right;
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie le coin haut gauche
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,start_y,color_top_left);
-        GFX_menu_block[start_y][start_x+x_pos]=color_top_left;
+        Gfx->Menu_block[start_y][start_x+x_pos]=color_top_left;
         Pixel_in_menu(start_x,start_y+x_pos,color_top_left);
-        GFX_menu_block[start_y+x_pos][start_x]=color_top_left;
+        Gfx->Menu_block[start_y+x_pos][start_x]=color_top_left;
       }
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_bottom_right);
-        GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y-x_pos][start_x+x_pos]=color_bottom_right;
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
       // On colorie le point haut droit
       Pixel_in_menu(end_x,start_y,color_diagonal);
-      GFX_menu_block[start_y][end_x]=color_diagonal;
+      Gfx->Menu_block[start_y][end_x]=color_diagonal;
       // On colorie le point bas gauche
       Pixel_in_menu(start_x,end_y,color_diagonal);
-      GFX_menu_block[end_y][start_x]=color_diagonal;
+      Gfx->Menu_block[end_y][start_x]=color_diagonal;
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(start_x+x_pos,end_y-x_pos,color_top_left);
-        GFX_menu_block[end_y-x_pos][start_x+x_pos]=color_top_left;
+        Gfx->Menu_block[end_y-x_pos][start_x+x_pos]=color_top_left;
       }
       // On colorie le coin bas droite
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
         Pixel_in_menu(end_x-x_pos,end_y,color_bottom_right);
-        GFX_menu_block[end_y][end_x-x_pos]=color_bottom_right;
+        Gfx->Menu_block[end_y][end_x-x_pos]=color_bottom_right;
         Pixel_in_menu(end_x,end_y-x_pos,color_bottom_right);
-        GFX_menu_block[end_y-x_pos][end_x]=color_bottom_right;
+        Gfx->Menu_block[end_y-x_pos][end_x]=color_bottom_right;
       }
   }
   if (Menu_is_visible)
@@ -371,6 +372,9 @@ void Select_button(int btn_number,byte click)
       // Right-clicking on Adjust opens a menu, so in this case we skip
       // the unselection of all "Tool" buttons.
       if (btn_number==BUTTON_ADJUST && click==RIGHT_SIDE)
+        break;
+      // Same case with the Grad. Rectangle button.
+      if (btn_number==BUTTON_GRADRECT && click==RIGHT_SIDE)
         break;
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
@@ -774,7 +778,7 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
-          Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL);
+          Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
           Key=0;
           break;
         case SPECIAL_INVERT_SIEVE :
@@ -821,6 +825,10 @@ void Main_handler(void)
           Button_Grid_menu();
           Key=0;
           break;
+        case SPECIAL_SHOW_GRID :
+          Button_Show_grid();
+          Key=0;
+          break;
         case SPECIAL_SIEVE_MODE :
           Button_Sieve_mode();
           Key=0;
@@ -857,6 +865,102 @@ void Main_handler(void)
           Button_Tiling_menu();
           Key=0;
           break;
+        case SPECIAL_EFFECTS_OFF :
+          Effects_off();
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_1 :
+          Transparency_set(1);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_2 :
+          Transparency_set(2);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_3 :
+          Transparency_set(3);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_4 :
+          Transparency_set(4);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_5 :
+          Transparency_set(5);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_6 :
+          Transparency_set(6);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_7 :
+          Transparency_set(7);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_8 :
+          Transparency_set(8);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_9 :
+          Transparency_set(9);
+          Key=0;
+          break;
+        case SPECIAL_TRANSPARENCY_0 :
+          Transparency_set(0);
+          Key=0;
+          break;
+	case SPECIAL_ZOOM_1 :
+	  Zoom_set(-1);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_2 :
+	  Zoom_set(0);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_3 :
+	  Zoom_set(1);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_4 :
+	  Zoom_set(2);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_5 :
+	  Zoom_set(3);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_6 :
+	  Zoom_set(4);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_8 :
+	  Zoom_set(5);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_10 :
+	  Zoom_set(6);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_12 :
+	  Zoom_set(7);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_14 :
+	  Zoom_set(8);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_16 :
+	  Zoom_set(9);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_18 :
+	  Zoom_set(10);
+	  Key=0;
+	  break;
+	case SPECIAL_ZOOM_20 :
+	  Zoom_set(11);
+	  Key=0;
+	  break;
         default   : // Gestion des touches de raccourci de bouton:
           // Pour chaque bouton
           shortcut_button=-1;
@@ -1132,6 +1236,7 @@ void Close_window(void)
   T_Scroller_button * temp3;
   T_Special_button  * temp4;
   T_Dropdown_button * temp5;
+  T_List_button     * temp6;
 
   Hide_cursor();
 
@@ -1165,6 +1270,12 @@ void Close_window(void)
     Window_dropdown_clear_items(Window_dropdown_button_list);
     free(Window_dropdown_button_list);
     Window_dropdown_button_list=temp5;
+  }
+  while (Window_list_button_list)
+  {
+    temp6=Window_list_button_list->Next;
+    free(Window_list_button_list);
+    Window_list_button_list=temp6;
   }
 
   if (Windows_open != 1)
@@ -1613,6 +1724,42 @@ void Window_dropdown_clear_items(T_Dropdown_button * dropdown)
     }
 }
 
+//----------------------- Create a List control -----------------------
+// These controls are special. They work over two controls previously created:
+// - entry_button is the textual area where the list values will be printed.
+// - scroller is a scroller button attached to it
+
+T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item)
+{
+  T_List_button *temp;
+
+  temp=(T_List_button *)malloc(sizeof(T_List_button));
+  temp->Number          =++Window_nb_buttons;
+  temp->List_start      = 0;
+  temp->Cursor_position = 0;
+  temp->Entry_button    = entry_button;
+  temp->Scroller        = scroller;
+  temp->Draw_list_item  = draw_list_item;
+
+  temp->Next=Window_list_button_list;
+  Window_list_button_list=temp;
+  return temp;
+}
+
+void Window_redraw_list(T_List_button * list)
+{
+  int i;
+
+  for (i=Min(list->Scroller->Nb_visibles-1, list->Scroller->Nb_elements-1); i>=0; i--)
+  {
+    list->Draw_list_item(
+      list->Entry_button->Pos_X,
+      list->Entry_button->Pos_Y + i * 8,
+      list->List_start + i,
+      i == list->Cursor_position);
+  }
+}
+
 //----------------------- Ouverture d'un pop-up -----------------------
 
 void Open_popup(word x_pos, word y_pos, word width,word height)
@@ -1676,7 +1823,8 @@ void Close_popup(void)
   T_Palette_button  * temp2;
   T_Scroller_button * temp3;
   T_Special_button  * temp4;
-  T_Dropdown_button  * temp5;
+  T_Dropdown_button * temp5;
+  T_List_button     * temp6;
 
   Hide_cursor();
 
@@ -1711,7 +1859,13 @@ void Close_popup(void)
     free(Window_dropdown_button_list);
     Window_dropdown_button_list=temp5;
   }
-
+  while (Window_list_button_list)
+  {
+    temp6=Window_list_button_list->Next;
+    free(Window_list_button_list);
+    Window_list_button_list=temp6;
+  }
+  
   if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
@@ -1843,6 +1997,7 @@ void Get_color_behind_window(byte * color, byte * click)
   char str[25];
   byte cursor_was_hidden;
 
+
   Hide_cursor();
 
   cursor_was_hidden=Cursor_hidden;
@@ -1933,15 +2088,15 @@ void Move_window(short dx, short dy)
 {
 	short new_x=Mouse_X-dx;
 	short new_y=Mouse_Y-dy;
-	short old_x;
-	short old_y;
-	short width=Window_width*Menu_factor_X;
-	short height=Window_height*Menu_factor_Y;
-	short a;
-	byte  b;
-	byte  *buffer=NULL;
+  short old_x;
+  short old_y;
+  short width=Window_width*Menu_factor_X;
+  short height=Window_height*Menu_factor_Y;
+  short a;
+  byte  b;
+  byte  *buffer=NULL;
 
-	Hide_cursor();
+  Hide_cursor();
 
   Horizontal_XOR_line(new_x,new_y,width);
   Vertical_XOR_line(new_x,new_y+1,height-2);
@@ -2179,8 +2334,11 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
     Window_attribute2=item->Number;
     if (Button->Display_choice)
     {
-      // Mettre à jour automatiquement le libellé de la dropdown
-      Print_in_window(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,item->Label,MC_Black,MC_Light);
+      // Automatically update the label of the dropdown list.
+      int text_length = (Button->Width-4-(Button->Display_arrow?8:0))/8;
+      // Clear original label area
+      Window_rectangle(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,text_length*8,8,MC_Light);
+      Print_in_window_limited(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,item->Label,text_length ,MC_Black,MC_Light);
     }
     return Button->Number;
   }
@@ -2221,7 +2379,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
   }
 }
 
-// --- Renvoie le numéro du bouton clicke (-1:hors de la fenêtre, 0:aucun) ---
+// --- Returns the number of the clicked button (-1:out of the window, 0:none) ---
 short Window_get_clicked_button(void)
 {
   T_Normal_button   * temp1;
@@ -2234,11 +2392,13 @@ short Window_get_clicked_button(void)
 
   Window_attribute1=Mouse_K;
 
-  // Test du click sur les boutons normaux
+  // Test click on normal buttons
   for (temp1=Window_normal_button_list; temp1; temp1=temp1->Next)
   {
-    if (Window_click_in_rectangle(temp1->Pos_X,temp1->Pos_Y,temp1->Pos_X+temp1->Width-1,temp1->Pos_Y+temp1->Height-1))
+    if ((Input_sticky_control == 0 || Input_sticky_control == temp1->Number)
+      && Window_click_in_rectangle(temp1->Pos_X,temp1->Pos_Y,temp1->Pos_X+temp1->Width-1,temp1->Pos_Y+temp1->Height-1))
     {
+      Input_sticky_control = temp1->Number;
       if (temp1->Repeatable)
       {
         Hide_cursor();
@@ -2254,135 +2414,145 @@ short Window_get_clicked_button(void)
     }
   }
 
-  // Test du click sur les zones "palette"
+  // Test click on "Palette" buttons
   for (temp2=Window_palette_button_list; temp2; temp2=temp2->Next)
   {
-    if (Window_click_in_rectangle(temp2->Pos_X+5,temp2->Pos_Y+3,temp2->Pos_X+160,temp2->Pos_Y+82))
+    if ((Input_sticky_control == 0 || Input_sticky_control == temp2->Number)
+      && Window_click_in_rectangle(temp2->Pos_X+5,temp2->Pos_Y+3,temp2->Pos_X+160,temp2->Pos_Y+82))
     {
-      // On stocke dans Attribut2 le numero de couleur cliqué
+      Input_sticky_control = temp2->Number;
+      // We store the clicked color in Attribute2
       Window_attribute2 = (((Mouse_X-Window_pos_X)/Menu_factor_X)-(temp2->Pos_X+2)) / 10 * 16 +
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-(temp2->Pos_Y+3)) / 5;
         return temp2->Number;
     }
   }
 
-  // Test du click sur les barres de défilement
+  // Test click oin slider/scroller bars
   for (temp3=Window_scroller_button_list; temp3; temp3=temp3->Next)
   {
-    if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1))
+    // Button Up arrow
+    if ((Input_sticky_control == 0 || Input_sticky_control == (temp3->Number|1024))
+      && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y,temp3->Pos_X+10,temp3->Pos_Y+10))
     {
-      // Button flèche Haut
-      if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y,temp3->Pos_X+10,temp3->Pos_Y+10))
+      Input_sticky_control = temp3->Number | 1024;
+      Hide_cursor();
+      Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
+
+      if (temp3->Position)
       {
-        Hide_cursor();
-        Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
-
-        if (temp3->Position)
-        {
-          temp3->Position--;
-          Window_attribute1=1;
-          Window_attribute2=temp3->Position;
-          Window_draw_slider(temp3);
-        }
-        else
-          Window_attribute1=0;
-        
-        Display_cursor();
-
-        Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
-
-        Hide_cursor();
-        Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
-        Display_cursor();
+        temp3->Position--;
+        Window_attribute1=1;
+        Window_attribute2=temp3->Position;
+        Window_draw_slider(temp3);
       }
       else
-      // Button flèche Bas
-      if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1))
+        Window_attribute1=0;
+      
+      Display_cursor();
+
+      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+
+      Hide_cursor();
+      Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
+      Display_cursor();
+      
+      return (Window_attribute1)? temp3->Number : 0;
+    }
+    
+    // Button Down arrow
+    if ((Input_sticky_control == 0 || Input_sticky_control == (temp3->Number|2048))
+      && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1))
+    {
+      Input_sticky_control = temp3->Number | 2048;
+      Hide_cursor();
+      Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
+
+      if (temp3->Position+temp3->Nb_visibles<temp3->Nb_elements)
       {
-        Hide_cursor();
-        Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
-
-        if (temp3->Position+temp3->Nb_visibles<temp3->Nb_elements)
-        {
-          temp3->Position++;
-          Window_attribute1=2;
-          Window_attribute2=temp3->Position;
-          Window_draw_slider(temp3);
-        }
-        else
-          Window_attribute1=0;
-
-        Display_cursor();
-
-        Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
-
-        Hide_cursor();
-        Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
-        Display_cursor();
+        temp3->Position++;
+        Window_attribute1=2;
+        Window_attribute2=temp3->Position;
+        Window_draw_slider(temp3);
       }
       else
-      // Jauge
-      if (Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-13))
-      {
-        if (temp3->Nb_elements>temp3->Nb_visibles)
-        {
-          // S'il y a la place de faire scroller le curseur:
-
-          max_slider_height=(temp3->Height-24);
-
-          // Window_attribute2 reçoit la position dans la jauge correspondant au click
-          Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
-          Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_height-1)>>1));
-          Window_attribute2*=(temp3->Nb_elements-temp3->Nb_visibles);
-
-          if (Window_attribute2<0)
-            Window_attribute2=0;
-          else
-          {
-            Window_attribute2 =Round_div(Window_attribute2,max_slider_height-temp3->Cursor_height);
-            if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
-              Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
-          }
-
-          // Si le curseur de la jauge bouge:
-
-          if (temp3->Position!=Window_attribute2)
-          {
-            temp3->Position=Window_attribute2;
-            Window_attribute1=3;
-            Hide_cursor();
-            Window_draw_slider(temp3);
-            Display_cursor();
-          }
-          else
-            // Si le curseur de la jauge ne bouge pas:
-            Window_attribute1=0;
-        }
-        else
-          // S'il n'y a pas la place de bouger le curseur de la jauge:
-          Window_attribute1=0;
-      }
-      else
-        // Le click se situe dans la zone de la jauge mais n'est sur aucune
-        // des 3 parties importantes de la jauge
         Window_attribute1=0;
 
+      Display_cursor();
+
+      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+
+      Hide_cursor();
+      Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
+      Display_cursor();
+      
       return (Window_attribute1)? temp3->Number : 0;
+    }
+    // Middle slider
+    if ((Input_sticky_control == temp3->Number) || (Input_sticky_control==0 &&
+        Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-13)))
+    {
+      Input_sticky_control = temp3->Number;
+      if (temp3->Nb_elements>temp3->Nb_visibles)
+      {
+        // If there is enough room to make the cursor move:
+
+        max_slider_height=(temp3->Height-24);
+
+        // Window_attribute2 receives the position of the cursor.
+        Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
+        Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_height-1)>>1));
+        Window_attribute2*=(temp3->Nb_elements-temp3->Nb_visibles);
+
+        if (Window_attribute2<0)
+          Window_attribute2=0;
+        else
+        {
+          Window_attribute2 =Round_div(Window_attribute2,max_slider_height-temp3->Cursor_height);
+          if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
+            Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
+        }
+
+        // If the cursor moved
+
+        if (temp3->Position!=Window_attribute2)
+        {
+          temp3->Position=Window_attribute2;
+          Window_attribute1=3;
+          Hide_cursor();
+          Window_draw_slider(temp3);
+          Display_cursor();
+        }
+        else
+          // If the cursor moved
+          Window_attribute1=0;
+      }
+      else
+        // If there's not enough room to make the cursor move:
+        Window_attribute1=0;
+        
+      return (Window_attribute1)? temp3->Number : 0; 
     }
   }
 
-  // Test du click sur une zone spéciale
+  // Test click on a special button
   for (temp4=Window_special_button_list; temp4; temp4=temp4->Next)
   {
-    if (Window_click_in_rectangle(temp4->Pos_X,temp4->Pos_Y,temp4->Pos_X+temp4->Width-1,temp4->Pos_Y+temp4->Height-1))
-      return temp4->Number;
+    if ((Input_sticky_control == 0 || Input_sticky_control == temp4->Number)
+      && Window_click_in_rectangle(temp4->Pos_X,temp4->Pos_Y,temp4->Pos_X+temp4->Width-1,temp4->Pos_Y+temp4->Height-1))
+    {
+       Input_sticky_control = temp4->Number;
+       return temp4->Number;
+    }
   }
 
-  // Test du click sur une dropdown
+  // Test click on a dropdown box
   for (temp5=Window_dropdown_button_list; temp5; temp5=temp5->Next)
   {
-    if (Window_click_in_rectangle(temp5->Pos_X,temp5->Pos_Y,temp5->Pos_X+temp5->Width-1,temp5->Pos_Y+temp5->Height-1))
+    if ((Input_sticky_control == 0 || Input_sticky_control == temp5->Number)
+     && Window_click_in_rectangle(temp5->Pos_X,temp5->Pos_Y,temp5->Pos_X+temp5->Width-1,temp5->Pos_Y+temp5->Height-1))
     {
+      Input_sticky_control = temp5->Number;
       if (Mouse_K & temp5->Active_button)
         return Window_dropdown_on_click(temp5);
       else
@@ -2440,7 +2610,25 @@ short Window_get_button_shortcut(void)
       temp=temp->Next;
     }
   }
-
+  
+  // Handle arrow keys, end/home, and mouse wheel that have
+  // a certain behavior if a list control is present.
+  if (Window_list_button_list)
+  {
+    T_List_button *list = Window_list_button_list;
+    // If there's more than one of such control, only capture
+    // events if the mouse cursor is over it.
+    if (list->Next)
+    {
+      // to do
+    }
+  
+  
+  
+  
+  
+  
+  }
   return 0;
 }
 
@@ -2450,30 +2638,274 @@ short Window_clicked_button(void)
 
   if(!Get_input())SDL_Delay(20);
 
-  // Gestion des clicks
+  // Handle clicks
   if (Mouse_K)
   {
     if ((Mouse_X<Window_pos_X) || (Mouse_Y<Window_pos_Y)
      || (Mouse_X>=Window_pos_X+(Window_width*Menu_factor_X))
      || (Mouse_Y>=Window_pos_Y+(Window_height*Menu_factor_Y)))
-      return -1;
+    {
+      if (Input_sticky_control == 0 || Input_sticky_control == -1)
+      {
+        Input_sticky_control = -1;
+        return -1;
+      }
+      else
+      {
+        return 0;
+      }
+    }
+     
+    if (!Input_sticky_control && Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
+    {
+      Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
+    }
     else
     {
-      if (Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
-        Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
-      else
-        return Window_get_clicked_button();
+      short clicked_button;
+      T_List_button * list;
+      
+      // Check which controls was clicked (by rectangular area)
+      clicked_button = Window_get_clicked_button();
+      
+      // Check if it's part of a list control
+      for (list=Window_list_button_list; list!=NULL; list=list->Next)
+      {
+        if (list->Entry_button->Number == clicked_button)
+        {
+          // Click in the textual part of a list.
+          short clicked_line;            
+          clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
+          if (clicked_line == list->Cursor_position ||   // Same as before
+            clicked_line >= list->Scroller->Nb_elements) // Below last line              
+            return 0;
+          
+          Hide_cursor();
+          // Redraw one item as disabled
+          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+            list->Draw_list_item(
+              list->Entry_button->Pos_X,
+              list->Entry_button->Pos_Y + list->Cursor_position * 8,
+              list->List_start + list->Cursor_position,
+              0);
+          list->Cursor_position = clicked_line;
+          // Redraw one item as enabled
+          if (list->Cursor_position>=0 && list->Cursor_position<list->Scroller->Nb_visibles)
+            list->Draw_list_item(
+              list->Entry_button->Pos_X,
+              list->Entry_button->Pos_Y + list->Cursor_position * 8,
+              list->List_start + list->Cursor_position,
+              1);
+          Display_cursor();
+
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        else if (list->Scroller->Number == clicked_button)
+        {
+          // Click in the scroller part of a list
+          if (list->List_start == list->Scroller->Position)
+            return 0; // Didn't actually move
+          // Update scroller indices
+          list->Cursor_position += list->List_start;
+          list->List_start = list->Scroller->Position;
+          list->Cursor_position -= list->List_start;
+          // Need to redraw all
+          Hide_cursor();
+          Window_redraw_list(list);
+          Display_cursor();
+        }
+      }
+      return clicked_button;
     }
   }
 
-  // Gestion des touches
+  // Intercept keys
   if (Key)
   {
+    T_List_button * list;
+
     Button=Window_get_button_shortcut();
     if (Button)
     {
       Key=0;
       return Button;
+    }
+    // Check if there's a list control and the keys can control it
+    for (list=Window_list_button_list; list!=NULL; list=list->Next)
+    {
+      // FIXME: Make only one list have the keyboard focus.
+      if (1)
+      {
+        if (Key==SDLK_UP && (list->Cursor_position+list->List_start)>0)
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position--;
+          if (list->Cursor_position<0)
+          {
+            list->List_start=list->List_start+list->Cursor_position;
+            list->Cursor_position=0;
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_DOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position++;
+          if (list->Cursor_position>(list->Scroller->Nb_visibles-1))
+          {
+            list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
+            list->Cursor_position=(list->Scroller->Nb_visibles-1);
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_HOME && (list->Cursor_position!=0 || list->List_start!=0))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position=0;
+          list->List_start=0;
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_END && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          list->Cursor_position=(list->Scroller->Nb_elements-1)-list->List_start;
+          if (list->Cursor_position>(list->Scroller->Nb_visibles-1))
+          {
+            list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
+            list->Cursor_position=(list->Scroller->Nb_visibles-1);
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_PAGEDOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        {
+          Key=0;
+          Hide_cursor();
+          if (list->Scroller->Nb_elements<list->Scroller->Nb_visibles)
+          {
+            list->Cursor_position=list->Scroller->Nb_elements-1;
+          }
+          else if(list->Cursor_position!=list->Scroller->Nb_visibles-1)
+          {
+            list->Cursor_position=list->Scroller->Nb_visibles-1;
+          }
+          else
+          {
+            list->List_start+=list->Scroller->Nb_visibles;
+            if (list->List_start+list->Scroller->Nb_visibles>list->Scroller->Nb_elements)
+            {
+              list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+            }
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key==SDLK_PAGEUP && (list->Cursor_position+list->List_start)>0)
+        {
+          Key=0;
+          Hide_cursor();
+          if(list->Cursor_position!=0)
+          {
+            list->Cursor_position=0;
+          }
+          else
+          {
+            list->List_start-=list->Scroller->Nb_visibles;
+            if (list->List_start<0)
+            {
+              list->List_start=0;
+            }
+            // Mise à jour du scroller
+            list->Scroller->Position=list->List_start;
+            Window_draw_slider(list->Scroller);
+          }
+          Window_redraw_list(list);
+          Display_cursor();
+          // Store the selected value as attribute2
+          Window_attribute2=list->List_start + list->Cursor_position;
+          // Return the control ID of the list.
+          return list->Number;
+        }
+        if (Key == KEY_MOUSEWHEELUP && list->List_start>0)
+        {
+          list->Cursor_position+=list->List_start;
+          if (list->List_start>=3)
+            list->List_start-=3;
+          else
+            list->List_start=0;
+          list->Cursor_position-=list->List_start;
+          // On affiche à nouveau la liste
+          Hide_cursor();
+          Window_redraw_list(list);
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+          Display_cursor();
+        }
+        if (Key==KEY_MOUSEWHEELDOWN && list->List_start<list->Scroller->Nb_elements-list->Scroller->Nb_visibles)
+        {
+          list->Cursor_position+=list->List_start;
+          list->List_start+=3;
+          if (list->List_start+list->Scroller->Nb_visibles>list->Scroller->Nb_elements)
+          {
+            list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+          }          
+          list->Cursor_position-=list->List_start;
+          // On affiche à nouveau la liste
+          Hide_cursor();
+          Window_redraw_list(list);
+          // Mise à jour du scroller
+          list->Scroller->Position=list->List_start;
+          Window_draw_slider(list->Scroller);
+          Display_cursor();
+        }
+      
+      }
     }
   }
 

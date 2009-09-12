@@ -33,7 +33,7 @@
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
-#define NB_SHORTCUTS              134   ///< Number of actions that can have a key combination associated to it.
+#define NB_SHORTCUTS              159   ///< Number of actions that can have a key combination associated to it.
 #define NB_ZOOM_FACTORS           12    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
@@ -58,12 +58,17 @@
 #define DEFAULT_ZOOM_FACTOR        4    ///< Initial zoom factor for the magnifier.
 #define MAX_PATH_CHARACTERS      260    ///< Number of characters for a file+complete path. Adapt to your OS...
 #define NB_BOOKMARKS               4    ///< Number of bookmark buttons in Save/Load screen.
-// Character to show a right arrow, used when editing long strings. It's present in ::GFX_system_font 
+// Character to show a right arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define RIGHT_TRIANGLE_CHARACTER  16
-// Character to show a left arrow, used when editing long strings. It's present in ::GFX_system_font 
+// Character to show a left arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
+
+#define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
+#define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
+#define BRUSH_CONTAINER_COLUMNS          4  ///< Number of columns in the Brush container
+#define BRUSH_CONTAINER_ROWS             3  ///< Number of rows in the Brush container
 
 ///
 /// We force the dynamic backup page allocation to leave a minimum of 
@@ -90,14 +95,14 @@
 // -- File formats
 
 #ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS         13    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          13    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          13    ///< Number of file formats that grafx2 can save.
+#define NB_KNOWN_FORMATS         15    ///< Total number of known file formats.
+#define NB_FORMATS_LOAD          15    ///< Number of file formats that grafx2 can load.
+#define NB_FORMATS_SAVE          15    ///< Number of file formats that grafx2 can save.
 #else
 // Without pnglib
-#define NB_KNOWN_FORMATS         12    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          12    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          12    ///< Number of file formats that grafx2 can save.
+#define NB_KNOWN_FORMATS         14    ///< Total number of known file formats.
+#define NB_FORMATS_LOAD          14    ///< Number of file formats that grafx2 can load.
+#define NB_FORMATS_SAVE          14    ///< Number of file formats that grafx2 can save.
 #endif
 
 /// List of file formats recognized by grafx2
@@ -114,8 +119,10 @@ enum FILE_FORMATS
   FORMAT_PI1,
   FORMAT_PC1,
   FORMAT_CEL,
+  FORMAT_NEO,
   FORMAT_KCF,
   FORMAT_PAL,
+  FORMAT_C64,
   FORMAT_PNG
 };
 
@@ -209,7 +216,8 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_MISC,        ///< A raw monochrome bitmap, can't be resized. This must be the last of the preset paintbrush types.
   PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like colorpicker.
   PAINTBRUSH_SHAPE_COLOR_BRUSH, ///< User's brush, in color mode
-  PAINTBRUSH_SHAPE_MONO_BRUSH   ///< User's brush, in mono mode
+  PAINTBRUSH_SHAPE_MONO_BRUSH,  ///< User's brush, in mono mode
+  PAINTBRUSH_SHAPE_MAX          ///< Upper limit.
 };
 
 /// Normal resting state for a menu button.
@@ -241,7 +249,7 @@ enum CHUNKS_CFG
   CHUNK_MAX
 };
 
-/// Identifiers for the 8x8 icons of ::GFX_icon_sprite (these are unused now)
+/// Identifiers for the 8x8 icons of ::Gfx->Icon_sprite (most are unused now)
 enum ICON_TYPES
 {
   ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk
@@ -271,7 +279,6 @@ enum BUTTON_NUMBERS
   BUTTON_CIRCLES,
   BUTTON_FILLCIRC,
   BUTTON_GRADRECT,
-  BUTTON_GRADMENU,
   BUTTON_SPHERES,
   BUTTON_BRUSH,
   BUTTON_POLYBRUSH,
@@ -374,8 +381,33 @@ enum SPECIAL_ACTIONS
   SPECIAL_SMOOTH_MODE,
   SPECIAL_SMOOTH_MENU,
   SPECIAL_SMEAR_MODE,
+  SPECIAL_EFFECTS_OFF,
   SPECIAL_TILING_MODE,
+  SPECIAL_TRANSPARENCY_1,
+  SPECIAL_TRANSPARENCY_2,
+  SPECIAL_TRANSPARENCY_3,
+  SPECIAL_TRANSPARENCY_4,
+  SPECIAL_TRANSPARENCY_5,
+  SPECIAL_TRANSPARENCY_6,
+  SPECIAL_TRANSPARENCY_7,
+  SPECIAL_TRANSPARENCY_8,
+  SPECIAL_TRANSPARENCY_9,
+  SPECIAL_TRANSPARENCY_0,
   SPECIAL_TILING_MENU,            ///< This must be the last of the "effects" family
+  SPECIAL_ZOOM_1,
+  SPECIAL_ZOOM_2,
+  SPECIAL_ZOOM_3,
+  SPECIAL_ZOOM_4,
+  SPECIAL_ZOOM_5,
+  SPECIAL_ZOOM_6,
+  SPECIAL_ZOOM_8,
+  SPECIAL_ZOOM_10,
+  SPECIAL_ZOOM_12,
+  SPECIAL_ZOOM_14,
+  SPECIAL_ZOOM_16,
+  SPECIAL_ZOOM_18,
+  SPECIAL_ZOOM_20,
+  SPECIAL_SHOW_GRID,
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 

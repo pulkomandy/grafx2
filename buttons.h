@@ -353,6 +353,11 @@ void Button_Snap_mode(void);
 */
 void Button_Grid_menu(void);
 
+/*!
+    Callback to toggle the grid visible in the magnified view.
+*/
+void Button_Show_grid(void);
+
 // Mode trame (Sieve)
 
 /*!
@@ -425,6 +430,17 @@ void Button_Tiling_mode(void);
     Displays the tiling setup menu.
 */
 void Button_Tiling_menu(void);
+
+/*!
+    Callback for the command that turns off all drawaing effects.
+*/
+void Effects_off(void);
+
+/*!
+    Command that sets the transparency level.
+*/
+void Transparency_set(byte amount);
+
 // Menu des effets
 
 /*!
@@ -568,6 +584,11 @@ void Button_Autosave(void);
 */
 void Button_Settings(void);
 
+/*!
+ 	Display the skin selector window.
+*/
+void Button_Skins(void);
+
 // Annulation de la dernière modification
 
 /*!
@@ -621,7 +642,7 @@ void Save_picture(byte image);
 /*!
     Generic color tagging menu, for various effects.
 */
-void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section);
+void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut );
 
 
 /*!
@@ -634,6 +655,8 @@ void Button_Smooth_menu(void);
     Toogles the smear mode.
 */
 void Button_Smear_mode(void);
+
+void Button_Brush_container(void);
 
 #endif
 

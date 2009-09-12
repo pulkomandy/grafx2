@@ -66,9 +66,9 @@ void Draw_empty_ellipse_preview  (short center_x,short center_y,short horizontal
 void Hide_empty_ellipse_preview (short center_x,short center_y,short horizontal_radius,short vertical_radius);
 void Draw_filled_ellipse        (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 
-void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by);
+void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by);
 void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color);
-void Draw_line_permanet  (short start_x,short start_y,short end_x,short end_y,byte color);
+void Draw_line_permanent  (short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview    (short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color);
 void Draw_line_preview_xorback(short start_x,short start_y,short end_x,short end_y,byte color);
@@ -108,3 +108,5 @@ void Remap_picture(void);
 extern Func_pixel Pixel_figure;
 
 void Update_part_of_screen(short x, short y, short width, short height);
+
+void Redraw_grid(short x, short y, unsigned short w, unsigned short h);

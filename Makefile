@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2009 Per Olofsson
 #  Copyright 2008 Peter Gordon
 #  Copyright 2008 Yves Rizoud
 #  Copyright 2007 Adrien Destugues
@@ -31,6 +32,8 @@
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
+PLATFORMOBJ =
+
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
 ifdef COMSPEC
@@ -45,8 +48,7 @@ ifdef COMSPEC
   OBJDIR = obj/win32
   # Resources (icon)
   WINDRES = windres.exe
-  OBJRES = $(OBJDIR)/winres.o
-  CFGOBJRES = $(OBJDIR)/wincfgres.o
+  PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
   ZIP = zip
@@ -62,12 +64,35 @@ else
     RMDIR = rmdir
     CP = cp
     BIN = grafx2
-    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -D__USE_INLINE__ $(TTFCOPT)
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -I/SDK/Local/common/include/SDL -D__USE_INLINE__ $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = obj/amiga
     ZIP = lha
     ZIPOPT = a
+
+  else ifeq ($(PLATFORM),Darwin)
+  #Mac OS X specific
+  DELCOMMAND = rm -rf
+  MKDIR = mkdir -p
+  RMDIR = rmdir
+  CP = cp
+  ZIP = zip
+  PLATFORMFILES = gfx2.png
+  BIN = grafx2
+  # Where the SDL frameworks are located
+  FWDIR = /Library/Frameworks
+  SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+  SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
+  COPT = -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+  LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
+  	# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+  	CC = gcc
+  	#CC = nccgen -ncgcc -ncld -ncfabs
+  OBJDIR = obj/macosx
+  PLATFORMOBJ = $(OBJDIR)/SDLMain.o
+  X11LOPT = 
+  MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
 
   else ifeq ($(PLATFORM),AROS)
   #AROS specific
@@ -185,7 +210,7 @@ else
 
         # Compiles a regular linux exectutable for the native platform
         BIN = grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
 		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
 		CC = gcc
@@ -225,9 +250,30 @@ endif
 .PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o 
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(PLATFORMOBJ)
 
+SKIN_FILES = skins/skin_classic.png skins/skin_modern.png skins/font_Classic.png skins/font_Fun.png
+
+ifeq ($(PLATFORM),Darwin)
+all : $(MACAPPEXE)
+$(MACAPPEXE) : $(BIN)
+	rm -rf Grafx2.app
+	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources
+	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
+	cp Info.plist Grafx2.app/Contents
+	cp -r English.lproj Grafx2.app/Contents/Resources
+	cp -r fonts Grafx2.app/Contents/Resources
+	cp -r skins Grafx2.app/Contents/Resources
+	cp -r gfx2.cfg Grafx2.app/Contents/Resources
+	cp -r gfx2def.ini Grafx2.app/Contents/Resources
+	cp -Rp $(FWDIR)/SDL.framework Grafx2.app/Contents/Frameworks
+	cp -Rp $(FWDIR)/SDL_image.framework Grafx2.app/Contents/Frameworks
+	cp -Rp $(FWDIR)/SDL_ttf.framework Grafx2.app/Contents/Frameworks
+	cp $(BIN) $(MACAPPEXE)
+else
 all : $(BIN)
+endif
+
 
 debug : $(BIN)
 
@@ -237,17 +283,22 @@ release : version $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
-	tar cvzf src-svn`svnversion | sed 's/:/-/'`.tgz --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-$(PLATFORM).$(ZIP) $(BIN) gfx2def.ini skins/base.gif gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-svn`svnversion | sed 's/:/-/'`.tgz $(PLATFORMFILES)
-	$(DELCOMMAND) src-svn`svnversion | sed 's/:/-/'`.tgz
-	tar cvzf grafx2-svn`svnversion | sed 's/:/-/'`$(TTFLABEL)-src.tgz --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini skins/base.gif gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e s/\\(wip\\)\\\\./\\1/I > $(OBJDIR)/versiontag
 
-$(BIN) : $(OBJ) $(OBJRES)
-	$(CC) $(OBJ) $(OBJRES) -o $(BIN) $(LOPT)
+	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
+	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
+	$(DELCOMMAND) "src-`cat $(OBJDIR)/versiontag`.tgz"
+	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	$(DELCOMMAND) "$(OBJDIR)/versiontag"
+
+testsed :
+
+$(BIN) : $(OBJ)
+	$(CC) $(OBJ) -o $(BIN) $(LOPT)
 
 # SVN revision number
 version.c :
-	echo "char SVN_revision[]=\"`svnversion`\";" > version.c
+	echo "char SVN_revision[]=\"`svnversion .`\";" > version.c
 ifeq ($(LABEL),)
 else
 	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
@@ -265,9 +316,13 @@ else
 	$(DELCOMMAND) pversion.c
 endif
 
-$(OBJDIR)/%.o :
+$(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
+
+$(OBJDIR)/%.o : %.m
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	$(CC) $(COPT) -c $*.m -o $(OBJDIR)/$*.o
 
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
@@ -277,7 +332,7 @@ $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
 
 clean :
-	$(DELCOMMAND) $(OBJ) $(OBJDIR)/version.o $(OBJRES)
+	$(DELCOMMAND) $(OBJ)
 	$(DELCOMMAND) $(BIN)
 
 # Linux installation of the program
@@ -298,7 +353,7 @@ install : $(BIN)
 	$(CP) gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
 	$(CP) gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
-	$(CP) skins/base.gif $(DESTDIR)$(datadir)/grafx2/skins/
+	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
 	# Icon and desktop file for debian
 	$(CP) misc/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) misc/grafx2.xpm $(DESTDIR)$(datadir)/icons/
@@ -312,7 +367,9 @@ uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/skins/base.gif
+	cd $(DESTDIR)$(datadir)/grafx2
+	$(DELCOMMAND) $(SKIN_FILES)
+	cd ..
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop

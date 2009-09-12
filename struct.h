@@ -33,6 +33,12 @@
 
 #include "const.h"
 
+
+// POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
+#ifdef WIN32
+	#define strcasecmp stricmp
+#endif
+
 // Definition of the base data types
 ///  8bit unsigned integer
 #define byte  uint8_t  
@@ -61,6 +67,7 @@ typedef void (* Func_display_zoom) (word,word,word,byte *);
 typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,byte,word,byte *);
 typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
 typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
+typedef void (* Func_draw_list_item) (word,word,word,byte);
 
 /// A set of RGB values.
 typedef struct
@@ -157,6 +164,35 @@ typedef struct T_Fileselector_item
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
 } T_Fileselector_item;
 
+/// Data for a fileselector
+typedef struct T_Fileselector
+{
+  /// Number of elements in the current fileselector's ::Filelist
+  short Nb_elements;
+  /// Number of files in the current fileselector's ::Filelist
+  short Nb_files;
+  /// Number of directories in the current fileselector's ::Filelist
+  short Nb_directories;
+  /// Head of the linked list for the fileselector.
+  T_Fileselector_item * First;
+  /// Index for direct access to element number N
+  T_Fileselector_item ** Index;
+} T_Fileselector;
+
+typedef struct T_List_button
+{
+  short Number;                     ///< Unique identifier for all controls
+  short List_start;                 ///< Index of the font to appear as first line
+  short Cursor_position;            ///< Index of the selected line (0=top)
+
+  T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
+  T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
+  
+  Func_draw_list_item   Draw_list_item; ///< 
+
+  struct T_List_button * Next;    ///< Pointer to the next list button of current window.
+} T_List_button;
+
 /// Data for one line of the "Help" screens.
 typedef struct {
   char Line_type;     ///< Kind of line: 'N' for normal line, 'S' for a bold line, 'K' for a line with keyboard shortcut, 'T' and '-' for upper and lower titles.
@@ -222,10 +258,11 @@ typedef struct
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } __attribute__((__packed__)) T_Config_shortcut_info;
 
-/// This structure holds all the settings which are saved and loaded as gfx2.ini.
+/// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
 {
-  byte Font;                             ///< Boolean, true to use the "fun" font in menus, false to use the classic one.
+  char *Font_file;                       ///< Name of the font used in the menus. Matches file skins/font_*.png (Case-sensitive on some filesystems)
+  char *Skin_file;                       ///< String, name of the file where all the graphic data is stored
   int  Show_hidden_files;                ///< Boolean, true to show hidden files in fileselectors.
   int  Show_hidden_directories;          ///< Boolean, true to show hidden directories in fileselectors.
 //  int  Show_system_directories;        ///< (removed when converted from DOS)
@@ -250,7 +287,7 @@ typedef struct
   int  Nb_max_vertices_per_polygon;      ///< Limit for the number of vertices in polygon tools.
   byte Clear_palette;                    ///< Boolean, true to reset the palette (to black) before loading an image.
   byte Set_resolution_according_to;      ///< When Auto_set_res is on, this determines if the mode should be chosen according to the "original screen" information in the file (1) or the picture dimensons (2)
-  byte Ratio;                            ///< Determines the scaling of menu and windows: 0 no scaling, 1 scaling, 2 slight scaling.
+  int8_t Ratio;                          ///< Determines the scaling of menu and windows: 0 no scaling, 1 scaling, 2 slight scaling, negative= opposite of max scaling
   byte Fast_zoom;                        ///< Boolean, true if the magnifier shortcut should automatically view the mouse area.
   byte Find_file_fast;                   ///< In fileselectors, this determines which entries should be sought when typing letters: 0 all, 1 files only, 2 directories only.
   byte Separate_colors;                  ///< Boolean, true if the menu palette should separate color cells with a black outline.
@@ -269,6 +306,9 @@ typedef struct
   char Bookmark_label[NB_BOOKMARKS][8+1];///< Bookmarked directories in fileselectors: This is the displayed name.
   int  Window_pos_x;                     ///< Last window x position (9999 if unsupportd/irrelevant for the platform)
   int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
+  word Double_click_speed;               ///< Maximum delay for double-click, in ms.
+  word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
+  byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
@@ -297,11 +337,88 @@ typedef struct
 /// Collection of undo/redo steps.
 typedef struct
 {
-  int      List_size;         /// Number of ::T_Page in the vector "Pages".
-  int      Nb_pages_allocated;/// Number of ::T_Page used so far in the vector "Pages".
-  T_Page * Pages;             /// Vector of Pages, each one being a undo/redo step.
+  int      List_size;         ///< Number of ::T_Page in the vector "Pages".
+  int      Nb_pages_allocated;///< Number of ::T_Page used so far in the vector "Pages".
+  T_Page * Pages;             ///< Vector of Pages, each one being a undo/redo step.
 } T_List_of_pages;
 
+/// A single memorized brush from the Brush Container
+typedef struct
+{
+  byte Paintbrush_shape; ///< Kind of brush
+  byte Thumbnail[BRUSH_CONTAINER_PREVIEW_WIDTH][BRUSH_CONTAINER_PREVIEW_HEIGHT]; 
+  // Data for color brush
+  word Width;
+  word Height;
+  byte * Brush; /// < Color brush (if any)
+  T_Palette Palette;
+  byte Transp_color;
+} T_Brush_template;
 
+
+/// GUI skin data
+typedef struct
+{
+  // Mouse
+  
+  /// X coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_WIDTH
+  word Cursor_offset_X[NB_CURSOR_SPRITES];
+  /// Y coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_HEIGHT
+  word Cursor_offset_Y[NB_CURSOR_SPRITES];
+  /// Graphic resources for the mouse cursor.
+  byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
+
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
+  /// Height of the preset paintbrushes.
+  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
+  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
+  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
+  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
+  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
+
+  // Sieve patterns
+  
+  /// Preset sieve patterns, stored as binary (one word per line)
+  word  Sieve_pattern[12][16];
+  
+  // Menu and other graphics
+  
+  /// Bitmap data for the menu, a single rectangle.
+  byte Menu_block[MENU_HEIGHT][MENU_WIDTH];
+  /// Bitmap data for the icons that are displayed over the menu.
+  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  /// Bitmap data for the different "effects" icons.
+  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
+  byte Logo_grafx2[231*56];
+  /// Bitmap data for the 6x8 font used in help screens.
+  byte Help_font_norm [256][6][8];
+  /// Bitmap data for the 6x8 font used in help screens ("bold" verstion).
+  byte Bold_font [256][6][8];
+  // 12
+  // 34
+  /// Bitmap data for the title font used in help screens. Top-left quarter.
+  byte Help_font_t1 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Top-right quarter.
+  byte Help_font_t2 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Bottom-left quarter.
+  byte Help_font_t3 [64][6][8];
+  /// Bitmap data for the title font used in help screens. Bottom-right quarter.
+  byte Help_font_t4 [64][6][8];
+  /// Bitmap data for the small 8x8 icons.
+  byte Icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
+
+  /// A default 256-color palette.
+  T_Palette Default_palette;
+
+
+} T_Gui_skin;
 
 #endif

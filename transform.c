@@ -196,6 +196,9 @@ void Button_Transform_menu(void)
       Key=0;
       Window_help(BUTTON_ADJUST, "PICTURE TRANSFORM");
     }
+    else if (Is_shortcut(Key,0x200+BUTTON_ADJUST))
+      clicked_button=1;
+      
     else switch(clicked_button)
     {
       case 9: // Unit

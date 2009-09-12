@@ -61,8 +61,9 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
     Screen_pixels=Screen_SDL->pixels;
   }
   else
+  {
     DEBUG("Error: Unable to change video mode!",0);
-
+  }
   SDL_ShowCursor(0); // Hide the SDL mouse cursor, we use our own
 }
 

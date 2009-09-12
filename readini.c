@@ -519,16 +519,9 @@ int Load_INI(T_Config * conf)
 
   if ((return_code=Load_INI_get_values (file,buffer,"Menu_ratio",1,values)))
     goto Erreur_Retour;
-  if ((values[0]<0) || (values[0]>2))
+  if (values[0]>2)
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Ratio=values[0];
-
-  if ((return_code=Load_INI_get_values (file,buffer,"Font",1,values)))
-    goto Erreur_Retour;
-  if ((values[0]<1) || (values[0]>2))
-    goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Font=values[0]-1;
-
 
   if ((return_code=Load_INI_reach_group(file,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
@@ -788,7 +781,7 @@ int Load_INI(T_Config * conf)
       break;
   }
   conf->Palette_vertical=0;
-  // Optionnel, vertical palette option (>98.0%)
+  // Optional, vertical palette option (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_vertical",1,values))
   {
     if ((values[0]<0) || (values[0]>1))
@@ -804,7 +797,42 @@ int Load_INI(T_Config * conf)
     conf->Window_pos_x = values[0];
     conf->Window_pos_y = values[1];
   }
+  
+  conf->Double_click_speed=500;
+  // Optional, speed of double-click (>2.0)
+  if (!Load_INI_get_values (file,buffer,"Double_click_speed",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=2000))
+      conf->Double_click_speed=values[0];
+  }
 
+  conf->Double_key_speed=500;
+  // Optional, speed of double-keypress (>2.0)
+  if (!Load_INI_get_values (file,buffer,"Double_key_speed",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=2000))
+      conf->Double_key_speed=values[0];
+  }
+
+  // Optional, name of skin file. (>2.0)
+  if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
+	  conf->Skin_file = strdup(value_label);
+  else
+    conf->Skin_file = strdup("skin_modern.png");
+
+  // Optional, name of font file. (>2.0)
+  if(!Load_INI_get_string(file,buffer,"Font_file",value_label,1))
+	  conf->Font_file = strdup(value_label);
+  else
+    conf->Font_file = strdup("font_Classic.png");
+
+  conf->Grid_XOR_color=255;
+  // Optional, XOR color for grid overlay (>2.0)
+  if (!Load_INI_get_values (file,buffer,"Grid_XOR_color",1,values))
+  {
+    if ((values[0]>0) || (values[0]<=255))
+      conf->Grid_XOR_color=values[0];
+  }
 
   fclose(file);
 

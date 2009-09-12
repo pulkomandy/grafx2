@@ -93,6 +93,7 @@ int Save_INI_char_in_value_alphabet(char c)
          (c<='z')
        ) ||
        (c == '$')        // Symbole d'hexadécimal
+	   || (c== '.')		// Point (dans les noms de fichiers)
      )
     return 1;
   else
@@ -475,11 +476,6 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menu_ratio",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=(conf->Font)+1;
-  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Font",1,values,0)))
-    goto Erreur_Retour;
-
-
   if ((return_code=Save_INI_reach_group(Ancien_fichier,Nouveau_fichier,buffer,"[FILE_SELECTOR]")))
     goto Erreur_Retour;
 
@@ -635,6 +631,23 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Window_position",2,values,0)))
     goto Erreur_Retour;
 
+  values[0]=(conf->Double_click_speed);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_click_speed",1,values,0)))
+    goto Erreur_Retour;
+    
+  values[0]=(conf->Double_key_speed);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Double_key_speed",1,values,0)))
+    goto Erreur_Retour;
+
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Skin_file",conf->Skin_file)))
+    goto Erreur_Retour;
+    
+  if ((return_code=Save_INI_set_strings (Ancien_fichier,Nouveau_fichier,buffer,"Font_file",conf->Font_file)))
+    goto Erreur_Retour;
+
+  values[0]=(conf->Grid_XOR_color);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Grid_XOR_color",1,values,0)))
+    goto Erreur_Retour;
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 

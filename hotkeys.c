@@ -1094,6 +1094,206 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_PERIOD, // .> (:/ en AZERTY)
   0},
+  {134,
+  "Effects off",
+  "Turns off all drawing effects. This",
+  "is the same as the 'All off' button",
+  "in the Effects screen",
+  true,
+  SDLK_e|MOD_SHIFT, // Shift-E
+  0},
+  {135,
+  "Transparency 10%",
+  "Turns transparency on and sets its",
+  "opacity at 10%.",
+  "",
+  true,
+  SDLK_1, // 1
+  0},
+  {136,
+  "Transparency 20%",
+  "Turns transparency on and sets its",
+  "opacity at 20%.",
+  "",
+  true,
+  SDLK_2, // 2
+  0},
+  {137,
+  "Transparency 30%",
+  "Turns transparency on and sets its",
+  "opacity at 30%.",
+  "",
+  true,
+  SDLK_3, // 3
+  0},
+  {138,
+  "Transparency 40%",
+  "Turns transparency on and sets its",
+  "opacity at 40%.",
+  "",
+  true,
+  SDLK_4, // 4
+  0},
+  {139,
+  "Transparency 50%",
+  "Turns transparency on and sets its",
+  "opacity at 50%.",
+  "",
+  true,
+  SDLK_5, // 5
+  0},
+  {140,
+  "Transparency 60%",
+  "Turns transparency on and sets its",
+  "opacity at 60%.",
+  "",
+  true,
+  SDLK_6, // 6
+  0},
+  {141,
+  "Transparency 70%",
+  "Turns transparency on and sets its",
+  "opacity at 70%.",
+  "",
+  true,
+  SDLK_7, // 7
+  0},
+  {142,
+  "Transparency 80%",
+  "Turns transparency on and sets its",
+  "opacity at 80%.",
+  "",
+  true,
+  SDLK_8, // 8
+  0},
+  {143,
+  "Transparency 90%",
+  "Turns transparency on and sets its",
+  "opacity at 90%.",
+  "",
+  true,
+  SDLK_9, // 9
+  0},
+  {144,
+  "Transparency 0%",
+  "Turns transparency on and sets its",
+  "opacity at 0%.",
+  "",
+  true,
+  SDLK_0, // 0
+  0},
+  {145,
+  "Zoom 1:1",
+  "Turns magnifier mode off.",
+  "",
+  "",
+  true,
+  SDLK_1|MOD_CTRL, /* Ctrl + 1 */
+  0},
+  {146,
+  "Zoom 2:1",
+  "Turns magnifier mode on and set its",
+  "factor to 2:1",
+  "",
+  true,
+  SDLK_2|MOD_CTRL, /* Ctrl + 2 */
+  0},
+  {147,
+  "Zoom 3:1",
+  "Turns magnifier mode on and set its",
+  "factor to 3:1",
+  "",
+  true,
+  SDLK_3|MOD_CTRL, /* Ctrl + 3 */
+  0},
+  {148,
+  "Zoom 4:1",
+  "Turns magnifier mode on and set its",
+  "factor to 4:1",
+  "",
+  true,
+  SDLK_4|MOD_CTRL, /* Ctrl + 4 */
+  0},
+  {149,
+  "Zoom 5:1",
+  "Turns magnifier mode on and set its",
+  "factor to 5:1",
+  "",
+  true,
+  SDLK_5|MOD_CTRL, /* Ctrl + 5 */
+  0},
+  {150,
+  "Zoom 6:1",
+  "Turns magnifier mode on and set its",
+  "factor to 6:1",
+  "",
+  true,
+  SDLK_6|MOD_CTRL, /* Ctrl + 6 */
+  0},
+  {151,
+  "Zoom 8:1",
+  "Turns magnifier mode on and set its",
+  "factor to 8:1",
+  "",
+  true,
+  SDLK_7|MOD_CTRL, /* Ctrl + 7 */
+  0},
+  {152,
+  "Zoom 10:1",
+  "Turns magnifier mode on and set its",
+  "factor to 10:1",
+  "",
+  true,
+  SDLK_8|MOD_CTRL, /* Ctrl + 8 */
+  0},
+  {153,
+  "Zoom 12:1",
+  "Turns magnifier mode on and set its",
+  "factor to 12:1",
+  "",
+  true,
+  0,
+  0},
+  {154,
+  "Zoom 14:1",
+  "Turns magnifier mode on and set its",
+  "factor to 14:1",
+  "",
+  true,
+  0,
+  0},
+  {155,
+  "Zoom 16:1",
+  "Turns magnifier mode on and set its",
+  "factor to 16:1",
+  "",
+  true,
+  0,
+  0},
+  {156,
+  "Zoom 18:1",
+  "Turns magnifier mode on and set its",
+  "factor to 18:1",
+  "",
+  true,
+  0,
+  0},
+  {157,
+  "Zoom 20:1",
+  "Turns magnifier mode on and set its",
+  "factor to 20:1",
+  "",
+  true,
+  0,
+  0},
+  {158,
+  "Show/Hide Grid",
+  "Turns on or off the visible grid in ",
+  "the magnified view. Grid cells match",
+  "the size ",
+  true,
+  SDLK_g|MOD_SHIFT|MOD_ALT, // Shift + Alt + G,
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1116,39 +1316,39 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_MOUSE_RIGHT,              // Emulate mouse right
   SPECIAL_CLICK_LEFT,               // Emulate mouse click left
   SPECIAL_CLICK_RIGHT,              // Emulate mouse click right
-  0x100+BUTTON_HIDE,              // Show / Hide menu
+  0x100+BUTTON_HIDE,                // Show / Hide menu
   SPECIAL_SHOW_HIDE_CURSOR,         // Show / Hide cursor
-  SPECIAL_DOT_PAINTBRUSH,            // Paintbrush = "."
-  0x100+BUTTON_PAINTBRUSHES,            // Paintbrush choice
-  0x200+BUTTON_PAINTBRUSHES,            // Monochrome brush
-  0x100+BUTTON_DRAW,              // Freehand drawing
-  0x200+BUTTON_DRAW,              // Switch freehand drawing mode
-  SPECIAL_CONTINUOUS_DRAW,           // Continuous freehand drawing
-  0x100+BUTTON_LINES,              // Line
-  0x200+BUTTON_LINES,              // Knotted lines
-  0x100+BUTTON_AIRBRUSH,               // Spray
-  0x200+BUTTON_AIRBRUSH,               // Spray menu
+  SPECIAL_DOT_PAINTBRUSH,           // Paintbrush = "."
+  0x100+BUTTON_PAINTBRUSHES,        // Paintbrush choice
+  0x200+BUTTON_PAINTBRUSHES,        // Monochrome brush
+  0x100+BUTTON_DRAW,                // Freehand drawing
+  0x200+BUTTON_DRAW,                // Switch freehand drawing mode
+  SPECIAL_CONTINUOUS_DRAW,          // Continuous freehand drawing
+  0x100+BUTTON_LINES,               // Line
+  0x200+BUTTON_LINES,               // Knotted lines
+  0x100+BUTTON_AIRBRUSH,            // Spray
+  0x200+BUTTON_AIRBRUSH,            // Spray menu
   0x100+BUTTON_FLOODFILL,           // Floodfill
   0x200+BUTTON_FLOODFILL,           // Replace color
-  0x100+BUTTON_CURVES,             // Bézier's curves
-  0x200+BUTTON_CURVES,             // Bézier's curve with 3 or 4 points
+  0x100+BUTTON_CURVES,              // Bézier's curves
+  0x200+BUTTON_CURVES,              // Bézier's curve with 3 or 4 points
   0x100+BUTTON_RECTANGLES,          // Empty rectangle
   0x100+BUTTON_FILLRECT,            // Filled rectangle
   0x100+BUTTON_CIRCLES,             // Empty circle
   0x200+BUTTON_CIRCLES,             // Empty ellipse
   0x100+BUTTON_FILLCIRC,            // Filled circle
   0x200+BUTTON_FILLCIRC,            // Filled ellipse
-  0x100+BUTTON_POLYGONS,           // Empty polygon
-  0x200+BUTTON_POLYGONS,           // Empty polyform
+  0x100+BUTTON_POLYGONS,            // Empty polygon
+  0x200+BUTTON_POLYGONS,            // Empty polyform
   0x100+BUTTON_POLYFILL,            // Polyfill
   0x200+BUTTON_POLYFILL,            // Filled polyform
   0x100+BUTTON_GRADRECT,            // Gradient rectangle
-  0x100+BUTTON_GRADMENU,            // Gradation menu
+  0x200+BUTTON_GRADRECT,            // Gradation menu
   0x100+BUTTON_SPHERES,             // Spheres
   0x200+BUTTON_SPHERES,             // Gradient ellipses
-  0x100+BUTTON_ADJUST,             // Adjust picture
-  0x200+BUTTON_ADJUST,             // Flip picture menu
-  0x100+BUTTON_EFFECTS,              // Menu des effets
+  0x100+BUTTON_ADJUST,              // Adjust picture
+  0x200+BUTTON_ADJUST,              // Flip picture menu
+  0x100+BUTTON_EFFECTS,             // Menu des effets
   SPECIAL_SHADE_MODE,               // Shade mode
   SPECIAL_SHADE_MENU,               // Shade menu
   SPECIAL_QUICK_SHADE_MODE,         // Quick-shade mode
@@ -1169,9 +1369,9 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_SMEAR_MODE,               // Smear mode
   SPECIAL_TILING_MODE,              // Tiling mode
   SPECIAL_TILING_MENU,              // Tiling menu
-  0x100+BUTTON_BRUSH,              // Pick brush
-  0x100+BUTTON_POLYBRUSH,          // Pick polyform brush
-  0x200+BUTTON_BRUSH,              // Restore brush
+  0x100+BUTTON_BRUSH,               // Pick brush
+  0x100+BUTTON_POLYBRUSH,           // Pick polyform brush
+  0x200+BUTTON_BRUSH,               // Restore brush
   SPECIAL_FLIP_X,                   // Flip X
   SPECIAL_FLIP_Y,                   // Flip Y
   SPECIAL_ROTATE_90,                // 90° brush rotation
@@ -1183,27 +1383,27 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_GET_BRUSH_COLORS,         // Get colors from brush
   SPECIAL_RECOLORIZE_BRUSH,         // Recolorize brush
   SPECIAL_ROTATE_ANY_ANGLE,         // Rotate brush by any angle
-  0x100+BUTTON_COLORPICKER,             // Pipette
-  0x200+BUTTON_COLORPICKER,             // Swap fore/back color
-  0x100+BUTTON_MAGNIFIER,               // Magnifier mode
-  0x200+BUTTON_MAGNIFIER,               // Zoom factor menu
+  0x100+BUTTON_COLORPICKER,         // Pipette
+  0x200+BUTTON_COLORPICKER,         // Swap fore/back color
+  0x100+BUTTON_MAGNIFIER,           // Magnifier mode
+  0x200+BUTTON_MAGNIFIER,           // Zoom factor menu
   SPECIAL_ZOOM_IN,                  // Zoom in
   SPECIAL_ZOOM_OUT,                 // Zoom out
   0x100+BUTTON_BRUSH_EFFECTS,       // Brush effects menu
-  0x100+BUTTON_TEXT,               // Text
+  0x100+BUTTON_TEXT,                // Text
   0x100+BUTTON_RESOL,               // Resolution menu
   0x200+BUTTON_RESOL,               // Safety resolution
   0x100+BUTTON_HELP,                // Help & credits
   0x200+BUTTON_HELP,                // Statistics
   0x100+BUTTON_PAGE,                // Go to spare page
   0x200+BUTTON_PAGE,                // Copy to spare page
-  0x100+BUTTON_SAVE,              // Save as
-  0x200+BUTTON_SAVE,              // Save
-  0x100+BUTTON_LOAD,             // Load
-  0x200+BUTTON_LOAD,             // Re-load
+  0x100+BUTTON_SAVE,                // Save as
+  0x200+BUTTON_SAVE,                // Save
+  0x100+BUTTON_LOAD,                // Load
+  0x200+BUTTON_LOAD,                // Re-load
   SPECIAL_SAVE_BRUSH,               // Save brush
   SPECIAL_LOAD_BRUSH,               // Load brush
-  0x100+BUTTON_SETTINGS,          // Settings
+  0x100+BUTTON_SETTINGS,            // Settings
   0x100+BUTTON_UNDO,                // Undo
   0x200+BUTTON_UNDO,                // Redo
   0x100+BUTTON_KILL,                // Kill
@@ -1230,6 +1430,31 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_PREVIOUS_USER_FORECOLOR,  // Previous user-defined foreground color
   SPECIAL_NEXT_USER_BACKCOLOR,      // Next user-defined background color
   SPECIAL_PREVIOUS_USER_BACKCOLOR,  // Previous user-defined background color
-  SPECIAL_SMALLER_PAINTBRUSH,         // Rétrécir le pinceau
-  SPECIAL_BIGGER_PAINTBRUSH           // Grossir le pinceau
+  SPECIAL_SMALLER_PAINTBRUSH,       // Sets paintbrush size: smaller
+  SPECIAL_BIGGER_PAINTBRUSH,        // Sets paintbrush size: bigger
+  SPECIAL_EFFECTS_OFF,              // Turns off all effects
+  SPECIAL_TRANSPARENCY_1,           // Sets transparency level 10%
+  SPECIAL_TRANSPARENCY_2,           // Sets transparency level 20% 
+  SPECIAL_TRANSPARENCY_3,           // Sets transparency level 30%
+  SPECIAL_TRANSPARENCY_4,           // Sets transparency level 40%
+  SPECIAL_TRANSPARENCY_5,           // Sets transparency level 50%
+  SPECIAL_TRANSPARENCY_6,           // Sets transparency level 60%
+  SPECIAL_TRANSPARENCY_7,           // Sets transparency level 70%
+  SPECIAL_TRANSPARENCY_8,           // Sets transparency level 80%
+  SPECIAL_TRANSPARENCY_9,           // Sets transparency level 90%
+  SPECIAL_TRANSPARENCY_0,           // Sets transparency level 00%
+  SPECIAL_ZOOM_1,                   /**< Sets zoom factor to 1:1 (no magnification) */
+  SPECIAL_ZOOM_2,                   /**< Sets zoom factor to 2:1 */
+  SPECIAL_ZOOM_3,                   /**< Sets zoom factor to 3:1 */
+  SPECIAL_ZOOM_4,                   /**< Sets zoom factor to 4:1 */
+  SPECIAL_ZOOM_5,                   /**< Sets zoom factor to 5:1 */
+  SPECIAL_ZOOM_6,                   /**< Sets zoom factor to 6:1 */
+  SPECIAL_ZOOM_8,                   /**< Sets zoom factor to 8:1 */
+  SPECIAL_ZOOM_10,                  /**< Sets zoom factor to 10:1 */
+  SPECIAL_ZOOM_12,                  /**< Sets zoom factor to 12:1 */
+  SPECIAL_ZOOM_14,                  /**< Sets zoom factor to 14:1 */
+  SPECIAL_ZOOM_16,                  /**< Sets zoom factor to 16:1 */
+  SPECIAL_ZOOM_18,                  /**< Sets zoom factor to 18:1 */
+  SPECIAL_ZOOM_20,                  /**< Sets zoom factor to 20:1 */
+  SPECIAL_SHOW_GRID,
 };

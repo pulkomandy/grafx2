@@ -66,6 +66,7 @@
 #include "init.h"
 #include "transform.h"
 
+char Gui_loading_error_message[512];
 
 // Rechercher la liste et le type des lecteurs de la machine
 
@@ -74,7 +75,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-void GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
+byte GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
 {
   byte color;
   int y;
@@ -86,17 +87,17 @@ void GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_co
     if (color!=neutral_color)
     {
       *start_y=y;
-      return;
+      return 0;
     }
     y++;
   } while (y<gui->h);
   
-  printf("Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
+  sprintf(Gui_loading_error_message, "Error in skin file: Was looking down from %d,%d for a '%s', and reached the end of the image\n",
     *start_x, *start_y, section);
-  Error(ERROR_GUI_CORRUPTED);
+  return 1;
 }
 
-void GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
+byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
 {
   byte color;
   int x;
@@ -108,17 +109,17 @@ void GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
     if (color!=neutral_color)
     {
       *start_x=x;
-      return;
+      return 0;
     }
     x++;
   } while (x<gui->w);
   
-  printf("Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
+  sprintf(Gui_loading_error_message, "Error in skin file: Was looking right from %d,%d for a '%s', and reached the edege of the image\n",
     *start_x, start_y, section);
-  Error(ERROR_GUI_CORRUPTED);
+  return 1;
 }
 
-void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
+byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
@@ -132,9 +133,9 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
   // Verification taille
   if (start_y+height>=gui->h || start_x+width>=gui->w)
   {
-    printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
+    sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but it doesn't fit the image.\n",
       start_x, start_y, height, width, section);
-    Error(ERROR_GUI_CORRUPTED);
+    return 1;
   }
 
   for (y=start_y; y<start_y+height; y++)
@@ -144,23 +145,23 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
       color=Get_SDL_pixel_8(gui,x,y);
       if (type==0 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White))
       {
-        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
+        sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
           start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White);
-        Error(ERROR_GUI_CORRUPTED);
+        return 1;
       }
       if (type==1 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White && color != MC_Trans))
       {
-        printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
+        sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
           start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White, MC_Trans);
-        Error(ERROR_GUI_CORRUPTED);
+        return 1;
       }
       if (type==2)
       {
         if (color != MC_White && color != MC_Trans)
         {
-          printf("Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
+          sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
             start_x, start_y, height, width, section, x, y, color, MC_White, MC_Trans);
-          Error(ERROR_GUI_CORRUPTED);
+          return 1;
         }
         // Conversion en 0/1 pour les brosses monochromes internes
         color = (color != MC_Trans);
@@ -169,14 +170,16 @@ void Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
       dest_ptr++;
     }
   }
+  return 0;
 }
 
-void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
+byte Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
   byte buffer[256];
   int x,y;
   
-  Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2);
+  if (Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2))
+    return 1;
 
   for (y=0; y<16; y++)
   {
@@ -187,13 +190,11 @@ void Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, ch
     }
     dest++;
   }
+  return 0;
 }
 
-void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
+void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
 {
-  // GFX_cursor_sprite[i]
-  //Cursor_offset_X[CURSOR_SHAPE_ARROW]=0;
-  //Cursor_offset_Y[CURSOR_SHAPE_ARROW]=0;
   int x,y;
   int start_x, start_y;
   byte found;
@@ -228,20 +229,17 @@ void Center_GUI_cursor(byte *cursor_buffer, int cursor_number)
     if (found)
       break;
   }
-  Cursor_offset_X[cursor_number]=14-start_x;
-  Cursor_offset_Y[cursor_number]=14-start_y;
+  gfx->Cursor_offset_X[cursor_number]=14-start_x;
+  gfx->Cursor_offset_Y[cursor_number]=14-start_y;
 
   for (y=0;y<CURSOR_SPRITE_HEIGHT;y++)
     for (x=0;x<CURSOR_SPRITE_WIDTH;x++)
-      GFX_cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
+      gfx->Cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 
-void Load_graphics(const char * skin_file)
+byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int  index;
-  char filename[MAX_PATH_CHARACTERS];
-  SDL_Surface * gui;
-  SDL_Palette * SDLPal;
   int i;
   int cursor_x=0,cursor_y=0;
   byte color;
@@ -251,43 +249,36 @@ void Load_graphics(const char * skin_file)
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
   byte mouse_cursor_area[29][29];
+  SDL_Palette * SDLPal;
   
-  // Lecture du fichier "skin"
-  strcpy(filename,Data_directory);
-  strcat(filename,skin_file);
-  
-  gui=IMG_Load(filename);
-  if (!gui)
-  {
-    Error(ERROR_GUI_MISSING);
-  }
+  // Default palette
   if (!gui->format || gui->format->BitsPerPixel != 8)
   {
-    printf("Not a 8-bit image");
-    Error(ERROR_GUI_CORRUPTED);
+    sprintf(Gui_loading_error_message, "Not a 8-bit image");
+    return 1;
   }
   SDLPal=gui->format->palette;
   if (!SDLPal || SDLPal->ncolors!=256)
   {
-    printf("Not a 256-color palette");
-    Error(ERROR_GUI_CORRUPTED);
+    sprintf(Gui_loading_error_message, "Not a 256-color palette");
+    return 1;
   }
-  // Lecture de la palette par défaut
+  // Read the default palette
   for (i=0; i<256; i++)
   {
-    Default_palette[i].R=SDLPal->colors[i].r;
-    Default_palette[i].G=SDLPal->colors[i].g;
-    Default_palette[i].B=SDLPal->colors[i].b;
+    gfx->Default_palette[i].R=SDLPal->colors[i].r;
+    gfx->Default_palette[i].G=SDLPal->colors[i].g;
+    gfx->Default_palette[i].B=SDLPal->colors[i].b;
   }
-  
+
   // Carré "noir"
   MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Black);
@@ -297,8 +288,8 @@ void Load_graphics(const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Dark);
@@ -308,8 +299,8 @@ void Load_graphics(const char * skin_file)
   {
     if (++cursor_x>gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Light);
@@ -319,8 +310,8 @@ void Load_graphics(const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_White);
@@ -330,8 +321,8 @@ void Load_graphics(const char * skin_file)
   {
     if (++cursor_x>=gui->w)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==MC_Trans);
@@ -346,24 +337,33 @@ void Load_graphics(const char * skin_file)
     cursor_y++;
     if (cursor_y>=gui->h)
     {
-      printf("Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
-      Error(ERROR_GUI_CORRUPTED);
+      sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
+      return 1;
     }
   }
   
   // Menu
-  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0);
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
+    return 1;
+  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
+    return 1;
   cursor_y+=MENU_HEIGHT;
 
   // Effets
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "effect sprite"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+      return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -372,11 +372,18 @@ void Load_graphics(const char * skin_file)
   for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor");
-    Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1);
-    Center_GUI_cursor((byte *)mouse_cursor_area,i);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+      return 1;
+    Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
   cursor_y+=29;
@@ -385,10 +392,17 @@ void Load_graphics(const char * skin_file)
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu sprite"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+      return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
@@ -401,13 +415,16 @@ void Load_graphics(const char * skin_file)
     {
       if (i!=0)
         cursor_y+=PAINTBRUSH_HEIGHT;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
+      return 1;
     cursor_x+=PAINTBRUSH_WIDTH;
   }
   cursor_y+=PAINTBRUSH_HEIGHT;
@@ -416,72 +433,47 @@ void Load_graphics(const char * skin_file)
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sprite drive"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive");
-    Read_GUI_block(gui, cursor_x, cursor_y, GFX_icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1);
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive"))
+        return 1;
+    }
+    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
+      return 1;
     cursor_x+=ICON_SPRITE_WIDTH;
   }
   cursor_y+=ICON_SPRITE_HEIGHT;
 
   // Logo splash screen
-  if (!(GFX_logo_grafx2=(byte *)malloc(231*56)))
-    Error(ERROR_MEMORY);
 
-  GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu");
-  Read_GUI_block(gui, cursor_x, cursor_y, GFX_logo_grafx2, 231, 56, "logo menu",3);
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
+    return 1;
+  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
+    return 1;
   cursor_y+=56;
   
   // Trames
   for (i=0; i<NB_PRESET_SIEVE; i++)
   {
     if (i==0)
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern");
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "sieve pattern"))
+        return 1;
+    }
     else
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern");
-    Read_GUI_pattern(gui, cursor_x, cursor_y, GFX_sieve_pattern[i],"sieve pattern");
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern"))
+        return 1;
+    }
+    if (Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
+      return 1;
     cursor_x+=16;
   }
   cursor_y+=16;
-  
-  // Font Système
-  for (i=0; i<256; i++)
-  {
-    // Rangés par ligne de 32
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "system font");
-    }
-    else
-    {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "system font");
-    }
-    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_system_font[i*64], 8, 8, "system font",2);
-    cursor_x+=8;
-  }
-  cursor_y+=8;
-  Menu_font=GFX_system_font;
-
-  // Font Fun
-  for (i=0; i<256; i++)
-  {
-    // Rangés par ligne de 32
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "fun font");
-    }
-    else
-    {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "fun font");
-    }
-    Read_GUI_block(gui, cursor_x, cursor_y, &GFX_fun_font[i*64], 8, 8, "fun font",2);
-    cursor_x+=8;
-  }
-  cursor_y+=8;
 
   // Font help normale
   for (i=0; i<256; i++)
@@ -491,13 +483,16 @@ void Load_graphics(const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_help_font_norm[i][0][0]), 6, 8, "help font (norm)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -510,13 +505,16 @@ void Load_graphics(const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)"))
+        return 1;
     }
-    Read_GUI_block(gui, cursor_x, cursor_y, &(GFX_bold_font[i][0][0]), 6, 8, "help font (bold)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
@@ -530,233 +528,344 @@ void Load_graphics(const char * skin_file)
     {
       if (i!=0)
         cursor_y+=8;
-      GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)");
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)"))
+        return 1;
     }
     else
     {
-      GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (title)");
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (title)"))
+        return 1;
     }
     
     if (i&1)
       if (i&64)
-        dest=&(GFX_help_font_t4[char_4++][0][0]);
+        dest=&(gfx->Help_font_t4[char_4++][0][0]);
       else
-        dest=&(GFX_help_font_t2[char_2++][0][0]);
+        dest=&(gfx->Help_font_t2[char_2++][0][0]);
     else
       if (i&64)
-        dest=&(GFX_help_font_t3[char_3++][0][0]);
+        dest=&(gfx->Help_font_t3[char_3++][0][0]);
       else
-        dest=&(GFX_help_font_t1[char_1++][0][0]);
+        dest=&(gfx->Help_font_t1[char_1++][0][0]);
     
-    Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0);
+    if (Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
+      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
   
-  // Terminé: libération de l'image skin
-  SDL_FreeSurface(gui);
-
   Current_help_section=0;
   Help_position=0;
 
-  Preset_paintbrush_width[ 0]= 1;
-  Preset_paintbrush_height[ 0]= 1;
-  Paintbrush_type             [ 0]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 0]= 1;
+  gfx->Preset_paintbrush_height[ 0]= 1;
+  gfx->Paintbrush_type         [ 0]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 1]= 2;
-  Preset_paintbrush_height[ 1]= 2;
-  Paintbrush_type             [ 1]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 1]= 2;
+  gfx->Preset_paintbrush_height[ 1]= 2;
+  gfx->Paintbrush_type         [ 1]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 2]= 3;
-  Preset_paintbrush_height[ 2]= 3;
-  Paintbrush_type             [ 2]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 2]= 3;
+  gfx->Preset_paintbrush_height[ 2]= 3;
+  gfx->Paintbrush_type         [ 2]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 3]= 4;
-  Preset_paintbrush_height[ 3]= 4;
-  Paintbrush_type             [ 3]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 3]= 4;
+  gfx->Preset_paintbrush_height[ 3]= 4;
+  gfx->Paintbrush_type         [ 3]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 4]= 5;
-  Preset_paintbrush_height[ 4]= 5;
-  Paintbrush_type             [ 4]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 4]= 5;
+  gfx->Preset_paintbrush_height[ 4]= 5;
+  gfx->Paintbrush_type         [ 4]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 5]= 7;
-  Preset_paintbrush_height[ 5]= 7;
-  Paintbrush_type             [ 5]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 5]= 7;
+  gfx->Preset_paintbrush_height[ 5]= 7;
+  gfx->Paintbrush_type         [ 5]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 6]= 8;
-  Preset_paintbrush_height[ 6]= 8;
-  Paintbrush_type             [ 6]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 6]= 8;
+  gfx->Preset_paintbrush_height[ 6]= 8;
+  gfx->Paintbrush_type         [ 6]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 7]=12;
-  Preset_paintbrush_height[ 7]=12;
-  Paintbrush_type             [ 7]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 7]=12;
+  gfx->Preset_paintbrush_height[ 7]=12;
+  gfx->Paintbrush_type         [ 7]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 8]=16;
-  Preset_paintbrush_height[ 8]=16;
-  Paintbrush_type             [ 8]=PAINTBRUSH_SHAPE_SQUARE;
+  gfx->Preset_paintbrush_width [ 8]=16;
+  gfx->Preset_paintbrush_height[ 8]=16;
+  gfx->Paintbrush_type         [ 8]=PAINTBRUSH_SHAPE_SQUARE;
 
-  Preset_paintbrush_width[ 9]=16;
-  Preset_paintbrush_height[ 9]=16;
-  Paintbrush_type             [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
+  gfx->Preset_paintbrush_width [ 9]=16;
+  gfx->Preset_paintbrush_height[ 9]=16;
+  gfx->Paintbrush_type         [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
 
-  Preset_paintbrush_width[10]=15;
-  Preset_paintbrush_height[10]=15;
-  Paintbrush_type             [10]=PAINTBRUSH_SHAPE_DIAMOND;
+  gfx->Preset_paintbrush_width [10]=15;
+  gfx->Preset_paintbrush_height[10]=15;
+  gfx->Paintbrush_type         [10]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Preset_paintbrush_width[11]= 5;
-  Preset_paintbrush_height[11]= 5;
-  Paintbrush_type             [11]=PAINTBRUSH_SHAPE_DIAMOND;
+  gfx->Preset_paintbrush_width [11]= 5;
+  gfx->Preset_paintbrush_height[11]= 5;
+  gfx->Paintbrush_type         [11]=PAINTBRUSH_SHAPE_DIAMOND;
 
-  Preset_paintbrush_width[12]= 3;
-  Preset_paintbrush_height[12]= 3;
-  Paintbrush_type             [12]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [12]= 3;
+  gfx->Preset_paintbrush_height[12]= 3;
+  gfx->Paintbrush_type         [12]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[13]= 4;
-  Preset_paintbrush_height[13]= 4;
-  Paintbrush_type             [13]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [13]= 4;
+  gfx->Preset_paintbrush_height[13]= 4;
+  gfx->Paintbrush_type         [13]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[14]= 5;
-  Preset_paintbrush_height[14]= 5;
-  Paintbrush_type             [14]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [14]= 5;
+  gfx->Preset_paintbrush_height[14]= 5;
+  gfx->Paintbrush_type         [14]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[15]= 6;
-  Preset_paintbrush_height[15]= 6;
-  Paintbrush_type             [15]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [15]= 6;
+  gfx->Preset_paintbrush_height[15]= 6;
+  gfx->Paintbrush_type         [15]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[16]= 8;
-  Preset_paintbrush_height[16]= 8;
-  Paintbrush_type             [16]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [16]= 8;
+  gfx->Preset_paintbrush_height[16]= 8;
+  gfx->Paintbrush_type         [16]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[17]=10;
-  Preset_paintbrush_height[17]=10;
-  Paintbrush_type             [17]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [17]=10;
+  gfx->Preset_paintbrush_height[17]=10;
+  gfx->Paintbrush_type         [17]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[18]=12;
-  Preset_paintbrush_height[18]=12;
-  Paintbrush_type             [18]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [18]=12;
+  gfx->Preset_paintbrush_height[18]=12;
+  gfx->Paintbrush_type         [18]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[19]=14;
-  Preset_paintbrush_height[19]=14;
-  Paintbrush_type             [19]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [19]=14;
+  gfx->Preset_paintbrush_height[19]=14;
+  gfx->Paintbrush_type         [19]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[20]=16;
-  Preset_paintbrush_height[20]=16;
-  Paintbrush_type             [20]=PAINTBRUSH_SHAPE_ROUND;
+  gfx->Preset_paintbrush_width [20]=16;
+  gfx->Preset_paintbrush_height[20]=16;
+  gfx->Paintbrush_type         [20]=PAINTBRUSH_SHAPE_ROUND;
 
-  Preset_paintbrush_width[21]=15;
-  Preset_paintbrush_height[21]=15;
-  Paintbrush_type             [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [21]=15;
+  gfx->Preset_paintbrush_height[21]=15;
+  gfx->Paintbrush_type         [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[22]=11;
-  Preset_paintbrush_height[22]=11;
-  Paintbrush_type             [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [22]=11;
+  gfx->Preset_paintbrush_height[22]=11;
+  gfx->Paintbrush_type         [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[23]= 5;
-  Preset_paintbrush_height[23]= 5;
-  Paintbrush_type             [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
+  gfx->Preset_paintbrush_width [23]= 5;
+  gfx->Preset_paintbrush_height[23]= 5;
+  gfx->Paintbrush_type         [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
 
-  Preset_paintbrush_width[24]= 2;
-  Preset_paintbrush_height[24]= 1;
-  Paintbrush_type             [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [24]= 2;
+  gfx->Preset_paintbrush_height[24]= 1;
+  gfx->Paintbrush_type         [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[25]= 3;
-  Preset_paintbrush_height[25]= 1;
-  Paintbrush_type             [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [25]= 3;
+  gfx->Preset_paintbrush_height[25]= 1;
+  gfx->Paintbrush_type         [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[26]= 4;
-  Preset_paintbrush_height[26]= 1;
-  Paintbrush_type             [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [26]= 4;
+  gfx->Preset_paintbrush_height[26]= 1;
+  gfx->Paintbrush_type         [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[27]= 8;
-  Preset_paintbrush_height[27]= 1;
-  Paintbrush_type             [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
+  gfx->Preset_paintbrush_width [27]= 8;
+  gfx->Preset_paintbrush_height[27]= 1;
+  gfx->Paintbrush_type         [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
 
-  Preset_paintbrush_width[28]= 1;
-  Preset_paintbrush_height[28]= 2;
-  Paintbrush_type             [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [28]= 1;
+  gfx->Preset_paintbrush_height[28]= 2;
+  gfx->Paintbrush_type         [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[29]= 1;
-  Preset_paintbrush_height[29]= 3;
-  Paintbrush_type             [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [29]= 1;
+  gfx->Preset_paintbrush_height[29]= 3;
+  gfx->Paintbrush_type         [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[30]= 1;
-  Preset_paintbrush_height[30]= 4;
-  Paintbrush_type             [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [30]= 1;
+  gfx->Preset_paintbrush_height[30]= 4;
+  gfx->Paintbrush_type         [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[31]= 1;
-  Preset_paintbrush_height[31]= 8;
-  Paintbrush_type             [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
+  gfx->Preset_paintbrush_width [31]= 1;
+  gfx->Preset_paintbrush_height[31]= 8;
+  gfx->Paintbrush_type         [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
 
-  Preset_paintbrush_width[32]= 3;
-  Preset_paintbrush_height[32]= 3;
-  Paintbrush_type             [32]=PAINTBRUSH_SHAPE_CROSS;
+  gfx->Preset_paintbrush_width [32]= 3;
+  gfx->Preset_paintbrush_height[32]= 3;
+  gfx->Paintbrush_type         [32]=PAINTBRUSH_SHAPE_CROSS;
 
-  Preset_paintbrush_width[33]= 5;
-  Preset_paintbrush_height[33]= 5;
-  Paintbrush_type             [33]=PAINTBRUSH_SHAPE_CROSS;
+  gfx->Preset_paintbrush_width [33]= 5;
+  gfx->Preset_paintbrush_height[33]= 5;
+  gfx->Paintbrush_type         [33]=PAINTBRUSH_SHAPE_CROSS;
 
-  Preset_paintbrush_width[34]= 5;
-  Preset_paintbrush_height[34]= 5;
-  Paintbrush_type             [34]=PAINTBRUSH_SHAPE_PLUS;
+  gfx->Preset_paintbrush_width [34]= 5;
+  gfx->Preset_paintbrush_height[34]= 5;
+  gfx->Paintbrush_type         [34]=PAINTBRUSH_SHAPE_PLUS;
 
-  Preset_paintbrush_width[35]=15;
-  Preset_paintbrush_height[35]=15;
-  Paintbrush_type             [35]=PAINTBRUSH_SHAPE_PLUS;
+  gfx->Preset_paintbrush_width [35]=15;
+  gfx->Preset_paintbrush_height[35]=15;
+  gfx->Paintbrush_type         [35]=PAINTBRUSH_SHAPE_PLUS;
 
-  Preset_paintbrush_width[36]= 2;
-  Preset_paintbrush_height[36]= 2;
-  Paintbrush_type             [36]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [36]= 2;
+  gfx->Preset_paintbrush_height[36]= 2;
+  gfx->Paintbrush_type         [36]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[37]= 4;
-  Preset_paintbrush_height[37]= 4;
-  Paintbrush_type             [37]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [37]= 4;
+  gfx->Preset_paintbrush_height[37]= 4;
+  gfx->Paintbrush_type         [37]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[38]= 8;
-  Preset_paintbrush_height[38]= 8;
-  Paintbrush_type             [38]=PAINTBRUSH_SHAPE_SLASH;
+  gfx->Preset_paintbrush_width [38]= 8;
+  gfx->Preset_paintbrush_height[38]= 8;
+  gfx->Paintbrush_type         [38]=PAINTBRUSH_SHAPE_SLASH;
 
-  Preset_paintbrush_width[39]= 2;
-  Preset_paintbrush_height[39]= 2;
-  Paintbrush_type             [39]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [39]= 2;
+  gfx->Preset_paintbrush_height[39]= 2;
+  gfx->Paintbrush_type         [39]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[40]= 4;
-  Preset_paintbrush_height[40]= 4;
-  Paintbrush_type             [40]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [40]= 4;
+  gfx->Preset_paintbrush_height[40]= 4;
+  gfx->Paintbrush_type         [40]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[41]= 8;
-  Preset_paintbrush_height[41]= 8;
-  Paintbrush_type             [41]=PAINTBRUSH_SHAPE_ANTISLASH;
+  gfx->Preset_paintbrush_width [41]= 8;
+  gfx->Preset_paintbrush_height[41]= 8;
+  gfx->Paintbrush_type         [41]=PAINTBRUSH_SHAPE_ANTISLASH;
 
-  Preset_paintbrush_width[42]= 4;
-  Preset_paintbrush_height[42]= 4;
-  Paintbrush_type             [42]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [42]= 4;
+  gfx->Preset_paintbrush_height[42]= 4;
+  gfx->Paintbrush_type         [42]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[43]= 8;
-  Preset_paintbrush_height[43]= 8;
-  Paintbrush_type             [43]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [43]= 8;
+  gfx->Preset_paintbrush_height[43]= 8;
+  gfx->Paintbrush_type         [43]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[44]=13;
-  Preset_paintbrush_height[44]=13;
-  Paintbrush_type             [44]=PAINTBRUSH_SHAPE_RANDOM;
+  gfx->Preset_paintbrush_width [44]=13;
+  gfx->Preset_paintbrush_height[44]=13;
+  gfx->Paintbrush_type         [44]=PAINTBRUSH_SHAPE_RANDOM;
 
-  Preset_paintbrush_width[45]= 3;
-  Preset_paintbrush_height[45]= 3;
-  Paintbrush_type             [45]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [45]= 3;
+  gfx->Preset_paintbrush_height[45]= 3;
+  gfx->Paintbrush_type         [45]=PAINTBRUSH_SHAPE_MISC;
 
-  Preset_paintbrush_width[46]= 3;
-  Preset_paintbrush_height[46]= 3;
-  Paintbrush_type             [46]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [46]= 3;
+  gfx->Preset_paintbrush_height[46]= 3;
+  gfx->Paintbrush_type         [46]=PAINTBRUSH_SHAPE_MISC;
 
-  Preset_paintbrush_width[47]= 7;
-  Preset_paintbrush_height[47]= 7;
-  Paintbrush_type             [47]=PAINTBRUSH_SHAPE_MISC;
+  gfx->Preset_paintbrush_width [47]= 7;
+  gfx->Preset_paintbrush_height[47]= 7;
+  gfx->Paintbrush_type         [47]=PAINTBRUSH_SHAPE_MISC;
 
   for (index=0;index<NB_PAINTBRUSH_SPRITES;index++)
   {
-    Preset_paintbrush_offset_X[index]=(Preset_paintbrush_width[index]>>1);
-    Preset_paintbrush_offset_Y[index]=(Preset_paintbrush_height[index]>>1);
+    gfx->Preset_paintbrush_offset_X[index]=(gfx->Preset_paintbrush_width [index]>>1);
+    gfx->Preset_paintbrush_offset_Y[index]=(gfx->Preset_paintbrush_height[index]>>1);
   }
+  return 0;
+}
 
+T_Gui_skin * Load_graphics(const char * skin_file)
+{
+  T_Gui_skin * gfx;
+  char filename[MAX_PATH_CHARACTERS];
+  SDL_Surface * gui;
+
+  gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
+  if (gfx == NULL)
+  {
+    sprintf(Gui_loading_error_message, "Not enough memory to read skin file\n");
+    return NULL;
+  }
+  
+  // Read the "skin" file
+  strcpy(filename,Data_directory);
+  strcat(filename,"skins" PATH_SEPARATOR);
+  strcat(filename,skin_file);
+  
+  gui=IMG_Load(filename);
+  if (!gui)
+  {
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    free(gfx);
+    return NULL;
+  }
+  if (Parse_skin(gui, gfx))
+  {
+    SDL_FreeSurface(gui);
+    free(gfx);
+    return NULL;
+  }
+  SDL_FreeSurface(gui);
+  return gfx;
+}
+
+// ---- font loading -----
+
+byte Parse_font(SDL_Surface * image, byte * font)
+{
+  int character;
+  byte color;
+  int x, y;
+  int chars_per_line;
+  
+  // Check image size
+  if (image->w % 8)
+  {
+    sprintf(Gui_loading_error_message, "Error in font file: Image width is not a multiple of 8.\n");
+    return 1;
+  }
+  if (image->w * image->h < 8*8*256)
+  {
+    sprintf(Gui_loading_error_message, "Error in font file: Image is too small to be a 256-character 8x8 font.\n");
+    return 1;
+  }
+  chars_per_line = image->w/8;
+
+  for (character=0; character < 256; character++)
+  {
+    for (y=0; y<8; y++)
+    {
+      for (x=0;x<8; x++)
+      {
+        // Pick pixel
+        color = Get_SDL_pixel_8(image, (character % chars_per_line)*8+x, (character / chars_per_line)*8+y);
+        if (color > 1)
+        {
+          sprintf(Gui_loading_error_message, "Error in font file: Only colors 0 and 1 can be used for the font.\n");
+          return 1;
+        }
+        // Put it in font. 0 = BG, 1 = FG.
+        font[character*64 + y*8 + x]=color;
+      }
+    }
+  }
+  return 0;
+}
+
+byte * Load_font(const char * font_name)
+{
+  byte * font;
+  char filename[MAX_PATH_CHARACTERS];
+  SDL_Surface * image;
+
+  font = (byte *)malloc(8*8*256);
+  if (font == NULL)
+  {
+    sprintf(Gui_loading_error_message, "Not enough memory to read font file\n");
+    return NULL;
+  }
+  
+  // Read the file containing the image
+  sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
+  
+  image=IMG_Load(filename);
+  if (!image)
+  {
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    free(font);
+    return NULL;
+  }
+  if (Parse_font(image, font))
+  {
+    SDL_FreeSurface(image);
+    free(font);
+    return NULL;
+  }
+  SDL_FreeSurface(image);
+  return font;
 }
 
 
@@ -920,19 +1029,11 @@ void Init_buttons(void)
 
   Init_button(BUTTON_GRADRECT,
                      85,1,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Grad_rectangle,Button_Grad_rectangle,
+                     16,16,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Grad_rectangle,Button_Gradients,
                      Do_nothing,
                      FAMILY_TOOL);
-
-  Init_button(BUTTON_GRADMENU,
-                     86,2,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Gradients,Button_Gradients,
-                     Do_nothing,
-                     FAMILY_INSTANT);
 
   Init_button(BUTTON_SPHERES,
                      85,18,
@@ -1034,7 +1135,7 @@ void Init_buttons(void)
                      178,18,
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Settings,Button_Settings,
+                     Button_Settings,Button_Skins,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1128,13 +1229,16 @@ void Init_buttons(void)
 void Init_operation(byte operation_number,
                            byte mouse_button,
                            byte stack_index,
-                           Func_action Action,
-                           byte Hide_cursor)
+                           Func_action action,
+                           byte hide_cursor,
+                           byte fast_mouse)
 {
   Operation[operation_number][mouse_button]
-           [stack_index].Action=Action;
+           [stack_index].Action=action;
   Operation[operation_number][mouse_button]
-           [stack_index].Hide_cursor=Hide_cursor;
+           [stack_index].Hide_cursor=hide_cursor;
+  Operation[operation_number][mouse_button]
+           [stack_index].Fast_mouse=fast_mouse;
 }
 
 
@@ -1145,391 +1249,393 @@ void Init_operations(void)
   byte number; // Numéro de l'option en cours d'auto-initialisation
   byte Button; // Button souris en cours d'auto-initialisation
   byte stack_index; // Taille de la pile en cours d'auto-initialisation
+  #define HIDE_CURSOR 1
+  #define FAST_MOUSE 1
 
   // Auto-initialisation des opérations (vers des actions inoffensives)
 
   for (number=0;number<NB_OPERATIONS;number++)
     for (Button=0;Button<3;Button++)
       for (stack_index=0;stack_index<OPERATION_STACK_SIZE;stack_index++)
-        Init_operation(number,Button,stack_index,Print_coordinates,0);
+        Init_operation(number,Button,stack_index,Print_coordinates,HIDE_CURSOR,FAST_MOUSE);
 
 
   // Ici viennent les déclarations détaillées des opérations
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,0,
-                        Freehand_mode1_1_0,1);
+                        Freehand_mode1_1_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,2,
-                        Freehand_mode1_1_2,0);
+                        Freehand_mode1_1_2,0,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,0,2,
-                        Freehand_mode12_0_2,0);
+                        Freehand_mode12_0_2,0,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,2,0,
-                        Freehand_mode1_2_0,1);
+                        Freehand_mode1_2_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,2,2,
-                        Freehand_mode1_2_2,0);
+                        Freehand_mode1_2_2,0,0);
 
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,0,
-                        Freehand_mode2_1_0,1);
+                        Freehand_mode2_1_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,1,2,
-                        Freehand_mode2_1_2,0);
+                        Freehand_mode2_1_2,0,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,0,2,
-                        Freehand_mode12_0_2,0);
+                        Freehand_mode12_0_2,0,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,0,
-                        Freehand_mode2_2_0,1);
+                        Freehand_mode2_2_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_DISCONTINUOUS_DRAW,2,2,
-                        Freehand_mode2_2_2,0);
+                        Freehand_mode2_2_2,0,0);
 
   Init_operation(OPERATION_POINT_DRAW,1,0,
-                        Freehand_mode3_1_0,1);
+                        Freehand_mode3_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POINT_DRAW,2,0,
-                        Freehand_Mode3_2_0,1);
+                        Freehand_Mode3_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POINT_DRAW,0,1,
-                        Freehand_mode3_0_1,0);
+                        Freehand_mode3_0_1,0,FAST_MOUSE);
 
   Init_operation(OPERATION_LINE,1,0,
-                        Line_12_0,1);
+                        Line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,1,5,
-                        Line_12_5,0);
+                        Line_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_LINE,0,5,
-                        Line_0_5,1);
+                        Line_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,2,0,
-                        Line_12_0,1);
+                        Line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_LINE,2,5,
-                        Line_12_5,0);
+                        Line_12_5,0,FAST_MOUSE);
 
   Init_operation(OPERATION_K_LIGNE,1,0,
-                        K_line_12_0,1);
+                        K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,1,6,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,1,7,
-                        K_line_12_7,1);
-  Init_operation(OPERATION_K_LIGNE,2,0,
-                        K_line_12_0,1);
+                        K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_K_LIGNE,2,FAST_MOUSE,
+                        K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,2,6,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,2,7,
-                        K_line_12_7,1);
+                        K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,0,6,
-                        K_line_0_6,1);
+                        K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_K_LIGNE,0,7,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,2,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,2,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_RECTANGLE,0,5,
-                        Empty_rectangle_0_5,1);
+                        Empty_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_RECTANGLE,1,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,2,0,
-                        Rectangle_12_0,1);
+                        Rectangle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,1,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,2,5,
-                        Rectangle_12_5,0);
+                        Rectangle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_RECTANGLE,0,5,
-                        Filled_rectangle_0_5,1);
+                        Filled_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_CIRCLE,1,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,2,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,1,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,2,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_CIRCLE,0,5,
-                        Empty_circle_0_5,1);
+                        Empty_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_CIRCLE,1,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,2,0,
-                        Circle_12_0,1);
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,1,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,2,5,
-                        Circle_12_5,0);
+                        Circle_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_CIRCLE,0,5,
-                        Filled_circle_0_5,1);
+                        Filled_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_ELLIPSE,1,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,2,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,1,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,2,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_EMPTY_ELLIPSE,0,5,
-                        Empty_ellipse_0_5,1);
+                        Empty_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_ELLIPSE,1,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,2,0,
-                        Ellipse_12_0,1);
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,1,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,2,5,
-                        Ellipse_12_5,0);
+                        Ellipse_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_ELLIPSE,0,5,
-                        Filled_ellipse_0_5,1);
+                        Filled_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILL,1,0,
-                        Fill_1_0,0);
+                        Fill_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_FILL,2,0,
-                        Fill_2_0,0);
+                        Fill_2_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_REPLACE,1,0,
-                        Replace_1_0,0);
+                        Replace_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_REPLACE,2,0,
-                        Replace_2_0,0);
+                        Replace_2_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_GRAB_BRUSH,1,0,
-                        Brush_12_0,1);
+                        Brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,2,0,
-                        Brush_12_0,1);
+                        Brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,1,5,
-                        Brush_12_5,0);
+                        Brush_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,2,5,
-                        Brush_12_5,0);
+                        Brush_12_5,0,FAST_MOUSE);
   Init_operation(OPERATION_GRAB_BRUSH,0,5,
-                        Brush_0_5,1);
+                        Brush_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_STRETCH_BRUSH,1,0,
-                        Stretch_brush_12_0,1);
+                        Stretch_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,2,0,
-                        Stretch_brush_12_0,1);
+                        Stretch_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,1,7,
-                        Stretch_brush_1_7,0);
+                        Stretch_brush_1_7,0,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,0,7,
-                        Stretch_brush_0_7,0);
+                        Stretch_brush_0_7,0,FAST_MOUSE);
   Init_operation(OPERATION_STRETCH_BRUSH,2,7,
-                        Stretch_brush_2_7,1);
+                        Stretch_brush_2_7,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_ROTATE_BRUSH,1,0,
-                        Rotate_brush_12_0,1);
+                        Rotate_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,2,0,
-                        Rotate_brush_12_0,1);
+                        Rotate_brush_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,1,5,
-                        Rotate_brush_1_5,0);
+                        Rotate_brush_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,0,5,
-                        Rotate_brush_0_5,0);
+                        Rotate_brush_0_5,0,FAST_MOUSE);
   Init_operation(OPERATION_ROTATE_BRUSH,2,5,
-                        Rotate_brush_2_5,1);
+                        Rotate_brush_2_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_DISTORT_BRUSH,0,0,
-                        Distort_brush_0_0,0);
+                        Distort_brush_0_0,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,0,
-                        Distort_brush_1_0,0);
+                        Distort_brush_1_0,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,8,
-                        Distort_brush_1_8,0);
+                        Distort_brush_1_8,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,2,8,
-                        Distort_brush_2_8,1);
+                        Distort_brush_2_8,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,2,0,
-                        Distort_brush_2_0,1);
+                        Distort_brush_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,1,9,
-                        Distort_brush_1_9,0);
+                        Distort_brush_1_9,0,FAST_MOUSE);
   Init_operation(OPERATION_DISTORT_BRUSH,0,9,
-                        Distort_brush_0_9,0);
+                        Distort_brush_0_9,0,FAST_MOUSE);
 
 
   Init_operation(OPERATION_POLYBRUSH,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYBRUSH,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYBRUSH,1,8,
-                        Polybrush_12_8,0);
+                        Polybrush_12_8,0,0);
   Init_operation(OPERATION_POLYBRUSH,2,8,
-                        Polybrush_12_8,0);
+                        Polybrush_12_8,0,0);
   Init_operation(OPERATION_POLYBRUSH,0,8,
-                        Filled_polyform_0_8,0);
+                        Filled_polyform_0_8,0,FAST_MOUSE);
 
   Colorpicker_color=-1;
   Init_operation(OPERATION_COLORPICK,1,0,
-                        Colorpicker_12_0,1);
+                        Colorpicker_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,2,0,
-                        Colorpicker_12_0,0);
+                        Colorpicker_12_0,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,1,1,
-                        Colorpicker_1_1,0);
+                        Colorpicker_1_1,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,2,1,
-                        Colorpicker_2_1,0);
+                        Colorpicker_2_1,0,FAST_MOUSE);
   Init_operation(OPERATION_COLORPICK,0,1,
-                        Colorpicker_0_1,1);
+                        Colorpicker_0_1,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_MAGNIFY,1,0,
-                        Magnifier_12_0,0);
+                        Magnifier_12_0,0,FAST_MOUSE);
   Init_operation(OPERATION_MAGNIFY,2,0,
-                        Magnifier_12_0,0);
+                        Magnifier_12_0,0,FAST_MOUSE);
 
   Init_operation(OPERATION_4_POINTS_CURVE,1,0,
-                        Curve_34_points_1_0,1);
+                        Curve_34_points_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,0,
-                        Curve_34_points_2_0,1);
+                        Curve_34_points_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,1,5,
-                        Curve_34_points_1_5,0);
+                        Curve_34_points_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,5,
-                        Curve_34_points_2_5,0);
+                        Curve_34_points_2_5,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,0,5,
-                        Curve_4_points_0_5,1);
+                        Curve_4_points_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,1,9,
-                        Curve_4_points_1_9,0);
+                        Curve_4_points_1_9,0,FAST_MOUSE);
   Init_operation(OPERATION_4_POINTS_CURVE,2,9,
-                        Curve_4_points_2_9,0);
+                        Curve_4_points_2_9,0,FAST_MOUSE);
 
   Init_operation(OPERATION_3_POINTS_CURVE,1,0,
-                        Curve_34_points_1_0,1);
+                        Curve_34_points_1_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,0,
-                        Curve_34_points_2_0,1);
+                        Curve_34_points_2_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,1,5,
-                        Curve_34_points_1_5,0);
+                        Curve_34_points_1_5,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,5,
-                        Curve_34_points_2_5,0);
+                        Curve_34_points_2_5,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,0,5,
-                        Curve_3_points_0_5,1);
+                        Curve_3_points_0_5,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,0,11,
-                        Curve_3_points_0_11,0);
+                        Curve_3_points_0_11,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,1,11,
-                        Curve_3_points_12_11,0);
+                        Curve_3_points_12_11,0,FAST_MOUSE);
   Init_operation(OPERATION_3_POINTS_CURVE,2,11,
-                        Curve_3_points_12_11,0);
+                        Curve_3_points_12_11,0,FAST_MOUSE);
 
   Init_operation(OPERATION_AIRBRUSH,1,0,
-                        Airbrush_1_0,0);
+                        Airbrush_1_0,0,0);
   Init_operation(OPERATION_AIRBRUSH,2,0,
-                        Airbrush_2_0,0);
+                        Airbrush_2_0,0,0);
   Init_operation(OPERATION_AIRBRUSH,1,2,
-                        Airbrush_12_2,0);
+                        Airbrush_12_2,0,0);
   Init_operation(OPERATION_AIRBRUSH,2,2,
-                        Airbrush_12_2,0);
+                        Airbrush_12_2,0,0);
   Init_operation(OPERATION_AIRBRUSH,0,2,
-                        Airbrush_0_2,0);
+                        Airbrush_0_2,0,0);
 
   Init_operation(OPERATION_POLYGON,1,0,
-                        Polygon_12_0,1);
+                        Polygon_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,0,
-                        Polygon_12_0,1);
+                        Polygon_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,1,8,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,8,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,1,9,
-                        Polygon_12_9,1);
+                        Polygon_12_9,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,2,9,
-                        Polygon_12_9,1);
+                        Polygon_12_9,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,0,8,
-                        K_line_0_6,1);
+                        K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYGON,0,9,
-                        K_line_12_6,0);
+                        K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_POLYFILL,1,0,
-                        Polyfill_12_0,1);
+                        Polyfill_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,0,
-                        Polyfill_12_0,1);
+                        Polyfill_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,1,8,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,8,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,1,9,
-                        Polyfill_12_9,0);
+                        Polyfill_12_9,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,2,9,
-                        Polyfill_12_9,0);
+                        Polyfill_12_9,0,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,0,8,
-                        Polyfill_0_8,1);
+                        Polyfill_0_8,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFILL,0,9,
-                        Polyfill_12_8,0);
+                        Polyfill_12_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_POLYFORM,1,0,
-                        Polyform_12_0,1);
+                        Polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFORM,2,0,
-                        Polyform_12_0,1);
+                        Polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_POLYFORM,1,8,
-                        Polyform_12_8,0);
+                        Polyform_12_8,0,0);
   Init_operation(OPERATION_POLYFORM,2,8,
-                        Polyform_12_8,0);
+                        Polyform_12_8,0,0);
   Init_operation(OPERATION_POLYFORM,0,8,
-                        Polyform_0_8,0);
+                        Polyform_0_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_POLYFORM,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_POLYFORM,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_FILLED_POLYFORM,1,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_POLYFORM,2,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_POLYFORM,0,8,
-                        Filled_polyform_0_8,0);
+                        Filled_polyform_0_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_FILLED_CONTOUR,1,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_FILLED_CONTOUR,2,0,
-                        Filled_polyform_12_0,1);
+                        Filled_polyform_12_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_FILLED_CONTOUR,1,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_CONTOUR,2,8,
-                        Filled_polyform_12_8,0);
+                        Filled_polyform_12_8,0,0);
   Init_operation(OPERATION_FILLED_CONTOUR,0,8,
-                        Filled_contour_0_8,0);
+                        Filled_contour_0_8,0,0);
 
   Init_operation(OPERATION_SCROLL,1,0,
-                        Scroll_12_0,1);
+                        Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,0,
-                        Scroll_12_0,1);
+                        Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,1,4,
-                        Scroll_12_4,0);
+                        Scroll_12_4,0,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,4,
-                        Scroll_12_4,0);
+                        Scroll_12_4,0,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,0,4,
-                        Scroll_0_4,1);
+                        Scroll_0_4,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,1);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,1);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,5,Grad_rectangle_0_5,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,7,Grad_rectangle_0_7,0);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,7,Grad_rectangle_12_7,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,2,7,Grad_rectangle_12_7,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,1,9,Grad_rectangle_12_9,1);
-  Init_operation(OPERATION_GRAD_RECTANGLE,0,9,Grad_rectangle_0_9,0);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,5,Grad_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,7,Grad_rectangle_0_7,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,7,Grad_rectangle_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,2,7,Grad_rectangle_12_7,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,1,9,Grad_rectangle_12_9,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_RECTANGLE,0,9,Grad_rectangle_0_9,0,FAST_MOUSE);
 
 
   Init_operation(OPERATION_CENTERED_LINES,1,0,
-                        Centered_lines_12_0,1);
+                        Centered_lines_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,0,
-                        Centered_lines_12_0,1);
+                        Centered_lines_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,1,3,
-                        Centered_lines_12_3,0);
+                        Centered_lines_12_3,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,3,
-                        Centered_lines_12_3,0);
+                        Centered_lines_12_3,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,3,
-                        Centered_lines_0_3,1);
+                        Centered_lines_0_3,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,1,7,
-                        Centered_lines_12_7,0);
+                        Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,2,7,
-                        Centered_lines_12_7,0);
+                        Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
-                        Centered_lines_0_7,0);
+                        Centered_lines_0_7,0,FAST_MOUSE);
 }
 
 
@@ -2340,3 +2446,23 @@ void Init_sighandler(void)
 #endif
 }
 
+void Init_brush_container(void)
+{
+  int i;
+  
+  for (i=0; i<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; i++)
+  {
+    int x,y;
+    
+    Brush_container[i].Paintbrush_shape=PAINTBRUSH_SHAPE_MAX;
+    Brush_container[i].Width=0;
+    Brush_container[i].Height=0;
+    memset(Brush_container[i].Palette,sizeof(T_Palette),0);
+    Brush_container[i].Transp_color=0;  
+    for (y=0; y<BRUSH_CONTAINER_PREVIEW_WIDTH; y++)
+      for (x=0; x<BRUSH_CONTAINER_PREVIEW_HEIGHT; x++)
+        Brush_container[i].Thumbnail[y][x]=0;
+        
+    Brush_container[i].Brush = NULL;
+  }
+}

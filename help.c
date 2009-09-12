@@ -119,7 +119,7 @@ void Window_set_shortcut(int action_id)
   while (Ordering[order_index]!=action_id)
   {
     order_index++;
-    if (order_index>=134)
+    if (order_index>=NB_SHORTCUTS)
     {
       Error(0);
       return;
@@ -130,7 +130,7 @@ void Window_set_shortcut(int action_id)
   while (ConfigKey[config_index].Number!=order_index)
   {
     config_index++;
-    if (config_index>=134)
+    if (config_index>=NB_SHORTCUTS)
     {
       Error(0);
       return;
@@ -278,7 +278,21 @@ void Display_help(void)
     else if (line_type == 'K')
     {
       const char *hyperlink;
+      const char * escaped_percent_pos;
+      // Determine link position:
       link_position = strstr(line,"%s") - line;
+      // Adjust for any escaped %% that would precede it.
+      escaped_percent_pos = line;
+      do
+      {
+        escaped_percent_pos = strstr(escaped_percent_pos,"%%");
+        if (escaped_percent_pos && escaped_percent_pos - line < link_position)
+        {
+          link_position--;
+          escaped_percent_pos+=2;
+        }
+      } while (escaped_percent_pos);
+      //
       hyperlink=Keyboard_shortcut_value(Help_section[Current_help_section].Help_table[start_line + line_index].Line_parameter);
       link_size=strlen(hyperlink);
       snprintf(buffer, 44, line, hyperlink);
@@ -309,27 +323,27 @@ void Display_help(void)
         if (line_type=='T')
         {
           if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(GFX_help_font_norm['!'][0][0]); // Caractère pas géré
+            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
           else if (char_index & 1)
-            char_pixel=&(GFX_help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
           else
-            char_pixel=&(GFX_help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
         }
         else if (line_type=='-')
         {
           if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(GFX_help_font_norm['!'][0][0]); // Caractère pas géré
+            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
           else if (char_index & 1)
-            char_pixel=&(GFX_help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
           else
-            char_pixel=&(GFX_help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
+            char_pixel=&(Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
         }
         else if (line_type=='S')
-          char_pixel=&(GFX_bold_font[(unsigned char)(line[char_index])][0][0]);
+          char_pixel=&(Gfx->Bold_font[(unsigned char)(line[char_index])][0][0]);
         else if (line_type=='N' || line_type=='K')
-          char_pixel=&(GFX_help_font_norm[(unsigned char)(line[char_index])][0][0]);
+          char_pixel=&(Gfx->Help_font_norm[(unsigned char)(line[char_index])][0][0]);
         else
-          char_pixel=&(GFX_help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
           
         for (x=0;x<6;x++)
           for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
@@ -571,11 +585,12 @@ void Window_help(int section, const char *sub_section)
       }
         break;
     }
-
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      clicked_button=1;
   }
   while ((clicked_button!=1) && (Key!=SDLK_RETURN));
 
-  if(Key==SDLK_RETURN) Key=0;
+  Key=0;
   Close_window();
   Unselect_button(BUTTON_HELP);
   Display_cursor();
@@ -684,6 +699,8 @@ void Button_Stats(void)
   do
   {
     clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x200+BUTTON_HELP))
+      clicked_button=1;
   }
   while ( (clicked_button!=1) && (Key!=SDLK_RETURN) );
 

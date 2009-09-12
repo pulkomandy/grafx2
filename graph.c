@@ -107,6 +107,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
 
   if(effective_Y + effective_h > Menu_Y)
     effective_h = Menu_Y - effective_Y;
+    
   /*
   SDL_Rect r;
   r.x=effective_X;
@@ -136,7 +137,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     }
     else
       effective_X += Main_separator_position + SEPARATOR_WIDTH*Menu_factor_X;
-    diff = effective_X+effective_w-Screen_width;
+    diff = effective_X+effective_w-Min(Screen_width, Main_X_zoom+(Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
     if (diff>0)
     {
       effective_w -=diff;
@@ -153,13 +154,14 @@ void Update_part_of_screen(short x, short y, short width, short height)
         return;
       effective_Y = 0;
     }
-    diff = effective_Y+effective_h-Menu_Y;
+    diff = effective_Y+effective_h-Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
     if (diff>0)
     {
       effective_h -=diff;
       if (effective_h<0)
         return;
     }
+
 
  // Très utile pour le debug :)
     /*SDL_Rect r;
@@ -169,6 +171,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     r.w=effective_w;
     SDL_FillRect(Screen_SDL,&r,3);*/
 
+    Redraw_grid(effective_X,effective_Y,effective_w,effective_h);
     Update_rect(effective_X,effective_Y,effective_w,effective_h);
   }
 }
@@ -468,7 +471,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 
   Clear_border(MC_Black); // Requires up-to-date Screen_* and Pixel_*
 
-  // Taille des menus
+  // Set menu size (software zoom)
   if (Screen_width/320 > Screen_height/200)
     factor=Screen_height/200;
   else
@@ -476,28 +479,32 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 
   switch (Config.Ratio)
   {
-    case 1: // adapter tout
+    case 1: // Always the biggest possible
       Menu_factor_X=factor;
       Menu_factor_Y=factor;
       break;
-    case 2: // adapter légèrement
+    case 2: // Only keep the aspect ratio
       Menu_factor_X=factor-1;
       if (Menu_factor_X<1) Menu_factor_X=1;
       Menu_factor_Y=factor-1;
       if (Menu_factor_Y<1) Menu_factor_Y=1;
       break;
-    default: // ne pas adapter
+    case 0: // Always smallest possible
       Menu_factor_X=1;
       Menu_factor_Y=1;
+	  break;
+	default: // Stay below some reasonable size
+	  Menu_factor_X=Min(factor,abs(Config.Ratio));
+	  Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
   if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
     Menu_factor_X*=2;
   else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
     Menu_factor_Y*=2;
     
-  if (Horizontal_line_buffer)
-    free(Horizontal_line_buffer);
-  Horizontal_line_buffer=(byte *)malloc(Pixel_width*((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+  free(Horizontal_line_buffer);
+  Horizontal_line_buffer=(byte *)malloc(Pixel_width * 
+	((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);
 
@@ -677,6 +684,7 @@ void Get_colors_from_brush(void)
     Display_all_screen();
     Display_menu();
     Display_cursor();
+    End_of_modification();
 
     Main_image_is_modified=1;
   }
@@ -994,7 +1002,18 @@ void Fill_general(byte fill_color)
     // par l'utilisation de "Display_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
 
+    if(Main_magnifier_mode)
+    {
+      short w,h;
+      
+      w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
+      h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
+
+      Redraw_grid(Main_X_zoom,0,w,h);
+    }
+
     Update_rect(0,0,0,0);
+    End_of_modification();
   }
 }
 
@@ -1005,11 +1024,32 @@ void Fill_general(byte fill_color)
 ////////////////////////// avec gestion de previews //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+  // Data used by ::Init_permanent_draw() and ::Pixel_figure_permanent()
+  static Uint32 Permanent_draw_next_refresh=0;
+  static int Permanent_draw_count=0;
+
+  void Init_permanent_draw(void)
+  {
+    Permanent_draw_count = 0;
+    Permanent_draw_next_refresh = SDL_GetTicks() + 100;
+  }
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
   void Pixel_figure_permanent(word x_pos,word y_pos,byte color)
   {
     Display_paintbrush(x_pos,y_pos,color,0);
+    Permanent_draw_count ++;
+    
+    // Check every 8 pixels
+    if (! (Permanent_draw_count&7))
+    {
+      Uint32 now = SDL_GetTicks();
+      if (now>= Permanent_draw_next_refresh)
+      {
+        Permanent_draw_next_refresh = now+100;
+        Flush_update();
+      }
+    }
   }
 
   // Affichage d'un point de façon définitive
@@ -1151,6 +1191,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
 void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_empty_circle_general(center_x,center_y,radius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
@@ -1293,6 +1334,7 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
   Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
 }
@@ -1356,46 +1398,132 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
 * TRACÉ DE LIGNES *
 ******************/
 
-void Clamp_coordinates_45_degrees(short ax, short ay, short* bx, short* by)
-// Modifie bx et by pour que la ligne AXAY - BXBY soit
-//  - une droite horizontale
-//  - une droite verticale
-//  - une droite avec une pente de 45 degrés
+/// Alters bx and by so the (AX,AY)-(BX,BY) segment becomes either horizontal,
+/// vertical, 45degrees, or isometrical for pixelart (ie 2:1 ratio)
+void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
 {
-    int dx, dy;
-    float tan;
+  int dx, dy;
+  float angle;
 
-    dx = (*bx)-ax;
-    dy = ay- *by; // On prend l'opposée car à l'écran les Y sont positifs en bas, et en maths, positifs en haut
+  dx = *bx-ax;
+  dy = *by-ay; 
 
-    if (dx==0) return; // On est en lockx et de toutes façons le X n'a pas bougé, on sort tout de suite pour éviter une méchante division par 0
+	// No mouse move: no need to clamp anything
+  if (dx==0 || dy == 0) return; 
 
-    tan = (float)dy/(float)dx;
+  // Determine angle (heading)
+  angle = atan2(dx, dy);
+    
+  // Get absolute values, useful from now on:
+  //dx=abs(dx);
+  //dy=abs(dy);
+    
+	// Negative Y
+  if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
+  {
+    *bx=ax;
+    *by=ay + dy;
+	}
+	// Iso close to negative Y
+  else if (angle < M_PI*(-13.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax + dy/2;
+    *by=ay + dy;
+	}
+	// 45deg
+  else if (angle < M_PI*(-11.0/16.0))
+  {
+    *by = (*by + ay + dx)/2;
+    *bx = ax  - ay + *by;
+	}
+	// Iso close to negative X
+  else if (angle < M_PI*(-9.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay + dx/2;
+	}
+	// Negative X
+  else if (angle < M_PI*(-7.0/16.0))
+  {
+    *bx=ax + dx;
+    *by=ay;
+	}
+	// Iso close to negative X
+  else if (angle < M_PI*(-5.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay - dx/2;
+  }
+  // 45 degrees
+  else if (angle < M_PI*(-3.0/16.0))
+  {
+    *by = (*by + ay - dx)/2;
+    *bx = ax  + ay - *by;
+  }
+  // Iso close to positive Y
+  else if (angle < M_PI*(-1.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax - dy/2;
+    *by=ay + dy;
+	}
+  // Positive Y
+  else if (angle < M_PI*(1.0/16.0))
+  {
+    *bx=ax;
+    *by=ay + dy;
+  }
+  // Iso close to positive Y
+  else if (angle < M_PI*(3.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax + dy/2;
+    *by=ay + dy;
+	}
+  // 45 degrees
+  else if (angle < M_PI*(5.0/16.0))
+  {
+    *by = (*by + ay + dx)/2;
+    *bx = ax  - ay + *by;
+  }
+  // Iso close to positive X
+  else if (angle < M_PI*(7.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay + dx/2;
+	}
+  // Positive X
+  else if (angle < M_PI*(9.0/16.0))
+  {
+    *bx=ax + dx;
+    *by=ay;
+	}
+  // Iso close to positive X
+  else if (angle < M_PI*(11.0/16.0))
+  {
+    dx=dx | 1; // Round up to next odd number
+    *bx=ax + dx;
+    *by=ay - dx/2;
+  }
+  // 45 degrees
+  else if (angle < M_PI*(13.0/16.0))
+  {
+    *by = (*by + ay - dx)/2;
+    *bx = ax  + ay - *by;
+  }
+  // Iso close to negative Y
+  else //if (angle < M_PI*(15.0/16.0))
+  {
+    dy=dy | 1; // Round up to next odd number
+    *bx=ax - dy/2;
+    *by=ay + dy;
+	}
 
-    if (tan <= 0.4142 && tan >= -0.4142)
-    {
-      // Cas 1 : Lock Y
-      *by = ay;
-    }
-    else if ( tan > 0.4142 && tan < 2.4142)
-    {
-      // Cas 2 : dy=dx
-      *by = (*by + ay - dx)/2;
-      *bx = ax  + ay - *by;
-    }
-    else if (tan < -0.4142 && tan >= -2.4142)
-    {
-      // Cas 8 : dy = -dx
-      *by = (*by + ay + dx)/2;
-      *bx = ax  - ay + *by;
-    }
-    else
-    {
-      // Cas 3 : Lock X
-      *bx = ax;
-    }
-
-    return;
+  return;
 }
 
   // -- Tracer général d'une ligne ------------------------------------------
@@ -1406,8 +1534,7 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
   short incr_x,incr_y;
   short i,cumul;
   short delta_x,delta_y;
-
-
+  
   x_pos=start_x;
   y_pos=start_y;
 
@@ -1471,11 +1598,12 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
 
   // -- Tracer définitif d'une ligne --
 
-void Draw_line_permanet(short start_x,short start_y,short end_x,short end_y, byte color)
+void Draw_line_permanent(short start_x,short start_y,short end_x,short end_y, byte color)
 {
 
   int w = end_x-start_x, h = end_y - start_y;
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_line_general(start_x,start_y,end_x,end_y,color);
   Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
 }
@@ -1555,18 +1683,20 @@ void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,by
   }
 
   // On trace le rectangle:
-
+  Init_permanent_draw();
+  
   for (x_pos=start_x;x_pos<=end_x;x_pos++)
-    Display_paintbrush(x_pos,start_y,color,0);
+  {
+    Pixel_figure_permanent(x_pos,start_y,color);
+    Pixel_figure_permanent(x_pos,  end_y,color);
+  }
 
   for (y_pos=start_y+1;y_pos<end_y;y_pos++)
   {
-    Display_paintbrush(start_x,y_pos,color,0);
-    Display_paintbrush(  end_x,y_pos,color,0);
+    Pixel_figure_permanent(start_x,y_pos,color);
+    Pixel_figure_permanent(  end_x,y_pos,color);
   }
-
-  for (x_pos=start_x;x_pos<=end_x;x_pos++)
-    Display_paintbrush(x_pos,  end_y,color,0);
+    
 #if defined(__macosx__) || defined(__FreeBSD__)
   Update_part_of_screen(start_x,end_x,end_x-start_x,end_y-start_y);
 #endif
@@ -1670,6 +1800,7 @@ void Draw_curve_permanent(short x1, short y1,
                              byte color)
 {
   Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
   Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
@@ -2685,3 +2816,41 @@ byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
     Read_pixel_from_current_screen(x,y); // C'est bien l'écran courant et pas
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.
+
+void Horizontal_grid_line(word x_pos,word y_pos,word width)
+{
+  int x;
+
+  for (x=!(x_pos&1);x<width;x+=2)
+    Pixel(x_pos+x, y_pos, *((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)^Config.Grid_XOR_color);
+}
+
+void Vertical_grid_line(word x_pos,word y_pos,word height)
+{
+  int y;
+  
+  for (y=!(y_pos&1);y<height;y+=2)
+    Pixel(x_pos, y_pos+y, *(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)^Config.Grid_XOR_color);
+}
+
+// Tile Grid
+void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
+{
+  int row, col;
+  if (!Show_grid)
+    return;
+    
+  row=y+((Snap_height*1000-(y-0)/Main_magnifier_factor-Main_magnifier_offset_Y+Snap_offset_Y-1)%Snap_height)*Main_magnifier_factor+Main_magnifier_factor-1;
+  while (row < y+h)
+  {
+    Horizontal_grid_line(x, row, w);
+    row+= Snap_height*Main_magnifier_factor;
+  }
+  
+  col=x+((Snap_width*1000-(x-Main_X_zoom)/Main_magnifier_factor-Main_magnifier_offset_X+Snap_offset_X-1)%Snap_width)*Main_magnifier_factor+Main_magnifier_factor-1;
+  while (col < x+w)
+  {
+    Vertical_grid_line(col, y, h);
+    col+= Snap_width*Main_magnifier_factor;
+  }
+}

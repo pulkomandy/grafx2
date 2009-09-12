@@ -88,7 +88,7 @@ typedef struct
 
 ///////////////////////////////////////// Définition d'un ensemble de couleur
 
-typedef struct
+typedef struct S_Cluster
 {
   int occurences; // Nb total d'occurences des couleurs de l'ensemble
 
@@ -106,6 +106,8 @@ typedef struct
   byte r,g,b;      // color synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
+
+  struct S_Cluster* next;
 } T_Cluster;
 
 
@@ -174,7 +176,7 @@ void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 ///////////////////////////////////////// Méthodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void Cluster_analyser(T_Cluster * c,T_Occurrence_table * to);
+void Cluster_pack(T_Cluster * c,T_Occurrence_table * to);
 void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,T_Occurrence_table * to);
 void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 

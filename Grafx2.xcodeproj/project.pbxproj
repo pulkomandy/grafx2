@@ -12,6 +12,12 @@
 		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
 		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		F5142653101F6CC5006CF3C4 /* font_Classic.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F514264D101F6CB8006CF3C4 /* font_Classic.png */; };
+		F5142654101F6CC5006CF3C4 /* font_Fairlight.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F514264E101F6CB8006CF3C4 /* font_Fairlight.png */; };
+		F5142655101F6CC5006CF3C4 /* font_Fun.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F514264F101F6CB9006CF3C4 /* font_Fun.png */; };
+		F5142656101F6CC5006CF3C4 /* font_Melon.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F5142650101F6CB9006CF3C4 /* font_Melon.png */; };
+		F5142657101F6CC5006CF3C4 /* skin_classic.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F5142651101F6CB9006CF3C4 /* skin_classic.png */; };
+		F5142658101F6CC5006CF3C4 /* skin_modern.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F5142652101F6CB9006CF3C4 /* skin_modern.png */; };
 		F51CBD2E0EC8A3E1005C06AC /* 5pxtinyfont.png in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */; };
 		F51CBD2F0EC8A3E1005C06AC /* colorfont.pcx in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */; };
 		F51CBD300EC8A3E1005C06AC /* Tuffy.ttf in Copy fonts */ = {isa = PBXBuildFile; fileRef = F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */; };
@@ -52,8 +58,6 @@
 		F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8B0EA4BE3E003F4BA4 /* shade.c */; };
 		F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8C0EA4BE3E003F4BA4 /* special.c */; };
 		F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */; };
-		F5B19BE10EA4C65A003F4BA5 /* base.gif in Copy skins */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA5 /* base.gif */; };
-		F5B19BE10EA4C65A003F4BA6 /* ilkke.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA6 /* ilkke.png */; };
 		F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */; };
 		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
 		F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */; };
@@ -104,6 +108,22 @@
 			name = "Copy Frameworks into .app bundle";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F514264B101F6C5B006CF3C4 /* Copy skins */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = skins;
+			dstSubfolderSpec = 7;
+			files = (
+				F5142653101F6CC5006CF3C4 /* font_Classic.png in Copy skins */,
+				F5142654101F6CC5006CF3C4 /* font_Fairlight.png in Copy skins */,
+				F5142655101F6CC5006CF3C4 /* font_Fun.png in Copy skins */,
+				F5142656101F6CC5006CF3C4 /* font_Melon.png in Copy skins */,
+				F5142657101F6CC5006CF3C4 /* skin_classic.png in Copy skins */,
+				F5142658101F6CC5006CF3C4 /* skin_modern.png in Copy skins */,
+			);
+			name = "Copy skins";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F5A33F1D0EC8A26C00F8052D /* Copy fonts */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -117,18 +137,6 @@
 				F5A33E6A0EC893F800F8052D /* 8pxfont.png in Copy fonts */,
 			);
 			name = "Copy fonts";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F5A33F1D0EC8A26C00F8052E /* Copy skins */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = skins;
-			dstSubfolderSpec = 7;
-			files = (
-				F5B19BE10EA4C65A003F4BA5 /* base.gif in Copy skins */,
-				F5B19BE10EA4C65A003F4BA6 /* ilkke.png in Copy skins */,
-			);
-			name = "Copy skins";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -145,6 +153,12 @@
 		32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grafx2_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Grafx2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grafx2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F514264D101F6CB8006CF3C4 /* font_Classic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font_Classic.png; path = skins/font_Classic.png; sourceTree = "<group>"; };
+		F514264E101F6CB8006CF3C4 /* font_Fairlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font_Fairlight.png; path = skins/font_Fairlight.png; sourceTree = "<group>"; };
+		F514264F101F6CB9006CF3C4 /* font_Fun.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font_Fun.png; path = skins/font_Fun.png; sourceTree = "<group>"; };
+		F5142650101F6CB9006CF3C4 /* font_Melon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font_Melon.png; path = skins/font_Melon.png; sourceTree = "<group>"; };
+		F5142651101F6CB9006CF3C4 /* skin_classic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = skin_classic.png; path = skins/skin_classic.png; sourceTree = "<group>"; };
+		F5142652101F6CB9006CF3C4 /* skin_modern.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = skin_modern.png; path = skins/skin_modern.png; sourceTree = "<group>"; };
 		F51CBD2B0EC8A3E1005C06AC /* 5pxtinyfont.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 5pxtinyfont.png; path = fonts/5pxtinyfont.png; sourceTree = "<group>"; };
 		F51CBD2C0EC8A3E1005C06AC /* colorfont.pcx */ = {isa = PBXFileReference; lastKnownFileType = file; name = colorfont.pcx; path = fonts/colorfont.pcx; sourceTree = "<group>"; };
 		F51CBD2D0EC8A3E1005C06AC /* Tuffy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Tuffy.ttf; path = fonts/Tuffy.ttf; sourceTree = "<group>"; };
@@ -186,8 +200,6 @@
 		F5B19B8B0EA4BE3E003F4BA4 /* shade.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = shade.c; sourceTree = "<group>"; };
 		F5B19B8C0EA4BE3E003F4BA4 /* special.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = special.c; sourceTree = "<group>"; };
 		F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.cfg; sourceTree = "<group>"; };
-		F5B19BDF0EA4C65A003F4BA5 /* base.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = base.gif; path = skins/base.gif; sourceTree = "<group>"; };
-		F5B19BDF0EA4C65A003F4BA6 /* ilkke.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ilkke.png; path = skins/ilkke.png; sourceTree = "<group>"; };
 		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2def.ini; sourceTree = "<group>"; };
@@ -260,6 +272,12 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				F514264D101F6CB8006CF3C4 /* font_Classic.png */,
+				F514264E101F6CB8006CF3C4 /* font_Fairlight.png */,
+				F514264F101F6CB9006CF3C4 /* font_Fun.png */,
+				F5142650101F6CB9006CF3C4 /* font_Melon.png */,
+				F5142651101F6CB9006CF3C4 /* skin_classic.png */,
+				F5142652101F6CB9006CF3C4 /* skin_modern.png */,
 				F539315D0FE171C3003CB103 /* pversion.c */,
 				F5CDCE310F6EA6D600B31F63 /* pxdouble.c */,
 				F5AC28B90F4873C700455509 /* hotkeys.c */,
@@ -294,8 +312,6 @@
 				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
 				F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */,
 				F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */,
-				F5B19BDF0EA4C65A003F4BA5 /* base.gif */,
-				F5B19BDF0EA4C65A003F4BA6 /* ilkke.png */,
 				F5B19B7B0EA4BE3E003F4BA4 /* graph.c */,
 				F5B19B7C0EA4BE3E003F4BA4 /* init.c */,
 				F5B19B7D0EA4BE3E003F4BA4 /* io.c */,
@@ -366,7 +382,7 @@
 				002F39FD09D0883400EBEB89 /* Copy Frameworks into .app bundle */,
 				002F39FD09D0883400EBEB8A /* Copy Frameworks into .app bundle */,
 				F5A33F1D0EC8A26C00F8052D /* Copy fonts */,
-				F5A33F1D0EC8A26C00F8052E /* Copy skins */,
+				F514264B101F6C5B006CF3C4 /* Copy skins */,
 			);
 			buildRules = (
 			);

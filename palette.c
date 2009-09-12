@@ -815,13 +815,21 @@ void Button_Palette(void)
   Block(Window_pos_X+(Menu_factor_X*206),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
   Block(Window_pos_X+(Menu_factor_X*233),Window_pos_Y+(Menu_factor_Y*141),Menu_factor_X*17,Menu_factor_Y,MC_Dark);
   // Jauges de couleur
-  Palette_view_is_RGB=1;
   red_slider = Window_set_scroller_button(182, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].R*Color_max/255);// 2
   green_slider = Window_set_scroller_button(209, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].G*Color_max/255);// 3
   blue_slider = Window_set_scroller_button(236, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].B*Color_max/255);// 4
-  Print_in_window(184,71,"R",MC_Dark,MC_Light);
-  Print_in_window(211,71,"G",MC_Dark,MC_Light);
-  Print_in_window(238,71,"B",MC_Dark,MC_Light);
+
+  if(Palette_view_is_RGB==1) {
+	  Print_in_window(184,71,"R",MC_Dark,MC_Light);
+	  Print_in_window(211,71,"G",MC_Dark,MC_Light);
+	  Print_in_window(238,71,"B",MC_Dark,MC_Light);
+      Componant_unit(RGB_scale);
+  } else {
+	  Print_in_window(184,71,"H",MC_Dark,MC_Light);
+	  Print_in_window(211,71,"S",MC_Dark,MC_Light);
+	  Print_in_window(238,71,"L",MC_Dark,MC_Light);
+      Componant_unit(256);
+  }
 
   first_color=last_color=block_start=block_end=Fore_color;
   Tag_color_range(block_start,block_end);
@@ -831,12 +839,7 @@ void Button_Palette(void)
   Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
-  Format_componant(Main_palette[Fore_color].R*Color_max/255,str);
-  Print_counter(176,172,str,MC_Black,MC_Light);
-  Format_componant(Main_palette[Fore_color].G*Color_max/255,str);
-  Print_counter(203,172,str,MC_Black,MC_Light);
-  Format_componant(Main_palette[Fore_color].B*Color_max/255,str);
-  Print_counter(230,172,str,MC_Black,MC_Light);
+  Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
 
   Print_in_window(129,58,"Color number:",MC_Dark,MC_Light);
   Num2str(Fore_color,str,3);
@@ -1227,9 +1230,9 @@ void Button_Palette(void)
 
       case 5 : // Default
         memcpy(backup_palette,working_palette,sizeof(T_Palette));
-        memcpy(working_palette,Default_palette,sizeof(T_Palette));
-        memcpy(temp_palette,Default_palette,sizeof(T_Palette));
-        Set_palette(Default_palette);
+        memcpy(working_palette,Gfx->Default_palette,sizeof(T_Palette));
+        memcpy(temp_palette,Gfx->Default_palette,sizeof(T_Palette));
+        Set_palette(Gfx->Default_palette);
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
@@ -1315,7 +1318,10 @@ void Button_Palette(void)
           
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
           if (clicked_button==8)
+          {
             Update_rect(0, 0, Screen_width, Menu_Y_before_window);
+            End_of_modification();
+          }
           Wait_end_of_click();
         }
         break;
@@ -1415,6 +1421,7 @@ void Button_Palette(void)
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
+        End_of_modification();
         need_to_remap=1;
         break;
 
@@ -1779,6 +1786,7 @@ void Button_Palette(void)
           Hide_cursor();
           Remap_image_highlevel(conversion_table);
           Display_cursor();
+          End_of_modification();
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
         Set_palette(working_palette);
@@ -1814,7 +1822,7 @@ void Button_Palette(void)
         
         // Acte les changements en cours sur une ou plusieurs couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
-        memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+        memcpy(backup_palette, working_palette,sizeof(T_Palette));
 
         Palette_view_is_RGB = !Palette_view_is_RGB;
 
@@ -1940,6 +1948,8 @@ void Button_Palette(void)
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
+        
+        End_of_modification();
         need_to_remap=1;
       }
       break;
@@ -2030,6 +2040,8 @@ void Button_Palette(void)
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
           Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
           Update_color_count(&used_colors,color_usage);
+          // End_of_modification();
+          // Not really needed, the change was in palette entries
           need_to_remap=1;
           Key=0;
           break;
@@ -2085,6 +2097,8 @@ void Button_Palette(void)
             Window_help(BUTTON_PALETTE, NULL);
             break;
           }
+          else if (Is_shortcut(Key,0x100+BUTTON_PALETTE))
+            clicked_button=14;
       }
 
       if (need_to_remap)
@@ -2114,6 +2128,8 @@ void Button_Palette(void)
       && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
       Backup();
     memcpy(Main_palette,working_palette,sizeof(T_Palette));
+    // End_of_modification();
+    // Not really needed, the change was in palette entries
   }
 
   Compute_optimal_menu_colors(Main_palette);
@@ -2160,7 +2176,8 @@ void Button_Secondary_palette(void)
   T_Scroller_button * rgb_scale_slider;
   char str[4];
   byte palette_vertical = Config.Palette_vertical;
-  byte palette_cols, palette_lines, rgb_scale;
+  byte palette_cols, palette_lines;
+  word rgb_scale;
   byte palette_needs_redraw=0;
   
   Open_window(200,146,"Palettes");
@@ -2207,6 +2224,9 @@ void Button_Secondary_palette(void)
       Key=0;
       Window_help(BUTTON_PALETTE, "PALETTE OPTIONS");
     }
+    else if (Is_shortcut(Key,0x200+BUTTON_PALETTE))
+      clicked_button=3;
+
     switch(clicked_button)
     {
       case 5:
@@ -2284,7 +2304,7 @@ void Button_Secondary_palette(void)
 
   if (clicked_button==1)
   {
-    Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL);
+    Menu_tag_colors("Tag colors to exclude",Exclude_color,&dummy,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
   }
   else if (clicked_button==2)
   {

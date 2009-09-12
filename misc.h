@@ -35,6 +35,7 @@ void Slider_timer(byte speed);
 dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
+word Count_used_colors_screen_area(dword* usage, word start_x, word start_y, word width, word height);
 void Pixel_in_current_screen      (word x,word y,byte color);
 void Pixel_in_brush             (word x,word y,byte color);
 byte Read_pixel_from_current_screen  (word x,word y);

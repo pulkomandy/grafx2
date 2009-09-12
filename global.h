@@ -63,9 +63,6 @@ GFX2_GLOBAL T_Video_mode Video_mode[MAX_VIDEO_MODES];
 /// Actual number of video modes in ::Video_mode.
 GFX2_GLOBAL int  Nb_video_modes;
 
-/// A default 256-color palette.
-GFX2_GLOBAL T_Palette Default_palette;
-
 // -- Menu colors
 
 GFX2_GLOBAL byte MC_Black; ///< Index of color to use as "black" in the GUI menus.
@@ -81,6 +78,7 @@ GFX2_GLOBAL T_Components Fav_menu_colors[4];
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
 GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.
 GFX2_GLOBAL byte Mouse_K; ///< Current mouse buttons state. Bitfield: 1 for RMB, 2 for LMB.
+GFX2_GLOBAL byte Keyboard_click_allowed; ///< Set to 0 when you edit a textfield so you can use space without exiting it
 
 /// Helper macro to take only one button when both are pressed (LMB has priority)
 #define Mouse_K_unique (Mouse_K==0?0:(Mouse_K&1?1:(Mouse_K&2?2:0)))
@@ -139,14 +137,8 @@ GFX2_GLOBAL byte Cursor_hidden;
 GFX2_GLOBAL byte Cursor_in_menu;
 /// Boolean, means the cursor was hovering over a menu GUI element.
 GFX2_GLOBAL byte Cursor_in_menu_previous;
-/// X coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_WIDTH
-GFX2_GLOBAL word Cursor_offset_X[NB_CURSOR_SPRITES];
-/// Y coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_HEIGHT
-GFX2_GLOBAL word Cursor_offset_Y[NB_CURSOR_SPRITES];
-/// Graphic resources for the mouse cursor.
-GFX2_GLOBAL byte GFX_cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 /// Storage for the graphics under the mouse cursor. Used by ::Hide_cursor and ::Display_cursor
-GFX2_GLOBAL byte CURSOR_BACKGROUND[CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
+GFX2_GLOBAL byte Cursor_background[CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
 // -- Paintbrush data
 
@@ -164,18 +156,6 @@ GFX2_GLOBAL byte  Paintbrush_hidden;
 GFX2_GLOBAL short Paintbrush_X;
 /// Cordinate of the preview paintbrush in image space.
 GFX2_GLOBAL short Paintbrush_Y;
-/// Graphic resources for the preset paintbrushes.
-GFX2_GLOBAL byte  GFX_paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
-/// Width of the preset paintbrushes.
-GFX2_GLOBAL word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
-/// Height of the preset paintbrushes.
-GFX2_GLOBAL word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
-/// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
-GFX2_GLOBAL byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
-/// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
-GFX2_GLOBAL word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
-/// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
-GFX2_GLOBAL word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
 /// Pixel data of the current brush
 GFX2_GLOBAL byte * Paintbrush_sprite;
 /// Current paintbrush's width
@@ -548,6 +528,11 @@ GFX2_GLOBAL T_Dropdown_button  * Window_stack_dropdown_button_list[8];
 /// List of dropdown buttons in the topmost window.
 #define Window_dropdown_button_list Window_stack_dropdown_button_list[Windows_open-1]
 
+GFX2_GLOBAL T_List_button  * Window_stack_list_button_list[8];
+/// List of list buttons in the topmost window.
+#define Window_list_button_list Window_stack_list_button_list[Windows_open-1]
+
+
 
 GFX2_GLOBAL int Window_stack_attribute1[8];
 ///
@@ -660,6 +645,8 @@ GFX2_GLOBAL byte Stencil[256];
 
 /// Boolean, true when the Grid mode is active.
 GFX2_GLOBAL byte  Snap_mode;
+/// Boolean, true when the Grid is displayed in zoomed view.
+GFX2_GLOBAL byte  Show_grid;
 /// Width of the grid in Grid mode.
 GFX2_GLOBAL word Snap_width;
 /// Height of the grid in Grid mode.
@@ -675,8 +662,6 @@ GFX2_GLOBAL word Snap_offset_Y;
 GFX2_GLOBAL byte  Sieve_mode;
 /// Sprite of the sieve pattern. It's actually an array of booleans.
 GFX2_GLOBAL byte  Sieve[16][16];
-/// Preset sieve patterns, stored as binary (one word per line)
-GFX2_GLOBAL word  GFX_sieve_pattern[12][16];
 /// Width of the sieve pattern, in Sieve mode.
 GFX2_GLOBAL short Sieve_width;
 /// Height of the sieve pattern, in Sieve mode.
@@ -810,39 +795,13 @@ GFX2_GLOBAL byte File_in_command_line;
 /// Boolean, true if Grafx2 was run with a command-line argument to set a resolution on startup (overrides config)
 GFX2_GLOBAL byte Resolution_in_command_line;
 
-// - Graphic skin data
+// - Graphic
 
-/// Bitmap data for the menu, a single rectangle.
-GFX2_GLOBAL byte GFX_menu_block[MENU_HEIGHT][MENU_WIDTH];
-/// Bitmap data for the icons that are displayed over the menu.
-GFX2_GLOBAL byte GFX_menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
-/// Bitmap data for the different "effects" icons.
-GFX2_GLOBAL byte GFX_effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
-/// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
-GFX2_GLOBAL byte * GFX_logo_grafx2;
-/// Bitmap data for the classic 8x8 font used in menus etc.
-GFX2_GLOBAL byte GFX_system_font[256*8*8];
-/// Bitmap data for the "fun" 8x8 font used in menus etc.
-GFX2_GLOBAL byte GFX_fun_font    [256*8*8];
-/// Bitmap data for the 6x8 font used in help screens.
-GFX2_GLOBAL byte GFX_help_font_norm [256][6][8];
-/// Bitmap data for the 6x8 font used in help screens ("bold" verstion).
-GFX2_GLOBAL byte GFX_bold_font [256][6][8];
-// 12
-// 34
-/// Bitmap data for the title font used in help screens. Top-left quarter.
-GFX2_GLOBAL byte GFX_help_font_t1 [64][6][8];
-/// Bitmap data for the title font used in help screens. Top-right quarter.
-GFX2_GLOBAL byte GFX_help_font_t2 [64][6][8];
-/// Bitmap data for the title font used in help screens. Bottom-left quarter.
-GFX2_GLOBAL byte GFX_help_font_t3 [64][6][8];
-/// Bitmap data for the title font used in help screens. Bottom-right quarter.
-GFX2_GLOBAL byte GFX_help_font_t4 [64][6][8];
-/// Bitmap data for the small 8x8 icons.
-GFX2_GLOBAL byte GFX_icon_sprite[NB_ICON_SPRITES][ICON_SPRITE_HEIGHT][ICON_SPRITE_WIDTH];
-
-/// Pointer to the font selected for menus. It's either ::GFX_system_font or ::GFX_fun_font
+/// Pointer to the font selected for menus.
 GFX2_GLOBAL byte * Menu_font;
+
+/// Pointer to the current active skin.
+GFX2_GLOBAL T_Gui_skin * Gfx;
 
 // -- Help data
 
@@ -873,6 +832,8 @@ GFX2_GLOBAL short Colorpicker_X;
 /// Position of the colorpicker tool, in image coordinates.
 GFX2_GLOBAL short Colorpicker_Y;
 
+/// Brush container
+GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS];
 
 #ifdef GLOBAL_VARIABLES
   byte CURSOR_FOR_OPERATION[NB_OPERATIONS]=
@@ -921,20 +882,10 @@ GFX2_GLOBAL short Colorpicker_Y;
 /// each operation, and for each mouse state (no button,left button,right button)
 GFX2_GLOBAL struct
 {
-  byte Hide_cursor;   ///< Boolean: Need to hide/unhide cursor during this step
   Func_action Action; ///< Function to call
+  byte Hide_cursor;   ///< Boolean: Need to hide/unhide cursor during this step
+  byte Fast_mouse;    ///< Operation should take shortcuts with mouse movements
 } Operation[NB_OPERATIONS][3][OPERATION_STACK_SIZE];
-
-// -- Fileselector data
-
-/// Number of elements in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_elements;
-/// Number of files in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_files;
-/// Number of directories in the current fileselector's ::Filelist
-GFX2_GLOBAL short Filelist_nb_directories;
-/// Head of the linked list for the fileselector.
-GFX2_GLOBAL T_Fileselector_item * Filelist;
 
 // -- misc
 

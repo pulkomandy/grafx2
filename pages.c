@@ -49,21 +49,6 @@ void Init_page(T_Page * page)
     page->File_directory[0]='\0';
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
-/*
-    page->X_offset=0;
-    page->Y_offset=0;
-    page->old_offset_x=0;
-    page->old_offset_y=0;
-    page->Split=0;
-    page->X_zoom=0;
-    page->Separator_proportion=INITIAL_SEPARATOR_PROPORTION;
-    page->Main_magnifier_mode=0;
-    page->Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
-    page->Main_magnifier_height=0;
-    page->Main_magnifier_width=0;
-    page->Main_magnifier_offset_X=0;
-    page->Main_magnifier_offset_Y=0;
-*/
   }
 }
 
@@ -86,35 +71,7 @@ void Download_infos_page_main(T_Page * page)
     strcpy(Main_file_directory,page->File_directory);
     strcpy(Main_filename,page->Filename);
     Main_fileformat=page->File_format;
-/*
-    Main_offset_X=page->X_offset;
-    Main_offset_Y=page->Y_offset;
 
-    // On corrige les décalages en fonction de la dimension de l'écran
-    if ( (Main_offset_X>0) &&
-         (Main_offset_X+Screen_width>Main_image_width) )
-      Main_offset_X=Max(0,Main_image_width-Screen_width);
-    if ( (Main_offset_Y>0) &&
-         (Main_offset_Y+Menu_Y>Main_image_height) )
-      Main_offset_Y=Max(0,Main_image_height-Menu_Y);
-
-    Old_main_offset_X=page->old_offset_x;
-    Old_main_offset_Y=page->old_offset_y;
-    Main_separator_position=page->Split;
-    Main_X_zoom=page->X_zoom;
-    Main_separator_proportion=page->Separator_proportion;
-    Main_magnifier_mode=page->Main_magnifier_mode;
-    Main_magnifier_factor=page->Main_magnifier_factor;
-    Main_magnifier_height=page->Main_magnifier_height;
-    Main_magnifier_width=page->Main_magnifier_width;
-    Main_magnifier_offset_X=page->Main_magnifier_offset_X;
-    Main_magnifier_offset_Y=page->Main_magnifier_offset_Y;
-
-    // Comme le facteur de zoom a des chances d'avoir changé, on appelle
-    // "Change_magnifier_factor".
-    for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
-    Change_magnifier_factor(factor_index);
-*/
     if (size_is_modified)
     {
       Main_magnifier_mode=0;
@@ -140,21 +97,6 @@ void Upload_infos_page_main(T_Page * page)
     strcpy(page->File_directory,Main_file_directory);
     strcpy(page->Filename,Main_filename);
     page->File_format=Main_fileformat;
-/*
-    page->X_offset=Main_offset_X;
-    page->Y_offset=Main_offset_Y;
-    page->old_offset_x=Old_main_offset_X;
-    page->old_offset_x=Old_main_offset_Y;
-    page->Split=Main_separator_position;
-    page->X_zoom=Main_X_zoom;
-    page->Separator_proportion=Main_separator_proportion;
-    page->Main_magnifier_mode=Main_magnifier_mode;
-    page->Main_magnifier_factor=Main_magnifier_factor;
-    page->Main_magnifier_height=Main_magnifier_height;
-    page->Main_magnifier_width=Main_magnifier_width;
-    page->Main_magnifier_offset_X=Main_magnifier_offset_X;
-    page->Main_magnifier_offset_Y=Main_magnifier_offset_Y;
-*/
   }
 }
 
@@ -170,21 +112,6 @@ void Download_infos_page_spare(T_Page * page)
     strcpy(Spare_file_directory,page->File_directory);
     strcpy(Spare_filename,page->Filename);
     Spare_fileformat=page->File_format;
-/*
-    Spare_offset_X=page->X_offset;
-    Spare_offset_Y=page->Y_offset;
-    Old_spare_offset_X=page->old_offset_x;
-    Old_spare_offset_Y=page->old_offset_y;
-    Spare_separator_position=page->Split;
-    Spare_X_zoom=page->X_zoom;
-    Spare_separator_proportion=page->Separator_proportion;
-    Spare_magnifier_mode=page->Main_magnifier_mode;
-    Spare_magnifier_factor=page->Main_magnifier_factor;
-    Spare_magnifier_height=page->Main_magnifier_height;
-    Spare_magnifier_width=page->Main_magnifier_width;
-    Spare_magnifier_offset_X=page->Main_magnifier_offset_X;
-    Spare_magnifier_offset_Y=page->Main_magnifier_offset_Y;
-*/
   }
 }
 
@@ -200,21 +127,6 @@ void Upload_infos_page_spare(T_Page * page)
     strcpy(page->File_directory,Spare_file_directory);
     strcpy(page->Filename,Spare_filename);
     page->File_format=Spare_fileformat;
-/*
-    page->X_offset=Spare_offset_X;
-    page->Y_offset=Spare_offset_Y;
-    page->old_offset_x=Old_spare_offset_X;
-    page->old_offset_y=Old_spare_offset_Y;
-    page->Split=Spare_separator_position;
-    page->X_zoom=Spare_X_zoom;
-    page->Separator_proportion=Spare_separator_proportion;
-    page->Main_magnifier_mode=Spare_magnifier_mode;
-    page->Main_magnifier_factor=Spare_magnifier_factor;
-    page->Main_magnifier_height=Spare_magnifier_height;
-    page->Main_magnifier_width=Spare_magnifier_width;
-    page->Main_magnifier_offset_X=Spare_magnifier_offset_X;
-    page->Main_magnifier_offset_Y=Spare_magnifier_offset_Y;
-*/
   }
 }
 
@@ -326,14 +238,14 @@ void Backward_in_list_of_pages(T_List_of_pages * list)
 {
   // Cette fonction fait l'équivalent d'un "Undo" dans la liste de pages.
   // Elle effectue une sorte de ROL (Rotation Left) sur la liste:
-  // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
-  // º0º1³2³3³4³5³6³7³8³9³Aº  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=page courante
-  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=page la plus ancienne
-  //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
-  // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
-  // º1º2³3³4³5³6³7³8³9³A³0º  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |
+  // +---+-+-+-+-+-+-+-+-+-+  |
+  // ¦0¦1¦2¦3¦4¦5¦6¦7¦8¦9¦A¦  |
+  // +---+-+-+-+-+-+-+-+-+-+  |  0=page courante
+  //  ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦   |_ A=page la plus ancienne
+  //  v v v v v v v v v v v   |  1=DerniŞre page (1er backup)
+  // +---+-+-+-+-+-+-+-+-+-+  |
+  // ¦1¦2¦3¦4¦5¦6¦7¦8¦9¦A¦0¦  |
+  // +---+-+-+-+-+-+-+-+-+-+  |
 
   // Pour simuler un véritable Undo, l'appelant doit mettre la structure
   // de page courante à jour avant l'appel, puis en réextraire les infos en
@@ -369,14 +281,14 @@ void Advance_in_list_of_pages(T_List_of_pages * list)
 {
   // Cette fonction fait l'équivalent d'un "Redo" dans la liste de pages.
   // Elle effectue une sorte de ROR (Rotation Right) sur la liste:
-  // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
-  // º0º1³2³3³4³5³6³7³8³9³Aº  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |  0=page courante
-  //  ³ ³ ³ ³ ³ ³ ³ ³ ³ ³ ³   |_ A=page la plus ancienne
+  // +-+-+-+-+-+-+-+-+-+-+-+  |
+  // |0|1|2|3|4|5|6|7|8|9|A|  |
+  // +-+-+-+-+-+-+-+-+-+-+-+  |  0=page courante
+  //  | | | | | | | | | | |   |_ A=page la plus ancienne
   //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
-  // ÉÍËÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍÑÍ»  |
-  // ºAº0³1³2³3³4³5³6³7³8³9º  |
-  // ÈÍÊÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍÏÍ¼  |
+  // +-+-+-+-+-+-+-+-+-+-+-+  |
+  // |A|0|1|2|3|4|5|6|7|8|9|  |
+  // +-+-+-+-+-+-+-+-+-+-+-+  |
 
   // Pour simuler un véritable Redo, l'appelant doit mettre la structure
   // de page courante à jour avant l'appel, puis en réextraire les infos en
@@ -1017,4 +929,8 @@ void * Borrow_memory_from_page(int size)
 
   // Pour que le compilateur ne dise pas qu'il manque une valeur de sortie:
   return 0;
+}
+
+void End_of_modification(void)
+{
 }

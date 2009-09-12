@@ -31,6 +31,15 @@
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 
+// public Globals (available as extern)
+
+int Input_sticky_control = 0;
+int Snap_axis = 0;
+int Snap_axis_origin_X;
+int Snap_axis_origin_Y;
+
+// --
+
 byte Directional_up;
 byte Directional_up_right;
 byte Directional_right;
@@ -39,10 +48,12 @@ byte Directional_down;
 byte Directional_down_left;
 byte Directional_left;
 byte Directional_up_left;
+byte Directional_click;
+
 long Directional_delay;
 long Directional_last_move;
 long Directional_step;
-short Mouse_count; // Number of mouse movements received in the current Get_input()
+int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
 
 word Input_new_mouse_X;
 word Input_new_mouse_Y;
@@ -71,7 +82,7 @@ short Joybutton_right_click=0; // Button number that serves as right-click
 
 int Is_shortcut(word Key, word function)
 {
-  if (Key == 0)
+  if (Key == 0 || function == 0xFFFF)
     return 0;
     
   if (function & 0x100)
@@ -101,19 +112,20 @@ int Is_shortcut(word Key, word function)
 int Move_cursor_with_constraints()
 {
   int feedback=0;
-  byte bl=0;//BL va indiquer si on doit corriger la position du curseur
+  int  mouse_blocked=0; ///< Boolean, Set to true if mouse movement was clipped.
+
   
   // Clip mouse to the editing area. There can be a border when using big 
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
   if (Input_new_mouse_Y>=Screen_height)
   {
       Input_new_mouse_Y=Screen_height-1;
-      bl=1;
+      mouse_blocked=1;
   }
   if (Input_new_mouse_X>=Screen_width)
   {
       Input_new_mouse_X=Screen_width-1;
-      bl=1;
+      mouse_blocked=1;
   }
   //Gestion "avancée" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
@@ -125,7 +137,7 @@ int Move_cursor_with_constraints()
         if(Menu_Y<=Input_new_mouse_Y)
         {
             //On bloque le curseur en fin d'image
-            bl++;
+            mouse_blocked=1;
             Input_new_mouse_Y=Menu_Y-1; //La ligne !!au-dessus!! du menu
         }
 
@@ -135,7 +147,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X>=Main_separator_position)
                 {
-                    bl++;
+                    mouse_blocked=1;
                     Input_new_mouse_X=Main_separator_position-1;
                 }
             }
@@ -143,7 +155,7 @@ int Move_cursor_with_constraints()
             {
                 if(Input_new_mouse_X<Main_X_zoom)
                 {
-                    bl++;
+                    mouse_blocked=1;
                     Input_new_mouse_X=Main_X_zoom;
                 }
             }
@@ -153,25 +165,36 @@ int Move_cursor_with_constraints()
     (Input_new_mouse_Y != Mouse_Y) ||
     (Input_new_mouse_K != Mouse_K))
   {
+    // On every change of mouse state
     if ((Input_new_mouse_K != Mouse_K))
-      feedback=1;        
-    Hide_cursor(); // On efface le curseur AVANT de le déplacer...
+    {
+      feedback=1;
+      
+      if (Input_new_mouse_K == 0)
+        Input_sticky_control = 0;
+    }
+    // Hide cursor, because even just a click change needs it
+    if (!Mouse_moved)
+    {
+      Mouse_moved++;
+      // Hide cursor (erasing icon and brush on screen
+      // before changing the coordinates.
+      Hide_cursor();
+    }
     if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
     {
       Mouse_X=Input_new_mouse_X;
       Mouse_Y=Input_new_mouse_Y;
-      if (bl)
-        Set_mouse_position();
     }
     Mouse_K=Input_new_mouse_K;
-    Compute_paintbrush_coordinates();
-    Display_cursor();
     
-    Mouse_count++;
-    if (Mouse_count>Config.Mouse_merge_movement)
-      feedback=1;
+    if (Mouse_moved > Config.Mouse_merge_movement)
+      if (! Operation[Current_operation][Mouse_K_unique]
+          [Operation_stack_size].Fast_mouse)
+        feedback=1;
   }
-
+  if (mouse_blocked)
+    Set_mouse_position();
   return feedback;
 }
 
@@ -296,6 +319,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
             Input_new_mouse_K &= ~2;
             break;
     }
+    
     return Move_cursor_with_constraints();
 }
 
@@ -327,14 +351,16 @@ int Handle_key_press(SDL_KeyboardEvent event)
       Directional_right=1;
       return 0;
     }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT))
+    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=1;
+        Directional_click=1;
         return Move_cursor_with_constraints();
     }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT))
+    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=2;
+        Directional_click=2;
         return Move_cursor_with_constraints();
     }
 
@@ -344,44 +370,60 @@ int Handle_key_press(SDL_KeyboardEvent event)
 
 int Release_control(int key_code, int modifier)
 {
+    int need_feedback = 0;
 
-    if(key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
+    if (modifier == MOD_SHIFT)
+    {
+      // Disable "snap axis" mode
+      Snap_axis = 0;
+      need_feedback = 1;
+    }
+
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
     {
       Directional_up=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
     {
       Directional_down=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
     {
       Directional_left=0;
     }
-    if(key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
     {
       Directional_right=0;
     }
-    if(key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
     {
-        Input_new_mouse_K &= ~1;
-        return Move_cursor_with_constraints();
+        if (Directional_click & 1)
+        {
+            Directional_click &= ~1;
+            Input_new_mouse_K &= ~1;
+            return Move_cursor_with_constraints() || need_feedback;
+        }
     }
-    if(key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
-      key_code == (Config_Key[SPECIAL_CLICK_RIGHT][1]&0x0FFF) || (Config_Key[SPECIAL_CLICK_RIGHT][1]&modifier))
+    if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][1]&modifier))
     {
-        Input_new_mouse_K &= ~2;
-        return Move_cursor_with_constraints();
+        if (Directional_click & 2)
+        {
+            Directional_click &= ~2;
+            Input_new_mouse_K &= ~2;
+            return Move_cursor_with_constraints() || need_feedback;
+        }
     }
   
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.
-    return 0;
+    return need_feedback;
 }
 
 
@@ -614,10 +656,12 @@ int Get_input(void)
 {
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
-
+                
     Key_ANSI = 0;
     Key = 0;
-    Mouse_count=0;
+    Mouse_moved=0;
+    Input_new_mouse_X = Mouse_X;
+    Input_new_mouse_Y = Mouse_Y;
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
@@ -734,11 +778,20 @@ int Get_input(void)
         }
       }
     }
-    // Vidage de toute mise à jour de l'affichage à l'écran qui serait encore en attente.
-    // (c'est fait ici car on est sur que cette function est apellée partout ou on a besoin d'interragir avec l'utilisateur)
+    // If the cursor was moved since last update,
+    // it was erased, so we need to redraw it (with the preview brush)
+    if (Mouse_moved)
+    {
+      Compute_paintbrush_coordinates();
+      Display_cursor();
+    }
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading 
+    // some user input.
     Flush_update();
 
-    return user_feedback_required;
+    
+    return (Mouse_moved!=0) || user_feedback_required;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)
