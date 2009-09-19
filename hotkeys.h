@@ -24,7 +24,11 @@
 /// The actual data is in hotkeys.c
 //////////////////////////////////////////////////////////////////////////////
 
-#include <stdbool.h>
+#ifndef __VBCC__
+    #include <stdbool.h>
+#else
+    #define bool char
+#endif
 #include <SDL.h>
 
 /*** Types definitions and structs ***/

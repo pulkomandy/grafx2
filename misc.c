@@ -717,15 +717,15 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
 #elif defined(__macosx__) || defined(__FreeBSD__)
-#include <sys/sysctl.h>
+  #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
-// sysinfo not implemented
+  // sysinfo not implemented
 #elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__) || defined(__amigaos__)
-#include <proto/exec.h>
+  #include <proto/exec.h>
 #elif defined(__SKYOS__)
-#include <skyos/sysinfo.h>
+  #include <skyos/sysinfo.h>
 #else
-#include <sys/sysinfo.h> // sysinfo() for free RAM
+  #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
 
 // Indique quelle est la mémoire disponible
@@ -846,4 +846,6 @@ int Convert_videomode_arg(const char *argument)
 			return mode_index;
 
 	return -1;
+
+
 }

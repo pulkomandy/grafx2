@@ -41,7 +41,6 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h errors.h misc.h \
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h misc.h engine.h readline.h \
   buttons.h pages.h help.h sdlscreen.h errors.h op_c.h windows.h input.h \
   palette.h shade.h
-$(OBJDIR)/pversion.o: pversion.c
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h misc.h \
   pxdouble.h pxwide.h
 $(OBJDIR)/pxquad.o: pxquad.c global.h struct.h const.h sdlscreen.h misc.h pxquad.h
@@ -74,6 +73,5 @@ $(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h \
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \
   sdlscreen.h windows.h input.h help.h misc.h readline.h buttons.h \
   pages.h
-$(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h global.h graph.h engine.h \
   misc.h sdlscreen.h errors.h

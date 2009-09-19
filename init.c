@@ -25,11 +25,14 @@
 #if defined(__WIN32__) || defined(__linux__)
   #define GRAFX2_CATCHES_SIGNALS
 #endif
-#include <fcntl.h>
 #include <stdio.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
+
+#ifndef __VBCC__
+    #include <unistd.h>
+#endif
+
 #include <stdlib.h>
 #include <errno.h>
 #include <SDL_byteorder.h>

@@ -17,6 +17,8 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include "struct.h"
+
 //////////////////////////////////////////////////////////////////////////////
 ///@file special.h
 /// Editor functions that can be hooked to a keyboard shortcut, but don't have

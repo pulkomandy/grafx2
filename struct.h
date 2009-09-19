@@ -70,12 +70,14 @@ typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word
 typedef void (* Func_draw_list_item) (word,word,word,byte);
 
 /// A set of RGB values.
+#pragma pack(1)
 typedef struct
 {
   byte R; ///< Red
   byte G; ///< Green
   byte B; ///< Blue
-}__attribute__ ((__packed__)) T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+} T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+#pragma pack()
 
 /// A normal rectangular button in windows and menus.
 typedef struct T_Normal_button
@@ -225,13 +227,15 @@ typedef struct
   byte Mode;      ///< Shade mode: Normal, Loop, or No-saturation see ::SHADE_MODES
 } T_Shade;
 
+#pragma pack(1) // is it useful ?
 /// Data for one fullscreen video mode in configuration file. Warning, this one is saved/loaded as binary.
 typedef struct
 {
   byte State; ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
   word Width; ///< Videomode width in pixels.
   word Height;///< Videomode height in pixels. 
-} __attribute__((__packed__)) T_Config_video_mode;
+} T_Config_video_mode;
+
 
 /// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -241,7 +245,9 @@ typedef struct
   byte Version2;     ///< Minor version number (ex: 0)
   byte Beta1;        ///< Major beta version number (ex: 96)
   byte Beta2;        ///< Major beta version number (ex: 5)
-} __attribute__((__packed__)) T_Config_header;
+} T_Config_header;
+
+#pragma pack()
 
 /// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -250,13 +256,15 @@ typedef struct
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
+#pragma pack(1)
 /// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
-} __attribute__((__packed__)) T_Config_shortcut_info;
+} T_Config_shortcut_info;
+#pragma pack()
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct

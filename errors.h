@@ -21,6 +21,10 @@
 /// Functions and macros for tracing and error reporting.
 //////////////////////////////////////////////////////////////////////////////
 
+#ifndef __func__
+    #define __func__ "stupid compiler !"
+#endif
+
 /// Prints the source filename, line number, function name, a string and an integer.
 #define DEBUG(y,z) printf("%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 

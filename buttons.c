@@ -53,6 +53,10 @@
 #include "input.h"
 #include "special.h"
 
+#ifdef __VBCC__
+    #define __attribute__(x)
+#endif
+
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <dirent.h>

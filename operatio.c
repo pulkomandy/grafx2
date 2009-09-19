@@ -35,7 +35,8 @@
 #include "brush.h"
 #include "windows.h"
 
-#if defined(__GP2X__)
+// PI is NOT part of math.h according to C standards...
+#if defined(__GP2X__) || defined(__VBCC__)
     #define M_PI 3.14159265358979323846 
 #endif
 

@@ -47,6 +47,11 @@
 #include "windows.h"
 #include "input.h"
 
+#ifdef __VBCC__
+    #define __attribute__(x)
+    #define M_PI 3.141592653589793238462643
+#endif
+
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
@@ -109,8 +114,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     effective_h = Menu_Y - effective_Y;
     
   /*
-  SDL_Rect r;
-  r.x=effective_X;
+  SDL_Rect r;      r.x=effective_X;
   r.y=effective_Y;
   r.h=effective_h;
   r.w=effective_w;
