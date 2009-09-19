@@ -28,6 +28,10 @@
 #include "misc.h"
 #include "input.h"
 
+#ifdef __VBCC__
+  #define __attribute__(x)
+#endif
+
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 

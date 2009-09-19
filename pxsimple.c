@@ -28,6 +28,10 @@
 #include "graph.h"
 #include "pxsimple.h"
 
+#ifdef __VBCC__
+    #define __attribute__(x)
+#endif
+
 void Pixel_simple (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {

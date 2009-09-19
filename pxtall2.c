@@ -31,6 +31,10 @@
 #define ZOOMX 2
 #define ZOOMY 4
 
+#ifdef __VBCC__
+  #define __attribute__(x)
+#endif
+
 void Pixel_tall2 (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {

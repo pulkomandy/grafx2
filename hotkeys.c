@@ -21,6 +21,11 @@
 #include "global.h"
 #include "hotkeys.h"
 
+#ifdef __VBCC__
+  #define false 0
+  #define true 1
+#endif
+
 T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {0,
   "Scroll up",

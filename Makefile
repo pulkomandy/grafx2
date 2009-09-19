@@ -184,11 +184,13 @@ else
     RMDIR= delete
     CP = copy
     BIN = grafx2
-    COPT = -c99 -Ivbcc:PosixLib/include -D__amigaos__
+    COPT = -c99 -Ivbcc:PosixLib/include -D__amigaos__ $(TTFCOPT)
     CC = vc
     OBJDIR = obj/amiga-vbcc
     ZIP = lha
-    ZIPOPT= a
+    ZIPOPT = a
+
+    NOTTF = 1
 
   else
   
@@ -260,7 +262,9 @@ else
   JOYCOPT =
 endif
 
-COPT += -DSVN_revision='"$(shell svnversion .)"' -DProgram_version='"$(LABEL)"'
+ifneq ($(PLATFORM),amiga-vbcc)
+  COPT += -DSVN_revision='"$(shell svnversion .)"' -DProgram_version='"$(LABEL)"'
+endif
 
 ### And now for the real build rules ###
 
