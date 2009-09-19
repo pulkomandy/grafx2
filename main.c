@@ -25,7 +25,7 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include <SDL.h>
 #include <SDL_image.h>
 

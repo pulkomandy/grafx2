@@ -260,7 +260,7 @@ else
   JOYCOPT =
 endif
 
-COPT += -DSVN_revision="$(shell svnversion .)" -DProgram_Revision="$(Label)"
+COPT += -DSVN_revision='"$(shell svnversion .)"' -DProgram_version='"$(LABEL)"'
 
 ### And now for the real build rules ###
 
