@@ -1319,7 +1319,7 @@ void Button_Page(void)
 {
 	byte   factor_index;
   char   Temp_buffer[256];
-
+  
   #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
   #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
   #define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
@@ -1351,14 +1351,16 @@ void Button_Page(void)
   SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
 
   // Swap des infos sur les fileselects
-  strcpy(Temp_buffer             ,Spare_current_directory);
+  strcpy(Temp_buffer            ,Spare_current_directory);
   strcpy(Spare_current_directory,Main_current_directory);
   strcpy(Main_current_directory,Temp_buffer             );
 
   SWAP_BYTES (Main_format,Spare_format)
   SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
   SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
-  
+  SWAP_SHORTS(Main_current_layer,Spare_current_layer)
+  SWAP_BYTES (Main_layers_visible,Spare_layers_visible)
+
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
   Change_magnifier_factor(factor_index);
@@ -1503,10 +1505,10 @@ void Button_Copy_page(void)
 // -- Suppression d'une page -------------------------------------------------
 void Button_Kill(void)
 {
-  if ( (Main_backups->Nb_pages_allocated==1)
+  if ( (Main_backups->List_size==1)
     || (!Confirmation_box("Delete the current page?")) )
   {
-    if (Main_backups->Nb_pages_allocated==1)
+    if (Main_backups->List_size==1)
       Warning_message("You can't delete the last page.");
     Hide_cursor();
     Unselect_button(BUTTON_KILL);
@@ -2540,33 +2542,33 @@ void Button_Paintbrush_menu(void)
         Hide_cursor();
         Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
         Display_cursor();
-      }
+  }
       else
       {
         // Restore and exit
-      
+
         if (Restore_brush(index))
         {
-          Close_window();
+  Close_window();
           break;
         }
       }
-    
+
     }
     else if (clicked_button>1 && Window_attribute1==LEFT_SIDE)
     // Standard paintbrushes
-    {
+  {
       Close_window();
-      index=clicked_button-2;
-      Paintbrush_shape=Gfx->Paintbrush_type[index];
-      Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-      Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-      Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-      Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
-      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-      Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
+    index=clicked_button-2;
+    Paintbrush_shape=Gfx->Paintbrush_type[index];
+    Paintbrush_width=Gfx->Preset_paintbrush_width[index];
+    Paintbrush_height=Gfx->Preset_paintbrush_height[index];
+    Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
+    Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
+    Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
       
       break;
     }
@@ -4254,6 +4256,45 @@ void Transparency_set(byte amount)
   Compute_colorize_table();
 }
 
+void Layer_activate(short layer, short side)
+{
+  if (side == RIGHT_SIDE)
+  {
+    // Right-click on current layer
+    if (Main_current_layer == layer)
+    {
+      if (Main_layers_visible == (1<<layer))
+      {
+        // Set all layers visible
+        Main_layers_visible = 0xFF;
+      }
+      else
+      {
+        // Set only this one visible
+        Main_layers_visible = 1<<layer;
+      }
+    }
+    else
+    {
+      // Right-click on an other layer : toggle its visibility
+      Main_layers_visible ^= 1<<layer;
+    }
+  }
+  else
+  {
+    // Left-click on any layer
+    Main_current_layer = layer;
+    Main_layers_visible |= 1<<layer;
+  }
+
+  Hide_cursor();
+  Redraw_layered_image();
+  //Download_infos_page_main(Main_backups->Pages);
+  //Download_infos_backup(Main_backups);
+  Display_all_screen();
+  Display_cursor();
+}
+
 //---------------------------- Courbes de Bézier ----------------------------
 
 void Button_Curves(void)
@@ -5442,9 +5483,11 @@ void Button_Effects(void)
         break;
       case 13 : // Feedback (pour Colorize et Shade)
         if ((Config.FX_Feedback=!Config.FX_Feedback)) //!!!
-          FX_feedback_screen=Main_screen;
+          FX_feedback_screen=Main_backups->Pages->Image[Main_current_layer];
+          // Main_screen
         else
-          FX_feedback_screen=Screen_backup;
+          FX_feedback_screen=Main_backups->Pages->Next->Image[Main_current_layer];
+          // Screen_backup
         Hide_cursor();
         Display_feedback_state();
         Display_cursor();
@@ -5752,10 +5795,10 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
       offset_y = (BRUSH_CONTAINER_PREVIEW_HEIGHT-Brush_container[index].Height)/2;
     // Determine corner pixel of paintbrush to draw (if bigger than preview area) 
     //
-    
+
     // Clear
     Window_rectangle(x_pos,y_pos,BRUSH_CONTAINER_PREVIEW_WIDTH,BRUSH_CONTAINER_PREVIEW_HEIGHT,MC_Light);
-    
+
     // Draw up to 16x16
     for (y=0; y<Brush_container[index].Height && y<BRUSH_CONTAINER_PREVIEW_HEIGHT; y++)
     {

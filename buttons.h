@@ -441,6 +441,8 @@ void Effects_off(void);
 */
 void Transparency_set(byte amount);
 
+void Layer_activate(short layer, short side);
+
 // Menu des effets
 
 /*!

@@ -725,7 +725,7 @@ void Fill(short * top_reached  , short * bottom_reached,
   current_limit_bottom =Min(Paintbrush_Y+1,Limit_bottom);
   *left_reached=Paintbrush_X;
   *right_reached=Paintbrush_X+1;
-  Pixel_in_current_screen(Paintbrush_X,Paintbrush_Y,2);
+  Pixel_in_current_screen(Paintbrush_X,Paintbrush_Y,2,0);
 
   while (changes_made)
   {
@@ -786,7 +786,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2);
+              Pixel_in_current_screen(x_pos,line,2,0);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -865,7 +865,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2);
+              Pixel_in_current_screen(x_pos,line,2,0);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -933,7 +933,7 @@ void Fill_general(byte fill_color)
     Replace_colors_within_limits(replace_table);
 
     // On fait maintenant un remplissage classique de la couleur 1 avec la 2
-   Fill(&top_reached  ,&bottom_reached,
+    Fill(&top_reached  ,&bottom_reached,
          &left_reached,&right_reached);
 
     //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
@@ -985,14 +985,14 @@ void Fill_general(byte fill_color)
           //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
           // précédemment (c'est important pour que les effets ne s'emmèlent
           // pas le pinceaux)
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos),0);
 
           //  Enfin, on peut afficher le pixel, en le soumettant aux effets en
           // cours:
           Display_pixel(x_pos,y_pos,fill_color);
         }
         else
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos),0);
 
     FX_feedback_screen=old_fx_feedback_screen;
 
@@ -1001,7 +1001,6 @@ void Fill_general(byte fill_color)
     // puisque les seuls points qui ont changé dans l'image ont été raffichés
     // par l'utilisation de "Display_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
-
     if(Main_magnifier_mode)
     {
       short w,h;
@@ -2642,8 +2641,7 @@ void Display_pixel(word x,word y,byte color)
     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
     color=Effect_function(x,y,color);
-    Pixel_in_current_screen(x,y,color);
-    Pixel_preview(x,y,color);
+    Pixel_in_current_screen(x,y,color,1);
   }
 }
 

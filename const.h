@@ -64,7 +64,7 @@
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
-
+#define NB_LAYERS                 8
 #define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_COLUMNS          4  ///< Number of columns in the Brush container

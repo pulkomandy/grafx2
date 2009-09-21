@@ -154,7 +154,7 @@ void Pixel_load_in_current_screen(word x_pos,word y_pos,byte color)
 {
   //if ((x_pos>=0) && (y_pos>=0)) //Toujours vrai ?
   if ((x_pos<Main_image_width) && (y_pos<Main_image_height))
-    Pixel_in_current_screen(x_pos,y_pos,color);
+    Pixel_in_current_screen(x_pos,y_pos,color,0);
 }
 
 
@@ -343,7 +343,7 @@ void Init_preview_24b(short width,short height,long size,int format)
 
     // Allocate 24bit buffer
     Buffer_image_24b=
-      (T_Components *)Borrow_memory_from_page(width*height*sizeof(T_Components));
+      (T_Components *)malloc(width*height*sizeof(T_Components));
     if (!Buffer_image_24b)
     {
       // Print an error message

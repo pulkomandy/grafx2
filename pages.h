@@ -39,13 +39,12 @@ void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
 
 // private
-void Init_page(T_Page * page);
+T_Page * New_page(void);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Download_infos_backup(T_List_of_pages * list);
-void Free_a_page(T_Page * page);
+void Clear_page(T_Page * page);
 void Copy_S_page(T_Page * dest,T_Page * source);
-int Size_of_a_page(T_Page * page);
 
 
 
@@ -55,14 +54,11 @@ int Size_of_a_page(T_Page * page);
 
 void Init_list_of_pages(T_List_of_pages * list);
 // private
-int Allocate_list_of_pages(T_List_of_pages * list,int size);
-void Free_a_list_of_pages(T_List_of_pages * list);
-int Size_of_a_list_of_pages(T_List_of_pages * list);
+int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
-int New_page_is_possible(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list);
 void Free_last_page_of_list(T_List_of_pages * list);
-void Create_new_page(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 
@@ -72,7 +68,7 @@ void Free_page_of_a_list(T_List_of_pages * list);
 /// BACKUP HIGH-LEVEL FUNCTIONS
 ///
 
-int Init_all_backup_lists(int size,int width,int height);
+int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
 int Backup_with_new_dimensions(int upload,int width,int height);
 int Backup_and_resize_the_spare(int width,int height);
@@ -82,15 +78,5 @@ void Redo(void);
 void Free_current_page(void); // 'Kill' button
 void Exchange_main_and_spare(void);
 void End_of_modification(void);
-
-
-///
-/// BORROWING MEMORY FROM PAGE
-///
-
-void * Borrow_memory_from_page(int size);
-// private
-int Can_borrow_memory_from_page(int size);
-
 
 #endif

@@ -345,6 +345,10 @@ GFX2_GLOBAL word  Main_magnifier_width;
 GFX2_GLOBAL short Main_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Main_magnifier_offset_Y;
+/// Index of layer currently being edited
+GFX2_GLOBAL int Main_current_layer;
+/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
+GFX2_GLOBAL byte Main_layers_visible;
 
 // -- Spare page data
 
@@ -405,7 +409,10 @@ GFX2_GLOBAL word  Spare_magnifier_width;
 GFX2_GLOBAL short Spare_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Spare_magnifier_offset_Y;
-
+/// Index of layer currently being edited
+GFX2_GLOBAL short Spare_current_layer;
+/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
+GFX2_GLOBAL byte Spare_layers_visible;
 // -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
@@ -414,6 +421,15 @@ GFX2_GLOBAL byte * Screen_backup;
 GFX2_GLOBAL T_List_of_pages * Main_backups;
 /// List of backup pages for the spare page.
 GFX2_GLOBAL T_List_of_pages * Spare_backups;
+
+
+// -- Layers data
+
+/// Array of two images, that contains the "flattened" version of the visible layers.
+GFX2_GLOBAL T_Image Visible_image[2];
+GFX2_GLOBAL T_Image Visible_image_depth_buffer;
+/// Index that is 0 or 1, it ways which of the two ::Visible_image[] contains the current image (the other contains the data from last backup)
+GFX2_GLOBAL int Visible_image_index;
 
 // -- Brush data
 

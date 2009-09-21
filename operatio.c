@@ -3004,7 +3004,8 @@ void Brush_0_5(void)
     Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
     Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
-
+  
+  End_of_modification();
   End_of_modification();
   Return_to_draw_mode();
 }

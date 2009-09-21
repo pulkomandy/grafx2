@@ -219,13 +219,37 @@ byte Read_pixel_from_brush         (word x,word y)
 
 byte Read_pixel_from_current_screen  (word x,word y)
 {
-	return *(Main_screen+y*Main_image_width+x);
+  byte depth;
+  byte color;
+  color = *(Main_screen+y*Main_image_width+x);
+  if (color != 0) // transparent
+    return color;
+  
+  depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+  return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+  // return *(Main_screen+y*Main_image_width+x);
 }
 
-void Pixel_in_current_screen      (word x,word y,byte color)
+void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 {
-	byte* dest=(x+y*Main_image_width+Main_screen);
-	*dest=color;
+    byte depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    if ( depth <= Main_current_layer)
+    {
+      if (color == 0) // transparent
+        // fetch pixel color from the topmost visible layer
+        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+      
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+}
+
+byte Read_pixel_from_current_layer(word x,word y)
+{
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
 }
 
 void Replace_a_color(byte old_color, byte New_color)
@@ -346,9 +370,9 @@ void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,sh
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-	byte* src=start_y*image_width+start_x+Main_screen; //Adr départ image (ESI)
-	byte* dest=Brush; //Adr dest brosse (EDI)
-	int dx;
+    byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
+    byte* dest=Brush; //Adr dest brosse (EDI)
+    int dx;
 
 	for (dx=Brush_height;dx!=0;dx--)
 		//Pour chaque ligne

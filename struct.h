@@ -319,9 +319,8 @@ typedef struct
 // backup dans "graph.c".
 
 /// This is the data for one step of Undo/Redo, for one image.
-typedef struct
+typedef struct T_Page
 {
-  byte *    Image;   ///< Pixel data for the image.
   int       Width;   ///< Image width in pixels.
   int       Height;  ///< Image height in pixels.
   T_Palette Palette; ///< Image palette.
@@ -331,16 +330,26 @@ typedef struct
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
   char      Filename[MAX_PATH_CHARACTERS];      ///< Filename without directory.
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
-
+  struct T_Page *Next;
+  struct T_Page *Prev;
+  byte *    Image[NB_LAYERS];///< Pixel data for the image.
 } T_Page;
 
 /// Collection of undo/redo steps.
 typedef struct
 {
   int      List_size;         ///< Number of ::T_Page in the vector "Pages".
-  int      Nb_pages_allocated;///< Number of ::T_Page used so far in the vector "Pages".
-  T_Page * Pages;             ///< Vector of Pages, each one being a undo/redo step.
+  T_Page * Pages;             ///< Head of a linked list of pages, each one being a undo/redo step.
 } T_List_of_pages;
+
+/// A single image bitmap
+typedef struct
+{
+  int       Width;   ///< Image width in pixels.
+  int       Height;  ///< Image height in pixels.
+  //int       Users;   ///< Number of references.
+  byte *    Image;   ///< Pixel data for the image.
+} T_Image;
 
 /// A single memorized brush from the Brush Container
 typedef struct
@@ -354,7 +363,6 @@ typedef struct
   T_Palette Palette;
   byte Transp_color;
 } T_Brush_template;
-
 
 /// GUI skin data
 typedef struct

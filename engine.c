@@ -870,35 +870,43 @@ void Main_handler(void)
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_1 :
-          Transparency_set(1);
+          Layer_activate(0, LEFT_SIDE);
+          //Transparency_set(1);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_2 :
-          Transparency_set(2);
+          Layer_activate(1, LEFT_SIDE);
+          //Transparency_set(2);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_3 :
-          Transparency_set(3);
+          Layer_activate(2, LEFT_SIDE);
+          //Transparency_set(3);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_4 :
-          Transparency_set(4);
+          Layer_activate(3, LEFT_SIDE);
+          //Transparency_set(4);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_5 :
-          Transparency_set(5);
+          Layer_activate(0, RIGHT_SIDE);
+          //Transparency_set(5);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_6 :
-          Transparency_set(6);
+          Layer_activate(1, RIGHT_SIDE);
+          //Transparency_set(6);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_7 :
-          Transparency_set(7);
+          Layer_activate(2, RIGHT_SIDE);
+          //Transparency_set(7);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_8 :
-          Transparency_set(8);
+          Layer_activate(3, RIGHT_SIDE);
+          //Transparency_set(8);
           Key=0;
           break;
         case SPECIAL_TRANSPARENCY_9 :
