@@ -735,7 +735,7 @@ void Exchange_main_and_spare(void)
 
 void End_of_modification(void)
 {
-/*
+
   Update_visible_page_buffer(1, Main_image_width, Main_image_height);
   memcpy(Visible_image[1].Image,
          Visible_image[0].Image,
@@ -744,7 +744,7 @@ void End_of_modification(void)
   Main_screen=Visible_image[0].Image;
   
   Download_infos_backup(Main_backups);
-  
+/*  
   Last_backed_up_layers = 0;
   Backup();
   */

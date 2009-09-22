@@ -1585,12 +1585,12 @@ void Init_operations(void)
                         Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,0,
                         Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,1,4,
-                        Scroll_12_4,0,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,2,4,
-                        Scroll_12_4,0,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,0,4,
-                        Scroll_0_4,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,1,5,
+                        Scroll_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,2,5,
+                        Scroll_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,0,5,
+                        Scroll_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);

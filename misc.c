@@ -685,33 +685,33 @@ void Slider_timer(byte speed)
 	} while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }
 
-void Scroll_picture(short x_offset,short y_offset)
+void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset)
 {
-	byte* esi = Screen_backup; //source de la copie
-	byte* edi = Main_screen + y_offset * Main_image_width + x_offset;
-	const word ax = Main_image_width - x_offset; // Nombre de pixels à copier à droite
-	word dx;
-	for(dx = Main_image_height - y_offset;dx>0;dx--)
+	byte* src = main_src; //source de la copie
+	byte* dest = main_dest + y_offset * Main_image_width + x_offset;
+	const word length = Main_image_width - x_offset; // Nombre de pixels à copier à droite
+	word y;
+	for(y = Main_image_height - y_offset;y>0;y--)
 	{
 		// Pour chaque ligne
-		memcpy(edi,esi,ax);
-		memcpy(edi - x_offset,esi+ax,x_offset);
+		memcpy(dest,src,length);
+		memcpy(dest - x_offset,src+length,x_offset);
 
 		// On passe à la ligne suivante
-		edi += Main_image_width;
-		esi += Main_image_width;
+		dest += Main_image_width;
+		src += Main_image_width;
 	}
 
 	// On vient de faire le traitement pour otutes les lignes au-dessous de y_offset
 	// Maintenant on traite celles au dessus
-	edi = x_offset + Main_screen;
-	for(dx = y_offset;dx>0;dx--)
+	dest = x_offset + main_dest;
+	for(y = y_offset;y>0;y--)
 	{
-		memcpy(edi,esi,ax);
-		memcpy(edi - x_offset,esi+ax,x_offset);
+		memcpy(dest,src,length);
+		memcpy(dest - x_offset,src+length,x_offset);
 
-		edi += Main_image_width;
-		esi += Main_image_width;
+		dest += Main_image_width;
+		src += Main_image_width;
 	}
 
 	Update_rect(0,0,0,0);

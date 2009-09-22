@@ -181,8 +181,8 @@ void Filled_contour_0_8(void);
 //////////////////////////////////////////////////////////// OPERATION_SCROLL
 
 void Scroll_12_0(void);
-void Scroll_12_4(void);
-void Scroll_0_4(void);
+void Scroll_12_5(void);
+void Scroll_0_5(void);
 
 //////////////////////////////////////////////////// OPERATION_GRAD_CIRCLE
 
