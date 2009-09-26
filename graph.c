@@ -598,10 +598,6 @@ void Resize_image(word chosen_width,word chosen_height)
     Main_image_is_modified=1;
 
     // On copie donc maintenant la partie C dans la nouvelle image.
-    //Copy_part_of_image_to_another(
-    //  Screen_backup,0,0,Min(old_width,Main_image_width),
-    //  Min(old_height,Main_image_height),old_width,
-    //  Main_screen,0,0,Main_image_width);
     for (i=0; i<NB_LAYERS; i++)
     {
       Copy_part_of_image_to_another(
