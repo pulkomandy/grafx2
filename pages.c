@@ -56,6 +56,8 @@ T_Page * New_page(void)
     page->File_directory[0]='\0';
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
+    
+    page->Next = page->Prev = NULL;
   }
   return page;
 }
@@ -71,7 +73,6 @@ void Download_infos_page_main(T_Page * page)
     size_is_modified=(Main_image_width!=page->Width) ||
                          (Main_image_height!=page->Height);
 
-    Main_screen=Visible_image[0].Image;
     Main_image_width=page->Width;
     Main_image_height=page->Height;
     memcpy(Main_palette,page->Palette,sizeof(T_Palette));
@@ -138,7 +139,6 @@ void Redraw_layered_image(void)
       }
     }
   }
-  Main_screen=Visible_image[0].Image;
   Download_infos_backup(Main_backups);
 }
 
@@ -190,7 +190,6 @@ void Upload_infos_page_spare(T_Page * page)
 
 void Download_infos_backup(T_List_of_pages * list)
 {
-  Screen_backup=Visible_image[1].Image;
   //list->Pages->Next->Image[Main_current_layer];
 
   if (Config.FX_Feedback)
@@ -369,7 +368,7 @@ int Create_new_page(T_Page * new_page,T_List_of_pages * list)
     // cas, il faut libérer une page.
     
     // Détruire la dernière page allouée dans la Liste_à_raboter
-    Free_last_page_of_list(list);    
+    Free_last_page_of_list(list);
   }
   {
     int i;
@@ -427,9 +426,18 @@ int Update_visible_page_buffer(int index, int width, int height)
   return 1;
 }
 
-void Advance_visible_page_buffer()
+int Update_depth_buffer(int width, int height)
 {
-  
+  if (Visible_image_depth_buffer.Width != width || Visible_image_depth_buffer.Height != height)
+  {
+    Visible_image_depth_buffer.Width = width;
+    Visible_image_depth_buffer.Height = height;
+    free(Visible_image_depth_buffer.Image);
+    Visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+    if (Visible_image_depth_buffer.Image == NULL)
+      return 0;
+  }
+  return 1;
 }
 
   ///
@@ -459,11 +467,12 @@ int Init_all_backup_lists(int width,int height)
 
     if (!Update_visible_page_buffer(0, width, height))
       return 0;
-    if (!Update_visible_page_buffer(1, width, height))
-      return 0;
-
     Main_screen=Visible_image[0].Image;
     
+    if (!Update_visible_page_buffer(1, width, height))
+      return 0;
+    Screen_backup=Visible_image[1].Image;
+        
     Download_infos_page_main(Main_backups->Pages);
     Download_infos_backup(Main_backups);
 
@@ -522,6 +531,7 @@ int Backup_with_new_dimensions(int upload,int width,int height)
 
   T_Page * new_page;
   int return_code=0;
+  int i;
 
   if (upload)
     // On remet à jour l'état des infos de la page courante (pour pouvoir les
@@ -535,21 +545,36 @@ int Backup_with_new_dimensions(int upload,int width,int height)
     Error(0);
     return 0;
   }
-
+  //Copy_S_page(new_page,Main_backups->Pages);
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
   if (Create_new_page(new_page,Main_backups))
   {
-    Download_infos_page_main(new_page);
+    for (i=0; i<NB_LAYERS;i++)
+    {
+      //Main_backups->Pages->Image[i]=(byte *)malloc(width*height);
+      memset(Main_backups->Pages->Image[i], 0, width*height);
+    }
+    Update_depth_buffer(width, height);
+
+    Update_visible_page_buffer(0, width, height);
+    Main_screen=Visible_image[0].Image;
+    
+    Update_visible_page_buffer(1, width, height);
+    Screen_backup=Visible_image[1].Image;
+
+
+    Download_infos_page_main(Main_backups->Pages);
     Download_infos_backup(Main_backups);
     // On nettoie la nouvelle image:
-    memset(Main_screen,0,Main_image_width*Main_image_height);
+    //memset(Main_screen,0,width*height);
+    
     return_code=1;
   }
 
   // On détruit le descripteur de la page courante
-  free(new_page);
+  //free(new_page);
 
   return return_code;
 }
@@ -728,20 +753,20 @@ void Exchange_main_and_spare(void)
     Main_image_height=Main_backups->Pages->Height;
 
   Download_infos_page_main(Main_backups->Pages);
-  Download_infos_page_spare(Spare_backups->Pages);
   Download_infos_backup(Main_backups);
+  Download_infos_page_spare(Spare_backups->Pages);
   Redraw_layered_image();
 }
 
 void End_of_modification(void)
 {
 
-  Update_visible_page_buffer(1, Main_image_width, Main_image_height);
+  //Update_visible_page_buffer(1, Main_image_width, Main_image_height);
+  
+  
   memcpy(Visible_image[1].Image,
          Visible_image[0].Image,
          Main_image_width*Main_image_height);
-  
-  Main_screen=Visible_image[0].Image;
   
   Download_infos_backup(Main_backups);
 /*  
