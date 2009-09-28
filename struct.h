@@ -330,9 +330,10 @@ typedef struct T_Page
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
   char      Filename[MAX_PATH_CHARACTERS];      ///< Filename without directory.
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
-  struct T_Page *Next;
-  struct T_Page *Prev;
-  byte *    Image[NB_LAYERS];///< Pixel data for the image.
+  struct T_Page *Next; ///< Pointer to the next backup
+  struct T_Page *Prev; ///< Pointer to the previous backup
+  byte      Nb_layers; ///< Number of layers
+  byte *    Image[0];  ///< Pixel data for the image.
 } T_Page;
 
 /// Collection of undo/redo steps.

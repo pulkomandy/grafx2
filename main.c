@@ -635,18 +635,6 @@ int Init_program(int argc,char * argv[])
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(Screen_width,Screen_height)==0)
     Error(ERROR_MEMORY);
-  // On remet le nom par défaut pour la page de brouillon car il été modifié
-  // par le passage d'un fichier en paramètre lors du traitement précédent.
-  // Note: le fait que l'on ne modifie que les variables globales 
-  // Brouillon_* et pas les infos contenues dans la page de brouillon 
-  // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
-  // poser de problèmes, alors...
-  if (File_in_command_line)
-  {
-    strcpy(Spare_file_directory,Spare_current_directory);
-    strcpy(Spare_filename,"NO_NAME.GIF");
-    Spare_fileformat=DEFAULT_FILEFORMAT;
-  }
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);

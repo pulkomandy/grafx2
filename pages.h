@@ -39,7 +39,7 @@ void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
 
 // private
-T_Page * New_page(void);
+T_Page * New_page(byte nb_layers);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Download_infos_backup(T_List_of_pages * list);

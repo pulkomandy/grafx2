@@ -39,15 +39,15 @@
 static word Last_backed_up_layers=0;
 
 /// Allocate and initialize a new page.
-T_Page * New_page(void)
+T_Page * New_page(byte nb_layers)
 {
   T_Page * page;
   
-  page = (T_Page *)malloc(sizeof(T_Page));
+  page = (T_Page *)malloc(sizeof(T_Page)+NB_LAYERS*sizeof(byte *));
   if (page!=NULL)
   {
     int i;
-    for (i=0; i<NB_LAYERS; i++)
+    for (i=0; i<nb_layers; i++)
       page->Image[i]=NULL;
     page->Width=0;
     page->Height=0;
@@ -56,10 +56,24 @@ T_Page * New_page(void)
     page->File_directory[0]='\0';
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
-    
+    page->Nb_layers=nb_layers;
     page->Next = page->Prev = NULL;
   }
   return page;
+}
+
+byte * New_layer(long pixel_size)
+{
+  return (byte *)(malloc(pixel_size));
+}
+void Free_layer(byte * layer)
+{
+  free(layer);
+}
+
+byte * Dup_layer(byte * layer)
+{
+  return layer;
 }
 
 void Download_infos_page_main(T_Page * page)
@@ -102,7 +116,7 @@ void Redraw_layered_image(void)
   // Re-construct the image with the visible layers
   int layer;  
   // First layer
-  for (layer=0; layer<NB_LAYERS; layer++)
+  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
   {
     if ((1<<layer) & Main_layers_visible)
     {
@@ -122,7 +136,7 @@ void Redraw_layered_image(void)
     }
   }
   // subsequent layer(s)
-  for (; layer<NB_LAYERS; layer++)
+  for (; layer<Main_backups->Pages->Nb_layers; layer++)
   {
     if ((1<<layer) & Main_layers_visible)
     {
@@ -162,7 +176,7 @@ void Download_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
   {
-    Spare_screen=page->Image[Spare_current_layer];
+    //Spare_screen=page->Image[Spare_current_layer];
     Spare_image_width=page->Width;
     Spare_image_height=page->Height;
     memcpy(Spare_palette,page->Palette,sizeof(T_Palette));
@@ -177,7 +191,7 @@ void Upload_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
   {
-    page->Image[Spare_current_layer]=Spare_screen;
+    //page->Image[Spare_current_layer]=Spare_screen;
     page->Width=Spare_image_width;
     page->Height=Spare_image_height;
     memcpy(page->Palette,Spare_palette,sizeof(T_Palette));
@@ -204,9 +218,9 @@ void Clear_page(T_Page * page)
 {
   // On peut appeler cette fonction sur une page non allouée.
   int i;
-  for (i=0; i<NB_LAYERS; i++)
+  for (i=0; i<page->Nb_layers; i++)
   {
-    free(page->Image[i]);
+    Free_layer(page->Image[i]);
     page->Image[i]=NULL;
   }
   page->Width=0;
@@ -240,7 +254,7 @@ int Allocate_list_of_pages(T_List_of_pages * list)
   T_Page * page;
 
   // On initialise chacune des nouvelles pages
-  page=New_page();
+  page=New_page(NB_LAYERS);
   if (!page)
     return 0;
   
@@ -372,8 +386,8 @@ int Create_new_page(T_Page * new_page,T_List_of_pages * list)
   }
   {
     int i;
-    for (i=0; i<NB_LAYERS; i++)
-      new_page->Image[i]=(byte *)malloc(new_page->Height*new_page->Width);
+    for (i=0; i<new_page->Nb_layers; i++)
+      new_page->Image[i]=New_layer(new_page->Height*new_page->Width);
   }
 
   
@@ -449,69 +463,84 @@ int Init_all_backup_lists(int width,int height)
   // width et height correspondent à la dimension des images de départ.
   int i;
 
-  if (Allocate_list_of_pages(Main_backups) &&
-      Allocate_list_of_pages(Spare_backups))
+  if (! Allocate_list_of_pages(Main_backups) ||
+      ! Allocate_list_of_pages(Spare_backups))
+    return 0;
+  // On a réussi à allouer deux listes de pages dont la taille correspond à
+  // celle demandée par l'utilisateur.
+
+  // On crée un descripteur de page correspondant à la page principale
+  Upload_infos_page_main(Main_backups->Pages);
+  // On y met les infos sur la dimension de démarrage
+  Main_backups->Pages->Width=width;
+  Main_backups->Pages->Height=height;
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
-    // On a réussi à allouer deux listes de pages dont la taille correspond à
-    // celle demandée par l'utilisateur.
-
-    // On crée un descripteur de page correspondant à la page principale
-    Upload_infos_page_main(Main_backups->Pages);
-    // On y met les infos sur la dimension de démarrage
-    Main_backups->Pages->Width=width;
-    Main_backups->Pages->Height=height;
-    for (i=0; i<NB_LAYERS; i++)
-    {
-      Main_backups->Pages->Image[i]=(byte *)malloc(width*height);
-    }
-
-    if (!Update_visible_page_buffer(0, width, height))
+    Main_backups->Pages->Image[i]=New_layer(width*height);
+    if (! Main_backups->Pages->Image[i])
       return 0;
-    Main_screen=Visible_image[0].Image;
-    
-    if (!Update_visible_page_buffer(1, width, height))
-      return 0;
-    Screen_backup=Visible_image[1].Image;
-        
-    Download_infos_page_main(Main_backups->Pages);
-    Download_infos_backup(Main_backups);
-
-    // Maintenant, on regarde si on a le droit de créer la même page dans
-    // la page de brouillon.
-    Download_infos_page_spare(Spare_backups->Pages);
-
-    // Et on efface les 2 images en les remplacant de "0"
-    memset(Main_screen,0,Main_image_width*Main_image_height);
-    memset(Spare_screen,0,Spare_image_width*Spare_image_height);
-
-    Visible_image[0].Width = width;
-    Visible_image[0].Height = height;
-    Visible_image[0].Image = NULL;
-
-    Visible_image[1].Width = width;
-    Visible_image[1].Height = height;
-    Visible_image[1].Image = NULL;
-
-    Visible_image_depth_buffer.Width = width;
-    Visible_image_depth_buffer.Height = height;
-    Visible_image_depth_buffer.Image = NULL;
-
-    Visible_image[0].Image = (byte *)malloc(Visible_image[0].Width * Visible_image[0].Height);
-    if (Visible_image[0].Image)
-    {
-      Visible_image[1].Image = (byte *)malloc(Visible_image[1].Width * Visible_image[1].Height);
-      if (Visible_image[1].Image)
-      {
-        Visible_image_depth_buffer.Image = (byte *)malloc(Visible_image_depth_buffer.Width * Visible_image_depth_buffer.Height);
-        if (Visible_image_depth_buffer.Image)
-        {
-          End_of_modification();
-          return 1;
-        }
-      }
-    }
   }
-  return 0;
+
+  if (!Update_visible_page_buffer(0, width, height))
+    return 0;
+  Main_screen=Visible_image[0].Image;
+  
+  if (!Update_visible_page_buffer(1, width, height))
+    return 0;
+  Screen_backup=Visible_image[1].Image;
+      
+  Download_infos_page_main(Main_backups->Pages); 
+  Download_infos_backup(Main_backups);
+
+  // Default values for spare page
+  Spare_backups->Pages->Width = width;
+  Spare_backups->Pages->Height = height;
+  memcpy(Spare_backups->Pages->Palette,Main_palette,sizeof(T_Palette));
+  strcpy(Spare_backups->Pages->Comment,"");
+  strcpy(Spare_backups->Pages->File_directory,Spare_current_directory);
+  strcpy(Spare_backups->Pages->Filename,"NO_NAME.GIF");
+  Spare_backups->Pages->File_format=DEFAULT_FILEFORMAT;
+  // Copy this informations in the global Spare_ variables
+  Download_infos_page_spare(Spare_backups->Pages);
+    
+  // Clear the initial Visible buffer
+  //memset(Main_screen,0,Main_image_width*Main_image_height);
+
+  // Spare
+  for (i=0; i<NB_LAYERS; i++)
+  {
+    Spare_backups->Pages->Image[i]=New_layer(width*height);
+    if (! Spare_backups->Pages->Image[i])
+      return 0;
+  }
+  //memset(Spare_screen,0,Spare_image_width*Spare_image_height);
+
+  Visible_image[0].Width = width;
+  Visible_image[0].Height = height;
+  Visible_image[0].Image = NULL;
+
+  Visible_image[1].Width = width;
+  Visible_image[1].Height = height;
+  Visible_image[1].Image = NULL;
+
+  Visible_image_depth_buffer.Width = width;
+  Visible_image_depth_buffer.Height = height;
+  Visible_image_depth_buffer.Image = NULL;
+
+  Visible_image[0].Image = (byte *)malloc(Visible_image[0].Width * Visible_image[0].Height);
+  if (! Visible_image[0].Image)
+    return 0;
+    
+  Visible_image[1].Image = (byte *)malloc(Visible_image[1].Width * Visible_image[1].Height);
+  if (! Visible_image[1].Image)
+    return 0;
+    
+  Visible_image_depth_buffer.Image = (byte *)malloc(Visible_image_depth_buffer.Width * Visible_image_depth_buffer.Height);
+  if (! Visible_image_depth_buffer.Image)
+    return 0;
+    
+  End_of_modification();
+  return 1;
 }
 
 void Set_number_of_backups(int nb_backups)
@@ -530,6 +559,7 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   // 0 sinon.
 
   T_Page * new_page;
+  byte nb_layers;
   int return_code=0;
   int i;
 
@@ -538,8 +568,9 @@ int Backup_with_new_dimensions(int upload,int width,int height)
     // retrouver plus tard)
     Upload_infos_page_main(Main_backups->Pages);
 
+  nb_layers=Main_backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page courante
-  new_page=New_page();
+  new_page=New_page(nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -551,7 +582,7 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   new_page->Height=height;
   if (Create_new_page(new_page,Main_backups))
   {
-    for (i=0; i<NB_LAYERS;i++)
+    for (i=0; i<nb_layers;i++)
     {
       //Main_backups->Pages->Image[i]=(byte *)malloc(width*height);
       memset(Main_backups->Pages->Image[i], 0, width*height);
@@ -592,7 +623,7 @@ int Backup_and_resize_the_spare(int width,int height)
   Upload_infos_page_spare(Spare_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page de brouillon
-  new_page=New_page();
+  new_page=New_page(Spare_backups->Pages->Nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -632,7 +663,7 @@ void Backup(void)
   Upload_infos_page_main(Main_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
-  new_page=New_page();
+  new_page=New_page(Main_backups->Pages->Nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -647,7 +678,7 @@ void Backup(void)
   Download_infos_backup(Main_backups);
 
   // On copie l'image du backup vers la page courante:
-  for (i=0; i<NB_LAYERS;i++)
+  for (i=0; i<Main_backups->Pages->Nb_layers;i++)
     memcpy(Main_backups->Pages->Image[i],
            Main_backups->Pages->Next->Image[i],
            Main_image_width*Main_image_height);
@@ -743,14 +774,23 @@ void Exchange_main_and_spare(void)
   // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
   // et backup.
 
-    /* SECTION GROS CACA PROUT PROUT */
-    // Auparavant on ruse en mettant déjà à jour les dimensions de la
-    // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
-    // un changement de dimensions et va bêtement sortir du mode loupe, alors
-    // que lors d'un changement de page, on veut bien conserver l'état du mode
-    // loupe du brouillon.
-    Main_image_width=Main_backups->Pages->Width;
-    Main_image_height=Main_backups->Pages->Height;
+  Update_depth_buffer(Main_backups->Pages->Width, Main_backups->Pages->Height);
+
+  Update_visible_page_buffer(0, Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Main_screen=Visible_image[0].Image;
+  
+  Update_visible_page_buffer(1, Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Screen_backup=Visible_image[1].Image;
+
+
+  /* SECTION GROS CACA PROUT PROUT */
+  // Auparavant on ruse en mettant déjà à jour les dimensions de la
+  // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
+  // un changement de dimensions et va bêtement sortir du mode loupe, alors
+  // que lors d'un changement de page, on veut bien conserver l'état du mode
+  // loupe du brouillon.
+  Main_image_width=Main_backups->Pages->Width;
+  Main_image_height=Main_backups->Pages->Height;
 
   Download_infos_page_main(Main_backups->Pages);
   Download_infos_backup(Main_backups);

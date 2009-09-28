@@ -4026,7 +4026,7 @@ void Scroll_0_5(void)
     
     
     // Do the actual scroll operation on all layers.
-    for (i=0; i<NB_LAYERS; i++)
+    for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       Scroll_picture(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], x_offset, y_offset);
   }  
   else

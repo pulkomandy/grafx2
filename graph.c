@@ -598,7 +598,7 @@ void Resize_image(word chosen_width,word chosen_height)
     Main_image_is_modified=1;
 
     // On copie donc maintenant la partie C dans la nouvelle image.
-    for (i=0; i<NB_LAYERS; i++)
+    for (i=0; i<Main_backups->Pages->Nb_layers; i++)
     {
       Copy_part_of_image_to_another(
         Main_backups->Pages->Next->Image[i],0,0,Min(old_width,Main_image_width),

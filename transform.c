@@ -380,40 +380,40 @@ void Button_Transform_menu(void)
         int i;
         
         case  2 : // Flip X
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
             Flip_X_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
           }
           break;
         case  3 : // Flip Y      
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
             Flip_Y_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
           }
           break;
         case  4 : // -90° Rotation
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             Rotate_270_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
           }
           break;
         case  5 : // +90° Rotation
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             Rotate_90_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
           }
           break;
         case  6 : // 180° Rotation
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
             Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
           }
           break;       
         case  7 : // Resize
-          for (i=0; i<NB_LAYERS; i++)
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             Rescale(Main_backups->Pages->Next->Image[i], old_width, old_height, Main_backups->Pages->Image[i], Main_image_width, Main_image_height, 0, 0);
           }
