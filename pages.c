@@ -649,7 +649,12 @@ void Backup(void)
 // Sauve la page courante comme première page de backup et crée une nouvelle page
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
-  int i;
+  Backup_layers(1<<Main_current_layer);
+}
+
+void Backup_layers(byte layer_mask)
+{
+    int i;
   
   T_Page *new_page;
 

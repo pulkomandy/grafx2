@@ -3909,12 +3909,15 @@ void Scroll_12_0(void)
 //
 {
   Init_start_operation();
-  Backup();
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Operation_push(Mouse_K); // LEFT_SIDE or RIGHT_SIDE
+  if (Mouse_K == LEFT_SIDE)
+    Backup();
+  else
+    Backup_layers(Main_layers_visible);
   
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;

@@ -175,16 +175,16 @@ void Hide_current_image_with_stencil(byte color, byte * stencil)
 	int nb_pixels=0; //ECX
 	//al=color
 	//edi=Screen_pixels
-	byte* Pixel_Courant=Screen_pixels; //dl
+	byte* pixel=Main_backups->Pages->Image[Main_current_layer];
 	int i;
 
 	nb_pixels=Main_image_height*Main_image_width;
 
 	for(i=0;i<nb_pixels;i++)
 	{
-		if (stencil[*Pixel_Courant]==0)
-			*Pixel_Courant=color;
-		Pixel_Courant++;
+		if (stencil[*pixel]==0)
+			*pixel=color;
+		pixel++;
 	}
 }
 
@@ -192,7 +192,7 @@ void Hide_current_image(byte color)
 	// Effacer l'image courante avec une certaine couleur
 {
 	memset(
-			Main_screen ,
+			Main_backups->Pages->Image[Main_current_layer],
 			color ,
 			Main_image_width * Main_image_height
 		  );

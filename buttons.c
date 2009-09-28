@@ -507,6 +507,7 @@ void Button_Clear(void)
     Hide_current_image_with_stencil(0,Stencil);
   else
     Hide_current_image(0);
+  Redraw_layered_image();
   Display_all_screen();
   End_of_modification();
   Unselect_button(BUTTON_CLEAR);
@@ -521,6 +522,7 @@ void Button_Clear_with_backcolor(void)
     Hide_current_image_with_stencil(Back_color,Stencil);
   else
     Hide_current_image(Back_color);
+  Redraw_layered_image();
   Display_all_screen();
   End_of_modification();
   Unselect_button(BUTTON_CLEAR);

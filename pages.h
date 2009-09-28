@@ -72,7 +72,10 @@ int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
 int Backup_with_new_dimensions(int upload,int width,int height);
 int Backup_and_resize_the_spare(int width,int height);
+/// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
+/// Backup with a new copy of some layers (the others are references).
+void Backup_layers(byte layer_mask);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button

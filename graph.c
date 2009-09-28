@@ -662,7 +662,8 @@ void Get_colors_from_brush(void)
 
   if (Confirmation_box("Modify current palette ?"))
   {
-    Backup();
+    // Backup with unchanged layers, only palette is modified
+    Backup_layers(0);
 
     // On commence par initialiser le tableau de booléen à faux
     for (color=0;color<=255;color++)
