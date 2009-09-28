@@ -58,7 +58,7 @@ int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
 void Free_last_page_of_list(T_List_of_pages * list);
-int Create_new_page(T_Page * new_page,T_List_of_pages * current_list);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, byte layer_mask);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 

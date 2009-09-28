@@ -62,19 +62,54 @@ T_Page * New_page(byte nb_layers)
   return page;
 }
 
+// ==============================================================
+// Layers allocation functions.
+//
+// Layers are made of a "number of users" (short), followed by
+// the actual pixel data (a large number of bytes).
+// Every time a layer is 'duplicated' as a reference, the number
+// of users is incremented.
+// Every time a layer is freed, the number of users is decreased,
+// and only when it reaches zero the pixel data is freed.
+// ==============================================================
+
+/// Allocate a new layer
 byte * New_layer(long pixel_size)
 {
-  return (byte *)(malloc(pixel_size));
-}
-void Free_layer(byte * layer)
-{
-  free(layer);
+  short * ptr = malloc(sizeof(short)+pixel_size);
+  if (ptr==NULL)
+    return NULL;
+  
+  *ptr = 1;
+  return (byte *)(ptr+1);
 }
 
+/// Free a layer
+void Free_layer(byte * layer)
+{
+  short * ptr = (short *)(layer);
+  if (layer==NULL)
+    return;
+    
+  if (-- (*(ptr-1))) // Users--
+    return;
+  else
+    free(ptr-1);
+}
+
+/// Duplicate a layer (new reference)
 byte * Dup_layer(byte * layer)
 {
+  short * ptr = (short *)(layer);
+  
+  if (layer==NULL)
+    return NULL;
+  
+  (*(ptr-1)) ++; // Users ++
   return layer;
 }
+
+// ==============================================================
 
 void Download_infos_page_main(T_Page * page)
 // Affiche la page à l'écran
@@ -367,7 +402,8 @@ void Free_last_page_of_list(T_List_of_pages * list)
   }
 }
 
-int Create_new_page(T_Page * new_page,T_List_of_pages * list)
+// layer_mask tells which layers have to be fresh copies instead of references
+int Create_new_page(T_Page * new_page,T_List_of_pages * list, byte layer_mask)
 {
 
 //   Cette fonction crée une nouvelle page dont les attributs correspondent à
@@ -387,7 +423,12 @@ int Create_new_page(T_Page * new_page,T_List_of_pages * list)
   {
     int i;
     for (i=0; i<new_page->Nb_layers; i++)
-      new_page->Image[i]=New_layer(new_page->Height*new_page->Width);
+    {
+      if ((1<<i) & layer_mask)
+        new_page->Image[i]=New_layer(new_page->Height*new_page->Width);
+      else
+        new_page->Image[i]=Dup_layer(list->Pages->Image[i]);
+    }
   }
 
   
@@ -580,7 +621,7 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Main_backups))
+  if (Create_new_page(new_page,Main_backups,0))
   {
     for (i=0; i<nb_layers;i++)
     {
@@ -633,7 +674,7 @@ int Backup_and_resize_the_spare(int width,int height)
   Upload_infos_page_spare(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups))
+  if (Create_new_page(new_page,Spare_backups,0))
   {
     Download_infos_page_spare(new_page);
     return_code=1;
@@ -677,17 +718,19 @@ void Backup_layers(byte layer_mask)
   
   // Enrichissement de l'historique
   Copy_S_page(new_page,Main_backups->Pages);
-  Create_new_page(new_page,Main_backups);
+  Create_new_page(new_page,Main_backups,layer_mask);
   Download_infos_page_main(new_page);
 
   Download_infos_backup(Main_backups);
 
   // On copie l'image du backup vers la page courante:
   for (i=0; i<Main_backups->Pages->Nb_layers;i++)
-    memcpy(Main_backups->Pages->Image[i],
-           Main_backups->Pages->Next->Image[i],
-           Main_image_width*Main_image_height);
-
+  {
+    if ((1<<i) & layer_mask)
+      memcpy(Main_backups->Pages->Image[i],
+             Main_backups->Pages->Next->Image[i],
+             Main_image_width*Main_image_height);
+  }
   // On allume l'indicateur de modification de l'image
   Main_image_is_modified=1;
   
