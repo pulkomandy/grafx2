@@ -3975,7 +3975,8 @@ void Scroll_12_5(void)
     {
       // One layer at once
       Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer], Main_backups->Pages->Image[Main_current_layer], x_offset, y_offset);
-      Redraw_layered_image();
+      //Redraw_layered_image();
+      Redraw_current_layer();
     }
 
     Display_all_screen();

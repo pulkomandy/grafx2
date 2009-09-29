@@ -191,6 +191,27 @@ void Redraw_layered_image(void)
   Download_infos_backup(Main_backups);
 }
 
+void Redraw_current_layer(void)
+{
+  int i;
+  for (i=0; i<Main_image_width*Main_image_height; i++)
+  {
+    byte depth = *(Visible_image_depth_buffer.Image+i);
+    if (depth<=Main_current_layer)
+    {
+      byte color = *(Main_backups->Pages->Image[Main_current_layer]+i);
+      if (color != 0) /* transp color */
+      {
+        *(Visible_image[0].Image+i) = color;
+      }
+      else
+      {
+        *(Visible_image[0].Image+i) = *(Main_backups->Pages->Image[depth]+i);
+      }
+    }
+  }
+}
+
 void Upload_infos_page_main(T_Page * page)
 // Sauve l'écran courant dans la page
 {
