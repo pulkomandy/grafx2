@@ -141,7 +141,7 @@ void Download_infos_page_main(T_Page * page)
     }
     
   }
-  //Update_visible_page_buffer(Visible_image_index, page->Width, page->Height);
+  //Update_buffers( page->Width, page->Height);
   //memcpy(Main_screen, page->Image[Main_current_layer], page->Width*page->Height);
   
 }
@@ -488,31 +488,40 @@ void Free_page_of_a_list(T_List_of_pages * list)
   }
 }
 
-int Update_visible_page_buffer(int index, int width, int height)
+/// Resize one of the special bitmap buffers, if necessary.
+int Update_buffer(T_Image * image, int width, int height)
 {
-  if (Visible_image[index].Width != width || Visible_image[index].Height != height)
+  // At least one dimension is different
+  if (image->Width != width || image->Height != height)
   {
-    Visible_image[index].Width = width;
-    Visible_image[index].Height = height;
-    free(Visible_image[index].Image);
-    Visible_image[index].Image = (byte *)malloc(width * height);
-    if (Visible_image[index].Image == NULL)
-      return 0;
+    // Actual size difference
+    if (image->Width * image->Height != width * height)
+    {
+      free(image->Image);
+      image->Image = (byte *)malloc(width * height);
+      if (image->Image == NULL)
+        return 0;
+    }
+    image->Width = width;
+    image->Height = height;
   }
   return 1;
 }
 
-int Update_depth_buffer(int width, int height)
+/// Update all the special image buffers, if necessary.
+int Update_buffers(int width, int height)
 {
-  if (Visible_image_depth_buffer.Width != width || Visible_image_depth_buffer.Height != height)
-  {
-    Visible_image_depth_buffer.Width = width;
-    Visible_image_depth_buffer.Height = height;
-    free(Visible_image_depth_buffer.Image);
-    Visible_image_depth_buffer.Image = (byte *)malloc(width * height);
-    if (Visible_image_depth_buffer.Image == NULL)
-      return 0;
-  }
+  if (! Update_buffer(&Visible_image_depth_buffer, width, height))
+    return 0;
+    
+  if (! Update_buffer(&Visible_image[0], width, height))
+    return 0;
+  Main_screen=Visible_image[0].Image;
+  
+  if (! Update_buffer(&Visible_image[1], width, height))
+    return 0;    
+  Screen_backup=Visible_image[1].Image;
+  
   return 1;
 }
 
@@ -543,13 +552,8 @@ int Init_all_backup_lists(int width,int height)
       return 0;
   }
 
-  if (!Update_visible_page_buffer(0, width, height))
+  if (!Update_buffers(width, height))
     return 0;
-  Main_screen=Visible_image[0].Image;
-  
-  if (!Update_visible_page_buffer(1, width, height))
-    return 0;
-  Screen_backup=Visible_image[1].Image;
       
   Download_infos_page_main(Main_backups->Pages); 
   Download_infos_backup(Main_backups);
@@ -577,29 +581,19 @@ int Init_all_backup_lists(int width,int height)
   }
   //memset(Spare_screen,0,Spare_image_width*Spare_image_height);
 
-  Visible_image[0].Width = width;
-  Visible_image[0].Height = height;
+  Visible_image[0].Width = 0;
+  Visible_image[0].Height = 0;
   Visible_image[0].Image = NULL;
 
-  Visible_image[1].Width = width;
-  Visible_image[1].Height = height;
+  Visible_image[1].Width = 0;
+  Visible_image[1].Height = 0;
   Visible_image[1].Image = NULL;
 
-  Visible_image_depth_buffer.Width = width;
-  Visible_image_depth_buffer.Height = height;
+  Visible_image_depth_buffer.Width = 0;
+  Visible_image_depth_buffer.Height = 0;
   Visible_image_depth_buffer.Image = NULL;
 
-  Visible_image[0].Image = (byte *)malloc(Visible_image[0].Width * Visible_image[0].Height);
-  if (! Visible_image[0].Image)
-    return 0;
-    
-  Visible_image[1].Image = (byte *)malloc(Visible_image[1].Width * Visible_image[1].Height);
-  if (! Visible_image[1].Image)
-    return 0;
-    
-  Visible_image_depth_buffer.Image = (byte *)malloc(Visible_image_depth_buffer.Width * Visible_image_depth_buffer.Height);
-  if (! Visible_image_depth_buffer.Image)
-    return 0;
+  Update_buffers(width, height);
     
   End_of_modification();
   return 1;
@@ -649,14 +643,8 @@ int Backup_with_new_dimensions(int upload,int width,int height)
       //Main_backups->Pages->Image[i]=(byte *)malloc(width*height);
       memset(Main_backups->Pages->Image[i], 0, width*height);
     }
-    Update_depth_buffer(width, height);
-
-    Update_visible_page_buffer(0, width, height);
-    Main_screen=Visible_image[0].Image;
     
-    Update_visible_page_buffer(1, width, height);
-    Screen_backup=Visible_image[1].Image;
-
+    Update_buffers(width, height);
 
     Download_infos_page_main(Main_backups->Pages);
     Download_infos_backup(Main_backups);
@@ -843,14 +831,7 @@ void Exchange_main_and_spare(void)
   // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
   // et backup.
 
-  Update_depth_buffer(Main_backups->Pages->Width, Main_backups->Pages->Height);
-
-  Update_visible_page_buffer(0, Main_backups->Pages->Width, Main_backups->Pages->Height);
-  Main_screen=Visible_image[0].Image;
-  
-  Update_visible_page_buffer(1, Main_backups->Pages->Width, Main_backups->Pages->Height);
-  Screen_backup=Visible_image[1].Image;
-
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
 
   /* SECTION GROS CACA PROUT PROUT */
   // Auparavant on ruse en mettant déjà à jour les dimensions de la
@@ -870,7 +851,7 @@ void Exchange_main_and_spare(void)
 void End_of_modification(void)
 {
 
-  //Update_visible_page_buffer(1, Main_image_width, Main_image_height);
+  //Update_buffers(Main_image_width, Main_image_height);
   
   
   memcpy(Visible_image[1].Image,
