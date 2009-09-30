@@ -191,6 +191,51 @@ void Redraw_layered_image(void)
   Download_infos_backup(Main_backups);
 }
 
+void Update_depth_buffer(void)
+{
+  // Re-construct the depth buffer with the visible layers.
+  // This function doesn't touch the visible buffer, it assumes
+  // that it was already up-to-date. (Ex. user only changed active layer)
+
+  int layer;  
+  // First layer
+  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Main_layers_visible)
+    {
+       // Initialize the depth buffer
+       memset(Visible_image_depth_buffer.Image,
+         layer,
+         Main_image_width*Main_image_height);
+       
+       // skip all other layers
+       layer++;
+       break;
+    }
+  }
+  // subsequent layer(s)
+  for (; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    // skip the current layer, whenever we reach it
+    if (layer == Main_current_layer)
+      continue;
+      
+    if ((1<<layer) & Main_layers_visible)
+    {
+      int i;
+      for (i=0; i<Main_image_width*Main_image_height; i++)
+      {
+        byte color = *(Main_backups->Pages->Image[layer]+i);
+        if (color != 0) /* transp color */
+        {
+          *(Visible_image_depth_buffer.Image+i) = layer;
+        }
+      }
+    }
+  }
+  Download_infos_backup(Main_backups);
+}
+
 void Redraw_current_layer(void)
 {
   int i;

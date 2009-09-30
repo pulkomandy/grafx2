@@ -2879,6 +2879,7 @@ void Load_picture(byte image)
       }
 
       Compute_optimal_menu_colors(Main_palette);
+      Redraw_layered_image();
       Display_all_screen();
 
       if (image)
@@ -2980,7 +2981,7 @@ void Button_Reload(void)
         Compute_limits();
         Compute_paintbrush_coordinates();
       }
-
+      Redraw_layered_image();
       Display_all_screen();
 
       Main_image_is_modified=0;
@@ -4260,6 +4261,10 @@ void Transparency_set(byte amount)
 
 void Layer_activate(short layer, short side)
 {
+  byte old_layers;
+  
+  // Keep a copy of which layers were visible
+  old_layers = Main_layers_visible;
   if (side == RIGHT_SIDE)
   {
     // Right-click on current layer
@@ -4290,7 +4295,10 @@ void Layer_activate(short layer, short side)
   }
 
   Hide_cursor();
-  Redraw_layered_image();
+  if (Main_layers_visible != old_layers)
+    Redraw_layered_image();
+  else
+    Update_depth_buffer(); // Only need the depth buffer
   //Download_infos_page_main(Main_backups->Pages);
   //Download_infos_backup(Main_backups);
   Display_all_screen();

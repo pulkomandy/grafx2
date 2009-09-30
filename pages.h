@@ -82,4 +82,8 @@ void Free_current_page(void); // 'Kill' button
 void Exchange_main_and_spare(void);
 void End_of_modification(void);
 
+void Update_depth_buffer(void);
+void Redraw_layered_image(void);
+void Redraw_current_layer(void);
+
 #endif
