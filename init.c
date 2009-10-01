@@ -1257,7 +1257,7 @@ void Init_operations(void)
   for (number=0;number<NB_OPERATIONS;number++)
     for (Button=0;Button<3;Button++)
       for (stack_index=0;stack_index<OPERATION_STACK_SIZE;stack_index++)
-        Init_operation(number,Button,stack_index,Print_coordinates,HIDE_CURSOR,FAST_MOUSE);
+        Init_operation(number,Button,stack_index,Print_coordinates,0,FAST_MOUSE);
 
 
   // Ici viennent les déclarations détaillées des opérations

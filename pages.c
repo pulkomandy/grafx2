@@ -595,10 +595,27 @@ int Init_all_backup_lists(int width,int height)
     Main_backups->Pages->Image[i]=New_layer(width*height);
     if (! Main_backups->Pages->Image[i])
       return 0;
+    memset(Main_backups->Pages->Image[i], 0, width*height);
   }
+
+  Visible_image[0].Width = 0;
+  Visible_image[0].Height = 0;
+  Visible_image[0].Image = NULL;
+
+  Visible_image[1].Width = 0;
+  Visible_image[1].Height = 0;
+  Visible_image[1].Image = NULL;
+
+  Visible_image_depth_buffer.Width = 0;
+  Visible_image_depth_buffer.Height = 0;
+  Visible_image_depth_buffer.Image = NULL;
 
   if (!Update_buffers(width, height))
     return 0;
+  // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
+  memset(Visible_image[0].Image, 0, width*height);
+  memset(Visible_image[1].Image, 0, width*height);
+  memset(Visible_image_depth_buffer.Image, 0, width*height);
       
   Download_infos_page_main(Main_backups->Pages); 
   Download_infos_backup(Main_backups);
@@ -623,23 +640,11 @@ int Init_all_backup_lists(int width,int height)
     Spare_backups->Pages->Image[i]=New_layer(width*height);
     if (! Spare_backups->Pages->Image[i])
       return 0;
+    memset(Spare_backups->Pages->Image[i], 0, width*height);
+
   }
   //memset(Spare_screen,0,Spare_image_width*Spare_image_height);
 
-  Visible_image[0].Width = 0;
-  Visible_image[0].Height = 0;
-  Visible_image[0].Image = NULL;
-
-  Visible_image[1].Width = 0;
-  Visible_image[1].Height = 0;
-  Visible_image[1].Image = NULL;
-
-  Visible_image_depth_buffer.Width = 0;
-  Visible_image_depth_buffer.Height = 0;
-  Visible_image_depth_buffer.Image = NULL;
-
-  Update_buffers(width, height);
-    
   End_of_modification();
   return 1;
 }
@@ -681,7 +686,7 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Main_backups,0))
+  if (Create_new_page(new_page,Main_backups,255))
   {
     for (i=0; i<nb_layers;i++)
     {
@@ -728,7 +733,7 @@ int Backup_and_resize_the_spare(int width,int height)
   Upload_infos_page_spare(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups,0))
+  if (Create_new_page(new_page,Spare_backups,255))
   {
     Download_infos_page_spare(new_page);
     return_code=1;
@@ -807,6 +812,8 @@ void Undo(void)
   // On fait faire un undo à la liste des backups de la page principale
   Backward_in_list_of_pages(Main_backups);
 
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
@@ -832,6 +839,8 @@ void Redo(void)
   // On fait faire un redo à la liste des backups de la page principale
   Advance_in_list_of_pages(Main_backups);
 
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
@@ -848,6 +857,9 @@ void Free_current_page(void)
 {
   // On détruit la page courante de la liste principale
   Free_page_of_a_list(Main_backups);
+  
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
