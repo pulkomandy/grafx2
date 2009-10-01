@@ -859,6 +859,7 @@ void Free_current_page(void)
   Free_page_of_a_list(Main_backups);
   
   Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Redraw_layered_image();
   
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
@@ -867,7 +868,7 @@ void Free_current_page(void)
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
-  //       devrait pas poser de problèmes.
+  //       devrait pas poser de problèmes.  
 }
 
 void Exchange_main_and_spare(void)
