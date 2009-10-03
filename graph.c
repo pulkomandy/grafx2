@@ -47,6 +47,10 @@
 #include "windows.h"
 #include "input.h"
 
+#ifndef M_PI
+	#define M_PI 3.1415926535897932385
+#endif
+
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
