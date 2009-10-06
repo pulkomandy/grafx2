@@ -70,7 +70,7 @@
     #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
-extern char Program_version[]; // generated in pversion.c
+//extern char Program_version[]; // generated in pversion.c
 
 extern short Old_MX;
 extern short Old_MY;
