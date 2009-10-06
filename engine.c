@@ -481,6 +481,7 @@ void Main_handler(void)
   byte temp;
   byte effect_modified;
   byte action;
+  dword key_pressed;
 
   do
   {
@@ -499,6 +500,12 @@ void Main_handler(void)
     if(Get_input())
     {
       action = 0;
+
+      // Inhibit all keys if a drawing operation is in progress.
+      // We make an exception for the freehand operations, but these will
+      // only accept a very limited number of shortcuts.
+      if (Operation_stack_size!=0 && !Allow_color_change_during_operation)
+        Key=0;
       
       // Evenement de fermeture
       if (Quit_is_required)
@@ -507,7 +514,6 @@ void Main_handler(void)
         Button_Quit();
       }
       
-      // Gestion des touches
       if (Key)
       {
         effect_modified = 0;
@@ -518,6 +524,54 @@ void Main_handler(void)
           {
             // Special keys (functions not hooked to a UI button)
             switch(key_index)
+            {
+              case SPECIAL_NEXT_FORECOLOR : // Next foreground color
+                Special_next_forecolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_FORECOLOR : // Previous foreground color
+                Special_previous_forecolor();
+                action++;
+                break;
+              case SPECIAL_NEXT_BACKCOLOR : // Next background color
+                Special_next_backcolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
+                Special_previous_backcolor();
+                action++;
+                break;
+              case SPECIAL_SMALLER_PAINTBRUSH: // Rétrécir le pinceau
+                Smaller_paintbrush();
+                action++;
+                break;
+              case SPECIAL_BIGGER_PAINTBRUSH: // Grossir le pinceau
+                Bigger_paintbrush();
+                action++;
+                break;
+              case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
+                Special_next_user_forecolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
+                Special_previous_user_forecolor();
+                action++;
+                break;
+              case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
+                Special_next_user_backcolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
+                Special_previous_user_backcolor();
+                action++;
+                break;
+            }
+            
+            // Other shortcuts are forbidden while an operation is in progress
+            if (Operation_stack_size!=0)
+              continue;
+            
+            switch (key_index)
             {
               case SPECIAL_SCROLL_UP : // Scroll up
                 if (Main_magnifier_mode)
@@ -601,46 +655,6 @@ void Main_handler(void)
                   Scroll_magnifier(1,0);
                 else
                   Scroll_screen(1,0);
-                action++;
-                break;
-              case SPECIAL_NEXT_FORECOLOR : // Next foreground color
-                Special_next_forecolor();
-                action++;
-                break;
-              case SPECIAL_PREVIOUS_FORECOLOR : // Previous foreground color
-                Special_previous_forecolor();
-                action++;
-                break;
-              case SPECIAL_NEXT_BACKCOLOR : // Next background color
-                Special_next_backcolor();
-                action++;
-                break;
-              case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
-                Special_previous_backcolor();
-                action++;
-                break;
-              case SPECIAL_SMALLER_PAINTBRUSH: // Rétrécir le pinceau
-                Smaller_paintbrush();
-                action++;
-                break;
-              case SPECIAL_BIGGER_PAINTBRUSH: // Grossir le pinceau
-                Bigger_paintbrush();
-                action++;
-                break;
-              case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
-                Special_next_user_forecolor();
-                action++;
-                break;
-              case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
-                Special_previous_user_forecolor();
-                action++;
-                break;
-              case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
-                Special_next_user_backcolor();
-                action++;
-                break;
-              case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
-                Special_previous_user_backcolor();
                 action++;
                 break;
               case SPECIAL_SHOW_HIDE_CURSOR : // Show / Hide cursor
@@ -1000,20 +1014,28 @@ void Main_handler(void)
           }
         } // End of special keys
         
-        // Shortcut for functions of Menu buttons
-        for (button_index=0;button_index<NB_BUTTONS;button_index++)
+        
+        // Shortcut for clicks of Menu buttons.
+        // Disable all of them when an operation is in progress
+        if (Operation_stack_size==0)
         {
-          if (Is_shortcut(Key,0x100+button_index))
-          {          
-            Select_button(button_index,LEFT_SIDE);
-            prev_button_number=-1;
-            action++;
-          }
-          else if (Is_shortcut(Key,0x200+button_index))
+          // Some functions open windows that clear the Key variable, 
+          // so we need to use a temporary replacement.
+          key_pressed = Key;
+          for (button_index=0;button_index<NB_BUTTONS;button_index++)
           {
-            Select_button(button_index,RIGHT_SIDE);
-            prev_button_number=-1;
-            action++;
+            if (Is_shortcut(key_pressed,0x100+button_index))
+            {          
+              Select_button(button_index,LEFT_SIDE);
+              prev_button_number=-1;
+              action++;
+            }
+            else if (Is_shortcut(key_pressed,0x200+button_index))
+            {
+              Select_button(button_index,RIGHT_SIDE);
+              prev_button_number=-1;
+              action++;
+            }
           }
         }
   

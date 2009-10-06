@@ -617,7 +617,7 @@ void Resize_image(word chosen_width,word chosen_height)
 
 
 
-void Remap_picture(void)
+void Remap_spare(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse

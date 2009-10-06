@@ -1488,7 +1488,7 @@ void Button_Copy_page(void)
           Copy_image_only();
 
         if (clicked_button==5)
-          Remap_picture();
+          Remap_spare();
 
         if (clicked_button!=2) // copie de la palette
           memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
