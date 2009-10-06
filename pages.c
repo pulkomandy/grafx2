@@ -682,7 +682,6 @@ int Backup_with_new_dimensions(int upload,int width,int height)
     Error(0);
     return 0;
   }
-  //Copy_S_page(new_page,Main_backups->Pages);
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
@@ -690,7 +689,6 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   {
     for (i=0; i<nb_layers;i++)
     {
-      //Main_backups->Pages->Image[i]=(byte *)malloc(width*height);
       memset(Main_backups->Pages->Image[i], 0, width*height);
     }
     
@@ -698,15 +696,9 @@ int Backup_with_new_dimensions(int upload,int width,int height)
 
     Download_infos_page_main(Main_backups->Pages);
     Download_infos_backup(Main_backups);
-    // On nettoie la nouvelle image:
-    //memset(Main_screen,0,width*height);
     
     return_code=1;
   }
-
-  // On détruit le descripteur de la page courante
-  //free(new_page);
-
   return return_code;
 }
 
@@ -717,31 +709,39 @@ int Backup_and_resize_the_spare(int width,int height)
 
   T_Page * new_page;
   int return_code=0;
+  byte nb_layers;
+
 
   // On remet à jour l'état des infos de la page de brouillon (pour pouvoir
   // les retrouver plus tard)
   Upload_infos_page_spare(Spare_backups->Pages);
 
+  nb_layers=Spare_backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page de brouillon
-  new_page=New_page(Spare_backups->Pages->Nb_layers);
+  new_page=New_page(nb_layers);
   if (!new_page)
   {
     Error(0);
     return 0;
   }
-  
   Upload_infos_page_spare(new_page);
   new_page->Width=width;
   new_page->Height=height;
   if (Create_new_page(new_page,Spare_backups,255))
   {
-    Download_infos_page_spare(new_page);
+    byte i;
+    
+    for (i=0; i<nb_layers;i++)
+    {
+      memset(Spare_backups->Pages->Image[i], 0, width*height);
+    }
+    
+    // Update_buffers(width, height); // Not for spare
+    
+    Download_infos_page_spare(Spare_backups->Pages);
+    
     return_code=1;
   }
-
-  // On détruit le descripteur de la page courante
-  free(new_page);
-
   return return_code;
 }
 

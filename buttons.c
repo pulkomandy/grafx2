@@ -1382,18 +1382,38 @@ void Button_Page(void)
 
 void Copy_image_only(void)
 {
+  word old_width=Spare_image_width;
+  word old_height=Spare_image_height;
+  
   if (Backup_and_resize_the_spare(Main_image_width,Main_image_height))
   {
-    // copie de l'image
-    memcpy(Spare_screen,Main_screen,Main_image_width*Main_image_height);
+    byte i;
+    for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
+    {
+      if (i == Spare_current_layer)
+      {
+        // Copy the current layer
+        memcpy(Spare_backups->Pages->Image[i],Main_backups->Pages->Image[Main_current_layer],Main_image_width*Main_image_height);
+      }
+      else
+      {
+        // Resize the original layer
+        Copy_part_of_image_to_another(
+        Spare_backups->Pages->Next->Image[i],0,0,Min(old_width,Spare_image_width),
+        Min(old_height,Spare_image_height),old_width,
+        Spare_backups->Pages->Image[i],0,0,Spare_image_width);
+      }
+    }
 
     // Copie des dimensions de l'image
     /*
       C'est inutile, le "Backuper et redimensionner brouillon" a déjà modifié
       ces valeurs pour qu'elles soient correctes.
     */
+    /*
     Spare_image_width=Main_image_width;
     Spare_image_height=Main_image_height;
+    */
 
     // Copie des décalages de la fenêtre principale (non zoomée) de l'image
     Spare_offset_X=Main_offset_X;
