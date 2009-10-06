@@ -92,11 +92,20 @@ void Display_syntax(void)
   printf("\t/tall2            to emulate a video mode with double tall pixels (2x4)\n");
   printf("\t/triple           to emulate a video mode with triple pixels (3x3)\n");
   printf("\t/quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t/skin <filename>  use an alternate file with the menu graphics\n");
+  printf("\t/rgb n            to reduce RGB precision from 256 to n levels\n");
+  printf("\t/skin <filename>  to use an alternate file with the menu graphics\n");
   printf("\t/mode <videomode> to set a video mode\n\n");
   printf("Available video modes:\n\n");
-  for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
-    printf("\t%s\n",Mode_label(mode_index));
+  for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 12)
+  {
+	int k;
+	for (k = 0; k < 6; k++)
+	{
+		if (mode_index + k >= Nb_video_modes) break;
+		printf("%12s",Mode_label(mode_index + k));
+	}
+	puts("");
+  }
 }
 
 
