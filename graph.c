@@ -47,6 +47,11 @@
 #include "windows.h"
 #include "input.h"
 
+#ifdef __VBCC__
+    #define __attribute__(x)
+    #define M_PI 3.141592653589793238462643
+#endif
+
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
@@ -618,7 +623,7 @@ void Resize_image(word chosen_width,word chosen_height)
 
 
 
-void Remap_picture(void)
+void Remap_spare(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse

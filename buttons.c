@@ -53,6 +53,10 @@
 #include "input.h"
 #include "special.h"
 
+#ifdef __VBCC__
+    #define __attribute__(x)
+#endif
+
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <dirent.h>
@@ -66,7 +70,7 @@
     #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
-extern char Program_version[]; // generated in pversion.c
+//extern char Program_version[]; // generated in pversion.c
 
 extern short Old_MX;
 extern short Old_MY;
@@ -1508,7 +1512,7 @@ void Button_Copy_page(void)
           Copy_image_only();
 
         if (clicked_button==5)
-          Remap_picture();
+          Remap_spare();
 
         if (clicked_button!=2) // copie de la palette
           memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
@@ -4282,6 +4286,9 @@ void Transparency_set(byte amount)
 void Layer_activate(short layer, short side)
 {
   byte old_layers;
+
+  if (layer >= Main_backups->Pages->Nb_layers)
+    return;
   
   // Keep a copy of which layers were visible
   old_layers = Main_layers_visible;

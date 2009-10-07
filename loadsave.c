@@ -871,6 +871,7 @@ void Save_PAL(void)
 //////////////////////////////////// IMG ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   byte Filler1[6];
@@ -878,7 +879,8 @@ typedef struct
   word Height;
   byte Filler2[118];
   T_Palette Palette;
-} __attribute__((__packed__)) T_IMG_Header;
+} T_IMG_Header;
+#pragma pack()
 
 // -- Tester si un fichier est au format IMG --------------------------------
 void Test_IMG(void)
@@ -1040,6 +1042,7 @@ void Save_IMG(void)
 //////////////////////////////////// PKM ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   char Ident[3]; // Chaîne "PKM" }
@@ -1053,7 +1056,8 @@ typedef struct
   T_Palette Palette; // Palette RVB 256*3
   word Jump;     // Taille du saut entre le header et l'image:
                  //   On va s'en servir pour rajouter un commentaire
-} __attribute__((__packed__)) T_PKM_Header;
+} T_PKM_Header;
+#pragma pack()
 
 // -- Tester si un fichier est au format PKM --------------------------------
 void Test_PKM(void)
@@ -1498,6 +1502,7 @@ void Save_PKM(void)
 //////////////////////////////////// LBM ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   word  Width;
@@ -1513,7 +1518,8 @@ typedef struct
   byte  Y_aspect;    // Inutile
   word  X_screen;
   word  Y_screen;
-} __attribute__((__packed__)) T_LBM_Header;
+} T_LBM_Header;
+#pragma pack()
 
 byte * LBM_buffer;
 FILE *LBM_file;
@@ -2282,7 +2288,7 @@ void Save_LBM(void)
 //////////////////////////////////// BMP ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
+#pragma pack(1)
 typedef struct
 {
     word  Signature;   // ='BM' = 0x4D42
@@ -2302,7 +2308,8 @@ typedef struct
     dword YPM;
     dword Nb_Clr;
     dword Clr_Imprt;
-} __attribute__((__packed__)) T_BMP_Header;
+} T_BMP_Header;
+#pragma pack()
 
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(void)
@@ -2852,6 +2859,7 @@ void Save_BMP(void)
 //////////////////////////////////// GIF ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   word Width; // width de l'écran virtuel
@@ -2859,7 +2867,7 @@ typedef struct
   byte Resol;   // Informations sur la résolution (et autres)
   byte Backcol; // color de fond
   byte Aspect;  // Informations sur l'aspect ratio (et autres)
-} __attribute__((__packed__)) T_GIF_LSDB; // Logical Screen Descriptor Block
+} T_GIF_LSDB; // Logical Screen Descriptor Block
 
 typedef struct
 {
@@ -2869,7 +2877,8 @@ typedef struct
   word Image_height; // height de l'image
   byte Indicator;    // Informations diverses sur l'image
   byte Nb_bits_pixel; // Nb de bits par pixel
-} __attribute__((__packed__)) T_GIF_IDB; // Image Descriptor Block
+} T_GIF_IDB; // Image Descriptor Block
+#pragma pack()
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -3719,6 +3728,7 @@ void Save_GIF(void)
 //////////////////////////////////// PCX ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
@@ -3739,7 +3749,8 @@ typedef struct
     word Screen_X;           // |_ Dimensions de
     word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
-  } __attribute__((__packed__)) T_PCX_Header;
+  } T_PCX_Header;
+#pragma pack()
 
 T_PCX_Header PCX_header;
 
@@ -4258,11 +4269,12 @@ void Save_PCX(void)
 //////////////////////////////////// CEL ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   word Width;              // width de l'image
   word Height;             // height de l'image
-} __attribute__((__packed__))  T_CEL_Header1;
+} T_CEL_Header1;
 
 typedef struct
 {
@@ -4275,7 +4287,8 @@ typedef struct
   word X_offset;         // Offset en X de l'image
   word Y_offset;         // Offset en Y de l'image
   byte Filler2[16];        // ???
-} __attribute__((__packed__))  T_CEL_Header2;
+} T_CEL_Header2;
+#pragma pack()
 
 // -- Tester si un fichier est au format CEL --------------------------------
 
@@ -4575,6 +4588,7 @@ void Save_CEL(void)
 //////////////////////////////////// KCF ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   struct
@@ -4585,7 +4599,8 @@ typedef struct
       byte Byte2;
     } color[16];
   } Palette[10];
-} __attribute__((__packed__)) T_KCF_Header;
+} T_KCF_Header;
+#pragma pack()
 
 // -- Tester si un fichier est au format KCF --------------------------------
 
@@ -4834,6 +4849,7 @@ void Save_KCF(void)
 //////////////////////////////////// SCx ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
+#pragma pack(1)
 typedef struct
 {
   byte Filler1[4];
@@ -4841,7 +4857,8 @@ typedef struct
   word Height;
   byte Filler2;
   byte Planes;
-} __attribute__((__packed__)) T_SCx_Header;
+} T_SCx_Header;
+#pragma pack()
 
 // -- Tester si un fichier est au format SCx --------------------------------
 void Test_SCx(void)

@@ -28,6 +28,10 @@
 #include "misc.h"
 #include "input.h"
 
+#ifdef __VBCC__
+  #define __attribute__(x)
+#endif
+
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 
@@ -198,40 +202,6 @@ int Move_cursor_with_constraints()
   return feedback;
 }
 
-// Inhibits a key shortcut if it's disallowed during an operation.
-dword Inhibit_shortcut(dword key)
-{
-    if (Operation_stack_size!=0 && key != 0)
-    {
-        //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
-        //ou de taille de pinceau lors d'une des operations suivantes:
-        //OPERATION_CONTINUOUS_DRAW, OPERATION_DISCONTINUOUS_DRAW, OPERATION_AIRBRUSH)
-        if(Allow_color_change_during_operation)
-        {
-            //A ce stade là, on sait qu'on est dans une des 3 opérations
-            //supportant le changement de couleur ou de taille de pinceau.
-
-            if(
-                    (!Is_shortcut(key,SPECIAL_NEXT_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_SMALLER_PAINTBRUSH)) &&
-                    (!Is_shortcut(key,SPECIAL_BIGGER_PAINTBRUSH)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_USER_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_USER_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_USER_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_USER_BACKCOLOR))
-              )
-            {
-                key=0;
-            }
-        }
-        else key = 0;
-    }
-    return key;
-}
-
 // WM events management
 
 void Handle_window_resize(SDL_ResizeEvent event)
@@ -290,16 +260,16 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             break;
 
         case SDL_BUTTON_MIDDLE:
-            Key = Inhibit_shortcut(KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState());
             // TODO: repeat system maybe?
             return 0;
 
         case SDL_BUTTON_WHEELUP:
-            Key = Inhibit_shortcut(KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
             return 0;
 
         case SDL_BUTTON_WHEELDOWN:
-            Key = Inhibit_shortcut(KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
             return 0;
         default:
         return 0;
@@ -364,7 +334,6 @@ int Handle_key_press(SDL_KeyboardEvent event)
         return Move_cursor_with_constraints();
     }
 
-    Key = Inhibit_shortcut(Key);
     return 0;
 }
 

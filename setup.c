@@ -49,7 +49,7 @@ int Create_ConfigDirectory(char * config_dir)
   #endif
 }
 
-#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) && !defined(__VBCC__)
   #define ARG_UNUSED __attribute__((unused))
 #else
   #define ARG_UNUSED

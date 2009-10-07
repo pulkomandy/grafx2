@@ -283,6 +283,23 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  Next    : %s",   SPECIAL_NEXT_USER_BACKCOLOR)
   HELP_LINK ("  Previous: %s",   SPECIAL_PREVIOUS_USER_BACKCOLOR)
   HELP_TEXT ("")
+  HELP_TEXT ("LAYERS")
+  HELP_LINK ("  Select 1 : %s",   SPECIAL_LAYER1_SELECT)
+  HELP_LINK ("  Toggle 1 : %s",   SPECIAL_LAYER1_TOGGLE)
+  HELP_LINK ("  Select 2 : %s",   SPECIAL_LAYER2_SELECT)
+  HELP_LINK ("  Toggle 2 : %s",   SPECIAL_LAYER2_TOGGLE)
+  HELP_LINK ("  Select 3 : %s",   SPECIAL_LAYER3_SELECT)
+  HELP_LINK ("  Toggle 3 : %s",   SPECIAL_LAYER3_TOGGLE)
+  HELP_LINK ("  Select 4 : %s",   SPECIAL_LAYER4_SELECT)
+  HELP_LINK ("  Toggle 4 : %s",   SPECIAL_LAYER4_TOGGLE)
+  HELP_LINK ("  Select 5 : %s",   SPECIAL_LAYER5_SELECT)
+  HELP_LINK ("  Toggle 5 : %s",   SPECIAL_LAYER5_TOGGLE)
+  HELP_LINK ("  Select 6 : %s",   SPECIAL_LAYER6_SELECT)
+  HELP_LINK ("  Toggle 6 : %s",   SPECIAL_LAYER6_TOGGLE)
+  HELP_LINK ("  Select 7 : %s",   SPECIAL_LAYER7_SELECT)
+  HELP_LINK ("  Toggle 7 : %s",   SPECIAL_LAYER7_TOGGLE)
+  HELP_LINK ("  Select 8 : %s",   SPECIAL_LAYER8_SELECT)
+  HELP_LINK ("  Toggle 8 : %s",   SPECIAL_LAYER8_TOGGLE)
 };
 static const T_Help_table helptable_credits[] =
 {
