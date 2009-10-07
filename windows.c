@@ -178,11 +178,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(32/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*((Menu_height-11)/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(32/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*((Menu_height-11)/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -215,7 +215,7 @@ void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
-  word cell_height=32/Menu_cells_Y;
+  word cell_height=(Menu_height-11)/Menu_cells_Y;
   byte color;
 
   if (id==Fore_color)
@@ -289,12 +289,12 @@ void Frame_menu_color(byte id)
 void Display_menu_palette(void)
 {
   int color;
-  byte cell_height=32/Menu_cells_Y;
+  byte cell_height=(Menu_height-11)/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
   if (Menu_is_visible)
   {
-    Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y,MC_Black);
+    Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11+2)*Menu_factor_Y,MC_Black);
 
     if (Config.Separate_colors)
       for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
@@ -313,7 +313,7 @@ void Display_menu_palette(void)
 
     Frame_menu_color(Back_color);
     Frame_menu_color(Fore_color);
-    Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
+    Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
   }
 }
 
@@ -380,7 +380,7 @@ void Change_palette_cells()
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
-  Buttons_Pool[BUTTON_CHOOSE_COL].Height=32/Menu_cells_Y*Menu_cells_Y-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(Menu_height-11)/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -395,7 +395,7 @@ int Pick_color_in_palette()
   int line;
   int column;
 
-  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/(32/Menu_cells_Y);
+  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_height-11)/Menu_cells_Y);
   column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
   if (Config.Palette_vertical)
   {
@@ -457,7 +457,7 @@ void Display_menu(void)
       Print_filename();
     }
 	// Now update the area: menu height and whole screen width (including palette)
-    Update_rect(0,Menu_Y,Screen_width,MENU_HEIGHT*Menu_factor_Y);
+    Update_rect(0,Menu_Y,Screen_width,Menu_height*Menu_factor_Y);
   }
 }
 
@@ -1107,12 +1107,12 @@ void Display_menu_palette_avoiding_window(byte * table)
   if (Config.Separate_colors)
   {
     width=(Menu_palette_cell_width-1)*Menu_factor_X;
-    height=Menu_factor_Y*(32/Menu_cells_Y-1);
+    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y-1);
   }
   else
   {
     width=Menu_palette_cell_width*Menu_factor_X;
-    height=Menu_factor_Y*(32/Menu_cells_Y);
+    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y);
   }
 
   for (color=0,real_color=First_color_in_palette;color<Menu_cells_X*Menu_cells_Y;color++,real_color++)
@@ -1195,7 +1195,7 @@ void Display_menu_palette_avoiding_window(byte * table)
       }
     }
   }
-  Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
+  Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
 }
 
 // -------- Calcul des bornes de la partie d'image visible à l'écran ---------
