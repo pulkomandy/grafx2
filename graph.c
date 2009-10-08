@@ -736,7 +736,7 @@ void Fill(short * top_reached  , short * bottom_reached,
   current_limit_bottom =Min(Paintbrush_Y+1,Limit_bottom);
   *left_reached=Paintbrush_X;
   *right_reached=Paintbrush_X+1;
-  Pixel_in_current_screen(Paintbrush_X,Paintbrush_Y,2,0);
+  Pixel_in_current_layer(Paintbrush_X,Paintbrush_Y,2);
 
   while (changes_made)
   {
@@ -755,7 +755,7 @@ void Fill(short * top_reached  , short * bottom_reached,
       {
         // On cherche son début
         while((start_x<=Limit_right) &&
-                (Read_pixel_from_current_screen(start_x,line)!=1))
+                (Read_pixel_from_current_layer(start_x,line)!=1))
              start_x++;
 
         if (start_x<=Limit_right)
@@ -763,7 +763,7 @@ void Fill(short * top_reached  , short * bottom_reached,
           // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
-               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
+               (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
@@ -774,16 +774,16 @@ void Fill(short * top_reached  , short * bottom_reached,
           can_propagate=(
             // Test de la présence d'un point à gauche du segment
             ((start_x>Limit_left) &&
-             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
+             (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((end_x-1<Limit_right) &&
-             (Read_pixel_from_current_screen(end_x    ,line)==2))
+             (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en haut du segment
           if (!can_propagate && (line>Limit_top))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              if (Read_pixel_from_current_screen(x_pos,line-1)==2)
+              if (Read_pixel_from_current_layer(x_pos,line-1)==2)
               {
                 can_propagate=1;
                 break;
@@ -797,7 +797,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2,0);
+              Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -835,14 +835,14 @@ void Fill(short * top_reached  , short * bottom_reached,
       {
         // On cherche son début
         for (;(start_x<=Limit_right) &&
-             (Read_pixel_from_current_screen(start_x,line)!=1);start_x++);
+             (Read_pixel_from_current_layer(start_x,line)!=1);start_x++);
 
         if (start_x<=Limit_right)
         {
           // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
-               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
+               (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
@@ -853,16 +853,16 @@ void Fill(short * top_reached  , short * bottom_reached,
           can_propagate=(
             // Test de la présence d'un point à gauche du segment
             ((start_x>Limit_left) &&
-             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
+             (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((end_x-1<Limit_right) &&
-             (Read_pixel_from_current_screen(end_x    ,line)==2))
+             (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en bas du segment
           if (!can_propagate && (line<Limit_bottom))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              if (Read_pixel_from_current_screen(x_pos,line+1)==2)
+              if (Read_pixel_from_current_layer(x_pos,line+1)==2)
               {
                 can_propagate=1;
                 break;
@@ -876,7 +876,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2,0);
+              Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -899,6 +899,10 @@ void Fill(short * top_reached  , short * bottom_reached,
   (*right_reached)--;
 } // end de la routine de remplissage "Fill"
 
+byte Read_pixel_from_backup_layer(word x,word y)
+{
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Next->Image[Main_current_layer]);
+}
 
 void Fill_general(byte fill_color)
 //
@@ -940,7 +944,7 @@ void Fill_general(byte fill_color)
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(replace_table,0,256);
-    replace_table[Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y)]=1;
+    replace_table[Read_pixel_from_backup_layer(Paintbrush_X,Paintbrush_Y)]=1;
     Replace_colors_within_limits(replace_table);
 
     // On fait maintenant un remplissage classique de la couleur 1 avec la 2
@@ -955,39 +959,39 @@ void Fill_general(byte fill_color)
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (top_reached>Limit_top)
-      Copy_part_of_image_to_another(Screen_backup,                    // source
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer], // source
                                                Limit_left,Limit_top,       // Pos X et Y dans source
                                                (Limit_right-Limit_left)+1, // width copie
                                                top_reached-Limit_top,// height copie
                                                Main_image_width,         // width de la source
-                                               Main_screen,                 // Destination
+                                               Main_backups->Pages->Image[Main_current_layer], // Destination
                                                Limit_left,Limit_top,       // Pos X et Y destination
                                                Main_image_width);        // width destination
     if (bottom_reached<Limit_bottom)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                Limit_left,bottom_reached+1,
                                                (Limit_right-Limit_left)+1,
                                                Limit_bottom-bottom_reached,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                Limit_left,bottom_reached+1,Main_image_width);
     if (left_reached>Limit_left)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                Limit_left,top_reached,
                                                left_reached-Limit_left,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                Limit_left,top_reached,Main_image_width);
     if (right_reached<Limit_right)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                right_reached+1,top_reached,
                                                Limit_right-right_reached,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                right_reached+1,top_reached,Main_image_width);
 
     for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
       for (x_pos=left_reached;x_pos<=right_reached;x_pos++)
-        if (Read_pixel_from_current_screen(x_pos,y_pos)==2)
+        if (Read_pixel_from_current_layer(x_pos,y_pos)==2)
         {
           //   Si le pixel en cours de traitement a été touché par le Fill()
           // on se doit d'afficher le pixel modifié par la couleur de
@@ -996,14 +1000,14 @@ void Fill_general(byte fill_color)
           //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
           // précédemment (c'est important pour que les effets ne s'emmèlent
           // pas le pinceaux)
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos),0);
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
 
           //  Enfin, on peut afficher le pixel, en le soumettant aux effets en
           // cours:
           Display_pixel(x_pos,y_pos,fill_color);
         }
         else
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos),0);
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
 
     FX_feedback_screen=old_fx_feedback_screen;
 
@@ -2555,7 +2559,7 @@ void Replace(byte New_color)
   if ((Paintbrush_X<Main_image_width)
    && (Paintbrush_Y<Main_image_height))
   {
-    old_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
+    old_color=Read_pixel_from_current_layer(Paintbrush_X,Paintbrush_Y);
     if ( (old_color!=New_color)
       && ((!Stencil_mode) || (!Stencil[old_color])) )
     {

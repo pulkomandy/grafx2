@@ -476,11 +476,12 @@ void Main_handler(void)
   int  button_index;           // Numéro de bouton de menu en cours
   int  prev_button_number=0; // Numéro de bouton de menu sur lequel on était précédemment
   byte blink;                   // L'opération demande un effacement du curseur
-  int  shortcut_button;           // Button à enclencher d'après la touche de raccourci enfoncée
-  byte clicked_button = 0;         // Côté du bouton à enclencher d'après la touche de raccourci enfoncée
   int  key_index;           // index du tableau de touches spéciales correspondant à la touche enfoncée
   char str[25];
   byte temp;
+  byte effect_modified;
+  byte action;
+  dword key_pressed;
 
   do
   {
@@ -498,534 +499,599 @@ void Main_handler(void)
     
     if(Get_input())
     {
-    
-    // Evenement de fermeture
-    if (Quit_is_required)
-    {
-      Quit_is_required=0;
-      Button_Quit();
-    }
-    
-    // Gestion des touches
-    if (Key)
-    {
-      for (key_index=0;(key_index<NB_SPECIAL_SHORTCUTS) && !Is_shortcut(Key,key_index);key_index++);
+      action = 0;
 
-      // Gestion des touches spéciales:
-      if (key_index>SPECIAL_CLICK_RIGHT)
-      switch(key_index)
+      // Inhibit all keys if a drawing operation is in progress.
+      // We make an exception for the freehand operations, but these will
+      // only accept a very limited number of shortcuts.
+      if (Operation_stack_size!=0 && !Allow_color_change_during_operation)
+        Key=0;
+      
+      // Evenement de fermeture
+      if (Quit_is_required)
       {
-        case SPECIAL_SCROLL_UP : // Scroll up
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,-(Main_magnifier_height>>2));
-          else
-            Scroll_screen(0,-(Screen_height>>3));
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_DOWN : // Scroll down
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,(Main_magnifier_height>>2));
-          else
-            Scroll_screen(0,(Screen_height>>3));
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_LEFT : // Scroll left
-          if (Main_magnifier_mode)
-            Scroll_magnifier(-(Main_magnifier_width>>2),0);
-          else
-            Scroll_screen(-(Screen_width>>3),0);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_RIGHT : // Scroll right
-          if (Main_magnifier_mode)
-            Scroll_magnifier((Main_magnifier_width>>2),0);
-          else
-            Scroll_screen((Screen_width>>3),0);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_UP_FAST : // Scroll up faster
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,-(Main_magnifier_height>>1));
-          else
-            Scroll_screen(0,-(Screen_height>>2));
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_DOWN_FAST : // Scroll down faster
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,(Main_magnifier_height>>1));
-          else
-            Scroll_screen(0,(Screen_height>>2));
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_LEFT_FAST : // Scroll left faster
-          if (Main_magnifier_mode)
-            Scroll_magnifier(-(Main_magnifier_width>>1),0);
-          else
-            Scroll_screen(-(Screen_width>>2),0);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_RIGHT_FAST : // Scroll right faster
-          if (Main_magnifier_mode)
-            Scroll_magnifier((Main_magnifier_width>>1),0);
-          else
-            Scroll_screen((Screen_width>>2),0);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_UP_SLOW : // Scroll up slower
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,-1);
-          else
-            Scroll_screen(0,-1);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_DOWN_SLOW : // Scroll down slower
-          if (Main_magnifier_mode)
-            Scroll_magnifier(0,1);
-          else
-            Scroll_screen(0,1);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_LEFT_SLOW : // Scroll left slower
-          if (Main_magnifier_mode)
-            Scroll_magnifier(-1,0);
-          else
-            Scroll_screen(-1,0);
-          Key=0;
-          break;
-        case SPECIAL_SCROLL_RIGHT_SLOW : // Scroll right slower
-          if (Main_magnifier_mode)
-            Scroll_magnifier(1,0);
-          else
-            Scroll_screen(1,0);
-          Key=0;
-          break;
-        case SPECIAL_NEXT_FORECOLOR : // Next foreground color
-          Special_next_forecolor();
-          Key=0;
-          break;
-        case SPECIAL_PREVIOUS_FORECOLOR : // Previous foreground color
-          Special_previous_forecolor();
-          Key=0;
-          break;
-        case SPECIAL_NEXT_BACKCOLOR : // Next background color
-          Special_next_backcolor();
-          Key=0;
-          break;
-        case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
-          Special_previous_backcolor();
-          Key=0;
-          break;
-        case SPECIAL_SMALLER_PAINTBRUSH: // Rétrécir le pinceau
-          Smaller_paintbrush();
-          Key=0;
-          break;
-        case SPECIAL_BIGGER_PAINTBRUSH: // Grossir le pinceau
-          Bigger_paintbrush();
-          Key=0;
-          break;
-        case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
-          Special_next_user_forecolor();
-          Key=0;
-          break;
-        case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
-          Special_previous_user_forecolor();
-          Key=0;
-          break;
-        case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
-          Special_next_user_backcolor();
-          Key=0;
-          break;
-        case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
-          Special_previous_user_backcolor();
-          Key=0;
-          break;
-        case SPECIAL_SHOW_HIDE_CURSOR : // Show / Hide cursor
-          Hide_cursor();
-          Cursor_hidden=!Cursor_hidden;
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_DOT_PAINTBRUSH : // Paintbrush = "."
-          Hide_cursor();
-          Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
-          Set_paintbrush_size(1,1);
-          Change_paintbrush_shape(PAINTBRUSH_SHAPE_ROUND);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_CONTINUOUS_DRAW : // Continuous freehand drawing
-          Select_button(BUTTON_DRAW,LEFT_SIDE);
-          // ATTENTION CE TRUC EST MOCHE ET VA MERDER SI ON SE MET A UTILISER DES BOUTONS POPUPS
-          while (Current_operation!=OPERATION_CONTINUOUS_DRAW)
-            Select_button(BUTTON_DRAW,RIGHT_SIDE);
-          Key=0;
-          break;
-        case SPECIAL_FLIP_X : // Flip X
-          Hide_cursor();
-          Flip_X_lowlevel(Brush, Brush_width, Brush_height);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_FLIP_Y : // Flip Y
-          Hide_cursor();
-          Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_ROTATE_90 : // 90° brush rotation
-          Hide_cursor();
-          Rotate_90_deg();
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_ROTATE_180 : // 180° brush rotation
-          Hide_cursor();
-          Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
-          Brush_offset_X=(Brush_width>>1);
-          Brush_offset_Y=(Brush_height>>1);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_STRETCH : // Stretch brush
-          Hide_cursor();
-          Start_operation_stack(OPERATION_STRETCH_BRUSH);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_DISTORT : // Distort brush
-          Hide_cursor();
-          Start_operation_stack(OPERATION_DISTORT_BRUSH);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_ROTATE_ANY_ANGLE : // Rotate brush by any angle
-          Hide_cursor();
-          Start_operation_stack(OPERATION_ROTATE_BRUSH);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_OUTLINE : // Outline brush
-          Hide_cursor();
-          Outline_brush();
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_NIBBLE : // Nibble brush
-          Hide_cursor();
-          Nibble_brush();
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_GET_BRUSH_COLORS : // Get colors from brush
-          Get_colors_from_brush();
-          Key=0;
-          break;
-        case SPECIAL_RECOLORIZE_BRUSH : // Recolorize brush
-          Hide_cursor();
-          Remap_brush();
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_LOAD_BRUSH :
-          Load_picture(0);
-          Key=0;
-          break;
-        case SPECIAL_SAVE_BRUSH :
-          Save_picture(0);
-          Key=0;
-          break;
-        case SPECIAL_ZOOM_IN : // Zoom in
-          Zoom(+1);
-          Key=0;
-          break;
-        case SPECIAL_ZOOM_OUT : // Zoom out
-          Zoom(-1);
-          Key=0;
-          break;
-        case SPECIAL_CENTER_ATTACHMENT : // Center brush attachment
-          Hide_cursor();
-          Brush_offset_X=(Brush_width>>1);
-          Brush_offset_Y=(Brush_height>>1);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_TOP_LEFT_ATTACHMENT : // Top-left brush attachment
-          Hide_cursor();
-          Brush_offset_X=0;
-          Brush_offset_Y=0;
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_TOP_RIGHT_ATTACHMENT : // Top-right brush attachment
-          Hide_cursor();
-          Brush_offset_X=(Brush_width-1);
-          Brush_offset_Y=0;
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_BOTTOM_LEFT_ATTACHMENT : // Bottom-left brush attachment
-          Hide_cursor();
-          Brush_offset_X=0;
-          Brush_offset_Y=(Brush_height-1);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_BOTTOM_RIGHT_ATTACHMENT : // Bottom right brush attachment
-          Hide_cursor();
-          Brush_offset_X=(Brush_width-1);
-          Brush_offset_Y=(Brush_height-1);
-          Display_cursor();
-          Key=0;
-          break;
-        case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
-          Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
-          Key=0;
-          break;
-        case SPECIAL_INVERT_SIEVE :
-          Invert_trame();
-          Key=0;
-          break;
-        case SPECIAL_SHADE_MODE :
-          Button_Shade_mode();
-          Key=0;
-          break;
-        case SPECIAL_SHADE_MENU :
-          Button_Shade_menu();
-          Key=0;
-          break;
-        case SPECIAL_QUICK_SHADE_MODE :
-          Button_Quick_shade_mode();
-          Key=0;
-          break;
-        case SPECIAL_QUICK_SHADE_MENU :
-          Button_Quick_shade_menu();
-          Key=0;
-          break;
-        case SPECIAL_STENCIL_MODE :
-          Button_Stencil_mode();
-          Key=0;
-          break;
-        case SPECIAL_STENCIL_MENU :
-          Button_Stencil_menu();
-          Key=0;
-          break;
-        case SPECIAL_MASK_MODE :
-          Button_Mask_mode();
-          Key=0;
-          break;
-        case SPECIAL_MASK_MENU :
-          Button_Mask_menu();
-          Key=0;
-          break;
-        case SPECIAL_GRID_MODE :
-          Button_Snap_mode();
-          Key=0;
-          break;
-        case SPECIAL_GRID_MENU :
-          Button_Grid_menu();
-          Key=0;
-          break;
-        case SPECIAL_SHOW_GRID :
-          Button_Show_grid();
-          Key=0;
-          break;
-        case SPECIAL_SIEVE_MODE :
-          Button_Sieve_mode();
-          Key=0;
-          break;
-        case SPECIAL_SIEVE_MENU :
-          Button_Sieve_menu();
-          Key=0;
-          break;
-        case SPECIAL_COLORIZE_MODE :
-          Button_Colorize_mode();
-          Key=0;
-          break;
-        case SPECIAL_COLORIZE_MENU :
-          Button_Colorize_menu();
-          Key=0;
-          break;
-        case SPECIAL_SMOOTH_MODE :
-          Button_Smooth_mode();
-          Key=0;
-          break;
-        case SPECIAL_SMOOTH_MENU :
-          Button_Smooth_menu();
-          Key=0;
-          break;
-        case SPECIAL_SMEAR_MODE :
-          Button_Smear_mode();
-          Key=0;
-          break;
-        case SPECIAL_TILING_MODE :
-          Button_Tiling_mode();
-          Key=0;
-          break;
-        case SPECIAL_TILING_MENU :
-          Button_Tiling_menu();
-          Key=0;
-          break;
-        case SPECIAL_EFFECTS_OFF :
-          Effects_off();
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_1 :
-          Layer_activate(0, LEFT_SIDE);
-          //Transparency_set(1);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_2 :
-          Layer_activate(1, LEFT_SIDE);
-          //Transparency_set(2);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_3 :
-          Layer_activate(2, LEFT_SIDE);
-          //Transparency_set(3);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_4 :
-          Layer_activate(3, LEFT_SIDE);
-          //Transparency_set(4);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_5 :
-          Layer_activate(0, RIGHT_SIDE);
-          //Transparency_set(5);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_6 :
-          Layer_activate(1, RIGHT_SIDE);
-          //Transparency_set(6);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_7 :
-          Layer_activate(2, RIGHT_SIDE);
-          //Transparency_set(7);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_8 :
-          Layer_activate(3, RIGHT_SIDE);
-          //Transparency_set(8);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_9 :
-          Transparency_set(9);
-          Key=0;
-          break;
-        case SPECIAL_TRANSPARENCY_0 :
-          Transparency_set(0);
-          Key=0;
-          break;
-	case SPECIAL_ZOOM_1 :
-	  Zoom_set(-1);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_2 :
-	  Zoom_set(0);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_3 :
-	  Zoom_set(1);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_4 :
-	  Zoom_set(2);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_5 :
-	  Zoom_set(3);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_6 :
-	  Zoom_set(4);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_8 :
-	  Zoom_set(5);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_10 :
-	  Zoom_set(6);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_12 :
-	  Zoom_set(7);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_14 :
-	  Zoom_set(8);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_16 :
-	  Zoom_set(9);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_18 :
-	  Zoom_set(10);
-	  Key=0;
-	  break;
-	case SPECIAL_ZOOM_20 :
-	  Zoom_set(11);
-	  Key=0;
-	  break;
-        default   : // Gestion des touches de raccourci de bouton:
-          // Pour chaque bouton
-          shortcut_button=-1;
+        Quit_is_required=0;
+        Button_Quit();
+      }
+      
+      if (Key)
+      {
+        effect_modified = 0;
+        
+        for (key_index=SPECIAL_CLICK_RIGHT+1;key_index<NB_SPECIAL_SHORTCUTS;key_index++)
+        {
+          if (Is_shortcut(Key,key_index))
+          {
+            // Special keys (functions not hooked to a UI button)
+            switch(key_index)
+            {
+              case SPECIAL_NEXT_FORECOLOR : // Next foreground color
+                Special_next_forecolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_FORECOLOR : // Previous foreground color
+                Special_previous_forecolor();
+                action++;
+                break;
+              case SPECIAL_NEXT_BACKCOLOR : // Next background color
+                Special_next_backcolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_BACKCOLOR : // Previous background color
+                Special_previous_backcolor();
+                action++;
+                break;
+              case SPECIAL_SMALLER_PAINTBRUSH: // Rétrécir le pinceau
+                Smaller_paintbrush();
+                action++;
+                break;
+              case SPECIAL_BIGGER_PAINTBRUSH: // Grossir le pinceau
+                Bigger_paintbrush();
+                action++;
+                break;
+              case SPECIAL_NEXT_USER_FORECOLOR : // Next user-defined foreground color
+                Special_next_user_forecolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_USER_FORECOLOR : // Previous user-defined foreground color
+                Special_previous_user_forecolor();
+                action++;
+                break;
+              case SPECIAL_NEXT_USER_BACKCOLOR : // Next user-defined background color
+                Special_next_user_backcolor();
+                action++;
+                break;
+              case SPECIAL_PREVIOUS_USER_BACKCOLOR : // Previous user-defined background color
+                Special_previous_user_backcolor();
+                action++;
+                break;
+            }
+            
+            // Other shortcuts are forbidden while an operation is in progress
+            if (Operation_stack_size!=0)
+              continue;
+            
+            switch (key_index)
+            {
+              case SPECIAL_SCROLL_UP : // Scroll up
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,-(Main_magnifier_height>>2));
+                else
+                  Scroll_screen(0,-(Screen_height>>3));
+                action++;
+                break;
+              case SPECIAL_SCROLL_DOWN : // Scroll down
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,(Main_magnifier_height>>2));
+                else
+                  Scroll_screen(0,(Screen_height>>3));
+                action++;
+                break;
+              case SPECIAL_SCROLL_LEFT : // Scroll left
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(-(Main_magnifier_width>>2),0);
+                else
+                  Scroll_screen(-(Screen_width>>3),0);
+                action++;
+                break;
+              case SPECIAL_SCROLL_RIGHT : // Scroll right
+                if (Main_magnifier_mode)
+                  Scroll_magnifier((Main_magnifier_width>>2),0);
+                else
+                  Scroll_screen((Screen_width>>3),0);
+                action++;
+                break;
+              case SPECIAL_SCROLL_UP_FAST : // Scroll up faster
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,-(Main_magnifier_height>>1));
+                else
+                  Scroll_screen(0,-(Screen_height>>2));
+                action++;
+                break;
+              case SPECIAL_SCROLL_DOWN_FAST : // Scroll down faster
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,(Main_magnifier_height>>1));
+                else
+                  Scroll_screen(0,(Screen_height>>2));
+                action++;
+                break;
+              case SPECIAL_SCROLL_LEFT_FAST : // Scroll left faster
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(-(Main_magnifier_width>>1),0);
+                else
+                  Scroll_screen(-(Screen_width>>2),0);
+                action++;
+                break;
+              case SPECIAL_SCROLL_RIGHT_FAST : // Scroll right faster
+                if (Main_magnifier_mode)
+                  Scroll_magnifier((Main_magnifier_width>>1),0);
+                else
+                  Scroll_screen((Screen_width>>2),0);
+                action++;
+                break;
+              case SPECIAL_SCROLL_UP_SLOW : // Scroll up slower
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,-1);
+                else
+                  Scroll_screen(0,-1);
+                action++;
+                break;
+              case SPECIAL_SCROLL_DOWN_SLOW : // Scroll down slower
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(0,1);
+                else
+                  Scroll_screen(0,1);
+                action++;
+                break;
+              case SPECIAL_SCROLL_LEFT_SLOW : // Scroll left slower
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(-1,0);
+                else
+                  Scroll_screen(-1,0);
+                action++;
+                break;
+              case SPECIAL_SCROLL_RIGHT_SLOW : // Scroll right slower
+                if (Main_magnifier_mode)
+                  Scroll_magnifier(1,0);
+                else
+                  Scroll_screen(1,0);
+                action++;
+                break;
+              case SPECIAL_SHOW_HIDE_CURSOR : // Show / Hide cursor
+                Hide_cursor();
+                Cursor_hidden=!Cursor_hidden;
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_DOT_PAINTBRUSH : // Paintbrush = "."
+                Hide_cursor();
+                Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
+                Set_paintbrush_size(1,1);
+                Change_paintbrush_shape(PAINTBRUSH_SHAPE_ROUND);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_CONTINUOUS_DRAW : // Continuous freehand drawing
+                Select_button(BUTTON_DRAW,LEFT_SIDE);
+                // ATTENTION CE TRUC EST MOCHE ET VA MERDER SI ON SE MET A UTILISER DES BOUTONS POPUPS
+                while (Current_operation!=OPERATION_CONTINUOUS_DRAW)
+                  Select_button(BUTTON_DRAW,RIGHT_SIDE);
+                action++;
+                break;
+              case SPECIAL_FLIP_X : // Flip X
+                Hide_cursor();
+                Flip_X_lowlevel(Brush, Brush_width, Brush_height);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_FLIP_Y : // Flip Y
+                Hide_cursor();
+                Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_ROTATE_90 : // 90° brush rotation
+                Hide_cursor();
+                Rotate_90_deg();
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_ROTATE_180 : // 180° brush rotation
+                Hide_cursor();
+                Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+                Brush_offset_X=(Brush_width>>1);
+                Brush_offset_Y=(Brush_height>>1);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_STRETCH : // Stretch brush
+                Hide_cursor();
+                Start_operation_stack(OPERATION_STRETCH_BRUSH);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_DISTORT : // Distort brush
+                Hide_cursor();
+                Start_operation_stack(OPERATION_DISTORT_BRUSH);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_ROTATE_ANY_ANGLE : // Rotate brush by any angle
+                Hide_cursor();
+                Start_operation_stack(OPERATION_ROTATE_BRUSH);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_OUTLINE : // Outline brush
+                Hide_cursor();
+                Outline_brush();
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_NIBBLE : // Nibble brush
+                Hide_cursor();
+                Nibble_brush();
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_GET_BRUSH_COLORS : // Get colors from brush
+                Get_colors_from_brush();
+                action++;
+                break;
+              case SPECIAL_RECOLORIZE_BRUSH : // Recolorize brush
+                Hide_cursor();
+                Remap_brush();
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_LOAD_BRUSH :
+                Load_picture(0);
+                action++;
+                break;
+              case SPECIAL_SAVE_BRUSH :
+                Save_picture(0);
+                action++;
+                break;
+              case SPECIAL_ZOOM_IN : // Zoom in
+                Zoom(+1);
+                action++;
+                break;
+              case SPECIAL_ZOOM_OUT : // Zoom out
+                Zoom(-1);
+                action++;
+                break;
+              case SPECIAL_CENTER_ATTACHMENT : // Center brush attachment
+                Hide_cursor();
+                Brush_offset_X=(Brush_width>>1);
+                Brush_offset_Y=(Brush_height>>1);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_TOP_LEFT_ATTACHMENT : // Top-left brush attachment
+                Hide_cursor();
+                Brush_offset_X=0;
+                Brush_offset_Y=0;
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_TOP_RIGHT_ATTACHMENT : // Top-right brush attachment
+                Hide_cursor();
+                Brush_offset_X=(Brush_width-1);
+                Brush_offset_Y=0;
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_BOTTOM_LEFT_ATTACHMENT : // Bottom-left brush attachment
+                Hide_cursor();
+                Brush_offset_X=0;
+                Brush_offset_Y=(Brush_height-1);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_BOTTOM_RIGHT_ATTACHMENT : // Bottom right brush attachment
+                Hide_cursor();
+                Brush_offset_X=(Brush_width-1);
+                Brush_offset_Y=(Brush_height-1);
+                Display_cursor();
+                action++;
+                break;
+              case SPECIAL_EXCLUDE_COLORS_MENU : // Exclude colors menu
+                Menu_tag_colors("Tag colors to exclude",Exclude_color,&temp,1, NULL, SPECIAL_EXCLUDE_COLORS_MENU);
+                action++;
+                break;
+              case SPECIAL_INVERT_SIEVE :
+                Invert_trame();
+                action++;
+                break;
+              case SPECIAL_SHADE_MODE :
+                Button_Shade_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SHADE_MENU :
+                Button_Shade_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_QUICK_SHADE_MODE :
+                Button_Quick_shade_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_QUICK_SHADE_MENU :
+                Button_Quick_shade_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_STENCIL_MODE :
+                Button_Stencil_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_STENCIL_MENU :
+                Button_Stencil_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_MASK_MODE :
+                Button_Mask_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_MASK_MENU :
+                Button_Mask_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_GRID_MODE :
+                Button_Snap_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_GRID_MENU :
+                Button_Grid_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SHOW_GRID :
+                Button_Show_grid();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SIEVE_MODE :
+                Button_Sieve_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SIEVE_MENU :
+                Button_Sieve_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_COLORIZE_MODE :
+                Button_Colorize_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_COLORIZE_MENU :
+                Button_Colorize_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SMOOTH_MODE :
+                Button_Smooth_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SMOOTH_MENU :
+                Button_Smooth_menu();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_SMEAR_MODE :
+                Button_Smear_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TILING_MODE :
+                Button_Tiling_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TILING_MENU :
+                effect_modified = 1;
+                Button_Tiling_menu();
+                action++;
+                break;
+              case SPECIAL_EFFECTS_OFF :
+                Effects_off();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_1 :
+                Transparency_set(1);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_2 :
+                Transparency_set(2);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_3 :
+                Transparency_set(3);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_4 :
+                Transparency_set(4);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_5 :
+                Transparency_set(5);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_6 :
+                Transparency_set(6);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_7 :
+                Transparency_set(7);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_8 :
+                Transparency_set(8);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_9 :
+                Transparency_set(9);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TRANSPARENCY_0 :
+                Transparency_set(0);
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_ZOOM_1 :
+                Zoom_set(-1);
+                action++;
+                break;
+              case SPECIAL_ZOOM_2 :
+                Zoom_set(0);
+                action++;
+                break;
+              case SPECIAL_ZOOM_3 :
+                Zoom_set(1);
+                action++;
+                break;
+              case SPECIAL_ZOOM_4 :
+                Zoom_set(2);
+                action++;
+                break;
+              case SPECIAL_ZOOM_5 :
+                Zoom_set(3);
+                action++;
+                break;
+              case SPECIAL_ZOOM_6 :
+                Zoom_set(4);
+                action++;
+                break;
+              case SPECIAL_ZOOM_8 :
+                Zoom_set(5);
+                action++;
+                break;
+              case SPECIAL_ZOOM_10 :
+                Zoom_set(6);
+                action++;
+                break;
+              case SPECIAL_ZOOM_12 :
+                Zoom_set(7);
+                action++;
+                break;
+              case SPECIAL_ZOOM_14 :
+                Zoom_set(8);
+                action++;
+                break;
+              case SPECIAL_ZOOM_16 :
+                Zoom_set(9);
+                action++;
+                break;
+              case SPECIAL_ZOOM_18 :
+                Zoom_set(10);
+                action++;
+                break;
+              case SPECIAL_ZOOM_20 :
+                Zoom_set(11);
+                action++;
+                break;
+              case SPECIAL_LAYER1_SELECT:
+              case SPECIAL_LAYER2_SELECT:
+              case SPECIAL_LAYER3_SELECT:
+              case SPECIAL_LAYER4_SELECT:
+              case SPECIAL_LAYER5_SELECT:
+              case SPECIAL_LAYER6_SELECT:
+              case SPECIAL_LAYER7_SELECT:
+              case SPECIAL_LAYER8_SELECT:
+                Layer_activate((key_index-SPECIAL_LAYER1_SELECT)/2, LEFT_SIDE);
+                action++;
+                break;
+              case SPECIAL_LAYER1_TOGGLE:
+              case SPECIAL_LAYER2_TOGGLE:
+              case SPECIAL_LAYER3_TOGGLE:
+              case SPECIAL_LAYER4_TOGGLE:
+              case SPECIAL_LAYER5_TOGGLE:
+              case SPECIAL_LAYER6_TOGGLE:
+              case SPECIAL_LAYER7_TOGGLE:
+              case SPECIAL_LAYER8_TOGGLE:
+                Layer_activate((key_index-SPECIAL_LAYER1_TOGGLE)/2, RIGHT_SIDE);
+                action++;
+                break;
+            }
+          }
+        } // End of special keys
+        
+        
+        // Shortcut for clicks of Menu buttons.
+        // Disable all of them when an operation is in progress
+        if (Operation_stack_size==0)
+        {
+          // Some functions open windows that clear the Key variable, 
+          // so we need to use a temporary replacement.
+          key_pressed = Key;
           for (button_index=0;button_index<NB_BUTTONS;button_index++)
           {
-            if (Is_shortcut(Key,0x100+button_index))
-            {
-              shortcut_button=button_index;
-              clicked_button  =LEFT_SIDE;
-              button_index=NB_BUTTONS;
+            if (Is_shortcut(key_pressed,0x100+button_index))
+            {          
+              Select_button(button_index,LEFT_SIDE);
+              prev_button_number=-1;
+              action++;
             }
-            else if (Is_shortcut(Key,0x200+button_index))
+            else if (Is_shortcut(key_pressed,0x200+button_index))
             {
-              shortcut_button=button_index;
-              clicked_button  =RIGHT_SIDE;
-              button_index=NB_BUTTONS;
+              Select_button(button_index,RIGHT_SIDE);
+              prev_button_number=-1;
+              action++;
             }
           }
-          // Après avoir scruté les boutons, si la recherche a été fructueuse,
-          // on lance le bouton.
-          if (shortcut_button!=-1)
-          {
-            Select_button(shortcut_button,clicked_button);
-            prev_button_number=-1;
-          }
+        }
+  
+        // Si on a modifié un effet, il faut rafficher le bouton des effets en
+        // conséquence.
+        if (effect_modified)
+        {
+          Hide_cursor();
+          Draw_menu_button_frame(BUTTON_EFFECTS,
+            (Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode));
+          Display_cursor();
+        }
       }
-
-      // Si on a modifié un effet, il faut rafficher le bouton des effets en
-      // conséquence.
-      if ((key_index>=SPECIAL_SHADE_MODE)
-       && (key_index<=SPECIAL_TILING_MENU))
-      {
-        Hide_cursor();
-        Draw_menu_button_frame(BUTTON_EFFECTS,
-          (Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode));
-        Display_cursor();
-      }
-    }
+      if (action)
+        Key=0;
     }
     else
-	{
-		// No event : we go asleep for a while, but we try to get waked up at constant intervals of time
-		// no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
-		// This allows nice smooth mouse movement.
-    	const int delay = 10;
-
-		Uint32 debut;
-		debut = SDL_GetTicks();
-		// Première attente : le complément de "delay" millisecondes
-		SDL_Delay(delay - (debut % delay));
-		// Si ça ne suffit pas, on complète par des attentes successives de "1ms".
-		// (Remarque, Windows arrondit généralement aux 10ms supérieures)
-		while ( SDL_GetTicks()/delay <= debut/delay)
-		{
-			SDL_Delay(1);
-		}
-	}
+    {
+  		// No event : we go asleep for a while, but we try to get waked up at constant intervals of time
+  		// no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
+  		// This allows nice smooth mouse movement.
+      	const int delay = 10;
+  
+  		Uint32 debut;
+  		debut = SDL_GetTicks();
+  		// Première attente : le complément de "delay" millisecondes
+  		SDL_Delay(delay - (debut % delay));
+  		// Si ça ne suffit pas, on complète par des attentes successives de "1ms".
+  		// (Remarque, Windows arrondit généralement aux 10ms supérieures)
+  		while ( SDL_GetTicks()/delay <= debut/delay)
+  		{
+  			SDL_Delay(1);
+  		}
+  	}
 
     // Gestion de la souris
 

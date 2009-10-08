@@ -247,6 +247,11 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
     }
 }
 
+void Pixel_in_current_layer(word x,word y, byte color)
+{
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+}
+
 byte Read_pixel_from_current_layer(word x,word y)
 {
   return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
@@ -254,12 +259,19 @@ byte Read_pixel_from_current_layer(word x,word y)
 
 void Replace_a_color(byte old_color, byte New_color)
 {
-	byte* edi;
+	byte* pixel_on_layer;
+	byte* pixel_visible;
 
 	// pour chaque pixel :
-	for(edi = Main_screen;edi < Main_screen + Main_image_height * Main_image_width;edi++)
-		if (*edi == old_color)
-			*edi = New_color;
+	pixel_visible=Main_screen;
+	for(pixel_on_layer = Main_backups->Pages->Image[Main_current_layer];pixel_on_layer < Main_screen + Main_image_height * Main_image_width;pixel_on_layer++,pixel_visible++)
+	{
+		if (*pixel_on_layer == old_color)
+		{
+			*pixel_on_layer = New_color;
+			*pixel_visible = New_color;
+	  }
+	}
 	Update_rect(0,0,0,0); // On peut TOUT a jour
 	// C'est pas un problème car il n'y a pas de preview
 }
@@ -405,21 +417,18 @@ byte Effect_sieve(word x,word y)
 
 void Replace_colors_within_limits(byte * replace_table)
 {
-	int line;
-	int counter;
-	byte* Adresse;
-
-	byte old;
+	int y;
+	int x;
+	byte* pixel;
 
 	// Pour chaque ligne :
-	for(line = Limit_top;line <= Limit_bottom; line++)
+	for(y = Limit_top;y <= Limit_bottom; y++)
 	{
 		// Pour chaque pixel sur la ligne :
-		for (counter = Limit_left;counter <= Limit_right;counter ++)
+		for (x = Limit_left;x <= Limit_right;x ++)
 		{
-			Adresse = Main_screen+line*Main_image_width+counter;
-			old=*Adresse;
-			*Adresse = replace_table[old];
+			pixel = Main_backups->Pages->Image[Main_current_layer]+y*Main_image_width+x;
+			*pixel = replace_table[*pixel];
 		}
 	}
 }
