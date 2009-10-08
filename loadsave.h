@@ -40,12 +40,13 @@ void Save_image(byte image);
 
 /// Data for an image file format.
 typedef struct {
-  char *Extension;  ///< Three-letter file extension
-  Func_action Test; ///< Function which tests if the file is of this format
-  Func_action Load; ///< Function which loads an image of this format
-  Func_action Save; ///< Function which saves an image of this format
-  byte Backup_done; ///< Boolean, true if this format saves all the image, and considers it backed up. Set false for formats which only save the palette.
-  byte Comment;     ///< This file format allows a text comment
+  char *Extension;      ///< Three-letter file extension
+  Func_action Test;     ///< Function which tests if the file is of this format
+  Func_action Load;     ///< Function which loads an image of this format
+  Func_action Save;     ///< Function which saves an image of this format
+  byte Backup_done;     ///< Boolean, true if this format saves all the image, and considers it backed up. Set false for formats which only save the palette.
+  byte Comment;         ///< This file format allows a text comment
+  byte Supports_layers; ///< Boolean, true if this format preserves layers on saving
 } T_Format;
 
 /// Array of the known file formats

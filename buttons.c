@@ -394,7 +394,7 @@ void Button_Hide_menu(void)
   {
     Menu_is_visible=1;
     Pixel_in_menu=Pixel_in_toolbar;
-    Menu_Y=Screen_height-(MENU_HEIGHT*Menu_factor_Y);
+    Menu_Y=Screen_height-(Menu_height*Menu_factor_Y);
 
     Compute_magnifier_data();
     if (Main_magnifier_mode)

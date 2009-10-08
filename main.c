@@ -462,6 +462,7 @@ int Init_program(int argc,char * argv[])
   // Données sur l'état du menu:
   Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
+  Menu_height=MENU_HEIGHT;
   // Données sur les couleurs et la palette:
   First_color_in_palette=0;
   // Données sur le curseur:

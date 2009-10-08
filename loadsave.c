@@ -126,22 +126,22 @@ void Save_PNG(void);
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
 T_Format File_formats[NB_KNOWN_FORMATS] = {
-  {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
-  {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0},
-  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 1},
-  {"bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0},
-  {"pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0},
-  {"img", Test_IMG, Load_IMG, Save_IMG, 1, 0},
-  {"sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0},
-  {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0},
-  {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0},
-  {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
-  {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
-  {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
-  {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
-  {"c64", Test_C64, Load_C64, Save_C64, 1, 1},
+  {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1, 0},
+  {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0, 0},
+  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 1, 1},
+  {"bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0, 0},
+  {"pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0, 0},
+  {"img", Test_IMG, Load_IMG, Save_IMG, 1, 0, 0},
+  {"sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0, 0},
+  {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0, 0},
+  {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0, 0},
+  {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0, 0},
+  {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0, 0},
+  {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, 0},
+  {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, 0},
+  {"c64", Test_C64, Load_C64, Save_C64, 1, 1, 0},
 #ifndef __no_pnglib__
-  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
+  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1, 0}
 #endif
 };
 
@@ -742,7 +742,28 @@ void Save_image(byte image)
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
 
-  Read_pixel_function=(image)?Read_pixel_from_current_screen:Read_pixel_from_brush;
+  if (image)
+  {
+    if (!File_formats[Main_fileformat-1].Supports_layers
+      && Main_backups->Pages->Nb_layers > 1)
+    {
+      if (! Confirmation_box("This format will save a flattened copy."))
+      {
+        // File_error is already set to 1.
+        return;
+      }
+      Read_pixel_function=Read_pixel_from_current_screen;
+    }
+    else
+    {
+      Read_pixel_function=Read_pixel_from_current_layer;
+    }
+  }
+  else
+  {
+    Read_pixel_function=Read_pixel_from_brush;
+  }
+  
 
   File_formats[Main_fileformat-1].Save();
 
@@ -3416,9 +3437,6 @@ void Save_GIF(void)
   byte old_current_layer=Main_current_layer;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
-
-  if (Read_pixel_function==Read_pixel_from_current_screen)
-    Read_pixel_function=Read_pixel_from_current_layer;
   
   File_error=0;
   
@@ -3714,8 +3732,9 @@ void Save_GIF(void)
   else
     File_error=1;
   
-  // Restore original layer
+  // Restore original index of current layer
   Main_current_layer = old_current_layer;
+
 }
 
 

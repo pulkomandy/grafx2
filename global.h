@@ -474,9 +474,11 @@ GFX2_GLOBAL short Brush_rotation_center_Y;
 
 /// Boolean, true if the menu has to be displayed.
 GFX2_GLOBAL byte  Menu_is_visible;
+/// Height of the menu, when it's displayed
+GFX2_GLOBAL word  Menu_height;
 ///
 /// Y position (in screen coordinates) where the menu begins.
-/// This is always either ::Screen_height (when menu is hidden) or (::Screen_height - ::MENU_HEIGHT)
+/// This is always either ::Screen_height (when menu is hidden) or (::Screen_height - ::Menu_height)
 /// As a result, the drawing algoritm always draws the image from 0 to ::Menu_Y-1
 GFX2_GLOBAL word  Menu_Y;
 /// Y position of the status bar (in screen coordinates)

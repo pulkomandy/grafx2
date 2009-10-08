@@ -531,7 +531,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   
   Menu_Y = Screen_height;
   if (Menu_is_visible)
-    Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
+    Menu_Y -= Menu_height * Menu_factor_Y;
   Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
 
   Adjust_mouse_sensitivity(fullscreen);

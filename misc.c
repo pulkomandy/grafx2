@@ -257,21 +257,16 @@ byte Read_pixel_from_current_layer(word x,word y)
   return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
 }
 
-void Replace_a_color(byte old_color, byte New_color)
+void Replace_a_color(byte old_color, byte new_color)
 {
-	byte* pixel_on_layer;
-	byte* pixel_visible;
-
-	// pour chaque pixel :
-	pixel_visible=Main_screen;
-	for(pixel_on_layer = Main_backups->Pages->Image[Main_current_layer];pixel_on_layer < Main_screen + Main_image_height * Main_image_width;pixel_on_layer++,pixel_visible++)
-	{
-		if (*pixel_on_layer == old_color)
-		{
-			*pixel_on_layer = New_color;
-			*pixel_visible = New_color;
-	  }
-	}
+  word x;
+  word y;
+  
+  // Update all pixels
+	for (y=0; y<Main_image_height; y++)
+  	for (x=0; x<Main_image_width; x++)
+  	  if (Read_pixel_from_current_layer(x,y) == old_color)
+  	    Pixel_in_current_screen(x,y,new_color,0);
 	Update_rect(0,0,0,0); // On peut TOUT a jour
 	// C'est pas un problème car il n'y a pas de preview
 }
