@@ -368,7 +368,7 @@ void Button_Transform_menu(void)
     old_height=Main_image_height;
     
     // Allocate a new page
-    if (Backup_with_new_dimensions(1,new_width,new_height))
+    if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,new_width,new_height))
     {
       // The new image is allocated, the new dimensions are already updated.
       

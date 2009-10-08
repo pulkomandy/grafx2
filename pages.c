@@ -43,7 +43,7 @@ T_Page * New_page(byte nb_layers)
 {
   T_Page * page;
   
-  page = (T_Page *)malloc(sizeof(T_Page)+NB_LAYERS*sizeof(byte *));
+  page = (T_Page *)malloc(sizeof(T_Page)+nb_layers*sizeof(byte *));
   if (page!=NULL)
   {
     int i;
@@ -469,7 +469,7 @@ void Free_last_page_of_list(T_List_of_pages * list)
 }
 
 // layer_mask tells which layers have to be fresh copies instead of references
-int Create_new_page(T_Page * new_page,T_List_of_pages * list, byte layer_mask)
+int Create_new_page(T_Page * new_page, T_List_of_pages * list, word layer_mask)
 {
 
 //   Cette fonction crée une nouvelle page dont les attributs correspondent à
@@ -659,13 +659,12 @@ void Set_number_of_backups(int nb_backups)
   // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
 
-int Backup_with_new_dimensions(int upload,int width,int height)
+int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
 {
   // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
   // 0 sinon.
 
   T_Page * new_page;
-  byte nb_layers;
   int return_code=0;
   int i;
 
@@ -674,9 +673,8 @@ int Backup_with_new_dimensions(int upload,int width,int height)
     // retrouver plus tard)
     Upload_infos_page_main(Main_backups->Pages);
 
-  nb_layers=Main_backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page courante
-  new_page=New_page(nb_layers);
+  new_page=New_page(layers);
   if (!new_page)
   {
     Error(0);
@@ -685,9 +683,9 @@ int Backup_with_new_dimensions(int upload,int width,int height)
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Main_backups,255))
+  if (Create_new_page(new_page,Main_backups,0xFFFF))
   {
-    for (i=0; i<nb_layers;i++)
+    for (i=0; i<layers;i++)
     {
       memset(Main_backups->Pages->Image[i], 0, width*height);
     }
@@ -727,7 +725,7 @@ int Backup_and_resize_the_spare(int width,int height)
   Upload_infos_page_spare(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups,255))
+  if (Create_new_page(new_page,Spare_backups,0xFFFF))
   {
     byte i;
     
@@ -752,10 +750,9 @@ void Backup(void)
   Backup_layers(1<<Main_current_layer);
 }
 
-void Backup_layers(byte layer_mask)
+void Backup_layers(word layer_mask)
 {
-    int i;
-  
+  int i;
   T_Page *new_page;
 
   /*
@@ -921,4 +918,151 @@ void End_of_modification(void)
   Last_backed_up_layers = 0;
   Backup();
   */
+}
+
+/// Add a new layer to latest page of a list. Returns 0 on success.
+byte Add_layer(T_List_of_pages *list, byte layer)
+{
+  T_Page * source_page;
+  T_Page * new_page;
+  byte * new_image;
+  int i;
+  
+  source_page = list->Pages;
+   
+  // Keep the position reasonable
+  if (layer > list->Pages->Nb_layers)
+    layer = list->Pages->Nb_layers;
+   
+  // Allocate the pixel data
+  new_image = New_layer(list->Pages->Height*list->Pages->Width);
+  if (! new_image)
+  {
+    Error(0);
+    return 1;
+  }
+  // Re-allocate the page itself, with room for one more pointer
+  new_page = realloc(source_page, sizeof(T_Page)+(list->Pages->Nb_layers+1)*sizeof(byte *));
+  if (!new_page)
+  {
+    Error(0);
+    return 1;
+  }
+  if (new_page != source_page)
+  {
+    // Need some housekeeping because the page moved in memory.
+    // Update all pointers that pointed to it:
+    new_page->Prev->Next = new_page;
+    new_page->Next->Prev = new_page;
+    list->Pages = new_page;
+  }
+  list->Pages->Nb_layers++;
+  // Move around the pointers. This part is going to be tricky when we
+  // have 'animations x layers' in this vector.
+  for (i=list->Pages->Nb_layers-1; i>layer ; i--)
+  {
+    new_page->Image[i]=new_page->Image[i-1];
+  }
+  new_page->Image[layer]=new_image;
+  // Fill with transparency, initially
+  memset(new_image, 0, list->Pages->Height*list->Pages->Width); // transparent color
+  
+  // Done. Note that the visible buffer is already ok since we
+  // only inserted a transparent "slide" somewhere.
+  // The depth buffer is all wrong though.
+
+  // Update the flags of visible layers. 
+  {
+    word layers_before;
+    word layers_after;
+    word *visible_layers_flag;
+    
+    // Determine if we're modifying the spare or the main page.
+    if (list == Main_backups)
+    {
+      visible_layers_flag = &Main_layers_visible;
+      Main_current_layer = layer;
+    }
+    else
+    {
+      visible_layers_flag = &Spare_layers_visible;
+      Spare_current_layer = layer;
+    }
+    
+    // Fun with binary!
+    layers_before = ((1<<layer)-1) & *visible_layers_flag;
+    layers_after = (*visible_layers_flag & (!layers_before))<<1;
+    *visible_layers_flag = (1<<layer) | layers_before | layers_after;
+  }
+  
+  // All ok
+  return 0;
+}
+
+/// Delete a layer from the latest page of a list. Returns 0 on success.
+byte Delete_layer(T_List_of_pages *list, byte layer)
+{
+  T_Page * page;
+  int i;
+  
+  page = list->Pages;
+   
+  // Keep the position reasonable
+  if (layer >= list->Pages->Nb_layers)
+    layer = list->Pages->Nb_layers - 1;
+  if (list->Pages->Nb_layers == 1)
+    return 1;
+   
+  // For simplicity, we won't actually shrink the page in terms of allocation.
+  // It would only save the size of a pointer, and anyway, as the user draws,
+  // this page is going to fall off the end of the Undo-list
+  // and so it will be cleared anyway.
+  
+  // Smart freeing of the pixel data
+  Free_layer(list->Pages->Image[layer]);
+  
+  list->Pages->Nb_layers--;
+  // Move around the pointers. This part is going to be tricky when we
+  // have 'animations x layers' in this vector.
+  for (i=layer; i < list->Pages->Nb_layers; i++)
+  {
+    list->Pages->Image[i]=list->Pages->Image[i+1];
+  }
+  
+  // Done. At this point the visible buffer and the depth buffer are
+  // all wrong.
+
+  // Update the flags of visible layers. 
+  {
+    word layers_before;
+    word layers_after;
+    word *visible_layers_flag;
+    byte new_current_layer;
+    
+    // Determine if we're modifying the spare or the main page.
+    if (list == Main_backups)
+    {
+      visible_layers_flag = &Main_layers_visible;
+      if (Main_current_layer>=layer && Main_current_layer>0)
+        Main_current_layer--;
+      new_current_layer = Main_current_layer;
+    }
+    else
+    {
+      visible_layers_flag = &Spare_layers_visible;
+      if (Spare_current_layer>=layer && Spare_current_layer>0)
+        Spare_current_layer--;
+      new_current_layer = Spare_current_layer;
+    }
+    
+    // Fun with binary!
+    layers_before = ((1<<layer)-1) & *visible_layers_flag;
+    layers_after = (*visible_layers_flag & (!layers_before))>>1;
+    *visible_layers_flag = layers_before | layers_after;
+    // Ensure the current layer is part what is shown.
+    *visible_layers_flag |= 1<<new_current_layer;
+  }
+  
+  // All ok
+  return 0;
 }

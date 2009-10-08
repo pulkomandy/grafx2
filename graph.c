@@ -595,7 +595,7 @@ void Resize_image(word chosen_width,word chosen_height)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  if (Backup_with_new_dimensions(1,chosen_width,chosen_height))
+  if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Main_image_width de large.

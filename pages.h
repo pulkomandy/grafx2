@@ -37,6 +37,10 @@
 
 void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
+/// Add a new layer to latest page of a list. Returns 0 on success.
+byte Add_layer(T_List_of_pages *list, byte layer);
+/// Delete a layer from the latest page of a list. Returns 0 on success.
+byte Delete_layer(T_List_of_pages *list, byte layer);
 
 // private
 T_Page * New_page(byte nb_layers);
@@ -58,7 +62,7 @@ int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
 void Free_last_page_of_list(T_List_of_pages * list);
-int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, byte layer_mask);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, word layer_mask);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 
@@ -70,12 +74,12 @@ void Free_page_of_a_list(T_List_of_pages * list);
 
 int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
-int Backup_with_new_dimensions(int upload,int width,int height);
+int Backup_with_new_dimensions(int upload,byte layers,int width,int height);
 int Backup_and_resize_the_spare(int width,int height);
 /// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
 /// Backup with a new copy of some layers (the others are references).
-void Backup_layers(byte layer_mask);
+void Backup_layers(word layer_mask);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button

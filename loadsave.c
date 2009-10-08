@@ -460,7 +460,7 @@ void Init_preview(short width,short height,long size,int format, enum PIXEL_RATI
   {
     if (Pixel_load_function==Pixel_load_in_current_screen)
     {
-      if (Backup_with_new_dimensions(0,width,height))
+      if (Backup_with_new_dimensions(0,1,width,height))
       {
         // La nouvelle page a pu être allouée, elle est pour l'instant pleine
         // de 0s. Elle fait Main_image_width de large.
@@ -3174,6 +3174,7 @@ void Load_GIF(void)
               if (number_LID!=0)
               {
                 Main_current_layer++;
+                Add_layer(Main_backups, Main_current_layer);
               }
               number_LID++;
               

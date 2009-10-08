@@ -1365,7 +1365,7 @@ void Button_Page(void)
   SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
   SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
   SWAP_SHORTS(Main_current_layer,Spare_current_layer)
-  SWAP_BYTES (Main_layers_visible,Spare_layers_visible)
+  SWAP_WORDS (Main_layers_visible,Spare_layers_visible)
 
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
@@ -4285,7 +4285,7 @@ void Transparency_set(byte amount)
 
 void Layer_activate(short layer, short side)
 {
-  byte old_layers;
+  word old_layers;
 
   if (layer >= Main_backups->Pages->Nb_layers)
     return;
@@ -4300,7 +4300,7 @@ void Layer_activate(short layer, short side)
       if (Main_layers_visible == (1<<layer))
       {
         // Set all layers visible
-        Main_layers_visible = 0xFF;
+        Main_layers_visible = 0xFFFF;
       }
       else
       {
