@@ -33,7 +33,7 @@
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
-#define NB_SHORTCUTS              175   ///< Number of actions that can have a key combination associated to it.
+#define NB_SHORTCUTS              181   ///< Number of actions that can have a key combination associated to it.
 #define NB_ZOOM_FACTORS           12    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
@@ -423,7 +423,13 @@ enum SPECIAL_ACTIONS
   SPECIAL_LAYER7_SELECT,
   SPECIAL_LAYER7_TOGGLE,
   SPECIAL_LAYER8_SELECT,
-  SPECIAL_LAYER8_TOGGLE,  
+  SPECIAL_LAYER8_TOGGLE,
+  SPECIAL_LAYER_ADD,
+  SPECIAL_LAYER_DELETE,
+  SPECIAL_LAYER_MERGE,
+  SPECIAL_LAYER_SWAP_UP,
+  SPECIAL_LAYER_SWAP_DOWN,
+  SPECIAL_LAYER_MENU,
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 

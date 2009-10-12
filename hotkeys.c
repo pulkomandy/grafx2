@@ -1427,7 +1427,54 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   0,
   0},
-  
+  {175,
+  "Add a layer",
+  "Adds a new layer on top of the",
+  "active one. The new layer is filled",
+  "with transparent color.",
+  true,
+  SDLK_INSERT|MOD_ALT, // Alt + Insert
+  0},
+  {176,
+  "Delete a layer",
+  "Delete the current layer.",
+  "You can't delete the last",
+  "layer.",
+  true,
+  SDLK_DELETE|MOD_ALT, // Alt + Delete
+  0},
+  {177,
+  "Merge a layer",
+  "Merges the current layer with",
+  "the one directly below it.",
+  "",
+  true,
+  SDLK_END|MOD_ALT, // Alt + End
+  0},
+  {178,
+  "Swap layer (up)",
+  "Moves the current layer one position",
+  "up the stack. No effect if already",
+  "on top.",
+  true,
+  SDLK_PAGEUP|MOD_ALT, // Alt + PageUp
+  0},
+  {179,
+  "Swap layer (down)",
+  "Moves the current layer one position",
+  "down the stack. No effect if already",
+  "on bottom.",
+  true,
+  SDLK_PAGEDOWN|MOD_ALT, // Alt + PageDown
+  0},
+  {180,
+  "Layers menu",
+  "Opens the window with layer options.",
+  "",
+  "",
+  true,
+  SDLK_HOME|MOD_ALT, // Alt + Home
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1606,5 +1653,11 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_LAYER7_SELECT,
   SPECIAL_LAYER7_TOGGLE,
   SPECIAL_LAYER8_SELECT,
-  SPECIAL_LAYER8_TOGGLE,  
+  SPECIAL_LAYER8_TOGGLE,
+  SPECIAL_LAYER_ADD,
+  SPECIAL_LAYER_DELETE,
+  SPECIAL_LAYER_MERGE,
+  SPECIAL_LAYER_SWAP_UP,
+  SPECIAL_LAYER_SWAP_DOWN,
+  SPECIAL_LAYER_MENU,
 };
