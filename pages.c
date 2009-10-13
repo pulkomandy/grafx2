@@ -991,7 +991,7 @@ byte Add_layer(T_List_of_pages *list, byte layer)
     
     // Fun with binary!
     layers_before = ((1<<layer)-1) & *visible_layers_flag;
-    layers_after = (*visible_layers_flag & (!layers_before))<<1;
+    layers_after = (*visible_layers_flag & (~layers_before))<<1;
     *visible_layers_flag = (1<<layer) | layers_before | layers_after;
   }
   
@@ -1057,7 +1057,7 @@ byte Delete_layer(T_List_of_pages *list, byte layer)
     
     // Fun with binary!
     layers_before = ((1<<layer)-1) & *visible_layers_flag;
-    layers_after = (*visible_layers_flag & (!layers_before))>>1;
+    layers_after = (*visible_layers_flag & (~layers_before))>>1;
     *visible_layers_flag = layers_before | layers_after;
     // Ensure the current layer is part what is shown.
     *visible_layers_flag |= 1<<new_current_layer;

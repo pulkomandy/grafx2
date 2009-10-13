@@ -36,6 +36,7 @@
 #include "brush.h"
 #include "input.h"
 #include "engine.h"
+#include "pages.h"
 
 
 // we need this as global
@@ -1030,6 +1031,30 @@ void Main_handler(void)
               case SPECIAL_LAYER7_TOGGLE:
               case SPECIAL_LAYER8_TOGGLE:
                 Layer_activate((key_index-SPECIAL_LAYER1_TOGGLE)/2, RIGHT_SIDE);
+                action++;
+                break;
+              case SPECIAL_LAYER_ADD:
+                // Backup with unchanged layers
+                Backup_layers(0);
+                if (!Add_layer(Main_backups,Main_current_layer+1))
+                {
+                  Update_depth_buffer();
+                  Hide_cursor();
+                  Display_all_screen();
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_LAYER_DELETE:
+                // Backup with unchanged layers
+                Backup_layers(0);
+                if (!Delete_layer(Main_backups,Main_current_layer))
+                {
+                  Redraw_layered_image();
+                  Hide_cursor();
+                  Display_all_screen();
+                  Display_cursor();
+                }
                 action++;
                 break;
             }

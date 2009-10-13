@@ -25,6 +25,11 @@
 #include "engine.h"
 #include "windows.h"
 #include "special.h"
+#include "pages.h"
+#include "misc.h"
+#include "buttons.h"
+
+
 
 
 
@@ -410,4 +415,114 @@ void Zoom_set(int index)
     Display_all_screen();
   }
   Display_cursor();
+}
+
+void Transparency_set(byte amount)
+{
+  const int doubleclick_delay = Config.Double_key_speed;
+  static long time_click = 0;
+  long time_previous;
+  
+  if (!Colorize_mode)
+  {
+    // Activate mode
+    switch(Colorize_current_mode)
+    {
+      case 0 :
+        Effect_function=Effect_interpolated_colorize;
+        break;
+      case 1 :
+        Effect_function=Effect_additive_colorize;
+        break;
+      case 2 :
+        Effect_function=Effect_substractive_colorize;
+    }
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
+
+    Colorize_mode=1;
+  }
+
+  time_previous = time_click;
+  time_click = SDL_GetTicks();
+
+  // Check if it's a quick re-press
+  if (time_click - time_previous < doubleclick_delay)
+  {
+    // Use the typed amount as units, keep the tens.
+    Colorize_opacity = ((Colorize_opacity%100) /10 *10) + amount;
+    if (Colorize_opacity == 0)
+      Colorize_opacity = 100;
+  }
+  else
+  {
+    // Use 10% units: "1"=10%, ... "0"=100%
+    if (amount == 0)
+      Colorize_opacity = 100;
+    else
+      Colorize_opacity = amount*10;
+  }
+  Compute_colorize_table();
+}
+
+void Layer_activate(short layer, short side)
+{
+  word old_layers;
+
+  if (layer >= Main_backups->Pages->Nb_layers)
+    return;
+  
+  // Keep a copy of which layers were visible
+  old_layers = Main_layers_visible;
+  if (side == RIGHT_SIDE)
+  {
+    // Right-click on current layer
+    if (Main_current_layer == layer)
+    {
+      if (Main_layers_visible == (1<<layer))
+      {
+        // Set all layers visible
+        Main_layers_visible = 0xFFFF;
+      }
+      else
+      {
+        // Set only this one visible
+        Main_layers_visible = 1<<layer;
+      }
+    }
+    else
+    {
+      // Right-click on an other layer : toggle its visibility
+      Main_layers_visible ^= 1<<layer;
+    }
+  }
+  else
+  {
+    // Left-click on any layer
+    Main_current_layer = layer;
+    Main_layers_visible |= 1<<layer;
+  }
+
+  Hide_cursor();
+  if (Main_layers_visible != old_layers)
+    Redraw_layered_image();
+  else
+    Update_depth_buffer(); // Only need the depth buffer
+  //Download_infos_page_main(Main_backups->Pages);
+  //Download_infos_backup(Main_backups);
+  Display_all_screen();
+  Display_cursor();
+}
+
+void Special_add_layer()
+{
+
+
+}
+void Special_delete_layer()
+{
+
+
 }
