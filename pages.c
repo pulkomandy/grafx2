@@ -38,6 +38,11 @@
 /// Bitfield which records which layers are backed up in Page 0.
 static word Last_backed_up_layers=0;
 
+/// Total number of unique bitmaps (layers, animation frames, backups)
+long Stats_pages_number=0;
+/// Total memory used by bitmaps (layers, animation frames, backups)
+long long Stats_pages_memory=0;
+
 /// Allocate and initialize a new page.
 T_Page * New_page(byte nb_layers)
 {
@@ -79,22 +84,31 @@ byte * New_layer(long pixel_size)
   short * ptr = malloc(sizeof(short)+pixel_size);
   if (ptr==NULL)
     return NULL;
+    
+  // Stats
+  Stats_pages_number++;
+  Stats_pages_memory+=pixel_size;
   
   *ptr = 1;
   return (byte *)(ptr+1);
 }
 
 /// Free a layer
-void Free_layer(byte * layer)
+void Free_layer(T_Page * page, byte layer)
 {
-  short * ptr = (short *)(layer);
-  if (layer==NULL)
+  short * ptr;
+  if (page->Image[layer]==NULL)
     return;
     
+  ptr = (short *)(page->Image[layer]);
   if (-- (*(ptr-1))) // Users--
     return;
   else
     free(ptr-1);
+    
+  // Stats
+  Stats_pages_number--;
+  Stats_pages_memory-=page->Width * page->Height;
 }
 
 /// Duplicate a layer (new reference)
@@ -321,7 +335,7 @@ void Clear_page(T_Page * page)
   int i;
   for (i=0; i<page->Nb_layers; i++)
   {
-    Free_layer(page->Image[i]);
+    Free_layer(page, i);
     page->Image[i]=NULL;
   }
   page->Width=0;
@@ -1019,7 +1033,7 @@ byte Delete_layer(T_List_of_pages *list, byte layer)
   // and so it will be cleared anyway.
   
   // Smart freeing of the pixel data
-  Free_layer(list->Pages->Image[layer]);
+  Free_layer(list->Pages, layer);
   
   list->Pages->Nb_layers--;
   // Move around the pointers. This part is going to be tricky when we

@@ -90,4 +90,13 @@ void Update_depth_buffer(void);
 void Redraw_layered_image(void);
 void Redraw_current_layer(void);
 
+///
+/// STATISTICS
+///
+
+/// Total number of unique bitmaps (layers, animation frames, backups)
+extern long  Stats_pages_number;
+/// Total memory used by bitmaps (layers, animation frames, backups)
+extern long long  Stats_pages_memory;
+
 #endif
