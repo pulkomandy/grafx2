@@ -481,10 +481,10 @@ void Layer_activate(short layer, short side)
     // Right-click on current layer
     if (Main_current_layer == layer)
     {
-      if (Main_layers_visible == (1<<layer))
+      if (Main_layers_visible == (dword)(1<<layer))
       {
         // Set all layers visible
-        Main_layers_visible = 0xFFFF;
+        Main_layers_visible = 0xFFFFFFFF;
       }
       else
       {

@@ -430,6 +430,7 @@ void Button_Transform_menu(void)
       */
       Redraw_layered_image();
       Display_all_screen();
+      End_of_modification();
     }
     else
     {

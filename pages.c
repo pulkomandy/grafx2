@@ -36,7 +36,7 @@
   ///
 
 /// Bitfield which records which layers are backed up in Page 0.
-static word Last_backed_up_layers=0;
+static dword Last_backed_up_layers=0;
 
 /// Total number of unique bitmaps (layers, animation frames, backups)
 long Stats_pages_number=0;
@@ -483,7 +483,7 @@ void Free_last_page_of_list(T_List_of_pages * list)
 }
 
 // layer_mask tells which layers have to be fresh copies instead of references
-int Create_new_page(T_Page * new_page, T_List_of_pages * list, word layer_mask)
+int Create_new_page(T_Page * new_page, T_List_of_pages * list, dword layer_mask)
 {
 
 //   Cette fonction crée une nouvelle page dont les attributs correspondent à
@@ -697,7 +697,7 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Main_backups,0xFFFF))
+  if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
     for (i=0; i<layers;i++)
     {
@@ -739,7 +739,7 @@ int Backup_and_resize_the_spare(int width,int height)
   Upload_infos_page_spare(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups,0xFFFF))
+  if (Create_new_page(new_page,Spare_backups,0xFFFFFFFF))
   {
     byte i;
     
@@ -764,7 +764,7 @@ void Backup(void)
   Backup_layers(1<<Main_current_layer);
 }
 
-void Backup_layers(word layer_mask)
+void Backup_layers(dword layer_mask)
 {
   int i;
   T_Page *new_page;
@@ -943,6 +943,10 @@ byte Add_layer(T_List_of_pages *list, byte layer)
   int i;
   
   source_page = list->Pages;
+  
+  // Hard limit of 32 at the moment, because layer bitmasks are 32bit.
+  if (list->Pages->Nb_layers == 32)
+    return 1;
    
   // Keep the position reasonable
   if (layer > list->Pages->Nb_layers)
@@ -987,9 +991,9 @@ byte Add_layer(T_List_of_pages *list, byte layer)
 
   // Update the flags of visible layers. 
   {
-    word layers_before;
-    word layers_after;
-    word *visible_layers_flag;
+    dword layers_before;
+    dword layers_after;
+    dword *visible_layers_flag;
     
     // Determine if we're modifying the spare or the main page.
     if (list == Main_backups)
@@ -1048,9 +1052,9 @@ byte Delete_layer(T_List_of_pages *list, byte layer)
 
   // Update the flags of visible layers. 
   {
-    word layers_before;
-    word layers_after;
-    word *visible_layers_flag;
+    dword layers_before;
+    dword layers_after;
+    dword *visible_layers_flag;
     byte new_current_layer;
     
     // Determine if we're modifying the spare or the main page.

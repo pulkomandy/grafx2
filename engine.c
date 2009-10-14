@@ -1042,6 +1042,7 @@ void Main_handler(void)
                   Hide_cursor();
                   Display_all_screen();
                   Display_cursor();
+                  End_of_modification();
                 }
                 action++;
                 break;
@@ -1054,6 +1055,7 @@ void Main_handler(void)
                   Hide_cursor();
                   Display_all_screen();
                   Display_cursor();
+                  End_of_modification();
                 }
                 action++;
                 break;

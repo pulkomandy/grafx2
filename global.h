@@ -348,7 +348,7 @@ GFX2_GLOBAL short Main_magnifier_offset_Y;
 /// Index of layer currently being edited
 GFX2_GLOBAL int Main_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
-GFX2_GLOBAL word Main_layers_visible;
+GFX2_GLOBAL dword Main_layers_visible;
 
 // -- Spare page data
 
@@ -412,7 +412,7 @@ GFX2_GLOBAL short Spare_magnifier_offset_Y;
 /// Index of layer currently being edited
 GFX2_GLOBAL short Spare_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
-GFX2_GLOBAL word Spare_layers_visible;
+GFX2_GLOBAL dword Spare_layers_visible;
 // -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.

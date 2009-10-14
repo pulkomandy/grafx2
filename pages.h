@@ -62,7 +62,7 @@ int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
 void Free_last_page_of_list(T_List_of_pages * list);
-int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, word layer_mask);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, dword layer_mask);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 
@@ -79,7 +79,7 @@ int Backup_and_resize_the_spare(int width,int height);
 /// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
 /// Backup with a new copy of some layers (the others are references).
-void Backup_layers(word layer_mask);
+void Backup_layers(dword layer_mask);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button

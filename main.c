@@ -370,9 +370,9 @@ int Init_program(int argc,char * argv[])
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_format=0;
   Main_current_layer=0;
-  Main_layers_visible=0xFFFF;
+  Main_layers_visible=0xFFFFFFFF;
   Spare_current_layer=0;
-  Spare_layers_visible=0xFFFF;
+  Spare_layers_visible=0xFFFFFFFF;
   
   Spare_fileselector_position=0;
   Spare_fileselector_offset=0;
