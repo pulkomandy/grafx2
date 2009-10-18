@@ -6881,7 +6881,7 @@ void Save_PNG(void)
 
           /* ecriture des pixels de l'image */
           Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
-          pixel_ptr = (Read_pixel_function==Read_pixel_from_current_screen)?Main_screen:Brush;
+          pixel_ptr = (Read_pixel_function==Read_pixel_from_brush)?Brush:Main_screen;
           for (y=0; y<Main_image_height; y++)
             Row_pointers[y] = (png_byte*)(pixel_ptr+y*Main_image_width);
 
