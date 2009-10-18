@@ -340,8 +340,10 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
+  word      Transparent_color; ///< Index of transparent color. -1 or 0 to 255.
   byte      Nb_layers; ///< Number of layers
-  byte *    Image[0];  ///< Pixel data for the image.
+  byte *    Image[0];  ///< Pixel data for the (first layer of) image.
+  // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
 
 /// Collection of undo/redo steps.
@@ -356,7 +358,6 @@ typedef struct
 {
   int       Width;   ///< Image width in pixels.
   int       Height;  ///< Image height in pixels.
-  //int       Users;   ///< Number of references.
   byte *    Image;   ///< Pixel data for the image.
 } T_Image;
 

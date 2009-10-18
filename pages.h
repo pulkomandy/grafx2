@@ -41,6 +41,8 @@ void Upload_infos_page_main(T_Page * page);
 byte Add_layer(T_List_of_pages *list, byte layer);
 /// Delete a layer from the latest page of a list. Returns 0 on success.
 byte Delete_layer(T_List_of_pages *list, byte layer);
+/// Merges the current layer onto the one below it.
+byte Merge_layer();
 
 // private
 T_Page * New_page(byte nb_layers);

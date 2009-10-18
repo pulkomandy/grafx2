@@ -193,7 +193,7 @@ void Redraw_layered_image(void)
       for (i=0; i<Main_image_width*Main_image_height; i++)
       {
         byte color = *(Main_backups->Pages->Image[layer]+i);
-        if (color != 0) /* transp color */
+        if (color != Main_backups->Pages->Transparent_color) // transparent color
         {
           *(Visible_image[0].Image+i) = color;
           if (layer != Main_current_layer)
@@ -240,7 +240,7 @@ void Update_depth_buffer(void)
       for (i=0; i<Main_image_width*Main_image_height; i++)
       {
         byte color = *(Main_backups->Pages->Image[layer]+i);
-        if (color != 0) /* transp color */
+        if (color != Main_backups->Pages->Transparent_color) // transparent color
         {
           *(Visible_image_depth_buffer.Image+i) = layer;
         }
@@ -259,7 +259,7 @@ void Redraw_current_layer(void)
     if (depth<=Main_current_layer)
     {
       byte color = *(Main_backups->Pages->Image[Main_current_layer]+i);
-      if (color != 0) /* transp color */
+      if (color != Main_backups->Pages->Transparent_color) // transparent color
       {
         *(Visible_image[0].Image+i) = color;
       }
@@ -833,6 +833,10 @@ void Undo(void)
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
   //       poser de problèmes.
+  
+  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
+    Main_current_layer = Main_backups->Pages->Nb_layers-1;
+  
   Redraw_layered_image();
   
 }
@@ -860,6 +864,10 @@ void Redo(void)
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
   //       poser de problèmes.
+  
+  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
+    Main_current_layer = Main_backups->Pages->Nb_layers-1;
+
   Redraw_layered_image();
 
 }
@@ -983,7 +991,7 @@ byte Add_layer(T_List_of_pages *list, byte layer)
   }
   new_page->Image[layer]=new_image;
   // Fill with transparency, initially
-  memset(new_image, 0, list->Pages->Height*list->Pages->Width); // transparent color
+  memset(new_image, Main_backups->Pages->Transparent_color, list->Pages->Height*list->Pages->Width); // transparent color
   
   // Done. Note that the visible buffer is already ok since we
   // only inserted a transparent "slide" somewhere.
@@ -1083,4 +1091,17 @@ byte Delete_layer(T_List_of_pages *list, byte layer)
   
   // All ok
   return 0;
+}
+
+/// Merges the current layer onto the one below it.
+byte Merge_layer()
+{
+  int i;
+  for (i=0; i<Main_image_width*Main_image_height; i++)
+  {
+    byte color = *(Main_backups->Pages->Image[Main_current_layer]+i);
+    if (color != Main_backups->Pages->Transparent_color) // transparent color
+      *(Main_backups->Pages->Image[Main_current_layer-1]+i) = color;
+  }
+  return Delete_layer(Main_backups,Main_current_layer);
 }

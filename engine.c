@@ -1059,6 +1059,90 @@ void Main_handler(void)
                 }
                 action++;
                 break;
+              case SPECIAL_LAYER_MERGE:
+                if (Main_current_layer>0)
+                {
+                  // Backup layer below the current
+                  Backup_layers(1<<(Main_current_layer-1));
+
+                  Merge_layer();
+
+                  Redraw_layered_image();
+                  Hide_cursor();
+                  Display_all_screen();
+                  Display_cursor();
+                  End_of_modification();
+                }
+                action++;
+                break;
+              case SPECIAL_LAYER_SWAP_UP:
+                if (Main_current_layer < (Main_backups->Pages->Nb_layers-1))
+                {
+                  byte * tmp;
+                  dword layer_flags;
+
+                  // Backup with unchanged layers
+                  Backup_layers(0);
+                  
+                  // swap
+                  tmp = Main_backups->Pages->Image[Main_current_layer];
+                  Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer+1];
+                  Main_backups->Pages->Image[Main_current_layer+1] = tmp;
+                  
+                  // Swap visibility indicators
+                  layer_flags = (Main_layers_visible >> Main_current_layer) & 3;
+                  // Only needed if they are different.
+                  if (layer_flags == 1 || layer_flags == 2)
+                  {
+                    // One is on, the other is off. Negating them will
+                    // perform the swap.
+                    Main_layers_visible ^= (3 << Main_current_layer);
+                  }
+                  Main_current_layer++;
+
+                  Redraw_layered_image();
+                  Hide_cursor();
+                  Display_all_screen();
+                  Display_cursor();
+                  End_of_modification();
+                }
+                action++;
+                break;
+                
+              case SPECIAL_LAYER_SWAP_DOWN:
+                if (Main_current_layer > 0)
+                {
+                  byte * tmp;
+                  dword layer_flags;
+
+                  // Backup with unchanged layers
+                  Backup_layers(0);
+                  
+                  // swap
+                  tmp = Main_backups->Pages->Image[Main_current_layer];
+                  Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer-1];
+                  Main_backups->Pages->Image[Main_current_layer-1] = tmp;
+                  
+                  // Swap visibility indicators
+                  layer_flags = (Main_layers_visible >> (Main_current_layer-1)) & 3;
+                  // Only needed if they are different.
+                  if (layer_flags == 1 || layer_flags == 2)
+                  {
+                    // Only needed if they are different.
+                    // One is on, the other is off. Negating them will
+                    // perform the swap.
+                    Main_layers_visible ^= (3 << (Main_current_layer-1));
+                  }
+                  Main_current_layer--;
+
+                  Redraw_layered_image();
+                  Hide_cursor();
+                  Display_all_screen();
+                  Display_cursor();
+                  End_of_modification();
+                }
+                action++;
+                break;
             }
           }
         } // End of special keys

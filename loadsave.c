@@ -2883,23 +2883,37 @@ void Save_BMP(void)
 #pragma pack(1)
 typedef struct
 {
-  word Width; // width de l'écran virtuel
-  word Height; // height de l'écran virtuel
-  byte Resol;   // Informations sur la résolution (et autres)
-  byte Backcol; // color de fond
-  byte Aspect;  // Informations sur l'aspect ratio (et autres)
-} T_GIF_LSDB; // Logical Screen Descriptor Block
+  word Width;   // Width of the complete image area
+  word Height;  // Height of the complete image area
+  byte Resol;   // Informations about the resolution (and other)
+  byte Backcol; // Proposed background color
+  byte Aspect;  // Informations about aspect ratio (and other)
+} T_GIF_LSDB;   // Logical Screen Descriptor Block
 
 typedef struct
 {
-  word Pos_X;         // Abscisse où devrait être affichée l'image
-  word Pos_Y;         // Ordonnée où devrait être affichée l'image
-  word Image_width; // width de l'image
-  word Image_height; // height de l'image
-  byte Indicator;    // Informations diverses sur l'image
+  word Pos_X;         // X offset where the image should be pasted
+  word Pos_Y;         // Y offset where the image should be pasted
+  word Image_width;   // Width of image
+  word Image_height;  // Height of image
+  byte Indicator;     // Misc image information
   byte Nb_bits_pixel; // Nb de bits par pixel
-} T_GIF_IDB; // Image Descriptor Block
+} T_GIF_IDB;          // Image Descriptor Block
 #pragma pack()
+
+typedef struct
+{
+  // byte Block_identifier : 0x21
+  // byte Function         : 0xF9
+  // byte Block_size         // 4
+  byte Packed_fields;     // 11100000 : Reserved
+                          // 00011100 : Disposal method
+                          // 00000010 : User input flag
+                          // 00000001 : Transparent flag
+  word Delay_time;        // Time for this frame to stay displayed
+  byte Transparent_color; // Which color index acts as transparent
+  //word Bloc_terminator; // 0x00
+} T_GIF_GCE;              // Graphic Control Extension
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -2983,13 +2997,14 @@ void Test_GIF(void)
 
   // -- Affiche un nouveau pixel --
 
-  void GIF_new_pixel(byte color)
+  void GIF_new_pixel(T_GIF_IDB *idb, byte color)
   {
-    Pixel_load_function(GIF_pos_X,GIF_pos_Y,color);
+    if (color != Main_backups->Pages->Transparent_color) // transparent color
+      Pixel_load_function(idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
 
     GIF_pos_X++;
 
-    if (GIF_pos_X>=Main_image_width)
+    if (GIF_pos_X>=idb->Image_width)
     {
       GIF_pos_X=0;
 
@@ -3008,7 +3023,7 @@ void Test_GIF(void)
           default: GIF_pos_Y+=2;
         }
 
-        if (GIF_pos_Y>=Main_image_height)
+        if (GIF_pos_Y>=idb->Image_height)
         {
           switch(++GIF_pass)
           {
@@ -3040,11 +3055,12 @@ void Load_GIF(void)
 
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
+  T_GIF_GCE GCE;
 
   word nb_colors;       // Nombre de couleurs dans l'image
   word color_index; // index de traitement d'une couleur
   byte size_to_read; // Nombre de données à lire      (divers)
-  byte block_indentifier;  // Code indicateur du type de bloc en cours
+  byte block_identifier;  // Code indicateur du type de bloc en cours
   word initial_nb_bits;   // Nb de bits au début du traitement LZW
   word special_case=0;       // Mémoire pour le cas spécial
   word old_code=0;       // Code précédent
@@ -3086,6 +3102,10 @@ void Load_GIF(void)
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
 
+        Init_preview(LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,PIXEL_SIMPLE);
+        Main_image_width=LSDB.Width;
+        Main_image_height=LSDB.Height;
+
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
         // Nombre de bits/pixel  = (LSDB.Resol  and $07)+1
@@ -3124,10 +3144,10 @@ void Load_GIF(void)
         }
 
         // On lit un indicateur de block
-        Read_byte(GIF_file,&block_indentifier);
-        while (block_indentifier!=0x3B && !File_error)
+        Read_byte(GIF_file,&block_identifier);
+        while (block_identifier!=0x3B && !File_error)
         {
-          switch (block_indentifier)
+          switch (block_identifier)
           {
             case 0x21: // Bloc d'extension
             {
@@ -3157,7 +3177,20 @@ void Load_GIF(void)
                     break;
                   case 0xF9: // Graphics Control Extension
                     // Prévu pour la transparence
+                    if ( Read_byte(GIF_file,&(GCE.Packed_fields))
+                      && Read_word_le(GIF_file,&(GCE.Delay_time))
+                      && Read_byte(GIF_file,&(GCE.Transparent_color)))
+                    {
+                      if (GCE.Packed_fields & 1)
+                        Main_backups->Pages->Transparent_color= GCE.Transparent_color;
+                      else
+                        Main_backups->Pages->Transparent_color = -1;
                     
+                    }
+                    else
+                      File_error=2;
+                    break;
+
                   default:
                     // On saute le bloc:
                     fseek(GIF_file,size_to_read,SEEK_CUR);
@@ -3171,10 +3204,11 @@ void Load_GIF(void)
             case 0x2C: // Local Image Descriptor
             {
               // Si on a deja lu une image, c'est une GIF animée ou bizarroide, on sort.
-              if (number_LID!=0)
+              if (number_LID!=0 && Pixel_load_function==Pixel_load_in_current_screen)
               {
-                Main_current_layer++;
-                Add_layer(Main_backups, Main_current_layer);
+                // This a second layer/frame, or more.
+                // Attempt to add a layer to current image
+                Add_layer(Main_backups, Main_current_layer+1);
               }
               number_LID++;
               
@@ -3187,11 +3221,6 @@ void Load_GIF(void)
                 && Read_byte(GIF_file,&(IDB.Nb_bits_pixel))
                 && IDB.Image_width && IDB.Image_height)
               {
-                Main_image_width=IDB.Image_width;
-                Main_image_height=IDB.Image_height;
-    
-                if (number_LID==1)
-                  Init_preview(IDB.Image_width,IDB.Image_height,file_size,FORMAT_GIF,PIXEL_SIMPLE);
     
                 // Palette locale dispo = (IDB.Indicator and $80)
                 // Image entrelacée     = (IDB.Indicator and $40)
@@ -3271,7 +3300,7 @@ void Load_GIF(void)
                       special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
     
                       do
-                        GIF_new_pixel(alphabet_stack[--alphabet_stack_pos]);
+                        GIF_new_pixel(&IDB, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
     
                       alphabet_prefix[alphabet_free  ]=old_code;
@@ -3291,7 +3320,7 @@ void Load_GIF(void)
                       alphabet_free     =nb_colors+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
-                      GIF_new_pixel(GIF_current_code);
+                      GIF_new_pixel(&IDB, GIF_current_code);
                     }
                   }
                   else
@@ -3302,7 +3331,7 @@ void Load_GIF(void)
     
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=Main_image_height) ) ||
+                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) ) ||
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
@@ -3314,7 +3343,7 @@ void Load_GIF(void)
             break;
           }
           // Lecture du code de fonction suivant:
-          Read_byte(GIF_file,&block_indentifier);
+          Read_byte(GIF_file,&block_identifier);
         }
       } // Le fichier contenait un LSDB
       else
@@ -3395,16 +3424,16 @@ void Load_GIF(void)
 
   // -- Lire le pixel suivant --
 
-  byte GIF_next_pixel(void)
+  byte GIF_next_pixel(T_GIF_IDB *idb)
   {
     byte temp;
 
     temp=Read_pixel_function(GIF_pos_X,GIF_pos_Y);
 
-    if (++GIF_pos_X>=Main_image_width)
+    if (++GIF_pos_X>=idb->Image_width)
     {
       GIF_pos_X=0;
-      if (++GIF_pos_Y>=Main_image_height)
+      if (++GIF_pos_Y>=idb->Image_height)
         GIF_stop=1;
     }
 
@@ -3430,7 +3459,7 @@ void Save_GIF(void)
   T_GIF_IDB IDB;
 
 
-  byte block_indentifier;  // Code indicateur du type de bloc en cours
+  byte block_identifier;  // Code indicateur du type de bloc en cours
   word current_string;   // Code de la chaîne en cours de traitement
   byte current_char;         // Caractère à coder
   word index;            // index de recherche de chaîne
@@ -3524,7 +3553,7 @@ void Save_GIF(void)
             {
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
-              block_indentifier=0x2C;
+              block_identifier=0x2C;
               IDB.Pos_X=0;
               IDB.Pos_Y=0;
               IDB.Image_width=Main_image_width;
@@ -3532,7 +3561,7 @@ void Save_GIF(void)
               IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
               IDB.Nb_bits_pixel=8; // Image 256 couleurs;
     
-              if ( Write_byte(GIF_file,block_indentifier) &&
+              if ( Write_byte(GIF_file,block_identifier) &&
                    Write_word_le(GIF_file,IDB.Pos_X) &&
                    Write_word_le(GIF_file,IDB.Pos_Y) &&
                    Write_word_le(GIF_file,IDB.Image_width) &&
@@ -3567,12 +3596,12 @@ void Save_GIF(void)
     
                 ////////////////////////////////////////////// COMPRESSION LZW //
     
-                start=current_string=GIF_next_pixel();
+                start=current_string=GIF_next_pixel(&IDB);
                 descend=1;
     
                 do
                 {
-                  current_char=GIF_next_pixel();
+                  current_char=GIF_next_pixel(&IDB);
     
                   //   On regarde si dans la table on aurait pas une chaîne
                   // équivalente à current_string+Caractere
