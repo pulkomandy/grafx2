@@ -125,14 +125,14 @@ void Save_PNG(void);
 #endif
 
 // -- SDL_Image -------------------------------------------------------------
-// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG)
+// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG, ICO)
 void Load_SDL_Image(void);
 
 
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
 T_Format File_formats[NB_KNOWN_FORMATS] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -151,7 +151,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 1, 1, "c64", "c64;koa"},
-  {FORMAT_MISC,"misc.", NULL, NULL, NULL, 1, 0,  "", "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
+  {FORMAT_MISC,"misc.", NULL, NULL, NULL, 1, 0,  "", "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
 
 // Cette variable est alimentée après chargement réussi d'une image.
