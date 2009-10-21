@@ -262,16 +262,12 @@ else
   JOYCOPT =
 endif
 
-ifneq ($(PLATFORM),amiga-vbcc)
-  COPT += -DSVN_revision='"$(shell svnversion .)"' -DProgram_version='"$(LABEL)"'
-endif
-
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend zip force install uninstall
+.PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(PLATFORMOBJ)
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(PLATFORMOBJ)
 
 SKIN_FILES = skins/skin_classic.png skins/skin_modern.png skins/font_Classic.png skins/font_Fun.png
 
@@ -316,6 +312,27 @@ testsed :
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
+
+# SVN revision number
+version.c :
+	echo "char SVN_revision[]=\"`svnversion .`\";" > version.c
+ifeq ($(LABEL),)
+else
+	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
+endif
+
+version : delversion delpversion version.c pversion.c $(OBJDIR)/version.o $(OBJDIR)/pversion.o all
+
+
+delversion :
+	$(DELCOMMAND) version.c
+	
+delpversion :
+ifeq ($(LABEL),)
+else
+	$(DELCOMMAND) pversion.c
+endif
+
 $(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
