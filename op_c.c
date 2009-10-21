@@ -826,6 +826,7 @@ void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to)
 	// On les remet dans le set
     CS_Set(cs,&Nouveau1);
     CS_Set(cs,&Nouveau2);
+    
   }
 }
 
@@ -1275,7 +1276,6 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
     if (table!=0)
       break;
   }
-
   if (table!=0)
   {
     //Convert_24b_bitmap_to_256_Floyd_Steinberg(dest,source,width,height,palette,table);

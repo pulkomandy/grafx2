@@ -100,15 +100,35 @@ Libpng
   make install (long)
   Files created in /usr/local/include and /usr/local/lib ....
   
+libjpeg (optional - improves SDL_image with JPEG reading)
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/project/li/libjpeg/libjpeg/
+  jpegsr6.zip
+  Uncompress in temporary directory
+  ./configure --enable-shared
+  make
+  (make install doesn't work. Copy jpeglib.h, jmorecfg.h, jconfig.h in include, and libjpeg.a in lib)
+  
+libtiff (optional - improves SDL_image with TIFF reading)
+  ftp://ftp.sgi.com/graphics/tiff/
+  tiff-v3.4-tar.gz
+  Uncompress in temporary directory
+  ./configure i686-pc-mingw32
+  make
+  Don't use 'make install', copy tiff.h libtiff.a manually instead.
+  
 SDL_image:
   Requires: Libpng
+  Requires optionally: libtiff
+  Requires optionally: libjpeg
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libsdl/
-  SDL_image-1.2.6.zip
+  SDL_image-1.2.8.zip
   Uncompress in temporary directory
   ./configure
-  Check that png worked
+  Check in the messages that png worked
+  Optionally check if jpeg worked too
+  Optionally check if tiff worked too
   make
-  make install
+  make install prefix=/usr/mingw
   
 FreeType:
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/m/mi/mingw-cross/

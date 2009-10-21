@@ -7,7 +7,7 @@ $(OBJDIR)/buttons.o: buttons.c const.h struct.h global.h misc.h graph.h engine.h
   sdlscreen.h windows.h brush.h input.h special.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
   buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
-  input.h engine.h
+  input.h engine.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
   windows.h sdlscreen.h loadsave.h mountlist.h engine.h readline.h \
   input.h help.h filesel.h
@@ -16,7 +16,7 @@ $(OBJDIR)/graph.o: graph.c global.h struct.h const.h engine.h buttons.h pages.h 
   pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxquad.h windows.h input.h
 $(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
   help.h sdlscreen.h text.h keyboard.h windows.h input.h hotkeys.h \
-  errors.h
+  errors.h pages.h
 $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c const.h struct.h global.h graph.h buttons.h palette.h \
   help.h operatio.h misc.h errors.h keyboard.h io.h hotkeys.h setup.h \
@@ -71,7 +71,7 @@ $(OBJDIR)/setup.o: setup.c struct.h const.h io.h setup.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h engine.h misc.h \
   readline.h help.h sdlscreen.h windows.h input.h shade.h
 $(OBJDIR)/special.o: special.c const.h struct.h global.h graph.h engine.h windows.h \
-  special.h
+  special.h pages.h misc.h buttons.h
 $(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h \
   errors.h
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \

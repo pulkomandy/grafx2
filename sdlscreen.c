@@ -139,10 +139,11 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 
 }
 
-// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
-// (indexed colors).
-// If dest is NULL, it's allocated by malloc(). Otherwise, be sure to
-// pass a buffer of the right dimensions.
+///
+/// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
+/// (indexed colors).
+/// If dest is NULL, it's allocated by malloc(). Otherwise, be sure to
+/// pass a buffer of the right dimensions.
 byte * Surface_to_bytefield(SDL_Surface *source, byte * dest)
 {
   byte *src;
@@ -185,11 +186,39 @@ SDL_Color Color_to_SDL_color(byte index)
   return color;
 }
 
-// Reads a pixel in a SDL surface.
-// Warning, this is only suitable for 8-bit surfaces.
+/// Reads a pixel in a 8-bit SDL surface.
 byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
 {
   return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
+}
+
+/// Reads a pixel in a multi-byte SDL surface.
+dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y)
+{
+  switch(bmp->format->BytesPerPixel)
+  {
+    case 4:
+    default:
+      return *((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*4)));
+    case 3:
+      return *(((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*3)))) & 0xFFFFFF;
+    case 2:
+      return *((word *)((byte *)bmp->pixels+(y*bmp->pitch+x*2)));
+  }
+}
+
+/// Convert a SDL Palette to a grafx2 palette
+void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette)
+{
+  int i;
+  
+  for (i=0; i<256; i++)
+  {
+    palette[i].R=sdl_palette->colors[i].r;
+    palette[i].G=sdl_palette->colors[i].g;
+    palette[i].B=sdl_palette->colors[i].b;
+  }
+
 }
 
 void Clear_border(byte color)
