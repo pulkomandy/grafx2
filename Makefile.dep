@@ -4,7 +4,7 @@ $(OBJDIR)/brush.o: brush.c global.h struct.h const.h graph.h misc.h errors.h \
 $(OBJDIR)/buttons.o: buttons.c const.h struct.h global.h misc.h graph.h engine.h \
   readline.h filesel.h loadsave.h init.h buttons.h operatio.h pages.h \
   palette.h errors.h readini.h saveini.h shade.h io.h help.h text.h \
-  sdlscreen.h windows.h brush.h input.h
+  sdlscreen.h windows.h brush.h input.h special.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
   buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
   input.h engine.h
@@ -26,7 +26,8 @@ $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
 $(OBJDIR)/keyboard.o: keyboard.c global.h struct.h const.h keyboard.h
 $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io.h \
-  loadsave.h misc.h op_c.h pages.h palette.h sdlscreen.h windows.h
+  loadsave.h misc.h op_c.h pages.h palette.h sdlscreen.h windows.h \
+  engine.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
   engine.h pages.h loadsave.h sdlscreen.h errors.h readini.h saveini.h \
   io.h text.h setup.h windows.h brush.h palette.h realpath.h
@@ -41,19 +42,22 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h errors.h misc.h \
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h misc.h engine.h readline.h \
   buttons.h pages.h help.h sdlscreen.h errors.h op_c.h windows.h input.h \
   palette.h shade.h
+$(OBJDIR)/pversion.o: pversion.c
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h misc.h \
-  pxdouble.h pxwide.h
-$(OBJDIR)/pxquad.o: pxquad.c global.h struct.h const.h sdlscreen.h misc.h pxquad.h
+  graph.h pxdouble.h pxwide.h
+$(OBJDIR)/pxquad.o: pxquad.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
+  pxquad.h
 $(OBJDIR)/pxsimple.o: pxsimple.c global.h struct.h const.h sdlscreen.h misc.h \
-  pxsimple.h
-$(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h misc.h pxtall.h \
-  pxsimple.h
-$(OBJDIR)/pxtall2.o: pxtall2.c global.h struct.h const.h sdlscreen.h misc.h \
+  graph.h pxsimple.h
+$(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
+  pxtall.h pxsimple.h
+$(OBJDIR)/pxtall2.o: pxtall2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
   pxtall2.h
 $(OBJDIR)/pxtriple.o: pxtriple.c global.h struct.h const.h sdlscreen.h misc.h \
-  pxtriple.h
-$(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h pxwide.h
-$(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h \
+  graph.h pxtriple.h
+$(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
+  pxwide.h
+$(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
   pxwide2.h
 $(OBJDIR)/readini.o: readini.c const.h global.h struct.h misc.h readini.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
@@ -73,5 +77,6 @@ $(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h \
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \
   sdlscreen.h windows.h input.h help.h misc.h readline.h buttons.h \
   pages.h
+$(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h global.h graph.h engine.h \
-  misc.h sdlscreen.h errors.h
+  misc.h sdlscreen.h errors.h input.h

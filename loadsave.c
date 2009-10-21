@@ -30,6 +30,7 @@
 #ifndef __no_pnglib__
 #include <png.h>
 #endif
+#include <SDL_image.h>
 
 #include "buttons.h"
 #include "const.h"
@@ -123,10 +124,15 @@ void Load_PNG(void);
 void Save_PNG(void);
 #endif
 
+// -- SDL_Image -------------------------------------------------------------
+// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG)
+void Load_SDL_Image(void);
+
+
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
 T_Format File_formats[NB_KNOWN_FORMATS] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -145,6 +151,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 1, 1, "c64", "c64;koa"},
+  {FORMAT_MISC,"misc.", NULL, NULL, NULL, 1, 0,  "", "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 
 // Cette variable est alimentée après chargement réussi d'une image.
@@ -617,7 +624,8 @@ void Load_image(byte image)
   if (Main_format>FORMAT_ALL_FILES)
   {
     format = Get_fileformat(Main_format);
-    format->Test();
+    if (format->Test)
+      format->Test();
   }
 
   if (File_error)
@@ -628,7 +636,7 @@ void Load_image(byte image)
     {
       format = Get_fileformat(index);
       // Loadable format
-      if (format->Load == NULL)
+      if (format->Test == NULL)
         continue;
         
       // On appelle le testeur du format:
@@ -638,9 +646,27 @@ void Load_image(byte image)
         break;
     }
   }
+  
+  if (File_error)
+  {
+    // Last try: with SDL_image
+    Image_24b=0;
+    Ratio_of_loaded_image=PIXEL_SIMPLE;
 
+    Load_SDL_Image();
+
+    if (File_error)
+    { 
+      // Sinon, l'appelant sera au courant de l'échec grace à File_error;
+      // et si on s'apprêtait à faire un chargement définitif de l'image (pas
+      // une preview), alors on flash l'utilisateur.
+      if (Pixel_load_function!=Pixel_load_in_preview)
+        Error(0);
+      return;
+    }
+  }
+  else
   // Si on a su déterminer avec succès le format du fichier:
-  if (!File_error)
   {
     // On peut charger le fichier:
     Image_24b=0;
@@ -648,102 +674,104 @@ void Load_image(byte image)
     // Dans certains cas il est possible que le chargement plante
     // après avoir modifié la palette. TODO
     format->Load();
+  }
 
-    if (File_error>0)
-    {
-      Error(0);
-    }
+  if (File_error>0)
+  {
+    Error(0);
+  }
 
-    if (Image_24b)
+  if (Image_24b)
+  {
+    // On vient de charger une image 24b
+    if (!File_error)
     {
-      // On vient de charger une image 24b
-      if (!File_error)
+      // Le chargement a réussi, on peut faire la conversion en 256 couleurs
+      if (Pixel_load_function==Pixel_load_in_current_screen)
       {
-        // Le chargement a réussi, on peut faire la conversion en 256 couleurs
-        if (Pixel_load_function==Pixel_load_in_current_screen)
-        {
-          // Cas d'un chargement dans l'image
-          if (Convert_24b_bitmap_to_256(Main_screen,Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
-            File_error=2;
-          else
-          {
-            Set_palette(Main_palette);
-          }
-        }
+        // Cas d'un chargement dans l'image
+        Hide_cursor();
+        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+        Display_cursor();
+        Flush_update();
+        if (Convert_24b_bitmap_to_256(Main_screen,Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
+          File_error=2;
         else
         {
-          // Cas d'un chargement dans la brosse
-          if (Convert_24b_bitmap_to_256(Brush,Buffer_image_24b,Brush_width,Brush_height,Main_palette))
-            File_error=2;
+          Set_palette(Main_palette);
         }
-        //if (!File_error)
-        //  Palette_256_to_64(Main_palette);
-        // Normalement plus besoin car 256 color natif, et c'etait probablement
-        // un bug - yr
-      }
-
-      free(Buffer_image_24b);
-    }
-
-    if (image)
-    {
-      if ( (File_error!=1) && (format->Backup_done) )
-      {
-        if (Pixel_load_function==Pixel_load_in_preview)
-        {
-          dword  color_usage[256];
-          Count_used_colors_screen_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
-          //Count_used_colors(color_usage);
-          Display_cursor();
-          Set_nice_menu_colors(color_usage,1);
-          Hide_cursor();
-        }
-      
-        // On considère que l'image chargée n'est plus modifiée
-        Main_image_is_modified=0;
-        // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format->Identifier;
-
-        // Correction des dimensions
-        if (Main_image_width<1)
-          Main_image_width=1;
-        if (Main_image_height<1)
-          Main_image_height=1;
-      }
-      else if (File_error!=1)
-      {
-        // On considère que l'image chargée est encore modifiée
-        Main_image_is_modified=1;
-        // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format->Identifier;
       }
       else
       {
-        // Dans ce cas, on sait que l'image n'a pas changé, mais ses
-        // paramètres (dimension, palette, ...) si. Donc on les restaures.
-        Download_infos_page_main(Main_backups->Pages);
+        // Cas d'un chargement dans la brosse
+        Hide_cursor();
+        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+        Display_cursor();
+        Flush_update();
+        if (Convert_24b_bitmap_to_256(Brush,Buffer_image_24b,Brush_width,Brush_height,Main_palette))
+          File_error=2;
       }
     }
+
+    free(Buffer_image_24b);
   }
-  else
-    // Sinon, l'appelant sera au courant de l'échec grace à File_error;
-    // et si on s'apprêtait à faire un chargement définitif de l'image (pas
-    // une preview), alors on flash l'utilisateur.
-    if (Pixel_load_function!=Pixel_load_in_preview)
-      Error(0);
+
+  if (image)
+  {
+    if ( (File_error!=1) && (format->Backup_done) )
+    {
+      if (Pixel_load_function==Pixel_load_in_preview)
+      {
+        dword  color_usage[256];
+        Count_used_colors_screen_area(color_usage,Preview_pos_X,Preview_pos_Y,Main_image_width/Preview_factor_X,Main_image_height/Preview_factor_Y);
+        //Count_used_colors(color_usage);
+        Display_cursor();
+        Set_nice_menu_colors(color_usage,1);
+        Hide_cursor();
+      }
+    
+      // On considère que l'image chargée n'est plus modifiée
+      Main_image_is_modified=0;
+      // Et on documente la variable Main_fileformat avec la valeur:
+      Main_fileformat=format->Identifier;
+
+      // Correction des dimensions
+      if (Main_image_width<1)
+        Main_image_width=1;
+      if (Main_image_height<1)
+        Main_image_height=1;
+    }
+    else if (File_error!=1)
+    {
+      // On considère que l'image chargée est encore modifiée
+      Main_image_is_modified=1;
+      // Et on documente la variable Main_fileformat avec la valeur:
+      Main_fileformat=format->Identifier;
+    }
+    else
+    {
+      // Dans ce cas, on sait que l'image n'a pas changé, mais ses
+      // paramètres (dimension, palette, ...) si. Donc on les restaures.
+      Download_infos_page_main(Main_backups->Pages);
+    }
+  }
 }
 
 
 // -- Sauver n'importe quel type connu de fichier d'image (ou palette) ------
 void Save_image(byte image)
 {
+  T_Format *format;
+  
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
 
   Read_pixel_function=(image)?Read_pixel_from_current_screen:Read_pixel_from_brush;
 
-  Get_fileformat(Main_fileformat)->Save();
+  format = Get_fileformat(Main_fileformat);
+  if (format->Save)
+    format->Save();
 
   if (File_error)
     Error(0);
@@ -6846,6 +6874,79 @@ void Save_PNG(void)
   }
 }
 #endif  // __no_pnglib__
+
+void Load_SDL_Image(void)
+{
+  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  word x_pos,y_pos;
+  // long file_size;
+  dword pixel;
+  long file_size;
+  SDL_Surface * surface;
+
+
+  Get_full_filename(filename,0);
+  File_error=0;
+  
+  surface = IMG_Load(filename);
+  
+  if (!surface)
+  {
+    File_error=1;
+    return;
+  }
+  
+  file_size=File_length(filename);
+  
+  if (surface->format->BytesPerPixel == 1)
+  {
+    // 8bpp image
+    
+    Init_preview(surface->w, surface->h, file_size ,FORMAT_MISC, PIXEL_SIMPLE);
+    // Read palette
+    if (surface->format->palette)
+    {
+      Get_SDL_Palette(surface->format->palette, Main_palette);
+      Set_palette(Main_palette);
+      Remap_fileselector();
+    }
+    Main_image_width=surface->w;
+    Main_image_height=surface->h;
+    
+    for (y_pos=0; y_pos<Main_image_height; y_pos++)
+    {
+      for (x_pos=0; x_pos<Main_image_width; x_pos++)
+      {
+        Pixel_load_function(x_pos,y_pos,Get_SDL_pixel_8(surface, x_pos, y_pos));
+      }
+    }
+
+  }
+  else
+  {
+    // Hi/Trucolor
+    Init_preview_24b(surface->w, surface->h, file_size ,FORMAT_ALL_IMAGES);
+    Main_image_width=surface->w;
+    Main_image_height=surface->h;
+    
+    for (y_pos=0; y_pos<Main_image_height; y_pos++)
+    {
+      for (x_pos=0; x_pos<Main_image_width; x_pos++)
+      {
+        pixel = Get_SDL_pixel_hicolor(surface, x_pos, y_pos);
+        Pixel_load_24b(
+          x_pos,
+          y_pos, 
+          ((pixel & surface->format->Rmask) >> surface->format->Rshift) << surface->format->Rloss,
+          ((pixel & surface->format->Gmask) >> surface->format->Gshift) << surface->format->Gloss,
+          ((pixel & surface->format->Bmask) >> surface->format->Bshift) << surface->format->Bloss);
+      }
+    }
+  }
+
+  SDL_FreeSurface(surface);
+}
+
 
 // Saves an image.
 // This routine will only be called when all hope is lost, memory thrashed, etc

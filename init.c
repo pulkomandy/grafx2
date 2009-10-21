@@ -267,12 +267,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   }
   // Read the default palette
-  for (i=0; i<256; i++)
-  {
-    gfx->Default_palette[i].R=SDLPal->colors[i].r;
-    gfx->Default_palette[i].G=SDLPal->colors[i].g;
-    gfx->Default_palette[i].B=SDLPal->colors[i].b;
-  }
+  Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Carré "noir"
   MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
