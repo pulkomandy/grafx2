@@ -210,13 +210,15 @@ void Add_element_to_list(T_Fileselector *list, const char * fname, int type)
   list->First=temp_item;
 }
 
-// -- Vérification si un fichier a l'extension demandée.
-// Autorise les '?', et '*' si c'est le seul caractère.
-int Check_extension(const char *filename, char * filter)
+///
+/// Checks if a file has the requested file extension.
+/// The extension string can end with a ';' (remainder is ignored)
+/// This function allows wildcard '?', and '*' if it's the only character.
+int Check_extension(const char *filename, const char * filter)
 {
   int pos_last_dot = -1;
   int c = 0;
-
+  
   if (filter[0] == '*')
     return 1;
   // On recherche la position du dernier . dans le nom
@@ -225,20 +227,21 @@ int Check_extension(const char *filename, char * filter)
       pos_last_dot = c;
   // Fichier sans extension (ca arrive)
   if (pos_last_dot == -1)
-    return (filter[0] == '\0');
+    return (filter[0] == '\0' || filter[0] == ';');
 
   // Vérification caractère par caractère, case-insensitive.
   c = 0;
-  do
+  while (1)
   {
+    if (filter[c] == '\0' || filter[c] == ';')
+      return filename[pos_last_dot + 1 + c] == '\0';
+    
     if (filter[c] != '?' &&
       tolower(filter[c]) != tolower(filename[pos_last_dot + 1 + c]))
       return 0;
 
      c++;
-  } while (filter[c++] != '\0');
-
-  return 1;
+  }
 }
 
 
@@ -254,8 +257,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   char * current_path;
 
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
-  if (selected_format) // Format (extension) spécifique
-    filter = File_formats[selected_format-1].Extension;
+  filter = Get_fileformat(selected_format)->Extensions;
 
   // Ensuite, on vide la liste actuelle:
   Free_fileselector_list(list);
@@ -288,11 +290,23 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       (Config.Show_hidden_files || //Il n'est pas caché
       !isHidden(entry)))
     {
-      if (Check_extension(entry->d_name, filter))
-      {
-        // On rajoute le fichier à la liste
-        Add_element_to_list(list, entry->d_name, 0);
-        list->Nb_files++;
+      const char * ext = filter;
+      while (ext!=NULL)
+      {      
+        if (Check_extension(entry->d_name, ext))
+        {
+          // On rajoute le fichier à la liste
+          Add_element_to_list(list, entry->d_name, 0);
+          list->Nb_files++;
+          // Stop searching
+          ext=NULL;
+        }
+        else
+        {
+          ext = strchr(ext, ';');
+          if (ext)
+            ext++;
+        }
       }
     }
   }
@@ -1061,21 +1075,21 @@ byte Button_Load_or_Save(byte load, byte image)
     else
       Open_window(310,200,"Save brush");
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
-    if (Main_format==FORMAT_ANY) // Correction du *.*
+    if (Main_format<=FORMAT_ALL_FILES) // Correction du *.*
     {
       Main_format=Main_fileformat;
       Main_fileselector_position=0;
       Main_fileselector_offset=0;
     }
 
-    if (Main_format>NB_FORMATS_SAVE) // Correction d'un format insauvable
+    if (Get_fileformat(Main_format)->Save == NULL) // Correction d'un format insauvable
     {
       Main_format=DEFAULT_FILEFORMAT;
       Main_fileselector_position=0;
       Main_fileselector_offset=0;
     }
     // Affichage du commentaire
-    if (File_formats[Main_format-1].Comment)
+    if (Get_fileformat(Main_format)->Comment)
       Print_in_window(47,70,Main_comment,MC_Black,MC_Light);
   }
 
@@ -1097,16 +1111,15 @@ byte Button_Load_or_Save(byte load, byte image)
 
   // Dropdown pour les formats de fichier
   formats_dropdown=
-    Window_set_dropdown_button(69,28,49,11,0,
-      (Main_format==FORMAT_ANY)?"*.*":File_formats[Main_format-1].Extension,
+    Window_set_dropdown_button(68,28,52,11,0,
+      Get_fileformat(Main_format)->Label,
       1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
-  if (load)
-    Window_dropdown_add_item(formats_dropdown,0,"*.*");
-  for (temp=0;temp<NB_KNOWN_FORMATS;temp++)
+
+  for (temp=0; temp < NB_KNOWN_FORMATS; temp++)
   {
-    if ((load && File_formats[temp].Load) || 
+    if ((load && (File_formats[temp].Identifier <= FORMAT_ALL_FILES || File_formats[temp].Load)) || 
       (!load && File_formats[temp].Save))
-        Window_dropdown_add_item(formats_dropdown,temp+1,File_formats[temp].Extension);
+        Window_dropdown_add_item(formats_dropdown,File_formats[temp].Identifier,File_formats[temp].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
   
@@ -1333,7 +1346,7 @@ byte Button_Load_or_Save(byte load, byte image)
         *quicksearch_filename=0;
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
-        if ( (!load) && (File_formats[Main_format-1].Comment) )
+        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
           Readline(45,70,Main_comment,32,0);
           Display_cursor();
@@ -1353,12 +1366,12 @@ byte Button_Load_or_Save(byte load, byte image)
               dummy=1;
           if (!dummy)
           {
-            if (Main_format != FORMAT_ANY)
+            if (Get_fileformat(Main_format)->Default_extension)
             {
               if(!Directory_exists(Main_filename))
               {
-                 strcat(Main_filename,".");
-                 strcat(Main_filename,File_formats[Main_format-1].Extension);
+                 strcat(Main_filename, ".");
+                 strcat(Main_filename,Get_fileformat(Main_format)->Default_extension);
               }
             }
             else
@@ -1658,9 +1671,9 @@ byte Button_Load_or_Save(byte load, byte image)
         // On efface la taille du fichier
         Window_rectangle(236,59,56,8,MC_Light);
         // On efface le format du fichier
-        Window_rectangle(59,59,3*8,8,MC_Light);
+        Window_rectangle(59,59,5*8,8,MC_Light);
         // Affichage du commentaire
-        if ( (!load) && (File_formats[Main_format-1].Comment) )
+        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
           Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
         }

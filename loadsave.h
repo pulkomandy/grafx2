@@ -40,16 +40,19 @@ void Save_image(byte image);
 
 /// Data for an image file format.
 typedef struct {
-  char *Extension;  ///< Three-letter file extension
-  Func_action Test; ///< Function which tests if the file is of this format
-  Func_action Load; ///< Function which loads an image of this format
-  Func_action Save; ///< Function which saves an image of this format
-  byte Backup_done; ///< Boolean, true if this format saves all the image, and considers it backed up. Set false for formats which only save the palette.
-  byte Comment;     ///< This file format allows a text comment
+  byte Identifier;         ///< Identifier for this format in enum :FILE_FORMATS
+  char *Label;             ///< Five-letter label
+  Func_action Test;        ///< Function which tests if the file is of this format
+  Func_action Load;        ///< Function which loads an image of this format
+  Func_action Save;        ///< Function which saves an image of this format
+  byte Backup_done;        ///< Boolean, true if this format saves all the image, and considers it backed up. Set false for formats which only save the palette.
+  byte Comment;            ///< This file format allows a text comment
+  char *Default_extension; ///< Default file extension
+  char *Extensions;        ///< List of semicolon-separated file extensions
 } T_Format;
 
 /// Array of the known file formats
-extern T_Format File_formats[NB_KNOWN_FORMATS];
+extern T_Format File_formats[];
 
 ///
 /// Function which attempts to save backups of the images (main and spare),
@@ -58,3 +61,15 @@ void Image_emergency_backup(void);
 
 /// Pixel ratio of last loaded image: one of :PIXEL_SIMPLE, :PIXEL_WIDE or :PIXEL_TALL
 extern enum PIXEL_RATIO Ratio_of_loaded_image;
+
+T_Format * Get_fileformat(byte format);
+
+// -- File formats
+
+#ifndef __no_pnglib__
+#define NB_KNOWN_FORMATS         17    ///< Total number of known file formats.
+#else
+// Without pnglib
+#define NB_KNOWN_FORMATS         16    ///< Total number of known file formats.
+#endif
+

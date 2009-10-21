@@ -126,23 +126,25 @@ void Save_PNG(void);
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
 T_Format File_formats[NB_KNOWN_FORMATS] = {
-  {"pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1},
-  {"lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0},
-  {"gif", Test_GIF, Load_GIF, Save_GIF, 1, 1},
-  {"bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0},
-  {"pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0},
-  {"img", Test_IMG, Load_IMG, Save_IMG, 1, 0},
-  {"sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0},
-  {"pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0},
-  {"pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0},
-  {"cel", Test_CEL, Load_CEL, Save_CEL, 1, 0},
-  {"neo", Test_NEO, Load_NEO, Save_NEO, 1, 0},
-  {"kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0},
-  {"pal", Test_PAL, Load_PAL, Save_PAL, 0, 0},
-  {"c64", Test_C64, Load_C64, Save_C64, 1, 1},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa"},
+  {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, "", "*"},
+  {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
-  {"png", Test_PNG, Load_PNG, Save_PNG, 1, 1}
+  {FORMAT_PNG, " png", Test_PNG, Load_PNG, Save_PNG, 1, 1, "png", "png"},
 #endif
+  {FORMAT_BMP, " bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0, "bmp", "bmp"},
+  {FORMAT_PCX, " pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0, "pcx", "pcx"},
+  {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 1, 1, "pkm", "pkm"},
+  {FORMAT_LBM, " lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0, "lbm", "lbm;iff"},
+  {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 1, 0, "img", "img"},
+  {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0, "sc?", "sci;scq;scf;scn;sco"},
+  {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 1, 0, "pi1", "pi1"},
+  {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 1, 0, "pc1", "pc1"},
+  {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 1, 0, "cel", "cel"},
+  {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 1, 0, "neo", "neo"},
+  {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, "kcf", "kcf"},
+  {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, "pal", "pal"},
+  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 1, 1, "c64", "c64;koa"},
 };
 
 // Cette variable est alimentée après chargement réussi d'une image.
@@ -415,13 +417,13 @@ void Init_preview(short width,short height,long size,int format, enum PIXEL_RATI
     // Affichage du vrai format
     if (format!=Main_format)
     {
-      Print_in_window( 59,59,File_formats[format-1].Extension,MC_Black,MC_Light);
+      Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
     }
 
     // On efface le commentaire précédent
     Window_rectangle(45,70,32*8,8,MC_Light);
     // Affichage du commentaire
-    if (File_formats[format-1].Comment)
+    if (Get_fileformat(format)->Comment)
       Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
 
     // Calculs des données nécessaires à l'affichage de la preview:
@@ -604,36 +606,36 @@ void Set_file_error(int value)
 // -- Charger n'importe connu quel type de fichier d'image (ou palette) -----
 void Load_image(byte image)
 {
-  int  index; // index de balayage des formats
-  int  format=0; // Format du fichier à charger
+  unsigned int index; // index de balayage des formats
+  T_Format *format = &(File_formats[2]); // Format du fichier à charger
 
 
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // charger le format du fichier:
   File_error=1;
 
-  if (Main_format!=0)
+  if (Main_format>FORMAT_ALL_FILES)
   {
-    File_formats[Main_format-1].Test();
-    if (!File_error)
-      // Si dans le sélecteur il y a un format valide on le prend tout de suite
-      format=Main_format-1;
+    format = Get_fileformat(Main_format);
+    format->Test();
   }
 
   if (File_error)
   {
     //  Sinon, on va devoir scanner les différents formats qu'on connait pour
     // savoir à quel format est le fichier:
-    for (index=0;index<NB_FORMATS_LOAD;index++)
+    for (index=0; index < NB_KNOWN_FORMATS; index++)
     {
+      format = Get_fileformat(index);
+      // Loadable format
+      if (format->Load == NULL)
+        continue;
+        
       // On appelle le testeur du format:
-      File_formats[index].Test();
+      format->Test();
       // On s'arrête si le fichier est au bon format:
       if (File_error==0)
-      {
-        format=index;
         break;
-      }
     }
   }
 
@@ -645,7 +647,7 @@ void Load_image(byte image)
     Ratio_of_loaded_image=PIXEL_SIMPLE;
     // Dans certains cas il est possible que le chargement plante
     // après avoir modifié la palette. TODO
-    File_formats[format].Load();
+    format->Load();
 
     if (File_error>0)
     {
@@ -685,7 +687,7 @@ void Load_image(byte image)
 
     if (image)
     {
-      if ( (File_error!=1) && (File_formats[format].Backup_done) )
+      if ( (File_error!=1) && (format->Backup_done) )
       {
         if (Pixel_load_function==Pixel_load_in_preview)
         {
@@ -700,7 +702,7 @@ void Load_image(byte image)
         // On considère que l'image chargée n'est plus modifiée
         Main_image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format+1;
+        Main_fileformat=format->Identifier;
 
         // Correction des dimensions
         if (Main_image_width<1)
@@ -713,7 +715,7 @@ void Load_image(byte image)
         // On considère que l'image chargée est encore modifiée
         Main_image_is_modified=1;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format+1;
+        Main_fileformat=format->Identifier;
       }
       else
       {
@@ -741,13 +743,13 @@ void Save_image(byte image)
 
   Read_pixel_function=(image)?Read_pixel_from_current_screen:Read_pixel_from_brush;
 
-  File_formats[Main_fileformat-1].Save();
+  Get_fileformat(Main_fileformat)->Save();
 
   if (File_error)
     Error(0);
   else
   {
-    if ((image) && (File_formats[Main_fileformat-1].Backup_done))
+    if ((image) && (Get_fileformat(Main_fileformat)->Backup_done))
       Main_image_is_modified=0;
   }
 }
@@ -6898,4 +6900,22 @@ void Image_emergency_backup()
 {
   Emergency_backup("phoenix.img",Main_screen, Main_image_width, Main_image_height, &Main_palette);
   Emergency_backup("phoenix2.img",Spare_screen, Spare_image_width, Spare_image_height, &Spare_palette);
+}
+
+T_Format * Get_fileformat(byte format)
+{
+  unsigned int i;
+  T_Format * safe_default = File_formats;
+  
+  for (i=0; i < NB_KNOWN_FORMATS; i++)
+  {
+    if (File_formats[i].Identifier == format)
+      return &(File_formats[i]);
+  
+    if (File_formats[i].Identifier == FORMAT_GIF)
+      safe_default=&(File_formats[i]);
+  }
+  // Normally impossible to reach this point, unless called with an invalid
+  // enum....
+  return safe_default;
 }
