@@ -92,38 +92,26 @@
    #define PARENT_DIR ".."
 #endif
 
-// -- File formats
-
-#ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS         15    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          15    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          15    ///< Number of file formats that grafx2 can save.
-#else
-// Without pnglib
-#define NB_KNOWN_FORMATS         14    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          14    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          14    ///< Number of file formats that grafx2 can save.
-#endif
-
 /// List of file formats recognized by grafx2
 enum FILE_FORMATS
 {
-  FORMAT_ANY=0, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
-  FORMAT_PKM=1,
-  FORMAT_LBM,
+  FORMAT_ALL_IMAGES=0, ///< This is not really a file format, it's reserverd for a compilation of all file extensions
+  FORMAT_ALL_FILES=1, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
+  FORMAT_PNG,
   FORMAT_GIF,
   FORMAT_BMP,
   FORMAT_PCX,
+  FORMAT_PKM,
+  FORMAT_LBM,
   FORMAT_IMG,
   FORMAT_SCx,
   FORMAT_PI1,
   FORMAT_PC1,
   FORMAT_CEL,
   FORMAT_NEO,
+  FORMAT_C64,
   FORMAT_KCF,
   FORMAT_PAL,
-  FORMAT_C64,
-  FORMAT_PNG
 };
 
 /// Default format for 'save as'

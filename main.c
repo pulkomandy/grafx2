@@ -368,7 +368,7 @@ int Init_program(int argc,char * argv[])
   
   Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_format=0;
+  Main_format=FORMAT_ALL_IMAGES;
   Main_current_layer=0;
   Main_layers_visible=0xFFFFFFFF;
   Spare_current_layer=0;
@@ -376,10 +376,10 @@ int Init_program(int argc,char * argv[])
   
   Spare_fileselector_position=0;
   Spare_fileselector_offset=0;
-  Spare_format=0;
+  Spare_format=FORMAT_ALL_IMAGES;
   Brush_fileselector_position=0;
   Brush_fileselector_offset=0;
-  Brush_format=0;
+  Brush_format=FORMAT_ALL_IMAGES;
 
   // On initialise les commentaires des images à des chaînes vides
   Main_comment[0]='\0';

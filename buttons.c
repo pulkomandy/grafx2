@@ -2788,7 +2788,7 @@ void Load_picture(byte image)
     {
       // Si c'est une image qu'on charge, on efface l'ancien commentaire
       // C'est loin d'être indispensable, m'enfin bon...
-      if (File_formats[Main_fileformat-1].Backup_done)
+      if (Get_fileformat(Main_fileformat)->Backup_done)
         Main_comment[0]='\0';
 
       Original_screen_X=0;
@@ -2852,7 +2852,7 @@ void Load_picture(byte image)
       Cursor_shape=old_cursor_shape;
     }
 
-    if ( (File_error==1) || (!File_formats[Main_fileformat-1].Backup_done) )
+    if ( (File_error==1) || (!Get_fileformat(Main_fileformat)->Backup_done) )
     {
       do_not_restore=0;
       if (File_error!=1)
@@ -3122,7 +3122,7 @@ void Save_picture(byte image)
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
 
-    if ((File_error==1) || (!File_formats[Main_fileformat-1].Backup_done))
+    if ((File_error==1) || (!Get_fileformat(Main_fileformat)->Backup_done))
       do_not_restore=0;
 
     Display_cursor();
