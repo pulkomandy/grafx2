@@ -70,7 +70,7 @@
     #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
-//extern char Program_version[]; // generated in pversion.c
+extern char Program_version[]; // generated in pversion.c
 
 extern short Old_MX;
 extern short Old_MY;
@@ -793,15 +793,6 @@ void Button_Settings(void)
   Window_display_frame(163, 16,139,48); // Show in filelist
   Window_display_frame(253, 77, 49,82); // Mouse sens.
   Window_display_frame(  5, 65,247,96); // |_ Misc.
-/*  Window_display_frame(  5, 65,157,14); // |
-  // On découpe le Frame bizarre des "Miscellaneous"
-  Pixel_in_window(6,77,MC_White);
-  Pixel_in_window(5,78,MC_Dark);
-  Block(Window_pos_X+(7*Menu_factor_X),Window_pos_Y+(77*Menu_factor_Y),
-        Menu_factor_X*154,Menu_factor_Y<<1,MC_Light);
-  Pixel_in_window(161,77,MC_Light);
-  Pixel_in_window(160,77,MC_Dark);
-*/
   // On affiche maintenant tout le blabla
   Print_in_window(169, 19,"Show in filelist",MC_Dark,MC_Light);
   Print_in_window(  9, 52,"Nb of UNDO pages",MC_Dark,MC_Light);
@@ -815,7 +806,6 @@ void Button_Settings(void)
   // Button Show/Hide dans le fileselect
   Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 1
   Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 2
-//  Window_set_normal_button(167, 58,131,14,"System dir. :   ",0,1,SDLK_LAST);
 
   // Button Show/Hide Picture limits
   Window_set_normal_button(  9, 81,107,14,"Limits   :   ",0,1,SDLK_LAST); // 3

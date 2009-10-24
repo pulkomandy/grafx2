@@ -26,13 +26,15 @@
 #include <string.h> // strncpy() strlen()
 
 #include "windows.h"
+
+#include "engine.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "engine.h"
-#include "misc.h"
-#include "sdlscreen.h"
-#include "errors.h"
 #include "input.h"
+#include "misc.h"
+#include "readline.h"
+#include "sdlscreen.h"
 
 // L'encapsulation tente une percée...ou un dernier combat.
 
@@ -835,6 +837,47 @@ byte Confirmation_box(char * message)
   return (clicked_button==1)? 1 : 0;
 }
 
+
+/// Window that allows you to enter a single value
+int Requester_window(char* message, int initial_value)
+{
+	short clicked_button = 0;
+	word window_width;
+	char str[10];
+
+	window_width=(strlen(message)<<3)+20;
+
+	if (window_width<120)
+		window_width = 120;
+
+	Open_window(window_width, 60, "Request");
+
+	Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
+		MC_Black, MC_Light);
+	sprintf(str, "%d", initial_value);
+	Window_set_input_button((window_width / 3) - 20, 37, 10); // 1
+	Print_in_window((window_width / 3) - 18, 39, str, MC_Black, MC_Light);
+
+	Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
+		Menu_factor_Y * 60);
+	Display_cursor();
+
+	do
+	{
+		clicked_button = Window_clicked_button();
+		if (clicked_button == 1)
+			Readline((window_width / 3) - 18, 39, str, 10, 1);
+		if (Key == SDLK_ESCAPE) clicked_button = 2;
+	}
+	while (clicked_button <= 0);
+
+	Key = 0;
+
+	Close_window();
+	Display_cursor();
+
+	return clicked_button==2?-1:atoi(str);
+}
 
 
 /// Window that show a warning message and wait for a click on the OK button

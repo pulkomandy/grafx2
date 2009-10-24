@@ -71,6 +71,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 byte Confirmation_box(char * message);
 void Warning_message(char * message);
 void Verbose_error_message(char * message);
+int Requester_window(char* message, int initial_value);
 
 void Display_image_limits(void);
 void Display_all_screen(void);
