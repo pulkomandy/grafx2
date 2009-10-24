@@ -854,10 +854,9 @@ void Button_Palette(void)
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
   Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
 
-  Print_in_window(129,58,"Color number:",MC_Dark,MC_Light);
-  Num2str(Fore_color,str,3);
-  Print_in_window(237,58,str,MC_Black,MC_Light);
-
+  Print_in_window(129, 58, "Color number:", MC_Dark, MC_Light);
+  Num2str(Fore_color, str, 3);
+  Print_in_window(237, 58, str, MC_Black, MC_Light);
 
   Window_set_normal_button( 6,17,59,14,"Default",3,1,SDLK_f);   // 5
   Window_set_normal_button(66,17,29,14,"Gry"    ,1,1,SDLK_g);   // 6
@@ -866,7 +865,7 @@ void Button_Palette(void)
   Window_set_normal_button(66,32,29,14,"Cpy"    ,1,1,SDLK_c);   // 9
   Window_set_normal_button( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
-  reduce_dropdown = Window_set_dropdown_button(222, 18, 60, 14, 60, "Reduce", 0,
+  reduce_dropdown = Window_set_dropdown_button(222, 17, 60, 14, 60, "Reduce", 0,
 	0, 1, 1); // 11
   Window_dropdown_add_item(reduce_dropdown, 0, "to 128");
   Window_dropdown_add_item(reduce_dropdown, 1, "to 64");
@@ -894,6 +893,17 @@ void Button_Palette(void)
   Window_set_normal_button(96,32,29,14,"HSL"    ,1,1,SDLK_h);   // 22
   Window_set_normal_button(96,47,29,14,"Srt"    ,1,1,SDLK_s);   // 23
 
+  if (Config.Auto_nb_used)
+  {
+	Update_color_count(&used_colors,color_usage);
+
+	Num2str(color_usage[Fore_color], str, 6);
+	Print_in_window(222, 33, str, MC_Black, MC_Light);
+	Print_in_window(222, 42, "pixels", MC_Dark, MC_Light);
+  }
+
+
+
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(263, 74,MC_White,-1);
   Draw_thingumajig(280, 74,MC_White,+1);
@@ -903,9 +913,6 @@ void Button_Palette(void)
   Update_window_area(0,0,299,188);
 
   Display_cursor();
-
-  if (Config.Auto_nb_used)
-    Update_color_count(&used_colors,color_usage);
 
   do
   {
@@ -955,6 +962,8 @@ void Button_Palette(void)
                 Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7,MC_Light);
                 Num2str(Fore_color,str,3);
                 Print_in_window(237,58,str,MC_Black,MC_Light);
+				Num2str(color_usage[Fore_color], str, 6);
+				Print_in_window(222, 33, str, MC_Black, MC_Light);
                 Update_rect(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7);
 
                 // Affichage des jauges
@@ -985,6 +994,13 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237,58,str,MC_Black,MC_Light);
+				  {
+					int pixel_count = 0;
+				  	for (i = block_start; i <= block_end; i++)
+						pixel_count += color_usage[i];
+				  	Num2str(pixel_count, str, 6);
+				  }
+				  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1002,6 +1018,13 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237,58,str,MC_Black,MC_Light);
+				  {
+					int pixel_count = 0;
+				  	for (i = block_start; i <= block_end; i++)
+						pixel_count += color_usage[i];
+				  	Num2str(pixel_count, str, 6);
+				  }
+				  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1018,6 +1041,8 @@ void Button_Palette(void)
                   Block(Window_pos_X+(Menu_factor_X*261),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*32,Menu_factor_Y*7,MC_Light);
                   Num2str(Fore_color,str,3);
                   Print_in_window(237,58,str,MC_Black,MC_Light);
+				  Num2str(Fore_color, str, 6);
+				  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
@@ -2041,7 +2066,7 @@ void Button_Palette(void)
             image_is_backed_up=1;
           }
           if (used_colors==-1)
-            Update_color_count(&used_colors,color_usage);
+            Update_color_count(&used_colors, color_usage);
 
           memcpy(backup_palette,working_palette,sizeof(T_Palette));
           memcpy(temp_palette,Main_palette,sizeof(T_Palette));
