@@ -23,6 +23,7 @@
 */
 
 #include <math.h>
+#include <stdlib.h> // atoi()
 #include <string.h> // strncpy() strlen()
 
 #include "windows.h"
@@ -1163,7 +1164,7 @@ void Display_menu_palette_avoiding_window(byte * table)
     if (table[real_color]!=real_color)
     {
       start_x=Palette_cell_X(real_color);
-      start_y=Palette_cell_Y(real_color); //Menu_Y_before_window ??!
+      start_y=Palette_cell_Y(real_color);
       end_x=start_x+width;
       end_y=start_y+height;
 
