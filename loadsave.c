@@ -31,6 +31,7 @@
 #include <png.h>
 #endif
 #include <SDL_image.h>
+#include <SDL_endian.h>
 
 #include "buttons.h"
 #include "const.h"
@@ -828,7 +829,7 @@ void Load_PAL(void)
   if ((file=fopen(filename, "rb")))
   {
     T_Palette palette_64;
-    // Init_preview(???); // Pas possible... pas d'image...
+    // Init_preview(?); // Pas possible... pas d'image...
 
     // Lecture du fichier dans Main_palette
     if (Read_bytes(file,palette_64,sizeof(T_Palette)))
@@ -4551,10 +4552,10 @@ void Save_CEL(void)
       memcpy(header2.Signature,"KiSS",4); // Initialisation de la signature
       header2.Kind=0x20;              // Initialisation du type (BitMaP)
       header2.Nb_bits=8;               // Initialisation du nombre de bits
-      header2.Filler1=0;              // Initialisation du filler 1 (???)
+      header2.Filler1=0;              // Initialisation du filler 1 (?)
       header2.Width=Main_image_width-header2.X_offset; // Initialisation de la largeur
       header2.Height=Main_image_height-header2.Y_offset; // Initialisation de la hauteur
-      for (x_pos=0;x_pos<16;x_pos++)  // Initialisation du filler 2 (???)
+      for (x_pos=0;x_pos<16;x_pos++)  // Initialisation du filler 2 (?)
         header2.Filler2[x_pos]=0;
 
       if (Write_bytes(file,&header2,sizeof(T_CEL_Header2)))
@@ -4670,7 +4671,7 @@ void Load_KCF(void)
 
       if (Read_bytes(file,&buffer,sizeof(T_KCF_Header)))
       {
-        // Init_preview(???); // Pas possible... pas d'image...
+        // Init_preview(?); // Pas possible... pas d'image...
 
         if (Config.Clear_palette)
           memset(Main_palette,0,sizeof(T_Palette));
@@ -4704,7 +4705,7 @@ void Load_KCF(void)
 
       if (Read_bytes(file,&header2,sizeof(T_CEL_Header2)))
       {
-        // Init_preview(???); // Pas possible... pas d'image...
+        // Init_preview(?); // Pas possible... pas d'image...
 
         index=(header2.Nb_bits==12)?16:0;
         for (pal_index=0;pal_index<header2.Height;pal_index++)
@@ -4806,12 +4807,12 @@ void Save_KCF(void)
       memcpy(header2.Signature,"KiSS",4); // Initialisation de la signature
       header2.Kind=0x10;              // Initialisation du type (PALette)
       header2.Nb_bits=24;              // Initialisation du nombre de bits
-      header2.Filler1=0;              // Initialisation du filler 1 (???)
+      header2.Filler1=0;              // Initialisation du filler 1 (?)
       header2.Width=256;            // Initialisation du nombre de couleurs
       header2.Height=1;              // Initialisation du nombre de palettes
       header2.X_offset=0;           // Initialisation du décalage X
       header2.Y_offset=0;           // Initialisation du décalage Y
-      for (index=0;index<16;index++) // Initialisation du filler 2 (???)
+      for (index=0;index<16;index++) // Initialisation du filler 2 (?)
         header2.Filler2[index]=0;
 
       if (! Write_bytes(file,&header2,sizeof(T_CEL_Header2)))
