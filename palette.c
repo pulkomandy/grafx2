@@ -1466,36 +1466,39 @@ void Button_Palette(void)
 				reduce_colors_number
 					= Requester_window("Enter the max. number of colors",
 						reduce_colors_number);
-				if (reduce_colors_number < 2 || reduce_colors_number > 256)
-					reduce_colors_number = 256;
+				if (reduce_colors_number < 2 || reduce_colors_number >= 256)
+					reduce_colors_number = -1;
 				break;
 		}
 
-        if (!image_is_backed_up)
-        {
-          Backup();
-          image_is_backed_up = 1;
-        }
+		if (reduce_colors_number > 0)
+		{
+			if (!image_is_backed_up)
+			{
+				Backup();
+				image_is_backed_up = 1;
+			}
 
-        Reduce_palette(&used_colors, reduce_colors_number, working_palette,
-			color_usage);
+			Reduce_palette(&used_colors, reduce_colors_number, working_palette,
+					color_usage);
 
-        if ((Config.Safety_colors) && (used_colors<4))
-        {
-          memcpy(temp_palette, Main_palette, sizeof(T_Palette));
-          memcpy(Main_palette, working_palette, sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage, 0);
-          memcpy(working_palette, Main_palette, sizeof(T_Palette));
-          memcpy(Main_palette, temp_palette, sizeof(T_Palette));
-        }
+			if ((Config.Safety_colors) && (used_colors<4))
+			{
+				memcpy(temp_palette, Main_palette, sizeof(T_Palette));
+				memcpy(Main_palette, working_palette, sizeof(T_Palette));
+				Set_nice_menu_colors(color_usage, 0);
+				memcpy(working_palette, Main_palette, sizeof(T_Palette));
+				memcpy(Main_palette, temp_palette, sizeof(T_Palette));
+			}
 
-        Set_palette(working_palette); // On définit la nouvelle palette
-        Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
-			working_palette, block_start, block_end);
-        memcpy(temp_palette, working_palette, sizeof(T_Palette));
+			Set_palette(working_palette); // On définit la nouvelle palette
+			Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
+					working_palette, block_start, block_end);
+			memcpy(temp_palette, working_palette, sizeof(T_Palette));
 
-        End_of_modification();
-        need_to_remap = 1;
+			End_of_modification();
+			need_to_remap = 1;
+		}
         break;
 
       case 12: // Undo

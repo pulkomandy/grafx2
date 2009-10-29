@@ -856,8 +856,10 @@ int Requester_window(char* message, int initial_value)
 	Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
 		MC_Black, MC_Light);
 	sprintf(str, "%d", initial_value);
-	Window_set_input_button((window_width / 3) - 20, 37, 10); // 1
-	Print_in_window((window_width / 3) - 18, 39, str, MC_Black, MC_Light);
+	Window_set_input_button(10, 37, 4); // 1
+	Print_in_window(11, 39, str, MC_Black, MC_Light);
+	Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
+	Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
 
 	Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
 		Menu_factor_Y * 60);
@@ -867,7 +869,7 @@ int Requester_window(char* message, int initial_value)
 	{
 		clicked_button = Window_clicked_button();
 		if (clicked_button == 1)
-			Readline((window_width / 3) - 18, 39, str, 10, 1);
+			Readline(11, 39, str, 4, 1);
 		if (Key == SDLK_ESCAPE) clicked_button = 2;
 	}
 	while (clicked_button <= 0);
