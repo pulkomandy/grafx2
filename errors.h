@@ -21,7 +21,7 @@
 /// Functions and macros for tracing and error reporting.
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __func__
+#ifdef __VBCC__
     #define __func__ "stupid compiler !"
 #endif
 
