@@ -50,6 +50,13 @@ int L_GetPixel(lua_State* L)
 	return 1;
 }
 
+int L_SetColor(lua_State* L)
+{
+	Set_color(lua_tonumber(L, 1), lua_tonumber(L, 2), lua_tonumber(L, 3),
+		lua_tonumber(L, 4));
+	return 0;
+}
+
 void Button_Brush_Factory(void)
 {
 	short clicked_button;
@@ -127,6 +134,7 @@ void Button_Brush_Factory(void)
 
 		lua_register(L,"putpixel",L_PutPixel);
 		lua_register(L,"getpixel",L_GetPixel);
+		lua_register(L,"setcolor",L_SetColor);
 
 		if (luaL_loadfile(L,"./test.lua") != 0)
 			Verbose_error_message(lua_tostring(L, 1));
