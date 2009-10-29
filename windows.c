@@ -908,7 +908,7 @@ void Warning_message(char * message)
 }
 
 /// Window that shows a big message, and waits for a click on OK
-void Verbose_error_message(char * message)
+void Verbose_error_message(const char * message)
 {
   short clicked_button;
   int line;

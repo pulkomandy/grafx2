@@ -206,12 +206,12 @@ void Init_chrono(dword delay)
 	return;
 }
 
-void Pixel_in_brush             (word x,word y,byte color)
+void Pixel_in_brush (word x, word y, byte color)
 {
-	*(Brush+y*Brush_width+x)=color;
+	*(Brush + y * Brush_width + x)=color;
 }
 
-byte Read_pixel_from_brush         (word x,word y)
+byte Read_pixel_from_brush (word x, word y)
 {
 	return *(Brush + y * Brush_width + x);
 }

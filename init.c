@@ -48,26 +48,27 @@
   #include <signal.h>
 #endif
 
+#include "buttons.h"
 #include "const.h"
-#include "struct.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "buttons.h"
-#include "palette.h"
-#include "help.h"
-#include "operatio.h"
-#include "misc.h"
-#include "errors.h"
-#include "keyboard.h"
-#include "io.h"
-#include "hotkeys.h"
-#include "setup.h"
-#include "windows.h"
-#include "sdlscreen.h"
-#include "mountlist.h" // read_file_system_list
-#include "loadsave.h" // Image_emergency_backup
 #include "init.h"
+#include "io.h"
+#include "factory.h"
+#include "help.h"
+#include "hotkeys.h"
+#include "keyboard.h"
+#include "loadsave.h" // Image_emergency_backup
+#include "misc.h"
+#include "mountlist.h" // read_file_system_list
+#include "operatio.h"
+#include "palette.h"
+#include "sdlscreen.h"
+#include "setup.h"
+#include "struct.h"
 #include "transform.h"
+#include "windows.h"
 
 char Gui_loading_error_message[512];
 
@@ -1058,10 +1059,14 @@ void Init_buttons(void)
                      FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_BRUSH_EFFECTS,
-                     106,18,
-                     16,16,
+                     106, 18,
+                     16, 16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Brush_FX,Button_Brush_FX,
+#ifdef __ENABLE_LUA__
+                     Button_Brush_FX, Button_Brush_Factory,
+#else
+                     Button_Brush_FX, Button_Brush_FX,
+#endif
                      Do_nothing,
                      FAMILY_INSTANT);
 

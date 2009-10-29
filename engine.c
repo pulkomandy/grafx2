@@ -79,7 +79,11 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Grad. spheres / ellipses",
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
+#ifdef __ENABLE_LUA__
+  "Brush effects / factory ",
+#else
   "Brush effects           ",
+#endif
   "Drawing modes (effects) ",
   "Text                    ",
   "Magnify mode / Menu     ",
