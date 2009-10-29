@@ -68,6 +68,11 @@ To compile a gp2x executable, type
 This will only work on an UNIXsystem (Linux or FreeBSD).
 
 == Windows ==
+
+It is also possible to compile from linux, with this command :
+	make WIN32CROSS=1
+You will need the mingw cross-compiler, and all the librairies listed above.
+
 Here are the resources used to build the Windows version:
 
 4DOS
@@ -141,6 +146,14 @@ SDL_ttf:
   SDL_ttf-2.0.9-win32.zip for DLLs: libfreetype-6.dll, SDL_ttf.dll, zlib1.dll
   SDL_ttf-2.0.9.tar.gz
 
-It is also possible to compile from linux, with this command :
-	make WIN32CROSS=1
-You will need the mingw cross-compiler, and all the librairies listed above.
+Lua:
+  (optional)
+  http://www.lua.org/ftp/lua-5.1.4.tar.gz
+  Uncompress in temporary directory
+  Use sh shell
+  make mingw
+  (make install doesn't work, even with prefix)
+  Copy luaconf.h, lualib.h, lua.h, lauxlib.h to c:\msys\mingw\include\lua5.1
+  Copy liblua.a to c:\msys\mingw\lib RENAMED AS liblua5.1.a
+  Copy lua51.dll to c:\msys\mingw\bin
+

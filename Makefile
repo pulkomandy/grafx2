@@ -42,15 +42,16 @@ ifdef COMSPEC
   RMDIR = rmdir
   CP = cp
   BIN = grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
   CC = gcc
   OBJDIR = obj/win32
   # Resources (icon)
   WINDRES = windres.exe
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  #some misc files we have to add to the release archive under windows.
+  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS)
   ZIP = zip
 else
 
