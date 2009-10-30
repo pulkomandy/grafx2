@@ -102,6 +102,12 @@ int L_SetColor(lua_State* L)
 	return 0;
 }
 
+int L_BrushEnable(lua_State* L)
+{
+	Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+	return 0;
+}
+
 void Button_Brush_Factory(void)
 {
 	short clicked_button;
@@ -138,6 +144,7 @@ void Button_Brush_Factory(void)
 		lua_register(L,"getbrushsize",L_GetBrushSize);
 		lua_register(L,"getpicturesize",L_GetPictureSize);
 		lua_register(L,"setcolor",L_SetColor);
+		lua_register(L,"brushenable",L_BrushEnable);
 
 		// For debug only
 		// luaL_openlibs(L);
@@ -151,6 +158,7 @@ void Button_Brush_Factory(void)
 	}
 
 	Close_window();
+	Unselect_button(BUTTON_BRUSH_EFFECTS);
 	Display_cursor();
 }
 
