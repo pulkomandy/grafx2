@@ -22,6 +22,7 @@
 #include "global.h"
 #include "graph.h"
 #include "engine.h"
+#include "errors.h"
 #include "misc.h"
 #include "readline.h"
 #include "help.h"
@@ -432,18 +433,18 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
 
 int Menu_shade(void)
 {
-  short clicked_button;  // Numéro du bouton sur lequel l'utilisateur a clické
-  char str[4];        // str d'affichage du n° de shade actif et du Pas
-  word old_mouse_x,old_mouse_x2; // Mémo. de l'ancienne pos. du curseur
-  word old_mouse_y,old_mouse_y2;
-  byte old_mouse_k,old_mouse_k2;
+  short clicked_button; // Numéro du bouton sur lequel l'utilisateur a clické
+  char str[4]; // str d'affichage du n° de shade actif et du Pas
+  word old_mouse_x, old_mouse_x2; // Mémo. de l'ancienne pos. du curseur
+  word old_mouse_y, old_mouse_y2;
+  byte old_mouse_k, old_mouse_k2;
   byte temp_color; // Variables de gestion des clicks dans la palette
-  byte first_color=0;
-  byte last_color=0;
-  word selection_start=0;
-  word selection_end=0;
+  byte first_color = Fore_color;
+  byte last_color = Fore_color;
+  word selection_start = 0;
+  word selection_end = 0;
   T_Special_button * input_button;
-  short temp,temp2;
+  short temp, temp2;
   word temp_cell;
   word * buffer;       // buffer du Copy/Paste
   word * undo_buffer;  // buffer du Undo
@@ -477,7 +478,7 @@ int Menu_shade(void)
   Window_set_normal_button(234,87,43,14,"Paste" ,1,1,SDLK_p);  // 7
 
   // On tagge le bloc
-  Tag_color_range(0,0);
+  Tag_color_range(Fore_color,Fore_color);
 
   // Tracé d'un cadre creux autour du bloc dégradé
   Window_display_frame_in(171,26,18,66);
@@ -613,6 +614,13 @@ int Menu_shade(void)
           Display_cursor();
         }
         break;
+
+	  case 5: // Ok
+		if (selection_start == selection_end && Shade_list[Shade_current].List[selection_start] > 0)
+			Set_fore_color(Shade_list[Shade_current].List[selection_start]);
+		else if (first_color == last_color)
+			Set_fore_color(first_color);
+		break;
 
       case  6 : // Copy
         memcpy(buffer,Shade_list[Shade_current].List,512*sizeof(word));
