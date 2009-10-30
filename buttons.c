@@ -1020,10 +1020,13 @@ void Button_Skins(void)
   int selected_cursor = Config.Cursor;
   byte separatecolors = Config.Separate_colors;
   byte showlimits = Config.Display_image_limits;
+
+  word x,y, x_pos, offs_y;
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
+  T_Gui_skin * gfx = NULL;
 
-  #define FILESEL_Y 52
+  #define FILESEL_Y 34
 
   // --- Read the contents of skins/ directory ------------------
   
@@ -1050,11 +1053,11 @@ void Button_Skins(void)
   Window_display_frame_in(6, FILESEL_Y - 2, 148, 84); // File selector
 
   // Texts
-  Print_in_window( 6, 21,"Font"            ,MC_Black,MC_Light);
-  Print_in_window( 6, 36,"Cursor"          ,MC_Black,MC_Light);
+  Print_in_window( 172, 33,"Font:"            ,MC_Black,MC_Light);
+  Print_in_window( 172, 59,"Cursor:"          ,MC_Black,MC_Light);
 
   // Ok button
-  Window_set_normal_button(172, 120, 51, 14, "OK", 0, 1, SDLK_RETURN); // 1
+  Window_set_normal_button(6, 120, 51, 14, "OK", 0, 1, SDLK_RETURN); // 1
 
   // List of skins
   skin_list = Window_set_list_button(
@@ -1068,30 +1071,34 @@ void Button_Skins(void)
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
 
   // Buttons to choose a font
-  font_dropdown = Window_set_dropdown_button(60,19,104,11,0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
+  font_dropdown = Window_set_dropdown_button(172, 43, 104, 11, 0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
   for (temp=0; temp<Font_files_list.Nb_files; temp++)
     Window_dropdown_add_item(font_dropdown,temp,Get_item_by_index(&Font_files_list,temp)->Short_name);
 
   // Cancel
-  Window_set_normal_button(227, 120, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
+  Window_set_normal_button(61, 120, 51,14,"Cancel",0,1,SDLK_ESCAPE); // 6
 
   // Dropdown list to choose cursor type
-  cursor_dropdown = Window_set_dropdown_button(60, 34, 104, 11, 0,
+  cursor_dropdown = Window_set_dropdown_button(172, 69, 104, 11, 0,
 	cursors[selected_cursor], 1, 0, 1, RIGHT_SIDE|LEFT_SIDE); // 7
   for (temp = 0; temp<3; temp++)
     Window_dropdown_add_item(cursor_dropdown, temp, cursors[temp]);
 
-  Window_set_normal_button(172, 23, 14, 14,
+  Window_set_normal_button(172, 87, 14, 14,
 	(Config.Display_image_limits)?"X":" ", -1, 1, SDLK_LAST); // 8
-  Print_in_window( 190, 21,"Draw picture", MC_Dark, MC_Light);
-  Print_in_window( 190, 30,"limits", MC_Dark, MC_Light);
+  Print_in_window( 190, 85,"Draw picture", MC_Dark, MC_Light);
+  Print_in_window( 190, 94,"limits", MC_Dark, MC_Light);
 
-  Window_set_normal_button(172, 52, 14, 14,
+  Window_set_normal_button(172, 111, 14, 14,
 	(Config.Separate_colors)?"X":" ", -1, 1, SDLK_LAST); // 9
-  Print_in_window( 190, 50,"Separate", MC_Dark, MC_Light);
-  Print_in_window( 190, 59,"colors", MC_Dark, MC_Light);
+  Print_in_window( 190, 109,"Separate", MC_Dark, MC_Light);
+  Print_in_window( 190, 118,"colors", MC_Dark, MC_Light);
   
   Window_redraw_list(skin_list);
+
+  for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+    for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+      Pixel_in_window(x, y, skin_logo[offs_y][x_pos]);
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -1110,6 +1117,22 @@ void Button_Skins(void)
 		case 3 : // doesn't happen
 			break;
 		case 4 : // a file is selected
+
+			// (Re-)load GUI graphics from selected skins
+			strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
+				skin_list->List_start + skin_list->Cursor_position)->Full_name);
+			gfx = Load_graphics(skinsdir);
+			if (gfx == NULL) // Error
+			{
+				Verbose_error_message(Gui_loading_error_message);
+			}
+
+			// Update preview
+			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+					Pixel_in_window(x, y, skin_logo[offs_y][x_pos]);
+			Update_window_area(4, 14, 174, 16);
+
 			break;
 		case 5 : // Font dropdown
 			selected_font = Window_attribute2; // Get the index of the chosen font.
@@ -1117,36 +1140,28 @@ void Button_Skins(void)
 			// 6: Cancel
 		case 7 : // Cursor
 			selected_cursor = Window_attribute2;
-        break;
+			break;
 		case 8: // Display limits
 			showlimits = !showlimits;
 			Hide_cursor();
-			Print_in_window(175, 26, (showlimits)?"X":" ", MC_Black, MC_Light);
+			Print_in_window(175, 90, (showlimits)?"X":" ", MC_Black, MC_Light);
 			Display_cursor();
 			break;
 		case 9: // Separate colors
 			separatecolors = !separatecolors;
 			Hide_cursor();
-			Print_in_window(175, 55, (separatecolors)?"X":" ", MC_Black, MC_Light);
+			Print_in_window(175, 114, (separatecolors)?"X":" ", MC_Black, MC_Light);
 			Display_cursor();
 			break;
-    }
+	}
   }
   while ( (clicked_button!=1) && (clicked_button !=6) && (Key != SDLK_ESCAPE));
 
   if(clicked_button == 1)
   {
-    T_Gui_skin * gfx;
-    byte * new_font;
+	byte * new_font;
 
-    // (Re-)load GUI graphics from selected skins
-    strcpy(skinsdir, Get_item_by_index(&Skin_files_list, skin_list->List_start+skin_list->Cursor_position)->Full_name);
-	  gfx=Load_graphics(skinsdir);
-	  if (gfx == NULL) // Error
-    {
-      Verbose_error_message(Gui_loading_error_message);
-	  }
-	  else
+	  if (gfx != NULL)
 	  {
       free(Gfx);
       Gfx = gfx;
