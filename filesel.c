@@ -1644,6 +1644,9 @@ byte Button_Load_or_Save(byte load, byte image)
         Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
         Display_cursor();
         New_preview_is_needed=1;
+
+		// On est dans un nouveau répertoire, donc on remet le quicksearch à 0
+        *quicksearch_filename=0;
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
