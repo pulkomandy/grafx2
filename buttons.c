@@ -994,6 +994,13 @@ void Add_font_or_skin(const char *name)
    
 }
 
+// declared in windows.c for remap
+extern byte Old_black;
+extern byte Old_dark;
+extern byte Old_light;
+extern byte Old_white;
+extern byte Old_trans;
+
 // Callback to display a skin name in the list
 void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 {
@@ -1001,8 +1008,9 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 
   if (Skin_files_list.Nb_elements)
   {
-    current_item = Get_item_by_index(&Skin_files_list, index);    
-    Print_in_window(x,y,current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
+    current_item = Get_item_by_index(&Skin_files_list, index);
+	// We use Old_ colors because previewing a skin mess up MC_ ...
+    Print_in_window(x,y,current_item->Short_name, Old_black, (highlighted)?Old_dark:Old_light);
   }
 }
 
@@ -1104,6 +1112,12 @@ void Button_Skins(void)
 
   Display_cursor();
 
+  Old_black = MC_Black;
+  Old_dark = MC_Dark;
+  Old_light = MC_Light;
+  Old_white = MC_White;
+  Old_trans = MC_Trans;
+
   do
   {
     clicked_button=Window_clicked_button();
@@ -1121,6 +1135,7 @@ void Button_Skins(void)
 			// (Re-)load GUI graphics from selected skins
 			strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
 				skin_list->List_start + skin_list->Cursor_position)->Full_name);
+
 			gfx = Load_graphics(skinsdir);
 			if (gfx == NULL) // Error
 			{
@@ -1128,9 +1143,20 @@ void Button_Skins(void)
 			}
 
 			// Update preview
+			// The new palette is not in place but the skin is loaded using the
+			// new color indexes, so we have to reverse-remap it...
 			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
 				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-					Pixel_in_window(x, y, skin_logo[offs_y][x_pos]);
+				{
+					if (skin_logo[offs_y][x_pos] == MC_Black)
+						Pixel_in_window(x, y, Old_black);
+					else if (skin_logo[offs_y][x_pos] == MC_Dark)
+						Pixel_in_window(x, y, Old_dark);
+					else if (skin_logo[offs_y][x_pos] == MC_Light)
+						Pixel_in_window(x, y, Old_light);
+					else if (skin_logo[offs_y][x_pos] == MC_White)
+						Pixel_in_window(x, y, Old_white);
+				}
 			Update_window_area(4, 14, 174, 16);
 
 			break;
@@ -1185,6 +1211,7 @@ void Button_Skins(void)
 	  Config.Cursor = selected_cursor;
 	  Config.Display_image_limits = showlimits;
 	  Config.Separate_colors = separatecolors;
+
   }
 
   Close_window();
