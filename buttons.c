@@ -1014,6 +1014,11 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   }
 }
 
+#define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
+#define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+#define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
+#define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
+
 /// Skin selector window
 void Button_Skins(void)
 {
@@ -1108,7 +1113,7 @@ void Button_Skins(void)
     for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
       Pixel_in_window(x, y, skin_logo[offs_y][x_pos]);
 
-  Update_window_area(0,0,Window_width, Window_height);
+  Update_window_area(0, 0, Window_width, Window_height);
 
   Display_cursor();
 
@@ -1212,6 +1217,31 @@ void Button_Skins(void)
 	  Config.Display_image_limits = showlimits;
 	  Config.Separate_colors = separatecolors;
 
+	  // We loaded a new menu but not changed the palette
+	  // So we have to remap FROM MC_ TO Old_ and not the reverse way...
+	  SWAP_BYTES(Old_black, MC_Black);
+	  SWAP_BYTES(Old_dark, MC_Dark);
+	  SWAP_BYTES(Old_light, MC_Light);
+	  SWAP_BYTES(Old_white, MC_White);
+	  SWAP_BYTES(Old_trans, MC_Trans);
+	  Remap_menu_sprites();
+	  Old_black = MC_Black;
+	  Old_dark = MC_Dark;
+	  Old_light = MC_Light;
+	  Old_white = MC_White;
+	  Old_trans = MC_Trans;
+
+  } else {
+	  MC_Black = Old_black;
+	  MC_Dark = Old_dark;
+	  MC_Light = Old_light;
+	  MC_White = Old_white;
+	  MC_Trans = Old_trans;
+
+	  // TODO : il faudrait aussi restaurer la preview du skin initial, soit ici
+	  // soit la prochaine fois qu'on ouvre la fenêtre. Une solution est de
+	  // ne pas utiliser une variable globale pour skin_logo mais de la mettre
+	  // dans gfx à la place.
   }
 
   Close_window();
@@ -1228,11 +1258,6 @@ void Button_Page(void)
 	byte   factor_index;
   char   Temp_buffer[256];
 
-  #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
-  #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
-  #define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
-  #define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
-  
   Hide_cursor();
 
   // On dégrossit le travail avec les infos des listes de pages

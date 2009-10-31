@@ -2543,14 +2543,14 @@ void Remap_screen_after_menu_colors_change(void)
 void Compute_optimal_menu_colors(T_Components * palette)
 {
   byte table[4];
-  short i,j,k;
+  short i;
 
 
   Old_black =MC_Black;
-  Old_dark=MC_Dark;
-  Old_light=MC_Light;
-  Old_white=MC_White;
-  Old_trans=MC_Trans;
+  Old_dark = MC_Dark;
+  Old_light = MC_Light;
+  Old_white = MC_White;
+  Old_trans = MC_Trans;
 
   // Recherche du noir
   Compute_4_best_colors_for_1_menu_color
@@ -2610,7 +2610,14 @@ void Compute_optimal_menu_colors(T_Components * palette)
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 
-  // Et maintenant, on "remappe" tous les sprites, etc...
+  Remap_menu_sprites();
+}
+
+/// Remap all menu data when the palette changes or a new skin is loaded
+void Remap_menu_sprites()
+{
+  int i, j, k;
+
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
     || (MC_White!=Old_white)
@@ -2667,6 +2674,11 @@ void Compute_optimal_menu_colors(T_Components * palette)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
+
+	// Skin preview
+	for (j = 0; j < 173; j++)
+		for (i = 0; i < 16; i++)
+			Remap_pixel(&skin_logo[i][j]);
   }
   Clear_border(MC_Black);
 }
