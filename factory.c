@@ -102,10 +102,10 @@ int L_SetColor(lua_State* L)
 	return 0;
 }
 
-int L_GetColor(lua_state* L)
+int L_GetColor(lua_State* L)
 {
 	T_Components couleur;
-	couleur = Main_palette[lua_tonumber(L,1)];
+	couleur = Main_palette[(int)(lua_tonumber(L,1))];
 
 	lua_pushinteger(L, couleur.R);
 	lua_pushinteger(L, couleur.G);
