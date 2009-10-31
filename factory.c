@@ -102,6 +102,17 @@ int L_SetColor(lua_State* L)
 	return 0;
 }
 
+int L_GetColor(lua_state* L)
+{
+	T_Components couleur;
+	couleur = Main_palette[lua_tonumber(L,1)];
+
+	lua_pushinteger(L, couleur.R);
+	lua_pushinteger(L, couleur.G);
+	lua_pushinteger(L, couleur.B);
+	return 3;
+}
+
 int L_BrushEnable(lua_State* L)
 {
 	Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
@@ -144,6 +155,7 @@ void Button_Brush_Factory(void)
 		lua_register(L,"getbrushsize",L_GetBrushSize);
 		lua_register(L,"getpicturesize",L_GetPictureSize);
 		lua_register(L,"setcolor",L_SetColor);
+		lua_register(L,"getcolor",L_GetColor);
 		lua_register(L,"brushenable",L_BrushEnable);
 
 		// For debug only
