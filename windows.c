@@ -213,7 +213,7 @@ void Set_back_color(byte color)
 ///
 /// Redraw the cell in the menu palette for ::Fore_color.
 /// This function checks bounds, it won't draw anything if Fore_color is not visible.
-/// @param id:Color number to frame
+/// @param id: Color number to frame
 void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;

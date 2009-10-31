@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-/// @file Window engine and interface management
+/// @file engine.c: Window engine and interface management
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
