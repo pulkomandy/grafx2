@@ -21,8 +21,9 @@
 ///@file init.h
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
-
+  
 T_Gui_skin *Load_graphics(const char * skin_file);
+void Set_current_skin(const char *skinfile, T_Gui_skin *gfx);
 void Init_buttons(void);
 void Init_operations(void);
 void Init_brush_container(void);

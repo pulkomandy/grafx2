@@ -159,7 +159,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
 	comp.r=red;
 	comp.g=green;
 	comp.b=blue;
-	SDL_SetPalette(Screen_SDL, SDL_LOGPAL, &comp, color, 1);
+	SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, &comp, color, 1);
 }
 
 void Wait_end_of_click(void)

@@ -75,9 +75,6 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-// filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS];
-
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
@@ -173,18 +170,18 @@ void Error_function(int error_code, const char *filename, int line_number, const
 }
 
 // --------------------- Analyse de la ligne de commande ---------------------
-void Analyze_command_line(int argc, char * argv[])
+void Analyze_command_line(int argc,char * argv[])
 {
   char *buffer ;
   int index;
 
 
-  File_in_command_line = 0;
-  Resolution_in_command_line = 0;
+  File_in_command_line=0;
+  Resolution_in_command_line=0;
   
-  Current_resolution = Config.Default_resolution;
+  Current_resolution=Config.Default_resolution;
   
-  for (index = 1; index<argc; index++)
+  for (index=1; index<argc; index++)
   {
     if ( !strcmp(argv[index],"/?") ||
          !strcmp(argv[index],"/h") ||
@@ -199,9 +196,9 @@ void Analyze_command_line(int argc, char * argv[])
       // mode
       index++;
       if (index<argc)
-      {
+      {    
         Resolution_in_command_line = 1;
-        Current_resolution = Convert_videomode_arg(argv[index]);
+        Current_resolution=Convert_videomode_arg(argv[index]);
         if (Current_resolution == -1)
         {
           Error(ERROR_COMMAND_LINE);
@@ -278,7 +275,7 @@ void Analyze_command_line(int argc, char * argv[])
       index++;
       if (index<argc)
       {
-        strcpy(Gui_skin_file, argv[index]);
+        strcpy(Config.Skin_file,argv[index]);
       }
       else
       {
@@ -290,31 +287,24 @@ void Analyze_command_line(int argc, char * argv[])
     else
     {
       // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-      if (File_in_command_line > 1)
+      if (File_in_command_line)
       {
-        // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
+        // plusieurs noms de fichier en argument
         Error(ERROR_COMMAND_LINE);
         Display_syntax();
         exit(0);
       }
       else if (File_exists(argv[index]))
       {
-		File_in_command_line ++;
-		buffer = Realpath(argv[index], NULL);
+        File_in_command_line=1;
 
-		if (File_in_command_line == 1)
-		{
-			// Separate path from filename
-			Extract_path(Main_file_directory, buffer);
-			Extract_filename(Main_filename, buffer);
-			DEBUG(Main_filename, 0);
-			free(buffer);
-		} else {
-			Extract_path(Spare_file_directory, buffer);
-			Extract_filename(Spare_filename, buffer);
-			DEBUG(Spare_filename, 1);
-			free(buffer);
-		}
+        // On récupère le chemin complet du paramètre
+        // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
+        buffer=Realpath(argv[index],NULL);
+        Extract_path(Main_file_directory, buffer);
+        Extract_filename(Main_filename, buffer);
+        free(buffer);
+        chdir(Main_file_directory);
       }
       else
       {
@@ -333,6 +323,7 @@ int Init_program(int argc,char * argv[])
   int temp;
   int starting_videomode;
   char program_directory[MAX_PATH_CHARACTERS];
+  T_Gui_skin *gfx;
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -555,48 +546,35 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  Analyze_command_line(argc, argv);
+  Analyze_command_line(argc,argv);
 
   Current_help_section=0;
   Help_position=0;
 
   // Load sprites, palette etc.
-  strcpy(Gui_skin_file,Config.Skin_file);
-  Gfx = Load_graphics(Gui_skin_file);
-  if (Gfx == NULL)
+  gfx = Load_graphics(Config.Skin_file);
+  if (gfx == NULL)
   {
-    Gfx = Load_graphics("skin_modern.png");
-    if (Gfx == NULL)
+    gfx = Load_graphics("skin_modern.png");
+    if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
       Error(ERROR_GUI_MISSING);
     }
   }
-  Config.Fav_menu_colors[0] = Gfx->Default_palette[Gfx->Color_black];
-  Config.Fav_menu_colors[1] = Gfx->Default_palette[Gfx->Color_dark];
-  Config.Fav_menu_colors[2] = Gfx->Default_palette[Gfx->Color_light];
-  Config.Fav_menu_colors[3] = Gfx->Default_palette[Gfx->Color_white];
-  
-  MC_Black = Gfx->Color_black;
-  MC_Dark =  Gfx->Color_dark;
-  MC_Light = Gfx->Color_light;
-  MC_White = Gfx->Color_white;
-  MC_Trans = Gfx->Color_trans;
-  
-  // Infos sur les trames (Sieve)
-  Sieve_mode=0;
-  Copy_preset_sieve(0);
-
-  // Transfert des valeurs du .INI qui ne changent pas dans des variables
-  // plus accessibles:
-  // Let's load the colors from the skin instead !
+  Set_current_skin(Config.Skin_file, gfx);
+  Fore_color=MC_White;
+  Back_color=MC_Black;
+  // Override colors
   // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
   // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
   Compute_optimal_menu_colors(Gfx->Default_palette);
-  Fore_color=MC_White;
-  Back_color=MC_Black;
+    
+  // Infos sur les trames (Sieve)
+  Sieve_mode=0;
+  Copy_preset_sieve(0);
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
@@ -657,7 +635,7 @@ int Init_program(int argc,char * argv[])
   // Brouillon_* et pas les infos contenues dans la page de brouillon 
   // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
   // poser de problèmes, alors...
-  if (File_in_command_line == 1)
+  if (File_in_command_line)
   {
     strcpy(Spare_file_directory,Spare_current_directory);
     strcpy(Spare_filename,"NO_NAME.GIF");
@@ -815,20 +793,11 @@ int main(int argc,char * argv[])
     if (Config.Opening_message && (!File_in_command_line))
       Button_Message_initial();
   
-    switch (File_in_command_line)
+    if (File_in_command_line)
     {
-		case 2:
-			Button_Reload();
-			DEBUG(Main_filename, 0);
-			DEBUG(Spare_filename, 0);
-			Button_Page();
-			// no break ! proceed with the other file now
-		case 1:
-			Button_Reload();
-			Resolution_in_command_line = 0;
-		default:
-			break;
-	}
+      Button_Reload();
+      Resolution_in_command_line=0;
+    }
   }
   Main_handler();
 

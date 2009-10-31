@@ -2472,3 +2472,28 @@ void Init_brush_container(void)
     Brush_container[i].Brush = NULL;
   }
 }
+
+void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
+{
+  // Free previous one
+  free(Gfx);
+  
+  // Assign main skin pointer
+  Gfx = gfx;
+
+  // Change config  
+  free(Config.Skin_file);
+  Config.Skin_file = strdup(skinfile);
+
+  Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
+  Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
+  Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
+  Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
+  
+  // Reassign GUI color indices
+  MC_Black = gfx->Color_black;
+  MC_Dark =  gfx->Color_dark;
+  MC_Light = gfx->Color_light;
+  MC_White = gfx->Color_white;
+  MC_Trans = gfx->Color_trans;
+}

@@ -309,10 +309,10 @@ void Button_Select_forecolor(void)
     // Check if it's a double-click    
     if (time_click - time_previous < Config.Double_click_speed)
     {
-    	// Open palette window
-    	Button_Palette();
+      // Open palette window
+      Button_Palette();
     }
-  }	  
+  }
   else if (color!=-1)
   {
     Hide_cursor();
@@ -964,8 +964,8 @@ void Add_font_or_skin(const char *name)
     fname=name;
   namelength = strlen(fname);
   if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, "skin_", 5)
-	&& (!strcasecmp(fname+namelength-4,".png") 
-		|| !strcasecmp(fname+namelength-4,".gif")))
+    && (!strcasecmp(fname+namelength-4,".png") 
+    || !strcasecmp(fname+namelength-4,".gif")))
   {
     Add_element_to_list(&Skin_files_list, name, 0);  
     
@@ -976,8 +976,8 @@ void Add_font_or_skin(const char *name)
     strcpy(Skin_files_list.First->Full_name, fname);
     // Reformat the short name differently
     strcpy(Skin_files_list.First->Short_name,
-		Format_filename(Skin_files_list.First->Full_name, 0)
-	);
+      Format_filename(Skin_files_list.First->Full_name, 0)
+    );
   }
   else if (namelength>=10 && !strncasecmp(fname, "font_", 5) && (!strcasecmp(fname+namelength-4,".png")))
   {
@@ -1031,8 +1031,13 @@ void Button_Skins(void)
   char * cursors[] = { "Solid", "Transparent", "Thin" };
   T_Gui_skin * gfx = NULL;
 
+
   #define FILESEL_Y 34
 
+  // Show preferred colors
+  Set_color(MC_Dark, Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B);
+  Set_color(MC_Light, Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B);
+  
   // --- Read the contents of skins/ directory ------------------
   
   // Here we use the same data container as the fileselectors.
@@ -1067,11 +1072,11 @@ void Button_Skins(void)
 
   // List of skins
   skin_list = Window_set_list_button(
-    // Fileselector
-    Window_set_special_button(8, FILESEL_Y + 1, 144, 80), // 2
+  // Fileselector
+  Window_set_special_button(8, FILESEL_Y + 1, 144, 80), // 2
     // Scroller for the fileselector
     (file_scroller = Window_set_scroller_button(155, FILESEL_Y - 1, 82,
-		Skin_files_list.Nb_elements, 10, 0)), // 3
+    Skin_files_list.Nb_elements, 10, 0)), // 3
     Draw_one_skin_name); // 4
   
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
@@ -1086,17 +1091,17 @@ void Button_Skins(void)
 
   // Dropdown list to choose cursor type
   cursor_dropdown = Window_set_dropdown_button(172, 69, 104, 11, 0,
-	cursors[selected_cursor], 1, 0, 1, RIGHT_SIDE|LEFT_SIDE); // 7
+    cursors[selected_cursor], 1, 0, 1, RIGHT_SIDE|LEFT_SIDE); // 7
   for (temp = 0; temp<3; temp++)
     Window_dropdown_add_item(cursor_dropdown, temp, cursors[temp]);
 
   Window_set_normal_button(172, 87, 14, 14,
-	(Config.Display_image_limits)?"X":" ", -1, 1, SDLK_LAST); // 8
+    (Config.Display_image_limits)?"X":" ", -1, 1, SDLK_LAST); // 8
   Print_in_window( 190, 85,"Draw picture", MC_Dark, MC_Light);
   Print_in_window( 190, 94,"limits", MC_Dark, MC_Light);
 
   Window_set_normal_button(172, 111, 14, 14,
-	(Config.Separate_colors)?"X":" ", -1, 1, SDLK_LAST); // 9
+    (Config.Separate_colors)?"X":" ", -1, 1, SDLK_LAST); // 9
   Print_in_window( 190, 109,"Separate", MC_Dark, MC_Light);
   Print_in_window( 190, 118,"colors", MC_Dark, MC_Light);
   
@@ -1116,66 +1121,77 @@ void Button_Skins(void)
 
     switch(clicked_button)
     {
-		case 1 : // OK
-			break;
-		case 2 : // doesn't happen
-			break;
-		case 3 : // doesn't happen
-			break;
-		case 4 : // a file is selected
+      case 1 : // OK
+        break;
+      case 2 : // doesn't happen
+        break;
+      case 3 : // doesn't happen
+        break;
+      case 4 : // a file is selected
 
-			// (Re-)load GUI graphics from selected skins
-			strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
-				skin_list->List_start + skin_list->Cursor_position)->Full_name);
+        // (Re-)load GUI graphics from selected skins
+        strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
+          skin_list->List_start + skin_list->Cursor_position)->Full_name);
 
-			gfx = Load_graphics(skinsdir);
-			if (gfx == NULL) // Error
-			{
-				Verbose_error_message(Gui_loading_error_message);
-  			// Update preview
-				Window_rectangle(4, 14, 174, 16, MC_Light);
-			}
-      else
-      {
-  			// Update preview
-  			// The new palette is not in place but the skin is loaded using the
-  			// new color indexes, so we have to reverse-remap it...
-  			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
-  				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-  				{
-  					if (gfx->Preview[offs_y][x_pos] == gfx->Color_black)
-  						Pixel_in_window(x, y, MC_Black);
-  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_dark)
-  						Pixel_in_window(x, y,  MC_Dark);
-  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_white)
-  						Pixel_in_window(x, y, MC_White);
-  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_light)
-  						Pixel_in_window(x, y, MC_Light);
-  				}
-		  }
-			Update_window_area(4, 14, 174, 16);
+        gfx = Load_graphics(skinsdir);
+        if (gfx == NULL) // Error
+        {
+          Verbose_error_message(Gui_loading_error_message);
+          // Update preview
+          Window_rectangle(4, 14, 174, 16, MC_Light);
+        }
+        else
+        {
+          // Update preview
+          
+          // Display the bitmap according to its own color indices
+          for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+          for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+          {
+            if (gfx->Preview[offs_y][x_pos] == gfx->Color_black)
+              Pixel_in_window(x, y, MC_Black);
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_dark)
+              Pixel_in_window(x, y,  MC_Dark);
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_white)
+              Pixel_in_window(x, y, MC_White);
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_light)
+              Pixel_in_window(x, y, MC_Light);
+          }
+          // Actualize current screen according to preferred GUI colors
+          Set_color(
+            MC_Dark, 
+            gfx->Default_palette[gfx->Color_dark].R,
+            gfx->Default_palette[gfx->Color_dark].G,
+            gfx->Default_palette[gfx->Color_dark].B);
+          Set_color(
+            MC_Light, 
+            gfx->Default_palette[gfx->Color_light].R,
+            gfx->Default_palette[gfx->Color_light].G,
+            gfx->Default_palette[gfx->Color_light].B);
+        }
+        Update_window_area(4, 14, 174, 16);
 
-			break;
-		case 5 : // Font dropdown
-			selected_font = Window_attribute2; // Get the index of the chosen font.
-			break;
-			// 6: Cancel
-		case 7 : // Cursor
-			selected_cursor = Window_attribute2;
-			break;
-		case 8: // Display limits
-			showlimits = !showlimits;
-			Hide_cursor();
-			Print_in_window(175, 90, (showlimits)?"X":" ", MC_Black, MC_Light);
-			Display_cursor();
-			break;
-		case 9: // Separate colors
-			separatecolors = !separatecolors;
-			Hide_cursor();
-			Print_in_window(175, 114, (separatecolors)?"X":" ", MC_Black, MC_Light);
-			Display_cursor();
-			break;
-	}
+        break;
+      case 5 : // Font dropdown
+        selected_font = Window_attribute2; // Get the index of the chosen font.
+        break;
+      // 6: Cancel
+      case 7 : // Cursor
+        selected_cursor = Window_attribute2;
+        break;
+      case 8: // Display limits
+        showlimits = !showlimits;
+        Hide_cursor();
+        Print_in_window(175, 90, (showlimits)?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 9: // Separate colors
+        separatecolors = !separatecolors;
+        Hide_cursor();
+        Print_in_window(175, 114, (separatecolors)?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+    }
   }
   while ( (clicked_button!=1) && (clicked_button !=6) && (Key != SDLK_ESCAPE));
 
@@ -1185,48 +1201,38 @@ void Button_Skins(void)
 
     if (gfx != NULL)
     {
-      free(Gfx);
-      Gfx = gfx;
-      
-      free(Config.Skin_file);
-	    Config.Skin_file = strdup(skinsdir);
-	    
-	    Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
-      Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
-      Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
-      Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
-      
-      MC_Black = gfx->Color_black;
-      MC_Dark =  gfx->Color_dark;
-      MC_Light = gfx->Color_light;
-      MC_White = gfx->Color_white;
-      MC_Trans = gfx->Color_trans;
+      Set_current_skin(skinsdir, gfx);
     }
-	  // (Re-)load the selected font
-	  new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
-	  if (new_font)
-	  {
-	    const char * fname;
-	    
-	    free(Menu_font);
-	    Menu_font = new_font;
-	    fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
-	    free(Config.Font_file);
-	    Config.Font_file = strdup(fname);
-	  }
+    // (Re-)load the selected font
+    new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
+    if (new_font)
+    {
+      const char * fname;
+      
+      free(Menu_font);
+      Menu_font = new_font;
+      fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
+      free(Config.Font_file);
+      Config.Font_file = strdup(fname);
+    }
     // Confirm the change of cursor shape
-	  Config.Cursor = selected_cursor;
-	  Config.Display_image_limits = showlimits;
-	  Config.Separate_colors = separatecolors;
+    Config.Cursor = selected_cursor;
+    Config.Display_image_limits = showlimits;
+    Config.Separate_colors = separatecolors;
 
-	  // Now find the best colors for the new skin in the current palette
-	  // and remap the skin
-	  Compute_optimal_menu_colors(Main_palette);
+    // Now find the best colors for the new skin in the current palette
+    // and remap the skin
+    Compute_optimal_menu_colors(Main_palette);
 
+  }
+  else
+  {
+    Set_palette(Main_palette);
   }
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
+  
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Display_menu();
   Display_cursor();
@@ -1236,7 +1242,7 @@ void Button_Skins(void)
 //---------------------------- Changement de page ----------------------------
 void Button_Page(void)
 {
-	byte   factor_index;
+  byte   factor_index;
   char   Temp_buffer[256];
 
   Hide_cursor();
@@ -1502,30 +1508,30 @@ void Display_modes_list(short list_start, short cursor_position)
     if(Video_mode[current_mode].Fullscreen == 0)
       memcpy(str+9,"   Window          ",20);
     else
-	{
+    {
       memcpy(str+9," Fullscreen ",13);
 
-	  if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*4)
-		  ratio="    4:3";
-	  else if (Video_mode[current_mode].Width*9 == Video_mode[current_mode].Height*16)
-		  ratio="   16:9";
-	  else if (Video_mode[current_mode].Width*10 == Video_mode[current_mode].Height*16)
-		  ratio="  16:10";
-	  else if (Video_mode[current_mode].Width*145 == Video_mode[current_mode].Height*192)
-		  ratio="192:145";
-	  else if (Video_mode[current_mode].Width*2 == Video_mode[current_mode].Height*3)
-		  ratio="    3:2";
-	  else if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*5)
-		  ratio="    5:3";
-	  else if (Video_mode[current_mode].Width*4 == Video_mode[current_mode].Height*5)
-		  ratio="    5:4";
-	  else if (Video_mode[current_mode].Width*16 == Video_mode[current_mode].Height*25)
-		  ratio="  25:16";
-	  else
-		  ratio="       ";
-
-	  strcpy(str+21,ratio);
-	}
+      if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*4)
+        ratio="    4:3";
+      else if (Video_mode[current_mode].Width*9 == Video_mode[current_mode].Height*16)
+        ratio="   16:9";
+      else if (Video_mode[current_mode].Width*10 == Video_mode[current_mode].Height*16)
+        ratio="  16:10";
+      else if (Video_mode[current_mode].Width*145 == Video_mode[current_mode].Height*192)
+        ratio="192:145";
+      else if (Video_mode[current_mode].Width*2 == Video_mode[current_mode].Height*3)
+        ratio="    3:2";
+      else if (Video_mode[current_mode].Width*3 == Video_mode[current_mode].Height*5)
+        ratio="    5:3";
+      else if (Video_mode[current_mode].Width*4 == Video_mode[current_mode].Height*5)
+        ratio="    5:4";
+      else if (Video_mode[current_mode].Width*16 == Video_mode[current_mode].Height*25)
+        ratio="  25:16";
+      else
+        ratio="       ";
+    
+      strcpy(str+21,ratio);
+    }
 
     Print_in_window(38,y_pos,str,text_color,background_color);
   }
@@ -2698,7 +2704,7 @@ void Load_picture(byte image)
         Brush_width=1;
         *Brush=Fore_color;
 
-    	free(Smear_brush);
+        free(Smear_brush);
         Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
         Smear_brush_height=MAX_PAINTBRUSH_SIZE;
         Smear_brush_width=MAX_PAINTBRUSH_SIZE;
@@ -5642,7 +5648,7 @@ void Button_Text()
       cursor_position = font_list->Cursor_position;
       
       free(new_brush);
-	  new_brush = NULL;
+      new_brush = NULL;
       Close_window();
       Unselect_button(BUTTON_TEXT);
       Display_cursor();
