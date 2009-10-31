@@ -272,6 +272,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 
   // Carré "noir"
   MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  Fav_menu_colors[0] = gfx->Default_palette[MC_Black];
   do
   {
     if (++cursor_x>=gui->w)
@@ -283,6 +284,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   } while(color==MC_Black);
   // Carré "foncé"
   MC_Dark=color;
+  Fav_menu_colors[1] = gfx->Default_palette[MC_Dark];
   do
   {
     if (++cursor_x>=gui->w)
@@ -294,6 +296,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   } while(color==MC_Dark);
   // Carré "clair"
   MC_Light=color;
+  Fav_menu_colors[2] = gfx->Default_palette[MC_Light];
   do
   {
     if (++cursor_x>gui->w)
@@ -305,6 +308,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   } while(color==MC_Light);
   // Carré "blanc"
   MC_White=color;
+  Fav_menu_colors[3] = gfx->Default_palette[MC_White];
   do
   {
     if (++cursor_x>=gui->w)

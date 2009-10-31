@@ -1057,6 +1057,14 @@ void Button_Skins(void)
   Sort_list_of_files(&Font_files_list);
   
   selected_font = Find_file_in_fileselector(&Font_files_list, Config.Font_file);
+
+  // Do this before setting up the skin list because it will redraw itself using the old colors...
+  Old_black = MC_Black;
+  Old_dark = MC_Dark;
+  Old_light = MC_Light;
+  Old_white = MC_White;
+  Old_trans = MC_Trans;
+
   
   // --------------------------------------------------------------
 
@@ -1116,12 +1124,6 @@ void Button_Skins(void)
   Update_window_area(0, 0, Window_width, Window_height);
 
   Display_cursor();
-
-  Old_black = MC_Black;
-  Old_dark = MC_Dark;
-  Old_light = MC_Light;
-  Old_white = MC_White;
-  Old_trans = MC_Trans;
 
   do
   {
@@ -1217,31 +1219,17 @@ void Button_Skins(void)
 	  Config.Display_image_limits = showlimits;
 	  Config.Separate_colors = separatecolors;
 
-	  // We loaded a new menu but not changed the palette
-	  // So we have to remap FROM MC_ TO Old_ and not the reverse way...
-	  SWAP_BYTES(Old_black, MC_Black);
-	  SWAP_BYTES(Old_dark, MC_Dark);
-	  SWAP_BYTES(Old_light, MC_Light);
-	  SWAP_BYTES(Old_white, MC_White);
-	  SWAP_BYTES(Old_trans, MC_Trans);
-	  Remap_menu_sprites();
-	  Old_black = MC_Black;
-	  Old_dark = MC_Dark;
-	  Old_light = MC_Light;
-	  Old_white = MC_White;
-	  Old_trans = MC_Trans;
+	  // Now find the best colors for the new skin in the current palette
+	  // and remap the skin
+	  Compute_optimal_menu_colors(Main_palette);
 
   } else {
+	  // Get the initial colors back
 	  MC_Black = Old_black;
 	  MC_Dark = Old_dark;
 	  MC_Light = Old_light;
 	  MC_White = Old_white;
 	  MC_Trans = Old_trans;
-
-	  // TODO : il faudrait aussi restaurer la preview du skin initial, soit ici
-	  // soit la prochaine fois qu'on ouvre la fenêtre. Une solution est de
-	  // ne pas utiliser une variable globale pour skin_logo mais de la mettre
-	  // dans gfx à la place.
   }
 
   Close_window();
