@@ -2678,7 +2678,7 @@ void Remap_menu_sprites()
 	// Skin preview
 	for (j = 0; j < 173; j++)
 		for (i = 0; i < 16; i++)
-			Remap_pixel(&skin_logo[i][j]);
+			Remap_pixel(&Gfx->preview[i][j]);
   }
   Clear_border(MC_Black);
 }

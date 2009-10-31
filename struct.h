@@ -426,6 +426,10 @@ typedef struct
   /// A default 256-color palette.
   T_Palette Default_palette;
 
+  /// Preview for displaying in the skin dialog
+  byte preview[16][173];
+
+
 
 } T_Gui_skin;
 

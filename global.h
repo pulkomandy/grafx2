@@ -805,9 +805,6 @@ GFX2_GLOBAL byte * Menu_font;
 /// Pointer to the current active skin.
 GFX2_GLOBAL T_Gui_skin * Gfx;
 
-/// Logo of skin
-byte skin_logo[16][173];
-
 // -- Help data
 
 /// Index of the ::Help_section shown by the Help screen.

@@ -1111,7 +1111,7 @@ void Button_Skins(void)
 
   for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
     for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-      Pixel_in_window(x, y, skin_logo[offs_y][x_pos]);
+      Pixel_in_window(x, y, Gfx->preview[offs_y][x_pos]);
 
   Update_window_area(0, 0, Window_width, Window_height);
 
@@ -1153,13 +1153,13 @@ void Button_Skins(void)
 			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
 				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
 				{
-					if (skin_logo[offs_y][x_pos] == MC_Black)
+					if (gfx->preview[offs_y][x_pos] == MC_Black)
 						Pixel_in_window(x, y, Old_black);
-					else if (skin_logo[offs_y][x_pos] == MC_Dark)
+					else if (gfx->preview[offs_y][x_pos] == MC_Dark)
 						Pixel_in_window(x, y, Old_dark);
-					else if (skin_logo[offs_y][x_pos] == MC_Light)
+					else if (gfx->preview[offs_y][x_pos] == MC_Light)
 						Pixel_in_window(x, y, Old_light);
-					else if (skin_logo[offs_y][x_pos] == MC_White)
+					else if (gfx->preview[offs_y][x_pos] == MC_White)
 						Pixel_in_window(x, y, Old_white);
 				}
 			Update_window_area(4, 14, 174, 16);

@@ -350,7 +350,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   cursor_x += MENU_WIDTH;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "logo"))
 	return 1;
-  if (Read_GUI_block(gui, cursor_x, cursor_y, skin_logo, 173, 16, "logo", 0))
+  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->preview, 173, 16, "logo", 0))
 	return 1;
   cursor_y+=MENU_HEIGHT;
 
