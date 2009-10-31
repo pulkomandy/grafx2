@@ -1138,7 +1138,7 @@ void Button_Skins(void)
         {
           Verbose_error_message(Gui_loading_error_message);
           // Update preview
-          Window_rectangle(4, 14, 174, 16, MC_Light);
+          Window_rectangle(6, 14, 173, 16, MC_Light);
         }
         else
         {
@@ -1169,7 +1169,7 @@ void Button_Skins(void)
             gfx->Default_palette[gfx->Color_light].G,
             gfx->Default_palette[gfx->Color_light].B);
         }
-        Update_window_area(4, 14, 174, 16);
+        Update_window_area(6, 14, 173, 16);
 
         break;
       case 5 : // Font dropdown
