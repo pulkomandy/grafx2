@@ -26,8 +26,10 @@
 #include "buttons.h"
 #include "engine.h"
 #include "errors.h"
+#include "filesel.h" // Get_item_by_index
 #include "global.h"
 #include "graph.h"
+#include "io.h" // find_last_slash
 #include "misc.h"
 #include "readline.h"
 #include "sdlscreen.h"
@@ -113,20 +115,67 @@ int L_GetColor(lua_State* L)
 	return 3;
 }
 
-int L_BrushEnable(lua_State* L)
+int L_BrushEnable(__attribute__((unused)) lua_State* L)
 {
 	Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 	return 0;
 }
 
+// Handlers for window internals
+T_Fileselector Scripts_list;
+
+// Callback to display a skin name in the list
+void Draw_script_name(word x, word y, word index, byte highlighted)
+{
+	T_Fileselector_item * current_item;
+
+	DEBUG("draw",index);
+	if (Scripts_list.Nb_elements)
+	{
+		current_item = Get_item_by_index(&Scripts_list, index);
+		Print_in_window(x, y, current_item->Short_name, MC_Black,
+			(highlighted)?MC_Dark:MC_Light);
+	}
+}
+
+// Add a skin to the list
+void Add_script(const char *name)
+{
+	Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
+}
+
 void Button_Brush_Factory(void)
 {
 	short clicked_button;
+	T_List_button* scriptlist;
+	T_Scroller_button* scriptscroll;
+	char scriptdir[MAX_PATH_CHARACTERS];
 
-	Open_window(154, 162, "Brush Factory");
+	Open_window(175, 162, "Brush Factory");
+
+	// Here we use the same data container as the fileselectors.
+	// Reinitialize the list
+	Free_fileselector_list(&Scripts_list);
+	strcpy(scriptdir, Data_directory);
+	strcat(scriptdir, "scripts/");
+	// Add each found file to the list
+	For_each_file(scriptdir, Add_script);
+	// Sort it
+	Sort_list_of_files(&Scripts_list);
 
 	Window_set_normal_button(77, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 	Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, 0); // 2
+
+	#define FILESEL_Y 18
+	Window_display_frame_in(6, FILESEL_Y - 2, 148, 84); // File selector
+	scriptlist = Window_set_list_button(
+		// Fileselector
+		Window_set_special_button(8, FILESEL_Y + 1, 144, 80), // 3
+		// Scroller for the fileselector
+		(scriptscroll = Window_set_scroller_button(154, FILESEL_Y - 1, 82,
+			Scripts_list.Nb_elements, 10, 0)), // 4
+		Draw_script_name); // 5
+	Window_redraw_list(scriptlist);
 
 	Update_window_area(0, 0, Window_width, Window_height);
 	Display_cursor();
@@ -161,7 +210,10 @@ void Button_Brush_Factory(void)
 		// For debug only
 		// luaL_openlibs(L);
 
-		if (luaL_loadfile(L,"./test.lua") != 0)
+		strcat(scriptdir, Get_item_by_index(&Scripts_list,
+					scriptlist->List_start + scriptlist->Cursor_position)
+						-> Full_name);
+		if (luaL_loadfile(L,scriptdir) != 0)
 			Verbose_error_message(lua_tostring(L, 1));
 		else if (lua_pcall(L, 0, 0, 0) != 0)
 			Verbose_error_message(lua_tostring(L, 1));

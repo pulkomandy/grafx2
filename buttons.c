@@ -961,13 +961,13 @@ void Add_font_or_skin(const char *name)
   if (fname)
     fname++;
   else
-    fname=name;
+    fname = name;
   namelength = strlen(fname);
   if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, "skin_", 5)
-    && (!strcasecmp(fname+namelength-4,".png") 
-    || !strcasecmp(fname+namelength-4,".gif")))
+	&& (!strcasecmp(fname + namelength - 4,".png")
+		|| !strcasecmp(fname + namelength - 4,".gif")))
   {
-    Add_element_to_list(&Skin_files_list, name, 0);  
+    Add_element_to_list(&Skin_files_list, name, 0);
     
     if (fname[0]=='\0')
       return;
@@ -979,9 +979,10 @@ void Add_font_or_skin(const char *name)
       Format_filename(Skin_files_list.First->Full_name, 0)
     );
   }
-  else if (namelength>=10 && !strncasecmp(fname, "font_", 5) && (!strcasecmp(fname+namelength-4,".png")))
+  else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
+		&& (!strcasecmp(fname + namelength - 4, ".png")))
   {
-    Add_element_to_list(&Font_files_list, name, 0);  
+    Add_element_to_list(&Font_files_list, name, 0);
     
     if (fname[0]=='\0')
       return;
@@ -989,7 +990,8 @@ void Add_font_or_skin(const char *name)
     // Remove directory from full name
     strcpy(Font_files_list.First->Full_name, fname);
     // Reformat the short name differently
-    strcpy(Font_files_list.First->Short_name,Format_font_filename(Font_files_list.First->Full_name));
+    strcpy(Font_files_list.First->Short_name,
+		Format_font_filename(Font_files_list.First->Full_name));
   }
    
 }
@@ -1002,7 +1004,8 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   if (Skin_files_list.Nb_elements)
   {
     current_item = Get_item_by_index(&Skin_files_list, index);
-    Print_in_window(x,y,current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
+    Print_in_window(x, y, current_item->Short_name, MC_Black,
+		(highlighted)?MC_Dark:MC_Light);
   }
 }
 
@@ -1026,7 +1029,7 @@ void Button_Skins(void)
   byte separatecolors = Config.Separate_colors;
   byte showlimits = Config.Display_image_limits;
 
-  word x,y, x_pos, offs_y;
+  word x, y, x_pos, offs_y;
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
   T_Gui_skin * gfx = NULL;
