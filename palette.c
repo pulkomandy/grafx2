@@ -433,9 +433,9 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
     rgb[index].R=Main_palette[color].R;
     rgb[index].G=Main_palette[color].G;
     rgb[index].B=Main_palette[color].B;
-    Main_palette[color].R=Fav_menu_colors[index].R;
-    Main_palette[color].G=Fav_menu_colors[index].G;
-    Main_palette[color].B=Fav_menu_colors[index].B;
+    Main_palette[color].R=Config.Fav_menu_colors[index].R;
+    Main_palette[color].G=Config.Fav_menu_colors[index].G;
+    Main_palette[color].B=Config.Fav_menu_colors[index].B;
   }
 
   //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles

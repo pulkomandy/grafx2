@@ -2554,12 +2554,12 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du noir
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[0].R, Fav_menu_colors[0].G, Fav_menu_colors[0].B,palette,table);
+    (Config.Fav_menu_colors[0].R, Config.Fav_menu_colors[0].G, Config.Fav_menu_colors[0].B,palette,table);
   MC_Black=table[0];
 
   // Recherche du blanc
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[3].R, Fav_menu_colors[3].G, Fav_menu_colors[3].B,palette,table);
+    (Config.Fav_menu_colors[3].R, Config.Fav_menu_colors[3].G, Config.Fav_menu_colors[3].B,palette,table);
   if (MC_Black!=table[0])
     MC_White=table[0];
   else
@@ -2567,7 +2567,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris clair
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[2].R, Fav_menu_colors[2].G, Fav_menu_colors[2].B,palette,table);
+    (Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
     MC_Light=table[0];
   else
@@ -2580,7 +2580,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris foncé
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[1].R, Fav_menu_colors[1].G, Fav_menu_colors[1].B,palette,table);
+    (Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
     MC_Dark=table[0];
   else
@@ -2678,7 +2678,7 @@ void Remap_menu_sprites()
 	// Skin preview
 	for (j = 0; j < 173; j++)
 		for (i = 0; i < 16; i++)
-			Remap_pixel(&Gfx->preview[i][j]);
+			Remap_pixel(&Gfx->Preview[i][j]);
   }
   Clear_border(MC_Black);
 }

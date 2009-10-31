@@ -427,8 +427,18 @@ typedef struct
   T_Palette Default_palette;
 
   /// Preview for displaying in the skin dialog
-  byte preview[16][173];
+  byte Preview[16][173];
 
+  /// Black GUI color index in skin palette
+  byte Color_black;
+  /// Dark GUI color index in skin palette
+  byte Color_dark;
+  /// Light GUI color index in skin palette
+  byte Color_light;
+  /// White GUI color index in skin palette
+  byte Color_white;
+  /// Transparent GUI color index in skin file
+  byte Color_trans;
 
 
 } T_Gui_skin;

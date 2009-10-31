@@ -994,13 +994,6 @@ void Add_font_or_skin(const char *name)
    
 }
 
-// declared in windows.c for remap
-extern byte Old_black;
-extern byte Old_dark;
-extern byte Old_light;
-extern byte Old_white;
-extern byte Old_trans;
-
 // Callback to display a skin name in the list
 void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 {
@@ -1009,8 +1002,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   if (Skin_files_list.Nb_elements)
   {
     current_item = Get_item_by_index(&Skin_files_list, index);
-	// We use Old_ colors because previewing a skin mess up MC_ ...
-    Print_in_window(x,y,current_item->Short_name, Old_black, (highlighted)?Old_dark:Old_light);
+    Print_in_window(x,y,current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
   }
 }
 
@@ -1057,13 +1049,6 @@ void Button_Skins(void)
   Sort_list_of_files(&Font_files_list);
   
   selected_font = Find_file_in_fileselector(&Font_files_list, Config.Font_file);
-
-  // Do this before setting up the skin list because it will redraw itself using the old colors...
-  Old_black = MC_Black;
-  Old_dark = MC_Dark;
-  Old_light = MC_Light;
-  Old_white = MC_White;
-  Old_trans = MC_Trans;
 
   
   // --------------------------------------------------------------
@@ -1119,7 +1104,7 @@ void Button_Skins(void)
 
   for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
     for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-      Pixel_in_window(x, y, Gfx->preview[offs_y][x_pos]);
+      Pixel_in_window(x, y, Gfx->Preview[offs_y][x_pos]);
 
   Update_window_area(0, 0, Window_width, Window_height);
 
@@ -1147,23 +1132,27 @@ void Button_Skins(void)
 			if (gfx == NULL) // Error
 			{
 				Verbose_error_message(Gui_loading_error_message);
+  			// Update preview
+				Window_rectangle(4, 14, 174, 16, MC_Light);
 			}
-
-			// Update preview
-			// The new palette is not in place but the skin is loaded using the
-			// new color indexes, so we have to reverse-remap it...
-			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
-				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-				{
-					if (gfx->preview[offs_y][x_pos] == MC_Black)
-						Pixel_in_window(x, y, Old_black);
-					else if (gfx->preview[offs_y][x_pos] == MC_Dark)
-						Pixel_in_window(x, y, Old_dark);
-					else if (gfx->preview[offs_y][x_pos] == MC_Light)
-						Pixel_in_window(x, y, Old_light);
-					else if (gfx->preview[offs_y][x_pos] == MC_White)
-						Pixel_in_window(x, y, Old_white);
-				}
+      else
+      {
+  			// Update preview
+  			// The new palette is not in place but the skin is loaded using the
+  			// new color indexes, so we have to reverse-remap it...
+  			for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+  				for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+  				{
+  					if (gfx->Preview[offs_y][x_pos] == gfx->Color_black)
+  						Pixel_in_window(x, y, MC_Black);
+  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_dark)
+  						Pixel_in_window(x, y,  MC_Dark);
+  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_white)
+  						Pixel_in_window(x, y, MC_White);
+  					else if (gfx->Preview[offs_y][x_pos] == gfx->Color_light)
+  						Pixel_in_window(x, y, MC_Light);
+  				}
+		  }
 			Update_window_area(4, 14, 174, 16);
 
 			break;
@@ -1192,15 +1181,26 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
-	byte * new_font;
+    byte * new_font;
 
-	  if (gfx != NULL)
-	  {
+    if (gfx != NULL)
+    {
       free(Gfx);
       Gfx = gfx;
       
       free(Config.Skin_file);
 	    Config.Skin_file = strdup(skinsdir);
+	    
+	    Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
+      Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
+      Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
+      Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
+      
+      MC_Black = gfx->Color_black;
+      MC_Dark =  gfx->Color_dark;
+      MC_Light = gfx->Color_light;
+      MC_White = gfx->Color_white;
+      MC_Trans = gfx->Color_trans;
     }
 	  // (Re-)load the selected font
 	  new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
@@ -1223,13 +1223,6 @@ void Button_Skins(void)
 	  // and remap the skin
 	  Compute_optimal_menu_colors(Main_palette);
 
-  } else {
-	  // Get the initial colors back
-	  MC_Black = Old_black;
-	  MC_Dark = Old_dark;
-	  MC_Light = Old_light;
-	  MC_White = Old_white;
-	  MC_Trans = Old_trans;
   }
 
   Close_window();

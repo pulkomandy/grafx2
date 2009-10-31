@@ -550,6 +550,9 @@ int Init_program(int argc,char * argv[])
 
   Analyze_command_line(argc,argv);
 
+  Current_help_section=0;
+  Help_position=0;
+
   // Load sprites, palette etc.
   strcpy(Gui_skin_file,Config.Skin_file);
   Gfx = Load_graphics(Gui_skin_file);
@@ -562,6 +565,17 @@ int Init_program(int argc,char * argv[])
       Error(ERROR_GUI_MISSING);
     }
   }
+  Config.Fav_menu_colors[0] = Gfx->Default_palette[Gfx->Color_black];
+  Config.Fav_menu_colors[1] = Gfx->Default_palette[Gfx->Color_dark];
+  Config.Fav_menu_colors[2] = Gfx->Default_palette[Gfx->Color_light];
+  Config.Fav_menu_colors[3] = Gfx->Default_palette[Gfx->Color_white];
+  
+  MC_Black = Gfx->Color_black;
+  MC_Dark =  Gfx->Color_dark;
+  MC_Light = Gfx->Color_light;
+  MC_White = Gfx->Color_white;
+  MC_Trans = Gfx->Color_trans;
+  
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
