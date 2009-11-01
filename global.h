@@ -112,11 +112,6 @@ GFX2_GLOBAL dword Key_ANSI;
 /// Boolean set to true when the OS/window manager requests the application to close. ie: [X] button
 GFX2_GLOBAL byte Quit_is_required;
 
-/// Divisor for the mouse coordinates recieved. No target currently needs it, should be left at 1.
-GFX2_GLOBAL byte Mouse_fix_factor_X;
-/// Divisor for the mouse coordinates recieved. No target currently needs it, should be left at 1.
-GFX2_GLOBAL byte Mouse_fix_factor_Y;
-
 ///
 /// This boolean is true when the current operation allows changing the
 /// foreground or background color.

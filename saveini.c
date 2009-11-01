@@ -445,11 +445,11 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Y_sensitivity",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=conf->Mouse_fix_factor_X;
+  values[0]=0;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"X_correction_factor",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=conf->Mouse_fix_factor_Y;
+  values[0]=0;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Y_correction_factor",1,values,0)))
     goto Erreur_Retour;
 

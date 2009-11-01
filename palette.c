@@ -801,46 +801,46 @@ void Button_Palette(void)
 
   // Graduation des jauges de couleur
   Block(Window_pos_X + (Menu_factor_X * 179),
-	Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 206),
-	Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 233),
-	Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 179),
-	Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 206),
-	Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 233),
-	Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 179),
-	Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 206),
-	Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   Block(Window_pos_X + (Menu_factor_X * 233),
-	Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-	MC_Dark);
+    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
+    MC_Dark);
   // Jauges de couleur
   red_slider = Window_set_scroller_button(182, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].R*Color_max/255);// 2
   green_slider = Window_set_scroller_button(209, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].G*Color_max/255);// 3
   blue_slider = Window_set_scroller_button(236, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].B*Color_max/255);// 4
 
   if(Palette_view_is_RGB==1) {
-	  Print_in_window(184,71,"R",MC_Dark,MC_Light);
-	  Print_in_window(211,71,"G",MC_Dark,MC_Light);
-	  Print_in_window(238,71,"B",MC_Dark,MC_Light);
+      Print_in_window(184,71,"R",MC_Dark,MC_Light);
+      Print_in_window(211,71,"G",MC_Dark,MC_Light);
+      Print_in_window(238,71,"B",MC_Dark,MC_Light);
       Componant_unit(RGB_scale);
   } else {
-	  Print_in_window(184,71,"H",MC_Dark,MC_Light);
-	  Print_in_window(211,71,"S",MC_Dark,MC_Light);
-	  Print_in_window(238,71,"L",MC_Dark,MC_Light);
+      Print_in_window(184,71,"H",MC_Dark,MC_Light);
+      Print_in_window(211,71,"S",MC_Dark,MC_Light);
+      Print_in_window(238,71,"L",MC_Dark,MC_Light);
       Componant_unit(256);
   }
 
@@ -866,7 +866,7 @@ void Button_Palette(void)
   Window_set_normal_button( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
   reduce_dropdown = Window_set_dropdown_button(222, 17, 60, 14, 60, "Reduce", 0,
-	0, 1, 1); // 11
+    0, 1, 1); // 11
   Window_dropdown_add_item(reduce_dropdown, 0, "to 128");
   Window_dropdown_add_item(reduce_dropdown, 1, "to 64");
   Window_dropdown_add_item(reduce_dropdown, 2, "to 32");
@@ -893,27 +893,27 @@ void Button_Palette(void)
   Window_set_normal_button(96,32,29,14,"HSL"    ,1,1,SDLK_h);   // 22
   Window_set_normal_button(96,47,29,14,"Srt"    ,1,1,SDLK_s);   // 23
 
-  if (Config.Auto_nb_used)
-  {
-	Update_color_count(&used_colors,color_usage);
-
-	Num2str(color_usage[Fore_color], str, 6);
-	Print_in_window(222, 33, str, MC_Black, MC_Light);
-	Print_in_window(222, 42, "pixels", MC_Dark, MC_Light);
-  }
-
-
-
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(263, 74,MC_White,-1);
   Draw_thingumajig(280, 74,MC_White,+1);
   Draw_thingumajig(263,165,MC_Dark,-1);
   Draw_thingumajig(280,165,MC_Dark,+1);
 
-  Update_window_area(0,0,299,188);
-
   Display_cursor();
 
+  if (Config.Auto_nb_used)
+  {
+    Update_color_count(&used_colors,color_usage);
+    
+    Hide_cursor();
+    Print_in_window(222, 42, "pixels", MC_Dark, MC_Light);
+    Num2str(color_usage[Fore_color], str, 6);
+    Print_in_window(222, 33, str, MC_Black, MC_Light);
+    Display_cursor();
+  }
+  
+  Update_window_area(0,0,299,188);
+  
   do
   {
     old_mouse_x=Mouse_X;
@@ -962,8 +962,8 @@ void Button_Palette(void)
                 Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7,MC_Light);
                 Num2str(Fore_color,str,3);
                 Print_in_window(237,58,str,MC_Black,MC_Light);
-				Num2str(color_usage[Fore_color], str, 6);
-				Print_in_window(222, 33, str, MC_Black, MC_Light);
+                Num2str(color_usage[Fore_color], str, 6);
+                Print_in_window(222, 33, str, MC_Black, MC_Light);
                 Update_rect(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*56,Menu_factor_Y*7);
 
                 // Affichage des jauges
@@ -994,13 +994,13 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237,58,str,MC_Black,MC_Light);
-				  {
-					int pixel_count = 0;
-				  	for (i = block_start; i <= block_end; i++)
-						pixel_count += color_usage[i];
-				  	Num2str(pixel_count, str, 6);
-				  }
-				  Print_in_window(222, 33, str, MC_Black, MC_Light);
+                  {
+                    int pixel_count = 0;
+                    for (i = block_start; i <= block_end; i++)
+                    pixel_count += color_usage[i];
+                    Num2str(pixel_count, str, 6);
+                  }
+                  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1018,13 +1018,13 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237,58,str,MC_Black,MC_Light);
-				  {
-					int pixel_count = 0;
-				  	for (i = block_start; i <= block_end; i++)
-						pixel_count += color_usage[i];
-				  	Num2str(pixel_count, str, 6);
-				  }
-				  Print_in_window(222, 33, str, MC_Black, MC_Light);
+                  {
+                    int pixel_count = 0;
+                    for (i = block_start; i <= block_end; i++)
+                      pixel_count += color_usage[i];
+                    Num2str(pixel_count, str, 6);
+                  }
+                  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1041,8 +1041,8 @@ void Button_Palette(void)
                   Block(Window_pos_X+(Menu_factor_X*261),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*32,Menu_factor_Y*7,MC_Light);
                   Num2str(Fore_color,str,3);
                   Print_in_window(237,58,str,MC_Black,MC_Light);
-				  Num2str(Fore_color, str, 6);
-				  Print_in_window(222, 33, str, MC_Black, MC_Light);
+                  Num2str(Fore_color, str, 6);
+                  Print_in_window(222, 33, str, MC_Black, MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
@@ -1439,65 +1439,65 @@ void Button_Palette(void)
 
       case 11: // Reduce
         memcpy(backup_palette, working_palette, sizeof(T_Palette));
-		switch(Window_attribute2) // Get the dropdown value
-		{
-			case 0: // 128
-				reduce_colors_number = 128;
-				break;
-			case 1: // 64
-				reduce_colors_number = 64;
-				break;
-			case 2: // 32
-				reduce_colors_number = 32;
-				break;
-			case 3: // 16
-				reduce_colors_number = 16;
-				break;
-			case 4: // 8
-				reduce_colors_number = 8;
-				break;
-			case 5: // 4
-				reduce_colors_number = 4;
-				break;
-			case 6: // 2
-				reduce_colors_number = 2;
-				break;
-			case 7: // other
-				reduce_colors_number
-					= Requester_window("Enter the max. number of colors",
-						reduce_colors_number);
-				if (reduce_colors_number < 2 || reduce_colors_number >= 256)
-					reduce_colors_number = -1;
-				break;
-		}
-		if (reduce_colors_number > 0)
-		{
-      if (!image_is_backed_up)
-      {
-        Backup_layers(-1);
-        image_is_backed_up=1;
-      }
+        switch(Window_attribute2) // Get the dropdown value
+        {
+            case 0: // 128
+                reduce_colors_number = 128;
+                break;
+            case 1: // 64
+                reduce_colors_number = 64;
+                break;
+            case 2: // 32
+                reduce_colors_number = 32;
+                break;
+            case 3: // 16
+                reduce_colors_number = 16;
+                break;
+            case 4: // 8
+                reduce_colors_number = 8;
+                break;
+            case 5: // 4
+                reduce_colors_number = 4;
+                break;
+            case 6: // 2
+                reduce_colors_number = 2;
+                break;
+            case 7: // other
+                reduce_colors_number
+                    = Requester_window("Enter the max. number of colors",
+                        reduce_colors_number);
+                if (reduce_colors_number < 2 || reduce_colors_number >= 256)
+                    reduce_colors_number = -1;
+                break;
+        }
+        if (reduce_colors_number > 0)
+        {
+            if (!image_is_backed_up)
+            {
+                Backup_layers(-1);
+                image_is_backed_up = 1;
+            }
 
-			Reduce_palette(&used_colors, reduce_colors_number, working_palette,
-					color_usage);
+            Reduce_palette(&used_colors, reduce_colors_number, working_palette,
+                    color_usage);
 
-			if ((Config.Safety_colors) && (used_colors<4))
-			{
-				memcpy(temp_palette, Main_palette, sizeof(T_Palette));
-				memcpy(Main_palette, working_palette, sizeof(T_Palette));
-				Set_nice_menu_colors(color_usage, 0);
-				memcpy(working_palette, Main_palette, sizeof(T_Palette));
-				memcpy(Main_palette, temp_palette, sizeof(T_Palette));
-			}
+            if ((Config.Safety_colors) && (used_colors<4))
+            {
+                memcpy(temp_palette, Main_palette, sizeof(T_Palette));
+                memcpy(Main_palette, working_palette, sizeof(T_Palette));
+                Set_nice_menu_colors(color_usage, 0);
+                memcpy(working_palette, Main_palette, sizeof(T_Palette));
+                memcpy(Main_palette, temp_palette, sizeof(T_Palette));
+            }
 
-			Set_palette(working_palette); // On définit la nouvelle palette
-			Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
-					working_palette, block_start, block_end);
-			memcpy(temp_palette, working_palette, sizeof(T_Palette));
+            Set_palette(working_palette); // On définit la nouvelle palette
+            Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
+                    working_palette, block_start, block_end);
+            memcpy(temp_palette, working_palette, sizeof(T_Palette));
 
-			End_of_modification();
-			need_to_remap = 1;
-		}
+            End_of_modification();
+            need_to_remap = 1;
+        }
         break;
 
       case 12: // Undo

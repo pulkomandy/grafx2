@@ -170,18 +170,18 @@ void Error_function(int error_code, const char *filename, int line_number, const
 }
 
 // --------------------- Analyse de la ligne de commande ---------------------
-void Analyze_command_line(int argc,char * argv[])
+void Analyze_command_line(int argc, char * argv[])
 {
   char *buffer ;
   int index;
 
 
-  File_in_command_line=0;
-  Resolution_in_command_line=0;
+  File_in_command_line = 0;
+  Resolution_in_command_line = 0;
   
-  Current_resolution=Config.Default_resolution;
+  Current_resolution = Config.Default_resolution;
   
-  for (index=1; index<argc; index++)
+  for (index = 1; index<argc; index++)
   {
     if ( !strcmp(argv[index],"/?") ||
          !strcmp(argv[index],"/h") ||
@@ -198,7 +198,7 @@ void Analyze_command_line(int argc,char * argv[])
       if (index<argc)
       {    
         Resolution_in_command_line = 1;
-        Current_resolution=Convert_videomode_arg(argv[index]);
+        Current_resolution = Convert_videomode_arg(argv[index]);
         if (Current_resolution == -1)
         {
           Error(ERROR_COMMAND_LINE);
@@ -287,24 +287,31 @@ void Analyze_command_line(int argc,char * argv[])
     else
     {
       // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-      if (File_in_command_line)
+      if (File_in_command_line > 1)
       {
-        // plusieurs noms de fichier en argument
+        // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
         Error(ERROR_COMMAND_LINE);
         Display_syntax();
         exit(0);
       }
       else if (File_exists(argv[index]))
       {
-        File_in_command_line=1;
+		File_in_command_line ++;
+		buffer = Realpath(argv[index], NULL);
 
-        // On récupère le chemin complet du paramètre
-        // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        buffer=Realpath(argv[index],NULL);
+		if (File_in_command_line == 1)
+		{
+			// Separate path from filename
         Extract_path(Main_file_directory, buffer);
         Extract_filename(Main_filename, buffer);
+			DEBUG(Main_filename, 0);
+			free(buffer);
+		} else {
+			Extract_path(Spare_file_directory, buffer);
+			Extract_filename(Spare_filename, buffer);
+			DEBUG(Spare_filename, 1);
         free(buffer);
-        chdir(Main_file_directory);
+		}
       }
       else
       {
@@ -551,7 +558,7 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  Analyze_command_line(argc,argv);
+  Analyze_command_line(argc, argv);
 
   Current_help_section=0;
   Help_position=0;
@@ -645,6 +652,18 @@ int Init_program(int argc,char * argv[])
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(Screen_width,Screen_height)==0)
     Error(ERROR_MEMORY);
+  // On remet le nom par défaut pour la page de brouillon car il été modifié
+  // par le passage d'un fichier en paramètre lors du traitement précédent.
+  // Note: le fait que l'on ne modifie que les variables globales 
+  // Brouillon_* et pas les infos contenues dans la page de brouillon 
+  // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
+  // poser de problèmes, alors...
+  if (File_in_command_line == 1)
+  {
+    strcpy(Spare_file_directory,Spare_current_directory);
+    strcpy(Spare_filename,"NO_NAME.GIF");
+    Spare_fileformat=DEFAULT_FILEFORMAT;
+  }
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
@@ -797,10 +816,19 @@ int main(int argc,char * argv[])
     if (Config.Opening_message && (!File_in_command_line))
       Button_Message_initial();
   
-    if (File_in_command_line)
+    switch (File_in_command_line)
     {
+		case 2:
       Button_Reload();
-      Resolution_in_command_line=0;
+			DEBUG(Main_filename, 0);
+			DEBUG(Spare_filename, 0);
+			Button_Page();
+			// no break ! proceed with the other file now
+		case 1:
+			Button_Reload();
+			Resolution_in_command_line = 0;
+		default:
+			break;
     }
   }
   Main_handler();

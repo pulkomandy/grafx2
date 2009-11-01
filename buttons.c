@@ -1123,6 +1123,8 @@ void Button_Skins(void)
   do
   {
     clicked_button=Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_SETTINGS, "SKINS");
 
     switch(clicked_button)
     {

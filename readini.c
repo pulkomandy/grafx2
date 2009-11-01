@@ -469,13 +469,13 @@ int Load_INI(T_Config * conf)
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_fix_factor_X=Mouse_fix_factor_X=values[0];
+  // Deprecated setting, unused
 
   if ((return_code=Load_INI_get_values (file,buffer,"Y_correction_factor",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_fix_factor_Y=Mouse_fix_factor_Y=values[0];
+  // Deprecated setting, unused
 
   if ((return_code=Load_INI_get_values (file,buffer,"Cursor_aspect",1,values)))
     goto Erreur_Retour;
