@@ -497,20 +497,6 @@ void Init_preview(short width,short height,long size,int format, enum PIXEL_RATI
 }
 
 
-
-void Draw_palette_preview(void)
-{
-  short index;
-
-  if (Pixel_load_function==Pixel_load_in_preview)
-    for (index=0; index<256; index++)
-      Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
-
-  Update_window_area(183,95,120,80);
-}
-
-
-
 // Calcul du nom complet du fichier
 void Get_full_filename(char * filename, byte is_colorix_format)
 {
