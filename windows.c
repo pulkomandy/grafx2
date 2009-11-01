@@ -1535,8 +1535,8 @@ void Compute_magnifier_data(void)
 /// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index)
 {
-  short center_x;
-  short center_y;
+  int center_x;
+  int center_y;
 
   // Values that need to be computed before switching to the new zoom factor
   if (Cursor_in_menu)
@@ -1545,8 +1545,8 @@ void Change_magnifier_factor(byte factor_index)
   	center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
   } else {
 	// Zoom to cursor
-	center_x = (Paintbrush_X - Main_magnifier_offset_X) * 255 / Main_magnifier_width;
-	center_y = (Paintbrush_Y - Main_magnifier_offset_Y) * 255 / Main_magnifier_height;
+	center_x = (Paintbrush_X - Main_magnifier_offset_X) * 65536 / Main_magnifier_width;
+	center_y = (Paintbrush_Y - Main_magnifier_offset_Y) * 65536 / Main_magnifier_height;
   }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
@@ -1561,8 +1561,8 @@ void Change_magnifier_factor(byte factor_index)
     	Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
     	Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
 	} else {
-		Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width / 255 ;
-		Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height / 255 ;
+		Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width / 65536 ;
+		Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height / 65536 ;
 	}
     // Correction en cas de débordement de l'image
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
