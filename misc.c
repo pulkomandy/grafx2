@@ -159,7 +159,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
 	comp.r=red;
 	comp.g=green;
 	comp.b=blue;
-	SDL_SetPalette(Screen_SDL, SDL_LOGPAL, &comp, color, 1);
+	SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, &comp, color, 1);
 }
 
 void Wait_end_of_click(void)
@@ -206,12 +206,12 @@ void Init_chrono(dword delay)
 	return;
 }
 
-void Pixel_in_brush             (word x,word y,byte color)
+void Pixel_in_brush (word x, word y, byte color)
 {
-	*(Brush+y*Brush_width+x)=color;
+	*(Brush + y * Brush_width + x)=color;
 }
 
-byte Read_pixel_from_brush         (word x,word y)
+byte Read_pixel_from_brush (word x, word y)
 {
 	return *(Brush + y * Brush_width + x);
 }
@@ -782,12 +782,12 @@ unsigned long Memory_free(void)
 	len = sizeof(maxmem);
 	sysctl(mib,2,&maxmem,&len,NULL,0);
 	return maxmem;
-#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__) || defined(__amigaos__)
+#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__)
 	// No <sys/sysctl.h> on BeOS or Haiku
 	// AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
 #warning "There is missing code there for your platform ! please check and correct :)"
 	return 10*1024*1024;
-#elif defined(__AROS__) || defined(__MORPHOS__)
+#elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
 	return AvailMem(MEMF_ANY);
 #else
 	struct sysinfo info;

@@ -42,15 +42,16 @@ ifdef COMSPEC
   RMDIR = rmdir
   CP = cp
   BIN = grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
   CC = gcc
   OBJDIR = obj/win32
   # Resources (icon)
   WINDRES = windres.exe
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS) #some misc files we have to add to the release archive under windows.
+  #some misc files we have to add to the release archive under windows.
+  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS)
   ZIP = zip
 else
 
@@ -227,8 +228,8 @@ else
 
         # Compiles a regular linux exectutable for the native platform
         BIN = grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT)
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
 		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
 		CC = gcc
 		#CC = nccgen -ncgcc -ncld -ncfabs
@@ -253,6 +254,17 @@ else
   TTFLABEL = 
 endif
 
+#Lua scripting is optional too
+ifeq ($(NOLUA),1)
+	LUACOPT =
+	LUALOPT =
+	LUALABEL = -nolua
+else
+	LUACOPT = -D__ENABLE_LUA__
+	LUALOPT = -llua5.1
+	LUALABEL =
+endif
+
 #To disable Joystick emulation of cursor, make NOJOY=1 (for input.o)
 #This can be necessary to test keyboard cursor code, because an existing
 #joystick will keep reporting a contradicting position.
@@ -262,16 +274,12 @@ else
   JOYCOPT =
 endif
 
-ifneq ($(PLATFORM),amiga-vbcc)
-  COPT += -DSVN_revision='"$(shell svnversion .)"' -DProgram_version='"$(LABEL)"'
-endif
-
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend zip force install uninstall
+.PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(PLATFORMOBJ)
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o
 
 SKIN_FILES = skins/skin_classic.png skins/skin_modern.png skins/font_Classic.png skins/font_Fun.png
 
@@ -307,15 +315,36 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e s/\\(wip\\)\\\\./\\1/I > $(OBJDIR)/versiontag
 
 	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini test.lua $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) "src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini test.lua $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/grafx2.1 misc/grafx2.xpm misc/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
 
 $(BIN) : $(OBJ)
 	$(CC) $(OBJ) -o $(BIN) $(LOPT)
+
+# SVN revision number
+version.c :
+	echo "char SVN_revision[]=\"`svnversion .`\";" > version.c
+ifeq ($(LABEL),)
+else
+	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
+endif
+
+version : delversion delpversion version.c pversion.c $(OBJDIR)/version.o $(OBJDIR)/pversion.o all
+
+
+delversion :
+	$(DELCOMMAND) version.c
+	
+delpversion :
+ifeq ($(LABEL),)
+else
+	$(DELCOMMAND) pversion.c
+endif
+
 $(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o

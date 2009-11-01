@@ -1206,7 +1206,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
 }
 
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
-	T_Bitmap24B source, int width, int height, T_Components * palette,
+	T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
 	T_Conversion_table * tc)
 {
   T_Bitmap24B current;

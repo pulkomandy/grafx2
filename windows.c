@@ -23,16 +23,19 @@
 */
 
 #include <math.h>
+#include <stdlib.h> // atoi()
 #include <string.h> // strncpy() strlen()
 
 #include "windows.h"
+
+#include "engine.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "engine.h"
-#include "misc.h"
-#include "sdlscreen.h"
-#include "errors.h"
 #include "input.h"
+#include "misc.h"
+#include "readline.h"
+#include "sdlscreen.h"
 
 // L'encapsulation tente une percée...ou un dernier combat.
 
@@ -210,7 +213,7 @@ void Set_back_color(byte color)
 ///
 /// Redraw the cell in the menu palette for ::Fore_color.
 /// This function checks bounds, it won't draw anything if Fore_color is not visible.
-/// @param id:Color number to frame
+/// @param id: Color number to frame
 void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
@@ -836,6 +839,49 @@ byte Confirmation_box(char * message)
 }
 
 
+/// Window that allows you to enter a single value
+int Requester_window(char* message, int initial_value)
+{
+	short clicked_button = 0;
+	word window_width;
+	char str[10];
+
+	window_width=(strlen(message)<<3)+20;
+
+	if (window_width<120)
+		window_width = 120;
+
+	Open_window(window_width, 60, "Request");
+
+	Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
+		MC_Black, MC_Light);
+	sprintf(str, "%d", initial_value);
+	Window_set_input_button(10, 37, 4); // 1
+	Print_in_window(11, 39, str, MC_Black, MC_Light);
+	Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
+	Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
+
+	Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
+		Menu_factor_Y * 60);
+	Display_cursor();
+
+	do
+	{
+		clicked_button = Window_clicked_button();
+		if (clicked_button == 1)
+			Readline(11, 39, str, 4, 1);
+		if (Key == SDLK_ESCAPE) clicked_button = 2;
+	}
+	while (clicked_button <= 0);
+
+	Key = 0;
+
+	Close_window();
+	Display_cursor();
+
+	return clicked_button==2?-1:atoi(str);
+}
+
 
 /// Window that show a warning message and wait for a click on the OK button
 void Warning_message(char * message)
@@ -864,7 +910,7 @@ void Warning_message(char * message)
 }
 
 /// Window that shows a big message, and waits for a click on OK
-void Verbose_error_message(char * message)
+void Verbose_error_message(const char * message)
 {
   short clicked_button;
   int line;
@@ -1120,7 +1166,7 @@ void Display_menu_palette_avoiding_window(byte * table)
     if (table[real_color]!=real_color)
     {
       start_x=Palette_cell_X(real_color);
-      start_y=Palette_cell_Y(real_color); //Menu_Y_before_window ??!
+      start_y=Palette_cell_Y(real_color);
       end_x=start_x+width;
       end_y=start_y+height;
 
@@ -2497,23 +2543,23 @@ void Remap_screen_after_menu_colors_change(void)
 void Compute_optimal_menu_colors(T_Components * palette)
 {
   byte table[4];
-  short i,j,k;
+  short i;
 
 
   Old_black =MC_Black;
-  Old_dark=MC_Dark;
-  Old_light=MC_Light;
-  Old_white=MC_White;
-  Old_trans=MC_Trans;
+  Old_dark = MC_Dark;
+  Old_light = MC_Light;
+  Old_white = MC_White;
+  Old_trans = MC_Trans;
 
   // Recherche du noir
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[0].R, Fav_menu_colors[0].G, Fav_menu_colors[0].B,palette,table);
+    (Config.Fav_menu_colors[0].R, Config.Fav_menu_colors[0].G, Config.Fav_menu_colors[0].B,palette,table);
   MC_Black=table[0];
 
   // Recherche du blanc
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[3].R, Fav_menu_colors[3].G, Fav_menu_colors[3].B,palette,table);
+    (Config.Fav_menu_colors[3].R, Config.Fav_menu_colors[3].G, Config.Fav_menu_colors[3].B,palette,table);
   if (MC_Black!=table[0])
     MC_White=table[0];
   else
@@ -2521,7 +2567,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris clair
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[2].R, Fav_menu_colors[2].G, Fav_menu_colors[2].B,palette,table);
+    (Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
     MC_Light=table[0];
   else
@@ -2534,7 +2580,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris foncé
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[1].R, Fav_menu_colors[1].G, Fav_menu_colors[1].B,palette,table);
+    (Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
     MC_Dark=table[0];
   else
@@ -2564,7 +2610,14 @@ void Compute_optimal_menu_colors(T_Components * palette)
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 
-  // Et maintenant, on "remappe" tous les sprites, etc...
+  Remap_menu_sprites();
+}
+
+/// Remap all menu data when the palette changes or a new skin is loaded
+void Remap_menu_sprites()
+{
+  int i, j, k;
+
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
     || (MC_White!=Old_white)
@@ -2621,6 +2674,11 @@ void Compute_optimal_menu_colors(T_Components * palette)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
+
+	// Skin preview
+	for (j = 0; j < 173; j++)
+		for (i = 0; i < 16; i++)
+			Remap_pixel(&Gfx->Preview[i][j]);
   }
   Clear_border(MC_Black);
 }

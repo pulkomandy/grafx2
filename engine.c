@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-/// @file Window engine and interface management
+/// @file engine.c: Window engine and interface management
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -80,7 +80,11 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Grad. spheres / ellipses",
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
+#ifdef __ENABLE_LUA__
+  "Brush effects / factory ",
+#else
   "Brush effects           ",
+#endif
   "Drawing modes (effects) ",
   "Text                    ",
   "Magnify mode / Menu     ",

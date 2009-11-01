@@ -75,9 +75,6 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-// filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS];
-
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
@@ -278,7 +275,7 @@ void Analyze_command_line(int argc,char * argv[])
       index++;
       if (index<argc)
       {
-        strcpy(Gui_skin_file,argv[index]);
+        strcpy(Config.Skin_file,argv[index]);
       }
       else
       {
@@ -326,6 +323,7 @@ int Init_program(int argc,char * argv[])
   int temp;
   int starting_videomode;
   char program_directory[MAX_PATH_CHARACTERS];
+  T_Gui_skin *gfx;
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -555,31 +553,33 @@ int Init_program(int argc,char * argv[])
 
   Analyze_command_line(argc,argv);
 
+  Current_help_section=0;
+  Help_position=0;
+
   // Load sprites, palette etc.
-  strcpy(Gui_skin_file,Config.Skin_file);
-  Gfx = Load_graphics(Gui_skin_file);
-  if (Gfx == NULL)
+  gfx = Load_graphics(Config.Skin_file);
+  if (gfx == NULL)
   {
-    Gfx = Load_graphics("skin_modern.png");
-    if (Gfx == NULL)
+    gfx = Load_graphics("skin_modern.png");
+    if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
       Error(ERROR_GUI_MISSING);
     }
   }
+  Set_current_skin(Config.Skin_file, gfx);
+  Fore_color=MC_White;
+  Back_color=MC_Black;
+  // Override colors
+  // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  Compute_optimal_menu_colors(Gfx->Default_palette);
+    
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
-
-  // Transfert des valeurs du .INI qui ne changent pas dans des variables
-  // plus accessibles:
-  Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  Compute_optimal_menu_colors(Gfx->Default_palette);
-  Fore_color=MC_White;
-  Back_color=MC_Black;
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))

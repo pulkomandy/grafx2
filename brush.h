@@ -25,6 +25,8 @@
 #ifndef __BRUSH_H_
 #define __BRUSH_H_
 
+#include "struct.h"
+
 /*!
     Gets the brush from the picture.
     @param start_x left edge coordinate in the picture

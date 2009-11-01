@@ -39,6 +39,7 @@ void Hide_cursor(void);
 
 void Remap_screen_after_menu_colors_change(void);
 void Compute_optimal_menu_colors(T_Components * palette);
+void Remap_menu_sprites();
 
 void Position_screen_according_to_zoom(void);
 void Compute_separator_data(void);
@@ -70,7 +71,8 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 
 byte Confirmation_box(char * message);
 void Warning_message(char * message);
-void Verbose_error_message(char * message);
+void Verbose_error_message(const char * message);
+int Requester_window(char* message, int initial_value);
 
 void Display_image_limits(void);
 void Display_all_screen(void);

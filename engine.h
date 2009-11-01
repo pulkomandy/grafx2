@@ -49,38 +49,44 @@ void Window_draw_scroller_bouton(T_Scroller_button * button);
 
 void Window_input_content(T_Special_button * button, char * content);
 void Window_clear_input_button(T_Special_button * button);
-void Window_draw_input_bouton(word x_pos,word y_pos,word width_in_characters);
+void Window_draw_input_bouton(word x_pos, word y_pos, word width_in_characters);
 
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
-                                   word width, word height,
-                                   char * title,byte undersc_letter,
-                                   byte clickable, word shortcut);
+	word width, word height, char * title, byte undersc_letter,
+	byte clickable, word shortcut);
+
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
-                                   word width, word height,
-                                   char * title,byte undersc_letter,
-                                   byte clickable, word shortcut);
+	word width, word height, char * title, byte undersc_letter,
+	byte clickable, word shortcut);
 
 T_Palette_button * Window_set_palette_button(word x_pos, word y_pos);
 void Window_clear_tags(void);
-void Tag_color_range(byte start,byte end);
+void Tag_color_range(byte start, byte end);
 
 T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
 	word height, word nb_elements, word nb_elements_visible,
 	word initial_position);
-T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,
+
+T_Special_button * Window_set_special_button(word x_pos, word y_pos, word width,
 	word height);
-T_Special_button * Window_set_input_button(word x_pos,word y_pos,
+
+T_Special_button * Window_set_input_button(word x_pos, word y_pos,
 	word width_in_characters);
-T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
-	word height,word dropdown_width,const char *label,byte display_choice,
-	byte display_centered,byte display_arrow,byte active_button);
+
+T_Dropdown_button * Window_set_dropdown_button(word x_pos, word y_pos,
+	word width,	word height, word dropdown_width, const char *label,
+	byte display_choice, byte display_centered, byte display_arrow,
+	byte active_button);
+
+/// Adds an item to a dropdown menu
 void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number,
 	const char *label);
+
 void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
 T_List_button * Window_set_list_button(T_Special_button * entry_button,
 	T_Scroller_button * scroller, Func_draw_list_item draw_list_item);
 void Window_redraw_list(T_List_button * list);
-byte Window_click_in_rectangle(short start_x,short start_y,short end_x,
+byte Window_click_in_rectangle(short start_x, short start_y, short end_x,
 	short end_y);
 short Wait_click_in_palette(T_Palette_button * button);
 void Get_color_behind_window(byte * color, byte * click);

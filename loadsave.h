@@ -22,9 +22,9 @@
 /// Also handles showing the preview in fileselectors.
 //////////////////////////////////////////////////////////////////////////////
 
-void Pixel_load_in_current_screen(word x_pos,word y_pos,byte color);
-void Pixel_load_in_preview      (word x_pos,word y_pos,byte color);
-void Pixel_load_in_brush       (word x_pos,word y_pos,byte color);
+void Pixel_load_in_current_screen (word x_pos, word y_pos, byte color);
+void Pixel_load_in_preview (word x_pos, word y_pos, byte color);
+void Pixel_load_in_brush (word x_pos, word y_pos, byte color);
 
 void Get_full_filename(char * filename, byte is_colorix_format);
 
@@ -33,6 +33,7 @@ void Get_full_filename(char * filename, byte is_colorix_format);
 /// Handles loading an image or a brush, or previewing only.
 /// @param image true if the fileselector is the one for loading images (not brush)
 void Load_image(byte image);
+
 ///
 /// High-level picture saving function.
 /// @param image true if the image should be saved (instead of the brush)
@@ -57,7 +58,7 @@ extern T_Format File_formats[];
 
 ///
 /// Function which attempts to save backups of the images (main and spare),
-/// called in case of SIGSEGV. 
+/// called in case of SIGSEGV.
 void Image_emergency_backup(void);
 
 /// Pixel ratio of last loaded image: one of :PIXEL_SIMPLE, :PIXEL_WIDE or :PIXEL_TALL
@@ -68,9 +69,31 @@ T_Format * Get_fileformat(byte format);
 // -- File formats
 
 #ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS         18    ///< Total number of known file formats.
+#define NB_KNOWN_FORMATS 18 ///< Total number of known file formats.
 #else
 // Without pnglib
-#define NB_KNOWN_FORMATS         17    ///< Total number of known file formats.
+#define NB_KNOWN_FORMATS 17 ///< Total number of known file formats.
 #endif
 
+// This is here and not in fileformats.c because the emergency save uses it...
+#pragma pack(1)
+typedef struct
+{
+  byte Filler1[6];
+  word Width;
+  word Height;
+  byte Filler2[118];
+  T_Palette Palette;
+} T_IMG_Header;
+#pragma pack()
+
+// Données pour la gestion du chargement en 24b
+#define FORMAT_24B 0x100
+typedef void (* Func_24b_display) (short,short,byte,byte,byte);
+extern int Image_24b;
+
+extern T_Components * Buffer_image_24b;
+extern Func_24b_display Pixel_load_24b;
+
+void Pixel_load_in_24b_preview(short x_pos,short y_pos,byte r,byte g,byte b);
+extern enum PIXEL_RATIO Ratio_of_loaded_image;

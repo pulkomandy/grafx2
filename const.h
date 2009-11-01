@@ -241,8 +241,8 @@ enum CHUNKS_CFG
 /// Identifiers for the 8x8 icons of ::Gfx->Icon_sprite (most are unused now)
 enum ICON_TYPES
 {
-  ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk
-  ICON_FLOPPY_5_25,  ///< 5¼" Floppy disk
+  ICON_FLOPPY_3_5=0, ///< 3.5 Floppy disk
+  ICON_FLOPPY_5_25,  ///< 5.25 Floppy disk
   ICON_HDD,          ///< Hard disk drive
   ICON_CDROM,        ///< CD-ROM
   ICON_NETWORK,      ///< "Network" drive

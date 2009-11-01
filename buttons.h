@@ -17,10 +17,10 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 ///@file buttons.h
 /// Almost all the editor actions that are called by the menu are here.
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BOUTONS_H_
 #define __BOUTONS_H_
@@ -28,19 +28,21 @@
 #include "struct.h"
 
 /*!
-    Displays an error message when there is no more memory for the requested operation. 
+	Displays an error message when there is no more memory for the requested
+	operation.
 */
 void Message_out_of_memory(void);
 
 /*!
-    Displays the splash screen at program startup.
+	Displays the splash screen at program startup.
 */
 void Button_Message_initial(void);
 
 /*!
-    Changes brush shape. 
-    This function saves the current brush shape and swith to the default one (single pixel brush) for the filler and the color picker. 
-    These functions don't need (and will not work with) a custom brush.
+	Changes brush shape.
+	This function saves the current brush shape and swith to the default one
+	(single pixel brush) for the filler and the color picker.
+	These functions don't need (and will not work with) a custom brush.
 */
 void Change_paintbrush_shape(byte shape);
 

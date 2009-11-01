@@ -47,6 +47,9 @@
 #include "errors.h"
 #include "pages.h"
 
+extern char Program_version[]; // generated in pversion.c
+extern char SVN_revision[]; // generated in pversion.c
+
 // Recherche un raccourci clavier:
 word * Shortcut(word shortcut_number)
 {

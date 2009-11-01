@@ -32,7 +32,7 @@ void Add_element_to_list(T_Fileselector *list, const char * fname, int type);
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).
 /// The returned value is a pointer to a single static buffer of 19 characters
-/// including the '\0'.
+/// including the '\\0'.
 char * Format_filename(const char * fname, int type);
 
 void Free_fileselector_list(T_Fileselector *list);

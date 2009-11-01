@@ -48,26 +48,27 @@
   #include <signal.h>
 #endif
 
+#include "buttons.h"
 #include "const.h"
-#include "struct.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "buttons.h"
-#include "palette.h"
-#include "help.h"
-#include "operatio.h"
-#include "misc.h"
-#include "errors.h"
-#include "keyboard.h"
-#include "io.h"
-#include "hotkeys.h"
-#include "setup.h"
-#include "windows.h"
-#include "sdlscreen.h"
-#include "mountlist.h" // read_file_system_list
-#include "loadsave.h" // Image_emergency_backup
 #include "init.h"
+#include "io.h"
+#include "factory.h"
+#include "help.h"
+#include "hotkeys.h"
+#include "keyboard.h"
+#include "loadsave.h" // Image_emergency_backup
+#include "misc.h"
+#include "mountlist.h" // read_file_system_list
+#include "operatio.h"
+#include "palette.h"
+#include "sdlscreen.h"
+#include "setup.h"
+#include "struct.h"
 #include "transform.h"
+#include "windows.h"
 
 char Gui_loading_error_message[512];
 
@@ -122,11 +123,11 @@ byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
   return 1;
 }
 
-byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
+byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
-  // type: 2 = brush icon or sieve pattern (only MC_White and MC_Trans)
+  // type: 2 = brush icon or sieve pattern (only gui->Color_white and gui->Color_trans)
   // type: 3 = raw bitmap (splash screen)
   
   byte * dest_ptr=dest;
@@ -146,28 +147,28 @@ byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
     for (x=start_x; x<start_x+width; x++)
     {
       color=Get_SDL_pixel_8(gui,x,y);
-      if (type==0 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White))
+      if (type==0 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white);
         return 1;
       }
-      if (type==1 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White && color != MC_Trans))
+      if (type==1 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white && color != gfx->Color_trans))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White, MC_Trans);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white, gfx->Color_trans);
         return 1;
       }
       if (type==2)
       {
-        if (color != MC_White && color != MC_Trans)
+        if (color != gfx->Color_white && color != gfx->Color_trans)
         {
           sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            start_x, start_y, height, width, section, x, y, color, MC_White, MC_Trans);
+            start_x, start_y, height, width, section, x, y, color, gfx->Color_white, gfx->Color_trans);
           return 1;
         }
         // Conversion en 0/1 pour les brosses monochromes internes
-        color = (color != MC_Trans);
+        color = (color != gfx->Color_trans);
       }
       *dest_ptr=color;
       dest_ptr++;
@@ -176,12 +177,12 @@ byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
   return 0;
 }
 
-byte Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
+byte Read_GUI_pattern(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
   byte buffer[256];
   int x,y;
   
-  if (Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2))
+  if (Read_GUI_block(gfx, gui, start_x, start_y, buffer, 16, 16, section, 2))
     return 1;
 
   for (y=0; y<16; y++)
@@ -208,7 +209,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
   {
     for (y=0;y<29;y++)
     {
-      if (cursor_buffer[y*29+start_x]!=MC_Trans)
+      if (cursor_buffer[y*29+start_x]!=gfx->Color_trans)
       {
         found=1;
         break;
@@ -223,7 +224,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
   {
     for (x=0;x<29;x++)
     {
-      if (cursor_buffer[start_y*29+x]!=MC_Trans)
+      if (cursor_buffer[start_y*29+x]!=gfx->Color_trans)
       {
         found=1;
         break;
@@ -270,7 +271,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Carré "noir"
-  MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  gfx->Color_black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
@@ -279,9 +280,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Black);
+  } while(color==gfx->Color_black);
   // Carré "foncé"
-  MC_Dark=color;
+  gfx->Color_dark = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -290,9 +291,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Dark);
+  } while(color==gfx->Color_dark);
   // Carré "clair"
-  MC_Light=color;
+  gfx->Color_light = color;
   do
   {
     if (++cursor_x>gui->w)
@@ -301,9 +302,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Light);
+  } while(color==gfx->Color_light);
   // Carré "blanc"
-  MC_White=color;
+  gfx->Color_white = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -312,9 +313,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_White);
+  } while(color==gfx->Color_white);
   // Carré "transparent"
-  MC_Trans=color;
+  gfx->Color_trans=color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -323,14 +324,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Trans);
+  } while(color==gfx->Color_trans);
   // Reste : couleur neutre
   neutral_color=color;
 
   
   cursor_x=0;
   cursor_y=1;
-  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==MC_Black)
+  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==gfx->Color_black)
   {
     cursor_y++;
     if (cursor_y>=gui->h)
@@ -343,8 +344,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
     return 1;
+
+  cursor_x += MENU_WIDTH;
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "logo"))
+	return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
+	return 1;
   cursor_y+=MENU_HEIGHT;
 
   // Effets
@@ -360,7 +367,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
@@ -379,7 +386,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
       return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
@@ -399,7 +406,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
@@ -421,7 +428,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
       return 1;
     cursor_x+=PAINTBRUSH_WIDTH;
   }
@@ -440,7 +447,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
       return 1;
     cursor_x+=ICON_SPRITE_WIDTH;
   }
@@ -450,7 +457,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
     return 1;
-  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
     return 1;
   cursor_y+=56;
   
@@ -467,7 +474,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern"))
         return 1;
     }
-    if (Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
+    if (Read_GUI_pattern(gfx, gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
       return 1;
     cursor_x+=16;
   }
@@ -489,7 +496,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
       return 1;
     cursor_x+=6;
   }
@@ -511,7 +518,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
       return 1;
     cursor_x+=6;
   }
@@ -546,15 +553,12 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       else
         dest=&(gfx->Help_font_t1[char_1++][0][0]);
     
-    if (Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
       return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
   
-  Current_help_section=0;
-  Help_position=0;
-
   gfx->Preset_paintbrush_width [ 0]= 1;
   gfx->Preset_paintbrush_height[ 0]= 1;
   gfx->Paintbrush_type         [ 0]=PAINTBRUSH_SHAPE_SQUARE;
@@ -1058,10 +1062,14 @@ void Init_buttons(void)
                      FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_BRUSH_EFFECTS,
-                     106,18,
-                     16,16,
+                     106, 18,
+                     16, 16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Brush_FX,Button_Brush_FX,
+#ifdef __ENABLE_LUA__
+                     Button_Brush_FX, Button_Brush_Factory,
+#else
+                     Button_Brush_FX, Button_Brush_FX,
+#endif
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -2463,4 +2471,29 @@ void Init_brush_container(void)
         
     Brush_container[i].Brush = NULL;
   }
+}
+
+void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
+{
+  // Free previous one
+  free(Gfx);
+  
+  // Assign main skin pointer
+  Gfx = gfx;
+
+  // Change config  
+  free(Config.Skin_file);
+  Config.Skin_file = strdup(skinfile);
+
+  Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
+  Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
+  Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
+  Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
+  
+  // Reassign GUI color indices
+  MC_Black = gfx->Color_black;
+  MC_Dark =  gfx->Color_dark;
+  MC_Light = gfx->Color_light;
+  MC_White = gfx->Color_white;
+  MC_Trans = gfx->Color_trans;
 }
