@@ -1013,6 +1013,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 
 #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
 #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+#define SWAP_DWORDS(a,b) { dword c=a; a=b; b=c;}
 #define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
 #define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
 
@@ -1286,7 +1287,7 @@ void Button_Page(void)
   SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
   SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
   SWAP_SHORTS(Main_current_layer,Spare_current_layer)
-  SWAP_WORDS (Main_layers_visible,Spare_layers_visible)
+  SWAP_DWORDS (Main_layers_visible,Spare_layers_visible)
 
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);

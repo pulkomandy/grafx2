@@ -415,14 +415,6 @@ GFX2_GLOBAL T_List_of_pages * Main_backups;
 GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
 
-// -- Layers data
-
-/// Array of two images, that contains the "flattened" version of the visible layers.
-GFX2_GLOBAL T_Image Visible_image[2];
-GFX2_GLOBAL T_Image Visible_image_depth_buffer;
-/// Index that is 0 or 1, it ways which of the two ::Visible_image[] contains the current image (the other contains the data from last backup)
-GFX2_GLOBAL int Visible_image_index;
-
 // -- Brush data
 
 /// Pixel data of the current brush.

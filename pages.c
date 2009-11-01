@@ -31,6 +31,15 @@
 #include "misc.h"
 #include "windows.h"
 
+// -- Layers data
+
+/// Array of two images, that contains the "flattened" version of the visible layers.
+#ifndef NOLAYERS
+T_Image Visible_image[2];
+T_Image Visible_image_depth_buffer;
+#endif
+
+
   ///
   /// GESTION DES PAGES
   ///
@@ -162,6 +171,7 @@ void Download_infos_page_main(T_Page * page)
 
 void Redraw_layered_image(void)
 {
+  #ifndef NOLAYERS
   // Re-construct the image with the visible layers
   int layer;  
   // First layer
@@ -202,11 +212,15 @@ void Redraw_layered_image(void)
       }
     }
   }
+  #else
+  Update_screen_targets();
+  #endif
   Download_infos_backup(Main_backups);
 }
 
 void Update_depth_buffer(void)
 {
+  #ifndef NOLAYERS
   // Re-construct the depth buffer with the visible layers.
   // This function doesn't touch the visible buffer, it assumes
   // that it was already up-to-date. (Ex. user only changed active layer)
@@ -247,11 +261,13 @@ void Update_depth_buffer(void)
       }
     }
   }
+  #endif
   Download_infos_backup(Main_backups);
 }
 
 void Redraw_current_layer(void)
 {
+#ifndef NOLAYERS
   int i;
   for (i=0; i<Main_image_width*Main_image_height; i++)
   {
@@ -269,6 +285,7 @@ void Redraw_current_layer(void)
       }
     }
   }
+#endif
 }
 
 void Upload_infos_page_main(T_Page * page)
@@ -323,10 +340,8 @@ void Download_infos_backup(T_List_of_pages * list)
 
   if (Config.FX_Feedback)
     FX_feedback_screen=list->Pages->Image[Main_current_layer];
-    // Visible_image[0].Image;
   else
     FX_feedback_screen=list->Pages->Next->Image[Main_current_layer];
-    // Visible_image[1].Image;
 }
 
 void Clear_page(T_Page * page)
@@ -567,26 +582,35 @@ int Update_buffer(T_Image * image, int width, int height)
   return 1;
 }
 
+void Update_screen_targets(void)
+{
+  #ifndef NOLAYERS
+    Main_screen=Visible_image[0].Image;
+    Screen_backup=Visible_image[1].Image;
+  #else
+    Main_screen=Main_backups->Pages->Image[Main_current_layer];
+    Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer];
+  #endif
+}
+
 /// Update all the special image buffers, if necessary.
 int Update_buffers(int width, int height)
 {
+#ifndef NOLAYERS
   if (! Update_buffer(&Visible_image_depth_buffer, width, height))
     return 0;
-    
   if (! Update_buffer(&Visible_image[0], width, height))
     return 0;
-  Main_screen=Visible_image[0].Image;
-  
   if (! Update_buffer(&Visible_image[1], width, height))
-    return 0;    
-  Screen_backup=Visible_image[1].Image;
-  
+    return 0;
+#endif
+  Update_screen_targets();
   return 1;
 }
 
-  ///
-  /// GESTION DES BACKUPS
-  ///
+///
+/// GESTION DES BACKUPS
+///
 
 int Init_all_backup_lists(int width,int height)
 {
@@ -611,7 +635,7 @@ int Init_all_backup_lists(int width,int height)
       return 0;
     memset(Main_backups->Pages->Image[i], 0, width*height);
   }
-
+#ifndef NOLAYERS
   Visible_image[0].Width = 0;
   Visible_image[0].Height = 0;
   Visible_image[0].Image = NULL;
@@ -623,14 +647,15 @@ int Init_all_backup_lists(int width,int height)
   Visible_image_depth_buffer.Width = 0;
   Visible_image_depth_buffer.Height = 0;
   Visible_image_depth_buffer.Image = NULL;
-
+#endif
   if (!Update_buffers(width, height))
     return 0;
+#ifndef NOLAYERS
   // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
   memset(Visible_image[0].Image, 0, width*height);
   memset(Visible_image[1].Image, 0, width*height);
   memset(Visible_image_depth_buffer.Image, 0, width*height);
-      
+#endif      
   Download_infos_page_main(Main_backups->Pages); 
   Download_infos_backup(Main_backups);
 
@@ -930,10 +955,11 @@ void End_of_modification(void)
 
   //Update_buffers(Main_image_width, Main_image_height);
   
-  
+#ifndef NOLAYERS
   memcpy(Visible_image[1].Image,
          Visible_image[0].Image,
          Main_image_width*Main_image_height);
+#endif
   
   Download_infos_backup(Main_backups);
 /*  

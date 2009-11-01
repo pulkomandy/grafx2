@@ -111,3 +111,8 @@ extern Func_pixel Pixel_figure;
 void Update_part_of_screen(short x, short y, short width, short height);
 
 void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
+
+void Pixel_in_current_screen      (word x,word y,byte color,int with_preview);
+void Pixel_in_current_layer(word x,word y, byte color);
+byte Read_pixel_from_current_screen  (word x,word y);
+byte Read_pixel_from_current_layer(word x,word y);

@@ -30,6 +30,8 @@
 /////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+extern T_Image Visible_image[2];
+extern T_Image Visible_image_depth_buffer;
 
 ///
 /// INDIVIDUAL PAGES
@@ -91,6 +93,8 @@ void End_of_modification(void);
 void Update_depth_buffer(void);
 void Redraw_layered_image(void);
 void Redraw_current_layer(void);
+
+void Update_screen_targets(void);
 
 ///
 /// STATISTICS

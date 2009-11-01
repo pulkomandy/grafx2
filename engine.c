@@ -1055,6 +1055,7 @@ void Main_handler(void)
                 Backup_layers(0);
                 if (!Delete_layer(Main_backups,Main_current_layer))
                 {
+                  Update_screen_targets();
                   Redraw_layered_image();
                   Hide_cursor();
                   Display_all_screen();
@@ -1070,7 +1071,8 @@ void Main_handler(void)
                   Backup_layers(1<<(Main_current_layer-1));
 
                   Merge_layer();
-
+                  
+                  Update_screen_targets();
                   Redraw_layered_image();
                   Hide_cursor();
                   Display_all_screen();
@@ -1103,7 +1105,8 @@ void Main_handler(void)
                     Main_layers_visible ^= (3 << Main_current_layer);
                   }
                   Main_current_layer++;
-
+                  
+                  Update_screen_targets();
                   Redraw_layered_image();
                   Hide_cursor();
                   Display_all_screen();
@@ -1138,7 +1141,7 @@ void Main_handler(void)
                     Main_layers_visible ^= (3 << (Main_current_layer-1));
                   }
                   Main_current_layer--;
-
+                  Update_screen_targets();
                   Redraw_layered_image();
                   Hide_cursor();
                   Display_all_screen();

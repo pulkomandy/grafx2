@@ -476,6 +476,9 @@ void Layer_activate(short layer, short side)
   
   // Keep a copy of which layers were visible
   old_layers = Main_layers_visible;
+  
+  #ifndef NOLAYERS
+  
   if (side == RIGHT_SIDE)
   {
     // Right-click on current layer
@@ -504,6 +507,16 @@ void Layer_activate(short layer, short side)
     Main_current_layer = layer;
     Main_layers_visible |= 1<<layer;
   }
+  #else
+  // Handler for limited layers support: only allow one visible at a time
+  if (side == LEFT_SIDE)
+  {
+    Main_current_layer = layer;
+    Main_layers_visible = 1<<layer;
+    
+    Update_screen_targets();
+  }
+  #endif
 
   Hide_cursor();
   if (Main_layers_visible != old_layers)

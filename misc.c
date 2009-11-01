@@ -34,6 +34,7 @@
 #include "windows.h"
 #include "palette.h"
 #include "input.h"
+#include "graph.h"
 
 ///Count used palette indexes in the whole picture
 ///Return the total number of different colors
@@ -214,47 +215,6 @@ void Pixel_in_brush (word x, word y, byte color)
 byte Read_pixel_from_brush (word x, word y)
 {
 	return *(Brush + y * Brush_width + x);
-}
-
-
-byte Read_pixel_from_current_screen  (word x,word y)
-{
-  byte depth;
-  byte color;
-  color = *(Main_screen+y*Main_image_width+x);
-  if (color != Main_backups->Pages->Transparent_color) // transparent color
-    return color;
-  
-  depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
-  return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
-  // return *(Main_screen+y*Main_image_width+x);
-}
-
-void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
-{
-    byte depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
-    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
-    if ( depth <= Main_current_layer)
-    {
-      if (color == Main_backups->Pages->Transparent_color) // transparent color
-        // fetch pixel color from the topmost visible layer
-        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
-      
-      *(x+y*Main_image_width+Main_screen)=color;
-      
-      if (with_preview)
-        Pixel_preview(x,y,color);
-    }
-}
-
-void Pixel_in_current_layer(word x,word y, byte color)
-{
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
-}
-
-byte Read_pixel_from_current_layer(word x,word y)
-{
-  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
 }
 
 void Replace_a_color(byte old_color, byte new_color)

@@ -37,6 +37,7 @@
 #include "io.h"
 #include "loadsave.h"
 #include "misc.h"
+#include "graph.h"
 #include "op_c.h"
 #include "pages.h"
 #include "palette.h"

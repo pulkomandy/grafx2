@@ -2867,3 +2867,52 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
     col+= Snap_width*Main_magnifier_factor;
   }
 }
+
+byte Read_pixel_from_current_screen  (word x,word y)
+{
+  #ifndef NOLAYERS
+  byte depth;
+  byte color;
+  color = *(Main_screen+y*Main_image_width+x);
+  if (color != Main_backups->Pages->Transparent_color) // transparent color
+    return color;
+  
+  depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+  return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+  #else
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
+  #endif
+}
+
+void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
+{
+    #ifndef NOLAYERS
+    byte depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    if ( depth <= Main_current_layer)
+    {
+      if (color == Main_backups->Pages->Transparent_color) // transparent color
+        // fetch pixel color from the topmost visible layer
+        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+      
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+    #else
+    *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+    if (with_preview)
+        Pixel_preview(x,y,color);
+	#endif
+}
+
+void Pixel_in_current_layer(word x,word y, byte color)
+{
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+}
+
+byte Read_pixel_from_current_layer(word x,word y)
+{
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
+}
