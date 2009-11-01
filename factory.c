@@ -84,14 +84,14 @@ int L_GetPictureSize(lua_State* L)
 
 int L_PutPicturePixel(lua_State* L)
 {
-	Pixel_in_current_screen(lua_tonumber(L, 1), lua_tonumber(L, 2),
+	Pixel_in_current_layer(lua_tonumber(L, 1), lua_tonumber(L, 2),
 		lua_tonumber(L, 3),1);
 	return 0; // no values returned for lua
 }
 
 int L_GetPicturePixel(lua_State* L)
 {
-	uint8_t c = Read_pixel_from_current_screen(lua_tonumber(L, 1),
+	uint8_t c = Read_pixel_from_current_layer(lua_tonumber(L, 1),
 		lua_tonumber(L, 2));
 	lua_pushinteger(L, c);
 	return 1;
