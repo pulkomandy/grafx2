@@ -1403,6 +1403,9 @@ byte Button_Load_or_Save(byte load, byte image)
             if(Directory_exists(Main_filename)) Selected_type = 1;
             else Selected_type = 0;
           }
+
+		  // Now load immediately, but only if the user exited readline by pressing ENTER
+		  if (Mouse_K == 0) has_clicked_ok = 1;
         }
         else
         {
