@@ -1388,7 +1388,7 @@ byte Button_Load_or_Save(byte load, byte image)
           if(load)
           {
             // Determine the type
-            if(File_exists(Main_filename)) 
+            if(File_exists(Main_filename))
             {
               Selected_type = 0;
               if(Directory_exists(Main_filename)) Selected_type = 1;
@@ -1403,7 +1403,6 @@ byte Button_Load_or_Save(byte load, byte image)
             if(Directory_exists(Main_filename)) Selected_type = 1;
             else Selected_type = 0;
           }
-          has_clicked_ok=1;
         }
         else
         {
