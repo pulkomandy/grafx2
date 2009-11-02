@@ -203,7 +203,7 @@ T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
 
     // Allocate the table
     size=(n->rng_r)*(n->rng_g)*(n->rng_b);
-    n->table=(byte *)malloc(size, 1);
+    n->table=(byte *)calloc(size, 1);
     if (n->table == NULL)
     {
       // Not enough memory
