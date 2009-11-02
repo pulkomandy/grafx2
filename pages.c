@@ -959,6 +959,8 @@ void End_of_modification(void)
   memcpy(Visible_image[1].Image,
          Visible_image[0].Image,
          Main_image_width*Main_image_height);
+#else
+  Update_screen_targets();
 #endif
   
   Download_infos_backup(Main_backups);

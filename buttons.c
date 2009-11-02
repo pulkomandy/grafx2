@@ -1286,8 +1286,11 @@ void Button_Page(void)
   SWAP_BYTES (Main_format,Spare_format)
   SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
   SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
+
   SWAP_SHORTS(Main_current_layer,Spare_current_layer)
   SWAP_DWORDS (Main_layers_visible,Spare_layers_visible)
+
+  Update_screen_targets();
 
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
