@@ -28,6 +28,8 @@
 #include "op_c.h"
 #include "errors.h"
 
+/// Convert RGB to HSL.
+/// Both input and output are in the 0..255 range to use in the palette screen
 void RGB_to_HSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
 {
   double rd,gd,bd,h,s,l,max,min;
@@ -36,9 +38,6 @@ void RGB_to_HSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
   rd = r / 255.0;            // rd,gd,bd range 0-1 instead of 0-255
   gd = g / 255.0;
   bd = b / 255.0;
-
-  // compute L
-//  l=(rd*0.30)+(gd*0.59)+(bd*0.11);
 
   // compute maximum of rd,gd,bd
   if (rd>=gd)
@@ -97,6 +96,8 @@ void RGB_to_HSL(int r,int g,int b,byte * hr,byte * sr,byte* lr)
   *sr = (s*255.0);
 }
 
+/// Convert HSL back to RGB
+/// Input and output are all in range 0..255
 void HSL_to_RGB(byte h,byte s,byte l, byte* r, byte* g, byte* b)
 {
     float rf =0 ,gf = 0,bf = 0;
@@ -162,10 +163,14 @@ void HSL_to_RGB(byte h,byte s,byte l, byte* r, byte* g, byte* b)
     *b = bf * (255);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-///////////////////////////// Méthodes de gestion des tables de conversion //
-/////////////////////////////////////////////////////////////////////////////
+// Conversion table handlers
+// The conversion table is built after a run of the median cut algorithm and is
+// used to find the best color index for a given (RGB) color. GIMP avoids
+// creating the whole table and only create parts of it when they are actually
+// needed. This may or may not be faster
 
+/// Creates a new conversion table
+/// params: bumber of bits for R, G, B (precision)
 T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
 {
   T_Conversion_table * n;
@@ -174,31 +179,34 @@ T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
   n=(T_Conversion_table *)malloc(sizeof(T_Conversion_table));
   if (n!=NULL)
   {
-    // On recopie les paramŠtres demand‚s
+    // Copy the passed parameters
     n->nbb_r=nbb_r;
     n->nbb_g=nbb_g;
     n->nbb_b=nbb_b;
 
-    // On calcule les autres
+    // Calculate the others
+	
+	// Value ranges (max value actually)
     n->rng_r=(1<<nbb_r);
     n->rng_g=(1<<nbb_g);
     n->rng_b=(1<<nbb_b);
+
+	// Shifts
     n->dec_r=nbb_g+nbb_b;
     n->dec_g=nbb_b;
     n->dec_b=0;
+
+	// Reductions (how many bits are lost)
     n->red_r=8-nbb_r;
     n->red_g=8-nbb_g;
     n->red_b=8-nbb_b;
 
-    // On tente d'allouer la table
+    // Allocate the table
     size=(n->rng_r)*(n->rng_g)*(n->rng_b);
-    n->table=(byte *)malloc(size);
-    if (n->table!=NULL)
-      // C'est bon!
-      memset(n->table,0,size); // Inutile, mais plus propre
-    else
+    n->table=(byte *)malloc(size, 1);
+    if (n->table == NULL)
     {
-      // Table impossible … allouer
+      // Not enough memory
       free(n);
       n=NULL;
     }
@@ -207,27 +215,33 @@ T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
   return n;
 }
 
+
+/// Delete a conversion table and release its memory
 void CT_delete(T_Conversion_table * t)
 {
   free(t->table);
   free(t);
 }
 
+
+/// Get the best palette index for an (R, G, B) color
 byte CT_get(T_Conversion_table * t,int r,int g,int b)
 {
   int index;
 
-  // On réduit le nombre de bits par couleur
+  // Reduce the number of bits to the table precision
   r=(r>>t->red_r);
   g=(g>>t->red_g);
   b=(b>>t->red_b);
   
-  // On recherche la couleur la plus proche dans la table de conversion
+  // Find the nearest color
   index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
 
   return t->table[index];
 }
 
+
+/// Set an entry of the table, index (RGB), value i
 void CT_set(T_Conversion_table * t,int r,int g,int b,byte i)
 {
   int index;
@@ -237,19 +251,21 @@ void CT_set(T_Conversion_table * t,int r,int g,int b,byte i)
 }
 
 
+// Handlers for the occurences tables
+// This table is used to count the occurence of an (RGB) pixel value in the
+// source 24bit image. These count are then used by the median cut algorithm to
+// decide which cluster to split.
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// M‚thodes de gestion des tables d'occurence //
-/////////////////////////////////////////////////////////////////////////////
-
+/// Initialize an occurence table
 void OT_init(T_Occurrence_table * t)
 {
   int size;
 
   size=(t->rng_r)*(t->rng_g)*(t->rng_b)*sizeof(int);
-  memset(t->table,0,size); // On initialise … 0
+  memset(t->table,0,size); // Set it to 0
 }
 
+/// Allocate an occurence table for given number of bits
 T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
 {
   T_Occurrence_table * n;
@@ -258,12 +274,12 @@ T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
   n=(T_Occurrence_table *)malloc(sizeof(T_Occurrence_table));
   if (n!=0)
   {
-    // On recopie les paramŠtres demand‚s
+    // Copy passed parameters
     n->nbb_r=nbb_r;
     n->nbb_g=nbb_g;
     n->nbb_b=nbb_b;
 
-    // On calcule les autres
+    // Compute others
     n->rng_r=(1<<nbb_r);
     n->rng_g=(1<<nbb_g);
     n->rng_b=(1<<nbb_b);
@@ -274,15 +290,12 @@ T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
     n->red_g=8-nbb_g;
     n->red_b=8-nbb_b;
 
-    // On tente d'allouer la table
+    // Allocate the table
     size=(n->rng_r)*(n->rng_g)*(n->rng_b)*sizeof(int);
-    n->table=(int *)malloc(size);
-    if (n->table!=0)
-      // C'est bon! On initialise … 0
-      OT_init(n);
-    else
+    n->table=(int *)calloc(size, 1);
+    if (n->table == NULL)
     {
-      // Table impossible … allouer
+      // Not enough memory !
       free(n);
       n=0;
     }
@@ -291,31 +304,42 @@ T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
   return n;
 }
 
+
+/// Delete a table and free the memory
 void OT_delete(T_Occurrence_table * t)
 {
   free(t->table);
   free(t);
 }
 
-int OT_get(T_Occurrence_table * t,int r,int g,int b)
+
+/// Get number of occurences for a given color
+int OT_get(T_Occurrence_table * t, int r, int g, int b)
 {
   int index;
 
+  // Drop bits as needed
   index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
   return t->table[index];
 }
 
+
+/// Add 1 to the count for a color
 void OT_inc(T_Occurrence_table * t,int r,int g,int b)
 {
   int index;
 
+  // Drop bits as needed
   r=(r>>t->red_r);
   g=(g>>t->red_g);
   b=(b>>t->red_b);
+  // Compute the address
   index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
   t->table[index]++;
 }
 
+
+/// Count the use of each color in a 24bit picture and fill in the table
 void OT_count_occurrences(T_Occurrence_table* t, T_Bitmap24B image, int size)
 {
   T_Bitmap24B ptr;
@@ -325,11 +349,13 @@ void OT_count_occurrences(T_Occurrence_table* t, T_Bitmap24B image, int size)
     OT_inc(t, ptr->R, ptr->G, ptr->B);
 }
 
+
+/// Count the total number of pixels in an occurence table
 int OT_count_colors(T_Occurrence_table * t)
 {
-  int val; // Valeur de retour
-  int nb; // Nombre de couleurs … tester
-  int i; // Compteur de couleurs test‚es
+  int val; // Computed return value
+  int nb; // Number of colors to test
+  int i; // Loop index
 
   val = 0;
   nb=(t->rng_r)*(t->rng_g)*(t->rng_b);
@@ -341,25 +367,41 @@ int OT_count_colors(T_Occurrence_table * t)
 }
 
 
+// Cluster management
+// Clusters are boxes in the RGB spaces, defined by 6 corner coordinates :
+// Rmax, Rmin, Vmax (or Gmax), Vmin, Rmax, Rmin
+// The median cut algorithm start with a single cluster covering the whole
+// colorspace then split it in two smaller clusters on the longest axis until
+// there are 256 non-empty clusters (with some tricks if the original image
+// actually has less than 256 colors)
+// Each cluster also store the number of pixels that are inside and the
+// rmin, rmax, vmin, vmax, bmin, bmax values are the first/last values that
+// actually are used by a pixel in the cluster
+// When you split a big cluster there may be some space between the splitting
+// plane and the first pixel actually in a cluster
 
-/////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// M‚thodes de gestion des clusters //
-/////////////////////////////////////////////////////////////////////////////
 
+/// Pack a cluster, ie compute its {r,v,b}{min,max} values
 void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
   int r,g,b;
 
-  // On cherche les mins et les maxs de chaque composante sur la couverture
+  // Find min. and max. values actually used for each component in this cluster
 
-  // int nbocc;
-
-  // On prédécale tout pour éviter de faire trop de bazar en se forçant à utiliser OT_get, plus rapide
+  // Pre-shift everything to avoid using OT_Get and be faster. This will only
+  // work if the occurence table actually has full precision, that is a
+  // 256^3*sizeof(int) = 64MB table. If your computer has less free ram and
+  // malloc fails, this will not work at all !
+  // GIMP use only 6 bits for G and B components in this table.
   rmin=c->rmax <<16; rmax=c->rmin << 16;
   vmin=c->vmax << 8; vmax=c->vmin << 8;
   bmin=c->bmax; bmax=c->bmin;
   c->occurences=0;
+
+  // Unoptimized code kept here for documentation purpose because the optimized
+  // one is unreadable : run over the whole cluster and find the min and max,
+  // and count the occurences at the same time.
   /*
   for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
@@ -379,9 +421,9 @@ void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
       }
   */
 
-  // On recherche le minimum et le maximum en parcourant le cluster selon chaque composante, 
-  // ça évite des accès mémoires inutiles, de plus chaque boucle est plus petite que la 
-  // précédente puisqu'on connait une borne supplémentaire
+  // Optimized version : find the extremums one at a time, so we can reduce the
+  // area to seek for the next one. Start at the edges of the cluster and go to
+  // the center until we find a pixel.
 
   for(r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
       for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
@@ -449,7 +491,8 @@ BMAX:
             }
           }
 ENDCRUSH:
-  // Il faut quand même parcourir la partie utile du cluster, pour savoir combien il y a d'occurences
+  // We still need to seek the internal part of the cluster to count pixels
+  // inside it
   for(r=rmin;r<=rmax;r+=1<<16)
       for(g=vmin;g<=vmax;g+=1<<8)
           for(b=bmin;b<=bmax;b++)
@@ -457,11 +500,14 @@ ENDCRUSH:
             c->occurences+=to->table[r + g + b]; // OT_get
           }
 
+  // Unshift the values and put them in the cluster info
   c->rmin=rmin>>16; c->rmax=rmax>>16;
   c->vmin=vmin>>8;  c->vmax=vmax>>8;
   c->bmin=bmin;     c->bmax=bmax;
 
-  // On regarde la composante qui a la variation la plus grande
+  // Find the longest axis to know which way to split the cluster
+  // This multiplications are supposed to improve the result, but may or may not
+  // work, actually.
   r=(c->rmax-c->rmin)*299;
   g=(c->vmax-c->vmin)*587;
   b=(c->bmax-c->bmin)*114;
@@ -496,6 +542,9 @@ ENDCRUSH:
   }
 }
 
+
+/// Split a cluster on its longest axis.
+/// c = source cluster, c1, c2 = output after split
 void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 	T_Occurrence_table * to)
 {
@@ -503,10 +552,12 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   int cumul;
   int r, g, b;
 
+  // Split criterion: each of the cluster will have the same number of pixels
   limit = c->occurences / 2;
   cumul = 0;
-  if (hue == 0)
+  if (hue == 0) // split on red
   {
+	// Run over the cluster until we reach the requested number of pixels
     for (r = c->rmin<<16; r<=c->rmax<<16; r+=1<<16)
     {
       for (g = c->vmin<<8; g<=c->vmax<<8; g+=1<<8)
@@ -527,9 +578,11 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     r>>=16;
     g>>=8;
 
+	// We tried to split on red, but found half of the pixels with r = rmin
+	// so we enforce some split to happen anyway, instead of creating an empty
+	// c2 and c1 == c
     if (r==c->rmin)
       r++;
-    // R est la valeur de d‚but du 2nd cluster
 
     c1->Rmin=c->Rmin; c1->Rmax=r-1;
     c1->rmin=c->rmin; c1->rmax=r-1;
@@ -546,7 +599,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     c2->bmin=c->bmin; c2->bmax=c->bmax;
   }
   else
-  if (hue==1)
+  if (hue==1) // split on green
   {
 
     for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
@@ -570,7 +623,6 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     if (g==c->vmin)
       g++;
-    // G est la valeur de d‚but du 2nd cluster
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
@@ -586,7 +638,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
     c2->bmin=c->bmin; c2->bmax=c->bmax;
   }
-  else
+  else // split on blue
   {
 
     for (b=c->bmin;b<=c->bmax;b++)
@@ -610,7 +662,6 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     if (b==c->bmin)
       b++;
-    // B est la valeur de d‚but du 2nd cluster
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
@@ -628,6 +679,8 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   }
 }
 
+
+/// Compute the mean R, G, B (for palette generation) and H, L (for palette sorting)
 void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to)
 {
   int cumul_r,cumul_g,cumul_b;
@@ -657,10 +710,11 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to)
 }
 
 
+// Cluster set management
+// A set of clusters in handled as a list, the median cut algorithm pops a
+// cluster from the list, split it, and pushes back the two splitted clusters
+// until the lit grows to 256 items
 
-/////////////////////////////////////////////////////////////////////////////
-//////////////////////////// M‚thodes de gestion des ensembles de clusters //
-/////////////////////////////////////////////////////////////////////////////
 
 // Debug helper : check if a cluster set has the right count value
 /*
@@ -679,6 +733,7 @@ void CS_Check(T_Cluster_set* cs)
 */
 
 /// Setup the first cluster before we start the operations
+/// This one covers the full palette range
 void CS_Init(T_Cluster_set * cs, T_Occurrence_table * to)
 {
   cs->clusters->Rmin = cs->clusters->rmin = 0;
@@ -700,25 +755,23 @@ T_Cluster_set * CS_New(int nbmax, T_Occurrence_table * to)
   n=(T_Cluster_set *)malloc(sizeof(T_Cluster_set));
   if (n != NULL)
   {
-    // On recopie les paramŠtres demand‚s
+    // Copy requested params
     n->nb_max = OT_count_colors(to);
 
-    // On vient de compter le nombre de couleurs existantes, s'il est plus grand
-	// que 256 on limite à 256
-	// (nombre de couleurs voulu au final)
+	// If the number of colors asked is > 256, we ceil it because we know we
+	// don't want more
     if (n->nb_max > nbmax)
     {
       n->nb_max = nbmax;
     }
 
-    // On tente d'allouer le premier cluster
+    // Allocate the first cluster
     n->clusters=(T_Cluster *)malloc(sizeof(T_Cluster));
     if (n->clusters != NULL)
-      // C'est bon! On initialise
       CS_Init(n, to);
     else
     {
-      // Table impossible … allouer
+      // No memory free ! Sorry !
       free(n);
       n = NULL;
     }
@@ -740,12 +793,18 @@ void CS_Delete(T_Cluster_set * cs)
 	free(cs);
 }
 
+
+/// Pop a cluster from the cluster list
 void CS_Get(T_Cluster_set * cs, T_Cluster * c)
 {
   T_Cluster* current = cs->clusters;
   T_Cluster* prev = NULL;
 
   // Search a cluster with at least 2 distinct colors so we can split it
+  // Clusters are sorted by number of occurences, so a cluster may end up
+  // with a lot of pixelsand on top of the list, but only one color. We can't
+  // split it in that case. It should probably be stored on a list of unsplittable
+  // clusters to avoid running on it again on each iteration.
   do
   {
     if ( (current->rmin < current->rmax) ||
@@ -771,12 +830,14 @@ void CS_Get(T_Cluster_set * cs, T_Cluster * c)
   current = NULL;
 }
 
+
+/// Push a cluster in the list
 void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 {
   T_Cluster* current = cs->clusters;
   T_Cluster* prev = NULL;
 
-  // Search the first cluster that is smaller than ours
+  // Search the first cluster that is smaller than ours (less pixels)
   while (current && current->occurences > c->occurences)
   {
 	prev = current;
@@ -795,41 +856,44 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
   cs->nb++;
 }
 
-// Détermination de la meilleure palette en utilisant l'algo Median Cut :
-// 1) On considère l'espace (R,G,B) comme 1 boîte
-// 2) On cherche les extrêmes de la boîte en (R,G,B)
-// 3) On trie les pixels de l'image selon l'axe le plus long parmi (R,G,B)
-// 4) On coupe la boîte en deux au milieu, et on compacte pour que chaque bord
-// corresponde bien à un pixel extreme
-// 5) On recommence à couper selon le plus grand axe toutes boîtes confondues
-// 6) On s'arrête quand on a le nombre de couleurs voulu
+/// This is the main median cut algorithm and the function actually called to
+/// reduce the palette. We get the number of pixels for each collor in the
+/// occurence table and generate the cluster set from it.
+// 1) RGB space is a big box
+// 2) We seek the pixels with extreme values
+// 3) We split the box in 2 parts on its longest axis
+// 4) We pack the 2 resulting boxes again to leave no empty space between the box border and the first pixel
+// 5) We take the box with the biggest number of pixels inside and we split it again
+// 6) Iterate until there are 256 boxes. Associate each of them to its middle color
 void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to)
 {
   T_Cluster current;
   T_Cluster Nouveau1;
   T_Cluster Nouveau2;
 
-  // Tant qu'on a moins de 256 clusters
+  // There are less than 256 boxes
   while (cs->nb<cs->nb_max)
   {
-    // On récupère le plus grand cluster
+    // Get the biggest one
     CS_Get(cs,&current);
 
-    // On le coupe en deux
+    // Split it
     Cluster_split(&current, &Nouveau1, &Nouveau2, current.plus_large, to);
 
-    // On compacte ces deux nouveaux (il peut y avoir un espace entre l'endroit
-	// de la coupure et les premiers pixels du cluster)
+	// Pack the 2 new clusters (the split may leave some empty space between the
+	// box border and the first actual pixel)
     Cluster_pack(&Nouveau1, to);
     Cluster_pack(&Nouveau2, to);
 
-	// On les remet dans le set
+	// Put them back in the list
     CS_Set(cs,&Nouveau1);
     CS_Set(cs,&Nouveau2);
     
   }
 }
 
+
+/// Compute the color associated to each box in the list
 void CS_Compute_colors(T_Cluster_set * cs, T_Occurrence_table * to)
 {
   T_Cluster * c;
@@ -838,6 +902,11 @@ void CS_Compute_colors(T_Cluster_set * cs, T_Occurrence_table * to)
     Cluster_compute_hue(c,to);
 }
 
+
+// We sort the clusters on two criterions to get a somewhat coherent palette.
+// TODO : It would be better to do this in one single pass.
+
+/// Sort the clusters by chrominance value
 void CS_Sort_by_chrominance(T_Cluster_set * cs)
 {
 	T_Cluster* nc;
@@ -866,10 +935,12 @@ void CS_Sort_by_chrominance(T_Cluster_set * cs)
 		prev = NULL;
 	}
 
-	// Put the new list bavk in place
+	// Put the new list back in place
 	cs->clusters = newlist;
 }
 
+
+/// Sort the clusters by luminance value
 void CS_Sort_by_luminance(T_Cluster_set * cs)
 {
 	T_Cluster* nc;
@@ -903,6 +974,8 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 	cs->clusters = newlist;
 }
 
+
+/// Generates the palette from the clusters, then the conversion table to map (RGB) to a palette index
 void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table * tc,T_Components * palette)
 {
   int index;
@@ -1028,8 +1101,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 }
 
 
-
-
+/// Compute best palette for given picture.
 T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
 	T_Components * palette, int r, int g, int b)
 {
@@ -1038,7 +1110,7 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   T_Cluster_set * cs;
   T_Gradient_set * ds;
 
-  // Création des éléments nécessaires au calcul de palette optimisée:
+  // Allocate all the elements
   to = 0; tc = 0; cs = 0; ds = 0;
 
   to = OT_new(r, g, b);
@@ -1052,7 +1124,7 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
 	return 0;
   }
 
-  // Première étape : on compte les pixels de chaque couleur pour pouvoir trier là dessus
+  // Count pixels for each color
   OT_count_occurrences(to, image, size);
 
   cs = CS_New(256, to);
@@ -1063,13 +1135,13 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
 	return 0;
   }
   //CS_Check(cs);
-  // C'est bon, on a pu tout allouer
+  // Ok, everything was allocated
 
-  // On génère les clusters (avec l'algo du median cut)
+  // Generate the cluster set with median cut algorithm
   CS_Generate(cs, to);
   //CS_Check(cs);
 
-  // On calcule la teinte de chaque pixel (Luminance et chrominance)
+  // Compute the color data for each cluster (palette entry + HL)
   CS_Compute_colors(cs, to);
   //CS_Check(cs);
 
@@ -1079,15 +1151,13 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
 	  GS_Generate(ds, cs);
 	  GS_Delete(ds);
   }
-  // Enfin on trie les clusters (donc les couleurs de la palette) dans un ordre
-  // sympa : par couleur, et par luminosité pour chaque couleur
+  // Sort the clusters on L and H to get a nice palette
   CS_Sort_by_luminance(cs);
   //CS_Check(cs);
   CS_Sort_by_chrominance(cs);
   //CS_Check(cs);
 
-  // Enfin on génère la palette et la table de correspondance entre chaque
-  // couleur 24b et sa couleur palette associée.
+  // And finally generate the conversion table to map RGB > pal. index
   CS_Generate_color_table_and_palette(cs, tc, palette);
   //CS_Check(cs);
 
@@ -1096,6 +1166,8 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   return tc;
 }
 
+
+/// Change a value with proper ceiling and flooring
 int Modified_value(int value,int modif)
 {
   value+=modif;
@@ -1110,10 +1182,11 @@ int Modified_value(int value,int modif)
   return value;
 }
 
+
+/// Convert a 24b image to 256 colors (with a given palette and conversion table)
+/// This destroys the 24b picture !
+/// Uses floyd steinberg dithering.
 void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,T_Conversion_table * tc)
-// Cette fonction dégrade au fur et à mesure le bitmap source, donc soit on ne
-// s'en ressert pas, soit on passe à la fonction une copie de travail du
-// bitmap original.
 {
   T_Bitmap24B current;
   T_Bitmap24B c_plus1;
@@ -1205,6 +1278,8 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
   }
 }
 
+
+/// Converts from 24b to 256c without dithering, using given conversion table
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
 	T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
 	T_Conversion_table * tc)
@@ -1241,6 +1316,8 @@ void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
 }
 
 
+// These are the allowed precisions for all the tables.
+// For some of them only the first one may work because of ugly optimizations
 static const byte precision_24b[]=
 {
  8,8,8,
@@ -1257,11 +1334,7 @@ static const byte precision_24b[]=
  3,3,2};
 
 
-// Convertie avec le plus de précision possible une image 24b en 256c
-// Renvoie s'il y a eu une erreur ou pas..
-
-// Cette fonction utilise l'algorithme "median cut" (Optimize_palette) pour trouver la palette, et diffuse les erreurs avec floyd-steinberg.
-
+// Give this one a 24b source, get back the 256c bitmap and its palette
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
   T_Conversion_table * table; // table de conversion
