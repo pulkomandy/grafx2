@@ -1539,7 +1539,7 @@ void Change_magnifier_factor(byte factor_index)
   int center_y;
 
   // Values that need to be computed before switching to the new zoom factor
-  if (Cursor_in_menu)
+  if (Cursor_in_menu || !Main_magnifier_mode)
   {
   	center_x=Main_magnifier_offset_X+(Main_magnifier_width>>1);
   	center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
