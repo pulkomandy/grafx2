@@ -129,7 +129,6 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 {
 	T_Fileselector_item * current_item;
 
-	DEBUG("draw",index);
 	if (Scripts_list.Nb_elements)
 	{
 		current_item = Get_item_by_index(&Scripts_list, index);
