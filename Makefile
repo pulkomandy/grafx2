@@ -229,7 +229,7 @@ else
         # Compiles a regular linux exectutable for the native platform
         BIN = grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
 		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
 		CC = gcc
 		#CC = nccgen -ncgcc -ncld -ncfabs
