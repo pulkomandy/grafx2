@@ -112,6 +112,7 @@ enum FILE_FORMATS
   FORMAT_C64,
   FORMAT_KCF,
   FORMAT_PAL,
+  FORMAT_SCR,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 

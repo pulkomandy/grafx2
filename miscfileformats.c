@@ -23,9 +23,11 @@
 ///@file miscfileformats.c
 /// Formats that aren't fully saving, either because of palette restrictions or other things
 
+#include "engine.h"
 #include "errors.h"
 #include "global.h"
 #include "io.h"
+#include "libraw2crtc.h"
 #include "limits.h"
 #include "loadsave.h"
 #include "misc.h"
@@ -2534,3 +2536,42 @@ void Save_C64(void)
         File_error = Save_C64_multi(filename,saveWhat,loadAddr);
 }
 
+
+// SCR (Amstrad CPC)
+
+void Save_SCR(void)
+{
+	unsigned char* output;
+	unsigned long outsize;
+	unsigned char r1;
+	int cpc_mode;
+	FILE* file;
+        char filename[MAX_PATH_CHARACTERS];
+        long file_size;
+
+        Get_full_filename(filename,0);
+
+
+	switch(Pixel_ratio)
+	{
+			case PIXEL_WIDE:
+			case PIXEL_WIDE2:
+				cpc_mode = 0;
+				break;
+			case PIXEL_TALL:
+			case PIXEL_TALL2:
+				cpc_mode = 2;
+				break;
+			default:
+				cpc_mode = 1;
+				break;
+	}
+
+	output = raw2crtc(Main_image_width,Main_image_height,cpc_mode,7,&outsize,&r1,0,0);
+
+	file = fopen(filename,"wb");
+	Write_bytes(file, output, outsize);
+	fclose(file);
+
+	File_error = 0;
+}

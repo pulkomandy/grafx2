@@ -115,6 +115,9 @@ void Test_C64(void);
 void Load_C64(void);
 void Save_C64(void);
 
+// -- SCR (Amstrad CPC)
+void Save_SCR(void);
+
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
 void Test_PNG(void);
@@ -150,6 +153,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, "c64", "c64;koa"},
+  {FORMAT_SCR, " cpc", NULL,	 NULL,	   Save_SCR, 0, 0, "cpc", "cpc;scr"},
   {FORMAT_MISC,"misc.", NULL, NULL, NULL, 1, 0,  "", "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
 
