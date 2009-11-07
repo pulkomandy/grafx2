@@ -59,11 +59,19 @@ unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned ch
   unsigned char *allocationBuffer;
   unsigned short minAddr = 0;
   unsigned char minAddrIsDefined = 0;
-  unsigned short maxAddr;
+  unsigned short maxAddr = 0;
 
   unsigned char nbPixPerByte;
   int y,x;
-
+  unsigned char r6;
+  unsigned short i;
+  unsigned char *ptrTmp;
+  unsigned char *ptrOut;
+  unsigned char vcc;
+  unsigned char rcc;
+  unsigned char hcc;
+  unsigned char cclk;
+  
   switch(mode)
   {
     case 0:
@@ -115,16 +123,15 @@ unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned ch
   }
   memset(allocationBuffer, 0, 0xFFFF);
 
-  unsigned char r6;
   r6 = height/(r9+1);
 
-  for(unsigned char vcc = 0; vcc < r6; vcc++)
+  for(vcc = 0; vcc < r6; vcc++)
   {
-    for(unsigned char rcc = 0; rcc < (r9+1); rcc++)
+    for(rcc = 0; rcc < (r9+1); rcc++)
     {
-      for(unsigned char hcc = 0; hcc < *r1; hcc++)
+      for(hcc = 0; hcc < *r1; hcc++)
       {
-	for(unsigned char cclk = 0; cclk < 2; cclk++)
+	for(cclk = 0; cclk < 2; cclk++)
 	{
 	  x = (hcc << 1 | cclk);
 	  y = vcc*(r9+1) + rcc;
@@ -136,7 +143,7 @@ unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned ch
     }
   }
 
-  for(unsigned short i = 0; i < 0xFFFF; i++)
+  for(i = 0; i < 0xFFFF; i++)
   {
     if(*(allocationBuffer + i) > 1)
     {
@@ -162,12 +169,10 @@ unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned ch
     exit(4);
   }
 
-  unsigned char *ptrTmp;
-  unsigned char *ptrOut;
   ptrTmp = tmpBuffer + minAddr;
   ptrOut = outBuffer;
 
-  for(unsigned short i = minAddr; i <= maxAddr; i++)
+  for(i = minAddr; i <= maxAddr; i++)
   {
     *(ptrOut++) = *(ptrTmp++);
   }
