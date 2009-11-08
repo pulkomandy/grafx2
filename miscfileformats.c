@@ -2546,10 +2546,9 @@ void Save_SCR(void)
 	unsigned char r1;
 	int cpc_mode;
 	FILE* file;
-        char filename[MAX_PATH_CHARACTERS];
-        long file_size;
+	char filename[MAX_PATH_CHARACTERS];
 
-        Get_full_filename(filename,0);
+	Get_full_filename(filename,0);
 
 
 	switch(Pixel_ratio)
@@ -2572,6 +2571,8 @@ void Save_SCR(void)
 	file = fopen(filename,"wb");
 	Write_bytes(file, output, outsize);
 	fclose(file);
+
+	free (output);
 
 	File_error = 0;
 }

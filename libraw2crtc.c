@@ -24,33 +24,33 @@ unsigned short addrCalc(unsigned char vcc, unsigned char rcc, unsigned char hcc,
   return addr;
 }
 
-unsigned char mode0interlace(unsigned char *x)
+unsigned char mode0interlace(unsigned char x, unsigned char y)
 {
   unsigned char mode0pixel[] = {0, 64, 4, 68, 16, 80, 20, 84, 1, 65, 5, 69, 17, 81, 21, 85};
-  return mode0pixel[x[0]] << 1 | mode0pixel[x[1]];
+  return mode0pixel[Read_pixel_function(x,y)] << 1 | mode0pixel[Read_pixel_function(x+1,y)];
 }
 
-unsigned char mode1interlace(unsigned char *x)
+unsigned char mode1interlace(unsigned char x, unsigned char y)
 {
   unsigned char mode1pixel[] = {0, 16, 1, 17};
-  return mode1pixel[x[0]] << 3 | mode1pixel[x[1]] << 2 | mode1pixel[x[2]] << 1 | mode1pixel[x[3]];
+  return mode1pixel[Read_pixel_function(x,y)] << 3 | mode1pixel[Read_pixel_function(x+1,y)] << 2 | mode1pixel[Read_pixel_function(x+2,y)] << 1 | mode1pixel[Read_pixel_function(x+3,y)];
 }
 
-unsigned char mode2interlace(unsigned char *x)
+unsigned char mode2interlace(unsigned char x, unsigned char y)
 {
   unsigned char out = 0;
   int i;
-  for(i = 0; i < 8; i++) out += ((x[7-i]&1) << i);
+  for(i = 0; i < 8; i++) out += ((Read_pixel_function(x+7-i,y)&1) << i);
   return out;
 }
 
-unsigned char mode3interlace(unsigned char *x)
+unsigned char mode3interlace(unsigned char x, unsigned char y)
 {
   unsigned char mode3pixel[] = {0, 16, 1, 17};
-  return mode3pixel[x[0]] << 3 | mode3pixel[x[1]] << 2;
+  return mode3pixel[Read_pixel_function(x,y)] << 3 | mode3pixel[Read_pixel_function(x+1,y)] << 2;
 }
 
-unsigned char (*ptrMode)(unsigned char *x);
+unsigned char (*ptrMode)(unsigned char x, unsigned char y);
 
 unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13)
 {
@@ -135,8 +135,7 @@ unsigned char *raw2crtc(unsigned short width, unsigned short height, unsigned ch
 	{
 	  x = (hcc << 1 | cclk);
 	  y = vcc*(r9+1) + rcc;
-	  // TODO : make this work properly when saving a brush...
-	  *(tmpBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) = (*ptrMode)(Main_screen+y*width+x);
+	  *(tmpBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) = (*ptrMode)(x,y);
 	  *(allocationBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) += 1;
 	}
       }
