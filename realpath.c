@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 #include <limits.h>
 #include <stdlib.h>
 #include <errno.h>

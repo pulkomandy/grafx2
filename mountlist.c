@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /* mountlist.c -- return a list of mounted file systems
 
    Copyright (C) 1991, 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003,

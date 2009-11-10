@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Franck Charlet
@@ -1388,7 +1390,7 @@ byte Button_Load_or_Save(byte load, byte image)
           if(load)
           {
             // Determine the type
-            if(File_exists(Main_filename)) 
+            if(File_exists(Main_filename))
             {
               Selected_type = 0;
               if(Directory_exists(Main_filename)) Selected_type = 1;
@@ -1403,7 +1405,9 @@ byte Button_Load_or_Save(byte load, byte image)
             if(Directory_exists(Main_filename)) Selected_type = 1;
             else Selected_type = 0;
           }
-          has_clicked_ok=1;
+
+		  // Now load immediately, but only if the user exited readline by pressing ENTER
+		  if (Mouse_K == 0) has_clicked_ok = 1;
         }
         else
         {

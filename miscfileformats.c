@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Petter Lindquist
@@ -23,34 +25,61 @@
 ///@file miscfileformats.c
 /// Formats that aren't fully saving, either because of palette restrictions or other things
 
+#include "engine.h"
+#include "errors.h"
 #include "global.h"
+#include "io.h"
+#include "libraw2crtc.h"
 #include "limits.h"
 #include "loadsave.h"
+#include "misc.h"
+#include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
 
 //////////////////////////////////// PAL ////////////////////////////////////
+//
+void Draw_palette_preview(void)
+{
+  short index;
+
+  if (Pixel_load_function==Pixel_load_in_preview)
+    for (index=0; index<256; index++)
+      Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
+
+  Update_window_area(183,95,120,80);
+}
+
+
 
 // -- Tester si un fichier est au format PAL --------------------------------
 void Test_PAL(void)
 {
-  FILE *file;             // Fichier du fichier
+  FILE *file; // Fichier du fichier
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  long file_size;   // Taille du fichier
+  long file_size; // Taille du fichier
 
-  Get_full_filename(filename,0);
+  Get_full_filename(filename, 0);
 
-  File_error=1;
+  File_error = 1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file = fopen(filename, "rb")))
   {
     // Lecture de la taille du fichier
-    file_size=File_length_file(file);
-    fclose(file);
+    file_size = File_length_file(file);
     // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
-    if (file_size==sizeof(T_Palette))
-      File_error=0;
+    if (file_size == sizeof(T_Palette))
+      File_error = 0;
+	else {
+		// Sinon c'est peut être un fichier palette ASCII "Jasc"
+		fread(filename, 1, 8, file);
+		if (strncmp(filename,"JASC-PAL",8) == 0)
+		{
+			File_error = 0;
+		}
+	}
+    fclose(file);
   }
 }
 
@@ -69,22 +98,56 @@ void Load_PAL(void)
   // Ouverture du fichier
   if ((file=fopen(filename, "rb")))
   {
-    T_Palette palette_64;
-    // Init_preview(?); // Pas possible... pas d'image...
+    long file_size = File_length_file(file);
+    // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
+    if (file_size == sizeof(T_Palette))
+	{
+		T_Palette palette_64;
+		// Init_preview(?); // Pas possible... pas d'image...
 
-    // Lecture du fichier dans Main_palette
-    if (Read_bytes(file,palette_64,sizeof(T_Palette)))
-    {
-      Palette_64_to_256(palette_64);
-      memcpy(Main_palette,palette_64,sizeof(T_Palette));
-      Set_palette(Main_palette);
-      Remap_fileselector();
+		// Lecture du fichier dans Main_palette
+		if (Read_bytes(file, palette_64, sizeof(T_Palette)))
+		{
+			Palette_64_to_256(palette_64);
+			memcpy(Main_palette, palette_64, sizeof(T_Palette));
+			Set_palette(Main_palette);
+			Remap_fileselector();
 
-      // On dessine une preview de la palette (si chargement=preview)
-      Draw_palette_preview();
-    }
-    else
-      File_error=2;
+			// On dessine une preview de la palette (si chargement = preview)
+			Draw_palette_preview();
+		}
+		else
+			File_error = 2;
+	} else {
+		fread(filename, 1, 8, file);
+		if (strncmp(filename,"JASC-PAL",8) == 0)
+		{
+			int i, n, r, g, b;
+			fscanf(file, "%d",&n);
+			if(n != 100) 
+			{
+				File_error = 2;
+				fclose(file);
+				return;
+			}
+			// Read color count
+			fscanf(file, "%d",&n);
+			for (i = 0; i < n; i++)
+			{
+				fscanf(file, "%d %d %d",&r, &g, &b);
+				Main_palette[i].R = r;
+				Main_palette[i].G = g;
+				Main_palette[i].B = b;
+
+				Set_palette(Main_palette);
+				Remap_fileselector();
+
+				// On dessine une preview de la palette (si chargement = preview)
+				Draw_palette_preview();
+			}
+		} else File_error = 2;
+		
+	}
 
     // Fermeture du fichier
     fclose(file);
@@ -107,20 +170,12 @@ void Save_PAL(void)
   File_error=0;
 
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=fopen(filename,"w")))
   {
-    T_Palette palette_64;
-    memcpy(palette_64,Main_palette,sizeof(T_Palette));
-    Palette_256_to_64(palette_64);
-    // Enregistrement de Main_palette dans le fichier
-    if (! Write_bytes(file,palette_64,sizeof(T_Palette)))
-    {
-      File_error=1;
-      fclose(file);
-      remove(filename);
-    }
-    else // Ecriture correcte => Fermeture normale du fichier
-      fclose(file);
+	int i;
+	fputs("JASC-PAL\n0100\n256\n", file);
+	for (i = 0; i < 256; i++)
+		fprintf(file,"%d %d %d\n",Main_palette[i].R, Main_palette[i].G, Main_palette[i].B);
   }
   else // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
   {
@@ -2483,3 +2538,90 @@ void Save_C64(void)
         File_error = Save_C64_multi(filename,saveWhat,loadAddr);
 }
 
+
+// SCR (Amstrad CPC)
+
+void Test_SCR(void)
+{
+	// Mmh... not sure what we could test. Any idea ?
+	// The palette file can be tested, if it exists and have the right size it's
+	// ok. But if it's not there the pixel data may still be valid. And we can't
+	// use the filesize as this depends on the screen format.
+	
+	// An AMSDOS header would be a good indication but in some cases it may not
+	// be there
+}
+
+void Load_SCR(void)
+{
+	// The Amstrad CPC screen memory is mapped in a weird mode, somewhere
+	// between bitmap and textmode. Basically the only way to decode this is to
+	// emulate the video chip and read the bytes as needed...
+	// Moreover, the hardware allows the screen to have any size from 8x1 to
+	// 800x273 pixels, and there is no indication of that in the file besides
+	// its size. It can also use any of the 3 screen modes. Fortunately this
+	// last bit of information is stored in the palette file.
+	// Oh, and BTW, the picture can be offset, and it's even usual to do it,
+	// because letting 128 pixels unused at the beginning of the file make it a
+	// lot easier to handle screens using more than 16K of VRam.
+	// The pixel encoding change with the video mode so we have to know that
+	// before attempting to load anything...
+	// As if this wasn't enough, Advanced OCP Art Studio, the reference tool on
+	// Amstrad, can use RLE packing when saving files, meaning we also have to
+	// handle that.
+	
+	// All this mess enforces us to load (and unpack if needed) the file to a
+	// temporary 32k buffer before actually decoding it.
+	
+	// 1) Seek for a palette
+	// 2) If palette found get screenmode from there, else ask user
+	// 3) ask user for screen size (or register values)
+	// 4) Load color data from palette (if found)
+	// 5) Close palette
+	// 6) Open the file
+	// 7) Run around the screen to untangle the pixeldata
+	// 8) Close the file
+}
+
+void Save_SCR(void)
+{
+	// TODO : Add possibility to set R9, R12, R13 values
+	// TODO : Add OCP packing support
+	// TODO : Add possibility to include AMSDOS header, with proper loading
+	// address guessed from r12/r13 values.
+	
+	unsigned char* output;
+	unsigned long outsize;
+	unsigned char r1;
+	int cpc_mode;
+	FILE* file;
+	char filename[MAX_PATH_CHARACTERS];
+
+	Get_full_filename(filename,0);
+
+
+	switch(Pixel_ratio)
+	{
+			case PIXEL_WIDE:
+			case PIXEL_WIDE2:
+				cpc_mode = 0;
+				break;
+			case PIXEL_TALL:
+			case PIXEL_TALL2:
+				cpc_mode = 2;
+				break;
+			default:
+				cpc_mode = 1;
+				break;
+	}
+
+	output = raw2crtc(Main_image_width,Main_image_height,cpc_mode,7,&outsize,&r1,0,0);
+
+	file = fopen(filename,"wb");
+	Write_bytes(file, output, outsize);
+	fclose(file);
+
+	free (output);
+
+	File_error = 0;
+}

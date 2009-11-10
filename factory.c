@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Adrien Destugues
@@ -129,7 +131,6 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 {
 	T_Fileselector_item * current_item;
 
-	DEBUG("draw",index);
 	if (Scripts_list.Nb_elements)
 	{
 		current_item = Get_item_by_index(&Scripts_list, index);

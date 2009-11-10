@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008      Franck Charlet
@@ -914,28 +916,42 @@ void Verbose_error_message(const char * message)
 {
   short clicked_button;
   int line;
-  int i;
-  char buffer[36]; // 35 characters + \0
+  int last_space;
+  int nb_char;
+  char buffer[36];
 
   Open_window(300,160,"Error!");
   
   // Word-wrap the message
-  for (line=0; line < 10; line++)
+  for (line=0; line < 12 && *message!='\0'; line++)
   {
-    for (i=0;i<35 && *message!='\0';i++)
+    last_space = -1;
+    for (nb_char=0; nb_char<35 && message[nb_char]!='\0'; nb_char++)
     {
-      if (*message == '\n')
+      buffer[nb_char]=message[nb_char];
+      if (message[nb_char] == ' ')
       {
-        message++;
+        last_space = nb_char;
+      }
+      else if (message[nb_char] == '\n')
+      {
+        last_space = nb_char;
         break;
       }
-      buffer[i]=*message;
-      message++;
     }
-    buffer[i]='\0';
+    // Close line buffer
+    if (last_space == -1)
+      last_space = 34;
+    buffer[last_space]='\0';
+    
+    // Print
     Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
-    if (*message=='\0')
-      break;
+    
+    // Next line
+    message=message+last_space+1;
+    // Strip leading spaces
+    while (*message == ' ')
+      message++;
   }
 
   Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,SDLK_RETURN); // 1
@@ -1518,15 +1534,22 @@ void Compute_magnifier_data(void)
 }
 
 
-
-// ------------ Changer le facteur de zoom et tout mettre à jour -------------
+/// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index)
 {
-  short center_x;
-  short center_y;
+  int center_x;
+  int center_y;
 
-  center_x=Main_magnifier_offset_X+(Main_magnifier_width>>1);
-  center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
+  // Values that need to be computed before switching to the new zoom factor
+  if (Cursor_in_menu || !Main_magnifier_mode)
+  {
+  	center_x=Main_magnifier_offset_X+(Main_magnifier_width>>1);
+  	center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
+  } else {
+	// Zoom to cursor
+	center_x = (Paintbrush_X - Main_magnifier_offset_X) * 65536 / Main_magnifier_width;
+	center_y = (Paintbrush_Y - Main_magnifier_offset_Y) * 65536 / Main_magnifier_height;
+  }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
   Compute_magnifier_data();
@@ -1535,8 +1558,14 @@ void Change_magnifier_factor(byte factor_index)
   {
     // Recalculer le décalage de la loupe
     // Centrage "brut" de lécran par rapport à la loupe
-    Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
-    Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
+	if (Cursor_in_menu)
+	{
+    	Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
+    	Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
+	} else {
+		Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width / 65536 ;
+		Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height / 65536 ;
+	}
     // Correction en cas de débordement de l'image
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
       Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
