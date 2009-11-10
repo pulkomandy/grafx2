@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /* GFX2CRTC - libraw2crtc.h
  * CloudStrife - 20080921
  * Diffusé sous licence libre CeCILL v2

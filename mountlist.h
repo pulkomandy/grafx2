@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /* mountlist.h -- declarations for list of mounted file systems
 
    Copyright (C) 1991, 1992, 1998, 2000, 2001, 2002, 2003, 2004, 2005
