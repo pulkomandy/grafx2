@@ -571,6 +571,7 @@ void Rotate_180_deg_lowlevel(byte *src, short width, short height)
 		return;
 	}
 
+
 	while(ESI < EDI)
 	{
 		// On échange les deux lignes pointées par EDI et

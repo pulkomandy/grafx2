@@ -1540,7 +1540,10 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
 
 //------------------------- Rotation de la brosse ---------------------------
 
-  #define UNDEFINED (-1.0e20F)
+#ifndef NAN
+  #define NAN (-1.0e20F)
+  #define isnan(x) ((x)==NAN)
+#endif
 float * ScanY_Xt[2];
 float * ScanY_Yt[2];
 float * ScanY_X[2];
@@ -1600,7 +1603,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((x_pos-start_x)*delta_xt))/(float)delta_x2) + (float)xt1;
         yt=(((float)((x_pos-start_x)*delta_yt))/(float)delta_x2) + (float)yt1;
-        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
         {
           ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
@@ -1610,7 +1613,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         {
           if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=(float)x_pos;
@@ -1620,7 +1623,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
           }
           else
           {
-            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
@@ -1657,7 +1660,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((y_pos-start_y)*delta_xt))/(float)delta_y2) + (float)xt1;
         yt=(((float)((y_pos-start_y)*delta_yt))/(float)delta_y2) + (float)yt1;
-        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
         {
           ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
@@ -1667,7 +1670,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         {
           if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=(float)x_pos;
@@ -1677,7 +1680,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
           }
           else
           {
-            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
@@ -1725,11 +1728,11 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à UNDEFINED.
+  // Fill_general avec des valeurs égales à NAN.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=UNDEFINED;
-    ScanY_X[1][y]=UNDEFINED;
+    ScanY_X[0][y]=NAN ;
+    ScanY_X[1][y]=NAN;
   }
 
   Interpolate_texture(x1-x_min,y1-y_min,xt1,yt1,x3-x_min,y3-y_min,xt3,yt3,height);
@@ -1879,11 +1882,11 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à UNDEFINED.
+  // Fill_general avec des valeurs égales à NAN.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=UNDEFINED;
-    ScanY_X[1][y]=UNDEFINED;
+    ScanY_X[0][y]=NAN;
+    ScanY_X[1][y]=NAN;
   }
 
   Interpolate_texture(x1,y1-y_min,xt1,yt1,x3,y3-y_min,xt3,yt3,height);
