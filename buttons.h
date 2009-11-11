@@ -29,6 +29,9 @@
 
 #include "struct.h"
 
+void Stencil_update_color(byte color);
+void Stencil_tag_color(byte color, byte tag_color);
+
 /*!
 	Displays an error message when there is no more memory for the requested
 	operation.
