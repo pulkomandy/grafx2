@@ -1544,23 +1544,37 @@ void Save_BMP(void)
 #pragma pack(1)
 typedef struct
 {
-  word Width; // width de l'écran virtuel
-  word Height; // height de l'écran virtuel
-  byte Resol;   // Informations sur la résolution (et autres)
-  byte Backcol; // color de fond
-  byte Aspect;  // Informations sur l'aspect ratio (et autres)
-} T_GIF_LSDB; // Logical Screen Descriptor Block
+  word Width;   // Width of the complete image area
+  word Height;  // Height of the complete image area
+  byte Resol;   // Informations about the resolution (and other)
+  byte Backcol; // Proposed background color
+  byte Aspect;  // Informations about aspect ratio (and other)
+} T_GIF_LSDB;   // Logical Screen Descriptor Block
 
 typedef struct
 {
-  word Pos_X;         // Abscisse où devrait être affichée l'image
-  word Pos_Y;         // Ordonnée où devrait être affichée l'image
-  word Image_width; // width de l'image
-  word Image_height; // height de l'image
-  byte Indicator;    // Informations diverses sur l'image
+  word Pos_X;         // X offset where the image should be pasted
+  word Pos_Y;         // Y offset where the image should be pasted
+  word Image_width;   // Width of image
+  word Image_height;  // Height of image
+  byte Indicator;     // Misc image information
   byte Nb_bits_pixel; // Nb de bits par pixel
-} T_GIF_IDB; // Image Descriptor Block
+} T_GIF_IDB;          // Image Descriptor Block
 #pragma pack()
+
+typedef struct
+{
+  // byte Block_identifier : 0x21
+  // byte Function         : 0xF9
+  // byte Block_size         // 4
+  byte Packed_fields;     // 11100000 : Reserved
+                          // 00011100 : Disposal method
+                          // 00000010 : User input flag
+                          // 00000001 : Transparent flag
+  word Delay_time;        // Time for this frame to stay displayed
+  byte Transparent_color; // Which color index acts as transparent
+  //word Bloc_terminator; // 0x00
+} T_GIF_GCE;              // Graphic Control Extension
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -1588,103 +1602,105 @@ void Test_GIF(void)
 
 
 // -- Lire un fichier au format GIF -----------------------------------------
+// -- Lire un fichier au format GIF -----------------------------------------
 
-  // Définition de quelques variables globales au chargement du GIF87a
-  word GIF_nb_bits;        // Nb de bits composants un code complet
-  word GIF_remainder_bits;      // Nb de bits encore dispos dans GIF_last_byte
-  byte GIF_remainder_byte;      // Nb d'octets avant le prochain bloc de Raster Data
-  word GIF_current_code;    // Code traité (qui vient d'être lu en général)
-  byte GIF_last_byte;      // Octet de lecture des bits
-  word GIF_pos_X;          // Coordonnées d'affichage de l'image
-  word GIF_pos_Y;
-  word GIF_interlaced;     // L'image est entrelacée
-  word GIF_finished_interlaced_image; // L'image entrelacée est finie de charger
-  word GIF_pass;          // index de passe de l'image entrelacée
-  FILE *GIF_file;        // L'handle du fichier
+// Définition de quelques variables globales au chargement du GIF87a
+word GIF_nb_bits;        // Nb de bits composants un code complet
+word GIF_remainder_bits;      // Nb de bits encore dispos dans GIF_last_byte
+byte GIF_remainder_byte;      // Nb d'octets avant le prochain bloc de Raster Data
+word GIF_current_code;    // Code traité (qui vient d'être lu en général)
+byte GIF_last_byte;      // Octet de lecture des bits
+word GIF_pos_X;          // Coordonnées d'affichage de l'image
+word GIF_pos_Y;
+word GIF_interlaced;     // L'image est entrelacée
+word GIF_finished_interlaced_image; // L'image entrelacée est finie de charger
+word GIF_pass;          // index de passe de l'image entrelacée
+FILE *GIF_file;        // L'handle du fichier
 
-  // -- Lit le code à GIF_nb_bits suivant --
+// -- Lit le code à GIF_nb_bits suivant --
 
-  word GIF_get_next_code(void)
+word GIF_get_next_code(void)
+{
+  word nb_bits_to_process=GIF_nb_bits;
+  word nb_bits_processed  =0;
+  word current_nb_bits;
+
+  GIF_current_code=0;
+
+  while (nb_bits_to_process)
   {
-    word nb_bits_to_process=GIF_nb_bits;
-    word nb_bits_processed  =0;
-    word current_nb_bits;
-
-    GIF_current_code=0;
-
-    while (nb_bits_to_process)
+    if (GIF_remainder_bits==0) // Il ne reste plus de bits...
     {
-      if (GIF_remainder_bits==0) // Il ne reste plus de bits...
-      {
-        // Lire l'octet suivant:
+      // Lire l'octet suivant:
 
-        // Si on a atteint la fin du bloc de Raster Data
-        if (GIF_remainder_byte==0)
-          // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
-          if(Read_byte(GIF_file, &GIF_remainder_byte)!=1)
-            File_error=2;
+      // Si on a atteint la fin du bloc de Raster Data
+      if (GIF_remainder_byte==0)
+        // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
+        if(Read_byte(GIF_file, &GIF_remainder_byte)!=1)
+          File_error=2;
 
-        if(Read_byte(GIF_file,&GIF_last_byte)!=1)
-          File_error = 2;
-        GIF_remainder_byte--;
-        GIF_remainder_bits=8;
-      }
-
-      current_nb_bits=(nb_bits_to_process<=GIF_remainder_bits)?nb_bits_to_process:GIF_remainder_bits;
-
-      GIF_current_code|=(GIF_last_byte & ((1<<current_nb_bits)-1))<<nb_bits_processed;
-      GIF_last_byte>>=current_nb_bits;
-      nb_bits_processed  +=current_nb_bits;
-      nb_bits_to_process-=current_nb_bits;
-      GIF_remainder_bits    -=current_nb_bits;
+      if(Read_byte(GIF_file,&GIF_last_byte)!=1)
+        File_error = 2;
+      GIF_remainder_byte--;
+      GIF_remainder_bits=8;
     }
 
-    return GIF_current_code;
+    current_nb_bits=(nb_bits_to_process<=GIF_remainder_bits)?nb_bits_to_process:GIF_remainder_bits;
+
+    GIF_current_code|=(GIF_last_byte & ((1<<current_nb_bits)-1))<<nb_bits_processed;
+    GIF_last_byte>>=current_nb_bits;
+    nb_bits_processed  +=current_nb_bits;
+    nb_bits_to_process-=current_nb_bits;
+    GIF_remainder_bits    -=current_nb_bits;
   }
 
-  // -- Affiche un nouveau pixel --
+  return GIF_current_code;
+}
 
-  void GIF_new_pixel(byte color)
+// -- Affiche un nouveau pixel --
+
+void GIF_new_pixel(T_GIF_IDB *idb, byte color)
+{
+  if (color != Main_backups->Pages->Transparent_color) // transparent color
+    Pixel_load_function(idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
+
+  GIF_pos_X++;
+
+  if (GIF_pos_X>=idb->Image_width)
   {
-    Pixel_load_function(GIF_pos_X,GIF_pos_Y,color);
+    GIF_pos_X=0;
 
-    GIF_pos_X++;
-
-    if (GIF_pos_X>=Main_image_width)
+    if (!GIF_interlaced)
+      GIF_pos_Y++;
+    else
     {
-      GIF_pos_X=0;
-
-      if (!GIF_interlaced)
-        GIF_pos_Y++;
-      else
+      switch (GIF_pass)
       {
-        switch (GIF_pass)
-        {
-          case 0 : GIF_pos_Y+=8;
-                   break;
-          case 1 : GIF_pos_Y+=8;
-                   break;
-          case 2 : GIF_pos_Y+=4;
-                   break;
-          default: GIF_pos_Y+=2;
-        }
+        case 0 : GIF_pos_Y+=8;
+                 break;
+        case 1 : GIF_pos_Y+=8;
+                 break;
+        case 2 : GIF_pos_Y+=4;
+                 break;
+        default: GIF_pos_Y+=2;
+      }
 
-        if (GIF_pos_Y>=Main_image_height)
+      if (GIF_pos_Y>=idb->Image_height)
+      {
+        switch(++GIF_pass)
         {
-          switch(++GIF_pass)
-          {
-          case 1 : GIF_pos_Y=4;
-                   break;
-          case 2 : GIF_pos_Y=2;
-                   break;
-          case 3 : GIF_pos_Y=1;
-                   break;
-          case 4 : GIF_finished_interlaced_image=1;
-          }
+        case 1 : GIF_pos_Y=4;
+                 break;
+        case 2 : GIF_pos_Y=2;
+                 break;
+        case 3 : GIF_pos_Y=1;
+                 break;
+        case 4 : GIF_finished_interlaced_image=1;
         }
       }
     }
   }
+}
 
 
 void Load_GIF(void)
@@ -1701,11 +1717,12 @@ void Load_GIF(void)
 
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
+  T_GIF_GCE GCE;
 
   word nb_colors;       // Nombre de couleurs dans l'image
   word color_index; // index de traitement d'une couleur
   byte size_to_read; // Nombre de données à lire      (divers)
-  byte block_indentifier;  // Code indicateur du type de bloc en cours
+  byte block_identifier;  // Code indicateur du type de bloc en cours
   word initial_nb_bits;   // Nb de bits au début du traitement LZW
   word special_case=0;       // Mémoire pour le cas spécial
   word old_code=0;       // Code précédent
@@ -1718,11 +1735,6 @@ void Load_GIF(void)
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
 
-  GIF_pos_X=0;
-  GIF_pos_Y=0;
-  GIF_last_byte=0;
-  GIF_remainder_bits=0;
-  GIF_remainder_byte=0;
   number_LID=0;
   
   Get_full_filename(filename,0);
@@ -1752,15 +1764,14 @@ void Load_GIF(void)
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
 
+        Init_preview(LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,PIXEL_SIMPLE);
+        Main_image_width=LSDB.Width;
+        Main_image_height=LSDB.Height;
+
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
         // Nombre de bits/pixel  = (LSDB.Resol  and $07)+1
         // Ordre de Classement   = (LSDB.Aspect and $80)
-
-        alphabet_stack_pos=0;
-        GIF_last_byte    =0;
-        GIF_remainder_bits    =0;
-        GIF_remainder_byte    =0;
 
         nb_colors=(1 << ((LSDB.Resol & 0x07)+1));
         initial_nb_bits=(LSDB.Resol & 0x07)+2;
@@ -1795,10 +1806,10 @@ void Load_GIF(void)
         }
 
         // On lit un indicateur de block
-        Read_byte(GIF_file,&block_indentifier);
-        while (block_indentifier!=0x3B && !File_error)
+        Read_byte(GIF_file,&block_identifier);
+        while (block_identifier!=0x3B && !File_error)
         {
-          switch (block_indentifier)
+          switch (block_identifier)
           {
             case 0x21: // Bloc d'extension
             {
@@ -1828,7 +1839,20 @@ void Load_GIF(void)
                     break;
                   case 0xF9: // Graphics Control Extension
                     // Prévu pour la transparence
+                    if ( Read_byte(GIF_file,&(GCE.Packed_fields))
+                      && Read_word_le(GIF_file,&(GCE.Delay_time))
+                      && Read_byte(GIF_file,&(GCE.Transparent_color)))
+                    {
+                      if (GCE.Packed_fields & 1)
+                        Main_backups->Pages->Transparent_color= GCE.Transparent_color;
+                      else
+                        Main_backups->Pages->Transparent_color = -1;
                     
+                    }
+                    else
+                      File_error=2;
+                    break;
+
                   default:
                     // On saute le bloc:
                     fseek(GIF_file,size_to_read,SEEK_CUR);
@@ -1842,10 +1866,11 @@ void Load_GIF(void)
             case 0x2C: // Local Image Descriptor
             {
               // Si on a deja lu une image, c'est une GIF animée ou bizarroide, on sort.
-              if (number_LID!=0)
+              if (number_LID!=0 && Pixel_load_function==Pixel_load_in_current_screen)
               {
-                File_error=2;
-                break;
+                // This a second layer/frame, or more.
+                // Attempt to add a layer to current image
+                Add_layer(Main_backups, Main_current_layer+1);
               }
               number_LID++;
               
@@ -1858,10 +1883,6 @@ void Load_GIF(void)
                 && Read_byte(GIF_file,&(IDB.Nb_bits_pixel))
                 && IDB.Image_width && IDB.Image_height)
               {
-                Main_image_width=IDB.Image_width;
-                Main_image_height=IDB.Image_height;
-    
-                Init_preview(IDB.Image_width,IDB.Image_height,file_size,FORMAT_GIF,PIXEL_SIMPLE);
     
                 // Palette locale dispo = (IDB.Indicator and $80)
                 // Image entrelacée     = (IDB.Indicator and $40)
@@ -1913,6 +1934,13 @@ void Load_GIF(void)
     
                 //////////////////////////////////////////// DECOMPRESSION LZW //
     
+                GIF_pos_X=0;
+                GIF_pos_Y=0;
+                alphabet_stack_pos=0;
+                GIF_last_byte    =0;
+                GIF_remainder_bits    =0;
+                GIF_remainder_byte    =0;
+
                 while ( (GIF_get_next_code()!=value_eof) && (!File_error) )
                 {
                   if (GIF_current_code<=alphabet_free)
@@ -1934,7 +1962,7 @@ void Load_GIF(void)
                       special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
     
                       do
-                        GIF_new_pixel(alphabet_stack[--alphabet_stack_pos]);
+                        GIF_new_pixel(&IDB, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
     
                       alphabet_prefix[alphabet_free  ]=old_code;
@@ -1954,7 +1982,7 @@ void Load_GIF(void)
                       alphabet_free     =nb_colors+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
-                      GIF_new_pixel(GIF_current_code);
+                      GIF_new_pixel(&IDB, GIF_current_code);
                     }
                   }
                   else
@@ -1965,7 +1993,7 @@ void Load_GIF(void)
     
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=Main_image_height) ) ||
+                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) ) ||
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
@@ -1977,7 +2005,7 @@ void Load_GIF(void)
             break;
           }
           // Lecture du code de fonction suivant:
-          Read_byte(GIF_file,&block_indentifier);
+          Read_byte(GIF_file,&block_identifier);
         }
       } // Le fichier contenait un LSDB
       else
@@ -2058,16 +2086,16 @@ void Load_GIF(void)
 
   // -- Lire le pixel suivant --
 
-  byte GIF_next_pixel(void)
+  byte GIF_next_pixel(T_GIF_IDB *idb)
   {
     byte temp;
 
     temp=Read_pixel_function(GIF_pos_X,GIF_pos_Y);
 
-    if (++GIF_pos_X>=Main_image_width)
+    if (++GIF_pos_X>=idb->Image_width)
     {
       GIF_pos_X=0;
-      if (++GIF_pos_Y>=Main_image_height)
+      if (++GIF_pos_Y>=idb->Image_height)
         GIF_stop=1;
     }
 
@@ -2093,21 +2121,17 @@ void Save_GIF(void)
   T_GIF_IDB IDB;
 
 
-  byte block_indentifier;  // Code indicateur du type de bloc en cours
+  byte block_identifier;  // Code indicateur du type de bloc en cours
   word current_string;   // Code de la chaîne en cours de traitement
   byte current_char;         // Caractère à coder
   word index;            // index de recherche de chaîne
 
+  byte old_current_layer=Main_current_layer;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
-
-
-  GIF_pos_X=0;
-  GIF_pos_Y=0;
-  GIF_last_byte=0;
-  GIF_remainder_bits=0;
-  GIF_remainder_byte=0;
-
+  
+  File_error=0;
+  
   Get_full_filename(filename,0);
 
   if ((GIF_file=fopen(filename,"wb")))
@@ -2140,12 +2164,11 @@ void Save_GIF(void)
 
       // On sauve le LSDB dans le fichier
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      LSDB.Width = SDL_Swap16(LSDB.Width);
-      LSDB.Height = SDL_Swap16(LSDB.Height);
-#endif
-
-      if (Write_bytes(GIF_file,&LSDB,sizeof(T_GIF_LSDB)))
+      if (Write_word_le(GIF_file,LSDB.Width) &&
+          Write_word_le(GIF_file,LSDB.Height) &&
+          Write_byte(GIF_file,LSDB.Resol) &&
+          Write_byte(GIF_file,LSDB.Backcol) &&
+          Write_byte(GIF_file,LSDB.Aspect) )
       {
         // Le LSDB a été correctement écrit.
 
@@ -2160,6 +2183,11 @@ void Save_GIF(void)
           // Ecriture de la transparence
           //Write_bytes(GIF_file,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
 
+          // "Netscape" animation extension
+          //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
+          // LL : 01 to loop
+          // SSSS : number of loops
+            
           // Ecriture du commentaire
           if (Main_comment[0])
           {
@@ -2167,180 +2195,208 @@ void Save_GIF(void)
             Write_byte(GIF_file,strlen(Main_comment));
             Write_bytes(GIF_file,Main_comment,strlen(Main_comment)+1);
           }
-                            
-
           
-          // On va écrire un block indicateur d'IDB et l'IDB du fichier
-
-          block_indentifier=0x2C;
-          IDB.Pos_X=0;
-          IDB.Pos_Y=0;
-          IDB.Image_width=Main_image_width;
-          IDB.Image_height=Main_image_height;
-          IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
-          IDB.Nb_bits_pixel=8; // Image 256 couleurs;
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-          IDB.Image_width = SDL_Swap16(IDB.Image_width);
-          IDB.Image_height = SDL_Swap16(IDB.Image_height);
-#endif
-
-          if ( Write_bytes(GIF_file,&block_indentifier,1) &&
-               Write_bytes(GIF_file,&IDB,sizeof(T_GIF_IDB)) )
+          // Loop on all layers
+          for (Main_current_layer=0; 
+            Main_current_layer < Main_backups->Pages->Nb_layers && !File_error;
+            Main_current_layer++)
           {
-            //   Le block indicateur d'IDB et l'IDB ont étés correctements
-            // écrits.
-
-            Init_write_buffer();
-
-            index=4096;
-            File_error=0;
-            GIF_stop=0;
-
-            // Réintialisation de la table:
-            alphabet_free=258;
-            GIF_nb_bits  =9;
-            alphabet_max =511;
-            GIF_set_code(256);
-            for (start=0;start<4096;start++)
+            // Write a Graphic Control Extension
+            char * GCE_block = "\x21\xF9\x04\x05\x05\x00\x00\x00";
+            //if (Main_current_layer > 0)
+            //  GCE_block[3] = '\x05';
+            if (Main_current_layer == Main_backups->Pages->Nb_layers -1)
             {
-              alphabet_daughter[start]=4096;
-              alphabet_sister[start]=4096;
+              // "Infinite" delay for last frame
+              GCE_block[4] = 255;
+              GCE_block[5] = 255;
             }
-
-            ////////////////////////////////////////////// COMPRESSION LZW //
-
-            start=current_string=GIF_next_pixel();
-            descend=1;
-
-            do
+            if (Write_bytes(GIF_file,GCE_block,8))
             {
-              current_char=GIF_next_pixel();
-
-              //   On regarde si dans la table on aurait pas une chaîne
-              // équivalente à current_string+Caractere
-
-              while ( (index<alphabet_free) &&
-                      ( (current_string!=alphabet_prefix[index]) ||
-                        (current_char      !=alphabet_suffix[index]) ) )
+            
+              // On va écrire un block indicateur d'IDB et l'IDB du fichier
+              block_identifier=0x2C;
+              IDB.Pos_X=0;
+              IDB.Pos_Y=0;
+              IDB.Image_width=Main_image_width;
+              IDB.Image_height=Main_image_height;
+              IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
+              IDB.Nb_bits_pixel=8; // Image 256 couleurs;
+    
+              if ( Write_byte(GIF_file,block_identifier) &&
+                   Write_word_le(GIF_file,IDB.Pos_X) &&
+                   Write_word_le(GIF_file,IDB.Pos_Y) &&
+                   Write_word_le(GIF_file,IDB.Image_width) &&
+                   Write_word_le(GIF_file,IDB.Image_height) &&
+                   Write_byte(GIF_file,IDB.Indicator) &&
+                   Write_byte(GIF_file,IDB.Nb_bits_pixel))
               {
-                descend=0;
-                start=index;
-                index=alphabet_sister[index];
-              }
-
-              if (index<alphabet_free)
-              {
-                //   On sait ici que la current_string+Caractere se trouve
-                // en position index dans les tables.
-
-                descend=1;
-                start=current_string=index;
-                index=alphabet_daughter[index];
-              }
-              else
-              {
-                // On fait la jonction entre la current_string et l'actuelle
-                if (descend)
-                  alphabet_daughter[start]=alphabet_free;
-                else
-                  alphabet_sister[start]=alphabet_free;
-
-                // On rajoute la chaîne current_string+Caractere à la table
-                alphabet_prefix[alphabet_free  ]=current_string;
-                alphabet_suffix[alphabet_free++]=current_char;
-
-                // On écrit le code dans le fichier
-                GIF_set_code(current_string);
-
-                if (alphabet_free>0xFFF)
+                //   Le block indicateur d'IDB et l'IDB ont étés correctements
+                // écrits.
+    
+                Init_write_buffer();
+                GIF_pos_X=0;
+                GIF_pos_Y=0;
+                GIF_last_byte=0;
+                GIF_remainder_bits=0;
+                GIF_remainder_byte=0;
+    
+                index=4096;
+                File_error=0;
+                GIF_stop=0;
+    
+                // Réintialisation de la table:
+                alphabet_free=258;
+                GIF_nb_bits  =9;
+                alphabet_max =511;
+                GIF_set_code(256);
+                for (start=0;start<4096;start++)
                 {
-                  // Réintialisation de la table:
-                  GIF_set_code(256);
-                  alphabet_free=258;
-                  GIF_nb_bits  =9;
-                  alphabet_max =511;
-                  for (start=0;start<4096;start++)
+                  alphabet_daughter[start]=4096;
+                  alphabet_sister[start]=4096;
+                }
+    
+                ////////////////////////////////////////////// COMPRESSION LZW //
+    
+                start=current_string=GIF_next_pixel(&IDB);
+                descend=1;
+    
+                do
+                {
+                  current_char=GIF_next_pixel(&IDB);
+    
+                  //   On regarde si dans la table on aurait pas une chaîne
+                  // équivalente à current_string+Caractere
+    
+                  while ( (index<alphabet_free) &&
+                          ( (current_string!=alphabet_prefix[index]) ||
+                            (current_char      !=alphabet_suffix[index]) ) )
                   {
-                    alphabet_daughter[start]=4096;
-                    alphabet_sister[start]=4096;
+                    descend=0;
+                    start=index;
+                    index=alphabet_sister[index];
+                  }
+    
+                  if (index<alphabet_free)
+                  {
+                    //   On sait ici que la current_string+Caractere se trouve
+                    // en position index dans les tables.
+    
+                    descend=1;
+                    start=current_string=index;
+                    index=alphabet_daughter[index];
+                  }
+                  else
+                  {
+                    // On fait la jonction entre la current_string et l'actuelle
+                    if (descend)
+                      alphabet_daughter[start]=alphabet_free;
+                    else
+                      alphabet_sister[start]=alphabet_free;
+    
+                    // On rajoute la chaîne current_string+Caractere à la table
+                    alphabet_prefix[alphabet_free  ]=current_string;
+                    alphabet_suffix[alphabet_free++]=current_char;
+    
+                    // On écrit le code dans le fichier
+                    GIF_set_code(current_string);
+    
+                    if (alphabet_free>0xFFF)
+                    {
+                      // Réintialisation de la table:
+                      GIF_set_code(256);
+                      alphabet_free=258;
+                      GIF_nb_bits  =9;
+                      alphabet_max =511;
+                      for (start=0;start<4096;start++)
+                      {
+                        alphabet_daughter[start]=4096;
+                        alphabet_sister[start]=4096;
+                      }
+                    }
+                    else if (alphabet_free>alphabet_max+1)
+                    {
+                      // On augmente le nb de bits
+    
+                      GIF_nb_bits++;
+                      alphabet_max=(1<<GIF_nb_bits)-1;
+                    }
+    
+                    // On initialise la current_string et le reste pour la suite
+                    index=alphabet_daughter[current_char];
+                    start=current_string=current_char;
+                    descend=1;
                   }
                 }
-                else if (alphabet_free>alphabet_max+1)
+                while ((!GIF_stop) && (!File_error));
+    
+                if (!File_error)
                 {
-                  // On augmente le nb de bits
-
-                  GIF_nb_bits++;
-                  alphabet_max=(1<<GIF_nb_bits)-1;
-                }
-
-                // On initialise la current_string et le reste pour la suite
-                index=alphabet_daughter[current_char];
-                start=current_string=current_char;
-                descend=1;
-              }
-            }
-            while ((!GIF_stop) && (!File_error));
-
-            if (!File_error)
-            {
-              // On écrit le code dans le fichier
-              GIF_set_code(current_string); // Dernière portion d'image
-
-              //   Cette dernière portion ne devrait pas poser de problèmes
-              // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
-              // valeur, il faudrait que la table de chaîne soit remplie or
-              // c'est impossible puisqu'on traite une chaîne qui se trouve
-              // déjà dans la table, et qu'elle n'a rien d'inédit. Donc on
-              // ne devrait pas avoir à changer de taille, mais je laisse
-              // quand même en remarque tout ça, au cas où il subsisterait
-              // des problèmes dans certains cas exceptionnels.
-              //
-              // Note: de toutes façons, ces lignes en commentaires ont étés
-              //      écrites par copier/coller du temps où la sauvegarde du
-              //      GIF déconnait. Il y a donc fort à parier qu'elles ne
-              //      sont pas correctes.
-
-              /*
-              if (current_string==alphabet_max)
-              {
-                if (alphabet_max==0xFFF)
-                {
-                  // On balargue un Clear Code
-                  GIF_set_code(256);
-
-                  // On réinitialise les données LZW
-                  alphabet_free=258;
-                  GIF_nb_bits  =9;
-                  alphabet_max =511;
-                }
-                else
-                {
-                  GIF_nb_bits++;
-                  alphabet_max=(1<<GIF_nb_bits)-1;
-                }
-              }
-              */
-
-              GIF_set_code(257);             // Code de End d'image
-              if (GIF_remainder_bits!=0)
-                GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
-              GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
-              End_write(GIF_file);   // On envoie les dernières données du buffer KM  dans le fichier
-
-              // On écrit un \0
-              if (! Write_byte(GIF_file,'\x00'))
+                  // On écrit le code dans le fichier
+                  GIF_set_code(current_string); // Dernière portion d'image
+    
+                  //   Cette dernière portion ne devrait pas poser de problèmes
+                  // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
+                  // valeur, il faudrait que la table de chaîne soit remplie or
+                  // c'est impossible puisqu'on traite une chaîne qui se trouve
+                  // déjà dans la table, et qu'elle n'a rien d'inédit. Donc on
+                  // ne devrait pas avoir à changer de taille, mais je laisse
+                  // quand même en remarque tout ça, au cas où il subsisterait
+                  // des problèmes dans certains cas exceptionnels.
+                  //
+                  // Note: de toutes façons, ces lignes en commentaires ont étés
+                  //      écrites par copier/coller du temps où la sauvegarde du
+                  //      GIF déconnait. Il y a donc fort à parier qu'elles ne
+                  //      sont pas correctes.
+    
+                  /*
+                  if (current_string==alphabet_max)
+                  {
+                    if (alphabet_max==0xFFF)
+                    {
+                      // On balargue un Clear Code
+                      GIF_set_code(256);
+    
+                      // On réinitialise les données LZW
+                      alphabet_free=258;
+                      GIF_nb_bits  =9;
+                      alphabet_max =511;
+                    }
+                    else
+                    {
+                      GIF_nb_bits++;
+                      alphabet_max=(1<<GIF_nb_bits)-1;
+                    }
+                  }
+                  */
+    
+                  GIF_set_code(257);             // Code de End d'image
+                  if (GIF_remainder_bits!=0)
+                    GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
+                  GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
+                  End_write(GIF_file);   // On envoie les dernières données du buffer KM  dans le fichier
+    
+                  // On écrit un \0
+                  if (! Write_byte(GIF_file,'\x00'))
+                    File_error=1;
+                  
+                  }
+      
+                } // On a pu écrire l'IDB
+              else
                 File_error=1;
-              // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
-              if (! Write_byte(GIF_file,'\x3B'))
-                File_error=1;
-
-              
             }
-
-          } // On a pu écrire l'IDB
-          else
-            File_error=1;
+            else
+              File_error=1;
+          }
+          
+          // After writing all layers
+          if (!File_error)
+          {
+            // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
+            if (! Write_byte(GIF_file,'\x3B'))
+              File_error=1;
+          }
 
         } // On a pu écrire la palette
         else
@@ -2367,7 +2423,12 @@ void Save_GIF(void)
   } // On a pu ouvrir le fichier en écriture
   else
     File_error=1;
+  
+  // Restore original index of current layer
+  Main_current_layer = old_current_layer;
+
 }
+
 
 
 //////////////////////////////////// PCX ////////////////////////////////////
@@ -3117,7 +3178,7 @@ void Test_PNG(void)
     fclose(file);
   }
 }
-
+  
 png_bytep * Row_pointers;
 // -- Lire un fichier au format PNG -----------------------------------------
 void Load_PNG(void)
@@ -3449,7 +3510,7 @@ void Save_PNG(void)
 
           /* ecriture des pixels de l'image */
           Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * Main_image_height);
-          pixel_ptr = (Read_pixel_function==Read_pixel_from_current_screen)?Main_screen:Brush;
+          pixel_ptr = (Read_pixel_function==Read_pixel_from_brush)?Brush:Main_screen;
           for (y=0; y<Main_image_height; y++)
             Row_pointers[y] = (png_byte*)(pixel_ptr+y*Main_image_width);
 

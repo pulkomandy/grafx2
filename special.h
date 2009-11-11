@@ -50,3 +50,15 @@ void Zoom_set(int index);
 void Display_stored_brush_in_window(word x,word y,int number);
 void Store_brush(int index);
 byte Restore_brush(int index);
+
+/*!
+    Command that sets the transparency level.
+*/
+void Transparency_set(byte amount);
+
+void Layer_activate(short layer, short side);
+
+void Special_add_layer(void);
+
+void Special_delete_layer(void);
+

@@ -36,6 +36,7 @@
 #include "windows.h"
 #include "palette.h"
 #include "input.h"
+#include "graph.h"
 
 ///Count used palette indexes in the whole picture
 ///Return the total number of different colors
@@ -177,16 +178,16 @@ void Hide_current_image_with_stencil(byte color, byte * stencil)
 	int nb_pixels=0; //ECX
 	//al=color
 	//edi=Screen_pixels
-	byte* Pixel_Courant=Screen_pixels; //dl
+	byte* pixel=Main_backups->Pages->Image[Main_current_layer];
 	int i;
 
 	nb_pixels=Main_image_height*Main_image_width;
 
 	for(i=0;i<nb_pixels;i++)
 	{
-		if (stencil[*Pixel_Courant]==0)
-			*Pixel_Courant=color;
-		Pixel_Courant++;
+		if (stencil[*pixel]==0)
+			*pixel=color;
+		pixel++;
 	}
 }
 
@@ -194,7 +195,7 @@ void Hide_current_image(byte color)
 	// Effacer l'image courante avec une certaine couleur
 {
 	memset(
-			Main_screen ,
+			Main_backups->Pages->Image[Main_current_layer],
 			color ,
 			Main_image_width * Main_image_height
 		  );
@@ -218,26 +219,16 @@ byte Read_pixel_from_brush (word x, word y)
 	return *(Brush + y * Brush_width + x);
 }
 
-
-byte Read_pixel_from_current_screen  (word x,word y)
+void Replace_a_color(byte old_color, byte new_color)
 {
-	return *(Main_screen+y*Main_image_width+x);
-}
-
-void Pixel_in_current_screen      (word x,word y,byte color)
-{
-	byte* dest=(x+y*Main_image_width+Main_screen);
-	*dest=color;
-}
-
-void Replace_a_color(byte old_color, byte New_color)
-{
-	byte* edi;
-
-	// pour chaque pixel :
-	for(edi = Main_screen;edi < Main_screen + Main_image_height * Main_image_width;edi++)
-		if (*edi == old_color)
-			*edi = New_color;
+  word x;
+  word y;
+  
+  // Update all pixels
+	for (y=0; y<Main_image_height; y++)
+  	for (x=0; x<Main_image_width; x++)
+  	  if (Read_pixel_from_current_layer(x,y) == old_color)
+  	    Pixel_in_current_screen(x,y,new_color,0);
 	Update_rect(0,0,0,0); // On peut TOUT a jour
 	// C'est pas un problème car il n'y a pas de preview
 }
@@ -348,9 +339,9 @@ void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,sh
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-	byte* src=start_y*image_width+start_x+Main_screen; //Adr départ image (ESI)
-	byte* dest=Brush; //Adr dest brosse (EDI)
-	int dx;
+    byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
+    byte* dest=Brush; //Adr dest brosse (EDI)
+    int dx;
 
 	for (dx=Brush_height;dx!=0;dx--)
 		//Pour chaque ligne
@@ -383,21 +374,18 @@ byte Effect_sieve(word x,word y)
 
 void Replace_colors_within_limits(byte * replace_table)
 {
-	int line;
-	int counter;
-	byte* Adresse;
-
-	byte old;
+	int y;
+	int x;
+	byte* pixel;
 
 	// Pour chaque ligne :
-	for(line = Limit_top;line <= Limit_bottom; line++)
+	for(y = Limit_top;y <= Limit_bottom; y++)
 	{
 		// Pour chaque pixel sur la ligne :
-		for (counter = Limit_left;counter <= Limit_right;counter ++)
+		for (x = Limit_left;x <= Limit_right;x ++)
 		{
-			Adresse = Main_screen+line*Main_image_width+counter;
-			old=*Adresse;
-			*Adresse = replace_table[old];
+			pixel = Main_backups->Pages->Image[Main_current_layer]+y*Main_image_width+x;
+			*pixel = replace_table[*pixel];
 		}
 	}
 }
@@ -663,33 +651,33 @@ void Slider_timer(byte speed)
 	} while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }
 
-void Scroll_picture(short x_offset,short y_offset)
+void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset)
 {
-	byte* esi = Screen_backup; //source de la copie
-	byte* edi = Main_screen + y_offset * Main_image_width + x_offset;
-	const word ax = Main_image_width - x_offset; // Nombre de pixels à copier à droite
-	word dx;
-	for(dx = Main_image_height - y_offset;dx>0;dx--)
+	byte* src = main_src; //source de la copie
+	byte* dest = main_dest + y_offset * Main_image_width + x_offset;
+	const word length = Main_image_width - x_offset; // Nombre de pixels à copier à droite
+	word y;
+	for(y = Main_image_height - y_offset;y>0;y--)
 	{
 		// Pour chaque ligne
-		memcpy(edi,esi,ax);
-		memcpy(edi - x_offset,esi+ax,x_offset);
+		memcpy(dest,src,length);
+		memcpy(dest - x_offset,src+length,x_offset);
 
 		// On passe à la ligne suivante
-		edi += Main_image_width;
-		esi += Main_image_width;
+		dest += Main_image_width;
+		src += Main_image_width;
 	}
 
 	// On vient de faire le traitement pour otutes les lignes au-dessous de y_offset
 	// Maintenant on traite celles au dessus
-	edi = x_offset + Main_screen;
-	for(dx = y_offset;dx>0;dx--)
+	dest = x_offset + main_dest;
+	for(y = y_offset;y>0;y--)
 	{
-		memcpy(edi,esi,ax);
-		memcpy(edi - x_offset,esi+ax,x_offset);
+		memcpy(dest,src,length);
+		memcpy(dest - x_offset,src+length,x_offset);
 
-		edi += Main_image_width;
-		esi += Main_image_width;
+		dest += Main_image_width;
+		src += Main_image_width;
 	}
 
 	Update_rect(0,0,0,0);

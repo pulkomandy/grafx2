@@ -25,7 +25,7 @@
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
 void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
-void Scroll_picture(short x_offset,short y_offset);
+void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset);
 void Wait_end_of_click(void);
 void Set_color(byte color, byte red, byte green, byte blue);
 void Set_palette(T_Palette palette);
@@ -38,9 +38,7 @@ dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
 word Count_used_colors_screen_area(dword* usage, word start_x, word start_y, word width, word height);
-void Pixel_in_current_screen      (word x,word y,byte color);
 void Pixel_in_brush             (word x,word y,byte color);
-byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_spare_screen(word x,word y);
 byte Read_pixel_from_backup_screen   (word x,word y);
 byte Read_pixel_from_feedback_screen (word x,word y);

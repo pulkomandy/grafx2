@@ -730,8 +730,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
       for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
         for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
         {
-          Pixel_in_current_screen(x_pos,y_pos,Back_color);
-          Pixel_preview           (x_pos,y_pos,Back_color);
+          Pixel_in_current_screen(x_pos,y_pos,Back_color,1);
         }
       Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
@@ -1156,10 +1155,10 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
       for (x_pos=start_x;x_pos<=end_x;x_pos++)
         if (Read_pixel_from_brush(x_pos-start_x,y_pos-start_y)!=Back_color)
         {
-          Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_screen(x_pos,y_pos));
+          Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_layer(x_pos,y_pos));
           // On regarde s'il faut effacer quelque chose:
           if (clear)
-            Pixel_in_current_screen(x_pos,y_pos,Back_color);
+            Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
         }
 
     // On centre la prise sur la brosse

@@ -376,6 +376,11 @@ int Init_program(int argc,char * argv[])
   Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_format=FORMAT_ALL_IMAGES;
+  Main_current_layer=0;
+  Main_layers_visible=0xFFFFFFFF;
+  Spare_current_layer=0;
+  Spare_layers_visible=0xFFFFFFFF;
+  
   Spare_fileselector_position=0;
   Spare_fileselector_offset=0;
   Spare_format=FORMAT_ALL_IMAGES;
@@ -635,8 +640,21 @@ int Init_program(int argc,char * argv[])
   Main_image_height=Screen_height/Pixel_height;
   Spare_image_width=Screen_width/Pixel_width;
   Spare_image_height=Screen_height/Pixel_height;
+  
+  #ifndef NOLAYERS
+  Visible_image[0].Width = 0;
+  Visible_image[0].Height = 0;
+  Visible_image[0].Image = NULL;
+  Visible_image[1].Width = 0;
+  Visible_image[1].Height = 0;
+  Visible_image[1].Image = NULL;
+  Visible_image_depth_buffer.Width = 0;
+  Visible_image_depth_buffer.Height = 0;
+  Visible_image_depth_buffer.Image = NULL;
+  #endif
+  
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
-  if (Init_all_backup_lists(Config.Max_undo_pages+1,Screen_width,Screen_height)==0)
+  if (Init_all_backup_lists(Screen_width,Screen_height)==0)
     Error(ERROR_MEMORY);
   // On remet le nom par défaut pour la page de brouillon car il été modifié
   // par le passage d'un fichier en paramètre lors du traitement précédent.

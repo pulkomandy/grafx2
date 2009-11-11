@@ -440,11 +440,6 @@ void Button_Tiling_menu(void);
 */
 void Effects_off(void);
 
-/*!
-    Command that sets the transparency level.
-*/
-void Transparency_set(byte amount);
-
 // Menu des effets
 
 /*!

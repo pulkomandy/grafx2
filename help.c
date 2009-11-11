@@ -47,6 +47,7 @@
 #include "input.h"
 #include "hotkeys.h"
 #include "errors.h"
+#include "pages.h"
 
 extern char Program_version[]; // generated in pversion.c
 extern char SVN_revision[]; // generated in pversion.c
@@ -642,6 +643,16 @@ void Button_Stats(void)
         sprintf(buffer,"%u bytes",(unsigned int)freeRam);
   Print_in_window(114,51,buffer,STATS_DATA_COLOR,MC_Black);
 
+  // Used memory
+  Print_in_window(10,59,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
+  if(Stats_pages_memory > (100LL*1024*1024*1024))
+        sprintf(buffer,"%u (%u Gb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/(1024*1024*1024)));
+  else if(Stats_pages_memory > (100*1024*1024))
+        sprintf(buffer,"%u (%u Mb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/(1024*1024)));
+  else
+        sprintf(buffer,"%u (%u Kb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/1024));
+  Print_in_window(162,59,buffer,STATS_DATA_COLOR,MC_Black);
+  
   // Affichage de l'espace disque libre
   sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
   Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);

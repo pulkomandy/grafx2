@@ -42,7 +42,7 @@ ifdef COMSPEC
   RMDIR = rmdir
   CP = cp
   BIN = grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT) $(LAYERCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
   CC = gcc
   OBJDIR = obj/win32
@@ -272,6 +272,14 @@ ifeq ($(NOJOY),1)
   JOYCOPT = -DNO_JOYCURSOR
 else
   JOYCOPT =
+endif
+
+#To speed up rendering, can disable the layered editing
+# with NOLAYERS=1
+ifeq ($(NOLAYERS),1)
+  LAYERCOPT = -DNOLAYERS
+else
+  LAYERCOPT =
 endif
 
 ### And now for the real build rules ###

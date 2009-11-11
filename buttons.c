@@ -513,6 +513,7 @@ void Button_Clear(void)
     Hide_current_image_with_stencil(0,Stencil);
   else
     Hide_current_image(0);
+  Redraw_layered_image();
   Display_all_screen();
   End_of_modification();
   Unselect_button(BUTTON_CLEAR);
@@ -527,6 +528,7 @@ void Button_Clear_with_backcolor(void)
     Hide_current_image_with_stencil(Back_color,Stencil);
   else
     Hide_current_image(Back_color);
+  Redraw_layered_image();
   Display_all_screen();
   End_of_modification();
   Unselect_button(BUTTON_CLEAR);
@@ -1013,6 +1015,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 
 #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
 #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+#define SWAP_DWORDS(a,b) { dword c=a; a=b; b=c;}
 #define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
 #define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
 
@@ -1251,7 +1254,7 @@ void Button_Page(void)
 {
   byte   factor_index;
   char   Temp_buffer[256];
-
+  
   Hide_cursor();
 
   // On dégrossit le travail avec les infos des listes de pages
@@ -1278,14 +1281,19 @@ void Button_Page(void)
   SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
 
   // Swap des infos sur les fileselects
-  strcpy(Temp_buffer             ,Spare_current_directory);
+  strcpy(Temp_buffer            ,Spare_current_directory);
   strcpy(Spare_current_directory,Main_current_directory);
   strcpy(Main_current_directory,Temp_buffer             );
 
   SWAP_BYTES (Main_format,Spare_format)
   SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
   SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
-  
+
+  SWAP_SHORTS(Main_current_layer,Spare_current_layer)
+  SWAP_DWORDS (Main_layers_visible,Spare_layers_visible)
+
+  Update_screen_targets();
+
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
   Change_magnifier_factor(factor_index);
@@ -1305,18 +1313,38 @@ void Button_Page(void)
 
 void Copy_image_only(void)
 {
+  word old_width=Spare_image_width;
+  word old_height=Spare_image_height;
+  
   if (Backup_and_resize_the_spare(Main_image_width,Main_image_height))
   {
-    // copie de l'image
-    memcpy(Spare_screen,Main_screen,Main_image_width*Main_image_height);
+    byte i;
+    for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
+    {
+      if (i == Spare_current_layer)
+      {
+        // Copy the current layer
+        memcpy(Spare_backups->Pages->Image[i],Main_backups->Pages->Image[Main_current_layer],Main_image_width*Main_image_height);
+      }
+      else
+      {
+        // Resize the original layer
+        Copy_part_of_image_to_another(
+        Spare_backups->Pages->Next->Image[i],0,0,Min(old_width,Spare_image_width),
+        Min(old_height,Spare_image_height),old_width,
+        Spare_backups->Pages->Image[i],0,0,Spare_image_width);
+      }
+    }
 
     // Copie des dimensions de l'image
     /*
       C'est inutile, le "Backuper et redimensionner brouillon" a déjà modifié
       ces valeurs pour qu'elles soient correctes.
     */
+    /*
     Spare_image_width=Main_image_width;
     Spare_image_height=Main_image_height;
+    */
 
     // Copie des décalages de la fenêtre principale (non zoomée) de l'image
     Spare_offset_X=Main_offset_X;
@@ -1430,10 +1458,10 @@ void Button_Copy_page(void)
 // -- Suppression d'une page -------------------------------------------------
 void Button_Kill(void)
 {
-  if ( (Main_backups->Nb_pages_allocated==1)
+  if ( (Main_backups->List_size==1)
     || (!Confirmation_box("Delete the current page?")) )
   {
-    if (Main_backups->Nb_pages_allocated==1)
+    if (Main_backups->List_size==1)
       Warning_message("You can't delete the last page.");
     Hide_cursor();
     Unselect_button(BUTTON_KILL);
@@ -2467,33 +2495,33 @@ void Button_Paintbrush_menu(void)
         Hide_cursor();
         Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
         Display_cursor();
-      }
+  }
       else
       {
         // Restore and exit
-      
+
         if (Restore_brush(index))
         {
-          Close_window();
+  Close_window();
           break;
         }
       }
-    
+
     }
     else if (clicked_button>1 && Window_attribute1==LEFT_SIDE)
     // Standard paintbrushes
-    {
+  {
       Close_window();
-      index=clicked_button-2;
-      Paintbrush_shape=Gfx->Paintbrush_type[index];
-      Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-      Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-      Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-      Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
-      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-      Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
+    index=clicked_button-2;
+    Paintbrush_shape=Gfx->Paintbrush_type[index];
+    Paintbrush_width=Gfx->Preset_paintbrush_width[index];
+    Paintbrush_height=Gfx->Preset_paintbrush_height[index];
+    Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
+    Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
+    Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
       
       break;
     }
@@ -2802,6 +2830,7 @@ void Load_picture(byte image)
       }
 
       Compute_optimal_menu_colors(Main_palette);
+      Redraw_layered_image();
       Display_all_screen();
 
       if (image)
@@ -2903,7 +2932,7 @@ void Button_Reload(void)
         Compute_limits();
         Compute_paintbrush_coordinates();
       }
-
+      Redraw_layered_image();
       Display_all_screen();
 
       Main_image_is_modified=0;
@@ -4158,56 +4187,6 @@ void Effects_off(void)
   Snap_mode=0;  
 }
 
-void Transparency_set(byte amount)
-{
-  const int doubleclick_delay = Config.Double_key_speed;
-  static long time_click = 0;
-  long time_previous;
-  
-  if (!Colorize_mode)
-  {
-    // Activate mode
-    switch(Colorize_current_mode)
-    {
-      case 0 :
-        Effect_function=Effect_interpolated_colorize;
-        break;
-      case 1 :
-        Effect_function=Effect_additive_colorize;
-        break;
-      case 2 :
-        Effect_function=Effect_substractive_colorize;
-    }
-    Shade_mode=0;
-    Quick_shade_mode=0;
-    Smooth_mode=0;
-    Tiling_mode=0;
-
-    Colorize_mode=1;
-  }
-
-  time_previous = time_click;
-  time_click = SDL_GetTicks();
-
-  // Check if it's a quick re-press
-  if (time_click - time_previous < doubleclick_delay)
-  {
-    // Use the typed amount as units, keep the tens.
-    Colorize_opacity = ((Colorize_opacity%100) /10 *10) + amount;
-    if (Colorize_opacity == 0)
-      Colorize_opacity = 100;
-  }
-  else
-  {
-    // Use 10% units: "1"=10%, ... "0"=100%
-    if (amount == 0)
-      Colorize_opacity = 100;
-    else
-      Colorize_opacity = amount*10;
-  }
-  Compute_colorize_table();
-}
-
 //---------------------------- Courbes de Bézier ----------------------------
 
 void Button_Curves(void)
@@ -5396,9 +5375,11 @@ void Button_Effects(void)
         break;
       case 13 : // Feedback (pour Colorize et Shade)
         if ((Config.FX_Feedback=!Config.FX_Feedback)) //!!!
-          FX_feedback_screen=Main_screen;
+          FX_feedback_screen=Main_backups->Pages->Image[Main_current_layer];
+          // Main_screen
         else
-          FX_feedback_screen=Screen_backup;
+          FX_feedback_screen=Main_backups->Pages->Next->Image[Main_current_layer];
+          // Screen_backup
         Hide_cursor();
         Display_feedback_state();
         Display_cursor();
@@ -5706,10 +5687,10 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
       offset_y = (BRUSH_CONTAINER_PREVIEW_HEIGHT-Brush_container[index].Height)/2;
     // Determine corner pixel of paintbrush to draw (if bigger than preview area) 
     //
-    
+
     // Clear
     Window_rectangle(x_pos,y_pos,BRUSH_CONTAINER_PREVIEW_WIDTH,BRUSH_CONTAINER_PREVIEW_HEIGHT,MC_Light);
-    
+
     // Draw up to 16x16
     for (y=0; y<Brush_container[index].Height && y<BRUSH_CONTAINER_PREVIEW_HEIGHT; y++)
     {

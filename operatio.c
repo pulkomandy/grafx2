@@ -3007,7 +3007,8 @@ void Brush_0_5(void)
     Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
     Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
-
+  
+  End_of_modification();
   End_of_modification();
   Return_to_draw_mode();
 }
@@ -3911,11 +3912,16 @@ void Scroll_12_0(void)
 //
 {
   Init_start_operation();
-  Backup();
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
+  Operation_push(Mouse_K); // LEFT_SIDE or RIGHT_SIDE
+  if (Mouse_K == LEFT_SIDE)
+    Backup();
+  else
+    Backup_layers(Main_layers_visible);
+  
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -3923,11 +3929,11 @@ void Scroll_12_0(void)
 }
 
 
-void Scroll_12_4(void)
+void Scroll_12_5(void)
 //
 //  Opération   : OPERATION_SCROLL
 //  Click Souris: 1 ou 2
-//  Taille_Pile : 4
+//  Taille_Pile : 5
 //
 //  Souris effacée: Non
 //
@@ -3938,8 +3944,10 @@ void Scroll_12_4(void)
   short y_pos;
   short x_offset;
   short y_offset;
+  short side;
   //char  str[5];
 
+  Operation_pop(&side);
   Operation_pop(&y_pos);
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
@@ -3961,7 +3969,18 @@ void Scroll_12_4(void)
 
     Display_coords_rel_or_abs(center_x,center_y);
 
-    Scroll_picture(x_offset,y_offset);
+    if (side == RIGHT_SIDE)
+    {
+      // All layers at once
+      Scroll_picture(Screen_backup, Main_screen, x_offset,y_offset);
+    }
+    else
+    {
+      // One layer at once
+      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer], Main_backups->Pages->Image[Main_current_layer], x_offset, y_offset);
+      //Redraw_layered_image();
+      Redraw_current_layer();
+    }
 
     Display_all_screen();
   }
@@ -3970,19 +3989,64 @@ void Scroll_12_4(void)
   Operation_push(center_y);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
+  Operation_push(side);
 }
 
-void Scroll_0_4(void)
+void Scroll_0_5(void)
 //
 //  Opération   : OPERATION_SCROLL
 //  Click Souris: 0
-//  Taille_Pile : 4
+//  Taille_Pile : 5
 //
 //  Souris effacée: Oui
 //
 {
-  Operation_stack_size-=4;
+  // All layers at once
+  short center_x;
+  short center_y;
+  short x_pos;
+  short y_pos;
+  short x_offset;
+  short y_offset;
+  short side;
+  int i;
+
+
+  Operation_pop(&side);
+  Operation_pop(&y_pos);
+  Operation_pop(&x_pos);
+  Operation_pop(&center_y);
+  Operation_pop(&center_x);
+  
+  if (side == RIGHT_SIDE)
+    {
+      // All layers at once
+    if (x_pos>=center_x)
+      x_offset=(x_pos-center_x)%Main_image_width;
+    else
+      x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
+  
+    if (y_pos>=center_y)
+      y_offset=(y_pos-center_y)%Main_image_height;
+    else
+      y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
+    
+    
+    // Do the actual scroll operation on all layers.
+    for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+      Scroll_picture(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], x_offset, y_offset);
+    // Update the depth buffer too ...
+    // It would be faster to scroll it, but we don't have method
+    // for in-place scrolling.
+    Update_depth_buffer();
+  }  
+  else
+  {
+    // One layer : everything was done while dragging the mouse
+  }
+  
   Cursor_hidden=Cursor_hidden_before_scroll;
+
   End_of_modification();
   if ((Config.Coords_rel) && (Menu_is_visible))
   {

@@ -1316,7 +1316,7 @@ void Button_Palette(void)
                                 // est en mode X-SWAP.
             if (!image_is_backed_up)
             {
-              Backup();
+              Backup_layers(-1);
               image_is_backed_up=1;
             }
 
@@ -1472,12 +1472,11 @@ void Button_Palette(void)
                     reduce_colors_number = -1;
                 break;
         }
-
         if (reduce_colors_number > 0)
         {
             if (!image_is_backed_up)
             {
-                Backup();
+                Backup_layers(-1);
                 image_is_backed_up = 1;
             }
 
@@ -1846,7 +1845,7 @@ void Button_Palette(void)
         {
           if (!image_is_backed_up)
           {
-            Backup();
+            Backup_layers(-1);
             image_is_backed_up=1;
           }
           Hide_cursor();
@@ -1923,7 +1922,7 @@ void Button_Palette(void)
         // Make a backup because remapping is an undoable modification
         if (!image_is_backed_up)
         {
-          Backup();
+          Backup_layers(-1);
           image_is_backed_up=1;
         }
 
@@ -2067,7 +2066,7 @@ void Button_Palette(void)
                       // de ne pas trop modifier l'image.
           if (!image_is_backed_up)
           {
-            Backup();
+            Backup_layers(-1);
             image_is_backed_up=1;
           }
           if (used_colors==-1)
@@ -2169,9 +2168,9 @@ void Button_Palette(void)
   {
     if ( (!image_is_backed_up)
       && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
-      Backup();
+      Backup_layers(-1);
     memcpy(Main_palette,working_palette,sizeof(T_Palette));
-    // End_of_modification();
+    End_of_modification();
     // Not really needed, the change was in palette entries
   }
 
