@@ -836,6 +836,9 @@ GFX2_GLOBAL short Colorpicker_X;
 /// Position of the colorpicker tool, in image coordinates.
 GFX2_GLOBAL short Colorpicker_Y;
 
+GFX2_GLOBAL short * Polyfill_table_of_points;
+GFX2_GLOBAL int Polyfill_number_of_points;
+
 /// Brush container
 GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS];
 

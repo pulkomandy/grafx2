@@ -646,11 +646,11 @@ void Button_Stats(void)
   // Used memory
   Print_in_window(10,59,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
-        sprintf(buffer,"%u (%u Gb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/(1024*1024*1024)));
+        sprintf(buffer,"%ld (%lld Gb)",Stats_pages_number, Stats_pages_memory/(1024*1024*1024));
   else if(Stats_pages_memory > (100*1024*1024))
-        sprintf(buffer,"%u (%u Mb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/(1024*1024)));
+        sprintf(buffer,"%ld (%lld Mb)",Stats_pages_number, Stats_pages_memory/(1024*1024));
   else
-        sprintf(buffer,"%u (%u Kb)",Stats_pages_number, (unsigned int)(Stats_pages_memory/1024));
+        sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
   Print_in_window(162,59,buffer,STATS_DATA_COLOR,MC_Black);
   
   // Affichage de l'espace disque libre
