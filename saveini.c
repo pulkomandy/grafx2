@@ -428,6 +428,7 @@ int Save_INI(T_Config * conf)
   if (Ancien_fichier==0)
   {
     fclose(Ancien_fichier);
+    free(buffer);
     return ERROR_INI_MISSING;
   }
   Nouveau_fichier=fopen(filename,"wb");
