@@ -720,7 +720,8 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     if (start_y+new_brush_height>Main_image_height)
       new_brush_height=Main_image_height-start_y;
 
-    Realloc_brush(new_brush_width, new_brush_height);
+    if (Realloc_brush(new_brush_width, new_brush_height) != 0)
+      return; // Unable to allocate the new brush, keep the old one.
 
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
@@ -747,10 +748,10 @@ void Rotate_90_deg()
   short temp;
   byte * new_brush;
 
-  new_brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+  new_brush=(byte *)malloc(((size_t)Brush_height)*Brush_width);
   if (new_brush)
   {
-    Rotate_90_deg_lowlevel(Brush,/*@out@*/ new_brush,Brush_width,Brush_height);
+    Rotate_90_deg_lowlevel(Brush,new_brush,Brush_width,Brush_height);
     free(Brush);
     Brush=new_brush;
 
@@ -1539,7 +1540,7 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
 
 //------------------------- Rotation de la brosse ---------------------------
 
-#define UNDEFINED (-1.0e20F)
+  #define UNDEFINED (-1.0e20F)
 float * ScanY_Xt[2];
 float * ScanY_Yt[2];
 float * ScanY_X[2];
@@ -1601,18 +1602,18 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         yt=(((float)((x_pos-start_x)*delta_yt))/(float)delta_x2) + (float)yt1;
         if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
         {
-          ScanY_X[0][y_pos]=x_pos;
+          ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
           ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
-          if (x_pos>=ScanY_X[0][y_pos])
+          if ((float)x_pos>=ScanY_X[0][y_pos])
           {
             if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][y_pos]=x_pos;
+              ScanY_X[1][y_pos]=(float)x_pos;
               ScanY_Xt[1][y_pos]=xt;
               ScanY_Yt[1][y_pos]=yt;
             }
@@ -1624,13 +1625,13 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
@@ -1658,18 +1659,18 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         yt=(((float)((y_pos-start_y)*delta_yt))/(float)delta_y2) + (float)yt1;
         if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
         {
-          ScanY_X[0][y_pos]=x_pos;
+          ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
           ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
-          if (x_pos>=ScanY_X[0][y_pos])
+          if ((float)x_pos>=ScanY_X[0][y_pos])
           {
             if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][y_pos]=x_pos;
+              ScanY_X[1][y_pos]=(float)x_pos;
               ScanY_Xt[1][y_pos]=xt;
               ScanY_Yt[1][y_pos]=yt;
             }
@@ -1681,13 +1682,13 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }

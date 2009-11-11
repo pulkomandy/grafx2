@@ -1013,12 +1013,6 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   }
 }
 
-#define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
-#define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
-#define SWAP_DWORDS(a,b) { dword c=a; a=b; b=c;}
-#define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
-#define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
-
 /// Skin selector window
 void Button_Skins(void)
 {
@@ -3827,7 +3821,7 @@ byte Smooth_default_matrices[4][3][3]=
 void Button_Smooth_menu(void)
 {
   short clicked_button;
-  short x,y,i,j;
+  word x,y,i,j;
   byte  chosen_matrix[3][3];
   T_Special_button * matrix_input[3][3];
   char  str[3];
@@ -3851,7 +3845,8 @@ void Button_Smooth_menu(void)
     for (i=0; i<3; i++)
     {
       matrix_input[i][j]=Window_set_input_button(10+(i*21),62+(j*13),2); // 7..15
-      Num2str(chosen_matrix[i][j]=Smooth_matrix[i][j],str,2);
+      chosen_matrix[i][j] = Smooth_matrix[i][j] ;
+      Num2str(chosen_matrix[i][j], str, 2);
       Window_input_content(matrix_input[i][j],str);
     }
   Update_window_area(0,0,Window_width, Window_height);

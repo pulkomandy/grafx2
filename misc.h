@@ -25,6 +25,12 @@
 
 #include "struct.h"
 
+#define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
+#define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+#define SWAP_DWORDS(a,b) { dword c=a; a=b; b=c;}
+#define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
+#define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
+
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
 void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset);

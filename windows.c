@@ -2572,8 +2572,6 @@ void Remap_screen_after_menu_colors_change(void)
 void Compute_optimal_menu_colors(T_Components * palette)
 {
   byte table[4];
-  short i;
-
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2630,9 +2628,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
   if ( ((palette[MC_Light].R*30)+(palette[MC_Light].G*59)+(palette[MC_Light].B*11)) <
        ((palette[MC_Dark].R*30)+(palette[MC_Dark].G*59)+(palette[MC_Dark].B*11)) )
   {
-    i=MC_Light;
-    MC_Light=MC_Dark;
-    MC_Dark=i;
+    SWAP_BYTES(MC_Light, MC_Dark);
   }
 
   // On cherche une couleur de transparence différente des 4 autres.
