@@ -759,24 +759,8 @@ unsigned long Memory_free(void)
 }
 
 
-
-// Transformer un nombre (entier naturel) en chaîne
-void Num2str(dword number,char * str,byte nb_char)
-{
-	int index;
-
-	for (index=nb_char-1;index>=0;index--)
-	{
-		str[index]=(number%10)+'0';
-		number/=10;
-		if (number==0)
-			for (index--;index>=0;index--)
-				str[index]=' ';
-	}
-	str[nb_char]='\0';
-}
-
 // Arrondir un nombre réel à la valeur entière la plus proche
+// TODO : this should probably be replaced with round() from C99...
 short Round(float value)
 {
 	short temp=value;

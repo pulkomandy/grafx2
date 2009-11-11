@@ -139,7 +139,7 @@ byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 
 unsigned long Memory_free(void);
 
-void  Num2str(dword number,char * str,byte nb_char);
+#define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
 
 short Round(float value);
 short Round_div_max(short numerator,short divisor);
