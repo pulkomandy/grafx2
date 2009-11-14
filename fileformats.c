@@ -34,6 +34,9 @@
 #include "loadsave.h"
 #include "misc.h"
 #include "struct.h"
+#include "io.h"
+#include "windows.h" // Best_color()
+#include "pages.h" // Add_layer()
 
 //////////////////////////////////// IMG ////////////////////////////////////
 

@@ -77,6 +77,11 @@ T_Format * Get_fileformat(byte format);
 #define NB_KNOWN_FORMATS 18 ///< Total number of known file formats.
 #endif
 
+// =================================================================
+// What follows here are the definitions of functions and data
+// useful for fileformats.c, miscfileformats.c etc.
+// =================================================================
+
 // This is here and not in fileformats.c because the emergency save uses it...
 #pragma pack(1)
 typedef struct
@@ -89,13 +94,26 @@ typedef struct
 } T_IMG_Header;
 #pragma pack()
 
-// Données pour la gestion du chargement en 24b
-#define FORMAT_24B 0x100
-typedef void (* Func_24b_display) (short,short,byte,byte,byte);
-extern int Image_24b;
+// Data for 24bit loading
 
+typedef void (* Func_24b_display) (short,short,byte,byte,byte);
+
+extern int Image_24b;
 extern T_Components * Buffer_image_24b;
 extern Func_24b_display Pixel_load_24b;
 
+void Init_preview_24b(short width,short height,long size,int format);
 void Pixel_load_in_24b_preview(short x_pos,short y_pos,byte r,byte g,byte b);
+
+//
+
 extern enum PIXEL_RATIO Ratio_of_loaded_image;
+
+void Set_file_error(int value);
+void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
+
+void Init_write_buffer(void);
+void Write_one_byte(FILE *file, byte b);
+void End_write(FILE *file);
+
+void Remap_fileselector(void);

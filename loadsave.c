@@ -132,9 +132,6 @@ void Save_PNG(void);
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG, ICO)
 void Load_SDL_Image(void);
 
-
-void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
-
 // ENUM			Name	TestFunc LoadFunc SaveFunc Backup Comment Layers Ext Exts	
 T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
