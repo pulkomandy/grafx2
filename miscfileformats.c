@@ -191,22 +191,20 @@ void Save_PAL(void)
 
 
 //////////////////////////////////// PKM ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
-  char Ident[3]; // Chaîne "PKM" }
-  byte Method;  // Compression method
-                 //   0 = compression en ligne (c)KM
-                 //   autres = inconnues pour le moment
-  byte recog1;   // Octet de reconnaissance sur 1 octet  }
-  byte recog2;   // Octet de reconnaissance sur 2 octets }
-  word Width;  // width de l'image
-  word Height;  // height de l'image
-  T_Palette Palette; // Palette RVB 256*3
-  word Jump;     // Taille du saut entre le header et l'image:
-                 //   On va s'en servir pour rajouter un commentaire
+  char Ident[3];    // String "PKM" }
+  byte Method;      // Compression method
+                    //   0 = per-line compression (c)KM
+                    //   others = unknown at the moment
+  byte Recog1;      // Recognition byte 1
+  byte Recog2;      // Recognition byte 2
+  word Width;       // Image width
+  word Height;      // Image height
+  T_Palette Palette;// RGB Palette 256*3, on a 1-64 scale for each component
+  word Jump;        // Size of the jump between header and image:
+                    //   Used to insert a comment
 } T_PKM_Header;
-#pragma pack()
 
 // -- Tester si un fichier est au format PKM --------------------------------
 void Test_PKM(void)
@@ -224,7 +222,14 @@ void Test_PKM(void)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture du header du fichier
-    if (Read_bytes(file,&header,sizeof(T_PKM_Header)))
+    if (Read_bytes(file,&header.Ident,3) &&
+        Read_byte(file,&header.Method) &&
+        Read_byte(file,&header.Recog1) &&
+        Read_byte(file,&header.Recog2) &&
+        Read_word_le(file,&header.Width) &&
+        Read_word_le(file,&header.Height) &&
+        Read_bytes(file,&header.Palette,sizeof(T_Palette)) &&
+        Read_word_le(file,&header.Jump))
     {
       // On regarde s'il y a la signature PKM suivie de la méthode 0.
       // La constante "PKM" étant un chaîne, elle se termine toujours par 0.
@@ -261,15 +266,15 @@ void Load_PKM(void)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,&header,sizeof(T_PKM_Header)))
+    if (Read_bytes(file,&header.Ident,3) &&
+        Read_byte(file,&header.Method) &&
+        Read_byte(file,&header.Recog1) &&
+        Read_byte(file,&header.Recog2) &&
+        Read_word_le(file,&header.Width) &&
+        Read_word_le(file,&header.Height) &&
+        Read_bytes(file,&header.Palette,sizeof(T_Palette)) &&
+        Read_word_le(file,&header.Jump))
     {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    header.Width = SDL_Swap16(header.Width);
-    header.Height = SDL_Swap16(header.Height);
-    header.Jump = SDL_Swap16(header.Jump);
-#endif
-
       Main_comment[0]='\0'; // On efface le commentaire
       if (header.Jump)
       {
@@ -390,7 +395,7 @@ void Load_PKM(void)
             }
 
             // Si ce n'est pas un octet de reconnaissance, c'est un pixel brut
-            if ( (temp_byte!=header.recog1) && (temp_byte!=header.recog2) )
+            if ( (temp_byte!=header.Recog1) && (temp_byte!=header.Recog2) )
             {
               Pixel_load_function(Compteur_de_pixels % Main_image_width,
                                   Compteur_de_pixels / Main_image_width,
@@ -400,7 +405,7 @@ void Load_PKM(void)
             }
             else // Sinon, On regarde si on va décompacter un...
             { // ... nombre de pixels tenant sur un byte
-                if (temp_byte==header.recog1)
+                if (temp_byte==header.Recog1)
                 {
                   if(Read_byte(file, &color)!=1)
                 {
@@ -507,7 +512,7 @@ void Save_PKM(void)
   // Construction du header
   memcpy(header.Ident,"PKM",3);
   header.Method=0;
-  Find_recog(&header.recog1,&header.recog2);
+  Find_recog(&header.Recog1,&header.Recog2);
   header.Width=Main_image_width;
   header.Height=Main_image_height;
   memcpy(header.Palette,Main_palette,sizeof(T_Palette));
@@ -527,15 +532,15 @@ void Save_PKM(void)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    header.Width = SDL_Swap16(header.Width);
-    header.Height = SDL_Swap16(header.Height);
-    header.Jump = SDL_Swap16(header.Jump);
-#endif
-
     // Ecriture du header
-    if (Write_bytes(file,&header,sizeof(T_PKM_Header)))
+    if (Write_bytes(file,&header.Ident,3) &&
+        Write_byte(file,header.Method) &&
+        Write_byte(file,header.Recog1) &&
+        Write_byte(file,header.Recog2) &&
+        Write_word_le(file,header.Width) &&
+        Write_word_le(file,header.Height) &&
+        Write_bytes(file,&header.Palette,sizeof(T_Palette)) &&
+        Write_word_le(file,header.Jump))
     {
       Init_write_buffer();
 
@@ -584,7 +589,7 @@ void Save_PKM(void)
           pixel_value=Read_pixel_function(Compteur_de_pixels % Main_image_width,Compteur_de_pixels / Main_image_width);
         }
 
-        if ( (last_color!=header.recog1) && (last_color!=header.recog2) )
+        if ( (last_color!=header.Recog1) && (last_color!=header.Recog2) )
         {
           if (repetitions==1)
             Write_one_byte(file,last_color);
@@ -597,14 +602,14 @@ void Save_PKM(void)
           else
           if ( (repetitions>2) && (repetitions<256) )
           { // RECON1/couleur/nombre
-            Write_one_byte(file,header.recog1);
+            Write_one_byte(file,header.Recog1);
             Write_one_byte(file,last_color);
             Write_one_byte(file,repetitions&0xFF);
           }
           else
           if (repetitions>=256)
           { // RECON2/couleur/hi(nombre)/lo(nombre)
-            Write_one_byte(file,header.recog2);
+            Write_one_byte(file,header.Recog2);
             Write_one_byte(file,last_color);
             Write_one_byte(file,repetitions>>8);
             Write_one_byte(file,repetitions&0xFF);
@@ -614,13 +619,13 @@ void Save_PKM(void)
         {
           if (repetitions<256)
           {
-            Write_one_byte(file,header.recog1);
+            Write_one_byte(file,header.Recog1);
             Write_one_byte(file,last_color);
             Write_one_byte(file,repetitions&0xFF);
           }
           else
           {
-            Write_one_byte(file,header.recog2);
+            Write_one_byte(file,header.Recog2);
             Write_one_byte(file,last_color);
             Write_one_byte(file,repetitions>>8);
             Write_one_byte(file,repetitions&0xFF);

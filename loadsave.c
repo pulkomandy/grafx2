@@ -132,29 +132,29 @@ void Save_PNG(void);
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG, ICO)
 void Load_SDL_Image(void);
 
-// ENUM			Name	TestFunc LoadFunc SaveFunc Backup Comment Layers Ext Exts	
+// ENUM			Name	TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts	
 T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
-  {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 1, 1, 1, "gif", "gif"},
+  {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
-  {FORMAT_PNG, " png", Test_PNG, Load_PNG, Save_PNG, 1, 1, 0, "png", "png"},
+  {FORMAT_PNG, " png", Test_PNG, Load_PNG, Save_PNG, 0, 1, 0, "png", "png"},
 #endif
-  {FORMAT_BMP, " bmp", Test_BMP, Load_BMP, Save_BMP, 1, 0, 0, "bmp", "bmp"},
-  {FORMAT_PCX, " pcx", Test_PCX, Load_PCX, Save_PCX, 1, 0, 0, "pcx", "pcx"},
-  {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 0, 1, 0, "pkm", "pkm"}, // Not a backup since it does not save the full palette
-  {FORMAT_LBM, " lbm", Test_LBM, Load_LBM, Save_LBM, 1, 0, 0, "lbm", "lbm;iff"},
-  {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 1, 0, 0, "img", "img"},
-  {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 1, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
+  {FORMAT_BMP, " bmp", Test_BMP, Load_BMP, Save_BMP, 0, 0, 0, "bmp", "bmp"},
+  {FORMAT_PCX, " pcx", Test_PCX, Load_PCX, Save_PCX, 0, 0, 0, "pcx", "pcx"},
+  {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 0, 1, 0, "pkm", "pkm"},
+  {FORMAT_LBM, " lbm", Test_LBM, Load_LBM, Save_LBM, 0, 0, 0, "lbm", "lbm;iff"},
+  {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 0, 0, 0, "img", "img"},
+  {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1"},
   {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 0, 0, 0, "pc1", "pc1"},
-  {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 1, 0, 0, "cel", "cel"},
+  {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 0, 0, 0, "cel", "cel"},
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
-  {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 0, 0, 0, "kcf", "kcf"},
-  {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 0, 0, 0, "pal", "pal"},
+  {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
+  {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
-  {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     1, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
+  {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
 
 // Cette variable est alimentée après chargement réussi d'une image.
@@ -703,7 +703,7 @@ void Load_image(byte image)
 
   if (image)
   {
-    if ( (File_error!=1) && (format->Backup_done) )
+    if ( (File_error!=1) && (!format->Palette_only) )
     {
       if (Pixel_load_function==Pixel_load_in_preview)
       {
@@ -783,7 +783,7 @@ void Save_image(byte image)
     Error(0);
   else
   {
-    if ((image) && (Get_fileformat(Main_fileformat)->Backup_done))
+    if ((image) && !(Get_fileformat(Main_fileformat)->Palette_only))
       Main_image_is_modified=0;
   }
 }

@@ -48,9 +48,9 @@ typedef struct {
   Func_action Test;        ///< Function which tests if the file is of this format
   Func_action Load;        ///< Function which loads an image of this format
   Func_action Save;        ///< Function which saves an image of this format
-  byte Backup_done;        ///< Boolean, true if this format saves all the image, and considers it backed up. Set false for formats which only save the palette.
+  byte Palette_only;       ///< Boolean, true if this format saves/loads only the palette.
   byte Comment;            ///< This file format allows a text comment
-  byte Supports_layers; ///< Boolean, true if this format preserves layers on saving
+  byte Supports_layers;    ///< Boolean, true if this format preserves layers on saving
   char *Default_extension; ///< Default file extension
   char *Extensions;        ///< List of semicolon-separated file extensions
 } T_Format;
