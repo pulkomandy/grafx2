@@ -2664,26 +2664,35 @@ void Remap_menu_sprites()
     || (MC_Black !=Old_black )
     || (MC_Trans!=Old_trans) )
   {
-    // Sprites du curseur
+    // Mouse cursor sprites
     for (k=0; k<NB_CURSOR_SPRITES; k++)
       for (j=0; j<CURSOR_SPRITE_HEIGHT; j++)
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
-    // Le menu
-    for (j=0; j<MENU_HEIGHT; j++)
+    // Main menu bar
+    for (j=0; j<35; j++)
       for (i=0; i<MENU_WIDTH; i++)
         Remap_pixel(&Gfx->Menu_block[j][i]);
-    // Sprites du menu
+    // Menu sprites
     for (k=0; k<NB_MENU_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Menu_sprite[k][j][i]);
-    // Sprites d'effets
+    // Effects sprites
     for (k=0; k<NB_EFFECTS_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
-    // Fontes de l'aide
+    // Status bar
+    for (j=0; j<9; j++)
+      for (i=0; i<MENU_WIDTH; i++)
+        Remap_pixel(&Gfx->Statusbar_block[j][i]);
+    // Layer bar
+    for (j=0; j<10; j++)
+      for (i=0; i<MENU_WIDTH; i++)
+        Remap_pixel(&Gfx->Layerbar_block[j][i]);
+    
+    // Help fonts
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
@@ -2709,7 +2718,7 @@ void Remap_menu_sprites()
         for (i=0; i<6; i++)
           Remap_pixel(&Gfx->Help_font_t4[k][i][j]);
         
-    // Sprites de lecteurs (drives)
+    // Drives and other misc. 8x8 icons
     for (k=0; k<NB_ICON_SPRITES; k++)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
