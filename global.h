@@ -476,6 +476,15 @@ GFX2_GLOBAL byte  Menu_factor_Y;
 /// Size of a color cell in the menu's palette.
 GFX2_GLOBAL word  Menu_palette_cell_width;
 
+GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBARS_COUNT] 
+#ifdef GLOBAL_VARIABLES
+  = 
+{{MENU_WIDTH, 9, 1, NULL }, // Status
+ {MENU_WIDTH, 10, 0, NULL }, // Layers
+ {MENU_WIDTH, 35, 1, NULL }} // Main
+#endif
+ ;
+
 
 // -- Window data
 

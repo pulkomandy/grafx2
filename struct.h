@@ -416,7 +416,9 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[MENU_HEIGHT][MENU_WIDTH];
+  byte Menu_block[35][MENU_WIDTH];
+  byte Layerbar_block[10][MENU_WIDTH];
+  byte Statusbar_block[9][MENU_WIDTH];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
@@ -459,5 +461,20 @@ typedef struct
 
 
 } T_Gui_skin;
+
+// A menubar.
+typedef struct {
+  word width;
+  word height;
+  byte visible;
+  byte* skin;
+} T_Menu_Bar;
+
+typedef enum {
+  status_bar = 0, // MUST be 0
+  layers_bar,
+  main_bar,
+  MENUBARS_COUNT
+} T_Menubars;
 
 #endif

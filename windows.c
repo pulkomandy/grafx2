@@ -419,16 +419,24 @@ int Pick_color_in_palette()
 void Display_menu(void)
 {
   word x_pos;
-  word y_pos;
+  word y_pos, y_off = 0;
+  int8_t current_menu;
   char str[4];
 
 
   if (Menu_is_visible)
   {
     // display menu sprite
-    for (y_pos=0;y_pos<MENU_HEIGHT;y_pos++)
-      for (x_pos=0;x_pos<MENU_WIDTH;x_pos++)
-        Pixel_in_menu(x_pos,y_pos,Gfx->Menu_block[y_pos][x_pos]);
+    for (current_menu = MENUBARS_COUNT - 1; current_menu >= 0; current_menu --)
+    {
+      if(Menu_bars[current_menu].visible)
+      {
+        for (y_pos=0;y_pos<Menu_bars[current_menu].height;y_pos++)
+          for (x_pos=0;x_pos<Menu_bars[current_menu].width;x_pos++)
+            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].skin[y_pos * Menu_bars[current_menu].width + x_pos]);
+        y_off += Menu_bars[current_menu].height;
+      }
+    }
     // Grey area for filename below palette
     Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
 

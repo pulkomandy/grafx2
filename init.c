@@ -346,15 +346,30 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[main_bar].width, Menu_bars[main_bar].height,"menu",0))
     return 1;
 
-  cursor_x += MENU_WIDTH;
+  // Preview
+  cursor_x += Menu_bars[main_bar].width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "logo"))
 	return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
 	return 1;
-  cursor_y+=MENU_HEIGHT;
+  cursor_y+= Menu_bars[main_bar].height;
+
+  // Layerbar
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[layers_bar].width, Menu_bars[layers_bar].height,"layer bar",0))
+    return 1;
+  cursor_y+= Menu_bars[layers_bar].height;
+
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[status_bar].width, Menu_bars[status_bar].height,"status bar",0))
+    return 1;
+  cursor_y+= Menu_bars[status_bar].height;
+
 
   // Effets
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
@@ -2498,4 +2513,9 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Light = gfx->Color_light;
   MC_White = gfx->Color_white;
   MC_Trans = gfx->Color_trans;
+
+  // Set menubars to point to the new data
+  Menu_bars[2].skin = (byte*)&(gfx->Menu_block);
+  Menu_bars[1].skin = (byte*)&(gfx->Layerbar_block);
+  Menu_bars[0].skin = (byte*)&(gfx->Statusbar_block);
 }
