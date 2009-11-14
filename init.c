@@ -71,6 +71,7 @@
 #include "struct.h"
 #include "transform.h"
 #include "windows.h"
+#include "layers.h"
 
 char Gui_loading_error_message[512];
 
@@ -1239,49 +1240,49 @@ void Init_buttons(void)
                      0,0,
                      57,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_menu, Button_Layer_menu,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_COLOR,
                      58,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_color, Button_Layer_color,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_MERGE,
                      72,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_merge, Button_Layer_merge,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_ADD,
                      86,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_add, Button_Layer_add,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_REMOVE,
                      100,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_remove, Button_Layer_remove,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_UP,
                      114,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_up, Button_Layer_up,
                      Do_nothing,
                      FAMILY_TOOLBAR);
   Init_button(BUTTON_LAYER_DOWN,
                      128,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Do_nothing, Do_nothing,
+                     Button_Layer_down, Button_Layer_down,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 

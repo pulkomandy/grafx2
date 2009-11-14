@@ -531,13 +531,3 @@ void Layer_activate(short layer, short side)
   Display_cursor();
 }
 
-void Special_add_layer()
-{
-
-
-}
-void Special_delete_layer()
-{
-
-
-}
