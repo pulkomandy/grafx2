@@ -2469,9 +2469,15 @@ static const T_Help_table helptable_hide[] =
 
   HELP_TITLE("HIDE MENU")
   HELP_TEXT ("")
-  HELP_TEXT ("Allows you to hide the menu. If you do this,")
-  HELP_TEXT ("take care to watch before the key to press")
-  HELP_TEXT ("to show the menu back (the key is")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Allow you to hide or show the layer bar.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Allows you to hide all the menus. If you do ")
+  HELP_TEXT ("this, take care to watch before the key to  ")
+  HELP_TEXT ("press to show the menu back (the key is")
   HELP_LINK ("%s).",0x100+BUTTON_HIDE)
 
 };
