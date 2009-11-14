@@ -68,6 +68,12 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Layerbar / Hide menu    ",
 
   "Layers manager          ",
+  "Select transparent color",
+  "Merge layer             ",
+  "Add layer               ",
+  "Drop layer              ",
+  "Raise layer             ",
+  "Lower layer             ",
 
   "Paintbrush choice       ",
   "Adjust / Transform menu ",

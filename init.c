@@ -1242,6 +1242,48 @@ void Init_buttons(void)
                      Do_nothing, Do_nothing,
                      Do_nothing,
                      FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_COLOR,
+                     58,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_MERGE,
+                     72,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_ADD,
+                     86,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_REMOVE,
+                     100,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_UP,
+                     114,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+  Init_button(BUTTON_LAYER_DOWN,
+                     128,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
 
   // Status bar
   Init_button(BUTTON_HIDE,
