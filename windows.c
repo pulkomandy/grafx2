@@ -2656,7 +2656,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 /// Remap all menu data when the palette changes or a new skin is loaded
 void Remap_menu_sprites()
 {
-  int i, j, k;
+  int i, j, k, l;
 
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
@@ -2683,6 +2683,13 @@ void Remap_menu_sprites()
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
+    // Layers buttons
+    for (l=0; l<3; l++)
+      for (k=0; k<16; k++)
+        for (j=0; j<LAYER_SPRITE_HEIGHT; j++)
+          for (i=0; i<LAYER_SPRITE_WIDTH; i++)
+            Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
+    
     // Status bar
     for (j=0; j<9; j++)
       for (i=0; i<MENU_WIDTH; i++)

@@ -1,17 +1,21 @@
 $(OBJDIR)/SFont.o: SFont.c SFont.h
 $(OBJDIR)/brush.o: brush.c global.h struct.h const.h graph.h misc.h errors.h \
   windows.h sdlscreen.h brush.h
+$(OBJDIR)/brush_ops.o: brush_ops.c brush.h struct.h const.h buttons.h engine.h \
+  global.h graph.h misc.h operatio.h pages.h windows.h
 $(OBJDIR)/buttons.o: buttons.c const.h struct.h global.h misc.h graph.h engine.h \
   readline.h filesel.h loadsave.h init.h buttons.h operatio.h pages.h \
   palette.h errors.h readini.h saveini.h shade.h io.h help.h text.h \
   sdlscreen.h windows.h brush.h input.h special.h
+$(OBJDIR)/buttons_effects.o: buttons_effects.c buttons.h struct.h const.h engine.h \
+  global.h graph.h help.h input.h misc.h readline.h sdlscreen.h windows.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
   buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
   input.h engine.h pages.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
   filesel.h global.h graph.h io.h misc.h readline.h sdlscreen.h windows.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
-  loadsave.h misc.h
+  loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
   windows.h sdlscreen.h loadsave.h mountlist.h engine.h readline.h \
   input.h help.h filesel.h
@@ -25,11 +29,12 @@ $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c buttons.h struct.h const.h errors.h global.h graph.h \
   init.h io.h factory.h help.h hotkeys.h keyboard.h loadsave.h misc.h \
   mountlist.h operatio.h palette.h sdlscreen.h setup.h transform.h \
-  windows.h
+  windows.h layers.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
   windows.h errors.h misc.h input.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
 $(OBJDIR)/keyboard.o: keyboard.c global.h struct.h const.h keyboard.h
+$(OBJDIR)/layers.o: layers.c const.h struct.h global.h windows.h engine.h pages.h
 $(OBJDIR)/libraw2crtc.o: libraw2crtc.c global.h struct.h const.h
 $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io.h \
   loadsave.h misc.h graph.h op_c.h pages.h palette.h sdlscreen.h \

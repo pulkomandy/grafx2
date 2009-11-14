@@ -247,7 +247,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
 byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int  index;
-  int i;
+  int i,j;
   int cursor_x=0,cursor_y=0;
   byte color;
   byte neutral_color; // color neutre utilisée pour délimiter les éléments GUI
@@ -352,7 +352,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 
   // Preview
   cursor_x += Menu_bars[main_bar].width;
-  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "logo"))
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
 	return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
 	return 1;
@@ -365,6 +365,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   cursor_y+= Menu_bars[layers_bar].height;
 
+  // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[status_bar].width, Menu_bars[status_bar].height,"status bar",0))
@@ -372,7 +373,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   cursor_y+= Menu_bars[status_bar].height;
 
 
-  // Effets
+  // Effects
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
   {
     if (i==0)
@@ -391,7 +392,30 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Curseurs souris
+  // Layer sprite
+  for (j=0; j<3; j++)
+  {
+    for (i=0; i<16; i++)
+    {
+      if (i==0)
+      {
+        if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer sprite"))
+          return 1;
+      }
+      else
+      {
+        if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "layer sprite"))
+          return 1;
+      }
+      if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layer_sprite[j][i], LAYER_SPRITE_WIDTH, LAYER_SPRITE_HEIGHT, "layer sprite",1))
+        return 1;
+      cursor_x+=LAYER_SPRITE_WIDTH;
+    }
+    cursor_y+=LAYER_SPRITE_HEIGHT;
+  }
+
+  
+  // Mouse cursors
   for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
     if (i==0)
@@ -411,7 +435,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=29;
 
-  // Sprites menu
+  // Menu sprites
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
     if (i==0)
@@ -430,10 +454,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Icones des Pinceaux
+  // Paintbrushes
   for (i=0; i<NB_PAINTBRUSH_SPRITES; i++)
   {
-    // Rangés par ligne de 12
+    // Each line holds 12
     if ((i%12)==0)
     {
       if (i!=0)
@@ -452,7 +476,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=PAINTBRUSH_HEIGHT;
 
-  // Sprites drive
+  // Drive sprites
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
     if (i==0)
@@ -498,10 +522,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=16;
 
-  // Font help normale
+  // Help font: Normal
   for (i=0; i<256; i++)
   {
-    // Rangés par ligne de 32
+    // Each line holds 32 symbols
     if ((i%32)==0)
     {
       if (i!=0)
@@ -520,10 +544,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=8;
   
-  // Font help bold
+  // Help font: Bold
   for (i=0; i<256; i++)
   {
-    // Rangés par ligne de 32
+    // Each line holds 32 symbols
     if ((i%32)==0)
     {
       if (i!=0)
@@ -542,11 +566,11 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=8;
 
-  // Font help titre
+  // Help font: Title
   for (i=0; i<256; i++)
   {
     byte * dest;
-    // Rangés par ligne de 64
+    // Each line holds 64 symbols
     if ((i%64)==0)
     {
       if (i!=0)

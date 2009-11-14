@@ -46,6 +46,8 @@
 #define NB_MENU_SPRITES           20    ///< Number of menu sprites.
 #define MENU_SPRITE_WIDTH         14    ///< Width of a menu sprite in pixels
 #define MENU_SPRITE_HEIGHT        14    ///< Height of a menu sprite in pixels
+#define LAYER_SPRITE_WIDTH        14    ///< Width of a layer button in pixels
+#define LAYER_SPRITE_HEIGHT       10    ///< Height of a layer button in pixels
 #define PAINTBRUSH_WIDTH          16    ///< Width of a preset paintbrush sprite
 #define PAINTBRUSH_HEIGHT         16    ///< Height of a preset paintbrush sprite
 #define MAX_PAINTBRUSH_SIZE       127   ///< Max size for a resizable paintbrush
