@@ -257,7 +257,14 @@ enum ICON_TYPES
 /// Identifiers for the buttons in the menu.
 enum BUTTON_NUMBERS
 {
-  BUTTON_PAINTBRUSHES=0,
+  // Status bar
+  BUTTON_HIDE = 0,
+
+  // Layer bar
+  BUTTON_LAYER_MENU,
+
+  // Main menu
+  BUTTON_PAINTBRUSHES,
   BUTTON_ADJUST,
   BUTTON_DRAW,
   BUTTON_CURVES,
@@ -293,7 +300,6 @@ enum BUTTON_NUMBERS
   BUTTON_PAL_LEFT,
   BUTTON_PAL_RIGHT,
   BUTTON_CHOOSE_COL,
-  BUTTON_HIDE,
   NB_BUTTONS            ///< Number of buttons in the menu bar.
 };
 

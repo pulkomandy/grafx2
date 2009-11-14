@@ -391,9 +391,81 @@ void Button_Hide_menu(void)
   }
   else
   {
+    byte current_menu;
     Menu_is_visible=1;
     Pixel_in_menu=Pixel_in_toolbar;
-    Menu_Y=Screen_height-(Menu_height*Menu_factor_Y);
+    Menu_Y=Screen_height;
+    for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu++)
+      if (Menu_bars[current_menu].visible)
+        Menu_Y -= Menu_bars[current_menu].height * Menu_factor_Y;
+
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    Display_menu();
+    if (Main_magnifier_mode)
+      Display_all_screen();
+  }
+  Unselect_button(BUTTON_HIDE);
+  Display_cursor();
+}
+
+void Button_Show_layerbar(void)
+{
+  Hide_cursor();
+  if (Menu_bars[layers_bar].visible)
+  {
+    // Hide it
+    Menu_bars[layers_bar].visible=0;
+    Menu_Y += Menu_bars[layers_bar].height * Menu_factor_Y;
+    Menu_height -= Menu_bars[layers_bar].height;
+
+    if (Main_magnifier_mode)
+    {
+      Compute_magnifier_data();
+      if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
+      {
+        if (Main_magnifier_height>Main_image_height)
+          Main_magnifier_offset_Y=0;
+        else
+          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
+      }
+    }
+
+    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
+    // -cohérences lorsqu'on sortira du mode Loupe.
+    if (Main_offset_Y+Screen_height>Main_image_height)
+    {
+      if (Screen_height>Main_image_height)
+        Main_offset_Y=0;
+      else
+        Main_offset_Y=Main_image_height-Screen_height;
+    }
+    // On fait pareil pour le brouillon
+    if (Spare_offset_Y+Screen_height>Spare_image_height)
+    {
+      if (Screen_height>Spare_image_height)
+        Spare_offset_Y=0;
+      else
+        Spare_offset_Y=Spare_image_height-Screen_height;
+    }
+
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    Display_menu();
+    Display_all_screen();
+  }
+  else
+  {
+    // Show it
+    Menu_bars[layers_bar].visible = 1;
+    Menu_Y -= Menu_bars[layers_bar].height * Menu_factor_Y;
+    Menu_height += Menu_bars[layers_bar].height;
 
     Compute_magnifier_data();
     if (Main_magnifier_mode)

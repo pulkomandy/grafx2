@@ -1234,11 +1234,21 @@ void Init_buttons(void)
                      Do_nothing,
                      FAMILY_INSTANT);
 
+  // Layer bar
+  Init_button(BUTTON_LAYER_MENU,
+                     0,0,
+                     57,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Do_nothing, Do_nothing,
+                     Do_nothing,
+                     FAMILY_TOOLBAR);
+
+  // Status bar
   Init_button(BUTTON_HIDE,
-                     0,35,
+                     0,0,
                      16,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Hide_menu,Button_Hide_menu,
+                     Button_Show_layerbar, Button_Hide_menu,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 }
@@ -2515,7 +2525,7 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  Menu_bars[2].skin = (byte*)&(gfx->Menu_block);
-  Menu_bars[1].skin = (byte*)&(gfx->Layerbar_block);
-  Menu_bars[0].skin = (byte*)&(gfx->Statusbar_block);
+  Menu_bars[main_bar].skin = (byte*)&(gfx->Menu_block);
+  Menu_bars[layers_bar].skin = (byte*)&(gfx->Layerbar_block);
+  Menu_bars[status_bar].skin = (byte*)&(gfx->Statusbar_block);
 }

@@ -183,11 +183,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*((Menu_height-11)/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[main_bar].height/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*((Menu_height-11)/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[main_bar].height/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -220,7 +220,7 @@ void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
-  word cell_height=(Menu_height-11)/Menu_cells_Y;
+  word cell_height=Menu_bars[main_bar].height*Menu_factor_Y/Menu_cells_Y;
   byte color;
 
   if (id==Fore_color)
@@ -238,12 +238,12 @@ void Frame_menu_color(byte id)
       start_y=Palette_cell_Y(id)-1*Menu_factor_Y;
 
       Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
-      Block(start_x,start_y+(Menu_factor_Y*cell_height),(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
+      Block(start_x,start_y+cell_height,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
 
-      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,Menu_factor_Y*(cell_height-1),color);
-      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,Menu_factor_Y*(cell_height-1),color);
+      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,cell_height - Menu_factor_Y,color);
+      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,cell_height - Menu_factor_Y,color);
 
-      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y*(cell_height+1));
+      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,cell_height + Menu_factor_Y);
     }
     else
     {
@@ -253,14 +253,14 @@ void Frame_menu_color(byte id)
       if (color==MC_Black)
       {
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,id);
+              cell_height,id);
 
-        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
+        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height);
       }
       else
       {
         end_x=Menu_palette_cell_width-1;
-        end_y=cell_height-1;
+        end_y=cell_height/Menu_factor_Y-1;
 
         // Top line
         for (index=0; index<=end_x; index++)
@@ -283,7 +283,7 @@ void Frame_menu_color(byte id)
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_y)&1)?color:MC_Black);
 
-        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+Menu_factor_Y*cell_height);
+        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height);
       }
     }
   }
@@ -294,7 +294,7 @@ void Frame_menu_color(byte id)
 void Display_menu_palette(void)
 {
   int color;
-  byte cell_height=(Menu_height-11)/Menu_cells_Y;
+  byte cell_height=(Menu_bars[main_bar].height)*Menu_factor_Y/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
   if (Menu_is_visible)
@@ -306,14 +306,14 @@ void Display_menu_palette(void)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
               (Menu_palette_cell_width-1)*Menu_factor_X,
-              (cell_height-1)*Menu_factor_Y,
+              cell_height-Menu_factor_Y,
               color);
     else
       for (color=First_color_in_palette;color<256&&color-First_color_in_palette<Menu_cells_X*Menu_cells_Y;color++)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
               Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,
+              cell_height,
               color);
 
     Frame_menu_color(Back_color);
@@ -439,6 +439,13 @@ void Display_menu(void)
     }
     // Grey area for filename below palette
     Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
+
+    // Black area below palette
+    if(Menu_bars[layers_bar].visible)
+      Block(MENU_WIDTH*Menu_factor_X,
+          Menu_Y + Menu_bars[main_bar].height*Menu_factor_Y,
+          Screen_width-(MENU_WIDTH*Menu_factor_X),
+          Menu_bars[layers_bar].height*Menu_factor_Y,MC_Black);
 
     // Display palette
     Display_menu_palette();

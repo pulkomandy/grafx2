@@ -629,6 +629,9 @@ void Button_Quit(void);
 */
 void Button_Hide_menu(void);
 
+/// Shows or hide the layerbar
+void Button_Show_layerbar(void);
+
 
 /*!
     Load picture from file.

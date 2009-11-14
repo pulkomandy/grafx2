@@ -479,9 +479,9 @@ GFX2_GLOBAL word  Menu_palette_cell_width;
 GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBARS_COUNT] 
 #ifdef GLOBAL_VARIABLES
   = 
-{{MENU_WIDTH, 9, 1, NULL }, // Status
- {MENU_WIDTH, 10, 0, NULL }, // Layers
- {MENU_WIDTH, 35, 1, NULL }} // Main
+{{MENU_WIDTH, 9, 1, NULL, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 0, NULL, BUTTON_LAYER_MENU }, // Layers
+ {MENU_WIDTH, 35, 1, NULL, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;
 

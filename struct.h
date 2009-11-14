@@ -468,6 +468,7 @@ typedef struct {
   word height;
   byte visible;
   byte* skin;
+  byte last_button_index;
 } T_Menu_Bar;
 
 typedef enum {

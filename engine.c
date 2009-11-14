@@ -65,6 +65,10 @@ byte* Window_background[8];
 ///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=
 {
+  "Layerbar / Hide menu    ",
+
+  "Layers manager          ",
+
   "Paintbrush choice       ",
   "Adjust / Transform menu ",
   "Freehand draw. / Toggle ",
@@ -105,7 +109,6 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Scroll pal. bkwd / Fast ",
   "Scroll pal. fwd / Fast  ",
   "Color #"                 ,
-  "Hide tool bar           "
 };
 
 ///Save a screen block (usually before erasing it with a new window or a dropdown menu)
@@ -144,11 +147,28 @@ int Button_under_mouse(void)
   int btn_number;
   short x_pos;
   short y_pos;
+  byte current_menu;
+  word current_offset = Screen_height;
+  byte first_button;
 
-  x_pos=(Mouse_X              )/Menu_factor_X;
-  y_pos=(Mouse_Y-Menu_Y)/Menu_factor_Y;
+  x_pos = Mouse_X / Menu_factor_X;
 
-  for (btn_number=0;btn_number<NB_BUTTONS;btn_number++)
+  // Find in which menubar we are
+  for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu ++)
+  {
+    if (Menu_bars[current_menu].visible)
+    {
+      current_offset -= Menu_bars[current_menu].height * Menu_factor_Y;
+      if (Mouse_Y >= current_offset)
+        break;
+    }
+  }
+  y_pos=(Mouse_Y - current_offset)/Menu_factor_Y;
+
+  if (current_menu == 0) first_button = 0;
+  else first_button = Menu_bars[current_menu - 1].last_button_index + 1;
+
+  for (btn_number=first_button;btn_number<=Menu_bars[current_menu].last_button_index;btn_number++)
   {
     switch(Buttons_Pool[btn_number].Shape)
     {
@@ -193,9 +213,24 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word end_y;
   word x_pos;
   word y_pos;
+  byte current_menu;
+  word y_off = 0;
+
+  // Find in which menu the button is
+  for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu++)
+  {
+    if(Menu_bars[current_menu].visible)
+    {
+      y_off += Menu_bars[current_menu].height;
+      if (Menu_bars[current_menu].last_button_index >= btn_number)
+        break;
+    }
+  }
+
+  y_off = Menu_height - y_off;
 
   start_x=Buttons_Pool[btn_number].X_offset;
-  start_y=Buttons_Pool[btn_number].Y_offset;
+  start_y=Buttons_Pool[btn_number].Y_offset + y_off;
   end_x  =start_x+Buttons_Pool[btn_number].Width;
   end_y  =start_y+Buttons_Pool[btn_number].Height;
 
