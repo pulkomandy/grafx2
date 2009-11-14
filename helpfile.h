@@ -2476,6 +2476,63 @@ static const T_Help_table helptable_hide[] =
 
 };
 
+static const T_Help_table helptable_layermenu[] =
+{
+
+  HELP_TITLE("LAYERS MENU")
+  HELP_TEXT ("")
+  HELP_TEXT ("* Not implemented yet! *")
+
+};
+static const T_Help_table helptable_layertrans[] =
+{
+
+  HELP_TITLE("LAYERS TRANSPARENCY")
+  HELP_TEXT ("")
+  HELP_TEXT ("* Not implemented yet! *")
+
+};
+static const T_Help_table helptable_layermerge[] =
+{
+
+  HELP_TITLE("LAYERS MERGE")
+  HELP_TEXT ("")
+  HELP_TEXT ("Merge layer with the one below")
+
+};
+static const T_Help_table helptable_layeradd[] =
+{
+
+  HELP_TITLE("ADD LAYER")
+  HELP_TEXT ("")
+  HELP_TEXT ("Add a new layer above the current one")
+
+};
+static const T_Help_table helptable_layerdel[] =
+{
+
+  HELP_TITLE("DROP LAYER")
+  HELP_TEXT ("")
+  HELP_TEXT ("Drop the current layer")
+
+};
+static const T_Help_table helptable_layerup[] =
+{
+
+  HELP_TITLE("MOVE LAYER UP")
+  HELP_TEXT ("")
+  HELP_TEXT ("Move current layer above the next one")
+
+};
+static const T_Help_table helptable_layerdown[] =
+{
+
+  HELP_TITLE("MOVE LAYER DOWN")
+  HELP_TEXT ("")
+  HELP_TEXT ("Move the current layer below the previous one")
+
+};
+
 #define HELP_TABLE_DECLARATION(x) {x, sizeof(x)/sizeof(const T_Help_table)},
 
 T_Help_section Help_section[] =
@@ -2486,6 +2543,14 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_credits)
 
   // Attention, keep the same order as BUTTON_NUMBERS:
+  HELP_TABLE_DECLARATION(helptable_hide)
+  HELP_TABLE_DECLARATION(helptable_layermenu)
+  HELP_TABLE_DECLARATION(helptable_layertrans)
+  HELP_TABLE_DECLARATION(helptable_layermerge)
+  HELP_TABLE_DECLARATION(helptable_layeradd)
+  HELP_TABLE_DECLARATION(helptable_layerdel)
+  HELP_TABLE_DECLARATION(helptable_layerup)
+  HELP_TABLE_DECLARATION(helptable_layerdown)
   HELP_TABLE_DECLARATION(helptable_paintbrush)
   HELP_TABLE_DECLARATION(helptable_adjust)
   HELP_TABLE_DECLARATION(helptable_draw)
@@ -2522,5 +2587,4 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_pal_scroll)
   HELP_TABLE_DECLARATION(helptable_pal_scroll)
   HELP_TABLE_DECLARATION(helptable_color_select)
-  HELP_TABLE_DECLARATION(helptable_hide)
 };
