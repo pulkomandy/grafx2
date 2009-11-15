@@ -221,7 +221,8 @@ else
         LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
         OBJDIR = obj/win32
         PLATFORM = win32
-      else ifdef GP2XCROSS
+      else
+	  ifdef GP2XCROSS
 
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
@@ -243,6 +244,7 @@ else
 		#CC = nccgen -ncgcc -ncld -ncfabs
         OBJDIR = obj/unix
         X11LOPT = -lX11
+      endif
       endif
   endif
   endif
