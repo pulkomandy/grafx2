@@ -287,12 +287,13 @@ static const T_Help_table helptable_help[] =
   HELP_TEXT ("")
   HELP_TEXT ("LAYERS")
   HELP_TEXT ("")
-  HELP_LINK ("  Menu      : %s",   SPECIAL_LAYER_MENU)
-  HELP_LINK ("  Add new   : %s",   SPECIAL_LAYER_ADD)
-  HELP_LINK ("  Delete    : %s",   SPECIAL_LAYER_DELETE)
-  HELP_LINK ("  Merge     : %s",   SPECIAL_LAYER_MERGE)
-  HELP_LINK ("  Move up   : %s",   SPECIAL_LAYER_SWAP_UP)
-  HELP_LINK ("  Move down : %s",   SPECIAL_LAYER_SWAP_DOWN)
+  HELP_LINK ("  Menu      : %s",   0x100+BUTTON_LAYER_MENU)
+  HELP_LINK ("  Add new   : %s",   0x100+BUTTON_LAYER_ADD)
+  HELP_LINK ("  Delete    : %s",   0x100+BUTTON_LAYER_REMOVE)
+  HELP_LINK ("  Merge     : %s",   0x100+BUTTON_LAYER_MERGE)
+  HELP_LINK ("  Move up   : %s",   0x100+BUTTON_LAYER_UP)
+  HELP_LINK ("  Move down : %s",   0x100+BUTTON_LAYER_DOWN)
+  //HELP_LINK ("  Set transp: %s",   0x100+BUTTON_LAYER_COLOR)
   HELP_TEXT ("  Select :")
   HELP_LINK ("    1 : %s",   SPECIAL_LAYER1_SELECT)
   HELP_LINK ("    2 : %s",   SPECIAL_LAYER2_SELECT)
@@ -2487,6 +2488,8 @@ static const T_Help_table helptable_layermenu[] =
 
   HELP_TITLE("LAYERS MENU")
   HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_MENU)
+  HELP_TEXT ("")
   HELP_TEXT ("* Not implemented yet! *")
 
 };
@@ -2495,7 +2498,8 @@ static const T_Help_table helptable_layertrans[] =
 
   HELP_TITLE("LAYERS TRANSPARENCY")
   HELP_TEXT ("")
-  HELP_TEXT ("* Not implemented yet! *")
+  HELP_TEXT ("The current Background color becomes the")
+  HELP_TEXT ("color considered transparent for the layers.")
 
 };
 static const T_Help_table helptable_layermerge[] =
@@ -2503,15 +2507,24 @@ static const T_Help_table helptable_layermerge[] =
 
   HELP_TITLE("LAYERS MERGE")
   HELP_TEXT ("")
-  HELP_TEXT ("Merge layer with the one below")
-
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_MERGE)
+  HELP_TEXT ("")
+  HELP_TEXT ("Merges the current layer with the one below")
+  HELP_TEXT ("it, and sets the resulting layer as current")
+  HELP_TEXT ("one for editing.")
+  HELP_TEXT ("This function has no effect if you're")
+  HELP_TEXT ("editing the lowest layer.")
 };
 static const T_Help_table helptable_layeradd[] =
 {
 
   HELP_TITLE("ADD LAYER")
   HELP_TEXT ("")
-  HELP_TEXT ("Add a new layer above the current one")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_ADD)
+  HELP_TEXT ("")
+  HELP_TEXT ("Add a new layer above the current one,")
+  HELP_TEXT ("and selects this new (empty) layer for")
+  HELP_TEXT ("editing.")
 
 };
 static const T_Help_table helptable_layerdel[] =
@@ -2519,7 +2532,9 @@ static const T_Help_table helptable_layerdel[] =
 
   HELP_TITLE("DROP LAYER")
   HELP_TEXT ("")
-  HELP_TEXT ("Drop the current layer")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_REMOVE)
+  HELP_TEXT ("")
+  HELP_TEXT ("Deletes the current layer.")
 
 };
 static const T_Help_table helptable_layerup[] =
@@ -2527,7 +2542,11 @@ static const T_Help_table helptable_layerup[] =
 
   HELP_TITLE("MOVE LAYER UP")
   HELP_TEXT ("")
-  HELP_TEXT ("Move current layer above the next one")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_UP)
+  HELP_TEXT ("")
+  HELP_TEXT ("Swaps the current layer with the one")
+  HELP_TEXT ("above it. This has no effect if this")
+  HELP_TEXT ("layer is already on top.")
 
 };
 static const T_Help_table helptable_layerdown[] =
@@ -2535,8 +2554,11 @@ static const T_Help_table helptable_layerdown[] =
 
   HELP_TITLE("MOVE LAYER DOWN")
   HELP_TEXT ("")
-  HELP_TEXT ("Move the current layer below the previous one")
-
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_DOWN)
+  HELP_TEXT ("")
+  HELP_TEXT ("Swaps the current layer with the one")
+  HELP_TEXT ("below it. This has no effect if this")
+  HELP_TEXT ("layer is already on the bottom.")
 };
 static const T_Help_table helptable_layerselect[] =
 {

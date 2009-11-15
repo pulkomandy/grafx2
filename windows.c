@@ -39,6 +39,9 @@
 #include "readline.h"
 #include "sdlscreen.h"
 
+/// Width of one layer button, in pixels before scaling
+word Layer_button_width = 1;
+
 // L'encapsulation tente une percée...ou un dernier combat.
 
 // Nombre de cellules réel dans la palette du menu
@@ -420,6 +423,18 @@ int Pick_color_in_palette()
   return color;
 }
 
+/// Draws a solid textured area, to the right of a toolbar.
+void Draw_bar_remainder(word current_menu, word x_off, word y_off)
+{
+  word y_pos;
+  word x_pos;
+
+  for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
+    for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
+      Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+}
+
+            
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
@@ -446,6 +461,9 @@ void Display_layerbar(void)
   // Don't display all buttons if not enough room
   if (horiz_space/button_width < button_number)
     button_number = horiz_space/button_width;
+  // Only 16 icons at the moment
+  if (button_number > 16)
+    button_number = 16;
 
   // Enlarge the buttons themselves if there's enough room
   while (button_number*(button_width+2) < horiz_space && repeats < 20)
@@ -494,8 +512,22 @@ void Display_layerbar(void)
     // Next button
     x_off+=button_width;
   }
+  // Texture any remaining space to the right.
+  // This overwrites any junk like deleted buttons.
+  Draw_bar_remainder(MENUBAR_LAYERS, x_off, y_off);
+  
   // Update the active area of the layers pseudo-button
   Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
+  
+  // Required to determine which layer button is clicked
+  Layer_button_width = button_width;
+  
+  // A screen refresh required by some callers
+  Update_rect(
+    Menu_bars[MENUBAR_LAYERS].Skin_width, 
+    Menu_Y+y_off*Menu_factor_Y, 
+    horiz_space*Menu_factor_X, 
+    Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
 }
 
 
@@ -520,14 +552,18 @@ void Display_menu(void)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
             Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
-        // If some area is remaining to the right, texture it with a copy of
-        // the last two columns
-        for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
-          for (x_pos=Menu_bars[current_menu].Skin_width;x_pos<Screen_width/Menu_factor_X;x_pos++)
-            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
-
         if (current_menu == MENUBAR_LAYERS)
+        {
+          // The layerbar has its own display, for the whole length.
           Display_layerbar();
+        }
+        else
+        {
+          // If some area is remaining to the right, texture it with a copy of
+          // the last two columns
+          Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width, y_off);
+        }
+        
         // Next bar
         y_off += Menu_bars[current_menu].Height;
       }

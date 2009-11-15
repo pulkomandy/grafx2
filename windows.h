@@ -56,6 +56,7 @@ void Set_back_color(byte color);
 void Frame_menu_color(byte id);
 void Display_menu_palette(void);
 void Display_menu(void);
+void Display_layerbar(void);
 void Reposition_palette(void);
 void Change_palette_cells(void);
 int Pick_color_in_palette(void);
@@ -101,5 +102,8 @@ void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
 
 void Change_magnifier_factor(byte factor_index);
+
+/// Width of one layer button, in pixels before scaling
+extern word Layer_button_width;
 
 #endif

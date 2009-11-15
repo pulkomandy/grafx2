@@ -22,20 +22,13 @@
 
 void Button_Layer_add(void);
 void Button_Layer_remove(void);
-/*
-void Button_Layer_1(void);
-void Button_Layer_2(void);
-void Button_Layer_3(void);
-void Button_Layer_4(void);
-void Button_Layer_5(void);
-void Button_Layer_6(void);
-void Button_Layer_7(void);
-void Button_Layer_8(void);
-*/
 void Button_Layer_menu(void);
 void Button_Layer_color(void);
 void Button_Layer_merge(void);
 void Button_Layer_up(void);
 void Button_Layer_down(void);
 void Button_Layer_select(void);
+void Button_Layer_toggle(void);
+void Layer_activate(short layer, short side);
+
 

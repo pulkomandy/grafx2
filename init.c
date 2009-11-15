@@ -1313,7 +1313,7 @@ void Init_buttons(void)
                      142,0,
                      13,9, // Will be updated according to actual number of layers
                      BUTTON_SHAPE_NO_FRAME,
-                     Button_Layer_select, Button_Layer_select,
+                     Button_Layer_select, Button_Layer_toggle,
                      Do_nothing,
                      FAMILY_INSTANT);
   // Status bar
