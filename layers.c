@@ -159,7 +159,7 @@ void Button_Layer_menu(void)
   Display_cursor();
 }
 
-void Button_Layer_color(void)
+void Button_Layer_set_transparent(void)
 {
   Hide_cursor();
 
@@ -170,8 +170,20 @@ void Button_Layer_color(void)
     
     Redraw_layered_image();
     Display_all_screen();
-    Display_cursor();
     End_of_modification();
+  }
+
+  Unselect_button(BUTTON_LAYER_COLOR);
+  Display_cursor();
+}
+
+void Button_Layer_get_transparent(void)
+{
+  Hide_cursor();
+
+  if (Main_backups->Pages->Transparent_color != Back_color)
+  {
+    Set_back_color(Main_backups->Pages->Transparent_color);
   }
 
   Unselect_button(BUTTON_LAYER_COLOR);

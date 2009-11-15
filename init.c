@@ -1271,7 +1271,7 @@ void Init_buttons(void)
                      58,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_color, Button_Layer_color,
+                     Button_Layer_get_transparent, Button_Layer_set_transparent,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_MERGE,

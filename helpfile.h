@@ -2498,9 +2498,16 @@ static const T_Help_table helptable_layertrans[] =
 
   HELP_TITLE("LAYERS TRANSPARENCY")
   HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Sets the transparent color as background pen")
+  HELP_TEXT ("color.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
   HELP_TEXT ("The current Background color becomes the")
   HELP_TEXT ("color considered transparent for the layers.")
-
+  
 };
 static const T_Help_table helptable_layermerge[] =
 {

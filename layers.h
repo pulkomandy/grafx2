@@ -23,7 +23,8 @@
 void Button_Layer_add(void);
 void Button_Layer_remove(void);
 void Button_Layer_menu(void);
-void Button_Layer_color(void);
+void Button_Layer_set_transparent(void);
+void Button_Layer_get_transparent(void);
 void Button_Layer_merge(void);
 void Button_Layer_up(void);
 void Button_Layer_down(void);
