@@ -1295,18 +1295,18 @@ void Init_buttons(void)
                      Button_Layer_remove, Button_Layer_remove,
                      Do_nothing,
                      FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_UP,
+  Init_button(BUTTON_LAYER_DOWN,
                      114,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_up, Button_Layer_up,
+                     Button_Layer_down, Button_Layer_down,
                      Do_nothing,
                      FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_DOWN,
+  Init_button(BUTTON_LAYER_UP,
                      128,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_down, Button_Layer_down,
+                     Button_Layer_up, Button_Layer_up,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_SELECT,
