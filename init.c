@@ -1312,7 +1312,7 @@ void Init_buttons(void)
   Init_button(BUTTON_LAYER_SELECT,
                      142,0,
                      13,9, // Will be updated according to actual number of layers
-                     BUTTON_SHAPE_RECTANGLE,
+                     BUTTON_SHAPE_NO_FRAME,
                      Button_Layer_select, Button_Layer_select,
                      Do_nothing,
                      FAMILY_INSTANT);

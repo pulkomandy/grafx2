@@ -420,6 +420,85 @@ int Pick_color_in_palette()
   return color;
 }
 
+/// Display / update the layer menubar
+void Display_layerbar(void)
+{
+  word current_menu;
+  word y_off=0;
+  word x_off=0;
+  word button_width = LAYER_SPRITE_WIDTH;
+  word button_number = Main_backups->Pages->Nb_layers;
+  word horiz_space;
+  word current_button;
+  word repeats=1;
+  
+  // Find top
+  for (current_menu = MENUBAR_COUNT - 1; current_menu > MENUBAR_LAYERS; current_menu --)
+  {
+    if(Menu_bars[current_menu].Visible)
+    {
+      y_off += Menu_bars[current_menu].Height;
+    }
+  }
+  // Available space in pixels
+  horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
+  
+  // Don't display all buttons if not enough room
+  if (horiz_space/button_width < button_number)
+    button_number = horiz_space/button_width;
+
+  // Enlarge the buttons themselves if there's enough room
+  while (button_number*(button_width+2) < horiz_space && repeats < 20)
+  {
+    repeats+=1;
+    button_width+=2;
+  }
+  
+  x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
+  for (current_button=0; current_button<button_number; current_button++)
+  {
+    word x_pos;
+    word y_pos;
+    word sprite_index;
+    
+    if (Main_current_layer == current_button)
+      sprite_index=1;
+    else if (Main_layers_visible & (1 << current_button))
+      sprite_index=0;
+    else
+      sprite_index=2;
+    
+    
+    for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
+    {
+      word source_x=0;
+      
+      for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
+      {
+        short i = 1;
+        
+        // This stretches a button, by duplicating the 2nd from right column 
+        // and 3rd column from left.    
+        if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
+          i=repeats;
+        
+        for (;i>0; i--)
+        {
+          Pixel_in_menu(x_pos + x_off, y_pos + y_off, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+          x_pos++;
+        }
+      }
+      // Next line
+      x_pos=0;
+    }    
+    // Next button
+    x_off+=button_width;
+  }
+  // Update the active area of the layers pseudo-button
+  Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
+}
+
+
 /// Display the whole menu
 void Display_menu(void)
 {
@@ -447,6 +526,8 @@ void Display_menu(void)
           for (x_pos=Menu_bars[current_menu].Skin_width;x_pos<Screen_width/Menu_factor_X;x_pos++)
             Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
 
+        if (current_menu == MENUBAR_LAYERS)
+          Display_layerbar();
         // Next bar
         y_off += Menu_bars[current_menu].Height;
       }
