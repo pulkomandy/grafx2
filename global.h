@@ -476,12 +476,12 @@ GFX2_GLOBAL byte  Menu_factor_Y;
 /// Size of a color cell in the menu's palette.
 GFX2_GLOBAL word  Menu_palette_cell_width;
 
-GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBARS_COUNT] 
+GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
 #ifdef GLOBAL_VARIABLES
   = 
-{{MENU_WIDTH, 9, 1, NULL, BUTTON_HIDE }, // Status
- {MENU_WIDTH, 10, 0, NULL, BUTTON_LAYER_DOWN }, // Layers
- {MENU_WIDTH, 35, 1, NULL, BUTTON_CHOOSE_COL }} // Main
+{{MENU_WIDTH, 9, 1, NULL, 20, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 0, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
+ {MENU_WIDTH, 35, 1, NULL, 254, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;
 

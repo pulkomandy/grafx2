@@ -2538,7 +2538,22 @@ static const T_Help_table helptable_layerdown[] =
   HELP_TEXT ("Move the current layer below the previous one")
 
 };
+static const T_Help_table helptable_layerselect[] =
+{
 
+  HELP_TITLE("LAYER SELECTION")
+  HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Choose a layer as the current one for")
+  HELP_TEXT ("drawing.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Makes a layer visible or invisible.")
+  HELP_TEXT ("If you click the current layer, this toggles")
+  HELP_TEXT ("the visibility of all other layers instead.")
+};
 #define HELP_TABLE_DECLARATION(x) {x, sizeof(x)/sizeof(const T_Help_table)},
 
 T_Help_section Help_section[] =
@@ -2557,6 +2572,7 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_layerdel)
   HELP_TABLE_DECLARATION(helptable_layerup)
   HELP_TABLE_DECLARATION(helptable_layerdown)
+  HELP_TABLE_DECLARATION(helptable_layerselect)
   HELP_TABLE_DECLARATION(helptable_paintbrush)
   HELP_TABLE_DECLARATION(helptable_adjust)
   HELP_TABLE_DECLARATION(helptable_draw)

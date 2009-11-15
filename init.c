@@ -347,30 +347,30 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[main_bar].width, Menu_bars[main_bar].height,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
 
   // Preview
-  cursor_x += Menu_bars[main_bar].width;
+  cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
 	return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
 	return 1;
-  cursor_y+= Menu_bars[main_bar].height;
+  cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
 
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[layers_bar].width, Menu_bars[layers_bar].height,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
     return 1;
-  cursor_y+= Menu_bars[layers_bar].height;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[status_bar].width, Menu_bars[status_bar].height,"status bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
     return 1;
-  cursor_y+= Menu_bars[status_bar].height;
+  cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
 
   // Effects
@@ -1266,50 +1266,56 @@ void Init_buttons(void)
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_menu, Button_Layer_menu,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_COLOR,
                      58,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_color, Button_Layer_color,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_MERGE,
                      72,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_merge, Button_Layer_merge,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_ADD,
                      86,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_add, Button_Layer_add,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_REMOVE,
                      100,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_remove, Button_Layer_remove,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_UP,
                      114,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_up, Button_Layer_up,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
+                     FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_DOWN,
                      128,0,
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_down, Button_Layer_down,
                      Do_nothing,
-                     FAMILY_TOOLBAR);
-
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_SELECT,
+                     142,0,
+                     13,9, // Will be updated according to actual number of layers
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_select, Button_Layer_select,
+                     Do_nothing,
+                     FAMILY_INSTANT);
   // Status bar
   Init_button(BUTTON_HIDE,
                      0,0,
@@ -2592,7 +2598,7 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  Menu_bars[main_bar].skin = (byte*)&(gfx->Menu_block);
-  Menu_bars[layers_bar].skin = (byte*)&(gfx->Layerbar_block);
-  Menu_bars[status_bar].skin = (byte*)&(gfx->Statusbar_block);
+  Menu_bars[MENUBAR_TOOLS].Skin = (byte*)&(gfx->Menu_block);
+  Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
+  Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
 }

@@ -183,11 +183,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[main_bar].height/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[main_bar].height/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -220,7 +220,7 @@ void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
-  word cell_height=Menu_bars[main_bar].height*Menu_factor_Y/Menu_cells_Y;
+  word cell_height=Menu_bars[MENUBAR_TOOLS].Height*Menu_factor_Y/Menu_cells_Y;
   byte color;
 
   if (id==Fore_color)
@@ -294,12 +294,17 @@ void Frame_menu_color(byte id)
 void Display_menu_palette(void)
 {
   int color;
-  byte cell_height=(Menu_bars[main_bar].height)*Menu_factor_Y/Menu_cells_Y;
+  byte cell_height=(Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
   if (Menu_is_visible)
   {
-    Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11+2)*Menu_factor_Y,MC_Black);
+    Block(
+      Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
+      Menu_Y,
+      Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
+      (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
+      MC_Black);
 
     if (Config.Separate_colors)
       for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
@@ -427,25 +432,25 @@ void Display_menu(void)
   if (Menu_is_visible)
   {
     // display menu sprite
-    for (current_menu = MENUBARS_COUNT - 1; current_menu >= 0; current_menu --)
+    for (current_menu = MENUBAR_COUNT - 1; current_menu >= 0; current_menu --)
     {
-      if(Menu_bars[current_menu].visible)
+      if(Menu_bars[current_menu].Visible)
       {
-        for (y_pos=0;y_pos<Menu_bars[current_menu].height;y_pos++)
-          for (x_pos=0;x_pos<Menu_bars[current_menu].width;x_pos++)
-            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].skin[y_pos * Menu_bars[current_menu].width + x_pos]);
-        y_off += Menu_bars[current_menu].height;
+        // Skinned area
+        for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
+          for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
+            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+
+        // If some area is remaining to the right, texture it with a copy of
+        // the last two columns
+        for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
+          for (x_pos=Menu_bars[current_menu].Skin_width;x_pos<Screen_width/Menu_factor_X;x_pos++)
+            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+
+        // Next bar
+        y_off += Menu_bars[current_menu].Height;
       }
     }
-    // Grey area for filename below palette
-    Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
-
-    // Black area below palette
-    if(Menu_bars[layers_bar].visible)
-      Block(MENU_WIDTH*Menu_factor_X,
-          Menu_Y + Menu_bars[main_bar].height*Menu_factor_Y,
-          Screen_width-(MENU_WIDTH*Menu_factor_X),
-          Menu_bars[layers_bar].height*Menu_factor_Y,MC_Black);
 
     // Display palette
     Display_menu_palette();
@@ -456,17 +461,17 @@ void Display_menu(void)
 
     if (!Windows_open)
     {
-      if ((Mouse_Y<Menu_Y) &&                                                    // Souris dans l'image
+      if ((Mouse_Y<Menu_Y) && // Mouse in the picture area
           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ))
       {
-		// Prepare display of XY coordinates even if in some cases they will be
-		// erased with some other text
+        // Prepare display of XY coordinates even if in some cases they will be
+        // erased with some other text
         if ( (Current_operation!=OPERATION_COLORPICK)
           && (Current_operation!=OPERATION_REPLACE) )
           Print_in_menu("X:       Y:             ",0);
         else
         {
-		  // The colorpicker display the color id between the parentheses
+          // The colorpicker display the color id between the parentheses
           Print_in_menu("X:       Y:       (    )",0);
           Num2str(Colorpicker_color,str,3);
           Print_in_menu(str,20);
@@ -476,7 +481,7 @@ void Display_menu(void)
       }
       Print_filename();
     }
-	// Now update the area: menu height and whole screen width (including palette)
+    // Now update the area: menu height and whole screen width (including palette)
     Update_rect(0,Menu_Y,Screen_width,Menu_height*Menu_factor_Y);
   }
 }
@@ -2670,8 +2675,8 @@ void Remap_menu_sprites()
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
     // Main menu bar
-    for (j=0; j<35; j++)
-      for (i=0; i<MENU_WIDTH; i++)
+    for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
         Remap_pixel(&Gfx->Menu_block[j][i]);
     // Menu sprites
     for (k=0; k<NB_MENU_SPRITES; k++)
@@ -2691,12 +2696,12 @@ void Remap_menu_sprites()
             Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
     
     // Status bar
-    for (j=0; j<9; j++)
-      for (i=0; i<MENU_WIDTH; i++)
+    for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
         Remap_pixel(&Gfx->Statusbar_block[j][i]);
     // Layer bar
-    for (j=0; j<10; j++)
-      for (i=0; i<MENU_WIDTH; i++)
+    for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
         Remap_pixel(&Gfx->Layerbar_block[j][i]);
     
     // Help fonts

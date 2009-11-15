@@ -395,9 +395,9 @@ void Button_Hide_menu(void)
     Menu_is_visible=1;
     Pixel_in_menu=Pixel_in_toolbar;
     Menu_Y=Screen_height;
-    for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu++)
-      if (Menu_bars[current_menu].visible)
-        Menu_Y -= Menu_bars[current_menu].height * Menu_factor_Y;
+    for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
+      if (Menu_bars[current_menu].Visible)
+        Menu_Y -= Menu_bars[current_menu].Height * Menu_factor_Y;
 
     Compute_magnifier_data();
     if (Main_magnifier_mode)
@@ -415,12 +415,12 @@ void Button_Hide_menu(void)
 void Button_Show_layerbar(void)
 {
   Hide_cursor();
-  if (Menu_bars[layers_bar].visible)
+  if (Menu_bars[MENUBAR_LAYERS].Visible)
   {
     // Hide it
-    Menu_bars[layers_bar].visible=0;
-    Menu_Y += Menu_bars[layers_bar].height * Menu_factor_Y;
-    Menu_height -= Menu_bars[layers_bar].height;
+    Menu_bars[MENUBAR_LAYERS].Visible=0;
+    Menu_Y += Menu_bars[MENUBAR_LAYERS].Height * Menu_factor_Y;
+    Menu_height -= Menu_bars[MENUBAR_LAYERS].Height;
 
     if (Main_magnifier_mode)
     {
@@ -463,9 +463,9 @@ void Button_Show_layerbar(void)
   else
   {
     // Show it
-    Menu_bars[layers_bar].visible = 1;
-    Menu_Y -= Menu_bars[layers_bar].height * Menu_factor_Y;
-    Menu_height += Menu_bars[layers_bar].height;
+    Menu_bars[MENUBAR_LAYERS].Visible = 1;
+    Menu_Y -= Menu_bars[MENUBAR_LAYERS].Height * Menu_factor_Y;
+    Menu_height += Menu_bars[MENUBAR_LAYERS].Height;
 
     Compute_magnifier_data();
     if (Main_magnifier_mode)

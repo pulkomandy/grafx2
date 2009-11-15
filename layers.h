@@ -37,3 +37,5 @@ void Button_Layer_color(void);
 void Button_Layer_merge(void);
 void Button_Layer_up(void);
 void Button_Layer_down(void);
+void Button_Layer_select(void);
+

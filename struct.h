@@ -417,8 +417,8 @@ typedef struct
   
   /// Bitmap data for the menu, a single rectangle.
   byte Menu_block[35][MENU_WIDTH];
-  byte Layerbar_block[10][MENU_WIDTH];
-  byte Statusbar_block[9][MENU_WIDTH];
+  byte Layerbar_block[10][144];
+  byte Statusbar_block[9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
@@ -466,18 +466,19 @@ typedef struct
 
 // A menubar.
 typedef struct {
-  word width;
-  word height;
-  byte visible;
-  byte* skin;
-  byte last_button_index;
+  word Width;
+  word Height;
+  byte Visible;
+  byte* Skin;
+  word Skin_width;
+  byte Last_button_index;
 } T_Menu_Bar;
 
 typedef enum {
-  status_bar = 0, // MUST be 0
-  layers_bar,
-  main_bar,
-  MENUBARS_COUNT
+  MENUBAR_STATUS = 0, // MUST be 0
+  MENUBAR_LAYERS,
+  MENUBAR_TOOLS,
+  MENUBAR_COUNT
 } T_Menubars;
 
 #endif

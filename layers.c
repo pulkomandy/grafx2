@@ -63,6 +63,13 @@ void Button_Layer_remove(void)
   Unselect_button(BUTTON_LAYER_REMOVE);
   Display_cursor();
 }
+void Button_Layer_select(void)
+{
+  Hide_cursor();
+  Unselect_button(BUTTON_LAYER_SELECT);
+  Display_cursor();
+}
+
 /*
 void Button_Layer_1(void)
 {

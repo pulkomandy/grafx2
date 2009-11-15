@@ -74,7 +74,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Drop layer              ",
   "Raise layer             ",
   "Lower layer             ",
-
+  "Layer select / toggle   ",
   "Paintbrush choice       ",
   "Adjust / Transform menu ",
   "Freehand draw. / Toggle ",
@@ -160,11 +160,11 @@ int Button_under_mouse(void)
   x_pos = Mouse_X / Menu_factor_X;
 
   // Find in which menubar we are
-  for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu ++)
+  for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu ++)
   {
-    if (Menu_bars[current_menu].visible)
+    if (Menu_bars[current_menu].Visible)
     {
-      current_offset -= Menu_bars[current_menu].height * Menu_factor_Y;
+      current_offset -= Menu_bars[current_menu].Height * Menu_factor_Y;
       if (Mouse_Y >= current_offset)
         break;
     }
@@ -172,9 +172,9 @@ int Button_under_mouse(void)
   y_pos=(Mouse_Y - current_offset)/Menu_factor_Y;
 
   if (current_menu == 0) first_button = 0;
-  else first_button = Menu_bars[current_menu - 1].last_button_index + 1;
+  else first_button = Menu_bars[current_menu - 1].Last_button_index + 1;
 
-  for (btn_number=first_button;btn_number<=Menu_bars[current_menu].last_button_index;btn_number++)
+  for (btn_number=first_button;btn_number<=Menu_bars[current_menu].Last_button_index;btn_number++)
   {
     switch(Buttons_Pool[btn_number].Shape)
     {
@@ -206,7 +206,7 @@ int Button_under_mouse(void)
   return -1;
 }
 
-#define Pixel_in_skinmenu(x,y,color) Menu_bars[current_menu].skin[(y - y_off)*Menu_bars[current_menu].width + x] = color
+#define Pixel_in_skinmenu(x,y,color) Menu_bars[current_menu].Skin[(y - y_off)*Menu_bars[current_menu].Skin_width + x] = color
 #define Pixel_in_menu_and_skin(x,y,color) Pixel_in_skinmenu(x,y,color); Pixel_in_menu(x,y,color)
 
 ///Draw the frame for a menu button
@@ -225,12 +225,12 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word y_off = 0;
 
   // Find in which menu the button is
-  for (current_menu = 0; current_menu < MENUBARS_COUNT; current_menu++)
+  for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
   {
-    if(Menu_bars[current_menu].visible)
+    if(Menu_bars[current_menu].Visible)
     {
-      y_off += Menu_bars[current_menu].height;
-      if (Menu_bars[current_menu].last_button_index >= btn_number)
+      y_off += Menu_bars[current_menu].Height;
+      if (Menu_bars[current_menu].Last_button_index >= btn_number)
         break;
     }
   }
