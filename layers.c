@@ -134,20 +134,32 @@ void Button_Layer_remove(void)
 
 void Button_Layer_select(void)
 {
-  word layer;
+  short layer;
   // Determine which button is clicked according to mouse position
   layer = (Mouse_X/Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width)
     / Layer_button_width;
-  
+
+  // Safety required because the mouse cursor can have slided outside button.
+  if (layer < 0)
+    layer=0;
+  else if (layer > Main_backups->Pages->Nb_layers-1)
+    layer=Main_backups->Pages->Nb_layers-1;
+
   Layer_activate(layer, LEFT_SIDE);
 }
 
 void Button_Layer_toggle(void)
 {
-  word layer;
+  short layer;
   // Determine which button is clicked according to mouse position
   layer = (Mouse_X/Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width)
     / Layer_button_width;
+
+  // Safety required because the mouse cursor can have slided outside button.
+  if (layer < 0)
+    layer=0;
+  else if (layer > Main_backups->Pages->Nb_layers-1)
+    layer=Main_backups->Pages->Nb_layers-1;
   
   Layer_activate(layer, RIGHT_SIDE);
 }

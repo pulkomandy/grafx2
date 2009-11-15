@@ -460,6 +460,9 @@ void Display_layerbar(void)
   word current_button;
   word repeats=1;
   
+  if (! Menu_bars[MENUBAR_LAYERS].Visible)
+    return;
+  
   // Find top
   for (current_menu = MENUBAR_COUNT - 1; current_menu > MENUBAR_LAYERS; current_menu --)
   {

@@ -69,7 +69,7 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Layerbar / Hide menu    ",
 
   "Layers manager          ",
-  "Select transparent color",
+  "Get/Set transparent col.",
   "Merge layer             ",
   "Add layer               ",
   "Drop layer              ",
