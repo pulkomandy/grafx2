@@ -984,16 +984,16 @@ void Save_LBM(void)
 typedef struct
 {
     word  Signature;   // ='BM' = 0x4D42
-    dword Size_1;    // =Taille du fichier
-    word  Reserved_1;    // =0
-    word  Reserved_2;    // =0
-    dword Offset;    // Nb octets avant les données bitmap
+    dword Size_1;    // file size
+    word  Reserved_1; // 0
+    word  Reserved_2; // 0
+    dword Offset; // Offset of bitmap data start
 
-    dword Size_2;    // =40 
+    dword Size_2; // 40
     dword Width;
     dword Height;
-    word  Planes;       // =1
-    word  Nb_bits;     // =1,4,8 ou 24
+    word  Planes; // 1
+    word  Nb_bits; // 1,4,8 ou 24
     dword Compression;
     dword Size_3;
     dword XPM;
@@ -1170,8 +1170,10 @@ void Load_BMP(void)
               case 0 : // Pas de compression
                 line_size=Main_image_width;
                 x_pos=(32/header.Nb_bits); // x_pos sert de variable temporaire
+                // On arrondit line_size au premier multiple de x_pos supérieur
                 if (line_size % x_pos)
                   line_size=((line_size/x_pos)*x_pos)+x_pos;
+                // On convertit cette taille en octets
                 line_size=(line_size*header.Nb_bits)>>3;
 
                 buffer=(byte *)malloc(line_size);
@@ -1452,7 +1454,9 @@ void Save_BMP(void)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
-    if (Main_image_width & 7)
+
+    // Image width must be a multiple of 4 bytes
+    if (Main_image_width & 3)
       line_size=((Main_image_width >> 3)+1) << 3;
     else
       line_size=Main_image_width;
@@ -1465,8 +1469,8 @@ void Save_BMP(void)
     header.Size_1   =(line_size*Main_image_height)+1078;
     header.Reserved_1   =0;
     header.Reserved_2   =0;
-    header.Offset   =1078;
-    header.Size_2   =40;
+    header.Offset   =1078; // Size of header data (including palette)
+    header.Size_2   =40; // Size of header
     header.Width    =Main_image_width;
     header.Height    =Main_image_height;
     header.Planes      =1;
