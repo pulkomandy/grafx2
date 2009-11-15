@@ -186,11 +186,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((1+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((1+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -223,7 +223,7 @@ void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
-  word cell_height=Menu_bars[MENUBAR_TOOLS].Height*Menu_factor_Y/Menu_cells_Y;
+  word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
 
   if (id==Fore_color)
@@ -240,30 +240,43 @@ void Frame_menu_color(byte id)
       start_x=Palette_cell_X(id)-1*Menu_factor_X;
       start_y=Palette_cell_Y(id)-1*Menu_factor_Y;
 
+      // TODO: if color is black, we are unselecting a color. If another color next to it is selected, we
+      // will erase one edge of its selection square.
+      // We should check for that here.
+      // But we have to find which color is above and below (not so easy) and for the horizontal, check we
+      // are not at the edge of the palette. This makes a lot of cases to handle.
+      // Top
       Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
-      Block(start_x,start_y+cell_height,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
+      // Bottom
+      Block(start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
 
-      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,cell_height - Menu_factor_Y,color);
-      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,cell_height - Menu_factor_Y,color);
+      // Left
+      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
+      //Right
+      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
 
-      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,cell_height + Menu_factor_Y);
+      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,(cell_height+1)* Menu_factor_Y);
     }
     else
     {
+      // Not separated colors
       start_x=Palette_cell_X(id);
       start_y=Palette_cell_Y(id);
 
       if (color==MC_Black)
       {
+        // Color is not selected, no dotted lines
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              cell_height,id);
+              cell_height*Menu_factor_Y,id);
 
-        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height);
+        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
       }
       else
       {
         end_x=Menu_palette_cell_width-1;
-        end_y=cell_height/Menu_factor_Y-1;
+        end_y=cell_height-1;
+
+        // Draw dotted lines
 
         // Top line
         for (index=0; index<=end_x; index++)
@@ -286,7 +299,7 @@ void Frame_menu_color(byte id)
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_y)&1)?color:MC_Black);
 
-        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height);
+        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height*Menu_factor_Y);
       }
     }
   }
@@ -297,7 +310,7 @@ void Frame_menu_color(byte id)
 void Display_menu_palette(void)
 {
   int color;
-  byte cell_height=(Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y/Menu_cells_Y;
+  byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
   if (Menu_is_visible)
@@ -314,14 +327,14 @@ void Display_menu_palette(void)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
               (Menu_palette_cell_width-1)*Menu_factor_X,
-              cell_height-Menu_factor_Y,
+              (cell_height-1)*Menu_factor_Y,
               color);
     else
       for (color=First_color_in_palette;color<256&&color-First_color_in_palette<Menu_cells_X*Menu_cells_Y;color++)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
               Menu_palette_cell_width*Menu_factor_X,
-              cell_height,
+              cell_height * Menu_factor_Y,
               color);
 
     Frame_menu_color(Back_color);
