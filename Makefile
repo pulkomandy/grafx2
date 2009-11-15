@@ -59,7 +59,7 @@ else
   PLATFORM = $(shell uname)
 
   #AmigaOS4 specific
-  ifeq ($(PLATFORM),AmigaOS)
+  ifeq ($(PLATFORM),AmigaOS) # 1
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -72,7 +72,8 @@ else
     ZIP = lha
     ZIPOPT = a
 
-  else ifeq ($(PLATFORM),Darwin)
+  else
+  ifeq ($(PLATFORM),Darwin) # 2
   #Mac OS X specific
   DELCOMMAND = rm -rf
   MKDIR = mkdir -p
@@ -95,7 +96,8 @@ else
   X11LOPT = 
   MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
 
-  else ifeq ($(PLATFORM),AROS)
+  else
+  ifeq ($(PLATFORM),AROS) # 3
   #AROS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -110,7 +112,8 @@ else
     ZIP = lha
     ZIPOPT = a
 
-  else ifeq ($(PLATFORM),MorphOS) 
+  else
+  ifeq ($(PLATFORM),MorphOS) # 4
   #MorphOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -124,7 +127,8 @@ else
     ZIP = lha
     ZIPOPT = a
 
-  else ifeq ($(PLATFORM),AMIGA)
+  else
+  ifeq ($(PLATFORM),AMIGA) # 5
   # AmigaOS 3.x specific (building with gcc)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -138,7 +142,8 @@ else
     ZIP = lha
     ZIPOPT = a
 
-  else ifeq ($(PLATFORM),BeOS)
+  else
+  ifeq ($(PLATFORM),BeOS) # 6
   #BeOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -151,7 +156,8 @@ else
     OBJDIR = obj/beos
     ZIP = zip
 
-  else ifeq ($(PLATFORM),Haiku)
+  else
+  ifeq ($(PLATFORM),Haiku) # 7
   #Haiku specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -164,7 +170,8 @@ else
     OBJDIR = obj/haiku
     ZIP = zip
 
-  else ifeq ($(PLATFORM),skyos)
+  else
+  ifeq ($(PLATFORM),skyos) # 8
   #SkyOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
@@ -177,7 +184,8 @@ else
     OBJDIR = obj/skyos
     ZIP = zip
 
-  else ifeq ($(findstring Kickstart,$(shell version)),Kickstart)
+  else
+  ifeq ($(findstring Kickstart,$(shell version)),Kickstart) # 9
     # Classic amiga without gcc. Use vbcc.
     PLATFORM = amiga-vbcc
     DELCOMMAND = delete
@@ -236,6 +244,14 @@ else
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
+  endif
+  endif
+  endif
+  endif
+  endif
+  endif
+  endif
+  endif
   endif
 endif
 
@@ -320,7 +336,7 @@ release : version $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
-	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e s/\\(wip\\)\\\\./\\1/I > $(OBJDIR)/versiontag
+	echo `sed "s/.*=\"\\\(.*\\\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e s/\\\(wip\\\)\\\\./\\1/I > $(OBJDIR)/versiontag
 
 	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
 	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini scripts/test.lua $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
