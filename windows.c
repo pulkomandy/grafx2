@@ -421,7 +421,7 @@ int Pick_color_in_palette()
   int line;
   int column;
 
-  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_height-11)/Menu_cells_Y);
+  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
   column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
   if (Config.Palette_vertical)
   {
