@@ -2582,8 +2582,11 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   Gfx = gfx;
 
   // Change config  
-  free(Config.Skin_file);
-  Config.Skin_file = strdup(skinfile);
+  if(Config.Skin_file != skinfile) // Happens when loading the initial skin
+  {
+    free(Config.Skin_file);
+    Config.Skin_file = strdup(skinfile);
+  }
 
   Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
   Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];

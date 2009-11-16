@@ -24,7 +24,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
 #include "const.h"
+#include "errors.h"
 #include "global.h"
 #include "misc.h"
 #include "readini.h"
@@ -175,7 +177,7 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(buffer,1024,file)==0)
+    if (fgets(buffer,1024,file)==NULL)
     {
       free(upper_buffer);
       free(option_upper);
@@ -435,13 +437,13 @@ int Load_INI(T_Config * conf)
   strcpy(filename,Config_directory);
   strcat(filename,"gfx2.ini");
 
-  file=fopen(filename,"rb");
+  file=fopen(filename,"r");
   if (file==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
     strcpy(filename,Data_directory);
     strcat(filename,"gfx2def.ini");
-    file=fopen(filename,"rb");
+    file=fopen(filename,"r");
     if (file == 0)
     {
       free(filename);
@@ -818,7 +820,9 @@ int Load_INI(T_Config * conf)
 
   // Optional, name of skin file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
+  {
 	  conf->Skin_file = strdup(value_label);
+  }
   else
     conf->Skin_file = strdup("skin_modern.png");
 

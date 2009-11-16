@@ -306,12 +306,10 @@ void Analyze_command_line(int argc, char * argv[])
 			// Separate path from filename
         Extract_path(Main_file_directory, buffer);
         Extract_filename(Main_filename, buffer);
-			DEBUG(Main_filename, 0);
 			free(buffer);
 		} else {
 			Extract_path(Spare_file_directory, buffer);
 			Extract_filename(Spare_filename, buffer);
-			DEBUG(Spare_filename, 1);
         free(buffer);
 		}
       }
@@ -744,7 +742,7 @@ void Program_shutdown(void)
     free(Gfx);
     Gfx=NULL;
   }
-  
+
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)
   {
@@ -835,6 +833,7 @@ int main(int argc,char * argv[])
 			break;
     }
   }
+  
   Main_handler();
 
   Program_shutdown();
