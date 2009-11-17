@@ -208,7 +208,7 @@ int Button_under_mouse(void)
 }
 
 #define Pixel_in_skinmenu(x,y,color) Menu_bars[current_menu].Skin[(y - y_off)*Menu_bars[current_menu].Skin_width + x] = color
-#define Pixel_in_menu_and_skin(x,y,color) Pixel_in_skinmenu(x,y,color); Pixel_in_menu(x,y,color)
+#define Pixel_in_menu_and_skin(x,y,color) Pixel_in_skinmenu(x,y,color); if(visible) Pixel_in_menu(x,y,color)
 
 ///Draw the frame for a menu button
 void Draw_menu_button_frame(byte btn_number,byte pressed)
@@ -223,6 +223,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word x_pos;
   word y_pos;
   byte current_menu;
+  byte visible;
   word y_off = 0;
 
   // Find in which menu the button is
@@ -231,8 +232,18 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
     if(Menu_bars[current_menu].Visible)
     {
       y_off += Menu_bars[current_menu].Height;
-      if (Menu_bars[current_menu].Last_button_index >= btn_number)
+      // We found the right bar !
+      if (Menu_bars[current_menu].Last_button_index >= btn_number && (current_menu==0 || Menu_bars[current_menu -1].Last_button_index < btn_number))
+      {
+        visible = 1;
         break;
+      } else
+      // We missed the bar, it's hidden ! But we still need to draw in the skin...
+      if (Menu_bars[current_menu].Last_button_index > btn_number)
+      {
+        current_menu--; // We can't enter the if with current_menu=0, so that's ok.
+        break;
+      }
     }
   }
 
