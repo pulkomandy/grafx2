@@ -1238,11 +1238,7 @@ byte Button_Load_or_Save(byte load, byte image)
               temp=(!remove(Main_filename));
             else // Si c'est un repertoire
               // On efface le repertoire (si on peut)
-#if defined(__MORPHOS__)
-  #warning rmdir does not exist ! Please fix this !
-#else
               temp=(!rmdir(Main_filename));
-#endif
 
             if (temp) // temp indique si l'effacement s'est bien passé
             {
