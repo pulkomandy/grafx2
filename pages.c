@@ -73,6 +73,7 @@ T_Page * New_page(byte nb_layers)
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
     page->Nb_layers=nb_layers;
+    page->Transparent_color=0; // Default transparent color
     page->Next = page->Prev = NULL;
   }
   return page;

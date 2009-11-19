@@ -11,7 +11,7 @@ $(OBJDIR)/buttons_effects.o: buttons_effects.c buttons.h struct.h const.h engine
   global.h graph.h help.h input.h misc.h readline.h sdlscreen.h windows.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
   buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
-  input.h engine.h pages.h
+  input.h engine.h pages.h layers.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
   filesel.h global.h graph.h io.h misc.h readline.h sdlscreen.h windows.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
@@ -72,7 +72,7 @@ $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h graph.
   pxwide.h
 $(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
   pxwide2.h
-$(OBJDIR)/readini.o: readini.c const.h global.h struct.h misc.h readini.h
+$(OBJDIR)/readini.o: readini.c const.h errors.h global.h struct.h misc.h readini.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
   sdlscreen.h readline.h windows.h input.h
 $(OBJDIR)/realpath.o: realpath.c
