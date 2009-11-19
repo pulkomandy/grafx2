@@ -223,7 +223,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word x_pos;
   word y_pos;
   byte current_menu;
-  byte visible;
+  byte visible = 0;
   word y_off = 0;
 
   // Find in which menu the button is
@@ -328,7 +328,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
         Pixel_in_menu_and_skin(end_x,end_y-x_pos,color_bottom_right);
       }
   }
-  if (Menu_is_visible)
+  if (Menu_is_visible && visible)
   {
     Update_rect(
       start_x*Menu_factor_X,
