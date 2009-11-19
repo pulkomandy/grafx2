@@ -735,25 +735,29 @@ void Print_coordinates(void)
 
 void Print_filename(void)
 {
-  char display_name[12+1];
-  int name_size;
-  if (Menu_is_visible)
-  {
-    // Si le nom de fichier fait plus de 12 caractères, on n'affiche que les 12 derniers
-    strncpy(display_name,Main_filename,12);
-    name_size=strlen(Main_filename);
-    display_name[12]='\0';
-    if (name_size>12)
-    {
-      display_name[11]=ELLIPSIS_CHARACTER;
-      name_size = 12;
-    }
-    
-    Block(Screen_width-96*Menu_factor_X,
-          Menu_status_Y,Menu_factor_X*96,Menu_factor_Y<<3,MC_Light);
+  word max_size;
+  word string_size;
+  char display_string[256];
 
-    Print_general(Screen_width-name_size*8*Menu_factor_X,Menu_status_Y,display_name,MC_Black,MC_Light);
+  // Determine maximum size, in characters
+  max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
+  
+  string_size = strlen(Main_filename);
+  
+  // Partial copy of the name
+  strncpy(display_string, Main_filename, max_size);
+  display_string[max_size]='\0';
+
+  if (string_size > max_size)
+  {
+    string_size = max_size;
+    display_string[string_size-1]=ELLIPSIS_CHARACTER;
   }
+  // Erase whole area
+  Block(Screen_width-max_size*8*Menu_factor_X,
+    Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
+  // Print
+  Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
