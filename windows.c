@@ -956,25 +956,71 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 
 
 
-//---- Fenêtre demandant de confirmer une action et renvoyant la réponse -----
+///
+/// Window asking for confirmation before an action is performed.
+/// This function is able to display multi-line messages and
+/// center the lines, but the carriage returns have to be explicit.
+/// The function will clip the message in case of problem.
+/// @return 1 if user pressed OK, 0 if CANCEL
 byte Confirmation_box(char * message)
 {
   short clicked_button;
-  word  window_width;
+  word  window_width = 120;
+  word  nb_lines = 1;
+  const char *c = message;
+  short current_length=0;
+  short current_line;
 
-  window_width=(strlen(message)<<3)+20;
+  // Count lines, and measure max line length
+  for (c=message; *c != '\0'; c++)
+  {
+    if (*c == '\n')
+    {
+      current_length=0;
+      nb_lines++;
+    }
+    else
+    {
+      current_length++;
+      window_width=Max(window_width, (current_length<<3)+20);
+    }
+  }
+  // Safety
+  if (window_width>310)
+    window_width=310;
 
-  if (window_width<120)
-    window_width=120;
+  Open_window(window_width,52+(nb_lines<<3),"Confirmation");
 
-  Open_window(window_width,60,"Confirmation");
+  c=message;
+  for (current_line=0; current_line < nb_lines; current_line++)
+  {
+    char * next_eol;
+    char display_string[36+1];
+    
+    next_eol = strchr(c, '\n');
+    if (next_eol==NULL) // last line
+      current_length = strlen(c);
+    else
+      current_length = next_eol-c;
 
-  Print_in_window((window_width>>1)-(strlen(message)<<2),20,message,MC_Black,MC_Light);
+    // Safeguard
+    if (current_length>36)
+      current_length=36;
+    // Copy part of string in null-terminated buffer
+    strncpy(display_string, c, current_length);
+    display_string[current_length]='\0';
 
-  Window_set_normal_button((window_width/3)-20     ,37,40,14,"Yes",1,1,SDLK_y); // 1
-  Window_set_normal_button(((window_width<<1)/3)-20,37,40,14,"No" ,1,1,SDLK_n); // 2
+    Print_in_window((window_width>>1)-(current_length<<2), 20+(current_line<<3), display_string, MC_Black, MC_Light);
+    
+    c += current_length;
+    if (*c == '\n')
+      c++;
+  }
 
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*window_width,Menu_factor_Y*60);
+  Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,SDLK_y); // 1
+  Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,SDLK_n); // 2
+
+  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
 
   Display_cursor();
 

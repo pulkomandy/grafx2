@@ -757,7 +757,7 @@ void Save_image(byte image)
     if (!File_formats[Main_fileformat-1].Supports_layers
       && Main_backups->Pages->Nb_layers > 1)
     {
-      if (! Confirmation_box("This format will save a flattened copy."))
+      if (! Confirmation_box("This format doesn't support layers\nand will save a flattened copy of\nyour image. Proceed?"))
       {
         // File_error is already set to 1.
         return;
