@@ -195,6 +195,7 @@ void Button_Brush_Factory(void)
 	if (clicked_button == 2) // Run the script
 	{
 		lua_State* L = lua_open();
+    char* message;
 
 		lua_register(L,"putbrushpixel",L_PutBrushPixel);
 		lua_register(L,"getbrushpixel",L_GetBrushPixel);
@@ -211,13 +212,27 @@ void Button_Brush_Factory(void)
 		// For debug only
 		// luaL_openlibs(L);
 
+    luaopen_math(L);
+
 		strcat(scriptdir, Get_item_by_index(&Scripts_list,
 					scriptlist->List_start + scriptlist->Cursor_position)
 						-> Full_name);
 		if (luaL_loadfile(L,scriptdir) != 0)
-			Verbose_error_message(lua_tostring(L, 1));
+    {
+      message = lua_tostring(L, 1);
+      if(message)
+			  Verbose_error_message(message);
+      else
+        Warning_message("Unknown error loading script!");
+    }
 		else if (lua_pcall(L, 0, 0, 0) != 0)
-			Verbose_error_message(lua_tostring(L, 1));
+    {
+      message = lua_tostring(L, 1);
+      if(message)
+			  Verbose_error_message(message);
+      else
+        Warning_message("Unknown error loading script!");
+    }
 
 		lua_close(L);
 	}
