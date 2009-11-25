@@ -2209,7 +2209,7 @@ void Save_GIF(void)
             Main_current_layer++)
           {
             // Write a Graphic Control Extension
-            char * GCE_block = "\x21\xF9\x04\x05\x05\x00\x00\x00";
+            char GCE_block[] = "\x21\xF9\x04\x05\x05\x00\x00\x00";
             //if (Main_current_layer > 0)
             //  GCE_block[3] = '\x05';
             if (Main_current_layer == Main_backups->Pages->Nb_layers -1)
