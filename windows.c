@@ -56,14 +56,21 @@ word Palette_cells_Y()
   return Menu_cells_Y;
 }
 
-// Affichage d'un pixel dans le menu (le menu doit être visible)
-void Pixel_in_toolbar(word x,word y,byte color)
+// Affichage d'un pixel dans le menu (si visible)
+void Pixel_in_menu(word bar, word x, word y, byte color)
 {
-  Block(x*Menu_factor_X,(y*Menu_factor_Y)+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
+  if (Menu_is_visible && Menu_bars[bar].Visible)
+    Block(x*Menu_factor_X,(y+Menu_bars[bar].Top)*Menu_factor_Y+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
+}
+
+// Affichage d'un pixel dans le menu et met a jour la bitmap de skin
+void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
+{
+  Pixel_in_menu(bar, x, y, color);
+  Menu_bars[bar].Skin[y*Menu_bars[bar].Skin_width + x] = color;  
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
-
 void Pixel_in_window(word x,word y,byte color)
 {
     Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
@@ -155,7 +162,7 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 
 void Display_foreback(void)
 {
-  if (Menu_is_visible)
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
     Block((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7,Back_color);
     Block((MENU_WIDTH-13)*Menu_factor_X,Menu_Y+(Menu_factor_Y<<1),Menu_factor_X<<3,Menu_factor_Y*5,Fore_color);
@@ -225,6 +232,9 @@ void Frame_menu_color(byte id)
   word index;
   word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
+  
+  if (! Menu_bars[MENUBAR_TOOLS].Visible)
+    return;
 
   if (id==Fore_color)
     color = MC_White;
@@ -313,7 +323,7 @@ void Display_menu_palette(void)
   byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
-  if (Menu_is_visible)
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
     Block(
       Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
@@ -437,22 +447,20 @@ int Pick_color_in_palette()
 }
 
 /// Draws a solid textured area, to the right of a toolbar.
-void Draw_bar_remainder(word current_menu, word x_off, word y_off)
+void Draw_bar_remainder(word current_menu, word x_off)
 {
   word y_pos;
   word x_pos;
 
   for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
     for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
-      Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
 }
 
             
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
-  word current_menu;
-  word y_off=0;
   word x_off=0;
   word button_width = LAYER_SPRITE_WIDTH;
   word button_number = Main_backups->Pages->Nb_layers;
@@ -463,14 +471,6 @@ void Display_layerbar(void)
   if (! Menu_bars[MENUBAR_LAYERS].Visible)
     return;
   
-  // Find top
-  for (current_menu = MENUBAR_COUNT - 1; current_menu > MENUBAR_LAYERS; current_menu --)
-  {
-    if(Menu_bars[current_menu].Visible)
-    {
-      y_off += Menu_bars[current_menu].Height;
-    }
-  }
   // Available space in pixels
   horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
   
@@ -518,7 +518,7 @@ void Display_layerbar(void)
         
         for (;i>0; i--)
         {
-          Pixel_in_menu(x_pos + x_off, y_pos + y_off, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+          Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
           x_pos++;
         }
       }
@@ -530,7 +530,7 @@ void Display_layerbar(void)
   }
   // Texture any remaining space to the right.
   // This overwrites any junk like deleted buttons.
-  Draw_bar_remainder(MENUBAR_LAYERS, x_off, y_off);
+  Draw_bar_remainder(MENUBAR_LAYERS, x_off);
   
   // Update the active area of the layers pseudo-button
   Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
@@ -541,7 +541,7 @@ void Display_layerbar(void)
   // A screen refresh required by some callers
   Update_rect(
     Menu_bars[MENUBAR_LAYERS].Skin_width, 
-    Menu_Y+y_off*Menu_factor_Y, 
+    Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
     horiz_space*Menu_factor_X, 
     Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
 }
@@ -551,7 +551,7 @@ void Display_layerbar(void)
 void Display_menu(void)
 {
   word x_pos;
-  word y_pos, y_off = 0;
+  word y_pos;
   int8_t current_menu;
   char str[4];
 
@@ -566,7 +566,7 @@ void Display_menu(void)
         // Skinned area
         for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
-            Pixel_in_menu(x_pos, y_pos + y_off, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
         if (current_menu == MENUBAR_LAYERS)
         {
@@ -577,11 +577,10 @@ void Display_menu(void)
         {
           // If some area is remaining to the right, texture it with a copy of
           // the last two columns
-          Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width, y_off);
+          Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width);
         }
         
         // Next bar
-        y_off += Menu_bars[current_menu].Height;
       }
     }
 
@@ -1193,11 +1192,11 @@ void Display_sprite_in_menu(int btn_number,int sprite_number)
     for (x_pos=0;x_pos<MENU_SPRITE_WIDTH;x_pos++)
     {
       color=Gfx->Menu_sprite[sprite_number][y_pos][x_pos];
-      Pixel_in_menu(menu_x_pos+x_pos,menu_y_pos+y_pos,color);
-      Gfx->Menu_block[menu_y_pos+y_pos][menu_x_pos+x_pos]=color;
+      Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos+x_pos, menu_y_pos+y_pos, color);
     }
+if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
-    (Buttons_Pool[btn_number].Y_offset+1)*Menu_factor_Y+Menu_Y,
+    (Buttons_Pool[btn_number].Y_offset+1+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
     MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
 }
 
@@ -1210,7 +1209,7 @@ void Display_paintbrush_in_menu(void)
   short menu_x_pos,menu_y_pos;
   short menu_start_x;
   byte color;
-
+    
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_COLOR_BRUSH    : // Brush en couleur
@@ -1219,8 +1218,7 @@ void Display_paintbrush_in_menu(void)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
           color=Gfx->Menu_sprite[4][y_pos][x_pos];
-          Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
         }
       break;
     default : // Pinceau
@@ -1228,8 +1226,7 @@ void Display_paintbrush_in_menu(void)
       for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
-          Pixel_in_menu(menu_x_pos,menu_y_pos,MC_Light);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=MC_Light;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Light);
         }
       // On affiche le nouveau
       menu_start_x=8-Paintbrush_offset_X;
@@ -1254,11 +1251,11 @@ void Display_paintbrush_in_menu(void)
         for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
         {
           color=(Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])?MC_Black:MC_Light;
-          Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
         }
   }
-  Update_rect(0,Menu_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
+    Update_rect(0,Menu_Y + Menu_bars[MENUBAR_TOOLS].Top*Menu_factor_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --

@@ -333,23 +333,12 @@ void Button_Select_backcolor(void)
   }
 }
 
-
-//---------------------- Cacher ou réafficher le menu ------------------------
-void Pixel_in_hidden_toolbar(__attribute__((unused)) word x,__attribute__((unused)) word y,__attribute__((unused)) byte color)
-{
-  // C'est fait exprès que ce soit vide...
-  // C'est parce que y'a rien du tout à afficher vu que la barre d'outil est
-  // cachée... C'est simple non?
-}
-
-
 void Button_Hide_menu(void)
 {
   Hide_cursor();
   if (Menu_is_visible)
   {
     Menu_is_visible=0;
-    Pixel_in_menu=Pixel_in_hidden_toolbar;
     Menu_Y=Screen_height;
 
     if (Main_magnifier_mode)
@@ -393,7 +382,6 @@ void Button_Hide_menu(void)
   {
     byte current_menu;
     Menu_is_visible=1;
-    Pixel_in_menu=Pixel_in_toolbar;
     Menu_Y=Screen_height;
     for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
       if (Menu_bars[current_menu].Visible)
@@ -412,15 +400,28 @@ void Button_Hide_menu(void)
   Display_cursor();
 }
 
-void Button_Show_layerbar(void)
+
+void Set_bar_visibility(word bar, byte visible)
 {
-  Hide_cursor();
-  if (Menu_bars[MENUBAR_LAYERS].Visible)
+  int i;
+  int offset;
+  
+  if (!visible && Menu_bars[bar].Visible)
   {
     // Hide it
-    Menu_bars[MENUBAR_LAYERS].Visible=0;
-    Menu_Y += Menu_bars[MENUBAR_LAYERS].Height * Menu_factor_Y;
-    Menu_height -= Menu_bars[MENUBAR_LAYERS].Height;
+    Menu_bars[bar].Visible=0;
+
+    // Recompute all offsets    
+    offset=0;
+    for (i = MENUBAR_COUNT-1; i >=0; i--)
+    {
+      Menu_bars[i].Top = offset;
+      if(Menu_bars[i].Visible)
+        offset += Menu_bars[i].Height;
+    }
+    // Update global menu coordinates
+    Menu_Y += Menu_bars[bar].Height * Menu_factor_Y;
+    Menu_height -= Menu_bars[bar].Height;
 
     if (Main_magnifier_mode)
     {
@@ -460,12 +461,21 @@ void Button_Show_layerbar(void)
     Display_menu();
     Display_all_screen();
   }
-  else
+  else if (visible && !Menu_bars[bar].Visible)
   {
     // Show it
-    Menu_bars[MENUBAR_LAYERS].Visible = 1;
-    Menu_Y -= Menu_bars[MENUBAR_LAYERS].Height * Menu_factor_Y;
-    Menu_height += Menu_bars[MENUBAR_LAYERS].Height;
+    Menu_bars[bar].Visible = 1;
+    // Recompute all offsets    
+    offset=0;
+    for (i = MENUBAR_COUNT-1; i >=0; i--)
+    {
+      Menu_bars[i].Top = offset;
+      if(Menu_bars[i].Visible)
+        offset += Menu_bars[i].Height;
+    }
+    // Update global menu coordinates
+    Menu_Y -= Menu_bars[bar].Height * Menu_factor_Y;
+    Menu_height += Menu_bars[bar].Height;
 
     Compute_magnifier_data();
     if (Main_magnifier_mode)
@@ -476,10 +486,27 @@ void Button_Show_layerbar(void)
     if (Main_magnifier_mode)
       Display_all_screen();
   }
+}
+
+void Button_Toggle_layerbar(void)
+{
+  Hide_cursor();
+  
+  Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+  
   Unselect_button(BUTTON_HIDE);
   Display_cursor();
 }
 
+void Button_Toggle_toolbox(void)
+{
+  Hide_cursor();
+  
+  Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
+  
+  Unselect_button(BUTTON_HIDE);
+  Display_cursor();
+}
 
 //--------------------------- Quitter le programme ---------------------------
 byte Button_Quit_local_function(void)

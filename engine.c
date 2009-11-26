@@ -155,7 +155,6 @@ int Button_under_mouse(void)
   short x_pos;
   short y_pos;
   byte current_menu;
-  word current_offset = Screen_height;
   byte first_button;
 
   x_pos = Mouse_X / Menu_factor_X;
@@ -165,12 +164,15 @@ int Button_under_mouse(void)
   {
     if (Menu_bars[current_menu].Visible)
     {
-      current_offset -= Menu_bars[current_menu].Height * Menu_factor_Y;
-      if (Mouse_Y >= current_offset)
+      if (Mouse_Y >= Menu_Y+Menu_factor_Y*(Menu_bars[current_menu].Top) && 
+      Mouse_Y < Menu_Y+Menu_factor_Y*(Menu_bars[current_menu].Top + Menu_bars[current_menu].Height))
         break;
     }
   }
-  y_pos=(Mouse_Y - current_offset)/Menu_factor_Y;
+  if (current_menu==MENUBAR_COUNT)
+    return -1;
+    
+  y_pos=(Mouse_Y - Menu_Y)/Menu_factor_Y - Menu_bars[current_menu].Top;
 
   if (current_menu == 0) first_button = 0;
   else first_button = Menu_bars[current_menu - 1].Last_button_index + 1;
@@ -207,8 +209,6 @@ int Button_under_mouse(void)
   return -1;
 }
 
-#define Pixel_in_skinmenu(x,y,color) Menu_bars[current_menu].Skin[(y - y_off)*Menu_bars[current_menu].Skin_width + x] = color
-#define Pixel_in_menu_and_skin(x,y,color) Pixel_in_skinmenu(x,y,color); if(visible) Pixel_in_menu(x,y,color)
 
 ///Draw the frame for a menu button
 void Draw_menu_button_frame(byte btn_number,byte pressed)
@@ -223,34 +223,20 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   word x_pos;
   word y_pos;
   byte current_menu;
-  byte visible = 0;
-  word y_off = 0;
 
   // Find in which menu the button is
   for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
   {
-    if(Menu_bars[current_menu].Visible)
+    // We found the right bar !
+    if (Menu_bars[current_menu].Last_button_index >= btn_number && 
+    (current_menu==0 || Menu_bars[current_menu -1].Last_button_index < btn_number))
     {
-      y_off += Menu_bars[current_menu].Height;
-      // We found the right bar !
-      if (Menu_bars[current_menu].Last_button_index >= btn_number && (current_menu==0 || Menu_bars[current_menu -1].Last_button_index < btn_number))
-      {
-        visible = 1;
-        break;
-      } else
-      // We missed the bar, it's hidden ! But we still need to draw in the skin...
-      if (Menu_bars[current_menu].Last_button_index > btn_number)
-      {
-        current_menu--; // We can't enter the if with current_menu=0, so that's ok.
-        break;
-      }
+      break;
     }
   }
 
-  y_off = Menu_height - y_off;
-
   start_x=Buttons_Pool[btn_number].X_offset;
-  start_y=Buttons_Pool[btn_number].Y_offset + y_off;
+  start_y=Buttons_Pool[btn_number].Y_offset;
   end_x  =start_x+Buttons_Pool[btn_number].Width;
   end_y  =start_y+Buttons_Pool[btn_number].Height;
 
@@ -273,66 +259,66 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       break;
     case BUTTON_SHAPE_RECTANGLE  :
       // On colorie le point haut droit
-      Pixel_in_menu_and_skin(end_x,start_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_diagonal);
       // On colorie le point bas gauche
-      Pixel_in_menu_and_skin(start_x,end_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
       // On colorie la partie haute
       for (x_pos=start_x;x_pos<=end_x-1;x_pos++)
       {
-        Pixel_in_menu_and_skin(x_pos,start_y,color_top_left);
+        Pixel_in_menu_and_skin(current_menu, x_pos, start_y, color_top_left);
       }
       for (y_pos=start_y+1;y_pos<=end_y-1;y_pos++)
       {
         // On colorie la partie gauche
-        Pixel_in_menu_and_skin(start_x,y_pos,color_top_left);
+        Pixel_in_menu_and_skin(current_menu, start_x, y_pos, color_top_left);
         // On colorie la partie droite
-        Pixel_in_menu_and_skin(end_x,y_pos,color_bottom_right);
+        Pixel_in_menu_and_skin(current_menu, end_x, y_pos, color_bottom_right);
       }
       // On colorie la partie basse
       for (x_pos=start_x+1;x_pos<=end_x;x_pos++)
       {
-        Pixel_in_menu_and_skin(x_pos,end_y,color_bottom_right);
+        Pixel_in_menu_and_skin(current_menu, x_pos, end_y, color_bottom_right);
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
       // On colorie le point haut droit
-      Pixel_in_menu_and_skin(end_x,start_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_diagonal);
       // On colorie le point bas gauche
-      Pixel_in_menu_and_skin(start_x,end_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
       // On colorie le coin haut gauche
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
-        Pixel_in_menu_and_skin(start_x+x_pos,start_y,color_top_left);
-        Pixel_in_menu_and_skin(start_x,start_y+x_pos,color_top_left);
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y, color_top_left);
+        Pixel_in_menu_and_skin(current_menu, start_x, start_y+x_pos, color_top_left);
       }
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
-        Pixel_in_menu_and_skin(start_x+x_pos,end_y-x_pos,color_bottom_right);
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_bottom_right);
       }
       break;
     case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
       // On colorie le point haut droit
-      Pixel_in_menu_and_skin(end_x,start_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_diagonal);
       // On colorie le point bas gauche
-      Pixel_in_menu_and_skin(start_x,end_y,color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
       // On colorie la diagonale
       for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
-        Pixel_in_menu_and_skin(start_x+x_pos,end_y-x_pos,color_top_left);
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_top_left);
       }
       // On colorie le coin bas droite
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
-        Pixel_in_menu_and_skin(end_x-x_pos,end_y,color_bottom_right);
-        Pixel_in_menu_and_skin(end_x,end_y-x_pos,color_bottom_right);
+        Pixel_in_menu_and_skin(current_menu, end_x-x_pos, end_y, color_bottom_right);
+        Pixel_in_menu_and_skin(current_menu, end_x, end_y-x_pos, color_bottom_right);
       }
   }
-  if (Menu_is_visible && visible)
+  if (Menu_is_visible && Menu_bars[current_menu].Visible)
   {
     Update_rect(
       start_x*Menu_factor_X,
-      start_y*Menu_factor_Y + Menu_Y,
+      (start_y+Menu_bars[current_menu].Top)*Menu_factor_Y + Menu_Y,
       (end_x+1-start_x)*Menu_factor_X,
       (end_y+1-start_y)*Menu_factor_Y);
   }

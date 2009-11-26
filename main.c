@@ -465,7 +465,6 @@ int Init_program(int argc,char * argv[])
   Quit_is_required=0;
   Quitting=0;
   // Données sur l'état du menu:
-  Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
   Menu_height=MENU_HEIGHT;
   // Données sur les couleurs et la palette:

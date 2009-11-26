@@ -629,8 +629,15 @@ void Button_Quit(void);
 */
 void Button_Hide_menu(void);
 
-/// Shows or hide the layerbar
-void Button_Show_layerbar(void);
+/*!
+    Shows or hide the layerbar
+*/
+void Button_Toggle_layerbar(void);
+
+/*!
+    Shows or hide the main toolbox
+*/
+void Button_Toggle_toolbox(void);
 
 
 /*!

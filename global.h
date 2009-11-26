@@ -165,8 +165,6 @@ GFX2_GLOBAL short Paintbrush_offset_Y;
 
 /// On the screen, draw a point.
 GFX2_GLOBAL Func_pixel Pixel;
-/// On screen, draw a point in the menu (do nothing is menu is hidden).
-GFX2_GLOBAL Func_pixel Pixel_in_menu;
 /// Test a pixel color from screen.
 GFX2_GLOBAL Func_read Read_pixel;
 /// Redraw all screen, without overwriting the menu.
@@ -479,9 +477,9 @@ GFX2_GLOBAL word  Menu_palette_cell_width;
 GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
 #ifdef GLOBAL_VARIABLES
   = 
-{{MENU_WIDTH, 9, 1, NULL, 20, BUTTON_HIDE }, // Status
- {MENU_WIDTH, 10, 0, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
- {MENU_WIDTH, 35, 1, NULL, 254, BUTTON_CHOOSE_COL }} // Main
+{{MENU_WIDTH,  9, 1, 35, NULL,  20, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 0, 35, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
+ {MENU_WIDTH, 35, 1,  0, NULL, 254, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;
 

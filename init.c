@@ -1321,7 +1321,7 @@ void Init_buttons(void)
                      0,0,
                      16,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Show_layerbar, Button_Hide_menu,
+                     Button_Toggle_layerbar, Button_Toggle_toolbox,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 }

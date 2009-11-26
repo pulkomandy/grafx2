@@ -469,6 +469,7 @@ typedef struct {
   word Width;
   word Height;
   byte Visible;
+  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
   byte* Skin;
   word Skin_width;
   byte Last_button_index;

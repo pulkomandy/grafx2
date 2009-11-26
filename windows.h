@@ -49,7 +49,8 @@ void Compute_magnifier_data(void);
 void Compute_limits(void);
 void Compute_paintbrush_coordinates(void);
 
-void Pixel_in_toolbar(word x,word y,byte color);
+void Pixel_in_menu(word bar, word x, word y, byte color);
+void Pixel_in_menu_and_skin(word bar, word x, word y, byte color);
 void Pixel_in_window(word x,word y,byte color);
 void Set_fore_color(byte color);
 void Set_back_color(byte color);
