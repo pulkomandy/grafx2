@@ -750,16 +750,18 @@ void Load_CEL(void)
   short y_pos;
   byte  last_byte=0;
   long  file_size;
+  const long int header_size = (long int)(sizeof(header1.Width)+sizeof(header1.Height));
 
   File_error=0;
   Get_full_filename(filename,0);
   if ((file=fopen(filename, "rb")))
   {
-    if (Read_bytes(file,&header1,sizeof(T_CEL_Header1)))
+    if (Read_word_le(file,&(header1.Width))
+    &&  Read_word_le(file,&(header1.Height)))
     {
       file_size=File_length_file(file);
-      if ( (file_size>(long int)sizeof(T_CEL_Header1))
-        && ( (((header1.Width+1)>>1)*header1.Height)==(file_size-(long int)sizeof(T_CEL_Header1)) ) )
+      if ( (file_size>header_size)
+        && ( (((header1.Width+1)>>1)*header1.Height)==(file_size-header_size) ) )
       {
         // Chargement d'un fichier CEL sans signature (vieux fichiers)
         Main_image_width=header1.Width;
@@ -788,7 +790,16 @@ void Load_CEL(void)
         // On réessaye avec le nouveau format
 
         fseek(file,0,SEEK_SET);
-        if (Read_bytes(file,&header2,sizeof(T_CEL_Header2)))
+        if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+        && Read_byte(file,&(header2.Kind))
+        && Read_byte(file,&(header2.Nb_bits))
+        && Read_word_le(file,&(header2.Filler1))
+        && Read_word_le(file,&(header2.Width))
+        && Read_word_le(file,&(header2.Height))
+        && Read_word_le(file,&(header2.X_offset))
+        && Read_word_le(file,&(header2.Y_offset))
+        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        )
         {
           // Chargement d'un fichier CEL avec signature (nouveaux fichiers)
 
@@ -887,7 +898,9 @@ void Save_CEL(void)
       header1.Width =Main_image_width;
       header1.Height=Main_image_height;
 
-      if (Write_bytes(file,&header1,sizeof(T_CEL_Header1)))
+      if (Write_word_le(file,header1.Width)
+      && Write_word_le(file,header1.Height)
+      )
       {
         // Sauvegarde de l'image
         Init_write_buffer();
@@ -944,7 +957,16 @@ void Save_CEL(void)
       for (x_pos=0;x_pos<16;x_pos++)  // Initialisation du filler 2 (?)
         header2.Filler2[x_pos]=0;
 
-      if (Write_bytes(file,&header2,sizeof(T_CEL_Header2)))
+      if (Write_bytes(file,header2.Signature,sizeof(header2.Signature))
+      && Write_byte(file,header2.Kind)
+      && Write_byte(file,header2.Nb_bits)
+      && Write_word_le(file,header2.Filler1)
+      && Write_word_le(file,header2.Width)
+      && Write_word_le(file,header2.Height)
+      && Write_word_le(file,header2.X_offset)
+      && Write_word_le(file,header2.Y_offset)
+      && Write_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+      )
       {
         // Sauvegarde de l'image
         Init_write_buffer();
@@ -1007,7 +1029,16 @@ void Test_KCF(void)
     }
     else
     {
-      if (Read_bytes(file,&header2,sizeof(T_CEL_Header2)))
+      if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+        && Read_byte(file,&(header2.Kind))
+        && Read_byte(file,&(header2.Nb_bits))
+        && Read_word_le(file,&(header2.Filler1))
+        && Read_word_le(file,&(header2.Width))
+        && Read_word_le(file,&(header2.Height))
+        && Read_word_le(file,&(header2.X_offset))
+        && Read_word_le(file,&(header2.Y_offset))
+        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        )
       {
         if (memcmp(header2.Signature,"KiSS",4)==0)
         {
@@ -1085,7 +1116,16 @@ void Load_KCF(void)
     {
       // Fichier KCF au nouveau format
 
-      if (Read_bytes(file,&header2,sizeof(T_CEL_Header2)))
+      if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+        && Read_byte(file,&(header2.Kind))
+        && Read_byte(file,&(header2.Nb_bits))
+        && Read_word_le(file,&(header2.Filler1))
+        && Read_word_le(file,&(header2.Width))
+        && Read_word_le(file,&(header2.Height))
+        && Read_word_le(file,&(header2.X_offset))
+        && Read_word_le(file,&(header2.Y_offset))
+        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        )
       {
         // Init_preview(?); // Pas possible... pas d'image...
 
@@ -1197,7 +1237,16 @@ void Save_KCF(void)
       for (index=0;index<16;index++) // Initialisation du filler 2 (?)
         header2.Filler2[index]=0;
 
-      if (! Write_bytes(file,&header2,sizeof(T_CEL_Header2)))
+      if (!Write_bytes(file,header2.Signature,sizeof(header2.Signature))
+      || !Write_byte(file,header2.Kind)
+      || !Write_byte(file,header2.Nb_bits)
+      || !Write_word_le(file,header2.Filler1)
+      || !Write_word_le(file,header2.Width)
+      || !Write_word_le(file,header2.Height)
+      || !Write_word_le(file,header2.X_offset)
+      || !Write_word_le(file,header2.Y_offset)
+      || !Write_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+      )
         File_error=1;
 
       for (index=0;(index<256) && (!File_error);index++)
@@ -2301,7 +2350,7 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
 
 int Save_C64_hires(char *filename, byte saveWhat, byte loadAddr)
 {
-    int cx,cy,x,y,c1,c2,i,pixel,bits,pos=0;
+    int cx,cy,x,y,c1,c2=0,i,pixel,bits,pos=0;
     word numcolors;
     dword cusage[256];
     byte colors[1000],bitmap[8000];

@@ -57,7 +57,12 @@ void Test_IMG(void)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,&IMG_header,sizeof(T_IMG_Header)))
+    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    && Read_word_le(file,&(IMG_header.Width))
+    && Read_word_le(file,&(IMG_header.Height))
+    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
+    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    )
     {
       if ( (!memcmp(IMG_header.Filler1,signature,6))
         && IMG_header.Width && IMG_header.Height)
@@ -87,13 +92,13 @@ void Load_IMG(void)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,&IMG_header,sizeof(T_IMG_Header)))
+    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    && Read_word_le(file,&(IMG_header.Width))
+    && Read_word_le(file,&(IMG_header.Height))
+    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
+    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    )
     {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    IMG_header.Width = SDL_Swap16(IMG_header.Width);
-    IMG_header.Height = SDL_Swap16(IMG_header.Height);
-#endif
 
       buffer=(byte *)malloc(IMG_header.Width);
 
@@ -160,12 +165,13 @@ void Save_IMG(void)
 
     memcpy(IMG_header.Palette,Main_palette,sizeof(T_Palette));
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    IMG_header.Width = SDL_Swap16(IMG_header.Width);
-    IMG_header.Height = SDL_Swap16(IMG_header.Height);
-#endif
+    if (Write_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    && Write_word_le(file,IMG_header.Width)
+    && Write_word_le(file,IMG_header.Height)
+    && Write_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
+    && Write_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    )
 
-    if (Write_bytes(file,&IMG_header,sizeof(T_IMG_Header)))
     {
       Init_write_buffer();
 
@@ -980,10 +986,9 @@ void Save_LBM(void)
 
 
 //////////////////////////////////// BMP ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
-    word  Signature;   // ='BM' = 0x4D42
+    byte  Signature[2];   // ='BM' = 0x4D42
     dword Size_1;    // file size
     word  Reserved_1; // 0
     word  Reserved_2; // 0
@@ -1001,7 +1006,6 @@ typedef struct
     dword Nb_Clr;
     dword Clr_Imprt;
 } T_BMP_Header;
-#pragma pack()
 
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(void)
@@ -1034,11 +1038,8 @@ void Test_BMP(void)
         )
      {
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-      header.Signature = SDL_Swap16(header.Signature);
-#endif
-
-      if ( (header.Signature==0x4D42) && (header.Size_2==40)
+      if ( header.Signature[0]=='B' && header.Signature[1]=='M'
+        && header.Size_2==40
         && header.Width && header.Height )
         File_error=0;
      }
@@ -1111,7 +1112,7 @@ void Load_BMP(void)
   {
     file_size=File_length_file(file);
 
-    if (Read_word_le(file,&(header.Signature))
+    if (Read_bytes(file,header.Signature,2)
      && Read_dword_le(file,&(header.Size_1))
      && Read_word_le(file,&(header.Reserved_1))
      && Read_word_le(file,&(header.Reserved_2))
@@ -1461,11 +1462,8 @@ void Save_BMP(void)
     else
       line_size=Main_image_width;
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    header.Signature  = 0x424D;
-#else
-    header.Signature  = 0x4D42;
-#endif
+    header.Signature[0]  = 'B';
+    header.Signature[1]  = 'M';
     header.Size_1   =(line_size*Main_image_height)+1078;
     header.Reserved_1   =0;
     header.Reserved_2   =0;
@@ -1482,18 +1480,22 @@ void Save_BMP(void)
     header.Nb_Clr     =0;
     header.Clr_Imprt  =0;
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    header.Size_1   = SDL_Swap32( header.Size_1 );
-    header.Offset   = SDL_Swap32( header.Offset );
-    header.Size_2   = SDL_Swap32( header.Size_2 );
-    header.Width    = SDL_Swap32( header.Width );
-    header.Height    = SDL_Swap32( header.Height );
-    header.Planes      = SDL_Swap16( header.Planes );
-    header.Nb_bits    = SDL_Swap16( header.Nb_bits );
-    // If you ever set any more fields to non-zero, please swap here!
-#endif
-
-    if (Write_bytes(file,&header,sizeof(T_BMP_Header)))
+    if (Write_bytes(file,header.Signature,2)
+     && Write_dword_le(file,header.Size_1)
+     && Write_word_le(file,header.Reserved_1)
+     && Write_word_le(file,header.Reserved_2)
+     && Write_dword_le(file,header.Offset)
+     && Write_dword_le(file,header.Size_2)
+     && Write_dword_le(file,header.Width)
+     && Write_dword_le(file,header.Height)
+     && Write_word_le(file,header.Planes)
+     && Write_word_le(file,header.Nb_bits)
+     && Write_dword_le(file,header.Compression)
+     && Write_dword_le(file,header.Size_3)
+     && Write_dword_le(file,header.XPM)
+     && Write_dword_le(file,header.YPM)
+     && Write_dword_le(file,header.Nb_Clr)
+     && Write_dword_le(file,header.Clr_Imprt))
     {
       //   Chez Bill, ils ont dit: "On va mettre les couleur dans l'ordre
       // inverse, et pour faire chier, on va les mettre sur une échelle de
@@ -2562,11 +2564,7 @@ void Load_PCX(void)
 
   if ((file=fopen(filename, "rb")))
   {
-    file_size=File_length_file(file);
-    /*
-    if (Read_bytes(file,&PCX_header,sizeof(T_PCX_Header)))
-    {*/
-    
+    file_size=File_length_file(file);   
     if (Read_byte(file,&(PCX_header.Manufacturer)) &&
         Read_byte(file,&(PCX_header.Version)) &&
         Read_byte(file,&(PCX_header.Compression)) &&
@@ -2976,7 +2974,6 @@ void Save_PCX(void)
 
 
 //////////////////////////////////// SCx ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   byte Filler1[4];
@@ -2985,7 +2982,6 @@ typedef struct
   byte Filler2;
   byte Planes;
 } T_SCx_Header;
-#pragma pack()
 
 // -- Tester si un fichier est au format SCx --------------------------------
 void Test_SCx(void)
@@ -3004,7 +3000,12 @@ void Test_SCx(void)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if ((Read_bytes(file,&SCx_header,sizeof(T_SCx_Header))))
+    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    && Read_word_le(file, &(SCx_header.Width))
+    && Read_word_le(file, &(SCx_header.Height))
+    && Read_byte(file, &(SCx_header.Filler2))
+    && Read_byte(file, &(SCx_header.Planes))
+    )
     {
       if ( (!memcmp(SCx_header.Filler1,"RIX",3))
         && SCx_header.Width && SCx_header.Height)
@@ -3035,7 +3036,12 @@ void Load_SCx(void)
   {
     file_size=File_length_file(file);
 
-    if ((Read_bytes(file,&SCx_header,sizeof(T_SCx_Header))))
+    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    && Read_word_le(file, &(SCx_header.Width))
+    && Read_word_le(file, &(SCx_header.Height))
+    && Read_byte(file, &(SCx_header.Filler2))
+    && Read_byte(file, &(SCx_header.Planes))
+    )
     {
       Init_preview(SCx_header.Width,SCx_header.Height,file_size,FORMAT_SCx,PIXEL_SIMPLE);
       if (File_error==0)
@@ -3127,8 +3133,13 @@ void Save_SCx(void)
     SCx_header.Filler2=0xAF;
     SCx_header.Planes=0x00;
 
-    if (Write_bytes(file,&SCx_header,sizeof(T_SCx_Header)) &&
-      Write_bytes(file,&palette_64,sizeof(T_Palette)))
+    if (Write_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    && Write_word_le(file, SCx_header.Width)
+    && Write_word_le(file, SCx_header.Height)
+    && Write_byte(file, SCx_header.Filler2)
+    && Write_byte(file, SCx_header.Planes)
+    && Write_bytes(file,&palette_64,sizeof(T_Palette))
+    )
     {
       Init_write_buffer();
 
