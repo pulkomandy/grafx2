@@ -2116,6 +2116,8 @@ void Button_Palette(void)
               Block(Window_pos_X+(Menu_factor_X*261),Window_pos_Y+(Menu_factor_Y*58),Menu_factor_X*32,Menu_factor_Y*7,MC_Light);
               Num2str(Fore_color,str,3);
               Print_in_window(237,58,str,MC_Black,MC_Light);
+              Num2str(color_usage[Fore_color], str, 6);
+              Print_in_window(222, 33, str, MC_Black, MC_Light);
 
               // Affichage des jauges
               Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
