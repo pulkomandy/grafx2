@@ -442,7 +442,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_TITLE(" OUR HOMEPAGE")
   HELP_TEXT ("")
-  HELP_BOLD ("  http://grafx2.codegoogle.com")
+  HELP_BOLD ("  http://grafx2.googlecode.com")
   HELP_TEXT ("")
   HELP_TEXT ("  Please report any bug you may find there")
   HELP_TEXT ("")
