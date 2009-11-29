@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -33,7 +34,7 @@
 
 // There is no WM on the GP2X...
 #ifndef __GP2X__
-	#include <SDL_syswm.h>
+    #include <SDL_syswm.h>
 #endif
 
 #include "const.h"
@@ -81,29 +82,31 @@
 void Display_syntax(void)
 {
   int mode_index;
-  printf("Syntax: grafx2 [<arguments>] [<picture>]\n\n");
+  printf("Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n");
   printf("<arguments> can be:]\n");
-  printf("\t/? /h /help       for this help screen\n");
-  printf("\t/wide             to emulate a video mode with wide pixels (2x1)\n");
-  printf("\t/tall             to emulate a video mode with tall pixels (1x2)\n");
-  printf("\t/double           to emulate a video mode with double pixels (2x2)\n");
-  printf("\t/wide2            to emulate a video mode with double wide pixels (4x2)\n");
-  printf("\t/tall2            to emulate a video mode with double tall pixels (2x4)\n");
-  printf("\t/triple           to emulate a video mode with triple pixels (3x3)\n");
-  printf("\t/quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t/rgb n            to reduce RGB precision from 256 to n levels\n");
-  printf("\t/skin <filename>  to use an alternate file with the menu graphics\n");
-  printf("\t/mode <videomode> to set a video mode\n\n");
+  printf("\t-? -h -H -help    for this help screen\n");
+  printf("\t-wide             to emulate a video mode with wide pixels (2x1)\n");
+  printf("\t-tall             to emulate a video mode with tall pixels (1x2)\n");
+  printf("\t-double           to emulate a video mode with double pixels (2x2)\n");
+  printf("\t-wide2            to emulate a video mode with double wide pixels (4x2)\n");
+  printf("\t-tall2            to emulate a video mode with double tall pixels (2x4)\n");
+  printf("\t-triple           to emulate a video mode with triple pixels (3x3)\n");
+  printf("\t-quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
+  printf("\t-rgb n            to reduce RGB precision from 256 to n levels\n");
+  printf("\t-skin <filename>  to use an alternate file with the menu graphics\n");
+  printf("\t-mode <videomode> to set a video mode\n");
+  printf("Arguments can be prefixed either by / - or --\n");
+  printf("They can also be abbreviated.\n\n");
   printf("Available video modes:\n\n");
   for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 12)
   {
-	int k;
-	for (k = 0; k < 6; k++)
-	{
-		if (mode_index + k >= Nb_video_modes) break;
-		printf("%12s",Mode_label(mode_index + k));
-	}
-	puts("");
+    int k;
+    for (k = 0; k < 6; k++)
+    {
+      if (mode_index + k >= Nb_video_modes) break;
+      printf("%12s",Mode_label(mode_index + k));
+    }
+    puts("");
   }
 }
 
@@ -171,12 +174,48 @@ void Error_function(int error_code, const char *filename, int line_number, const
   }
 }
 
+enum CMD_PARAMS
+{
+    CMDPARAM_HELP,
+    CMDPARAM_MODE,
+    CMDPARAM_PIXELRATIO_TALL,
+    CMDPARAM_PIXELRATIO_WIDE,
+    CMDPARAM_PIXELRATIO_DOUBLE,
+    CMDPARAM_PIXELRATIO_TRIPLE,
+    CMDPARAM_PIXELRATIO_QUAD,
+    CMDPARAM_PIXELRATIO_TALL2,
+    CMDPARAM_PIXELRATIO_WIDE2,
+    CMDPARAM_RGB,
+    CMDPARAM_SKIN
+};
+
+struct {
+    const char *param;
+    int id;
+} cmdparams[] = {
+    {"?", CMDPARAM_HELP},
+    {"h", CMDPARAM_HELP},
+    {"H", CMDPARAM_HELP},
+    {"help", CMDPARAM_HELP},
+    {"mode", CMDPARAM_MODE},
+    {"tall", CMDPARAM_PIXELRATIO_TALL},
+    {"wide", CMDPARAM_PIXELRATIO_WIDE},
+    {"double", CMDPARAM_PIXELRATIO_DOUBLE},
+    {"triple", CMDPARAM_PIXELRATIO_TRIPLE},
+    {"quadruple", CMDPARAM_PIXELRATIO_QUAD},
+    {"tall2", CMDPARAM_PIXELRATIO_TALL2},
+    {"wide2", CMDPARAM_PIXELRATIO_WIDE2},
+    {"rgb", CMDPARAM_RGB},
+    {"skin", CMDPARAM_SKIN}
+};
+
+#define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
+
 // --------------------- Analyse de la ligne de commande ---------------------
 void Analyze_command_line(int argc, char * argv[])
 {
   char *buffer ;
   int index;
-
 
   File_in_command_line = 0;
   Resolution_in_command_line = 0;
@@ -185,140 +224,162 @@ void Analyze_command_line(int argc, char * argv[])
   
   for (index = 1; index<argc; index++)
   {
-    if ( !strcmp(argv[index],"/?") ||
-         !strcmp(argv[index],"/h") ||
-         !strcmp(argv[index],"/H") )
+    char *s = argv[index];
+    int is_switch = ((strchr(s,'/') == s) || (strchr(s,'-') == s) || (strstr(s,"--") == s));
+    int tmpi;
+    int paramtype = -1;
+    if (is_switch)
     {
-      // help
-      Display_syntax();
-      exit(0);
-    }
-    else if ( !strcmp(argv[index],"/mode") )
-    {
-      // mode
-      index++;
-      if (index<argc)
-      {    
-        Resolution_in_command_line = 1;
-        Current_resolution = Convert_videomode_arg(argv[index]);
-        if (Current_resolution == -1)
-        {
-          Error(ERROR_COMMAND_LINE);
-          Display_syntax();
-          exit(0);
-        }
-        if ((Video_mode[Current_resolution].State & 0x7F) == 3)
-        {
-          Error(ERROR_FORBIDDEN_MODE);
-          exit(0);
-        }
+      int param_matches = 0;
+      int param_match = -1;
+      if (*s == '-')
+      {
+        s++;
+        if (*s == '-')
+          s++;
       }
       else
+        s++;
+  
+      for (tmpi = 0; tmpi < ARRAY_SIZE(cmdparams); tmpi++)
       {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else if ( !strcmp(argv[index],"/tall") )
-    {
-      Pixel_ratio = PIXEL_TALL;
-    }
-    else if ( !strcmp(argv[index],"/wide") )
-    {
-      Pixel_ratio = PIXEL_WIDE;
-    }
-    else if ( !strcmp(argv[index],"/double") )
-    {
-      Pixel_ratio = PIXEL_DOUBLE;
-    }
-    else if ( !strcmp(argv[index],"/triple") )
-    {
-      Pixel_ratio = PIXEL_TRIPLE;
-    }
-    else if ( !strcmp(argv[index],"/quadruple") )
-    {
-      Pixel_ratio = PIXEL_QUAD;
-    }
-    else if ( !strcmp(argv[index],"/tall2") )
-    {
-      Pixel_ratio = PIXEL_TALL2;
-    }
-    else if ( !strcmp(argv[index],"/wide2") )
-    {
-      Pixel_ratio = PIXEL_WIDE2;
-    }
-    else if ( !strcmp(argv[index],"/rgb") )
-    {
-      // echelle des composants RGB
-      index++;
-      if (index<argc)
-      {
-        int scale;
-        scale = atoi(argv[index]);
-        if (scale < 2 || scale > 256)
+        if (!strcmp(s, cmdparams[tmpi].param))
         {
-          Error(ERROR_COMMAND_LINE);
-          Display_syntax();
-          exit(0);
+          paramtype = cmdparams[tmpi].id;
+          break;
         }
-        Set_palette_RGB_scale(scale);
+        else if (strstr(cmdparams[tmpi].param, s))
+        {
+          param_matches++;
+          param_match = cmdparams[tmpi].id;
+        }
       }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else if ( !strcmp(argv[index],"/skin") )
-    {
-      // GUI skin file
-      index++;
-      if (index<argc)
-      {
-        strcpy(Config.Skin_file,argv[index]);
-      }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else
-    {
-      // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-      if (File_in_command_line > 1)
-      {
-        // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-      else if (File_exists(argv[index]))
-      {
-		File_in_command_line ++;
-		buffer = Realpath(argv[index], NULL);
+      if (paramtype == -1 && param_matches == 1)
+        paramtype = param_match;
 
-		if (File_in_command_line == 1)
-		{
-			// Separate path from filename
-        Extract_path(Main_file_directory, buffer);
-        Extract_filename(Main_filename, buffer);
-			free(buffer);
-		} else {
-			Extract_path(Spare_file_directory, buffer);
-			Extract_filename(Spare_filename, buffer);
-        free(buffer);
-		}
-      }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
+    }
+    switch (paramtype)
+    {
+      case CMDPARAM_HELP:
         Display_syntax();
         exit(0);
-      }
+      case CMDPARAM_MODE:
+        index++;
+        if (index<argc)
+        {
+          Resolution_in_command_line = 1;
+          Current_resolution = Convert_videomode_arg(argv[index]);
+          if (Current_resolution == -1)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          if ((Video_mode[Current_resolution].State & 0x7F) == 3)
+          {
+            Error(ERROR_FORBIDDEN_MODE);
+            exit(0);
+          }
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_PIXELRATIO_TALL:
+        Pixel_ratio = PIXEL_TALL;
+        break;
+      case CMDPARAM_PIXELRATIO_WIDE:
+        Pixel_ratio = PIXEL_WIDE;
+        break;
+      case CMDPARAM_PIXELRATIO_DOUBLE:
+        Pixel_ratio = PIXEL_DOUBLE;
+        break;
+      case CMDPARAM_PIXELRATIO_TRIPLE:
+        Pixel_ratio = PIXEL_TRIPLE;
+        break;
+      case CMDPARAM_PIXELRATIO_QUAD:
+        Pixel_ratio = PIXEL_QUAD;
+        break;
+      case CMDPARAM_PIXELRATIO_TALL2:
+        Pixel_ratio = PIXEL_TALL2;
+        break;
+      case CMDPARAM_PIXELRATIO_WIDE2:
+        Pixel_ratio = PIXEL_WIDE2;
+        break;
+      case CMDPARAM_RGB:
+        // echelle des composants RGB
+        index++;
+        if (index<argc)
+        {
+          int scale;
+          scale = atoi(argv[index]);
+          if (scale < 2 || scale > 256)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          Set_palette_RGB_scale(scale);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_SKIN:
+        // GUI skin file
+        index++;
+        if (index<argc)
+        {
+          strcpy(Config.Skin_file,argv[index]);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      default:
+        // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
+        if (File_in_command_line > 1)
+        {
+          // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        else if (File_exists(argv[index]))
+        {
+          File_in_command_line ++;
+          buffer = Realpath(argv[index], NULL);
+        
+          if (File_in_command_line == 1)
+          {
+            // Separate path from filename
+            Extract_path(Main_file_directory, buffer);
+            Extract_filename(Main_filename, buffer);
+            free(buffer);
+          }
+          else
+          {
+            Extract_path(Spare_file_directory, buffer);
+            Extract_filename(Spare_filename, buffer);
+            free(buffer);
+          }
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
     }
   }
 }
@@ -772,7 +833,7 @@ int main(int argc,char * argv[])
   char phoenix_filename2[MAX_PATH_CHARACTERS];
   if(!Init_program(argc,argv))
   {
-	Program_shutdown();
+    Program_shutdown();
     return 0;
   }
 
@@ -819,17 +880,17 @@ int main(int argc,char * argv[])
   
     switch (File_in_command_line)
     {
-		case 2:
+      case 2:
       Button_Reload();
-			DEBUG(Main_filename, 0);
-			DEBUG(Spare_filename, 0);
-			Button_Page();
-			// no break ! proceed with the other file now
-		case 1:
-			Button_Reload();
-			Resolution_in_command_line = 0;
-		default:
-			break;
+      DEBUG(Main_filename, 0);
+      DEBUG(Spare_filename, 0);
+      Button_Page();
+      // no break ! proceed with the other file now
+    case 1:
+      Button_Reload();
+      Resolution_in_command_line = 0;
+    default:
+      break;
     }
   }
   
