@@ -837,6 +837,15 @@ void Backup_layers(dword layer_mask)
   */
 }
 
+void Check_layers_limits()
+{
+  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
+  {
+    Main_current_layer = Main_backups->Pages->Nb_layers-1;
+    Main_layers_visible |= 1<<Main_current_layer;
+  }
+}
+    
 void Undo(void)
 {
   if (Last_backed_up_layers)
@@ -862,9 +871,7 @@ void Undo(void)
   //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
   //       poser de problèmes.
   
-  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
-    Main_current_layer = Main_backups->Pages->Nb_layers-1;
-  
+  Check_layers_limits();
   Redraw_layered_image();
   
 }
@@ -893,9 +900,7 @@ void Redo(void)
   //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
   //       poser de problèmes.
   
-  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
-    Main_current_layer = Main_backups->Pages->Nb_layers-1;
-
+  Check_layers_limits();
   Redraw_layered_image();
 
 }
@@ -905,9 +910,6 @@ void Free_current_page(void)
   // On détruit la page courante de la liste principale
   Free_page_of_a_list(Main_backups);
   
-  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
-  Redraw_layered_image();
-  
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
   // Et celles du backup
@@ -915,7 +917,11 @@ void Free_current_page(void)
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
-  //       devrait pas poser de problèmes.  
+  //       devrait pas poser de problèmes.
+   
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Check_layers_limits();
+  Redraw_layered_image();
 }
 
 void Exchange_main_and_spare(void)
