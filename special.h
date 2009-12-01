@@ -56,9 +56,3 @@ byte Restore_brush(int index);
 */
 void Transparency_set(byte amount);
 
-void Layer_activate(short layer, short side);
-
-void Special_add_layer(void);
-
-void Special_delete_layer(void);
-

@@ -30,6 +30,6 @@ void Button_Layer_up(void);
 void Button_Layer_down(void);
 void Button_Layer_select(void);
 void Button_Layer_toggle(void);
-void Layer_activate(short layer, short side);
+void Layer_activate(byte layer, short side);
 
 

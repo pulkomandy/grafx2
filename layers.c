@@ -26,7 +26,7 @@
 #include "engine.h"
 #include "pages.h"
 
-void Layer_activate(short layer, short side)
+void Layer_activate(byte layer, short side)
 {
   word old_layers;
 

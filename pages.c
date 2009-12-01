@@ -176,7 +176,7 @@ void Redraw_layered_image(void)
 {
   #ifndef NOLAYERS
   // Re-construct the image with the visible layers
-  int layer;  
+  byte layer;  
   // First layer
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
   {
@@ -950,7 +950,6 @@ void Exchange_main_and_spare(void)
   Download_infos_page_main(Main_backups->Pages);
   Download_infos_backup(Main_backups);
   Download_infos_page_spare(Spare_backups->Pages);
-  Redraw_layered_image();
 }
 
 void End_of_modification(void)
