@@ -41,6 +41,7 @@
 
 #include <lua5.1/lua.h>
 #include <lua5.1/lauxlib.h>
+#include <lua5.1/lualib.h>
 
 // Wrapper functions to call C from Lua
 
@@ -195,7 +196,7 @@ void Button_Brush_Factory(void)
 	if (clicked_button == 2) // Run the script
 	{
 		lua_State* L = lua_open();
-    char* message;
+    const char* message;
 
 		lua_register(L,"putbrushpixel",L_PutBrushPixel);
 		lua_register(L,"getbrushpixel",L_GetBrushPixel);
