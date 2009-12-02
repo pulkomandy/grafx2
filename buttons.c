@@ -1367,6 +1367,8 @@ void Button_Copy_page(void)
       if ( (!Spare_image_is_modified)
         || (Confirmation_box("Spare page was modified. Proceed?")) )
       {
+        // FIXME: add here some code to backup the spare
+      
         if (clicked_button<=2)
           Copy_image_only();
 
@@ -1375,6 +1377,8 @@ void Button_Copy_page(void)
 
         if (clicked_button!=2) // copie de la palette
           memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+        
+        // FIXME: here is the 'end_of_modifications' for spare.
 
         Spare_image_is_modified=1;
       }

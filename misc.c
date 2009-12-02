@@ -287,7 +287,10 @@ void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,wor
 
 byte Read_pixel_from_spare_screen(word x,word y)
 {
+  return 0;
+  /* Temporarily disabled. Need to implement a third Visible_image buffer
 	return *(Spare_screen+y*Spare_image_width+x);
+	*/
 }
 
 void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height)

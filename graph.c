@@ -631,15 +631,17 @@ void Remap_spare(void)
   short y_pos; // Variable de balayage de la brosse
   byte  used[256]; // Tableau de booléens "La couleur est utilisée"
   int   color;
+  byte layer;
 
   // On commence par initialiser le tableau de booléens à faux
   for (color=0;color<=255;color++)
     used[color]=0;
 
   // On calcule la table d'utilisation des couleurs
-  for (y_pos=0;y_pos<Spare_image_height;y_pos++)
-    for (x_pos=0;x_pos<Spare_image_width;x_pos++)
-      used[Read_pixel_from_spare_screen(x_pos,y_pos)]=1;
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+    for (y_pos=0;y_pos<Spare_image_height;y_pos++)
+      for (x_pos=0;x_pos<Spare_image_width;x_pos++)
+        used[*(Spare_backups->Pages->Image[layer]+(y_pos*Spare_image_width+x_pos))]=1;
 
   //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
@@ -655,7 +657,8 @@ void Remap_spare(void)
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_lowlevel(used,Spare_screen,Spare_image_width,Spare_image_height,Spare_image_width);
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
 }
 
 
