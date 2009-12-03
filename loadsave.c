@@ -679,7 +679,7 @@ void Load_image(byte image)
         Cursor_shape=CURSOR_SHAPE_HOURGLASS;
         Display_cursor();
         Flush_update();
-        if (Convert_24b_bitmap_to_256(Main_screen,Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
+        if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0],Buffer_image_24b,Main_image_width,Main_image_height,Main_palette))
           File_error=2;
         else
         {
