@@ -1192,6 +1192,9 @@ void Button_Page(void)
   Exchange_main_and_spare();
 
   // On fait le reste du travail "à la main":
+  SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
+  SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)
+  SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
   SWAP_SHORTS(Old_main_offset_X,Old_spare_offset_X)
@@ -1223,8 +1226,13 @@ void Button_Page(void)
   SWAP_BYTES (Main_current_layer,Spare_current_layer)
   SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
 
+  //Redraw_layered_image();
+  // replaced by
+  Update_buffers(Main_image_width, Main_image_height);
+  Update_depth_buffer();
   Update_screen_targets();
-  Redraw_layered_image();
+  End_of_modification();
+  // --
 
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);

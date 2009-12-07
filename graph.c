@@ -2882,7 +2882,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
   if (color != Main_backups->Pages->Transparent_color) // transparent color
     return color;
   
-  depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+  depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
   return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
   #else
   return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
@@ -2892,7 +2892,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
 void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 {
     #ifndef NOLAYERS
-    byte depth = *(Visible_image_depth_buffer.Image+x+y*Main_image_width);
+    byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
     *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
     if ( depth <= Main_current_layer)
     {

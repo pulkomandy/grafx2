@@ -366,7 +366,7 @@ typedef struct
   int       Width;   ///< Image width in pixels.
   int       Height;  ///< Image height in pixels.
   byte *    Image;   ///< Pixel data for the image.
-} T_Image;
+} T_Bitmap;
 
 /// A single memorized brush from the Brush Container
 typedef struct

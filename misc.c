@@ -37,6 +37,7 @@
 #include "palette.h"
 #include "input.h"
 #include "graph.h"
+#include "pages.h"
 
 ///Count used palette indexes in the whole picture
 ///Return the total number of different colors
@@ -287,10 +288,18 @@ void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,wor
 
 byte Read_pixel_from_spare_screen(word x,word y)
 {
-  return 0;
-  /* Temporarily disabled. Need to implement a third Visible_image buffer
-	return *(Spare_screen+y*Spare_image_width+x);
-	*/
+//  return *(Spare_screen+y*Spare_image_width+x);
+
+  // Clipping is required as this can be called with coordinates from main image
+  // (can be a bigger or smaller image)
+  if (x>=Spare_image_width || y>=Spare_image_height)
+    return 0; // TODO: we could return the spare's transparent color, if it has one.
+#ifndef NOLAYERS
+  return *(Spare_visible_image.Image + y*Spare_image_width + x);
+#else
+  return *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x);
+#endif
+
 }
 
 void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height)

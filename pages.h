@@ -32,8 +32,15 @@
 /////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-extern T_Image Visible_image[2];
-extern T_Image Visible_image_depth_buffer;
+/// The pixels of visible layers, flattened copy.
+extern T_Bitmap Main_visible_image;
+/// The pixels of visible layers, flattened copy, used for no-feedback effects.
+extern T_Bitmap Main_visible_image_backup;
+/// The index of visible pixels from ::Visible image. Points to the right layer.
+extern T_Bitmap Main_visible_image_depth_buffer;
+
+/// The pixels of visible layers for the spare page, flattened copy.
+extern T_Bitmap Spare_visible_image;
 
 ///
 /// INDIVIDUAL PAGES

@@ -107,8 +107,6 @@ void Pixel_load_in_24b_preview(short x_pos,short y_pos,byte r,byte g,byte b);
 
 //
 
-extern enum PIXEL_RATIO Ratio_of_loaded_image;
-
 void Set_file_error(int value);
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 
