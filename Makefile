@@ -320,7 +320,6 @@ $(MACAPPEXE) : $(BIN)
 	cp -r English.lproj Grafx2.app/Contents/Resources
 	cp -r fonts Grafx2.app/Contents/Resources
 	cp -r skins Grafx2.app/Contents/Resources
-	cp -r gfx2.cfg Grafx2.app/Contents/Resources
 	cp -r gfx2def.ini Grafx2.app/Contents/Resources
 	cp -Rp $(FWDIR)/SDL.framework Grafx2.app/Contents/Frameworks
 	cp -Rp $(FWDIR)/SDL_image.framework Grafx2.app/Contents/Frameworks
