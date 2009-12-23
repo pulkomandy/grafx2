@@ -1457,10 +1457,10 @@ void Save_BMP(void)
   {
 
     // Image width must be a multiple of 4 bytes
-    if (Main_image_width & 3)
-      line_size=((Main_image_width >> 3)+1) << 3;
-    else
-      line_size=Main_image_width;
+    line_size = Main_image_width;
+
+    if (line_size & 3) 
+      line_size += (4 - (line_size & 3));
 
     header.Signature[0]  = 'B';
     header.Signature[1]  = 'M';
