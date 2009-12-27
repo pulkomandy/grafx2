@@ -2750,10 +2750,10 @@ void Save_BMP(void)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
-    if (Main_image_width & 7)
-      line_size=((Main_image_width >> 3)+1) << 3;
-    else
-      line_size=Main_image_width;
+    line_size = Main_image_width;
+    
+    if (line_size & 3)
+      line_size += (4 - (line_size & 3));
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     header.Signature  = 0x424D;
