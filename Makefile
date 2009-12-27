@@ -411,8 +411,8 @@ install : $(BIN)
 	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
 	# Icon and desktop file for debian
-	$(CP) misc/grafx2.desktop $(DESTDIR)$(datadir)/applications/
-	$(CP) misc/grafx2.xpm $(DESTDIR)$(datadir)/icons/
+	$(CP) misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
+	$(CP) misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
 	@echo Install complete
   
 # Linux uninstallation of the program
