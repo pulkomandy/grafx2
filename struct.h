@@ -27,7 +27,7 @@
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
-#if defined(__BEOS__)
+#if defined(__BEOS__) || defined(__TRU64__)
     #include <inttypes.h>
 #else
     #include <stdint.h>

@@ -186,6 +186,23 @@ else
     ZIP = zip
 
   else
+  ifeq ($(PLATFORM),OSF1) #9
+  #OSF1 / tru64 alpha
+      DELCOMMAND = rm -rf
+      MKDIR = mkdir -p
+      RMDIR = rmdir
+      CP = cp
+      ZIP = zip
+      PLATFORMFILES = gfx2.png
+      BIN = grafx2
+      COPT = -W -Wall -std=c99 -c -g -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+      LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
+      CC = gcc
+      OBJDIR = obj/unix
+      X11LOPT = -lX11
+    
+
+  else
   ifeq ($(findstring Kickstart,$(shell version)),Kickstart) # 9
     # Classic amiga without gcc. Use vbcc.
     PLATFORM = amiga-vbcc
@@ -247,6 +264,7 @@ else
         X11LOPT = -lX11
       endif
       endif
+  endif
   endif
   endif
   endif
