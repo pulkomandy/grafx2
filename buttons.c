@@ -4040,8 +4040,8 @@ void Button_Effects(void)
   Window_set_normal_button(  7, 57, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
   Window_set_normal_button(  7, 76, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
   Window_set_normal_button(  7, 95, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
-  Window_set_normal_button(153, 19, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 6
-  Window_set_normal_button(153, 38, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 7
+  Window_set_normal_button(153, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
+  Window_set_normal_button(153, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
   Window_set_normal_button(153, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
   Window_set_normal_button(153, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
   Window_set_normal_button(153, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
