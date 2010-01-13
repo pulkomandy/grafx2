@@ -27,8 +27,9 @@
 #define __FILESEL_H__
 
 #include "struct.h"
+#include "loadsave.h"
 
-byte Button_Load_or_Save(byte load, byte image);
+byte Button_Load_or_Save(byte load, T_IO_Context *context);
 
 void Add_element_to_list(T_Fileselector *list, const char * fname, int type);
 ///

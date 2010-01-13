@@ -153,8 +153,6 @@ void Download_infos_page_main(T_Page * page)
     Main_image_height=page->Height;
     memcpy(Main_palette,page->Palette,sizeof(T_Palette));
     strcpy(Main_comment,page->Comment);
-    strcpy(Main_file_directory,page->File_directory);
-    strcpy(Main_filename,page->Filename);
     Main_fileformat=page->File_format;
 
     if (size_is_modified)
@@ -302,8 +300,6 @@ void Upload_infos_page_main(T_Page * page)
     page->Height=Main_image_height;
     memcpy(page->Palette,Main_palette,sizeof(T_Palette));
     strcpy(page->Comment,Main_comment);
-    strcpy(page->File_directory,Main_file_directory);
-    strcpy(page->Filename,Main_filename);
     page->File_format=Main_fileformat;
   }
 }
@@ -316,9 +312,6 @@ void Download_infos_page_spare(T_Page * page)
     Spare_image_width=page->Width;
     Spare_image_height=page->Height;
     memcpy(Spare_palette,page->Palette,sizeof(T_Palette));
-    strcpy(Spare_comment,page->Comment);
-    strcpy(Spare_file_directory,page->File_directory);
-    strcpy(Spare_filename,page->Filename);
     Spare_fileformat=page->File_format;
   }
 }
@@ -331,9 +324,6 @@ void Upload_infos_page_spare(T_Page * page)
     page->Width=Spare_image_width;
     page->Height=Spare_image_height;
     memcpy(page->Palette,Spare_palette,sizeof(T_Palette));
-    strcpy(page->Comment,Spare_comment);
-    strcpy(page->File_directory,Spare_file_directory);
-    strcpy(page->Filename,Spare_filename);
     page->File_format=Spare_fileformat;
   }
 }
@@ -659,6 +649,10 @@ int Init_all_backup_lists(int width,int height)
   // On y met les infos sur la dimension de démarrage
   Main_backups->Pages->Width=width;
   Main_backups->Pages->Height=height;
+  strcpy(Main_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Main_backups->Pages->Filename,"NO_NAME.GIF");
+
+
   for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
     Main_backups->Pages->Image[i]=New_layer(width*height);
@@ -698,8 +692,8 @@ int Init_all_backup_lists(int width,int height)
   Spare_backups->Pages->Height = height;
   memcpy(Spare_backups->Pages->Palette,Main_palette,sizeof(T_Palette));
   strcpy(Spare_backups->Pages->Comment,"");
-  strcpy(Spare_backups->Pages->File_directory,Spare_current_directory);
-  strcpy(Spare_backups->Pages->Filename,"NO_NAME.GIF");
+  strcpy(Spare_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Spare_backups->Pages->Filename,"NO_NAME2.GIF");
   Spare_backups->Pages->File_format=DEFAULT_FILEFORMAT;
   // Copy this informations in the global Spare_ variables
   Download_infos_page_spare(Spare_backups->Pages);
@@ -756,6 +750,8 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
+  strcpy(new_page->Filename, Main_backups->Pages->Filename);
+  strcpy(new_page->File_directory, Main_backups->Pages->File_directory);
   if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
     for (i=0; i<layers;i++)
@@ -766,7 +762,17 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
     Update_buffers(width, height);
 
     Download_infos_page_main(Main_backups->Pages);
-    End_of_modification();
+    
+    // Same code as in End_of_modification():
+    #ifndef NOLAYERS
+      memcpy(Main_visible_image_backup.Image,
+             Main_visible_image.Image,
+             Main_image_width*Main_image_height);
+    #else
+      Update_screen_targets();
+    #endif
+    Download_infos_backup(Main_backups);
+    // --
     
     return_code=1;
   }
@@ -1001,6 +1007,11 @@ void End_of_modification(void)
   Last_backed_up_layers = 0;
   Backup();
   */
+  //
+  // Processing safety backups
+  //
+  Main_edits_since_safety_backup++;
+  Rotate_safety_backups();
 }
 
 /// Add a new layer to latest page of a list. Returns 0 on success.

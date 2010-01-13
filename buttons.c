@@ -543,30 +543,34 @@ byte Button_Quit_local_function(void)
   {
     case 1 : return 0; // Rester
     case 2 : // Sauver et enregistrer
-             Get_full_filename(filename,0);
-             if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
-             {
-               Hide_cursor();
-               old_cursor_shape=Cursor_shape;
-               Cursor_shape=CURSOR_SHAPE_HOURGLASS;
-               Display_cursor();
+      Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+      if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
+      {
+        T_IO_Context save_context;
 
-               Save_image(1);
-
-               Hide_cursor();
-               Cursor_shape=old_cursor_shape;
-               Display_cursor();
-
-               if (!File_error)
-                 // L'ayant sauvée avec succès,
-                 return 1; // On peut quitter
-               else
-                 // Il y a eu une erreur lors de la sauvegarde,
-                 return 0; // On ne peut donc pas quitter
-             }
-             else
-               // L'utilisateur ne veut pas écraser l'ancien fichier,
-               return 0; // On doit donc rester
+        Hide_cursor();
+        old_cursor_shape=Cursor_shape;
+        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+        Display_cursor();
+       
+        Init_context_layered_image(&save_context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+        Save_image(&save_context);
+        Destroy_context(&save_context);
+        
+        Hide_cursor();
+        Cursor_shape=old_cursor_shape;
+        Display_cursor();
+       
+        if (!File_error)
+          // L'ayant sauvée avec succès,
+          return 1; // On peut quitter
+        else
+          // Il y a eu une erreur lors de la sauvegarde,
+          return 0; // On ne peut donc pas quitter
+      }
+      else
+        // L'utilisateur ne veut pas écraser l'ancien fichier,
+        return 0; // On doit donc rester
     case 3 : return 1; // Quitter
   }
   return 0;
@@ -1225,6 +1229,16 @@ void Button_Page(void)
 
   SWAP_BYTES (Main_current_layer,Spare_current_layer)
   SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
+  
+  SWAP_DWORDS(Main_safety_number,Spare_safety_number)
+  SWAP_DWORDS(Main_edits_since_safety_backup,Spare_edits_since_safety_backup)
+  SWAP_BYTES(Main_safety_backup_prefix,Spare_safety_backup_prefix)
+  {
+    Uint32 a;
+    a=Main_time_of_safety_backup;
+    Main_time_of_safety_backup=Spare_time_of_safety_backup;
+    Spare_time_of_safety_backup=a;
+  }
 
   //Redraw_layered_image();
   // replaced by
@@ -2560,95 +2574,46 @@ int Best_video_mode(void)
   return best_mode;
 }
 
-
-void Swap_data_of_image_and_brush(void)
-{
-  char  temp_string[MAX_PATH_CHARACTERS];
-  byte  temp_byte;
-  short temp_int;
-
-
-  strcpy(temp_string           ,Brush_file_directory);
-  strcpy(Brush_file_directory   ,Main_file_directory);
-  strcpy(Main_file_directory,temp_string);
-
-  strcpy(temp_string    ,Brush_filename);
-  strcpy(Brush_filename   ,Main_filename);
-  strcpy(Main_filename,temp_string);
-
-  temp_byte        =Brush_fileformat;
-  Brush_fileformat   =Main_fileformat;
-  Main_fileformat=temp_byte;
-
-  temp_byte=Brush_format;
-  Brush_format   =Main_format;
-  Main_format=temp_byte;
-
-  temp_int            =Brush_fileselector_position;
-  Brush_fileselector_position    =Main_fileselector_position;
-  Main_fileselector_position=temp_int;
-
-  temp_int            =Brush_fileselector_offset;
-  Brush_fileselector_offset    =Main_fileselector_offset;
-  Main_fileselector_offset=temp_int;
-
-  strcpy(temp_string           ,Brush_current_directory);
-  strcpy(Brush_current_directory   ,Main_current_directory);
-  strcpy(Main_current_directory,temp_string);
-
-  strcpy(temp_string    ,Brush_comment);
-  strcpy(Brush_comment   ,Main_comment);
-  strcpy(Main_comment,temp_string);
-}
-
-
 void Load_picture(byte image)
   // Image=1 => On charge/sauve une image
   // Image=0 => On charge/sauve une brosse
 {
-  // Données initiales du fichier (au cas où on voudrait annuler)
-  char  initial_file_directory[MAX_PATH_CHARACTERS];
-  char  initial_filename[MAX_PATH_CHARACTERS];
-  byte  initial_file_format;
-  byte  do_not_restore;
+  byte  confirm;
   byte  use_brush_palette = 0;
-  T_Components * initial_palette=NULL;
   byte  old_cursor_shape;
-  short initial_main_image_width=Main_image_width;
-  short initial_main_image_height=Main_image_height;
-  //char  initial_comment[COMMENT_SIZE+1];
   int   new_mode;
-
-
-  if (!image)
-    Swap_data_of_image_and_brush();
-
-  strcpy(initial_file_directory,Main_file_directory);
-  strcpy(initial_filename       ,Main_filename);
-  initial_file_format=Main_fileformat;
-
-  if (!image)
+  T_IO_Context context;
+  static char filename [MAX_PATH_CHARACTERS];
+  static char directory[MAX_PATH_CHARACTERS];
+  
+  if (image)
   {
-    initial_palette=(T_Components *)malloc(sizeof(T_Palette));
-    memcpy(initial_palette,Main_palette,sizeof(T_Palette));
+    strcpy(filename, Main_backups->Pages->Filename);
+    strcpy(directory, Main_backups->Pages->File_directory);
+    Init_context_layered_image(&context, filename, directory);
   }
+  else
+  {
+    strcpy(filename, Brush_filename);
+    strcpy(directory, Main_current_directory);
+    Init_context_brush(&context, Brush_filename, Main_current_directory);
+  }
+  confirm=Button_Load_or_Save(1, &context);
 
-  do_not_restore=Button_Load_or_Save(1,image);
-
-  if (do_not_restore)
+  if (confirm)
   {
     if (image)
     {
       if (Main_image_is_modified)
-        do_not_restore=Confirmation_box("Discard unsaved changes?");
+        confirm=Confirmation_box("Discard unsaved changes?");
     }
     else
       use_brush_palette=Confirmation_box("Use the palette of the brush?");
   }
 
-  // do_not_restore is modified inside the first if, that's why we check it
+  // confirm is modified inside the first if, that's why we check it
   // again here
-  if (do_not_restore)
+  if (confirm)
   {
     old_cursor_shape=Cursor_shape;
     Hide_cursor();
@@ -2657,23 +2622,16 @@ void Load_picture(byte image)
 
     if (image)
     {
-      // Si c'est une image qu'on charge, on efface l'ancien commentaire
-      // C'est loin d'être indispensable, m'enfin bon...
-      if (! Get_fileformat(Main_fileformat)->Palette_only)
-        Main_comment[0]='\0';
-
       Original_screen_X=0;
       Original_screen_Y=0;
     }
-    else
-      Pixel_load_function=Pixel_load_in_brush;
 
-    Load_image(image);
+    Load_image(&context);
 
     if (!image)
     {
-      if (!use_brush_palette)
-        memcpy(Main_palette,initial_palette,sizeof(T_Palette));
+      //if (!use_brush_palette)
+      //  memcpy(Main_palette,initial_palette,sizeof(T_Palette));
 
       if (File_error==3) // On ne peut pas allouer la brosse
       {
@@ -2688,23 +2646,13 @@ void Load_picture(byte image)
         Smear_brush_height=MAX_PAINTBRUSH_SIZE;
         Smear_brush_width=MAX_PAINTBRUSH_SIZE;
       }
-      else
-      {
-        Brush_width=Main_image_width;
-        Brush_height=Main_image_height;
-        Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-        Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-      }
+
 
       Tiling_offset_X=0;
       Tiling_offset_Y=0;
 
       Brush_offset_X=(Brush_width>>1);
       Brush_offset_Y=(Brush_height>>1);
-
-      Main_image_width=initial_main_image_width;
-      Main_image_height=initial_main_image_height;
-      Pixel_load_function=Pixel_load_in_current_screen;
 
       Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
@@ -2722,10 +2670,10 @@ void Load_picture(byte image)
       Hide_cursor();
       Cursor_shape=old_cursor_shape;
     }
-
+    
+    
     if ( (File_error==1) || (Get_fileformat(Main_fileformat)->Palette_only) )
     {
-      do_not_restore=0;
       if (File_error!=1)
         Compute_optimal_menu_colors(Main_palette);
     }
@@ -2752,16 +2700,16 @@ void Load_picture(byte image)
         }
         // In window mode, activate wide or tall pixels if the image says so.
         else if (!Video_mode[Current_resolution].Fullscreen &&
-          ((Ratio_of_loaded_image == PIXEL_WIDE &&
+          ((context.Ratio == PIXEL_WIDE &&
             Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
-            (Ratio_of_loaded_image == PIXEL_TALL &&
+            (context.Ratio == PIXEL_TALL &&
             Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
         {
           Init_mode_video(
             Video_mode[Current_resolution].Width,
             Video_mode[Current_resolution].Height,
             Video_mode[Current_resolution].Fullscreen,
-            Ratio_of_loaded_image);
+            context.Ratio);
             Display_menu();
         }
         else
@@ -2780,21 +2728,15 @@ void Load_picture(byte image)
       if (image)
         Main_image_is_modified=0;
     }
+
+    Destroy_context(&context);
+
     Display_menu();
     Display_cursor();
   }
 
-  free(initial_palette);
-
-  if (!do_not_restore)
-  {
-    strcpy(Main_filename       ,initial_filename);
-    strcpy(Main_file_directory,initial_file_directory);
-    Main_fileformat    =initial_file_format;
-  }
-
-  if (!image)
-    Swap_data_of_image_and_brush();
+  //if (!image)
+  //  Swap_data_of_image_and_brush();
   Hide_cursor();
   Print_filename();
   Display_cursor();
@@ -2823,6 +2765,8 @@ void Button_Reload(void)
 
   if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
   {
+    T_IO_Context context;
+    
     Hide_cursor();
     old_cursor_shape=Cursor_shape;
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -2830,7 +2774,9 @@ void Button_Reload(void)
 
     Original_screen_X=0;
     Original_screen_Y=0;
-    Load_image(1);
+    
+    Init_context_layered_image(&context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+    Load_image(&context);
 
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
@@ -2857,16 +2803,16 @@ void Button_Reload(void)
       }
       // In window mode, activate wide or tall pixels if the image says so.
       else if (!Video_mode[Current_resolution].Fullscreen &&
-        ((Ratio_of_loaded_image == PIXEL_WIDE &&
+        ((context.Ratio == PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
-          (Ratio_of_loaded_image == PIXEL_TALL &&
+          (context.Ratio == PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
       {
         Init_mode_video(
           Video_mode[Current_resolution].Width,
           Video_mode[Current_resolution].Height,
           Video_mode[Current_resolution].Fullscreen,
-          Ratio_of_loaded_image);
+          context.Ratio);
           Display_menu();
       }
       else
@@ -2881,6 +2827,7 @@ void Button_Reload(void)
 
       Main_image_is_modified=0;
     }
+    Destroy_context(&context);
   }
   else
     Hide_cursor();
@@ -2901,7 +2848,7 @@ void Backup_filename(char * fname, char * backup_name)
   short i;
 
   strcpy(backup_name,fname);
-  for (i=strlen(fname)-strlen(Main_filename); backup_name[i]!='.'; i++);
+  for (i=strlen(fname)-strlen(Main_backups->Pages->Filename); backup_name[i]!='.'; i++);
   backup_name[i+1]='\0';
   strcat(backup_name,"BAK");
 }
@@ -2912,7 +2859,7 @@ void Backup_existing_file(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup
 
-  Get_full_filename(filename,0);
+  Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
   // Calcul du nom complet du fichier backup
   Backup_filename(filename,new_filename);
 
@@ -2938,76 +2885,63 @@ void Save_picture(byte image)
   // image=1 => On charge/sauve une image
   // image=0 => On charge/sauve une brosse
 {
-  // Données initiales du fichier (au cas où on voudrait annuler)
-  char  initial_file_directory[MAX_PATH_CHARACTERS];
-  char  initial_filename[MAX_PATH_CHARACTERS];
-  byte  initial_file_format;
-  byte  do_not_restore;
+  byte  confirm;
   byte  old_cursor_shape;
-  short initial_main_image_width=Main_image_width;
-  short initial_main_image_height=Main_image_height;
-  //char  initial_comment[COMMENT_SIZE+1];
-
-
-  if (!image)
-    Swap_data_of_image_and_brush();
-
-  strcpy(initial_file_directory,Main_file_directory);
-  strcpy(initial_filename       ,Main_filename);
-  initial_file_format=Main_fileformat;
-
-  do_not_restore=Button_Load_or_Save(0,image);
-
-  if (do_not_restore && File_exists(Main_filename))
+  T_IO_Context save_context;
+  static char filename [MAX_PATH_CHARACTERS];
+  static char directory[MAX_PATH_CHARACTERS];
+  
+  if (image)
   {
-    do_not_restore=Confirmation_box("Erase old file ?");
-    if ((do_not_restore) && (Config.Backup))
+    strcpy(filename, Main_backups->Pages->Filename);
+    strcpy(directory, Main_backups->Pages->File_directory);
+    Init_context_layered_image(&save_context, filename, directory);
+    save_context.Format = Main_fileformat;
+  }
+  else
+  {
+    strcpy(filename, Brush_filename);
+    strcpy(directory, Brush_file_directory);
+    Init_context_brush(&save_context, filename, directory);
+    save_context.Format = Main_fileformat;
+  }
+  
+  //if (!image)
+  //  Swap_data_of_image_and_brush();
+
+  confirm=Button_Load_or_Save(0, &save_context);
+
+  if (confirm && File_exists(save_context.File_name))
+  {
+    confirm=Confirmation_box("Erase old file ?");
+    if (confirm && (Config.Backup))
     {
       Backup_existing_file();
       if (File_error)
       {
-        do_not_restore=0;
+        confirm=0;
         Error(0);
       }
     }
   }
 
-  if (do_not_restore)
+  if (confirm)
   {
+    
     old_cursor_shape=Cursor_shape;
     Hide_cursor();
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
     Display_cursor();
 
-    if (image)
-      Save_image(image);
-    else
-    {
-      Main_image_width=Brush_width;
-      Main_image_height=Brush_height;
-      Save_image(image);
-      Main_image_width=initial_main_image_width;
-      Main_image_height=initial_main_image_height;
-    }
+    Save_image(&save_context);
 
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
-
-    if ((File_error==1) || (Get_fileformat(Main_fileformat)->Palette_only))
-      do_not_restore=0;
-
     Display_cursor();
   }
-
-  if (!do_not_restore)
-  {
-    strcpy(Main_filename       ,initial_filename);
-    strcpy(Main_file_directory,initial_file_directory);
-           Main_fileformat    =initial_file_format;
-  }
-
-  if (!image)
-    Swap_data_of_image_and_brush();
+  Destroy_context(&save_context);
+  //if (!image)
+  //  Swap_data_of_image_and_brush();
 
   Print_filename();
   Set_palette(Main_palette);
@@ -3027,7 +2961,7 @@ void Button_Autosave(void)
   byte file_already_exists;
 
 
-  Get_full_filename(filename,0);
+  Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
   file_already_exists=File_exists(filename);
 
   if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
@@ -3041,11 +2975,15 @@ void Button_Autosave(void)
 
     if (!File_error)
     {
+      T_IO_Context save_context;
+    
       old_cursor_shape=Cursor_shape;
       Cursor_shape=CURSOR_SHAPE_HOURGLASS;
       Display_cursor();
 
-      Save_image(1);
+      Init_context_layered_image(&save_context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+      Save_image(&save_context);
+      Destroy_context(&save_context);
 
       Hide_cursor();
       Cursor_shape=old_cursor_shape;

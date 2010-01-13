@@ -212,12 +212,13 @@ struct {
 #define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
 
 // --------------------- Analyse de la ligne de commande ---------------------
-void Analyze_command_line(int argc, char * argv[])
+int Analyze_command_line(int argc, char * argv[], char *main_filename, char *main_directory, char *spare_filename, char *spare_directory)
 {
   char *buffer ;
   int index;
+  int file_in_command_line;
 
-  File_in_command_line = 0;
+  file_in_command_line = 0;
   Resolution_in_command_line = 0;
   
   Current_resolution = Config.Default_resolution;
@@ -347,7 +348,7 @@ void Analyze_command_line(int argc, char * argv[])
         break;
       default:
         // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-        if (File_in_command_line > 1)
+        if (file_in_command_line > 1)
         {
           // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
           Error(ERROR_COMMAND_LINE);
@@ -356,22 +357,22 @@ void Analyze_command_line(int argc, char * argv[])
         }
         else if (File_exists(argv[index]))
         {
-          File_in_command_line ++;
+          file_in_command_line ++;
           buffer = Realpath(argv[index], NULL);
         
-          if (File_in_command_line == 1)
+          if (file_in_command_line == 1)
           {
             // Separate path from filename
-            Extract_path(Main_file_directory, buffer);
-            Extract_filename(Main_filename, buffer);
-            free(buffer);
+            Extract_path(main_directory, buffer);
+            Extract_filename(main_filename, buffer);
           }
           else
           {
-            Extract_path(Spare_file_directory, buffer);
-            Extract_filename(Spare_filename, buffer);
-            free(buffer);
+            // Separate path from filename
+            Extract_path(spare_directory, buffer);
+            Extract_filename(spare_filename, buffer);
           }
+          free(buffer);
         }
         else
         {
@@ -382,6 +383,7 @@ void Analyze_command_line(int argc, char * argv[])
         break;
     }
   }
+  return file_in_command_line;
 }
 
 // ------------------------ Initialiser le programme -------------------------
@@ -390,8 +392,15 @@ int Init_program(int argc,char * argv[])
 {
   int temp;
   int starting_videomode;
-  char program_directory[MAX_PATH_CHARACTERS];
+  static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
+  int file_in_command_line;
+  static char main_filename [MAX_PATH_CHARACTERS];
+  static char main_directory[MAX_PATH_CHARACTERS];
+  static char spare_filename [MAX_PATH_CHARACTERS];
+  static char spare_directory[MAX_PATH_CHARACTERS];
+  
+  
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -415,19 +424,15 @@ int Init_program(int argc,char * argv[])
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main_current_directory);
 
-  // On initialise les données sur le nom de fichier de l'image principale:
-  strcpy(Main_file_directory,Main_current_directory);
-  strcpy(Main_filename,"NO_NAME.GIF");
-  Main_fileformat=DEFAULT_FILEFORMAT;
-
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare_current_directory,Main_current_directory);
-  strcpy(Spare_file_directory,Main_file_directory);
-  strcpy(Spare_filename       ,Main_filename);
+  
+  Main_fileformat=DEFAULT_FILEFORMAT;
   Spare_fileformat    =Main_fileformat;
+  
   strcpy(Brush_current_directory,Main_current_directory);
-  strcpy(Brush_file_directory,Main_file_directory);
-  strcpy(Brush_filename       ,Main_filename);
+  strcpy(Brush_file_directory,Main_current_directory);
+  strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
@@ -449,7 +454,6 @@ int Init_program(int argc,char * argv[])
 
   // On initialise les commentaires des images à des chaînes vides
   Main_comment[0]='\0';
-  Spare_comment[0]='\0';
   Brush_comment[0]='\0';
 
   // On initialise d'ot' trucs
@@ -480,6 +484,12 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
   Keyboard_click_allowed = 0;
+  
+  Main_safety_backup_prefix = 'a';
+  Spare_safety_backup_prefix = 'b';
+  Main_time_of_safety_backup = 0;
+  Spare_time_of_safety_backup = 0;
+  
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -515,6 +525,7 @@ int Init_program(int argc,char * argv[])
       SDL_FreeSurface(icon);
     }
   }
+  
   // Texte
   Init_text();
 
@@ -538,8 +549,6 @@ int Init_program(int argc,char * argv[])
   Paintbrush_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
-
-  Pixel_load_function=Pixel_load_in_current_screen;
 
   // On initialise tout ce qui concerne les opérations et les effets
   Operation_stack_size=0;
@@ -618,7 +627,7 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  Analyze_command_line(argc, argv);
+  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
 
   Current_help_section=0;
   Help_position=0;
@@ -702,18 +711,6 @@ int Init_program(int argc,char * argv[])
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(Screen_width,Screen_height)==0)
     Error(ERROR_MEMORY);
-  // On remet le nom par défaut pour la page de brouillon car il été modifié
-  // par le passage d'un fichier en paramètre lors du traitement précédent.
-  // Note: le fait que l'on ne modifie que les variables globales 
-  // Brouillon_* et pas les infos contenues dans la page de brouillon 
-  // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
-  // poser de problèmes, alors...
-  if (File_in_command_line == 1)
-  {
-    strcpy(Spare_file_directory,Spare_current_directory);
-    strcpy(Spare_filename,"NO_NAME.GIF");
-    Spare_fileformat=DEFAULT_FILEFORMAT;
-  }
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
@@ -745,6 +742,51 @@ int Init_program(int argc,char * argv[])
   Brush_height=1;
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
+  
+  // Test de recuperation de fichiers sauvés
+  if (Check_recovery())
+  {
+    // Some files were loaded from last crash-exit.
+    // Do not load files from command-line, nor show splash screen.
+  }
+  else
+  {
+    T_IO_Context context;
+    
+    switch (file_in_command_line)
+    {
+      case 0:
+        if (Config.Opening_message)
+          Button_Message_initial();
+        break;
+
+      case 2:
+        // Load this file
+    		Init_context_layered_image(&context, spare_filename, spare_directory);
+    		Load_image(&context);
+    		Destroy_context(&context);
+        Redraw_layered_image();
+
+        Button_Page();
+        // no break ! proceed with the other file now
+      case 1:
+    		Init_context_layered_image(&context, main_filename, main_directory);
+    		Load_image(&context);
+    		Destroy_context(&context);
+        Redraw_layered_image();
+        
+        Hide_cursor();
+        Compute_optimal_menu_colors(Main_palette);
+        Display_all_screen();
+        Display_menu();
+        Display_cursor();
+        Resolution_in_command_line = 0;
+        break;
+  
+      default:
+        break;
+    }
+  }
   return(1);
 }
 
@@ -771,6 +813,9 @@ void Program_shutdown(void)
     Config.Window_pos_x = 9999;
     Config.Window_pos_y = 9999;
   #endif
+
+  // Remove the safety backups, this is normal exit
+  Delete_safety_backups();
 
   // On libère le buffer de gestion de lignes
   if(Horizontal_line_buffer) free(Horizontal_line_buffer);
@@ -815,71 +860,11 @@ void Program_shutdown(void)
 // -------------------------- Procédure principale ---------------------------
 int main(int argc,char * argv[])
 {
-  int phoenix_found=0;
-  int phoenix2_found=0;
-  char phoenix_filename1[MAX_PATH_CHARACTERS];
-  char phoenix_filename2[MAX_PATH_CHARACTERS];
+
   if(!Init_program(argc,argv))
   {
     Program_shutdown();
     return 0;
-  }
-
-  // Test de recuperation de fichiers sauvés
-  strcpy(phoenix_filename1,Config_directory);
-  strcat(phoenix_filename1,"phoenix.img");
-  strcpy(phoenix_filename2,Config_directory);
-  strcat(phoenix_filename2,"phoenix2.img");
-  if (File_exists(phoenix_filename1))
-    phoenix_found=1;
-  if (File_exists(phoenix_filename2))
-    phoenix2_found=1;
-  if (phoenix_found || phoenix2_found)
-  {
-    if (phoenix2_found)
-    {
-      strcpy(Main_file_directory,Config_directory);
-      strcpy(Main_filename,"phoenix2.img");
-      chdir(Main_file_directory);
-
-      Button_Reload();
-      Main_image_is_modified=1;
-      Warning_message("Spare page recovered");
-      // I don't really like this, but...
-      remove(phoenix_filename2);
-      Button_Page();
-    }
-    if (phoenix_found)
-    {
-      strcpy(Main_file_directory,Config_directory);
-      strcpy(Main_filename,"phoenix.img");
-      chdir(Main_file_directory);
-      Button_Reload();
-      Main_image_is_modified=1;
-      Warning_message("Main page recovered");
-      // I don't really like this, but...
-      remove(phoenix_filename1);
-    }
-  }
-  else
-  {
-    if (Config.Opening_message && (!File_in_command_line))
-      Button_Message_initial();
-  
-    switch (File_in_command_line)
-    {
-      case 2:
-      Button_Reload();
-      DEBUG(Main_filename, 0);
-      DEBUG(Spare_filename, 0);
-      Button_Page();
-      // no break ! proceed with the other file now
-    case 1:
-      Button_Reload();
-      Resolution_in_command_line = 0;
-    default:
-      break;
-    }
   }
   
   Main_handler();

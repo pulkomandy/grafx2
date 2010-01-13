@@ -89,3 +89,8 @@ int  Directory_exists(char * directory);
 
 /// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));
+
+///
+/// Creates a fully qualified name from a directory and filename.
+/// The point is simply to insert a PATH_SEPARATOR when needed.
+void Get_full_filename(char * output_name, char * file_name, char * directory_name);

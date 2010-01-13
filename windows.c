@@ -741,10 +741,10 @@ void Print_filename(void)
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
   
-  string_size = strlen(Main_filename);
+  string_size = strlen(Main_backups->Pages->Filename);
   
   // Partial copy of the name
-  strncpy(display_string, Main_filename, max_size);
+  strncpy(display_string, Main_backups->Pages->Filename, max_size);
   display_string[max_size]='\0';
 
   if (string_size > max_size)

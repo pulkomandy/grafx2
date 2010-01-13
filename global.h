@@ -341,6 +341,14 @@ GFX2_GLOBAL short Main_magnifier_offset_Y;
 GFX2_GLOBAL byte Main_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Main_layers_visible;
+/// Index to use next time, when creating incremental backups, to make unique filename.
+GFX2_GLOBAL long Main_safety_number;
+/// Number of edit actions since the last safety backup
+GFX2_GLOBAL long Main_edits_since_safety_backup;
+/// SDL Time of the previous safety backup
+GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
+/// Letter prefix for the filenames of safety backups. a or b
+GFX2_GLOBAL byte Main_safety_backup_prefix;
 
 // -- Spare page data
 
@@ -405,6 +413,15 @@ GFX2_GLOBAL short Spare_magnifier_offset_Y;
 GFX2_GLOBAL byte Spare_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Spare_layers_visible;
+/// Index to use next time, when creating incremental backups, to make unique filename.
+GFX2_GLOBAL long Spare_safety_number;
+/// Number of edit actions since the last safety backup
+GFX2_GLOBAL long Spare_edits_since_safety_backup;
+/// SDL Time of the previous safety backup
+GFX2_GLOBAL Uint32 Spare_time_of_safety_backup;
+/// Letter prefix for the filenames of safety backups. a or b
+GFX2_GLOBAL byte Spare_safety_backup_prefix;
+
 // -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
@@ -801,8 +818,6 @@ GFX2_GLOBAL byte Selected_curve_mode;
 GFX2_GLOBAL byte Selected_line_mode;
 /// Determines which color appears in the first cell of the menu palette. Change this value to "scroll" the palette.
 GFX2_GLOBAL byte First_color_in_palette;
-/// Boolean, true if Grafx2 was run with a file as command-line argument, which must be open immediately.
-GFX2_GLOBAL byte File_in_command_line;
 /// Boolean, true if Grafx2 was run with a command-line argument to set a resolution on startup (overrides config)
 GFX2_GLOBAL byte Resolution_in_command_line;
 
@@ -912,14 +927,6 @@ GFX2_GLOBAL struct
 GFX2_GLOBAL signed char File_error;
 /// Current line number when reading/writing gfx2.ini
 GFX2_GLOBAL int Line_number_in_INI_file;
-///
-/// Pointer to a pixel-loading function. This is used by the generic loading
-/// function to load a preview, a brush or an image.
-GFX2_GLOBAL Func_pixel Pixel_load_function;
-///
-/// Pointer to a pixel-reading function. This is used by the generic saving
-/// function to save a brush or an image.
-GFX2_GLOBAL Func_read   Read_pixel_function;
 
 // -- Specific to SDL
 

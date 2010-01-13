@@ -252,8 +252,12 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   strcpy(full_filename, directory_name);
   current_directory=opendir(directory_name);
   if(current_directory == NULL) return;        // Répertoire invalide ...
-  strcat(full_filename, PATH_SEPARATOR);
   filename_position = strlen(full_filename);
+  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+  {
+    strcat(full_filename, PATH_SEPARATOR);
+    filename_position = strlen(full_filename);
+  }
   while ((entry=readdir(current_directory)))
   {
     struct stat Infos_enreg;
@@ -267,3 +271,15 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   closedir(current_directory);
 }
 
+void Get_full_filename(char * output_name, char * file_name, char * directory_name)
+{
+  strcpy(output_name,directory_name);
+
+  // Append a separator at the end of path, if there isn't one already.
+  // This handles the case of directory variables which contain one,
+  // as well as directories like "/" on Unix.
+  if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
+      strcat(output_name,PATH_SEPARATOR);
+
+  strcat(output_name,file_name);
+}
