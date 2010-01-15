@@ -33,6 +33,7 @@ enum CONTEXT_TYPE {
   CONTEXT_MAIN_IMAGE,
   CONTEXT_BRUSH,
   CONTEXT_PREVIEW,
+  CONTEXT_SURFACE,
 };
 
 
@@ -76,6 +77,9 @@ typedef struct
   short Preview_factor_Y;
   short Preview_pos_X;
   short Preview_pos_Y;
+  
+  // Internal: returned surface for SDL_Surface case
+  SDL_Surface * Surface;
 
 } T_IO_Context;
 
@@ -98,6 +102,8 @@ void Init_context_flat_image(T_IO_Context * context, char *file_name, char *file
 void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for saving an arbitrary undo/redo step, from either the main or spare page. 
 void Init_context_history_step(T_IO_Context * context, T_Page *page);
+// Setup for loading an image into a new SDL surface.
+void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory);
 
 // Cleans up resources (currently: the 24bit buffer) 
 void Destroy_context(T_IO_Context *context);
@@ -141,6 +147,10 @@ extern T_Format File_formats[];
 /// called in case of SIGSEGV.
 void Image_emergency_backup(void);
 
+/// Load an arbitrary SDL_Surface.
+SDL_Surface * Load_surface(char *full_name);
+
+
 /*
 /// Pixel ratio of last loaded image: one of :PIXEL_SIMPLE, :PIXEL_WIDE or :PIXEL_TALL
 extern enum PIXEL_RATIO Ratio_of_loaded_image;
@@ -162,7 +172,7 @@ T_Format * Get_fileformat(byte format);
 /// Generic allocation and similar stuff, done at beginning of image load, as soon as size is known.
 void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte truecolor);
 /// Remaps the window. To call after palette (last) changes.
-void Remap_fileselector(T_IO_Context *context);
+void Palette_loaded(T_IO_Context *context);
 /// Generic cleanup done on end of loading (ex: color-conversion from the temporary 24b buffer)
 //void Post_load(T_IO_Context *context);
 

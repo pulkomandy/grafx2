@@ -274,12 +274,13 @@ void For_each_file(const char * directory_name, void Callback(const char *))
 void Get_full_filename(char * output_name, char * file_name, char * directory_name)
 {
   strcpy(output_name,directory_name);
-
-  // Append a separator at the end of path, if there isn't one already.
-  // This handles the case of directory variables which contain one,
-  // as well as directories like "/" on Unix.
-  if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
-      strcat(output_name,PATH_SEPARATOR);
-
+  if (output_name[0] != '\0')
+  {
+    // Append a separator at the end of path, if there isn't one already.
+    // This handles the case of directory variables which contain one,
+    // as well as directories like "/" on Unix.
+    if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
+        strcat(output_name,PATH_SEPARATOR);
+  }
   strcat(output_name,file_name);
 }

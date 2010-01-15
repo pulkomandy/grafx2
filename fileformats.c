@@ -106,8 +106,7 @@ void Load_IMG(T_IO_Context * context)
       if (File_error==0)
       {
         memcpy(context->Palette,IMG_header.Palette,sizeof(T_Palette));
-        Set_palette(context->Palette);
-        Remap_fileselector(context);
+        Palette_loaded(context);
 
         context->Width=IMG_header.Width;
         context->Height=IMG_header.Height;
@@ -595,8 +594,7 @@ void Load_LBM(T_IO_Context * context)
             if (Image_HAM)
               Adapt_palette_HAM(context);
             Palette_64_to_256(context->Palette);
-            Set_palette(context->Palette);
-            Remap_fileselector(context);
+            Palette_loaded(context);
 
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (nb_colors&1)
@@ -1160,8 +1158,7 @@ void Load_BMP(T_IO_Context * context)
               context->Palette[index].G=local_palette[index][1];
               context->Palette[index].B=local_palette[index][0];
             }
-            Set_palette(context->Palette);
-            Remap_fileselector(context);
+            Palette_loaded(context);
 
             context->Width=header.Width;
             context->Height=header.Height;
@@ -1811,7 +1808,6 @@ void Load_GIF(T_IO_Context * context)
             for (color_index=0;color_index<nb_colors;color_index++)
               Read_byte(GIF_file,&(context->Palette[color_index].B));
           }
-          Set_palette(context->Palette);
         }
 
         // On lit un indicateur de block
@@ -1924,10 +1920,9 @@ void Load_GIF(T_IO_Context * context)
                     for (color_index=0;color_index<nb_colors;color_index++)
                       Read_byte(GIF_file,&(context->Palette[color_index].B));
                   }
-                  Set_palette(context->Palette);
                 }
     
-                Remap_fileselector(context);
+                Palette_loaded(context);
     
                 value_clr   =nb_colors+0;
                 value_eof   =nb_colors+1;
@@ -2648,8 +2643,7 @@ void Load_PCX(T_IO_Context * context)
                   }
               }
           }
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
           // à la fin, on retourne juste après le header pour lire l'image.
@@ -3057,8 +3051,7 @@ void Load_SCx(T_IO_Context * context)
 
           Palette_64_to_256(SCx_Palette);
           memcpy(context->Palette,SCx_Palette,size);
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           context->Width=SCx_header.Width;
           context->Height=SCx_header.Height;
@@ -3384,10 +3377,10 @@ void Load_PNG(T_IO_Context * context)
                     }
                     free(palette);
                   }
+                  
                   if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
                   {
-                    Set_palette(context->Palette);
-                    Remap_fileselector(context);
+                    Palette_loaded(context);
                   }
                   
                   context->Width=info_ptr->width;
@@ -3441,6 +3434,7 @@ void Load_PNG(T_IO_Context * context)
                           break;
                         case CONTEXT_MAIN_IMAGE:
                         case CONTEXT_BRUSH:
+                        case CONTEXT_SURFACE:
                           // It's loading an actual image
                           // We'll save memory and time by writing directly into
                           // our pre-allocated 24bit buffer

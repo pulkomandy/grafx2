@@ -819,7 +819,7 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   strcat(filename,"skins" PATH_SEPARATOR);
   strcat(filename,skin_file);
   
-  gui=IMG_Load(filename);
+  gui=Load_surface(filename);
   if (!gui)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
@@ -895,7 +895,7 @@ byte * Load_font(const char * font_name)
   // Read the file containing the image
   sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
-  image=IMG_Load(filename);
+  image=Load_surface(filename);
   if (!image)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");

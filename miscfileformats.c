@@ -110,8 +110,7 @@ void Load_PAL(T_IO_Context * context)
 		{
 			Palette_64_to_256(palette_64);
 			memcpy(context->Palette, palette_64, sizeof(T_Palette));
-			Set_palette(context->Palette);
-			Remap_fileselector(context);
+			Palette_loaded(context);
 
 			// On dessine une preview de la palette (si chargement = preview)
 			Draw_palette_preview(context);
@@ -139,8 +138,7 @@ void Load_PAL(T_IO_Context * context)
 				context->Palette[i].G = g;
 				context->Palette[i].B = b;
 
-				Set_palette(context->Palette);
-				Remap_fileselector(context);
+				Palette_loaded(context);
 
 				// On dessine une preview de la palette (si chargement = preview)
 				Draw_palette_preview(context);
@@ -378,8 +376,7 @@ void Load_PKM(T_IO_Context * context)
           // Palette lue en 64
           memcpy(context->Palette,header.Palette,sizeof(T_Palette));
           Palette_64_to_256(context->Palette);
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
@@ -1106,8 +1103,7 @@ void Load_KCF(T_IO_Context * context)
           context->Palette[index].B=context->Palette[index+16].B;
         }
 
-        Set_palette(context->Palette);
-        Remap_fileselector(context);
+        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1166,8 +1162,7 @@ void Load_KCF(T_IO_Context * context)
             context->Palette[index].B=context->Palette[index+16].B;
           }
 
-        Set_palette(context->Palette);
-        Remap_fileselector(context);
+        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1445,8 +1440,7 @@ void Load_PI1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffer+2,(byte *)context->Palette);
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -1771,8 +1765,7 @@ void Load_PC1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -1954,8 +1947,7 @@ void Load_NEO(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           // on saute la résolution et le flag, chacun 2 bits
           PI1_decode_palette(buffer+4,(byte *)context->Palette);
-          Set_palette(context->Palette);
-          Remap_fileselector(context);
+          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -2224,8 +2216,7 @@ void Load_C64(T_IO_Context * context)
         }
         
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
-        Set_palette(context->Palette); // this set the hardware palette for SDL
-        Remap_fileselector(context); // Always call it if you change the palette
+        Palette_loaded(context); // Always call it if you change the palette
                 
     if (file_size>9002)
         width=160;

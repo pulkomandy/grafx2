@@ -210,14 +210,32 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
       }
 
       break;
+      
+    // Load pixels in a SDL_Surface
+    case CONTEXT_SURFACE:
+      if (x_pos>=0 && y_pos>=0 && x_pos<context->Surface->w && y_pos<context->Surface->h)
+        *(((byte *)(context->Surface->pixels)) + context->Surface->pitch * y_pos + x_pos) = color;
+      break;
   
   }
 
 }
 
 
-void Remap_fileselector(T_IO_Context *context)
+void Palette_loaded(T_IO_Context *context)
 {
+  // Update the current screen to the loaded palette
+  switch (context->Type)
+  {
+    case CONTEXT_MAIN_IMAGE:
+    case CONTEXT_PREVIEW:
+      Set_palette(context->Palette);
+      break;
+    case CONTEXT_BRUSH:
+    case CONTEXT_SURFACE:
+      break;
+  }
+
   switch (context->Type)
   {
     case CONTEXT_PREVIEW:
@@ -268,10 +286,11 @@ void Remap_fileselector(T_IO_Context *context)
       */
       Remap_screen_after_menu_colors_change();
       break;
+      
     case CONTEXT_MAIN_IMAGE:
     case CONTEXT_BRUSH:
+    case CONTEXT_SURFACE:
       break;
-      
   }
 }
 
@@ -288,6 +307,7 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
   {
     case CONTEXT_MAIN_IMAGE:
     case CONTEXT_BRUSH:
+    case CONTEXT_SURFACE:
       {
         int index;
         
@@ -465,6 +485,17 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       context->Target_address=context->Buffer_image;
       
       break;
+      
+    case CONTEXT_SURFACE:
+      context->Surface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCCOLORKEY, width, height, 8, 0, 0, 0, 0);
+      if (! context->Surface)
+      {
+        File_error=1;
+        return;
+      }
+      //context->Pitch = context->Surface->pitch;
+      //context->Target_address = context->Surface->pixels;
+      break;
   }
 
   if (File_error)
@@ -479,6 +510,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     {
       case CONTEXT_MAIN_IMAGE:
       case CONTEXT_BRUSH:
+      case CONTEXT_SURFACE:
         // Allocate 24bit buffer
         context->Buffer_image_24b=
           (T_Components *)malloc(width*height*sizeof(T_Components));
@@ -495,8 +527,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       case CONTEXT_PREVIEW:
         // Load palette
         Set_palette_fake_24b(context->Palette);
-        Set_palette(context->Palette);
-        Remap_fileselector(context);
+        Palette_loaded(context);
         break;
     }
   }
@@ -635,7 +666,7 @@ void Load_image(T_IO_Context *context)
             File_error=2;
           else
           {
-            Set_palette(context->Palette);
+            Palette_loaded(context);
           }
           break;
           
@@ -651,6 +682,11 @@ void Load_image(T_IO_Context *context)
 
         case CONTEXT_PREVIEW:
           // nothing to do
+          break;
+          
+        case CONTEXT_SURFACE:
+          if (Convert_24b_bitmap_to_256(context->Surface->pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+            File_error=1;
           break;
 
       }
@@ -727,6 +763,23 @@ void Load_image(T_IO_Context *context)
     if (!Smear_brush)
       File_error=3;
   }
+  else if (context->Type == CONTEXT_SURFACE)
+  {
+    if (File_error == 0)
+    {
+      // Copy the palette
+      SDL_Color colors[256];
+      int i;
+      
+      for (i=0; i<256; i++)
+      {
+        colors[i].r=context->Palette[i].R;
+        colors[i].g=context->Palette[i].G;
+        colors[i].b=context->Palette[i].B;
+      }
+      SDL_SetColors(context->Surface, colors, 0, 256);
+    }
+  }
 }
 
 
@@ -757,6 +810,9 @@ void Save_image(T_IO_Context *context)
       break;
       
     case CONTEXT_PREVIEW:
+      break;
+      
+    case CONTEXT_SURFACE:
       break;
   }
 
@@ -807,8 +863,6 @@ void Load_SDL_Image(T_IO_Context *context)
     if (surface->format->palette)
     {
       Get_SDL_Palette(surface->format->palette, context->Palette);
-      Set_palette(context->Palette);
-      Remap_fileselector(context);
     }
     
     for (y_pos=0; y_pos<context->Height; y_pos++)
@@ -843,6 +897,24 @@ void Load_SDL_Image(T_IO_Context *context)
 
   SDL_FreeSurface(surface);
 }
+
+/// Load an arbitrary SDL_Surface.
+SDL_Surface * Load_surface(char *full_name)
+{
+  SDL_Surface * bmp=NULL;
+  T_IO_Context context;
+  
+  Init_context_surface(&context, full_name, "");
+  Load_image(&context);
+  
+  if (context.Surface)
+    bmp=context.Surface;
+    
+  Destroy_context(&context);
+
+  return bmp;
+}
+
 
 /// Saves an image.
 /// This routine will only be called when all hope is lost, memory thrashed, etc
@@ -1007,6 +1079,25 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
 
 }
 
+// Setup for loading an image into a new SDL surface.
+void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory)
+{
+  memset(context, 0, sizeof(T_IO_Context));
+  
+  context->Type = CONTEXT_SURFACE;
+  context->File_name = file_name;
+  context->File_directory = file_directory;
+  context->Format = DEFAULT_FILEFORMAT;
+  // context->Palette
+  // context->Width
+  // context->Height
+  context->Nb_layers = 1;
+  context->Transparent_color=-1;
+  context->Ratio=PIXEL_SIMPLE;
+  //context->Target_address
+  //context->Pitch
+
+}
 /// Function to call when need to switch layers.
 void Set_layer(T_IO_Context *context, byte layer)
 {
