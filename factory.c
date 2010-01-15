@@ -87,8 +87,10 @@ int L_GetPictureSize(lua_State* L)
 
 int L_PutPicturePixel(lua_State* L)
 {
-	Pixel_in_current_layer(lua_tonumber(L, 1), lua_tonumber(L, 2),
-		lua_tonumber(L, 3));
+  int x = lua_tonumber(L,1);
+  int y = lua_tonumber(L,2);
+  int c = lua_tonumber(L,3);
+	Pixel_figure_permanent(x, y, c);
 	return 0; // no values returned for lua
 }
 
@@ -232,7 +234,7 @@ void Button_Brush_Factory(void)
       if(message)
 			  Verbose_error_message(message);
       else
-        Warning_message("Unknown error loading script!");
+        Warning_message("Unknown error running script!");
     }
 
 		lua_close(L);
