@@ -251,6 +251,7 @@ else
         NOTTF = 1
         PLATFORM = gp2x
         STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
+        JOYCOPT = -DUSE_JOYSTICK
       else
 
         # Compiles a regular linux exectutable for the native platform
@@ -302,13 +303,13 @@ else
 	LUALABEL =
 endif
 
-#To disable Joystick emulation of cursor, make NOJOY=1 (for input.o)
-#This can be necessary to test keyboard cursor code, because an existing
-#joystick will keep reporting a contradicting position.
-ifeq ($(NOJOY),1)
-  JOYCOPT = -DNO_JOYCURSOR
-else
-  JOYCOPT =
+#To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
+#This can be necessary to test cursor code on a PC, but by default for all
+#non-console platforms the joystick is disabled, to avoid reporting
+#'restless' movements when an analog joystick or a poorly-calibrated joypad
+#is plugged in.
+ifeq ($(USE_JOYSTICK),1)
+  JOYCOPT = -DUSE_JOYSTICK
 endif
 
 #To speed up rendering, can disable the layered editing

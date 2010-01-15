@@ -465,7 +465,6 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     #ifdef __GP2X__
     switch(event.button)
     {
-      #ifndef NO_JOYCURSOR
       case GP2X_BUTTON_UP:
         Directional_up=1;
         break;
@@ -490,7 +489,6 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       case GP2X_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
-      #endif
       default:
 		break;
     }
@@ -563,7 +561,6 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
 
 void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
-    #ifndef NO_JOYCURSOR
     if (event.axis==0) // X
     {
       Directional_right=Directional_left=0;
@@ -584,7 +581,6 @@ void Handle_joystick_movement(SDL_JoyAxisEvent event)
       else if (event.value>1000)
         Directional_down=1;
     }
-    #endif
 }
 
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
@@ -674,6 +670,9 @@ int Get_input(void)
                 Handle_key_release(event.key);
                 break;
 
+            // Start of Joystik handling
+            #ifdef USE_JOYSTICK
+
             case SDL_JOYBUTTONUP:
                 Handle_joystick_release(event.jbutton);
                 user_feedback_required = 1;
@@ -687,7 +686,10 @@ int Get_input(void)
             case SDL_JOYAXISMOTION:
                 Handle_joystick_movement(event.jaxis);
                 break;
-                
+
+            #endif
+            // End of Joystick handling
+            
             default:
             //    DEBUG("Unhandled SDL event number : ",event.type);
                 break;
