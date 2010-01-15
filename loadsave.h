@@ -28,6 +28,7 @@
 #define __LOADSAVE_H__
 
 #include <stdio.h>
+#include <SDL_image.h>
 
 enum CONTEXT_TYPE {
   CONTEXT_MAIN_IMAGE,
