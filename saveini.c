@@ -82,20 +82,21 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
 int Save_INI_char_in_value_alphabet(char c)
 {
   if (
-       (                    // Chiffre
+       (                    // Digit
          (c>='0') &&
          (c<='9')
        ) ||
-       (                    // Lettre majuscule
+       (                    // Uppercase letter
          (c>='A') &&
          (c<='Z')
        ) ||
-       (                    // Lettre minuscule
+       (                    // Lowerchase letter
          (c>='a') &&
          (c<='z')
        ) ||
-       (c == '$')        // Symbole d'hexadécimal
-	   || (c== '.')		// Point (dans les noms de fichiers)
+       (c == '$') ||        // Hexa prefix
+       (c == '-') ||        // Minus sign
+       (c== '.')            // Dot (in filenames)
      )
     return 1;
   else

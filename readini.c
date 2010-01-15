@@ -523,7 +523,7 @@ int Load_INI(T_Config * conf)
 
   if ((return_code=Load_INI_get_values (file,buffer,"Menu_ratio",1,values)))
     goto Erreur_Retour;
-  if (values[0]>2)
+  if ((values[0]<-4) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Ratio=values[0];
 
