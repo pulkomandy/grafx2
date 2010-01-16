@@ -229,6 +229,8 @@ else
       CP = cp
       ZIP = zip
       PLATFORMFILES = gfx2.png
+	  LUACOPT = `pkg-config lua5.1 --cflags`
+	  LUALOPT = `pkg-config lua5.1 --libs`
 
       # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
       ifdef WIN32CROSS
@@ -298,8 +300,7 @@ ifeq ($(NOLUA),1)
 	LUALOPT =
 	LUALABEL = -nolua
 else
-	LUACOPT = -D__ENABLE_LUA__
-	LUALOPT = -llua5.1
+	LUACOPT += -D__ENABLE_LUA__
 	LUALABEL =
 endif
 
