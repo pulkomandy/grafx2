@@ -3404,10 +3404,12 @@ void Grad_rectangle_0_5(void)
   height = abs(rby - ray);
 
   // Check if the rectangle is not fully outside the picture
-  if (Min(rax, rbx) > Main_image_width || Min(ray, rby) > Main_image_height)
+  if (Min(rax, rbx) > Main_image_width                  // Rectangle at right of picture
+      || Min(ray, rby) > Main_image_height              // Rectangle below picture
+      || Min(ray, rby) - 1 - Main_offset_Y > Menu_Y )   // Rectangle below viewport
   {
-	Operation_pop(&rby); // reset the stack
-	return; // cancel the operation
+	  Operation_pop(&rby); // reset the stack
+	  return; // cancel the operation
   }
 
 	// Handle clipping
@@ -3426,20 +3428,22 @@ void Grad_rectangle_0_5(void)
 		Min(ray, rby) - Main_offset_Y, width - offset_width);
 
 	// If not, this line is out of the picture so there is no need to draw it
-	if (offset_height == 0)
+	if (offset_height == 0 || Max(ray, rby) - 1 > Menu_Y + Main_offset_Y )
 	{
 		Horizontal_XOR_line(Min(rax, rbx) - Main_offset_X, Max(ray, rby) - 1
 			- Main_offset_Y, width - offset_width);
 	}
 
-	Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
-		- Main_offset_Y, height - offset_height);
+  if (height > offset_height) {
+	  Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
+		  - Main_offset_Y, height - offset_height);
 
-	if (offset_width == 0)
-	{
-		Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
-			- Main_offset_Y, height - offset_height);
-	}
+	  if (offset_width == 0)
+	  {
+		  Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
+			  - Main_offset_Y, height - offset_height);
+	  }
+  }
 
 	Update_rect(Min(rax, rbx) - Main_offset_X, Min(ray, rby) - Main_offset_Y,
 		width + 1 - offset_width, height + 1 - offset_height);
