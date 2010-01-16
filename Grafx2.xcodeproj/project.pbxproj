@@ -7,10 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
 		002F39FA09D0881F10EBEB88 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F10EBEB88 /* SDL_image.framework */; };
 		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
 		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
+		40D82CA110ECAF13005D27B5 /* miscfileformats.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CA010ECAF13005D27B5 /* miscfileformats.c */; };
+		40D82CA610ECAF58005D27B5 /* brush_ops.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CA510ECAF58005D27B5 /* brush_ops.c */; };
+		40D82CAA10ECAFC5005D27B5 /* buttons_effects.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CA910ECAFC5005D27B5 /* buttons_effects.c */; };
+		40D82CAE10ECAFDC005D27B5 /* layers.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CAD10ECAFDC005D27B5 /* layers.c */; };
+		40D82CB210ECB02B005D27B5 /* fileformats.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CB110ECB02B005D27B5 /* fileformats.c */; };
+		40D82CBF10ECB089005D27B5 /* libraw2crtc.c in Sources */ = {isa = PBXBuildFile; fileRef = 40D82CBE10ECB089005D27B5 /* libraw2crtc.c */; };
+		40D82D3A10ECC4CA005D27B5 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
+		40D82D4310ECC536005D27B5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D4110ECC536005D27B5 /* Info.plist */; };
+		40D82D4410ECC536005D27B5 /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D4210ECC536005D27B5 /* SDLMain.nib */; };
+		40D82D5010ECC609005D27B5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D4E10ECC609005D27B5 /* Info.plist */; };
+		40D82D5110ECC609005D27B5 /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D4F10ECC609005D27B5 /* SDLMain.nib */; };
+		40D82D5710ECC67A005D27B5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D5510ECC67A005D27B5 /* Info.plist */; };
+		40D82D5810ECC67A005D27B5 /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 40D82D5610ECC67A005D27B5 /* SDLMain.nib */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		F5142653101F6CC5006CF3C4 /* font_Classic.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F514264D101F6CB8006CF3C4 /* font_Classic.png */; };
 		F5142654101F6CC5006CF3C4 /* font_Fairlight.png in Copy skins */ = {isa = PBXBuildFile; fileRef = F514264E101F6CB8006CF3C4 /* font_Fairlight.png */; };
@@ -57,7 +69,6 @@
 		F5B19BA20EA4BE3E003F4BA4 /* SFont.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */; };
 		F5B19BA30EA4BE3E003F4BA4 /* shade.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8B0EA4BE3E003F4BA4 /* shade.c */; };
 		F5B19BA40EA4BE3E003F4BA4 /* special.c in Sources */ = {isa = PBXBuildFile; fileRef = F5B19B8C0EA4BE3E003F4BA4 /* special.c */; };
-		F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */ = {isa = PBXBuildFile; fileRef = F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */; };
 		F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */; };
 		F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */; };
 		F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */ = {isa = PBXBuildFile; fileRef = F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */; };
@@ -108,6 +119,24 @@
 			name = "Copy Frameworks into .app bundle";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		40D82D4C10ECC5A4005D27B5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Library/Frameworks/SDL.framework/Resources;
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		40D82D5310ECC659005D27B5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F514264B101F6C5B006CF3C4 /* Copy skins */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -151,6 +180,18 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Grafx2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Grafx2_Prefix.pch; sourceTree = "<group>"; };
+		40D82CA010ECAF13005D27B5 /* miscfileformats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = miscfileformats.c; sourceTree = "<group>"; };
+		40D82CA510ECAF58005D27B5 /* brush_ops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = brush_ops.c; sourceTree = "<group>"; };
+		40D82CA910ECAFC5005D27B5 /* buttons_effects.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = buttons_effects.c; sourceTree = "<group>"; };
+		40D82CAD10ECAFDC005D27B5 /* layers.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = layers.c; sourceTree = "<group>"; };
+		40D82CB110ECB02B005D27B5 /* fileformats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileformats.c; sourceTree = "<group>"; };
+		40D82CBE10ECB089005D27B5 /* libraw2crtc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = libraw2crtc.c; sourceTree = "<group>"; };
+		40D82D4110ECC536005D27B5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Library/Frameworks/SDL.framework/Resources/Info.plist; sourceTree = "<absolute>"; };
+		40D82D4210ECC536005D27B5 /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = /Library/Frameworks/SDL.framework/Resources/SDLMain.nib; sourceTree = "<absolute>"; };
+		40D82D4E10ECC609005D27B5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Library/Frameworks/SDL.framework/Versions/A/Resources/Info.plist; sourceTree = "<absolute>"; };
+		40D82D4F10ECC609005D27B5 /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = /Library/Frameworks/SDL.framework/Versions/A/Resources/SDLMain.nib; sourceTree = "<absolute>"; };
+		40D82D5510ECC67A005D27B5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Library/Frameworks/SDL.framework/Versions/A/Resources/Info.plist; sourceTree = "<absolute>"; };
+		40D82D5610ECC67A005D27B5 /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = /Library/Frameworks/SDL.framework/Versions/A/Resources/SDLMain.nib; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Grafx2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grafx2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F514264D101F6CB8006CF3C4 /* font_Classic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font_Classic.png; path = skins/font_Classic.png; sourceTree = "<group>"; };
@@ -199,8 +240,7 @@
 		F5B19B8A0EA4BE3E003F4BA4 /* SFont.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SFont.c; sourceTree = "<group>"; };
 		F5B19B8B0EA4BE3E003F4BA4 /* shade.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = shade.c; sourceTree = "<group>"; };
 		F5B19B8C0EA4BE3E003F4BA4 /* special.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = special.c; sourceTree = "<group>"; };
-		F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */ = {isa = PBXFileReference; lastKnownFileType = file; path = gfx2.cfg; sourceTree = "<group>"; };
-		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = SYSTEM_DEVELOPER_DIR; };
+		F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F5B19C3C0EA4DC91003F4BA4 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F5B1EE840EAD0F4E00B087B5 /* gfx2def.ini */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = gfx2def.ini; sourceTree = "<group>"; };
 		F5B310AD0F949A9C008197E2 /* buttons.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = buttons.c; sourceTree = "<group>"; };
@@ -221,12 +261,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */,
 				002F39FA09D0881F10EBEB88 /* SDL_image.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				F5B19C1D0EA4D71C003F4BA4 /* CoreFoundation.framework in Frameworks */,
 				F5B138C30EB71D28000B83CC /* SDL_ttf in Frameworks */,
 				F5AE83FD0ECF8FD300200704 /* ApplicationServices.framework in Frameworks */,
+				40D82D3A10ECC4CA005D27B5 /* SDL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +312,15 @@
 		29B97314FDCFA39411CA2CEA /* Grafx2 */ = {
 			isa = PBXGroup;
 			children = (
+				40D82D5410ECC67A005D27B5 /* Resources */,
+				40D82D4D10ECC609005D27B5 /* Resources */,
+				40D82D4010ECC536005D27B5 /* Resources */,
+				40D82CBE10ECB089005D27B5 /* libraw2crtc.c */,
+				40D82CB110ECB02B005D27B5 /* fileformats.c */,
+				40D82CAD10ECAFDC005D27B5 /* layers.c */,
+				40D82CA910ECAFC5005D27B5 /* buttons_effects.c */,
+				40D82CA510ECAF58005D27B5 /* brush_ops.c */,
+				40D82CA010ECAF13005D27B5 /* miscfileformats.c */,
 				F514264D101F6CB8006CF3C4 /* font_Classic.png */,
 				F514264E101F6CB8006CF3C4 /* font_Fairlight.png */,
 				F514264F101F6CB9006CF3C4 /* font_Fun.png */,
@@ -311,7 +360,6 @@
 				F5DCE2BE0EA5118F0065B0EF /* SDL_ttf */,
 				F5B19C3B0EA4DC91003F4BA4 /* InfoPlist.strings */,
 				F5B19C1C0EA4D71C003F4BA4 /* CoreFoundation.framework */,
-				F5B19BDF0EA4C65A003F4BA4 /* gfx2.cfg */,
 				F5B19B7B0EA4BE3E003F4BA4 /* graph.c */,
 				F5B19B7C0EA4BE3E003F4BA4 /* init.c */,
 				F5B19B7D0EA4BE3E003F4BA4 /* io.c */,
@@ -368,6 +416,36 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		40D82D4010ECC536005D27B5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				40D82D4110ECC536005D27B5 /* Info.plist */,
+				40D82D4210ECC536005D27B5 /* SDLMain.nib */,
+			);
+			name = Resources;
+			path = /Library/Frameworks/SDL.framework/Resources;
+			sourceTree = "<absolute>";
+		};
+		40D82D4D10ECC609005D27B5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				40D82D4E10ECC609005D27B5 /* Info.plist */,
+				40D82D4F10ECC609005D27B5 /* SDLMain.nib */,
+			);
+			name = Resources;
+			path = /Library/Frameworks/SDL.framework/Versions/A/Resources;
+			sourceTree = "<absolute>";
+		};
+		40D82D5410ECC67A005D27B5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				40D82D5510ECC67A005D27B5 /* Info.plist */,
+				40D82D5610ECC67A005D27B5 /* SDLMain.nib */,
+			);
+			name = Resources;
+			path = /Library/Frameworks/SDL.framework/Versions/A/Resources;
+			sourceTree = "<absolute>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -383,6 +461,8 @@
 				002F39FD09D0883400EBEB8A /* Copy Frameworks into .app bundle */,
 				F5A33F1D0EC8A26C00F8052D /* Copy fonts */,
 				F514264B101F6C5B006CF3C4 /* Copy skins */,
+				40D82D4C10ECC5A4005D27B5 /* CopyFiles */,
+				40D82D5310ECC659005D27B5 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -400,9 +480,11 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Grafx2" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Grafx2 */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Grafx2 */,
 			);
@@ -414,9 +496,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5B19BE10EA4C65A003F4BA4 /* gfx2.cfg in Resources */,
 				F5B19C3D0EA4DC91003F4BA4 /* InfoPlist.strings in Resources */,
 				F5B1EE850EAD0F4E00B087B5 /* gfx2def.ini in Resources */,
+				40D82D4310ECC536005D27B5 /* Info.plist in Resources */,
+				40D82D4410ECC536005D27B5 /* SDLMain.nib in Resources */,
+				40D82D5010ECC609005D27B5 /* Info.plist in Resources */,
+				40D82D5110ECC609005D27B5 /* SDLMain.nib in Resources */,
+				40D82D5710ECC67A005D27B5 /* Info.plist in Resources */,
+				40D82D5810ECC67A005D27B5 /* SDLMain.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,6 +556,12 @@
 				F5AA40620FBC406D00B7577C /* pxwide2.c in Sources */,
 				F5AA40630FBC406D00B7577C /* transform.c in Sources */,
 				F539315E0FE171C3003CB103 /* pversion.c in Sources */,
+				40D82CA110ECAF13005D27B5 /* miscfileformats.c in Sources */,
+				40D82CA610ECAF58005D27B5 /* brush_ops.c in Sources */,
+				40D82CAA10ECAFC5005D27B5 /* buttons_effects.c in Sources */,
+				40D82CAE10ECAFDC005D27B5 /* layers.c in Sources */,
+				40D82CB210ECB02B005D27B5 /* fileformats.c in Sources */,
+				40D82CBF10ECB089005D27B5 /* libraw2crtc.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,6 +612,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/SDL_ttf.framework\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework\"";
 				PRODUCT_NAME = Grafx2;
+				REZ_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
@@ -577,20 +671,25 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/usr/X11/include,
+					/Library/Frameworks/SDL_image.framework/Headers,
 					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
 					/Library/Frameworks/SDL.framework/Headers,
 					/Library/SDL_ttf.framework/Headers,
 					/usr/local/include,
 					"$(HEADER_SEARCH_PATHS)",
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/X11/lib,
+					/usr/local/lib,
+				);
 				OTHER_LDFLAGS = (
 					"-lpng",
 					"-lz",
 				);
 				PREBINDING = NO;
 				PRELINK_LIBS = SDL_Image;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				ZERO_LINK = YES;
 			};
@@ -623,7 +722,7 @@
 				);
 				PREBINDING = NO;
 				PRELINK_LIBS = SDL_Image;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 			};
 			name = Release;
