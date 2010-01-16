@@ -2609,11 +2609,13 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
+
+    if(delta_r == delta_g == delta_b) return col;
+
     rmean = ( Main_palette[col].R + red ) / 2;
 
-    if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
-    //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
-      return col;
+    dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8);
+    //dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)
 
     if (dist<best_dist)
     {

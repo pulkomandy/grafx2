@@ -31,8 +31,9 @@
 #include "filesel.h" // Get_item_by_index
 #include "global.h"
 #include "graph.h"
-#include "io.h" // find_last_slash
+#include "io.h"     // find_last_slash
 #include "misc.h"
+#include "pages.h"  // Backup()
 #include "readline.h"
 #include "sdlscreen.h"
 #include "windows.h"
@@ -102,6 +103,14 @@ int L_GetPicturePixel(lua_State* L)
 	return 1;
 }
 
+int L_GetBackupPixel(lua_State* L)
+{
+	uint8_t c = Read_pixel_from_backup_screen(lua_tonumber(L, 1),
+		lua_tonumber(L, 2));
+	lua_pushinteger(L, c);
+	return 1;
+}
+
 int L_SetColor(lua_State* L)
 {
 	Set_color(lua_tonumber(L, 1), lua_tonumber(L, 2), lua_tonumber(L, 3),
@@ -118,6 +127,13 @@ int L_GetColor(lua_State* L)
 	lua_pushinteger(L, couleur.G);
 	lua_pushinteger(L, couleur.B);
 	return 3;
+}
+
+int L_MatchColor(lua_State* L)
+{
+  int c = Best_color_nonexcluded(lua_tonumber(L,1), lua_tonumber(L, 2), lua_tonumber(L, 3));
+  lua_pushinteger(L, c);
+  return 1;
 }
 
 int L_BrushEnable(__attribute__((unused)) lua_State* L)
@@ -204,12 +220,14 @@ void Button_Brush_Factory(void)
 		lua_register(L,"getbrushpixel",L_GetBrushPixel);
 		lua_register(L,"putpicturepixel",L_PutPicturePixel);
 		lua_register(L,"getpicturepixel",L_GetPicturePixel);
+		lua_register(L,"getbackuppixel",L_GetBackupPixel);
 		lua_register(L,"setbrushsize",L_SetBrushSize);
 		lua_register(L,"setpicturesize",L_SetPictureSize);
 		lua_register(L,"getbrushsize",L_GetBrushSize);
 		lua_register(L,"getpicturesize",L_GetPictureSize);
 		lua_register(L,"setcolor",L_SetColor);
 		lua_register(L,"getcolor",L_GetColor);
+		lua_register(L,"matchcolor",L_MatchColor);
 		lua_register(L,"brushenable",L_BrushEnable);
 
 		// For debug only
@@ -220,6 +238,13 @@ void Button_Brush_Factory(void)
 		strcat(scriptdir, Get_item_by_index(&Scripts_list,
 					scriptlist->List_start + scriptlist->Cursor_position)
 						-> Full_name);
+
+    // TODO The script may modify the picture, so we do a backup here.
+    // If the script is only touching the brush, this isn't needed...
+    // The backup also allows the script to read from it to make something
+    // like a feedback off effect (convolution matrix comes to mind).
+    Backup();
+
 		if (luaL_loadfile(L,scriptdir) != 0)
     {
       message = lua_tostring(L, 1);

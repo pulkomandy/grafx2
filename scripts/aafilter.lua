@@ -2,7 +2,10 @@
 w, h = getpicturesize();
 
 -- Here is the filtering matrix
- matrix = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ matrix = {
+	 {  0, -1,  0 },
+	 { -1,  5, -1 },
+	 {  0, -1,  0 }};
 
 -- Loop trough all the pixels
 -- To make this script simpler we don't handle the picture borders
@@ -11,15 +14,15 @@ w, h = getpicturesize();
 for y = 1, h - 2, 1 do
 	for x = 1, w - 2, 1 do
 		filtered =
-			matrix[1][1] * getpicturepixel(x - 1, y - 1) +
-			matrix[1][2] * getpicturepixel(x    , y - 1) +
-			matrix[1][3] * getpicturepixel(x + 1, y - 1) +
-			matrix[2][1] * getpicturepixel(x - 1, y    ) +
-			matrix[2][2] * getpicturepixel(x    , y    ) +
-			matrix[2][3] * getpicturepixel(x + 1, y    ) +
-			matrix[3][1] * getpicturepixel(x - 1, y + 1) +
-			matrix[3][2] * getpicturepixel(x    , y + 1) +
-			matrix[3][3] * getpicturepixel(x + 1, y + 1);
+			matrix[1][1] * getbackuppixel(x - 1, y - 1) +
+			matrix[1][2] * getbackuppixel(x    , y - 1) +
+			matrix[1][3] * getbackuppixel(x + 1, y - 1) +
+			matrix[2][1] * getbackuppixel(x - 1, y    ) +
+			matrix[2][2] * getbackuppixel(x    , y    ) +
+			matrix[2][3] * getbackuppixel(x + 1, y    ) +
+			matrix[3][1] * getbackuppixel(x - 1, y + 1) +
+			matrix[3][2] * getbackuppixel(x    , y + 1) +
+			matrix[3][3] * getbackuppixel(x + 1, y + 1);
 		putpicturepixel(x,y,filtered);
 	end
 end
