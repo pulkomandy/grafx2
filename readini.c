@@ -846,6 +846,36 @@ int Load_INI(T_Config * conf)
   if (!Load_INI_get_values (file, buffer,"Pixel_ratio",1,values))
   {
     Pixel_ratio = values[0];
+    switch(Pixel_ratio) {
+      case PIXEL_WIDE:
+        if(Video_mode[0].Width < 640)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TALL:
+        if(Video_mode[0].Height < 400)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_DOUBLE:
+        if(Video_mode[0].Width < 640 || Video_mode[0].Height < 400)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TRIPLE:
+        if(Video_mode[0].Width < 3*320 || Video_mode[0].Height < 3*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_WIDE2:
+        if(Video_mode[0].Width < 4*320 || Video_mode[0].Height < 2*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TALL2:
+        if(Video_mode[0].Width < 2*320 || Video_mode[0].Height < 4*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_QUAD:
+        if(Video_mode[0].Width < 4*320 || Video_mode[0].Height < 4*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+    }
   }
 
   fclose(file);
