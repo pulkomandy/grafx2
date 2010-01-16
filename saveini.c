@@ -335,6 +335,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
       free(result_buffer);
       free(upper_buffer);
       free(option_upper);
+      DEBUG("END OF FILE",0);
       return ERROR_INI_CORRUPTED;
     }
 
@@ -652,6 +653,12 @@ int Save_INI(T_Config * conf)
   values[0]=(conf->Grid_XOR_color);
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Grid_XOR_color",1,values,0)))
     goto Erreur_Retour;
+
+  values[0]=(Pixel_ratio);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Pixel_ratio",1,values,0))) {
+    DEBUG("saving pixel ratio",return_code);
+    goto Erreur_Retour;
+  }
     
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 

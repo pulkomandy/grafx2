@@ -394,13 +394,16 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
         if ( ((++nb_values) == nb_expected_values) &&
              (upper_buffer[buffer_index]!='\0') )
         {
+          // Too many values !
           free(upper_buffer);
           free(option_upper);
           return ERROR_INI_CORRUPTED;
         }
       }
+
       if (nb_values<nb_expected_values)
       {
+        // Not enough values !
         free(upper_buffer);
         free(option_upper);
         return ERROR_INI_CORRUPTED;
@@ -414,7 +417,6 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
 
   return 0;
 }
-
 
 
 int Load_INI(T_Config * conf)
@@ -836,8 +838,14 @@ int Load_INI(T_Config * conf)
   // Optional, XOR color for grid overlay (>2.0)
   if (!Load_INI_get_values (file,buffer,"Grid_XOR_color",1,values))
   {
-    if ((values[0]>0) || (values[0]<=255))
+    if ((values[0]>0) && (values[0]<=255))
       conf->Grid_XOR_color=values[0];
+  }
+
+  // Optional, "fake hardware zoom" factor (>2.1)
+  if (!Load_INI_get_values (file, buffer,"Pixel_ratio",1,values))
+  {
+    Pixel_ratio = values[0];
   }
 
   fclose(file);

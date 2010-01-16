@@ -731,6 +731,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
   #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
 
+
 // Indique quelle est la mémoire disponible
 unsigned long Memory_free(void)
 {
@@ -786,6 +787,7 @@ short Round(float value)
 	return temp;
 }
 
+
 // Arrondir le résultat d'une division à la valeur entière supérieure
 short Round_div_max(short numerator,short divisor)
 {
@@ -795,18 +797,19 @@ short Round_div_max(short numerator,short divisor)
 		return (numerator/divisor)+1;
 }
 
+
 // Retourne le minimum entre deux nombres
 int Min(int a,int b)
 {
 	return (a<b)?a:b;
 }
 
+
 // Retourne le maximum entre deux nombres
 int Max(int a,int b)
 {
 	return (a>b)?a:b;
 }
-
 
 
 // Fonction retournant le libellé d'une mode (ex: " 320x200")
@@ -819,6 +822,7 @@ char * Mode_label(int mode)
 
 	return str;
 }
+
 
 // Trouve un mode video à partir d'une chaine: soit "window",
 // soit de la forme "320x200"
@@ -833,6 +837,5 @@ int Convert_videomode_arg(const char *argument)
 			return mode_index;
 
 	return -1;
-
-
 }
+
