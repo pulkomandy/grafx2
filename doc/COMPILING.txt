@@ -153,7 +153,7 @@ Lua:
   Use sh shell
   make mingw
   (make install doesn't work, even with prefix)
-  Copy luaconf.h, lualib.h, lua.h, lauxlib.h to c:\msys\mingw\include\lua5.1
-  Copy liblua.a to c:\msys\mingw\lib RENAMED AS liblua5.1.a
+  Copy luaconf.h, lualib.h, lua.h, lauxlib.h to c:\msys\mingw\include
+  Copy liblua.a to c:\msys\mingw\lib
   Copy lua51.dll to c:\msys\mingw\bin
 

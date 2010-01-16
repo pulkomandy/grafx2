@@ -44,6 +44,7 @@ ifdef COMSPEC
   BIN = grafx2.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT) $(LAYERCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
+  LUALOPT = -llua
   CC = gcc
   OBJDIR = obj/win32
   # Resources (icon)
@@ -88,9 +89,9 @@ else
   SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
   COPT = -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
   LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
-  	# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
-  	CC = gcc
-  	#CC = nccgen -ncgcc -ncld -ncfabs
+  # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+  CC = gcc
+  #CC = nccgen -ncgcc -ncld -ncfabs
   OBJDIR = obj/macosx
   PLATFORMOBJ = $(OBJDIR)/SDLMain.o
   X11LOPT = 
@@ -108,7 +109,7 @@ else
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = obj/aros
-	STRIP = strip --strip-unneeded --remove-section .comment
+    STRIP = strip --strip-unneeded --remove-section .comment
     ZIP = lha
     ZIPOPT = a
 
@@ -126,7 +127,7 @@ else
     OBJDIR = obj/morphos
     ZIP = lha
     ZIPOPT = a
-	PLATFORMFILES = misc/grafx2.info
+    PLATFORMFILES = misc/grafx2.info
 
   else
   ifeq ($(PLATFORM),AMIGA) # 5
@@ -229,8 +230,8 @@ else
       CP = cp
       ZIP = zip
       PLATFORMFILES = gfx2.png
-	  LUACOPT = `pkg-config lua5.1 --cflags`
-	  LUALOPT = `pkg-config lua5.1 --libs`
+      LUACOPT = `pkg-config lua5.1 --cflags`
+      LUALOPT = `pkg-config lua5.1 --libs`
 
       # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
       ifdef WIN32CROSS
@@ -242,7 +243,7 @@ else
         OBJDIR = obj/win32
         PLATFORM = win32
       else
-	  ifdef GP2XCROSS
+      ifdef GP2XCROSS
 
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
@@ -260,9 +261,9 @@ else
         BIN = grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
-		# Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
-		CC = gcc
-		#CC = nccgen -ncgcc -ncld -ncfabs
+        # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+        CC = gcc
+        #CC = nccgen -ncgcc -ncld -ncfabs
         OBJDIR = obj/unix
         X11LOPT = -lX11
       endif
@@ -296,12 +297,12 @@ endif
 
 #Lua scripting is optional too
 ifeq ($(NOLUA),1)
-	LUACOPT =
-	LUALOPT =
-	LUALABEL = -nolua
+    LUACOPT =
+    LUALOPT =
+    LUALABEL = -nolua
 else
-	LUACOPT += -D__ENABLE_LUA__
-	LUALABEL =
+    LUACOPT += -D__ENABLE_LUA__
+    LUALABEL =
 endif
 
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
