@@ -692,6 +692,7 @@ void Load_image(T_IO_Context *context)
       }
     }
     free(context->Buffer_image_24b);
+    context->Buffer_image_24b = NULL;
   }
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
