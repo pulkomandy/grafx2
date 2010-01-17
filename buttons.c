@@ -1162,6 +1162,7 @@ void Button_Skins(void)
               Pixel_in_window(x, y, MC_Light);
           }
           // Actualize current screen according to preferred GUI colors
+          // Note this only updates onscreen colors
           Set_color(
             MC_Dark, 
             gfx->Default_palette[gfx->Color_dark].R,
@@ -1229,10 +1230,9 @@ void Button_Skins(void)
     Compute_optimal_menu_colors(Main_palette);
 
   }
-  else
-  {
-    Set_palette(Main_palette);
-  }
+  
+  // We don't want to keep the skin's palette, as this would corrupt the current picture's one.
+  Set_palette(Main_palette);
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
