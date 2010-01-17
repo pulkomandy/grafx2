@@ -224,10 +224,15 @@ void Remap_image_highlevel(byte * conversion_table)
   short end_y;
   short end_x_mag=0;
   short end_y_mag=0;
+  int layer;
 
-  // On s'occupe de faire la traduction dans l'image
+  // Remap the flatenned image view
   Remap_general_lowlevel(conversion_table,Main_screen,
                          Main_image_width,Main_image_height,Main_image_width);
+
+  // Remap all layers
+  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer],Main_image_width,Main_image_height,Main_image_width);
 
   // On calcule les limites à l'écran de l'image
   if (Main_image_height>=Menu_Y_before_window)
