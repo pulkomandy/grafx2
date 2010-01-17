@@ -595,6 +595,8 @@ GFX2_GLOBAL struct
   Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
   word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
   word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
+  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
+  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
 
   // Data used when the button is unselected
   Func_action     Unselect_action;  ///< Action triggered by unselecting the button

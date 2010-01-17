@@ -174,9 +174,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_SPACE|MOD_SHIFT, // Shift + Space
   0},
   {18,
-  "Show/hide option menu",
-  "Switch the tool bar display on/off.",
-  "This hot-key cannot be removed.",
+  "Show/hide menu toolbars",
+  "Hides all toolbar menus, or shows",
+  "them back.",
   "",
   false,
   SDLK_F10, // F10
@@ -1499,7 +1499,7 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_MOUSE_RIGHT,              // Emulate mouse right
   SPECIAL_CLICK_LEFT,               // Emulate mouse click left
   SPECIAL_CLICK_RIGHT,              // Emulate mouse click right
-  0x200+BUTTON_HIDE,                // Show / Hide menu
+  0x200+BUTTON_HIDE,                // Show / Hide menus
   SPECIAL_SHOW_HIDE_CURSOR,         // Show / Hide cursor
   SPECIAL_DOT_PAINTBRUSH,           // Paintbrush = "."
   0x100+BUTTON_PAINTBRUSHES,        // Paintbrush choice

@@ -1109,7 +1109,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   formats_dropdown=
     Window_set_dropdown_button(68,28,52,11,0,
       Get_fileformat(Main_format)->Label,
-      1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
+      1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 6
 
   for (temp=0; temp < NB_KNOWN_FORMATS; temp++)
   {
@@ -1141,7 +1141,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   for (temp=0;temp<NB_BOOKMARKS;temp++)
   {
     bookmark_dropdown[temp]=
-      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE); // 10-13
+      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE,0); // 10-13
     Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }

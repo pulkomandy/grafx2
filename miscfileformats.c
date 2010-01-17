@@ -2301,13 +2301,13 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE);
     
     Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
-    what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE);
+    what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0);
     Window_dropdown_clear_items(what);
     for (i=0; i<sizeof(what_label)/sizeof(char *); i++)
         Window_dropdown_add_item(what,i,what_label[i]);
     
     Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
-    addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE);
+    addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0);
     Window_dropdown_clear_items(addr);
     for (i=0; i<sizeof(address_label)/sizeof(char *); i++)
         Window_dropdown_add_item(addr,i,address_label[i]); 

@@ -630,14 +630,14 @@ void Button_Quit(void);
 void Button_Hide_menu(void);
 
 /*!
-    Shows or hide the layerbar
+    Shows a dropdown panel where you can choose which toolbars are visible
 */
-void Button_Toggle_layerbar(void);
+void Button_Toggle_toolbar(void);
 
 /*!
-    Shows or hide the main toolbox
+    Hides all toolbars (except status) or shows them again
 */
-void Button_Toggle_toolbox(void);
+void Button_Toggle_all_toolbars(void);
 
 
 /*!

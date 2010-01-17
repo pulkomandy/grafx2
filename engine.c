@@ -66,7 +66,7 @@ byte* Window_background[8];
 ///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=
 {
-  "Layerbar / Hide menu    ",
+  "Toolbars / Hide toolbars",
 
   "Layers manager          ",
   "Get/Set transparent col.",
@@ -422,8 +422,12 @@ void Select_button(int btn_number,byte click)
 
   Display_cursor();
 
-  // On attend ensuite que l'utilisateur lâche son bouton:
-  Wait_end_of_click();
+  if ((click==1 && !Buttons_Pool[btn_number].Left_instant)
+    ||(click!=1 && !Buttons_Pool[btn_number].Right_instant))
+  {
+    // On attend ensuite que l'utilisateur lâche son bouton:
+    Wait_end_of_click();
+  }
 
   // On considère que le bouton est enfoncé
   Buttons_Pool[btn_number].Pressed=BUTTON_PRESSED;
@@ -1763,7 +1767,7 @@ T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_c
   return temp;
 }
 
-T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,const char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button)
+T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,const char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button, byte bottom_up)
 {
   T_Dropdown_button *temp;
   
@@ -1779,6 +1783,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
   temp->Display_centered=display_centered;
   temp->Display_arrow=display_arrow;
   temp->Active_button=active_button;
+  temp->Bottom_up=bottom_up;
 
   temp->Next=Window_dropdown_button_list;
   Window_dropdown_button_list=temp;
@@ -2317,8 +2322,12 @@ void Move_window(short dx, short dy)
 
 }
 
-// Gestion des dropdown
-short Window_dropdown_on_click(T_Dropdown_button *Button)
+///
+/// Displays a dropped-down menu and handles the UI logic until the user
+/// releases a mouse button.
+/// This function then clears the dropdown and returns the selected item,
+/// or NULL if the user wasn't highlighting an item when he closed.
+T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, short off_y)
 {
   short nb_choices;
   short choice_index;
@@ -2326,6 +2335,7 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
   short old_selected_index;
   short box_height;
   T_Dropdown_choice *item;
+  
   // Taille de l'ombre portée (en plus des dimensions normales)
   #define SHADOW_RIGHT 3
   #define SHADOW_BOTTOM 4
@@ -2333,18 +2343,17 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
   
   // Comptage des items pour calculer la taille
   nb_choices=0;
-  for (item=Button->First_item; item!=NULL; item=item->Next)
+  for (item=button->First_item; item!=NULL; item=item->Next)
   {
     nb_choices++;
   }
   box_height=3+nb_choices*8+1;
-  
-  Hide_cursor();
-  Window_select_normal_button(Button->Pos_X,Button->Pos_Y,Button->Width,Button->Height);
+
+  // Open a new stacked "window" to serve as drawing area.
   Open_popup(
-    Window_pos_X+(Button->Pos_X)*Menu_factor_X,
-    Window_pos_Y+(Button->Pos_Y+Button->Height)*Menu_factor_Y,
-    Button->Dropdown_width+SHADOW_RIGHT,
+    off_x+(button->Pos_X)*Menu_factor_X,
+    off_y+(button->Pos_Y+(button->Bottom_up?-box_height:button->Height))*Menu_factor_Y,
+    button->Dropdown_width+SHADOW_RIGHT,
     box_height+SHADOW_BOTTOM);
 
   // Dessin de la boite
@@ -2352,13 +2361,13 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
   // Bord gauche
   Block(Window_pos_X,Window_pos_Y,Menu_factor_X,box_height*Menu_factor_Y,MC_Black);
   // Frame fonce et blanc
-  Window_display_frame_out(1,0,Button->Dropdown_width-1,box_height);
+  Window_display_frame_out(1,0,button->Dropdown_width-1,box_height);
   // Ombre portée
   if (SHADOW_BOTTOM)
   {
     Block(Window_pos_X+SHADOW_RIGHT*Menu_factor_X,
         Window_pos_Y+box_height*Menu_factor_Y,
-        Button->Dropdown_width*Menu_factor_X,
+        button->Dropdown_width*Menu_factor_X,
         SHADOW_BOTTOM*Menu_factor_Y,
         MC_Black);
     Block(Window_pos_X,
@@ -2369,12 +2378,12 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
   }
   if (SHADOW_RIGHT)
   {
-    Block(Window_pos_X+Button->Dropdown_width*Menu_factor_X,
+    Block(Window_pos_X+button->Dropdown_width*Menu_factor_X,
         Window_pos_Y+SHADOW_BOTTOM*Menu_factor_Y,
         SHADOW_RIGHT*Menu_factor_X,
         (box_height-SHADOW_BOTTOM)*Menu_factor_Y,
         MC_Black);
-    Block(Window_pos_X+Button->Dropdown_width*Menu_factor_X,
+    Block(Window_pos_X+button->Dropdown_width*Menu_factor_X,
         Window_pos_Y,
         Menu_factor_X,
         SHADOW_BOTTOM*Menu_factor_Y,
@@ -2388,9 +2397,9 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
     // Fenêtre grise
     Block(Window_pos_X+2*Menu_factor_X,
         Window_pos_Y+1*Menu_factor_Y,
-        (Button->Dropdown_width-3)*Menu_factor_X,(box_height-2)*Menu_factor_Y,MC_Light);
+        (button->Dropdown_width-3)*Menu_factor_X,(box_height-2)*Menu_factor_Y,MC_Light);
     // Affichage des items
-    for(item=Button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
+    for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
     {
       byte color_1;
       byte color_2;
@@ -2400,7 +2409,7 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
         color_2=MC_Dark;
         Block(Window_pos_X+3*Menu_factor_X,
         Window_pos_Y+((2+choice_index*8)*Menu_factor_Y),
-        (Button->Dropdown_width-5)*Menu_factor_X,(8)*Menu_factor_Y,MC_Dark);
+        (button->Dropdown_width-5)*Menu_factor_X,(8)*Menu_factor_Y,MC_Dark);
       }
       else
       {
@@ -2417,7 +2426,7 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
       // Attente
       if(!Get_input()) SDL_Delay(20);
       // Mise à jour du survol
-      selected_index=Window_click_in_rectangle(2,2,Button->Dropdown_width-2,box_height-1)?
+      selected_index=Window_click_in_rectangle(2,2,button->Dropdown_width-2,box_height-1)?
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
 
     } while (Mouse_K && selected_index==old_selected_index);
@@ -2429,27 +2438,49 @@ short Window_dropdown_on_click(T_Dropdown_button *Button)
 
   Close_popup();  
 
-
-  Window_unselect_normal_button(Button->Pos_X,Button->Pos_Y,Button->Width,Button->Height);
-  Display_cursor();
-
   if (selected_index>=0 && selected_index<nb_choices)
   {
-    for(item=Button->First_item; selected_index; item=item->Next,selected_index--)
+    for(item=button->First_item; selected_index; item=item->Next,selected_index--)
       ;
-    Window_attribute2=item->Number;
-    if (Button->Display_choice)
-    {
-      // Automatically update the label of the dropdown list.
-      int text_length = (Button->Width-4-(Button->Display_arrow?8:0))/8;
-      // Clear original label area
-      Window_rectangle(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,text_length*8,8,MC_Light);
-      Print_in_window_limited(Button->Pos_X+2,Button->Pos_Y+(Button->Height-7)/2,item->Label,text_length ,MC_Black,MC_Light);
-    }
-    return Button->Number;
+    return item;
   }
-  Window_attribute2=-1;
-  return 0;
+  return NULL;
+}
+
+// Gestion des dropdown
+short Window_dropdown_on_click(T_Dropdown_button *button)
+{
+  T_Dropdown_choice * item;
+  
+  // Highlight the button
+  Hide_cursor();
+  Window_select_normal_button(button->Pos_X,button->Pos_Y,button->Width,button->Height);
+        
+  // Handle the dropdown's logic
+  item = Dropdown_activate(button, Window_pos_X, Window_pos_Y);
+  
+  // Unhighlight the button
+  Window_unselect_normal_button(button->Pos_X,button->Pos_Y,button->Width,button->Height);
+  Display_cursor();
+
+  if (item == NULL)
+  {
+    Window_attribute2=-1;
+    return 0;
+  }
+
+  if (button->Display_choice)
+  {
+    // Automatically update the label of the dropdown list.
+    int text_length = (button->Width-4-(button->Display_arrow?8:0))/8;
+    // Clear original label area
+    Window_rectangle(button->Pos_X+2,button->Pos_Y+(button->Height-7)/2,text_length*8,8,MC_Light);
+    Print_in_window_limited(button->Pos_X+2,button->Pos_Y+(button->Height-7)/2,item->Label,text_length ,MC_Black,MC_Light);
+  } 
+
+  Window_attribute2=item->Number;
+  return button->Number;
+  
 }
 
 // --- Fonction de clic sur un bouton a peu près ordinaire:

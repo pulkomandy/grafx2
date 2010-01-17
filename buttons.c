@@ -488,21 +488,80 @@ void Set_bar_visibility(word bar, byte visible)
   }
 }
 
-void Button_Toggle_layerbar(void)
-{
+void Button_Toggle_toolbar(void)
+{  
+  T_Dropdown_button dropdown;
+  T_Dropdown_choice *item;
+  static char menu_name[2][9]= {
+    " Tools",
+    " Layers"
+  };
+  
+  menu_name[0][0] = Menu_bars[MENUBAR_TOOLS ].Visible ? 22 : ' ';
+  menu_name[1][0] = Menu_bars[MENUBAR_LAYERS].Visible ? 22 : ' ';
+
   Hide_cursor();
   
-  Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+  dropdown.Pos_X         =Buttons_Pool[BUTTON_HIDE].X_offset;
+  dropdown.Pos_Y         =Buttons_Pool[BUTTON_HIDE].Y_offset;
+  dropdown.Height        =Buttons_Pool[BUTTON_HIDE].Height;
+  dropdown.Dropdown_width=70;
+  dropdown.First_item    =NULL;
+  dropdown.Bottom_up     =1;
+
+  Window_dropdown_add_item(&dropdown, 0, menu_name[0]);
+  Window_dropdown_add_item(&dropdown, 1, menu_name[1]);
+
+  item=Dropdown_activate(&dropdown,0,Menu_Y+Menu_bars[MENUBAR_STATUS].Top*Menu_factor_Y);
+  
+  if (item)
+  {
+    switch (item->Number)
+    {
+      case 0:
+        Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
+        break;
+      case 1:
+        Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+        break;
+    }
+  }
+  
+  // Closing
+  Window_dropdown_clear_items(&dropdown);
   
   Unselect_button(BUTTON_HIDE);
   Display_cursor();
 }
 
-void Button_Toggle_toolbox(void)
+void Button_Toggle_all_toolbars(void)
 {
+  // This is used to memorize the bars' visibility when temporarily hidden
+  static word Last_visibility = 0xFFFF;
+  int i;
+  word current_visibility;
+
   Hide_cursor();
   
-  Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
+  // Check which bars are visible
+  current_visibility=0;
+  for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
+    if (Menu_bars[i].Visible)
+      current_visibility |= (1<<i);
+  
+  if (current_visibility)
+  {
+    // At least one is visible: Hide all
+    Last_visibility=current_visibility;
+    for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
+      Set_bar_visibility(i,0);
+  }
+  else
+  {
+    // Restore all
+    for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
+      Set_bar_visibility(i,(Last_visibility & (1<<i)) ? 1 : 0);
+  }
   
   Unselect_button(BUTTON_HIDE);
   Display_cursor();
@@ -1025,7 +1084,7 @@ void Button_Skins(void)
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
 
   // Buttons to choose a font
-  font_dropdown = Window_set_dropdown_button(172, 43, 104, 11, 0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE); // 5
+  font_dropdown = Window_set_dropdown_button(172, 43, 104, 11, 0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 5
   for (temp=0; temp<Font_files_list.Nb_files; temp++)
     Window_dropdown_add_item(font_dropdown,temp,Get_item_by_index(&Font_files_list,temp)->Short_name);
 
@@ -1034,7 +1093,7 @@ void Button_Skins(void)
 
   // Dropdown list to choose cursor type
   cursor_dropdown = Window_set_dropdown_button(172, 69, 104, 11, 0,
-    cursors[selected_cursor], 1, 0, 1, RIGHT_SIDE|LEFT_SIDE); // 7
+    cursors[selected_cursor], 1, 0, 1, RIGHT_SIDE|LEFT_SIDE,0); // 7
   for (temp = 0; temp<3; temp++)
     Window_dropdown_add_item(cursor_dropdown, temp, cursors[temp]);
 
@@ -1617,7 +1676,7 @@ void Button_Resolution(void)
 
   chosen_pixel=Pixel_ratio;
   Print_in_window( 12, 57,"Pixel size:"    ,MC_Dark,MC_Light);
-  pixel_button=Window_set_dropdown_button(108,55,17*8,11,17*8,pixel_ratio_labels[Pixel_ratio],1,0,1,LEFT_SIDE|RIGHT_SIDE);    // 7
+  pixel_button=Window_set_dropdown_button(108,55,17*8,11,17*8,pixel_ratio_labels[Pixel_ratio],1,0,1,LEFT_SIDE|RIGHT_SIDE,0);    // 7
   for (temp=0;temp<PIXEL_MAX;temp++)
     Window_dropdown_add_item(pixel_button,temp,pixel_ratio_labels[temp]);
 

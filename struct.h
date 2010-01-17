@@ -152,6 +152,7 @@ typedef struct T_Dropdown_button
   byte Display_choice;            ///< Boolean, true if the engine should print the selected item's label in the dropdown area when the user chooses it.
   byte Display_centered;          ///< Boolean, true to center the labels (otherwise, align left)
   byte Display_arrow;             ///< Boolean, true to display a "down" arrow box in top right
+  byte Bottom_up;                 ///< Boolean, true to make the dropdown panel go above its button instead of below it
   byte Active_button;             ///< Determines which mouse button(s) cause the dropdown panel to open: LEFT_SIDE || RIGHT_SIDE || (LEFT_SIDE|RIGHT_SIDE)
   word Dropdown_width;            ///< Width of the dropdown panel when it's open. Use 0 for "same as the dropdown button"
   T_Dropdown_choice * First_item; ///< Linked list with the choices available for this dropdown.

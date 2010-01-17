@@ -78,13 +78,21 @@ T_Special_button * Window_set_input_button(word x_pos, word y_pos,
 T_Dropdown_button * Window_set_dropdown_button(word x_pos, word y_pos,
 	word width,	word height, word dropdown_width, const char *label,
 	byte display_choice, byte display_centered, byte display_arrow,
-	byte active_button);
+	byte active_button,byte bottom_up);
 
 /// Adds an item to a dropdown menu
 void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number,
 	const char *label);
 
 void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
+
+///
+/// Displays a dropped-down menu and handles the UI logic until the user
+/// releases a mouse button.
+/// This function then clears the dropdown and returns the selected item,
+/// or NULL if the user wasn't highlighting an item when he closed.
+T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, short off_y);
+
 T_List_button * Window_set_list_button(T_Special_button * entry_button,
 	T_Scroller_button * scroller, Func_draw_list_item draw_list_item);
 void Window_redraw_list(T_List_button * list);

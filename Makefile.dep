@@ -13,7 +13,8 @@ $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h 
   buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
   input.h engine.h pages.h layers.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
-  filesel.h global.h graph.h io.h misc.h readline.h sdlscreen.h windows.h
+  filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
+  sdlscreen.h windows.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
   loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
@@ -35,7 +36,7 @@ $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
 $(OBJDIR)/keyboard.o: keyboard.c global.h struct.h const.h keyboard.h
 $(OBJDIR)/layers.o: layers.c const.h struct.h global.h windows.h engine.h pages.h
-$(OBJDIR)/libraw2crtc.o: libraw2crtc.c global.h struct.h const.h
+$(OBJDIR)/libraw2crtc.o: libraw2crtc.c const.h global.h struct.h loadsave.h
 $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io.h \
   loadsave.h misc.h graph.h op_c.h pages.h palette.h sdlscreen.h \
   windows.h engine.h
@@ -43,7 +44,7 @@ $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons
   engine.h pages.h loadsave.h sdlscreen.h errors.h readini.h saveini.h \
   io.h text.h setup.h windows.h brush.h palette.h realpath.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.h \
-  engine.h misc.h keyboard.h windows.h palette.h input.h graph.h
+  engine.h misc.h keyboard.h windows.h palette.h input.h graph.h pages.h
 $(OBJDIR)/miscfileformats.o: miscfileformats.c engine.h struct.h const.h errors.h \
   global.h io.h libraw2crtc.h loadsave.h misc.h sdlscreen.h windows.h
 $(OBJDIR)/mountlist.o: mountlist.c

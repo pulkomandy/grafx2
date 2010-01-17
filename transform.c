@@ -136,7 +136,7 @@ void Button_Transform_menu(void)
   Print_in_window( 44, 75,"Lock proportions",MC_Dark,MC_Light);
 
   Window_set_normal_button( 28, 72, 13,13,ratio_is_locked?"X":" ",0,1,SDLK_l);// 8
-  unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE);// 9
+  unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
   Window_dropdown_add_item(unit_button,UNIT_PIXELS,unit_label[UNIT_PIXELS]);
   Window_dropdown_add_item(unit_button,UNIT_PERCENT,unit_label[UNIT_PERCENT]);
   Window_dropdown_add_item(unit_button,UNIT_RATIO,unit_label[UNIT_RATIO]);

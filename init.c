@@ -928,6 +928,8 @@ void Init_button(byte   btn_number,
                         byte   shape,
                         Func_action left_action,
                         Func_action right_action,
+                        byte left_instant,
+                        byte right_instant,
                         Func_action unselect_action,
                         byte   family)
 {
@@ -939,6 +941,8 @@ void Init_button(byte   btn_number,
   Buttons_Pool[btn_number].Shape           =shape;
   Buttons_Pool[btn_number].Left_action     =left_action;
   Buttons_Pool[btn_number].Right_action    =right_action;
+  Buttons_Pool[btn_number].Left_instant    =left_instant;
+  Buttons_Pool[btn_number].Right_instant   =right_instant;
   Buttons_Pool[btn_number].Unselect_action =unselect_action;
   Buttons_Pool[btn_number].Family          =family;
 }
@@ -961,6 +965,7 @@ void Init_buttons(void)
                        1,1,
                        BUTTON_SHAPE_RECTANGLE,
                        Do_nothing,Do_nothing,
+                       0,0,
                        Do_nothing,
                        0);
   }
@@ -972,6 +977,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Paintbrush_menu,Button_Brush_monochrome,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -980,6 +986,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Adjust,Button_Transform_menu,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -988,6 +995,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Draw,Button_Draw_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -996,6 +1004,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Curves,Button_Curves_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1004,6 +1013,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Lines,Button_Lines_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1012,6 +1022,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Airbrush,Button_Airbrush_menu,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1020,6 +1031,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Fill,Button_Replace,
+                     0,0,
                      Button_Unselect_fill,
                      FAMILY_TOOL);
 
@@ -1028,6 +1040,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_polygon,Button_Polyform,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1036,6 +1049,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Polyfill,Button_Filled_polyform,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1044,6 +1058,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Empty_rectangle,Button_Empty_rectangle,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1052,6 +1067,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Filled_rectangle,Button_Filled_rectangle,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1060,6 +1076,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Empty_circle,Button_Empty_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1068,6 +1085,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Filled_circle,Button_Filled_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1076,6 +1094,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Grad_rectangle,Button_Gradients,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1084,6 +1103,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Grad_circle,Button_Grad_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1092,6 +1112,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Brush,Button_Restore_brush,
+                     0,0,
                      Button_Unselect_brush,
                      FAMILY_INTERRUPTION);
 
@@ -1100,6 +1121,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Lasso,Button_Restore_brush,
+                     0,0,
                      Button_Unselect_lasso,
                      FAMILY_INTERRUPTION);
 
@@ -1112,6 +1134,7 @@ void Init_buttons(void)
 #else
                      Button_Brush_FX, Button_Brush_FX,
 #endif
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1120,6 +1143,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Effects,Button_Effects,
+                     0,0,
                      Do_nothing,
                      FAMILY_EFFECTS);
 
@@ -1128,6 +1152,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Text,Button_Text,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1136,6 +1161,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Magnify,Button_Magnify_menu,
+                     0,0,
                      Button_Unselect_magnifier,
                      FAMILY_INTERRUPTION);
 
@@ -1144,6 +1170,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Colorpicker,Button_Invert_foreback,
+                     0,0,
                      Button_Unselect_colorpicker,
                      FAMILY_INTERRUPTION);
 
@@ -1152,6 +1179,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Resolution,Button_Safety_resolution,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1160,6 +1188,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Page,Button_Copy_page,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1168,6 +1197,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Save,Button_Autosave,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1176,6 +1206,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Load,Button_Reload,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1184,6 +1215,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Settings,Button_Skins,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1192,6 +1224,7 @@ void Init_buttons(void)
                      17,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Clear,Button_Clear_with_backcolor,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1200,6 +1233,7 @@ void Init_buttons(void)
                      17,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Help,Button_Stats,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1208,6 +1242,7 @@ void Init_buttons(void)
                      19,12,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Undo,Button_Redo,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1216,6 +1251,7 @@ void Init_buttons(void)
                      19,7,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Kill,Button_Kill,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1224,6 +1260,7 @@ void Init_buttons(void)
                      19,12,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Quit,Button_Quit,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1232,6 +1269,7 @@ void Init_buttons(void)
                      16,8,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Palette,Button_Secondary_palette,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1240,6 +1278,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Pal_left,Button_Pal_left_fast,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1248,6 +1287,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Pal_right,Button_Pal_right_fast,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1256,6 +1296,7 @@ void Init_buttons(void)
                      1,32, // La largeur est mise à jour à chq chngmnt de mode
                      BUTTON_SHAPE_NO_FRAME,
                      Button_Select_forecolor,Button_Select_backcolor,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1265,6 +1306,7 @@ void Init_buttons(void)
                      57,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_menu, Button_Layer_menu,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_COLOR,
@@ -1272,6 +1314,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_get_transparent, Button_Layer_set_transparent,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_MERGE,
@@ -1279,6 +1322,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_merge, Button_Layer_merge,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_ADD,
@@ -1286,6 +1330,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_add, Button_Layer_add,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_REMOVE,
@@ -1293,6 +1338,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_remove, Button_Layer_remove,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_DOWN,
@@ -1300,6 +1346,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_down, Button_Layer_down,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_UP,
@@ -1307,6 +1354,7 @@ void Init_buttons(void)
                      13,9,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Layer_up, Button_Layer_up,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_SELECT,
@@ -1314,6 +1362,7 @@ void Init_buttons(void)
                      13,9, // Will be updated according to actual number of layers
                      BUTTON_SHAPE_NO_FRAME,
                      Button_Layer_select, Button_Layer_toggle,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
   // Status bar
@@ -1321,7 +1370,8 @@ void Init_buttons(void)
                      0,0,
                      16,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Toggle_layerbar, Button_Toggle_toolbox,
+                     Button_Toggle_toolbar, Button_Toggle_all_toolbars,
+                     1,0,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 }

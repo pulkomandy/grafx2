@@ -868,7 +868,7 @@ void Button_Palette(void)
   Window_set_normal_button( 6,32,59,14,"Spread" ,4,1,SDLK_e);   // 10
 
   reduce_dropdown = Window_set_dropdown_button(222, 17, 60, 14, 60, "Reduce", 0,
-    0, 1, 1); // 11
+    0, 1, LEFT_SIDE, 0); // 11
   Window_dropdown_add_item(reduce_dropdown, 0, "to 128");
   Window_dropdown_add_item(reduce_dropdown, 1, "to 64");
   Window_dropdown_add_item(reduce_dropdown, 2, "to 32");
