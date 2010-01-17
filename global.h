@@ -742,7 +742,7 @@ GFX2_GLOBAL byte Mask_table[256];
 // -- Magnifier data
 
 #ifdef GLOBAL_VARIABLES
-  word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20};
+  word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20, 24, 28, 32};
 #else
 /// Successive zoom factors, used by the Magnifier.
   extern word ZOOM_FACTOR[NB_ZOOM_FACTORS];

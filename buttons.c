@@ -3273,64 +3273,50 @@ void Button_Magnify(void)
   Update_rect(0,0,0,0);
 }
 
-
 void Button_Magnify_menu(void)
 {
-  short clicked_button;
-
-  Open_window(141,114,"Zoom factors");
-
-  Window_set_normal_button(45,88,51,14,"Cancel",0,1,KEY_ESC); // 1
-
-  Window_set_normal_button(  9,25,27,14, "x2",0,Main_magnifier_factor!= 2,SDLK_F1);    // 2
-  Window_set_normal_button( 41,25,27,14, "x3",0,Main_magnifier_factor!= 3,SDLK_F2);    // 3
-  Window_set_normal_button( 73,25,27,14, "x4",0,Main_magnifier_factor!= 4,SDLK_F3);    // 4
-  Window_set_normal_button(105,25,27,14, "x5",0,Main_magnifier_factor!= 5,SDLK_F4);    // 5
-  Window_set_normal_button(  9,45,27,14, "x6",0,Main_magnifier_factor!= 6,SDLK_F5);    // 6
-  Window_set_normal_button( 41,45,27,14, "x8",0,Main_magnifier_factor!= 8,SDLK_F6);    // 7
-  Window_set_normal_button( 73,45,27,14,"x10",0,Main_magnifier_factor!=10,SDLK_F7);    // 8
-  Window_set_normal_button(105,45,27,14,"x12",0,Main_magnifier_factor!=12,SDLK_F8);    // 9
-  Window_set_normal_button(  9,65,27,14,"x14",0,Main_magnifier_factor!=14,SDLK_F9);    // 10
-  Window_set_normal_button( 41,65,27,14,"x16",0,Main_magnifier_factor!=16,SDLK_F10);    // 11
-  Window_set_normal_button( 73,65,27,14,"x18",0,Main_magnifier_factor!=18,SDLK_F11);    // 12
-  Window_set_normal_button(105,65,27,14,"x20",0,Main_magnifier_factor!=20,SDLK_F12);    // 13
-  Update_window_area(0,0,Window_width, Window_height);
-
-  Display_cursor();
-
-  do
-  {
-    clicked_button=Window_clicked_button();
-    if (Is_shortcut(Key,0x100+BUTTON_HELP))
-      Window_help(BUTTON_MAGNIFIER, NULL);
-    else if (Is_shortcut(Key,0x200+BUTTON_MAGNIFIER))
-      clicked_button=1;
-  }
-  while (clicked_button<=0);
-
-  Close_window();
-
-  if (clicked_button>1)
-  {
-    Menu_Y=Menu_Y_before_window;
-    Change_magnifier_factor(clicked_button-2);
+  T_Dropdown_button dropdown;
+  T_Dropdown_choice *item;
+  int i;
+  const char text[NB_ZOOM_FACTORS][4] =
+    {"x2", "x3", "x4", "x5", "x6", "x8", "x10", "x12", "x14", "x16", "x18", "x20",
+      "x24", "x28", "x32"};
+  
+  Hide_cursor();
+  
+  dropdown.Pos_X         =Buttons_Pool[BUTTON_MAGNIFIER].X_offset;
+  dropdown.Pos_Y         =Buttons_Pool[BUTTON_MAGNIFIER].Y_offset;
+  dropdown.Height        =Buttons_Pool[BUTTON_MAGNIFIER].Height;
+  dropdown.Dropdown_width=28;
+  dropdown.First_item    =NULL;
+  dropdown.Bottom_up     =1;
+  
+  for(i = 0; i < NB_ZOOM_FACTORS; i++) {
+    Window_dropdown_add_item(&dropdown, i, text[i]);
   }
 
-  if ( (clicked_button==1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
+  item=Dropdown_activate(&dropdown,0,Menu_Y);
+  
+  if (item)
+  {
+    Change_magnifier_factor(item->Number);
+  }
+
+  if ( (!item) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
     Unselect_button(BUTTON_MAGNIFIER);
 
   Display_all_screen();
   Display_cursor();
   Update_rect(Main_separator_position,0,Screen_width-Main_separator_position,Menu_Y);
 
-  if ( (clicked_button>1) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
+  if ( (item) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
   {
     Coming_from_zoom_factor_menu=1;
     Select_button(BUTTON_MAGNIFIER,LEFT_SIDE);
   }
-
+  
+  Window_dropdown_clear_items(&dropdown);
 }
-
 
 void Button_Unselect_magnifier(void)
 {

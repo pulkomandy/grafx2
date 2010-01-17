@@ -1161,7 +1161,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Magnify,Button_Magnify_menu,
-                     0,0,
+                     0,1,
                      Button_Unselect_magnifier,
                      FAMILY_INTERRUPTION);
 
