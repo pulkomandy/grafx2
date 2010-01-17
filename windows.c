@@ -1737,8 +1737,8 @@ void Compute_magnifier_data(void)
 /// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index)
 {
-  int center_x;
-  int center_y;
+  float center_x;
+  float center_y;
 
   // Values that need to be computed before switching to the new zoom factor
   if (Cursor_in_menu || !Main_magnifier_mode)
@@ -1747,8 +1747,8 @@ void Change_magnifier_factor(byte factor_index)
   	center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
   } else {
 	// Zoom to cursor
-	center_x = (Paintbrush_X - Main_magnifier_offset_X) * 65536 / Main_magnifier_width;
-	center_y = (Paintbrush_Y - Main_magnifier_offset_Y) * 65536 / Main_magnifier_height;
+	center_x = (Paintbrush_X - Main_magnifier_offset_X) / (float)Main_magnifier_width;
+	center_y = (Paintbrush_Y - Main_magnifier_offset_Y) / (float)Main_magnifier_height;
   }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
@@ -2610,7 +2610,7 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
 
-    if(delta_r == delta_g && delta_g == delta_b) return col;
+    if(delta_r == 0 && delta_g == 0 && delta_b == 0) return col;
 
     rmean = ( Main_palette[col].R + red ) / 2;
 
