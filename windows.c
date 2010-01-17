@@ -2610,7 +2610,7 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
 
-    if(delta_r == delta_g == delta_b) return col;
+    if(delta_r == delta_g && delta_g == delta_b) return col;
 
     rmean = ( Main_palette[col].R + red ) / 2;
 
