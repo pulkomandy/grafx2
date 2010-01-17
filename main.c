@@ -664,7 +664,7 @@ int Init_program(int argc,char * argv[])
   // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  Compute_optimal_menu_colors(Gfx->Default_palette);
+//  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -761,6 +761,10 @@ int Init_program(int argc,char * argv[])
   {
     // Some files were loaded from last crash-exit.
     // Do not load files from command-line, nor show splash screen.
+    Compute_optimal_menu_colors(Main_palette);
+    Display_all_screen();
+    Display_menu();
+    Display_cursor();
   }
   else
   {

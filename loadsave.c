@@ -1292,7 +1292,7 @@ int Check_recovery(void)
     Display_all_screen();
     return 1;
   }*/
-  return 0;
+  return restored_main || restored_spare;
 }
 
 const int Rotation_safety_backup = 8;
