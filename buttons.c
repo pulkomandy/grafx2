@@ -2994,13 +2994,18 @@ void Save_picture(byte image)
 
     Save_image(&save_context);
 
+    if (!File_error && image && !Get_fileformat(save_context.Format)->Palette_only)
+    {
+      Main_image_is_modified=0;
+      strcpy(Main_backups->Pages->Filename, save_context.File_name);
+      strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
+    }
+    
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
     Display_cursor();
   }
   Destroy_context(&save_context);
-  //if (!image)
-  //  Swap_data_of_image_and_brush();
 
   Print_filename();
   Set_palette(Main_palette);
@@ -3042,6 +3047,10 @@ void Button_Autosave(void)
 
       Init_context_layered_image(&save_context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
       Save_image(&save_context);
+      if (!File_error)
+      {
+        Main_image_is_modified=0;
+      }
       Destroy_context(&save_context);
 
       Hide_cursor();

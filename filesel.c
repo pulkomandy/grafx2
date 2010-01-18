@@ -1086,7 +1086,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     }
     // Affichage du commentaire
     if (Get_fileformat(Main_format)->Comment)
-      Print_in_window(47,70,context->Comment,MC_Black,MC_Light);
+      Print_in_window(47,70,context->Comment,MC_Black,MC_Light);      
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
@@ -1167,6 +1167,9 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     strcpy(Selector_filename,context->File_name);
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
+
+    Highlight_file(context->File_name);
+    Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
   }
 
   New_preview_is_needed=1;
@@ -1616,12 +1619,12 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
         // On mémorise le répertoire dans lequel on était
         if (strcmp(Selector_filename,PARENT_DIR))
-          strcpy(previous_directory,Format_filename(PARENT_DIR, 1));
+        {
+          strcpy(previous_directory,PARENT_DIR);
+        }
         else
         {
-          strcpy(previous_directory,
-            Format_filename(Find_last_slash(Main_current_directory), 1)
-            );
+            Extract_filename(previous_directory, Main_current_directory);
         }
 
         // On doit rentrer dans le répertoire:
@@ -1719,6 +1722,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   {
     strcpy(context->File_name, Selector_filename);
     strcpy(context->File_directory, Main_current_directory);
+    if (!load)
+      context->Format = Main_format;
   }
   else
   {

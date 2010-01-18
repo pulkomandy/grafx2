@@ -822,12 +822,10 @@ void Save_image(T_IO_Context *context)
     format->Save(context);
 
   if (File_error)
+  {
     Error(0);
-  //else
-  //{
-  //  if ((image) && !(Get_fileformat(Main_fileformat)->Palette_only))
-  //    Main_image_is_modified=0;
-  //}
+    return;
+  }
 }  
    
    
