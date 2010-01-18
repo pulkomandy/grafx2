@@ -205,7 +205,9 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   byte pixels_changed;
   int absolute_mouse_x=Mouse_X*Pixel_width;
   int absolute_mouse_y=Mouse_Y*Pixel_height;
-  
+  static int Wrong_resize;
+
+try_again:
   
   switch (pix_ratio)
   {
@@ -251,15 +253,31 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   // Valeurs raisonnables: minimum 320x200
   if (!fullscreen)
   {
+    if (Wrong_resize>20 && (width < 320*pix_width || height < 200*pix_height))
+    {
+      if(pix_ratio != PIXEL_SIMPLE) {
+        pix_ratio = PIXEL_SIMPLE;
+        Verbose_error_message("Your WM is forcing GrafX2 to resize to something "
+          "smaller than the minimal resolution.\n"
+          "GrafX2 switched to a smaller\npixel scaler to avoid problems                     ");
+        goto try_again;
+      }
+    }
+    
+    if (width > 320*pix_width && height > 200*pix_height)
+      Wrong_resize = 0;
+
     if (width < 320*pix_width)
     {
         width = 320*pix_width;
         screen_changed=1;
+        Wrong_resize++;
     }
     if (height < 200*pix_height)
     {
         height = 200*pix_height;
         screen_changed=1;
+        Wrong_resize++;
     }
     Video_mode[0].Width = width;
     Video_mode[0].Height = height;
