@@ -1988,6 +1988,7 @@ void Close_popup(void)
   else
   {
     free(Window_background[Windows_open-1]);
+    Window_background[Windows_open-1] = NULL;
     Windows_open--;
   
     Paintbrush_hidden=Paintbrush_hidden_before_window;

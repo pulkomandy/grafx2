@@ -507,6 +507,7 @@ void Polybrush_12_8(void)
 
     Capture_brush_with_lasso(Polyfill_number_of_points,Polyfill_table_of_points,click==RIGHT_SIDE);
     free(Polyfill_table_of_points);
+    Polyfill_table_of_points = NULL;
 
     // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
     // l'écran si on a découpé une partie de l'image en prenant la brosse.

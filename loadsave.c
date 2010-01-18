@@ -563,6 +563,7 @@ void End_write(FILE *file)
     if (! Write_bytes(file,Write_buffer,Write_buffer_index))
       File_error=1;
   free(Write_buffer);
+  Write_buffer = NULL;
 }
 
 
@@ -1001,14 +1002,8 @@ byte Get_pixel(T_IO_Context *context, short x, short y)
 /// Cleans up resources (currently: the 24bit buffer) 
 void Destroy_context(T_IO_Context *context)
 {
-  if (context->Buffer_image_24b)
-  {
-    free(context->Buffer_image_24b);
-  }
-  if (context->Buffer_image)
-  {
-    free(context->Buffer_image);
-  }
+  free(context->Buffer_image_24b);
+  free(context->Buffer_image);
   memset(context, 0, sizeof(T_IO_Context));
 }
 
@@ -1243,6 +1238,7 @@ byte Process_backups(T_String_list **list)
     free(files_vector[i]);
   }
   free(files_vector);
+  files_vector = NULL;
   
   return nb_files;
 }

@@ -223,6 +223,7 @@ void CT_delete(T_Conversion_table * t)
 {
   free(t->table);
   free(t);
+  t = NULL;
 }
 
 
@@ -299,7 +300,7 @@ T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
     {
       // Not enough memory !
       free(n);
-      n=0;
+      n=NULL;
     }
   }
 
@@ -312,6 +313,7 @@ void OT_delete(T_Occurrence_table * t)
 {
   free(t->table);
   free(t);
+  t = NULL;
 }
 
 
@@ -793,6 +795,7 @@ void CS_Delete(T_Cluster_set * cs)
 		cs->clusters = nxt;
 	}
 	free(cs);
+  cs = NULL;
 }
 
 
@@ -1019,7 +1022,7 @@ T_Gradient_set * GS_New(T_Cluster_set * cs)
     n=(T_Gradient_set *)malloc(sizeof(T_Gradient_set));
     if (n!=NULL)
     {
-        // On recopie les paramŠtres demand‚s
+        // On recopie les paramètres demandés
         n->nb_max=cs->nb_max;
 
         // On tente d'allouer la table
@@ -1029,9 +1032,9 @@ T_Gradient_set * GS_New(T_Cluster_set * cs)
             GS_Init(n,cs);
         else
         {
-            // Table impossible … allouer
+            // Table impossible à allouer
             free(n);
-            n=0;
+            n=NULL;
         }
     }
 

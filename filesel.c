@@ -138,6 +138,7 @@ void Free_fileselector_list(T_Fileselector *list)
     list->First=list->First->Next;
     // Et on efface l'ancien premier élément de la liste
     free(temp_item);
+    temp_item = NULL;
   }
   Recount_files(list);
 }
@@ -325,6 +326,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 
   closedir(current_directory);
   free(current_path);
+  current_path = NULL;
 
   Recount_files(list);
 }
@@ -1447,8 +1449,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                 break;
                 
               case 0: // Set
-                if (Config.Bookmark_directory[clicked_button-10])
-                  free(Config.Bookmark_directory[clicked_button-10]);
+                free(Config.Bookmark_directory[clicked_button-10]);
+                Config.Bookmark_directory[clicked_button-10] = NULL;
                 Config.Bookmark_label[clicked_button-10][0]='\0';
                 temp=strlen(Main_current_directory);
                 Config.Bookmark_directory[clicked_button-10]=malloc(temp+1);

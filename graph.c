@@ -2531,6 +2531,7 @@ void Polyfill_general(int vertices, short * points, int color)
   }
 
   free(initial_edge);
+  initial_edge = NULL;
 
   // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
   Update_part_of_screen(0,top,Main_image_width,bottom-top+1);

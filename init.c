@@ -824,12 +824,14 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
     free(gfx);
+    gfx = NULL;
     return NULL;
   }
   if (Parse_skin(gui, gfx))
   {
     SDL_FreeSurface(gui);
     free(gfx);
+    gfx = NULL;
     return NULL;
   }
   SDL_FreeSurface(gui);

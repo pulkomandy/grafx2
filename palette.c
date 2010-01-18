@@ -2209,6 +2209,7 @@ void Button_Palette(void)
   free(backup_palette);
   free(temp_palette);
   free(working_palette);
+  backup_palette = temp_palette = working_palette = NULL;
 }
 
 

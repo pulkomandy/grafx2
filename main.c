@@ -373,6 +373,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
             Extract_filename(spare_filename, buffer);
           }
           free(buffer);
+          buffer = NULL;
         }
         else
         {
@@ -533,6 +534,7 @@ int Init_program(int argc,char * argv[])
               icon_mask[(y*32+x)/8] |=0x80>>(x&7);
         SDL_WM_SetIcon(icon,icon_mask);
         free(icon_mask);
+        icon_mask = NULL;
       }
 
       SDL_FreeSurface(icon);
@@ -835,23 +837,25 @@ void Program_shutdown(void)
   Delete_safety_backups();
 
   // On libère le buffer de gestion de lignes
-  if(Horizontal_line_buffer) free(Horizontal_line_buffer);
+  free(Horizontal_line_buffer);
+  Horizontal_line_buffer = NULL;
 
   // On libère le pinceau spécial
-  if (Paintbrush_sprite) free(Paintbrush_sprite);
+  free(Paintbrush_sprite);
+  Paintbrush_sprite = NULL;
 
   // On libère les différents écrans virtuels et brosse:
-  if(Brush) free(Brush);
+  free(Brush);
+  Brush = NULL;
   Set_number_of_backups(0);
-  if(Spare_screen) free(Spare_screen);
-  if(Main_screen) free(Main_screen);
+  free(Spare_screen);
+  Spare_screen = NULL;
+  free(Main_screen);
+  Main_screen = NULL;
 
   // Free the skin (Gui graphics) data
-  if (Gfx)
-  {
-    free(Gfx);
-    Gfx=NULL;
-  }
+  free(Gfx);
+  Gfx=NULL;
 
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)

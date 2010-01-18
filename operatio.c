@@ -2226,6 +2226,7 @@ void Polyfill_12_9(void)
     Display_all_screen();
     Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
     free(Polyfill_table_of_points);
+    Polyfill_table_of_points = NULL;
 
     End_of_modification();
     if ( (Config.Coords_rel) && (Menu_is_visible) )
@@ -2556,6 +2557,7 @@ void Filled_polyform_12_8(void)
     Display_all_screen();
     Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
     free(Polyfill_table_of_points);
+    Polyfill_table_of_points = NULL;
 
     Paintbrush_hidden=0;
 
@@ -2640,6 +2642,7 @@ void Filled_contour_0_8(void)
   Display_all_screen();
   Polyfill(Polyfill_number_of_points,Polyfill_table_of_points,color);
   free(Polyfill_table_of_points);
+  Polyfill_table_of_points = NULL;
 
   Paintbrush_hidden=0;
 

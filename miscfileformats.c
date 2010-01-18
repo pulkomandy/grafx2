@@ -1462,6 +1462,7 @@ void Load_PI1(T_IO_Context * context)
       else
         File_error=1;
       free(buffer);
+      buffer = NULL;
     }
     else
       File_error=1;
@@ -1528,6 +1529,7 @@ void Save_PI1(T_IO_Context * context)
     }
     // Libération du buffer mémoire
     free(buffer);
+    buffer = NULL;
   }
   else
   {
@@ -1790,12 +1792,14 @@ void Load_PC1(T_IO_Context * context)
         File_error=1;
       free(bufferdecomp);
       free(buffercomp);
+      buffercomp = bufferdecomp = NULL;
     }
     else
     {
       File_error=1;
       free(bufferdecomp);
       free(buffercomp);
+      buffercomp = bufferdecomp = NULL;
     }
     fclose(file);
   }
@@ -1866,6 +1870,7 @@ void Save_PC1(T_IO_Context * context)
     // Libération des buffers mémoire
     free(bufferdecomp);
     free(buffercomp);
+    buffercomp = bufferdecomp = NULL;
   }
   else
   {
@@ -1969,6 +1974,7 @@ void Load_NEO(T_IO_Context * context)
       else
         File_error=1;
       free(buffer);
+      buffer = NULL;
     }
     else
       File_error=1;
@@ -2033,6 +2039,7 @@ void Save_NEO(T_IO_Context * context)
     }
     // Libération du buffer mémoire
     free(buffer);
+    buffer = NULL;
   }
   else
   {
@@ -2667,6 +2674,7 @@ void Save_SCR(T_IO_Context * context)
 	fclose(file);
 
 	free (output);
+  output = NULL;
 
 	File_error = 0;
 }

@@ -116,8 +116,9 @@ void Free_layer(T_Page * page, byte layer)
   ptr = (short *)(page->Image[layer]);
   if (-- (*(ptr-1))) // Users--
     return;
-  else
+  else {
     free(ptr-1);
+  }
     
   // Stats
   Stats_pages_number--;
@@ -486,6 +487,7 @@ void Free_last_page_of_list(T_List_of_pages * list)
         page->Prev->Next = page->Next;
         Clear_page(page);
         free(page);
+        page = NULL;
         list->List_size--;
     }
   }

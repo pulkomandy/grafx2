@@ -914,6 +914,7 @@ void Outline_brush(void)
     Brush_offset_Y=(Brush_height>>1);
 
     free(temp); // Libération de l'ancienne brosse
+    temp = NULL;
 
     // Réallocation d'un buffer de Smear
     free(Smear_brush);
@@ -1026,6 +1027,7 @@ void Nibble_brush(void)
       Brush_offset_Y=(Brush_height>>1);
 
       free(temp); // Libération de l'ancienne brosse
+      temp = NULL;
 
       // Réallocation d'un buffer de Smear
       free(Smear_brush);
@@ -1196,6 +1198,7 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
 
   // Free some memory
   free(Smear_brush);
+  Smear_brush = NULL;
 
   if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
@@ -1507,6 +1510,7 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
     // Out of memory while allocating new brush
     Error(0);
     free(new_smear_brush);
+    new_smear_brush = NULL;
     return;
   }
 
@@ -1767,6 +1771,8 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
   free(ScanY_Yt[1]);
   free(ScanY_X[0]);
   free(ScanY_X[1]);
+
+  ScanY_Xt[0] = ScanY_Xt[1] = ScanY_Yt[0] = ScanY_Yt[1] = ScanY_X[0] = ScanY_X[1] = NULL;
 }
 
 
@@ -1807,6 +1813,7 @@ void Rotate_brush(float angle)
   new_brush_height=y_max+1-y_min;
 
   free(Smear_brush); // On libère un peu de mémoire
+  Smear_brush = NULL;
 
   if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
@@ -1929,6 +1936,8 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
   free(ScanY_Yt[1]);
   free(ScanY_X[0]);
   free(ScanY_X[1]);
+
+  ScanY_Xt[0] = ScanY_Xt[1] = ScanY_Yt[0] = ScanY_Yt[1] = ScanY_X[0] = ScanY_X[1] = NULL;
 }
 
 

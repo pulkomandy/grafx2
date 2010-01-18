@@ -125,6 +125,7 @@ void Load_IMG(T_IO_Context * context)
       }
 
       free(buffer);
+      buffer = NULL;
     }
     else
       File_error=1;
@@ -642,6 +643,7 @@ void Load_LBM(T_IO_Context * context)
                         File_error=2;
                     }
                     free(LBM_buffer);
+                    LBM_buffer = NULL;
                   }
                   else
                   {                                               // compressé
@@ -684,6 +686,7 @@ void Load_LBM(T_IO_Context * context)
                     }
 
                     free(LBM_buffer);
+                    LBM_buffer = NULL;
                     /*Close_lecture();*/
                   }
                 }
@@ -703,6 +706,7 @@ void Load_LBM(T_IO_Context * context)
                         File_error=2;
                     }
                     free(LBM_buffer);
+                    LBM_buffer = NULL;
                   }
                   else
                   {                                               // compressé
@@ -1200,6 +1204,7 @@ void Load_BMP(T_IO_Context * context)
                     File_error=2;
                 }
                 free(buffer);
+                buffer = NULL;
                 break;
 
               case 1 : // Compression RLE 8 bits
@@ -1418,6 +1423,7 @@ void Load_BMP(T_IO_Context * context)
             
           }
           free(buffer);
+          buffer = NULL;
           fclose(file);
         }
       }
@@ -2020,6 +2026,7 @@ void Load_GIF(T_IO_Context * context)
       free(alphabet_suffix);
       free(alphabet_prefix);
       free(alphabet_stack);
+      alphabet_suffix = alphabet_prefix = alphabet_stack = NULL;
     } // Le fichier contenait au moins la signature GIF87a ou GIF89a
     else
       File_error=1;
@@ -2759,6 +2766,7 @@ void Load_PCX(T_IO_Context * context)
             }
 
             free(LBM_buffer);
+            LBM_buffer = NULL;
           }
         }
       }
@@ -2834,6 +2842,7 @@ void Load_PCX(T_IO_Context * context)
             /*Close_lecture();*/
           }
           free(buffer);
+          buffer = NULL;
         }
       }
     }
@@ -3086,6 +3095,7 @@ void Load_SCx(T_IO_Context * context)
             }
           }
           free(LBM_buffer);
+          LBM_buffer = NULL;
         }
         else
           File_error=1;
@@ -3376,6 +3386,7 @@ void Load_PNG(T_IO_Context * context)
                       context->Palette[x].B=palette[x].blue;
                     }
                     free(palette);
+                    palette = NULL;
                   }
                   
                   if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
@@ -3452,10 +3463,14 @@ void Load_PNG(T_IO_Context * context)
                   /* cleanup heap allocation */
                   if (row_pointers_allocated)
                   {
-                    for (y=0; y<context->Height; y++)
+                    for (y=0; y<context->Height; y++) {
                       free(Row_pointers[y]);
+                      Row_pointers[y] = NULL;
+                    }
+                      
                   }
                   free(Row_pointers);
+                  Row_pointers = NULL;
                 }
                 else
                   File_error=2;
