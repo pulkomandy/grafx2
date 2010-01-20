@@ -758,7 +758,7 @@ unsigned long Memory_free(void)
 	len = sizeof(maxmem);
 	sysctl(mib,2,&maxmem,&len,NULL,0);
 	return maxmem;
-#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__)
+#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__) || defined(__TRU64__)
 	// No <sys/sysctl.h> on BeOS or Haiku
 	// AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
 #warning "There is missing code there for your platform ! please check and correct :)"

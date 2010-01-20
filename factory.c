@@ -270,4 +270,10 @@ void Button_Brush_Factory(void)
 	Display_cursor();
 }
 
+#else // NOLUA
+void Button_Brush_Factory(void)
+{
+    Verbose_error_message("The brush factory is not available in this build of GrafX2.");
+}
+
 #endif

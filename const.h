@@ -28,7 +28,9 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
+#ifndef M_2PI
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
+#endif
 
 #define VERSION1                  2     ///< Version number for gfx2.cfg (1/4)
 #define VERSION2                  0     ///< Version number for gfx2.cfg (2/4)

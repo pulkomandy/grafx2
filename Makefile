@@ -196,12 +196,11 @@ else
       ZIP = zip
       PLATFORMFILES = gfx2.png
       BIN = grafx2
-      COPT = -W -Wall -std=c99 -c -g -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+      COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
       LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
-      CC = gcc
       OBJDIR = obj/unix
       X11LOPT = -lX11
-    
+      CC = gcc
 
   else
   ifeq ($(findstring Kickstart,$(shell version)),Kickstart) # 9

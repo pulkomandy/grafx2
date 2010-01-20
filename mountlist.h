@@ -28,7 +28,7 @@
 #ifndef MOUNTLIST_H_
 # define MOUNTLIST_H_
 
-#ifndef __VBCC__
+#if !defined(__VBCC__)
   # include <stdbool.h>
 #else
     #define bool char

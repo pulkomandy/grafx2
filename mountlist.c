@@ -27,6 +27,10 @@
     #define MOUNTED_GETMNTINFO
 #elif defined(__BEOS__) || defined(__HAIKU__)
     #define MOUNTED_FS_STAT_DEV
+#elif defined(__TRU64__)
+    #define MOUNTED_GETFSSTAT 1 
+    #define HAVE_SYS_MOUNT_H 1
+    #include <sys/types.h>
 #elif defined(__SKYOS__)
     #warning "Your platform is missing some specific code here ! please check and fix :)"
 #else
@@ -630,11 +634,12 @@ read_file_system_list (bool need_fs_type)
     numsys = getfsstat ((struct statfs *)0, 0L, MNT_NOWAIT);
     if (numsys < 0)
       return (NULL);
+      /*
     if (SIZE_MAX / sizeof *stats <= numsys)
-      xalloc_die ();
+      xalloc_die ();*/
 
     bufsize = (1 + numsys) * sizeof *stats;
-    stats = xmalloc (bufsize);
+    stats = malloc (bufsize);
     numsys = getfsstat (stats, bufsize, MNT_NOWAIT);
 
     if (numsys < 0)
@@ -645,10 +650,10 @@ read_file_system_list (bool need_fs_type)
 
     for (counter = 0; counter < numsys; counter++)
       {
-        me = xmalloc (sizeof *me);
-        me->me_devname = xstrdup (stats[counter].f_mntfromname);
-        me->me_mountdir = xstrdup (stats[counter].f_mntonname);
-        me->me_type = xstrdup (FS_TYPE (stats[counter]));
+        me = malloc (sizeof *me);
+        me->me_devname = strdup (stats[counter].f_mntfromname);
+        me->me_mountdir = strdup (stats[counter].f_mntonname);
+        //me->me_type = strdup (FS_TYPE (stats[counter]));
         me->me_type_malloced = 1;
         me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
         me->me_remote = ME_REMOTE (me->me_devname, me->me_type);

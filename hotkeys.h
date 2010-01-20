@@ -26,7 +26,7 @@
 /// The actual data is in hotkeys.c
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __VBCC__
+#if !defined(__VBCC__)
     #include <stdbool.h>
 #else
     #define bool char
