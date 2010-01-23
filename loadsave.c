@@ -971,8 +971,10 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 
 void Image_emergency_backup()
 {
-  Emergency_backup("a999999.bkp",Main_screen, Main_image_width, Main_image_height, &Main_palette);
-  Emergency_backup("b999999.bkp",Spare_screen, Spare_image_width, Spare_image_height, &Spare_palette);
+  if (Main_backups && Main_backups->Pages && Main_backups->Pages->Nb_layers == 1)
+    Emergency_backup("a999999.bkp",Main_screen, Main_image_width, Main_image_height, &Main_palette);
+  if (Spare_backups && Spare_backups->Pages && Spare_backups->Pages->Nb_layers == 1)
+    Emergency_backup("b999999.bkp",Spare_screen, Spare_image_width, Spare_image_height, &Spare_palette);
 }
 
 T_Format * Get_fileformat(byte format)
@@ -1131,6 +1133,16 @@ T_String_list *Backups_main = NULL;
 /// A list of files, used for scanning a directory
 T_String_list *Backups_spare = NULL;
 
+// Settings for safety backup (frequency, numbers, etc)
+
+const int Rotation_safety_backup = 8;
+
+const int Min_interval_for_safety_backup = 30000;
+const int Min_edits_for_safety_backup = 10;
+
+const int Max_interval_for_safety_backup = 60000;
+const int Max_edits_for_safety_backup = 30;
+
 ///
 /// Adds a file to Backups_main or Backups_spare lists, if it's a backup.
 ///
@@ -1193,9 +1205,15 @@ byte Process_backups(T_String_list **list)
   int i;
   char ** files_vector;
   T_String_list *element;
+  byte backup_max_undo_pages;
 
   if (*list == NULL)
     return 0;
+
+  // Save the maximum number of pages
+  // (It's used in Create_new_page() which gets called on each Load_image)
+  backup_max_undo_pages = Config.Max_undo_pages;
+  Config.Max_undo_pages = 99;
 
   // Count files
   nb_files=0;
@@ -1239,6 +1257,9 @@ byte Process_backups(T_String_list **list)
   }
   free(files_vector);
   files_vector = NULL;
+  
+  // Restore the maximum number of pages
+  Config.Max_undo_pages = backup_max_undo_pages;
   
   return nb_files;
 }
@@ -1288,14 +1309,6 @@ int Check_recovery(void)
   }*/
   return restored_main || restored_spare;
 }
-
-const int Rotation_safety_backup = 8;
-
-const int Min_interval_for_safety_backup = 30000;
-const int Min_edits_for_safety_backup = 10;
-
-const int Max_interval_for_safety_backup = 60000;
-const int Max_edits_for_safety_backup = 30;
 
 void Rotate_safety_backups(void)
 {

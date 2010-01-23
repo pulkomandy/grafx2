@@ -146,6 +146,9 @@ extern T_Format File_formats[];
 ///
 /// Function which attempts to save backups of the images (main and spare),
 /// called in case of SIGSEGV.
+/// It will save an image only if it has just one layer... otherwise,
+/// the risk of flattening a layered image (or saving just one detail layer)
+/// is too high.
 void Image_emergency_backup(void);
 
 /// Load an arbitrary SDL_Surface.
