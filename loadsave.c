@@ -285,6 +285,18 @@ void Palette_loaded(T_IO_Context *context)
       }
       */
       Remap_screen_after_menu_colors_change();
+      
+      // Preview palette
+      if (Get_fileformat(context->Format)->Palette_only)
+      {
+        short index;
+      
+        if (context->Type == CONTEXT_PREVIEW)
+          for (index=0; index<256; index++)
+            Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
+      
+        Update_window_area(183,95,120,80);
+      }
       break;
       
     case CONTEXT_MAIN_IMAGE:
@@ -621,6 +633,7 @@ void Load_image(T_IO_Context *context)
   
   if (File_error)
   {
+    context->Format = DEFAULT_FILEFORMAT;
     // Last try: with SDL_image
     Load_SDL_Image(context);
 
@@ -637,6 +650,7 @@ void Load_image(T_IO_Context *context)
   else
   // Si on a su déterminer avec succès le format du fichier:
   {
+    context->Format = format->Identifier;
     // On peut charger le fichier:
     // Dans certains cas il est possible que le chargement plante
     // après avoir modifié la palette. TODO
@@ -698,42 +712,42 @@ void Load_image(T_IO_Context *context)
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    if ( (File_error!=1) && (!format->Palette_only) )
+    if ( File_error!=1)
     {
-      /* Shouldn't happen ???
-      if (Pixel_load_function==Pixel_load_in_preview)
+      if (format->Palette_only)
       {
-        dword  color_usage[256];
-        Count_used_colors_screen_area(color_usage,context->Preview_pos_X,context->Preview_pos_Y,context->Width/context->Preview_factor_X,context->Height/context->Preview_factor_Y);
-        //Count_used_colors(color_usage);
-        Display_cursor();
-        Set_nice_menu_colors(color_usage,1);
-        Hide_cursor();
+        // Make a backup step
+        Backup_layers(0);
       }
-      */
-      strcpy(Main_backups->Pages->Filename,context->File_name);
-      strcpy(Main_backups->Pages->File_directory,context->File_directory);
-      
-      // On considère que l'image chargée n'est plus modifiée
-      Main_image_is_modified=0;
-      // Et on documente la variable Main_fileformat avec la valeur:
-      Main_fileformat=format->Identifier;
-
-      // already done initially on Backup_with_new_dimensions
-      //Main_image_width= context->Width;
-      //Main_image_height= context->Height;
+      // Copy the loaded palette
       memcpy(Main_palette, context->Palette, sizeof(T_Palette));
       memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
-      
-      Main_current_layer = context->Nb_layers - 1;
-      Main_layers_visible = (2<<Main_current_layer)-1;
 
-      // Correction des dimensions
-      if (Main_image_width<1)
-        Main_image_width=1;
-      if (Main_image_height<1)
-        Main_image_height=1;
+      // For formats that handle more than just the palette:
+      // Transfer the data to main image.
+      if (!format->Palette_only)
+      {
+        strcpy(Main_backups->Pages->Filename,context->File_name);
+        strcpy(Main_backups->Pages->File_directory,context->File_directory);
         
+        // On considère que l'image chargée n'est plus modifiée
+        Main_image_is_modified=0;
+        // Et on documente la variable Main_fileformat avec la valeur:
+        Main_fileformat=format->Identifier;
+  
+        // already done initially on Backup_with_new_dimensions
+        //Main_image_width= context->Width;
+        //Main_image_height= context->Height;
+        
+        Main_current_layer = context->Nb_layers - 1;
+        Main_layers_visible = (2<<Main_current_layer)-1;
+  
+        // Correction des dimensions
+        if (Main_image_width<1)
+          Main_image_width=1;
+        if (Main_image_height<1)
+          Main_image_height=1;
+      }
     }
     else if (File_error!=1)
     {

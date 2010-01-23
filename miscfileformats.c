@@ -39,18 +39,6 @@
 
 //////////////////////////////////// PAL ////////////////////////////////////
 //
-void Draw_palette_preview(T_IO_Context * context)
-{
-  short index;
-
-  if (context->Type == CONTEXT_PREVIEW)
-    for (index=0; index<256; index++)
-      Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
-
-  Update_window_area(183,95,120,80);
-}
-
-
 
 // -- Tester si un fichier est au format PAL --------------------------------
 void Test_PAL(T_IO_Context * context)
@@ -71,14 +59,14 @@ void Test_PAL(T_IO_Context * context)
     // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
     if (file_size == sizeof(T_Palette))
       File_error = 0;
-	else {
-		// Sinon c'est peut être un fichier palette ASCII "Jasc"
-		fread(filename, 1, 8, file);
-		if (strncmp(filename,"JASC-PAL",8) == 0)
-		{
-			File_error = 0;
-		}
-	}
+    else {
+      // Sinon c'est peut être un fichier palette ASCII "Jasc"
+      fread(filename, 1, 8, file);
+      if (strncmp(filename,"JASC-PAL",8) == 0)
+      {
+        File_error = 0;
+      }
+    }
     fclose(file);
   }
 }
@@ -101,52 +89,45 @@ void Load_PAL(T_IO_Context * context)
     long file_size = File_length_file(file);
     // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
     if (file_size == sizeof(T_Palette))
-	{
-		T_Palette palette_64;
-		// Pre_load(context, ?); // Pas possible... pas d'image...
+    {
+      T_Palette palette_64;
+      // Pre_load(context, ?); // Pas possible... pas d'image...
 
-		// Lecture du fichier dans context->Palette
-		if (Read_bytes(file, palette_64, sizeof(T_Palette)))
-		{
-			Palette_64_to_256(palette_64);
-			memcpy(context->Palette, palette_64, sizeof(T_Palette));
-			Palette_loaded(context);
-
-			// On dessine une preview de la palette (si chargement = preview)
-			Draw_palette_preview(context);
-		}
-		else
-			File_error = 2;
-	} else {
-		fread(filename, 1, 8, file);
-		if (strncmp(filename,"JASC-PAL",8) == 0)
-		{
-			int i, n, r, g, b;
-			fscanf(file, "%d",&n);
-			if(n != 100) 
-			{
-				File_error = 2;
-				fclose(file);
-				return;
-			}
-			// Read color count
-			fscanf(file, "%d",&n);
-			for (i = 0; i < n; i++)
-			{
-				fscanf(file, "%d %d %d",&r, &g, &b);
-				context->Palette[i].R = r;
-				context->Palette[i].G = g;
-				context->Palette[i].B = b;
-
-				Palette_loaded(context);
-
-				// On dessine une preview de la palette (si chargement = preview)
-				Draw_palette_preview(context);
-			}
-		} else File_error = 2;
-		
-	}
-
+      // Lecture du fichier dans context->Palette
+      if (Read_bytes(file, palette_64, sizeof(T_Palette)))
+      {
+        Palette_64_to_256(palette_64);
+        memcpy(context->Palette, palette_64, sizeof(T_Palette));
+        Palette_loaded(context);
+      }
+      else
+        File_error = 2;
+    } else {
+      fread(filename, 1, 8, file);
+      if (strncmp(filename,"JASC-PAL",8) == 0)
+      {
+        int i, n, r, g, b;
+        fscanf(file, "%d",&n);
+        if(n != 100) 
+        {
+          File_error = 2;
+          fclose(file);
+          return;
+        }
+        // Read color count
+        fscanf(file, "%d",&n);
+        for (i = 0; i < n; i++)
+        {
+          fscanf(file, "%d %d %d",&r, &g, &b);
+          context->Palette[i].R = r;
+          context->Palette[i].G = g;
+          context->Palette[i].B = b;
+        }
+        Palette_loaded(context);
+      } else File_error = 2;
+    
+    }
+    
     // Fermeture du fichier
     fclose(file);
   }
@@ -159,31 +140,34 @@ void Load_PAL(T_IO_Context * context)
 // -- Sauver un fichier au format PAL ---------------------------------------
 void Save_PAL(T_IO_Context * context)
 {
-  FILE *file;             // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  //long file_size;   // Taille du fichier
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS]; ///< full filename
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
-  // Ouverture du fichier
+  // Open output file
   if ((file=fopen(filename,"w")))
   {
-	int i;
-	fputs("JASC-PAL\n0100\n256\n", file);
-	for (i = 0; i < 256; i++)
-		fprintf(file,"%d %d %d\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B);
-  }
-  else // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
-  {
-    File_error=1;
+    int i;
+    if (fputs("JASC-PAL\n0100\n256\n", file)==EOF)
+      File_error=1;
+    for (i = 0; i < 256 && File_error==0; i++)
+    {
+      if (fprintf(file,"%d %d %d\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
+        File_error=1;
+    }
+    
     fclose(file);
-    remove(filename);
-                     //   On se fout du résultat de l'opération car si ça
-                     // renvoie 0 c'est que le fichier avait été partiel-
-                     // -lement écrit, sinon pas du tout. Or dans tous les
-                     // cas ça revient au même pour nous: Sauvegarde ratée!
+    
+    if (File_error)
+      remove(filename);
+  }
+  else
+  {
+    // unable to open output file, nothing saved.
+    File_error=1;
   }
 }
 
@@ -1171,8 +1155,6 @@ void Load_KCF(T_IO_Context * context)
   }
   else
     File_error=1;
-
-  if (!File_error) Draw_palette_preview(context);
 }
 
 
