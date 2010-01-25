@@ -234,6 +234,10 @@ void Remap_image_highlevel(byte * conversion_table)
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer],Main_image_width,Main_image_height,Main_image_width);
 
+  // Remap transparent color
+  Main_backups->Pages->Transparent_color = 
+    conversion_table[Main_backups->Pages->Transparent_color];
+
   // On calcule les limites à l'écran de l'image
   if (Main_image_height>=Menu_Y_before_window)
     end_y=Menu_Y_before_window;
