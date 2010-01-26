@@ -352,8 +352,6 @@ GFX2_GLOBAL byte Main_safety_backup_prefix;
 
 // -- Spare page data
 
-/// Pointer to the pixel data of the spare page
-GFX2_GLOBAL byte *    Spare_screen;
 /// Palette of the spare page
 GFX2_GLOBAL T_Palette Spare_palette;
 /// Boolean, means the spare page has been modified since last save.

@@ -1332,6 +1332,7 @@ void Copy_image_only(void)
   if (Backup_and_resize_the_spare(Main_image_width,Main_image_height))
   {
     byte i;
+        
     for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
     {
       if (i == Spare_current_layer)
@@ -1381,6 +1382,17 @@ void Copy_image_only(void)
     Spare_separator_position=Main_separator_position;
     Spare_X_zoom=Main_X_zoom;
     Spare_separator_proportion=Main_separator_proportion;
+    
+    // Update the visible buffer of the spare.
+    // It's a bit complex because at the moment, to save memory,
+    // the spare doesn't have a full visible_buffer + depth_buffer,
+    // so I can't use exactly the same technique as for Main page.
+    // (It's the same reason that the "Page" function gets complex,
+    // it needs to rebuild a depth buffer only, trusting the
+    // depth buffer that was already available in Spare_.)
+    Update_spare_buffers(Spare_image_width,Spare_image_height);
+    Redraw_spare_image();
+
   }
   else
     Message_out_of_memory();
@@ -1396,9 +1408,10 @@ void Copy_some_colors(void)
   memset(mask_color_to_copy,1,256);
   Menu_tag_colors("Tag colors to copy",mask_color_to_copy,&confirmation,0, NULL, 0xFFFF);
 
-  if (confirmation &&
-    (!Spare_image_is_modified || Confirmation_box("Spare page was modified. Proceed?")))
+  if (confirmation)
   {
+    // Make a backup with the same pixel data as previous history steps
+    Backup_the_spare(0);
     for (index=0; index<256; index++)
     {
       if (mask_color_to_copy[index])
@@ -1442,27 +1455,31 @@ void Button_Copy_page(void)
   if (clicked_button!=6)
   {
     if (clicked_button==4)
+    {
+      // Will backup if needed
       Copy_some_colors();
+    }
     else
     {
-      if ( (!Spare_image_is_modified)
-        || (Confirmation_box("Spare page was modified. Proceed?")) )
+      if (clicked_button<=2)
       {
-        // FIXME: add here some code to backup the spare
-      
-        if (clicked_button<=2)
-          Copy_image_only();
-
-        if (clicked_button==5)
-          Remap_spare();
-
-        if (clicked_button!=2) // copie de la palette
-          memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
-        
-        // FIXME: here is the 'end_of_modifications' for spare.
-
-        Spare_image_is_modified=1;
+        Backup_the_spare(-1);
+        Copy_image_only();
       }
+      else
+        Backup_the_spare(0);
+
+      if (clicked_button==5)
+        Remap_spare();
+
+      if (clicked_button!=2) // copie de la palette
+        memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      
+      // Here is the 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+
+      Spare_image_is_modified=1;
     }
   }
 

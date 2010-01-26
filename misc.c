@@ -293,7 +293,7 @@ byte Read_pixel_from_spare_screen(word x,word y)
   // Clipping is required as this can be called with coordinates from main image
   // (can be a bigger or smaller image)
   if (x>=Spare_image_width || y>=Spare_image_height)
-    return 0; // TODO: we could return the spare's transparent color, if it has one.
+    return Spare_backups->Pages->Transparent_color;
 #ifndef NOLAYERS
   return *(Spare_visible_image.Image + y*Spare_image_width + x);
 #else

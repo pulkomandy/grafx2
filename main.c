@@ -848,10 +848,6 @@ void Program_shutdown(void)
   free(Brush);
   Brush = NULL;
   Set_number_of_backups(0);
-  free(Spare_screen);
-  Spare_screen = NULL;
-  free(Main_screen);
-  Main_screen = NULL;
 
   // Free the skin (Gui graphics) data
   free(Gfx);

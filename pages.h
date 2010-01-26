@@ -88,6 +88,8 @@ void Free_page_of_a_list(T_List_of_pages * list);
 int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
 int Backup_with_new_dimensions(int upload,byte layers,int width,int height);
+/// Backup the spare image, the one you don't see.
+void Backup_the_spare(dword layer_mask);
 int Backup_and_resize_the_spare(int width,int height);
 /// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
@@ -104,6 +106,10 @@ void Redraw_layered_image(void);
 void Redraw_current_layer(void);
 
 void Update_screen_targets(void);
+/// Update all the special image buffers, if necessary.
+int Update_buffers(int width, int height);
+int Update_spare_buffers(int width, int height);
+void Redraw_spare_image(void);
 
 ///
 /// STATISTICS

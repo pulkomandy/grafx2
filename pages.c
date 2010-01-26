@@ -268,6 +268,52 @@ void Update_depth_buffer(void)
   Download_infos_backup(Main_backups);
 }
 
+void Redraw_spare_image(void)
+{
+  #ifndef NOLAYERS
+  // Re-construct the image with the visible layers
+  byte layer;  
+  // First layer
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Spare_layers_visible)
+    {
+       // Copy it in Spare_visible_image
+       memcpy(Spare_visible_image.Image,
+         Spare_backups->Pages->Image[layer],
+         Spare_image_width*Main_image_height);
+       
+       // No depth buffer in the spare
+       //memset(Spare_visible_image_depth_buffer.Image,
+       //  layer,
+       //  Spare_image_width*Spare_image_height);
+       
+       // skip all other layers
+       layer++;
+       break;
+    }
+  }
+  // subsequent layer(s)
+  for (; layer<Spare_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Spare_layers_visible)
+    {
+      int i;
+      for (i=0; i<Spare_image_width*Spare_image_height; i++)
+      {
+        byte color = *(Spare_backups->Pages->Image[layer]+i);
+        if (color != Spare_backups->Pages->Transparent_color) // transparent color
+        {
+          *(Spare_visible_image.Image+i) = color;
+          //if (layer != Spare_current_layer)
+          //  *(Spare_visible_image_depth_buffer.Image+i) = layer;
+        }
+      }
+    }
+  }
+  #endif
+}
+
 void Redraw_current_layer(void)
 {
 #ifndef NOLAYERS
@@ -309,7 +355,6 @@ void Download_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
   {
-    //Spare_screen=page->Image[Spare_current_layer];
     Spare_image_width=page->Width;
     Spare_image_height=page->Height;
     memcpy(Spare_palette,page->Palette,sizeof(T_Palette));
@@ -331,7 +376,6 @@ void Upload_infos_page_spare(T_Page * page)
 
 void Download_infos_backup(T_List_of_pages * list)
 {
-  //list->Pages->Next->Image[Main_current_layer];
 
   if (Config.FX_Feedback)
     FX_feedback_screen=list->Pages->Image[Main_current_layer];
@@ -497,18 +541,19 @@ void Free_last_page_of_list(T_List_of_pages * list)
 int Create_new_page(T_Page * new_page, T_List_of_pages * list, dword layer_mask)
 {
 
-//   Cette fonction crée une nouvelle page dont les attributs correspondent à
-// ceux de new_page (width,height,...) (le champ Image est invalide
-// à l'appel, c'est la fonction qui le met à jour), et l'enfile dans
-// list.
-
+//   This function fills the "Image" field of a new Page,
+// based on the pages's attributes (width,height,...)
+// then pushes it on front of a Page list.
 
   if (list->List_size >= (Config.Max_undo_pages+1))
   {
-    // On manque de mémoire ou la list est pleine. Dans tous les
-    // cas, il faut libérer une page.
+    // List is full.
+    // If some other memory-limit was to be implemented, here would
+    // be the right place to do it.
+    // For example, we could rely on Stats_pages_memory, 
+    // because it's the sum of all bitmaps in use (in bytes).
     
-    // Détruire la dernière page allouée dans la Liste_à_raboter
+    // Destroy the latest page
     Free_last_page_of_list(list);
   }
   {
@@ -790,11 +835,6 @@ int Backup_and_resize_the_spare(int width,int height)
   int return_code=0;
   byte nb_layers;
 
-
-  // On remet à jour l'état des infos de la page de brouillon (pour pouvoir
-  // les retrouver plus tard)
-  Upload_infos_page_spare(Spare_backups->Pages);
-
   nb_layers=Spare_backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page de brouillon
   new_page=New_page(nb_layers);
@@ -803,7 +843,10 @@ int Backup_and_resize_the_spare(int width,int height)
     Error(0);
     return 0;
   }
-  Upload_infos_page_spare(new_page);
+  
+  // Fill it with a copy of the latest history
+  Copy_S_page(new_page,Spare_backups->Pages);
+  
   new_page->Width=width;
   new_page->Height=height;
   if (Create_new_page(new_page,Spare_backups,0xFFFFFFFF))
@@ -818,6 +861,9 @@ int Backup_and_resize_the_spare(int width,int height)
     // Update_buffers(width, height); // Not for spare
     
     Download_infos_page_spare(Spare_backups->Pages);
+    
+    // Light up the 'has unsaved changes' indicator
+    Spare_image_is_modified=1;
     
     return_code=1;
   }
@@ -845,7 +891,7 @@ void Backup_layers(dword layer_mask)
   // retrouver plus tard)
   Upload_infos_page_main(Main_backups->Pages);
 
-  // On crée un descripteur pour la nouvelle page courante
+  // Create a fresh Page descriptor
   new_page=New_page(Main_backups->Pages->Nb_layers);
   if (!new_page)
   {
@@ -853,14 +899,14 @@ void Backup_layers(dword layer_mask)
     return;
   }
   
-  // Enrichissement de l'historique
+  // Fill it with a copy of the latest history
   Copy_S_page(new_page,Main_backups->Pages);
   Create_new_page(new_page,Main_backups,layer_mask);
   Download_infos_page_main(new_page);
 
   Download_infos_backup(Main_backups);
 
-  // On copie l'image du backup vers la page courante:
+  // Copy the actual pixels from the backup to the latest page
   for (i=0; i<Main_backups->Pages->Nb_layers;i++)
   {
     if ((1<<i) & layer_mask)
@@ -868,12 +914,42 @@ void Backup_layers(dword layer_mask)
              Main_backups->Pages->Next->Image[i],
              Main_image_width*Main_image_height);
   }
-  // On allume l'indicateur de modification de l'image
+  // Light up the 'has unsaved changes' indicator
   Main_image_is_modified=1;
   
   /*
   Last_backed_up_layers = 1<<Main_current_layer;
   */
+}
+
+void Backup_the_spare(dword layer_mask)
+{
+  int i;
+  T_Page *new_page;
+
+  // Create a fresh Page descriptor
+  new_page=New_page(Spare_backups->Pages->Nb_layers);
+  if (!new_page)
+  {
+    Error(0);
+    return;
+  }
+  
+  // Fill it with a copy of the latest history
+  Copy_S_page(new_page,Spare_backups->Pages);
+  Create_new_page(new_page,Spare_backups,layer_mask);
+
+  // Copy the actual pixels from the backup to the latest page
+  for (i=0; i<Spare_backups->Pages->Nb_layers;i++)
+  {
+    if ((1<<i) & layer_mask)
+      memcpy(Spare_backups->Pages->Image[i],
+             Spare_backups->Pages->Next->Image[i],
+             Spare_image_width*Spare_image_height);
+  }
+  // Light up the 'has unsaved changes' indicator
+  Spare_image_is_modified=1;
+
 }
 
 void Check_layers_limits()
