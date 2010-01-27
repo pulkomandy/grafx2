@@ -91,13 +91,13 @@ int L_PutPicturePixel(lua_State* L)
   int x = lua_tonumber(L,1);
   int y = lua_tonumber(L,2);
   int c = lua_tonumber(L,3);
-	Pixel_in_current_layer(x, y, c);
+	Pixel_in_current_screen(x, y, c, 0);
 	return 0; // no values returned for lua
 }
 
 int L_GetPicturePixel(lua_State* L)
 {
-	uint8_t c = Read_pixel_from_current_layer(lua_tonumber(L, 1),
+	uint8_t c = Read_pixel_from_current_screen(lua_tonumber(L, 1),
 		lua_tonumber(L, 2));
 	lua_pushinteger(L, c);
 	return 1;
@@ -106,6 +106,14 @@ int L_GetPicturePixel(lua_State* L)
 int L_GetBackupPixel(lua_State* L)
 {
 	uint8_t c = Read_pixel_from_backup_screen(lua_tonumber(L, 1),
+		lua_tonumber(L, 2));
+	lua_pushinteger(L, c);
+	return 1;
+}
+
+int L_GetLayerPixel(lua_State* L)
+{
+	uint8_t c = Read_pixel_from_current_layer(lua_tonumber(L, 1),
 		lua_tonumber(L, 2));
 	lua_pushinteger(L, c);
 	return 1;
@@ -213,13 +221,23 @@ void Button_Brush_Factory(void)
 
 	if (clicked_button == 2) // Run the script
 	{
-		lua_State* L = lua_open();
+		lua_State* L;
     const char* message;
+
+    // Some scripts are slow
+    Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Display_cursor();
+    Flush_update();
+    
+
+    L = lua_open();
 
 		lua_register(L,"putbrushpixel",L_PutBrushPixel);
 		lua_register(L,"getbrushpixel",L_GetBrushPixel);
 		lua_register(L,"putpicturepixel",L_PutPicturePixel);
 		lua_register(L,"getpicturepixel",L_GetPicturePixel);
+		lua_register(L,"getlayerpixel",L_GetLayerPixel);
 		lua_register(L,"getbackuppixel",L_GetBackupPixel);
 		lua_register(L,"setbrushsize",L_SetBrushSize);
 		lua_register(L,"setpicturesize",L_SetPictureSize);
@@ -269,6 +287,7 @@ void Button_Brush_Factory(void)
 
 	Close_window();
 	Unselect_button(BUTTON_BRUSH_EFFECTS);
+  Display_all_screen();
 	Display_cursor();
 }
 
