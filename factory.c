@@ -91,7 +91,7 @@ int L_PutPicturePixel(lua_State* L)
   int x = lua_tonumber(L,1);
   int y = lua_tonumber(L,2);
   int c = lua_tonumber(L,3);
-	Pixel_figure_permanent(x, y, c);
+	Pixel_in_current_layer(x, y, c);
 	return 0; // no values returned for lua
 }
 
@@ -261,6 +261,8 @@ void Button_Brush_Factory(void)
       else
         Warning_message("Unknown error running script!");
     }
+
+    End_of_modification();
 
 		lua_close(L);
 	}
