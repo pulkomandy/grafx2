@@ -4289,12 +4289,8 @@ void Button_Effects(void)
         Display_cursor();
         break;
       case 13 : // Feedback (pour Colorize et Shade)
-        if ((Config.FX_Feedback=!Config.FX_Feedback)) //!!!
-          FX_feedback_screen=Main_backups->Pages->Image[Main_current_layer];
-          // Main_screen
-        else
-          FX_feedback_screen=Main_backups->Pages->Next->Image[Main_current_layer];
-          // Screen_backup
+        Config.FX_Feedback = !Config.FX_Feedback;
+        Update_FX_feedback(Config.FX_Feedback);
         Hide_cursor();
         Display_feedback_state();
         Display_cursor();

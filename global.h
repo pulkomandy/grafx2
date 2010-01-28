@@ -610,12 +610,6 @@ GFX2_GLOBAL struct
 GFX2_GLOBAL Func_effect Effect_function;
 
 ///
-/// Pointer to the image to read, while drawing. It's either ::Main_screen
-/// (the image you draw) when FX feedback is ON, or ::Screen_backup (a backup
-/// copy) when FX feedback is off.
-GFX2_GLOBAL byte * FX_feedback_screen;
-
-///
 /// Array of booleans, indicates which colors should never be picked by
 /// ::Best_color()
 GFX2_GLOBAL byte Exclude_color[256];

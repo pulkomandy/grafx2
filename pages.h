@@ -27,6 +27,13 @@
 #ifndef _PAGES_H_
 #define _PAGES_H_
 
+///
+/// Pointer to the image to read, while drawing. It's either the last history
+/// layer page when FX feedback is on, or the history page before it
+/// when FX feedback is off.
+extern byte * FX_feedback_screen;
+
+
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////////// BACKUP ///////////////////////////////////////
@@ -59,7 +66,6 @@ byte Merge_layer();
 T_Page * New_page(byte nb_layers);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
-void Download_infos_backup(T_List_of_pages * list);
 void Clear_page(T_Page * page);
 void Copy_S_page(T_Page * dest,T_Page * source);
 
@@ -110,6 +116,10 @@ void Update_screen_targets(void);
 int Update_buffers(int width, int height);
 int Update_spare_buffers(int width, int height);
 void Redraw_spare_image(void);
+///
+/// Must be called after changing the head of Main_backups list, or
+/// Main_current_layer
+void Update_FX_feedback(byte with_feedback);
 
 ///
 /// STATISTICS

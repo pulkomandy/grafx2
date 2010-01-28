@@ -934,7 +934,6 @@ void Fill_general(byte fill_color)
 //
 {
   byte   cursor_shape_before_fill;
-  byte * old_fx_feedback_screen;
   short  x_pos,y_pos;
   short  top_reached  ,bottom_reached;
   short  left_reached,right_reached;
@@ -962,8 +961,7 @@ void Fill_general(byte fill_color)
     Backup();
 
     // On fait attention au Feedback qui DOIT se faire avec le backup.
-    old_fx_feedback_screen=FX_feedback_screen;
-    FX_feedback_screen=Screen_backup;
+    Update_FX_feedback(0);
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(replace_table,0,256);
@@ -1032,7 +1030,8 @@ void Fill_general(byte fill_color)
         else
           Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
 
-    FX_feedback_screen=old_fx_feedback_screen;
+    // Restore original feedback value
+    Update_FX_feedback(Config.FX_Feedback);
 
     //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
     // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
@@ -2541,7 +2540,6 @@ void Polyfill_general(int vertices, short * points, int color)
 void Polyfill(int vertices, short * points, int color)
 {
   int index;
-  byte *old_fx_feedback_screen;
 
   Pixel_clipped(points[0],points[1],color);
   if (vertices==1)
@@ -2552,8 +2550,7 @@ void Polyfill(int vertices, short * points, int color)
 
   // Comme pour le Fill, cette operation fait un peu d'"overdraw"
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
-  old_fx_feedback_screen=FX_feedback_screen;
-  FX_feedback_screen=Screen_backup;
+  Update_FX_feedback(0);
 
   Pixel_figure=Pixel_clipped;    
   Polyfill_general(vertices,points,color);
@@ -2567,8 +2564,8 @@ void Polyfill(int vertices, short * points, int color)
     Draw_line_general(points[index*2],points[index*2+1],points[index*2+2],points[index*2+3],color);
   Draw_line_general(points[0],points[1],points[index*2],points[index*2+1],color);
 
-  // restore de l'etat du FX Feedback  
-  FX_feedback_screen=old_fx_feedback_screen;
+  // Restore original feedback value
+  Update_FX_feedback(Config.FX_Feedback);
 
 }
 

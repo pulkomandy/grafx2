@@ -218,7 +218,7 @@ void Redraw_layered_image(void)
   #else
   Update_screen_targets();
   #endif
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 }
 
 void Update_depth_buffer(void)
@@ -265,7 +265,7 @@ void Update_depth_buffer(void)
     }
   }
   #endif
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 }
 
 void Redraw_spare_image(void)
@@ -374,13 +374,15 @@ void Upload_infos_page_spare(T_Page * page)
   }
 }
 
-void Download_infos_backup(T_List_of_pages * list)
+byte * FX_feedback_screen;
+
+void Update_FX_feedback(byte with_feedback)
 {
 
-  if (Config.FX_Feedback)
-    FX_feedback_screen=list->Pages->Image[Main_current_layer];
+  if (with_feedback)
+    FX_feedback_screen=Main_backups->Pages->Image[Main_current_layer];
   else
-    FX_feedback_screen=list->Pages->Next->Image[Main_current_layer];
+    FX_feedback_screen=Main_backups->Pages->Next->Image[Main_current_layer];
 }
 
 void Clear_page(T_Page * page)
@@ -732,7 +734,7 @@ int Init_all_backup_lists(int width,int height)
   
 #endif      
   Download_infos_page_main(Main_backups->Pages); 
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 
   // Default values for spare page
   Spare_backups->Pages->Width = width;
@@ -818,7 +820,7 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
     #else
       Update_screen_targets();
     #endif
-    Download_infos_backup(Main_backups);
+    Update_FX_feedback(Config.FX_Feedback);
     // --
     
     return_code=1;
@@ -904,7 +906,7 @@ void Backup_layers(dword layer_mask)
   Create_new_page(new_page,Main_backups,layer_mask);
   Download_infos_page_main(new_page);
 
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 
   // Copy the actual pixels from the backup to the latest page
   for (i=0; i<Main_backups->Pages->Nb_layers;i++)
@@ -1080,7 +1082,7 @@ void End_of_modification(void)
   Update_screen_targets();
 #endif
   
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 /*  
   Last_backed_up_layers = 0;
   Backup();
