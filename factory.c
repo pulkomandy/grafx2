@@ -375,27 +375,31 @@ void Button_Brush_Factory(void)
     Brush_backup_width = Brush_width;
     Brush_backup_height = Brush_height;
     
-    if (Brush == NULL)
+    if (Brush_backup == NULL)
     {
       Verbose_error_message("Out of memory!");
     }
-		else if (luaL_loadfile(L,scriptdir) != 0)
-    {
-      message = lua_tostring(L, 1);
-      if(message)
-			  Verbose_error_message(message);
-      else
-        Warning_message("Unknown error loading script!");
+		else 
+		{
+		  memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
+		
+  		if (luaL_loadfile(L,scriptdir) != 0)
+      {
+        message = lua_tostring(L, 1);
+        if(message)
+  			  Verbose_error_message(message);
+        else
+          Warning_message("Unknown error loading script!");
+      }
+  		else if (lua_pcall(L, 0, 0, 0) != 0)
+      {
+        message = lua_tostring(L, 1);
+        if(message)
+  			  Verbose_error_message(message);
+        else
+          Warning_message("Unknown error running script!");
+      }
     }
-		else if (lua_pcall(L, 0, 0, 0) != 0)
-    {
-      message = lua_tostring(L, 1);
-      if(message)
-			  Verbose_error_message(message);
-      else
-        Warning_message("Unknown error running script!");
-    }
-
     // Cleanup
     free(Brush_backup);
     Brush_backup=NULL;
