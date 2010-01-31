@@ -246,6 +246,16 @@ int L_GetColor(lua_State* L)
 	return 3;
 }
 
+int L_GetBackupColor(lua_State* L)
+{
+	byte c=lua_tonumber(L,1);
+
+	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].R);
+	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].G);
+	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].B);
+	return 3;
+}
+
 int L_MatchColor(lua_State* L)
 {
   int c = Best_color_nonexcluded(lua_tonumber(L,1), lua_tonumber(L, 2), lua_tonumber(L, 3));
@@ -349,6 +359,7 @@ void Button_Brush_Factory(void)
 		lua_register(L,"getpicturesize",L_GetPictureSize);
 		lua_register(L,"setcolor",L_SetColor);
 		lua_register(L,"getcolor",L_GetColor);
+		lua_register(L,"getbackupcolor",L_GetBackupColor);
 		lua_register(L,"matchcolor",L_MatchColor);
 		lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
 
