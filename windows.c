@@ -1046,44 +1046,44 @@ byte Confirmation_box(char * message)
 /// Window that allows you to enter a single value
 int Requester_window(char* message, int initial_value)
 {
-	short clicked_button = 0;
-	word window_width;
-	char str[10];
+  short clicked_button = 0;
+  word window_width;
+  char str[10];
 
-	window_width=(strlen(message)<<3)+20;
+  window_width=(strlen(message)<<3)+20;
 
-	if (window_width<120)
-		window_width = 120;
+  if (window_width<120)
+    window_width = 120;
 
-	Open_window(window_width, 60, "Request");
+  Open_window(window_width, 60, "Request");
 
-	Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
-		MC_Black, MC_Light);
-	sprintf(str, "%d", initial_value);
-	Window_set_input_button(10, 37, 4); // 1
-	Print_in_window(11, 39, str, MC_Black, MC_Light);
-	Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
-	Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
+  Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
+    MC_Black, MC_Light);
+  sprintf(str, "%d", initial_value);
+  Window_set_input_button(10, 37, 4); // 1
+  Print_in_window(11, 39, str, MC_Black, MC_Light);
+  Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
+  Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
 
-	Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
-		Menu_factor_Y * 60);
-	Display_cursor();
+  Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
+    Menu_factor_Y * 60);
+  Display_cursor();
 
-	do
-	{
-		clicked_button = Window_clicked_button();
-		if (clicked_button == 1)
-			Readline(11, 39, str, 4, 1);
-		if (Key == SDLK_ESCAPE) clicked_button = 2;
-	}
-	while (clicked_button <= 0);
+  do
+  {
+    clicked_button = Window_clicked_button();
+    if (clicked_button == 1)
+      Readline(11, 39, str, 4, 1);
+    if (Key == SDLK_ESCAPE) clicked_button = 2;
+  }
+  while (clicked_button <= 0);
 
-	Key = 0;
+  Key = 0;
 
-	Close_window();
-	Display_cursor();
+  Close_window();
+  Display_cursor();
 
-	return clicked_button==2?-1:atoi(str);
+  return clicked_button==2?-1:atoi(str);
 }
 
 
@@ -1743,12 +1743,12 @@ void Change_magnifier_factor(byte factor_index)
   // Values that need to be computed before switching to the new zoom factor
   if (Cursor_in_menu || !Main_magnifier_mode)
   {
-  	center_x = Main_magnifier_offset_X + (Main_magnifier_width / 2);
-  	center_y = Main_magnifier_offset_Y + (Main_magnifier_height / 2);
+    center_x = Main_magnifier_offset_X + (Main_magnifier_width / 2);
+    center_y = Main_magnifier_offset_Y + (Main_magnifier_height / 2);
   } else {
-	  // Zoom to cursor
-	  center_x = (Paintbrush_X - Main_magnifier_offset_X) / (float)Main_magnifier_width;
-	  center_y = (Paintbrush_Y - Main_magnifier_offset_Y) / (float)Main_magnifier_height;
+  // Zoom to cursor
+  center_x = (Paintbrush_X - Main_magnifier_offset_X) / (float)Main_magnifier_width;
+  center_y = (Paintbrush_Y - Main_magnifier_offset_Y) / (float)Main_magnifier_height;
   }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
@@ -1758,14 +1758,14 @@ void Change_magnifier_factor(byte factor_index)
   {
     // Recalculer le décalage de la loupe
     // Centrage "brut" de lécran par rapport à la loupe
-	if (Cursor_in_menu)
-	{
-    	Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
-    	Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
-	} else {
-		Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width ;
-		Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height ;
-	}
+    if (Cursor_in_menu)
+    {
+      Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
+      Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
+    } else {
+      Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width ;
+      Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height ;
+    }
     // Correction en cas de débordement de l'image
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
       Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
@@ -1930,17 +1930,17 @@ void Display_cursor(void)
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (y_pos=start_y,counter_y=0; counter_y<15 && y_pos < Screen_height;
-			y_pos++,counter_y++)
+            y_pos++,counter_y++)
           {
-        	if( y_pos < 0 ) continue;
-          	for (x_pos=start_x,counter_x=0;
-				counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
-          	{
-            	if( x_pos < 0 ) continue;
-              	color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-              	if (color!=MC_Trans)
-                	Pixel(x_pos,y_pos,color);
+            if( y_pos < 0 ) continue;
+              for (x_pos=start_x,counter_x=0;
+                counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
+              {
+                if( x_pos < 0 ) continue;
+                  color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+                  Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+                  if (color!=MC_Trans)
+                    Pixel(x_pos,y_pos,color);
             }
           }
 
@@ -2001,17 +2001,17 @@ void Display_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-        	if(y_pos<0) continue;
-        	if(y_pos>=Screen_height) break;
-          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-          	{
+            if(y_pos<0) continue;
+            if(y_pos>=Screen_height) break;
+            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+            {
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
               color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
               // On sauvegarde dans Cursor_background pour restaurer plus tard
               Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
               if (color!=MC_Trans)
-            	Pixel(x_pos,y_pos,color);
+                Pixel(x_pos,y_pos,color);
             }
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
@@ -2030,16 +2030,16 @@ void Display_cursor(void)
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
       for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
       {
-    	if(y_pos<0) continue;
+        if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-    	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-		{
-        	if(x_pos<0) continue;
-        	if(x_pos>=Screen_width) break;
-          	color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
-          	// On sauvegarde dans Cursor_background pour restaurer plus tard
-          	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-          	if (color!=MC_Trans)
+        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        {
+          if(x_pos<0) continue;
+          if(x_pos>=Screen_width) break;
+          color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
+          // On sauvegarde dans Cursor_background pour restaurer plus tard
+          Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+          if (color!=MC_Trans)
               Pixel(x_pos,y_pos,color);
         }
       }
@@ -2235,7 +2235,7 @@ void Hide_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-			if(y_pos < 0) continue;
+            if(y_pos < 0) continue;
             if(y_pos>=Screen_height) break;
             for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
             {
@@ -2304,10 +2304,10 @@ void Hide_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-        	if(y_pos<0) continue;
+            if(y_pos<0) continue;
             if(y_pos>=Screen_height) break;
-          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-          	{
+            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+            {
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
                   Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
@@ -2334,10 +2334,10 @@ void Hide_cursor(void)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-      	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-      	{
-        	if(x_pos<0) continue;
-        	if(x_pos>=Screen_width) break;
+        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        {
+          if(x_pos<0) continue;
+          if(x_pos>=Screen_width) break;
             Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
         }
       }
@@ -2918,10 +2918,10 @@ void Remap_menu_sprites()
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
 
-	// Skin preview
-	for (j = 0; j < 173; j++)
-		for (i = 0; i < 16; i++)
-			Remap_pixel(&Gfx->Preview[i][j]);
+    // Skin preview
+    for (j = 0; j < 173; j++)
+      for (i = 0; i < 16; i++)
+        Remap_pixel(&Gfx->Preview[i][j]);
   }
   Clear_border(MC_Black);
 }
