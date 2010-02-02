@@ -102,7 +102,7 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue);
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
 
-void Change_magnifier_factor(byte factor_index);
+void Change_magnifier_factor(byte factor_index, byte point_at_mouse);
 
 /// Width of one layer button, in pixels before scaling
 extern word Layer_button_width;

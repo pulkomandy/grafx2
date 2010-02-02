@@ -1309,7 +1309,14 @@ void Button_Page(void)
 
   // A la fin, on affiche l'écran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
-  Change_magnifier_factor(factor_index);
+  //Change_magnifier_factor(factor_index,0);
+  Compute_magnifier_data();
+  if (Main_magnifier_mode)
+    Pixel_preview=Pixel_preview_magnifier;
+  else
+    Pixel_preview=Pixel_preview_normal;
+  Compute_limits();
+  Compute_paintbrush_coordinates();
 
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
@@ -3325,7 +3332,7 @@ void Button_Magnify_menu(void)
   
   if (item)
   {
-    Change_magnifier_factor(item->Number);
+    Change_magnifier_factor(item->Number,0);
   }
 
   if ( (!item) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel

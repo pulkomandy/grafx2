@@ -390,7 +390,7 @@ void Zoom(short delta)
   if ( (index>=0) && (index<NB_ZOOM_FACTORS) )
   {
     Hide_cursor();
-    Change_magnifier_factor(index);
+    Change_magnifier_factor(index,1);
     if (Main_magnifier_mode)
       Display_all_screen();
     Display_cursor();
@@ -411,7 +411,7 @@ void Zoom_set(int index)
   }
   else
   {
-    Change_magnifier_factor(index);
+    Change_magnifier_factor(index,1);
     if (!Main_magnifier_mode)
       Select_button(BUTTON_MAGNIFIER,1);
     Display_all_screen();

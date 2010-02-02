@@ -1777,18 +1777,18 @@ void Compute_magnifier_data(void)
 
 
 /// Changes magnifier factor and updates everything needed
-void Change_magnifier_factor(byte factor_index)
+void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
 {
   int target_x,target_y; // These coordinates are in image space
-  byte point_at_mouse=0;
   byte magnified_view_leads=1;
 
   // Values that need to be computed before switching to the new zoom factor
-  if (Cursor_in_menu || !Main_magnifier_mode)
+  if (!point_at_mouse || Cursor_in_menu || !Main_magnifier_mode)
   {
     // Locate the pixel in center of the magnified area
     target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1);
     target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1);
+    point_at_mouse=0;
   }
   else if (Mouse_X>=Main_X_zoom)
   {
@@ -1803,6 +1803,7 @@ void Change_magnifier_factor(byte factor_index)
     target_x=Mouse_X+Main_offset_X;
     target_y=Mouse_Y+Main_offset_Y;
     magnified_view_leads=0;
+    point_at_mouse=0;
   }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
