@@ -1655,8 +1655,7 @@ void Position_screen_according_to_zoom(void)
                          -(Main_separator_position>>1);
     if (Main_offset_X<0)
       Main_offset_X=0;
-    else
-    if (Main_image_width<Main_offset_X+Main_separator_position)
+    else if (Main_image_width<Main_offset_X+Main_separator_position)
       Main_offset_X=Main_image_width-Main_separator_position;
   }
   else
@@ -1669,8 +1668,51 @@ void Position_screen_according_to_zoom(void)
                          -(Menu_Y>>1);
     if (Main_offset_Y<0)
       Main_offset_Y=0;
-    else
-    if (Main_image_height<Main_offset_Y+Menu_Y)
+    else if (Main_image_height<Main_offset_Y+Menu_Y)
+      Main_offset_Y=Main_image_height-Menu_Y;
+  }
+  else
+    Main_offset_Y=0;
+}
+
+// -- Recenter the non-zoomed part of image around a precise pixel
+void Position_screen_according_to_position(int target_x, int target_y)
+{
+  // Centrage en X
+  if (Main_image_width>Main_separator_position)
+  {
+    Main_offset_X=target_x-Mouse_X;
+    // Do not allow the zoomed part to show something that the
+    // non-zoomed part doesn't see. All clipping is computed according
+    // to the non-zoomed part.
+    if (Main_magnifier_offset_X<Main_offset_X)
+      Main_offset_X=Main_magnifier_offset_X;
+    else if (Main_magnifier_offset_X+Main_magnifier_width > Main_offset_X+Main_separator_position)
+      Main_offset_X = Main_magnifier_offset_X+Main_magnifier_width-Main_separator_position;
+    if (Main_offset_X<0)
+      Main_offset_X=0;
+    else if (Main_image_width<Main_offset_X+Main_separator_position)
+      Main_offset_X=Main_image_width-Main_separator_position;
+      
+    
+  }
+  else
+    Main_offset_X=0;
+
+  // Centrage en Y
+  if (Main_image_height>Menu_Y)
+  {
+    Main_offset_Y=target_y-Mouse_Y;
+    // Do not allow the zoomed part to show something that the
+    // non-zoomed part doesn't see. All clipping is computed according
+    // to the non-zoomed part.
+    if (Main_magnifier_offset_Y<Main_offset_Y)
+      Main_offset_Y=Main_magnifier_offset_Y;
+    else if (Main_magnifier_offset_Y+Main_magnifier_height > Main_offset_Y)
+      Main_offset_Y = Main_magnifier_offset_Y+Main_magnifier_height;
+    if (Main_offset_Y<0)
+      Main_offset_Y=0;
+    else if (Main_image_height<Main_offset_Y+Menu_Y)
       Main_offset_Y=Main_image_height-Menu_Y;
   }
   else
@@ -1737,18 +1779,30 @@ void Compute_magnifier_data(void)
 /// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index)
 {
-  float center_x;
-  float center_y;
+  int target_x,target_y; // These coordinates are in image space
+  byte point_at_mouse=0;
+  byte magnified_view_leads=1;
 
   // Values that need to be computed before switching to the new zoom factor
   if (Cursor_in_menu || !Main_magnifier_mode)
   {
-    center_x = Main_magnifier_offset_X + (Main_magnifier_width / 2);
-    center_y = Main_magnifier_offset_Y + (Main_magnifier_height / 2);
-  } else {
-  // Zoom to cursor
-  center_x = (Paintbrush_X - Main_magnifier_offset_X) / (float)Main_magnifier_width;
-  center_y = (Paintbrush_Y - Main_magnifier_offset_Y) / (float)Main_magnifier_height;
+    // Locate the pixel in center of the magnified area
+    target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1);
+    target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1);
+  }
+  else if (Mouse_X>=Main_X_zoom)
+  {
+    // Locate the pixel under the cursor, in magnified area
+    target_x=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
+    target_y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    point_at_mouse=1;
+  }
+  else
+  {
+    // Locate the pixel under the cursor, in normal area
+    target_x=Mouse_X+Main_offset_X;
+    target_y=Mouse_Y+Main_offset_Y;
+    magnified_view_leads=0;
   }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
@@ -1756,17 +1810,20 @@ void Change_magnifier_factor(byte factor_index)
 
   if (Main_magnifier_mode)
   {
-    // Recalculer le décalage de la loupe
-    // Centrage "brut" de lécran par rapport à la loupe
-    if (Cursor_in_menu)
+    // Recompute the magnifier offset (center its view)
+    if (point_at_mouse)
     {
-      Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
-      Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
-    } else {
-      Main_magnifier_offset_X = Paintbrush_X - center_x * Main_magnifier_width ;
-      Main_magnifier_offset_Y = Paintbrush_Y - center_y * Main_magnifier_height ;
+      // Target pixel must be located under the mouse position.
+      Main_magnifier_offset_X = target_x-((Mouse_X-Main_X_zoom)/Main_magnifier_factor);
+      Main_magnifier_offset_Y = target_y-((Mouse_Y)/Main_magnifier_factor);
     }
-    // Correction en cas de débordement de l'image
+    else
+    {
+      // Target pixel must be positioned at new center
+      Main_magnifier_offset_X = target_x-(Main_magnifier_width>>1);
+      Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
+    }
+    // Fix cases where the image would overflow on edges
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
       Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
     if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
@@ -1776,7 +1833,10 @@ void Change_magnifier_factor(byte factor_index)
     if (Main_magnifier_offset_Y<0)
       Main_magnifier_offset_Y=0;
 
-    Position_screen_according_to_zoom();
+    if (magnified_view_leads)
+      Position_screen_according_to_zoom();
+    else
+      Position_screen_according_to_position(target_x, target_y);
 
     Pixel_preview=Pixel_preview_magnifier;
 
