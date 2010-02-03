@@ -1173,16 +1173,13 @@ void Add_backup_file(const char *name)
   
   // Check first character
   if (file_name[0]=='a')
-  {
     list = &Backups_main;
-  }
   else if (file_name[0]=='b')
-  {
     list = &Backups_spare;
-  }
-   else
+   else {
     // Not a good file
     return;
+  }
   
   // Check next characters till file extension
   i = 1;
@@ -1377,13 +1374,16 @@ void Delete_safety_backups(void)
   
   For_each_file(Config_directory, Add_backup_file);
   
+  chdir(Config_directory);
   for (element=Backups_main; element!=NULL; element=element->Next)
   {
-    remove(element->String);
+    if(remove(element->String))
+      printf("Failed to delete %s\n",element->String);
   }
   for (element=Backups_spare; element!=NULL; element=element->Next)
   {
-    remove(element->String);
+    if(remove(element->String))
+      printf("Failed to delete %s\n",element->String);
   }
   
 }
