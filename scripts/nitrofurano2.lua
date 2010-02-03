@@ -1,5 +1,5 @@
 -- x8palettetopicture.lua
-w,h=getpicturesize();
+setpicturesize(256,64);
 for y1=0,7,1 do
   for x1=0,31,1 do
     for y2=0,7,1 do
