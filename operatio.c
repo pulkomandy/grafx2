@@ -2025,8 +2025,14 @@ void Polygon_12_9(void)
     Operation_pop(&end_y);
     Operation_pop(&end_x);
     Paintbrush_shape=Paintbrush_shape_before_operation;
-    // Le pied aurait été de ne pas repasser sur le 1er point de la 1ère ligne
-    // mais c'est pas possible :(
+
+    // Avoid overdrawing the first point
+    if(start_x < end_x) end_x--;
+    else if(start_x>end_x) end_x++;
+
+    if(start_y < end_y) end_y--;
+    else if(start_y>end_y) end_y++;
+
     Draw_line_permanent(start_x,start_y,end_x,end_y,color);
     Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
@@ -2346,6 +2352,14 @@ void Polyform_12_8(void)
 
     // On efface la preview du segment annulé:
     Hide_line_preview(start_x,start_y,end_x,end_y);
+
+    // Avoid overdrawing the first point
+    if(start_x < initial_x) initial_x--;
+    else if(start_x>initial_x) initial_x++;
+
+    if(start_y < initial_y) initial_y--;
+    else if(start_y>initial_y) initial_y++;
+
 
     // On affiche de façon définitive le bouclage du polygone:
     Draw_line_permanent(start_x,start_y,initial_x,initial_y,color);

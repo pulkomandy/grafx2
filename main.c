@@ -835,7 +835,6 @@ void Program_shutdown(void)
 
   // Remove the safety backups, this is normal exit
   Delete_safety_backups();
-  DEBUG("bye",1);
 
   // On libère le buffer de gestion de lignes
   free(Horizontal_line_buffer);
