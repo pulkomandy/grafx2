@@ -1911,7 +1911,10 @@ void Button_Resolution(void)
 
     if ( (chosen_width!=Main_image_width)
       || (chosen_height!=Main_image_height) )
+    {
       Resize_image(chosen_width,chosen_height);
+      End_of_modification(); 
+    }
     
     if ((Video_mode[selected_mode].State & 3) == 3 ||
       Init_mode_video(
@@ -2764,6 +2767,8 @@ void Load_picture(byte image)
     {
       if (image)
       {
+        End_of_modification();
+        
         if (Main_magnifier_mode)
         {
           Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
@@ -2866,6 +2871,8 @@ void Button_Reload(void)
 
     if (File_error!=1)
     {
+      End_of_modification();
+      
       if (Main_magnifier_mode)
       {
         Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
