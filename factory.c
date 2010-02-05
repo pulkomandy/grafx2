@@ -52,6 +52,15 @@ static word Brush_backup_height;
 static byte Palette_has_changed;
 static byte Brush_was_altered;
 
+/// Helper function to clamp a double to 0-255 range
+inline byte clamp_byte(double value)
+{
+  if (value<0.0)
+    return 0;
+  else if (value>255.0)
+    return 255;
+  else return (byte)value;
+}
 
 // Wrapper functions to call C from Lua
 
@@ -224,10 +233,10 @@ int L_GetLayerPixel(lua_State* L)
 int L_SetColor(lua_State* L)
 {
   byte c=lua_tonumber(L,1);
-  byte r=lua_tonumber(L,2);
-  byte g=lua_tonumber(L,3);
-  byte b=lua_tonumber(L,4);
-  
+  byte r=clamp_byte(lua_tonumber(L,2));
+  byte g=clamp_byte(lua_tonumber(L,3));
+  byte b=clamp_byte(lua_tonumber(L,4));
+    
   Main_palette[c].R=Round_palette_component(r);
   Main_palette[c].G=Round_palette_component(g);
   Main_palette[c].B=Round_palette_component(b);
@@ -258,7 +267,11 @@ int L_GetBackupColor(lua_State* L)
 
 int L_MatchColor(lua_State* L)
 {
-  int c = Best_color_nonexcluded(lua_tonumber(L,1), lua_tonumber(L, 2), lua_tonumber(L, 3));
+  byte r=clamp_byte(lua_tonumber(L,1));
+  byte g=clamp_byte(lua_tonumber(L,2));
+  byte b=clamp_byte(lua_tonumber(L,3));
+
+  int c = Best_color_nonexcluded(r,g,b);
   lua_pushinteger(L, c);
   return 1;
 }

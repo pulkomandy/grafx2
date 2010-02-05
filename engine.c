@@ -66,7 +66,7 @@ byte* Window_background[8];
 ///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=
 {
-  "Toolbars / Hide toolbars",
+  "Hide toolbars / Select  ",
 
   "Layers manager          ",
   "Get/Set transparent col.",

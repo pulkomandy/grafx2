@@ -56,7 +56,7 @@ for y = 0, h - 1, 1 do
    g = V + SPEC1 + SPEC2
    b = V + SPEC1 + SPEC2
 
-   c = matchcolor(math.max(0,math.min(255,r)),math.max(0,math.min(255,g)),math.max(0,math.min(255,b)))
+   c = matchcolor(r,g,b)
  
    putpicturepixel(x, y, c);
 

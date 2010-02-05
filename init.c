@@ -1372,8 +1372,8 @@ void Init_buttons(void)
                      0,0,
                      16,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Toggle_toolbar, Button_Toggle_all_toolbars,
-                     1,0,
+                     Button_Toggle_all_toolbars, Button_Toggle_toolbar,
+                     0,1,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 }

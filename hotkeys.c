@@ -1499,7 +1499,7 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_MOUSE_RIGHT,              // Emulate mouse right
   SPECIAL_CLICK_LEFT,               // Emulate mouse click left
   SPECIAL_CLICK_RIGHT,              // Emulate mouse click right
-  0x200+BUTTON_HIDE,                // Show / Hide menus
+  0x100+BUTTON_HIDE,                // Show / Hide menus
   SPECIAL_SHOW_HIDE_CURSOR,         // Show / Hide cursor
   SPECIAL_DOT_PAINTBRUSH,           // Paintbrush = "."
   0x100+BUTTON_PAINTBRUSHES,        // Paintbrush choice
