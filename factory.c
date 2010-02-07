@@ -45,6 +45,13 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+///
+/// Number of characters for name in fileselector.
+/// Window is adjusted according to it.
+#define NAME_WIDTH 34
+/// Position of fileselector top, in window space
+#define FILESEL_Y 18
+
 // Work data that can be used during a script
 static byte * Brush_backup = NULL;
 static word Brush_backup_width;
@@ -287,13 +294,92 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
 	if (Scripts_list.Nb_elements)
 	{
+	  short name_size;
+	  
 		current_item = Get_item_by_index(&Scripts_list, index);
-		Print_in_window(x, y, current_item->Short_name, MC_Black,
+
+		Print_in_window_limited(x, y, current_item->Full_name, NAME_WIDTH, MC_Black,
 			(highlighted)?MC_Dark:MC_Light);
+	  name_size=strlen(current_item->Full_name);
+	  // Clear remaining area on the right
+	  if (name_size<NAME_WIDTH)
+  	  Window_rectangle(x+name_size*8,y,(NAME_WIDTH-name_size)*8,8,(highlighted)?MC_Dark:MC_Light);
+
+  	Update_window_area(x,y,NAME_WIDTH*8,8);
 	}
 }
 
-// Add a skin to the list
+///
+/// Displays first lines of comments from a lua script in the window.
+void Draw_script_information(T_Fileselector_item * script_item)
+{
+  FILE *script_file;
+  char full_name[MAX_PATH_CHARACTERS];
+  char text_block[3][NAME_WIDTH+3];
+  int x, y;
+  
+  Hide_cursor();
+  // Blank the target area
+	Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
+
+  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  {
+    strcpy(full_name, Data_directory);
+  	strcat(full_name, "scripts/");
+  	strcat(full_name, script_item->Full_name);
+    
+    
+    x=0;
+    y=0;
+    text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
+    // Start reading
+    script_file = fopen(full_name, "r");
+    if (script_file != NULL)
+    {
+      int c;
+      c = fgetc(script_file);
+      while (c != EOF && y<3)
+      {
+        if (c == '\n')
+        {
+          if (x<2)
+            break; // Carriage return without comment: Stopping
+          y++;
+          x=0;
+        }
+        else if (x==0 || x==1)
+        {
+          if (c != '-')
+            break; // Non-comment line was encountered. Stopping.       
+          x++;
+        }
+        else
+        {
+          if (x < NAME_WIDTH+4)
+          {
+            // Adding character
+            text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
+            text_block[y][x-1] = '\0';
+          }
+          x++;
+        }
+        // Read next
+        c = fgetc(script_file);
+      }
+      fclose(script_file);
+    }
+    
+    Print_in_window(7, FILESEL_Y + 89   , text_block[0], MC_Light, MC_Black);
+    Print_in_window(7, FILESEL_Y + 89+ 8, text_block[1], MC_Light, MC_Black);
+    Print_in_window(7, FILESEL_Y + 89+16, text_block[2], MC_Light, MC_Black);
+  
+  }
+  Display_cursor();
+  Update_window_area(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8);
+    
+}
+
+// Add a script to the list
 void Add_script(const char *name)
 {
 	Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
@@ -306,7 +392,7 @@ void Button_Brush_Factory(void)
 	T_Scroller_button* scriptscroll;
 	char scriptdir[MAX_PATH_CHARACTERS];
 
-	Open_window(175, 162, "Brush Factory");
+	Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
 
 	// Here we use the same data container as the fileselectors.
 	// Reinitialize the list
@@ -318,19 +404,24 @@ void Button_Brush_Factory(void)
 	// Sort it
 	Sort_list_of_files(&Scripts_list);
 
-	Window_set_normal_button(77, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
+	Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 	Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, 0); // 2
 
-	#define FILESEL_Y 18
-	Window_display_frame_in(6, FILESEL_Y - 2, 148, 84); // File selector
+	Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
 	scriptlist = Window_set_list_button(
 		// Fileselector
-		Window_set_special_button(8, FILESEL_Y + 1, 144, 80), // 3
+		Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 3
 		// Scroller for the fileselector
-		(scriptscroll = Window_set_scroller_button(154, FILESEL_Y - 1, 82,
+		(scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
 			Scripts_list.Nb_elements, 10, 0)), // 4
 		Draw_script_name); // 5
+		
+	Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
+	
 	Window_redraw_list(scriptlist);
+  Draw_script_information(Get_item_by_index(&Scripts_list,
+    scriptlist->List_start + scriptlist->Cursor_position));
+
 
 	Update_window_area(0, 0, Window_width, Window_height);
 	Display_cursor();
@@ -340,6 +431,12 @@ void Button_Brush_Factory(void)
 
 		switch (clicked_button)
 		{
+		  case 5:
+        Draw_script_information(Get_item_by_index(&Scripts_list,
+          scriptlist->List_start + scriptlist->Cursor_position));
+		    break;
+		    
+		    
 			default:
 				break;
 		}

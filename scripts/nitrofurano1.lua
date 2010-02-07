@@ -1,4 +1,4 @@
--- x1palettetopicture.lua
+-- x1 palette to picture
 w,h=getpicturesize();
 for y1=0,7,1 do
   for x1=0,31,1 do

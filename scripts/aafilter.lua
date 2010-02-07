@@ -1,3 +1,5 @@
+-- Apply a kind of AA filter on picture
+
 -- Get the picture size
 w, h = getpicturesize();
 

@@ -1,4 +1,4 @@
--- x8palettetopicture.lua
+-- x8 palette to picture
 setpicturesize(256,64);
 for y1=0,7,1 do
   for x1=0,31,1 do

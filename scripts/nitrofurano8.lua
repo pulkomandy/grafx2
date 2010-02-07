@@ -1,4 +1,5 @@
--- 18bitcolourspacefrompalette.lua
+-- 18bit colour space from palette
+--
 w,h=getpicturesize();
 for y1=0,7,1 do
   for x1=0,7,1 do

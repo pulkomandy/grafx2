@@ -1,3 +1,4 @@
+-- ?
 w,h=getpicturesize();
 for y1=0,h-1,8 do
   for x1=0,w-1,8 do

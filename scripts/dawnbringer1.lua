@@ -1,4 +1,6 @@
--- Picture scene: Amigaball (by Richard Fhager, code adopted from Evalion)
+-- Picture scene: Amigaball
+-- by Richard Fhager, code adopted
+-- from Evalion
 
 w = 256
 h = 256

@@ -1,4 +1,4 @@
--- drawisometricgrid.lua
+-- Draw isometric grid
 w,h=getpicturesize();
 for y=0,h-1,8 do
   for x=0,w-1,1 do
