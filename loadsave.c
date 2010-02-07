@@ -1354,7 +1354,7 @@ void Rotate_safety_backups(void)
     // Create a new file name and save
     sprintf(file_name, "%c%6.6d.bkp",
       Main_safety_backup_prefix,
-      (Unit32)Main_safety_number);
+      (Uint32)Main_safety_number);
     Init_context_layered_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     Save_image(&context);
