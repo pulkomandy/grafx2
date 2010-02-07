@@ -229,5 +229,6 @@ void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO
 void Init_write_buffer(void);
 void Write_one_byte(FILE *file, byte b);
 void End_write(FILE *file);
+void Rotate_safety_backups(void);
 
 #endif

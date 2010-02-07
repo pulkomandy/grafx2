@@ -34,6 +34,7 @@
 #include "misc.h"
 #include "operatio.h"
 #include "pages.h"
+#include "sdlscreen.h"
 #include "windows.h"
 
 

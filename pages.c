@@ -30,6 +30,7 @@
 #include "global.h"
 #include "pages.h"
 #include "errors.h"
+#include "loadsave.h"
 #include "misc.h"
 #include "windows.h"
 

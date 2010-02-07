@@ -1344,7 +1344,7 @@ void Rotate_safety_backups(void)
     sprintf(deleted_file, "%s%c%6.6d.bkp",
       Config_directory,
       Main_safety_backup_prefix,
-      (Main_safety_number + 1000000l - Rotation_safety_backup) % 1000000l);
+      (Uint32)(Main_safety_number + 1000000l - Rotation_safety_backup) % (Uint32)1000000l);
     remove(deleted_file); // no matter if fail
     
     // Reset counters
@@ -1354,7 +1354,7 @@ void Rotate_safety_backups(void)
     // Create a new file name and save
     sprintf(file_name, "%c%6.6d.bkp",
       Main_safety_backup_prefix,
-      Main_safety_number);
+      (Unit32)Main_safety_number);
     Init_context_layered_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     Save_image(&context);

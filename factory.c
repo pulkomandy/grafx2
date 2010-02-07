@@ -53,7 +53,7 @@ static byte Palette_has_changed;
 static byte Brush_was_altered;
 
 /// Helper function to clamp a double to 0-255 range
-inline byte clamp_byte(double value)
+static inline byte clamp_byte(double value)
 {
   if (value<0.0)
     return 0;
@@ -233,9 +233,10 @@ int L_GetLayerPixel(lua_State* L)
 int L_SetColor(lua_State* L)
 {
   byte c=lua_tonumber(L,1);
-  byte r=clamp_byte(lua_tonumber(L,2));
-  byte g=clamp_byte(lua_tonumber(L,3));
-  byte b=clamp_byte(lua_tonumber(L,4));
+
+  byte r=clamp_byte((double)lua_tonumber(L,2));
+  byte g=clamp_byte((double)lua_tonumber(L,3));
+  byte b=clamp_byte((double)lua_tonumber(L,4));
     
   Main_palette[c].R=Round_palette_component(r);
   Main_palette[c].G=Round_palette_component(g);

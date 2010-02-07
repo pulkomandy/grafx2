@@ -422,7 +422,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Pasi Kallinen the Peach     petter        ")
   HELP_TEXT ("  richienyhus   tape.wyrm     TeeEmCee      ")
   HELP_TEXT ("  tempest       Timo Kurrpa   titus^Rab     ")
-  HELP_TEXT ("  Tobé          00ai99        ")
+  HELP_TEXT ("  Tobé          yakumo9275    00ai99        ")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("  ... posted the annoying bug reports.")
