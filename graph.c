@@ -2673,7 +2673,7 @@ void Display_pixel(word x,word y,byte color)
   // La Loupe est gérée par appel à Pixel_preview().
 {
   if ( ( (!Sieve_mode)   || (Effect_sieve(x,y)) )
-    && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_screen(x,y)])))
+    && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_layer(x,y)])))
     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
     color=Effect_function(x,y,color);
