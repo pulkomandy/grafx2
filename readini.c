@@ -877,6 +877,17 @@ int Load_INI(T_Config * conf)
         break;
     }
   }
+  
+  // Optional, Menu bars visibility (> 2.1)
+  if (!Load_INI_get_values (file, buffer,"Menubars_visible",1,values))
+  {
+    int index;
+    for (index=MENUBAR_STATUS+1; index<MENUBAR_COUNT;index++)
+    {
+      // Note that I skip the status bar, always enabled.
+      Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
+    }
+  }
 
   fclose(file);
 

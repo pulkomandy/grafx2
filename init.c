@@ -2657,3 +2657,27 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
   Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
 }
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void)
+{
+  int i;
+  int offset;
+  
+  // Recompute all offsets    
+  offset=0;
+  Menu_height=0;
+  for (i = MENUBAR_COUNT-1; i >=0; i--)
+  {
+    Menu_bars[i].Top = offset;
+    if(Menu_bars[i].Visible)
+    {
+      offset += Menu_bars[i].Height;
+      Menu_height += Menu_bars[i].Height;
+    }
+  }
+  // Update global menu coordinates
+  Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
+}

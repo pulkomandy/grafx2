@@ -553,7 +553,6 @@ int Init_program(int argc,char * argv[])
   Quitting=0;
   // Données sur l'état du menu:
   Menu_is_visible=1;
-  Menu_height=MENU_HEIGHT;
   // Données sur les couleurs et la palette:
   First_color_in_palette=0;
   // Données sur le curseur:
@@ -641,6 +640,8 @@ int Init_program(int argc,char * argv[])
   temp=Load_INI(&Config);
   if (temp)
     Error(temp);
+
+  Compute_menu_offsets();
 
   file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
 

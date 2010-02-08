@@ -402,26 +402,13 @@ void Button_Hide_menu(void)
 
 
 void Set_bar_visibility(word bar, byte visible)
-{
-  int i;
-  int offset;
-  
+{  
   if (!visible && Menu_bars[bar].Visible)
   {
     // Hide it
     Menu_bars[bar].Visible=0;
 
-    // Recompute all offsets    
-    offset=0;
-    for (i = MENUBAR_COUNT-1; i >=0; i--)
-    {
-      Menu_bars[i].Top = offset;
-      if(Menu_bars[i].Visible)
-        offset += Menu_bars[i].Height;
-    }
-    // Update global menu coordinates
-    Menu_Y += Menu_bars[bar].Height * Menu_factor_Y;
-    Menu_height -= Menu_bars[bar].Height;
+    Compute_menu_offsets();
 
     if (Main_magnifier_mode)
     {
@@ -465,18 +452,8 @@ void Set_bar_visibility(word bar, byte visible)
   {
     // Show it
     Menu_bars[bar].Visible = 1;
-    // Recompute all offsets    
-    offset=0;
-    for (i = MENUBAR_COUNT-1; i >=0; i--)
-    {
-      Menu_bars[i].Top = offset;
-      if(Menu_bars[i].Visible)
-        offset += Menu_bars[i].Height;
-    }
-    // Update global menu coordinates
-    Menu_Y -= Menu_bars[bar].Height * Menu_factor_Y;
-    Menu_height += Menu_bars[bar].Height;
-
+    
+    Compute_menu_offsets();
     Compute_magnifier_data();
     if (Main_magnifier_mode)
       Position_screen_according_to_zoom();

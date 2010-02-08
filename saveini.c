@@ -659,7 +659,16 @@ int Save_INI(T_Config * conf)
     DEBUG("saving pixel ratio",return_code);
     goto Erreur_Retour;
   }
-    
+  
+  values[0]=0;
+  for (index=0; index<MENUBAR_COUNT;index++)
+  {
+    values[0] |= Menu_bars[index].Visible ? (1<<index) : 0;
+  }
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menubars_visible",1,values,0)))
+    goto Erreur_Retour;
+
+
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 
   fclose(Nouveau_fichier);

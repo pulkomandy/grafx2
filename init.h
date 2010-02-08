@@ -44,3 +44,8 @@ extern char Gui_loading_error_message[512];
 /// If an error is encountered, it frees what needs it, prints an error message
 /// in ::Gui_loading_error_message, and returns NULL.
 byte * Load_font(const char * font_name);
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void);
