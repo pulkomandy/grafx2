@@ -665,6 +665,11 @@ int Save_INI(T_Config * conf)
   {
     values[0] |= Menu_bars[index].Visible ? (1<<index) : 0;
   }
+  // Fill out the remaining bits. When new toolbars get implemented, they will
+  // be visible by default.
+  for (; index<8;index++)
+    values[0] |= (1<<index);
+    
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menubars_visible",1,values,0)))
     goto Erreur_Retour;
 
