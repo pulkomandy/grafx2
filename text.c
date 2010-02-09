@@ -456,6 +456,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   SDL_Surface * Texte8Bit;
   SDL_Surface *Surface_fonte;
   byte * new_brush;
+  SDL_Rect rectangle;
 
   // Chargement de la fonte
   Surface_fonte=IMG_Load(Font_name(font_number));
@@ -476,6 +477,17 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
   TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
+  // Fill with backcolor
+  rectangle.x=0;
+  rectangle.y=0;
+  rectangle.w=*width;
+  rectangle.h=*height;
+  SDL_FillRect(TexteColore, &rectangle, SDL_MapRGB(
+    TexteColore->format, 
+    Main_palette[Back_color].R, 
+    Main_palette[Back_color].G, 
+    Main_palette[Back_color].B
+    ));
   // Rendu du texte
   SFont_Write(TexteColore, font, 0, 0, str);
   if (!TexteColore)
