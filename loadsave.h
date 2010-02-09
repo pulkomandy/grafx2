@@ -56,7 +56,8 @@ typedef struct
   short Height;
   byte Nb_layers;
   char Comment[COMMENT_SIZE+1];
-  short Transparent_color;
+  byte Background_transparent;
+  byte Transparent_color;
   /// Pixel ratio of the image
   enum PIXEL_RATIO Ratio;
   
@@ -64,7 +65,10 @@ typedef struct
   byte *Target_address;
   /// Pitch: Difference of addresses between one pixel and the one just "below" it
   long Pitch;
-  
+
+  /// Internal: during load, marks which layer is being loaded.
+  short Current_layer;
+
   /// Internal: Used to mark truecolor images on loading. Only used by preview.
   //byte Is_truecolor;
   /// Internal: Temporary RGB buffer when loading 24bit images

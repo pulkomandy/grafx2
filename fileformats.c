@@ -1672,8 +1672,7 @@ word GIF_get_next_code(void)
 
 void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, byte color)
 {
-  if (color != context->Transparent_color) // transparent color
-    Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
+  Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
 
   GIF_pos_X++;
 
@@ -1855,9 +1854,17 @@ void Load_GIF(T_IO_Context * context)
                       && Read_byte(GIF_file,&(GCE.Transparent_color)))
                     {
                       if (GCE.Packed_fields & 1)
+                      {
+                        if (number_LID == 0)
+                          context->Background_transparent = 1;
                         context->Transparent_color= GCE.Transparent_color;
+                      }
                       else
-                        context->Transparent_color = -1;
+                      {
+                        if (number_LID == 0)
+                          context->Background_transparent = 0;
+                        context->Transparent_color = 0; // Reset transparent color
+                      }
                     
                     }
                     else
@@ -2170,7 +2177,7 @@ void Save_GIF(T_IO_Context * context)
         LSDB.Height=context->Height;
       }
       LSDB.Resol  =0x97;          // Image en 256 couleurs, avec une palette
-      LSDB.Backcol=0;
+      LSDB.Backcol=context->Transparent_color;
       LSDB.Aspect =0;             // Palette normale
 
       // On sauve le LSDB dans le fichier
@@ -2213,9 +2220,15 @@ void Save_GIF(T_IO_Context * context)
             current_layer++)
           {
             // Write a Graphic Control Extension
-            char GCE_block[] = "\x21\xF9\x04\x05\x05\x00\x00\x00";
-            //if (Main_current_layer > 0)
-            //  GCE_block[3] = '\x05';
+            char GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
+            // 'Default' values:
+            //    Disposal method "Do not dispose"
+            //    Duration 5/100s (minimum viable value for current web browsers)
+            
+            if (current_layer > 0 || context->Background_transparent)
+              GCE_block[3] |= 1; // Transparent color flag
+            GCE_block[6] = context->Transparent_color;
+            
             Set_layer(context, current_layer);
             
             if (current_layer == context->Nb_layers -1)
@@ -3231,6 +3244,9 @@ void Load_PNG(T_IO_Context * context)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];  
   byte row_pointers_allocated;
+  png_bytep trans;
+  int num_trans;
+  png_color_16p trans_values;
  
   png_structp png_ptr;
   png_infop info_ptr;
@@ -3388,10 +3404,23 @@ void Load_PNG(T_IO_Context * context)
                     free(palette);
                     palette = NULL;
                   }
-                  
                   if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
                   {
                     Palette_loaded(context);
+                  }
+                  // Transparency (tRNS)
+                  if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
+                  {
+                    int i;
+                    for (i=0; i<num_trans; i++)
+                    {
+                      if (trans[i]==0)
+                      {
+                        context->Transparent_color = i;
+                        context->Background_transparent = 1;
+                        break;
+                      }
+                    }
                   }
                   
                   context->Width=info_ptr->width;
@@ -3545,6 +3574,17 @@ void Save_PNG(T_IO_Context * context)
               nb_text_chunks=2;
             }
             png_set_text(png_ptr, info_ptr, text_ptr, nb_text_chunks);
+          }
+          if (context->Background_transparent)
+          {
+            // Transparency
+            byte opacity[256];
+            // Need to fill a segment with '255', up to the transparent color
+            // which will have a 0. This piece of data (1 to 256 bytes)
+            // will be stored in the file.
+            memset(opacity, 255,context->Transparent_color);
+            opacity[context->Transparent_color]=0;
+            png_set_tRNS(png_ptr, info_ptr, opacity, (int)1 + context->Transparent_color,0);
           }
           switch(Pixel_ratio)
           {

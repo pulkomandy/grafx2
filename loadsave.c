@@ -179,6 +179,11 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
       
     // Chargement des pixels dans la preview
     case CONTEXT_PREVIEW:
+      // Skip pixels of transparent index if :
+      // - It's the first layer, and image has transparent background.
+      // - or it's a layer above the first one
+      if (color == context->Transparent_color && (context->Current_layer > 0 || context->Background_transparent))
+        break;
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
         if (context->Ratio == PIXEL_WIDE && 
@@ -375,6 +380,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   context->Height = height;
   context->Ratio = ratio;
   context->Nb_layers = 1;
+  context->Transparent_color=0;
+  context->Background_transparent=0;
   
   switch(context->Type)
   {
@@ -741,6 +748,10 @@ void Load_image(T_IO_Context *context)
         
         Main_current_layer = context->Nb_layers - 1;
         Main_layers_visible = (2<<Main_current_layer)-1;
+        
+        // Load the transparency data
+        Main_backups->Pages->Transparent_color = context->Transparent_color;
+        Main_backups->Pages->Background_transparent = context->Background_transparent;
   
         // Correction des dimensions
         if (Main_image_width<1)
@@ -1032,7 +1043,6 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
   context->File_name = file_name;
   context->File_directory = file_directory;
   context->Format = Main_fileformat; // FIXME ?
-  
 }
 
 /// Setup for loading/saving the current main image
@@ -1050,6 +1060,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Nb_layers = Main_backups->Pages->Nb_layers;
   strcpy(context->Comment, Main_comment);
   context->Transparent_color=Main_backups->Pages->Transparent_color;
+  context->Background_transparent=Main_backups->Pages->Background_transparent;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
     context->Ratio=PIXEL_WIDE;
   else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2)
@@ -1082,7 +1093,8 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
   context->Height = Brush_height;
   context->Nb_layers = 1;
   // Solid save... could use BG color maybe
-  context->Transparent_color=-1;
+  context->Transparent_color=0;
+  context->Background_transparent=0;
   context->Ratio=PIXEL_SIMPLE;
   context->Target_address=Brush;
   context->Pitch=Brush_width;
@@ -1102,7 +1114,8 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
   // context->Width
   // context->Height
   context->Nb_layers = 1;
-  context->Transparent_color=-1;
+  context->Transparent_color=0;
+  context->Background_transparent=0;
   context->Ratio=PIXEL_SIMPLE;
   //context->Target_address
   //context->Pitch
@@ -1111,6 +1124,8 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
 /// Function to call when need to switch layers.
 void Set_layer(T_IO_Context *context, byte layer)
 {
+  context->Current_layer = layer;
+
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
     // This awful thing is the part that happens on load

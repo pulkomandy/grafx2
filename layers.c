@@ -25,6 +25,10 @@
 #include "windows.h"
 #include "engine.h"
 #include "pages.h"
+#include "sdlscreen.h"
+#include "input.h"
+#include "help.h"
+#include "misc.h"
 
 void Layer_activate(byte layer, short side)
 {
@@ -164,9 +168,93 @@ void Button_Layer_toggle(void)
   Layer_activate(layer, RIGHT_SIDE);
 }
 
+static void Draw_transparent_color(byte color)
+{
+  char buf[4];
+  Num2str(color, buf, 3);
+  Print_in_window(63,39,buf,MC_Black,MC_Light);
+  Window_rectangle(90,39,13,7,color);
+}
+
+static void Draw_transparent_background(byte background)
+{
+  Print_in_window(99,57,background?"X":" ",MC_Black,MC_Light);
+}
+
+
 void Button_Layer_menu(void)
 {
+  byte transparent_color = Main_backups->Pages->Transparent_color;
+  byte transparent_background = Main_backups->Pages->Background_transparent;
+  short clicked_button;
+  byte color;
+  byte click;
+
+  Open_window(122,100,"Layers");
+
+  Window_display_frame_in( 6, 21,110, 52);
+  Print_in_window(14,18,"Transparency",MC_Dark,MC_Light);
+
+  Print_in_window(11,38,"Color",MC_Black,MC_Light);
+  Window_set_normal_button(54, 36, 56,13,"" , 0,1,KEY_NONE); // 1
+  Draw_transparent_color(transparent_color);
+  
+  Print_in_window(11,57,"Background",MC_Black,MC_Light);
+  Window_set_normal_button(95, 54, 15,13,"" , 0,1,KEY_NONE); // 2
+  Draw_transparent_background(transparent_background);
+  
+  Window_set_normal_button( 7, 78, 51,14,"OK" , 0,1,SDLK_RETURN); // 3
+  Window_set_normal_button(63, 78, 51,14,"Cancel", 0,1,KEY_ESC); // 4
+  
+  Update_window_area(0,0,Window_width, Window_height);
+
+  do
+  {
+    
+    clicked_button=Window_clicked_button();
+    //if (Is_shortcut(Key,0x100+BUTTON_HELP))
+    //  Window_help(BUTTON_LAYERS, NULL);
+    switch(clicked_button)
+    {
+      case 1: // color
+        Get_color_behind_window(&color,&click);
+        if (click && transparent_color!=color)
+        {
+          transparent_color=color;
+          Hide_cursor();
+          Draw_transparent_color(transparent_color);
+          Display_cursor();
+          Wait_end_of_click();
+        }
+        break;
+        
+      case 2: // background
+        transparent_background = !transparent_background;
+        Hide_cursor();
+        Draw_transparent_background(transparent_background);
+        Display_cursor();
+        break;
+    }
+  }
+  while (clicked_button<3);
+
+  // On exit
   Hide_cursor();
+  Close_window();
+  if (clicked_button==3)
+  {
+    // Accept changes
+    if (Main_backups->Pages->Transparent_color != transparent_color ||
+        Main_backups->Pages->Background_transparent != transparent_background)
+    {
+      Backup_layers(-1);
+      Main_backups->Pages->Transparent_color = transparent_color;
+      Main_backups->Pages->Background_transparent = transparent_background;
+      Redraw_layered_image();
+      Display_all_screen();
+      End_of_modification();
+    }
+  }
   Unselect_button(BUTTON_LAYER_MENU);
   Display_cursor();
 }
