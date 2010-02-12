@@ -237,6 +237,63 @@ int L_GetLayerPixel(lua_State* L)
 	return 1;
 }
 
+// Spare
+
+int L_GetSparePictureSize(lua_State* L)
+{
+	lua_pushinteger(L, Spare_image_width);	
+	lua_pushinteger(L, Spare_image_height);	
+	return 2;
+}
+
+int L_GetSpareLayerPixel(lua_State* L)
+{
+  int x = lua_tonumber(L,1);
+  int y = lua_tonumber(L,2);
+  // Bound check
+  if (x<0 || y<0 || x>=Spare_image_width || y>=Spare_image_height)
+  {
+    // Silently return the image's transparent color
+    lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+	  return 1;
+  }
+	lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x));
+	return 1;
+}
+
+int L_GetSparePicturePixel(lua_State* L)
+{
+  int x = lua_tonumber(L,1);
+  int y = lua_tonumber(L,2);
+  // Some bound checking is done by the function itself, here's the rest.
+  if (x<0 || y<0)
+  {
+    // Silently return the image's transparent color
+    lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+	  return 1;
+  }
+	lua_pushinteger(L, Read_pixel_from_spare_screen(x,y));
+	return 1;
+}
+
+int L_GetSpareColor(lua_State* L)
+{
+	byte c=lua_tonumber(L,1);
+
+	lua_pushinteger(L, Spare_palette[c].R);
+	lua_pushinteger(L, Spare_palette[c].G);
+	lua_pushinteger(L, Spare_palette[c].B);
+	return 3;
+}
+
+int L_GetSpareTransColor(lua_State* L)
+{
+	lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+	return 1;
+}
+
+
+
 int L_SetColor(lua_State* L)
 {
   byte c=lua_tonumber(L,1);
@@ -283,6 +340,26 @@ int L_MatchColor(lua_State* L)
   lua_pushinteger(L, c);
   return 1;
 }
+
+int L_GetForeColor(lua_State* L)
+{
+	lua_pushinteger(L, Fore_color);
+	return 1;
+}
+
+int L_GetBackColor(lua_State* L)
+{
+	lua_pushinteger(L, Back_color);
+	return 1;
+}
+
+int L_GetTransColor(lua_State* L)
+{
+	lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+	return 1;
+}
+
+
 
 
 int L_InputBox(lua_State* L)
@@ -681,7 +758,15 @@ void Button_Brush_Factory(void)
 		lua_register(L,"matchcolor",L_MatchColor);
 		lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
 		lua_register(L,"inputbox",L_InputBox);
-
+    lua_register(L,"getforecolor",L_GetForeColor);
+    lua_register(L,"getbackcolor",L_GetBackColor);
+    lua_register(L,"gettranscolor",L_GetTransColor);
+    lua_register(L,"getsparepicturesize ",L_GetSparePictureSize);
+    lua_register(L,"getsparelayerpixel ",L_GetSpareLayerPixel);
+    lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
+    lua_register(L,"getsparecolor",L_GetSpareColor);
+    lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+    
 
 		// For debug only
 		// luaL_openlibs(L);
