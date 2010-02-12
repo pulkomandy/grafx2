@@ -284,6 +284,214 @@ int L_MatchColor(lua_State* L)
   return 1;
 }
 
+
+int L_InputBox(lua_State* L)
+{
+  const int max_settings = 9;
+  int min_value[max_settings];
+  int max_value[max_settings];
+  int current_value[max_settings];
+  const char * label[max_settings];
+  unsigned short control[max_settings*3+1]; // Each value has at most 3 widgets.
+  enum CONTROL_TYPE {
+    CONTROL_OK          = 0x0100,
+    CONTROL_CANCEL      = 0x0200,
+    CONTROL_INPUT       = 0x0300,
+    CONTROL_INPUT_MINUS = 0x0400,
+    CONTROL_INPUT_PLUS  = 0x0500,
+    CONTROL_CHECKBOX    = 0x0600,
+    CONTROL_VALUE_MASK  = 0x00FF,
+    CONTROL_TYPE_MASK   = 0xFF00
+  };
+  const char * window_caption;
+  int caption_length;
+  int nb_settings;
+  int nb_args;
+  unsigned int max_label_length;
+  int setting;
+  short clicked_button;
+  char  str[5];
+  short close_window = 0;
+  
+  nb_args = lua_gettop (L);
+  
+  if (nb_args < 5)
+  {
+    return luaL_error(L, "InputBox: Less than 5 arguments");
+  }
+  if ((nb_args - 1) % 4)
+  {
+    return luaL_error(L, "InputBox: Wrong number of arguments");
+  }
+  nb_settings = (nb_args-1)/4;
+  if (nb_settings > max_settings)
+  {
+    return luaL_error(L, "InputBox: Too many settings, limit reached");
+  }
+  
+  max_label_length=4; // Minimum size to account for OK / Cancel buttons
+  
+  // First argument is window caption
+  window_caption = lua_tostring(L,1);
+  caption_length = strlen(window_caption);
+  if ( caption_length > 14)
+    max_label_length = caption_length - 10;
+  
+  for (setting=0; setting<nb_settings; setting++)
+  {
+    label[setting] = lua_tostring(L,setting*4+2);
+    if (strlen(label[setting]) > max_label_length)
+      max_label_length = strlen(label[setting]);
+      
+    current_value[setting] = lua_tonumber(L,setting*4+3);
+    min_value[setting] = lua_tonumber(L,setting*4+4);
+    max_value[setting] = lua_tonumber(L,setting*4+5);
+    if (max_value[setting] > 9999)
+      max_value[setting] = 9999;
+      
+    // Keep current value in range
+    if (current_value[setting] < min_value[setting])
+      current_value[setting] = min_value[setting];
+    else if (current_value[setting] > max_value[setting])
+      current_value[setting] = max_value[setting];
+  }
+  // Max is 25 to keep window under 320 pixel wide
+  if (max_label_length>25)
+    max_label_length=25;
+
+  Hide_cursor();
+  Open_window(91+max_label_length*8,44+nb_settings*17,window_caption);
+
+  // OK
+  Window_set_normal_button( 7, 25 + 17 * nb_settings, 51,14,"OK" , 0,1,SDLK_RETURN);
+  control[Window_nb_buttons] = CONTROL_OK;
+
+  // Cancel
+  Window_set_normal_button( 64, 25 + 17 * nb_settings, 51,14,"Cancel" , 0,1,KEY_ESC);
+  control[Window_nb_buttons] = CONTROL_CANCEL;
+  
+  for (setting=0; setting<nb_settings; setting++)
+  {
+    Print_in_window_limited(12,22+setting*17,label[setting],max_label_length,MC_Black,MC_Light);
+    if (min_value[setting]==0 && max_value[setting]==1)
+    {
+      // Checkbox
+      Window_set_normal_button(12+max_label_length*8+30, 19+setting*17, 15,13,current_value[setting]?"X":"", 0,1,KEY_NONE);
+      control[Window_nb_buttons] = CONTROL_CHECKBOX | setting;
+    }
+    else
+    {
+      // - Button
+      Window_set_repeatable_button(12+max_label_length*8+5, 20+setting*17, 13,11,"-" , 0,1,KEY_NONE);
+      control[Window_nb_buttons] = CONTROL_INPUT_MINUS | setting;
+
+      // Numeric input field
+      Window_display_frame_in(12+max_label_length*8+21, 20+setting*17,35, 11);
+      Window_set_input_button(12+max_label_length*8+21, 20+setting*17,4);
+      // Print editable value
+      Num2str(current_value[setting],str,4);
+      Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+      //
+      control[Window_nb_buttons] = CONTROL_INPUT | setting;
+
+      // + Button
+      Window_set_repeatable_button(12+max_label_length*8+60, 20+setting*17, 13,11,"+" , 0,1,KEY_NONE);
+      control[Window_nb_buttons] = CONTROL_INPUT_PLUS | setting;
+    }
+  }
+  
+  Update_window_area(0,0,Window_width, Window_height);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Display_cursor();
+
+  while (!close_window)
+  {
+    clicked_button=Window_clicked_button();
+    if (clicked_button>0)
+    {
+      setting = control[clicked_button] & (CONTROL_VALUE_MASK);
+      
+      switch (control[clicked_button] & CONTROL_TYPE_MASK)
+      {
+        case CONTROL_OK:
+          close_window = CONTROL_OK;
+          break;
+          
+        case CONTROL_CANCEL:
+          close_window = CONTROL_CANCEL;
+          break;
+          
+        case CONTROL_INPUT:
+          Num2str(current_value[setting],str,4);
+          Readline(12+max_label_length*8+23, 22+setting*17,str,4,1);
+          current_value[setting]=atoi(str);
+
+          if (current_value[setting] < min_value[setting])
+            current_value[setting] = min_value[setting];
+          else if (current_value[setting] > max_value[setting])
+            current_value[setting] = max_value[setting];
+          Hide_cursor();
+          // Print editable value
+          Num2str(current_value[setting],str,4);
+          Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+          //
+          Display_cursor();
+          
+          break;
+          
+        case CONTROL_INPUT_MINUS:
+          if (current_value[setting] > min_value[setting])
+          {
+            current_value[setting]--;
+            Hide_cursor();
+            // Print editable value
+            Num2str(current_value[setting],str,4);
+            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+            //
+            Display_cursor();
+          }
+          break;
+          
+        case CONTROL_INPUT_PLUS:
+          if (current_value[setting] < max_value[setting])
+          {
+            current_value[setting]++;
+            Hide_cursor();
+            // Print editable value
+            Num2str(current_value[setting],str,4);
+            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+            //
+            Display_cursor();
+          }
+          break;
+          
+        case CONTROL_CHECKBOX:
+          current_value[setting] = !current_value[setting];
+          Hide_cursor();
+          Print_in_window(12+max_label_length*8+34, 22+setting*17, current_value[setting]?"X":" ",MC_Black,MC_Light);
+          Display_cursor();
+          break;
+      }
+    }
+  }
+  
+  Hide_cursor();
+  Close_window();
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+  
+  // Return values:
+
+  // One boolean to tell if user pressed ok or cancel
+  lua_pushboolean(L, (close_window == CONTROL_OK));
+  
+  // One value per control
+  for (setting=0; setting<nb_settings; setting++)
+    lua_pushinteger(L, current_value[setting]);
+    
+  return 1 + nb_settings;
+}
+
 // Handlers for window internals
 T_Fileselector Scripts_list;
 
@@ -318,7 +526,6 @@ void Draw_script_information(T_Fileselector_item * script_item)
   char text_block[3][NAME_WIDTH+3];
   int x, y;
   
-  Hide_cursor();
   // Blank the target area
 	Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
 
@@ -374,7 +581,6 @@ void Draw_script_information(T_Fileselector_item * script_item)
     Print_in_window(7, FILESEL_Y + 89+16, text_block[2], MC_Light, MC_Black);
   
   }
-  Display_cursor();
   Update_window_area(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8);
     
 }
@@ -392,7 +598,7 @@ void Button_Brush_Factory(void)
 	T_Scroller_button* scriptscroll;
 	char scriptdir[MAX_PATH_CHARACTERS];
 
-	Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
+  Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
 
 	// Here we use the same data container as the fileselectors.
 	// Reinitialize the list
@@ -421,8 +627,7 @@ void Button_Brush_Factory(void)
 	Window_redraw_list(scriptlist);
   Draw_script_information(Get_item_by_index(&Scripts_list,
     scriptlist->List_start + scriptlist->Cursor_position));
-
-
+  
 	Update_window_area(0, 0, Window_width, Window_height);
 	Display_cursor();
 
@@ -432,8 +637,10 @@ void Button_Brush_Factory(void)
 		switch (clicked_button)
 		{
 		  case 5:
+        Hide_cursor();
         Draw_script_information(Get_item_by_index(&Scripts_list,
           scriptlist->List_start + scriptlist->Cursor_position));
+        Display_cursor();
 		    break;
 		    
 		    
@@ -473,6 +680,8 @@ void Button_Brush_Factory(void)
 		lua_register(L,"getbackupcolor",L_GetBackupColor);
 		lua_register(L,"matchcolor",L_MatchColor);
 		lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
+		lua_register(L,"inputbox",L_InputBox);
+
 
 		// For debug only
 		// luaL_openlibs(L);

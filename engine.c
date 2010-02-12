@@ -1277,11 +1277,12 @@ void Main_handler(void)
 
 //----------------------- Tracer une fenêtre d'options -----------------------
 
-void Open_window(word width,word height, char * title)
+void Open_window(word width,word height, const char * title)
 // Lors de l'appel à cette procédure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 {
   //word i,j;
+  size_t title_length;
 
   Hide_cursor();
 
@@ -1311,7 +1312,10 @@ void Open_window(word width,word height, char * title)
   Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(11*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_Dark);
   Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(12*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_White);
 
-  Print_in_window((width-(strlen(title)<<3))>>1,3,title,MC_Black,MC_Light);
+  title_length = strlen(title);
+  if (title_length+2 > width/8)
+    title_length = width/8-2;
+  Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
 
   if (Windows_open == 1)
   {
