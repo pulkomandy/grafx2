@@ -1113,8 +1113,8 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-/// Window that shows a big message, and waits for a click on OK
-void Verbose_error_message(const char * message)
+/// Window that shows a big message (up to 34x12), and waits for a click on OK
+void Verbose_message(const char *caption, const char * message )
 {
   short clicked_button;
   int line;
@@ -1122,7 +1122,7 @@ void Verbose_error_message(const char * message)
   int nb_char;
   char buffer[36];
 
-  Open_window(300,160,"Error!");
+  Open_window(300,160,caption);
   
   // Word-wrap the message
   for (line=0; line < 12 && *message!='\0'; line++)
@@ -1142,16 +1142,18 @@ void Verbose_error_message(const char * message)
       }
     }
     // Close line buffer
-    if (last_space == -1)
-      last_space = 34;
+    if (message[nb_char]=='\0' || last_space == -1)
+      last_space = nb_char;
     buffer[last_space]='\0';
     
     // Print
     Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
     
     // Next line
-    message=message+last_space+1;
-    // Strip leading spaces
+    message=message+last_space;
+    // Strip at most one carriage return and any leading spaces
+    if (*message == '\n')
+      message++;
     while (*message == ' ')
       message++;
   }
@@ -1168,7 +1170,6 @@ void Verbose_error_message(const char * message)
   Close_window();
   Display_cursor();
 }
-
 
   // -- Redessiner le sprite d'un bouton dans le menu --
 

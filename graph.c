@@ -257,7 +257,7 @@ try_again:
     {
       if(pix_ratio != PIXEL_SIMPLE) {
         pix_ratio = PIXEL_SIMPLE;
-        Verbose_error_message("Your WM is forcing GrafX2 to resize to something "
+        Verbose_message("Error!", "Your WM is forcing GrafX2 to resize to something "
           "smaller than the minimal resolution.\n"
           "GrafX2 switched to a smaller\npixel scaler to avoid problems                     ");
         goto try_again;

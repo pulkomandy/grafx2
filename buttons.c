@@ -1117,7 +1117,7 @@ void Button_Skins(void)
         gfx = Load_graphics(skinsdir);
         if (gfx == NULL) // Error
         {
-          Verbose_error_message(Gui_loading_error_message);
+          Verbose_message("Error!", Gui_loading_error_message);
           // Update preview
           Window_rectangle(6, 14, 173, 16, MC_Light);
         }

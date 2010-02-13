@@ -793,7 +793,7 @@ void Button_Brush_Factory(void)
     
     if (Brush_backup == NULL)
     {
-      Verbose_error_message("Out of memory!");
+      Verbose_message("Error!", "Out of memory!");
     }
 		else 
 		{
@@ -803,7 +803,7 @@ void Button_Brush_Factory(void)
       {
         message = lua_tostring(L, 1);
         if(message)
-  			  Verbose_error_message(message);
+  			  Verbose_message("Error!", message);
         else
           Warning_message("Unknown error loading script!");
       }
@@ -812,7 +812,10 @@ void Button_Brush_Factory(void)
         int stack_size;
         stack_size= lua_gettop(L);
         if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-  			  Verbose_error_message(message);
+  			  //Verbose_message("Error running script", message);
+  			  Verbose_message("Error!", "Your WM is forcing GrafX2 to resize to something "
+          "smallerthantheminimalresolution.\n"
+          "GrafX2 switched to a smaller\npixel scaler to avoid problems.");
         else
           Warning_message("Unknown error running script!");
       }
@@ -841,7 +844,7 @@ void Button_Brush_Factory(void)
 #else // NOLUA
 void Button_Brush_Factory(void)
 {
-    Verbose_error_message("The brush factory is not available in this build of GrafX2.");
+    Verbose_message("Error!", "The brush factory is not available in this build of GrafX2.");
 }
 
 #endif
