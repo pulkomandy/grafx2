@@ -812,10 +812,7 @@ void Button_Brush_Factory(void)
         int stack_size;
         stack_size= lua_gettop(L);
         if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-  			  //Verbose_message("Error running script", message);
-  			  Verbose_message("Error!", "Your WM is forcing GrafX2 to resize to something "
-          "smallerthantheminimalresolution.\n"
-          "GrafX2 switched to a smaller\npixel scaler to avoid problems.");
+  			  Verbose_message("Error running script", message);
         else
           Warning_message("Unknown error running script!");
       }
