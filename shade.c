@@ -617,12 +617,12 @@ int Menu_shade(void)
         }
         break;
 
-	  case 5: // Ok
-		if (selection_start == selection_end && Shade_list[Shade_current].List[selection_start] > 0)
-			Set_fore_color(Shade_list[Shade_current].List[selection_start]);
-		else if (first_color == last_color)
-			Set_fore_color(first_color);
-		break;
+      case 5: // Ok
+        if (selection_start == selection_end && Shade_list[Shade_current].List[selection_start] > 0)
+          Set_fore_color(Shade_list[Shade_current].List[selection_start]);
+        else if (first_color == last_color)
+          Set_fore_color(first_color);
+        break;
 
       case  6 : // Copy
         memcpy(buffer,Shade_list[Shade_current].List,512*sizeof(word));

@@ -38,7 +38,7 @@
 
 // POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
 #ifdef WIN32
-	#define strcasecmp stricmp
+    #define strcasecmp stricmp
 #endif
 
 // Definition of the base data types

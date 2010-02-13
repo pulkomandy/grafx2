@@ -187,18 +187,18 @@ T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
     n->nbb_b=nbb_b;
 
     // Calculate the others
-	
-	// Value ranges (max value actually)
+
+    // Value ranges (max value actually)
     n->rng_r=(1<<nbb_r);
     n->rng_g=(1<<nbb_g);
     n->rng_b=(1<<nbb_b);
 
-	// Shifts
+    // Shifts
     n->dec_r=nbb_g+nbb_b;
     n->dec_g=nbb_b;
     n->dec_b=0;
 
-	// Reductions (how many bits are lost)
+    // Reductions (how many bits are lost)
     n->red_r=8-nbb_r;
     n->red_g=8-nbb_g;
     n->red_b=8-nbb_b;
@@ -550,7 +550,7 @@ ENDCRUSH:
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
 void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
-	T_Occurrence_table * to)
+  T_Occurrence_table * to)
 {
   int limit;
   int cumul;
@@ -561,7 +561,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   cumul = 0;
   if (hue == 0) // split on red
   {
-	// Run over the cluster until we reach the requested number of pixels
+    // Run over the cluster until we reach the requested number of pixels
     for (r = c->rmin<<16; r<=c->rmax<<16; r+=1<<16)
     {
       for (g = c->vmin<<8; g<=c->vmax<<8; g+=1<<8)
@@ -582,9 +582,9 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     r>>=16;
     g>>=8;
 
-	// We tried to split on red, but found half of the pixels with r = rmin
-	// so we enforce some split to happen anyway, instead of creating an empty
-	// c2 and c1 == c
+    // We tried to split on red, but found half of the pixels with r = rmin
+    // so we enforce some split to happen anyway, instead of creating an empty
+    // c2 and c1 == c
     if (r==c->rmin)
       r++;
 
@@ -724,15 +724,15 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to)
 /*
 void CS_Check(T_Cluster_set* cs)
 {
-	int i;
-	T_Cluster* c = cs->clusters;
-	for (i = cs->nb; i > 0; i--)
-	{
-		assert( c != NULL);
-		c = c->next;
-	}
+    int i;
+    T_Cluster* c = cs->clusters;
+    for (i = cs->nb; i > 0; i--)
+    {
+        assert( c != NULL);
+        c = c->next;
+    }
 
-	assert(c == NULL);
+    assert(c == NULL);
 }
 */
 
@@ -762,8 +762,8 @@ T_Cluster_set * CS_New(int nbmax, T_Occurrence_table * to)
     // Copy requested params
     n->nb_max = OT_count_colors(to);
 
-	// If the number of colors asked is > 256, we ceil it because we know we
-	// don't want more
+    // If the number of colors asked is > 256, we ceil it because we know we
+    // don't want more
     if (n->nb_max > nbmax)
     {
       n->nb_max = nbmax;
@@ -787,14 +787,14 @@ T_Cluster_set * CS_New(int nbmax, T_Occurrence_table * to)
 /// Free a cluster set
 void CS_Delete(T_Cluster_set * cs)
 {
-	T_Cluster* nxt;
-	while (cs->clusters != NULL)
-	{
-		nxt = cs->clusters->next;
-		free(cs->clusters);
-		cs->clusters = nxt;
-	}
-	free(cs);
+    T_Cluster* nxt;
+    while (cs->clusters != NULL)
+    {
+        nxt = cs->clusters->next;
+        free(cs->clusters);
+        cs->clusters = nxt;
+    }
+    free(cs);
   cs = NULL;
 }
 
@@ -817,8 +817,8 @@ void CS_Get(T_Cluster_set * cs, T_Cluster * c)
          (current->bmin < current->bmax) )
       break;
 
-	prev = current;
-	
+    prev = current;
+    
   } while((current = current -> next));
 
   // copy it to c
@@ -828,9 +828,9 @@ void CS_Get(T_Cluster_set * cs, T_Cluster * c)
   cs->nb--;
 
   if(prev)
-	prev->next = current->next;
+    prev->next = current->next;
   else
-	cs->clusters = current->next;
+    cs->clusters = current->next;
   free(current);
   current = NULL;
 }
@@ -845,8 +845,8 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
   // Search the first cluster that is smaller than ours (less pixels)
   while (current && current->occurences > c->occurences)
   {
-	prev = current;
-	current = current->next;
+    prev = current;
+    current = current->next;
   }
 
   // Now insert our cluster just before the one we found
@@ -885,12 +885,12 @@ void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to)
     // Split it
     Cluster_split(&current, &Nouveau1, &Nouveau2, current.plus_large, to);
 
-	// Pack the 2 new clusters (the split may leave some empty space between the
-	// box border and the first actual pixel)
+    // Pack the 2 new clusters (the split may leave some empty space between the
+    // box border and the first actual pixel)
     Cluster_pack(&Nouveau1, to);
     Cluster_pack(&Nouveau2, to);
 
-	// Put them back in the list
+    // Put them back in the list
     CS_Set(cs,&Nouveau1);
     CS_Set(cs,&Nouveau2);
     
@@ -914,69 +914,69 @@ void CS_Compute_colors(T_Cluster_set * cs, T_Occurrence_table * to)
 /// Sort the clusters by chrominance value
 void CS_Sort_by_chrominance(T_Cluster_set * cs)
 {
-	T_Cluster* nc;
-	T_Cluster* prev = NULL;
-	T_Cluster* place;
-	T_Cluster* newlist = NULL;
+  T_Cluster* nc;
+  T_Cluster* prev = NULL;
+  T_Cluster* place;
+  T_Cluster* newlist = NULL;
 
-	while (cs->clusters)
-	{
-		// Remove the first cluster from the original list
-		nc = cs->clusters;
-		cs->clusters = cs->clusters->next;
+  while (cs->clusters)
+  {
+    // Remove the first cluster from the original list
+    nc = cs->clusters;
+    cs->clusters = cs->clusters->next;
 
-		// Find his position in the new list
-		for (place = newlist; place != NULL; place = place->next)
-		{
-			if (place->h > nc->h) break;
-			prev = place;
-		}
+    // Find his position in the new list
+    for (place = newlist; place != NULL; place = place->next)
+    {
+      if (place->h > nc->h) break;
+      prev = place;
+    }
 
-		// Chain it there
-		nc->next = place;
-		if (prev) prev->next = nc;
-		else newlist = nc;
+    // Chain it there
+    nc->next = place;
+    if (prev) prev->next = nc;
+    else newlist = nc;
 
-		prev = NULL;
-	}
+    prev = NULL;
+  }
 
-	// Put the new list back in place
-	cs->clusters = newlist;
+  // Put the new list back in place
+  cs->clusters = newlist;
 }
 
 
 /// Sort the clusters by luminance value
 void CS_Sort_by_luminance(T_Cluster_set * cs)
 {
-	T_Cluster* nc;
-	T_Cluster* prev = NULL;
-	T_Cluster* place;
-	T_Cluster* newlist = NULL;
+  T_Cluster* nc;
+  T_Cluster* prev = NULL;
+  T_Cluster* place;
+  T_Cluster* newlist = NULL;
 
-	while (cs->clusters)
-	{
-		// Remove the first cluster from the original list
-		nc = cs->clusters;
-		cs->clusters = cs->clusters->next;
+  while (cs->clusters)
+  {
+    // Remove the first cluster from the original list
+    nc = cs->clusters;
+    cs->clusters = cs->clusters->next;
 
-		// Find its position in the new list
-		for (place = newlist; place != NULL; place = place->next)
-		{
-			if (place->l > nc->l) break;
-			prev = place;
-		}
+    // Find its position in the new list
+    for (place = newlist; place != NULL; place = place->next)
+    {
+      if (place->l > nc->l) break;
+      prev = place;
+    }
 
-		// Chain it there
-		nc->next = place;
-		if (prev) prev->next = nc;
-		else newlist = nc;
+    // Chain it there
+    nc->next = place;
+    if (prev) prev->next = nc;
+    else newlist = nc;
 
-		// reset prev pointer
-		prev = NULL;
-	}
+    // reset prev pointer
+    prev = NULL;
+  }
 
-	// Put the new list back in place
-	cs->clusters = newlist;
+  // Put the new list back in place
+  cs->clusters = newlist;
 }
 
 
@@ -997,7 +997,7 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table *
       for (g=current->Gmin;g<=current->Vmax;g++)
         for (b=current->Bmin;b<=current->Bmax;b++)
           CT_set(tc,r,g,b,index);
-	current = current->next;
+    current = current->next;
   }
 }
 
@@ -1053,62 +1053,62 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
     int best_gradient; // Meilleur d‚grad‚
     int best_diff; // Meilleure diff‚rence de chrominance
     int diff;  // difference de chrominance courante
-	T_Cluster * current = cs->clusters;
+    T_Cluster * current = cs->clusters;
 
     // Pour chacun des clusters … traiter
     do
-	{
-		// On recherche le d‚grad‚ le plus proche de la chrominance du cluster
-		best_gradient=-1;
-		best_diff=99999999;
-		for (id=0;id<ds->nb;id++)
-		{
-			diff=abs(current->h - ds->gradients[id].hue);
-			if ((best_diff>diff) && (diff<16))
-			{
-				best_gradient=id;
-				best_diff=diff;
-			}
-		}
+    {
+        // On recherche le d‚grad‚ le plus proche de la chrominance du cluster
+        best_gradient=-1;
+        best_diff=99999999;
+        for (id=0;id<ds->nb;id++)
+        {
+            diff=abs(current->h - ds->gradients[id].hue);
+            if ((best_diff>diff) && (diff<16))
+            {
+                best_gradient=id;
+                best_diff=diff;
+            }
+        }
 
-		// Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
-		if (best_gradient!=-1)
-		{
-			// On met … jour le d‚grad‚
-			if (current->h < ds->gradients[best_gradient].min)
-				ds->gradients[best_gradient].min=current->h;
-			if (current->h > ds->gradients[best_gradient].max)
-				ds->gradients[best_gradient].max=current->h;
-			ds->gradients[best_gradient].hue=((ds->gradients[best_gradient].hue*
-						ds->gradients[best_gradient].nb_colors)
-					+current->h)
-				/(ds->gradients[best_gradient].nb_colors+1);
-			ds->gradients[best_gradient].nb_colors++;
-		}
-		else
-		{
-			// On cr‚e un nouveau d‚grad‚
-			best_gradient=ds->nb;
-			ds->gradients[best_gradient].nb_colors=1;
-			ds->gradients[best_gradient].min=current->h;
-			ds->gradients[best_gradient].max=current->h;
-			ds->gradients[best_gradient].hue=current->h;
-			ds->nb++;
-		}
-		current->h=best_gradient;
-	} while((current = current->next));
+        // Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
+        if (best_gradient!=-1)
+        {
+            // On met … jour le d‚grad‚
+            if (current->h < ds->gradients[best_gradient].min)
+                ds->gradients[best_gradient].min=current->h;
+            if (current->h > ds->gradients[best_gradient].max)
+                ds->gradients[best_gradient].max=current->h;
+            ds->gradients[best_gradient].hue=((ds->gradients[best_gradient].hue*
+                        ds->gradients[best_gradient].nb_colors)
+                    +current->h)
+                /(ds->gradients[best_gradient].nb_colors+1);
+            ds->gradients[best_gradient].nb_colors++;
+        }
+        else
+        {
+            // On cr‚e un nouveau d‚grad‚
+            best_gradient=ds->nb;
+            ds->gradients[best_gradient].nb_colors=1;
+            ds->gradients[best_gradient].min=current->h;
+            ds->gradients[best_gradient].max=current->h;
+            ds->gradients[best_gradient].hue=current->h;
+            ds->nb++;
+        }
+        current->h=best_gradient;
+    } while((current = current->next));
 
-	// On redistribue les valeurs dans les clusters
-	current = cs -> clusters;
-	do
-		current->h=ds->gradients[current->h].hue;
-	while((current = current ->next));
+    // On redistribue les valeurs dans les clusters
+    current = cs -> clusters;
+    do
+        current->h=ds->gradients[current->h].hue;
+    while((current = current ->next));
 }
 
 
 /// Compute best palette for given picture.
 T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
-	T_Components * palette, int r, int g, int b)
+  T_Components * palette, int r, int g, int b)
 {
   T_Occurrence_table * to;
   T_Conversion_table * tc;
@@ -1120,13 +1120,13 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
 
   to = OT_new(r, g, b);
   if (to == NULL)
-	return 0;
+    return 0;
 
   tc = CT_new(r, g, b);
   if (tc == NULL)
   {
-	OT_delete(to);
-	return 0;
+    OT_delete(to);
+    return 0;
   }
 
   // Count pixels for each color
@@ -1137,7 +1137,7 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   {
     CT_delete(tc);
     OT_delete(to);
-	return 0;
+    return 0;
   }
   //CS_Check(cs);
   // Ok, everything was allocated
@@ -1153,8 +1153,8 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   ds = GS_New(cs);
   if (ds!= NULL)
   {
-	  GS_Generate(ds, cs);
-	  GS_Delete(ds);
+    GS_Generate(ds, cs);
+    GS_Delete(ds);
   }
   // Sort the clusters on L and H to get a nice palette
   CS_Sort_by_luminance(cs);
@@ -1286,8 +1286,8 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
 
 /// Converts from 24b to 256c without dithering, using given conversion table
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
-	T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
-	T_Conversion_table * tc)
+  T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
+  T_Conversion_table * tc)
 {
   T_Bitmap24B current;
   T_Bitmap256 d;
@@ -1310,7 +1310,7 @@ void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
       green = current->G;
       blue = current->B;
       // Cherche la couleur correspondant dans la palette et la range dans
-	  // l'image de destination
+      // l'image de destination
       *d = CT_get(tc, red, green, blue);
 
       // On passe au pixel suivant :

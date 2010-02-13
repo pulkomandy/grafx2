@@ -118,8 +118,8 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     strcpy(config_dir,"PROGDIR:");
   // GP2X
   #elif defined(__GP2X__)
-	// On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
-	// on an internal flash chip. So, keep these settings locals.
+    // On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
+    // on an internal flash chip. So, keep these settings locals.
     strcpy(config_dir,program_dir);
   #else
     char filename[MAX_PATH_CHARACTERS];

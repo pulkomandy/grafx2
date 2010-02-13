@@ -258,9 +258,9 @@ void Button_Grid_menu(void)
   Window_set_normal_button(12, 62, 14, 14, " ", 0, 1, 0);  // 7
   Window_set_normal_button(70, 62, 14, 14, " ", 0, 1, 0); // 8
   if (snapgrid)
-	Print_in_window(16, 65, "X", MC_Black, MC_Light);
+    Print_in_window(16, 65, "X", MC_Black, MC_Light);
   if (Show_grid)
-	Print_in_window(74, 65, "X", MC_Black, MC_Light);
+    Print_in_window(74, 65, "X", MC_Black, MC_Light);
   Print_in_window(32, 65,"Snap",MC_Dark,MC_Light);
   Print_in_window(90, 65,"Show",MC_Dark,MC_Light);
 
@@ -349,18 +349,18 @@ void Button_Grid_menu(void)
 
         Display_cursor();
 
-	  case 7:
-		snapgrid = !snapgrid;
-		Hide_cursor();
-		Print_in_window(16, 65, snapgrid?"X":" ", MC_Black, MC_Light);
-		Display_cursor();
-		break;
-	  case 8:
-		showgrid = !showgrid;
-		Hide_cursor();
-		Print_in_window(74, 65, showgrid?"X":" ", MC_Black, MC_Light);
-		Display_cursor();
-		break;
+      case 7:
+        snapgrid = !snapgrid;
+        Hide_cursor();
+        Print_in_window(16, 65, snapgrid?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 8:
+        showgrid = !showgrid;
+        Hide_cursor();
+        Print_in_window(74, 65, showgrid?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
 
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
@@ -375,7 +375,7 @@ void Button_Grid_menu(void)
     Snap_offset_X=dx_selected;
     Snap_offset_Y=dy_selected;
     Snap_mode=snapgrid;
-	Show_grid=showgrid;
+    Show_grid=showgrid;
   }
 
   Close_window();

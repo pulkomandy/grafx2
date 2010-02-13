@@ -353,9 +353,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Preview
   cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
-	return 1;
+    return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
-	return 1;
+    return 1;
   cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
 
   // Layerbar
@@ -1936,10 +1936,10 @@ void Set_all_video_modes(void)
     {
       int index2;
 #if defined(__GP2X__)
-	  // On the GP2X the first mode is not windowed, so include it in the search.
-	  index2=0;
+      // On the GP2X the first mode is not windowed, so include it in the search.
+      index2=0;
 #else
-	  index2=1;
+      index2=1;
 #endif
       for (/**/; index2 < Nb_video_modes; index2++)
         if (Modes[index]->w == Video_mode[index2].Width &&
@@ -2084,9 +2084,9 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
 
 #if defined(__GP2X__)
-		  index2=0;
+          index2=0;
 #else
-		  index2=1;
+          index2=1;
 #endif
           for (/**/; index2<Nb_video_modes; index2++)
           {

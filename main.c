@@ -782,19 +782,19 @@ int Init_program(int argc,char * argv[])
 
       case 2:
         // Load this file
-    		Init_context_layered_image(&context, spare_filename, spare_directory);
-    		Load_image(&context);
-    		Destroy_context(&context);
-    		End_of_modification();
+        Init_context_layered_image(&context, spare_filename, spare_directory);
+        Load_image(&context);
+        Destroy_context(&context);
+        End_of_modification();
         Redraw_layered_image();
 
         Button_Page();
         // no break ! proceed with the other file now
       case 1:
-    		Init_context_layered_image(&context, main_filename, main_directory);
-    		Load_image(&context);
-    		Destroy_context(&context);
-    		End_of_modification();
+        Init_context_layered_image(&context, main_filename, main_directory);
+        Load_image(&context);
+        Destroy_context(&context);
+        End_of_modification();
         Redraw_layered_image();
         
         Hide_cursor();

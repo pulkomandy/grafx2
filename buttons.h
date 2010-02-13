@@ -33,21 +33,21 @@ void Stencil_update_color(byte color);
 void Stencil_tag_color(byte color, byte tag_color);
 
 /*!
-	Displays an error message when there is no more memory for the requested
-	operation.
+    Displays an error message when there is no more memory for the requested
+    operation.
 */
 void Message_out_of_memory(void);
 
 /*!
-	Displays the splash screen at program startup.
+    Displays the splash screen at program startup.
 */
 void Button_Message_initial(void);
 
 /*!
-	Changes brush shape.
-	This function saves the current brush shape and swith to the default one
-	(single pixel brush) for the filler and the color picker.
-	These functions don't need (and will not work with) a custom brush.
+    Changes brush shape.
+    This function saves the current brush shape and swith to the default one
+    (single pixel brush) for the filler and the color picker.
+    These functions don't need (and will not work with) a custom brush.
 */
 void Change_paintbrush_shape(byte shape);
 
@@ -587,7 +587,7 @@ void Button_Autosave(void);
 void Button_Settings(void);
 
 /*!
- 	Display the skin selector window.
+     Display the skin selector window.
 */
 void Button_Skins(void);
 

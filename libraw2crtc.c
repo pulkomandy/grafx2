@@ -136,13 +136,13 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned short width, unsigned sh
     {
       for(hcc = 0; hcc < *r1; hcc++)
       {
-	for(cclk = 0; cclk < 2; cclk++)
-	{
-	  x = (hcc << 1 | cclk);
-	  y = vcc*(r9+1) + rcc;
-	  *(tmpBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) = (*ptrMode)(context,x,y);
-	  *(allocationBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) += 1;
-	}
+        for(cclk = 0; cclk < 2; cclk++)
+        {
+          x = (hcc << 1 | cclk);
+          y = vcc*(r9+1) + rcc;
+          *(tmpBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) = (*ptrMode)(context,x,y);
+          *(allocationBuffer + addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13)) += 1;
+        }
       }
     }
   }

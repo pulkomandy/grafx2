@@ -1404,8 +1404,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             else Selected_type = 0;
           }
 
-		  // Now load immediately, but only if the user exited readline by pressing ENTER
-		  if (Mouse_K == 0) has_clicked_ok = 1;
+          // Now load immediately, but only if the user exited readline by pressing ENTER
+          if (Mouse_K == 0) has_clicked_ok = 1;
         }
         else
         {
@@ -1647,7 +1647,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         Display_cursor();
         New_preview_is_needed=1;
 
-		// On est dans un nouveau répertoire, donc on remet le quicksearch à 0
+        // On est dans un nouveau répertoire, donc on remet le quicksearch à 0
         *quicksearch_filename=0;
       }
       else  // Sinon on essaye de charger ou sauver le fichier

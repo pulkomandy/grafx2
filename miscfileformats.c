@@ -2577,86 +2577,86 @@ void Save_C64(T_IO_Context * context)
 
 void Test_SCR(__attribute__((unused)) T_IO_Context * context)
 {
-	// Mmh... not sure what we could test. Any idea ?
-	// The palette file can be tested, if it exists and have the right size it's
-	// ok. But if it's not there the pixel data may still be valid. And we can't
-	// use the filesize as this depends on the screen format.
-	
-	// An AMSDOS header would be a good indication but in some cases it may not
-	// be there
+    // Mmh... not sure what we could test. Any idea ?
+    // The palette file can be tested, if it exists and have the right size it's
+    // ok. But if it's not there the pixel data may still be valid. And we can't
+    // use the filesize as this depends on the screen format.
+    
+    // An AMSDOS header would be a good indication but in some cases it may not
+    // be there
 }
 
 void Load_SCR(__attribute__((unused)) T_IO_Context * context)
 {
-	// The Amstrad CPC screen memory is mapped in a weird mode, somewhere
-	// between bitmap and textmode. Basically the only way to decode this is to
-	// emulate the video chip and read the bytes as needed...
-	// Moreover, the hardware allows the screen to have any size from 8x1 to
-	// 800x273 pixels, and there is no indication of that in the file besides
-	// its size. It can also use any of the 3 screen modes. Fortunately this
-	// last bit of information is stored in the palette file.
-	// Oh, and BTW, the picture can be offset, and it's even usual to do it,
-	// because letting 128 pixels unused at the beginning of the file make it a
-	// lot easier to handle screens using more than 16K of VRam.
-	// The pixel encoding change with the video mode so we have to know that
-	// before attempting to load anything...
-	// As if this wasn't enough, Advanced OCP Art Studio, the reference tool on
-	// Amstrad, can use RLE packing when saving files, meaning we also have to
-	// handle that.
-	
-	// All this mess enforces us to load (and unpack if needed) the file to a
-	// temporary 32k buffer before actually decoding it.
-	
-	// 1) Seek for a palette
-	// 2) If palette found get screenmode from there, else ask user
-	// 3) ask user for screen size (or register values)
-	// 4) Load color data from palette (if found)
-	// 5) Close palette
-	// 6) Open the file
-	// 7) Run around the screen to untangle the pixeldata
-	// 8) Close the file
+    // The Amstrad CPC screen memory is mapped in a weird mode, somewhere
+    // between bitmap and textmode. Basically the only way to decode this is to
+    // emulate the video chip and read the bytes as needed...
+    // Moreover, the hardware allows the screen to have any size from 8x1 to
+    // 800x273 pixels, and there is no indication of that in the file besides
+    // its size. It can also use any of the 3 screen modes. Fortunately this
+    // last bit of information is stored in the palette file.
+    // Oh, and BTW, the picture can be offset, and it's even usual to do it,
+    // because letting 128 pixels unused at the beginning of the file make it a
+    // lot easier to handle screens using more than 16K of VRam.
+    // The pixel encoding change with the video mode so we have to know that
+    // before attempting to load anything...
+    // As if this wasn't enough, Advanced OCP Art Studio, the reference tool on
+    // Amstrad, can use RLE packing when saving files, meaning we also have to
+    // handle that.
+    
+    // All this mess enforces us to load (and unpack if needed) the file to a
+    // temporary 32k buffer before actually decoding it.
+    
+    // 1) Seek for a palette
+    // 2) If palette found get screenmode from there, else ask user
+    // 3) ask user for screen size (or register values)
+    // 4) Load color data from palette (if found)
+    // 5) Close palette
+    // 6) Open the file
+    // 7) Run around the screen to untangle the pixeldata
+    // 8) Close the file
 }
 
 void Save_SCR(T_IO_Context * context)
 {
-	// TODO : Add possibility to set R9, R12, R13 values
-	// TODO : Add OCP packing support
-	// TODO : Add possibility to include AMSDOS header, with proper loading
-	// address guessed from r12/r13 values.
-	
-	unsigned char* output;
-	unsigned long outsize;
-	unsigned char r1;
-	int cpc_mode;
-	FILE* file;
-	char filename[MAX_PATH_CHARACTERS];
+    // TODO : Add possibility to set R9, R12, R13 values
+    // TODO : Add OCP packing support
+    // TODO : Add possibility to include AMSDOS header, with proper loading
+    // address guessed from r12/r13 values.
+    
+    unsigned char* output;
+    unsigned long outsize;
+    unsigned char r1;
+    int cpc_mode;
+    FILE* file;
+    char filename[MAX_PATH_CHARACTERS];
 
-	Get_full_filename(filename, context->File_name, context->File_directory);
+    Get_full_filename(filename, context->File_name, context->File_directory);
 
 
-	switch(Pixel_ratio)
-	{
-			case PIXEL_WIDE:
-			case PIXEL_WIDE2:
-				cpc_mode = 0;
-				break;
-			case PIXEL_TALL:
-			case PIXEL_TALL2:
-				cpc_mode = 2;
-				break;
-			default:
-				cpc_mode = 1;
-				break;
-	}
+    switch(Pixel_ratio)
+    {
+        case PIXEL_WIDE:
+        case PIXEL_WIDE2:
+            cpc_mode = 0;
+            break;
+        case PIXEL_TALL:
+        case PIXEL_TALL2:
+            cpc_mode = 2;
+            break;
+        default:
+            cpc_mode = 1;
+            break;
+    }
 
-	output = raw2crtc(context->Width,context->Height,cpc_mode,7,&outsize,&r1,0,0);
+    output = raw2crtc(context->Width,context->Height,cpc_mode,7,&outsize,&r1,0,0);
 
-	file = fopen(filename,"wb");
-	Write_bytes(file, output, outsize);
-	fclose(file);
+    file = fopen(filename,"wb");
+    Write_bytes(file, output, outsize);
+    fclose(file);
 
-	free (output);
+    free (output);
   output = NULL;
 
-	File_error = 0;
+    File_error = 0;
 }

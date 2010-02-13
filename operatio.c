@@ -299,14 +299,14 @@ void Freehand_mode2_1_2(void)
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
     Print_coordinates();
-	if (SDL_GetTicks()>Airbrush_next_time)
-	{
-		Airbrush_next_time+=Airbrush_delay*10;
-    	Hide_cursor();
-    	// On affiche définitivement le pinceau
-    	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
-    	Display_cursor();
-	}
+    if (SDL_GetTicks()>Airbrush_next_time)
+    {
+      Airbrush_next_time+=Airbrush_delay*10;
+      Hide_cursor();
+      // On affiche définitivement le pinceau
+      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+      Display_cursor();
+    }
   }
 
   Operation_push(Paintbrush_X);
@@ -328,9 +328,9 @@ void Freehand_mode2_2_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-	Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
-  	// On affiche définitivement le pinceau
- 	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
+  // On affiche définitivement le pinceau
+  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
 }
 
 
@@ -350,14 +350,14 @@ void Freehand_mode2_2_2(void)
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
     Print_coordinates();
-	if (SDL_GetTicks()>Airbrush_next_time)
-	{
-		Airbrush_next_time+=Airbrush_delay*10;
-    	Hide_cursor();
-    	// On affiche définitivement le pinceau
-    	Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
-    	Display_cursor();
-	}
+    if (SDL_GetTicks()>Airbrush_next_time)
+    {
+      Airbrush_next_time+=Airbrush_delay*10;
+      Hide_cursor();
+      // On affiche définitivement le pinceau
+      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+      Display_cursor();
+    }
   }
 
   Operation_push(Paintbrush_X);
@@ -3425,60 +3425,60 @@ void Grad_rectangle_0_5(void)
       || Min(ray, rby) > Main_image_height              // Rectangle below picture
       || Min(ray, rby) - 1 - Main_offset_Y > Menu_Y )   // Rectangle below viewport
   {
-	  Operation_pop(&rby); // reset the stack
-	  return; // cancel the operation
+    Operation_pop(&rby); // reset the stack
+    return; // cancel the operation
   }
 
-	// Handle clipping
-	if (Max(rax, rbx)-Main_offset_X > Min(Main_image_width,
-		Main_magnifier_mode?Main_separator_position:Screen_width))
-	{
-		offset_width = Max(rax, rbx) - Min(Main_image_width,
-			Main_magnifier_mode?Main_separator_position:Screen_width);
-	}
+  // Handle clipping
+  if (Max(rax, rbx)-Main_offset_X > Min(Main_image_width,
+    Main_magnifier_mode?Main_separator_position:Screen_width))
+  {
+    offset_width = Max(rax, rbx) - Min(Main_image_width,
+      Main_magnifier_mode?Main_separator_position:Screen_width);
+  }
 
-	if (Max(ray, rby)-Main_offset_Y > Min(Main_image_height, Menu_Y))
-		offset_height = Max(ray, rby) - Min(Main_image_height, Menu_Y);
+  if (Max(ray, rby)-Main_offset_Y > Min(Main_image_height, Menu_Y))
+    offset_height = Max(ray, rby) - Min(Main_image_height, Menu_Y);
 
-	// Dessin dans la zone de dessin normale
-	Horizontal_XOR_line(Min(rax, rbx)-Main_offset_X,
-		Min(ray, rby) - Main_offset_Y, width - offset_width);
+  // Dessin dans la zone de dessin normale
+  Horizontal_XOR_line(Min(rax, rbx)-Main_offset_X,
+    Min(ray, rby) - Main_offset_Y, width - offset_width);
 
-	// If not, this line is out of the picture so there is no need to draw it
-	if (offset_height == 0 || Max(ray, rby) - 1 > Menu_Y + Main_offset_Y )
-	{
-		Horizontal_XOR_line(Min(rax, rbx) - Main_offset_X, Max(ray, rby) - 1
-			- Main_offset_Y, width - offset_width);
-	}
+  // If not, this line is out of the picture so there is no need to draw it
+  if (offset_height == 0 || Max(ray, rby) - 1 > Menu_Y + Main_offset_Y )
+  {
+    Horizontal_XOR_line(Min(rax, rbx) - Main_offset_X, Max(ray, rby) - 1
+      - Main_offset_Y, width - offset_width);
+  }
 
   if (height > offset_height) {
-	  Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
-		  - Main_offset_Y, height - offset_height);
+    Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
+      - Main_offset_Y, height - offset_height);
 
-	  if (offset_width == 0)
-	  {
-		  Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
-			  - Main_offset_Y, height - offset_height);
-	  }
+    if (offset_width == 0)
+    {
+      Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
+        - Main_offset_Y, height - offset_height);
+    }
   }
 
-	Update_rect(Min(rax, rbx) - Main_offset_X, Min(ray, rby) - Main_offset_Y,
-		width + 1 - offset_width, height + 1 - offset_height);
+  Update_rect(Min(rax, rbx) - Main_offset_X, Min(ray, rby) - Main_offset_Y,
+    width + 1 - offset_width, height + 1 - offset_height);
 
   // Dessin dans la zone zoomée
   if (Main_magnifier_mode && Min(rax, rbx) <= Limit_right_zoom
-	&& Max(rax, rbx) > Limit_left_zoom
-	&& Min(ray, rby) <= Limit_bottom_zoom
-	&& Max(ray, rby) > Limit_top_zoom )
+    && Max(rax, rbx) > Limit_left_zoom
+    && Min(ray, rby) <= Limit_bottom_zoom
+    && Max(ray, rby) > Limit_top_zoom )
   {
-	offset_width = 0;
-	offset_height = 0;
+    offset_width = 0;
+    offset_height = 0;
 
-	if (Min(rax, rbx)<=Limit_left_zoom) // On dépasse du zoom à gauche
-	{
-		offset_width += Limit_left_zoom - Min(rax, rbx);
-		offset_left = Limit_left_zoom;
-	}
+  if (Min(rax, rbx)<=Limit_left_zoom) // On dépasse du zoom à gauche
+  {
+    offset_width += Limit_left_zoom - Min(rax, rbx);
+    offset_left = Limit_left_zoom;
+  }
 
     if(Max(rax,rbx)>Limit_right_zoom) // On dépasse du zoom à droite
         offset_width += Max(rax,rbx) - Limit_right_zoom - 1;
@@ -3604,8 +3604,8 @@ void Grad_rectangle_12_7(void)
 
       // Dessin dans la zone zoomée
       if (Main_magnifier_mode && Min(rax, rbx) <= Limit_right_zoom
-		&& Max(rax, rbx)>Limit_left_zoom && Min(ray, rby) <= Limit_bottom_zoom
-		&& Max(ray,rby)>Limit_top_zoom )
+        && Max(rax, rbx)>Limit_left_zoom && Min(ray, rby) <= Limit_bottom_zoom
+        && Max(ray,rby)>Limit_top_zoom )
       {
           offset_width = 0;
           offset_height=0;
@@ -3758,10 +3758,10 @@ void Grad_rectangle_0_9(void)
 
         // Dessin dans la zone zoomée
         if (Main_magnifier_mode
-			&& Min(rect_start_x, rect_end_x) <= Limit_right_zoom
-			&& Max(rect_start_x, rect_end_x) > Limit_left_zoom
-			&& Min(rect_start_y, rect_end_y) <= Limit_bottom_zoom
-			&& Max(rect_start_y, rect_end_y) > Limit_top_zoom )
+            && Min(rect_start_x, rect_end_x) <= Limit_right_zoom
+            && Max(rect_start_x, rect_end_x) > Limit_left_zoom
+            && Min(rect_start_y, rect_end_y) <= Limit_bottom_zoom
+            && Max(rect_start_y, rect_end_y) > Limit_top_zoom )
         {
             offset_width = 0;
             offset_height=0;

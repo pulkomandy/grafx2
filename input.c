@@ -490,7 +490,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
         Directional_up_left=1;
         break;
       default:
-		break;
+        break;
     }
     #endif
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
@@ -517,15 +517,15 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Release_control(0,MOD_ALT);
     }
     if (event.button == Joybutton_left_click)
-	{
-        Input_new_mouse_K &= ~1;
-  		return Move_cursor_with_constraints();
-	}
+    {
+      Input_new_mouse_K &= ~1;
+      return Move_cursor_with_constraints();
+    }
     if (event.button == Joybutton_right_click)
-	{
-        Input_new_mouse_K &= ~2;
-  		return Move_cursor_with_constraints();
-	}
+    {
+      Input_new_mouse_K &= ~2;
+      return Move_cursor_with_constraints();
+    }
   
     #ifdef __GP2X__
     switch(event.button)

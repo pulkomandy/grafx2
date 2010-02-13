@@ -715,15 +715,15 @@ int Load_INI(T_Config * conf)
   // Do that only if the first mode is actually windowed (not the case on gp2x for example)
   if(Video_mode[0].Fullscreen==0)
   {
-	  Video_mode[0].Width = 640;
-	  Video_mode[0].Height = 480;
-	  if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
-	  {
-		  if ((values[0]>=320))
-			  Video_mode[0].Width = values[0];
-		  if ((values[1]>=200))
-			  Video_mode[0].Height = values[1];
-	  }
+    Video_mode[0].Width = 640;
+    Video_mode[0].Height = 480;
+    if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
+    {
+      if ((values[0]>=320))
+        Video_mode[0].Width = values[0];
+      if ((values[1]>=200))
+        Video_mode[0].Height = values[1];
+    }
   }
 
   conf->Mouse_merge_movement=100;
@@ -823,14 +823,14 @@ int Load_INI(T_Config * conf)
   // Optional, name of skin file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
   {
-	  conf->Skin_file = strdup(value_label);
+    conf->Skin_file = strdup(value_label);
   }
   else
     conf->Skin_file = strdup("skin_modern.png");
 
   // Optional, name of font file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Font_file",value_label,1))
-	  conf->Font_file = strdup(value_label);
+    conf->Font_file = strdup(value_label);
   else
     conf->Font_file = strdup("font_Classic.png");
 
