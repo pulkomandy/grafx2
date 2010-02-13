@@ -809,8 +809,9 @@ void Button_Brush_Factory(void)
       }
   		else if (lua_pcall(L, 0, 0, 0) != 0)
       {
-        message = lua_tostring(L, 1);
-        if(message)
+        int stack_size;
+        stack_size= lua_gettop(L);
+        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
   			  Verbose_error_message(message);
         else
           Warning_message("Unknown error running script!");

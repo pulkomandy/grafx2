@@ -283,7 +283,7 @@ void Redraw_spare_image(void)
        // Copy it in Spare_visible_image
        memcpy(Spare_visible_image.Image,
          Spare_backups->Pages->Image[layer],
-         Spare_image_width*Main_image_height);
+         Spare_image_width*Spare_image_height);
        
        // No depth buffer in the spare
        //memset(Spare_visible_image_depth_buffer.Image,
