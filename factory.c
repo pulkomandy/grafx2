@@ -569,6 +569,32 @@ int L_InputBox(lua_State* L)
   return 1 + nb_settings;
 }
 
+int L_MessageBox(lua_State* L)
+{
+  int nb_args = lua_gettop (L);
+  const char * caption;
+  const char * message;
+  
+  if (nb_args == 1)
+  {
+    caption = "Script message";
+    message = lua_tostring(L,1);
+  }
+  else if (nb_args == 2)
+  {
+    caption = lua_tostring(L,1);
+    message = lua_tostring(L,2);
+  }
+  else
+  {
+    return luaL_error(L, "MessageBox: Needs one or two arguments.");
+  }
+
+  Verbose_message(caption, message);
+	return 0;
+}
+
+
 // Handlers for window internals
 T_Fileselector Scripts_list;
 
@@ -758,6 +784,7 @@ void Button_Brush_Factory(void)
 		lua_register(L,"matchcolor",L_MatchColor);
 		lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
 		lua_register(L,"inputbox",L_InputBox);
+		lua_register(L,"messagebox",L_MessageBox);
     lua_register(L,"getforecolor",L_GetForeColor);
     lua_register(L,"getbackcolor",L_GetBackColor);
     lua_register(L,"gettranscolor",L_GetTransColor);

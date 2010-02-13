@@ -1113,7 +1113,9 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-/// Window that shows a big message (up to 34x12), and waits for a click on OK
+/// Window that shows a big message (up to 34x12), and waits for a click on OK.
+/// On call: Cursor must be displayed
+/// On exit: Cursor is displayed
 void Verbose_message(const char *caption, const char * message )
 {
   short clicked_button;
@@ -1121,7 +1123,9 @@ void Verbose_message(const char *caption, const char * message )
   int last_space;
   int nb_char;
   char buffer[36];
+  byte original_cursor_shape = Cursor_shape;
 
+  
   Open_window(300,160,caption);
   
   // Word-wrap the message
@@ -1160,6 +1164,7 @@ void Verbose_message(const char *caption, const char * message )
 
   Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,SDLK_RETURN); // 1
   Update_window_area(0,0,Window_width,Window_height);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
 
   do
@@ -1168,6 +1173,7 @@ void Verbose_message(const char *caption, const char * message )
   Key=0;
 
   Close_window();
+  Cursor_shape=original_cursor_shape;
   Display_cursor();
 }
 
