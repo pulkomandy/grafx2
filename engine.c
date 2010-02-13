@@ -1112,22 +1112,22 @@ void Main_handler(void)
     }
     else
     {
-  		// No event : we go asleep for a while, but we try to get waked up at constant intervals of time
-  		// no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
-  		// This allows nice smooth mouse movement.
-      	const int delay = 10;
+      // No event : we go asleep for a while, but we try to get waked up at constant intervals of time
+      // no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
+      // This allows nice smooth mouse movement.
+        const int delay = 10;
   
-  		Uint32 debut;
-  		debut = SDL_GetTicks();
-  		// Première attente : le complément de "delay" millisecondes
-  		SDL_Delay(delay - (debut % delay));
-  		// Si ça ne suffit pas, on complète par des attentes successives de "1ms".
-  		// (Remarque, Windows arrondit généralement aux 10ms supérieures)
-  		while ( SDL_GetTicks()/delay <= debut/delay)
-  		{
-  			SDL_Delay(1);
-  		}
-  	}
+      Uint32 debut;
+      debut = SDL_GetTicks();
+      // Première attente : le complément de "delay" millisecondes
+      SDL_Delay(delay - (debut % delay));
+      // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
+      // (Remarque, Windows arrondit généralement aux 10ms supérieures)
+      while ( SDL_GetTicks()/delay <= debut/delay)
+      {
+        SDL_Delay(1);
+      }
+    }
 
     // Gestion de la souris
 
@@ -2134,59 +2134,59 @@ void Get_color_behind_window(byte * color, byte * click)
   Paintbrush_hidden=1;
   c=-1; // color pointée: au début aucune, comme ça on initialise tout
   if (Menu_is_visible_before_window)
-	  Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
+    Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
 
   Display_cursor();
 
   do
   {
-	  if(!Get_input())SDL_Delay(20);
+    if(!Get_input())SDL_Delay(20);
 
-	  if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
-	  {
-		  Hide_cursor();
-		  a=Read_pixel(Mouse_X,Mouse_Y);
-		  if (a!=c)
-		  {
-			  c=a; // Mise à jour de la couleur pointée
-			  if (Menu_is_visible_before_window)
-			  {
-				  sprintf(str,"%d",a);
-				  d=strlen(str);
-				  strcat(str,"   (");
-				  sprintf(str+strlen(str),"%d",Main_palette[a].R);
-				  strcat(str,",");
-				  sprintf(str+strlen(str),"%d",Main_palette[a].G);
-				  strcat(str,",");
-				  sprintf(str+strlen(str),"%d",Main_palette[a].B);
-				  strcat(str,")");
-				  a=24-d;
-				  for (index=strlen(str); index<a; index++)
-					  str[index]=' ';
-				  str[a]=0;
-				  Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
+    if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
+    {
+      Hide_cursor();
+      a=Read_pixel(Mouse_X,Mouse_Y);
+      if (a!=c)
+      {
+        c=a; // Mise à jour de la couleur pointée
+        if (Menu_is_visible_before_window)
+        {
+          sprintf(str,"%d",a);
+          d=strlen(str);
+          strcat(str,"   (");
+          sprintf(str+strlen(str),"%d",Main_palette[a].R);
+          strcat(str,",");
+          sprintf(str+strlen(str),"%d",Main_palette[a].G);
+          strcat(str,",");
+          sprintf(str+strlen(str),"%d",Main_palette[a].B);
+          strcat(str,")");
+          a=24-d;
+          for (index=strlen(str); index<a; index++)
+            str[index]=' ';
+          str[a]=0;
+          Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
 
-				  Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
-						  Menu_status_Y," ",0,c);
-			  }
-		  }
-		  Display_cursor();
-	  }
+          Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
+              Menu_status_Y," ",0,c);
+        }
+      }
+      Display_cursor();
+    }
 
-	  old_x=Mouse_X;
-	  old_y=Mouse_Y;
+    old_x=Mouse_X;
+    old_y=Mouse_Y;
   } while (!(Mouse_K || (Key==KEY_ESC)));
 
   if (Mouse_K)
   {
-	  Hide_cursor();
-	  *click=Mouse_K;
-	  *color=Read_pixel(Mouse_X,Mouse_Y);
+    Hide_cursor();
+    *click=Mouse_K;
+    *color=Read_pixel(Mouse_X,Mouse_Y);
   }
   else
   {
-	  *click=0;
-	  Hide_cursor();
+    *click=0;
+    Hide_cursor();
   }
 
   Restore_background(buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
@@ -2202,8 +2202,8 @@ void Get_color_behind_window(byte * color, byte * click)
 // ------------ Opération de déplacement de la fenêtre à l'écran -------------
 void Move_window(short dx, short dy)
 {
-	short new_x=Mouse_X-dx;
-	short new_y=Mouse_Y-dy;
+  short new_x=Mouse_X-dx;
+  short new_y=Mouse_Y-dy;
   short old_x;
   short old_y;
   short width=Window_width*Menu_factor_X;

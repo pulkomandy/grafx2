@@ -517,10 +517,10 @@ try_again:
     case 0: // Always smallest possible
       Menu_factor_X=1;
       Menu_factor_Y=1;
-	  break;
-	default: // Stay below some reasonable size
-	  Menu_factor_X=Min(factor,abs(Config.Ratio));
-	  Menu_factor_Y=Min(factor,abs(Config.Ratio));
+      break;
+    default: // Stay below some reasonable size
+      Menu_factor_X=Min(factor,abs(Config.Ratio));
+      Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
   if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
     Menu_factor_X*=2;
@@ -529,7 +529,7 @@ try_again:
     
   free(Horizontal_line_buffer);
   Horizontal_line_buffer=(byte *)malloc(Pixel_width * 
-	((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+    ((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);
 
@@ -1444,7 +1444,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   dx = *bx-ax;
   dy = *by-ay; 
 
-	// No mouse move: no need to clamp anything
+  // No mouse move: no need to clamp anything
   if (dx==0 || dy == 0) return; 
 
   // Determine angle (heading)
@@ -1454,39 +1454,39 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   //dx=abs(dx);
   //dy=abs(dy);
     
-	// Negative Y
+  // Negative Y
   if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
   {
     *bx=ax;
     *by=ay + dy;
-	}
-	// Iso close to negative Y
+  }
+  // Iso close to negative Y
   else if (angle < M_PI*(-13.0/16.0))
   {
     dy=dy | 1; // Round up to next odd number
     *bx=ax + dy/2;
     *by=ay + dy;
-	}
-	// 45deg
+  }
+  // 45deg
   else if (angle < M_PI*(-11.0/16.0))
   {
     *by = (*by + ay + dx)/2;
     *bx = ax  - ay + *by;
-	}
-	// Iso close to negative X
+  }
+  // Iso close to negative X
   else if (angle < M_PI*(-9.0/16.0))
   {
     dx=dx | 1; // Round up to next odd number
     *bx=ax + dx;
     *by=ay + dx/2;
-	}
-	// Negative X
+  }
+  // Negative X
   else if (angle < M_PI*(-7.0/16.0))
   {
     *bx=ax + dx;
     *by=ay;
-	}
-	// Iso close to negative X
+  }
+  // Iso close to negative X
   else if (angle < M_PI*(-5.0/16.0))
   {
     dx=dx | 1; // Round up to next odd number
@@ -1505,7 +1505,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax - dy/2;
     *by=ay + dy;
-	}
+  }
   // Positive Y
   else if (angle < M_PI*(1.0/16.0))
   {
@@ -1518,7 +1518,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax + dy/2;
     *by=ay + dy;
-	}
+  }
   // 45 degrees
   else if (angle < M_PI*(5.0/16.0))
   {
@@ -1531,13 +1531,13 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dx=dx | 1; // Round up to next odd number
     *bx=ax + dx;
     *by=ay + dx/2;
-	}
+  }
   // Positive X
   else if (angle < M_PI*(9.0/16.0))
   {
     *bx=ax + dx;
     *by=ay;
-	}
+  }
   // Iso close to positive X
   else if (angle < M_PI*(11.0/16.0))
   {
@@ -1557,7 +1557,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax - dy/2;
     *by=ay + dy;
-	}
+  }
 
   return;
 }
@@ -2925,7 +2925,7 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
     *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
     if (with_preview)
         Pixel_preview(x,y,color);
-	#endif
+    #endif
 }
 
 void Pixel_in_current_layer(word x,word y, byte color)

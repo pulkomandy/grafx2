@@ -945,8 +945,8 @@ void Add_font_or_skin(const char *name)
     fname = name;
   namelength = strlen(fname);
   if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, "skin_", 5)
-	&& (!strcasecmp(fname + namelength - 4,".png")
-		|| !strcasecmp(fname + namelength - 4,".gif")))
+    && (!strcasecmp(fname + namelength - 4,".png")
+    || !strcasecmp(fname + namelength - 4,".gif")))
   {
     Add_element_to_list(&Skin_files_list, name, 0);
     
@@ -961,7 +961,7 @@ void Add_font_or_skin(const char *name)
     );
   }
   else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
-		&& (!strcasecmp(fname + namelength - 4, ".png")))
+    && (!strcasecmp(fname + namelength - 4, ".png")))
   {
     Add_element_to_list(&Font_files_list, name, 0);
     
@@ -972,7 +972,7 @@ void Add_font_or_skin(const char *name)
     strcpy(Font_files_list.First->Full_name, fname);
     // Reformat the short name differently
     strcpy(Font_files_list.First->Short_name,
-		Format_font_filename(Font_files_list.First->Full_name));
+      Format_font_filename(Font_files_list.First->Full_name));
   }
    
 }
@@ -986,7 +986,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   {
     current_item = Get_item_by_index(&Skin_files_list, index);
     Print_in_window(x, y, current_item->Short_name, MC_Black,
-		(highlighted)?MC_Dark:MC_Light);
+      (highlighted)?MC_Dark:MC_Light);
   }
 }
 

@@ -19,7 +19,7 @@
 */
 
 /*! \file factory.c
- *	\brief Brush factory - generates brush from lua scripts
+ *  \brief Brush factory - generates brush from lua scripts
  *
  * The brush factory allows you to generate brushes with Lua code.
  */
@@ -80,54 +80,54 @@ int L_SetBrushSize(lua_State* L)
   {
     return luaL_error(L, "SetBrushSize: Unreasonable arguments");
   }
-	if (Realloc_brush(w, h))
-	{
-	  return luaL_error(L, "SetBrushSize: Resize failed");
-	}
-	Brush_was_altered=1;
+  if (Realloc_brush(w, h))
+  {
+    return luaL_error(L, "SetBrushSize: Resize failed");
+  }
+  Brush_was_altered=1;
   // Fill with Back_color
   memset(Brush,Back_color,(long)Brush_width*Brush_height);
   // Center the handle
   Brush_offset_X=(Brush_width>>1);
   Brush_offset_Y=(Brush_height>>1);
-	return 0;
+  return 0;
 }
 
 int L_GetBrushSize(lua_State* L)
 {
-	lua_pushinteger(L, Brush_width);	
-	lua_pushinteger(L, Brush_height);	
-	return 2;
+  lua_pushinteger(L, Brush_width);  
+  lua_pushinteger(L, Brush_height); 
+  return 2;
 }
 
 int L_GetBrushTransparentColor(lua_State* L)
 {
-	lua_pushinteger(L, Back_color);
-	return 1;
+  lua_pushinteger(L, Back_color);
+  return 1;
 }
 
 int L_PutBrushPixel(lua_State* L)
 {
   int x = lua_tonumber(L,1);
   int y = lua_tonumber(L,2);
-	uint8_t c = lua_tonumber(L,3);
-	
-	Brush_was_altered=1;
-	
+  uint8_t c = lua_tonumber(L,3);
+  
+  Brush_was_altered=1;
+  
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
   ;
   else
   {
     Pixel_in_brush(x, y, c);
   }
-	return 0; // no values returned for lua
+  return 0; // no values returned for lua
 }
 
 int L_GetBrushPixel(lua_State* L)
 {
   int x = lua_tonumber(L,1);
   int y = lua_tonumber(L,2);
-	uint8_t c;
+  uint8_t c;
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
   {
     c = Back_color; // Return 'transparent'
@@ -136,15 +136,15 @@ int L_GetBrushPixel(lua_State* L)
   {
     c = Read_pixel_from_brush(x, y);
   }
-	lua_pushinteger(L, c);
-	return 1;
+  lua_pushinteger(L, c);
+  return 1;
 }
 
 int L_GetBrushBackupPixel(lua_State* L)
 {
   int x = lua_tonumber(L,1);
   int y = lua_tonumber(L,2);
-	uint8_t c;
+  uint8_t c;
   if (x<0 || y<0 || x>=Brush_backup_width || y>=Brush_backup_height)
   {
     c = Back_color; // Return 'transparent'
@@ -153,8 +153,8 @@ int L_GetBrushBackupPixel(lua_State* L)
   {
     c = *(Brush_backup + y * Brush_backup_width + x);
   }
-	lua_pushinteger(L, c);
-	return 1;
+  lua_pushinteger(L, c);
+  return 1;
 }
 
 int L_SetPictureSize(lua_State* L)
@@ -165,15 +165,15 @@ int L_SetPictureSize(lua_State* L)
   if (w<1 || h<1 || w>9999 || h>9999)
     return luaL_error(L, "SetPictureSize: Unreasonable dimensions");
     
-	Resize_image(w, h); // TODO: a return value to catch runtime errors
-	return 0;
+  Resize_image(w, h); // TODO: a return value to catch runtime errors
+  return 0;
 }
 
 int L_GetPictureSize(lua_State* L)
 {
-	lua_pushinteger(L, Main_image_width);	
-	lua_pushinteger(L, Main_image_height);	
-	return 2;
+  lua_pushinteger(L, Main_image_width); 
+  lua_pushinteger(L, Main_image_height);  
+  return 2;
 }
 
 int L_PutPicturePixel(lua_State* L)
@@ -188,8 +188,8 @@ int L_PutPicturePixel(lua_State* L)
     // Silently ignored
     return 0;
   }
-	Pixel_in_current_screen(x, y, c, 0);
-	return 0; // no values returned for lua
+  Pixel_in_current_screen(x, y, c, 0);
+  return 0; // no values returned for lua
 }
 
 int L_GetPicturePixel(lua_State* L)
@@ -201,10 +201,10 @@ int L_GetPicturePixel(lua_State* L)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
-	  return 1;
+    return 1;
   }
-	lua_pushinteger(L, Read_pixel_from_current_screen(x,y));
-	return 1;
+  lua_pushinteger(L, Read_pixel_from_current_screen(x,y));
+  return 1;
 }
 
 int L_GetBackupPixel(lua_State* L)
@@ -216,10 +216,10 @@ int L_GetBackupPixel(lua_State* L)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
-	  return 1;
+    return 1;
   }
-	lua_pushinteger(L, Read_pixel_from_backup_screen(x,y));
-	return 1;
+  lua_pushinteger(L, Read_pixel_from_backup_screen(x,y));
+  return 1;
 }
 
 int L_GetLayerPixel(lua_State* L)
@@ -231,19 +231,19 @@ int L_GetLayerPixel(lua_State* L)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
-	  return 1;
+    return 1;
   }
-	lua_pushinteger(L, Read_pixel_from_current_layer(x,y));
-	return 1;
+  lua_pushinteger(L, Read_pixel_from_current_layer(x,y));
+  return 1;
 }
 
 // Spare
 
 int L_GetSparePictureSize(lua_State* L)
 {
-	lua_pushinteger(L, Spare_image_width);	
-	lua_pushinteger(L, Spare_image_height);	
-	return 2;
+  lua_pushinteger(L, Spare_image_width);  
+  lua_pushinteger(L, Spare_image_height); 
+  return 2;
 }
 
 int L_GetSpareLayerPixel(lua_State* L)
@@ -255,10 +255,10 @@ int L_GetSpareLayerPixel(lua_State* L)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
-	  return 1;
+    return 1;
   }
-	lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x));
-	return 1;
+  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x));
+  return 1;
 }
 
 int L_GetSparePicturePixel(lua_State* L)
@@ -270,26 +270,26 @@ int L_GetSparePicturePixel(lua_State* L)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
-	  return 1;
+    return 1;
   }
-	lua_pushinteger(L, Read_pixel_from_spare_screen(x,y));
-	return 1;
+  lua_pushinteger(L, Read_pixel_from_spare_screen(x,y));
+  return 1;
 }
 
 int L_GetSpareColor(lua_State* L)
 {
-	byte c=lua_tonumber(L,1);
+  byte c=lua_tonumber(L,1);
 
-	lua_pushinteger(L, Spare_palette[c].R);
-	lua_pushinteger(L, Spare_palette[c].G);
-	lua_pushinteger(L, Spare_palette[c].B);
-	return 3;
+  lua_pushinteger(L, Spare_palette[c].R);
+  lua_pushinteger(L, Spare_palette[c].G);
+  lua_pushinteger(L, Spare_palette[c].B);
+  return 3;
 }
 
 int L_GetSpareTransColor(lua_State* L)
 {
-	lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
-	return 1;
+  lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+  return 1;
 }
 
 
@@ -305,29 +305,29 @@ int L_SetColor(lua_State* L)
   Main_palette[c].R=Round_palette_component(r);
   Main_palette[c].G=Round_palette_component(g);
   Main_palette[c].B=Round_palette_component(b);
-	// Set_color(c, r, g, b); Not needed. Update screen when script is finished
-	Palette_has_changed=1;
-	return 0;
+  // Set_color(c, r, g, b); Not needed. Update screen when script is finished
+  Palette_has_changed=1;
+  return 0;
 }
 
 int L_GetColor(lua_State* L)
 {
-	byte c=lua_tonumber(L,1);
+  byte c=lua_tonumber(L,1);
 
-	lua_pushinteger(L, Main_palette[c].R);
-	lua_pushinteger(L, Main_palette[c].G);
-	lua_pushinteger(L, Main_palette[c].B);
-	return 3;
+  lua_pushinteger(L, Main_palette[c].R);
+  lua_pushinteger(L, Main_palette[c].G);
+  lua_pushinteger(L, Main_palette[c].B);
+  return 3;
 }
 
 int L_GetBackupColor(lua_State* L)
 {
-	byte c=lua_tonumber(L,1);
+  byte c=lua_tonumber(L,1);
 
-	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].R);
-	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].G);
-	lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].B);
-	return 3;
+  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].R);
+  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].G);
+  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].B);
+  return 3;
 }
 
 int L_MatchColor(lua_State* L)
@@ -343,20 +343,20 @@ int L_MatchColor(lua_State* L)
 
 int L_GetForeColor(lua_State* L)
 {
-	lua_pushinteger(L, Fore_color);
-	return 1;
+  lua_pushinteger(L, Fore_color);
+  return 1;
 }
 
 int L_GetBackColor(lua_State* L)
 {
-	lua_pushinteger(L, Back_color);
-	return 1;
+  lua_pushinteger(L, Back_color);
+  return 1;
 }
 
 int L_GetTransColor(lua_State* L)
 {
-	lua_pushinteger(L, Main_backups->Pages->Transparent_color);
-	return 1;
+  lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+  return 1;
 }
 
 
@@ -591,7 +591,7 @@ int L_MessageBox(lua_State* L)
   }
 
   Verbose_message(caption, message);
-	return 0;
+  return 0;
 }
 
 
@@ -601,23 +601,23 @@ T_Fileselector Scripts_list;
 // Callback to display a skin name in the list
 void Draw_script_name(word x, word y, word index, byte highlighted)
 {
-	T_Fileselector_item * current_item;
+  T_Fileselector_item * current_item;
 
-	if (Scripts_list.Nb_elements)
-	{
-	  short name_size;
-	  
-		current_item = Get_item_by_index(&Scripts_list, index);
+  if (Scripts_list.Nb_elements)
+  {
+    short name_size;
+    
+    current_item = Get_item_by_index(&Scripts_list, index);
 
-		Print_in_window_limited(x, y, current_item->Full_name, NAME_WIDTH, MC_Black,
-			(highlighted)?MC_Dark:MC_Light);
-	  name_size=strlen(current_item->Full_name);
-	  // Clear remaining area on the right
-	  if (name_size<NAME_WIDTH)
-  	  Window_rectangle(x+name_size*8,y,(NAME_WIDTH-name_size)*8,8,(highlighted)?MC_Dark:MC_Light);
+    Print_in_window_limited(x, y, current_item->Full_name, NAME_WIDTH, MC_Black,
+      (highlighted)?MC_Dark:MC_Light);
+    name_size=strlen(current_item->Full_name);
+    // Clear remaining area on the right
+    if (name_size<NAME_WIDTH)
+      Window_rectangle(x+name_size*8,y,(NAME_WIDTH-name_size)*8,8,(highlighted)?MC_Dark:MC_Light);
 
-  	Update_window_area(x,y,NAME_WIDTH*8,8);
-	}
+    Update_window_area(x,y,NAME_WIDTH*8,8);
+  }
 }
 
 ///
@@ -630,13 +630,13 @@ void Draw_script_information(T_Fileselector_item * script_item)
   int x, y;
   
   // Blank the target area
-	Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
+  Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
 
   if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
     strcpy(full_name, Data_directory);
-  	strcat(full_name, "scripts/");
-  	strcat(full_name, script_item->Full_name);
+    strcat(full_name, "scripts/");
+    strcat(full_name, script_item->Full_name);
     
     
     x=0;
@@ -691,71 +691,71 @@ void Draw_script_information(T_Fileselector_item * script_item)
 // Add a script to the list
 void Add_script(const char *name)
 {
-	Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
+  Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
 }
 
 void Button_Brush_Factory(void)
 {
-	short clicked_button;
-	T_List_button* scriptlist;
-	T_Scroller_button* scriptscroll;
-	char scriptdir[MAX_PATH_CHARACTERS];
+  short clicked_button;
+  T_List_button* scriptlist;
+  T_Scroller_button* scriptscroll;
+  char scriptdir[MAX_PATH_CHARACTERS];
 
   Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
 
-	// Here we use the same data container as the fileselectors.
-	// Reinitialize the list
-	Free_fileselector_list(&Scripts_list);
-	strcpy(scriptdir, Data_directory);
-	strcat(scriptdir, "scripts/");
-	// Add each found file to the list
-	For_each_file(scriptdir, Add_script);
-	// Sort it
-	Sort_list_of_files(&Scripts_list);
+  // Here we use the same data container as the fileselectors.
+  // Reinitialize the list
+  Free_fileselector_list(&Scripts_list);
+  strcpy(scriptdir, Data_directory);
+  strcat(scriptdir, "scripts/");
+  // Add each found file to the list
+  For_each_file(scriptdir, Add_script);
+  // Sort it
+  Sort_list_of_files(&Scripts_list);
 
-	Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
-	Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, 0); // 2
+  Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
+  Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, 0); // 2
 
-	Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
-	scriptlist = Window_set_list_button(
-		// Fileselector
-		Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 3
-		// Scroller for the fileselector
-		(scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
-			Scripts_list.Nb_elements, 10, 0)), // 4
-		Draw_script_name); // 5
-		
-	Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
-	
-	Window_redraw_list(scriptlist);
+  Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
+  scriptlist = Window_set_list_button(
+    // Fileselector
+    Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 3
+    // Scroller for the fileselector
+    (scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
+      Scripts_list.Nb_elements, 10, 0)), // 4
+    Draw_script_name); // 5
+    
+  Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
+  
+  Window_redraw_list(scriptlist);
   Draw_script_information(Get_item_by_index(&Scripts_list,
     scriptlist->List_start + scriptlist->Cursor_position));
   
-	Update_window_area(0, 0, Window_width, Window_height);
-	Display_cursor();
+  Update_window_area(0, 0, Window_width, Window_height);
+  Display_cursor();
 
-	do {
-		clicked_button = Window_clicked_button();
+  do {
+    clicked_button = Window_clicked_button();
 
-		switch (clicked_button)
-		{
-		  case 5:
+    switch (clicked_button)
+    {
+      case 5:
         Hide_cursor();
         Draw_script_information(Get_item_by_index(&Scripts_list,
           scriptlist->List_start + scriptlist->Cursor_position));
         Display_cursor();
-		    break;
-		    
-		    
-			default:
-				break;
-		}
-		
-	} while (clicked_button <= 0 || clicked_button >= 3);
+        break;
+        
+        
+      default:
+        break;
+    }
+    
+  } while (clicked_button <= 0 || clicked_button >= 3);
 
-	if (clicked_button == 2) // Run the script
-	{
-		lua_State* L;
+  if (clicked_button == 2) // Run the script
+  {
+    lua_State* L;
     const char* message;
 
     // Some scripts are slow
@@ -767,24 +767,24 @@ void Button_Brush_Factory(void)
 
     L = lua_open();
 
-		lua_register(L,"putbrushpixel",L_PutBrushPixel);
-		lua_register(L,"getbrushpixel",L_GetBrushPixel);
-		lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
-		lua_register(L,"putpicturepixel",L_PutPicturePixel);
-		lua_register(L,"getpicturepixel",L_GetPicturePixel);
-		lua_register(L,"getlayerpixel",L_GetLayerPixel);
-		lua_register(L,"getbackuppixel",L_GetBackupPixel);
-		lua_register(L,"setbrushsize",L_SetBrushSize);
-		lua_register(L,"setpicturesize",L_SetPictureSize);
-		lua_register(L,"getbrushsize",L_GetBrushSize);
-		lua_register(L,"getpicturesize",L_GetPictureSize);
-		lua_register(L,"setcolor",L_SetColor);
-		lua_register(L,"getcolor",L_GetColor);
-		lua_register(L,"getbackupcolor",L_GetBackupColor);
-		lua_register(L,"matchcolor",L_MatchColor);
-		lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
-		lua_register(L,"inputbox",L_InputBox);
-		lua_register(L,"messagebox",L_MessageBox);
+    lua_register(L,"putbrushpixel",L_PutBrushPixel);
+    lua_register(L,"getbrushpixel",L_GetBrushPixel);
+    lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
+    lua_register(L,"putpicturepixel",L_PutPicturePixel);
+    lua_register(L,"getpicturepixel",L_GetPicturePixel);
+    lua_register(L,"getlayerpixel",L_GetLayerPixel);
+    lua_register(L,"getbackuppixel",L_GetBackupPixel);
+    lua_register(L,"setbrushsize",L_SetBrushSize);
+    lua_register(L,"setpicturesize",L_SetPictureSize);
+    lua_register(L,"getbrushsize",L_GetBrushSize);
+    lua_register(L,"getpicturesize",L_GetPictureSize);
+    lua_register(L,"setcolor",L_SetColor);
+    lua_register(L,"getcolor",L_GetColor);
+    lua_register(L,"getbackupcolor",L_GetBackupColor);
+    lua_register(L,"matchcolor",L_MatchColor);
+    lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
+    lua_register(L,"inputbox",L_InputBox);
+    lua_register(L,"messagebox",L_MessageBox);
     lua_register(L,"getforecolor",L_GetForeColor);
     lua_register(L,"getbackcolor",L_GetBackColor);
     lua_register(L,"gettranscolor",L_GetTransColor);
@@ -795,14 +795,14 @@ void Button_Brush_Factory(void)
     lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
     
 
-		// For debug only
-		// luaL_openlibs(L);
+    // For debug only
+    // luaL_openlibs(L);
 
     luaopen_math(L);
 
-		strcat(scriptdir, Get_item_by_index(&Scripts_list,
-					scriptlist->List_start + scriptlist->Cursor_position)
-						-> Full_name);
+    strcat(scriptdir, Get_item_by_index(&Scripts_list,
+          scriptlist->List_start + scriptlist->Cursor_position)
+            -> Full_name);
 
     // TODO The script may modify the picture, so we do a backup here.
     // If the script is only touching the brush, this isn't needed...
@@ -822,24 +822,24 @@ void Button_Brush_Factory(void)
     {
       Verbose_message("Error!", "Out of memory!");
     }
-		else 
-		{
-		  memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
-		
-  		if (luaL_loadfile(L,scriptdir) != 0)
+    else 
+    {
+      memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
+    
+      if (luaL_loadfile(L,scriptdir) != 0)
       {
         message = lua_tostring(L, 1);
         if(message)
-  			  Verbose_message("Error!", message);
+          Verbose_message("Error!", message);
         else
           Warning_message("Unknown error loading script!");
       }
-  		else if (lua_pcall(L, 0, 0, 0) != 0)
+      else if (lua_pcall(L, 0, 0, 0) != 0)
       {
         int stack_size;
         stack_size= lua_gettop(L);
         if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-  			  Verbose_message("Error running script", message);
+          Verbose_message("Error running script", message);
         else
           Warning_message("Unknown error running script!");
       }
@@ -854,15 +854,15 @@ void Button_Brush_Factory(void)
     }
     End_of_modification();
 
-		lua_close(L);
-	}
+    lua_close(L);
+  }
 
-	Close_window();
-	if (Brush_was_altered)
-	  Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-	Unselect_button(BUTTON_BRUSH_EFFECTS);
+  Close_window();
+  if (Brush_was_altered)
+    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+  Unselect_button(BUTTON_BRUSH_EFFECTS);
   Display_all_screen();
-	Display_cursor();
+  Display_cursor();
 }
 
 #else // NOLUA
