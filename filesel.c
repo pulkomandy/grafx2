@@ -963,14 +963,22 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
 
 short Find_file_in_fileselector(T_Fileselector *list, char * fname)
 {
-  T_Fileselector_item * current_item;
+  T_Fileselector_item * item;
   short  index;
+  short  close_match=0;
 
-  for (index=0, current_item=list->First;
-       ((current_item!=NULL) && (strcmp(current_item->Full_name,fname)));
-       index++,current_item=current_item->Next);
+  index=0;
+  for (item=list->First; item!=NULL; item=item->Next)
+  {
+    if (strcmp(item->Full_name,fname)==0)
+      return index;
+    if (strcasecmp(item->Full_name,fname)==0)
+      close_match=index;
+      
+    index++;
+  }
 
-  return (current_item!=NULL)?index:0;
+  return close_match;
 }
 
 
