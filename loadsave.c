@@ -1162,6 +1162,7 @@ T_String_list *Backups_main = NULL;
 /// A list of files, used for scanning a directory
 T_String_list *Backups_spare = NULL;
 
+
 // Settings for safety backup (frequency, numbers, etc)
 
 const int Rotation_safety_backup = 8;
@@ -1187,9 +1188,9 @@ void Add_backup_file(const char *name)
   Extract_filename(file_name, name);
   
   // Check first character
-  if (file_name[0]=='a')
+  if (file_name[0]==Main_safety_backup_prefix)
     list = &Backups_main;
-  else if (file_name[0]=='b')
+  else if (file_name[0]==Spare_safety_backup_prefix)
     list = &Backups_spare;
    else {
     // Not a good file
@@ -1291,13 +1292,22 @@ byte Process_backups(T_String_list **list)
 }
 
 
+/// Global indicator that tells if the safety backup system is active
+byte Safety_backup_active = 0;
+
 ///
 /// Checks if there are any pending safety backups, and then opens them.
-///
+/// @return 0 if no problem, -1 if the backup system cannot be activated, >=1 if some backups are restored
 int Check_recovery(void)
 {
   int restored_spare;
   int restored_main;
+  
+  // First check if can write backups
+  if (Create_lock_file(Config_directory))
+    return -1;
+
+  Safety_backup_active=1;
     
   Backups_main = NULL;
   Backups_spare = NULL;
@@ -1327,13 +1337,7 @@ int Check_recovery(void)
     Compute_paintbrush_coordinates();
     Redraw_layered_image();
   }
-  /*
-  if (restored_main||restored_spare)
-  {
-    Display_all_screen();
-    return 1;
-  }*/
-  return restored_main || restored_spare;
+  return restored_main + restored_spare;
 }
 
 void Rotate_safety_backups(void)
@@ -1343,6 +1347,9 @@ void Rotate_safety_backups(void)
   char file_name[12+1];
   char deleted_file[MAX_PATH_CHARACTERS];
 
+  if (!Safety_backup_active)
+    return;
+    
   now = SDL_GetTicks();
   // It's time to save if either:
   // - Many edits have taken place
@@ -1384,6 +1391,9 @@ void Delete_safety_backups(void)
 {
   T_String_list *element;
 
+  if (!Safety_backup_active)
+    return;
+  
   Backups_main = NULL;
   Backups_spare = NULL;
   
@@ -1400,5 +1410,8 @@ void Delete_safety_backups(void)
     if(remove(element->String))
       printf("Failed to delete %s\n",element->String);
   }
+  
+  // Release lock file
+  Release_lock_file(Config_directory);
   
 }

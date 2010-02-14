@@ -94,3 +94,12 @@ void For_each_file(const char * directory_name, void Callback(const char *));
 /// Creates a fully qualified name from a directory and filename.
 /// The point is simply to insert a PATH_SEPARATOR when needed.
 void Get_full_filename(char * output_name, char * file_name, char * directory_name);
+
+///
+/// Creates a lock file, to check if an other instance of Grafx2 is running.
+/// @return 0 on success (first instance), -1 on failure (others are running)
+byte Create_lock_file(const char *file_directory);
+
+///
+/// Release a lock file created by ::Create_Lock_file
+void Release_lock_file(const char *file_directory);

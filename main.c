@@ -760,54 +760,74 @@ int Init_program(int argc,char * argv[])
   *Brush=MC_White;
   
   // Test de recuperation de fichiers sauvés
-  if (Check_recovery())
-  {
-    // Some files were loaded from last crash-exit.
-    // Do not load files from command-line, nor show splash screen.
-    Compute_optimal_menu_colors(Main_palette);
-    Display_all_screen();
-    Display_menu();
-    Display_cursor();
-  }
-  else
+  switch (Check_recovery())
   {
     T_IO_Context context;
-    
-    switch (file_in_command_line)
-    {
-      case 0:
-        if (Config.Opening_message)
-          Button_Message_initial();
-        break;
 
-      case 2:
-        // Load this file
-        Init_context_layered_image(&context, spare_filename, spare_directory);
-        Load_image(&context);
-        Destroy_context(&context);
-        End_of_modification();
-        Redraw_layered_image();
-
-        Button_Page();
-        // no break ! proceed with the other file now
-      case 1:
-        Init_context_layered_image(&context, main_filename, main_directory);
-        Load_image(&context);
-        Destroy_context(&context);
-        End_of_modification();
-        Redraw_layered_image();
-        
-        Hide_cursor();
-        Compute_optimal_menu_colors(Main_palette);
-        Display_all_screen();
-        Display_menu();
-        Display_cursor();
-        Resolution_in_command_line = 0;
-        break;
+    default:    
+      // Some files were loaded from last crash-exit.
+      // Do not load files from command-line, nor show splash screen.
+      Compute_optimal_menu_colors(Main_palette);
+      Display_all_screen();
+      Display_menu();
+      Display_cursor();
+      Verbose_message("Images recovered",
+        "Grafx2 has recovered images from\n"
+        "last session, before a crash or\n"
+        "shutdown. Browse the history using\n"
+        "the Undo/Redo button, and when\n"
+        "you find a state that you want to\n"
+        "save, use the 'Save as' button to\n"
+        "save the image.\n"
+        "Some backups can be present in\n"
+        "the spare page too.\n");
+      break;
   
-      default:
-        break;
-    }
+    case -1: // Unable to write lock file
+      Verbose_message("Warning", 
+        "Safety backups (every minute) are\n"
+        "disabled because Grafx2 is running\n"
+        "from a read-only device, or other\n"
+        "instances are running.");
+      break;
+
+    case 0:
+    
+      switch (file_in_command_line)
+      {
+        case 0:
+          if (Config.Opening_message)
+            Button_Message_initial();
+          break;
+  
+        case 2:
+          // Load this file
+          Init_context_layered_image(&context, spare_filename, spare_directory);
+          Load_image(&context);
+          Destroy_context(&context);
+          End_of_modification();
+          Redraw_layered_image();
+  
+          Button_Page();
+          // no break ! proceed with the other file now
+        case 1:
+          Init_context_layered_image(&context, main_filename, main_directory);
+          Load_image(&context);
+          Destroy_context(&context);
+          End_of_modification();
+          Redraw_layered_image();
+          
+          Hide_cursor();
+          Compute_optimal_menu_colors(Main_palette);
+          Display_all_screen();
+          Display_menu();
+          Display_cursor();
+          Resolution_in_command_line = 0;
+          break;
+    
+        default:
+          break;
+      }
   }
   return(1);
 }
