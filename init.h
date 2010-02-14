@@ -49,3 +49,4 @@ byte * Load_font(const char * font_name);
 /// Based on which toolbars are visible, updates their offsets and
 /// computes ::Menu_height and ::Menu_Y
 void Compute_menu_offsets(void);
+

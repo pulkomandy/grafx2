@@ -27,6 +27,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #if defined(__amigaos4__)
     #include <proto/dos.h>
     #include <dirent.h>
@@ -315,7 +318,7 @@ byte Create_lock_file(const char *file_directory)
   }
   #else
   // Unixy method for lock file
-  Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT);
+  Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT,S_IRUSR|S_IWUSR);
   if (Lock_file_handle == -1)
   {
     // Usually write-protected media
@@ -342,10 +345,10 @@ void Release_lock_file(const char *file_directory)
   }
   #else
   if (Lock_file_handle != -1)
-  {
-    close(Lock_file_handle);
-    Lock_file_handle = -1;
-  }  
+  //{
+  //  close(Lock_file_handle);
+  //  Lock_file_handle = -1;
+  //}  
   #endif
   
   // Actual deletion

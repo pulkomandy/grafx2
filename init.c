@@ -2681,3 +2681,4 @@ void Compute_menu_offsets(void)
   // Update global menu coordinates
   Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
 }
+
