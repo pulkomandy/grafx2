@@ -592,7 +592,6 @@ try_again:
     Position_screen_according_to_zoom();
   Compute_limits();
   Compute_paintbrush_coordinates();
-  Display_all_screen();
   
   Resize_width=0;
   Resize_height=0;

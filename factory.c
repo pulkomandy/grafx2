@@ -38,6 +38,8 @@
 #include "sdlscreen.h"
 #include "windows.h"
 #include "palette.h"
+#include "input.h" // Is_shortcut()
+#include "help.h" // Window_help()
 
 #ifdef __ENABLE_LUA__
 
@@ -768,8 +770,11 @@ void Button_Brush_Factory(void)
   Update_window_area(0, 0, Window_width, Window_height);
   Display_cursor();
 
-  do {
+  do
+  {
     clicked_button = Window_clicked_button();
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
 
     switch (clicked_button)
     {

@@ -173,7 +173,7 @@ void Wait_end_of_click(void)
   while(Mouse_K) if(!Get_input()) SDL_Delay(20);
 }
 
-void Hide_current_image_with_stencil(byte color, byte * stencil)
+void Clear_current_image_with_stencil(byte color, byte * stencil)
   //Effacer l'image courante avec une certaine couleur en mode Stencil
 {
   int nb_pixels=0; //ECX
@@ -192,7 +192,7 @@ void Hide_current_image_with_stencil(byte color, byte * stencil)
   }
 }
 
-void Hide_current_image(byte color)
+void Clear_current_image(byte color)
   // Effacer l'image courante avec une certaine couleur
 {
   memset(

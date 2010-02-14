@@ -478,7 +478,7 @@ void Display_layerbar(void)
   if (horiz_space/button_width < button_number)
     button_number = horiz_space/button_width;
   // Only 16 icons at the moment
-  if (button_number > 16)
+  if (button_number > 16) // can be different from MAX_NB_LAYERS
     button_number = 16;
 
   // Enlarge the buttons themselves if there's enough room
@@ -2582,15 +2582,15 @@ void Display_all_screen(void)
   if (Main_magnifier_mode)
   {
     if (Main_image_width<Main_separator_position && Main_image_width < Screen_width)
-      Block(Main_image_width,0,(Main_separator_position-Main_image_width),Menu_Y,0);
+      Block(Main_image_width,0,(Main_separator_position-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
   else
   {
     if (Main_image_width<Screen_width)
-      Block(Main_image_width,0,(Screen_width-Main_image_width),Menu_Y,0);
+      Block(Main_image_width,0,(Screen_width-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
   if (Main_image_height<Menu_Y)
-    Block(0,Main_image_height,width,(Menu_Y-height),0);
+    Block(0,Main_image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Main_magnifier_mode)
@@ -2616,9 +2616,9 @@ void Display_all_screen(void)
     if (Main_image_width<Main_magnifier_width)
       Block(Main_X_zoom+(Main_image_width*Main_magnifier_factor),0,
             (Main_magnifier_width-Main_image_width)*Main_magnifier_factor,
-            Menu_Y,0);
+            Menu_Y,Main_backups->Pages->Transparent_color);
     if (Main_image_height<Main_magnifier_height)
-      Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),0);
+      Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
   }
 
   // ---/\/\/\ Affichage des limites /\/\/\---

@@ -646,9 +646,9 @@ void Button_Clear(void)
   Hide_cursor();
   Backup();
   if (Stencil_mode && Config.Clear_with_stencil)
-    Hide_current_image_with_stencil(0,Stencil);
+    Clear_current_image_with_stencil(Main_backups->Pages->Transparent_color,Stencil);
   else
-    Hide_current_image(0);
+    Clear_current_image(Main_backups->Pages->Transparent_color);
   Redraw_layered_image();
   Display_all_screen();
   End_of_modification();
@@ -661,9 +661,9 @@ void Button_Clear_with_backcolor(void)
   Hide_cursor();
   Backup();
   if (Stencil_mode && Config.Clear_with_stencil)
-    Hide_current_image_with_stencil(Back_color,Stencil);
+    Clear_current_image_with_stencil(Back_color,Stencil);
   else
-    Hide_current_image(Back_color);
+    Clear_current_image(Back_color);
   Redraw_layered_image();
   Display_all_screen();
   End_of_modification();

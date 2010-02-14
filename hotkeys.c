@@ -903,9 +903,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {104,
   "Clear page",
-  "Clears the picture with the first",
-  "color of the palette (usually black)",
-  "",
+  "Clears the picture with color 0,",
+  "or the transparent color if it's",
+  "a layered image.",
   true,
   SDLK_BACKSPACE, // BackSpace
   0},
@@ -1471,8 +1471,8 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {180,
   "Layers menu",
-  "Opens the window with layer options.",
-  "",
+  "Opens a window with options related",
+  "to layers and image transparency.",
   "",
   true,
   SDLK_HOME|MOD_ALT, // Alt + Home

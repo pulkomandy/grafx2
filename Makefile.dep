@@ -14,7 +14,7 @@ $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h 
   input.h engine.h pages.h layers.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
   filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
-  sdlscreen.h windows.h palette.h
+  sdlscreen.h windows.h palette.h input.h help.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
   loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \

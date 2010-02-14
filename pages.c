@@ -807,7 +807,7 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
   {
     for (i=0; i<layers;i++)
     {
-      memset(Main_backups->Pages->Image[i], 0, width*height);
+      memset(Main_backups->Pages->Image[i], Main_backups->Pages->Transparent_color, width*height);
     }
     
     Update_buffers(width, height);
@@ -859,7 +859,7 @@ int Backup_and_resize_the_spare(int width,int height)
     
     for (i=0; i<nb_layers;i++)
     {
-      memset(Spare_backups->Pages->Image[i], 0, width*height);
+      memset(Spare_backups->Pages->Image[i], Spare_backups->Pages->Transparent_color, width*height);
     }
     
     // Update_buffers(width, height); // Not for spare
@@ -1106,8 +1106,7 @@ byte Add_layer(T_List_of_pages *list, byte layer)
   
   source_page = list->Pages;
   
-  // Hard limit of 32 at the moment, because layer bitmasks are 32bit.
-  if (list->Pages->Nb_layers == 32)
+  if (list->Pages->Nb_layers == MAX_NB_LAYERS)
     return 1;
    
   // Keep the position reasonable

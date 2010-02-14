@@ -97,7 +97,7 @@ void Button_Layer_add(void)
 {
   Hide_cursor();
 
-  if (Main_backups->Pages->Nb_layers < 32)
+  if (Main_backups->Pages->Nb_layers < MAX_NB_LAYERS)
   {
     // Backup with unchanged layers
     Backup_layers(0);
@@ -212,8 +212,8 @@ void Button_Layer_menu(void)
   {
     
     clicked_button=Window_clicked_button();
-    //if (Is_shortcut(Key,0x100+BUTTON_HELP))
-    //  Window_help(BUTTON_LAYERS, NULL);
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_LAYER_MENU, NULL);
     switch(clicked_button)
     {
       case 1: // color
