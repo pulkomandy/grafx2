@@ -694,12 +694,39 @@ void Add_script(const char *name)
   Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
 }
 
+void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_script)
+{
+  short index;
+
+  index=Find_file_in_fileselector(selector, selected_script);
+
+  if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (index<list->Scroller->Nb_visibles/2))
+  {
+    list->List_start=0;
+    list->Cursor_position=index;
+  }
+  else
+  {
+    if (index>=list->Scroller->Nb_elements-list->Scroller->Nb_visibles/2)
+    {
+      list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+      list->Cursor_position=index-list->List_start;
+    }
+    else
+    {
+      list->List_start=index-(list->Scroller->Nb_visibles-1)/2;
+      list->Cursor_position=(list->Scroller->Nb_visibles-1)/2;
+    }
+  }
+}
+
 void Button_Brush_Factory(void)
 {
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
   char scriptdir[MAX_PATH_CHARACTERS];
+  static char selected_script[MAX_PATH_CHARACTERS]="";
 
   Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
 
@@ -714,7 +741,7 @@ void Button_Brush_Factory(void)
   Sort_list_of_files(&Scripts_list);
 
   Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
-  Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, 0); // 2
+  Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, SDLK_RETURN); // 2
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   scriptlist = Window_set_list_button(
@@ -722,10 +749,17 @@ void Button_Brush_Factory(void)
     Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 3
     // Scroller for the fileselector
     (scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
-      Scripts_list.Nb_elements, 10, 0)), // 4
+      Scripts_list.Nb_elements,10, 0)), // 4
     Draw_script_name); // 5
     
   Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
+  
+  // Update position
+  Highlight_script(&Scripts_list, scriptlist, selected_script);
+  // Update the scroller position
+  scriptscroll->Position=scriptlist->List_start;
+  if (scriptscroll->Position)
+    Window_draw_slider(scriptscroll);
   
   Window_redraw_list(scriptlist);
   Draw_script_information(Get_item_by_index(&Scripts_list,
@@ -753,6 +787,9 @@ void Button_Brush_Factory(void)
     
   } while (clicked_button <= 0 || clicked_button >= 3);
 
+  strcpy(selected_script, Get_item_by_index(&Scripts_list,
+    scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
+            
   if (clicked_button == 2) // Run the script
   {
     lua_State* L;
@@ -800,9 +837,7 @@ void Button_Brush_Factory(void)
 
     luaopen_math(L);
 
-    strcat(scriptdir, Get_item_by_index(&Scripts_list,
-          scriptlist->List_start + scriptlist->Cursor_position)
-            -> Full_name);
+    strcat(scriptdir, selected_script);
 
     // TODO The script may modify the picture, so we do a backup here.
     // If the script is only touching the brush, this isn't needed...

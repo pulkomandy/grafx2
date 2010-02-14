@@ -961,7 +961,7 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
 }
 
 
-short Find_file_in_fileselector(T_Fileselector *list, char * fname)
+short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
 {
   T_Fileselector_item * item;
   short  index;

@@ -46,6 +46,6 @@ void Recount_files(T_Fileselector *list);
 
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
-short Find_file_in_fileselector(T_Fileselector *list, char * fname);
+short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
 
 #endif
