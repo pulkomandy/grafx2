@@ -345,10 +345,10 @@ void Release_lock_file(const char *file_directory)
   }
   #else
   if (Lock_file_handle != -1)
-  //{
-  //  close(Lock_file_handle);
-  //  Lock_file_handle = -1;
-  //}  
+  {
+    close(Lock_file_handle);
+    Lock_file_handle = -1;
+  }  
   #endif
   
   // Actual deletion
