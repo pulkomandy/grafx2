@@ -29,6 +29,8 @@
 #include <png.h>
 #endif
 
+#include <stdlib.h>
+
 #include "errors.h"
 #include "global.h"
 #include "loadsave.h"

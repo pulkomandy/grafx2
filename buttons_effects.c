@@ -26,6 +26,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include <SDL.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "buttons.h"
 #include "engine.h"

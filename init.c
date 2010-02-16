@@ -22,6 +22,8 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#define _XOPEN_SOURCE 500
+
 // Signal handler: I activate it for the two platforms who certainly
 // support them. Feel free to check with others.
 #if defined(__WIN32__) || defined(__linux__)

@@ -36,6 +36,8 @@
 #else
     #define MOUNTED_GETMNTENT1
 #endif
+
+#define _XOPEN_SOURCE 500
 // --- END GRAFX2 CUSTOM CONFIG ---
 
 #include "mountlist.h"
@@ -332,8 +334,14 @@ fstype_to_string (int t)
 /* Return the device number from MOUNT_OPTIONS, if possible.
    Otherwise return (dev_t) -1.  */
 
+#ifdef __linux__
+  #define BROKEN __attribute__((unused))
+#else
+  #define BROKEN
+#endif
+
 static dev_t
-dev_from_mount_options (char const *mount_options)
+dev_from_mount_options (BROKEN char const *mount_options)
 {
   /* GNU/Linux allows file system implementations to define their own
      meaning for "dev=" mount options, so don't trust the meaning
@@ -370,7 +378,7 @@ dev_from_mount_options (char const *mount_options)
    the returned list are valid.  Otherwise, they might not be.  */
 
 struct mount_entry *
-read_file_system_list (bool need_fs_type)
+read_file_system_list (BROKEN bool need_fs_type)
 {
   struct mount_entry *mount_list;
   struct mount_entry *me;

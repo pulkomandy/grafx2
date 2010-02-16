@@ -23,6 +23,8 @@
 // Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
 // little-endian.
 
+#define _XOPEN_SOURCE 500
+
 #include <SDL_endian.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -316,7 +318,7 @@ byte Create_lock_file(const char *file_directory)
   {
     return -1;
   }
-  #elseif !defined(__GP2X__) // gp2x does not defines F_TLOCK and is not really multitasking anyway
+  #else
   // Unixy method for lock file
   Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT,S_IRUSR|S_IWUSR);
   if (Lock_file_handle == -1)

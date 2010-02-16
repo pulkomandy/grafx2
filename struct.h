@@ -350,7 +350,8 @@ typedef struct T_Page
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
-  byte *    Image[0];  ///< Pixel data for the (first layer of) image.
+  byte *    Image[];  ///< Pixel data for the (first layer of) image.
+    // Define as Image[0] if you have an old gcc which is not C99.
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
 

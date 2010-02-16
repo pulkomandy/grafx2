@@ -25,6 +25,9 @@
 ///@file miscfileformats.c
 /// Formats that aren't fully saving, either because of palette restrictions or other things
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "engine.h"
 #include "errors.h"
 #include "global.h"
