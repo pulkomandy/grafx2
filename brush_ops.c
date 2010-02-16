@@ -37,6 +37,10 @@
 #include "sdlscreen.h"
 #include "windows.h"
 
+#if defined(__VBCC__)||defined(__GP2X__)
+    #define M_PI 3.141592653589793238462643
+#endif
+
 
 /// Simulates clicking the "Draw" button.
 void Return_to_draw_mode(void)

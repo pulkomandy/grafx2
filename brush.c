@@ -36,6 +36,7 @@
 #include "sdlscreen.h"
 #include "brush.h"
 
+
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image
 void Compute_clipped_dimensions(short * x,short * y,short * width,short * height)

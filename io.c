@@ -316,7 +316,7 @@ byte Create_lock_file(const char *file_directory)
   {
     return -1;
   }
-  #else
+  #elseif !defined(__GP2X__) // gp2x does not defines F_TLOCK and is not really multitasking anyway
   // Unixy method for lock file
   Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT,S_IRUSR|S_IWUSR);
   if (Lock_file_handle == -1)

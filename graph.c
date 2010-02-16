@@ -51,6 +51,9 @@
 
 #ifdef __VBCC__
     #define __attribute__(x)
+#endif
+
+#if defined(__VBCC__)||defined(__GP2X__)
     #define M_PI 3.141592653589793238462643
 #endif
 
