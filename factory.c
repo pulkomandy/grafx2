@@ -840,6 +840,7 @@ void Button_Brush_Factory(void)
     // For debug only
     // luaL_openlibs(L);
 
+    luaopen_base(L);
     luaopen_math(L);
 
     strcat(scriptdir, selected_script);
