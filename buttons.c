@@ -4443,7 +4443,7 @@ void Button_Text()
     switch(clicked_button)
     {
       case 1: // Texte saisi
-      Readline_ex(50,20,str,29,250,0);
+      Readline_ex(50,20,str,29,250,0,0);
       preview_is_needed=1;
       break;
 

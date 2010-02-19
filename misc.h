@@ -150,8 +150,15 @@ unsigned long Memory_free(void);
 
 #define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
 
+#define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))
+
 short Round(float value);
 short Round_div_max(short numerator,short divisor);
+
+/* round number n to d decimal points */
+double Fround(double n, unsigned d);
+
+
 
 int Min(int a,int b);
 int Max(int a,int b);

@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "const.h"
 #include "struct.h"
@@ -120,18 +121,19 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
     max_size = 255;
   else
     max_size = visible_size;
-  return Readline_ex(x_pos,y_pos,str,visible_size,max_size,input_type);
+  return Readline_ex(x_pos,y_pos,str,visible_size,max_size,input_type,0);
 }
 
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
-byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type)
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
 //   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
 //   max_size  : Nombre de caractères logeant dans la zone de saisie
-//   input_type  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+//   input_type  : 0=String, 1=Unsigned int, 2=Filename 3=Signed Double
+//   decimal_places: Number of decimal places for a double
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
@@ -149,6 +151,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     str[0]='\0';
   else if (input_type==1)
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
+  else if (input_type==3)
+    sprintf(str,"%.*f",decimal_places, atof(str)); // On tasse la chaine à gauche
 
   Wait_end_of_click();
   Keyboard_click_allowed = 0;
@@ -286,6 +290,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               if ( (input_key>='0') && (input_key<='9') )
                 is_authorized=1;
               break;
+            case 3: // Decimal number
+              if ( (input_key>='0') && (input_key<='9') )
+                is_authorized=1;
+              else if (input_key=='-' && position==0 && str[0]!='-')
+                is_authorized=1;
+              else if (input_key=='.')
+                is_authorized=1;
+              break;
             default : // Nom de fichier
               // On regarde si la touche est autorisée
               if ( Valid_character(input_key))
@@ -343,6 +355,46 @@ affichage:
       size=1;
     }
     Print_in_window(x_pos+((max_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+  }
+  else if (input_type==3)
+  {
+    double value;
+    int i;
+    unsigned int str_length;
+
+    value = atof(str);
+
+    // Remove extraneous decimal places:
+    // From number
+    value = Fround(value, decimal_places);
+
+    // From display
+    sprintf(str,"%.*f",decimal_places, atof(str));
+    // Remove extraneous zeroes
+    /*
+    for (i=0; i<size; i++)
+    {
+      if (str[i]=='.')
+      {
+        int j;
+        
+        for (j=0; i+j<size && j<decimal_places && str[i+j]!='.'; j++)
+        {
+          // advance
+        }
+        str[i+j]='\0';
+        size = i+j;
+        break; // end of process
+      }
+    }
+    */
+    // Recompute updated size
+    size = strlen(str);
+    
+    if (size<=visible_size)
+      Print_in_window(x_pos+((visible_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+    else
+      Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
   else
   {

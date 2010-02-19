@@ -1488,7 +1488,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
                   if (bookmark_label[7]==ELLIPSIS_CHARACTER)
                     bookmark_label[7]='\0';
-                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0))
+                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0,0))
                     strcpy(Config.Bookmark_label[clicked_button-10],bookmark_label);
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                   Display_cursor();

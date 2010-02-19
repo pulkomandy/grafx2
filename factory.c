@@ -24,6 +24,8 @@
  * The brush factory allows you to generate brushes with Lua code.
  */
 
+#include <math.h>
+
 #include "brush.h"
 #include "buttons.h"
 #include "engine.h"
@@ -367,9 +369,11 @@ int L_GetTransColor(lua_State* L)
 int L_InputBox(lua_State* L)
 {
   const int max_settings = 9;
-  int min_value[max_settings];
-  int max_value[max_settings];
-  int current_value[max_settings];
+  const int args_per_setting = 5;
+  double min_value[max_settings];
+  double max_value[max_settings];
+  byte decimal_places[max_settings];
+  double current_value[max_settings];
   const char * label[max_settings];
   unsigned short control[max_settings*3+1]; // Each value has at most 3 widgets.
   enum CONTROL_TYPE {
@@ -389,20 +393,20 @@ int L_InputBox(lua_State* L)
   unsigned int max_label_length;
   int setting;
   short clicked_button;
-  char  str[5];
+  char  str[40];
   short close_window = 0;
   
   nb_args = lua_gettop (L);
   
-  if (nb_args < 5)
+  if (nb_args < 6)
   {
-    return luaL_error(L, "InputBox: Less than 5 arguments");
+    return luaL_error(L, "InputBox: Less than 6 arguments");
   }
-  if ((nb_args - 1) % 4)
+  if ((nb_args - 1) % args_per_setting)
   {
     return luaL_error(L, "InputBox: Wrong number of arguments");
   }
-  nb_settings = (nb_args-1)/4;
+  nb_settings = (nb_args-1)/args_per_setting;
   if (nb_settings > max_settings)
   {
     return luaL_error(L, "InputBox: Too many settings, limit reached");
@@ -418,17 +422,23 @@ int L_InputBox(lua_State* L)
   
   for (setting=0; setting<nb_settings; setting++)
   {
-    label[setting] = lua_tostring(L,setting*4+2);
+    label[setting] = lua_tostring(L,setting*args_per_setting+2);
     if (strlen(label[setting]) > max_label_length)
       max_label_length = strlen(label[setting]);
       
-    current_value[setting] = lua_tonumber(L,setting*4+3);
-    min_value[setting] = lua_tonumber(L,setting*4+4);
-    max_value[setting] = lua_tonumber(L,setting*4+5);
-    if (max_value[setting] > 9999)
-      max_value[setting] = 9999;
-      
+    current_value[setting] = lua_tonumber(L,setting*args_per_setting+3);
+    min_value[setting] = lua_tonumber(L,setting*args_per_setting+4);
+    /*if (min_value[setting] < -999999999999999.0)
+      min_value[setting] = -999999999999999.0;*/
+    max_value[setting] = lua_tonumber(L,setting*args_per_setting+5);
+    /*if (max_value[setting] > 999999999999999.0)
+      max_value[setting] = 999999999999999.0;*/
+    decimal_places[setting] = lua_tonumber(L,setting*args_per_setting+6);
+    if (decimal_places[setting]>15)
+        decimal_places[setting]=15;
     // Keep current value in range
+    current_value[setting] = Fround(current_value[setting], decimal_places[setting]);
+
     if (current_value[setting] < min_value[setting])
       current_value[setting] = min_value[setting];
     else if (current_value[setting] > max_value[setting])
@@ -439,7 +449,7 @@ int L_InputBox(lua_State* L)
     max_label_length=25;
 
   Hide_cursor();
-  Open_window(91+max_label_length*8,44+nb_settings*17,window_caption);
+  Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
   // OK
   Window_set_normal_button( 7, 25 + 17 * nb_settings, 51,14,"OK" , 0,1,SDLK_RETURN);
@@ -455,7 +465,7 @@ int L_InputBox(lua_State* L)
     if (min_value[setting]==0 && max_value[setting]==1)
     {
       // Checkbox
-      Window_set_normal_button(12+max_label_length*8+30, 19+setting*17, 15,13,current_value[setting]?"X":"", 0,1,KEY_NONE);
+      Window_set_normal_button(12+max_label_length*8+42, 19+setting*17, 15,13,current_value[setting]?"X":"", 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_CHECKBOX | setting;
     }
     else
@@ -465,16 +475,15 @@ int L_InputBox(lua_State* L)
       control[Window_nb_buttons] = CONTROL_INPUT_MINUS | setting;
 
       // Numeric input field
-      Window_display_frame_in(12+max_label_length*8+21, 20+setting*17,35, 11);
-      Window_set_input_button(12+max_label_length*8+21, 20+setting*17,4);
+      Window_set_input_button(12+max_label_length*8+21, 20+setting*17,7);
       // Print editable value
-      Num2str(current_value[setting],str,4);
-      Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+      Dec2str(current_value[setting],str,decimal_places[setting]);
+      Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
       //
       control[Window_nb_buttons] = CONTROL_INPUT | setting;
 
       // + Button
-      Window_set_repeatable_button(12+max_label_length*8+60, 20+setting*17, 13,11,"+" , 0,1,KEY_NONE);
+      Window_set_repeatable_button(12+max_label_length*8+84, 20+setting*17, 13,11,"+" , 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_INPUT_PLUS | setting;
     }
   }
@@ -501,9 +510,9 @@ int L_InputBox(lua_State* L)
           break;
           
         case CONTROL_INPUT:
-          Num2str(current_value[setting],str,4);
-          Readline(12+max_label_length*8+23, 22+setting*17,str,4,1);
-          current_value[setting]=atoi(str);
+          Dec2str(current_value[setting],str,decimal_places[setting]);
+          Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,3,decimal_places[setting]);
+          current_value[setting]=atof(str);
 
           if (current_value[setting] < min_value[setting])
             current_value[setting] = min_value[setting];
@@ -511,8 +520,8 @@ int L_InputBox(lua_State* L)
             current_value[setting] = max_value[setting];
           Hide_cursor();
           // Print editable value
-          Num2str(current_value[setting],str,4);
-          Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+          Dec2str(current_value[setting],str,decimal_places[setting]);
+          Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
           //
           Display_cursor();
           
@@ -522,10 +531,13 @@ int L_InputBox(lua_State* L)
           if (current_value[setting] > min_value[setting])
           {
             current_value[setting]--;
+            if (current_value[setting] < min_value[setting])
+              current_value[setting] = min_value[setting];
+              
             Hide_cursor();
             // Print editable value
-            Num2str(current_value[setting],str,4);
-            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+            Dec2str(current_value[setting],str,decimal_places[setting]);
+            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
             //
             Display_cursor();
           }
@@ -535,19 +547,22 @@ int L_InputBox(lua_State* L)
           if (current_value[setting] < max_value[setting])
           {
             current_value[setting]++;
+            if (current_value[setting] > max_value[setting])
+              current_value[setting] = max_value[setting];
+            
             Hide_cursor();
             // Print editable value
-            Num2str(current_value[setting],str,4);
-            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 4,MC_Black,MC_Light);
+            Dec2str(current_value[setting],str,decimal_places[setting]);
+            Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
             //
             Display_cursor();
           }
           break;
           
         case CONTROL_CHECKBOX:
-          current_value[setting] = !current_value[setting];
+          current_value[setting] = (current_value[setting]<0.5);
           Hide_cursor();
-          Print_in_window(12+max_label_length*8+34, 22+setting*17, current_value[setting]?"X":" ",MC_Black,MC_Light);
+          Print_in_window(12+max_label_length*8+46, 22+setting*17, current_value[setting]?"X":" ",MC_Black,MC_Light);
           Display_cursor();
           break;
       }
@@ -566,7 +581,7 @@ int L_InputBox(lua_State* L)
   
   // One value per control
   for (setting=0; setting<nb_settings; setting++)
-    lua_pushinteger(L, current_value[setting]);
+    lua_pushnumber(L, current_value[setting]);
     
   return 1 + nb_settings;
 }

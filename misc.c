@@ -24,6 +24,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdlib.h>
+#include <math.h>
 #include "struct.h"
 #include "sdlscreen.h"
 #include "global.h"
@@ -809,6 +810,14 @@ int Min(int a,int b)
 int Max(int a,int b)
 {
   return (a>b)?a:b;
+}
+
+/* Round number n to d decimal points */
+double Fround(double n, unsigned d)
+{
+  double exp;
+  exp = pow(10.0, d);
+  return floor(n * exp + 0.5) / exp;
 }
 
 
