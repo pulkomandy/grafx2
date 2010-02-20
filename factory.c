@@ -48,6 +48,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <float.h> // for DBL_MAX
 
 ///
 /// Number of characters for name in fileselector.
@@ -73,20 +74,65 @@ static inline byte clamp_byte(double value)
   else return (byte)value;
 }
 
+///
+/// This macro reads a Lua argument into a double or integral lvalue.
+/// If argument is invalid, it will break the caller and raise a verbose message.
+/// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
+/// @param index     Index of the argument to check, starting at 1.
+/// @param func_name The name of the lua callback, to display a message in case of error.
+/// @param dest      Destination lvalue. Can be a double, or any integral type. Conversion will "floor".
+/// @param min_value Check for minimum value. Pass a double, or if you don't care, -DBL_MAX.
+/// @param max_value Check for maximum value. Pass a double, or if you don't care, DBL_MAX.
+#define LUA_ARG_NUMBER(index, func_name, dest, min_value, max_value) \
+do { \
+  double value; \
+  if (nb_args < (index)) return luaL_error(L, "%s: Argument %d is missing.", func_name, (index)); \
+  if (!lua_isnumber(L, (index))) return luaL_error(L, "%s: Argument %d is not a number.", func_name, (index)); \
+  value = lua_tonumber(L, (index)); \
+  if ((min_value) != -DBL_MAX && value<(min_value)) return luaL_error(L, "%s: Argument %d was too small, it had value of %f and minimum should be %f.", func_name, (index), value, (double)(min_value)); \
+  if ((max_value) != DBL_MAX && value>(max_value)) return luaL_error(L, "%s: Argument %d was too big, it had value of %f and maximum should be %f.", func_name, (index), value, (double)(max_value)); \
+  dest = value; \
+} while(0)
+
+///
+/// This macro reads a Lua argument into a string.
+/// If argument is invalid, it will break the caller and raise a verbose message.
+/// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
+/// @param index     Index of the argument to check, starting at 1.
+/// @param func_name The name of the lua callback, to display a message in case of error.
+/// @param dest      Destination string pointer, ideally a const char *.
+#define LUA_ARG_STRING(index, func_name, dest) \
+do { \
+  if (nb_args < (index)) return luaL_error(L, "%s: Argument %d is missing.", func_name, index); \
+  if (!lua_isstring(L, (index))) return luaL_error(L, "%s: Argument %d is not a string.", func_name, index); \
+  dest = lua_tostring(L, (index)); \
+} while (0)
+
+/// Check if 'num' arguments were provided exactly
+#define LUA_ARG_LIMIT(num, func_name) \
+do { \
+  if (nb_args != (num)) \
+    return luaL_error(L, "%s: Expected %d arguments, but found %d.", func_name, (num), nb_args); \
+} while(0)
+
+
+
+
 // Wrapper functions to call C from Lua
 
 int L_SetBrushSize(lua_State* L)
 {
-  int w = lua_tonumber(L,1);
-  int h = lua_tonumber(L,2);
+  int w;
+  int h;
+  int nb_args=lua_gettop(L);
   
-  if (w<1 || h<1)
-  {
-    return luaL_error(L, "SetBrushSize: Unreasonable arguments");
-  }
+  LUA_ARG_LIMIT (2, "setbrushsize");
+  LUA_ARG_NUMBER(1, "setbrushsize", w, 1, 10000);
+  LUA_ARG_NUMBER(2, "setbrushsize", h, 1, 10000);
+  
   if (Realloc_brush(w, h))
   {
-    return luaL_error(L, "SetBrushSize: Resize failed");
+    return luaL_error(L, "setbrushsize: Resize failed");
   }
   Brush_was_altered=1;
   // Fill with Back_color
@@ -112,10 +158,16 @@ int L_GetBrushTransparentColor(lua_State* L)
 
 int L_PutBrushPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
-  uint8_t c = lua_tonumber(L,3);
+  int x;
+  int y;
+  uint8_t c;
+  int nb_args=lua_gettop(L);
   
+  LUA_ARG_LIMIT (3, "putbrushpixel");
+  LUA_ARG_NUMBER(1, "putbrushpixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "putbrushpixel", y, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "putbrushpixel", c, INT_MIN, INT_MAX);
+
   Brush_was_altered=1;
   
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
@@ -129,9 +181,15 @@ int L_PutBrushPixel(lua_State* L)
 
 int L_GetBrushPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
   uint8_t c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getbrushpixel");
+  LUA_ARG_NUMBER(1, "getbrushpixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getbrushpixel", y, INT_MIN, INT_MAX);
+
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
   {
     c = Back_color; // Return 'transparent'
@@ -146,9 +204,15 @@ int L_GetBrushPixel(lua_State* L)
 
 int L_GetBrushBackupPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
   uint8_t c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getbrushbackuppixel");
+  LUA_ARG_NUMBER(1, "getbrushbackuppixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getbrushbackuppixel", y, INT_MIN, INT_MAX);
+  
   if (x<0 || y<0 || x>=Brush_backup_width || y>=Brush_backup_height)
   {
     c = Back_color; // Return 'transparent'
@@ -163,11 +227,14 @@ int L_GetBrushBackupPixel(lua_State* L)
 
 int L_SetPictureSize(lua_State* L)
 {
-  int w = lua_tonumber(L,1);
-  int h = lua_tonumber(L,2);
   
-  if (w<1 || h<1 || w>9999 || h>9999)
-    return luaL_error(L, "SetPictureSize: Unreasonable dimensions");
+  int w;
+  int h;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "setpicturesize");
+  LUA_ARG_NUMBER(1, "setpicturesize", w, 1, 9999);
+  LUA_ARG_NUMBER(2, "setpicturesize", h, 1, 9999);
     
   Resize_image(w, h); // TODO: a return value to catch runtime errors
   return 0;
@@ -175,16 +242,22 @@ int L_SetPictureSize(lua_State* L)
 
 int L_GetPictureSize(lua_State* L)
 {
-  lua_pushinteger(L, Main_image_width); 
-  lua_pushinteger(L, Main_image_height);  
+  lua_pushinteger(L, Main_image_width);
+  lua_pushinteger(L, Main_image_height);
   return 2;
 }
 
 int L_PutPicturePixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
-  int c = lua_tonumber(L,3);
+  int x;
+  int y;
+  int c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (3, "putpicturepixel");
+  LUA_ARG_NUMBER(1, "putpicturepixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "putpicturepixel", y, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "putpicturepixel", c, INT_MIN, INT_MAX);
   
   // Bound check
   if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
@@ -198,8 +271,14 @@ int L_PutPicturePixel(lua_State* L)
 
 int L_GetPicturePixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getpicturepixel");
+  LUA_ARG_NUMBER(1, "getpicturepixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getpicturepixel", y, INT_MIN, INT_MAX);
+  
   // Bound check
   if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
   {
@@ -213,8 +292,14 @@ int L_GetPicturePixel(lua_State* L)
 
 int L_GetBackupPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getbackuppixel");
+  LUA_ARG_NUMBER(1, "getbackuppixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getbackuppixel", y, INT_MIN, INT_MAX);
+  
   // Bound check
   if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
   {
@@ -228,8 +313,14 @@ int L_GetBackupPixel(lua_State* L)
 
 int L_GetLayerPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getlayerpixel");
+  LUA_ARG_NUMBER(1, "getlayerpixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getlayerpixel", y, INT_MIN, INT_MAX);
+  
   // Bound check
   if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
   {
@@ -252,8 +343,14 @@ int L_GetSparePictureSize(lua_State* L)
 
 int L_GetSpareLayerPixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getsparelayerpixel");
+  LUA_ARG_NUMBER(1, "getsparelayerpixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getsparelayerpixel", y, INT_MIN, INT_MAX);
+  
   // Bound check
   if (x<0 || y<0 || x>=Spare_image_width || y>=Spare_image_height)
   {
@@ -267,8 +364,14 @@ int L_GetSpareLayerPixel(lua_State* L)
 
 int L_GetSparePicturePixel(lua_State* L)
 {
-  int x = lua_tonumber(L,1);
-  int y = lua_tonumber(L,2);
+  int x;
+  int y;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (2, "getsparepicturepixel");
+  LUA_ARG_NUMBER(1, "getsparepicturepixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "getsparepicturepixel", y, INT_MIN, INT_MAX);
+  
   // Some bound checking is done by the function itself, here's the rest.
   if (x<0 || y<0)
   {
@@ -282,7 +385,11 @@ int L_GetSparePicturePixel(lua_State* L)
 
 int L_GetSpareColor(lua_State* L)
 {
-  byte c=lua_tonumber(L,1);
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "getsparecolor");
+  LUA_ARG_NUMBER(1, "getsparecolor", c, INT_MIN, INT_MAX);
 
   lua_pushinteger(L, Spare_palette[c].R);
   lua_pushinteger(L, Spare_palette[c].G);
@@ -300,15 +407,20 @@ int L_GetSpareTransColor(lua_State* L)
 
 int L_SetColor(lua_State* L)
 {
-  byte c=lua_tonumber(L,1);
-
-  byte r=clamp_byte((double)lua_tonumber(L,2));
-  byte g=clamp_byte((double)lua_tonumber(L,3));
-  byte b=clamp_byte((double)lua_tonumber(L,4));
+  byte c;
+  double r, g, b;
+  int nb_args=lua_gettop(L);
     
-  Main_palette[c].R=Round_palette_component(r);
-  Main_palette[c].G=Round_palette_component(g);
-  Main_palette[c].B=Round_palette_component(b);
+  LUA_ARG_LIMIT (4, "setcolor");
+  LUA_ARG_NUMBER(1, "setcolor", c, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "setcolor", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "setcolor", g, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "setcolor", b, INT_MIN, INT_MAX);
+  
+    
+  Main_palette[c].R=Round_palette_component(clamp_byte(r));
+  Main_palette[c].G=Round_palette_component(clamp_byte(g));
+  Main_palette[c].B=Round_palette_component(clamp_byte(b));
   // Set_color(c, r, g, b); Not needed. Update screen when script is finished
   Palette_has_changed=1;
   return 0;
@@ -316,7 +428,11 @@ int L_SetColor(lua_State* L)
 
 int L_GetColor(lua_State* L)
 {
-  byte c=lua_tonumber(L,1);
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "getcolor");
+  LUA_ARG_NUMBER(1, "getcolor", c, INT_MIN, INT_MAX);
 
   lua_pushinteger(L, Main_palette[c].R);
   lua_pushinteger(L, Main_palette[c].G);
@@ -326,7 +442,11 @@ int L_GetColor(lua_State* L)
 
 int L_GetBackupColor(lua_State* L)
 {
-  byte c=lua_tonumber(L,1);
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "getbackupcolor");
+  LUA_ARG_NUMBER(1, "getbackupcolor", c, INT_MIN, INT_MAX);
 
   lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].R);
   lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].G);
@@ -336,11 +456,16 @@ int L_GetBackupColor(lua_State* L)
 
 int L_MatchColor(lua_State* L)
 {
-  byte r=clamp_byte(lua_tonumber(L,1));
-  byte g=clamp_byte(lua_tonumber(L,2));
-  byte b=clamp_byte(lua_tonumber(L,3));
+  double r, g, b;
+  int c;
+  int nb_args=lua_gettop(L);
 
-  int c = Best_color_nonexcluded(r,g,b);
+  LUA_ARG_LIMIT (3, "matchcolor");
+  LUA_ARG_NUMBER(1, "matchcolor", r, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(2, "matchcolor", g, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(3, "matchcolor", b, -DBL_MAX, DBL_MAX);
+  
+  c = Best_color_nonexcluded(clamp_byte(r),clamp_byte(g),clamp_byte(b));
   lua_pushinteger(L, c);
   return 1;
 }
@@ -398,42 +523,43 @@ int L_InputBox(lua_State* L)
   
   nb_args = lua_gettop (L);
   
+  
   if (nb_args < 6)
   {
-    return luaL_error(L, "InputBox: Less than 6 arguments");
+    return luaL_error(L, "inputbox: Less than 6 arguments");
   }
   if ((nb_args - 1) % args_per_setting)
   {
-    return luaL_error(L, "InputBox: Wrong number of arguments");
+    return luaL_error(L, "inputbox: Wrong number of arguments");
   }
   nb_settings = (nb_args-1)/args_per_setting;
   if (nb_settings > max_settings)
   {
-    return luaL_error(L, "InputBox: Too many settings, limit reached");
+    return luaL_error(L, "inputbox: Too many settings, limit reached");
   }
   
   max_label_length=4; // Minimum size to account for OK / Cancel buttons
   
   // First argument is window caption
-  window_caption = lua_tostring(L,1);
+  LUA_ARG_STRING(1, "inputbox", window_caption);
   caption_length = strlen(window_caption);
   if ( caption_length > 14)
     max_label_length = caption_length - 10;
   
   for (setting=0; setting<nb_settings; setting++)
   {
-    label[setting] = lua_tostring(L,setting*args_per_setting+2);
+    LUA_ARG_STRING(setting*args_per_setting+2, "inputbox", label[setting]);
     if (strlen(label[setting]) > max_label_length)
       max_label_length = strlen(label[setting]);
-      
-    current_value[setting] = lua_tonumber(L,setting*args_per_setting+3);
-    min_value[setting] = lua_tonumber(L,setting*args_per_setting+4);
+    
+    LUA_ARG_NUMBER(setting*args_per_setting+3, "inputbox", current_value[setting], -DBL_MAX, DBL_MAX);
+    LUA_ARG_NUMBER(setting*args_per_setting+4, "inputbox", min_value[setting], -DBL_MAX, DBL_MAX);
     /*if (min_value[setting] < -999999999999999.0)
       min_value[setting] = -999999999999999.0;*/
-    max_value[setting] = lua_tonumber(L,setting*args_per_setting+5);
+    LUA_ARG_NUMBER(setting*args_per_setting+5, "inputbox", max_value[setting], -DBL_MAX, DBL_MAX);
     /*if (max_value[setting] > 999999999999999.0)
       max_value[setting] = 999999999999999.0;*/
-    decimal_places[setting] = lua_tonumber(L,setting*args_per_setting+6);
+    LUA_ARG_NUMBER(setting*args_per_setting+6, "inputbox", decimal_places[setting], INT_MIN, INT_MAX);
     if (decimal_places[setting]>15)
         decimal_places[setting]=15;
     // Keep current value in range
@@ -588,23 +714,23 @@ int L_InputBox(lua_State* L)
 
 int L_MessageBox(lua_State* L)
 {
-  int nb_args = lua_gettop (L);
   const char * caption;
   const char * message;
+  int nb_args = lua_gettop (L);
   
   if (nb_args == 1)
   {
     caption = "Script message";
-    message = lua_tostring(L,1);
+    LUA_ARG_STRING(1, "messagebox", message);
   }
   else if (nb_args == 2)
   {
-    caption = lua_tostring(L,1);
-    message = lua_tostring(L,2);
+    LUA_ARG_STRING(1, "messagebox", caption);
+    LUA_ARG_STRING(2, "messagebox", message);
   }
   else
   {
-    return luaL_error(L, "MessageBox: Needs one or two arguments.");
+    return luaL_error(L, "messagebox: Needs one or two arguments.");
   }
 
   Verbose_message(caption, message);
@@ -884,8 +1010,9 @@ void Button_Brush_Factory(void)
     
       if (luaL_loadfile(L,scriptdir) != 0)
       {
-        message = lua_tostring(L, 1);
-        if(message)
+        int stack_size;
+        stack_size= lua_gettop(L);
+        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
           Verbose_message("Error!", message);
         else
           Warning_message("Unknown error loading script!");
