@@ -247,6 +247,23 @@ int L_GetPictureSize(lua_State* L)
   return 2;
 }
 
+int L_ClearPicture(lua_State* L)
+{
+  int c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "clearpicture");
+  LUA_ARG_NUMBER(1, "clearpicture", c, INT_MIN, INT_MAX);
+  
+  if (Stencil_mode && Config.Clear_with_stencil)
+    Clear_current_image_with_stencil(c,Stencil);
+  else
+    Clear_current_image(c);
+  Redraw_layered_image();
+  
+  return 0; // no values returned for lua
+}
+
 int L_PutPicturePixel(lua_State* L)
 {
   int x;
@@ -971,6 +988,7 @@ void Button_Brush_Factory(void)
     lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
     lua_register(L,"getsparecolor",L_GetSpareColor);
     lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+    lua_register(L,"clearpicture",L_ClearPicture);
     
 
     // For debug only
