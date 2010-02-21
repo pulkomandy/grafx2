@@ -361,9 +361,9 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 
 	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini scripts/test.lua $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
+	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini scripts/bru_*.lua scripts/pal_*.lua scripts/pic_*.lua scripts/scn_*.lua $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
 	$(DELCOMMAND) "src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini scripts/test.lua $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/unix/grafx2.1 misc/unix/grafx2.xpm misc/unix/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini scripts/bru_*.lua scripts/pal_*.lua scripts/pic_*.lua scripts/scn_*.lua $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/unix/grafx2.1 misc/unix/grafx2.xpm misc/unix/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
