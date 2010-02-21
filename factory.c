@@ -488,9 +488,6 @@ int L_GetTransColor(lua_State* L)
   return 1;
 }
 
-
-
-
 int L_InputBox(lua_State* L)
 {
   const int max_settings = 9;
@@ -574,7 +571,6 @@ int L_InputBox(lua_State* L)
   if (max_label_length>25)
     max_label_length=25;
 
-  Hide_cursor();
   Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
   // OK
@@ -603,7 +599,7 @@ int L_InputBox(lua_State* L)
       // Numeric input field
       Window_set_input_button(12+max_label_length*8+21, 20+setting*17,7);
       // Print editable value
-      Dec2str(current_value[setting],str,decimal_places[setting]);
+      Sprint_double(str,current_value[setting],decimal_places[setting],7);
       Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
       //
       control[Window_nb_buttons] = CONTROL_INPUT | setting;
@@ -636,7 +632,8 @@ int L_InputBox(lua_State* L)
           break;
           
         case CONTROL_INPUT:
-          Dec2str(current_value[setting],str,decimal_places[setting]);
+
+          Sprint_double(str,current_value[setting],decimal_places[setting],0);
           Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,3,decimal_places[setting]);
           current_value[setting]=atof(str);
 
@@ -644,9 +641,8 @@ int L_InputBox(lua_State* L)
             current_value[setting] = min_value[setting];
           else if (current_value[setting] > max_value[setting])
             current_value[setting] = max_value[setting];
-          Hide_cursor();
           // Print editable value
-          Dec2str(current_value[setting],str,decimal_places[setting]);
+          Sprint_double(str,current_value[setting],decimal_places[setting],7);
           Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
           //
           Display_cursor();
@@ -662,7 +658,7 @@ int L_InputBox(lua_State* L)
               
             Hide_cursor();
             // Print editable value
-            Dec2str(current_value[setting],str,decimal_places[setting]);
+            Sprint_double(str,current_value[setting],decimal_places[setting],7);
             Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
             //
             Display_cursor();
@@ -678,7 +674,7 @@ int L_InputBox(lua_State* L)
             
             Hide_cursor();
             // Print editable value
-            Dec2str(current_value[setting],str,decimal_places[setting]);
+            Sprint_double(str,current_value[setting],decimal_places[setting],7);
             Print_in_window_limited(12+max_label_length*8+23, 22+setting*17, str, 7,MC_Black,MC_Light);
             //
             Display_cursor();
@@ -695,7 +691,6 @@ int L_InputBox(lua_State* L)
     }
   }
   
-  Hide_cursor();
   Close_window();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();

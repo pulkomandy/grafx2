@@ -13,8 +13,8 @@ messagebox(
 
 
 ok, w, h = inputbox("Modify brush",
-  "Width",  w, -100.0,100.0, 0,
-  "Height", h, -200.0,100.0, 0,
+  "Width",  w, -900.0,900.0, 3,
+  "Height", h, -900.0,900.0, 4,
   "X Flip", 0, 0, 1,  0,
   "Y Flip", 0, 0, 1,  0
 );

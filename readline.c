@@ -152,7 +152,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   else if (input_type==1)
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
   else if (input_type==3)
-    sprintf(str,"%.*f",decimal_places, atof(str)); // On tasse la chaine à gauche
+  {
+    //  Nothing. The caller should have used Sprint_double, with min_positions
+    //  at zero, so there's no spaces on the left and no useless 0s on the right.
+  }
 
   Wait_end_of_click();
   Keyboard_click_allowed = 0;
@@ -169,7 +172,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   size=strlen(str);
   position=(size<max_size)? size:size-1;
-  if (position-offset>visible_size)
+  if (position-offset>=visible_size)
     offset=position-visible_size+1;
   // Formatage d'une partie de la chaine (si trop longue pour tenir)
   strncpy(display_string, str + offset, visible_size);
@@ -247,7 +250,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             if ((position<size) && (position<max_size-1))
             {
               position=(size<max_size)?size:size-1;
-              if (position-offset>visible_size)
+              if (position-offset>=visible_size)
                 offset=position-visible_size+1;
               goto affichage;
             }
@@ -359,35 +362,9 @@ affichage:
   else if (input_type==3)
   {
     double value;
-    int i;
-    unsigned int str_length;
-
-    value = atof(str);
-
-    // Remove extraneous decimal places:
-    // From number
-    value = Fround(value, decimal_places);
-
-    // From display
-    sprintf(str,"%.*f",decimal_places, atof(str));
-    // Remove extraneous zeroes
-    /*
-    for (i=0; i<size; i++)
-    {
-      if (str[i]=='.')
-      {
-        int j;
-        
-        for (j=0; i+j<size && j<decimal_places && str[i+j]!='.'; j++)
-        {
-          // advance
-        }
-        str[i+j]='\0';
-        size = i+j;
-        break; // end of process
-      }
-    }
-    */
+    // Discard extra digits
+    value = Fround(atof(str), decimal_places);
+    Sprint_double(str,value,decimal_places,visible_size);
     // Recompute updated size
     size = strlen(str);
     
@@ -404,4 +381,54 @@ affichage:
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
   return (input_key==SDLK_RETURN || Mouse_K != 0);
+}
+
+void Sprint_double(char *str, double value, byte decimal_places, byte min_positions)
+{
+  int i;
+  int length;
+  
+  sprintf(str,"%.*f",decimal_places, value);
+  length=strlen(str);
+
+  for (i=0; i<length; i++)
+  {
+    if (str[i]=='.')
+    {
+      // Remove extraneous zeroes
+      char * decimals = str+i+1;
+      int j;
+      
+      for (j=strlen(decimals)-1; j >= 0 && decimals[j]=='0'; j--)
+      {
+          decimals[j] = '\0';
+      }
+      // If all decimals were removed, remove the dot too
+      if (str[i+1]=='\0')
+        str[i]='\0';
+      
+      // Update string length
+      length=strlen(str);
+      
+      // Ends the parent loop
+      break; 
+    }
+  }
+  
+  // Now try add spaces at beginning
+  if (length<min_positions)
+  {
+    int offset = min_positions - length;
+    
+    // Move the string to the right
+    for (i=0; i<=length; i++)
+    {
+      str[length+offset-i] = str[length-i];
+    }
+    // Replace the N first characters by spaces
+    for (i=0; i<offset; i++)
+    {
+      str[i] = ' ';
+    }
+  }
 }

@@ -1,35 +1,13 @@
--- Picture scene: Amigaball
--- by Richard Fhager, code adopted
--- from Evalion
+--BRUSH Scene: Amigaball 1.0
+--by Richard Fhager 
+--http://hem.fyristorg.com/dawnbringer/
 
-w = 256
-h = 256
-
-setpicturesize(w,h)
+-- This script was adopted from Evalion, a Javascript codecrafting/imageprocessing project
+--http://goto.glocalnet.net/richard_fhager/evalion/evalion.html 
 
 
--- Set Amiga Palette
 
-colors = {}
-
-for c = 0, 63, 1 do
- colors[c+1] = {c*4,0,0}
-end
-
-for c = 0, 63, 1 do
- colors[c+65] = {255,c*4,c*4}
-end
-
-for c = 0, 63, 1 do
- colors[c+129] = {255-c*4,255-c*4,255-c*4}
-end
-
-for c = 1, #colors, 1 do
- setcolor(c-1,colors[c][1],colors[c][2],colors[c][3]) 
-end
-
-
--- Make Amiga ball
+w, h = getbrushsize()
 
 for y = 0, h - 1, 1 do
   for x = 0, w - 1, 1 do
@@ -58,9 +36,7 @@ for y = 0, h - 1, 1 do
    g = V + SPEC1 + SPEC2
    b = V + SPEC1 + SPEC2
 
-   c = matchcolor(r,g,b)
- 
-   putpicturepixel(x, y, c);
+   putbrushpixel(x, y, matchcolor(r,g,b));
 
   end
 end
