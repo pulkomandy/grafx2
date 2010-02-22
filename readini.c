@@ -877,6 +877,10 @@ int Load_INI(T_Config * conf)
         if(Video_mode[0].Width < 4*320 || Video_mode[0].Height < 4*200)
           Pixel_ratio = PIXEL_SIMPLE;
         break;
+      default:
+        // Convert back unknown values to PIXEL_SIMPLE
+        Pixel_ratio = PIXEL_SIMPLE;
+        break;
     }
   }
   
