@@ -811,8 +811,8 @@ int Init_program(int argc,char * argv[])
           Init_context_layered_image(&context, spare_filename, spare_directory);
           Load_image(&context);
           Destroy_context(&context);
-          End_of_modification();
           Redraw_layered_image();
+          End_of_modification();
   
           Button_Page();
           // no break ! proceed with the other file now
@@ -820,8 +820,8 @@ int Init_program(int argc,char * argv[])
           Init_context_layered_image(&context, main_filename, main_directory);
           Load_image(&context);
           Destroy_context(&context);
-          End_of_modification();
           Redraw_layered_image();
+          End_of_modification();
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);

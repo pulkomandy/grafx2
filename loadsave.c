@@ -1329,7 +1329,6 @@ int Check_recovery(void)
     Main_offset_Y=0;
     Compute_limits();
     Compute_paintbrush_coordinates();
-    Redraw_layered_image();
     if (Backups_main)
       Button_Page();
   }
@@ -1341,7 +1340,6 @@ int Check_recovery(void)
     Main_offset_Y=0;
     Compute_limits();
     Compute_paintbrush_coordinates();
-    Redraw_layered_image();
   }
   return restored_main + restored_spare;
 }

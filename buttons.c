@@ -653,8 +653,8 @@ void Button_Clear(void)
   else
     Clear_current_image(Main_backups->Pages->Transparent_color);
   Redraw_layered_image();
-  Display_all_screen();
   End_of_modification();
+  Display_all_screen();
   Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
@@ -668,8 +668,8 @@ void Button_Clear_with_backcolor(void)
   else
     Clear_current_image(Back_color);
   Redraw_layered_image();
-  Display_all_screen();
   End_of_modification();
+  Display_all_screen();
   Unselect_button(BUTTON_CLEAR);
   Display_cursor();
 }
@@ -2747,8 +2747,6 @@ void Load_picture(byte image)
     {
       if (image)
       {
-        End_of_modification();
-        
         if (Main_magnifier_mode)
         {
           Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
@@ -2791,6 +2789,7 @@ void Load_picture(byte image)
 
       Compute_optimal_menu_colors(Main_palette);
       Redraw_layered_image();
+      End_of_modification();
       Display_all_screen();
 
       if (image)
@@ -2851,8 +2850,6 @@ void Button_Reload(void)
 
     if (File_error!=1)
     {
-      End_of_modification();
-      
       if (Main_magnifier_mode)
       {
         Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
@@ -2893,6 +2890,7 @@ void Button_Reload(void)
         Compute_paintbrush_coordinates();
       }
       Redraw_layered_image();
+      End_of_modification();
       Display_all_screen();
 
       Main_image_is_modified=0;
