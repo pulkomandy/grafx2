@@ -46,25 +46,31 @@
 word Count_used_colors(dword* usage)
 {
   int nb_pixels = 0;
-  Uint8* current_pixel = Main_screen;
+  Uint8* current_pixel;
   Uint8 color;
   word nb_colors = 0;
   int i;
+  int layer;
 
   for (i = 0; i < 256; i++) usage[i]=0;
 
   // Compute total number of pixels in the picture
   nb_pixels = Main_image_height * Main_image_width;
 
-  // For each pixel in picture
-  for (i = 0; i < nb_pixels; i++)
+  // For each layer
+  for (layer = 0; layer < Main_backups->Pages->Nb_layers; layer++)
   {
-    color=*current_pixel; // get color in picture for this pixel
-
-    usage[color]++; // add it to the counter
-
-    // go to next pixel
-    current_pixel++;
+    current_pixel = Main_backups->Pages->Image[layer];
+    // For each pixel in picture
+    for (i = 0; i < nb_pixels; i++)
+    {
+      color=*current_pixel; // get color in picture for this pixel
+  
+      usage[color]++; // add it to the counter
+  
+      // go to next pixel
+      current_pixel++;
+    }
   }
 
   // count the total number of unique used colors

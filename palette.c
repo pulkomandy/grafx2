@@ -1838,7 +1838,7 @@ void Button_Palette(void)
           Set_red(i,backup_palette[temp_color].R,working_palette);
           Set_green (i,backup_palette[temp_color].G,working_palette);
           Set_blue (i,backup_palette[temp_color].B,working_palette);
-          if (clicked_button==22)
+          if (clicked_button==21)
           {
             conversion_table[i]=temp_color;
             conversion_table[temp_color]=i;
@@ -1850,7 +1850,7 @@ void Button_Palette(void)
         }
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // Si on est en X-Invert, on remap l'image (=> on fait aussi 1 backup)
-        if (clicked_button==22)
+        if (clicked_button==21)
         {
           if (!image_is_backed_up)
           {
