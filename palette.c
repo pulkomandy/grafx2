@@ -1832,12 +1832,17 @@ void Button_Palette(void)
         for (i=0; i<=255; i++)
           conversion_table[i]=i;
         // Inversion
-        for (i=block_start;i<=block_end;i++)
+        for (i=block_start; i< block_start + (block_end-block_start)/2;i++)
         {
           temp_color=block_end-(i-block_start);
-          Set_red(i,backup_palette[temp_color].R,working_palette);
+          
+          Set_red   (i,backup_palette[temp_color].R,working_palette);
           Set_green (i,backup_palette[temp_color].G,working_palette);
-          Set_blue (i,backup_palette[temp_color].B,working_palette);
+          Set_blue  (i,backup_palette[temp_color].B,working_palette);
+          Set_red   (temp_color,backup_palette[i].R,working_palette);
+          Set_green (temp_color,backup_palette[i].G,working_palette);
+          Set_blue  (temp_color,backup_palette[i].B,working_palette);
+          
           if (clicked_button==21)
           {
             conversion_table[i]=temp_color;
