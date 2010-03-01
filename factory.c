@@ -959,6 +959,7 @@ void Button_Brush_Factory(void)
     Display_cursor();
     Flush_update();
     
+    chdir(scriptdir);
 
     L = lua_open();
 
