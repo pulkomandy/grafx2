@@ -110,7 +110,6 @@ void Set_red(byte color, short new_color, T_Palette palette)
   new_color=Round_palette_component(new_color);
 
   palette[color].R=new_color;
-  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
 
@@ -124,7 +123,6 @@ void Set_green(byte color, short new_color, T_Palette palette)
   new_color=Round_palette_component(new_color);
 
   palette[color].G=new_color;
-  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
 
@@ -138,7 +136,6 @@ void Set_blue(byte color, short new_color, T_Palette palette)
   new_color=Round_palette_component(new_color);
 
   palette[color].B=new_color;
-  Set_color(color,palette[color].R,palette[color].G,palette[color].B);
 }
 
 void Format_componant(byte value, char *str)
@@ -179,6 +176,7 @@ void Spread_colors(short start,short end,T_Palette palette)
       Set_green (index, ((end_green -start_green ) * (index-start))/(end-start) + start_green ,palette);
       Set_blue (index, ((end_blue -start_blue ) * (index-start))/(end-start) + start_blue ,palette);
     }
+    Set_palette(palette);
   }
 }
 
@@ -1099,7 +1097,7 @@ void Button_Palette(void)
         {
           if(Palette_view_is_RGB)
           {
-          for (i=block_start; i<=block_end; i++)
+            for (i=block_start; i<=block_end; i++)
               Set_red(i,temp_palette[i].R+(Color_max-red_slider->Position)*255/Color_max,working_palette);
           }
           else
