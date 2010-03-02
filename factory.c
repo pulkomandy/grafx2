@@ -49,6 +49,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 #include <float.h> // for DBL_MAX
+#include <unistd.h> // chdir()
 
 ///
 /// Number of characters for name in fileselector.
@@ -896,17 +897,18 @@ void Button_Brush_Factory(void)
   Sort_list_of_files(&Scripts_list);
 
   Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
-  Window_set_normal_button(10, 141, 67, 14, "Run", 0, 1, SDLK_RETURN); // 2
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   scriptlist = Window_set_list_button(
     // Fileselector
-    Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 3
+    Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 2
     // Scroller for the fileselector
     (scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
-      Scripts_list.Nb_elements,10, 0)), // 4
-    Draw_script_name); // 5
-    
+      Scripts_list.Nb_elements,10, 0)), // 3
+    Draw_script_name); // 4
+
+  Window_set_normal_button(10, 141, 67, 14, "Run", 0, Scripts_list.Nb_elements!=0, SDLK_RETURN); // 5
+
   Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
   
   // Update position
@@ -931,7 +933,7 @@ void Button_Brush_Factory(void)
 
     switch (clicked_button)
     {
-      case 5:
+      case 4:
         Hide_cursor();
         Draw_script_information(Get_item_by_index(&Scripts_list,
           scriptlist->List_start + scriptlist->Cursor_position));
@@ -943,12 +945,15 @@ void Button_Brush_Factory(void)
         break;
     }
     
-  } while (clicked_button <= 0 || clicked_button >= 3);
+  } while (clicked_button != 1 && clicked_button != 5);
 
-  strcpy(selected_script, Get_item_by_index(&Scripts_list,
-    scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
+  if (Scripts_list.Nb_elements == 0)
+    selected_script[0]='\0';
+  else
+    strcpy(selected_script, Get_item_by_index(&Scripts_list,
+      scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
             
-  if (clicked_button == 2) // Run the script
+  if (clicked_button == 5) // Run the script
   {
     lua_State* L;
     const char* message;
