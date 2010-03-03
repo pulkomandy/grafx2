@@ -393,7 +393,7 @@ endif
 
 $(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
-	$(CC) $(COPT) -c $*.c -o $(OBJDIR)/$*.o
+	$(CC) $(COPT) $(CFLAGS) -c $*.c -o $(OBJDIR)/$*.o
 
 $(OBJDIR)/%.o : %.m
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
