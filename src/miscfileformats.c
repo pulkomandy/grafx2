@@ -2079,8 +2079,8 @@ void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *colors)
     {
         for(cx=0; cx<40; cx++)
         {
-            c[1]=colors[cy*40+cx]&15;
-            c[0]=colors[cy*40+cx]>>4;
+            c[0]=colors[cy*40+cx]&15;
+            c[1]=colors[cy*40+cx]>>4;
             for(y=0; y<8; y++)
             {
                 pixel=bitmap[cy*320+cx*8+y];
@@ -2356,6 +2356,7 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
                 printf("\nerror at %dx%d (%d colors)\n",cx*8,cy*8,numcolors);
                 return 1;
             }
+            c1 = 0; c2 = 0;
             for(i=0;i<16;i++)
             {
                 if(cusage[i])
@@ -2364,8 +2365,8 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
                     break;
                 }
             }
-            c1=c2;
-            for(i=c2+1;i<16;i++)
+            c1=c2+1;
+            for(i=c2;i<16;i++)
             {
                 if(cusage[i])
                 {
@@ -2389,7 +2390,7 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
                         return 1;
                     }
                     bits=bits<<1;
-                    if (pixel==c1) bits|=1;
+                    if (pixel==c2) bits|=1;
                 }
                 bitmap[pos++]=bits;
                 //Write_byte(file,bits&255);
