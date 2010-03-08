@@ -1830,7 +1830,7 @@ void Button_Palette(void)
         for (i=0; i<=255; i++)
           conversion_table[i]=i;
         // Inversion
-        for (i=block_start; i< block_start + (block_end-block_start)/2;i++)
+        for (i=block_start; i < block_start + (block_end-block_start+1)/2;i++)
         {
           temp_color=block_end-(i-block_start);
           
