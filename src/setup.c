@@ -35,6 +35,9 @@
   #import <sys/param.h>
 #elif defined(__FreeBSD__)
   #import <sys/param.h>
+#elif defined(__linux__)
+  #include <limits.h>
+  #include <unistd.h>
 #endif
 
 #include "struct.h"
@@ -77,11 +80,20 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     strcpy(program_dir,"PROGDIR:");
 
+  // Linux: argv[0] unreliable
+  #elif defined(__linux__)
+  if (argv0[0]!='/')
+  {
+    char path[PATH_MAX];
+    readlink("/proc/self/exe", path, sizeof(path));
+    Extract_path(program_dir, path);
+    return;
+  }  
+  Extract_path(program_dir, argv0);
+  
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
-  // Note that on Unix, once installed, the executable is called from a shell
-  // script sitting in /usr/local/bin/, this allows argv[0] to contain the full
-  // path. On Windows, Mingw32 already provides the full path in all cases.
+  // On Windows, Mingw32 already provides the full path in all cases.
   #else
     Extract_path(program_dir, argv0);
   #endif
