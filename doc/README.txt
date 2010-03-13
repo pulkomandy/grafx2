@@ -6,7 +6,7 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2009 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
+Copyright (C)2007-2010 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 -------------------------------------
 
 === ABOUT ===
@@ -44,6 +44,7 @@ own licenses:
 - SDL_image: see doc/README-SDL_image.txt
 - SDL_ttf: see doc/README-SDL_ttf.txt
 - zlib: (on Windows) see doc/README-zlib1.txt
+- Lua: see doc/README-lua.txt
 The font Tuffy.ttf included as a sample in the fonts/ directory is public domain.
 
 The source code of Grafx2 should always be distributed along with the
@@ -76,6 +77,7 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * ??/2010  2.2       Layers, Lua scripting
   * 09/2009  2.1       GUI improvements and some new features.
   * 06/2009  2.0       Completed the features planned by Sunset Design.
   * 04/2009  2.0b99.0% Many new features and critical fixes.
