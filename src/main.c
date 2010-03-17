@@ -666,8 +666,6 @@ int Init_program(int argc,char * argv[])
     }
   }
   Set_current_skin(Config.Skin_file, gfx);
-  Fore_color=MC_White;
-  Back_color=MC_Black;
   // Override colors
   // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
   // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
@@ -688,6 +686,9 @@ int Init_program(int argc,char * argv[])
       }
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
+
+  Fore_color=Best_color_nonexcluded(255,255,255);
+  Back_color=Best_color_nonexcluded(0,0,0);
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
