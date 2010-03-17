@@ -430,6 +430,7 @@ install : $(BIN)
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
+	$(CP) ../share/icons/grafx2.svg $(DESTDIR)$(datadir)/icons/
 	@echo Install complete
   
 # Linux uninstallation of the program
@@ -445,6 +446,7 @@ uninstall :
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.xpm
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.svg
 	@echo Uninstall complete
 
 endif
