@@ -44,6 +44,11 @@
 #include "io.h"
 #include "setup.h"
 
+#if defined(__GP2X__)
+    // This is a random default value ...
+    #define PATH_MAX 32768
+#endif
+
 int Create_ConfigDirectory(char * config_dir)
 {
   #ifdef __WIN32__
