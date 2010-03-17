@@ -59,12 +59,12 @@ static const T_Help_table helptable_about[] =
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TITLE("        GRAFX 2   ")
-  HELP_BOLD ("           \"Summer Sunset\" Edition")
+  HELP_BOLD ("         \"Dragon's Layers\" Edition")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
   HELP_TEXT ("       http://grafx2.googlecode.com")
   HELP_TEXT ("")
-  HELP_TEXT ("  Copyright 2007 by the Grafx2 project team")
-  HELP_TEXT ("    Copyright 1996-2001 by SUNSET DESIGN")
+  HELP_TEXT ("Copyright 2007-2010, the Grafx2 project team")
+  HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
 };
 static const T_Help_table helptable_licence[] =
 {

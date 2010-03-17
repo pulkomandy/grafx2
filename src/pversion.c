@@ -1,2 +1,2 @@
-char Program_version[]="2.2wip";
+char Program_version[]="2.2";
 
