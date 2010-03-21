@@ -2,18 +2,18 @@
 --by Richard Fhager 
 --http://hem.fyristorg.com/dawnbringer/
 
+-- Copyright 2010 Richard Fhager
+--
+-- This program is free software; you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation; version 2
+-- of the License. See <http://www.gnu.org/licenses/>
+
 -- This script was adopted from Evalion, a Javascript codecrafting/imageprocessing project
 -- http://goto.glocalnet.net/richard_fhager/evalion/evalion.html 
 
 
 --Shift_degrees = 45
-
---ok, w, h, xflip, yflip = inputbox("Modify brush",
---  "Width",  w, 1,100,0,
---  "Height", h, 1,100,0,
---  "X-Flip", 0, 0, 1,0,
---  "Y-Flip", 0, 0, 1,0
---);
 
 OK,Shift_degrees = inputbox("Shift Hue v0.9","Degrees", 45, 0,360,3);
 

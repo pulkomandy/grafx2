@@ -999,9 +999,15 @@ void Button_Brush_Factory(void)
 
     // For debug only
     // luaL_openlibs(L);
-
+    
     luaopen_base(L);
+    //luaopen_package(L); // crashes on Windows, for unknown reason
+    luaopen_table(L);
+    //luaopen_io(L); // crashes on Windows, for unknown reason
+    //luaopen_os(L);
+    //luaopen_string(L);
     luaopen_math(L);
+    //luaopen_debug(L);
 
     strcat(scriptdir, selected_script);
 
