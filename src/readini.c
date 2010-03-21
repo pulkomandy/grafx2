@@ -828,7 +828,7 @@ int Load_INI(T_Config * conf)
     conf->Skin_file = strdup(value_label);
   }
   else
-    conf->Skin_file = strdup("skin_modern.png");
+    conf->Skin_file = strdup("skin_DPaint.png");
 
   // Optional, name of font file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Font_file",value_label,1))
