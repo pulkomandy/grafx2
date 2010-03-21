@@ -1,5 +1,5 @@
 -- Test LUA inputbox
---  this script only resizes the brush
+--  this script tests the inputbox
 
 w, h = getbrushsize()
 --[[
@@ -16,16 +16,18 @@ ok, w, h = inputbox("Modify brush",
   "Width",  w, -900.0,900.0, 3,
   "Height", h, -900.0,900.0, 4,
   "X Flip", 0, 0, 1,  0,
-  "Y Flip", 0, 0, 1,  0
+  "Y Flip", 0, 0, 1,  0,
+  "RGB",    1, 0, 1,  -1,
+  "HSV",    0, 0, 1,  -1,
+  "HSL",    0, 0, 1,  -1,
+  "Degrees",1, 0, 1,  -2,
+  "Radians",0, 0, 1,  -2  
 );
 if ok == true then
-  setbrushsize(w,h)
-  for y = 0, h-1, 1 do
-    for x = 0, w-1, 1 do
-      putbrushpixel(x,y,1);
-    end
-  end
+  messagebox(
+    "w: " .. w .. "\n" ..
+    "h: " .. h .. "\n"
+  )
 end
-
 
 
