@@ -658,7 +658,7 @@ int Init_program(int argc,char * argv[])
   gfx = Load_graphics(Config.Skin_file);
   if (gfx == NULL)
   {
-    gfx = Load_graphics("skin_modern.png");
+    gfx = Load_graphics("skin_DPaint.png");
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -679,7 +679,7 @@ int Init_program(int argc,char * argv[])
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font("font_Classic.png")))
+    if (!(Menu_font=Load_font("font_DPaint.png")))
       {
         printf("Unable to open the default font file: %s\n", "font_Classic.png");
         Error(ERROR_GUI_MISSING);
