@@ -3375,7 +3375,15 @@ void Load_PNG(T_IO_Context * context)
                   {
                     // Map low bpp greyscales to full 8bit (0-255 range)
                     if (bit_depth < 8)
-                      png_set_gray_1_2_4_to_8(png_ptr);
+                    {
+                      #if (PNG_LIBPNG_VER_MAJOR <= 1) && (PNG_LIBPNG_VER_MINOR < 4)
+                        // Works well with png 1.2.8, but deprecated in 1.4 ...
+                        png_set_gray_1_2_4_to_8(png_ptr);
+                      #else
+                        // ...where this seems to replace it:
+                        png_set_expand_gray_1_2_4_to_8(png_ptr);
+                      #endif
+                    }
                     
                     // Create greyscale palette
                     for (x=0;x<256;x++)
