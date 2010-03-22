@@ -333,7 +333,9 @@ endif
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o 
 
-SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png
+SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png
+
+SCRIPT_FILES = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scripts/bru_db_ColorSphere.lua ../share/grafx2/scripts/bru_db_FindAA.lua ../share/grafx2/scripts/bru_db_Fisheye.lua ../share/grafx2/scripts/bru_db_GrayscaleAvg.lua ../share/grafx2/scripts/bru_db_GrayscaleDesat.lua ../share/grafx2/scripts/bru_db_Halfsmooth.lua ../share/grafx2/scripts/bru_db_Mandelbrot.lua ../share/grafx2/scripts/bru_db_Waves.lua ../share/grafx2/scripts/pal_db_Desaturate.lua ../share/grafx2/scripts/pal_db_ExpandColors.lua ../share/grafx2/scripts/pal_db_FillColorCube.lua ../share/grafx2/scripts/pal_db_InvertedRGB.lua ../share/grafx2/scripts/pal_db_Set3bit.lua ../share/grafx2/scripts/pal_db_Set6bit.lua ../share/grafx2/scripts/pal_db_SetC64Palette.lua ../share/grafx2/scripts/pal_db_ShiftHue.lua ../share/grafx2/scripts/pic_db_Pic2isometric.lua ../share/grafx2/scripts/pic_db_Rainbow-Dark2Bright.lua ../share/grafx2/scripts/pic_db_SierpinskyCarpet.lua ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_Colorspace12bit.lua ../share/grafx2/scripts/pic_ni_Colorspace15bit.lua ../share/grafx2/scripts/pic_ni_Colorspace18bit.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/pic_ni_Grid8.lua ../share/grafx2/scripts/pic_ni_Grid8red.lua ../share/grafx2/scripts/pic_ni_GridIso.lua ../share/grafx2/scripts/pic_ni_PaletteX1.lua ../share/grafx2/scripts/pic_ni_PaletteX8.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
@@ -366,9 +368,9 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 
 	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico 
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini share/grafx2/scripts/bru_*.lua share/grafx2/scripts/pal_*.lua share/grafx2/scripts/pic_*.lua share/grafx2/scripts/scn_*.lua $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt share/grafx2/fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt share/grafx2/fonts/Tuffy.ttf src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt share/grafx2/fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt share/grafx2/fonts/Tuffy.ttf src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini ../share/grafx2/scripts/bru_*.lua ../share/grafx2/scripts/pal_*.lua ../share/grafx2/scripts/pic_*.lua ../share/grafx2/scripts/scn_*.lua $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf
+	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
@@ -424,6 +426,7 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2
 	test -d $(DESTDIR)$(datadir)/grafx2/fonts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/fonts
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(datadir)/icons || $(MKDIR) $(DESTDIR)$(datadir)/icons
 	# Copy files
@@ -432,6 +435,7 @@ install : $(BIN)
 	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
+	$(CP) $(SCRIPT_FILES) $(DESTDIR)$(datadir)/grafx2/scripts/
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
@@ -445,8 +449,10 @@ uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
-	cd $(DESTDIR)$(datadir) && $(DELCOMMAND) $(SKIN_FILES)
+	$(DELCOMMAND) $(SKIN_FILES:../share%=$(DESTDIR)$(datadir)%)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
+	$(DELCOMMAND) $(SCRIPT_FILES:../share%=$(DESTDIR)$(datadir)%)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop

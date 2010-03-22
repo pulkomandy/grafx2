@@ -45,7 +45,7 @@ own licenses:
 - SDL_ttf: see doc/README-SDL_ttf.txt
 - zlib: (on Windows) see doc/README-zlib1.txt
 - Lua: see doc/README-lua.txt
-The font Tuffy.ttf included as a sample in the fonts/ directory is public domain.
+The font Tuffy.ttf included as a sample in the fonts directory is public domain.
 
 The source code of Grafx2 should always be distributed along with the
 executable; You can normally find it in a packed archive whose name begins by
@@ -77,7 +77,7 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
-  * ??/2010  2.2       Layers, Lua scripting
+  * 03/2010  2.2       Layers, Lua scripting
   * 09/2009  2.1       GUI improvements and some new features.
   * 06/2009  2.0       Completed the features planned by Sunset Design.
   * 04/2009  2.0b99.0% Many new features and critical fixes.
