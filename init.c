@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Peter Gordon
@@ -20,16 +22,21 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#define _XOPEN_SOURCE 500
+
 // Signal handler: I activate it for the two platforms who certainly
 // support them. Feel free to check with others.
 #if defined(__WIN32__) || defined(__linux__)
   #define GRAFX2_CATCHES_SIGNALS
 #endif
-#include <fcntl.h>
 #include <stdio.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
+
+#ifndef __VBCC__
+    #include <unistd.h>
+#endif
+
 #include <stdlib.h>
 #include <errno.h>
 #include <SDL_byteorder.h>
@@ -45,26 +52,28 @@
   #include <signal.h>
 #endif
 
+#include "buttons.h"
 #include "const.h"
-#include "struct.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "buttons.h"
-#include "palette.h"
-#include "help.h"
-#include "operatio.h"
-#include "misc.h"
-#include "errors.h"
-#include "keyboard.h"
-#include "io.h"
-#include "hotkeys.h"
-#include "setup.h"
-#include "windows.h"
-#include "sdlscreen.h"
-#include "mountlist.h" // read_file_system_list
-#include "loadsave.h" // Image_emergency_backup
 #include "init.h"
+#include "io.h"
+#include "factory.h"
+#include "help.h"
+#include "hotkeys.h"
+#include "keyboard.h"
+#include "loadsave.h" // Image_emergency_backup
+#include "misc.h"
+#include "mountlist.h" // read_file_system_list
+#include "operatio.h"
+#include "palette.h"
+#include "sdlscreen.h"
+#include "setup.h"
+#include "struct.h"
 #include "transform.h"
+#include "windows.h"
+#include "layers.h"
 
 char Gui_loading_error_message[512];
 
@@ -119,11 +128,11 @@ byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
   return 1;
 }
 
-byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
+byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
-  // type: 2 = brush icon or sieve pattern (only MC_White and MC_Trans)
+  // type: 2 = brush icon or sieve pattern (only gui->Color_white and gui->Color_trans)
   // type: 3 = raw bitmap (splash screen)
   
   byte * dest_ptr=dest;
@@ -143,28 +152,28 @@ byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
     for (x=start_x; x<start_x+width; x++)
     {
       color=Get_SDL_pixel_8(gui,x,y);
-      if (type==0 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White))
+      if (type==0 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white);
         return 1;
       }
-      if (type==1 && (color != MC_Black && color != MC_Dark && color != MC_Light && color != MC_White && color != MC_Trans))
+      if (type==1 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white && color != gfx->Color_trans))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, MC_Black, MC_Dark, MC_Light, MC_White, MC_Trans);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white, gfx->Color_trans);
         return 1;
       }
       if (type==2)
       {
-        if (color != MC_White && color != MC_Trans)
+        if (color != gfx->Color_white && color != gfx->Color_trans)
         {
           sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            start_x, start_y, height, width, section, x, y, color, MC_White, MC_Trans);
+            start_x, start_y, height, width, section, x, y, color, gfx->Color_white, gfx->Color_trans);
           return 1;
         }
         // Conversion en 0/1 pour les brosses monochromes internes
-        color = (color != MC_Trans);
+        color = (color != gfx->Color_trans);
       }
       *dest_ptr=color;
       dest_ptr++;
@@ -173,12 +182,12 @@ byte Read_GUI_block(SDL_Surface *gui, int start_x, int start_y, void *dest, int 
   return 0;
 }
 
-byte Read_GUI_pattern(SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
+byte Read_GUI_pattern(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
   byte buffer[256];
   int x,y;
   
-  if (Read_GUI_block(gui, start_x, start_y, buffer, 16, 16, section, 2))
+  if (Read_GUI_block(gfx, gui, start_x, start_y, buffer, 16, 16, section, 2))
     return 1;
 
   for (y=0; y<16; y++)
@@ -205,7 +214,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
   {
     for (y=0;y<29;y++)
     {
-      if (cursor_buffer[y*29+start_x]!=MC_Trans)
+      if (cursor_buffer[y*29+start_x]!=gfx->Color_trans)
       {
         found=1;
         break;
@@ -220,7 +229,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
   {
     for (x=0;x<29;x++)
     {
-      if (cursor_buffer[start_y*29+x]!=MC_Trans)
+      if (cursor_buffer[start_y*29+x]!=gfx->Color_trans)
       {
         found=1;
         break;
@@ -240,7 +249,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
 byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int  index;
-  int i;
+  int i,j;
   int cursor_x=0,cursor_y=0;
   byte color;
   byte neutral_color; // color neutre utilisée pour délimiter les éléments GUI
@@ -264,15 +273,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   }
   // Read the default palette
-  for (i=0; i<256; i++)
-  {
-    gfx->Default_palette[i].R=SDLPal->colors[i].r;
-    gfx->Default_palette[i].G=SDLPal->colors[i].g;
-    gfx->Default_palette[i].B=SDLPal->colors[i].b;
-  }
+  Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Carré "noir"
-  MC_Black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  gfx->Color_black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
@@ -281,9 +285,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Black);
+  } while(color==gfx->Color_black);
   // Carré "foncé"
-  MC_Dark=color;
+  gfx->Color_dark = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -292,9 +296,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Dark);
+  } while(color==gfx->Color_dark);
   // Carré "clair"
-  MC_Light=color;
+  gfx->Color_light = color;
   do
   {
     if (++cursor_x>gui->w)
@@ -303,9 +307,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Light);
+  } while(color==gfx->Color_light);
   // Carré "blanc"
-  MC_White=color;
+  gfx->Color_white = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -314,9 +318,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_White);
+  } while(color==gfx->Color_white);
   // Carré "transparent"
-  MC_Trans=color;
+  gfx->Color_trans=color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -325,14 +329,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==MC_Trans);
+  } while(color==gfx->Color_trans);
   // Reste : couleur neutre
   neutral_color=color;
 
   
   cursor_x=0;
   cursor_y=1;
-  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==MC_Black)
+  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==gfx->Color_black)
   {
     cursor_y++;
     if (cursor_y>=gui->h)
@@ -345,11 +349,33 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_block, MENU_WIDTH, MENU_HEIGHT,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
-  cursor_y+=MENU_HEIGHT;
 
-  // Effets
+  // Preview
+  cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
+
+  // Layerbar
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
+
+  // Status bar
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
+
+
+  // Effects
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
   {
     if (i==0)
@@ -362,13 +388,36 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Curseurs souris
+  // Layer sprite
+  for (j=0; j<3; j++)
+  {
+    for (i=0; i<16; i++)
+    {
+      if (i==0)
+      {
+        if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer sprite"))
+          return 1;
+      }
+      else
+      {
+        if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "layer sprite"))
+          return 1;
+      }
+      if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layer_sprite[j][i], LAYER_SPRITE_WIDTH, LAYER_SPRITE_HEIGHT, "layer sprite",1))
+        return 1;
+      cursor_x+=LAYER_SPRITE_WIDTH;
+    }
+    cursor_y+=LAYER_SPRITE_HEIGHT;
+  }
+
+  
+  // Mouse cursors
   for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
     if (i==0)
@@ -381,14 +430,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
       return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
   cursor_y+=29;
 
-  // Sprites menu
+  // Menu sprites
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
     if (i==0)
@@ -401,16 +450,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Icones des Pinceaux
+  // Paintbrushes
   for (i=0; i<NB_PAINTBRUSH_SPRITES; i++)
   {
-    // Rangés par ligne de 12
+    // Each line holds 12
     if ((i%12)==0)
     {
       if (i!=0)
@@ -423,13 +472,13 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
       return 1;
     cursor_x+=PAINTBRUSH_WIDTH;
   }
   cursor_y+=PAINTBRUSH_HEIGHT;
 
-  // Sprites drive
+  // Drive sprites
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
     if (i==0)
@@ -442,7 +491,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
       return 1;
     cursor_x+=ICON_SPRITE_WIDTH;
   }
@@ -452,7 +501,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
     return 1;
-  if (Read_GUI_block(gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
     return 1;
   cursor_y+=56;
   
@@ -469,16 +518,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sieve pattern"))
         return 1;
     }
-    if (Read_GUI_pattern(gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
+    if (Read_GUI_pattern(gfx, gui, cursor_x, cursor_y, gfx->Sieve_pattern[i],"sieve pattern"))
       return 1;
     cursor_x+=16;
   }
   cursor_y+=16;
 
-  // Font help normale
+  // Help font: Normal
   for (i=0; i<256; i++)
   {
-    // Rangés par ligne de 32
+    // Each line holds 32 symbols
     if ((i%32)==0)
     {
       if (i!=0)
@@ -491,16 +540,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
       return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
   
-  // Font help bold
+  // Help font: Bold
   for (i=0; i<256; i++)
   {
-    // Rangés par ligne de 32
+    // Each line holds 32 symbols
     if ((i%32)==0)
     {
       if (i!=0)
@@ -513,17 +562,17 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)"))
         return 1;
     }
-    if (Read_GUI_block(gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
       return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
 
-  // Font help titre
+  // Help font: Title
   for (i=0; i<256; i++)
   {
     byte * dest;
-    // Rangés par ligne de 64
+    // Each line holds 64 symbols
     if ((i%64)==0)
     {
       if (i!=0)
@@ -548,15 +597,12 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       else
         dest=&(gfx->Help_font_t1[char_1++][0][0]);
     
-    if (Read_GUI_block(gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
       return 1;
     cursor_x+=6;
   }
   cursor_y+=8;
   
-  Current_help_section=0;
-  Help_position=0;
-
   gfx->Preset_paintbrush_width [ 0]= 1;
   gfx->Preset_paintbrush_height[ 0]= 1;
   gfx->Paintbrush_type         [ 0]=PAINTBRUSH_SHAPE_SQUARE;
@@ -775,17 +821,19 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   strcat(filename,"skins" PATH_SEPARATOR);
   strcat(filename,skin_file);
   
-  gui=IMG_Load(filename);
+  gui=Load_surface(filename);
   if (!gui)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
     free(gfx);
+    gfx = NULL;
     return NULL;
   }
   if (Parse_skin(gui, gfx))
   {
     SDL_FreeSurface(gui);
     free(gfx);
+    gfx = NULL;
     return NULL;
   }
   SDL_FreeSurface(gui);
@@ -851,7 +899,7 @@ byte * Load_font(const char * font_name)
   // Read the file containing the image
   sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
-  image=IMG_Load(filename);
+  image=Load_surface(filename);
   if (!image)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
@@ -884,6 +932,8 @@ void Init_button(byte   btn_number,
                         byte   shape,
                         Func_action left_action,
                         Func_action right_action,
+                        byte left_instant,
+                        byte right_instant,
                         Func_action unselect_action,
                         byte   family)
 {
@@ -895,6 +945,8 @@ void Init_button(byte   btn_number,
   Buttons_Pool[btn_number].Shape           =shape;
   Buttons_Pool[btn_number].Left_action     =left_action;
   Buttons_Pool[btn_number].Right_action    =right_action;
+  Buttons_Pool[btn_number].Left_instant    =left_instant;
+  Buttons_Pool[btn_number].Right_instant   =right_instant;
   Buttons_Pool[btn_number].Unselect_action =unselect_action;
   Buttons_Pool[btn_number].Family          =family;
 }
@@ -917,6 +969,7 @@ void Init_buttons(void)
                        1,1,
                        BUTTON_SHAPE_RECTANGLE,
                        Do_nothing,Do_nothing,
+                       0,0,
                        Do_nothing,
                        0);
   }
@@ -928,6 +981,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Paintbrush_menu,Button_Brush_monochrome,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -936,6 +990,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Adjust,Button_Transform_menu,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -944,6 +999,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Draw,Button_Draw_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -952,6 +1008,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Curves,Button_Curves_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -960,6 +1017,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Lines,Button_Lines_switch_mode,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -968,6 +1026,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Airbrush,Button_Airbrush_menu,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -976,6 +1035,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Fill,Button_Replace,
+                     0,0,
                      Button_Unselect_fill,
                      FAMILY_TOOL);
 
@@ -984,6 +1044,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_polygon,Button_Polyform,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -992,6 +1053,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Polyfill,Button_Filled_polyform,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1000,6 +1062,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Empty_rectangle,Button_Empty_rectangle,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1008,6 +1071,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Filled_rectangle,Button_Filled_rectangle,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1016,6 +1080,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Empty_circle,Button_Empty_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1024,6 +1089,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Filled_circle,Button_Filled_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1032,6 +1098,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Grad_rectangle,Button_Gradients,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1040,6 +1107,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Grad_circle,Button_Grad_ellipse,
+                     0,0,
                      Do_nothing,
                      FAMILY_TOOL);
 
@@ -1048,6 +1116,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Brush,Button_Restore_brush,
+                     0,0,
                      Button_Unselect_brush,
                      FAMILY_INTERRUPTION);
 
@@ -1056,14 +1125,20 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Lasso,Button_Restore_brush,
+                     0,0,
                      Button_Unselect_lasso,
                      FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_BRUSH_EFFECTS,
-                     106,18,
-                     16,16,
+                     106, 18,
+                     16, 16,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Brush_FX,Button_Brush_FX,
+#ifdef __ENABLE_LUA__
+                     Button_Brush_FX, Button_Brush_Factory,
+#else
+                     Button_Brush_FX, Button_Brush_FX,
+#endif
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1072,6 +1147,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Effects,Button_Effects,
+                     0,0,
                      Do_nothing,
                      FAMILY_EFFECTS);
 
@@ -1080,6 +1156,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Text,Button_Text,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1088,6 +1165,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Magnify,Button_Magnify_menu,
+                     0,1,
                      Button_Unselect_magnifier,
                      FAMILY_INTERRUPTION);
 
@@ -1096,6 +1174,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Colorpicker,Button_Invert_foreback,
+                     0,0,
                      Button_Unselect_colorpicker,
                      FAMILY_INTERRUPTION);
 
@@ -1104,6 +1183,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Resolution,Button_Safety_resolution,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1112,6 +1192,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Page,Button_Copy_page,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1120,6 +1201,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Save,Button_Autosave,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1128,6 +1210,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Load,Button_Reload,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1136,6 +1219,7 @@ void Init_buttons(void)
                      16,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Settings,Button_Skins,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1144,6 +1228,7 @@ void Init_buttons(void)
                      17,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Clear,Button_Clear_with_backcolor,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1152,6 +1237,7 @@ void Init_buttons(void)
                      17,16,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Help,Button_Stats,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1160,6 +1246,7 @@ void Init_buttons(void)
                      19,12,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Undo,Button_Redo,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1168,6 +1255,7 @@ void Init_buttons(void)
                      19,7,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Kill,Button_Kill,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1176,6 +1264,7 @@ void Init_buttons(void)
                      19,12,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Quit,Button_Quit,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1184,6 +1273,7 @@ void Init_buttons(void)
                      16,8,
                      BUTTON_SHAPE_RECTANGLE,
                      Button_Palette,Button_Secondary_palette,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1192,6 +1282,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
                      Button_Pal_left,Button_Pal_left_fast,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1200,6 +1291,7 @@ void Init_buttons(void)
                      15,15,
                      BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
                      Button_Pal_right,Button_Pal_right_fast,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
@@ -1208,14 +1300,82 @@ void Init_buttons(void)
                      1,32, // La largeur est mise à jour à chq chngmnt de mode
                      BUTTON_SHAPE_NO_FRAME,
                      Button_Select_forecolor,Button_Select_backcolor,
+                     0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
 
+  // Layer bar
+  Init_button(BUTTON_LAYER_MENU,
+                     0,0,
+                     57,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_menu, Button_Layer_menu,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_COLOR,
+                     58,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_get_transparent, Button_Layer_set_transparent,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_MERGE,
+                     72,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_merge, Button_Layer_merge,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_ADD,
+                     86,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_add, Button_Layer_add,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_REMOVE,
+                     100,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_remove, Button_Layer_remove,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_DOWN,
+                     114,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_down, Button_Layer_down,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_UP,
+                     128,0,
+                     13,9,
+                     BUTTON_SHAPE_RECTANGLE,
+                     Button_Layer_up, Button_Layer_up,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  Init_button(BUTTON_LAYER_SELECT,
+                     142,0,
+                     13,9, // Will be updated according to actual number of layers
+                     BUTTON_SHAPE_NO_FRAME,
+                     Button_Layer_select, Button_Layer_toggle,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+  // Status bar
   Init_button(BUTTON_HIDE,
-                     0,35,
+                     0,0,
                      16,9,
                      BUTTON_SHAPE_RECTANGLE,
-                     Button_Hide_menu,Button_Hide_menu,
+                     Button_Toggle_all_toolbars, Button_Toggle_toolbar,
+                     0,1,
                      Do_nothing,
                      FAMILY_TOOLBAR);
 }
@@ -1585,12 +1745,12 @@ void Init_operations(void)
                         Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_SCROLL,2,0,
                         Scroll_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,1,4,
-                        Scroll_12_4,0,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,2,4,
-                        Scroll_12_4,0,FAST_MOUSE);
-  Init_operation(OPERATION_SCROLL,0,4,
-                        Scroll_0_4,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,1,5,
+                        Scroll_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,2,5,
+                        Scroll_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_SCROLL,0,5,
+                        Scroll_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
   Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
@@ -1778,10 +1938,10 @@ void Set_all_video_modes(void)
     {
       int index2;
 #if defined(__GP2X__)
-	  // On the GP2X the first mode is not windowed, so include it in the search.
-	  index2=0;
+      // On the GP2X the first mode is not windowed, so include it in the search.
+      index2=0;
 #else
-	  index2=1;
+      index2=1;
 #endif
       for (/**/; index2 < Nb_video_modes; index2++)
         if (Modes[index]->w == Video_mode[index2].Width &&
@@ -1926,9 +2086,9 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
 
 #if defined(__GP2X__)
-		  index2=0;
+          index2=0;
 #else
-		  index2=1;
+          index2=1;
 #endif
           for (/**/; index2<Nb_video_modes; index2++)
           {
@@ -2466,3 +2626,61 @@ void Init_brush_container(void)
     Brush_container[i].Brush = NULL;
   }
 }
+
+void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
+{
+  // Free previous one
+  free(Gfx);
+  
+  // Assign main skin pointer
+  Gfx = gfx;
+
+  // Change config  
+  if(Config.Skin_file != skinfile) // Happens when loading the initial skin
+  {
+    free(Config.Skin_file);
+    Config.Skin_file = strdup(skinfile);
+  }
+
+  Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
+  Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
+  Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
+  Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
+  
+  // Reassign GUI color indices
+  MC_Black = gfx->Color_black;
+  MC_Dark =  gfx->Color_dark;
+  MC_Light = gfx->Color_light;
+  MC_White = gfx->Color_white;
+  MC_Trans = gfx->Color_trans;
+
+  // Set menubars to point to the new data
+  Menu_bars[MENUBAR_TOOLS].Skin = (byte*)&(gfx->Menu_block);
+  Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
+  Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
+}
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void)
+{
+  int i;
+  int offset;
+  
+  // Recompute all offsets    
+  offset=0;
+  Menu_height=0;
+  for (i = MENUBAR_COUNT-1; i >=0; i--)
+  {
+    Menu_bars[i].Top = offset;
+    if(Menu_bars[i].Visible)
+    {
+      offset += Menu_bars[i].Height;
+      Menu_height += Menu_bars[i].Height;
+    }
+  }
+  // Update global menu coordinates
+  Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
+}
+

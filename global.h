@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Franck Charlet
@@ -71,9 +73,6 @@ GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI
 GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
 GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
 
-/// Favorite menu colors (RGB values).
-GFX2_GLOBAL T_Components Fav_menu_colors[4];
-
 // Input state
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
 GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.
@@ -114,11 +113,6 @@ GFX2_GLOBAL dword Key_ANSI;
 
 /// Boolean set to true when the OS/window manager requests the application to close. ie: [X] button
 GFX2_GLOBAL byte Quit_is_required;
-
-/// Divisor for the mouse coordinates recieved. No target currently needs it, should be left at 1.
-GFX2_GLOBAL byte Mouse_fix_factor_X;
-/// Divisor for the mouse coordinates recieved. No target currently needs it, should be left at 1.
-GFX2_GLOBAL byte Mouse_fix_factor_Y;
 
 ///
 /// This boolean is true when the current operation allows changing the
@@ -171,8 +165,6 @@ GFX2_GLOBAL short Paintbrush_offset_Y;
 
 /// On the screen, draw a point.
 GFX2_GLOBAL Func_pixel Pixel;
-/// On screen, draw a point in the menu (do nothing is menu is hidden).
-GFX2_GLOBAL Func_pixel Pixel_in_menu;
 /// Test a pixel color from screen.
 GFX2_GLOBAL Func_read Read_pixel;
 /// Redraw all screen, without overwriting the menu.
@@ -345,11 +337,21 @@ GFX2_GLOBAL word  Main_magnifier_width;
 GFX2_GLOBAL short Main_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Main_magnifier_offset_Y;
+/// Index of layer currently being edited
+GFX2_GLOBAL byte Main_current_layer;
+/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
+GFX2_GLOBAL dword Main_layers_visible;
+/// Index to use next time, when creating incremental backups, to make unique filename.
+GFX2_GLOBAL long Main_safety_number;
+/// Number of edit actions since the last safety backup
+GFX2_GLOBAL long Main_edits_since_safety_backup;
+/// SDL Time of the previous safety backup
+GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
+/// Letter prefix for the filenames of safety backups. a or b
+GFX2_GLOBAL byte Main_safety_backup_prefix;
 
 // -- Spare page data
 
-/// Pointer to the pixel data of the spare page
-GFX2_GLOBAL byte *    Spare_screen;
 /// Palette of the spare page
 GFX2_GLOBAL T_Palette Spare_palette;
 /// Boolean, means the spare page has been modified since last save.
@@ -405,6 +407,18 @@ GFX2_GLOBAL word  Spare_magnifier_width;
 GFX2_GLOBAL short Spare_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Spare_magnifier_offset_Y;
+/// Index of layer currently being edited
+GFX2_GLOBAL byte Spare_current_layer;
+/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
+GFX2_GLOBAL dword Spare_layers_visible;
+/// Index to use next time, when creating incremental backups, to make unique filename.
+GFX2_GLOBAL long Spare_safety_number;
+/// Number of edit actions since the last safety backup
+GFX2_GLOBAL long Spare_edits_since_safety_backup;
+/// SDL Time of the previous safety backup
+GFX2_GLOBAL Uint32 Spare_time_of_safety_backup;
+/// Letter prefix for the filenames of safety backups. a or b
+GFX2_GLOBAL byte Spare_safety_backup_prefix;
 
 // -- Image backups
 
@@ -414,6 +428,7 @@ GFX2_GLOBAL byte * Screen_backup;
 GFX2_GLOBAL T_List_of_pages * Main_backups;
 /// List of backup pages for the spare page.
 GFX2_GLOBAL T_List_of_pages * Spare_backups;
+
 
 // -- Brush data
 
@@ -458,9 +473,11 @@ GFX2_GLOBAL short Brush_rotation_center_Y;
 
 /// Boolean, true if the menu has to be displayed.
 GFX2_GLOBAL byte  Menu_is_visible;
+/// Height of the menu, when it's displayed
+GFX2_GLOBAL word  Menu_height;
 ///
 /// Y position (in screen coordinates) where the menu begins.
-/// This is always either ::Screen_height (when menu is hidden) or (::Screen_height - ::MENU_HEIGHT)
+/// This is always either ::Screen_height (when menu is hidden) or (::Screen_height - ::Menu_height)
 /// As a result, the drawing algoritm always draws the image from 0 to ::Menu_Y-1
 GFX2_GLOBAL word  Menu_Y;
 /// Y position of the status bar (in screen coordinates)
@@ -471,6 +488,15 @@ GFX2_GLOBAL byte  Menu_factor_X;
 GFX2_GLOBAL byte  Menu_factor_Y;
 /// Size of a color cell in the menu's palette.
 GFX2_GLOBAL word  Menu_palette_cell_width;
+
+GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
+#ifdef GLOBAL_VARIABLES
+  = 
+{{MENU_WIDTH,  9, 1, 45, NULL,  20, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 1, 35, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
+ {MENU_WIDTH, 35, 1,  0, NULL, 254, BUTTON_CHOOSE_COL }} // Main
+#endif
+ ;
 
 
 // -- Window data
@@ -567,6 +593,8 @@ GFX2_GLOBAL struct
   Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
   word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
   word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
+  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
+  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
 
   // Data used when the button is unselected
   Func_action     Unselect_action;  ///< Action triggered by unselecting the button
@@ -580,12 +608,6 @@ GFX2_GLOBAL struct
 
 /// Current effecting function. When no effect is selected this is ::No_effect()
 GFX2_GLOBAL Func_effect Effect_function;
-
-///
-/// Pointer to the image to read, while drawing. It's either ::Main_screen
-/// (the image you draw) when FX feedback is ON, or ::Screen_backup (a backup
-/// copy) when FX feedback is off.
-GFX2_GLOBAL byte * FX_feedback_screen;
 
 ///
 /// Array of booleans, indicates which colors should never be picked by
@@ -712,7 +734,7 @@ GFX2_GLOBAL byte Mask_table[256];
 // -- Magnifier data
 
 #ifdef GLOBAL_VARIABLES
-  word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20};
+  word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20, 24, 28, 32};
 #else
 /// Successive zoom factors, used by the Magnifier.
   extern word ZOOM_FACTOR[NB_ZOOM_FACTORS];
@@ -790,8 +812,6 @@ GFX2_GLOBAL byte Selected_curve_mode;
 GFX2_GLOBAL byte Selected_line_mode;
 /// Determines which color appears in the first cell of the menu palette. Change this value to "scroll" the palette.
 GFX2_GLOBAL byte First_color_in_palette;
-/// Boolean, true if Grafx2 was run with a file as command-line argument, which must be open immediately.
-GFX2_GLOBAL byte File_in_command_line;
 /// Boolean, true if Grafx2 was run with a command-line argument to set a resolution on startup (overrides config)
 GFX2_GLOBAL byte Resolution_in_command_line;
 
@@ -831,6 +851,9 @@ GFX2_GLOBAL short Colorpicker_color;
 GFX2_GLOBAL short Colorpicker_X;
 /// Position of the colorpicker tool, in image coordinates.
 GFX2_GLOBAL short Colorpicker_Y;
+
+GFX2_GLOBAL short * Polyfill_table_of_points;
+GFX2_GLOBAL int Polyfill_number_of_points;
 
 /// Brush container
 GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS];
@@ -898,14 +921,6 @@ GFX2_GLOBAL struct
 GFX2_GLOBAL signed char File_error;
 /// Current line number when reading/writing gfx2.ini
 GFX2_GLOBAL int Line_number_in_INI_file;
-///
-/// Pointer to a pixel-loading function. This is used by the generic loading
-/// function to load a preview, a brush or an image.
-GFX2_GLOBAL Func_pixel Pixel_load_function;
-///
-/// Pointer to a pixel-reading function. This is used by the generic saving
-/// function to save a brush or an image.
-GFX2_GLOBAL Func_read   Read_pixel_function;
 
 // -- Specific to SDL
 

@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Franck Charlet
@@ -47,8 +49,12 @@
 #include "windows.h"
 #include "input.h"
 
-#ifndef M_PI
-	#define M_PI 3.1415926535897932385
+#ifdef __VBCC__
+    #define __attribute__(x)
+#endif
+
+#if defined(__VBCC__)||defined(__GP2X__)
+    #define M_PI 3.141592653589793238462643
 #endif
 
 // Generic pixel-drawing function.
@@ -202,7 +208,9 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   byte pixels_changed;
   int absolute_mouse_x=Mouse_X*Pixel_width;
   int absolute_mouse_y=Mouse_Y*Pixel_height;
-  
+  static int Wrong_resize;
+
+try_again:
   
   switch (pix_ratio)
   {
@@ -248,15 +256,31 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   // Valeurs raisonnables: minimum 320x200
   if (!fullscreen)
   {
+    if (Wrong_resize>20 && (width < 320*pix_width || height < 200*pix_height))
+    {
+      if(pix_ratio != PIXEL_SIMPLE) {
+        pix_ratio = PIXEL_SIMPLE;
+        Verbose_message("Error!", "Your WM is forcing GrafX2 to resize to something "
+          "smaller than the minimal resolution.\n"
+          "GrafX2 switched to a smaller\npixel scaler to avoid problems                     ");
+        goto try_again;
+      }
+    }
+    
+    if (width > 320*pix_width && height > 200*pix_height)
+      Wrong_resize = 0;
+
     if (width < 320*pix_width)
     {
         width = 320*pix_width;
         screen_changed=1;
+        Wrong_resize++;
     }
     if (height < 200*pix_height)
     {
         height = 200*pix_height;
         screen_changed=1;
+        Wrong_resize++;
     }
     Video_mode[0].Width = width;
     Video_mode[0].Height = height;
@@ -496,10 +520,10 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
     case 0: // Always smallest possible
       Menu_factor_X=1;
       Menu_factor_Y=1;
-	  break;
-	default: // Stay below some reasonable size
-	  Menu_factor_X=Min(factor,abs(Config.Ratio));
-	  Menu_factor_Y=Min(factor,abs(Config.Ratio));
+      break;
+    default: // Stay below some reasonable size
+      Menu_factor_X=Min(factor,abs(Config.Ratio));
+      Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
   if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
     Menu_factor_X*=2;
@@ -508,7 +532,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
     
   free(Horizontal_line_buffer);
   Horizontal_line_buffer=(byte *)malloc(Pixel_width * 
-	((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+    ((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);
 
@@ -530,7 +554,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   
   Menu_Y = Screen_height;
   if (Menu_is_visible)
-    Menu_Y -= MENU_HEIGHT * Menu_factor_Y;
+    Menu_Y -= Menu_height * Menu_factor_Y;
   Menu_status_Y = Screen_height-(Menu_factor_Y<<3);
 
   Adjust_mouse_sensitivity(fullscreen);
@@ -571,7 +595,6 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
     Position_screen_according_to_zoom();
   Compute_limits();
   Compute_paintbrush_coordinates();
-  Display_all_screen();
   
   Resize_width=0;
   Resize_height=0;
@@ -586,6 +609,7 @@ void Resize_image(word chosen_width,word chosen_height)
 {
   word old_width=Main_image_width;
   word old_height=Main_image_height;
+  int i;
 
   // +-+-+
   // |C| |  A+B+C = Ancienne image
@@ -593,7 +617,7 @@ void Resize_image(word chosen_width,word chosen_height)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  if (Backup_with_new_dimensions(1,chosen_width,chosen_height))
+  if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Main_image_width de large.
@@ -601,10 +625,14 @@ void Resize_image(word chosen_width,word chosen_height)
     Main_image_is_modified=1;
 
     // On copie donc maintenant la partie C dans la nouvelle image.
-    Copy_part_of_image_to_another(
-      Screen_backup,0,0,Min(old_width,Main_image_width),
-      Min(old_height,Main_image_height),old_width,
-      Main_screen,0,0,Main_image_width);
+    for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+    {
+      Copy_part_of_image_to_another(
+        Main_backups->Pages->Next->Image[i],0,0,Min(old_width,Main_image_width),
+        Min(old_height,Main_image_height),old_width,
+        Main_backups->Pages->Image[i],0,0,Main_image_width);
+    }
+    Redraw_layered_image();
   }
   else
   {
@@ -617,21 +645,23 @@ void Resize_image(word chosen_width,word chosen_height)
 
 
 
-void Remap_picture(void)
+void Remap_spare(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
   byte  used[256]; // Tableau de booléens "La couleur est utilisée"
   int   color;
+  byte layer;
 
   // On commence par initialiser le tableau de booléens à faux
   for (color=0;color<=255;color++)
     used[color]=0;
 
   // On calcule la table d'utilisation des couleurs
-  for (y_pos=0;y_pos<Spare_image_height;y_pos++)
-    for (x_pos=0;x_pos<Spare_image_width;x_pos++)
-      used[Read_pixel_from_spare_screen(x_pos,y_pos)]=1;
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+    for (y_pos=0;y_pos<Spare_image_height;y_pos++)
+      for (x_pos=0;x_pos<Spare_image_width;x_pos++)
+        used[*(Spare_backups->Pages->Image[layer]+(y_pos*Spare_image_width+x_pos))]=1;
 
   //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
@@ -647,7 +677,8 @@ void Remap_picture(void)
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_lowlevel(used,Spare_screen,Spare_image_width,Spare_image_height,Spare_image_width);
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
 }
 
 
@@ -661,7 +692,8 @@ void Get_colors_from_brush(void)
 
   if (Confirmation_box("Modify current palette ?"))
   {
-    Backup();
+    // Backup with unchanged layers, only palette is modified
+    Backup_layers(0);
 
     // On commence par initialiser le tableau de booléen à faux
     for (color=0;color<=255;color++)
@@ -729,7 +761,7 @@ void Fill(short * top_reached  , short * bottom_reached,
   current_limit_bottom =Min(Paintbrush_Y+1,Limit_bottom);
   *left_reached=Paintbrush_X;
   *right_reached=Paintbrush_X+1;
-  Pixel_in_current_screen(Paintbrush_X,Paintbrush_Y,2);
+  Pixel_in_current_layer(Paintbrush_X,Paintbrush_Y,2);
 
   while (changes_made)
   {
@@ -748,7 +780,7 @@ void Fill(short * top_reached  , short * bottom_reached,
       {
         // On cherche son début
         while((start_x<=Limit_right) &&
-                (Read_pixel_from_current_screen(start_x,line)!=1))
+                (Read_pixel_from_current_layer(start_x,line)!=1))
              start_x++;
 
         if (start_x<=Limit_right)
@@ -756,7 +788,7 @@ void Fill(short * top_reached  , short * bottom_reached,
           // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
-               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
+               (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
@@ -767,16 +799,16 @@ void Fill(short * top_reached  , short * bottom_reached,
           can_propagate=(
             // Test de la présence d'un point à gauche du segment
             ((start_x>Limit_left) &&
-             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
+             (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((end_x-1<Limit_right) &&
-             (Read_pixel_from_current_screen(end_x    ,line)==2))
+             (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en haut du segment
           if (!can_propagate && (line>Limit_top))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              if (Read_pixel_from_current_screen(x_pos,line-1)==2)
+              if (Read_pixel_from_current_layer(x_pos,line-1)==2)
               {
                 can_propagate=1;
                 break;
@@ -790,7 +822,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2);
+              Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -828,14 +860,14 @@ void Fill(short * top_reached  , short * bottom_reached,
       {
         // On cherche son début
         for (;(start_x<=Limit_right) &&
-             (Read_pixel_from_current_screen(start_x,line)!=1);start_x++);
+             (Read_pixel_from_current_layer(start_x,line)!=1);start_x++);
 
         if (start_x<=Limit_right)
         {
           // Un segment de couleur 1 existe et commence à la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
-               (Read_pixel_from_current_screen(end_x,line)==1);end_x++);
+               (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
 
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
@@ -846,16 +878,16 @@ void Fill(short * top_reached  , short * bottom_reached,
           can_propagate=(
             // Test de la présence d'un point à gauche du segment
             ((start_x>Limit_left) &&
-             (Read_pixel_from_current_screen(start_x-1,line)==2)) ||
+             (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
             // Test de la présence d'un point à droite du segment
             ((end_x-1<Limit_right) &&
-             (Read_pixel_from_current_screen(end_x    ,line)==2))
+             (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
           // Test de la présence d'un point en bas du segment
           if (!can_propagate && (line<Limit_bottom))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              if (Read_pixel_from_current_screen(x_pos,line+1)==2)
+              if (Read_pixel_from_current_layer(x_pos,line+1)==2)
               {
                 can_propagate=1;
                 break;
@@ -869,7 +901,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *right_reached=end_x;
             // On remplit le segment de start_x à end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
-              Pixel_in_current_screen(x_pos,line,2);
+              Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
             changes_made=1;
             line_is_modified=1;
@@ -892,6 +924,10 @@ void Fill(short * top_reached  , short * bottom_reached,
   (*right_reached)--;
 } // end de la routine de remplissage "Fill"
 
+byte Read_pixel_from_backup_layer(word x,word y)
+{
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Next->Image[Main_current_layer]);
+}
 
 void Fill_general(byte fill_color)
 //
@@ -900,7 +936,6 @@ void Fill_general(byte fill_color)
 //
 {
   byte   cursor_shape_before_fill;
-  byte * old_fx_feedback_screen;
   short  x_pos,y_pos;
   short  top_reached  ,bottom_reached;
   short  left_reached,right_reached;
@@ -928,16 +963,15 @@ void Fill_general(byte fill_color)
     Backup();
 
     // On fait attention au Feedback qui DOIT se faire avec le backup.
-    old_fx_feedback_screen=FX_feedback_screen;
-    FX_feedback_screen=Screen_backup;
+    Update_FX_feedback(0);
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(replace_table,0,256);
-    replace_table[Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y)]=1;
+    replace_table[Read_pixel_from_backup_layer(Paintbrush_X,Paintbrush_Y)]=1;
     Replace_colors_within_limits(replace_table);
 
     // On fait maintenant un remplissage classique de la couleur 1 avec la 2
-   Fill(&top_reached  ,&bottom_reached,
+    Fill(&top_reached  ,&bottom_reached,
          &left_reached,&right_reached);
 
     //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
@@ -948,39 +982,39 @@ void Fill_general(byte fill_color)
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (top_reached>Limit_top)
-      Copy_part_of_image_to_another(Screen_backup,                    // source
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer], // source
                                                Limit_left,Limit_top,       // Pos X et Y dans source
                                                (Limit_right-Limit_left)+1, // width copie
                                                top_reached-Limit_top,// height copie
                                                Main_image_width,         // width de la source
-                                               Main_screen,                 // Destination
+                                               Main_backups->Pages->Image[Main_current_layer], // Destination
                                                Limit_left,Limit_top,       // Pos X et Y destination
                                                Main_image_width);        // width destination
     if (bottom_reached<Limit_bottom)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                Limit_left,bottom_reached+1,
                                                (Limit_right-Limit_left)+1,
                                                Limit_bottom-bottom_reached,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                Limit_left,bottom_reached+1,Main_image_width);
     if (left_reached>Limit_left)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                Limit_left,top_reached,
                                                left_reached-Limit_left,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                Limit_left,top_reached,Main_image_width);
     if (right_reached<Limit_right)
-      Copy_part_of_image_to_another(Screen_backup,
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
                                                right_reached+1,top_reached,
                                                Limit_right-right_reached,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_screen,
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
                                                right_reached+1,top_reached,Main_image_width);
 
     for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
       for (x_pos=left_reached;x_pos<=right_reached;x_pos++)
-        if (Read_pixel_from_current_screen(x_pos,y_pos)==2)
+        if (Read_pixel_from_current_layer(x_pos,y_pos)==2)
         {
           //   Si le pixel en cours de traitement a été touché par le Fill()
           // on se doit d'afficher le pixel modifié par la couleur de
@@ -989,23 +1023,23 @@ void Fill_general(byte fill_color)
           //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
           // précédemment (c'est important pour que les effets ne s'emmèlent
           // pas le pinceaux)
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
 
           //  Enfin, on peut afficher le pixel, en le soumettant aux effets en
           // cours:
           Display_pixel(x_pos,y_pos,fill_color);
         }
         else
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_screen(x_pos,y_pos));
+          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
 
-    FX_feedback_screen=old_fx_feedback_screen;
+    // Restore original feedback value
+    Update_FX_feedback(Config.FX_Feedback);
 
     //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
     // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
     // puisque les seuls points qui ont changé dans l'image ont été raffichés
     // par l'utilisation de "Display_pixel()", et que les autres... eh bein
     // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
-
     if(Main_magnifier_mode)
     {
       short w,h;
@@ -1412,7 +1446,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   dx = *bx-ax;
   dy = *by-ay; 
 
-	// No mouse move: no need to clamp anything
+  // No mouse move: no need to clamp anything
   if (dx==0 || dy == 0) return; 
 
   // Determine angle (heading)
@@ -1422,39 +1456,39 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   //dx=abs(dx);
   //dy=abs(dy);
     
-	// Negative Y
+  // Negative Y
   if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
   {
     *bx=ax;
     *by=ay + dy;
-	}
-	// Iso close to negative Y
+  }
+  // Iso close to negative Y
   else if (angle < M_PI*(-13.0/16.0))
   {
     dy=dy | 1; // Round up to next odd number
     *bx=ax + dy/2;
     *by=ay + dy;
-	}
-	// 45deg
+  }
+  // 45deg
   else if (angle < M_PI*(-11.0/16.0))
   {
     *by = (*by + ay + dx)/2;
     *bx = ax  - ay + *by;
-	}
-	// Iso close to negative X
+  }
+  // Iso close to negative X
   else if (angle < M_PI*(-9.0/16.0))
   {
     dx=dx | 1; // Round up to next odd number
     *bx=ax + dx;
     *by=ay + dx/2;
-	}
-	// Negative X
+  }
+  // Negative X
   else if (angle < M_PI*(-7.0/16.0))
   {
     *bx=ax + dx;
     *by=ay;
-	}
-	// Iso close to negative X
+  }
+  // Iso close to negative X
   else if (angle < M_PI*(-5.0/16.0))
   {
     dx=dx | 1; // Round up to next odd number
@@ -1473,7 +1507,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax - dy/2;
     *by=ay + dy;
-	}
+  }
   // Positive Y
   else if (angle < M_PI*(1.0/16.0))
   {
@@ -1486,7 +1520,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax + dy/2;
     *by=ay + dy;
-	}
+  }
   // 45 degrees
   else if (angle < M_PI*(5.0/16.0))
   {
@@ -1499,13 +1533,13 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dx=dx | 1; // Round up to next odd number
     *bx=ax + dx;
     *by=ay + dx/2;
-	}
+  }
   // Positive X
   else if (angle < M_PI*(9.0/16.0))
   {
     *bx=ax + dx;
     *by=ay;
-	}
+  }
   // Iso close to positive X
   else if (angle < M_PI*(11.0/16.0))
   {
@@ -1525,7 +1559,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
     dy=dy | 1; // Round up to next odd number
     *bx=ax - dy/2;
     *by=ay + dy;
-	}
+  }
 
   return;
 }
@@ -2498,6 +2532,7 @@ void Polyfill_general(int vertices, short * points, int color)
   }
 
   free(initial_edge);
+  initial_edge = NULL;
 
   // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
   Update_part_of_screen(0,top,Main_image_width,bottom-top+1);
@@ -2507,7 +2542,6 @@ void Polyfill_general(int vertices, short * points, int color)
 void Polyfill(int vertices, short * points, int color)
 {
   int index;
-  byte *old_fx_feedback_screen;
 
   Pixel_clipped(points[0],points[1],color);
   if (vertices==1)
@@ -2518,8 +2552,7 @@ void Polyfill(int vertices, short * points, int color)
 
   // Comme pour le Fill, cette operation fait un peu d'"overdraw"
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
-  old_fx_feedback_screen=FX_feedback_screen;
-  FX_feedback_screen=Screen_backup;
+  Update_FX_feedback(0);
 
   Pixel_figure=Pixel_clipped;    
   Polyfill_general(vertices,points,color);
@@ -2533,8 +2566,8 @@ void Polyfill(int vertices, short * points, int color)
     Draw_line_general(points[index*2],points[index*2+1],points[index*2+2],points[index*2+3],color);
   Draw_line_general(points[0],points[1],points[index*2],points[index*2+1],color);
 
-  // restore de l'etat du FX Feedback  
-  FX_feedback_screen=old_fx_feedback_screen;
+  // Restore original feedback value
+  Update_FX_feedback(Config.FX_Feedback);
 
 }
 
@@ -2549,7 +2582,7 @@ void Replace(byte New_color)
   if ((Paintbrush_X<Main_image_width)
    && (Paintbrush_Y<Main_image_height))
   {
-    old_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
+    old_color=Read_pixel_from_current_layer(Paintbrush_X,Paintbrush_Y);
     if ( (old_color!=New_color)
       && ((!Stencil_mode) || (!Stencil[old_color])) )
     {
@@ -2642,12 +2675,11 @@ void Display_pixel(word x,word y,byte color)
   // La Loupe est gérée par appel à Pixel_preview().
 {
   if ( ( (!Sieve_mode)   || (Effect_sieve(x,y)) )
-    && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_screen(x,y)])))
+    && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_layer(x,y)])))
     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
     color=Effect_function(x,y,color);
-    Pixel_in_current_screen(x,y,color);
-    Pixel_preview(x,y,color);
+    Pixel_in_current_screen(x,y,color,1);
   }
 }
 
@@ -2857,4 +2889,53 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
     Vertical_grid_line(col, y, h);
     col+= Snap_width*Main_magnifier_factor;
   }
+}
+
+byte Read_pixel_from_current_screen  (word x,word y)
+{
+  #ifndef NOLAYERS
+  byte depth;
+  byte color;
+  color = *(Main_screen+y*Main_image_width+x);
+  if (color != Main_backups->Pages->Transparent_color) // transparent color
+    return color;
+  
+  depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+  return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+  #else
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
+  #endif
+}
+
+void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
+{
+    #ifndef NOLAYERS
+    byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    if ( depth <= Main_current_layer)
+    {
+      if (color == Main_backups->Pages->Transparent_color) // transparent color
+        // fetch pixel color from the topmost visible layer
+        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+      
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+    #else
+    *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+    if (with_preview)
+        Pixel_preview(x,y,color);
+    #endif
+}
+
+void Pixel_in_current_layer(word x,word y, byte color)
+{
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+}
+
+byte Read_pixel_from_current_layer(word x,word y)
+{
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
 }

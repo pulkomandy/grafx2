@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008      Franck Charlet
@@ -33,6 +35,7 @@
 #include "windows.h"
 #include "sdlscreen.h"
 #include "brush.h"
+
 
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image
@@ -718,7 +721,8 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     if (start_y+new_brush_height>Main_image_height)
       new_brush_height=Main_image_height-start_y;
 
-    Realloc_brush(new_brush_width, new_brush_height);
+    if (Realloc_brush(new_brush_width, new_brush_height) != 0)
+      return; // Unable to allocate the new brush, keep the old one.
 
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
@@ -728,8 +732,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
       for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
         for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
         {
-          Pixel_in_current_screen(x_pos,y_pos,Back_color);
-          Pixel_preview           (x_pos,y_pos,Back_color);
+          Pixel_in_current_screen(x_pos,y_pos,Back_color,1);
         }
       Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
@@ -746,10 +749,10 @@ void Rotate_90_deg()
   short temp;
   byte * new_brush;
 
-  new_brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+  new_brush=(byte *)malloc(((size_t)Brush_height)*Brush_width);
   if (new_brush)
   {
-    Rotate_90_deg_lowlevel(Brush,/*@out@*/ new_brush,Brush_width,Brush_height);
+    Rotate_90_deg_lowlevel(Brush,new_brush,Brush_width,Brush_height);
     free(Brush);
     Brush=new_brush;
 
@@ -912,6 +915,7 @@ void Outline_brush(void)
     Brush_offset_Y=(Brush_height>>1);
 
     free(temp); // Libération de l'ancienne brosse
+    temp = NULL;
 
     // Réallocation d'un buffer de Smear
     free(Smear_brush);
@@ -1024,6 +1028,7 @@ void Nibble_brush(void)
       Brush_offset_Y=(Brush_height>>1);
 
       free(temp); // Libération de l'ancienne brosse
+      temp = NULL;
 
       // Réallocation d'un buffer de Smear
       free(Smear_brush);
@@ -1154,10 +1159,10 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
       for (x_pos=start_x;x_pos<=end_x;x_pos++)
         if (Read_pixel_from_brush(x_pos-start_x,y_pos-start_y)!=Back_color)
         {
-          Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_screen(x_pos,y_pos));
+          Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_layer(x_pos,y_pos));
           // On regarde s'il faut effacer quelque chose:
           if (clear)
-            Pixel_in_current_screen(x_pos,y_pos,Back_color);
+            Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
         }
 
     // On centre la prise sur la brosse
@@ -1194,6 +1199,7 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
 
   // Free some memory
   free(Smear_brush);
+  Smear_brush = NULL;
 
   if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
@@ -1505,6 +1511,7 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
     // Out of memory while allocating new brush
     Error(0);
     free(new_smear_brush);
+    new_smear_brush = NULL;
     return;
   }
 
@@ -1538,7 +1545,10 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
 
 //------------------------- Rotation de la brosse ---------------------------
 
-#define UNDEFINED (-1.0e20F)
+#ifndef NAN
+  #define NAN (-1.0e20F)
+  #define isnan(x) ((x)==NAN)
+#endif
 float * ScanY_Xt[2];
 float * ScanY_Yt[2];
 float * ScanY_X[2];
@@ -1598,38 +1608,38 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((x_pos-start_x)*delta_xt))/(float)delta_x2) + (float)xt1;
         yt=(((float)((x_pos-start_x)*delta_yt))/(float)delta_x2) + (float)yt1;
-        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
         {
-          ScanY_X[0][y_pos]=x_pos;
+          ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
           ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
-          if (x_pos>=ScanY_X[0][y_pos])
+          if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][y_pos]=x_pos;
+              ScanY_X[1][y_pos]=(float)x_pos;
               ScanY_Xt[1][y_pos]=xt;
               ScanY_Yt[1][y_pos]=yt;
             }
           }
           else
           {
-            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
@@ -1655,38 +1665,38 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((y_pos-start_y)*delta_xt))/(float)delta_y2) + (float)xt1;
         yt=(((float)((y_pos-start_y)*delta_yt))/(float)delta_y2) + (float)yt1;
-        if (ScanY_X[0][y_pos]==UNDEFINED) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
         {
-          ScanY_X[0][y_pos]=x_pos;
+          ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
           ScanY_Yt[0][y_pos]=yt;
         }
         else
         {
-          if (x_pos>=ScanY_X[0][y_pos])
+          if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if ((ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
              || (x_pos>ScanY_X[1][y_pos]))
             {
-              ScanY_X[1][y_pos]=x_pos;
+              ScanY_X[1][y_pos]=(float)x_pos;
               ScanY_Xt[1][y_pos]=xt;
               ScanY_Yt[1][y_pos]=yt;
             }
           }
           else
           {
-            if (ScanY_X[1][y_pos]==UNDEFINED) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
               ScanY_Yt[1][y_pos]=ScanY_Yt[0][y_pos];
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
             else
             {
-              ScanY_X[0][y_pos]=x_pos;
+              ScanY_X[0][y_pos]=(float)x_pos;
               ScanY_Xt[0][y_pos]=xt;
               ScanY_Yt[0][y_pos]=yt;
             }
@@ -1723,11 +1733,11 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à UNDEFINED.
+  // Fill_general avec des valeurs égales à NAN.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=UNDEFINED;
-    ScanY_X[1][y]=UNDEFINED;
+    ScanY_X[0][y]=NAN ;
+    ScanY_X[1][y]=NAN;
   }
 
   Interpolate_texture(x1-x_min,y1-y_min,xt1,yt1,x3-x_min,y3-y_min,xt3,yt3,height);
@@ -1762,6 +1772,8 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
   free(ScanY_Yt[1]);
   free(ScanY_X[0]);
   free(ScanY_X[1]);
+
+  ScanY_Xt[0] = ScanY_Xt[1] = ScanY_Yt[0] = ScanY_Yt[1] = ScanY_X[0] = ScanY_X[1] = NULL;
 }
 
 
@@ -1802,6 +1814,7 @@ void Rotate_brush(float angle)
   new_brush_height=y_max+1-y_min;
 
   free(Smear_brush); // On libère un peu de mémoire
+  Smear_brush = NULL;
 
   if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
   {
@@ -1877,11 +1890,11 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à UNDEFINED.
+  // Fill_general avec des valeurs égales à NAN.
   for (y=0; y<height; y++)
   {
-    ScanY_X[0][y]=UNDEFINED;
-    ScanY_X[1][y]=UNDEFINED;
+    ScanY_X[0][y]=NAN;
+    ScanY_X[1][y]=NAN;
   }
 
   Interpolate_texture(x1,y1-y_min,xt1,yt1,x3,y3-y_min,xt3,yt3,height);
@@ -1924,6 +1937,8 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
   free(ScanY_Yt[1]);
   free(ScanY_X[0]);
   free(ScanY_X[1]);
+
+  ScanY_Xt[0] = ScanY_Xt[1] = ScanY_Yt[0] = ScanY_Yt[1] = ScanY_X[0] = ScanY_X[1] = NULL;
 }
 
 

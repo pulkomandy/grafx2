@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /* mountlist.c -- return a list of mounted file systems
 
    Copyright (C) 1991, 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
@@ -25,11 +27,17 @@
     #define MOUNTED_GETMNTINFO
 #elif defined(__BEOS__) || defined(__HAIKU__)
     #define MOUNTED_FS_STAT_DEV
+#elif defined(__TRU64__)
+    #define MOUNTED_GETFSSTAT 1 
+    #define HAVE_SYS_MOUNT_H 1
+    #include <sys/types.h>
 #elif defined(__SKYOS__)
     #warning "Your platform is missing some specific code here ! please check and fix :)"
 #else
     #define MOUNTED_GETMNTENT1
 #endif
+
+#define _XOPEN_SOURCE 500
 // --- END GRAFX2 CUSTOM CONFIG ---
 
 #include "mountlist.h"
@@ -326,8 +334,14 @@ fstype_to_string (int t)
 /* Return the device number from MOUNT_OPTIONS, if possible.
    Otherwise return (dev_t) -1.  */
 
+#ifdef __linux__
+  #define BROKEN __attribute__((unused))
+#else
+  #define BROKEN
+#endif
+
 static dev_t
-dev_from_mount_options (char const *mount_options)
+dev_from_mount_options (BROKEN char const *mount_options)
 {
   /* GNU/Linux allows file system implementations to define their own
      meaning for "dev=" mount options, so don't trust the meaning
@@ -364,7 +378,7 @@ dev_from_mount_options (char const *mount_options)
    the returned list are valid.  Otherwise, they might not be.  */
 
 struct mount_entry *
-read_file_system_list (bool need_fs_type)
+read_file_system_list (BROKEN bool need_fs_type)
 {
   struct mount_entry *mount_list;
   struct mount_entry *me;
@@ -628,11 +642,12 @@ read_file_system_list (bool need_fs_type)
     numsys = getfsstat ((struct statfs *)0, 0L, MNT_NOWAIT);
     if (numsys < 0)
       return (NULL);
+      /*
     if (SIZE_MAX / sizeof *stats <= numsys)
-      xalloc_die ();
+      xalloc_die ();*/
 
     bufsize = (1 + numsys) * sizeof *stats;
-    stats = xmalloc (bufsize);
+    stats = malloc (bufsize);
     numsys = getfsstat (stats, bufsize, MNT_NOWAIT);
 
     if (numsys < 0)
@@ -643,10 +658,10 @@ read_file_system_list (bool need_fs_type)
 
     for (counter = 0; counter < numsys; counter++)
       {
-        me = xmalloc (sizeof *me);
-        me->me_devname = xstrdup (stats[counter].f_mntfromname);
-        me->me_mountdir = xstrdup (stats[counter].f_mntonname);
-        me->me_type = xstrdup (FS_TYPE (stats[counter]));
+        me = malloc (sizeof *me);
+        me->me_devname = strdup (stats[counter].f_mntfromname);
+        me->me_mountdir = strdup (stats[counter].f_mntonname);
+        //me->me_type = strdup (FS_TYPE (stats[counter]));
         me->me_type_malloced = 1;
         me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
         me->me_remote = ME_REMOTE (me->me_devname, me->me_type);

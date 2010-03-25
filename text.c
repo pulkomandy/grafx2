@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -454,6 +456,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   SDL_Surface * Texte8Bit;
   SDL_Surface *Surface_fonte;
   byte * new_brush;
+  SDL_Rect rectangle;
 
   // Chargement de la fonte
   Surface_fonte=IMG_Load(Font_name(font_number));
@@ -474,6 +477,17 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
   TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
+  // Fill with backcolor
+  rectangle.x=0;
+  rectangle.y=0;
+  rectangle.w=*width;
+  rectangle.h=*height;
+  SDL_FillRect(TexteColore, &rectangle, SDL_MapRGB(
+    TexteColore->format, 
+    Main_palette[Back_color].R, 
+    Main_palette[Back_color].G, 
+    Main_palette[Back_color].B
+    ));
   // Rendu du texte
   SFont_Write(TexteColore, font, 0, 0, str);
   if (!TexteColore)
@@ -501,11 +515,16 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   return new_brush;
 }
 
+#ifdef NOTTF
+  #define TTFONLY __attribute__((unused))
+#else
+  #define TTFONLY
+#endif
 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height)
+byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height)
 {
   T_Font *font = font_list_start;
   int index=font_number;

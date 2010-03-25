@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -21,24 +23,31 @@
 /// Miscellanous unsorted functions.
 //////////////////////////////////////////////////////////////////////////////
 
+#include "struct.h"
+
+#define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
+#define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
+#define SWAP_DWORDS(a,b) { dword c=a; a=b; b=c;}
+#define SWAP_SHORTS(a,b) { short c=a; a=b; b=c;}
+#define SWAP_FLOATS(a,b) { float c=a; a=b; b=c;}
+#define SWAP_PBYTES(a,b) { byte * c=a; a=b; b=c;}
+
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
 void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
-void Scroll_picture(short x_offset,short y_offset);
+void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset);
 void Wait_end_of_click(void);
 void Set_color(byte color, byte red, byte green, byte blue);
 void Set_palette(T_Palette palette);
 void Palette_256_to_64(T_Palette palette);
 void Palette_64_to_256(T_Palette palette);
-void Hide_current_image(byte color);
-void Hide_current_image_with_stencil(byte color, byte * stencil);
+void Clear_current_image(byte color);
+void Clear_current_image_with_stencil(byte color, byte * stencil);
 void Slider_timer(byte speed);
 dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
 word Count_used_colors_screen_area(dword* usage, word start_x, word start_y, word width, word height);
-void Pixel_in_current_screen      (word x,word y,byte color);
 void Pixel_in_brush             (word x,word y,byte color);
-byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_spare_screen(word x,word y);
 byte Read_pixel_from_backup_screen   (word x,word y);
 byte Read_pixel_from_feedback_screen (word x,word y);
@@ -139,10 +148,17 @@ byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 
 unsigned long Memory_free(void);
 
-void  Num2str(dword number,char * str,byte nb_char);
+#define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
+
+#define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))
 
 short Round(float value);
 short Round_div_max(short numerator,short divisor);
+
+/* round number n to d decimal points */
+double Fround(double n, unsigned d);
+
+
 
 int Min(int a,int b);
 int Max(int a,int b);

@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -24,7 +26,11 @@
 /// The actual data is in hotkeys.c
 //////////////////////////////////////////////////////////////////////////////
 
-#include <stdbool.h>
+#if !defined(__VBCC__)
+    #include <stdbool.h>
+#else
+    #define bool char
+#endif
 #include <SDL.h>
 
 /*** Types definitions and structs ***/

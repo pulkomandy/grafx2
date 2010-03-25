@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -25,6 +27,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "const.h"
 #include "struct.h"
@@ -118,18 +121,19 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
     max_size = 255;
   else
     max_size = visible_size;
-  return Readline_ex(x_pos,y_pos,str,visible_size,max_size,input_type);
+  return Readline_ex(x_pos,y_pos,str,visible_size,max_size,input_type,0);
 }
 
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
-byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type)
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
 //   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
 //   max_size  : Nombre de caractères logeant dans la zone de saisie
-//   input_type  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+//   input_type  : 0=String, 1=Unsigned int, 2=Filename 3=Signed Double
+//   decimal_places: Number of decimal places for a double
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
@@ -147,6 +151,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     str[0]='\0';
   else if (input_type==1)
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
+  else if (input_type==3)
+  {
+    //  Nothing. The caller should have used Sprint_double, with min_positions
+    //  at zero, so there's no spaces on the left and no useless 0s on the right.
+  }
 
   Wait_end_of_click();
   Keyboard_click_allowed = 0;
@@ -163,7 +172,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   size=strlen(str);
   position=(size<max_size)? size:size-1;
-  if (position-offset>visible_size)
+  if (position-offset>=visible_size)
     offset=position-visible_size+1;
   // Formatage d'une partie de la chaine (si trop longue pour tenir)
   strncpy(display_string, str + offset, visible_size);
@@ -241,7 +250,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             if ((position<size) && (position<max_size-1))
             {
               position=(size<max_size)?size:size-1;
-              if (position-offset>visible_size)
+              if (position-offset>=visible_size)
                 offset=position-visible_size+1;
               goto affichage;
             }
@@ -282,6 +291,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               break;
             case 1 : // Nombre
               if ( (input_key>='0') && (input_key<='9') )
+                is_authorized=1;
+              break;
+            case 3: // Decimal number
+              if ( (input_key>='0') && (input_key<='9') )
+                is_authorized=1;
+              else if (input_key=='-' && position==0 && str[0]!='-')
+                is_authorized=1;
+              else if (input_key=='.')
                 is_authorized=1;
               break;
             default : // Nom de fichier
@@ -342,6 +359,20 @@ affichage:
     }
     Print_in_window(x_pos+((max_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
   }
+  else if (input_type==3)
+  {
+    double value;
+    // Discard extra digits
+    value = Fround(atof(str), decimal_places);
+    Sprint_double(str,value,decimal_places,visible_size);
+    // Recompute updated size
+    size = strlen(str);
+    
+    if (size<=visible_size)
+      Print_in_window(x_pos+((visible_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+    else
+      Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
+  }
   else
   {
     Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
@@ -350,4 +381,54 @@ affichage:
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
   return (input_key==SDLK_RETURN || Mouse_K != 0);
+}
+
+void Sprint_double(char *str, double value, byte decimal_places, byte min_positions)
+{
+  int i;
+  int length;
+  
+  sprintf(str,"%.*f",decimal_places, value);
+  length=strlen(str);
+
+  for (i=0; i<length; i++)
+  {
+    if (str[i]=='.')
+    {
+      // Remove extraneous zeroes
+      char * decimals = str+i+1;
+      int j;
+      
+      for (j=strlen(decimals)-1; j >= 0 && decimals[j]=='0'; j--)
+      {
+          decimals[j] = '\0';
+      }
+      // If all decimals were removed, remove the dot too
+      if (str[i+1]=='\0')
+        str[i]='\0';
+      
+      // Update string length
+      length=strlen(str);
+      
+      // Ends the parent loop
+      break; 
+    }
+  }
+  
+  // Now try add spaces at beginning
+  if (length<min_positions)
+  {
+    int offset = min_positions - length;
+    
+    // Move the string to the right
+    for (i=0; i<=length; i++)
+    {
+      str[length+offset-i] = str[length-i];
+    }
+    // Replace the N first characters by spaces
+    for (i=0; i<offset; i++)
+    {
+      str[i] = ' ';
+    }
+  }
 }

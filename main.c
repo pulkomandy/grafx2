@@ -1,5 +1,8 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -31,7 +34,7 @@
 
 // There is no WM on the GP2X...
 #ifndef __GP2X__
-	#include <SDL_syswm.h>
+    #include <SDL_syswm.h>
 #endif
 
 #include "const.h"
@@ -75,28 +78,42 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-// filename for the current GUI skin file.
-static char Gui_skin_file[MAX_PATH_CHARACTERS];
-
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
   int mode_index;
-  printf("Syntax: grafx2 [<arguments>] [<picture>]\n\n");
+  printf("Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n");
   printf("<arguments> can be:]\n");
-  printf("\t/? /h /help       for this help screen\n");
-  printf("\t/wide             to emulate a video mode with wide pixels (2x1)\n");
-  printf("\t/tall             to emulate a video mode with tall pixels (1x2)\n");
-  printf("\t/double           to emulate a video mode with double pixels (2x2)\n");
-  printf("\t/wide2            to emulate a video mode with double wide pixels (4x2)\n");
-  printf("\t/tall2            to emulate a video mode with double tall pixels (2x4)\n");
-  printf("\t/triple           to emulate a video mode with triple pixels (3x3)\n");
-  printf("\t/quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t/skin <filename>  use an alternate file with the menu graphics\n");
-  printf("\t/mode <videomode> to set a video mode\n\n");
+  printf("\t-? -h -H -help    for this help screen\n");
+  printf("\t-wide             to emulate a video mode with wide pixels (2x1)\n");
+  printf("\t-tall             to emulate a video mode with tall pixels (1x2)\n");
+  printf("\t-double           to emulate a video mode with double pixels (2x2)\n");
+  printf("\t-wide2            to emulate a video mode with double wide pixels (4x2)\n");
+  printf("\t-tall2            to emulate a video mode with double tall pixels (2x4)\n");
+  printf("\t-triple           to emulate a video mode with triple pixels (3x3)\n");
+  printf("\t-quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
+  printf("\t-rgb n            to reduce RGB precision from 256 to n levels\n");
+  printf("\t-skin <filename>  to use an alternate file with the menu graphics\n");
+  printf("\t-mode <videomode> to set a video mode\n");
+  printf("Arguments can be prefixed either by / - or --\n");
+  printf("They can also be abbreviated.\n\n");
   printf("Available video modes:\n\n");
-  for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
-    printf("\t%s\n",Mode_label(mode_index));
+  for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 12)
+  {
+    int k;
+    for (k = 0; k < 6; k++)
+    {
+      if (mode_index + k >= Nb_video_modes) break;
+      printf("%12s",Mode_label(mode_index + k));
+    }
+    puts("");
+  }
+}
+
+// ---------------------------- Sortie impromptue ----------------------------
+void Warning_function(const char *message, const char *filename, int line_number, const char *function_name)
+{
+  printf("Warning in file %s, line %d, function %s : %s\n", filename, line_number, function_name, message);
 }
 
 
@@ -163,151 +180,217 @@ void Error_function(int error_code, const char *filename, int line_number, const
   }
 }
 
+enum CMD_PARAMS
+{
+    CMDPARAM_HELP,
+    CMDPARAM_MODE,
+    CMDPARAM_PIXELRATIO_TALL,
+    CMDPARAM_PIXELRATIO_WIDE,
+    CMDPARAM_PIXELRATIO_DOUBLE,
+    CMDPARAM_PIXELRATIO_TRIPLE,
+    CMDPARAM_PIXELRATIO_QUAD,
+    CMDPARAM_PIXELRATIO_TALL2,
+    CMDPARAM_PIXELRATIO_WIDE2,
+    CMDPARAM_RGB,
+    CMDPARAM_SKIN
+};
+
+struct {
+    const char *param;
+    int id;
+} cmdparams[] = {
+    {"?", CMDPARAM_HELP},
+    {"h", CMDPARAM_HELP},
+    {"H", CMDPARAM_HELP},
+    {"help", CMDPARAM_HELP},
+    {"mode", CMDPARAM_MODE},
+    {"tall", CMDPARAM_PIXELRATIO_TALL},
+    {"wide", CMDPARAM_PIXELRATIO_WIDE},
+    {"double", CMDPARAM_PIXELRATIO_DOUBLE},
+    {"triple", CMDPARAM_PIXELRATIO_TRIPLE},
+    {"quadruple", CMDPARAM_PIXELRATIO_QUAD},
+    {"tall2", CMDPARAM_PIXELRATIO_TALL2},
+    {"wide2", CMDPARAM_PIXELRATIO_WIDE2},
+    {"rgb", CMDPARAM_RGB},
+    {"skin", CMDPARAM_SKIN}
+};
+
+#define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
+
 // --------------------- Analyse de la ligne de commande ---------------------
-void Analyze_command_line(int argc,char * argv[])
+int Analyze_command_line(int argc, char * argv[], char *main_filename, char *main_directory, char *spare_filename, char *spare_directory)
 {
   char *buffer ;
   int index;
+  int file_in_command_line;
 
-
-  File_in_command_line=0;
-  Resolution_in_command_line=0;
+  file_in_command_line = 0;
+  Resolution_in_command_line = 0;
   
-  Current_resolution=Config.Default_resolution;
+  Current_resolution = Config.Default_resolution;
   
-  for (index=1; index<argc; index++)
+  for (index = 1; index<argc; index++)
   {
-    if ( !strcmp(argv[index],"/?") ||
-         !strcmp(argv[index],"/h") ||
-         !strcmp(argv[index],"/H") )
+    char *s = argv[index];
+    int is_switch = ((strchr(s,'/') == s) || (strchr(s,'-') == s) || (strstr(s,"--") == s));
+    int tmpi;
+    int paramtype = -1;
+    if (is_switch)
     {
-      // help
-      Display_syntax();
-      exit(0);
-    }
-    else if ( !strcmp(argv[index],"/mode") )
-    {
-      // mode
-      index++;
-      if (index<argc)
-      {    
-        Resolution_in_command_line = 1;
-        Current_resolution=Convert_videomode_arg(argv[index]);
-        if (Current_resolution == -1)
-        {
-          Error(ERROR_COMMAND_LINE);
-          Display_syntax();
-          exit(0);
-        }
-        if ((Video_mode[Current_resolution].State & 0x7F) == 3)
-        {
-          Error(ERROR_FORBIDDEN_MODE);
-          exit(0);
-        }
+      int param_matches = 0;
+      int param_match = -1;
+      if (*s == '-')
+      {
+        s++;
+        if (*s == '-')
+          s++;
       }
       else
+        s++;
+  
+      for (tmpi = 0; tmpi < ARRAY_SIZE(cmdparams); tmpi++)
       {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else if ( !strcmp(argv[index],"/tall") )
-    {
-      Pixel_ratio = PIXEL_TALL;
-    }
-    else if ( !strcmp(argv[index],"/wide") )
-    {
-      Pixel_ratio = PIXEL_WIDE;
-    }
-    else if ( !strcmp(argv[index],"/double") )
-    {
-      Pixel_ratio = PIXEL_DOUBLE;
-    }
-    else if ( !strcmp(argv[index],"/triple") )
-    {
-      Pixel_ratio = PIXEL_TRIPLE;
-    }
-    else if ( !strcmp(argv[index],"/quadruple") )
-    {
-      Pixel_ratio = PIXEL_QUAD;
-    }
-    else if ( !strcmp(argv[index],"/tall2") )
-    {
-      Pixel_ratio = PIXEL_TALL2;
-    }
-    else if ( !strcmp(argv[index],"/wide2") )
-    {
-      Pixel_ratio = PIXEL_WIDE2;
-    }
-    else if ( !strcmp(argv[index],"/rgb") )
-    {
-      // echelle des composants RGB
-      index++;
-      if (index<argc)
-      {
-        int scale;
-        scale = atoi(argv[index]);
-        if (scale < 2 || scale > 256)
+        if (!strcmp(s, cmdparams[tmpi].param))
         {
-          Error(ERROR_COMMAND_LINE);
-          Display_syntax();
-          exit(0);
+          paramtype = cmdparams[tmpi].id;
+          break;
         }
-        Set_palette_RGB_scale(scale);
+        else if (strstr(cmdparams[tmpi].param, s))
+        {
+          param_matches++;
+          param_match = cmdparams[tmpi].id;
+        }
       }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else if ( !strcmp(argv[index],"/skin") )
-    {
-      // GUI skin file
-      index++;
-      if (index<argc)
-      {
-        strcpy(Gui_skin_file,argv[index]);
-      }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-    }
-    else
-    {
-      // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
-      if (File_in_command_line)
-      {
-        // plusieurs noms de fichier en argument
-        Error(ERROR_COMMAND_LINE);
-        Display_syntax();
-        exit(0);
-      }
-      else if (File_exists(argv[index]))
-      {
-        File_in_command_line=1;
+      if (paramtype == -1 && param_matches == 1)
+        paramtype = param_match;
 
-        // On récupère le chemin complet du paramètre
-        // Et on découpe ce chemin en répertoire(path) + fichier(.ext)
-        buffer=Realpath(argv[index],NULL);
-        Extract_path(Main_file_directory, buffer);
-        Extract_filename(Main_filename, buffer);
-        free(buffer);
-        chdir(Main_file_directory);
-      }
-      else
-      {
-        Error(ERROR_COMMAND_LINE);
+    }
+    switch (paramtype)
+    {
+      case CMDPARAM_HELP:
         Display_syntax();
         exit(0);
-      }
+      case CMDPARAM_MODE:
+        index++;
+        if (index<argc)
+        {
+          Resolution_in_command_line = 1;
+          Current_resolution = Convert_videomode_arg(argv[index]);
+          if (Current_resolution == -1)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          if ((Video_mode[Current_resolution].State & 0x7F) == 3)
+          {
+            Error(ERROR_FORBIDDEN_MODE);
+            exit(0);
+          }
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_PIXELRATIO_TALL:
+        Pixel_ratio = PIXEL_TALL;
+        break;
+      case CMDPARAM_PIXELRATIO_WIDE:
+        Pixel_ratio = PIXEL_WIDE;
+        break;
+      case CMDPARAM_PIXELRATIO_DOUBLE:
+        Pixel_ratio = PIXEL_DOUBLE;
+        break;
+      case CMDPARAM_PIXELRATIO_TRIPLE:
+        Pixel_ratio = PIXEL_TRIPLE;
+        break;
+      case CMDPARAM_PIXELRATIO_QUAD:
+        Pixel_ratio = PIXEL_QUAD;
+        break;
+      case CMDPARAM_PIXELRATIO_TALL2:
+        Pixel_ratio = PIXEL_TALL2;
+        break;
+      case CMDPARAM_PIXELRATIO_WIDE2:
+        Pixel_ratio = PIXEL_WIDE2;
+        break;
+      case CMDPARAM_RGB:
+        // echelle des composants RGB
+        index++;
+        if (index<argc)
+        {
+          int scale;
+          scale = atoi(argv[index]);
+          if (scale < 2 || scale > 256)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          Set_palette_RGB_scale(scale);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_SKIN:
+        // GUI skin file
+        index++;
+        if (index<argc)
+        {
+          strcpy(Config.Skin_file,argv[index]);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      default:
+        // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
+        if (file_in_command_line > 1)
+        {
+          // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        else if (File_exists(argv[index]))
+        {
+          file_in_command_line ++;
+          buffer = Realpath(argv[index], NULL);
+        
+          if (file_in_command_line == 1)
+          {
+            // Separate path from filename
+            Extract_path(main_directory, buffer);
+            Extract_filename(main_filename, buffer);
+          }
+          else
+          {
+            // Separate path from filename
+            Extract_path(spare_directory, buffer);
+            Extract_filename(spare_filename, buffer);
+          }
+          free(buffer);
+          buffer = NULL;
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
     }
   }
+  return file_in_command_line;
 }
 
 // ------------------------ Initialiser le programme -------------------------
@@ -316,7 +399,15 @@ int Init_program(int argc,char * argv[])
 {
   int temp;
   int starting_videomode;
-  char program_directory[MAX_PATH_CHARACTERS];
+  static char program_directory[MAX_PATH_CHARACTERS];
+  T_Gui_skin *gfx;
+  int file_in_command_line;
+  static char main_filename [MAX_PATH_CHARACTERS];
+  static char main_directory[MAX_PATH_CHARACTERS];
+  static char spare_filename [MAX_PATH_CHARACTERS];
+  static char spare_directory[MAX_PATH_CHARACTERS];
+  
+  
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -340,36 +431,36 @@ int Init_program(int argc,char * argv[])
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main_current_directory);
 
-  // On initialise les données sur le nom de fichier de l'image principale:
-  strcpy(Main_file_directory,Main_current_directory);
-  strcpy(Main_filename,"NO_NAME.GIF");
-  Main_fileformat=DEFAULT_FILEFORMAT;
-
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare_current_directory,Main_current_directory);
-  strcpy(Spare_file_directory,Main_file_directory);
-  strcpy(Spare_filename       ,Main_filename);
+  
+  Main_fileformat=DEFAULT_FILEFORMAT;
   Spare_fileformat    =Main_fileformat;
+  
   strcpy(Brush_current_directory,Main_current_directory);
-  strcpy(Brush_file_directory,Main_file_directory);
-  strcpy(Brush_filename       ,Main_filename);
+  strcpy(Brush_file_directory,Main_current_directory);
+  strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
   Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_format=0;
+  Main_format=FORMAT_ALL_IMAGES;
+  Main_current_layer=0;
+  Main_layers_visible=0xFFFFFFFF;
+  Spare_current_layer=0;
+  Spare_layers_visible=0xFFFFFFFF;
+  
   Spare_fileselector_position=0;
   Spare_fileselector_offset=0;
-  Spare_format=0;
+  Spare_format=FORMAT_ALL_IMAGES;
   Brush_fileselector_position=0;
   Brush_fileselector_offset=0;
-  Brush_format=0;
+  Brush_format=FORMAT_ALL_IMAGES;
 
   // On initialise les commentaires des images à des chaînes vides
   Main_comment[0]='\0';
-  Spare_comment[0]='\0';
   Brush_comment[0]='\0';
 
   // On initialise d'ot' trucs
@@ -400,6 +491,12 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
   Keyboard_click_allowed = 0;
+  
+  Main_safety_backup_prefix = 'a';
+  Spare_safety_backup_prefix = 'b';
+  Main_time_of_safety_backup = 0;
+  Spare_time_of_safety_backup = 0;
+  
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -420,21 +517,36 @@ int Init_program(int argc,char * argv[])
     SDL_Surface * icon;
     sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
     icon = IMG_Load(icon_path);
-    if (icon)
+    if (icon && icon->w == 32 && icon->h == 32)
     {
-      byte *icon_mask;
-      int x,y;
-      icon_mask=malloc(128);
-      memset(icon_mask,0,128);
-      for (y=0;y<32;y++)
-        for (x=0;x<32;x++)
-          if (((byte *)(icon->pixels))[(y*32+x)] != 255)
-            icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-      SDL_WM_SetIcon(icon,icon_mask);
-      free(icon_mask);
+      Uint32 pink;
+      pink = SDL_MapRGB(icon->format, 255, 0, 255);
+      
+      if (icon->format->BitsPerPixel == 8)
+      {
+        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
+        SDL_WM_SetIcon(icon,NULL);
+      }
+      else
+      {
+        byte *icon_mask;
+        int x,y;
+        
+        icon_mask=malloc(128);
+        memset(icon_mask,0,128);
+        for (y=0;y<32;y++)
+          for (x=0;x<32;x++)
+            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
+              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
+        SDL_WM_SetIcon(icon,icon_mask);
+        free(icon_mask);
+        icon_mask = NULL;
+      }
+
       SDL_FreeSurface(icon);
     }
   }
+  
   // Texte
   Init_text();
 
@@ -446,7 +558,6 @@ int Init_program(int argc,char * argv[])
   Quit_is_required=0;
   Quitting=0;
   // Données sur l'état du menu:
-  Pixel_in_menu=Pixel_in_toolbar;
   Menu_is_visible=1;
   // Données sur les couleurs et la palette:
   First_color_in_palette=0;
@@ -458,8 +569,6 @@ int Init_program(int argc,char * argv[])
   Paintbrush_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
-
-  Pixel_load_function=Pixel_load_in_current_screen;
 
   // On initialise tout ce qui concerne les opérations et les effets
   Operation_stack_size=0;
@@ -538,33 +647,37 @@ int Init_program(int argc,char * argv[])
   if (temp)
     Error(temp);
 
-  Analyze_command_line(argc,argv);
+  Compute_menu_offsets();
+
+  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
+
+  Current_help_section=0;
+  Help_position=0;
 
   // Load sprites, palette etc.
-  strcpy(Gui_skin_file,Config.Skin_file);
-  Gfx = Load_graphics(Gui_skin_file);
-  if (Gfx == NULL)
+  gfx = Load_graphics(Config.Skin_file);
+  if (gfx == NULL)
   {
-    Gfx = Load_graphics("skin_modern.png");
-    if (Gfx == NULL)
+    gfx = Load_graphics("skin_modern.png");
+    if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
       Error(ERROR_GUI_MISSING);
     }
   }
+  Set_current_skin(Config.Skin_file, gfx);
+  Fore_color=MC_White;
+  Back_color=MC_Black;
+  // Override colors
+  // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
+  // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
+  // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
+  // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+//  Compute_optimal_menu_colors(Gfx->Default_palette);
+    
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
-
-  // Transfert des valeurs du .INI qui ne changent pas dans des variables
-  // plus accessibles:
-  Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-  Compute_optimal_menu_colors(Gfx->Default_palette);
-  Fore_color=MC_White;
-  Back_color=MC_Black;
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
@@ -616,21 +729,10 @@ int Init_program(int argc,char * argv[])
   Main_image_height=Screen_height/Pixel_height;
   Spare_image_width=Screen_width/Pixel_width;
   Spare_image_height=Screen_height/Pixel_height;
+  
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
-  if (Init_all_backup_lists(Config.Max_undo_pages+1,Screen_width,Screen_height)==0)
+  if (Init_all_backup_lists(Screen_width,Screen_height)==0)
     Error(ERROR_MEMORY);
-  // On remet le nom par défaut pour la page de brouillon car il été modifié
-  // par le passage d'un fichier en paramètre lors du traitement précédent.
-  // Note: le fait que l'on ne modifie que les variables globales 
-  // Brouillon_* et pas les infos contenues dans la page de brouillon 
-  // elle-même ne m'inspire pas confiance mais ça a l'air de marcher sans 
-  // poser de problèmes, alors...
-  if (File_in_command_line)
-  {
-    strcpy(Spare_file_directory,Spare_current_directory);
-    strcpy(Spare_filename,"NO_NAME.GIF");
-    Spare_fileformat=DEFAULT_FILEFORMAT;
-  }
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
@@ -662,6 +764,77 @@ int Init_program(int argc,char * argv[])
   Brush_height=1;
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
+  
+  // Test de recuperation de fichiers sauvés
+  switch (Check_recovery())
+  {
+    T_IO_Context context;
+
+    default:    
+      // Some files were loaded from last crash-exit.
+      // Do not load files from command-line, nor show splash screen.
+      Compute_optimal_menu_colors(Main_palette);
+      Display_all_screen();
+      Display_menu();
+      Display_cursor();
+      Verbose_message("Images recovered",
+        "Grafx2 has recovered images from\n"
+        "last session, before a crash or\n"
+        "shutdown. Browse the history using\n"
+        "the Undo/Redo button, and when\n"
+        "you find a state that you want to\n"
+        "save, use the 'Save as' button to\n"
+        "save the image.\n"
+        "Some backups can be present in\n"
+        "the spare page too.\n");
+      break;
+  
+    case -1: // Unable to write lock file
+      Verbose_message("Warning", 
+        "Safety backups (every minute) are\n"
+        "disabled because Grafx2 is running\n"
+        "from a read-only device, or other\n"
+        "instances are running.");
+      break;
+
+    case 0:
+    
+      switch (file_in_command_line)
+      {
+        case 0:
+          if (Config.Opening_message)
+            Button_Message_initial();
+          break;
+  
+        case 2:
+          // Load this file
+          Init_context_layered_image(&context, spare_filename, spare_directory);
+          Load_image(&context);
+          Destroy_context(&context);
+          Redraw_layered_image();
+          End_of_modification();
+  
+          Button_Page();
+          // no break ! proceed with the other file now
+        case 1:
+          Init_context_layered_image(&context, main_filename, main_directory);
+          Load_image(&context);
+          Destroy_context(&context);
+          Redraw_layered_image();
+          End_of_modification();
+          
+          Hide_cursor();
+          Compute_optimal_menu_colors(Main_palette);
+          Display_all_screen();
+          Display_menu();
+          Display_cursor();
+          Resolution_in_command_line = 0;
+          break;
+    
+        default:
+          break;
+      }
+  }
   return(1);
 }
 
@@ -689,25 +862,26 @@ void Program_shutdown(void)
     Config.Window_pos_y = 9999;
   #endif
 
+  // Remove the safety backups, this is normal exit
+  Delete_safety_backups();
+
   // On libère le buffer de gestion de lignes
-  if(Horizontal_line_buffer) free(Horizontal_line_buffer);
+  free(Horizontal_line_buffer);
+  Horizontal_line_buffer = NULL;
 
   // On libère le pinceau spécial
-  if (Paintbrush_sprite) free(Paintbrush_sprite);
+  free(Paintbrush_sprite);
+  Paintbrush_sprite = NULL;
 
   // On libère les différents écrans virtuels et brosse:
-  if(Brush) free(Brush);
+  free(Brush);
+  Brush = NULL;
   Set_number_of_backups(0);
-  if(Spare_screen) free(Spare_screen);
-  if(Main_screen) free(Main_screen);
 
   // Free the skin (Gui graphics) data
-  if (Gfx)
-  {
-    free(Gfx);
-    Gfx=NULL;
-  }
-  
+  free(Gfx);
+  Gfx=NULL;
+
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)
   {
@@ -732,63 +906,13 @@ void Program_shutdown(void)
 // -------------------------- Procédure principale ---------------------------
 int main(int argc,char * argv[])
 {
-  int phoenix_found=0;
-  int phoenix2_found=0;
-  char phoenix_filename1[MAX_PATH_CHARACTERS];
-  char phoenix_filename2[MAX_PATH_CHARACTERS];
+
   if(!Init_program(argc,argv))
   {
-	Program_shutdown();
+    Program_shutdown();
     return 0;
   }
-
-  // Test de recuperation de fichiers sauvés
-  strcpy(phoenix_filename1,Config_directory);
-  strcat(phoenix_filename1,"phoenix.img");
-  strcpy(phoenix_filename2,Config_directory);
-  strcat(phoenix_filename2,"phoenix2.img");
-  if (File_exists(phoenix_filename1))
-    phoenix_found=1;
-  if (File_exists(phoenix_filename2))
-    phoenix2_found=1;
-  if (phoenix_found || phoenix2_found)
-  {
-    if (phoenix2_found)
-    {
-      strcpy(Main_file_directory,Config_directory);
-      strcpy(Main_filename,"phoenix2.img");
-      chdir(Main_file_directory);
-
-      Button_Reload();
-      Main_image_is_modified=1;
-      Warning_message("Spare page recovered");
-      // I don't really like this, but...
-      remove(phoenix_filename2);
-      Button_Page();
-    }
-    if (phoenix_found)
-    {
-      strcpy(Main_file_directory,Config_directory);
-      strcpy(Main_filename,"phoenix.img");
-      chdir(Main_file_directory);
-      Button_Reload();
-      Main_image_is_modified=1;
-      Warning_message("Main page recovered");
-      // I don't really like this, but...
-      remove(phoenix_filename1);
-    }
-  }
-  else
-  {
-    if (Config.Opening_message && (!File_in_command_line))
-      Button_Message_initial();
   
-    if (File_in_command_line)
-    {
-      Button_Reload();
-      Resolution_in_command_line=0;
-    }
-  }
   Main_handler();
 
   Program_shutdown();

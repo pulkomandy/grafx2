@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Franck Charlet
@@ -22,6 +24,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -67,6 +70,11 @@
 // -- Fileselector data
 
 T_Fileselector Filelist;
+
+/// Name of the current directory
+//static char Selector_directory[1024];
+/// Filename (without directory) of the highlighted file
+static char Selector_filename[256];
 
 // Conventions:
 //
@@ -131,6 +139,7 @@ void Free_fileselector_list(T_Fileselector *list)
     list->First=list->First->Next;
     // Et on efface l'ancien premier élément de la liste
     free(temp_item);
+    temp_item = NULL;
   }
   Recount_files(list);
 }
@@ -210,13 +219,15 @@ void Add_element_to_list(T_Fileselector *list, const char * fname, int type)
   list->First=temp_item;
 }
 
-// -- Vérification si un fichier a l'extension demandée.
-// Autorise les '?', et '*' si c'est le seul caractère.
-int Check_extension(const char *filename, char * filter)
+///
+/// Checks if a file has the requested file extension.
+/// The extension string can end with a ';' (remainder is ignored)
+/// This function allows wildcard '?', and '*' if it's the only character.
+int Check_extension(const char *filename, const char * filter)
 {
   int pos_last_dot = -1;
   int c = 0;
-
+  
   if (filter[0] == '*')
     return 1;
   // On recherche la position du dernier . dans le nom
@@ -225,20 +236,21 @@ int Check_extension(const char *filename, char * filter)
       pos_last_dot = c;
   // Fichier sans extension (ca arrive)
   if (pos_last_dot == -1)
-    return (filter[0] == '\0');
+    return (filter[0] == '\0' || filter[0] == ';');
 
   // Vérification caractère par caractère, case-insensitive.
   c = 0;
-  do
+  while (1)
   {
+    if (filter[c] == '\0' || filter[c] == ';')
+      return filename[pos_last_dot + 1 + c] == '\0';
+    
     if (filter[c] != '?' &&
       tolower(filter[c]) != tolower(filename[pos_last_dot + 1 + c]))
       return 0;
 
      c++;
-  } while (filter[c++] != '\0');
-
-  return 1;
+  }
 }
 
 
@@ -254,8 +266,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   char * current_path;
 
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
-  if (selected_format) // Format (extension) spécifique
-    filter = File_formats[selected_format-1].Extension;
+  filter = Get_fileformat(selected_format)->Extensions;
 
   // Ensuite, on vide la liste actuelle:
   Free_fileselector_list(list);
@@ -288,11 +299,23 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       (Config.Show_hidden_files || //Il n'est pas caché
       !isHidden(entry)))
     {
-      if (Check_extension(entry->d_name, filter))
-      {
-        // On rajoute le fichier à la liste
-        Add_element_to_list(list, entry->d_name, 0);
-        list->Nb_files++;
+      const char * ext = filter;
+      while (ext!=NULL)
+      {      
+        if (Check_extension(entry->d_name, ext))
+        {
+          // On rajoute le fichier à la liste
+          Add_element_to_list(list, entry->d_name, 0);
+          list->Nb_files++;
+          // Stop searching
+          ext=NULL;
+        }
+        else
+        {
+          ext = strchr(ext, ';');
+          if (ext)
+            ext++;
+        }
       }
     }
   }
@@ -304,6 +327,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 
   closedir(current_directory);
   free(current_path);
+  current_path = NULL;
 
   Recount_files(list);
 }
@@ -846,14 +870,13 @@ void Print_current_directory(void)
   Update_window_area(10,84,37*8,8);
 }
 
-
+//
+// Print the current file name
+//
 void Print_filename_in_fileselector(void)
-//
-// Affiche Main_filename dans le Fileselect
-//
 {
   Window_rectangle(82,48,27*8,8,MC_Light);
-  Print_in_window_limited(82,48,Main_filename,27,MC_Black,MC_Light);
+  Print_in_window_limited(82,48,Selector_filename,27,MC_Black,MC_Light);
   Update_window_area(82,48,27*8,8);
 }
 
@@ -874,7 +897,7 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
   Update_window_area(8-1,95-1,144+2,80+2);
 
   // On récupère le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Position,offset,Main_filename,&Selected_type);
+  Get_selected_item(&Filelist, Position,offset,Selector_filename,&Selected_type);
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
   // On affiche le nom du répertoire courant
@@ -919,7 +942,7 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
 {
   char old_filename[MAX_PATH_CHARACTERS];
 
-  strcpy(old_filename,Main_filename);
+  strcpy(old_filename,Selector_filename);
 
   // On regarde si la liste a bougé
   if (file_scroller->Position!=Main_fileselector_position)
@@ -929,8 +952,8 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
     Window_draw_slider(file_scroller);
   }
   // On récupére le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Main_filename,&Selected_type);
-  if (strcmp(old_filename,Main_filename))
+  Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
+  if (strcmp(old_filename,Selector_filename))
     New_preview_is_needed=1;
 
   // On affiche le nouveau nom de fichier
@@ -939,16 +962,24 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
 }
 
 
-short Find_file_in_fileselector(T_Fileselector *list, char * fname)
+short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
 {
-  T_Fileselector_item * current_item;
+  T_Fileselector_item * item;
   short  index;
+  short  close_match=0;
 
-  for (index=0, current_item=list->First;
-       ((current_item!=NULL) && (strcmp(current_item->Full_name,fname)));
-       index++,current_item=current_item->Next);
+  index=0;
+  for (item=list->First; item!=NULL; item=item->Next)
+  {
+    if (strcmp(item->Full_name,fname)==0)
+      return index;
+    if (strcasecmp(item->Full_name,fname)==0)
+      close_match=index;
+      
+    index++;
+  }
 
-  return (current_item!=NULL)?index:0;
+  return close_match;
 }
 
 
@@ -1006,7 +1037,7 @@ char * Find_filename_match(T_Fileselector *list, char * fname)
   return best_name_ptr;
 }
 
-byte Button_Load_or_Save(byte load, byte image)
+byte Button_Load_or_Save(byte load, T_IO_Context *context)
   // load=1 => On affiche le menu du bouton LOAD
   // load=0 => On affiche le menu du bouton SAVE
 {
@@ -1019,36 +1050,26 @@ byte Button_Load_or_Save(byte load, byte image)
   byte  save_or_load_image=0;
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
-  T_Components * initial_palette; // |  Données concernant l'image qui
-  byte  initial_image_is_modified;         // |  sont mémorisées pour pouvoir
-  short initial_image_width;          // |- être restaurées en sortant,
-  short initial_image_height;          // |  parce que la preview elle les
-  byte  old_back_color;             // |  fout en l'air (c'te conne).
-  char  initial_filename[MAX_PATH_CHARACTERS]; // Sert à laisser le nom courant du fichier en cas de sauvegarde
+  byte  initial_back_color;             // |  fout en l'air (c'te conne).
   char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
-  char  initial_comment[COMMENT_SIZE+1];
   char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
   char  save_filename[MAX_PATH_CHARACTERS];
+  char  initial_comment[COMMENT_SIZE+1];
   char * most_matching_filename;
   short window_shortcut;
   
-  if (image)
+  if (context->Type == CONTEXT_MAIN_IMAGE)
     window_shortcut = load?(0x100+BUTTON_LOAD):(0x100+BUTTON_SAVE);
   else
     window_shortcut = load?SPECIAL_LOAD_BRUSH:SPECIAL_SAVE_BRUSH;
 
-  initial_palette=(T_Components *)malloc(sizeof(T_Palette));
-  memcpy(initial_palette,Main_palette,sizeof(T_Palette));
-
-  old_back_color=Back_color;
-  initial_image_is_modified=Main_image_is_modified;
-  initial_image_width=Main_image_width;
-  initial_image_height=Main_image_height;
-  strcpy(initial_filename,Main_filename);
-  strcpy(initial_comment,Main_comment);
+  // Backup data that needs be restored on "cancel"  
+  initial_back_color=Back_color;
+  strcpy(initial_comment,context->Comment);
+  
   if (load)
   {
-    if (image)
+    if (context->Type == CONTEXT_MAIN_IMAGE)
       Open_window(310,200,"Load picture");
     else
       Open_window(310,200,"Load brush");
@@ -1056,27 +1077,27 @@ byte Button_Load_or_Save(byte load, byte image)
   }
   else
   {
-    if (image)
+    if (context->Type == CONTEXT_MAIN_IMAGE)
       Open_window(310,200,"Save picture");
     else
       Open_window(310,200,"Save brush");
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
-    if (Main_format==FORMAT_ANY) // Correction du *.*
+    if (Main_format<=FORMAT_ALL_FILES) // Correction du *.*
     {
       Main_format=Main_fileformat;
       Main_fileselector_position=0;
       Main_fileselector_offset=0;
     }
 
-    if (Main_format>NB_FORMATS_SAVE) // Correction d'un format insauvable
+    if (Get_fileformat(Main_format)->Save == NULL) // Correction d'un format insauvable
     {
       Main_format=DEFAULT_FILEFORMAT;
       Main_fileselector_position=0;
       Main_fileselector_offset=0;
     }
     // Affichage du commentaire
-    if (File_formats[Main_format-1].Comment)
-      Print_in_window(47,70,Main_comment,MC_Black,MC_Light);
+    if (Get_fileformat(Main_format)->Comment)
+      Print_in_window(47,70,context->Comment,MC_Black,MC_Light);      
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
@@ -1097,16 +1118,15 @@ byte Button_Load_or_Save(byte load, byte image)
 
   // Dropdown pour les formats de fichier
   formats_dropdown=
-    Window_set_dropdown_button(69,28,49,11,0,
-      (Main_format==FORMAT_ANY)?"*.*":File_formats[Main_format-1].Extension,
-      1,0,1,RIGHT_SIDE|LEFT_SIDE); // 6
-  if (load)
-    Window_dropdown_add_item(formats_dropdown,0,"*.*");
-  for (temp=0;temp<NB_KNOWN_FORMATS;temp++)
+    Window_set_dropdown_button(68,28,52,11,0,
+      Get_fileformat(Main_format)->Label,
+      1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 6
+
+  for (temp=0; temp < NB_KNOWN_FORMATS; temp++)
   {
-    if ((load && File_formats[temp].Load) || 
+    if ((load && (File_formats[temp].Identifier <= FORMAT_ALL_FILES || File_formats[temp].Load)) || 
       (!load && File_formats[temp].Save))
-        Window_dropdown_add_item(formats_dropdown,temp+1,File_formats[temp].Extension);
+        Window_dropdown_add_item(formats_dropdown,File_formats[temp].Identifier,File_formats[temp].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
   
@@ -1132,7 +1152,7 @@ byte Button_Load_or_Save(byte load, byte image)
   for (temp=0;temp<NB_BOOKMARKS;temp++)
   {
     bookmark_dropdown[temp]=
-      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE); // 10-13
+      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE,0); // 10-13
     Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
@@ -1144,7 +1164,7 @@ byte Button_Load_or_Save(byte load, byte image)
   }
   else
   {
-    chdir(Main_file_directory);
+    chdir(context->File_directory);
     getcwd(Main_current_directory,256);
   }
   
@@ -1155,12 +1175,14 @@ byte Button_Load_or_Save(byte load, byte image)
   {
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
-    strcpy(Main_filename,initial_filename);
+    strcpy(Selector_filename,context->File_name);
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
+
+    Highlight_file(context->File_name);
+    Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
   }
 
-  Pixel_load_function=Pixel_load_in_preview;
   New_preview_is_needed=1;
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -1180,10 +1202,10 @@ byte Button_Load_or_Save(byte load, byte image)
       if(load)
         {
           // Determine the type
-          if(File_exists(Main_filename)) 
+          if(File_exists(Selector_filename)) 
           {
             Selected_type = 0;
-            if(Directory_exists(Main_filename)) Selected_type = 1;
+            if(Directory_exists(Selector_filename)) Selected_type = 1;
           }
           else
           {
@@ -1192,7 +1214,7 @@ byte Button_Load_or_Save(byte load, byte image)
         }
         else
         {
-          if(Directory_exists(Main_filename)) Selected_type = 1;
+          if(Directory_exists(Selector_filename)) Selected_type = 1;
           else Selected_type = 0;
         }
         has_clicked_ok=1;
@@ -1202,7 +1224,7 @@ byte Button_Load_or_Save(byte load, byte image)
         break;
 
       case  3 : // Delete
-        if (Filelist.Nb_elements && (*Main_filename!='.') && Selected_type!=2)
+        if (Filelist.Nb_elements && (*Selector_filename!='.') && Selected_type!=2)
         {
           char * message;
           Hide_cursor();
@@ -1220,10 +1242,10 @@ byte Button_Load_or_Save(byte load, byte image)
             // Si c'est un fichier
             if (Main_fileselector_position+Main_fileselector_offset>=Filelist.Nb_directories)
               // On efface le fichier (si on peut)
-              temp=(!remove(Main_filename));
+              temp=(!remove(Selector_filename));
             else // Si c'est un repertoire
               // On efface le repertoire (si on peut)
-              temp=(!rmdir(Main_filename));
+              temp=(!rmdir(Selector_filename));
 
             if (temp) // temp indique si l'effacement s'est bien passé
             {
@@ -1276,7 +1298,7 @@ byte Button_Load_or_Save(byte load, byte image)
             Main_fileselector_offset=temp;
 
             // On récupére le nom du schmilblick à "accéder"
-            Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Main_filename,&Selected_type);
+            Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
             // On affiche le nouveau nom de fichier
             Print_filename_in_fileselector();
             // On affiche à nouveau la liste
@@ -1294,7 +1316,7 @@ byte Button_Load_or_Save(byte load, byte image)
             // certains cas, on risque de sauvegarder avec le nom du fichier
             // actuel au lieu de changer de répertoire.
             if (Main_fileselector_position+Main_fileselector_offset<Filelist.Nb_directories)
-              Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Main_filename,&Selected_type);
+              Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
 
             has_clicked_ok=1;
             New_preview_is_needed=1;
@@ -1309,7 +1331,7 @@ byte Button_Load_or_Save(byte load, byte image)
         Hide_cursor();
         Main_fileselector_position=Window_attribute2;
         // On récupére le nom du schmilblick à "accéder"
-        Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Main_filename,&Selected_type);
+        Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
         // On affiche à nouveau la liste
@@ -1333,32 +1355,32 @@ byte Button_Load_or_Save(byte load, byte image)
         *quicksearch_filename=0;
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
-        if ( (!load) && (File_formats[Main_format-1].Comment) )
+        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
-          Readline(45,70,Main_comment,32,0);
+          Readline(45,70,context->Comment,32,0);
           Display_cursor();
         }
         break;
       case  8 : // Saisie du nom de fichier
 
         // Save the filename
-        strcpy(save_filename, Main_filename);
+        strcpy(save_filename, Selector_filename);
 
-        if (Readline(82,48,Main_filename,27,2))
+        if (Readline(82,48,Selector_filename,27,2))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
-          for(temp=0,dummy=0; ((Main_filename[temp]) && (!dummy)); temp++)
-            if (Main_filename[temp]=='.')
+          for(temp=0,dummy=0; ((Selector_filename[temp]) && (!dummy)); temp++)
+            if (Selector_filename[temp]=='.')
               dummy=1;
           if (!dummy)
           {
-            if (Main_format != FORMAT_ANY)
+            if (Get_fileformat(Main_format)->Default_extension)
             {
-              if(!Directory_exists(Main_filename))
+              if(!Directory_exists(Selector_filename))
               {
-                 strcat(Main_filename,".");
-                 strcat(Main_filename,File_formats[Main_format-1].Extension);
+                 strcat(Selector_filename, ".");
+                 strcat(Selector_filename,Get_fileformat(Main_format)->Default_extension);
               }
             }
             else
@@ -1366,19 +1388,19 @@ byte Button_Load_or_Save(byte load, byte image)
               // put default extension
               // (but maybe we should browse through all available ones until we find
               //  something suitable ?)
-              if(!Directory_exists(Main_filename))
+              if(!Directory_exists(Selector_filename))
               {
-                 strcat(Main_filename, ".pkm");
+                 strcat(Selector_filename, ".pkm");
               }
             }
           }
           if(load)
           {
             // Determine the type
-            if(File_exists(Main_filename)) 
+            if(File_exists(Selector_filename))
             {
               Selected_type = 0;
-              if(Directory_exists(Main_filename)) Selected_type = 1;
+              if(Directory_exists(Selector_filename)) Selected_type = 1;
             }
             else
             {
@@ -1387,15 +1409,17 @@ byte Button_Load_or_Save(byte load, byte image)
           }
           else
           {
-            if(Directory_exists(Main_filename)) Selected_type = 1;
+            if(Directory_exists(Selector_filename)) Selected_type = 1;
             else Selected_type = 0;
           }
-          has_clicked_ok=1;
+
+          // Now load immediately, but only if the user exited readline by pressing ENTER
+          if (Mouse_K == 0) has_clicked_ok = 1;
         }
         else
         {
           // Restore the old filename
-          strcpy(Main_filename, save_filename);
+          strcpy(Selector_filename, save_filename);
           Print_filename_in_fileselector();
         }
         Display_cursor();
@@ -1426,7 +1450,7 @@ byte Button_Load_or_Save(byte load, byte image)
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
                   *quicksearch_filename=0;
-                  strcpy(Main_filename,Config.Bookmark_directory[clicked_button-10]);
+                  strcpy(Selector_filename,Config.Bookmark_directory[clicked_button-10]);
                   Selected_type=1;
                   has_clicked_ok=1;
                   *quicksearch_filename=0;
@@ -1434,8 +1458,8 @@ byte Button_Load_or_Save(byte load, byte image)
                 break;
                 
               case 0: // Set
-                if (Config.Bookmark_directory[clicked_button-10])
-                  free(Config.Bookmark_directory[clicked_button-10]);
+                free(Config.Bookmark_directory[clicked_button-10]);
+                Config.Bookmark_directory[clicked_button-10] = NULL;
                 Config.Bookmark_label[clicked_button-10][0]='\0';
                 temp=strlen(Main_current_directory);
                 Config.Bookmark_directory[clicked_button-10]=malloc(temp+1);
@@ -1464,7 +1488,7 @@ byte Button_Load_or_Save(byte load, byte image)
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
                   if (bookmark_label[7]==ELLIPSIS_CHARACTER)
                     bookmark_label[7]='\0';
-                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0))
+                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0,0))
                     strcpy(Config.Bookmark_label[clicked_button-10],bookmark_label);
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                   Display_cursor();
@@ -1550,7 +1574,7 @@ byte Button_Load_or_Save(byte load, byte image)
         if (!strcmp(Filelist.First->Full_name,PARENT_DIR))
         {                              
           // On va dans le répertoire parent.
-          strcpy(Main_filename,PARENT_DIR);
+          strcpy(Selector_filename,PARENT_DIR);
           Selected_type=1;
           has_clicked_ok=1;
         }
@@ -1605,17 +1629,17 @@ byte Button_Load_or_Save(byte load, byte image)
         has_clicked_ok=0;
 
         // On mémorise le répertoire dans lequel on était
-        if (strcmp(Main_filename,PARENT_DIR))
-          strcpy(previous_directory,Format_filename(PARENT_DIR, 1));
+        if (strcmp(Selector_filename,PARENT_DIR))
+        {
+          strcpy(previous_directory,PARENT_DIR);
+        }
         else
         {
-          strcpy(previous_directory,
-            Format_filename(Find_last_slash(Main_current_directory), 1)
-            );
+            Extract_filename(previous_directory, Main_current_directory);
         }
 
         // On doit rentrer dans le répertoire:
-        if (!chdir(Main_filename))
+        if (!chdir(Selector_filename))
         {
           getcwd(Main_current_directory,256);
   
@@ -1631,10 +1655,13 @@ byte Button_Load_or_Save(byte load, byte image)
         Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
         Display_cursor();
         New_preview_is_needed=1;
+
+        // On est dans un nouveau répertoire, donc on remet le quicksearch à 0
+        *quicksearch_filename=0;
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
-        strcpy(Main_file_directory,Main_current_directory);
+        strcpy(context->File_directory,Main_current_directory);
         if (!load)
           Main_fileformat=Main_format;
         save_or_load_image=1;
@@ -1658,11 +1685,11 @@ byte Button_Load_or_Save(byte load, byte image)
         // On efface la taille du fichier
         Window_rectangle(236,59,56,8,MC_Light);
         // On efface le format du fichier
-        Window_rectangle(59,59,3*8,8,MC_Light);
+        Window_rectangle(59,59,5*8,8,MC_Light);
         // Affichage du commentaire
-        if ( (!load) && (File_formats[Main_format-1].Comment) )
+        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
-          Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
+          Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
         }
         Display_cursor();
         // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
@@ -1684,20 +1711,17 @@ byte Button_Load_or_Save(byte load, byte image)
     {
       if ( (Main_fileselector_position+Main_fileselector_offset>=Filelist.Nb_directories) && (Filelist.Nb_elements) )
       {
-        strcpy(Main_file_directory,Main_current_directory);
-
+        T_IO_Context preview_context;
+      
+        Init_context_preview(&preview_context, Selector_filename, Main_current_directory);
         Hide_cursor();
-        Load_image(image);
-        //Update_window_area(183,95,120,80);
+
+        Load_image(&preview_context);
+        Destroy_context(&preview_context);
+
         Update_window_area(0,0,Window_width,Window_height);
         Display_cursor();
 
-        // Après le chargement de la preview, on restaure tout ce qui aurait
-        // pu être modifié par le chargement de l'image:
-        memcpy(Main_palette,initial_palette,sizeof(T_Palette));
-        Main_image_is_modified=initial_image_is_modified;
-        Main_image_width=initial_image_width;
-        Main_image_height=initial_image_height;
       }
 
       Timer_state=2; // On arrête le chrono
@@ -1705,19 +1729,24 @@ byte Button_Load_or_Save(byte load, byte image)
   }
   while ( (!has_clicked_ok) && (clicked_button!=2) );
 
-  // Si on annule, on restaure l'ancien commentaire
-  if (clicked_button==2)
-    strcpy(Main_comment,initial_comment);
+  if (has_clicked_ok)
+  {
+    strcpy(context->File_name, Selector_filename);
+    strcpy(context->File_directory, Main_current_directory);
+    if (!load)
+      context->Format = Main_format;
+  }
+  else
+  {
+    // Data to restore
+    strcpy(context->Comment, initial_comment);
+  }
+  
 
   //   On restaure les données de l'image qui ont certainement été modifiées
   // par la preview.
-  memcpy(Main_palette,initial_palette,sizeof(T_Palette));
   Set_palette(Main_palette);
-  Back_color=old_back_color;
-  Main_image_is_modified=initial_image_is_modified;
-  Main_image_width=initial_image_width;
-  Main_image_height=initial_image_height;
-  Set_palette(Main_palette);
+  Back_color=initial_back_color;
 
   Compute_optimal_menu_colors(Main_palette);
   temp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
@@ -1730,10 +1759,6 @@ byte Button_Load_or_Save(byte load, byte image)
   Unselect_button((load)?BUTTON_LOAD:BUTTON_SAVE);
   Display_cursor();
   Free_fileselector_list(&Filelist);
-
-  Pixel_load_function=Pixel_load_in_current_screen;
-
-  free(initial_palette);
 
   return save_or_load_image;
 }

@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -30,6 +32,10 @@
 
 #define ZOOMX 3
 #define ZOOMY 3
+
+#ifdef __VBCC__
+  #define __attribute__(x)
+#endif
 
 void Pixel_triple (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */

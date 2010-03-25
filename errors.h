@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Adrien Destugues
@@ -21,6 +23,10 @@
 /// Functions and macros for tracing and error reporting.
 //////////////////////////////////////////////////////////////////////////////
 
+#ifdef __VBCC__
+    #define __func__ "stupid compiler !"
+#endif
+
 /// Prints the source filename, line number, function name, a string and an integer.
 #define DEBUG(y,z) printf("%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
@@ -36,3 +42,13 @@ void Error_function(int error_code, const char *filename, int line_number, const
 /// - If the error code is 0, just do a red screen flash and resume.
 /// - If the error code is non-zero, abort the program.
 #define Error(n) Error_function(n, __FILE__,__LINE__,__func__)
+
+/// Helper function used by the macro ::Warning
+void Warning_function(const char *message, const char *filename, int line_number, const char *function_name);
+
+///
+/// Report a run-time abnormal condition : It will print to standard output
+/// some information about the calling function, and then resume silently.
+/// This is most useful in debugger so you can put a breakpoint on
+/// ::Warning_function and examine the stack trace.
+#define Warning(msg) Warning_function(msg, __FILE__,__LINE__,__func__)

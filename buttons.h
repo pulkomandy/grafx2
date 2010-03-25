@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -17,18 +19,22 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 ///@file buttons.h
 /// Almost all the editor actions that are called by the menu are here.
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BOUTONS_H_
 #define __BOUTONS_H_
 
 #include "struct.h"
 
+void Stencil_update_color(byte color);
+void Stencil_tag_color(byte color, byte tag_color);
+
 /*!
-    Displays an error message when there is no more memory for the requested operation. 
+    Displays an error message when there is no more memory for the requested
+    operation.
 */
 void Message_out_of_memory(void);
 
@@ -38,8 +44,9 @@ void Message_out_of_memory(void);
 void Button_Message_initial(void);
 
 /*!
-    Changes brush shape. 
-    This function saves the current brush shape and swith to the default one (single pixel brush) for the filler and the color picker. 
+    Changes brush shape.
+    This function saves the current brush shape and swith to the default one
+    (single pixel brush) for the filler and the color picker.
     These functions don't need (and will not work with) a custom brush.
 */
 void Change_paintbrush_shape(byte shape);
@@ -436,11 +443,6 @@ void Button_Tiling_menu(void);
 */
 void Effects_off(void);
 
-/*!
-    Command that sets the transparency level.
-*/
-void Transparency_set(byte amount);
-
 // Menu des effets
 
 /*!
@@ -585,7 +587,7 @@ void Button_Autosave(void);
 void Button_Settings(void);
 
 /*!
- 	Display the skin selector window.
+     Display the skin selector window.
 */
 void Button_Skins(void);
 
@@ -626,6 +628,16 @@ void Button_Quit(void);
     Hides the menubar.
 */
 void Button_Hide_menu(void);
+
+/*!
+    Shows a dropdown panel where you can choose which toolbars are visible
+*/
+void Button_Toggle_toolbar(void);
+
+/*!
+    Hides all toolbars (except status) or shows them again
+*/
+void Button_Toggle_all_toolbars(void);
 
 
 /*!

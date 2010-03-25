@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -21,8 +23,9 @@
 ///@file init.h
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
-
+  
 T_Gui_skin *Load_graphics(const char * skin_file);
+void Set_current_skin(const char *skinfile, T_Gui_skin *gfx);
 void Init_buttons(void);
 void Init_operations(void);
 void Init_brush_container(void);
@@ -41,3 +44,9 @@ extern char Gui_loading_error_message[512];
 /// If an error is encountered, it frees what needs it, prints an error message
 /// in ::Gui_loading_error_message, and returns NULL.
 byte * Load_font(const char * font_name);
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void);
+

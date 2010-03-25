@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Yves Rizoud
@@ -134,7 +136,7 @@ void Button_Transform_menu(void)
   Print_in_window( 44, 75,"Lock proportions",MC_Dark,MC_Light);
 
   Window_set_normal_button( 28, 72, 13,13,ratio_is_locked?"X":" ",0,1,SDLK_l);// 8
-  unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE);// 9
+  unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
   Window_dropdown_add_item(unit_button,UNIT_PIXELS,unit_label[UNIT_PIXELS]);
   Window_dropdown_add_item(unit_button,UNIT_PERCENT,unit_label[UNIT_PERCENT]);
   Window_dropdown_add_item(unit_button,UNIT_RATIO,unit_label[UNIT_RATIO]);
@@ -368,7 +370,7 @@ void Button_Transform_menu(void)
     old_height=Main_image_height;
     
     // Allocate a new page
-    if (Backup_with_new_dimensions(1,new_width,new_height))
+    if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,new_width,new_height))
     {
       // The new image is allocated, the new dimensions are already updated.
       
@@ -377,29 +379,60 @@ void Button_Transform_menu(void)
       // Process the transformation:
       switch(clicked_button)
       {
+        int i;
+        
         case  2 : // Flip X
-          memcpy(Main_screen,Screen_backup,Main_image_width*Main_image_height);
-          Flip_X_lowlevel(Main_screen, Main_image_width, Main_image_height);
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
+            Flip_X_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+          }
           break;
         case  3 : // Flip Y      
-          memcpy(Main_screen,Screen_backup,Main_image_width*Main_image_height);
-          Flip_Y_lowlevel(Main_screen, Main_image_width, Main_image_height);
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
+            Flip_Y_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+          }
           break;
         case  4 : // -90° Rotation
-          Rotate_270_deg_lowlevel(Screen_backup, Main_screen, old_width, old_height);
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            Rotate_270_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
+          }
           break;
         case  5 : // +90° Rotation
-          Rotate_90_deg_lowlevel(Screen_backup, Main_screen, old_width, old_height);
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            Rotate_90_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
+          }
           break;
         case  6 : // 180° Rotation
-          memcpy(Main_screen,Screen_backup,Main_image_width*Main_image_height);
-          Rotate_180_deg_lowlevel(Main_screen, Main_image_width, Main_image_height);
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
+            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+          }
           break;       
         case  7 : // Resize
-          Rescale(Screen_backup, old_width, old_height, Main_screen, Main_image_width, Main_image_height, 0, 0);
-        break;
+          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          {
+            Rescale(Main_backups->Pages->Next->Image[i], old_width, old_height, Main_backups->Pages->Image[i], Main_image_width, Main_image_height, 0, 0);
+          }
+          break;
       }
-        Display_all_screen();
+      /*
+      for (i=0; i<NB_LAYERS; i++)
+      {
+        Copy_part_of_image_to_another(
+          Main_backups->Pages->Next->Image[i],0,0,Min(old_width,Main_image_width),
+          Min(old_height,Main_image_height),old_width,
+          Main_backups->Pages->Image[i],0,0,Main_image_width);
+      }
+      */
+      Redraw_layered_image();
+      Display_all_screen();
+      End_of_modification();
     }
     else
     {

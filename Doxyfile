@@ -782,7 +782,7 @@ HTML_HEADER            =
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = 
+HTML_FOOTER            = doc/footer.html 
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -840,92 +840,6 @@ DOCSET_BUNDLE_ID       = org.doxygen.Project
 
 GENERATE_HTMLHELP      = NO
 
-# If the GENERATE_HTMLHELP tag is set to YES, the CHM_FILE tag can 
-# be used to specify the file name of the resulting .chm file. You 
-# can add a path in front of the file if the result should not be 
-# written to the html output directory.
-
-CHM_FILE               = 
-
-# If the GENERATE_HTMLHELP tag is set to YES, the HHC_LOCATION tag can 
-# be used to specify the location (absolute path including file name) of 
-# the HTML help compiler (hhc.exe). If non-empty doxygen will try to run 
-# the HTML help compiler on the generated index.hhp.
-
-HHC_LOCATION           = 
-
-# If the GENERATE_HTMLHELP tag is set to YES, the GENERATE_CHI flag 
-# controls if a separate .chi index file is generated (YES) or that 
-# it should be included in the master .chm file (NO).
-
-GENERATE_CHI           = NO
-
-# If the GENERATE_HTMLHELP tag is set to YES, the CHM_INDEX_ENCODING 
-# is used to encode HtmlHelp index (hhk), content (hhc) and project file 
-# content.
-
-CHM_INDEX_ENCODING     = 
-
-# If the GENERATE_HTMLHELP tag is set to YES, the BINARY_TOC flag 
-# controls whether a binary table of contents is generated (YES) or a 
-# normal table of contents (NO) in the .chm file.
-
-BINARY_TOC             = NO
-
-# The TOC_EXPAND flag can be set to YES to add extra items for group members 
-# to the contents of the HTML help documentation and to the tree view.
-
-TOC_EXPAND             = NO
-
-# If the GENERATE_QHP tag is set to YES and both QHP_NAMESPACE and QHP_VIRTUAL_FOLDER 
-# are set, an additional index file will be generated that can be used as input for 
-# Qt's qhelpgenerator to generate a Qt Compressed Help (.qch) of the generated 
-# HTML documentation.
-
-GENERATE_QHP           = NO
-
-# If the QHG_LOCATION tag is specified, the QCH_FILE tag can 
-# be used to specify the file name of the resulting .qch file. 
-# The path specified is relative to the HTML output folder.
-
-QCH_FILE               = 
-
-# The QHP_NAMESPACE tag specifies the namespace to use when generating 
-# Qt Help Project output. For more information please see 
-# http://doc.trolltech.com/qthelpproject.html#namespace
-
-QHP_NAMESPACE          = 
-
-# The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating 
-# Qt Help Project output. For more information please see 
-# http://doc.trolltech.com/qthelpproject.html#virtual-folders
-
-QHP_VIRTUAL_FOLDER     = doc
-
-# If QHP_CUST_FILTER_NAME is set, it specifies the name of a custom filter to add. 
-# For more information please see 
-# http://doc.trolltech.com/qthelpproject.html#custom-filters
-
-QHP_CUST_FILTER_NAME   = 
-
-# The QHP_CUST_FILT_ATTRS tag specifies the list of the attributes of the custom filter to add.For more information please see 
-# <a href="http://doc.trolltech.com/qthelpproject.html#custom-filters">Qt Help Project / Custom Filters</a>.
-
-QHP_CUST_FILTER_ATTRS  = 
-
-# The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this project's 
-# filter section matches. 
-# <a href="http://doc.trolltech.com/qthelpproject.html#filter-attributes">Qt Help Project / Filter Attributes</a>.
-
-QHP_SECT_FILTER_ATTRS  = 
-
-# If the GENERATE_QHP tag is set to YES, the QHG_LOCATION tag can 
-# be used to specify the location of Qt's qhelpgenerator. 
-# If non-empty doxygen will try to run qhelpgenerator on the generated 
-# .qhp file.
-
-QHG_LOCATION           = 
-
 # The DISABLE_INDEX tag can be used to turn on/off the condensed index at 
 # top of each HTML page. The value NO (the default) enables the index and 
 # the value YES disables it.
@@ -939,20 +853,8 @@ ENUM_VALUES_PER_LINE   = 4
 
 # The GENERATE_TREEVIEW tag is used to specify whether a tree-like index 
 # structure should be generated to display hierarchical information. 
-# If the tag value is set to FRAME, a side panel will be generated 
-# containing a tree-like index structure (just like the one that 
-# is generated for HTML Help). For this to work a browser that supports 
-# JavaScript, DHTML, CSS and frames is required (for instance Mozilla 1.0+, 
-# Netscape 6.0+, Internet explorer 5.0+, or Konqueror). Windows users are 
-# probably better off using the HTML help feature. Other possible values 
-# for this tag are: HIERARCHIES, which will generate the Groups, Directories, 
-# and Class Hierarchy pages using a tree view instead of an ordered list; 
-# ALL, which combines the behavior of FRAME and HIERARCHIES; and NONE, which 
-# disables this behavior completely. For backwards compatibility with previous 
-# releases of Doxygen, the values YES and NO are equivalent to FRAME and NONE 
-# respectively.
 
-GENERATE_TREEVIEW      = FRAME
+GENERATE_TREEVIEW      = YES
 
 # If the treeview is enabled (see GENERATE_TREEVIEW) then this tag can be 
 # used to set the initial width (in pixels) of the frame in which the tree 
@@ -968,233 +870,7 @@ TREEVIEW_WIDTH         = 250
 
 FORMULA_FONTSIZE       = 10
 
-#---------------------------------------------------------------------------
-# configuration options related to the LaTeX output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_LATEX tag is set to YES (the default) Doxygen will 
-# generate Latex output.
-
-GENERATE_LATEX         = NO
-
-# The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. 
-# If a relative path is entered the value of OUTPUT_DIRECTORY will be 
-# put in front of it. If left blank `latex' will be used as the default path.
-
-LATEX_OUTPUT           = latex
-
-# The LATEX_CMD_NAME tag can be used to specify the LaTeX command name to be 
-# invoked. If left blank `latex' will be used as the default command name.
-
-LATEX_CMD_NAME         = latex
-
-# The MAKEINDEX_CMD_NAME tag can be used to specify the command name to 
-# generate index for LaTeX. If left blank `makeindex' will be used as the 
-# default command name.
-
-MAKEINDEX_CMD_NAME     = makeindex
-
-# If the COMPACT_LATEX tag is set to YES Doxygen generates more compact 
-# LaTeX documents. This may be useful for small projects and may help to 
-# save some trees in general.
-
-COMPACT_LATEX          = NO
-
-# The PAPER_TYPE tag can be used to set the paper type that is used 
-# by the printer. Possible values are: a4, a4wide, letter, legal and 
-# executive. If left blank a4wide will be used.
-
-PAPER_TYPE             = a4wide
-
-# The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX 
-# packages that should be included in the LaTeX output.
-
-EXTRA_PACKAGES         = 
-
-# The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
-# the generated latex document. The header should contain everything until 
-# the first chapter. If it is left blank doxygen will generate a 
-# standard header. Notice: only use this tag if you know what you are doing!
-
-LATEX_HEADER           = 
-
-# If the PDF_HYPERLINKS tag is set to YES, the LaTeX that is generated 
-# is prepared for conversion to pdf (using ps2pdf). The pdf file will 
-# contain links (just like the HTML output) instead of page references 
-# This makes the output suitable for online browsing using a pdf viewer.
-
-PDF_HYPERLINKS         = YES
-
-# If the USE_PDFLATEX tag is set to YES, pdflatex will be used instead of 
-# plain latex in the generated Makefile. Set this option to YES to get a 
-# higher quality PDF documentation.
-
-USE_PDFLATEX           = YES
-
-# If the LATEX_BATCHMODE tag is set to YES, doxygen will add the \\batchmode. 
-# command to the generated LaTeX files. This will instruct LaTeX to keep 
-# running if errors occur, instead of asking the user for help. 
-# This option is also used when generating formulas in HTML.
-
-LATEX_BATCHMODE        = NO
-
-# If LATEX_HIDE_INDICES is set to YES then doxygen will not 
-# include the index chapters (such as File Index, Compound Index, etc.) 
-# in the output.
-
-LATEX_HIDE_INDICES     = NO
-
-#---------------------------------------------------------------------------
-# configuration options related to the RTF output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_RTF tag is set to YES Doxygen will generate RTF output 
-# The RTF output is optimized for Word 97 and may not look very pretty with 
-# other RTF readers or editors.
-
-GENERATE_RTF           = NO
-
-# The RTF_OUTPUT tag is used to specify where the RTF docs will be put. 
-# If a relative path is entered the value of OUTPUT_DIRECTORY will be 
-# put in front of it. If left blank `rtf' will be used as the default path.
-
-RTF_OUTPUT             = rtf
-
-# If the COMPACT_RTF tag is set to YES Doxygen generates more compact 
-# RTF documents. This may be useful for small projects and may help to 
-# save some trees in general.
-
-COMPACT_RTF            = NO
-
-# If the RTF_HYPERLINKS tag is set to YES, the RTF that is generated 
-# will contain hyperlink fields. The RTF file will 
-# contain links (just like the HTML output) instead of page references. 
-# This makes the output suitable for online browsing using WORD or other 
-# programs which support those fields. 
-# Note: wordpad (write) and others do not support links.
-
-RTF_HYPERLINKS         = NO
-
-# Load stylesheet definitions from file. Syntax is similar to doxygen's 
-# config file, i.e. a series of assignments. You only have to provide 
-# replacements, missing definitions are set to their default value.
-
-RTF_STYLESHEET_FILE    = 
-
-# Set optional variables used in the generation of an rtf document. 
-# Syntax is similar to doxygen's config file.
-
-RTF_EXTENSIONS_FILE    = 
-
-#---------------------------------------------------------------------------
-# configuration options related to the man page output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_MAN tag is set to YES (the default) Doxygen will 
-# generate man pages
-
-GENERATE_MAN           = NO
-
-# The MAN_OUTPUT tag is used to specify where the man pages will be put. 
-# If a relative path is entered the value of OUTPUT_DIRECTORY will be 
-# put in front of it. If left blank `man' will be used as the default path.
-
-MAN_OUTPUT             = man
-
-# The MAN_EXTENSION tag determines the extension that is added to 
-# the generated man pages (default is the subroutine's section .3)
-
-MAN_EXTENSION          = .3
-
-# If the MAN_LINKS tag is set to YES and Doxygen generates man output, 
-# then it will generate one additional man file for each entity 
-# documented in the real man page(s). These additional files 
-# only source the real man page, but without them the man command 
-# would be unable to find the correct page. The default is NO.
-
-MAN_LINKS              = NO
-
-#---------------------------------------------------------------------------
-# configuration options related to the XML output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_XML tag is set to YES Doxygen will 
-# generate an XML file that captures the structure of 
-# the code including all documentation.
-
-GENERATE_XML           = NO
-
-# The XML_OUTPUT tag is used to specify where the XML pages will be put. 
-# If a relative path is entered the value of OUTPUT_DIRECTORY will be 
-# put in front of it. If left blank `xml' will be used as the default path.
-
-XML_OUTPUT             = xml
-
-# The XML_SCHEMA tag can be used to specify an XML schema, 
-# which can be used by a validating XML parser to check the 
-# syntax of the XML files.
-
-XML_SCHEMA             = 
-
-# The XML_DTD tag can be used to specify an XML DTD, 
-# which can be used by a validating XML parser to check the 
-# syntax of the XML files.
-
-XML_DTD                = 
-
-# If the XML_PROGRAMLISTING tag is set to YES Doxygen will 
-# dump the program listings (including syntax highlighting 
-# and cross-referencing information) to the XML output. Note that 
-# enabling this will significantly increase the size of the XML output.
-
-XML_PROGRAMLISTING     = YES
-
-#---------------------------------------------------------------------------
-# configuration options for the AutoGen Definitions output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_AUTOGEN_DEF tag is set to YES Doxygen will 
-# generate an AutoGen Definitions (see autogen.sf.net) file 
-# that captures the structure of the code including all 
-# documentation. Note that this feature is still experimental 
-# and incomplete at the moment.
-
-GENERATE_AUTOGEN_DEF   = NO
-
-#---------------------------------------------------------------------------
-# configuration options related to the Perl module output
-#---------------------------------------------------------------------------
-
-# If the GENERATE_PERLMOD tag is set to YES Doxygen will 
-# generate a Perl module file that captures the structure of 
-# the code including all documentation. Note that this 
-# feature is still experimental and incomplete at the 
-# moment.
-
-GENERATE_PERLMOD       = NO
-
-# If the PERLMOD_LATEX tag is set to YES Doxygen will generate 
-# the necessary Makefile rules, Perl scripts and LaTeX code to be able 
-# to generate PDF and DVI output from the Perl module output.
-
-PERLMOD_LATEX          = NO
-
-# If the PERLMOD_PRETTY tag is set to YES the Perl module output will be 
-# nicely formatted so it can be parsed by a human reader. 
-# This is useful 
-# if you want to understand what is going on. 
-# On the other hand, if this 
-# tag is set to NO the size of the Perl module output will be much smaller 
-# and Perl will parse it just the same.
-
-PERLMOD_PRETTY         = YES
-
-# The names of the make variables in the generated doxyrules.make file 
-# are prefixed with the string contained in PERLMOD_MAKEVAR_PREFIX. 
-# This is useful so different doxyrules.make files included by the same 
-# Makefile don't overwrite each other's variables.
-
-PERLMOD_MAKEVAR_PREFIX = 
+GENERATE_LATEX = NO
 
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor   
@@ -1340,7 +1016,7 @@ HIDE_UNDOC_RELATIONS   = YES
 # toolkit from AT&T and Lucent Bell Labs. The other options in this section 
 # have no effect if this option is set to NO (the default)
 
-HAVE_DOT               = NO
+HAVE_DOT               = YES
 
 # By default doxygen will write a font called FreeSans.ttf to the output 
 # directory and reference it in all dot files that doxygen generates. This 
@@ -1388,7 +1064,7 @@ GROUP_GRAPHS           = YES
 # collaboration diagrams in a style similar to the OMG's Unified Modeling 
 # Language.
 
-UML_LOOK               = NO
+UML_LOOK               = YES
 
 # If set to YES, the inheritance and collaboration graphs will show the 
 # relations between templates and their instances.
@@ -1435,7 +1111,7 @@ GRAPHICAL_HIERARCHY    = YES
 # in a graphical way. The dependency relations are determined by the #include 
 # relations between the files in the directories.
 
-DIRECTORY_GRAPH        = YES
+DIRECTORY_GRAPH        = NO
 
 # The DOT_IMAGE_FORMAT tag can be used to set the image format of the images 
 # generated by dot. Possible values are png, jpg, or gif 
@@ -1480,14 +1156,14 @@ MAX_DOT_GRAPH_DEPTH    = 0
 # enabling this option may lead to badly anti-aliased labels on the edges of 
 # a graph (i.e. they become hard to read).
 
-DOT_TRANSPARENT        = NO
+DOT_TRANSPARENT        = YES
 
 # Set the DOT_MULTI_TARGETS tag to YES allow dot to generate multiple output 
 # files in one run (i.e. multiple -o and -T options on the command line). This 
 # makes dot run faster, but since only newer versions of dot (>1.8.10) 
 # support this, this feature is disabled by default.
 
-DOT_MULTI_TARGETS      = NO
+DOT_MULTI_TARGETS      = YES
 
 # If the GENERATE_LEGEND tag is set to YES (the default) Doxygen will 
 # generate a legend page explaining the meaning of the various boxes and 

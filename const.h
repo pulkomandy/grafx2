@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -26,15 +28,17 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
+#ifndef M_2PI
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
+#endif
 
 #define VERSION1                  2     ///< Version number for gfx2.cfg (1/4)
 #define VERSION2                  0     ///< Version number for gfx2.cfg (2/4)
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
-#define NB_SHORTCUTS              159   ///< Number of actions that can have a key combination associated to it.
-#define NB_ZOOM_FACTORS           12    ///< Number of zoom levels available in the magnifier.
+#define NB_SHORTCUTS              181   ///< Number of actions that can have a key combination associated to it.
+#define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
 #define NB_CURSOR_SPRITES         8     ///< Number of available mouse cursor sprites.
@@ -44,6 +48,8 @@
 #define NB_MENU_SPRITES           20    ///< Number of menu sprites.
 #define MENU_SPRITE_WIDTH         14    ///< Width of a menu sprite in pixels
 #define MENU_SPRITE_HEIGHT        14    ///< Height of a menu sprite in pixels
+#define LAYER_SPRITE_WIDTH        14    ///< Width of a layer button in pixels
+#define LAYER_SPRITE_HEIGHT       10    ///< Height of a layer button in pixels
 #define PAINTBRUSH_WIDTH          16    ///< Width of a preset paintbrush sprite
 #define PAINTBRUSH_HEIGHT         16    ///< Height of a preset paintbrush sprite
 #define MAX_PAINTBRUSH_SIZE       127   ///< Max size for a resizable paintbrush
@@ -64,7 +70,8 @@
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
-
+#define NB_LAYERS                  1    ///< Initial number of layers for a new image
+#define MAX_NB_LAYERS             16    ///< Maximum number of layers that can be used in grafx2. Note that 32 is upper limit because of a few bit fields.
 #define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_COLUMNS          4  ///< Number of columns in the Brush container
@@ -92,38 +99,28 @@
    #define PARENT_DIR ".."
 #endif
 
-// -- File formats
-
-#ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS         15    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          15    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          15    ///< Number of file formats that grafx2 can save.
-#else
-// Without pnglib
-#define NB_KNOWN_FORMATS         14    ///< Total number of known file formats.
-#define NB_FORMATS_LOAD          14    ///< Number of file formats that grafx2 can load.
-#define NB_FORMATS_SAVE          14    ///< Number of file formats that grafx2 can save.
-#endif
-
 /// List of file formats recognized by grafx2
 enum FILE_FORMATS
 {
-  FORMAT_ANY=0, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
-  FORMAT_PKM=1,
-  FORMAT_LBM,
+  FORMAT_ALL_IMAGES=0, ///< This is not really a file format, it's reserverd for a compilation of all file extensions
+  FORMAT_ALL_FILES=1, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
+  FORMAT_PNG,
   FORMAT_GIF,
   FORMAT_BMP,
   FORMAT_PCX,
+  FORMAT_PKM,
+  FORMAT_LBM,
   FORMAT_IMG,
   FORMAT_SCx,
   FORMAT_PI1,
   FORMAT_PC1,
   FORMAT_CEL,
   FORMAT_NEO,
+  FORMAT_C64,
   FORMAT_KCF,
   FORMAT_PAL,
-  FORMAT_C64,
-  FORMAT_PNG
+  FORMAT_SCR,
+  FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 
 /// Default format for 'save as'
@@ -153,14 +150,14 @@ enum ERROR_CODES
 enum PIXEL_RATIO
 {
     PIXEL_SIMPLE=0, ///< Use real pixels
-    PIXEL_WIDE,		///< Use wide pixels (2x1) like on Amstrad CPC mode 0
-    PIXEL_TALL,		///< Use tall pixels (1x2) like on Amstrad CPC mode 2
-    PIXEL_DOUBLE,	///< Use big pixels (2x2) if your LCD screen can't do lowres by itself
-    PIXEL_TRIPLE,	///< Use really big pixels (3x3)
-    PIXEL_WIDE2,	///< Use big wide pixels (4x2)
-    PIXEL_TALL2,	///< Use big tall pixels (2x4)
-    PIXEL_QUAD,		///< Use really giant pixels (4x4). You need to have a screen resolution at least 1280x800 to use this one
-    PIXEL_MAX ///< Number of elements in enum
+    PIXEL_WIDE,     ///< Use wide pixels (2x1) like on Amstrad CPC mode 0
+    PIXEL_TALL,     ///< Use tall pixels (1x2) like on Amstrad CPC mode 2
+    PIXEL_DOUBLE,   ///< Use big pixels (2x2) if your LCD screen can't do lowres by itself
+    PIXEL_TRIPLE,   ///< Use really big pixels (3x3)
+    PIXEL_WIDE2,    ///< Use big wide pixels (4x2)
+    PIXEL_TALL2,    ///< Use big tall pixels (2x4)
+    PIXEL_QUAD,     ///< Use really giant pixels (4x4). You need to have a screen resolution at least 1280x800 to use this one
+    PIXEL_MAX       ///< Number of elements in enum
 };
 
 /// Different kinds of menu button behavior.
@@ -252,8 +249,8 @@ enum CHUNKS_CFG
 /// Identifiers for the 8x8 icons of ::Gfx->Icon_sprite (most are unused now)
 enum ICON_TYPES
 {
-  ICON_FLOPPY_3_5=0, ///< 3½" Floppy disk
-  ICON_FLOPPY_5_25,  ///< 5¼" Floppy disk
+  ICON_FLOPPY_3_5=0, ///< 3.5 Floppy disk
+  ICON_FLOPPY_5_25,  ///< 5.25 Floppy disk
   ICON_HDD,          ///< Hard disk drive
   ICON_CDROM,        ///< CD-ROM
   ICON_NETWORK,      ///< "Network" drive
@@ -265,7 +262,21 @@ enum ICON_TYPES
 /// Identifiers for the buttons in the menu.
 enum BUTTON_NUMBERS
 {
-  BUTTON_PAINTBRUSHES=0,
+  // Status bar
+  BUTTON_HIDE = 0,
+
+  // Layer bar
+  BUTTON_LAYER_MENU,
+  BUTTON_LAYER_COLOR,
+  BUTTON_LAYER_MERGE,
+  BUTTON_LAYER_ADD,
+  BUTTON_LAYER_REMOVE,
+  BUTTON_LAYER_UP,
+  BUTTON_LAYER_DOWN,
+  BUTTON_LAYER_SELECT,
+
+  // Main menu
+  BUTTON_PAINTBRUSHES,
   BUTTON_ADJUST,
   BUTTON_DRAW,
   BUTTON_CURVES,
@@ -301,7 +312,6 @@ enum BUTTON_NUMBERS
   BUTTON_PAL_LEFT,
   BUTTON_PAL_RIGHT,
   BUTTON_CHOOSE_COL,
-  BUTTON_HIDE,
   NB_BUTTONS            ///< Number of buttons in the menu bar.
 };
 
@@ -408,6 +418,22 @@ enum SPECIAL_ACTIONS
   SPECIAL_ZOOM_18,
   SPECIAL_ZOOM_20,
   SPECIAL_SHOW_GRID,
+  SPECIAL_LAYER1_SELECT,
+  SPECIAL_LAYER1_TOGGLE,
+  SPECIAL_LAYER2_SELECT,
+  SPECIAL_LAYER2_TOGGLE,
+  SPECIAL_LAYER3_SELECT,
+  SPECIAL_LAYER3_TOGGLE,
+  SPECIAL_LAYER4_SELECT,
+  SPECIAL_LAYER4_TOGGLE,
+  SPECIAL_LAYER5_SELECT,
+  SPECIAL_LAYER5_TOGGLE,
+  SPECIAL_LAYER6_SELECT,
+  SPECIAL_LAYER6_TOGGLE,
+  SPECIAL_LAYER7_SELECT,
+  SPECIAL_LAYER7_TOGGLE,
+  SPECIAL_LAYER8_SELECT,
+  SPECIAL_LAYER8_TOGGLE,
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 

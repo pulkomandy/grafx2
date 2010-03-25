@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008      Franck Charlet
@@ -23,16 +25,22 @@
 */
 
 #include <math.h>
+#include <stdlib.h> // atoi()
 #include <string.h> // strncpy() strlen()
 
 #include "windows.h"
+
+#include "engine.h"
+#include "errors.h"
 #include "global.h"
 #include "graph.h"
-#include "engine.h"
-#include "misc.h"
-#include "sdlscreen.h"
-#include "errors.h"
 #include "input.h"
+#include "misc.h"
+#include "readline.h"
+#include "sdlscreen.h"
+
+/// Width of one layer button, in pixels before scaling
+word Layer_button_width = 1;
 
 // L'encapsulation tente une percée...ou un dernier combat.
 
@@ -48,14 +56,21 @@ word Palette_cells_Y()
   return Menu_cells_Y;
 }
 
-// Affichage d'un pixel dans le menu (le menu doit être visible)
-void Pixel_in_toolbar(word x,word y,byte color)
+// Affichage d'un pixel dans le menu (si visible)
+void Pixel_in_menu(word bar, word x, word y, byte color)
 {
-  Block(x*Menu_factor_X,(y*Menu_factor_Y)+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
+  if (Menu_is_visible && Menu_bars[bar].Visible)
+    Block(x*Menu_factor_X,(y+Menu_bars[bar].Top)*Menu_factor_Y+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
+}
+
+// Affichage d'un pixel dans le menu et met a jour la bitmap de skin
+void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
+{
+  Pixel_in_menu(bar, x, y, color);
+  Menu_bars[bar].Skin[y*Menu_bars[bar].Skin_width + x] = color;  
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
-
 void Pixel_in_window(word x,word y,byte color)
 {
     Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
@@ -147,7 +162,7 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 
 void Display_foreback(void)
 {
-  if (Menu_is_visible)
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
     Block((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7,Back_color);
     Block((MENU_WIDTH-13)*Menu_factor_X,Menu_Y+(Menu_factor_Y<<1),Menu_factor_X<<3,Menu_factor_Y*5,Fore_color);
@@ -178,11 +193,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)/Menu_cells_X)*(32/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((1+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((2+(((index-First_color_in_palette)%Menu_cells_Y)*(32/Menu_cells_Y)))*Menu_factor_Y);
+    return Menu_Y+((1+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -210,13 +225,16 @@ void Set_back_color(byte color)
 ///
 /// Redraw the cell in the menu palette for ::Fore_color.
 /// This function checks bounds, it won't draw anything if Fore_color is not visible.
-/// @param id:Color number to frame
+/// @param id: Color number to frame
 void Frame_menu_color(byte id)
 {
   word start_x,start_y,end_x,end_y;
   word index;
-  word cell_height=32/Menu_cells_Y;
+  word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
+  
+  if (! Menu_bars[MENUBAR_TOOLS].Visible)
+    return;
 
   if (id==Fore_color)
     color = MC_White;
@@ -232,21 +250,32 @@ void Frame_menu_color(byte id)
       start_x=Palette_cell_X(id)-1*Menu_factor_X;
       start_y=Palette_cell_Y(id)-1*Menu_factor_Y;
 
+      // TODO: if color is black, we are unselecting a color. If another color next to it is selected, we
+      // will erase one edge of its selection square.
+      // We should check for that here.
+      // But we have to find which color is above and below (not so easy) and for the horizontal, check we
+      // are not at the edge of the palette. This makes a lot of cases to handle.
+      // Top
       Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
-      Block(start_x,start_y+(Menu_factor_Y*cell_height),(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
+      // Bottom
+      Block(start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
 
-      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,Menu_factor_Y*(cell_height-1),color);
-      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,Menu_factor_Y*(cell_height-1),color);
+      // Left
+      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
+      //Right
+      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
 
-      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y*(cell_height+1));
+      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,(cell_height+1)* Menu_factor_Y);
     }
     else
     {
+      // Not separated colors
       start_x=Palette_cell_X(id);
       start_y=Palette_cell_Y(id);
 
       if (color==MC_Black)
       {
+        // Color is not selected, no dotted lines
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
               cell_height*Menu_factor_Y,id);
 
@@ -256,6 +285,8 @@ void Frame_menu_color(byte id)
       {
         end_x=Menu_palette_cell_width-1;
         end_y=cell_height-1;
+
+        // Draw dotted lines
 
         // Top line
         for (index=0; index<=end_x; index++)
@@ -278,7 +309,7 @@ void Frame_menu_color(byte id)
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_y)&1)?color:MC_Black);
 
-        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+Menu_factor_Y*cell_height);
+        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height*Menu_factor_Y);
       }
     }
   }
@@ -289,12 +320,17 @@ void Frame_menu_color(byte id)
 void Display_menu_palette(void)
 {
   int color;
-  byte cell_height=32/Menu_cells_Y;
+  byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
-  if (Menu_is_visible)
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
-    Block(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y,MC_Black);
+    Block(
+      Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
+      Menu_Y,
+      Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
+      (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
+      MC_Black);
 
     if (Config.Separate_colors)
       for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
@@ -308,12 +344,12 @@ void Display_menu_palette(void)
         Block(Palette_cell_X(color),
               Palette_cell_Y(color),
               Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,
+              cell_height * Menu_factor_Y,
               color);
 
     Frame_menu_color(Back_color);
     Frame_menu_color(Fore_color);
-    Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
+    Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
   }
 }
 
@@ -380,7 +416,7 @@ void Change_palette_cells()
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
-  Buttons_Pool[BUTTON_CHOOSE_COL].Height=32/Menu_cells_Y*Menu_cells_Y-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(Menu_height-11)/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -395,7 +431,7 @@ int Pick_color_in_palette()
   int line;
   int column;
 
-  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/(32/Menu_cells_Y);
+  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
   column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
   if (Config.Palette_vertical)
   {
@@ -410,22 +446,143 @@ int Pick_color_in_palette()
   return color;
 }
 
+/// Draws a solid textured area, to the right of a toolbar.
+void Draw_bar_remainder(word current_menu, word x_off)
+{
+  word y_pos;
+  word x_pos;
+
+  for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
+    for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
+      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+}
+
+            
+/// Display / update the layer menubar
+void Display_layerbar(void)
+{
+  word x_off=0;
+  word button_width = LAYER_SPRITE_WIDTH;
+  word button_number = Main_backups->Pages->Nb_layers;
+  word horiz_space;
+  word current_button;
+  word repeats=1;
+  
+  if (! Menu_bars[MENUBAR_LAYERS].Visible)
+    return;
+  
+  // Available space in pixels
+  horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
+  
+  // Don't display all buttons if not enough room
+  if (horiz_space/button_width < button_number)
+    button_number = horiz_space/button_width;
+  // Only 16 icons at the moment
+  if (button_number > 16) // can be different from MAX_NB_LAYERS
+    button_number = 16;
+
+  // Enlarge the buttons themselves if there's enough room
+  while (button_number*(button_width+2) < horiz_space && repeats < 20)
+  {
+    repeats+=1;
+    button_width+=2;
+  }
+  
+  x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
+  for (current_button=0; current_button<button_number; current_button++)
+  {
+    word x_pos;
+    word y_pos;
+    word sprite_index;
+    
+    if (Main_current_layer == current_button)
+      sprite_index=1;
+    else if (Main_layers_visible & (1 << current_button))
+      sprite_index=0;
+    else
+      sprite_index=2;
+    
+    
+    for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
+    {
+      word source_x=0;
+      
+      for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
+      {
+        short i = 1;
+        
+        // This stretches a button, by duplicating the 2nd from right column 
+        // and 3rd column from left.    
+        if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
+          i=repeats;
+        
+        for (;i>0; i--)
+        {
+          Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+          x_pos++;
+        }
+      }
+      // Next line
+      x_pos=0;
+    }    
+    // Next button
+    x_off+=button_width;
+  }
+  // Texture any remaining space to the right.
+  // This overwrites any junk like deleted buttons.
+  Draw_bar_remainder(MENUBAR_LAYERS, x_off);
+  
+  // Update the active area of the layers pseudo-button
+  Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
+  
+  // Required to determine which layer button is clicked
+  Layer_button_width = button_width;
+  
+  // A screen refresh required by some callers
+  Update_rect(
+    Menu_bars[MENUBAR_LAYERS].Skin_width, 
+    Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
+    horiz_space*Menu_factor_X, 
+    Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
+}
+
+
 /// Display the whole menu
 void Display_menu(void)
 {
   word x_pos;
   word y_pos;
+  int8_t current_menu;
   char str[4];
 
 
   if (Menu_is_visible)
   {
     // display menu sprite
-    for (y_pos=0;y_pos<MENU_HEIGHT;y_pos++)
-      for (x_pos=0;x_pos<MENU_WIDTH;x_pos++)
-        Pixel_in_menu(x_pos,y_pos,Gfx->Menu_block[y_pos][x_pos]);
-    // Grey area for filename below palette
-    Block(MENU_WIDTH*Menu_factor_X,Menu_status_Y-Menu_factor_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),9*Menu_factor_Y,MC_Light);
+    for (current_menu = MENUBAR_COUNT - 1; current_menu >= 0; current_menu --)
+    {
+      if(Menu_bars[current_menu].Visible)
+      {
+        // Skinned area
+        for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
+          for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
+            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+
+        if (current_menu == MENUBAR_LAYERS)
+        {
+          // The layerbar has its own display, for the whole length.
+          Display_layerbar();
+        }
+        else
+        {
+          // If some area is remaining to the right, texture it with a copy of
+          // the last two columns
+          Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width);
+        }
+        
+        // Next bar
+      }
+    }
 
     // Display palette
     Display_menu_palette();
@@ -436,17 +593,17 @@ void Display_menu(void)
 
     if (!Windows_open)
     {
-      if ((Mouse_Y<Menu_Y) &&                                                    // Souris dans l'image
+      if ((Mouse_Y<Menu_Y) && // Mouse in the picture area
           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ))
       {
-		// Prepare display of XY coordinates even if in some cases they will be
-		// erased with some other text
+        // Prepare display of XY coordinates even if in some cases they will be
+        // erased with some other text
         if ( (Current_operation!=OPERATION_COLORPICK)
           && (Current_operation!=OPERATION_REPLACE) )
           Print_in_menu("X:       Y:             ",0);
         else
         {
-		  // The colorpicker display the color id between the parentheses
+          // The colorpicker display the color id between the parentheses
           Print_in_menu("X:       Y:       (    )",0);
           Num2str(Colorpicker_color,str,3);
           Print_in_menu(str,20);
@@ -456,8 +613,8 @@ void Display_menu(void)
       }
       Print_filename();
     }
-	// Now update the area: menu height and whole screen width (including palette)
-    Update_rect(0,Menu_Y,Screen_width,MENU_HEIGHT*Menu_factor_Y);
+    // Now update the area: menu height and whole screen width (including palette)
+    Update_rect(0,Menu_Y,Screen_width,Menu_height*Menu_factor_Y);
   }
 }
 
@@ -577,25 +734,29 @@ void Print_coordinates(void)
 
 void Print_filename(void)
 {
-  char display_name[12+1];
-  int name_size;
-  if (Menu_is_visible)
-  {
-    // Si le nom de fichier fait plus de 12 caractères, on n'affiche que les 12 derniers
-    strncpy(display_name,Main_filename,12);
-    name_size=strlen(Main_filename);
-    display_name[12]='\0';
-    if (name_size>12)
-    {
-      display_name[11]=ELLIPSIS_CHARACTER;
-      name_size = 12;
-    }
-    
-    Block(Screen_width-96*Menu_factor_X,
-          Menu_status_Y,Menu_factor_X*96,Menu_factor_Y<<3,MC_Light);
+  word max_size;
+  word string_size;
+  char display_string[256];
 
-    Print_general(Screen_width-name_size*8*Menu_factor_X,Menu_status_Y,display_name,MC_Black,MC_Light);
+  // Determine maximum size, in characters
+  max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
+  
+  string_size = strlen(Main_backups->Pages->Filename);
+  
+  // Partial copy of the name
+  strncpy(display_string, Main_backups->Pages->Filename, max_size);
+  display_string[max_size]='\0';
+
+  if (string_size > max_size)
+  {
+    string_size = max_size;
+    display_string[string_size-1]=ELLIPSIS_CHARACTER;
   }
+  // Erase whole area
+  Block(Screen_width-max_size*8*Menu_factor_X,
+    Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
+  // Print
+  Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
@@ -798,25 +959,71 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 
 
 
-//---- Fenêtre demandant de confirmer une action et renvoyant la réponse -----
+///
+/// Window asking for confirmation before an action is performed.
+/// This function is able to display multi-line messages and
+/// center the lines, but the carriage returns have to be explicit.
+/// The function will clip the message in case of problem.
+/// @return 1 if user pressed OK, 0 if CANCEL
 byte Confirmation_box(char * message)
 {
   short clicked_button;
-  word  window_width;
+  word  window_width = 120;
+  word  nb_lines = 1;
+  const char *c = message;
+  short current_length=0;
+  short current_line;
 
-  window_width=(strlen(message)<<3)+20;
+  // Count lines, and measure max line length
+  for (c=message; *c != '\0'; c++)
+  {
+    if (*c == '\n')
+    {
+      current_length=0;
+      nb_lines++;
+    }
+    else
+    {
+      current_length++;
+      window_width=Max(window_width, (current_length<<3)+20);
+    }
+  }
+  // Safety
+  if (window_width>310)
+    window_width=310;
 
-  if (window_width<120)
-    window_width=120;
+  Open_window(window_width,52+(nb_lines<<3),"Confirmation");
 
-  Open_window(window_width,60,"Confirmation");
+  c=message;
+  for (current_line=0; current_line < nb_lines; current_line++)
+  {
+    char * next_eol;
+    char display_string[36+1];
+    
+    next_eol = strchr(c, '\n');
+    if (next_eol==NULL) // last line
+      current_length = strlen(c);
+    else
+      current_length = next_eol-c;
 
-  Print_in_window((window_width>>1)-(strlen(message)<<2),20,message,MC_Black,MC_Light);
+    // Safeguard
+    if (current_length>36)
+      current_length=36;
+    // Copy part of string in null-terminated buffer
+    strncpy(display_string, c, current_length);
+    display_string[current_length]='\0';
 
-  Window_set_normal_button((window_width/3)-20     ,37,40,14,"Yes",1,1,SDLK_y); // 1
-  Window_set_normal_button(((window_width<<1)/3)-20,37,40,14,"No" ,1,1,SDLK_n); // 2
+    Print_in_window((window_width>>1)-(current_length<<2), 20+(current_line<<3), display_string, MC_Black, MC_Light);
+    
+    c += current_length;
+    if (*c == '\n')
+      c++;
+  }
 
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*window_width,Menu_factor_Y*60);
+  Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,SDLK_y); // 1
+  Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,SDLK_n); // 2
+
+  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
 
   Display_cursor();
 
@@ -835,6 +1042,49 @@ byte Confirmation_box(char * message)
   return (clicked_button==1)? 1 : 0;
 }
 
+
+/// Window that allows you to enter a single value
+int Requester_window(char* message, int initial_value)
+{
+  short clicked_button = 0;
+  word window_width;
+  char str[10];
+
+  window_width=(strlen(message)<<3)+20;
+
+  if (window_width<120)
+    window_width = 120;
+
+  Open_window(window_width, 60, "Request");
+
+  Print_in_window((window_width>>1)-(strlen(message)<<2), 20, message,
+    MC_Black, MC_Light);
+  sprintf(str, "%d", initial_value);
+  Window_set_input_button(10, 37, 4); // 1
+  Print_in_window(11, 39, str, MC_Black, MC_Light);
+  Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
+  Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
+
+  Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
+    Menu_factor_Y * 60);
+  Display_cursor();
+
+  do
+  {
+    clicked_button = Window_clicked_button();
+    if (clicked_button == 1)
+      Readline(11, 39, str, 4, 1);
+    if (Key == SDLK_ESCAPE) clicked_button = 2;
+  }
+  while (clicked_button <= 0);
+
+  Key = 0;
+
+  Close_window();
+  Display_cursor();
+
+  return clicked_button==2?-1:atoi(str);
+}
 
 
 /// Window that show a warning message and wait for a click on the OK button
@@ -863,37 +1113,58 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-/// Window that shows a big message, and waits for a click on OK
-void Verbose_error_message(char * message)
+/// Window that shows a big message (up to 34x12), and waits for a click on OK.
+/// On call: Cursor must be displayed
+/// On exit: Cursor is displayed
+void Verbose_message(const char *caption, const char * message )
 {
   short clicked_button;
   int line;
-  int i;
-  char buffer[36]; // 35 characters + \0
+  int last_space;
+  int nb_char;
+  char buffer[36];
+  byte original_cursor_shape = Cursor_shape;
 
-  Open_window(300,160,"Error!");
+  
+  Open_window(300,160,caption);
   
   // Word-wrap the message
-  for (line=0; line < 10; line++)
+  for (line=0; line < 12 && *message!='\0'; line++)
   {
-    for (i=0;i<35 && *message!='\0';i++)
+    last_space = -1;
+    for (nb_char=0; nb_char<35 && message[nb_char]!='\0'; nb_char++)
     {
-      if (*message == '\n')
+      buffer[nb_char]=message[nb_char];
+      if (message[nb_char] == ' ')
       {
-        message++;
+        last_space = nb_char;
+      }
+      else if (message[nb_char] == '\n')
+      {
+        last_space = nb_char;
         break;
       }
-      buffer[i]=*message;
-      message++;
     }
-    buffer[i]='\0';
+    // Close line buffer
+    if (message[nb_char]=='\0' || last_space == -1)
+      last_space = nb_char;
+    buffer[last_space]='\0';
+    
+    // Print
     Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
-    if (*message=='\0')
-      break;
+    
+    // Next line
+    message=message+last_space;
+    // Strip at most one carriage return and any leading spaces
+    if (*message == '\n')
+      message++;
+    while (*message == ' ')
+      message++;
   }
 
   Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,SDLK_RETURN); // 1
   Update_window_area(0,0,Window_width,Window_height);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
 
   do
@@ -902,9 +1173,9 @@ void Verbose_error_message(char * message)
   Key=0;
 
   Close_window();
+  Cursor_shape=original_cursor_shape;
   Display_cursor();
 }
-
 
   // -- Redessiner le sprite d'un bouton dans le menu --
 
@@ -928,11 +1199,11 @@ void Display_sprite_in_menu(int btn_number,int sprite_number)
     for (x_pos=0;x_pos<MENU_SPRITE_WIDTH;x_pos++)
     {
       color=Gfx->Menu_sprite[sprite_number][y_pos][x_pos];
-      Pixel_in_menu(menu_x_pos+x_pos,menu_y_pos+y_pos,color);
-      Gfx->Menu_block[menu_y_pos+y_pos][menu_x_pos+x_pos]=color;
+      Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos+x_pos, menu_y_pos+y_pos, color);
     }
+if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
-    (Buttons_Pool[btn_number].Y_offset+1)*Menu_factor_Y+Menu_Y,
+    (Buttons_Pool[btn_number].Y_offset+1+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
     MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
 }
 
@@ -945,7 +1216,7 @@ void Display_paintbrush_in_menu(void)
   short menu_x_pos,menu_y_pos;
   short menu_start_x;
   byte color;
-
+    
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_COLOR_BRUSH    : // Brush en couleur
@@ -954,8 +1225,7 @@ void Display_paintbrush_in_menu(void)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
           color=Gfx->Menu_sprite[4][y_pos][x_pos];
-          Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
         }
       break;
     default : // Pinceau
@@ -963,8 +1233,7 @@ void Display_paintbrush_in_menu(void)
       for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
         for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
         {
-          Pixel_in_menu(menu_x_pos,menu_y_pos,MC_Light);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=MC_Light;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Light);
         }
       // On affiche le nouveau
       menu_start_x=8-Paintbrush_offset_X;
@@ -989,11 +1258,11 @@ void Display_paintbrush_in_menu(void)
         for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
         {
           color=(Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])?MC_Black:MC_Light;
-          Pixel_in_menu(menu_x_pos,menu_y_pos,color);
-          Gfx->Menu_block[menu_y_pos][menu_x_pos]=color;
+          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
         }
   }
-  Update_rect(0,Menu_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
+  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
+    Update_rect(0,Menu_Y + Menu_bars[MENUBAR_TOOLS].Top*Menu_factor_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --
@@ -1107,12 +1376,12 @@ void Display_menu_palette_avoiding_window(byte * table)
   if (Config.Separate_colors)
   {
     width=(Menu_palette_cell_width-1)*Menu_factor_X;
-    height=Menu_factor_Y*(32/Menu_cells_Y-1);
+    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y-1);
   }
   else
   {
     width=Menu_palette_cell_width*Menu_factor_X;
-    height=Menu_factor_Y*(32/Menu_cells_Y);
+    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y);
   }
 
   for (color=0,real_color=First_color_in_palette;color<Menu_cells_X*Menu_cells_Y;color++,real_color++)
@@ -1120,7 +1389,7 @@ void Display_menu_palette_avoiding_window(byte * table)
     if (table[real_color]!=real_color)
     {
       start_x=Palette_cell_X(real_color);
-      start_y=Palette_cell_Y(real_color); //Menu_Y_before_window ??!
+      start_y=Palette_cell_Y(real_color);
       end_x=start_x+width;
       end_y=start_y+height;
 
@@ -1195,7 +1464,7 @@ void Display_menu_palette_avoiding_window(byte * table)
       }
     }
   }
-  Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(MENU_HEIGHT-9)*Menu_factor_Y);
+  Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
 }
 
 // -------- Calcul des bornes de la partie d'image visible à l'écran ---------
@@ -1393,8 +1662,7 @@ void Position_screen_according_to_zoom(void)
                          -(Main_separator_position>>1);
     if (Main_offset_X<0)
       Main_offset_X=0;
-    else
-    if (Main_image_width<Main_offset_X+Main_separator_position)
+    else if (Main_image_width<Main_offset_X+Main_separator_position)
       Main_offset_X=Main_image_width-Main_separator_position;
   }
   else
@@ -1407,8 +1675,51 @@ void Position_screen_according_to_zoom(void)
                          -(Menu_Y>>1);
     if (Main_offset_Y<0)
       Main_offset_Y=0;
-    else
-    if (Main_image_height<Main_offset_Y+Menu_Y)
+    else if (Main_image_height<Main_offset_Y+Menu_Y)
+      Main_offset_Y=Main_image_height-Menu_Y;
+  }
+  else
+    Main_offset_Y=0;
+}
+
+// -- Recenter the non-zoomed part of image around a precise pixel
+void Position_screen_according_to_position(int target_x, int target_y)
+{
+  // Centrage en X
+  if (Main_image_width>Main_separator_position)
+  {
+    Main_offset_X=target_x-Mouse_X;
+    // Do not allow the zoomed part to show something that the
+    // non-zoomed part doesn't see. All clipping is computed according
+    // to the non-zoomed part.
+    if (Main_magnifier_offset_X<Main_offset_X)
+      Main_offset_X=Main_magnifier_offset_X;
+    else if (Main_magnifier_offset_X+Main_magnifier_width > Main_offset_X+Main_separator_position)
+      Main_offset_X = Main_magnifier_offset_X+Main_magnifier_width-Main_separator_position;
+    if (Main_offset_X<0)
+      Main_offset_X=0;
+    else if (Main_image_width<Main_offset_X+Main_separator_position)
+      Main_offset_X=Main_image_width-Main_separator_position;
+      
+    
+  }
+  else
+    Main_offset_X=0;
+
+  // Centrage en Y
+  if (Main_image_height>Menu_Y)
+  {
+    Main_offset_Y=target_y-Mouse_Y;
+    // Do not allow the zoomed part to show something that the
+    // non-zoomed part doesn't see. All clipping is computed according
+    // to the non-zoomed part.
+    if (Main_magnifier_offset_Y<Main_offset_Y)
+      Main_offset_Y=Main_magnifier_offset_Y;
+    else if (Main_magnifier_offset_Y+Main_magnifier_height > Main_offset_Y)
+      Main_offset_Y = Main_magnifier_offset_Y+Main_magnifier_height;
+    if (Main_offset_Y<0)
+      Main_offset_Y=0;
+    else if (Main_image_height<Main_offset_Y+Menu_Y)
       Main_offset_Y=Main_image_height-Menu_Y;
   }
   else
@@ -1472,26 +1783,55 @@ void Compute_magnifier_data(void)
 }
 
 
-
-// ------------ Changer le facteur de zoom et tout mettre à jour -------------
-void Change_magnifier_factor(byte factor_index)
+/// Changes magnifier factor and updates everything needed
+void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
 {
-  short center_x;
-  short center_y;
+  int target_x,target_y; // These coordinates are in image space
+  byte magnified_view_leads=1;
 
-  center_x=Main_magnifier_offset_X+(Main_magnifier_width>>1);
-  center_y=Main_magnifier_offset_Y+(Main_magnifier_height>>1);
+  // Values that need to be computed before switching to the new zoom factor
+  if (!point_at_mouse || Cursor_in_menu || !Main_magnifier_mode)
+  {
+    // Locate the pixel in center of the magnified area
+    target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1);
+    target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1);
+    point_at_mouse=0;
+  }
+  else if (Mouse_X>=Main_X_zoom)
+  {
+    // Locate the pixel under the cursor, in magnified area
+    target_x=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
+    target_y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    point_at_mouse=1;
+  }
+  else
+  {
+    // Locate the pixel under the cursor, in normal area
+    target_x=Mouse_X+Main_offset_X;
+    target_y=Mouse_Y+Main_offset_Y;
+    magnified_view_leads=0;
+    point_at_mouse=0;
+  }
 
   Main_magnifier_factor=ZOOM_FACTOR[factor_index];
   Compute_magnifier_data();
 
   if (Main_magnifier_mode)
   {
-    // Recalculer le décalage de la loupe
-    // Centrage "brut" de lécran par rapport à la loupe
-    Main_magnifier_offset_X=center_x-(Main_magnifier_width>>1);
-    Main_magnifier_offset_Y=center_y-(Main_magnifier_height>>1);
-    // Correction en cas de débordement de l'image
+    // Recompute the magnifier offset (center its view)
+    if (point_at_mouse)
+    {
+      // Target pixel must be located under the mouse position.
+      Main_magnifier_offset_X = target_x-((Mouse_X-Main_X_zoom)/Main_magnifier_factor);
+      Main_magnifier_offset_Y = target_y-((Mouse_Y)/Main_magnifier_factor);
+    }
+    else
+    {
+      // Target pixel must be positioned at new center
+      Main_magnifier_offset_X = target_x-(Main_magnifier_width>>1);
+      Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
+    }
+    // Fix cases where the image would overflow on edges
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
       Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
     if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
@@ -1501,7 +1841,10 @@ void Change_magnifier_factor(byte factor_index)
     if (Main_magnifier_offset_Y<0)
       Main_magnifier_offset_Y=0;
 
-    Position_screen_according_to_zoom();
+    if (magnified_view_leads)
+      Position_screen_according_to_zoom();
+    else
+      Position_screen_according_to_position(target_x, target_y);
 
     Pixel_preview=Pixel_preview_magnifier;
 
@@ -1655,17 +1998,17 @@ void Display_cursor(void)
           start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
 
           for (y_pos=start_y,counter_y=0; counter_y<15 && y_pos < Screen_height;
-			y_pos++,counter_y++)
+            y_pos++,counter_y++)
           {
-        	if( y_pos < 0 ) continue;
-          	for (x_pos=start_x,counter_x=0;
-				counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
-          	{
-            	if( x_pos < 0 ) continue;
-              	color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-              	if (color!=MC_Trans)
-                	Pixel(x_pos,y_pos,color);
+            if( y_pos < 0 ) continue;
+              for (x_pos=start_x,counter_x=0;
+                counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
+              {
+                if( x_pos < 0 ) continue;
+                  color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+                  Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+                  if (color!=MC_Trans)
+                    Pixel(x_pos,y_pos,color);
             }
           }
 
@@ -1726,17 +2069,17 @@ void Display_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-        	if(y_pos<0) continue;
-        	if(y_pos>=Screen_height) break;
-          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-          	{
+            if(y_pos<0) continue;
+            if(y_pos>=Screen_height) break;
+            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+            {
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
               color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
               // On sauvegarde dans Cursor_background pour restaurer plus tard
               Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
               if (color!=MC_Trans)
-            	Pixel(x_pos,y_pos,color);
+                Pixel(x_pos,y_pos,color);
             }
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
@@ -1755,16 +2098,16 @@ void Display_cursor(void)
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
       for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
       {
-    	if(y_pos<0) continue;
+        if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-    	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-		{
-        	if(x_pos<0) continue;
-        	if(x_pos>=Screen_width) break;
-          	color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
-          	// On sauvegarde dans Cursor_background pour restaurer plus tard
-          	Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-          	if (color!=MC_Trans)
+        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        {
+          if(x_pos<0) continue;
+          if(x_pos>=Screen_width) break;
+          color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
+          // On sauvegarde dans Cursor_background pour restaurer plus tard
+          Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+          if (color!=MC_Trans)
               Pixel(x_pos,y_pos,color);
         }
       }
@@ -1960,7 +2303,7 @@ void Hide_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-			if(y_pos < 0) continue;
+            if(y_pos < 0) continue;
             if(y_pos>=Screen_height) break;
             for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
             {
@@ -2029,10 +2372,10 @@ void Hide_cursor(void)
 
           for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
           {
-        	if(y_pos<0) continue;
+            if(y_pos<0) continue;
             if(y_pos>=Screen_height) break;
-          	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-          	{
+            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+            {
               if(x_pos<0) continue;
               if(x_pos>=Screen_width) break;
                   Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
@@ -2059,10 +2402,10 @@ void Hide_cursor(void)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-      	for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-      	{
-        	if(x_pos<0) continue;
-        	if(x_pos>=Screen_width) break;
+        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        {
+          if(x_pos<0) continue;
+          if(x_pos>=Screen_width) break;
             Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
         }
       }
@@ -2239,15 +2582,15 @@ void Display_all_screen(void)
   if (Main_magnifier_mode)
   {
     if (Main_image_width<Main_separator_position && Main_image_width < Screen_width)
-      Block(Main_image_width,0,(Main_separator_position-Main_image_width),Menu_Y,0);
+      Block(Main_image_width,0,(Main_separator_position-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
   else
   {
     if (Main_image_width<Screen_width)
-      Block(Main_image_width,0,(Screen_width-Main_image_width),Menu_Y,0);
+      Block(Main_image_width,0,(Screen_width-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
   if (Main_image_height<Menu_Y)
-    Block(0,Main_image_height,width,(Menu_Y-height),0);
+    Block(0,Main_image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Main_magnifier_mode)
@@ -2273,9 +2616,9 @@ void Display_all_screen(void)
     if (Main_image_width<Main_magnifier_width)
       Block(Main_X_zoom+(Main_image_width*Main_magnifier_factor),0,
             (Main_magnifier_width-Main_image_width)*Main_magnifier_factor,
-            Menu_Y,0);
+            Menu_Y,Main_backups->Pages->Transparent_color);
     if (Main_image_height<Main_magnifier_height)
-      Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),0);
+      Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
   }
 
   // ---/\/\/\ Affichage des limites /\/\/\---
@@ -2334,11 +2677,13 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
     delta_b=(int)Main_palette[col].B-blue;
+
+    if(delta_r == 0 && delta_g == 0 && delta_b == 0) return col;
+
     rmean = ( Main_palette[col].R + red ) / 2;
 
-    if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
-    //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
-      return col;
+    dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8);
+    //dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)
 
     if (dist<best_dist)
     {
@@ -2497,23 +2842,21 @@ void Remap_screen_after_menu_colors_change(void)
 void Compute_optimal_menu_colors(T_Components * palette)
 {
   byte table[4];
-  short i,j,k;
-
 
   Old_black =MC_Black;
-  Old_dark=MC_Dark;
-  Old_light=MC_Light;
-  Old_white=MC_White;
-  Old_trans=MC_Trans;
+  Old_dark = MC_Dark;
+  Old_light = MC_Light;
+  Old_white = MC_White;
+  Old_trans = MC_Trans;
 
   // Recherche du noir
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[0].R, Fav_menu_colors[0].G, Fav_menu_colors[0].B,palette,table);
+    (Config.Fav_menu_colors[0].R, Config.Fav_menu_colors[0].G, Config.Fav_menu_colors[0].B,palette,table);
   MC_Black=table[0];
 
   // Recherche du blanc
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[3].R, Fav_menu_colors[3].G, Fav_menu_colors[3].B,palette,table);
+    (Config.Fav_menu_colors[3].R, Config.Fav_menu_colors[3].G, Config.Fav_menu_colors[3].B,palette,table);
   if (MC_Black!=table[0])
     MC_White=table[0];
   else
@@ -2521,7 +2864,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris clair
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[2].R, Fav_menu_colors[2].G, Fav_menu_colors[2].B,palette,table);
+    (Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
     MC_Light=table[0];
   else
@@ -2534,7 +2877,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris foncé
   Compute_4_best_colors_for_1_menu_color
-    (Fav_menu_colors[1].R, Fav_menu_colors[1].G, Fav_menu_colors[1].B,palette,table);
+    (Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
     MC_Dark=table[0];
   else
@@ -2555,42 +2898,63 @@ void Compute_optimal_menu_colors(T_Components * palette)
   if ( ((palette[MC_Light].R*30)+(palette[MC_Light].G*59)+(palette[MC_Light].B*11)) <
        ((palette[MC_Dark].R*30)+(palette[MC_Dark].G*59)+(palette[MC_Dark].B*11)) )
   {
-    i=MC_Light;
-    MC_Light=MC_Dark;
-    MC_Dark=i;
+    SWAP_BYTES(MC_Light, MC_Dark);
   }
 
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 
-  // Et maintenant, on "remappe" tous les sprites, etc...
+  Remap_menu_sprites();
+}
+
+/// Remap all menu data when the palette changes or a new skin is loaded
+void Remap_menu_sprites()
+{
+  int i, j, k, l;
+
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
     || (MC_White!=Old_white)
     || (MC_Black !=Old_black )
     || (MC_Trans!=Old_trans) )
   {
-    // Sprites du curseur
+    // Mouse cursor sprites
     for (k=0; k<NB_CURSOR_SPRITES; k++)
       for (j=0; j<CURSOR_SPRITE_HEIGHT; j++)
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
-    // Le menu
-    for (j=0; j<MENU_HEIGHT; j++)
-      for (i=0; i<MENU_WIDTH; i++)
+    // Main menu bar
+    for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
         Remap_pixel(&Gfx->Menu_block[j][i]);
-    // Sprites du menu
+    // Menu sprites
     for (k=0; k<NB_MENU_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Menu_sprite[k][j][i]);
-    // Sprites d'effets
+    // Effects sprites
     for (k=0; k<NB_EFFECTS_SPRITES; k++)
       for (j=0; j<MENU_SPRITE_HEIGHT; j++)
         for (i=0; i<MENU_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
-    // Fontes de l'aide
+    // Layers buttons
+    for (l=0; l<3; l++)
+      for (k=0; k<16; k++)
+        for (j=0; j<LAYER_SPRITE_HEIGHT; j++)
+          for (i=0; i<LAYER_SPRITE_WIDTH; i++)
+            Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
+    
+    // Status bar
+    for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
+        Remap_pixel(&Gfx->Statusbar_block[j][i]);
+    // Layer bar
+    for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
+      for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
+        Remap_pixel(&Gfx->Layerbar_block[j][i]);
+    
+    // Help fonts
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
@@ -2616,11 +2980,16 @@ void Compute_optimal_menu_colors(T_Components * palette)
         for (i=0; i<6; i++)
           Remap_pixel(&Gfx->Help_font_t4[k][i][j]);
         
-    // Sprites de lecteurs (drives)
+    // Drives and other misc. 8x8 icons
     for (k=0; k<NB_ICON_SPRITES; k++)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
         for (i=0; i<ICON_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
+
+    // Skin preview
+    for (j = 0; j < 173; j++)
+      for (i = 0; i < 16; i++)
+        Remap_pixel(&Gfx->Preview[i][j]);
   }
   Clear_border(MC_Black);
 }

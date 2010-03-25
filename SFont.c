@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  SFont: a simple font-library that uses special .pngs as fonts
     Copyright (C) 2003 Karl Bartel
 

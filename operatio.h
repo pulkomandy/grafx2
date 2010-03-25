@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -19,8 +21,12 @@
 
 //////////////////////////////////////////////////////////////////////////////
 ///@file operatio.h
-/// Code for the operations, ie all drawing tools.
+/// Code for the drawing tools operations.
 //////////////////////////////////////////////////////////////////////////////
+
+#include "struct.h"
+
+// General operation handling functions. These may be moved to ops_handler.h when operatio.c grows over 5000 lines again...
 
 /// Do some housekeeping before starting work on a operation.
 void Start_operation_stack(word new_operation);
@@ -28,6 +34,8 @@ void Start_operation_stack(word new_operation);
 void Operation_push(short value);
 /// Take a value off ::Operation_stack
 void Operation_pop(short * value);
+void Init_start_operation(void);
+short Distance(short x1, short y1, short x2, short y2);
 
 //////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW
 void Freehand_mode1_1_0(void);
@@ -181,8 +189,8 @@ void Filled_contour_0_8(void);
 //////////////////////////////////////////////////////////// OPERATION_SCROLL
 
 void Scroll_12_0(void);
-void Scroll_12_4(void);
-void Scroll_0_4(void);
+void Scroll_12_5(void);
+void Scroll_0_5(void);
 
 //////////////////////////////////////////////////// OPERATION_GRAD_CIRCLE
 

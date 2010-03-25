@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -39,6 +41,15 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
 /// @param str          The original string value (will be modified, unless user cancels.
 /// @param visible_size Number of characters visible.
 /// @param max_size     Number of characters editable.
-/// @param input_type   0=string, 1=number, 2=filename (255 editable characters)
+/// @param input_type   0=string, 1=integer, 2=filename (255 editable characters) 3=decimal
+/// @param decimal_places Number of decimal places (used only with decimal type)
 /// @return             0 if user cancelled (esc), 1 if accepted (return)
-byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type);
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places);
+
+///
+/// Converts a double to string.
+/// @param str            Target string, should be pre-allocated and at least 40 characters, to be safe.
+/// @param value          The number to convert
+/// @param decimal_places Number of decimal places to keep. 15 seems the maximum.
+/// @param min_positions  Minimum number of characters: Will pad spaces on the left to meet this minimum.
+void Sprint_double(char *str, double value, byte decimal_places, byte min_positions);

@@ -1,6 +1,6 @@
 The following file:
 
-	SDL_ttf.dll
+	SDL.dll
 
 is the runtime environment for the SDL library.
 

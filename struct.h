@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -25,7 +27,7 @@
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
-#if defined(__BEOS__)
+#if defined(__BEOS__) || defined(__TRU64__)
     #include <inttypes.h>
 #else
     #include <stdint.h>
@@ -36,7 +38,7 @@
 
 // POSIX calls it strcasecmp, Windows uses stricmp... no ANSI standard.
 #ifdef WIN32
-	#define strcasecmp stricmp
+    #define strcasecmp stricmp
 #endif
 
 // Definition of the base data types
@@ -50,14 +52,15 @@
 #define qword uint64_t
 
 // Named function prototypes
-typedef void (* Func_action)    (void);
-typedef void (* Func_pixel) (word,word,byte);
-typedef byte (* Func_read)   (word,word);
+// GrafX2 use a lot of function pointer to do the drawing depending in the "fake hardware zoom" and the magnifier status.
+typedef void (* Func_action)    (void); ///< An action. Used when you click a menu button or trigger a keyboard shortcut.
+typedef void (* Func_pixel) (word,word,byte); ///< Set pixel at position (x,y) to color c. Used in load screen to write the data to brush, picture, or preview area.
+typedef byte (* Func_read)   (word,word); ///< Read a pixel at position (x,y) on something. Used for example in save to tell if the data is a brush or a picture
 typedef void (* Func_clear)  (byte);
 typedef void (* Func_display)   (word,word,word);
-typedef byte (* Func_effect)     (word,word,byte);
+typedef byte (* Func_effect)     (word,word,byte); ///< Called by all drawing tools to draw with a special effect (smooth, transparency, shade, ...)
 typedef void (* Func_block)     (word,word,word,word,byte);
-typedef void (* Func_line_XOR) (word,word,word);
+typedef void (* Func_line_XOR) (word,word,word); ///< Draw an XOR line on the picture view of the screen. Use a different function when in magnify mode.
 typedef void (* Func_display_brush_color) (word,word,word,word,word,word,byte,word);
 typedef void (* Func_display_brush_mono)  (word,word,word,word,word,word,byte,byte,word);
 typedef void (* Func_gradient)   (long,short,short);
@@ -67,15 +70,17 @@ typedef void (* Func_display_zoom) (word,word,word,byte *);
 typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,byte,word,byte *);
 typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
 typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
-typedef void (* Func_draw_list_item) (word,word,word,byte);
+typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
 
 /// A set of RGB values.
+#pragma pack(1)
 typedef struct
 {
   byte R; ///< Red
   byte G; ///< Green
   byte B; ///< Blue
-}__attribute__ ((__packed__)) T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+} T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+#pragma pack()
 
 /// A normal rectangular button in windows and menus.
 typedef struct T_Normal_button
@@ -114,7 +119,7 @@ typedef struct T_Scroller_button
   struct T_Scroller_button * Next;///< Pointer to the next scroller of current window.
 } T_Scroller_button;
 
-///
+/// Special invisible button
 /// A window control that only has a rectangular "active" area which catches mouse clicks,
 // but no visible shape. It's used for custom controls where the drawing is done on
 // a case by case basis.
@@ -147,6 +152,7 @@ typedef struct T_Dropdown_button
   byte Display_choice;            ///< Boolean, true if the engine should print the selected item's label in the dropdown area when the user chooses it.
   byte Display_centered;          ///< Boolean, true to center the labels (otherwise, align left)
   byte Display_arrow;             ///< Boolean, true to display a "down" arrow box in top right
+  byte Bottom_up;                 ///< Boolean, true to make the dropdown panel go above its button instead of below it
   byte Active_button;             ///< Determines which mouse button(s) cause the dropdown panel to open: LEFT_SIDE || RIGHT_SIDE || (LEFT_SIDE|RIGHT_SIDE)
   word Dropdown_width;            ///< Width of the dropdown panel when it's open. Use 0 for "same as the dropdown button"
   T_Dropdown_choice * First_item; ///< Linked list with the choices available for this dropdown.
@@ -179,6 +185,8 @@ typedef struct T_Fileselector
   T_Fileselector_item ** Index;
 } T_Fileselector;
 
+/// "List" button as used in the font selection, skin selection, and brush factory screens. It's like a limited filelist.
+/// The screenmode selection and load/save screen were written before this existed so they use their own code. It would be nice if they were updated to use this one.
 typedef struct T_List_button
 {
   short Number;                     ///< Unique identifier for all controls
@@ -225,13 +233,15 @@ typedef struct
   byte Mode;      ///< Shade mode: Normal, Loop, or No-saturation see ::SHADE_MODES
 } T_Shade;
 
+#pragma pack(1) // is it useful ?
 /// Data for one fullscreen video mode in configuration file. Warning, this one is saved/loaded as binary.
 typedef struct
 {
   byte State; ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
   word Width; ///< Videomode width in pixels.
   word Height;///< Videomode height in pixels. 
-} __attribute__((__packed__)) T_Config_video_mode;
+} T_Config_video_mode;
+
 
 /// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -241,7 +251,9 @@ typedef struct
   byte Version2;     ///< Minor version number (ex: 0)
   byte Beta1;        ///< Major beta version number (ex: 96)
   byte Beta2;        ///< Major beta version number (ex: 5)
-} __attribute__((__packed__)) T_Config_header;
+} T_Config_header;
+
+#pragma pack()
 
 /// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -250,13 +262,15 @@ typedef struct
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
+#pragma pack(1)
 /// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
-} __attribute__((__packed__)) T_Config_shortcut_info;
+} T_Config_shortcut_info;
+#pragma pack()
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
@@ -277,8 +291,6 @@ typedef struct
   byte Max_undo_pages;                   ///< Number of steps to memorize for Undo/Redo.
   byte Mouse_sensitivity_index_x;        ///< Mouse sensitivity in X axis
   byte Mouse_sensitivity_index_y;        ///< Mouse sensitivity in Y axis
-  byte Mouse_fix_factor_X;               ///< Mouse correction factor in X axis.
-  byte Mouse_fix_factor_Y;               ///< Mouse correction factor in Y axis.
   byte Mouse_merge_movement;             ///< Number of SDL mouse events that are merged into a single change of mouse coordinates.
   byte Delay_left_click_on_slider;       ///< Delay (in 1/100s) between two activations of a repeatable button when you hold left-click.
   byte Delay_right_click_on_slider;      ///< Delay (in 1/100s) between two activations of a repeatable button when you hold left-click.
@@ -319,9 +331,11 @@ typedef struct
 // backup dans "graph.c".
 
 /// This is the data for one step of Undo/Redo, for one image.
-typedef struct
+/// This structure is resized dynamically to hold pointers to all of the layers in the picture.
+/// The pointed layers are just byte* holding the raw pixel data. But at Image[0]-1 you will find a short that is used as a reference counter for each layer.
+/// This way we can use the same pixel data in many undo pages when the user edit only one of the layers (which is what they usually do).
+typedef struct T_Page
 {
-  byte *    Image;   ///< Pixel data for the image.
   int       Width;   ///< Image width in pixels.
   int       Height;  ///< Image height in pixels.
   T_Palette Palette; ///< Image palette.
@@ -331,16 +345,31 @@ typedef struct
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
   char      Filename[MAX_PATH_CHARACTERS];      ///< Filename without directory.
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
-
+  struct T_Page *Next; ///< Pointer to the next backup
+  struct T_Page *Prev; ///< Pointer to the previous backup
+  byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
+  byte      Transparent_color; ///< Index of transparent color. 0 to 255.
+  byte      Nb_layers; ///< Number of layers
+  byte *    Image[];  ///< Pixel data for the (first layer of) image.
+    // Define as Image[0] if you have an old gcc which is not C99.
+  // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
 
 /// Collection of undo/redo steps.
 typedef struct
 {
   int      List_size;         ///< Number of ::T_Page in the vector "Pages".
-  int      Nb_pages_allocated;///< Number of ::T_Page used so far in the vector "Pages".
-  T_Page * Pages;             ///< Vector of Pages, each one being a undo/redo step.
+  T_Page * Pages;             ///< Head of a linked list of pages, each one being a undo/redo step.
 } T_List_of_pages;
+
+/// A single image bitmap
+/// This struct is used to store a flattened view of the current picture.
+typedef struct
+{
+  int       Width;   ///< Image width in pixels.
+  int       Height;  ///< Image height in pixels.
+  byte *    Image;   ///< Pixel data for the image.
+} T_Bitmap;
 
 /// A single memorized brush from the Brush Container
 typedef struct
@@ -354,7 +383,6 @@ typedef struct
   T_Palette Palette;
   byte Transp_color;
 } T_Brush_template;
-
 
 /// GUI skin data
 typedef struct
@@ -391,11 +419,15 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[MENU_HEIGHT][MENU_WIDTH];
+  byte Menu_block[35][MENU_WIDTH];
+  byte Layerbar_block[10][144];
+  byte Statusbar_block[9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
   byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  /// Bitmap data for the different Layer icons.
+  byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
   byte Logo_grafx2[231*56];
   /// Bitmap data for the 6x8 font used in help screens.
@@ -418,7 +450,39 @@ typedef struct
   /// A default 256-color palette.
   T_Palette Default_palette;
 
+  /// Preview for displaying in the skin dialog
+  byte Preview[16][173];
+
+  /// Black GUI color index in skin palette
+  byte Color_black;
+  /// Dark GUI color index in skin palette
+  byte Color_dark;
+  /// Light GUI color index in skin palette
+  byte Color_light;
+  /// White GUI color index in skin palette
+  byte Color_white;
+  /// Transparent GUI color index in skin file
+  byte Color_trans;
+
 
 } T_Gui_skin;
+
+// A menubar.
+typedef struct {
+  word Width;
+  word Height;
+  byte Visible;
+  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
+  byte* Skin;
+  word Skin_width;
+  byte Last_button_index;
+} T_Menu_Bar;
+
+typedef enum {
+  MENUBAR_STATUS = 0, // MUST be 0
+  MENUBAR_LAYERS,
+  MENUBAR_TOOLS,
+  MENUBAR_COUNT
+} T_Menubars;
 
 #endif

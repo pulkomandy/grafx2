@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Franck Charlet
@@ -28,20 +30,43 @@
 #include "global.h"
 #include "pages.h"
 #include "errors.h"
+#include "loadsave.h"
 #include "misc.h"
 #include "windows.h"
+
+// -- Layers data
+
+/// Array of two images, that contains the "flattened" version of the visible layers.
+#ifndef NOLAYERS
+T_Bitmap Main_visible_image;
+T_Bitmap Main_visible_image_backup;
+T_Bitmap Main_visible_image_depth_buffer;
+T_Bitmap Spare_visible_image;
+#endif
 
   ///
   /// GESTION DES PAGES
   ///
 
-void Init_page(T_Page * page)
-{
-  // Important: appeler cette fonction sur toute nouvelle structure T_Page!
+/// Bitfield which records which layers are backed up in Page 0.
+static dword Last_backed_up_layers=0;
 
+/// Total number of unique bitmaps (layers, animation frames, backups)
+long Stats_pages_number=0;
+/// Total memory used by bitmaps (layers, animation frames, backups)
+long long Stats_pages_memory=0;
+
+/// Allocate and initialize a new page.
+T_Page * New_page(byte nb_layers)
+{
+  T_Page * page;
+  
+  page = (T_Page *)malloc(sizeof(T_Page)+nb_layers*sizeof(byte *));
   if (page!=NULL)
   {
-    page->Image=NULL;
+    int i;
+    for (i=0; i<nb_layers; i++)
+      page->Image[i]=NULL;
     page->Width=0;
     page->Height=0;
     memset(page->Palette,0,sizeof(T_Palette));
@@ -49,27 +74,88 @@ void Init_page(T_Page * page)
     page->File_directory[0]='\0';
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
+    page->Nb_layers=nb_layers;
+    page->Transparent_color=0; // Default transparent color
+    page->Background_transparent=0;
+    page->Next = page->Prev = NULL;
   }
+  return page;
 }
+
+// ==============================================================
+// Layers allocation functions.
+//
+// Layers are made of a "number of users" (short), followed by
+// the actual pixel data (a large number of bytes).
+// Every time a layer is 'duplicated' as a reference, the number
+// of users is incremented.
+// Every time a layer is freed, the number of users is decreased,
+// and only when it reaches zero the pixel data is freed.
+// ==============================================================
+
+/// Allocate a new layer
+byte * New_layer(long pixel_size)
+{
+  short * ptr = malloc(sizeof(short)+pixel_size);
+  if (ptr==NULL)
+    return NULL;
+    
+  // Stats
+  Stats_pages_number++;
+  Stats_pages_memory+=pixel_size;
+  
+  *ptr = 1;
+  return (byte *)(ptr+1);
+}
+
+/// Free a layer
+void Free_layer(T_Page * page, byte layer)
+{
+  short * ptr;
+  if (page->Image[layer]==NULL)
+    return;
+    
+  ptr = (short *)(page->Image[layer]);
+  if (-- (*(ptr-1))) // Users--
+    return;
+  else {
+    free(ptr-1);
+  }
+    
+  // Stats
+  Stats_pages_number--;
+  Stats_pages_memory-=page->Width * page->Height;
+}
+
+/// Duplicate a layer (new reference)
+byte * Dup_layer(byte * layer)
+{
+  short * ptr = (short *)(layer);
+  
+  if (layer==NULL)
+    return NULL;
+  
+  (*(ptr-1)) ++; // Users ++
+  return layer;
+}
+
+// ==============================================================
 
 void Download_infos_page_main(T_Page * page)
 // Affiche la page à l'écran
 {
   //int factor_index;
   int size_is_modified;
-
+  
   if (page!=NULL)
   {
     size_is_modified=(Main_image_width!=page->Width) ||
                          (Main_image_height!=page->Height);
 
-    Main_screen=page->Image;
     Main_image_width=page->Width;
     Main_image_height=page->Height;
     memcpy(Main_palette,page->Palette,sizeof(T_Palette));
     strcpy(Main_comment,page->Comment);
-    strcpy(Main_file_directory,page->File_directory);
-    strcpy(Main_filename,page->Filename);
     Main_fileformat=page->File_format;
 
     if (size_is_modified)
@@ -81,7 +167,176 @@ void Download_infos_page_main(T_Page * page)
       Compute_limits();
       Compute_paintbrush_coordinates();
     }
+    
   }
+  //Update_buffers( page->Width, page->Height);
+  //memcpy(Main_screen, page->Image[Main_current_layer], page->Width*page->Height);
+  
+}
+
+void Redraw_layered_image(void)
+{
+  #ifndef NOLAYERS
+  // Re-construct the image with the visible layers
+  byte layer;  
+  // First layer
+  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Main_layers_visible)
+    {
+       // Copy it in Main_visible_image
+       memcpy(Main_visible_image.Image,
+         Main_backups->Pages->Image[layer],
+         Main_image_width*Main_image_height);
+       
+       // Initialize the depth buffer
+       memset(Main_visible_image_depth_buffer.Image,
+         layer,
+         Main_image_width*Main_image_height);
+       
+       // skip all other layers
+       layer++;
+       break;
+    }
+  }
+  // subsequent layer(s)
+  for (; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Main_layers_visible)
+    {
+      int i;
+      for (i=0; i<Main_image_width*Main_image_height; i++)
+      {
+        byte color = *(Main_backups->Pages->Image[layer]+i);
+        if (color != Main_backups->Pages->Transparent_color) // transparent color
+        {
+          *(Main_visible_image.Image+i) = color;
+          if (layer != Main_current_layer)
+            *(Main_visible_image_depth_buffer.Image+i) = layer;
+        }
+      }
+    }
+  }
+  #else
+  Update_screen_targets();
+  #endif
+  Update_FX_feedback(Config.FX_Feedback);
+}
+
+void Update_depth_buffer(void)
+{
+  #ifndef NOLAYERS
+  // Re-construct the depth buffer with the visible layers.
+  // This function doesn't touch the visible buffer, it assumes
+  // that it was already up-to-date. (Ex. user only changed active layer)
+
+  int layer;  
+  // First layer
+  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Main_layers_visible)
+    {
+       // Initialize the depth buffer
+       memset(Main_visible_image_depth_buffer.Image,
+         layer,
+         Main_image_width*Main_image_height);
+       
+       // skip all other layers
+       layer++;
+       break;
+    }
+  }
+  // subsequent layer(s)
+  for (; layer<Main_backups->Pages->Nb_layers; layer++)
+  {
+    // skip the current layer, whenever we reach it
+    if (layer == Main_current_layer)
+      continue;
+      
+    if ((1<<layer) & Main_layers_visible)
+    {
+      int i;
+      for (i=0; i<Main_image_width*Main_image_height; i++)
+      {
+        byte color = *(Main_backups->Pages->Image[layer]+i);
+        if (color != Main_backups->Pages->Transparent_color) // transparent color
+        {
+          *(Main_visible_image_depth_buffer.Image+i) = layer;
+        }
+      }
+    }
+  }
+  #endif
+  Update_FX_feedback(Config.FX_Feedback);
+}
+
+void Redraw_spare_image(void)
+{
+  #ifndef NOLAYERS
+  // Re-construct the image with the visible layers
+  byte layer;  
+  // First layer
+  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Spare_layers_visible)
+    {
+       // Copy it in Spare_visible_image
+       memcpy(Spare_visible_image.Image,
+         Spare_backups->Pages->Image[layer],
+         Spare_image_width*Spare_image_height);
+       
+       // No depth buffer in the spare
+       //memset(Spare_visible_image_depth_buffer.Image,
+       //  layer,
+       //  Spare_image_width*Spare_image_height);
+       
+       // skip all other layers
+       layer++;
+       break;
+    }
+  }
+  // subsequent layer(s)
+  for (; layer<Spare_backups->Pages->Nb_layers; layer++)
+  {
+    if ((1<<layer) & Spare_layers_visible)
+    {
+      int i;
+      for (i=0; i<Spare_image_width*Spare_image_height; i++)
+      {
+        byte color = *(Spare_backups->Pages->Image[layer]+i);
+        if (color != Spare_backups->Pages->Transparent_color) // transparent color
+        {
+          *(Spare_visible_image.Image+i) = color;
+          //if (layer != Spare_current_layer)
+          //  *(Spare_visible_image_depth_buffer.Image+i) = layer;
+        }
+      }
+    }
+  }
+  #endif
+}
+
+void Redraw_current_layer(void)
+{
+#ifndef NOLAYERS
+  int i;
+  for (i=0; i<Main_image_width*Main_image_height; i++)
+  {
+    byte depth = *(Main_visible_image_depth_buffer.Image+i);
+    if (depth<=Main_current_layer)
+    {
+      byte color = *(Main_backups->Pages->Image[Main_current_layer]+i);
+      if (color != Main_backups->Pages->Transparent_color) // transparent color
+      {
+        *(Main_visible_image.Image+i) = color;
+      }
+      else
+      {
+        *(Main_visible_image.Image+i) = *(Main_backups->Pages->Image[depth]+i);
+      }
+    }
+  }
+#endif
 }
 
 void Upload_infos_page_main(T_Page * page)
@@ -89,13 +344,11 @@ void Upload_infos_page_main(T_Page * page)
 {
   if (page!=NULL)
   {
-    page->Image=Main_screen;
+    //page->Image[Main_current_layer]=Main_screen;
     page->Width=Main_image_width;
     page->Height=Main_image_height;
     memcpy(page->Palette,Main_palette,sizeof(T_Palette));
     strcpy(page->Comment,Main_comment);
-    strcpy(page->File_directory,Main_file_directory);
-    strcpy(page->Filename,Main_filename);
     page->File_format=Main_fileformat;
   }
 }
@@ -104,13 +357,9 @@ void Download_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
   {
-    Spare_screen=page->Image;
     Spare_image_width=page->Width;
     Spare_image_height=page->Height;
     memcpy(Spare_palette,page->Palette,sizeof(T_Palette));
-    strcpy(Spare_comment,page->Comment);
-    strcpy(Spare_file_directory,page->File_directory);
-    strcpy(Spare_filename,page->Filename);
     Spare_fileformat=page->File_format;
   }
 }
@@ -119,34 +368,34 @@ void Upload_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
   {
-    page->Image=Spare_screen;
+    //page->Image[Spare_current_layer]=Spare_screen;
     page->Width=Spare_image_width;
     page->Height=Spare_image_height;
     memcpy(page->Palette,Spare_palette,sizeof(T_Palette));
-    strcpy(page->Comment,Spare_comment);
-    strcpy(page->File_directory,Spare_file_directory);
-    strcpy(page->Filename,Spare_filename);
     page->File_format=Spare_fileformat;
   }
 }
 
-void Download_infos_backup(T_List_of_pages * list)
-{
-  Screen_backup=list->Pages[1].Image;
+byte * FX_feedback_screen;
 
-  if (Config.FX_Feedback)
-    FX_feedback_screen=list->Pages[0].Image;
+void Update_FX_feedback(byte with_feedback)
+{
+
+  if (with_feedback)
+    FX_feedback_screen=Main_backups->Pages->Image[Main_current_layer];
   else
-    FX_feedback_screen=list->Pages[1].Image;
+    FX_feedback_screen=Main_backups->Pages->Next->Image[Main_current_layer];
 }
 
-void Free_a_page(T_Page * page)
+void Clear_page(T_Page * page)
 {
   // On peut appeler cette fonction sur une page non allouée.
-
-  if (page->Image!=NULL)
-    free(page->Image);
-  page->Image=NULL;
+  int i;
+  for (i=0; i<page->Nb_layers; i++)
+  {
+    Free_layer(page, i);
+    page->Image[i]=NULL;
+  }
   page->Width=0;
   page->Height=0;
   // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
@@ -155,15 +404,6 @@ void Free_a_page(T_Page * page)
 void Copy_S_page(T_Page * dest,T_Page * source)
 {
   *dest=*source;
-}
-
-int Size_of_a_page(T_Page * page)
-{
-  return sizeof(T_Page)+(page->Width*page->Height)+8;
-  // 8 = 4 + 4
-  // (Toute zone allouée en mémoire est précédée d'un mot double indiquant sa
-  // taille, or la taille d'un mot double est de 4 octets, et on utilise deux
-  // allocations de mémoires: une pour la T_Page et une pour l'image)
 }
 
 
@@ -177,62 +417,30 @@ void Init_list_of_pages(T_List_of_pages * list)
   //            T_List_of_pages!
 
   list->List_size=0;
-  list->Nb_pages_allocated=0;
   list->Pages=NULL;
 }
 
-int Allocate_list_of_pages(T_List_of_pages * list,int size)
+int Allocate_list_of_pages(T_List_of_pages * list)
 {
   // Important: la T_List_of_pages ne doit pas déjà désigner une liste de
   //            pages allouée auquel cas celle-ci serait perdue.
-  int index;
+  T_Page * page;
 
-  /* Debug : if (list->Pages!=NULL) exit(666); */
+  // On initialise chacune des nouvelles pages
+  page=New_page(NB_LAYERS);
+  if (!page)
+    return 0;
+  
+  // Set as first page of the list
+  page->Next = page;
+  page->Prev = page;
+  list->Pages = page;
 
-  // On alloue la mémoire pour la liste
-  list->Pages=(T_Page *)malloc(size*sizeof(T_Page));
+  list->List_size=1;
 
-  // On vérifie que l'allocation se soit bien passée
-  if (list->Pages==NULL)
-    return 0; // Echec
-  else
-  {
-    // On initialise chacune des nouvelles pages
-    for (index=0;index<size;index++)
-      Init_page(list->Pages+index);
-    list->List_size=size;
-    list->Nb_pages_allocated=0;
-
-    return 1; // Succès
-  }
+  return 1; // Succès
 }
 
-void Free_a_list_of_pages(T_List_of_pages * list)
-{
-  // On peut appeler cette fonction sur une liste de pages non allouée.
-
-  // Important: cette fonction ne libère pas les pages de la liste. Il faut
-  //            donc le faire préalablement si nécessaire.
-
-  if (list->Pages!=NULL)
-    free(list->Pages);
-  list->Pages=NULL;
-  list->List_size=0;
-  list->Nb_pages_allocated=0;
-}
-
-int Size_of_a_list_of_pages(T_List_of_pages * list)
-{
-  int result=0;
-  int index;
-
-  for (index=0;index<list->Nb_pages_allocated;index++)
-    result+=Size_of_a_page(list->Pages+index);
-
-  return result+sizeof(T_List_of_pages)+4;
-
-  // C.F. la remarque à propos de Size_of_a_page pour la valeur 4.
-}
 
 void Backward_in_list_of_pages(T_List_of_pages * list)
 {
@@ -252,29 +460,26 @@ void Backward_in_list_of_pages(T_List_of_pages * list)
   // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
 
-  int index;
-  T_Page * temp_page;
-
-  if (list->Nb_pages_allocated>1)
+  if (Last_backed_up_layers)
   {
-    // On crée la page tempo
-    temp_page=(T_Page *)malloc(sizeof(T_Page));
-    Init_page(temp_page);
+    // First page contains a ready-made backup of its ->Next.
+    // We have swap the first two pages, so the original page 0
+    // will end up in position 0 again, and then overwrite it with a backup
+    // of the 'new' page1.
+    T_Page * page0;
+    T_Page * page1;
 
-    // On copie la 1ère page (page 0) dans la page temporaire
-    Copy_S_page(temp_page,list->Pages);
-
-    // On copie toutes les pages 1-A à leur gauche
-    for (index=1;index<list->Nb_pages_allocated;index++)
-      Copy_S_page(list->Pages+index-1,list->Pages+index);
-
-    // On copie la page 0 (dont la sauvegarde a été effectuée dans la page
-    // temporaire) en dernière position
-    Copy_S_page(list->Pages+list->Nb_pages_allocated-1,temp_page);
-
-    // On détruit la page tempo
-    free(temp_page);
+      page0 = list->Pages;
+      page1 = list->Pages->Next;
+      
+      page0->Next = page1->Next;
+      page1->Prev = page0->Prev;
+      page0->Prev = page1;
+      page1->Next = page0;
+      list->Pages = page0;
+      return;
   }
+  list->Pages = list->Pages->Next;
 }
 
 void Advance_in_list_of_pages(T_List_of_pages * list)
@@ -294,242 +499,104 @@ void Advance_in_list_of_pages(T_List_of_pages * list)
   // de page courante à jour avant l'appel, puis en réextraire les infos en
   // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
   // page de la liste).
-
-  int index;
-  T_Page * temp_page;
-
-  if (list->Nb_pages_allocated>1)
+  if (Last_backed_up_layers)
   {
-    // On crée la page tempo
-    temp_page=(T_Page *)malloc(sizeof(T_Page));
-    Init_page(temp_page);
+    // First page contains a ready-made backup of its ->Next.
+    // We have swap the first two pages, so the original page 0
+    // will end up in position -1 again, and then overwrite it with a backup
+    // of the 'new' page1.
+    T_Page * page0;
+    T_Page * page1;
 
-    // On copie la dernière page dans la page temporaire
-    Copy_S_page(temp_page,list->Pages+list->Nb_pages_allocated-1);
-
-    // On copie toutes les pages 0-9 à leur droite
-    for (index=list->Nb_pages_allocated-1;index>0;index--)
-      Copy_S_page(list->Pages+index,list->Pages+index-1);
-
-    // On copie la page plus ancienne page (la "A", dont la sauvegarde a été
-    // effectuée dans la page temporaire) en 1ère position
-    Copy_S_page(list->Pages,temp_page);
-
-    // On détruit la page tempo
-    free(temp_page);
+      page0 = list->Pages;
+      page1 = list->Pages->Prev;
+      
+      page0->Prev = page1->Prev;
+      page1->Next = page0->Next;
+      page0->Next = page1;
+      page1->Prev = page0;
+      list->Pages = page1;
+      return;
   }
-}
-
-int New_page_is_possible(
-        T_Page           * new_page,
-        T_List_of_pages * current_list,
-        T_List_of_pages * secondary_list
-)
-{
-  long long mem_available_now;
-  unsigned long current_list_size;
-  unsigned long spare_list_size;
-  unsigned long current_page_size;
-  unsigned long spare_page_size;
-  unsigned long new_page_size;
-
-  mem_available_now = Memory_free()
-        - MINIMAL_MEMORY_TO_RESERVE;
-  current_list_size =Size_of_a_list_of_pages(current_list);
-  spare_list_size=Size_of_a_list_of_pages(secondary_list);
-  current_page_size  =Size_of_a_page(current_list->Pages);
-  spare_page_size =Size_of_a_page(secondary_list->Pages);
-  new_page_size  =Size_of_a_page(new_page);
-
-  // Il faut pouvoir loger la nouvelle page et son backup dans la page
-  // courante, en conservant au pire la 1ère page de brouillon.
-  if ( (mem_available_now + current_list_size +
-       spare_list_size - spare_page_size)
-       < (2*new_page_size) )
-    return 0;
-
-  // Il faut pouvoir loger le brouillon et son backup dans la page de
-  // brouillon, en conservant au pire un exemplaire de la nouvelle page dans
-  // la page courante. (pour permettre à l'utilisateur de travailler sur son
-  // brouillon)
-  if ((mem_available_now+current_list_size+
-       spare_list_size-new_page_size)<(2*spare_page_size))
-    return 0;
-
-  return 1;
+  list->Pages = list->Pages->Prev;
 }
 
 void Free_last_page_of_list(T_List_of_pages * list)
 {
   if (list!=NULL)
   {
-    if (list->Nb_pages_allocated>0)
+    if (list->List_size>0)
     {
-      list->Nb_pages_allocated--;
-      Free_a_page(list->Pages+list->Nb_pages_allocated);
+        T_Page * page;
+        // The last page is the one before first
+        page = list->Pages->Prev;
+        
+        page->Next->Prev = page->Prev;
+        page->Prev->Next = page->Next;
+        Clear_page(page);
+        free(page);
+        page = NULL;
+        list->List_size--;
     }
   }
 }
 
-void Create_new_page(T_Page * new_page,T_List_of_pages * current_list,T_List_of_pages * secondary_list)
+// layer_mask tells which layers have to be fresh copies instead of references
+int Create_new_page(T_Page * new_page, T_List_of_pages * list, dword layer_mask)
 {
 
-//   Cette fonction crée une nouvelle page dont les attributs correspondent à
-// ceux de new_page (width,height,...) (le champ Image est invalide
-// à l'appel, c'est la fonction qui le met à jour), et l'enfile dans
-// current_list.
-//   Il est impératif que la création de cette page soit possible,
-// éventuellement au détriment des backups de la page de brouillon
-// (secondary_list). Afin de s'en assurer, il faut vérifier cette
-// possibilité à l'aide de
-// New_page_is_possible(new_page,current_list,secondary_list) avant
-// l'appel à cette fonction.
-//   De plus, il faut qu'il y ait au moins une page dans chacune des listes.
+//   This function fills the "Image" field of a new Page,
+// based on the pages's attributes (width,height,...)
+// then pushes it on front of a Page list.
 
-  int                need_to_free;
-  T_List_of_pages * list_to_reduce=NULL;
-  T_Page *           page_to_delete;
-  int                index;
-
-  // On regarde s'il faut libérer des pages:
-  need_to_free=
-    // C'est le cas si la current_list est pleine
-  (  (current_list->List_size==current_list->Nb_pages_allocated)
-    // ou qu'il ne reste plus assez de place pour allouer la new_page
-  || ( (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<
-       (unsigned long)(new_page->Height*new_page->Width) )  );
-
-  if (!need_to_free)
+  if (list->List_size >= (Config.Max_undo_pages+1))
   {
-    // On a assez de place pour allouer une page, et de plus la current_list
-    // n'est pas pleine. On n'a donc aucune page à supprimer. On peut en
-    // allouer une directement.
-    new_page->Image=(byte *)malloc(new_page->Height*new_page->Width);
+    // List is full.
+    // If some other memory-limit was to be implemented, here would
+    // be the right place to do it.
+    // For example, we could rely on Stats_pages_memory, 
+    // because it's the sum of all bitmaps in use (in bytes).
+    
+    // Destroy the latest page
+    Free_last_page_of_list(list);
   }
-  else
   {
-    // On manque de mémoire ou la current_list est pleine. Dans tous les
-    // cas, il faut libérer une page... qui peut-être pourra re-servir.
-
-    // Tant qu'il faut libérer
-    while (need_to_free)
+    int i;
+    for (i=0; i<new_page->Nb_layers; i++)
     {
-      // On cherche sur quelle liste on va virer une page
-
-      // S'il reste des pages à libérer dans la current_list
-      if (current_list->Nb_pages_allocated>1)
-        // Alors on va détruire la dernière page allouée de la current_list
-        list_to_reduce=current_list;
+      if ((1<<i) & layer_mask)
+        new_page->Image[i]=New_layer(new_page->Height*new_page->Width);
       else
-      {
-        if (secondary_list->Nb_pages_allocated>1)
-        {
-          // Sinon on va détruire la dernière page allouée de la
-          // secondary_list
-          list_to_reduce=secondary_list;
-        }
-        else
-        {
-          // Bon, alors là, on vient de vider toutes les pages et on a toujours pas asez de mémoire... C'est donc qu'un vilain programmeur a oublié de vérifier avec Noiuvelle_page_possible avant de venir ici.
-          // On sort méchament du programme sans sauvegarde ni rien. De toutes façons, ça ne devrait jamais se produire...
-          Error(ERROR_SORRY_SORRY_SORRY);
-        }
-      }
-
-      // Puis on détermine la page que l'on va supprimer (c'est la dernière de
-      // la liste)
-      page_to_delete=list_to_reduce->Pages+(list_to_reduce->Nb_pages_allocated)-1;
-
-      // On regarde si on peut recycler directement la page (cas où elle
-      // aurait la même surface que la new_page)
-      if ((page_to_delete->Height*page_to_delete->Width)==
-          (new_page->Height*new_page->Width))
-      {
-        // Alors
-        // On récupère le bitmap de la page à supprimer (évite de faire des
-        // allocations/désallocations fastidieuses et inutiles)
-        new_page->Image=page_to_delete->Image;
-
-        // On fait semblant que la dernière page allouée ne l'est pas
-        list_to_reduce->Nb_pages_allocated--;
-
-        // On n'a plus besoin de libérer de la mémoire puisqu'on a refilé à
-        // new_page un bitmap valide
-        need_to_free=0;
-      }
-      else
-      {
-        // Sinon
-
-        // Détruire la dernière page allouée dans la Liste_à_raboter
-        Free_last_page_of_list(list_to_reduce);
-
-        // On regarde s'il faut continuer à libérer de la place
-        need_to_free=(Memory_free()-MINIMAL_MEMORY_TO_RESERVE)
-                       <(unsigned long)(new_page->Height*new_page->Width);
-
-        // S'il ne faut pas, c'est qu'on peut allouer un bitmap
-        // pour la new_page
-        if (!need_to_free)
-          new_page->Image=(byte *)malloc(new_page->Height*new_page->Width);
-      }
+        new_page->Image[i]=Dup_layer(list->Pages->Image[i]);
     }
   }
 
-  // D'après l'hypothèse de départ, la boucle ci-dessus doit s'arrêter car
-  // on a assez de mémoire pour allouer la nouvelle page.
-  // Désormais new_page contient un pointeur sur une zone bitmap valide.
-
-  // Décaler la current_list d'un cran vers le passé.
-  for (index=current_list->List_size-1;index>0;index--)
-    Copy_S_page(current_list->Pages+index,current_list->Pages+index-1);
-
-  // Recopier la new_page en 1ère position de la current_list
-  Copy_S_page(current_list->Pages,new_page);
-  current_list->Nb_pages_allocated++;
+  
+  // Insert as first
+  new_page->Next = list->Pages;
+  new_page->Prev = list->Pages->Prev;
+  list->Pages->Prev->Next = new_page;
+  list->Pages->Prev = new_page;
+  list->Pages = new_page;
+  list->List_size++;
+  
+  return 1;
 }
 
 void Change_page_number_of_list(T_List_of_pages * list,int number)
 {
-  int index;
-  T_Page * new_pages;
-
-  // Si la liste a déjà la taille demandée
-  if (list->List_size==number)
-    // Alors il n'y a rien à faire
-    return;
-
-  // Si la liste contient plus de pages que souhaité
-  if (list->List_size>number)
-    // Alors pour chaque page en excés
-    for (index=number;index<list->List_size;index++)
-      // On libère la page
-      Free_a_page(list->Pages+index);
-
-  // On fait une nouvelle liste de pages:
-  new_pages=(T_Page *)malloc(number*sizeof(T_Page));
-  for (index=0;index<number;index++)
-    Init_page(new_pages+index);
-
-  // On recopie les pages à conserver de l'ancienne liste
-  for (index=0;index<Min(number,list->List_size);index++)
-    Copy_S_page(new_pages+index,list->Pages+index);
-
-  // On libère l'ancienne liste
-  free(list->Pages);
-
-  // On met à jour les champs de la nouvelle liste
-  list->Pages=new_pages;
-  list->List_size=number;
-  if (list->Nb_pages_allocated>number)
-    list->Nb_pages_allocated=number;
+  // Truncate the list if larger than requested
+  while(list->List_size > number)
+  {
+    Free_last_page_of_list(list);
+  }
 }
 
 void Free_page_of_a_list(T_List_of_pages * list)
 {
   // On ne peut pas détruire la page courante de la liste si après
   // destruction il ne reste pas encore au moins une page.
-  if (list->Nb_pages_allocated>1)
+  if (list->List_size>1)
   {
     // On fait faire un undo à la liste, comme ça, la nouvelle page courante
     // est la page précédente
@@ -540,82 +607,164 @@ void Free_page_of_a_list(T_List_of_pages * list)
   }
 }
 
-
-  ///
-  /// GESTION DES BACKUPS
-  ///
-
-int Init_all_backup_lists(int size,int width,int height)
+void Update_screen_targets(void)
 {
-  // size correspond au nombre de pages que l'on souhaite dans chaque liste
-  // (1 pour la page courante, puis 1 pour chaque backup, soit 2 au minimum).
+  #ifndef NOLAYERS
+    Main_screen=Main_visible_image.Image;
+    Screen_backup=Main_visible_image_backup.Image;
+  #else
+    Main_screen=Main_backups->Pages->Image[Main_current_layer];
+    Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer];
+  #endif
+}
+
+/// Update all the special image buffers, if necessary.
+int Update_buffers(int width, int height)
+{
+#ifndef NOLAYERS
+  // At least one dimension is different
+  if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+  {
+    // Current image
+    free(Main_visible_image.Image);
+    Main_visible_image.Image = (byte *)malloc(width * height);
+    if (Main_visible_image.Image == NULL)
+      return 0;
+  }
+  Main_visible_image.Width = width;
+  Main_visible_image.Height = height;
+      
+  if (Main_visible_image_backup.Width*Main_visible_image_backup.Height != width*height)
+  {
+    // Previous image
+    free(Main_visible_image_backup.Image);
+    Main_visible_image_backup.Image = (byte *)malloc(width * height);
+    if (Main_visible_image_backup.Image == NULL)
+      return 0;
+  }
+  Main_visible_image_backup.Width = width;
+  Main_visible_image_backup.Height = height;
+
+  if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
+  {      
+    // Depth buffer
+    free(Main_visible_image_depth_buffer.Image);
+    Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+    if (Main_visible_image_depth_buffer.Image == NULL)
+      return 0;
+  }
+  Main_visible_image_depth_buffer.Width = width;
+  Main_visible_image_depth_buffer.Height = height;
+  
+#endif
+  Update_screen_targets();
+  return 1;
+}
+/// Update all the special image buffers of the spare page, if necessary.
+int Update_spare_buffers(int width, int height)
+{
+#ifndef NOLAYERS
+  // At least one dimension is different
+  if (Spare_visible_image.Width*Spare_visible_image.Height != width*height)
+  {
+    // Current image
+    free(Spare_visible_image.Image);
+    Spare_visible_image.Image = (byte *)malloc(width * height);
+    if (Spare_visible_image.Image == NULL)
+      return 0;
+  }
+  Spare_visible_image.Width = width;
+  Spare_visible_image.Height = height;
+  
+#endif
+  return 1;
+}
+
+///
+/// GESTION DES BACKUPS
+///
+
+int Init_all_backup_lists(int width,int height)
+{
   // width et height correspondent à la dimension des images de départ.
+  int i;
 
-  T_Page * page;
-  int return_code=0;
+  if (! Allocate_list_of_pages(Main_backups) ||
+      ! Allocate_list_of_pages(Spare_backups))
+    return 0;
+  // On a réussi à allouer deux listes de pages dont la taille correspond à
+  // celle demandée par l'utilisateur.
 
-  if (Allocate_list_of_pages(Main_backups,size) &&
-      Allocate_list_of_pages(Spare_backups,size))
+  // On crée un descripteur de page correspondant à la page principale
+  Upload_infos_page_main(Main_backups->Pages);
+  // On y met les infos sur la dimension de démarrage
+  Main_backups->Pages->Width=width;
+  Main_backups->Pages->Height=height;
+  strcpy(Main_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Main_backups->Pages->Filename,"NO_NAME.GIF");
+
+
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
-    // On a réussi à allouer deux listes de pages dont la taille correspond à
-    // celle demandée par l'utilisateur.
-
-    // On crée un descripteur de page correspondant à la page principale
-    page=(T_Page *)malloc(sizeof(T_Page));
-    Init_page(page);
-    Upload_infos_page_main(page);
-    // On y met les infos sur la dimension de démarrage
-    page->Width=width;
-    page->Height=height;
-
-    // On regarde si on peut ajouter cette page
-    if (New_page_is_possible(page,Main_backups,Spare_backups))
-    {
-      // On peut, donc on va la créer
-      Create_new_page(page,Main_backups,Spare_backups);
-      Download_infos_page_main(page);
-      Download_infos_backup(Main_backups);
-
-      // Maintenant, on regarde si on a le droit de créer la même page dans
-      // la page de brouillon.
-      if (New_page_is_possible(page,Spare_backups,Main_backups))
-      {
-        // On peut donc on le fait
-        Create_new_page(page,Spare_backups,Main_backups);
-        Download_infos_page_spare(page);
-
-        // Et on efface les 2 images en les remplacant de "0"
-        memset(Main_screen,0,Main_image_width*Main_image_height);
-        memset(Spare_screen,0,Spare_image_width*Spare_image_height);
-
-        return_code=1;
-      }
-      else
-      {
-        // Il n'est pas possible de démarrer le programme avec la page 
-        // principale et la page de brouillon aux dimensions demandée par 
-        // l'utilisateur. ==> On l'envoie ballader
-        return_code=0;
-      }
-    }
-    else
-    {
-      // On ne peut pas démarrer le programme avec ne serait-ce qu'une
-      // page de la dimension souhaitée, donc on laisse tout tomber et on
-      // le renvoie chier.
-      free(page);
-      return_code=0;
-    }
+    Main_backups->Pages->Image[i]=New_layer(width*height);
+    if (! Main_backups->Pages->Image[i])
+      return 0;
+    memset(Main_backups->Pages->Image[i], 0, width*height);
   }
-  else
+#ifndef NOLAYERS
+  Main_visible_image.Width = 0;
+  Main_visible_image.Height = 0;
+  Main_visible_image.Image = NULL;
+  Main_visible_image_backup.Image = NULL;
+  Main_visible_image_depth_buffer.Image = NULL;
+  Spare_visible_image.Width = 0;
+  Spare_visible_image.Height = 0;
+  Spare_visible_image.Image = NULL;
+
+#endif
+  if (!Update_buffers(width, height))
+    return 0;
+  if (!Update_spare_buffers(width, height))
+    return 0;
+    
+#ifndef NOLAYERS
+  // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
+  memset(Main_visible_image.Image, 0, width*height);
+  memset(Main_visible_image_backup.Image, 0, width*height);
+  memset(Main_visible_image_depth_buffer.Image, 0, width*height);
+  memset(Spare_visible_image.Image, 0, width*height);
+  
+#endif      
+  Download_infos_page_main(Main_backups->Pages); 
+  Update_FX_feedback(Config.FX_Feedback);
+
+  // Default values for spare page
+  Spare_backups->Pages->Width = width;
+  Spare_backups->Pages->Height = height;
+  memcpy(Spare_backups->Pages->Palette,Main_palette,sizeof(T_Palette));
+  strcpy(Spare_backups->Pages->Comment,"");
+  strcpy(Spare_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Spare_backups->Pages->Filename,"NO_NAME2.GIF");
+  Spare_backups->Pages->File_format=DEFAULT_FILEFORMAT;
+  // Copy this informations in the global Spare_ variables
+  Download_infos_page_spare(Spare_backups->Pages);
+    
+  // Clear the initial Visible buffer
+  //memset(Main_screen,0,Main_image_width*Main_image_height);
+
+  // Spare
+  for (i=0; i<NB_LAYERS; i++)
   {
-    // On n'a même pas réussi à créer les listes. Donc c'est même pas la 
-    // peine de continuer : l'utilisateur ne pourra jamais rien faire, 
-    // autant avorter le chargement du programme.
-    return_code=0;
-  }
+    Spare_backups->Pages->Image[i]=New_layer(width*height);
+    if (! Spare_backups->Pages->Image[i])
+      return 0;
+    memset(Spare_backups->Pages->Image[i], 0, width*height);
 
-  return return_code;
+  }
+  //memset(Spare_screen,0,Spare_image_width*Spare_image_height);
+
+  End_of_modification();
+  return 1;
 }
 
 void Set_number_of_backups(int nb_backups)
@@ -628,13 +777,14 @@ void Set_number_of_backups(int nb_backups)
   // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
 
-int Backup_with_new_dimensions(int upload,int width,int height)
+int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
 {
   // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
   // 0 sinon.
 
   T_Page * new_page;
   int return_code=0;
+  int i;
 
   if (upload)
     // On remet à jour l'état des infos de la page courante (pour pouvoir les
@@ -642,25 +792,41 @@ int Backup_with_new_dimensions(int upload,int width,int height)
     Upload_infos_page_main(Main_backups->Pages);
 
   // On crée un descripteur pour la nouvelle page courante
-  new_page=(T_Page *)malloc(sizeof(T_Page));
-  Init_page(new_page);
-
+  new_page=New_page(layers);
+  if (!new_page)
+  {
+    Error(0);
+    return 0;
+  }
   Upload_infos_page_main(new_page);
   new_page->Width=width;
   new_page->Height=height;
-  if (New_page_is_possible(new_page,Main_backups,Spare_backups))
+  strcpy(new_page->Filename, Main_backups->Pages->Filename);
+  strcpy(new_page->File_directory, Main_backups->Pages->File_directory);
+  if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
-    Create_new_page(new_page,Main_backups,Spare_backups);
-    Download_infos_page_main(new_page);
-    Download_infos_backup(Main_backups);
-    // On nettoie la nouvelle image:
-    memset(Main_screen,0,Main_image_width*Main_image_height);
+    for (i=0; i<layers;i++)
+    {
+      memset(Main_backups->Pages->Image[i], Main_backups->Pages->Transparent_color, width*height);
+    }
+    
+    Update_buffers(width, height);
+
+    Download_infos_page_main(Main_backups->Pages);
+    
+    // Same code as in End_of_modification():
+    #ifndef NOLAYERS
+      memcpy(Main_visible_image_backup.Image,
+             Main_visible_image.Image,
+             Main_image_width*Main_image_height);
+    #else
+      Update_screen_targets();
+    #endif
+    Update_FX_feedback(Config.FX_Feedback);
+    // --
+    
     return_code=1;
   }
-
-  // On détruit le descripteur de la page courante
-  free(new_page);
-
   return return_code;
 }
 
@@ -671,28 +837,40 @@ int Backup_and_resize_the_spare(int width,int height)
 
   T_Page * new_page;
   int return_code=0;
+  byte nb_layers;
 
-  // On remet à jour l'état des infos de la page de brouillon (pour pouvoir
-  // les retrouver plus tard)
-  Upload_infos_page_spare(Spare_backups->Pages);
-
+  nb_layers=Spare_backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page de brouillon
-  new_page=(T_Page *)malloc(sizeof(T_Page));
-  Init_page(new_page);
-
-  Upload_infos_page_spare(new_page);
+  new_page=New_page(nb_layers);
+  if (!new_page)
+  {
+    Error(0);
+    return 0;
+  }
+  
+  // Fill it with a copy of the latest history
+  Copy_S_page(new_page,Spare_backups->Pages);
+  
   new_page->Width=width;
   new_page->Height=height;
-  if (New_page_is_possible(new_page,Spare_backups,Main_backups))
+  if (Create_new_page(new_page,Spare_backups,0xFFFFFFFF))
   {
-    Create_new_page(new_page,Spare_backups,Main_backups);
-    Download_infos_page_spare(new_page);
+    byte i;
+    
+    for (i=0; i<nb_layers;i++)
+    {
+      memset(Spare_backups->Pages->Image[i], Spare_backups->Pages->Transparent_color, width*height);
+    }
+    
+    // Update_buffers(width, height); // Not for spare
+    
+    Download_infos_page_spare(Spare_backups->Pages);
+    
+    // Light up the 'has unsaved changes' indicator
+    Spare_image_is_modified=1;
+    
     return_code=1;
   }
-
-  // On détruit le descripteur de la page courante
-  free(new_page);
-
   return return_code;
 }
 
@@ -700,96 +878,166 @@ void Backup(void)
 // Sauve la page courante comme première page de backup et crée une nouvelle page
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
-  #if defined(__macosx__) || defined(__FreeBSD__)
-    T_Page new_page;
-  #else
-    T_Page *new_page;
-  #endif
+  Backup_layers(1<<Main_current_layer);
+}
+
+void Backup_layers(dword layer_mask)
+{
+  int i;
+  T_Page *new_page;
+
+  /*
+  if (Last_backed_up_layers == (1<<Main_current_layer))
+    return; // Already done.
+  */
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_main(Main_backups->Pages);
 
-  // On crée un descripteur pour la nouvelle page courante
-#if defined(__macosx__) || defined(__FreeBSD__)
-  Init_page(&new_page);
-
-  // Enrichissement de l'historique
-  Copy_S_page(&new_page,Main_backups->Pages);
-  Create_new_page(&new_page,Main_backups,Spare_backups);
-  Download_infos_page_main(&new_page);
-#else
-  new_page=(T_Page *)malloc(sizeof(T_Page));
-  Init_page(new_page);
-
-  // Enrichissement de l'historique
+  // Create a fresh Page descriptor
+  new_page=New_page(Main_backups->Pages->Nb_layers);
+  if (!new_page)
+  {
+    Error(0);
+    return;
+  }
+  
+  // Fill it with a copy of the latest history
   Copy_S_page(new_page,Main_backups->Pages);
-  Create_new_page(new_page,Main_backups,Spare_backups);
+  Create_new_page(new_page,Main_backups,layer_mask);
   Download_infos_page_main(new_page);
-#endif
 
-  Download_infos_backup(Main_backups);
+  Update_FX_feedback(Config.FX_Feedback);
 
-  // On copie l'image du backup vers la page courante:
-  memcpy(Main_screen,Screen_backup,Main_image_width*Main_image_height);
-
-  // On détruit le descripteur de la page courante
-#if !(defined(__macosx__) || defined(__FreeBSD__))
-  free(new_page);
-#endif
-
-  // On allume l'indicateur de modification de l'image
+  // Copy the actual pixels from the backup to the latest page
+  for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+  {
+    if ((1<<i) & layer_mask)
+      memcpy(Main_backups->Pages->Image[i],
+             Main_backups->Pages->Next->Image[i],
+             Main_image_width*Main_image_height);
+  }
+  // Light up the 'has unsaved changes' indicator
   Main_image_is_modified=1;
+  
+  /*
+  Last_backed_up_layers = 1<<Main_current_layer;
+  */
 }
 
+void Backup_the_spare(dword layer_mask)
+{
+  int i;
+  T_Page *new_page;
+
+  // Create a fresh Page descriptor
+  new_page=New_page(Spare_backups->Pages->Nb_layers);
+  if (!new_page)
+  {
+    Error(0);
+    return;
+  }
+  
+  // Fill it with a copy of the latest history
+  Copy_S_page(new_page,Spare_backups->Pages);
+  Create_new_page(new_page,Spare_backups,layer_mask);
+
+  // Copy the actual pixels from the backup to the latest page
+  for (i=0; i<Spare_backups->Pages->Nb_layers;i++)
+  {
+    if ((1<<i) & layer_mask)
+      memcpy(Spare_backups->Pages->Image[i],
+             Spare_backups->Pages->Next->Image[i],
+             Spare_image_width*Spare_image_height);
+  }
+  // Light up the 'has unsaved changes' indicator
+  Spare_image_is_modified=1;
+
+}
+
+void Check_layers_limits()
+{
+  if (Main_current_layer > Main_backups->Pages->Nb_layers-1)
+  {
+    Main_current_layer = Main_backups->Pages->Nb_layers-1;
+    Main_layers_visible |= 1<<Main_current_layer;
+  }
+}
+    
 void Undo(void)
 {
+  if (Last_backed_up_layers)
+  {
+    Free_page_of_a_list(Main_backups);
+    Last_backed_up_layers=0;
+  }
+
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_main(Main_backups->Pages);
   // On fait faire un undo à la liste des backups de la page principale
   Backward_in_list_of_pages(Main_backups);
 
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
-  // Et celles du backup
-  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
   //       poser de problèmes.
+  
+  Check_layers_limits();
+  Redraw_layered_image();
+  End_of_modification();
+  
 }
 
 void Redo(void)
 {
+  if (Last_backed_up_layers)
+  {
+    Free_page_of_a_list(Main_backups);
+    Last_backed_up_layers=0;
+  }
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page_main(Main_backups->Pages);
   // On fait faire un redo à la liste des backups de la page principale
   Advance_in_list_of_pages(Main_backups);
 
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
-  // Et celles du backup
-  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
   //       poser de problèmes.
+  
+  Check_layers_limits();
+  Redraw_layered_image();
+  End_of_modification();
+
 }
 
 void Free_current_page(void)
 {
   // On détruit la page courante de la liste principale
   Free_page_of_a_list(Main_backups);
+  
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main_backups->Pages);
-  // Et celles du backup
-  Download_infos_backup(Main_backups);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
   //       devrait pas poser de problèmes.
+   
+  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Check_layers_limits();
+  Redraw_layered_image();
+  End_of_modification();
 }
 
 void Exchange_main_and_spare(void)
@@ -810,127 +1058,203 @@ void Exchange_main_and_spare(void)
   // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
   // et backup.
 
-    /* SECTION GROS CACA PROUT PROUT */
-    // Auparavant on ruse en mettant déjà à jour les dimensions de la
-    // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
-    // un changement de dimensions et va bêtement sortir du mode loupe, alors
-    // que lors d'un changement de page, on veut bien conserver l'état du mode
-    // loupe du brouillon.
-    Main_image_width=Main_backups->Pages->Width;
-    Main_image_height=Main_backups->Pages->Height;
+  /* SECTION GROS CACA PROUT PROUT */
+  // Auparavant on ruse en mettant déjà à jour les dimensions de la
+  // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
+  // un changement de dimensions et va bêtement sortir du mode loupe, alors
+  // que lors d'un changement de page, on veut bien conserver l'état du mode
+  // loupe du brouillon.
+  Main_image_width=Main_backups->Pages->Width;
+  Main_image_height=Main_backups->Pages->Height;
 
   Download_infos_page_main(Main_backups->Pages);
   Download_infos_page_spare(Spare_backups->Pages);
-  Download_infos_backup(Main_backups);
-}
-
-
-int Can_borrow_memory_from_page(int size)
-{
-  int mem_available_now;
-  int current_list_size;
-  int spare_list_size;
-  int current_page_size;
-  int spare_page_size;
-
-  mem_available_now=Memory_free()-MINIMAL_MEMORY_TO_RESERVE;
-  current_list_size =Size_of_a_list_of_pages(Main_backups);
-  spare_list_size=Size_of_a_list_of_pages(Spare_backups);
-  current_page_size  =Size_of_a_page(Main_backups->Pages);
-  spare_page_size =Size_of_a_page(Spare_backups->Pages);
-
-  // Il faut pouvoir loger la zone mémoire ainsi qu'un exemplaire de la page
-  // courante, en conservant au pire la 1ère page de brouillon.
-  if ((mem_available_now
-      +current_list_size
-      +spare_list_size
-      -current_page_size
-      -spare_page_size)<size)
-    return 0;
-
-  return 1;
-}
-
-void * Borrow_memory_from_page(int size)
-{
-  int                need_to_free;
-  T_List_of_pages * list_to_reduce;
-  T_Page *           page_to_delete;
-  //int                index;
-
-  if (Can_borrow_memory_from_page(size))
-  {
-    // On regarde s'il faut libérer des pages:
-    need_to_free=
-      (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<(unsigned long)size;
-
-    if (!need_to_free)
-    {
-      // On a assez de place pour allouer une page. On n'a donc aucune page
-      // à supprimer. On peut allouer de la mémoire directement.
-      return malloc(size);
-    }
-    else
-    {
-      // On manque de mémoire. Il faut libérer une page...
-
-      // Tant qu'il faut libérer
-      while (need_to_free)
-      {
-        // On cherche sur quelle liste on va virer une page
-
-        // S'il reste des pages à libérer dans la liste des brouillons
-        if (Spare_backups->Nb_pages_allocated>1)
-          // Alors on va détruire la dernière page allouée de la liste des
-          // brouillons
-          list_to_reduce=Spare_backups;
-        else
-        {
-          if (Main_backups->Nb_pages_allocated>1)
-          {
-            // Sinon on va détruire la dernière page allouée de la
-            // liste principale
-            list_to_reduce=Main_backups;
-          }
-          else
-          {
-            // Dans cette branche, il était prévu qu'on obtienne la mémoire
-            // nécessaire mais on n'arrive pas à la trouver. On indique donc
-            // qu'elle n'est pas disponible, et on aura perdu des backups
-            // pour rien
-            return 0;
-          }
-        }
-
-        // Puis on détermine la page que l'on va supprimer (c'est la dernière
-        // de la liste)
-        page_to_delete=list_to_reduce->Pages+(list_to_reduce->Nb_pages_allocated)-1;
-
-        // Détruire la dernière page allouée dans la Liste_à_raboter
-        Free_last_page_of_list(list_to_reduce);
-
-        // On regarde s'il faut continuer à libérer de la place
-        need_to_free=
-          (Memory_free()-MINIMAL_MEMORY_TO_RESERVE)<(unsigned long)size;
-
-        // S'il ne faut pas, c'est qu'on peut allouer un bitmap
-        // pour la new_page
-        if (!need_to_free)
-          return malloc(size);
-      }
-    }
-  }
-  else
-  {
-    // Il n'y a pas assez de place pour allouer la mémoire temporaire dans
-    // la mémoire réservée aux pages.
-    return 0;
-  }
-
-  // Pour que le compilateur ne dise pas qu'il manque une valeur de sortie:
-  return 0;
 }
 
 void End_of_modification(void)
 {
+
+  //Update_buffers(Main_image_width, Main_image_height);
+  
+#ifndef NOLAYERS
+  memcpy(Main_visible_image_backup.Image,
+         Main_visible_image.Image,
+         Main_image_width*Main_image_height);
+#else
+  Update_screen_targets();
+#endif
+  
+  Update_FX_feedback(Config.FX_Feedback);
+/*  
+  Last_backed_up_layers = 0;
+  Backup();
+  */
+  //
+  // Processing safety backups
+  //
+  Main_edits_since_safety_backup++;
+  Rotate_safety_backups();
+}
+
+/// Add a new layer to latest page of a list. Returns 0 on success.
+byte Add_layer(T_List_of_pages *list, byte layer)
+{
+  T_Page * source_page;
+  T_Page * new_page;
+  byte * new_image;
+  int i;
+  
+  source_page = list->Pages;
+  
+  if (list->Pages->Nb_layers == MAX_NB_LAYERS)
+    return 1;
+   
+  // Keep the position reasonable
+  if (layer > list->Pages->Nb_layers)
+    layer = list->Pages->Nb_layers;
+   
+  // Allocate the pixel data
+  new_image = New_layer(list->Pages->Height*list->Pages->Width);
+  if (! new_image)
+  {
+    Error(0);
+    return 1;
+  }
+  // Re-allocate the page itself, with room for one more pointer
+  new_page = realloc(source_page, sizeof(T_Page)+(list->Pages->Nb_layers+1)*sizeof(byte *));
+  if (!new_page)
+  {
+    Error(0);
+    return 1;
+  }
+  if (new_page != source_page)
+  {
+    // Need some housekeeping because the page moved in memory.
+    // Update all pointers that pointed to it:
+    new_page->Prev->Next = new_page;
+    new_page->Next->Prev = new_page;
+    list->Pages = new_page;
+  }
+  list->Pages->Nb_layers++;
+  // Move around the pointers. This part is going to be tricky when we
+  // have 'animations x layers' in this vector.
+  for (i=list->Pages->Nb_layers-1; i>layer ; i--)
+  {
+    new_page->Image[i]=new_page->Image[i-1];
+  }
+  new_page->Image[layer]=new_image;
+  // Fill with transparency, initially
+  memset(new_image, Main_backups->Pages->Transparent_color, list->Pages->Height*list->Pages->Width); // transparent color
+  
+  // Done. Note that the visible buffer is already ok since we
+  // only inserted a transparent "slide" somewhere.
+  // The depth buffer is all wrong though.
+
+  // Update the flags of visible layers. 
+  {
+    dword layers_before;
+    dword layers_after;
+    dword *visible_layers_flag;
+    
+    // Determine if we're modifying the spare or the main page.
+    if (list == Main_backups)
+    {
+      visible_layers_flag = &Main_layers_visible;
+      Main_current_layer = layer;
+    }
+    else
+    {
+      visible_layers_flag = &Spare_layers_visible;
+      Spare_current_layer = layer;
+    }
+    
+    // Fun with binary!
+    layers_before = ((1<<layer)-1) & *visible_layers_flag;
+    layers_after = (*visible_layers_flag & (~layers_before))<<1;
+    *visible_layers_flag = (1<<layer) | layers_before | layers_after;
+  }
+  
+  // All ok
+  return 0;
+}
+
+/// Delete a layer from the latest page of a list. Returns 0 on success.
+byte Delete_layer(T_List_of_pages *list, byte layer)
+{
+  T_Page * page;
+  int i;
+  
+  page = list->Pages;
+   
+  // Keep the position reasonable
+  if (layer >= list->Pages->Nb_layers)
+    layer = list->Pages->Nb_layers - 1;
+  if (list->Pages->Nb_layers == 1)
+    return 1;
+   
+  // For simplicity, we won't actually shrink the page in terms of allocation.
+  // It would only save the size of a pointer, and anyway, as the user draws,
+  // this page is going to fall off the end of the Undo-list
+  // and so it will be cleared anyway.
+  
+  // Smart freeing of the pixel data
+  Free_layer(list->Pages, layer);
+  
+  list->Pages->Nb_layers--;
+  // Move around the pointers. This part is going to be tricky when we
+  // have 'animations x layers' in this vector.
+  for (i=layer; i < list->Pages->Nb_layers; i++)
+  {
+    list->Pages->Image[i]=list->Pages->Image[i+1];
+  }
+  
+  // Done. At this point the visible buffer and the depth buffer are
+  // all wrong.
+
+  // Update the flags of visible layers. 
+  {
+    dword layers_before;
+    dword layers_after;
+    dword *visible_layers_flag;
+    byte new_current_layer;
+    
+    // Determine if we're modifying the spare or the main page.
+    if (list == Main_backups)
+    {
+      visible_layers_flag = &Main_layers_visible;
+      if (Main_current_layer>=layer && Main_current_layer>0)
+        Main_current_layer--;
+      new_current_layer = Main_current_layer;
+    }
+    else
+    {
+      visible_layers_flag = &Spare_layers_visible;
+      if (Spare_current_layer>=layer && Spare_current_layer>0)
+        Spare_current_layer--;
+      new_current_layer = Spare_current_layer;
+    }
+    
+    // Fun with binary!
+    layers_before = ((1<<layer)-1) & *visible_layers_flag;
+    layers_after = (*visible_layers_flag & (~layers_before))>>1;
+    *visible_layers_flag = layers_before | layers_after;
+    // Ensure the current layer is part what is shown.
+    *visible_layers_flag |= 1<<new_current_layer;
+  }
+  
+  // All ok
+  return 0;
+}
+
+/// Merges the current layer onto the one below it.
+byte Merge_layer()
+{
+  int i;
+  for (i=0; i<Main_image_width*Main_image_height; i++)
+  {
+    byte color = *(Main_backups->Pages->Image[Main_current_layer]+i);
+    if (color != Main_backups->Pages->Transparent_color) // transparent color
+      *(Main_backups->Pages->Image[Main_current_layer-1]+i) = color;
+  }
+  return Delete_layer(Main_backups,Main_current_layer);
 }

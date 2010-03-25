@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Peter Gordon
@@ -80,20 +82,21 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
 int Save_INI_char_in_value_alphabet(char c)
 {
   if (
-       (                    // Chiffre
+       (                    // Digit
          (c>='0') &&
          (c<='9')
        ) ||
-       (                    // Lettre majuscule
+       (                    // Uppercase letter
          (c>='A') &&
          (c<='Z')
        ) ||
-       (                    // Lettre minuscule
+       (                    // Lowerchase letter
          (c>='a') &&
          (c<='z')
        ) ||
-       (c == '$')        // Symbole d'hexadécimal
-	   || (c== '.')		// Point (dans les noms de fichiers)
+       (c == '$') ||        // Hexa prefix
+       (c == '-') ||        // Minus sign
+       (c== '.')            // Dot (in filenames)
      )
     return 1;
   else
@@ -332,6 +335,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
       free(result_buffer);
       free(upper_buffer);
       free(option_upper);
+      DEBUG("END OF FILE",0);
       return ERROR_INI_CORRUPTED;
     }
 
@@ -426,6 +430,7 @@ int Save_INI(T_Config * conf)
   if (Ancien_fichier==0)
   {
     fclose(Ancien_fichier);
+    free(buffer);
     return ERROR_INI_MISSING;
   }
   Nouveau_fichier=fopen(filename,"wb");
@@ -445,11 +450,11 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Y_sensitivity",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=conf->Mouse_fix_factor_X;
+  values[0]=0;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"X_correction_factor",1,values,0)))
     goto Erreur_Retour;
 
-  values[0]=conf->Mouse_fix_factor_Y;
+  values[0]=0;
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Y_correction_factor",1,values,0)))
     goto Erreur_Retour;
 
@@ -648,7 +653,27 @@ int Save_INI(T_Config * conf)
   values[0]=(conf->Grid_XOR_color);
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Grid_XOR_color",1,values,0)))
     goto Erreur_Retour;
+
+  values[0]=(Pixel_ratio);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Pixel_ratio",1,values,0))) {
+    DEBUG("saving pixel ratio",return_code);
+    goto Erreur_Retour;
+  }
+  
+  values[0]=0;
+  for (index=0; index<MENUBAR_COUNT;index++)
+  {
+    values[0] |= Menu_bars[index].Visible ? (1<<index) : 0;
+  }
+  // Fill out the remaining bits. When new toolbars get implemented, they will
+  // be visible by default.
+  for (; index<8;index++)
+    values[0] |= (1<<index);
     
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menubars_visible",1,values,0)))
+    goto Erreur_Retour;
+
+
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 
   fclose(Nouveau_fichier);

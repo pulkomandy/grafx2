@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -42,9 +44,20 @@ byte* Screen_pixels;
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);
+///
+/// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
+/// (indexed colors).
+/// If dest is NULL, it's allocated by malloc(). Otherwise, be sure to
+/// pass a buffer of the right dimensions.
 byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
+/// Gets the RGB 24-bit color currently associated with a palette index.
 SDL_Color Color_to_SDL_color(byte);
+/// Reads a pixel in a 8-bit SDL surface.
 byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
+/// Reads a pixel in a multi-byte SDL surface.
+dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y);
+/// Convert a SDL Palette to a grafx2 palette
+void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 
 ///
 /// Clears the parts of screen that are outside of the editing area.

@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Peter Gordon
@@ -18,11 +20,15 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#define _XOPEN_SOURCE 500
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
 #include "const.h"
+#include "errors.h"
 #include "global.h"
 #include "misc.h"
 #include "readini.h"
@@ -173,7 +179,7 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
   do
   {
     // On lit une ligne dans le fichier:
-    if (fgets(buffer,1024,file)==0)
+    if (fgets(buffer,1024,file)==NULL)
     {
       free(upper_buffer);
       free(option_upper);
@@ -390,13 +396,16 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
         if ( ((++nb_values) == nb_expected_values) &&
              (upper_buffer[buffer_index]!='\0') )
         {
+          // Too many values !
           free(upper_buffer);
           free(option_upper);
           return ERROR_INI_CORRUPTED;
         }
       }
+
       if (nb_values<nb_expected_values)
       {
+        // Not enough values !
         free(upper_buffer);
         free(option_upper);
         return ERROR_INI_CORRUPTED;
@@ -410,7 +419,6 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
 
   return 0;
 }
-
 
 
 int Load_INI(T_Config * conf)
@@ -433,13 +441,13 @@ int Load_INI(T_Config * conf)
   strcpy(filename,Config_directory);
   strcat(filename,"gfx2.ini");
 
-  file=fopen(filename,"rb");
+  file=fopen(filename,"r");
   if (file==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
     strcpy(filename,Data_directory);
     strcat(filename,"gfx2def.ini");
-    file=fopen(filename,"rb");
+    file=fopen(filename,"r");
     if (file == 0)
     {
       free(filename);
@@ -469,13 +477,13 @@ int Load_INI(T_Config * conf)
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_fix_factor_X=Mouse_fix_factor_X=values[0];
+  // Deprecated setting, unused
 
   if ((return_code=Load_INI_get_values (file,buffer,"Y_correction_factor",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>4))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Mouse_fix_factor_Y=Mouse_fix_factor_Y=values[0];
+  // Deprecated setting, unused
 
   if ((return_code=Load_INI_get_values (file,buffer,"Cursor_aspect",1,values)))
     goto Erreur_Retour;
@@ -519,7 +527,7 @@ int Load_INI(T_Config * conf)
 
   if ((return_code=Load_INI_get_values (file,buffer,"Menu_ratio",1,values)))
     goto Erreur_Retour;
-  if (values[0]>2)
+  if ((values[0]<-4) || (values[0]>2))
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Ratio=values[0];
 
@@ -709,15 +717,15 @@ int Load_INI(T_Config * conf)
   // Do that only if the first mode is actually windowed (not the case on gp2x for example)
   if(Video_mode[0].Fullscreen==0)
   {
-	  Video_mode[0].Width = 640;
-	  Video_mode[0].Height = 480;
-	  if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
-	  {
-		  if ((values[0]>=320))
-			  Video_mode[0].Width = values[0];
-		  if ((values[1]>=200))
-			  Video_mode[0].Height = values[1];
-	  }
+    Video_mode[0].Width = 640;
+    Video_mode[0].Height = 480;
+    if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
+    {
+      if ((values[0]>=320))
+        Video_mode[0].Width = values[0];
+      if ((values[1]>=200))
+        Video_mode[0].Height = values[1];
+    }
   }
 
   conf->Mouse_merge_movement=100;
@@ -816,13 +824,15 @@ int Load_INI(T_Config * conf)
 
   // Optional, name of skin file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Skin_file",value_label,1))
-	  conf->Skin_file = strdup(value_label);
+  {
+    conf->Skin_file = strdup(value_label);
+  }
   else
     conf->Skin_file = strdup("skin_modern.png");
 
   // Optional, name of font file. (>2.0)
   if(!Load_INI_get_string(file,buffer,"Font_file",value_label,1))
-	  conf->Font_file = strdup(value_label);
+    conf->Font_file = strdup(value_label);
   else
     conf->Font_file = strdup("font_Classic.png");
 
@@ -830,8 +840,59 @@ int Load_INI(T_Config * conf)
   // Optional, XOR color for grid overlay (>2.0)
   if (!Load_INI_get_values (file,buffer,"Grid_XOR_color",1,values))
   {
-    if ((values[0]>0) || (values[0]<=255))
+    if ((values[0]>0) && (values[0]<=255))
       conf->Grid_XOR_color=values[0];
+  }
+
+  // Optional, "fake hardware zoom" factor (>2.1)
+  if (!Load_INI_get_values (file, buffer,"Pixel_ratio",1,values))
+  {
+    Pixel_ratio = values[0];
+    switch(Pixel_ratio) {
+      case PIXEL_WIDE:
+        if(Video_mode[0].Width < 640)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TALL:
+        if(Video_mode[0].Height < 400)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_DOUBLE:
+        if(Video_mode[0].Width < 640 || Video_mode[0].Height < 400)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TRIPLE:
+        if(Video_mode[0].Width < 3*320 || Video_mode[0].Height < 3*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_WIDE2:
+        if(Video_mode[0].Width < 4*320 || Video_mode[0].Height < 2*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_TALL2:
+        if(Video_mode[0].Width < 2*320 || Video_mode[0].Height < 4*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      case PIXEL_QUAD:
+        if(Video_mode[0].Width < 4*320 || Video_mode[0].Height < 4*200)
+          Pixel_ratio = PIXEL_SIMPLE;
+        break;
+      default:
+        // Convert back unknown values to PIXEL_SIMPLE
+        Pixel_ratio = PIXEL_SIMPLE;
+        break;
+    }
+  }
+  
+  // Optional, Menu bars visibility (> 2.1)
+  if (!Load_INI_get_values (file, buffer,"Menubars_visible",1,values))
+  {
+    int index;
+    for (index=MENUBAR_STATUS+1; index<MENUBAR_COUNT;index++)
+    {
+      // Note that I skip the status bar, always enabled.
+      Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
+    }
   }
 
   fclose(file);

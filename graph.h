@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007-2008 Adrien Destugues
@@ -95,7 +97,8 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
 void Polyfill_general(int vertices, short * points, int color);
 void Polyfill(int vertices, short * points, int color);
 
-void Remap_picture(void);
+/// Remap the spare page according to the main page's palette
+void Remap_spare(void);
 
 ///
 /// All the figure-drawing functions work by calling this function for each
@@ -110,3 +113,8 @@ extern Func_pixel Pixel_figure;
 void Update_part_of_screen(short x, short y, short width, short height);
 
 void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
+
+void Pixel_in_current_screen      (word x,word y,byte color,int with_preview);
+void Pixel_in_current_layer(word x,word y, byte color);
+byte Read_pixel_from_current_screen  (word x,word y);
+byte Read_pixel_from_current_layer(word x,word y);

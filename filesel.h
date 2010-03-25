@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -25,14 +27,15 @@
 #define __FILESEL_H__
 
 #include "struct.h"
+#include "loadsave.h"
 
-byte Button_Load_or_Save(byte load, byte image);
+byte Button_Load_or_Save(byte load, T_IO_Context *context);
 
 void Add_element_to_list(T_Fileselector *list, const char * fname, int type);
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).
 /// The returned value is a pointer to a single static buffer of 19 characters
-/// including the '\0'.
+/// including the '\\0'.
 char * Format_filename(const char * fname, int type);
 
 void Free_fileselector_list(T_Fileselector *list);
@@ -43,6 +46,6 @@ void Recount_files(T_Fileselector *list);
 
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
-short Find_file_in_fileselector(T_Fileselector *list, char * fname);
+short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
 
 #endif

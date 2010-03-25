@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -21,10 +23,15 @@
 // Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
 // little-endian.
 
+#define _XOPEN_SOURCE 500
+
 #include <SDL_endian.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #if defined(__amigaos4__)
     #include <proto/dos.h>
     #include <dirent.h>
@@ -250,8 +257,12 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   strcpy(full_filename, directory_name);
   current_directory=opendir(directory_name);
   if(current_directory == NULL) return;        // Répertoire invalide ...
-  strcat(full_filename, PATH_SEPARATOR);
   filename_position = strlen(full_filename);
+  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+  {
+    strcat(full_filename, PATH_SEPARATOR);
+    filename_position = strlen(full_filename);
+  }
   while ((entry=readdir(current_directory)))
   {
     struct stat Infos_enreg;
@@ -265,3 +276,85 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   closedir(current_directory);
 }
 
+void Get_full_filename(char * output_name, char * file_name, char * directory_name)
+{
+  strcpy(output_name,directory_name);
+  if (output_name[0] != '\0')
+  {
+    // Append a separator at the end of path, if there isn't one already.
+    // This handles the case of directory variables which contain one,
+    // as well as directories like "/" on Unix.
+    if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
+        strcat(output_name,PATH_SEPARATOR);
+  }
+  strcat(output_name,file_name);
+}
+
+/// Lock file used to prevent several instances of grafx2 from harming each others' backups
+#ifdef __WIN32__
+HANDLE Lock_file_handle = INVALID_HANDLE_VALUE;
+#else
+int Lock_file_handle = -1;
+#endif
+
+byte Create_lock_file(const char *file_directory)
+{
+  char lock_filename[MAX_PATH_CHARACTERS];
+  
+  strcpy(lock_filename,file_directory);
+  strcat(lock_filename,"gfx2.lck");
+  
+  #ifdef __WIN32__
+  // Windowzy method for creating a lock file
+  Lock_file_handle = CreateFile(
+    lock_filename,
+    GENERIC_WRITE,
+    0, // No sharing
+    NULL,
+    OPEN_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL);
+  if (Lock_file_handle == INVALID_HANDLE_VALUE)
+  {
+    return -1;
+  }
+  #else
+  // Unixy method for lock file
+  Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT,S_IRUSR|S_IWUSR);
+  if (Lock_file_handle == -1)
+  {
+    // Usually write-protected media
+    return -1;
+  }
+  if (lockf(Lock_file_handle, F_TLOCK, 0)==-1)
+  {
+    close(Lock_file_handle);
+    // Usually write-protected media
+    return -1;
+  }
+  #endif
+  return 0;
+}
+
+void Release_lock_file(const char *file_directory)
+{
+  char lock_filename[MAX_PATH_CHARACTERS];
+    
+  #ifdef __WIN32__
+  if (Lock_file_handle != INVALID_HANDLE_VALUE)
+  {
+    CloseHandle(Lock_file_handle);
+  }
+  #else
+  if (Lock_file_handle != -1)
+  {
+    close(Lock_file_handle);
+    Lock_file_handle = -1;
+  }  
+  #endif
+  
+  // Actual deletion
+  strcpy(lock_filename,file_directory);
+  strcat(lock_filename,"gfx2.lck");
+  remove(lock_filename);
+}

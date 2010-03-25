@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -25,6 +27,11 @@
 #include "engine.h"
 #include "windows.h"
 #include "special.h"
+#include "pages.h"
+#include "misc.h"
+#include "buttons.h"
+
+
 
 
 
@@ -383,7 +390,7 @@ void Zoom(short delta)
   if ( (index>=0) && (index<NB_ZOOM_FACTORS) )
   {
     Hide_cursor();
-    Change_magnifier_factor(index);
+    Change_magnifier_factor(index,1);
     if (Main_magnifier_mode)
       Display_all_screen();
     Display_cursor();
@@ -404,10 +411,62 @@ void Zoom_set(int index)
   }
   else
   {
-    Change_magnifier_factor(index);
+    Change_magnifier_factor(index,1);
     if (!Main_magnifier_mode)
       Select_button(BUTTON_MAGNIFIER,1);
     Display_all_screen();
   }
   Display_cursor();
 }
+
+void Transparency_set(byte amount)
+{
+  const int doubleclick_delay = Config.Double_key_speed;
+  static long time_click = 0;
+  long time_previous;
+  
+  if (!Colorize_mode)
+  {
+    // Activate mode
+    switch(Colorize_current_mode)
+    {
+      case 0 :
+        Effect_function=Effect_interpolated_colorize;
+        break;
+      case 1 :
+        Effect_function=Effect_additive_colorize;
+        break;
+      case 2 :
+        Effect_function=Effect_substractive_colorize;
+    }
+    Shade_mode=0;
+    Quick_shade_mode=0;
+    Smooth_mode=0;
+    Tiling_mode=0;
+
+    Colorize_mode=1;
+  }
+
+  time_previous = time_click;
+  time_click = SDL_GetTicks();
+
+  // Check if it's a quick re-press
+  if (time_click - time_previous < doubleclick_delay)
+  {
+    // Use the typed amount as units, keep the tens.
+    Colorize_opacity = ((Colorize_opacity%100) /10 *10) + amount;
+    if (Colorize_opacity == 0)
+      Colorize_opacity = 100;
+  }
+  else
+  {
+    // Use 10% units: "1"=10%, ... "0"=100%
+    if (amount == 0)
+      Colorize_opacity = 100;
+    else
+      Colorize_opacity = amount*10;
+  }
+  Compute_colorize_table();
+}
+
+

@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
@@ -283,6 +285,33 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  Next    : %s",   SPECIAL_NEXT_USER_BACKCOLOR)
   HELP_LINK ("  Previous: %s",   SPECIAL_PREVIOUS_USER_BACKCOLOR)
   HELP_TEXT ("")
+  HELP_TEXT ("LAYERS")
+  HELP_TEXT ("")
+  HELP_LINK ("  Menu      : %s",   0x100+BUTTON_LAYER_MENU)
+  HELP_LINK ("  Add new   : %s",   0x100+BUTTON_LAYER_ADD)
+  HELP_LINK ("  Delete    : %s",   0x100+BUTTON_LAYER_REMOVE)
+  HELP_LINK ("  Merge     : %s",   0x100+BUTTON_LAYER_MERGE)
+  HELP_LINK ("  Move up   : %s",   0x100+BUTTON_LAYER_UP)
+  HELP_LINK ("  Move down : %s",   0x100+BUTTON_LAYER_DOWN)
+  //HELP_LINK ("  Set transp: %s",   0x100+BUTTON_LAYER_COLOR)
+  HELP_TEXT ("  Select :")
+  HELP_LINK ("    1 : %s",   SPECIAL_LAYER1_SELECT)
+  HELP_LINK ("    2 : %s",   SPECIAL_LAYER2_SELECT)
+  HELP_LINK ("    3 : %s",   SPECIAL_LAYER3_SELECT)
+  HELP_LINK ("    4 : %s",   SPECIAL_LAYER4_SELECT)
+  HELP_LINK ("    5 : %s",   SPECIAL_LAYER5_SELECT)
+  HELP_LINK ("    6 : %s",   SPECIAL_LAYER6_SELECT)
+  HELP_LINK ("    7 : %s",   SPECIAL_LAYER7_SELECT)
+  HELP_LINK ("    8 : %s",   SPECIAL_LAYER8_SELECT)
+  HELP_TEXT ("  Toggle :")
+  HELP_LINK ("    1 : %s",   SPECIAL_LAYER1_TOGGLE)
+  HELP_LINK ("    2 : %s",   SPECIAL_LAYER2_TOGGLE)
+  HELP_LINK ("    3 : %s",   SPECIAL_LAYER3_TOGGLE)
+  HELP_LINK ("    4 : %s",   SPECIAL_LAYER4_TOGGLE)
+  HELP_LINK ("    5 : %s",   SPECIAL_LAYER5_TOGGLE)
+  HELP_LINK ("    6 : %s",   SPECIAL_LAYER6_TOGGLE)
+  HELP_LINK ("    7 : %s",   SPECIAL_LAYER7_TOGGLE)
+  HELP_LINK ("    8 : %s",   SPECIAL_LAYER8_TOGGLE)
 };
 static const T_Help_table helptable_credits[] =
 {
@@ -314,6 +343,9 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Petter Lindquist")
   HELP_TEXT ("     C64 file and image formats")
   HELP_TEXT ("")
+  HELP_TEXT ("  Pasi Kallinen")
+  HELP_TEXT ("     Better command-line handling")
+  HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TITLE("         ART")
   HELP_TEXT ("")
@@ -325,6 +357,9 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_TEXT ("  iLKke (ilkke.blogspot.com)")
   HELP_TEXT ("     Buttons and logo (modern), extra fonts")
+  HELP_TEXT ("")
+  HELP_TEXT ("  Jamon")
+  HELP_TEXT ("     Buttons, logo and font (DPaint tribute)")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("               ...Pixelled all the graphics")
@@ -376,16 +411,18 @@ static const T_Help_table helptable_credits[] =
   HELP_TITLE(" BUGFINDERS")
   HELP_TEXT ("")
 //HELP_TEXT ("0----5----0----5----0----5----0----5----0--X")
-  HELP_TEXT ("  blumunkee     BDCIron        Ced          ")
-  HELP_TEXT ("  El Topo       fallenblood    Frost        ")
-  HELP_TEXT ("  Grimmy        Gürkan Sengün  Hatch        ")
-  HELP_TEXT ("  HoraK-FDF     iLKke          Iw2evk       ")
-  HELP_TEXT ("  Jamon         keito          kusma        ")
-  HELP_TEXT ("  Lord Graga    MagerValp      mind         ")
-  HELP_TEXT ("  MooZ          the Peach      petter       ")
-  HELP_TEXT ("  richienyhus   tape.wyrm      TeeEmCee     ")
-  HELP_TEXT ("  tempest       Timo Kurrpa    titus^Rab    ")
-  HELP_TEXT ("  Tobé          00ai99")
+  HELP_TEXT ("  anibiqme      blumunkee     BDCIron       ")
+  HELP_TEXT ("  Ced           DawnBringer   El Topo       ")
+  HELP_TEXT ("  falenblood    fano          Frost         ")
+  HELP_TEXT ("  Grimmy        Gürkan Sengün Hatch         ")
+  HELP_TEXT ("  HoraK-FDF     iLKke         Iw2evk        ")
+  HELP_TEXT ("  Jamon         keito         kusma         ")
+  HELP_TEXT ("  Lord Graga    lorenzo gatti MagerValp     ")
+  HELP_TEXT ("  maymunbeyin   mind          MooZ          ")
+  HELP_TEXT ("  Pasi Kallinen the Peach     petter        ")
+  HELP_TEXT ("  richienyhus   tape.wyrm     TeeEmCee      ")
+  HELP_TEXT ("  tempest       Timo Kurrpa   titus^Rab     ")
+  HELP_TEXT ("  Tobé          yakumo9275    00ai99        ")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("  ... posted the annoying bug reports.")
@@ -407,7 +444,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_TITLE(" OUR HOMEPAGE")
   HELP_TEXT ("")
-  HELP_BOLD ("  http://grafx2.codegoogle.com")
+  HELP_BOLD ("  http://grafx2.googlecode.com")
   HELP_TEXT ("")
   HELP_TEXT ("  Please report any bug you may find there")
   HELP_TEXT ("")
@@ -719,8 +756,8 @@ static const T_Help_table helptable_draw[] =
   HELP_TEXT ("Contour fill: Draws pixels like continuous")
   HELP_TEXT ("mode, but when you release the button Grafx2")
   HELP_TEXT ("draws a line back to your starting position,")
-  HELP_TEXT ("and fills the area. This tool doesn't use the")
-  HELP_TEXT ("current brush, but single pixels.")
+  HELP_TEXT ("and fills the area. This tool doesn't use")
+  HELP_TEXT ("the current brush, but single pixels.")
   HELP_TEXT ("")
   HELP_BOLD ("    RIGHT CLICK")
   HELP_LINK ("(Key:%s)",0x200+BUTTON_DRAW)
@@ -1247,6 +1284,30 @@ static const T_Help_table helptable_brush_fx[] =
   HELP_TEXT ("")
   HELP_LINK ("- Save : (Key:%s)",SPECIAL_SAVE_BRUSH)
   HELP_TEXT ("Save a brush to disk.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TITLE("BRUSH FACTORY")
+  HELP_TEXT ("")
+  HELP_TEXT ("This menu allows you to run scripts. Scripts")
+  HELP_TEXT ("are written in the Lua language, and allow")
+  HELP_TEXT ("you to modify the brush (hence the name")
+  HELP_TEXT ("'Brush factory'), or even modify the image")
+  HELP_TEXT ("or palette, like a Photoshop filter. See")
+  HELP_TEXT ("the online documentation for more help")
+  HELP_TEXT ("on scripting.")
+  HELP_TEXT ("")
+  HELP_TEXT ("You can select a script with the selector,")
+  HELP_TEXT ("the bottom panel shows a short description")
+  HELP_TEXT ("of what it does, and you can click Run to")
+  HELP_TEXT ("launch it.")
+  HELP_TEXT ("")
+  HELP_TEXT ("The scripts are located in the application's")
+  HELP_TEXT ("data folder, under the '/scripts'")
+  HELP_TEXT ("subdirectory. The list is refreshed each")
+  HELP_TEXT ("time you open the window. Scripts are loaded")
+  HELP_TEXT ("from disk when you run them.")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_effects[] =
 {
@@ -2039,11 +2100,6 @@ static const T_Help_table helptable_settings[] =
   HELP_TEXT ("some particular files or directories must be")
   HELP_TEXT ("displayed by the fileselectors or not.")
   HELP_TEXT ("")
-  HELP_TEXT ("- Show/Hide picture limits: Indicates if the")
-  HELP_TEXT ("picture boundaries must be displayed when")
-  HELP_TEXT ("you are in a resolution bigger than the")
-  HELP_TEXT ("picture.")
-  HELP_TEXT ("")
   HELP_TEXT ("- Clear palette: Indicates if loading a file")
   HELP_TEXT ("with a palette of less than 256 colors must")
   HELP_TEXT ("erase the rest of the current palette")
@@ -2091,9 +2147,6 @@ static const T_Help_table helptable_settings[] =
   HELP_TEXT ("placing the handle in the center of the")
   HELP_TEXT ("brush.")
   HELP_TEXT ("")
-  HELP_TEXT ("- Separate colors: Draws a squaring around")
-  HELP_TEXT ("the colors of the tool-bar.")
-  HELP_TEXT ("")
   HELP_TEXT ("- Auto-set resolution: sets the best")
   HELP_TEXT ("resolution for the loaded image.")
   HELP_TEXT ("")
@@ -2125,9 +2178,10 @@ static const T_Help_table helptable_settings[] =
   HELP_TEXT ("GrafX2 with a classical font, or another one")
   HELP_TEXT ("a bit funnier.")
   HELP_TEXT ("")
-  HELP_TEXT ("- Cursor: allows you to choose whether you")
-  HELP_TEXT ("prefer a solid cursor or a transparent")
-  HELP_TEXT ("cursor.")
+  HELP_TEXT ("- Cursor: Allows you to choose the graphic")
+  HELP_TEXT ("mouse cursor: Solid and Thin are solid black")
+  HELP_TEXT ("and white cursors defined by the skin file,")
+  HELP_TEXT (" Transparent is a 1-pixel wide XOR cross.")
   HELP_TEXT ("")
   HELP_TEXT ("- Graphic file: you can change the whole")
   HELP_TEXT ("interface by selecting where the sprites for")
@@ -2139,6 +2193,15 @@ static const T_Help_table helptable_settings[] =
   HELP_TEXT ("days of Sunset Design. If you create a good")
   HELP_TEXT ("skin, feel free to share it with us! We may")
   HELP_TEXT ("include it in a future release...")
+  HELP_TEXT ("")
+  HELP_TEXT ("- Separate colors: Draws a squaring around")
+  HELP_TEXT ("the colors of the tool-bar.")
+  HELP_TEXT ("")
+  HELP_TEXT ("- Show/Hide picture limits: Indicates if the")
+  HELP_TEXT ("picture boundaries must be displayed when")
+  HELP_TEXT ("you are in a resolution bigger than the")
+  HELP_TEXT ("picture.")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_clear[] =
 {
@@ -2148,7 +2211,8 @@ static const T_Help_table helptable_clear[] =
   HELP_BOLD ("LEFT CLICK")
   HELP_LINK ("(Key:%s)",0x100+BUTTON_CLEAR)
   HELP_TEXT ("")
-  HELP_TEXT ("Clears the picture with the color number 0.")
+  HELP_TEXT ("Clears the picture with the color number 0,")
+  HELP_TEXT ("or the transparent color of the picture.")
   HELP_TEXT ("")
   HELP_BOLD ("RIGHT CLICK")
   HELP_LINK ("(Key:%s)",0x200+BUTTON_CLEAR)
@@ -2439,13 +2503,136 @@ static const T_Help_table helptable_hide[] =
 
   HELP_TITLE("HIDE MENU")
   HELP_TEXT ("")
-  HELP_TEXT ("Allows you to hide the menu. If you do this,")
-  HELP_TEXT ("take care to watch before the key to press")
-  HELP_TEXT ("to show the menu back (the key is")
-  HELP_LINK ("%s).",0x100+BUTTON_HIDE)
+  HELP_BOLD ("LEFT CLICK")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_HIDE)
+  HELP_TEXT ("")
+  HELP_TEXT ("Allows you to hide all toolbars, leaving")
+  HELP_TEXT ("only the status bar.")
+  HELP_TEXT ("Click again to show them again.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Opens a drop-down menu where you can choose")
+  HELP_TEXT ("Which toolbars are going to be visible in")
+  HELP_TEXT ("the menu.")
 
 };
 
+static const T_Help_table helptable_layermenu[] =
+{
+
+  HELP_TITLE("LAYERS MENU")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_MENU)
+  HELP_TEXT ("")
+  HELP_TEXT ("In this menu you can set the following")
+  HELP_TEXT ("options:")
+  HELP_TEXT ("")
+  HELP_TEXT ("* Transparent color : This determines which")
+  HELP_TEXT ("color index is considered transparent when")
+  HELP_TEXT ("using layers. Click the button and then")
+  HELP_TEXT ("click on the image to pick the right color,")
+  HELP_TEXT ("or use ESC to cancel.")
+  HELP_TEXT ("")
+  HELP_TEXT ("* Transparent background : When this option")
+  HELP_TEXT ("is checked, all pixels of the transparent")
+  HELP_TEXT ("color on layer 1 (background layer) will")
+  HELP_TEXT ("be tagged as transparent in the final image.")
+  HELP_TEXT ("Check this option if you want to make a")
+  HELP_TEXT ("transparent GIF or PNG. These are the only")
+  HELP_TEXT ("file formats that support this option.")
+
+};
+static const T_Help_table helptable_layertrans[] =
+{
+
+  HELP_TITLE("LAYERS TRANSPARENCY")
+  HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Sets the transparent color as background pen")
+  HELP_TEXT ("color.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("The current Background color becomes the")
+  HELP_TEXT ("color considered transparent for the layers.")
+  
+};
+static const T_Help_table helptable_layermerge[] =
+{
+
+  HELP_TITLE("LAYERS MERGE")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_MERGE)
+  HELP_TEXT ("")
+  HELP_TEXT ("Merges the current layer with the one below")
+  HELP_TEXT ("it, and sets the resulting layer as current")
+  HELP_TEXT ("one for editing.")
+  HELP_TEXT ("This function has no effect if you're")
+  HELP_TEXT ("editing the lowest layer.")
+};
+static const T_Help_table helptable_layeradd[] =
+{
+
+  HELP_TITLE("ADD LAYER")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_ADD)
+  HELP_TEXT ("")
+  HELP_TEXT ("Add a new layer above the current one,")
+  HELP_TEXT ("and selects this new (empty) layer for")
+  HELP_TEXT ("editing.")
+
+};
+static const T_Help_table helptable_layerdel[] =
+{
+
+  HELP_TITLE("DROP LAYER")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_REMOVE)
+  HELP_TEXT ("")
+  HELP_TEXT ("Deletes the current layer.")
+
+};
+static const T_Help_table helptable_layerup[] =
+{
+
+  HELP_TITLE("MOVE LAYER UP")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_UP)
+  HELP_TEXT ("")
+  HELP_TEXT ("Swaps the current layer with the one")
+  HELP_TEXT ("above it. This has no effect if this")
+  HELP_TEXT ("layer is already on top.")
+
+};
+static const T_Help_table helptable_layerdown[] =
+{
+
+  HELP_TITLE("MOVE LAYER DOWN")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_DOWN)
+  HELP_TEXT ("")
+  HELP_TEXT ("Swaps the current layer with the one")
+  HELP_TEXT ("below it. This has no effect if this")
+  HELP_TEXT ("layer is already on the bottom.")
+};
+static const T_Help_table helptable_layerselect[] =
+{
+
+  HELP_TITLE("LAYER SELECTION")
+  HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Choose a layer as the current one for")
+  HELP_TEXT ("drawing.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Makes a layer visible or invisible.")
+  HELP_TEXT ("If you click the current layer, this toggles")
+  HELP_TEXT ("the visibility of all other layers instead.")
+};
 #define HELP_TABLE_DECLARATION(x) {x, sizeof(x)/sizeof(const T_Help_table)},
 
 T_Help_section Help_section[] =
@@ -2456,6 +2643,15 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_credits)
 
   // Attention, keep the same order as BUTTON_NUMBERS:
+  HELP_TABLE_DECLARATION(helptable_hide)
+  HELP_TABLE_DECLARATION(helptable_layermenu)
+  HELP_TABLE_DECLARATION(helptable_layertrans)
+  HELP_TABLE_DECLARATION(helptable_layermerge)
+  HELP_TABLE_DECLARATION(helptable_layeradd)
+  HELP_TABLE_DECLARATION(helptable_layerdel)
+  HELP_TABLE_DECLARATION(helptable_layerup)
+  HELP_TABLE_DECLARATION(helptable_layerdown)
+  HELP_TABLE_DECLARATION(helptable_layerselect)
   HELP_TABLE_DECLARATION(helptable_paintbrush)
   HELP_TABLE_DECLARATION(helptable_adjust)
   HELP_TABLE_DECLARATION(helptable_draw)
@@ -2492,5 +2688,4 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_pal_scroll)
   HELP_TABLE_DECLARATION(helptable_pal_scroll)
   HELP_TABLE_DECLARATION(helptable_color_select)
-  HELP_TABLE_DECLARATION(helptable_hide)
 };

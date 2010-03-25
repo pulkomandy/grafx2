@@ -68,6 +68,11 @@ To compile a gp2x executable, type
 This will only work on an UNIXsystem (Linux or FreeBSD).
 
 == Windows ==
+
+It is also possible to compile from linux, with this command :
+	make WIN32CROSS=1
+You will need the mingw cross-compiler, and all the librairies listed above.
+
 Here are the resources used to build the Windows version:
 
 4DOS
@@ -100,15 +105,35 @@ Libpng
   make install (long)
   Files created in /usr/local/include and /usr/local/lib ....
   
+libjpeg (optional - improves SDL_image with JPEG reading)
+  http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/project/li/libjpeg/libjpeg/
+  jpegsr6.zip
+  Uncompress in temporary directory
+  ./configure --enable-shared
+  make
+  (make install doesn't work. Copy jpeglib.h, jmorecfg.h, jconfig.h in include, and libjpeg.a in lib)
+  
+libtiff (optional - improves SDL_image with TIFF reading)
+  ftp://ftp.sgi.com/graphics/tiff/
+  tiff-v3.4-tar.gz
+  Uncompress in temporary directory
+  ./configure i686-pc-mingw32
+  make
+  Don't use 'make install', copy tiff.h libtiff.a manually instead.
+  
 SDL_image:
   Requires: Libpng
+  Requires optionally: libtiff
+  Requires optionally: libjpeg
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libsdl/
-  SDL_image-1.2.6.zip
+  SDL_image-1.2.8.zip
   Uncompress in temporary directory
   ./configure
-  Check that png worked
+  Check in the messages that png worked
+  Optionally check if jpeg worked too
+  Optionally check if tiff worked too
   make
-  make install
+  make install prefix=/usr/mingw
   
 FreeType:
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/m/mi/mingw-cross/
@@ -121,6 +146,14 @@ SDL_ttf:
   SDL_ttf-2.0.9-win32.zip for DLLs: libfreetype-6.dll, SDL_ttf.dll, zlib1.dll
   SDL_ttf-2.0.9.tar.gz
 
-It is also possible to compile from linux, with this command :
-	make WIN32CROSS=1
-You will need the mingw cross-compiler, and all the librairies listed above.
+Lua:
+  (optional)
+  http://www.lua.org/ftp/lua-5.1.4.tar.gz
+  Uncompress in temporary directory
+  Use sh shell
+  make mingw
+  (make install doesn't work, even with prefix)
+  Copy luaconf.h, lualib.h, lua.h, lauxlib.h to c:\msys\mingw\include
+  Copy liblua.a to c:\msys\mingw\lib
+  Copy lua51.dll to c:\msys\mingw\bin
+

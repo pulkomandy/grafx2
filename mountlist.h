@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /* mountlist.h -- declarations for list of mounted file systems
 
    Copyright (C) 1991, 1992, 1998, 2000, 2001, 2002, 2003, 2004, 2005
@@ -26,8 +28,13 @@
 #ifndef MOUNTLIST_H_
 # define MOUNTLIST_H_
 
-# include <stdbool.h>
-# include <sys/types.h>
+#if !defined(__VBCC__)
+  # include <stdbool.h>
+#else
+    #define bool char
+#endif
+
+#include <sys/types.h>
 
 /* A mount table entry. */
 struct mount_entry

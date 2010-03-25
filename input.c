@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2009 Franck Charlet
@@ -27,6 +29,10 @@
 #include "errors.h"
 #include "misc.h"
 #include "input.h"
+
+#ifdef __VBCC__
+  #define __attribute__(x)
+#endif
 
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
@@ -198,40 +204,6 @@ int Move_cursor_with_constraints()
   return feedback;
 }
 
-// Inhibits a key shortcut if it's disallowed during an operation.
-dword Inhibit_shortcut(dword key)
-{
-    if (Operation_stack_size!=0 && key != 0)
-    {
-        //Enfin, on inhibe les touches (sauf si c'est un changement de couleur
-        //ou de taille de pinceau lors d'une des operations suivantes:
-        //OPERATION_CONTINUOUS_DRAW, OPERATION_DISCONTINUOUS_DRAW, OPERATION_AIRBRUSH)
-        if(Allow_color_change_during_operation)
-        {
-            //A ce stade là, on sait qu'on est dans une des 3 opérations
-            //supportant le changement de couleur ou de taille de pinceau.
-
-            if(
-                    (!Is_shortcut(key,SPECIAL_NEXT_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_SMALLER_PAINTBRUSH)) &&
-                    (!Is_shortcut(key,SPECIAL_BIGGER_PAINTBRUSH)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_USER_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_USER_FORECOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_NEXT_USER_BACKCOLOR)) &&
-                    (!Is_shortcut(key,SPECIAL_PREVIOUS_USER_BACKCOLOR))
-              )
-            {
-                key=0;
-            }
-        }
-        else key = 0;
-    }
-    return key;
-}
-
 // WM events management
 
 void Handle_window_resize(SDL_ResizeEvent event)
@@ -290,16 +262,16 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             break;
 
         case SDL_BUTTON_MIDDLE:
-            Key = Inhibit_shortcut(KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState());
             // TODO: repeat system maybe?
             return 0;
 
         case SDL_BUTTON_WHEELUP:
-            Key = Inhibit_shortcut(KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
             return 0;
 
         case SDL_BUTTON_WHEELDOWN:
-            Key = Inhibit_shortcut(KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState()));
+            Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
             return 0;
         default:
         return 0;
@@ -364,7 +336,6 @@ int Handle_key_press(SDL_KeyboardEvent event)
         return Move_cursor_with_constraints();
     }
 
-    Key = Inhibit_shortcut(Key);
     return 0;
 }
 
@@ -494,7 +465,6 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     #ifdef __GP2X__
     switch(event.button)
     {
-      #ifndef NO_JOYCURSOR
       case GP2X_BUTTON_UP:
         Directional_up=1;
         break;
@@ -519,9 +489,8 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       case GP2X_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
-      #endif
       default:
-		break;
+        break;
     }
     #endif
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
@@ -548,15 +517,15 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Release_control(0,MOD_ALT);
     }
     if (event.button == Joybutton_left_click)
-	{
-        Input_new_mouse_K &= ~1;
-  		return Move_cursor_with_constraints();
-	}
+    {
+      Input_new_mouse_K &= ~1;
+      return Move_cursor_with_constraints();
+    }
     if (event.button == Joybutton_right_click)
-	{
-        Input_new_mouse_K &= ~2;
-  		return Move_cursor_with_constraints();
-	}
+    {
+      Input_new_mouse_K &= ~2;
+      return Move_cursor_with_constraints();
+    }
   
     #ifdef __GP2X__
     switch(event.button)
@@ -592,7 +561,6 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
 
 void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
-    #ifndef NO_JOYCURSOR
     if (event.axis==0) // X
     {
       Directional_right=Directional_left=0;
@@ -613,7 +581,6 @@ void Handle_joystick_movement(SDL_JoyAxisEvent event)
       else if (event.value>1000)
         Directional_down=1;
     }
-    #endif
 }
 
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
@@ -703,6 +670,9 @@ int Get_input(void)
                 Handle_key_release(event.key);
                 break;
 
+            // Start of Joystik handling
+            #ifdef USE_JOYSTICK
+
             case SDL_JOYBUTTONUP:
                 Handle_joystick_release(event.jbutton);
                 user_feedback_required = 1;
@@ -716,7 +686,10 @@ int Get_input(void)
             case SDL_JOYAXISMOTION:
                 Handle_joystick_movement(event.jaxis);
                 break;
-                
+
+            #endif
+            // End of Joystick handling
+            
             default:
             //    DEBUG("Unhandled SDL event number : ",event.type);
                 break;

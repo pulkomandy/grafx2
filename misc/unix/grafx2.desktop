@@ -4,5 +4,5 @@ Comment=Deluxe Paint Clone
 Exec=grafx2
 Terminal=false
 Type=Application
-Icon=grafx2.xpm
+Icon=grafx2
 Categories=Application;Graphics;

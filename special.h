@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007 Adrien Destugues
@@ -16,6 +18,8 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+
+#include "struct.h"
 
 //////////////////////////////////////////////////////////////////////////////
 ///@file special.h
@@ -46,3 +50,9 @@ void Zoom_set(int index);
 void Display_stored_brush_in_window(word x,word y,int number);
 void Store_brush(int index);
 byte Restore_brush(int index);
+
+/*!
+    Command that sets the transparency level.
+*/
+void Transparency_set(byte amount);
+

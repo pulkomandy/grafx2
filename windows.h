@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007-2008 Adrien Destugues
@@ -39,6 +41,7 @@ void Hide_cursor(void);
 
 void Remap_screen_after_menu_colors_change(void);
 void Compute_optimal_menu_colors(T_Components * palette);
+void Remap_menu_sprites();
 
 void Position_screen_according_to_zoom(void);
 void Compute_separator_data(void);
@@ -46,13 +49,15 @@ void Compute_magnifier_data(void);
 void Compute_limits(void);
 void Compute_paintbrush_coordinates(void);
 
-void Pixel_in_toolbar(word x,word y,byte color);
+void Pixel_in_menu(word bar, word x, word y, byte color);
+void Pixel_in_menu_and_skin(word bar, word x, word y, byte color);
 void Pixel_in_window(word x,word y,byte color);
 void Set_fore_color(byte color);
 void Set_back_color(byte color);
 void Frame_menu_color(byte id);
 void Display_menu_palette(void);
 void Display_menu(void);
+void Display_layerbar(void);
 void Reposition_palette(void);
 void Change_palette_cells(void);
 int Pick_color_in_palette(void);
@@ -70,7 +75,8 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 
 byte Confirmation_box(char * message);
 void Warning_message(char * message);
-void Verbose_error_message(char * message);
+void Verbose_message(const char * caption, const char * message);
+int Requester_window(char* message, int initial_value);
 
 void Display_image_limits(void);
 void Display_all_screen(void);
@@ -96,6 +102,9 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue);
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
 
-void Change_magnifier_factor(byte factor_index);
+void Change_magnifier_factor(byte factor_index, byte point_at_mouse);
+
+/// Width of one layer button, in pixels before scaling
+extern word Layer_button_width;
 
 #endif

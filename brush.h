@@ -1,3 +1,5 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2007-2008 Adrien Destugues
@@ -24,6 +26,8 @@
 
 #ifndef __BRUSH_H_
 #define __BRUSH_H_
+
+#include "struct.h"
 
 /*!
     Gets the brush from the picture.
