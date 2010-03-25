@@ -4,7 +4,14 @@
 -- Email: dawnbringer@hem.utfors.se
 -- MSN:   annassar@hotmail.com
 --
+-- Copyright 2010 Richard Fhager
 --
+-- This program is free software; you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation; version 2
+-- of the License. See <http://www.gnu.org/licenses/>
+
+
 -- Continously fill the greatest void in the area of the color-cube enclosed by (or along ramps of) initial colors
 -- This algorithm will create lines of allowed colors (all ranges) in 3d colorspace and the pick
 -- new colors from the most void areas (on any line). Almost like a Median-cut in reverse.

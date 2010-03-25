@@ -658,7 +658,7 @@ int Init_program(int argc,char * argv[])
   gfx = Load_graphics(Config.Skin_file);
   if (gfx == NULL)
   {
-    gfx = Load_graphics("skin_modern.png");
+    gfx = Load_graphics("skin_DPaint.png");
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -666,8 +666,6 @@ int Init_program(int argc,char * argv[])
     }
   }
   Set_current_skin(Config.Skin_file, gfx);
-  Fore_color=MC_White;
-  Back_color=MC_Black;
   // Override colors
   // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
   // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
@@ -681,13 +679,16 @@ int Init_program(int argc,char * argv[])
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font("font_Classic.png")))
+    if (!(Menu_font=Load_font("font_DPaint.png")))
       {
         printf("Unable to open the default font file: %s\n", "font_Classic.png");
         Error(ERROR_GUI_MISSING);
       }
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
+
+  Fore_color=Best_color_nonexcluded(255,255,255);
+  Back_color=Best_color_nonexcluded(0,0,0);
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);

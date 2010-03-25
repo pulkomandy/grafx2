@@ -2,6 +2,13 @@
 --by Richard Fhager 
 --http://hem.fyristorg.com/dawnbringer/
 
+-- Copyright 2010 Richard Fhager
+--
+-- This program is free software; you can redistribute it and/or
+-- modify it under the terms of the GNU General Public License
+-- as published by the Free Software Foundation; version 2
+-- of the License. See <http://www.gnu.org/licenses/>
+
 
 -- Generate palette of all colors possible with a given number of shades for each channel
 -- 2 shades = 1 bit / channel = 3 bit palette = 2^3 colors =  8 colors

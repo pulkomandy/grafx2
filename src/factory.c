@@ -512,7 +512,7 @@ int L_InputBox(lua_State* L)
   const int args_per_setting = 5;
   double min_value[max_settings];
   double max_value[max_settings];
-  byte decimal_places[max_settings];
+  double decimal_places[max_settings];
   double current_value[max_settings];
   const char * label[max_settings];
   unsigned short control[max_settings*3+1]; // Each value has at most 3 widgets.
@@ -574,11 +574,12 @@ int L_InputBox(lua_State* L)
     LUA_ARG_NUMBER(setting*args_per_setting+5, "inputbox", max_value[setting], -DBL_MAX, DBL_MAX);
     /*if (max_value[setting] > 999999999999999.0)
       max_value[setting] = 999999999999999.0;*/
-    LUA_ARG_NUMBER(setting*args_per_setting+6, "inputbox", decimal_places[setting], INT_MIN, INT_MAX);
+    LUA_ARG_NUMBER(setting*args_per_setting+6, "inputbox", decimal_places[setting], -15.0, 15.0);
     if (decimal_places[setting]>15)
         decimal_places[setting]=15;
     // Keep current value in range
-    current_value[setting] = Fround(current_value[setting], decimal_places[setting]);
+    if (decimal_places[setting]>=0)
+      current_value[setting] = Fround(current_value[setting], decimal_places[setting]);
 
     if (current_value[setting] < min_value[setting])
       current_value[setting] = min_value[setting];
@@ -602,10 +603,11 @@ int L_InputBox(lua_State* L)
   for (setting=0; setting<nb_settings; setting++)
   {
     Print_in_window_limited(12,22+setting*17,label[setting],max_label_length,MC_Black,MC_Light);
-    if (min_value[setting]==0 && max_value[setting]==1)
+    if (min_value[setting]==0 && max_value[setting]==1 && decimal_places[setting]<=0)
     {
-      // Checkbox
-      Window_set_normal_button(12+max_label_length*8+42, 19+setting*17, 15,13,current_value[setting]?"X":"", 0,1,KEY_NONE);
+      // Checkbox or Radio button
+      byte outline = decimal_places[setting]==0 ? 2 : 0;
+      Window_set_normal_button(12+max_label_length*8+44-outline, 21+setting*17-outline, 12+outline*2,10+outline*2,current_value[setting]?"X":"", 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_CHECKBOX | setting;
     }
     else
@@ -625,6 +627,20 @@ int L_InputBox(lua_State* L)
       // + Button
       Window_set_repeatable_button(12+max_label_length*8+84, 20+setting*17, 13,11,"+" , 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_INPUT_PLUS | setting;
+    }
+  }
+  
+  // Draw outlines for series of radio buttons
+  for (setting=0; setting<nb_settings; setting++)
+  {
+    if (min_value[setting]==0 && max_value[setting]==1 && decimal_places[setting]<0)
+    {
+      word first_setting=setting;
+      for (;setting+1<nb_settings; setting++)
+        if (min_value[setting+1]!=0 || max_value[setting+1]!=1 || decimal_places[setting+1]!=decimal_places[first_setting])
+          break;
+      
+      Window_display_frame_in(12+max_label_length*8+41,18+first_setting*17,18,(setting-first_setting+1)*17-1);
     }
   }
   
@@ -700,10 +716,31 @@ int L_InputBox(lua_State* L)
           break;
           
         case CONTROL_CHECKBOX:
-          current_value[setting] = (current_value[setting]<0.5);
-          Hide_cursor();
-          Print_in_window(12+max_label_length*8+46, 22+setting*17, current_value[setting]?"X":" ",MC_Black,MC_Light);
-          Display_cursor();
+          if (decimal_places[setting]==0 || current_value[setting]==0.0)
+          {
+            current_value[setting] = (current_value[setting]==0.0);
+            Hide_cursor();
+            Print_in_window(12+max_label_length*8+46, 22+setting*17, current_value[setting]?"X":" ",MC_Black,MC_Light);
+            // Uncheck other buttons of same family
+            if (decimal_places[setting]<0)
+            {
+              byte button;
+              for (button=0; button<=Window_nb_buttons; button++)
+              {
+                if (button != clicked_button && control[button] & CONTROL_CHECKBOX)
+                {
+                  byte other_setting = control[button] & (CONTROL_VALUE_MASK);
+                  if (decimal_places[other_setting] == decimal_places[setting])
+                  {
+                    // Same family: unset and uncheck
+                    current_value[other_setting]=0.0;
+                    Print_in_window(12+max_label_length*8+46, 22+other_setting*17, " ",MC_Black,MC_Light);
+                  }
+                }
+              }
+            }
+            Display_cursor();
+          }
           break;
       }
     }
@@ -999,9 +1036,15 @@ void Button_Brush_Factory(void)
 
     // For debug only
     // luaL_openlibs(L);
-
+    
     luaopen_base(L);
+    //luaopen_package(L); // crashes on Windows, for unknown reason
+    luaopen_table(L);
+    //luaopen_io(L); // crashes on Windows, for unknown reason
+    //luaopen_os(L);
+    //luaopen_string(L);
     luaopen_math(L);
+    //luaopen_debug(L);
 
     strcat(scriptdir, selected_script);
 

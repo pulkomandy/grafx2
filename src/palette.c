@@ -694,11 +694,11 @@ void Display_sliders(T_Scroller_button * red_slider,
       RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
 
-    Format_componant(j1*Color_max/255,str);
+    Format_componant(j1*Color_count/256,str);
     Set_palette_slider(red_slider,Color_count,Color_max-j1*Color_max/255,str,176);
-    Format_componant(j2*Color_max/255,str);
+    Format_componant(j2*Color_count/256,str);
     Set_palette_slider(green_slider,Color_count,Color_max-j2*Color_max/255,str,203);
-    Format_componant(j3*Color_max/255,str);
+    Format_componant(j3*Color_count/256,str);
     Set_palette_slider(blue_slider,Color_count,Color_max-j3*Color_max/255,str,230);
   }
 }
@@ -740,17 +740,18 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
     {
       RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
-    Format_componant(j1*Color_max/255,str);
+    DEBUG("j1",j1);
+    Format_componant(j1*Color_count/256,str);
     red_slider->Position=Color_max-j1*Color_max/255;
     Window_draw_slider(red_slider);
     Print_counter(176,172,str,MC_Black,MC_Light);
 
-    Format_componant(j2*Color_max/255,str);
+    Format_componant(j2*Color_count/256,str);
     green_slider->Position=Color_max-j2*Color_max/255;
     Window_draw_slider(green_slider);
     Print_counter(203,172,str,MC_Black,MC_Light);
 
-    Format_componant(j3*Color_max/255,str);
+    Format_componant(j3*Color_count/256,str);
     blue_slider->Position=Color_max-j3*Color_max/255;
     Window_draw_slider(blue_slider);
     Print_counter(230,172,str,MC_Black,MC_Light);
@@ -1078,7 +1079,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
             Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
+            Format_componant((working_palette[Fore_color].R)*Color_count/256,str);
           } 
           else
           {
@@ -1146,7 +1147,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
             Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].G*Color_count/256,str);
           } 
           else
           {
@@ -1214,7 +1215,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
             Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].B*Color_count/256,str);
           } 
           else
           {
@@ -1565,7 +1566,7 @@ void Button_Palette(void)
             (red_slider->Position)--;
             Window_draw_slider(red_slider);
             Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].R*Color_count/256,str);
             Print_counter(176,172,str,MC_Black,MC_Light);
           }
           if (green_slider->Position)
@@ -1573,7 +1574,7 @@ void Button_Palette(void)
             (green_slider->Position)--;
             Window_draw_slider(green_slider);
             Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].G*Color_count/256,str);
             Print_counter(203,172,str,MC_Black,MC_Light);
           }
           if (blue_slider->Position)
@@ -1581,7 +1582,7 @@ void Button_Palette(void)
             (blue_slider->Position)--;
             Window_draw_slider(blue_slider);
             Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].B*Color_count/256,str);
             Print_counter(230,172,str,MC_Black,MC_Light);
           }
         }
@@ -1690,7 +1691,7 @@ void Button_Palette(void)
             (red_slider->Position)++;
             Window_draw_slider(red_slider);
             Set_red(Fore_color,(Color_max-red_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].R*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].R*Color_count/256,str);
             Print_counter(176,172,str,MC_Black,MC_Light);
           }
           if (green_slider->Position<Color_max)
@@ -1698,7 +1699,7 @@ void Button_Palette(void)
             (green_slider->Position)++;
             Window_draw_slider(green_slider);
             Set_green (Fore_color,(Color_max-green_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].G*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].G*Color_count/256,str);
             Print_counter(203,172,str,MC_Black,MC_Light);
           }
           if (blue_slider->Position<Color_max)
@@ -1706,7 +1707,7 @@ void Button_Palette(void)
             (blue_slider->Position)++;
             Window_draw_slider(blue_slider);
             Set_blue (Fore_color,(Color_max-blue_slider->Position)*255/Color_max,working_palette);
-            Format_componant(working_palette[Fore_color].B*Color_max/255,str);
+            Format_componant(working_palette[Fore_color].B*Color_count/256,str);
             Print_counter(230,172,str,MC_Black,MC_Light);
           }
         }
@@ -1830,7 +1831,7 @@ void Button_Palette(void)
         for (i=0; i<=255; i++)
           conversion_table[i]=i;
         // Inversion
-        for (i=block_start; i< block_start + (block_end-block_start)/2;i++)
+        for (i=block_start; i < block_start + (block_end-block_start+1)/2;i++)
         {
           temp_color=block_end-(i-block_start);
           

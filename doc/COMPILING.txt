@@ -8,27 +8,41 @@ Grafx2 compilation and installation
 * SDL library v1.2
 * SDL_image library
 * libpng (not on MacOSX)
-* FreeType library (optional)
-* SDL_ttf library (optional)
+* FreeType library (optional, for truetype fonts)
+* SDL_ttf library (optional, for truetype fonts)
+* Lua library v5.1 (optional, for Lua scripting)
 
 Extra requirements for Windows:
 * a POSIX environment: MSYS is fine, maybe Cygwin would work as well.
 * use Mingw C compiler instead of gcc
 
 Extra requirements for UNIX/X11 (Linux, FreeBSD, ...):
+* pkg-config (optional, for Lua scripting)
 * X11 headers (optional, for truetype fonts)
+
+On Debian-based distributions you should be able to get all these files by
+simply running the following command from a terminal :
+  sudo aptitude install gcc make libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libfreetype6-dev liblua5.1-0-dev lua5.1
 
 === Instructions ===
 
-Open a shell/Terminal, cd to the directory where you have the source code, and
+Open a shell/Terminal, enter the directory where you have the project tree, and
 type:
+  cd src
   make
-If all goes well, it should build grafx2 (the main program) in the current
+If all goes well, it should build grafx2 (the main program) in the "bin"
 directory. Voilà.
 
-If you don't have FreeType and SDL_ttf, compile with NOTTF=1, it will
+If you don't have FreeType and SDL_ttf, type make NOTTF=1 instead. It will
 build a version without TrueType support : the Text tool will be limited to
 bitmap fonts, proportional fonts with .ttf extension won't be available.
+
+If you don't have lua available, type `make NOLUA=1`. You will not be able to
+use lua scripts to generate and alter brush and pictures.
+
+These options can be combined, for example for a build without ttf nor lua type
+make NOTTF=1 NOLUA=1
+
 
 === Build variants ===
 
@@ -38,14 +52,20 @@ to do.
 Compile with OPTIM=3 to use maximum optimizations.
 Type "make release" if you don't want the debugging symbols.
 
-Compile with NOJOY=1 to disable joystick support.
+Compile with USE_JOYSTICK=1 to enable joystick input : Only useful for
+developers, to check the input code for platforms that don't have a mouse.
+
+Compile with NOLAYERS=1 to make a version of Grafx2 that can't display 
+several layers at a time: You will still be able to edit layered images,
+but you will only see one layer at a time. This option is designed for slow
+platforms, as it makes the program faster.
 
 === Other compilation targets ===
   make clean
-Erases the generated files
+Erases all generated files (intermediate objects, and executable)
 
   make depend
-Re-compute the dependencies (makefile.dep). 
+Re-compute the dependencies (makefile.dep).
 
 Other compilation targets (make version, make ziprelease) require Subversion
 and are only useful to contributors to the svn repository of Grafx2.
@@ -53,14 +73,20 @@ and are only useful to contributors to the svn repository of Grafx2.
 === System specifics ===
 
 == Unix/Linux ==
+
   sudo make install
-This copies the executable and data files in your system, in the /usr/local/
-and /usr/share directories. You then no longer need the compilation directory.
+This copies the executable and data files in your system, in the /usr/local/bin
+and /usr/local/share directories. You then no longer need the compilation
+directory.
 
   sudo make uninstall
 Removes the copied files from your system, keeps your configuration.
 
+For both options, you can specify prefix=something to choose the target
+directory root: For example prefix=/usr or prefix=./test-install
+
 == gp2x ==
+
 The gp2x build is very similar to the Linux one. TTF is always disabled because 
 there is no X11 support on the gp2x.
 To compile a gp2x executable, type
@@ -73,7 +99,7 @@ It is also possible to compile from linux, with this command :
 	make WIN32CROSS=1
 You will need the mingw cross-compiler, and all the librairies listed above.
 
-Here are the resources used to build the Windows version:
+Here is a list of the resources used to build the Windows version:
 
 4DOS
   with an alias make=mingw32-make
@@ -95,6 +121,7 @@ Zlib:
   http://gnuwin32.sourceforge.net/downlinks/zlib.php
   zlib-1.2.3.exe
   Install in c:\msys\mingw
+  
 Libpng
   Requires: Zlib
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libpng/
