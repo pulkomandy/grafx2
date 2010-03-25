@@ -41,18 +41,18 @@ ifdef COMSPEC
   MKDIR = mkdir -p
   RMDIR = rmdir
   CP = cp
-  BIN = grafx2.exe
+  BIN = ../bin/grafx2.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT) $(LAYERCOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
-  OBJDIR = obj/win32
+  OBJDIR = ../obj/win32
   # Resources (icon)
   WINDRES = windres.exe
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = SDL.dll SDL_image.dll libpng13.dll zlib1.dll gfx2.ico $(TTFLIBS)
+  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng13.dll bin/zlib1.dll $(TTFLIBS)
   ZIP = zip
 else
 
@@ -65,11 +65,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -I/SDK/Local/common/include/SDL -D__USE_INLINE__ $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
-    OBJDIR = obj/amiga
+    OBJDIR = ../obj/amiga
     ZIP = lha
     ZIPOPT = a
 
@@ -82,7 +82,7 @@ else
   CP = cp
   ZIP = zip
   PLATFORMFILES = gfx2.png
-  BIN = grafx2
+  BIN = ../bin/grafx2
   # Where the SDL frameworks are located
   FWDIR = /Library/Frameworks
   SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
@@ -92,7 +92,7 @@ else
   # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
   CC = gcc
   #CC = nccgen -ncgcc -ncld -ncfabs
-  OBJDIR = obj/macosx
+  OBJDIR = ../obj/macosx
   PLATFORMOBJ = $(OBJDIR)/SDLMain.o
   X11LOPT = 
   MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
@@ -104,11 +104,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -Wall -g `sdl-config --cflags` $(TTFCOPT)
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
-    OBJDIR = obj/aros
+    OBJDIR = ../obj/aros
     STRIP = strip --strip-unneeded --remove-section .comment
     ZIP = lha
     ZIPOPT = a
@@ -120,14 +120,14 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
-    OBJDIR = obj/morphos
+    OBJDIR = ../obj/morphos
     ZIP = lha
     ZIPOPT = a
-    PLATFORMFILES = misc/grafx2.info
+    PLATFORMFILES = ../misc/grafx2.info
 
   else
   ifeq ($(PLATFORM),AMIGA) # 5
@@ -136,11 +136,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
     LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
     CC = gcc
-    OBJDIR = obj/amiga
+    OBJDIR = ../obj/amiga
     ZIP = lha
     ZIPOPT = a
 
@@ -151,11 +151,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/home/config/include
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
-    OBJDIR = obj/beos
+    OBJDIR = ../obj/beos
     ZIP = zip
 
   else
@@ -165,11 +165,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
-    OBJDIR = obj/haiku
+    OBJDIR = ../obj/haiku
     ZIP = zip
 
   else
@@ -179,11 +179,11 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -W -Wall -Wdeclaration-after-statement -c -g `sdl-config --cflags` $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
-    OBJDIR = obj/skyos
+    OBJDIR = ../obj/skyos
     ZIP = zip
 
   else
@@ -195,10 +195,10 @@ else
       CP = cp
       ZIP = zip
       PLATFORMFILES = gfx2.png
-      BIN = grafx2
+      BIN = ../bin/grafx2
       COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
       LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
-      OBJDIR = obj/unix
+      OBJDIR = ../obj/unix
       X11LOPT = -lX11
       CC = gcc
 
@@ -210,10 +210,10 @@ else
     MKDIR = makedir
     RMDIR= delete
     CP = copy
-    BIN = grafx2
+    BIN = ../bin/grafx2
     COPT = -c99 -Ivbcc:PosixLib/include -D__amigaos__ $(TTFCOPT)
     CC = vc
-    OBJDIR = obj/amiga-vbcc
+    OBJDIR = ../obj/amiga-vbcc
     ZIP = lha
     ZIPOPT = a
 
@@ -236,34 +236,34 @@ else
       ifdef WIN32CROSS
         #cross compile a Win32 executable
         CC = i586-mingw32msvc-gcc
-        BIN = grafx2.exe
+        BIN = ../bin/grafx2.exe
         COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
         LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
-        OBJDIR = obj/win32
+        OBJDIR = ../obj/win32
         PLATFORM = win32
       else
       ifdef GP2XCROSS
 
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
-        BIN = grafx2.gpe
+        BIN = ../grafx2.gpe
         COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O3 -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__
         LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT)
-        OBJDIR = obj/gp2x
+        OBJDIR = ../obj/gp2x
         NOTTF = 1
         PLATFORM = gp2x
         STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
       else
 
-        # Compiles a regular linux exectutable for the native platform
-        BIN = grafx2
+        # Compiles a regular linux executable for the native platform
+        BIN = ../bin/grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
         # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
         CC = gcc
         #CC = nccgen -ncgcc -ncld -ncfabs
-        OBJDIR = obj/unix
+        OBJDIR = ../obj/unix
         X11LOPT = -lX11
       endif
       endif
@@ -290,7 +290,7 @@ ifeq ($(NOTTF),1)
 else
   TTFCOPT = 
   TTFLOPT = -L/usr/local/lib -lSDL_ttf $(X11LOPT)
-  TTFLIBS = libfreetype-6.dll SDL_ttf.dll
+  TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
   TTFLABEL = 
 endif
 
@@ -328,7 +328,7 @@ endif
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o 
 
-SKIN_FILES = skins/skin_classic.png skins/skin_modern.png skins/font_Classic.png skins/font_Fun.png
+SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
@@ -360,16 +360,17 @@ release : version $(BIN)
 ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 
-	tar cvzf "src-`cat $(OBJDIR)/versiontag`.tgz" --transform 's,^,src/,g' *.c *.h Makefile Makefile.dep gfx2.ico 
-	$(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN) gfx2def.ini scripts/bru_*.lua scripts/pal_*.lua scripts/pic_*.lua scripts/scn_*.lua $(SKIN_FILES) gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt fonts/Tuffy.ttf src-`cat $(OBJDIR)/versiontag`.tgz $(PLATFORMFILES)
-	$(DELCOMMAND) "src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --transform 's,^,grafx2/,g' *.c *.h Makefile Makefile.dep gfx2def.ini scripts/bru_*.lua scripts/pal_*.lua scripts/pic_*.lua scripts/scn_*.lua $(SKIN_FILES) gfx2.ico gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt misc/unix/grafx2.1 misc/unix/grafx2.xpm misc/unix/grafx2.desktop fonts/8pxfont.png fonts/Tuffy.ttf
+	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico 
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini share/grafx2/scripts/bru_*.lua share/grafx2/scripts/pal_*.lua share/grafx2/scripts/pic_*.lua share/grafx2/scripts/scn_*.lua $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt share/grafx2/fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt share/grafx2/fonts/Tuffy.ttf src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
+	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
+	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini ../share/grafx2/scripts/bru_*.lua ../share/grafx2/scripts/pal_*.lua ../share/grafx2/scripts/pic_*.lua ../share/grafx2/scripts/scn_*.lua $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
 
 $(BIN) : $(OBJ)
-	$(CC) $(OBJ) -o $(BIN) $(LOPT)
+	test -d ../bin || $(MKDIR) ../bin
+	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LFLAGS)
 
 # SVN revision number
 version.c :
@@ -420,33 +421,27 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(datadir)/icons || $(MKDIR) $(DESTDIR)$(datadir)/icons
-	# Generate launcher script
-	echo "#!/bin/sh" > $(DESTDIR)$(bindir)/grafx2
-	echo $(datadir)/grafx2/$(BIN) '$$*' >> $(DESTDIR)$(bindir)/grafx2
-	chmod 755 $(DESTDIR)$(bindir)/grafx2
 	# Copy files
-	$(CP) $(BIN) $(DESTDIR)$(datadir)/grafx2/
-	$(CP) gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
-	$(CP) gfx2.gif $(DESTDIR)$(datadir)/grafx2/
-	$(CP) fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
+	$(CP) $(BIN) $(DESTDIR)$(bindir)
+	$(CP) ../share/grafx2/gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
+	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
+	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
 	# Icon and desktop file for debian
-	$(CP) misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
-	$(CP) misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
+	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
+	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
 	@echo Install complete
   
 # Linux uninstallation of the program
 uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(bindir)/grafx2
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/$(BIN)
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2def.ini
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
-	cd $(DESTDIR)$(datadir)/grafx2
-	$(DELCOMMAND) $(SKIN_FILES)
-	cd ..
+	cd $(DESTDIR)$(datadir) && $(DELCOMMAND) $(SKIN_FILES)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.xpm

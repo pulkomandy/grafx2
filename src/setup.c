@@ -92,11 +92,17 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
 // OUT: Write into data_dir. Trailing / or \ is kept.
 void Set_data_directory(const char * program_dir, char * data_dir)
 {
-  // On all platforms, data is in the executable's directory
+  // On all platforms, data is relative to the executable's directory
   strcpy(data_dir,program_dir);
-  // Except MacOSX, here it is stored in a special folder:
+  // On MacOSX,  it is stored in a special folder:
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
+  // On GP2X, executable is not in bin/
+  #elif defined (__gp2x__)
+    strcat(data_dir,"share/grafx2/");
+  // All other targets, program is in a "bin" subdirectory
+  #else
+    strcat(data_dir,"../share/grafx2/");
   #endif
 }
 
@@ -124,8 +130,12 @@ void Set_config_directory(const char * program_dir, char * config_dir)
   #else
     char filename[MAX_PATH_CHARACTERS];
 
-    // In priority: check own directory
+    // In priority: check root directory
     strcpy(config_dir, program_dir);
+    // On all these targets except OSX and GP2X, the executable is in ./bin
+    #if !defined(__macosx__) && !defined(__gp2x__)
+      strcat(config_dir, "../");
+    #endif
     strcpy(filename, config_dir);
     strcat(filename, "gfx2.cfg");
 
@@ -176,6 +186,9 @@ void Set_config_directory(const char * program_dir, char * config_dir)
           {
             // Echec: on se rabat sur le repertoire de l'executable.
             strcpy(config_dir,program_dir);
+            #if !defined(__macosx__) && !defined(__gp2x__)
+              strcat(config_dir, "../");
+            #endif
           }
         }
       }

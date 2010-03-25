@@ -709,20 +709,20 @@ int Get_input(void)
       
       time_now=SDL_GetTicks();
       
-      if (time_now>Directional_last_move + Directional_delay)
+      if (time_now>Directional_last_move+Directional_delay)
       {
         // Speed parameters, acceleration etc. are here
         if (Directional_delay==-1)
         {
-          Directional_delay = 150;
-          Directional_step = 16;
+          Directional_delay=150;
+          Directional_step=16;
         }
-        else if (Directional_delay == 150)
-          Directional_delay = 40;
-        else if (Directional_delay != 0)
-          Directional_delay = Directional_delay * 8 / 10;
-        // else if (Directional_step < 16 * 2)
-        //  Directional_step++;
+        else if (Directional_delay==150)
+          Directional_delay=40;
+        else if (Directional_delay!=0)
+          Directional_delay=Directional_delay*8/10;
+        else if (Directional_step<16*4)
+          Directional_step++;
         Directional_last_move = time_now;
       
         // Directional controller UP
