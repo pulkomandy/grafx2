@@ -592,6 +592,10 @@ int L_InputBox(lua_State* L)
 
   Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
+  // Normally this index is unused, but this initialization avoids
+  // any weird behavior if it was used by mistake.
+  control[0]=0;
+  
   // OK
   Window_set_normal_button( 7, 25 + 17 * nb_settings, 51,14,"OK" , 0,1,SDLK_RETURN);
   control[Window_nb_buttons] = CONTROL_OK;
@@ -725,7 +729,7 @@ int L_InputBox(lua_State* L)
             if (decimal_places[setting]<0)
             {
               byte button;
-              for (button=0; button<=Window_nb_buttons; button++)
+              for (button=3; button<=Window_nb_buttons; button++)
               {
                 if (button != clicked_button && control[button] & CONTROL_CHECKBOX)
                 {
