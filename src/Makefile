@@ -377,7 +377,7 @@ testsed :
 
 $(BIN) : $(OBJ)
 	test -d ../bin || $(MKDIR) ../bin
-	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LFLAGS)
+	$(CC) $(OBJ) -o $(BIN) $(COPT) $(LOPT) $(LFLAGS)
 
 # SVN revision number
 version.c :

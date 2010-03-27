@@ -358,7 +358,7 @@ word Keysym_to_keycode(SDL_keysym keysym)
   return key_code;
 }
 
-const char * Key_name(word Key)
+const char * Key_name(word key)
 {
   typedef struct
   {
@@ -447,30 +447,30 @@ const char * Key_name(word Key)
   static char buffer[41];
   buffer[0] = '\0';
 
-  if (Key == SDLK_UNKNOWN)
+  if (key == SDLK_UNKNOWN)
     return "None";
   
-  if (Key & MOD_CTRL)
+  if (key & MOD_CTRL)
     strcat(buffer, "Ctrl+");
-  if (Key & MOD_ALT)
+  if (key & MOD_ALT)
     strcat(buffer, "Alt+");
-  if (Key & MOD_SHIFT)
+  if (key & MOD_SHIFT)
     strcat(buffer, "Shift+");
-  if (Key & MOD_META)
+  if (key & MOD_META)
     strcat(buffer, "\201");
   // Note: Apple's "command" character is not present in the ANSI table, so we
   // recycled an ANSI value that doesn't have any displayable character
   // associated.
   
   
-  Key=Key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
+  key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   
-  if (Key>=KEY_JOYBUTTON && Key<=KEY_JOYBUTTON+18)
+  if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+18)
   {
 #ifdef __GP2X__
     
     char *button_name;
-    switch(Key-KEY_JOYBUTTON)
+    switch(key-KEY_JOYBUTTON)
     {    
       case GP2X_BUTTON_UP: button_name="[UP]"; break;
       case GP2X_BUTTON_DOWN: button_name="[DOWN]"; break;
@@ -491,45 +491,45 @@ const char * Key_name(word Key)
       case GP2X_BUTTON_SELECT: button_name="[SELECT]"; break;
       case GP2X_BUTTON_VOLUP: button_name="[VOL UP]"; break;
       case GP2X_BUTTON_VOLDOWN: button_name="[VOL DOWN]"; break;
-      default: sprintf(buffer+strlen(buffer), "[B%d]", Key);return buffer;
+      default: sprintf(buffer+strlen(buffer), "[B%d]", key);return buffer;
     }
     strcat(buffer,button_name);
 #else    
-    sprintf(buffer+strlen(buffer), "[B%d]", Key-KEY_JOYBUTTON);
+    sprintf(buffer+strlen(buffer), "[B%d]", key-KEY_JOYBUTTON);
 #endif
     return buffer;
   }
   
-  if (Key & 0x800)
+  if (key & 0x800)
   {
-    sprintf(buffer+strlen(buffer), "[%d]", Key & 0x7FF);
+    sprintf(buffer+strlen(buffer), "[%d]", key & 0x7FF);
     return buffer;
   }
-  Key = Key & 0x7FF;
+  key = key & 0x7FF;
   // Touches ASCII
-  if (Key>=' ' && Key < 127)
+  if (key>=' ' && key < 127)
   {
-    sprintf(buffer+strlen(buffer), "'%c'", toupper(Key));
+    sprintf(buffer+strlen(buffer), "'%c'", toupper(key));
     return buffer;
   }
   // Touches 'World'
-  if (Key>=SDLK_WORLD_0 && Key <= SDLK_WORLD_95)
+  if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
   {
-    sprintf(buffer+strlen(buffer), "w%d", Key - SDLK_WORLD_0);
+    sprintf(buffer+strlen(buffer), "w%d", key - SDLK_WORLD_0);
     return buffer;
   }
                              
   // Touches au libellé connu
   for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
   {
-    if (Key == key_labels[index].keysym)
+    if (key == key_labels[index].keysym)
     {
       sprintf(buffer+strlen(buffer), "%s", key_labels[index].Key_name);
       return buffer;
     }
   }
   // Autres touches inconnues
-  sprintf(buffer+strlen(buffer), "0x%X", Key & 0x7FF);
+  sprintf(buffer+strlen(buffer), "0x%X", key & 0x7FF);
   return buffer;
 
 }
