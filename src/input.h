@@ -36,7 +36,7 @@
 int  Get_input(void);
 
 /// Returns true if the keycode has been set as a keyboard shortcut for the function.
-int Is_shortcut(word Key, word function);
+int Is_shortcut(word key, word function);
 
 /// Adjust mouse sensitivity (and actual mouse input mode)
 void Adjust_mouse_sensitivity(word fullscreen);

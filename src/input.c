@@ -86,30 +86,30 @@ short Joybutton_left_click=0; // Button number that serves as left click
 short Joybutton_right_click=0; // Button number that serves as right-click
 #endif
 
-int Is_shortcut(word Key, word function)
+int Is_shortcut(word key, word function)
 {
-  if (Key == 0 || function == 0xFFFF)
+  if (key == 0 || function == 0xFFFF)
     return 0;
     
   if (function & 0x100)
   {
-    if (Buttons_Pool[function&0xFF].Left_shortcut[0]==Key)
+    if (Buttons_Pool[function&0xFF].Left_shortcut[0]==key)
       return 1;
-    if (Buttons_Pool[function&0xFF].Left_shortcut[1]==Key)
+    if (Buttons_Pool[function&0xFF].Left_shortcut[1]==key)
       return 1;
     return 0;
   }
   if (function & 0x200)
   {
-    if (Buttons_Pool[function&0xFF].Right_shortcut[0]==Key)
+    if (Buttons_Pool[function&0xFF].Right_shortcut[0]==key)
       return 1;
-    if (Buttons_Pool[function&0xFF].Right_shortcut[1]==Key)
+    if (Buttons_Pool[function&0xFF].Right_shortcut[1]==key)
       return 1;
     return 0;
   }
-  if(Key == Config_Key[function][0])
+  if(key == Config_Key[function][0])
     return 1;
-  if(Key == Config_Key[function][1])
+  if(key == Config_Key[function][1])
     return 1;
   return 0; 
 }

@@ -66,7 +66,7 @@ word Key_for_scancode(word scancode);
     Returns key name in a string. Used to display them in the helpscreens and in the keymapper window.
   @param Key keycode of the key to translate, including modifiers
 */
-const char * Key_name(word Key);
+const char * Key_name(word key);
 
 /*!
   Gets the modifiers in our format from the SDL_Mod information.
