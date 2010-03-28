@@ -1110,6 +1110,14 @@ void Button_Brush_Factory(void)
   if (Brush_was_altered)
     Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
   Unselect_button(BUTTON_BRUSH_EFFECTS);
+  // If the image has been resized, Compute_limits() has been called and it 
+  // has computed wrong values because a window was open : In this
+  // context, Menu_Y and Menu_is_visible are artificially set to "menu hidden".
+  // This whole "_before_window" looks like it's completely useless anyway,
+  // but we're too close to release to scrap it and re-test everything.
+  // So: call Compute_limits() one more time, and be done with it.
+  Compute_limits();
+
   Display_all_screen();
   Display_cursor();
 }
