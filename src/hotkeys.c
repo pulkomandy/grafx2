@@ -944,7 +944,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {130,
   "Exclude colors menu",
   "Opens a menu which allows you to",
-  "define the colors you don""t want to",
+  "define the colors you don't want to",
   "use in Smooth and Transparency",
   true,
   SDLK_p|MOD_CTRL, // Ctrl + P
