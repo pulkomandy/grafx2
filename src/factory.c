@@ -577,6 +577,9 @@ int L_InputBox(lua_State* L)
     LUA_ARG_NUMBER(setting*args_per_setting+6, "inputbox", decimal_places[setting], -15.0, 15.0);
     if (decimal_places[setting]>15)
         decimal_places[setting]=15;
+    if (min_value[setting]!=0 || min_value[setting]!=1)
+      if (decimal_places[setting]<0)
+        decimal_places[setting]=0;
     // Keep current value in range
     if (decimal_places[setting]>=0)
       current_value[setting] = Fround(current_value[setting], decimal_places[setting]);
