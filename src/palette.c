@@ -764,12 +764,18 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
 {
   int i, j;
   unsigned int max_count = 0;
+  int old_height=0;
 
   /* Draws an histogram of the selected range in a separate window */
+  
   if (block_start == block_end) {
-    // only one color selected, do an histogram for the full range instead
-    block_start = 0;
-    block_end = 255;
+    // only one color selected: auto-detect the range
+    for (block_start=0; block_start!=255; block_start++)
+      if (color_usage[block_start])
+        break;
+    for (block_end=255; block_end!=0; block_end--)
+      if (color_usage[block_end])
+        break;
   }
 
   // Normalize the histogram towards the most used color
@@ -789,22 +795,52 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
   // Step 2 : draw bars
   j = 0;
   for(i=block_start; i<= block_end; i++) {
-    Block(
-        ToWinX(3+j*(256/(block_end-block_start+1))),
-        ToWinY(117-100*color_usage[i]/max_count),
-        ToWinL(256/(block_end-block_start+1)),
-        ToWinH(100*color_usage[i]/max_count), i);
-
-    if (i == MC_Light) {
-      Block(
-          ToWinX(3+j*256/(block_end-block_start+1)),
-          ToWinY(117-100*color_usage[i]/max_count),
-          ToWinL(256/(block_end-block_start+1)),
-          ToWinH(1),MC_Black);
+    int height = 100*color_usage[i]/max_count;
+    // Don't draw anything if the color is unused
+    if (color_usage[i]!=0)
+    {
+      // Draw at least one pixel if the color is used
+      if (height==0)
+        height=1;
+        
+      Window_rectangle(
+            3+j*(256/(block_end-block_start+1)),
+            117-height,
+            256/(block_end-block_start+1),
+            height, i);
+    
+      //if (i == MC_Light) {
+        Window_rectangle(
+              3+j*(256/(block_end-block_start+1)),
+              116-height,
+              256/(block_end-block_start+1),
+              1,MC_Black);
+      //}
     }
-
+    // vertical outline
+    if (height>old_height)
+      Window_rectangle(
+              2+j*(256/(block_end-block_start+1)),
+              116-height,
+              1,
+              height-old_height+1,MC_Black);
+    else if (old_height>height)
+      Window_rectangle(
+              3+j*(256/(block_end-block_start+1)),
+              116-old_height,
+              1,
+              old_height-height+1,MC_Black);
+      
+    old_height=height;
     j++;
   }
+  // Last vertical outline
+  if (old_height!=0)
+  Window_rectangle(
+      3+j*(256/(block_end-block_start+1)),
+      116-old_height,
+      1,
+      old_height+1,MC_Black);
 
   Update_window_area(0,0,263,140);
   Display_cursor();
@@ -863,33 +899,15 @@ void Button_Palette(void)
   Window_display_frame (173, 67, 121, 116);
 
   // Graduation des jauges de couleur
-  Block(Window_pos_X + (Menu_factor_X * 179),
-    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 206),
-    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 233),
-    Window_pos_Y + (Menu_factor_Y * 109), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 179),
-    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 206),
-    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 233),
-    Window_pos_Y + (Menu_factor_Y * 125), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 179),
-    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 206),
-    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
-  Block(Window_pos_X + (Menu_factor_X * 233),
-    Window_pos_Y + (Menu_factor_Y * 141), Menu_factor_X * 17, Menu_factor_Y,
-    MC_Dark);
+  Window_rectangle(179,109,17,1,MC_Dark);
+  Window_rectangle(206,109,17,1,MC_Dark);
+  Window_rectangle(233,109,17,1,MC_Dark);
+  Window_rectangle(179,125,17,1,MC_Dark);
+  Window_rectangle(206,125,17,1,MC_Dark);
+  Window_rectangle(233,125,17,1,MC_Dark);
+  Window_rectangle(179,141,17,1,MC_Dark);
+  Window_rectangle(206,141,17,1,MC_Dark);
+  Window_rectangle(233,141,17,1,MC_Dark);
   // Jauges de couleur
   red_slider = Window_set_scroller_button(182, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].R*Color_max/255);// 2
   green_slider = Window_set_scroller_button(209, 81, 88,Color_count,1,Color_max-working_palette[Fore_color].G*Color_max/255);// 3
@@ -911,8 +929,8 @@ void Button_Palette(void)
   Tag_color_range(block_start,block_end);
 
   // Affichage dans le block de visu de la couleur en cours
-  Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*89),Menu_factor_X*24,Menu_factor_Y*72,Back_color);
-  Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+  Window_rectangle(260,89,24,72,Back_color);
+  Window_rectangle(264,93,16,64,Fore_color);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
   Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
@@ -998,11 +1016,11 @@ void Button_Palette(void)
             {
               Back_color=temp_color;
               // 4 blocks de back_color entourant la fore_color
-              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-              Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-              Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-              Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
+              Window_rectangle(260,89,24,4,Back_color);
+              Window_rectangle(260,157,24,4,Back_color);
+              Window_rectangle(260,93,4,64,Back_color);
+              Window_rectangle(280,93,4,64,Back_color);
+              Update_window_area(260,89,32,72);
             }
           }
           else
@@ -1020,20 +1038,20 @@ void Button_Palette(void)
                 Tag_color_range(block_start,block_end);
 
                 // Affichage du n° de la couleur sélectionnée
-                Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*36),Menu_factor_X*56,Menu_factor_Y*7,MC_Light);
+                Window_rectangle(237,36,56,7,MC_Light);
                 Num2str(Fore_color,str,3);
                 Print_in_window(237, 36, str,MC_Black,MC_Light);
                 Num2str(color_usage[Fore_color], str, 7);
                 Print_in_window(230,50, str, MC_Black, MC_Light);
-                Update_rect(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*36),Menu_factor_X*56,Menu_factor_Y*7);
+                Update_window_area(237,36,56,7);
 
                 // Affichage des jauges
-                Block(Window_pos_X+(Menu_factor_X*176),Window_pos_Y+(Menu_factor_Y*172),Menu_factor_X*84,Menu_factor_Y*7,MC_Light);
+                Window_rectangle(176,172,84,7,MC_Light);
                 Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                 // Affichage dans le block de visu de la couleur en cours
-                Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
-                Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+                Window_rectangle(264,93,16,64,Fore_color);
+                Update_window_area(264,93,16,64);
 
                 memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
                 memcpy(temp_palette,working_palette,sizeof(T_Palette));
@@ -1096,7 +1114,7 @@ void Button_Palette(void)
                 else
                 {
                   block_start=block_end=first_color;
-                  Block(Window_pos_X+(Menu_factor_X*176),Window_pos_Y+(Menu_factor_Y*172),Menu_factor_X*84,Menu_factor_Y*7,MC_Light);
+                  Window_rectangle(176,172,84,7,MC_Light);
 
                   // Affichage du n° de la couleur sélectionnée
                   Window_rectangle(261,36,32,7,MC_Light);
@@ -1110,8 +1128,8 @@ void Button_Palette(void)
                   Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                   // Affichage dans le block de visu de la couleur en cours
-                  Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
-                  Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+                  Window_rectangle(264,93,16,64,Fore_color);
+                  Update_window_area(264,93,16,64);
                 }
 
                 // On tagge le bloc (ou la couleur)
@@ -1401,9 +1419,9 @@ void Button_Palette(void)
           {
             // Cas d'une seule couleur
             Num2str(Fore_color,str,3);
-            Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*36),Menu_factor_X*56,Menu_factor_Y* 7,MC_Light);
+            Window_rectangle(237,36,56,7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+            Window_rectangle(264,93,16,64,Fore_color);
           }
           Print_in_window(237, 36, str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
@@ -1453,9 +1471,9 @@ void Button_Palette(void)
           {
             // Cas d'une seule couleur
             Num2str(Fore_color,str,3);
-            Block(Window_pos_X+(Menu_factor_X*237),Window_pos_Y+(Menu_factor_Y*36),Menu_factor_X*56,Menu_factor_Y* 7,MC_Light);
+            Window_rectangle(237,36,56,7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
+            Window_rectangle(264,93,16,64,Fore_color);
           }
           Print_in_window(237, 36, str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
@@ -2081,8 +2099,8 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Print_in_window(237, 36, str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
-            Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+            Window_rectangle(264,93,16,64,Fore_color);
+            Update_window_area(264,93,16,64);
             Display_cursor();
           }
           Key=0;
@@ -2103,8 +2121,8 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Print_in_window(237, 36, str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
-            Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+            Window_rectangle(264,93,16,64,Fore_color);
+            Update_window_area(264,93,16,64);
             Display_cursor();
           }
           Key=0;
@@ -2117,11 +2135,11 @@ void Button_Palette(void)
           if (Key==(SDLK_RIGHTBRACKET|MOD_SHIFT))
             Back_color++;
           Hide_cursor();
-          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-          Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-          Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-          Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
+          Window_rectangle(260,89,24,4,Back_color);
+          Window_rectangle(260,157,24,4,Back_color);
+          Window_rectangle(260,93,4,64,Back_color);
+          Window_rectangle(280,93,4,64,Back_color);
+          Update_window_area(260,89,32,72);
           Display_cursor();
           Key=0;
           break;
@@ -2164,11 +2182,11 @@ void Button_Palette(void)
               {
                 Back_color=color;
                 // 4 blocks de back_color entourant la fore_color
-                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*157),Menu_factor_X*24,Menu_factor_Y<<2,Back_color);
-                Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-                Block(Window_pos_X+(Menu_factor_X*280),Window_pos_Y+(Menu_factor_Y* 93),Menu_factor_X<<2,Menu_factor_Y<<6,Back_color);
-                Update_rect(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y* 89),Menu_factor_X*32,Menu_factor_Y*72);
+                Window_rectangle(260,89,24,4,Back_color);
+                Window_rectangle(260,157,24,4,Back_color);
+                Window_rectangle(260,93,4,64,Back_color);
+                Window_rectangle(280,93,4,64,Back_color);
+                Update_window_area(260,89,32,72);
               }
             }
             else
@@ -2188,8 +2206,8 @@ void Button_Palette(void)
               Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
               // Affichage dans le block de visu de la couleur en cours
-              Block(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64,Fore_color);
-              Update_rect(Window_pos_X+(Menu_factor_X*264),Window_pos_Y+(Menu_factor_Y*93),Menu_factor_X<<4,Menu_factor_Y*64);
+              Window_rectangle(264,93,16,64,Fore_color);
+              Update_window_area(264,93,16,64);
               
               memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
               memcpy(temp_palette,working_palette,sizeof(T_Palette));
@@ -2219,10 +2237,10 @@ void Button_Palette(void)
         Remap_screen_after_menu_colors_change();
         // Puis on remet les trucs qui ne devaient pas changer
         Window_draw_palette_bouton(5,79);
-        Block(Window_pos_X+(Menu_factor_X*260),Window_pos_Y+(Menu_factor_Y*89),Menu_factor_X*24,Menu_factor_Y*72,Back_color);
+        Window_rectangle(260,89,24,72,Back_color);
         Display_grad_block_in_window(264,93,block_start,block_end);
 
-        Update_rect(Window_pos_X+8*Menu_factor_X,Window_pos_Y+82*Menu_factor_Y,Menu_factor_X*16*10,Menu_factor_Y*5*16);
+        Update_window_area(8,82,16*10,5*16);
 
         Display_cursor();
         need_to_remap=0;
