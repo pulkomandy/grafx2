@@ -762,7 +762,7 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
 
 void Window_Histogram(unsigned char block_start, unsigned char block_end, dword* color_usage)
 {
-  int i;
+  int i, j;
   unsigned int max_count = 0;
 
   /* Draws an histogram of the selected range in a separate window */
@@ -787,20 +787,25 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
   Window_set_normal_button(120, 120, 42, 14, "Close",-1,1,SDLK_RETURN);
 
   // Step 2 : draw bars
+  j = 0;
   for(i=block_start; i<= block_end; i++) {
-   Block(
-       ToWinX(3+i*256/(block_end-block_start+1)),
-       ToWinY(117-100*color_usage[i]/max_count),
-       ToWinL(256/(block_end-block_start+1)),
-       ToWinH(100*color_usage[i]/max_count), i);
+    Block(
+        ToWinX(3+j*(256/(block_end-block_start+1))),
+        ToWinY(117-100*color_usage[i]/max_count),
+        ToWinL(256/(block_end-block_start+1)),
+        ToWinH(100*color_usage[i]/max_count), i);
 
-   if (i == MC_Light)
-     Block(
-       ToWinX(3+i*256/(block_end-block_start+1)),
-       ToWinY(117-100*color_usage[i]/max_count),
-       ToWinL(256/(block_end-block_start+1)),
-       ToWinH(1),MC_Black);
+    if (i == MC_Light) {
+      Block(
+          ToWinX(3+j*256/(block_end-block_start+1)),
+          ToWinY(117-100*color_usage[i]/max_count),
+          ToWinL(256/(block_end-block_start+1)),
+          ToWinH(1),MC_Black);
+    }
+
+    j++;
   }
+
   Update_window_area(0,0,263,140);
   Display_cursor();
 
@@ -940,7 +945,7 @@ void Button_Palette(void)
 
   // histogram button
   button_used = Window_set_normal_button(228,47,64,14,"000000",0,1,SDLK_d);// 15
-  Window_set_normal_button(210,17,83,14,"Zap unused",0,1,SDLK_DELETE);//16
+  Window_set_normal_button(209,17,83,14,"Zap unused",0,1,SDLK_DELETE);//16
 
   Window_set_repeatable_button(266, 74,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
   Window_set_repeatable_button(266,165,12,11,"-",0,1,SDLK_KP_MINUS);       // 18
