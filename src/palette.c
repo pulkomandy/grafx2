@@ -760,6 +760,55 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
 }
 
 
+void Window_Histogram(unsigned char block_start, unsigned char block_end, dword* color_usage)
+{
+  int i;
+  unsigned int max_count = 0;
+
+  /* Draws an histogram of the selected range in a separate window */
+  if (block_start == block_end) {
+    // only one color selected, do an histogram for the full range instead
+    block_start = 0;
+    block_end = 255;
+  }
+
+  // Normalize the histogram towards the most used color
+  // Step 1 : find the most used color in the range
+  for(i=block_start; i<= block_end; i++) {
+    if(color_usage[i] > max_count) max_count = color_usage[i];
+  }
+
+  if (max_count == 0) {
+    Warning_message("All these colors are unused!");
+    return;
+  }
+
+  Open_window(263, 140, "Histogram");
+  Window_set_normal_button(120, 120, 42, 14, "Close",-1,1,SDLK_RETURN);
+
+  // Step 2 : draw bars
+  for(i=block_start; i<= block_end; i++) {
+   Block(
+       ToWinX(3+i*256/(block_end-block_start+1)),
+       ToWinY(117-100*color_usage[i]/max_count),
+       ToWinL(256/(block_end-block_start+1)),
+       ToWinH(100*color_usage[i]/max_count), i);
+
+   if (i == MC_Light)
+     Block(
+       ToWinX(3+i*256/(block_end-block_start+1)),
+       ToWinY(117-100*color_usage[i]/max_count),
+       ToWinL(256/(block_end-block_start+1)),
+       ToWinH(1),MC_Black);
+  }
+  Update_window_area(0,0,263,140);
+  Display_cursor();
+
+  while(Window_clicked_button() != 1);
+  Close_window();
+  Display_cursor();
+}
+
 void Button_Palette(void)
 {
   static short reduce_colors_number = 256;
@@ -1517,9 +1566,8 @@ void Button_Palette(void)
         need_to_remap=1;
         break;
 
-      case 15 : // Used
-        if (used_colors==-1)
-          Update_color_count(&used_colors,color_usage);
+      case 15 : // Used > open histogram
+        Window_Histogram(block_start, block_end, color_usage);
         break;
 
       case 16 : // Zap unused
