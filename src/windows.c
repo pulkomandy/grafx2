@@ -2020,70 +2020,67 @@ void Display_cursor(void)
     case CURSOR_SHAPE_COLORPICKER:
       if (!Paintbrush_hidden)
         Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
-      if (!Cursor_hidden)
+      if (Config.Cursor==1)
       {
-        if (Config.Cursor==1)
+        // Barres formant la croix principale
+
+        start_y=(Mouse_Y<5)?5-Mouse_Y:0;
+        if (start_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
+
+        start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
+        if (start_x<3)
+          Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
+
+        end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
+        if (end_x<3)
+          Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
+
+        end_y=(Mouse_Y+6>Menu_Y/*Screen_height*/)?Mouse_Y+6-Menu_Y/*Screen_height*/:0;
+        if (end_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
+
+        // Petites barres aux extrémités
+
+        start_x=(!Mouse_X);
+        start_y=(!Mouse_Y);
+        end_x=(Mouse_X>=Screen_width-1);
+        end_y=(Mouse_Y>=Menu_Y-1);
+
+        if (Mouse_Y>5)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
+
+        if (Mouse_X>5)
+          Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
+
+        if (Mouse_X<Screen_width-6)
+          Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
+
+        if (Mouse_Y<Menu_Y-6)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
+      }
+      else
+      {
+        temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
+        start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+        start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
+
+        for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
         {
-          // Barres formant la croix principale
-
-          start_y=(Mouse_Y<5)?5-Mouse_Y:0;
-          if (start_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
-
-          start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
-          if (start_x<3)
-            Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
-
-          end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
-          if (end_x<3)
-            Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
-
-          end_y=(Mouse_Y+6>Menu_Y/*Screen_height*/)?Mouse_Y+6-Menu_Y/*Screen_height*/:0;
-          if (end_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
-
-          // Petites barres aux extrémités
-
-          start_x=(!Mouse_X);
-          start_y=(!Mouse_Y);
-          end_x=(Mouse_X>=Screen_width-1);
-          end_y=(Mouse_Y>=Menu_Y-1);
-
-          if (Mouse_Y>5)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
-
-          if (Mouse_X>5)
-            Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
-
-          if (Mouse_X<Screen_width-6)
-            Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
-
-          if (Mouse_Y<Menu_Y-6)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
-        }
-        else
-        {
-          temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+          if(y_pos<0) continue;
+          if(y_pos>=Screen_height) break;
+          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
           {
-            if(y_pos<0) continue;
-            if(y_pos>=Screen_height) break;
-            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            {
-              if(x_pos<0) continue;
-              if(x_pos>=Screen_width) break;
-              color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              // On sauvegarde dans Cursor_background pour restaurer plus tard
-              Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-              if (color!=MC_Trans)
-                Pixel(x_pos,y_pos,color);
-            }
+            if(x_pos<0) continue;
+            if(x_pos>=Screen_width) break;
+            color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+            // On sauvegarde dans Cursor_background pour restaurer plus tard
+            Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+            if (color!=MC_Trans)
+              Pixel(x_pos,y_pos,color);
           }
-          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
+        Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
       }
       break;
 
@@ -2108,7 +2105,7 @@ void Display_cursor(void)
           // On sauvegarde dans Cursor_background pour restaurer plus tard
           Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
           if (color!=MC_Trans)
-              Pixel(x_pos,y_pos,color);
+            Pixel(x_pos,y_pos,color);
         }
       }
       Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
@@ -2323,8 +2320,6 @@ void Hide_cursor(void)
       break;
 
     case CURSOR_SHAPE_COLORPICKER:
-      if (!Cursor_hidden)
-      {
         if (Config.Cursor==1)
         {
           // Barres formant la croix principale
@@ -2383,7 +2378,6 @@ void Hide_cursor(void)
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
-      }
       if (!Paintbrush_hidden)
         Hide_paintbrush(Paintbrush_X,Paintbrush_Y);
       break;
