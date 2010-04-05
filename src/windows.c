@@ -1776,7 +1776,7 @@ void Compute_magnifier_data(void)
   if (Main_magnifier_mode && Main_magnifier_offset_Y)
   {
     if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
+      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
     if (Main_magnifier_offset_Y<0) Main_magnifier_offset_Y=0;
   }
   
@@ -1835,7 +1835,7 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
     if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
       Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
     if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
+      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
     if (Main_magnifier_offset_X<0)
       Main_magnifier_offset_X=0;
     if (Main_magnifier_offset_Y<0)

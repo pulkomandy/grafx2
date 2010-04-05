@@ -352,7 +352,7 @@ void Button_Hide_menu(void)
         if (Main_magnifier_height>Main_image_height)
           Main_magnifier_offset_Y=0;
         else
-          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
+          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
       }
     }
 
@@ -421,7 +421,7 @@ void Set_bar_visibility(word bar, byte visible)
         if (Main_magnifier_height>Main_image_height)
           Main_magnifier_offset_Y=0;
         else
-          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
+          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
       }
     }
 
