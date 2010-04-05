@@ -130,6 +130,8 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
                                      // en train de cliquer
   switch (Paintbrush_shape)
   {
+    case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
+      break;
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
       if ( (Paintbrush_X>=Limit_left)
         && (Paintbrush_X<=Limit_right)

@@ -211,7 +211,8 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_SIEVE_ROUND,
   PAINTBRUSH_SHAPE_SIEVE_SQUARE,
   PAINTBRUSH_SHAPE_MISC,        ///< A raw monochrome bitmap, can't be resized. This must be the last of the preset paintbrush types.
-  PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like colorpicker.
+  PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like floodfill.
+  PAINTBRUSH_SHAPE_NONE, ///< Used to display no cursor at all (colorpicker)
   PAINTBRUSH_SHAPE_COLOR_BRUSH, ///< User's brush, in color mode
   PAINTBRUSH_SHAPE_MONO_BRUSH,  ///< User's brush, in mono mode
   PAINTBRUSH_SHAPE_MAX          ///< Upper limit.

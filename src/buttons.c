@@ -182,7 +182,7 @@ void Change_paintbrush_shape(byte shape)
       break;
     case OPERATION_COLORPICK :
       Paintbrush_shape_before_colorpicker=shape;
-      Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
+      Paintbrush_shape=PAINTBRUSH_SHAPE_NONE;
       break;
     // Note: Il existe un Paintbrush_shape_before_lasso, mais comme le lasso aura
     // été automatiquement désactivé avant d'arriver ici, y'a pas de problème.
@@ -3179,7 +3179,7 @@ void Button_Colorpicker(void)
     Colorpicker_color=-1;
     Start_operation_stack(OPERATION_COLORPICK);
     Paintbrush_shape_before_colorpicker=Paintbrush_shape;
-    Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
+    Paintbrush_shape=PAINTBRUSH_SHAPE_NONE;
     if (Operation_before_interrupt!=OPERATION_REPLACE)
       if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
            ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
