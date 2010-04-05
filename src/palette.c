@@ -197,6 +197,23 @@ void Update_color_count(short * used_colors, dword * color_usage)
   Display_cursor();
 }
 
+void Update_pixel_count(byte block_start, byte block_end, dword color_usage[])
+{
+  int i;
+  int pixel_count = 0;
+  char  str[10];
+
+  if (block_start<=block_end)
+    for (i = block_start; i <= block_end; i++)
+      pixel_count += color_usage[i];
+  else
+    for (i = block_end; i <= block_start; i++)
+      pixel_count += color_usage[i];
+  
+  Num2str(pixel_count, str, 7);
+  Print_in_window(230,50, str, MC_Black, MC_Light);
+  
+}
 
 void Remap_zone_highlevel(short x1, short y1, short x2, short y2,
                      byte * conversion_table)
@@ -291,17 +308,16 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
   short pos_2;
   short end_1;
   short end_2;
-  dword temp;
   byte  conversion_table[256];
 
   T_Components temp_palette[256];
-  dword Utilisation_temporaire[256];
+  dword temp_usage[256];
 
   // On fait une copie de la palette
   memcpy(temp_palette, palette, sizeof(T_Palette));
 
   // On fait une copie de la table d'utilisation des couleurs
-  memcpy(Utilisation_temporaire, color_usage, sizeof(dword) * 256);
+  memcpy(temp_usage, color_usage, sizeof(dword) * 256);
 
   // On commence à initialiser la table de conversion à un état où elle ne
   // fera aucune conversion.
@@ -321,7 +337,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       // Il faut transformer la couleur pos_1 en pos_2:
 
       conversion_table[pos_2]=pos_1;
-      color_usage[pos_1]=Utilisation_temporaire[pos_2];
+      color_usage[pos_1]=temp_usage[pos_2];
       palette[pos_1].R=temp_palette[pos_2].R;
       palette[pos_1].G=temp_palette[pos_2].G;
       palette[pos_1].B=temp_palette[pos_2].B;
@@ -343,7 +359,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       // Il faut transformer la couleur pos_1 en pos_2:
 
       conversion_table[pos_2]=pos_1;
-      color_usage[pos_1]=Utilisation_temporaire[pos_2];
+      color_usage[pos_1]=temp_usage[pos_2];
       palette[pos_1].R=temp_palette[pos_2].R;
       palette[pos_1].G=temp_palette[pos_2].G;
       palette[pos_1].B=temp_palette[pos_2].B;
@@ -367,28 +383,23 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
 
       //   On intervertit le nombre d'utilisation des couleurs pour garder une
       // cohérence lors d'un éventuel "Zap unused".
-      temp                     =color_usage[pos_1];
-      color_usage[pos_1]=color_usage[pos_2];
-      color_usage[pos_2]=temp;
+      SWAP_DWORDS(color_usage[pos_1], color_usage[pos_2])
 
       // On fait un changement de teinte:
-      temp           =palette[pos_1].R;
-      palette[pos_1].R=palette[pos_2].R;
-      palette[pos_2].R=temp;
-
-      temp           =palette[pos_1].G;
-      palette[pos_1].G=palette[pos_2].G;
-      palette[pos_2].G=temp;
-
-      temp           =palette[pos_1].B;
-      palette[pos_1].B=palette[pos_2].B;
-      palette[pos_2].B=temp;
+      SWAP_BYTES(palette[pos_1].R, palette[pos_2].R)
+      SWAP_BYTES(palette[pos_1].G, palette[pos_2].G)
+      SWAP_BYTES(palette[pos_1].B, palette[pos_2].B)
     }
   }
 
   if (with_remap)
   {
     Remap_image_highlevel(conversion_table);
+  }
+  else
+  {
+    // Restore color usage. Shouldn't have reordered it in the first place.
+    memcpy(color_usage, temp_usage, sizeof(dword) * 256);
   }
 }
 
@@ -987,8 +998,9 @@ void Button_Palette(void)
     
   Hide_cursor();
   Print_in_window(130, 49, "Pixel count:", MC_Dark, MC_Light);
-  Num2str(color_usage[Fore_color], str, 7);
-  Print_in_window(230,50, str, MC_Black, MC_Light);
+
+  Update_pixel_count(Fore_color, Fore_color, color_usage);
+
   Display_cursor();
   
   Update_window_area(0,0,299,188);
@@ -1041,9 +1053,10 @@ void Button_Palette(void)
                 Window_rectangle(237,36,56,7,MC_Light);
                 Num2str(Fore_color,str,3);
                 Print_in_window(237, 36, str,MC_Black,MC_Light);
-                Num2str(color_usage[Fore_color], str, 7);
-                Print_in_window(230,50, str, MC_Black, MC_Light);
                 Update_window_area(237,36,56,7);
+
+                // Pixel count
+                Update_pixel_count(Fore_color, Fore_color, color_usage);
 
                 // Affichage des jauges
                 Window_rectangle(176,172,84,7,MC_Light);
@@ -1065,8 +1078,6 @@ void Button_Palette(void)
                 // On commence par ordonner la 1ère et dernière couleur du bloc
                 if (first_color<temp_color)
                 {
-                  int pixel_count = 0;
-
                   block_start=first_color;
                   block_end=temp_color;
 
@@ -1075,11 +1086,9 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237, 36, str,MC_Black,MC_Light);
-                  for (i = block_start; i <= block_end; i++)
-                    pixel_count += color_usage[i];
-
-                  Num2str(pixel_count, str, 7);
-                  Print_in_window(230,50, str, MC_Black, MC_Light);
+                  
+                  // Pixel count
+                  Update_pixel_count(block_start, block_end, color_usage);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1097,13 +1106,9 @@ void Button_Palette(void)
                   Num2str(block_end  ,str+4,3);
                   str[3]=26; // Flèche vers la droite
                   Print_in_window(237, 36, str,MC_Black,MC_Light);
-                  {
-                    int pixel_count = 0;
-                    for (i = block_start; i <= block_end; i++)
-                      pixel_count += color_usage[i];
-                    Num2str(pixel_count, str, 7);
-                  }
-                  Print_in_window(230,50, str, MC_Black, MC_Light);
+                  
+                  // Pixel count
+                  Update_pixel_count(block_start, block_end, color_usage);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
@@ -1121,8 +1126,9 @@ void Button_Palette(void)
                   Update_window_area(261,36,32,7);
                   Num2str(Fore_color,str,3);
                   Print_in_window(237, 36, str,MC_Black,MC_Light);
-                  Num2str(color_usage[Fore_color], str, 7);
-                  Print_in_window(230,50, str, MC_Black, MC_Light);
+                  
+                  // Pixel count
+                  Update_pixel_count(Fore_color, Fore_color, color_usage);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
@@ -1426,6 +1432,8 @@ void Button_Palette(void)
           Print_in_window(237, 36, str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
           Tag_color_range(block_start,block_end);
+          
+          Update_pixel_count(block_start, block_end, color_usage);
 
           need_to_remap=1;
 
@@ -1478,7 +1486,8 @@ void Button_Palette(void)
           Print_in_window(237, 36, str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
           Tag_color_range(block_start,block_end);
-
+          Update_pixel_count(block_start, block_end, color_usage);
+          
           need_to_remap=1;
 
           Display_cursor();
@@ -2027,12 +2036,13 @@ void Button_Palette(void)
               || ((os==0 && s==0) && l>ol))  // Two greys: sort by L only
             {
               // Swap color with the previous one
-              byte swap_color;
-              Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
-              
-              swap_color=remap_table[temp_color];
-              remap_table[temp_color]=remap_table[temp_color-1];
-              remap_table[temp_color-1]=swap_color;
+              SWAP_BYTES(working_palette[temp_color].R, working_palette[temp_color-1].R)
+              SWAP_BYTES(working_palette[temp_color].G, working_palette[temp_color-1].G)
+              SWAP_BYTES(working_palette[temp_color].B, working_palette[temp_color-1].B)
+
+              SWAP_DWORDS(color_usage[temp_color], color_usage[temp_color-1])
+
+              SWAP_BYTES(remap_table[temp_color], remap_table[temp_color-1])
               
               swap=1;
             }
@@ -2054,12 +2064,13 @@ void Button_Palette(void)
             if(l>ol)
             {
               // Swap color with the previous one
-              byte swap_color;
-              Swap(0,temp_color,temp_color-1,1,working_palette,color_usage);
+              SWAP_BYTES(working_palette[temp_color].R, working_palette[temp_color-1].R)
+              SWAP_BYTES(working_palette[temp_color].G, working_palette[temp_color-1].G)
+              SWAP_BYTES(working_palette[temp_color].B, working_palette[temp_color-1].B)
+      
+              SWAP_DWORDS(color_usage[temp_color], color_usage[temp_color-1])
               
-              swap_color=remap_table[temp_color];
-              remap_table[temp_color]=remap_table[temp_color-1];
-              remap_table[temp_color-1]=swap_color;
+              SWAP_BYTES(remap_table[temp_color], remap_table[temp_color-1])
               
               swap=1;
             }
@@ -2082,9 +2093,10 @@ void Button_Palette(void)
 
     if (!Mouse_K)
     {
-      switch (Key)
+      if (Key)
       {
-        case SDLK_LEFTBRACKET : // Décaler Forecolor vers la gauche
+        if (Is_shortcut(Key,SPECIAL_PREVIOUS_FORECOLOR)) // Décaler Forecolor vers la gauche
+        {
           if (block_start==block_end)
           {
             Fore_color--;
@@ -2101,12 +2113,14 @@ void Button_Palette(void)
             // Affichage dans le block de visu de la couleur en cours
             Window_rectangle(264,93,16,64,Fore_color);
             Update_window_area(264,93,16,64);
+            // Pixel count
+            Update_pixel_count(Fore_color, Fore_color, color_usage);
             Display_cursor();
           }
           Key=0;
-          break;
-
-        case SDLK_RIGHTBRACKET : // Décaler Forecolor vers la droite
+        }
+        else if (Is_shortcut(Key,SPECIAL_NEXT_FORECOLOR)) // Décaler Forecolor vers la droite
+        {
           if (block_start==block_end)
           {
             Fore_color++;
@@ -2123,17 +2137,15 @@ void Button_Palette(void)
             // Affichage dans le block de visu de la couleur en cours
             Window_rectangle(264,93,16,64,Fore_color);
             Update_window_area(264,93,16,64);
+            // Pixel count
+            Update_pixel_count(Fore_color, Fore_color, color_usage);
             Display_cursor();
           }
           Key=0;
-          break;
-
-        case (SDLK_LEFTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la gauche
+        }
+        else if (Is_shortcut(Key,SPECIAL_PREVIOUS_BACKCOLOR))
+        {
           Back_color--;
-        case (SDLK_RIGHTBRACKET|MOD_SHIFT) : // Decaler Backcolor vers la droite
-          // attention: pas de break ci-dessus
-          if (Key==(SDLK_RIGHTBRACKET|MOD_SHIFT))
-            Back_color++;
           Hide_cursor();
           Window_rectangle(260,89,24,4,Back_color);
           Window_rectangle(260,157,24,4,Back_color);
@@ -2142,10 +2154,23 @@ void Button_Palette(void)
           Update_window_area(260,89,32,72);
           Display_cursor();
           Key=0;
-          break;
-
-        case SDLK_BACKSPACE : // Remise des couleurs du menu à l'état normal en essayant
-                      // de ne pas trop modifier l'image.
+        }
+        else if (Is_shortcut(Key,SPECIAL_NEXT_BACKCOLOR))
+        {
+          Back_color++;
+          Hide_cursor();
+          Window_rectangle(260,89,24,4,Back_color);
+          Window_rectangle(260,157,24,4,Back_color);
+          Window_rectangle(260,93,4,64,Back_color);
+          Window_rectangle(280,93,4,64,Back_color);
+          Update_window_area(260,89,32,72);
+          Display_cursor();
+          Key=0;
+        }
+        else if (Key == SDLK_BACKSPACE)
+        // Remise des couleurs du menu à l'état normal en essayant
+        // de ne pas trop modifier l'image.
+        {
           if (!image_is_backed_up)
           {
             Backup_layers(-1);
@@ -2168,10 +2193,10 @@ void Button_Palette(void)
           // Not really needed, the change was in palette entries
           need_to_remap=1;
           Key=0;
-          break;
-
-        case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
-        case SDLK_COMMA :
+        }
+        else if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
+        {
+          // Récupération d'une couleur derrière le menu
           Get_color_behind_window(&color,&click);
           if (click)
           {
@@ -2199,8 +2224,9 @@ void Button_Palette(void)
               Update_window_area(261,36,32,7);
               Num2str(Fore_color,str,3);
               Print_in_window(237, 36, str,MC_Black,MC_Light);
-              Num2str(color_usage[Fore_color], str, 7);
-              Print_in_window(230,50, str, MC_Black, MC_Light);
+              
+              // Pixel count
+              Update_pixel_count(Fore_color, Fore_color, color_usage);
 
               // Affichage des jauges
               Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
@@ -2216,16 +2242,17 @@ void Button_Palette(void)
             Wait_end_of_click();
           }
           Key=0;
-          break;
-        default:
-          if (Is_shortcut(Key,0x100+BUTTON_HELP))
-          {
-            Key=0;
-            Window_help(BUTTON_PALETTE, NULL);
-            break;
-          }
-          else if (Is_shortcut(Key,0x100+BUTTON_PALETTE))
-            clicked_button=14;
+        }
+        else if (Is_shortcut(Key,0x100+BUTTON_HELP))
+        {
+          Key=0;
+          Window_help(BUTTON_PALETTE, NULL);
+        }
+        else if (Is_shortcut(Key,0x100+BUTTON_PALETTE))
+        {
+          // Close (confirm)
+          clicked_button=14;
+        }
       }
 
       if (need_to_remap)
