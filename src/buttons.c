@@ -347,13 +347,6 @@ void Button_Hide_menu(void)
     if (Main_magnifier_mode)
     {
       Compute_magnifier_data();
-      if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
-      {
-        if (Main_magnifier_height>Main_image_height)
-          Main_magnifier_offset_Y=0;
-        else
-          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
-      }
     }
 
     //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
@@ -416,13 +409,6 @@ void Set_bar_visibility(word bar, byte visible)
     if (Main_magnifier_mode)
     {
       Compute_magnifier_data();
-      if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
-      {
-        if (Main_magnifier_height>Main_image_height)
-          Main_magnifier_offset_Y=0;
-        else
-          Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
-      }
     }
 
     //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
@@ -3263,20 +3249,11 @@ void Button_Magnify(void)
       Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
       Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
 
-      // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
-      if (Main_magnifier_offset_X+Main_magnifier_width>=Limit_right-Main_offset_X)
-        Main_magnifier_offset_X=Limit_right-Main_magnifier_width-Main_offset_X+1;
-      if (Main_magnifier_offset_Y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
-        Main_magnifier_offset_Y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
-
-      // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
+     // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
       Main_magnifier_offset_X+=Main_offset_X;
       Main_magnifier_offset_Y+=Main_offset_Y;
 
-      if (Main_magnifier_offset_X<0)
-        Main_magnifier_offset_X=0;
-      if (Main_magnifier_offset_Y<0)
-        Main_magnifier_offset_Y=0;
+      Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 
       // On calcule les bornes visibles dans l'écran
       Position_screen_according_to_zoom();

@@ -1767,21 +1767,29 @@ void Compute_magnifier_data(void)
   if (Menu_Y%Main_magnifier_factor)
     Main_magnifier_height++;
 
-  if (Main_magnifier_mode && Main_magnifier_offset_X)
-  {
-    if (Main_image_width<Main_magnifier_offset_X+Main_magnifier_width)
-      Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
-    if (Main_magnifier_offset_X<0) Main_magnifier_offset_X=0;
-  }
-  if (Main_magnifier_mode && Main_magnifier_offset_Y)
-  {
-    if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
-    if (Main_magnifier_offset_Y<0) Main_magnifier_offset_Y=0;
-  }
-  
+  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 }
 
+void Clip_magnifier_offsets(short *x_offset, short *y_offset)
+{
+  if (Main_magnifier_mode)
+  {
+    if (*x_offset)
+    {
+      if (Main_image_width<*x_offset+Main_magnifier_width)
+        *x_offset=Main_image_width-Main_magnifier_width;
+      if (*x_offset<0)
+        *x_offset=0;
+    }
+    if (*y_offset)
+    {
+      if (Main_image_height<*y_offset+Main_magnifier_height)
+        *y_offset=Main_image_height-Main_magnifier_height+(Main_magnifier_height*Main_magnifier_factor-Menu_Y>=Main_magnifier_factor/2);
+      if (*y_offset<0)
+        *y_offset=0;
+    }
+  }
+}
 
 /// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
@@ -1832,14 +1840,7 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
       Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
     }
     // Fix cases where the image would overflow on edges
-    if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
-      Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
-    if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height+1;
-    if (Main_magnifier_offset_X<0)
-      Main_magnifier_offset_X=0;
-    if (Main_magnifier_offset_Y<0)
-      Main_magnifier_offset_Y=0;
+    Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 
     if (magnified_view_leads)
       Position_screen_according_to_zoom();
@@ -2601,9 +2602,12 @@ void Display_all_screen(void)
     // Calcul du nombre de lignes visibles de l'image zoomée
     if (Main_image_height<Main_magnifier_height)
       height=Main_image_height*Main_magnifier_factor;
+    else if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
+      // Omit "last line" if it's outside picture limits
+      height=Menu_Y/Main_magnifier_factor*Main_magnifier_factor;
     else
       height=Menu_Y;
-
+    
     Display_zoomed_screen(width,height,Main_image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
@@ -2611,7 +2615,7 @@ void Display_all_screen(void)
       Block(Main_X_zoom+(Main_image_width*Main_magnifier_factor),0,
             (Main_magnifier_width-Main_image_width)*Main_magnifier_factor,
             Menu_Y,Main_backups->Pages->Transparent_color);
-    if (Main_image_height<Main_magnifier_height)
+    if (height<Menu_Y)
       Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
   }
 

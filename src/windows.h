@@ -46,6 +46,7 @@ void Remap_menu_sprites();
 void Position_screen_according_to_zoom(void);
 void Compute_separator_data(void);
 void Compute_magnifier_data(void);
+void Clip_magnifier_offsets(short *x_offset, short *y_offset);
 void Compute_limits(void);
 void Compute_paintbrush_coordinates(void);
 

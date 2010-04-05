@@ -353,14 +353,7 @@ void Scroll_magnifier(short delta_x,short delta_y)
   temp_x_offset=Main_magnifier_offset_X+delta_x;
   temp_y_offset=Main_magnifier_offset_Y+delta_y;
 
-  if (temp_x_offset+Main_magnifier_width>Main_image_width)
-    temp_x_offset=Main_image_width-Main_magnifier_width;
-  if (temp_y_offset+Main_magnifier_height>Main_image_height)
-    temp_y_offset=Main_image_height-Main_magnifier_height+1;
-  if (temp_x_offset<0)
-    temp_x_offset=0;
-  if (temp_y_offset<0)
-    temp_y_offset=0;
+  Clip_magnifier_offsets(&temp_x_offset, &temp_y_offset);
 
   if ( (Main_magnifier_offset_X!=temp_x_offset) ||
        (Main_magnifier_offset_Y!=temp_y_offset) )

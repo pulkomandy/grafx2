@@ -96,20 +96,11 @@ void Magnifier_12_0(void)
   Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
   Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
 
-  // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
-  if (Main_magnifier_offset_X+Main_magnifier_width>=Limit_right-Main_offset_X)
-    Main_magnifier_offset_X=Limit_right-Main_magnifier_width-Main_offset_X+1;
-  if (Main_magnifier_offset_Y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
-    Main_magnifier_offset_Y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
-
   // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
   Main_magnifier_offset_X+=Main_offset_X;
   Main_magnifier_offset_Y+=Main_offset_Y;
 
-  if (Main_magnifier_offset_X<0)
-    Main_magnifier_offset_X=0;
-  if (Main_magnifier_offset_Y<0)
-    Main_magnifier_offset_Y=0;
+  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 
   // On calcule les bornes visibles dans l'écran
   Position_screen_according_to_zoom();
