@@ -3371,6 +3371,121 @@ void Grad_rectangle_12_5(void)
   Operation_push(Paintbrush_Y);
 }
 
+// Start and End coordinates must be sorted
+void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
+{
+  short offset_width = 0;
+  short offset_height = 0;
+  short offset_left = 0;
+  short offset_top = 0;
+  short width = end_x-start_x;
+  short height = end_y-start_y;
+  
+  // Handle clipping
+  if (end_x-Main_offset_X > Min(Main_image_width,
+    Main_magnifier_mode?Main_separator_position:Screen_width))
+  {
+    offset_width = end_x - Min(Main_image_width,
+      Main_magnifier_mode?Main_separator_position:Screen_width);
+  }
+
+  if (end_y-Main_offset_Y > Min(Main_image_height, Menu_Y))
+    offset_height = end_y - Min(Main_image_height, Menu_Y);
+
+  if (width == 0)
+  {
+    // Single line
+    Vertical_XOR_line(start_x-Main_offset_X, start_y
+      - Main_offset_Y, height - offset_height + 1);
+  }
+  else if (height == 0)
+  {
+    // Single line
+    Horizontal_XOR_line(start_x-Main_offset_X,
+      start_y - Main_offset_Y, width - offset_width + 1);
+  }
+  else
+  {
+    // Dessin dans la zone de dessin normale
+    Horizontal_XOR_line(start_x-Main_offset_X,
+      start_y - Main_offset_Y, width - offset_width + 1);
+
+    // If not, this line is out of the picture so there is no need to draw it
+    if (offset_height == 0 || end_y - 1 > Menu_Y + Main_offset_Y)
+    {
+      Horizontal_XOR_line(start_x - Main_offset_X, end_y
+        - Main_offset_Y, width - offset_width + 1);
+    }
+  
+    if (height > offset_height + 2)
+    {
+      Vertical_XOR_line(start_x-Main_offset_X, start_y
+        - Main_offset_Y + 1, height - offset_height - 1);
+  
+      if (offset_width == 0)
+      {
+        Vertical_XOR_line(end_x - Main_offset_X, start_y
+          - Main_offset_Y + 1, height - offset_height - 1);
+      }
+    }
+  }
+  
+  Update_rect(start_x - Main_offset_X, start_y - Main_offset_Y,
+    width + 1 - offset_width, height + 1 - offset_height);
+
+  // Dessin dans la zone zoomée
+  if (Main_magnifier_mode && start_x <= Limit_right_zoom
+    && end_x > Limit_left_zoom
+    && start_y <= Limit_bottom_zoom
+    && end_y > Limit_top_zoom )
+  {
+    offset_width = 0;
+    offset_height = 0;
+
+    if (start_x<Limit_left_zoom) // On dépasse du zoom à gauche
+    {
+      offset_width += Limit_left_zoom - start_x;
+      offset_left = Limit_left_zoom;
+    }
+
+    if(end_x>Limit_right_zoom) // On dépasse du zoom à droite
+        offset_width += end_x - Limit_right_zoom;
+
+    if(start_y<Limit_top_zoom) // On dépasse du zoom en haut
+    {
+        offset_height += Limit_top_zoom - start_y;
+        offset_top = Limit_top_zoom;
+    }
+
+    if(end_y>Limit_bottom_zoom) // On dépasse du zoom en bas
+        offset_height += end_y - Limit_bottom_zoom;
+
+    if(width > offset_width)
+    {
+      if(offset_top==0) // La ligne du haut est visible
+        Horizontal_XOR_line_zoom(offset_left>0?offset_left:start_x,start_y,width-offset_width+1);
+
+      if(height!=0 && end_y<=Limit_bottom_zoom) // La  ligne du bas est visible
+        Horizontal_XOR_line_zoom(offset_left>0?offset_left:start_x,end_y,width-offset_width+1);
+    }
+    if (width==0 && height!=0 && height > offset_height && offset_left==0)
+    {
+      // Single vertical line
+      Vertical_XOR_line_zoom(start_x,offset_top!=0?offset_top:start_y,height-offset_height);
+    }
+    else
+    {
+      if(height > offset_height + 2)
+      {
+        if(offset_left==0) // La ligne de gauche est visible
+          Vertical_XOR_line_zoom(start_x,offset_top!=0?offset_top:(start_y+1),height-offset_height-(offset_top==0)+(end_y>Limit_bottom_zoom));
+  
+        if(end_x<=Limit_right_zoom) // La ligne de droite est visible
+          Vertical_XOR_line_zoom(end_x,offset_top!=0?offset_top:(start_y+1),height-offset_height-(offset_top==0)+(end_y>Limit_bottom_zoom));
+      }
+    }
+  }
+}
 void Grad_rectangle_0_5(void)
 // OPERATION_GRAD_RECTANGLE
 // click souris 0
@@ -3382,129 +3497,54 @@ void Grad_rectangle_0_5(void)
 // on doit donc attendre que l'utilisateur clique quelque part
 // On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
 {
-  // !!! Cette fonction remet rax ray rbx rby dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
-  short rax;
-  short ray;
-  short rbx;
-  short rby, width,height;
-  short offset_width = 0;
-  short offset_height = 0;
-  short offset_left = 0;
-  short offset_top = 0;
+  // !!! Cette fonction remet start_x start_y end_x end_y dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
+  short start_x;
+  short start_y;
+  short end_x;
+  short end_y;
+  short width,height;
 
 
   // Tracé propre du rectangle
-  Operation_pop(&rby);
-  Operation_pop(&rbx);
-  Operation_pop(&ray);
-  Operation_pop(&rax);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
 
-  Paintbrush_X = rax;
-  Paintbrush_Y = ray;
+  // This trick will erase the large crosshair at original position, 
+  // in normal and zoomed views.
+  Paintbrush_X = start_x;
+  Paintbrush_Y = start_y;
+
+  if (start_x>end_x)
+    SWAP_SHORTS(start_x, end_x)
+  
+  if (start_y>end_y)
+    SWAP_SHORTS(start_y, end_y)
+  
   Hide_cursor();
 
-  width = abs(rbx - rax);
-  height = abs(rby - ray);
+  width = end_x - start_x;
+  height = end_y - start_y;
 
   // Check if the rectangle is not fully outside the picture
-  if (Min(rax, rbx) > Main_image_width                  // Rectangle at right of picture
-      || Min(ray, rby) > Main_image_height              // Rectangle below picture
-      || Min(ray, rby) - 1 - Main_offset_Y > Menu_Y )   // Rectangle below viewport
+  if (start_x > Main_image_width                  // Rectangle at right of picture
+      || start_y > Main_image_height              // Rectangle below picture
+      || start_y - 1 - Main_offset_Y > Menu_Y )   // Rectangle below viewport
   {
-    Operation_pop(&rby); // reset the stack
+    Operation_pop(&end_y); // reset the stack
     return; // cancel the operation
   }
+  Draw_xor_rect(start_x, start_y, end_x, end_y);
 
-  // Handle clipping
-  if (Max(rax, rbx)-Main_offset_X > Min(Main_image_width,
-    Main_magnifier_mode?Main_separator_position:Screen_width))
-  {
-    offset_width = Max(rax, rbx) - Min(Main_image_width,
-      Main_magnifier_mode?Main_separator_position:Screen_width);
-  }
-
-  if (Max(ray, rby)-Main_offset_Y > Min(Main_image_height, Menu_Y))
-    offset_height = Max(ray, rby) - Min(Main_image_height, Menu_Y);
-
-  // Dessin dans la zone de dessin normale
-  Horizontal_XOR_line(Min(rax, rbx)-Main_offset_X,
-    Min(ray, rby) - Main_offset_Y, width - offset_width);
-
-  // If not, this line is out of the picture so there is no need to draw it
-  if (offset_height == 0 || Max(ray, rby) - 1 > Menu_Y + Main_offset_Y )
-  {
-    Horizontal_XOR_line(Min(rax, rbx) - Main_offset_X, Max(ray, rby) - 1
-      - Main_offset_Y, width - offset_width);
-  }
-
-  if (height > offset_height) {
-    Vertical_XOR_line(Min(rax, rbx)-Main_offset_X, Min(ray, rby)
-      - Main_offset_Y, height - offset_height);
-
-    if (offset_width == 0)
-    {
-      Vertical_XOR_line(Max(rax, rbx) - 1 - Main_offset_X, Min(ray, rby)
-        - Main_offset_Y, height - offset_height);
-    }
-  }
-
-  Update_rect(Min(rax, rbx) - Main_offset_X, Min(ray, rby) - Main_offset_Y,
-    width + 1 - offset_width, height + 1 - offset_height);
-
-  // Dessin dans la zone zoomée
-  if (Main_magnifier_mode && Min(rax, rbx) <= Limit_right_zoom
-    && Max(rax, rbx) > Limit_left_zoom
-    && Min(ray, rby) <= Limit_bottom_zoom
-    && Max(ray, rby) > Limit_top_zoom )
-  {
-    offset_width = 0;
-    offset_height = 0;
-
-  if (Min(rax, rbx)<=Limit_left_zoom) // On dépasse du zoom à gauche
-  {
-    offset_width += Limit_left_zoom - Min(rax, rbx);
-    offset_left = Limit_left_zoom;
-  }
-
-    if(Max(rax,rbx)>Limit_right_zoom) // On dépasse du zoom à droite
-        offset_width += Max(rax,rbx) - Limit_right_zoom - 1;
-
-    if(Min(ray,rby)<Limit_top_zoom) // On dépasse du zoom en haut
-    {
-        offset_height += Limit_top_zoom - Min(ray,rby);
-        offset_top = Limit_top_zoom;
-    }
-
-    if(Max(ray,rby)>Limit_bottom_zoom) // On dépasse du zoom en bas
-        offset_height += Max(ray,rby) - Limit_bottom_zoom - 1;
-
-    if(width > offset_width)
-    {
-      if(offset_top==0) // La ligne du haut est visible
-        Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Min(ray,rby),width-offset_width);
-
-      if(Max(ray,rby)<=Limit_bottom_zoom) // La  ligne du bas est visible
-        Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Max(ray,rby),width-offset_width);
-    }
-
-    if(height>offset_height)
-    {
-      if(offset_left==0) // La ligne de gauche est visible
-        Vertical_XOR_line_zoom(Min(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
-
-      if(Max(rax,rbx)<=Limit_right_zoom) // La ligne de droite est visible
-        Vertical_XOR_line_zoom(Max(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
-    }
-  }
-
-  Operation_push(rax);
-  Operation_push(ray);
-  Operation_push(rbx);
-  Operation_push(rby);
+  Operation_push(start_x);
+  Operation_push(start_y);
+  Operation_push(end_x);
+  Operation_push(end_y);
 
   // On ajoute des trucs dans la pile pour forcer le passage à l'étape suivante
-  Operation_push(rbx);
-  Operation_push(rby);
+  Operation_push(end_x);
+  Operation_push(end_y);
 }
 
 void Grad_rectangle_0_7(void)
@@ -3534,24 +3574,24 @@ void Grad_rectangle_12_7(void)
 
 // Si l'utilisateur utilise le mauvais bouton, on annule le tracé. Mais ça nous oblige à vider toute la pile pour vérifier :(
 {
-  short rax,rbx,ray,rby,vax,vay,click;
+  short start_x,end_x,start_y,end_y,vax,vay,click;
 
   Operation_pop(&vay);
   Operation_pop(&vax);
-  Operation_pop(&ray);
-  Operation_pop(&rax);
-  Operation_pop(&rby);
-  Operation_pop(&rbx);
+  Operation_pop(&end_y);
+  Operation_pop(&end_x);
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
   Operation_pop(&click);
 
 
   if(click==Mouse_K)
   {
       Operation_push(click);
-      Operation_push(rbx);
-      Operation_push(rby);
-      Operation_push(rax);
-      Operation_push(ray);
+      Operation_push(start_x);
+      Operation_push(start_y);
+      Operation_push(end_x);
+      Operation_push(end_y);
       Operation_push(vax);
       Operation_push(vay);
       Operation_push(Paintbrush_X);
@@ -3562,83 +3602,14 @@ void Grad_rectangle_12_7(void)
   {
       // Mauvais bouton > anulation de l'opération.
       // On a déjà vidé la pile, il reste à effacer le rectangle XOR
-      short width, height;
-      short offset_width = 0;
-      short offset_height = 0;
-      short offset_left = 0;
-      short offset_top = 0;
-
-      width = abs(rbx-rax);
-      height = abs(rby-ray);
-
-      if (Max(rax,rbx)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
-          offset_width = Max(rax,rbx) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
-
-      if (Max(ray,rby)-Main_offset_Y > Min(Main_image_height,Menu_Y))
-          offset_height = Max(ray,rby) - Min(Main_image_height,Menu_Y);
-
-      // Dessin dans la zone de dessin normale
-      Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width - offset_width);
-      if(offset_height == 0)
-          Horizontal_XOR_line(Min(rax,rbx)-Main_offset_X,Max(ray,rby)-1-Main_offset_Y,width - offset_width);
-
-      Vertical_XOR_line(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
-      if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-          Vertical_XOR_line(Max(rax,rbx)-1-Main_offset_X,Min(ray,rby)-Main_offset_Y,height-offset_height);
-
-      Update_rect(Min(rax,rbx)-Main_offset_X,Min(ray,rby)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
-
-      // Dessin dans la zone zoomée
-      if (Main_magnifier_mode && Min(rax, rbx) <= Limit_right_zoom
-        && Max(rax, rbx)>Limit_left_zoom && Min(ray, rby) <= Limit_bottom_zoom
-        && Max(ray,rby)>Limit_top_zoom )
-      {
-          offset_width = 0;
-          offset_height=0;
-
-          if(Min(rax,rbx)<Limit_left_zoom) // On dépasse du zoom à gauche
-          {
-              offset_width += Limit_left_zoom - Min(rax,rbx);
-              offset_left = Limit_left_zoom;
-          }
-
-          if(Max(rax,rbx)>Limit_right_zoom) // On dépasse du zoom à droite
-              offset_width += Max(rax,rbx) - Limit_right_zoom - 1;
-
-          if(Min(ray,rby)<Limit_top_zoom) // On dépasse du zoom en haut
-          {
-              offset_height += Limit_top_zoom - Min(ray,rby);
-              offset_top = Limit_top_zoom;
-          }
-
-          if(Max(ray,rby)>Limit_bottom_zoom) // On dépasse du zoom en bas
-              offset_height += Max(ray,rby) - Limit_bottom_zoom - 1;
-
-          if(width > offset_width)
-          {
-              if(offset_top==0) // La ligne du haut est visible
-                  Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Min(ray,rby),width-offset_width);
-
-              if(Max(ray,rby)<Limit_bottom_zoom) // La ligne du bas est visible
-                  Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rax,rbx),Max(ray,rby),width-offset_width);
-          }
-
-          if(height>offset_height)
-          {
-              if(offset_left==0) // La ligne de gauche est visible
-                  Vertical_XOR_line_zoom(Min(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
-
-              if(Max(rax,rbx)<=Limit_right_zoom) // La ligne de droite est visible
-                  Vertical_XOR_line_zoom(Max(rax,rbx),offset_top>0?offset_top:Min(ray,rby),height-offset_height);
-          }
-      }
+      Draw_xor_rect(start_x, start_y, end_x, end_y);
   }
 }
 
 void Grad_rectangle_12_9(void)
     // Opération   : OPERATION_GRAD_RECTANGLE
     // Click Souris: 1
-    // Taille_Pile : 5
+    // Taille_Pile : 9
     //
     // Souris effacée: Oui
 
@@ -3709,89 +3680,18 @@ void Grad_rectangle_0_9(void)
 
     Hide_cursor();
     // Maintenant on efface tout le bazar temporaire : rectangle et ligne XOR
+    Draw_xor_rect(rect_start_x, rect_start_y, rect_end_x, rect_end_y);
     Hide_line_preview(vector_start_x,vector_start_y,vector_end_x,vector_end_y);
 
     // Et enfin on trace le rectangle avec le dégradé dedans !
     if (vector_end_x==vector_start_x && vector_end_y==vector_start_y)
     {
         // Vecteur nul > pas de rectangle tracé
-        // Du coup on doit effacer la preview xor ...
-        short width, height;
-        short offset_width = 0;
-        short offset_height = 0;
-        short offset_left = 0;
-        short offset_top = 0;
-
-        width = abs(rect_end_x-rect_start_x);
-        height = abs(rect_end_y-rect_start_y);
-
-        if (Max(rect_start_x,rect_end_x)-Main_offset_X > Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width)) // Tous les clippings à gérer sont là
-            offset_width = Max(rect_start_x,rect_end_x) - Min(Main_image_width,Main_magnifier_mode?Main_separator_position:Screen_width);
-
-        if (Max(rect_start_y,rect_end_y)-Main_offset_Y > Min(Main_image_height,Menu_Y))
-            offset_height = Max(rect_start_y,rect_end_y) - Min(Main_image_height,Menu_Y);
-
-        // Dessin dans la zone de dessin normale
-        Horizontal_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,width - offset_width);
-        if(offset_height == 0)
-            Horizontal_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Max(rect_start_y,rect_end_y)-1-Main_offset_Y,width - offset_width);
-
-        Vertical_XOR_line(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,height-offset_height);
-        if (offset_width == 0) // Sinon cette ligne est en dehors de la zone image, inutile de la dessiner
-            Vertical_XOR_line(Max(rect_start_x,rect_end_x)-1-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,height-offset_height);
-
-        Update_rect(Min(rect_start_x,rect_end_x)-Main_offset_X,Min(rect_start_y,rect_end_y)-Main_offset_Y,width+1-offset_width,height+1-offset_height);
-
-        // Dessin dans la zone zoomée
-        if (Main_magnifier_mode
-            && Min(rect_start_x, rect_end_x) <= Limit_right_zoom
-            && Max(rect_start_x, rect_end_x) > Limit_left_zoom
-            && Min(rect_start_y, rect_end_y) <= Limit_bottom_zoom
-            && Max(rect_start_y, rect_end_y) > Limit_top_zoom )
-        {
-            offset_width = 0;
-            offset_height=0;
-
-            if(Min(rect_start_x,rect_end_x)<Limit_left_zoom) // On dépasse du zoom à gauche
-            {
-                offset_width += Limit_left_zoom - Min(rect_start_x,rect_end_x);
-                offset_left = Limit_left_zoom;
-            }
-
-            if(Max(rect_start_x,rect_end_x)>Limit_right_zoom) // On dépasse du zoom à droite
-                offset_width += Max(rect_start_x,rect_end_x) - Limit_right_zoom;
-
-            if(Min(rect_start_y,rect_end_y)<Limit_top_zoom) // On dépasse du zoom en haut
-            {
-                offset_height += Limit_top_zoom - Min(rect_start_y,rect_end_y);
-                offset_top = Limit_top_zoom;
-            }
-
-            if(Max(rect_start_y,rect_end_y)>Limit_bottom_zoom) // On dépasse du zoom en bas
-                offset_height += Max(rect_start_y,rect_end_y) - Limit_bottom_zoom;
-
-            if(width > offset_width)
-            {
-                if(offset_top==0) // La ligne du haut est visible
-                    Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rect_start_x,rect_end_x),Min(rect_start_y,rect_end_y),width-offset_width);
-
-                if(Max(rect_start_y,rect_end_y) <= Limit_bottom_zoom) // La ligne du bas est visible
-                    Horizontal_XOR_line_zoom(offset_left>0?offset_left:Min(rect_start_x,rect_end_x),Max(rect_start_y,rect_end_y),width-offset_width);
-            }
-
-            if(height>offset_height)
-            {
-                if(offset_left==0) // La ligne de gauche est visible
-                    Vertical_XOR_line_zoom(Min(rect_start_x,rect_end_x),offset_top>0?offset_top:Min(rect_start_y,rect_end_y),height-offset_height);
-
-                if(Max(rect_start_x,rect_end_x) <= Limit_right_zoom) // La ligne de droite est visible
-                    Vertical_XOR_line_zoom(Max(rect_start_x,rect_end_x),offset_top>0?offset_top:Min(rect_start_y,rect_end_y),height-offset_height);
-            }
-        }
     }
     else
+    {
         Draw_grad_rectangle(rect_start_x,rect_start_y,rect_end_x,rect_end_y,vector_start_x,vector_start_y,vector_end_x,vector_end_y);
-
+    }
     Display_cursor();
     End_of_modification();
     Wait_end_of_click();

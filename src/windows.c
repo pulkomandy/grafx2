@@ -1929,7 +1929,7 @@ void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height)
 {
   short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
   short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+(height*Main_magnifier_factor<Menu_Y))?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
+  short end_y_pos=(real_y_pos+height*Main_magnifier_factor<Menu_Y)?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
   short index;
 
   for (index=real_y_pos; index<end_y_pos; index++)
