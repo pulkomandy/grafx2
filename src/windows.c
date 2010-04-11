@@ -416,7 +416,7 @@ void Change_palette_cells()
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
-  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(Menu_height-11)/Menu_cells_Y*Menu_cells_Y-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(MENU_HEIGHT-9)/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -431,7 +431,7 @@ int Pick_color_in_palette()
   int line;
   int column;
 
-  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
+  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-1)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
   column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
   if (Config.Palette_vertical)
   {

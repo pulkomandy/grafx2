@@ -300,12 +300,13 @@ void Button_Select_forecolor(void)
 {
   static long time_click = 0;
   long time_previous;
-
-  int color=Pick_color_in_palette();
-
+  int color;
+  
   time_previous = time_click;
   time_click = SDL_GetTicks();
-
+  
+  color=Pick_color_in_palette();
+      
   if (color == Fore_color)
   {
     // Check if it's a double-click    
@@ -313,27 +314,66 @@ void Button_Select_forecolor(void)
     {
       // Open palette window
       Button_Palette();
+      return;
     }
   }
-  else if (color!=-1)
+  
+  do
   {
-    Hide_cursor();
-    Set_fore_color(color);
-    Display_cursor();
-  }
+    if (color != Fore_color && color!=-1)
+    {
+      Hide_cursor();
+      Set_fore_color(color);
+      Display_cursor();
+    }
+    // Wait loop after initial click
+    while(Mouse_K)
+    {
+      if(!Get_input())
+        SDL_Delay(20);
+      
+      if (Button_under_mouse()==BUTTON_CHOOSE_COL)
+      {
+        color=Pick_color_in_palette();
+        if (color != Fore_color && color!=-1)
+        {
+          Hide_cursor();
+          Status_print_palette_color(color);
+          Set_fore_color(color);
+          Display_cursor();
+        }
+      }
+    }
+  } while(Mouse_K);
 }
 
 //-------------------- item de la backcolor dans le menu --------------------
 void Button_Select_backcolor(void)
 {
-  int color=Pick_color_in_palette();
-
-  if (color!=-1)
+  int color;
+  
+  do
   {
-    Hide_cursor();
-    Set_back_color(color);
-    Display_cursor();
-  }
+    color=Pick_color_in_palette();
+    
+    if (color!=-1 && color != Back_color)
+    {
+      Hide_cursor();
+      Status_print_palette_color(color);
+      Set_back_color(color);
+      Display_cursor();
+    }
+    // Wait loop after initial click
+    do
+    {
+      if(!Get_input())
+        SDL_Delay(20);
+      
+      if (Button_under_mouse()==BUTTON_CHOOSE_COL)
+        break; // This will repeat this button's action
+        
+    } while(Mouse_K);
+  } while(Mouse_K);
 }
 
 void Button_Hide_menu(void)

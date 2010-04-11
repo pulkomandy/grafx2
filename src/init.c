@@ -1296,11 +1296,11 @@ void Init_buttons(void)
                      FAMILY_INSTANT);
 
   Init_button(BUTTON_CHOOSE_COL,
-                     MENU_WIDTH+1,2,
+                     MENU_WIDTH+1,1,
                      1,32, // La largeur est mise à jour à chq chngmnt de mode
                      BUTTON_SHAPE_NO_FRAME,
                      Button_Select_forecolor,Button_Select_backcolor,
-                     0,0,
+                     1,1,
                      Do_nothing,
                      FAMILY_INSTANT);
 

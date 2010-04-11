@@ -504,6 +504,23 @@ void Move_separator(void)
   Display_cursor();
 }
 
+///
+/// Updates the status bar line with a color number.
+/// Used when hovering the menu palette.
+void Status_print_palette_color(byte color)
+{
+  char str[25];
+  int i;
+  
+  strcpy(str,Menu_tooltip[BUTTON_CHOOSE_COL]);
+  sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main_palette[color].R,Main_palette[color].G,Main_palette[color].B);
+  // Pad spaces
+  for (i=strlen(str); i<24; i++)
+    str[i]=' ';
+  str[24]='\0';
+  
+  Print_in_menu(str,0);
+}
 
 ///Main handler for everything. This is the main loop of the program
 void Main_handler(void)
@@ -513,7 +530,6 @@ void Main_handler(void)
   int  prev_button_number=0; // Numéro de bouton de menu sur lequel on était précédemment
   byte blink;                   // L'opération demande un effacement du curseur
   int  key_index;           // index du tableau de touches spéciales correspondant à la touche enfoncée
-  char str[25];
   byte temp;
   byte effect_modified;
   byte action;
@@ -1179,12 +1195,7 @@ void Main_handler(void)
               if ((color=Pick_color_in_palette())!=-1)
               {
                 Hide_cursor();
-                strcpy(str,Menu_tooltip[button_index]);
-                sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main_palette[color].R,Main_palette[color].G,Main_palette[color].B);
-                for (temp=strlen(str); temp<24; temp++)
-                  str[temp]=' ';
-                str[24]=0;
-                Print_in_menu(str,0);
+                Status_print_palette_color(color);
                 Display_cursor();
               }
               else

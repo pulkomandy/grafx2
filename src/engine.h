@@ -106,5 +106,8 @@ int Button_under_mouse(void);
 short Window_get_clicked_button(void);
 void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y);
 void Pixel_background(int x_pos, int y_pos, byte color);
-
+///
+/// Updates the status bar line with a color number.
+/// Used when hovering the menu palette.
+void Status_print_palette_color(byte color);
 #endif
