@@ -329,16 +329,16 @@ fstype_to_string (int t)
 #endif /* MOUNTED_VMOUNT */
 
 
-#if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
-
-/* Return the device number from MOUNT_OPTIONS, if possible.
-   Otherwise return (dev_t) -1.  */
-
 #ifdef __linux__
   #define BROKEN __attribute__((unused))
 #else
   #define BROKEN
 #endif
+
+#if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
+
+/* Return the device number from MOUNT_OPTIONS, if possible.
+   Otherwise return (dev_t) -1.  */
 
 static dev_t
 dev_from_mount_options (BROKEN char const *mount_options)
