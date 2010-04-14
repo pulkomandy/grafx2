@@ -657,7 +657,7 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*used_colors,str,3);
-    Print_in_window(186,23,str,MC_Black,MC_Light);
+    Print_in_window(180,20,str,MC_Black,MC_Light);
   }
 
   //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
