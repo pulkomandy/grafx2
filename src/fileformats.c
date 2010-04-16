@@ -3421,15 +3421,32 @@ void Load_PNG(T_IO_Context * context)
                   // Transparency (tRNS)
                   if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
                   {
-                    int i;
-                    for (i=0; i<num_trans; i++)
+                    if (color_type == PNG_COLOR_TYPE_PALETTE && trans!=NULL)
                     {
-                      if (trans[i]==0)
+                      int i;
+                      for (i=0; i<num_trans; i++)
                       {
-                        context->Transparent_color = i;
-                        context->Background_transparent = 1;
-                        break;
+                        if (trans[i]==0)
+                        {
+                          context->Transparent_color = i;
+                          context->Background_transparent = 1;
+                          break;
+                        }
                       }
+                    }
+                    else if ((color_type == PNG_COLOR_TYPE_GRAY
+                      || color_type == PNG_COLOR_TYPE_RGB) && trans_values!=NULL)
+                    {
+                      // In this case, num_trans is supposed to be "1", 
+                      // and trans_values[0] contains the reference color
+                      // (RGB triplet) that counts as transparent.
+                      
+                      // Ideally, we should reserve this color in the palette,
+                      // (so it's not merged and averaged with a neighbor one)
+                      // and after creating the optimized palette, find its
+                      // index and mark it transparent.
+                      
+                      // Current implementation: ignore.
                     }
                   }
                   
