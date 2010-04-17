@@ -128,7 +128,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {12,
   "Move mouse cursor 1 pixel up",
   "Used to simulate a very small mouse",
-  "deplacement up.It""s very useful",
+  "deplacement up.It's very useful",
   "when you want ultra-high precision.",
   true,
   SDLK_UP|MOD_CTRL, // Ctrl + Haut
@@ -136,7 +136,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {13,
   "Move mouse cursor 1 pixel down",
   "Used to simulate a very small mouse",
-  "deplacement down.It""s very useful",
+  "deplacement down.It's very useful",
   "when you want ultra-high precision.",
   true,
   SDLK_DOWN|MOD_CTRL, // Ctrl + Bas
@@ -144,7 +144,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {14,
   "Move mouse cursor 1 pixel left",
   "Used to simulate a very small mouse",
-  "deplacement left.It""s very useful",
+  "deplacement left.It's very useful",
   "when you want ultra-high precision.",
   true,
   SDLK_LEFT|MOD_CTRL, // Ctrl + Gauche
@@ -152,7 +152,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {15,
   "Move mouse cursor 1 pixel right",
   "Used to simulate a very small mouse",
-  "deplacement right.It""s very useful",
+  "deplacement right.It's very useful",
   "when you want ultra-high precision.",
   true,
   SDLK_RIGHT|MOD_CTRL, // Ctrl + Droite
@@ -160,7 +160,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {16,
   "Simulate left mouse click",
   "Used to simulate a click with the",
-  "left mouse button. It""s useful",
+  "left mouse button. It's useful",
   "when you want ultra-high precision.",
   true,
   SDLK_SPACE, // Space
@@ -168,7 +168,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   {17,
   "Simulate right mouse click",
   "Used to simulate a click with the",
-  "right mouse button.. It""s useful",
+  "right mouse button.. It's useful",
   "when you want ultra-high precision.",
   true,
   SDLK_SPACE|MOD_SHIFT, // Shift + Space
@@ -286,17 +286,17 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_f|MOD_SHIFT, // Shift + F
   0},
   {31,
-  "Bezier""s curves",
-  "Allows you to draw Bezier""s curves.",
+  "Bezier's curves",
+  "Allows you to draw Bezier's curves.",
   "",
   "",
   true,
   SDLK_i, // I
   0},
   {32,
-  "Bezier""s curve with 3 or 4 points",
+  "Bezier's curve with 3 or 4 points",
   "Allows you to choose whether you",
-  "want to draw Bezier""s curves with",
+  "want to draw Bezier's curves with",
   "3 or 4 points.",
   true,
   SDLK_i|MOD_SHIFT, // Shift + I
