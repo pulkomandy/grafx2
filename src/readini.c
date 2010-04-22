@@ -538,19 +538,19 @@ int Load_INI(T_Config * conf)
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_hidden_files=values[0]?-1:0;
+  conf->Show_hidden_files=values[0]?1:0;
 
   if ((return_code=Load_INI_get_values (file,buffer,"Show_hidden_directories",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_hidden_directories=values[0]?-1:0;
+  conf->Show_hidden_directories=values[0]?1:0;
 
 /*  if ((return_code=Load_INI_get_values (file,buffer,"Show_system_directories",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_system_directories=values[0]?-1:0;
+  conf->Show_system_directories=values[0]?1:0;
 */
   if ((return_code=Load_INI_get_values (file,buffer,"Preview_delay",1,values)))
     goto Erreur_Retour;

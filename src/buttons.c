@@ -703,40 +703,136 @@ void Button_Clear_with_backcolor(void)
 
 //------------------------------- Paramètres ---------------------------------
 
-void Settings_display_config(T_Config * conf)
-#define YES "YES"
-#define NO  " NO"
-{
-  T_Scroller_button * slider=Window_scroller_button_list;
-  char str[4];
+#define SETTING_PER_PAGE 11 
+#define SETTING_HEIGHT 12
 
+typedef struct {
+  const char* Label; // Use NULL label to stop an array
+  int Code;
+} T_Lookup;
+
+const T_Lookup Lookup_YesNo[] = {
+  {"NO",0},
+  {"YES",1},
+  {NULL,-1},
+};
+
+const T_Lookup Lookup_FFF[] = {
+  {"All",0},
+  {"Files",1},
+  {"Dirs.",2},
+  {NULL,-1},
+};
+
+const T_Lookup Lookup_AutoRes[] = {
+  {"Internal",1},
+  {"Real",2},
+  {NULL,-1},
+};
+
+const T_Lookup Lookup_Coords[] = {
+  {"Relative",1},
+  {"Absolute",2},
+  {NULL,-1},
+};
+
+const T_Lookup Lookup_MenuRatio[] = {
+  {"None",0},
+  {"x2",254}, // -2
+  {"x3",253}, // -3
+  {"x4",252}, // -4
+  {"Moderate",2},
+  {"Maximum",1},
+  {NULL,-1},
+};
+
+typedef struct {
+  const char* Label;
+  byte Type; // 0: label, 1+: setting (size in bytes) 
+  void * Value;
+  int Min_value;
+  int Max_value;
+  int Digits; // Could be computed from Max_value...but don't bother.
+  const T_Lookup * Lookup;
+} T_Setting;
+
+// Fetch a label in a lookup table. Unknown values get label 0.
+const char *Lookup_code(int code, const T_Lookup *lookup)
+{
+  int i;
+  
+  for(i=0; lookup[i].Label!=NULL; i++)
+  {
+    if (lookup[i].Code == code)
+      return lookup[i].Label;
+  }
+  return lookup[0].Label;
+}
+
+int Lookup_toggle(int code, const T_Lookup *lookup)
+{
+  int i;
+  
+  for(i=0; lookup[i].Label!=NULL; i++)
+  {
+    if (lookup[i].Code == code)
+    {
+      if (lookup[i+1].Label==NULL)
+        return lookup[0].Code;
+      return lookup[i+1].Code;
+    }
+  }
+  return 0;
+}
+
+void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_button *panel)
+{
+  int i;
+  
   Hide_cursor();
 
-  // slider = sensitivity slider for Y
-  slider->Position=conf->Mouse_sensitivity_index_y-1;
-  Window_draw_slider(slider);
-
-  slider=slider->Next;
-  // slider = sensitivity slider for X
-  slider->Position=conf->Mouse_sensitivity_index_x-1;
-  Window_draw_slider(slider);
-
-  Print_in_window(273, 31,(conf->Show_hidden_files)?YES:NO,MC_Black,MC_Light);
-  Print_in_window(273, 46,(conf->Show_hidden_directories)?YES:NO,MC_Black,MC_Light);
-
-  Print_in_window(223, 84,(conf->Safety_colors)?YES:NO,MC_Black,MC_Light);
-  Print_in_window(223, 99,(conf->Adjust_brush_pick)?YES:NO,MC_Black,MC_Light);
-  Print_in_window(223,114,(conf->Auto_set_res)?YES:NO,MC_Black,MC_Light);
-  Print_in_window(183,129,(conf->Coords_rel)?"Relative":"Absolute",MC_Black,MC_Light);
-
-  Print_in_window( 91, 84,(conf->Clear_palette)?YES:NO,MC_Black,MC_Light);
-  Print_in_window( 91, 99,(conf->Maximize_preview)?YES:NO,MC_Black,MC_Light);
-  Print_in_window( 91,114,(conf->Backup)?YES:NO,MC_Black,MC_Light);
-
-  Print_in_window(155,166,(conf->Auto_save)?YES:NO,MC_Black,MC_Light);
-
-  Num2str(conf->Max_undo_pages,str,2);
-  Window_input_content(Window_special_button_list,str);
+  // A single button
+  Print_in_window(155,166,(conf->Auto_save)?"YES":" NO",MC_Black,MC_Light);
+  
+  // Clear all
+  Window_rectangle(panel->Pos_X, panel->Pos_Y, panel->Width, panel->Height+1, MC_Light);
+  for (i=0; i<SETTING_PER_PAGE; i++)
+  {
+    Print_in_window(panel->Pos_X+3, panel->Pos_Y+i*SETTING_HEIGHT+3, setting[i].Label, i==0?MC_White:MC_Dark, MC_Light);
+    if(setting[i].Value)
+    {
+      // Fetch value
+      int value;
+      switch(setting[i].Type)
+      {
+        case 1:
+          value = *((byte *)(setting[i].Value));
+          break;
+        case 2:
+          value = *((word *)(setting[i].Value));
+          break;
+        case 4:
+        default:
+          value = *((long int *)(setting[i].Value));
+          break;
+      }
+      
+      if (setting[i].Lookup)
+      {
+        // Use a lookup table to print a label
+        const char *str;
+        str = Lookup_code(value,setting[i].Lookup);
+        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+3, str, MC_Black, MC_Light);
+      }
+      else
+      {
+        // Print a number
+        char str[29];
+        Num2str(value,str,setting[i].Digits);
+        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+3, str, MC_Black, MC_Light);
+      }
+    }
+  }
 
   Display_cursor();
 }
@@ -763,158 +859,195 @@ void Button_Settings(void)
 {
   short clicked_button;
   T_Config Config_choisie;
-  char str[3];
   byte config_is_reloaded=0;
+  T_Special_button *panel;
+  byte need_redraw=1;
+  static byte current_page=0;
+
+  // Definition of settings pages
+  T_Setting setting[] = {
+  {"      --- File selector  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Show in fileselector",0,NULL,0,0,0,NULL},
+  {"  Hidden files:",4,&(Config_choisie.Show_hidden_files),0,1,0,Lookup_YesNo},
+  {"  Hidden dirs:",4,&(Config_choisie.Show_hidden_directories),0,1,0,Lookup_YesNo},
+  {"Preview delay:",4,&(Config_choisie.Timer_delay), 1,256,3,NULL},
+  {"Maximize preview:",1,&(Config_choisie.Maximize_preview), 0,1,0,Lookup_YesNo},
+  {"Find file fast:",1,&(Config_choisie.Find_file_fast), 0,2,0,Lookup_FFF},
+  {"Auto set resolution:",1,&(Config_choisie.Auto_set_res), 0,1,0,Lookup_YesNo},
+  {"  According to:",1,&(Config_choisie.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
+  {"Backup:",1,&(Config_choisie.Backup), 0,1,0,Lookup_YesNo},
+  
+  {"      --- Format options  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Screen size in GIF:",1,&(Config_choisie.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
+  {"Clear palette:",1,&(Config_choisie.Clear_palette),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
+  {"           --- GUI  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Opening message:",1,&(Config_choisie.Opening_message),0,1,0,Lookup_YesNo},
+  {"Menu ratio adapt:",1,&(Config_choisie.Ratio),0,1,0,Lookup_MenuRatio},
+  {"Draw limits:",1,&(Config_choisie.Display_image_limits),0,1,0,Lookup_YesNo},
+  {"Coordinates:",1,&(Config_choisie.Coords_rel),0,1,0,Lookup_Coords},
+  {"Separate colors:",1,&(Config_choisie.Separate_colors),0,1,0,Lookup_YesNo},
+  {"Safety colors:",1,&(Config_choisie.Safety_colors),0,1,0,Lookup_YesNo},
+  {"Grid XOR color:",1,&(Config_choisie.Grid_XOR_color),0,255,3,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
+  {"           --- Input  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Scrollbar speed",0,NULL,0,0,0,NULL},
+  {"  on left click:",1,&(Config_choisie.Delay_left_click_on_slider),1,255,3,NULL},
+  {"  on right click:",1,&(Config_choisie.Delay_right_click_on_slider),1,255,3,NULL},
+  {"Merge movement:",1,&(Config_choisie.Mouse_merge_movement),0,100,3,NULL},
+  {"Double click speed:",2,&(Config_choisie.Double_click_speed),1,1999,4,NULL},
+  {"Double key speed:",2,&(Config_choisie.Double_key_speed),1,1999,4,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
+  {"          --- Editing  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Adjust brush pick:",1,&(Config_choisie.Adjust_brush_pick),0,1,0,Lookup_YesNo},
+  {"Undo pages:",1,&(Config_choisie.Max_undo_pages),1,99,2,NULL},
+  {"Vertices per polygon:",4,&(Config_choisie.Nb_max_vertices_per_polygon),2,16384,5,NULL},
+  {"Fast zoom:",1,&(Config_choisie.Fast_zoom),0,1,0,Lookup_YesNo},
+  {"Clear with stencil:",1,&(Config_choisie.Clear_with_stencil),0,1,0,Lookup_YesNo},
+  {"Auto discontinuous:",1,&(Config_choisie.Auto_discontinuous),0,1,0,Lookup_YesNo},
+  {"Auto count colors:",1,&(Config_choisie.Auto_nb_used),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+
+  };
+
 
   Config_choisie=Config;
 
   Open_window(307,182,"Settings");
 
-  // On commence par dessiner tous les Cadres
-  Window_display_frame(  5, 47,157,17); // Nb UNDO
-  Window_display_frame(163, 16,139,48); // Show in filelist
-  Window_display_frame(253, 77, 49,82); // Mouse sens.
-  Window_display_frame(  5, 65,247,96); // |_ Misc.
-  // On affiche maintenant tout le blabla
-  Print_in_window(169, 19,"Show in filelist",MC_Dark,MC_Light);
-  Print_in_window(  9, 52,"Nb of UNDO pages",MC_Dark,MC_Light);
-  Print_in_window( 80, 70,"Miscellaneous"   ,MC_Dark,MC_Light);
-  Print_in_window(258, 80,"Mouse"           ,MC_Dark,MC_Light);
-  Print_in_window(258, 88,"Sens."           ,MC_Dark,MC_Light);
-  Print_in_window(256,123,"X"               ,MC_Dark,MC_Light);
-  Print_in_window(292,123,"Y"               ,MC_Dark,MC_Light);
-
-
-  // Button Show/Hide dans le fileselect
-  Window_set_normal_button(167, 28,131,14,"Hidden files:   ",0,1,SDLK_LAST); // 1
-  Window_set_normal_button(167, 43,131,14,"Hidden dir. :   ",0,1,SDLK_LAST); // 2
-
-  Window_set_normal_button(9, 81, 107, 14, "Clear pal:   ", 0, 1, SDLK_LAST); // 3
-  Window_set_normal_button(9, 96, 107, 14, "Max prev.:   ", 0, 1, SDLK_LAST); // 4
-  // Button Effectuer des backups à chaque sauvegarde
-  Window_set_normal_button(  9,111,107,14,"Backup   :   ",0,1,SDLK_LAST); // 5
-
-  // Button Safety colors
-  Window_set_normal_button(117, 81,131,14,"Safe. colors:   ",0,1,SDLK_LAST); // 6
-  // Button Adjust Brush Pick
-  Window_set_normal_button(117, 96,131,14,"AdjBrushPick:   ",0,1,SDLK_LAST); // 7
-  // Button Passer dans la résolution appropriée après un chargement
-  Window_set_normal_button(117,111,131,14,"Auto-set res:   ",0,1,SDLK_LAST); // 8
-  // Button Adapter la palette après un chargement (<=> Shift+BkSpc)
-  Window_set_normal_button(117,126,131,14,"Coords:         ",0,1,SDLK_LAST); // 9
-
     // Button Reload
-  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 10
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 1
     // Button Auto-save
-  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 11
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 2
     // Button Save
-  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 12
+  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 3
     // Button Close
-  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 13
+  Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 4
 
-  // Jauges de sensibilité de la souris (X puis Y)
-  Window_set_scroller_button(265,99,56,4,1,0); // 14
-  Window_set_scroller_button(279,99,56,4,1,0); // 15
-
-  // Zone de saisie du nb de pages de Undo
-  Window_set_input_button(140,50,2);           // 16
-
+  panel=Window_set_special_button(10, 21, 272,SETTING_PER_PAGE*SETTING_HEIGHT); // 5
+  Window_set_scroller_button(285,21,SETTING_PER_PAGE*SETTING_HEIGHT,sizeof(setting)/sizeof(setting[0])/SETTING_PER_PAGE,1,current_page); // 6
+  
   Update_window_area(0,0,Window_width, Window_height);
-
   Display_cursor();
-
-  Settings_display_config(&Config_choisie);
-
 
   do
   {
+    if (need_redraw)
+    {
+      Settings_display_config(setting+current_page*SETTING_PER_PAGE, &Config_choisie, panel);
+      need_redraw=0;
+    }
+      
     clicked_button=Window_clicked_button();
 
     switch(clicked_button)
     {
-      case  1 : // Hidden files
-        Config_choisie.Show_hidden_files=(Config_choisie.Show_hidden_files)?0:-1;
-        break;
-      case  2 : // Hidden dir.
-        Config_choisie.Show_hidden_directories=(Config_choisie.Show_hidden_directories)?0:-1;
-        break;
-      case  3 : // Clear palette
-        Config_choisie.Clear_palette=!Config_choisie.Clear_palette;
-        break;
-      case  4 : // Maximize preview
-        Config_choisie.Maximize_preview=!Config_choisie.Maximize_preview;
-        break;
-      case  5 : // Backup
-        Config_choisie.Backup=!Config_choisie.Backup;
-        break;
-      case 6 : // Safety colors
-        Config_choisie.Safety_colors=!Config_choisie.Safety_colors;
-        break;
-      case 7 : // Adjust brush pick
-        Config_choisie.Adjust_brush_pick=!Config_choisie.Adjust_brush_pick;
-        break;
-      case 8 : // Auto-set resolution
-        Config_choisie.Auto_set_res=!Config_choisie.Auto_set_res;
-        break;
-      case 9 : // Coordonnées
-        Config_choisie.Coords_rel=!Config_choisie.Coords_rel;
-        break;
-      case 10 : // Reload
+
+      case 1 : // Reload
         Settings_load_config(&Config_choisie);
         config_is_reloaded=1;
+        need_redraw=1;
         break;
-      case 11 : // Auto-save
+      case 2 : // Auto-save
         Config_choisie.Auto_save=!Config_choisie.Auto_save;
+        need_redraw=1;
         break;
-      case 12 : // Save
+      case 3 : // Save
         Settings_save_config(&Config_choisie);
         break;
-      // 13 close
-      case 14 : // X Sensib.
-        Config_choisie.Mouse_sensitivity_index_x=Window_attribute2+1;
-        break;
-      case 15 : // Y Sensib.
-        Config_choisie.Mouse_sensitivity_index_y=Window_attribute2+1;
-        break;
-      case 16 : // Nb pages Undo
-        Num2str(Config_choisie.Max_undo_pages,str,2);
-        Readline(142,52,str,2,1);
-        Config_choisie.Max_undo_pages=atoi(str);
-        // On corrige la valeur
-        if (Config_choisie.Max_undo_pages>NB_MAX_PAGES_UNDO)
+      // case 4: // Close
+      
+      case 5: // Panel area
         {
-          Config_choisie.Max_undo_pages=NB_MAX_PAGES_UNDO;
-          Num2str(Config_choisie.Max_undo_pages,str,2);
-          Window_input_content(Window_special_button_list,str);
+          T_Setting item;
+          
+          int num=(((short)Mouse_Y-Window_pos_Y)/Menu_factor_Y - panel->Pos_Y)/SETTING_HEIGHT;
+          if (num >= 0 && num < SETTING_PER_PAGE)
+          {
+            item=setting[current_page*SETTING_PER_PAGE+num];
+            if (item.Type!=0)
+            {
+              if (Window_normal_button_onclick(panel->Pos_X, panel->Pos_Y+num*SETTING_HEIGHT+1, panel->Width, SETTING_HEIGHT, 5))
+              {
+                // Fetch value
+                int value;
+                switch(item.Type)
+                {
+                  case 1:
+                    value = *((byte *)(item.Value));
+                    break;
+                  case 2:
+                    value = *((word *)(item.Value));
+                    break;
+                  case 4:
+                  default:
+                    value = *((long int *)(item.Value));
+                    break;
+                }
+                if (item.Lookup)
+                {
+                  value = Lookup_toggle(value, item.Lookup);
+                  switch(item.Type)
+                  {
+                    case 1:
+                      *((byte *)(item.Value)) = value;
+                      break;
+                    case 2:
+                      *((word *)(item.Value)) = value;
+                      break;
+                    case 4:
+                    default:
+                      *((long int *)(item.Value)) = value;
+                      break;
+                  }
+                }
+              }
+            }
+          }
         }
-        else if (!Config_choisie.Max_undo_pages)
-        {
-          Config_choisie.Max_undo_pages=1;
-          Num2str(Config_choisie.Max_undo_pages,str,2);
-          Window_input_content(Window_special_button_list,str);
-        }
-        Display_cursor();
-        Key=0;
-        Wait_end_of_click();
+        need_redraw=1;
+        break;
+      case 6: // Scroller
+        current_page = Window_attribute2;
+        need_redraw=1;
+        break;
+      
     }
-
+    /* Keep in reserve:
+       Piece of code to reset fileselector offsets
+       if the visibility settings changed.
     if ((clicked_button>=3) && (clicked_button<=4))
     {
       Main_fileselector_position=0;
       Main_fileselector_offset=0;
       Spare_fileselector_position=0;
       Spare_fileselector_offset=0;
-    }
-
-    if ((clicked_button>=1) && (clicked_button<13))
-      Settings_display_config(&Config_choisie);
+    }*/
       
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_SETTINGS, NULL);
     else if (Is_shortcut(Key,0x100+BUTTON_SETTINGS))
-      clicked_button=13;
+      clicked_button=4;
   }
-  while ( (clicked_button!=13) && (Key!=SDLK_RETURN) );
+  while ( (clicked_button!=4) && (Key!=SDLK_RETURN) );
 
   Config=Config_choisie;
 

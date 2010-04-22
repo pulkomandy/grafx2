@@ -99,6 +99,7 @@ void Window_redraw_list(T_List_button * list);
 byte Window_click_in_rectangle(short start_x, short start_y, short end_x,
   short end_y);
 short Wait_click_in_palette(T_Palette_button * button);
+short Window_normal_button_onclick(word x_pos, word y_pos, word width, word height, short btn_number);
 void Get_color_behind_window(byte * color, byte * click);
 
 short Window_clicked_button(void);
