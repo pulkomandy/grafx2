@@ -59,19 +59,20 @@ else
 #For all other platforms, we can rely on uname
   PLATFORM = $(shell uname)
 
-  #AmigaOS4 specific
+  #AmigaOS (3 or 4) specific
   ifeq ($(PLATFORM),AmigaOS) # 1
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -I/SDK/Local/common/include/SDL -D__USE_INLINE__ $(TTFCOPT)
+    COPT = -Wall -c -gstabs `sdl-config --cflags` $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = ../obj/amiga
     ZIP = lha
     ZIPOPT = a
+    NOTTF = 1
 
   else
   ifeq ($(PLATFORM),Darwin) # 2
@@ -130,21 +131,6 @@ else
     PLATFORMFILES = ../misc/grafx2.info
 
   else
-  ifeq ($(PLATFORM),AMIGA) # 5
-  # AmigaOS 3.x specific (building with gcc)
-    DELCOMMAND = rm -rf
-    MKDIR = mkdir -p
-    RMDIR = rmdir
-    CP = cp
-    BIN = ../bin/grafx2
-    COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
-    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
-    CC = gcc
-    OBJDIR = ../obj/amiga
-    ZIP = lha
-    ZIPOPT = a
-
-  else
   ifeq ($(PLATFORM),BeOS) # 6
   #BeOS specific
     DELCOMMAND = rm -rf
@@ -201,24 +187,6 @@ else
       OBJDIR = ../obj/unix
       X11LOPT = -lX11
       CC = gcc
-
-  else
-  ifeq ($(findstring Kickstart,$(shell version)),Kickstart) # 9
-    # Classic amiga without gcc. Use vbcc.
-    PLATFORM = amiga-vbcc
-    DELCOMMAND = delete
-    MKDIR = makedir
-    RMDIR= delete
-    CP = copy
-    BIN = ../bin/grafx2
-    COPT = -c99 -Ivbcc:PosixLib/include -D__amigaos__ $(TTFCOPT)
-    CC = vc
-    OBJDIR = ../obj/amiga-vbcc
-    ZIP = lha
-    ZIPOPT = a
-
-    NOTTF = 1
-
   else
   
       # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
@@ -280,8 +248,6 @@ else
   endif
   endif
   endif
-  endif
-  endif
 endif
 
 ### BUILD SETTINGS are set according to vars set in the platform selection, the "overridable defaults", and environment variables set before launching make
@@ -335,7 +301,9 @@ OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o 
 
 SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png
 
-SCRIPT_FILES = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scripts/bru_db_ColorSphere.lua ../share/grafx2/scripts/bru_db_FindAA.lua ../share/grafx2/scripts/bru_db_Fisheye.lua ../share/grafx2/scripts/bru_db_GrayscaleAvg.lua ../share/grafx2/scripts/bru_db_GrayscaleDesat.lua ../share/grafx2/scripts/bru_db_Halfsmooth.lua ../share/grafx2/scripts/bru_db_Mandelbrot.lua ../share/grafx2/scripts/bru_db_Waves.lua ../share/grafx2/scripts/pal_db_Desaturate.lua ../share/grafx2/scripts/pal_db_ExpandColors.lua ../share/grafx2/scripts/pal_db_FillColorCube.lua ../share/grafx2/scripts/pal_db_InvertedRGB.lua ../share/grafx2/scripts/pal_db_Set3bit.lua ../share/grafx2/scripts/pal_db_Set6bit.lua ../share/grafx2/scripts/pal_db_SetC64Palette.lua ../share/grafx2/scripts/pal_db_ShiftHue.lua ../share/grafx2/scripts/pic_db_Pic2isometric.lua ../share/grafx2/scripts/pic_db_Rainbow-Dark2Bright.lua ../share/grafx2/scripts/pic_db_SierpinskyCarpet.lua ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_Colorspace12bit.lua ../share/grafx2/scripts/pic_ni_Colorspace15bit.lua ../share/grafx2/scripts/pic_ni_Colorspace18bit.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/pic_ni_Grid8.lua ../share/grafx2/scripts/pic_ni_Grid8red.lua ../share/grafx2/scripts/pic_ni_GridIso.lua ../share/grafx2/scripts/pic_ni_PaletteX1.lua ../share/grafx2/scripts/pic_ni_PaletteX8.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
+SCRIPT_FILES1 = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scripts/bru_db_ColorSphere.lua ../share/grafx2/scripts/bru_db_FindAA.lua ../share/grafx2/scripts/bru_db_Fisheye.lua ../share/grafx2/scripts/bru_db_GrayscaleAvg.lua ../share/grafx2/scripts/bru_db_GrayscaleDesat.lua ../share/grafx2/scripts/bru_db_Halfsmooth.lua ../share/grafx2/scripts/bru_db_Mandelbrot.lua ../share/grafx2/scripts/bru_db_Waves.lua ../share/grafx2/scripts/pal_db_Desaturate.lua ../share/grafx2/scripts/pal_db_ExpandColors.lua ../share/grafx2/scripts/pal_db_FillColorCube.lua ../share/grafx2/scripts/pal_db_InvertedRGB.lua ../share/grafx2/scripts/pal_db_Set3bit.lua ../share/grafx2/scripts/pal_db_Set6bit.lua ../share/grafx2/scripts/pal_db_SetC64Palette.lua ../share/grafx2/scripts/pal_db_ShiftHue.lua ../share/grafx2/scripts/pic_db_Pic2isometric.lua ../share/grafx2/scripts/pic_db_Rainbow-Dark2Bright.lua ../share/grafx2/scripts/pic_db_SierpinskyCarpet.lua
+SCRIPT_FILES2 = ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_Colorspace12bit.lua ../share/grafx2/scripts/pic_ni_Colorspace15bit.lua ../share/grafx2/scripts/pic_ni_Colorspace18bit.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/pic_ni_Grid8.lua ../share/grafx2/scripts/pic_ni_Grid8red.lua ../share/grafx2/scripts/pic_ni_GridIso.lua ../share/grafx2/scripts/pic_ni_PaletteX1.lua ../share/grafx2/scripts/pic_ni_PaletteX8.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
+SCRIPT_FILES1= SCRIPT_FILES1 SCRIPT_FILES2
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)

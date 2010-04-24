@@ -299,6 +299,9 @@ int Lock_file_handle = -1;
 
 byte Create_lock_file(const char *file_directory)
 {
+  #ifdef __amigaos__
+    #warning "Missing code for your platform, please check and correct!"
+  #else
   char lock_filename[MAX_PATH_CHARACTERS];
   
   strcpy(lock_filename,file_directory);
@@ -333,6 +336,7 @@ byte Create_lock_file(const char *file_directory)
     return -1;
   }
   #endif
+  #endif // __amigaos__
   return 0;
 }
 

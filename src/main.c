@@ -23,14 +23,21 @@
 */
 #define GLOBAL_VARIABLES
 
+// time.h defines timeval which conflicts with the one in amiga SDK
+#ifdef __amigaos__
+  #include <devices/timer.h>
+#else
+  #include <time.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <time.h>
 #include <unistd.h>
 #include <SDL.h>
 #include <SDL_image.h>
+
 
 // There is no WM on the GP2X...
 #ifndef __GP2X__

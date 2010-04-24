@@ -21,18 +21,10 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
-#include <strings.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
+    #include <sys/types.h>
     #include <dirent.h>
     #define isHidden(x) (0)
 #elif defined(__WIN32__)
@@ -43,6 +35,16 @@
     #include <dirent.h>
     #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+#include <strings.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "const.h"
 #include "struct.h"

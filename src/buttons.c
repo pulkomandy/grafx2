@@ -19,6 +19,21 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+    #include <proto/dos.h>
+    #include <sys/types.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
+#elif defined(__WIN32__)
+    #include <dirent.h>
+    #include <windows.h>
+    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#else
+    #include <dirent.h>
+    #define isHidden(x) ((x)->d_name[0]=='.')
+#endif
+
 #define _XOPEN_SOURCE 500
 
 #include <fcntl.h>
@@ -62,18 +77,6 @@
     #define __attribute__(x)
 #endif
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-    #include <proto/dos.h>
-    #include <dirent.h>
-    #define isHidden(x) (0)
-#elif defined(__WIN32__)
-    #include <dirent.h>
-    #include <windows.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
-#else
-    #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
-#endif
 
 extern char Program_version[]; // generated in pversion.c
 

@@ -29,6 +29,12 @@
 #if defined(__WIN32__) || defined(__linux__)
   #define GRAFX2_CATCHES_SIGNALS
 #endif
+
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  #include <proto/exec.h>
+  #include <proto/dos.h>
+#endif
+
 #include <stdio.h>
 //#include <fcntl.h>
 #include <string.h>
@@ -43,10 +49,6 @@
 #include <SDL_image.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
-#endif
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  #include <proto/exec.h>
-  #include <proto/dos.h>
 #endif
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>

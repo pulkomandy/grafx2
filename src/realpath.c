@@ -17,7 +17,7 @@
 // the path. So this implementation is limited, it's really better to
 // use realpath() if your platform has it.
   
-    #if defined(__GP2X__)
+    #if defined(__GP2X__) || defined(__amigaos__)
         // This is a random default value ...
         #define PATH_MAX 32768
     #endif
