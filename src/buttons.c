@@ -704,7 +704,9 @@ void Button_Clear_with_backcolor(void)
 //------------------------------- Paramètres ---------------------------------
 
 #define SETTING_PER_PAGE 11 
-#define SETTING_HEIGHT 12
+#define SETTING_PAGES     5
+
+#define SETTING_HEIGHT   12
 
 typedef struct {
   const char* Label; // Use NULL label to stop an array
@@ -756,6 +758,40 @@ typedef struct {
   const T_Lookup * Lookup;
 } T_Setting;
 
+long int Get_setting_value(T_Setting *item)
+{
+  switch(item->Type)
+  {
+    case 1:
+      return *((byte *)(item->Value));
+      break;
+    case 2:
+      return *((word *)(item->Value));
+      break;
+    case 4:
+    default:
+      return *((long int *)(item->Value));
+      break;
+  }
+}
+
+void Set_setting_value(T_Setting *item, long int value)
+{
+  switch(item->Type)
+  {
+    case 1:
+      *((byte *)(item->Value)) = value;
+      break;
+    case 2:
+      *((word *)(item->Value)) = value;
+      break;
+    case 4:
+    default:
+      *((long int *)(item->Value)) = value;
+      break;
+  }
+}
+
 // Fetch a label in a lookup table. Unknown values get label 0.
 const char *Lookup_code(int code, const T_Lookup *lookup)
 {
@@ -801,22 +837,9 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
     Print_in_window(panel->Pos_X+3, panel->Pos_Y+i*SETTING_HEIGHT+3, setting[i].Label, i==0?MC_White:MC_Dark, MC_Light);
     if(setting[i].Value)
     {
-      // Fetch value
-      int value;
-      switch(setting[i].Type)
-      {
-        case 1:
-          value = *((byte *)(setting[i].Value));
-          break;
-        case 2:
-          value = *((word *)(setting[i].Value));
-          break;
-        case 4:
-        default:
-          value = *((long int *)(setting[i].Value));
-          break;
-      }
       
+      int value = Get_setting_value(&setting[i]);
+
       if (setting[i].Lookup)
       {
         // Use a lookup table to print a label
@@ -827,7 +850,7 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
       else
       {
         // Print a number
-        char str[29];
+        char str[10];
         Num2str(value,str,setting[i].Digits);
         Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+3, str, MC_Black, MC_Light);
       }
@@ -865,7 +888,47 @@ void Button_Settings(void)
   static byte current_page=0;
 
   // Definition of settings pages
-  T_Setting setting[] = {
+  //  Label,Type (0 = label, 1+ = setting size in bytes), 
+  //  Value, min, max, digits, Lookup)
+
+  T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
+  
+    {"           --- GUI  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Opening message:",1,&(Config_choisie.Opening_message),0,1,0,Lookup_YesNo},
+  {"Menu ratio adapt:",1,&(Config_choisie.Ratio),0,1,0,Lookup_MenuRatio},
+  {"Draw limits:",1,&(Config_choisie.Display_image_limits),0,1,0,Lookup_YesNo},
+  {"Coordinates:",1,&(Config_choisie.Coords_rel),0,1,0,Lookup_Coords},
+  {"Separate colors:",1,&(Config_choisie.Separate_colors),0,1,0,Lookup_YesNo},
+  {"Safety colors:",1,&(Config_choisie.Safety_colors),0,1,0,Lookup_YesNo},
+  {"Grid XOR color:",1,&(Config_choisie.Grid_XOR_color),0,255,3,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
+  {"           --- Input  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Scrollbar speed",0,NULL,0,0,0,NULL},
+  {"  on left click:",1,&(Config_choisie.Delay_left_click_on_slider),1,255,4,NULL},
+  {"  on right click:",1,&(Config_choisie.Delay_right_click_on_slider),1,255,4,NULL},
+  {"Merge movement:",1,&(Config_choisie.Mouse_merge_movement),0,100,4,NULL},
+  {"Double click speed:",2,&(Config_choisie.Double_click_speed),1,1999,4,NULL},
+  {"Double key speed:",2,&(Config_choisie.Double_key_speed),1,1999,4,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
+  {"          --- Editing  ---",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"Adjust brush pick:",1,&(Config_choisie.Adjust_brush_pick),0,1,0,Lookup_YesNo},
+  {"Undo pages:",1,&(Config_choisie.Max_undo_pages),1,99,5,NULL},
+  {"Vertices per polygon:",4,&(Config_choisie.Nb_max_vertices_per_polygon),2,16384,5,NULL},
+  {"Fast zoom:",1,&(Config_choisie.Fast_zoom),0,1,0,Lookup_YesNo},
+  {"Clear with stencil:",1,&(Config_choisie.Clear_with_stencil),0,1,0,Lookup_YesNo},
+  {"Auto discontinuous:",1,&(Config_choisie.Auto_discontinuous),0,1,0,Lookup_YesNo},
+  {"Auto count colors:",1,&(Config_choisie.Auto_nb_used),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Show in fileselector",0,NULL,0,0,0,NULL},
@@ -890,44 +953,16 @@ void Button_Settings(void)
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
-  {"           --- GUI  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"Opening message:",1,&(Config_choisie.Opening_message),0,1,0,Lookup_YesNo},
-  {"Menu ratio adapt:",1,&(Config_choisie.Ratio),0,1,0,Lookup_MenuRatio},
-  {"Draw limits:",1,&(Config_choisie.Display_image_limits),0,1,0,Lookup_YesNo},
-  {"Coordinates:",1,&(Config_choisie.Coords_rel),0,1,0,Lookup_Coords},
-  {"Separate colors:",1,&(Config_choisie.Separate_colors),0,1,0,Lookup_YesNo},
-  {"Safety colors:",1,&(Config_choisie.Safety_colors),0,1,0,Lookup_YesNo},
-  {"Grid XOR color:",1,&(Config_choisie.Grid_XOR_color),0,255,3,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  
-  {"           --- Input  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"Scrollbar speed",0,NULL,0,0,0,NULL},
-  {"  on left click:",1,&(Config_choisie.Delay_left_click_on_slider),1,255,3,NULL},
-  {"  on right click:",1,&(Config_choisie.Delay_right_click_on_slider),1,255,3,NULL},
-  {"Merge movement:",1,&(Config_choisie.Mouse_merge_movement),0,100,3,NULL},
-  {"Double click speed:",2,&(Config_choisie.Double_click_speed),1,1999,4,NULL},
-  {"Double key speed:",2,&(Config_choisie.Double_key_speed),1,1999,4,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  
-  {"          --- Editing  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"Adjust brush pick:",1,&(Config_choisie.Adjust_brush_pick),0,1,0,Lookup_YesNo},
-  {"Undo pages:",1,&(Config_choisie.Max_undo_pages),1,99,2,NULL},
-  {"Vertices per polygon:",4,&(Config_choisie.Nb_max_vertices_per_polygon),2,16384,5,NULL},
-  {"Fast zoom:",1,&(Config_choisie.Fast_zoom),0,1,0,Lookup_YesNo},
-  {"Clear with stencil:",1,&(Config_choisie.Clear_with_stencil),0,1,0,Lookup_YesNo},
-  {"Auto discontinuous:",1,&(Config_choisie.Auto_discontinuous),0,1,0,Lookup_YesNo},
-  {"Auto count colors:",1,&(Config_choisie.Auto_nb_used),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
 
   };
 
+  const char * help_section[SETTING_PAGES] = {
+    "GUI",
+    "INPUT",
+    "EDITING"
+    "FILE SELECTOR",
+    "FILE FORMAT OPTIONS",
+  };
 
   Config_choisie=Config;
 
@@ -943,7 +978,7 @@ void Button_Settings(void)
   Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 4
 
   panel=Window_set_special_button(10, 21, 272,SETTING_PER_PAGE*SETTING_HEIGHT); // 5
-  Window_set_scroller_button(285,21,SETTING_PER_PAGE*SETTING_HEIGHT,sizeof(setting)/sizeof(setting[0])/SETTING_PER_PAGE,1,current_page); // 6
+  Window_set_scroller_button(285,21,SETTING_PER_PAGE*SETTING_HEIGHT,SETTING_PAGES,1,current_page); // 6
   
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -952,7 +987,17 @@ void Button_Settings(void)
   {
     if (need_redraw)
     {
+      Hide_cursor();
       Settings_display_config(setting+current_page*SETTING_PER_PAGE, &Config_choisie, panel);
+      if (need_redraw & 2)
+      {
+        // Including slider position
+        Window_scroller_button_list->Position=current_page;
+        Window_draw_slider(Window_scroller_button_list);
+      }
+
+      Display_cursor();
+      
       need_redraw=0;
     }
       
@@ -985,39 +1030,37 @@ void Button_Settings(void)
             item=setting[current_page*SETTING_PER_PAGE+num];
             if (item.Type!=0)
             {
+              // Remember which button is clicked
+              byte old_mouse_k = Mouse_K;
+              
               if (Window_normal_button_onclick(panel->Pos_X, panel->Pos_Y+num*SETTING_HEIGHT+1, panel->Width, SETTING_HEIGHT, 5))
               {
-                // Fetch value
-                int value;
-                switch(item.Type)
-                {
-                  case 1:
-                    value = *((byte *)(item.Value));
-                    break;
-                  case 2:
-                    value = *((word *)(item.Value));
-                    break;
-                  case 4:
-                  default:
-                    value = *((long int *)(item.Value));
-                    break;
-                }
+                int value = Get_setting_value(&item);
+                
                 if (item.Lookup)
                 {
+                  // Enum: toggle it
                   value = Lookup_toggle(value, item.Lookup);
-                  switch(item.Type)
+                  Set_setting_value(&item, value);
+                }
+                else
+                {
+                  // Numeric: edit it
+                  char str[10];
+                  str[0]='\0';
+                  if (! (old_mouse_k & RIGHT_SIDE))
+                    Num2str(value,str,item.Digits+1);
+                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+3,str,item.Digits+1,1))
                   {
-                    case 1:
-                      *((byte *)(item.Value)) = value;
-                      break;
-                    case 2:
-                      *((word *)(item.Value)) = value;
-                      break;
-                    case 4:
-                    default:
-                      *((long int *)(item.Value)) = value;
-                      break;
+                    value=atoi(str);
+                    if (value<item.Min_value)
+                      value = item.Min_value;
+                    else if (value>item.Max_value)
+                      value = item.Max_value;
+                      
+                    Set_setting_value(&item, value);
                   }
+                  Key=0; // Need to discard keys used during editing
                 }
               }
             }
@@ -1042,8 +1085,24 @@ void Button_Settings(void)
       Spare_fileselector_offset=0;
     }*/
       
-    if (Is_shortcut(Key,0x100+BUTTON_HELP))
-      Window_help(BUTTON_SETTINGS, NULL);
+    if (Key == KEY_MOUSEWHEELDOWN)
+    {
+      if (current_page < (SETTING_PAGES-1))
+      {
+        current_page++;
+        need_redraw=2;
+      }
+    }
+    else if (Key == KEY_MOUSEWHEELUP)
+    {
+      if (current_page > 0)
+      {
+        current_page--;
+        need_redraw=2;
+      }
+    }     
+    else if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(NB_BUTTONS+0, help_section[current_page]);
     else if (Is_shortcut(Key,0x100+BUTTON_SETTINGS))
       clicked_button=4;
   }

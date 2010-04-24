@@ -149,7 +149,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
     str[0]='\0';
-  else if (input_type==1)
+  else if (input_type==1 && str[0]!='\0')
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
   else if (input_type==3)
   {
