@@ -904,7 +904,7 @@ void Settings_load_config(T_Config * conf)
 void Button_Settings(void)
 {
   short clicked_button;
-  T_Config config;
+  T_Config selected_config;
   byte config_is_reloaded=0;
   T_Special_button *panel;
   byte need_redraw=1;
@@ -918,56 +918,56 @@ void Button_Settings(void)
   
     {"           --- GUI  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Opening message:",1,&(config.Opening_message),0,1,0,Lookup_YesNo},
-  {"Menu ratio adapt:",1,&(config.Ratio),0,1,0,Lookup_MenuRatio},
-  {"Draw limits:",1,&(config.Display_image_limits),0,1,0,Lookup_YesNo},
-  {"Coordinates:",1,&(config.Coords_rel),0,1,0,Lookup_Coords},
-  {"Separate colors:",1,&(config.Separate_colors),0,1,0,Lookup_YesNo},
-  {"Safety colors:",1,&(config.Safety_colors),0,1,0,Lookup_YesNo},
-  {"Grid XOR color:",1,&(config.Grid_XOR_color),0,255,3,NULL},
+  {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
+  {"Menu ratio adapt:",1,&(selected_config.Ratio),0,1,0,Lookup_MenuRatio},
+  {"Draw limits:",1,&(selected_config.Display_image_limits),0,1,0,Lookup_YesNo},
+  {"Coordinates:",1,&(selected_config.Coords_rel),0,1,0,Lookup_Coords},
+  {"Separate colors:",1,&(selected_config.Separate_colors),0,1,0,Lookup_YesNo},
+  {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
+  {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Scrollbar speed",0,NULL,0,0,0,NULL},
-  {"  on left click:",1,&(config.Delay_left_click_on_slider),1,255,4,NULL},
-  {"  on right click:",1,&(config.Delay_right_click_on_slider),1,255,4,NULL},
-  {"Merge movement:",1,&(config.Mouse_merge_movement),0,100,4,NULL},
-  {"Double click speed:",2,&(config.Double_click_speed),1,1999,4,NULL},
-  {"Double key speed:",2,&(config.Double_key_speed),1,1999,4,NULL},
+  {"  on left click:",1,&(selected_config.Delay_left_click_on_slider),1,255,4,NULL},
+  {"  on right click:",1,&(selected_config.Delay_right_click_on_slider),1,255,4,NULL},
+  {"Merge movement:",1,&(selected_config.Mouse_merge_movement),0,100,4,NULL},
+  {"Double click speed:",2,&(selected_config.Double_click_speed),1,1999,4,NULL},
+  {"Double key speed:",2,&(selected_config.Double_key_speed),1,1999,4,NULL},
   {"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
-  {"  horizontally:",1,&(config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
-  {"  vertically:",1,&(config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
+  {"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
+  {"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
   
   {"          --- Editing  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Adjust brush pick:",1,&(config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
-  {"Undo pages:",1,&(config.Max_undo_pages),1,99,5,NULL},
-  {"Vertices per polygon:",4,&(config.Nb_max_vertices_per_polygon),2,16384,5,NULL},
-  {"Fast zoom:",1,&(config.Fast_zoom),0,1,0,Lookup_YesNo},
-  {"Clear with stencil:",1,&(config.Clear_with_stencil),0,1,0,Lookup_YesNo},
-  {"Auto discontinuous:",1,&(config.Auto_discontinuous),0,1,0,Lookup_YesNo},
-  {"Auto count colors:",1,&(config.Auto_nb_used),0,1,0,Lookup_YesNo},
+  {"Adjust brush pick:",1,&(selected_config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
+  {"Undo pages:",1,&(selected_config.Max_undo_pages),1,99,5,NULL},
+  {"Vertices per polygon:",4,&(selected_config.Nb_max_vertices_per_polygon),2,16384,5,NULL},
+  {"Fast zoom:",1,&(selected_config.Fast_zoom),0,1,0,Lookup_YesNo},
+  {"Clear with stencil:",1,&(selected_config.Clear_with_stencil),0,1,0,Lookup_YesNo},
+  {"Auto discontinuous:",1,&(selected_config.Auto_discontinuous),0,1,0,Lookup_YesNo},
+  {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Show in fileselector",0,NULL,0,0,0,NULL},
-  {"  Hidden files:",4,&(config.Show_hidden_files),0,1,0,Lookup_YesNo},
-  {"  Hidden dirs:",4,&(config.Show_hidden_directories),0,1,0,Lookup_YesNo},
-  {"Preview delay:",4,&(config.Timer_delay), 1,256,3,NULL},
-  {"Maximize preview:",1,&(config.Maximize_preview), 0,1,0,Lookup_YesNo},
-  {"Find file fast:",1,&(config.Find_file_fast), 0,2,0,Lookup_FFF},
-  {"Auto set resolution:",1,&(config.Auto_set_res), 0,1,0,Lookup_YesNo},
-  {"  According to:",1,&(config.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
-  {"Backup:",1,&(config.Backup), 0,1,0,Lookup_YesNo},
+  {"  Hidden files:",4,&(selected_config.Show_hidden_files),0,1,0,Lookup_YesNo},
+  {"  Hidden dirs:",4,&(selected_config.Show_hidden_directories),0,1,0,Lookup_YesNo},
+  {"Preview delay:",4,&(selected_config.Timer_delay), 1,256,3,NULL},
+  {"Maximize preview:",1,&(selected_config.Maximize_preview), 0,1,0,Lookup_YesNo},
+  {"Find file fast:",1,&(selected_config.Find_file_fast), 0,2,0,Lookup_FFF},
+  {"Auto set resolution:",1,&(selected_config.Auto_set_res), 0,1,0,Lookup_YesNo},
+  {"  According to:",1,&(selected_config.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
+  {"Backup:",1,&(selected_config.Backup), 0,1,0,Lookup_YesNo},
   
   {"      --- Format options  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Screen size in GIF:",1,&(config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
-  {"Clear palette:",1,&(config.Clear_palette),0,1,0,Lookup_YesNo},
+  {"Screen size in GIF:",1,&(selected_config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
+  {"Clear palette:",1,&(selected_config.Clear_palette),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
@@ -987,7 +987,7 @@ void Button_Settings(void)
     "FILE FORMAT OPTIONS",
   };
 
-  config=Config;
+  selected_config=Config;
 
   Open_window(307,182,"Settings");
 
@@ -1011,7 +1011,7 @@ void Button_Settings(void)
     if (need_redraw)
     {
       Hide_cursor();
-      Settings_display_config(setting+current_page*SETTING_PER_PAGE, &config, panel);
+      Settings_display_config(setting+current_page*SETTING_PER_PAGE, &selected_config, panel);
       if (need_redraw & 2)
       {
         // Including slider position
@@ -1030,16 +1030,16 @@ void Button_Settings(void)
     {
 
       case 1 : // Reload
-        Settings_load_config(&config);
+        Settings_load_config(&selected_config);
         config_is_reloaded=1;
         need_redraw=1;
         break;
       case 2 : // Auto-save
-        config.Auto_save=!config.Auto_save;
+        selected_config.Auto_save=!selected_config.Auto_save;
         need_redraw=1;
         break;
       case 3 : // Save
-        Settings_save_config(&config);
+        Settings_save_config(&selected_config);
         break;
       // case 4: // Close
       
@@ -1125,8 +1125,8 @@ void Button_Settings(void)
   while ( (clicked_button!=4) && (Key!=SDLK_RETURN) );
 
   // Checks on change
-  if (Config.Show_hidden_directories!=config.Show_hidden_directories
-    ||Config.Show_hidden_files!=config.Show_hidden_files)
+  if (Config.Show_hidden_directories!=selected_config.Show_hidden_directories
+    ||Config.Show_hidden_files!=selected_config.Show_hidden_files)
   {
     // Reset fileselector offsets
     // since different files are shown now
@@ -1136,7 +1136,7 @@ void Button_Settings(void)
     Spare_fileselector_offset=0;
   }
   // Copy all
-  Config=config;
+  Config=selected_config;
 
   if (config_is_reloaded)
     Compute_optimal_menu_colors(Main_palette);
