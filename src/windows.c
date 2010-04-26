@@ -2849,12 +2849,12 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du noir
   Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[0].R, Config.Fav_menu_colors[0].G, Config.Fav_menu_colors[0].B,palette,table);
+    (Gfx->Default_palette[Gfx->Color[0]].R, Gfx->Default_palette[Gfx->Color[0]].G, Gfx->Default_palette[Gfx->Color[0]].B,palette,table);
   MC_Black=table[0];
 
   // Recherche du blanc
   Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[3].R, Config.Fav_menu_colors[3].G, Config.Fav_menu_colors[3].B,palette,table);
+    (Gfx->Default_palette[Gfx->Color[3]].R, Gfx->Default_palette[Gfx->Color[3]].G, Gfx->Default_palette[Gfx->Color[3]].B,palette,table);
   if (MC_Black!=table[0])
     MC_White=table[0];
   else
@@ -2862,7 +2862,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris clair
   Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B,palette,table);
+    (Gfx->Default_palette[Gfx->Color[2]].R, Gfx->Default_palette[Gfx->Color[2]].G, Gfx->Default_palette[Gfx->Color[2]].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
     MC_Light=table[0];
   else
@@ -2875,7 +2875,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Recherche du gris foncé
   Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B,palette,table);
+    (Gfx->Default_palette[Gfx->Color[1]].R, Gfx->Default_palette[Gfx->Color[1]].G, Gfx->Default_palette[Gfx->Color[1]].B,palette,table);
   if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
     MC_Dark=table[0];
   else

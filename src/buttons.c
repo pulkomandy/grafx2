@@ -751,6 +751,14 @@ const T_Lookup Lookup_MenuRatio[] = {
   {NULL,-1},
 };
 
+const T_Lookup Lookup_MouseSpeed[] = {
+  {"Normal",1},
+  {"/2",2},
+  {"/3",3},
+  {"/4",4},
+  {NULL,-1},
+};
+
 typedef struct {
   const char* Label;
   byte Type; // 0: label, 1+: setting (size in bytes) 
@@ -808,7 +816,8 @@ const char *Lookup_code(int code, const T_Lookup *lookup)
   return lookup[0].Label;
 }
 
-int Lookup_toggle(int code, const T_Lookup *lookup)
+/// Increase an enum to next-higher value (wrapping).
+int Lookup_next(int code, const T_Lookup *lookup)
 {
   int i;
   
@@ -824,11 +833,24 @@ int Lookup_toggle(int code, const T_Lookup *lookup)
   return 0;
 }
 
+/// Decrease an enum to previous value (wrapping).
+int Lookup_previous(int code, const T_Lookup *lookup)
+{
+  int count;
+  int current=-1;
+  
+  for(count=0; lookup[count].Label!=NULL; count++)
+  {
+    if (lookup[count].Code == code)
+      current=count;
+  }
+  
+  return lookup[(current + count - 1) % count].Code;  
+}
+
 void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_button *panel)
 {
   int i;
-  
-  Hide_cursor();
 
   // A single button
   Print_in_window(155,166,(conf->Auto_save)?"YES":" NO",MC_Black,MC_Light);
@@ -837,7 +859,7 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
   Window_rectangle(panel->Pos_X, panel->Pos_Y, panel->Width, panel->Height+1, MC_Light);
   for (i=0; i<SETTING_PER_PAGE; i++)
   {
-    Print_in_window(panel->Pos_X+3, panel->Pos_Y+i*SETTING_HEIGHT+3, setting[i].Label, i==0?MC_White:MC_Dark, MC_Light);
+    Print_in_window(panel->Pos_X+3, panel->Pos_Y+i*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2, setting[i].Label, i==0?MC_White:MC_Dark, MC_Light);
     if(setting[i].Value)
     {
       
@@ -848,19 +870,17 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
         // Use a lookup table to print a label
         const char *str;
         str = Lookup_code(value,setting[i].Lookup);
-        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+3, str, MC_Black, MC_Light);
+        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2, str, MC_Black, MC_Light);
       }
       else
       {
         // Print a number
         char str[10];
         Num2str(value,str,setting[i].Digits);
-        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+3, str, MC_Black, MC_Light);
+        Print_in_window(panel->Pos_X+3+176, panel->Pos_Y+i*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2, str, MC_Black, MC_Light);
       }
     }
   }
-
-  Display_cursor();
 }
 
 void Settings_save_config(T_Config * conf)
@@ -884,7 +904,7 @@ void Settings_load_config(T_Config * conf)
 void Button_Settings(void)
 {
   short clicked_button;
-  T_Config Config_choisie;
+  T_Config config;
   byte config_is_reloaded=0;
   T_Special_button *panel;
   byte need_redraw=1;
@@ -898,56 +918,56 @@ void Button_Settings(void)
   
     {"           --- GUI  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Opening message:",1,&(Config_choisie.Opening_message),0,1,0,Lookup_YesNo},
-  {"Menu ratio adapt:",1,&(Config_choisie.Ratio),0,1,0,Lookup_MenuRatio},
-  {"Draw limits:",1,&(Config_choisie.Display_image_limits),0,1,0,Lookup_YesNo},
-  {"Coordinates:",1,&(Config_choisie.Coords_rel),0,1,0,Lookup_Coords},
-  {"Separate colors:",1,&(Config_choisie.Separate_colors),0,1,0,Lookup_YesNo},
-  {"Safety colors:",1,&(Config_choisie.Safety_colors),0,1,0,Lookup_YesNo},
-  {"Grid XOR color:",1,&(Config_choisie.Grid_XOR_color),0,255,3,NULL},
+  {"Opening message:",1,&(config.Opening_message),0,1,0,Lookup_YesNo},
+  {"Menu ratio adapt:",1,&(config.Ratio),0,1,0,Lookup_MenuRatio},
+  {"Draw limits:",1,&(config.Display_image_limits),0,1,0,Lookup_YesNo},
+  {"Coordinates:",1,&(config.Coords_rel),0,1,0,Lookup_Coords},
+  {"Separate colors:",1,&(config.Separate_colors),0,1,0,Lookup_YesNo},
+  {"Safety colors:",1,&(config.Safety_colors),0,1,0,Lookup_YesNo},
+  {"Grid XOR color:",1,&(config.Grid_XOR_color),0,255,3,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Scrollbar speed",0,NULL,0,0,0,NULL},
-  {"  on left click:",1,&(Config_choisie.Delay_left_click_on_slider),1,255,4,NULL},
-  {"  on right click:",1,&(Config_choisie.Delay_right_click_on_slider),1,255,4,NULL},
-  {"Merge movement:",1,&(Config_choisie.Mouse_merge_movement),0,100,4,NULL},
-  {"Double click speed:",2,&(Config_choisie.Double_click_speed),1,1999,4,NULL},
-  {"Double key speed:",2,&(Config_choisie.Double_key_speed),1,1999,4,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
+  {"  on left click:",1,&(config.Delay_left_click_on_slider),1,255,4,NULL},
+  {"  on right click:",1,&(config.Delay_right_click_on_slider),1,255,4,NULL},
+  {"Merge movement:",1,&(config.Mouse_merge_movement),0,100,4,NULL},
+  {"Double click speed:",2,&(config.Double_click_speed),1,1999,4,NULL},
+  {"Double key speed:",2,&(config.Double_key_speed),1,1999,4,NULL},
+  {"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
+  {"  horizontally:",1,&(config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
+  {"  vertically:",1,&(config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
   
   {"          --- Editing  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Adjust brush pick:",1,&(Config_choisie.Adjust_brush_pick),0,1,0,Lookup_YesNo},
-  {"Undo pages:",1,&(Config_choisie.Max_undo_pages),1,99,5,NULL},
-  {"Vertices per polygon:",4,&(Config_choisie.Nb_max_vertices_per_polygon),2,16384,5,NULL},
-  {"Fast zoom:",1,&(Config_choisie.Fast_zoom),0,1,0,Lookup_YesNo},
-  {"Clear with stencil:",1,&(Config_choisie.Clear_with_stencil),0,1,0,Lookup_YesNo},
-  {"Auto discontinuous:",1,&(Config_choisie.Auto_discontinuous),0,1,0,Lookup_YesNo},
-  {"Auto count colors:",1,&(Config_choisie.Auto_nb_used),0,1,0,Lookup_YesNo},
+  {"Adjust brush pick:",1,&(config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
+  {"Undo pages:",1,&(config.Max_undo_pages),1,99,5,NULL},
+  {"Vertices per polygon:",4,&(config.Nb_max_vertices_per_polygon),2,16384,5,NULL},
+  {"Fast zoom:",1,&(config.Fast_zoom),0,1,0,Lookup_YesNo},
+  {"Clear with stencil:",1,&(config.Clear_with_stencil),0,1,0,Lookup_YesNo},
+  {"Auto discontinuous:",1,&(config.Auto_discontinuous),0,1,0,Lookup_YesNo},
+  {"Auto count colors:",1,&(config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Show in fileselector",0,NULL,0,0,0,NULL},
-  {"  Hidden files:",4,&(Config_choisie.Show_hidden_files),0,1,0,Lookup_YesNo},
-  {"  Hidden dirs:",4,&(Config_choisie.Show_hidden_directories),0,1,0,Lookup_YesNo},
-  {"Preview delay:",4,&(Config_choisie.Timer_delay), 1,256,3,NULL},
-  {"Maximize preview:",1,&(Config_choisie.Maximize_preview), 0,1,0,Lookup_YesNo},
-  {"Find file fast:",1,&(Config_choisie.Find_file_fast), 0,2,0,Lookup_FFF},
-  {"Auto set resolution:",1,&(Config_choisie.Auto_set_res), 0,1,0,Lookup_YesNo},
-  {"  According to:",1,&(Config_choisie.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
-  {"Backup:",1,&(Config_choisie.Backup), 0,1,0,Lookup_YesNo},
+  {"  Hidden files:",4,&(config.Show_hidden_files),0,1,0,Lookup_YesNo},
+  {"  Hidden dirs:",4,&(config.Show_hidden_directories),0,1,0,Lookup_YesNo},
+  {"Preview delay:",4,&(config.Timer_delay), 1,256,3,NULL},
+  {"Maximize preview:",1,&(config.Maximize_preview), 0,1,0,Lookup_YesNo},
+  {"Find file fast:",1,&(config.Find_file_fast), 0,2,0,Lookup_FFF},
+  {"Auto set resolution:",1,&(config.Auto_set_res), 0,1,0,Lookup_YesNo},
+  {"  According to:",1,&(config.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
+  {"Backup:",1,&(config.Backup), 0,1,0,Lookup_YesNo},
   
   {"      --- Format options  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
-  {"Screen size in GIF:",1,&(Config_choisie.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
-  {"Clear palette:",1,&(Config_choisie.Clear_palette),0,1,0,Lookup_YesNo},
+  {"Screen size in GIF:",1,&(config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
+  {"Clear palette:",1,&(config.Clear_palette),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
@@ -967,7 +987,7 @@ void Button_Settings(void)
     "FILE FORMAT OPTIONS",
   };
 
-  Config_choisie=Config;
+  config=Config;
 
   Open_window(307,182,"Settings");
 
@@ -991,7 +1011,7 @@ void Button_Settings(void)
     if (need_redraw)
     {
       Hide_cursor();
-      Settings_display_config(setting+current_page*SETTING_PER_PAGE, &Config_choisie, panel);
+      Settings_display_config(setting+current_page*SETTING_PER_PAGE, &config, panel);
       if (need_redraw & 2)
       {
         // Including slider position
@@ -1010,16 +1030,16 @@ void Button_Settings(void)
     {
 
       case 1 : // Reload
-        Settings_load_config(&Config_choisie);
+        Settings_load_config(&config);
         config_is_reloaded=1;
         need_redraw=1;
         break;
       case 2 : // Auto-save
-        Config_choisie.Auto_save=!Config_choisie.Auto_save;
+        config.Auto_save=!config.Auto_save;
         need_redraw=1;
         break;
       case 3 : // Save
-        Settings_save_config(&Config_choisie);
+        Settings_save_config(&config);
         break;
       // case 4: // Close
       
@@ -1036,14 +1056,17 @@ void Button_Settings(void)
               // Remember which button is clicked
               byte old_mouse_k = Mouse_K;
               
-              if (Window_normal_button_onclick(panel->Pos_X, panel->Pos_Y+num*SETTING_HEIGHT+1, panel->Width, SETTING_HEIGHT, 5))
+              if (Window_normal_button_onclick(panel->Pos_X, panel->Pos_Y+num*SETTING_HEIGHT, panel->Width, SETTING_HEIGHT+1, 5))
               {
                 int value = Get_setting_value(&item);
                 
                 if (item.Lookup)
                 {
                   // Enum: toggle it
-                  value = Lookup_toggle(value, item.Lookup);
+                  if (old_mouse_k & LEFT_SIDE)
+                    value = Lookup_next(value, item.Lookup);
+                  else
+                    value = Lookup_previous(value, item.Lookup);
                   Set_setting_value(&item, value);
                 }
                 else
@@ -1053,7 +1076,7 @@ void Button_Settings(void)
                   str[0]='\0';
                   if (! (old_mouse_k & RIGHT_SIDE))
                     Num2str(value,str,item.Digits+1);
-                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+3,str,item.Digits+1,1))
+                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,1))
                   {
                     value=atoi(str);
                     if (value<item.Min_value)
@@ -1077,16 +1100,6 @@ void Button_Settings(void)
         break;
       
     }
-    /* Keep in reserve:
-       Piece of code to reset fileselector offsets
-       if the visibility settings changed.
-    if ((clicked_button>=3) && (clicked_button<=4))
-    {
-      Main_fileselector_position=0;
-      Main_fileselector_offset=0;
-      Spare_fileselector_position=0;
-      Spare_fileselector_offset=0;
-    }*/
       
     if (Key == KEY_MOUSEWHEELDOWN)
     {
@@ -1111,7 +1124,19 @@ void Button_Settings(void)
   }
   while ( (clicked_button!=4) && (Key!=SDLK_RETURN) );
 
-  Config=Config_choisie;
+  // Checks on change
+  if (Config.Show_hidden_directories!=config.Show_hidden_directories
+    ||Config.Show_hidden_files!=config.Show_hidden_files)
+  {
+    // Reset fileselector offsets
+    // since different files are shown now
+    Main_fileselector_position=0;
+    Main_fileselector_offset=0;
+    Spare_fileselector_position=0;
+    Spare_fileselector_offset=0;
+  }
+  // Copy all
+  Config=config;
 
   if (config_is_reloaded)
     Compute_optimal_menu_colors(Main_palette);
@@ -1237,10 +1262,6 @@ void Button_Skins(void)
 
   #define FILESEL_Y 34
 
-  // Show preferred colors
-  Set_color(MC_Dark, Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B);
-  Set_color(MC_Light, Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B);
-  
   // --- Read the contents of skins/ directory ------------------
   
   // Here we use the same data container as the fileselectors.
@@ -1353,27 +1374,37 @@ void Button_Skins(void)
           for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
           for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
           {
-            if (gfx->Preview[offs_y][x_pos] == gfx->Color_black)
+            if (gfx->Preview[offs_y][x_pos] == gfx->Color[0])
               Pixel_in_window(x, y, MC_Black);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_dark)
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[1])
               Pixel_in_window(x, y,  MC_Dark);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_white)
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[3])
               Pixel_in_window(x, y, MC_White);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color_light)
+            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[2])
               Pixel_in_window(x, y, MC_Light);
           }
           // Actualize current screen according to preferred GUI colors
           // Note this only updates onscreen colors
           Set_color(
+            MC_Black, 
+            gfx->Default_palette[gfx->Color[0]].R,
+            gfx->Default_palette[gfx->Color[0]].G,
+            gfx->Default_palette[gfx->Color[0]].B);
+          Set_color(
             MC_Dark, 
-            gfx->Default_palette[gfx->Color_dark].R,
-            gfx->Default_palette[gfx->Color_dark].G,
-            gfx->Default_palette[gfx->Color_dark].B);
+            gfx->Default_palette[gfx->Color[1]].R,
+            gfx->Default_palette[gfx->Color[1]].G,
+            gfx->Default_palette[gfx->Color[1]].B);
           Set_color(
             MC_Light, 
-            gfx->Default_palette[gfx->Color_light].R,
-            gfx->Default_palette[gfx->Color_light].G,
-            gfx->Default_palette[gfx->Color_light].B);
+            gfx->Default_palette[gfx->Color[2]].R,
+            gfx->Default_palette[gfx->Color[2]].G,
+            gfx->Default_palette[gfx->Color[2]].B);
+          Set_color(
+            MC_White, 
+            gfx->Default_palette[gfx->Color[3]].R,
+            gfx->Default_palette[gfx->Color[3]].G,
+            gfx->Default_palette[gfx->Color[3]].B);
         }
         Update_window_area(6, 14, 173, 16);
 

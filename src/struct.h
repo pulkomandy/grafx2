@@ -453,14 +453,8 @@ typedef struct
   /// Preview for displaying in the skin dialog
   byte Preview[16][173];
 
-  /// Black GUI color index in skin palette
-  byte Color_black;
-  /// Dark GUI color index in skin palette
-  byte Color_dark;
-  /// Light GUI color index in skin palette
-  byte Color_light;
-  /// White GUI color index in skin palette
-  byte Color_white;
+  /// GUI color indices in skin palette: black, dark, light, white.
+  byte Color[4];
   /// Transparent GUI color index in skin file
   byte Color_trans;
 

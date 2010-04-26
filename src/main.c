@@ -674,10 +674,10 @@ int Init_program(int argc,char * argv[])
   }
   Set_current_skin(Config.Skin_file, gfx);
   // Override colors
-  // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
+  // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
+  // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
+  // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
+  // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
 //  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)

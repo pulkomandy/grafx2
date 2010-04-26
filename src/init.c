@@ -134,7 +134,7 @@ byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y,
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
-  // type: 2 = brush icon or sieve pattern (only gui->Color_white and gui->Color_trans)
+  // type: 2 = brush icon or sieve pattern (only gui->Color[3] and gui->Color_trans)
   // type: 3 = raw bitmap (splash screen)
   
   byte * dest_ptr=dest;
@@ -154,24 +154,24 @@ byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y,
     for (x=start_x; x<start_x+width; x++)
     {
       color=Get_SDL_pixel_8(gui,x,y);
-      if (type==0 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white))
+      if (type==0 && (color != gfx->Color[0] && color != gfx->Color[1] && color != gfx->Color[2] && color != gfx->Color[3]))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color[0], gfx->Color[1], gfx->Color[2], gfx->Color[3]);
         return 1;
       }
-      if (type==1 && (color != gfx->Color_black && color != gfx->Color_dark && color != gfx->Color_light && color != gfx->Color_white && color != gfx->Color_trans))
+      if (type==1 && (color != gfx->Color[0] && color != gfx->Color[1] && color != gfx->Color[2] && color != gfx->Color[3] && color != gfx->Color_trans))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the mouse colors (which were detected as %d,%d,%d,%d,%d.\n",
-          start_x, start_y, height, width, section, x, y, color, gfx->Color_black, gfx->Color_dark, gfx->Color_light, gfx->Color_white, gfx->Color_trans);
+          start_x, start_y, height, width, section, x, y, color, gfx->Color[0], gfx->Color[1], gfx->Color[2], gfx->Color[3], gfx->Color_trans);
         return 1;
       }
       if (type==2)
       {
-        if (color != gfx->Color_white && color != gfx->Color_trans)
+        if (color != gfx->Color[3] && color != gfx->Color_trans)
         {
           sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the brush colors (which were detected as %d on %d.\n",
-            start_x, start_y, height, width, section, x, y, color, gfx->Color_white, gfx->Color_trans);
+            start_x, start_y, height, width, section, x, y, color, gfx->Color[3], gfx->Color_trans);
           return 1;
         }
         // Conversion en 0/1 pour les brosses monochromes internes
@@ -278,7 +278,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Carré "noir"
-  gfx->Color_black = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  gfx->Color[0] = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
@@ -287,9 +287,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==gfx->Color_black);
+  } while(color==gfx->Color[0]);
   // Carré "foncé"
-  gfx->Color_dark = color;
+  gfx->Color[1] = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -298,9 +298,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==gfx->Color_dark);
+  } while(color==gfx->Color[1]);
   // Carré "clair"
-  gfx->Color_light = color;
+  gfx->Color[2] = color;
   do
   {
     if (++cursor_x>gui->w)
@@ -309,9 +309,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==gfx->Color_light);
+  } while(color==gfx->Color[2]);
   // Carré "blanc"
-  gfx->Color_white = color;
+  gfx->Color[3] = color;
   do
   {
     if (++cursor_x>=gui->w)
@@ -320,7 +320,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
-  } while(color==gfx->Color_white);
+  } while(color==gfx->Color[3]);
   // Carré "transparent"
   gfx->Color_trans=color;
   do
@@ -338,7 +338,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   
   cursor_x=0;
   cursor_y=1;
-  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==gfx->Color_black)
+  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==gfx->Color[0])
   {
     cursor_y++;
     if (cursor_y>=gui->h)
@@ -2644,16 +2644,16 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
     Config.Skin_file = strdup(skinfile);
   }
 
-  Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color_black];
-  Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color_dark];
-  Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color_light];
-  Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color_white];
+  //Config.Fav_menu_colors[0] = gfx->Default_palette[gfx->Color[0]];
+  //Config.Fav_menu_colors[1] = gfx->Default_palette[gfx->Color[1]];
+  //Config.Fav_menu_colors[2] = gfx->Default_palette[gfx->Color[2]];
+  //Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color[3]];
   
   // Reassign GUI color indices
-  MC_Black = gfx->Color_black;
-  MC_Dark =  gfx->Color_dark;
-  MC_Light = gfx->Color_light;
-  MC_White = gfx->Color_white;
+  MC_Black = gfx->Color[0];
+  MC_Dark =  gfx->Color[1];
+  MC_Light = gfx->Color[2];
+  MC_White = gfx->Color[3];
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
