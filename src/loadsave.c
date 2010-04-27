@@ -740,8 +740,17 @@ void Load_image(T_IO_Context *context)
       // Transfer the data to main image.
       if (!format->Palette_only)
       {
-        strcpy(Main_backups->Pages->Filename,context->File_name);
-        strcpy(Main_backups->Pages->File_directory,context->File_directory);
+        if (context->Original_file_name && context->Original_file_name[0]
+          && context->Original_file_directory && context->Original_file_directory[0])
+        {
+          strcpy(Main_backups->Pages->Filename,context->Original_file_name);
+          strcpy(Main_backups->Pages->File_directory,context->Original_file_directory);
+        }
+        else
+        {
+          strcpy(Main_backups->Pages->Filename,context->File_name);
+          strcpy(Main_backups->Pages->File_directory,context->File_directory);
+        }
         
         // On considère que l'image chargée n'est plus modifiée
         Main_image_is_modified=0;
@@ -1051,6 +1060,12 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
   context->Format = Main_fileformat; // FIXME ?
 }
 
+// Setup for loading/saving an intermediate backup
+void Init_context_backup_image(T_IO_Context * context, char *file_name, char *file_directory)
+{
+  Init_context_layered_image(context, file_name, file_directory);
+}
+
 /// Setup for loading/saving the current main image
 void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory)
 {
@@ -1276,8 +1291,15 @@ byte Process_backups(T_String_list **list)
   {
     // Load this file
     T_IO_Context context;
-    Init_context_layered_image(&context, files_vector[i], Config_directory);
+    char file_name[MAX_PATH_CHARACTERS]="";
+    char file_directory[MAX_PATH_CHARACTERS]="";
+    
+    Init_context_backup_image(&context, files_vector[i], Config_directory);
+    // Provide buffers to read original location
+    context.Original_file_name = file_name;
+    context.Original_file_directory = file_directory;
     Load_image(&context);
+    Main_image_is_modified=1;
     Destroy_context(&context);
     Redraw_layered_image();
     Display_all_screen();
@@ -1381,8 +1403,12 @@ void Rotate_safety_backups(void)
     sprintf(file_name, "%c%6.6d.bkp",
       Main_safety_backup_prefix,
       (Uint32)Main_safety_number);
-    Init_context_layered_image(&context, file_name, Config_directory);
+    Init_context_backup_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
+    // Provide original file data, to store as a GIF Application Extension
+    context.Original_file_name = Main_backups->Pages->Filename;
+    context.Original_file_directory = Main_backups->Pages->File_directory;
+    
     Save_image(&context);
     Destroy_context(&context);
     

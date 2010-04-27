@@ -42,7 +42,7 @@ if OK == true then
 
 
  if clean == 1 then
-   for c = #colors+1, 255, 1 do 
+   for c = #colors+1, 256, 1 do 
      setcolor(c-1,0,0,0)  
    end
  end

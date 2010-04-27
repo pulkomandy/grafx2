@@ -65,6 +65,11 @@ typedef struct
   byte *Target_address;
   /// Pitch: Difference of addresses between one pixel and the one just "below" it
   long Pitch;
+  
+  /// Original file name, stored in GIF file
+  char * Original_file_name;
+  /// Original file directory, stored in GIF file
+  char * Original_file_directory;
 
   /// Internal: during load, marks which layer is being loaded.
   short Current_layer;
@@ -101,6 +106,8 @@ void Pixel_load_in_brush (word x_pos, word y_pos, byte color);
 void Init_context_preview(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for loading/saving the current main image
 void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory);
+// Setup for loading/saving an intermediate backup
+void Init_context_backup_image(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for loading/saving the flattened version of current main image
 void Init_context_flat_image(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for loading/saving the user's brush

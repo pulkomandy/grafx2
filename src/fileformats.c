@@ -1848,6 +1848,8 @@ void Load_GIF(T_IO_Context * context)
                       if (size_to_read>nb_char_to_keep)
                         fseek(GIF_file,size_to_read-nb_char_to_keep,SEEK_CUR);
                     }
+                    // Lecture de la taille du bloc suivant:
+                    Read_byte(GIF_file,&size_to_read);
                     break;
                   case 0xF9: // Graphics Control Extension
                     // Prévu pour la transparence
@@ -1871,15 +1873,73 @@ void Load_GIF(T_IO_Context * context)
                     }
                     else
                       File_error=2;
+                    // Lecture de la taille du bloc suivant:
+                    Read_byte(GIF_file,&size_to_read);
                     break;
 
+                  case 0xFF: // Application Extension
+                    // Normally, always a 11-byte block
+                    if (size_to_read == 0x0B)
+                    {
+                      char aeb[0x0B];
+                      Read_bytes(GIF_file,aeb, 0x0B);
+                      if (File_error)
+                        ;
+                      else if (!memcmp(aeb,"NETSCAPE2.0",0x0B))
+                      {
+                        // The well-known Netscape extension.
+                        // Nothing to do, just skip sub-block
+                        do
+                        {
+                          if (! Read_byte(GIF_file,&size_to_read))
+                            File_error=1;
+                          fseek(GIF_file,size_to_read,SEEK_CUR);
+                        } while (!File_error && size_to_read!=0);
+                      }
+                      else if (!memcmp(aeb,"GFX2PATH\x00\x00\x00",0x0B))
+                      {
+                        // Original file path
+                        if (context->Original_file_name && context->Original_file_directory)
+                        {
+                          Read_byte(GIF_file,&size_to_read);
+                          if (!File_error && size_to_read)
+                          {
+                            Read_bytes(GIF_file,context->Original_file_directory, size_to_read);
+                            Read_byte(GIF_file,&size_to_read);
+                            if (!File_error && size_to_read)
+                            {
+                              Read_bytes(GIF_file,context->Original_file_name, size_to_read);
+                              Read_byte(GIF_file,&size_to_read); // Normally 0
+                            }
+                          }
+                        }
+                        else
+                        {
+                          // Nothing to do, just skip sub-block
+                          Read_byte(GIF_file,&size_to_read);
+                          while (size_to_read!=0 && !File_error)
+                          {
+                            fseek(GIF_file,size_to_read,SEEK_CUR);
+                            Read_byte(GIF_file,&size_to_read);
+                          }
+                        }
+                      }
+                    }
+                    else
+                    {
+                      fseek(GIF_file,size_to_read,SEEK_CUR);
+                      // Lecture de la taille du bloc suivant:
+                      Read_byte(GIF_file,&size_to_read);
+                    }
+                    break;
+                    
                   default:
                     // On saute le bloc:
                     fseek(GIF_file,size_to_read,SEEK_CUR);
+                    // Lecture de la taille du bloc suivant:
+                    Read_byte(GIF_file,&size_to_read);
                     break;
                 }
-                // Lecture de la taille du bloc suivant:
-                Read_byte(GIF_file,&size_to_read);
               }
             }
             break;
@@ -2421,6 +2481,31 @@ void Save_GIF(T_IO_Context * context)
           // After writing all layers
           if (!File_error)
           {
+            // If requested, write a specific extension for storing
+            // original file path.
+            // This is used by the backup system.
+            // The format is :
+            //   21 FF 0B G  F  X  2  P  A  T  H  00 00 00
+            //   <size of path (byte)> <null-terminated path>
+            //   <size of filename (byte)> <null-terminated filename>
+            //   00
+            if (context->Original_file_name != NULL
+             && context->Original_file_directory != NULL)
+            {
+              long name_size = 1+strlen(context->Original_file_name);
+              long dir_size = 1+strlen(context->Original_file_directory);
+              if (name_size<256 && dir_size<256)
+              {
+                if (! Write_bytes(GIF_file,"\x21\xFF\x0BGFX2PATH\x00\x00\x00", 14)
+                || ! Write_byte(GIF_file,dir_size)
+                || ! Write_bytes(GIF_file, context->Original_file_directory, dir_size)
+                || ! Write_byte(GIF_file,name_size)
+                || ! Write_bytes(GIF_file, context->Original_file_name, name_size)
+                || ! Write_byte(GIF_file,0))
+                  File_error=1;
+              }
+            }
+          
             // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
             if (! Write_byte(GIF_file,'\x3B'))
               File_error=1;
