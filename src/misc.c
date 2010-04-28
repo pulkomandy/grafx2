@@ -726,7 +726,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 #if defined(__WIN32__)
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
-#elif defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
   #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
   // sysinfo not implemented
@@ -755,7 +755,7 @@ unsigned long Memory_free(void)
   mstt.dwLength = sizeof(MEMORYSTATUS);
   GlobalMemoryStatus(&mstt);
   return mstt.dwAvailPhys;
-#elif defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
   int mib[2];
   int maxmem;
   size_t len;
