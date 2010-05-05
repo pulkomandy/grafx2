@@ -153,7 +153,7 @@ else
     CP = cp
     BIN = ../bin/grafx2
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
