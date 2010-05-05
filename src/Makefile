@@ -152,8 +152,9 @@ else
     RMDIR = rmdir
     CP = cp
     BIN = ../bin/grafx2
+    PLATFORMOBJ = $(OBJDIR)/haiku.o
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
@@ -302,7 +303,7 @@ endif
 .PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o 
+OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o
 
 SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png
 
@@ -386,6 +387,10 @@ depend :
 # Link the icons to the program under windows
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+
+# Compile the C++ file needed in Haiku to use the API
+$(OBJDIR)/haiku.o : haiku.cpp
+	g++ -c haiku.cpp -o $(OBJDIR)/haiku.o
 
 clean :
 	$(DELCOMMAND) $(OBJ)

@@ -31,6 +31,8 @@
     #include <sys/mount.h>
 #elif defined (__linux__)
     #include <sys/vfs.h>
+#elif defined(__HAIKU__)
+	#include "haiku.h"
 #endif
 
 #include "const.h"
@@ -62,7 +64,7 @@ word * Shortcut(word shortcut_number)
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 
-// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number)
 {
@@ -670,6 +672,8 @@ void Button_Stats(void)
       statfs(Main_current_directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
+#elif defined(__HAIKU__)
+	mem_size = haiku_get_free_space(Main_current_directory);
 #else
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
