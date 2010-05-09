@@ -38,6 +38,7 @@ byte Effect_shade(word x,word y,byte color);
 byte Effect_quick_shade(word x,word y,byte color);
 byte Effect_tiling(word x,word y,byte color);
 byte Effect_smooth(word x,word y,byte color);
+byte Effect_layer_copy(word x,word y,byte color);
 
 void Display_foreback(void);
 

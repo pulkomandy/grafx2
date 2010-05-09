@@ -2853,6 +2853,15 @@ byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.
 
+byte Effect_layer_copy(word x,word y,byte color)
+{
+  if (color<Main_backups->Pages->Nb_layers)
+  {
+    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[color]);
+  }
+  return Read_pixel_from_feedback_screen(x,y);
+}
+
 void Horizontal_grid_line(word x_pos,word y_pos,word width)
 {
   int x;
