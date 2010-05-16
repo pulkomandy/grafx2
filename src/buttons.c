@@ -111,6 +111,10 @@ void Bouton_***(void)
 }
 */
 
+void Select_paintbrush(int index);
+byte Store_paintbrush(int index);
+
+
 void Message_out_of_memory(void)
 {
   short clicked_button;
@@ -2720,7 +2724,7 @@ void Button_Unselect_fill(void)
 //---------------------------- Menu des pinceaux -----------------------------
 
 /// Checks if the current brush is identical to a preset one.
-byte Is_paintbrush(byte index)
+byte Same_paintbrush(byte index)
 {
   if (Paintbrush_shape!=Gfx->Paintbrush_type[index] ||
       Paintbrush_width!=Gfx->Preset_paintbrush_width[index] ||
@@ -2755,9 +2759,11 @@ void Button_Paintbrush_menu(void)
   {
     x_pos=13+(index%12)*24;
     y_pos=27+(index/12)*25;
-    Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
+    Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
     // Highlight selected brush
-    if (Is_paintbrush(index))
+    if (Same_paintbrush(index))
       Window_rectangle(x_pos,y_pos,20,20,MC_White);
       
     Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
@@ -2766,7 +2772,8 @@ void Button_Paintbrush_menu(void)
   {
     x_pos=13+((index+NB_PAINTBRUSH_SPRITES)%12)*24;
     y_pos=27+((index+NB_PAINTBRUSH_SPRITES)/12)*25;
-    Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
+    Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
     Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
   }
   
@@ -2784,7 +2791,7 @@ void Button_Paintbrush_menu(void)
     {
       index = clicked_button-NB_PAINTBRUSH_SPRITES-2;
       
-      if (Window_attribute1==RIGHT_SIDE)
+      if (Window_attribute2==1) // Set
       {
         // Store
         
@@ -2808,22 +2815,31 @@ void Button_Paintbrush_menu(void)
       }
 
     }
-    else if (clicked_button>1 && Window_attribute1==LEFT_SIDE)
+    else if (clicked_button>1)
     // Standard paintbrushes
     {
-      Close_window();
-      index=clicked_button-2;
-      Paintbrush_shape=Gfx->Paintbrush_type[index];
-      Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-      Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-      Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-      Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
-      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-      Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
-      
-      break;
+      if (Window_attribute2!=1)
+      {
+        // Select paintbrush
+        Close_window();
+        Select_paintbrush(clicked_button-2);
+        break;
+      }
+      else if (Window_attribute2==1)
+      {
+        // Store current
+        index=clicked_button-2;
+        if (!Store_paintbrush(index))
+        {        
+          // Redraw
+          Hide_cursor();
+          x_pos=13+(index%12)*24;
+          y_pos=27+(index/12)*25;
+          Window_rectangle(x_pos,y_pos,20,20,MC_White);
+          Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
+          Display_cursor();
+        }
+      }
     }
     else if (clicked_button==1 || Is_shortcut(Key,0x100+BUTTON_PAINTBRUSHES))
     {
@@ -4879,6 +4895,7 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
   }
 }
 
+/// Store the current brush in brush container
 void Store_brush(int index)
 {
   if (Brush_container[index].Paintbrush_shape < PAINTBRUSH_SHAPE_MAX)
@@ -4911,9 +4928,27 @@ void Store_brush(int index)
     // Re-init the rest
     Brush_container[index].Transp_color=0;
   }
-  if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
+  else if (Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH &&
+    Brush_width <= BRUSH_CONTAINER_PREVIEW_WIDTH &&
+    Brush_height <= BRUSH_CONTAINER_PREVIEW_HEIGHT)
+  {
+    // Color brush transformed into a real mono paintbrush
+    int x,y;
+    
+    Brush_container[index].Paintbrush_shape=PAINTBRUSH_SHAPE_MISC;
+    Brush_container[index].Width=Brush_width;
+    Brush_container[index].Height=Brush_height;
+    // Preview: pick center for big mono brush
+    for (y=0; y<BRUSH_CONTAINER_PREVIEW_HEIGHT && y<Brush_height; y++)
+      for (x=0; x<BRUSH_CONTAINER_PREVIEW_WIDTH && x<Brush_width; x++)
+        Brush_container[index].Thumbnail[y][x]=(Brush[y*Brush_width+x]!=Back_color);
+    // Re-init the rest
+    Brush_container[index].Transp_color=0;
+  }
+  else if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
      Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
   {
+    // Color brush
     Brush_container[index].Brush=(byte *)malloc(Brush_width*Brush_height);
     if (Brush_container[index].Brush)
     {
@@ -4941,6 +4976,66 @@ void Store_brush(int index)
       Error(0);
     }
   }
+}
+
+/// Retrieve a normal paintbrush
+void Select_paintbrush(int index)
+{
+  int x_pos,y_pos;
+  Paintbrush_shape=Gfx->Paintbrush_type[index];
+  Paintbrush_width=Gfx->Preset_paintbrush_width[index];
+  Paintbrush_height=Gfx->Preset_paintbrush_height[index];
+  Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
+  Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
+  for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+    for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+      Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
+  Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
+}
+
+/// Store the current brush in paintbrush slot, if possible.
+byte Store_paintbrush(int index)
+{
+  // Store a mono brush
+  if (Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+  {
+    int x_pos,y_pos;
+    
+    Gfx->Paintbrush_type[index]=Paintbrush_shape;
+    Gfx->Preset_paintbrush_width[index]=Paintbrush_width;
+    Gfx->Preset_paintbrush_height[index]=Paintbrush_height;
+    Gfx->Preset_paintbrush_offset_X[index]=Paintbrush_offset_X;
+    Gfx->Preset_paintbrush_offset_Y[index]=Paintbrush_offset_Y;
+    
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Gfx->Paintbrush_sprite[index][y_pos][x_pos]=Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos];
+    
+    return 0;
+  }
+  
+  else if ((Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH || 
+    Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH) &&
+    Brush_width <= PAINTBRUSH_WIDTH &&
+    Brush_height <= PAINTBRUSH_HEIGHT)
+  {
+    // Color brush transformed into a real mono paintbrush
+    int x_pos,y_pos;
+    
+    Gfx->Paintbrush_type[index]=PAINTBRUSH_SHAPE_MISC;
+    Gfx->Preset_paintbrush_width[index]=Brush_width;
+    Gfx->Preset_paintbrush_height[index]=Brush_height;
+    Gfx->Preset_paintbrush_offset_X[index]=Brush_offset_X;
+    Gfx->Preset_paintbrush_offset_Y[index]=Brush_offset_Y;
+    
+    for (y_pos=0; y_pos<Brush_height; y_pos++)
+      for (x_pos=0; x_pos<Brush_width; x_pos++)
+        Gfx->Paintbrush_sprite[index][y_pos][x_pos]=Brush[(y_pos*Brush_width)+x_pos]!=Back_color;
+        
+    return 0;
+  }
+  // Can't store it
+  return 1;
 }
 
 byte Restore_brush(int index)
