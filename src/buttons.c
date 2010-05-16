@@ -2753,7 +2753,21 @@ void Button_Paintbrush_menu(void)
 
   Window_display_frame(8,21,294,132);
 
-  Window_set_normal_button(122,158,67,14,"Cancel",0,1,KEY_ESC); // 1
+  Window_set_normal_button(10,158,67,14,"Cancel",0,1,KEY_ESC); // 1
+
+  Window_set_dropdown_button(216, 158, 84,14,84,"Preset...", 0,0,1,RIGHT_SIDE|LEFT_SIDE,1);  
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_ROUND,         "Round");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SQUARE,        "Square");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_HORIZONTAL_BAR,"Horizontal");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_VERTICAL_BAR,  "Vertical");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SLASH,         "Slash");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_ANTISLASH,     "Antislash");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_RANDOM,        "Random");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_CROSS,         "Cross");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_PLUS,          "Plus");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_DIAMOND,       "Diamond");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SIEVE_ROUND,   "Sieve Rnd");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SIEVE_SQUARE,  "Sieve Sqr");
 
   for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
   {
@@ -2787,9 +2801,9 @@ void Button_Paintbrush_menu(void)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_PAINTBRUSHES, NULL);
     // Brush container
-    if (clicked_button>(NB_PAINTBRUSH_SPRITES+1))
+    if (clicked_button>=(NB_PAINTBRUSH_SPRITES+3))
     {
-      index = clicked_button-NB_PAINTBRUSH_SPRITES-2;
+      index = clicked_button-NB_PAINTBRUSH_SPRITES-3;
       
       if (Window_attribute2==1) // Set
       {
@@ -2815,20 +2829,20 @@ void Button_Paintbrush_menu(void)
       }
 
     }
-    else if (clicked_button>1)
+    else if (clicked_button>=3)
     // Standard paintbrushes
     {
       if (Window_attribute2!=1)
       {
         // Select paintbrush
         Close_window();
-        Select_paintbrush(clicked_button-2);
+        Select_paintbrush(clicked_button-3);
         break;
       }
       else if (Window_attribute2==1)
       {
         // Store current
-        index=clicked_button-2;
+        index=clicked_button-3;
         if (!Store_paintbrush(index))
         {        
           // Redraw
@@ -2844,6 +2858,38 @@ void Button_Paintbrush_menu(void)
     else if (clicked_button==1 || Is_shortcut(Key,0x100+BUTTON_PAINTBRUSHES))
     {
       Close_window();
+      break;
+    }
+    else if (clicked_button==2)
+    {
+      int size;
+      // Pick a standard shape
+      Paintbrush_shape=Window_attribute2;
+      // Assign a reasonable size
+      size=Max(Paintbrush_width,Paintbrush_height);
+      if (size==1)
+        size=3;
+      
+      switch (Paintbrush_shape)
+      {
+        case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
+          Set_paintbrush_size(size, 1);
+          break;
+        case PAINTBRUSH_SHAPE_VERTICAL_BAR:
+            Set_paintbrush_size(1, size);
+          break;
+        case PAINTBRUSH_SHAPE_CROSS:
+        case PAINTBRUSH_SHAPE_PLUS:
+        case PAINTBRUSH_SHAPE_DIAMOND:
+          Set_paintbrush_size(size|1,size|1);
+          break;
+        default:
+          Set_paintbrush_size(size,size);
+          break;
+        
+      }
+      Close_window();
+      Change_paintbrush_shape(Paintbrush_shape);
       break;
     }
   }
