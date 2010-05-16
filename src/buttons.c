@@ -2719,6 +2719,26 @@ void Button_Unselect_fill(void)
 
 //---------------------------- Menu des pinceaux -----------------------------
 
+/// Checks if the current brush is identical to a preset one.
+byte Is_paintbrush(byte index)
+{
+  if (Paintbrush_shape!=Gfx->Paintbrush_type[index] ||
+      Paintbrush_width!=Gfx->Preset_paintbrush_width[index] ||
+      Paintbrush_height!=Gfx->Preset_paintbrush_height[index])
+  return 0;
+  
+  if (Paintbrush_shape==PAINTBRUSH_SHAPE_MISC)
+  {
+    // Check all pixels
+    int x,y;
+    for(y=0;y<Paintbrush_height;y++)
+      for(x=0;x<Paintbrush_width;x++)
+        if(Paintbrush_sprite[(y*MAX_PAINTBRUSH_SIZE)+x]!=Gfx->Paintbrush_sprite[index][y][x])
+          return 0;
+  }
+  return 1;
+}
+
 void Button_Paintbrush_menu(void)
 {
   short clicked_button;
@@ -2736,6 +2756,10 @@ void Button_Paintbrush_menu(void)
     x_pos=13+(index%12)*24;
     y_pos=27+(index/12)*25;
     Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    // Highlight selected brush
+    if (Is_paintbrush(index))
+      Window_rectangle(x_pos,y_pos,20,20,MC_White);
+      
     Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
   }
   for (index=0; index<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; index++)
@@ -2771,14 +2795,14 @@ void Button_Paintbrush_menu(void)
         Hide_cursor();
         Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
         Display_cursor();
-  }
+      }
       else
       {
         // Restore and exit
 
         if (Restore_brush(index))
         {
-  Close_window();
+          Close_window();
           break;
         }
       }
@@ -2786,18 +2810,18 @@ void Button_Paintbrush_menu(void)
     }
     else if (clicked_button>1 && Window_attribute1==LEFT_SIDE)
     // Standard paintbrushes
-  {
+    {
       Close_window();
-    index=clicked_button-2;
-    Paintbrush_shape=Gfx->Paintbrush_type[index];
-    Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-    Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-    Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-    Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
-    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-    Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
+      index=clicked_button-2;
+      Paintbrush_shape=Gfx->Paintbrush_type[index];
+      Paintbrush_width=Gfx->Preset_paintbrush_width[index];
+      Paintbrush_height=Gfx->Preset_paintbrush_height[index];
+      Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
+      Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
+      for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+        for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+          Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
+      Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
       
       break;
     }
