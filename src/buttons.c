@@ -5028,14 +5028,26 @@ void Store_brush(int index)
 void Select_paintbrush(int index)
 {
   int x_pos,y_pos;
+  
   Paintbrush_shape=Paintbrush[index].Shape;
-  Paintbrush_width=Paintbrush[index].Width;
-  Paintbrush_height=Paintbrush[index].Height;
-  Paintbrush_offset_X=Paintbrush[index].Offset_X;
-  Paintbrush_offset_Y=Paintbrush[index].Offset_Y;
-  for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-    for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-      Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Paintbrush[index].Sprite[y_pos][x_pos];
+  
+  if (Paintbrush[index].Width<=PAINTBRUSH_WIDTH &&
+    Paintbrush[index].Height<=PAINTBRUSH_HEIGHT)
+  {
+    Paintbrush_width=Paintbrush[index].Width;
+    Paintbrush_height=Paintbrush[index].Height;
+    Paintbrush_offset_X=Paintbrush[index].Offset_X;
+    Paintbrush_offset_Y=Paintbrush[index].Offset_Y;
+    
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Paintbrush[index].Sprite[y_pos][x_pos];
+  }
+  else
+  {
+    // Too big to read from the preview: need re-generate it
+    Set_paintbrush_size(Paintbrush[index].Width,Paintbrush[index].Height);
+  }
   Change_paintbrush_shape(Paintbrush[index].Shape);
 }
 
@@ -5045,7 +5057,7 @@ byte Store_paintbrush(int index)
   // Store a mono brush
   if (Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
   {
-    int x_pos,y_pos;
+    int x_pos,y_pos, x_off=0, y_off=0;
     
     Paintbrush[index].Shape=Paintbrush_shape;
     Paintbrush[index].Width=Paintbrush_width;
@@ -5053,29 +5065,32 @@ byte Store_paintbrush(int index)
     Paintbrush[index].Offset_X=Paintbrush_offset_X;
     Paintbrush[index].Offset_Y=Paintbrush_offset_Y;
     
-    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-        Paintbrush[index].Sprite[y_pos][x_pos]=Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos];
+    if (Paintbrush_width>PAINTBRUSH_WIDTH)
+      x_off=(Paintbrush_width-PAINTBRUSH_WIDTH)/2;
+    if (Paintbrush_height>PAINTBRUSH_HEIGHT)
+      y_off=(Paintbrush_height-PAINTBRUSH_HEIGHT)/2;
+    
+    for (y_pos=0; y_pos<Paintbrush_height && y_pos<PAINTBRUSH_HEIGHT; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width && x_pos<PAINTBRUSH_WIDTH; x_pos++)
+        Paintbrush[index].Sprite[y_pos][x_pos]=Paintbrush_sprite[((y_pos+y_off)*MAX_PAINTBRUSH_SIZE)+(x_pos+x_off)];
     
     return 0;
   }
   
   else if ((Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH || 
-    Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH) &&
-    Brush_width <= PAINTBRUSH_WIDTH &&
-    Brush_height <= PAINTBRUSH_HEIGHT)
+    Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH))
   {
     // Color brush transformed into a real mono paintbrush
     int x_pos,y_pos;
     
     Paintbrush[index].Shape=PAINTBRUSH_SHAPE_MISC;
-    Paintbrush[index].Width=Brush_width;
-    Paintbrush[index].Height=Brush_height;
-    Paintbrush[index].Offset_X=Brush_offset_X;
-    Paintbrush[index].Offset_Y=Brush_offset_Y;
+    Paintbrush[index].Width=Min(Brush_width,PAINTBRUSH_WIDTH);
+    Paintbrush[index].Height=Min(Brush_height,PAINTBRUSH_HEIGHT);
+    Paintbrush[index].Offset_X=Brush_offset_X*Paintbrush[index].Width/Brush_width;
+    Paintbrush[index].Offset_Y=Brush_offset_Y*Paintbrush[index].Height/Brush_height;
     
-    for (y_pos=0; y_pos<Brush_height; y_pos++)
-      for (x_pos=0; x_pos<Brush_width; x_pos++)
+    for (y_pos=0; y_pos<Brush_height&&y_pos<PAINTBRUSH_HEIGHT; y_pos++)
+      for (x_pos=0; x_pos<Brush_width&&x_pos<PAINTBRUSH_WIDTH; x_pos++)
         Paintbrush[index].Sprite[y_pos][x_pos]=Brush[(y_pos*Brush_width)+x_pos]!=Back_color;
         
     return 0;
