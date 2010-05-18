@@ -2726,9 +2726,9 @@ void Button_Unselect_fill(void)
 /// Checks if the current brush is identical to a preset one.
 byte Same_paintbrush(byte index)
 {
-  if (Paintbrush_shape!=Gfx->Paintbrush_type[index] ||
-      Paintbrush_width!=Gfx->Preset_paintbrush_width[index] ||
-      Paintbrush_height!=Gfx->Preset_paintbrush_height[index])
+  if (Paintbrush_shape!=Paintbrush[index].Shape ||
+      Paintbrush_width!=Paintbrush[index].Width ||
+      Paintbrush_height!=Paintbrush[index].Height)
   return 0;
   
   if (Paintbrush_shape==PAINTBRUSH_SHAPE_MISC)
@@ -2737,7 +2737,7 @@ byte Same_paintbrush(byte index)
     int x,y;
     for(y=0;y<Paintbrush_height;y++)
       for(x=0;x<Paintbrush_width;x++)
-        if(Paintbrush_sprite[(y*MAX_PAINTBRUSH_SIZE)+x]!=Gfx->Paintbrush_sprite[index][y][x])
+        if(Paintbrush_sprite[(y*MAX_PAINTBRUSH_SIZE)+x]!=Paintbrush[index].Sprite[y][x])
           return 0;
   }
   return 1;
@@ -5028,15 +5028,15 @@ void Store_brush(int index)
 void Select_paintbrush(int index)
 {
   int x_pos,y_pos;
-  Paintbrush_shape=Gfx->Paintbrush_type[index];
-  Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-  Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-  Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-  Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
+  Paintbrush_shape=Paintbrush[index].Shape;
+  Paintbrush_width=Paintbrush[index].Width;
+  Paintbrush_height=Paintbrush[index].Height;
+  Paintbrush_offset_X=Paintbrush[index].Offset_X;
+  Paintbrush_offset_Y=Paintbrush[index].Offset_Y;
   for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
     for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-      Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-  Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
+      Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Paintbrush[index].Sprite[y_pos][x_pos];
+  Change_paintbrush_shape(Paintbrush[index].Shape);
 }
 
 /// Store the current brush in paintbrush slot, if possible.
@@ -5047,15 +5047,15 @@ byte Store_paintbrush(int index)
   {
     int x_pos,y_pos;
     
-    Gfx->Paintbrush_type[index]=Paintbrush_shape;
-    Gfx->Preset_paintbrush_width[index]=Paintbrush_width;
-    Gfx->Preset_paintbrush_height[index]=Paintbrush_height;
-    Gfx->Preset_paintbrush_offset_X[index]=Paintbrush_offset_X;
-    Gfx->Preset_paintbrush_offset_Y[index]=Paintbrush_offset_Y;
+    Paintbrush[index].Shape=Paintbrush_shape;
+    Paintbrush[index].Width=Paintbrush_width;
+    Paintbrush[index].Height=Paintbrush_height;
+    Paintbrush[index].Offset_X=Paintbrush_offset_X;
+    Paintbrush[index].Offset_Y=Paintbrush_offset_Y;
     
     for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
       for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-        Gfx->Paintbrush_sprite[index][y_pos][x_pos]=Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos];
+        Paintbrush[index].Sprite[y_pos][x_pos]=Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos];
     
     return 0;
   }
@@ -5068,15 +5068,15 @@ byte Store_paintbrush(int index)
     // Color brush transformed into a real mono paintbrush
     int x_pos,y_pos;
     
-    Gfx->Paintbrush_type[index]=PAINTBRUSH_SHAPE_MISC;
-    Gfx->Preset_paintbrush_width[index]=Brush_width;
-    Gfx->Preset_paintbrush_height[index]=Brush_height;
-    Gfx->Preset_paintbrush_offset_X[index]=Brush_offset_X;
-    Gfx->Preset_paintbrush_offset_Y[index]=Brush_offset_Y;
+    Paintbrush[index].Shape=PAINTBRUSH_SHAPE_MISC;
+    Paintbrush[index].Width=Brush_width;
+    Paintbrush[index].Height=Brush_height;
+    Paintbrush[index].Offset_X=Brush_offset_X;
+    Paintbrush[index].Offset_Y=Brush_offset_Y;
     
     for (y_pos=0; y_pos<Brush_height; y_pos++)
       for (x_pos=0; x_pos<Brush_width; x_pos++)
-        Gfx->Paintbrush_sprite[index][y_pos][x_pos]=Brush[(y_pos*Brush_width)+x_pos]!=Back_color;
+        Paintbrush[index].Sprite[y_pos][x_pos]=Brush[(y_pos*Brush_width)+x_pos]!=Back_color;
         
     return 0;
   }

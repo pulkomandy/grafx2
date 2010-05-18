@@ -400,21 +400,6 @@ typedef struct
   /// Graphic resources for the mouse cursor.
   byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
-  // Preset paintbrushes
-  
-  /// Graphic resources for the preset paintbrushes.
-  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
-  /// Width of the preset paintbrushes.
-  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
-  /// Height of the preset paintbrushes.
-  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
-  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
-  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
-  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
-  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
-
   // Sieve patterns
   
   /// Preset sieve patterns, stored as binary (one word per line)
@@ -464,6 +449,24 @@ typedef struct
 
 
 } T_Gui_skin;
+
+typedef struct {
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Sprite[PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Width;
+  /// Height of the preset paintbrushes.
+  word  Height;
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Shape;
+  /// Brush handle for the preset brushes. Generally ::Width[]/2
+  word  Offset_X;
+  /// Brush handle for the preset brushes. Generally ::Height[]/2
+  word  Offset_Y;
+
+} T_Paintbrush;
 
 // A menubar.
 typedef struct {

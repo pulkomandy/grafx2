@@ -243,7 +243,8 @@ enum CHUNKS_CFG
   CHUNK_SMOOTH          = 6, ///< Smooth effect settings
   CHUNK_EXCLUDE_COLORS  = 7, ///< List of excluded colors
   CHUNK_QUICK_SHADE     = 8, ///< QShade effect settings
-  CHUNK_GRID            = 9,
+  CHUNK_GRID            = 9, ///< Grid settings
+  CHUNK_BRUSH           =10, ///< Paintbrushes
   CHUNK_MAX
 };
 

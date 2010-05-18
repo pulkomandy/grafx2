@@ -823,6 +823,9 @@ GFX2_GLOBAL byte * Menu_font;
 /// Pointer to the current active skin.
 GFX2_GLOBAL T_Gui_skin * Gfx;
 
+/// Pointer to the current active skin.
+GFX2_GLOBAL T_Paintbrush Paintbrush[NB_PAINTBRUSH_SPRITES];
+
 // -- Help data
 
 /// Index of the ::Help_section shown by the Help screen.

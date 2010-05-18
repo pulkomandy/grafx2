@@ -574,7 +574,6 @@ int Init_program(int argc,char * argv[])
   // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
-  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
 
   // On initialise tout ce qui concerne les opérations et les effets
@@ -633,6 +632,18 @@ int Init_program(int argc,char * argv[])
   Init_brush_container();
 
   Windows_open=0;
+  
+  // Paintbrush
+  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  
+  // Load preset paintbrushes (uses Paintbrush_ variables)
+  Init_paintbrushes();
+  
+  // Set a valid paintbrush afterwards
+  *Paintbrush_sprite=1;
+  Paintbrush_width=1;
+  Paintbrush_height=1;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   
   // Charger la configuration des touches
   Set_config_defaults();
@@ -701,11 +712,6 @@ int Init_program(int argc,char * argv[])
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
-  // Pinceau
-  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  *Paintbrush_sprite=1;
-  Paintbrush_width=1;
-  Paintbrush_height=1;
 
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;

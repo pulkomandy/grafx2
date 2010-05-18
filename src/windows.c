@@ -1286,19 +1286,19 @@ void Display_paintbrush_in_window(word x,word y,int number)
   if (y_size<1)
     y_size=1;
 
-  origin_x = (x + 8)*Menu_factor_X - (Gfx->Preset_paintbrush_offset_X[number])*x_size+Window_pos_X;
-  origin_y = (y + 8)*Menu_factor_Y - (Gfx->Preset_paintbrush_offset_Y[number])*y_size+Window_pos_Y;
+  origin_x = (x + 8)*Menu_factor_X - (Paintbrush[number].Offset_X)*x_size+Window_pos_X;
+  origin_y = (y + 8)*Menu_factor_Y - (Paintbrush[number].Offset_Y)*y_size+Window_pos_Y;
 
-  for (window_y_pos=0,y_pos=0; y_pos<Gfx->Preset_paintbrush_height[number]; window_y_pos++,y_pos++)
-    for (window_x_pos=0,x_pos=0; x_pos<Gfx->Preset_paintbrush_width[number]; window_x_pos++,x_pos++)
-      if (Gfx->Paintbrush_sprite[number][y_pos][x_pos])
+  for (window_y_pos=0,y_pos=0; y_pos<Paintbrush[number].Height; window_y_pos++,y_pos++)
+    for (window_x_pos=0,x_pos=0; x_pos<Paintbrush[number].Width; window_x_pos++,x_pos++)
+      if (Paintbrush[number].Sprite[y_pos][x_pos])
         Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,MC_Black);
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
   // forcément avec la même taille de pixel.
 
   Update_rect( ToWinX(origin_x), ToWinY(origin_y),
-        ToWinL(Gfx->Preset_paintbrush_width[number]),
-        ToWinH(Gfx->Preset_paintbrush_height[number])
+        ToWinL(Paintbrush[number].Width),
+        ToWinH(Paintbrush[number].Height)
   );
 }
 
