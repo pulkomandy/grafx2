@@ -643,6 +643,8 @@ int Init_program(int argc,char * argv[])
   *Paintbrush_sprite=1;
   Paintbrush_width=1;
   Paintbrush_height=1;
+  Paintbrush_offset_X=0;
+  Paintbrush_offset_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   
   // Charger la configuration des touches

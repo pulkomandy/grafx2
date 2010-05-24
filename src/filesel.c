@@ -473,6 +473,15 @@ void Read_list_of_drives(T_Fileselector *list)
   Recount_files(list);
 }
 
+// Comparison of file names:
+#ifdef WIN32
+// case-insensitive
+  #define FILENAME_COMPARE strcasecmp
+#else
+// case-sensitive
+  #define FILENAME_COMPARE strcmp
+#endif
+
 
 // -- Tri de la liste des fichiers et répertoires ---------------------------
 void Sort_list_of_files(T_Fileselector *list)
@@ -514,7 +523,7 @@ void Sort_list_of_files(T_Fileselector *list)
           // Si les deux éléments sont de même type et que le nom du suivant
           // est plus petit que celui du courant -> need_swap
         else if ( (current_item->Type==next_item->Type) &&
-                  (strcmp(current_item->Full_name,next_item->Full_name)>0) )
+                  (FILENAME_COMPARE(current_item->Full_name,next_item->Full_name)>0) )
           need_swap=1;
 
 
