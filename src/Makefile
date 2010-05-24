@@ -311,6 +311,9 @@ SCRIPT_FILES1 = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scr
 SCRIPT_FILES2 = ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_Colorspace12bit.lua ../share/grafx2/scripts/pic_ni_Colorspace15bit.lua ../share/grafx2/scripts/pic_ni_Colorspace18bit.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/pic_ni_Grid8.lua ../share/grafx2/scripts/pic_ni_Grid8red.lua ../share/grafx2/scripts/pic_ni_GridIso.lua ../share/grafx2/scripts/pic_ni_PaletteX1.lua ../share/grafx2/scripts/pic_ni_PaletteX8.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
 SCRIPT_FILES1= SCRIPT_FILES1 SCRIPT_FILES2
 
+FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/grafx2/fonts/PF_Westa_7__.png
+
+
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
@@ -342,9 +345,9 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 
 	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico 
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt share/grafx2/fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt share/grafx2/fonts/Tuffy.ttf src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf
+	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop $(FONT_FILES)
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
