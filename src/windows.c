@@ -706,6 +706,7 @@ void Print_coordinates(void)
   if (Menu_is_visible && !Cursor_in_menu)
   {
     if ( (Current_operation==OPERATION_COLORPICK)
+      || (Current_operation==OPERATION_RMB_COLORPICK)
       || (Current_operation==OPERATION_REPLACE) )
     {
       if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)

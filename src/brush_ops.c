@@ -251,6 +251,106 @@ void Colorpicker_0_1(void)
   Unselect_button(BUTTON_COLORPICKER);
 }
 
+/////////////////////////////////////////////////////////// OPERATION_RMB_COLORPICK
+
+
+byte Rightclick_colorpick(byte cursor_visible)
+{
+  // Check if the rightclick colorpick should take over:
+  if (!Config.Right_click_colorpick)
+    return 0;
+  if (Mouse_K!=RIGHT_SIDE)
+    return 0;    
+  // In these modes, the Foreground color is ignored,
+  // so the RMB should act as normal.
+  if (Shade_mode||Quick_shade_mode||Tiling_mode)
+    return 0;
+
+  Colorpicker_color=-1;
+  Colorpicker_X=-1;
+  Colorpicker_Y=-1;
+  
+  if (cursor_visible)
+    Hide_cursor();
+  Start_operation_stack(OPERATION_RMB_COLORPICK);
+  
+  Init_start_operation();
+  
+  // Just an indicator to go to next step
+  Operation_push(1);
+  Rightclick_colorpick_2_1();
+  
+  if (cursor_visible)
+    Display_cursor();
+    
+  return 1;
+}
+
+void Rightclick_colorpick_2_1(void)
+//
+// Opération   : OPERATION_RMB_COLORPICK
+// Click Souris: 2
+// Taille_Pile : 1
+//
+// Souris effacée: Non
+//
+{
+  char str[4];
+
+  if ( (Colorpicker_X!=Paintbrush_X)
+    || (Colorpicker_Y!=Paintbrush_Y) )
+  {
+    if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
+      && (Paintbrush_X<Main_image_width)
+      && (Paintbrush_Y<Main_image_height) )
+      Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
+    else
+      Colorpicker_color=0;
+
+    Colorpicker_X=Paintbrush_X;
+    Colorpicker_Y=Paintbrush_Y;
+
+    if (Menu_is_visible)
+    {
+      Print_coordinates();
+      Num2str(Colorpicker_color,str,3);
+      Print_in_menu(str,20);
+      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
+    }
+  }
+}
+
+
+
+void Rightclick_colorpick_0_1(void)
+//
+// Opération   : OPERATION_RMB_COLORPICK
+// Click Souris: 0
+// Taille_Pile : 1
+//
+// Souris effacée: Non
+//
+{
+  short dummy;
+
+  Hide_cursor();
+  
+  Operation_pop(&dummy);
+  Set_fore_color(Colorpicker_color);
+  
+  // Restore previous operation
+  Start_operation_stack(Operation_before_interrupt);
+  
+  // Erase the color block which shows the picked color
+  if (Operation_before_interrupt!=OPERATION_REPLACE)
+    if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      Print_in_menu("X:       Y:             ",0);
+
+  Print_coordinates();
+  
+  Display_cursor();
+}
 
 ////////////////////////////////////////////////////// OPERATION_GRAB_BRUSH
 

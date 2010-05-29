@@ -53,11 +53,12 @@ void Start_operation_stack(word new_operation)
   // On mémorise l'opération précédente si on démarre une interruption
   switch(new_operation)
   {
-    case OPERATION_MAGNIFY         :
-    case OPERATION_COLORPICK       :
-    case OPERATION_GRAB_BRUSH  :
-    case OPERATION_POLYBRUSH    :
-    case OPERATION_STRETCH_BRUSH :
+    case OPERATION_MAGNIFY:
+    case OPERATION_COLORPICK:
+    case OPERATION_RMB_COLORPICK:
+    case OPERATION_GRAB_BRUSH:
+    case OPERATION_POLYBRUSH:
+    case OPERATION_STRETCH_BRUSH:
     case OPERATION_ROTATE_BRUSH:
       Operation_before_interrupt=Current_operation;
       // On passe à l'operation demandée
@@ -226,6 +227,9 @@ void Freehand_mode1_2_0(void)
 //
 //  Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -322,6 +326,9 @@ void Freehand_mode2_2_0(void)
 //
 //  Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -390,6 +397,9 @@ void Freehand_Mode3_2_0(void)
 //
 //  Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -422,6 +432,9 @@ void Line_12_0(void)
 
 //  Début du tracé d'une ligne (premier clic)
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Paintbrush_shape_before_operation=Paintbrush_shape;
@@ -569,6 +582,9 @@ void K_line_12_0(void)
 {
   byte color;
 
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -745,6 +761,9 @@ void Rectangle_12_0(void)
 //
 // Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
 
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -916,6 +935,9 @@ void Circle_12_0(void)
 //
 // Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
 
@@ -1090,6 +1112,9 @@ void Ellipse_12_0(void)
 //
 // Souris effacée: Oui
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
 
@@ -1284,9 +1309,12 @@ void Fill_2_0(void)
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacée: Non
 //
 {
+  if (Rightclick_colorpick(1))
+    return;
+  
   Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
@@ -1309,7 +1337,7 @@ void Replace_1_0(void)
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacée: Non
 //
 {
   Hide_cursor();
@@ -1331,9 +1359,12 @@ void Replace_2_0(void)
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacée: Non
 //
 {
+  if (Rightclick_colorpick(1))
+    return;
+  
   Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Replace, et on se fout de savoir si on est dans la partie gauche ou
@@ -1433,6 +1464,9 @@ void Curve_34_points_2_0(void)
 //  Souris effacée: Oui
 //
 {
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -1889,6 +1923,9 @@ void Airbrush_2_0(void)
 //  Souris effacée: Non
 //
 {
+  if (Rightclick_colorpick(1))
+    return;
+
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -1956,6 +1993,9 @@ void Polygon_12_0(void)
 {
   byte color;
 
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2057,6 +2097,9 @@ void Polyfill_12_0(void)
 {
   byte color;
 
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2255,6 +2298,9 @@ void Polyform_12_0(void)
 {
   short color;
 
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2413,6 +2459,9 @@ void Filled_polyform_12_0(void)
 {
   short color;
 
+  if (Rightclick_colorpick(0))
+    return;
+  
   Init_start_operation();
 
   // Cette opération étant également utilisée pour le lasso, on ne fait pas de
@@ -3712,6 +3761,9 @@ void Centered_lines_12_0(void)
     //
     //  Souris effacée: Oui
 {
+    if (Rightclick_colorpick(0))
+      return;
+    
     Init_start_operation();
     Backup();
     Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;

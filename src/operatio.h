@@ -225,3 +225,8 @@ void Centered_lines_0_3(void);
 void Centered_lines_12_7(void);
 void Centered_lines_0_7(void);
 
+/////////////////////////////////////////////////// OPERATION_RMB_COLORPICK
+
+byte Rightclick_colorpick(byte cursor_visible);
+void Rightclick_colorpick_2_1(void);
+void Rightclick_colorpick_0_1(void);

@@ -2353,7 +2353,14 @@ static const T_Help_table helptable_settings_details[] =
   HELP_TEXT ("window. (Set it to 'no' if you have a slow")
   HELP_TEXT ("computer or if you edit huge pictures)")
   HELP_TEXT ("")
-  HELP_TEXT ("")  
+  HELP_BOLD ("  Right click colorpick")  
+  HELP_TEXT ("This enables a mode where the right mouse")
+  HELP_TEXT ("buttons acts as a color picker until")
+  HELP_TEXT ("it's released, and selects Foreground color.")  
+  HELP_TEXT ("This mode prevents you from painting with")  
+  HELP_TEXT ("Background color.")
+  HELP_TEXT ("This option is ignored when the Shade,")
+  HELP_TEXT ("Quick-shade, or Tiling mode is used.")  
 };
 
 static const T_Help_table helptable_clear[] =

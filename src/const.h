@@ -483,6 +483,7 @@ enum OPERATIONS
   OPERATION_STRETCH_BRUSH,     ///< Stretch brush
   OPERATION_DISTORT_BRUSH,     ///< Distort brush
   OPERATION_GRAD_RECTANGLE,    ///< Gradient-filled rectangle
+  OPERATION_RMB_COLORPICK,     ///< Colorpick on right mouse button
   NB_OPERATIONS                ///< Number of operations handled by the engine
 };
 

@@ -894,6 +894,13 @@ int Load_INI(T_Config * conf)
       Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
     }
   }
+  
+  conf->Right_click_colorpick=0;
+  // Optional, right mouse button to pick colors (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Right_click_colorpick",1,values))
+  {
+    conf->Right_click_colorpick=(values[0]!=0);
+  }
 
   fclose(file);
 

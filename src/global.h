@@ -897,6 +897,7 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
     CURSOR_SHAPE_TARGET            , // Distort brush
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled rectangle
+    CURSOR_SHAPE_COLORPICKER       , // Colorpick on right mouse button
   };
 #else
   /// ::Cursor_shape to use for each operation.

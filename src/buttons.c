@@ -920,7 +920,7 @@ void Button_Settings(void)
 
   T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
   
-    {"           --- GUI  ---",0,NULL,0,0,0,NULL},
+  {"           --- GUI  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
   {"Menu ratio adapt:",1,&(selected_config.Ratio),0,1,0,Lookup_MenuRatio},
@@ -953,7 +953,7 @@ void Button_Settings(void)
   {"Clear with stencil:",1,&(selected_config.Clear_with_stencil),0,1,0,Lookup_YesNo},
   {"Auto discontinuous:",1,&(selected_config.Auto_discontinuous),0,1,0,Lookup_YesNo},
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
@@ -3532,6 +3532,7 @@ void Button_Colorpicker(void)
 
 void Button_Unselect_colorpicker(void)
 {
+  // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
          ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )

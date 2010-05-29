@@ -1602,6 +1602,10 @@ void Init_operations(void)
                         Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
                         Centered_lines_0_7,0,FAST_MOUSE);
+                        
+  Init_operation(OPERATION_RMB_COLORPICK,0,1,
+                        Rightclick_colorpick_0_1,0,FAST_MOUSE);
+                        
 }
 
 
