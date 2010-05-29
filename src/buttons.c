@@ -986,7 +986,7 @@ void Button_Settings(void)
   const char * help_section[SETTING_PAGES] = {
     "GUI",
     "INPUT",
-    "EDITING"
+    "EDITING",
     "FILE SELECTOR",
     "FILE FORMAT OPTIONS",
   };
