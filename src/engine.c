@@ -240,17 +240,44 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
   end_x  =start_x+Buttons_Pool[btn_number].Width;
   end_y  =start_y+Buttons_Pool[btn_number].Height;
 
-  if (!pressed)
+  switch (pressed)
   {
+    default:
+    case BUTTON_RELEASED:
+    if (Gfx->No_outline)
+    {
+      color_top_left=MC_Light;
+      color_bottom_right=MC_Light;
+      color_diagonal=MC_Light;
+    }
+    else
+    {
+      color_top_left=MC_White;
+      color_bottom_right=MC_Dark;
+      color_diagonal=MC_Light;
+    }
+    break;
+
+    case BUTTON_PRESSED:
+    if (Gfx->No_outline)
+    {
+      color_top_left=MC_Dark;
+      color_bottom_right=MC_White;
+      color_diagonal=MC_White;
+    }
+    else
+    {
+      color_top_left=MC_Dark;
+      color_bottom_right=MC_Black;
+      color_diagonal=MC_Dark;
+    }
+    break;
+    
+    case BUTTON_HIGHLIGHTED:
     color_top_left=MC_White;
     color_bottom_right=MC_Dark;
     color_diagonal=MC_Light;
-  }
-  else
-  {
-    color_top_left=MC_Dark;
-    color_bottom_right=MC_Black;
-    color_diagonal=MC_Dark;
+    break;
   }
 
   switch(Buttons_Pool[btn_number].Shape)
@@ -282,9 +309,9 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       break;
     case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
       // On colorie le point haut droit
-      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_top_left);
       // On colorie le point bas gauche
-      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_top_left);
       // On colorie le coin haut gauche
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
@@ -292,10 +319,19 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
         Pixel_in_menu_and_skin(current_menu, start_x, start_y+x_pos, color_top_left);
       }
       // On colorie la diagonale
-      for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
+      if (Gfx->No_outline)
       {
-        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_bottom_right);
+        if (! Buttons_Pool[btn_number+1].Pressed)
+          for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
+          {
+            Pixel_in_menu_and_skin(current_menu, start_x+x_pos+1, end_y-x_pos, color_bottom_right);
+          }
       }
+      else
+        for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
+        {
+          Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_bottom_right);
+        }
       break;
     case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
       // On colorie le point haut droit
@@ -303,10 +339,19 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       // On colorie le point bas gauche
       Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
       // On colorie la diagonale
-      for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
+      if (Gfx->No_outline)
       {
-        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_top_left);
+        if (! Buttons_Pool[btn_number-1].Pressed)
+          for (x_pos=1;x_pos<=Buttons_Pool[btn_number].Width;x_pos++)
+          {
+            Pixel_in_menu_and_skin(current_menu, start_x+x_pos-1, end_y-x_pos, color_top_left);
+          }
       }
+      else
+        for (x_pos=1;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
+        {
+          Pixel_in_menu_and_skin(current_menu, start_x+x_pos, end_y-x_pos, color_top_left);
+        }
       // On colorie le coin bas droite
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
@@ -1171,6 +1216,10 @@ void Main_handler(void)
           {
             // On nettoie les coordonnées
             Hide_cursor();
+            
+            if (Gfx->No_outline && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+              Draw_menu_button_frame(prev_button_number, BUTTON_RELEASED);
+
             Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
             Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
             Display_cursor();
@@ -1186,7 +1235,15 @@ void Main_handler(void)
             if (button_index!=BUTTON_CHOOSE_COL)
             {
               Hide_cursor();
+
+              if (Gfx->No_outline && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+                Draw_menu_button_frame(prev_button_number, BUTTON_RELEASED);
+
               Print_in_menu(Menu_tooltip[button_index],0);
+
+              if (Gfx->No_outline && !Buttons_Pool[button_index].Pressed)
+                Draw_menu_button_frame(button_index, 2 /* BUTTON_HIGHLIGHTED */);
+              
               Display_cursor();
             }
             else
@@ -1241,21 +1298,26 @@ void Main_handler(void)
     // Le curseur se trouve dans l'image
     if ( (!Cursor_in_menu) && (Menu_is_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Key || Mouse_K)) // On ne met les coordonnées à jour que si l'utilisateur a fait un truc
     {
-       if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
-       {
-          if(Cursor_in_menu_previous)
-          {
-             Print_in_menu("X:       Y:             ",0);
-          }
-       }
-       else
-       {
-          if(Cursor_in_menu_previous)
-          {
-             Print_in_menu("X:       Y:       (    )",0);
-          }
-       }
-       Cursor_in_menu_previous = 0;
+      if(Cursor_in_menu_previous)
+      {
+        Hide_cursor();
+        
+        if (Gfx->No_outline && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+          Draw_menu_button_frame(prev_button_number, BUTTON_RELEASED);
+    
+        if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
+        {
+          Print_in_menu("X:       Y:             ",0);
+        }
+        else
+        {
+          Print_in_menu("X:       Y:       (    )",0);
+        }
+        
+        Display_cursor();
+        
+        Cursor_in_menu_previous = 0;
+      }
     }
 
     if(Cursor_in_menu)

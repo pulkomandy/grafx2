@@ -277,6 +277,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     sprintf(Gui_loading_error_message, "Not a 256-color palette");
     return 1;
   }
+  
   // Read the default palette
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
@@ -357,6 +358,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
 
+  // Check the skin as "No outline" if the first button
+  // has a grey pixel at top left angle.
+  gfx->No_outline=gfx->Menu_block[1][0]==gfx->Color[2];
+  
   // Preview
   cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))

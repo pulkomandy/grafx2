@@ -448,6 +448,8 @@ typedef struct
   /// Transparent GUI color index in skin file
   byte Color_trans;
 
+  /// Boolean, true if the buttons have normally no outline
+  byte No_outline;
 
 } T_Gui_skin;
 

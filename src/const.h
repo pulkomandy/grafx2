@@ -230,6 +230,8 @@ enum PAINTBRUSH_SHAPES
 #define BUTTON_RELEASED 0
 /// State of a menu button that is being pressed.
 #define BUTTON_PRESSED  1
+/// State of a button temporarily highligted
+#define BUTTON_HIGHLIGHTED 2
 
 /// The different modes of the Shade
 enum SHADE_MODES
