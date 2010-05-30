@@ -517,42 +517,7 @@ int Init_program(int argc,char * argv[])
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
-
-  {
-    // Routine pour définir l'icone.
-    char icon_path[MAX_PATH_CHARACTERS];
-    SDL_Surface * icon;
-    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
-    icon = IMG_Load(icon_path);
-    if (icon && icon->w == 32 && icon->h == 32)
-    {
-      Uint32 pink;
-      pink = SDL_MapRGB(icon->format, 255, 0, 255);
-      
-      if (icon->format->BitsPerPixel == 8)
-      {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
-        SDL_WM_SetIcon(icon,NULL);
-      }
-      else
-      {
-        byte *icon_mask;
-        int x,y;
-        
-        icon_mask=malloc(128);
-        memset(icon_mask,0,128);
-        for (y=0;y<32;y++)
-          for (x=0;x<32;x++)
-            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
-              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-        SDL_WM_SetIcon(icon,icon_mask);
-        free(icon_mask);
-        icon_mask = NULL;
-      }
-
-      SDL_FreeSurface(icon);
-    }
-  }
+  Define_icon();
   
   // Texte
   Init_text();

@@ -50,6 +50,10 @@
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
+#ifndef __GP2X__
+    #include <SDL_syswm.h>
+#endif
+
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
 #endif
@@ -2692,5 +2696,165 @@ void Init_paintbrushes(void)
   {
     Paintbrush[index].Offset_X=(Paintbrush[index].Width>>1);
     Paintbrush[index].Offset_Y=(Paintbrush[index].Height>>1);
+  }
+}
+
+/// Set application icon(s)
+void Define_icon(void)
+{
+#ifdef WIN32
+  // Specific code for Win32:
+  // Load icon from embedded resource.
+  // This will provide both the 16x16 and 32x32 versions.
+  do
+  {
+    HICON hicon;
+    HRSRC hresource;
+    HINSTANCE hInstance;
+    LPVOID lpResIconDir;
+    LPVOID lpResIcon16;
+    LPVOID lpResIcon32;
+    HGLOBAL hMem;
+    WORD nID;
+    SDL_SysWMinfo info;
+    
+    hInstance = (HINSTANCE)GetModuleHandle(NULL);
+    if (hInstance==NULL)
+      break;
+      
+    // Icon is resource #1
+    hresource = FindResource(hInstance, 
+      MAKEINTRESOURCE(1), 
+      RT_GROUP_ICON);
+    if (hresource==NULL)
+      break;
+  
+    // Load and lock the icon directory. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+
+    lpResIconDir = LockResource(hMem);
+    if (lpResIconDir==NULL)
+      break;
+      
+    SDL_VERSION(&info.version);
+    SDL_GetWMInfo(&info);
+      
+    //
+    // 16x16
+    //
+    
+    // Get the identifier of the 16x16 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE, 
+        16, 16, LR_DEFAULTCOLOR); 
+    if (nID==0)
+      break;
+    
+    // Find the bits for the nID icon. 
+    hresource = FindResource(hInstance, 
+        MAKEINTRESOURCE(nID), 
+        MAKEINTRESOURCE(RT_ICON)); 
+    if (hresource==NULL)
+      break;
+     
+    // Load and lock the icon. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+    lpResIcon16 = LockResource(hMem);
+    if (lpResIcon16==NULL)
+      break;
+
+    // Create a handle to the icon. 
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon16, 
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000, 
+        16, 16, LR_DEFAULTCOLOR); 
+    if (hicon==NULL)
+      break;
+      
+    // Set it
+		SetClassLongPtr(info.window, GCL_HICONSM, (LONG_PTR)hicon);
+
+    
+    //
+    // 32x32
+    //
+    
+    // Get the identifier of the 32x32 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE, 
+        32, 32, LR_DEFAULTCOLOR); 
+    if (nID==0)
+      break;
+    
+    // Find the bits for the nID icon. 
+    hresource = FindResource(hInstance, 
+        MAKEINTRESOURCE(nID), 
+        MAKEINTRESOURCE(RT_ICON)); 
+    if (hresource==NULL)
+      break;
+     
+    // Load and lock the icon. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+    lpResIcon32 = LockResource(hMem);
+    if (lpResIcon32==NULL)
+      break;
+
+    // Create a handle to the icon. 
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon32, 
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000, 
+        32, 32, LR_DEFAULTCOLOR); 
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(info.window, GCL_HICON, (LONG_PTR)hicon);
+		
+		
+		// Success
+		return;
+  } while (0);
+  // Failure: fall back on normal SDL version:
+  
+#endif
+  // General version: Load icon from the file gfx2.gif
+  {
+    char icon_path[MAX_PATH_CHARACTERS];
+    SDL_Surface * icon;
+    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
+    icon = IMG_Load(icon_path);
+    if (icon && icon->w == 32 && icon->h == 32)
+    {
+      Uint32 pink;
+      pink = SDL_MapRGB(icon->format, 255, 0, 255);
+      
+      if (icon->format->BitsPerPixel == 8)
+      {
+        // 8bit image: use color key
+        
+        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
+        SDL_WM_SetIcon(icon,NULL);
+      }
+      else
+      {
+        // 24bit image: need to build a mask on magic pink
+        
+        byte *icon_mask;
+        int x,y;
+        
+        icon_mask=malloc(128);
+        memset(icon_mask,0,128);
+        for (y=0;y<32;y++)
+          for (x=0;x<32;x++)
+            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
+              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
+        SDL_WM_SetIcon(icon,icon_mask);
+        free(icon_mask);
+        icon_mask = NULL;
+      }
+      SDL_FreeSurface(icon);
+    }
   }
 }
