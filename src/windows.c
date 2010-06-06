@@ -1195,55 +1195,19 @@ void Display_sprite_in_menu(int btn_number,char sprite_number)
 
 void Display_paintbrush_in_menu(void)
 {
-  short x_pos,y_pos;
-  short start_x;
-  short menu_x_pos,menu_y_pos;
-  short menu_start_x;
-  byte color;
-    
-  switch (Paintbrush_shape)
+  switch(Paintbrush_shape)
   {
-    case PAINTBRUSH_SHAPE_COLOR_BRUSH    : // Brush en couleur
-      Display_sprite_in_menu(BUTTON_PAINTBRUSHES,MENU_SPRITE_COLOR_BRUSH);
+    case PAINTBRUSH_SHAPE_COLOR_BRUSH:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_COLOR_BRUSH);
       break;
-    case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
-      Display_sprite_in_menu(BUTTON_PAINTBRUSHES,MENU_SPRITE_MONO_BRUSH);
+    case PAINTBRUSH_SHAPE_MONO_BRUSH:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_MONO_BRUSH);
       break;
-    default : // Pinceau
-      // On efface le pinceau précédent
-      for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
-        for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
-        {
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Light);
-        }
-      // On affiche le nouveau
-      menu_start_x=8-Paintbrush_offset_X;
-      if (menu_start_x<1)
-      {
-        start_x=Paintbrush_offset_X-7;
-        menu_start_x=1;
-      }
-      else
-        start_x=0;
-
-      menu_y_pos=9-Paintbrush_offset_Y;
-      if (menu_y_pos<2)
-      {
-        y_pos=Paintbrush_offset_Y-7;
-        menu_y_pos=2;
-      }
-      else
-        y_pos=0;
-
-      for (;((y_pos<Paintbrush_height) && (menu_y_pos<16));menu_y_pos++,y_pos++)
-        for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
-        {
-          color=(Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])?MC_Black:MC_Light;
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
-        }
+    default:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, -1);
+      break;
   }
-  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-    Update_rect(0,Menu_Y + Menu_bars[MENUBAR_TOOLS].Top*Menu_factor_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
+  Draw_menu_button(BUTTON_PAINTBRUSHES,BUTTON_RELEASED);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --

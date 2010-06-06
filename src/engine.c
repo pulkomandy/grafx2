@@ -287,6 +287,42 @@ void Draw_menu_button(byte btn_number,byte pressed)
       }
     break;
   }
+  // Special: Show specific shape
+  if (btn_number==BUTTON_PAINTBRUSHES
+    && Paintbrush_shape!=PAINTBRUSH_SHAPE_COLOR_BRUSH
+    && Paintbrush_shape!=PAINTBRUSH_SHAPE_MONO_BRUSH)
+  {
+    short x_pos,y_pos;
+    short start_x;
+    short menu_x_pos,menu_y_pos;
+    short menu_start_x;
+  
+    // Print paintbrush shape
+    menu_start_x=8-Paintbrush_offset_X;
+    if (menu_start_x<1)
+    {
+      start_x=Paintbrush_offset_X-7;
+      menu_start_x=1;
+    }
+    else
+      start_x=0;
+
+    menu_y_pos=9-Paintbrush_offset_Y;
+    if (menu_y_pos<2)
+    {
+      y_pos=Paintbrush_offset_Y-7;
+      menu_y_pos=2;
+    }
+    else
+      y_pos=0;
+
+    for (;((y_pos<Paintbrush_height) && (menu_y_pos<16));menu_y_pos++,y_pos++)
+      for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
+      {
+        if (Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])
+        Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Black);
+      }
+  }
   
   if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
     Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset),
