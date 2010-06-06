@@ -208,7 +208,7 @@ void Button_Undo(void)
 
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -223,7 +223,7 @@ void Button_Redo(void)
 
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -1558,7 +1558,7 @@ void Button_Page(void)
   Compute_optimal_menu_colors(Main_palette);
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
 
   Display_cursor();
@@ -1754,7 +1754,7 @@ void Button_Kill(void)
 
     Display_all_screen();
     Unselect_button(BUTTON_KILL);
-    Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+    Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
     Display_menu();
     Display_cursor();
   }
@@ -2224,13 +2224,31 @@ void Button_Draw(void)
 
 void Button_Draw_switch_mode(void)
 {
+  char icon;
+  
 /* ANCIEN CODE SANS POPUPS */
   Selected_freehand_mode++;
   if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
     Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+  switch(Selected_freehand_mode)
+  {
+    default:
+    case OPERATION_CONTINUOUS_DRAW:
+      icon=-1;
+      break;
+    case OPERATION_DISCONTINUOUS_DRAW:
+      icon=MENU_SPRITE_DISCONTINUOUS_DRAW;
+      break;
+    case OPERATION_POINT_DRAW:
+      icon=MENU_SPRITE_POINT_DRAW;
+      break;
+    case OPERATION_FILLED_CONTOUR:
+      icon=MENU_SPRITE_CONTOUR_DRAW;
+      break;
+  }
+  Display_sprite_in_menu(BUTTON_DRAW,icon);
   Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
@@ -2258,7 +2276,7 @@ void Button_Draw_switch_mode(void)
     while (Mouse_K);
 
     Close_popup();
-    Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+    //Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode+2);
     Start_operation_stack(Selected_freehand_mode);
     Display_cursor();
 */
@@ -3087,9 +3105,9 @@ void Load_picture(byte image)
       {
         if (Main_magnifier_mode)
         {
-          Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
           Pixel_preview=Pixel_preview_normal;
           Main_magnifier_mode=0;
+          Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
         }
 
         new_mode=Best_video_mode();
@@ -3190,9 +3208,9 @@ void Button_Reload(void)
     {
       if (Main_magnifier_mode)
       {
-        Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
         Pixel_preview=Pixel_preview_normal;
         Main_magnifier_mode=0;
+        Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
       }
 
       new_mode=Best_video_mode();     
@@ -3427,18 +3445,33 @@ void Button_Lines(void)
 
 void Button_Lines_switch_mode(void)
 {
+  char icon;
+  
   if (Selected_line_mode==OPERATION_LINE)
-    Selected_line_mode=OPERATION_K_LIGNE;
+    Selected_line_mode=OPERATION_K_LINE;
   else
   {
-    if (Selected_line_mode==OPERATION_K_LIGNE)
+    if (Selected_line_mode==OPERATION_K_LINE)
       Selected_line_mode=OPERATION_CENTERED_LINES;
     else
       Selected_line_mode=OPERATION_LINE;
   }
+  switch(Selected_line_mode)
+  {
+    default:
+    case OPERATION_LINE:
+      icon=-1;
+      break;
+    case OPERATION_K_LINE:
+      icon=MENU_SPRITE_K_LINE;
+      break;
+    case OPERATION_CENTERED_LINES:
+      icon=MENU_SPRITE_CENTERED_LINES;
+      break;
+  }
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_LINES,Selected_line_mode-OPERATION_LINE+7);
+  Display_sprite_in_menu(BUTTON_LINES,icon);
   Start_operation_stack(Selected_line_mode);
   Display_cursor();
 }
@@ -3898,7 +3931,7 @@ void Button_Curves_switch_mode(void)
     Selected_curve_mode=OPERATION_4_POINTS_CURVE;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode-OPERATION_3_POINTS_CURVE+5);
+  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();
 }
@@ -4318,11 +4351,11 @@ void Display_effect_sprite(short sprite_number, short start_x, short start_y)
 {
   short x,y,x_pos,y_pos;
 
-  for (y=0,y_pos=start_y;y<MENU_SPRITE_HEIGHT;y++,y_pos++)
-    for (x=0,x_pos=start_x;x<MENU_SPRITE_WIDTH;x++,x_pos++)
+  for (y=0,y_pos=start_y;y<EFFECT_SPRITE_HEIGHT;y++,y_pos++)
+    for (x=0,x_pos=start_x;x<EFFECT_SPRITE_WIDTH;x++,x_pos++)
       Pixel_in_window(x_pos,y_pos,Gfx->Effect_sprite[sprite_number][y][x]);
 
-  Update_rect(ToWinX(start_x),ToWinY(start_y),MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
+  Update_rect(ToWinX(start_x),ToWinY(start_y),EFFECT_SPRITE_WIDTH*Menu_factor_X,EFFECT_SPRITE_HEIGHT*Menu_factor_Y);
 }
 
 

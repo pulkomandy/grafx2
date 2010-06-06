@@ -409,13 +409,13 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[35][MENU_WIDTH];
-  byte Layerbar_block[10][144];
-  byte Statusbar_block[9][20];
+  byte Menu_block[3][35][MENU_WIDTH];
+  byte Layerbar_block[3][10][144];
+  byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
-  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
-  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Effect_sprite[NB_EFFECTS_SPRITES][EFFECT_SPRITE_HEIGHT][EFFECT_SPRITE_WIDTH];
   /// Bitmap data for the different Layer icons.
   byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
@@ -448,9 +448,6 @@ typedef struct
   /// Transparent GUI color index in skin file
   byte Color_trans;
 
-  /// Boolean, true if the buttons have normally no outline
-  byte No_outline;
-
 } T_Gui_skin;
 
 typedef struct {
@@ -477,7 +474,7 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin;
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
   word Skin_width;
   byte Last_button_index;
 } T_Menu_Bar;

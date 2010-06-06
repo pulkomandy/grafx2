@@ -45,9 +45,10 @@
 #define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
 #define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
 #define NB_EFFECTS_SPRITES        9     ///< Number of effect sprites.
-#define NB_MENU_SPRITES           20    ///< Number of menu sprites.
-#define MENU_SPRITE_WIDTH         14    ///< Width of a menu sprite in pixels
-#define MENU_SPRITE_HEIGHT        14    ///< Height of a menu sprite in pixels
+#define MENU_SPRITE_WIDTH         16    ///< Width of a menu sprite in pixels
+#define MENU_SPRITE_HEIGHT        16    ///< Height of a menu sprite in pixels
+#define EFFECT_SPRITE_WIDTH       14    ///< Width of an effect sprite in pixels
+#define EFFECT_SPRITE_HEIGHT      14    ///< Height of an effect sprite in pixels
 #define LAYER_SPRITE_WIDTH        14    ///< Width of a layer button in pixels
 #define LAYER_SPRITE_HEIGHT       10    ///< Height of a layer button in pixels
 #define PAINTBRUSH_WIDTH          16    ///< Width of a preset paintbrush sprite
@@ -327,6 +328,24 @@ enum BUTTON_NUMBERS
   NB_BUTTONS            ///< Number of buttons in the menu bar.
 };
 
+enum MENU_SPRITE
+{
+  MENU_SPRITE_COLOR_BRUSH=0,
+  MENU_SPRITE_MONO_BRUSH,
+  MENU_SPRITE_DISCONTINUOUS_DRAW,
+  MENU_SPRITE_POINT_DRAW,
+  MENU_SPRITE_CONTOUR_DRAW,
+  MENU_SPRITE_4_POINTS_CURVE,
+  MENU_SPRITE_K_LINE,
+  MENU_SPRITE_CENTERED_LINES,
+  MENU_SPRITE_ELLIPSES,
+  MENU_SPRITE_POLYFORM,
+  MENU_SPRITE_REPLACE,
+  MENU_SPRITE_GRAD_ELLIPSE,
+  MENU_SPRITE_VERTICAL_PALETTE_SCROLL,
+  NB_MENU_SPRITES ///< Number of menu sprites.
+};
+
 ///
 /// Identifiers of special actions that can have a keyboard shortcut.
 /// They are special in the sense that there's no button in the menu for them,
@@ -457,7 +476,7 @@ enum OPERATIONS
   OPERATION_POINT_DRAW,        ///< Freehand point-by-point draw
   OPERATION_FILLED_CONTOUR,    ///< Filled contour
   OPERATION_LINE,              ///< Lines
-  OPERATION_K_LIGNE,           ///< Linked lines
+  OPERATION_K_LINE,            ///< Linked lines
   OPERATION_CENTERED_LINES,    ///< Centered lines
   OPERATION_EMPTY_RECTANGLE,   ///< Empty rectangle
   OPERATION_FILLED_RECTANGLE,  ///< Filled rectangle

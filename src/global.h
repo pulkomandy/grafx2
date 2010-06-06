@@ -492,9 +492,9 @@ GFX2_GLOBAL word  Menu_palette_cell_width;
 GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
 #ifdef GLOBAL_VARIABLES
   = 
-{{MENU_WIDTH,  9, 1, 45, NULL,  20, BUTTON_HIDE }, // Status
- {MENU_WIDTH, 10, 1, 35, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
- {MENU_WIDTH, 35, 1,  0, NULL, 254, BUTTON_CHOOSE_COL }} // Main
+{{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
+ {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;
 
@@ -587,6 +587,7 @@ GFX2_GLOBAL struct
   word            Height;           ///< Button's active heigth
   byte            Pressed;          ///< Button is currently pressed
   byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
+  char            Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
 
   // Triggers on mouse/keyboard
   Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button

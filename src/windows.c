@@ -67,7 +67,7 @@ void Pixel_in_menu(word bar, word x, word y, byte color)
 void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 {
   Pixel_in_menu(bar, x, y, color);
-  Menu_bars[bar].Skin[y*Menu_bars[bar].Skin_width + x] = color;  
+  Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;  
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
@@ -454,7 +454,7 @@ void Draw_bar_remainder(word current_menu, word x_off)
 
   for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
     for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
-      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
 }
 
             
@@ -566,7 +566,7 @@ void Display_menu(void)
         // Skinned area
         for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
-            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
         if (current_menu == MENUBAR_LAYERS)
         {
@@ -1180,32 +1180,15 @@ void Verbose_message(const char *caption, const char * message )
 
   // -- Redessiner le sprite d'un bouton dans le menu --
 
-void Display_sprite_in_menu(int btn_number,int sprite_number)
+void Display_sprite_in_menu(int btn_number,char sprite_number)
 {
-  word x_pos;
-  word y_pos;
-  word menu_x_pos;
-  word menu_y_pos;
-  byte color;
+  Buttons_Pool[btn_number].Icon=sprite_number;
 
-  menu_y_pos=Buttons_Pool[btn_number].Y_offset;
-  menu_x_pos=Buttons_Pool[btn_number].X_offset;
-  if (Buttons_Pool[btn_number].Shape != BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
-  {
-    menu_y_pos+=1;
-    menu_x_pos+=1;
-  }
-  
-  for (y_pos=0;y_pos<MENU_SPRITE_HEIGHT;y_pos++)
-    for (x_pos=0;x_pos<MENU_SPRITE_WIDTH;x_pos++)
-    {
-      color=Gfx->Menu_sprite[sprite_number][y_pos][x_pos];
-      Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos+x_pos, menu_y_pos+y_pos, color);
-    }
-if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-  Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
-    (Buttons_Pool[btn_number].Y_offset+1+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
-    MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
+  if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_TOP_LEFT)
+    Buttons_Pool[btn_number+1].Icon=sprite_number;
+
+  else if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
+    Buttons_Pool[btn_number-1].Icon=sprite_number;
 }
 
   // -- Redessiner la forme du pinceau dans le menu --
@@ -1221,13 +1204,10 @@ void Display_paintbrush_in_menu(void)
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_COLOR_BRUSH    : // Brush en couleur
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES,MENU_SPRITE_COLOR_BRUSH);
+      break;
     case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
-      for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
-        for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
-        {
-          color=Gfx->Menu_sprite[4][y_pos][x_pos];
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
-        }
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES,MENU_SPRITE_MONO_BRUSH);
       break;
     default : // Pinceau
       // On efface le pinceau précédent
@@ -2952,18 +2932,20 @@ void Remap_menu_sprites()
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
     // Main menu bar
-    for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
-        Remap_pixel(&Gfx->Menu_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
+          Remap_pixel(&Gfx->Menu_block[k][j][i]);
     // Menu sprites
-    for (k=0; k<NB_MENU_SPRITES; k++)
-      for (j=0; j<MENU_SPRITE_HEIGHT; j++)
-        for (i=0; i<MENU_SPRITE_WIDTH; i++)
-          Remap_pixel(&Gfx->Menu_sprite[k][j][i]);
+    for (l=0; l<2; l++)
+      for (k=0; k<NB_MENU_SPRITES; k++)
+        for (j=0; j<MENU_SPRITE_HEIGHT; j++)
+          for (i=0; i<MENU_SPRITE_WIDTH; i++)
+            Remap_pixel(&Gfx->Menu_sprite[l][k][j][i]);
     // Effects sprites
     for (k=0; k<NB_EFFECTS_SPRITES; k++)
-      for (j=0; j<MENU_SPRITE_HEIGHT; j++)
-        for (i=0; i<MENU_SPRITE_WIDTH; i++)
+      for (j=0; j<EFFECT_SPRITE_HEIGHT; j++)
+        for (i=0; i<EFFECT_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
     // Layers buttons
     for (l=0; l<3; l++)
@@ -2973,13 +2955,15 @@ void Remap_menu_sprites()
             Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
     
     // Status bar
-    for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
-        Remap_pixel(&Gfx->Statusbar_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
+          Remap_pixel(&Gfx->Statusbar_block[k][j][i]);
     // Layer bar
-    for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
-        Remap_pixel(&Gfx->Layerbar_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
+          Remap_pixel(&Gfx->Layerbar_block[k][j][i]);
     
     // Help fonts
     for (k=0; k<256; k++)

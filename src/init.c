@@ -355,35 +355,51 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[0], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
 
-  // Check the skin as "No outline" if the first button
-  // has a grey pixel at top left angle.
-  gfx->No_outline=gfx->Menu_block[1][0]==gfx->Color[2];
-  
   // Preview
   cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "preview", 0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
 
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[0], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
+  // Menu (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected menu"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[1], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"selected menu",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
+
+  // Layerbar (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected layer bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"selected layer bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
+
+  // Status bar (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[1], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"selected status bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
   // Effects
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
@@ -398,11 +414,11 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], EFFECT_SPRITE_WIDTH, EFFECT_SPRITE_HEIGHT, "effect sprite",0))
       return 1;
-    cursor_x+=MENU_SPRITE_WIDTH;
+    cursor_x+=EFFECT_SPRITE_WIDTH;
   }
-  cursor_y+=MENU_SPRITE_HEIGHT;
+  cursor_y+=EFFECT_SPRITE_HEIGHT;
   
   // Layer sprite
   for (j=0; j<3; j++)
@@ -460,36 +476,31 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[0][i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+      return 1;
+    cursor_x+=MENU_SPRITE_WIDTH;
+  }
+  cursor_y+=MENU_SPRITE_HEIGHT;
+
+  // Menu sprites (selected)
+  for (i=0; i<NB_MENU_SPRITES; i++)
+  {
+    if (i==0)
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected menu sprite"))
+        return 1;
+    }
+    else
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "selected menu sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[1][i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "selected menu sprite",1))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Paintbrushes
-  /*
-  for (i=0; i<NB_PAINTBRUSH_SPRITES; i++)
-  {
-    // Each line holds 12
-    if ((i%12)==0)
-    {
-      if (i!=0)
-        cursor_y+=PAINTBRUSH_HEIGHT;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
-        return 1;
-    }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, Paintbrush[i].Sprite, PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
-      return 1;
-    cursor_x+=PAINTBRUSH_WIDTH;
-  }
-  cursor_y+=PAINTBRUSH_HEIGHT;
-  */
-
   // Drive sprites
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
@@ -614,7 +625,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     cursor_x+=6;
   }
   cursor_y+=8;
-
+  
+  // Copy unselected bitmaps to current ones
+  memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
+    Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
+  memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
+    Menu_bars[MENUBAR_LAYERS].Skin_width*Menu_bars[MENUBAR_LAYERS].Height);
+  memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
+    Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
+  
+  
   return 0;
 }
 
@@ -757,6 +777,7 @@ void Init_button(byte   btn_number,
   Buttons_Pool[btn_number].Width           =width-1;
   Buttons_Pool[btn_number].Height          =height-1;
   Buttons_Pool[btn_number].Pressed         =0;
+  Buttons_Pool[btn_number].Icon            =-1;
   Buttons_Pool[btn_number].Shape           =shape;
   Buttons_Pool[btn_number].Left_action     =left_action;
   Buttons_Pool[btn_number].Right_action    =right_action;
@@ -1276,21 +1297,21 @@ void Init_operations(void)
   Init_operation(OPERATION_LINE,2,5,
                         Line_12_5,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_K_LIGNE,1,0,
+  Init_operation(OPERATION_K_LINE,1,0,
                         K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,1,6,
+  Init_operation(OPERATION_K_LINE,1,6,
                         K_line_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,1,7,
+  Init_operation(OPERATION_K_LINE,1,7,
                         K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,FAST_MOUSE,
+  Init_operation(OPERATION_K_LINE,2,FAST_MOUSE,
                         K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,6,
+  Init_operation(OPERATION_K_LINE,2,6,
                         K_line_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,7,
+  Init_operation(OPERATION_K_LINE,2,7,
                         K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,0,6,
+  Init_operation(OPERATION_K_LINE,0,6,
                         K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,0,7,
+  Init_operation(OPERATION_K_LINE,0,7,
                         K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,0,
@@ -2558,6 +2579,8 @@ void Init_brush_container(void)
 
 void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
 {
+  int i;
+  
   // Free previous one
   free(Gfx);
   
@@ -2584,9 +2607,12 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  Menu_bars[MENUBAR_TOOLS].Skin = (byte*)&(gfx->Menu_block);
-  Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
-  Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
+  for (i=0; i<3; i++)
+  {
+    Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
+    Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
+    Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
+  }
 }
 
 ///

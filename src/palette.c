@@ -2473,6 +2473,6 @@ void Button_Secondary_palette(void)
   {
     Change_palette_cells();
     Display_menu();
-    Display_sprite_in_menu(BUTTON_PAL_LEFT,18+(Config.Palette_vertical!=0));
+    Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
   }
 }

@@ -570,11 +570,11 @@ void Line_0_5(void)
 }
 
 
-/////////////////////////////////////////////////////////// OPERATION_K_LIGNE
+/////////////////////////////////////////////////////////// OPERATION_K_LINE
 
 
 void K_line_12_0(void)
-// Opération   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
@@ -610,7 +610,7 @@ void K_line_12_0(void)
 
 
 void K_line_12_6(void)
-// Opération   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LINE
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 6      | 7
 //
@@ -650,7 +650,7 @@ void K_line_12_6(void)
 
 
 void K_line_0_6(void)
-// Opération   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LINE
 // Click Souris: 0
 // Taille_Pile : 6
 //
@@ -700,7 +700,7 @@ void K_line_0_6(void)
 
 
 void K_line_12_7(void)
-// Opération   : OPERATION_K_LIGNE
+// Opération   : OPERATION_K_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //

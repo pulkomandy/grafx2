@@ -726,7 +726,7 @@ int Init_program(int argc,char * argv[])
   // On affiche le menu:
   Display_menu();
   Display_paintbrush_in_menu();
-  Display_sprite_in_menu(BUTTON_PAL_LEFT,18+(Config.Palette_vertical!=0));
+  Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
 
   // On affiche le curseur pour débutter correctement l'état du programme:
   Display_cursor();

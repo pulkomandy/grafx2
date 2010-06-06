@@ -30,7 +30,7 @@
 #include "struct.h"
 
 void Main_handler          (void);
-void Draw_menu_button_frame(byte btn_number,byte pressed);
+void Draw_menu_button      (byte btn_number,byte pressed);
 void Unselect_button       (int btn_number);
 void Select_button         (int btn_number,byte click);
 void Open_window           (word width,word height, const char * title);
