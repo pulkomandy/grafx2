@@ -1257,6 +1257,7 @@ void Button_Skins(void)
   int selected_cursor = Config.Cursor;
   byte separatecolors = Config.Separate_colors;
   byte showlimits = Config.Display_image_limits;
+  byte need_load=1;
 
   word x, y, x_pos, offs_y;
   
@@ -1345,6 +1346,68 @@ void Button_Skins(void)
 
   do
   {
+    if (need_load)
+    {
+      need_load=0;
+      
+      Hide_cursor();
+      // (Re-)load GUI graphics from selected skins
+      strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
+        skin_list->List_start + skin_list->Cursor_position)->Full_name);
+
+      gfx = Load_graphics(skinsdir);
+      if (gfx == NULL) // Error
+      {
+        Display_cursor();
+        Verbose_message("Error!", Gui_loading_error_message);
+        Hide_cursor();
+        // Update preview
+        Window_rectangle(6, 14, 173, 16, MC_Light);
+      }
+      else
+      {
+        // Update preview
+        
+        // Display the bitmap according to its own color indices
+        for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+        for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+        {
+          if (gfx->Preview[offs_y][x_pos] == gfx->Color[0])
+            Pixel_in_window(x, y, MC_Black);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[1])
+            Pixel_in_window(x, y,  MC_Dark);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[3])
+            Pixel_in_window(x, y, MC_White);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[2])
+            Pixel_in_window(x, y, MC_Light);
+        }
+        // Actualize current screen according to preferred GUI colors
+        // Note this only updates onscreen colors
+        Set_color(
+          MC_Black, 
+          gfx->Default_palette[gfx->Color[0]].R,
+          gfx->Default_palette[gfx->Color[0]].G,
+          gfx->Default_palette[gfx->Color[0]].B);
+        Set_color(
+          MC_Dark, 
+          gfx->Default_palette[gfx->Color[1]].R,
+          gfx->Default_palette[gfx->Color[1]].G,
+          gfx->Default_palette[gfx->Color[1]].B);
+        Set_color(
+          MC_Light, 
+          gfx->Default_palette[gfx->Color[2]].R,
+          gfx->Default_palette[gfx->Color[2]].G,
+          gfx->Default_palette[gfx->Color[2]].B);
+        Set_color(
+          MC_White, 
+          gfx->Default_palette[gfx->Color[3]].R,
+          gfx->Default_palette[gfx->Color[3]].G,
+          gfx->Default_palette[gfx->Color[3]].B);
+      }
+      Update_window_area(6, 14, 173, 16);
+      Display_cursor();
+    }
+  
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_SETTINGS, "SKINS");
@@ -1358,60 +1421,7 @@ void Button_Skins(void)
       case 3 : // doesn't happen
         break;
       case 4 : // a file is selected
-
-        // (Re-)load GUI graphics from selected skins
-        strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
-          skin_list->List_start + skin_list->Cursor_position)->Full_name);
-
-        gfx = Load_graphics(skinsdir);
-        if (gfx == NULL) // Error
-        {
-          Verbose_message("Error!", Gui_loading_error_message);
-          // Update preview
-          Window_rectangle(6, 14, 173, 16, MC_Light);
-        }
-        else
-        {
-          // Update preview
-          
-          // Display the bitmap according to its own color indices
-          for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
-          for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-          {
-            if (gfx->Preview[offs_y][x_pos] == gfx->Color[0])
-              Pixel_in_window(x, y, MC_Black);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[1])
-              Pixel_in_window(x, y,  MC_Dark);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[3])
-              Pixel_in_window(x, y, MC_White);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[2])
-              Pixel_in_window(x, y, MC_Light);
-          }
-          // Actualize current screen according to preferred GUI colors
-          // Note this only updates onscreen colors
-          Set_color(
-            MC_Black, 
-            gfx->Default_palette[gfx->Color[0]].R,
-            gfx->Default_palette[gfx->Color[0]].G,
-            gfx->Default_palette[gfx->Color[0]].B);
-          Set_color(
-            MC_Dark, 
-            gfx->Default_palette[gfx->Color[1]].R,
-            gfx->Default_palette[gfx->Color[1]].G,
-            gfx->Default_palette[gfx->Color[1]].B);
-          Set_color(
-            MC_Light, 
-            gfx->Default_palette[gfx->Color[2]].R,
-            gfx->Default_palette[gfx->Color[2]].G,
-            gfx->Default_palette[gfx->Color[2]].B);
-          Set_color(
-            MC_White, 
-            gfx->Default_palette[gfx->Color[3]].R,
-            gfx->Default_palette[gfx->Color[3]].G,
-            gfx->Default_palette[gfx->Color[3]].B);
-        }
-        Update_window_area(6, 14, 173, 16);
-
+        need_load=1;
         break;
       case 5 : // Font dropdown
         selected_font = Window_attribute2; // Get the index of the chosen font.
