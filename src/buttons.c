@@ -1258,7 +1258,8 @@ void Button_Skins(void)
   byte separatecolors = Config.Separate_colors;
   byte showlimits = Config.Display_image_limits;
   byte need_load=1;
-
+  int button;
+  
   word x, y, x_pos, offs_y;
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
@@ -1485,6 +1486,22 @@ void Button_Skins(void)
   
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Display_menu();
+  // Redraw all buttons, to ensure all specific sprites are in place.
+  // This is necessary for multi-state buttons, for example Freehand.
+  for (button=0; button<NB_BUTTONS; button++)
+  {
+    byte state=Buttons_Pool[button].Pressed;    
+    switch(button)
+    {
+      case BUTTON_MAGNIFIER:
+        state|=Main_magnifier_mode;
+        break;
+      case BUTTON_EFFECTS:
+        state|=(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode);
+        break;
+    }
+    Draw_menu_button(button,state);
+  }
   Display_cursor();
 }
 
