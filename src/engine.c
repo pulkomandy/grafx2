@@ -463,7 +463,18 @@ void Select_button(int btn_number,byte click)
       break;
   }
   if (icon!=-1)
+  {
+    // This changes the sprite number of both halves of a split button
     Display_sprite_in_menu(btn_number,click==RIGHT_SIDE?icon:-1);
+
+    // Redraw the other half if Unselect_button() won't do it.
+    if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_TOP_LEFT && 
+      !Buttons_Pool[btn_number+1].Pressed)
+      Draw_menu_button(btn_number+1, BUTTON_RELEASED);
+    else if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT &&
+      !Buttons_Pool[btn_number-1].Pressed)
+      Draw_menu_button(btn_number-1, BUTTON_RELEASED);
+  }
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
   family=Buttons_Pool[btn_number].Family;

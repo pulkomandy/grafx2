@@ -2249,6 +2249,7 @@ void Button_Draw_switch_mode(void)
       break;
   }
   Display_sprite_in_menu(BUTTON_DRAW,icon);
+  Draw_menu_button(BUTTON_DRAW,BUTTON_PRESSED);
   Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
@@ -3472,6 +3473,7 @@ void Button_Lines_switch_mode(void)
 
   Hide_cursor();
   Display_sprite_in_menu(BUTTON_LINES,icon);
+  Draw_menu_button(BUTTON_LINES,BUTTON_PRESSED);
   Start_operation_stack(Selected_line_mode);
   Display_cursor();
 }
@@ -3932,6 +3934,7 @@ void Button_Curves_switch_mode(void)
 
   Hide_cursor();
   Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
+  Draw_menu_button(BUTTON_CURVES,BUTTON_PRESSED);
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();
 }
