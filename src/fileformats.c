@@ -1937,6 +1937,16 @@ void Load_GIF(T_IO_Context * context)
                           }
                         }
                       }
+                      else
+                      {
+                        // Unknown extension, skip.
+                        Read_byte(GIF_file,&size_to_read);
+                        while (size_to_read!=0 && !File_error)
+                        {
+                          fseek(GIF_file,size_to_read,SEEK_CUR);
+                          Read_byte(GIF_file,&size_to_read);
+                        }
+                      }
                     }
                     else
                     {
