@@ -4717,7 +4717,7 @@ void Button_Text()
   int new_height;
   int clicked_button;  
   const int NB_FONTS=8;
-  char size_buffer[3];
+  char size_buffer[4];
   T_Special_button * input_size_button;
   T_Special_button * input_text_button;
   T_Special_button * preview_button;
