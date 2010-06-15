@@ -1745,6 +1745,7 @@ void Load_GIF(T_IO_Context * context)
   T_GIF_GCE GCE;
 
   word nb_colors;       // Nombre de couleurs dans l'image
+  word base_nb_colors;  // Number of colors for computations. Same as nb_colors, except for 1bit images.
   word color_index; // index de traitement d'une couleur
   byte size_to_read; // Nombre de données à lire      (divers)
   byte block_identifier;  // Code indicateur du type de bloc en cours
@@ -1800,7 +1801,16 @@ void Load_GIF(T_IO_Context * context)
         // Ordre de Classement   = (LSDB.Aspect and $80)
 
         nb_colors=(1 << ((LSDB.Resol & 0x07)+1));
-        initial_nb_bits=(LSDB.Resol & 0x07)+2;
+        if (nb_colors==2)
+        {
+          base_nb_colors=4;
+          initial_nb_bits=3;
+        }
+        else
+        {
+          base_nb_colors=nb_colors;
+          initial_nb_bits=(LSDB.Resol & 0x07)+2;
+        }
 
         if (LSDB.Resol & 0x80)
         {
@@ -1998,7 +2008,16 @@ void Load_GIF(T_IO_Context * context)
                   // Palette locale dispo
     
                   nb_colors=(1 << ((IDB.Indicator & 0x07)+1));
-                  initial_nb_bits=(IDB.Indicator & 0x07)+2;
+                  if (nb_colors==2)
+                  {
+                    base_nb_colors=4;
+                    initial_nb_bits=3;
+                  }
+                  else
+                  {
+                    base_nb_colors=nb_colors;
+                    initial_nb_bits=(IDB.Indicator & 0x07)+2;
+                  }
     
                   if (!(IDB.Indicator & 0x40))
                     // Palette dans l'ordre:
@@ -2022,9 +2041,10 @@ void Load_GIF(T_IO_Context * context)
     
                 Palette_loaded(context);
     
-                value_clr   =nb_colors+0;
-                value_eof   =nb_colors+1;
-                alphabet_free=nb_colors+2;
+                value_clr    =base_nb_colors+0;
+                value_eof    =base_nb_colors+1;
+                alphabet_free=base_nb_colors+2;
+
                 GIF_nb_bits  =initial_nb_bits;
                 alphabet_max      =((1 <<  GIF_nb_bits)-1);
                 GIF_interlaced    =(IDB.Indicator & 0x40);
@@ -2082,7 +2102,7 @@ void Load_GIF(T_IO_Context * context)
                     {
                       GIF_nb_bits       =initial_nb_bits;
                       alphabet_max      =((1 <<  GIF_nb_bits)-1);
-                      alphabet_free     =nb_colors+2;
+                      alphabet_free     =base_nb_colors+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
                       GIF_new_pixel(context, &IDB, GIF_current_code);
