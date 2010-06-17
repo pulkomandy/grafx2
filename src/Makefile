@@ -52,7 +52,7 @@ ifdef COMSPEC
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng13.dll bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
   ZIP = zip
 else
 
