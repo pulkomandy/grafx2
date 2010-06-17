@@ -4942,6 +4942,20 @@ void Button_Text()
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
       else
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
+      // Activate alpha mode
+      if (antialias && TrueType_font(selected_font_index))
+      {
+        Shade_mode=0;
+        Quick_shade_mode=0;
+        Smooth_mode=0;
+        Tiling_mode=0;
+        Smear_mode=0;
+        Colorize_mode=1;
+        Colorize_current_mode=3;
+        Effect_function=Effect_alpha_colorize;
+        
+        Draw_menu_button(BUTTON_EFFECTS,BUTTON_PRESSED);
+      }
 
       Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
