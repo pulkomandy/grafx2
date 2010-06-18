@@ -497,7 +497,7 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
-  Keyboard_click_allowed = 0;
+  Keyboard_click_allowed = 1;
   
   Main_safety_backup_prefix = 'a';
   Spare_safety_backup_prefix = 'b';
