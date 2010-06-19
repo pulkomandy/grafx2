@@ -1025,8 +1025,54 @@ void Button_Palette(void)
           temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==RIGHT_SIDE)
           {
-            if (Back_color!=temp_color)
+            // Contextual menu
+            T_Dropdown_button dropdown;
+            T_Dropdown_choice *item;
+            
+            dropdown.Pos_X         =0;
+            dropdown.Pos_Y         =0;
+            dropdown.Height        =0;
+            dropdown.Dropdown_width=48;
+            dropdown.First_item    =NULL;
+            dropdown.Bottom_up     =1;
+            
+            Window_dropdown_add_item(&dropdown, 1, "Copy");
+            Window_dropdown_add_item(&dropdown, 2, "Paste");
+          
+            item=Dropdown_activate(&dropdown,Mouse_X,Mouse_Y);
+            
+            if (item && item->Number == 1)
             {
+              // Copy
+              Set_clipboard_colors(block_end+1-block_start,working_palette + block_start);
+              Display_cursor();
+            }
+            else if (item && item->Number == 2)
+            {
+              // Paste
+              int nb_colors;
+              
+              // Backup
+              memcpy(backup_palette,working_palette,sizeof(T_Palette));
+              
+              nb_colors = Get_clipboard_colors(working_palette, block_start);
+              if (nb_colors>0)
+              {
+                memcpy(temp_palette,working_palette,sizeof(T_Palette));
+                Set_palette(working_palette);
+                need_to_remap=1;
+                Display_cursor();
+                Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+              }
+              else
+              {
+                Display_cursor();
+              }
+            }
+            else if (Back_color!=temp_color)
+            {
+              // Just select back color
+              
               Back_color=temp_color;
               // 4 blocks de back_color entourant la fore_color
               Window_rectangle(260,89,24,4,Back_color);
@@ -1034,7 +1080,16 @@ void Button_Palette(void)
               Window_rectangle(260,93,4,64,Back_color);
               Window_rectangle(280,93,4,64,Back_color);
               Update_window_area(260,89,32,72);
+              
+              Display_cursor();
             }
+            else
+            {
+              Display_cursor();
+            }
+            
+            
+            Window_dropdown_clear_items(&dropdown);
           }
           else
           {
@@ -1145,8 +1200,9 @@ void Button_Palette(void)
 
               last_color=temp_color;
             }
+            Display_cursor();
           }
-          Display_cursor();
+          
         }
         break;
       case  2 : // Jauge rouge
@@ -2339,8 +2395,6 @@ void Button_Palette(void)
   free(working_palette);
   backup_palette = temp_palette = working_palette = NULL;
 }
-
-
 
 
 //---------------------- Menu de palettes secondaires ------------------------
