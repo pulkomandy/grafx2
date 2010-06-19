@@ -2254,6 +2254,28 @@ void Button_Palette(void)
           // Close (confirm)
           clicked_button=14;
         }
+        else if (Key == (SDLK_c|MOD_CTRL)) // Ctrl-C
+        {
+          Set_clipboard_colors(block_end+1-block_start,working_palette + block_start);
+        }
+        else if (Key == (SDLK_v|MOD_CTRL)) // Ctrl-V
+        {
+          int nb_colors;
+
+          Hide_cursor();
+          // Backup
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          
+          nb_colors = Get_clipboard_colors(working_palette, block_start);
+          if (nb_colors>0)
+          {
+            memcpy(temp_palette,working_palette,sizeof(T_Palette));
+            Set_palette(working_palette);
+            need_to_remap=1;
+            Display_cursor();
+            Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+          }
+        }
       }
 
       if (need_to_remap)
@@ -2477,4 +2499,40 @@ void Button_Secondary_palette(void)
     Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
     Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
   }
+}
+
+// ========= Clipboard management ==============
+
+int Palette_clipboard_count=0;
+T_Palette Palette_clipboard;
+
+/// Put some colors in the clipboard.
+/// @param nb_colors Number of colors to push
+/// @param colors First color of the input array
+void Set_clipboard_colors(int nb_colors, T_Components *colors)
+{
+  Palette_clipboard_count=nb_colors;
+  if (nb_colors)
+  {
+    memcpy(Palette_clipboard, colors, nb_colors*sizeof(T_Components));
+  }
+}
+
+/// Get some RGB colors from clipboard.
+/// @param palette Target palette
+/// @param start_color  Index of first color to replace
+/// @return        Number of colors retrieved (0-256)
+int Get_clipboard_colors(T_Palette palette, byte start_color)
+{
+  int nb_colors = Palette_clipboard_count;
+  
+  if (nb_colors==0)
+    return 0;
+
+  if (start_color+nb_colors > 256)
+  {
+    nb_colors=256-start_color;
+  }
+  memcpy(palette+start_color, Palette_clipboard, nb_colors*sizeof(T_Components));
+  return nb_colors;
 }
