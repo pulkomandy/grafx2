@@ -1745,11 +1745,10 @@ void Load_GIF(T_IO_Context * context)
   T_GIF_GCE GCE;
 
   word nb_colors;       // Nombre de couleurs dans l'image
-  word base_nb_colors;  // Number of colors for computations. Same as nb_colors, except for 1bit images.
   word color_index; // index de traitement d'une couleur
   byte size_to_read; // Nombre de données à lire      (divers)
   byte block_identifier;  // Code indicateur du type de bloc en cours
-  word initial_nb_bits;   // Nb de bits au début du traitement LZW
+  byte initial_nb_bits;   // Nb de bits au début du traitement LZW
   word special_case=0;       // Mémoire pour le cas spécial
   word old_code=0;       // Code précédent
   word byte_read;         // Sauvegarde du code en cours de lecture
@@ -1801,17 +1800,6 @@ void Load_GIF(T_IO_Context * context)
         // Ordre de Classement   = (LSDB.Aspect and $80)
 
         nb_colors=(1 << ((LSDB.Resol & 0x07)+1));
-        if (nb_colors==2)
-        {
-          base_nb_colors=4;
-          initial_nb_bits=3;
-        }
-        else
-        {
-          base_nb_colors=nb_colors;
-          initial_nb_bits=(LSDB.Resol & 0x07)+2;
-        }
-
         if (LSDB.Resol & 0x80)
         {
           // Palette globale dispo:
@@ -1819,24 +1807,12 @@ void Load_GIF(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
 
-          //   On peut maintenant charger la nouvelle palette:
-          if (!(LSDB.Aspect & 0x80))
-            // Palette dans l'ordre:
-            for(color_index=0;color_index<nb_colors;color_index++)
-            {
-              Read_byte(GIF_file,&(context->Palette[color_index].R));
-              Read_byte(GIF_file,&(context->Palette[color_index].G));
-              Read_byte(GIF_file,&(context->Palette[color_index].B));
-            }
-          else
+          // Load the palette
+          for(color_index=0;color_index<nb_colors;color_index++)
           {
-            // Palette triée par composantes:
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].R));
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].G));
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].B));
+            Read_byte(GIF_file,&(context->Palette[color_index].R));
+            Read_byte(GIF_file,&(context->Palette[color_index].G));
+            Read_byte(GIF_file,&(context->Palette[color_index].B));
           }
         }
 
@@ -1994,7 +1970,6 @@ void Load_GIF(T_IO_Context * context)
                 && Read_word_le(GIF_file,&(IDB.Image_width))
                 && Read_word_le(GIF_file,&(IDB.Image_height))
                 && Read_byte(GIF_file,&(IDB.Indicator))
-                && Read_byte(GIF_file,&(IDB.Nb_bits_pixel))
                 && IDB.Image_width && IDB.Image_height)
               {
     
@@ -2007,52 +1982,38 @@ void Load_GIF(T_IO_Context * context)
                 {
                   // Palette locale dispo
     
+                  if (Config.Clear_palette)
+                    memset(context->Palette,0,sizeof(T_Palette));
+
                   nb_colors=(1 << ((IDB.Indicator & 0x07)+1));
-                  if (nb_colors==2)
-                  {
-                    base_nb_colors=4;
-                    initial_nb_bits=3;
+                  // Load the palette
+                  for(color_index=0;color_index<nb_colors;color_index++)
+                  {   
+                    Read_byte(GIF_file,&(context->Palette[color_index].R));
+                    Read_byte(GIF_file,&(context->Palette[color_index].G));
+                    Read_byte(GIF_file,&(context->Palette[color_index].B));
                   }
-                  else
-                  {
-                    base_nb_colors=nb_colors;
-                    initial_nb_bits=(IDB.Indicator & 0x07)+2;
-                  }
-    
-                  if (!(IDB.Indicator & 0x40))
-                    // Palette dans l'ordre:
-                    for(color_index=0;color_index<nb_colors;color_index++)
-                    {   
-                      Read_byte(GIF_file,&(context->Palette[color_index].R));
-                      Read_byte(GIF_file,&(context->Palette[color_index].G));
-                      Read_byte(GIF_file,&(context->Palette[color_index].B));
-                    }
-                  else
-                  {
-                    // Palette triée par composantes:
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].R));
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].G));
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].B));
-                  }
+                  
                 }
     
                 Palette_loaded(context);
-    
-                value_clr    =base_nb_colors+0;
-                value_eof    =base_nb_colors+1;
-                alphabet_free=base_nb_colors+2;
 
-                GIF_nb_bits  =initial_nb_bits;
+                File_error=0;
+                if (!Read_byte(GIF_file,&(initial_nb_bits)))
+                  File_error=1;
+    
+                value_clr    =(1<<initial_nb_bits)+0;
+                value_eof    =(1<<initial_nb_bits)+1;
+                alphabet_free=(1<<initial_nb_bits)+2;
+
+                GIF_nb_bits  =initial_nb_bits + 1;
                 alphabet_max      =((1 <<  GIF_nb_bits)-1);
                 GIF_interlaced    =(IDB.Indicator & 0x40);
                 GIF_pass         =0;
     
                 /*Init_lecture();*/
     
-                File_error=0;
+
                 GIF_finished_interlaced_image=0;
     
                 //////////////////////////////////////////// DECOMPRESSION LZW //
@@ -2100,9 +2061,9 @@ void Load_GIF(T_IO_Context * context)
                     }
                     else // Code Clear rencontré
                     {
-                      GIF_nb_bits       =initial_nb_bits;
+                      GIF_nb_bits       =initial_nb_bits + 1;
                       alphabet_max      =((1 <<  GIF_nb_bits)-1);
-                      alphabet_free     =base_nb_colors+2;
+                      alphabet_free     =(1<<initial_nb_bits)+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
                       GIF_new_pixel(context, &IDB, GIF_current_code);
