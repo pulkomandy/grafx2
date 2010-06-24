@@ -655,6 +655,11 @@ static const int NUMERIC_R_X = 176;
 static const int NUMERIC_G_X = 203;
 static const int NUMERIC_B_X = 230;
 static const int NUMERIC_Y   = 171;
+// Position of the whole button
+static const int NUMERIC_BOX_X = 175;
+static const int NUMERIC_BOX_Y = 169;
+static const int NUMERIC_BOX_W = 81;
+static const int NUMERIC_BOX_H = 12;
 
 void Set_palette_slider(T_Scroller_button * slider,
                             word nb_elements, word position,
@@ -999,9 +1004,9 @@ void Button_Palette(void)
 
   Window_set_normal_button(136,16,54,14,"Sort" ,1,1,SDLK_s);   // 23
 
-  Window_set_normal_button(175,169,81,12,"" ,0,1,KEY_NONE);   // 24
+  Window_set_normal_button(NUMERIC_BOX_X,NUMERIC_BOX_Y,NUMERIC_BOX_W,NUMERIC_BOX_H,"" ,0,1,KEY_NONE);   // 24
   // Button without outline
-  Window_display_frame_mono(175-1,169-1,81+2,12+2,MC_Light);
+  Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(265, 74,MC_White,-1);
@@ -2141,6 +2146,58 @@ void Button_Palette(void)
       }
       break;
       case 24: // R G B value: Hex entry
+      {
+        char str[7];
+        unsigned int new_color;
+        
+        Hide_cursor();
+        Print_in_window(NUMERIC_BOX_X+2,NUMERIC_BOX_Y+2,"Hex",MC_Black,MC_Light);
+        // Clear out remaining area
+        Window_rectangle(NUMERIC_BOX_X+1+3*8,NUMERIC_BOX_Y+1,NUMERIC_BOX_W-3-3*8, NUMERIC_BOX_H-3,MC_Light);
+        Update_window_area(NUMERIC_BOX_X+1+3*8,NUMERIC_BOX_Y+1,NUMERIC_BOX_W-3-3*8, NUMERIC_BOX_H-3);
+        
+        str[0]='\0';
+        Display_cursor();
+        if (Readline(NUMERIC_BOX_X+NUMERIC_BOX_W-2-6*8, NUMERIC_BOX_Y+2, str, 6, INPUT_TYPE_HEXA))
+        {
+          int length = strlen(str);
+          short new_red, new_blue, new_green;
+          
+          if (length==3 || length==6)
+          {
+            sscanf(str, "%x", &new_color);
+            if (length==3)
+            {
+              new_color =
+                ((new_color&0xF00)*0x1100) |
+                ((new_color&0x0F0)*0x110) |
+                ((new_color&0x00F)*0x11); 
+            }
+            new_red=(new_color&0xFF0000) >> 16;
+            new_green=(new_color&0x00FF00) >> 8;
+            new_blue=(new_color&0x0000FF);
+            
+            // Backup
+            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            // Assign color
+            for (i=block_start;i<=block_end;i++)
+            {
+              Set_red(i,new_red,working_palette);
+              Set_green (i,new_green,working_palette);
+              Set_blue (i,new_blue,working_palette);
+            }
+            // On prépare la "modifiabilité" des nouvelles couleurs
+            Set_palette(working_palette);
+            memcpy(temp_palette,working_palette,sizeof(T_Palette));
+            need_to_remap=1;
+          }
+        }
+        // Clear out numeric area
+        Window_rectangle(NUMERIC_BOX_X+1,NUMERIC_BOX_Y+1,NUMERIC_BOX_W-2, NUMERIC_BOX_H-2,MC_Light);
+        Update_window_area(NUMERIC_BOX_X+1,NUMERIC_BOX_Y+1,NUMERIC_BOX_W-2, NUMERIC_BOX_H-2);
+        Display_cursor();
+        Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
+      }
       break;
       
     }
