@@ -675,7 +675,7 @@ int L_InputBox(lua_State* L)
         case CONTROL_INPUT:
 
           Sprint_double(str,current_value[setting],decimal_places[setting],0);
-          Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,3,decimal_places[setting]);
+          Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,INPUT_TYPE_DECIMAL,decimal_places[setting]);
           current_value[setting]=atof(str);
 
           if (current_value[setting] < min_value[setting])

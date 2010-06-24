@@ -1368,7 +1368,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
-          Readline(45,70,context->Comment,32,0);
+          Readline(45,70,context->Comment,32,INPUT_TYPE_STRING);
           Display_cursor();
         }
         break;
@@ -1377,7 +1377,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // Save the filename
         strcpy(save_filename, Selector_filename);
 
-        if (Readline(82,48,Selector_filename,27,2))
+        if (Readline(82,48,Selector_filename,27,INPUT_TYPE_FILENAME))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -1499,7 +1499,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
                   if (bookmark_label[7]==ELLIPSIS_CHARACTER)
                     bookmark_label[7]='\0';
-                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0,0))
+                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,INPUT_TYPE_STRING,0))
                     strcpy(Config.Bookmark_label[clicked_button-10],bookmark_label);
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                   Display_cursor();

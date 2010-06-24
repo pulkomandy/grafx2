@@ -1080,7 +1080,7 @@ void Button_Settings(void)
                   str[0]='\0';
                   if (! (old_mouse_k & RIGHT_SIDE))
                     Num2str(value,str,item.Digits+1);
-                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,1))
+                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,INPUT_TYPE_INTEGER))
                   {
                     value=atoi(str);
                     if (value<item.Min_value)
@@ -2006,7 +2006,7 @@ void Button_Resolution(void)
 
       case 3 : // Largeur
         Num2str(chosen_width,str,4);
-        Readline(62,37,str,4,1);
+        Readline(62,37,str,4,INPUT_TYPE_INTEGER);
         chosen_width=atoi(str);
         // On corrige les dimensions
         if (chosen_width==0)
@@ -2020,7 +2020,7 @@ void Button_Resolution(void)
 
       case 4 : // Height
         Num2str(chosen_height,str,4);
-        Readline(166,37,str,4,1);
+        Readline(166,37,str,4,INPUT_TYPE_INTEGER);
         chosen_height=atoi(str);
         // On corrige les dimensions
         if (chosen_height==0)
@@ -4203,7 +4203,7 @@ void Button_Airbrush_menu(void)
 
       case 11 : // Size
         Num2str(Airbrush_size,str,3);
-        Readline(188,25,str,3,1);
+        Readline(188,25,str,3,INPUT_TYPE_INTEGER);
         Airbrush_size=atoi(str);
         // On corrige les dimensions
         if (Airbrush_size>256)
@@ -4223,7 +4223,7 @@ void Button_Airbrush_menu(void)
 
       case 12 : // Delay
         Num2str(Airbrush_delay,str,2);
-        Readline(196,39,str,2,1);
+        Readline(196,39,str,2,INPUT_TYPE_INTEGER);
         Airbrush_delay=atoi(str);
         // On corrige le delai
         if (Airbrush_delay>99)
@@ -4237,7 +4237,7 @@ void Button_Airbrush_menu(void)
 
       case 13 : // Mono-Flow
         Num2str(Airbrush_mono_flow,str,2);
-        Readline(113,24,str,2,1);
+        Readline(113,24,str,2,INPUT_TYPE_INTEGER);
         Airbrush_mono_flow=atoi(str);
         // On corrige le flux
         if (!Airbrush_mono_flow)
@@ -4251,7 +4251,7 @@ void Button_Airbrush_menu(void)
 
       case 14 : // Init
         Num2str(spray_init,str,2);
-        Readline(113,40,str,2,1);
+        Readline(113,40,str,2,INPUT_TYPE_INTEGER);
         spray_init=atoi(str);
         // On corrige la valeur
         if (spray_init>=50)
@@ -4834,7 +4834,7 @@ void Button_Text()
     switch(clicked_button)
     {
       case 1: // Texte saisi
-      Readline_ex(50,20,str,29,250,0,0);
+      Readline_ex(50,20,str,29,250,INPUT_TYPE_STRING,0);
       preview_is_needed=1;
       break;
 
@@ -4874,7 +4874,7 @@ void Button_Text()
       break;
                   
       case 7: // Taille du texte (nombre)
-      Readline(222,45,size_buffer,3,1);
+      Readline(222,45,size_buffer,3,INPUT_TYPE_INTEGER);
       font_size=atoi(size_buffer);
       // On corrige les dimensions
       if (font_size < 1)

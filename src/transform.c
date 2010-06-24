@@ -273,7 +273,7 @@ void Button_Transform_menu(void)
           input_button[clicked_button-10]->Pos_Y+2,
           buffer,
           4,
-          1))
+          INPUT_TYPE_INTEGER))
         {
           // Accept entered value
           *(input_value[clicked_button-10])=atoi(buffer);

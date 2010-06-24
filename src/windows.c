@@ -1074,7 +1074,7 @@ int Requester_window(char* message, int initial_value)
   {
     clicked_button = Window_clicked_button();
     if (clicked_button == 1)
-      Readline(11, 39, str, 4, 1);
+      Readline(11, 39, str, 4, INPUT_TYPE_INTEGER);
     if (Key == SDLK_ESCAPE) clicked_button = 2;
   }
   while (clicked_button <= 0);

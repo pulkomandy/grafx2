@@ -24,13 +24,22 @@
 /// Text input functions.
 //////////////////////////////////////////////////////////////////////////////
 
+enum INPUT_TYPE
+{
+  INPUT_TYPE_STRING=0,  ///< Any string
+  INPUT_TYPE_INTEGER=1, ///< Decimal integer
+  INPUT_TYPE_FILENAME=2,///< Filename
+  INPUT_TYPE_DECIMAL=3, ///< Decimal value
+  INPUT_TYPE_HEXA=4,    ///< Hexadecimal integer
+};
+
 ///
 /// Lets the user input a line of text, exit by Esc or Return.
 /// @param x_pos        Coordinates of input, in window coordinates before scaling.
 /// @param y_pos        Coordinates of input, in window coordinates before scaling.
 /// @param str          The original string value (will be modified, unless user cancels.
 /// @param visible_size Number of characters visible and editable.
-/// @param input_type   0=string, 1=number, 2=filename (255 editable characters)
+/// @param input_type   one of enum ::INPUT_TYPE
 /// @return             0 if user cancelled (esc), 1 if accepted (return)
 byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type);
 
@@ -41,7 +50,7 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
 /// @param str          The original string value (will be modified, unless user cancels.
 /// @param visible_size Number of characters visible.
 /// @param max_size     Number of characters editable.
-/// @param input_type   0=string, 1=integer, 2=filename (255 editable characters) 3=decimal
+/// @param input_type   one of enum ::INPUT_TYPE
 /// @param decimal_places Number of decimal places (used only with decimal type)
 /// @return             0 if user cancelled (esc), 1 if accepted (return)
 byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places);
