@@ -46,6 +46,11 @@ char * Palette_reduce_label[7]=
   "128"," 64"," 32"," 16","  8","  4","  2"
 };
 
+// Coordinates of the color count (on histogram button)
+static const int COUNT_X = 214;
+static const int COUNT_Y = 19;
+  
+
 // Nombre de graduations pour une composante RGB
 int RGB_scale = 256; // 24bit
 //int RGB_scale = 64; // VGA
@@ -192,7 +197,7 @@ void Update_color_count(short * used_colors, dword * color_usage)
   strcpy(str,"Used: ");
   Num2str(*used_colors,str+6,3);
   Hide_cursor();
-  Print_in_window(214,19,str,MC_Black,MC_Light);
+  Print_in_window(COUNT_X,COUNT_Y,str,MC_Black,MC_Light);
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
 }
@@ -640,7 +645,7 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*used_colors,str,3);
-    Print_in_window(180,20,str,MC_Black,MC_Light);
+    Print_in_window(COUNT_X+6*8,COUNT_Y,str,MC_Black,MC_Light);
   }
 
   //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
@@ -881,6 +886,7 @@ void Button_Palette(void)
   // Coordinates of the Color#
   static const int COLOR_X = 111;
   static const int COLOR_Y = 69;
+  
   
   static short reduce_colors_number = 256;
   short temp_color; // Variable pouvant reservir pour différents calculs intermédiaires
