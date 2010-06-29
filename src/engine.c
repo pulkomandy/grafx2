@@ -1668,14 +1668,14 @@ void Tag_color_range(byte start,byte end)
 
   // On efface les anciens TAGs
   for (index=0;index<=start;index++)
-    Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-          Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-          Menu_factor_X*3,Menu_factor_Y*5,MC_Light);
+    Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+          Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+          3,5,MC_Light);
 
   for (index=end;index<256;index++)
-    Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-          Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-          Menu_factor_X*3,Menu_factor_Y*5,MC_Light);
+    Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+          Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+          3,5,MC_Light);
 
   // On affiche le 1er TAG
   origin_x=(Window_palette_button_list->Pos_X+3)+(start>>4)*10;
@@ -1703,9 +1703,9 @@ void Tag_color_range(byte start,byte end)
     // On TAG toutes les couleurs intermédiaires
     for (index=start+1;index<end;index++)
     {
-      Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-            Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-            Menu_factor_X*2,Menu_factor_Y*5,MC_Black);
+      Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+            Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+            2,5,MC_Black);
       // On efface l'éventuelle pointe d'une ancienne extrémité de l'intervalle
       Pixel_in_window(Window_palette_button_list->Pos_X+5+((index>>4)*10),
                          Window_palette_button_list->Pos_Y+5+((index&15)* 5),
@@ -1715,7 +1715,7 @@ void Tag_color_range(byte start,byte end)
 
   }
 
-  Update_rect(ToWinX(Window_palette_button_list->Pos_X+3),ToWinY(Window_palette_button_list->Pos_Y+3),ToWinL(12*16),ToWinH(5*16));
+  Update_window_area(Window_palette_button_list->Pos_X+3,Window_palette_button_list->Pos_Y+3,12*16,5*16);
 
 }
 

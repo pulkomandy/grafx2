@@ -864,6 +864,23 @@ void Print_RGB_or_HSL(byte mode)
   Print_in_window(238,68,mode?"L":"B",MC_Dark,MC_Light);
 }
 
+void Tag_used_colors(byte color, dword color_usage[])
+{
+  word index;
+
+  for (index=0;index<=255;index++)
+  {
+    short x_pos=Window_palette_button_list->Pos_X+6+((index>>4)*10);
+    short y_pos=Window_palette_button_list->Pos_Y+3+((index&15)* 5);
+    byte col;
+    
+    col=(color&&color_usage[index])?MC_White:MC_Light;
+    Window_rectangle(x_pos+5,y_pos+0,1,5,col);
+  }
+
+  Update_window_area(Window_palette_button_list->Pos_X+3,Window_palette_button_list->Pos_Y+3,12*16,5*16);
+}
+
 void Button_Palette(void)
 {
   static const int BUTTON_PLUS_X = 268;
@@ -917,6 +934,8 @@ void Button_Palette(void)
   T_Components * backup_palette;
   T_Components * temp_palette;
   T_Components * working_palette;
+  
+  static byte show_used_colors=0;
 
   backup_palette =(T_Components *)malloc(sizeof(T_Palette));
   temp_palette=(T_Components *)malloc(sizeof(T_Palette));
@@ -1023,6 +1042,8 @@ void Button_Palette(void)
   Display_cursor();
 
   Update_color_count(&used_colors,color_usage);
+  if (show_used_colors)
+    Tag_used_colors(1, color_usage);
     
   Update_window_area(0,0,299,188);
   
@@ -1032,7 +1053,7 @@ void Button_Palette(void)
     old_mouse_y=Mouse_Y;
     old_mouse_k=Mouse_K;
     clicked_button=Window_clicked_button();
-
+    
     switch (clicked_button)
     {
       case  0 : // Nulle part
@@ -1497,6 +1518,8 @@ void Button_Palette(void)
           Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
           Tag_color_range(block_start,block_end);
+          if (show_used_colors)
+            Tag_used_colors(1, color_usage);
           
           need_to_remap=1;
 
@@ -1662,7 +1685,15 @@ void Button_Palette(void)
         break;
 
       case 15 : // Used > open histogram
-        Window_Histogram(block_start, block_end, color_usage);
+        if (Window_attribute1==RIGHT_SIDE)
+        {
+          Window_Histogram(block_start, block_end, color_usage);
+        }
+        else
+        {
+          show_used_colors = !show_used_colors;
+          Tag_used_colors(show_used_colors, color_usage);
+        }
         break;
 
       case 16 : // Zap unused
@@ -2397,6 +2428,8 @@ void Button_Palette(void)
         Remap_screen_after_menu_colors_change();
         // Puis on remet les trucs qui ne devaient pas changer
         Window_draw_palette_bouton(5,79);
+        if (show_used_colors)
+          Tag_used_colors(1, color_usage);
         Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,Back_color);
         Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
         
