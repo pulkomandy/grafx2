@@ -1477,6 +1477,22 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_HOME|MOD_ALT, // Alt + Home
   0},
+  {181,
+  "Brush factory",
+  "Opens a window where you can run a",
+  "Lua script.",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {182,
+  "Repeat script",
+  "Re-run the last script selected",
+  "in the Brush factory window.",
+  "",
+  true,
+  0, // No shortcut
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1662,4 +1678,6 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_LAYER_UP,
   0x100+BUTTON_LAYER_DOWN,
   0x100+BUTTON_LAYER_MENU,
+  0x200+BUTTON_BRUSH_EFFECTS,
+  SPECIAL_REPEAT_SCRIPT,
 };

@@ -228,6 +228,8 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  18:1               %s",   SPECIAL_ZOOM_18)
   HELP_LINK ("  20:1               %s",   SPECIAL_ZOOM_20)
   HELP_LINK ("Brush effects menu:  %s",   0x100+BUTTON_BRUSH_EFFECTS)
+  HELP_LINK ("Brush factory:       %s",   0x200+BUTTON_BRUSH_EFFECTS)
+  HELP_LINK ("Repeat last script:  %s",   SPECIAL_REPEAT_SCRIPT)
   HELP_LINK ("Text:                %s",   0x100+BUTTON_TEXT)
   HELP_LINK ("Resolution menu:     %s",   0x100+BUTTON_RESOL)
   HELP_LINK ("Safety resolution:   %s",   0x200+BUTTON_RESOL)
@@ -1306,6 +1308,8 @@ static const T_Help_table helptable_brush_fx[] =
   HELP_TEXT ("")
   HELP_TITLE("BRUSH FACTORY")
   HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x200+BUTTON_BRUSH_EFFECTS)
+  HELP_TEXT ("")
   HELP_TEXT ("This menu allows you to run scripts. Scripts")
   HELP_TEXT ("are written in the Lua language, and allow")
   HELP_TEXT ("you to modify the brush (hence the name")
@@ -1324,6 +1328,8 @@ static const T_Help_table helptable_brush_fx[] =
   HELP_TEXT ("subdirectory. The list is refreshed each")
   HELP_TEXT ("time you open the window. Scripts are loaded")
   HELP_TEXT ("from disk when you run them.")
+  HELP_TEXT ("")
+  HELP_LINK ("- Repeat last script: %s", SPECIAL_REPEAT_SCRIPT)
   HELP_TEXT ("")
 };
 static const T_Help_table helptable_effects[] =

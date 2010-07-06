@@ -920,13 +920,152 @@ void Highlight_script(T_Fileselector *selector, T_List_button *list, const char 
   }
 }
 
+static char selected_script[MAX_PATH_CHARACTERS]="";
+
+// Before: Cursor hidden
+// After: Cursor shown
+void Run_script(char *scriptdir)
+{
+  lua_State* L;
+  const char* message;
+  byte  old_cursor_shape=Cursor_shape;
+
+  // Some scripts are slow
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+  Flush_update();
+  
+  chdir(scriptdir);
+
+  L = lua_open();
+
+  lua_register(L,"putbrushpixel",L_PutBrushPixel);
+  lua_register(L,"getbrushpixel",L_GetBrushPixel);
+  lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
+  lua_register(L,"putpicturepixel",L_PutPicturePixel);
+  lua_register(L,"getpicturepixel",L_GetPicturePixel);
+  lua_register(L,"getlayerpixel",L_GetLayerPixel);
+  lua_register(L,"getbackuppixel",L_GetBackupPixel);
+  lua_register(L,"setbrushsize",L_SetBrushSize);
+  lua_register(L,"setpicturesize",L_SetPictureSize);
+  lua_register(L,"getbrushsize",L_GetBrushSize);
+  lua_register(L,"getpicturesize",L_GetPictureSize);
+  lua_register(L,"setcolor",L_SetColor);
+  lua_register(L,"getcolor",L_GetColor);
+  lua_register(L,"getbackupcolor",L_GetBackupColor);
+  lua_register(L,"matchcolor",L_MatchColor);
+  lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
+  lua_register(L,"inputbox",L_InputBox);
+  lua_register(L,"messagebox",L_MessageBox);
+  lua_register(L,"getforecolor",L_GetForeColor);
+  lua_register(L,"getbackcolor",L_GetBackColor);
+  lua_register(L,"gettranscolor",L_GetTransColor);
+  lua_register(L,"getsparepicturesize ",L_GetSparePictureSize);
+  lua_register(L,"getsparelayerpixel ",L_GetSpareLayerPixel);
+  lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
+  lua_register(L,"getsparecolor",L_GetSpareColor);
+  lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+  lua_register(L,"clearpicture",L_ClearPicture);
+  
+
+  // For debug only
+  // luaL_openlibs(L);
+  
+  luaopen_base(L);
+  //luaopen_package(L); // crashes on Windows, for unknown reason
+  luaopen_table(L);
+  //luaopen_io(L); // crashes on Windows, for unknown reason
+  //luaopen_os(L);
+  //luaopen_string(L);
+  luaopen_math(L);
+  //luaopen_debug(L);
+
+  strcat(scriptdir, selected_script);
+
+  // TODO The script may modify the picture, so we do a backup here.
+  // If the script is only touching the brush, this isn't needed...
+  // The backup also allows the script to read from it to make something
+  // like a feedback off effect (convolution matrix comes to mind).
+  Backup();
+
+  Palette_has_changed=0;
+  Brush_was_altered=0;
+
+  // Backup the brush
+  Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
+  Brush_backup_width = Brush_width;
+  Brush_backup_height = Brush_height;
+  
+  if (Brush_backup == NULL)
+  {
+    Verbose_message("Error!", "Out of memory!");
+  }
+  else 
+  {
+    memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
+  
+    if (luaL_loadfile(L,scriptdir) != 0)
+    {
+      int stack_size;
+      stack_size= lua_gettop(L);
+      if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
+        Verbose_message("Error!", message);
+      else
+        Warning_message("Unknown error loading script!");
+    }
+    else if (lua_pcall(L, 0, 0, 0) != 0)
+    {
+      int stack_size;
+      stack_size= lua_gettop(L);
+      if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
+        Verbose_message("Error running script", message);
+      else
+        Warning_message("Unknown error running script!");
+    }
+  }
+  // Cleanup
+  free(Brush_backup);
+  Brush_backup=NULL;
+  if (Palette_has_changed)
+  {
+    Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
+  }
+  End_of_modification();
+
+  lua_close(L);
+  
+  if (Brush_was_altered)
+    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+
+  Display_all_screen();
+  Cursor_shape=old_cursor_shape;
+  Display_cursor();
+}
+
+void Repeat_script(void)
+{
+  char scriptdir[MAX_PATH_CHARACTERS];
+
+  if (selected_script==NULL || selected_script[0]=='\0')
+  {
+    Warning_message("No script to repeat.");
+    return;
+  }
+
+  strcpy(scriptdir, Data_directory);
+  strcat(scriptdir, "scripts/");
+  
+  Hide_cursor();
+  Run_script(scriptdir);
+}
+
 void Button_Brush_Factory(void)
 {
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
   char scriptdir[MAX_PATH_CHARACTERS];
-  static char selected_script[MAX_PATH_CHARACTERS]="";
 
   Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
 
@@ -974,6 +1113,8 @@ void Button_Brush_Factory(void)
     clicked_button = Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
+    else if (Is_shortcut(Key,0x200+BUTTON_BRUSH_EFFECTS))
+      clicked_button=1; // Cancel
 
     switch (clicked_button)
     {
@@ -990,139 +1131,27 @@ void Button_Brush_Factory(void)
     }
     
   } while (clicked_button != 1 && clicked_button != 5);
+  
+  if (clicked_button == 5) // OK
+  {
+    if (Scripts_list.Nb_elements == 0)
+      selected_script[0]='\0';
+    else
+      strcpy(selected_script, Get_item_by_index(&Scripts_list,
+        scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
+  }
+  
+  Close_window();
+  Unselect_button(BUTTON_BRUSH_EFFECTS);
 
-  if (Scripts_list.Nb_elements == 0)
-    selected_script[0]='\0';
-  else
-    strcpy(selected_script, Get_item_by_index(&Scripts_list,
-      scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
-            
   if (clicked_button == 5) // Run the script
   {
-    lua_State* L;
-    const char* message;
-
-    // Some scripts are slow
-    Hide_cursor();
-    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
-    Display_cursor();
-    Flush_update();
-    
-    chdir(scriptdir);
-
-    L = lua_open();
-
-    lua_register(L,"putbrushpixel",L_PutBrushPixel);
-    lua_register(L,"getbrushpixel",L_GetBrushPixel);
-    lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
-    lua_register(L,"putpicturepixel",L_PutPicturePixel);
-    lua_register(L,"getpicturepixel",L_GetPicturePixel);
-    lua_register(L,"getlayerpixel",L_GetLayerPixel);
-    lua_register(L,"getbackuppixel",L_GetBackupPixel);
-    lua_register(L,"setbrushsize",L_SetBrushSize);
-    lua_register(L,"setpicturesize",L_SetPictureSize);
-    lua_register(L,"getbrushsize",L_GetBrushSize);
-    lua_register(L,"getpicturesize",L_GetPictureSize);
-    lua_register(L,"setcolor",L_SetColor);
-    lua_register(L,"getcolor",L_GetColor);
-    lua_register(L,"getbackupcolor",L_GetBackupColor);
-    lua_register(L,"matchcolor",L_MatchColor);
-    lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
-    lua_register(L,"inputbox",L_InputBox);
-    lua_register(L,"messagebox",L_MessageBox);
-    lua_register(L,"getforecolor",L_GetForeColor);
-    lua_register(L,"getbackcolor",L_GetBackColor);
-    lua_register(L,"gettranscolor",L_GetTransColor);
-    lua_register(L,"getsparepicturesize ",L_GetSparePictureSize);
-    lua_register(L,"getsparelayerpixel ",L_GetSpareLayerPixel);
-    lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
-    lua_register(L,"getsparecolor",L_GetSpareColor);
-    lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
-    lua_register(L,"clearpicture",L_ClearPicture);
-    
-
-    // For debug only
-    // luaL_openlibs(L);
-    
-    luaopen_base(L);
-    //luaopen_package(L); // crashes on Windows, for unknown reason
-    luaopen_table(L);
-    //luaopen_io(L); // crashes on Windows, for unknown reason
-    //luaopen_os(L);
-    //luaopen_string(L);
-    luaopen_math(L);
-    //luaopen_debug(L);
-
-    strcat(scriptdir, selected_script);
-
-    // TODO The script may modify the picture, so we do a backup here.
-    // If the script is only touching the brush, this isn't needed...
-    // The backup also allows the script to read from it to make something
-    // like a feedback off effect (convolution matrix comes to mind).
-    Backup();
-
-    Palette_has_changed=0;
-    Brush_was_altered=0;
-
-    // Backup the brush
-    Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
-    Brush_backup_width = Brush_width;
-    Brush_backup_height = Brush_height;
-    
-    if (Brush_backup == NULL)
-    {
-      Verbose_message("Error!", "Out of memory!");
-    }
-    else 
-    {
-      memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
-    
-      if (luaL_loadfile(L,scriptdir) != 0)
-      {
-        int stack_size;
-        stack_size= lua_gettop(L);
-        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-          Verbose_message("Error!", message);
-        else
-          Warning_message("Unknown error loading script!");
-      }
-      else if (lua_pcall(L, 0, 0, 0) != 0)
-      {
-        int stack_size;
-        stack_size= lua_gettop(L);
-        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-          Verbose_message("Error running script", message);
-        else
-          Warning_message("Unknown error running script!");
-      }
-    }
-    // Cleanup
-    free(Brush_backup);
-    Brush_backup=NULL;
-    if (Palette_has_changed)
-    {
-      Set_palette(Main_palette);
-      Compute_optimal_menu_colors(Main_palette);
-    }
-    End_of_modification();
-
-    lua_close(L);
+    Run_script(scriptdir);
   }
-
-  Close_window();
-  if (Brush_was_altered)
-    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-  Unselect_button(BUTTON_BRUSH_EFFECTS);
-  // If the image has been resized, Compute_limits() has been called and it 
-  // has computed wrong values because a window was open : In this
-  // context, Menu_Y and Menu_is_visible are artificially set to "menu hidden".
-  // This whole "_before_window" looks like it's completely useless anyway,
-  // but we're too close to release to scrap it and re-test everything.
-  // So: call Compute_limits() one more time, and be done with it.
-  Compute_limits();
-
-  Display_all_screen();
-  Display_cursor();
+  else
+  {
+    Display_cursor();
+  }
 }
 
 #else // NOLUA

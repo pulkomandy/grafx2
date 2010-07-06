@@ -40,6 +40,7 @@
 #include "engine.h"
 #include "pages.h"
 #include "layers.h"
+#include "factory.h"
 
 
 // we need this as global
@@ -1191,6 +1192,10 @@ void Main_handler(void)
               case SPECIAL_LAYER7_TOGGLE:
               case SPECIAL_LAYER8_TOGGLE:
                 Layer_activate((key_index-SPECIAL_LAYER1_TOGGLE)/2, RIGHT_SIDE);
+                action++;
+                break;
+              case SPECIAL_REPEAT_SCRIPT:
+                Repeat_script();
                 action++;
                 break;
             }
