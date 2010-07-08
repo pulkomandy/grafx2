@@ -1493,6 +1493,38 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   0, // No shortcut
   0},
+  {183,
+  "Double brush size",
+  "Resizes the current user brush",
+  "by doubling width and height.",
+  "",
+  true,
+  SDLK_h|MOD_SHIFT, // Shift+H
+  0},
+  {184,
+  "Double brush width",
+  "Resizes the current user brush",
+  "by doubling its width.",
+  "",
+  true,
+  SDLK_x|MOD_SHIFT, // Shift+X
+  0},
+  {185,
+  "Double brush height",
+  "Resizes the current user brush",
+  "by doubling its height.",
+  "",
+  true,
+  SDLK_y|MOD_SHIFT, // Shift+Y
+  0},
+  {186,
+  "Halve brush size",
+  "Resizes the current user brush",
+  "by halving its width and height",
+  "",
+  true,
+  SDLK_h, // H
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1680,4 +1712,8 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_LAYER_MENU,
   0x200+BUTTON_BRUSH_EFFECTS,
   SPECIAL_REPEAT_SCRIPT,
+  SPECIAL_BRUSH_DOUBLE,
+  SPECIAL_BRUSH_DOUBLE_WIDTH,
+  SPECIAL_BRUSH_DOUBLE_HEIGHT,
+  SPECIAL_BRUSH_HALVE,
 };

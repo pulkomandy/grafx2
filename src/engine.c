@@ -884,6 +884,46 @@ void Main_handler(void)
                 Display_cursor();
                 action++;
                 break;
+              case SPECIAL_BRUSH_DOUBLE:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width*2,Brush_height*2);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_DOUBLE_WIDTH:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width*2,Brush_height);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_DOUBLE_HEIGHT:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width,Brush_height*2);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_HALVE:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width/2,Brush_height/2);
+                  Display_cursor();
+                }
+                action++;
+                break;
               case SPECIAL_OUTLINE : // Outline brush
                 Hide_cursor();
                 Outline_brush();

@@ -37,7 +37,6 @@
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
-#define NB_SHORTCUTS              183   ///< Number of actions that can have a key combination associated to it.
 #define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
@@ -394,6 +393,10 @@ enum SPECIAL_ACTIONS
   SPECIAL_GET_BRUSH_COLORS,
   SPECIAL_RECOLORIZE_BRUSH,
   SPECIAL_ROTATE_ANY_ANGLE,
+  SPECIAL_BRUSH_DOUBLE,
+  SPECIAL_BRUSH_DOUBLE_WIDTH,
+  SPECIAL_BRUSH_DOUBLE_HEIGHT,
+  SPECIAL_BRUSH_HALVE,
   SPECIAL_LOAD_BRUSH,
   SPECIAL_SAVE_BRUSH,
   SPECIAL_INVERT_SIEVE,
