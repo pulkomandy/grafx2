@@ -1641,10 +1641,10 @@ void Button_Palette(void)
                     = Requester_window("Enter the max. number of colors",
                         reduce_colors_number);
                 if (reduce_colors_number < 2 || reduce_colors_number >= 256)
-                    reduce_colors_number = -1;
+                    reduce_colors_number = 256;
                 break;
         }
-        if (reduce_colors_number > 0)
+        if (reduce_colors_number != 256)
         {
             if (!image_is_backed_up)
             {
@@ -2089,6 +2089,9 @@ void Button_Palette(void)
         byte remap_table[256];
         byte inverted_table[256];
         byte begin, end;
+        long lightness;
+        long old_lightness;
+
 
         if(block_start==block_end)
         {
@@ -2112,7 +2115,7 @@ void Button_Palette(void)
         }
 
         if(Window_attribute1==LEFT_SIDE)
-        // Laft click on button: Sort by Hue (H) and Lightness (L)
+        // Left click on button: Sort by Hue (H) and Lightness (L)
         while(swap==1)
         {
           swap=0;
@@ -2143,19 +2146,17 @@ void Button_Palette(void)
           }
         }
 
-        else // Right click > Sort only on L
+        else // Right click > Sort only on perceived lightness
         while(swap==1)
         {
           swap=0;
-          l=255;
-          for(temp_color=begin;temp_color<=end;temp_color++)
+          lightness=Perceptual_lightness(working_palette+begin);
+          for(temp_color=begin+1;temp_color<=end;temp_color++)
           {
-            ol=l; 
-            RGB_to_HSL(working_palette[temp_color].R,
-            working_palette[temp_color].G,
-            working_palette[temp_color].B,&h,&s,&l);
+            old_lightness=lightness; 
+            lightness=Perceptual_lightness(working_palette+temp_color);
 
-            if(l>ol)
+            if(lightness>old_lightness)
             {
               // Swap color with the previous one
               SWAP_BYTES(working_palette[temp_color].R, working_palette[temp_color-1].R)
