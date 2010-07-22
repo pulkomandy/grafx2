@@ -1030,6 +1030,7 @@ void Run_script(char *scriptdir)
   {
     Set_palette(Main_palette);
     Compute_optimal_menu_colors(Main_palette);
+    Display_menu();
   }
   End_of_modification();
 
