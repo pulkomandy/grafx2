@@ -2125,6 +2125,49 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
         }
         break;
+        
+        
+      case CHUNK_SCRIPTS:
+        if (reload_all)
+        {
+          int current_size=0;
+          int current_script=0;
+          
+          while(current_size<Chunk.Size)
+          {
+            byte size;
+            
+            // Free (old) string
+            free(Bound_script[current_script]);
+            Bound_script[current_script]=NULL;
+            
+            if (!Read_byte(Handle, &size))
+              goto Erreur_lecture_config;
+              
+            if (size!=0)
+            {
+              // Alloc string
+              Bound_script[current_script]=malloc(size+1);
+              if (Bound_script[current_script]==NULL)
+                return ERROR_MEMORY;
+              
+              // Init and load string
+              memset(Bound_script[current_script], 0, size+1);
+              if (!Read_bytes(Handle, Bound_script[current_script], size))
+                goto Erreur_lecture_config;
+            }
+            current_size+=size+1;
+            current_script++;
+            
+            // Do not load more strings than hard-coded limit
+            if (current_script>=10)
+              break;
+          }
+          
+          
+        }
+        break;
+        
       default: // Chunk inconnu
         goto Erreur_lecture_config;
     }
@@ -2348,7 +2391,7 @@ int Save_CFG(void)
   {
     long total_size=0;
     int index;
-    // Compute size: normal paintbrushes
+    // Compute size: monochrome paintbrushes
     for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
     {
       total_size+=9+(Paintbrush[index].Width*Paintbrush[index].Height+7)/8;
@@ -2405,6 +2448,40 @@ int Save_CFG(void)
         if (!Write_byte(Handle, current_byte))
           goto Erreur_sauvegarde_config;
       }
+    }
+  }
+  
+  // Save script shortcuts
+  {
+    int i;
+    Chunk.Number=CHUNK_SCRIPTS;
+    // Compute size : Data stored as 10 pascal strings
+    Chunk.Size=0;
+    for (i=0; i<10; i++)    
+    {
+      if (Bound_script[i]==NULL)
+        Chunk.Size+=1;
+      else
+        Chunk.Size+=strlen(Bound_script[i])+1;
+    }
+    // Header
+    if (!Write_byte(Handle, Chunk.Number) ||
+        !Write_word_le(Handle, Chunk.Size) )
+      goto Erreur_sauvegarde_config;
+      
+    // Strings
+    for (i=0; i<10; i++)    
+    {
+      byte size=0;      
+      if (Bound_script[i]!=NULL)
+        size=strlen(Bound_script[i]);
+        
+      if (!Write_byte(Handle, size))
+        goto Erreur_sauvegarde_config;
+        
+      if (size)
+        if (!Write_bytes(Handle, Bound_script[i], size))
+          goto Erreur_sauvegarde_config;
     }
   }
   

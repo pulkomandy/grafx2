@@ -901,6 +901,8 @@ int Load_INI(T_Config * conf)
   {
     conf->Right_click_colorpick=(values[0]!=0);
   }
+  
+  
 
   fclose(file);
 

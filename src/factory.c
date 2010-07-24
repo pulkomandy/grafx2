@@ -43,6 +43,9 @@
 #include "input.h" // Is_shortcut()
 #include "help.h" // Window_help()
 
+/// Lua scripts bound to shortcut keys.
+char * Bound_script[10];
+
 #ifdef __ENABLE_LUA__
 
 #include <lua.h>
@@ -55,6 +58,8 @@
 /// Number of characters for name in fileselector.
 /// Window is adjusted according to it.
 #define NAME_WIDTH 34
+/// Number of characters for the description block
+#define DESC_WIDTH ((NAME_WIDTH+2)*8/6)
 /// Position of fileselector top, in window space
 #define FILESEL_Y 18
 
@@ -826,11 +831,12 @@ void Draw_script_information(T_Fileselector_item * script_item)
 {
   FILE *script_file;
   char full_name[MAX_PATH_CHARACTERS];
-  char text_block[3][NAME_WIDTH+3];
+  char text_block[3][DESC_WIDTH+1];
   int x, y;
+  int i;
   
   // Blank the target area
-  Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
+  Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
   if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
@@ -865,7 +871,7 @@ void Draw_script_information(T_Fileselector_item * script_item)
         }
         else
         {
-          if (x < NAME_WIDTH+4)
+          if (x < DESC_WIDTH+2)
           {
             // Adding character
             text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
@@ -879,12 +885,31 @@ void Draw_script_information(T_Fileselector_item * script_item)
       fclose(script_file);
     }
     
-    Print_in_window(7, FILESEL_Y + 89   , text_block[0], MC_Light, MC_Black);
-    Print_in_window(7, FILESEL_Y + 89+ 8, text_block[1], MC_Light, MC_Black);
-    Print_in_window(7, FILESEL_Y + 89+16, text_block[2], MC_Light, MC_Black);
+    Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
+    Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
+    Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
   
+    // Display a line with the keyboard shortcut
+    Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
+    for (i=0; i<10; i++)
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+        break;
+  
+    if (i<10)
+    {
+      const char *shortcut;    
+      shortcut=Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
+      Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
+    }
+    else
+    {
+      Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
+    }
   }
-  Update_window_area(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8);
+  
+
+  
+  Update_window_area(8, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8);
     
 }
 
@@ -1044,6 +1069,23 @@ void Run_script(char *scriptdir)
   Display_cursor();
 }
 
+void Run_numbered_script(byte index)
+{
+  char scriptdir[MAX_PATH_CHARACTERS];
+
+  if (index>=10)
+    return;
+  if (Bound_script[index]==NULL)
+    return;
+    
+  strcpy(scriptdir, Data_directory);
+  strcat(scriptdir, "scripts/");
+  
+  strcpy(selected_script, Bound_script[index]);
+  
+  Run_script(scriptdir);
+}               
+
 void Repeat_script(void)
 {
   char scriptdir[MAX_PATH_CHARACTERS];
@@ -1061,6 +1103,58 @@ void Repeat_script(void)
   Run_script(scriptdir);
 }
 
+void Set_script_shortcut(T_Fileselector_item * script_item)
+{
+  int i;
+  char full_name[MAX_PATH_CHARACTERS];
+  
+  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  {
+    strcpy(full_name, Data_directory);
+    strcat(full_name, "scripts/");
+    strcat(full_name, script_item->Full_name);
+    
+    // Find if it already has a shortcut
+    for (i=0; i<10; i++)
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+        break;
+    if (i<10)
+    {
+      // Existing shortcut
+    }
+    else
+    {
+      // Try to find a "free" one.
+      for (i=0; i<10; i++)
+        if (Bound_script[i]==NULL
+          || !Has_shortcut(SPECIAL_RUN_SCRIPT_1+i)
+          || !File_exists(full_name))
+          break;
+      if (i<10)
+      {
+        free(Bound_script[i]);
+        Bound_script[i]=strdup(script_item->Full_name);
+      }
+      else
+      {
+        Warning_message("Already 10 scripts have shortcuts.");
+        return;
+      }
+    }
+    Window_set_shortcut(SPECIAL_RUN_SCRIPT_1+i);
+    if (!Has_shortcut(SPECIAL_RUN_SCRIPT_1+i))
+    {
+      // User cancelled or deleted all shortcuts
+      free(Bound_script[i]);
+      Bound_script[i]=NULL;
+    }
+    // Refresh display
+    Hide_cursor();
+    Draw_script_information(script_item);
+    Display_cursor();
+  }
+}
+
 void Button_Brush_Factory(void)
 {
   short clicked_button;
@@ -1068,7 +1162,7 @@ void Button_Brush_Factory(void)
   T_Scroller_button* scriptscroll;
   char scriptdir[MAX_PATH_CHARACTERS];
 
-  Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
+  Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
 
   // Here we use the same data container as the fileselectors.
   // Reinitialize the list
@@ -1080,7 +1174,7 @@ void Button_Brush_Factory(void)
   // Sort it
   Sort_list_of_files(&Scripts_list);
 
-  Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
+  Window_set_normal_button(85, 149, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   scriptlist = Window_set_list_button(
@@ -1091,10 +1185,11 @@ void Button_Brush_Factory(void)
       Scripts_list.Nb_elements,10, 0)), // 3
     Draw_script_name); // 4
 
-  Window_set_normal_button(10, 141, 67, 14, "Run", 0, Scripts_list.Nb_elements!=0, SDLK_RETURN); // 5
+  Window_set_normal_button(10, 149, 67, 14, "Run", 0, Scripts_list.Nb_elements!=0, SDLK_RETURN); // 5
 
-  Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
-  
+  Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
+  Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
+    
   // Update position
   Highlight_script(&Scripts_list, scriptlist, selected_script);
   // Update the scroller position
@@ -1125,7 +1220,11 @@ void Button_Brush_Factory(void)
           scriptlist->List_start + scriptlist->Cursor_position));
         Display_cursor();
         break;
-        
+      
+      case 6:
+        Set_script_shortcut(Get_item_by_index(&Scripts_list,
+          scriptlist->List_start + scriptlist->Cursor_position));
+        break;
         
       default:
         break;

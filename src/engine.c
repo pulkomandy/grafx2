@@ -1238,6 +1238,19 @@ void Main_handler(void)
                 Repeat_script();
                 action++;
                 break;
+              case SPECIAL_RUN_SCRIPT_1:
+              case SPECIAL_RUN_SCRIPT_2:
+              case SPECIAL_RUN_SCRIPT_3:
+              case SPECIAL_RUN_SCRIPT_4:
+              case SPECIAL_RUN_SCRIPT_5:
+              case SPECIAL_RUN_SCRIPT_6:
+              case SPECIAL_RUN_SCRIPT_7:
+              case SPECIAL_RUN_SCRIPT_8:
+              case SPECIAL_RUN_SCRIPT_9:
+              case SPECIAL_RUN_SCRIPT_10:
+                Run_numbered_script(key_index-SPECIAL_RUN_SCRIPT_1);
+                action++;
+                break;
             }
           }
         } // End of special keys

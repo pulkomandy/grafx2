@@ -46,5 +46,17 @@ void Button_Stats(void);
 */
 void Window_help(int section, const char * sub_section);
 
+/// Opens a window where you can change a shortcut key(s).
+void Window_set_shortcut(int action_id);
+
+///
+/// Print a line with the 'help' (6x8) font.
+short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size);
+
+// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// de type 0x100+BOUTON_* ou SPECIAL_*
+const char * Keyboard_shortcut_value(word shortcut_number);
+
+
 #endif
 

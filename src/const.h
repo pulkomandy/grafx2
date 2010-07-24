@@ -255,6 +255,7 @@ enum CHUNKS_CFG
   CHUNK_QUICK_SHADE     = 8, ///< QShade effect settings
   CHUNK_GRID            = 9, ///< Grid settings
   CHUNK_BRUSH           =10, ///< Paintbrushes
+  CHUNK_SCRIPTS         =11, ///< Callable scripts
   CHUNK_MAX
 };
 
@@ -469,6 +470,16 @@ enum SPECIAL_ACTIONS
   SPECIAL_LAYER8_SELECT,
   SPECIAL_LAYER8_TOGGLE,
   SPECIAL_REPEAT_SCRIPT,
+  SPECIAL_RUN_SCRIPT_1,
+  SPECIAL_RUN_SCRIPT_2,
+  SPECIAL_RUN_SCRIPT_3,
+  SPECIAL_RUN_SCRIPT_4,
+  SPECIAL_RUN_SCRIPT_5,
+  SPECIAL_RUN_SCRIPT_6,
+  SPECIAL_RUN_SCRIPT_7,
+  SPECIAL_RUN_SCRIPT_8,
+  SPECIAL_RUN_SCRIPT_9,
+  SPECIAL_RUN_SCRIPT_10,
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 
