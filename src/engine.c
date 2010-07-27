@@ -1235,8 +1235,10 @@ void Main_handler(void)
                 action++;
                 break;
               case SPECIAL_REPEAT_SCRIPT:
+#ifdef __ENABLE_LUA__
                 Repeat_script();
                 action++;
+#endif
                 break;
               case SPECIAL_RUN_SCRIPT_1:
               case SPECIAL_RUN_SCRIPT_2:
@@ -1248,8 +1250,10 @@ void Main_handler(void)
               case SPECIAL_RUN_SCRIPT_8:
               case SPECIAL_RUN_SCRIPT_9:
               case SPECIAL_RUN_SCRIPT_10:
+#ifdef __ENABLE_LUA__
                 Run_numbered_script(key_index-SPECIAL_RUN_SCRIPT_1);
                 action++;
+#endif
                 break;
             }
           }
