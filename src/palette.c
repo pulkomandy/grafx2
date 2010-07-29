@@ -47,7 +47,7 @@ char * Palette_reduce_label[7]=
 };
 
 // Coordinates of the color count (on histogram button)
-static const int COUNT_X = 214;
+static const int COUNT_X = 262;
 static const int COUNT_Y = 19;
   
 
@@ -188,14 +188,13 @@ void Spread_colors(short start,short end,T_Palette palette)
 
 void Update_color_count(short * used_colors, dword * color_usage)
 {
-  char   str[10];
+  char   str[4];
 
   Hide_cursor();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
   *used_colors=Count_used_colors(color_usage);
-  strcpy(str,"Used: ");
-  Num2str(*used_colors,str+6,3);
+  Num2str(*used_colors,str,3);
   Hide_cursor();
   Print_in_window(COUNT_X,COUNT_Y,str,MC_Black,MC_Light);
   Cursor_shape=CURSOR_SHAPE_ARROW;
@@ -924,6 +923,7 @@ void Button_Palette(void)
   T_Scroller_button * green_slider;
   T_Scroller_button * blue_slider;
   T_Dropdown_button * reduce_dropdown;
+  T_Dropdown_button * sort_dropdown;
   byte   image_is_backed_up = 0;
   byte   need_to_remap = 0;
 
@@ -1012,8 +1012,7 @@ void Button_Palette(void)
   Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
   Window_set_normal_button(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  // histogram button
-  button_used = Window_set_normal_button(209,16,83,14,"",0,1,SDLK_d);// 15
+  Window_set_normal_button(209,16,45,14,"Used:",0,1,SDLK_d); // 15
   Window_set_normal_button(209,31,83,14,"Zap unused",0,1,SDLK_DELETE);//16
   
   Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
@@ -1027,12 +1026,17 @@ void Button_Palette(void)
   Window_set_normal_button(175,66,81,11,""    ,0,1,SDLK_h);   // 22
   Window_display_frame_mono(175-1,66-1,81+2,11+2,MC_Light);
 
-  Window_set_normal_button(136,16,54,14,"Sort" ,1,1,SDLK_s);   // 23
-
+  sort_dropdown = Window_set_dropdown_button(136, 16, 54, 14, 80, " Sort", 0,
+    1, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 23
+  Window_dropdown_add_item(sort_dropdown, 0, "Hue/Light");
+  Window_dropdown_add_item(sort_dropdown, 1, "Lightness");
+  
   Window_set_normal_button(NUMERIC_BOX_X,NUMERIC_BOX_Y,NUMERIC_BOX_W,NUMERIC_BOX_H,"" ,0,1,KEY_NONE);   // 24
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
+  button_used = Window_set_normal_button(255,16,37,14,"",0,1,KEY_NONE);// 25
+  
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(265, 74,MC_White,-1);
   Draw_thingumajig(282, 74,MC_White,+1);
@@ -1684,16 +1688,9 @@ void Button_Palette(void)
         need_to_remap=1;
         break;
 
-      case 15 : // Used > open histogram
-        if (Window_attribute1==RIGHT_SIDE)
-        {
-          Window_Histogram(block_start, block_end, color_usage);
-        }
-        else
-        {
-          show_used_colors = !show_used_colors;
-          Tag_used_colors(show_used_colors, color_usage);
-        }
+      case 15 : // Used : show usage tags
+        show_used_colors = !show_used_colors;
+        Tag_used_colors(show_used_colors, color_usage);
         break;
 
       case 16 : // Zap unused
@@ -2114,8 +2111,8 @@ void Button_Palette(void)
           image_is_backed_up=1;
         }
 
-        if(Window_attribute1==LEFT_SIDE)
-        // Left click on button: Sort by Hue (H) and Lightness (L)
+        if(Window_attribute2==0)
+        // Sort by Hue (H) and Lightness (L)
         while(swap==1)
         {
           swap=0;
@@ -2146,7 +2143,7 @@ void Button_Palette(void)
           }
         }
 
-        else // Right click > Sort only on perceived lightness
+        else // Sort only on perceived lightness
         while(swap==1)
         {
           swap=0;
@@ -2238,6 +2235,9 @@ void Button_Palette(void)
       }
       break;
       
+      case 25: // Number of colors used: Open histogram
+        Window_Histogram(block_start, block_end, color_usage);
+        break;
     }
 
 
