@@ -67,8 +67,10 @@ byte* Window_background[8];
 ///Table of tooltip texts for menu buttons
 char * Menu_tooltip[NB_BUTTONS]=
 {
+  // Status bar
   "Hide toolbars / Select  ",
 
+  // Layer bar
   "Layers manager          ",
   "Get/Set transparent col.",
   "Merge layer             ",
@@ -77,6 +79,8 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Raise layer             ",
   "Lower layer             ",
   "Layer select / toggle   ",
+
+  // Drawing
   "Paintbrush choice       ",
   "Adjust / Transform menu ",
   "Freehand draw. / Toggle ",
@@ -92,17 +96,21 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Filled circles / ellips.",
   "Grad. rect / Grad. menu ",
   "Grad. spheres / ellipses",
+
+  // Effects
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
-#ifdef __ENABLE_LUA__
-  "Brush effects / factory ",
-#else
   "Brush effects           ",
-#endif
   "Drawing modes (effects) ",
+#ifdef __ENABLE_LUA__
+  "Text / Brush factory    ",
+#else
   "Text                    ",
+#endif
   "Magnify mode / Menu     ",
   "Pipette / Invert colors ",
+
+  // File, settings
   "Screen size / Safe. res.",
   "Go / Copy to other page ",
   "Save as / Save          ",
@@ -113,6 +121,8 @@ char * Menu_tooltip[NB_BUTTONS]=
   "Undo / Redo             ",
   "Kill current page       ",
   "Quit                    ",
+
+  // Palette
   "Palette editor / setup  ",
   "Scroll pal. bkwd / Fast ",
   "Scroll pal. fwd / Fast  ",

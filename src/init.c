@@ -966,6 +966,38 @@ void Init_buttons(void)
                      Button_Unselect_lasso,
                      FAMILY_INTERRUPTION);
 
+  Init_button(BUTTON_EFFECTS,
+                     123,1,
+                     15,15,
+                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+                     Button_Effects,Button_Effects,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_EFFECTS);
+
+  Init_button(BUTTON_BRUSH_EFFECTS,
+                     124, 2,
+                     15, 15,
+                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+                     Button_Brush_FX, Button_Brush_FX,
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+
+  Init_button(BUTTON_TEXT,
+                     123,18,
+                     16,16,
+                     BUTTON_SHAPE_RECTANGLE,
+#ifdef __ENABLE_LUA__
+                     Button_Text,Button_Brush_Factory,
+#else
+                     Button_Text,Button_Text,
+#endif
+                     0,0,
+                     Do_nothing,
+                     FAMILY_INSTANT);
+
+/*
   Init_button(BUTTON_BRUSH_EFFECTS,
                      106, 18,
                      16, 16,
@@ -996,7 +1028,7 @@ void Init_buttons(void)
                      0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
-
+*/
   Init_button(BUTTON_MAGNIFIER,
                      140,1,
                      16,16,
