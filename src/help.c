@@ -126,7 +126,7 @@ void Window_set_shortcut(int action_id)
     order_index++;
     if (order_index>=NB_SHORTCUTS)
     {
-      Error(0);
+      Warning_message("Shortcut does not exist!");
       return;
     }
   }

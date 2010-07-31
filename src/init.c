@@ -76,6 +76,7 @@
 #include "palette.h"
 #include "sdlscreen.h"
 #include "setup.h"
+#include "special.h"
 #include "struct.h"
 #include "transform.h"
 #include "windows.h"
