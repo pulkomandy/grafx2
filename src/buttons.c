@@ -111,6 +111,10 @@ void Bouton_***(void)
 }
 */
 
+void Select_paintbrush(int index);
+byte Store_paintbrush(int index);
+
+
 void Message_out_of_memory(void)
 {
   short clicked_button;
@@ -204,7 +208,7 @@ void Button_Undo(void)
 
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -219,7 +223,7 @@ void Button_Redo(void)
 
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -916,7 +920,7 @@ void Button_Settings(void)
 
   T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
   
-    {"           --- GUI  ---",0,NULL,0,0,0,NULL},
+  {"           --- GUI  ---",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
   {"Menu ratio adapt:",1,&(selected_config.Ratio),0,1,0,Lookup_MenuRatio},
@@ -949,7 +953,7 @@ void Button_Settings(void)
   {"Clear with stencil:",1,&(selected_config.Clear_with_stencil),0,1,0,Lookup_YesNo},
   {"Auto discontinuous:",1,&(selected_config.Auto_discontinuous),0,1,0,Lookup_YesNo},
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
@@ -982,7 +986,7 @@ void Button_Settings(void)
   const char * help_section[SETTING_PAGES] = {
     "GUI",
     "INPUT",
-    "EDITING"
+    "EDITING",
     "FILE SELECTOR",
     "FILE FORMAT OPTIONS",
   };
@@ -1076,7 +1080,7 @@ void Button_Settings(void)
                   str[0]='\0';
                   if (! (old_mouse_k & RIGHT_SIDE))
                     Num2str(value,str,item.Digits+1);
-                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,1))
+                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,INPUT_TYPE_INTEGER))
                   {
                     value=atoi(str);
                     if (value<item.Min_value)
@@ -1253,7 +1257,9 @@ void Button_Skins(void)
   int selected_cursor = Config.Cursor;
   byte separatecolors = Config.Separate_colors;
   byte showlimits = Config.Display_image_limits;
-
+  byte need_load=1;
+  int button;
+  
   word x, y, x_pos, offs_y;
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
@@ -1341,6 +1347,68 @@ void Button_Skins(void)
 
   do
   {
+    if (need_load)
+    {
+      need_load=0;
+      
+      Hide_cursor();
+      // (Re-)load GUI graphics from selected skins
+      strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
+        skin_list->List_start + skin_list->Cursor_position)->Full_name);
+
+      gfx = Load_graphics(skinsdir);
+      if (gfx == NULL) // Error
+      {
+        Display_cursor();
+        Verbose_message("Error!", Gui_loading_error_message);
+        Hide_cursor();
+        // Update preview
+        Window_rectangle(6, 14, 173, 16, MC_Light);
+      }
+      else
+      {
+        // Update preview
+        
+        // Display the bitmap according to its own color indices
+        for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
+        for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
+        {
+          if (gfx->Preview[offs_y][x_pos] == gfx->Color[0])
+            Pixel_in_window(x, y, MC_Black);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[1])
+            Pixel_in_window(x, y,  MC_Dark);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[3])
+            Pixel_in_window(x, y, MC_White);
+          else if (gfx->Preview[offs_y][x_pos] == gfx->Color[2])
+            Pixel_in_window(x, y, MC_Light);
+        }
+        // Actualize current screen according to preferred GUI colors
+        // Note this only updates onscreen colors
+        Set_color(
+          MC_Black, 
+          gfx->Default_palette[gfx->Color[0]].R,
+          gfx->Default_palette[gfx->Color[0]].G,
+          gfx->Default_palette[gfx->Color[0]].B);
+        Set_color(
+          MC_Dark, 
+          gfx->Default_palette[gfx->Color[1]].R,
+          gfx->Default_palette[gfx->Color[1]].G,
+          gfx->Default_palette[gfx->Color[1]].B);
+        Set_color(
+          MC_Light, 
+          gfx->Default_palette[gfx->Color[2]].R,
+          gfx->Default_palette[gfx->Color[2]].G,
+          gfx->Default_palette[gfx->Color[2]].B);
+        Set_color(
+          MC_White, 
+          gfx->Default_palette[gfx->Color[3]].R,
+          gfx->Default_palette[gfx->Color[3]].G,
+          gfx->Default_palette[gfx->Color[3]].B);
+      }
+      Update_window_area(6, 14, 173, 16);
+      Display_cursor();
+    }
+  
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_SETTINGS, "SKINS");
@@ -1354,60 +1422,7 @@ void Button_Skins(void)
       case 3 : // doesn't happen
         break;
       case 4 : // a file is selected
-
-        // (Re-)load GUI graphics from selected skins
-        strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
-          skin_list->List_start + skin_list->Cursor_position)->Full_name);
-
-        gfx = Load_graphics(skinsdir);
-        if (gfx == NULL) // Error
-        {
-          Verbose_message("Error!", Gui_loading_error_message);
-          // Update preview
-          Window_rectangle(6, 14, 173, 16, MC_Light);
-        }
-        else
-        {
-          // Update preview
-          
-          // Display the bitmap according to its own color indices
-          for (y = 14, offs_y = 0; offs_y < 16; offs_y++, y++)
-          for (x = 6, x_pos = 0; x_pos<173; x_pos++, x++)
-          {
-            if (gfx->Preview[offs_y][x_pos] == gfx->Color[0])
-              Pixel_in_window(x, y, MC_Black);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[1])
-              Pixel_in_window(x, y,  MC_Dark);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[3])
-              Pixel_in_window(x, y, MC_White);
-            else if (gfx->Preview[offs_y][x_pos] == gfx->Color[2])
-              Pixel_in_window(x, y, MC_Light);
-          }
-          // Actualize current screen according to preferred GUI colors
-          // Note this only updates onscreen colors
-          Set_color(
-            MC_Black, 
-            gfx->Default_palette[gfx->Color[0]].R,
-            gfx->Default_palette[gfx->Color[0]].G,
-            gfx->Default_palette[gfx->Color[0]].B);
-          Set_color(
-            MC_Dark, 
-            gfx->Default_palette[gfx->Color[1]].R,
-            gfx->Default_palette[gfx->Color[1]].G,
-            gfx->Default_palette[gfx->Color[1]].B);
-          Set_color(
-            MC_Light, 
-            gfx->Default_palette[gfx->Color[2]].R,
-            gfx->Default_palette[gfx->Color[2]].G,
-            gfx->Default_palette[gfx->Color[2]].B);
-          Set_color(
-            MC_White, 
-            gfx->Default_palette[gfx->Color[3]].R,
-            gfx->Default_palette[gfx->Color[3]].G,
-            gfx->Default_palette[gfx->Color[3]].B);
-        }
-        Update_window_area(6, 14, 173, 16);
-
+        need_load=1;
         break;
       case 5 : // Font dropdown
         selected_font = Window_attribute2; // Get the index of the chosen font.
@@ -1471,6 +1486,22 @@ void Button_Skins(void)
   
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Display_menu();
+  // Redraw all buttons, to ensure all specific sprites are in place.
+  // This is necessary for multi-state buttons, for example Freehand.
+  for (button=0; button<NB_BUTTONS; button++)
+  {
+    byte state=Buttons_Pool[button].Pressed;    
+    switch(button)
+    {
+      case BUTTON_MAGNIFIER:
+        state|=Main_magnifier_mode;
+        break;
+      case BUTTON_EFFECTS:
+        state|=(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode);
+        break;
+    }
+    Draw_menu_button(button,state);
+  }
   Display_cursor();
 }
 
@@ -1554,7 +1585,7 @@ void Button_Page(void)
   Compute_optimal_menu_colors(Main_palette);
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
-  Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
   Display_menu();
 
   Display_cursor();
@@ -1750,7 +1781,7 @@ void Button_Kill(void)
 
     Display_all_screen();
     Unselect_button(BUTTON_KILL);
-    Draw_menu_button_frame(BUTTON_MAGNIFIER,Main_magnifier_mode);
+    Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
     Display_menu();
     Display_cursor();
   }
@@ -1975,7 +2006,7 @@ void Button_Resolution(void)
 
       case 3 : // Largeur
         Num2str(chosen_width,str,4);
-        Readline(62,37,str,4,1);
+        Readline(62,37,str,4,INPUT_TYPE_INTEGER);
         chosen_width=atoi(str);
         // On corrige les dimensions
         if (chosen_width==0)
@@ -1989,7 +2020,7 @@ void Button_Resolution(void)
 
       case 4 : // Height
         Num2str(chosen_height,str,4);
-        Readline(166,37,str,4,1);
+        Readline(166,37,str,4,INPUT_TYPE_INTEGER);
         chosen_height=atoi(str);
         // On corrige les dimensions
         if (chosen_height==0)
@@ -2220,13 +2251,32 @@ void Button_Draw(void)
 
 void Button_Draw_switch_mode(void)
 {
+  char icon;
+  
 /* ANCIEN CODE SANS POPUPS */
   Selected_freehand_mode++;
   if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
     Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+  switch(Selected_freehand_mode)
+  {
+    default:
+    case OPERATION_CONTINUOUS_DRAW:
+      icon=-1;
+      break;
+    case OPERATION_DISCONTINUOUS_DRAW:
+      icon=MENU_SPRITE_DISCONTINUOUS_DRAW;
+      break;
+    case OPERATION_POINT_DRAW:
+      icon=MENU_SPRITE_POINT_DRAW;
+      break;
+    case OPERATION_FILLED_CONTOUR:
+      icon=MENU_SPRITE_CONTOUR_DRAW;
+      break;
+  }
+  Display_sprite_in_menu(BUTTON_DRAW,icon);
+  Draw_menu_button(BUTTON_DRAW,BUTTON_PRESSED);
   Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 /* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
@@ -2254,7 +2304,7 @@ void Button_Draw_switch_mode(void)
     while (Mouse_K);
 
     Close_popup();
-    Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode);
+    //Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode+2);
     Start_operation_stack(Selected_freehand_mode);
     Display_cursor();
 */
@@ -2719,6 +2769,26 @@ void Button_Unselect_fill(void)
 
 //---------------------------- Menu des pinceaux -----------------------------
 
+/// Checks if the current brush is identical to a preset one.
+byte Same_paintbrush(byte index)
+{
+  if (Paintbrush_shape!=Paintbrush[index].Shape ||
+      Paintbrush_width!=Paintbrush[index].Width ||
+      Paintbrush_height!=Paintbrush[index].Height)
+  return 0;
+  
+  if (Paintbrush_shape==PAINTBRUSH_SHAPE_MISC)
+  {
+    // Check all pixels
+    int x,y;
+    for(y=0;y<Paintbrush_height;y++)
+      for(x=0;x<Paintbrush_width;x++)
+        if(Paintbrush_sprite[(y*MAX_PAINTBRUSH_SIZE)+x]!=Paintbrush[index].Sprite[y][x])
+          return 0;
+  }
+  return 1;
+}
+
 void Button_Paintbrush_menu(void)
 {
   short clicked_button;
@@ -2729,20 +2799,41 @@ void Button_Paintbrush_menu(void)
 
   Window_display_frame(8,21,294,132);
 
-  Window_set_normal_button(122,158,67,14,"Cancel",0,1,KEY_ESC); // 1
+  Window_set_normal_button(10,158,67,14,"Cancel",0,1,KEY_ESC); // 1
+
+  Window_set_dropdown_button(216, 158, 84,14,84,"Preset...", 0,0,1,RIGHT_SIDE|LEFT_SIDE,1);  
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_ROUND,         "Round");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SQUARE,        "Square");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_HORIZONTAL_BAR,"Horizontal");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_VERTICAL_BAR,  "Vertical");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SLASH,         "Slash");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_ANTISLASH,     "Antislash");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_RANDOM,        "Random");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_CROSS,         "Cross");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_PLUS,          "Plus");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_DIAMOND,       "Diamond");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SIEVE_ROUND,   "Sieve Rnd");
+  Window_dropdown_add_item(Window_dropdown_button_list,PAINTBRUSH_SHAPE_SIEVE_SQUARE,  "Sieve Sqr");
 
   for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
   {
     x_pos=13+(index%12)*24;
     y_pos=27+(index/12)*25;
-    Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
+    Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
+    // Highlight selected brush
+    if (Same_paintbrush(index))
+      Window_rectangle(x_pos,y_pos,20,20,MC_White);
+      
     Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
   }
   for (index=0; index<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; index++)
   {
     x_pos=13+((index+NB_PAINTBRUSH_SPRITES)%12)*24;
     y_pos=27+((index+NB_PAINTBRUSH_SPRITES)/12)*25;
-    Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
+    Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
     Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
   }
   
@@ -2756,11 +2847,11 @@ void Button_Paintbrush_menu(void)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_PAINTBRUSHES, NULL);
     // Brush container
-    if (clicked_button>(NB_PAINTBRUSH_SPRITES+1))
+    if (clicked_button>=(NB_PAINTBRUSH_SPRITES+3))
     {
-      index = clicked_button-NB_PAINTBRUSH_SPRITES-2;
+      index = clicked_button-NB_PAINTBRUSH_SPRITES-3;
       
-      if (Window_attribute1==RIGHT_SIDE)
+      if (Window_attribute2==1) // Set
       {
         // Store
         
@@ -2771,39 +2862,80 @@ void Button_Paintbrush_menu(void)
         Hide_cursor();
         Display_stored_brush_in_window(x_pos+2, y_pos+2, index);
         Display_cursor();
-  }
+      }
       else
       {
         // Restore and exit
 
         if (Restore_brush(index))
         {
-  Close_window();
+          Close_window();
           break;
         }
       }
 
     }
-    else if (clicked_button>1 && Window_attribute1==LEFT_SIDE)
+    else if (clicked_button>=3)
     // Standard paintbrushes
-  {
-      Close_window();
-    index=clicked_button-2;
-    Paintbrush_shape=Gfx->Paintbrush_type[index];
-    Paintbrush_width=Gfx->Preset_paintbrush_width[index];
-    Paintbrush_height=Gfx->Preset_paintbrush_height[index];
-    Paintbrush_offset_X=Gfx->Preset_paintbrush_offset_X[index];
-    Paintbrush_offset_Y=Gfx->Preset_paintbrush_offset_Y[index];
-    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
-      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
-        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Gfx->Paintbrush_sprite[index][y_pos][x_pos];
-    Change_paintbrush_shape(Gfx->Paintbrush_type[index]);
-      
-      break;
+    {
+      if (Window_attribute2!=1)
+      {
+        // Select paintbrush
+        Close_window();
+        Select_paintbrush(clicked_button-3);
+        break;
+      }
+      else if (Window_attribute2==1)
+      {
+        // Store current
+        index=clicked_button-3;
+        if (!Store_paintbrush(index))
+        {        
+          // Redraw
+          Hide_cursor();
+          x_pos=13+(index%12)*24;
+          y_pos=27+(index/12)*25;
+          Window_rectangle(x_pos,y_pos,20,20,MC_White);
+          Display_paintbrush_in_window(x_pos+2,y_pos+2,index);
+          Display_cursor();
+        }
+      }
     }
     else if (clicked_button==1 || Is_shortcut(Key,0x100+BUTTON_PAINTBRUSHES))
     {
       Close_window();
+      break;
+    }
+    else if (clicked_button==2)
+    {
+      int size;
+      // Pick a standard shape
+      Paintbrush_shape=Window_attribute2;
+      // Assign a reasonable size
+      size=Max(Paintbrush_width,Paintbrush_height);
+      if (size==1)
+        size=3;
+      
+      switch (Paintbrush_shape)
+      {
+        case PAINTBRUSH_SHAPE_HORIZONTAL_BAR:
+          Set_paintbrush_size(size, 1);
+          break;
+        case PAINTBRUSH_SHAPE_VERTICAL_BAR:
+            Set_paintbrush_size(1, size);
+          break;
+        case PAINTBRUSH_SHAPE_CROSS:
+        case PAINTBRUSH_SHAPE_PLUS:
+        case PAINTBRUSH_SHAPE_DIAMOND:
+          Set_paintbrush_size(size|1,size|1);
+          break;
+        default:
+          Set_paintbrush_size(size,size);
+          break;
+        
+      }
+      Close_window();
+      Change_paintbrush_shape(Paintbrush_shape);
       break;
     }
   }
@@ -3001,9 +3133,9 @@ void Load_picture(byte image)
       {
         if (Main_magnifier_mode)
         {
-          Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
           Pixel_preview=Pixel_preview_normal;
           Main_magnifier_mode=0;
+          Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
         }
 
         new_mode=Best_video_mode();
@@ -3104,9 +3236,9 @@ void Button_Reload(void)
     {
       if (Main_magnifier_mode)
       {
-        Draw_menu_button_frame(BUTTON_MAGNIFIER,0);
         Pixel_preview=Pixel_preview_normal;
         Main_magnifier_mode=0;
+        Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
       }
 
       new_mode=Best_video_mode();     
@@ -3341,18 +3473,34 @@ void Button_Lines(void)
 
 void Button_Lines_switch_mode(void)
 {
+  char icon;
+  
   if (Selected_line_mode==OPERATION_LINE)
-    Selected_line_mode=OPERATION_K_LIGNE;
+    Selected_line_mode=OPERATION_K_LINE;
   else
   {
-    if (Selected_line_mode==OPERATION_K_LIGNE)
+    if (Selected_line_mode==OPERATION_K_LINE)
       Selected_line_mode=OPERATION_CENTERED_LINES;
     else
       Selected_line_mode=OPERATION_LINE;
   }
+  switch(Selected_line_mode)
+  {
+    default:
+    case OPERATION_LINE:
+      icon=-1;
+      break;
+    case OPERATION_K_LINE:
+      icon=MENU_SPRITE_K_LINE;
+      break;
+    case OPERATION_CENTERED_LINES:
+      icon=MENU_SPRITE_CENTERED_LINES;
+      break;
+  }
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_LINES,Selected_line_mode-OPERATION_LINE+7);
+  Display_sprite_in_menu(BUTTON_LINES,icon);
+  Draw_menu_button(BUTTON_LINES,BUTTON_PRESSED);
   Start_operation_stack(Selected_line_mode);
   Display_cursor();
 }
@@ -3446,6 +3594,7 @@ void Button_Colorpicker(void)
 
 void Button_Unselect_colorpicker(void)
 {
+  // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
          ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
@@ -3811,7 +3960,8 @@ void Button_Curves_switch_mode(void)
     Selected_curve_mode=OPERATION_4_POINTS_CURVE;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode-OPERATION_3_POINTS_CURVE+5);
+  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
+  Draw_menu_button(BUTTON_CURVES,BUTTON_PRESSED);
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();
 }
@@ -4053,7 +4203,7 @@ void Button_Airbrush_menu(void)
 
       case 11 : // Size
         Num2str(Airbrush_size,str,3);
-        Readline(188,25,str,3,1);
+        Readline(188,25,str,3,INPUT_TYPE_INTEGER);
         Airbrush_size=atoi(str);
         // On corrige les dimensions
         if (Airbrush_size>256)
@@ -4073,7 +4223,7 @@ void Button_Airbrush_menu(void)
 
       case 12 : // Delay
         Num2str(Airbrush_delay,str,2);
-        Readline(196,39,str,2,1);
+        Readline(196,39,str,2,INPUT_TYPE_INTEGER);
         Airbrush_delay=atoi(str);
         // On corrige le delai
         if (Airbrush_delay>99)
@@ -4087,7 +4237,7 @@ void Button_Airbrush_menu(void)
 
       case 13 : // Mono-Flow
         Num2str(Airbrush_mono_flow,str,2);
-        Readline(113,24,str,2,1);
+        Readline(113,24,str,2,INPUT_TYPE_INTEGER);
         Airbrush_mono_flow=atoi(str);
         // On corrige le flux
         if (!Airbrush_mono_flow)
@@ -4101,7 +4251,7 @@ void Button_Airbrush_menu(void)
 
       case 14 : // Init
         Num2str(spray_init,str,2);
-        Readline(113,40,str,2,1);
+        Readline(113,40,str,2,INPUT_TYPE_INTEGER);
         spray_init=atoi(str);
         // On corrige la valeur
         if (spray_init>=50)
@@ -4231,11 +4381,11 @@ void Display_effect_sprite(short sprite_number, short start_x, short start_y)
 {
   short x,y,x_pos,y_pos;
 
-  for (y=0,y_pos=start_y;y<MENU_SPRITE_HEIGHT;y++,y_pos++)
-    for (x=0,x_pos=start_x;x<MENU_SPRITE_WIDTH;x++,x_pos++)
+  for (y=0,y_pos=start_y;y<EFFECT_SPRITE_HEIGHT;y++,y_pos++)
+    for (x=0,x_pos=start_x;x<EFFECT_SPRITE_WIDTH;x++,x_pos++)
       Pixel_in_window(x_pos,y_pos,Gfx->Effect_sprite[sprite_number][y][x]);
 
-  Update_rect(ToWinX(start_x),ToWinY(start_y),MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
+  Update_rect(ToWinX(start_x),ToWinY(start_y),EFFECT_SPRITE_WIDTH*Menu_factor_X,EFFECT_SPRITE_HEIGHT*Menu_factor_Y);
 }
 
 
@@ -4567,7 +4717,7 @@ void Button_Text()
   int new_height;
   int clicked_button;  
   const int NB_FONTS=8;
-  char size_buffer[3];
+  char size_buffer[4];
   T_Special_button * input_size_button;
   T_Special_button * input_text_button;
   T_Special_button * preview_button;
@@ -4684,7 +4834,7 @@ void Button_Text()
     switch(clicked_button)
     {
       case 1: // Texte saisi
-      Readline_ex(50,20,str,29,250,0,0);
+      Readline_ex(50,20,str,29,250,INPUT_TYPE_STRING,0);
       preview_is_needed=1;
       break;
 
@@ -4724,7 +4874,7 @@ void Button_Text()
       break;
                   
       case 7: // Taille du texte (nombre)
-      Readline(222,45,size_buffer,3,1);
+      Readline(222,45,size_buffer,3,INPUT_TYPE_INTEGER);
       font_size=atoi(size_buffer);
       // On corrige les dimensions
       if (font_size < 1)
@@ -4792,6 +4942,20 @@ void Button_Text()
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
       else
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
+      // Activate alpha mode
+      if (antialias && TrueType_font(selected_font_index))
+      {
+        Shade_mode=0;
+        Quick_shade_mode=0;
+        Smooth_mode=0;
+        Tiling_mode=0;
+        Smear_mode=0;
+        Colorize_mode=1;
+        Colorize_current_mode=3;
+        Effect_function=Effect_alpha_colorize;
+        
+        Draw_menu_button(BUTTON_EFFECTS,BUTTON_PRESSED);
+      }
 
       Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
@@ -4855,6 +5019,7 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
   }
 }
 
+/// Store the current brush in brush container
 void Store_brush(int index)
 {
   if (Brush_container[index].Paintbrush_shape < PAINTBRUSH_SHAPE_MAX)
@@ -4887,9 +5052,27 @@ void Store_brush(int index)
     // Re-init the rest
     Brush_container[index].Transp_color=0;
   }
-  if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
+  else if (Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH &&
+    Brush_width <= BRUSH_CONTAINER_PREVIEW_WIDTH &&
+    Brush_height <= BRUSH_CONTAINER_PREVIEW_HEIGHT)
+  {
+    // Color brush transformed into a real mono paintbrush
+    int x,y;
+    
+    Brush_container[index].Paintbrush_shape=PAINTBRUSH_SHAPE_MISC;
+    Brush_container[index].Width=Brush_width;
+    Brush_container[index].Height=Brush_height;
+    // Preview: pick center for big mono brush
+    for (y=0; y<BRUSH_CONTAINER_PREVIEW_HEIGHT && y<Brush_height; y++)
+      for (x=0; x<BRUSH_CONTAINER_PREVIEW_WIDTH && x<Brush_width; x++)
+        Brush_container[index].Thumbnail[y][x]=(Brush[y*Brush_width+x]!=Back_color);
+    // Re-init the rest
+    Brush_container[index].Transp_color=0;
+  }
+  else if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
      Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
   {
+    // Color brush
     Brush_container[index].Brush=(byte *)malloc(Brush_width*Brush_height);
     if (Brush_container[index].Brush)
     {
@@ -4917,6 +5100,81 @@ void Store_brush(int index)
       Error(0);
     }
   }
+}
+
+/// Retrieve a normal paintbrush
+void Select_paintbrush(int index)
+{
+  int x_pos,y_pos;
+  
+  Paintbrush_shape=Paintbrush[index].Shape;
+  
+  if (Paintbrush[index].Width<=PAINTBRUSH_WIDTH &&
+    Paintbrush[index].Height<=PAINTBRUSH_HEIGHT)
+  {
+    Paintbrush_width=Paintbrush[index].Width;
+    Paintbrush_height=Paintbrush[index].Height;
+    Paintbrush_offset_X=Paintbrush[index].Offset_X;
+    Paintbrush_offset_Y=Paintbrush[index].Offset_Y;
+    
+    for (y_pos=0; y_pos<Paintbrush_height; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width; x_pos++)
+        Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos]=Paintbrush[index].Sprite[y_pos][x_pos];
+  }
+  else
+  {
+    // Too big to read from the preview: need re-generate it
+    Set_paintbrush_size(Paintbrush[index].Width,Paintbrush[index].Height);
+  }
+  Change_paintbrush_shape(Paintbrush[index].Shape);
+}
+
+/// Store the current brush in paintbrush slot, if possible.
+byte Store_paintbrush(int index)
+{
+  // Store a mono brush
+  if (Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
+  {
+    int x_pos,y_pos, x_off=0, y_off=0;
+    
+    Paintbrush[index].Shape=Paintbrush_shape;
+    Paintbrush[index].Width=Paintbrush_width;
+    Paintbrush[index].Height=Paintbrush_height;
+    Paintbrush[index].Offset_X=Paintbrush_offset_X;
+    Paintbrush[index].Offset_Y=Paintbrush_offset_Y;
+    
+    if (Paintbrush_width>PAINTBRUSH_WIDTH)
+      x_off=(Paintbrush_width-PAINTBRUSH_WIDTH)/2;
+    if (Paintbrush_height>PAINTBRUSH_HEIGHT)
+      y_off=(Paintbrush_height-PAINTBRUSH_HEIGHT)/2;
+    
+    for (y_pos=0; y_pos<Paintbrush_height && y_pos<PAINTBRUSH_HEIGHT; y_pos++)
+      for (x_pos=0; x_pos<Paintbrush_width && x_pos<PAINTBRUSH_WIDTH; x_pos++)
+        Paintbrush[index].Sprite[y_pos][x_pos]=Paintbrush_sprite[((y_pos+y_off)*MAX_PAINTBRUSH_SIZE)+(x_pos+x_off)];
+    
+    return 0;
+  }
+  
+  else if ((Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH || 
+    Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH))
+  {
+    // Color brush transformed into a real mono paintbrush
+    int x_pos,y_pos;
+    
+    Paintbrush[index].Shape=PAINTBRUSH_SHAPE_MISC;
+    Paintbrush[index].Width=Min(Brush_width,PAINTBRUSH_WIDTH);
+    Paintbrush[index].Height=Min(Brush_height,PAINTBRUSH_HEIGHT);
+    Paintbrush[index].Offset_X=Brush_offset_X*Paintbrush[index].Width/Brush_width;
+    Paintbrush[index].Offset_Y=Brush_offset_Y*Paintbrush[index].Height/Brush_height;
+    
+    for (y_pos=0; y_pos<Brush_height&&y_pos<PAINTBRUSH_HEIGHT; y_pos++)
+      for (x_pos=0; x_pos<Brush_width&&x_pos<PAINTBRUSH_WIDTH; x_pos++)
+        Paintbrush[index].Sprite[y_pos][x_pos]=Brush[(y_pos*Brush_width)+x_pos]!=Back_color;
+        
+    return 0;
+  }
+  // Can't store it
+  return 1;
 }
 
 byte Restore_brush(int index)

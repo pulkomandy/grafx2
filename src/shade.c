@@ -837,7 +837,7 @@ int Menu_shade(void)
 
       case 15 : // Saisie du pas
         Num2str(Shade_list[Shade_current].Step,str,3);
-        Readline(276,176,str,3,1);
+        Readline(276,176,str,3,INPUT_TYPE_INTEGER);
         temp=atoi(str);
         // On corrige le pas
         if (!temp)
@@ -1089,7 +1089,7 @@ void Button_Quick_shade_menu(void)
 
       case 4 : // Saisie du pas
         Num2str(Quick_shade_step,str,3);
-        Readline(42,21,str,3,1);
+        Readline(42,21,str,3,INPUT_TYPE_INTEGER);
         temp=atoi(str);
         // On corrige le pas
         if (!temp)

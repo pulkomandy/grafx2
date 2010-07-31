@@ -34,6 +34,10 @@ int  Save_CFG(void);
 void Set_all_video_modes(void);
 void Set_config_defaults(void);
 void Init_sighandler(void);
+void Init_paintbrushes(void);
+
+/// Set application icon(s)
+void Define_icon(void);
 
 extern char Gui_loading_error_message[512];
 

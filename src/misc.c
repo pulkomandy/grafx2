@@ -499,6 +499,22 @@ byte Effect_substractive_colorize(word x,word y,byte color)
     blue<blue_under?blue:blue_under);
 }
 
+byte Effect_alpha_colorize    (word x,word y,byte color)
+{
+  byte color_under = Read_pixel_from_feedback_screen(x,y);
+  byte blue_under=Main_palette[color_under].B;
+  byte green_under=Main_palette[color_under].G;
+  byte red_under=Main_palette[color_under].R;
+  int factor=(Main_palette[color].R*76 + 
+    Main_palette[color].G*151 + 
+    Main_palette[color].B*28)/255;
+
+  return Best_color(
+    (Main_palette[Fore_color].R*factor + red_under*(255-factor))/255,
+    (Main_palette[Fore_color].G*factor + green_under*(255-factor))/255,
+    (Main_palette[Fore_color].B*factor + blue_under*(255-factor))/255);
+}
+
 void Check_timer(void)
 {
   if((SDL_GetTicks()/55)-Timer_delay>Timer_start) Timer_state=1;

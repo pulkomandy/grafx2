@@ -42,3 +42,14 @@ byte Round_palette_component(byte comp);
   @param not_picture 0 if the caller is the palette screen, 1 if it's a preview in the file selector.
 */
 void Set_nice_menu_colors(dword * color_usage,int not_picture);
+
+/// Put some colors in the clipboard.
+/// @param nb_colors Number of colors to push
+/// @param colors First color of the input array
+void Set_clipboard_colors(int nb_colors, T_Components *colors);
+
+/// Get some RGB colors from clipboard.
+/// @param palette Target palette
+/// @param start_color  Index of first color to replace
+/// @return        Number of colors retrieved (0-256)
+int Get_clipboard_colors(T_Palette palette, byte start_color);

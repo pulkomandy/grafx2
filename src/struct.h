@@ -321,13 +321,14 @@ typedef struct
   word Double_click_speed;               ///< Maximum delay for double-click, in ms.
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
   byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
+  byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
 } T_Config;
 
-// Structures utilisées pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
+// Structures utilisÃ©es pour les descriptions de pages et de liste de pages.
+// Lorsqu'on gÃ©rera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulées à travers des fonctions de gestion du
+// Ces structures sont manipulÃ©es Ã  travers des fonctions de gestion du
 // backup dans "graph.c".
 
 /// This is the data for one step of Undo/Redo, for one image.
@@ -350,7 +351,11 @@ typedef struct T_Page
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
+#if __GNUC__ < 3
+  byte *    Image[0];
+#else
   byte *    Image[];  ///< Pixel data for the (first layer of) image.
+#endif
     // Define as Image[0] if you have an old gcc which is not C99.
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
@@ -396,21 +401,6 @@ typedef struct
   /// Graphic resources for the mouse cursor.
   byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
-  // Preset paintbrushes
-  
-  /// Graphic resources for the preset paintbrushes.
-  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
-  /// Width of the preset paintbrushes.
-  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
-  /// Height of the preset paintbrushes.
-  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
-  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
-  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
-  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
-  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
-
   // Sieve patterns
   
   /// Preset sieve patterns, stored as binary (one word per line)
@@ -419,13 +409,13 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[35][MENU_WIDTH];
-  byte Layerbar_block[10][144];
-  byte Statusbar_block[9][20];
+  byte Menu_block[3][35][MENU_WIDTH];
+  byte Layerbar_block[3][10][144];
+  byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
-  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
-  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Effect_sprite[NB_EFFECTS_SPRITES][EFFECT_SPRITE_HEIGHT][EFFECT_SPRITE_WIDTH];
   /// Bitmap data for the different Layer icons.
   byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
@@ -458,8 +448,25 @@ typedef struct
   /// Transparent GUI color index in skin file
   byte Color_trans;
 
-
 } T_Gui_skin;
+
+typedef struct {
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Sprite[PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Width;
+  /// Height of the preset paintbrushes.
+  word  Height;
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Shape;
+  /// Brush handle for the preset brushes. Generally ::Width[]/2
+  word  Offset_X;
+  /// Brush handle for the preset brushes. Generally ::Height[]/2
+  word  Offset_Y;
+
+} T_Paintbrush;
 
 // A menubar.
 typedef struct {
@@ -467,7 +474,7 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin;
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
   word Skin_width;
   byte Last_button_index;
 } T_Menu_Bar;

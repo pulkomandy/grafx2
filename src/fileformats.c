@@ -27,6 +27,19 @@
 
 #ifndef __no_pnglib__
 #include <png.h>
+#if (PNG_LIBPNG_VER_MAJOR <= 1) && (PNG_LIBPNG_VER_MINOR < 4)
+  // Compatibility layer to allow us to use libng 1.4 or any older one.
+  
+  // This function is renamed in 1.4
+  #define png_set_expand_gray_1_2_4_to_8(x) png_set_gray_1_2_4_to_8(x)
+  
+  // Wrappers that are mandatory in 1.4. Older version allowed direct access.
+  #define png_get_rowbytes(png_ptr,info_ptr) ((info_ptr)->rowbytes)
+  #define png_get_image_width(png_ptr,info_ptr) ((info_ptr)->width)
+  #define png_get_image_height(png_ptr,info_ptr) ((info_ptr)->height)
+  #define png_get_bit_depth(png_ptr,info_ptr) ((info_ptr)->bit_depth)
+  #define png_get_color_type(png_ptr,info_ptr) ((info_ptr)->color_type)
+#endif
 #endif
 
 #include <stdlib.h>
@@ -1735,7 +1748,7 @@ void Load_GIF(T_IO_Context * context)
   word color_index; // index de traitement d'une couleur
   byte size_to_read; // Nombre de données à lire      (divers)
   byte block_identifier;  // Code indicateur du type de bloc en cours
-  word initial_nb_bits;   // Nb de bits au début du traitement LZW
+  byte initial_nb_bits;   // Nb de bits au début du traitement LZW
   word special_case=0;       // Mémoire pour le cas spécial
   word old_code=0;       // Code précédent
   word byte_read;         // Sauvegarde du code en cours de lecture
@@ -1787,8 +1800,6 @@ void Load_GIF(T_IO_Context * context)
         // Ordre de Classement   = (LSDB.Aspect and $80)
 
         nb_colors=(1 << ((LSDB.Resol & 0x07)+1));
-        initial_nb_bits=(LSDB.Resol & 0x07)+2;
-
         if (LSDB.Resol & 0x80)
         {
           // Palette globale dispo:
@@ -1796,24 +1807,12 @@ void Load_GIF(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
 
-          //   On peut maintenant charger la nouvelle palette:
-          if (!(LSDB.Aspect & 0x80))
-            // Palette dans l'ordre:
-            for(color_index=0;color_index<nb_colors;color_index++)
-            {
-              Read_byte(GIF_file,&(context->Palette[color_index].R));
-              Read_byte(GIF_file,&(context->Palette[color_index].G));
-              Read_byte(GIF_file,&(context->Palette[color_index].B));
-            }
-          else
+          // Load the palette
+          for(color_index=0;color_index<nb_colors;color_index++)
           {
-            // Palette triée par composantes:
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].R));
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].G));
-            for (color_index=0;color_index<nb_colors;color_index++)
-              Read_byte(GIF_file,&(context->Palette[color_index].B));
+            Read_byte(GIF_file,&(context->Palette[color_index].R));
+            Read_byte(GIF_file,&(context->Palette[color_index].G));
+            Read_byte(GIF_file,&(context->Palette[color_index].B));
           }
         }
 
@@ -1924,6 +1923,16 @@ void Load_GIF(T_IO_Context * context)
                           }
                         }
                       }
+                      else
+                      {
+                        // Unknown extension, skip.
+                        Read_byte(GIF_file,&size_to_read);
+                        while (size_to_read!=0 && !File_error)
+                        {
+                          fseek(GIF_file,size_to_read,SEEK_CUR);
+                          Read_byte(GIF_file,&size_to_read);
+                        }
+                      }
                     }
                     else
                     {
@@ -1961,7 +1970,6 @@ void Load_GIF(T_IO_Context * context)
                 && Read_word_le(GIF_file,&(IDB.Image_width))
                 && Read_word_le(GIF_file,&(IDB.Image_height))
                 && Read_byte(GIF_file,&(IDB.Indicator))
-                && Read_byte(GIF_file,&(IDB.Nb_bits_pixel))
                 && IDB.Image_width && IDB.Image_height)
               {
     
@@ -1974,42 +1982,38 @@ void Load_GIF(T_IO_Context * context)
                 {
                   // Palette locale dispo
     
+                  if (Config.Clear_palette)
+                    memset(context->Palette,0,sizeof(T_Palette));
+
                   nb_colors=(1 << ((IDB.Indicator & 0x07)+1));
-                  initial_nb_bits=(IDB.Indicator & 0x07)+2;
-    
-                  if (!(IDB.Indicator & 0x40))
-                    // Palette dans l'ordre:
-                    for(color_index=0;color_index<nb_colors;color_index++)
-                    {   
-                      Read_byte(GIF_file,&(context->Palette[color_index].R));
-                      Read_byte(GIF_file,&(context->Palette[color_index].G));
-                      Read_byte(GIF_file,&(context->Palette[color_index].B));
-                    }
-                  else
-                  {
-                    // Palette triée par composantes:
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].R));
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].G));
-                    for (color_index=0;color_index<nb_colors;color_index++)
-                      Read_byte(GIF_file,&(context->Palette[color_index].B));
+                  // Load the palette
+                  for(color_index=0;color_index<nb_colors;color_index++)
+                  {   
+                    Read_byte(GIF_file,&(context->Palette[color_index].R));
+                    Read_byte(GIF_file,&(context->Palette[color_index].G));
+                    Read_byte(GIF_file,&(context->Palette[color_index].B));
                   }
+                  
                 }
     
                 Palette_loaded(context);
+
+                File_error=0;
+                if (!Read_byte(GIF_file,&(initial_nb_bits)))
+                  File_error=1;
     
-                value_clr   =nb_colors+0;
-                value_eof   =nb_colors+1;
-                alphabet_free=nb_colors+2;
-                GIF_nb_bits  =initial_nb_bits;
+                value_clr    =(1<<initial_nb_bits)+0;
+                value_eof    =(1<<initial_nb_bits)+1;
+                alphabet_free=(1<<initial_nb_bits)+2;
+
+                GIF_nb_bits  =initial_nb_bits + 1;
                 alphabet_max      =((1 <<  GIF_nb_bits)-1);
                 GIF_interlaced    =(IDB.Indicator & 0x40);
                 GIF_pass         =0;
     
                 /*Init_lecture();*/
     
-                File_error=0;
+
                 GIF_finished_interlaced_image=0;
     
                 //////////////////////////////////////////// DECOMPRESSION LZW //
@@ -2057,9 +2061,9 @@ void Load_GIF(T_IO_Context * context)
                     }
                     else // Code Clear rencontré
                     {
-                      GIF_nb_bits       =initial_nb_bits;
+                      GIF_nb_bits       =initial_nb_bits + 1;
                       alphabet_max      =((1 <<  GIF_nb_bits)-1);
-                      alphabet_free     =nb_colors+2;
+                      alphabet_free     =(1<<initial_nb_bits)+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
                       GIF_new_pixel(context, &IDB, GIF_current_code);
@@ -3371,8 +3375,8 @@ void Load_PNG(T_IO_Context * context)
             
               // Load file information
               png_read_info(png_ptr, info_ptr);
-              color_type = info_ptr->color_type;
-              bit_depth = info_ptr->bit_depth;
+              color_type = png_get_color_type(png_ptr,info_ptr);
+              bit_depth = png_get_bit_depth(png_ptr,info_ptr);
               
               // If it's any supported file
               // (Note: As of writing this, this test covers every possible 
@@ -3425,9 +3429,9 @@ void Load_PNG(T_IO_Context * context)
                   }
                 }
                 if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-                  Pre_load(context,info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,1);
+                  Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,1);
                 else
-                  Pre_load(context, info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG,context->Ratio,0);
+                  Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,context->Ratio,0);
 
                 if (File_error==0)
                 {
@@ -3535,8 +3539,8 @@ void Load_PNG(T_IO_Context * context)
                     }
                   }
                   
-                  context->Width=info_ptr->width;
-                  context->Height=info_ptr->height;
+                  context->Width=png_get_image_width(png_ptr,info_ptr);
+                  context->Height=png_get_image_height(png_ptr,info_ptr);
                   
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
@@ -3556,7 +3560,7 @@ void Load_PNG(T_IO_Context * context)
                       // 8bpp
                       
                       for (y=0; y<context->Height; y++)
-                        Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                        Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                       row_pointers_allocated = 1;
                       
                       png_read_image(png_ptr, Row_pointers);
@@ -3575,7 +3579,7 @@ void Load_PNG(T_IO_Context * context)
                           // It's a preview
                           // Unfortunately we need to allocate loads of memory
                           for (y=0; y<context->Height; y++)
-                            Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                            Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                           row_pointers_allocated = 1;
                           
                           png_read_image(png_ptr, Row_pointers);
@@ -3674,9 +3678,15 @@ void Save_PNG(T_IO_Context * context)
           {
             // Commentaires texte PNG
             // Cette partie est optionnelle
-            png_text text_ptr[2] = {
-              {-1, "Software", "Grafx2", 6},
-              {-1, "Title", NULL, 0}
+            #ifdef PNG_iTXt_SUPPORTED
+              png_text text_ptr[2] = {
+                {-1, "Software", "Grafx2", 6, 0, NULL, NULL},
+                {-1, "Title", NULL, 0, 0, NULL, NULL}
+            #else
+              png_text text_ptr[2] = {
+                {-1, "Software", "Grafx2", 6},
+                {-1, "Title", NULL, 0}
+            #endif
             };
             int nb_text_chunks=1;
             if (context->Comment[0])

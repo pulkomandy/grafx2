@@ -165,6 +165,16 @@ void HSL_to_RGB(byte h,byte s,byte l, byte* r, byte* g, byte* b)
     *b = bf * (255);
 }
 
+///
+/// Returns a value that is high when color is near white,
+/// and low when it's darker. Used for sorting.
+long Perceptual_lightness(T_Components *color)
+{
+  return 26*color->R*26*color->R +
+         55*color->G*55*color->G +
+         19*color->B*19*color->B;
+}
+
 // Conversion table handlers
 // The conversion table is built after a run of the median cut algorithm and is
 // used to find the best color index for a given (RGB) color. GIMP avoids

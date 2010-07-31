@@ -1,0 +1,21 @@
+Fonts by Yusuke Kamiyamane
+http://p.yusukekamiyamane.com/fonts/
+
+License: "The fonts can be used free for any personal or commercial projects."
+
+- Arma Five
+- Ronda Seven
+- Easta Seven
+- Westa Seven
+- Tempesta Seven
+- Tempesta Five
+
+
+
+Converted to Sfont format by yrizoud
+Changed filenames for better sorting:
+    for Compressed
+_   for Condensed
+__  for Normal
+___ for Extended
+

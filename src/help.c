@@ -31,6 +31,8 @@
     #include <sys/mount.h>
 #elif defined (__linux__)
     #include <sys/vfs.h>
+#elif defined(__HAIKU__)
+	#include "haiku.h"
 #endif
 
 #include "const.h"
@@ -62,7 +64,7 @@ word * Shortcut(word shortcut_number)
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 
-// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number)
 {
@@ -231,22 +233,102 @@ void Window_set_shortcut(int action_id)
   Display_cursor();
 }
 
-// -- Menu d'aide -----------------------------------------------------------
-
-void Display_help(void)
+///
+/// Print a line with the 'help' (6x8) font.
+short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size)
 {
+  short  width;             // Largeur physique d'une ligne de texte
   short  x;                   // Indices d'affichage d'un caractère
   short  y;
   short  x_position;          // Parcours de remplissage du buffer de ligne
-  short  line_index;     // 0-15 (16 lignes de textes)
   short  char_index; // Parcours des caractères d'une ligne
-  short  start_line=Help_position;
+  byte * char_pixel;
   short  repeat_menu_x_factor;
   short  repeat_menu_y_factor;
   short  real_x_pos;
   short  real_y_pos;
-  byte * char_pixel;
-  short  width;             // Largeur physique d'une ligne de texte
+
+  real_x_pos=ToWinX(x_pos);
+  real_y_pos=ToWinY(y_pos);
+  
+  // Calcul de la taille
+  width=strlen(line);
+  // Les lignes de titres prennent plus de place
+  if (line_type == 'T' || line_type == '-')
+    width = width*2;
+
+  // Pour chaque ligne dans la fenêtre:
+  for (y=0;y<8;y++)
+  {
+    x_position=0;
+    // On crée une nouvelle ligne à splotcher
+    for (char_index=0;char_index<width;char_index++)
+    {
+      // Recherche du caractère dans les fontes de l'aide.
+      // Ligne titre : Si l'indice est impair on dessine le quart de caractère
+      // qui va a gauche, sinon celui qui va a droite.
+      if (line_type=='T')
+      {
+        if (line[char_index/2]>'_' || line[char_index/2]<' ')
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
+        else if (char_index & 1)
+          char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
+        else
+          char_pixel=&(Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
+      }
+      else if (line_type=='-')
+      {
+        if (line[char_index/2]>'_' || line[char_index/2]<' ')
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
+        else if (char_index & 1)
+          char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
+        else
+          char_pixel=&(Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
+      }
+      else if (line_type=='S')
+        char_pixel=&(Gfx->Bold_font[(unsigned char)(line[char_index])][0][0]);
+      else if (line_type=='N' || line_type=='K')
+        char_pixel=&(Gfx->Help_font_norm[(unsigned char)(line[char_index])][0][0]);
+      else
+        char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
+        
+      for (x=0;x<6;x++)
+        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
+        {
+          byte color = *(char_pixel+x+y*6);
+          byte repetition = Pixel_width-1;
+          // Surlignement pour liens
+          if (line_type=='K' && char_index>=link_position
+            && char_index<(link_position+link_size))
+          {
+            if (color == MC_Light)
+              color=MC_White;
+            else if (color == MC_Dark)
+              color=MC_Light;
+            else if (y<7)
+              color=MC_Dark;
+          }
+          Horizontal_line_buffer[x_position++]=color;
+          while (repetition--)
+            Horizontal_line_buffer[x_position++]=color;
+        }
+    }
+    // On la splotche
+    for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
+      Display_line_fast(real_x_pos,real_y_pos++,width*Menu_factor_X*6,Horizontal_line_buffer);
+  }
+  return width;
+}
+
+
+// -- Menu d'aide -----------------------------------------------------------
+
+void Display_help(void)
+{
+  short  line_index;     // 0-15 (16 lignes de textes)
+  short  start_line=Help_position;
+  const short  x_pos=13;
+  const short  y_pos=19;
   char   line_type;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
   const char * line;
@@ -254,21 +336,19 @@ void Display_help(void)
                               // raccourcis clavier
   short  link_position=0;     // Position du premier caractère "variable"
   short  link_size=0;       // Taille de la partie variable
-
-  real_x_pos=Window_pos_X+(13*Menu_factor_X);
-  real_y_pos=Window_pos_Y+(19*Menu_factor_Y);
-
+  short width;
+  
   for (line_index=0;line_index<16;line_index++)
   {
     // Shortcut au cas ou la section fait moins de 16 lignes
     if (line_index >= Help_section[Current_help_section].Length)
     {
-      Block (real_x_pos,
-           real_y_pos,
-           44*6*Menu_factor_X,
+      Window_rectangle (x_pos,
+           y_pos,
+           44*6,
            // 44 = Nb max de char (+1 pour éviter les plantages en mode X
            // causés par une largeur = 0)
-           (Menu_factor_Y<<3) * (16 - line_index),
+           (16 - line_index)*8,
            MC_Black);
       break;
     }
@@ -307,83 +387,16 @@ void Display_help(void)
       line = buffer;
     }
     
-    // Calcul de la taille
-    width=strlen(line);
-    // Les lignes de titres prennent plus de place
-    if (line_type == 'T' || line_type == '-')
-      width = width*2;
-
-    // Pour chaque ligne dans la fenêtre:
-    for (y=0;y<8;y++)
-    {
-      x_position=0;
-      // On crée une nouvelle ligne à splotcher
-      for (char_index=0;char_index<width;char_index++)
-      {
-        // Recherche du caractère dans les fontes de l'aide.
-        // Ligne titre : Si l'indice est impair on dessine le quart de caractère
-        // qui va a gauche, sinon celui qui va a droite.
-        if (line_type=='T')
-        {
-          if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
-          else if (char_index & 1)
-            char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
-          else
-            char_pixel=&(Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
-        }
-        else if (line_type=='-')
-        {
-          if (line[char_index/2]>'_' || line[char_index/2]<' ')
-            char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
-          else if (char_index & 1)
-            char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
-          else
-            char_pixel=&(Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
-        }
-        else if (line_type=='S')
-          char_pixel=&(Gfx->Bold_font[(unsigned char)(line[char_index])][0][0]);
-        else if (line_type=='N' || line_type=='K')
-          char_pixel=&(Gfx->Help_font_norm[(unsigned char)(line[char_index])][0][0]);
-        else
-          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
-          
-        for (x=0;x<6;x++)
-          for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
-          {
-            byte color = *(char_pixel+x+y*6);
-            byte repetition = Pixel_width-1;
-            // Surlignement pour liens
-            if (line_type=='K' && char_index>=link_position
-              && char_index<(link_position+link_size))
-            {
-              if (color == MC_Light)
-                color=MC_White;
-              else if (color == MC_Dark)
-                color=MC_Light;
-              else if (y<7)
-                color=MC_Dark;
-            }
-            Horizontal_line_buffer[x_position++]=color;
-            while (repetition--)
-              Horizontal_line_buffer[x_position++]=color;
-          }
-      }
-      // On la splotche
-      for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
-        Display_line_fast(real_x_pos,real_y_pos++,width*Menu_factor_X*6,Horizontal_line_buffer);
-    }
-
+    width=Print_help(x_pos, y_pos+(line_index<<3), line, line_type, link_position, link_size);
     // On efface la fin de la ligne:
-    Block (real_x_pos+width*Menu_factor_X*6,
-           real_y_pos-(8*Menu_factor_Y),
-           ((44*6*Menu_factor_X)-width*Menu_factor_X*6)+1,
-           // 44 = Nb max de char (+1 pour éviter les plantages en mode X
-           // causés par une largeur = 0)
-           Menu_factor_Y<<3,
+    if (width<44)
+      Window_rectangle (x_pos+width*6,
+           y_pos+(line_index<<3),
+           (44-width)*6,
+           8,
            MC_Black);
   }
-  Update_rect(Window_pos_X+13*Menu_factor_X,Window_pos_Y+19*Menu_factor_Y,44*6*Menu_factor_X,16*8*Menu_factor_Y);
+  Update_window_area(x_pos,y_pos,44*6,16*8);
 }
 
 
@@ -670,6 +683,8 @@ void Button_Stats(void)
       statfs(Main_current_directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
+#elif defined(__HAIKU__)
+	mem_size = haiku_get_free_space(Main_current_directory);
 #else
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"

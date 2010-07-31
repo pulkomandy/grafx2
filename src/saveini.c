@@ -673,7 +673,10 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Menubars_visible",1,values,0)))
     goto Erreur_Retour;
 
-
+  values[0]=(conf->Right_click_colorpick);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Right_click_colorpick",1,values,1)))
+    goto Erreur_Retour;
+    
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 
   fclose(Nouveau_fichier);

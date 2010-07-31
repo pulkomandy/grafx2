@@ -377,8 +377,8 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   int index;
   int style;
   
-  SDL_Color Couleur_Avant;
-  SDL_Color Couleur_Arriere;
+  SDL_Color fg_color;
+  SDL_Color bg_color;
 
   // Chargement de la fonte
   font=TTF_OpenFont(Font_name(font_number), size);
@@ -386,6 +386,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   {
     return NULL;
   }
+  
   // Style
   style=0;
   if (italic)
@@ -393,24 +394,18 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   if (bold)
     style|=TTF_STYLE_BOLD;
   TTF_SetFontStyle(font, style);
+  
   // Couleurs
-  if (antialias)
-  {
-    Couleur_Avant = Color_to_SDL_color(Fore_color);
-    Couleur_Arriere = Color_to_SDL_color(Back_color);
-  }
-  else
-  {
-    Couleur_Avant = Color_to_SDL_color(MC_White);
-    Couleur_Arriere = Color_to_SDL_color(MC_Black);
-  }
-
+  fg_color.r=fg_color.g=fg_color.b=255;
+  bg_color.r=bg_color.g=bg_color.b=0;
+  // The following is alpha, supposedly unused
+  bg_color.unused=fg_color.unused=255;
   
   // Rendu du texte: crée une surface SDL RGB 24bits
   if (antialias)
-    TexteColore=TTF_RenderText_Shaded(font, str, Couleur_Avant, Couleur_Arriere );
+    TexteColore=TTF_RenderText_Shaded(font, str, fg_color, bg_color );
   else
-    TexteColore=TTF_RenderText_Solid(font, str, Couleur_Avant);
+    TexteColore=TTF_RenderText_Solid(font, str, fg_color);
   if (!TexteColore)
   {
     TTF_CloseFont(font);
@@ -431,13 +426,17 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   }
   if (!antialias)
   {
-    // Mappage des couleurs
+    // Map colors: white->fg, black->bg
     for (index=0; index < Texte8Bit->w * Texte8Bit->h; index++)
     {
-      if (*(new_brush+index) == MC_Black)
-      *(new_brush+index)=Back_color;
-      else if (*(new_brush+index) == MC_White)
-      *(new_brush+index)=Fore_color;
+      int sum;
+      sum = Main_palette[*(new_brush+index)].R
+        + Main_palette[*(new_brush+index)].G
+        + Main_palette[*(new_brush+index)].B;
+      if (sum < 128 * 3)
+        *(new_brush+index)=Back_color;
+      else
+        *(new_brush+index)=Fore_color;
     }
   }
   *width=Texte8Bit->w;

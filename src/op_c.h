@@ -160,6 +160,7 @@ void CT_set(T_Conversion_table * t,int r,int g,int b,byte i);
 void RGB_to_HSL(int r, int g,int b, byte* h, byte*s, byte* l);
 void HSL_to_RGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
+long Perceptual_lightness(T_Components *color);
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Méthodes de gestion des tables d'occurence //

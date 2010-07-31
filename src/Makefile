@@ -43,7 +43,7 @@ ifdef COMSPEC
   CP = cp
   BIN = ../bin/grafx2.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT) $(LAYERCOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
   OBJDIR = ../obj/win32
@@ -52,7 +52,7 @@ ifdef COMSPEC
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng13.dll bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
   ZIP = zip
 else
 
@@ -152,8 +152,9 @@ else
     RMDIR = rmdir
     CP = cp
     BIN = ../bin/grafx2
+    PLATFORMOBJ = $(OBJDIR)/haiku.o
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
@@ -236,7 +237,7 @@ else
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
         # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
         CC = gcc
@@ -304,11 +305,14 @@ endif
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o $(OBJDIR)/oldies.o 
 
-SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png
+SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png ../share/grafx2/skins/skin_Aurora.png ../share/grafx2/skins/skin_Clax3.gif ../share/grafx2/skins/skin_Clax2.gif ../share/grafx2/skins/skin_Clax4.gif
 
 SCRIPT_FILES1 = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scripts/bru_db_ColorSphere.lua ../share/grafx2/scripts/bru_db_FindAA.lua ../share/grafx2/scripts/bru_db_Fisheye.lua ../share/grafx2/scripts/bru_db_GrayscaleAvg.lua ../share/grafx2/scripts/bru_db_GrayscaleDesat.lua ../share/grafx2/scripts/bru_db_Halfsmooth.lua ../share/grafx2/scripts/bru_db_Mandelbrot.lua ../share/grafx2/scripts/bru_db_Waves.lua ../share/grafx2/scripts/pal_db_Desaturate.lua ../share/grafx2/scripts/pal_db_ExpandColors.lua ../share/grafx2/scripts/pal_db_FillColorCube.lua ../share/grafx2/scripts/pal_db_InvertedRGB.lua ../share/grafx2/scripts/pal_db_Set3bit.lua ../share/grafx2/scripts/pal_db_Set6bit.lua ../share/grafx2/scripts/pal_db_SetC64Palette.lua ../share/grafx2/scripts/pal_db_ShiftHue.lua ../share/grafx2/scripts/pic_db_Pic2isometric.lua ../share/grafx2/scripts/pic_db_Rainbow-Dark2Bright.lua ../share/grafx2/scripts/pic_db_SierpinskyCarpet.lua
 SCRIPT_FILES2 = ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_Colorspace12bit.lua ../share/grafx2/scripts/pic_ni_Colorspace15bit.lua ../share/grafx2/scripts/pic_ni_Colorspace18bit.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/pic_ni_Grid8.lua ../share/grafx2/scripts/pic_ni_Grid8red.lua ../share/grafx2/scripts/pic_ni_GridIso.lua ../share/grafx2/scripts/pic_ni_PaletteX1.lua ../share/grafx2/scripts/pic_ni_PaletteX8.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
-SCRIPT_FILES1= SCRIPT_FILES1 SCRIPT_FILES2
+SCRIPT_FILES= $(SCRIPT_FILES1) $(SCRIPT_FILES2)
+
+FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf ../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/fonts/PF_Westa_7__.png
+
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
@@ -341,9 +345,9 @@ ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 
 	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico 
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt share/grafx2/fonts/8pxfont.png doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt share/grafx2/fonts/Tuffy.ttf src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf
+	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop $(FONT_FILES)
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 testsed :
@@ -386,6 +390,10 @@ depend :
 # Link the icons to the program under windows
 $(OBJDIR)/winres.o : gfx2.ico
 	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+
+# Compile the C++ file needed in Haiku to use the API
+$(OBJDIR)/haiku.o : haiku.cpp
+	g++ -c haiku.cpp -o $(OBJDIR)/haiku.o
 
 clean :
 	$(DELCOMMAND) $(OBJ)

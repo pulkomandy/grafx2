@@ -50,6 +50,10 @@
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
+#ifndef __GP2X__
+    #include <SDL_syswm.h>
+#endif
+
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
 #endif
@@ -250,7 +254,6 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
 
 byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
-  int  index;
   int i,j;
   int cursor_x=0,cursor_y=0;
   byte color;
@@ -274,6 +277,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     sprintf(Gui_loading_error_message, "Not a 256-color palette");
     return 1;
   }
+  
   // Read the default palette
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
@@ -351,31 +355,51 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[0], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
 
   // Preview
   cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "logo", 0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "preview", 0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
 
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[0], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
+  // Menu (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected menu"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[1], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"selected menu",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
+
+  // Layerbar (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected layer bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"selected layer bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
+
+  // Status bar (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[1], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"selected status bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
   // Effects
   for (i=0; i<NB_EFFECTS_SPRITES; i++)
@@ -390,11 +414,11 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "effect sprite",0))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], EFFECT_SPRITE_WIDTH, EFFECT_SPRITE_HEIGHT, "effect sprite",0))
       return 1;
-    cursor_x+=MENU_SPRITE_WIDTH;
+    cursor_x+=EFFECT_SPRITE_WIDTH;
   }
-  cursor_y+=MENU_SPRITE_HEIGHT;
+  cursor_y+=EFFECT_SPRITE_HEIGHT;
   
   // Layer sprite
   for (j=0; j<3; j++)
@@ -452,34 +476,31 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "menu sprite"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[0][i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "menu sprite",1))
+      return 1;
+    cursor_x+=MENU_SPRITE_WIDTH;
+  }
+  cursor_y+=MENU_SPRITE_HEIGHT;
+
+  // Menu sprites (selected)
+  for (i=0; i<NB_MENU_SPRITES; i++)
+  {
+    if (i==0)
+    {
+      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected menu sprite"))
+        return 1;
+    }
+    else
+    {
+      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "selected menu sprite"))
+        return 1;
+    }
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_sprite[1][i], MENU_SPRITE_WIDTH, MENU_SPRITE_HEIGHT, "selected menu sprite",1))
       return 1;
     cursor_x+=MENU_SPRITE_WIDTH;
   }
   cursor_y+=MENU_SPRITE_HEIGHT;
   
-  // Paintbrushes
-  for (i=0; i<NB_PAINTBRUSH_SPRITES; i++)
-  {
-    // Each line holds 12
-    if ((i%12)==0)
-    {
-      if (i!=0)
-        cursor_y+=PAINTBRUSH_HEIGHT;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "brush icon"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "brush icon"))
-        return 1;
-    }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Paintbrush_sprite[i], PAINTBRUSH_WIDTH, PAINTBRUSH_HEIGHT, "brush icon",2))
-      return 1;
-    cursor_x+=PAINTBRUSH_WIDTH;
-  }
-  cursor_y+=PAINTBRUSH_HEIGHT;
-
   // Drive sprites
   for (i=0; i<NB_ICON_SPRITES; i++)
   {
@@ -605,203 +626,15 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   }
   cursor_y+=8;
   
-  gfx->Preset_paintbrush_width [ 0]= 1;
-  gfx->Preset_paintbrush_height[ 0]= 1;
-  gfx->Paintbrush_type         [ 0]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 1]= 2;
-  gfx->Preset_paintbrush_height[ 1]= 2;
-  gfx->Paintbrush_type         [ 1]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 2]= 3;
-  gfx->Preset_paintbrush_height[ 2]= 3;
-  gfx->Paintbrush_type         [ 2]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 3]= 4;
-  gfx->Preset_paintbrush_height[ 3]= 4;
-  gfx->Paintbrush_type         [ 3]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 4]= 5;
-  gfx->Preset_paintbrush_height[ 4]= 5;
-  gfx->Paintbrush_type         [ 4]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 5]= 7;
-  gfx->Preset_paintbrush_height[ 5]= 7;
-  gfx->Paintbrush_type         [ 5]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 6]= 8;
-  gfx->Preset_paintbrush_height[ 6]= 8;
-  gfx->Paintbrush_type         [ 6]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 7]=12;
-  gfx->Preset_paintbrush_height[ 7]=12;
-  gfx->Paintbrush_type         [ 7]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 8]=16;
-  gfx->Preset_paintbrush_height[ 8]=16;
-  gfx->Paintbrush_type         [ 8]=PAINTBRUSH_SHAPE_SQUARE;
-
-  gfx->Preset_paintbrush_width [ 9]=16;
-  gfx->Preset_paintbrush_height[ 9]=16;
-  gfx->Paintbrush_type         [ 9]=PAINTBRUSH_SHAPE_SIEVE_SQUARE;
-
-  gfx->Preset_paintbrush_width [10]=15;
-  gfx->Preset_paintbrush_height[10]=15;
-  gfx->Paintbrush_type         [10]=PAINTBRUSH_SHAPE_DIAMOND;
-
-  gfx->Preset_paintbrush_width [11]= 5;
-  gfx->Preset_paintbrush_height[11]= 5;
-  gfx->Paintbrush_type         [11]=PAINTBRUSH_SHAPE_DIAMOND;
-
-  gfx->Preset_paintbrush_width [12]= 3;
-  gfx->Preset_paintbrush_height[12]= 3;
-  gfx->Paintbrush_type         [12]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [13]= 4;
-  gfx->Preset_paintbrush_height[13]= 4;
-  gfx->Paintbrush_type         [13]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [14]= 5;
-  gfx->Preset_paintbrush_height[14]= 5;
-  gfx->Paintbrush_type         [14]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [15]= 6;
-  gfx->Preset_paintbrush_height[15]= 6;
-  gfx->Paintbrush_type         [15]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [16]= 8;
-  gfx->Preset_paintbrush_height[16]= 8;
-  gfx->Paintbrush_type         [16]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [17]=10;
-  gfx->Preset_paintbrush_height[17]=10;
-  gfx->Paintbrush_type         [17]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [18]=12;
-  gfx->Preset_paintbrush_height[18]=12;
-  gfx->Paintbrush_type         [18]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [19]=14;
-  gfx->Preset_paintbrush_height[19]=14;
-  gfx->Paintbrush_type         [19]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [20]=16;
-  gfx->Preset_paintbrush_height[20]=16;
-  gfx->Paintbrush_type         [20]=PAINTBRUSH_SHAPE_ROUND;
-
-  gfx->Preset_paintbrush_width [21]=15;
-  gfx->Preset_paintbrush_height[21]=15;
-  gfx->Paintbrush_type         [21]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
-
-  gfx->Preset_paintbrush_width [22]=11;
-  gfx->Preset_paintbrush_height[22]=11;
-  gfx->Paintbrush_type         [22]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
-
-  gfx->Preset_paintbrush_width [23]= 5;
-  gfx->Preset_paintbrush_height[23]= 5;
-  gfx->Paintbrush_type         [23]=PAINTBRUSH_SHAPE_SIEVE_ROUND;
-
-  gfx->Preset_paintbrush_width [24]= 2;
-  gfx->Preset_paintbrush_height[24]= 1;
-  gfx->Paintbrush_type         [24]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
-
-  gfx->Preset_paintbrush_width [25]= 3;
-  gfx->Preset_paintbrush_height[25]= 1;
-  gfx->Paintbrush_type         [25]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
-
-  gfx->Preset_paintbrush_width [26]= 4;
-  gfx->Preset_paintbrush_height[26]= 1;
-  gfx->Paintbrush_type         [26]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
-
-  gfx->Preset_paintbrush_width [27]= 8;
-  gfx->Preset_paintbrush_height[27]= 1;
-  gfx->Paintbrush_type         [27]=PAINTBRUSH_SHAPE_HORIZONTAL_BAR;
-
-  gfx->Preset_paintbrush_width [28]= 1;
-  gfx->Preset_paintbrush_height[28]= 2;
-  gfx->Paintbrush_type         [28]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
-
-  gfx->Preset_paintbrush_width [29]= 1;
-  gfx->Preset_paintbrush_height[29]= 3;
-  gfx->Paintbrush_type         [29]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
-
-  gfx->Preset_paintbrush_width [30]= 1;
-  gfx->Preset_paintbrush_height[30]= 4;
-  gfx->Paintbrush_type         [30]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
-
-  gfx->Preset_paintbrush_width [31]= 1;
-  gfx->Preset_paintbrush_height[31]= 8;
-  gfx->Paintbrush_type         [31]=PAINTBRUSH_SHAPE_VERTICAL_BAR;
-
-  gfx->Preset_paintbrush_width [32]= 3;
-  gfx->Preset_paintbrush_height[32]= 3;
-  gfx->Paintbrush_type         [32]=PAINTBRUSH_SHAPE_CROSS;
-
-  gfx->Preset_paintbrush_width [33]= 5;
-  gfx->Preset_paintbrush_height[33]= 5;
-  gfx->Paintbrush_type         [33]=PAINTBRUSH_SHAPE_CROSS;
-
-  gfx->Preset_paintbrush_width [34]= 5;
-  gfx->Preset_paintbrush_height[34]= 5;
-  gfx->Paintbrush_type         [34]=PAINTBRUSH_SHAPE_PLUS;
-
-  gfx->Preset_paintbrush_width [35]=15;
-  gfx->Preset_paintbrush_height[35]=15;
-  gfx->Paintbrush_type         [35]=PAINTBRUSH_SHAPE_PLUS;
-
-  gfx->Preset_paintbrush_width [36]= 2;
-  gfx->Preset_paintbrush_height[36]= 2;
-  gfx->Paintbrush_type         [36]=PAINTBRUSH_SHAPE_SLASH;
-
-  gfx->Preset_paintbrush_width [37]= 4;
-  gfx->Preset_paintbrush_height[37]= 4;
-  gfx->Paintbrush_type         [37]=PAINTBRUSH_SHAPE_SLASH;
-
-  gfx->Preset_paintbrush_width [38]= 8;
-  gfx->Preset_paintbrush_height[38]= 8;
-  gfx->Paintbrush_type         [38]=PAINTBRUSH_SHAPE_SLASH;
-
-  gfx->Preset_paintbrush_width [39]= 2;
-  gfx->Preset_paintbrush_height[39]= 2;
-  gfx->Paintbrush_type         [39]=PAINTBRUSH_SHAPE_ANTISLASH;
-
-  gfx->Preset_paintbrush_width [40]= 4;
-  gfx->Preset_paintbrush_height[40]= 4;
-  gfx->Paintbrush_type         [40]=PAINTBRUSH_SHAPE_ANTISLASH;
-
-  gfx->Preset_paintbrush_width [41]= 8;
-  gfx->Preset_paintbrush_height[41]= 8;
-  gfx->Paintbrush_type         [41]=PAINTBRUSH_SHAPE_ANTISLASH;
-
-  gfx->Preset_paintbrush_width [42]= 4;
-  gfx->Preset_paintbrush_height[42]= 4;
-  gfx->Paintbrush_type         [42]=PAINTBRUSH_SHAPE_RANDOM;
-
-  gfx->Preset_paintbrush_width [43]= 8;
-  gfx->Preset_paintbrush_height[43]= 8;
-  gfx->Paintbrush_type         [43]=PAINTBRUSH_SHAPE_RANDOM;
-
-  gfx->Preset_paintbrush_width [44]=13;
-  gfx->Preset_paintbrush_height[44]=13;
-  gfx->Paintbrush_type         [44]=PAINTBRUSH_SHAPE_RANDOM;
-
-  gfx->Preset_paintbrush_width [45]= 3;
-  gfx->Preset_paintbrush_height[45]= 3;
-  gfx->Paintbrush_type         [45]=PAINTBRUSH_SHAPE_MISC;
-
-  gfx->Preset_paintbrush_width [46]= 3;
-  gfx->Preset_paintbrush_height[46]= 3;
-  gfx->Paintbrush_type         [46]=PAINTBRUSH_SHAPE_MISC;
-
-  gfx->Preset_paintbrush_width [47]= 7;
-  gfx->Preset_paintbrush_height[47]= 7;
-  gfx->Paintbrush_type         [47]=PAINTBRUSH_SHAPE_MISC;
-
-  for (index=0;index<NB_PAINTBRUSH_SPRITES;index++)
-  {
-    gfx->Preset_paintbrush_offset_X[index]=(gfx->Preset_paintbrush_width [index]>>1);
-    gfx->Preset_paintbrush_offset_Y[index]=(gfx->Preset_paintbrush_height[index]>>1);
-  }
+  // Copy unselected bitmaps to current ones
+  memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
+    Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
+  memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
+    Menu_bars[MENUBAR_LAYERS].Skin_width*Menu_bars[MENUBAR_LAYERS].Height);
+  memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
+    Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
+  
+  
   return 0;
 }
 
@@ -944,6 +777,7 @@ void Init_button(byte   btn_number,
   Buttons_Pool[btn_number].Width           =width-1;
   Buttons_Pool[btn_number].Height          =height-1;
   Buttons_Pool[btn_number].Pressed         =0;
+  Buttons_Pool[btn_number].Icon            =-1;
   Buttons_Pool[btn_number].Shape           =shape;
   Buttons_Pool[btn_number].Left_action     =left_action;
   Buttons_Pool[btn_number].Right_action    =right_action;
@@ -1463,21 +1297,21 @@ void Init_operations(void)
   Init_operation(OPERATION_LINE,2,5,
                         Line_12_5,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_K_LIGNE,1,0,
+  Init_operation(OPERATION_K_LINE,1,0,
                         K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,1,6,
+  Init_operation(OPERATION_K_LINE,1,6,
                         K_line_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,1,7,
+  Init_operation(OPERATION_K_LINE,1,7,
                         K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,FAST_MOUSE,
+  Init_operation(OPERATION_K_LINE,2,FAST_MOUSE,
                         K_line_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,6,
+  Init_operation(OPERATION_K_LINE,2,6,
                         K_line_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,2,7,
+  Init_operation(OPERATION_K_LINE,2,7,
                         K_line_12_7,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,0,6,
+  Init_operation(OPERATION_K_LINE,0,6,
                         K_line_0_6,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_K_LIGNE,0,7,
+  Init_operation(OPERATION_K_LINE,0,7,
                         K_line_12_6,0,FAST_MOUSE);
 
   Init_operation(OPERATION_EMPTY_RECTANGLE,1,0,
@@ -1798,6 +1632,10 @@ void Init_operations(void)
                         Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
                         Centered_lines_0_7,0,FAST_MOUSE);
+                        
+  Init_operation(OPERATION_RMB_COLORPICK,0,1,
+                        Rightclick_colorpick_0_1,0,FAST_MOUSE);
+                        
 }
 
 
@@ -2240,6 +2078,96 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
         }
         break;
+        
+      case CHUNK_BRUSH:
+        if (reload_all)
+        {
+          int index;
+          for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
+          {
+            int i;
+            byte current_byte=0;
+            word width,height;
+
+            if (!Read_byte(Handle, &Paintbrush[index].Shape))
+              goto Erreur_lecture_config;
+
+            if (!Read_word_le(Handle, &width))
+              goto Erreur_lecture_config;
+            if (!Read_word_le(Handle, &height))
+              goto Erreur_lecture_config;
+      
+            Paintbrush[index].Width=width;
+            Paintbrush[index].Height=height;
+
+            if (!Read_word_le(Handle, &Paintbrush[index].Offset_X))
+              goto Erreur_lecture_config;
+            if (!Read_word_le(Handle, &Paintbrush[index].Offset_Y))
+              goto Erreur_lecture_config;
+            
+            // Decode binary
+            for (i=0;i<width*height;i++)
+            {
+              if ((i&7) == 0)
+              {
+                // Read one byte
+                if (!Read_byte(Handle, &current_byte))
+                  goto Erreur_lecture_config;
+              }
+              Paintbrush[index].Sprite[i/width][i%width] =
+                ((current_byte & (0x80 >> (i&7))) != 0);              
+            }
+          }
+        }
+        else
+        {
+          if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
+            goto Erreur_lecture_config;
+        }
+        break;
+        
+        
+      case CHUNK_SCRIPTS:
+        if (reload_all)
+        {
+          int current_size=0;
+          int current_script=0;
+          
+          while(current_size<Chunk.Size)
+          {
+            byte size;
+            
+            // Free (old) string
+            free(Bound_script[current_script]);
+            Bound_script[current_script]=NULL;
+            
+            if (!Read_byte(Handle, &size))
+              goto Erreur_lecture_config;
+              
+            if (size!=0)
+            {
+              // Alloc string
+              Bound_script[current_script]=malloc(size+1);
+              if (Bound_script[current_script]==NULL)
+                return ERROR_MEMORY;
+              
+              // Init and load string
+              memset(Bound_script[current_script], 0, size+1);
+              if (!Read_bytes(Handle, Bound_script[current_script], size))
+                goto Erreur_lecture_config;
+            }
+            current_size+=size+1;
+            current_script++;
+            
+            // Do not load more strings than hard-coded limit
+            if (current_script>=10)
+              break;
+          }
+          
+          
+        }
+        break;
+        
       default: // Chunk inconnu
         goto Erreur_lecture_config;
     }
@@ -2292,7 +2220,7 @@ int Save_CFG(void)
 
   // Enregistrement des touches
   Chunk.Number=CHUNK_KEYS;
-  Chunk.Size=NB_SHORTCUTS*sizeof(cfg_shortcut_info);
+  Chunk.Size=NB_SHORTCUTS*6;
 
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
@@ -2334,7 +2262,7 @@ int Save_CFG(void)
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Number=CHUNK_VIDEO_MODES;
-  Chunk.Size=modes_to_save * sizeof(cfg_video_mode);
+  Chunk.Size=modes_to_save * 5;
 
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
@@ -2359,7 +2287,7 @@ int Save_CFG(void)
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Number=CHUNK_SHADE;
-  Chunk.Size=sizeof(Shade_list)+sizeof(Shade_current);
+  Chunk.Size=8209;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2379,7 +2307,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Masque
   Chunk.Number=CHUNK_MASK;
-  Chunk.Size=sizeof(Mask_table);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2388,7 +2316,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Stencil
   Chunk.Number=CHUNK_STENCIL;
-  Chunk.Size=sizeof(Stencil);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2397,7 +2325,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations des dégradés
   Chunk.Number=CHUNK_GRADIENTS;
-  Chunk.Size=sizeof(Gradient_array)+1;
+  Chunk.Size=241;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2415,7 +2343,7 @@ int Save_CFG(void)
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
-  Chunk.Size=sizeof(Smooth_matrix);
+  Chunk.Size=9;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2426,7 +2354,7 @@ int Save_CFG(void)
 
   // Sauvegarde des couleurs à exclure
   Chunk.Number=CHUNK_EXCLUDE_COLORS;
-  Chunk.Size=sizeof(Exclude_color);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2435,7 +2363,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Quick-shade
   Chunk.Number=CHUNK_QUICK_SHADE;
-  Chunk.Size=sizeof(Quick_shade_step)+sizeof(Quick_shade_loop);
+  Chunk.Size=2;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2459,7 +2387,104 @@ int Save_CFG(void)
   if (!Write_word_le(Handle, Snap_offset_Y))
     goto Erreur_sauvegarde_config;
 
+  // Save brush data
+  {
+    long total_size=0;
+    int index;
+    // Compute size: monochrome paintbrushes
+    for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
+    {
+      total_size+=9+(Paintbrush[index].Width*Paintbrush[index].Height+7)/8;
+    }
+    /*
+    // Compute size: brush container
+    for (index=0; index<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; index++)
+    {
+      
+    }
+    */
+    Chunk.Number=CHUNK_BRUSH;
+    Chunk.Size=total_size;
+    if (!Write_byte(Handle, Chunk.Number) ||
+        !Write_word_le(Handle, Chunk.Size) )
+      goto Erreur_sauvegarde_config;
+    for (index=0; index<NB_PAINTBRUSH_SPRITES; index++)
+    {
+      int i;
+      byte current_byte=0;
+      word width,height;
 
+      width=Paintbrush[index].Width;
+      height=Paintbrush[index].Height;
+      
+      
+      if (!Write_byte(Handle, Paintbrush[index].Shape))
+        goto Erreur_sauvegarde_config;
+      if (!Write_word_le(Handle, width))
+        goto Erreur_sauvegarde_config;
+      if (!Write_word_le(Handle, height))
+        goto Erreur_sauvegarde_config;
+      if (!Write_word_le(Handle, Paintbrush[index].Offset_X))
+        goto Erreur_sauvegarde_config;
+      if (!Write_word_le(Handle, Paintbrush[index].Offset_Y))
+        goto Erreur_sauvegarde_config;
+      // Encode in binary
+      for (i=0;i<width*height;i++)
+      {
+        if (Paintbrush[index].Sprite[i/width][i%width])
+          current_byte |= 0x80 >> (i&7);
+        if ((i&7) == 7)
+        {
+          // Write one byte
+          if (!Write_byte(Handle, current_byte))
+            goto Erreur_sauvegarde_config;
+          current_byte=0;
+        }
+      }
+      // Remainder
+      if ((i&7) != 0)
+      {
+        // Write one byte
+        if (!Write_byte(Handle, current_byte))
+          goto Erreur_sauvegarde_config;
+      }
+    }
+  }
+  
+  // Save script shortcuts
+  {
+    int i;
+    Chunk.Number=CHUNK_SCRIPTS;
+    // Compute size : Data stored as 10 pascal strings
+    Chunk.Size=0;
+    for (i=0; i<10; i++)    
+    {
+      if (Bound_script[i]==NULL)
+        Chunk.Size+=1;
+      else
+        Chunk.Size+=strlen(Bound_script[i])+1;
+    }
+    // Header
+    if (!Write_byte(Handle, Chunk.Number) ||
+        !Write_word_le(Handle, Chunk.Size) )
+      goto Erreur_sauvegarde_config;
+      
+    // Strings
+    for (i=0; i<10; i++)    
+    {
+      byte size=0;      
+      if (Bound_script[i]!=NULL)
+        size=strlen(Bound_script[i]);
+        
+      if (!Write_byte(Handle, size))
+        goto Erreur_sauvegarde_config;
+        
+      if (size)
+        if (!Write_bytes(Handle, Bound_script[i], size))
+          goto Erreur_sauvegarde_config;
+    }
+  }
+  
   if (fclose(Handle))
     return ERROR_SAVING_CFG;
 
@@ -2631,6 +2656,8 @@ void Init_brush_container(void)
 
 void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
 {
+  int i;
+  
   // Free previous one
   free(Gfx);
   
@@ -2657,9 +2684,12 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  Menu_bars[MENUBAR_TOOLS].Skin = (byte*)&(gfx->Menu_block);
-  Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
-  Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
+  for (i=0; i<3; i++)
+  {
+    Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
+    Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
+    Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
+  }
 }
 
 ///
@@ -2686,3 +2716,253 @@ void Compute_menu_offsets(void)
   Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
 }
 
+void Init_paintbrush(int index, int width, int height, byte shape, const char * bitmap)
+{
+  if (bitmap!=NULL)
+  {
+    int i;
+    
+    Paintbrush[index].Shape=shape;
+    Paintbrush[index].Width=width;
+    Paintbrush[index].Height=height;
+    Paintbrush[index].Offset_X=width>>1;
+    Paintbrush[index].Offset_Y=height>>1;
+  
+    // Decode pixels
+    for (i=0;i<width*height;i++)
+    {
+      Paintbrush[index].Sprite[i/width][i%width] =
+        ((bitmap[i/8] & (0x80 >> (i&7))) != 0);              
+    }
+  }
+  else
+  {
+    Paintbrush_shape=shape;
+    Set_paintbrush_size(width, height);
+    Store_paintbrush(index);
+  }
+
+}
+
+
+void Init_paintbrushes(void)
+{
+  int index;
+ 
+  Init_paintbrush( 0, 1, 1,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 1, 2, 2,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 2, 3, 3,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 3, 4, 4,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 4, 5, 5,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 5, 7, 7,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 6, 8, 8,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 7,12,12,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 8,16,16,PAINTBRUSH_SHAPE_SQUARE, NULL);
+  Init_paintbrush( 9,16,16,PAINTBRUSH_SHAPE_SIEVE_SQUARE, NULL);
+  Init_paintbrush(10,15,15,PAINTBRUSH_SHAPE_DIAMOND, NULL);
+  Init_paintbrush(11, 5, 5,PAINTBRUSH_SHAPE_DIAMOND, NULL);
+  Init_paintbrush(12, 3, 3,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(13, 4, 4,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(14, 5, 5,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(15, 6, 6,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(16, 8, 8,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(17,10,10,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(18,12,12,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(19,14,14,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(20,16,16,PAINTBRUSH_SHAPE_ROUND, NULL);
+  Init_paintbrush(21,15,15,PAINTBRUSH_SHAPE_SIEVE_ROUND, NULL);
+  Init_paintbrush(22,11,11,PAINTBRUSH_SHAPE_SIEVE_ROUND, NULL);
+  Init_paintbrush(23, 5, 5,PAINTBRUSH_SHAPE_SIEVE_ROUND, NULL);
+  Init_paintbrush(24, 2, 1,PAINTBRUSH_SHAPE_HORIZONTAL_BAR, NULL);
+  Init_paintbrush(25, 3, 1,PAINTBRUSH_SHAPE_HORIZONTAL_BAR, NULL);
+  Init_paintbrush(26, 4, 1,PAINTBRUSH_SHAPE_HORIZONTAL_BAR, NULL);
+  Init_paintbrush(27, 8, 1,PAINTBRUSH_SHAPE_HORIZONTAL_BAR, NULL);
+  Init_paintbrush(28, 1, 2,PAINTBRUSH_SHAPE_VERTICAL_BAR, NULL);
+  Init_paintbrush(29, 1, 3,PAINTBRUSH_SHAPE_VERTICAL_BAR, NULL);
+  Init_paintbrush(30, 1, 4,PAINTBRUSH_SHAPE_VERTICAL_BAR, NULL);
+  Init_paintbrush(31, 1, 8,PAINTBRUSH_SHAPE_VERTICAL_BAR, NULL);
+  Init_paintbrush(32, 3, 3,PAINTBRUSH_SHAPE_CROSS, NULL);
+  Init_paintbrush(33, 5, 5,PAINTBRUSH_SHAPE_CROSS, NULL);
+  Init_paintbrush(34, 5, 5,PAINTBRUSH_SHAPE_PLUS, NULL);
+  Init_paintbrush(35,15,15,PAINTBRUSH_SHAPE_PLUS, NULL);
+  Init_paintbrush(36, 2, 2,PAINTBRUSH_SHAPE_SLASH, NULL);
+  Init_paintbrush(37, 4, 4,PAINTBRUSH_SHAPE_SLASH, NULL);
+  Init_paintbrush(38, 8, 8,PAINTBRUSH_SHAPE_SLASH, NULL);
+  Init_paintbrush(39, 2, 2,PAINTBRUSH_SHAPE_ANTISLASH, NULL);
+  Init_paintbrush(40, 4, 4,PAINTBRUSH_SHAPE_ANTISLASH, NULL);
+  Init_paintbrush(41, 8, 8,PAINTBRUSH_SHAPE_ANTISLASH, NULL);
+  
+  Init_paintbrush(42, 4, 4,PAINTBRUSH_SHAPE_RANDOM, "\x20\x81");
+  Init_paintbrush(43, 8, 8,PAINTBRUSH_SHAPE_RANDOM, "\x44\x00\x11\x00\x88\x01\x40\x08");
+  Init_paintbrush(44,13,13,PAINTBRUSH_SHAPE_RANDOM, "\x08\x00\x08\x90\x00\x10\x42\x10\x02\x06\x02\x02\x04\x02\x08\x42\x10\x44\x00\x00\x44\x00");
+  
+  Init_paintbrush(45, 3, 3,PAINTBRUSH_SHAPE_MISC, "\x7f\x00");
+  Init_paintbrush(46, 3, 3,PAINTBRUSH_SHAPE_MISC, "\xdd\x80");
+  Init_paintbrush(47, 7, 7,PAINTBRUSH_SHAPE_MISC, "\x06\x30\x82\x04\x10\x20\x00");
+
+  for (index=0;index<NB_PAINTBRUSH_SPRITES;index++)
+  {
+    Paintbrush[index].Offset_X=(Paintbrush[index].Width>>1);
+    Paintbrush[index].Offset_Y=(Paintbrush[index].Height>>1);
+  }
+}
+
+/// Set application icon(s)
+void Define_icon(void)
+{
+#ifdef WIN32
+  // Specific code for Win32:
+  // Load icon from embedded resource.
+  // This will provide both the 16x16 and 32x32 versions.
+  do
+  {
+    HICON hicon;
+    HRSRC hresource;
+    HINSTANCE hInstance;
+    LPVOID lpResIconDir;
+    LPVOID lpResIcon16;
+    LPVOID lpResIcon32;
+    HGLOBAL hMem;
+    WORD nID;
+    SDL_SysWMinfo info;
+    
+    hInstance = (HINSTANCE)GetModuleHandle(NULL);
+    if (hInstance==NULL)
+      break;
+      
+    // Icon is resource #1
+    hresource = FindResource(hInstance, 
+      MAKEINTRESOURCE(1), 
+      RT_GROUP_ICON);
+    if (hresource==NULL)
+      break;
+  
+    // Load and lock the icon directory. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+
+    lpResIconDir = LockResource(hMem);
+    if (lpResIconDir==NULL)
+      break;
+      
+    SDL_VERSION(&info.version);
+    SDL_GetWMInfo(&info);
+      
+    //
+    // 16x16
+    //
+    
+    // Get the identifier of the 16x16 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE, 
+        16, 16, LR_DEFAULTCOLOR); 
+    if (nID==0)
+      break;
+    
+    // Find the bits for the nID icon. 
+    hresource = FindResource(hInstance, 
+        MAKEINTRESOURCE(nID), 
+        MAKEINTRESOURCE(RT_ICON)); 
+    if (hresource==NULL)
+      break;
+     
+    // Load and lock the icon. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+    lpResIcon16 = LockResource(hMem);
+    if (lpResIcon16==NULL)
+      break;
+
+    // Create a handle to the icon. 
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon16, 
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000, 
+        16, 16, LR_DEFAULTCOLOR); 
+    if (hicon==NULL)
+      break;
+      
+    // Set it
+		SetClassLongPtr(info.window, GCL_HICONSM, (LONG_PTR)hicon);
+
+    
+    //
+    // 32x32
+    //
+    
+    // Get the identifier of the 32x32 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE, 
+        32, 32, LR_DEFAULTCOLOR); 
+    if (nID==0)
+      break;
+    
+    // Find the bits for the nID icon. 
+    hresource = FindResource(hInstance, 
+        MAKEINTRESOURCE(nID), 
+        MAKEINTRESOURCE(RT_ICON)); 
+    if (hresource==NULL)
+      break;
+     
+    // Load and lock the icon. 
+    hMem = LoadResource(hInstance, hresource); 
+    if (hMem==NULL)
+      break;
+    lpResIcon32 = LockResource(hMem);
+    if (lpResIcon32==NULL)
+      break;
+
+    // Create a handle to the icon. 
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon32, 
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000, 
+        32, 32, LR_DEFAULTCOLOR); 
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(info.window, GCL_HICON, (LONG_PTR)hicon);
+		
+		
+		// Success
+		return;
+  } while (0);
+  // Failure: fall back on normal SDL version:
+  
+#endif
+  // General version: Load icon from the file gfx2.gif
+  {
+    char icon_path[MAX_PATH_CHARACTERS];
+    SDL_Surface * icon;
+    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
+    icon = IMG_Load(icon_path);
+    if (icon && icon->w == 32 && icon->h == 32)
+    {
+      Uint32 pink;
+      pink = SDL_MapRGB(icon->format, 255, 0, 255);
+      
+      if (icon->format->BitsPerPixel == 8)
+      {
+        // 8bit image: use color key
+        
+        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
+        SDL_WM_SetIcon(icon,NULL);
+      }
+      else
+      {
+        // 24bit image: need to build a mask on magic pink
+        
+        byte *icon_mask;
+        int x,y;
+        
+        icon_mask=malloc(128);
+        memset(icon_mask,0,128);
+        for (y=0;y<32;y++)
+          for (x=0;x<32;x++)
+            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
+              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
+        SDL_WM_SetIcon(icon,icon_mask);
+        free(icon_mask);
+        icon_mask = NULL;
+      }
+      SDL_FreeSurface(icon);
+    }
+  }
+}

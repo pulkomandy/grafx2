@@ -37,7 +37,6 @@
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
 #define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
-#define NB_SHORTCUTS              183   ///< Number of actions that can have a key combination associated to it.
 #define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
@@ -45,9 +44,10 @@
 #define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
 #define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
 #define NB_EFFECTS_SPRITES        9     ///< Number of effect sprites.
-#define NB_MENU_SPRITES           20    ///< Number of menu sprites.
-#define MENU_SPRITE_WIDTH         14    ///< Width of a menu sprite in pixels
-#define MENU_SPRITE_HEIGHT        14    ///< Height of a menu sprite in pixels
+#define MENU_SPRITE_WIDTH         16    ///< Width of a menu sprite in pixels
+#define MENU_SPRITE_HEIGHT        16    ///< Height of a menu sprite in pixels
+#define EFFECT_SPRITE_WIDTH       14    ///< Width of an effect sprite in pixels
+#define EFFECT_SPRITE_HEIGHT      14    ///< Height of an effect sprite in pixels
 #define LAYER_SPRITE_WIDTH        14    ///< Width of a layer button in pixels
 #define LAYER_SPRITE_HEIGHT       10    ///< Height of a layer button in pixels
 #define PAINTBRUSH_WIDTH          16    ///< Width of a preset paintbrush sprite
@@ -210,9 +210,17 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_DIAMOND,
   PAINTBRUSH_SHAPE_SIEVE_ROUND,
   PAINTBRUSH_SHAPE_SIEVE_SQUARE,
+  PAINTBRUSH_SHAPE_RESERVED1,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED2,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED3,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED4,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED5,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED6,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED7,   ///< Reserved for future use
+  PAINTBRUSH_SHAPE_RESERVED8,   ///< Reserved for future use
   PAINTBRUSH_SHAPE_MISC,        ///< A raw monochrome bitmap, can't be resized. This must be the last of the preset paintbrush types.
   PAINTBRUSH_SHAPE_POINT,       ///< Used to reduce the paintbrush to a single pixel, during operations like floodfill.
-  PAINTBRUSH_SHAPE_NONE, ///< Used to display no cursor at all (colorpicker)
+  PAINTBRUSH_SHAPE_NONE,        ///< Used to display no cursor at all (colorpicker)
   PAINTBRUSH_SHAPE_COLOR_BRUSH, ///< User's brush, in color mode
   PAINTBRUSH_SHAPE_MONO_BRUSH,  ///< User's brush, in mono mode
   PAINTBRUSH_SHAPE_MAX          ///< Upper limit.
@@ -222,6 +230,8 @@ enum PAINTBRUSH_SHAPES
 #define BUTTON_RELEASED 0
 /// State of a menu button that is being pressed.
 #define BUTTON_PRESSED  1
+/// State of a button temporarily highligted
+#define BUTTON_HIGHLIGHTED 2
 
 /// The different modes of the Shade
 enum SHADE_MODES
@@ -243,7 +253,9 @@ enum CHUNKS_CFG
   CHUNK_SMOOTH          = 6, ///< Smooth effect settings
   CHUNK_EXCLUDE_COLORS  = 7, ///< List of excluded colors
   CHUNK_QUICK_SHADE     = 8, ///< QShade effect settings
-  CHUNK_GRID            = 9,
+  CHUNK_GRID            = 9, ///< Grid settings
+  CHUNK_BRUSH           =10, ///< Paintbrushes
+  CHUNK_SCRIPTS         =11, ///< Callable scripts
   CHUNK_MAX
 };
 
@@ -316,6 +328,24 @@ enum BUTTON_NUMBERS
   NB_BUTTONS            ///< Number of buttons in the menu bar.
 };
 
+enum MENU_SPRITE
+{
+  MENU_SPRITE_COLOR_BRUSH=0,
+  MENU_SPRITE_MONO_BRUSH,
+  MENU_SPRITE_DISCONTINUOUS_DRAW,
+  MENU_SPRITE_POINT_DRAW,
+  MENU_SPRITE_CONTOUR_DRAW,
+  MENU_SPRITE_4_POINTS_CURVE,
+  MENU_SPRITE_K_LINE,
+  MENU_SPRITE_CENTERED_LINES,
+  MENU_SPRITE_ELLIPSES,
+  MENU_SPRITE_POLYFORM,
+  MENU_SPRITE_REPLACE,
+  MENU_SPRITE_GRAD_ELLIPSE,
+  MENU_SPRITE_VERTICAL_PALETTE_SCROLL,
+  NB_MENU_SPRITES ///< Number of menu sprites.
+};
+
 ///
 /// Identifiers of special actions that can have a keyboard shortcut.
 /// They are special in the sense that there's no button in the menu for them,
@@ -364,6 +394,10 @@ enum SPECIAL_ACTIONS
   SPECIAL_GET_BRUSH_COLORS,
   SPECIAL_RECOLORIZE_BRUSH,
   SPECIAL_ROTATE_ANY_ANGLE,
+  SPECIAL_BRUSH_DOUBLE,
+  SPECIAL_BRUSH_DOUBLE_WIDTH,
+  SPECIAL_BRUSH_DOUBLE_HEIGHT,
+  SPECIAL_BRUSH_HALVE,
   SPECIAL_LOAD_BRUSH,
   SPECIAL_SAVE_BRUSH,
   SPECIAL_INVERT_SIEVE,
@@ -435,8 +469,21 @@ enum SPECIAL_ACTIONS
   SPECIAL_LAYER7_TOGGLE,
   SPECIAL_LAYER8_SELECT,
   SPECIAL_LAYER8_TOGGLE,
+  SPECIAL_REPEAT_SCRIPT,
+  SPECIAL_RUN_SCRIPT_1,
+  SPECIAL_RUN_SCRIPT_2,
+  SPECIAL_RUN_SCRIPT_3,
+  SPECIAL_RUN_SCRIPT_4,
+  SPECIAL_RUN_SCRIPT_5,
+  SPECIAL_RUN_SCRIPT_6,
+  SPECIAL_RUN_SCRIPT_7,
+  SPECIAL_RUN_SCRIPT_8,
+  SPECIAL_RUN_SCRIPT_9,
+  SPECIAL_RUN_SCRIPT_10,
+
   SPECIAL_FORMAT_CHECKER,
   SPECIAL_FORMAT_CHECKER_MENU,
+
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 
@@ -448,7 +495,7 @@ enum OPERATIONS
   OPERATION_POINT_DRAW,        ///< Freehand point-by-point draw
   OPERATION_FILLED_CONTOUR,    ///< Filled contour
   OPERATION_LINE,              ///< Lines
-  OPERATION_K_LIGNE,           ///< Linked lines
+  OPERATION_K_LINE,            ///< Linked lines
   OPERATION_CENTERED_LINES,    ///< Centered lines
   OPERATION_EMPTY_RECTANGLE,   ///< Empty rectangle
   OPERATION_FILLED_RECTANGLE,  ///< Filled rectangle
@@ -476,6 +523,7 @@ enum OPERATIONS
   OPERATION_STRETCH_BRUSH,     ///< Stretch brush
   OPERATION_DISTORT_BRUSH,     ///< Distort brush
   OPERATION_GRAD_RECTANGLE,    ///< Gradient-filled rectangle
+  OPERATION_RMB_COLORPICK,     ///< Colorpick on right mouse button
   NB_OPERATIONS                ///< Number of operations handled by the engine
 };
 

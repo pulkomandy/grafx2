@@ -497,7 +497,7 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
-  Keyboard_click_allowed = 0;
+  Keyboard_click_allowed = 1;
   
   Main_safety_backup_prefix = 'a';
   Spare_safety_backup_prefix = 'b';
@@ -517,42 +517,7 @@ int Init_program(int argc,char * argv[])
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
-
-  {
-    // Routine pour définir l'icone.
-    char icon_path[MAX_PATH_CHARACTERS];
-    SDL_Surface * icon;
-    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
-    icon = IMG_Load(icon_path);
-    if (icon && icon->w == 32 && icon->h == 32)
-    {
-      Uint32 pink;
-      pink = SDL_MapRGB(icon->format, 255, 0, 255);
-      
-      if (icon->format->BitsPerPixel == 8)
-      {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
-        SDL_WM_SetIcon(icon,NULL);
-      }
-      else
-      {
-        byte *icon_mask;
-        int x,y;
-        
-        icon_mask=malloc(128);
-        memset(icon_mask,0,128);
-        for (y=0;y<32;y++)
-          for (x=0;x<32;x++)
-            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
-              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-        SDL_WM_SetIcon(icon,icon_mask);
-        free(icon_mask);
-        icon_mask = NULL;
-      }
-
-      SDL_FreeSurface(icon);
-    }
-  }
+  Define_icon();
   
   // Texte
   Init_text();
@@ -574,7 +539,6 @@ int Init_program(int argc,char * argv[])
   // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
-  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
 
   // On initialise tout ce qui concerne les opérations et les effets
@@ -633,6 +597,20 @@ int Init_program(int argc,char * argv[])
   Init_brush_container();
 
   Windows_open=0;
+  
+  // Paintbrush
+  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  
+  // Load preset paintbrushes (uses Paintbrush_ variables)
+  Init_paintbrushes();
+  
+  // Set a valid paintbrush afterwards
+  *Paintbrush_sprite=1;
+  Paintbrush_width=1;
+  Paintbrush_height=1;
+  Paintbrush_offset_X=0;
+  Paintbrush_offset_Y=0;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   
   // Charger la configuration des touches
   Set_config_defaults();
@@ -701,11 +679,6 @@ int Init_program(int argc,char * argv[])
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
-  // Pinceau
-  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  *Paintbrush_sprite=1;
-  Paintbrush_width=1;
-  Paintbrush_height=1;
 
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
@@ -751,9 +724,11 @@ int Init_program(int argc,char * argv[])
   Compute_paintbrush_coordinates();
 
   // On affiche le menu:
-  Display_menu();
   Display_paintbrush_in_menu();
-  Display_sprite_in_menu(BUTTON_PAL_LEFT,18+(Config.Palette_vertical!=0));
+  Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
+  Display_menu();
+  Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
+  Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
   // On affiche le curseur pour débutter correctement l'état du programme:
   Display_cursor();

@@ -149,12 +149,16 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
     str[0]='\0';
-  else if (input_type==1 && str[0]!='\0')
+  else if (input_type==INPUT_TYPE_INTEGER && str[0]!='\0')
     snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
-  else if (input_type==3)
+  else if (input_type==INPUT_TYPE_DECIMAL)
   {
     //  Nothing. The caller should have used Sprint_double, with min_positions
     //  at zero, so there's no spaces on the left and no useless 0s on the right.
+  }
+  else if (input_type==INPUT_TYPE_HEXA)
+  {
+    //  Nothing. The caller should have initialized a valid hexa number.
   }
 
   Wait_end_of_click();
@@ -285,15 +289,15 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           is_authorized=0; // On commence par supposer qu'elle est interdite
           switch(input_type)
           {
-            case 0 : // N'importe quelle chaîne:
+            case INPUT_TYPE_STRING :
               if (input_key>=' ' && input_key<= 255)
                 is_authorized=1;
               break;
-            case 1 : // Nombre
+            case INPUT_TYPE_INTEGER :
               if ( (input_key>='0') && (input_key<='9') )
                 is_authorized=1;
               break;
-            case 3: // Decimal number
+            case INPUT_TYPE_DECIMAL:
               if ( (input_key>='0') && (input_key<='9') )
                 is_authorized=1;
               else if (input_key=='-' && position==0 && str[0]!='-')
@@ -301,10 +305,18 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               else if (input_key=='.')
                 is_authorized=1;
               break;
-            default : // Nom de fichier
+            case INPUT_TYPE_FILENAME:
               // On regarde si la touche est autorisée
               if ( Valid_character(input_key))
                 is_authorized=1;
+            case INPUT_TYPE_HEXA:
+              if ( (input_key>='0') && (input_key<='9') )
+                is_authorized=1;
+              else if ( (input_key>='A') && (input_key<='F') )
+                is_authorized=1;
+              else if ( (input_key>='a') && (input_key<='f') )
+                is_authorized=1;
+              break;
           } // End du "switch(input_type)"
 
           // Si la touche était autorisée...
@@ -350,7 +362,7 @@ affichage:
   Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
   // On raffiche la chaine correctement
-  if (input_type==1)
+  if (input_type==INPUT_TYPE_INTEGER)
   {
     if (str[0]=='\0')
     {
@@ -359,7 +371,7 @@ affichage:
     }
     Print_in_window(x_pos+((max_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
   }
-  else if (input_type==3)
+  else if (input_type==INPUT_TYPE_DECIMAL)
   {
     double value;
     // Discard extra digits
