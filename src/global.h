@@ -207,6 +207,8 @@ GFX2_GLOBAL Func_display_brush_color_zoom Clear_brush_scaled;
 GFX2_GLOBAL Func_draw_brush Display_brush;
 GFX2_GLOBAL Func_constraint Check_constraints;
 
+GFX2_GLOBAL T_Constraint_Enforcer* ConstraintFuncs;
+
 // -- Screen data
 
 /// Requested window width. This is set when the user resizes the window.

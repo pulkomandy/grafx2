@@ -26,4 +26,7 @@ byte C64_FLI_enforcer(void);
 
 byte Null_enforcer(void);
 
+extern T_Constraint_Enforcer ConstraintsCPC;
+extern T_Constraint_Enforcer ConstraintsNone;
+
 #endif

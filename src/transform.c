@@ -351,10 +351,15 @@ void Button_Transform_menu(void)
         // constraint popup
         switch (Window_attribute2) {
           case LAYER_C64_FLI:
+            ConstraintFuncs = &ConstraintsNone;
             Check_constraints = C64_FLI_enforcer;
-            // Constraint_enforcer = ;
           break;
+          case LAYER_CPC_MODE5:
+            ConstraintFuncs = &ConstraintsCPC;
+            Check_constraints = Null_enforcer;
+            break;
           default:
+            ConstraintFuncs = &ConstraintsNone;
             Check_constraints = Null_enforcer;
           break;
         }
@@ -365,7 +370,9 @@ void Button_Transform_menu(void)
           Main_backups->Pages->Layermode_flags = 0;
         else
           Main_backups->Pages->Layermode_flags = 2;
-        Print_in_window(124,140,(Main_backups->Pages->Layermode_flags == 2)?"X":" ",MC_Black,MC_Light);
+        Hide_cursor();
+        Print_in_window(124,140,(Main_backups->Pages->Layermode_flags == 2)?"X":" ",MC_Black,MC_Light);       
+        Display_cursor();
 
         // TODO : ensure there are 5 layers
 

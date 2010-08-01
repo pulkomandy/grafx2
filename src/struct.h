@@ -73,6 +73,15 @@ typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word
 typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
 typedef byte (* Func_constraint) (void); ///< Constraint checker, to see if your picture matches a specific video constraint
 
+typedef struct
+{
+  byte (* Display_brush) (short x, short y, byte color);
+  int (* Redraw_layered_image)(void);
+  int (* Read_pixel)(word x, word y);
+  byte (* Put_pixel)(word x, word y, byte color, int with_preview);
+  void (* Init)(void);
+} T_Constraint_Enforcer;
+
 /// A set of RGB values.
 #pragma pack(1)
 typedef struct

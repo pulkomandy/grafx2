@@ -36,6 +36,25 @@ void Pixel_in_layer(word x,word y, byte layer, byte color)
   *((y)*Main_image_width+(x)+Main_backups->Pages->Image[layer])=color;
 }
 
+// - Fallback - for incomplete platforms
+  byte a(short x, short y, byte color){return 0;}
+  int b(){return -1;}
+  int c(word x, word y){return -1;}
+  byte d(word x, word y, byte color, int with_preview) {return 0;}
+  void e(){}
+
+const T_Constraint_Enforcer ConstraintsNone = {
+  a,b,c,d, e
+};
+
+
+byte Null_enforcer(void)
+{
+  return 0;
+}
+
+// C64 FLI
+
 byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 {
   word used_colors[200][40];
@@ -591,10 +610,12 @@ byte CPC_Mode5_PutPixel(word x, word y, byte color, int with_preview)
     return 0;
 }
 
-// - Fallback - for incomplete platforms
+const T_Constraint_Enforcer ConstraintsCPC = {
+  CPC_Mode5_DisplayPaintbrush,
+  CPC_Mode5_RedrawLayeredImage,
+  CPC_Mode5_ReadPixel,
+  CPC_Mode5_PutPixel,
+  e // TODO - Init code
+};
 
-byte Null_enforcer(void)
-{
-  return 0;
-}
 
