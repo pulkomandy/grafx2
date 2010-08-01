@@ -410,6 +410,189 @@ byte C64_FLI_enforcer(void)
   return 0;
 }
 
+// - Amstrad CPC "Mode 5" rasters
+byte CPC_Mode5_DisplayPaintbrush(short x, short y, byte color)
+{
+  byte old_color;
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_current_layer < 4)
+  {
+    // Flood-fill the enclosing area
+    if (x<Main_image_width && y<Main_image_height && x>= 0 && y >= 0
+        && (color=Effect_function(x,y,color)) != (old_color=Read_pixel_from_current_layer(x,y))
+        && (!((Stencil_mode) && (Stencil[old_color])))
+        && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)])))
+       )
+    {
+      short min_x,width,min_y,height;
+      short xx,yy;
+
+      // determine area
+      switch(Main_current_layer)
+      {
+        case 0:
+        default:
+          // Full layer
+          min_x=0;
+          min_y=0;
+          width=Main_image_width;
+          height=Main_image_height;
+          break;
+        case 1:
+        case 2:
+          // Line
+          min_x=0;
+          min_y=y;
+          width=Main_image_width;
+          height=1;
+          break;
+        case 3:
+          // Segment
+          min_x=x / 48 * 48;
+          min_y=y;
+          width=48;
+          height=1;
+          break;
+          //case 4:
+          //  // 8x8
+          //  min_x=x / 8 * 8;
+          //  min_y=y / 8 * 8;
+          //  width=8;
+          //  height=8;
+          //  break;
+      }
+      // Clip the bottom edge.
+      // (Necessary if image height is not a multiple)
+      if (min_y+height>=Main_image_height)
+        height=Main_image_height-min_y;
+      // Clip the right edge.
+      // (Necessary if image width is not a multiple)
+      if (min_x+width>=Main_image_width)
+        width=Main_image_width-min_x;
+
+      for (yy=min_y; yy<min_y+height; yy++)
+        for (xx=min_x; xx<min_x+width; xx++)
+        {
+          Pixel_in_current_screen(xx,yy,color,0);
+        }
+      // Feedback
+      // This part is greatly taken from Hide_paintbrush()
+      Compute_clipped_dimensions(&min_x,&min_y,&width,&height);
+
+      if ( (width>0) && (height>0) )
+        Clear_brush(min_x-Main_offset_X,
+            min_y-Main_offset_Y,
+            0,0,
+            width,height,0,
+            Main_image_width);
+
+      if (Main_magnifier_mode != 0)
+      {
+        Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
+        xx=min_x;
+        yy=min_y;
+
+        if ( (width>0) && (height>0) )
+        {
+          // Corrections dues au Zoom:
+          min_x=(min_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          min_y=(min_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=min_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
+
+          Clear_brush_scaled(Main_X_zoom+min_x,min_y,
+              xx,yy,
+              width,height,0,
+              Main_image_width,
+              Horizontal_line_buffer);
+        }
+      }
+      // End of graphic feedback
+    }
+    return 1;
+  }
+  return 0;
+}
+
+extern T_Bitmap Main_visible_image;
+extern T_Bitmap Main_visible_image_depth_buffer;
+int CPC_Mode5_RedrawLayeredImage()
+{
+  byte layer = 0;
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_layers_visible & (1<<4))
+  {
+    // The raster result layer is visible: start there
+    // Copy it in Main_visible_image
+    int i;
+    for (i=0; i< Main_image_width*Main_image_height; i++)
+    {
+      layer = *(Main_backups->Pages->Image[4]+i);
+      Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer]+i);
+    }
+      
+    // Copy it to the depth buffer
+    memcpy(Main_visible_image_depth_buffer.Image,
+      Main_backups->Pages->Image[4],
+      Main_image_width*Main_image_height);
+      
+    // Next
+    layer= (1<<4)+1;
+    return layer;
+  }
+  return -1;
+}
+
+int CPC_Mode5_ReadPixel(word x, word y)
+{
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_current_layer==4)
+    return *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width);
+  else return -1;
+}
+
+byte CPC_Mode5_PutPixel(word x, word y, byte color, int with_preview)
+{
+    if (Main_current_layer == 4)
+    {
+      if (color<4)
+      {
+        // Paste in layer
+        *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+        // Paste in depth buffer
+        *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
+        // Fetch pixel color from the target raster layer
+        color=*(Main_backups->Pages->Image[color] + x+y*Main_image_width);
+        // Draw that color on the visible image buffer
+        *(x+y*Main_image_width+Main_screen)=color;
+
+        if (with_preview)
+          Pixel_preview(x,y,color);
+      }
+      return 1;
+    }
+    else if (Main_current_layer<4 && (Main_layers_visible & (1<<4)))
+    {
+      byte depth;
+
+      // Paste in layer
+      *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+      // Search depth
+      depth = *(Main_backups->Pages->Image[4] + x+y*Main_image_width);
+
+      if ( depth == Main_current_layer)
+      {
+        // Draw that color on the visible image buffer
+        *(x+y*Main_image_width+Main_screen)=color;
+
+        if (with_preview)
+          Pixel_preview(x,y,color);
+      }
+      return 1;
+    }
+    return 0;
+}
+
+// - Fallback - for incomplete platforms
+
 byte Null_enforcer(void)
 {
   return 0;

@@ -546,10 +546,10 @@ void Button_Colorize_mode(void)
     switch(Colorize_current_mode)
     {
       case 0 :
-		if(Main_backups->Pages->Layermode_flags == 2)
+        if(Main_backups->Pages->Layermode_flags == 2)
           Effect_function=Effect_layer_copy;
-		else
-		  Effect_function=Effect_interpolated_colorize;
+		    else
+		      Effect_function=Effect_interpolated_colorize;
         break;
       case 1 :
         Effect_function=Effect_additive_colorize;
