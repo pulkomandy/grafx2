@@ -71,6 +71,7 @@ typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,by
 typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
 typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
 typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
+typedef byte (* Func_constraint) (void); ///< Constraint checker, to see if your picture matches a specific video constraint
 
 /// A set of RGB values.
 #pragma pack(1)

@@ -1268,7 +1268,7 @@ void Main_handler(void)
                 break;
 
               case SPECIAL_FORMAT_CHECKER:
-                C64_FLI_enforcer();
+                Check_constraints();
                 action++;
                 break;
 

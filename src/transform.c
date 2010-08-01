@@ -149,8 +149,10 @@ void Button_Transform_menu(void)
 
   Print_in_window(121,114,"Constraints",MC_Dark,MC_Light);
 
-  constraint_list = Window_set_dropdown_button(121,123,69,11,69,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 14
-  Window_dropdown_add_item(constraint_list,1,"C64 FLI");
+  constraint_list = Window_set_dropdown_button(121,123,86,11,86,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 14
+  Window_dropdown_add_item(constraint_list,LAYER_C64_FLI,"C64 FLI");
+  Window_dropdown_add_item(constraint_list,LAYER_CPC_MODE5,"CPC Mode5");
+  Window_dropdown_add_item(constraint_list,LAYER_THOMSON,"Thomson");
 
   Window_set_normal_button(121,137, 13,13,
     (Main_backups->Pages->Layermode_flags == 2)?"X":" ",0,1,SDLK_LAST);// 15
@@ -347,7 +349,15 @@ void Button_Transform_menu(void)
       // CONSTRAINT CHECK
       case 14:
         // constraint popup
-        // Nothing to do, only one option in the popup anyway
+        switch (Window_attribute2) {
+          case LAYER_C64_FLI:
+            Check_constraints = C64_FLI_enforcer;
+            // Constraint_enforcer = ;
+          break;
+          default:
+            Check_constraints = Null_enforcer;
+          break;
+        }
         break;
       case 15:
         // force constraint checkbox
@@ -456,7 +466,7 @@ void Button_Transform_menu(void)
           break;
 
         case 16 : // Check constraints
-          switch(C64_FLI_enforcer()) {
+          switch(Check_constraints()) {
             case 1:
               Warning_message("Picture size must be 160x200");
               break;

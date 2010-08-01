@@ -63,6 +63,7 @@
 #include "setup.h"
 #include "windows.h"
 #include "brush.h"
+#include "oldies.h"
 #include "palette.h"
 #include "realpath.h"
 
@@ -710,6 +711,8 @@ int Init_program(int argc,char * argv[])
   Main_image_height=Screen_height/Pixel_height;
   Spare_image_width=Screen_width/Pixel_width;
   Spare_image_height=Screen_height/Pixel_height;
+
+  Check_constraints = C64_FLI_enforcer;
   
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(Screen_width,Screen_height)==0)

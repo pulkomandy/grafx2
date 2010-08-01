@@ -226,6 +226,15 @@ enum PAINTBRUSH_SHAPES
   PAINTBRUSH_SHAPE_MAX          ///< Upper limit.
 };
 
+enum LAYER_MODES
+{
+  LAYER_OPAQUE,
+  LAYER_TRANSPARENT,
+  LAYER_CPC_MODE5,
+  LAYER_C64_FLI,
+  LAYER_THOMSON
+};
+
 /// Normal resting state for a menu button.
 #define BUTTON_RELEASED 0
 /// State of a menu button that is being pressed.

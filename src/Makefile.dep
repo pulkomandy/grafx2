@@ -11,12 +11,14 @@ $(OBJDIR)/buttons_effects.o: buttons_effects.c buttons.h struct.h const.h engine
  global.h graph.h help.h input.h misc.h readline.h sdlscreen.h windows.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
  buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
- input.h engine.h pages.h layers.h factory.h
+ input.h engine.h pages.h layers.h factory.h oldies.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
  filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
  sdlscreen.h windows.h palette.h input.h help.h
-$(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
- loadsave.h misc.h io.h windows.h pages.h
+$(OBJDIR)/fileformats.o: fileformats.c h:/Qt/msys/1.0/local/include/png.h \
+ h:/Qt/msys/1.0/local/include/zlib.h h:/Qt/msys/1.0/local/include/zconf.h \
+ h:/Qt/msys/1.0/local/include/pngconf.h errors.h global.h struct.h \
+ const.h loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
  windows.h sdlscreen.h loadsave.h mountlist.h engine.h readline.h input.h \
  help.h filesel.h
@@ -29,8 +31,8 @@ $(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
 $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c buttons.h struct.h const.h errors.h global.h graph.h \
  init.h io.h factory.h help.h hotkeys.h keyboard.h loadsave.h misc.h \
- mountlist.h operatio.h palette.h sdlscreen.h setup.h transform.h \
- windows.h layers.h
+ mountlist.h operatio.h palette.h sdlscreen.h setup.h special.h \
+ transform.h windows.h layers.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
  windows.h errors.h misc.h input.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
@@ -47,8 +49,10 @@ $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons
 $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.h \
  engine.h misc.h keyboard.h windows.h palette.h input.h graph.h pages.h
 $(OBJDIR)/miscfileformats.o: miscfileformats.c engine.h struct.h const.h errors.h \
- global.h io.h libraw2crtc.h loadsave.h misc.h sdlscreen.h windows.h
+ global.h io.h libraw2crtc.h loadsave.h misc.h sdlscreen.h windows.h \
+ oldies.h
 $(OBJDIR)/mountlist.o: mountlist.c
+$(OBJDIR)/oldies.o: oldies.c struct.h const.h global.h errors.h misc.h palette.h
 $(OBJDIR)/op_c.o: op_c.c op_c.h struct.h const.h errors.h
 $(OBJDIR)/operatio.o: operatio.c const.h struct.h global.h misc.h engine.h graph.h \
  operatio.h buttons.h pages.h errors.h sdlscreen.h brush.h windows.h
@@ -90,7 +94,8 @@ $(OBJDIR)/special.o: special.c const.h struct.h global.h graph.h engine.h window
 $(OBJDIR)/text.o: text.c SFont.h struct.h const.h global.h sdlscreen.h io.h \
  errors.h
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \
- sdlscreen.h windows.h input.h help.h misc.h readline.h buttons.h pages.h
+ sdlscreen.h windows.h input.h help.h misc.h readline.h buttons.h \
+ oldies.h pages.h
 $(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  global.h graph.h input.h misc.h readline.h sdlscreen.h

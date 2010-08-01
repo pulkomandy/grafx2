@@ -18,7 +18,12 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
+#ifndef __OLDIES_H__
+#define __OLDIES_H__
 
+byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 byte C64_FLI_enforcer(void);
 
+byte Null_enforcer(void);
+
+#endif

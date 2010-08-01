@@ -205,6 +205,7 @@ GFX2_GLOBAL Func_display_brush_mono_zoom  Display_brush_mono_zoom;
 GFX2_GLOBAL Func_display_brush_color_zoom Clear_brush_scaled;
 /// Draw an arbitrary brush on screen (not the current brush)
 GFX2_GLOBAL Func_draw_brush Display_brush;
+GFX2_GLOBAL Func_constraint Check_constraints;
 
 // -- Screen data
 

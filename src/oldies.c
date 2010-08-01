@@ -409,3 +409,9 @@ byte C64_FLI_enforcer(void)
     
   return 0;
 }
+
+byte Null_enforcer(void)
+{
+  return 0;
+}
+
