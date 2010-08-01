@@ -101,13 +101,13 @@ char * Menu_tooltip[NB_BUTTONS]=
   // Effects
   "Brush grab. / Restore   ",
   "Lasso / Restore brush   ",
-  "Brush effects           ",
-  "Drawing modes (effects) ",
 #ifdef __ENABLE_LUA__
-  "Text / Brush factory    ",
+  "Brush effects / factory ",
 #else
-  "Text                    ",
+  "Brush effects           ",
 #endif
+  "Drawing modes (effects) ",
+  "Text                    ",
   "Magnify mode / Menu     ",
   "Pipette / Invert colors ",
 
