@@ -33,6 +33,7 @@
 #include "misc.h" // Num2str
 #include "readline.h"
 #include "buttons.h" // Message_out_of_memory()
+#include "oldies.h"
 #include "pages.h" // Backup_with_new_dimensions()
 
 /// Reduces a fraction A/B to its smallest representation. ie (40,60) becomes (2/3)
@@ -148,13 +149,13 @@ void Button_Transform_menu(void)
 
   Print_in_window(121,114,"Constraints",MC_Dark,MC_Light);
 
-  constraint_list = Window_set_dropdown_button(121,123,69,11,69,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
+  constraint_list = Window_set_dropdown_button(121,123,69,11,69,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 14
   Window_dropdown_add_item(constraint_list,1,"C64 FLI");
 
-  Window_set_normal_button(121,137, 13,13,/*constraint_enabled?"X":*/" ",0,1,SDLK_LAST);// 8
+  Window_set_normal_button(121,137, 13,13,/*constraint_enabled?"X":*/" ",0,1,SDLK_LAST);// 15
   Print_in_window(137, 140, "Force", MC_Black, MC_Light);
 
-  Window_set_normal_button(121,153, 50,14,"Check"  ,1,1,SDLK_c); // 6
+  Window_set_normal_button(121,153, 50,14,"Check"  ,1,1,SDLK_c); // 16
 
   
   Update_window_area(0,0,Window_width, Window_height);
@@ -341,9 +342,23 @@ void Button_Transform_menu(void)
         }
         Display_cursor();
       break;
+
+      // CONSTRAINT CHECK
+      case 14:
+        // constraint popup
+        // Nothing to do, only one option in the popup anyway
+        break;
+      case 15:
+        // force constraint checkbox
+        // TODO : allow toggling it
+        break;
+      case 16:
+        // check constraint button
+        // nothing to do, will close the window first
+        break;
     }
   }
-  while (clicked_button<=0 || clicked_button>=8);
+  while ((clicked_button<=0 || clicked_button>=8) && clicked_button != 16);
 
   Close_window();
   
@@ -429,6 +444,17 @@ void Button_Transform_menu(void)
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
             Rescale(Main_backups->Pages->Next->Image[i], old_width, old_height, Main_backups->Pages->Image[i], Main_image_width, Main_image_height, 0, 0);
+          }
+          break;
+
+        case 16 : // Check constraints
+          switch(C64_FLI_enforcer()) {
+            case 1:
+              Warning_message("Picture size must be 160x200");
+              break;
+            case 2:
+              Warning_message("Picture must have 4 layers.");
+              break;
           }
           break;
       }
