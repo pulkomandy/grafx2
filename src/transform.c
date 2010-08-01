@@ -99,6 +99,7 @@ void Button_Transform_menu(void)
   static short ratio_is_locked = 1; // True if X and Y resize should go together
   
   T_Dropdown_button * unit_button;
+  T_Dropdown_button * constraint_list;
   T_Special_button * input_button[4];
   short *input_value[4];
 
@@ -108,22 +109,21 @@ void Button_Transform_menu(void)
   else
     new_ratio_width=old_ratio_width=new_ratio_height=old_ratio_height=1;
   
-  Open_window(215,165,"Picture transform");
+  Open_window(215,180,"Picture transform");
 
-  Window_display_frame( 5, 15,205,91);
-  Window_display_frame( 5,110, 55,49);
-  Window_display_frame(64,110, 85,49);
+  Window_display_frame( 5, 15,205,91); // resize
+  Window_display_frame( 5,110,111,49); // mirror-rotate
+  Window_display_frame(117,110, 94,62); // constraints
 
-  Window_set_normal_button(154,140, 54,14,"Cancel",0,1,KEY_ESC); // 1
+  Window_set_normal_button(30,161, 54,14,"Cancel",0,1,KEY_ESC); // 1
 
-  Print_in_window(  9,114,"Mirror",MC_Dark,MC_Light);
-  Window_set_normal_button( 17,125, 27,14,"X\035" ,1,1,SDLK_x);  // 2
-  Window_set_normal_button( 17,140, 27,14,"Y\022" ,1,1,SDLK_y);  // 3
+  Print_in_window(  9,114,"Mirror/Rotate",MC_Dark,MC_Light);
+  Window_set_normal_button( 9,125, 27,14,"X\035" ,1,1,SDLK_x);  // 2
+  Window_set_normal_button( 9,140, 27,14,"Y\022" ,1,1,SDLK_y);  // 3
 
-  Print_in_window( 84,114,"Rotate",MC_Dark,MC_Light);
-  Window_set_normal_button( 69,125, 37,14,"-90°"  ,0,1,SDLK_LAST); // 4
-  Window_set_normal_button(107,125, 37,14,"+90°"  ,0,1,SDLK_LAST); // 5
-  Window_set_normal_button( 69,140, 75,14,"180°"  ,0,1,SDLK_LAST); // 6
+  Window_set_normal_button(37,125, 37,14,"-90°"  ,0,1,SDLK_LAST); // 4
+  Window_set_normal_button(75,125, 37,14,"+90°"  ,0,1,SDLK_LAST); // 5
+  Window_set_normal_button(37,140, 75,14,"180°"  ,0,1,SDLK_LAST); // 6
 
   Print_in_window( 87, 19,"Resize",MC_Dark,MC_Light);
   Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,SDLK_r);    // 7
@@ -145,6 +145,17 @@ void Button_Transform_menu(void)
   input_button[1] = Window_set_input_button(89,43,4); // 11
   input_button[2] = Window_set_input_button(45,58,4); // 12
   input_button[3] = Window_set_input_button(89,58,4); // 13
+
+  Print_in_window(121,114,"Constraints",MC_Dark,MC_Light);
+
+  constraint_list = Window_set_dropdown_button(121,123,69,11,69,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
+  Window_dropdown_add_item(constraint_list,1,"C64 FLI");
+
+  Window_set_normal_button(121,137, 13,13,/*constraint_enabled?"X":*/" ",0,1,SDLK_LAST);// 8
+  Print_in_window(137, 140, "Force", MC_Black, MC_Light);
+
+  Window_set_normal_button(121,153, 50,14,"Check"  ,1,1,SDLK_c); // 6
+
   
   Update_window_area(0,0,Window_width, Window_height);
   
