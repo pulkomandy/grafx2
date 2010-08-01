@@ -713,6 +713,7 @@ int Init_program(int argc,char * argv[])
   Spare_image_height=Screen_height/Pixel_height;
 
   Check_constraints = C64_FLI_enforcer;
+  ConstraintFuncs = &ConstraintsNone;
   
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(Screen_width,Screen_height)==0)

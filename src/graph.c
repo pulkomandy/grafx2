@@ -2908,7 +2908,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
   byte depth;
   byte color;
   
-  int c = CPC_Mode5_ReadPixel(x, y);
+  int c = ConstraintFuncs->Read_pixel(x, y);
   if (c > 0)
     return c;
     
@@ -2928,7 +2928,7 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
   #ifndef NOLAYERS
   if (Main_backups->Pages->Layermode_flags == 2)
   {
-    if (CPC_Mode5_PutPixel(x,y,color,with_preview)) return;
+    if (ConstraintFuncs->Put_pixel(x,y,color,with_preview)) return;
   }  
   byte depth;
 

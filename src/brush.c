@@ -131,7 +131,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
     
   // Handle the "Amstrad CPC mode 5" mode
   if (!is_preview) {
-    if (CPC_Mode5_DisplayPaintbrush(x,y,color) == 1)
+    if (ConstraintFuncs->Display_brush(x,y,color) == 1)
       return;
   }
 
@@ -140,7 +140,6 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
     case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
       break;
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
-    single_pixel:
       if ( (Paintbrush_X>=Limit_left)
         && (Paintbrush_X<=Limit_right)
         && (Paintbrush_Y>=Limit_top)
