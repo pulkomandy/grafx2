@@ -40,12 +40,6 @@
 
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 
-// --------------------------- Menu des palettes -----------------------------
-char * Palette_reduce_label[7]=
-{
-  "128"," 64"," 32"," 16","  8","  4","  2"
-};
-
 // Coordinates of the color count (on histogram button)
 static const int COUNT_X = 262;
 static const int COUNT_Y = 19;
@@ -302,7 +296,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
   // On fait une copie de la palette
   memcpy(temp_palette, palette, sizeof(T_Palette));
 
-  // On fait une copie de la table d'utilisation des couleurs
+  // On fait une copie de la table d'used des couleurs
   memcpy(temp_usage, color_usage, sizeof(dword) * 256);
 
   // On commence à initialiser la table de conversion à un état où elle ne
@@ -367,7 +361,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       conversion_table[pos_1]=pos_2;
       conversion_table[pos_2]=pos_1;
 
-      //   On intervertit le nombre d'utilisation des couleurs pour garder une
+      //   On intervertit le nombre d'used des couleurs pour garder une
       // cohérence lors d'un éventuel "Zap unused".
       SWAP_DWORDS(color_usage[pos_1], color_usage[pos_2])
 
@@ -477,8 +471,8 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
   int   best_color_2=0;
   int   difference;
   int   best_difference;
-  dword Utilisation;
-  dword Meilleure_utilisation;
+  dword used;
+  dword best_used;
 
   //   On commence par initialiser la table de conversion dans un état où
   // aucune conversion ne sera effectuée.
@@ -529,7 +523,8 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
 
   //   Maintenant qu'on a une palette clean, on va boucler en réduisant
   // le nombre de couleurs jusqu'à ce qu'on atteigne le nombre désiré.
-  while ((*used_colors)>nb_colors_asked)
+  // (The stop condition is further down)
+  while (1)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
     // parmis celles qui sont utilisées (bien sûr) et de les remplacer par
@@ -537,7 +532,7 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // en fonction de leur utilisation dans l'image.
 
     best_difference =0x7FFF;
-    Meilleure_utilisation=0x7FFFFFFF;
+    best_used=0x7FFFFFFF;
 
     for (color_1=0;color_1<(*used_colors);color_1++)
       for (color_2=color_1+1;color_2<(*used_colors);color_2++)
@@ -549,16 +544,21 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
 
           if (difference<=best_difference)
           {
-            Utilisation=color_usage[color_1]+color_usage[color_2];
-            if ((difference<best_difference) || (Utilisation<Meilleure_utilisation))
+            used=color_usage[color_1]+color_usage[color_2];
+            if ((difference<best_difference) || (used<best_used))
             {
               best_difference =difference;
-              Meilleure_utilisation=Utilisation;
+              best_used=used;
               best_color_1  =color_1;
               best_color_2  =color_2;
             }
           }
         }
+    
+    // Stop condition: when no more duplicates exist
+    // and the number of colors has reached the target.
+    if (best_difference!=0 && (*used_colors)<=nb_colors_asked)
+      break;
 
     //   Maintenant qu'on les a trouvées, on va pouvoir mettre à jour nos
     // données pour que le remplacement se fasse sans encombres.
@@ -570,13 +570,13 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // On met à jour la palette.
     palette[best_color_1].R=Round_div((color_usage[best_color_1]*palette[best_color_1].R)+
                                              (color_usage[best_color_2]*palette[best_color_2].R),
-                                             Meilleure_utilisation);
+                                             best_used);
     palette[best_color_1].G=Round_div((color_usage[best_color_1]*palette[best_color_1].G)+
                                              (color_usage[best_color_2]*palette[best_color_2].G),
-                                             Meilleure_utilisation);
+                                             best_used);
     palette[best_color_1].B=Round_div((color_usage[best_color_1]*palette[best_color_1].B)+
                                              (color_usage[best_color_2]*palette[best_color_2].B),
-                                             Meilleure_utilisation);
+                                             best_used);
 
     // On met à jour la table d'utilisation.
     color_usage[best_color_1]+=color_usage[best_color_2];
@@ -644,7 +644,7 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
     // l'intermédiaire du compteur de nombre utilisées.
     Num2str(*used_colors,str,3);
-    Print_in_window(COUNT_X+6*8,COUNT_Y,str,MC_Black,MC_Light);
+    Print_in_window(COUNT_X,COUNT_Y,str,MC_Black,MC_Light);
   }
 
   //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
@@ -990,23 +990,24 @@ void Button_Palette(void)
   Num2str(Fore_color, str, 3);
   Print_in_window(COLOR_X, COLOR_Y, str, MC_Black, MC_Light);
 
-  Window_set_normal_button(  7,16,55,14,"Preset" ,0,1,SDLK_f);   // 5
+  Window_set_normal_button(  7,16,55,14,"Merge" ,0,1,SDLK_m);    // 5
   Window_set_normal_button( 63,16,36,14,"Gray"   ,1,1,SDLK_g);   // 6
   Window_set_normal_button(  7,46,55,14,"Swap"   ,0,1,KEY_NONE); // 7
   Window_set_normal_button( 63,46,72,14,"X-Swap" ,1,1,SDLK_x);   // 8
   Window_set_normal_button(136,31,54,14,"Copy"   ,1,1,SDLK_c);   // 9
   Window_set_normal_button(136,46,54,14,"Spread" ,4,1,SDLK_e);   // 10
 
-  reduce_dropdown = Window_set_dropdown_button(209, 46, 83, 14, 83, "Reduce", 0,
+  reduce_dropdown = Window_set_dropdown_button(209, 46, 83, 14, 84, "Reduce", 0,
     0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 11
-  Window_dropdown_add_item(reduce_dropdown, 0, "to 128");
-  Window_dropdown_add_item(reduce_dropdown, 1, "to 64");
-  Window_dropdown_add_item(reduce_dropdown, 2, "to 32");
-  Window_dropdown_add_item(reduce_dropdown, 3, "to 16");
-  Window_dropdown_add_item(reduce_dropdown, 4, "to 8");
-  Window_dropdown_add_item(reduce_dropdown, 5, "to 4");
-  Window_dropdown_add_item(reduce_dropdown, 6, "to 2");
-  Window_dropdown_add_item(reduce_dropdown, 7, "Other");
+  Window_dropdown_add_item(reduce_dropdown, 256, "to uniques");
+  Window_dropdown_add_item(reduce_dropdown, 128, "to 128");
+  Window_dropdown_add_item(reduce_dropdown,  64, "to 64");
+  Window_dropdown_add_item(reduce_dropdown,  32, "to 32");
+  Window_dropdown_add_item(reduce_dropdown,  16, "to 16");
+  Window_dropdown_add_item(reduce_dropdown,   8, "to 8");
+  Window_dropdown_add_item(reduce_dropdown,   4, "to 4");
+  Window_dropdown_add_item(reduce_dropdown,   2, "to 2");
+  Window_dropdown_add_item(reduce_dropdown,   0, "Other");
 
   Window_set_normal_button(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
   Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
@@ -1442,16 +1443,83 @@ void Button_Palette(void)
         Set_palette(working_palette);
         break;
 
-      case 5 : // Default
-        memcpy(backup_palette,working_palette,sizeof(T_Palette));
-        memcpy(working_palette,Gfx->Default_palette,sizeof(T_Palette));
-        memcpy(temp_palette,Gfx->Default_palette,sizeof(T_Palette));
-        Set_palette(Gfx->Default_palette);
+      case 5 : // Merge
+        if (block_start!=block_end)
+        {
+          dword sum_r=0, sum_g=0, sum_b=0, used=0;
+
+          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          // Compute weighted average
+          for (i=block_start; i<=block_end; i++)
+          {
+            used+=color_usage[i];
+            sum_r+=working_palette[i].R * color_usage[i];
+            sum_g+=working_palette[i].G * color_usage[i];
+            sum_b+=working_palette[i].B * color_usage[i];
+          }
+          // Do normal average if no pixels used
+          if (used==0)
+          {
+            sum_r=sum_g=sum_b=used=0;
+            for (i=block_start; i<=block_end; i++)
+            {
+              used+=1;
+              sum_r+=working_palette[i].R;
+              sum_g+=working_palette[i].G;
+              sum_b+=working_palette[i].B;
+            }
+          }
+          for (i=block_start; i<=block_end; i++)
+          {
+            Set_red  (i,sum_r/used,working_palette);
+            Set_green(i,sum_g/used,working_palette);
+            Set_blue (i,sum_b/used,working_palette);
+          }
+        }
+        else
+        {
+          temp_color=Wait_click_in_palette(Window_palette_button_list);
+          if (temp_color>=0)
+          {
+            dword sum_r=0, sum_g=0, sum_b=0, used;
+            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            
+            // Compute weighted average
+            used=color_usage[temp_color]+color_usage[Fore_color];
+            if (used)
+            {
+              sum_r=(working_palette[temp_color].R * color_usage[temp_color]
+                +    working_palette[Fore_color].R * color_usage[Fore_color])
+                / used;
+              sum_g=(working_palette[temp_color].G * color_usage[temp_color]
+                +    working_palette[Fore_color].G * color_usage[Fore_color])
+                / used;
+              sum_b=(working_palette[temp_color].B * color_usage[temp_color]
+                +    working_palette[Fore_color].B * color_usage[Fore_color])
+                / used;
+            }
+            else // Normal average
+            {
+              sum_r=(working_palette[temp_color].R+working_palette[Fore_color].R)/2;
+              sum_g=(working_palette[temp_color].G+working_palette[Fore_color].G)/2;
+              sum_b=(working_palette[temp_color].B+working_palette[Fore_color].B)/2;
+            }
+            Set_red  (temp_color,sum_r,working_palette);
+            Set_green(temp_color,sum_g,working_palette);
+            Set_blue (temp_color,sum_b,working_palette);
+            Set_red  (Fore_color,sum_r,working_palette);
+            Set_green(Fore_color,sum_g,working_palette);
+            Set_blue (Fore_color,sum_b,working_palette);
+            
+            Wait_end_of_click();
+          }
+        }
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         // On prépare la "modifiabilité" des nouvelles couleurs
+        Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
-
         need_to_remap=1;
+
         break;
 
       case 6 : // Grey scale
@@ -1617,38 +1685,23 @@ void Button_Palette(void)
 
       case 11: // Reduce
         memcpy(backup_palette, working_palette, sizeof(T_Palette));
-        switch(Window_attribute2) // Get the dropdown value
+        if (Window_attribute2==0) // User picked "other" choice
         {
-            case 0: // 128
-                reduce_colors_number = 128;
-                break;
-            case 1: // 64
-                reduce_colors_number = 64;
-                break;
-            case 2: // 32
-                reduce_colors_number = 32;
-                break;
-            case 3: // 16
-                reduce_colors_number = 16;
-                break;
-            case 4: // 8
-                reduce_colors_number = 8;
-                break;
-            case 5: // 4
-                reduce_colors_number = 4;
-                break;
-            case 6: // 2
-                reduce_colors_number = 2;
-                break;
-            case 7: // other
-                reduce_colors_number
-                    = Requester_window("Enter the max. number of colors",
+          int choice;
+          
+          choice=Requester_window("Enter the max. number of colors",
                         reduce_colors_number);
-                if (reduce_colors_number < 2 || reduce_colors_number >= 256)
-                    reduce_colors_number = 256;
-                break;
+          
+          if (choice < 2 || choice > 256)
+            break; // Cancel
+            
+          reduce_colors_number = choice;
         }
-        if (reduce_colors_number != 256)
+        else
+          // Each other dropdown item has a number of colors as id.
+          reduce_colors_number = Window_attribute2;
+
+        if (reduce_colors_number >= 2)
         {
             if (!image_is_backed_up)
             {
