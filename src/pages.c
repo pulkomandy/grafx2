@@ -76,7 +76,7 @@ T_Page * New_page(byte nb_layers)
     page->File_format=DEFAULT_FILEFORMAT;
     page->Nb_layers=nb_layers;
     page->Transparent_color=0; // Default transparent color
-    page->Background_transparent=0;
+    page->Layermode_flags=0; // Layer 0 is opaque
     page->Next = page->Prev = NULL;
   }
   return page;
@@ -180,7 +180,7 @@ void Redraw_layered_image(void)
   // Re-construct the image with the visible layers
   byte layer=0;  
   // First layer
-  if (Main_layers_visible & (1<<4))
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_layers_visible & (1<<4))
   {
     // The raster result layer is visible: start there
     // Copy it in Main_visible_image

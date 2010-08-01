@@ -185,7 +185,7 @@ static void Draw_transparent_background(byte background)
 void Button_Layer_menu(void)
 {
   byte transparent_color = Main_backups->Pages->Transparent_color;
-  byte transparent_background = Main_backups->Pages->Background_transparent;
+  byte transparent_background = (Main_backups->Pages->Layermode_flags == 1);
   short clicked_button;
   byte color;
   byte click;
@@ -245,11 +245,11 @@ void Button_Layer_menu(void)
   {
     // Accept changes
     if (Main_backups->Pages->Transparent_color != transparent_color ||
-        Main_backups->Pages->Background_transparent != transparent_background)
+        (Main_backups->Pages->Layermode_flags == 1 && !transparent_background))
     {
       Backup_layers(-1);
       Main_backups->Pages->Transparent_color = transparent_color;
-      Main_backups->Pages->Background_transparent = transparent_background;
+      Main_backups->Pages->Layermode_flags = transparent_background;
       Redraw_layered_image();
       Display_all_screen();
       End_of_modification();

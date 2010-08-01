@@ -152,7 +152,8 @@ void Button_Transform_menu(void)
   constraint_list = Window_set_dropdown_button(121,123,69,11,69,"C64 FLI",1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 14
   Window_dropdown_add_item(constraint_list,1,"C64 FLI");
 
-  Window_set_normal_button(121,137, 13,13,/*constraint_enabled?"X":*/" ",0,1,SDLK_LAST);// 15
+  Window_set_normal_button(121,137, 13,13,
+    (Main_backups->Pages->Layermode_flags == 2)?"X":" ",0,1,SDLK_LAST);// 15
   Print_in_window(137, 140, "Force", MC_Black, MC_Light);
 
   Window_set_normal_button(121,153, 50,14,"Check"  ,1,1,SDLK_c); // 16
@@ -350,7 +351,14 @@ void Button_Transform_menu(void)
         break;
       case 15:
         // force constraint checkbox
-        // TODO : allow toggling it
+        if (Main_backups->Pages->Layermode_flags == 2)
+          Main_backups->Pages->Layermode_flags = 0;
+        else
+          Main_backups->Pages->Layermode_flags = 2;
+        Print_in_window(124,140,(Main_backups->Pages->Layermode_flags == 2)?"X":" ",MC_Black,MC_Light);
+
+        // TODO : ensure there are 5 layers
+
         break;
       case 16:
         // check constraint button

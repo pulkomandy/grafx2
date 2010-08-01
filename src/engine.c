@@ -41,6 +41,7 @@
 #include "pages.h"
 #include "layers.h"
 #include "factory.h"
+#include "oldies.h"
 
 
 // we need this as global

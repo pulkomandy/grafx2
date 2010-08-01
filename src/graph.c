@@ -2853,6 +2853,7 @@ byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.
 
+
 byte Effect_layer_copy(word x,word y,byte color)
 {
   if (color<Main_backups->Pages->Nb_layers)
@@ -2861,6 +2862,7 @@ byte Effect_layer_copy(word x,word y,byte color)
   }
   return Read_pixel_from_feedback_screen(x,y);
 }
+
 
 void Horizontal_grid_line(word x_pos,word y_pos,word width)
 {
@@ -2906,7 +2908,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
   byte depth;
   byte color;
   
-  if (Main_current_layer==4)
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_current_layer==4)
     return *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width);
     
   color = *(Main_screen+y*Main_image_width+x);
@@ -2923,7 +2925,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
 void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 {
   #ifndef NOLAYERS
-  if ( Main_current_layer == 4)
+  if (Main_backups->Pages->Layermode_flags == 2 && Main_current_layer == 4)
   {
     if (color<4)
     {

@@ -348,7 +348,7 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
-  byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
+  byte      Layermode_flags; ///< 0 = normal ; 1 = layer 0 is transparent ; 2 = amstrad "Mode5" picture
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
 #if __GNUC__ < 3

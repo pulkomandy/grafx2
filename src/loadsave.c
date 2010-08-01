@@ -430,7 +430,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       // On efface le commentaire précédent
       Window_rectangle(45,70,32*8,8,MC_Light);
       // Affichage du commentaire
-      Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
+      if (Get_fileformat(format)->Comment)
+        Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
   
       // Calcul des données nécessaires à l'affichage de la preview:
       if (ratio == PIXEL_WIDE && 
@@ -766,7 +767,7 @@ void Load_image(T_IO_Context *context)
         
         // Load the transparency data
         Main_backups->Pages->Transparent_color = context->Transparent_color;
-        Main_backups->Pages->Background_transparent = context->Background_transparent;
+        Main_backups->Pages->Layermode_flags = context->Background_transparent;
   
         // Correction des dimensions
         if (Main_image_width<1)
@@ -1081,7 +1082,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Nb_layers = Main_backups->Pages->Nb_layers;
   strcpy(context->Comment, Main_comment);
   context->Transparent_color=Main_backups->Pages->Transparent_color;
-  context->Background_transparent=Main_backups->Pages->Background_transparent;
+  context->Background_transparent=Main_backups->Pages->Layermode_flags;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
     context->Ratio=PIXEL_WIDE;
   else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2)
