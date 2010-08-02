@@ -21,6 +21,12 @@
 */
 
 #include <SDL.h>
+#include <SDL_syswm.h>
+
+#ifdef __WIN32__
+  #include <windows.h>
+  #include <ShellApi.h>
+#endif
 
 #include "global.h"
 #include "keyboard.h"
@@ -29,6 +35,7 @@
 #include "errors.h"
 #include "misc.h"
 #include "input.h"
+#include "loadsave.h"
 
 #ifdef __VBCC__
   #define __attribute__(x)
@@ -85,6 +92,19 @@ short Joybutton_alt=-1; // Button number that serves as a "alt" modifier
 short Joybutton_left_click=0; // Button number that serves as left click
 short Joybutton_right_click=0; // Button number that serves as right-click
 #endif
+
+
+void AcceptDND(void)
+{
+#ifdef __WIN32__
+	SDL_SysWMinfo wminfo;
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWMInfo(&wminfo);
+	HWND hwnd = wminfo.window;
+	DragAcceptFiles(hwnd,TRUE);
+	SDL_EventState (SDL_SYSWMEVENT,SDL_ENABLE );
+#endif
+}
 
 int Has_shortcut(word function)
 {
@@ -717,6 +737,33 @@ int Get_input(void)
 
             #endif
             // End of Joystick handling
+            
+            case SDL_SYSWMEVENT:
+#ifdef __WIN32__
+                if(event.syswm.msg->msg  == WM_DROPFILES) {
+                  int fileCount;
+                  HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
+                  if((fileCount = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0) {
+                      char buf[MAX_PATH];
+                      T_IO_Context context;
+                      char* flimit;
+
+                      DragQueryFile(hdrop,0 ,(LPTSTR) buf ,(UINT) MAX_PATH);
+                      flimit = Find_last_slash(buf);
+                      *(flimit++) = '\0';
+
+                      // TODO : check if there are unsaved changes first !
+
+                      Init_context_layered_image(&context, flimit, buf);
+                      Load_image(&context);
+                      Destroy_context(&context);
+                      Redraw_layered_image();
+                      End_of_modification();
+                      Display_all_screen();
+                  }
+                }
+#endif
+                break;
             
             default:
             //    DEBUG("Unhandled SDL event number : ",event.type);

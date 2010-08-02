@@ -85,6 +85,15 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
+int test_colorcycling(void* useless)
+{
+  byte r = 0;
+  while(1) {
+    SDL_Delay(50);
+    Set_color(0,++r,0,0);
+  }
+}
+
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
@@ -818,6 +827,16 @@ int Init_program(int argc,char * argv[])
           break;
       }
   }
+
+#if 0
+  // Color cycling test
+  {
+    SDL_Thread* t = SDL_CreateThread(test_colorcycling, NULL);
+  }
+#endif
+
+  AcceptDND();
+
   return(1);
 }
 
