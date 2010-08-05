@@ -22,6 +22,8 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <SDL/SDL_syswm.h>
+
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
@@ -30,6 +32,7 @@
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
+    #include <commdlg.h>
     #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
@@ -69,6 +72,51 @@
 #define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de repértoire sélectionnée
 #define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne sélectionnée
 
+// -- Native fileselector for WIN32
+
+// Returns 0 if all ok, something else if failed
+byte Native_filesel(byte load)
+{
+#ifdef __WIN32__
+  OPENFILENAME ofn;
+  char szFileName[MAX_PATH] = "";
+	SDL_SysWMinfo wminfo;
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWMInfo(&wminfo);
+	HWND hwnd = wminfo.window;
+
+  ZeroMemory(&ofn, sizeof(ofn));
+
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = hwnd;
+  ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+  ofn.lpstrFile = szFileName;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.Flags = OFN_EXPLORER;
+  if(load) ofn.Flags |= OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+  ofn.lpstrDefExt = "txt";
+
+  if(load)
+  {
+    if (GetOpenFileName(&ofn))
+      // Do something usefull with the filename stored in szFileName 
+      return 0;
+    else
+      // error - check if its just user pressing cancel or something else
+      return CommDlgExtendedError();
+  } else if(GetSaveFileName(&ofn)) {
+    return 0;
+  } else {
+    // Check if cancel
+    return CommDlgExtendedError();
+  }
+#else
+  return 255; // fail !
+#endif
+}  
+
+// -- "Standard" fileselector for other platforms
+
 // -- Fileselector data
 
 T_Fileselector Filelist;
@@ -86,7 +134,7 @@ static char Selector_filename[256];
 void Recount_files(T_Fileselector *list)
 {
   T_Fileselector_item *item;
-  
+
   list->Nb_files=0;
   list->Nb_directories=0;
   list->Nb_elements=0;
@@ -1068,6 +1116,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   char  initial_comment[COMMENT_SIZE+1];
   char * most_matching_filename;
   short window_shortcut;
+
+  // if (Native_filesel(load) != 0); // TODO : handle this
   
   if (context->Type == CONTEXT_MAIN_IMAGE)
     window_shortcut = load?(0x100+BUTTON_LOAD):(0x100+BUTTON_SAVE);
