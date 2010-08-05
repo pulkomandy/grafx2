@@ -36,6 +36,7 @@
 #include "graph.h"
 #include "input.h"
 #include "misc.h"
+#include "op_c.h"
 #include "readline.h"
 #include "sdlscreen.h"
 
@@ -2665,66 +2666,6 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
   return best_color;
 }
 
-void Compute_4_best_colors_for_1_menu_color
-     (byte red, byte green, byte blue, T_Components * palette, byte * table)
-{
-  short col;
-  int   delta_r,delta_g,delta_b;
-  int   dist;
-  int   best_dist[4]={0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF};
-
-
-  for (col=0; col<256; col++)
-  {
-    delta_r=(int)palette[col].R-red;
-    delta_g=(int)palette[col].G-green;
-    delta_b=(int)palette[col].B-blue;
-
-    dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11);
-
-    if (dist<best_dist[0])
-    {
-      best_dist[3]=best_dist[2];
-      best_dist[2]=best_dist[1];
-      best_dist[1]=best_dist[0];
-      best_dist[0]=dist;
-      table[3]=table[2];
-      table[2]=table[1];
-      table[1]=table[0];
-      table[0]=col;
-    }
-    else
-    {
-      if (dist<best_dist[1])
-      {
-        best_dist[3]=best_dist[2];
-        best_dist[2]=best_dist[1];
-        best_dist[1]=dist;
-        table[3]=table[2];
-        table[2]=table[1];
-        table[1]=col;
-      }
-      else
-      {
-        if (dist<best_dist[2])
-        {
-          best_dist[3]=best_dist[2];
-          best_dist[2]=dist;
-          table[3]=table[2];
-          table[2]=col;
-        }
-        else
-        if (dist<best_dist[3])
-        {
-          best_dist[3]=dist;
-          table[3]=col;
-        }
-      }
-    }
-  }
-}
-
-
 
 byte Old_black;
 byte Old_dark;
@@ -2812,7 +2753,13 @@ void Remap_screen_after_menu_colors_change(void)
 
 void Compute_optimal_menu_colors(T_Components * palette)
 {
-  byte table[4];
+  int i;
+  byte l[256];
+  byte s[256];
+  byte h;
+  byte max_l = 0, min_l = 255;
+  byte low_l, hi_l;
+  byte delta_low = 255, delta_hi = 255;
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2820,57 +2767,47 @@ void Compute_optimal_menu_colors(T_Components * palette)
   Old_white = MC_White;
   Old_trans = MC_Trans;
 
-  // Recherche du noir
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[0]].R, Gfx->Default_palette[Gfx->Color[0]].G, Gfx->Default_palette[Gfx->Color[0]].B,palette,table);
-  MC_Black=table[0];
+  // Compute luminance for whole palette
+  // Take the darkest as black, the brightest white
+  for(i = 0; i < 256; i++) {
+    RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
+    if (l[i] > max_l) {
+      max_l = l[i];
+      MC_White = i;
+    }
 
-  // Recherche du blanc
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[3]].R, Gfx->Default_palette[Gfx->Color[3]].G, Gfx->Default_palette[Gfx->Color[3]].B,palette,table);
-  if (MC_Black!=table[0])
-    MC_White=table[0];
-  else
-    MC_White=table[1];
-
-  // Recherche du gris clair
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[2]].R, Gfx->Default_palette[Gfx->Color[2]].G, Gfx->Default_palette[Gfx->Color[2]].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
-    MC_Light=table[0];
-  else
-  {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) )
-      MC_Light=table[1];
-    else
-      MC_Light=table[2];
-  }
-
-  // Recherche du gris foncé
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[1]].R, Gfx->Default_palette[Gfx->Color[1]].G, Gfx->Default_palette[Gfx->Color[1]].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
-    MC_Dark=table[0];
-  else
-  {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) && (MC_Light!=table[1]) )
-      MC_Dark=table[1];
-    else
-    {
-      if ( (MC_Black!=table[2]) && (MC_White!=table[2]) && (MC_Light!=table[2]) )
-        MC_Dark=table[2];
-      else
-        MC_Dark=table[3];
+    if (l[i] < min_l) {
+      min_l = l[i];
+      MC_Black = i;
     }
   }
 
-  // C'est peu probable mais il est possible que MC_Light soit plus foncée que
-  // MC_Dark. Dans ce cas, on les inverse.
-  if ( ((palette[MC_Light].R*30)+(palette[MC_Light].G*59)+(palette[MC_Light].B*11)) <
-       ((palette[MC_Dark].R*30)+(palette[MC_Dark].G*59)+(palette[MC_Dark].B*11)) )
-  {
-    SWAP_BYTES(MC_Light, MC_Dark);
+  // Find colors nearest to min+(max-min)/3 and min+2(max-min)/3
+  // but at the same time we try to minimize the saturation so that the menu
+  // still looks grey
+  low_l = min_l + (max_l - min_l)/3;
+  hi_l = min_l + 2*(max_l - min_l)/3;
+
+  for (i = 0; i < 256; i++) {
+    if ( abs(l[i] - low_l) + s[i]/2 < delta_low ) {
+      delta_low = abs(l[i] - low_l);
+      MC_Dark = i;
+    }
+
+    if ( abs(l[i] - hi_l) + s[i]/3 < delta_hi ) {
+      delta_hi = abs(l[i] - hi_l);
+      MC_Light = i;
+    }
   }
+
+  // Si deux des couleurs choisies ont le même index, c'est destructif car 
+  // on fait ensuite un remap de l'image. Donc on évite ce problème (un
+  // peu brutalement)
+  // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
+  // le blanc et le noir
+  while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark) MC_Dark--;
+  while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light) MC_Light--;
+  while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
 
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
