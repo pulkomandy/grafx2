@@ -126,6 +126,8 @@ T_Fileselector Filelist;
 /// Filename (without directory) of the highlighted file
 static char Selector_filename[256];
 
+int drive_types[26];
+
 // Conventions:
 //
 // * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
@@ -443,26 +445,25 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         // On a ce lecteur, il faut maintenant déterminer son type "physique".
         // pour profiter des jolies icones de X-man.
-        int drive_type;
         char drive_path[]="A:\\";
         // Cette API Windows est étrange, je dois m'y faire...
         drive_path[0]='A'+bit_index;
         switch (GetDriveType(drive_path))
         {
           case DRIVE_CDROM:
-            drive_type=ICON_CDROM;
+            drive_types[drive_index]=ICON_CDROM;
             break;
           case DRIVE_REMOTE:
-            drive_type=ICON_NETWORK;
+            drive_types[drive_index]=ICON_NETWORK;
             break;
           case DRIVE_REMOVABLE:
-            drive_type=ICON_FLOPPY_3_5;
+            drive_types[drive_index]=ICON_FLOPPY_3_5;
             break;
           case DRIVE_FIXED:
-            drive_type=ICON_HDD;
+            drive_types[drive_index]=ICON_HDD;
             break;
           default:
-            drive_type=ICON_NETWORK;
+            drive_types[drive_index]=ICON_NETWORK;
             break;
         }
         drive_name[0]='A'+bit_index;
@@ -697,7 +698,13 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
       }
 
       // On affiche l'élément
-      Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
+#ifdef __WIN32__
+      if (current_item->Short_name[1]==':') {
+        Print_in_window(17,95+index*8,current_item->Short_name,text_color,background_color);
+        Window_display_icon_sprite(8,95+index*8,drive_types[index]);
+      } else
+#endif
+        Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
 
       // On passe à la ligne suivante
       selector_offset--;
