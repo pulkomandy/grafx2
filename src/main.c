@@ -409,6 +409,30 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
   return file_in_command_line;
 }
 
+
+Uint32 putTimerEvent(Uint32 i, void* p)
+{
+    SDL_Event event;
+    SDL_UserEvent userevent;
+
+    /* Dans cet exemple, notre fonction de rappel pousse
+    un evenement SDL_USEREVENT dans la file... */
+
+    userevent.type = SDL_USEREVENT;
+    userevent.code = 0;
+    userevent.data1 = NULL;
+    userevent.data2 = NULL;
+
+    event.type = SDL_USEREVENT;
+    event.user = userevent;
+
+    SDL_PushEvent(&event);
+  
+
+  return i;
+}
+
+
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
@@ -521,6 +545,7 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
+  SDL_TimerID tid = SDL_AddTimer(10, putTimerEvent, NULL);
 
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);

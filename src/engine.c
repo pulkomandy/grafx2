@@ -2759,7 +2759,7 @@ short Window_get_clicked_button(void)
         Hide_cursor();
         Window_select_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();
-        Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+        // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
         Hide_cursor();
         Window_unselect_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();        
@@ -2783,7 +2783,7 @@ short Window_get_clicked_button(void)
     }
   }
 
-  // Test click oin slider/scroller bars
+  // Test click on slider/scroller bars
   for (temp3=Window_scroller_button_list; temp3; temp3=temp3->Next)
   {
     // Button Up arrow
@@ -2806,7 +2806,7 @@ short Window_get_clicked_button(void)
       
       Display_cursor();
 
-      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
       Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
@@ -2835,7 +2835,7 @@ short Window_get_clicked_button(void)
 
       Display_cursor();
 
-      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
       Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
@@ -2941,7 +2941,7 @@ short Window_get_button_shortcut(void)
       Window_select_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);
       Display_cursor();
       
-      Slider_timer(Config.Delay_right_click_on_slider);
+      // Slider_timer(Config.Delay_right_click_on_slider);
       
       Hide_cursor();
       Window_unselect_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);

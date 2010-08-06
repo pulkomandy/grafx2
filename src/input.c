@@ -243,8 +243,9 @@ int Move_cursor_with_constraints()
     Mouse_K=Input_new_mouse_K;
     
     if (Mouse_moved > Config.Mouse_merge_movement)
-      if (! Operation[Current_operation][Mouse_K_unique]
-          [Operation_stack_size].Fast_mouse)
+      // TODO : not sure what that was meant to do, but it prevents moving the default cursor when there is no operation.
+      // if (! Operation[Current_operation][Mouse_K_unique]
+      //    [Operation_stack_size].Fast_mouse)
         feedback=1;
   }
   if (mouse_blocked)
@@ -681,7 +682,7 @@ int Get_input(void)
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while( (!user_feedback_required) && SDL_PollEvent(&event)) // Try to cumulate for a full VBL except if there is a required feedback
+    while( (!user_feedback_required) && SDL_WaitEvent(&event)) // Try to cumulate for a full VBL except if there is a required feedback
     {
         switch(event.type)
         {
@@ -765,6 +766,9 @@ int Get_input(void)
 #endif
                 break;
             
+            case SDL_USEREVENT:
+                user_feedback_required = 1;
+                break;
             default:
             //    DEBUG("Unhandled SDL event number : ",event.type);
                 break;

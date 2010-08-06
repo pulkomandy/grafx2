@@ -675,17 +675,6 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
   }
 }
 
-void Slider_timer(byte speed)
-  //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
-{
-  Uint32 end;
-  byte original_mouse_k = Mouse_K;
-  end = SDL_GetTicks() + speed*10;
-  do
-  {
-    if (!Get_input()) SDL_Delay(20);
-  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
-}
 
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset)
 {

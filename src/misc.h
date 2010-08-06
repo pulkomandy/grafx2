@@ -42,7 +42,6 @@ void Palette_256_to_64(T_Palette palette);
 void Palette_64_to_256(T_Palette palette);
 void Clear_current_image(byte color);
 void Clear_current_image_with_stencil(byte color, byte * stencil);
-void Slider_timer(byte speed);
 dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
