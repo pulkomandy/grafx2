@@ -269,7 +269,8 @@ enum ICON_TYPES
   ICON_NETWORK,      ///< "Network" drive
   ICON_STAR,         ///< Star (favorite)
   ICON_DROPDOWN,     ///< Dropdown arrow
-  NB_ICON_SPRITES    ///< Number of 8x8 icons
+  NB_ICON_SPRITES,   ///< Number of 8x8 icons
+  ICON_NONE          ///< None of the above
 };
 
 /// Identifiers for the buttons in the menu.

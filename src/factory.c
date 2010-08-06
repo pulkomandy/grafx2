@@ -916,7 +916,7 @@ void Draw_script_information(T_Fileselector_item * script_item)
 // Add a script to the list
 void Add_script(const char *name)
 {
-  Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
+  Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0, ICON_NONE);
 }
 
 void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_script)

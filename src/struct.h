@@ -165,6 +165,7 @@ typedef struct T_Fileselector_item
   char Short_name[19]; ///< Name to display.
   char Full_name[256]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
+  byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.

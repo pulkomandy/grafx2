@@ -1201,7 +1201,7 @@ void Add_font_or_skin(const char *name)
     && (!strcasecmp(fname + namelength - 4,".png")
     || !strcasecmp(fname + namelength - 4,".gif")))
   {
-    Add_element_to_list(&Skin_files_list, name, 0);
+    Add_element_to_list(&Skin_files_list, name, 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;
@@ -1216,7 +1216,7 @@ void Add_font_or_skin(const char *name)
   else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
     && (!strcasecmp(fname + namelength - 4, ".png")))
   {
-    Add_element_to_list(&Font_files_list, name, 0);
+    Add_element_to_list(&Font_files_list, name, 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;

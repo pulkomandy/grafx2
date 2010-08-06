@@ -98,9 +98,11 @@ void AcceptDND(void)
 {
 #ifdef __WIN32__
 	SDL_SysWMinfo wminfo;
+	HWND hwnd;
+	
 	SDL_VERSION(&wminfo.version);
 	SDL_GetWMInfo(&wminfo);
-	HWND hwnd = wminfo.window;
+	hwnd = wminfo.window;
 	DragAcceptFiles(hwnd,TRUE);
 	SDL_EventState (SDL_SYSWMEVENT,SDL_ENABLE );
 #endif

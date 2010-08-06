@@ -51,6 +51,8 @@
 void Set_mode_SDL(int *width, int *height, int fullscreen)
 {
   static SDL_Cursor* cur = NULL;
+  static byte cursorData = 0;
+
   Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
   if(Screen_SDL != NULL)
   {
@@ -70,11 +72,10 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
 
   // Trick borrowed to Barrage (http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg737265.html) :
   // Showing the cursor but setting it to fully transparent allows us to get absolute mouse coordinates,
-  // this means we canuse tablet in fullscreen mode.
+  // this means we can use tablet in fullscreen mode.
   SDL_ShowCursor(1); // Hide the SDL mouse cursor, we use our own
 
   SDL_FreeCursor(cur);
-  static byte cursorData = 0;
   cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
   SDL_SetCursor(cur);
 }

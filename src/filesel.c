@@ -22,7 +22,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-#include <SDL/SDL_syswm.h>
+#include <SDL_syswm.h>
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -81,9 +81,11 @@ byte Native_filesel(byte load)
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
 	SDL_SysWMinfo wminfo;
+	HWND hwnd;
+	
 	SDL_VERSION(&wminfo.version);
 	SDL_GetWMInfo(&wminfo);
-	HWND hwnd = wminfo.window;
+	hwnd = wminfo.window;
 
   ZeroMemory(&ofn, sizeof(ofn));
 
@@ -125,8 +127,6 @@ T_Fileselector Filelist;
 //static char Selector_directory[1024];
 /// Filename (without directory) of the highlighted file
 static char Selector_filename[256];
-
-int drive_types[26];
 
 // Conventions:
 //
@@ -249,7 +249,7 @@ char * Format_filename(const char * fname, int type)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Add_element_to_list(T_Fileselector *list, const char * fname, int type)
+void Add_element_to_list(T_Fileselector *list, const char * fname, int type, byte icon)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
   // Pointeur temporaire d'insertion
@@ -262,6 +262,13 @@ void Add_element_to_list(T_Fileselector *list, const char * fname, int type)
   strcpy(temp_item->Short_name,Format_filename(fname, type));
   strcpy(temp_item->Full_name,fname);
   temp_item->Type = type;
+  temp_item->Icon = icon;
+  if (icon != ICON_NONE)
+  {
+    // If the item has an icon preceding it, its short
+    // name must be one character shorter
+    temp_item->Short_name[17]='\0';
+  }
 
   temp_item->Next    =list->First;
   temp_item->Previous=NULL;
@@ -344,7 +351,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
      !isHidden(entry)))
     {
       // On rajoute le répertoire à la liste
-      Add_element_to_list(list, entry->d_name, 1);
+      Add_element_to_list(list, entry->d_name, 1, ICON_NONE);
       list->Nb_directories++;
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
@@ -357,7 +364,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
         if (Check_extension(entry->d_name, ext))
         {
           // On rajoute le fichier à la liste
-          Add_element_to_list(list, entry->d_name, 0);
+          Add_element_to_list(list, entry->d_name, 0, ICON_NONE);
           list->Nb_files++;
           // Stop searching
           ext=NULL;
@@ -373,7 +380,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
 
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
-  Add_element_to_list(list, "/",1); // on amiga systems, / means parent. And there is no ..
+  Add_element_to_list(list, "/",1, ICON_NONE); // on amiga systems, / means parent. And there is no ..
   list->Nb_directories ++;
 #endif
 
@@ -425,7 +432,7 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
-        Add_element_to_list(list, tmp, 2 );
+        Add_element_to_list(list, tmp, 2, ICON_NONE );
         list->Nb_directories++;
       }
       UnLockDosList( LDF_VOLUMES | LDF_READ );
@@ -437,6 +444,8 @@ void Read_list_of_drives(T_Fileselector *list)
     int drive_bits = GetLogicalDrives();
     int drive_index;
     int bit_index;
+    byte icon;
+    
     // Sous Windows, on a la totale, presque aussi bien que sous DOS:
     drive_index = 0;
     for (bit_index=0; bit_index<26 && drive_index<23; bit_index++)
@@ -451,23 +460,23 @@ void Read_list_of_drives(T_Fileselector *list)
         switch (GetDriveType(drive_path))
         {
           case DRIVE_CDROM:
-            drive_types[drive_index]=ICON_CDROM;
+            icon=ICON_CDROM;
             break;
           case DRIVE_REMOTE:
-            drive_types[drive_index]=ICON_NETWORK;
+            icon=ICON_NETWORK;
             break;
           case DRIVE_REMOVABLE:
-            drive_types[drive_index]=ICON_FLOPPY_3_5;
+            icon=ICON_FLOPPY_3_5;
             break;
           case DRIVE_FIXED:
-            drive_types[drive_index]=ICON_HDD;
+            icon=ICON_HDD;
             break;
           default:
-            drive_types[drive_index]=ICON_NETWORK;
+            icon=ICON_NETWORK;
             break;
         }
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,2);
+        Add_element_to_list(list, drive_name,2, icon);
         list->Nb_directories++;
         drive_index++;
       }
@@ -489,11 +498,11 @@ void Read_list_of_drives(T_Fileselector *list)
     #else
         char * home_dir = getenv("HOME");
     #endif
-    Add_element_to_list(list, "/", 2);
+    Add_element_to_list(list, "/", 2, ICON_NONE);
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, 2);
+        Add_element_to_list(list, home_dir, 2, ICON_NONE);
         list->Nb_directories++;
     }
 
@@ -503,7 +512,7 @@ void Read_list_of_drives(T_Fileselector *list)
     {
         if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir,2);
+            Add_element_to_list(list, mount_points_list->me_mountdir,2, ICON_NONE);
             list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
@@ -698,12 +707,13 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
       }
 
       // On affiche l'élément
-#ifdef __WIN32__
-      if (current_item->Short_name[1]==':') {
-        Print_in_window(17,95+index*8,current_item->Short_name,text_color,background_color);
-        Window_display_icon_sprite(8,95+index*8,drive_types[index]);
+      if (current_item->Icon != ICON_NONE)
+      {
+        // Name preceded by an icon
+        Print_in_window(16,95+index*8,current_item->Short_name,text_color,background_color);
+        Window_display_icon_sprite(8,95+index*8,current_item->Icon);
       } else
-#endif
+        // Name without icon
         Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
 
       // On passe à la ligne suivante

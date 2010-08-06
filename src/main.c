@@ -442,6 +442,7 @@ int Init_program(int argc,char * argv[])
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
+  SDL_TimerID tid;
   static char main_filename [MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
@@ -545,7 +546,7 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-  SDL_TimerID tid = SDL_AddTimer(10, putTimerEvent, NULL);
+  tid = SDL_AddTimer(10, putTimerEvent, NULL);
 
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
