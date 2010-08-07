@@ -2767,6 +2767,53 @@ void Compute_optimal_menu_colors(T_Components * palette)
   Old_white = MC_White;
   Old_trans = MC_Trans;
 
+  // First method:
+  // If all exact match for the ideal colors exist, pick them.
+  for (i=255; i>=0; i--)
+  {
+    
+    if (palette[i].R==Gfx->Default_palette[Gfx->Color[3]].R 
+     && palette[i].G==Gfx->Default_palette[Gfx->Color[3]].G
+     && palette[i].B==Gfx->Default_palette[Gfx->Color[3]].B)
+    {
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (palette[i].R==Gfx->Default_palette[Gfx->Color[2]].R 
+         && palette[i].G==Gfx->Default_palette[Gfx->Color[2]].G
+         && palette[i].B==Gfx->Default_palette[Gfx->Color[2]].B)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (palette[i].R==Gfx->Default_palette[Gfx->Color[1]].R 
+             && palette[i].G==Gfx->Default_palette[Gfx->Color[1]].G
+             && palette[i].B==Gfx->Default_palette[Gfx->Color[1]].B)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (palette[i].R==Gfx->Default_palette[Gfx->Color[0]].R 
+                 && palette[i].G==Gfx->Default_palette[Gfx->Color[0]].G
+                 && palette[i].B==Gfx->Default_palette[Gfx->Color[0]].B)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                
+                  Remap_menu_sprites();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // Second method:
+
   // Compute luminance for whole palette
   // Take the darkest as black, the brightest white
   for(i = 0; i < 256; i++) {
