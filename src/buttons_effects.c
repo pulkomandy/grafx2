@@ -575,10 +575,12 @@ void Button_Colorize_display_selection(int mode)
   Print_in_window(4,37," ",MC_Black,MC_Light);
   Print_in_window(4,57," ",MC_Black,MC_Light);
   Print_in_window(4,74," ",MC_Black,MC_Light);
+  Print_in_window(4,91," ",MC_Black,MC_Light);
     // Partie droite
   Print_in_window(129,37," ",MC_Black,MC_Light);
   Print_in_window(129,57," ",MC_Black,MC_Light);
   Print_in_window(129,74," ",MC_Black,MC_Light);
+  Print_in_window(129,91," ",MC_Black,MC_Light);
 
   // Ensuite, on affiche la flèche là où il le faut:
   switch(mode)
