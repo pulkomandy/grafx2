@@ -51,6 +51,8 @@ int Snap_axis = 0;
 int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
 
+volatile int Need_Timer_events;
+
 // --
 
 byte Directional_up;
@@ -675,6 +677,11 @@ int Get_input(void)
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
                 
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading 
+    // some user input.
+    Flush_update();
+
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
@@ -719,6 +726,7 @@ int Get_input(void)
 
             case SDL_KEYUP:
                 Handle_key_release(event.key);
+                user_feedback_required = 1; // new
                 break;
 
             // Start of Joystik handling
@@ -772,7 +780,7 @@ int Get_input(void)
                 user_feedback_required = 1;
                 break;
             default:
-            //    DEBUG("Unhandled SDL event number : ",event.type);
+                //DEBUG("Unhandled SDL event number : ",event.type);
                 break;
         }
     }
@@ -839,13 +847,8 @@ int Get_input(void)
       Compute_paintbrush_coordinates();
       Display_cursor();
     }
-    // Commit any pending screen update.
-    // This is done in this function because it's called after reading 
-    // some user input.
-    Flush_update();
-
     
-    return (Mouse_moved!=0) || user_feedback_required;
+    return 1;//(Mouse_moved!=0) || user_feedback_required;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)

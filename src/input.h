@@ -59,3 +59,6 @@ extern int Snap_axis;
 extern int Snap_axis_origin_X;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)
 extern int Snap_axis_origin_Y;
+
+/// Boolean, true if Push_timer_event() should put "ticks" in the SDL queue
+extern volatile int Need_Timer_events;

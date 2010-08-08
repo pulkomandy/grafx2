@@ -36,6 +36,7 @@
 #include "sdlscreen.h"
 #include "brush.h"
 #include "windows.h"
+#include "input.h"
 
 // PI is NOT part of math.h according to C standards...
 #if defined(__GP2X__) || defined(__VBCC__)
@@ -1908,6 +1909,7 @@ void Airbrush_1_0(void)
   Shade_table=Shade_table_left;
 
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  Need_Timer_events=1;
   Airbrush(LEFT_SIDE);
 
   Operation_push(Paintbrush_X);
@@ -1930,6 +1932,7 @@ void Airbrush_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  Need_Timer_events=1;
   Airbrush(RIGHT_SIDE);
 
   Operation_push(Paintbrush_X);
@@ -1977,6 +1980,7 @@ void Airbrush_0_2(void)
 //
 {
   Operation_stack_size-=2;
+  Need_Timer_events=0;
   End_of_modification();
 }
 

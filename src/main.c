@@ -65,6 +65,7 @@
 #include "brush.h"
 #include "palette.h"
 #include "realpath.h"
+#include "input.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -149,6 +150,12 @@ void Error_function(int error_code, const char *filename, int line_number, const
       temp_palette[index].R=255;
     Set_palette(temp_palette);
     SDL_Delay(500);
+    // TODO: Replace the above by a loop where cursor is active:
+    // Need_Timer_events=1
+    // Compute target=now+500
+    // Do
+    //   Get_input()
+    // While now<target
     Set_palette(Main_palette);
   }
   else
@@ -410,25 +417,23 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
 }
 
 
-Uint32 putTimerEvent(Uint32 i, void* p)
+Uint32 Push_timer_event(Uint32 i, void* p)
 {
+  if (Need_Timer_events)
+  {
     SDL_Event event;
-    SDL_UserEvent userevent;
+    SDL_UserEvent user_event;
 
-    /* Dans cet exemple, notre fonction de rappel pousse
-    un evenement SDL_USEREVENT dans la file... */
-
-    userevent.type = SDL_USEREVENT;
-    userevent.code = 0;
-    userevent.data1 = NULL;
-    userevent.data2 = NULL;
+    user_event.type = SDL_USEREVENT;
+    user_event.code = 0;
+    user_event.data1 = NULL;
+    user_event.data2 = NULL;
 
     event.type = SDL_USEREVENT;
-    event.user = userevent;
+    event.user = user_event;
 
     SDL_PushEvent(&event);
-  
-
+  }
   return i;
 }
 
@@ -546,7 +551,7 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-  tid = SDL_AddTimer(10, putTimerEvent, NULL);
+  tid = SDL_AddTimer(10, Push_timer_event, NULL);
 
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
