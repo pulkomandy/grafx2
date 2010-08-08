@@ -766,11 +766,16 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
 }
 
 
-void Window_Histogram(unsigned char block_start, unsigned char block_end, dword* color_usage)
+int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* color_usage)
 {
   int i, j;
   unsigned int max_count = 0;
   int old_height=0;
+  int hovered_color=-1;
+  int new_hovered_color;
+  int bar_width;
+  T_Special_button *histo;
+  int clicked_button;
 
   /* Draws an histogram of the selected range in a separate window */
   
@@ -790,15 +795,21 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
     if(color_usage[i] > max_count) max_count = color_usage[i];
   }
 
-  if (max_count == 0) {
+  if (max_count == 0)
+  {
     Warning_message("All these colors are unused!");
-    return;
+    Hide_cursor();
+    return -1;
   }
+  
+  Open_window(263, 150, "Histogram");
+  Window_set_normal_button(120, 130, 42, 14, "Close",-1,1,SDLK_RETURN);
 
-  Open_window(263, 140, "Histogram");
-  Window_set_normal_button(120, 120, 42, 14, "Close",-1,1,SDLK_RETURN);
+  Print_in_window(6, 17, "Color:", MC_Dark, MC_Light);
+  Print_in_window(110+12*8, 17, "Pixels", MC_Dark, MC_Light);
 
   // Step 2 : draw bars
+  bar_width=256/(block_end-block_start+1);
   j = 0;
   for(i=block_start; i<= block_end; i++) {
     int height = 100*color_usage[i]/max_count;
@@ -810,30 +821,30 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
         height=1;
         
       Window_rectangle(
-            3+j*(256/(block_end-block_start+1)),
-            117-height,
-            256/(block_end-block_start+1),
+            3+j*bar_width,
+            127-height,
+            bar_width,
             height, i);
     
       //if (i == MC_Light) {
         Window_rectangle(
-              3+j*(256/(block_end-block_start+1)),
-              116-height,
-              256/(block_end-block_start+1),
+              3+j*bar_width,
+              126-height,
+              bar_width,
               1,MC_Black);
       //}
     }
     // vertical outline
     if (height>old_height)
       Window_rectangle(
-              2+j*(256/(block_end-block_start+1)),
-              116-height,
+              2+j*bar_width,
+              126-height,
               1,
               height-old_height+1,MC_Black);
     else if (old_height>height)
       Window_rectangle(
-              3+j*(256/(block_end-block_start+1)),
-              116-old_height,
+              3+j*bar_width,
+              126-old_height,
               1,
               old_height-height+1,MC_Black);
       
@@ -844,16 +855,71 @@ void Window_Histogram(unsigned char block_start, unsigned char block_end, dword*
   if (old_height!=0)
   Window_rectangle(
       3+j*(256/(block_end-block_start+1)),
-      116-old_height,
+      126-old_height,
       1,
       old_height+1,MC_Black);
 
-  Update_window_area(0,0,263,140);
-  Display_cursor();
+  histo = Window_set_special_button(3, 27, j*bar_width, 100); // 2
 
-  while(Window_clicked_button() != 1 && Key != KEY_ESC);
-  Close_window();
+  Update_window_area(0,0,263,150);
   Display_cursor();
+  do
+  {
+    // Find hovered area
+    if (Window_click_in_rectangle(histo->Pos_X,histo->Pos_Y,histo->Pos_X+histo->Width-1,histo->Pos_Y+histo->Height-1))
+    {
+      short x_pos;
+      x_pos=((short)Mouse_X-Window_pos_X)/Menu_factor_X;
+      new_hovered_color=block_start+(x_pos-histo->Pos_X)/bar_width;
+    }
+    else
+      new_hovered_color=-1;
+    
+    // When changing hovered color, update the info area
+    if (new_hovered_color!=hovered_color)
+    {
+      char str[12];
+      
+      hovered_color=new_hovered_color;
+      Hide_cursor();
+      if (hovered_color==-1)
+      {
+        Window_rectangle(6+6*8,17,3*8,7,MC_Light);
+        Update_window_area(6+6*8,17,3*8,7);
+        Window_rectangle(86,17,2*8,8,MC_Light);
+        Update_window_area(86,17,2*8,8);
+        Window_rectangle(110,17,11*8,7,MC_Light);
+        Update_window_area(110,17,11*8,7);
+      }
+      else
+      {
+        Num2str(hovered_color,str  ,3);
+        Print_in_window(6+6*8,17,str,MC_Black,MC_Light);
+        Window_rectangle(86,17,2*8,8,hovered_color);
+        Update_window_area(86,17,2*8,8);
+        Num2str(color_usage[hovered_color],str  ,11);
+        Print_in_window(110,17,str,MC_Black,MC_Light);
+      }
+      Display_cursor();
+    }
+    clicked_button=Window_clicked_button();
+    if (Key == KEY_ESC)
+      clicked_button=1;
+      
+  } while( clicked_button < 1);
+  Close_window();
+  
+  if (clicked_button==2)
+  {
+    // This is a counter-hack. Close_window() sets Mouse_K to zero
+    // on exit, I don't know why (It will become 1 again if you move
+    // the mouse slightly)
+    // Here I force it back to 1, so that the Wait_end_of_click()
+    // will really wait for a release of mouse button.
+    Mouse_K=1;
+    return hovered_color;  
+  }
+  return -1;
 }
 
 void Print_RGB_or_HSL(byte mode)
@@ -2289,8 +2355,39 @@ void Button_Palette(void)
       break;
       
       case 25: // Number of colors used: Open histogram
-        Window_Histogram(block_start, block_end, color_usage);
+      {
+        int selected_col;
+        
+        selected_col=Window_Histogram(block_start, block_end, color_usage);
+        if (selected_col!=-1)
+        {
+          // Tag selected color
+          Fore_color=first_color=last_color=block_start=block_end=selected_col;
+          Tag_color_range(block_start,block_end);
+      
+          // Affichage du n° de la couleur sélectionnée
+          Window_rectangle(COLOR_X,COLOR_Y,56,7,MC_Light);
+          Num2str(Fore_color,str,3);
+          Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
+          Update_window_area(COLOR_X,COLOR_Y,56,7);
+      
+          // Affichage des jauges
+          Window_rectangle(NUMERIC_R_X,NUMERIC_Y,72,7,MC_Light);
+          Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
+      
+          // Affichage dans le block de visu de la couleur en cours
+          Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Fore_color);
+          Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
+      
+          memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
+          memcpy(temp_palette,working_palette,sizeof(T_Palette));
+
+        }
+        Display_cursor();
+        Input_sticky_control=0;
+        Wait_end_of_click();
         break;
+      }
     }
 
 
