@@ -41,8 +41,8 @@
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 
 // Coordinates of the color count (on histogram button)
-static const int COUNT_X = 262;
-static const int COUNT_Y = 19;
+static const int COUNT_X = 258;
+static const int COUNT_Y = 49;
   
 
 // Nombre de graduations pour une composante RGB
@@ -1079,7 +1079,7 @@ void Button_Palette(void)
   Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
   Window_set_normal_button(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Window_set_normal_button(209,16,45,14,"Used:",0,1,SDLK_d); // 15
+  Window_set_normal_button(209,16,37,14,"Used",0,1,SDLK_d); // 15
   Window_set_normal_button(209,31,83,14,"Zap unused",0,1,SDLK_DELETE);//16
   
   Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
@@ -1102,7 +1102,7 @@ void Button_Palette(void)
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  button_used = Window_set_normal_button(255,16,37,14,"",0,1,KEY_NONE);// 25
+  button_used = Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
   
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(265, 74,MC_White,-1);
