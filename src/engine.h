@@ -111,4 +111,6 @@ void Pixel_background(int x_pos, int y_pos, byte color);
 /// Updates the status bar line with a color number.
 /// Used when hovering the menu palette.
 void Status_print_palette_color(byte color);
+
+void Delay_with_active_mouse(int delay);
 #endif

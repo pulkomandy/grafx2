@@ -2748,7 +2748,7 @@ short Window_get_clicked_button(void)
         Hide_cursor();
         Window_select_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();
-        // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+        Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
         Hide_cursor();
         Window_unselect_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();        
@@ -2795,7 +2795,7 @@ short Window_get_clicked_button(void)
       
       Display_cursor();
 
-      // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
       Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
@@ -2824,7 +2824,7 @@ short Window_get_clicked_button(void)
 
       Display_cursor();
 
-      // Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
       Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
@@ -2930,7 +2930,7 @@ short Window_get_button_shortcut(void)
       Window_select_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);
       Display_cursor();
       
-      // Slider_timer(Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse(Config.Delay_right_click_on_slider);
       
       Hide_cursor();
       Window_unselect_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);
@@ -3288,4 +3288,19 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
                 }
         }
   }
+}
+
+void Delay_with_active_mouse(int speed)
+{
+  Uint32 now;
+  Uint32 end;
+  end = SDL_GetTicks()+speed*10;
+  
+  Need_Timer_events=1;
+  
+  do
+  {
+    Get_input();
+    now = SDL_GetTicks();
+  } while (now<end);
 }

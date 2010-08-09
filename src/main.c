@@ -149,13 +149,7 @@ void Error_function(int error_code, const char *filename, int line_number, const
     for (index=0;index<=255;index++)
       temp_palette[index].R=255;
     Set_palette(temp_palette);
-    SDL_Delay(500);
-    // TODO: Replace the above by a loop where cursor is active:
-    // Need_Timer_events=1
-    // Compute target=now+500
-    // Do
-    //   Get_input()
-    // While now<target
+    Delay_with_active_mouse(50); // Half a second of red flash
     Set_palette(Main_palette);
   }
   else
