@@ -411,27 +411,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
 }
 
 
-Uint32 Push_timer_event(Uint32 i, void* p)
-{
-  if (Need_Timer_events)
-  {
-    SDL_Event event;
-    SDL_UserEvent user_event;
-
-    user_event.type = SDL_USEREVENT;
-    user_event.code = 0;
-    user_event.data1 = NULL;
-    user_event.data2 = NULL;
-
-    event.type = SDL_USEREVENT;
-    event.user = user_event;
-
-    SDL_PushEvent(&event);
-  }
-  return i;
-}
-
-
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
@@ -441,7 +420,6 @@ int Init_program(int argc,char * argv[])
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
-  SDL_TimerID tid;
   static char main_filename [MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
@@ -545,7 +523,10 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-  tid = SDL_AddTimer(10, Push_timer_event, NULL);
+  
+  // Start the timer that will push about 60 "wake up" events
+  // per second in the event queue.
+  Activate_timer(16);
 
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);

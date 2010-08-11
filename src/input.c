@@ -234,11 +234,11 @@ int Move_cursor_with_constraints()
     // Hide cursor, because even just a click change needs it
     if (!Mouse_moved)
     {
-      Mouse_moved++;
       // Hide cursor (erasing icon and brush on screen
       // before changing the coordinates.
       Hide_cursor();
     }
+    Mouse_moved++;
     if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
     {
       Mouse_X=Input_new_mouse_X;
@@ -246,10 +246,9 @@ int Move_cursor_with_constraints()
     }
     Mouse_K=Input_new_mouse_K;
     
-    if (Mouse_moved > Config.Mouse_merge_movement)
-      // TODO : not sure what that was meant to do, but it prevents moving the default cursor when there is no operation.
-      // if (! Operation[Current_operation][Mouse_K_unique]
-      //    [Operation_stack_size].Fast_mouse)
+    if (Mouse_moved > Config.Mouse_merge_movement
+      && !Operation[Current_operation][Mouse_K_unique]
+          [Operation_stack_size].Fast_mouse)
         feedback=1;
   }
   if (mouse_blocked)
@@ -687,11 +686,14 @@ int Get_input(void)
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
-
+    if (!SDL_PollEvent(&event))
+    {
+      SDL_WaitEvent(&event);
+    }
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while( (!user_feedback_required) && SDL_WaitEvent(&event)) // Try to cumulate for a full VBL except if there is a required feedback
+    while(1) 
     {
         switch(event.type)
         {
@@ -783,6 +785,12 @@ int Get_input(void)
                 //DEBUG("Unhandled SDL event number : ",event.type);
                 break;
         }
+        if (user_feedback_required)
+          break;
+        // Fetch another event from the queue,
+        // stopping when it's empty.
+        if (!SDL_PollEvent(&event))
+          break;
     }
     // Directional controller
     if (!(Directional_up||Directional_up_right||Directional_right||
@@ -848,7 +856,7 @@ int Get_input(void)
       Display_cursor();
     }
     
-    return 1;//(Mouse_moved!=0) || user_feedback_required;
+    return (Mouse_moved!=0) || user_feedback_required;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)

@@ -1909,7 +1909,8 @@ void Airbrush_1_0(void)
   Shade_table=Shade_table_left;
 
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
-  Need_Timer_events=1;
+  //Need_Timer_events=1;
+  //Activate_timer(10);
   Airbrush(LEFT_SIDE);
 
   Operation_push(Paintbrush_X);
@@ -1932,7 +1933,8 @@ void Airbrush_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
-  Need_Timer_events=1;
+  //Need_Timer_events=1;
+  //Activate_timer(10);
   Airbrush(RIGHT_SIDE);
 
   Operation_push(Paintbrush_X);
@@ -1949,6 +1951,7 @@ void Airbrush_12_2(void)
 //
 {
   short old_x,old_y;
+  Uint32 now;
 
   Operation_pop(&old_y);
   Operation_pop(&old_x);
@@ -1960,9 +1963,13 @@ void Airbrush_12_2(void)
     Display_cursor();
   }
 
-  if (SDL_GetTicks()>Airbrush_next_time)
+  now=SDL_GetTicks();
+  if (now>Airbrush_next_time)
   {
-    Airbrush_next_time+=Airbrush_delay*10;
+    //Airbrush_next_time+=Airbrush_delay*10;
+    // Time is now reset, because the += was death spiral
+    // if drawing took more time than the frequency.
+    Airbrush_next_time=now+Airbrush_delay*10;    
     Airbrush(Mouse_K_unique);
   }
 
@@ -1980,7 +1987,8 @@ void Airbrush_0_2(void)
 //
 {
   Operation_stack_size-=2;
-  Need_Timer_events=0;
+  //Need_Timer_events=0;
+  //Disable_timer();  
   End_of_modification();
 }
 

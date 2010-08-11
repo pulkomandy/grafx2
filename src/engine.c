@@ -3296,11 +3296,75 @@ void Delay_with_active_mouse(int speed)
   Uint32 end;
   end = SDL_GetTicks()+speed*10;
   
-  Need_Timer_events=1;
-  
+  //Need_Timer_events=1;
+  //Activate_timer(10);
   do
   {
     Get_input();
     now = SDL_GetTicks();
   } while (now<end);
+  //Need_Timer_events=0;
+  //Disable_timer();
+}
+
+// ======== Timer stuff =========
+// This system is installed whenever Grafx2 needs to wait
+// for some input, but wants to be called back anyway
+// if a specified amount of time has elapsed.
+
+/// Pointer to the current timer, NULL if disabled at the moment.
+static SDL_TimerID Current_timer=NULL;
+
+///
+/// This callback is meant to post SDL_USEREVENT in the event queue.
+/// It is designed especially to "wake" grafx2 in some situations where
+/// an animation or something is running, even if the mouse and keyboard
+/// are untouched.
+Uint32 Push_timer_event(Uint32 i, void* p)
+{
+  //if (Need_Timer_events)
+  {
+    SDL_Event event;
+    SDL_UserEvent user_event;
+
+    user_event.type = SDL_USEREVENT;
+    user_event.code = 0;
+    user_event.data1 = NULL;
+    user_event.data2 = NULL;
+
+    event.type = SDL_USEREVENT;
+    event.user = user_event;
+
+    SDL_PushEvent(&event);
+  }
+  return i;
+}
+
+///
+/// Activate the timer that runs Push_timer_event()
+/// This function can safely be called while it's active.
+void Activate_timer(int speed)
+{
+  if (Current_timer)
+  {
+    if (SDL_RemoveTimer(Current_timer)==SDL_FALSE)
+      // Problem ?... keep running.
+      return;
+  }
+  
+  Current_timer = SDL_AddTimer(speed, Push_timer_event, NULL);
+}
+
+///
+/// Remove the running timer that runs Push_timer_event()
+/// This function can safely be called while it's disabled.
+void Disable_timer(void)
+{
+  if (Current_timer)
+  {
+    if (SDL_RemoveTimer(Current_timer)==SDL_FALSE)
+      // Problem ?... can't really do anything.
+      return;
+  }
+  Current_timer=NULL;
 }

@@ -1082,6 +1082,7 @@ void Fill_general(byte fill_color)
     if (! (Permanent_draw_count&7))
     {
       Uint32 now = SDL_GetTicks();
+      SDL_PumpEvents();
       if (now>= Permanent_draw_next_refresh)
       {
         Permanent_draw_next_refresh = now+100;
