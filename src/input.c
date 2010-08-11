@@ -779,7 +779,7 @@ int Get_input(void)
                 break;
             
             case SDL_USEREVENT:
-                user_feedback_required = 1;
+                //user_feedback_required = 1;
                 break;
             default:
                 //DEBUG("Unhandled SDL event number : ",event.type);

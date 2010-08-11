@@ -1908,10 +1908,13 @@ void Airbrush_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
 
-  Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
   //Need_Timer_events=1;
   //Activate_timer(10);
-  Airbrush(LEFT_SIDE);
+  if (SDL_GetTicks()>Airbrush_next_time)
+  {
+    Airbrush(LEFT_SIDE);
+    Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  }
 
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -1932,10 +1935,13 @@ void Airbrush_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
   //Need_Timer_events=1;
   //Activate_timer(10);
-  Airbrush(RIGHT_SIDE);
+  if (SDL_GetTicks()>Airbrush_next_time)
+  {
+    Airbrush(RIGHT_SIDE);
+    Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+  }
 
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
