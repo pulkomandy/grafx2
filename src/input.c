@@ -51,7 +51,10 @@ int Snap_axis = 0;
 int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
 
-volatile int Need_Timer_events;
+volatile int Need_timer_for_tool;
+volatile int Need_timer_for_cursor;
+
+char * Drop_file_name = NULL;
 
 // --
 
@@ -229,7 +232,11 @@ int Move_cursor_with_constraints()
       feedback=1;
       
       if (Input_new_mouse_K == 0)
+      {
         Input_sticky_control = 0;
+        Need_timer_for_tool=0;
+        Need_timer_for_cursor=0;
+      }
     }
     // Hide cursor, because even just a click change needs it
     if (!Mouse_moved)
@@ -753,26 +760,43 @@ int Get_input(void)
             
             case SDL_SYSWMEVENT:
 #ifdef __WIN32__
-                if(event.syswm.msg->msg  == WM_DROPFILES) {
-                  int fileCount;
+                if(event.syswm.msg->msg  == WM_DROPFILES)
+                {
+                  int file_count;
                   HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
-                  if((fileCount = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0) {
-                      char buf[MAX_PATH];
-                      T_IO_Context context;
-                      char* flimit;
-
-                      DragQueryFile(hdrop,0 ,(LPTSTR) buf ,(UINT) MAX_PATH);
-                      flimit = Find_last_slash(buf);
-                      *(flimit++) = '\0';
-
-                      // TODO : check if there are unsaved changes first !
-
-                      Init_context_layered_image(&context, flimit, buf);
-                      Load_image(&context);
-                      Destroy_context(&context);
-                      Redraw_layered_image();
-                      End_of_modification();
-                      Display_all_screen();
+                  if((file_count = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0)
+                  {
+                    long len;
+                    // Query filename length
+                    len = DragQueryFile(hdrop,0 ,NULL ,0);
+                    if (len)
+                    {
+                      Drop_file_name=calloc(len+1,1);
+                      if (Drop_file_name)
+                      {
+                        if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
+                        {
+                          // Success
+                        }
+                        else
+                        {
+                          free(Drop_file_name);
+                          // Don't report name copy error
+                        }
+                      }
+                      else
+                      {
+                        // Don't report alloc error (for a file name? :/ )
+                      }
+                    }
+                    else
+                    {
+                      // Don't report weird Windows error
+                    }
+                  }
+                  else
+                  {
+                    // Drop of zero files. Thanks for the information, Bill.
                   }
                 }
 #endif
@@ -798,6 +822,7 @@ int Get_input(void)
       Directional_left||Directional_up_left))
     {
       Directional_delay=-1;
+      Need_timer_for_cursor=1;
       Directional_last_move=SDL_GetTicks();
     }
     else

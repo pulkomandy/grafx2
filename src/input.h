@@ -60,5 +60,17 @@ extern int Snap_axis_origin_X;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)
 extern int Snap_axis_origin_Y;
 
-/// Boolean, true if Push_timer_event() should put "ticks" in the SDL queue
-extern volatile int Need_Timer_events;
+///
+/// Boolean, true if the timer should put "ticks" in the SDL queue.
+/// This one flag is for tools (airbrush) or windows (repeatable button) that require it.
+extern volatile int Need_timer_for_tool;
+///
+/// Boolean, true if the timer should put "ticks" in the SDL queue.
+/// This one flag is for the mouse emulation, by keyboard/joystick.
+extern volatile int Need_timer_for_cursor;
+
+///
+/// This malloced string is set when a drag-and-drop event
+/// brings a file to Grafx2's window.
+extern char * Drop_file_name;
+ 

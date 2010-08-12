@@ -1908,8 +1908,7 @@ void Airbrush_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
 
-  //Need_Timer_events=1;
-  //Activate_timer(10);
+  Need_timer_for_tool=1;
   if (SDL_GetTicks()>Airbrush_next_time)
   {
     Airbrush(LEFT_SIDE);
@@ -1935,8 +1934,7 @@ void Airbrush_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  //Need_Timer_events=1;
-  //Activate_timer(10);
+  Need_timer_for_tool=1;
   if (SDL_GetTicks()>Airbrush_next_time)
   {
     Airbrush(RIGHT_SIDE);
@@ -1993,8 +1991,7 @@ void Airbrush_0_2(void)
 //
 {
   Operation_stack_size-=2;
-  //Need_Timer_events=0;
-  //Disable_timer();  
+  //Need_timer_for_tool=0; // Not needed, mouse release did it in Get_input()
   End_of_modification();
 }
 

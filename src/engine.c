@@ -41,6 +41,7 @@
 #include "pages.h"
 #include "layers.h"
 #include "factory.h"
+#include "loadsave.h"
 
 
 // we need this as global
@@ -657,6 +658,39 @@ void Main_handler(void)
       Reposition_palette();
       Display_all_screen();
       Display_cursor();
+    }
+    else if (Drop_file_name)
+    {
+      // A file was dragged into Grafx2's window
+      Upload_infos_page_main(Main_backups->Pages);
+
+      if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
+      {
+        T_IO_Context context;
+        char* flimit;
+        byte old_cursor_shape;
+  
+        flimit = Find_last_slash(Drop_file_name);
+        *(flimit++) = '\0';
+  
+        Hide_cursor();
+        old_cursor_shape=Cursor_shape;
+        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+        Display_cursor();
+        
+        Init_context_layered_image(&context, flimit, Drop_file_name);
+        Load_image(&context);
+        Destroy_context(&context);
+        Redraw_layered_image();
+        Hide_cursor();
+        Cursor_shape=old_cursor_shape;
+        Display_cursor();
+        End_of_modification();
+        Display_all_screen();
+        
+        free(Drop_file_name);
+        Drop_file_name=NULL;
+      }
     }
     
     if(Get_input())
@@ -2750,6 +2784,7 @@ short Window_get_clicked_button(void)
         Display_cursor();
         Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
         Hide_cursor();
+        Need_timer_for_tool=1;
         Window_unselect_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();        
         return temp1->Number;
@@ -3296,15 +3331,13 @@ void Delay_with_active_mouse(int speed)
   Uint32 end;
   end = SDL_GetTicks()+speed*10;
   
-  //Need_Timer_events=1;
-  //Activate_timer(10);
+  Need_timer_for_tool=1;
   do
   {
     Get_input();
     now = SDL_GetTicks();
   } while (now<end);
-  //Need_Timer_events=0;
-  //Disable_timer();
+  Need_timer_for_tool=0;
 }
 
 // ======== Timer stuff =========
@@ -3320,9 +3353,9 @@ static SDL_TimerID Current_timer=NULL;
 /// It is designed especially to "wake" grafx2 in some situations where
 /// an animation or something is running, even if the mouse and keyboard
 /// are untouched.
-Uint32 Push_timer_event(Uint32 i, void* p)
+Uint32 Push_timer_event(Uint32 i, __attribute__((unused)) void* p)
 {
-  //if (Need_Timer_events)
+  if (Need_timer_for_tool || Need_timer_for_cursor)
   {
     SDL_Event event;
     SDL_UserEvent user_event;
