@@ -662,13 +662,13 @@ void Main_handler(void)
     else if (Drop_file_name)
     {
       // A file was dragged into Grafx2's window
-      Upload_infos_page_main(Main_backups->Pages);
-
       if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
       {
         T_IO_Context context;
         char* flimit;
         byte old_cursor_shape;
+
+        Upload_infos_page_main(Main_backups->Pages);
   
         flimit = Find_last_slash(Drop_file_name);
         *(flimit++) = '\0';
@@ -680,17 +680,29 @@ void Main_handler(void)
         
         Init_context_layered_image(&context, flimit, Drop_file_name);
         Load_image(&context);
+        if (File_error!=1)
+        {
+          Compute_limits();
+          Compute_paintbrush_coordinates();
+          Redraw_layered_image();
+          End_of_modification();
+          Display_all_screen();
+          Main_image_is_modified=0;
+        }
         Destroy_context(&context);
-        Redraw_layered_image();
+        
+        Compute_optimal_menu_colors(Main_palette);
+        Display_menu();
+        if (Config.Display_image_limits)
+          Display_image_limits();
+
         Hide_cursor();
         Cursor_shape=old_cursor_shape;
-        Display_cursor();
-        End_of_modification();
         Display_all_screen();
-        
-        free(Drop_file_name);
-        Drop_file_name=NULL;
+        Display_cursor();
       }
+      free(Drop_file_name);
+      Drop_file_name=NULL;
     }
     
     if(Get_input())
