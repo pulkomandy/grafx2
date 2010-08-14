@@ -37,6 +37,14 @@ enum CONTEXT_TYPE {
   CONTEXT_SURFACE,
 };
 
+/// Data for a cycling color series. Heavily cloned from T_Gradient_array.
+typedef struct
+{
+  byte Start;    ///< First color
+  byte End;      ///< Last color
+  byte Inverse;  ///< Boolean, true if the gradient goes in descending order
+  byte Speed;    ///< Frequency of cycling, from 1 (slow) to 64 (fast)
+} T_Color_cycle;
 
 typedef struct
 {
@@ -70,6 +78,9 @@ typedef struct
   char * Original_file_name;
   /// Original file directory, stored in GIF file
   char * Original_file_directory;
+
+  byte Color_cycles;
+  T_Color_cycle Cycle_range[16];
 
   /// Internal: during load, marks which layer is being loaded.
   short Current_layer;

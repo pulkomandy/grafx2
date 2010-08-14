@@ -606,7 +606,7 @@ void Load_image(T_IO_Context *context)
 {
   unsigned int index; // index de balayage des formats
   T_Format *format = &(File_formats[2]); // Format du fichier à charger
-
+  int i;
 
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // charger le format du fichier:
@@ -774,6 +774,15 @@ void Load_image(T_IO_Context *context)
           Main_image_width=1;
         if (Main_image_height<1)
           Main_image_height=1;
+
+        // Color cyling ranges:
+        for (i=0; i<context->Color_cycles; i++)
+        {
+          Gradient_array[i].Start=context->Cycle_range[i].Start;
+          Gradient_array[i].End=context->Cycle_range[i].End;
+          Gradient_array[i].Inverse=context->Cycle_range[i].Inverse;
+        }
+
       }
     }
     else if (File_error!=1)

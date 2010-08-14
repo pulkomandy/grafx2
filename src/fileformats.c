@@ -388,28 +388,42 @@ void Test_LBM(T_IO_Context * context)
     }
   }
 
-  // ------------------------- Attendre une section -------------------------
-  byte Wait_for(byte * expected_section)
-  {
-    // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
-    dword Taille_section;
-    byte section_read[4];
+// Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
+#define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
+/// Skips the current section in an ILBM file.
+/// This function should be called while the file pointer is right
+/// after the 4-character code that identifies the section.
+int LBM_Skip_section(void)
+{
+  dword size;
+  
+  if (!Read_dword_be(LBM_file,&size))
+    return 0;
+  if (size&1)
+    size++;
+  if (fseek(LBM_file,size,SEEK_CUR))
+    return 0;
+  return 1;
+}
+
+// ------------------------- Attendre une section -------------------------
+byte LBM_Wait_for(byte * expected_section)
+{
+  // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
+  byte section_read[4];
+
+  if (! Read_bytes(LBM_file,section_read,4))
+    return 0;
+  while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
+  {
+    if (!LBM_Skip_section())
+      return 0;
     if (! Read_bytes(LBM_file,section_read,4))
       return 0;
-    while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
-    {
-      if (!Read_dword_be(LBM_file,&Taille_section))
-        return 0;
-      if (Taille_section&1)
-        Taille_section++;
-      if (fseek(LBM_file,Taille_section,SEEK_CUR))
-        return 0;
-      if (! Read_bytes(LBM_file,section_read,4))
-        return 0;
-    }
-    return 1;
   }
+  return 1;
+}
 
 // Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
 // en faire du chunky
@@ -522,7 +536,7 @@ void Load_LBM(T_IO_Context * context)
   byte  temp_byte;
   short b256;
   dword nb_colors;
-  dword image_size;
+  dword section_size;
   short x_pos;
   short y_pos;
   short counter;
@@ -544,7 +558,7 @@ void Load_LBM(T_IO_Context * context)
     Read_bytes(LBM_file,section,4);
     Read_dword_be(LBM_file,&dummy);
     Read_bytes(LBM_file,format,4);
-    if (!Wait_for((byte *)"BMHD"))
+    if (!LBM_Wait_for((byte *)"BMHD"))
       File_error=1;
     Read_dword_be(LBM_file,&dummy);
 
@@ -564,7 +578,7 @@ void Load_LBM(T_IO_Context * context)
       && (Read_word_be(LBM_file,&header.Y_screen))
       && header.Width && header.Height)
     {
-      if ( (header.BitPlanes) && (Wait_for((byte *)"CMAP")) )
+      if ( (header.BitPlanes) && (LBM_Wait_for((byte *)"CMAP")) )
       {
         Read_dword_be(LBM_file,&nb_colors);
         nb_colors/=3;
@@ -616,10 +630,72 @@ void Load_LBM(T_IO_Context * context)
             if (nb_colors&1)
               if (Read_byte(LBM_file,&temp_byte))
                 File_error=2;
-
-            if ( (Wait_for((byte *)"BODY")) && (!File_error) )
+                
+            // Keep reading sections until we find the body
+            while (1)
             {
-              Read_dword_be(LBM_file,&image_size);
+              if (! Read_bytes(LBM_file,section,4))
+              {
+                File_error=2;
+                break;
+              }
+              // Found body : stop searching
+              if (!memcmp(section,"BODY",4))
+                break;
+              else if (!memcmp(section,"CRNG",4))
+              {
+                // Handle CRNG
+                
+                // The content of a CRNG is as follows:
+                word padding;
+                word rate;
+                word flags;
+                byte min_col;
+                byte max_col;
+                //
+                
+                if ( (Read_dword_be(LBM_file,&section_size))
+                  && (Read_word_be(LBM_file,&padding))
+                  && (Read_word_be(LBM_file,&rate))
+                  && (Read_word_be(LBM_file,&flags))
+                  && (Read_byte(LBM_file,&min_col))
+                  && (Read_byte(LBM_file,&max_col)))
+                {
+                  if (section_size == 8 && (flags & 1) && min_col != max_col)
+                  {
+                    // Valid cycling range
+                    if (max_col<min_col)
+                    SWAP_BYTES(min_col,max_col)
+                    
+                    context->Cycle_range[context->Color_cycles].Start=min_col;
+                    context->Cycle_range[context->Color_cycles].End=max_col;
+                    context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+                    context->Cycle_range[context->Color_cycles].Speed=rate/78;
+                                        
+                    context->Color_cycles++;
+                  }
+                }
+                else
+                {
+                  File_error=2;
+                  break;
+                }
+              }
+              else
+              {
+                // ignore any number of unknown sections
+                if (!LBM_Skip_section())
+                {
+                  File_error=2;
+                  break;
+                }
+              }
+              
+            }
+
+            if ( !File_error )
+            {
+              Read_dword_be(LBM_file,&section_size);
               //swab((char *)&header.Width ,(char *)&context->Width,2);
               //swab((char *)&header.Height,(char *)&context->Height,2);
               context->Width = header.Width;

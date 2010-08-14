@@ -88,12 +88,41 @@
 
 int test_colorcycling(void* useless)
 {
-  byte r = 0;
-  while(1) {
+  static byte offset[16]; // static forces init at 0
+  int i, color;
+  static SDL_Color PaletteSDL[256];
+  
+  while(!Quitting)
+  {
     SDL_Delay(50);
-    Set_color(0,++r,0,0);
+    // Init palette
+    for(color=0;color<256;color++)
+    {
+      PaletteSDL[color].r=Main_palette[color].R;
+      PaletteSDL[color].g=Main_palette[color].G;
+      PaletteSDL[color].b=Main_palette[color].B;
+    }
+    for (i=0; i<16; i++)
+    {
+      byte len;
+      
+      len=Gradient_array[i].End-Gradient_array[i].Start+1;
+      if (len)
+      {
+        for(color=Gradient_array[i].Start;color<=Gradient_array[i].End;color++)
+        {
+          PaletteSDL[color].r=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].R;
+          PaletteSDL[color].g=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].G;
+          PaletteSDL[color].b=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].B;
+        }
+        offset[i]= (offset[i]+len-1)%len;
+      }
+    }
+    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
   }
+  return 0;
 }
+
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)

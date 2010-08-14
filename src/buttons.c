@@ -2422,6 +2422,8 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 
 void Load_gradient_data(int index)
 {
+  if (Gradient_array[index].Start>Gradient_array[index].End)
+    Error(0);
   Gradient_lower_bound =Gradient_array[index].Start;
   Gradient_upper_bound =Gradient_array[index].End;
   Gradient_is_inverted          =Gradient_array[index].Inverse;
