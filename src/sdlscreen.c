@@ -47,6 +47,8 @@
   #endif
 #endif
 
+volatile int Allow_colorcycling=1;
+
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
 {

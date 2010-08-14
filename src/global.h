@@ -766,6 +766,8 @@ GFX2_GLOBAL long  Gradient_bounds_range;
 GFX2_GLOBAL long  Gradient_total_range;
 /// Amount of randomness to use in gradient (1-256+)
 GFX2_GLOBAL long  Gradient_random_factor;
+/// Gradient speed of cycling (0-64)
+GFX2_GLOBAL byte  Gradient_speed;
 /// Pointer to a gradient function, depending on the selected method.
 GFX2_GLOBAL Func_gradient Gradient_function;
 ///

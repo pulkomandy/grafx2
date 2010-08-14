@@ -1572,6 +1572,7 @@ void Open_window(word width,word height, const char * title)
     Cursor_shape=CURSOR_SHAPE_ARROW;
     Paintbrush_hidden_before_window=Paintbrush_hidden;
     Paintbrush_hidden=1;
+    Allow_colorcycling=0;
   }
 
   // Initialisation des listes de boutons de la fenêtre
@@ -1661,6 +1662,7 @@ void Close_window(void)
     
     Display_all_screen();
     Display_menu();
+    Allow_colorcycling=1;
   }
 
   Key=0;

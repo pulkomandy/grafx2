@@ -65,4 +65,6 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 /// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
 void Clear_border(byte color);
   
+extern volatile int Allow_colorcycling;
+
 #endif // SDLSCREEN_H_INCLUDED

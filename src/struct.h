@@ -224,6 +224,7 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
+  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
 } T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.

@@ -86,39 +86,81 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-int test_colorcycling(void* useless)
+int Color_cycling(__attribute__((unused)) void* useless)
 {
-  static byte offset[16]; // static forces init at 0
+  byte offset[16];
   int i, color;
   static SDL_Color PaletteSDL[256];
+  int changed; // boolean : true if the palette needs a change in this tick.
+  
+  long now;
+  long start;
   
   while(!Quitting)
   {
-    SDL_Delay(50);
+    start = SDL_GetTicks();
+    memset(offset, 0, sizeof(offset));
+  
     // Init palette
-    for(color=0;color<256;color++)
+    while (Allow_colorcycling)
     {
-      PaletteSDL[color].r=Main_palette[color].R;
-      PaletteSDL[color].g=Main_palette[color].G;
-      PaletteSDL[color].b=Main_palette[color].B;
-    }
-    for (i=0; i<16; i++)
-    {
-      byte len;
+      now = SDL_GetTicks();
+      changed=0;
       
-      len=Gradient_array[i].End-Gradient_array[i].Start+1;
-      if (len)
+      // Check all cycles for a change at this tick
+      for (i=0; i<16; i++)
       {
-        for(color=Gradient_array[i].Start;color<=Gradient_array[i].End;color++)
+        int len;
+        
+        len=Gradient_array[i].End-Gradient_array[i].Start+1;
+        if (len>1 && Gradient_array[i].Speed)
         {
-          PaletteSDL[color].r=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].R;
-          PaletteSDL[color].g=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].G;
-          PaletteSDL[color].b=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].B;
+          int new_offset;
+          
+          new_offset=(now-start)/(int)(1000.0/(Gradient_array[i].Speed*0.2856)) % len;
+          if (!Gradient_array[i].Inverse)
+            new_offset=len - new_offset;
+          
+          if (new_offset!=offset[i])
+            changed=1;
+          offset[i]=new_offset;
         }
-        offset[i]= (offset[i]+len-1)%len;
       }
+      
+      if (changed)
+      {
+        // Initialize the palette
+        for(color=0;color<256;color++)
+        {
+          PaletteSDL[color].r=Main_palette[color].R;
+          PaletteSDL[color].g=Main_palette[color].G;
+          PaletteSDL[color].b=Main_palette[color].B;
+        }
+        for (i=0; i<16; i++)
+        {
+          int len;
+        
+          len=Gradient_array[i].End-Gradient_array[i].Start+1;
+          if (len>1 && Gradient_array[i].Speed)
+          {
+            for(color=Gradient_array[i].Start;color<=Gradient_array[i].End;color++)
+            {
+              PaletteSDL[color].r=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].R;
+              PaletteSDL[color].g=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].G;
+              PaletteSDL[color].b=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].B;
+            }
+          }
+        }
+        SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+      }
+      SDL_Delay(20);
     }
-    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+    // Restore normal palette
+    Set_palette(Main_palette);
+    while (!Allow_colorcycling)
+    {
+      SDL_Delay(20);
+    }
   }
   return 0;
 }
@@ -863,10 +905,10 @@ int Init_program(int argc,char * argv[])
       }
   }
 
-#if 0
+#if 1
   // Color cycling test
   {
-    SDL_Thread* t = SDL_CreateThread(test_colorcycling, NULL);
+    SDL_Thread* t = SDL_CreateThread(Color_cycling, NULL);
   }
 #endif
 

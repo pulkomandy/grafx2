@@ -2477,6 +2477,7 @@ void Button_Gradients(void)
   T_Gradient_array backup_gradients[16];
   int   old_current_gradient;
   T_Scroller_button * mix_scroller;
+  T_Scroller_button * speed_scroller;
   short old_mouse_x;
   short old_mouse_y;
   byte  old_mouse_k;
@@ -2491,7 +2492,7 @@ void Button_Gradients(void)
   old_current_gradient=Current_gradient;
   memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
 
-  Open_window(237,133,"Gradation menu");
+  Open_window(258,133,"Gradation menu");
 
   Window_set_palette_button(48,21);                            // 1
     // Définition du scrolleur <=> indice du dégradé dans le tableau
@@ -2508,6 +2509,7 @@ void Button_Gradients(void)
 
   Window_set_normal_button(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
   Window_set_normal_button(123,112,51,14,"Cancel",0,1,KEY_ESC);  // 7
+  speed_scroller = Window_set_scroller_button(238,22,88,65,1,64-Gradient_array[Current_gradient].Speed);  // 8
 
   Print_in_window(5,60,"MIX",MC_Dark,MC_Light);
 
@@ -2534,6 +2536,8 @@ void Button_Gradients(void)
     old_mouse_k=Mouse_K;
 
     clicked_button=Window_clicked_button();
+    if (Input_sticky_control!=8 || !Mouse_K)
+      Allow_colorcycling=0;
 
     switch(clicked_button)
     {
@@ -2602,6 +2606,10 @@ void Button_Gradients(void)
         mix_scroller->Position=Gradient_array[Current_gradient].Mix;
         Window_draw_slider(mix_scroller);
 
+        // Update speed
+        speed_scroller->Position=64-Gradient_array[Current_gradient].Speed;
+        Window_draw_slider(speed_scroller);
+
         // On raffiche la technique qui va avec
         Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
 
@@ -2635,6 +2643,10 @@ void Button_Gradients(void)
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,112,108,14,Current_gradient);
         Display_cursor();
+      case  8 : // Speed
+        Gradient_array[Current_gradient].Speed=64-Window_attribute2;
+        Allow_colorcycling=1;
+        break;
     }
 
     if (!Mouse_K)
@@ -2670,7 +2682,7 @@ void Button_Gradients(void)
           clicked_button=6;
     }
   }
-  while (clicked_button<6);
+  while (clicked_button!=6 && clicked_button!=7);
 
   Close_window();
   // The Grad rect operation uses the same button as Grad menu.
