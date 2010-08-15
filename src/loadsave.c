@@ -607,6 +607,9 @@ void Load_image(T_IO_Context *context)
   unsigned int index; // index de balayage des formats
   T_Format *format = &(File_formats[2]); // Format du fichier à charger
   int i;
+  
+  // Not sure it's the best place...
+  context->Color_cycles=0;
 
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // charger le format du fichier:
@@ -1082,6 +1085,8 @@ void Init_context_backup_image(T_IO_Context * context, char *file_name, char *fi
 /// Setup for loading/saving the current main image
 void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory)
 {
+  int i;
+  
   memset(context, 0, sizeof(T_IO_Context));
   
   context->Type = CONTEXT_MAIN_IMAGE;
@@ -1104,6 +1109,18 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Target_address=Main_backups->Pages->Image[0];
   context->Pitch=Main_image_width;
   
+  // Color cyling ranges:
+  for (i=0; i<16; i++)
+  {
+    if (Gradient_array[i].Start!=Gradient_array[i].End && Gradient_array[i].Speed)
+    {
+      context->Cycle_range[context->Color_cycles].Start=Gradient_array[i].Start;
+      context->Cycle_range[context->Color_cycles].End=Gradient_array[i].End;
+      context->Cycle_range[context->Color_cycles].Inverse=Gradient_array[i].Inverse;
+      context->Cycle_range[context->Color_cycles].Speed=Gradient_array[i].Speed;
+      context->Color_cycles++;
+    }
+  }
 }
 
 /// Setup for loading/saving the flattened version of current main image

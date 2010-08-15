@@ -630,7 +630,7 @@ void Load_LBM(T_IO_Context * context)
             if (nb_colors&1)
               if (Read_byte(LBM_file,&temp_byte))
                 File_error=2;
-                
+
             // Keep reading sections until we find the body
             while (1)
             {
@@ -653,7 +653,6 @@ void Load_LBM(T_IO_Context * context)
                 byte min_col;
                 byte max_col;
                 //
-                
                 if ( (Read_dword_be(LBM_file,&section_size))
                   && (Read_word_be(LBM_file,&padding))
                   && (Read_word_be(LBM_file,&rate))
@@ -963,6 +962,7 @@ void Save_LBM(T_IO_Context * context)
   byte temp_byte;
   word real_width;
   int file_size;
+  int i;
 
   File_error=0;
   Get_full_filename(filename, context->File_name, context->File_directory);
@@ -1012,7 +1012,19 @@ void Save_LBM(T_IO_Context * context)
     Write_dword_be(LBM_file,sizeof(T_Palette));
 
     Write_bytes(LBM_file,context->Palette,sizeof(T_Palette));
-
+    
+    for (i=0; i<context->Color_cycles; i++)
+    {
+      Write_bytes(LBM_file,"CRNG",4);
+      Write_dword_be(LBM_file,8); // Section size
+      Write_word_be(LBM_file,0); // Padding
+      Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
+      Write_word_be(LBM_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
+      Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
+      Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
+      // No padding, size is multiple of 2
+    }
+    
     Write_bytes(LBM_file,"BODY",4);
     Write_dword_be(LBM_file,0); // On mettra la taille à jour à la fin
 
@@ -1037,8 +1049,8 @@ void Save_LBM(T_IO_Context * context)
       file_size=File_length(filename);
       
       LBM_file=fopen(filename,"rb+");
-      fseek(LBM_file,820,SEEK_SET);
-      Write_dword_be(LBM_file,file_size-824);
+      fseek(LBM_file,820+context->Color_cycles*16,SEEK_SET);
+      Write_dword_be(LBM_file,file_size-824-context->Color_cycles*16);
 
       if (!File_error)
       {
