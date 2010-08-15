@@ -2625,22 +2625,14 @@ byte Best_color(byte r,byte g,byte b)
 
 byte Best_color_nonexcluded(byte red,byte green,byte blue)
 {
-  // This "static" allows the loop to start on the last successful match.
-  // If the same color is requested again (and it happens often) and the match
-  // was perfect, it allows an early exit that avoids
-  // 255 computations of color distance.
-  // This system still works with no bad effects when the palette changes.
-  static byte col=0;
-  
-  byte  end_color;
+  int   col;  
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
   int   rmean;
   byte  best_color=0;
 
-  end_color=col;
-  do
+  for (col=0; col<256; col++)
   {
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
@@ -2658,11 +2650,7 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
       best_dist=dist;
       best_color=col;
     }
-  
-    // Loop  
-    col++;
-  } while(col!=end_color);
-  
+  }
   return best_color;
 }
 
