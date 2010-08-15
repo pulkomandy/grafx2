@@ -1721,35 +1721,53 @@ void Button_Copy_page(void)
   Close_window();
   Display_cursor();
 
-  if (clicked_button!=6)
+  switch (clicked_button)
   {
-    if (clicked_button==4)
-    {
-      // Will backup if needed
-      Copy_some_colors();
-    }
-    else
-    {
-      if (clicked_button<=2)
-      {
-        Backup_the_spare(-1);
-        Copy_image_only();
-      }
-      else
-        Backup_the_spare(0);
-
-      if (clicked_button==5)
-        Remap_spare();
-
-      if (clicked_button!=2) // copie de la palette
-        memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
-      
-      // Here is the 'end_of_modifications' for spare.
+    case 1: // Pixels+palette
+      Backup_the_spare(-1);
+      Copy_image_only();
+      // copie de la palette
+      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
-
       Spare_image_is_modified=1;
-    }
+      break;
+      
+    case 2: // Pixels only
+      Backup_the_spare(-1);
+      Copy_image_only();
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;
+      
+    case 3: // Palette only
+      Backup_the_spare(0);
+      // Copy palette
+      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;
+      
+    case 4: // Some colors
+      // Will backup if needed
+      Copy_some_colors();
+      break;
+      
+    case 5: // Palette and remap
+      Backup_the_spare(-1);
+      Remap_spare();
+      // Copy palette
+      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;  
   }
 
   Hide_cursor();
