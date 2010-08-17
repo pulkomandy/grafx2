@@ -2496,6 +2496,7 @@ void Button_Gradients(void)
   int   old_current_gradient;
   T_Scroller_button * mix_scroller;
   T_Scroller_button * speed_scroller;
+  T_Scroller_button * gradient_scroller;
   short old_mouse_x;
   short old_mouse_y;
   byte  old_mouse_k;
@@ -2504,17 +2505,19 @@ void Button_Gradients(void)
   byte  last_color;
   byte  color;
   byte  click;
+  int  changed_gradient_index;
 
-
+  
   Gradient_pixel=Pixel;
   old_current_gradient=Current_gradient;
+  changed_gradient_index=0;
   memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
 
   Open_window(258,133,"Gradation menu");
 
   Window_set_palette_button(48,21);                            // 1
     // Définition du scrolleur <=> indice du dégradé dans le tableau
-  Window_set_scroller_button(218,22,75,16,1,Current_gradient);  // 2
+  gradient_scroller=Window_set_scroller_button(218,22,75,16,1,Current_gradient);  // 2
     // Définition du scrolleur de mélange du dégradé
   mix_scroller = Window_set_scroller_button(31,22,84,256,1,
     Gradient_array[Current_gradient].Mix);                      // 3
@@ -2537,9 +2540,9 @@ void Button_Gradients(void)
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
 
-    // On affiche le cadre autour de la préview
+  // On affiche le cadre autour de la préview
   Window_display_frame_in(7,111,110,16);
-    // On affiche la preview
+  // On affiche la preview
   Draw_gradient_preview(8,112,108,14,Current_gradient);
 
   first_color=last_color=(Gradient_array[Current_gradient].Inverse)?Gradient_array[Current_gradient].End:Gradient_array[Current_gradient].Start;
@@ -2552,6 +2555,43 @@ void Button_Gradients(void)
     old_mouse_x=Mouse_X;
     old_mouse_y=Mouse_Y;
     old_mouse_k=Mouse_K;
+    if (changed_gradient_index)
+    {
+      // User has changed which gradient (0-15) he's watching
+      changed_gradient_index=0;
+      
+      Hide_cursor();
+
+      // On affiche la valeur sous la jauge
+      Num2str(Current_gradient+1,str,2);
+      Print_in_window(215,100,str,MC_Black,MC_Light);
+
+      // On tagge les couleurs qui vont avec
+      Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+
+      // On affiche le sens qui va avec
+      Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+
+      // On raffiche le mélange (jauge) qui va avec
+      mix_scroller->Position=Gradient_array[Current_gradient].Mix;
+      Window_draw_slider(mix_scroller);
+
+      // Update speed
+      speed_scroller->Position=64-Gradient_array[Current_gradient].Speed;
+      Window_draw_slider(speed_scroller);
+
+      // Gradient #
+      gradient_scroller->Position=Current_gradient;
+      Window_draw_slider(gradient_scroller);
+      
+      // Technique (flat, dithered, very dithered)
+      Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+
+      // Rectangular gradient preview
+      Draw_gradient_preview(8,112,108,14,Current_gradient);
+
+      Display_cursor();
+    }
 
     clicked_button=Window_clicked_button();
     if (Input_sticky_control!=8 || !Mouse_K)
@@ -2606,35 +2646,9 @@ void Button_Gradients(void)
         }
         break;
       case  2 : // Nouvel indice de dégradé
-        Hide_cursor();
         // Nouvel indice dans Window_attribute2
         Current_gradient=Window_attribute2;
-
-        // On affiche la valeur sous la jauge
-        Num2str(Current_gradient+1,str,2);
-        Print_in_window(215,100,str,MC_Black,MC_Light);
-
-        // On tagge les couleurs qui vont avec
-        Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
-
-        // On affiche le sens qui va avec
-        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
-
-        // On raffiche le mélange (jauge) qui va avec
-        mix_scroller->Position=Gradient_array[Current_gradient].Mix;
-        Window_draw_slider(mix_scroller);
-
-        // Update speed
-        speed_scroller->Position=64-Gradient_array[Current_gradient].Speed;
-        Window_draw_slider(speed_scroller);
-
-        // On raffiche la technique qui va avec
-        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
-
-        // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
-
-        Display_cursor();
+        changed_gradient_index=1;
         break;
       case  3 : // Nouveau mélange de dégradé
         Hide_cursor();
@@ -2689,6 +2703,21 @@ void Button_Gradients(void)
         }
         Key=0;
         break;
+      case KEY_MOUSEWHEELUP:
+        if (Current_gradient>0)
+        {
+          Current_gradient--;
+          changed_gradient_index=1;
+        }
+        break;
+      case KEY_MOUSEWHEELDOWN:
+        if (Current_gradient<15)
+        {
+          Current_gradient++;
+          changed_gradient_index=1;
+        }
+        break;
+      
       default:
         if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
