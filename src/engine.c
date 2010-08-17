@@ -662,7 +662,11 @@ void Main_handler(void)
     else if (Drop_file_name)
     {
       // A file was dragged into Grafx2's window
-      if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
+      if (Main_image_is_modified && !Confirmation_box("Discard unsaved changes ?"))
+      {
+        // do nothing
+      }
+      else
       {
         T_IO_Context context;
         char* flimit;
