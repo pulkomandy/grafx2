@@ -202,8 +202,8 @@ else
         LUACOPT =
         LUALOPT =
       else
-            LUACOPT = `pkg-config lua --cflags || pkg-config lua5.1 --cflags || pkg-config lua-5.1 --cflags`
-            LUALOPT = `pkg-config lua --libs || pkg-config lua5.1 --libs || pkg-config lua-5.1 --libs`
+            LUACOPT = `pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags`
+            LUALOPT = `pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs`
       endif
 
       # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
