@@ -178,7 +178,7 @@ void Wait_end_of_click(void)
   // On désactive tous les raccourcis clavier
 
   while(Mouse_K)
-    Get_input();
+    Get_input(20);
 }
 
 void Clear_current_image_with_stencil(byte color, byte * stencil)

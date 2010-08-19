@@ -116,13 +116,4 @@ void Status_print_palette_color(byte color);
 /// though the mouse still works.
 void Delay_with_active_mouse(int delay);
 
-///
-/// Activate the timer that runs Push_timer_event()
-/// This function can safely be called while it's active.
-void Activate_timer(int speed);
-
-///
-/// Remove the running timer that runs Push_timer_event()
-/// This function can safely be called while it's disabled.
-void Disable_timer(void);
 #endif

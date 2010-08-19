@@ -43,6 +43,7 @@
 
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
+int Color_cycling(__attribute__((unused)) void* useless);
 
 // public Globals (available as extern)
 
@@ -50,9 +51,6 @@ int Input_sticky_control = 0;
 int Snap_axis = 0;
 int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
-
-volatile int Need_timer_for_tool;
-volatile int Need_timer_for_cursor;
 
 char * Drop_file_name = NULL;
 
@@ -234,8 +232,6 @@ int Move_cursor_with_constraints()
       if (Input_new_mouse_K == 0)
       {
         Input_sticky_control = 0;
-        Need_timer_for_tool=0;
-        Need_timer_for_cursor=0;
       }
     }
     // Hide cursor, because even just a click change needs it
@@ -678,7 +674,7 @@ int Cursor_displace(short delta_x, short delta_y)
 
 // Main input handling function
 
-int Get_input(void)
+int Get_input(int sleep_time)
 {
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
@@ -687,6 +683,7 @@ int Get_input(void)
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
+    Color_cycling(NULL);
 
     Key_ANSI = 0;
     Key = 0;
@@ -695,7 +692,8 @@ int Get_input(void)
     Input_new_mouse_Y = Mouse_Y;
     if (!SDL_PollEvent(&event))
     {
-      SDL_WaitEvent(&event);
+      SDL_Delay(sleep_time);
+      return 0;
     }
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
@@ -735,7 +733,6 @@ int Get_input(void)
 
             case SDL_KEYUP:
                 Handle_key_release(event.key);
-                user_feedback_required = 1; // new
                 break;
 
             // Start of Joystik handling
@@ -802,9 +799,6 @@ int Get_input(void)
 #endif
                 break;
             
-            case SDL_USEREVENT:
-                //user_feedback_required = 1;
-                break;
             default:
                 //DEBUG("Unhandled SDL event number : ",event.type);
                 break;
@@ -822,7 +816,6 @@ int Get_input(void)
       Directional_left||Directional_up_left))
     {
       Directional_delay=-1;
-      Need_timer_for_cursor=1;
       Directional_last_move=SDL_GetTicks();
     }
     else
@@ -912,4 +905,75 @@ void Set_mouse_position(void)
       Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
       Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
     }
+}
+
+int Color_cycling(__attribute__((unused)) void* useless)
+{
+  static byte offset[16];
+  int i, color;
+  static SDL_Color PaletteSDL[256];
+  int changed; // boolean : true if the palette needs a change in this tick.
+  
+  long now;
+  static long start=0;
+  
+  if (start==0)
+  {
+    // First run
+    start = SDL_GetTicks();
+    return 1;
+  }
+  if (!Allow_colorcycling)
+    return 1;
+    
+
+  now = SDL_GetTicks();
+  changed=0;
+  
+  // Check all cycles for a change at this tick
+  for (i=0; i<16; i++)
+  {
+    int len;
+    
+    len=Gradient_array[i].End-Gradient_array[i].Start+1;
+    if (len>1 && Gradient_array[i].Speed)
+    {
+      int new_offset;
+      
+      new_offset=(now-start)/(int)(1000.0/(Gradient_array[i].Speed*0.2856)) % len;
+      if (!Gradient_array[i].Inverse)
+        new_offset=len - new_offset;
+      
+      if (new_offset!=offset[i])
+        changed=1;
+      offset[i]=new_offset;
+    }
+  }
+  if (changed)
+  {
+    // Initialize the palette
+    for(color=0;color<256;color++)
+    {
+      PaletteSDL[color].r=Main_palette[color].R;
+      PaletteSDL[color].g=Main_palette[color].G;
+      PaletteSDL[color].b=Main_palette[color].B;
+    }
+    for (i=0; i<16; i++)
+    {
+      int len;
+    
+      len=Gradient_array[i].End-Gradient_array[i].Start+1;
+      if (len>1 && Gradient_array[i].Speed)
+      {
+        for(color=Gradient_array[i].Start;color<=Gradient_array[i].End;color++)
+        {
+          PaletteSDL[color].r=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].R;
+          PaletteSDL[color].g=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].G;
+          PaletteSDL[color].b=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].B;
+        }
+      }
+    }
+    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+  }
+  return 0;
 }

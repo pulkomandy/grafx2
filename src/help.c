@@ -94,7 +94,7 @@ void Redefine_control(word *shortcut, int x_pos, int y_pos)
   Display_cursor();
   while (1)
   {
-    Get_input();
+    Get_input(20);
     if (Key==KEY_ESC)
       return;
     if (Key!=0)

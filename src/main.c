@@ -86,86 +86,6 @@
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-int Color_cycling(__attribute__((unused)) void* useless)
-{
-  byte offset[16];
-  int i, color;
-  static SDL_Color PaletteSDL[256];
-  int changed; // boolean : true if the palette needs a change in this tick.
-  
-  long now;
-  long start;
-  
-  while(!Quitting)
-  {
-    start = SDL_GetTicks();
-    memset(offset, 0, sizeof(offset));
-  
-    // Init palette
-    while (Allow_colorcycling)
-    {
-      now = SDL_GetTicks();
-      changed=0;
-      
-      // Check all cycles for a change at this tick
-      for (i=0; i<16; i++)
-      {
-        int len;
-        
-        len=Gradient_array[i].End-Gradient_array[i].Start+1;
-        if (len>1 && Gradient_array[i].Speed)
-        {
-          int new_offset;
-          
-          new_offset=(now-start)/(int)(1000.0/(Gradient_array[i].Speed*0.2856)) % len;
-          if (!Gradient_array[i].Inverse)
-            new_offset=len - new_offset;
-          
-          if (new_offset!=offset[i])
-            changed=1;
-          offset[i]=new_offset;
-        }
-      }
-      
-      if (changed)
-      {
-        // Initialize the palette
-        for(color=0;color<256;color++)
-        {
-          PaletteSDL[color].r=Main_palette[color].R;
-          PaletteSDL[color].g=Main_palette[color].G;
-          PaletteSDL[color].b=Main_palette[color].B;
-        }
-        for (i=0; i<16; i++)
-        {
-          int len;
-        
-          len=Gradient_array[i].End-Gradient_array[i].Start+1;
-          if (len>1 && Gradient_array[i].Speed)
-          {
-            for(color=Gradient_array[i].Start;color<=Gradient_array[i].End;color++)
-            {
-              PaletteSDL[color].r=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].R;
-              PaletteSDL[color].g=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].G;
-              PaletteSDL[color].b=Main_palette[Gradient_array[i].Start+((color-Gradient_array[i].Start+offset[i])%len)].B;
-            }
-          }
-        }
-        SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
-      }
-      SDL_Delay(20);
-    }
-    // Restore normal palette
-    Set_palette(Main_palette);
-    while (!Allow_colorcycling)
-    {
-      SDL_Delay(20);
-    }
-  }
-  return 0;
-}
-
-
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
@@ -588,17 +508,13 @@ int Init_program(int argc,char * argv[])
   
 
   // SDL
-  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
   
-  // Start the timer that will push about 60 "wake up" events
-  // per second in the event queue.
-  Activate_timer(16);
-
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
@@ -905,7 +821,7 @@ int Init_program(int argc,char * argv[])
       }
   }
 
-#if 1
+#if 0
   // Color cycling test
   {
     SDL_Thread* t = SDL_CreateThread(Color_cycling, NULL);

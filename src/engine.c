@@ -599,7 +599,7 @@ void Move_separator(void)
         Display_cursor();
       }
     }
-    Get_input();
+    Get_input(20);
   }
 
   // Effacer la barre en XOR
@@ -709,7 +709,7 @@ void Main_handler(void)
       Drop_file_name=NULL;
     }
     
-    if(Get_input())
+    if(Get_input(0))
     {
       action = 0;
 
@@ -1350,6 +1350,7 @@ void Main_handler(void)
     else
     {
       // Removed all SDL_Delay() timing here: relying on Get_input()
+      SDL_Delay(10);
     }
 
     // Gestion de la souris
@@ -2310,7 +2311,8 @@ short Wait_click_in_palette(T_Palette_button * button)
 
   for (;;)
   {
-    Get_input();
+    while (Get_input(20))
+      ;
 
     if (Mouse_K==LEFT_SIDE)
     {
@@ -2391,7 +2393,7 @@ void Get_color_behind_window(byte * color, byte * click)
 
   do
   {
-    Get_input();
+    Get_input(20);
 
     if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
     {
@@ -2480,7 +2482,7 @@ void Move_window(short dx, short dy)
 
     do
     {
-      Get_input();
+      Get_input(20);
     } while(new_x==Mouse_X-dx && new_y==Mouse_Y-dy);
 
     new_x=Mouse_X-dx;
@@ -2683,7 +2685,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
     do 
     {
       // Attente
-      Get_input();
+      Get_input(20);
       // Mise à jour du survol
       selected_index=Window_click_in_rectangle(2,2,button->Dropdown_width-2,box_height-1)?
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
@@ -2754,7 +2756,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1))
     {
-      Get_input();
+      Get_input(20);
       if (!Mouse_K)
       {
         Hide_cursor();
@@ -2768,7 +2770,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (!(Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1)))
     {
-      Get_input();
+      Get_input(20);
       if (!Mouse_K)
         return 0;
     }
@@ -2802,7 +2804,6 @@ short Window_get_clicked_button(void)
         Display_cursor();
         Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
         Hide_cursor();
-        Need_timer_for_tool=1;
         Window_unselect_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();        
         return temp1->Number;
@@ -3033,7 +3034,7 @@ short Window_clicked_button(void)
 {
   short Button;
 
-  Get_input();
+  Get_input(20);
 
   // Handle clicks
   if (Mouse_K)
@@ -3345,77 +3346,13 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
 
 void Delay_with_active_mouse(int speed)
 {
-  Uint32 now;
   Uint32 end;
+  byte original_mouse_k = Mouse_K;
+  
   end = SDL_GetTicks()+speed*10;
   
-  Need_timer_for_tool=1;
   do
   {
-    Get_input();
-    now = SDL_GetTicks();
-  } while (now<end);
-  Need_timer_for_tool=0;
-}
-
-// ======== Timer stuff =========
-// This system is installed whenever Grafx2 needs to wait
-// for some input, but wants to be called back anyway
-// if a specified amount of time has elapsed.
-
-/// Pointer to the current timer, NULL if disabled at the moment.
-static SDL_TimerID Current_timer=NULL;
-
-///
-/// This callback is meant to post SDL_USEREVENT in the event queue.
-/// It is designed especially to "wake" grafx2 in some situations where
-/// an animation or something is running, even if the mouse and keyboard
-/// are untouched.
-Uint32 Push_timer_event(Uint32 i, __attribute__((unused)) void* p)
-{
-  if (Need_timer_for_tool || Need_timer_for_cursor)
-  {
-    SDL_Event event;
-    SDL_UserEvent user_event;
-
-    user_event.type = SDL_USEREVENT;
-    user_event.code = 0;
-    user_event.data1 = NULL;
-    user_event.data2 = NULL;
-
-    event.type = SDL_USEREVENT;
-    event.user = user_event;
-
-    SDL_PushEvent(&event);
-  }
-  return i;
-}
-
-///
-/// Activate the timer that runs Push_timer_event()
-/// This function can safely be called while it's active.
-void Activate_timer(int speed)
-{
-  if (Current_timer)
-  {
-    if (SDL_RemoveTimer(Current_timer)==SDL_FALSE)
-      // Problem ?... keep running.
-      return;
-  }
-  
-  Current_timer = SDL_AddTimer(speed, Push_timer_event, NULL);
-}
-
-///
-/// Remove the running timer that runs Push_timer_event()
-/// This function can safely be called while it's disabled.
-void Disable_timer(void)
-{
-  if (Current_timer)
-  {
-    if (SDL_RemoveTimer(Current_timer)==SDL_FALSE)
-      // Problem ?... can't really do anything.
-      return;
-  }
-  Current_timer=NULL;
+    Get_input(20);
+  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }

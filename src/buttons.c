@@ -167,7 +167,7 @@ void Button_Message_initial(void)
   Display_cursor();
 
   while(!Mouse_K && !Key)
-    Get_input();
+    Get_input(20);
   if (Mouse_K)
     Wait_end_of_click();
 
@@ -337,7 +337,7 @@ void Button_Select_forecolor(void)
     // Wait loop after initial click
     while(Mouse_K)
     {
-      Get_input();
+      Get_input(20);
       
       if (Button_under_mouse()==BUTTON_CHOOSE_COL)
       {
@@ -373,7 +373,7 @@ void Button_Select_backcolor(void)
     // Wait loop after initial click
     do
     {
-      Get_input();
+      Get_input(20);
       
       if (Button_under_mouse()==BUTTON_CHOOSE_COL)
         break; // This will repeat this button's action

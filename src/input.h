@@ -33,7 +33,7 @@
 /// The latest input variables are held in ::Key, ::Key_ANSI, ::Mouse_X, ::Mouse_Y, ::Mouse_K.
 /// Note that ::Key and ::Key_ANSI are not persistent, they will be reset to 0
 /// on subsequent calls to ::Get_input().
-int  Get_input(void);
+int  Get_input(int sleep_time);
 
 /// Returns true if the keycode has been set as a keyboard shortcut for the function.
 int Is_shortcut(word key, word function);
@@ -59,15 +59,6 @@ extern int Snap_axis;
 extern int Snap_axis_origin_X;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)
 extern int Snap_axis_origin_Y;
-
-///
-/// Boolean, true if the timer should put "ticks" in the SDL queue.
-/// This one flag is for tools (airbrush) or windows (repeatable button) that require it.
-extern volatile int Need_timer_for_tool;
-///
-/// Boolean, true if the timer should put "ticks" in the SDL queue.
-/// This one flag is for the mouse emulation, by keyboard/joystick.
-extern volatile int Need_timer_for_cursor;
 
 ///
 /// This malloced string is set when a drag-and-drop event
