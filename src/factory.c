@@ -1001,7 +1001,7 @@ void Run_script(char *scriptdir)
   luaopen_table(L);
   //luaopen_io(L); // crashes on Windows, for unknown reason
   //luaopen_os(L);
-  //luaopen_string(L);
+  luaopen_string(L);
   luaopen_math(L);
   //luaopen_debug(L);
 
