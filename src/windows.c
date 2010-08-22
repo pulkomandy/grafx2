@@ -2738,7 +2738,14 @@ void Remap_screen_after_menu_colors_change(void)
 }
 
 
-
+int Same_color(T_Components * palette, byte c1, byte c2)
+{
+  if (palette[c1].R==palette[c2].R &&
+    palette[c1].G==palette[c2].G &&
+    palette[c1].B==palette[c2].B)
+    return 1;
+  return 0;
+}
 
 void Compute_optimal_menu_colors(T_Components * palette)
 {
@@ -2746,9 +2753,10 @@ void Compute_optimal_menu_colors(T_Components * palette)
   byte l[256];
   byte s[256];
   byte h;
-  byte max_l = 0, min_l = 255;
-  byte low_l, hi_l;
-  byte delta_low = 255, delta_hi = 255;
+  int max_l = -1, min_l = 256;
+  int low_l, hi_l;
+  int delta_low = 999999;
+  int delta_high = 999999;
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2790,7 +2798,11 @@ void Compute_optimal_menu_colors(T_Components * palette)
                   // On cherche une couleur de transparence différente des 4 autres.
                   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-                
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
                   Remap_menu_sprites();
                   return;
                 }
@@ -2805,50 +2817,86 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   // Compute luminance for whole palette
   // Take the darkest as black, the brightest white
-  for(i = 0; i < 256; i++) {
+  for(i = 0; i < 256; i++)
+  {
     RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
-    if (l[i] > max_l) {
+    if (l[i] > max_l)
+    {
       max_l = l[i];
       MC_White = i;
     }
-
-    if (l[i] < min_l) {
+  }
+  for(i = 0; i < 256; i++)
+  {
+    if (l[i] < min_l && i!=MC_White)
+    {
       min_l = l[i];
       MC_Black = i;
     }
   }
 
-  // Find colors nearest to min+(max-min)/3 and min+2(max-min)/3
+  // Find color nearest to min+2(max-min)/3
   // but at the same time we try to minimize the saturation so that the menu
   // still looks grey
-  low_l = min_l + (max_l - min_l)/3;
   hi_l = min_l + 2*(max_l - min_l)/3;
 
-  for (i = 0; i < 256; i++) {
-    if ( abs(l[i] - low_l) + s[i]/2 < delta_low ) {
-      delta_low = abs(l[i] - low_l);
-      MC_Dark = i;
-    }
-
-    if ( abs(l[i] - hi_l) + s[i]/3 < delta_hi ) {
-      delta_hi = abs(l[i] - hi_l);
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs(l[i] - hi_l) + s[i]/4 < delta_high && i!=MC_White && i!=MC_Black)
+    {
+      delta_high = abs(l[i] - hi_l) + s[i]/4;
       MC_Light = i;
     }
   }
+  
+  // Target "Dark color" is halfway between Light and Black
+  low_l = ((int)l[MC_Light]+l[MC_Black])/2;
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs((int)l[i] - low_l) + s[i]/4 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
+    {
+      delta_low = abs((int)l[i] - low_l)+ s[i]/4;
+      MC_Dark = i;
+    }
+  }
+  
+  
+  //if (l[MC_Light]<l[MC_Dark])
+  //{
+  //  // Not sure if that can happen, but just in case:
+  //  SWAP_BYTES(MC_Light, MC_Dark)
+  //}
 
   // Si deux des couleurs choisies ont le même index, c'est destructif car 
   // on fait ensuite un remap de l'image. Donc on évite ce problème (un
   // peu brutalement)
   // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
   // le blanc et le noir
-  while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark) MC_Dark--;
-  while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light) MC_Light--;
-  while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
+  //while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark || Same_color(palette, MC_Dark, MC_White)) MC_Dark--;
+  //while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light || Same_color(palette, MC_Light, MC_Black)) MC_Light--;
+  //while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
 
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-
+  
+  if (Same_color(palette, MC_Black, MC_Dark))
+    MC_OnBlack=MC_Light;
+  else
+    MC_OnBlack=MC_Dark;
+  
+  if (Same_color(palette, MC_White, MC_Light))
+  {
+    MC_Window=MC_Dark;
+    MC_Darker=MC_Black;
+  }
+  else
+  {
+    MC_Window=MC_Light;
+    MC_Darker=MC_Dark;
+  }
+  MC_Lighter=MC_White;
+  
   Remap_menu_sprites();
 }
 

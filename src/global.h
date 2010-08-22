@@ -73,6 +73,12 @@ GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI
 GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
 GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
 
+GFX2_GLOBAL byte MC_OnBlack; ///< Index of color immediately lighter than "black" in the GUI menus.
+GFX2_GLOBAL byte MC_Window; ///< Index of color to use as window background in the GUI menus.
+GFX2_GLOBAL byte MC_Lighter; ///< Index of color lighter than window in the GUI menus.
+GFX2_GLOBAL byte MC_Darker; ///< Index of color darker than window in the GUI menus.
+
+
 // Input state
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
 GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.

@@ -1550,7 +1550,7 @@ void Open_window(word width,word height, const char * title)
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
   // Fenêtre grise
-  Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Light);
+  Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Window);
 
   // -- Frame de la fenêtre ----- --- -- -  -
 
@@ -1852,7 +1852,7 @@ void Window_draw_slider(T_Scroller_button * button)
 
   Block(Window_pos_X+(button->Pos_X*Menu_factor_X),
         Window_pos_Y+(slider_position*Menu_factor_Y),
-        11*Menu_factor_X,button->Cursor_height*Menu_factor_Y,MC_Dark/*MC_White*/);
+        11*Menu_factor_X,button->Cursor_height*Menu_factor_Y,MC_OnBlack/*MC_White*/);
 
   Update_rect(Window_pos_X+(button->Pos_X*Menu_factor_X),
         Window_pos_Y+button->Pos_Y*Menu_factor_Y,

@@ -2682,6 +2682,11 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Light = gfx->Color[2];
   MC_White = gfx->Color[3];
   MC_Trans = gfx->Color_trans;
+  MC_OnBlack=MC_Dark;
+  MC_Window=MC_Light;
+  MC_Lighter=MC_White;
+  MC_Darker=MC_Dark;
+  
 
   // Set menubars to point to the new data
   for (i=0; i<3; i++)
