@@ -48,7 +48,6 @@
 #endif
 
 #include <SDL_image.h>
-// SFont
 #include "SFont.h"
 
 #include "struct.h"
@@ -56,6 +55,7 @@
 #include "sdlscreen.h"
 #include "io.h"
 #include "errors.h"
+#include "windows.h"
 
 typedef struct T_Font
 {
@@ -461,7 +461,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   Surface_fonte=IMG_Load(Font_name(font_number));
   if (!Surface_fonte)
   {
-    DEBUG("Font loading failed",0);
+    Warning_message("Error loading font. The file may be corrupt.");
     return NULL;
   }
   font=SFont_InitFont(Surface_fonte);
