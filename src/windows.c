@@ -1505,6 +1505,7 @@ void Compute_paintbrush_coordinates(void)
   {
     // Operations that don't implement it
     case OPERATION_LINE:
+	case OPERATION_ROTATE_BRUSH:
       Snap_axis=0;
       break;
     // Operations that implement it

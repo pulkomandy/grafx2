@@ -494,9 +494,7 @@ void Line_12_5(void)
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   if(SDL_GetModState() & KMOD_SHIFT)
-  {
     Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
-  }
 
   // On vient de bouger
   if ((cursor_x!=end_x) || (cursor_y!=end_y))
