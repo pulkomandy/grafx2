@@ -153,8 +153,15 @@ else
     CP = cp
     BIN = ../bin/grafx2
     PLATFORMOBJ = $(OBJDIR)/haiku.o
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe
+      ifeq ($(NOLUA),1)
+        LUACOPT =
+        LUALOPT =
+      else
+            LUACOPT = -D__ENABLE_LUA__
+            LUALOPT = -llua
+      endif
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include $(LUACOPT)
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
