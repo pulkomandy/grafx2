@@ -77,6 +77,7 @@
 // Returns 0 if all ok, something else if failed
 byte Native_filesel(byte load)
 {
+	load = load;
 #ifdef __WIN32__
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
@@ -1419,23 +1420,37 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         *quicksearch_filename=0;
         break;
 
-      case  6 : // Scroller des formats
-        Hide_cursor();
-        // On met à jour le format de browsing du fileselect:
-        Main_format=Window_attribute2;
-        // Comme on change de liste, on se place en début de liste:
-        Main_fileselector_position=0;
-        Main_fileselector_offset=0;
-        // Affichage des premiers fichiers visibles:
-        Reload_list_of_files(Main_format,file_scroller);
-        Display_cursor();
-        New_preview_is_needed=1;
-        *quicksearch_filename=0;
+	  case  6 : // Scroller des formats
+		// On met à jour le format de browsing du fileselect:
+		if (Main_format != Window_attribute2) {
+			char* savename = strdup(Selector_filename);
+			int nameLength = strlen(savename);
+			DEBUG(Selector_filename, 42);
+			Main_format = Window_attribute2;
+			// Comme on change de liste, on se place en début de liste:
+			Main_fileselector_position = 0;
+			Main_fileselector_offset = 0;
+			// Affichage des premiers fichiers visibles:
+			Hide_cursor();
+			Reload_list_of_files(Main_format, file_scroller);
+			New_preview_is_needed = 1;
+			*quicksearch_filename = 0;
+			strcpy(Selector_filename, savename);
+			if (Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
+				Selector_filename[nameLength - 4] == '.')
+			{
+				strcpy(Selector_filename + nameLength - 3,
+					Get_fileformat(Main_format)->Default_extension);
+			}
+			free(savename);
+			Print_filename_in_fileselector();
+        	Display_cursor();
+		}
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
-          Readline(45,70,context->Comment,32,INPUT_TYPE_STRING);
+          Readline(45, 70, context->Comment, 32, INPUT_TYPE_STRING);
           Display_cursor();
         }
         break;
@@ -1458,7 +1473,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
               if(!Directory_exists(Selector_filename))
               {
                  strcat(Selector_filename, ".");
-                 strcat(Selector_filename,Get_fileformat(Main_format)->Default_extension);
+                strcat(Selector_filename, Get_fileformat(Main_format)->Default_extension);
               }
             }
             else
