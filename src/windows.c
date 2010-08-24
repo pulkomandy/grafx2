@@ -2834,6 +2834,22 @@ void Compute_optimal_menu_colors(T_Components * palette)
       MC_Black = i;
     }
   }
+  // Alter the S values according to the L range - this is for the future
+  // comparisons, so that highly variable saturation doesn't weigh
+  // too heavily when the the lightness is in a narrow range.
+  for(i = 0; i < 256; i++)
+  {
+    s[i]=s[i]*(max_l-min_l)/255;
+  }
+  // Adjust (reduce) perceived saturation at both ends of L spectrum
+  for(i = 0; i < 256; i++)
+  {
+    if (l[i]>192)
+      s[i]=s[i]*(255-l[i])/64;
+    else if (l[i]<64)
+      s[i]=s[i]*l[i]/64;
+  }
+  
 
   // Find color nearest to min+2(max-min)/3
   // but at the same time we try to minimize the saturation so that the menu
@@ -2842,20 +2858,20 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   for (i = 0; i < 256; i++)
   {
-    if ( abs(l[i] - hi_l) + s[i]/4 < delta_high && i!=MC_White && i!=MC_Black)
+    if ( abs(l[i] - hi_l) + s[i]/6 < delta_high && i!=MC_White && i!=MC_Black)
     {
-      delta_high = abs(l[i] - hi_l) + s[i]/4;
+      delta_high = abs(l[i] - hi_l) + s[i]/6;
       MC_Light = i;
     }
   }
   
-  // Target "Dark color" is halfway between Light and Black
-  low_l = ((int)l[MC_Light]+l[MC_Black])/2;
+  // Target "Dark color" is 2/3 between Light and Black
+  low_l = ((int)l[MC_Light]*2+l[MC_Black])/3;
   for (i = 0; i < 256; i++)
   {
-    if ( abs((int)l[i] - low_l) + s[i]/4 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
+    if ( abs((int)l[i] - low_l) + s[i]/6 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
     {
-      delta_low = abs((int)l[i] - low_l)+ s[i]/4;
+      delta_low = abs((int)l[i] - low_l)+ s[i]/6;
       MC_Dark = i;
     }
   }
