@@ -67,6 +67,11 @@ void Set_palette_RGB_scale(int scale)
     RGB_scale = scale;
 }
 
+int Get_palette_RGB_scale(void)
+{
+  return RGB_scale;
+}
+
 byte Round_palette_component(byte comp)
 {
   return ((comp+128/RGB_scale)*(RGB_scale-1)/255*255+(RGB_scale&1?1:0))/(RGB_scale-1);
@@ -391,6 +396,13 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
   byte color;
   byte replace_table[256];
   T_Components rgb[4];
+  const T_Components * target_rgb[4];
+  const T_Components cpc_colors[4] = {
+    {  0,  0,  0},
+    {128,128,128}, // Grey
+    {  0,255,128}, // Soft light green
+    {255,255,255}
+  };
   short new_colors[4]={255,254,253,252};
 
   // On initialise la table de remplacement
@@ -425,6 +437,15 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
     }
   } while (color);
 
+  if (RGB_scale==3)
+    // Specialized colors for CPC palette
+    for (index=0; index<4; index++)
+      target_rgb[index] = &cpc_colors[index];
+  else
+    // Should be Config.Fav_menu_colors[index] if using user colors
+    for (index=0; index<4; index++)
+      target_rgb[index]=&(Gfx->Default_palette[Gfx->Color[index]]);
+
   //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
   // couleurs du menu par défaut
   for (index=0; index<4; index++)
@@ -434,9 +455,9 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
     rgb[index].G=Main_palette[color].G;
     rgb[index].B=Main_palette[color].B;
     // Should be Config.Fav_menu_colors[index] if using user colors
-    Main_palette[color].R=Gfx->Default_palette[Gfx->Color[index]].R;
-    Main_palette[color].G=Gfx->Default_palette[Gfx->Color[index]].G;
-    Main_palette[color].B=Gfx->Default_palette[Gfx->Color[index]].B;
+    Main_palette[color].R=Round_palette_component(target_rgb[index]->R);
+    Main_palette[color].G=Round_palette_component(target_rgb[index]->G);
+    Main_palette[color].B=Round_palette_component(target_rgb[index]->B);
   }
 
   //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
@@ -2772,6 +2793,7 @@ void Button_Secondary_palette(void)
   {
     Set_palette_RGB_scale(rgb_scale);
     Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
   }
 
   if (clicked_button==1)

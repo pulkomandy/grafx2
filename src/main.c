@@ -658,7 +658,10 @@ int Init_program(int argc,char * argv[])
   // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-//  Compute_optimal_menu_colors(Gfx->Default_palette);
+  
+  // Even when using the skin's palette, if RGB range is small
+  // the colors will be unusable.
+  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)
   Sieve_mode=0;

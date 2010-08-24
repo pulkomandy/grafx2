@@ -39,6 +39,8 @@
 #include "op_c.h"
 #include "readline.h"
 #include "sdlscreen.h"
+#include "palette.h"
+
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
@@ -2757,6 +2759,13 @@ void Compute_optimal_menu_colors(T_Components * palette)
   int low_l, hi_l;
   int delta_low = 999999;
   int delta_high = 999999;
+  const int tolerence=16;
+  const T_Components cpc_colors[4] = {
+    {  0,  0,  0},
+    {128,128,128}, // Grey
+    {  0,255,128}, // Soft light green
+    {255,255,255}
+  };
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2765,34 +2774,34 @@ void Compute_optimal_menu_colors(T_Components * palette)
   Old_trans = MC_Trans;
 
   // First method:
-  // If all exact match for the ideal colors exist, pick them.
+  // If all close matches for the ideal colors exist, pick them.
   for (i=255; i>=0; i--)
   {
     
-    if (palette[i].R==Gfx->Default_palette[Gfx->Color[3]].R 
-     && palette[i].G==Gfx->Default_palette[Gfx->Color[3]].G
-     && palette[i].B==Gfx->Default_palette[Gfx->Color[3]].B)
+    if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
     {
       MC_White=i;
       for (i=255; i>=0; i--)
       {
-        if (palette[i].R==Gfx->Default_palette[Gfx->Color[2]].R 
-         && palette[i].G==Gfx->Default_palette[Gfx->Color[2]].G
-         && palette[i].B==Gfx->Default_palette[Gfx->Color[2]].B)
+        if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
         {
           MC_Light=i;
           for (i=255; i>=0; i--)
           {
-            if (palette[i].R==Gfx->Default_palette[Gfx->Color[1]].R 
-             && palette[i].G==Gfx->Default_palette[Gfx->Color[1]].G
-             && palette[i].B==Gfx->Default_palette[Gfx->Color[1]].B)
+            if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
             {
               MC_Dark=i;
               for (i=255; i>=0; i--)
               {
-                if (palette[i].R==Gfx->Default_palette[Gfx->Color[0]].R 
-                 && palette[i].G==Gfx->Default_palette[Gfx->Color[0]].G
-                 && palette[i].B==Gfx->Default_palette[Gfx->Color[0]].B)
+                if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
                 {
                   MC_Black=i;
                   // On cherche une couleur de transparence différente des 4 autres.
@@ -2813,13 +2822,66 @@ void Compute_optimal_menu_colors(T_Components * palette)
       }
     }
   }
-  // Second method:
+  // Second method: For CPC 27-color modes only
+  // Try to find colors that just work
+  if (Get_palette_RGB_scale()==3)
+  for (i=255; i>=0; i--)
+  {
+    
+    if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[3].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==cpc_colors[3].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==cpc_colors[3].B/tolerence)
+    {
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[2].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==cpc_colors[2].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==cpc_colors[2].B/tolerence)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[1].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==cpc_colors[1].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==cpc_colors[1].B/tolerence)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[0].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==cpc_colors[0].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==cpc_colors[0].B/tolerence)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
+                  Remap_menu_sprites();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Third method:
 
   // Compute luminance for whole palette
   // Take the darkest as black, the brightest white
   for(i = 0; i < 256; i++)
   {
     RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
+    // Another formula for lightness, in 0-255 range
+    //l[i]=Perceptual_lightness(&palette[i])/4062/255;
     if (l[i] > max_l)
     {
       max_l = l[i];
@@ -2841,9 +2903,9 @@ void Compute_optimal_menu_colors(T_Components * palette)
   {
     s[i]=s[i]*(max_l-min_l)/255;
   }
-  // Adjust (reduce) perceived saturation at both ends of L spectrum
   for(i = 0; i < 256; i++)
   {
+    // Adjust (reduce) perceived saturation at both ends of L spectrum
     if (l[i]>192)
       s[i]=s[i]*(255-l[i])/64;
     else if (l[i]<64)
@@ -2858,9 +2920,9 @@ void Compute_optimal_menu_colors(T_Components * palette)
 
   for (i = 0; i < 256; i++)
   {
-    if ( abs(l[i] - hi_l) + s[i]/6 < delta_high && i!=MC_White && i!=MC_Black)
+    if ( abs(l[i] - hi_l) + s[i]/2 < delta_high && i!=MC_White && i!=MC_Black)
     {
-      delta_high = abs(l[i] - hi_l) + s[i]/6;
+      delta_high = abs(l[i] - hi_l) + s[i]/2;
       MC_Light = i;
     }
   }

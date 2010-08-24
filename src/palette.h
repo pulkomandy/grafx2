@@ -31,6 +31,8 @@ void Button_Secondary_palette(void);
 /// Choose the number of graduations for RGB components, from 2 to 256.
 void Set_palette_RGB_scale(int);
 
+int Get_palette_RGB_scale(void);
+
 ///
 /// Scale a component (R, G or B) according to the current RGB graduations.
 /// Returns the resulting value, in the [0-255] range.
