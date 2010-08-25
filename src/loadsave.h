@@ -98,11 +98,16 @@ typedef struct
   short Preview_factor_Y;
   short Preview_pos_X;
   short Preview_pos_Y;
+  byte *Preview_bitmap;
+  byte  Preview_usage[256];
   
   // Internal: returned surface for SDL_Surface case
   SDL_Surface * Surface;
 
 } T_IO_Context;
+
+#define PREVIEW_WIDTH  120
+#define PREVIEW_HEIGHT  80
 
 /// Type of a function that can be called for a T_IO_Context. Kind of a method.
 typedef void (* Func_IO) (T_IO_Context *);

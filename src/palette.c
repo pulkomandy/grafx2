@@ -396,13 +396,6 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
   byte color;
   byte replace_table[256];
   T_Components rgb[4];
-  const T_Components * target_rgb[4];
-  const T_Components cpc_colors[4] = {
-    {  0,  0,  0},
-    {128,128,128}, // Grey
-    {  0,255,128}, // Soft light green
-    {255,255,255}
-  };
   short new_colors[4]={255,254,253,252};
 
   // On initialise la table de remplacement
@@ -437,27 +430,20 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
     }
   } while (color);
 
-  if (RGB_scale==3)
-    // Specialized colors for CPC palette
-    for (index=0; index<4; index++)
-      target_rgb[index] = &cpc_colors[index];
-  else
-    // Should be Config.Fav_menu_colors[index] if using user colors
-    for (index=0; index<4; index++)
-      target_rgb[index]=&(Gfx->Default_palette[Gfx->Color[index]]);
-
   //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
   // couleurs du menu par défaut
   for (index=0; index<4; index++)
   {
+    const T_Components * target_rgb;
+
+    target_rgb=Favorite_GUI_color(index);
     color=new_colors[index];
     rgb[index].R=Main_palette[color].R;
     rgb[index].G=Main_palette[color].G;
     rgb[index].B=Main_palette[color].B;
-    // Should be Config.Fav_menu_colors[index] if using user colors
-    Main_palette[color].R=Round_palette_component(target_rgb[index]->R);
-    Main_palette[color].G=Round_palette_component(target_rgb[index]->G);
-    Main_palette[color].B=Round_palette_component(target_rgb[index]->B);
+    Main_palette[color].R=Round_palette_component(target_rgb->R);
+    Main_palette[color].G=Round_palette_component(target_rgb->G);
+    Main_palette[color].B=Round_palette_component(target_rgb->B);
   }
 
   //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
@@ -2851,4 +2837,22 @@ int Get_clipboard_colors(T_Palette palette, byte start_color)
   }
   memcpy(palette+start_color, Palette_clipboard, nb_colors*sizeof(T_Components));
   return nb_colors;
+}
+
+/// Get the favorite color to use for GUI's black,dark,light or white.
+const T_Components * Favorite_GUI_color(byte color_index)
+{
+  static const T_Components cpc_colors[4] = {
+    {  0,  0,  0},
+    {128,128,128}, // Grey
+    {  0,255,128}, // Soft light green
+    {255,255,255}
+  };
+  
+  if (RGB_scale==3)
+    // Specialized colors for CPC palette
+    return &cpc_colors[color_index];
+  else
+    // Should be Config.Fav_menu_colors[index] if using user colors
+      return &(Gfx->Default_palette[Gfx->Color[color_index]]);
 }

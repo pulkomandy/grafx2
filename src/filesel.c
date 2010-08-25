@@ -1772,7 +1772,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // On efface le commentaire précédent
         Window_rectangle(45,70,32*8,8,MC_Light);
         // On nettoie la zone où va s'afficher la preview:
-        Window_rectangle(183,95,120,80,MC_Light);
+        Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
         // On efface les dimensions de l'image
         Window_rectangle(143,59,72,8,MC_Light);
         // On efface la taille du fichier
@@ -1788,7 +1788,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
         Update_window_area(45,48,256,30);
         // Zone de preview
-        Update_window_area(183,95,120,80);
+        Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
       }
 
       New_preview_is_needed=0;

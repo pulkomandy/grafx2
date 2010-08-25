@@ -55,3 +55,6 @@ void Set_clipboard_colors(int nb_colors, T_Components *colors);
 /// @param start_color  Index of first color to replace
 /// @return        Number of colors retrieved (0-256)
 int Get_clipboard_colors(T_Palette palette, byte start_color);
+
+/// Get the favorite color to use for GUI's black,dark,light or white.
+const T_Components * Favorite_GUI_color(byte color_index);
