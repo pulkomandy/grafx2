@@ -194,15 +194,15 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
           Pixel_ratio != PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE2)
         {
-          context->Preview_bitmap[x_pos/context->Preview_factor_X*2 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X*2]=color;
-          context->Preview_bitmap[x_pos/context->Preview_factor_X*2+1 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X*2]=color;
+          context->Preview_bitmap[x_pos/context->Preview_factor_X*2 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
+          context->Preview_bitmap[x_pos/context->Preview_factor_X*2+1 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
         }
         else if (context->Ratio == PIXEL_TALL && 
           Pixel_ratio != PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL2)
         {
-          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X*2]=color;
-          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X*2+1]=color;
+          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2)*PREVIEW_WIDTH*Menu_factor_X]=color;
+          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2+1)*PREVIEW_WIDTH*Menu_factor_X]=color;
         }
         else
           context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
@@ -827,9 +827,20 @@ void Load_image(T_IO_Context *context)
     else if (context->Preview_bitmap)
     {
       int x_pos,y_pos;
+      int width,height;
+      width=context->Width/context->Preview_factor_X;
+      height=context->Height/context->Preview_factor_Y;
+      if (context->Ratio == PIXEL_WIDE && 
+          Pixel_ratio != PIXEL_WIDE &&
+          Pixel_ratio != PIXEL_WIDE2)
+        width*=2;
+      else if (context->Ratio == PIXEL_TALL && 
+          Pixel_ratio != PIXEL_TALL &&
+          Pixel_ratio != PIXEL_TALL2)
+        height*=2;
       
-      for (y_pos=0; y_pos<context->Height/context->Preview_factor_Y;y_pos++)
-        for (x_pos=0; x_pos<context->Width/context->Preview_factor_X;x_pos++)
+      for (y_pos=0; y_pos<height;y_pos++)
+        for (x_pos=0; x_pos<width;x_pos++)
         {
           byte color=context->Preview_bitmap[x_pos+y_pos*PREVIEW_WIDTH*Menu_factor_X];
 
