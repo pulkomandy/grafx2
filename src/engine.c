@@ -42,6 +42,8 @@
 #include "layers.h"
 #include "factory.h"
 #include "loadsave.h"
+#include "io.h"
+
 
 
 // we need this as global
@@ -2483,7 +2485,7 @@ void Move_window(short dx, short dy)
     do
     {
       Get_input(20);
-    } while(new_x==Mouse_X-dx && new_y==Mouse_Y-dy);
+    } while(Mouse_K && new_x==Mouse_X-dx && new_y==Mouse_Y-dy);
 
     new_x=Mouse_X-dx;
 
