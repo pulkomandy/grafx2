@@ -1605,6 +1605,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   0, // No shortcut
   0},
+  {197,
+  "Toggle color cycling",
+  "Activates or desactivates color",
+  "cycling, if the current image has",
+  "cycling colors. (See gradient menu)",
+  true,
+  SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1806,4 +1814,5 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_RUN_SCRIPT_8,
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
+  SPECIAL_CYCLE_MODE,
 };

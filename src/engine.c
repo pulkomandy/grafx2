@@ -1307,6 +1307,13 @@ void Main_handler(void)
                 action++;
 #endif
                 break;
+              case SPECIAL_CYCLE_MODE:
+                Cycling_mode= !Cycling_mode;
+                // Restore palette
+                if (!Cycling_mode)
+                  Set_palette(Main_palette);
+                action++;
+                break;
             }
           }
         } // End of special keys
@@ -1579,7 +1586,12 @@ void Open_window(word width,word height, const char * title)
     Cursor_shape=CURSOR_SHAPE_ARROW;
     Paintbrush_hidden_before_window=Paintbrush_hidden;
     Paintbrush_hidden=1;
-    Allow_colorcycling=0;
+    if (Allow_colorcycling)
+    {
+      Allow_colorcycling=0;
+      // Restore palette
+      Set_palette(Main_palette);
+    }
   }
 
   // Initialisation des listes de boutons de la fenêtre

@@ -785,6 +785,8 @@ GFX2_GLOBAL Func_pixel Gradient_pixel;
 GFX2_GLOBAL T_Gradient_array Gradient_array[16];
 /// Index in ::Gradient_array of the currently selected gradient.
 GFX2_GLOBAL byte Current_gradient;
+/// Boolean, true when the color cycling is active.
+GFX2_GLOBAL byte Cycling_mode;
 
 // -- Airbrush data
 

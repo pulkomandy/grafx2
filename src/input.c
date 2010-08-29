@@ -923,7 +923,7 @@ int Color_cycling(__attribute__((unused)) void* useless)
     start = SDL_GetTicks();
     return 1;
   }
-  if (!Allow_colorcycling)
+  if (!Allow_colorcycling || !Cycling_mode)
     return 1;
     
 
