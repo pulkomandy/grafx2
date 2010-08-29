@@ -404,7 +404,7 @@ void Scroll_help(T_Scroller_button * scroller)
 {
   Hide_cursor();
   scroller->Position=Help_position;
-  Compute_slider_cursor_height(scroller);
+  Compute_slider_cursor_length(scroller);
   Window_draw_slider(scroller);
   Display_help();
   Display_cursor();
@@ -523,7 +523,7 @@ void Window_help(int section, const char *sub_section)
           nb_lines=Help_section[Current_help_section].Length;
           scroller->Position=0;
           scroller->Nb_elements=nb_lines;
-          Compute_slider_cursor_height(scroller);
+          Compute_slider_cursor_length(scroller);
           Window_draw_slider(scroller);
         }
         else

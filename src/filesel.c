@@ -77,7 +77,7 @@
 // Returns 0 if all ok, something else if failed
 byte Native_filesel(byte load)
 {
-	load = load;
+	//load = load;
 #ifdef __WIN32__
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
@@ -964,7 +964,7 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 {
   button->Nb_elements=Filelist.Nb_elements;
   button->Position=Position;
-  Compute_slider_cursor_height(button);
+  Compute_slider_cursor_length(button);
   Window_draw_slider(button);
   // On efface les anciens noms de fichier:
   Window_rectangle(8-1,95-1,144+2,80+2,MC_Black);

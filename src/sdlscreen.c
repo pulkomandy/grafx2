@@ -23,6 +23,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <SDL.h>
+#if defined(__WIN32__)
+    #include <windows.h>
+#endif
+// There is no WM on the GP2X...
+#ifndef __GP2X__
+    #include <SDL_syswm.h>
+#endif
+
 #include "global.h"
 #include "sdlscreen.h"
 #include "errors.h"
@@ -270,3 +278,18 @@ void Clear_border(byte color)
   }  
 }
 
+/// Activates or desactivates file drag-dropping in program window.
+void Allow_drag_and_drop(int flag)
+{
+  // Inform Windows that we accept drag-n-drop events or not
+  #ifdef __WIN32__
+	SDL_SysWMinfo wminfo;
+	HWND hwnd;
+	
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWMInfo(&wminfo);
+	hwnd = wminfo.window;
+	DragAcceptFiles(hwnd,flag?TRUE:FALSE);
+	SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
+  #endif
+}

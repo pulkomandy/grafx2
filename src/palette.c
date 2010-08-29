@@ -678,7 +678,7 @@ void Set_palette_slider(T_Scroller_button * slider,
 {
   slider->Nb_elements=nb_elements;
   slider->Position=position;
-  Compute_slider_cursor_height(slider);
+  Compute_slider_cursor_length(slider);
   Window_draw_slider(slider);
   Print_counter(x_pos,NUMERIC_Y,value,MC_Black,MC_Light);
 }

@@ -67,4 +67,7 @@ void Clear_border(byte color);
   
 extern volatile int Allow_colorcycling;
 
+/// Activates or desactivates file drag-dropping in program window.
+void Allow_drag_and_drop(int flag);
+
 #endif // SDLSCREEN_H_INCLUDED

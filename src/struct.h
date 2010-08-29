@@ -105,17 +105,18 @@ typedef struct T_Palette_button
   struct T_Palette_button * Next;///< Pointer to the next palette of current window.
 } T_Palette_button;
 
-/// A window control that represents a vertical scrollbar, with a slider, and two arrow buttons.
+/// A window control that represents a scrollbar, with a slider, and two arrow buttons.
 typedef struct T_Scroller_button
 {
   short Number;                   ///< Unique identifier for all controls
+  byte Is_horizontal;             ///< Boolean: True if slider is horizontal instead of vertical.
   word Pos_X;                     ///< Coordinate for top of button, relative to the window, before scaling.
   word Pos_Y;                     ///< Coordinate for left of button, relative to the window, before scaling.
-  word Height;                    ///< Height before scaling.
+  word Length;                    ///< Length before scaling.
   word Nb_elements;               ///< Number of distinct values it can take.
   word Nb_visibles;               ///< If this slider is meant to show several elements of a collection, this is their number (otherwise, it's 1).
   word Position;                  ///< Current position of the slider: which item it's pointing.
-  word Cursor_height;             ///< Vertical dimension of the slider, in pixels before scaling.
+  word Cursor_length;             ///< Dimension of the slider, in pixels before scaling.
   struct T_Scroller_button * Next;///< Pointer to the next scroller of current window.
 } T_Scroller_button;
 

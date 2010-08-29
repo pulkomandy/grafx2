@@ -824,14 +824,7 @@ int Init_program(int argc,char * argv[])
       }
   }
 
-#if 0
-  // Color cycling test
-  {
-    SDL_Thread* t = SDL_CreateThread(Color_cycling, NULL);
-  }
-#endif
-
-  AcceptDND();
+  Allow_drag_and_drop(1);
 
   return(1);
 }

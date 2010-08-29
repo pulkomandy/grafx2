@@ -96,21 +96,6 @@ short Joybutton_left_click=0; // Button number that serves as left click
 short Joybutton_right_click=0; // Button number that serves as right-click
 #endif
 
-
-void AcceptDND(void)
-{
-#ifdef __WIN32__
-	SDL_SysWMinfo wminfo;
-	HWND hwnd;
-	
-	SDL_VERSION(&wminfo.version);
-	SDL_GetWMInfo(&wminfo);
-	hwnd = wminfo.window;
-	DragAcceptFiles(hwnd,TRUE);
-	SDL_EventState (SDL_SYSWMEVENT,SDL_ENABLE );
-#endif
-}
-
 int Has_shortcut(word function)
 {
   if (function == 0xFFFF)

@@ -45,7 +45,7 @@ void Window_select_normal_button(word x_pos,word y_pos,word width,word height);
 void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height);
 void Window_draw_palette_bouton(word x_pos,word y_pos);
 
-void Compute_slider_cursor_height(T_Scroller_button * button);
+void Compute_slider_cursor_length(T_Scroller_button * button);
 void Window_draw_slider(T_Scroller_button * button);
 void Window_draw_scroller_bouton(T_Scroller_button * button);
 
@@ -66,6 +66,10 @@ void Window_clear_tags(void);
 void Tag_color_range(byte start, byte end);
 
 T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
+  word height, word nb_elements, word nb_elements_visible,
+  word initial_position);
+
+T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos,
   word height, word nb_elements, word nb_elements_visible,
   word initial_position);
 
