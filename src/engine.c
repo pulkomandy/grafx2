@@ -1857,32 +1857,66 @@ void Window_draw_slider(T_Scroller_button * button)
 {
   word slider_position;
 
-  slider_position=button->Pos_Y+12;
-
-  Block(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+(slider_position*Menu_factor_Y),
-        11*Menu_factor_X,(button->Length-24)*Menu_factor_Y,MC_Black/*MC_Dark*/);
-
-  if (button->Nb_elements>button->Nb_visibles)
-    slider_position+=Round_div(button->Position*(button->Length-24-button->Cursor_length),button->Nb_elements-button->Nb_visibles);
-
-  Block(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+(slider_position*Menu_factor_Y),
-        11*Menu_factor_X,button->Cursor_length*Menu_factor_Y,MC_OnBlack/*MC_White*/);
-
-  Update_rect(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+button->Pos_Y*Menu_factor_Y,
-        11*Menu_factor_X,(button->Length)*Menu_factor_Y);
+  if (button->Is_horizontal)
+  {
+    slider_position=button->Pos_X+12;
+  
+    Window_rectangle(slider_position,
+          button->Pos_Y,
+          button->Length-24,11,MC_Black/*MC_Dark*/);
+  
+    if (button->Nb_elements>button->Nb_visibles)
+      slider_position+=Round_div(button->Position*(button->Length-24-button->Cursor_length),button->Nb_elements-button->Nb_visibles);
+  
+    Window_rectangle(slider_position,
+          button->Pos_Y,
+          button->Cursor_length,11,MC_OnBlack/*MC_White*/);
+  
+    Update_window_area(button->Pos_X,
+          button->Pos_Y,
+          button->Length,11);
+  }
+  else
+  {
+    slider_position=button->Pos_Y+12;
+  
+    Window_rectangle(button->Pos_X,
+          slider_position,
+          11,button->Length-24,MC_Black/*MC_Dark*/);
+  
+    if (button->Nb_elements>button->Nb_visibles)
+      slider_position+=Round_div(button->Position*(button->Length-24-button->Cursor_length),button->Nb_elements-button->Nb_visibles);
+  
+    Window_rectangle(button->Pos_X,
+          slider_position,
+          11,button->Cursor_length,MC_OnBlack/*MC_White*/);
+  
+    Update_window_area(button->Pos_X,
+          button->Pos_Y,
+          11,button->Length);
+  }
 }
 
-void Window_draw_scroller_bouton(T_Scroller_button * button)
+void Window_draw_scroller_button(T_Scroller_button * button)
 {
-  Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
-  Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
-  Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
-  Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);
-  Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\030",MC_Black,MC_Light);
-  Print_in_window(button->Pos_X+2,button->Pos_Y+button->Length-9,"\031",MC_Black,MC_Light);
+  if (button->Is_horizontal)
+  {
+    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_frame_mono(button->Pos_X+11,button->Pos_Y-1,button->Length-22,13,MC_Black);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
+    Window_display_frame_out(button->Pos_X+button->Length-11,button->Pos_Y,11,11);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\033",MC_Black,MC_Light);
+    Print_in_window(button->Pos_X+button->Length-9,button->Pos_Y+2,"\032",MC_Black,MC_Light);
+  }
+  else
+  {
+    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\030",MC_Black,MC_Light);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+button->Length-9,"\031",MC_Black,MC_Light);
+  }
   Window_draw_slider(button);
 }
 
@@ -2010,7 +2044,7 @@ T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
   temp->Next=Window_scroller_button_list;
   Window_scroller_button_list=temp;
 
-  Window_draw_scroller_bouton(temp);
+  Window_draw_scroller_button(temp);
   return temp;
 }
 
@@ -2036,7 +2070,7 @@ T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos
   temp->Next=Window_scroller_button_list;
   Window_scroller_button_list=temp;
 
-  Window_draw_scroller_bouton(temp);
+  Window_draw_scroller_button(temp);
   return temp;
 }
 
@@ -2902,12 +2936,16 @@ short Window_get_clicked_button(void)
     
     // Button Down arrow
     if ((Input_sticky_control == 0 || Input_sticky_control == (temp3->Number|2048))
-      && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-1))
+      && ((temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,temp3->Pos_X+temp3->Length-1,temp3->Pos_Y+10))
+      || (!temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-1))))
     {
       Input_sticky_control = temp3->Number | 2048;
       Hide_cursor();
-      Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
-
+      if (temp3->Is_horizontal)
+        Window_select_normal_button(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,11,11);
+      else
+        Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
+      
       if (temp3->Position+temp3->Nb_visibles<temp3->Nb_elements)
       {
         temp3->Position++;
@@ -2923,14 +2961,18 @@ short Window_get_clicked_button(void)
       Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
-      Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
+      if (temp3->Is_horizontal)
+        Window_unselect_normal_button(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,11,11);
+      else
+        Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
       Display_cursor();
       
       return (Window_attribute1)? temp3->Number : 0;
     }
     // Middle slider
     if ((Input_sticky_control == temp3->Number) || (Input_sticky_control==0 &&
-        Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-13)))
+        ((!temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-13))
+        ||(temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X+12,temp3->Pos_Y,temp3->Pos_X+temp3->Length-13,temp3->Pos_Y+10)))))
     {
       Input_sticky_control = temp3->Number;
       if (temp3->Nb_elements>temp3->Nb_visibles)
@@ -2940,8 +2982,16 @@ short Window_get_clicked_button(void)
         max_slider_height=(temp3->Length-24);
 
         // Window_attribute2 receives the position of the cursor.
-        Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
-        Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_length-1)>>1));
+        if (temp3->Is_horizontal)
+        {
+          Window_attribute2 =(Mouse_X-Window_pos_X) / Menu_factor_X;
+          Window_attribute2-=(temp3->Pos_X+12+((temp3->Cursor_length-1)>>1));
+        }
+        else
+        {
+          Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
+          Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_length-1)>>1));
+        }
         Window_attribute2*=(temp3->Nb_elements-temp3->Nb_visibles);
 
         if (Window_attribute2<0)

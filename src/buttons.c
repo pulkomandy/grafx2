@@ -2506,34 +2506,44 @@ void Button_Gradients(void)
   byte  color;
   byte  click;
   int  changed_gradient_index;
+  byte cycling_mode=Cycling_mode;
 
+  // Enable cycling while this window is open
+  Cycling_mode=1;
   
   Gradient_pixel=Pixel;
   old_current_gradient=Current_gradient;
   changed_gradient_index=0;
   memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
 
-  Open_window(258,133,"Gradation menu");
+  Open_window(235,146,"Gradation menu");
 
-  Window_set_palette_button(48,21);                            // 1
-    // Définition du scrolleur <=> indice du dégradé dans le tableau
-  gradient_scroller=Window_set_scroller_button(218,22,75,16,1,Current_gradient);  // 2
-    // Définition du scrolleur de mélange du dégradé
-  mix_scroller = Window_set_scroller_button(31,22,84,256,1,
+  Window_set_palette_button(48,19);                            // 1
+  // Slider for gradient selection
+  gradient_scroller=Window_set_scroller_button(218,20,75,16,1,Current_gradient);  // 2
+  // Slider for mix
+  mix_scroller = Window_set_scroller_button(31,20,84,256,1,
     Gradient_array[Current_gradient].Mix);                      // 3
-    // Définition du bouton de sens
-  Window_set_normal_button(8,22,15,14,
+  // Direction
+  Window_set_normal_button(8,20,15,14,
     (Gradient_array[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
-    // Définition du bouton de technique
-  Window_set_normal_button(8,92,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
-  Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+  // Technique
+  Window_set_normal_button(8,90,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
+  Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
 
-  Window_set_normal_button(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
-  Window_set_normal_button(123,112,51,14,"Cancel",0,1,KEY_ESC);  // 7
-  speed_scroller = Window_set_scroller_button(238,22,88,65,1,64-Gradient_array[Current_gradient].Speed);  // 8
+  Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
+  Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
+  // Scrolling speed
+  speed_scroller = Window_set_horizontal_scroller_button(76,111,88,65,1,Gradient_array[Current_gradient].Speed);  // 8
+  Num2str(Gradient_array[Current_gradient].Speed,str,2);
+  Print_in_window(169,113,str,MC_Black,MC_Light);
+      
+  Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
 
-  Print_in_window(5,60,"MIX",MC_Dark,MC_Light);
-
+  // Cycling mode on/off
+  Window_set_normal_button(8,109,62,14,"",0,1,KEY_NONE); // 9
+  Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+  
   // On tagge les couleurs qui vont avec
   Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
 
@@ -2541,9 +2551,9 @@ void Button_Gradients(void)
   Print_in_window(215,100,str,MC_Black,MC_Light);
 
   // On affiche le cadre autour de la préview
-  Window_display_frame_in(7,111,110,16);
+  Window_display_frame_in(7,127,110,16);
   // On affiche la preview
-  Draw_gradient_preview(8,112,108,14,Current_gradient);
+  Draw_gradient_preview(8,128,108,14,Current_gradient);
 
   first_color=last_color=(Gradient_array[Current_gradient].Inverse)?Gradient_array[Current_gradient].End:Gradient_array[Current_gradient].Start;
   Update_window_area(0,0,Window_width, Window_height);
@@ -2570,25 +2580,27 @@ void Button_Gradients(void)
       Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
 
       // On affiche le sens qui va avec
-      Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+      Print_in_window(12,23,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
 
       // On raffiche le mélange (jauge) qui va avec
       mix_scroller->Position=Gradient_array[Current_gradient].Mix;
       Window_draw_slider(mix_scroller);
 
       // Update speed
-      speed_scroller->Position=64-Gradient_array[Current_gradient].Speed;
+      speed_scroller->Position=Gradient_array[Current_gradient].Speed;
       Window_draw_slider(speed_scroller);
+      Num2str(Gradient_array[Current_gradient].Speed,str,2);
+      Print_in_window(169,113,str,MC_Black,MC_Light);
 
       // Gradient #
       gradient_scroller->Position=Current_gradient;
       Window_draw_slider(gradient_scroller);
       
       // Technique (flat, dithered, very dithered)
-      Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+      Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
 
       // Rectangular gradient preview
-      Draw_gradient_preview(8,112,108,14,Current_gradient);
+      Draw_gradient_preview(8,128,108,14,Current_gradient);
 
       Display_cursor();
     }
@@ -2615,7 +2627,7 @@ void Button_Gradients(void)
             // On tagge le bloc
             Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
             // Tracé de la preview:
-            Draw_gradient_preview(8,112,108,14,Current_gradient);
+            Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
           else
           {
@@ -2638,7 +2650,7 @@ void Button_Gradients(void)
               // On tagge le bloc
               Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
               // Tracé de la preview:
-              Draw_gradient_preview(8,112,108,14,Current_gradient);
+              Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
             }
           }
@@ -2655,7 +2667,7 @@ void Button_Gradients(void)
         // Nouvel mélange dans Window_attribute2
         Gradient_array[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
         break;
       case  4 : // Changement de sens
@@ -2664,20 +2676,30 @@ void Button_Gradients(void)
         Gradient_array[Current_gradient].Inverse^=1;
         Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
         break;
       case  5 : // Changement de technique
         Hide_cursor();
         // On change la technique par (+1)%3
         Gradient_array[Current_gradient].Technique=(Gradient_array[Current_gradient].Technique+1)%3;
-        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+        Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
       case  8 : // Speed
-        Gradient_array[Current_gradient].Speed=64-Window_attribute2;
+        Gradient_array[Current_gradient].Speed=Window_attribute2;
+        Num2str(Gradient_array[Current_gradient].Speed,str,2);
+        Hide_cursor();
+        Print_in_window(169,113,str,MC_Black,MC_Light);
+        Display_cursor();
         Allow_colorcycling=1;
+        break;
+      case 9: // Cycling on/off
+        cycling_mode = !cycling_mode;
+        Hide_cursor();
+        Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+        Display_cursor();
         break;
     }
 
@@ -2697,7 +2719,7 @@ void Button_Gradients(void)
           // On tagge le bloc
           Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
           // Tracé de la preview:
-          Draw_gradient_preview(8,112,108,14,Current_gradient);
+          Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
           Wait_end_of_click();
         }
@@ -2725,8 +2747,16 @@ void Button_Gradients(void)
           Key=0;
           break;
         }
-        if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
+        else if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
           clicked_button=6;
+        else if (Is_shortcut(Key,SPECIAL_CYCLE_MODE))
+        {
+          // Cycling on/off
+          cycling_mode = !cycling_mode;
+          Hide_cursor();
+          Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+          Display_cursor();
+        }
     }
   }
   while (clicked_button!=6 && clicked_button!=7);
@@ -2739,6 +2769,7 @@ void Button_Gradients(void)
   Display_cursor();
 
   Gradient_pixel=Display_pixel;
+  Cycling_mode=cycling_mode;
   if (clicked_button==7) // Cancel
   {
     Current_gradient=old_current_gradient;
