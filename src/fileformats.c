@@ -2011,6 +2011,47 @@ void Load_GIF(T_IO_Context * context)
                           }
                         }
                       }
+                      else if (!memcmp(aeb,"CRNG\0\0\0\0" "1.0",0x0B))
+                      {            
+                        // Color animation. Similar to a LBM CRNG chunk.
+                        word rate;
+                        word flags;
+                        byte min_col;
+                        byte max_col;
+                        //
+                        Read_byte(GIF_file,&size_to_read);
+                        for(;size_to_read>0 && !File_error;size_to_read-=6)
+                        {
+                          if ( (Read_word_be(GIF_file,&rate))
+                            && (Read_word_be(GIF_file,&flags))
+                            && (Read_byte(GIF_file,&min_col))
+                            && (Read_byte(GIF_file,&max_col)))
+                          {
+                            if ((flags & 1) && min_col != max_col)
+                            {
+                              // Valid cycling range
+                              if (max_col<min_col)
+                              SWAP_BYTES(min_col,max_col)
+                              
+                              context->Cycle_range[context->Color_cycles].Start=min_col;
+                              context->Cycle_range[context->Color_cycles].End=max_col;
+                              context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+                              context->Cycle_range[context->Color_cycles].Speed=rate/78;
+                                                  
+                              context->Color_cycles++;
+                            }
+                          }
+                          else
+                          {
+                            File_error=1;
+                          }
+                        }
+                        // Read end-of-block delimiter
+                        if (!File_error)
+                          Read_byte(GIF_file,&size_to_read);
+                        if (size_to_read!=0)
+                          File_error=1;
+                      }
                       else
                       {
                         // Unknown extension, skip.
@@ -2349,9 +2390,6 @@ void Save_GIF(T_IO_Context * context)
         {
           // La palette a été correctement écrite.
 
-          //   Le jour où on se servira des blocks d'extensions pour placer
-          // des commentaires, on le fera ici.
-
           // Ecriture de la transparence
           //Write_bytes(GIF_file,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
 
@@ -2366,6 +2404,22 @@ void Save_GIF(T_IO_Context * context)
             Write_bytes(GIF_file,"\x21\xFE",2);
             Write_byte(GIF_file,strlen(context->Comment));
             Write_bytes(GIF_file,context->Comment,strlen(context->Comment)+1);
+          }
+          // Write cycling colors
+          if (context->Color_cycles)
+          {
+            int i;
+            
+            Write_bytes(GIF_file,"\x21\xff\x0B" "CRNG\0\0\0\0" "1.0",14);
+            Write_byte(GIF_file,context->Color_cycles*6);
+            for (i=0; i<context->Color_cycles; i++)
+            {
+              Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
+              Write_word_be(LBM_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
+              Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
+              Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
+            }
+            Write_byte(GIF_file,0);
           }
           
           // Loop on all layers
