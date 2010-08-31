@@ -1999,7 +1999,10 @@ int Load_CFG(int reload_all)
         }
         break;
       case CHUNK_GRADIENTS: // Infos sur les dégradés
-        if (reload_all)
+        // The gradients chunk is deprecated since the data
+        // is now loaded/saved in GIF and LBM formats.
+        // The chunk will be completely ignored.
+        /*if (reload_all)
         {
           if (! Read_byte(Handle, &Current_gradient))
             goto Erreur_lecture_config;
@@ -2014,7 +2017,7 @@ int Load_CFG(int reload_all)
           }
           Load_gradient_data(Current_gradient);
         }
-        else
+        else*/
         {
           if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
@@ -2324,6 +2327,9 @@ int Save_CFG(void)
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
+  // The gradients chunk is deprecated since the data
+  // is now loaded/saved in GIF and LBM formats.
+  /*
   Chunk.Number=CHUNK_GRADIENTS;
   Chunk.Size=241;
   if (!Write_byte(Handle, Chunk.Number) ||
@@ -2340,6 +2346,7 @@ int Save_CFG(void)
         !Write_dword_le(Handle, Gradient_array[index].Technique) )
         goto Erreur_sauvegarde_config;
   }
+  */
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
@@ -2547,6 +2554,7 @@ void Set_config_defaults(void)
     Stencil[index]=1;
 
   // Dégradés
+  /* TODO
   Current_gradient=0;
   for(index=0;index<16;index++)
   {
@@ -2557,7 +2565,8 @@ void Set_config_defaults(void)
     Gradient_array[index].Technique=0;
   }
   Load_gradient_data(Current_gradient);
-
+  */
+  
   // Smooth
   Smooth_matrix[0][0]=1;
   Smooth_matrix[0][1]=2;

@@ -2440,19 +2440,19 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 
 void Load_gradient_data(int index)
 {
-  if (Gradient_array[index].Start>Gradient_array[index].End)
+  if (Main_backups->Pages->Gradients->Range[index].Start>Main_backups->Pages->Gradients->Range[index].End)
     Error(0);
-  Gradient_lower_bound =Gradient_array[index].Start;
-  Gradient_upper_bound =Gradient_array[index].End;
-  Gradient_is_inverted          =Gradient_array[index].Inverse;
-  Gradient_random_factor=Gradient_array[index].Mix+1;
+  Gradient_lower_bound =Main_backups->Pages->Gradients->Range[index].Start;
+  Gradient_upper_bound =Main_backups->Pages->Gradients->Range[index].End;
+  Gradient_is_inverted          =Main_backups->Pages->Gradients->Range[index].Inverse;
+  Gradient_random_factor=Main_backups->Pages->Gradients->Range[index].Mix+1;
 
   Gradient_bounds_range=(Gradient_lower_bound<Gradient_upper_bound)?
                             Gradient_upper_bound-Gradient_lower_bound:
                             Gradient_lower_bound-Gradient_upper_bound;
   Gradient_bounds_range++;
 
-  switch(Gradient_array[index].Technique)
+  switch(Main_backups->Pages->Gradients->Range[index].Technique)
   {
     case 0 : // Degradé de base
       Gradient_function=Gradient_basic;
@@ -2492,7 +2492,7 @@ void Button_Gradients(void)
 {
   short clicked_button;
   char  str[3];
-  T_Gradient_array backup_gradients[16];
+  T_Gradient_array backup_gradients;
   int   old_current_gradient;
   T_Scroller_button * mix_scroller;
   T_Scroller_button * speed_scroller;
@@ -2514,7 +2514,7 @@ void Button_Gradients(void)
   Gradient_pixel=Pixel;
   old_current_gradient=Current_gradient;
   changed_gradient_index=0;
-  memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
+  memcpy(&backup_gradients,Main_backups->Pages->Gradients,sizeof(T_Gradient_array));
 
   Open_window(235,146,"Gradation menu");
 
@@ -2523,19 +2523,19 @@ void Button_Gradients(void)
   gradient_scroller=Window_set_scroller_button(218,20,75,16,1,Current_gradient);  // 2
   // Slider for mix
   mix_scroller = Window_set_scroller_button(31,20,84,256,1,
-    Gradient_array[Current_gradient].Mix);                      // 3
+    Main_backups->Pages->Gradients->Range[Current_gradient].Mix);                      // 3
   // Direction
   Window_set_normal_button(8,20,15,14,
-    (Gradient_array[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
+    (Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
   // Technique
   Window_set_normal_button(8,90,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
-  Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
+  Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
 
   Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
   Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
   // Scrolling speed
-  speed_scroller = Window_set_horizontal_scroller_button(76,111,88,65,1,Gradient_array[Current_gradient].Speed);  // 8
-  Num2str(Gradient_array[Current_gradient].Speed,str,2);
+  speed_scroller = Window_set_horizontal_scroller_button(76,111,88,65,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
+  Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
   Print_in_window(169,113,str,MC_Black,MC_Light);
       
   Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
@@ -2545,7 +2545,7 @@ void Button_Gradients(void)
   Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
   
   // On tagge les couleurs qui vont avec
-  Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+  Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
 
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
@@ -2555,7 +2555,7 @@ void Button_Gradients(void)
   // On affiche la preview
   Draw_gradient_preview(8,128,108,14,Current_gradient);
 
-  first_color=last_color=(Gradient_array[Current_gradient].Inverse)?Gradient_array[Current_gradient].End:Gradient_array[Current_gradient].Start;
+  first_color=last_color=(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?Main_backups->Pages->Gradients->Range[Current_gradient].End:Main_backups->Pages->Gradients->Range[Current_gradient].Start;
   Update_window_area(0,0,Window_width, Window_height);
 
   Display_cursor();
@@ -2577,19 +2577,19 @@ void Button_Gradients(void)
       Print_in_window(215,100,str,MC_Black,MC_Light);
 
       // On tagge les couleurs qui vont avec
-      Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+      Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
 
       // On affiche le sens qui va avec
-      Print_in_window(12,23,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+      Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
 
       // On raffiche le mélange (jauge) qui va avec
-      mix_scroller->Position=Gradient_array[Current_gradient].Mix;
+      mix_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Mix;
       Window_draw_slider(mix_scroller);
 
       // Update speed
-      speed_scroller->Position=Gradient_array[Current_gradient].Speed;
+      speed_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Speed;
       Window_draw_slider(speed_scroller);
-      Num2str(Gradient_array[Current_gradient].Speed,str,2);
+      Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
       Print_in_window(169,113,str,MC_Black,MC_Light);
 
       // Gradient #
@@ -2597,7 +2597,7 @@ void Button_Gradients(void)
       Window_draw_slider(gradient_scroller);
       
       // Technique (flat, dithered, very dithered)
-      Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
+      Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
 
       // Rectangular gradient preview
       Draw_gradient_preview(8,128,108,14,Current_gradient);
@@ -2623,9 +2623,9 @@ void Button_Gradients(void)
             // On vient de clicker
 
             // On met à jour l'intervalle du dégradé
-            first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
+            first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
             // On tagge le bloc
-            Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+            Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
             // Tracé de la preview:
             Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
@@ -2637,18 +2637,18 @@ void Button_Gradients(void)
               // On commence par ordonner la 1ère et dernière couleur du bloc
               if (first_color<temp_color)
               {
-                Gradient_array[Current_gradient].Start=first_color;
-                Gradient_array[Current_gradient].End  =temp_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].End  =temp_color;
               }
               else if (first_color>temp_color)
               {
-                Gradient_array[Current_gradient].Start=temp_color;
-                Gradient_array[Current_gradient].End  =first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=temp_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].End  =first_color;
               }
               else
-                Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=first_color;
               // On tagge le bloc
-              Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+              Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
               // Tracé de la preview:
               Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
@@ -2665,7 +2665,7 @@ void Button_Gradients(void)
       case  3 : // Nouveau mélange de dégradé
         Hide_cursor();
         // Nouvel mélange dans Window_attribute2
-        Gradient_array[Current_gradient].Mix=Window_attribute2;
+        Main_backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
@@ -2673,8 +2673,8 @@ void Button_Gradients(void)
       case  4 : // Changement de sens
         Hide_cursor();
         // On inverse le sens (par un XOR de 1)
-        Gradient_array[Current_gradient].Inverse^=1;
-        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+        Main_backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
+        Print_in_window(12,25,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
@@ -2682,14 +2682,14 @@ void Button_Gradients(void)
       case  5 : // Changement de technique
         Hide_cursor();
         // On change la technique par (+1)%3
-        Gradient_array[Current_gradient].Technique=(Gradient_array[Current_gradient].Technique+1)%3;
-        Draw_button_gradient_style(8,90,Gradient_array[Current_gradient].Technique);
+        Main_backups->Pages->Gradients->Range[Current_gradient].Technique=(Main_backups->Pages->Gradients->Range[Current_gradient].Technique+1)%3;
+        Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
       case  8 : // Speed
-        Gradient_array[Current_gradient].Speed=Window_attribute2;
-        Num2str(Gradient_array[Current_gradient].Speed,str,2);
+        Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
+        Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
         Hide_cursor();
         Print_in_window(169,113,str,MC_Black,MC_Light);
         Display_cursor();
@@ -2715,9 +2715,9 @@ void Button_Gradients(void)
           temp_color=color;
 
           // On met à jour l'intervalle du dégradé
-          first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
+          first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
           // On tagge le bloc
-          Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+          Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
           // Tracé de la preview:
           Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
@@ -2773,7 +2773,7 @@ void Button_Gradients(void)
   if (clicked_button==7) // Cancel
   {
     Current_gradient=old_current_gradient;
-    memcpy(Gradient_array,backup_gradients,sizeof(T_Gradient_array)*16);
+    memcpy(Main_backups->Pages->Gradients,&backup_gradients,sizeof(T_Gradient_array));
     Load_gradient_data(Current_gradient);
   }
 }

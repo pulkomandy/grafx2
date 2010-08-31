@@ -719,13 +719,13 @@ void Load_image(T_IO_Context *context)
 
         // Color cyling ranges:
         for (i=0; i<16; i++)
-          Gradient_array[i].Speed=0;
+          Main_backups->Pages->Gradients->Range[i].Speed=0;
         for (i=0; i<context->Color_cycles; i++)
         {
-          Gradient_array[i].Start=context->Cycle_range[i].Start;
-          Gradient_array[i].End=context->Cycle_range[i].End;
-          Gradient_array[i].Inverse=context->Cycle_range[i].Inverse;
-          Gradient_array[i].Speed=context->Cycle_range[i].Speed;
+          Main_backups->Pages->Gradients->Range[i].Start=context->Cycle_range[i].Start;
+          Main_backups->Pages->Gradients->Range[i].End=context->Cycle_range[i].End;
+          Main_backups->Pages->Gradients->Range[i].Inverse=context->Cycle_range[i].Inverse;
+          Main_backups->Pages->Gradients->Range[i].Speed=context->Cycle_range[i].Speed;
         }
 
       }
@@ -1132,12 +1132,12 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   // Color cyling ranges:
   for (i=0; i<16; i++)
   {
-    if (Gradient_array[i].Start!=Gradient_array[i].End && Gradient_array[i].Speed)
+    if (Main_backups->Pages->Gradients->Range[i].Start!=Main_backups->Pages->Gradients->Range[i].End && Main_backups->Pages->Gradients->Range[i].Speed)
     {
-      context->Cycle_range[context->Color_cycles].Start=Gradient_array[i].Start;
-      context->Cycle_range[context->Color_cycles].End=Gradient_array[i].End;
-      context->Cycle_range[context->Color_cycles].Inverse=Gradient_array[i].Inverse;
-      context->Cycle_range[context->Color_cycles].Speed=Gradient_array[i].Speed;
+      context->Cycle_range[context->Color_cycles].Start=Main_backups->Pages->Gradients->Range[i].Start;
+      context->Cycle_range[context->Color_cycles].End=Main_backups->Pages->Gradients->Range[i].End;
+      context->Cycle_range[context->Color_cycles].Inverse=Main_backups->Pages->Gradients->Range[i].Inverse;
+      context->Cycle_range[context->Color_cycles].Speed=Main_backups->Pages->Gradients->Range[i].Speed;
       context->Color_cycles++;
     }
   }

@@ -781,8 +781,6 @@ GFX2_GLOBAL Func_gradient Gradient_function;
 /// either ::Pixel (if the gradient must be drawn on menus only)
 /// or ::Display_pixel (if the gradient must be drawn on the image)
 GFX2_GLOBAL Func_pixel Gradient_pixel;
-/// Settings for all gradients
-GFX2_GLOBAL T_Gradient_array Gradient_array[16];
 /// Index in ::Gradient_array of the currently selected gradient.
 GFX2_GLOBAL byte Current_gradient;
 /// Boolean, true when the color cycling is active.

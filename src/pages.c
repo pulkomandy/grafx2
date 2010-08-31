@@ -75,6 +75,7 @@ T_Page * New_page(byte nb_layers)
     page->Filename[0]='\0';
     page->File_format=DEFAULT_FILEFORMAT;
     page->Nb_layers=nb_layers;
+    page->Gradients=NULL;
     page->Transparent_color=0; // Default transparent color
     page->Background_transparent=0;
     page->Next = page->Prev = NULL;
@@ -140,6 +141,24 @@ byte * Dup_layer(byte * layer)
 }
 
 // ==============================================================
+
+/// Adds a shared reference to the gradient data of another page. Pass NULL for new.
+T_Gradient_array *Dup_gradient(T_Page * page)
+{
+  // new
+  if (page==NULL || page->Gradients==NULL)
+  {
+    T_Gradient_array *array;
+    array=(T_Gradient_array *)calloc(1, sizeof(T_Gradient_array));
+    if (!array)
+      return NULL;
+    array->Used=1;
+    return array;
+  }
+  // shared
+  page->Gradients->Used++;
+  return page->Gradients;
+}
 
 void Download_infos_page_main(T_Page * page)
 // Affiche la page à l'écran
@@ -396,6 +415,16 @@ void Clear_page(T_Page * page)
     Free_layer(page, i);
     page->Image[i]=NULL;
   }
+
+  // Free_gradient() : This data is reference-counted
+  if (page->Gradients)
+  {
+    page->Gradients->Used--;
+    if (page->Gradients->Used==0)
+      free(page->Gradients);
+    page->Gradients=NULL;
+  }
+
   page->Width=0;
   page->Height=0;
   // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
@@ -404,6 +433,7 @@ void Clear_page(T_Page * page)
 void Copy_S_page(T_Page * dest,T_Page * source)
 {
   *dest=*source;
+  dest->Gradients=NULL;
 }
 
 
@@ -438,6 +468,10 @@ int Allocate_list_of_pages(T_List_of_pages * list)
 
   list->List_size=1;
 
+  page->Gradients=Dup_gradient(NULL);
+  if (!page->Gradients)
+    return 0;
+  
   return 1; // Succès
 }
 
@@ -803,6 +837,7 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
   new_page->Height=height;
   strcpy(new_page->Filename, Main_backups->Pages->Filename);
   strcpy(new_page->File_directory, Main_backups->Pages->File_directory);
+  new_page->Gradients=Dup_gradient(upload?Main_backups->Pages:NULL);
   if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
     for (i=0; i<layers;i++)
@@ -850,6 +885,7 @@ int Backup_and_resize_the_spare(int width,int height)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Spare_backups->Pages);
+  new_page->Gradients=Dup_gradient(Spare_backups->Pages);
   
   new_page->Width=width;
   new_page->Height=height;
@@ -905,6 +941,7 @@ void Backup_layers(dword layer_mask)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Main_backups->Pages);
+  new_page->Gradients=Dup_gradient(Main_backups->Pages);
   Create_new_page(new_page,Main_backups,layer_mask);
   Download_infos_page_main(new_page);
 
@@ -941,6 +978,7 @@ void Backup_the_spare(dword layer_mask)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Spare_backups->Pages);
+  new_page->Gradients=Dup_gradient(Spare_backups->Pages);
   Create_new_page(new_page,Spare_backups,layer_mask);
 
   // Copy the actual pixels from the backup to the latest page

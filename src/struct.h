@@ -226,7 +226,14 @@ typedef struct
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
   byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
-} T_Gradient_array;
+} T_Gradient_range;
+
+/// Data for a full set of gradients.
+typedef struct
+{
+  int Used; ///< Reference count
+  T_Gradient_range Range[16];
+}  T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -351,6 +358,7 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
+  T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
