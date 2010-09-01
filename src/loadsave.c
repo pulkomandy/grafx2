@@ -227,8 +227,6 @@ void Palette_loaded(T_IO_Context *context)
   switch (context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
-      Set_palette(context->Palette);
-      break;
     case CONTEXT_PREVIEW:
     case CONTEXT_BRUSH:
     case CONTEXT_SURFACE:
@@ -665,11 +663,34 @@ void Load_image(T_IO_Context *context)
     free(context->Buffer_image_24b);
     context->Buffer_image_24b = NULL;
   }
+  else if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    // Non-24b main image: Add menu colors
+    if (Config.Safety_colors)
+    {
+      dword color_usage[256];
+      memset(color_usage,0,sizeof(color_usage));
+      if (Count_used_colors(color_usage)<252)
+      {
+        int gui_index=0;
+        int c;
+        for (c=255; c>=0 && gui_index<4; c--)
+        {
+          if (color_usage[c]==0)
+          {
+            context->Palette[c]=*Favorite_GUI_color(gui_index);
+            gui_index++;
+          }
+        }
+      }
+    }
+  }
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
     if ( File_error!=1)
     {
+      Set_palette(context->Palette);
       if (format->Palette_only)
       {
         // Make a backup step

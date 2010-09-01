@@ -2414,10 +2414,10 @@ void Save_GIF(T_IO_Context * context)
             Write_byte(GIF_file,context->Color_cycles*6);
             for (i=0; i<context->Color_cycles; i++)
             {
-              Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
-              Write_word_be(LBM_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
-              Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
-              Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
+              Write_word_be(GIF_file,context->Cycle_range[i].Speed*78); // Rate
+              Write_word_be(GIF_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
+              Write_byte(GIF_file,context->Cycle_range[i].Start); // Min color
+              Write_byte(GIF_file,context->Cycle_range[i].End); // Max color
             }
             Write_byte(GIF_file,0);
           }
