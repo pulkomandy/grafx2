@@ -1074,6 +1074,7 @@ void Run_script(char *scriptdir)
   if (Brush_was_altered)
     Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
+  Hide_cursor();
   Display_all_screen();
   Cursor_shape=old_cursor_shape;
   Display_cursor();
