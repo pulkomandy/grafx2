@@ -121,7 +121,17 @@ do { \
     return luaL_error(L, "%s: Expected %d arguments, but found %d.", func_name, (num), nb_args); \
 } while(0)
 
-
+// Updates the screen colors after a running screen has modified the palette.
+void Update_colors_during_script(void)
+{
+  if (Palette_has_changed)
+  {
+    Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
+    Display_menu();
+    Palette_has_changed=0;
+  }
+}
 
 
 // Wrapper functions to call C from Lua
@@ -598,6 +608,7 @@ int L_InputBox(lua_State* L)
   if (max_label_length>25)
     max_label_length=25;
 
+  Update_colors_during_script();
   Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
   // Normally this index is unused, but this initialization avoids
@@ -795,6 +806,7 @@ int L_MessageBox(lua_State* L)
     return luaL_error(L, "messagebox: Needs one or two arguments.");
   }
 
+  Update_colors_during_script();
   Verbose_message(caption, message);
   return 0;
 }
@@ -1042,6 +1054,9 @@ void Run_script(char *scriptdir)
     {
       int stack_size;
       stack_size= lua_gettop(L);
+      
+      Update_colors_during_script();
+      
       if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
         Verbose_message("Error running script", message);
       else
@@ -1051,12 +1066,7 @@ void Run_script(char *scriptdir)
   // Cleanup
   free(Brush_backup);
   Brush_backup=NULL;
-  if (Palette_has_changed)
-  {
-    Set_palette(Main_palette);
-    Compute_optimal_menu_colors(Main_palette);
-    Display_menu();
-  }
+  Update_colors_during_script();
   End_of_modification();
 
   lua_close(L);

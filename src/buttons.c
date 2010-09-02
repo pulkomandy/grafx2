@@ -2607,7 +2607,11 @@ void Button_Gradients(void)
 
     clicked_button=Window_clicked_button();
     if (Input_sticky_control!=8 || !Mouse_K)
+    {
       Allow_colorcycling=0;
+      // Restore palette
+      Set_palette(Main_palette);
+    }
 
     switch(clicked_button)
     {
