@@ -2844,14 +2844,28 @@ const T_Components * Favorite_GUI_color(byte color_index)
 {
   static const T_Components cpc_colors[4] = {
     {  0,  0,  0},
+    {  0,  0,128}, // Dark blue
     {128,128,128}, // Grey
-    {  0,255,128}, // Soft light green
     {255,255,255}
   };
   
   if (RGB_scale==3)
-    // Specialized colors for CPC palette
-    return &cpc_colors[color_index];
+  {
+    // Check if ALL GUI colors are compatible with /rgb 3
+    int i;
+    for (i=0; i<4; i++)
+    {
+      T_Components col;
+      col=Gfx->Default_palette[Gfx->Color[i]];
+      if ((col.R!=255 && col.R!=128 && col.R!=0)
+        ||(col.G!=255 && col.G!=128 && col.G!=0)
+        ||(col.B!=255 && col.B!=128 && col.B!=0))
+        // Specialized colors for CPC palette
+        return &cpc_colors[color_index];
+    }
+    // Skin has suitable colors
+    return &(Gfx->Default_palette[Gfx->Color[color_index]]);
+  }
   else
     // Should be Config.Fav_menu_colors[index] if using user colors
       return &(Gfx->Default_palette[Gfx->Color[color_index]]);

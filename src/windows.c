@@ -2762,8 +2762,8 @@ void Compute_optimal_menu_colors(T_Components * palette)
   const int tolerence=16;
   const T_Components cpc_colors[4] = {
     {  0,  0,  0},
+    {  0,  0,128}, // Dark blue
     {128,128,128}, // Grey
-    {  0,255,128}, // Soft light green
     {255,255,255}
   };
 
