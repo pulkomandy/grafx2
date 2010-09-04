@@ -2491,7 +2491,7 @@ void Draw_gradient_preview(short start_x,short start_y,short width,short height,
 void Button_Gradients(void)
 {
   short clicked_button;
-  char  str[3];
+  char  str[4];
   T_Gradient_array backup_gradients;
   int   old_current_gradient;
   T_Scroller_button * mix_scroller;
@@ -2534,9 +2534,9 @@ void Button_Gradients(void)
   Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
   Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
   // Scrolling speed
-  speed_scroller = Window_set_horizontal_scroller_button(76,111,88,65,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
-  Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
-  Print_in_window(169,113,str,MC_Black,MC_Light);
+  speed_scroller = Window_set_horizontal_scroller_button(100,111,129,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
+  Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+  Print_in_window(74,113,str,MC_Black,MC_Light);
       
   Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
 
@@ -2589,8 +2589,8 @@ void Button_Gradients(void)
       // Update speed
       speed_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Speed;
       Window_draw_slider(speed_scroller);
-      Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
-      Print_in_window(169,113,str,MC_Black,MC_Light);
+      Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+      Print_in_window(74,113,str,MC_Black,MC_Light);
 
       // Gradient #
       gradient_scroller->Position=Current_gradient;
@@ -2693,9 +2693,9 @@ void Button_Gradients(void)
         Display_cursor();
       case  8 : // Speed
         Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
-        Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,2);
+        Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
         Hide_cursor();
-        Print_in_window(169,113,str,MC_Black,MC_Light);
+        Print_in_window(74,113,str,MC_Black,MC_Light);
         Display_cursor();
         Allow_colorcycling=1;
         break;
