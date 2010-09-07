@@ -2862,8 +2862,6 @@ short Window_get_clicked_button(void)
   T_Special_button  * temp4;
   T_Dropdown_button * temp5;
 
-  long max_slider_height;
-
   Window_attribute1=Mouse_K;
 
   // Test click on normal buttons
@@ -2978,30 +2976,20 @@ short Window_get_clicked_button(void)
       if (temp3->Nb_elements>temp3->Nb_visibles)
       {
         // If there is enough room to make the cursor move:
-
-        max_slider_height=(temp3->Length-24);
+        long mouse_pos;
 
         // Window_attribute2 receives the position of the cursor.
         if (temp3->Is_horizontal)
-        {
-          Window_attribute2 =(Mouse_X-Window_pos_X) / Menu_factor_X;
-          Window_attribute2-=(temp3->Pos_X+12+((temp3->Cursor_length-1)>>1));
-        }
+          mouse_pos =(Mouse_X-Window_pos_X) / Menu_factor_X - (temp3->Pos_X+12);
         else
-        {
-          Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
-          Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_length-1)>>1));
-        }
-        Window_attribute2*=(temp3->Nb_elements-temp3->Nb_visibles);
+          mouse_pos =(Mouse_Y-Window_pos_Y) / Menu_factor_Y - (temp3->Pos_Y+12);
+
+        Window_attribute2 = mouse_pos * temp3->Nb_elements / (temp3->Length-24) - temp3->Nb_visibles/2;
 
         if (Window_attribute2<0)
           Window_attribute2=0;
-        else
-        {
-          Window_attribute2 =Round_div(Window_attribute2,max_slider_height-temp3->Cursor_length);
-          if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
-            Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
-        }
+        else if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
+          Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
 
         // If the cursor moved
 
