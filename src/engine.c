@@ -1885,7 +1885,10 @@ void Window_draw_slider(T_Scroller_button * button)
           11,button->Length-24,MC_Black/*MC_Dark*/);
   
     if (button->Nb_elements>button->Nb_visibles)
-      slider_position+=Round_div(button->Position*(button->Length-24-button->Cursor_length),button->Nb_elements-button->Nb_visibles);
+      slider_position+=
+        (button->Length-24-button->Cursor_length)*(button->Position)/(button->Nb_elements-button->Nb_visibles);
+        //
+        //(button->Position*) / (button->Nb_elements-button->Nb_visibles));
   
     Window_rectangle(button->Pos_X,
           slider_position,
@@ -2977,6 +2980,7 @@ short Window_get_clicked_button(void)
       {
         // If there is enough room to make the cursor move:
         long mouse_pos;
+        long origin;
 
         // Window_attribute2 receives the position of the cursor.
         if (temp3->Is_horizontal)
@@ -2984,8 +2988,17 @@ short Window_get_clicked_button(void)
         else
           mouse_pos =(Mouse_Y-Window_pos_Y) / Menu_factor_Y - (temp3->Pos_Y+12);
 
-        Window_attribute2 = mouse_pos * temp3->Nb_elements / (temp3->Length-24) - temp3->Nb_visibles/2;
-
+        // The following formula is wicked. The issue is that you want two
+        // different behaviors:
+        // *) If the range is bigger than the pixel precision, the last pixel
+        //    should map to max value, exactly.
+        // *) Otherwise, the possible cursor positions are separated by
+        //    at least one full pixel, so we should find the valid position
+        //    closest to the center of the mouse cursor position pixel.
+        
+        origin = (temp3->Nb_visibles-1)*(temp3->Length-24)/temp3->Nb_elements/2;
+        Window_attribute2 = (mouse_pos - origin) * (temp3->Nb_elements-(temp3->Cursor_length>1?0:1)) / (temp3->Length-24-1);
+        
         if (Window_attribute2<0)
           Window_attribute2=0;
         else if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
