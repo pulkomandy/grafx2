@@ -1866,7 +1866,8 @@ void Window_draw_slider(T_Scroller_button * button)
           button->Length-24,11,MC_Black/*MC_Dark*/);
   
     if (button->Nb_elements>button->Nb_visibles)
-      slider_position+=Round_div(button->Position*(button->Length-24-button->Cursor_length),button->Nb_elements-button->Nb_visibles);
+      slider_position+=
+        ((button->Length-24-button->Cursor_length)*(button->Position)+(button->Nb_elements-button->Nb_visibles)/2)/(button->Nb_elements-button->Nb_visibles);
   
     Window_rectangle(slider_position,
           button->Pos_Y,
@@ -1886,7 +1887,7 @@ void Window_draw_slider(T_Scroller_button * button)
   
     if (button->Nb_elements>button->Nb_visibles)
       slider_position+=
-        (button->Length-24-button->Cursor_length)*(button->Position)/(button->Nb_elements-button->Nb_visibles);
+        ((button->Length-24-button->Cursor_length)*(button->Position)+(button->Nb_elements-button->Nb_visibles)/2)/(button->Nb_elements-button->Nb_visibles);
         //
         //(button->Position*) / (button->Nb_elements-button->Nb_visibles));
   

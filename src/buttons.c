@@ -2534,9 +2534,9 @@ void Button_Gradients(void)
   Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
   Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
   // Scrolling speed
-  speed_scroller = Window_set_horizontal_scroller_button(100,111,129,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
+  speed_scroller = Window_set_horizontal_scroller_button(99,111,130,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
   Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
-  Print_in_window(74,113,str,MC_Black,MC_Light);
+  Print_in_window(73,113,str,MC_Black,MC_Light);
       
   Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
 
@@ -2590,7 +2590,7 @@ void Button_Gradients(void)
       speed_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Speed;
       Window_draw_slider(speed_scroller);
       Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
-      Print_in_window(74,113,str,MC_Black,MC_Light);
+      Print_in_window(73,113,str,MC_Black,MC_Light);
 
       // Gradient #
       gradient_scroller->Position=Current_gradient;
@@ -2695,7 +2695,7 @@ void Button_Gradients(void)
         Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
         Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
         Hide_cursor();
-        Print_in_window(74,113,str,MC_Black,MC_Light);
+        Print_in_window(73,113,str,MC_Black,MC_Light);
         Display_cursor();
         Allow_colorcycling=1;
         break;
