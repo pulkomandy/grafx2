@@ -114,6 +114,18 @@ do { \
   dest = lua_tostring(L, (index)); \
 } while (0)
 
+///
+/// This macro checks that a Lua argument is a function.
+/// If argument is invalid, it will break the caller and raise a verbose message.
+/// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
+/// @param index     Index of the argument to check, starting at 1.
+/// @param func_name The name of the lua callback, to display a message in case of error.
+#define LUA_ARG_FUNCTION(index, func_name) \
+do { \
+  if (nb_args < (index)) return luaL_error(L, "%s: Argument %d is missing.", func_name, index); \
+  if (!lua_isfunction(L, (index))) return luaL_error(L, "%s: Argument %d is not a function.", func_name, index); \
+} while (0)
+
 /// Check if 'num' arguments were provided exactly
 #define LUA_ARG_LIMIT(num, func_name) \
 do { \
@@ -805,7 +817,7 @@ int L_SelectBox(lua_State* L)
   const char * label[max_settings];
 
   const char * window_caption;
-  int caption_length;
+  unsigned int caption_length;
   int nb_args;
   
   unsigned int max_label_length;
@@ -821,21 +833,28 @@ int L_SelectBox(lua_State* L)
   {
     return luaL_error(L, "selectbox: Less than 2 arguments");
   }
-  nb_buttons=nb_args-1;
+  if ((nb_args - 1) % 2)
+  {
+    return luaL_error(L, "selectbox: Wrong number of arguments");
+  }
+  
+  
+  nb_buttons=(nb_args-1) /2;
   
   max_label_length=4; // Minimum size
   
   // First argument is window caption
   LUA_ARG_STRING(1, "selectbox", window_caption);
   caption_length = strlen(window_caption);
-  if ( caption_length > 14)
-    max_label_length = caption_length - 10;
+  if ( caption_length > max_label_length)
+    max_label_length = caption_length;
   
   for (button=0; button<nb_buttons; button++)
   {
-    LUA_ARG_STRING(button+2, "selectbox", label[button]);
+    LUA_ARG_STRING(button*2+2, "selectbox", label[button]);
     if (strlen(label[button]) > max_label_length)
       max_label_length = strlen(label[button]);
+    LUA_ARG_FUNCTION(button*2+3, "selectbox");
   }
   // Max is 25 to keep window under 320 pixel wide
   if (max_label_length>25)
@@ -862,11 +881,16 @@ int L_SelectBox(lua_State* L)
   Close_window();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
-  
-  // Return value:
-  lua_pushnumber(L, clicked_button);
-    
-  return 1;
+
+  if (clicked_button)
+  {
+    // Push the function on top of the stack
+    lua_pushvalue(L, 1+2*clicked_button);
+    // Call it
+    lua_call(L, 0, 0);
+  }
+  // No return value:    
+  return 0;
 }
 
 int L_MessageBox(lua_State* L)
