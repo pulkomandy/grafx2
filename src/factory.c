@@ -799,6 +799,76 @@ int L_InputBox(lua_State* L)
   return 1 + nb_settings;
 }
 
+int L_SelectBox(lua_State* L)
+{
+  const int max_settings = 10;
+  const char * label[max_settings];
+
+  const char * window_caption;
+  int caption_length;
+  int nb_args;
+  
+  unsigned int max_label_length;
+  int button;
+  int nb_buttons;
+  short clicked_button;
+  //char  str[40];
+  //short close_window = 0;
+  
+  nb_args = lua_gettop (L);
+  
+  if (nb_args < 2)
+  {
+    return luaL_error(L, "selectbox: Less than 2 arguments");
+  }
+  nb_buttons=nb_args-1;
+  
+  max_label_length=4; // Minimum size
+  
+  // First argument is window caption
+  LUA_ARG_STRING(1, "selectbox", window_caption);
+  caption_length = strlen(window_caption);
+  if ( caption_length > 14)
+    max_label_length = caption_length - 10;
+  
+  for (button=0; button<nb_buttons; button++)
+  {
+    LUA_ARG_STRING(button+2, "selectbox", label[button]);
+    if (strlen(label[button]) > max_label_length)
+      max_label_length = strlen(label[button]);
+  }
+  // Max is 25 to keep window under 320 pixel wide
+  if (max_label_length>25)
+    max_label_length=25;
+
+  Update_colors_during_script();
+  Open_window(28+max_label_length*8,26+nb_buttons*17,window_caption);
+
+  for (button=0; button<nb_buttons; button++)
+  {
+    Window_set_normal_button( 7, 22 + 17 * button, 14+max_label_length*8,14,label[button], 0,1,KEY_NONE);
+  }
+
+  Update_window_area(0,0,Window_width, Window_height);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Display_cursor();
+ 
+  Key=0;
+  do
+  {
+    clicked_button=Window_clicked_button();
+  } while (clicked_button<1 && Key != KEY_ESC);
+    
+  Close_window();
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+  
+  // Return value:
+  lua_pushnumber(L, clicked_button);
+    
+  return 1;
+}
+
 int L_MessageBox(lua_State* L)
 {
   const char * caption;
@@ -1008,6 +1078,7 @@ void Run_script(char *scriptdir)
   lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
   lua_register(L,"inputbox",L_InputBox);
   lua_register(L,"messagebox",L_MessageBox);
+  lua_register(L,"selectbox",L_SelectBox);
   lua_register(L,"getforecolor",L_GetForeColor);
   lua_register(L,"getbackcolor",L_GetBackColor);
   lua_register(L,"gettranscolor",L_GetTransColor);
