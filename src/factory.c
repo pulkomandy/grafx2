@@ -345,10 +345,10 @@ int L_GetBackupPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getbackuppixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
+  if (x<0 || y<0 || x>=Main_backups->Pages->Next->Width || y>=Main_backups->Pages->Next->Height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Main_backups->Pages->Next->Transparent_color);
     return 1;
   }
   // Can't use Read_pixel_from_backup_screen(), because in a Lua script
