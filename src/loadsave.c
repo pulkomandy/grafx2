@@ -405,7 +405,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       
     // Other loading
     case CONTEXT_MAIN_IMAGE:
-      if (Backup_with_new_dimensions(0,1,width,height))
+      if (Backup_new_image(1,width,height))
       {
         // La nouvelle page a pu être allouée, elle est pour l'instant pleine
         // de 0s. Elle fait Main_image_width de large.

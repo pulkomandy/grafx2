@@ -811,19 +811,10 @@ void Set_number_of_backups(int nb_backups)
   // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
 
-int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
+int Backup_new_image(byte layers,int width,int height)
 {
-  // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
-  // 0 sinon.
-
-  T_Page * new_page;
-  int return_code=0;
-  int i;
-
-  if (upload)
-    // On remet à jour l'état des infos de la page courante (pour pouvoir les
-    // retrouver plus tard)
-    Upload_infos_page_main(Main_backups->Pages);
+  // Retourne 1 si une nouvelle page est disponible et 0 sinon
+  T_Page * new_page;  
 
   // On crée un descripteur pour la nouvelle page courante
   new_page=New_page(layers);
@@ -832,43 +823,161 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
     Error(0);
     return 0;
   }
-  Upload_infos_page_main(new_page);
-  
-  // Other data not covered by Upload_infos_page_main.
-  // I dunno really why we don't use Copy_S_Page
-  strcpy(new_page->Filename, Main_backups->Pages->Filename);
-  strcpy(new_page->File_directory, Main_backups->Pages->File_directory);
-  new_page->Gradients=Dup_gradient(upload?Main_backups->Pages:NULL);
-  new_page->Background_transparent=Main_backups->Pages->Background_transparent;
-  new_page->Transparent_color=Main_backups->Pages->Transparent_color;
-  //
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
+  new_page->Transparent_color=0;
+  new_page->Gradients=Dup_gradient(NULL);
+  if (!Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
-    for (i=0; i<layers;i++)
-    {
-      memset(Main_backups->Pages->Image[i], Main_backups->Pages->Transparent_color, width*height);
-    }
-    
-    Update_buffers(width, height);
-
-    Download_infos_page_main(Main_backups->Pages);
-    
-    // Same code as in End_of_modification():
-    #ifndef NOLAYERS
-      memcpy(Main_visible_image_backup.Image,
-             Main_visible_image.Image,
-             Main_image_width*Main_image_height);
-    #else
-      Update_screen_targets();
-    #endif
-    Update_FX_feedback(Config.FX_Feedback);
-    // --
-    
-    return_code=1;
+    Error(0);
+    return 0;
   }
-  return return_code;
+  
+  Update_buffers(width, height);
+  
+  Download_infos_page_main(Main_backups->Pages);
+  
+  return 1;
+}
+
+
+int Backup_with_new_dimensions(int width,int height)
+{
+  // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
+  // 0 sinon.
+
+  T_Page * new_page;  
+  int i;
+
+  // On crée un descripteur pour la nouvelle page courante
+  new_page=New_page(Main_backups->Pages->Nb_layers);
+  if (!new_page)
+  {
+    Error(0);
+    return 0;
+  }
+  new_page->Width=width;
+  new_page->Height=height;
+  new_page->Transparent_color=0;
+  if (!Create_new_page(new_page,Main_backups,0xFFFFFFFF))
+  {
+    Error(0);
+    return 0;
+  }
+  
+  // Copy data from previous history step
+  memcpy(Main_backups->Pages->Palette,Main_backups->Pages->Next->Palette,sizeof(T_Palette));
+  strcpy(Main_backups->Pages->Comment,Main_backups->Pages->Next->Comment);
+  Main_backups->Pages->File_format=Main_backups->Pages->Next->File_format;
+  strcpy(Main_backups->Pages->Filename, Main_backups->Pages->Next->Filename);
+  strcpy(Main_backups->Pages->File_directory, Main_backups->Pages->Next->File_directory);
+  Main_backups->Pages->Gradients=Dup_gradient(Main_backups->Pages->Next);
+  Main_backups->Pages->Background_transparent=Main_backups->Pages->Next->Background_transparent;
+  Main_backups->Pages->Transparent_color=Main_backups->Pages->Next->Transparent_color;
+  
+  // Fill with transparent color
+  for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+  {
+    memset(Main_backups->Pages->Image[i], Main_backups->Pages->Transparent_color, width*height);
+  }
+  
+  Update_buffers(width, height);
+
+  Download_infos_page_main(Main_backups->Pages);
+  
+  // Same code as in End_of_modification(),
+  // Without saving a safety backup:
+  #ifndef NOLAYERS
+    memcpy(Main_visible_image_backup.Image,
+           Main_visible_image.Image,
+           Main_image_width*Main_image_height);
+  #else
+    Update_screen_targets();
+  #endif
+  Update_FX_feedback(Config.FX_Feedback);
+  // --
+  
+  return 1;
+}
+
+///
+/// Resizes a backup step in-place.
+/// Should only be called after an actual backup, because it loses the current.
+/// pixels. This function is meant to be used from within Lua scripts.
+int Backup_in_place(int width,int height)
+{
+  // Retourne 1 si une nouvelle page est disponible (alors pleine de 0) et
+  // 0 sinon.
+
+  int i;
+  byte ** new_layer;
+
+  // Perform all allocations first
+  
+  new_layer=calloc(Main_backups->Pages->Nb_layers,1);
+  if (!new_layer)
+    return 0;
+  
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  {
+    new_layer[i]=New_layer(height*width);
+    if (!new_layer[i])
+    {
+      // Allocation error
+      for (; i>0; i--)
+        free(new_layer[i]);
+      free(new_layer);
+      return 0;
+    }
+  }
+  
+  // Now ok to proceed
+  
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  {
+    // Replace layers
+    Free_layer(Main_backups->Pages,i);
+    Main_backups->Pages->Image[i]=new_layer[i];
+    
+    // Fill with transparency
+    memset(Main_backups->Pages->Image[i], Main_backups->Pages->Transparent_color, width*height);
+  }
+  
+  Main_backups->Pages->Width=width;
+  Main_backups->Pages->Height=height;
+
+  Download_infos_page_main(Main_backups->Pages);
+  
+  // The following is part of Update_buffers()
+  // (without changing the backup buffer)
+  #ifndef NOLAYERS
+  // At least one dimension is different
+  if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+  {
+    // Current image
+    free(Main_visible_image.Image);
+    Main_visible_image.Image = (byte *)malloc(width * height);
+    if (Main_visible_image.Image == NULL)
+      return 0;
+  }
+  Main_visible_image.Width = width;
+  Main_visible_image.Height = height;
+
+  if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
+  {      
+    // Depth buffer
+    free(Main_visible_image_depth_buffer.Image);
+    Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+    if (Main_visible_image_depth_buffer.Image == NULL)
+      return 0;
+  }
+  Main_visible_image_depth_buffer.Width = width;
+  Main_visible_image_depth_buffer.Height = height;
+  
+#endif
+  Update_screen_targets();
+  
+  return 1;
 }
 
 int Backup_and_resize_the_spare(int width,int height)
@@ -1121,6 +1230,11 @@ void End_of_modification(void)
   //Update_buffers(Main_image_width, Main_image_height);
   
 #ifndef NOLAYERS
+  // Backup buffer can have "wrong" size if a Lua script
+  // performs a resize.
+  Update_buffers(Main_image_width, Main_image_height);
+  //
+
   memcpy(Main_visible_image_backup.Image,
          Main_visible_image.Image,
          Main_image_width*Main_image_height);

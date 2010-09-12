@@ -247,12 +247,23 @@ int L_SetPictureSize(lua_State* L)
   int w;
   int h;
   int nb_args=lua_gettop(L);
+  int i;
   
   LUA_ARG_LIMIT (2, "setpicturesize");
   LUA_ARG_NUMBER(1, "setpicturesize", w, 1, 9999);
   LUA_ARG_NUMBER(2, "setpicturesize", h, 1, 9999);
     
-  Resize_image(w, h); // TODO: a return value to catch runtime errors
+  Backup_in_place(w, h);
+  // part of Resize_image() : the pixel copy part.
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  {
+    Copy_part_of_image_to_another(
+      Main_backups->Pages->Next->Image[i],0,0,Min(Main_backups->Pages->Next->Width,Main_image_width),
+      Min(Main_backups->Pages->Next->Height,Main_image_height),Main_backups->Pages->Next->Width,
+      Main_backups->Pages->Image[i],0,0,Main_image_width);
+  }
+  Redraw_layered_image();
+  
   return 0;
 }
 
