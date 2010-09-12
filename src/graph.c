@@ -673,13 +673,16 @@ void Remap_spare(void)
   //       ne seront pas utilisées par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
     if (used[color])
-      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+      used[color]=Best_color_perceptual(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    
+  // Change transparent color index
+  Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];
 }
 
 

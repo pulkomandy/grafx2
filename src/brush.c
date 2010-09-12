@@ -806,7 +806,7 @@ void Remap_brush(void)
   //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
   for (color=0;color<=255;color++)
     if (used[color] != 0)
-      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+      used[color]=Best_color_perceptual(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son

@@ -2584,22 +2584,14 @@ void Display_all_screen(void)
 
 byte Best_color(byte r,byte g,byte b)
 {
-  // This "static" allows the loop to start on the last successful match.
-  // If the same color is requested again (and it happens often) and the match
-  // was perfect, it allows an early exit that avoids
-  // 255 computations of color distance.
-  // This system still works with no bad effects when the palette changes.
-  static byte col=0;
-  
-  byte  end_color;
+  int col;
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
   int   rmean;
   byte  best_color=0;
 
-  end_color=col;
-  do
+  for (col=0; col<256; col++)
   {
     if (!Exclude_color[col])
     {
@@ -2619,9 +2611,7 @@ byte Best_color(byte r,byte g,byte b)
         best_color=col;
       }
     }
-    // Loop  
-    col++;
-  } while(col!=end_color);
+  }
 
   return best_color;
 }
@@ -2654,6 +2644,51 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
       best_color=col;
     }
   }
+  return best_color;
+}
+
+
+
+byte Best_color_perceptual(byte r,byte g,byte b)
+{
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
+
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
+  for (col=0; col<256; col++)
+  {
+    if (Exclude_color[col])
+      continue;
+
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
+
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
+    {
+      best_diff=diff;
+      best_color=col;
+    } 
+  }
+
   return best_color;
 }
 
