@@ -340,7 +340,10 @@ int L_GetBackupPixel(lua_State* L)
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
     return 1;
   }
-  lua_pushinteger(L, Read_pixel_from_backup_screen(x,y));
+  // Can't use Read_pixel_from_backup_screen(), because in a Lua script
+  // the "backup" can use a different screen dimension.
+  lua_pushinteger(L, *(Screen_backup + x + Main_backups->Pages->Next->Width * y));
+  
   return 1;
 }
 

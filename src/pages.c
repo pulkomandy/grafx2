@@ -833,11 +833,17 @@ int Backup_with_new_dimensions(int upload,byte layers,int width,int height)
     return 0;
   }
   Upload_infos_page_main(new_page);
-  new_page->Width=width;
-  new_page->Height=height;
+  
+  // Other data not covered by Upload_infos_page_main.
+  // I dunno really why we don't use Copy_S_Page
   strcpy(new_page->Filename, Main_backups->Pages->Filename);
   strcpy(new_page->File_directory, Main_backups->Pages->File_directory);
   new_page->Gradients=Dup_gradient(upload?Main_backups->Pages:NULL);
+  new_page->Background_transparent=Main_backups->Pages->Background_transparent;
+  new_page->Transparent_color=Main_backups->Pages->Transparent_color;
+  //
+  new_page->Width=width;
+  new_page->Height=height;
   if (Create_new_page(new_page,Main_backups,0xFFFFFFFF))
   {
     for (i=0; i<layers;i++)
