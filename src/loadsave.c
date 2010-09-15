@@ -363,12 +363,9 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       {
         Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
       }
-  
+
       // On efface le commentaire précédent
       Window_rectangle(45,70,32*8,8,MC_Light);
-      // Affichage du commentaire
-      if (Get_fileformat(format)->Comment)
-        Print_in_window(45,70,Main_comment,MC_Black,MC_Light);
   
       // Calcul des données nécessaires à l'affichage de la preview:
       if (ratio == PIXEL_WIDE && 
@@ -748,6 +745,9 @@ void Load_image(T_IO_Context *context)
           Main_backups->Pages->Gradients->Range[i].Inverse=context->Cycle_range[i].Inverse;
           Main_backups->Pages->Gradients->Range[i].Speed=context->Cycle_range[i].Speed;
         }
+        
+        // Comment
+        strcpy(Main_comment, context->Comment);
 
       }
     }
@@ -873,9 +873,14 @@ void Load_image(T_IO_Context *context)
                 context->Preview_pos_Y+y_pos,
                 color);
         }
-    }
+    }    
     // Refresh modified part
     Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
+    
+    // Preview comment
+    Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
+    //Update_window_area(45,70,32*8,8);
+
   }
   
 }

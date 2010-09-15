@@ -1176,7 +1176,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     }
     // Affichage du commentaire
     if (Get_fileformat(Main_format)->Comment)
-      Print_in_window(47,70,context->Comment,MC_Black,MC_Light);      
+      Print_in_window(45,70,context->Comment,MC_Black,MC_Light);      
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
