@@ -1698,7 +1698,7 @@ void Close_window(void)
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
-                                    char * title,byte undersc_letter,byte clickable)
+                                    const char * title,byte undersc_letter,byte clickable)
 {
   byte title_color;
   word text_x_pos,text_y_pos;
@@ -1953,7 +1953,7 @@ void Window_clear_input_button(T_Special_button * button)
 
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title, byte undersc_letter,
+                                   const char * title, byte undersc_letter,
                                    byte clickable, word shortcut)
 {
   T_Normal_button * temp=NULL;
@@ -1983,7 +1983,7 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
 
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title, byte undersc_letter,
+                                   const char * title, byte undersc_letter,
                                    byte clickable, word shortcut)
 {
   T_Normal_button * temp=NULL;

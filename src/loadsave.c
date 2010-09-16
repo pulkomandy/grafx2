@@ -1158,7 +1158,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   // Color cyling ranges:
   for (i=0; i<16; i++)
   {
-    if (Main_backups->Pages->Gradients->Range[i].Start!=Main_backups->Pages->Gradients->Range[i].End && Main_backups->Pages->Gradients->Range[i].Speed)
+    if (Main_backups->Pages->Gradients->Range[i].Start!=Main_backups->Pages->Gradients->Range[i].End)
     {
       context->Cycle_range[context->Color_cycles].Start=Main_backups->Pages->Gradients->Range[i].Start;
       context->Cycle_range[context->Color_cycles].End=Main_backups->Pages->Gradients->Range[i].End;

@@ -901,7 +901,7 @@ int Backup_with_new_dimensions(int width,int height)
 }
 
 ///
-/// Resizes a backup step in-place.
+/// Resizes a backup step in-place (doesn't add a Undo/Redo step).
 /// Should only be called after an actual backup, because it loses the current.
 /// pixels. This function is meant to be used from within Lua scripts.
 int Backup_in_place(int width,int height)

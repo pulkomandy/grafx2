@@ -93,7 +93,13 @@ void Free_page_of_a_list(T_List_of_pages * list);
 
 int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
+int Backup_new_image(byte layers,int width,int height);
 int Backup_with_new_dimensions(int width,int height);
+///
+/// Resizes a backup step in-place (doesn't add a Undo/Redo step).
+/// Should only be called after an actual backup, because it loses the current.
+/// pixels. This function is meant to be used from within Lua scripts.
+int Backup_in_place(int width,int height);
 /// Backup the spare image, the one you don't see.
 void Backup_the_spare(dword layer_mask);
 int Backup_and_resize_the_spare(int width,int height);

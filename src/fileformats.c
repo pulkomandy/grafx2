@@ -660,7 +660,7 @@ void Load_LBM(T_IO_Context * context)
                   && (Read_byte(LBM_file,&min_col))
                   && (Read_byte(LBM_file,&max_col)))
                 {
-                  if (section_size == 8 && (flags & 1) && min_col != max_col)
+                  if (section_size == 8 && min_col != max_col)
                   {
                     // Valid cycling range
                     if (max_col<min_col)
@@ -669,7 +669,7 @@ void Load_LBM(T_IO_Context * context)
                     context->Cycle_range[context->Color_cycles].Start=min_col;
                     context->Cycle_range[context->Color_cycles].End=max_col;
                     context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
-                    context->Cycle_range[context->Color_cycles].Speed=rate/78;
+                    context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
                                         
                     context->Color_cycles++;
                   }
@@ -1015,11 +1015,15 @@ void Save_LBM(T_IO_Context * context)
     
     for (i=0; i<context->Color_cycles; i++)
     {
+      word flags=0;
+      flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+      flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
+              
       Write_bytes(LBM_file,"CRNG",4);
       Write_dword_be(LBM_file,8); // Section size
       Write_word_be(LBM_file,0); // Padding
       Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
-      Write_word_be(LBM_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
+      Write_word_be(LBM_file,flags); // Flags
       Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
       Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
       // No padding, size is multiple of 2
@@ -2027,7 +2031,7 @@ void Load_GIF(T_IO_Context * context)
                             && (Read_byte(GIF_file,&min_col))
                             && (Read_byte(GIF_file,&max_col)))
                           {
-                            if ((flags & 1) && min_col != max_col)
+                            if (min_col != max_col)
                             {
                               // Valid cycling range
                               if (max_col<min_col)
@@ -2036,7 +2040,7 @@ void Load_GIF(T_IO_Context * context)
                               context->Cycle_range[context->Color_cycles].Start=min_col;
                               context->Cycle_range[context->Color_cycles].End=max_col;
                               context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
-                              context->Cycle_range[context->Color_cycles].Speed=rate/78;
+                              context->Cycle_range[context->Color_cycles].Speed=(flags&1)?rate/78:0;
                                                   
                               context->Color_cycles++;
                             }
@@ -2414,8 +2418,12 @@ void Save_GIF(T_IO_Context * context)
             Write_byte(GIF_file,context->Color_cycles*6);
             for (i=0; i<context->Color_cycles; i++)
             {
+              word flags=0;
+              flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+              flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
+              
               Write_word_be(GIF_file,context->Cycle_range[i].Speed*78); // Rate
-              Write_word_be(GIF_file,1|(context->Cycle_range[i].Inverse?2:0)); // Flags
+              Write_word_be(GIF_file,flags); // Flags
               Write_byte(GIF_file,context->Cycle_range[i].Start); // Min color
               Write_byte(GIF_file,context->Cycle_range[i].End); // Max color
             }
