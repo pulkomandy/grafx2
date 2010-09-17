@@ -109,4 +109,7 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse);
 /// Width of one layer button, in pixels before scaling
 extern word Layer_button_width;
 
+/// Copy viewport settings and offsets from the Main to the Spare.
+void Copy_view_to_spare(void);
+
 #endif

@@ -1812,7 +1812,36 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
   Compute_paintbrush_coordinates();
 }
 
+void Copy_view_to_spare(void)
+{
+  
+  // Don't do anything if the pictures have different dimensions
+  if (Main_image_width!=Spare_image_width || Main_image_height!=Spare_image_height)
+    return;
+  
+  // Copie des décalages de la fenêtre principale (non zoomée) de l'image
+  Spare_offset_X=Main_offset_X;
+  Spare_offset_Y=Main_offset_Y;
 
+  // Copie du booléen "Mode loupe" de l'image
+  Spare_magnifier_mode=Main_magnifier_mode;
+
+  // Copie du facteur de zoom du brouillon
+  Spare_magnifier_factor=Main_magnifier_factor;
+
+  // Copie des dimensions de la fenêtre de zoom
+  Spare_magnifier_width=Main_magnifier_width;
+  Spare_magnifier_height=Main_magnifier_height;
+
+  // Copie des décalages de la fenêtre de zoom
+  Spare_magnifier_offset_X=Main_magnifier_offset_X;
+  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
+
+  // Copie des données du split du zoom
+  Spare_separator_position=Main_separator_position;
+  Spare_X_zoom=Main_X_zoom;
+  Spare_separator_proportion=Main_separator_proportion;
+}
 
   // -- Afficher la barre de séparation entre les parties zoomées ou non en
   //    mode Loupe --

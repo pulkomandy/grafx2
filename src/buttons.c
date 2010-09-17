@@ -928,7 +928,7 @@ void Button_Settings(void)
   {"Separate colors:",1,&(selected_config.Separate_colors),0,1,0,Lookup_YesNo},
   {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
   {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
-  {"",0,NULL,0,0,0,NULL},
+  {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
@@ -1513,6 +1513,9 @@ void Button_Page(void)
   
   Hide_cursor();
 
+  if (Config.Sync_views)
+    Copy_view_to_spare();
+
   // On dégrossit le travail avec les infos des listes de pages
   Exchange_main_and_spare();
 
@@ -1626,29 +1629,8 @@ void Copy_image_only(void)
     Spare_image_width=Main_image_width;
     Spare_image_height=Main_image_height;
     */
-
-    // Copie des décalages de la fenêtre principale (non zoomée) de l'image
-    Spare_offset_X=Main_offset_X;
-    Spare_offset_Y=Main_offset_Y;
-
-    // Copie du booléen "Mode loupe" de l'image
-    Spare_magnifier_mode=Main_magnifier_mode;
-
-    // Copie du facteur de zoom du brouillon
-    Spare_magnifier_factor=Main_magnifier_factor;
-
-    // Copie des dimensions de la fenêtre de zoom
-    Spare_magnifier_width=Main_magnifier_width;
-    Spare_magnifier_height=Main_magnifier_height;
-
-    // Copie des décalages de la fenêtre de zoom
-    Spare_magnifier_offset_X=Main_magnifier_offset_X;
-    Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
-
-    // Copie des données du split du zoom
-    Spare_separator_position=Main_separator_position;
-    Spare_X_zoom=Main_X_zoom;
-    Spare_separator_proportion=Main_separator_proportion;
+    
+    Copy_view_to_spare();
     
     // Update the visible buffer of the spare.
     // It's a bit complex because at the moment, to save memory,

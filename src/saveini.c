@@ -677,6 +677,12 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Right_click_colorpick",1,values,1)))
     goto Erreur_Retour;
     
+  values[0]=(conf->Sync_views);
+  if ((return_code=Save_INI_set_values (Ancien_fichier,Nouveau_fichier,buffer,"Sync_views",1,values,1)))
+    goto Erreur_Retour;
+  
+  // Insert new values here
+  
   Save_INI_flush(Ancien_fichier,Nouveau_fichier,buffer);
 
   fclose(Nouveau_fichier);

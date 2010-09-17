@@ -902,7 +902,14 @@ int Load_INI(T_Config * conf)
     conf->Right_click_colorpick=(values[0]!=0);
   }
   
+  conf->Sync_views=1;
+  // Optional, synced view of main and spare (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Sync_views",1,values))
+  {
+    conf->Sync_views=(values[0]!=0);
+  }
   
+  // Insert new values here
 
   fclose(file);
 
