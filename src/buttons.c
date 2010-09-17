@@ -1522,8 +1522,6 @@ void Button_Page(void)
   SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
-  SWAP_SHORTS(Old_main_offset_X,Old_spare_offset_X)
-  SWAP_SHORTS(Old_main_offset_Y,Old_spare_offset_Y)
   SWAP_SHORTS(Main_separator_position,Spare_separator_position)
   SWAP_SHORTS(Main_X_zoom,Spare_X_zoom)
   SWAP_FLOATS(Main_separator_proportion,Spare_separator_proportion)
@@ -3736,8 +3734,6 @@ void Button_Magnify(void)
   }
   else
   {
-    Old_main_offset_X=Main_offset_X;
-    Old_main_offset_Y=Main_offset_Y;
     Compute_magnifier_data();
     if ((!Config.Fast_zoom) || (Mouse_Y>=Menu_Y) || Coming_from_zoom_factor_menu)
     {
@@ -3830,24 +3826,20 @@ void Button_Unselect_magnifier(void)
     // On sort du mode loupe
     Main_magnifier_mode=0;
 
-    /*
+    
     // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
     // Centrage "brut" de lécran par rapport à la loupe
     Main_offset_X=Main_magnifier_offset_X-((Screen_width-Main_magnifier_width)>>1);
     Main_offset_Y=Main_magnifier_offset_Y-((Menu_Y-Main_magnifier_height)>>1);
-    */
+    
     // Correction en cas de débordement de l'image
-    if (Old_main_offset_X+Screen_width>Main_image_width)
+    if (Main_offset_X+Screen_width>Main_image_width)
       Main_offset_X=Main_image_width-Screen_width;
-    else
-      Main_offset_X=Old_main_offset_X;
     if (Main_offset_X<0)
       Main_offset_X=0;
 
-    if (Old_main_offset_Y+Menu_Y>Main_image_height)
+    if (Main_offset_Y+Menu_Y>Main_image_height)
       Main_offset_Y=Main_image_height-Menu_Y;
-    else
-      Main_offset_Y=Old_main_offset_Y;
     if (Main_offset_Y<0)
       Main_offset_Y=0;
 

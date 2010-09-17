@@ -300,10 +300,6 @@ GFX2_GLOBAL short Main_image_height;
 GFX2_GLOBAL short Main_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Main_offset_Y;
-/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_main_offset_X;
-/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_main_offset_Y;
 /// Name of the directory that holds the image currently edited.
 GFX2_GLOBAL char  Main_file_directory[1024];
 /// Filename (without directory) of the image currently edited.
@@ -370,10 +366,6 @@ GFX2_GLOBAL short Spare_image_height;
 GFX2_GLOBAL short Spare_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Spare_offset_Y;
-/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_spare_offset_X;
-/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_spare_offset_Y;
 /// Name of the directory that holds the image currently edited as spare page.
 GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
 /// Filename (without directory) of the image currently edited as spare page.

@@ -475,8 +475,6 @@ int Init_program(int argc,char * argv[])
   // On initialise d'ot' trucs
   Main_offset_X=0;
   Main_offset_Y=0;
-  Old_main_offset_X=0;
-  Old_main_offset_Y=0;
   Main_separator_position=0;
   Main_X_zoom=0;
   Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -488,8 +486,6 @@ int Init_program(int argc,char * argv[])
   Main_magnifier_offset_Y=0;
   Spare_offset_X=0;
   Spare_offset_Y=0;
-  Old_spare_offset_X=0;
-  Old_spare_offset_Y=0;
   Spare_separator_position=0;
   Spare_X_zoom=0;
   Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
