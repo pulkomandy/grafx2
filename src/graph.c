@@ -522,6 +522,8 @@ try_again:
       Menu_factor_Y=1;
       break;
     default: // Stay below some reasonable size
+      if (factor>Max(Pixel_width,Pixel_height))
+        factor/=Max(Pixel_width,Pixel_height);
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
