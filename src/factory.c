@@ -1106,8 +1106,8 @@ void Run_script(char *scriptdir)
   lua_register(L,"getforecolor",L_GetForeColor);
   lua_register(L,"getbackcolor",L_GetBackColor);
   lua_register(L,"gettranscolor",L_GetTransColor);
-  lua_register(L,"getsparepicturesize ",L_GetSparePictureSize);
-  lua_register(L,"getsparelayerpixel ",L_GetSpareLayerPixel);
+  lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
+  lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
   lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
   lua_register(L,"getsparecolor",L_GetSpareColor);
   lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
