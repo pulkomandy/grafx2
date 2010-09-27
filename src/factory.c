@@ -1036,6 +1036,11 @@ void Draw_script_information(T_Fileselector_item * script_item)
 // Add a script to the list
 void Add_script(const char *name)
 {
+  // Only files ending in ".lua"
+  int len=strlen(name);
+  if (len<=4 || strcasecmp(name+len-4, ".lua"))
+    return;
+    
   Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0, ICON_NONE);
 }
 
@@ -1083,7 +1088,8 @@ void Run_script(char *scriptdir)
   chdir(scriptdir);
 
   L = lua_open();
-
+  putenv("LUA_PATH=libs\\?.lua");
+  
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
   lua_register(L,"getbrushpixel",L_GetBrushPixel);
   lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
@@ -1115,8 +1121,9 @@ void Run_script(char *scriptdir)
   
 
   // For debug only
-  // luaL_openlibs(L);
+  luaL_openlibs(L);
   
+  /*
   luaopen_base(L);
   //luaopen_package(L); // crashes on Windows, for unknown reason
   luaopen_table(L);
@@ -1125,6 +1132,7 @@ void Run_script(char *scriptdir)
   luaopen_string(L);
   luaopen_math(L);
   //luaopen_debug(L);
+  */
 
   strcat(scriptdir, selected_script);
 
