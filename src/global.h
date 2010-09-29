@@ -955,34 +955,80 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 /// It was chosen to not conflict with any SDL key number.
 #define KEY_JOYBUTTON       (SDLK_LAST+4)
 
-/// Button definitions for the gp2x
-#define GP2X_BUTTON_UP              (0)
-#define GP2X_BUTTON_DOWN            (4)
-#define GP2X_BUTTON_LEFT            (2)
-#define GP2X_BUTTON_RIGHT           (6)
-#define GP2X_BUTTON_UPLEFT          (1)
-#define GP2X_BUTTON_UPRIGHT         (7)
-#define GP2X_BUTTON_DOWNLEFT        (3)
-#define GP2X_BUTTON_DOWNRIGHT       (5)
-#define GP2X_BUTTON_CLICK           (18)
-#define GP2X_BUTTON_A               (12)
-#define GP2X_BUTTON_B               (13)
-#define GP2X_BUTTON_Y               (14)
-#define GP2X_BUTTON_X               (15)
-#define GP2X_BUTTON_L               (10)
-#define GP2X_BUTTON_R               (11)
-#define GP2X_BUTTON_START           (8)
-#define GP2X_BUTTON_SELECT          (9)
-#define GP2X_BUTTON_VOLUP           (16)
-#define GP2X_BUTTON_VOLDOWN         (17)
+/// The joystick axis are {X,Y} - on all platforms so far.
+/// If there is ever a platform where they are reversed, put
+/// these lines in each platform "case" below.
+#define JOYSTICK_AXIS_X             (0)
+#define JOYSTICK_AXIS_Y             (1)
 
-#ifdef __gp2x__
-  #define KEY_ESC (KEY_JOYBUTTON+GP2X_BUTTON_X)
+#ifdef __GP2X__
+
+    #define JOYSTICK_THRESHOLD  (4096)
+
+    /// Button definitions for the gp2x
+    #define GP2X_BUTTON_UP              (0)
+    #define GP2X_BUTTON_DOWN            (4)
+    #define GP2X_BUTTON_LEFT            (2)
+    #define GP2X_BUTTON_RIGHT           (6)
+    #define GP2X_BUTTON_UPLEFT          (1)
+    #define GP2X_BUTTON_UPRIGHT         (7)
+    #define GP2X_BUTTON_DOWNLEFT        (3)
+    #define GP2X_BUTTON_DOWNRIGHT       (5)
+    #define GP2X_BUTTON_CLICK           (18)
+    #define GP2X_BUTTON_A               (12)
+    #define GP2X_BUTTON_B               (13)
+    #define GP2X_BUTTON_Y               (14)
+    #define GP2X_BUTTON_X               (15)
+    #define GP2X_BUTTON_L               (10)
+    #define GP2X_BUTTON_R               (11)
+    #define GP2X_BUTTON_START           (8)
+    #define GP2X_BUTTON_SELECT          (9)
+    #define GP2X_BUTTON_VOLUP           (16)
+    #define GP2X_BUTTON_VOLDOWN         (17)
+    
+    #define KEY_ESC (KEY_JOYBUTTON+GP2X_BUTTON_X)
+#elif defined(__WIZ__)
+    /// Button definitions for the Wiz
+    #define WIZ_BUTTON_UP               (0)
+    #define WIZ_BUTTON_DOWN             (4)
+    #define WIZ_BUTTON_LEFT             (2)
+    #define WIZ_BUTTON_RIGHT            (6)
+    #define WIZ_BUTTON_UPLEFT           (1)
+    #define WIZ_BUTTON_UPRIGHT          (7)
+    #define WIZ_BUTTON_DOWNLEFT         (3)
+    #define WIZ_BUTTON_DOWNRIGHT        (5)
+    #define WIZ_BUTTON_L                (10)
+    #define WIZ_BUTTON_R                (11)
+    #define WIZ_BUTTON_A                (12)
+    #define WIZ_BUTTON_B                (13)
+    #define WIZ_BUTTON_X                (14)
+    #define WIZ_BUTTON_Y                (15)
+    #define WIZ_BUTTON_MENU             (8)
+    #define WIZ_BUTTON_SELECT           (9)
+    #define WIZ_BUTTON_VOLUP            (16)
+    #define WIZ_BUTTON_VOLDOWN          (17)
+
+    #define KEY_ESC (KEY_JOYBUTTON+WIZ_BUTTON_X)
+#elif __CAANOO__
+    /// Button definitions for the Caanoo
+    #define CAANOO_BUTTON_A             (0)
+    #define CAANOO_BUTTON_X             (1)
+    #define CAANOO_BUTTON_B             (2)
+    #define CAANOO_BUTTON_Y             (3)
+    #define CAANOO_BUTTON_L             (4)
+    #define CAANOO_BUTTON_R             (5)
+    #define CAANOO_BUTTON_HOME          (6)
+    #define CAANOO_BUTTON_HOLD          (7)
+    #define CAANOO_BUTTON_I             (8)
+    #define CAANOO_BUTTON_II            (9)
+    #define CAANOO_BUTTON_JOY           (10)
+
+    #define KEY_ESC (KEY_JOYBUTTON+CAANOO_BUTTON_HOME)
 #else
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
   /// for buttons, etc. we use this instead of SDLK_ESCAPE,
-  /// so the GP2X port can get a joybutton equivalent of it.
+  /// so the console ports can get a joybutton equivalent of it.
   #define KEY_ESC SDLK_ESCAPE
 #endif
 

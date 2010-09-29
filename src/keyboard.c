@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2010 A Filyanov
     Copyright 2009 Franck Charlet
     Copyright 2008 Yves Rizoud
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -465,9 +466,9 @@ const char * Key_name(word key)
   
   key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   
+#if defined(__GP2X__)
   if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+18)
   {
-#ifdef __GP2X__
     
     char *button_name;
     switch(key-KEY_JOYBUTTON)
@@ -494,7 +495,47 @@ const char * Key_name(word key)
       default: sprintf(buffer+strlen(buffer), "[B%d]", key);return buffer;
     }
     strcat(buffer,button_name);
-#else    
+#elif defined(__WIZ__)
+  if (Key>=KEY_JOYBUTTON && Key<=KEY_JOYBUTTON+17)
+  {
+    char *button_name;
+    switch(Key-KEY_JOYBUTTON)
+    {
+      case WIZ_BUTTON_A: button_name="[A]"; break;
+      case WIZ_BUTTON_X: button_name="[X]"; break;
+      case WIZ_BUTTON_B: button_name="[B]"; break;
+      case WIZ_BUTTON_Y: button_name="[Y]"; break;
+      case WIZ_BUTTON_L: button_name="[L]"; break;
+      case WIZ_BUTTON_R: button_name="[R]"; break;
+      case WIZ_BUTTON_MENU: button_name="[MENU]"; break;
+      case WIZ_BUTTON_SELECT: button_name="[SELECT]"; break;
+      case WIZ_BUTTON_VOLUP: button_name="[VOL UP]"; break;
+      case WIZ_BUTTON_VOLDOWN: button_name="[VOL DOWN]"; break;
+      default: sprintf(buffer+strlen(buffer), "[B%d]", Key);return buffer;
+    }
+    strcat(buffer,button_name);
+#elif defined(__CAANOO__)
+  if (Key>=KEY_JOYBUTTON && Key<=KEY_JOYBUTTON+10)
+  {
+    char *button_name;
+    switch(Key-KEY_JOYBUTTON)
+    {
+      case CAANOO_BUTTON_A: button_name="[A]"; break;
+      case CAANOO_BUTTON_X: button_name="[X]"; break;
+      case CAANOO_BUTTON_B: button_name="[B]"; break;
+      case CAANOO_BUTTON_Y: button_name="[Y]"; break;
+      case CAANOO_BUTTON_L: button_name="[L]"; break;
+      case CAANOO_BUTTON_R: button_name="[R]"; break;
+      case CAANOO_BUTTON_HOME: button_name="[HOME]"; break;
+      case CAANOO_BUTTON_HOLD: button_name="[HOLD]"; break;
+      case CAANOO_BUTTON_I: button_name="[BUTTON I]"; break;
+      case CAANOO_BUTTON_II: button_name="[BUTTON II]"; break;
+      case CAANOO_BUTTON_JOY: button_name="[THUMB JOY]"; break;
+      default: sprintf(buffer+strlen(buffer), "[B%d]", Key);return buffer;
+    }
+    strcat(buffer,button_name);
+#else
+  {
     sprintf(buffer+strlen(buffer), "[B%d]", key-KEY_JOYBUTTON);
 #endif
     return buffer;

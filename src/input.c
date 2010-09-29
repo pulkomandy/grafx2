@@ -34,6 +34,7 @@
 #include "windows.h"
 #include "errors.h"
 #include "misc.h"
+#include "buttons.h"
 #include "input.h"
 #include "loadsave.h"
 
@@ -81,19 +82,53 @@ short Mouse_virtual_y_position;
 short Mouse_virtual_width;
 short Mouse_virtual_height;
 
-// TODO: move to config
-#ifdef __GP2X__
-short Joybutton_shift=GP2X_BUTTON_L; // Button number that serves as a "shift" modifier
-short Joybutton_control=GP2X_BUTTON_R; // Button number that serves as a "ctrl" modifier
-short Joybutton_alt=GP2X_BUTTON_CLICK; // Button number that serves as a "alt" modifier
-short Joybutton_left_click=GP2X_BUTTON_B; // Button number that serves as left click
-short Joybutton_right_click=GP2X_BUTTON_Y; // Button number that serves as right-click
-#else
-short Joybutton_shift=-1; // Button number that serves as a "shift" modifier
-short Joybutton_control=-1; // Button number that serves as a "ctrl" modifier
-short Joybutton_alt=-1; // Button number that serves as a "alt" modifier
-short Joybutton_left_click=0; // Button number that serves as left click
-short Joybutton_right_click=0; // Button number that serves as right-click
+// Joystick/pad configurations for the various console ports.
+// See the #else for the documentation of fields.
+// TODO: Make these user-settable somehow.
+#if defined(__GP2X__)
+
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=GP2X_BUTTON_L;
+  short Joybutton_control=GP2X_BUTTON_R;
+  short Joybutton_alt=GP2X_BUTTON_CLICK;
+  short Joybutton_left_click=GP2X_BUTTON_B;
+  short Joybutton_right_click=GP2X_BUTTON_Y;
+
+#elif defined(__WIZ__)
+
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=WIZ_BUTTON_X;
+  short Joybutton_control=WIZ_BUTTON_SELECT;
+  short Joybutton_alt=WIZ_BUTTON_Y;
+  short Joybutton_left_click=WIZ_BUTTON_A;
+  short Joybutton_right_click=WIZ_BUTTON_B;
+
+#elif defined(__CAANOO__)
+
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=CAANOO_BUTTON_L;
+  short Joybutton_control=CAANOO_BUTTON_R;
+  short Joybutton_alt=CAANOO_BUTTON_Y;
+  short Joybutton_left_click=CAANOO_BUTTON_A;
+  short Joybutton_right_click=CAANOO_BUTTON_B;
+
+#else // Default : Any joystick on a computer platform
+  ///
+  /// This is the sensitivity threshold for the directional
+  /// pad of a cheap digital joypad on the PC. It has been set through
+  /// trial and error : If value is too large then the movement is
+  /// randomly interrupted; if the value is too low the cursor will
+  /// move by itself, controlled by parasits.
+  #define JOYSTICK_THRESHOLD  (1000)
+  
+  /// A button that is marked as "modifier" will 
+  short Joybutton_shift=-1; ///< Button number that serves as a "shift" modifier; -1 for none
+  short Joybutton_control=-1; ///< Button number that serves as a "ctrl" modifier; -1 for none
+  short Joybutton_alt=-1; ///< Button number that serves as a "alt" modifier; -1 for none
+  
+  short Joybutton_left_click=0; ///< Button number that serves as left click; -1 for none
+  short Joybutton_right_click=1; ///< Button number that serves as right-click; -1 for none
+
 #endif
 
 int Has_shortcut(word function)
@@ -502,7 +537,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       Input_new_mouse_K=2;
       return Move_cursor_with_constraints();
     }
-    #ifdef __GP2X__
+    #if defined(__GP2X__)
     switch(event.button)
     {
       case GP2X_BUTTON_UP:
@@ -529,8 +564,77 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       case GP2X_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
+
       default:
         break;
+      }
+      #elif __WIZ__
+      switch(event.button)
+      {
+        case WIZ_BUTTON_UP:
+          Directional_up=1;
+          break;
+        case WIZ_BUTTON_UPRIGHT:
+          Directional_up_right=1;
+          break;
+        case WIZ_BUTTON_RIGHT:
+          Directional_right=1;
+          break;
+        case WIZ_BUTTON_DOWNRIGHT:
+          Directional_down_right=1;
+          break;
+        case WIZ_BUTTON_DOWN:
+          Directional_down=1;
+          break;
+        case WIZ_BUTTON_DOWNLEFT:
+          Directional_down_left=1;
+        case WIZ_BUTTON_LEFT:
+          Directional_left=1;
+          break;
+        case WIZ_BUTTON_UPLEFT:
+          Directional_up_left=1;
+          break;
+        case WIZ_BUTTON_MENU:
+        {
+          SDL_Event Event;
+          Event.type = SDL_QUIT;
+          SDL_PushEvent(&Event);
+        }
+        break;
+        case WIZ_BUTTON_L:
+          if(!Windows_open)
+            Button_Undo();
+          break;
+        case WIZ_BUTTON_R:
+          if(!Windows_open)
+            Button_Redo();
+          break;
+        default:
+          break;
+      }
+      #elif __CAANOO__
+      switch(event.button)
+      {
+        case CAANOO_BUTTON_HOME:
+          {
+            SDL_Event Event;
+            
+            Event.type = SDL_QUIT;
+            SDL_PushEvent(&Event);
+          }
+          break;
+          
+        case CAANOO_BUTTON_I:
+          if(!Windows_open)
+            Button_Undo();
+          break;
+        case CAANOO_BUTTON_II:
+          if(!Windows_open)
+            Button_Redo();
+          break;
+          
+          default:
+          break;
     }
     #endif
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
@@ -567,7 +671,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Move_cursor_with_constraints();
     }
   
-    #ifdef __GP2X__
+    #if defined(__GP2X__)
     switch(event.button)
     {
       case GP2X_BUTTON_UP:
@@ -595,30 +699,58 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
         Directional_up_left=0;
         break;
     }
+    #elif defined(__WIZ__)
+    switch(event.button)
+    {
+      case WIZ_BUTTON_UP:
+        Directional_up=0;
+        break;
+      case WIZ_BUTTON_UPRIGHT:
+        Directional_up_right=0;
+        break;
+      case WIZ_BUTTON_RIGHT:
+        Directional_right=0;
+        break;
+      case WIZ_BUTTON_DOWNRIGHT:
+        Directional_down_right=0;
+        break;
+      case WIZ_BUTTON_DOWN:
+        Directional_down=0;
+        break;
+      case WIZ_BUTTON_DOWNLEFT:
+        Directional_down_left=0;
+        break;
+      case WIZ_BUTTON_LEFT:
+        Directional_left=0;
+        break;
+      case WIZ_BUTTON_UPLEFT:
+        Directional_up_left=0;
+        break;
+    }
     #endif
   return Move_cursor_with_constraints();
 }
 
 void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
-    if (event.axis==0) // X
+    if (event.axis==JOYSTICK_AXIS_X)
     {
       Directional_right=Directional_left=0;
-      if (event.value<-1000)
+      if (event.value<-JOYSTICK_THRESHOLD)
       {
         Directional_left=1;
       }
-      else if (event.value>1000)
+      else if (event.value>JOYSTICK_THRESHOLD)
         Directional_right=1;
     }
-    else if (event.axis==1) // Y
+    else if (event.axis==JOYSTICK_AXIS_Y)
     {
       Directional_up=Directional_down=0;
-      if (event.value<-1000)
+      if (event.value<-JOYSTICK_THRESHOLD)
       {
         Directional_up=1;
       }
-      else if (event.value>1000)
+      else if (event.value>JOYSTICK_THRESHOLD)
         Directional_down=1;
     }
 }

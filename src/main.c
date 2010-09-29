@@ -40,7 +40,7 @@
 
 
 // There is no WM on the GP2X...
-#ifndef __GP2X__
+#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
     #include <SDL_syswm.h>
 #endif
 
@@ -887,6 +887,12 @@ void Program_shutdown(void)
     Error(ERROR_MISSING_DIRECTORY);
     
   SDL_Quit();
+  
+  #if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
+  chdir("/usr/gp2x");
+  execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
+  #endif
+  
 }
 
 

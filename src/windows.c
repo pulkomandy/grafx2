@@ -494,7 +494,7 @@ void Display_layerbar(void)
   x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
   for (current_button=0; current_button<button_number; current_button++)
   {
-    word x_pos;
+    word x_pos=0;
     word y_pos;
     word sprite_index;
     

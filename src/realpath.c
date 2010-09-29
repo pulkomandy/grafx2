@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__amigaos__)
+#if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
 // These platforms don't have realpath().
 // We use the following implementation, found in:
 // http://amiga.sourceforge.net/amigadevhelp/FUNCTIONS/GeekGadgets/realpath/ex02_realpath.c
@@ -17,7 +17,7 @@
 // the path. So this implementation is limited, it's really better to
 // use realpath() if your platform has it.
   
-    #if defined(__GP2X__) || defined(__amigaos__)
+    #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
         // This is a random default value ...
         #define PATH_MAX 32768
     #endif
