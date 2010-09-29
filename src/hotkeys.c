@@ -884,7 +884,16 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_u, // U
-  0},
+  // Secondary shortcut is button I on the Caanoo, L on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_I)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_L)
+  #else
+    0
+  #endif
+  // --
+  },
   {103,
   "Redo",
   "Redo the last undone action.",
@@ -892,7 +901,16 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_u|MOD_SHIFT, // Shift + U
-  0},
+  // Secondary shortcut is button II on the Caanoo, R on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_II)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_R)
+  #else
+    0
+  #endif
+  // --
+  },
   {133,
   "Kill",
   "Kills the current page. It actually",
@@ -924,7 +942,17 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "confirmation is asked.",
   false,
   SDLK_q, // Q (A en AZERTY)
-  0},
+  // Secondary shortcut is button Home on the Caanoo, Menu on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_HOME)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_MENU)
+  #else
+    0
+  #endif
+  // --
+
+  },
   {107,
   "Palette menu",
   "Opens a menu which allows you to",

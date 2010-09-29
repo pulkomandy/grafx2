@@ -88,29 +88,29 @@ short Mouse_virtual_height;
 #if defined(__GP2X__)
 
   #define JOYSTICK_THRESHOLD  (4096)
-  short Joybutton_shift=GP2X_BUTTON_L;
-  short Joybutton_control=GP2X_BUTTON_R;
-  short Joybutton_alt=GP2X_BUTTON_CLICK;
-  short Joybutton_left_click=GP2X_BUTTON_B;
-  short Joybutton_right_click=GP2X_BUTTON_Y;
+  short Joybutton_shift=      JOY_BUTTON_L;
+  short Joybutton_control=    JOY_BUTTON_R;
+  short Joybutton_alt=        JOY_BUTTON_CLICK;
+  short Joybutton_left_click= JOY_BUTTON_B;
+  short Joybutton_right_click=JOY_BUTTON_Y;
 
 #elif defined(__WIZ__)
 
   #define JOYSTICK_THRESHOLD  (4096)
-  short Joybutton_shift=WIZ_BUTTON_X;
-  short Joybutton_control=WIZ_BUTTON_SELECT;
-  short Joybutton_alt=WIZ_BUTTON_Y;
-  short Joybutton_left_click=WIZ_BUTTON_A;
-  short Joybutton_right_click=WIZ_BUTTON_B;
+  short Joybutton_shift=      JOY_BUTTON_X;
+  short Joybutton_control=    JOY_BUTTON_SELECT;
+  short Joybutton_alt=        JOY_BUTTON_Y;
+  short Joybutton_left_click= JOY_BUTTON_A;
+  short Joybutton_right_click=JOY_BUTTON_B;
 
 #elif defined(__CAANOO__)
 
   #define JOYSTICK_THRESHOLD  (4096)
-  short Joybutton_shift=CAANOO_BUTTON_L;
-  short Joybutton_control=CAANOO_BUTTON_R;
-  short Joybutton_alt=CAANOO_BUTTON_Y;
-  short Joybutton_left_click=CAANOO_BUTTON_A;
-  short Joybutton_right_click=CAANOO_BUTTON_B;
+  short Joybutton_shift=      JOY_BUTTON_L;
+  short Joybutton_control=    JOY_BUTTON_R;
+  short Joybutton_alt=        JOY_BUTTON_Y;
+  short Joybutton_left_click= JOY_BUTTON_A;
+  short Joybutton_right_click=JOY_BUTTON_B;
 
 #else // Default : Any joystick on a computer platform
   ///
@@ -537,106 +537,53 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
       Input_new_mouse_K=2;
       return Move_cursor_with_constraints();
     }
-    #if defined(__GP2X__)
     switch(event.button)
     {
-      case GP2X_BUTTON_UP:
+      #ifdef JOY_BUTTON_UP
+      case JOY_BUTTON_UP:
         Directional_up=1;
         break;
-      case GP2X_BUTTON_UPRIGHT:
+      #endif
+      #ifdef JOY_BUTTON_UPRIGHT
+      case JOY_BUTTON_UPRIGHT:
         Directional_up_right=1;
         break;
-      case GP2X_BUTTON_RIGHT:
+      #endif
+      #ifdef JOY_BUTTON_RIGHT
+      case JOY_BUTTON_RIGHT:
         Directional_right=1;
         break;
-      case GP2X_BUTTON_DOWNRIGHT:
+      #endif
+      #ifdef JOY_BUTTON_DOWNRIGHT
+      case JOY_BUTTON_DOWNRIGHT:
         Directional_down_right=1;
         break;
-      case GP2X_BUTTON_DOWN:
+      #endif
+      #ifdef JOY_BUTTON_DOWN
+      case JOY_BUTTON_DOWN:
         Directional_down=1;
         break;
-      case GP2X_BUTTON_DOWNLEFT:
+      #endif
+      #ifdef JOY_BUTTON_DOWNLEFT
+      case JOY_BUTTON_DOWNLEFT:
         Directional_down_left=1;
         break;
-      case GP2X_BUTTON_LEFT:
+      #endif
+      #ifdef JOY_BUTTON_LEFT
+      case JOY_BUTTON_LEFT:
         Directional_left=1;
         break;
-      case GP2X_BUTTON_UPLEFT:
+      #endif
+      #ifdef JOY_BUTTON_UPLEFT
+      case JOY_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
-
+      #endif
+      
       default:
         break;
-      }
-      #elif __WIZ__
-      switch(event.button)
-      {
-        case WIZ_BUTTON_UP:
-          Directional_up=1;
-          break;
-        case WIZ_BUTTON_UPRIGHT:
-          Directional_up_right=1;
-          break;
-        case WIZ_BUTTON_RIGHT:
-          Directional_right=1;
-          break;
-        case WIZ_BUTTON_DOWNRIGHT:
-          Directional_down_right=1;
-          break;
-        case WIZ_BUTTON_DOWN:
-          Directional_down=1;
-          break;
-        case WIZ_BUTTON_DOWNLEFT:
-          Directional_down_left=1;
-        case WIZ_BUTTON_LEFT:
-          Directional_left=1;
-          break;
-        case WIZ_BUTTON_UPLEFT:
-          Directional_up_left=1;
-          break;
-        case WIZ_BUTTON_MENU:
-        {
-          SDL_Event Event;
-          Event.type = SDL_QUIT;
-          SDL_PushEvent(&Event);
-        }
-        break;
-        case WIZ_BUTTON_L:
-          if(!Windows_open)
-            Button_Undo();
-          break;
-        case WIZ_BUTTON_R:
-          if(!Windows_open)
-            Button_Redo();
-          break;
-        default:
-          break;
-      }
-      #elif __CAANOO__
-      switch(event.button)
-      {
-        case CAANOO_BUTTON_HOME:
-          {
-            SDL_Event Event;
-            
-            Event.type = SDL_QUIT;
-            SDL_PushEvent(&Event);
-          }
-          break;
-          
-        case CAANOO_BUTTON_I:
-          if(!Windows_open)
-            Button_Undo();
-          break;
-        case CAANOO_BUTTON_II:
-          if(!Windows_open)
-            Button_Redo();
-          break;
-          
-          default:
-          break;
     }
-    #endif
+      
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
     // TODO: systeme de répétition
     
@@ -671,63 +618,52 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Move_cursor_with_constraints();
     }
   
-    #if defined(__GP2X__)
     switch(event.button)
     {
-      case GP2X_BUTTON_UP:
-        Directional_up=0;
+      #ifdef JOY_BUTTON_UP
+      case JOY_BUTTON_UP:
+        Directional_up=1;
         break;
-      case GP2X_BUTTON_UPRIGHT:
-        Directional_up_right=0;
+      #endif
+      #ifdef JOY_BUTTON_UPRIGHT
+      case JOY_BUTTON_UPRIGHT:
+        Directional_up_right=1;
         break;
-      case GP2X_BUTTON_RIGHT:
-        Directional_right=0;
+      #endif
+      #ifdef JOY_BUTTON_RIGHT
+      case JOY_BUTTON_RIGHT:
+        Directional_right=1;
         break;
-      case GP2X_BUTTON_DOWNRIGHT:
-        Directional_down_right=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWNRIGHT
+      case JOY_BUTTON_DOWNRIGHT:
+        Directional_down_right=1;
         break;
-      case GP2X_BUTTON_DOWN:
-        Directional_down=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWN
+      case JOY_BUTTON_DOWN:
+        Directional_down=1;
         break;
-      case GP2X_BUTTON_DOWNLEFT:
-        Directional_down_left=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWNLEFT
+      case JOY_BUTTON_DOWNLEFT:
+        Directional_down_left=1;
         break;
-      case GP2X_BUTTON_LEFT:
-        Directional_left=0;
+      #endif
+      #ifdef JOY_BUTTON_LEFT
+      case JOY_BUTTON_LEFT:
+        Directional_left=1;
         break;
-      case GP2X_BUTTON_UPLEFT:
-        Directional_up_left=0;
+      #endif
+      #ifdef JOY_BUTTON_UPLEFT
+      case JOY_BUTTON_UPLEFT:
+        Directional_up_left=1;
         break;
-    }
-    #elif defined(__WIZ__)
-    switch(event.button)
-    {
-      case WIZ_BUTTON_UP:
-        Directional_up=0;
-        break;
-      case WIZ_BUTTON_UPRIGHT:
-        Directional_up_right=0;
-        break;
-      case WIZ_BUTTON_RIGHT:
-        Directional_right=0;
-        break;
-      case WIZ_BUTTON_DOWNRIGHT:
-        Directional_down_right=0;
-        break;
-      case WIZ_BUTTON_DOWN:
-        Directional_down=0;
-        break;
-      case WIZ_BUTTON_DOWNLEFT:
-        Directional_down_left=0;
-        break;
-      case WIZ_BUTTON_LEFT:
-        Directional_left=0;
-        break;
-      case WIZ_BUTTON_UPLEFT:
-        Directional_up_left=0;
+      #endif
+      
+      default:
         break;
     }
-    #endif
   return Move_cursor_with_constraints();
 }
 
