@@ -1396,75 +1396,20 @@ extern void Set_palette_fake_24b(T_Palette palette);
 /// Really small, fast and dirty convertor(just for handhelds)
 int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
-  T_Components * palette_fake24b;
-  int px_pos, py_pos;
-  int size, size_percent, size_percent_progress;
-  int delta, delta_old;
-  int i, idx, progress_counter;
-  char progress_str[8];
-  SDL_Rect pw;
+  int size;
 
   Set_palette_fake_24b(palette);
-  palette_fake24b = palette;
 
-  Open_window(80, 30, "Progress");
-  pw.x = Window_pos_X;
-  pw.y = Window_pos_Y;
-  pw.w = Window_width * Menu_factor_X;
-  pw.h = Window_height* Menu_factor_Y;
-  Window_rectangle(pw.x, pw.y, pw.w, pw.h, MC_Light);
-  px_pos = (pw.w / (2 * Menu_factor_X)) - 10;
-  py_pos = (pw.h / (2 * Menu_factor_Y)) + 1;
-
-  progress_counter = 0;
   size = width*height;
-  size_percent = size / 100;
-  size_percent_progress = size - 1;
 
   while(size--)
   {
-    //Progress counter update
-    if(size_percent_progress == size)
-    {
-      size_percent_progress = size - size_percent;
-      progress_counter++;
-      //Because of integer division it less of resolution and need to be checked for small files
-      //(maybe you can do a more smart checking or use a float values)
-      progress_counter = progress_counter > 100 ? 100 : progress_counter;
-      snprintf(progress_str, sizeof(progress_str), "%d%%", progress_counter);
-      Print_in_window(px_pos, py_pos, (const char *)progress_str, MC_Black, MC_Light);
-
-      SDL_LockSurface(Screen_SDL);
-      SDL_UpdateRect(Screen_SDL, pw.x, pw.y, pw.w, pw.h);
-      SDL_UnlockSurface(Screen_SDL);
-    }
-
-    palette = palette_fake24b;
-    delta = delta_old = INT_MAX;
-    //Searching for most suitable colour in palette
-    for(i=idx=0; i<256; i++)
-    {
-      //A HUGE field for optimizations lies here
-
-      //Compute delta beetween current and palette colours.
-      //(calling function 3 times in a row is a lame, i know)
-      delta = abs(source->R - palette->R) + abs(source->G - palette->G) + abs(source->B - palette->B);
-
-      if(delta < delta_old)
-      {
-        delta_old = delta;
-        idx = i;
-        //Most suitable color found - step out from loop
-        if(delta == 0) break;
-      }
-      palette++;
-    }
     //Set palette color index to destination bitmap
-    *dest = idx;
+    *dest = ((source->R >> 5) << 5) |
+            ((source->G >> 5) << 2) |
+            ((source->B >> 6));
     source++;
     dest++;
   }
-  Close_window();
-
   return 0;
 }

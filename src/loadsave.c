@@ -980,27 +980,7 @@ void Load_SDL_Image(T_IO_Context *context)
   {
     {
       // Hi/Trucolor
-      ///Sorry, but i give up! It needs a hard debug. So, a simply workaround here. Unfortunately it doubling memory usage by conversion surface :(
-      #if defined(__WIZ__) || defined(__CAANOO__)
-      SDL_Surface *pNewSurface;
-      SDL_PixelFormat pixfmt;
-      #endif
       Pre_load(context, surface->w, surface->h, file_size ,FORMAT_ALL_IMAGES, PIXEL_SIMPLE, 1);
-      #if defined(__WIZ__) || defined(__CAANOO__)
-      memcpy(&pixfmt, surface->format, sizeof(SDL_PixelFormat));
-      pixfmt.BitsPerPixel = 32;
-      pixfmt.BytesPerPixel = 4;
-      
-      pNewSurface = SDL_ConvertSurface(surface, &pixfmt, SDL_SWSURFACE);
-      if (pNewSurface == NULL)
-      {
-        File_error=1;
-        return;
-      }
-      
-      SDL_FreeSurface(surface);
-      surface = pNewSurface;
-    #endif
     }
     
     for (y_pos=0; y_pos<context->Height; y_pos++)
