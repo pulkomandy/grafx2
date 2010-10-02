@@ -203,6 +203,25 @@ typedef struct T_List_button
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;
 
+/// A stackable window (editor screen)
+typedef struct
+{
+  word Pos_X;
+  word Pos_Y;
+  word Width;
+  word Height;
+  word Nb_buttons;
+  T_Normal_button   *Normal_button_list;
+  T_Palette_button  *Palette_button_list;
+  T_Scroller_button *Scroller_button_list;
+  T_Special_button  *Special_button_list;
+  T_Dropdown_button *Dropdown_button_list;
+  T_List_button     *List_button_list;
+  int Attribute1;
+  int Attribute2;
+  byte Draggable;
+} T_Window;
+
 /// Data for one line of the "Help" screens.
 typedef struct {
   char Line_type;     ///< Kind of line: 'N' for normal line, 'S' for a bold line, 'K' for a line with keyboard shortcut, 'T' and '-' for upper and lower titles.

@@ -508,71 +508,59 @@ GFX2_GLOBAL word Menu_Y_before_window;
 /// Backup of ::Paintbrush_hidden, used to store it while a window is open.
 GFX2_GLOBAL byte Paintbrush_hidden_before_window;
 
-GFX2_GLOBAL word Window_stack_pos_X[8];
+/// The global stack of editor screens.
+GFX2_GLOBAL T_Window Window_stack[8];
+
 /// Position of the left border of the topmost window (in screen coordinates)
-#define Window_pos_X Window_stack_pos_X[Windows_open-1]
+#define Window_pos_X Window_stack[Windows_open-1].Pos_X
 
-GFX2_GLOBAL word Window_stack_pos_Y[8];
 /// Position of the top border of the topmost window (in screen coordinates)
-#define Window_pos_Y Window_stack_pos_Y[Windows_open-1]
+#define Window_pos_Y Window_stack[Windows_open-1].Pos_Y
 
-GFX2_GLOBAL word Window_stack_width[8];
 ///
 /// Width of the topmost window, in "window pixels"
 /// (multiply by ::Menu_factor_X to get screen pixels)
-#define Window_width Window_stack_width[Windows_open-1]
+#define Window_width Window_stack[Windows_open-1].Width
 
-GFX2_GLOBAL word Window_stack_height[8];
 ///
 /// Height of the topmost window, in "window pixels"
 /// (multiply by ::Menu_factor_Y to get screen pixels)
-#define Window_height Window_stack_height[Windows_open-1]
+#define Window_height Window_stack[Windows_open-1].Height
 
-GFX2_GLOBAL word Window_stack_nb_buttons[8];
 /// Total number of buttons/controls in the topmost window.
-#define Window_nb_buttons Window_stack_nb_buttons[Windows_open-1]
+#define Window_nb_buttons Window_stack[Windows_open-1].Nb_buttons
 
-GFX2_GLOBAL T_Normal_button   * Window_stack_normal_button_list[8];
 /// List of normal buttons in the topmost window.
-#define Window_normal_button_list Window_stack_normal_button_list[Windows_open-1]
+#define Window_normal_button_list Window_stack[Windows_open-1].Normal_button_list
 
-GFX2_GLOBAL T_Palette_button  * Window_stack_palette_button_list[8];
 /// List of "palette" buttons in the topmost window.
-#define Window_palette_button_list Window_stack_palette_button_list[Windows_open-1]
+#define Window_palette_button_list Window_stack[Windows_open-1].Palette_button_list
 
-GFX2_GLOBAL T_Scroller_button * Window_stack_scroller_button_list[8];
 /// List of sliders (scrollers) in the topmost window.
-#define Window_scroller_button_list Window_stack_scroller_button_list[Windows_open-1]
+#define Window_scroller_button_list Window_stack[Windows_open-1].Scroller_button_list
 
-GFX2_GLOBAL T_Special_button  * Window_stack_special_button_list[8];
 /// List of special buttons in the topmost window.
-#define Window_special_button_list Window_stack_special_button_list[Windows_open-1]
+#define Window_special_button_list Window_stack[Windows_open-1].Special_button_list
 
-GFX2_GLOBAL T_Dropdown_button  * Window_stack_dropdown_button_list[8];
 /// List of dropdown buttons in the topmost window.
-#define Window_dropdown_button_list Window_stack_dropdown_button_list[Windows_open-1]
+#define Window_dropdown_button_list Window_stack[Windows_open-1].Dropdown_button_list
 
-GFX2_GLOBAL T_List_button  * Window_stack_list_button_list[8];
 /// List of list buttons in the topmost window.
-#define Window_list_button_list Window_stack_list_button_list[Windows_open-1]
+#define Window_list_button_list Window_stack[Windows_open-1].List_button_list
 
-
-
-GFX2_GLOBAL int Window_stack_attribute1[8];
 ///
 /// The function ::Window_clicked_button() set this to ::LEFT_SIDE or ::RIGHT_SIDE
 /// after a button is activated through left or right mouse click.
-#define Window_attribute1 Window_stack_attribute1[Windows_open-1]
+#define Window_attribute1 Window_stack[Windows_open-1].Attribute1
 
-GFX2_GLOBAL int Window_stack_attribute2[8];
 ///
 /// The function ::Window_clicked_button() set this to return extra information:
 /// - When a scroller was clicked: the scroller position (0-n)
 /// - When a palette was clicked: the color index (0-255)
 /// - When a dropdown was used: the selected item's number T_Dropdown_choice::Number
-#define Window_attribute2 Window_stack_attribute2[Windows_open-1]
+#define Window_attribute2 Window_stack[Windows_open-1].Attribute2
 
-
+#define Window_draggable Window_stack[Windows_open-1].Draggable
 
 
 /// Definition of the menu (toolbox)

@@ -1554,6 +1554,8 @@ void Open_window(word width,word height, const char * title)
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
 
   Window_pos_Y=(Screen_height-(height*Menu_factor_Y))>>1;
+  
+  Window_draggable=1;
 
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
@@ -2225,6 +2227,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_height=height;
   Window_pos_X=x_pos;
   Window_pos_Y=y_pos;
+  Window_draggable=0;
 
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
@@ -3148,7 +3151,7 @@ short Window_clicked_button(void)
       }
     }
      
-    if (!Input_sticky_control && Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
+    if (!Input_sticky_control && Window_draggable && Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
     {
       Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
     }
@@ -3419,17 +3422,17 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
     EDI = Window_background[window_index];
   
         // Pour chaque ligne
-        for(dx=0; dx<Window_stack_height[window_index]*Menu_factor_Y;dx++)
+        for(dx=0; dx<Window_stack[window_index].Height*Menu_factor_Y;dx++)
         {
-          if (dx+Window_stack_pos_Y[window_index]>Max_Y)
+          if (dx+Window_stack[window_index].Pos_Y>Max_Y)
             return;
-          if (dx+Window_stack_pos_Y[window_index]<Min_Y)
+          if (dx+Window_stack[window_index].Pos_Y<Min_Y)
           {
-            EDI += Window_stack_width[window_index]*Menu_factor_X*Pixel_width;
+            EDI += Window_stack[window_index].Width*Menu_factor_X*Pixel_width;
           }
           else
                 // Pour chaque pixel
-                for(cx=Window_stack_width[window_index]*Menu_factor_X*Pixel_width;cx>0;cx--)
+                for(cx=Window_stack[window_index].Width*Menu_factor_X*Pixel_width;cx>0;cx--)
                 {
                         *EDI = conversion_table[*EDI];
                         EDI ++;

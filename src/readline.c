@@ -98,8 +98,12 @@ int Valid_character(int c)
 
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
 {
-  Print_in_window(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
-  Print_char_in_window(x_pos+(position<<3),y_pos,str[position],CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+  char cursor[2];
+  Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+
+  cursor[0]=str[position] ? str[position] : ' ';
+  cursor[1]='\0';
+  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 /****************************************************************************
@@ -143,6 +147,24 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   byte size;
   word input_key=0;
   byte is_authorized;
+  word window_x=Window_pos_X;
+  word window_y=Window_pos_Y;
+  // Virtual keyboard
+  byte use_virtual_keyboard=0;
+  static byte caps_lock=0;
+  word keymapping[] =
+  {
+    SDLK_CLEAR,SDLK_BACKSPACE,SDLK_RETURN,KEY_ESC,
+    '0','1','2','3','4','5','6','7','8','9','.',',',
+    'Q','W','E','R','T','Y','U','I','O','P',
+    'A','S','D','F','G','H','J','K','L',
+    SDLK_CAPSLOCK,'Z','X','C','V','B','N','M',' ',
+    '-','+','*','/','|','\\',
+    '(',')','{','}','[',']',
+    '_','=','<','>','%','@',
+    ':',';','`','\'','"','~',
+    '!','?','^','&','#','$'
+  };
 
   byte offset=0; // index du premier caractère affiché
 
@@ -160,15 +182,101 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   {
     //  Nothing. The caller should have initialized a valid hexa number.
   }
+  
+  // Virtual keyboards
+  if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
+  {
+    // Full keyboard
+    
+    const int keyboard_width=320;
+    const int keyboard_height=87;    
+    int h_pos;
+    int x,y;
+    
+    h_pos= Window_pos_X+(keyboard_width-Window_width)/-2;
+    if (h_pos<0)
+      h_pos=0;
+    else if (h_pos+keyboard_width>Screen_width)
+      h_pos=Screen_width-keyboard_width;
+    
+    use_virtual_keyboard=1;
+    Hide_cursor();
+    Open_popup(h_pos,Window_pos_Y+(y_pos+9)*Menu_factor_Y,keyboard_width,keyboard_height);
+    Window_rectangle(0,0,Window_width, Window_height-2, MC_Light);
+    Window_rectangle(2,Window_height-3,Window_width, 2, MC_Black);
+    
+    // The order is important, see the array
+    
+    Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
+    Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
+    Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
+    Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
+    Window_display_frame_in(5,65,179,19);
 
-  Wait_end_of_click();
+    Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
+    Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
+    Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
+    Window_set_normal_button(229,43,17,19,"3", 0,1,KEY_NONE);
+    Window_set_normal_button(193,23,17,19,"4", 0,1,KEY_NONE);
+    Window_set_normal_button(211,23,17,19,"5", 0,1,KEY_NONE);
+    Window_set_normal_button(229,23,17,19,"6", 0,1,KEY_NONE);
+    Window_set_normal_button(193, 3,17,19,"7", 0,1,KEY_NONE);
+    Window_set_normal_button(211, 3,17,19,"8", 0,1,KEY_NONE);
+    Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
+    Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
+    Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
+ 
+    Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
+    Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
+    Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
+    Window_set_normal_button( 60, 3,18,19,"R", 0,1,KEY_NONE);
+    Window_set_normal_button( 79, 3,18,19,"T", 0,1,KEY_NONE);
+    Window_set_normal_button( 98, 3,18,19,"Y", 0,1,KEY_NONE);
+    Window_set_normal_button(117, 3,18,19,"U", 0,1,KEY_NONE);
+    Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
+    Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
+    Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
+
+    Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
+    Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
+    Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
+    Window_set_normal_button( 69,23,18,19,"F", 0,1,KEY_NONE);
+    Window_set_normal_button( 88,23,18,19,"G", 0,1,KEY_NONE);
+    Window_set_normal_button(107,23,18,19,"H", 0,1,KEY_NONE);
+    Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
+    Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
+    Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
+    
+    Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
+    Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
+    Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
+    Window_set_normal_button( 60,43,18,19,"C", 0,1,KEY_NONE);
+    Window_set_normal_button( 79,43,18,19,"V", 0,1,KEY_NONE);
+    Window_set_normal_button( 98,43,18,19,"B", 0,1,KEY_NONE);
+    Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
+    Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
+    Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
+
+    for (y=0; y<5; y++)
+    {
+      for (x=0; x<6; x++)
+      {
+        char label[2]=" ";
+        label[0]=keymapping[x+y*6+44];        
+        Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
+      }
+    }
+
+    Update_window_area(0,0,Window_width, Window_height);
+    Display_cursor();
+  }
   Keyboard_click_allowed = 0;
   Hide_cursor();
 
   // Effacement de la chaîne
-  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+  Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
-  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
@@ -186,19 +294,56 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   if (visible_size + offset + 1 < size )
     display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
-  Display_whole_string(x_pos,y_pos,display_string,position - offset);
-  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+  Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
   Flush_update();
-
-  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC) && Mouse_K == 0)
+  if (Mouse_K)
   {
     Display_cursor();
-    do
+    Wait_end_of_click();
+    Hide_cursor();
+  }
+
+  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
+  {
+    Display_cursor();
+    if (use_virtual_keyboard)
     {
-      Get_input(20);
+      int clicked_button;
+
+      clicked_button=Window_clicked_button();
       input_key=Key_ANSI;
-    } while(input_key==0 && Mouse_K == 0);
+
+      if (clicked_button==-1)
+        input_key=SDLK_RETURN;
+      else if (clicked_button>0)
+      {
+        input_key=keymapping[clicked_button-1];
+        if (input_key==SDLK_CAPSLOCK)
+        {
+          // toggle uppercase
+          caps_lock=!caps_lock;
+          Hide_cursor();
+          Print_in_window(8, 49,caps_lock?"\036":"\037", MC_Black,MC_Light);
+          Display_cursor();
+        }
+        else if (input_key>='A' && input_key<='Z' && !caps_lock)
+        {
+          input_key+='a'-'A';
+        }
+      }
+    }
+    else
+    {
+      do
+      {
+        Get_input(20);
+        input_key=Key_ANSI;
+        if (Mouse_K)
+          input_key=SDLK_RETURN;
+      } while(input_key==0);
+    }
     Hide_cursor();
     switch (input_key)
     {
@@ -209,7 +354,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               size--;
               
               // Effacement de la chaîne
-              Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+              Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
                     visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               goto affichage;
             }
@@ -219,7 +364,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
                       visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               position--;
               if (offset > 0 && (position == 0 || position < (offset + 1)))
@@ -243,7 +388,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+                Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
                       visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
               position = 0;
               offset = 0;
@@ -269,11 +414,18 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           Remove_character(str,position);
           size--;
           // Effacement de la chaîne
-          Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+          Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
                 visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
           goto affichage;
         }
         break;
+      case  SDLK_CLEAR : // Clear
+        str[0]='\0';
+        position=offset=0;
+        // Effacement de la chaîne
+        Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
+              visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+        goto affichage;
       case SDLK_RETURN :
         break;
         
@@ -349,17 +501,25 @@ affichage:
         if (visible_size + offset + 0 < size )
           display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
         
-        Display_whole_string(x_pos,y_pos,display_string,position - offset);
-        Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+        Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+        Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
     } // End du "switch(input_key)"
     Flush_update();
 
   } // End du "while"
   Keyboard_click_allowed = 1;
-
+  if (use_virtual_keyboard)
+  {
+    byte old_mouse_k = Mouse_K;
+    Close_popup();
+    Mouse_K=old_mouse_k;
+    Input_sticky_control=0;
+  }
+  
+  
   // Effacement de la chaîne
-  Block(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+  Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
   // On raffiche la chaine correctement
   if (input_type==INPUT_TYPE_INTEGER)
@@ -389,10 +549,10 @@ affichage:
   {
     Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
-  Update_rect(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),
+  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
-  return (input_key==SDLK_RETURN || Mouse_K != 0);
+  return (input_key==SDLK_RETURN);
 }
 
 void Sprint_double(char *str, double value, byte decimal_places, byte min_positions)
