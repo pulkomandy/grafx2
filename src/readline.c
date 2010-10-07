@@ -40,6 +40,13 @@
 #include "windows.h"
 #include "input.h"
 
+// Virtual keyboard is mandatory on these platforms:
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  #ifndef VIRT_KEY
+    #define VIRT_KEY 1
+  #endif
+#endif
+
 #define TEXT_COLOR         MC_Black
 #define BACKGROUND_COLOR          MC_Light
 #define CURSOR_COLOR MC_Black
@@ -106,6 +113,35 @@ void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
   Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
+void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
+{
+  int h_pos;
+  int v_pos;
+  int parent_window_x=Window_pos_X+2;
+  
+  h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
+  if (h_pos<0)
+    h_pos=0;
+  else if (h_pos+keyboard_width*Menu_factor_X>Screen_width)
+    h_pos=Screen_width-keyboard_width*Menu_factor_X;
+  v_pos=Window_pos_Y+(y_pos+9)*Menu_factor_Y;
+  if (v_pos+(keyboard_height*Menu_factor_Y)>Screen_height)
+    v_pos=Window_pos_Y+(y_pos-keyboard_height-4)*Menu_factor_Y;
+
+  Hide_cursor();
+  Open_popup(h_pos,v_pos,keyboard_width,keyboard_height);
+  Window_rectangle(1,0,Window_width-1, Window_height-1, MC_Light);
+  Window_rectangle(0,0,1,Window_height-2, MC_White);
+  // white border on top left angle, when it exceeds border.
+  if (parent_window_x>Window_pos_X)
+    Window_rectangle(0,0,(parent_window_x-Window_pos_X)/Menu_factor_X, 1, MC_White);
+  Window_rectangle(2,Window_height-2,Window_width-2, 2, MC_Black);
+  if(keyboard_width<320)
+  {
+    Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
+  }
+}
+
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
@@ -149,6 +185,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   byte is_authorized;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
+  byte offset=0; // index du premier caractère affiché
+  
+#ifdef VIRT_KEY
   // Virtual keyboard
   byte use_virtual_keyboard=0;
   static byte caps_lock=0;
@@ -165,8 +204,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     ':',';','`','\'','"','~',
     '!','?','^','&','#','$'
   };
-
-  byte offset=0; // index du premier caractère affiché
+#endif
 
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
@@ -184,26 +222,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   }
   
   // Virtual keyboards
+#ifdef VIRT_KEY
   if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
   {
-    // Full keyboard
-    
-    const int keyboard_width=320;
-    const int keyboard_height=87;    
-    int h_pos;
     int x,y;
-    
-    h_pos= Window_pos_X+(keyboard_width-Window_width)/-2;
-    if (h_pos<0)
-      h_pos=0;
-    else if (h_pos+keyboard_width>Screen_width)
-      h_pos=Screen_width-keyboard_width;
+
+    Init_virtual_keyboard(y_pos, 320, 87);
     
     use_virtual_keyboard=1;
-    Hide_cursor();
-    Open_popup(h_pos,Window_pos_Y+(y_pos+9)*Menu_factor_Y,keyboard_width,keyboard_height);
-    Window_rectangle(0,0,Window_width, Window_height-2, MC_Light);
-    Window_rectangle(2,Window_height-3,Window_width, 2, MC_Black);
     
     // The order is important, see the array
     
@@ -270,6 +296,36 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     Update_window_area(0,0,Window_width, Window_height);
     Display_cursor();
   }
+  else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
+  {
+    Init_virtual_keyboard(y_pos, 215, 47);
+    
+    use_virtual_keyboard=1;
+    
+    // The order is important, see the array
+    
+    Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
+    Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
+    Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
+    Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
+    Window_display_frame_in(5,25,179,19);
+
+    Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
+    Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
+    Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
+    Window_set_normal_button( 41, 3,18,19,"3", 0,1,KEY_NONE);
+    Window_set_normal_button( 60, 3,18,19,"4", 0,1,KEY_NONE);
+    Window_set_normal_button( 79, 3,18,19,"5", 0,1,KEY_NONE);
+    Window_set_normal_button( 98, 3,18,19,"6", 0,1,KEY_NONE);
+    Window_set_normal_button(117, 3,18,19,"7", 0,1,KEY_NONE);
+    Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
+    Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
+    Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
+
+    Update_window_area(0,0,Window_width, Window_height);
+    Display_cursor();
+  }
+#endif
   Keyboard_click_allowed = 0;
   Hide_cursor();
 
@@ -308,6 +364,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
   {
     Display_cursor();
+#ifdef VIRT_KEY
     if (use_virtual_keyboard)
     {
       int clicked_button;
@@ -328,6 +385,15 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           Print_in_window(8, 49,caps_lock?"\036":"\037", MC_Black,MC_Light);
           Display_cursor();
         }
+        else if (input_key==SDLK_BACKSPACE)
+        {
+          // A little hack: the button for backspace will:
+          // - backspace if the cursor is at end of string
+          // - delete otherwise
+          // It's needed for those input boxes that are completely full.
+          if (position<size)
+            input_key = SDLK_DELETE;
+        }
         else if (input_key>='A' && input_key<='Z' && !caps_lock)
         {
           input_key+='a'-'A';
@@ -335,6 +401,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       }
     }
     else
+#endif
     {
       do
       {
@@ -509,6 +576,7 @@ affichage:
 
   } // End du "while"
   Keyboard_click_allowed = 1;
+  #ifdef VIRT_KEY
   if (use_virtual_keyboard)
   {
     byte old_mouse_k = Mouse_K;
@@ -516,7 +584,7 @@ affichage:
     Mouse_K=old_mouse_k;
     Input_sticky_control=0;
   }
-  
+  #endif
   
   // Effacement de la chaîne
   Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
