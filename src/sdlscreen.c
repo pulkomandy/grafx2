@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <SDL.h>
+#include <SDL_endian.h>
 #if defined(__WIN32__)
     #include <windows.h>
 #endif
@@ -218,13 +219,26 @@ byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
 /// Reads a pixel in a multi-byte SDL surface.
 dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y)
 {
+  byte * ptr;
+  
   switch(bmp->format->BytesPerPixel)
   {
     case 4:
     default:
       return *((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*4)));
     case 3:
-      return *(((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*3)))) & 0xFFFFFF;
+      // Reading a 4-byte number starting at an address that isn't a multiple
+      // of 2 (or 4?) is not supported on Caanoo console at least (ARM CPU)
+      // So instead, we will read the 3 individual bytes, and re-construct the
+      // "dword" expected by SDL.
+      ptr = ((byte *)bmp->pixels)+(y*bmp->pitch+x*3);
+      #ifdef SDL_LIL_ENDIAN
+      // Read ABC, output _CBA : Most Significant Byte is zero.
+      return (*ptr) | (*(ptr+1)<<8) | (*(ptr+2)<<16);
+      #else
+      // Read ABC, output ABC_ : Least Significant Byte is zero.
+      return ((*ptr)<<24) | (*(ptr+1)<<16) | (*(ptr+2)<<8);
+      #endif
     case 2:
       return *((word *)((byte *)bmp->pixels+(y*bmp->pitch+x*2)));
   }
