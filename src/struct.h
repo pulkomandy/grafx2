@@ -262,7 +262,6 @@ typedef struct
   byte Mode;      ///< Shade mode: Normal, Loop, or No-saturation see ::SHADE_MODES
 } T_Shade;
 
-#pragma pack(1) // is it useful ?
 /// Data for one fullscreen video mode in configuration file. Warning, this one is saved/loaded as binary.
 typedef struct
 {
@@ -272,7 +271,7 @@ typedef struct
 } T_Config_video_mode;
 
 
-/// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for gfx2.cfg
 typedef struct
 {
   char Signature[3]; ///< Signature for the file format. "CFG".
@@ -282,24 +281,23 @@ typedef struct
   byte Beta2;        ///< Major beta version number (ex: 5)
 } T_Config_header;
 
-#pragma pack()
 
-/// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for a config chunk in for gfx2.cfg
 typedef struct
 {
   byte Number; ///< Section identfier. Possible values are in enum ::CHUNKS_CFG
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
-#pragma pack(1)
-/// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
+
+/// Configuration for one keyboard shortcut in gfx2.cfg
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } T_Config_shortcut_info;
-#pragma pack()
+
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct

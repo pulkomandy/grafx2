@@ -217,7 +217,6 @@ void Save_IMG(T_IO_Context * context)
 
 
 //////////////////////////////////// LBM ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word  Width;
@@ -234,7 +233,6 @@ typedef struct
   word  X_screen;
   word  Y_screen;
 } T_LBM_Header;
-#pragma pack()
 
 byte * LBM_buffer;
 FILE *LBM_file;
@@ -695,13 +693,9 @@ void Load_LBM(T_IO_Context * context)
             if ( !File_error )
             {
               Read_dword_be(LBM_file,&section_size);
-              //swab((char *)&header.Width ,(char *)&context->Width,2);
-              //swab((char *)&header.Height,(char *)&context->Height,2);
               context->Width = header.Width;
               context->Height = header.Height;
 
-              //swab((char *)&header.X_screen,(char *)&Original_screen_X,2);
-              //swab((char *)&header.Y_screen,(char *)&Original_screen_Y,2);
               Original_screen_X = header.X_screen;
               Original_screen_Y = header.Y_screen;
 
@@ -979,7 +973,6 @@ void Save_LBM(T_IO_Context * context)
     // On corrige la largeur de l'image pour qu'elle soit multiple de 2
     real_width=context->Width+(context->Width&1);
 
-    //swab((byte *)&real_width,(byte *)&header.Width,2);
     header.Width=context->Width;
     header.Height=context->Height;
     header.X_org=0;
@@ -1659,7 +1652,6 @@ void Save_BMP(T_IO_Context * context)
 
 
 //////////////////////////////////// GIF ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word Width;   // Width of the complete image area
@@ -1678,7 +1670,6 @@ typedef struct
   byte Indicator;     // Misc image information
   byte Nb_bits_pixel; // Nb de bits par pixel
 } T_GIF_IDB;          // Image Descriptor Block
-#pragma pack()
 
 typedef struct
 {
@@ -2696,7 +2687,6 @@ void Save_GIF(T_IO_Context * context)
 
 
 //////////////////////////////////// PCX ////////////////////////////////////
-#pragma pack(1)
 typedef struct
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
@@ -2718,7 +2708,6 @@ typedef struct
     word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
   } T_PCX_Header;
-#pragma pack()
 
 T_PCX_Header PCX_header;
 

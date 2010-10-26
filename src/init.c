@@ -1824,7 +1824,7 @@ int Load_CFG(int reload_all)
   if ((Handle=fopen(filename,"rb"))==NULL)
     return ERROR_CFG_MISSING;
 
-  if ( (file_size<(long)sizeof(cfg_header))
+  if ( (file_size<7)
     || (!Read_bytes(Handle, &cfg_header.Signature, 3))
     || memcmp(cfg_header.Signature,"CFG",3)
     || (!Read_byte(Handle, &cfg_header.Version1))
@@ -1865,7 +1865,7 @@ int Load_CFG(int reload_all)
       case CHUNK_KEYS: // Touches
         if (reload_all)
         {
-          for (index=0; index<(long)(Chunk.Size/sizeof(cfg_shortcut_info)); index++)
+          for (index=0; index<(long)(Chunk.Size/6); index++)
           {
             if (!Read_word_le(Handle, &cfg_shortcut_info.Number) ||
                 !Read_word_le(Handle, &cfg_shortcut_info.Key) ||
@@ -1918,7 +1918,7 @@ int Load_CFG(int reload_all)
         }
         break;
       case CHUNK_VIDEO_MODES: // Modes vidéo
-        for (index=0; index<(long)(Chunk.Size/sizeof(cfg_video_mode)); index++)
+        for (index=0; index<(long)(Chunk.Size/5); index++)
         {
           if (!Read_byte(Handle, &cfg_video_mode.State) ||
               !Read_word_le(Handle, &cfg_video_mode.Width) ||
