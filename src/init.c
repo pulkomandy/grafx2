@@ -2653,7 +2653,7 @@ void Init_brush_container(void)
     Brush_container[i].Paintbrush_shape=PAINTBRUSH_SHAPE_MAX;
     Brush_container[i].Width=0;
     Brush_container[i].Height=0;
-    memset(Brush_container[i].Palette,sizeof(T_Palette),0);
+    memset(Brush_container[i].Palette,0,sizeof(T_Palette));
     Brush_container[i].Transp_color=0;  
     for (y=0; y<BRUSH_CONTAINER_PREVIEW_WIDTH; y++)
       for (x=0; x<BRUSH_CONTAINER_PREVIEW_HEIGHT; x++)
