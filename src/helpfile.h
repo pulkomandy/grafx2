@@ -65,6 +65,12 @@ static const T_Help_table helptable_about[] =
   HELP_TEXT ("")
   HELP_TEXT ("Copyright 2007-2010, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  // Keep enough empty lines to ensure the 16-line screen is fully redrawn.
+  // HELP_TITLE counts for 2.
 };
 static const T_Help_table helptable_licence[] =
 {
@@ -454,10 +460,11 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  keito         kusma         Lord Graga    ")
   HELP_TEXT ("  Lorenzo Gatti MagerValp     maymunbeyin   ")
   HELP_TEXT ("  mind          MooZ          Pasi Kallinen ")
-  HELP_TEXT ("  the Peach     petter        richienyhus   ")
-  HELP_TEXT ("  spratek       tape.yrm      TeeEmCee      ")
-  HELP_TEXT ("  tempest       Timo Kurrpa   titus^Rab     ")
-  HELP_TEXT ("  Tobé          yakumo9275    00ai99")
+  HELP_TEXT ("  the Peach     petter        PheeL         ")
+  HELP_TEXT ("  richienyhus   spratek       tape.yrm      ")
+  HELP_TEXT ("  TeeEmCee      tempest       Timo Kurrpa   ")
+  HELP_TEXT ("  titus^Rab     Tobé          yakumo9275    ")
+  HELP_TEXT ("  00ai99")
   HELP_TEXT ("")
   HELP_TEXT ("  ... posted the annoying bug reports.")
   HELP_TEXT ("")
