@@ -610,6 +610,11 @@ int Init_program(int argc,char * argv[])
   Paintbrush_offset_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  // Prefer cycling active by default
+  Cycling_mode=1;
+  #endif
+
   // Charger la configuration des touches
   Set_config_defaults();
 
@@ -888,7 +893,7 @@ void Program_shutdown(void)
     
   SDL_Quit();
   
-  #if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   chdir("/usr/gp2x");
   execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
   #endif

@@ -64,4 +64,3 @@ extern int Snap_axis_origin_Y;
 /// This malloced string is set when a drag-and-drop event
 /// brings a file to Grafx2's window.
 extern char * Drop_file_name;
- 

@@ -443,7 +443,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_BOLD ("              WIZ & CAANOO PORT")
   HELP_TEXT ("")
-  HELP_TEXT ("  PheeL")
+  HELP_TEXT ("  Alexander Filyanov (PheeL)")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("  ... made it work on your favourite toaster")

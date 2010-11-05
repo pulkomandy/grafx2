@@ -53,6 +53,7 @@ char * Bound_script[10];
 #include <lualib.h>
 #include <float.h> // for DBL_MAX
 #include <unistd.h> // chdir()
+#include <limits.h> //for INT_MIN
 
 ///
 /// Number of characters for name in fileselector.

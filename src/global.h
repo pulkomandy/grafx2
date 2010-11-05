@@ -997,7 +997,10 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
     #define JOY_BUTTON_VOLDOWN          (17)
 
     #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_X)
-#elif __CAANOO__
+#elif defined (__CAANOO__)
+
+    #define JOYSTICK_THRESHOLD  (4096)
+
     /// Button definitions for the Caanoo
     #define JOY_BUTTON_A             (0)
     #define JOY_BUTTON_X             (1)

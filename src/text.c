@@ -36,14 +36,14 @@
   #include <SDL_ttf.h>
 #endif
 
-#if defined(__linux__)
-#if defined(__macosx__)
+#if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+// No X11
+#elif defined(__macosx__)
   #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
-#else
+#elif defined(__linux__)
   #include <X11/Xlib.h>
-#endif
 #endif
 #endif
 
@@ -321,6 +321,8 @@ void Init_text(void)
       CFRelease(url);
     #endif
 
+  #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+  // No X11 : Only use fonts from Grafx2
   #elif defined(__linux__)
     #ifndef NOTTF
        #define USE_XLIB

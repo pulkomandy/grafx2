@@ -1464,7 +1464,7 @@ void Button_Skins(void)
       Menu_font = new_font;
       fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
       free(Config.Font_file);
-      Config.Font_file = strdup(fname);
+      Config.Font_file = (char *)strdup(fname);
     }
     // Confirm the change of cursor shape
     Config.Cursor = selected_cursor;

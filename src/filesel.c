@@ -1423,7 +1423,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 	  case  6 : // Scroller des formats
 		// On met à jour le format de browsing du fileselect:
 		if (Main_format != Window_attribute2) {
-			char* savename = strdup(Selector_filename);
+			char* savename = (char *)strdup(Selector_filename);
 			int nameLength = strlen(savename);
 			DEBUG(Selector_filename, 42);
 			Main_format = Window_attribute2;
