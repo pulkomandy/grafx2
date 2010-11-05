@@ -57,6 +57,7 @@ char * Drop_file_name = NULL;
 
 // --
 
+// Digital joystick state
 byte Directional_up;
 byte Directional_up_right;
 byte Directional_right;
@@ -67,9 +68,16 @@ byte Directional_left;
 byte Directional_up_left;
 byte Directional_click;
 
-long Directional_delay;
+// Emulated directional controller.
+// This has a distinct state from Directional_, because some joysticks send
+// "I'm not moving" SDL events when idle, thus stopping the emulated one.
+byte Directional_emulated_up;
+byte Directional_emulated_right;
+byte Directional_emulated_down;
+byte Directional_emulated_left;
+
+long Directional_first_move;
 long Directional_last_move;
-long Directional_step;
 int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
 
 word Input_new_mouse_X;
@@ -119,7 +127,8 @@ short Mouse_virtual_height;
   /// trial and error : If value is too large then the movement is
   /// randomly interrupted; if the value is too low the cursor will
   /// move by itself, controlled by parasits.
-  #define JOYSTICK_THRESHOLD  (1000)
+  /// YR 04/11/2010: I just observed a -8700 when joystick is idle.
+  #define JOYSTICK_THRESHOLD  (10000)
   
   /// A button that is marked as "modifier" will 
   short Joybutton_shift=-1; ///< Button number that serves as a "shift" modifier; -1 for none
@@ -380,22 +389,22 @@ int Handle_key_press(SDL_KeyboardEvent event)
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
-      Directional_up=1;
+      Directional_emulated_up=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_DOWN))
     {
-      Directional_down=1;
+      Directional_emulated_down=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_LEFT))
     {
-      Directional_left=1;
+      Directional_emulated_left=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_RIGHT))
     {
-      Directional_right=1;
+      Directional_emulated_right=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
@@ -428,22 +437,22 @@ int Release_control(int key_code, int modifier)
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
     {
-      Directional_up=0;
+      Directional_emulated_up=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
     {
-      Directional_down=0;
+      Directional_emulated_down=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
     {
-      Directional_left=0;
+      Directional_emulated_left=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
     {
-      Directional_right=0;
+      Directional_emulated_right=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
@@ -724,6 +733,23 @@ int Cursor_displace(short delta_x, short delta_y)
   return Move_cursor_with_constraints();
 }
 
+// This function is the acceleration profile for directional (digital) cursor
+// controllers.
+int Directional_acceleration(int msec)
+{
+  const int initial_delay = 250;
+  const int linear_factor = 200;
+  const int accel_factor = 10000;
+  // At beginning there is 1 pixel move, then nothing for N milliseconds
+  if (msec<initial_delay)
+    return 1;
+    
+  // After that, position over time is generally y = ax²+bx+c
+  // a = 1/accel_factor
+  // b = 1/linear_factor
+  // c = 1
+  return 1+(msec-initial_delay+linear_factor)/linear_factor+(msec-initial_delay)*(msec-initial_delay)/accel_factor;
+}
 
 // Main input handling function
 
@@ -737,185 +763,191 @@ int Get_input(int sleep_time)
     // some user input.
     Flush_update();
     Color_cycling(NULL);
-
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
-    if (!SDL_PollEvent(&event))
-    {
-      SDL_Delay(sleep_time);
-      return 0;
-    }
+
+    // Not using SDL_PollEvent() because every call polls the input
+    // device. In some cases such as high-sensitivity mouse or cheap
+    // digital joypad, every call will see something subtly different in
+    // the state of the device, and thus it will enqueue a new event.
+    // The result is that the queue will never empty !!!
+
+    // Get new events from input devices.
+    SDL_PumpEvents();
+
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while(1) 
+    while(SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1 && !user_feedback_required)
     {
-        switch(event.type)
-        {
-            case SDL_VIDEORESIZE:
-                Handle_window_resize(event.resize);
-                user_feedback_required = 1;
-                break;
+      switch(event.type)
+      {
+          case SDL_VIDEORESIZE:
+              Handle_window_resize(event.resize);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_QUIT:
-                Handle_window_exit(event.quit);
-                user_feedback_required = 1;
-                break;
+          case SDL_QUIT:
+              Handle_window_exit(event.quit);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_MOUSEMOTION:
-                user_feedback_required = Handle_mouse_move(event.motion);
-                break;
+          case SDL_MOUSEMOTION:
+              user_feedback_required = Handle_mouse_move(event.motion);
+              break;
 
-            case SDL_MOUSEBUTTONDOWN:
-                Handle_mouse_click(event.button);
-                user_feedback_required = 1;
-                break;
+          case SDL_MOUSEBUTTONDOWN:
+              Handle_mouse_click(event.button);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_MOUSEBUTTONUP:
-                Handle_mouse_release(event.button);
-                user_feedback_required = 1;
-                break;
+          case SDL_MOUSEBUTTONUP:
+              Handle_mouse_release(event.button);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_KEYDOWN:
-                Handle_key_press(event.key);
-                user_feedback_required = 1;
-                break;
+          case SDL_KEYDOWN:
+              Handle_key_press(event.key);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_KEYUP:
-                Handle_key_release(event.key);
-                break;
+          case SDL_KEYUP:
+              Handle_key_release(event.key);
+              break;
 
-            // Start of Joystik handling
-            #ifdef USE_JOYSTICK
+          // Start of Joystik handling
+          #ifdef USE_JOYSTICK
 
-            case SDL_JOYBUTTONUP:
-                Handle_joystick_release(event.jbutton);
-                user_feedback_required = 1;
-                break;
+          case SDL_JOYBUTTONUP:
+              Handle_joystick_release(event.jbutton);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_JOYBUTTONDOWN:
-                Handle_joystick_press(event.jbutton);
-                user_feedback_required = 1;
-                break;
+          case SDL_JOYBUTTONDOWN:
+              Handle_joystick_press(event.jbutton);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_JOYAXISMOTION:
-                Handle_joystick_movement(event.jaxis);
-                break;
+          case SDL_JOYAXISMOTION:
+              Handle_joystick_movement(event.jaxis);
+              break;
 
-            #endif
-            // End of Joystick handling
-            
-            case SDL_SYSWMEVENT:
+          #endif
+          // End of Joystick handling
+          
+          case SDL_SYSWMEVENT:
 #ifdef __WIN32__
-                if(event.syswm.msg->msg  == WM_DROPFILES)
+              if(event.syswm.msg->msg  == WM_DROPFILES)
+              {
+                int file_count;
+                HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
+                if((file_count = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0)
                 {
-                  int file_count;
-                  HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
-                  if((file_count = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0)
+                  long len;
+                  // Query filename length
+                  len = DragQueryFile(hdrop,0 ,NULL ,0);
+                  if (len)
                   {
-                    long len;
-                    // Query filename length
-                    len = DragQueryFile(hdrop,0 ,NULL ,0);
-                    if (len)
+                    Drop_file_name=calloc(len+1,1);
+                    if (Drop_file_name)
                     {
-                      Drop_file_name=calloc(len+1,1);
-                      if (Drop_file_name)
+                      if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
                       {
-                        if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
-                        {
-                          // Success
-                        }
-                        else
-                        {
-                          free(Drop_file_name);
-                          // Don't report name copy error
-                        }
+                        // Success
                       }
                       else
                       {
-                        // Don't report alloc error (for a file name? :/ )
+                        free(Drop_file_name);
+                        // Don't report name copy error
                       }
                     }
                     else
                     {
-                      // Don't report weird Windows error
+                      // Don't report alloc error (for a file name? :/ )
                     }
                   }
                   else
                   {
-                    // Drop of zero files. Thanks for the information, Bill.
+                    // Don't report weird Windows error
                   }
                 }
+                else
+                {
+                  // Drop of zero files. Thanks for the information, Bill.
+                }
+              }
 #endif
-                break;
-            
-            default:
-                //DEBUG("Unhandled SDL event number : ",event.type);
-                break;
-        }
-        if (user_feedback_required)
-          break;
-        // Fetch another event from the queue,
-        // stopping when it's empty.
-        if (!SDL_PollEvent(&event))
-          break;
+              break;
+          
+          default:
+              //DEBUG("Unhandled SDL event number : ",event.type);
+              break;
+      }
     }
     // Directional controller
     if (!(Directional_up||Directional_up_right||Directional_right||
-    Directional_down_right||Directional_down||Directional_down_left||
-      Directional_left||Directional_up_left))
+      Directional_down_right||Directional_down||Directional_down_left||
+      Directional_left||Directional_up_left||Directional_emulated_up||
+      Directional_emulated_right||Directional_emulated_down||
+      Directional_emulated_left))
     {
-      Directional_delay=-1;
-      Directional_last_move=SDL_GetTicks();
+       Directional_first_move=0;
     }
     else
     {
       long time_now;
+      int step=0;
       
       time_now=SDL_GetTicks();
       
-      if (time_now>Directional_last_move+Directional_delay)
+      if (Directional_first_move==0)
       {
-        // Speed parameters, acceleration etc. are here
-        if (Directional_delay==-1)
-        {
-          Directional_delay=150;
-          Directional_step=16;
-        }
-        else if (Directional_delay==150)
-          Directional_delay=40;
-        else if (Directional_delay!=0)
-          Directional_delay=Directional_delay*8/10;
-        else if (Directional_step<16*4)
-          Directional_step++;
-        Directional_last_move = time_now;
-      
+        Directional_first_move=time_now;
+        step=1;
+      }
+      else
+      {
+        // Compute how much the cursor has moved since last call.
+        // This tries to make smooth cursor movement
+        // no matter the frequency of calls to Get_input()
+        step =
+          Directional_acceleration(time_now - Directional_first_move) -
+          Directional_acceleration(Directional_last_move - Directional_first_move);
+        
+        // Clip speed at 3 pixel per visible frame.
+        if (step > 3)
+          step=3;
+        
+      }
+      Directional_last_move = time_now;
+      if (step)
+      {
         // Directional controller UP
-        if ((Directional_up||Directional_up_left||Directional_up_right) &&
-           !(Directional_down_right||Directional_down||Directional_down_left))
+        if ((Directional_up||Directional_emulated_up||Directional_up_left||Directional_up_right) &&
+           !(Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left))
         {
-          Cursor_displace(0, -Directional_step/16);
+          Cursor_displace(0, -step);
         }
         // Directional controller RIGHT
-        if ((Directional_up_right||Directional_right||Directional_down_right) &&
-           !(Directional_down_left||Directional_left||Directional_up_left))
+        if ((Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right) &&
+           !(Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left))
         {
-          Cursor_displace(Directional_step/16,0);
+          Cursor_displace(step,0);
         }    
         // Directional controller DOWN
-        if ((Directional_down_right||Directional_down||Directional_down_left) &&
-           !(Directional_up_left||Directional_up||Directional_up_right))
+        if ((Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left) &&
+           !(Directional_up_left||Directional_up||Directional_emulated_up||Directional_up_right))
         {
-          Cursor_displace(0, Directional_step/16);
+          Cursor_displace(0, step);
         }
         // Directional controller LEFT
-        if ((Directional_down_left||Directional_left||Directional_up_left) &&
-           !(Directional_up_right||Directional_right||Directional_down_right))
+        if ((Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left) &&
+           !(Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right))
         {
-          Cursor_displace(-Directional_step/16,0);
+          Cursor_displace(-step,0);
         }
       }
     }
@@ -925,9 +957,15 @@ int Get_input(int sleep_time)
     {
       Compute_paintbrush_coordinates();
       Display_cursor();
+      return 1;
     }
+    if (user_feedback_required)
+      return 1;
     
-    return (Mouse_moved!=0) || user_feedback_required;
+    // Nothing significant happened
+    if (sleep_time)
+      SDL_Delay(sleep_time);
+    return 0;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)
