@@ -2566,6 +2566,14 @@ void Set_config_defaults(void)
   }
   Load_gradient_data(Current_gradient);
   */
+  // Can't Load_gradient_data(), it depends on Backup system
+  // and this function can be called before Backup system is ready.
+  Gradient_function=Gradient_basic;
+  Gradient_lower_bound=0;
+  Gradient_upper_bound=0;
+  Gradient_random_factor=1;
+  Gradient_bounds_range=1;
+  
   
   // Smooth
   Smooth_matrix[0][0]=1;
