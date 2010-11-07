@@ -65,12 +65,6 @@ static const T_Help_table helptable_about[] =
   HELP_TEXT ("")
   HELP_TEXT ("Copyright 2007-2010, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
-  HELP_TEXT ("")
-  HELP_TEXT ("")
-  HELP_TEXT ("")
-  HELP_TEXT ("")
-  // Keep enough empty lines to ensure the 16-line screen is fully redrawn.
-  // HELP_TITLE counts for 2.
 };
 static const T_Help_table helptable_licence[] =
 {

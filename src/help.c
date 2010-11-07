@@ -344,7 +344,7 @@ void Display_help(void)
     if (line_index >= Help_section[Current_help_section].Length)
     {
       Window_rectangle (x_pos,
-           y_pos,
+           y_pos + line_index*8,
            44*6,
            // 44 = Nb max de char (+1 pour éviter les plantages en mode X
            // causés par une largeur = 0)
