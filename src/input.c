@@ -781,7 +781,7 @@ int Get_input(int sleep_time)
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while(SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1 && !user_feedback_required)
+    while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1)
     {
       switch(event.type)
       {
