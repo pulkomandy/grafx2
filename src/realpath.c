@@ -6,6 +6,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#if defined(__AROS__)
+#include <limits.h>
+#endif
 
 #if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
 // These platforms don't have realpath().

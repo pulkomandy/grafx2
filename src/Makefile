@@ -235,6 +235,18 @@ else
         PLATFORM = gp2x
         STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
+
+      else ifdef AROS32CROSS
+	#cross compile an Aros 32 bit executable
+        BIN = ../bin/grafx2
+        COPT = -Wall -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
+        LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
+        CC = i386-aros-gcc
+        OBJDIR = ../obj/aros
+	STRIP = strip --strip-unneeded --remove-section .comment
+        PLATFORM = AROS
+        ZIP = lha
+        ZIPOPT = a
       else
 
         # Compiles a regular linux executable for the native platform

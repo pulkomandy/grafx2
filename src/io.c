@@ -299,7 +299,7 @@ int Lock_file_handle = -1;
 
 byte Create_lock_file(const char *file_directory)
 {
-  #ifdef __amigaos__
+  #if defined (__amigaos__)||(__AROS__)
     #warning "Missing code for your platform, please check and correct!"
   #else
   char lock_filename[MAX_PATH_CHARACTERS];
@@ -336,7 +336,7 @@ byte Create_lock_file(const char *file_directory)
     return -1;
   }
   #endif
-  #endif // __amigaos__
+  #endif // __amigaos__ or __AROS__
   return 0;
 }
 
