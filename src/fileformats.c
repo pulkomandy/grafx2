@@ -2427,7 +2427,7 @@ void Save_GIF(T_IO_Context * context)
             current_layer++)
           {
             // Write a Graphic Control Extension
-            char GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
+            byte GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
             // 'Default' values:
             //    Disposal method "Do not dispose"
             //    Duration 5/100s (minimum viable value for current web browsers)
