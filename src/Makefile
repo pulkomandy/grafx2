@@ -88,7 +88,7 @@ else
   FWDIR = /Library/Frameworks
   SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
   SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
-  COPT = -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+  COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
   LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
   # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
   CC = gcc
@@ -344,11 +344,11 @@ $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
-	cp Info.plist Grafx2.app/Contents
+	cp ../Info.plist Grafx2.app/Contents
 	cp -r English.lproj Grafx2.app/Contents/Resources
-	cp -r fonts Grafx2.app/Contents/Resources
-	cp -r skins Grafx2.app/Contents/Resources
-	cp -r gfx2def.ini Grafx2.app/Contents/Resources
+	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
+	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
+	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
 	cp -Rp $(FWDIR)/SDL.framework Grafx2.app/Contents/Frameworks
 	cp -Rp $(FWDIR)/SDL_image.framework Grafx2.app/Contents/Frameworks
 	cp -Rp $(FWDIR)/SDL_ttf.framework Grafx2.app/Contents/Frameworks
