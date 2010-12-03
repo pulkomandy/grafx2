@@ -70,6 +70,8 @@ static word Brush_backup_width;
 static word Brush_backup_height;
 static byte Palette_has_changed;
 static byte Brush_was_altered;
+static byte Original_fore_color;
+static byte Original_back_color;
 
 /// Helper function to clamp a double to 0-255 range
 static inline byte clamp_byte(double value)
@@ -547,6 +549,33 @@ int L_GetTransColor(lua_State* L)
   lua_pushinteger(L, Main_backups->Pages->Transparent_color);
   return 1;
 }
+
+int L_SetForeColor(lua_State* L)
+{
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "setforecolor");
+  LUA_ARG_NUMBER(1, "setforecolor", c, -DBL_MAX, DBL_MAX);
+
+  Fore_color = c;
+
+  return 0;
+}
+
+int L_SetBackColor(lua_State* L)
+{
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "setbackcolor");
+  LUA_ARG_NUMBER(1, "setbackcolor", c, -DBL_MAX, DBL_MAX);
+
+  Back_color = c;
+
+  return 0;
+}
+
 
 int L_InputBox(lua_State* L)
 {
@@ -1112,6 +1141,8 @@ void Run_script(char *scriptdir)
   lua_register(L,"selectbox",L_SelectBox);
   lua_register(L,"getforecolor",L_GetForeColor);
   lua_register(L,"getbackcolor",L_GetBackColor);
+  lua_register(L,"setforecolor",L_SetForeColor);
+  lua_register(L,"setbackcolor",L_SetBackColor);
   lua_register(L,"gettranscolor",L_GetTransColor);
   lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
   lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
@@ -1145,6 +1176,8 @@ void Run_script(char *scriptdir)
 
   Palette_has_changed=0;
   Brush_was_altered=0;
+  Original_back_color=Back_color;
+  Original_fore_color=Fore_color;
 
   // Backup the brush
   Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
@@ -1194,6 +1227,25 @@ void Run_script(char *scriptdir)
 
   Hide_cursor();
   Display_all_screen();
+  // Update changed pen colors.
+  if (Back_color!=Original_back_color || Fore_color!=Original_fore_color)
+  {
+    // This is done at end of script, in case somebody would use the
+    // functions in a custom window.
+    if (Back_color!=Original_back_color)
+    {
+      byte new_color = Back_color;
+      Back_color = Original_back_color;
+      Set_back_color(new_color);
+    }
+    if (Fore_color!=Original_fore_color)
+    {
+      byte new_color = Fore_color;
+      Fore_color = Original_fore_color;
+      Set_fore_color(new_color);
+    }
+    
+  }
   Cursor_shape=old_cursor_shape;
   Display_cursor();
 }
