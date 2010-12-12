@@ -432,6 +432,13 @@ int Load_INI(T_Config * conf)
   char   value_label[1024];
 
   Line_number_in_INI_file=0;
+  
+#if defined(__WIZ__) || defined(__CAANOO__)
+  conf->Stylus_mode = 1;
+#else
+  conf->Stylus_mode = 0;
+#endif
+
 
   // On alloue les zones de mémoire:
   buffer=(char *)malloc(1024);
