@@ -1366,15 +1366,27 @@ void Button_Palette(void)
           }
           else
           {
+            byte greys=0;
+            byte non_greys=0;
+            // Check if the range contains both greys and non-greys
             for (i=block_start; i<=block_end; i++)
+              if (temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B)
+                non_greys=1;
+              else
+                greys=1;
+            
+            for (i=block_start; i<=block_end; i++)
+            {
+              byte is_grey = temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B;
               Set_HSL(
                 temp_palette,
                 working_palette,
                 i,
-                Color_max-red_slider->Position,
-                Color_max-green_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-red_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-green_slider->Position,
                 Color_max-blue_slider->Position
                 );
+            }
           }
 
           if (red_slider->Position>Color_max)
@@ -1434,15 +1446,27 @@ void Button_Palette(void)
           }
           else
           {
-          for (i=block_start; i<=block_end; i++)
+            byte greys=0;
+            byte non_greys=0;
+            // Check if the range contains both greys and non-greys
+            for (i=block_start; i<=block_end; i++)
+              if (temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B)
+                non_greys=1;
+              else
+                greys=1;
+            
+            for (i=block_start; i<=block_end; i++)
+            {
+              byte is_grey = temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B;
               Set_HSL(
                 temp_palette,
                 working_palette,
                 i,
-                Color_max-red_slider->Position,
-                Color_max-green_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-red_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-green_slider->Position,
                 Color_max-blue_slider->Position
                 );
+            }
           }
 
           if (green_slider->Position>Color_max)
@@ -1502,15 +1526,27 @@ void Button_Palette(void)
           }
           else
           {
+            byte greys=0;
+            byte non_greys=0;
+            // Check if the range contains both greys and non-greys
             for (i=block_start; i<=block_end; i++)
+              if (temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B)
+                non_greys=1;
+              else
+                greys=1;
+            
+            for (i=block_start; i<=block_end; i++)
+            {
+              byte is_grey = temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B;
               Set_HSL(
                 temp_palette,
                 working_palette,
                 i,
-                Color_max-red_slider->Position,
-                Color_max-green_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-red_slider->Position,
+                is_grey && greys && non_greys ? 0 : Color_max-green_slider->Position,
                 Color_max-blue_slider->Position
                 );
+            }
           }
 
           if (blue_slider->Position>Color_max)
