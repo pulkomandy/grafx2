@@ -1200,31 +1200,18 @@ void Add_font_or_skin(const char *name)
     && (!strcasecmp(fname + namelength - 4,".png")
     || !strcasecmp(fname + namelength - 4,".gif")))
   {
-    Add_element_to_list(&Skin_files_list, name, 0, ICON_NONE);
+    Add_element_to_list(&Skin_files_list, fname, Format_filename(fname, 19, 0), 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;
-
-    // Remove directory from full name
-    strcpy(Skin_files_list.First->Full_name, fname);
-    // Reformat the short name differently
-    strcpy(Skin_files_list.First->Short_name,
-      Format_filename(Skin_files_list.First->Full_name, 0)
-    );
   }
   else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
     && (!strcasecmp(fname + namelength - 4, ".png")))
   {
-    Add_element_to_list(&Font_files_list, name, 0, ICON_NONE);
+    Add_element_to_list(&Font_files_list, fname, Format_font_filename(fname), 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;
-
-    // Remove directory from full name
-    strcpy(Font_files_list.First->Full_name, fname);
-    // Reformat the short name differently
-    strcpy(Font_files_list.First->Short_name,
-      Format_font_filename(Font_files_list.First->Full_name));
   }
    
 }

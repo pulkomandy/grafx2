@@ -163,13 +163,20 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Short_name[19]; ///< Name to display.
   char Full_name[256]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
   byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
+  
+  word  Length_short_name; ///< Number of bytes allocated for :Short_name
+  #if __GNUC__ < 3
+  char Short_name[0]; ///< Name to display.
+#else
+  char Short_name[]; ///< Name to display.
+#endif
+  // No field after Short_name[] ! Dynamic allocation according to name length.
 } T_Fileselector_item;
 
 /// Data for a fileselector

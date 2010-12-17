@@ -960,16 +960,10 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
   if (Scripts_list.Nb_elements)
   {
-    short name_size;
-    
     current_item = Get_item_by_index(&Scripts_list, index);
 
-    Print_in_window_limited(x, y, current_item->Full_name, NAME_WIDTH, MC_Black,
+    Print_in_window(x, y, current_item->Short_name, MC_Black,
       (highlighted)?MC_Dark:MC_Light);
-    name_size=strlen(current_item->Full_name);
-    // Clear remaining area on the right
-    if (name_size<NAME_WIDTH)
-      Window_rectangle(x+name_size*8,y,(NAME_WIDTH-name_size)*8,8,(highlighted)?MC_Dark:MC_Light);
 
     Update_window_area(x,y,NAME_WIDTH*8,8);
   }
@@ -1066,12 +1060,14 @@ void Draw_script_information(T_Fileselector_item * script_item)
 // Add a script to the list
 void Add_script(const char *name)
 {
+  const char * file_name;
+  
   // Only files ending in ".lua"
   int len=strlen(name);
   if (len<=4 || strcasecmp(name+len-4, ".lua"))
     return;
-    
-  Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0, ICON_NONE);
+  file_name=Find_last_slash(name)+1;
+  Add_element_to_list(&Scripts_list, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
 }
 
 void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_script)
@@ -1384,6 +1380,8 @@ void Button_Brush_Factory(void)
   
   Update_window_area(0, 0, Window_width, Window_height);
   Display_cursor();
+  
+  Reset_quicksearch();
 
   do
   {
@@ -1392,6 +1390,11 @@ void Button_Brush_Factory(void)
       Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
     else if (Is_shortcut(Key,0x200+BUTTON_BRUSH_EFFECTS))
       clicked_button=1; // Cancel
+    // Quicksearch
+    if (clicked_button==4)
+      Reset_quicksearch();
+    else if (clicked_button==0 && Key_ANSI)
+      clicked_button=Quicksearch_list(scriptlist, &Scripts_list);
 
     switch (clicked_button)
     {

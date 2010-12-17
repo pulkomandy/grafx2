@@ -31,12 +31,12 @@
 
 byte Button_Load_or_Save(byte load, T_IO_Context *context);
 
-void Add_element_to_list(T_Fileselector *list, const char * fname, int type, byte icon);
+void Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon);
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).
-/// The returned value is a pointer to a single static buffer of 19 characters
+/// The returned value is a pointer to a single static buffer of maximum 40 characters
 /// including the '\\0'.
-char * Format_filename(const char * fname, int type);
+char * Format_filename(const char * fname, word max_length, int type);
 
 void Free_fileselector_list(T_Fileselector *list);
 
@@ -47,5 +47,9 @@ void Recount_files(T_Fileselector *list);
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
 short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
+
+int Quicksearch_list(T_List_button * list, T_Fileselector * selector);
+
+void Reset_quicksearch(void);
 
 #endif
