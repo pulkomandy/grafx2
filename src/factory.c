@@ -949,6 +949,24 @@ int L_MessageBox(lua_State* L)
   return 0;
 }
 
+int L_Sleep(lua_State* L)
+{
+  int delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "sleep");
+  LUA_ARG_NUMBER(1, "sleep", delay, 0, 10000);
+
+  end = SDL_GetTicks()+delay;
+  
+  do
+  {
+    Get_input(20);
+  } while (SDL_GetTicks()<end);
+
+  return 0;
+}
 
 // Handlers for window internals
 T_Fileselector Scripts_list;
@@ -1146,6 +1164,7 @@ void Run_script(char *scriptdir)
   lua_register(L,"getsparecolor",L_GetSpareColor);
   lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
   lua_register(L,"clearpicture",L_ClearPicture);
+  lua_register(L,"sleep",L_Sleep);
   
 
   // For debug only
