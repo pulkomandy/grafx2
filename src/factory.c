@@ -949,21 +949,74 @@ int L_MessageBox(lua_State* L)
   return 0;
 }
 
-int L_Sleep(lua_State* L)
+int L_Wait(lua_State* L)
 {
-  int delay;
+  float delay;
   Uint32 end;
   int nb_args=lua_gettop(L);
   
-  LUA_ARG_LIMIT (1, "sleep");
-  LUA_ARG_NUMBER(1, "sleep", delay, 0, 10000);
+  LUA_ARG_LIMIT (1, "wait");
+  LUA_ARG_NUMBER(1, "wait", delay, 0.0, 10.0);
 
-  end = SDL_GetTicks()+delay;
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    Get_input(0);
+    return 0;
+  }
+  // Wait specified time
+  end = SDL_GetTicks()+(int)(delay*1000.0);
   
   do
   {
     Get_input(20);
   } while (SDL_GetTicks()<end);
+  return 0;
+}
+
+int L_Wait_break(lua_State* L)
+{
+  float delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "waitbreak");
+  LUA_ARG_NUMBER(1, "waitbreak", delay, 0.0, DBL_MAX);
+
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    Get_input(0);
+    lua_pushinteger(L, (Key == KEY_ESC));
+    return 1;
+  }
+  // Wait specified time
+  end = SDL_GetTicks()+(int)(delay*1000.0);
+  
+  do
+  {
+    Get_input(20);
+    if (Key == KEY_ESC)
+    {
+      lua_pushinteger(L, 1);
+      return 1;
+    }
+  } while (SDL_GetTicks()<end);
+
+  lua_pushinteger(L, 0);
+  return 1;
+}
+
+int L_Update_screen(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "updatescreen");
+  
+  Update_colors_during_script();
+  Hide_cursor();
+  Display_all_screen();
+  Display_cursor();
 
   return 0;
 }
@@ -1164,8 +1217,9 @@ void Run_script(char *scriptdir)
   lua_register(L,"getsparecolor",L_GetSpareColor);
   lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
   lua_register(L,"clearpicture",L_ClearPicture);
-  lua_register(L,"sleep",L_Sleep);
-  
+  lua_register(L,"wait",L_Wait);
+  lua_register(L,"waitbreak",L_Wait_break);
+  lua_register(L,"updatescreen",L_Update_screen);
 
   // For debug only
   luaL_openlibs(L);
