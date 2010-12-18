@@ -974,7 +974,7 @@ int L_Wait(lua_State* L)
   return 0;
 }
 
-int L_Wait_break(lua_State* L)
+int L_WaitBreak(lua_State* L)
 {
   float delay;
   Uint32 end;
@@ -1007,7 +1007,7 @@ int L_Wait_break(lua_State* L)
   return 1;
 }
 
-int L_Update_screen(lua_State* L)
+int L_UpdateScreen(lua_State* L)
 {
   int nb_args=lua_gettop(L);
   
@@ -1018,6 +1018,19 @@ int L_Update_screen(lua_State* L)
   Display_all_screen();
   Display_cursor();
 
+  return 0;
+}
+
+int L_FinalizePicture(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "finalizepicture");
+  
+  Update_colors_during_script();
+  End_of_modification();
+  Backup();
+  
   return 0;
 }
 
@@ -1218,10 +1231,11 @@ void Run_script(char *scriptdir)
   lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
   lua_register(L,"clearpicture",L_ClearPicture);
   lua_register(L,"wait",L_Wait);
-  lua_register(L,"waitbreak",L_Wait_break);
-  lua_register(L,"updatescreen",L_Update_screen);
-
-  // For debug only
+  lua_register(L,"waitbreak",L_WaitBreak);
+  lua_register(L,"updatescreen",L_UpdateScreen);
+  lua_register(L,"finalizepicture",L_FinalizePicture);
+  
+  // Load all standard libraries
   luaL_openlibs(L);
   
   /*
