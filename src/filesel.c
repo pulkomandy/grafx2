@@ -65,12 +65,18 @@
 #include "help.h"
 #include "filesel.h"
 
-#define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de fichier non sélectionné
-#define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de répertoire non sélectionné
-#define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne non sélectionnée
-#define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de fichier    sélectionnée
-#define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de repértoire sélectionnée
-#define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne sélectionnée
+#define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de
+	// fichier non sélectionné
+#define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de
+	// répertoire non sélectionné
+#define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne
+	// non sélectionnée
+#define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de
+	// fichier sélectionnée
+#define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de
+	// repértoire sélectionnée
+#define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne
+	// sélectionnée
 
 // -- Native fileselector for WIN32
 
@@ -514,7 +520,7 @@ void Read_list_of_drives(T_Fileselector *list)
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, Format_filename(home_name, 19, 2), 2, ICON_NONE);
+        Add_element_to_list(list, home_dir, Format_filename(home_dir, 19, 2), 2, ICON_NONE);
         list->Nb_directories++;
     }
 
