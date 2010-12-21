@@ -463,7 +463,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   Surface_fonte=IMG_Load(Font_name(font_number));
   if (!Surface_fonte)
   {
-    Warning_message("Error loading font. The file may be corrupt.");
+    Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
     return NULL;
   }
   font=SFont_InitFont(Surface_fonte);
