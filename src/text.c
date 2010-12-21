@@ -345,11 +345,14 @@ void Init_text(void)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif
-  #elif defined(__BEOS__) || defined(__HAIKU__)
+  #elif defined(__BEOS__)
     #ifndef NOTTF
       For_each_file("/etc/fonts/ttfonts", Add_font);
     #endif
-
+  #elif defined(__HAIKU__)
+    #ifndef NOTTF
+      For_each_file("/boot/system/data/fonts/ttfonts/", Add_font);
+    #endif
   #elif defined(__SKYOS__)
     #ifndef NOTTF
       For_each_file("/boot/system/fonts", Add_font);
