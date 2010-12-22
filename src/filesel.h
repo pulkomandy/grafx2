@@ -48,6 +48,8 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
 short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
 
+void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item);
+
 int Quicksearch_list(T_List_button * list, T_Fileselector * selector);
 
 void Reset_quicksearch(void);

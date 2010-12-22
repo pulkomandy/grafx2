@@ -1035,19 +1035,31 @@ int L_FinalizePicture(lua_State* L)
 }
 
 // Handlers for window internals
-T_Fileselector Scripts_list;
+T_Fileselector Scripts_selector;
 
 // Callback to display a skin name in the list
 void Draw_script_name(word x, word y, word index, byte highlighted)
 {
   T_Fileselector_item * current_item;
 
-  if (Scripts_list.Nb_elements)
+  if (Scripts_selector.Nb_elements)
   {
-    current_item = Get_item_by_index(&Scripts_list, index);
+    byte fg, bg;
+    
+    current_item = Get_item_by_index(&Scripts_selector, index);
 
-    Print_in_window(x, y, current_item->Short_name, MC_Black,
-      (highlighted)?MC_Dark:MC_Light);
+    if (current_item->Type==1) // Directories
+    {
+      fg=(highlighted)?MC_Black:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Light;
+    }
+    else // Files
+    {
+      fg=MC_Black;
+      bg=(highlighted)?MC_Dark:MC_Light;
+    }
+    
+    Print_in_window(x, y, current_item->Short_name, fg,bg);
 
     Update_window_area(x,y,NAME_WIDTH*8,8);
   }
@@ -1142,53 +1154,59 @@ void Draw_script_information(T_Fileselector_item * script_item)
 }
 
 // Add a script to the list
-void Add_script(const char *name)
+void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidden)
 {
   const char * file_name;
-  
-  // Only files ending in ".lua"
-  int len=strlen(name);
-  if (len<=4 || strcasecmp(name+len-4, ".lua"))
-    return;
+  int len;
+
   file_name=Find_last_slash(name)+1;
-  Add_element_to_list(&Scripts_list, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+
+  if (is_file)
+  {
+    // Only files ending in ".lua"
+    len=strlen(file_name);
+    if (len<=4 || strcasecmp(file_name+len-4, ".lua"))
+      return;
+    // Hidden
+    //if (is_hidden && !Config.Show_hidden_files)
+    //  return;
+      
+    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+  }
+  else if (is_directory)
+  {
+    // Ignore current directory
+    if ( !strcmp(file_name, "."))
+      return;
+    // Hidden
+    //if (is_hidden && !Config.Show_hidden_directories)
+    //  return;
+    
+    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
+  }
 }
 
-void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_script)
+void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_file)
 {
   short index;
 
-  index=Find_file_in_fileselector(selector, selected_script);
-
-  if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (index<list->Scroller->Nb_visibles/2))
-  {
-    list->List_start=0;
-    list->Cursor_position=index;
-  }
-  else
-  {
-    if (index>=list->Scroller->Nb_elements-list->Scroller->Nb_visibles/2)
-    {
-      list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
-      list->Cursor_position=index-list->List_start;
-    }
-    else
-    {
-      list->List_start=index-(list->Scroller->Nb_visibles-1)/2;
-      list->Cursor_position=(list->Scroller->Nb_visibles-1)/2;
-    }
-  }
+  index=Find_file_in_fileselector(selector, selected_file);
+  Locate_list_item(list, selector, index);
 }
 
-static char selected_script[MAX_PATH_CHARACTERS]="";
+static char Last_run_script[MAX_PATH_CHARACTERS]="";
 
 // Before: Cursor hidden
 // After: Cursor shown
-void Run_script(char *scriptdir)
+void Run_script(const char *script_subdirectory, const char *script_filename)
 {
   lua_State* L;
   const char* message;
   byte  old_cursor_shape=Cursor_shape;
+  char scriptdir[MAX_PATH_CHARACTERS];
+  
+  strcpy(scriptdir, Data_directory);
+  strcat(scriptdir, "scripts/");
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -1196,6 +1214,16 @@ void Run_script(char *scriptdir)
   Flush_update();
   
   chdir(scriptdir);
+  
+  if (script_subdirectory && script_subdirectory[0]!='\0')
+  {
+    sprintf(Last_run_script, "%s%s%s", script_subdirectory, PATH_SEPARATOR, script_filename);
+  }
+  else
+  {
+    strcpy(Last_run_script, script_filename);
+  }
+  
 
   L = lua_open();
   putenv("LUA_PATH=libs\\?.lua");
@@ -1249,8 +1277,6 @@ void Run_script(char *scriptdir)
   //luaopen_debug(L);
   */
 
-  strcat(scriptdir, selected_script);
-
   // TODO The script may modify the picture, so we do a backup here.
   // If the script is only touching the brush, this isn't needed...
   // The backup also allows the script to read from it to make something
@@ -1275,7 +1301,7 @@ void Run_script(char *scriptdir)
   {
     memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
   
-    if (luaL_loadfile(L,scriptdir) != 0)
+    if (luaL_loadfile(L,Last_run_script) != 0)
     {
       int stack_size;
       stack_size= lua_gettop(L);
@@ -1335,36 +1361,27 @@ void Run_script(char *scriptdir)
 
 void Run_numbered_script(byte index)
 {
-  char scriptdir[MAX_PATH_CHARACTERS];
 
   if (index>=10)
     return;
   if (Bound_script[index]==NULL)
     return;
     
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
-  
-  strcpy(selected_script, Bound_script[index]);
-  
-  Run_script(scriptdir);
+  Hide_cursor();
+  Run_script(NULL, Bound_script[index]);
 }               
 
 void Repeat_script(void)
 {
-  char scriptdir[MAX_PATH_CHARACTERS];
 
-  if (selected_script==NULL || selected_script[0]=='\0')
+  if (Last_run_script==NULL || Last_run_script[0]=='\0')
   {
     Warning_message("No script to repeat.");
     return;
   }
-
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
   
   Hide_cursor();
-  Run_script(scriptdir);
+  Run_script(NULL, Last_run_script);
 }
 
 void Set_script_shortcut(T_Fileselector_item * script_item)
@@ -1421,95 +1438,193 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
 
 void Button_Brush_Factory(void)
 {
+  static char selected_file[MAX_PATH_CHARACTERS]="";
+  static char sub_directory[MAX_PATH_CHARACTERS]="";
+
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
+  T_Special_button* scriptarea;
   char scriptdir[MAX_PATH_CHARACTERS];
-
-  Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
-
-  // Here we use the same data container as the fileselectors.
+  T_Fileselector_item *item;
+  
   // Reinitialize the list
-  Free_fileselector_list(&Scripts_list);
+  Free_fileselector_list(&Scripts_selector);
   strcpy(scriptdir, Data_directory);
   strcat(scriptdir, "scripts/");
+  strcat(scriptdir, sub_directory);
   // Add each found file to the list
-  For_each_file(scriptdir, Add_script);
+  For_each_directory_entry(scriptdir, Add_script);
   // Sort it
-  Sort_list_of_files(&Scripts_list);
+  Sort_list_of_files(&Scripts_selector);
+  //
 
+  Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
+  
   Window_set_normal_button(85, 149, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
-  scriptlist = Window_set_list_button(
-    // Fileselector
-    Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 2
-    // Scroller for the fileselector
-    (scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
-      Scripts_list.Nb_elements,10, 0)), // 3
-    Draw_script_name); // 4
+  // Fileselector
+  scriptarea=Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80); // 2
+  // Scroller for the fileselector
+  scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
+      Scripts_selector.Nb_elements,10, 0); // 3
+  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name); // 4
 
-  Window_set_normal_button(10, 149, 67, 14, "Run", 0, Scripts_list.Nb_elements!=0, SDLK_RETURN); // 5
+  Window_set_normal_button(10, 149, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
   Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
   Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
-    
-  // Update position
-  Highlight_script(&Scripts_list, scriptlist, selected_script);
-  // Update the scroller position
-  scriptscroll->Position=scriptlist->List_start;
-  if (scriptscroll->Position)
+  
+  while (1)
+  {
+    // Locate selected file in view
+    Highlight_script(&Scripts_selector, scriptlist, selected_file);
+    // Update the scroller position
+    scriptscroll->Position=scriptlist->List_start;
     Window_draw_slider(scriptscroll);
-  
-  Window_redraw_list(scriptlist);
-  Draw_script_information(Get_item_by_index(&Scripts_list,
-    scriptlist->List_start + scriptlist->Cursor_position));
-  
-  Update_window_area(0, 0, Window_width, Window_height);
-  Display_cursor();
-  
-  Reset_quicksearch();
-
-  do
-  {
-    clicked_button = Window_clicked_button();
-    if (Is_shortcut(Key,0x100+BUTTON_HELP))
-      Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
-    else if (Is_shortcut(Key,0x200+BUTTON_BRUSH_EFFECTS))
-      clicked_button=1; // Cancel
-    // Quicksearch
-    if (clicked_button==4)
-      Reset_quicksearch();
-    else if (clicked_button==0 && Key_ANSI)
-      clicked_button=Quicksearch_list(scriptlist, &Scripts_list);
-
-    switch (clicked_button)
-    {
-      case 4:
-        Hide_cursor();
-        Draw_script_information(Get_item_by_index(&Scripts_list,
-          scriptlist->List_start + scriptlist->Cursor_position));
-        Display_cursor();
-        break;
-      
-      case 6:
-        Set_script_shortcut(Get_item_by_index(&Scripts_list,
-          scriptlist->List_start + scriptlist->Cursor_position));
-        break;
-        
-      default:
-        break;
-    }
     
-  } while (clicked_button != 1 && clicked_button != 5);
+    Window_redraw_list(scriptlist);
+    Draw_script_information(Get_item_by_index(&Scripts_selector,
+      scriptlist->List_start + scriptlist->Cursor_position));
+    
+    Update_window_area(0, 0, Window_width, Window_height);
+    Display_cursor();
+    
+    Reset_quicksearch();
   
-  if (clicked_button == 5) // OK
-  {
-    if (Scripts_list.Nb_elements == 0)
-      selected_script[0]='\0';
-    else
-      strcpy(selected_script, Get_item_by_index(&Scripts_list,
-        scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
+    do
+    {
+      clicked_button = Window_clicked_button();
+      if (Key==SDLK_BACKSPACE && sub_directory[0]!='\0')
+      {
+        // Make it select first entry (parent directory)
+        scriptlist->List_start=0;
+        scriptlist->Cursor_position=0;
+        clicked_button=5;
+      }
+      if (Is_shortcut(Key,0x100+BUTTON_HELP))
+        Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
+      else if (Is_shortcut(Key,0x200+BUTTON_BRUSH_EFFECTS))
+        clicked_button=1; // Cancel
+      // Quicksearch
+      if (clicked_button==4)
+        Reset_quicksearch();
+      else if (clicked_button==0 && Key_ANSI)
+        clicked_button=Quicksearch_list(scriptlist, &Scripts_selector);
+  
+      switch (clicked_button)
+      {
+        case 4:
+          Hide_cursor();
+          Draw_script_information(Get_item_by_index(&Scripts_selector,
+            scriptlist->List_start + scriptlist->Cursor_position));
+          Display_cursor();
+          {
+            // Test double-click
+            static long time_click = 0;
+            static int last_selected_item=-1;
+            static long time_previous;
+            
+            time_previous = time_click;
+            time_click = SDL_GetTicks();
+            if (scriptlist->List_start + scriptlist->Cursor_position == last_selected_item)
+            {
+              if (time_click - time_previous < Config.Double_click_speed)
+                clicked_button=5;
+            }
+            else
+            {
+              last_selected_item=scriptlist->List_start + scriptlist->Cursor_position;
+            }
+          }
+          break;
+        
+        case 6:
+          Set_script_shortcut(Get_item_by_index(&Scripts_selector,
+            scriptlist->List_start + scriptlist->Cursor_position));
+          break;
+          
+        default:
+          break;
+      }
+      
+    } while (clicked_button != 1 && clicked_button != 5);
+    
+    // Cancel
+    if (clicked_button==1)
+      break;
+      
+    // OK
+    if (Scripts_selector.Nb_elements == 0)
+    {
+      // No items : same as Cancel
+      clicked_button=1;
+      break;
+    }
+  
+    // Examine selected file
+    item = Get_item_by_index(&Scripts_selector,
+      scriptlist->List_start + scriptlist->Cursor_position);
+    
+    if (item->Type==0) // File
+    {
+      strcpy(selected_file, sub_directory);
+      strcat(selected_file, item->Full_name);
+      break;
+    }
+    else if (item->Type==1) // Directory
+    {
+      if (!strcmp(item->Full_name,PARENT_DIR))
+      {
+        // Going up one directory
+        long len;
+        char * slash_pos;
+
+        // Remove trailing slash      
+        len=strlen(sub_directory);
+        if (len && !strcmp(sub_directory+len-1,PATH_SEPARATOR))
+          sub_directory[len-1]='\0';
+        
+        slash_pos=Find_last_slash(sub_directory);
+        if (slash_pos)
+        {
+          strcpy(selected_file, slash_pos+1);
+          *slash_pos='\0';
+        }
+        else
+        {
+          strcpy(selected_file, sub_directory);
+          sub_directory[0]='\0';
+        }
+      }
+      else
+      {
+        // Going down one directory
+        strcpy(selected_file, PARENT_DIR);
+
+        strcat(sub_directory, item->Full_name);
+        strcat(sub_directory, PATH_SEPARATOR);
+      }
+
+      // No break: going back up to beginning of loop
+      
+      // Reinitialize the list
+      Free_fileselector_list(&Scripts_selector);
+      strcpy(scriptdir, Data_directory);
+      strcat(scriptdir, "scripts/");
+      strcat(scriptdir, sub_directory);
+      // Add each found file to the list
+      For_each_directory_entry(scriptdir, Add_script);
+      // Sort it
+      Sort_list_of_files(&Scripts_selector); 
+      //
+      
+      scriptlist->Scroller->Nb_elements=Scripts_selector.Nb_elements;
+      Compute_slider_cursor_length(scriptlist->Scroller);
+      
+      Hide_cursor();
+    }
   }
   
   Close_window();
@@ -1517,7 +1632,7 @@ void Button_Brush_Factory(void)
 
   if (clicked_button == 5) // Run the script
   {
-    Run_script(scriptdir);
+    Run_script("", selected_file);
   }
   else
   {

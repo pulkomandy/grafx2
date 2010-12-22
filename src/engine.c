@@ -2207,6 +2207,15 @@ void Window_redraw_list(T_List_button * list)
       list->List_start + i,
       i == list->Cursor_position);
   }
+  // Remaining rectangle under list
+  i=list->Scroller->Nb_visibles-list->Scroller->Nb_elements;
+  if (i>0)
+    Window_rectangle(
+      list->Entry_button->Pos_X,
+      list->Entry_button->Pos_Y+list->Scroller->Nb_elements*8,
+      list->Entry_button->Width,
+      i*8,
+      MC_Light);
 }
 
 //----------------------- Ouverture d'un pop-up -----------------------

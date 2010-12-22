@@ -217,6 +217,10 @@ char * Format_filename(const char * fname, word max_length, int type)
   if (strcmp(fname,PARENT_DIR)==0)
   {
     strcpy(result,"<-PARENT DIRECTORY");
+    // Append spaces
+    for (c=18; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
   }
   else if (fname[0]=='.' || type==1 || type==2)
   {
@@ -1159,33 +1163,45 @@ short Quicksearch(T_Fileselector *selector)
   return -1;
 }
 
+// Translated from Highlight_file
+void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item)
+{
+
+  // Safety bounds
+  if (selected_item<0)
+    selected_item=0;
+  else if (selected_item>=list->Scroller->Nb_elements)
+    selected_item=list->Scroller->Nb_elements-1;
+    
+    
+  if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (selected_item<(list->Scroller->Nb_visibles/2)))
+  {
+    list->List_start=0;
+    list->Cursor_position=selected_item;
+  }
+  else
+  {
+    if (selected_item>=list->Scroller->Nb_elements-(list->Scroller->Nb_visibles/2))
+    {
+      list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+      list->Cursor_position=selected_item-list->List_start;
+    }
+    else
+    {
+      list->List_start=selected_item-(list->Scroller->Nb_visibles/2-1);
+      list->Cursor_position=(list->Scroller->Nb_visibles/2-1);
+    }
+  }
+}
+
 int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
 {
   // Try Quicksearch
   short selected_item=Quicksearch(selector);
   if (selected_item>=0 && selected_item!=list->Cursor_position+list->List_start)
   {
-    // This part translated from Highlight_file()
-    //---
-    if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (selected_item<(list->Scroller->Nb_visibles/2)))
-    {
-      list->List_start=0;
-      list->Cursor_position=selected_item;
-    }
-    else
-    {
-      if (selected_item>=list->Scroller->Nb_elements-(list->Scroller->Nb_visibles/2))
-      {
-        list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
-        list->Cursor_position=selected_item-list->List_start;
-      }
-      else
-      {
-        list->List_start=selected_item-(list->Scroller->Nb_visibles/2-1);
-        list->Cursor_position=(list->Scroller->Nb_visibles/2-1);
-      }
-    }
-    //---
+    Locate_list_item(list, selector, selected_item);
+    
     Hide_cursor();
     // Mise à jour du scroller
     list->Scroller->Position=list->List_start;

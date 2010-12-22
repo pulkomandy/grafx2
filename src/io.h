@@ -90,6 +90,10 @@ int  Directory_exists(char * directory);
 /// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));
 
+/// Scans a directory, calls Callback for each file or directory in it,
+void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden));
+
+
 ///
 /// Creates a fully qualified name from a directory and filename.
 /// The point is simply to insert a PATH_SEPARATOR when needed.
