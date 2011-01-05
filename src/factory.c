@@ -1021,6 +1021,19 @@ int L_UpdateScreen(lua_State* L)
   return 0;
 }
 
+
+int L_StatusMessage(lua_State* L)
+{
+	const char* msg;
+	int nb_args = lua_gettop(L);
+	LUA_ARG_LIMIT(1,"statusmessage");
+
+	LUA_ARG_STRING(1, "statusmessage", msg);
+	Print_in_menu(msg,0);
+	return 0;
+}
+
+
 int L_FinalizePicture(lua_State* L)
 {
   int nb_args=lua_gettop(L);
@@ -1246,6 +1259,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
   lua_register(L,"inputbox",L_InputBox);
   lua_register(L,"messagebox",L_MessageBox);
+  lua_register(L,"statusmessage",L_StatusMessage);
   lua_register(L,"selectbox",L_SelectBox);
   lua_register(L,"getforecolor",L_GetForeColor);
   lua_register(L,"getbackcolor",L_GetBackColor);
