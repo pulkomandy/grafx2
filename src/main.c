@@ -710,6 +710,9 @@ int Init_program(int argc,char * argv[])
       SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
     }
   }
+
+  // Open a console for debugging...
+  //ActivateConsole();
   #endif
   
   Main_image_width=Screen_width/Pixel_width;

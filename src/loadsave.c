@@ -122,6 +122,10 @@ void Save_C64(T_IO_Context *);
 // -- SCR (Amstrad CPC)
 void Save_SCR(T_IO_Context *);
 
+// -- XPM (X PixMap)
+// Loading is done through SDL_Image 
+void Save_XPM(T_IO_Context*);
+
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
 void Test_PNG(T_IO_Context *);
@@ -155,6 +159,7 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
+  {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
 

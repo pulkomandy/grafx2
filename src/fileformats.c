@@ -3437,6 +3437,44 @@ void Save_SCx(T_IO_Context * context)
   }
 }
 
+//////////////////////////////////// XPM ////////////////////////////////////
+void Save_XPM(T_IO_Context* context)
+{
+  FILE* file;
+  char filename[MAX_PATH_CHARACTERS];
+  int i,j;
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  File_error = 0;
+
+  file = fopen(filename, "w");
+  if (file == NULL)
+  {
+    File_error = 1;
+    return;
+  }
+
+  fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
+  fprintf(file, "\"%d %d 256 2\",\n", context->Width, context->Height);
+
+  for (i = 0; i < 256; i++)
+  {
+    fprintf(file,"\"%2.2X c #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
+      context->Palette[i].B);
+  }
+
+  for (j = 0; j < context->Height; j++)
+  {
+    fprintf(file, "\"");
+    for (i = 0; i < context->Width; i++)
+    {
+      fprintf(file, "%2.2X", Get_pixel(context, i, j));
+    }
+    fprintf(file,"\"\n");
+  }
+
+  fclose(file);
+}
 
 //////////////////////////////////// PNG ////////////////////////////////////
 
