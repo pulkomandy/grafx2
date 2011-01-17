@@ -25,6 +25,7 @@
   bindir = $(exec_prefix)/bin
   datarootdir = $(prefix)/share
   datadir = $(datarootdir)
+  pixmapdir = $(datarootdir)/icons
 
 # Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
@@ -434,7 +435,7 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
-	test -d $(DESTDIR)$(datadir)/icons || $(MKDIR) $(DESTDIR)$(datadir)/icons
+	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	# Copy files
 	$(CP) $(BIN) $(DESTDIR)$(bindir)
 	$(CP) ../share/grafx2/gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
@@ -445,8 +446,8 @@ install : $(BIN)
 	$(CP) $(SCRIPTLIB_FILES) $(DESTDIR)$(datadir)/grafx2/scripts/libs/
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
-	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(datadir)/icons/
-	$(CP) ../share/icons/grafx2.svg $(DESTDIR)$(datadir)/icons/
+	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(pixmapdir)
+	$(CP) ../share/icons/grafx2.svg $(DESTDIR)$(pixmapdir)
 	@echo Install complete
   
 # Linux uninstallation of the program
@@ -465,8 +466,8 @@ uninstall :
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.xpm
-	$(DELCOMMAND) $(DESTDIR)$(datadir)/icons/grafx2.svg
+	$(DELCOMMAND) $(DESTDIR)$(pixmapdir)/grafx2.xpm
+	$(DELCOMMAND) $(DESTDIR)$(pixmapdir)/grafx2.svg
 	@echo Uninstall complete
 
 endif
