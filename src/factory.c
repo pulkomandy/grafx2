@@ -1007,6 +1007,52 @@ int L_WaitBreak(lua_State* L)
   return 1;
 }
 
+int L_WaitInput(lua_State* L)
+{
+  float delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  int moved;
+  
+  /*word key;
+  word button;
+  word mouse_x;
+  word mouse_y;*/
+  
+  LUA_ARG_LIMIT (1, "waitinput");
+  LUA_ARG_NUMBER(1, "waitinput", delay, 0.0, DBL_MAX);
+
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    moved=Get_input(0);
+  }
+  else
+  {
+    // Wait specified time
+    end = SDL_GetTicks()+(int)(delay*1000.0);
+  
+    moved=0;
+    do
+    {
+      moved=Get_input(20);
+    } while (!moved && SDL_GetTicks()<end);
+  }
+  
+  lua_pushboolean(L, moved ? 1 : 0);
+  lua_pushinteger(L, (Key == KEY_ESC) ? SDLK_ESCAPE : Key);
+  lua_pushinteger(L, Mouse_X);
+  lua_pushinteger(L, Mouse_Y);
+  lua_pushinteger(L, Mouse_K);
+  
+  // The event arguments are in the stack.
+  // Need to reset "Key" here, so that a key event will not be
+  // created again before an actual key repeat occurs.
+  Key=0;
+  
+  return 5;
+}
+
 int L_UpdateScreen(lua_State* L)
 {
   int nb_args=lua_gettop(L);
@@ -1017,6 +1063,7 @@ int L_UpdateScreen(lua_State* L)
   Hide_cursor();
   Display_all_screen();
   Display_cursor();
+  //Flush_update();
 
   return 0;
 }
@@ -1274,6 +1321,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"clearpicture",L_ClearPicture);
   lua_register(L,"wait",L_Wait);
   lua_register(L,"waitbreak",L_WaitBreak);
+  lua_register(L,"waitinput",L_WaitInput);
   lua_register(L,"updatescreen",L_UpdateScreen);
   lua_register(L,"finalizepicture",L_FinalizePicture);
   
