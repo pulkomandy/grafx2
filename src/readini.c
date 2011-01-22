@@ -923,16 +923,10 @@ int Load_INI(T_Config * conf)
     switch(values[0])
     {
       case 1:
-        conf->Swap_buttons=MOD_SHIFT;
-        break;
-      case 2:
         conf->Swap_buttons=MOD_CTRL;
         break;
-      case 3:
+      case 2:
         conf->Swap_buttons=MOD_ALT;
-        break;
-      case 4:
-        conf->Swap_buttons=MOD_META;
         break;
     }
   }

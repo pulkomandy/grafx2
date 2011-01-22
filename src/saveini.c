@@ -683,17 +683,11 @@ int Save_INI(T_Config * conf)
     
   switch(conf->Swap_buttons)
   {
-      case MOD_SHIFT:
+      case MOD_CTRL:
         values[0]=1;
         break;
-      case MOD_CTRL:
-        values[0]=2;
-        break;
       case MOD_ALT:
-        values[0]=3;
-        break;
-      case MOD_META:
-        values[0]=4;
+        values[0]=2;
         break;
       default:
         values[0]=0;

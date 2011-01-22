@@ -764,10 +764,8 @@ const T_Lookup Lookup_MouseSpeed[] = {
 
 const T_Lookup Lookup_SwapButtons[] = {
   {"None",0},
-  {"Shift",MOD_SHIFT},
   {"Control",MOD_CTRL},
   {"Alt",MOD_ALT},
-  {"Meta",MOD_META},
   {NULL,-1},
 };
 
