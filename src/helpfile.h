@@ -2389,6 +2389,14 @@ static const T_Help_table helptable_settings_details[] =
   HELP_TEXT ("GrafX2 to recognize them as a combo.")
   HELP_TEXT ("")
   HELP_TEXT ("")
+  HELP_BOLD ("  Swap buttons")
+  HELP_TEXT ("This setting determines which key inverts")
+  HELP_TEXT ("the mouse buttons when it's held : A left")
+  HELP_TEXT ("click is then interpreted as a right-click.")
+  HELP_TEXT ("It's especially useful for one-button")
+  HELP_TEXT ("controllers, such as touchscreens and")
+  HELP_TEXT ("tablets.")
+  HELP_TEXT ("")
   HELP_TITLE("EDITING")
   HELP_TEXT ("")
   HELP_TEXT ("")
@@ -2432,7 +2440,7 @@ static const T_Help_table helptable_settings_details[] =
   HELP_TEXT ("This mode prevents you from painting with")  
   HELP_TEXT ("Background color.")
   HELP_TEXT ("This option is ignored when the Shade,")
-  HELP_TEXT ("Quick-shade, or Tiling mode is used.")  
+  HELP_TEXT ("Quick-shade, or Tiling mode is used.")    
 };
 
 static const T_Help_table helptable_clear[] =

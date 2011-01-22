@@ -916,6 +916,29 @@ int Load_INI(T_Config * conf)
     conf->Sync_views=(values[0]!=0);
   }
   
+  conf->Swap_buttons=0;
+  // Optional, key for swap buttons (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Swap_buttons",1,values))
+  {
+    switch(values[0])
+    {
+      case 1:
+        conf->Swap_buttons=MOD_SHIFT;
+        break;
+      case 2:
+        conf->Swap_buttons=MOD_CTRL;
+        break;
+      case 3:
+        conf->Swap_buttons=MOD_ALT;
+        break;
+      case 4:
+        conf->Swap_buttons=MOD_META;
+        break;
+    }
+  }
+  
+  
+  
   // Insert new values here
 
   fclose(file);

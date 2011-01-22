@@ -83,6 +83,7 @@ int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
 word Input_new_mouse_X;
 word Input_new_mouse_Y;
 byte Input_new_mouse_K;
+byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
 byte Mouse_mode = 0; ///< Mouse mode = 0:normal, 1:emulated with custom sensitivity.
 short Mouse_virtual_x_position;
@@ -338,11 +339,19 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
     switch(event.button)
     {
         case SDL_BUTTON_LEFT:
-            Input_new_mouse_K |= 1;
+            if (Button_inverter)
+              Input_new_mouse_K |= 2;
+            else
+              Input_new_mouse_K |= 1;
+            break;
             break;
 
         case SDL_BUTTON_RIGHT:
-            Input_new_mouse_K |= 2;
+            if (Button_inverter)
+              Input_new_mouse_K |= 1;
+            else
+              Input_new_mouse_K |= 2;
+            break;
             break;
 
         case SDL_BUTTON_MIDDLE:
@@ -368,11 +377,17 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
     switch(event.button)
     {
         case SDL_BUTTON_LEFT:
-            Input_new_mouse_K &= ~1;
+            if (Button_inverter)
+              Input_new_mouse_K &= ~2;
+            else
+              Input_new_mouse_K &= ~1;
             break;
 
         case SDL_BUTTON_RIGHT:
-            Input_new_mouse_K &= ~2;
+            if (Button_inverter)
+              Input_new_mouse_K &= ~1;
+            else
+              Input_new_mouse_K &= ~2;
             break;
     }
     
@@ -384,8 +399,45 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
+    int modifier;
+  
     Key = Keysym_to_keycode(event.keysym);
     Key_ANSI = Keysym_to_ANSI(event.keysym);
+    switch(event.keysym.sym)
+    {
+      case SDLK_RSHIFT:
+      case SDLK_LSHIFT:
+        modifier=MOD_SHIFT;
+        break;
+
+      case SDLK_RCTRL:
+      case SDLK_LCTRL:
+        modifier=MOD_CTRL;
+        break;
+
+      case SDLK_RALT:
+      case SDLK_LALT:
+      case SDLK_MODE:
+        modifier=MOD_ALT;
+        break;
+
+      case SDLK_RMETA:
+      case SDLK_LMETA:
+        modifier=MOD_META;
+        break;
+
+      default:
+        modifier=0;
+    }
+    if (Config.Swap_buttons && modifier == Config.Swap_buttons && Button_inverter==0)
+    {
+      Button_inverter=1;
+      if (Input_new_mouse_K)
+      {
+        Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+        return Move_cursor_with_constraints();
+      }
+    }
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
@@ -432,6 +484,15 @@ int Release_control(int key_code, int modifier)
       // Disable "snap axis" mode
       Snap_axis = 0;
       need_feedback = 1;
+    }
+    if (Config.Swap_buttons && modifier == Config.Swap_buttons && Button_inverter==1)
+    {
+      Button_inverter=0;
+      if (Input_new_mouse_K)
+      {      
+        Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+        return Move_cursor_with_constraints();
+      }
     }
 
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
@@ -538,12 +599,12 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     }
     if (event.button == Joybutton_left_click)
     {
-      Input_new_mouse_K=1;
+      Input_new_mouse_K = Button_inverter ? 2 : 1;
       return Move_cursor_with_constraints();
     }
     if (event.button == Joybutton_right_click)
     {
-      Input_new_mouse_K=2;
+      Input_new_mouse_K = Button_inverter ? 1 : 2;
       return Move_cursor_with_constraints();
     }
     switch(event.button)
@@ -768,6 +829,7 @@ int Get_input(int sleep_time)
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
+    Input_new_mouse_K = Mouse_K;
 
     // Not using SDL_PollEvent() because every call polls the input
     // device. In some cases such as high-sensitivity mouse or cheap

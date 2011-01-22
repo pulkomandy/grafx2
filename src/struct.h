@@ -358,6 +358,7 @@ typedef struct
   byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
   byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
   byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
+  word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_SHIFT, MOD_CTRL, MOD_ALT, MOD_META.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.

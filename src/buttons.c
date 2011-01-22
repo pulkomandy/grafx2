@@ -762,6 +762,15 @@ const T_Lookup Lookup_MouseSpeed[] = {
   {NULL,-1},
 };
 
+const T_Lookup Lookup_SwapButtons[] = {
+  {"None",0},
+  {"Shift",MOD_SHIFT},
+  {"Control",MOD_CTRL},
+  {"Alt",MOD_ALT},
+  {"Meta",MOD_META},
+  {NULL,-1},
+};
+
 typedef struct {
   const char* Label;
   byte Type; // 0: label, 1+: setting (size in bytes) 
@@ -920,7 +929,6 @@ void Button_Settings(void)
   T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
   
   {"           --- GUI  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
   {"Menu ratio adapt:",1,&(selected_config.Ratio),0,1,0,Lookup_MenuRatio},
   {"Draw limits:",1,&(selected_config.Display_image_limits),0,1,0,Lookup_YesNo},
@@ -930,9 +938,9 @@ void Button_Settings(void)
   {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
   {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Scrollbar speed",0,NULL,0,0,0,NULL},
   {"  on left click:",1,&(selected_config.Delay_left_click_on_slider),1,255,4,NULL},
   {"  on right click:",1,&(selected_config.Delay_right_click_on_slider),1,255,4,NULL},
@@ -942,9 +950,9 @@ void Button_Settings(void)
   {"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
   {"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
   {"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
+  {"Key to swap buttons:",2,&(selected_config.Swap_buttons),0,0,0,Lookup_SwapButtons},
   
   {"          --- Editing  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Adjust brush pick:",1,&(selected_config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
   {"Undo pages:",1,&(selected_config.Max_undo_pages),1,99,5,NULL},
   {"Vertices per polygon:",4,&(selected_config.Nb_max_vertices_per_polygon),2,16384,5,NULL},
@@ -954,9 +962,9 @@ void Button_Settings(void)
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Show in fileselector",0,NULL,0,0,0,NULL},
   {"  Hidden files:",4,&(selected_config.Show_hidden_files),0,1,0,Lookup_YesNo},
   {"  Hidden dirs:",4,&(selected_config.Show_hidden_directories),0,1,0,Lookup_YesNo},
@@ -966,11 +974,12 @@ void Button_Settings(void)
   {"Auto set resolution:",1,&(selected_config.Auto_set_res), 0,1,0,Lookup_YesNo},
   {"  According to:",1,&(selected_config.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
   {"Backup:",1,&(selected_config.Backup), 0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
   
   {"      --- Format options  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Screen size in GIF:",1,&(selected_config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
   {"Clear palette:",1,&(selected_config.Clear_palette),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
