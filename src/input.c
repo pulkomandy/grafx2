@@ -590,11 +590,29 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_CTRL);
+      if (Config.Swap_buttons == MOD_CTRL && Button_inverter==0)
+      {
+        Button_inverter=1;
+        if (Input_new_mouse_K)
+        {
+          Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+          return Move_cursor_with_constraints();
+        }
+      }
       return 0;
     }
     if (event.button == Joybutton_alt)
     {
       SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
+      if (Config.Swap_buttons == MOD_ALT && Button_inverter==0)
+      {
+        Button_inverter=1;
+        if (Input_new_mouse_K)
+        {
+          Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+          return Move_cursor_with_constraints();
+        }
+      }
       return 0;
     }
     if (event.button == Joybutton_left_click)
