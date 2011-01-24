@@ -420,8 +420,9 @@ void Button_Transform_menu(void)
     old_width=Main_image_width;
     old_height=Main_image_height;
     
+    Upload_infos_page_main(Main_backups->Pages);
     // Allocate a new page
-    if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,new_width,new_height))
+    if (Backup_with_new_dimensions(new_width,new_height))
     {
       // The new image is allocated, the new dimensions are already updated.
       
@@ -473,6 +474,7 @@ void Button_Transform_menu(void)
           break;
 
         case 16 : // Check constraints
+          ConstraintFuncs->Init();
           switch(Check_constraints()) {
             case 1:
               Warning_message("Picture size must be 160x200");

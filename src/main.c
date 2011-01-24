@@ -40,7 +40,7 @@
 
 
 // There is no WM on the GP2X...
-#ifndef __GP2X__
+#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
     #include <SDL_syswm.h>
 #endif
 
@@ -66,6 +66,7 @@
 #include "oldies.h"
 #include "palette.h"
 #include "realpath.h"
+#include "input.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -140,7 +141,7 @@ void Error_function(int error_code, const char *filename, int line_number, const
     for (index=0;index<=255;index++)
       temp_palette[index].R=255;
     Set_palette(temp_palette);
-    SDL_Delay(500);
+    Delay_with_active_mouse(50); // Half a second of red flash
     Set_palette(Main_palette);
   }
   else
@@ -401,6 +402,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
   return file_in_command_line;
 }
 
+
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
@@ -474,8 +476,6 @@ int Init_program(int argc,char * argv[])
   // On initialise d'ot' trucs
   Main_offset_X=0;
   Main_offset_Y=0;
-  Old_main_offset_X=0;
-  Old_main_offset_Y=0;
   Main_separator_position=0;
   Main_X_zoom=0;
   Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -487,8 +487,6 @@ int Init_program(int argc,char * argv[])
   Main_magnifier_offset_Y=0;
   Spare_offset_X=0;
   Spare_offset_Y=0;
-  Old_spare_offset_X=0;
-  Old_spare_offset_Y=0;
   Spare_separator_position=0;
   Spare_X_zoom=0;
   Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -507,7 +505,7 @@ int Init_program(int argc,char * argv[])
   
 
   // SDL
-  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
@@ -613,6 +611,11 @@ int Init_program(int argc,char * argv[])
   Paintbrush_offset_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  // Prefer cycling active by default
+  Cycling_mode=1;
+  #endif
+
   // Charger la configuration des touches
   Set_config_defaults();
 
@@ -657,7 +660,10 @@ int Init_program(int argc,char * argv[])
   // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-//  Compute_optimal_menu_colors(Gfx->Default_palette);
+    
+  // Even when using the skin's palette, if RGB range is small
+  // the colors will be unusable.
+  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -705,6 +711,9 @@ int Init_program(int argc,char * argv[])
       SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
     }
   }
+
+  // Open a console for debugging...
+  //ActivateConsole();
   #endif
   
   Main_image_width=Screen_width/Pixel_width;
@@ -822,6 +831,9 @@ int Init_program(int argc,char * argv[])
           break;
       }
   }
+
+  Allow_drag_and_drop(1);
+
   return(1);
 }
 
@@ -887,6 +899,12 @@ void Program_shutdown(void)
     Error(ERROR_MISSING_DIRECTORY);
     
   SDL_Quit();
+  
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  chdir("/usr/gp2x");
+  execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
+  #endif
+  
 }
 
 

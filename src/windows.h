@@ -99,6 +99,7 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);
+byte Best_color_perceptual(byte r,byte g,byte b);
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
@@ -107,5 +108,8 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse);
 
 /// Width of one layer button, in pixels before scaling
 extern word Layer_button_width;
+
+/// Copy viewport settings and offsets from the Main to the Spare.
+void Copy_view_to_spare(void);
 
 #endif

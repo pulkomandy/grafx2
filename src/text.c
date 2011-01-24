@@ -36,19 +36,18 @@
   #include <SDL_ttf.h>
 #endif
 
-#if defined(__linux__)
-#if defined(__macosx__)
+#if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+// No X11
+#elif defined(__macosx__)
   #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
-#else
+#elif defined(__linux__)
   #include <X11/Xlib.h>
-#endif
 #endif
 #endif
 
 #include <SDL_image.h>
-// SFont
 #include "SFont.h"
 
 #include "struct.h"
@@ -56,6 +55,7 @@
 #include "sdlscreen.h"
 #include "io.h"
 #include "errors.h"
+#include "windows.h"
 
 typedef struct T_Font
 {
@@ -321,6 +321,8 @@ void Init_text(void)
       CFRelease(url);
     #endif
 
+  #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+  // No X11 : Only use fonts from Grafx2
   #elif defined(__linux__)
     #ifndef NOTTF
        #define USE_XLIB
@@ -343,11 +345,14 @@ void Init_text(void)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif
-  #elif defined(__BEOS__) || defined(__HAIKU__)
+  #elif defined(__BEOS__)
     #ifndef NOTTF
       For_each_file("/etc/fonts/ttfonts", Add_font);
     #endif
-
+  #elif defined(__HAIKU__)
+    #ifndef NOTTF
+      For_each_file("/boot/system/data/fonts/ttfonts/", Add_font);
+    #endif
   #elif defined(__SKYOS__)
     #ifndef NOTTF
       For_each_file("/boot/system/fonts", Add_font);
@@ -461,7 +466,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   Surface_fonte=IMG_Load(Font_name(font_number));
   if (!Surface_fonte)
   {
-    DEBUG("Font loading failed",0);
+    Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
     return NULL;
   }
   font=SFont_InitFont(Surface_fonte);

@@ -40,25 +40,25 @@ void Open_popup            (word x_pos, word y_pos, word width, word height);
 void Close_popup           (void);
 
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
-  char * title,byte undersc_letter,byte clickable);
+  const char * title,byte undersc_letter,byte clickable);
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height);
 void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height);
 void Window_draw_palette_bouton(word x_pos,word y_pos);
 
-void Compute_slider_cursor_height(T_Scroller_button * button);
+void Compute_slider_cursor_length(T_Scroller_button * button);
 void Window_draw_slider(T_Scroller_button * button);
-void Window_draw_scroller_bouton(T_Scroller_button * button);
+void Window_draw_scroller_button(T_Scroller_button * button);
 
 void Window_input_content(T_Special_button * button, char * content);
 void Window_clear_input_button(T_Special_button * button);
 void Window_draw_input_bouton(word x_pos, word y_pos, word width_in_characters);
 
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
-  word width, word height, char * title, byte undersc_letter,
+  word width, word height, const char * title, byte undersc_letter,
   byte clickable, word shortcut);
 
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
-  word width, word height, char * title, byte undersc_letter,
+  word width, word height, const char * title, byte undersc_letter,
   byte clickable, word shortcut);
 
 T_Palette_button * Window_set_palette_button(word x_pos, word y_pos);
@@ -66,6 +66,10 @@ void Window_clear_tags(void);
 void Tag_color_range(byte start, byte end);
 
 T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
+  word height, word nb_elements, word nb_elements_visible,
+  word initial_position);
+
+T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos,
   word height, word nb_elements, word nb_elements_visible,
   word initial_position);
 
@@ -111,4 +115,9 @@ void Pixel_background(int x_pos, int y_pos, byte color);
 /// Updates the status bar line with a color number.
 /// Used when hovering the menu palette.
 void Status_print_palette_color(byte color);
+
+/// Puts the user in wait mode for the specified time ( in 1/100s),
+/// though the mouse still works.
+void Delay_with_active_mouse(int delay);
+
 #endif

@@ -23,6 +23,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <SDL.h>
+#include <SDL_endian.h>
+#if defined(__WIN32__)
+    #include <windows.h>
+#endif
+// There is no WM on the GP2X...
+#ifndef __GP2X__
+    #include <SDL_syswm.h>
+#endif
+
 #include "global.h"
 #include "sdlscreen.h"
 #include "errors.h"
@@ -47,9 +56,14 @@
   #endif
 #endif
 
+volatile int Allow_colorcycling=1;
+
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
 {
+  static SDL_Cursor* cur = NULL;
+  static byte cursorData = 0;
+
   Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
   if(Screen_SDL != NULL)
   {
@@ -66,7 +80,15 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   {
     DEBUG("Error: Unable to change video mode!",0);
   }
-  SDL_ShowCursor(0); // Hide the SDL mouse cursor, we use our own
+
+  // Trick borrowed to Barrage (http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg737265.html) :
+  // Showing the cursor but setting it to fully transparent allows us to get absolute mouse coordinates,
+  // this means we can use tablet in fullscreen mode.
+  SDL_ShowCursor(1); // Hide the SDL mouse cursor, we use our own
+
+  SDL_FreeCursor(cur);
+  cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
+  SDL_SetCursor(cur);
 }
 
 #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -197,13 +219,26 @@ byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
 /// Reads a pixel in a multi-byte SDL surface.
 dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y)
 {
+  byte * ptr;
+  
   switch(bmp->format->BytesPerPixel)
   {
     case 4:
     default:
       return *((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*4)));
     case 3:
-      return *(((dword *)((byte *)bmp->pixels+(y*bmp->pitch+x*3)))) & 0xFFFFFF;
+      // Reading a 4-byte number starting at an address that isn't a multiple
+      // of 2 (or 4?) is not supported on Caanoo console at least (ARM CPU)
+      // So instead, we will read the 3 individual bytes, and re-construct the
+      // "dword" expected by SDL.
+      ptr = ((byte *)bmp->pixels)+(y*bmp->pitch+x*3);
+      #ifdef SDL_LIL_ENDIAN
+      // Read ABC, output _CBA : Most Significant Byte is zero.
+      return (*ptr) | (*(ptr+1)<<8) | (*(ptr+2)<<16);
+      #else
+      // Read ABC, output ABC_ : Least Significant Byte is zero.
+      return ((*ptr)<<24) | (*(ptr+1)<<16) | (*(ptr+2)<<8);
+      #endif
     case 2:
       return *((word *)((byte *)bmp->pixels+(y*bmp->pitch+x*2)));
   }
@@ -257,3 +292,18 @@ void Clear_border(byte color)
   }  
 }
 
+/// Activates or desactivates file drag-dropping in program window.
+void Allow_drag_and_drop(int flag)
+{
+  // Inform Windows that we accept drag-n-drop events or not
+  #ifdef __WIN32__
+	SDL_SysWMinfo wminfo;
+	HWND hwnd;
+	
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWMInfo(&wminfo);
+	hwnd = wminfo.window;
+	DragAcceptFiles(hwnd,flag?TRUE:FALSE);
+	SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
+  #endif
+}

@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2010 Alexander Filyanov
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -29,6 +30,8 @@
 
 #include "op_c.h"
 #include "errors.h"
+
+int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 
 /// Convert RGB to HSL.
 /// Both input and output are in the 0..255 range to use in the palette screen
@@ -1352,6 +1355,10 @@ static const byte precision_24b[]=
 // Give this one a 24b source, get back the 256c bitmap and its palette
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
+  #if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
+  return Convert_24b_bitmap_to_256_fast(dest, source, width, height, palette);  
+
+  #else
   T_Conversion_table * table; // table de conversion
   int                ip;    // index de précision pour la conversion
 
@@ -1373,7 +1380,36 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
   }
   else
     return 1;
+
+  #endif
 }
 
 
+//Really small, fast and ugly converter(just for handhelds)
+#include "global.h"
+#include "limits.h"
+#include "engine.h"
+#include "windows.h"
 
+extern void Set_palette_fake_24b(T_Palette palette);
+
+/// Really small, fast and dirty convertor(just for handhelds)
+int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
+{
+  int size;
+
+  Set_palette_fake_24b(palette);
+
+  size = width*height;
+
+  while(size--)
+  {
+    //Set palette color index to destination bitmap
+    *dest = ((source->R >> 5) << 5) |
+            ((source->G >> 5) << 2) |
+            ((source->B >> 6));
+    source++;
+    dest++;
+  }
+  return 0;
+}

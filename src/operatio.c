@@ -36,6 +36,7 @@
 #include "sdlscreen.h"
 #include "brush.h"
 #include "windows.h"
+#include "input.h"
 
 // PI is NOT part of math.h according to C standards...
 #if defined(__GP2X__) || defined(__VBCC__)
@@ -493,9 +494,7 @@ void Line_12_5(void)
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   if(SDL_GetModState() & KMOD_SHIFT)
-  {
     Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
-  }
 
   // On vient de bouger
   if ((cursor_x!=end_x) || (cursor_y!=end_y))
@@ -1745,17 +1744,17 @@ void Compute_3_point_curve(short x1, short y1, short x4, short y4,
   float cx,cy; // Centre de (x1,y1) et (x4,y4)
   float bx,by; // Intersect. des dtes ((x1,y1),(x2,y2)) et ((x3,y3),(x4,y4))
 
-  cx=(float)(x1+x4)/2.0;           // P1*--_               Légende:
-  cy=(float)(y1+y4)/2.0;           //   ·   \·· P2         -_\|/ : courbe
-                                   //   ·    \ ·*·         * : point important
-  bx=cx+((8.0/3.0)*(Paintbrush_X-cx));//   ·     |   ··       · : pointillÚ
+  cx=(float)(x1+x4)/2.0;              // P1*--_               Legend:
+  cy=(float)(y1+y4)/2.0;              //   ·   \·· P2         -_\|/ : curve
+                                      //   ·    \ ·*·         * : important point
+  bx=cx+((8.0/3.0)*(Paintbrush_X-cx));//   ·     |   ··       · : dotted line
   by=cy+((8.0/3.0)*(Paintbrush_Y-cy));//   ·     |P    ··  B
-                                   // C *·····*·········*  P=Pos. du pinceau
-  *x2=Round((bx+x1)/2.0);          //   ·     |     ··     C=milieu de [P1,P4]
-  *y2=Round((by+y1)/2.0);          //   ·     |   ··       B=point tel que
+                                      // C *·····*·········*  P=Pencil position
+  *x2=Round((bx+x1)/2.0);             //   ·     |     ··     C=middle of [P1,P4]
+  *y2=Round((by+y1)/2.0);             //   ·     |   ··       B=point computed as
                                    //   ·    / ·*·         C->B=(8/3) * C->P
-  *x3=Round((bx+x4)/2.0);          //   ·  _/·· P3         P2=milieu de [P1,B]
-  *y3=Round((by+y4)/2.0);          // P4*--                P3=milieu de [P4,B]
+  *x3=Round((bx+x4)/2.0);             //   ·  _/·· P3         P2=middle of [P1,B]
+  *y3=Round((by+y4)/2.0);             // P4*--                P3=middle of [P4,B]
 }
 
 
@@ -1779,8 +1778,11 @@ void Curve_3_points_0_5(void)
 
   Compute_3_point_curve(x1,y1,x4,y4,&x2,&y2,&x3,&y3);
 
+  if (!Config.Stylus_mode)
+  {
   Hide_line_preview(x1,y1,x4,y4);
   Draw_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
+  }
 
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
@@ -1799,17 +1801,19 @@ void Curve_3_points_0_5(void)
   Operation_push(y4);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
+  
+  if (Config.Stylus_mode)
+  {
+    Display_cursor();
+    while(!Mouse_K)
+      Get_input(20);
+    Hide_cursor();
+    
+    Hide_line_preview(x1,y1,x4,y4);
+}
 }
 
-
-void Curve_3_points_0_11(void)
-//
-//  Opération   : OPERATION_3_POINTS_CURVE
-//  Click Souris: 0
-//  Taille_Pile : 11
-//
-//  Souris effacée: Non
-//
+void Curve_drag(void)
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
   short old_x,old_y;
@@ -1851,16 +1855,7 @@ void Curve_3_points_0_11(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
-
-
-void Curve_3_points_12_11(void)
-//
-//  Opération   : OPERATION_3_POINTS_CURVE
-//  Click Souris: 1 ou 2
-//  Taille_Pile : 11
-//
-//  Souris effacée: Oui
-//
+void Curve_finalize(void)
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
   short old_x,old_y;
@@ -1891,6 +1886,37 @@ void Curve_3_points_12_11(void)
   Wait_end_of_click();
 }
 
+void Curve_3_points_0_11(void)
+//
+//  Opération   : OPERATION_3_POINTS_CURVE
+//  Click Souris: 0
+//  Taille_Pile : 11
+//
+//  Souris effacée: Non
+//
+{
+  if (!Config.Stylus_mode)
+    Curve_drag();
+  else
+    Curve_finalize();
+}
+
+
+void Curve_3_points_12_11(void)
+//
+//  Opération   : OPERATION_3_POINTS_CURVE
+//  Click Souris: 1 ou 2
+//  Taille_Pile : 11
+//
+//  Souris effacée: Oui
+//
+{
+  if (!Config.Stylus_mode)
+    Curve_finalize();
+  else
+    Curve_drag();
+}
+
 
 ///////////////////////////////////////////////////////////// OPERATION_AIRBRUSH
 
@@ -1907,8 +1933,11 @@ void Airbrush_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
 
+  if (SDL_GetTicks()>Airbrush_next_time)
+  {
+    Airbrush(LEFT_SIDE);
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
-  Airbrush(LEFT_SIDE);
+  }
 
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -1929,8 +1958,11 @@ void Airbrush_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
+  if (SDL_GetTicks()>Airbrush_next_time)
+  {
+    Airbrush(RIGHT_SIDE);
   Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
-  Airbrush(RIGHT_SIDE);
+  }
 
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -1946,6 +1978,7 @@ void Airbrush_12_2(void)
 //
 {
   short old_x,old_y;
+  Uint32 now;
 
   Operation_pop(&old_y);
   Operation_pop(&old_x);
@@ -1957,9 +1990,13 @@ void Airbrush_12_2(void)
     Display_cursor();
   }
 
-  if (SDL_GetTicks()>Airbrush_next_time)
+  now=SDL_GetTicks();
+  if (now>Airbrush_next_time)
   {
-    Airbrush_next_time+=Airbrush_delay*10;
+    //Airbrush_next_time+=Airbrush_delay*10;
+    // Time is now reset, because the += was death spiral
+    // if drawing took more time than the frequency.
+    Airbrush_next_time=now+Airbrush_delay*10;    
     Airbrush(Mouse_K_unique);
   }
 

@@ -36,8 +36,11 @@
 #include "graph.h"
 #include "input.h"
 #include "misc.h"
+#include "op_c.h"
 #include "readline.h"
 #include "sdlscreen.h"
+#include "palette.h"
+
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
@@ -491,7 +494,7 @@ void Display_layerbar(void)
   x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
   for (current_button=0; current_button<button_number; current_button++)
   {
-    word x_pos;
+    word x_pos=0;
     word y_pos;
     word sprite_index;
     
@@ -1504,6 +1507,7 @@ void Compute_paintbrush_coordinates(void)
   {
     // Operations that don't implement it
     case OPERATION_LINE:
+	case OPERATION_ROTATE_BRUSH:
       Snap_axis=0;
       break;
     // Operations that implement it
@@ -1808,7 +1812,36 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
   Compute_paintbrush_coordinates();
 }
 
+void Copy_view_to_spare(void)
+{
 
+  // Don't do anything if the pictures have different dimensions
+  if (Main_image_width!=Spare_image_width || Main_image_height!=Spare_image_height)
+    return;
+
+  // Copie des décalages de la fenêtre principale (non zoomée) de l'image
+  Spare_offset_X=Main_offset_X;
+  Spare_offset_Y=Main_offset_Y;
+
+  // Copie du booléen "Mode loupe" de l'image
+  Spare_magnifier_mode=Main_magnifier_mode;
+
+  // Copie du facteur de zoom du brouillon
+  Spare_magnifier_factor=Main_magnifier_factor;
+
+  // Copie des dimensions de la fenêtre de zoom
+  Spare_magnifier_width=Main_magnifier_width;
+  Spare_magnifier_height=Main_magnifier_height;
+
+  // Copie des décalages de la fenêtre de zoom
+  Spare_magnifier_offset_X=Main_magnifier_offset_X;
+  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
+
+  // Copie des données du split du zoom
+  Spare_separator_position=Main_separator_position;
+  Spare_X_zoom=Main_X_zoom;
+  Spare_separator_proportion=Main_separator_proportion;
+}
 
   // -- Afficher la barre de séparation entre les parties zoomées ou non en
   //    mode Loupe --
@@ -2580,22 +2613,14 @@ void Display_all_screen(void)
 
 byte Best_color(byte r,byte g,byte b)
 {
-  // This "static" allows the loop to start on the last successful match.
-  // If the same color is requested again (and it happens often) and the match
-  // was perfect, it allows an early exit that avoids
-  // 255 computations of color distance.
-  // This system still works with no bad effects when the palette changes.
-  static byte col=0;
-  
-  byte  end_color;
+  int col;
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
   int   rmean;
   byte  best_color=0;
 
-  end_color=col;
-  do
+  for (col=0; col<256; col++)
   {
     if (!Exclude_color[col])
     {
@@ -2615,31 +2640,21 @@ byte Best_color(byte r,byte g,byte b)
         best_color=col;
       }
     }
-    // Loop  
-    col++;
-  } while(col!=end_color);
+  }
 
   return best_color;
 }
 
 byte Best_color_nonexcluded(byte red,byte green,byte blue)
 {
-  // This "static" allows the loop to start on the last successful match.
-  // If the same color is requested again (and it happens often) and the match
-  // was perfect, it allows an early exit that avoids
-  // 255 computations of color distance.
-  // This system still works with no bad effects when the palette changes.
-  static byte col=0;
-  
-  byte  end_color;
+  int   col;  
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
   int   rmean;
   byte  best_color=0;
 
-  end_color=col;
-  do
+  for (col=0; col<256; col++)
   {
     delta_r=(int)Main_palette[col].R-red;
     delta_g=(int)Main_palette[col].G-green;
@@ -2657,73 +2672,54 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
       best_dist=dist;
       best_color=col;
     }
-  
-    // Loop  
-    col++;
-  } while(col!=end_color);
-  
+  }
   return best_color;
 }
 
-void Compute_4_best_colors_for_1_menu_color
-     (byte red, byte green, byte blue, T_Components * palette, byte * table)
+
+
+byte Best_color_perceptual(byte r,byte g,byte b)
 {
-  short col;
-  int   delta_r,delta_g,delta_b;
-  int   dist;
-  int   best_dist[4]={0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF};
 
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
 
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
   for (col=0; col<256; col++)
   {
-    delta_r=(int)palette[col].R-red;
-    delta_g=(int)palette[col].G-green;
-    delta_b=(int)palette[col].B-blue;
+    if (Exclude_color[col])
+      continue;
 
-    dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11);
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
 
-    if (dist<best_dist[0])
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
     {
-      best_dist[3]=best_dist[2];
-      best_dist[2]=best_dist[1];
-      best_dist[1]=best_dist[0];
-      best_dist[0]=dist;
-      table[3]=table[2];
-      table[2]=table[1];
-      table[1]=table[0];
-      table[0]=col;
+      best_diff=diff;
+      best_color=col;
     }
-    else
-    {
-      if (dist<best_dist[1])
-      {
-        best_dist[3]=best_dist[2];
-        best_dist[2]=best_dist[1];
-        best_dist[1]=dist;
-        table[3]=table[2];
-        table[2]=table[1];
-        table[1]=col;
       }
-      else
-      {
-        if (dist<best_dist[2])
-        {
-          best_dist[3]=best_dist[2];
-          best_dist[2]=dist;
-          table[3]=table[2];
-          table[2]=col;
-        }
-        else
-        if (dist<best_dist[3])
-        {
-          best_dist[3]=dist;
-          table[3]=col;
-        }
-      }
-    }
-  }
-}
 
+  return best_color;
+        }
 
 
 byte Old_black;
@@ -2808,11 +2804,32 @@ void Remap_screen_after_menu_colors_change(void)
 }
 
 
-
+int Same_color(T_Components * palette, byte c1, byte c2)
+{
+  if (palette[c1].R==palette[c2].R &&
+    palette[c1].G==palette[c2].G &&
+    palette[c1].B==palette[c2].B)
+    return 1;
+  return 0;
+}
 
 void Compute_optimal_menu_colors(T_Components * palette)
 {
-  byte table[4];
+  int i;
+  byte l[256];
+  byte s[256];
+  byte h;
+  int max_l = -1, min_l = 256;
+  int low_l, hi_l;
+  int delta_low = 999999;
+  int delta_high = 999999;
+  const int tolerence=16;
+  const T_Components cpc_colors[4] = {
+    {  0,  0,  0},
+    {  0,  0,128}, // Dark blue
+    {128,128,128}, // Grey
+    {255,255,255}
+  };
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2820,62 +2837,208 @@ void Compute_optimal_menu_colors(T_Components * palette)
   Old_white = MC_White;
   Old_trans = MC_Trans;
 
-  // Recherche du noir
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[0]].R, Gfx->Default_palette[Gfx->Color[0]].G, Gfx->Default_palette[Gfx->Color[0]].B,palette,table);
-  MC_Black=table[0];
-
-  // Recherche du blanc
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[3]].R, Gfx->Default_palette[Gfx->Color[3]].G, Gfx->Default_palette[Gfx->Color[3]].B,palette,table);
-  if (MC_Black!=table[0])
-    MC_White=table[0];
-  else
-    MC_White=table[1];
-
-  // Recherche du gris clair
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[2]].R, Gfx->Default_palette[Gfx->Color[2]].G, Gfx->Default_palette[Gfx->Color[2]].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
-    MC_Light=table[0];
-  else
+  // First method:
+  // If all close matches for the ideal colors exist, pick them.
+  for (i=255; i>=0; i--)
   {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) )
-      MC_Light=table[1];
-    else
-      MC_Light=table[2];
-  }
 
-  // Recherche du gris foncé
-  Compute_4_best_colors_for_1_menu_color
-    (Gfx->Default_palette[Gfx->Color[1]].R, Gfx->Default_palette[Gfx->Color[1]].G, Gfx->Default_palette[Gfx->Color[1]].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
-    MC_Dark=table[0];
-  else
-  {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) && (MC_Light!=table[1]) )
-      MC_Dark=table[1];
-    else
+    if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
     {
-      if ( (MC_Black!=table[2]) && (MC_White!=table[2]) && (MC_Light!=table[2]) )
-        MC_Dark=table[2];
-      else
-        MC_Dark=table[3];
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
+                  Remap_menu_sprites();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // Second method: For CPC 27-color modes only
+  // Try to find colors that just work
+  if (Get_palette_RGB_scale()==3)
+  for (i=255; i>=0; i--)
+  {
+
+    if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[3].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==cpc_colors[3].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==cpc_colors[3].B/tolerence)
+  {
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[2].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==cpc_colors[2].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==cpc_colors[2].B/tolerence)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[1].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==cpc_colors[1].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==cpc_colors[1].B/tolerence)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[0].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==cpc_colors[0].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==cpc_colors[0].B/tolerence)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
+                  Remap_menu_sprites();
+                  return;
+  }
+              }
+            }
+          }
+        }
+      }
     }
   }
 
-  // C'est peu probable mais il est possible que MC_Light soit plus foncée que
-  // MC_Dark. Dans ce cas, on les inverse.
-  if ( ((palette[MC_Light].R*30)+(palette[MC_Light].G*59)+(palette[MC_Light].B*11)) <
-       ((palette[MC_Dark].R*30)+(palette[MC_Dark].G*59)+(palette[MC_Dark].B*11)) )
+  // Third method:
+
+  // Compute luminance for whole palette
+  // Take the darkest as black, the brightest white
+  for(i = 0; i < 256; i++)
   {
-    SWAP_BYTES(MC_Light, MC_Dark);
+    RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
+    // Another formula for lightness, in 0-255 range
+    //l[i]=Perceptual_lightness(&palette[i])/4062/255;
+    if (l[i] > max_l)
+    {
+      max_l = l[i];
+      MC_White = i;
+    }
   }
+  for(i = 0; i < 256; i++)
+  {
+    if (l[i] < min_l && i!=MC_White)
+    {
+      min_l = l[i];
+      MC_Black = i;
+    }
+  }
+  // Alter the S values according to the L range - this is for the future
+  // comparisons, so that highly variable saturation doesn't weigh
+  // too heavily when the the lightness is in a narrow range.
+  for(i = 0; i < 256; i++)
+  {
+    s[i]=s[i]*(max_l-min_l)/255;
+  }
+  for(i = 0; i < 256; i++)
+  {
+    // Adjust (reduce) perceived saturation at both ends of L spectrum
+    if (l[i]>192)
+      s[i]=s[i]*(255-l[i])/64;
+    else if (l[i]<64)
+      s[i]=s[i]*l[i]/64;
+  }
+
+
+  // Find color nearest to min+2(max-min)/3
+  // but at the same time we try to minimize the saturation so that the menu
+  // still looks grey
+  hi_l = min_l + 2*(max_l - min_l)/3;
+
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs(l[i] - hi_l) + s[i]/2 < delta_high && i!=MC_White && i!=MC_Black)
+    {
+      delta_high = abs(l[i] - hi_l) + s[i]/2;
+      MC_Light = i;
+  }
+  }
+
+  // Target "Dark color" is 2/3 between Light and Black
+  low_l = ((int)l[MC_Light]*2+l[MC_Black])/3;
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs((int)l[i] - low_l) + s[i]/6 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
+    {
+      delta_low = abs((int)l[i] - low_l)+ s[i]/6;
+      MC_Dark = i;
+    }
+  }
+  
+  
+  //if (l[MC_Light]<l[MC_Dark])
+  //{
+  //  // Not sure if that can happen, but just in case:
+  //  SWAP_BYTES(MC_Light, MC_Dark)
+  //}
+
+  // Si deux des couleurs choisies ont le même index, c'est destructif car 
+  // on fait ensuite un remap de l'image. Donc on évite ce problème (un
+  // peu brutalement)
+  // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
+  // le blanc et le noir
+  //while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark || Same_color(palette, MC_Dark, MC_White)) MC_Dark--;
+  //while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light || Same_color(palette, MC_Light, MC_Black)) MC_Light--;
+  //while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
 
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 
+  if (Same_color(palette, MC_Black, MC_Dark))
+    MC_OnBlack=MC_Light;
+  else
+    MC_OnBlack=MC_Dark;
+  
+  if (Same_color(palette, MC_White, MC_Light))
+  {
+    MC_Window=MC_Dark;
+    MC_Darker=MC_Black;
+  }
+  else
+  {
+    MC_Window=MC_Light;
+    MC_Darker=MC_Dark;
+  }
+  MC_Lighter=MC_White;
+  
   Remap_menu_sprites();
 }
 

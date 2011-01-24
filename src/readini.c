@@ -433,6 +433,13 @@ int Load_INI(T_Config * conf)
 
   Line_number_in_INI_file=0;
 
+#if defined(__WIZ__) || defined(__CAANOO__)
+  conf->Stylus_mode = 1;
+#else
+  conf->Stylus_mode = 0;
+#endif
+
+
   // On alloue les zones de mémoire:
   buffer=(char *)malloc(1024);
   filename=(char *)malloc(256);
@@ -902,7 +909,31 @@ int Load_INI(T_Config * conf)
     conf->Right_click_colorpick=(values[0]!=0);
   }
   
+  conf->Sync_views=1;
+  // Optional, synced view of main and spare (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Sync_views",1,values))
+  {
+    conf->Sync_views=(values[0]!=0);
+  }
   
+  conf->Swap_buttons=0;
+  // Optional, key for swap buttons (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Swap_buttons",1,values))
+  {
+    switch(values[0])
+    {
+      case 1:
+        conf->Swap_buttons=MOD_CTRL;
+        break;
+      case 2:
+        conf->Swap_buttons=MOD_ALT;
+        break;
+    }
+  }
+
+  
+  
+  // Insert new values here
 
   fclose(file);
 

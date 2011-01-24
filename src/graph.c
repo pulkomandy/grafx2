@@ -53,7 +53,7 @@
     #define __attribute__(x)
 #endif
 
-#if defined(__VBCC__)||defined(__GP2X__)
+#if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
 #endif
 
@@ -522,6 +522,8 @@ try_again:
       Menu_factor_Y=1;
       break;
     default: // Stay below some reasonable size
+      if (factor>Max(Pixel_width,Pixel_height))
+        factor/=Max(Pixel_width,Pixel_height);
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
@@ -617,7 +619,8 @@ void Resize_image(word chosen_width,word chosen_height)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,chosen_width,chosen_height))
+  Upload_infos_page_main(Main_backups->Pages);
+  if (Backup_with_new_dimensions(chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Main_image_width de large.
@@ -672,13 +675,16 @@ void Remap_spare(void)
   //       ne seront pas utilisées par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
     if (used[color])
-      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+      used[color]=Best_color_perceptual(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    
+  // Change transparent color index
+  Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];
 }
 
 
@@ -1082,6 +1088,7 @@ void Fill_general(byte fill_color)
     if (! (Permanent_draw_count&7))
     {
       Uint32 now = SDL_GetTicks();
+      SDL_PumpEvents();
       if (now>= Permanent_draw_next_refresh)
       {
         Permanent_draw_next_refresh = now+100;

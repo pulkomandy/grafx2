@@ -33,7 +33,7 @@
 /// The latest input variables are held in ::Key, ::Key_ANSI, ::Mouse_X, ::Mouse_Y, ::Mouse_K.
 /// Note that ::Key and ::Key_ANSI are not persistent, they will be reset to 0
 /// on subsequent calls to ::Get_input().
-int  Get_input(void);
+int  Get_input(int sleep_time);
 
 /// Returns true if the keycode has been set as a keyboard shortcut for the function.
 int Is_shortcut(word key, word function);
@@ -59,3 +59,8 @@ extern int Snap_axis;
 extern int Snap_axis_origin_X;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)
 extern int Snap_axis_origin_Y;
+
+///
+/// This malloced string is set when a drag-and-drop event
+/// brings a file to Grafx2's window.
+extern char * Drop_file_name;

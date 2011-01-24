@@ -38,7 +38,7 @@
 #include "sdlscreen.h"
 #include "windows.h"
 
-#if defined(__VBCC__)||defined(__GP2X__)
+#if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
 #endif
 
@@ -958,6 +958,10 @@ void Rotate_brush_1_5(void)
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
+  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  if(SDL_GetModState() & KMOD_SHIFT)
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
+
   if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=2) )
   {
     if ( (Brush_rotation_center_X==Paintbrush_X)
@@ -1020,6 +1024,10 @@ void Rotate_brush_0_5(void)
   Operation_pop(&prev_state);
   Operation_pop(&old_y);
   Operation_pop(&old_x);
+
+  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  if(SDL_GetModState() & KMOD_SHIFT)
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
 
   if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=3))
   {

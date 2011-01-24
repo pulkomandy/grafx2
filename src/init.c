@@ -1699,7 +1699,7 @@ void Set_all_video_modes(void)
   // The first mode will have index number 0.
   // It will be the default mode if an unsupported one
   // is requested in gfx2.ini
-  #if defined(__GP2X__)
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   // Native GP2X resolution
   Set_video_mode( 320,240,0, 1);
   #else
@@ -1709,7 +1709,7 @@ void Set_all_video_modes(void)
 
   Set_video_mode( 320,200,0, 1);
   Set_video_mode( 320,224,0, 1);
-  #if !defined(__GP2X__)
+  #if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
   // For the GP2X, this one is already declared above.
   Set_video_mode( 320,240,0, 1);
   #endif
@@ -1778,7 +1778,7 @@ void Set_all_video_modes(void)
     for (index=0; Modes[index]; index++)
     {
       int index2;
-#if defined(__GP2X__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
       // On the GP2X the first mode is not windowed, so include it in the search.
       index2=0;
 #else
@@ -1825,7 +1825,7 @@ int Load_CFG(int reload_all)
   if ((Handle=fopen(filename,"rb"))==NULL)
     return ERROR_CFG_MISSING;
 
-  if ( (file_size<(long)sizeof(cfg_header))
+  if ( (file_size<7)
     || (!Read_bytes(Handle, &cfg_header.Signature, 3))
     || memcmp(cfg_header.Signature,"CFG",3)
     || (!Read_byte(Handle, &cfg_header.Version1))
@@ -1866,7 +1866,7 @@ int Load_CFG(int reload_all)
       case CHUNK_KEYS: // Touches
         if (reload_all)
         {
-          for (index=0; index<(long)(Chunk.Size/sizeof(cfg_shortcut_info)); index++)
+          for (index=0; index<(long)(Chunk.Size/6); index++)
           {
             if (!Read_word_le(Handle, &cfg_shortcut_info.Number) ||
                 !Read_word_le(Handle, &cfg_shortcut_info.Key) ||
@@ -1919,14 +1919,14 @@ int Load_CFG(int reload_all)
         }
         break;
       case CHUNK_VIDEO_MODES: // Modes vidéo
-        for (index=0; index<(long)(Chunk.Size/sizeof(cfg_video_mode)); index++)
+        for (index=0; index<(long)(Chunk.Size/5); index++)
         {
           if (!Read_byte(Handle, &cfg_video_mode.State) ||
               !Read_word_le(Handle, &cfg_video_mode.Width) ||
               !Read_word_le(Handle, &cfg_video_mode.Height) )
             goto Erreur_lecture_config;
 
-#if defined(__GP2X__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
           index2=0;
 #else
           index2=1;
@@ -2000,7 +2000,10 @@ int Load_CFG(int reload_all)
         }
         break;
       case CHUNK_GRADIENTS: // Infos sur les dégradés
-        if (reload_all)
+        // The gradients chunk is deprecated since the data
+        // is now loaded/saved in GIF and LBM formats.
+        // The chunk will be completely ignored.
+        /*if (reload_all)
         {
           if (! Read_byte(Handle, &Current_gradient))
             goto Erreur_lecture_config;
@@ -2015,7 +2018,7 @@ int Load_CFG(int reload_all)
           }
           Load_gradient_data(Current_gradient);
         }
-        else
+        else*/
         {
           if (fseek(Handle,Chunk.Size,SEEK_CUR)==-1)
             goto Erreur_lecture_config;
@@ -2252,7 +2255,7 @@ int Save_CFG(void)
 
   // D'abord compter les modes pour lesquels l'utilisateur a mis une préférence
   modes_to_save=0;
-#if defined(__GP2X__)
+#if defined(__GP2X__) || defined (__WIZ__) || defined (__CAANOO__)
   index = 0;
 #else
   index = 1;
@@ -2268,7 +2271,7 @@ int Save_CFG(void)
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
-#if defined(__GP2X__)
+#if defined(__GP2X__) || defined (__WIZ__) || defined (__CAANOO__)
   index = 0;
 #else
   index = 1;
@@ -2325,6 +2328,9 @@ int Save_CFG(void)
     goto Erreur_sauvegarde_config;
 
   // Sauvegarde des informations des dégradés
+  // The gradients chunk is deprecated since the data
+  // is now loaded/saved in GIF and LBM formats.
+  /*
   Chunk.Number=CHUNK_GRADIENTS;
   Chunk.Size=241;
   if (!Write_byte(Handle, Chunk.Number) ||
@@ -2341,6 +2347,7 @@ int Save_CFG(void)
         !Write_dword_le(Handle, Gradient_array[index].Technique) )
         goto Erreur_sauvegarde_config;
   }
+  */
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
@@ -2548,6 +2555,7 @@ void Set_config_defaults(void)
     Stencil[index]=1;
 
   // Dégradés
+  /* TODO
   Current_gradient=0;
   for(index=0;index<16;index++)
   {
@@ -2558,7 +2566,16 @@ void Set_config_defaults(void)
     Gradient_array[index].Technique=0;
   }
   Load_gradient_data(Current_gradient);
+  */
+  // Can't Load_gradient_data(), it depends on Backup system
+  // and this function can be called before Backup system is ready.
+  Gradient_function=Gradient_basic;
+  Gradient_lower_bound=0;
+  Gradient_upper_bound=0;
+  Gradient_random_factor=1;
+  Gradient_bounds_range=1;
 
+  
   // Smooth
   Smooth_matrix[0][0]=1;
   Smooth_matrix[0][1]=2;
@@ -2645,7 +2662,7 @@ void Init_brush_container(void)
     Brush_container[i].Paintbrush_shape=PAINTBRUSH_SHAPE_MAX;
     Brush_container[i].Width=0;
     Brush_container[i].Height=0;
-    memset(Brush_container[i].Palette,sizeof(T_Palette),0);
+    memset(Brush_container[i].Palette,0,sizeof(T_Palette));
     Brush_container[i].Transp_color=0;  
     for (y=0; y<BRUSH_CONTAINER_PREVIEW_WIDTH; y++)
       for (x=0; x<BRUSH_CONTAINER_PREVIEW_HEIGHT; x++)
@@ -2683,6 +2700,11 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Light = gfx->Color[2];
   MC_White = gfx->Color[3];
   MC_Trans = gfx->Color_trans;
+  MC_OnBlack=MC_Dark;
+  MC_Window=MC_Light;
+  MC_Lighter=MC_White;
+  MC_Darker=MC_Dark;
+
 
   // Set menubars to point to the new data
   for (i=0; i<3; i++)

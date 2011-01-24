@@ -166,7 +166,8 @@ void Button_Message_initial(void)
 
   Display_cursor();
 
-  while(!Mouse_K && !Key) if(!Get_input()) SDL_Delay(20);
+  while(!Mouse_K && !Key)
+    Get_input(20);
   if (Mouse_K)
     Wait_end_of_click();
 
@@ -336,8 +337,7 @@ void Button_Select_forecolor(void)
     // Wait loop after initial click
     while(Mouse_K)
     {
-      if(!Get_input())
-        SDL_Delay(20);
+      Get_input(20);
       
       if (Button_under_mouse()==BUTTON_CHOOSE_COL)
       {
@@ -373,8 +373,7 @@ void Button_Select_backcolor(void)
     // Wait loop after initial click
     do
     {
-      if(!Get_input())
-        SDL_Delay(20);
+      Get_input(20);
       
       if (Button_under_mouse()==BUTTON_CHOOSE_COL)
         break; // This will repeat this button's action
@@ -763,6 +762,13 @@ const T_Lookup Lookup_MouseSpeed[] = {
   {NULL,-1},
 };
 
+const T_Lookup Lookup_SwapButtons[] = {
+  {"None",0},
+  {"Control",MOD_CTRL},
+  {"Alt",MOD_ALT},
+  {NULL,-1},
+};
+
 typedef struct {
   const char* Label;
   byte Type; // 0: label, 1+: setting (size in bytes) 
@@ -921,7 +927,6 @@ void Button_Settings(void)
   T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
   
   {"           --- GUI  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
   {"Menu ratio adapt:",1,&(selected_config.Ratio),0,1,0,Lookup_MenuRatio},
   {"Draw limits:",1,&(selected_config.Display_image_limits),0,1,0,Lookup_YesNo},
@@ -929,11 +934,11 @@ void Button_Settings(void)
   {"Separate colors:",1,&(selected_config.Separate_colors),0,1,0,Lookup_YesNo},
   {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
   {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
+  {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Scrollbar speed",0,NULL,0,0,0,NULL},
   {"  on left click:",1,&(selected_config.Delay_left_click_on_slider),1,255,4,NULL},
   {"  on right click:",1,&(selected_config.Delay_right_click_on_slider),1,255,4,NULL},
@@ -943,9 +948,9 @@ void Button_Settings(void)
   {"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
   {"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
   {"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
+  {"Key to swap buttons:",2,&(selected_config.Swap_buttons),0,0,0,Lookup_SwapButtons},
   
   {"          --- Editing  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Adjust brush pick:",1,&(selected_config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
   {"Undo pages:",1,&(selected_config.Max_undo_pages),1,99,5,NULL},
   {"Vertices per polygon:",4,&(selected_config.Nb_max_vertices_per_polygon),2,16384,5,NULL},
@@ -955,9 +960,9 @@ void Button_Settings(void)
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Show in fileselector",0,NULL,0,0,0,NULL},
   {"  Hidden files:",4,&(selected_config.Show_hidden_files),0,1,0,Lookup_YesNo},
   {"  Hidden dirs:",4,&(selected_config.Show_hidden_directories),0,1,0,Lookup_YesNo},
@@ -967,11 +972,12 @@ void Button_Settings(void)
   {"Auto set resolution:",1,&(selected_config.Auto_set_res), 0,1,0,Lookup_YesNo},
   {"  According to:",1,&(selected_config.Set_resolution_according_to), 1,2,0,Lookup_AutoRes},
   {"Backup:",1,&(selected_config.Backup), 0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
   
   {"      --- Format options  ---",0,NULL,0,0,0,NULL},
-  {"",0,NULL,0,0,0,NULL},
   {"Screen size in GIF:",1,&(selected_config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
   {"Clear palette:",1,&(selected_config.Clear_palette),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
@@ -1201,31 +1207,18 @@ void Add_font_or_skin(const char *name)
     && (!strcasecmp(fname + namelength - 4,".png")
     || !strcasecmp(fname + namelength - 4,".gif")))
   {
-    Add_element_to_list(&Skin_files_list, name, 0);
+    Add_element_to_list(&Skin_files_list, fname, Format_filename(fname, 19, 0), 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;
-
-    // Remove directory from full name
-    strcpy(Skin_files_list.First->Full_name, fname);
-    // Reformat the short name differently
-    strcpy(Skin_files_list.First->Short_name,
-      Format_filename(Skin_files_list.First->Full_name, 0)
-    );
   }
   else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
     && (!strcasecmp(fname + namelength - 4, ".png")))
   {
-    Add_element_to_list(&Font_files_list, name, 0);
+    Add_element_to_list(&Font_files_list, fname, Format_font_filename(fname), 0, ICON_NONE);
     
     if (fname[0]=='\0')
       return;
-
-    // Remove directory from full name
-    strcpy(Font_files_list.First->Full_name, fname);
-    // Reformat the short name differently
-    strcpy(Font_files_list.First->Short_name,
-      Format_font_filename(Font_files_list.First->Full_name));
   }
    
 }
@@ -1465,7 +1458,7 @@ void Button_Skins(void)
       Menu_font = new_font;
       fname = Get_item_by_index(&Font_files_list,selected_font)->Full_name;
       free(Config.Font_file);
-      Config.Font_file = strdup(fname);
+      Config.Font_file = (char *)strdup(fname);
     }
     // Confirm the change of cursor shape
     Config.Cursor = selected_cursor;
@@ -1514,6 +1507,9 @@ void Button_Page(void)
   
   Hide_cursor();
 
+  if (Config.Sync_views)
+    Copy_view_to_spare();
+
   // On dégrossit le travail avec les infos des listes de pages
   Exchange_main_and_spare();
 
@@ -1523,8 +1519,6 @@ void Button_Page(void)
   SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
-  SWAP_SHORTS(Old_main_offset_X,Old_spare_offset_X)
-  SWAP_SHORTS(Old_main_offset_Y,Old_spare_offset_Y)
   SWAP_SHORTS(Main_separator_position,Spare_separator_position)
   SWAP_SHORTS(Main_X_zoom,Spare_X_zoom)
   SWAP_FLOATS(Main_separator_proportion,Spare_separator_proportion)
@@ -1630,29 +1624,8 @@ void Copy_image_only(void)
     Spare_image_height=Main_image_height;
     */
 
-    // Copie des décalages de la fenêtre principale (non zoomée) de l'image
-    Spare_offset_X=Main_offset_X;
-    Spare_offset_Y=Main_offset_Y;
+    Copy_view_to_spare();
 
-    // Copie du booléen "Mode loupe" de l'image
-    Spare_magnifier_mode=Main_magnifier_mode;
-
-    // Copie du facteur de zoom du brouillon
-    Spare_magnifier_factor=Main_magnifier_factor;
-
-    // Copie des dimensions de la fenêtre de zoom
-    Spare_magnifier_width=Main_magnifier_width;
-    Spare_magnifier_height=Main_magnifier_height;
-
-    // Copie des décalages de la fenêtre de zoom
-    Spare_magnifier_offset_X=Main_magnifier_offset_X;
-    Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
-
-    // Copie des données du split du zoom
-    Spare_separator_position=Main_separator_position;
-    Spare_X_zoom=Main_X_zoom;
-    Spare_separator_proportion=Main_separator_proportion;
-    
     // Update the visible buffer of the spare.
     // It's a bit complex because at the moment, to save memory,
     // the spare doesn't have a full visible_buffer + depth_buffer,
@@ -1722,36 +1695,54 @@ void Button_Copy_page(void)
   Close_window();
   Display_cursor();
 
-  if (clicked_button!=6)
+  switch (clicked_button)
   {
-    if (clicked_button==4)
-    {
-      // Will backup if needed
-      Copy_some_colors();
-    }
-    else
-    {
-      if (clicked_button<=2)
-      {
+    case 1: // Pixels+palette
         Backup_the_spare(-1);
         Copy_image_only();
-      }
-      else
-        Backup_the_spare(0);
-
-      if (clicked_button==5)
-        Remap_spare();
-
-      if (clicked_button!=2) // copie de la palette
-        memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
-      
-      // Here is the 'end_of_modifications' for spare.
+      // copie de la palette
+      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
-
       Spare_image_is_modified=1;
+      break;
+      
+    case 2: // Pixels only
+      Backup_the_spare(-1);
+      Copy_image_only();
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;
+      
+    case 3: // Palette only
+        Backup_the_spare(0);
+      // Copy palette
+      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;
+
+    case 4: // Some colors
+      // Will backup if needed
+      Copy_some_colors();
+      break;
+      
+    case 5: // Palette and remap
+      Backup_the_spare(-1);
+        Remap_spare();
+      // Copy palette
+        memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      // Equivalent of 'end_of_modifications' for spare.
+      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Redraw_spare_image();
+      Spare_image_is_modified=1;
+      break;  
     }
-  }
 
   Hide_cursor();
   Unselect_button(BUTTON_PAGE);
@@ -2423,17 +2414,19 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 
 void Load_gradient_data(int index)
 {
-  Gradient_lower_bound =Gradient_array[index].Start;
-  Gradient_upper_bound =Gradient_array[index].End;
-  Gradient_is_inverted          =Gradient_array[index].Inverse;
-  Gradient_random_factor=Gradient_array[index].Mix+1;
+  if (Main_backups->Pages->Gradients->Range[index].Start>Main_backups->Pages->Gradients->Range[index].End)
+    Error(0);
+  Gradient_lower_bound =Main_backups->Pages->Gradients->Range[index].Start;
+  Gradient_upper_bound =Main_backups->Pages->Gradients->Range[index].End;
+  Gradient_is_inverted          =Main_backups->Pages->Gradients->Range[index].Inverse;
+  Gradient_random_factor=Main_backups->Pages->Gradients->Range[index].Mix+1;
 
   Gradient_bounds_range=(Gradient_lower_bound<Gradient_upper_bound)?
                             Gradient_upper_bound-Gradient_lower_bound:
                             Gradient_lower_bound-Gradient_upper_bound;
   Gradient_bounds_range++;
 
-  switch(Gradient_array[index].Technique)
+  switch(Main_backups->Pages->Gradients->Range[index].Technique)
   {
     case 0 : // Degradé de base
       Gradient_function=Gradient_basic;
@@ -2472,10 +2465,12 @@ void Draw_gradient_preview(short start_x,short start_y,short width,short height,
 void Button_Gradients(void)
 {
   short clicked_button;
-  char  str[3];
-  T_Gradient_array backup_gradients[16];
+  char  str[4];
+  T_Gradient_array backup_gradients;
   int   old_current_gradient;
   T_Scroller_button * mix_scroller;
+  T_Scroller_button * speed_scroller;
+  T_Scroller_button * gradient_scroller;
   short old_mouse_x;
   short old_mouse_y;
   byte  old_mouse_k;
@@ -2484,44 +2479,57 @@ void Button_Gradients(void)
   byte  last_color;
   byte  color;
   byte  click;
+  int  changed_gradient_index;
+  byte cycling_mode=Cycling_mode;
 
+  // Enable cycling while this window is open
+  Cycling_mode=1;
 
   Gradient_pixel=Pixel;
   old_current_gradient=Current_gradient;
-  memcpy(backup_gradients,Gradient_array,sizeof(T_Gradient_array)*16);
+  changed_gradient_index=0;
+  memcpy(&backup_gradients,Main_backups->Pages->Gradients,sizeof(T_Gradient_array));
 
-  Open_window(237,133,"Gradation menu");
+  Open_window(235,146,"Gradation menu");
 
-  Window_set_palette_button(48,21);                            // 1
-    // Définition du scrolleur <=> indice du dégradé dans le tableau
-  Window_set_scroller_button(218,22,75,16,1,Current_gradient);  // 2
-    // Définition du scrolleur de mélange du dégradé
-  mix_scroller = Window_set_scroller_button(31,22,84,256,1,
-    Gradient_array[Current_gradient].Mix);                      // 3
-    // Définition du bouton de sens
-  Window_set_normal_button(8,22,15,14,
-    (Gradient_array[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
-    // Définition du bouton de technique
-  Window_set_normal_button(8,92,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
-  Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+  Window_set_palette_button(48,19);                            // 1
+  // Slider for gradient selection
+  gradient_scroller=Window_set_scroller_button(218,20,75,16,1,Current_gradient);  // 2
+  // Slider for mix
+  mix_scroller = Window_set_scroller_button(31,20,84,256,1,
+    Main_backups->Pages->Gradients->Range[Current_gradient].Mix);                      // 3
+  // Direction
+  Window_set_normal_button(8,20,15,14,
+    (Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
+  // Technique
+  Window_set_normal_button(8,90,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
+  Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
 
-  Window_set_normal_button(178,112,51,14,"OK",0,1,SDLK_RETURN);     // 6
-  Window_set_normal_button(123,112,51,14,"Cancel",0,1,KEY_ESC);  // 7
+  Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
+  Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
+  // Scrolling speed
+  speed_scroller = Window_set_horizontal_scroller_button(99,111,130,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
+  Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+  Print_in_window(73,113,str,MC_Black,MC_Light);
 
-  Print_in_window(5,60,"MIX",MC_Dark,MC_Light);
+  Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
 
+  // Cycling mode on/off
+  Window_set_normal_button(8,109,62,14,"",0,1,KEY_NONE); // 9
+  Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+  
   // On tagge les couleurs qui vont avec
-  Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+  Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
 
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
 
     // On affiche le cadre autour de la préview
-  Window_display_frame_in(7,111,110,16);
+  Window_display_frame_in(7,127,110,16);
     // On affiche la preview
-  Draw_gradient_preview(8,112,108,14,Current_gradient);
+  Draw_gradient_preview(8,128,108,14,Current_gradient);
 
-  first_color=last_color=(Gradient_array[Current_gradient].Inverse)?Gradient_array[Current_gradient].End:Gradient_array[Current_gradient].Start;
+  first_color=last_color=(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?Main_backups->Pages->Gradients->Range[Current_gradient].End:Main_backups->Pages->Gradients->Range[Current_gradient].Start;
   Update_window_area(0,0,Window_width, Window_height);
 
   Display_cursor();
@@ -2531,8 +2539,53 @@ void Button_Gradients(void)
     old_mouse_x=Mouse_X;
     old_mouse_y=Mouse_Y;
     old_mouse_k=Mouse_K;
+    if (changed_gradient_index)
+    {
+      // User has changed which gradient (0-15) he's watching
+      changed_gradient_index=0;
+
+      Hide_cursor();
+
+      // On affiche la valeur sous la jauge
+      Num2str(Current_gradient+1,str,2);
+      Print_in_window(215,100,str,MC_Black,MC_Light);
+
+      // On tagge les couleurs qui vont avec
+      Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+
+      // On affiche le sens qui va avec
+      Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+
+      // On raffiche le mélange (jauge) qui va avec
+      mix_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Mix;
+      Window_draw_slider(mix_scroller);
+
+      // Update speed
+      speed_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Speed;
+      Window_draw_slider(speed_scroller);
+      Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+      Print_in_window(73,113,str,MC_Black,MC_Light);
+
+      // Gradient #
+      gradient_scroller->Position=Current_gradient;
+      Window_draw_slider(gradient_scroller);
+      
+      // Technique (flat, dithered, very dithered)
+      Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
+
+      // Rectangular gradient preview
+      Draw_gradient_preview(8,128,108,14,Current_gradient);
+
+      Display_cursor();
+    }
 
     clicked_button=Window_clicked_button();
+    if (Input_sticky_control!=8 || !Mouse_K)
+    {
+      Allow_colorcycling=0;
+      // Restore palette
+      Set_palette(Main_palette);
+    }
 
     switch(clicked_button)
     {
@@ -2548,11 +2601,11 @@ void Button_Gradients(void)
             // On vient de clicker
 
             // On met à jour l'intervalle du dégradé
-            first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
+            first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
             // On tagge le bloc
-            Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+            Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
             // Tracé de la preview:
-            Draw_gradient_preview(8,112,108,14,Current_gradient);
+            Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
           else
           {
@@ -2562,20 +2615,20 @@ void Button_Gradients(void)
               // On commence par ordonner la 1ère et dernière couleur du bloc
               if (first_color<temp_color)
               {
-                Gradient_array[Current_gradient].Start=first_color;
-                Gradient_array[Current_gradient].End  =temp_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].End  =temp_color;
               }
               else if (first_color>temp_color)
               {
-                Gradient_array[Current_gradient].Start=temp_color;
-                Gradient_array[Current_gradient].End  =first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=temp_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].End  =first_color;
               }
               else
-                Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=first_color;
+                Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=first_color;
               // On tagge le bloc
-              Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+              Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
               // Tracé de la preview:
-              Draw_gradient_preview(8,112,108,14,Current_gradient);
+              Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
             }
           }
@@ -2583,57 +2636,49 @@ void Button_Gradients(void)
         }
         break;
       case  2 : // Nouvel indice de dégradé
-        Hide_cursor();
         // Nouvel indice dans Window_attribute2
         Current_gradient=Window_attribute2;
-
-        // On affiche la valeur sous la jauge
-        Num2str(Current_gradient+1,str,2);
-        Print_in_window(215,100,str,MC_Black,MC_Light);
-
-        // On tagge les couleurs qui vont avec
-        Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
-
-        // On affiche le sens qui va avec
-        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
-
-        // On raffiche le mélange (jauge) qui va avec
-        mix_scroller->Position=Gradient_array[Current_gradient].Mix;
-        Window_draw_slider(mix_scroller);
-
-        // On raffiche la technique qui va avec
-        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
-
-        // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
-
-        Display_cursor();
+        changed_gradient_index=1;
         break;
       case  3 : // Nouveau mélange de dégradé
         Hide_cursor();
         // Nouvel mélange dans Window_attribute2
-        Gradient_array[Current_gradient].Mix=Window_attribute2;
+        Main_backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
         break;
       case  4 : // Changement de sens
         Hide_cursor();
         // On inverse le sens (par un XOR de 1)
-        Gradient_array[Current_gradient].Inverse^=1;
-        Print_in_window(12,25,(Gradient_array[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+        Main_backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
+        Print_in_window(12,25,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
         break;
       case  5 : // Changement de technique
         Hide_cursor();
         // On change la technique par (+1)%3
-        Gradient_array[Current_gradient].Technique=(Gradient_array[Current_gradient].Technique+1)%3;
-        Draw_button_gradient_style(8,92,Gradient_array[Current_gradient].Technique);
+        Main_backups->Pages->Gradients->Range[Current_gradient].Technique=(Main_backups->Pages->Gradients->Range[Current_gradient].Technique+1)%3;
+        Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,112,108,14,Current_gradient);
+        Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
+      case  8 : // Speed
+        Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
+        Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+        Hide_cursor();
+        Print_in_window(73,113,str,MC_Black,MC_Light);
+        Display_cursor();
+        Allow_colorcycling=1;
+        break;
+      case 9: // Cycling on/off
+        cycling_mode = !cycling_mode;
+        Hide_cursor();
+        Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+        Display_cursor();
+        break;
     }
 
     if (!Mouse_K)
@@ -2648,16 +2693,31 @@ void Button_Gradients(void)
           temp_color=color;
 
           // On met à jour l'intervalle du dégradé
-          first_color=last_color=Gradient_array[Current_gradient].Start=Gradient_array[Current_gradient].End=temp_color;
+          first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
           // On tagge le bloc
-          Tag_color_range(Gradient_array[Current_gradient].Start,Gradient_array[Current_gradient].End);
+          Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
           // Tracé de la preview:
-          Draw_gradient_preview(8,112,108,14,Current_gradient);
+          Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
           Wait_end_of_click();
         }
         Key=0;
         break;
+      case KEY_MOUSEWHEELUP:
+        if (Current_gradient>0)
+        {
+          Current_gradient--;
+          changed_gradient_index=1;
+        }
+        break;
+      case KEY_MOUSEWHEELDOWN:
+        if (Current_gradient<15)
+        {
+          Current_gradient++;
+          changed_gradient_index=1;
+        }
+        break;
+      
       default:
         if (Is_shortcut(Key,0x100+BUTTON_HELP))
         {
@@ -2665,11 +2725,19 @@ void Button_Gradients(void)
           Key=0;
           break;
         }
-        if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
+        else if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
           clicked_button=6;
+        else if (Is_shortcut(Key,SPECIAL_CYCLE_MODE))
+        {
+          // Cycling on/off
+          cycling_mode = !cycling_mode;
+          Hide_cursor();
+          Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+          Display_cursor();
     }
   }
-  while (clicked_button<6);
+  }
+  while (clicked_button!=6 && clicked_button!=7);
 
   Close_window();
   // The Grad rect operation uses the same button as Grad menu.
@@ -2679,10 +2747,11 @@ void Button_Gradients(void)
   Display_cursor();
 
   Gradient_pixel=Display_pixel;
+  Cycling_mode=cycling_mode;
   if (clicked_button==7) // Cancel
   {
     Current_gradient=old_current_gradient;
-    memcpy(Gradient_array,backup_gradients,sizeof(T_Gradient_array)*16);
+    memcpy(Main_backups->Pages->Gradients,&backup_gradients,sizeof(T_Gradient_array));
     Load_gradient_data(Current_gradient);
   }
 }
@@ -3641,8 +3710,6 @@ void Button_Magnify(void)
   }
   else
   {
-    Old_main_offset_X=Main_offset_X;
-    Old_main_offset_Y=Main_offset_Y;
     Compute_magnifier_data();
     if ((!Config.Fast_zoom) || (Mouse_Y>=Menu_Y) || Coming_from_zoom_factor_menu)
     {
@@ -3735,24 +3802,20 @@ void Button_Unselect_magnifier(void)
     // On sort du mode loupe
     Main_magnifier_mode=0;
 
-    /*
+    
     // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
     // Centrage "brut" de lécran par rapport à la loupe
     Main_offset_X=Main_magnifier_offset_X-((Screen_width-Main_magnifier_width)>>1);
     Main_offset_Y=Main_magnifier_offset_Y-((Menu_Y-Main_magnifier_height)>>1);
-    */
+    
     // Correction en cas de débordement de l'image
-    if (Old_main_offset_X+Screen_width>Main_image_width)
+    if (Main_offset_X+Screen_width>Main_image_width)
       Main_offset_X=Main_image_width-Screen_width;
-    else
-      Main_offset_X=Old_main_offset_X;
     if (Main_offset_X<0)
       Main_offset_X=0;
 
-    if (Old_main_offset_Y+Menu_Y>Main_image_height)
+    if (Main_offset_Y+Menu_Y>Main_image_height)
       Main_offset_Y=Main_image_height-Menu_Y;
-    else
-      Main_offset_Y=Old_main_offset_Y;
     if (Main_offset_Y<0)
       Main_offset_Y=0;
 

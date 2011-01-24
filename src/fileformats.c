@@ -217,7 +217,6 @@ void Save_IMG(T_IO_Context * context)
 
 
 //////////////////////////////////// LBM ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word  Width;
@@ -234,7 +233,6 @@ typedef struct
   word  X_screen;
   word  Y_screen;
 } T_LBM_Header;
-#pragma pack()
 
 byte * LBM_buffer;
 FILE *LBM_file;
@@ -388,22 +386,36 @@ void Test_LBM(T_IO_Context * context)
     }
   }
 
+// Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
+#define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
+
+/// Skips the current section in an ILBM file.
+/// This function should be called while the file pointer is right
+/// after the 4-character code that identifies the section.
+int LBM_Skip_section(void)
+{
+  dword size;
+  
+  if (!Read_dword_be(LBM_file,&size))
+    return 0;
+  if (size&1)
+    size++;
+  if (fseek(LBM_file,size,SEEK_CUR))
+    return 0;
+  return 1;
+}
+
   // ------------------------- Attendre une section -------------------------
-  byte Wait_for(byte * expected_section)
+byte LBM_Wait_for(byte * expected_section)
   {
     // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
-    dword Taille_section;
     byte section_read[4];
 
     if (! Read_bytes(LBM_file,section_read,4))
       return 0;
     while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
     {
-      if (!Read_dword_be(LBM_file,&Taille_section))
-        return 0;
-      if (Taille_section&1)
-        Taille_section++;
-      if (fseek(LBM_file,Taille_section,SEEK_CUR))
+    if (!LBM_Skip_section())
         return 0;
       if (! Read_bytes(LBM_file,section_read,4))
         return 0;
@@ -522,7 +534,7 @@ void Load_LBM(T_IO_Context * context)
   byte  temp_byte;
   short b256;
   dword nb_colors;
-  dword image_size;
+  dword section_size;
   short x_pos;
   short y_pos;
   short counter;
@@ -544,7 +556,7 @@ void Load_LBM(T_IO_Context * context)
     Read_bytes(LBM_file,section,4);
     Read_dword_be(LBM_file,&dummy);
     Read_bytes(LBM_file,format,4);
-    if (!Wait_for((byte *)"BMHD"))
+    if (!LBM_Wait_for((byte *)"BMHD"))
       File_error=1;
     Read_dword_be(LBM_file,&dummy);
 
@@ -564,7 +576,7 @@ void Load_LBM(T_IO_Context * context)
       && (Read_word_be(LBM_file,&header.Y_screen))
       && header.Width && header.Height)
     {
-      if ( (header.BitPlanes) && (Wait_for((byte *)"CMAP")) )
+      if ( (header.BitPlanes) && (LBM_Wait_for((byte *)"CMAP")) )
       {
         Read_dword_be(LBM_file,&nb_colors);
         nb_colors/=3;
@@ -617,16 +629,73 @@ void Load_LBM(T_IO_Context * context)
               if (Read_byte(LBM_file,&temp_byte))
                 File_error=2;
 
-            if ( (Wait_for((byte *)"BODY")) && (!File_error) )
+            // Keep reading sections until we find the body
+            while (1)
             {
-              Read_dword_be(LBM_file,&image_size);
-              //swab((char *)&header.Width ,(char *)&context->Width,2);
-              //swab((char *)&header.Height,(char *)&context->Height,2);
+              if (! Read_bytes(LBM_file,section,4))
+              {
+                File_error=2;
+                break;
+              }
+              // Found body : stop searching
+              if (!memcmp(section,"BODY",4))
+                break;
+              else if (!memcmp(section,"CRNG",4))
+              {
+                // Handle CRNG
+                
+                // The content of a CRNG is as follows:
+                word padding;
+                word rate;
+                word flags;
+                byte min_col;
+                byte max_col;
+                //
+                if ( (Read_dword_be(LBM_file,&section_size))
+                  && (Read_word_be(LBM_file,&padding))
+                  && (Read_word_be(LBM_file,&rate))
+                  && (Read_word_be(LBM_file,&flags))
+                  && (Read_byte(LBM_file,&min_col))
+                  && (Read_byte(LBM_file,&max_col)))
+                {
+                  if (section_size == 8 && min_col != max_col)
+                  {
+                    // Valid cycling range
+                    if (max_col<min_col)
+                    SWAP_BYTES(min_col,max_col)
+                    
+                    context->Cycle_range[context->Color_cycles].Start=min_col;
+                    context->Cycle_range[context->Color_cycles].End=max_col;
+                    context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+                    context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
+                                        
+                    context->Color_cycles++;
+                  }
+                }
+                else
+                {
+                  File_error=2;
+                  break;
+                }
+              }
+              else
+              {
+                // ignore any number of unknown sections
+                if (!LBM_Skip_section())
+                {
+                  File_error=2;
+                  break;
+                }
+              }
+              
+            }
+
+            if ( !File_error )
+            {
+              Read_dword_be(LBM_file,&section_size);
               context->Width = header.Width;
               context->Height = header.Height;
 
-              //swab((char *)&header.X_screen,(char *)&Original_screen_X,2);
-              //swab((char *)&header.Y_screen,(char *)&Original_screen_Y,2);
               Original_screen_X = header.X_screen;
               Original_screen_Y = header.Y_screen;
 
@@ -887,6 +956,7 @@ void Save_LBM(T_IO_Context * context)
   byte temp_byte;
   word real_width;
   int file_size;
+  int i;
 
   File_error=0;
   Get_full_filename(filename, context->File_name, context->File_directory);
@@ -903,7 +973,6 @@ void Save_LBM(T_IO_Context * context)
     // On corrige la largeur de l'image pour qu'elle soit multiple de 2
     real_width=context->Width+(context->Width&1);
 
-    //swab((byte *)&real_width,(byte *)&header.Width,2);
     header.Width=context->Width;
     header.Height=context->Height;
     header.X_org=0;
@@ -937,6 +1006,22 @@ void Save_LBM(T_IO_Context * context)
 
     Write_bytes(LBM_file,context->Palette,sizeof(T_Palette));
 
+    for (i=0; i<context->Color_cycles; i++)
+    {
+      word flags=0;
+      flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+      flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
+              
+      Write_bytes(LBM_file,"CRNG",4);
+      Write_dword_be(LBM_file,8); // Section size
+      Write_word_be(LBM_file,0); // Padding
+      Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
+      Write_word_be(LBM_file,flags); // Flags
+      Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
+      Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
+      // No padding, size is multiple of 2
+    }
+    
     Write_bytes(LBM_file,"BODY",4);
     Write_dword_be(LBM_file,0); // On mettra la taille à jour à la fin
 
@@ -961,8 +1046,8 @@ void Save_LBM(T_IO_Context * context)
       file_size=File_length(filename);
       
       LBM_file=fopen(filename,"rb+");
-      fseek(LBM_file,820,SEEK_SET);
-      Write_dword_be(LBM_file,file_size-824);
+      fseek(LBM_file,820+context->Color_cycles*16,SEEK_SET);
+      Write_dword_be(LBM_file,file_size-824-context->Color_cycles*16);
 
       if (!File_error)
       {
@@ -1567,7 +1652,6 @@ void Save_BMP(T_IO_Context * context)
 
 
 //////////////////////////////////// GIF ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word Width;   // Width of the complete image area
@@ -1586,7 +1670,6 @@ typedef struct
   byte Indicator;     // Misc image information
   byte Nb_bits_pixel; // Nb de bits par pixel
 } T_GIF_IDB;          // Image Descriptor Block
-#pragma pack()
 
 typedef struct
 {
@@ -1922,6 +2005,47 @@ void Load_GIF(T_IO_Context * context)
                             Read_byte(GIF_file,&size_to_read);
                           }
                         }
+                      }
+                      else if (!memcmp(aeb,"CRNG\0\0\0\0" "1.0",0x0B))
+                      {            
+                        // Color animation. Similar to a LBM CRNG chunk.
+                        word rate;
+                        word flags;
+                        byte min_col;
+                        byte max_col;
+                        //
+                        Read_byte(GIF_file,&size_to_read);
+                        for(;size_to_read>0 && !File_error;size_to_read-=6)
+                        {
+                          if ( (Read_word_be(GIF_file,&rate))
+                            && (Read_word_be(GIF_file,&flags))
+                            && (Read_byte(GIF_file,&min_col))
+                            && (Read_byte(GIF_file,&max_col)))
+                          {
+                            if (min_col != max_col)
+                            {
+                              // Valid cycling range
+                              if (max_col<min_col)
+                              SWAP_BYTES(min_col,max_col)
+                              
+                              context->Cycle_range[context->Color_cycles].Start=min_col;
+                              context->Cycle_range[context->Color_cycles].End=max_col;
+                              context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+                              context->Cycle_range[context->Color_cycles].Speed=(flags&1)?rate/78:0;
+                                                  
+                              context->Color_cycles++;
+                            }
+                          }
+                      else
+                      {
+                            File_error=1;
+                          }
+                        }
+                        // Read end-of-block delimiter
+                        if (!File_error)
+                          Read_byte(GIF_file,&size_to_read);
+                        if (size_to_read!=0)
+                          File_error=1;
                       }
                       else
                       {
@@ -2261,9 +2385,6 @@ void Save_GIF(T_IO_Context * context)
         {
           // La palette a été correctement écrite.
 
-          //   Le jour où on se servira des blocks d'extensions pour placer
-          // des commentaires, on le fera ici.
-
           // Ecriture de la transparence
           //Write_bytes(GIF_file,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
 
@@ -2279,6 +2400,26 @@ void Save_GIF(T_IO_Context * context)
             Write_byte(GIF_file,strlen(context->Comment));
             Write_bytes(GIF_file,context->Comment,strlen(context->Comment)+1);
           }
+          // Write cycling colors
+          if (context->Color_cycles)
+          {
+            int i;
+          
+            Write_bytes(GIF_file,"\x21\xff\x0B" "CRNG\0\0\0\0" "1.0",14);
+            Write_byte(GIF_file,context->Color_cycles*6);
+            for (i=0; i<context->Color_cycles; i++)
+            {
+              word flags=0;
+              flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+              flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
+              
+              Write_word_be(GIF_file,context->Cycle_range[i].Speed*78); // Rate
+              Write_word_be(GIF_file,flags); // Flags
+              Write_byte(GIF_file,context->Cycle_range[i].Start); // Min color
+              Write_byte(GIF_file,context->Cycle_range[i].End); // Max color
+            }
+            Write_byte(GIF_file,0);
+          }
           
           // Loop on all layers
           for (current_layer=0; 
@@ -2286,7 +2427,7 @@ void Save_GIF(T_IO_Context * context)
             current_layer++)
           {
             // Write a Graphic Control Extension
-            char GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
+            byte GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
             // 'Default' values:
             //    Disposal method "Do not dispose"
             //    Duration 5/100s (minimum viable value for current web browsers)
@@ -2546,7 +2687,6 @@ void Save_GIF(T_IO_Context * context)
 
 
 //////////////////////////////////// PCX ////////////////////////////////////
-#pragma pack(1)
 typedef struct
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
@@ -2568,7 +2708,6 @@ typedef struct
     word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
   } T_PCX_Header;
-#pragma pack()
 
 T_PCX_Header PCX_header;
 
@@ -3298,6 +3437,44 @@ void Save_SCx(T_IO_Context * context)
   }
 }
 
+//////////////////////////////////// XPM ////////////////////////////////////
+void Save_XPM(T_IO_Context* context)
+{
+  FILE* file;
+  char filename[MAX_PATH_CHARACTERS];
+  int i,j;
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  File_error = 0;
+
+  file = fopen(filename, "w");
+  if (file == NULL)
+  {
+    File_error = 1;
+    return;
+  }
+
+  fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
+  fprintf(file, "\"%d %d 256 2\",\n", context->Width, context->Height);
+
+  for (i = 0; i < 256; i++)
+  {
+    fprintf(file,"\"%2.2X c #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
+      context->Palette[i].B);
+  }
+
+  for (j = 0; j < context->Height; j++)
+  {
+    fprintf(file, "\"");
+    for (i = 0; i < context->Width; i++)
+    {
+      fprintf(file, "%2.2X", Get_pixel(context, i, j));
+    }
+    fprintf(file,"\"\n");
+  }
+
+  fclose(file);
+}
 
 //////////////////////////////////// PNG ////////////////////////////////////
 

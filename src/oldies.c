@@ -430,6 +430,15 @@ byte C64_FLI_enforcer(void)
 }
 
 // - Amstrad CPC "Mode 5" rasters
+
+void CPC_Mode5_InitMode()
+{
+  // Set picture size
+  // 5 layers
+  Backup_with_new_dimensions(1,5,320,200);
+  // Palette ?
+}
+
 byte CPC_Mode5_DisplayPaintbrush(short x, short y, byte color)
 {
   byte old_color;
@@ -615,7 +624,7 @@ const T_Constraint_Enforcer ConstraintsCPC = {
   CPC_Mode5_RedrawLayeredImage,
   CPC_Mode5_ReadPixel,
   CPC_Mode5_PutPixel,
-  e // TODO - Init code
+  CPC_Mode5_InitMode
 };
 
 

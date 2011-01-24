@@ -31,6 +31,8 @@ void Button_Secondary_palette(void);
 /// Choose the number of graduations for RGB components, from 2 to 256.
 void Set_palette_RGB_scale(int);
 
+int Get_palette_RGB_scale(void);
+
 ///
 /// Scale a component (R, G or B) according to the current RGB graduations.
 /// Returns the resulting value, in the [0-255] range.
@@ -53,3 +55,6 @@ void Set_clipboard_colors(int nb_colors, T_Components *colors);
 /// @param start_color  Index of first color to replace
 /// @return        Number of colors retrieved (0-256)
 int Get_clipboard_colors(T_Palette palette, byte start_color);
+
+/// Get the favorite color to use for GUI's black,dark,light or white.
+const T_Components * Favorite_GUI_color(byte color_index);

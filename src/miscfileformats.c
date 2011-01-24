@@ -368,7 +368,8 @@ void Load_PKM(T_IO_Context * context)
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
-          Taille_pack=(file_size)-sizeof(T_PKM_Header)-header.Jump;
+          // Header size is 780
+          Taille_pack=(file_size)-780-header.Jump;
 
           // Boucle de décompression:
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
@@ -637,7 +638,6 @@ void Save_PKM(T_IO_Context * context)
 
 
 //////////////////////////////////// CEL ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word Width;              // width de l'image
@@ -656,7 +656,6 @@ typedef struct
   word Y_offset;         // Offset en Y de l'image
   byte Filler2[16];        // ???
 } T_CEL_Header2;
-#pragma pack()
 
 // -- Tester si un fichier est au format CEL --------------------------------
 
@@ -689,7 +688,7 @@ void Test_CEL(T_IO_Context * context)
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
       
-      size=file_size-sizeof(T_CEL_Header1);
+      size=file_size-4;
       if ( (!size) || ( (((header1.Width+1)>>1)*header1.Height)!=size ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers
@@ -974,7 +973,6 @@ void Save_CEL(T_IO_Context * context)
 
 
 //////////////////////////////////// KCF ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   struct
@@ -986,7 +984,6 @@ typedef struct
     } color[16];
   } Palette[10];
 } T_KCF_Header;
-#pragma pack()
 
 // -- Tester si un fichier est au format KCF --------------------------------
 
@@ -994,7 +991,7 @@ void Test_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   int pal_index;
   int color_index;
@@ -1003,13 +1000,17 @@ void Test_KCF(T_IO_Context * context)
   Get_full_filename(filename, context->File_name, context->File_directory);
   if ((file=fopen(filename, "rb")))
   {
-    if (File_length_file(file)==sizeof(T_KCF_Header))
+    if (File_length_file(file)==320)
     {
-      Read_bytes(file,&buffer,sizeof(T_KCF_Header));
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte2))
+            File_error=1;
       // On vérifie une propriété de la structure de palette:
       for (pal_index=0;pal_index<10;pal_index++)
         for (color_index=0;color_index<16;color_index++)
-          if ((buffer.Palette[pal_index].color[color_index].Byte2>>4)!=0)
+          if ((header1.Palette[pal_index].color[color_index].Byte2>>4)!=0)
             File_error=1;
     }
     else
@@ -1049,7 +1050,7 @@ void Load_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   byte bytes[3];
   int pal_index;
@@ -1063,11 +1064,16 @@ void Load_KCF(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     file_size=File_length_file(file);
-    if (file_size==sizeof(T_KCF_Header))
+    if (file_size==320)
     {
       // Fichier KCF à l'ancien format
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte2))
+            File_error=1;
 
-      if (Read_bytes(file,&buffer,sizeof(T_KCF_Header)))
+      if (!File_error)
       {
         // Pre_load(context, ?); // Pas possible... pas d'image...
 
@@ -1079,9 +1085,9 @@ void Load_KCF(T_IO_Context * context)
           for (color_index=0;color_index<16;color_index++)
           {
             index=16+(pal_index*16)+color_index;
-            context->Palette[index].R=((buffer.Palette[pal_index].color[color_index].Byte1 >> 4) << 4);
-            context->Palette[index].B=((buffer.Palette[pal_index].color[color_index].Byte1 & 15) << 4);
-            context->Palette[index].G=((buffer.Palette[pal_index].color[color_index].Byte2 & 15) << 4);
+            context->Palette[index].R=((header1.Palette[pal_index].color[color_index].Byte1 >> 4) << 4);
+            context->Palette[index].B=((header1.Palette[pal_index].color[color_index].Byte1 & 15) << 4);
+            context->Palette[index].G=((header1.Palette[pal_index].color[color_index].Byte2 & 15) << 4);
           }
 
         for (index=0;index<16;index++)
@@ -1168,7 +1174,7 @@ void Save_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   byte bytes[3];
   int pal_index;
@@ -1196,11 +1202,15 @@ void Save_KCF(T_IO_Context * context)
         for (color_index=0;color_index<16;color_index++)
         {
           index=16+(pal_index*16)+color_index;
-          buffer.Palette[pal_index].color[color_index].Byte1=((context->Palette[index].R>>4)<<4) | (context->Palette[index].B>>4);
-          buffer.Palette[pal_index].color[color_index].Byte2=context->Palette[index].G>>4;
+          header1.Palette[pal_index].color[color_index].Byte1=((context->Palette[index].R>>4)<<4) | (context->Palette[index].B>>4);
+          header1.Palette[pal_index].color[color_index].Byte2=context->Palette[index].G>>4;
         }
 
-      if (! Write_bytes(file,&buffer,sizeof(T_KCF_Header)))
+      // Write all
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Write_byte(file,header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Write_byte(file,header1.Palette[pal_index].color[color_index].Byte2))
         File_error=1;
     }
     else
@@ -2472,13 +2482,13 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
     what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3
     Window_dropdown_clear_items(what);
-    for (i=0; i<sizeof(what_label)/sizeof(char *); i++)
+    for (i=0; i<sizeof(what_label)/sizeof(what_label[0]); i++)
         Window_dropdown_add_item(what,i,what_label[i]);
     
     Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
     addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
     Window_dropdown_clear_items(addr);
-    for (i=0; i<sizeof(address_label)/sizeof(char *); i++)
+    for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
         Window_dropdown_add_item(addr,i,address_label[i]); 
     
     Update_window_area(0,0,Window_width,Window_height); 

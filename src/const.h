@@ -120,6 +120,7 @@ enum FILE_FORMATS
   FORMAT_KCF,
   FORMAT_PAL,
   FORMAT_SCR,
+  FORMAT_XPM,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 
@@ -278,7 +279,8 @@ enum ICON_TYPES
   ICON_NETWORK,      ///< "Network" drive
   ICON_STAR,         ///< Star (favorite)
   ICON_DROPDOWN,     ///< Dropdown arrow
-  NB_ICON_SPRITES    ///< Number of 8x8 icons
+  NB_ICON_SPRITES,   ///< Number of 8x8 icons
+  ICON_NONE          ///< None of the above
 };
 
 /// Identifiers for the buttons in the menu.
@@ -489,6 +491,7 @@ enum SPECIAL_ACTIONS
   SPECIAL_RUN_SCRIPT_8,
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
+  SPECIAL_CYCLE_MODE,
 
   SPECIAL_FORMAT_CHECKER,
   SPECIAL_FORMAT_CHECKER_MENU,

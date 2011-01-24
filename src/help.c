@@ -94,7 +94,7 @@ void Redefine_control(word *shortcut, int x_pos, int y_pos)
   Display_cursor();
   while (1)
   {
-    while(!Get_input())SDL_Delay(20);
+    Get_input(20);
     if (Key==KEY_ESC)
       return;
     if (Key!=0)
@@ -344,7 +344,7 @@ void Display_help(void)
     if (line_index >= Help_section[Current_help_section].Length)
     {
       Window_rectangle (x_pos,
-           y_pos,
+           y_pos + line_index*8,
            44*6,
            // 44 = Nb max de char (+1 pour éviter les plantages en mode X
            // causés par une largeur = 0)
@@ -404,7 +404,7 @@ void Scroll_help(T_Scroller_button * scroller)
 {
   Hide_cursor();
   scroller->Position=Help_position;
-  Compute_slider_cursor_height(scroller);
+  Compute_slider_cursor_length(scroller);
   Window_draw_slider(scroller);
   Display_help();
   Display_cursor();
@@ -523,7 +523,7 @@ void Window_help(int section, const char *sub_section)
           nb_lines=Help_section[Current_help_section].Length;
           scroller->Position=0;
           scroller->Nb_elements=nb_lines;
-          Compute_slider_cursor_height(scroller);
+          Compute_slider_cursor_length(scroller);
           Window_draw_slider(scroller);
         }
         else

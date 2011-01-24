@@ -115,17 +115,18 @@ typedef struct T_Palette_button
   struct T_Palette_button * Next;///< Pointer to the next palette of current window.
 } T_Palette_button;
 
-/// A window control that represents a vertical scrollbar, with a slider, and two arrow buttons.
+/// A window control that represents a scrollbar, with a slider, and two arrow buttons.
 typedef struct T_Scroller_button
 {
   short Number;                   ///< Unique identifier for all controls
+  byte Is_horizontal;             ///< Boolean: True if slider is horizontal instead of vertical.
   word Pos_X;                     ///< Coordinate for top of button, relative to the window, before scaling.
   word Pos_Y;                     ///< Coordinate for left of button, relative to the window, before scaling.
-  word Height;                    ///< Height before scaling.
+  word Length;                    ///< Length before scaling.
   word Nb_elements;               ///< Number of distinct values it can take.
   word Nb_visibles;               ///< If this slider is meant to show several elements of a collection, this is their number (otherwise, it's 1).
   word Position;                  ///< Current position of the slider: which item it's pointing.
-  word Cursor_height;             ///< Vertical dimension of the slider, in pixels before scaling.
+  word Cursor_length;             ///< Dimension of the slider, in pixels before scaling.
   struct T_Scroller_button * Next;///< Pointer to the next scroller of current window.
 } T_Scroller_button;
 
@@ -172,12 +173,20 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Short_name[19]; ///< Name to display.
   char Full_name[256]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
+  byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
+  
+  word  Length_short_name; ///< Number of bytes allocated for :Short_name
+  #if __GNUC__ < 3
+  char Short_name[0]; ///< Name to display.
+#else
+  char Short_name[]; ///< Name to display.
+#endif
+  // No field after Short_name[] ! Dynamic allocation according to name length.
 } T_Fileselector_item;
 
 /// Data for a fileselector
@@ -211,6 +220,25 @@ typedef struct T_List_button
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;
 
+/// A stackable window (editor screen)
+typedef struct
+{
+  word Pos_X;
+  word Pos_Y;
+  word Width;
+  word Height;
+  word Nb_buttons;
+  T_Normal_button   *Normal_button_list;
+  T_Palette_button  *Palette_button_list;
+  T_Scroller_button *Scroller_button_list;
+  T_Special_button  *Special_button_list;
+  T_Dropdown_button *Dropdown_button_list;
+  T_List_button     *List_button_list;
+  int Attribute1;
+  int Attribute2;
+  byte Draggable;
+} T_Window;
+
 /// Data for one line of the "Help" screens.
 typedef struct {
   char Line_type;     ///< Kind of line: 'N' for normal line, 'S' for a bold line, 'K' for a line with keyboard shortcut, 'T' and '-' for upper and lower titles.
@@ -233,7 +261,15 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
-} T_Gradient_array;
+  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
+} T_Gradient_range;
+
+/// Data for a full set of gradients.
+typedef struct
+{
+  int Used; ///< Reference count
+  T_Gradient_range Range[16];
+}  T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -243,7 +279,6 @@ typedef struct
   byte Mode;      ///< Shade mode: Normal, Loop, or No-saturation see ::SHADE_MODES
 } T_Shade;
 
-#pragma pack(1) // is it useful ?
 /// Data for one fullscreen video mode in configuration file. Warning, this one is saved/loaded as binary.
 typedef struct
 {
@@ -253,7 +288,7 @@ typedef struct
 } T_Config_video_mode;
 
 
-/// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for gfx2.cfg
 typedef struct
 {
   char Signature[3]; ///< Signature for the file format. "CFG".
@@ -263,24 +298,23 @@ typedef struct
   byte Beta2;        ///< Major beta version number (ex: 5)
 } T_Config_header;
 
-#pragma pack()
 
-/// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for a config chunk in for gfx2.cfg
 typedef struct
 {
   byte Number; ///< Section identfier. Possible values are in enum ::CHUNKS_CFG
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
-#pragma pack(1)
-/// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
+
+/// Configuration for one keyboard shortcut in gfx2.cfg
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } T_Config_shortcut_info;
-#pragma pack()
+
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
@@ -332,6 +366,9 @@ typedef struct
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
   byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
   byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
+  byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
+  byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
+  word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
@@ -358,6 +395,8 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
+  T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
+  byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Layermode_flags; ///< 0 = normal ; 1 = layer 0 is transparent ; 2 = amstrad "Mode5" picture
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers

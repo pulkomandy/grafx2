@@ -348,7 +348,7 @@ short Wait_click_in_shade_table()
 
   while (selected_cell<0)
   {
-    Get_input();
+    Get_input(20);
 
     if ( (Mouse_K==LEFT_SIDE)
       && ( ( (Window_click_in_rectangle(8,127,263,179)) && (((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)%7)<4) )
