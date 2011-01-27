@@ -3152,20 +3152,13 @@ void Load_picture(byte image)
       //if (!use_brush_palette)
       //  memcpy(Main_palette,initial_palette,sizeof(T_Palette));
 
-      if (File_error==3) // On ne peut pas allouer la brosse
+      if (File_error==3) // Memory allocation error when loading brush
       {
-        free(Brush);
-        Brush=(byte *)malloc(1*1);
-        Brush_height=1;
-        Brush_width=1;
-        *Brush=Fore_color;
-
-        free(Smear_brush);
-        Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-        Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-        Smear_brush_width=MAX_PAINTBRUSH_SIZE;
+        // Nothing to do here.
+        // Previous versions of Grafx2 would have damaged the Brush,
+        // and need reset it here, but now the loading is done in separate
+        // memory buffers.
       }
-
 
       Tiling_offset_X=0;
       Tiling_offset_Y=0;
@@ -4764,7 +4757,7 @@ void Draw_one_font_name(word x, word y, word index, byte highlighted)
   Print_in_window(x,y,Font_label(index), MC_Black, (highlighted)?MC_Dark:MC_Light);
 }
 
-void Button_Text()
+void Button_Text(void)
 {
   static char str[256]="";
   static int font_size=32;
@@ -4987,11 +4980,15 @@ void Button_Text()
         Error(0);
         return;
       }
-      free(Brush);
+      if (Realloc_brush(new_width, new_height, new_brush, NULL))
+      {
+        free(new_brush);
+        Close_window();
+        Unselect_button(BUTTON_TEXT);
+        Display_cursor();
+        Error(0);
+      }
     
-      Brush=new_brush;
-      Brush_width=new_width;
-      Brush_height=new_height;
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
  
@@ -5281,14 +5278,16 @@ byte Restore_brush(int index)
   // Color brushes
   if (shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
      shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
-  {
+  {    
     Paintbrush_shape=shape;
-    Realloc_brush(Brush_container[index].Width,Brush_container[index].Height);
-    // Realloc sets Brush_width and Brush_height to new size.
-    memcpy(Brush, Brush_container[index].Brush, Brush_height*Brush_width);
-    
-    Brush_offset_X=Brush_width>>1;
-    Brush_offset_Y=Brush_height>>1;
+    if (!Realloc_brush(Brush_container[index].Width,Brush_container[index].Height,NULL,NULL))
+    {
+      // Realloc sets Brush_width and Brush_height to new size.
+      memcpy(Brush, Brush_container[index].Brush, Brush_height*Brush_width);
+      
+      Brush_offset_X=Brush_width>>1;
+      Brush_offset_Y=Brush_height>>1;
+    }
 
   }
   Change_paintbrush_shape(shape);

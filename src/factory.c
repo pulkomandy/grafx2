@@ -161,10 +161,11 @@ int L_SetBrushSize(lua_State* L)
   LUA_ARG_NUMBER(1, "setbrushsize", w, 1, 10000);
   LUA_ARG_NUMBER(2, "setbrushsize", h, 1, 10000);
   
-  if (Realloc_brush(w, h))
+  if (Realloc_brush(w, h, NULL, NULL))
   {
     return luaL_error(L, "setbrushsize: Resize failed");
   }
+  
   Brush_was_altered=1;
   // Fill with Back_color
   memset(Brush,Back_color,(long)Brush_width*Brush_height);

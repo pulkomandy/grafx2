@@ -40,6 +40,7 @@
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
+#include "brush.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -985,8 +986,8 @@ void Button_Sieve_menu(void)
   {
     clicked_button=Window_clicked_button();
 
-  origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
-  origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
+    origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
+    origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
 
 
     switch (clicked_button)
@@ -1073,15 +1074,17 @@ void Button_Sieve_menu(void)
         break;
 
       case  7 : // Transfer to brush
-        Brush_width=Sieve_width;
-        Brush_height=Sieve_height;
-        free(Brush);
-        Brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+      
+        if (Realloc_brush(Sieve_width, Sieve_height, NULL, NULL))
+          break;
+        
         for (y_pos=0; y_pos<Sieve_height; y_pos++)
           for (x_pos=0; x_pos<Sieve_width; x_pos++)
             Pixel_in_brush(x_pos,y_pos,(Sieve[x_pos][y_pos])?Fore_color:Back_color);
+        
         Brush_offset_X=(Brush_width>>1);
         Brush_offset_Y=(Brush_height>>1);
+        
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
         break;
 

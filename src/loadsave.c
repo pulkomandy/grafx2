@@ -48,6 +48,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "engine.h"
+#include "brush.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *);
@@ -773,19 +774,13 @@ void Load_image(T_IO_Context *context)
   }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
   {
-    free(Brush);
-    Brush=context->Buffer_image;
-    context->Buffer_image = NULL;
-
-    Brush_width=context->Width;
-    Brush_height=context->Height;
-
-    free(Smear_brush);
-      Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-      Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(Smear_brush_width*Smear_brush_height);
-    if (!Smear_brush)
+    
+    if (Realloc_brush(context->Width, context->Height, context->Buffer_image, NULL))
+    {
       File_error=3;
+      free(context->Buffer_image);
+    }
+    context->Buffer_image = NULL;
   }
   else if (context->Type == CONTEXT_SURFACE)
   {
